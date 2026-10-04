@@ -14,7 +14,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:6ccc8df0b538b4b191e6c326dff163fc1a9b3de1b21e19f61a8cfd641452e319
             parser: official-jp-exact-v1
@@ -25,7 +24,6 @@ records:
             lang: en
             raw: Mercurius Foundation
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:0dcbcab9bcaf4fd798a45818a2545de03851421324a13fc291826af26a7b15fe
               parser: official-en-exact-v1
@@ -36,7 +34,6 @@ records:
             lang: ja
             raw: メルクリウス財団
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:6ccc8df0b538b4b191e6c326dff163fc1a9b3de1b21e19f61a8cfd641452e319
               parser: official-jp-exact-v1
@@ -46,7 +43,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:6ccc8df0b538b4b191e6c326dff163fc1a9b3de1b21e19f61a8cfd641452e319
             parser: official-jp-exact-v1
@@ -54,7 +50,6 @@ records:
             text_hash: sha256:414e878081cbe19fdace98ebad53719e610869ebdded0cda80ff6309fadb5c02
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:0dcbcab9bcaf4fd798a45818a2545de03851421324a13fc291826af26a7b15fe
             parser: official-en-exact-v1
@@ -74,7 +69,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:c58d643c72c59770d49e538f71e5a3b4e417f03c68ec13bd49b68cd27e30bb01
             parser: official-jp-exact-v1
@@ -85,7 +79,6 @@ records:
             lang: en
             raw: Mount
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:83bad1a243f2f5d388aa9a6bb13003ef00b800376f53beb4a927ad3de6937d99
               parser: official-en-exact-v1
@@ -96,7 +89,6 @@ records:
             lang: ja
             raw: 乗物
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:c58d643c72c59770d49e538f71e5a3b4e417f03c68ec13bd49b68cd27e30bb01
               parser: official-jp-exact-v1
@@ -106,7 +98,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:c58d643c72c59770d49e538f71e5a3b4e417f03c68ec13bd49b68cd27e30bb01
             parser: official-jp-exact-v1
@@ -114,7 +105,6 @@ records:
             text_hash: sha256:775c7e9306bda962bf0d1e119fe60e7f72f3b538f3cac88466abb9adf4456075
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:83bad1a243f2f5d388aa9a6bb13003ef00b800376f53beb4a927ad3de6937d99
             parser: official-en-exact-v1
@@ -134,7 +124,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:75ad7952aa81341f9e51cdfbcb441fef41a72957cdb28bce46ac73e52f3fb0ae
             parser: official-jp-exact-v1
@@ -145,7 +134,6 @@ records:
             lang: en
             raw: Musical
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:48aeff9c499c37bf2afaf3e2ceb43dab1d62810a07a09ea491b25a14e297a7ce
               parser: official-en-exact-v1
@@ -156,7 +144,6 @@ records:
             lang: ja
             raw: シンガー
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:75ad7952aa81341f9e51cdfbcb441fef41a72957cdb28bce46ac73e52f3fb0ae
               parser: official-jp-exact-v1
@@ -166,7 +153,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:75ad7952aa81341f9e51cdfbcb441fef41a72957cdb28bce46ac73e52f3fb0ae
             parser: official-jp-exact-v1
@@ -174,7 +160,6 @@ records:
             text_hash: sha256:5c39a6129cec7e921fdbe4e53c3af3cf488d5f6c9d5c5121a4f86805a59f0c1a
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:48aeff9c499c37bf2afaf3e2ceb43dab1d62810a07a09ea491b25a14e297a7ce
             parser: official-en-exact-v1
@@ -194,7 +179,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:08d70d864bc79d8b4959da41fe97748763fe066fbad1f6dbb28f2bf587f60e78
             parser: official-jp-exact-v1
@@ -205,7 +189,6 @@ records:
             lang: en
             raw: Natura
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:2b5606745e3008f1094a3a3e89f1065ebaa0ffd1475115d7b033b075b52108d3
               parser: official-en-exact-v1
@@ -216,7 +199,6 @@ records:
             lang: ja
             raw: 自然
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:08d70d864bc79d8b4959da41fe97748763fe066fbad1f6dbb28f2bf587f60e78
               parser: official-jp-exact-v1
@@ -226,7 +208,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:08d70d864bc79d8b4959da41fe97748763fe066fbad1f6dbb28f2bf587f60e78
             parser: official-jp-exact-v1
@@ -234,7 +215,6 @@ records:
             text_hash: sha256:4f12408398369b19b2617b36f1eca59f1e4cb6faca15412c1d1ac8570a331890
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:2b5606745e3008f1094a3a3e89f1065ebaa0ffd1475115d7b033b075b52108d3
             parser: official-en-exact-v1
@@ -254,7 +234,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:cf70dd1690f705dc816dc9cac2c49cad7f0b5184e14e142d7039da956dde0a1a
             parser: official-jp-exact-v1
@@ -265,7 +244,6 @@ records:
             lang: en
             raw: Necromancer
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:edb77415d7fab202cc2ab54166feafe3ea6ae879ba74164f11ad37ed0e62d3e3
               parser: official-en-exact-v1
@@ -276,7 +254,6 @@ records:
             lang: ja
             raw: 死霊術師
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:cf70dd1690f705dc816dc9cac2c49cad7f0b5184e14e142d7039da956dde0a1a
               parser: official-jp-exact-v1
@@ -286,7 +263,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:cf70dd1690f705dc816dc9cac2c49cad7f0b5184e14e142d7039da956dde0a1a
             parser: official-jp-exact-v1
@@ -294,7 +270,6 @@ records:
             text_hash: sha256:fc9de5f237a36f6280e01e694e7e901d3d352a24d39f22ebd5e3d1228e2d9483
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:edb77415d7fab202cc2ab54166feafe3ea6ae879ba74164f11ad37ed0e62d3e3
             parser: official-en-exact-v1
@@ -314,7 +289,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:95b0becad110164a30047761531d1eb1be4888c55d095662c5114cc015d3dcd8
             parser: official-jp-exact-v1
@@ -325,7 +299,6 @@ records:
             lang: en
             raw: Neutral
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:959aeca46b704e8cca47f62ef208e74298120fd2d5f0c4dd97b756cb7d898ff9
               parser: official-en-exact-v1
@@ -336,7 +309,6 @@ records:
             lang: ja
             raw: ニュートラル
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:95b0becad110164a30047761531d1eb1be4888c55d095662c5114cc015d3dcd8
               parser: official-jp-exact-v1
@@ -346,7 +318,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:95b0becad110164a30047761531d1eb1be4888c55d095662c5114cc015d3dcd8
             parser: official-jp-exact-v1
@@ -354,7 +325,6 @@ records:
             text_hash: sha256:a1270a5b22ac31b07c6d96a87737f77ce8fb8fab6836e6e435ea4a34ca980b8c
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:959aeca46b704e8cca47f62ef208e74298120fd2d5f0c4dd97b756cb7d898ff9
             parser: official-en-exact-v1
@@ -374,7 +344,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:ccbdd681e9e358555c8855f962ced09473015e650c4e734f8eaf03669946a75a
             parser: official-en-exact-v1
@@ -385,7 +354,6 @@ records:
             lang: en
             raw: New Year
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:ccbdd681e9e358555c8855f962ced09473015e650c4e734f8eaf03669946a75a
               parser: official-en-exact-v1
@@ -395,7 +363,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:ccbdd681e9e358555c8855f962ced09473015e650c4e734f8eaf03669946a75a
             parser: official-en-exact-v1
@@ -415,7 +382,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:61aecfb0f3c75dd1737f3a429930692e9c7c40b09b6fca8d89c94dcbbc53bc3c
             parser: official-jp-exact-v1
@@ -426,7 +392,6 @@ records:
             lang: en
             raw: Abysscraft
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:7bd357245bf80f86528cb3e8696c34afd7171aec74ff24f87e3572864f5ccba9
               parser: official-en-exact-v1
@@ -437,7 +402,6 @@ records:
             lang: ja
             raw: ナイトメア
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:61aecfb0f3c75dd1737f3a429930692e9c7c40b09b6fca8d89c94dcbbc53bc3c
               parser: official-jp-exact-v1
@@ -447,7 +411,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:61aecfb0f3c75dd1737f3a429930692e9c7c40b09b6fca8d89c94dcbbc53bc3c
             parser: official-jp-exact-v1
@@ -455,7 +418,6 @@ records:
             text_hash: sha256:39874e63298fb671264ce2700c984d8426ee47c1f7f1f4fa5b4a496e266682b0
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:7bd357245bf80f86528cb3e8696c34afd7171aec74ff24f87e3572864f5ccba9
             parser: official-en-exact-v1
@@ -475,7 +437,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:8ce27828b2a39abc79d23087091733fbd84c6161013cd1f08072b151b0ed5026
             parser: official-jp-exact-v1
@@ -486,7 +447,6 @@ records:
             lang: en
             raw: Nightmare
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:5e4f43c93b1730c8c75e538cb2c5cae32bf31fbc29ced7761510f55eaa950a19
               parser: official-en-exact-v1
@@ -497,7 +457,6 @@ records:
             lang: ja
             raw: NIGHTMARE
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:8ce27828b2a39abc79d23087091733fbd84c6161013cd1f08072b151b0ed5026
               parser: official-jp-exact-v1
@@ -507,7 +466,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:8ce27828b2a39abc79d23087091733fbd84c6161013cd1f08072b151b0ed5026
             parser: official-jp-exact-v1
@@ -515,7 +473,6 @@ records:
             text_hash: sha256:8f7bcd544b3c47ff37fde365e6389d7c5e74d67ebbaf48aeb5b9576f630bb8b5
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:5e4f43c93b1730c8c75e538cb2c5cae32bf31fbc29ced7761510f55eaa950a19
             parser: official-en-exact-v1
@@ -535,7 +492,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:5527e889cfebde76c0a1d40db7fa95641c5c324e985184795356b54ce13607a6
             parser: official-jp-exact-v1
@@ -546,7 +502,6 @@ records:
             lang: en
             raw: Ninja
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:2db7dd70b3a18dd5b0416d6a5cf6ac908b49d7984d68fd5c4cc10f2462b8dc87
               parser: official-en-exact-v1
@@ -557,7 +512,6 @@ records:
             lang: ja
             raw: 忍者
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:5527e889cfebde76c0a1d40db7fa95641c5c324e985184795356b54ce13607a6
               parser: official-jp-exact-v1
@@ -567,7 +521,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:5527e889cfebde76c0a1d40db7fa95641c5c324e985184795356b54ce13607a6
             parser: official-jp-exact-v1
@@ -575,7 +528,6 @@ records:
             text_hash: sha256:5a9c5e44d14122ce93fb206870b847d308a6b6bd462bf405365e8af333fd10fb
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:2db7dd70b3a18dd5b0416d6a5cf6ac908b49d7984d68fd5c4cc10f2462b8dc87
             parser: official-en-exact-v1
@@ -595,7 +547,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:fd4bb912ea14ecae784ff27832800487c0c6e40ee2ebee30c2a602a3438dfec0
             parser: official-jp-exact-v1
@@ -606,7 +557,6 @@ records:
             lang: en
             raw: Noble
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:e71578df4c8f0dedfcf12371af836784b780b26bf3e65bb4ce8cf2c95eff85c7
               parser: official-en-exact-v1
@@ -617,7 +567,6 @@ records:
             lang: ja
             raw: 貴族
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:fd4bb912ea14ecae784ff27832800487c0c6e40ee2ebee30c2a602a3438dfec0
               parser: official-jp-exact-v1
@@ -627,7 +576,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:fd4bb912ea14ecae784ff27832800487c0c6e40ee2ebee30c2a602a3438dfec0
             parser: official-jp-exact-v1
@@ -635,7 +583,6 @@ records:
             text_hash: sha256:83a3e1d2d09f298411c0caedcc9166fae4762afc645436089683c0fd04a28da2
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:e71578df4c8f0dedfcf12371af836784b780b26bf3e65bb4ce8cf2c95eff85c7
             parser: official-en-exact-v1
@@ -655,7 +602,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:26d24ce00c4067d8d1530e8815b304f51c0c177a84453dd85dd79ac431dfd766
             parser: official-jp-exact-v1
@@ -666,7 +612,6 @@ records:
             lang: en
             raw: Officer
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:b415b22a1504bbedf5c018b1f6cee57b1e1748707e657e40d1fadf90918962f9
               parser: official-en-exact-v1
@@ -677,7 +622,6 @@ records:
             lang: ja
             raw: 兵士
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:26d24ce00c4067d8d1530e8815b304f51c0c177a84453dd85dd79ac431dfd766
               parser: official-jp-exact-v1
@@ -687,7 +631,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:26d24ce00c4067d8d1530e8815b304f51c0c177a84453dd85dd79ac431dfd766
             parser: official-jp-exact-v1
@@ -695,7 +638,6 @@ records:
             text_hash: sha256:8fbb183df9cb2873cc42fe7a1d2aa577eb35753d872a0cd7fdeadd2e63af9acf
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:b415b22a1504bbedf5c018b1f6cee57b1e1748707e657e40d1fadf90918962f9
             parser: official-en-exact-v1
@@ -715,7 +657,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:e7c9bd82fabd9f06e391acf686ab332eb49ac26487c6394b3fa808cf785bd1b7
             parser: official-jp-exact-v1
@@ -726,7 +667,6 @@ records:
             lang: en
             raw: Omen
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:11f67dd61528b32e510c8b4ace0798f7f7c3e3f20a98de0daeb64583e42daa83
               parser: official-en-exact-v1
@@ -737,7 +677,6 @@ records:
             lang: ja
             raw: 絶傑
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:e7c9bd82fabd9f06e391acf686ab332eb49ac26487c6394b3fa808cf785bd1b7
               parser: official-jp-exact-v1
@@ -747,7 +686,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:e7c9bd82fabd9f06e391acf686ab332eb49ac26487c6394b3fa808cf785bd1b7
             parser: official-jp-exact-v1
@@ -755,7 +693,6 @@ records:
             text_hash: sha256:4c7e1992bb33f7c75ca82a494896522332be6a112455d2f14d3b2d8d84131423
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:11f67dd61528b32e510c8b4ace0798f7f7c3e3f20a98de0daeb64583e42daa83
             parser: official-en-exact-v1
@@ -775,7 +712,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:c435c728394a49d4b7d03880609aef11e25eac38bc8a4c54d47b10e27fc70ef5
             parser: official-jp-exact-v1
@@ -786,7 +722,6 @@ records:
             lang: en
             raw: Onmyoji
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:6fde1a6758131b210836178632ea56a519b8a403758401afdebaea4f9d24712e
               parser: official-en-exact-v1
@@ -797,7 +732,6 @@ records:
             lang: ja
             raw: 陰陽師
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:c435c728394a49d4b7d03880609aef11e25eac38bc8a4c54d47b10e27fc70ef5
               parser: official-jp-exact-v1
@@ -807,7 +741,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:c435c728394a49d4b7d03880609aef11e25eac38bc8a4c54d47b10e27fc70ef5
             parser: official-jp-exact-v1
@@ -815,7 +748,6 @@ records:
             text_hash: sha256:dab3507e991d0dc47ffd3e329992c4dd3ea128f0a72737869775b4d6707f0a64
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:6fde1a6758131b210836178632ea56a519b8a403758401afdebaea4f9d24712e
             parser: official-en-exact-v1
@@ -835,7 +767,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:bdb2c89271937473cf2f3967ecfea103abff17a6bff5b3caed6eed30c3bb34b7
             parser: official-jp-exact-v1
@@ -846,7 +777,6 @@ records:
             lang: en
             raw: Oracle Think Tank
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:4592459c2a9ac0e0e74e5fe7fc6d1f01c4e7e8da70db8cf3ffb75e0fdeb636e9
               parser: official-en-exact-v1
@@ -857,7 +787,6 @@ records:
             lang: ja
             raw: オラクルシンクタンク
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:bdb2c89271937473cf2f3967ecfea103abff17a6bff5b3caed6eed30c3bb34b7
               parser: official-jp-exact-v1
@@ -867,7 +796,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:bdb2c89271937473cf2f3967ecfea103abff17a6bff5b3caed6eed30c3bb34b7
             parser: official-jp-exact-v1
@@ -875,7 +803,6 @@ records:
             text_hash: sha256:9816752d607477216de940508f2a128dc0cb0de28834987487914f917f881ff8
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:4592459c2a9ac0e0e74e5fe7fc6d1f01c4e7e8da70db8cf3ffb75e0fdeb636e9
             parser: official-en-exact-v1
@@ -895,7 +822,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:6ae5483f96473cd4a34d111ff4b0e2a01fca98c1d69a21a301e4421f6a09438b
             parser: official-jp-exact-v1
@@ -906,7 +832,6 @@ records:
             lang: en
             raw: Pale Moon
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:289f3064254500321fc454c50424a224a68ffca4e965bbc6bcbc8d41f355e8d1
               parser: official-en-exact-v1
@@ -917,7 +842,6 @@ records:
             lang: ja
             raw: ペイルムーン
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:6ae5483f96473cd4a34d111ff4b0e2a01fca98c1d69a21a301e4421f6a09438b
               parser: official-jp-exact-v1
@@ -927,7 +851,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:6ae5483f96473cd4a34d111ff4b0e2a01fca98c1d69a21a301e4421f6a09438b
             parser: official-jp-exact-v1
@@ -935,7 +858,6 @@ records:
             text_hash: sha256:fad4126b0bbe04d24a2ee707169344e9985a07b64006546156811b4f33739a95
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:289f3064254500321fc454c50424a224a68ffca4e965bbc6bcbc8d41f355e8d1
             parser: official-en-exact-v1
@@ -955,7 +877,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:7ea142d17fa0cae5520100100dd572a64938cff3a28ea99e71d2c4b3f77ea5a1
             parser: official-jp-exact-v1
@@ -966,7 +887,6 @@ records:
             lang: en
             raw: Passion
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:f5fe25c7acfef5a8ffc6a50a572959b54589d564a8701a83e82eb16fa3292b36
               parser: official-en-exact-v1
@@ -977,7 +897,6 @@ records:
             lang: ja
             raw: パッション
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:7ea142d17fa0cae5520100100dd572a64938cff3a28ea99e71d2c4b3f77ea5a1
               parser: official-jp-exact-v1
@@ -987,7 +906,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:7ea142d17fa0cae5520100100dd572a64938cff3a28ea99e71d2c4b3f77ea5a1
             parser: official-jp-exact-v1
@@ -995,7 +913,6 @@ records:
             text_hash: sha256:6506edc4876c1f3f13ff306066e2355355a837086d6e7979599badcb6979b0d6
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:f5fe25c7acfef5a8ffc6a50a572959b54589d564a8701a83e82eb16fa3292b36
             parser: official-en-exact-v1
@@ -1015,7 +932,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:d59390c598f42620a98db26c9fcc45e2888401884e17da29d9dde72987a6669a
             parser: official-jp-exact-v1
@@ -1026,7 +942,6 @@ records:
             lang: en
             raw: Phoenix
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:dab8c9b38e69c3e6f21b9140147ea443c9d9fa5302f2eb1aa93fb6909ac3f5bd
               parser: official-en-exact-v1
@@ -1037,7 +952,6 @@ records:
             lang: ja
             raw: 不死鳥
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:d59390c598f42620a98db26c9fcc45e2888401884e17da29d9dde72987a6669a
               parser: official-jp-exact-v1
@@ -1047,7 +961,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:d59390c598f42620a98db26c9fcc45e2888401884e17da29d9dde72987a6669a
             parser: official-jp-exact-v1
@@ -1055,7 +968,6 @@ records:
             text_hash: sha256:b6fd957976a019651ca37613d45bb8702bcc74787a39c636aaa61d6a6d3f1363
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:dab8c9b38e69c3e6f21b9140147ea443c9d9fa5302f2eb1aa93fb6909ac3f5bd
             parser: official-en-exact-v1
@@ -1075,7 +987,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:4e531e1831cc4e26e561261dc6d724308f16be687b8db1feb711980cf3b6396e
             parser: official-jp-exact-v1
@@ -1086,7 +997,6 @@ records:
             lang: en
             raw: Pixie
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:59c07a36fac9a4c518c56d7cb2905b64dac2dba0fa93ff7f1807e20a10bb8978
               parser: official-en-exact-v1
@@ -1097,7 +1007,6 @@ records:
             lang: ja
             raw: 妖精
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:4e531e1831cc4e26e561261dc6d724308f16be687b8db1feb711980cf3b6396e
               parser: official-jp-exact-v1
@@ -1107,7 +1016,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:4e531e1831cc4e26e561261dc6d724308f16be687b8db1feb711980cf3b6396e
             parser: official-jp-exact-v1
@@ -1115,7 +1023,6 @@ records:
             text_hash: sha256:3602014779bdc7396fd097da57ee2b4735d9994edd331b2a4d469448966b71a8
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:59c07a36fac9a4c518c56d7cb2905b64dac2dba0fa93ff7f1807e20a10bb8978
             parser: official-en-exact-v1
@@ -1135,7 +1042,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:7e8ae2fd659265e94949ba89a93472b5dfaaa2c13afafbc1add4c45d921d3c3f
             parser: official-jp-exact-v1
@@ -1146,7 +1052,6 @@ records:
             lang: en
             raw: PriConne
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:841efc51b5c6be8315058e061d8375eee2485fe3adb4db878a18c6f9d2d14791
               parser: official-en-exact-v1
@@ -1157,7 +1062,6 @@ records:
             lang: ja
             raw: プリコネ
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:7e8ae2fd659265e94949ba89a93472b5dfaaa2c13afafbc1add4c45d921d3c3f
               parser: official-jp-exact-v1
@@ -1167,7 +1071,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:7e8ae2fd659265e94949ba89a93472b5dfaaa2c13afafbc1add4c45d921d3c3f
             parser: official-jp-exact-v1
@@ -1175,7 +1078,6 @@ records:
             text_hash: sha256:cc8cab512424adab138e4d7394084859a93ba7f44f07165fd7ad8c59533212d2
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:841efc51b5c6be8315058e061d8375eee2485fe3adb4db878a18c6f9d2d14791
             parser: official-en-exact-v1
@@ -1195,7 +1097,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:418b5ee92e67b8cd41752f93100f7b769e5f8c78a7e89a99046585f6e18c97c2
             parser: official-jp-exact-v1
@@ -1206,7 +1107,6 @@ records:
             lang: en
             raw: Prince
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:6733e22cf2ce4a6626e6c2322d46f5fbfc8b864847866f57e7e065710704730d
               parser: official-en-exact-v1
@@ -1217,7 +1117,6 @@ records:
             lang: ja
             raw: プリンス
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:418b5ee92e67b8cd41752f93100f7b769e5f8c78a7e89a99046585f6e18c97c2
               parser: official-jp-exact-v1
@@ -1227,7 +1126,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:418b5ee92e67b8cd41752f93100f7b769e5f8c78a7e89a99046585f6e18c97c2
             parser: official-jp-exact-v1
@@ -1235,7 +1133,6 @@ records:
             text_hash: sha256:dcf0616aa48a99d39128af2a6c7eb1165e8089876e012b70494efd4d20a5ed4f
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:6733e22cf2ce4a6626e6c2322d46f5fbfc8b864847866f57e7e065710704730d
             parser: official-en-exact-v1
@@ -1255,7 +1152,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:c1aca52dd07bc1b2b10dfe7fc7105fc97b504388233b2b892bae113f953598a0
             parser: official-jp-exact-v1
@@ -1266,7 +1162,6 @@ records:
             lang: en
             raw: Princess
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:b9cf8d2d60644b55084c9e8042e7621cfadb2843e5462c36a103a0e653a12f4a
               parser: official-en-exact-v1
@@ -1277,7 +1172,6 @@ records:
             lang: ja
             raw: プリンセス
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:c1aca52dd07bc1b2b10dfe7fc7105fc97b504388233b2b892bae113f953598a0
               parser: official-jp-exact-v1
@@ -1287,7 +1181,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:c1aca52dd07bc1b2b10dfe7fc7105fc97b504388233b2b892bae113f953598a0
             parser: official-jp-exact-v1
@@ -1295,7 +1188,6 @@ records:
             text_hash: sha256:d47cdbb80556bf7b12fb7121bce7e49eca008e8fe4a2b31778edde3512097115
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:b9cf8d2d60644b55084c9e8042e7621cfadb2843e5462c36a103a0e653a12f4a
             parser: official-en-exact-v1
@@ -1315,7 +1207,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:7e8ae2fd659265e94949ba89a93472b5dfaaa2c13afafbc1add4c45d921d3c3f
             parser: official-jp-exact-v1
@@ -1326,7 +1217,6 @@ records:
             lang: en
             raw: 'Princess Connect! Re: Dive'
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:841efc51b5c6be8315058e061d8375eee2485fe3adb4db878a18c6f9d2d14791
               parser: official-en-exact-v1
@@ -1337,7 +1227,6 @@ records:
             lang: ja
             raw: プリンセスコネクト！Re:Dive
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:7e8ae2fd659265e94949ba89a93472b5dfaaa2c13afafbc1add4c45d921d3c3f
               parser: official-jp-exact-v1
@@ -1347,7 +1236,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:7e8ae2fd659265e94949ba89a93472b5dfaaa2c13afafbc1add4c45d921d3c3f
             parser: official-jp-exact-v1
@@ -1355,7 +1243,6 @@ records:
             text_hash: sha256:458303ecf9ce6120b7c4d54b79b19c8e56a15971fea83a3957cf995b207cb053
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:841efc51b5c6be8315058e061d8375eee2485fe3adb4db878a18c6f9d2d14791
             parser: official-en-exact-v1
@@ -1375,7 +1262,6 @@ records:
         label:
           kind: source
           source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:72250179818710a4e4b912fc6276b018980a0f4a42e588d5c7c381196fdba06f
             parser: official-jp-exact-v1
@@ -1386,7 +1272,6 @@ records:
             lang: en
             raw: Puppetry
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
               source_version_id: src:v1:4204b1be9eb6d3eda79431f6f0766812e7b4ce73118aa8e9e079d155ffa5cb1b
               parser: official-en-exact-v1
@@ -1397,7 +1282,6 @@ records:
             lang: ja
             raw: 人形
             source_ref:
-              store_id: gbaian10-home
               batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
               source_version_id: src:v1:72250179818710a4e4b912fc6276b018980a0f4a42e588d5c7c381196fdba06f
               parser: official-jp-exact-v1
@@ -1407,7 +1291,6 @@ records:
         active: true
       evidence:
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
             source_version_id: src:v1:72250179818710a4e4b912fc6276b018980a0f4a42e588d5c7c381196fdba06f
             parser: official-jp-exact-v1
@@ -1415,7 +1298,6 @@ records:
             text_hash: sha256:8f0298f9c8a835e73f6ec8f040fd778b1b681f776df8d351f95d3ba88c854cc6
           role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
-            store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
             source_version_id: src:v1:4204b1be9eb6d3eda79431f6f0766812e7b4ce73118aa8e9e079d155ffa5cb1b
             parser: official-en-exact-v1
