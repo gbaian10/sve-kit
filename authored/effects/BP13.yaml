@@ -179,7 +179,7 @@ cards:
             modes:
               - 2
           - key: '3'
-            select: &id001
+            select:
               side: opponent
               zone: field
               type: follower
@@ -200,8 +200,7 @@ cards:
           then:
             op: seq
             steps:
-              - &id003
-                op: select
+              - op: select
                 select:
                   side: self
                   zone: field
@@ -209,15 +208,16 @@ cards:
                 min: 1
                 max: 1
                 bind: gift_self
-              - &id002
-                op: select
-                select: *id001
+              - op: select
+                select:
+                  side: opponent
+                  zone: field
+                  type: follower
                 min: 1
                 max: 1
                 bind: gift_other
                 by: opponent
-              - &id005
-                op: if
+              - op: if
                 condition:
                   fn: lt
                   args:
@@ -229,8 +229,7 @@ cards:
                   op: control
                   subjects: gift_self
                   side: opponent
-              - &id004
-                op: if
+              - op: if
                 condition:
                   fn: lt
                   args:
@@ -245,10 +244,47 @@ cards:
           else:
             op: seq
             steps:
-              - *id002
-              - *id003
-              - *id004
-              - *id005
+              - op: select
+                select:
+                  side: opponent
+                  zone: field
+                  type: follower
+                min: 1
+                max: 1
+                bind: gift_other
+                by: opponent
+              - op: select
+                select:
+                  side: self
+                  zone: field
+                  type: follower
+                min: 1
+                max: 1
+                bind: gift_self
+              - op: if
+                condition:
+                  fn: lt
+                  args:
+                    - count:
+                        side: self
+                        zone: field
+                    - 5
+                then:
+                  op: control
+                  subjects: gift_other
+                  side: self
+              - op: if
+                condition:
+                  fn: lt
+                  args:
+                    - count:
+                        side: opponent
+                        zone: field
+                    - 5
+                then:
+                  op: control
+                  subjects: gift_self
+                  side: opponent
   BP13-060:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -282,7 +318,10 @@ cards:
                       - assail
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
         additional_costs:

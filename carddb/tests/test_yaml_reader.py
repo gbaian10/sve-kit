@@ -18,15 +18,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 AUTHORED = Path(__file__).resolve().parents[2] / "authored"
-PROTOTYPES_WITH_ANCHORS = {
-    "effects/" + name + ".yaml"
-    for name in ("BP02", "BP04", "BP09", "BP13", "EBD03", "SD07", "SD08")
-}
-PRODUCTION = [
-    p
-    for p in sorted(AUTHORED.rglob("*.yaml"))
-    if p.relative_to(AUTHORED).as_posix() not in PROTOTYPES_WITH_ANCHORS
-]
+PRODUCTION = sorted(AUTHORED.rglob("*.yaml"))
 
 
 @pytest.mark.parametrize(
@@ -265,13 +257,6 @@ def test_strict_json_validation_is_retained(
     path.write_text("a: value")
     mocker.patch.object(storage, "parse_yaml", return_value={"a": ("tuple",)})
     with pytest.raises(ValidationError, match="invalid-json-value"):
-        read_yaml(path)
-
-
-@pytest.mark.parametrize("name", sorted(PROTOTYPES_WITH_ANCHORS))
-def test_existing_prototypes_with_anchors_remain_rejected(name: str) -> None:
-    path = AUTHORED / name
-    with pytest.raises(TypeError, match="Anchors"):
         read_yaml(path)
 
 

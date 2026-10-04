@@ -9,7 +9,7 @@ cards:
         body:
           op: damage
           subjects: target.1
-          amount: &id001
+          amount:
             fn: add
             args:
               - count:
@@ -23,13 +23,21 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: &id003
+            select:
               side: opponent
               zone: field
               type: follower
             min: 0
             max: 5
-            distribute: *id001
+            distribute:
+              fn: add
+              args:
+                - count:
+                    side: self
+                    zone: hand
+                - count:
+                    side: self
+                    zone: ex
   BP04-003:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -62,7 +70,7 @@ cards:
         kind: activated
         body:
           op: choice
-          min: &id002
+          min:
             if:
               fn: ge
               args:
@@ -70,7 +78,14 @@ cards:
                 - 3
             then: 1
             else: 0
-          max: *id002
+          max:
+            if:
+              fn: ge
+              args:
+                - read: self.combo
+                - 3
+            then: 1
+            else: 0
           modes:
             - op: modify
               subjects: target.1
@@ -92,7 +107,10 @@ cards:
             modes:
               - 1
           - key: '2'
-            select: *id003
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
             modes:
@@ -168,13 +186,19 @@ cards:
             read: paid.boost
           then:
             op: banish
-            subjects: *id003
+            subjects:
+              side: opponent
+              zone: field
+              type: follower
           else:
             op: banish
             subjects: target.1
         targets:
           - key: '1'
-            select: *id003
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
         additional_costs:
@@ -231,7 +255,10 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id003
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
   BP04-092:
@@ -335,6 +362,9 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id003
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
