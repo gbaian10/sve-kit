@@ -1,6 +1,22 @@
 parameter_rule_format: 2
 kind: template_parameter_rules
 rules:
+  - rule_id: attack_assignment
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: attack_bound
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: attack_health_assignment
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: attack_sum_bound
+    enabled: true
+    origin: project
+    low_confidence: false
   - rule_id: braced_ability_reference
     enabled: true
     origin: project
@@ -17,7 +33,15 @@ rules:
     enabled: true
     origin: project
     low_confidence: false
+  - rule_id: cost_assignment
+    enabled: true
+    origin: project
+    low_confidence: false
   - rule_id: deck_top_ordinal
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: health_assignment
     enabled: true
     origin: project
     low_confidence: false
@@ -34,6 +58,14 @@ rules:
     origin: project
     low_confidence: false
   - rule_id: keyword_threshold_spell_chain
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: leader_health_assignment
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: leader_health_bound
     enabled: true
     origin: project
     low_confidence: false
@@ -57,7 +89,23 @@ rules:
     enabled: true
     origin: project
     low_confidence: false
+  - rule_id: original_cost_bound
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: original_cost_sum_bound
+    enabled: true
+    origin: project
+    low_confidence: false
   - rule_id: player_person_quantity
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: pp_capacity_bound
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: pp_remaining_bound
     enabled: true
     origin: project
     low_confidence: false

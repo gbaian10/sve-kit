@@ -180,36 +180,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T794b6a416a","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T794b6a416a
-      lang: zh-Hant
-      text: 【進化時】從自己的牌堆中搜尋原始消費合計為N以下的至多N張自然・法術，放置到EX區。本回合，使用該卡之際，消費變為N。
-      inventory_ids:
-        - inv:45ade7cd5fda47a1197d67f9c0685f262f29ddb90d0fa6b6d745d4c4a9c07b29
-        - inv:981950bf809ea23915217414806e6796ad6c637b10d82fdc3b65e5bcd9f0e681
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T795018717b","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T795018717b
-      lang: zh-Hant
-      text: 指定敵方戰場上的N個從者。給予其N點傷害。如果為【覺醒】狀態，則轉變為N點傷害。（如果自己的PP最大值為N以上，則成為【覺醒】狀態）
-      inventory_ids:
-        - inv:4c712c8a8c0ac27103e7f72e3838a8b7ae94d669be1413d1a9478dbb12df51f6
-        - inv:7534061865153aa9d17e49af7489aceb09b51026de282b2b404d35bc04399d17
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T79a83fa8d0","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -239,36 +209,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T7ab7ad4c8e","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T7ab7ad4c8e
-      lang: zh-Hant
-      text: 【進化時】指定敵方戰場上至多N個從者。對其任意分配N點傷害。如果自己主戰者的生命值為N以下，則轉變為N點傷害。
-      inventory_ids:
-        - inv:66b783047c4afb7ad15eca99a2a34a081fdb4384eaae24f49f6da7f47afd2b7d
-        - inv:7d5bd8b979d1d7598e3adb8b700903fed7c4903742f2fd696dd0fa84fd398bc7
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T7ad9182907","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T7ad9182907
-      lang: zh-Hant
-      text: 自己的結束階段到來時，如果自己的剩餘PP為N以上，則指定敵方的N名主戰者。給予其N點傷害。
-      inventory_ids:
-        - inv:62c9933af30989cd460393c9f9e203ad910d934c6123d8ef3b7e3c4578979442
-        - inv:c6c411c7c65b074a46348a5b326e2efdcbdba02a8f58fed31039d4dc46250382
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T7af0c4cad7","zh-Hant"]'
@@ -419,20 +359,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T7e52650e64","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T7e52650e64
-      lang: zh-Hant
-      text: 將自己牌堆頂的N張卡片放置到EX區。重複此動作直到EX區達到上限為止。本回合，自己下一次使用「藉此放置到EX區的卡片」之際，消費變為N。
-      inventory_ids:
-        - inv:9012e75a5a24d2bf79fc09897add40a7e552269dc55c7e35b5cbacd1cb5f4692
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T7e91c92ef7","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -535,21 +461,6 @@ records:
         - inv:f528b7df9152ddef02822e120acf9c721bf821d1539f8dd0c6955e278b959a4a
       reasons:
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T7fdfea771d","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T7fdfea771d
-      lang: zh-Hant
-      text: 【超進化時】給予戰場上的全部從者N點傷害。給予敵方的全部主戰者N點傷害。將這張卡片的生命值變為N。
-      inventory_ids:
-        - inv:73aacdfb6fae2560306a24c5a827ad44da5b535a067c820b31ea20a248cfcc96
-        - inv:a7c4fc2f7bfc2beb5367627bc0416bd20865b5084d1b804acb09a6729115f959
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T8035ad03d2","zh-Hant"]'
@@ -763,22 +674,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T83c6980455","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T83c6980455
-      lang: zh-Hant
-      text: 【攻擊時】給予敵方的全部主戰者與「本回合中自己主戰者的生命值減少的次數」相同的傷害。如果自己主戰者的{生命值}為N，則這張卡片{攻擊力}+N/{生命值}+N。
-      inventory_ids:
-        - inv:87f0d7a1235b2995850062eab6457499da85a76e1cf319faa3398138dae8557c
-        - inv:a2e8d45d53475dc6f8014c43ba12636b838489b530c6264fe75b9bfa36cfdbf2
-        - inv:daa7f8cfaee81044dd419b5beb3fac7014c3236614585d85bb5179e60ec0a8d0
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T8422d6981f","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -793,20 +688,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T842edde988","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T842edde988
-      lang: zh-Hant
-      text: 自己主戰者的{生命值}變為N以下時，將這張卡片放置到墓場。將自己主戰者的{生命值}變為N。
-      inventory_ids:
-        - inv:33c65828e940583f9346e295724eb389aac91e8a91f6cdb1088413afedabbeef
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T849952879c","zh-Hant"]'
@@ -1305,21 +1186,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T9198e08d44","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T9198e08d44
-      lang: zh-Hant
-      text: '{入場曲}查看自己牌堆頂的N張卡片。可以從其中將原始消費合計為N以下的至多N張Cool・從者召喚到戰場上。將其餘卡片以任意順序放置到牌堆底。'
-      inventory_ids:
-        - inv:5e1c75583e9417b15a7e1faefdeb462c18d3c304d0c371de55095be322ec6acb
-        - inv:65e688c4aa2fc4246807634de4af542b16b01ffef7807e184164061be4fe755e
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T91bd7a5749","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1429,23 +1295,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T9494ac9b86","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T9494ac9b86
-      lang: zh-Hant
-      text: '{入場曲}給予敵方戰場上的全部從者N點傷害。如果自己戰場上Passion・卡片的原始消費合計為N以上，則轉變為N點傷害。如果自己戰場上Passion・卡片的原始消費合計為N以上，則給予敵方的全部主戰者N點傷害。'
-      inventory_ids:
-        - inv:3bae04ab9874180a02c56a066dde16adaae8bd9bea3b4cdd8c925933fbc5907f
-        - inv:441e3b6581858ccba463ef1da5126f840409e98a106598b231577008004fbd59
-        - inv:8b139a7f8b77eda55109564aa5998accc5d00e5d5d951ecd099f21851d2650f6
-        - inv:b81a71e57f9a38d130108a65827161eea2477a5fa9642c083733d607c3d5bed4
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T94a5c510ad","zh-Hant"]'
@@ -1672,21 +1521,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T9912546180","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T9912546180
-      lang: zh-Hant
-      text: 自己的結束階段到來時，如果自己的剩餘PP為N以上，則指定敵方戰場上的N個從者。給予其N點傷害。
-      inventory_ids:
-        - inv:49e3d92fc7a16950d570cc925ce44d62729cf40ba4fd52e0100cbb7d629d2e58
-        - inv:a05e7fdcfc796d415af05a44f2a39a6c5484b0c680e4125826be6e4245e41048
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T9922f13706","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1745,20 +1579,6 @@ records:
         - inv:6aa82aaa2d1d02c91f2a57c94123a4e2c3bf1458016cb8520469c43098ce5b0c
         - inv:bc3f9d0d89637cdb6362ca5e71d0d0019117c02c54052e485b817f25f4775646
         - inv:f375037b7fb71f818c8f9c082087d688e0c9f74600fc7e40dce174f3bfcedc34
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T996612a4d4","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T996612a4d4
-      lang: zh-Hant
-      text: '{謝幕曲}【土之秘術】將這張卡片召喚到戰場上。將這張卡片的攻擊力與生命值變為N。這張卡片獲得【疾馳】。'
-      inventory_ids:
-        - inv:1f9732628e5d9e5f419b5e5b693269a4270727f0909faf585ab1043936ccc2f0
       reasons:
         - alignment_definition_unavailable
         - numeric_role_requires_review
@@ -1840,22 +1660,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T9c9a62793d","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T9c9a62793d
-      lang: zh-Hant
-      text: 【進化時】指定自己墓場的N張消費N以下的法術。將其消費變為N並使用。
-      inventory_ids:
-        - inv:16207e9cde8108024b9916da5887b65592ca45f051b5897118f254d92bac4be1
-        - inv:dd49b78171136e8778ceebaea8167851fcb0ce3444633be99023ad21c3e4ac03
-        - inv:e82b8e341828aa45e864be7a901035b42d27f3892a3cc2833ea12527a99df9d4
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T9dc82cdbb5","zh-Hant"]'
@@ -1973,21 +1777,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - numeric_identifier_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T9f97b07753","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T9f97b07753
-      lang: zh-Hant
-      text: 只要這張卡片的攻擊力為N以上，這張卡片獲得【守護】。只要這張卡片的攻擊力為N以上，這張卡片獲得【疾馳】。只要這張卡片的攻擊力為N以上，這張卡片可以無視【守護】進行攻擊。
-      inventory_ids:
-        - inv:232fced849edf3d4f903c88e1680536bbd93f5b629cfefde549fff2f78c3a107
-        - inv:486af023fe4b5092f8520b5056c045436366f59279080eb50b25965fe986b8ee
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T9fca8a8ef4","zh-Hant"]'
@@ -2146,21 +1935,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Ta2d1a88ef1","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Ta2d1a88ef1
-      lang: zh-Hant
-      text: 自己的結束階段到來時，在這張卡片上放置N個祈禱指示物。之後，如果祈禱指示物為N個以上，則將這張卡片放置到墓場。自己的主戰者{生命值}+N。從自己的牌堆中搜尋至多N張卡片，放置到EX區。使用該卡之際，消費變為N。
-      inventory_ids:
-        - inv:3f1bb24680d1cede5f5d0bee2b84f5eb871976c117b829731056b48acae0955a
-        - inv:584efd8ed2d364b2198379aece39fd35a323f79ce2b6139186bdae4afd9e41b9
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","Ta2d3fbdf05","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2312,22 +2086,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Ta5acb3d403","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Ta5acb3d403
-      lang: zh-Hant
-      text: '{入場曲}指定敵方戰場上的N個從者。給予其N點傷害。如果自己的PP最大值為N，則這張卡片進化。'
-      inventory_ids:
-        - inv:3f786f0183a57cc17ad4ca0417910e689388be2cf2278b587cf8ed6bac35445c
-        - inv:8825ede5c543333b1a9bdb52543e67829408eafc7a5b5f66c29cc7ac0ceb8248
-        - inv:9b067934221c51d4ce7758dc6dc542c50e55edd73d42a506a3a1f5993f8641f7
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Ta673b1aaf7","zh-Hant"]'
@@ -2771,34 +2529,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tae0c30005f","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tae0c30005f
-      lang: zh-Hant
-      text: 給予全部從者N點傷害。如果為【覺醒】狀態，則轉變為N點傷害。（如果自己的PP最大值為N以上，則成為【覺醒】狀態）
-      inventory_ids:
-        - inv:26282f4de06aea0d85658f8afca53649eefccc450c8f34f8cfd27fca5b981652
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Taf38ff6906","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Taf38ff6906
-      lang: zh-Hant
-      text: 【攻擊時】這張卡片{攻擊力}+N。之後，如果這張卡片的攻擊力為N以上，則給予敵方的全部主戰者N點傷害。
-      inventory_ids:
-        - inv:38e43e0b2eed299cd83a29b2dbd263ef2f1c8dbb85b171afd5e9f3c6e82f9e64
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","Taf5d67e5ed","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2871,21 +2601,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tb2799a0f70","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tb2799a0f70
-      lang: zh-Hant
-      text: '{入場曲}查看自己牌堆頂的N張卡片。可以從其中將原始消費合計為N以下的至多N張學院・從者召喚到戰場上。將其餘卡片以任意順序放置到牌堆底。'
-      inventory_ids:
-        - inv:1725c2b26f0cc1748bca820aabd3d336301c885686d2566068e97097124d74c9
-        - inv:455c9290d17a2c90947aeb6df322d2c8a1fe55907663829f3a70c89e7a947a40
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tb33503d498","zh-Hant"]'
@@ -2968,37 +2683,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tb53cc5a1bc","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tb53cc5a1bc
-      lang: zh-Hant
-      text: 指定自己墓場中原始消費合計為N以下的至多N張絕傑・魔法使・從者。將其召喚到戰場上。使其獲得「自己的結束階段到來時，破壞該從者」。
-      inventory_ids:
-        - inv:4c8707266696f021c46704e30d7a1cfcf6fa5b4edc0d6b174dd51defe5ddc98f
-        - inv:94f7d379a67729f08a0b08b9c928ff31c4de5301c39a16aaa87e9cb13ab44b74
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tb590352995","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tb590352995
-      lang: zh-Hant
-      text: 查看自己牌堆頂的N張卡片。可以從其中將原始消費合計為N以下的任意張數原始消費N以下的{皇家護衛}從者召喚到戰場上。將其餘卡片以任意順序放置到牌堆底。
-      inventory_ids:
-        - inv:17ba0c38a5eddadd38ababaeedea8c918eda7dab247ead5fc25c6925cd7ec05e
-        - inv:1c1049b1181e7130511d213b81eba683f980a0d3a7359ee94927b37ac9fdb3a2
-        - inv:fa6cea81c77b5f522cc0d6c94af4b070efd03d9a1336d49d7068e2f44c1552d0
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tb5a6c2317a","zh-Hant"]'
