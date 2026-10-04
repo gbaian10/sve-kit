@@ -61,19 +61,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T00b1dbce85","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T00b1dbce85
-      lang: zh-Hant
-      text: '{入場曲}從自己的牌堆中搜尋N張消費N的{中立}從者，召喚到戰場上。'
-      inventory_ids:
-        - inv:4c667ecc4e6014cfe9622c999a81c30d0cd678c5b03aedbee719802546656739
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T00bca62041","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -181,19 +168,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T023465985d","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T023465985d
-      lang: zh-Hant
-      text: 自己的回合中，自己使用{龍族}法術時，給予敵方戰場上的全部從者N點傷害。
-      inventory_ids:
-        - inv:d0f554920794c671f4be379f5e41cf52cf53d48e2a4c3ea6f86370d088128520
-      reasons:
-        - alignment_reference_label_missing
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T0259b8f4a3","zh-Hant"]'
@@ -390,23 +364,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T06360eeda8","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T06360eeda8
-      lang: zh-Hant
-      text: '{起動}將這張卡片{橫置}並放置到墓場：指定自己戰場上的N個{龍族}從者。使其{生命值}+N，並獲得武裝・類型。'
-      inventory_ids:
-        - inv:10ea530bdbf5af7401a5764862cb82b776dcaece04546c028b2ddd4b18a46fc4
-        - inv:483b81b0eff9f804a547e3ce5e5f957bc7852f62da89d913cd8dcc87a77f1354
-        - inv:52a1782f76128c634f8a5e9a30b5ab8404649a93668a2066354fd792386165d7
-        - inv:7b9e33829d77d05e525a01a0a314ee8f61e6e6b30d2b716b455f7d23a379c2f2
-        - inv:c0361c3cb6165a4488b7ab05f82b79872df9ef879888cb163cbdaa4976a45efa
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T063e6c5fc8","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -556,20 +513,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T08de225fb5","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T08de225fb5
-      lang: zh-Hant
-      text: '{謝幕曲}查看自己牌堆頂的N張卡片。可以從其中將N張{精靈}從者召喚到戰場上。將其餘卡片以任意順序放置到牌堆底。'
-      inventory_ids:
-        - inv:2eb7c32c0b24a77448c78705f5b67f0aeea050e064b9c82587ba6002eee5ea78
-        - inv:78ce2dd4f11996fbe68bdeae5c4417c8ead25616b8c19553797d0880af487b05
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T090d9b34cc","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -693,20 +636,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T09ce30f0e8","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T09ce30f0e8
-      lang: zh-Hant
-      text: 從下列之中選擇N項。【N】指定自己的N個從者。使其{攻擊力}+N。可以在其上放置N個童話指示物。【N】指定自己墓場至多N張{皇家護衛}從者。將其返回牌堆並洗牌。抽取N張卡片。
-      inventory_ids:
-        - inv:8732998f4e2f927ab1f56b591dbce8f37b41391ab8f74d0db9934b71da1a0555
-        - inv:881257d0416ec5af09610a8bbc6648a9904b19a40917ed80d4954ddd07f99f4f
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T09eb480f3a","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -795,21 +724,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T0ad3701948","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T0ad3701948
-      lang: zh-Hant
-      text: '{入場曲}指定自己墓場的N張「與這張卡片同名者除外的原始消費N以下的{夜魔}從者」。【死靈充能_N】將其召喚到戰場上。使其獲得【守護】。'
-      inventory_ids:
-        - inv:0f1b1b796e537411f48be3bd2d24c90cc894a49a31d79f01a90791b5552938c4
-        - inv:4163d0ce5a46b374bd123fa94c3d35199624d4984590446caeb6794e729fadef
-        - inv:bba996d0884790aa97c7f2e1ae62041f744652c3a8aee551052ff12720e20da5
-      reasons:
-        - alignment_reference_label_missing
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T0b14b1cd29","zh-Hant"]'
@@ -966,19 +880,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T0d100d28c1","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T0d100d28c1
-      lang: zh-Hant
-      text: '{起動}將這張卡片{橫置}：本回合，自己戰場上的全部{皇家護衛}從者獲得【突進】【指定攻擊】。'
-      inventory_ids:
-        - inv:7b5e0bb12a7639c10210b940d9be80c9db7a918ad29fd1aafc6da58cdb736167
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T0d6108c64c","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1028,20 +929,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T0ddcddd1de","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T0ddcddd1de
-      lang: zh-Hant
-      text: '{起動}{消費N}捨棄手牌中的這張卡片與N張原始消費N以上的{龍族}卡片：抽取N張卡片。'
-      inventory_ids:
-        - inv:15b207727087135742be8c8b8bf8ade8bc2fa11039cd010a9047670c2ea51590
-        - inv:f749fd224e2baae36db7bb5475a4357f7a8e64394288bdf724c66ad30012f774
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T0e2e005160","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1055,19 +942,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T0ed6f1ad5c","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T0ed6f1ad5c
-      lang: zh-Hant
-      text: 使用這張卡片之際，可以作為追加消費捨棄手牌中的N張原始消費N以上的{龍族}卡片。
-      inventory_ids:
-        - inv:5f86290cd2a5276ecca1d0c77664bfa4e8b44896acddafe4fca9baac9ba7ac7d
-      reasons:
-        - alignment_reference_label_missing
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T0ee289e833","zh-Hant"]'
@@ -1100,21 +974,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: true
-  - record_key: '["template_translation_candidate","effect","T0f6a37dbd4","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T0f6a37dbd4
-      lang: zh-Hant
-      text: '{入場曲}查看自己牌堆頂的N張卡片。可以從其中公開{精靈}從者與{精靈}法術各至多N張並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。【連擊_N】回復自己的PP N點。'
-      inventory_ids:
-        - inv:4fa56bee2c09d683e949080d539f88fb68d226b04100ce01648b59bcc99bc832
-        - inv:6e3e39f5da22330cb17c756a0cdcf561ac2cd1866f86fb5f0b8f72dae6a9f252
-        - inv:7fb4d09a167283ee877c3c60e5a745a3e10375289fd27c146473696ca9022073
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T0f800303da","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1238,20 +1097,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T114f459beb","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T114f459beb
-      lang: zh-Hant
-      text: '{入場曲}如果自己戰場上與自己EX區的{皇家護衛}從者合計為N張以上，則使敵方戰場上的全部從者消失。'
-      inventory_ids:
-        - inv:54a93863745a8bcf8f95dcda82c13e285c2441daf846866cf462e8a4d95c4809
-        - inv:c7e2100fd2ce5e96c95f10683f023255c7a3a31b6ed951ab9ab57d650d0e4537
-      reasons:
-        - alignment_reference_label_missing
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1163cc2a4c","zh-Hant"]'
@@ -1489,19 +1334,6 @@ records:
         - inv:e24c3075b32d62ff6fcba870f61a166e92ef5d2a216cb1e94bcf2872df33f921
       reasons:
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T1444df476a","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T1444df476a
-      lang: zh-Hant
-      text: 【進化時】查看自己牌堆頂的N張卡片。可以從其中將N張原始消費N以下的{龍族}從者放置到EX區。將其餘卡片以任意順序放置到牌堆底。使其{攻擊力}+N/{生命值}+N。
-      inventory_ids:
-        - inv:6e63d6093ddf1a75b9014e9b7d8f832e3bb301ca12905736a50571546a3f6490
-      reasons:
-        - alignment_reference_label_missing
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1462f5dab0","zh-Hant"]'
@@ -1837,20 +1669,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T18a3f617e8","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T18a3f617e8
-      lang: zh-Hant
-      text: '{起動}將戰場上的N個護符放置到墓場：可以將自己手牌中N張原始消費N以下的{主教}從者或原始消費N以下的{主教}護符召喚到戰場上。此能力N回合中可使用N次。'
-      inventory_ids:
-        - inv:9afc3cfafd8b55f6e93a00095da6dbca2ed1b47e9f13c1c851ce9f86a7896f4b
-        - inv:e3133fdb0e79e451cb81e03f8fd0d88bdfa742cafcc437972e448acefbe6119b
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T18b7eb5e48","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2033,19 +1851,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T1c3f8cc8db","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T1c3f8cc8db
-      lang: zh-Hant
-      text: 從自己的手牌捨棄這張卡片時，查看自己牌堆頂的N張卡片。可以從其中公開N張原始消費N以上的{龍族}卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
-      inventory_ids:
-        - inv:aac08c15d430bbc02bafc92de62f4d20fda0130c9fe948da1602ad233eb1572a
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1c6a3fdb12","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2152,20 +1957,6 @@ records:
         - signed_numeric_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T1d46d82458","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T1d46d82458
-      lang: zh-Hant
-      text: '{入場曲}如果自己墓場的{皇家護衛}從者為N張以上，則指定敵方戰場上的N個從者。將其破壞。'
-      inventory_ids:
-        - inv:6028f46ae41a9ac8475fbbe7b8ba3f022a6e7381306f27bf3108f368d58340dc
-        - inv:79067604ec7eb2b61cf266f7a40658bc1d41d27d80fe5e815439e8adc7430e6d
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1d9bd94635","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2246,19 +2037,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T1e0d7af8c0","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T1e0d7af8c0
-      lang: zh-Hant
-      text: 【攻擊時】指定自己墓場的N張{夜魔}從者。將其增加到手牌中。
-      inventory_ids:
-        - inv:98f669c64fc96876cbdb7fca6d32a3ccc11cd2d7665535e3a3257d8258e045e1
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1e750755eb","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2319,20 +2097,6 @@ records:
         - signed_numeric_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T1f57144aff","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T1f57144aff
-      lang: zh-Hant
-      text: '{入場曲}指定自己墓場的N張原始消費N以下的{精靈}從者。將其召喚到戰場上。'
-      inventory_ids:
-        - inv:42c3f8ef50e786575ed4a77699fff0d5d75d89ad43e413216f9829e74bc3c4ce
-        - inv:61577a5916ab4ed89a1401879edfcd793d2c403e61e15dc2bb6fd0829433991f
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1f71fca1f7","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2347,20 +2111,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T2024a1d750","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T2024a1d750
-      lang: zh-Hant
-      text: '{入場曲}從自己的牌堆中搜尋N張{皇家護衛}從者，增加到手牌中。'
-      inventory_ids:
-        - inv:7bf23ba1191499f02b3e98fa10e642c610651521a1043fd7d29711a881a723fc
-        - inv:c4df7a1c5d7e78f5a069ee778ce5e731db4d567cbf9d0d3ca8dfcf63c0f6a120
-      reasons:
-        - alignment_reference_label_missing
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T204073a4f7","zh-Hant"]'
@@ -2405,20 +2155,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T208b272f26","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T208b272f26
-      lang: zh-Hant
-      text: '{入場曲}如果自己墓場的{皇家護衛}從者為N張以上，則這張卡片{攻擊力}+N，並獲得【突進】。'
-      inventory_ids:
-        - inv:085ed6ae680db3ec980d0117e8647dba8958940efc704c89193119e23a13dbfb
-        - inv:c8d94db81f59ec0ba154911dcb0559cdbf01bc8bf503303f3f9ea8fdeec4fb1e
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T20b8d91398","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2434,21 +2170,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T20dee0cef0","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T20dee0cef0
-      lang: zh-Hant
-      text: 【超進化時】指定自己墓場的N張原始消費N以下的{巫師}法術。將其放置到EX區。本回合，使用該卡之際，消費-N。
-      inventory_ids:
-        - inv:858b353e995a4821c13325aad94623c72887a0967314e8e8e924d94b7b730dbd
-        - inv:b4594a73eba23cb617e8449cc9dd112fa3a004cee10b4885554f75de7ac2084e
-        - inv:ff0f3d0c7c47a6d19cf7c41a136db31eb553ea8ecd258554c1164231cdcea8cd
-      reasons:
-        - alignment_reference_label_missing
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T20df1cf2b1","zh-Hant"]'
@@ -2486,19 +2207,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T21bb0e895e","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T21bb0e895e
-      lang: zh-Hant
-      text: '{龍族}衍生物・從者進入自己的戰場時，自己的主戰者{生命值}+N。'
-      inventory_ids:
-        - inv:3f5f09d57be03267be222124a4688e7b3a2aa89196545624a495bf2bb7147b15
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T22023ddb38","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2514,19 +2222,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T22183fc0fd","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T22183fc0fd
-      lang: zh-Hant
-      text: '{入場曲}可以將自己手牌中N張消費X以下的{中立}從者召喚到戰場上。X為「自己的PP最大值」。使其獲得「自己的結束階段到來時，將該從者放置到牌堆底」。'
-      inventory_ids:
-        - inv:6190faa859dca06b0b200fa06dfbb84a0d578314027b78b16631b1c487d571d7
-      reasons:
-        - alignment_reference_label_missing
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T2233138dc3","zh-Hant"]'
@@ -2799,20 +2494,6 @@ records:
         - signed_numeric_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T24ce7e3e91","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T24ce7e3e91
-      lang: zh-Hant
-      text: 【超進化時】指定自己墓場中的N張{夜魔}絕傑・從者。將其召喚到戰場上。其進化。
-      inventory_ids:
-        - inv:3742448e5021f5c26a10204322649c37c7acda36b1f001dea3d84520b7548630
-        - inv:510ad8f94479720c92b34340892addca9f9c76892aab93074ac5ae79e8d822e2
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T24eb899c85","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2874,19 +2555,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: true
-  - record_key: '["template_translation_candidate","effect","T258cb8b25d","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T258cb8b25d
-      lang: zh-Hant
-      text: '{入場曲}指定自己戰場上的N個其他{主教}從者。使其獲得【必殺】。'
-      inventory_ids:
-        - inv:0a1b6e74854b113bcb2cb02e30c1aa757a2f3fe32e64452fca1d3f997d83b878
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T259cb3adaf","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -3068,20 +2736,6 @@ records:
         - signed_numeric_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T2774c07e58","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T2774c07e58
-      lang: zh-Hant
-      text: 從自己的手牌捨棄這張卡片時，或這張卡片從自己的手牌消失時，指定自己戰場上的N個{夜魔}從者。使其獲得【必殺】。
-      inventory_ids:
-        - inv:354790552d0b5794c218f03564d673ffcefeed2d5d40e6a52a8619f40de3373e
-        - inv:67c8debffcbc1fae55d8c677026de3384cf62158a429d5c292bb56322332aa3a
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T279c97f172","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -3155,21 +2809,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T29a2617cd4","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T29a2617cd4
-      lang: zh-Hant
-      text: 【攻擊時】如果自己戰場上的{皇家護衛}卡片為N張，則這張卡片{攻擊力}+N。
-      inventory_ids:
-        - inv:0f0e7e9373b450a16f9e4d8ed7116c28edc92bd8cfab8cd8ac2d880186ad775f
-        - inv:182c29c0c5ef665e4c8c7d1b48ef642c7c69814a566c7df687106b1ab4a59f9d
-        - inv:67602b47d25066fa8d102d254c8d4745cce46566123fcc1eceed967fc4d21bd0
-      reasons:
-        - alignment_reference_label_missing
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T2ace90e5e8","zh-Hant"]'
@@ -3402,19 +3041,6 @@ records:
         - signed_numeric_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T2f4d1d411f","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T2f4d1d411f
-      lang: zh-Hant
-      text: '{入場曲}指定自己戰場上的N個其他擁有【守護】的{主教}從者。如果自己戰場上擁有【守護】的從者為N個以上，則使其獲得【疾馳】。'
-      inventory_ids:
-        - inv:e5ab8af16012c067b51ccc420782ae74ae654110d74a213d843de75aaf8b065c
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T2f68771733","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -3460,20 +3086,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T30c17c43b6","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T30c17c43b6
-      lang: zh-Hant
-      text: 使用這張卡片之際，如果自己墓場的原始消費N以上的{龍族}卡片為N張以上，則消費-N。
-      inventory_ids:
-        - inv:364f58c96f39da2a9d99f7cd149715539670b9ab73aca1ef55558372051b8c73
-        - inv:372e805cb4bb8b99e7b8293749ef8dc2092b45ca25ab94c93c3bd2abd4465305
-      reasons:
-        - alignment_reference_label_missing
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T30f31614f7","zh-Hant"]'
@@ -3747,25 +3359,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T34724c5c8c","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T34724c5c8c
-      lang: zh-Hant
-      text: 【攻擊時】指定自己戰場上的N個原始消費N以下的{主教}從者。使其{攻擊力}+N。
-      inventory_ids:
-        - inv:4164501bfedd305001e3d04757ad50e15e3461448a0df0d7e8cf3bc517a6e856
-        - inv:6fd7b4490bd99c0a194ffcf6e80eae7674f4d6a71063466177641d80fd10c28a
-        - inv:78d83565ae9e7e344bd510a274afa61695584de6766c207d35824a38dc248b8b
-        - inv:79fa10cc99dd137df69a84d07ff7d1e17c76e71ae2e1a0abe3086c33db9c5fdb
-        - inv:99498a30a143510e3fa90d96d215c7e359c92036d05989bfd79052c60bbafdb4
-        - inv:a285e24940bf21b1af5b09dd77d2b4b5b99310f0be358e34069d50d0afcc1b12
-        - inv:ce6271d37d145efcbada5f12d94793fc8fc5f02145f9fdd748edf9dd140c9813
-      reasons:
-        - alignment_reference_label_missing
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T35112c9a0b","zh-Hant"]'
