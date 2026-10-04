@@ -4,8 +4,8 @@
 介面、路由與渲染設計屬專案內容。見[文件引用說明](../quotations.md)。
 
 版本：**v1**，2026-09-28 定案。用語依 [`docs/terminology.md`](../terminology.md)；
-資料契約以 [`docs/schema/snapshot-format.md`](../schema/snapshot-format.md) 為準。設計稿（顏色、字級、間距、圓角、各畫面規格）
-不在 repo，本文只寫規則與命名，數值以「見設計交接」帶過。
+資料契約以 [`docs/schema/snapshot-format.md`](../schema/snapshot-format.md) 為準。
+共用尺寸見 §7、§8；色彩值見進版控的 [`tokens.css`](../../sim/web/src/styles/tokens.css)。各畫面完整間距與尺寸規格：待補。
 
 `sim/web` 是查卡、建牌、對戰共用的前端（`AGENTS.md`）。本文涵蓋查卡需要的架構；建牌與對戰只預留接點。
 
@@ -208,7 +208,7 @@ idle → loading(version-index) → loading(manifest) → loading(bootstrap) →
 
 ### 4.8 假資料與三層防漂移
 
-`scripts/fixture/` 手寫合成卡（不複製任何設計交接內容），產出完整的版本索引（兩頁）、快照清單、config、啟動包、依 owner 切的詳情分片
+`scripts/fixture/` 手寫合成卡（使用自編名稱與卡文），產出完整的版本索引（兩頁）、快照清單、config、啟動包、依 owner 切的詳情分片
 （故意把同 owner 同 kind 拆成兩片）、影像清單與程式生成的佔位圖；檔名內容定址、hash 真算、輸出確定性。reader 的測試直接載入它。
 
 | 層                                      | 防什麼                       | 適用資料                     |
@@ -241,7 +241,9 @@ idle → loading(version-index) → loading(manifest) → loading(bootstrap) →
 - 底部固定元件共用 `BottomBar`，內建 `env(safe-area-inset-bottom)`；鍵盤彈出時底部導覽收起。
 - 面板與對話框用原生 `<dialog>`（`showModal()`：焦點圈住、Esc、關閉後焦點回原處、背景 inert），開啟時 push 一筆 history 讓瀏覽器返回也能關；
   選單用 Popover API。
-- 焦點環用主文字色不用品牌色；skip link；結果數 `aria-live="polite"`；`motion-reduce:` 關動畫；主要觸控目標的最小尺寸依設計交接。
+- 焦點環用主文字色，寬 2 px、外距 2 px；skip link；結果數 `aria-live="polite"`；`motion-reduce:` 關動畫。
+- 主要觸控目標至少 44×44 CSS px；主要動作按鈕高 48 px、最小寬 48 px（根字級 16 px 時）。較小的可見控制項須補足點擊區域。
+  既有按鈕以 rem 實作，隨根字級縮放，見 [`Button.tsx`](../../sim/web/src/components/ui/Button.tsx)。
 - 職業快捷列 7 格永遠一排；帶字版放得下才顯示文字（離屏量測）。
 
 ## 8. 主題 token
@@ -259,6 +261,14 @@ idle → loading(version-index) → loading(manifest) → loading(bootstrap) →
   整段 try／catch，設 `data-theme`／`data-accent`。它在 `src/` 外、不受 storage 的 ESLint 規則管，是唯一例外；有 Vitest 測壞資料與 storage 拋錯，
   且與 `resolveTheme` 結果一致。
 - 字型：IBM Plex Sans（latin 子集）配系統中日文字型堆疊。
+
+共用數值與 [`index.css`](../../sim/web/src/styles/index.css) 一致：
+
+| 項目 | 數值 |
+| --- | --- |
+| 字級 | 11、12、13、14、15、16、17、18、20、22、24；實際值為該數字除以 16 的 rem，隨根字級縮放 |
+| 效果文字行高 | 1.75 |
+| 圓角（px） | badge 5、sm 6、card 8、control 10、button 12、block 14、pill 16、dialog 18、sheet 20 |
 
 ## 9. 自動把關與測試
 
