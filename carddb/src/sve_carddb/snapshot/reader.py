@@ -5,6 +5,7 @@ browser's streaming store, a publisher, or a validator of build-only evidence.
 """
 
 from dataclasses import dataclass
+from graphlib import CycleError, TopologicalSorter
 from operator import itemgetter
 from typing import TYPE_CHECKING
 
@@ -93,19 +94,14 @@ def _files(manifest: Row) -> dict[str, Row]:
             dep = object_value(item)
             if dep != _reference(result[string(dep["key"])]):
                 raise ValueError("Dependency hash mismatch")
-    pending = set(result)
-    while pending:
-        ready = {
-            key
-            for key in pending
-            if all(
-                string(object_value(dep)["key"]) not in pending
-                for dep in array(result[key]["dependencies"])
-            )
-        }
-        if not ready:
-            raise ValueError("Cyclic dependencies")
-        pending -= ready
+    graph = {
+        key: [string(object_value(dep)["key"]) for dep in array(file["dependencies"])]
+        for key, file in result.items()
+    }
+    try:
+        TopologicalSorter(graph).prepare()
+    except CycleError as exc:
+        raise ValueError("Cyclic dependencies") from exc
     return result
 
 
