@@ -5,9 +5,10 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.registry.storage import MAX_BYTES
+from sve_carddb.catalog.current_models import Shard as CatalogShard
+from sve_carddb.registry.storage import MAX_BYTES, encode
 from sve_carddb.snapshot.values import canonical
-from sve_carddb.translations.current_models import ChoiceRecord
+from sve_carddb.translations.current_models import ChoiceRecord, Shard
 
 if TYPE_CHECKING:
     from sve_carddb.catalog.adoption_loader import AdoptionSnapshot
@@ -35,12 +36,17 @@ def _chunks(
     result = {}
     for start in range(0, len(ordered), 24):
         path = f"{prefix}/{area}/{start // 24 + 1:03}.yaml"
-        raw = canonical(
+        payload = canonical(
             {
                 field: 2,
                 "kind": kind,
                 "records": list[JsonValue](ordered[start : start + 24]),
             }
+        )
+        raw = encode(
+            CatalogShard.model_validate_json(payload)
+            if catalog
+            else Shard.model_validate_json(payload)
         )
         if len(raw) >= MAX_BYTES:
             raise ValueError("Converted current shard exceeds size limit")
@@ -133,4 +139,4 @@ def name_policy(loaded: LoadedPolicy, overrides: tuple[Override, ...] = ()) -> b
         "note": "",
     }
     checked = Policy.model_validate_json(canonical(payload))
-    return canonical(checked.model_dump(mode="json"))
+    return encode(checked)

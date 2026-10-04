@@ -8,7 +8,7 @@ from pydantic import JsonValue
 
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.digital_name_policies.evaluate import NameOwner
-from sve_carddb.digital_name_policies.loader import DIRECTORIES, INDEX, load
+from sve_carddb.digital_name_policies.loader import INDEX, load
 from sve_carddb.digital_name_policies.runtime import RUNTIME
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
@@ -25,9 +25,171 @@ NAMES = "draft-i51-names-v1"
 LINKS = "digital-name-links-v1"
 
 
+def _legacy_files(purpose: str) -> tuple[dict[str, JsonValue], ...]:
+    """Keep legacy guards testable after active authored names move to format two."""
+    from sve_carddb.digital_name_policies.loader import INITIAL_NAMES_DOCUMENT  # ruff: ignore[import-outside-top-level] -- exercise the legacy first-layout special case
+
+    business = object_value(
+        parse(
+            (
+                REPO / "carddb/tests/fixtures/digital-name-policy-legacy-business.json"
+            ).read_bytes()
+        )
+    )
+    content = object_value(business[purpose])
+    identifier = NAMES if purpose == "names" else LINKS
+    checksum = digest(b"synthetic policy evidence; no actual approval")
+    revision = "a" * 40
+    batches: list[JsonValue] = [{"store_id": "test-store", "batch_id": checksum}]
+    registry: dict[str, JsonValue] = {
+        "authored_revision": revision,
+        "index_path": "authored/ids/index.yaml",
+        "index_hash": checksum,
+    }
+    recipes: dict[str, JsonValue] = {
+        "translation-" + provider + "-v1": {
+            "version": "translation-" + provider + "-v1",
+            "program_revision": revision,
+            "code_path": "carddb/src/sve_carddb/translations/sources.py",
+            "code_hash": checksum,
+            "config": {"provider": provider},
+            "config_hash": digest(canonical({"provider": provider})),
+        }
+        for provider in ("jp", "sv1", "svwb")
+    }
+    content["catalogue_pins"] = {
+        "approved_coverage_claim": False,
+        "candidate_counts": {},
+        "count_replay_main_revision": revision,
+        "extra_unicode_scan_hash": checksum,
+        "parser_and_registry_configuration": {
+            "catalog_registry": registry,
+            "digital_link_sources": batches,
+            "translation_recipes": recipes,
+        },
+        "private_name_list_hash": checksum,
+        "r2_inventory_evidence_hash": checksum,
+        "source_batches": batches,
+        "store_id": "test-store",
+    }
+    content["proposed_clause_replacements"] = []
+    if purpose == "links":
+        content["registry_pins"] = {
+            "revision": revision,
+            "index_hash": checksum,
+            "card_projection_evidence_hash": checksum,
+            "source_replay_revision": revision,
+        }
+    approved = INITIAL_NAMES_DOCUMENT if purpose == "names" else checksum
+    document: dict[str, JsonValue] = {
+        "digital_name_policy_format": 1,
+        "kind": "digital_name_policy",
+        "policy_id": identifier,
+        "version": 1,
+        "purpose": purpose,
+        "approved_document_hash": approved,
+        "projection_recipe": "approved-digital-name-document-v1",
+        "content": content,
+    }
+    excluded: dict[str, JsonValue] = {
+        "digital_name_exclusion_format": 1,
+        "kind": "digital_name_initial_exclusions",
+        "policy_id": identifier,
+        "version": 1,
+        "purpose": purpose,
+        "approved_list_hash": content["final_exclusions_hash"]
+        if purpose == "names"
+        else object_value(content["exclusions"])["initial_exclusions_hash"],
+        "entries": [],
+    }
+    instant = "2026-10-02T20:32:22.779Z"
+    uuid = "b5d164b7-8e06-4336-af4e-de21f0306da4"
+    events: list[JsonValue] = [
+        {
+            "kind": "page_button",
+            "at": instant,
+            "uuid": None,
+            "source_hash": checksum,
+            "locator": f"name2_policy/{purpose}.json",
+            "value": {
+                "at": instant,
+                "id": purpose,
+                "note": "",
+                "policy_hash": approved,
+                "text_sha256": checksum,
+                "value": "agree",
+            },
+        },
+        {
+            "kind": "message",
+            "at": "2026-10-02T20:33:39.423Z",
+            "uuid": uuid,
+            "source_hash": checksum,
+            "locator": uuid,
+            "value": None,
+        },
+    ]
+    approval: dict[str, JsonValue] = {
+        "digital_name_approval_format": 1,
+        "kind": "digital_name_policy_approval",
+        "policy_id": identifier,
+        "version": 1,
+        "policy_hash": digest(canonical(document)),
+        "approved_document_hash": approved,
+        "presented_text_hash": checksum,
+        "reviewed_by": "gbaian10",
+        "reviewed_at": instant,
+        "reviewed_precision": "instant",
+        "approval_events": events,
+        "evidence_hashes": {
+            purpose + "-policy.canonical.json": approved,
+            purpose + "-policy.plain.md": checksum,
+            f"name2_policy/{purpose}.json": checksum,
+            uuid: checksum,
+        },
+        "initial_exclusions_hash": digest(canonical(excluded)),
+        "disclosed_changes": [
+            {
+                "rule_id": r,
+                "removed": "Synthetic boundary case",
+                "added": "Synthetic boundary replacement",
+                "disclosed_at": "2026-10-02T20:30:00Z",
+                "accepted_message_uuid": uuid,
+            }
+            for r in ("label-and-authority", "new-jp")
+        ],
+        "note": "Synthetic boundary inputs; no actual approval evidence.",
+    }
+    return document, approval, excluded
+
+
 def copy_policies(root: Path) -> None:
-    for directory in DIRECTORIES:
-        shutil.copytree(REPO / "authored" / directory, root / "authored" / directory)
+    index: dict[str, JsonValue] = {
+        "digital_name_policy_index_format": 1,
+        "kind": "digital_name_policy_index",
+        "policies": {},
+    }
+    for purpose, identifier in (("names", NAMES), ("links", LINKS)):
+        document, approval, excluded = _legacy_files(purpose)
+        base = root / "authored/digital-name-policies" / identifier
+        base.mkdir(parents=True, exist_ok=True)
+        exclusions = root / "authored/digital-name-exclusions" / identifier
+        exclusions.mkdir(parents=True, exist_ok=True)
+        (base / "001.policy.yaml").write_bytes(canonical(document))
+        (base / "001.approval.yaml").write_bytes(canonical(approval))
+        (exclusions / "001.yaml").write_bytes(canonical(excluded))
+        object_value(index["policies"])[identifier] = [
+            {
+                "version": 1,
+                "path": f"digital-name-policies/{identifier}/001.policy.yaml",
+                "hash": digest(canonical(document)),
+                "approval_receipt_hash": digest(canonical(approval)),
+                "exclusions_path": f"digital-name-exclusions/{identifier}/001.yaml",
+                "exclusions_hash": digest(canonical(excluded)),
+                "predecessor": None,
+            }
+        ]
+    (root / "authored" / INDEX).write_bytes(canonical(index))
 
 
 def policy(root: Path, purpose: str) -> dict[str, JsonValue]:

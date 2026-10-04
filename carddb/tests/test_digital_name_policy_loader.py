@@ -7,7 +7,14 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.digital_name_policies.loader import INDEX, decoded, load, model
+from sve_carddb.digital_name_policies.loader import (
+    ADOPTED_APPROVALS,
+    ADOPTED_PROJECTIONS,
+    INDEX,
+    decoded,
+    load,
+    model,
+)
 from sve_carddb.digital_name_policies.models import Policy
 from sve_carddb.registry.storage import MAX_BYTES, read_yaml
 from sve_carddb.snapshot.values import array, canonical, digest, object_value
@@ -30,6 +37,22 @@ if TYPE_CHECKING:
 @pytest.fixture(scope="module")
 def baseline(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, str]:
     return loader_repository(tmp_path_factory.mktemp("name-policy-loader"))
+
+
+@pytest.fixture(autouse=True)  # ruff: ignore[pytest-fixture-autouse] -- all legacy boundary cases share synthetic document bindings
+def synthetic_bindings(
+    baseline: tuple[Path, str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Legacy immutability guards use synthetic bindings rather than personal evidence.
+    for purpose in ("names", "links"):
+        document = policy(baseline[0], purpose)
+        approved = str(document["approved_document_hash"])
+        monkeypatch.setitem(ADOPTED_PROJECTIONS, approved, digest(canonical(document)))
+        monkeypatch.setitem(
+            ADOPTED_APPROVALS,
+            approved,
+            digest(canonical(receipt(baseline[0], purpose))),
+        )
 
 
 def copied(baseline: tuple[Path, str], root: Path) -> Path:
