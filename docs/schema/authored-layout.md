@@ -37,9 +37,9 @@
 
 分片內記錄依對應 printing 的 `(region, card_no, variant_key, printing id)` 排序（`card_no` 為原樣字串的 code-point 字典序）：printing、配號、來源更正用自身或所指 printing；art 用第一個 use 的 printing；card、face、英文獨有查核、換皮卡用該 card 所有 printing 中最小的鍵（face 再加 ordinal）；最後一律以 `record_key` 收尾。排序只作用於**同一次寫入的新記錄**：正常追加只排序本次新增、寫到該 `(area, owner)` 的下一個序號檔，舊分片不動，所以同一 owner 的多個分片合起來不保證是全域卡號序。2026-09-28 首次公開前曾一次性全量重新分片（見 §3.2）；此後不再重排。
 
-YAML 固定 1.2 core schema、單一文件、UTF-8；所有鍵必須是字串，禁止重複鍵、anchor、alias、merge key、顯式 tag、非有限浮點及 YAML 1.1 指示。日期字串須加引號；隱式日期仍是字串，不啟用 timestamp resolver。遵循 [DSL 1.0 §11](../dsl/author-syntax-1.0.md#11-載入與錯誤) 的解析邊界。`carddb` 以 PyYAML `CSafeLoader`（libyaml C 擴充）單趟事件讀取，於組裝資料前拒絕上述語法；純量沿用明確限定的 YAML 1.2 core resolver，不使用 PyYAML 預設的 1.1 resolver。缺少 C 擴充即明確失敗，不靜默退回純 Python。寫出仍使用 `ruamel.yaml`；載入後仍要做 strict JSON、canonical 雜湊、結構與引用檢查。
+YAML 為單一文件、UTF-8；省略版本指示或明示 `%YAML 1.2` 可讀，其他版本指示拒絕。`carddb` 使用 `yamlrocks==0.6.1` 的純量與詞法語意，不宣稱完全等同 YAML 1.2 core resolver，也不保留舊數字拼法相容層：例如 plain `0777`、`0b101`、`1_000` 是字串；正常十進位、`0o17`、`0xFF` 與指數形式依套件解讀。日期仍是字串，不啟用 timestamp；作者的日期字串加引號慣例不變。所有鍵必須是字串，禁止重複鍵、非有限浮點；套件先拒絕重複鍵與複合鍵，載入後仍做 strict JSON、canonical 雜湊（`allow_nan=False`）、結構與引用檢查。大小限制與分片規則不變，另見 [DSL 1.0 §11](../dsl/author-syntax-1.0.md#11-載入與錯誤)。
 
-為避免 libyaml 的 YAML 1.1 字元處理靜默改寫結構或值，`carddb` 在解析前拒絕 raw U+0085（NEL）、U+2028（LS）、U+2029（PS）；raw U+FEFF（BOM）僅允許在解碼後第 0 個字元。依 2026-10-01 的協調者決定，同時拒絕所有 raw tab，含引號、區塊純量與註解內的 tab；雙引號中的 `\t`、`\u0085`、`\u2028`、`\u2029`、`\uFEFF` 等跳脫仍可表達原值。ruamel 寫出會跳脫 tab／BOM，但可能原樣寫出 NEL／LS／PS；後者讀回明確失敗，不允許靜默正規化。未知指示（例如 `%FOO`）由 libyaml 拒絕，保留此較嚴的讀取邊界。數值底線拼法沿舊讀取器的 resolver／去底線行為，例如 `1__0` → 10、`1_` → 1，不直接套用 Python `int()` 的拼法限制。
+Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通 alias 與 merge 由套件展開，循環 alias 報錯，quoted `"<<"` 保留為一般字串鍵。標準 tag 依套件解讀；自訂 tag 保留為物件，再由 strict JSON 拒絕，不註冊 tag callback，也不啟用 include／env／secret／Python 物件執行。合法位置的 tab、NEL／LS／PS、interior BOM 與未知指示由套件處理，不另設 libyaml 字元禁令或 lint；縮排等語法錯誤仍拒絕。Parser 錯誤只回報安全類別，不附原始文字。寫出維持 `ruamel.yaml` 與原有 `storage.encode`，不設 PyYAML fallback；套件升級須重驗 canonical 差分與邊界案例。
 
 人工限量序號版次的獨立入口為 `manual-printings/index.yaml` 與 `manual-printings/<area>/<filing_key>/<sequence>.yaml`；完整欄位、來源類別及續版以 [manual-printings-v1](manual-printings.md#2-入口封套決定與續版) 為準，不加入身分 registry v1。
 
