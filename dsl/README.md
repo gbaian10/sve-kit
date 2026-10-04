@@ -18,3 +18,6 @@ correctness or runtime support.
 one selection with the execution or mode decision. Separate `select` nodes
 remain separate input points. Declining clears the selection binding; an
 explicit zero-card execution is a distinct option when `min` permits it.
+
+Prototype effect `review` notes are optional and do not authorize execution or
+represent an acceptance state. Keep specific explanations; omit boilerplate.
