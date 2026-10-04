@@ -17,7 +17,9 @@ def insert_exact(
         )
     ]
     if previous:
-        if previous != [values]:
+        if previous != [{name: values.get(name) for name in db.columns(table)}] or (
+            set(values) - set(db.columns(table))
+        ):
             raise ValueError("Conflicting catalog row")
     else:
         db.insert(table, values)

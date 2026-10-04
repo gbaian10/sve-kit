@@ -7,6 +7,8 @@ import pytest
 from sve_carddb.build_db.rows import insert_exact
 
 if TYPE_CHECKING:
+    from sve_carddb.build_db import Value
+
     from .database_fixtures import DatabaseTemplate
 
 
@@ -75,3 +77,27 @@ def test_exact_insert_remains_idempotent_and_conflicts_are_rejected(
                 ("id",),
             )
         assert len(db.rows("source_record")) == 1
+
+
+def test_exact_insert_compares_omitted_nullable_columns(
+    t0_database_template: DatabaseTemplate,
+) -> None:
+    with t0_database_template.copy() as db:
+        values = dict(db.rows("source_record")[0].values)
+        sparse: dict[str, Value] = {
+            name: value for name, value in values.items() if value is not None
+        }
+        with db.transaction():
+            insert_exact(db, "source_record", sparse, ("id",))
+        assert db.rows("source_record")[0].values == values
+        with db.transaction():
+            db.update(
+                "source_record",
+                {"id": values["id"]},
+                {"authored_path": "synthetic/source.yaml"},
+            )
+        with (
+            pytest.raises(ValueError, match=r"^Conflicting catalog row$"),
+            db.transaction(),
+        ):
+            insert_exact(db, "source_record", sparse, ("id",))

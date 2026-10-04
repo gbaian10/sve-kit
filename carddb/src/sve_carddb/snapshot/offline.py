@@ -8,7 +8,8 @@ from pydantic import JsonValue, model_validator
 
 from sve_carddb.build_bundle import publish_bundle
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES, compile_build
+from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES
 from sve_carddb.build_inputs import BuildContext, Revision, input_record, uses_sorted
 from sve_carddb.card_extras import (
     FrozenCardExtras,
@@ -421,7 +422,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         configuration["image_crop_overrides"] = mounted.crops.configuration()
         configuration["image_recipe"] = DEFAULT_RECIPE.version
     context = BuildContext.from_inputs(inputs.revision, dependencies, configuration)
-    schema = compile_build(
+    schema = compile_current_build(
         (
             *MINIMUM_CAPABILITIES,
             "en",

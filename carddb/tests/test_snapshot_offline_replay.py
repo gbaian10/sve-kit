@@ -9,8 +9,9 @@ import pytest
 from pydantic import JsonValue
 from typer.testing import CliRunner
 
+from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_db.database import open_database
-from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES, compile_build
+from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES
 from sve_carddb.build_inputs import BuildContext, InputRecord
 from sve_carddb.catalog import adoption_importer
 from sve_carddb.cli import app
@@ -84,7 +85,6 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
                 {
                     "data_headers": {"result_code": 1},
                     "data": {
-                        "skill_names": {"1": "Synthetic history evidence"},
                         "card_details": {
                             "10000002": {
                                 "common": {"skill_text": "Synthetic frozen term"}
@@ -132,8 +132,8 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
             name = "term"
         elif "lang=ja" in entry.url:
             locator, text, parser = (
-                "/data/skill_names/1",
-                "Synthetic history evidence",
+                "/data/card_details/10000002/common/skill_text",
+                "Synthetic frozen term",
                 "translation-svwb-v1",
             )
             name = "evidence"
@@ -164,11 +164,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
     chosen["concept_evidence"] = [
         {
             "kind": "effect_term",
-            "jp_ref": references["evidence"]
-            | {
-                "locator": "/data/card_details/10000002/common/skill_text",
-                "text_hash": digest(b"Synthetic frozen term"),
-            },
+            "jp_ref": references["evidence"],
             "jp_span": {"start": 0, "end": len("Synthetic frozen term")},
             "target_ref": references["choice"],
             "target_span": {"start": 0, "end": len("Synthetic chosen label")},
@@ -297,11 +293,16 @@ def test_export_offline_replays_source_receipts_after_pinned_update(
     source_uses = [use for use in record.uses if use.usage == "catalog_exact_text"]
     assert len({use.source.id for use in source_uses}) == 2
     glossary_uses = [use for use in record.uses if use.usage == "translation_evidence"]
-    assert len(glossary_uses) == 4
+    assert len(glossary_uses) == 3
+    assert {use.locator for use in glossary_uses} == {
+        "/faces/0/text",
+        "/data/card_details/10000002/common/skill_text",
+        "/data/card_details/10000001/common/skill_text",
+    }
     assert len({use.source.id for use in glossary_uses}) == 3
     config = object_value(parse(record.context.configuration.encode()))
     with open_database(
-        compile_build((*MINIMUM_CAPABILITIES, "en", "translation_evidence")),
+        compile_current_build((*MINIMUM_CAPABILITIES, "en", "translation_evidence")),
         tmp_path / "bundle/build.sqlite",
     ) as db:
         assert len(db.rows("glossary_term")) == 1
