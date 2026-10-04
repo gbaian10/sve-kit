@@ -7,7 +7,7 @@ from pydantic import JsonValue
 
 from sve_carddb.catalog.current_models import Shard as CatalogShard
 from sve_carddb.registry.storage import MAX_BYTES, encode
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.snapshot.values import array, canonical, object_value
 from sve_carddb.translations.current_models import ChoiceRecord, Shard
 
 if TYPE_CHECKING:
@@ -84,13 +84,20 @@ def catalog(snapshot: AdoptionSnapshot) -> dict[str, bytes]:
             label = value.get("label")
             if isinstance(label, dict) and label.get("kind") == "source":
                 origin = "official"
+        evidence = array(raw["evidence"])
+        if record.kind == "vocabulary_adoption":
+            for item in evidence:
+                object_value(item)["role"] = (
+                    "凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，"
+                    "非譯名或額外身分採納。"
+                )
         row: dict[str, JsonValue] = {
             "record_key": canonical([record.kind, data["subject"]]).decode(),
             "kind": record.kind,
             "data": {
                 "subject": data["subject"],
                 "value": value,
-                "evidence": raw["evidence"],
+                "evidence": evidence,
             },
             "origin": origin,
             "low_confidence": False,
