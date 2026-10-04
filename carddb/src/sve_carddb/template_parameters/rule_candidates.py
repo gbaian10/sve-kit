@@ -10,6 +10,7 @@ from sve_carddb.template_parameters.numeric_rules import (
     ASCII_BEFORE,
     SIGNS,
 )
+from sve_carddb.template_parameters.signed_contexts import SIGNED_CONTEXTS
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -175,6 +176,16 @@ RULES += tuple(
     )
     for identifier, spec in EXPLICIT.items()
 )
+RULES += tuple(
+    Rule(
+        identifier,
+        spec.role,
+        "signed_numeric_requires_review",
+        "finite signed context",
+        (spec.target,) if spec.target else (),
+    )
+    for identifier, spec in SIGNED_CONTEXTS.items()
+)
 BY_ID = {rule.id: rule for rule in RULES}
 
 
@@ -211,6 +222,19 @@ def conditions(rule: Rule) -> dict[str, JsonValue]:
             "maximum": 9007199254740991,
             "raw_unsigned_decimal": True,
             "context_includes_numeric_span": True,
+        }
+        return result
+    if rule.id in SIGNED_CONTEXTS:
+        signed_spec = SIGNED_CONTEXTS[rule.id]
+        result["signed_context_evidence"] = {
+            "prefix_pattern": signed_spec.before,
+            "suffix_pattern": signed_spec.after,
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "raw_unsigned_magnitude": True,
+            "sign_is_literal": True,
+            "context_includes_magnitude_and_suffix": True,
+            "exact_unique_ability": signed_spec.target,
         }
         return result
     if rule.targets:

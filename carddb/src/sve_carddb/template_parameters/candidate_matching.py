@@ -27,6 +27,7 @@ from sve_carddb.template_parameters.rule_candidates import (
     condition_hash,
     selection,
 )
+from sve_carddb.template_parameters.signed_contexts import SIGNED_CONTEXTS
 from sve_carddb.template_sources.normalizer import QUOTED, partition
 
 if TYPE_CHECKING:
@@ -151,6 +152,33 @@ def _signed(
     )
 
 
+def _signed_context(
+    rule: Rule,
+    text: str,
+    hint: Hint,
+    refs: References,
+    units: tuple[Unit, ...],
+    edges: tuple[str, str],
+) -> Match | None:
+    before, after = edges
+    spec = SIGNED_CONTEXTS[rule.id]
+    prefix = re.search(spec.before, before)
+    suffix = re.match(spec.after, after)
+    if prefix is None or suffix is None:
+        return None
+    target = None
+    if spec.target is not None:
+        spans = _origins(units, prefix.start("term"), prefix.end("term"))
+        target = _exact_target(_raw(text, spans), refs, (spec.target,))
+        if target is None:
+            return None
+    return Match(
+        context=_origins(units, prefix.start(), hint.occurrence.end + suffix.end()),
+        target_id=target[0] if target else None,
+        target_hash=target[1] if target else None,
+    )
+
+
 def _threshold(
     rule: Rule,
     text: str,
@@ -214,8 +242,12 @@ def _numeric_match(
         )
     if rule.id in SUFFIXES:
         return _suffix(rule, hint, before, after)
-    if rule.id in SIGNED:
-        return _signed(rule, text, refs, units, before, after)
+    if rule.id in SIGNED or rule.id in SIGNED_CONTEXTS:
+        return (
+            _signed_context(rule, text, hint, refs, units, edges)
+            if rule.id in SIGNED_CONTEXTS
+            else _signed(rule, text, refs, units, before, after)
+        )
     if rule.id.startswith("keyword_threshold_"):
         return _threshold(rule, text, hint, refs, units, (before, after))
     choice = (
