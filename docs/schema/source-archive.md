@@ -177,3 +177,9 @@ raw 歷史 logical bytes 為 `Σ(size(hash))`，只加總所有保留版本引�
 一次性取得、已有 URL／HTTP metadata／時間／內容 hash 的官方 HTML／PDF，依 [構築採納 §2](construction-adoption.md#2-一次性抓回原檔如何正式登錄與釘版) 及 [carddb 離線登錄入口](../../carddb/src/sve_carddb/source_import/README.md) 登錄：原 index／raw 唯讀驗證，在全新隔離 manifest 保存專用匯入收據，不開 live manifest、不造 HTTP fetch_log，再用本契約既有來源版本／inventory／seal 格式封存、備份與 restore-check。已實作的隔離格式使用 PRAGMA user_version=2，inventory 記同版號；v2 完整 schema 獨立凍結，reader 分版本驗完整表／欄位／約束、Resource 與收據閉包，不能只新增表卻仍宣稱版本 1。僅支援版本 1 的舊 reader 必須拒絕版本 2；現行 reader 支援版本 1／2，live writer 仍只寫版本 1 並拒絕版本 2，不自動升 live 或已封存批次。未壓縮來源用實際 raw／stored bytes 與 `.html`／`.pdf` path，不假用 `.zst`；缺 metadata 不補造。
 
 登錄收據由隔離 manifest 的 backup hash 納入 metadata 閉包；不能手工補一個未被釘住的旁檔冒充完成。seal＋獨立備份＋restore-check 後，已引用的 DB 副本／收據／raw 永久保留，工作副本也不自動清理；未引用工作檔的回收須另行核對全部引用與授權。正式批次／政策核對採納完成前，研究樣本或成功抓取 log 均不能成為構築 SourceUse。入口落後公告或沒有個別公告連結，只影響知識覆蓋，不影響原檔的不可變留存；seal 成功不等於 restriction_coverage=complete。
+
+### authored 的來源批次定位
+
+authored 的 `source_ref`、商品／身分證據與 `source_batches` 只保存 `batch_id`／`source_version_id` 等來源定位欄位，不保存 `store_id`。執行端以既有 CLI、環境變數或 ignored 本機設定提供具名 store 與根目錄；解析器在明示配置的 stores 中要求批次恰有一處，找不到或多處皆拒絕，再依原契約驗完整封存閉包及 `entry.blob.store_id` 與設定名稱相等。來源版本不在指定批次時拒絕，不能借用其他批次或 latest cache。
+
+封存 inventory 的 `blob.store_id` 與 batch 的 canonical bytes 雜湊維持不變；搬移磁碟只改本機 root，設定的名稱仍須與既有封存內容一致，不改名或重封。翻譯 inventory ID 的既有雜湊材料仍包含驗證後的歸檔 store 名稱，由執行端重建，不從 authored 讀取舊欄位；既有 inventory ID 與譯文對應因此維持不變。authored 舊 `store_id` 欄位作為未知欄位拒絕，不提供相容讀取。
