@@ -122,6 +122,35 @@ def _read_yaml_content(path: Path) -> tuple[JsonValue, bytes]:
     return result, canonical(result)
 
 
+type OmittedFields = dict[str, bool | OmittedFields] | dict[int, bool | OmittedFields]
+
+
+def _empty_notes(value: object) -> OmittedFields:
+    if isinstance(value, BaseModel):
+        omitted: dict[str, bool | OmittedFields] = {}
+        for name, info in type(value).model_fields.items():
+            item = getattr(value, name)
+            if (
+                name == "note"
+                and isinstance(info.default, str)
+                and not info.default
+                and isinstance(item, str)
+                and not item
+            ):
+                omitted[name] = True
+            elif nested := _empty_notes(item):
+                omitted[name] = nested
+        return omitted
+    if isinstance(value, (list, tuple)):
+        indexed: dict[int, bool | OmittedFields] = {
+            index: nested
+            for index, item in enumerate(value)
+            if (nested := _empty_notes(item))
+        }
+        return indexed
+    return {}
+
+
 def encode(model: BaseModel) -> bytes:
     """Write stable block YAML with quoted dates and no object aliases."""
     yaml = YAML()
@@ -129,7 +158,8 @@ def encode(model: BaseModel) -> bytes:
     yaml.width = 1000
     yaml.indent(mapping=2, sequence=4, offset=2)
     stream = io.StringIO()
-    yaml.dump(model.model_dump(mode="json"), stream)
+    # Only optional empty notes are omitted; other defaults can be required wire fields.
+    yaml.dump(model.model_dump(mode="json", exclude=_empty_notes(model)), stream)
     return stream.getvalue().encode()
 
 
