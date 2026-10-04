@@ -22,6 +22,20 @@ from .r2_upload_fixtures import ACCOUNT, BUCKET, CREDENTIALS, NOW
             "f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41",
         ),
         (
+            "GET",
+            "?max-keys=2&prefix=J",
+            {},
+            b"",
+            "34b48302e7b5fa45bde8084f4b7868a86f0a534bc59db6670ed5711ef69dc6f7",
+        ),
+        (
+            "GET",
+            "?lifecycle",
+            {},
+            b"",
+            "fea454ca298b7da1c68078a5d1bdbfbbe0d65c699e0f91ac7a200a0136783543",
+        ),
+        (
             "PUT",
             "test%24file.text",
             {
@@ -32,7 +46,7 @@ from .r2_upload_fixtures import ACCOUNT, BUCKET, CREDENTIALS, NOW
             "98ad721746da40c64f1a55b78f14c238d841ea1380cd77a1b5971af0ece108bd",
         ),
     ],
-    ids=["aws-get", "aws-put"],
+    ids=["aws-get", "aws-list", "aws-lifecycle", "aws-put"],
 )
 def test_published_aws_s3_sigv4_vectors(
     method: str, path: str, headers: dict[str, str], body: bytes, expected: str
