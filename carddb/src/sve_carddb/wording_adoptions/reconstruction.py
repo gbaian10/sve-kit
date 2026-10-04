@@ -117,19 +117,15 @@ class Reconstructor:
         self.contexts: dict[
             bytes, tuple[RegistrySnapshot, ProductSnapshot | None, dict[str, bytes]]
         ] = {}
-        self.batches: dict[tuple[str, str], FrozenSources] = {}
-        self.providers: dict[tuple[str, str, str], FrozenTexts] = {}
+        self.batches: dict[str, FrozenSources] = {}
+        self.providers: dict[tuple[str, str], FrozenTexts] = {}
         self.scopes: dict[tuple[bytes, str, str], ReconstructedScope] = {}
 
-    def batch(self, store: str, batch: str) -> FrozenSources:
+    def batch(self, batch: str) -> FrozenSources:
         """Verify a sealed inventory before resolving any caller-supplied source."""
-        key = store, batch
-        if key not in self.batches:
-            root = self.stores.get(store)
-            if root is None:
-                raise ValueError("Reviewed archive store is not configured")
-            self.batches[key] = FrozenSources(root, store, batch)
-        return self.batches[key]
+        if batch not in self.batches:
+            self.batches[batch] = FrozenSources.configured(self.stores, batch)
+        return self.batches[batch]
 
     def _inventory(self, root: Path, pin: AuthoredPin) -> dict[str, bytes]:
         content = self.repository.read(pin.authored_revision, pin.index_path)
@@ -190,12 +186,12 @@ class Reconstructor:
         registry, products, files = self._context(review)
         providers = []
         for pin in review.source_batches:
-            self.batch(pin.store_id, pin.batch_id)
-            provider_key = pin.store_id, pin.batch_id, region
+            self.batch(pin.batch_id)
+            provider_key = pin.batch_id, region
             if provider_key not in self.providers:
                 self.providers[provider_key] = FrozenTexts(
-                    self.stores[pin.store_id],
-                    pin.store_id,
+                    self.batches[pin.batch_id].root,
+                    self.batches[pin.batch_id].store_id,
                     pin.batch_id,
                     region=region,
                     parser_version=config.parser,
@@ -298,7 +294,7 @@ class _Images:
         """An image outside declared review batches cannot satisfy a correction."""
         found = []
         for pin in self.review.source_batches:
-            batch = self.reconstruction.batch(pin.store_id, pin.batch_id)
+            batch = self.reconstruction.batch(pin.batch_id)
             for entry in batch.inventory.entries:
                 descriptor = batch.descriptor(entry.source_version_id)
                 if (
@@ -330,7 +326,6 @@ def scope_evidence(scope: ReconstructedScope) -> tuple[Evidence, ...]:
         sorted(
             {
                 Evidence(
-                    store_id=u.source.archive.store_id,
                     batch_id=u.source.archive.batch_id,
                     source_version_id=u.source.id,
                     locator=u.locator,

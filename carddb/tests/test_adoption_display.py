@@ -340,7 +340,7 @@ def test_reviewed_names_require_every_pinned_source_version(
     review["source_batches"] = sorted(
         [
             *array(review["source_batches"]),
-            {"store_id": archive.store_id, "batch_id": archive.batch_id},
+            {"batch_id": archive.batch_id},
         ],
         key=canonical,
     )

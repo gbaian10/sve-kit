@@ -69,11 +69,11 @@ SEMANTICS = {
     "links": "sha256:8514cf4a651bc8fb1881de24956c36896fa78eb07946a503fa63c883a51079ca",
 }
 ADOPTED_PROJECTIONS = {
-    "sha256:0742f89d50384f076eb3ab219b6a369af60708f3d5d52d3d1b53b33d98d1389d": "sha256:6d752c9f50170e2d2dc236d2c5f1a6bb255b09c229b6946b99d85f8ca46d40e5",
+    "sha256:0742f89d50384f076eb3ab219b6a369af60708f3d5d52d3d1b53b33d98d1389d": "sha256:d070390485462df20759cacf0a20c1bef2aa632ebb433a0d6ab5b7e2f6501938",
 }
 
 ADOPTED_APPROVALS = {
-    "sha256:0742f89d50384f076eb3ab219b6a369af60708f3d5d52d3d1b53b33d98d1389d": "sha256:b1ba6c901a6e5d92ba5e98fcf92244f129cac18cdb498abde36f2d46b32159fa",
+    "sha256:0742f89d50384f076eb3ab219b6a369af60708f3d5d52d3d1b53b33d98d1389d": "sha256:b7245f9890324c09817bc140ccb3e732899449b9641483e4f5a97dc6509d084a",
 }
 
 
@@ -351,8 +351,8 @@ def _content(policy: Policy) -> None:
         pins.source_batches
         != pins.parser_and_registry_configuration.digital_link_sources
         or not pins.source_batches
-        or tuple(sorted({(b.store_id, b.batch_id) for b in pins.source_batches}))
-        != tuple((b.store_id, b.batch_id) for b in pins.source_batches)
+        or tuple(sorted({b.batch_id for b in pins.source_batches}))
+        != tuple(b.batch_id for b in pins.source_batches)
     ):
         raise ValueError("Digital-name policy catalogue batch closure mismatch")
     recipes = pins.parser_and_registry_configuration.translation_recipes

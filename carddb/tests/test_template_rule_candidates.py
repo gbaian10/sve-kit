@@ -410,7 +410,6 @@ def test_field_replays_prior_line_choice_context_and_emits_hash_only_proposals()
 ):
     text = "２つチョイス。\n【１】仮\n【２】例"
     ref = SourceRef(
-        store_id="synthetic",
         batch_id=HASH,
         source_version_id="src:v1:" + "b" * 64,
         parser=PARSER,
@@ -418,11 +417,12 @@ def test_field_replays_prior_line_choice_context_and_emits_hash_only_proposals()
         text_hash=digest(text.encode()),
     )
     context = Field(
+        "test-store",
         ref.source_version_id,
         ref.locator,
         text,
         None,
-        [entry(ref, p, VERSION) for p in partition(text)],
+        [entry(ref, p, VERSION, store_id="test-store") for p in partition(text)],
         {"faces": [{"text": text, "sections": []}]},
     )
     off = Candidates()
@@ -514,7 +514,6 @@ def test_new_suffix_cannot_claim_an_old_prefix_owned_position(prefix: str) -> No
 
 def choice_field(text: str) -> Candidates:
     ref = SourceRef(
-        store_id="synthetic",
         batch_id=HASH,
         source_version_id="src:v1:" + "b" * 64,
         parser=PARSER,
@@ -522,11 +521,12 @@ def choice_field(text: str) -> Candidates:
         text_hash=digest(text.encode()),
     )
     field = Field(
+        "test-store",
         ref.source_version_id,
         ref.locator,
         text,
         None,
-        [entry(ref, part, VERSION) for part in partition(text)],
+        [entry(ref, part, VERSION, store_id="test-store") for part in partition(text)],
         {"faces": [{"text": text, "sections": []}]},
     )
     result = Candidates(enabled_rules=("bracket_choice_index",))

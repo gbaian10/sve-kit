@@ -238,7 +238,7 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
     raw = page("jp", '<div class="detail">' + text + "</div>")
     _put(store, _resource(card_url("SYN-02"), "raw/more.html", raw, Kind.CARD), raw)
     sealed = seal_batch(store)
-    batch = Batch(store_id=store.store_id, batch_id=sealed.batch_id)
+    batch = Batch(batch_id=sealed.batch_id)
     sources = Sources(
         {store.store_id: store.root}, References(), current_case.sources.rules
     )

@@ -135,7 +135,6 @@ def identity_record(
         "data": {"product_id": product_id, "region": page.region, "match": match},
         "evidence": [
             {
-                "store_id": page.source.archive.store_id,
                 "batch_id": page.source.archive.batch_id,
                 "source_version_id": page.source.id,
                 "locator": '{"product_block_ordinal":' + str(ordinal) + "}",

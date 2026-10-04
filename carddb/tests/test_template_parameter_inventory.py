@@ -43,7 +43,7 @@ def test_inventory_cannot_shrink_or_duplicate_first_checkpoint_inputs(
         build(
             FrozenSources(
                 template_case.store,
-                template_case.scan.entries[0].source_ref.store_id,
+                "test-store",
                 template_case.batch,
             ),
             scan,
@@ -87,7 +87,7 @@ def test_candidate_output_must_cover_all_and_only_first_checkpoint_entries(
         build(
             FrozenSources(
                 template_case.store,
-                template_case.scan.entries[0].source_ref.store_id,
+                "test-store",
                 template_case.batch,
             ),
             template_case.scan,
@@ -98,7 +98,7 @@ def test_candidate_output_must_cover_all_and_only_first_checkpoint_entries(
 def test_legacy_normalized_replay_cannot_be_replaced_with_a_different_value(
     template_case: Case, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(inventory, "replay", lambda *_: "Synthetic wrong replay")
+    monkeypatch.setattr(inventory, "replay", lambda *_, **__: "Synthetic wrong replay")
     with pytest.raises(
         ValueError,
         match=r"\AParameter source recipe must reproduce exact legacy normalized bytes\Z",
@@ -106,7 +106,7 @@ def test_legacy_normalized_replay_cannot_be_replaced_with_a_different_value(
         build(
             FrozenSources(
                 template_case.store,
-                template_case.scan.entries[0].source_ref.store_id,
+                "test-store",
                 template_case.batch,
             ),
             template_case.scan,

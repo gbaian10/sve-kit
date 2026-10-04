@@ -220,7 +220,6 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
         descriptor = frozen.descriptor(current.source_version_id)
         if descriptor.provider == "jp":
             jp = SourceRef(
-                store_id=store.store_id,
                 batch_id=sealed.batch_id,
                 source_version_id=current.source_version_id,
                 parser="translation-jp-v1",
@@ -242,7 +241,6 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
             assert isinstance(text, str)
             refs.append(
                 SourceRef(
-                    store_id=store.store_id,
                     batch_id=sealed.batch_id,
                     source_version_id=current.source_version_id,
                     parser="translation-svwb-v1",
@@ -322,9 +320,7 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
                 canonical(read_yaml(root / "authored/ids/index.yaml"))
             ),
         },
-        "digital_link_sources": [
-            {"store_id": store.store_id, "batch_id": sealed.batch_id}
-        ],
+        "digital_link_sources": [{"batch_id": sealed.batch_id}],
         "translation_recipes": {},
     }
     recipes = object_value(config["translation_recipes"])
@@ -494,9 +490,7 @@ def current_api(  # ruff: ignore[too-many-locals] -- synthetic resealing preserv
         _put(store, resource, raw)
     batch = seal_batch(store)
     config = object_value(parse(fixture.build.configuration.encode()))
-    config["digital_link_sources"] = [
-        {"store_id": "test-store", "batch_id": batch.batch_id}
-    ]
+    config["digital_link_sources"] = [{"batch_id": batch.batch_id}]
     frozen = FrozenSources(store.root, "test-store", batch.batch_id)
     refs = []
     for current in batch.inventory.current:
@@ -514,7 +508,6 @@ def current_api(  # ruff: ignore[too-many-locals] -- synthetic resealing preserv
             if isinstance(text, str) and text:
                 refs.append(
                     SourceRef(
-                        store_id="test-store",
                         batch_id=batch.batch_id,
                         source_version_id=current.source_version_id,
                         parser="translation-svwb-v1",
@@ -594,9 +587,7 @@ def catalogue_fixture(
         _put(store, resource, raw)
     batch = seal_batch(store)
     config = object_value(parse(fixture.build.configuration.encode()))
-    config["digital_link_sources"] = [
-        {"store_id": "test-store", "batch_id": batch.batch_id}
-    ]
+    config["digital_link_sources"] = [{"batch_id": batch.batch_id}]
     recipes = object_value(config["translation_recipes"])
     recipe = object_value(parse(canonical(recipes["translation-svwb-v1"])))
     recipe.update(

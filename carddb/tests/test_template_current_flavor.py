@@ -43,9 +43,7 @@ def test_current_flavor_whole_field_exact_owner_and_separate_states(
     flavor_case: Case,
 ) -> None:
     sources = provider(flavor_case)
-    result = sources.generate(
-        (Batch(store_id="test-store", batch_id=flavor_case.batch),)
-    )
+    result = sources.generate((Batch(batch_id=flavor_case.batch),))
     members = tuple(
         member for member in result.entries if member.entry.role == "flavor"
     )
@@ -61,13 +59,13 @@ def test_current_flavor_whole_field_exact_owner_and_separate_states(
     reports = array(parse(result.report))
     states = object_value(object_value(reports[0])["flavor_states"])
     assert states == {"present": 3, "unknown": 1, "empty": 1}
-    sources.generate((Batch(store_id="test-store", batch_id=flavor_case.batch),))
+    sources.generate((Batch(batch_id=flavor_case.batch),))
     assert sources.generated_batches == 1
 
 
 def test_current_flavor_missing_owner_cannot_be_a_definition(flavor_case: Case) -> None:
     result = provider(flavor_case, owners=False).generate(
-        (Batch(store_id="test-store", batch_id=flavor_case.batch),)
+        (Batch(batch_id=flavor_case.batch),)
     )
     members = tuple(
         member for member in result.entries if member.entry.role == "flavor"
@@ -90,4 +88,4 @@ def test_current_flavor_still_checks_exact_own_physical_text(
     with pytest.raises(
         ValueError, match=r"^Flavor owner source differs from its exact physical field$"
     ):
-        sources.generate((Batch(store_id="test-store", batch_id=flavor_case.batch),))
+        sources.generate((Batch(batch_id=flavor_case.batch),))

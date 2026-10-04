@@ -234,14 +234,8 @@ def _evidence(record: Record, shard: Shard) -> None:
     }
     if {canonical(e.model_dump(mode="json")) for e in record.evidence} != expected:
         raise ValueError("Digital-link evidence set differs from name references")
-    batches = {
-        (batch.store_id, batch.batch_id)
-        for batch in shard.review_context.source_batches
-    }
-    if any(
-        (e.source_ref.store_id, e.source_ref.batch_id) not in batches
-        for e in record.evidence
-    ):
+    batches = {batch.batch_id for batch in shard.review_context.source_batches}
+    if any(e.source_ref.batch_id not in batches for e in record.evidence):
         raise ValueError("Digital-link evidence batch absent from review context")
 
 

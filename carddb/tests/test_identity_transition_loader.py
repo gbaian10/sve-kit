@@ -529,7 +529,6 @@ def mutate(value: dict[str, Any], edits: list[tuple[str, str, Any]]) -> None:
                     "evidence",
                     "append",
                     {
-                        "store_id": "example",
                         "batch_id": "sha256:" + "4" * 64,
                         "source_version_id": "src:v1:" + "7" * 64,
                         "locator": "a-first",

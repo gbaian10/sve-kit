@@ -286,9 +286,7 @@ def owner_text(
         )
     ref = owner.name_ref
     assert ref is not None
-    if (ref.store_id, ref.batch_id) not in {
-        (b.store_id, b.batch_id) for b in review.source_batches
-    }:
+    if ref.batch_id not in {b.batch_id for b in review.source_batches}:
         raise ValueError("Digital-name owner source is outside build closure")
     lang, text, source = sources.text(ref)
     if (
@@ -304,7 +302,7 @@ def owner_text(
         }
     ):
         raise ValueError("Digital-name owner printing face source mismatch")
-    _, raw, _ = sources.batches[ref.store_id, ref.batch_id].read(
+    _, raw, _ = sources.batch(ref.batch_id).read(
         ref.source_version_id, parser_version=ref.parser
     )
     actual = observation(

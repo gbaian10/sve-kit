@@ -29,7 +29,7 @@ class IdentityEvidence:
         self.sources = sources
         self.authored_revision = authored_revision
         self.cache: dict[bytes, RegistrySnapshot] = {}
-        self.providers: dict[tuple[str, str, str], FrozenTexts] = {}
+        self.providers: dict[tuple[str, str], FrozenTexts] = {}
         self.uses: list[SourceUse] = []
         self.authored_uses: list[tuple[str, str, str]] = []
 
@@ -162,11 +162,12 @@ class IdentityEvidence:
             or faces[face].card_id != printing.card_id
         ):
             raise ValueError("Name override requires confirmed physical identity")
-        key = ref.store_id, ref.batch_id, printing.region
+        key = ref.batch_id, printing.region
         if key not in self.providers:
+            batch = self.sources.batch(ref.batch_id)
             self.providers[key] = FrozenTexts(
-                self.sources.stores[ref.store_id],
-                ref.store_id,
+                batch.root,
+                batch.store_id,
                 ref.batch_id,
                 region=printing.region,
                 parser_version=ref.parser,

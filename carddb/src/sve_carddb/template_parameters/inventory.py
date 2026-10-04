@@ -43,6 +43,7 @@ class Candidates:
 
 @dataclass(frozen=True)
 class Field:
+    store_id: str
     source_id: str
     locator: str
     text: str
@@ -77,6 +78,7 @@ def build(
             _field(
                 result,
                 Field(
+                    source.archive.store_id,
                     source.id,
                     locator,
                     text,
@@ -110,14 +112,16 @@ def _candidate(
     result: Candidates, context: Field, part: Part, position: Located, refs: References
 ) -> None:
     matches = [
-        e for e in context.entries if entry(e.source_ref, part, VERSION).id == e.id
+        e
+        for e in context.entries
+        if entry(e.source_ref, part, VERSION, store_id=context.store_id).id == e.id
     ]
     if len(matches) != 1:
         raise ValueError(
             "Parameter candidates must locate every first-checkpoint entry"
         )
     item = matches[0]
-    if replay(item, context.document) != part.normalized:
+    if replay(item, context.document, store_id=context.store_id) != part.normalized:
         raise ValueError(
             "Parameter source recipe must reproduce exact legacy normalized bytes"
         )

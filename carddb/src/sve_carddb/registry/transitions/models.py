@@ -62,15 +62,7 @@ class RegistryBasis(RecordData):
 
 
 class Batch(RecordData):
-    store_id: Text
     batch_id: Hash
-
-    @field_validator("store_id")
-    @classmethod
-    def _store(cls, value: str) -> str:
-        if "/" in value or ".." in value:
-            raise ValueError("Archive store ID must be a stable name")
-        return value
 
 
 class Evidence(Batch):
@@ -321,10 +313,7 @@ class Transition(RecordData):
         ordered(self.routes)
         ordered(self.evidence)
         batches = set(self.review_context.source_batches)
-        if any(
-            Batch(store_id=item.store_id, batch_id=item.batch_id) not in batches
-            for item in self.evidence
-        ):
+        if any(Batch(batch_id=item.batch_id) not in batches for item in self.evidence):
             raise ValueError("Transition evidence batch missing from review context")
         return self
 

@@ -37,7 +37,6 @@ def ordered_objects(values: tuple[RecordData, ...]) -> None:
 
 
 class SourceBatch(RecordData):
-    store_id: Text
     batch_id: Hash
 
 
@@ -363,7 +362,7 @@ class AdoptionRecord(RecordData):
         ):
             if any(index >= len(self.evidence) for index in proof.evidence_indexes):
                 raise ValueError("Order evidence index is outside the complete record")
-        batches = {(b.store_id, b.batch_id) for b in d.review_context.source_batches}
+        batches = {b.batch_id for b in d.review_context.source_batches}
         for observation in d.observations:
             locator = canonical(
                 {
@@ -376,7 +375,7 @@ class AdoptionRecord(RecordData):
                 e.role == "wording_observation"
                 and e.source_version_id == observation.source_version_id
                 and e.locator == locator
-                and (e.store_id, e.batch_id) in batches
+                and e.batch_id in batches
                 for e in self.evidence
             ):
                 raise ValueError(

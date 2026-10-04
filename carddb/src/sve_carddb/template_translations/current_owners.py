@@ -2,6 +2,7 @@
 
 from typing import TYPE_CHECKING
 
+from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.registry.records import CardData, FaceData, PrintingData
 from sve_carddb.snapshot.values import digest
@@ -37,7 +38,7 @@ class Owners:
             for r in registry.records.values()
             if isinstance(r.data, FaceData)
         }
-        self.providers: dict[tuple[str, str], FrozenTexts] = {}
+        self.providers: dict[str, FrozenTexts] = {}
 
     def resolve(self, ref: SourceRef, source: Source, text: str) -> FlavorOwner | None:
         """A matching paragraph cannot borrow another printing's confirmed identity."""
@@ -55,10 +56,15 @@ class Owners:
             or self.faces[mapping.face_id].card_id != printing.card_id
         ):
             return None
-        key = ref.store_id, ref.batch_id
+        key = ref.batch_id
         if key not in self.providers:
+            archive = FrozenSources.configured(self.stores, key)
             self.providers[key] = FrozenTexts(
-                self.stores[ref.store_id], *key, region="jp", parser_version=ref.parser
+                archive.root,
+                archive.store_id,
+                key,
+                region="jp",
+                parser_version=ref.parser,
             )
         frozen = self.providers[key].version(
             "jp", printing.card_no, ref.source_version_id

@@ -42,10 +42,7 @@ class Composer:
             for policy in loaded.policies
             for pin in policy.catalogue().source_batches
         ]
-        batches.extend(
-            {"store_id": recipe.store_id, "batch_id": pin.card_batch}
-            for pin in recipe.sources
-        )
+        batches.extend({"batch_id": pin.card_batch} for pin in recipe.sources)
         registry = read_yaml(recipe.repo / "authored/ids/index.yaml")
         config = self.inputs.configuration() | {
             "catalog_registry": {

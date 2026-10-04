@@ -307,16 +307,14 @@ def _check_shard(shard: Shard, path: str) -> None:  # ruff: ignore[complex-struc
                 raise ValueError("Adoption dependency primary key fields mismatch")
             if any(not isinstance(v, str) or not v for v in dependency.key.values()):
                 raise ValueError("Adoption dependency keys must be nonempty text")
-        batches = {
-            (b.store_id, b.batch_id) for b in shard.review_context.source_batches
-        }
+        batches = {b.batch_id for b in shard.review_context.source_batches}
         for evidence in record.evidence:
             ref = (
                 evidence.source_ref
                 if hasattr(evidence, "source_ref")
                 else evidence.image_ref
             )
-            if (ref.store_id, ref.batch_id) not in batches:
+            if ref.batch_id not in batches:
                 raise ValueError("Adoption evidence batch absent from review context")
     members = tuple((r.record_key, digest(canonical(_json(r)))) for r in shard.records)
     checksum = digest(canonical([[key, value] for key, value in members]))

@@ -265,7 +265,6 @@ def test_review_envelope_single_guard(  # ruff: ignore[complex-structure,too-man
             member["evidence"] = [
                 {
                     "source_ref": {
-                        "store_id": "test-store",
                         "batch_id": "sha256:" + "a" * 64,
                         "source_version_id": "src:v1:" + "b" * 64,
                         "parser": "exact-json-v1",

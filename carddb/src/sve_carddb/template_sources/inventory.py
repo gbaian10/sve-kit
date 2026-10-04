@@ -45,10 +45,10 @@ class Scan:
     documents: dict[str, JsonValue] = field(default_factory=dict)
 
 
-def entry(ref: SourceRef, part: Part, normalizer_id: str) -> Entry:
+def entry(ref: SourceRef, part: Part, normalizer_id: str, *, store_id: str) -> Entry:
     """The deterministic ID can be recomputed by enumerating the pinned field recipe."""
     key: JsonValue = [
-        ref.model_dump(mode="json"),
+        ref.model_dump(mode="json") | {"store_id": store_id},
         part.line_ordinal,
         part.role,
         [[span.start, span.end] for span in part.segments],
@@ -114,7 +114,6 @@ def _field(
         return
     verify_partition(text, parts)
     ref = SourceRef(
-        store_id=source.archive.store_id,
         batch_id=source.archive.batch_id,
         source_version_id=source.id,
         parser=PARSER,
@@ -122,7 +121,7 @@ def _field(
         text_hash=digest(text.encode()),
     )
     for part in parts:
-        item = entry(ref, part, VERSION)
+        item = entry(ref, part, VERSION, store_id=source.archive.store_id)
         scan.entries.append(item)
         if part.template:
             member = f"{number}#{locator.split('/')[2]}/{part.member_source}/{part.line_ordinal}"
@@ -135,7 +134,7 @@ def _field(
     proof["code_points"] = len(text)
     proof["segments"] = [
         {
-            "entry_id": entry(ref, part, VERSION).id,
+            "entry_id": entry(ref, part, VERSION, store_id=source.archive.store_id).id,
             "role": part.role,
             "ranges": [[span.start, span.end] for span in part.segments],
         }
@@ -304,7 +303,7 @@ def coverage(scan: Scan) -> dict[str, JsonValue]:
     }
 
 
-def replay(item: Entry, document: JsonValue) -> str:
+def replay(item: Entry, document: JsonValue, *, store_id: str) -> str:
     """Reconstruct a candidate from its complete field and verify every declared hash."""
     text = pointer(document, item.source_ref.locator)
     if not isinstance(text, str) or digest(text.encode()) != item.source_ref.text_hash:
@@ -322,6 +321,6 @@ def replay(item: Entry, document: JsonValue) -> str:
         )
     _, section = located[0]
     for part in partition(text, section=section):
-        if entry(item.source_ref, part, item.normalizer_id) == item:
+        if entry(item.source_ref, part, item.normalizer_id, store_id=store_id) == item:
             return part.normalized
     raise ValueError("Template entry cannot be replayed from the pinned field recipe")

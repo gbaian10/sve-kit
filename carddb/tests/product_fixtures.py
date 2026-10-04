@@ -69,7 +69,6 @@ def family(
 
 def reference() -> Object:
     return {
-        "store_id": "synthetic",
         "batch_id": "sha256:" + "1" * 64,
         "source_version_id": "src:v1:" + "2" * 64,
         "locator": "product block 0",

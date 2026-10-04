@@ -195,7 +195,7 @@ def _prepare_adoptions(  # ruff: ignore[complex-structure,too-many-locals] -- va
             raise ValueError("Adoption identity/text inputs require frozen raw bytes")
         for item in text_plan.observations:
             archive = item.card.source.archive
-            source, raw, _ = sources.batch(archive.store_id, archive.batch_id).read(
+            source, raw, _ = sources.batch(archive.batch_id).read(
                 item.card.source.id, parser_version=item.card.source.parser_version
             )
             if source != item.card.source or raw != item.card.raw:
@@ -223,7 +223,7 @@ def _prepare_adoptions(  # ruff: ignore[complex-structure,too-many-locals] -- va
         sources.uses.extend(text_plan.identity.source_uses())
         for use in {use.source for use in text_plan.source_uses()}:
             archive = use.archive
-            source, _, _ = sources.batch(archive.store_id, archive.batch_id).read(
+            source, _, _ = sources.batch(archive.batch_id).read(
                 use.id, parser_version=use.parser_version
             )
             if source != use:
@@ -445,7 +445,7 @@ def _verify_identity(
                 "Current identity source recipe does not match pinned parser"
             )
         archive = evidence.source.archive
-        source, raw, _ = sources.batch(archive.store_id, archive.batch_id).read(
+        source, raw, _ = sources.batch(archive.batch_id).read(
             evidence.source.id, parser_version=evidence.source.parser_version
         )
         if source != evidence.source:

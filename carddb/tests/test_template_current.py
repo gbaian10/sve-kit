@@ -69,7 +69,7 @@ def make_case(tmp_path: Path) -> Case:
     raw = page("jp", '<div class="detail">甲2枚</div>')
     _put(store, _resource(card_url("SYN-01"), "raw/card.html", raw, Kind.CARD), raw)
     sealed = seal_batch(store)
-    batch = Batch(store_id=store.store_id, batch_id=sealed.batch_id)
+    batch = Batch(batch_id=sealed.batch_id)
     rules = parse_rules(
         canonical(
             {

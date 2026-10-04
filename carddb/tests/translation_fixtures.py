@@ -21,7 +21,6 @@ def reference(
     *, provider: str = "svwb", locator: str = "/data/skill_names/1"
 ) -> dict[str, JsonValue]:
     return {
-        "store_id": "synthetic",
         "batch_id": HASH,
         "source_version_id": "src:v1:" + "b" * 64,
         "parser": "translation-" + provider + "-v1",

@@ -131,7 +131,6 @@ def test_frozen_glossary_source_use_is_in_the_combined_input_record(
     locator = "/data/skill_names/1"
     definition = term("rule.frozen")
     object_value(definition["data"])["source_ref"] = {
-        "store_id": store.store_id,
         "batch_id": batch.batch_id,
         "source_version_id": source.id,
         "parser": "translation-svwb-v1",

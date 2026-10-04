@@ -203,7 +203,7 @@ def test_newer_translation_change_is_reported_without_activation(
     from sve_carddb.digital_links.importer import review_context  # ruff: ignore[import-outside-top-level] -- same explicit context as the comparison source
 
     complete_inventory(comparing, review_context(comparing), "sv1")
-    for (_, _, _, parser), (lang, document, _) in comparing.cache.items():
+    for (_, _, parser), (lang, document, _) in comparing.cache.items():
         if parser == "translation-sv1-v1" and lang == "zh-Hant":
             cards = array(object_value(object_value(document)["data"])["cards"])
             object_value(cards[0])["card_name"] = "另一個合成譯名"

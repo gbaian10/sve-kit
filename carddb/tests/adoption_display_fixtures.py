@@ -270,7 +270,7 @@ def make_display_case(  # ruff: ignore[too-many-locals,too-many-statements] -- o
     )
     review: dict[str, JsonValue] = {
         "context": context.model_dump(mode="json"),
-        "source_batches": [{"store_id": store.store_id, "batch_id": sealed.batch_id}],
+        "source_batches": [{"batch_id": sealed.batch_id}],
     }
     for shard_path in (case.root / "catalog-adoptions").rglob("*.yaml"):
         if shard_path.name == "index.yaml":
@@ -288,7 +288,6 @@ def make_display_case(  # ruff: ignore[too-many-locals,too-many-statements] -- o
         )
     refs: tuple[dict[str, JsonValue], ...] = tuple(
         {
-            "store_id": store.store_id,
             "batch_id": sealed.batch_id,
             "source_version_id": o.card.source.id,
             "parser": "official-jp-exact-v1",
@@ -346,7 +345,6 @@ def make_display_case(  # ruff: ignore[too-many-locals,too-many-statements] -- o
             *array(names["evidence"]),
             {
                 "image_ref": {
-                    "store_id": store.store_id,
                     "batch_id": sealed.batch_id,
                     "source_version_id": next(
                         e.source_version_id

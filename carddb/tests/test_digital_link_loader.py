@@ -116,10 +116,14 @@ def test_record_refusals(  # ruff: ignore[complex-structure,too-many-branches,to
         r["evidence"] = []
     elif fault == "batch":
         for e in array(r["evidence"]):
-            object_value(object_value(e)["source_ref"])["store_id"] = "other"
+            object_value(object_value(e)["source_ref"])["batch_id"] = (
+                "sha256:" + "0" * 64
+            )
         for names in ("sve_names", "digital_names"):
             for e in array(value[names]):
-                object_value(object_value(e)["name_ref"])["store_id"] = "other"
+                object_value(object_value(e)["name_ref"])["batch_id"] = (
+                    "sha256:" + "0" * 64
+                )
     elif fault == "no-ja":
         object_value(array(value["digital_names"])[0])["lang"] = "en"
     elif fault == "wrong-face":

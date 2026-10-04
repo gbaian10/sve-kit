@@ -153,7 +153,6 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
             )
             name = "choice"
         references[name] = {
-            "store_id": store.store_id,
             "batch_id": batch.batch_id,
             "source_version_id": entry.source_version_id,
             "parser": parser,
@@ -435,7 +434,7 @@ def test_translation_recipes_have_a_domain_refusal(
     with pytest.raises(
         ValueError, match=r"^Translation source recipes must be an object$"
     ):
-        sources.projection("test-store", "unused", "unused", "translation-jp-v1")
+        sources.projection("unused", "unused", "translation-jp-v1")
 
 
 def test_offline_translation_recipe_requires_pinned_code() -> None:

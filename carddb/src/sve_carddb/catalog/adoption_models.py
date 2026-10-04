@@ -26,7 +26,6 @@ VocabularyKind = Literal[
 
 
 class Batch(RecordData):
-    store_id: Text
     batch_id: Hash
 
 

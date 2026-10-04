@@ -73,7 +73,6 @@ def reference_identity_source(root: Path, provider: MemoryEvidence) -> None:
     raw = obj(read_yaml(root / NAME))
     first_record(raw)["evidence"] = [
         {
-            "store_id": source.archive.store_id,
             "batch_id": source.archive.batch_id,
             "source_version_id": source.id,
             "locator": "product block 0",

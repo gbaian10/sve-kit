@@ -199,7 +199,7 @@ def merge_record() -> dict[str, Any]:
         "index_path": "ids/index.yaml",
         "index_hash": "sha256:" + "3" * 64,
     }
-    batch = {"store_id": "example", "batch_id": "sha256:" + "4" * 64}
+    batch = {"batch_id": "sha256:" + "4" * 64}
     return {
         "record_key": '["identity_transition",1]',
         "kind": "identity_transition",
