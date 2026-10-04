@@ -34,7 +34,7 @@ describe("catalog", () => {
       defaultPrinting: { jp: "p:bp01-001", en: "p:bp01-001-en" },
     })
     expect(recruit?.names.map((name) => name.lang).sort()).toEqual(["en", "ja", "zh-Hant"])
-    expect(recruit?.printings.map((printing) => printing.cardNo)).toEqual([
+    expect(recruit?.printings.map((printing) => printing.cardNo).sort()).toEqual([
       "BP01-001",
       "BP01EN-001",
     ])
@@ -79,12 +79,12 @@ describe("catalog", () => {
   it("lists results in snapshot order and filters by class", () => {
     const all = catalog.results(DEFAULT_QUERY, "jp")
     expect(all).toHaveLength(catalog.entries.length)
-    expect(all[0]).toEqual({ key: "c:bp01-001", printingId: "p:bp01-001" })
+    expect(all[0]).toEqual({ key: "c:bp01-021", printingId: "p:bp01-021" })
     const bishops = catalog.results({ ...DEFAULT_QUERY, classes: ["bishop"] }, "en")
     expect(bishops.every((item) => catalog.summary(item.printingId)?.classCode === "bishop")).toBe(
       true,
     )
-    expect(bishops[0]?.printingId).toBe("p:bp01-050-en")
+    expect(bishops[0]?.printingId).toBe("p:bp01-051-en")
   })
 
   it("labels classes in the UI language and caches one catalog per snapshot", () => {

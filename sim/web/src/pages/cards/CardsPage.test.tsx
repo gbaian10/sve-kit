@@ -146,7 +146,7 @@ describe("CardsPage", () => {
     await waitFor(() => {
       expect(screen.getByRole("listbox")).toHaveAttribute("aria-busy", "false")
     })
-    await user.click(within(screen.getByRole("listbox")).getAllByRole("option")[0] ?? first)
+    await user.click(within(screen.getByRole("listbox")).getByRole("option", { name: /BP01-050/u }))
     expect(router.state.location.pathname).toBe("/cards/BP01-050")
     expect(router.state.location.state).toMatchObject({ background: "?q=bp01-05" })
   })
