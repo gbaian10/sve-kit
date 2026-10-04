@@ -2,7 +2,7 @@
 
 本文件補足 [snapshot-format.md](snapshot-format.md) 的 JSON 容器、欄序與版本契約；公開邏輯欄位仍以該文件 §2 為唯一白名單。這些記錄不是新增的玩家集合或建置表。所有物件拒絕未列出的欄位；所有列出的欄位必須存在，`T?` 表示 `T` 或 JSON null，不能省略。空陣列表示已知無成員，來源是否完整另看 coverage。
 
-2.0.0 的圖片契約與配置見 §5.4；1.x 各節保留原版本解讀，不能套用其圖片 path／下載 hash 規則於 2.0.0。此為待實作契約，機器資源依 [snapshot-contract](snapshot-contract.md) 同步後才可發布。
+目前 producer／reader 僅支援 2.0.0，圖片契約與配置見 §5.4；不提供 1.x 產出或相容讀取。機器資源依 [snapshot-contract](snapshot-contract.md) 維護。
 
 ## 1. 基本型別與 canonical bytes
 
@@ -16,11 +16,13 @@
 
 - `format_version`、`min_reader_version` 為不含 prerelease/build 的 SemVer；後者屬獨立的快照 reader 契約版本，不是 web、Python 套件或 Git tag 版號。reader 明示自身契約版本、支援的 format 範圍及 capabilities。
 - 正式 `data_version` 為 `YYYYMMDDTHHMMSSZ-NNNN`，NNNN 是同 UTC 秒內從 0001 起的四位流水號。預覽為 `preview-YYYYMMDDTHHMMSSZ-NNNN`；只在隔離根中分配且不能進正式版本索引。`published_at` 是該批次 UTC Instant；預覽填產出時間，不代表公開發布。
-- `required_capabilities` 是排序、唯一的非空 Code 陣列，v1 至少含 `column-partition-v1`、`fragment-container-v1`。reader 需同時滿足 format 範圍、最低契約版本、所有 capabilities，才能啟用；不因 major 相同就接受未知 minor。
+- `required_capabilities` 是排序、唯一的非空 Code 陣列，2.0 的固定集合依 §5.4。reader 需同時滿足 format 範圍、最低契約版本、所有 capabilities，才能啟用；不因 major 相同就接受未知 minor。
 - 改 tuple 欄序／型別／nullable、移除欄、改 enum 語義、變動 canonical 規則或 join 語義，升 format major。新增可協商功能／新分片配置以 minor 升版並更新 Schema、共用 golden、reader 能力與最低版本。patch 只修正不改 wire bytes 解釋的規格問題。資料修字、來源新增與新卡只升 data_version。
 - 分片 bucket 的算法與數目由每個 format 版本的配置釘死；調整至少升 minor，不能只更換 data_version。`search.grammar_version/normalizer_version` 是搜尋契約的獨立 Code，不宣稱特定搜尋實作已完成；reader 必須明示支援這一對值，未知值停用搜尋並告知，不能用舊 normalizer 建錯索引。
 
-例如 reader 支援 `1.0.0` 且具有上述兩能力，可以讀兩個 data_version 不同的 `1.0.0` 快照。`1.1.0` 改 bucket 數後，尚未宣告支援 `1.1.0` 的 reader 留在 current／previous 中相容者或本機已驗 active，無相容者提示更新；支援該版本者依新 manifest 重建索引。`2.0.0` 改欄序不能沿用 `1.x` accessor。`preview-20260929T010203Z-0001` 即使格式相容，也不能交給正式發布器。
+例如 reader 可以讀兩個 data_version 不同的 `2.0.0` 快照，但仍須驗證固定能力集合。
+未知格式拒收；更新失敗可保留相容 current／previous 或本機已驗 active。
+`preview-20260929T010203Z-0001` 即使格式相容，也不能交給正式發布器。
 
 ## 2. 快照清單與檔案描述
 
@@ -185,11 +187,11 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 
 DSL 程式包是物件 `{format_version,entries}`；兩鍵皆 required 且不得有額外鍵，format_version 與所屬 manifest 相同，entries 是陣列、不可 null。程式項目的封套為 `{id:ID,dsl_version:Text,ast:JSON}`，三鍵皆 required 且不得有額外鍵；id 在包內唯一並排序，dsl_version 採 `主版.次版`（非負十進位整數，除 0 外無前導零）。ast 保留 JSON，不轉 tuple，其合法形狀只由該 DSL 版本在 `dsl/` 的正式 Schema 定義。
 
-format_version=`1.0.0`、`1.1.0`、`1.2.0` 與 `2.0.0` 的支援 DSL 版本集合固定為空：唯一可接受的 entries 為 `[]`。任何非空 entries 都拒絕整包，即使封套完整也不放行；不忽略項目、不轉用 astra/1、不使用任意 JSON 的 ast 驗證替代正式 Schema。此規則是版本契約，不因執行環境裝有某個引擎或 Schema 而改變。沒有程式項目可供引用時，非 null ProgramRef 亦無法通過引用閉包驗證。
+format_version=`2.0.0` 的支援 DSL 版本集合固定為空：唯一可接受的 entries 為 `[]`。任何非空 entries 都拒絕整包，即使封套完整也不放行；不忽略項目、不轉用 astra/1、不使用任意 JSON 的 ast 驗證替代正式 Schema。此規則是版本契約，不因執行環境裝有某個引擎或 Schema 而改變。沒有程式項目可供引用時，非 null ProgramRef 亦無法通過引用閉包驗證。
 
-此格式每份 manifest 必須恰有一個 role=programs 的 File，固定提供 format_version 與 manifest 相同且 entries=[] 的程式包（1.0.0 例為 `{"format_version":"1.0.0","entries":[]}`）；row_counts 與 dependencies 都是 []，仍驗 canonical bytes、長度及 hash。不得以省略檔案表示沒有程式；reader 缺檔即拒收。此附件依 §4.2 不列入 text_all，下載文字分片不依賴它；驗完整快照時另外取得。
+此格式每份 manifest 必須恰有一個 role=programs 的 File，固定提供 format_version 與 manifest 相同且 entries=[] 的程式包（`{"format_version":"2.0.0","entries":[]}`）；row_counts 與 dependencies 都是 []，仍驗 canonical bytes、長度及 hash。不得以省略檔案表示沒有程式；reader 缺檔即拒收。此附件依 §4.2 不列入 text_all，下載文字分片不依賴它；驗完整快照時另外取得。
 
-啟用正式 DSL 1.0 時須由新的 format 配置至少升 minor，明列支援 DSL 版本到 `dsl/` Schema 資源的映射、所需 capability 與最低 reader 版本，並依 §1.1 協商；reader 使用釘住的權威資源驗 ast，且拒絕未展開的作者巨集。未知 DSL 版本仍拒絕整包，不改寫既有 `1.0.0` 的空集合。
+啟用正式 DSL 1.0 時須由新的 format 配置至少升 minor，明列支援 DSL 版本到 `dsl/` Schema 資源的映射、所需 capability 與最低 reader 版本，並依 §1.1 協商；reader 使用釘住的權威資源驗 ast，且拒絕未展開的作者巨集。未知 DSL 版本仍拒絕整包，不改寫既有 `2.0.0` 的空集合。
 
 ## 4. fragment 容器與 join
 
@@ -232,11 +234,11 @@ text_all 是替代表示，不列入 files，不在容量合計重算。文字�
 
 ### 4.3 檔案描述與容器對照例
 
-以下是手寫合成片段，假設示例 format 配置 N=1；不代表正式 bucket 數目已定，也不是完整可發布卡表。未顯示的 manifest/config／引用者需另行補齊。此 text_unit 屬名稱閉包，容器如下（排版不計入 canonical bytes）：
+以下是手寫合成片段，使用 2.0 固定 N=64；不是完整可發布卡表。未顯示的 manifest/config／引用者需另行補齊。此 text_unit 屬名稱閉包，容器如下（排版不計入 canonical bytes）：
 
 ```json
 {
-  "format_version": "1.0.0",
+  "format_version": "2.0.0",
   "types": {},
   "tables": {
     "text_unit": [
@@ -245,7 +247,7 @@ text_all 是替代表示，不列入 files，不在容量合計重算。文字�
           "kind": "global",
           "id": null
         },
-        "bucket": 0,
+        "bucket": 23,
         "partition": "bootstrap",
         "base": null,
         "columns": [
@@ -270,10 +272,10 @@ text_all 是替代表示，不列入 files，不在容量合計重算。文字�
 
 ```json
 {
-  "key": "bootstrap/text/0",
-  "path": "snapshots/blobs/47709eb127600386c6319ff78d16753286e7e1c4936a5647c1fe6fda8af98166.json",
-  "sha256": "sha256:47709eb127600386c6319ff78d16753286e7e1c4936a5647c1fe6fda8af98166",
-  "bytes": 233,
+  "key": "bootstrap/bootstrap/global/global/band/2",
+  "path": "snapshots/blobs/099e7804e341d8ad5cff67c3addc5f90ee5843fb7174b02c7718156193d288e4.json",
+  "sha256": "sha256:099e7804e341d8ad5cff67c3addc5f90ee5843fb7174b02c7718156193d288e4",
+  "bytes": 234,
   "compressed_bytes": {
     "br": null,
     "gzip": null
@@ -285,7 +287,7 @@ text_all 是替代表示，不列入 files，不在容量合計重算。文字�
         "kind": "global",
         "id": null
       },
-      "bucket": 0,
+      "bucket": 23,
       "partition": "bootstrap",
       "count": 1
     }
@@ -301,7 +303,7 @@ text_all.contains 使用同一 key/sha256，其 members 的 payload 是上述整
 
 card、face、face_revision、card_engine_support、mechanic_projection、card_mechanic_coverage、card_related、digital_link、digital_link_coverage、card_voice 跟所屬 card.home_set_id；card_related 用 from_card_id。printing、printing_product、printing_image 跟永久 printing.home_set_id；art、digital_art_link 跟 art.card_id 的 home_set。其餘集合用 global owner；從全球共用的 image_asset/image_variant 到 text_unit、translation、QA、CR 都不跟最近引用者搬家。owner 只用建置資料推導，不因此將 printing.home_set_id 加入公開邏輯欄位。
 
-bucket 使用 `sha256-mod-v1`：分片鍵一律為 JSON 陣列，再依 §1 引用的 canonical-json-v1 取得 bytes。card 系列的鍵為 `[card_id]`，printing 系列為 `[printing_id]`，art 系列為 `[art_id]`；format 1.0.0 的其他集合使用依公開 PK 欄序排列的完整主鍵值陣列，單欄 PK 也保留陣列外層。format 1.1.0 只有 image_variant 改用 `[image_id]`，與 image_asset 的 `[id]` 共用實體 bucket；其邏輯 PK 與排序不變。對這組 bytes 算 SHA-256，全 256 bit 視為無號 big-endian 整數，對 bucket_count 取餘數。所有同主實體欄位分割／所有 revision 共用此鍵；ID 保持字串型別，hash 不截斷。bucket 範圍 `[0,bucket_count)`，空 bucket 不必出檔。owner 分組與 bucket 一起定位，不由檔案下載順序決定。
+bucket 使用 `sha256-mod-v1`：分片鍵一律為 JSON 陣列，再依 §1 引用的 canonical-json-v1 取得 bytes。card 系列的鍵為 `[card_id]`，printing 系列為 `[printing_id]`，art 系列為 `[art_id]`；image_asset／image_variant 使用 `[id]`／`[image_id]` 共用實體 bucket；其他集合使用依公開 PK 欄序排列的完整主鍵值陣列，單欄 PK 也保留陣列外層。對這組 bytes 算 SHA-256，全 256 bit 視為無號 big-endian 整數，對 bucket_count 取餘數。所有同主實體欄位分割／所有 revision 共用此鍵；ID 保持字串型別，hash 不截斷。bucket 範圍 `[0,bucket_count)`，空 bucket 不必出檔。owner 分組與 bucket 一起定位，不由檔案下載順序決定。
 
 可核算向量：card ID `c:example` 的鍵是 `["c:example"]`；canonical bytes 長度 13，hex 為 `5b22633a6578616d706c65225d`，SHA-256 為 `6ff93079f7688d35b704b55a2eea460f7d087079d15d238d8980a5d4b0eaea9f`。`bucket_count=4` 時餘數為 **3**（末 byte `0x9f` 對 4 取餘數亦為 3）。producer／reader 的共用 golden 須固定此向量，確保字串鍵的引號與陣列括號都參與 hash。
 
@@ -309,9 +311,10 @@ bucket 使用 `sha256-mod-v1`：分片鍵一律為 JSON 陣列，再依 §1 引�
 
 每一候選配置也須有明示的 format 版本，且 Schema／golden／reader 支援表釘住對應 N；manifest 不得自選同版本的另一個 N。正式發布前以雙區實測（未收錄區域則如實列明）凍結配置；增加資料後若需改 N，升 format minor 並同步契約與 reader，保留窗口內舊快照仍按原配置解讀，不承諾永久重新下載。此規則不預先宣稱某個未量測數目足以承載全庫。
 
-### 5.1 format 1.1.0 固定配置
+### 5.1 format 2.0.0 固定配置
 
-此 minor 保持 1.0.0 的公開 tuple 欄序、型別、nullable、永久 ID、owner、PK 與 join 語意，新增 image 實體分片及同名表整表按需。1.0.0／N=1 仍依舊配置解讀；1.1.0 釘 N=64、min_reader_version=1.1.0，required_capabilities 恰為排序的 `column-partition-v1`、`fragment-container-v1`、`image-entity-buckets-v1`、`rules-name-on-demand-v1`。producer／reader 須明示支援這套配置，不只放寬 bucket 範圍；未支援者保留 current／previous 中相容者或本機已驗 active，無相容者提示更新。Schema 與共用 golden 隨 producer／reader 同步，此文件不表示現有機器資源已支援 1.1.0。
+2.0 固定 N=64、min_reader_version=2.0.0，完整能力集合依 §5.4。
+producer／reader 須明示支援此配置，不放寬 bucket 範圍，也不保留 1.x accessor。
 
 image_asset 使用 `[id]`，image_variant 使用 `[image_id]`，兩者仍是 global owner、detail partition，同 image 的所有 variant 同 bucket。printing_image 沿永久 printing.home_set_id 與 `[printing_id]`；不依卡號或 card.home_set_id 猜歸屬。rules_name／face_rules_name 的完整列唯一存於 global detail，其他集合仍用 §5 原本的主實體／完整 PK 鍵與欄位分割。
 
@@ -320,7 +323,7 @@ image_asset 使用 `[id]`，image_variant 使用 `[image_id]`，兩者仍是 glo
 | role／partition／owner | width |
 | --- | ---: |
 | images／detail／global | 1 |
-| images／detail／home_set | 64 |
+| images／detail／home_set | 32 |
 | bootstrap／bootstrap／global | 8 |
 | bootstrap／bootstrap／home_set | 64；BP01、CP04 固定為 32 |
 | text／detail／global | 2 |
@@ -333,60 +336,17 @@ config 與 programs 各一檔，key 分別為 `config`、`programs`。無列 buc
 
 ### 5.2 影像 metadata 的背景預取與逐頁解析
 
-1.1 reader 在首屏文字／名稱／facet 就緒後背景預取全部 role=images metadata，圖片 blob 只按可見面下載。這是延後完整 metadata 成本，不承諾 global 雜湊按頁省流量；必列完整 session／離線的 raw／br／gzip、檔數與 cache footprint。任何 metadata 若實際阻擋首屏，均加回 startup_by_region。saveData 啟用時延後背景預取、優先只補當頁，且不宣稱 metadata 已完整離線。
+2.0 reader 依 §5.4 只取可見面的卡包 media，圖片 blob 按可見面下載；全域來源詳情按需另取。必列實際 session／離線的 raw／br／gzip、檔數與 cache footprint。任何 metadata 若實際阻擋首屏，均加回 startup_by_region；未下載完整集合時不宣稱已完整離線。
 
-先驗 File bytes／hash，再按 manifest hash 與內容 hash 隔離保存 CacheStorage bytes；按頁解析仍驗 canonical／Schema／語意，不把已驗 bytes 當已解析資料。當頁先取 printing_image，再依 image_id 定位 global asset／variant。同 File 的多 locator 去重，當頁優先於背景，整體最多 4 個 in-flight。切快照取消舊工作，舊回應不寫入新狀態；失敗／重試與尚未完整的進度明示，不標離線備妥。
+先驗 File bytes／hash，再按 manifest hash 與內容 hash 隔離保存 CacheStorage bytes；按頁解析仍驗 canonical／Schema／語意，不把已驗 bytes 當已解析資料。當頁取 printing_image 的狀態、尺寸與版本即可組 URL，不必另取 global asset／variant。同 File 的多 locator 去重，當頁優先於背景，整體最多 4 個 in-flight。切快照取消舊工作，舊回應不寫入新狀態；失敗／重試與尚未完整的進度明示，不標離線備妥。
 
 解析片的調度上限為 12 MiB raw 對應量與 64 檔，當頁 pin 到畫面移除；解析時只留下當頁所需 image 列，立即丟掉其他列與整片解碼物件，不建立全庫資產／variant Map。上一頁解除 pin 後即釋放不再使用的 image 列；列快取也須有界，連同 view／Map／暫存與 pinned 工作集量 JS heap；raw 調度量不能代替 48／80 MiB 手機驗收。已驗 bytes 可留在持久快取，換頁後重解析不需外部重抓；CacheStorage 不可用／quota 失敗／被清除時明示退化及實際成本。
 
 冷頁成本以前置啟動包已驗證並快取、尚無 images metadata 的狀態計算，config 依賴已在啟動量計入。每次配置定版須用至多 24 張可見面圖的頁面量冷頁 P50／P95／max：同 printing owner ≤25 個 metadata File、raw≤9 MiB、br≤2 MiB；混 owner ≤48 檔、raw≤12 MiB、br≤2.5 MiB。雙面若同時展示兩圖就算兩張圖，超過 24 圖的頁面另外量當頁 pin，不沿用此上界。同頁重繪、P1→P2→P1 及解析 LRU 淘汰後回頁，在已驗 byte cache 未被清除時，metadata 外部請求與傳輸 bytes 為 0，另報 cache 讀取／重解析成本。假 fetch／CacheStorage 接線與真實 heap 仍須獨立測，不用數值模擬冒稱瀏覽器驗收。
 
-### 5.3 format 1.2.0 同名規則瀏覽配置
-
-1.2.0 沿用 §5.1 的 N=64、bucket 鍵、owner、band widths、512 KiB 資料 File 上限及欄位分割，
-並沿 §5.2 的影像 metadata 調度；不因增加數位連結而更改裝檔或啟動包預算。
-公開 tuple 欄序、型別、nullable、PK、ID、canonical bytes 與 join 語意維持 1.1.0。
-新增的可協商功能是 [snapshot-format §9](snapshot-format.md#9-format-120-同名規則瀏覽) 的
-digital_link.relation=same_name，以及由已驗建置資料庫投影的 config.digital_endpoints；
-後者沿 §3 的既有物件形狀，不新增公開 digital_endpoint 表或第 41 個集合。
-
-format_version 與 min_reader_version 都為 `1.2.0`，required_capabilities 恰為下列排序集合：
-
-```json
-[
-  "column-partition-v1",
-  "digital-same-name-links-v1",
-  "fragment-container-v1",
-  "image-entity-buckets-v1",
-  "rules-name-on-demand-v1"
-]
-```
-
-只要選擇此配置，即使當次 same_name 列為空也須帶上述能力及最低版本；
-manifest、config、所有 fragment、programs、text_all 與 changes 的 format_version 必須一致，
-不能只升 manifest 或以 data_version 放行新枚舉。
-只有名字政策的建置仍可選原來的 1.0.0 或 1.1.0 配置，不能因此宣稱已提供規則瀏覽。
-只支持 1.0.0／1.1.0、最低 reader 版本不足、或缺少任一 required capability 的讀者拒絕整份 1.2.0；
-具備該 capability 卻未明示支持 1.2.0 也拒絕，不偷偷刪除連結後當作舊快照。
-1.0.0／1.1.0 都不接受 same_name，原有枚舉意義與機器資源不回寫。
-
-producer 與 reader 須各自驗 same_name 的卡層 null、effect_similarity=null、review_level=unreviewed
-及完整公開引用閉包，不只驗 enum 合法。config.digital_endpoints 依 game 排序，
-此配置啟用規則瀏覽時固定 sv1／svwb 兩列；模板、language_map 沿 §3，
-未做連線健康檢查時 status=unknown，refresh_policy 分別為 frozen／on_sve_release。
-每個公開 digital_card.game 都須有可用來解析卡片頁 URL 的 endpoint；
-缺 UI 語言對照不能猜 provider_lang，狀態 unknown 不得顯示為已確認可用。
-
-1.2.0 的獨立 Schema、source descriptor、typed accessor 與 golden／invalid fixture 須與實作同步；
-沿現行資源命名另放 `v1_2/`，不覆寫 `v1/` 或 `v1_1/`。
-各版本 golden 均交由該版本明示支持的 reader 驗證；另測舊 reader 拒絕新版本、新 reader 保留舊版本解讀。
-本節定義尚待實作的版本，不表示現有 producer／reader 或前端已支援。
-實作與前端讀取能力到位後，才可發布使用此配置的產物；容量依各版本實際選定的文字／影像集合分開量測。
-
 ### 5.4 format 2.0.0 卡包 media 與 ID 圖片
 
-format_version、min_reader_version 均為 `2.0.0`。除下述圖片投影外，文字欄序、same_name 規則、canonical、owner、分片鍵及文字裝檔沿 1.2.0；
-圖片欄序改變是 major，不假稱 1.3 相容新增。required_capabilities 恰為排序的：
+format_version、min_reader_version 均為 `2.0.0`。公開欄序依 snapshot-format，canonical、owner、分片鍵與裝檔依本文件前述各節。required_capabilities 恰為排序的：
 
 ```json
 [
@@ -401,7 +361,12 @@ format_version、min_reader_version 均為 `2.0.0`。除下述圖片投影外，
 
 所有容器、config、programs、text_all、changes 的 format_version 都必須一致；空圖片／same_name 也不省能力。
 索引以獨立 `index_format:2` 協商，形狀依 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)，不混同於 reader 契約版號。
-沒有已公開 1.x 快照須先行遷移；既有 1.x fixtures 不回寫，也不要求為不存在的使用者先發布中間版。
+producer 與 reader 須各自驗 same_name 的卡層 null、effect_similarity=null、review_level=unreviewed
+及完整公開引用閉包，不只驗 enum 合法。config.digital_endpoints 依 game 排序，
+2.0固定 sv1／svwb 兩列；模板、language_map 沿 §3，
+未做連線健康檢查時 status=unknown，refresh_policy 分別為 frozen／on_sve_release。
+每個公開 digital_card.game 都須有可用來解析卡片頁 URL 的 endpoint；
+缺 UI 語言對照不能猜 provider_lang，狀態 unknown 不得顯示為已確認可用。
 
 N 固定為 64，沿用 sha256-mod-v1。printing_image 使用永久 printing.home_set_id、鍵 `[printing_id]`，
 role=images、partition=detail、base=null，columns 為 snapshot-format §2.1 的完整 2.0 欄序。
@@ -423,7 +388,7 @@ version 為 1..2^53−1 或 null，狀態／空陣列約束依 snapshot-format �
 按實際可見面 eager、其餘 lazy，不能把固定 100 張 eager 當規格。
 
 本配置仍須用 2.0 雙區輸出核對 ≤512 KiB 單片、manifest、首屏 24 面同包／混包及單面成本、增量重建與真實 heap；
-不能拿舊 C2 或 1.1 數字當通過。未驗收不得發布，超標依 §5 的候選／升版流程處理，不在同格式自動改 width。
+不能拿其他配置的數字當通過。未驗收不得發布，超標依 §5 的候選／升版流程處理，不在同格式自動改 width。
 
 ## 6. 覆蓋與 QA／errata 摘要
 
@@ -462,7 +427,6 @@ support_changes 比較套用 override/block 後的有效狀態；同狀態但 re
 
 ## 數位同名規則的版本准入
 
-[數位名字政策](digital-name-policy.md) 的 same_name 枚舉能力選用 §5.3 的 1.2.0 配置，
-須在 producer／reader 同步實作後才啟用。未支持 digital-same-name-links-v1 或 min_reader 不足的 reader
+[數位名字政策](digital-name-policy.md) 的 same_name 枚舉能力使用 §5.4 的 2.0 配置。未支持 digital-same-name-links-v1 或 min_reader 不足的 reader
 拒絕該快照，不把規則 unreviewed 誤看成裸候選或真人確認。
 政策與收據不出貨，不追加公開 tuple 欄位；枚舉新增 minor、既有欄序／語意更換 major，沿既有快照准入與完整引用閉包。

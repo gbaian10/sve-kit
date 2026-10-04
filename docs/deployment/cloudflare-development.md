@@ -160,7 +160,7 @@ mise exec -- bun run wrangler deploy --config wrangler.dev.jsonc
 
 ## 6. 快照 2.0 的離線對帳
 
-R2 只發布快照 2.0。1.x 預覽仍可在本機匯出，不再提供上傳入口；不能把 preview
+R2 只發布快照 2.0。preview 僅在本機產出 2.0，沒有上傳入口；不能把 preview
 直接升格為正式版本。先依既有發布流程完成來源與採納守門、版本預留、圖片規劃及
 凍結包，保存發布 ledger 的主副本與獨立 checkpoint；命令不自動初始化或恢復。
 詳細格式與步驟見 [R2 2.0 發布](../../carddb/src/sve_carddb/r2_upload/v2/README.md)。

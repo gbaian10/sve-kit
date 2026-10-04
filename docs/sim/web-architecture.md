@@ -165,7 +165,7 @@ idle → loading(version-index) → loading(manifest) → loading(bootstrap) →
 
 - `data/format-v1/schema.ts`：把快照格式 §2 的公開欄位與 §3.1 的啟動包／詳情欄位分割寫成**常數表**（表名 → columns 順序、巢狀型別 → columns）。
   解碼時比對 `tables[name].columns`、驗每列長度、依 `types` 驗巢狀 tuple 長度；不符就拒絕該檔。假資料產生器共用這份常數。
-  常數表只防 web 內部漂移；與匯出器「一起錯」要靠卡表管線提供的 golden 契約樣本（`tests/fixtures/snapshot-contract/v1/`）與真快照。
+  常數表只防 web 內部漂移；與匯出器「一起錯」要靠卡表管線提供的 golden 契約樣本（`tests/fixtures/snapshot-contract/v2/`）與真快照。
 - 拒絕條件（快照格式 §3.1）：詳情分片 `dependencies` 釘的啟動包 key／hash 與現用啟動包不符；`row_index` 越界；同一 `row_index`／`face_ordinal` 重複；
   `printing.faces` 裝飾片與文字片不是一對一；translation 子陣列依 `field/ordinal/target_lang` 合併後有重複；歷史 `face_revision` 出現在現行詳情片。
 - `data/format-v1/types.ts`：TS 型別對應 §2 的邏輯集合（可 null 的欄位是 `| null`，與 `exactOptionalPropertyTypes` 一致）；有 JSON Schema 時以生成型別為準，並與常數表比對。
