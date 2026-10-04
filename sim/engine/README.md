@@ -42,7 +42,15 @@ cargo run --locked --release -p sve-engine --bin sve-prototype -- /path/to/cards
 Successful CLI exit means reports were written; inspect their statuses for failures.
 
 Tests use synthetic cards for boundaries and the immutable original snapshot for
-the shared suites. Supply it explicitly instead of maintaining another card table:
+the shared suites. Without `SVE_TEST_SNAPSHOT`, local `cards` and `shared` tests
+return early; `-- --nocapture` displays the `SKIP` notice. These early returns
+appear as successful tests in libtest totals, not as tested private scenarios or
+full coverage acceptance. All synthetic tests still run. An explicitly supplied
+missing or invalid snapshot fails. Required mode (`SVE_PRIVATE_TESTDATA_MODE=required`) and full CI
+(`SVE_CI_TEST_MODE=full`, or `CI` without an explicit fork scope) require the snapshot and fails if it is unset; fork CI
+continues to exclude the two private targets through its existing selector.
+Supply the snapshot explicitly for the full coverage gate instead of maintaining
+another card table:
 
 ```bash
 export SVE_TEST_SNAPSHOT=/path/to/cards.jsonl

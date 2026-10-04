@@ -2,34 +2,17 @@
 //! (docs/m0/known-errors.md KE-13, KE-14). Needs `SVE_TEST_SNAPSHOT`.
 
 #![cfg(feature = "runner")]
-#![expect(
-    clippy::unwrap_used,
-    clippy::expect_used,
-    reason = "A missing fixture or a construction error must fail the test."
-)]
-
 extern crate alloc;
 
 use alloc::sync::Arc;
-use std::env::var_os;
-use std::path::PathBuf;
-use std::sync::OnceLock;
 
 use serde_json::{Value, json};
-use sve_engine::catalog::Catalog;
 use sve_engine::game::Game;
 
-fn catalog() -> Arc<Catalog> {
-    static CATALOG: OnceLock<Arc<Catalog>> = OnceLock::new();
-    Arc::clone(CATALOG.get_or_init(|| {
-        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-        let snapshot = PathBuf::from(
-            var_os("SVE_TEST_SNAPSHOT")
-                .expect("set SVE_TEST_SNAPSHOT to the immutable cards.jsonl input"),
-        );
-        Arc::new(Catalog::load(&snapshot, &root.join("authored")).unwrap())
-    }))
-}
+#[path = "support/private_catalog.rs"]
+mod private_catalog;
+
+use private_catalog::catalog;
 
 fn position(class: &str, hand: &Value, deck: &Value, counters: &Value) -> Value {
     json!({
@@ -50,9 +33,12 @@ fn position(class: &str, hand: &Value, deck: &Value, counters: &Value) -> Value 
 /// evolve actions (`evolve_played`).
 #[test]
 fn bp16_036_widens_the_choice_after_any_evolution() {
+    let Some(catalog) = catalog() else {
+        return;
+    };
     let max_options = |counters: &Value| {
         let game = Game::new(
-            catalog(),
+            Arc::clone(&catalog),
             &position(
                 "ロイヤル",
                 &json!([{"id":"s","card":"BP16-036"}]),
@@ -83,8 +69,11 @@ fn bp16_036_widens_the_choice_after_any_evolution() {
 /// KE-14, BP20-P28: only onmyoji followers and spells are offered.
 #[test]
 fn bp20_p28_offers_onmyoji_followers_or_spells_only() {
+    let Some(catalog) = catalog() else {
+        return;
+    };
     let mut game = Game::new(
-        catalog(),
+        catalog,
         &position(
             "ウィッチ",
             &json!([{"id":"s","card":"BP20-P28"},{"id":"h","card":"BP01-173"}]),
