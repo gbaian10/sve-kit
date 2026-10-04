@@ -24,6 +24,8 @@ ADR 中引用的官方卡名、卡文及 CR／Q&A 原文片段不在本專案授
 | [ADR-0014](0014-license-policy.md) | 程式與資料的路徑授權及第三方內容排除 | 已採用 | 2026-10-03 |
 | [ADR-0015](0015-image-url-version.md) | 卡圖採永久 ID 路徑與查詢版本 | 已採用 | 2026-10-04 |
 | [ADR-0016](0016-snapshot-retention.md) | 公開卡圖只留最新、快照保留兩版 | 已採用 | 2026-10-04 |
+| [ADR-0018](0018-translation-validation.md) | 翻譯資料驗證層簡化 | 已採用 | 2026-10-04 |
+| [ADR-0019](0019-platform-dependency-policy.md) | 支援平台與依賴選型 | 已採用 | 2026-10-04 |
 
 ADR-0001～0012 是效果 DSL 1.0 的設計決定，規格本文見 [`docs/dsl/`](../dsl/README.md)；
 裁定登錄見 `authored/rulings/`。
