@@ -19,6 +19,7 @@ from sve_carddb.digital_name_policies.evaluate import (
 from sve_carddb.digital_name_policies.loader import load
 from sve_carddb.digital_name_policies.owners import publication_owners
 from sve_carddb.digital_name_policies.runtime import require_runtime
+from sve_carddb.maintainers import is_maintainer
 from sve_carddb.registry.records import Instant
 from sve_carddb.snapshot.project.evidence import DisplayBinding
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
@@ -314,7 +315,7 @@ def _counterparts(  # ruff: ignore[too-many-locals] -- relation, actual sample m
         for key, decision in decisions.items()
         if key in fresh
         and key in links.checked_members
-        and records[decision]["reviewed_by"] == "gbaian10"
+        and is_maintainer(records[decision]["reviewed_by"])
         and records[decision]["state"] in {"sampled", "confirmed"}
         and isinstance(records[decision]["sample_ids"], Json)
         and _sample_member(key, records[decision]["sample_ids"])
@@ -401,7 +402,7 @@ def _choices(
         raise ValueError("Imported name choice differs from checked authored evidence")
     human = (
         record.data.adoption_review.mode == "human"
-        and decision.reviewed_by == "gbaian10"
+        and is_maintainer(decision.reviewed_by)
         and record.record_key in decision.sample_ids
     )
     official = str(chosen["origin"]).startswith("official_")
