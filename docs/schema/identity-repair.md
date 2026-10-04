@@ -7,7 +7,7 @@
 
 ## 1. 範圍與不變條件
 
-- 永久 card／face／printing／art ID 不重新計算；`int_id→printing`、allocated_at、region 及既有 owner 不變。
+- 永久 card／face／printing／art ID 不重新計算；`int_id→printing`、region 及既有 owner 不變。
   舊 record、分片與 decision 的 bytes 保留，不以重排 YAML、更新 index hash 或 Git 歷史代替原檔保存。
 - `identity_change` 只表達既有 printing 的父 card 真正改變或既有 card 合併／拆分；首次登錄、
   來源改字、重新確認同一對應、新增再錄、confirmed_none／reskin 續版均不憑空建立修復事件。
