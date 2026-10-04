@@ -1,7 +1,8 @@
+import compiled from "#snapshot-validators"
+
 import contract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v1/contract.schema.json"
 import shardedContract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v1_1/contract.schema.json"
 import v2Contract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v2/contract.schema.json"
-import compiled from "../../../node_modules/.cache/sve-schema/validators.js"
 import { fail } from "./errors"
 import {
   arrayValue,

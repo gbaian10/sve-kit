@@ -61,4 +61,22 @@ describe("Ajv2020 standalone compilation", () => {
       )
     },
   )
+
+  it.each([
+    "#",
+    "#/$defs/Text/type",
+    "#/properties/label",
+    "https://example.invalid/schema",
+    "#/$defs/",
+    "#/$defs/a~1b",
+  ])("rejects unsupported reference shape %s before compilation", (reference) => {
+    expect(() => compileSchemas({ fixture: { ...authority, $ref: reference } })).toThrow(
+      `unsupported schema $ref: ${reference}`,
+    )
+    const changed = structuredClone(authority)
+    changed.$defs.Record.properties.label.$ref = reference
+    expect(() => compileSchemas({ fixture: changed })).toThrow(
+      `unsupported schema $ref: ${reference}`,
+    )
+  })
 })

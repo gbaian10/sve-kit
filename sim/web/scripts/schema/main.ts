@@ -17,10 +17,6 @@ for (const version of ["v1", "v1_1", "v2"]) {
 await mkdir(output, { recursive: true })
 await writeFile(path.join(output, "conformance.cjs"), compileSchemas(roots))
 await writeFile(
-  path.join(output, "conformance.d.cts"),
-  'import type { ValidateFunction } from "ajv"\ndeclare const validators: Record<string, ValidateFunction>\nexport = validators\n',
-)
-await writeFile(
   path.join(output, "standalone.cjs"),
   compileSchemas(
     roots,
@@ -52,7 +48,3 @@ await build({
     lib: { entry: path.join(output, "entry.js"), formats: ["es"], fileName: () => "validators.js" },
   },
 })
-await writeFile(
-  path.join(output, "validators.d.ts"),
-  'import type { ValidateFunction } from "ajv"\ndeclare const validators: Record<string, ValidateFunction>\nexport default validators\n',
-)

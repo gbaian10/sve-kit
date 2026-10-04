@@ -2,7 +2,8 @@
 import Ajv2020 from "ajv/dist/2020"
 import { describe, expect, it } from "vitest"
 
-import compiled from "../../../node_modules/.cache/sve-schema/conformance.cjs"
+import compiled from "#snapshot-conformance"
+
 import { SnapshotError } from "./errors"
 import { type JsonObject, type JsonValue, parseStrict } from "./json"
 import {

@@ -292,8 +292,10 @@ Added once pages exist:
 - Component tests that the jsx-a11y component mapping (`CardImage`, `Link`, `Button`) matches the rendered DOM
 
 The package scripts compile schemas before dev, build, preview, typecheck, test, knip and fixture
-commands. Generated JavaScript and declarations live only in `node_modules/.cache/sve-schema/`;
-run `bun run schema:compile` before invoking Vite, Vitest, TypeScript or a fixture script directly.
+commands. Generated JavaScript lives only in `node_modules/.cache/sve-schema/`. Fixed Vite/TypeScript
+aliases use the committed `compiled-validators.d.ts`, so clean-checkout lint and type checking
+do not need generated files. Run `bun run schema:compile` before invoking Vite, Vitest or a
+fixture script directly.
 Generation uses Bun, Node APIs and Vite, without shell utilities or OS-specific dependencies.
 
 Production builds include `third-party-licenses.md` from Vite's dependency license reporting,

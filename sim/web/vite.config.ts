@@ -78,6 +78,18 @@ const cdnDir = process.env["SVE_CDN_DIR"] ?? path.join(import.meta.dirname, "fix
 const previewDir = process.env["SVE_PREVIEW_DIR"]
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "#snapshot-validators": path.resolve(
+        import.meta.dirname,
+        "node_modules/.cache/sve-schema/validators.js",
+      ),
+      "#snapshot-conformance": path.resolve(
+        import.meta.dirname,
+        "node_modules/.cache/sve-schema/conformance.cjs",
+      ),
+    },
+  },
   build: { license: { fileName: "third-party-licenses.md" } },
   // Lets the dev badge hide its root switch when no preview root is configured.
   define: {
