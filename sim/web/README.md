@@ -198,11 +198,14 @@ aborts old metadata requests and isolates CacheStorage by manifest hash and file
 After successful adoption, old metadata namespaces are pruned, retaining the active and
 immediately previous manifest only; unrelated application caches are preserved.
 
-Visible work takes priority, with at most four requests including bodies and no more than
-three background requests. Verified persistent bytes are rechecked before decoding; returning
+Visible work takes priority, with p-queue limiting metadata work to four requests including
+bodies and a second queue admitting no more than three background requests. Queued work
+can be promoted without duplicating its shared promise; cancellation removes queued background
+work while running requests finish, and snapshot replacement aborts the active transport. Verified persistent bytes are rechecked before decoding; returning
 to an evicted face can reparse without another external request; recently used faces do not
 need re-decoding. CacheStorage failures visibly degrade
-to a 12 MiB / 64-file RAM byte LRU. The page parsing workset is capped at 12 MiB raw for 1.1 and 2.0;
+to a 12 MiB / 64-file RAM byte LRU provided by lru-cache. Oversized files are not retained;
+empty values count as one byte for the library's size accounting. The page parsing workset is capped at 12 MiB raw for 1.1 and 2.0;
 this is not a heap measurement or a physical-phone acceptance claim. The legacy 1.0 index is reused per snapshot and is exempt from the 1.1 file/workset limits.
 
 ## Development snapshot
@@ -301,3 +304,5 @@ Generation uses Bun, Node APIs and Vite, without shell utilities or OS-specific 
 
 Production builds include `third-party-licenses.md` from Vite's dependency license reporting,
 and `snapshot-validator-LICENSE.md` for Ajv and its helpers already bundled into generated code.
+The dependency report includes lru-cache's BlueOak-1.0.0 terms and the MIT notices for p-queue,
+p-timeout and eventemitter3; these third-party terms are not replaced by the project license.

@@ -1,3 +1,6 @@
+import { LRUCache } from "lru-cache"
+import PQueue from "p-queue"
+
 import { fetchBytes, type Fetcher } from "./cdn"
 import { SnapshotError } from "./format-v1/errors"
 import { integerValue, type JsonObject, stringValue } from "./format-v1/json"
@@ -12,8 +15,13 @@ export interface MetadataProgress {
 }
 interface Job {
   readonly key: string
+  readonly file: JsonObject
+  readonly promise: Promise<Uint8Array>
   priority: boolean
-  readonly run: (priority: boolean) => Promise<Uint8Array>
+  submitted: boolean
+  started: boolean
+  readonly gateAbort: AbortController
+  readonly queueAbort: AbortController
   readonly resolve: (bytes: Uint8Array) => void
   readonly reject: (error: unknown) => void
 }
@@ -23,15 +31,16 @@ const cacheInitializers = new WeakMap<CacheStorage, Promise<unknown>>()
 
 /** Bytes only: background work never decodes fragments or builds an image index. */
 export class MetadataBytes {
-  private readonly queue: Job[] = []
-  private readonly pending = new Map<string, Promise<Uint8Array>>()
-  private readonly memory = new Map<string, Uint8Array>()
+  private readonly queue = new PQueue({ concurrency: 4 })
+  private readonly background = new PQueue({ concurrency: 3 })
+  private readonly pending = new Map<string, Job>()
+  private readonly memory = new LRUCache<string, Uint8Array>({
+    max: MAX_FILES,
+    maxSize: MAX_BYTES,
+    sizeCalculation: (bytes) => Math.max(1, bytes.length),
+  })
   private readonly verified = new Set<string>()
   private readonly abort = new AbortController()
-  private running = 0
-  private backgroundRunning = 0
-  private memoryBytes = 0
-  private cancelled = false
   private disposed = false
   private epoch = 0
   private progress: MetadataProgress
@@ -102,71 +111,66 @@ export class MetadataBytes {
     this.changed()
   }
 
-  private remember(key: string, bytes: Uint8Array): void {
-    const previous = this.memory.get(key)
-    this.memoryBytes -= previous?.length ?? 0
-    this.memory.delete(key)
-    this.memory.set(key, bytes)
-    this.memoryBytes += bytes.length
-    while (this.memoryBytes > MAX_BYTES || this.memory.size > MAX_FILES) {
-      const first = this.memory.entries().next().value
-      if (!first) break
-      this.memory.delete(first[0])
-      this.memoryBytes -= first[1].length
-    }
-  }
-
   read(key: string, priority = true): Promise<Uint8Array> {
     if (this.disposed) return Promise.reject(new Error("snapshot replaced"))
     const memory = this.memory.get(key)
-    if (memory) {
-      this.remember(key, memory)
-      return Promise.resolve(memory)
-    }
+    if (memory) return Promise.resolve(memory)
     const existing = this.pending.get(key)
     if (existing) {
-      const queued = this.queue.find((job) => job.key === key)
-      if (queued) queued.priority ||= priority
-      this.pump()
-      return existing
+      if (priority && !existing.priority && !existing.started) {
+        existing.priority = true
+        if (existing.submitted) this.queue.setPriority(key, 1)
+        else void this.submit(existing)
+        // Promotion releases a background permit without duplicating its shared request.
+        existing.gateAbort.abort()
+      }
+      return existing.promise
     }
     const file = this.files.get(key)
     if (!file) return Promise.reject(new SnapshotError("payload-set", "unknown image file"))
-    const promise = new Promise<Uint8Array>((resolve, reject) => {
-      this.queue.push({
-        key,
-        priority,
-        resolve,
-        reject,
-        run: (priority) => this.obtain(key, file, priority),
-      })
-    })
-    this.pending.set(key, promise)
-    this.pump()
+    const { promise, resolve, reject } = Promise.withResolvers<Uint8Array>()
+    const job: Job = {
+      key,
+      file,
+      promise,
+      resolve,
+      reject,
+      priority,
+      submitted: false,
+      started: false,
+      gateAbort: new AbortController(),
+      queueAbort: new AbortController(),
+    }
+    this.pending.set(key, job)
+    if (priority) void this.submit(job)
+    else
+      void this.background
+        .add(() => this.submit(job), { signal: job.gateAbort.signal })
+        .catch((error: unknown) => {
+          if (!job.priority) this.rejectQueued(job, error)
+        })
     return promise
   }
 
-  private pump(): void {
-    while (!this.disposed && this.running < 4) {
-      let index = this.queue.findIndex((job) => job.priority)
-      if (index < 0) {
-        if (this.cancelled || this.backgroundRunning >= 3) return
-        index = 0
-      }
-      const job = this.queue.splice(index, 1)[0]
-      if (!job) return
-      this.running += 1
-      if (!job.priority) this.backgroundRunning += 1
-      void job
-        .run(job.priority)
-        .then(job.resolve, job.reject)
-        .finally(() => {
-          this.pending.delete(job.key)
-          this.running -= 1
-          if (!job.priority) this.backgroundRunning -= 1
-          this.pump()
-        })
-    }
+  private submit(job: Job): Promise<void> {
+    job.submitted = true
+    return this.queue
+      .add(
+        () => {
+          job.started = true
+          return this.obtain(job.key, job.file, job.priority)
+        },
+        { id: job.key, priority: job.priority ? 1 : 0, signal: job.queueAbort.signal },
+      )
+      .then(job.resolve, job.reject)
+      .finally(() => {
+        if (this.pending.get(job.key) === job) this.pending.delete(job.key)
+      })
+  }
+
+  private rejectQueued(job: Job, error: unknown): void {
+    job.reject(error)
+    if (this.pending.get(job.key) === job) this.pending.delete(job.key)
   }
 
   private async obtain(key: string, file: JsonObject, priority: boolean): Promise<Uint8Array> {
@@ -214,7 +218,7 @@ export class MetadataBytes {
     }
     if (this.disposed) throw new Error("snapshot replaced")
     // CacheStorage owns persistent bytes; keep a bounded RAM fallback only when it fails.
-    if (!this.progress.persistent && priority) this.remember(key, bytes)
+    if (!this.progress.persistent && priority) this.memory.set(key, bytes)
     this.verified.add(key)
     this.update({
       done: this.verified.size,
@@ -231,7 +235,7 @@ export class MetadataBytes {
   async prefetch(): Promise<void> {
     await this.cache
     if (this.disposed || !this.progress.persistent) return
-    this.cancelled = false
+    this.background.start()
     const epoch = ++this.epoch
     this.update({ state: "running" })
     try {
@@ -250,22 +254,30 @@ export class MetadataBytes {
   }
 
   cancel(): void {
-    this.cancelled = true
+    this.background.pause()
     this.epoch += 1
-    const removed = this.queue.filter((job) => !job.priority)
-    for (const job of removed) {
-      this.queue.splice(this.queue.indexOf(job), 1)
-      this.pending.delete(job.key)
-      job.reject(new Error("prefetch cancelled"))
+    for (const job of this.pending.values()) {
+      if (job.priority || job.started) continue
+      const error = new Error("prefetch cancelled")
+      job.gateAbort.abort(error)
+      job.queueAbort.abort(error)
+      this.rejectQueued(job, error)
     }
     this.update({ state: this.verified.size === this.files.size ? "complete" : "cancelled" })
   }
 
   dispose(): void {
     this.disposed = true
+    this.queue.pause()
+    this.background.pause()
     this.abort.abort()
-    for (const job of this.queue.splice(0)) job.reject(new Error("snapshot replaced"))
+    for (const job of this.pending.values()) {
+      if (job.started) continue
+      const error = new Error("snapshot replaced")
+      job.gateAbort.abort(error)
+      job.queueAbort.abort(error)
+      this.rejectQueued(job, error)
+    }
     this.memory.clear()
-    this.memoryBytes = 0
   }
 }
