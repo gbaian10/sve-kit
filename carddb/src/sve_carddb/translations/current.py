@@ -37,6 +37,11 @@ def convert(record: LegacyRecord, *, low_confidence: bool = False) -> Record:
     for evidence in data.get("concept_evidence", []):
         if isinstance(evidence, dict):
             evidence.pop("decision_id", None)
+            if "concept_note" in evidence:
+                evidence["concept_note"] = "同概念依精確來源定位核對。"
+    claim = data.get("source_claim")
+    if isinstance(claim, dict):
+        claim["note"] = "保留所列翻譯來源主張，不據此認定為官方譯名。"
     raw = {
         "record_key": record.record_key,
         "kind": record.kind,
