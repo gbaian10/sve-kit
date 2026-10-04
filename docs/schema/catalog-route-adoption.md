@@ -12,7 +12,7 @@ vocabulary／languages 分片為 `{catalog_adoption_format:2,kind:catalog_adopti
 includes 的 canonical hash 只驗檔案完整；過渡期可索引其他 area 的 format 1 分片，按各檔版本分派。
 不再掃全部歷史，當前目錄仍須完整索引、安全路徑、唯一鍵、無缺檔／多檔且每檔小於 1 MiB。
 
-record 恰為 `{record_key,kind,data,origin,low_confidence,note}`；品質欄位沿翻譯契約。
+record 欄位為 `{record_key,kind,data,origin,low_confidence}`，note 可省略；品質欄位沿翻譯契約。
 kind 為 vocabulary_adoption/language_adoption；record_key 是 `[kind,subject]` canonical JSON 字串。
 data 恰為 `{subject,value,evidence}`，subject/value 沿 §4 表格，evidence 為 §2.2 的來源引用陣列，
 不含私人證據或人員事件。null value 表示明示停用；code 不因此供另一概念重用。

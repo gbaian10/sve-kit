@@ -36,9 +36,10 @@ includes／inventories 均是 authored 相對路徑到解析後 canonical JSON S
 翻譯入口只接受 format 2 分片與 format 3 清冊；glossary 與模板 reader 均驗整個入口的檔案閉包。
 舊格式留在 Git 歷史，不作現行載入分支。
 
-record 完整欄位為 `{record_key,kind,data,origin,low_confidence,note}`。
+record 欄位為 `{record_key,kind,data,origin,low_confidence}`，另可選填 note。
 record_key 是下表選擇鍵前加 kind 的 canonical JSON 陣列字串；全入口唯一，不再包含 adoption_no 或 revision。
-note 可空，僅寫簡短資料理由，不參與 ID 或決定狀態。來源、owner、參數等結構欄位不是審查欄位。
+note 省略時為空字串，僅寫簡短資料理由，不參與 ID 或決定狀態。來源、owner、參數等結構欄位不是審查欄位。
+concept_evidence 的 concept_note 可省略，只保留有實際內容的說明；精確來源核對不依賴套話。
 沒有 decisions、default_decision_id、members、sample_ids、delegation、adoption_review 或 predecessor。
 同一選擇鍵直接修改當前資料；null 的含義按各 kind 明定，不能以最後讀入的重複鍵覆蓋。
 
