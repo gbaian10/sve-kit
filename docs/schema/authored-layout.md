@@ -30,7 +30,7 @@
 | 定案（新格式） | 數位名字／同名瀏覽政策 | `digital-name-policies/index.yaml`；名字用可修改的 current 規則，同名瀏覽維持獨立非翻譯入口，見[名字契約](digital-name-policy.md) |
 | legacy，僅供轉換 | 模板採納政策／核可收據 | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml`；無文字摘要進索引，首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用 |
 | 定案（新格式） | 模板參數辨識規則 | `template-parameter-rules/current.yaml`，format 2；規則與必要反例隨程式 PR 修改，不需 approval |
-| 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `image-crops/<filing_key>/<sequence>.yaml`、`image-crops/receipts/<receipt_id>.yaml`；無 index、全體查重，列不存 image_id，依[覆寫契約](image-crop-overrides.md)；不表示 loader 或資料已完成 |
+| 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `image-crops/<filing_key>/<sequence>.yaml`；無 index、全體查重，列不存 image_id，依[覆寫契約](image-crop-overrides.md)；不表示 loader 或資料已完成 |
 | 提案 | DSL、設定 | `effects/`、`macros/`、`config/` 等，見後續各節；跨區語義差異採納改走 translations/region-reviews |
 
 `owner` 是首次歸檔代號，保留大小寫（例如 BP01、DSD01a、PR），不是商品收錄證據。card 採首次配發代表版次的 owner；printing 與配號按自身 owner，跨包外鍵允許。檔名為只增序號，不因新增較早排序的卡而重新分片。每檔 **小於 1,048,576 bytes**，以 512 KiB（524,288 bytes）為目標：以**寫出後的完整分片 YAML**（含封套、decision 的 members／sample_ids）量測，依序裝入不超過目標的最多筆數；單筆就使分片達 1 MiB 時直接報錯。PR 同樣切序號檔，不造單一大檔。

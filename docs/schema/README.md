@@ -16,7 +16,7 @@
 | [快照傳輸契約](snapshot-transport.md)            | manifest、config、tuple descriptor、fragment 身分與欄序、版本及變動摘要           |
 | [機器契約](snapshot-contract.md)                 | Schema 資源、候選格式配置、Python reader 與 TS 驗收清單                           |
 | [卡圖衍生檔契約](image-variants.md)              | 直向／橫向五檔 WebP、裁切取整與原圖邊界                                           |
-| [插畫裁切覆寫](image-crop-overrides.md)          | 來源鍵與 raw hash、無索引分片、輕量核可收據、建置端框比對與重印診斷               |
+| [插畫裁切覆寫](image-crop-overrides.md)          | 來源鍵與 raw hash、無索引分片、建置端框比對與重印診斷                             |
 | [來源歸檔與凍結輸入](source-archive.md)          | raw 歷史、版本 inventory、鎖與一致副本、保留及備份恢復                            |
 | [構築規則與禁限採納](construction-adoption.md)   | Standard 專用封套、來源登錄、有限 ref／CR 引用與 coverage／unknown 邊界           |
 | [容量與記憶體預算](size-budget.md)               | 卡表快照的容量門檻、量測方法與目前結論                                            |
