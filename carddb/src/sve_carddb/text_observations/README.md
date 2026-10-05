@@ -91,7 +91,7 @@ card/region missing a current on any required face. `mark_wording_pending` adds
 that reason and disables automatic operation on existing build support rows;
 callers generating support rows later must merge the declared blocks. A settled
 front and pending back both remain visible. These APIs do not consume equivalence
-adoptions or enable semantics/DSL capabilities.
+adoptions or enable DSL capabilities.
 
 Format 1.0.0's candidate schema, descriptors, handwritten shared golden and Python
 reader now include `WordingDisplay`, `WordingCandidate`, `WordingView`,
@@ -156,8 +156,8 @@ insertion. Null observations are included in the expected uses. Raw sources keep
 whole graph and leave the destination unpublished. Redacted differences contain
 hashes, byte lengths and character edit offsets, never official card wording.
 
-This segment does not enable semantics tables, create an adoption input format,
-export a public snapshot or declare release readiness. Human current adoption,
+This segment does not create an adoption input format, export a public snapshot
+or declare release readiness. Human current adoption,
 errata coverage and publication remain separate gates. Correction staging is an
 explicit optional input; scoped known corrections require verified image evidence
 before the importer can proceed.

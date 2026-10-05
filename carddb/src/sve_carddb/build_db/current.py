@@ -162,10 +162,6 @@ def compile_current_build(requested: tuple[str, ...] = ("t0",)) -> CompiledSchem
         | current_templates.schemas()
         | {
             "TranslationTokens": {"type": "null"},
-            "semantic_sections": {
-                "type": "array",
-                "items": {"type": "string", "minLength": 1},
-            },
         },
         version=t1.SCHEMA_VERSION + 1,
     )

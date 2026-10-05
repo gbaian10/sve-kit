@@ -14,7 +14,7 @@
 - 來源版本、歷史核可與本次投影有效性分開。歷史 confirmed 不降級、不覆寫；新來源沒有受審，
   就不能冒用舊核可。現行表記、來源更正、勘誤與 DSL 分別重驗，不因身分確認而繼承。
 - 本格式僅處理 registry 的 card、face、printing、art、region_mapping_review、card_related。
-  不改配號格式，不提供商品內容／商品身分對照的續版，亦不替代表記採納或來源更正生命週期。
+  不改配號格式，不提供商品內容／商品身分對照的續版，亦不替代來源更正生命週期。
   商品誤配仍依 [authored-layout §11.3](authored-layout.md#113-首次採納重建匹配與改址) 停止受影響匯入。
 
 ## 2. 獨立入口與不可變封套
@@ -41,7 +41,7 @@ includes 釘解析後完整分片的 canonical hash，歷史 entries 只增不�
 | sequence | 正整數，決定套用順序，不表示官方年代或發布版號 |
 | previous | 首筆 null；其餘為 `{record_key,record_hash,decision_id}`，恰指 sequence−1 的完整 transition 與決定 |
 | registry_basis | `{authored_revision,index_path,index_hash}`；完整 Git commit SHA、固定 `ids/index.yaml`、其 canonical hash，釘核對時原始 registry |
-| review_context | 沿 authored-layout §9.2 的 `{context,source_batches}`；完整 F1 程式、依賴、設定與凍結批次，釘前件及核對來源，不引用尚未產生的自身分片 |
+| review_context | 完整 F1 程式、依賴、設定與凍結批次，釘前件及核對來源，不引用尚未產生的自身分片 |
 | updates | 非空陣列，按 target_key 排序且唯一；元素見下節，完整新內容參與本次 record hash |
 | repairs | 按 id 排序唯一的修復群組陣列；純來源更新／決定續版為 []，見 §4 |
 | evidence | 沿 authored-layout §10.3 的非空 `{batch_id,source_version_id,locator,role}` 陣列，按 canonical bytes 排序唯一；全部批次列入 review_context |
@@ -147,7 +147,7 @@ printing after.source_face_map 必須與此映射完全相同，after.card_id �
   存活 card 仍驗 single／double_faced 數量、side、ordinal 唯一；墓碑亦保留原有完整 faces。
 
 完整移轉不限於 printing FK：printing_face、art uses、圖像／標誌、printed observation 等以具體版次來源
-重建至新面；face_revision、current、表記採納、規則同名、baseline、語義、翻譯、DSL 與換皮等
+重建至新面；face_revision、current、規則同名、baseline、語義、翻譯、DSL 與換皮等
 不可只換 face_id 繼承核可。舊歷史留原面，新面缺 fresh 採納時依該能力顯示未知／未實作，
 不能造 confirmed 或已驗 DSL。來源更正若仍綁舊 face，須由其獨立契約取得新有效採納，否則阻止受影響結果冒充正確。
 建置逐一列出所有實際啟用的面／插畫依賴之重建、保留或失效結果，漏引用為錯誤。

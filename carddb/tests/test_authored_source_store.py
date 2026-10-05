@@ -8,15 +8,12 @@ from pydantic import ValidationError
 from sve_carddb.catalog.adoption_models import Batch, SourceRef
 from sve_carddb.products.models import Evidence
 from sve_carddb.registry.transitions.models import Batch as TransitionBatch
-from sve_carddb.wording_adoptions.models import SourceBatch
 
 if TYPE_CHECKING:
     from sve_carddb.registry.records import RecordData
 
 
-@pytest.mark.parametrize(
-    "model", [Batch, SourceRef, Evidence, TransitionBatch, SourceBatch]
-)
+@pytest.mark.parametrize("model", [Batch, SourceRef, Evidence, TransitionBatch])
 def test_authored_store_id_is_an_unknown_field(model: type[RecordData]) -> None:
     with pytest.raises(ValidationError) as error:
         model.model_validate(

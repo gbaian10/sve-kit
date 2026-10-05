@@ -68,9 +68,6 @@ def test_exact_initial_keeps_every_physical_source_and_one_revision_per_face_reg
         assert {
             row.values["source_id"] for row in db.rows("printing_face_observation")
         } == {item.card.source.id for item in case.plan.observations}
-        assert not {"face_semantics", "revision_semantics", "semantic_reference"} & {
-            table.name for table in schema.tables
-        }
 
 
 @pytest.mark.parametrize("missing", [None, ""])

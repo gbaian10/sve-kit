@@ -3,7 +3,7 @@
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
 專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../quotations.md)。
 
-身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；current／wording 採納輸入 **wording-adoption-v1，使用者 2026-10-01 核可具體格式**（§9.1–§9.7）；§9.5、§9.6、§9.8 分別記載 2026-10-01 已核可的處理政策；身分修復與決定續版 **identity-transition-v1，使用者 2026-10-01 核可**（§12）；翻譯／模板格式與推導邊界見 §6（2026-10-01，技術契約）；詞彙與顯示覆寫封套見 §8（技術契約，稀有度白名單與繁中缺譯順序於 2026-10-01 核可）；來源綁定的插畫裁切覆寫見[覆寫契約](image-crop-overrides.md)（技術契約，不表示 loader 或資料已完成）；人工限量序號版次另定待審技術契約 [manual-printings-v1](manual-printings.md)，收錄政策依維護者 2026-10-03 最新更正；構築專用入口見 [construction-adoption-v1](construction-adoption.md)，首批政策為維護者 2026-10-03 決定的 JP／EN Standard，首發先上可查禁限資料、CR 引用與固定 ref 等 #48 並明示尚未完成，不承諾整副牌合法性；其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；已核可的表記未定顯示擴充另見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
+身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；未採納表記的顯示與無主文證據（§9.1、§9.2）為 2026-10-01 已核可的處理政策，沒有 wording 採納輸入；身分修復與決定續版 **identity-transition-v1，使用者 2026-10-01 核可**（§12）；翻譯／模板格式與推導邊界見 §6（2026-10-01，技術契約）；詞彙與顯示覆寫封套見 §8（技術契約，稀有度白名單與繁中缺譯順序於 2026-10-01 核可）；來源綁定的插畫裁切覆寫見[覆寫契約](image-crop-overrides.md)（技術契約，不表示 loader 或資料已完成）；人工限量序號版次另定待審技術契約 [manual-printings-v1](manual-printings.md)，收錄政策依維護者 2026-10-03 最新更正；構築專用入口見 [construction-adoption-v1](construction-adoption.md)，首批政策為維護者 2026-10-03 決定的 JP／EN Standard，首發先上可查禁限資料、CR 引用與固定 ref 等 #48 並明示尚未完成，不承諾整副牌合法性；其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；已核可的表記未定顯示擴充另見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
 
 ## 1. 路徑與共同格式
 
@@ -17,7 +17,6 @@
 | 定案 | 本批來源更正 | `registry/source_correction/active/<owner>/001.yaml`、`registry/source_correction/needs_review/<owner>/001.yaml` |
 | 定案（格式） | 歸檔類別、人工商品與收錄 | `products/index.yaml`、`products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
 | 定案（格式） | 官方商品身分對照 | `product-identities/index.yaml`、`product-identities/<region>/001.yaml`，見 §11；獨立於商品內容採納 |
-| 定案（格式） | current／wording 表記採納 | `wording-adoptions/index.yaml`、`wording-adoptions/<region>/001.yaml`，見 §9.1–§9.7；使用者 2026-10-01 核可格式與處理政策，不表示已採納任何群組 |
 | 待審技術契約 | 人工序號版次／官方序號補充 | `manual-printings/index.yaml`、`manual-printings/{printings,serials}/<filing_key>/<sequence>.yaml`，見 manual-printings-v1；不表示已有採納資料 |
 | 已定案（ADR-0011） | 裁定 | `rulings/R-0001.yaml`，維持原格式 |
 | 定案（格式） | 身分修復與決定續版 | `identity-transitions/index.yaml`、`identity-transitions/<sequence>.yaml`，見 §12 |
@@ -84,7 +83,7 @@ hash recipe 固定：JSON 物件鍵排序、UTF-8（不 ASCII escape）、分隔
 
 每張 printing 的 `observation` 保存 `region/card_no/recipe/observation_hash/rules_hash`。`registry-observation-v1` 是工具 `Card` typed projection 的 canonical JSON；包括全部 faces 的 card name、職業、種類、數值、特性、原文、sections／speech、來源 img src，不含抓取時間或本機路徑。它是**萃取觀測 hash，不是原 HTML hash**。原始萃取仍留 repo 外；建置匯入需以同 recipe 驗證原始觀測並連到 source_record／decision_source，不能把它偽裝成官方 HTML 的 sha256。僅取得此 registry 不足以重建官方卡文。
 
-規則 hash 包含逐面 `name/text/speech/sections` 的原值。JP／EN 再錄措辭、提醒文字與標點差異可依本批人工政策共用 card，但各觀測分別保留；**不產生 confirmed 的 revision_semantics 或規則等義證明**，不沿用 DSL 驗證。未來來源變動須重新審核，不是忽略括號後自動通過。
+規則 hash 包含逐面 `name/text/speech/sections` 的原值。JP／EN 再錄措辭、提醒文字與標點差異可依本批人工政策共用 card，但各觀測分別保留；**不產生規則等義證明**，不沿用 DSL 驗證。未來來源變動須重新審核，不是忽略括號後自動通過。
 
 建置讀取先驗完整 index 與全區分片，再做地區投影；不得先濾 JP 再改寫 decision 成員、checked 集合或配號游標。讀取保留分片路徑、解析後 canonical 內容及 hash、record 的原 decision 指向與完整封套。格式／kind 等封套欄位必須明示；配號與帶 decision 的 record 不得混在同一分片。decision ID 必須由其完整 membership hash 決定；任何狀態的 sample_ids 都不可重複或含非成員，confirmed 仍須全部 checked。這些檢查驗歷史登錄一致性，不代表已對目前 raw 來源驗證 fresh 採納。
 
@@ -249,7 +248,7 @@ origin 與 authority 分開，本站效果翻譯仍 unofficial；機器譯文人
 
 ## 7. DSL 與拒絕輸入
 
-meta 保留 DSL 版本、rule-bundle-v2 source hash（原觀測 face-bundle-v1 另留追溯，遷移需重驗）、`written_by/reviews/status`、`verified_by_exam`、ruling IDs、QA IDs、macro 用途。審卡程式自動填，不要人工複製逐卡 hash。shared 是預設，EN exception 才 `scope=en_override`；DSL body 僅依 `dsl/` 真正 schema，不在此造示意 op。
+meta 保留 DSL 版本、實際來源觀測（正式規則新鮮度 hash recipe 尚未實作）、`written_by/reviews/status`、`verified_by_exam`、ruling IDs、QA IDs、macro 用途。審卡程式自動填，不要人工複製逐卡 hash。shared 是預設，EN exception 才 `scope=en_override`；DSL body 僅依 `dsl/` 真正 schema，不在此造示意 op。
 
 effects/index.yaml 提供 `card_id`＋scope＋file/record key；即使候選 YAML 解析失敗仍可定位卡。candidate hash 取 exact authored bytes，`load_report` 在建置層追加 accepted/rejected＋目標版本。valid AST 才進 `dsl_document`；無效候選不進公開附件，support 仍能列 `rejected_yaml`。
 
@@ -271,7 +270,7 @@ route/default 純推導；authored 只寫 alias、variant `route_override`、`de
 
 ## 9. 批次表記、上下文與非官方條目
 
-wording diff 封套可一次簽 confirmed，但 `sample_ids` 必須列全部 checked 成員；不能用抽樣認定整批全都等義。使用者 2026-10-01 核可的規則集可按 §9.5 完整檢查涵蓋差異，須區分政策檢查與逐組人工核對。scope=record 的三個 batch 欄位皆 null。初始 exact 原文/無差異採機械路徑，省略提醒或共用語義才檢正規化政策。保留 `printing_face_observation` 與 `revision_semantics`，最新表記改顯示、等義 bundle 保持；真規則或 token 依賴改動才重驗 DSL。對同一頁不同時間的更新也先分觀測，不一律當互斥衝突。
+表記差異不需採納封套：保留 `printing_face_observation`，最新表記改顯示。對同一頁不同時間的更新也先分觀測，不一律當互斥衝突。
 
 `translation_context` 每次建置推導，預設 `semantic_variant=default`；只有採納的同字異義例外才能另配 variant。`translation_use` 釘具體 owner/field/ordinal，`translation_selection` 依 `context/target_lang` 選同模板同參數唯一翻法。不是每張卡任意自由翻；模板/術語更新仍沿 binding 反查。建置資料庫的上下文關係不出貨，卡表快照的 FieldTranslation 指已選 translation.id。
 
@@ -283,134 +282,7 @@ wording diff 封套可一次簽 confirmed，但 `sample_ids` 必須列全部 che
 
 發布程序維護精簡且耐久的 `(lang,short_id,full_digest)` 文字鍵索引，以全部已發布／已保留鍵檢查固定 16 hex＋lang 碰撞，不能只驗 current＋previous 或重配歷史鍵。此索引及發布收據須備份驗回，不進人工 registry，不含完整歷史卡文；資料來源不再是永久 R2 快照聯集。公開快照只保 current＋previous，詳 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
 
-### 9.1 current／wording 採納入口 wording-adoption-v1
-
-**wording-adoption-v1 的具體格式（§9.1–§9.7）經使用者 2026-10-01 核可**，含 §9.6 的暫顯選取規則。既有核可政策為：可證 absent 用空字串、表記未定仍顯示、規則清單核可一次後自動分類處理、剩餘群組以 Artifact 逐組／同型態批次確認。格式核可不表示任何群組已採納；§9.5 的具體規則清單與核可收據儲存格式仍由 #145 提交核可，#146 的實際回答與 §9.6 的 semantics 能力例外仍待決。
-
-本節補齊 §9 與 build-db §4 的持久採納輸入，適用同一 face／region 的等義表記；不修改身分 registry v1 或商品封套。公開表記未定的顯示另依 §9.6 與 snapshot-format，不能把它當已採納 current。**格式可驗、觀測全體核對、current 可選、語義能力已實作是四個分開的條件**。本格式不提供真規則變更、來源更正、未核對的顯示偏好或真規則 override 的捷徑，也不把既有 identity_registry 決定當表記決定。
-
-| 路徑（相對 authored 根目錄） | 完整頂層欄位 |
-| --- | --- |
-| `wording-adoptions/index.yaml` | `wording_adoption_format: 1, kind: wording_adoption_index, includes` |
-| `wording-adoptions/<region>/<sequence>.yaml` | `wording_adoption_format: 1, kind: wording_adoption_shard, default_decision_id, records, decisions` |
-
-region 恰為 jp/en；sequence 是只增的三位以上十進位序號。沿 §1、§10.2 的 YAML 限制、單檔大小、路徑安全與新分片排序；includes 只含本表分片，值是完整分片解析後的 §2 canonical JSON Hash。先驗完整 index、全區全部分片與決定，再作地區投影。缺檔、未索引分片、未知欄位／格式、重複鍵、hash 不符均拒絕；新分片寫好才原子換 index，不覆寫歷史分片。正式空集合使用存在且 `includes: {}` 的 index；啟用本入口卻缺 index 不等於尚無採納。
-
-每筆 record 恰有 `record_key, kind, filing_key, data, evidence`；kind 固定 `wording_adoption`，filing_key 等於路徑及 data.region。record_key 是 `["wording_adoption",face_id,region,adoption_no]` 的 §2 canonical JSON **字串**。`adoption_no` 是同 face／region 從 1 起連續只增的整數，不是 face_revision.revision 或來源日期。全域 record_key 及 `(face_id,region,adoption_no)` 唯一；同一面可追加續次採納，不藉重複主鍵替換舊決定。
-
-採獨立入口是為了沿用商品封套的檢查與來源追溯，同時避免把內容選擇混入永久身分或商品內容。只存 hash／識別碼及不含官方卡文的理由；重建文字仍讀凍結來源，不在 authored 複製第二份卡文。
-
-### 9.2 record data 與精確觀測
-
-data 恰含下表欄位；可空欄仍必須明示 null。Hash 一律為完整 `sha256:<64 lowercase hex>`；陣列除另定順序者外按完整 canonical JSON bytes 排序唯一。
-
-| 欄位 | 型別與含義 |
-| --- | --- |
-| `face_id, region, adoption_no` | 已登錄 face、jp/en、上述正整數；須驗全部 printing 的 face／card／region 一致 |
-| `review_context` | 下述完整凍結核對範圍與程式／設定 pin；不只存報告 URL |
-| `observations` | 非空的精確觀測物件陣列，按 observation_key 排序；包含該範圍內全部觀測，不只差異或選中者 |
-| `observations_hash` | 對完整 observations 陣列套 §2 recipe；與 decision.members 的 hash 分開 |
-| `checked_observation_keys` | 恰為 observations 的全部 observation_key，排序無重複；不能只列每個表記的代表版次 |
-| `previous` | null、機械初始 current，或前次採納引用，見 §9.4 |
-| `equivalence` | 固定 `equivalent`；全部觀測的投影內容及非空 previous 已經人工或核可規則完整核對等義，不由 hash 推論 |
-| `review` | 核對方式與規則 pin，見 §9.5；人工與政策檢查不能混稱 |
-| `wording_order` | 由舊至新的非空層級陣列；每層為非空 observation_key 陣列，見 §9.3 |
-| `order_evidence` | 相鄰層的排序證據陣列，見 §9.3；單層時為空 |
-| `selected_observation_key` | 精確指 observations 成員，且位於 wording_order 最後一層 |
-| `previous_order` | previous=null 時為 null；否則明示前次選中內容至本次選中內容的先後證據，見 §9.4 |
-
-`review_context` 恰有 `context, source_batches`。context 沿 [F1 §2.2.1](source-archive.md#221-建置輸入紀錄與完整使用閉包) 的完整 `{program_revision,dependencies,configuration}`；source_batches 是排序唯一的 `{batch_id}` 陣列。configuration 的 canonical JSON 內容明列本次 registry、商品內容、商品身分、更正／勘誤等已讀 authored 入口各自的 `{authored_revision,index_path,index_hash}`、解析與投影 recipe、地區範圍及勘誤查核截止日。dependencies 保存所有實際讀取的 index／分片、parser／投影程式與 lock 的 exact bytes hash。不能以 authored revision 代替程式 revision；所有檔案須能從對應 immutable revision 重取。尚未支援的能力明示未啟用，不假造空的已驗覆蓋。
-
-此 context 是**產生待核對觀測時**的輸入，不引用尚未寫出的本次採納分片，避免 hash 自我引用。採納後的建置另釘住 wording-adoptions 入口，見 §9.7。批次包括核對來源與排序證據來源；範圍由釘住 registry 的該 face／region 全部 printing，加上 source_batches 中能匹配這些 printing 的全部卡片來源版本決定。不得挑一頁、刪除缺句版本或先濾不合意內容後宣稱全體；缺來源、解析失敗、身分不匹配均列明並阻止該群組 confirmed。
-
-每個 observation 恰有 `observation_key, printing_id, source_index, source_version_id, raw_hash, parser_version, raw_face_hash, effect_presence, corrections, content_hash`。source_index 為來源面的零起算 UInt，必須吻合 registry.source_face_map；source_version_id 為來源歸檔的 `src:v1:…`，不能用官網 URL、卡號或建置 DB 的流水號代替。raw_hash 須等於 descriptor 的原始 bytes hash；parser_version 為實際 extractor pin，須由 review_context 的程式與依賴重現。
-
-`raw_face_hash` 使用 `wording-face-v1`：對物件 `{name,class,type,cost,attack,defense,traits,title,text,sections}` 套 §2 canonical hash。這些是正式 extractor 的原始面欄位，attack／defense 對應 power／hp；數值保留來源字串，title／text 可為 null，traits 與 sections 保留原順序、每項原字串。其餘純文字欄位保留原值；不 trim、不移除括號、不做 Unicode／空白正規化。萃取器的別名轉接須在 context 釘住，不從 card_no 推欄位。此 hash 不含插畫、稀有度、語音等不參與 current 規則選取的欄位，亦不能取代包含全部面的 registry observation_hash 或 rules_hash。
-
-`corrections` 恰列該觀測所有適用 active 更正，每項為 `{correction_id,record_hash,decision_id,status}`；record_hash 為來源更正完整 record 的 §2 hash，status 僅 `applied/already_fixed`。順序按 correction_id；不得重複或選擇性漏掉適用更正，同欄位互相矛盾即失敗。`content_hash` 對同一 wording-face-v1 物件先依 §9.8 的 effect_presence 判別投影 absent，再套已驗更正後計算；沒有 absent 轉換且無更正時必等於 raw_face_hash。不把更正值改寫為 raw；未知段落類型仍是 unknown，不藉此 hash 自動分類 reminder／token_definition。
-
-observation_key 是 `["wording-observation-v1",printing_id,face_id,region,source_index,source_version_id,raw_hash,parser_version,raw_face_hash,effect_presence,corrections,content_hash]` 的 §2 canonical JSON **字串**。同一 printing／face 的不同來源版本都保留；同來源換 parser 或更正採納也不會誤命中舊收據。僅 raw hash 相同不足以合併來源；觀測物件、checked 全集合與排序均包含在完整 record hash 內。
-
-record.evidence 沿 §10.3 的 `{batch_id,source_version_id,locator,role}`，非空、無重複，逐項驗 sealed batch／descriptor／first receipt／raw 閉包。effect_presence 的完整 result／hash 沿 §9.8，參與精確觀測鍵與重建；尚未核可或實作的 parser 不得用固定 absent 填值。每個 observation 至少有 role=`wording_observation` 的對應證據，locator 是 `{printing_id,face_id,source_index}` 的 canonical JSON 字串。來源可共用，角色與定位不丟失；舊 current、更正與排序的依賴須同樣能追回完整來源閉包，不能只留下 hash。所有 evidence 的批次均須列於相應 review_context。
-
-### 9.3 明示順序與選定觀測
-
-wording_order 恰好分割 observations 全集合，各 observation_key 出現一次。**同層所有 content_hash 必須相同，且重建內容須 exact 相同**；層內按 observation_key 排序只供穩定呈現，不表示時間。最後一層的 selected_observation_key 明示選中的 printing／來源版本；同內容的不同來源選一筆作代表不等於刪除其他 printing_face_observation。
-
-不同內容必須分層；每組相鄰層恰有一筆 order_evidence，欄位為 `{before_level,after_level,basis,evidence_indexes,review_receipt}`。level 是零起算 UInt、after=before+1。basis 為 `printing_availability/source_update/reviewed_order`：前兩者的 evidence_indexes 為本 record.evidence 的非空唯一排序索引，分別釘正式 product／printing_product 的可信發售／收錄日期，或可驗的官方更新證據，review_receipt=null；證據必須支持該相鄰層先後，不只指任一相關頁。
-
-**使用者 2026-10-01 核可**：按可信發售日排序；未知日期的 PR 等版次另列詢問使用者。同日、month/year/unknown 或多重收錄不足以判斷時，不以 date_raw 字典序、卡號、hash、fetched_at 或分片順序補年代。對未知／並列部分，reviewed_order 保存使用者明示的**採納順序**，不聲稱官方先後：evidence_indexes=[]，review_receipt 恰有 `{before_observation_keys,after_observation_keys,note}`；兩組 keys 恰等於該相鄰層，精確內容已在 record hash 中。收據保存兩組觀測及順序說明，不保存回答者／時間，不能從等義回答自動生成採納順序。沒有回答仍報 unresolved_wording_order，但按 §9.6 顯示候選，不排除卡片。
-
-只依可信發售／更新證據選取時，basis=latest_adopted_wording；wording_order 或 previous_order 含任一 reviewed_order 時，face_current.basis=reviewed_override，decision 指本次精確封套。這個例外只核可同面同區、已證等義表記的採納順序，不授權真規則 override。順序不填 effective_from／effective_until，不改未知日期；正式勘誤仍依生效區間處理，不能以等義收據接受真規則變更。§9.6 未採納觀測的暫顯也不是此 reviewed_override。
-
-### 9.4 前次 current、續次採納與重建
-
-previous 是封閉的三選一，不讀當前 dist DB 猜前次值：
-
-| 形式 | 完整欄位與驗證 |
-| --- | --- |
-| null | 僅 adoption_no=1 且沒有可用舊 current；不得藉此切斷已存在的採納鏈 |
-| `kind: mechanical` | `{kind,review_context,observations,observations_hash,selected_observation_key}`；僅 adoption_no=1，以上欄位沿 §9.2；從釘住的舊輸入重跑 build-db §4 機械初始 current，全部候選內容 exact 相同、來源完整且無未解勘誤／更正，selected 必須匹配重建結果；沒有人工 decision |
-| `kind: adoption` | `{kind,record_key,record_hash,decision_id}`；指同 face／region 的 adoption_no−1，完整 record 與 confirmed 封套必須存在於已釘住 includes，hash 及 decision.members 都匹配 |
-
-重建先按 adoption_no 逐步驗前件，再從每次釘住的 raw／parser／correction 重現 observations 與選中內容；DB revision ID 只作重建產物，不是 previous 的採納證據。機械根的完整觀測集合可自舊來源重建，不能只存一個 text hash。前件選中內容即本次核對基準；若不在本次來源集合，確認頁仍須加列前件原文與差異，不能宣稱本次 observations 自動涵蓋它。其原始來源與程式 pins 留在前件 context，不要求用新 parser 冒充舊結果。
-
-previous_order 恰有 `{basis,evidence_indexes,review_receipt}`，basis 為 `same_content/printing_availability/source_update/reviewed_order`，另必填可空 review_receipt。same_content 要求兩次選中內容 exact 相同，evidence_indexes=[]、review_receipt=null；發售／更新兩種 basis 沿 §9.3 的非空證據索引機制，證明本次選中表記晚於前次，不能只驗本次候選內部順序便回退 current。前件不在本次來源集合時亦須保留這項比較；reviewed_order 的收據沿 §9.3，但 before_observation_keys 恰含前件選中鍵、after 恰含本次選中鍵，明示使用者選擇的採納順序；採用它時 current.basis 亦為 reviewed_override。沒有證據或明示回答就暫不追加採納，仍可公開候選。這不是由 adoption_no 推論表記年代。
-
-同面同區是一條連續鏈：缺號、跳號、分叉、循環、前件跨面／跨區或同號不同內容均為輸入錯誤，整筆交易失敗。全體 checked 與 equivalence 同時涵蓋這次 observations 及前件選中內容；任何未核對新增觀測、更正或選取變更，另寫下一次採納、新 record hash 與新 decision，不原地修改舊分片。此續次格式只適用表記採納，不擴張 §10／§11 或 identity_registry 的修復規則。已採納判斷事後發現錯誤時隔離受影響結果，走來源更正／勘誤／身分修復，不能以等義續次記錄掩蓋。
-
-新的建置先重建既有採納，再比對本次全部觀測。新增版本不繼承 checked；即使 raw 內容相同，新來源鍵仍是未核對候選。原收據保留為歷史 confirmed；沒有新採納時保留仍有效的舊 current 並報候選。前件依賴缺失／hash 不符是不可重建錯誤，不能退回任取現存觀測；已知更正／勘誤或身分衝突使舊 current 不再有效時也不能繼續當確定事實。
-
-### 9.5 核可規則、confirmed 封套與人工確認
-
-本節的 wording 等義授權不替代[模板參數辨識政策](template-parameter-policy.md)；兩者重用 canonical／不可變 pin 做法，但 kind、收據與授權範圍各自獨立。
-
-**使用者 2026-10-01 核可**：空白、標點、提醒文、句型等差異由程式分類，具體規則清單核可一次後，僅對規則完整涵蓋的差異套用；其餘群組在 Artifact 確認頁逐組確認，也可對同一變更型態明示批次確認。下表定義分類邊界，**不是已核可的替換／等義規則清單**；具體 matcher、反例與適用範圍由 #145 提交使用者核可。
-
-| 分類 code | 可分類的差異 | 不可由類別名稱推得的結論 |
-| --- | --- | --- |
-| `whitespace` | 空白、換行、排版差異 | 不能刪除會改變詞界、數字或條件的空白 |
-| `punctuation` | 標點、括號、字形差異 | 括號可能是規則條件，不能一律略過 |
-| `reminder` | 已識別的提醒文增刪／改寫 | 未識別段落或 token 定義不能冒充 reminder |
-| `section_layout` | 主文與 sections 分段、段落順序差異 | 分段相似不表示條件／適用對象未變 |
-| `terminology` | 同一地區的術語替換／改名 | 不跨區推翻譯等價，也不自動改卡名或數值 |
-| `sentence_pattern` | 有限、具名句型的改寫 | 不能用自由改寫模型或相似度涵蓋新句型 |
-| `uncovered` | 其餘改字、缺句、數值／種類／特性／token 依賴差異，或規則互相衝突 | 留人工確認／勘誤判讀，不自行等義 |
-
-每條待核可規則必須列唯一 rule_id、類別、適用 region／欄位／段落、精確匹配條件及排除條件、有限變換、正反例，並明示 action=`classify_only/equivalent`。只有使用者核可 action=equivalent 的規則才能讓命中差異免逐組再問；僅分類的規則仍留人工佇列。規則集以 `{policy_id,authored_revision,path,hash,approval_receipt_hash}` 釘住不可變內容與核可收據，path 為 repo 相對路徑，hash 為 §2 canonical 內容 hash，收據 hash 同 recipe；實際檔案 bytes 另進 F1 dependencies。具體儲存格式隨 #145 一併審核，未取得收據以前不啟用自動採納。
-
-**wording-rule-policy-v1 儲存格式**：格式由協調者依使用者授權採用；使用者 2026-10-02 核可的 action 只有 `wp:eol-v1`（僅 CRLF／LF）為 equivalent，其餘六條為 classify_only。這是規則政策核可，不是任何逐卡等義或採納順序回答。
-
-沿 authored 的 YAML 慣例，政策與收據配對存於 `authored/wording-rules/<version>.policy.yaml`、`authored/wording-rules/<version>.approval.yaml`；首版為 `145-v1`。`review.rule_set.path` 指政策檔的 repo 相對路徑，收據路徑以同一版本將 `.policy.yaml` 換成 `.approval.yaml` 推得，不提供可任意改指的第二個路徑。
-
-| 封套 | 必填欄位 |
-| --- | --- |
-| policy | `rule_policy_format: 1`、`kind: wording_rule_policy`、`policy_id`、`common_boundary`、`rules` |
-| common_boundary | `comparison`、`protected_fields`、`protected_condition`、`missing_text`、`sections`、`output`、`equivalence`；保存全體規則的共同比較、保護欄位、null、段落與採納邊界 |
-| rules 每項 | `rule_id`、`category`、`regions`、`fields`、`matcher_version`、`parameters`、`action`、`match_condition`、`exclusions`、`finite_transform`、`examples` |
-| examples | `positive`、`negative` 非空陣列；每項恰含 `case_id`、`region`、`before`、`after`、`parameters`；before／after 是完整合成 wording-face-v1 物件，case_id 在該規則內唯一 |
-| approval | `rule_approval_format: 1`、`kind: wording_rule_approval`、`policy_id`、`rule_set_hash`、`rules`、`note` |
-| approval.rules 每項 | `rule_id`、`action`；按 rule_id 排序唯一，恰與 policy.rules 相同 |
-
-封套欄位封閉；policy.rules 依 rule_id 排序唯一，regions／fields 保留已核可範圍。examples.parameters 是固定測試輸入，不能擴張正式 rules.parameters（首版 reminder ordinals 與 term pairs 皆空）；危險正例仍可分類，action=classify_only 不因正例而升為 equivalent。例子只可用合成文字、hash 或位置，不保存官方卡文。
-
-對**完整解析後的 YAML 值**（包含共同邊界、匹配／排除、有限變換、正反例、parameters 與 action）套 §2 canonical JSON 與 SHA-256，得到政策 hash；approval.rule_set_hash 必須等於它。收據對完整解析值套同一 recipe，得到 approval_receipt_hash。YAML 排版不是此 canonical hash 的一部分，兩個檔案的 exact bytes hash 仍各自列入 F1 dependencies，並從 rule_set.authored_revision 的 immutable Git 內容重取。policy_id 與 action 清單逐項一致；不能只釘住名稱、README 或 matcher_version。day 精度沿 §2 保存 UTC 當日零時。
-
-每個 matcher_version 與政策中的同一組固定正反例綁定，程式测试逐例核對 region、完整欄位、有限參數及預期是否命中；另驗共同排除與僅分類不能採納。更改 matcher 行為、条件、排除、參數、案例或 action 必須建立新 version／policy_id／檔名及新的實際核可收據；不能沿用版本名或舊核可。消費端拒絕未知 matcher／未支援的等義 recipe，不以類別名或相似度補判。已合併政策與收據不可原地覆寫；更正或擴張採只增續版，保留舊內容與 Git revision，使歷史採納仍能重建。
-
-record.data 新增必填 `review`，恰有 `{mode,rule_set,rule_matches}`；mode=`human/approved_rules`。human 的 rule_set=null、rule_matches=[]；approved_rules 的 rule_set 是上述完整 pin，rule_matches 為排序唯一的 `{from_observation_key,to_observation_key,rule_id,field,before_range,after_range}`。range 是兩個 UInt 的 `[start,end]`、start≤end，表示原始 Unicode code point 的零起算半開區間，sections 的 field 用 `sections/<ordinal>` 定位；前件比較以 `previous` 這個保留字指前件選中觀測。每個不同內容與選中觀測、以及非空前件的完整 diff 都須重算，所有差異區段恰被核可 equivalent 規則涵蓋；重疊、未覆蓋、跨欄位未知差異、parser／規則 pin 不符即回人工，不任取某條規則通過。原文／sections 原樣保存，規則只提供採納依據，不在 raw 或公開顯示中刪字。
-
-每檔 records 非空，共用一個 default_decision_id，decisions 恰含該決定。決定欄位與 hash 計算沿 §10.4；scope=`batch`、category=`wording_adoption`、policy_id=`wording-adoption-v1`、state 固定 `confirmed`。members 恰為本檔全部 `[record_key,完整 record 的 semantic_hash]`；membership_hash 對排序 members 計算，id=`d:<完整 membership hash hex>`。semantic_hash 是歷史欄位名，不表示工具已證明語義相同。
-
-sample_ids 恰為全體 checked record_key，各 record 的 checked_observation_keys 恰為全部精確觀測；human 表示人逐組／逐型態核對，approved_rules 表示依核可政策逐觀測完整機械檢查，**不能把後者宣稱為逐卡人工審閱**。兩種 mode 分檔；同檔 approved_rules 使用同一 rule_set。human／approved_rules 的依據由 mode 與政策內容區分，決定不保存姓名／時間；approved_rules 的 note 明示「政策核可」。不捏造使用者此次逐組點擊，也不以舊身分／商品決定代簽。報告分開計 `human_rows`（mode=human）、`approved_rules_rows`（mode=approved_rules）與仍待人工的群組。
-
-只對等義且可表示、排序已解的群組追加採納；未回答、勘誤、不確定、未涵蓋或待排序者留 authored 外的精確收據／診斷，不先寫 proposed 再覆寫。null 主文未能依 §9.8 證明 absent 者仍 deferred，不能以等義回答補造缺文。
-
-**確認頁方向（#146 實作時再細化，不屬於本格式驗收條件）**：每列為 face／region 群組，顯示全部 printing 原樣卡號、精確來源、前件與各候選的逐欄差異、段落邊界、更正狀態、日期及精度、分類與規則命中／未涵蓋區段。Artifact 從受控凍結來源顯示原文；官方卡文不進 git 或 PR。依可信發售日排審，日期未知的 PR 等版次獨立列出詢問順序，不以 fetched_at、卡號或 hash 補年代。
-
-選項為「意思相同／勘誤／不確定」，預設未回答。「勘誤」是待判讀意見，不直接建立官方 errata、來源更正或虛構生效日。同一變更型態可批次確認，但提交前須明示精確成員、完整變換與例外；批次回覆只涵蓋這些成員，不自動成為可套未來卡片的規則。逐組與批次收據都由工具展開到全體 checked；使用者不用填 hash、parser、YAML 或日期格式。未涵蓋的語義差異及未知排序分別提問，不把同意語義等價當成同意某個年代。
-
-### 9.6 未採納表記的顯示與來源更正
+### 9.1 未採納表記的顯示與來源更正
 
 **使用者 2026-10-01 核可本節暫顯規則**：沒有舊 current、但表記有差異的卡照樣顯示，不因待採納排除。正式／preview 採相同邊界：`face_current` 只表示已採納 current；暫時顯示的觀測另由公開 `face.wording` 投影，不能寫成 latest_adopted_wording 或虛構 decision。完整公開形狀、候選引用與分片規則見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
 
@@ -420,7 +292,6 @@ sample_ids 恰為全體 checked record_key，各 record 的 checked_observation_
 | 未核對差異或順序未解，但舊 current 可重建且仍有效 | 保留舊 current；公開標「表記未定」，各版次仍顯示自己的觀測，另列未採納候選 |
 | 有差異、無可用舊 current | 各 printing 顯示該版次可表示的觀測；face／card 摘要按下述發售日規則暫顯並標「表記未定」，不能決定時列候選；手動使用，不整卡排除 |
 | 已知更正／勘誤衝突使舊 current 無效 | 不再當有效 current；觀測保留且標明衝突，已知有誤的內容不當無警告摘要或規則自動執行依據；按既有更正／勘誤閘門處理 |
-| 正式輸入缺檔、hash／成員不符或前件不能重建 | 輸入驗證失敗，回滾；不得當普通待採納而略過 |
 
 暫顯優先使用仍有效的 current。沒有 current 時，由正式 product／printing_product 的可信發售／收錄日選**已知完整日精度日期中的最新版次**；多重收錄須能證明該 printing 的首次取得日；若其他未知日期收錄使首次日無法判定，該 printing 也列日期未定，不用後來再錄商品日期讓同一 printing 變新。最大日期的觀測均可表示且無更正衝突，並只對應一個 exact 內容，顯示該內容並標「依已知發售日暫顯、表記未定」。同內容的代表 revision ID 只為去重定位，不宣稱某來源年代更晚。最新版次本身有多種尚未定序內容、同日最新版次內容不同或最新日仍有主文待確認／更正衝突、或沒有完整日精度日期時，display 為空、列出全部候選，不任選。日期未知／月年精度的版次另列，不因較晚抓到而排在最後；即使另有已知日期可暫顯，也明示這些版本尚未參與排序，交 #146 詢問使用者。
 
@@ -430,19 +301,7 @@ printing 的觀測不是印刷原文：保留自己的 revision／sections 與�
 
 來源更正先於候選可用性判斷：#30 的 active 決定仍獨立驗原值／觀測 hash／圖片證據，成功 application 後再計 content_hash、diff 與顯示／採納候選。原始 printing_face_observation、raw_face_hash 與更正後 revision／application 分開。已採納更正不重問；needs_review 不套用，conflict 不當可信摘要，already_fixed 不重複替換並警告退役。更正清單／內容／狀態變更須重驗核可規則或新人工收據，不能沿用舊 checked；全體 exact 相同且通過其餘閘門可走機械 current。更正不自動產表記順序，未套更正的 census 不是最終待問數。
 
-本格式保留 [實作分期](implementation-tiers.md) 的等義能力閘門：消費等義採納、建立 semantic_id 或重用 DSL 仍須 semantics 子組及完整依賴。上述暫顯不消費等義採納，無須先啟用 semantics；report-only 的診斷也不能決定公開範圍。是否另准許正式採納 current 而延後 semantics 仍需另行決定，不以本次「可讀觀測」的核可代替。
-
-### 9.7 建置追溯與驗收邊界
-
-建置 configuration 的 `wording_adoption` 保存 `{authored_revision,index_path,index_hash}`；dependencies 保存完整 index／所有歷史分片的 exact bytes hash，實際檔案須符合 immutable revision。每分片建立 authored source_record，parser_version=`wording-adoption-v1`，決定以 decision_source 指回封套與全部原始證據。共用 raw 的 source_record.parser_version 仍為 null；官方觀測／revision 的 source_id 仍指 raw，採納的 face_current.decision_id 與相關 wording revision 的 decision_id 指 confirmed 封套。更正 revision 仍保留來源更正決定，不以 wording 決定覆蓋其 provenance。
-
-F1 使用紀錄分別保存 `wording_observation`（實際 extractor pin、精確 printing／face／source_index locator）、`wording_order_evidence`（實際日期／更新解析 pin 與定位）與 `wording_evidence_closure`（僅閉包驗證，parser=`archive-closure-v1`）。更正／身分／商品的實際用途另外保存，不因共用 raw 吞掉；歷史前件 context／用途亦須驗回並納入本次實際使用。decision_source 同 source／role 多定位時，locator 保存排序唯一的 canonical JSON 定位陣列，避免其複合 PK 丟失定位；quote=null，不複製官方卡文。
-
-輸出前從釘住 registry、批次、採納鏈與證據獨立列 expected uses，再驗 F1 完整閉包、metadata 及四檔 bundle；報告保留本次選用 record_key／record_hash／decision、selected_observation_key、前件與未採納候選。重跑須由相同 pins 得到相同採納／暫顯選取與待確認狀態，不依工作目錄、檔案迭代順序或舊 DB 狀態。
-
-匯入器至少驗：漏一觀測／checked 成員、同來源不同版本、錯 face／region／source_index、同字不同來源、同日／月年／未知日期無證據或明示順序回答、選到非末層、同層內容不同、前件缺失／分叉／機械根不能重現、新觀測不能繼承舊核對、active／already_fixed／conflict、absent 證據／unknown 主文、雙面候選顯示與公開引用閉包、核可規則未涵蓋差異必回人工、F1 缺用途／錯 pin，以及等義能力尚未啟用。格式文件與 hash-only 盤點都不是上述實作驗收，也不是任何真實群組的人工採納。
-
-### 9.8 無主文的證據 recipe（採用 B）
+### 9.2 無主文的證據 recipe（採用 B）
 
 **使用者 2026-10-01 核可 B**：能證明「確定沒有效果主文」的面使用 exact 空字串，不能證明者維持 null、留 report／F1。這沿用 build-db 已有的「空字串＝已確定無文字」語意；新增的是判別與追溯 recipe，不放寬任何 NOT NULL 欄位，也不新增公開 effect_state。absent 只表示該來源版本的主文欄位沒有文字，不表示卡沒有能力；sections、種類／特性／標記仍保留，不因 absent 放行自動規則。
 
@@ -459,13 +318,13 @@ F1 使用紀錄分別保存 `wording_observation`（實際 extractor pin、精�
 
 除 unknown 的 template_id 可明示 null 外，所有識別／定位欄位非空；每種 parser 的版型簽章、容器定位與省略條件須釘住、附獨立完整／截斷／錯面／未知節點反例，#145 實作時驗收。text=null、sections=[]、卡種是 follower 或另一版次沒有文字，均不能代替上述來源證據。若需核圖／補來源才能判斷就維持 unknown，不要求使用者對全部 null 觀測猜答案。
 
-對完整結果物件套 §2 canonical hash；觀測的 `effect_presence` 恰有 `{result,result_hash}`，result_hash 須重算匹配。raw_face_hash 仍含 extractor 原值（包括原始 null），不改寫凍結 raw；只有 absent 的可重現證據才在建置投影將主文表為 `""`，再套已驗來源更正並計 content_hash。present 保留 exact 主文；unknown 保留 null，不建立空文字單元或引用其他版次。原先的「無更正 content_hash=raw_face_hash」只適用沒有 absent 投影轉換者。effect_presence 與其 hash 必須包含在 observation_key／record hash 及採納 freshness 中，不能按 card_no 沿用判斷。
+對完整結果物件套 §2 canonical hash；觀測的 `effect_presence` 恰有 `{result,result_hash}`，result_hash 須重算匹配。raw_face_hash 仍含 extractor 原值（包括原始 null），不改寫凍結 raw；只有 absent 的可重現證據才在建置投影將主文表為 `""`，再套已驗來源更正並計 content_hash。present 保留 exact 主文；unknown 保留 null，不建立空文字單元或引用其他版次。原先的「無更正 content_hash=raw_face_hash」只適用沒有 absent 投影轉換者。
 
 F1 新增 usage=`effect_presence`，parser_version 為實際判別 parser pin；locator 為 `{printing_id,face_id,source_index,recipe,template_id,container_locator,state,reason_code,result_hash}` 的 canonical JSON。原始來源 metadata 與 archive pin 依 F1 保存，raw source_record.parser_version 仍為 null。所有 present／absent／unknown 的已讀來源均列此 use，未知／deferred 也不能漏掉；報告保存完整 result，輸出前從凍結來源獨立重跑判別並核對 result_hash／用途閉包。
 
-建置維持 `face_revision.effect_unit_id`、`printing_face_observation.revision_id`、`text_unit.text` NOT NULL。absent 可引用依既有語言＋exact 空字串 recipe 產生的 text_unit；來源證據留引用端／F1，不掛在共享空文字上。unknown 暫不建其 revision／觀測表列，report 明列 total／materialized／deferred 與理由。公開 effect_unit_id 仍非空；已證 absent 顯示無主文並照常呈現 sections。公開候選無 revision 時使用 §9.6 的明示待確認位置，不把 null 傳進 face_revision.effect_unit_id。
+建置維持 `face_revision.effect_unit_id`、`printing_face_observation.revision_id`、`text_unit.text` NOT NULL。absent 可引用依既有語言＋exact 空字串 recipe 產生的 text_unit；來源證據留引用端／F1，不掛在共享空文字上。unknown 暫不建其 revision／觀測表列，report 明列 total／materialized／deferred 與理由。公開 effect_unit_id 仍非空；已證 absent 顯示無主文並照常呈現 sections。公開候選無 revision 時使用 §9.1 的明示待確認位置，不把 null 傳進 face_revision.effect_unit_id。
 
-**A 未採用**：新增三態 DB 欄與 nullable effect FK 可讓 unknown 進 revision，但目前保存在 report／F1 已足夠，B 可沿用現有儲存與公開文字語意。A 若在候選 format 1.0.0 期間實作，依 [snapshot-contract](snapshot-contract.md) 可直接同步 Schema、descriptor、golden 與 reader，**不必因此升格式版本**；正式凍結後才另判相容性。B 本身不要求更動 DDL／公開 Schema；§9.6「表記未定」的公開欄位擴充則是另一項已核可顯示政策的實作工作，不能混算為 B 的成本。本 PR 只改文件，沒有修改上述機器契約或宣稱 absence 判別器已完成。
+**A 未採用**：新增三態 DB 欄與 nullable effect FK 可讓 unknown 進 revision，但目前保存在 report／F1 已足夠，B 可沿用現有儲存與公開文字語意。A 若在候選 format 1.0.0 期間實作，依 [snapshot-contract](snapshot-contract.md) 可直接同步 Schema、descriptor、golden 與 reader，**不必因此升格式版本**；正式凍結後才另判相容性。B 本身不要求更動 DDL／公開 Schema；§9.1「表記未定」的公開欄位擴充則是另一項已核可顯示政策的實作工作，不能混算為 B 的成本。本 PR 只改文件，沒有修改上述機器契約或宣稱 absence 判別器已完成。
 
 ## 10. 商品人工輸入 product-authored-v1
 
@@ -619,8 +478,7 @@ URL／識別碼改動、相對連結解析結果變更或原本無 URL 後來補
 confirmed_none／reskin 續版及有效投影順序見 [身分修復與決定續版](identity-repair.md)。
 **使用者 2026-10-01 核可**，含指名撤回修復；新增封套不修改 v1 舊記錄或 hash recipe，
 後續實作完成前既有工具的拒絕行為不變。
-此獨立入口僅處理卡片 registry，不授權 §10 商品內容、§11 商品身分誤配的續版；
-§9 表記採納仍使用其已核可的獨立鏈。
+此獨立入口僅處理卡片 registry，不授權 §10 商品內容、§11 商品身分誤配的續版。
 
 ## 13. 數位名字與同名瀏覽政策
 

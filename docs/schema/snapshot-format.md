@@ -124,7 +124,7 @@ DSL 程式包（`dsl-programs`）不是集合；封套及 AST 驗證統一依 [�
 
 ### 2.2 留在建置端與延後項
 
-建置資料庫才有 `source_record`、`printing_face_observation`、`face_semantics/revision_semantics/semantic_reference`、`translation_context/use`、`decision/decision_source`、`correction_evidence/application`、所有模板/術語/translation binding/history、ruling review/supersession/template、DSL load/exam/review/source/macro、`card_mechanic/coverage/override`、`digital_text/face/source` 對齊、`restriction_event`、`build_issue`。卡表快照的引用均投影成公開 ID/文字，不殘留指向建置資料庫的 FK。
+建置資料庫才有 `source_record`、`printing_face_observation`、`translation_context/use`、`decision/decision_source`、`correction_evidence/application`、所有模板/術語/translation binding/history、ruling review/supersession/template、DSL load/exam/review/source/macro、`card_mechanic/coverage/override`、`digital_text/face/source` 對齊、`restriction_event`、`build_issue`。卡表快照的引用均投影成公開 ID/文字，不殘留指向建置資料庫的 FK。
 
 只保留玩家查閱需要的歷史：face revision、勘誤、QA 歷史、被引用的 CR、裁定有效片段與被替代鏈。完整 CR 當前版與裁定引用的歷史 CR 條文進文字包；未被引用的舊 CR 全文可不出貨。已不用的翻譯/文字單元不出貨，避免累積所有建置歷史。
 
@@ -132,7 +132,7 @@ DSL 程式包（`dsl-programs`）不是集合；封套及 AST 驗證統一依 [�
 
 ### 2.3 表記未定的公開呈現
 
-**使用者 2026-10-01 核可本節暫顯規則**：觀測有差異、沒有舊 current 的卡仍可讀，不因未採納排除。以下公開欄位擴充對應 §2 白名單；wording-adoption-v1 採納封套的具體格式（authored-layout §9.1–§9.7）亦經使用者 2026-10-01 核可。公開形狀、Schema／types／golden 與 reader 依目前 2.0 的 [snapshot-contract](snapshot-contract.md) 同步維護。
+**使用者 2026-10-01 核可本節暫顯規則**：觀測有差異、沒有舊 current 的卡仍可讀，不因未採納排除。以下公開欄位擴充對應 §2 白名單。公開形狀、Schema／types／golden 與 reader 依目前 2.0 的 [snapshot-contract](snapshot-contract.md) 同步維護。
 
 - `PrintingFace.observations` 是 `{revision_id?,state,source_url}` 陣列；state=`available/missing_effect/correction_conflict`。available 必有同 face、同 printing.region 的公開 revision；missing_effect 的 revision_id=null，表示原觀測主文未知且無法建 revision；correction_conflict 可有原觀測 revision 或 null，只供帶警告查閱，不能作可信暫顯。source_url 是該 printing 的原始來源 URL，不出 source ID、hash 或決定。完整三欄 exact 相同才去重；按來源 URL／狀態／revision ID 的固定字串序儲存**不表示年代**。
 - `face.wording` 是稀疏陣列，只對表記未定的公開 face-region 各出一項，恰有 `{region,state,display,candidates,undated_printing_ids}`。state 固定 `pending`；display 恰有 `{revision_id?,basis}`，basis=`current/latest_known_release/candidates`。candidates 是 `{printing_id,revision_id?}` 陣列，恰列仍需核對的候選版次／revision，去重並按 printing_id／revision_id 固定排序，null 為尚無可表示 revision；undated_printing_ids 列無可信完整日精度收錄日的候選版次，去重排序。這些 ID 排序僅供穩定序列化，UI 的年代由日期證據顯示，不能用 ID 補順序。
@@ -143,7 +143,7 @@ producer 按下列規則計算 pending 的 display，reader 不自行推論 curr
 1. 有仍有效的已採納／機械 current，display 指它、basis=current；新候選不覆蓋它，也不能因 current 存在把 pending 改成 settled。
 2. 無 current 時，在所有有可信完整日精度首次收錄／發售日的候選版次中比較，包含主文待確認／更正衝突者，不先丟掉問題版本。日期讀 product／printing_product，依既有 precision 繼承與 unknown 覆寫規則；多重收錄取可驗首次取得日。若其他收錄日期未知而無法證明首次日，該 printing 亦列 undated，不任取已知商品日期。只讀「目前已知日精度版本的最新值」，不是全部版次的官方最新表記。
 3. 最大日期涉及的觀測全部 available 且投影內容 exact 相同，display 指其中一個 revision、basis=latest_known_release。多個 exact 同內容 revision 取 ID 字串序第一個僅供內容定位；仍保留所有版次／觀測，不由 ID 斷言先後。同日不同內容、同 printing 有多個無法排序內容、或沒有上述可用日期時，display.revision_id=null、basis=candidates，列全部候選。已知日期最新的版次若仍有 missing_effect／correction_conflict，也不能退取較舊版假稱「已知最新版」；改列候選與問題。
-4. 未知／月年精度版次獨立顯示日期未定清單，即使第 3 步有暫顯值也不隱藏，交 Artifact 頁詢問使用者。不補一號、不以 fetched_at／卡號／hash 排序；人工回答釘住採納封套的 reviewed_order 後才可能建立 current，不能由 UI 點選候選靜默採納。
+4. 未知／月年精度版次獨立顯示日期未定清單，即使第 3 步有暫顯值也不隱藏，交 Artifact 頁詢問使用者。不補一號、不以 fetched_at／卡號／hash 排序；目前沒有採納輸入，不能由 UI 點選候選靜默建立 current。
 
 printing 頁顯示自己的 observations 文字，並標為官網觀測；有多種內容且沒有可驗來源更新順序時列全部，不任取最後爬到者。不將它填進 printed_name_unit_id／printed_effect_unit_id 或提升 printed_text_state；有成功 source correction 時顯示該來源的更正後 revision 與既有 Correction，原始來源觀測仍留建置歷史。沒有 current 的 card／face 顯示上述暫顯值與「表記未定」，basis=latest_known_release 另標「依已知發售日暫顯」；basis=candidates 則列候選，文字未知者顯示待確認而非無能力。雙面各自保留狀態，不能只出一面。
 
