@@ -28,8 +28,6 @@ const images = (availability: string, publication = "approved"): ImageIndex => (
     id: "img",
     availability,
     publication_state: publication,
-    withdrawal_reason: "rights holder request",
-    source_url: "https://example.invalid/x.png",
   }),
   cardImage: () =>
     availability === "available"
@@ -47,7 +45,7 @@ afterEach(() => {
 })
 
 describe("CardImage", () => {
-  it("removes a loaded old-v image on withdrawal and shows failure instead of falling back to it", async () => {
+  it("removes a loaded old-v image once unpublished and shows failure instead of falling back to it", async () => {
     const old = images("available")
     const props = { summary, name, sizes: "50vw", className: "w-full" }
     const { rerender } = await renderInRouter(<CardImage {...props} alt="redundant" images={old} />)
@@ -56,7 +54,7 @@ describe("CardImage", () => {
     act(() => {
       oldImage.dispatchEvent(new Event("load"))
     })
-    rerender(<CardImage {...props} alt="redundant" images={images("available", "withdrawn")} />)
+    rerender(<CardImage {...props} alt="redundant" images={images("available", "pending")} />)
     expect(document.querySelector("img[srcset]")).toBeNull()
     const changed: ImageIndex = {
       asset: old.asset,
@@ -80,28 +78,6 @@ describe("CardImage", () => {
     })
     expect(document.querySelector("img[srcset]")).toBeNull()
     expect(screen.getByText("卡圖載入失敗")).toBeInTheDocument()
-  })
-  it("shows a compact withdrawn media reason without inventing a source host", async () => {
-    const compact: ImageIndex = {
-      cardImage: () => undefined,
-      asset: () => ({
-        publication_state: "withdrawn",
-        withdrawal_reason: "Synthetic reason",
-        availability: "available",
-      }),
-    }
-    await renderInRouter(
-      <CardImage
-        summary={summary}
-        name={name}
-        images={compact}
-        alt="redundant"
-        sizes="50vw"
-        className="w-full"
-      />,
-    )
-    expect(screen.getByText("卡圖已撤下：Synthetic reason")).toBeInTheDocument()
-    expect(document.querySelector("img[srcset]")).toBeNull()
   })
   it("names the card in identify mode and stays silent in redundant mode", async () => {
     await renderInRouter(
@@ -189,7 +165,7 @@ describe("CardImage", () => {
     expect(screen.queryByText("BP01-001")).not.toBeInTheDocument()
   })
 
-  it("shows the text card with a reason for missing, pending and withdrawn images", async () => {
+  it("shows the text card with a reason for missing and pending images", async () => {
     const { unmount } = await renderInRouter(
       <CardImage
         summary={summary}
@@ -213,21 +189,8 @@ describe("CardImage", () => {
       />,
     )
     expect(screen.getByText("卡圖待確認")).toBeInTheDocument()
-    pending.unmount()
-    await renderInRouter(
-      <CardImage
-        summary={summary}
-        name={name}
-        images={images("available", "withdrawn")}
-        alt="redundant"
-        sizes="50vw"
-        className="w-full"
-      />,
-    )
-    expect(
-      screen.getByText("卡圖已撤下：rights holder request（來源 example.invalid）"),
-    ).toBeInTheDocument()
     expect(document.querySelector("img[srcset]")).toBeNull()
+    pending.unmount()
   })
 
   it("holds the image back in data-saver mode until the caller wants it", async () => {

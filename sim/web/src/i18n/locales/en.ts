@@ -102,8 +102,6 @@ export default {
     imageDownloadError: "Could not load the card image",
     imageError: "Could not load image metadata",
     imagePending: "Image awaiting review",
-    withdrawnNoSource: "Image withdrawn: {{reason}}",
-    withdrawn: "Image withdrawn: {{reason}} (source {{host}})",
     noTranslation: "No translation yet",
     loadImage: "Load image",
   },

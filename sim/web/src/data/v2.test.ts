@@ -177,7 +177,7 @@ describe("2.0 shared contract and display projection", () => {
     await client.load()
     await expect(loadImagePage(client, [front])).rejects.toThrow("printing-image-face")
   })
-  it.each(["missing", "withdrawn"])(
+  it.each(["missing", "pending"])(
     "clears an old ready image after adopting %s, without borrowing another printing",
     async (state) => {
       const first = v2Version()
@@ -187,12 +187,11 @@ describe("2.0 shared contract and display projection", () => {
       expect((await loadImagePage(client, [front])).cardImage("p:a", "f:a")).toBeDefined()
       const second = v2Version(2, (table, row) => {
         if (table !== "printing_image" || row[0] !== "p:a") return
-        row[3] = state === "withdrawn" ? "withdrawn" : "approved"
-        row[4] = state === "missing" ? "missing" : "available"
-        row[5] = state === "withdrawn" ? "Synthetic withdrawal" : null
+        row[3] = "pending"
+        row[4] = state === "missing" ? "missing" : "unfetched"
+        row[5] = null
         row[6] = null
-        row[7] = null
-        row[8] = []
+        row[7] = []
       })
       for (const [key, bytes] of second.files) served.files.set(key, bytes)
       served.setIndex({
@@ -205,7 +204,7 @@ describe("2.0 shared contract and display projection", () => {
       const page = await loadImagePage(client, [front])
       expect(page.cardImage("p:a", "f:a")).toBeUndefined()
       expect(
-        page.asset("p:a", "f:a")?.[state === "withdrawn" ? "publication_state" : "availability"],
+        page.asset("p:a", "f:a")?.[state === "pending" ? "publication_state" : "availability"],
       ).toBe(state)
     },
   )
@@ -216,7 +215,7 @@ describe("2.0 shared contract and display projection", () => {
     for (const token of [8, 9]) {
       const next = v2Version(token === 8 ? 2 : 3, (table, row) => {
         if (table === "printing_image" && row[3] === "approved" && row[4] === "available")
-          row[6] = token
+          row[5] = token
       })
       for (const [key, bytes] of next.files) served.files.set(key, bytes)
       served.setIndex({ index_format: 2, revision: token, current: next.entry, previous: null })
@@ -274,7 +273,7 @@ describe("2.0 shared contract and display projection", () => {
     for (const value of [
       { ...row, card_version: null },
       { ...row, variants: [] },
-      { ...row, publication_state: "withdrawn" },
+      { ...row, publication_state: "pending" },
       {
         ...row,
         variants: [

@@ -130,6 +130,6 @@ describe("images", () => {
     expect(source?.srcSet.split(", ")).toHaveLength(3)
     expect(source?.srcSet).toContain(" 128w")
     expect(images.cardImage("p:bp01-040", "f:bp01-040")).toBeUndefined()
-    expect(images.asset("p:bp01-040", "f:bp01-040")?.["publication_state"]).toBe("withdrawn")
+    expect(images.asset("p:bp01-040", "f:bp01-040")?.["publication_state"]).toBe("pending")
   })
 })

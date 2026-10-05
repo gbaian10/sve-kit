@@ -248,8 +248,8 @@ Each grid cell shows the name with the card number at the right of the same line
 2026-09-29), then the translation line when the name display asks for one.
 
 `CardImage` is one fixed 63:88 slot: the text card (name, class frame, cost, number, stats) sits
-underneath and the image fades in over it; missing, pending and withdrawn images keep the text card
-with a reason, and data saver waits for a tap. Callers set the width (`w-full`, `w-8`).
+underneath and the image fades in over it; missing and pending images keep the text card with a
+reason, and data saver waits for a tap. Callers set the width (`w-full`, `w-8`).
 
 The class quick bar shows labels only when an off-screen labelled copy fits the row width: the six
 classes of the physical game plus neutral. A class code the design does not know yet would use the

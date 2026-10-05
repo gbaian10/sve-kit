@@ -101,8 +101,6 @@ export default {
     imageDownloadError: "画像を読み込めませんでした",
     imageError: "画像情報を読み込めませんでした",
     imagePending: "画像は確認待ち",
-    withdrawnNoSource: "画像は取り下げ済み：{{reason}}",
-    withdrawn: "画像は取り下げ済み：{{reason}}（出典 {{host}}）",
     noTranslation: "訳名なし",
     loadImage: "画像を読み込む",
   },
