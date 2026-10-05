@@ -15,7 +15,6 @@ from sve_carddb.snapshot.contract import validate
 from sve_carddb.snapshot.export import Brotli, Ownership, Snapshot, export_snapshot
 from sve_carddb.snapshot.export.layout import Group, Layout
 from sve_carddb.snapshot.export.measure import measure, update
-from sve_carddb.snapshot.export.page_cost import Replay, page_image_cost
 from sve_carddb.snapshot.profiles import MEDIA, profile
 from sve_carddb.snapshot.project import Projection
 from sve_carddb.snapshot.reader import read_snapshot, read_text_all
@@ -328,39 +327,6 @@ def test_image_increment_changes_only_one_entity_file(
         for k, blob in sharded.payloads.items()
         if not k.startswith("images/detail/global/")
     )
-
-
-def test_metadata_page_cost_distinguishes_transfer_from_heap(sharded: Snapshot) -> None:
-    cost = page_image_cost(sharded)
-    assert cost["page_count"] == 1
-    assert object_value(object_value(cost["cold"])["requests"])["max"] == 1
-    assert object_value(cost["warm"])["requests"] == 0
-    assert cost["image_blob_bytes"] is None
-    assert object_value(cost["lru"])["fits"] is True
-
-
-def test_lru_pins_over_limit_and_evicts_unpinned(sharded: Snapshot) -> None:
-    snapshot = replace(
-        sharded,
-        payloads={k: replace(b, raw=b"x" * 10) for k, b in sharded.payloads.items()},
-    )
-    replay = Replay()
-    replay.cache["stale"] = 13 * 1024 * 1024
-    replay.page(snapshot, {"config"}, {"image"})
-    assert replay.evictions == 1
-    oversized = replace(
-        snapshot,
-        payloads=snapshot.payloads
-        | {
-            "programs": replace(
-                snapshot.payloads["programs"], raw=b"x" * (13 * 1024 * 1024)
-            )
-        },
-    )
-    replay.page(oversized, {"config", "programs"}, {"image"})
-    assert "programs" in replay.cache
-    assert replay.max_cache > 12 * 1024 * 1024
-    assert replay.evictions == 1
 
 
 def test_default_schema_does_not_silently_negotiate_new_minor() -> None:

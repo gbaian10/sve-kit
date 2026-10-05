@@ -11,7 +11,7 @@ from sve_carddb import image_assets, image_variants
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_assets import (
     PreviewRoots,
-    build_jp_assets,
+    build_regional_assets,
     verify_asset_sources,
     verify_assets,
 )
@@ -68,8 +68,12 @@ def test_serial_parallel_resume_and_hashes_use_only_frozen_bytes(
     before = {p: p.read_bytes() for p in frozen.root.rglob("*") if p.is_file()}
     serial_roots = roots(tmp_path / "serial")
     parallel_roots = roots(tmp_path / "parallel")
-    serial = build_jp_assets(frozen, serial_roots, workers=1, crops=empty_crops)
-    parallel = build_jp_assets(frozen, parallel_roots, workers=4, crops=empty_crops)
+    serial = build_regional_assets(
+        frozen, serial_roots, workers=1, region="jp", crops=empty_crops
+    )
+    parallel = build_regional_assets(
+        frozen, parallel_roots, workers=4, region="jp", crops=empty_crops
+    )
     assert [item.result.variants for item in serial.images] == [
         item.result.variants for item in parallel.images
     ]
@@ -98,7 +102,9 @@ def test_serial_parallel_resume_and_hashes_use_only_frozen_bytes(
         pytest.fail("resume must reuse validated image cache")
 
     monkeypatch.setattr(image_variants, "_encode", unexpected_encode)
-    resumed = build_jp_assets(frozen, serial_roots, workers=2, crops=empty_crops)
+    resumed = build_regional_assets(
+        frozen, serial_roots, workers=2, region="jp", crops=empty_crops
+    )
     assert resumed.report()["cache_hits"] == 3
     assert bytes_by_path(resumed, serial_roots.preview) == blobs
 
@@ -109,7 +115,9 @@ def test_worker_limit_is_checked_before_writing(
 ) -> None:
     output = roots(tmp_path)
     with pytest.raises(ValueError, match="between 1 and 4"):
-        build_jp_assets(frozen, output, workers=workers, crops=empty_crops)
+        build_regional_assets(
+            frozen, output, workers=workers, region="jp", crops=empty_crops
+        )
     assert not output.preview.exists()
 
 
@@ -135,7 +143,7 @@ def test_build_rechecks_blob_tampering_before_returning(
 
     monkeypatch.setattr(image_assets, "build_variants", corrupt_after_encoding)
     with pytest.raises(ValueError, match="blob hash or bytes mismatch"):
-        build_jp_assets(frozen, output, crops=empty_crops)
+        build_regional_assets(frozen, output, region="jp", crops=empty_crops)
 
 
 @pytest.mark.parametrize(
@@ -181,7 +189,7 @@ def test_each_root_isolation_constraint_fails_before_writing(
         output.preview.mkdir()
         (output.preview / "images").symlink_to(frozen.root, target_is_directory=True)
     with pytest.raises(ValueError, match=r"overlap|symlink|absolute"):
-        build_jp_assets(frozen, output, crops=empty_crops)
+        build_regional_assets(frozen, output, region="jp", crops=empty_crops)
     assert not list(frozen.root.rglob("*.webp"))
     assert not output.cache.exists()
 
@@ -207,7 +215,7 @@ def test_wrong_batch_provider_or_kind_is_rejected(
     batch = seal_batch(store)
     frozen = FrozenSources(store.root, store.store_id, batch.batch_id)
     with pytest.raises(ValueError, match="exclusively JP image batch"):
-        build_jp_assets(frozen, roots(tmp_path), crops=empty_crops)
+        build_regional_assets(frozen, roots(tmp_path), region="jp", crops=empty_crops)
     assert not roots(tmp_path).preview.exists()
 
 
@@ -236,7 +244,7 @@ def test_independent_asset_tampering_is_rejected(  # ruff: ignore[complex-struct
     empty_crops: ImageCrops, tmp_path: Path, frozen: FrozenSources, case: str
 ) -> None:
     output = roots(tmp_path)
-    build = build_jp_assets(frozen, output, crops=empty_crops)
+    build = build_regional_assets(frozen, output, region="jp", crops=empty_crops)
     item = build.images[0]
     result = item.result
     variant = result.variants[0]
@@ -294,7 +302,9 @@ def test_independent_asset_tampering_is_rejected(  # ruff: ignore[complex-struct
 def test_source_dimensions_and_raw_bytes_are_checked_independently(
     empty_crops: ImageCrops, tmp_path: Path, frozen: FrozenSources, case: str
 ) -> None:
-    build = build_jp_assets(frozen, roots(tmp_path), crops=empty_crops)
+    build = build_regional_assets(
+        frozen, roots(tmp_path), region="jp", crops=empty_crops
+    )
     item = build.images[0]
     if case == "raw-bytes":
         item = replace(item, raw_bytes=item.raw_bytes + 1)
@@ -315,7 +325,7 @@ def test_corrupt_archive_is_never_replaced_by_latest(
     raw = frozen.root / frozen.inventory.entries[0].blob.path
     raw.write_bytes(b"tampered")
     with pytest.raises(ArchiveError, match="hash"):
-        build_jp_assets(frozen, roots(tmp_path), crops=empty_crops)
+        build_regional_assets(frozen, roots(tmp_path), region="jp", crops=empty_crops)
 
 
 def test_interrupted_conversion_resumes_complete_blobs(
@@ -337,12 +347,12 @@ def test_interrupted_conversion_resumes_complete_blobs(
 
     monkeypatch.setattr(image_assets, "build_variants", interrupted)
     with pytest.raises(OSError, match="disk full"):
-        build_jp_assets(frozen, output, workers=1, crops=empty_crops)
+        build_regional_assets(frozen, output, workers=1, region="jp", crops=empty_crops)
     before = {p: p.read_bytes() for p in output.preview.rglob("*.webp")}
     assert before
     assert not (output.preview / "snapshots").exists()
     monkeypatch.setattr(image_assets, "build_variants", original)
-    resumed = build_jp_assets(frozen, output, crops=empty_crops)
+    resumed = build_regional_assets(frozen, output, region="jp", crops=empty_crops)
     hits = resumed.report()["cache_hits"]
     assert isinstance(hits, int)
     assert hits >= 1
@@ -359,7 +369,7 @@ def readonly_images(
     root, store_id, batch = image_archive_template
     output = roots(tmp_path_factory.mktemp("readonly-images"))
     source = FrozenSources(root, store_id, batch)
-    build_jp_assets(source, output, crops=empty_crops)
+    build_regional_assets(source, output, region="jp", crops=empty_crops)
     return source, output
 
 
@@ -395,14 +405,19 @@ def test_readonly_reuse_never_encodes_or_repairs_inputs(
     monkeypatch.setattr(image_variants, "_write_blob", forbidden)
     monkeypatch.setattr(image_variants, "_write_cache", forbidden)
     if case == "hit":
-        build = build_jp_assets(
-            frozen, output, workers=4, reuse_only=True, crops=empty_crops
+        build = build_regional_assets(
+            frozen, output, workers=4, reuse_only=True, region="jp", crops=empty_crops
         )
         assert build.report()["cache_hits"] == len(build.images)
     else:
         with pytest.raises(ValueError, match="cache is incomplete"):
-            build_jp_assets(
-                frozen, output, workers=4, reuse_only=True, crops=empty_crops
+            build_regional_assets(
+                frozen,
+                output,
+                workers=4,
+                reuse_only=True,
+                region="jp",
+                crops=empty_crops,
             )
     assert before == {
         p: p.read_bytes()

@@ -30,7 +30,7 @@ from sve_carddb.snapshot.values import digest, object_value, parse
 from sve_carddb.sources import official_en
 from sve_carddb.sources.official_jp import image_url
 
-from .image_crop_fixtures import initialize, install, record
+from .image_crop_fixtures import SHARD, initialize, install, record
 from .test_image_assets_en import FRONT, EnglishImages
 from .test_image_assets_en import english_images as english_images  # ruff: ignore[useless-import-alias] -- reuse one sealed EN baseline
 from .test_snapshot_offline import prepared as prepared  # ruff: ignore[useless-import-alias] -- reuse the existing regional text/adoption fixture
@@ -168,6 +168,14 @@ def test_bilingual_images_bundle_snapshot_and_preview(
         "en_image_variant",
     } <= {use.usage for use in record.uses}
     assert (tmp_path / "bundle/inputs.json").read_bytes() == built.input_content
+    crops = load_image_crops(
+        recipe.repo / "authored", authored_revision=recipe.revision
+    )
+    crops.verify_context(record.context)
+    crop_report = object_value(
+        object_value(built.report["image_assets"])["crop_overrides"]
+    )
+    assert crop_report["applied_source_images"] == 1
     plan = prepare_media(
         built.projection,
         roots.preview,
@@ -211,18 +219,32 @@ def test_offline_cli_reuses_both_caches_and_rejects_partial_roots(
         str(roots.cdn),
         "--bundle-dir",
         str(tmp_path / "bundle"),
-        "--image-assets-dir",
-        str(roots.preview),
     ]
     runner = CliRunner()
-    assert runner.invoke(app, arguments).exit_code != 0
-    assert not (tmp_path / "preview").exists()
+    for option, root in (
+        ("--image-assets-dir", roots.preview),
+        ("--image-cache-dir", roots.cache),
+    ):
+        rejected = runner.invoke(app, [*arguments, option, str(root)])
+        assert rejected.exit_code != 0
+        assert "provided together" in rejected.output
+        assert not (tmp_path / "preview").exists()
+        assert not (tmp_path / "bundle").exists()
 
     def forbidden(*_args: object, **_kwargs: object) -> bytes:
         pytest.fail("CLI must reuse both complete five-size recipe caches")
 
     monkeypatch.setattr("sve_carddb.image_variants._encode", forbidden)
-    result = runner.invoke(app, [*arguments, "--image-cache-dir", str(roots.cache)])
+    result = runner.invoke(
+        app,
+        [
+            *arguments,
+            "--image-assets-dir",
+            str(roots.preview),
+            "--image-cache-dir",
+            str(roots.cache),
+        ],
+    )
     assert result.exit_code == 0, result.stdout
     assert (tmp_path / "preview/snapshots/preview/current.json").is_file()
 
@@ -280,7 +302,17 @@ def test_offline_cli_missing_cache_never_encodes_or_publishes(
     assert not cache.exists()
 
 
-@pytest.mark.parametrize("failure", ["partial-batch", "wrong-pin", "missing-use"])
+@pytest.mark.parametrize(
+    "failure",
+    [
+        "partial-batch",
+        "wrong-pin",
+        "missing-use",
+        "old-box",
+        "raw-bytes",
+        "dirty-shard",
+    ],
+)
 def test_offline_image_closure_failures_publish_nothing(
     regional_images: tuple[Inputs, ImageBuild, PreviewRoots],
     tmp_path: Path,
@@ -301,6 +333,25 @@ def test_offline_image_closure_failures_publish_nothing(
                 )
             }
         )
+    elif failure == "old-box":
+        item = next(item for item in assets.images if item.region == "en")
+        crop = item.result.crop_box
+        forged = replace(
+            item, result=replace(item.result, crop_box=replace(crop, top=0))
+        )
+        assets = replace(
+            assets,
+            images=tuple(forged if image is item else image for image in assets.images),
+        )
+    elif failure == "raw-bytes":
+        item = assets.images[0]
+        assets = replace(
+            assets,
+            images=(replace(item, raw_bytes=item.raw_bytes + 1), *assets.images[1:]),
+        )
+    elif failure == "dirty-shard":
+        shard = recipe.repo / "authored" / SHARD
+        shard.write_bytes(shard.read_bytes() + b"\n")
     else:
 
         def omit(
@@ -316,9 +367,15 @@ def test_offline_image_closure_failures_publish_nothing(
             )
 
         monkeypatch.setattr(offline_images, "populate_assets", omit)
-    with pytest.raises(
-        ValueError, match=r"current regional source|pinned regional|use closure"
-    ):
+    messages = {
+        "partial-batch": "Offline images must cover every current regional source",
+        "wrong-pin": "Offline images differ from the pinned regional image batches",
+        "missing-use": "Build input use closure or context mismatch",
+        "old-box": "Image crop box differs from adopted source crop",
+        "raw-bytes": "Image source bytes or oriented dimensions mismatch",
+        "dirty-shard": "Image crop bytes differ from pinned authored revision",
+    }
+    with pytest.raises(ValueError, match="^" + messages[failure] + "$"):
         offline.build(
             recipe,
             images=assets,
@@ -326,3 +383,21 @@ def test_offline_image_closure_failures_publish_nothing(
             bundle_dir=tmp_path / "bundle",
         )
     assert not (tmp_path / "bundle").exists()
+
+
+def test_text_only_offline_does_not_depend_on_crop_data(
+    regional_images: tuple[Inputs, ImageBuild, PreviewRoots],
+) -> None:
+    recipe, _, _ = regional_images
+    before = offline.build(recipe)
+    (recipe.repo / "authored" / SHARD).write_bytes(b"invalid synthetic crop data")
+    after = offline.build(recipe)
+    assert before.input_content == after.input_content
+    config = object_value(
+        parse(
+            InputRecord.model_validate_json(
+                after.input_content
+            ).context.configuration.encode()
+        )
+    )
+    assert "image_crop_overrides" not in config

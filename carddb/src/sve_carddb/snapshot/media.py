@@ -73,11 +73,6 @@ class MediaPlan:
                 raise ValueError("Media plan source hash or bytes mismatch")
             yield string(asset["path"]), raw
 
-    def verify_retry(self, other: MediaPlan) -> None:
-        """A reserved image revision cannot acquire different outputs on retry."""
-        if self.state != other.state or self.assets != other.assets:
-            raise ValueError("Retry changes reserved media plan")
-
 
 def display_url(printing: Record, face: Record, media: Record, size: str) -> str | None:
     """Select the group's version only after validating the exact printing face."""

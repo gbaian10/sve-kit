@@ -1,4 +1,4 @@
-# JP preview 建置與前端接線
+# preview 建置與前端接線
 
 preview 僅供本機，匯出器預設產出 2.0。圖片投影依 [圖片發布契約](image-variants.md#20-圖片-url版本與新鮮度)
 與 [傳輸 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)：從建置 hash path
@@ -7,7 +7,7 @@ preview 配號與快取仍隔離，不寫正式 current／previous 索引。正�
 與 2.0 凍結包，不能把 preview 直接升格。
 
 preview 使用正式傳輸契約與共用匯出器，但不是正式發布。`data_version` 必須有
-`preview-` 前綴，`regions` 固定為 `jp`。payload 的欄位、分片 N、bootstrap/detail
+`preview-` 前綴，`regions` 固定為 `en`、`jp`。payload 的欄位、分片 N、bootstrap/detail
 分工不因 preview 或容量目標而改變。
 
 ## 建置
@@ -17,10 +17,11 @@ preview 使用正式傳輸契約與共用匯出器，但不是正式發布。`da
 ```bash
 SVE_PREVIEW_DIR=/explicit/isolated/preview \
 SVE_CDN_DIR=/explicit/formal/cdn \
-uv --directory carddb run sve-carddb snapshot export --inputs /private/jp-inputs.json
+uv --directory carddb run sve-carddb snapshot export-offline --inputs /private/inputs.json \
+  --bundle-dir /private/bundle
 ```
 
-若要接入已轉好的 JP 卡圖，同時提供 `--image-assets-dir /readonly/webp-library` 與
+若要接入已轉好的日英卡圖，同時提供 `--image-assets-dir /readonly/webp-library` 與
 `--image-cache-dir /readonly/recipe-cache`。前者指到含 `images/` 的那一層，後者指到含
 `image-variants/` 的那一層。兩者皆唯讀，只重用通過來源批次／配方／hash／解碼尺寸
 驗證的 #152 資產；缺件或快取不符即停止，不自動轉檔或修補。使用最多 4 個 worker。
@@ -38,12 +39,11 @@ uv --directory carddb run sve-carddb snapshot export --inputs /private/jp-inputs
 | 欄位 | 意義 |
 | --- | --- |
 | `repo`、`archive`、`store_id` | 唯讀 repo、封存庫與 store 識別 |
-| `card_batch`、`image_batch` | JP HTML 批次與校正證據圖批次的完整 `sha256:` pin |
-| `revision`、`parser_version` | 40 碼程式／authored revision 與明確 parser 配方 |
-| `vocabulary` | 私人 `Vocabulary` JSON；`bindings` 每項有 `region,kind,raw,code,special_kinds` |
-| `languages` | 明確語言列：`code,display_name,fallback_order` |
+| `sources` | 依 `en`、`jp` 排序的兩筆 `{region,card_batch,image_batch,parser_version}`，pin 為完整 `sha256:` |
+| `revision` | 40 碼程式／authored revision |
 | `as_of`、`data_version`、`published_at` | 查核日期、preview 批次識別與 UTC 時間 |
 | `feedback_url`、`grammar_version`、`normalizer_version` | 公開 config；normalizer 應與目標前端一致 |
+| `name_policy` | 選填；目前只接受 `approved-frozen-v1` |
 
 建置只讀凍結批次與 authored，不開 live manifest、不抓官網。封存來源逐份驗 hash，
 輸入記錄驗 source-use 閉包，建置 DB 驗 FK／JSON，公開投影驗參照閉包；匯出後由
@@ -58,7 +58,7 @@ uv --directory carddb run sve-carddb snapshot export --inputs /private/jp-inputs
 ## 輸出與容量
 
 分片與完整文字包存於 `snapshots/blobs/<sha256>.json`，另存固定時間戳、等級 9 的
-gzip。`snapshot export` 與 `snapshot export-offline` 可用 `--brotli` 額外產生 `.br`；
+gzip。`snapshot export-offline` 可用 `--brotli` 額外產生 `.br`；
 預設為 `--no-brotli`，br 數字為 null，不能宣稱通過 br 容量目標。
 啟用時直接使用 `uv.lock` 鎖定的 PyPI `brotli`，固定 generic mode、quality 11、
 lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行檔 hash。
@@ -78,7 +78,7 @@ R2 僅透過 `r2 upload-v2` 發布通過驗證的 2.0 凍結包；凍結包、le
 不寫 `snapshots/versions/index.json` 或 pages，也不碰正式 active／快取。
 已有同名不可變檔案的 bytes 不符即停止，保留既有 preview 指標。
 
-`reports/<manifest-hash>.json` 保存輸入 hash、JP 範圍、逐表數量、真正排除清單、
+`reports/<manifest-hash>.json` 保存輸入 hash、地區範圍、逐表數量、真正排除清單、
 未定卡文數、容量及未完成的正式閘門；輸入記錄留在 `private/inputs/<input-hash>.json`。
 preview 根下的 `private/` 與 `reports/` 不屬於公開內容；整個 preview 只供本機使用，
 沒有上傳入口。正式 R2 發布須使用另行建置的 2.0 凍結包。

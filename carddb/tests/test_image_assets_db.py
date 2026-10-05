@@ -6,21 +6,17 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_bundle import verify_bundle
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.build_inputs import BuildContext, InputRecord, input_record, uses_sorted
+from sve_carddb.build_inputs import BuildContext, InputRecord
 from sve_carddb.extract.compare_jp import legacy_projection
 from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_assets import (
-    build_jp_assets,
-    plan_jp_images,
-    populate_jp_assets,
-    publish_jp_image_bundle,
-    reference_uses,
+    build_regional_assets,
+    plan_regional_images,
+    populate_assets,
 )
-from sve_carddb.image_crops import load_image_crops
 from sve_carddb.image_variants import DEFAULT_RECIPE
 from sve_carddb.manifest import Kind
 from sve_carddb.registry.build import build
@@ -29,13 +25,10 @@ from sve_carddb.registry.preview import FrozenJP, plan_preview, populate_preview
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.registry.review import Inputs, Receipt
 from sve_carddb.registry.storage import plan_files, write_files
-from sve_carddb.snapshot.values import object_value, parse
 from sve_carddb.source_archive import ArchiveStore, Scope, seal_batch
 from sve_carddb.sources.official_jp import card_url
 
 from .build_db_fixtures import rows
-from .image_crop_fixtures import initialize, install
-from .image_crop_fixtures import record as crop_record
 from .test_image_assets import frozen as frozen  # ruff: ignore[useless-import-alias] -- reuse only synthetic archive fixture
 from .test_image_assets import roots
 from .test_image_variants import png
@@ -43,7 +36,6 @@ from .test_registry_preview_archive import RAW
 from .test_source_archive import _put, _resource
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
     from pathlib import Path
 
     from sve_carddb.build_db import Database
@@ -154,7 +146,7 @@ def refs_for(staged: Staged) -> tuple[ImageReference, ...]:
     with create_database(compile_build(("images",))) as db:
         with db.transaction():
             staged.parents(db)
-        return plan_jp_images(db, staged.plan, staged.cards)
+        return plan_regional_images(db, staged.plan, staged.cards, region="jp")
 
 
 @pytest.mark.parametrize(
@@ -191,16 +183,16 @@ def test_original_src_and_crawler_url_encoding_bind_the_same_archived_image(
     batch = seal_batch(store, scope=(Scope(provider="jp", kind="image"),))
     images = FrozenSources(store.root, store.store_id, batch.batch_id)
     output = roots(tmp_path)
-    encoded = build_jp_assets(images, output, crops=empty_crops)
+    encoded = build_regional_assets(images, output, region="jp", crops=empty_crops)
     with create_database(compile_build(("images",))) as db:
         with db.transaction():
             staged.parents(db)
-        refs = plan_jp_images(db, staged.plan, staged.cards)
+        refs = plan_regional_images(db, staged.plan, staged.cards, region="jp")
         selected = tuple(ref for ref in refs if ref.source_src_raw == raw_src)
         assert len(selected) == 2
         assert {ref.source_url for ref in selected} == {source_url}
         with db.transaction():
-            populate_jp_assets(db, encoded, selected, output.preview)
+            populate_assets(db, encoded, selected, output.preview)
         assert len(db.rows("printing_image")) == 2
         assert len(db.rows("image_variant")) == 5
         asset = db.rows("image_asset")[0].values
@@ -214,18 +206,18 @@ def test_original_src_double_faces_and_five_variants_are_projected(
     empty_crops: ImageCrops, tmp_path: Path, frozen: FrozenSources, staged: Staged
 ) -> None:
     output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output, crops=empty_crops)
+    encoded = build_regional_assets(frozen, output, region="jp", crops=empty_crops)
     with create_database(compile_build(("images",))) as db:
         with db.transaction():
             staged.parents(db)
-        refs = plan_jp_images(db, staged.plan, staged.cards)
+        refs = plan_regional_images(db, staged.plan, staged.cards, region="jp")
         assert len(refs) == 3
         assert {ref.source_src_raw for ref in refs} == {
             "/synthetic/0.png",
             "/synthetic/1.png",
         }
         with db.transaction():
-            uses = populate_jp_assets(db, encoded, refs, output.preview)
+            uses = populate_assets(db, encoded, refs, output.preview)
         assert len(db.rows("printing_image")) == 3
         assert len(db.rows("image_asset")) == 2
         assert len(db.rows("image_variant")) == 10
@@ -272,7 +264,7 @@ def test_adopted_source_map_is_used_instead_of_logical_face_order(
     with create_database(compile_build(("images",))) as db:
         with db.transaction():
             staged.parents(db)
-        refs = plan_jp_images(db, plan, staged.cards)
+        refs = plan_regional_images(db, plan, staged.cards, region="jp")
     by_face = {
         ref.face_id: ref.source_src_raw for ref in refs if ref.printing_id == data.id
     }
@@ -291,7 +283,7 @@ def test_each_binding_provenance_constraint_rolls_back(
     field: str,
 ) -> None:
     output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output, crops=empty_crops)
+    encoded = build_regional_assets(frozen, output, region="jp", crops=empty_crops)
     refs = refs_for(staged)
     ref = refs[0]
     bad = {
@@ -305,7 +297,7 @@ def test_each_binding_provenance_constraint_rolls_back(
         with db.transaction():
             staged.parents(db)
         with pytest.raises(ValueError, match="binding"), db.transaction():
-            populate_jp_assets(db, encoded, (bad, *refs[1:]), output.preview)
+            populate_assets(db, encoded, (bad, *refs[1:]), output.preview)
         assert not db.rows("image_asset")
         assert not db.rows("image_variant")
         assert not db.rows("printing_image")
@@ -315,7 +307,7 @@ def test_absent_source_has_metadata_without_fake_path(
     empty_crops: ImageCrops, tmp_path: Path, frozen: FrozenSources, staged: Staged
 ) -> None:
     output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output, crops=empty_crops)
+    encoded = build_regional_assets(frozen, output, region="jp", crops=empty_crops)
     refs = refs_for(staged)
     ref = replace(
         refs[0],
@@ -325,7 +317,7 @@ def test_absent_source_has_metadata_without_fake_path(
     with create_database(compile_build(("images",))) as db:
         with db.transaction():
             staged.parents(db)
-            populate_jp_assets(db, encoded, (ref,), output.preview)
+            populate_assets(db, encoded, (ref,), output.preview)
         asset = db.rows("image_asset")[0].values
         assert asset["availability"] == "unfetched"
         assert asset["publication_state"] == "pending"
@@ -340,7 +332,7 @@ def test_shared_url_with_different_original_spelling_keeps_both(
     empty_crops: ImageCrops, tmp_path: Path, frozen: FrozenSources, staged: Staged
 ) -> None:
     output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output, crops=empty_crops)
+    encoded = build_regional_assets(frozen, output, region="jp", crops=empty_crops)
     refs = refs_for(staged)
     ref = next(ref for ref in refs if ref.source_src_raw == "/synthetic/0.png")
     other = next(
@@ -352,212 +344,10 @@ def test_shared_url_with_different_original_spelling_keeps_both(
     with create_database(compile_build(("images",))) as db:
         with db.transaction():
             staged.parents(db)
-            populate_jp_assets(db, encoded, (ref, other), output.preview)
+            populate_assets(db, encoded, (ref, other), output.preview)
         assert len(db.rows("image_asset")) == 2
         assert len(db.rows("image_variant")) == 10
         assert len({row.values["path"] for row in db.rows("image_variant")}) == 2
-
-
-def test_complete_bundle_binds_source_uses_after_blobs_and_is_immutable(
-    empty_crops: ImageCrops, tmp_path: Path, frozen: FrozenSources, staged: Staged
-) -> None:
-    output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output, crops=empty_crops)
-    refs = refs_for(staged)
-    expected = uses_sorted(
-        (*staged.plan.source_uses(), *encoded.source_uses(), *reference_uses(refs))
-    )
-    stores = {frozen.store_id: frozen.root}
-    destination = tmp_path / "bundle"
-    schema = compile_build(("images",))
-    record = publish_jp_image_bundle(
-        schema,
-        destination,
-        staged.context,
-        staged.parents,
-        encoded,
-        refs,
-        output,
-        parent_uses=staged.plan.source_uses(),
-        stores=stores,
-        crops=empty_crops,
-    )
-    assert record == verify_bundle(
-        schema, destination, staged.context, expected, stores=stores
-    )
-    before = {path: path.read_bytes() for path in destination.iterdir()}
-    assert b"Synthetic rule" not in before[destination / "report.json"]
-    with pytest.raises(FileExistsError):
-        publish_jp_image_bundle(
-            schema,
-            destination,
-            staged.context,
-            staged.parents,
-            encoded,
-            refs,
-            output,
-            parent_uses=staged.plan.source_uses(),
-            stores=stores,
-            crops=empty_crops,
-        )
-    assert before == {path: path.read_bytes() for path in destination.iterdir()}
-
-
-def test_bundle_requires_authored_crop_pins_and_seals_diagnostics(
-    empty_crops: ImageCrops, tmp_path: Path, frozen: FrozenSources, staged: Staged
-) -> None:
-    repo = tmp_path / "crop-repo"
-    descriptor = frozen.descriptor(frozen.inventory.current[0].source_version_id)
-    install(repo / "authored", [crop_record(descriptor)])
-    crops = load_image_crops(repo / "authored", authored_revision=initialize(repo))
-    context = BuildContext.from_inputs(
-        REVISION,
-        {"synthetic.lock": b"synthetic"} | crops.dependencies(),
-        {
-            "image_recipe": DEFAULT_RECIPE.version,
-            "image_crop_overrides": crops.configuration(),
-        },
-    )
-    output = roots(tmp_path)
-    original = build_jp_assets(frozen, output, crops=empty_crops)
-    refs = refs_for(staged)
-    schema = compile_build(("images",))
-    stores = {frozen.store_id: frozen.root}
-
-    def parents(db: Database) -> InputRecord:
-        parent = staged.parents(db)
-        return input_record(context, parent.uses)
-
-    destination = tmp_path / "crop-bundle"
-    with pytest.raises(ValueError, match=r"^Image crop configuration pin mismatch$"):
-        publish_jp_image_bundle(
-            schema,
-            destination,
-            context,
-            parents,
-            original,
-            refs,
-            output,
-            parent_uses=staged.plan.source_uses(),
-            stores=stores,
-            crops=empty_crops,
-        )
-    with pytest.raises(
-        ValueError, match=r"^Image crop box differs from adopted source crop$"
-    ):
-        publish_jp_image_bundle(
-            schema,
-            destination,
-            context,
-            parents,
-            original,
-            refs,
-            output,
-            parent_uses=staged.plan.source_uses(),
-            stores=stores,
-            crops=crops,
-        )
-    assert not destination.exists()
-    adopted = build_jp_assets(frozen, output, crops=crops)
-    published = publish_jp_image_bundle(
-        schema,
-        destination,
-        context,
-        parents,
-        adopted,
-        refs,
-        output,
-        parent_uses=staged.plan.source_uses(),
-        stores=stores,
-        crops=crops,
-    )
-    assert published == verify_bundle(
-        schema,
-        destination,
-        context,
-        uses_sorted(
-            (*staged.plan.source_uses(), *adopted.source_uses(), *reference_uses(refs))
-        ),
-        stores=stores,
-    )
-    envelope = object_value(parse((destination / "report.json").read_bytes()))
-    report = object_value(envelope["report"])
-    crop_report = object_value(report["crop_overrides"])
-    assert crop_report["applied_source_images"] == 1
-    assert crop_report["unused"] == []
-    assert crop_report["art_webp_review"] == "pending_coordinator_review"
-
-
-def test_bundle_rejects_adopted_crops_without_context_pins(
-    tmp_path: Path, frozen: FrozenSources, staged: Staged
-) -> None:
-    repo = tmp_path / "crop-repo"
-    descriptor = frozen.descriptor(frozen.inventory.current[0].source_version_id)
-    install(repo / "authored", [crop_record(descriptor)])
-    crops = load_image_crops(repo / "authored", authored_revision=initialize(repo))
-    output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output, crops=crops)
-    context = BuildContext.from_inputs(
-        REVISION,
-        {"synthetic.lock": b"synthetic"},
-        {"image_recipe": DEFAULT_RECIPE.version},
-    )
-
-    def parents(db: Database) -> InputRecord:
-        return input_record(context, staged.parents(db).uses)
-
-    destination = tmp_path / "unadopted-bundle"
-    with pytest.raises(ValueError, match=r"^Image crop configuration pin mismatch$"):
-        publish_jp_image_bundle(
-            compile_build(("images",)),
-            destination,
-            context,
-            parents,
-            encoded,
-            refs_for(staged),
-            output,
-            parent_uses=staged.plan.source_uses(),
-            stores={frozen.store_id: frozen.root},
-            crops=crops,
-        )
-    assert not destination.exists()
-
-
-@pytest.mark.parametrize("case", ["raw-bytes", "source-width"])
-def test_publication_rechecks_frozen_source_metadata(
-    empty_crops: ImageCrops,
-    tmp_path: Path,
-    frozen: FrozenSources,
-    staged: Staged,
-    case: str,
-) -> None:
-    output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output, crops=empty_crops)
-    item = encoded.images[0]
-    if case == "raw-bytes":
-        item = replace(item, raw_bytes=item.raw_bytes + 1)
-    else:
-        item = replace(
-            item, result=replace(item.result, source_width=item.result.source_width + 1)
-        )
-    encoded = replace(encoded, images=(item, *encoded.images[1:]))
-    destination = tmp_path / "rejected-source-bundle"
-    with pytest.raises(
-        ValueError, match=r"^Image source bytes or oriented dimensions mismatch$"
-    ):
-        publish_jp_image_bundle(
-            compile_build(("images",)),
-            destination,
-            staged.context,
-            staged.parents,
-            encoded,
-            refs_for(staged),
-            output,
-            parent_uses=staged.plan.source_uses(),
-            stores={frozen.store_id: frozen.root},
-            crops=empty_crops,
-        )
-    assert not destination.exists()
 
 
 @pytest.mark.parametrize(
@@ -620,69 +410,7 @@ def test_each_page_source_gate_has_an_independent_counterexample(
             else "JP image page provenance differs from the identity input"
         )
         with pytest.raises(ValueError, match="^" + expected + "$"):
-            plan_jp_images(db, plan, staged.cards)
-
-
-@pytest.mark.parametrize(
-    "case",
-    [
-        "blob-missing",
-        "recipe-context",
-        "private-root",
-        "parent-failure",
-        "binding-duplicate",
-    ],
-)
-def test_publication_failure_keeps_existing_bundle(
-    empty_crops: ImageCrops,
-    tmp_path: Path,
-    frozen: FrozenSources,
-    staged: Staged,
-    case: str,
-) -> None:
-    output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output, crops=empty_crops)
-    refs = refs_for(staged)
-    context = staged.context
-    destination = tmp_path / "failed-bundle"
-    populate: Callable[[Database], InputRecord] = staged.parents
-    if case == "blob-missing":
-        (output.preview / encoded.images[0].result.variants[0].path).unlink()
-    elif case == "recipe-context":
-        context = BuildContext.from_inputs(
-            REVISION, {"synthetic.lock": b"synthetic"}, {}
-        )
-
-        def same_context(db: Database) -> InputRecord:
-            parent = staged.parents(db)
-            return input_record(context, parent.uses)
-
-        populate = same_context
-    elif case == "private-root":
-        destination = output.preview / "private"
-    elif case == "binding-duplicate":
-        refs = (*refs, refs[0])
-    else:
-
-        def failed(_db: Database) -> InputRecord:
-            raise OSError("synthetic parent failure")
-
-        populate = failed
-    with pytest.raises((ValueError, FileNotFoundError, OSError)):
-        publish_jp_image_bundle(
-            compile_build(("images",)),
-            destination,
-            context,
-            populate,
-            encoded,
-            refs,
-            output,
-            parent_uses=staged.plan.source_uses(),
-            stores={frozen.store_id: frozen.root},
-            crops=empty_crops,
-        )
-    assert not destination.exists()
-    assert not list(tmp_path.glob(".build-bundle-*"))
+            plan_regional_images(db, plan, staged.cards, region="jp")
 
 
 @pytest.mark.parametrize(
@@ -740,4 +468,4 @@ def test_identity_plan_and_source_face_map_are_rechecked(
                             {"source_id": source},
                         )
         with pytest.raises(ValueError, match=r"source face map|provenance|identity"):
-            plan_jp_images(db, plan, staged.cards)
+            plan_regional_images(db, plan, staged.cards, region="jp")

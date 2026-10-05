@@ -76,7 +76,6 @@ def crop_report(
             )
     return {
         "applied_source_images": len(used & by_id.keys()),
-        "art_webp_review": "pending_coordinator_review",
         "unused": [
             _label(record)
             for key, record in sorted(crops.records.items())

@@ -154,7 +154,7 @@ class VariantSet:
     source_sha256: str
     source_width: int
     source_height: int
-    crop_box: CropBox | None
+    crop_box: CropBox
     recipe_version: str
     variants: tuple[ImageVariant, ...]
     cache_hit: bool
@@ -178,7 +178,7 @@ class _CacheEntry(BaseModel):
     recipe_version: str
     source_width: int
     source_height: int
-    crop: list[int] | None
+    crop: list[int]
     variants: list[_CachedVariant]
 
 
@@ -200,7 +200,7 @@ def build_variants(
         _canonical(
             {
                 "source_sha256": source.source_sha256,
-                "crop": None if crop is None else list(crop.bounds),
+                "crop": list(crop.bounds),
                 "recipe": recipe.definition(),
             }
         )
@@ -215,8 +215,6 @@ def build_variants(
     generated: list[ImageVariant] = []
     for size in SIZES:
         if size.purpose == "art":
-            if crop is None:
-                continue
             pixels = image.crop(crop.bounds)
             dimensions = _art_dimensions(crop, size)
         else:
@@ -371,7 +369,7 @@ def _convert_icc(image: Image.Image, profile: object) -> Image.Image:
 
 def crop_box(
     source: ImageSource, width: int, height: int, override: CropOverride | None
-) -> CropBox | None:
+) -> CropBox:
     """Use the same geometry at encoding and independently verified consumption."""
     if override is not None:
         if (
@@ -483,7 +481,7 @@ def _read_cache(
     path: Path,
     source: ImageSource,
     image: Image.Image,
-    crop: CropBox | None,
+    crop: CropBox,
     recipe: Recipe,
     blob_root: Path,
 ) -> VariantSet | None:
@@ -491,10 +489,6 @@ def _read_cache(
         entry = _CacheEntry.model_validate_json(path.read_bytes())
     except FileNotFoundError, ValidationError:
         return None
-    crop_values = None if crop is None else list(crop.bounds)
-    expected_specs = [
-        size for size in SIZES if size.purpose == "card" or crop is not None
-    ]
     if (
         entry.cache_key != path.stem
         or entry.source_sha256 != source.source_sha256
@@ -503,12 +497,12 @@ def _read_cache(
         or entry.source_height != image.height
     ):
         return None
-    if entry.crop != crop_values or [item.size_key for item in entry.variants] != [
-        size.key for size in expected_specs
-    ]:
+    if entry.crop != list(crop.bounds) or [
+        item.size_key for item in entry.variants
+    ] != [size.key for size in SIZES]:
         return None
     variants = _cached_variants(
-        zip(entry.variants, expected_specs, strict=True),
+        zip(entry.variants, SIZES, strict=True),
         image,
         crop,
         source,
@@ -533,7 +527,7 @@ def _read_cache(
 def _cached_variants(
     entries: Iterable[tuple[_CachedVariant, SizeSpec]],
     image: Image.Image,
-    crop: CropBox | None,
+    crop: CropBox,
     source: ImageSource,
     recipe: Recipe,
     blob_root: Path,
@@ -543,8 +537,6 @@ def _cached_variants(
         if item.width <= 0 or item.height <= 0 or item.bytes <= 0:
             return None
         if size.purpose == "art":
-            if crop is None:
-                return None
             dimensions = _art_dimensions(crop, size)
         else:
             dimensions = _card_dimensions(image.width, image.height, size)
@@ -577,7 +569,7 @@ def _write_cache(path: Path, result: VariantSet, key: str) -> None:
         recipe_version=result.recipe_version,
         source_width=result.source_width,
         source_height=result.source_height,
-        crop=None if result.crop_box is None else list(result.crop_box.bounds),
+        crop=list(result.crop_box.bounds),
         variants=[
             _CachedVariant(
                 size_key=item.size_key,

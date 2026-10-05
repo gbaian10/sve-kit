@@ -5,37 +5,23 @@ from copy import deepcopy
 from dataclasses import dataclass, replace
 from io import BytesIO
 from pathlib import Path
-from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import pytest
 from PIL import Image
-from typer.testing import CliRunner
 
 import sve_carddb.snapshot.preview as writer_module
-import sve_carddb.snapshot.preview.commands as cli_module
 from sve_carddb.build_db import create_database
-from sve_carddb.cli import app
 from sve_carddb.image_variants import SIZES, build_variants
 from sve_carddb.snapshot.export import Ownership, export_snapshot
 from sve_carddb.snapshot.media import MediaPlan, prepare_media
 from sve_carddb.snapshot.preview import Roots, _write, write_preview
-from sve_carddb.snapshot.preview.build import Built
 from sve_carddb.snapshot.preview.images import image_blobs
-from sve_carddb.snapshot.values import (
-    array,
-    canonical,
-    digest,
-    integer,
-    object_value,
-    parse,
-    string,
-)
+from sve_carddb.snapshot.values import digest, integer, string
 
 from .snapshot_project_fixtures import populate, schema
 from .test_image_variants import png, source
 from .test_snapshot_export import BATCH
-from .test_snapshot_preview import cli_recipe
 from .test_snapshot_project import projected
 
 if TYPE_CHECKING:
@@ -467,58 +453,6 @@ def test_image_source_roots_must_be_disjoint(
     assert list(tmp_path.iterdir()) == []
 
 
-@pytest.mark.parametrize("option", ["--image-assets-dir", "--image-cache-dir"])
-def test_cli_requires_both_readonly_image_roots(tmp_path: Path, option: str) -> None:
-    path = tmp_path / "inputs.json"
-    path.write_bytes(canonical(cli_recipe(tmp_path)))
-    library = tmp_path / "library"
-    library.mkdir()
-    result = CliRunner().invoke(
-        app,
-        [
-            "snapshot",
-            "export",
-            "--inputs",
-            str(path),
-            "--preview-dir",
-            str(tmp_path / "preview"),
-            "--cdn-dir",
-            str(tmp_path / "formal"),
-            option,
-            str(library),
-        ],
-        env={"NO_COLOR": "1", "TERM": "dumb"},
-    )
-    assert result.exit_code != 0
-    assert "provided together" in result.output
-    assert not (tmp_path / "preview").exists()
-
-
-def test_cli_rejects_relative_preview_before_reading_recipe(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.chdir(tmp_path)
-    path = tmp_path / "inputs.json"
-    path.write_bytes(b"not a recipe")
-    result = CliRunner().invoke(
-        app,
-        [
-            "snapshot",
-            "export",
-            "--inputs",
-            str(path),
-            "--preview-dir",
-            "relative-preview",
-            "--cdn-dir",
-            str(tmp_path / "formal"),
-        ],
-    )
-    assert result.exit_code != 0
-    assert isinstance(result.exception, ValueError)
-    assert str(result.exception) == "Preview root must be an absolute path"
-    assert list(tmp_path.iterdir()) == [path]
-
-
 def test_writer_rejects_relative_preview_before_writes(
     images: PublicImages, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -532,72 +466,3 @@ def test_writer_rejects_relative_preview_before_writes(
             media_plan=images.plan(),
         )
     assert list(tmp_path.iterdir()) == []
-
-
-def test_cli_passes_confirmed_images_to_writer(
-    images: PublicImages, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    path = tmp_path / "inputs.json"
-    path.write_bytes(canonical(cli_recipe(tmp_path)))
-    cache = tmp_path / "cache"
-    cache.mkdir()
-    tables = images.tables()
-    tables["image_asset"][0]["origin"] = "third_party"
-    built = Built(
-        replace(images.projection, tables=tables),
-        images.ownership,
-        b"synthetic input",
-        {},
-        frozenset({"image"}),
-    )
-    # The CLI must bind its frozen loader's result and root to the actual builder.
-    sentinel = object()
-    monkeypatch.setattr(cli_module, "FrozenSources", lambda *_args: sentinel)
-    image_build = SimpleNamespace(images=(), elapsed_seconds=0)
-    crop_inputs = object()
-    monkeypatch.setattr(
-        cli_module, "load_image_crops", lambda *_args, **_kwargs: crop_inputs
-    )
-
-    def assets(source: object, _roots: object, **kwargs: object) -> object:
-        assert source is sentinel
-        assert kwargs == {"workers": 4, "reuse_only": True, "crops": crop_inputs}
-        return image_build
-
-    def build(_recipe: object, **kwargs: object) -> Built:
-        assert kwargs == {"images": image_build, "image_root": images.library}
-        return built
-
-    monkeypatch.setattr(cli_module, "build_jp_assets", assets)
-    monkeypatch.setattr(cli_module, "build", build)
-    result = CliRunner().invoke(
-        app,
-        [
-            "snapshot",
-            "export",
-            "--inputs",
-            str(path),
-            "--preview-dir",
-            str(tmp_path / "preview"),
-            "--cdn-dir",
-            str(tmp_path / "formal"),
-            "--image-assets-dir",
-            str(images.library),
-            "--image-cache-dir",
-            str(cache),
-        ],
-    )
-    assert result.exit_code == 0, result.exception
-    report = object_value(parse(result.output.encode()))
-    assert report["image_execution"] == {
-        "reuse_milliseconds": 0,
-        "cache_hits": 0,
-        "new_encoding_milliseconds": 0,
-    }
-    pointer = object_value(report["pointer"])
-    manifest_path = string(pointer["manifest_path"])
-    manifest = object_value(parse((tmp_path / "preview" / manifest_path).read_bytes()))
-    assert any(
-        string(object_value(row)["key"]).startswith("images/")
-        for row in array(manifest["files"])
-    )

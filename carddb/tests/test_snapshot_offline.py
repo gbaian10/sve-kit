@@ -28,6 +28,7 @@ from sve_carddb.registry.records import PrintingData
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot import offline
 from sve_carddb.snapshot.export import export_snapshot
+from sve_carddb.snapshot.export.compression import verify_brotli
 from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.offline import (
     Inputs,
@@ -35,7 +36,12 @@ from sve_carddb.snapshot.offline import (
     build,
     require_offline_coverage,
 )
-from sve_carddb.snapshot.preview import Roots, require_unknown_coverage, write_preview
+from sve_carddb.snapshot.preview import (
+    Roots,
+    commands,
+    require_unknown_coverage,
+    write_preview,
+)
 from sve_carddb.snapshot.project import project
 from sve_carddb.snapshot.publication import require_preview
 from sve_carddb.snapshot.reader import read_snapshot
@@ -50,8 +56,9 @@ from sve_carddb.snapshot.values import (
 
 from .adoption_fixtures import REPO, commit
 from .catalog_vocabulary_fixtures import current_vocabulary_case, make_vocabulary_case
+from .test_snapshot_export import BATCH
 from .test_snapshot_export import exported as exported  # ruff: ignore[useless-import-alias] -- register shared export fixture
-from .test_snapshot_preview import EmptySources, prepare_build
+from .test_snapshot_preview import EmptySources
 from .test_snapshot_preview import logical as logical  # ruff: ignore[useless-import-alias] -- register the export fixture parent
 from .text_observation_fixtures import LANGUAGES
 
@@ -74,7 +81,9 @@ def prepared(
     default_text_case: TextCaseTemplate, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> tuple[Case, Inputs, tuple[CardPage, ...]]:
     case = default_text_case.copy(tmp_path / "synthetic")
-    original = prepare_build(case, tmp_path, monkeypatch)
+    repo = tmp_path / "repo"
+    (repo / "carddb/src/sve_carddb").mkdir(parents=True)
+    (repo / "carddb/uv.lock").write_bytes(b"synthetic lock")
     for name in (
         "carddb/pyproject.toml",
         "carddb/src/sve_carddb/extract/official_jp.py",
@@ -82,7 +91,7 @@ def prepared(
         "carddb/src/sve_carddb/snapshot/values.py",
         "carddb/src/sve_carddb/translations/sources.py",
     ):
-        target = original.repo / name
+        target = repo / name
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes((REPO / name).read_bytes())
     pins = tuple(
@@ -93,24 +102,24 @@ def prepared(
                 for (code, _), card in case.provider.cards.items()
                 if code == region
             ),
-            image_batch=original.image_batch,
+            image_batch="sha256:" + "b" * 64,
             parser_version="synthetic-v1",
         )
         for region in ("en", "jp")
     )
     recipe = Inputs(
-        **original.model_dump(
-            exclude={
-                "card_batch",
-                "image_batch",
-                "parser_version",
-                "vocabulary",
-                "languages",
-            }
-        ),
+        repo=repo,
+        archive=case.store,
+        store_id="test-store",
         sources=pins,
+        revision="a" * 40,
+        as_of="2026-10-02",
+        data_version=BATCH.data_version,
+        published_at=BATCH.published_at,
+        feedback_url="https://example.invalid/feedback",
+        grammar_version="synthetic-v1",
+        normalizer_version="synthetic-v1",
     )
-    original.vocabulary.unlink()
 
     class AdoptedInputs:
         def translation_inputs(self) -> None:
@@ -465,8 +474,10 @@ def test_offline_coverage_remains_unknown(
 
 
 @pytest.mark.parametrize("format_version", ["2.0.0"])
+@pytest.mark.parametrize("with_brotli", [False, True])
 def test_offline_cli_writes_private_bundle_and_dual_preview(
     format_version: str,
+    with_brotli: bool,
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
     tmp_path: Path,
 ) -> None:
@@ -478,17 +489,18 @@ def test_offline_cli_writes_private_bundle_and_dual_preview(
         [
             "snapshot",
             "export-offline",
+            "--brotli" if with_brotli else "--no-brotli",
             "--format-version",
             format_version,
             "--inputs",
             str(path),
-            "--preview-dir",
-            str(tmp_path / "preview"),
-            "--cdn-dir",
-            str(tmp_path / "formal"),
             "--bundle-dir",
             str(tmp_path / "bundle"),
         ],
+        env={
+            "SVE_PREVIEW_DIR": str(tmp_path / "preview"),
+            "SVE_CDN_DIR": str(tmp_path / "formal"),
+        },
     )
     assert result.exit_code == 0, result.exception
     assert (tmp_path / "bundle/build.sqlite").is_file()
@@ -503,6 +515,10 @@ def test_offline_cli_writes_private_bundle_and_dual_preview(
         parse((root / string(pointer["manifest_path"])).read_bytes())
     )
     assert manifest["format_version"] == format_version
+    br_files = list((root / "snapshots").rglob("*.json.br"))
+    assert bool(br_files) == with_brotli
+    for member in br_files:
+        verify_brotli(member.read_bytes(), member.with_suffix("").read_bytes())
 
     report = object_value(
         parse(
@@ -513,6 +529,100 @@ def test_offline_cli_writes_private_bundle_and_dual_preview(
     )
     startup = object_value(object_value(report["capacity"])["startup_by_region"])
     assert startup["jp"] == startup["en"]
+
+
+@pytest.mark.parametrize("protected", ["repo", "archive", "formal", "relative"])
+def test_cli_preview_validates_output_before_build(
+    prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    protected: str,
+) -> None:
+    recipe = prepared[1]
+    path = tmp_path / "inputs.json"
+    path.write_text(recipe.model_dump_json())
+    formal = tmp_path / "formal"
+    targets = {
+        "repo": recipe.repo / "output",
+        "archive": recipe.archive / "output",
+        "formal": formal,
+        "relative": tmp_path / "relative-preview",
+    }
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("No build before output validation")
+
+    monkeypatch.setattr(commands, "build_offline", forbidden)
+    monkeypatch.chdir(tmp_path)
+    result = CliRunner().invoke(
+        app,
+        [
+            "snapshot",
+            "export-offline",
+            "--inputs",
+            str(path),
+            "--preview-dir",
+            "relative-preview" if protected == "relative" else str(targets[protected]),
+            "--cdn-dir",
+            str(formal),
+            "--bundle-dir",
+            str(tmp_path / "bundle"),
+        ],
+    )
+    messages = {
+        "repo": "Preview output must be disjoint from immutable input roots",
+        "archive": "Preview output must be disjoint from immutable input roots",
+        "formal": "Preview and formal roots must be disjoint",
+        "relative": "Preview root must be an absolute path",
+    }
+    assert isinstance(result.exception, ValueError)
+    assert str(result.exception) == messages[protected]
+    assert not targets[protected].exists()
+    assert not (tmp_path / "bundle").exists()
+
+
+def test_cli_rejects_formal_export_before_preview_writes(
+    prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    recipe = prepared[1]
+    built = build(recipe)
+    plan = prepare_media(built.projection, None, revision=1)
+    invalid = export_snapshot(plan.projection, built.ownership, recipe.batch())
+    invalid = replace(
+        invalid,
+        manifest=invalid.manifest | {"data_version": "20261002T010203Z-0001"},
+    )
+    monkeypatch.setattr(commands, "build_offline", lambda *_args, **_kwargs: built)
+    monkeypatch.setattr(commands, "export_snapshot", lambda *_args, **_kwargs: invalid)
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("Formal manifest must not reach the preview writer")
+
+    monkeypatch.setattr(commands, "write_preview", forbidden)
+    path = tmp_path / "inputs.json"
+    path.write_text(recipe.model_dump_json())
+    result = CliRunner().invoke(
+        app,
+        [
+            "snapshot",
+            "export-offline",
+            "--inputs",
+            str(path),
+            "--preview-dir",
+            str(tmp_path / "preview"),
+            "--cdn-dir",
+            str(tmp_path / "formal"),
+            "--bundle-dir",
+            str(tmp_path / "bundle"),
+        ],
+    )
+    assert isinstance(result.exception, ValueError)
+    assert str(result.exception).startswith("Preview requires")
+    assert not (tmp_path / "preview/snapshots").exists()
+    assert not (tmp_path / "preview/private/inputs").exists()
+    assert not (tmp_path / "formal").exists()
 
 
 @pytest.mark.parametrize("pins", [(), ("jp",), ("jp", "en"), ("en", "en")])
