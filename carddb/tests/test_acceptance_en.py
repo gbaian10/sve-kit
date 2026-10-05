@@ -150,9 +150,7 @@ def make_case(
         else {},
         en={NUMBER: original},
         mapping=CardMapping(targets={NUMBER: None}, original_art=set(), reskins={}),
-        decisions=InitDecisions(
-            policy="identity-init-2026-09-28-v1",
-        ),
+        decisions=InitDecisions(),
         as_of=date(2026, 10, 1),
         jp_hash="sha256:" + "2" * 64,
     )

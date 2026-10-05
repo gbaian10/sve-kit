@@ -28,7 +28,6 @@ class Correction(BaseModel):
 
 class InitDecisions(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    policy: Literal["identity-init-2026-09-28-v1"]
     corrections: list[Correction] = Field(default_factory=list)
     reskins: dict[str, str] = Field(default_factory=dict)
     separate_groups: dict[str, str] = Field(default_factory=dict)

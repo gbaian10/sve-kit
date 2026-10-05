@@ -261,7 +261,6 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
         en={},
         mapping=Mapping(targets={}, original_art=set(), reskins={}),
         decisions=InitDecisions(
-            policy="identity-init-2026-09-28-v1",
             separate_groups={"jp:SYN-001": "synthetic-a", "jp:SYN-002": "synthetic-b"}
             if dual
             else {},

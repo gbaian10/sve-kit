@@ -521,9 +521,7 @@ def test_english_inclusions_obey_existing_identity_gate(
             original_art={en_card.number},
             reskins={},
         ),
-        decisions=InitDecisions(
-            policy="identity-init-2026-09-28-v1",
-        ),
+        decisions=InitDecisions(),
         as_of=date(2026, 9, 30),
         jp_hash="sha256:" + "1" * 64,
     )

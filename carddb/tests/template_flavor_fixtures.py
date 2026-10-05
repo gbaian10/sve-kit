@@ -69,7 +69,6 @@ def flavor_case(tmp_path_factory: pytest.TempPathFactory) -> Case:
         en={},
         mapping=Mapping(targets={}, original_art=set(), reskins={}),
         decisions=InitDecisions(
-            policy="identity-init-2026-09-28-v1",
             separate_groups={"jp:" + number: number for number in jp},
         ),
         as_of=date(2026, 9, 28),

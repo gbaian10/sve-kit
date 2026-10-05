@@ -178,7 +178,7 @@ CLI 每次建置均驗證這個投影，可用 `--corrections-output <absolute-d
 
 工具入口為 `uv --directory <absolute-carddb> run python -m sve_carddb.registry`；參數 `--jp/--en/--candidates/--confirmations/--original-art/--decisions/--images/--authored` 全為明示路徑，`--as-of` 為 JP 輸入的 ISO 日期，`--check` 要求現有輸出完全相同。全程只讀本機來源，不讀 manifest、不抓網路。
 
-decisions 是本機的初始化決定檔（`registry.review.InitDecisions`），JSON 欄位為 policy、corrections、reskins、separate_groups、art_groups，只記人工配對決定。policy 目前固定 identity-init-2026-09-28-v1。工具不從 confidence 產生配對決定；產生的登錄照一般 PR diff 審查。新包先產候選、核對所有面與差異、核圖實質增刪，再更新決定檔。任何未核對的職業、種類、數值或英文同卡名稱衝突都失敗。
+decisions 是本機的初始化決定檔（`registry.review.InitDecisions`），JSON 欄位為 corrections、reskins、separate_groups、art_groups，只記人工配對決定。工具不從 confidence 產生配對決定；產生的登錄照一般 PR diff 審查。新包先產候選、核對所有面與差異、核圖實質增刪，再更新決定檔。任何未核對的職業、種類、數值或英文同卡名稱衝突都失敗。
 
 corrections 元素包含 region、card_no、face_index、field、expected_raw_value、corrected_value、image_sha256、locator、state、reason。needs_review 的 card_type 候選另須明示 `adoption_scope: identity_check_only` 與 `source_correction_status: pending_user_confirmation`，否則拒絕用於身分核對；這兩欄不會提升來源更正狀態，也不改寫原觀測或正式分片。reskins 是 EN 卡號 → JP 原卡號；separate_groups 是 `region:exact_card_no` → 明示分組鍵；art_groups 是已核對同幅插畫的 EN 卡號陣列集合，組間不得重疊、不能跨 card。未列入者各自登錄；本批 CP02-072EN／CP02-P57EN 依同圖不同簽名加工規則共用 art。決定檔不進 git，採納後的永久登錄與其精確成員決定才是維護狀態。新增 package 使用包含原觀測的完整輸入集合，不把變動的舊來源塞進追加工具；舊來源更新另走 source／identity 修復流程。
 

@@ -454,9 +454,7 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
             jp={"SYN-01": cards["jp"]},
             en={"SYN-02": cards["en"]},
             mapping=Mapping(targets={"SYN-02": None}, original_art=set(), reskins={}),
-            decisions=InitDecisions(
-                policy="identity-init-2026-09-28-v1",
-            ),
+            decisions=InitDecisions(),
             as_of=date(2026, 10, 2),
             jp_hash=digest(b"synthetic JP coverage"),
         ),

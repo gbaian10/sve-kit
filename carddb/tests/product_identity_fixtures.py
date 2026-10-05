@@ -253,9 +253,7 @@ def identity_template(tmp_path_factory: pytest.TempPathFactory) -> IdentityTempl
         jp={card.number: card},
         en={},
         mapping=CardMapping(targets={}, original_art=set(), reskins={}),
-        decisions=InitDecisions(
-            policy="identity-init-2026-09-28-v1",
-        ),
+        decisions=InitDecisions(),
         as_of=date(2026, 9, 30),
         jp_hash="sha256:" + "1" * 64,
     )

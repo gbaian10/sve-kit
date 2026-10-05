@@ -126,9 +126,7 @@ def english_images(  # ruff: ignore[too-many-locals] -- seal the shared minimal 
         jp=jp_cards,
         en={NUMBER: legacy_en(extract_en(raw, number=NUMBER))},
         mapping=Mapping(targets={NUMBER: "TEST-002"}, original_art=set(), reskins={}),
-        decisions=InitDecisions(
-            policy="identity-init-2026-09-28-v1",
-        ),
+        decisions=InitDecisions(),
         as_of=date(2026, 9, 29),
         jp_hash="sha256:" + "0" * 64,
     )

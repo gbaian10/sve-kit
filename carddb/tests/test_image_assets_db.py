@@ -123,9 +123,7 @@ def make_staged(
         },
         en={},
         mapping=Mapping(targets={}, original_art=set(), reskins={}),
-        decisions=InitDecisions(
-            policy="identity-init-2026-09-28-v1",
-        ),
+        decisions=InitDecisions(),
         as_of=date(2026, 9, 29),
         jp_hash="sha256:" + "0" * 64,
     )

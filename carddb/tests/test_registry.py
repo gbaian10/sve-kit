@@ -98,9 +98,7 @@ def make_inputs() -> Inputs:
             original_art={"BP02-070EN"},
             reskins={"GF01-001EN": "BP02-071"},
         ),
-        decisions=InitDecisions(
-            policy="identity-init-2026-09-28-v1",
-        ),
+        decisions=InitDecisions(),
         as_of=date(2026, 9, 28),
         jp_hash="sha256:" + "0" * 64,
     )
