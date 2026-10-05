@@ -36,21 +36,12 @@ export interface ImageRequest {
   readonly width: number
   readonly height: number
   readonly seed: number
-  /** A source file to resize, or null for a synthetic placeholder. */
-  readonly source: string | null
 }
 
 type ImageEncoder = (request: ImageRequest) => Promise<Uint8Array>
 
 export interface BuildOptions {
   readonly encodeImage: ImageEncoder
-  readonly cards?: readonly Card[]
-  readonly families?: Record<string, Family>
-  readonly vocabulary?: Vocabulary
-  /** Synthetic-only extras (keywords, symbol, stamp, route rows); off for real data. */
-  readonly synthetic?: boolean
-  readonly dataVersion?: string
-  readonly publishedAt?: string
 }
 
 export interface BuiltSnapshot {
@@ -512,7 +503,6 @@ interface CardContext {
   readonly seed: number
   readonly vocabulary: Vocabulary
   readonly artistIds: Map<string, string>
-  readonly synthetic: boolean
 }
 
 interface FaceRevisions {
@@ -712,11 +702,7 @@ async function addImages(
   ordinal: number,
 ): Promise<void> {
   const { builder, owner, encodeImage, images } = ctx
-  const source = printing.imagePaths?.[ordinal] ?? null
-  const state =
-    printing.imagePaths !== undefined && source === null
-      ? "missing"
-      : (printing.image ?? "approved")
+  const state = printing.image ?? "approved"
   const imageId = `img:${printing.id.slice(2)}:${String(ordinal)}`
   builder.push("image_asset", GLOBAL, "detail", {
     id: imageId,
@@ -753,7 +739,6 @@ async function addImages(
         ctx.seed * 8 +
         ordinal * 3 +
         (printing.variant === "alt" ? 1 : printing.variant === "signed" ? 2 : 0),
-      source,
     })
     images.set(
       `images/${size.key}/${String(printing.intId)}${ordinal === 0 ? "" : `-f${String(ordinal)}`}.webp`,
@@ -777,7 +762,7 @@ async function addImages(
 
 function artistFor(ctx: CardContext, face: Face, index: number): string | null {
   if (face.illustrator === undefined) {
-    return ctx.synthetic ? (ARTISTS[(ctx.seed + index) % ARTISTS.length] ?? "") : null
+    return ARTISTS[(ctx.seed + index) % ARTISTS.length] ?? ""
   }
   let id = ctx.artistIds.get(face.illustrator)
   if (id === undefined) {
@@ -1235,12 +1220,11 @@ function blob(value: JsonValue): { bytes: Uint8Array; hash: string; path: string
 }
 
 export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapshot> {
-  const cards = options.cards ?? CARDS
-  const dataVersion = options.dataVersion ?? "20260929T000000Z-0001"
-  const publishedAt = options.publishedAt ?? "2026-09-29T00:00:00Z"
-  const families = options.families ?? SETS
-  const vocabulary = options.vocabulary ?? SYNTHETIC_VOCABULARY
-  const synthetic = options.synthetic ?? true
+  const cards = CARDS
+  const dataVersion = "20260929T000000Z-0001"
+  const publishedAt = "2026-09-29T00:00:00Z"
+  const families = SETS
+  const vocabulary = SYNTHETIC_VOCABULARY
   const builder = new Builder()
   const images = new Map<string, Uint8Array>()
   const artistIds = new Map<string, string>()
@@ -1256,10 +1240,8 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
   addVocabulary(builder, "frame", "normal", { ja: "通常", zhHant: "一般", en: "Standard" })
   addVocabulary(builder, "frame", "alt", { ja: "特別", zhHant: "特別", en: "Special" })
   addSets(builder, families)
-  if (synthetic) {
-    addStamp(builder)
-    addKeywords(builder)
-  }
+  addStamp(builder)
+  addKeywords(builder)
   addRules(builder)
   for (const [seed, card] of cards.entries()) {
     await addCard({
@@ -1271,23 +1253,19 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
       seed,
       vocabulary,
       artistIds,
-      synthetic,
     })
   }
-  if (synthetic)
-    builder.push("card_route_alias", GLOBAL, "detail", {
-      namespace: "official",
-      old_key: "BP01-002A",
-      target_namespace: "official",
-      target_key: "BP01-002a",
-      reason: "renumbered",
-    })
-  if (synthetic) {
-    builder.push("route_override", GLOBAL, "detail", {
-      route_key: "BP01-002",
-      printing_id: "p:bp01-002",
-    })
-  }
+  builder.push("card_route_alias", GLOBAL, "detail", {
+    namespace: "official",
+    old_key: "BP01-002A",
+    target_namespace: "official",
+    target_key: "BP01-002a",
+    reason: "renumbered",
+  })
+  builder.push("route_override", GLOBAL, "detail", {
+    route_key: "BP01-002",
+    printing_id: "p:bp01-002",
+  })
   const usedArtists = new Set(
     fragmentsOf(builder, "art").flatMap((row) =>
       (row["artists"] as JsonObject[]).map((item) => stringValue(item["artist_id"])),

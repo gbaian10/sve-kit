@@ -18,7 +18,6 @@
     "check": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run knip && bun run build",
     "knip": "bun run schema:compile && knip",
     "fixture:build": "bun run schema:compile && bun run scripts/fixture/main.ts",
-    "fixture:local": "bun run schema:compile && bun run scripts/fixture/local-main.ts",
     "schema:compile": "bun run scripts/schema/main.ts",
     "deploy:dev": "wrangler deploy --config wrangler.dev.jsonc"
   },
