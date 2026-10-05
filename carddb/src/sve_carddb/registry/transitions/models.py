@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, JsonValue, field_validator, model_validator
 
-from sve_carddb.build_inputs import BuildContext, Revision, Version  # ruff: ignore[typing-only-first-party-import] -- Pydantic evaluates wire annotations at runtime
+from sve_carddb.build_inputs import BuildContext, Revision, Version
 from sve_carddb.registry.inputs import canonical
 from sve_carddb.registry.records import (
     DATA_MODELS,

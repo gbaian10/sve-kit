@@ -1,7 +1,5 @@
 """Current vocabulary and language values; other catalog kinds retain format one."""
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves nested values at runtime
-
 from typing import Annotated, Literal
 
 from pydantic import Field

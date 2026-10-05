@@ -16,7 +16,7 @@ from sve_carddb.registry.records import (
     UInt,
 )
 from sve_carddb.snapshot.values import canonical, digest
-from sve_carddb.text_observations.presence import EffectPresence  # ruff: ignore[typing-only-first-party-import] -- full presence results are part of observation identities
+from sve_carddb.text_observations.presence import EffectPresence
 
 POLICY = "wording-adoption-v1"
 Positive = Annotated[int, Field(gt=0)]

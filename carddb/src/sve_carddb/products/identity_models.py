@@ -5,7 +5,7 @@ from urllib.parse import parse_qsl, urlsplit
 
 from pydantic import Field, field_validator, model_validator
 
-from sve_carddb.build_inputs import Version  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves this constrained alias at runtime
+from sve_carddb.build_inputs import Version
 from sve_carddb.products.models import Code, DecisionMetadata, Evidence
 from sve_carddb.registry.records import Hash, RecordData, Region, Text
 

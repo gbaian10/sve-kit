@@ -1,7 +1,7 @@
 """Compose regional card-page supplements without granting formal release coverage."""
 
 from dataclasses import replace
-from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] -- Pydantic resolves recipe paths at runtime
+from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import JsonValue, model_validator
@@ -32,7 +32,7 @@ from sve_carddb.products import (
     load_products,
     plan_official_products,
 )
-from sve_carddb.products.models import Date  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves constrained fields at runtime
+from sve_carddb.products.models import Date
 from sve_carddb.registry.preview import FrozenEN, FrozenJP, FrozenRegions, plan_preview
 from sve_carddb.registry.records import (
     Hash,

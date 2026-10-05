@@ -1,7 +1,5 @@
 """Hash-only candidate inventories; none of these records asserts human adoption."""
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves constrained nested types at runtime
-
 from typing import Annotated, Literal
 
 from pydantic import Field

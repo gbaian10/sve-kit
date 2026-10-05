@@ -8,7 +8,7 @@ from pydantic import JsonValue, model_validator
 
 from sve_carddb.build_db.t0_json import schemas, symbol_valid
 from sve_carddb.build_db.validation import Rules
-from sve_carddb.products.models import Code, Lang  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves constrained aliases at runtime
+from sve_carddb.products.models import Code, Lang
 from sve_carddb.registry.records import RecordData, Text
 from sve_carddb.snapshot.values import array, canonical, integer, object_value, string
 

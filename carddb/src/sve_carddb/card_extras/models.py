@@ -5,7 +5,7 @@ from urllib.parse import urlsplit
 
 from pydantic import JsonValue, model_validator
 
-from sve_carddb.build_inputs import Source  # ruff: ignore[typing-only-first-party-import] -- runtime Pydantic field
+from sve_carddb.build_inputs import Source
 from sve_carddb.registry.records import Date, RecordData, Region, Text
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.sources import official_en, official_jp

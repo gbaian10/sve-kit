@@ -1,7 +1,7 @@
 """Runtime settings, read from `SVE_*` environment variables."""
 
 import os
-from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] -- pydantic reads annotations at runtime
+from pathlib import Path
 from typing import Annotated
 
 from pydantic import Field, field_validator

@@ -1,7 +1,7 @@
 """Compose the pinned offline JP build without opening crawler settings or a manifest."""
 
 from dataclasses import dataclass
-from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] -- Pydantic resolves path fields at runtime
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
@@ -26,7 +26,7 @@ from sve_carddb.products import (
     load_products,
     plan_official_products,
 )
-from sve_carddb.products.models import Date  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves constrained fields at runtime
+from sve_carddb.products.models import Date
 from sve_carddb.registry.preview import FrozenJP, plan_preview
 from sve_carddb.registry.records import Hash, Instant, PrintingData, RecordData, Text
 from sve_carddb.snapshot.export import Batch, Ownership

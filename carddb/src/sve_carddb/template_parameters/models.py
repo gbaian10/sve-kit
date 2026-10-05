@@ -1,7 +1,5 @@
 """Translation-contract span/schema shapes, separate from candidate uncertainty."""
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves constrained nested types
-
 from itertools import pairwise
 from typing import Annotated, Literal, Self
 

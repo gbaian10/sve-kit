@@ -1,6 +1,5 @@
 """Shared semantic definition fields for editable current templates."""
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves constrained wire annotations
 from typing import Annotated, Literal
 
 from pydantic import Field

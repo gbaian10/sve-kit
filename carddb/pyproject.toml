@@ -161,7 +161,6 @@ extend-exclude = ["src/sve_carddb/_version.py"]
 
 [tool.ruff.lint]
 preview = true
-future-annotations = false # TODO: ruff plans to default this to true
 select = ["ALL"]
 
 ignore = [
@@ -219,6 +218,19 @@ convention = "google"
 
 [tool.ruff.lint.flake8-type-checking]
 exempt-modules = ["typing", "typing_extensions", "pydantic"]
+# Pydantic resolves field annotations at runtime, so their imports must not move into
+# TYPE_CHECKING. Ruff cannot follow inheritance across files; list subclassed bases here.
+runtime-evaluated-base-classes = [
+    "pydantic.BaseModel",
+    "pydantic.RootModel",
+    "pydantic_settings.BaseSettings",
+    "sve_carddb.catalog.adoption_models.Batch",
+    "sve_carddb.products.models.DecisionMetadata",
+    "sve_carddb.products.models.Evidence",
+    "sve_carddb.registry.records.RecordData",
+    "sve_carddb.source_archive._Model",
+    "sve_carddb.source_import.models.Observation",
+]
 
 [tool.ruff.lint.pylint]
 max-returns = 6            # default is 6

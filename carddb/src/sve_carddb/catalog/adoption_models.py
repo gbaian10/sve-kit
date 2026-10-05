@@ -1,7 +1,5 @@
 """Strict catalog/display adoption wire types; candidates never enter this boundary."""
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic evaluates nested types and constrained aliases at runtime
-
 from typing import Annotated, Literal
 
 from pydantic import Field, JsonValue

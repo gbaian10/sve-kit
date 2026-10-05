@@ -1,7 +1,5 @@
 """Current translation values; source and semantic keys are independent of review."""
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves models at runtime
-
 from typing import Annotated, Literal
 
 from pydantic import Field, JsonValue, field_validator, model_validator

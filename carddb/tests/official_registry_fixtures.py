@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 
-from sve_carddb.registry.records import BatchDecision  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves this cache model at runtime
+from sve_carddb.registry.records import BatchDecision
 from sve_carddb.registry.snapshot import (
     RegistryRecord,
     RegistrySnapshot,
