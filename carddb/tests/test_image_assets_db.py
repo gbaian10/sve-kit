@@ -72,16 +72,14 @@ class Staged:
 
 
 @pytest.fixture
-def staged(tmp_path: Path, frozen: FrozenSources, empty_crops: ImageCrops) -> Staged:
-    return make_staged(tmp_path, frozen, crops=empty_crops)
+def staged(tmp_path: Path, frozen: FrozenSources) -> Staged:
+    return make_staged(tmp_path, frozen)
 
 
 def make_staged(
     tmp_path: Path,
     frozen: FrozenSources,
     front_src: bytes = b"/synthetic/0.png",
-    *,
-    crops: ImageCrops,
 ) -> Staged:
     data_root = frozen.root.parent / "data"
     store = ArchiveStore(
@@ -131,11 +129,8 @@ def make_staged(
     assert len(plan.included("printing")) == 2
     context = BuildContext.from_inputs(
         REVISION,
-        {"synthetic.lock": b"synthetic"} | crops.dependencies(),
-        {
-            "image_recipe": DEFAULT_RECIPE.version,
-            "image_crop_overrides": crops.configuration(),
-        },
+        {"synthetic.lock": b"synthetic"},
+        {"image_recipe": DEFAULT_RECIPE.version},
     )
     return Staged(frozen_cards, plan, context)
 
@@ -166,7 +161,7 @@ def test_original_src_and_crawler_url_encoding_bind_the_same_archived_image(
     raw_src: str,
     resolved: str,
 ) -> None:
-    staged = make_staged(tmp_path, frozen, raw_src.encode(), crops=empty_crops)
+    staged = make_staged(tmp_path, frozen, raw_src.encode())
     data_root = frozen.root.parent / "data"
     store = ArchiveStore(
         data_root,

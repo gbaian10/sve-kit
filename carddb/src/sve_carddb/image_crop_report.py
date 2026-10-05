@@ -4,8 +4,9 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
+from sve_carddb.image_crops import image_source_key
 from sve_carddb.snapshot.project.source import Source
-from sve_carddb.snapshot.values import canonical, digest, string
+from sve_carddb.snapshot.values import string
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database
@@ -29,11 +30,13 @@ def crop_report(
     db: Database,
 ) -> dict[str, JsonValue]:
     """Use effective DB card/face ownership only for non-blocking diagnostics."""
-    by_id = {record.image_id: record for record in crops.records.values()}
-    used = {item.result.image_id for item in images.images}
     by_url = {
-        item.source.url: by_id.get(item.result.image_id) for item in images.images
+        item.source.url: crops.records.get(
+            (image_source_key(item.region, item.source.url), item.source.sha256[7:])
+        )
+        for item in images.images
     }
+    applied = {record.key for record in by_url.values() if record is not None}
     printings = {
         string(row["id"]): string(row["card_id"])
         for row in Source(db).rows("printing", "id,card_id")
@@ -60,26 +63,21 @@ def crop_report(
         other = covered.get(key, set()) - {ref.printing_id}
         if record is None and other:
             # A missing regional pipeline must not be reported as a verified binding.
-            source_key = digest(
-                canonical(
-                    {"provider": ref.region, "kind": "image", "url": ref.source_url}
-                )
-            )
             warnings.append(
                 {
                     "card_id": key[0],
                     "face_id": key[1],
                     "printing_id": ref.printing_id,
-                    "source_key": source_key,
+                    "source_key": image_source_key(ref.region, ref.source_url),
                     "other_printing_ids": list[JsonValue](sorted(other)),
                 }
             )
     return {
-        "applied_source_images": len(used & by_id.keys()),
+        "applied_source_images": len(applied),
         "unused": [
             _label(record)
             for key, record in sorted(crops.records.items())
-            if record.image_id not in used
+            if key not in applied
         ],
         "annotation_mismatches": annotations,
         "reprint_candidates": warnings,

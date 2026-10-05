@@ -467,8 +467,6 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         dependencies.update(names.dependencies())
         configuration |= names.configuration(inputs)
     if mounted is not None:
-        dependencies.update(mounted.crops.dependencies())
-        configuration["image_crop_overrides"] = mounted.crops.configuration()
         configuration["image_recipe"] = DEFAULT_RECIPE.version
     context = BuildContext.from_inputs(inputs.revision, dependencies, configuration)
     schema = compile_current_build(

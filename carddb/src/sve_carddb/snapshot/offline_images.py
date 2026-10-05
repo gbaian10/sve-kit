@@ -43,7 +43,6 @@ class MountedImages:
         parents: InputRecord,
     ) -> tuple[InputRecord, dict[str, JsonValue]]:
         """Replay exact page bindings in both staging and sealed bundle databases."""
-        self.crops.verify_context(context)
         references = tuple(
             ref
             for pin in inputs.sources
@@ -84,9 +83,7 @@ def prepare_images(
             protected.resolve()
         ) or protected.resolve().is_relative_to(root.resolve()):
             raise ValueError("Image asset root overlaps protected offline inputs")
-    crops = load_image_crops(
-        inputs.repo / "authored", authored_revision=inputs.revision
-    )
+    crops = load_image_crops(inputs.repo / "authored")
     pins = {pin.region: pin.image_batch for pin in inputs.sources}
     if any(
         item.region not in pins

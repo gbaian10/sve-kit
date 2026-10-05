@@ -59,17 +59,6 @@ class ImageSource:
 
 
 @dataclass(frozen=True, slots=True)
-class CropOverride:
-    image_id: str
-    source_sha256: str
-    left: int
-    top: int
-    width: int
-    height: int
-    reason: str
-
-
-@dataclass(frozen=True, slots=True)
 class CropBox:
     left: int
     top: int
@@ -187,7 +176,7 @@ def build_variants(
     *,
     blob_root: Path,
     cache_root: Path,
-    override: CropOverride | None = None,
+    override: CropBox | None = None,
     recipe: Recipe = DEFAULT_RECIPE,
     reuse_only: bool = False,
 ) -> VariantSet:
@@ -195,7 +184,7 @@ def build_variants(
     _validate_source(source)
     _validate_recipe(recipe)
     image = _decode(source.source_bytes)
-    crop = crop_box(source, image.width, image.height, override)
+    crop = crop_box(image.width, image.height, override)
     cache_key = hashlib.sha256(
         _canonical(
             {
@@ -367,34 +356,19 @@ def _convert_icc(image: Image.Image, profile: object) -> Image.Image:
     return converted
 
 
-def crop_box(
-    source: ImageSource, width: int, height: int, override: CropOverride | None
-) -> CropBox:
+def crop_box(width: int, height: int, override: CropBox | None) -> CropBox:
     """Use the same geometry at encoding and independently verified consumption."""
     if override is not None:
         if (
-            override.image_id != source.image_id
-            or override.source_sha256 != source.source_sha256
-            or not override.reason.strip()
-        ):
-            msg = "invalid or stale art crop override"
-            raise ImageVariantError(msg)
-        if (
-            override.left < 0
-            or override.top < 0
-            or override.width <= 0
-            or override.height <= 0
-        ):
-            msg = "invalid or stale art crop override"
-            raise ImageVariantError(msg)
-        if (
-            override.width * 3 != override.height * 4
+            min(override.left, override.top) < 0
+            or min(override.width, override.height) <= 0
+            or override.width * 3 != override.height * 4
             or override.left + override.width > width
             or override.top + override.height > height
         ):
-            msg = "invalid or stale art crop override"
+            msg = "invalid art crop override"
             raise ImageVariantError(msg)
-        return CropBox(override.left, override.top, override.width, override.height)
+        return override
     left_percent, top_percent, width_percent = (
         (17, 4, 65) if width > height else (8, 14, 84)
     )

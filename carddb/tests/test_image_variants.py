@@ -12,7 +12,6 @@ from sve_carddb import image_variants
 from sve_carddb.image_variants import (
     DEFAULT_RECIPE,
     CropBox,
-    CropOverride,
     ImageSource,
     ImageVariantError,
     Recipe,
@@ -24,9 +23,6 @@ if TYPE_CHECKING:
 
 
 class CropChanges(TypedDict, total=False):
-    image_id: str
-    source_sha256: str
-    reason: str
     left: int
     top: int
     width: int
@@ -82,7 +78,7 @@ def build(
     item: ImageSource,
     root: Path,
     *,
-    override: CropOverride | None = None,
+    override: CropBox | None = None,
     recipe: Recipe = DEFAULT_RECIPE,
 ) -> image_variants.VariantSet:
     return build_variants(
@@ -307,26 +303,20 @@ def test_recipe_change_keeps_old_content_addressed_blobs(tmp_path: Path) -> None
     assert len(list((tmp_path / "cache" / "image-variants").glob("*.json"))) == 2
 
 
-def test_crop_override_is_tied_to_source_and_cannot_fallback(tmp_path: Path) -> None:
+def test_crop_override_cannot_fallback(tmp_path: Path) -> None:
     item = source(png(100, 140))
-    override = CropOverride(item.image_id, item.source_sha256, 4, 10, 64, 48, "face")
+    override = CropBox(4, 10, 64, 48)
     result = build(item, tmp_path / "valid", override=override)
     assert result.crop_box == CropBox(4, 10, 64, 48)
     assert [(v.width, v.height) for v in result.variants[-2:]] == [(64, 48)] * 2
-    invalid = (
-        replace(override, source_sha256="0" * 64),
-        replace(override, width=60),
-        replace(override, left=90),
-        replace(override, reason=" "),
-    )
+    invalid = (replace(override, width=60), replace(override, left=90))
     for index, bad in enumerate(invalid):
         root = tmp_path / f"bad-{index}"
         with pytest.raises(ImageVariantError, match="override"):
             build(item, root, override=bad)
         assert not (root / "blobs").exists()
     landscape = source(png(140, 100))
-    landscape_override = replace(override, source_sha256=landscape.source_sha256)
-    result = build(landscape, tmp_path / "landscape", override=landscape_override)
+    result = build(landscape, tmp_path / "landscape", override=override)
     assert result.crop_box == CropBox(4, 10, 64, 48)
     assert [(v.width, v.height) for v in result.variants[-2:]] == [(64, 48)] * 2
 
@@ -425,9 +415,6 @@ def test_zero_k_has_diagnostic_before_writing(
 @pytest.mark.parametrize(
     "changes",
     [
-        {"image_id": "wrong-image"},
-        {"source_sha256": "0" * 64},
-        {"reason": " "},
         {"left": -1},
         {"top": -1},
         {"width": 0},
@@ -445,9 +432,9 @@ def test_each_invalid_override_constraint_stops_all_output(
     tmp_path: Path, width: int, height: int, changes: CropChanges
 ) -> None:
     item = source(png(width, height))
-    override = CropOverride(item.image_id, item.source_sha256, 4, 10, 64, 48, "face")
-    with pytest.raises(ImageVariantError, match="invalid or stale art crop override"):
-        build(item, tmp_path, override=replace(override, **changes))
+    override = replace(CropBox(4, 10, 64, 48), **changes)
+    with pytest.raises(ImageVariantError, match="invalid art crop override"):
+        build(item, tmp_path, override=override)
     assert not (tmp_path / "blobs").exists()
     assert not (tmp_path / "cache").exists()
 
@@ -457,9 +444,7 @@ def test_override_can_touch_bottom_and_right_edges(
     tmp_path: Path, width: int, height: int
 ) -> None:
     item = source(png(width, height))
-    override = CropOverride(
-        item.image_id, item.source_sha256, width - 64, height - 48, 64, 48, "edge"
-    )
+    override = CropBox(width - 64, height - 48, 64, 48)
     result = build(item, tmp_path, override=override)
     assert result.crop_box == CropBox(width - 64, height - 48, 64, 48)
     assert [(v.width, v.height) for v in result.variants[3:]] == [(64, 48)] * 2

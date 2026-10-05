@@ -1,5 +1,6 @@
 """Bilingual text, verified image closure, private bundle and preview export."""
 
+import json
 import shutil
 from dataclasses import replace
 from typing import TYPE_CHECKING
@@ -18,7 +19,7 @@ from sve_carddb.image_assets import (
     build_regional_assets,
     populate_assets,
 )
-from sve_carddb.image_crops import load_image_crops
+from sve_carddb.image_crops import FILE, load_image_crops
 from sve_carddb.image_variants import ImageVariantError
 from sve_carddb.products import OfficialProducts, ProductIdentities
 from sve_carddb.registry.records import PrintingData
@@ -30,7 +31,7 @@ from sve_carddb.snapshot.values import object_value, parse
 from sve_carddb.sources import official_en
 from sve_carddb.sources.official_jp import image_url
 
-from .image_crop_fixtures import SHARD, initialize, install, record
+from .image_crop_fixtures import install, record
 from .test_image_assets_en import FRONT, EnglishImages
 from .test_image_assets_en import english_images as english_images  # ruff: ignore[useless-import-alias] -- reuse one sealed EN baseline
 from .test_snapshot_offline import prepared as prepared  # ruff: ignore[useless-import-alias] -- reuse the existing regional text/adoption fixture
@@ -69,10 +70,8 @@ def regional_images(
             | {"region": "en", "card_no": "BP02-070EN"}
         ],
     )
-    revision = initialize(original.repo)
     recipe = original.model_copy(
         update={
-            "revision": revision,
             "sources": tuple(
                 pin.model_copy(
                     update={
@@ -85,7 +84,7 @@ def regional_images(
             ),
         }
     )
-    identities = ProductIdentities(revision, (), {}, {}, (), case.catalog)
+    identities = ProductIdentities(recipe.revision, (), {}, {}, (), case.catalog)
     monkeypatch.setattr(
         offline, "load_product_identities", lambda *_args, **_kwargs: identities
     )
@@ -96,9 +95,7 @@ def regional_images(
             identities, (), (), (), (), case.identity
         ),
     )
-    crops = load_image_crops(
-        recipe.repo / "authored", authored_revision=recipe.revision
-    )
+    crops = load_image_crops(recipe.repo / "authored")
     roots = PreviewRoots(tmp_path / "library", tmp_path / "formal", tmp_path / "cache")
     parts = tuple(
         build_regional_assets(
@@ -166,10 +163,6 @@ def test_bilingual_images_bundle_snapshot_and_preview(
         "en_image_variant",
     } <= {use.usage for use in record.uses}
     assert (tmp_path / "bundle/inputs.json").read_bytes() == built.input_content
-    crops = load_image_crops(
-        recipe.repo / "authored", authored_revision=recipe.revision
-    )
-    crops.verify_context(record.context)
     crop_report = object_value(
         object_value(built.report["image_assets"])["crop_overrides"]
     )
@@ -308,7 +301,7 @@ def test_offline_cli_missing_cache_never_encodes_or_publishes(
         "missing-use",
         "old-box",
         "raw-bytes",
-        "dirty-shard",
+        "edited-crop",
     ],
 )
 def test_offline_image_closure_failures_publish_nothing(
@@ -347,9 +340,12 @@ def test_offline_image_closure_failures_publish_nothing(
             assets,
             images=(replace(item, raw_bytes=item.raw_bytes + 1), *assets.images[1:]),
         )
-    elif failure == "dirty-shard":
-        shard = recipe.repo / "authored" / SHARD
-        shard.write_bytes(shard.read_bytes() + b"\n")
+    elif failure == "edited-crop":
+        # An uncommitted edit is read directly, so images built from the old box no longer match.
+        path = recipe.repo / "authored" / FILE
+        rows = json.loads(path.read_text())
+        rows[0]["top"] -= 1
+        path.write_text(json.dumps(rows))
     else:
 
         def omit(
@@ -371,7 +367,7 @@ def test_offline_image_closure_failures_publish_nothing(
         "missing-use": "Build input use closure or context mismatch",
         "old-box": "Image crop box differs from adopted source crop",
         "raw-bytes": "Image source bytes or oriented dimensions mismatch",
-        "dirty-shard": "Image crop bytes differ from pinned authored revision",
+        "edited-crop": "Image crop box differs from adopted source crop",
     }
     with pytest.raises(ValueError, match="^" + messages[failure] + "$"):
         offline.build(
@@ -388,14 +384,6 @@ def test_text_only_offline_does_not_depend_on_crop_data(
 ) -> None:
     recipe, _, _ = regional_images
     before = offline.build(recipe)
-    (recipe.repo / "authored" / SHARD).write_bytes(b"invalid synthetic crop data")
+    (recipe.repo / "authored" / FILE).write_bytes(b"invalid synthetic crop data")
     after = offline.build(recipe)
     assert before.input_content == after.input_content
-    config = object_value(
-        parse(
-            InputRecord.model_validate_json(
-                after.input_content
-            ).context.configuration.encode()
-        )
-    )
-    assert "image_crop_overrides" not in config

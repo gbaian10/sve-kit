@@ -19,17 +19,22 @@ from sve_carddb.image_assets import (
     verify_asset_sources,
 )
 from sve_carddb.image_crop_report import crop_report
-from sve_carddb.image_crops import load_image_crops
+from sve_carddb.image_crops import image_source_key, load_image_crops
 from sve_carddb.image_variants import CropBox
 from sve_carddb.snapshot.values import array, object_value
 
-from .image_crop_fixtures import initialize, install, record
+from .image_crop_fixtures import install, record
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.image_assets import ImageBuild
+    from sve_carddb.image_assets import EncodedImage, ImageBuild
     from sve_carddb.image_crops import ImageCrops
+
+
+def adopted(crops: ImageCrops, item: EncodedImage) -> bool:
+    key = image_source_key(item.region, item.source.url), item.source.sha256[7:]
+    return key in crops.records
 
 
 @pytest.fixture(scope="module")
@@ -51,7 +56,7 @@ def crop_assets(
         "source_key": "sha256:" + "e" * 64,
     }
     install(repo / "authored", [row, en])
-    crops = load_image_crops(repo / "authored", authored_revision=initialize(repo))
+    crops = load_image_crops(repo / "authored")
     default_roots = PreviewRoots(base / "default", base / "cdn", base / "default-cache")
     override_roots = PreviewRoots(
         base / "override", base / "cdn", base / "override-cache"
@@ -72,10 +77,9 @@ def test_override_changes_only_art_and_keeps_orientation(
 ) -> None:
     frozen, crops, default, overridden, _, output = crop_assets
     by_id = {item.result.image_id: item.result for item in default.images}
-    selected = next(r for r in crops.records.values() if r.region == "jp")
     for item in overridden.images:
         old = by_id[item.result.image_id]
-        if item.result.image_id == selected.image_id:
+        if adopted(crops, item):
             assert item.result.crop_box == CropBox(4, 24, 64, 48)
             assert [v.path for v in item.result.variants[:3]] == [
                 v.path for v in old.variants[:3]
@@ -175,11 +179,9 @@ def test_selected_crop_must_fit_verified_oriented_source(
     frozen, _, _, _, _, _ = crop_assets
     descriptor = frozen.descriptor(frozen.inventory.current[0].source_version_id)
     install(tmp_path / "authored", [record(descriptor) | {"top": 1000}])
-    crops = load_image_crops(
-        tmp_path / "authored", authored_revision=initialize(tmp_path)
-    )
+    crops = load_image_crops(tmp_path / "authored")
     output = PreviewRoots(tmp_path / "blobs", tmp_path / "cdn", tmp_path / "cache")
-    with pytest.raises(ValueError, match=r"^invalid or stale art crop override$"):
+    with pytest.raises(ValueError, match=r"^invalid art crop override$"):
         build_regional_assets(frozen, output, region="jp", crops=crops)
 
 
@@ -191,11 +193,7 @@ def test_report_uses_effective_owner_and_never_auto_inherits(
 ) -> None:
 
     _, crops, _, images, _, _ = crop_assets
-    chosen = next(
-        item
-        for item in images.images
-        if item.result.image_id in {r.image_id for r in crops.records.values()}
-    )
+    chosen = next(item for item in images.images if adopted(crops, item))
     other = next(item for item in images.images if item is not chosen)
     refs = (
         ImageReference(
@@ -309,9 +307,7 @@ def test_two_adopted_printings_do_not_warn_about_each_other(
     frozen, _, _, images, _, _ = crop_assets
     rows = [record(frozen.descriptor(item.source.id)) for item in images.images[:2]]
     install(tmp_path / "authored", rows)
-    crops = load_image_crops(
-        tmp_path / "authored", authored_revision=initialize(tmp_path)
-    )
+    crops = load_image_crops(tmp_path / "authored")
     report = _diagnostics(
         crops,
         images,
@@ -330,9 +326,7 @@ def test_other_cards_adopted_printing_does_not_affect_this_card(
 ) -> None:
     _, crops, _, images, _, _ = crop_assets
     selected = next(
-        index
-        for index, item in enumerate(images.images)
-        if item.result.image_id in {r.image_id for r in crops.records.values()}
+        index for index, item in enumerate(images.images) if adopted(crops, item)
     )
     plain = next(index for index, item in enumerate(images.images) if index != selected)
     report = _diagnostics(
