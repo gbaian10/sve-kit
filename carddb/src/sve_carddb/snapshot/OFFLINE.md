@@ -58,8 +58,8 @@ no image publication is claimed.
 
 Prepare a separate private image library and recipe cache before exporting.
 `build_regional_assets(FrozenSources(...), roots, region=pin.region, crops=crops,
-workers=2)` converts one exclusively regional image batch. Load the complete
-`authored/image-crops` closure at the same revision, including unused records.
+workers=2)` converts one exclusively regional image batch. `load_image_crops`
+reads `authored/image-crops.yaml` from the working tree, so uncommitted box edits apply.
 Keep the JP and EN sealed batches independent, and retain each original PNG.
 
 ```bash

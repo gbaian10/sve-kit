@@ -20,7 +20,8 @@ and `docs/schema/image-crop-overrides.md` (adopted crop boxes).
   unused rows and annotation mismatches, and flags reprints of the same card/face
   whose source has no crop. It never inherits a box or blocks a build.
 
-Crops come from `image_crops.load_image_crops` and are selected by
+Crops come from `image_crops.load_image_crops`, which reads
+`authored/image-crops.yaml` from the working tree, and are selected by
 `(source_key, source_sha256)`. Reports never include official card text.
 The `export-offline` command is the only caller that wires these into a snapshot
 preview; see `snapshot/OFFLINE.md`.

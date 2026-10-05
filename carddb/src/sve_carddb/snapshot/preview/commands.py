@@ -76,9 +76,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
         image_roots.validate(
             (recipe.archive, recipe.repo, preview_dir, bundle_dir, inputs)
         )
-        crops = load_image_crops(
-            recipe.repo / "authored", authored_revision=recipe.revision
-        )
+        crops = load_image_crops(recipe.repo / "authored")
         regional = tuple(
             build_regional_assets(
                 FrozenSources(recipe.archive, recipe.store_id, pin.image_batch),

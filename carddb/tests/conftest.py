@@ -14,7 +14,7 @@ from .database_fixtures import t0_database_template as t0_database_template  # r
 from .database_fixtures import t1_database_template as t1_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
 from .database_fixtures import t1b_database_template as t1b_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
 from .image_archive_fixtures import image_archive_template as image_archive_template  # ruff: ignore[useless-import-alias] -- register shared synthetic archive template
-from .image_crop_fixtures import empty_crops as empty_crops  # ruff: ignore[useless-import-alias] -- register shared pinned empty crop closure
+from .image_crop_fixtures import empty_crops as empty_crops  # ruff: ignore[useless-import-alias] -- register shared empty crop set
 from .isolation_guard import IsolationGuard
 from .official_registry_fixtures import load_shared_registry
 from .product_fixtures import product_files as product_files  # ruff: ignore[useless-import-alias] -- register session fixture dependency

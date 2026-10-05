@@ -14,7 +14,6 @@ from sve_carddb.build_inputs import Source, SourceUse, insert_raw_sources, uses_
 from sve_carddb.extract.official_en import extract_card as extract_en
 from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.image_crops import conversion_image_id
 from sve_carddb.image_variants import (
     DEFAULT_RECIPE,
     SIZES,
@@ -40,6 +39,11 @@ PARSER = "jp-image-links-v1"
 EN_PARSER = "en-image-links-v1"
 PARSERS = {"jp": PARSER, "en": EN_PARSER}
 MAX_WORKERS = 4
+
+
+def conversion_image_id(source_version_id: str) -> str:
+    """Keep conversion IDs distinct from the later HTML binding IDs."""
+    return "img:v1:" + digest(canonical({"source_id": source_version_id}))[7:]
 
 
 @dataclass(frozen=True)
@@ -297,12 +301,10 @@ def build_regional_assets(
             raise ValueError(
                 f"{region.upper()} image batch contains another provider or source kind"
             )
-        image_id = conversion_image_id(source.id)
-        override = crops.override(descriptor)
         # Conversion only knows the resource URL; HTML src enters the DB from verified bindings.
         result = build_variants(
             ImageSource(
-                image_id,
+                conversion_image_id(source.id),
                 raw,
                 source.sha256.removeprefix("sha256:"),
                 source.url,
@@ -314,7 +316,7 @@ def build_regional_assets(
             blob_root=roots.preview,
             cache_root=roots.cache,
             reuse_only=reuse_only,
-            override=override,
+            override=crops.box(descriptor),
         )
         return EncodedImage(source, descriptor.raw_bytes, result, region)
 
@@ -339,11 +341,8 @@ def verify_assets(build: ImageBuild, preview: Path) -> None:
         raise ValueError("Image asset identities must be unique")
     for item in build.images:
         result = item.result
-        expected_id = "img:v1:" + digest(
-            canonical({"source_id": item.source.id})
-        ).removeprefix("sha256:")
         if (
-            result.image_id != expected_id
+            result.image_id != conversion_image_id(item.source.id)
             or item.source.kind != "image"
             or item.source.parser_version != DEFAULT_RECIPE.version
             or result.recipe_version != DEFAULT_RECIPE.version
@@ -545,20 +544,8 @@ def verify_asset_sources(
             or dimensions != (item.result.source_width, item.result.source_height)
         ):
             raise ValueError("Image source bytes or oriented dimensions mismatch")
-        override = None if crops is None else crops.override(descriptor)
         expected = crop_box(
-            ImageSource(
-                conversion_image_id(source.id),
-                raw,
-                source.sha256[7:],
-                source.url,
-                "sve_card",
-                "official",
-                "approved",
-                "available",
-            ),
-            *dimensions,
-            override,
+            *dimensions, None if crops is None else crops.box(descriptor)
         )
         if item.result.crop_box != expected:
             raise ValueError("Image crop box differs from adopted source crop")

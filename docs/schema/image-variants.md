@@ -26,7 +26,7 @@
 
 art_s／art_m 由同一框分別縮放，輸出為 `4n×3n`，n 分別取 `min(k,40)`、`min(k,96)`；不放大，不因原圖太小填補像素。k≤0 屬無法產圖的診斷，不能發布聲稱完整的五檔結果。
 
-產圖 API 的 `CropOverride` 維持 `{image_id,source_sha256,left,top,width,height,reason}`。其中 `image_id` 是產圖用的 `img:v1:`，不是建置資料庫／公開快照的 `image_asset.id`（`img:binding:`）。正式 authored 列**不存 image_id**，以 `(source_key,source_sha256)` 為鍵；loader 由來源版本推導 `img:v1:` 再組成 `CropOverride`。兩種 ID 的完整公式、分片見[覆寫契約](image-crop-overrides.md)。呼叫端設定不能取代 authored 的有效採納。
+產圖 API 的覆寫只傳框 `CropBox{left,top,width,height}`。呼叫端以 `(source_key,source_sha256)` 從[覆寫契約](image-crop-overrides.md)的裁切檔查出框，覆寫列不存 image ID。
 
 座標為套用既有方向資訊後的整數像素，框須位於圖片內、width/height 為正且精確 4:3。source_sha256 必須匹配凍結來源 bytes；同一來源資源換 bytes 後，未採納的新 hash 必須停止產圖，不能靜默退回預設或套用舊框。有效覆寫優先於預設框，無效覆寫停止該圖產製並要求修正。直向與橫向都接受符合上述約束的 art 覆寫。框只在建置端，不加進快照；來源圖的 publication_state／availability 規則仍獨立適用。
 

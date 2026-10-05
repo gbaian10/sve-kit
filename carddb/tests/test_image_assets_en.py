@@ -35,7 +35,7 @@ from sve_carddb.sources import official_en
 from sve_carddb.sources.official_jp import image_url
 
 from .en_extract_fixtures import page
-from .image_crop_fixtures import initialize, install, record
+from .image_crop_fixtures import install, record
 from .test_image_assets_db import Staged, make_staged
 from .test_image_variants import png
 from .test_source_archive import _put, _resource
@@ -64,13 +64,12 @@ class EnglishImages:
 def english_images(  # ruff: ignore[too-many-locals] -- seal the shared minimal bilingual baseline once per module
     tmp_path_factory: pytest.TempPathFactory,
     image_archive_template: tuple[Path, str, str],
-    empty_crops: ImageCrops,
 ) -> EnglishImages:
     base = tmp_path_factory.mktemp("english-images")
     original, store_id, batch = image_archive_template
     shutil.copytree(original.parent, base / "input")
     jp_images = FrozenSources(base / "input/archive", store_id, batch)
-    jp = make_staged(base, jp_images, crops=empty_crops)
+    jp = make_staged(base, jp_images)
     data_root = jp_images.root.parent / "data"
     store = ArchiveStore(
         data_root,
@@ -151,9 +150,7 @@ def english_images(  # ruff: ignore[too-many-locals] -- seal the shared minimal 
             | {"region": "en", "card_no": NUMBER}
         ],
     )
-    crops = load_image_crops(
-        crop_repo / "authored", authored_revision=initialize(crop_repo)
-    )
+    crops = load_image_crops(crop_repo / "authored")
     roots = PreviewRoots(base / "library", base / "formal", base / "cache")
     encoded = build_regional_assets(images, roots, region="en", crops=crops, workers=2)
     return EnglishImages(
