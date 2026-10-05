@@ -4,6 +4,8 @@ name: ci
 
 on:
   pull_request:
+    # ready_for_review runs the full suite once a draft leaves draft.
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [main]
 
@@ -28,9 +30,11 @@ jobs:
       contents: read
       pull-requests: read # paths-filter lists PR files through the REST API
     outputs:
-      python: ${{ steps.filter.outputs.python == 'true' || steps.filter.outputs.shared == 'true' }}
-      rust: ${{ steps.filter.outputs.rust == 'true' || steps.filter.outputs.shared == 'true' }}
-      web: ${{ steps.filter.outputs.web == 'true' || steps.filter.outputs.shared == 'true' }}
+      # Drafts cannot merge, so they skip the component test jobs; ci-ok fails until the PR is ready.
+      draft: ${{ github.event.pull_request.draft == true }}
+      python: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.python == 'true' || steps.filter.outputs.shared == 'true') }}
+      rust: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.rust == 'true' || steps.filter.outputs.shared == 'true') }}
+      web: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.web == 'true' || steps.filter.outputs.shared == 'true') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -441,6 +445,11 @@ jobs:
               status=1
             fi
           done
+          if jq -e '.changes.outputs.draft == "true"' <<<"$NEEDS" >/dev/null; then
+            echo "FAIL draft: component tests were not run; mark the PR ready for review to run them"
+            echo "Draft PR: component tests were not run. Mark it ready for review to run the full suite." >>"$GITHUB_STEP_SUMMARY"
+            status=1
+          fi
           exit "$status"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: env.MAIN_MAINTENANCE == 'true'

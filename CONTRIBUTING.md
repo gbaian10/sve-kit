@@ -223,6 +223,10 @@ runs directly with its 90% line threshold. Web formatting, lint, types, Vitest, 
 checks and build use the existing package scripts in separate steps. Local manual test hooks
 remain available. The hook ownership table marks direct steps so pre-commit skips them.
 
+Draft pull requests run only the quick checks (repository hooks, commit messages and the
+title). The Python, Rust and Web test jobs are skipped and `ci-ok` fails with a note that tests
+were not run. Marking the PR ready for review starts the full run, which decides `ci-ok`.
+
 Open **Actions → a workflow run → Summary** for test totals, passed/skipped/failed counts,
 elapsed time and coverage. Python and Web include the slowest 30 cases and counts/time per
 source file. Case times include setup/teardown and overlap under parallel execution; they
