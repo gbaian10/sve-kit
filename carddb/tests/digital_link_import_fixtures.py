@@ -1,4 +1,4 @@
-"""One sealed synthetic JP/API and immutable authored baseline per module."""
+"""One sealed synthetic JP/API and authored link baseline per module."""
 
 import shutil
 from dataclasses import dataclass, replace
@@ -334,21 +334,11 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
             (("svwb", "22345678"),) + ((("svwb", "22345679"),) if dual else ()),
         )
     )
-    background = BuildContext.from_inputs(
-        program, {name: (root / name).read_bytes() for name in RUNTIME}, config
-    )
-    review: dict[str, JsonValue] = {
-        "context": background.model_dump(mode="json"),
-        "source_batches": config["digital_link_sources"],
-    }
     r = record()
-    data = object_value(r["data"])
-    subject = object_value(data["subject"])
-    value = object_value(data["value"])
+    subject = object_value(r["subject"])
+    value = object_value(r["value"])
     subject["card_id"] = card.id
     subject["face_id"] = face.id
-    r["record_key"] = canonical(["digital_link_adoption", subject, 1]).decode()
-    data["review_context_hash"] = digest(canonical(review))
     value["sve_names"] = [
         {
             "printing_id": printing.id,
@@ -369,30 +359,13 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
         ],
         key=lambda n: (str(object_value(n)["phase"]), str(object_value(n)["lang"])),
     )
-    r["evidence"] = sorted(
-        [
-            {"source_ref": jp.model_dump(mode="json"), "role": "sve_name"},
-            *[
-                dict[str, JsonValue](
-                    source_ref=ref.model_dump(mode="json"), role="digital_name"
-                )
-                for ref in refs
-            ],
-        ],
-        key=canonical,
-    )
     records = [r]
     for other_card, other_face, other_printing, other_ref in others:
         extra = object_value(parse(canonical(r)))
-        other_data = object_value(extra["data"])
-        other_subject = object_value(other_data["subject"])
-        other_subject.update(
+        object_value(extra["subject"]).update(
             card_id=other_card.id, face_id=other_face.id, official_id="22345679"
         )
-        extra["record_key"] = canonical(
-            ["digital_link_adoption", other_subject, 1]
-        ).decode()
-        other_value = object_value(other_data["value"])
+        other_value = object_value(extra["value"])
         other_value["sve_names"] = [
             {
                 "printing_id": other_printing.id,
@@ -406,21 +379,8 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
             ref["locator"] = "/data/card_details/22345679/common/name"
             if item["lang"] == "zh-Hant":
                 ref["text_hash"] = digest("第二個測試譯名".encode())
-        extra["evidence"] = sorted(
-            [
-                {"source_ref": other_ref.model_dump(mode="json"), "role": "sve_name"},
-                *[
-                    dict[str, JsonValue](
-                        source_ref=object_value(n)["name_ref"], role="digital_name"
-                    )
-                    for n in array(other_value["digital_names"])
-                ],
-            ],
-            key=canonical,
-        )
         records.append(extra)
     shard = envelope(records)
-    shard["review_context"] = review
     write(root / "authored", {"digital-links/links/synthetic/001.yaml": shard})
     authored = commit(root)
     config.update(Inputs(root / "authored", root, authored).configuration())
@@ -451,9 +411,8 @@ def copied(fixture: Fixture, root: Path) -> Fixture:
     )
 
 
-def signed(fixture: Fixture, records: list[dict[str, JsonValue]]) -> Fixture:
+def with_records(fixture: Fixture, records: list[dict[str, JsonValue]]) -> Fixture:
     shard = envelope(records)
-    shard["review_context"] = object_value(parse(fixture.shard))["review_context"]
     write(fixture.root / "authored", {"digital-links/links/synthetic/001.yaml": shard})
     authored = commit(fixture.root)
     inputs = Inputs(fixture.root / "authored", fixture.root, authored)
@@ -465,7 +424,7 @@ def signed(fixture: Fixture, records: list[dict[str, JsonValue]]) -> Fixture:
 def current_api(  # ruff: ignore[too-many-locals] -- synthetic resealing preserves both old and current input closures
     fixture: Fixture, transform: Callable[[dict[str, JsonValue], str], None]
 ) -> Fixture:
-    """Seal changed synthetic APIs while preserving immutable historical sources."""
+    """Seal changed synthetic APIs while the authored link keeps its old references."""
     store = _store(fixture.root / "current-store")
     shutil.copytree(fixture.store, store.root, dirs_exist_ok=True)
     _put(store, _resource(card_url("SYN-001"), "raw/jp.html", RAW, Kind.CARD), RAW)
@@ -524,7 +483,7 @@ def catalogue_fixture(
     languages: tuple[str, ...] = ("ja", "cht"),
     transform: Callable[[dict[str, JsonValue], str], None] | None = None,
 ) -> Fixture:
-    """Reseal complete synthetic API pages, preserving the adopted old batch."""
+    """Reseal complete synthetic API pages, preserving the linked old batch."""
     store = _store(fixture.root / "catalogue-store")
     shutil.copytree(fixture.store, store.root, dirs_exist_ok=True)
     _put(store, _resource(card_url("SYN-001"), "raw/jp.html", RAW, Kind.CARD), RAW)

@@ -2,12 +2,12 @@
 
 from collections import Counter, defaultdict
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlsplit
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import BuildContext, input_record
-from sve_carddb.catalog.adoption_models import ReviewContext
+from sve_carddb.build_inputs import input_record
 from sve_carddb.digital_links.catalogue import complete_inventory as complete_inventory  # ruff: ignore[useless-import-alias] -- preserve the existing typed triage import while sharing the catalogue boundary
 from sve_carddb.digital_links.evidence import Evidence
 from sve_carddb.digital_links.importer import review_context
@@ -15,6 +15,9 @@ from sve_carddb.digital_links.models import SveName
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.translations.sources import Sources, pointer
+
+if TYPE_CHECKING:
+    from sve_carddb.catalog.adoption_models import ReviewContext
 
 # This is the maintainer-approved enum table, not a similarity heuristic.
 CLASSES: dict[str, dict[int, str | None]] = {
@@ -192,7 +195,7 @@ def sve_inventory(  # ruff: ignore[complex-structure] -- multiple printing varia
 def generate(  # ruff: ignore[complex-structure,too-many-branches,too-many-statements,too-many-locals] -- aggregate triage keeps shared and per-game failures distinct
     content: bytes, sources: Sources
 ) -> dict[str, JsonValue]:
-    """Return private, text-free candidates; no adopted keys, receipts or checked IDs."""
+    """Return private, text-free candidates; no authored records or receipts."""
     drafts = read_draft(content)
     review = review_context(sources)
     games = sorted({t.game for r in drafts for t in r.targets if t.game in CLASSES})
@@ -356,23 +359,4 @@ def generate(  # ruff: ignore[complex-structure,too-many-branches,too-many-state
         },
         "candidates": rows,
     }
-
-    result_hash = digest(canonical(report))
-    config = object_value(parse(sources.build.configuration.encode()))
-    config.pop("digital_link_authored", None)
-    config["digital_candidate_report"] = {
-        "recipe": report["recipe"],
-        "draft_hash": report["draft_hash"],
-        "result_hash": result_hash,
-        "mapping_hash": report["mapping_hash"],
-    }
-    background = BuildContext(
-        program_revision=sources.build.program_revision,
-        dependencies=sources.build.dependencies,
-        configuration=canonical(config).decode(),
-    )
-    report["result_hash"] = result_hash
-    report["adoption_background"] = ReviewContext(
-        context=background, source_batches=review.source_batches
-    ).model_dump(mode="json")
     return report

@@ -1,10 +1,10 @@
-"""Strict digital-link-adoption format 1; coverage is deliberately unsupported."""
+"""Strict current digital-link format; coverage is deliberately unsupported."""
 
 from typing import Annotated, Literal
 
 from pydantic import Field, field_validator, model_validator
 
-from sve_carddb.catalog.adoption_models import Predecessor, ReviewContext, SourceRef
+from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.products.models import Lang
 from sve_carddb.registry.records import (
     CardId,
@@ -58,12 +58,11 @@ class Value(RecordData):
     digital_names: Annotated[tuple[DigitalName, ...], Field(min_length=1)]
 
 
-class Data(RecordData):
+class Record(RecordData):
     subject: Subject
-    adoption_no: Annotated[int, Field(ge=1)]
-    predecessor: Predecessor | None
-    value: Value | None
-    review_context_hash: Hash
+    value: Value
+    # Batch-sampled links must not be shown as individually confirmed.
+    review_level: Literal["sampled", "confirmed"]
     reason: Text
 
     @field_validator("reason")
@@ -74,39 +73,14 @@ class Data(RecordData):
         return value
 
 
-class Evidence(RecordData):
-    source_ref: SourceRef
-    role: Literal["sve_name", "digital_name"]
-
-
-class Record(RecordData):
-    record_key: Text
-    kind: Literal["digital_link_adoption"]
-    filing_key: Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]+\Z")]
-    data: Data
-    evidence: tuple[Evidence, ...]
-
-
-class Decision(RecordData):
-    id: Annotated[str, Field(pattern=r"^d:[0-9a-f]{64}\Z")]
-    state: Literal["sampled", "confirmed"]
-    scope: Literal["batch"]
-    category: Literal["digital_link"]
-    policy_id: Literal["digital-link-v1"]
-    membership_hash: Hash
-    members: tuple[tuple[Text, Hash], ...]
-    sample_ids: tuple[Text, ...]
-    note: str
-
-
 class Envelope(RecordData):
-    digital_link_authored_format: Literal[1]
+    digital_link_authored_format: Literal[2]
 
     @field_validator("digital_link_authored_format", mode="before")
     @classmethod
     def _format(cls, value: object) -> object:
         if type(value) is not int:
-            raise ValueError("Digital link format must be integer one")
+            raise ValueError("Digital link format must be an integer")
         return value
 
 
@@ -117,7 +91,4 @@ class Index(Envelope):
 
 class Shard(Envelope):
     kind: Literal["digital_link_shard"]
-    review_context: ReviewContext
-    default_decision_id: Text
     records: Annotated[tuple[Record, ...], Field(min_length=1)]
-    decisions: Annotated[tuple[Decision, ...], Field(min_length=1, max_length=1)]

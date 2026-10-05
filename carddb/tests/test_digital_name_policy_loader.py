@@ -7,25 +7,13 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.digital_name_policies.loader import (
-    ADOPTED_PROJECTIONS,
-    INDEX,
-    decoded,
-    load,
-    model,
-)
-from sve_carddb.digital_name_policies.models import Policy
+from sve_carddb.digital_name_policies.current_models import LinkPolicy
+from sve_carddb.digital_name_policies.loader import INDEX, decoded, load, model
 from sve_carddb.registry.storage import MAX_BYTES, read_yaml
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.snapshot.values import canonical, digest, object_value
 
 from .adoption_fixtures import commit
-from .digital_name_policy_fixtures import (
-    LINKS,
-    exclusion,
-    loader_repository,
-    policy,
-    rewrite,
-)
+from .digital_name_policy_fixtures import LINKS, current, loader_repository, rewrite
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -34,17 +22,6 @@ if TYPE_CHECKING:
 @pytest.fixture(scope="module")
 def baseline(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, str]:
     return loader_repository(tmp_path_factory.mktemp("name-policy-loader"))
-
-
-@pytest.fixture(autouse=True)  # ruff: ignore[pytest-fixture-autouse] -- versioned link guards share synthetic document bindings
-def synthetic_bindings(
-    baseline: tuple[Path, str], monkeypatch: pytest.MonkeyPatch
-) -> None:
-    # Versioned link immutability uses synthetic bindings rather than private evidence.
-    for purpose in ("links",):
-        document = policy(baseline[0], purpose)
-        approved = str(document["approved_document_hash"])
-        monkeypatch.setitem(ADOPTED_PROJECTIONS, approved, digest(canonical(document)))
 
 
 def copied(baseline: tuple[Path, str], root: Path) -> Path:
@@ -57,20 +34,14 @@ def reject(root: Path, message: str) -> None:
         load(root / "authored", root, commit(root))
 
 
-def test_complete_entry_is_detached_and_retains_both_hashes(
-    baseline: tuple[Path, str],
-) -> None:
+def test_complete_entry_reads_names_and_links(baseline: tuple[Path, str]) -> None:
     root, revision = baseline
     snapshot = load(root / "authored", root, revision)
-    assert len(snapshot.files) == 4
-    assert len(snapshot.policies) == 1
-    for purpose in ("links",):
-        loaded = snapshot.effective(purpose)
-        document = loaded.document()
-        assert document.approved_document_hash != digest(loaded.policy)
-        document.content.clear()
-        assert loaded.document().content
-        assert loaded.excluded().entries == ()
+    assert len(snapshot.files) == 3
+    assert len(snapshot.current_names) == 1
+    assert snapshot.links is not None
+    assert snapshot.links.content.excluded_names == ()
+    assert snapshot.links.content.excluded_targets == ()
     assert snapshot.pins()["authored_revision"] == revision
 
 
@@ -122,17 +93,11 @@ def test_size_boundary() -> None:
         decoded(b" " * MAX_BYTES)
 
 
-@pytest.mark.parametrize("field", ["digital_name_policy_format", "version"])
-def test_bool_is_not_a_version(baseline: tuple[Path, str], field: str) -> None:
-    raw = policy(baseline[0], "links")
-    raw[field] = True
-    message = (
-        "Policy format must be an integer"
-        if field.endswith("_format")
-        else "Invalid digital-name policy fields"
-    )
-    with pytest.raises(ValueError, match="^" + message + "$"):
-        model(Policy, raw)
+def test_bool_is_not_a_format(baseline: tuple[Path, str]) -> None:
+    raw = current(baseline[0], LINKS)
+    raw["digital_name_policy_format"] = True
+    with pytest.raises(ValueError, match=r"^Policy format must be an integer$"):
+        model(LinkPolicy, raw)
 
 
 @pytest.mark.parametrize(
@@ -140,102 +105,53 @@ def test_bool_is_not_a_version(baseline: tuple[Path, str], field: str) -> None:
     [
         ("extra", 1),
         ("kind", "unknown"),
-        ("version", 0),
         ("purpose", "coverage"),
-        ("projection_recipe", "new-rules-v2"),
-        ("approved_document_hash", "sha256:abc"),
+        ("digital_name_policy_format", 1),
     ],
 )
-def test_unknown_envelope_is_not_ignored(
+def test_unknown_policy_fields_are_not_ignored(
     baseline: tuple[Path, str], tmp_path: Path, field: str, value: JsonValue
 ) -> None:
     root = copied(baseline, tmp_path / "repo")
-    raw = policy(root, "links")
+    raw = current(root, LINKS)
     raw[field] = value
-    rewrite(root, "links", raw)
+    rewrite(root, LINKS, raw)
     reject(root, "Invalid digital-name policy fields")
 
 
 @pytest.mark.parametrize(
     ("fault", "message"),
     [
-        ("sequence", "Digital-name policy version sequence is incomplete"),
-        ("empty", "Digital-name policy version sequence is incomplete"),
         ("path", "Digital-name policy indexed path mismatch"),
-        ("predecessor", "Digital-name policy predecessor mismatch"),
         ("hash", "Digital-name policy indexed hash mismatch"),
-        ("missing", "Digital-name policy indexed member is missing"),
+        ("missing", "Digital-name policy indexed path mismatch"),
         ("orphan", "Unindexed digital-name policy input"),
-        ("identity", "Digital-name policy envelope identity mismatch"),
-        ("content_keys", "Digital-name policy content projection mismatch"),
-        ("content_id", "Digital-name policy content projection mismatch"),
-        ("projection", "Previously adopted digital-name document projection changed"),
-        ("semantics", "Unsupported digital-name policy rule semantics"),
+        ("identity", "Digital-name policy identity mismatch"),
+        ("second", "Digital-name policy purpose must select at most one policy"),
     ],
 )
-def test_entry_and_rule_closure(
+def test_entry_closure(
     baseline: tuple[Path, str], tmp_path: Path, fault: str, message: str
 ) -> None:
     root = copied(baseline, tmp_path / "repo")
     index_path = root / "authored" / INDEX
     index = object_value(read_yaml(index_path))
-    entries = array(object_value(index["policies"])[LINKS])
-    entry = object_value(entries[0])
-    if fault in {"sequence", "path", "predecessor", "hash"}:
-        bad_values: dict[str, JsonValue] = {
-            "sequence": 2,
-            "path": "../outside.yaml",
-            "predecessor": digest(b"invalid"),
-            "hash": digest(b"invalid"),
-        }
-        entry[
-            {
-                "sequence": "version",
-                "path": "path",
-                "predecessor": "predecessor",
-                "hash": "hash",
-            }[fault]
-        ] = bad_values[fault]
-        index_path.write_bytes(canonical(index))
-    elif fault == "empty":
-        object_value(index["policies"])[LINKS] = []
+    entry = object_value(object_value(index["policies"])[LINKS])
+    if fault in {"path", "hash"}:
+        entry[fault] = "../outside.yaml" if fault == "path" else digest(b"invalid")
         index_path.write_bytes(canonical(index))
     elif fault == "missing":
         (root / "authored" / str(entry["path"])).unlink()
     elif fault == "orphan":
         (root / "authored/digital-name-policies/orphan.yaml").write_text("{}")
+    elif fault == "identity":
+        raw = current(root, LINKS)
+        raw["policy_id"] = "synthetic-other"
+        rewrite(root, LINKS, raw)
     else:
-        raw = policy(root, "links")
-        if fault == "identity":
-            raw["policy_id"] = "synthetic-other"
-        elif fault == "content_keys":
-            object_value(raw["content"])["unsupported"] = True
-        elif fault == "content_id":
-            object_value(raw["content"])["policy_id"] = "synthetic-other"
-        else:
-            object_value(raw["content"])["rule"] = "Unsupported rule"
-            if fault == "semantics":
-                raw["approved_document_hash"] = digest(b"synthetic new document")
-        rewrite(root, "links", raw)
-    reject(root, message)
-
-
-@pytest.mark.parametrize("fault", ["receipt_file", "receipt_hash"])
-def test_removed_receipt_inputs_are_not_accepted(
-    baseline: tuple[Path, str], tmp_path: Path, fault: str
-) -> None:
-    root = copied(baseline, tmp_path / "repo")
-    if fault == "receipt_file":
-        path = root / "authored/digital-name-policies" / LINKS / "001.approval.yaml"
-        path.write_text("{}")
-        message = "Unindexed digital-name policy input"
-    else:
-        index_path = root / "authored" / INDEX
-        index = object_value(read_yaml(index_path))
-        entries = array(object_value(index["policies"])[LINKS])
-        object_value(entries[0])["approval_receipt_hash"] = digest(b"obsolete receipt")
-        index_path.write_bytes(canonical(index))
-        message = "Invalid digital-name policy fields"
+        raw = current(root, LINKS)
+        raw["policy_id"] = "synthetic-other-links"
+        rewrite(root, "synthetic-other-links", raw)
     reject(root, message)
 
 
@@ -255,7 +171,7 @@ def test_git_and_disk_are_both_immutable(
 ) -> None:
     root = copied(baseline, tmp_path / "repo")
     revision = baseline[1]
-    target = root / "authored/digital-name-policies" / LINKS / "001.policy.yaml"
+    target = root / "authored/digital-name-policies" / LINKS / "current.yaml"
     if fault == "revision":
         revision = "HEAD"
     elif fault == "absent":
@@ -277,95 +193,75 @@ def test_git_and_disk_are_both_immutable(
 
 
 @pytest.mark.parametrize(
-    ("fault", "message"),
+    "fault",
     [
-        ("batches", "Digital-name policy catalogue batch closure mismatch"),
-        ("recipes", "Digital-name policy catalogue recipes are incomplete"),
-        ("provider", "Unsupported digital-name policy catalogue recipe"),
-        ("registry", "Digital-name link registry pins mismatch"),
-        ("reason", "Digital-name exclusion reason is blank"),
-        ("kind", "Invalid digital-name policy fields"),
-        ("target", "Digital-name exclusion target ID mismatch"),
-        ("duplicate", "Digital-name exclusions must be sorted and unique"),
+        "no_batches",
+        "unsorted_batches",
+        "reason",
+        "english_name",
+        "target_width",
+        "duplicate_name",
+        "duplicate_target",
     ],
 )
-def test_remaining_closed_fields(
-    baseline: tuple[Path, str], tmp_path: Path, fault: str, message: str
+def test_link_conditions_are_closed(
+    baseline: tuple[Path, str], tmp_path: Path, fault: str
 ) -> None:
     root = copied(baseline, tmp_path / "repo")
-    purpose = "links"
-    raw = policy(root, purpose)
-    excluded = exclusion(root, purpose)
+    raw = current(root, LINKS)
     content = object_value(raw["content"])
-    raw["approved_document_hash"] = digest(b"synthetic replacement")
-    pins = object_value(content["catalogue_pins"])
-    if fault == "batches":
-        pins["source_batches"] = []
-    elif fault == "recipes":
-        object_value(
-            object_value(pins["parser_and_registry_configuration"])[
-                "translation_recipes"
-            ]
-        ).pop("translation-sv1-v1")
-    elif fault == "provider":
-        object_value(
-            object_value(
-                object_value(pins["parser_and_registry_configuration"])[
-                    "translation_recipes"
-                ]
-            )["translation-sv1-v1"]
-        )["config"] = {"provider": "svwb"}
-    elif fault == "registry":
-        object_value(content["registry_pins"])["index_hash"] = digest(
-            b"different index"
-        )
+    name: dict[str, JsonValue] = {
+        "source_lang": "ja",
+        "source_name_hash": digest(b"Synthetic card"),
+        "reason": "Synthetic exclusion",
+    }
+    target: dict[str, JsonValue] = {
+        "card_id": "c:" + "1" * 32,
+        "game": "sv1",
+        "official_id": "123456789",
+        "reason": "Synthetic exclusion",
+    }
+    if fault == "no_batches":
+        content["source_batches"] = []
+    elif fault == "unsorted_batches":
+        content["source_batches"] = [
+            {"batch_id": batch}
+            for batch in sorted((digest(b"a"), digest(b"b")), reverse=True)
+        ]
+    elif fault == "reason":
+        content["excluded_names"] = [name | {"reason": " "}]
+    elif fault == "english_name":
+        content["excluded_names"] = [name | {"source_lang": "en"}]
+    elif fault == "target_width":
+        content["excluded_targets"] = [target | {"official_id": "123"}]
+    elif fault == "duplicate_name":
+        content["excluded_names"] = [name, name]
     else:
-        item: dict[str, JsonValue] = {
-            "source_lang": "ja",
-            "source_name_hash": digest(b"Synthetic card"),
-            "reason": "Synthetic exclusion",
-            "kind": "name",
+        content["excluded_targets"] = [target, target]
+    rewrite(root, LINKS, raw)
+    reject(root, "Invalid digital-name policy fields")
+
+
+def test_link_exclusions_are_read_directly(
+    baseline: tuple[Path, str], tmp_path: Path
+) -> None:
+    root = copied(baseline, tmp_path / "repo")
+    raw = current(root, LINKS)
+    object_value(raw["content"])["excluded_targets"] = [
+        {
+            "card_id": "c:" + "1" * 32,
+            "game": "svwb",
+            "official_id": "22345678",
+            "reason": "Synthetic different card",
         }
-        if fault == "reason":
-            item["reason"] = " "
-        elif fault == "kind":
-            item["kind"] = "unsupported"
-        elif fault == "target":
-            item = {
-                "kind": "card_target",
-                "card_id": "c:" + "1" * 32,
-                "game": "sv1",
-                "official_id": "123",
-                "reason": "Synthetic exclusion",
-            }
-        excluded["entries"] = [item, item] if fault == "duplicate" else [item]
-    rewrite(root, purpose, raw, excluded)
-    reject(root, message)
+    ]
+    rewrite(root, LINKS, raw)
+    links = load(root / "authored", root, commit(root)).links
+    assert links is not None
+    assert [t.official_id for t in links.content.excluded_targets] == ["22345678"]
 
 
 def test_missing_immutable_revision_is_rejected(baseline: tuple[Path, str]) -> None:
     root, _ = baseline
     with pytest.raises(ValueError, match=r"^Policy immutable tree is unavailable$"):
         load(root / "authored", root, "0" * 40)
-
-
-def test_purpose_must_be_explicit_and_unique(baseline: tuple[Path, str]) -> None:
-    root, revision = baseline
-    snapshot = load(root / "authored", root, revision)
-    from dataclasses import replace  # ruff: ignore[import-outside-top-level] -- this fault only alters the detached snapshot
-
-    with pytest.raises(
-        ValueError,
-        match=r"^Digital-name policy purpose must select exactly one policy$",
-    ):
-        replace(snapshot, policies=()).effective("links")
-
-
-def test_versioned_names_are_rejected_while_links_remain_valid(
-    baseline: tuple[Path, str],
-) -> None:
-    raw = policy(baseline[0], "links")
-    assert model(Policy, raw).purpose == "links"
-    raw["purpose"] = "names"
-    with pytest.raises(ValueError, match=r"^Invalid digital-name policy fields$"):
-        model(Policy, raw)

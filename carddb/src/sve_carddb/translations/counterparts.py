@@ -19,7 +19,6 @@ class NameCandidate:
     decision_id: str | None
     source: Source | None
     refs: tuple[SourceRef, ...] = ()
-    counterpart_checked: bool = False
 
 
 def first_counterpart(candidates: tuple[NameCandidate, ...]) -> NameCandidate | None:

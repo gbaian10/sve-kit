@@ -1,7 +1,6 @@
 """Explicit offline CLI, private output boundaries and nonpublication diagnostics."""
 
 import re
-from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -37,8 +36,10 @@ def test_report_contains_no_names_and_cannot_claim_publication(
     assert summary["rule_link_plans"] == 2
     assert summary["published_links"] == 0
     assert summary["published_translations"] == 0
-    assert summary["historical_warnings_unavailable"] is True
     assert summary["coverage_adopted"] is False
+    assert {object_value(p)["relation"] for p in array(report["rule_link_plans"])} == {
+        "same_name"
+    }
     unsigned = dict(report)
     checksum = unsigned.pop("report_hash")
     assert checksum == digest(canonical(unsigned))
@@ -52,7 +53,7 @@ def test_explicit_baseline_detects_new_owners(
     assert after["baseline_hash"] == digest(canonical(report))
 
 
-def test_comparison_does_not_replace_pinned_catalogue(
+def test_comparison_does_not_replace_policy_inputs(
     baseline: PolicyFixture, report: dict[str, JsonValue]
 ) -> None:
     after = generate(
@@ -215,23 +216,3 @@ def test_newer_translation_change_is_reported_without_activation(
         for row in array(changes["owner_changes"])
     )
     assert object_value(result["summary"])["published_translations"] == 0
-
-
-def test_name_and_link_policies_keep_separate_catalogue_pins(
-    baseline: PolicyFixture,
-) -> None:
-    from sve_carddb.digital_name_policies.loader import LoadedPolicy  # ruff: ignore[import-outside-top-level] -- the detached metadata change simulates independently approved catalogue provenance
-
-    snapshot = baseline.snapshot()
-    links = snapshot.effective("links")
-    raw = links.document().model_dump(mode="json")
-    object_value(object_value(raw["content"])["catalogue_pins"])[
-        "private_name_list_hash"
-    ] = digest(b"different private diagnostic metadata")
-    different = LoadedPolicy(canonical(raw), links.exclusions)
-    snapshot = replace(
-        snapshot,
-        policies=tuple(different if p is links else p for p in snapshot.policies),
-    )
-    result = generate(snapshot, baseline.digital.sources(), None)
-    assert len(array(result["policy_catalogue_input_records"])) == 2

@@ -169,13 +169,10 @@ class Sources:
         stores: dict[str, Path],
         repository: Path,
         build: BuildContext,
-        *,
-        historical: bool = False,
     ) -> None:
         self.stores = stores
         self.repository = PinnedRepository(repository)
         self.build = build
-        self.historical = historical
         # One immutable batch avoids a Git process for each dependency on every owner replay.
         self.repository.read_many(
             build.program_revision, tuple(pin.name for pin in build.dependencies)
@@ -186,7 +183,7 @@ class Sources:
         self.context_keys: dict[BuildContext, bytes] = {}
         dependencies = {pin.name: pin.sha256 for pin in build.dependencies}
         runtime = Path(__file__).resolve().parents[4]
-        for name in () if historical else RUNTIME:
+        for name in RUNTIME:
             file = runtime / name
             if file.is_symlink() or dependencies.get(name) != digest(file.read_bytes()):
                 raise ValueError(
@@ -228,11 +225,7 @@ class Sources:
             or set(pin.config) != {"provider"}
         ):
             raise ValueError("Unsupported translation source recipe")
-        self.repository.implementation(
-            pin,
-            self.build,
-            current_runtime=not self.historical,
-        )
+        self.repository.implementation(pin, self.build)
         provider = pin.config["provider"]
         if not isinstance(provider, str) or parser != "translation-" + provider + "-v1":
             raise ValueError("Translation recipe/provider mismatch")

@@ -2,12 +2,8 @@ digital_name_policy_index_format: 2
 kind: digital_name_policy_index
 policies:
   digital-name-links-v1:
-    - version: 1
-      path: digital-name-policies/digital-name-links-v1/001.policy.yaml
-      hash: sha256:d070390485462df20759cacf0a20c1bef2aa632ebb433a0d6ab5b7e2f6501938
-      exclusions_path: digital-name-exclusions/digital-name-links-v1/001.yaml
-      exclusions_hash: sha256:62845487cd435b85000a2398d1edb925e71f59e72b35cdd690b983bd2742dcfc
-      predecessor:
+    path: digital-name-policies/digital-name-links-v1/current.yaml
+    hash: sha256:04993aa8637f400f7c070d0284909f4b94ae4d65b6a1a16518021642837f081e
   draft-i51-names-v1:
     path: digital-name-policies/draft-i51-names-v1/current.yaml
     hash: sha256:9c0e33adeb4400f9212edb1d8e2557c2c2a8cf28064bed77bef2ec8dd2938890
