@@ -310,6 +310,11 @@ records:
               text_hash: sha256:a1270a5b22ac31b07c6d96a87737f77ce8fb8fab6836e6e435ea4a34ca980b8c
             special_kinds: []
         active: true
+        translations:
+          - lang: zh-Hant
+            text: 中立
+            origin: machine
+            low_confidence: false
       evidence:
         - source_ref:
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
@@ -401,6 +406,11 @@ records:
               text_hash: sha256:39874e63298fb671264ce2700c984d8426ee47c1f7f1f4fa5b4a496e266682b0
             special_kinds: []
         active: true
+        translations:
+          - lang: zh-Hant
+            text: 夜魔
+            origin: machine
+            low_confidence: true
       evidence:
         - source_ref:
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4

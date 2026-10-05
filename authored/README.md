@@ -11,6 +11,7 @@ Human-maintained data and permanent identity allocations, read by `carddb` at bu
 - `effects/` — effect data in the DSL defined by `../dsl/`
 - `rulings/` — evidence-backed interpretations; see `../docs/adr/0011-rulings-evidence.md`
 - `translations/index.yaml`, `translations/glossary/<filing_key>/*.yaml` — checksummed glossary concepts and editable current translations
+- `flavor-translations/<hash digit>.yaml` — whole-paragraph flavor translations keyed by the source text's SHA-256; see [flavor translation](../docs/schema/flavor-translation.md)
 
 The identity registry format is defined in [authored layout](../docs/schema/authored-layout.md).
 The former `card-ids.yaml` proposal is replaced by `registry/` and `ids/`.
@@ -27,5 +28,5 @@ and `origin`; a `source_claim` is optional and only holds a work, URL or claimed
 
 Class and card-type labels use catalog vocabulary references `(kind, code)`, rather than
 glossary identities. Equal display text does not merge those references: resource EP/SEP
-and their card types, or a class and a trait, remain distinct. A glossary-only import
-does not adopt vocabulary labels.
+and their card types, or a class and a trait, remain distinct. Their translated labels
+live in the catalog vocabulary record's `value.translations`.

@@ -3,1423 +3,6 @@ kind: template_source_inventory
 source_batches:
   - batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
 entries:
-  - id: inv:07aee18597d661b0a863b468f76b156ead091aacc09894e7707e417d1a20f8b7
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:3788f2c7aa5d149b74ebd959b101f56a6acb1195aa0b71552d4229e8347cb130
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:6167e470c2d254baae42b805b514dd55b52a2ba99a4613ec76b1f79befcf81a2
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:a8354b1d56af3b839eef265655cd2f5de498e806d9cd40602b522ee53bd33523
-    legacy_fingerprint: sha256:a8354b1d56af3b839eef265655cd2f5de498e806d9cd40602b522ee53bd33523
-  - id: inv:07b24da7eb722841b2f692b2d4a99b0d0068dda6dd4296aa4c18f3e117fd946b
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:500ceac98458e79c16eb0b85fccd1d5b4db57a67cd5c6adba218b536d5118f57
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:b825809c153ad4fd521906baeeb7ec12ca1bfb2922cee1a6637e5ac51e36b5d8
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:2136dab64e0290a57212fd1b602fd7a870124b9e6c55f7a06f542f32576b8c74
-    legacy_fingerprint: sha256:2136dab64e0290a57212fd1b602fd7a870124b9e6c55f7a06f542f32576b8c74
-  - id: inv:07b39b0a47afed10c7312033e93397208aa94950029afc727eb1a39ecd2593d3
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:7ca58701cb26083d671673124839f0d0fcf945ba0f105a045304b8c804ecc3a0
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:1c1cbddc99c7a2cfe8492bc9e9e4c18425513641a592ea5c149124ca731c329d
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:07b67c309fb8fdee497b13b25a2f9774bddb5b0590e7fe6b61c9970e092e373f
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:0be369f00b4a671cda9da9eda513dec6b6576b615f257774e25dc0a1c9346b1a
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:1c6191cc955eb23c323d07ab79102e144e70d7da2e99e8f8b889cb02fef0de24
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:cfb242da8a2c8aad5dcaae977b3f567a1b7a1f37f6f9c4541e6ce1fcf5608fed
-    legacy_fingerprint: sha256:cfb242da8a2c8aad5dcaae977b3f567a1b7a1f37f6f9c4541e6ce1fcf5608fed
-  - id: inv:07b788fb2382158cc34912c48f6251136480356bf2db94d9a1472f5119ed956c
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:4976dab3e86ff8de4d624152e4dd7fd5b8fe0ebc5c1c2a34a93cdb1a8ae51e1e
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:119887f2978558fd2e71357ea3af0cfa95f0890596d7d8cab75815b9e5c6f5df
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
-    legacy_fingerprint: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
-  - id: inv:07bb28e1ab7bec54cf1f2af9b08955ec03466653964b70c1be1d2faaa94ab9d5
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:1f421c2b5ad501ef1132e89c1f8658c68aa7fa3afc8dbc2e1b8508b8cc8ee615
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:7750be8f5bc4f05ba2ea3abb78122ec1aacdaa0b4b0d8c7be81a3dc143f6e34d
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:7750be8f5bc4f05ba2ea3abb78122ec1aacdaa0b4b0d8c7be81a3dc143f6e34d
-    legacy_fingerprint:
-  - id: inv:07bbdaf78e72375beb98da850969541b06a3ccc8025bf1addd8c2671c62e2246
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:48d770928c1db190dfbaa5b281010191dd6856db52876af065438ab4167003f9
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:5c3afe880bc3529ddc2e08bfbc51fce65d67ad658de2d7152a4dab88adacf1f1
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:07be79c4425c6a930ed44e45119cf5f2f45c19497c8d7eb0b87317f6259cb466
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:a1354028a27b3d79590caa88e43841e908bfaa9fa1899f04cc37a98f42425be8
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:a544204dd2fda5628a6ba4bfb7e4dc5fc5fbaa250cb2077f2720e2dacd4cf152
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:07bebf06bd578460b3100c42c1bf3ac0ebb7742ee25511f2e3461c2bf4e20497
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:dd40c528d406fc578b233c0d2e4775c818c5c65ee127bcb9e4c6bd295271b94a
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:7ffa1bb2db2bfd5647cd2ee28bd1ee4562db65d342b1874c536b3a1a86af2dd6
-    line_ordinal: 2
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:614037e8f0173bf694118287307fd5c2544e550d615dbae9e0225520f01c816c
-    legacy_fingerprint: sha256:614037e8f0173bf694118287307fd5c2544e550d615dbae9e0225520f01c816c
-  - id: inv:07c2dc782d38fda8a951798d2569c3269a655531c1bd8e0f626f9debcda1110c
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:a46a73e33dfe84e58a9c59956c295410ed209c484fd3a341df17c02c43f2903b
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:8366da935cbdad0045079cca5d5ca8ffa049fe147372262b5b4f22d62bbf33b2
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
-    legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
-  - id: inv:07c91e54a2cc0697e05b9d88e5adcb3c1411c755933835a77bde204966b30d57
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:3a401c4108a0561334156a68a70579f4b6368d555455c06bf25d8a08ff00d7ec
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:e13fa2d6047173cb251f4732020a40e184d94496d60f4d67e270f138baf37d3e
-    line_ordinal: 3
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:68af0fb4780fc5fc35e1951827566069ab287bade1e73dd79ef9f615833e8622
-    legacy_fingerprint: sha256:68af0fb4780fc5fc35e1951827566069ab287bade1e73dd79ef9f615833e8622
-  - id: inv:07ca52d71175d3230cecea97c9d9771ea405ff36ef03b17c730397a4383ffd9c
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:116dbad48a9153263798e300edeed0e5bfcd174bed653bdc6687546afa12f20d
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:fca60c0d405cb669ece49c54d6258df4210835eec3ae14b0e2f4cea247dfe0ac
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:07ca8c36d55c08c118995dcd425db67752b0212f4342ce59ff87324d03f85611
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:6a5a9b86afb892ff084ec779294ccf4a8821cadfc7bcbf221f1af93f07ad61b4
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:fcf4de8d903676105d3d57eb28ed08a36fac1a838c727f1df8d86436172458f6
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:aa51d64db6f4fcc237b204018ae48988c43e43989ebbde57ccdd8366f14e9a38
-    legacy_fingerprint: sha256:aa51d64db6f4fcc237b204018ae48988c43e43989ebbde57ccdd8366f14e9a38
-  - id: inv:07cc0fb530764f22684fe266dc8c476b7653299969823b67ee31405d29f1e376
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:596c617b5bb22ff335a8e8dc2e9d57f0ceb225f89593135e2323922fa49b725d
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:513ee5ba6d75091d08eb43f283af4d0d3e5ee1d25d6dc84c603dfcfb926b65b8
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:6f16b2a8804f96fcd2cb28f9afa45c5f8d7ae1ead191f093834984c9f1049a6a
-    legacy_fingerprint: sha256:6f16b2a8804f96fcd2cb28f9afa45c5f8d7ae1ead191f093834984c9f1049a6a
-  - id: inv:07d4a90319d50e0006831bfdc667b20a096fa0fdd0d0dc8fb2b8dada382df486
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:1915d6e65e23ab844d520ab9ed274196855fd95b5c8b42c5413ea99bd920d58f
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:f0e6a760b27f0b30aa59eb71a05d24ecf897801fe490891dec478dacc3d6d8c3
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:25ba50b47a2ae8b7ff4290bbd7f09c0e5a1ce382b20d8b5230398db71a11ab82
-    legacy_fingerprint: sha256:25ba50b47a2ae8b7ff4290bbd7f09c0e5a1ce382b20d8b5230398db71a11ab82
-  - id: inv:07d86cdbce9fd0ec47a059d91e9d9525cff37e4cdc7f667cc516ab874a915293
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:d0a6dc1af09768b9edf947a8a347df0f849bd133a491d644fadfecb61d8a78a1
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:20e49d3343785100b201b3df0d46a03af6e9146a9ddcd50f8d0f0bdf21adb809
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
-    legacy_fingerprint: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
-  - id: inv:07d97af6f4e63038b0a8023810acfa93ae7cc2c0cb73ba13d41be6b41ea6f7fa
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:5713894ceaec47fa836f6c5490ec5d7f45716a811d77380d4cf9640ae823f0e1
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:2fb9b130f23727137c930365ccd60104ae3cccecdfde75710d282c1deedbff06
-    line_ordinal: 2
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:07d9bd317b601485bf3b5a38afffce31b77453b054a9d3117b6dfc15db17882d
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:81a6c9feb0d1dd1a58c12c0a01dc44483a2094c26f15673359c2cc5061c06fc8
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:461a34f26a73922c927c35874aac25200d362faed3b51156cbc6e54a8bba7ace
-    line_ordinal: 2
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:0fabf2ce5c1cce887703c2785b566d760501aab3d48d96b7f3db114952ad30a2
-    legacy_fingerprint: sha256:0fabf2ce5c1cce887703c2785b566d760501aab3d48d96b7f3db114952ad30a2
-  - id: inv:07e323117d365dd18f21f74dec2eadfe54f9f1d2ff8da23d5bc7e635dc45f5ec
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:a1b25502bd8faa998aa0ae79756d11cfcdca17805e9f2c014b3f9269e3ef03f2
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:7828d7772549facb82e9a2326342b8a30d68f0431f9280d27b40b48f9869e197
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:c66525c4cd20c14deeaa5c8e37e369bf00583d30aa9d077e1a07700b82925976
-    legacy_fingerprint: sha256:c66525c4cd20c14deeaa5c8e37e369bf00583d30aa9d077e1a07700b82925976
-  - id: inv:07f018900082b003170d28b76c000e759d3540b8f91388cfc4d721c7c17b3058
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:64c3aa8e7e37bd3c737c51246656a538140d49f7c14f76d02737e104303fac6a
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:81da8f14dadfe3dabe7517aa1dddc524d6c10bd2ba0f6df3c4f07cde04127cf6
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:8854fba743bc40582c5c83d82667cc197753a9264a02fb67215c59a8f8ad40a4
-    legacy_fingerprint: sha256:8854fba743bc40582c5c83d82667cc197753a9264a02fb67215c59a8f8ad40a4
-  - id: inv:07f277c98585d9975b46c1e7141dcc1b01e4a9b3ce53adff1971a223e4d9d733
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:a0e5742171ac65374eca0e587ebd88dad02e70f060384728a3c6e14ead3c5fcc
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:0fc7c82fda8186e704c87a722f8cebe90ecaf82e64a62196dbdfc351eb8a0cc3
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
-    legacy_fingerprint: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
-  - id: inv:07f4144a1c9a754a0f05922f2c620889b9d23a945505008fd117c8784899c1d1
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:1d1fee0bcac8d0a3f4e7216c04efe4c45d80eca732102672cdad3b4296622539
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:c0273eed8a1c6d20153033694a29c3f57aea55ea5c7dc9b88ac882c4c714ab24
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:07f666fb30716a5632436b1f1c7f79c85249d443c77584074a0e52f7f830f8e5
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:4f05e5ad3060e3f0595f4f46d7adace4c67db9388de6697944c6def16bc14afd
-      parser: translation-jp-v1
-      locator: /faces/0/sections/0
-      text_hash: sha256:5ad029c2f81fa204b650ce83f6d10ca5900704b2e6fe85ba01835f700e851aed
-    line_ordinal: 0
-    role: token_header
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:5ad029c2f81fa204b650ce83f6d10ca5900704b2e6fe85ba01835f700e851aed
-    legacy_fingerprint:
-  - id: inv:07f692b7c997fb914a9cda4751e260dafdb9ec8633d81b0c4f3f718e921a3e73
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:bbaf21fd2e7effe70f20a9bce32a95f09607bc0e3fc0b660396a71a0dd6fe3b3
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:6970d3117efdeaec0bb218505b0382eedc8ca321c2b4903650f6dcb168388233
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:0b72be619bca495419846af89d964f2f3f8fda11d0f404c67415280e92ded75e
-    legacy_fingerprint: sha256:0b72be619bca495419846af89d964f2f3f8fda11d0f404c67415280e92ded75e
-  - id: inv:07f69396ee381d255789eeaeb5d1b6ff047208876e0adbce4a7663a6583a2043
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:849bc0b3fccfe491805d143539960ad18cdd78ae50776bf7514c2243583c7ea0
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:875120ebd8c5fb670c7a68c44d2330e8f7e44398d57d9de85657aed8dfac6b5a
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:fd678bcd1332fe12be124b07a3c7bfd911249d88779f257162ea62fe880d7e02
-    legacy_fingerprint: sha256:fd678bcd1332fe12be124b07a3c7bfd911249d88779f257162ea62fe880d7e02
-  - id: inv:07f715ac9760171561ed86f08ef8fe2d2fd37aa1ad638bfc9c294589d0dcbca8
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:653df0679742f12bed27f0640616da9d6ab8d605a81b0fb9c0d01fd069e57226
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:2cfed3d8bd233747044604178b47620d3f081ba86e8702cab76f13f2ec2322e8
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:07f84329bdf234bfee4cc3f37068c413e1eaa72ac0b68e6ff18b501e61a1ebcc
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:64936249764eaa6432765ee1ab17b035ab00f8c5a986e87c1bacb15b4c623b53
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:b199797b6c3e5836f229200c0619abb5bac5c757c07ffaf412557aaf15047608
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:fccbd93286faab3a9c04194823c2a388ed6263a15b52639c2f44358d874565e6
-    legacy_fingerprint: sha256:fccbd93286faab3a9c04194823c2a388ed6263a15b52639c2f44358d874565e6
-  - id: inv:07f844d929ff64cf39803378260c26cb2d9567b6085e499ccbb3f3fbde3feb75
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:51a4c4057a7eb7fcebdb193af92d3382bee838b279eade65f96beacaa3171a26
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:667bb4a8bd598e1d2a35776419835627171ffc11615d07f1b22e6c9298162320
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:3a20a20719a6588d9050753c9fec50bd99c72064eca77adeb7a0efd50f3d96cd
-    legacy_fingerprint: sha256:3a20a20719a6588d9050753c9fec50bd99c72064eca77adeb7a0efd50f3d96cd
-  - id: inv:07fa9bd6b6935312985c119c9894a007d880b088c83f077437be9905dcb4936c
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:b8829d6b117ca99188d663d5d08d3cd87339be6ff95d9286c38201b73dd42f4b
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:519652698c0d47e1bfd93b22a128f2c8832675a0b90fbcfc7409b85e1441b5cd
-    line_ordinal: 2
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:ed68bf8d2ee9e4cb68ba84e89c2e587f0e1a539b6343b9aaddfb505617c35fee
-    legacy_fingerprint: sha256:ed68bf8d2ee9e4cb68ba84e89c2e587f0e1a539b6343b9aaddfb505617c35fee
-  - id: inv:07ff771a14727bcd891c639e388c28c0a68165647cc1ad8c4fea53c1832da8cf
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:969cb9fafffea300f7bff84646d408e9beb1647c83e8a81336a9fea2bb9e9b19
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:fd00ce7ae03a32cbee506be2ed4a1a598c33b7bacaebc6d165a9e76799d8e08e
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:fd00ce7ae03a32cbee506be2ed4a1a598c33b7bacaebc6d165a9e76799d8e08e
-    legacy_fingerprint:
-  - id: inv:0801402be498c1f5fce7f41f60afa263f301d2f875db363ebd4569a892baa9e6
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:53135d33c95c13101271e427efec6e7da42a01bb8f4778ba68468674a81b026c
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:0552de80ebebf89b51bd57ba0bf3ce6151424bffcdb553cfe1acf84b26bf21f9
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:080a7a6ae95dfced08ade2ee603c2184657d78c8471d73de8048972797ead525
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:6abf8913221e44680abf10021934a95fa1abca5fd94f50917c2687bfc293c2f5
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:150f4f08f1184b951b632b1f57bd7db090343209e2dd3e3940625a4151fe62c4
-    line_ordinal: 1
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:080b08d403a6b3cce2897769d9f3a3218e44a1413d4843c7306f15f9e295c9d4
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:6b6ff9878fcc5b14e426855d22d36430da01534bec8421a633c0d7105fd08bff
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:142c0f6bdcaacf509d26e1c898b206e894fb61c1cd35a234ed151de4671fc91c
-    line_ordinal: 2
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:3bc2d5537054a3bbd2bf8e1d51e912e4ff6265cc937155cf668e8a7e94270db4
-    legacy_fingerprint: sha256:3bc2d5537054a3bbd2bf8e1d51e912e4ff6265cc937155cf668e8a7e94270db4
-  - id: inv:080c5055cf528604f14621ec0ec033c2fa99004ffa208ded3e7bcae923a369c5
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:b37b09b37197cf6df5697d4a89327849895b9e839caa067a617159c1d4f77fb2
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:d4593a0f8958f75d6dd4fbe179df2c8c1d58401c844c7b793af4028d896d74d2
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:d4593a0f8958f75d6dd4fbe179df2c8c1d58401c844c7b793af4028d896d74d2
-    legacy_fingerprint:
-  - id: inv:080ce4417eb772587fc1c14ac2227d98ca2428c633166334dbfb61c90a15e5d4
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:e0a87e73eeddf236aa0ceebff33cbeac03f855b2383ce6dd0099205d1a5b878d
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:29f40a728edbcc0019bc785f01781f365f5e041ec62b078153a9e3f42b581d40
-    line_ordinal: 2
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:09180b6b6ec9ce770cbdc18dbd5432f37ee807f5398f40d3c45fadd7a6304791
-    legacy_fingerprint: sha256:09180b6b6ec9ce770cbdc18dbd5432f37ee807f5398f40d3c45fadd7a6304791
-  - id: inv:081123dca7935677d37cfa0956469f931d67988a43adfc08278549898e968b10
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:a056e5d9f9081bb1aaf0227896c4e098e1d360805d4958b67389460216ab27e5
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:34ce8a724f169ad0e9225d2f79e5e99063b46afc39f82f7101bd7da288134c08
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:08136942cb68055a9c4c829a9449472bce03bf72cd393064663b294ecd8565f3
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:3980db3858378f78e8f01e971c4fcf7d471fa4abbcd49317b072dfad4dfdee23
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:e09fcc24992570d44af659d152f11b31134f4a64a14d5e808355a442744ef23a
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:05be7d3534c1192bfc869ab8d03b584715aa2dab5c33dbd304fce98db03bde04
-    legacy_fingerprint: sha256:05be7d3534c1192bfc869ab8d03b584715aa2dab5c33dbd304fce98db03bde04
-  - id: inv:08199c359d6da0b663bfdd6078eba248144ecbc6af4f152bf3713ed19bcf4276
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:9cfb1faa228ccb4456f76cb7a585ab3b9b3c28b37878d119967af6fb64172b52
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:ae26ae380cfa2cb38e80ee4770dd2befc49f720fe166262b9edc51362425a86e
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:80c1d4175ac81423e5a1c056b81ed7ca1725e1ef6efbb94568c92dcdcebdd09e
-    legacy_fingerprint: sha256:80c1d4175ac81423e5a1c056b81ed7ca1725e1ef6efbb94568c92dcdcebdd09e
-  - id: inv:081af7c7748ea88ec436b5759e4dbb8c2b7f4238eea8d46f3276647bce19b901
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:119a5861967ffec6a6583bc50bbf6471bcc7443c216087b7d173383d756df3fd
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:5dc1f04a95cce8fbd9ab1bca2e5041044564ced3fd295919461c5bbbba66e5e0
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:081bae6d5e0a7722071daefa1b3093a31d2fd539fb7cf8acb81398bdc9c01cda
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:34693a0534d97a7c01672492c9e024e25b764b0e8305ebe14d82e91b87319e0c
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:a4c7c2a80bf3a64ac93c075677750357f26b60486fb1018b93b8a717eaf4b136
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:562b423ea52dbe4b6c7883af7492080f80e293d68080894596b9f716f43c5a63
-    legacy_fingerprint: sha256:562b423ea52dbe4b6c7883af7492080f80e293d68080894596b9f716f43c5a63
-  - id: inv:081bc3b880e2232ee5ef8f59d4333b16ae2941d2bf934edc41bf072fa9a396ca
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:76981add49c9701e66b3f93bc34f500c78008eaf9b336236bbd5f31ce91f9138
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:ae26ae380cfa2cb38e80ee4770dd2befc49f720fe166262b9edc51362425a86e
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:80c1d4175ac81423e5a1c056b81ed7ca1725e1ef6efbb94568c92dcdcebdd09e
-    legacy_fingerprint: sha256:80c1d4175ac81423e5a1c056b81ed7ca1725e1ef6efbb94568c92dcdcebdd09e
-  - id: inv:08264d9fb61aef0a66493b12032280cef819e43ed85a58d0870e78685153d3c6
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:d1df885f40e2887f77e30f4a85afa02f7a7b2b303cb89f1da2cc11c69e6434b0
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:2cfed3d8bd233747044604178b47620d3f081ba86e8702cab76f13f2ec2322e8
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:e792d1892c3ad8c72195911cd6123c01a24488d74d155727c7555f2876c7aea3
-    legacy_fingerprint: sha256:e792d1892c3ad8c72195911cd6123c01a24488d74d155727c7555f2876c7aea3
-  - id: inv:0826fbb29a5645012f17c3a6f0802b3d21b1d2b6bf8b8fd2754e5c2fee90788d
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:08056b6ea8b1241e14db03bb6af186e8f679013950e58dcd4c08f29475c9df46
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:3f0ca079be9127e269455126add2d11c2275409d732b682417493b36774f2633
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:082cf1c983412e82bee5d38a9eb66c9473ac77770500ed762a4c245d89f08cfd
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:cb44b7aeffb50fddb598952989b738528bce7ca89cf091f55b0dae06011fd8e1
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:398050f3afba228962b41ac9d6fb183b5d9144e95c2edb62eb5d89c7950ea159
-    line_ordinal: 1
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:0832eafefe73abcbd1c68350d4cfba45cfcadcb8af9c95e5002cc7b5deda7cb6
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:602f5713647c9c655dba36636171e86b1dfe301de30e5ed41ad2061cf975c978
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:ca605599fc7910f52ef8cf389fc40d6f84658d7c6680936917a4ac40ed645d7b
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:148200284b376eb3b25e6ef726a9efa685023570d4053a0d4efc90464ebfd284
-    legacy_fingerprint: sha256:148200284b376eb3b25e6ef726a9efa685023570d4053a0d4efc90464ebfd284
-  - id: inv:08341887d99c4786f7b6b874a751979adf910e6b794fe8eb4f0d5c1d03203947
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:7b899ce6a3006a89d891bb6f99ae30fee9dd2d985596cb1a1a959bb0599b12fa
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:2e2cc3a780ccd0b4d6ea00366ef7caf2d2460b71e88a9a929057c9272bf9d88a
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:2e2cc3a780ccd0b4d6ea00366ef7caf2d2460b71e88a9a929057c9272bf9d88a
-    legacy_fingerprint:
-  - id: inv:0834dc0ce49014757bc7261b185535991fd2ec9463c90cc6ab4419b531a51184
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:1ba6c18b32dc32d6e5d06ff062fe977144d4f127746746c85d551b79e2532168
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:b1b89f0052acb77de120b5b781bbf79bce240c218347ea267bd5c7e578502350
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
-    legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
-  - id: inv:083663588ae2490c15bbf1a503f88ea125ff89cbb0e2d5e698a056c73f9e7eff
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:d0d0b13d8156934461549760d3206430e24f8836feef1d608ce54f4424a5743a
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:b577838f7c5610bf6a4c414fc5664d3f566c7dadda56e6d7f48a9a65d4580b04
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:a5940a4b4d395ec9674913bd72f13922a923b68348fd87cda19f98b3363aee65
-    legacy_fingerprint: sha256:a5940a4b4d395ec9674913bd72f13922a923b68348fd87cda19f98b3363aee65
-  - id: inv:0839f797bd7aca2a20c36fda47751c15bfaf869e82c195cf79515c64649de1f9
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:9dc1902e4af677c6e8bb42f32998a0261e6e628169afa3cbb9d766eb80830912
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:91fd0306ec1b68c97522863fe7cf5fca66657f0b5955601a16fe01744a015078
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:083c4bd207136d8273fdf321940cf21c26dc562a756034d29128cb7263f4a29f
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:f9af2668642184e3722520b0d38ebc526da4b568f1f619f3d19d1d221720969b
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:70f10363821589fa948b786cb09ad7966ae24a5cb0af521c59a7576dda80d611
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:083d1832757ca1f1491c419d9b135f79c66d23acc57ef2b7baaca28a8a9e7cf0
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:f67ba9cb5b976824fd0deb48bcebdf9c4856c0ace3e74a2695d414a2d2b67f93
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:12735d6b181848872c199e897f7274141ab5bf35060ae3198fdad74ae858e003
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:083eca374a72911f389eb68f4976ad8635f20fe2b3ae6415ecf15fa5c5216eb8
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:8fd518305f8682f580b69edf2409895cce193753070df688987995d8064ea3b4
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:59bd031f13c0bc0ff27070f101c9daab071dc4fddb9a57d0bee9b9d82764da0f
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:13ebc1ae39a4331838299566d2a9c8a120d26b91e959752becf90ce0cedf7024
-    legacy_fingerprint: sha256:13ebc1ae39a4331838299566d2a9c8a120d26b91e959752becf90ce0cedf7024
-  - id: inv:0840c95c223199cb0fed508fce2c10b190cf44f9371f33a2c46a77131d718848
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:097044203ce9d5b744240e9dcdadc0ff52a0bd64950a715bfe5fe089700851ce
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:27b8f3264fd9f7c0a2b2e3d47da1f3689d98d1a552679f19df23423bbaa84b0b
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:08452bfc3fb8388b044d684c9825217ae5e1b70b12b997864a08c9df8ab796d4
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:f23ff0cdfb1bffbd5d551e11031f537c4d5f34ed48b80afd3c5887f963d6287a
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:d2d28698abd2aede45ef199e205c5861c92a0a4b7b1b75b69f82f121b1324296
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:a899ed2a5c768b4ef598dfc70ed04eb1b4d10edb2a0165b30b9b0b5a873b1d67
-    legacy_fingerprint: sha256:a899ed2a5c768b4ef598dfc70ed04eb1b4d10edb2a0165b30b9b0b5a873b1d67
-  - id: inv:084de0f8d6fd83a88afb55f7e69d1abc7b649ffa76b45bb91302b1eccbae18f2
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:060c58a8da791ff0df80c5ddb6fe62de237e4b47077b887e6f9076b8919cad8e
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:f4ffdb90a0f6c7610e626a8b353f7361786ba34328eb5d462ca2f6594c972dcb
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:d5914ae7becb66d15368e78c63e0df2fee0099d166317f16d58bb3fba5f8b893
-    legacy_fingerprint: sha256:d5914ae7becb66d15368e78c63e0df2fee0099d166317f16d58bb3fba5f8b893
-  - id: inv:0855aafd9300a1346d17a12ea41d801845b300f0e830c17b2570ca00a5606227
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:f1e2bfabb9fef2bb8e860c38a7b4df08d7c56fc06c9f88696bb58d0714b459b4
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:3178b56a29b7765b78b82939c8ab7ffe90c217e36ca2a07c3f83f9f3e383f21b
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:2e72d945fe25ce97f7a84433b7c4895855ab10b01a6c1a952df4b24252399c5d
-    legacy_fingerprint: sha256:2e72d945fe25ce97f7a84433b7c4895855ab10b01a6c1a952df4b24252399c5d
-  - id: inv:08576de05c563061420b937b95f1068bbb8abd12b82ff447a52b34f62e6401a1
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:46385cefce5fcbc5aed70cf42ea317484fd07debef01b714f7c80bfc97025188
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:0b3c6cc35cb9c3745ca784706262ff60cf2e4f75c50f7d7a208cb0ee2b1f54fc
-    line_ordinal: 2
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:ffb167a52c44fe101bbfcf9900bc86e0840fc72812654229e565557aac370ff5
-    legacy_fingerprint: sha256:ffb167a52c44fe101bbfcf9900bc86e0840fc72812654229e565557aac370ff5
-  - id: inv:085ac08fedc4cbc90b4cd0dd2baae0e1e75704656dfd3ecda2e68c56b0bffd49
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:08778458794ee1dbeb3b7be27d3c42f2fe5b1991393394ff848ed6e5495af1d8
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:6587f30677e5516e7b22505672c5cf1ec170f68e52194be4f8af0d33a2eae7cc
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:b83983cdeadb68f1c7d4de1bee856c90cf4d1508e5b368078dc49a51a71747f7
-    legacy_fingerprint: sha256:b83983cdeadb68f1c7d4de1bee856c90cf4d1508e5b368078dc49a51a71747f7
-  - id: inv:085e0c5ce4c792945eb73398f583c0122ebc7e404c7d84cd52653d71eeb62306
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:f9af2668642184e3722520b0d38ebc526da4b568f1f619f3d19d1d221720969b
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:79916a55438b011d3633129f64b35c62ed907809b8282971302bd33cf795b19a
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:79916a55438b011d3633129f64b35c62ed907809b8282971302bd33cf795b19a
-    legacy_fingerprint:
-  - id: inv:085e6988e3ee44017bb630aa30d040bbdcf0f4e3678f2574973f70f98237a0c8
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:3b237646a82c1edae5c5b7dbdeb49e558b789dfbc00d3b32e7d4d4de280cb367
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:6334b6402d806b76458ce4720490e5cdee8c0966736bf59168e1f8ea4882171a
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:6334b6402d806b76458ce4720490e5cdee8c0966736bf59168e1f8ea4882171a
-    legacy_fingerprint:
-  - id: inv:085ed6ae680db3ec980d0117e8647dba8958940efc704c89193119e23a13dbfb
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:3a3b9e9bede594cce8208b09e9d203cd36114580d92ee7fb0209652410276803
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:0e9f626aded012d75d47f1c3ad081b778325dcb0f5c5f8c7a34f53dfb039b209
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:208b272f26dc8a1ac2c741cb6d2d4a0928975e5b80de4cf7fd66b4fcbe65b3a3
-    legacy_fingerprint: sha256:208b272f26dc8a1ac2c741cb6d2d4a0928975e5b80de4cf7fd66b4fcbe65b3a3
-  - id: inv:085fca00f816712c42ab6bb1a9873bd0628773b1aa50581e11fd853cffce2af6
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:c4bfec71ecca37ae459669f13e16e030bdf7d67a19af7e5b4d59e6daec718d05
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:e3d51bc62c9721f383bfa9e1f7824ed94ace6a7411a7465e938b8784fa5bf897
-    line_ordinal: 2
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:d1d6269cf762468cce540b1b8a26b3626ba0817ce2e228f4c173ea35061b8eac
-    legacy_fingerprint: sha256:d1d6269cf762468cce540b1b8a26b3626ba0817ce2e228f4c173ea35061b8eac
-  - id: inv:0861624bae5e862459b1bd05b995e524556e80dbac74a78ee417ca93dad735a2
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:a336137d56765e1c83b1e6393a08dde7b9e60684f9035478944e9cd410995768
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:661892c130b2054701919808211ef23ceac9782ec325ef08570d1e792a53ece0
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:6a4dd201564431605bf19bb8d5c973638f1fdf638c628fe920b791a12438311b
-    legacy_fingerprint: sha256:6a4dd201564431605bf19bb8d5c973638f1fdf638c628fe920b791a12438311b
-  - id: inv:08631751956a71a21000bf078fbae0901c4f026d0cacd17db77b2cb251e69716
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:ef5ad5d70beafc62eaef036edec8022f614b26900792461b73ca9c18c36b6659
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:82cc2c5fc909fccd0a66f0c8f6f5926e3f2e220d68b4d7264e45b2b08f44b402
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:75413a3ecc7ecb6204a4adfc89cd4d92c010350e3f912f749a249fe50ee28fb8
-    legacy_fingerprint: sha256:75413a3ecc7ecb6204a4adfc89cd4d92c010350e3f912f749a249fe50ee28fb8
-  - id: inv:086414009b79228e1babc2d0fe9ad99a4b357e6b9db377d593298b244f257b93
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:5de182718eb42e7b8f1f1af59d711da20e673654f7a1f79d6080e622d9a8178b
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:13e6af5f1c0710a783e2e76c07c905fe7f504b4b409321421728de2193e0dbed
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:13e6af5f1c0710a783e2e76c07c905fe7f504b4b409321421728de2193e0dbed
-    legacy_fingerprint:
-  - id: inv:08662de75c896c7da403974a8bde6a27e5d7bf04a19a54ad912cf619090b52fb
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:debcd77fa7a116a2203d0adac6c78106480d65aaa36f231f855fb9aac78f2a87
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:b08eb8157348dc068d2001c11cc01d11e6b07d2fa31388d0b5d16172f35a72f7
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:086680903877bf6839096fdba6f509ad5721e71a5bf062c30e2a0c56a7ff82e3
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:a5d79e2cb5c985d32efae782b1b2b3cb93d840bc74dbb8019b0a23ea2630bb5a
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:242397f65c71fa66c5f3f1beb0ca88a7328c7fad77c2bb936e36cc171f8e155a
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:242397f65c71fa66c5f3f1beb0ca88a7328c7fad77c2bb936e36cc171f8e155a
-    legacy_fingerprint:
-  - id: inv:0866a43b974225e3cd79abb2fe271f187c7dcbfcdbfca5666f1314740059ac8d
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:b147a8c96057054fd74376ffe4e521ee05b42022a2d0f56f65c715d725e2e7ca
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:4e23d0e4a29d99e6092c76c644031020392d06ab72028a4b447920c67efb0107
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:df5662e6d62460998e00f96b0d28f710b3c1a07c53b3db2b5e2e4de7d92e0dd2
-    legacy_fingerprint: sha256:df5662e6d62460998e00f96b0d28f710b3c1a07c53b3db2b5e2e4de7d92e0dd2
-  - id: inv:086717bb37fc527196903fe00963a93d27d70aa820e8ed526a2e5d264e6faf57
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:9f85b60da8d6fe7875f24f17f09baa120251ec4279211e5b032b467728d1fc33
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:4357c4c4a2966d36433a090f60d64698b4cdb4c5a4433225301b74c778c50494
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:e24db00bc89e0ce1ee868603b77ac39c7943e33ece3531fa0ab7ae2647e7c3fe
-    legacy_fingerprint: sha256:e24db00bc89e0ce1ee868603b77ac39c7943e33ece3531fa0ab7ae2647e7c3fe
-  - id: inv:086719844c44c1cccf4b3a4e2b924c06dc4b0ed8087a6464a561c10d892e6863
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:7710313e00cbc21e1e32f23b567fa79eafd5bfd0596cba3f7f2fe801bfce5ba6
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:2e41ecfb44e4621aafb9eab9d5d846c84faa6f2400984981d7c5c92f0d013a1e
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:2e41ecfb44e4621aafb9eab9d5d846c84faa6f2400984981d7c5c92f0d013a1e
-    legacy_fingerprint: sha256:2e41ecfb44e4621aafb9eab9d5d846c84faa6f2400984981d7c5c92f0d013a1e
-  - id: inv:086a8468feb7b5b709d865c0c456e3560b6da48d32764e775c5e07aca888edf9
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:923940dca9bc99bda13e3313bf04179c0f1dfe2fe5dfb92dd7607ce9dbf0c9b4
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:5b2e8e0cfe2c07f551cfb2bb1cd8028f69c71940b87a7d9d77b3d9e8f1a9cf6d
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:ad68e8e378525ace56e846a355d4a6d07e70c5004e51cb4bdb90eb4cea9ed1b7
-    legacy_fingerprint: sha256:ad68e8e378525ace56e846a355d4a6d07e70c5004e51cb4bdb90eb4cea9ed1b7
-  - id: inv:086b1edebec0f19b3f26d97f18c94702e80e83ac14091f0165a47db0db604e9a
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:a80ea345a5bcd17c4d4d02128cc36dc3a7ae809d28eb6e8b56a2bf9c62761d17
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:415d6750287b22efcec7a3c55b1be71633d864b010975f4188985227b13099f9
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:f890b18d975814243c8bf1fc8964c2e86ed0b040b27dab377382e70ffb5a78ca
-    legacy_fingerprint: sha256:f890b18d975814243c8bf1fc8964c2e86ed0b040b27dab377382e70ffb5a78ca
-  - id: inv:086e93dccc72515ec9396d2ea6c001c12f6592501913d48b40d3a927e3f40734
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:413904fe1776daf766a5c59beba2077417059e5cdf65b5438fe493126384fbba
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
-    legacy_fingerprint: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
-  - id: inv:0871579b49b9c3943801e1184a3c67c670e4f03a66ae5153f51d732e8675a4da
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:46385cefce5fcbc5aed70cf42ea317484fd07debef01b714f7c80bfc97025188
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:0b3c6cc35cb9c3745ca784706262ff60cf2e4f75c50f7d7a208cb0ee2b1f54fc
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:087345107b63e3ddca8e68eaa96af73743ad8642bdea3a2b22f6b530a10a7fd6
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:ae1e6052a220b412eb838bc2c97f80dd12a3a7869f6a682c1c71f4798ef7f5b7
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:57af234701730f7a837cf5bfa83b2388e5fd3563fd4975a3370fbfd2951b8a18
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:57af234701730f7a837cf5bfa83b2388e5fd3563fd4975a3370fbfd2951b8a18
-    legacy_fingerprint:
-  - id: inv:0875ebcb8a5efa04fb512a01d15d487c05ae58510731cd3cd6de99f6b5a66469
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:14af99fc54a7c6f986bd63e67fbcd90bf1efe9684750b01fc85986872d221c9c
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:afee3d7336e3ac60b85646129023601ce9610a338c064096d63a3e1c9f52c179
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:1adffb12daa5666f44c2be8dda8f57996c6c70887e6622384f68acdc6fac1186
-    legacy_fingerprint: sha256:1adffb12daa5666f44c2be8dda8f57996c6c70887e6622384f68acdc6fac1186
-  - id: inv:0876716f4d45903afa3886d575cbf54486531e2792d14bc711e11ba6b9fa8b7d
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:2d848ff0929adc53e768a1a3a202507b52db77925dbe301951e47fb48842b775
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:b20da1e1e7a0427641ab71f2c71588410ea1c9e1d4f9411437a7e8399b03b51e
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:087694021e75f5618f2a686fdeb363efb15ab19f29494721458221ab225ded58
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:7fa18224256dfe7624d91ed8f14f0a72d5a405ece16ceb1976570bb3277a91cb
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:8616259b879f2bd09f8ce0b5797d5af9bfdf136b70308ff18ed0e2060ca39c70
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
-    legacy_fingerprint: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
-  - id: inv:087736f8b92814a03d4fec626f1d82a0ef3dd8401ac949d8843e74a13675aa7e
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:8e38266ff1e1980f1c52540812d04c001278b0b475c5beb5a8254ef75f5dd1e8
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:42f2849c4b079f401d9726dfb81ace7baebf623478ed7a80a8ce74c7cbc2d132
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:42f2849c4b079f401d9726dfb81ace7baebf623478ed7a80a8ce74c7cbc2d132
-    legacy_fingerprint:
-  - id: inv:087b5c313ba7b444fd269f11323d04b8340a922cb0aec2bf474cdb1c0f84cfd6
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:13c050eaa722ee87e2969131b4ecd23efb8aa54858e42804f34f9beffd0df373
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:8cffa9b27b168b1890ba9e85ca205f8342b4f6a999ac8307fc50e6aaff186f9d
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:6429494e6ce5ca71c4ebf801de5e0c0482de8f7360f06e7d2f7d5847c6ac03c5
-    legacy_fingerprint: sha256:6429494e6ce5ca71c4ebf801de5e0c0482de8f7360f06e7d2f7d5847c6ac03c5
-  - id: inv:087f05ae9afc992c6118758eb39d35c1f243fd5db388e10729e51509783ee869
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:c4d5c0a019f2f25bfcda26e77729d2039e2cdabe58aac23e42d89a98e75c97c1
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:781540fe916fd90fe6d6fa5b487acc50aaa3d8994deb47adfb511076ce6f15ec
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:781540fe916fd90fe6d6fa5b487acc50aaa3d8994deb47adfb511076ce6f15ec
-    legacy_fingerprint:
-  - id: inv:08812e7aac79354867212affa242d9a4ca79d36d32c35ae33e9cd9803891d65b
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:f5302e2031f3304f78018a2c8e0224a9cd8bea74259402e50acd061f59fe4aaa
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:93a3f94681f98bd6b8345d3b739b5705d69fad5214db8abf2201168f7855cb09
-    line_ordinal: 2
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:ab78f5a04fbfb8b6a3ad936553c2b95c7b3c97cbe457835a377a8ddb040aea44
-    legacy_fingerprint: sha256:ab78f5a04fbfb8b6a3ad936553c2b95c7b3c97cbe457835a377a8ddb040aea44
-  - id: inv:0882a39bc57b7ce69ac59102d326f1b21710ec6e7bcc24acde6c27a0c4e46e70
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:71dd7b857bbf8c0fac0e5e223bf52ae1e5a970622c9e2e4f36a32732c3f82994
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:356ac99bfc3959a06e1fdd66cc4ea3a53aac90c5891485e2dee89e73dfe4b340
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:356ac99bfc3959a06e1fdd66cc4ea3a53aac90c5891485e2dee89e73dfe4b340
-    legacy_fingerprint: sha256:356ac99bfc3959a06e1fdd66cc4ea3a53aac90c5891485e2dee89e73dfe4b340
-  - id: inv:088abc0f240a558d62039be3a7855e43c5b7bd1c52840b59d73170409e2921ea
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:0f3fe6080cd36fd3c7326c1b72efb5ddfad190c3d0529ac993e06d7e9c714d81
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:72a9d35cc42226b9eb1be49f43a9cd761cc7e61c067a533b83fd10bc40795644
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
-    legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
-  - id: inv:088c64873aaec8929ce60b908874581804bbbaa9b63e15982c188bc0b4ceaf51
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:e8f175d8bfe7e437070e14acc94db74ba620c4842cb39b9b57d8f3aa944ed58c
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:0323a10c95d07a2d1f30d099bc2378d0fa3e78c4fe778d3d956c52cc1259cc81
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:85fc4f701492c7e67a868c7fb4f4c54facb292de89e78caacfbacf5a0f1056ba
-    legacy_fingerprint: sha256:85fc4f701492c7e67a868c7fb4f4c54facb292de89e78caacfbacf5a0f1056ba
-  - id: inv:0890a0020b92869b4387c7552fc6674685cb794c79f11214d45228fb71dd270c
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:df97e30f974c4d3c826d0e5a1f62d89616766a3d80e08fd6281a32ef4cf9e058
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:3f4ec6dc23a7f623a3c9bc990e89c7095a8a714b71179ea38610f6c9df3ea23c
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:3f4ec6dc23a7f623a3c9bc990e89c7095a8a714b71179ea38610f6c9df3ea23c
-    legacy_fingerprint: sha256:3f4ec6dc23a7f623a3c9bc990e89c7095a8a714b71179ea38610f6c9df3ea23c
-  - id: inv:0890a6a7c034a58df0dd731e3296d61093f33de97580591036018746936b5341
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:f4ddafc95b235d75e7e775a8d64786a7b746825f93f3e12c1d0ac4ef9316bfd2
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:06d202ec79a16ac333047d604d0d5e7b8b4f09f6f382eecd99d5701c3b351455
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:06d202ec79a16ac333047d604d0d5e7b8b4f09f6f382eecd99d5701c3b351455
-    legacy_fingerprint:
-  - id: inv:089780988107b5a30e26f8f49974d7aa790d15d55ef539f13f067662803af948
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:dea0f7e70727b0658e519a3eed1a7d9bf02c6202625f51ed942a346e61ef01d8
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:1bfebc812503cada0302da950ab97a24d5f9f766f0a305010a54a875cb660beb
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:fa2b905c57e71d5eb6fb39fd4e01220d42682c9d32b5ca730f0dcac07910eb8c
-    legacy_fingerprint: sha256:fa2b905c57e71d5eb6fb39fd4e01220d42682c9d32b5ca730f0dcac07910eb8c
-  - id: inv:089d9bc2f0ea60937eb42c441e45afeb55f47a60472026966b1e12fee9a48a1f
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:7cd84d98a2368300e8ac9c813691824e92ed4722d3ad3434c4330c9eddeab402
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:dadc4fbc28950a8d8af4deff3e276425f2f91c087933de3b1f451f035b1c6b6f
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:dadc4fbc28950a8d8af4deff3e276425f2f91c087933de3b1f451f035b1c6b6f
-    legacy_fingerprint:
-  - id: inv:089fa0f99417f8bb4e87947a9c427b0fa0cd673dd5fa1cff293d05b4985f7ec1
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:002b4de88d82bcda000a91badbf3a0ac9b6029b7422646731ec97fe6322f56ed
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:74c31d5c3da3f30a894b527dc883a5b37d14145a093d69472b3605c3a600e12b
-    line_ordinal: 2
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:80ef80026779aa012bdecd6a530af3d93c84823b75910920ddfc7f0b60f74811
-    legacy_fingerprint: sha256:80ef80026779aa012bdecd6a530af3d93c84823b75910920ddfc7f0b60f74811
-  - id: inv:08a7415e5668e895427bf4dc0eca09c70c86c7e1e50a0bebafc30041b09944b5
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:13fc2413ba8817af218a3fcf171367e04a3f8749c9b743a6e6575ff58a385879
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:2952770dae676e4fc454438fa9f19089ce8cf337a8aabde2568112504cdbbd17
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:08aabca88748d7f825aeb4c450dc0aefdc5ae23f3c165f5d0dacf15336446e9b
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:ce899b8b1ee181f22e75b18256423c2fb3a982e00fc402782fc0259774d42301
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:7d5119a813517eb2ebe6b59ee6ee769c6f870415effe83981222b53e529a2c94
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:44dbf155c48dce8096043d1de363737b4dbf1dee9da0a53ffcc5e97ee8201f1b
-    legacy_fingerprint: sha256:44dbf155c48dce8096043d1de363737b4dbf1dee9da0a53ffcc5e97ee8201f1b
-  - id: inv:08ad1ab0a9db289690ab18a59dcf401b17978446bcecc1cc540285c40b8f37b7
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:9e8a9d44700d9876ecfcf5cbd7314d6a28ef1efb9913c7a1ac6735400a84a81e
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:90845aef19749e19cfb8aa1fa5ada405c9628ca377cfd2b39c6de5882ab6f428
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:3f4ec6dc23a7f623a3c9bc990e89c7095a8a714b71179ea38610f6c9df3ea23c
-    legacy_fingerprint: sha256:3f4ec6dc23a7f623a3c9bc990e89c7095a8a714b71179ea38610f6c9df3ea23c
-  - id: inv:08ad45de6db850eed2560c7b29c21dcb27ee7ab28cd5e78d11a10ee4c9d58a45
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:e5cf5501e6fd77588997fc7d5a550cca3982d8805af5ec2db5e1257b57491de9
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:fce30ec75752417ab9da0b79bb6764288b32c241cb65b65d88bc9b0b0d6a1a1a
-    line_ordinal: 1
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:08ad7b55e2da23bc34c56718c1599c799b6cd04e3f17c3af79b542ca81349e7f
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:6b77bc55668fa31c0cc0f4d20105038ca5a2b0d40682e3a8cbbc7ab5aca41f96
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:e8d5f0d57b95e855f63168a7392e8d8613a09401fdef72784637d09003764417
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:1b3704b138e7287a5c017b3d387d4cc029f4406bae0ebf91067783fd912bbd5f
-    legacy_fingerprint: sha256:1b3704b138e7287a5c017b3d387d4cc029f4406bae0ebf91067783fd912bbd5f
-  - id: inv:08ad7ccb33153ce514350667186fe40a6434be847f4e37fca84daf2b6cad1a2a
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:deeb2ef88c49b8bc2f5c4356eee777d06e0e26f3592715e4ae8dbe36614464d4
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:f696e132e0bae5e26d0633b7879fe5045d5780e88e1f39e4e721ef90ef133eb7
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:f696e132e0bae5e26d0633b7879fe5045d5780e88e1f39e4e721ef90ef133eb7
-    legacy_fingerprint:
-  - id: inv:08ae3665de8ccb2b1edbc9364901dc41622c2d54ffb25118b010285fd043fe84
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:13e52a8a6be60aa8236b3f14429b98618a7d77db4155ab7918ca8736799bba9a
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:5835a4d5abf295e3a6f54722f48fd36a2bd3bd837a66e16c1fc3d51a036fe4a4
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:4969d0808f6d1e5e7570f42c37ed826112cb6f9b1b59b24c744bc77f9dd88ace
-    legacy_fingerprint: sha256:4969d0808f6d1e5e7570f42c37ed826112cb6f9b1b59b24c744bc77f9dd88ace
-  - id: inv:08b027ae82f746d83041fbd8b3b910cc798d1f05de1fb6928be4d66fe7e9a30e
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:6287d92a23d6b0d1b455c380692366d5beb0cbbc88dff6a8e8db3f8a84148cca
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:84f317a32af5f7c2bbd231892e095570292d819e2f2583b08d23298ffb6f73e5
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:84f317a32af5f7c2bbd231892e095570292d819e2f2583b08d23298ffb6f73e5
-    legacy_fingerprint:
-  - id: inv:08b1f67fcb606f23942c987ece2b60560b3d240afa128d21ac2b176d12a2f075
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:d843784f9431b5b68278c222d499b09a47465d33c1559ab646d9d6454c7cb212
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:00d8926e863524443d6fcd113fdccf473e465f50a87150fe928b2cdd338d1171
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:25ba50b47a2ae8b7ff4290bbd7f09c0e5a1ce382b20d8b5230398db71a11ab82
-    legacy_fingerprint: sha256:25ba50b47a2ae8b7ff4290bbd7f09c0e5a1ce382b20d8b5230398db71a11ab82
-  - id: inv:08b2efc159766066609282ef32d3ab40a70697fcb02f93068044a286d1dc8066
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:ffd0647f106ec6a8e2e16ce6207579adcfb62ae2dbed2ccdca3478c0a550de47
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:97012c4f015ba8cd4d513c7bfcf4e38345dd85988f90d91eba9e40cf84fae2be
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:810aa49538c18cea2b102e7e270b368bcf731d8c0e37a9c17a1a844d8628c913
-    legacy_fingerprint: sha256:810aa49538c18cea2b102e7e270b368bcf731d8c0e37a9c17a1a844d8628c913
-  - id: inv:08b659c75888b578b15810fe58f8ffad722ee02383a839d0e24232ddc82b069e
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:4c86c563db42561079739020f2ecb54d9b33048e338c216246c6f151a1e9e775
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:6b4e1de25a6779888611471f945dc6197cd92bfb0e199b54cb1d047f093f6b0c
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
-    legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
-  - id: inv:08b95b0261f75678d3f63b0cbe308a6763d14436c66b8d520a86973f139e57bc
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:92178b45155a6dec717f5519c11589178c96b76c6f7735074661f2a67ab628a8
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:ea66fb91c821feb9ad17115918076dd651a702b090a7b32dde1f5f201c9d714e
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:08b9dce9d78580b43bdc9e87a061c9c47cfff60f8e49b5bc85ff56ea52daeaec
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:24238c019da4b82bb103e5ef227362400940dc2d2fe03e0cf6dd8efd72743d4e
-      parser: translation-jp-v1
-      locator: /faces/0/sections/0
-      text_hash: sha256:f166c1129c8ba2909ed88a63ecc2da54f63051ecce6d1ca90f45b07ee7c8873d
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:b48a24a038a877a5fe2972ff58d4dd3e69ef28a2b429d8ea7ac4a5d03b774406
-    legacy_fingerprint: sha256:b48a24a038a877a5fe2972ff58d4dd3e69ef28a2b429d8ea7ac4a5d03b774406
-  - id: inv:08b9e9307600eb8c9a6f072dd5964fcce0fa3f0e4278e4a30ef6606b8fc67a52
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:df4964e7f4ed430b816bc00ba3886d12b91e7e2104fcb3872ca5693f7d71acb3
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:31bdc6e937feeaa6fbd789987803680cf0e2069b88b0771b3857289f950dec73
-    line_ordinal: 1
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:a47e6bfcc9b9a6326af976bf54729227df88f3eec452014a425cad3d39757ddc
-    legacy_fingerprint: sha256:a47e6bfcc9b9a6326af976bf54729227df88f3eec452014a425cad3d39757ddc
-  - id: inv:08b9ee3e9aad9f9d38d403ae85669343961271b05120d4264788ccdf4b7d77a3
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:cfd22770220d52e72ed19bb2774184cd03b97da2ea19659844361e3856be3b22
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:d551026466a09421c3add48ee58a3d749aa7ce41883dc3dad22251f2c4e1e3a1
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:08c168c9bb451e20b716715a63a2957f872554480a059a4d7649070ef92e302f
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:68ddceaa37903745cb6a3d3624c40babb489019006690e8fd11266d4acecb78d
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:6a628cd60682ac540d4acf5ccc665d782cfb1b3bcb9ad0f9dcba183219ffd764
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:6a628cd60682ac540d4acf5ccc665d782cfb1b3bcb9ad0f9dcba183219ffd764
-    legacy_fingerprint:
-  - id: inv:08c1eb9f604070dbdfc11b36f603b530b5a4941d6e62d9359c95be2fe1cd251d
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:65d719d119e127bbe76f4c2514c4420e5a3b0b82676ffbb47013ce0d09b0cd52
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:43e07993087ddfb46f8776fe60468c4dac928c09ecbc227d09807a9fd320b43b
-    line_ordinal: 0
-    role: body
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:fab14334d9677deee2e1b3711c32edd24f8af9df028a3f64907c672d7ff08bcd
-    legacy_fingerprint: sha256:fab14334d9677deee2e1b3711c32edd24f8af9df028a3f64907c672d7ff08bcd
-  - id: inv:08c316c5991f6cbfd24e7ad022e1cfee2a751369732e9d7f393c9d849769f84e
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:7bafd213ea72785582b32aa767db05a2de697deac7e33ece47960a7fb380b9d0
-      parser: translation-jp-v1
-      locator: /faces/0/text
-      text_hash: sha256:0cd2ded0b3b5aaab679d85ddd186c68c4a08371f939fb9e79495154fe945deb2
-    line_ordinal: 0
-    role: layout
-    normalizer_id: classification-jp-v0-v1
-    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:08c39d00dd725282e96b182a0098a5b7baea9b41fb88219e30f286a4238bfec8
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:3c1b0947c812c49e8d6cc0a078d2e77eb727869d2672120ae8c2ad0e5e655f34
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:29a6adb7465ce2b9ed0cb3827e6ad47aaf0f2235427bc6226af8114143dc294a
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:29a6adb7465ce2b9ed0cb3827e6ad47aaf0f2235427bc6226af8114143dc294a
-    legacy_fingerprint:
   - id: inv:08c57d4c96cca1666bcfa1669d9a9dec89b613400c23e100b241dfb53852a9ad
     level: sentence
     source_ref:
@@ -1667,19 +250,6 @@ entries:
     normalizer_id: classification-jp-v0-v1
     normalized_hash: sha256:85508440a5d88a51d8620f3d96c1a2cd39c7b33a6bf9d0db6bc9c407a61db408
     legacy_fingerprint: sha256:85508440a5d88a51d8620f3d96c1a2cd39c7b33a6bf9d0db6bc9c407a61db408
-  - id: inv:08f7ba291b30cf4ecbf6645b94bf09d4f790ae3cd2848cbb9d338eead6d1f2d6
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:03ed3e113cf2c20c62e63d1fbc708a71fe6e522df4c70290c5092a1666928c77
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:f5ee43d6e40ac7af86e59ac705cdf55fcb36b7a1077b403ca03928447836079d
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:f5ee43d6e40ac7af86e59ac705cdf55fcb36b7a1077b403ca03928447836079d
-    legacy_fingerprint:
   - id: inv:08faed20fa92cfd75bb419935e504faa23790c5411518ff39f7245fdd84a16e2
     level: sentence
     source_ref:
@@ -1757,19 +327,6 @@ entries:
     role: layout
     normalizer_id: classification-jp-v0-v1
     normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
-    legacy_fingerprint:
-  - id: inv:0907007d36aab9d385e3df06b4cdfc424e69a0776cc6d61ca5082ba236a70dc0
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:ab5deb0c37105586ee86c46999e695dd463921068520fa589c95f7e710e92fc0
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:b10e9cfb69d365508066a7b601c176f50915fe6ccbea47d88c569251348b8e7c
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:b10e9cfb69d365508066a7b601c176f50915fe6ccbea47d88c569251348b8e7c
     legacy_fingerprint:
   - id: inv:0908cf9d5b9f91e868051589b3fd2a0604347fcc8dfd5bf21bb2f8176308c0c4
     level: sentence
@@ -1914,19 +471,6 @@ entries:
     normalizer_id: classification-jp-v0-v1
     normalized_hash: sha256:eefd794fedb98cbc9ffe1f6a1362408e2df0d5c4e378189fd0a95de11b5c1496
     legacy_fingerprint: sha256:eefd794fedb98cbc9ffe1f6a1362408e2df0d5c4e378189fd0a95de11b5c1496
-  - id: inv:091ca7ab333558af0bd364e0f2c240e5ac7487e65aaadd0821d0b985bcdcd93c
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:b8a064b40a68137c9576a9006d267ed4f03668b779a16f1b6d1f383025dc9c5d
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:bc3bd307f3ff3721704c88164c0661e1763036e914bc53f8ef727592f2154ce4
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:bc3bd307f3ff3721704c88164c0661e1763036e914bc53f8ef727592f2154ce4
-    legacy_fingerprint:
   - id: inv:091d6593a6a3e3f75c09957cd673736fec3754e0836ddbdea48bf487481a8bda
     level: sentence
     source_ref:
@@ -2200,19 +744,6 @@ entries:
     normalizer_id: classification-jp-v0-v1
     normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
     legacy_fingerprint:
-  - id: inv:09653d01e319520995c972ada0e65c9b72592851382b0b23eb5e229ef0a1c110
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:7fab5751951264d83bb75fbf0f000a25028c236b2aa511564c7e9b47d43be638
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:e2f1802f82e41fb0587d4e8658e4f6a914b00ae9f0b9677737e59cd719054b03
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:e2f1802f82e41fb0587d4e8658e4f6a914b00ae9f0b9677737e59cd719054b03
-    legacy_fingerprint:
   - id: inv:096951872717a49cb230486de9593350a2cb702cc63211964a09c6a888d89ed6
     level: sentence
     source_ref:
@@ -2226,19 +757,6 @@ entries:
     normalizer_id: classification-jp-v0-v1
     normalized_hash: sha256:826e58e245d818b0958f92fb1eb7dc462ec37d2cd144b596bca57e88c96c03b3
     legacy_fingerprint: sha256:826e58e245d818b0958f92fb1eb7dc462ec37d2cd144b596bca57e88c96c03b3
-  - id: inv:096ab4c56bb8badb294f397a0331dd7c1eea1a45912ba136876993aa62d6b2b0
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:fd25132e3d7cbf91591392c2cba91a5972cafa224f707c063d8a1f09502e6b8c
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:5f118bd21432e0746ca03c1aef32fb0198e3603a1234e68e229365a7aee0e870
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:5f118bd21432e0746ca03c1aef32fb0198e3603a1234e68e229365a7aee0e870
-    legacy_fingerprint:
   - id: inv:096e0bc2d6d6653a360f3898f1fbbc1c436ad486be37d167207d3a9dbd076562
     level: sentence
     source_ref:
@@ -2343,19 +861,6 @@ entries:
     normalizer_id: classification-jp-v0-v1
     normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
     legacy_fingerprint:
-  - id: inv:0984f6b7fad5375cb959bb263c0286a051db089b99c6af82da1f8712beac977d
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:b85b7c1e2a1d94ee0be4c04e7c061c3710cc61e9eccf770055b3cd0671216208
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:4ea0708398a3b6bc96b3c2e73acefb1c83691b07d0221dafecb9fc494873cebf
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:4ea0708398a3b6bc96b3c2e73acefb1c83691b07d0221dafecb9fc494873cebf
-    legacy_fingerprint:
   - id: inv:098884ea06638b59b578f0d0f2c0e8b4816df4cf6a14b7b1354a03f785cf13b4
     level: sentence
     source_ref:
@@ -2434,19 +939,6 @@ entries:
     normalizer_id: classification-jp-v0-v1
     normalized_hash: sha256:18f22a9b0c36139a81f8cd0debdc42c5e538e6db82ac7281736fef58ccc4f1f0
     legacy_fingerprint: sha256:18f22a9b0c36139a81f8cd0debdc42c5e538e6db82ac7281736fef58ccc4f1f0
-  - id: inv:09a4ef1fb753a3df3bca3a88599218720bf53462f13dcda1a2b8e7d28a4a4545
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:a0b6e3aa5c638eacb080cb340f4f338ea7f4c39411070c7c6a1430cc130fabff
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:436ad0bf07feccc0f985d3421af21b405bb894f0016e98dabc179e730d7a1ad1
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:436ad0bf07feccc0f985d3421af21b405bb894f0016e98dabc179e730d7a1ad1
-    legacy_fingerprint:
   - id: inv:09a687698145cbf3a2ca7ec391dbc30a351104ccbbf0352b34efc31802269a56
     level: sentence
     source_ref:
@@ -2668,19 +1160,6 @@ entries:
     normalizer_id: classification-jp-v0-v1
     normalized_hash: sha256:e683ba80662851aa875006654aa07101853d35468cbe57b1468a4a01162856c2
     legacy_fingerprint:
-  - id: inv:09d8e6ec5b7633031fde5c430188889bfda5618e4f3f540e478f12ed88c2f24f
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:417f9979e6534a03f60171e3bc34f6cace91d475c2c45fddabc0b4e621a232f1
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:ca0c456c59362213137721cc5022939ea04966c1a300d9cb0572b42ce03332d3
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:ca0c456c59362213137721cc5022939ea04966c1a300d9cb0572b42ce03332d3
-    legacy_fingerprint:
   - id: inv:09db43063b4339ad695593a031c281c72cc2d6033b4d1e80190f63d3956bbcb7
     level: sentence
     source_ref:
@@ -2850,32 +1329,6 @@ entries:
     normalizer_id: classification-jp-v0-v1
     normalized_hash: sha256:5acba189adbdb4746bf4c076145656dce651bf7a3af5a7a131345ce60237f5bb
     legacy_fingerprint: sha256:5acba189adbdb4746bf4c076145656dce651bf7a3af5a7a131345ce60237f5bb
-  - id: inv:09f33cbae65549ae84c3da208d4a2f5582939e1b55ae914ce176a1a7a5f41a3b
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:0277527495c6f247346d0a8fed404b4bc6fdb016bcab0b14263df5deb270a3b7
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:4a8e90232721aa5ddeccbf9f64fefdc5ebded168d4809ee33ceb3994ac4c35ce
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:4a8e90232721aa5ddeccbf9f64fefdc5ebded168d4809ee33ceb3994ac4c35ce
-    legacy_fingerprint:
-  - id: inv:09f489012234fb54619079e0356a8b80892b3a34fb5e898fd63ff3ed51f78456
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:bc3d7f01562ef1fc6d4b531bf2a1c804006adcc5b53868955ac5012971824bbb
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:0a104df26cda68d8570c4e8631f480de11f628f7a1cc5a9c7b75adc5c3aa5266
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:0a104df26cda68d8570c4e8631f480de11f628f7a1cc5a9c7b75adc5c3aa5266
-    legacy_fingerprint:
   - id: inv:09f69d167d0e9a2392e09b2689031783dab56374a507cb003ed5dd380430fe00
     level: sentence
     source_ref:
@@ -2954,19 +1407,6 @@ entries:
     normalizer_id: classification-jp-v0-v1
     normalized_hash: sha256:b4006380ea81e87e8ac526321a71d121c67750c4a7ce65c2f686b749e33f69fa
     legacy_fingerprint: sha256:b4006380ea81e87e8ac526321a71d121c67750c4a7ce65c2f686b749e33f69fa
-  - id: inv:0a0c9c08b22c8c22e44fd64ccc1227bc6c34530164f55930c7f9ef626718f03b
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:437f7212eb2dc6226db75dd76d8b18c128c06bd89f4ccc581342b250aa151aa7
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:ea95b1c2cc4fb3c31938a4a996ee0f2fa1035df61f2d289fb1b4d0b7f32369f3
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:ea95b1c2cc4fb3c31938a4a996ee0f2fa1035df61f2d289fb1b4d0b7f32369f3
-    legacy_fingerprint:
   - id: inv:0a0ea5eedfde45385ee8c71a54756a1857ca8e81229c1ebbddca84f4bf5306b3
     level: sentence
     source_ref:
@@ -3019,19 +1459,6 @@ entries:
     normalizer_id: classification-jp-v0-v1
     normalized_hash: sha256:258cb8b25d74b7d55e4a494750e786a7fe34a3dd2c7bc65a7a9d45b431e232f6
     legacy_fingerprint: sha256:258cb8b25d74b7d55e4a494750e786a7fe34a3dd2c7bc65a7a9d45b431e232f6
-  - id: inv:0a1d1364fc745361d8bb93a7e8ddb21b8dfae04e8cb5909d8f466470baaf83d0
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:e8821b2f9a5e0faf743c97848b27fccb693413d4a80228c2bda550175d1b5615
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:9bb9a6fb12ec055aa92592f83955717683af0456a7e0a0416fa2ae06fad15e09
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:9bb9a6fb12ec055aa92592f83955717683af0456a7e0a0416fa2ae06fad15e09
-    legacy_fingerprint:
   - id: inv:0a1e38a9619a15d9dc41fcbb7302a3ccbb508a0184c46e1fcb3b7ec341b8095b
     level: sentence
     source_ref:
@@ -3071,19 +1498,6 @@ entries:
     normalizer_id: classification-jp-v0-v1
     normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
     legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
-  - id: inv:0a279cdc534c7d96141d1c0c2cdfbe5a5a10d86e6c6873fe16b591bd8fe8ab98
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:921944e6634818a4d59059a715a823ca69708e546d15b335c522612d313ef66f
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:f15b0f1d9c434fa0d61636ac6a05ccabbaef1d87cd3e04650b6d9d5b3e5c0a9b
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:f15b0f1d9c434fa0d61636ac6a05ccabbaef1d87cd3e04650b6d9d5b3e5c0a9b
-    legacy_fingerprint:
   - id: inv:0a2a1c996b540ce998c0b38d7ab1e47369b51e1940ee88e4fdf07e8580e80e9b
     level: sentence
     source_ref:
@@ -3161,19 +1575,6 @@ entries:
     role: reminder
     normalizer_id: classification-jp-v0-v1
     normalized_hash: sha256:17cf40bdb93dd8ce5326263fa1546eb468de7a979c63324a0a1d630d4b9426a9
-    legacy_fingerprint:
-  - id: inv:0a3be3efd8049fc92c8f7780d67d1fb77d4315f8c85469a8844ee1f99e41fc47
-    level: sentence
-    source_ref:
-      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:1c29be1f07d58fb0cc10975c9628ce006a7c238878314b0e3250bc3630c1ccd2
-      parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:6d10fc6e09da59031da5f73d90f54217c94fd64edf3fb58d78a1884356e7694c
-    line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:6d10fc6e09da59031da5f73d90f54217c94fd64edf3fb58d78a1884356e7694c
     legacy_fingerprint:
   - id: inv:0a3ce7aedd79bb71f9826e9df8299f773feb458455a6df5db08bf0fec568cb43
     level: sentence
@@ -3318,16 +1719,1615 @@ entries:
     normalizer_id: classification-jp-v0-v1
     normalized_hash: sha256:00b1c894d349052a4fb081d434fc146fc370fd35632bdddba550a014508b678a
     legacy_fingerprint: sha256:00b1c894d349052a4fb081d434fc146fc370fd35632bdddba550a014508b678a
-  - id: inv:0a5950399b300ce0cf18503ba0d3e45027780872dfc63c4e3d545cddf1ec95ce
+  - id: inv:0a5ab1fd4e544d9941d6d8be767719876c5e79437b673757ffff51c397cdaf9d
     level: sentence
     source_ref:
       batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-      source_version_id: src:v1:60ddc1881bad0573b2f4cb81124e76ebbe32209e880f039ef3c78b088ff73957
+      source_version_id: src:v1:1b3be860fcf80f1dae725cc45866eb7bc43cfd6629f7677cbfcbf3b95319668b
       parser: translation-jp-v1
-      locator: /faces/0/flavor
-      text_hash: sha256:5e199f8878055205e6639e5d3060dbc43ff0b6aa8470f3812844902015910224
+      locator: /faces/0/text
+      text_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
     line_ordinal: 0
-    role: flavor
-    normalizer_id: flavor-exact-v1
-    normalized_hash: sha256:5e199f8878055205e6639e5d3060dbc43ff0b6aa8470f3812844902015910224
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    legacy_fingerprint: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+  - id: inv:0a5e56c5704a2b8d0eadf60776a06831b9c78350a35c1861a93305948fc970d9
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:c1ea6ccf452d081f14fad3e03c7d312dd205e54a3338bbb04c933cd6a13e5c79
+      parser: translation-jp-v1
+      locator: /faces/0/sections/0
+      text_hash: sha256:aeffc2cf25ad5efba009f3a1b61902f2cb6d97c942ddc3f5b08910befedeb3c5
+    line_ordinal: 0
+    role: token_header
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:b9e64a790b6ad44906ad749b4f9e4d0c350ec7097610889d2f47bac74619da7c
     legacy_fingerprint:
+  - id: inv:0a5f9ae287d1a3e0047da5b02e0dc9fa0bfb729c54218428e766e1b8220a3921
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:347315fa0e6c818f3e5749d92aae4bb4fa483e40186ec5126f6579a84b0dcdaf
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:c821adacca0abd2be12728d1815cd5dcd99b5d1917e003b572e143127eec371a
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0a5f9e2c155a010273d3b77efe6f88207298bbeb43cc305788e7acb0885c4434
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:992b8ade040b003980ad2888b7d4a43cdc5f8e704a97a84077e78217048ba5a5
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:a82f7601f1cf2907edf7a44e6ba5c96978782e1e8edda1a32ab4adb1befa2db4
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:67bf2eaba586c21eb79efceadc0af3287a0510e8bcdef4be80610457c73380f5
+    legacy_fingerprint: sha256:67bf2eaba586c21eb79efceadc0af3287a0510e8bcdef4be80610457c73380f5
+  - id: inv:0a5fdd7a0972da4e9f303b1ab43bf298b196790eab7f0d1090b496a7ac352718
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:9cfb1faa228ccb4456f76cb7a585ab3b9b3c28b37878d119967af6fb64172b52
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:ae26ae380cfa2cb38e80ee4770dd2befc49f720fe166262b9edc51362425a86e
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:795d232ec7235d82bebb71cb85b7131c9c73b8eb44b0f8191e639bce8c564241
+    legacy_fingerprint: sha256:795d232ec7235d82bebb71cb85b7131c9c73b8eb44b0f8191e639bce8c564241
+  - id: inv:0a61ebbdf53d76d151db2bbf1f6cc61c8cb836cd2c711414add160de8822771c
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:ca0e25279de4ec5620c7581d2ac0d453d3bb390f74d5d83c7a3dc8f7be9c819c
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:7c6fe3d3918a78f9b955fbfa5983071f1d882c414e4d37cd91f9de864b51cd0b
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:76ee4ab0e8035ee868afff83544c1e85eac23998b822f73118b30d8bf0ce34c6
+    legacy_fingerprint: sha256:76ee4ab0e8035ee868afff83544c1e85eac23998b822f73118b30d8bf0ce34c6
+  - id: inv:0a64f15cc02803700f86fbce5b87dc8be292995ddb6e082319692d8b533f87c1
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:08d70d864bc79d8b4959da41fe97748763fe066fbad1f6dbb28f2bf587f60e78
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:13786fee1dc9f6bfb82dfe14cb03d4123cef748d2fd890076511274622b3a3f9
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:ec9dbd28d4b14880b4d0b4545c22618241906dd7c160a30a5d560fb5e911b2b9
+    legacy_fingerprint: sha256:ec9dbd28d4b14880b4d0b4545c22618241906dd7c160a30a5d560fb5e911b2b9
+  - id: inv:0a660fa98a0ca030268d20e87d9262e7ae00902be83213c3dd72083bc8577ba6
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:98c9fee4adf921d9cc6f489bdf43460a024ea7ddcc06fd29a554f155225a87d0
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:0ddfc7128ae57150c1ecf9f8d86a751a98d7de513d8c7925aa63c758d7446e1b
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0a6694e4f2a2f5a5669dbdb8de4462b0e8068e7f817c8fb556219f702d223b47
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:453c026490c367017b7afda1910d07bb0f1f36fc79a02ee78bd50eaaa6a09dec
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:c4ffc79c7dd4602573b4ab7d0997f794265f600d1e79c8b8240ddfa8a6924367
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    legacy_fingerprint: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+  - id: inv:0a696c16d79e5a95ac8e12e1663846c7d1ab94e9650c47847c61041b017d9aa7
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:128a7f51e84a8581d2bdc17811a4ccf8bfcdb4f1e335685ca89957438937225c
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:33081d24abbb4f9d4c7c2774d036c716ef6c2cbf1805f040eb1092be496f6708
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0a6a840e16a387839694f4869fa4cff3aa465851046a7c910a6853568c6a771b
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:8f745b79c6d1d31b6833d0e008337b4f461038eab9ee32e5684b4929cb9e7626
+      parser: translation-jp-v1
+      locator: /faces/0/sections/0
+      text_hash: sha256:64c352069469412013e620a2bc0e9191f6d37343ed7d85fe0efa5f9ab879b57b
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:12859641aa845e8bfebff33f7423b569e989ca8c6f0e5aa2c73260da36e0a33a
+    legacy_fingerprint: sha256:12859641aa845e8bfebff33f7423b569e989ca8c6f0e5aa2c73260da36e0a33a
+  - id: inv:0a6ccd420122eaa78d2426518700b05ad6695d8c907647db726c2b4ef55b761e
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:405662d29357e817e209057644d9dff066a5f99eea7810fb8351e3007b6dab5c
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:4a75e96c120578f1445b17f09550ee460307bfb4535c3812ed1ae4613cf53f86
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0a7091c51c12d565ad47f0aee709b0be9e9774372c8a75c9aef9a2763f948c0f
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:721a8f04a6256c55dfc9a01c991a6c4f5486d9a2930093b370ac163a28836b27
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:63a9921348a96a04756d64e3b085f2f710588ffddf38ca3a1f2a6e69f0e15fd0
+    line_ordinal: 1
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0a7183cfcf78576969c5541f81801983f8b071877b20e0bfefbec5ac7e52ed62
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:3a1ce9859ff11d1c41f5748d45f8399a24b63a749de25611905a56c24a474673
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:a053a081cc06c9319401d11c7f063e7927019df83a7cd0ea36a2997a331cf08e
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0a73b4be4b18ed065cd66f219b344fff6d7a61b09ad1d449f7113ccf33650e1f
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:68a53282ae55750a9e38356d57e38406640895bb23bf17890d23b11f89b2a16c
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:f0f7eaecb3a1b0c9a8f62e6bb54ba6e90669b72f208d2939bdd1e14051ff4fa3
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:d45530fabd473b7a7f8fe14955a80a60287e2438c6ae564fa3849a62fa54374c
+    legacy_fingerprint: sha256:d45530fabd473b7a7f8fe14955a80a60287e2438c6ae564fa3849a62fa54374c
+  - id: inv:0a749baca463c7697bfaa9c960ce13310e54b201fc74c75ee72c474f5fb14b6a
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:41acdc903900a09edc3221e28448cd85b7b69a2411a61774be81170009acce3f
+      parser: translation-jp-v1
+      locator: /faces/0/sections/0
+      text_hash: sha256:0cef34893a34140fcda34c10c65ea7101db783ee1c1ee71545694dfe9a2bdfdb
+    line_ordinal: 0
+    role: token_header
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:0cef34893a34140fcda34c10c65ea7101db783ee1c1ee71545694dfe9a2bdfdb
+    legacy_fingerprint:
+  - id: inv:0a773ed8775feb072c259516598d83eb5a15cfc0baded78935083305f659f66b
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:fc74a19370f45d7386d16e1c9697e788c65ee1153da08a53e8ba1deb738c3c45
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:1a256bff880eac58d2154b6e38a4b16854056364f48e572b94b4536fdbd6af87
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:c3cd819f4f9554604dddf6e23fc0e612dddddf1c7ae07f6aa574ef21d308f39e
+    legacy_fingerprint: sha256:c3cd819f4f9554604dddf6e23fc0e612dddddf1c7ae07f6aa574ef21d308f39e
+  - id: inv:0a7870a742d28f588d752f0992e88269dce03a0ebd34de8ef4ec9d40684e8a5f
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:80102221450d54ca1a0491791a4a642785afc77fdb4ae2e463b47b1144375ca0
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:2cb5ac77e494d4adf280057decff8096e2ead111d0091626ddbb7768e7001fdc
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:ebb751861ed5db1ab0ab8880287c1cb347cef34d6b777e8492c5435603a86ffa
+    legacy_fingerprint: sha256:ebb751861ed5db1ab0ab8880287c1cb347cef34d6b777e8492c5435603a86ffa
+  - id: inv:0a7a8e71e8cac518a0dfbb6ab8029aa90d50341bc10e27e0862571aa5dbc8951
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:7abf03b1ee8fb0801bc0370ce99abbfbee71ed2caa149d4e269dbae4148eb075
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:81d1700bccdcd46b4c1b70406a4cc89f85432e417d5601bf4d841fed774d82d1
+    line_ordinal: 2
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0a82af51e69eba314d2fdba7324cb96b05fd13c5a86810d3d0af0d6f41493557
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:09e32ddb5b453fec759a5d21d75860dd08d6e71eb45ea308b5ccc30a91fd1fdc
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:947710b683684770942f9d8358fc84d237005d727db21ee296d27311ed567b6f
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:602e7589fd69dd0403757c42f98a10454c9da4e444fb3c9826c17df274d38e75
+    legacy_fingerprint: sha256:602e7589fd69dd0403757c42f98a10454c9da4e444fb3c9826c17df274d38e75
+  - id: inv:0a833ea4962ed6df6945dcb68aa055ba39b2940c643b751a11232ac7ded65e29
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:068f4d796b075269524250119b2e5853784692bef520a639cdb0af3616377f06
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:a01a94577a3aa52fb70a2e561600e28ba0f0c4d2c29c192e3bacbf1ba351670d
+    line_ordinal: 2
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:83ba8aefbf5e20d3c195ab4f936d8e01e02e8afd3fab916244947fd0c45bbe90
+    legacy_fingerprint: sha256:83ba8aefbf5e20d3c195ab4f936d8e01e02e8afd3fab916244947fd0c45bbe90
+  - id: inv:0a841e19ddf9ee2090a067f1ccf9c30c2967a977a06b0a6a41575f232d0f56ab
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:d025c2d19345d02b7a9bdd042882bfb7bb9bfe40e4f6916292784d78abd14396
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:2959fd3e8705545a490d5db274650be02b8e5791597d7415c7293f0da7cec415
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+    legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+  - id: inv:0a876c281f5961583b15e0734d80c32df0cec7b4dbd9fbd70748232724c133b5
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:a4d3e2a32ec18845b63b0fb9723b78253a664afd76da592811d91ef5b0b22ed9
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:05a11b67bf78a36fbc02a0213d785a27e56910b7b7c99b4be1b4fb38355cbe8f
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:7677a507403230a2f7435d5c25f03844efd8c6acac2825a86a52d1635710e390
+    legacy_fingerprint: sha256:7677a507403230a2f7435d5c25f03844efd8c6acac2825a86a52d1635710e390
+  - id: inv:0a87a4123e3b4e22bff292ea5e34c335dadf7efbab829f04e12c4b6327fae3f3
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:f3ef72ece7b9d68dd854efd9eaa1a4684fde6de28aaad1f3d67d333e80f2adb6
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:c94fcadb48d35e98b504e0af1d71304c1eb25285ab3d99a70fd3660a9c3664a3
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:ec5ea75eb9391f72a873aab746983ac67afb74d8ad86038d791a16da518623c3
+    legacy_fingerprint: sha256:ec5ea75eb9391f72a873aab746983ac67afb74d8ad86038d791a16da518623c3
+  - id: inv:0a8a5cabc685a490acc13559e7d3a94e233dc6f76526836a66cac62d18d577c0
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:5d33b73096732a35e59f82d111b20f7bbec48e7cfaaa14f16fc57f107b9bd0af
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:7d40fb3f4bd90f7076f4cd84fac1662f4c15172a0ac9ec763836dafa0a910f46
+    line_ordinal: 1
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0a8a697a018b84d0097f251b7d5d6cfe9b654fd46a36a8efe96c2026a211596c
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:c0b0e8e2d8963b5e66f63f886ab8afed8ffdee9878b5eff1d34a52efd938b962
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:84c34f919fbcb3bc838faba5804b0cbb307cc9eedbae3ddacb1cee9bbe5d893b
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:3c8ec015fc2dfb04639e767e7aec8b4b1925d9c9672056fb91b5b1279b153e13
+    legacy_fingerprint: sha256:3c8ec015fc2dfb04639e767e7aec8b4b1925d9c9672056fb91b5b1279b153e13
+  - id: inv:0a8d2a1641a97456d3debbc4568158b6a336eac6cb461c3c0a81eeec4a37fe0e
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:7b36688e50941d20b7c3e9e7dd51f35dbcfa3a0b5e15db1a2beee4896c4ef8b9
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:841e1a67bb0f8418a36e0e3639d97a5500a210914e378cc07af255787cd9c447
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:811657382347164a8e1a00567b024eb3cda955885097b552fba3bf16ebc37f6e
+    legacy_fingerprint: sha256:811657382347164a8e1a00567b024eb3cda955885097b552fba3bf16ebc37f6e
+  - id: inv:0a9661dd8eab0d093c2a3a21e82a8d338e03953da0e2434cec9425df88198bf6
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:4743c461c90ce387803777ddec549627eb10b3be176f0182c8dc0afa93808e61
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:ebbfefe1d061c68cd028776c4d8bb7815fcae6a071a909cea2de17e47ec42263
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0a9c111ad46ba4968119dd01d42cbe48dd068999ec5b045e52dca8402a851d15
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:cb180b8404cfe4f9d7a1b58d55187b4e850af47a22b65e24ba1663c28be3acf9
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:8a286391e9a3318cd36d8420da100a19e722a7b7aa0138e32b1b943ab2b15698
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:4d5b0f46dad8e3b8291ef11ac9a4277f8b7a7b10a2b5ebf9dc153fe073753c99
+    legacy_fingerprint: sha256:4d5b0f46dad8e3b8291ef11ac9a4277f8b7a7b10a2b5ebf9dc153fe073753c99
+  - id: inv:0a9c3d42a9bd878004c8da0b8e0d2ea1f2e842c8d5e6830271370927d23b0e7a
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:da5f9716a58a13bbf6daf23411cf270b46295f7283b976d9becefb32502cb916
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:f86a7cc4a40b2528eee92264b03311de0abc69c8108739ba8d190ae137993850
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:b77a58afaf483fc0042e175cfacbd87da436b376d2897069792edb3e16036849
+    legacy_fingerprint: sha256:b77a58afaf483fc0042e175cfacbd87da436b376d2897069792edb3e16036849
+  - id: inv:0a9c8f7dd36291b9a1fcffac438076827bb3cabecc6381184de220958ed9d2a4
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:d176073e58afe5cf57a7e0ffa863b5ab73eefc76e89aa3397871d8688f17ba00
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:7b12daed32f8015db5d8a1f8f165853e90f76ebdc8a368eee9dadf8af486663b
+    line_ordinal: 2
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:4e12bf3ccccbd1c2b9b8e5d70fc710b75594cfa5ec41f45ffa43e861a522d490
+    legacy_fingerprint: sha256:4e12bf3ccccbd1c2b9b8e5d70fc710b75594cfa5ec41f45ffa43e861a522d490
+  - id: inv:0aa12901de96a480b19c634f441bbfe1ad9d28dfa6823f3bb4f6fde46588a740
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:3f40b5c72724939eb8e01d55f3f0811452951fcfd4dee3ce85b9ae5714d43f54
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:876be05494503113b207350c6164a09abf5e4e4b4be6dae55f3f75b84a6e3678
+    line_ordinal: 3
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:73956d7a8374c31447ff8bf86bf71367033a2c58f68fe347a5d8bba40ba5605b
+    legacy_fingerprint: sha256:73956d7a8374c31447ff8bf86bf71367033a2c58f68fe347a5d8bba40ba5605b
+  - id: inv:0aa28eeb022059dec6d2700e0bbf3cc95b30687ec744756fc2ab4ead707d4496
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:370db591d6f485df49ee9cc0e7ec528fb94a99a745d0a2b9d25775faa517b588
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:6d65c1881e12ed549c92890a077c4ace28dc5f714dc143ac09e002dc01854715
+    line_ordinal: 2
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:b4006380ea81e87e8ac526321a71d121c67750c4a7ce65c2f686b749e33f69fa
+    legacy_fingerprint: sha256:b4006380ea81e87e8ac526321a71d121c67750c4a7ce65c2f686b749e33f69fa
+  - id: inv:0aa2ae32522837082231293b12230cc6aaacc679aca782f08bda5b95bd0b5769
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:f9a1bd2579a1874ac2496c7c6131d0a2286611047b9a3a245d39879547406057
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:a2d376131816ed628e1d3672374eb5e29d8cf46cda4b96de478040d1eaa3730f
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0aa6e59edf75667d7fffaa748644afab9b65c35d3edab3271cfe5fddfa754de7
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:ea2543688d803923ec64dfe884e1051549bf1078f9b9e3033c0cdac924de6760
+      parser: translation-jp-v1
+      locator: /faces/0/sections/0
+      text_hash: sha256:e6716573cec24da7b46807424baf31dfb214d8f36371c55c4fc12a277cf1a609
+    line_ordinal: 1
+    role: token_header
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:550485e8af4719937a303554b1555929cb2dab8aff8eac0e230c2d8fc4e1bfa9
+    legacy_fingerprint:
+  - id: inv:0aa902fc14c6f69d12de154ec33be06732128ccf7e3b15b6072c40f49c96786c
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:9a14debbb4a9670969a96d98588263fc39df80ba9a31784fcea1f69b70ba4fea
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:c24c487a451987b857b397757232454b619f9918ae591b43b8b08582f13a85a1
+    line_ordinal: 1
+    role: reminder
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
+    legacy_fingerprint:
+  - id: inv:0aa9c80a00907eb32dc0767d6c08d1373ae87afac73f8196d629c39b95c06c9b
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:058a5ac892657619426a0fc8bdd4842a614d0b565f15168738ac5cdc71671318
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:0af8a4af740073fc8aa5c4455f16b96c6b093775bbd178d40bf160888a7ea45e
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0aa9e38d25e40d9b61fde481041d3bf37f41f20fac43a86c94cc6546bc9b916c
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:6a80ddbfbec612ddafdf73b96ca751ab7b172c4eeb64363bbb8b2c47cf7438c9
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:028ae142566c9b064185c48a2b38b7c4110ca5f1b24f89d377b2effbdca47f57
+    line_ordinal: 0
+    role: reminder
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:3293d751ad6232076056b07a6d34cb14c4d8df776875c4d77d83bc8f8613a391
+    legacy_fingerprint:
+  - id: inv:0aab8dc67cb1a318b1b19613c1ee3b9d5c866ccff33a962557db699aaf8222dc
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:eeff429047fa5c098da567e2d125ad751238192800dd2788f128f0e5f206b2d5
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:34ce8a724f169ad0e9225d2f79e5e99063b46afc39f82f7101bd7da288134c08
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:ab2364502f685e2ce5a0d4f454416e6a2d2a6a3f4383ba12571f88d59cef69e8
+    legacy_fingerprint: sha256:ab2364502f685e2ce5a0d4f454416e6a2d2a6a3f4383ba12571f88d59cef69e8
+  - id: inv:0ab2f4ebf1d4394cbd91e27c15af1ee11f1e3167547673cd9d241ee8aee55119
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:4afc84763ef357e186686feb521bfb78e34d6c695d2ade98aaefa546ea9063aa
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:fc26bd54a1a53538738d83c8b196acf0d31b0c5ed4134f1b7f5842b9711d9c67
+    line_ordinal: 1
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0ab6ed7fe548ee08b8f49e37f03dd924f96ecbffb97200a942c20a232f952c87
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:c8d1d59ce66abc6462685c392796916c2e82ca2a0b5ec8e0f67c5f16a3265217
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:dca9d8557f3f815e1401121563c681b0dce279c7a8993c4ca954ba1e0e89720b
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:5acba189adbdb4746bf4c076145656dce651bf7a3af5a7a131345ce60237f5bb
+    legacy_fingerprint: sha256:5acba189adbdb4746bf4c076145656dce651bf7a3af5a7a131345ce60237f5bb
+  - id: inv:0ab732260c258bc6b92170b2eb2c5df7a06506f66a313357c0b1db0f1ff13246
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:11916447da6bfbfcfc9ad5b3cbed899b1c9288984b9340343466b56ab2dc738c
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:f10265336cf817f1cf9661c181f17377a3d8dfa442a9065fa731b86c2f3e62f9
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:47258abdd9f246864a9b5a69922f715f4d228db73977d91753d51bc2afb18d44
+    legacy_fingerprint: sha256:47258abdd9f246864a9b5a69922f715f4d228db73977d91753d51bc2afb18d44
+  - id: inv:0abbd744743ab5d8e907295fb9c0fd3b18b66e47abb6be0c663edd37315ac1aa
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:3e23f991eb98e7046eef33131412da77ef28d8f91ff960a8ee701e337d6239da
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:3928d64a092a4d5e7b64048dbcc0e517357b33defa71bff1a53685acebe8343a
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:d2b05746efbf188c2ab94df860693795f2dbd5cff0b3a45135cc84230f6f3960
+    legacy_fingerprint: sha256:d2b05746efbf188c2ab94df860693795f2dbd5cff0b3a45135cc84230f6f3960
+  - id: inv:0abe0c99f56582c1892c42879e7fd5194271b1f7d0394c77c6222ea96921c669
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:a2681162ab92cf65ed6e565b676748fd82bff4bc2aba10abfbc4a08f7d1ba123
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:d18bccb93c97f2acfe5c5c8bb5489dde01e70589671a2cbea97a68987239deaa
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:fd2b339ba3f9f79199f75607147f0e27563d8c11497342b009267e1b7c7d0945
+    legacy_fingerprint: sha256:fd2b339ba3f9f79199f75607147f0e27563d8c11497342b009267e1b7c7d0945
+  - id: inv:0ac4cde7d96921e4f17876f830adeafae2773f25a39b768b1ea763415f1e1a78
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:b7a684a292dc6044b60ecb2d9f55da283100a594c43f32a72da113a5e4c46660
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:b3fb7d10e423ecd537e237124f6f13d8e752bd52bd77b093a03c5d2be83372ae
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:cedf97e64880f29e27aa190eeaa82713976d08fa74fc3e55269e20720c46b005
+    legacy_fingerprint: sha256:cedf97e64880f29e27aa190eeaa82713976d08fa74fc3e55269e20720c46b005
+  - id: inv:0ac607e65507e2d431ea9003ed6532eb8cc5381d9d7a5b8f7fdba673bbacc140
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:b12e423ee8d684a42821169dda16859643917e6ca1117e67a99ab34104851ae7
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:30f1f29f0e186ae1ceed250b6fb63e49b5c5fb6fa93ee6f2a68b3455dad7c209
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0acc2f4501a3ae891a91cfcfa4adc9e102da0f03ec8184b66e956ff31896e5ac
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:62cca3ce5a77a71409d43e5fcca1702f79b787fe06c4970fe457d57b7facd5f4
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:5094fcca586578543afbb743ec4cfb3011a18dd82210fcc5277d568b15c06054
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:7a081758bdb853f2a90c63293e4c4db4154acaeddb59e31ff10dc663614ce48f
+    legacy_fingerprint: sha256:7a081758bdb853f2a90c63293e4c4db4154acaeddb59e31ff10dc663614ce48f
+  - id: inv:0acce2e84143b93ad13d29f43ac9dc33ed4470fb74c46c4790a9df824711a66c
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:54af4a8b3b16e5d3b816eb9f801b0b1b232e1a343642cc667483ab664fcf221b
+      parser: translation-jp-v1
+      locator: /faces/0/sections/0
+      text_hash: sha256:1a162b5b0f5a4813b62472f8b5aae6393bec0122f169399bef3bcacf89340ddd
+    line_ordinal: 0
+    role: token_header
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:42a03b48547d5ccc283cf2b93014edf75ea767a88a38d7b717101c0f500f777b
+    legacy_fingerprint:
+  - id: inv:0acd210e52bb15f68618194d7bae98ccd496719578033ec3fa1104fdb6be6e5f
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:a021e3258eb4e3c241f6dddd3602bdc010193dde1f0a6199ec7dea5190588154
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:2959fd3e8705545a490d5db274650be02b8e5791597d7415c7293f0da7cec415
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0ad1e32a8e11f101bd9ba20024ae4e035bfc9adc814131e388045372e783784d
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:25777830424ba9942031a3449dbac05486949a484c3bce8c608ae75ea00417dc
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:7e27b28e2026f1e6587bf9340633f5c5ae14aea05600bfd219626b5f0d5a02b4
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0ad3e28625bf19254da2483bb9d910d8e8024b56d61786e8ccba227d982cbd50
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:d2d6bf35cdfdb6703fdcadf3c0d4c2757ad3d09340e69582900d31bac067f0fe
+      parser: translation-jp-v1
+      locator: /faces/0/sections/0
+      text_hash: sha256:3f23f878b03538e4efff7a47ba96d6c72e0c8c787a338b3f033536ae7a1b3cf5
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:b034f10a01357450ef5c7e0b5a6456dfdf00c0b61d2b2f1f072b81abafa6017c
+    legacy_fingerprint: sha256:b034f10a01357450ef5c7e0b5a6456dfdf00c0b61d2b2f1f072b81abafa6017c
+  - id: inv:0ad71df393aa142684f1539036d82506503cc8f40c3ddb71c161f1f246ea4e68
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:228fa1717e3c560ac90ee6e6e127ccde36d06a3775f0c4a7453ba6952a9fe26b
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:f10768ba69c70881168b45391c08194f2a35070c140b37edd76c0dfb41f1ca22
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:48a6712874b17a73d4b4a39d4ac82952349a4dda8445dcc7ddb7bce2bca5acbc
+    legacy_fingerprint: sha256:48a6712874b17a73d4b4a39d4ac82952349a4dda8445dcc7ddb7bce2bca5acbc
+  - id: inv:0adaf6d725f6f4644fea9d1001cfd3c9fe62f3d0729a8ea6743c7d39cd423468
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:3f40b5c72724939eb8e01d55f3f0811452951fcfd4dee3ce85b9ae5714d43f54
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:876be05494503113b207350c6164a09abf5e4e4b4be6dae55f3f75b84a6e3678
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:4fd59ab0b1c67a920ac99aadc78eb0645a3f7d503f8c95b19b8c89e1f467f463
+    legacy_fingerprint: sha256:4fd59ab0b1c67a920ac99aadc78eb0645a3f7d503f8c95b19b8c89e1f467f463
+  - id: inv:0adb5f73233647adc1c7af0d01b8f9c6e54e2e93a15406a72495991cf42c8b7b
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:8ebbed7ff69b3cfde7e1880cb5e679642f0c0c8ae2f5b9caf7c5fefaf1c3d0f8
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+    legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+  - id: inv:0adbf4eb6ddc53ce2bcf5243cf2e483f9d9911b2bcfd9b6d935db79c900f926e
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:dd40c528d406fc578b233c0d2e4775c818c5c65ee127bcb9e4c6bd295271b94a
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:7ffa1bb2db2bfd5647cd2ee28bd1ee4562db65d342b1874c536b3a1a86af2dd6
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:55c15db83e67982837ce4f8929dc2e24e0921dce302b0251ffaf799688e26378
+    legacy_fingerprint: sha256:55c15db83e67982837ce4f8929dc2e24e0921dce302b0251ffaf799688e26378
+  - id: inv:0adc4937ca621ae71b1429a7db42057f01fbeead6303044a4accdc4f2c59da11
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:93ec1d61d14897f16a0a86f829e679543bf3106f171eb26b2ceb8db7f5d7630c
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:3a1b1033bf96a79c8c465ba1a55f606dd69025041c603b0815184c9216354249
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0addca0d81c86475e645c8687696e90afe2ee8c18fea5fd694fe7536007d3cbb
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:5c26ea4263f9a3c4364f8f5d0b5d40d93fd41f3ef17fa19905ad9ddaebdb423f
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:d8d281bc49dbdd256f2b5b886d192c3313e5dc49315a984c9b25dade6b2f5bad
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+    legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+  - id: inv:0adf5170ea760058b7340cf0d3750b530e3ec6335d2bc4579b99b8fbe59c3ab5
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:c38385813869f2987d1c64e02dcd68bd51468eb0cbafd72256734590be46f1c7
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:a8887965f53a99dde02284d7deb217df4a20c000490c5fdc42330865aee829a3
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+    legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+  - id: inv:0ae1ca8015fbfc734f262c34c59fcd4860325a3c8131e5de405e312fdb36b978
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:2a66f2728b295fd899a233720a62b91b53b68e7c78e1d6b640d21571e801e37c
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:af25435f158f939c87acd83d25c0cde836cace96781094a49886009cf58b2c05
+    line_ordinal: 1
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0ae7fb43fdf15348c97d2eb22a3b67dd96842f55eb3b9bf49a60add7971cfbe7
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:7dc26934fb15292e4d217b08119eb87e825cf6cea6fb5bed2a018974d0a97e7e
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:cc72e06a908794e3cd00aa2ca5f666ce2d4b068196f907b881d2c796aeff7b2d
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0ae80214b5da04aa5bea0ba189ed82c15588cc7cc287c5abf134d14d396fc764
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:22aa6a59ae005af653c02a1f7981dff621f1f8dafa808a24dd829acf08a00dd1
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:c012bd8b3c1d616666956e57c28b2f0a85165e23da504a2dcb45b2a4b4262884
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+    legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+  - id: inv:0aea29f2cbc440115d8f5cdadfc10c4ca63933f922cbf7142fe731f7bf93d03d
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:83fcc9636196550b225b204e5060cbc961f005753c383be1184d7c771c30c645
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:bcb63143459d87ca62a230fbf0f2368d02b88355c3588b79a8f06159cb7c7586
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0aecc126ee9fd6b53db759a72669dc740c933cf0d4a96a6aab0a0c6dc08bd05d
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:24de36ac05becef26d233f706c0f6ec71c13fe09b7fd3aefbfdca124720d3065
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:ff92bba65064ba1a9143cb31fbcd24c0fc3ac55d24ccba1cf6ac9632929509b6
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:8e3a49dc563cedc93139a86aa52bb99d83c3fbb04fa55be1fccc54159ce708a9
+    legacy_fingerprint: sha256:8e3a49dc563cedc93139a86aa52bb99d83c3fbb04fa55be1fccc54159ce708a9
+  - id: inv:0afa1df3a838c75830499e823aabbde9322c62634795e5c3cca99a08d0bf3f85
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:a7b454e3dd69d5c6b161b6d45e69f24f0c71df1204f26ffa8d6b3d2482ff1d0d
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:07eaddc992c91a1f5fe4d425be8388a9293789aed5374246a474c6d1d81ee223
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:b95ddef903314d0f362203ced9d938ba40e75bbdc571d3c908c164e1daebab39
+    legacy_fingerprint: sha256:b95ddef903314d0f362203ced9d938ba40e75bbdc571d3c908c164e1daebab39
+  - id: inv:0afd924e316766d3c9d5e165b8f5c5d73100cf5123f1e46d8e4566a6051f5a26
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:7b0b3bfe4c2f658542ce704ad980dedaa92fafeae4614b88c033a971cdf70ccf
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:66468fdb5f104399dcdec66b07832847cc11ec4fca7bf52679108bc726a48f76
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:b779a7138c526f18e8e30189b101e2ac5937ccc0e9db7e820e6596cfc53ea749
+    legacy_fingerprint: sha256:b779a7138c526f18e8e30189b101e2ac5937ccc0e9db7e820e6596cfc53ea749
+  - id: inv:0b03ff4d976d19485c5b0713de967fbcd3a444fcd56a43789d4eb2ad68aea45c
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:c6b49347f66a4ee5552c2079e182ebe71580155a6c478f51f312ad567be3c250
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:9084c467f68b23afb8dcfcb63577a0deb10b14cecb20b3ab472568600640e70b
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:92223c0ca3aa4a81bff85e2a40123be2ca4de95768228c20c84841e90dc3db40
+    legacy_fingerprint: sha256:92223c0ca3aa4a81bff85e2a40123be2ca4de95768228c20c84841e90dc3db40
+  - id: inv:0b0468f2675fa681fe677717032a928c8dd59690cae843082c1979007d03bef2
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:257a17ff6f2e10e3404e50a638984ad7ec48fba9c08730c9ba9659aa996f48eb
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:963c7f75a2ce86aa95782a55a10ce2d58511bd634bbdde14783deca5b8d477ed
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+    legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+  - id: inv:0b06da7a1d574d4cfd7c94bec4c9510cac7997d9f4063aa111950106739a6dc9
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:a06637e8695977c21483f1b327c2da7b3de08c096860fdd3fe94a3b4c6cdec94
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:279f4e356c373018d2fdcd9c3e9e851766f5208a1260aec3ec8e70a2b29aa91f
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:e2dacc467d467547e30b1f9b1b9d4d7571611f4b612930ba443c41c357777a43
+    legacy_fingerprint: sha256:e2dacc467d467547e30b1f9b1b9d4d7571611f4b612930ba443c41c357777a43
+  - id: inv:0b0a019179597b2c5496dda85e56e22618985f6c2f09adca2ea16408031124fc
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:4994003881ac7d5398ee8f79f472bc1a65d04a7990ead85fb13e5cde284ce6c3
+      parser: translation-jp-v1
+      locator: /faces/0/sections/0
+      text_hash: sha256:aeffc2cf25ad5efba009f3a1b61902f2cb6d97c942ddc3f5b08910befedeb3c5
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:2d4ab371cacf8d36e561f45563dee6a7724086bece7504545e9d0e6c1bd0defd
+    legacy_fingerprint: sha256:2d4ab371cacf8d36e561f45563dee6a7724086bece7504545e9d0e6c1bd0defd
+  - id: inv:0b0a22d596fb4d6e2ec2788b26b72071355af1522ff899ebb1d7051411445284
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:6406d118ae6f62a9db64391bbc464819ee73cb7e4ea8d8464a3e32b9b8f9ce7a
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:417e9efaaff9d2934e199514882df6f12d8da914696cbb1f943c5a9e338d909c
+    line_ordinal: 1
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0b0b19d1394c99de5b736a1cc8afc2a08a821cee8cee2f2f2dbd6a0949a1816b
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:1352c8019dd2cc5845da555ea64429ae77f92db5790129e2d8ac7027db88d326
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:a6e29b66b92750f29c5958a03dd1862789c81b985e7c1d10e7bc442c9973a4e0
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:6d61151fe7af10a77c40c61e7382ac6f4119a00204d1c21349bae999d35c3ea3
+    legacy_fingerprint: sha256:6d61151fe7af10a77c40c61e7382ac6f4119a00204d1c21349bae999d35c3ea3
+  - id: inv:0b10564e7c4e44911e935a3b1a9957bc735aedc436f05acf282a1d996af18bfe
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:6181963e328fdaff573fd71ff0dfc31f2bddbcb263a85ad3da92b108eb1771f2
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:3ff74bf0d037e32ad84f9ea65ea8c63e47f5884f727c99107904f88aaa524639
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:108fe64ee6a87633058914e0d2e350dcb180b1369b02a137f9f0dc58ff268fb1
+    legacy_fingerprint: sha256:108fe64ee6a87633058914e0d2e350dcb180b1369b02a137f9f0dc58ff268fb1
+  - id: inv:0b115ae200683b8c87715d0085a887e387d414cdae33ba9c3e8663b273b5a1ef
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:2eb8a971ba22277dff01b0752514c78c158a68406142087ce75da68245621aef
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:70c807710926cd7368db81c375402962b7f4ecac6b56bbd6bfa16cd39a1cf088
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0b1362b11591f5bbac4de8b6a52a46fe7398330aad84d393f55ecfff48b91b43
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:de58bcec1a56fbca4ae1e3db7927e8a7f787ad59169288321edab5be83b12d92
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:5aa71e6d4e1f21bd783f87be9ee2401918199f00dca6c95c94062e79021f41be
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:103a4b7ce7ccf00648637829fa58087ee9d2e9faa25a5d24cadf2c6e9e3d9139
+    legacy_fingerprint: sha256:103a4b7ce7ccf00648637829fa58087ee9d2e9faa25a5d24cadf2c6e9e3d9139
+  - id: inv:0b1beec671e49350d1b863a3cbf81cbd01f6d8c7bd3405c0fcfd49bab1a962d3
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:d8ad898dc7e4672522e2b6db22c0fc4d53562860e1bb62b371efe2d8dee5e276
+      parser: translation-jp-v1
+      locator: /faces/0/sections/0
+      text_hash: sha256:ca0b17344ce4b58c238e9f0786a36e5dbf8d60b81b9e88fe7371b26d02af3e01
+    line_ordinal: 0
+    role: reminder
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:ca0b17344ce4b58c238e9f0786a36e5dbf8d60b81b9e88fe7371b26d02af3e01
+    legacy_fingerprint:
+  - id: inv:0b1e34223b1b0c9b7174c6960ab22c4b79cf499d6fa23e7be8e4ca8481f1df4e
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:04bc4248822c0cad30e46323ec9d0023468b4258c2c1e22b2c946cff471bc119
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:a4723ee8aba5ad73d8c0ab4d754f3a0843fdaa463f8d01d57a89836711316685
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:9f08734b3669bad5c34231c63a88a5a912423973d38d9d1d588fa5c6a85a8b8c
+    legacy_fingerprint: sha256:9f08734b3669bad5c34231c63a88a5a912423973d38d9d1d588fa5c6a85a8b8c
+  - id: inv:0b1f61695c1f060c7ae47504034ee472936f0195b08645efe7c4b8c20a0ae5cc
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:5a860aabb8ea57e2376c4c57c2c75e5b1c8a03c3dc7661534e13fe4e8248b90e
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:0068ec1ae0288e95bf64ec343356b8d01de1fbf9f74b5f328364d7d5b60e16af
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:5bbdc74a73b25fe61918868a9a98eb0bb384f8893bcc3ff1c4816567fef0e99d
+    legacy_fingerprint: sha256:5bbdc74a73b25fe61918868a9a98eb0bb384f8893bcc3ff1c4816567fef0e99d
+  - id: inv:0b22c07d59811af4b866d53324cb16a0c79decf6e0f59ae26fdb353eda5a468e
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:8ef41e550592f15377648c1e4c5f34342e3f9a2b44054044ebd92ebc86a777b1
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:3edfd11fa74fbc70925b44a94f297aeb22bdd81e4052509defdcc8e61dfa8390
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0b25243856ea1f849ff0fa0d9b2ceb27d61f3e3d505d6f167f56ec033a5c8b65
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:13d4ec3146676734463c062e3005ac7321c3456112530fd9f4d5c3365fb6405d
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:3a4c69fc7d50e86fe56f63634225f332d19e8f5446f8cceef3b1a4c94cd81910
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+    legacy_fingerprint: sha256:921ff9f9b9bc3d5ec6eb30c1a903f03858202059cbd4e98a8c7c43d4d96fa0df
+  - id: inv:0b2cf51bc51f41b83b7f767b5ad78c1f4daaf69bd5dd1b1bb7f2c0728eb5be3d
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:c33a3e2dc568baaab6f091d443fb3772915453816400cd19f6378034efe7466a
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:f558c3af2dd6d4e24192be8085b6e8f04d7a35bf819b6e59c7edfa8937609987
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0b2ff1ec19b267249d54461051c18d69174db3e77b3e796f0689bb80a5c6e979
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:a46c25d6257098f0ece3abb6244409427dd3a4734428fbc08801ff0c597c20a5
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:44feeb3a437c2fa92e1095ed38714538d5afda272206905c3874f16465de85bd
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0b312bee798814995d58c1f32c4fb507cd9623482f322ae74d78019ada5bac17
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:3af0fa671ae101872b4141fab768eac0cd085890381f60f17e16153bc7c55b2f
+      parser: translation-jp-v1
+      locator: /faces/0/sections/0
+      text_hash: sha256:c9e685a31a95ea46d399ad2a10678010e09de952c82b2efcd681ffc3290bc1b2
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
+    legacy_fingerprint: sha256:ca6721d15777ebae36f3c431dc67cfd0dda049ad4c5abb2c0a0412042d736c2f
+  - id: inv:0b35e16353a1f4799fbf301fa36fd85179826f8e5f731ac5d4f58de6d602587e
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:f8b268ed307d152815fe37ad2c33b4fed406ddb34cded1400494e4d6a26be60f
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:19a9d52160568cbcf7d4bdfd001c4c66793aa1f4f3668eb0b3a01eb01fe810cb
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:6b3c66f16c2adc5eb7bd16316de84e30de11edb6685caf3e3da54b3d00787c9b
+    legacy_fingerprint: sha256:6b3c66f16c2adc5eb7bd16316de84e30de11edb6685caf3e3da54b3d00787c9b
+  - id: inv:0b3b50391dac45ee26a9071941204390b2e8a068470265ec6b800ddbd22663cf
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:f8a0878f2b5200fc44add0583946fd8f14b8cc3fe0996f8396e1eb92c07efc68
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:e902c4e0eb270e309e163abb8381e85dff84e39cc822f97beb6d96587e3897e6
+    line_ordinal: 1
+    role: reminder
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:74d7fa3dcc7bfcfe0779a6f42cb5ed2e4e390efe33c105de29d598d13a6b56c6
+    legacy_fingerprint:
+  - id: inv:0b3d1486fab5c832fcee05968f86d4eb705209550ffa6f7e73043a6aafec2a2a
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:70e3d5db7f24e9eb3f66da2d2f4d7ead24d6e5928cc945fb9216248680258503
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:8429cdf4f771df1c19a751f6db0f5c88b3bd8780d03cb73d8d3cbbe685aec244
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:0259b8f4a3a468ec8171f163142c5e97f25b92f94461a8fe32ef92194b47a930
+    legacy_fingerprint: sha256:0259b8f4a3a468ec8171f163142c5e97f25b92f94461a8fe32ef92194b47a930
+  - id: inv:0b3dd717924c8b350c2e5f871cfb534bbad72eeb70800aac9171c0d7446a08f5
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:54af4a8b3b16e5d3b816eb9f801b0b1b232e1a343642cc667483ab664fcf221b
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:3c4122b6afc5bd2ce2c3f0470d8f1a981490083a1724eadfedbe7f926df06d2f
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:12f5d4d6ceb834dde6857f6a2d7d4d891f23ac887299248dcf1a25e2ff221594
+    legacy_fingerprint: sha256:12f5d4d6ceb834dde6857f6a2d7d4d891f23ac887299248dcf1a25e2ff221594
+  - id: inv:0b3f6a9661de4aaeb19fdf0df1b924091a432da21dc69ff68092d7c6e276784b
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:ff5b7f8265e710cf2242f866b630682b0c79327a33fedf2c30ce7fef4c67ad85
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:d72eb58a0673ce84224c04d5fb6db69f79f86c38648de7bd1ad5f21c28826fb6
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:42996af29ee691e8fa847032855ec717a638c2260ec0b95151301ae457396758
+    legacy_fingerprint: sha256:42996af29ee691e8fa847032855ec717a638c2260ec0b95151301ae457396758
+  - id: inv:0b4179aa811501eedf8b5331b7efa7b0c7dd8dc3cd5bb4f6880d253ce84334f9
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:549f2cf70d0325f0d3d98e3bb77f5beca0b79d155487da8948de18c056321e2d
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:16b523c5e7e618c2008861797ab1e729b422b98360b114c1de694fe73dd58dd2
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:00f61a728693c034484d9af1049ea0d7e0fbadf649132794ba0960e42fbc68e5
+    legacy_fingerprint: sha256:00f61a728693c034484d9af1049ea0d7e0fbadf649132794ba0960e42fbc68e5
+  - id: inv:0b4541441b81db7b28c92965ca5aa90d51cd4176ecd8f4e78cd9f7282e537153
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:d4231f6ea26a61cdf63d254312a37e18a0b416c4998f593371e55c2ef52e1623
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:84d01498b554a54c8edf44c9aa1cdd1ac68882030170e4f935e4cd52dfec4581
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:8e3a49dc563cedc93139a86aa52bb99d83c3fbb04fa55be1fccc54159ce708a9
+    legacy_fingerprint: sha256:8e3a49dc563cedc93139a86aa52bb99d83c3fbb04fa55be1fccc54159ce708a9
+  - id: inv:0b47e86c64ad24beae762e902c4ed3efe0cafaaca3a76cbb765e5ab38f5ef880
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:cc76b2c7d6312251ccd35cbff638bb3b2b1998592da72bc9a3c3e6fa1815ba17
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:cc3665f2db2c16cf2b703bb9fcc8b673827cbc3e7cd08a56d6d3750c6bba998e
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0b49b0b883a779a99efe19b4facd1bcc828cf1fd844474621ff0e55a7c9f148a
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:e266d6ce12dfc36362ca5f0df2dd1afeda7c69cf053316906cac748a9d124066
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:7e27b28e2026f1e6587bf9340633f5c5ae14aea05600bfd219626b5f0d5a02b4
+    line_ordinal: 1
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0b4df1af35366ebc3cf26251faf9b35c8497845135fc7512a8a9f751c8d4a868
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:b409bd974a4b679d9d449fd52b2eb21e46c6c44f0ad8f7ab483f57cb17486cda
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:7a3baf96394b38ad91de321ce56b7badad643580faef482ed43ec290b22a0535
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:7a4b8d464847dcb2350fab045d029dc76be35a1048c869ae53c63f8b3816162e
+    legacy_fingerprint: sha256:7a4b8d464847dcb2350fab045d029dc76be35a1048c869ae53c63f8b3816162e
+  - id: inv:0b4edde3b8ca27d2fc7b91096c21e1cf0657eab57f678ae61f0dabb8e80c6e19
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:9a0c0688c86ae6f88ece1039c42a1f96aa9a331d95b2ba38c0ec8ccd44495708
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:287d1a11c658a5b13ab620d2d40c549603b1043f5c54322325d16d784843efd5
+    line_ordinal: 1
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0b52195c82d6140ce01aded832fa8e6b1fafa230423386e065808653cde9ea83
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:d704df9512cd5c5442a0838813a2b4dc56975b68175457c0814cf6e30503fd5f
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:d5054ad94b788c243ab922e569384fe006a3fade479a6808c582b9a1c78da7d7
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:25ba50b47a2ae8b7ff4290bbd7f09c0e5a1ce382b20d8b5230398db71a11ab82
+    legacy_fingerprint: sha256:25ba50b47a2ae8b7ff4290bbd7f09c0e5a1ce382b20d8b5230398db71a11ab82
+  - id: inv:0b568db7a28211196a24bbecb3bff90f99589afb74a0393e16dba185ae17b0cd
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:ae2760f93e0bbf3c4f7ce33616eb9c1c0105be4ae4f80d56bfec4d37ac995268
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:2b66ce5a9af2a08882f2c16527f911cc0bdc759770e52979d469bc0109b25ba6
+    line_ordinal: 1
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0b5bb4c5481056c9dc9d9851b041e6a2dfb3b20a95fe27ba73316cf2df102e45
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:26ef36636045d5369adbc3256126e8c20b0a9eb8a290fa0c37f59b84d0d1b8b1
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:8f6cde0e324b383c728954e9a1c18a63dfbf97724f1fa96a37232742038403da
+    line_ordinal: 2
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:31e697d369b80e4d96f648ca18eccaa67cecbde740cf01a2f73d82c1f01d2186
+    legacy_fingerprint: sha256:31e697d369b80e4d96f648ca18eccaa67cecbde740cf01a2f73d82c1f01d2186
+  - id: inv:0b5bb720e5a80677ce6bb326f5bc34ecddf540d0ffac4bc730b71da59b188a17
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:6dcad0ac19c252bd7ffbb668383dc01273bddd8e47fb6f80962e549edc0f4e74
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:2bb4e641c6c4de73e311b95a85e807766627bc14262a818dca80ded79eb3064c
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:76ee4ab0e8035ee868afff83544c1e85eac23998b822f73118b30d8bf0ce34c6
+    legacy_fingerprint: sha256:76ee4ab0e8035ee868afff83544c1e85eac23998b822f73118b30d8bf0ce34c6
+  - id: inv:0b5c853d8fd9ecdaec3bc740f5e6ff47b9cd9b8e28e8852305c96c86caf59c20
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:053d48e5910e875d1971f1778a04a35055b225023f7abf7a60520dbbff8b3692
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:a1bdb0cceb681f632c7685b397278043127a6b9b901b3f270d6897698da5c01c
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:63ab037284614542b3b3cc5fce5c520a23640490798486a808ce403a4c06d0d0
+    legacy_fingerprint: sha256:63ab037284614542b3b3cc5fce5c520a23640490798486a808ce403a4c06d0d0
+  - id: inv:0b5ee7c47a3091c22fedd672c019bc2389dc13a2c6fb6f54419706b2547a1428
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:c4b13e790523a463e6ce068f467c0eedfe06bd8e02dc17be75eae4ec19526fa9
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:138839100bb288dfab1d0c68a6aa48cab0640a266f9d7eaab3bf729a37de21f4
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0b5f7d097e50468990470c86f70e427acc0c0c21c3f6549fc6a0563cb699dfe4
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:0621a49a4bf0efc4aea40fab92e33e06749f50ea41e4427ae9a1ae670b6f1678
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:3bfea202a61ae8b7866d953c7bf40eedab56e098c754b8ef87f52565e5f5e40e
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+    legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+  - id: inv:0b644aeba034c4978b0528a48499ed67c776615165628309a9deffa7b2db960d
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:33157b70dc6fc2409896f65eaecd218914939b1775d73b02a92ec1d266e62bb2
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:ffb9d28592951c67d89580f82a08914847346e4fa975cccf30fa0301cee97d97
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:f342c1e93b3425924dcf07f23ac555fd9d5dfa8dc43af10baf4c1092fa375cb1
+    legacy_fingerprint: sha256:f342c1e93b3425924dcf07f23ac555fd9d5dfa8dc43af10baf4c1092fa375cb1
+  - id: inv:0b670e74edc8066254e5037d93e70f81eb80bb32573af4632a06bb7e8258442c
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:0fb4d688fd7f646fc1b21eeca129b7881e4fa196ca74ca165d7b56bfb0ea3333
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:07d095f71bd647531b77077a5462b2c5334e1e771a424df2c9d51f2e60fdc7fe
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:eb99b5094f4f80d63d47cd97b05ca0a100b2574a5c4af21775c2d567e9901e46
+    legacy_fingerprint: sha256:eb99b5094f4f80d63d47cd97b05ca0a100b2574a5c4af21775c2d567e9901e46
+  - id: inv:0b7151471903d2cb0c927078aaab5836a41215534da2a63bad20b54b8d590389
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:fbdc76047966fada3456fedacf4557a646aa56bce8313cb1371b421da9607ba1
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:334a6a23f820fa4db3d15456b80460a64ce35a7cc5a9c5229ef0f23cfdaf7676
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:ddabb639edde2b653fe0f184e3f497191ec2f6b99f2d139d5d1d2ad9c3ef19a3
+    legacy_fingerprint: sha256:ddabb639edde2b653fe0f184e3f497191ec2f6b99f2d139d5d1d2ad9c3ef19a3
+  - id: inv:0b71bededb8a3430c037d74240339ac75713c3013186bb81815fc2a6252da33d
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:2652bc6a6a305c8f083502352537a7e96119632e8c524f28d4c3fcdb7f9cee97
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:5788247732399842d65ab9f57edb561b5116fd84660072ea11ea6543f8065170
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0b7884b1deefb63e1590d0f8c9894be723d88153cf2d12b2bbec8e07893346f7
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:abdc6faef7ffbda25b57e72f972265951b4043ff6184832e69682f3983eb9048
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:c5e341273c0d36f8d41ecdcf8fd1ad038ea4f1f38b22b61ec7e052408ddbf324
+    line_ordinal: 1
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0b7c1f4f4b55777886e45922ab4341f8d00932b33cc76eac99a8010c195f6cd2
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:c4c9b0a719a5745141766a79fd99efa3448a3796b1a5142c4b95f6062c8769bf
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:b4c38e1613e2ea23a023d96fa98b8e4b03a09634478cde8fb8bd3fd36bf6201c
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+    legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+  - id: inv:0b830304fbcdc58c2ceb5896f81ed880cd9afe376005d45d8da29b786907828a
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:c9ba18cbb70646418e9eb520398842bb3b4b303e9cc540bbcc2dd07f89b8f2ab
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:9bde8670bd3c2d26147f84dbceb24ab0fb66a9c098fd68041c2309d84f54401b
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+    legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+  - id: inv:0b844d230502b2263612090200e320237688f8c0a6665dfeca11439ec9f5ec77
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:3cc12f9117075adb3747130fb51948694eb2a6bbb50a2bdaba2175417b5d71d2
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:94aab1d2bfa92976506bc808f11011572b0f7faf043e69f78beaae8eaf9f7684
+    line_ordinal: 1
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:4b3324291f62867e719eb19a48d66380ebdc522d944cfc909765c48f2e968ec2
+    legacy_fingerprint: sha256:4b3324291f62867e719eb19a48d66380ebdc522d944cfc909765c48f2e968ec2
+  - id: inv:0b8e06c2169e1c377ccfc75cb93213936195837b1690aa8a57473633ff56bcc4
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:ec0f2f66005d9dfc3eaa20ae76fbc84e4c7808b14cfc3bf0e3176b6ffe23e8ab
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:fab20cd8347a88ce00289e00b882aaf5e12599b33a6f749cc8128cb133244640
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:8d9ec8d0532e2c094e732eacb241184df64f697cc4b8c67c68d78490a0a33baa
+    legacy_fingerprint: sha256:8d9ec8d0532e2c094e732eacb241184df64f697cc4b8c67c68d78490a0a33baa
+  - id: inv:0b8eee19cf699637bc46faa81da38ca41a3296a66c62be932b135bf30048b7b5
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:80dd9caa57ea1b9a7a59b8b04d0363a94a402f8effbcf8f8e0364ea7c114c17f
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:fb6243550a95984f9d21fb72777408eb9efe4fe5cfde19b35a3bf5f1b68691cc
+    line_ordinal: 2
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:d7a175c2ad7fc8b20624513b98832b88328e8ae2ac033a013d1cafe7c0f21cff
+    legacy_fingerprint: sha256:d7a175c2ad7fc8b20624513b98832b88328e8ae2ac033a013d1cafe7c0f21cff
+  - id: inv:0b931a6d8bc79eade41640b30531b6de85a76fda3b9b24dae80a836fb5d92830
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:a210452dc03e857f0a769c6d896d3d53c9c414443b9eec9203d27c7bbcbdd4be
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:b1b485a423b670ca306ee31b62abf42e15524572df5550f44b86a9bc4e64be54
+    line_ordinal: 3
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:1070db658207850f65720f78c0096c3f2f9f8d8b36e9a8107759c9ea0e4b8903
+    legacy_fingerprint: sha256:1070db658207850f65720f78c0096c3f2f9f8d8b36e9a8107759c9ea0e4b8903
+  - id: inv:0b976d70966ea917b2901233d6cd907641f344fee2c626e18922d386622f814e
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:d0455323dea37454d798e427dbe0432841e8436d9d1f37b7a3952c103a6216ed
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:81d1700bccdcd46b4c1b70406a4cc89f85432e417d5601bf4d841fed774d82d1
+    line_ordinal: 3
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:e24db00bc89e0ce1ee868603b77ac39c7943e33ece3531fa0ab7ae2647e7c3fe
+    legacy_fingerprint: sha256:e24db00bc89e0ce1ee868603b77ac39c7943e33ece3531fa0ab7ae2647e7c3fe
+  - id: inv:0b9a137a02a481c390420a7a244a216527fbaef5fa0ae175d9c78a52744af73f
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:ef36d2bd54d2e6aa95245053cbf5cd7285be5fda7ba813fdfb660956f8727061
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:7a958ef8f10725f096ed2bc99766a873ea9421294be5f97023268afb060e512d
+    line_ordinal: 1
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0ba2b12d1023e6a862ccc15dfbb227eb8f0ffef9c3fbc14ececbd3386b66ff25
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:58d8d9907f1bfe62a90dbd7d9088e0207bc3d888ca825fc847ac81f972a2232c
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:94ad801e92e51d8dac1e4b82ddfea37964f94c0d33b0ebd85a1f7c22d60baa36
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:f4cf71342a9b242bc4ec3b3801805d688fa985d6e47d9e7e8b841b1a1364baf3
+    legacy_fingerprint: sha256:f4cf71342a9b242bc4ec3b3801805d688fa985d6e47d9e7e8b841b1a1364baf3
+  - id: inv:0ba6af8ac87b76e0d2ba1456c1b366a4d79b8f39eb2fadb23af3d14bdd6ebd24
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:cbcfed567a55252d7d07719741fa3ffc106449fd0df9e4b7fc264fcd543322e9
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:3bfea202a61ae8b7866d953c7bf40eedab56e098c754b8ef87f52565e5f5e40e
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+    legacy_fingerprint: sha256:23f16a285158dae996cc6496a6c139d66cead6b5784cbdd4ecdc2cb730babd01
+  - id: inv:0ba743151d4063d2e577081bbc121ebaf8178259b0b01d1727513ffc545299ff
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:af971293279e64ecd3ecf67259a50da14fce9d91b02b518360fdc6e67c7c4e36
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:9f44de5ed39ee914a63e553c8eee15a84194e547787d14ebbc13ce489cec5a8b
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:85fc4f701492c7e67a868c7fb4f4c54facb292de89e78caacfbacf5a0f1056ba
+    legacy_fingerprint: sha256:85fc4f701492c7e67a868c7fb4f4c54facb292de89e78caacfbacf5a0f1056ba
+  - id: inv:0bb32e90f98ccda006536bc2af721656079a203acbf0aa577edb83fa5073d6f8
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:e3ac55013358399704b5ba4b5db61ddb2aab1f4f67753953f7f7a960596a4908
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:9b2ffaeedeb00b978cbec0f96f304663e0621273caaa311e5ba2d94a181252b5
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0bbc98f1336d2270abef7aeec3e05ebc37e7f6a16f619751be34770f1b1de59f
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:fbdde4eb4c8bf5ac5211598ea2e45503bf0de48259af7d69ab57888ff1ff45ce
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:fb41e1a328775f1d2b4955aad929c0fa4dfd24f00baf5e694255ce09e71d6007
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0bbe6324d35d354773cbff619fef962a5c178d23a8e41a5f09b91cc6f9145c0a
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:8ad3d74289f170a4f7a0cb17c9ce85661e69c44c9b6c7760a3154154781d9994
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:d41b77db5190b44e99e154c3fb2194af038da84d78c7a5f210ad8cabd333f29c
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:cd38e265a23bf0781e82e6e8ccfe864d8380508ce39d46541726656a554adc11
+    legacy_fingerprint: sha256:cd38e265a23bf0781e82e6e8ccfe864d8380508ce39d46541726656a554adc11
+  - id: inv:0bc0e6ac56d90db177457a979ef5c0e30774d04389f051a27721cd21131d0ee2
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:07c1dc6315dcb2cf7e722513e1981610723574669cb38d4abd8fb92d59c856de
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:53b30f71c08bd057e6a74cb69c8b91a2caa6e69970eacd71d557ab9b0585aea7
+    line_ordinal: 2
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0bc50ce78bb04a5d50bf21846aa803fa9809d28082c62d3d73e2741a960634d0
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:62bcc8220628016bf1716a358cdf7c18a51218c1d234325af8cffd99965d6997
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:3d6e156f981106c091e2574b8dfe49b6338267548239ce1817cae47a6da25d41
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:54b0b50e7f347f15621813238d4caf2c06f5c6ac14e121f2df32832574e43f22
+    legacy_fingerprint: sha256:54b0b50e7f347f15621813238d4caf2c06f5c6ac14e121f2df32832574e43f22
+  - id: inv:0bc6523143a1c50d05fad8f71040a2017fd0def18324ae7b819c6ddff4a06d74
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:4a03fb657f93f4a6f7361d3fef3471774db1cbccf7c78af870ab873e89b90e35
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:93a9d669c177591d571755cdd383beae1ffe2ee0e45856fb8144edee540fb041
+    line_ordinal: 1
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0bc7438d38fb49823ad54e6abcc748b0e76675e600bfb73d0a0ccdcd446c77d6
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:870e2147d6942a7b22f5d4cf89ccac9af97deac5e03907abf60b83a4af722461
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:8961c4b245298e8b73dfefbc9384e4a644bd611f148e040f20a2d93e2fdbfc03
+    line_ordinal: 0
+    role: layout
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+    legacy_fingerprint:
+  - id: inv:0bcba34fb89d8ce9117eaaed54aee4b0bd82c6dc80089df74d92fe74a688053b
+    level: sentence
+    source_ref:
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+      source_version_id: src:v1:fcb63dd6e8ea0b846c3cb4571af936247b8f7417eb64a5d57c399506e63a37cb
+      parser: translation-jp-v1
+      locator: /faces/0/text
+      text_hash: sha256:bed832bce6186ea4552cbf0e6287c29b7515efdcb92ada881384a2cc818db205
+    line_ordinal: 0
+    role: body
+    normalizer_id: classification-jp-v0-v1
+    normalized_hash: sha256:25ba50b47a2ae8b7ff4290bbd7f09c0e5a1ce382b20d8b5230398db71a11ab82
+    legacy_fingerprint: sha256:25ba50b47a2ae8b7ff4290bbd7f09c0e5a1ce382b20d8b5230398db71a11ab82
