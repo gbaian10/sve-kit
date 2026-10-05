@@ -194,6 +194,7 @@ uv --directory carddb run sve-carddb r2 upload-v2 \
   --checkpoint-file "$CHECKPOINT_FILE" \
   --cdn-base-url "$CDN_BASE_URL" \
   --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" \
+  --skip-cdn-verify \
   --execute --confirm-maintainer-authorization
 ```
 
@@ -202,9 +203,8 @@ uv --directory carddb run sve-carddb r2 upload-v2 \
 條件或傳輸失敗就停止，不退回無條件 PUT，也不重送寫入；保留既有狀態與 checkpoint，
 由維護者核對後重跑。GC 為另外授權的 `r2 gc-v2`，不在上傳後自動刪除。
 
-正式發布包含 CDN GET 驗證。受 Access 保護的入口若不能供此無登入、無授權標頭的
-驗證讀取，執行會被擋；須先解決驗收條件，不能用 1.x 預覽繞過或宣稱已發布成功。
-Worker 須原樣提供 bytes／metadata，資料路徑不能回 SPA HTML。
+開發環境執行時加上 `--skip-cdn-verify`，略過 CDN GET 驗證；維護者須以瀏覽器檢查圖片。
+來源端讀回比對仍會執行，命令輸出會標示 CDN 驗證已略過。
 
 ## 8. 執行成本與恢復
 

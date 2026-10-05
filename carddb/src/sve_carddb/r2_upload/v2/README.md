@@ -103,6 +103,9 @@ authorization headers, redirects, cache bypass, cache busting or purge. HTTP den
 (including Access), encoded or poisoned/negative-cache bytes block publication.
 Normal publication performs four CDN GETs per current image URL; an already
 committed retry performs two. This can be expensive and needs live acceptance.
+Use `--skip-cdn-verify` only for development environments where maintainers will
+check images in a browser; origin read-back and the remaining publication steps
+still run, and command output marks CDN verification as skipped.
 
 After successful or failed durable publication, the independent checkpoint is
 advanced and fsynced; failed attempts keep their reservation/sealed plan. If an

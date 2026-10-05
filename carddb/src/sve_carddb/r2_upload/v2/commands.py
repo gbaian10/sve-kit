@@ -34,6 +34,7 @@ def upload_v2(  # ruff: ignore[too-many-arguments] -- all deployment and recover
     checkpoint_file: Annotated[Path, typer.Option()],
     cdn_base_url: Annotated[str, typer.Option()],
     execute: Annotated[bool, typer.Option("--execute/--dry-run")] = False,
+    skip_cdn_verify: Annotated[bool, typer.Option("--skip-cdn-verify")] = False,
     confirm_maintainer_authorization: Annotated[bool, typer.Option()] = False,
     account_id: Annotated[str | None, typer.Option()] = None,
     bucket: Annotated[str | None, typer.Option()] = None,
@@ -47,7 +48,14 @@ def upload_v2(  # ruff: ignore[too-many-arguments] -- all deployment and recover
         release = load_bundle(release_dir, ledger, cdn_root=root)
         result = report(release, ledger)
         if execute:
-            result |= _execute(ledger, release, checkpoint_file, account_id, bucket)
+            result |= _execute(
+                ledger,
+                release,
+                checkpoint_file,
+                account_id,
+                bucket,
+                skip_cdn_verify=skip_cdn_verify,
+            )
         typer.echo(json.dumps(result, sort_keys=True, separators=(",", ":")))
     except (PublishError, UploadError) as error:
         raise typer.BadParameter(str(error)) from None
@@ -66,6 +74,8 @@ def _execute(
     checkpoint: Path,
     account_id: str | None,
     bucket: str | None,
+    *,
+    skip_cdn_verify: bool,
 ) -> dict[str, object]:
     credentials = Credentials.environment()
     account, target = target_values(account_id, bucket)
@@ -80,12 +90,16 @@ def _execute(
                 store,
                 release,
                 CDNFreshness(release.cdn_root, cdn_client),
+                verify_cdn=not skip_cdn_verify,
             )
-            return {
+            result: dict[str, object] = {
                 "mode": "execute",
                 "receipt": receipt,
                 "remote_existence": "verified",
             }
+            if skip_cdn_verify:
+                result["cdn_verification"] = "skipped"
+            return result
         finally:
             save_checkpoint(checkpoint, ledger)
 
