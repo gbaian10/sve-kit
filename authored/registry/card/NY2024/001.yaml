@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:3597d08c0b51b939f0918ae2dfd82a5aa0f337f124f62eab2525b58f9e970d8a
 records:
   - record_key: card:c:36d1c70e4a2b55f3aaa4ccc7c88e2a17
     kind: card
@@ -10,15 +9,3 @@ records:
       layout: single
       identity_state: confirmed
       home_set_id: NY2024
-decisions:
-  - id: d:3597d08c0b51b939f0918ae2dfd82a5aa0f337f124f62eab2525b58f9e970d8a
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:3597d08c0b51b939f0918ae2dfd82a5aa0f337f124f62eab2525b58f9e970d8a
-    members:
-      -   - card:c:36d1c70e4a2b55f3aaa4ccc7c88e2a17
-          - sha256:157bd6ddb4168a2fa53c2ab2b656e203622f99b5acfdfaf8102ef730d5ff9d6c
-    sample_ids:
-      - card:c:36d1c70e4a2b55f3aaa4ccc7c88e2a17

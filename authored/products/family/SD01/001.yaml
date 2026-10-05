@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:81d0ca3de2cb3dbce8a07b47f5bd66a9738429d1cd91ccbbe5f61206d0e54669
 records:
   - record_key: '["product_family","SD01"]'
     kind: product_family
     filing_key: SD01
+    state: confirmed
     data:
       id: SD01
       code: sd01
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: スターターデッキ第1弾「麗しの妖精姫」
     evidence: []
-decisions:
-  - id: d:81d0ca3de2cb3dbce8a07b47f5bd66a9738429d1cd91ccbbe5f61206d0e54669
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:81d0ca3de2cb3dbce8a07b47f5bd66a9738429d1cd91ccbbe5f61206d0e54669
-    members:
-      -   - '["product_family","SD01"]'
-          - sha256:e8c823e0530ab397c422324a0265a813f12c4523ea1c145cac553899f9f3748a
-    sample_ids:
-      - '["product_family","SD01"]'

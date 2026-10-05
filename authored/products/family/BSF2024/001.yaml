@@ -1,10 +1,11 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:e41d7f1cfd151a6e286995c931727d8871a1ce0fba3cf99815ba1e3aa73e12e3
 records:
   - record_key: '["product_family","BSF2024"]'
     kind: product_family
     filing_key: BSF2024
+    state: confirmed
+    note: 使用者：歸 PR 類。代號印在 EN 卡號上（BSF2024-001EN，對應 JP PR-049），保留自己的家族
     data:
       id: BSF2024
       code: bsf2024
@@ -14,16 +15,3 @@ records:
         lang: en
         text: Promo Cards
     evidence: []
-decisions:
-  - id: d:e41d7f1cfd151a6e286995c931727d8871a1ce0fba3cf99815ba1e3aa73e12e3
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:e41d7f1cfd151a6e286995c931727d8871a1ce0fba3cf99815ba1e3aa73e12e3
-    members:
-      -   - '["product_family","BSF2024"]'
-          - sha256:8ecc3fbd9c4774343751626b140ac879f60984fcaa09616454f9fc5a1d214792
-    sample_ids:
-      - '["product_family","BSF2024"]'
-    note: 使用者：歸 PR 類。代號印在 EN 卡號上（BSF2024-001EN，對應 JP PR-049），保留自己的家族

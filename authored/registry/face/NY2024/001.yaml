@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:8a1d62fce1562ee2700102fc4b10b30f94be9521d000c77694be0b0e2c327608
 records:
   - record_key: face:f:67b8b56d010558398bab2692d34a5aed
     kind: face
@@ -10,15 +9,3 @@ records:
       card_id: c:36d1c70e4a2b55f3aaa4ccc7c88e2a17
       ordinal: 0
       side: front
-decisions:
-  - id: d:8a1d62fce1562ee2700102fc4b10b30f94be9521d000c77694be0b0e2c327608
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:8a1d62fce1562ee2700102fc4b10b30f94be9521d000c77694be0b0e2c327608
-    members:
-      -   - face:f:67b8b56d010558398bab2692d34a5aed
-          - sha256:45ac354d6122e79ff92f133fea919169fbe0c460f7cb0094dcd485c66c45c97b
-    sample_ids:
-      - face:f:67b8b56d010558398bab2692d34a5aed

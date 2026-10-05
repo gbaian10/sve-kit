@@ -1,10 +1,11 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:df7a3c07f78bc67924c02d07ef9e598150188a976f61af9fc53699a6bf79e84d
 records:
   - record_key: '["product_family","BP15"]'
     kind: product_family
     filing_key: BP15
+    state: confirmed
+    note: 使用者：EN 為合併包（Combined Set），在家族附商品連結即可
     data:
       id: BP15
       code: bp15
@@ -14,16 +15,3 @@ records:
         lang: ja
         text: ブースターパック「絶傑の試練」
     evidence: []
-decisions:
-  - id: d:df7a3c07f78bc67924c02d07ef9e598150188a976f61af9fc53699a6bf79e84d
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:df7a3c07f78bc67924c02d07ef9e598150188a976f61af9fc53699a6bf79e84d
-    members:
-      -   - '["product_family","BP15"]'
-          - sha256:c696ab2d65d4017f19d41e2cf7968295ff6f9017e89b0fb47acd6f1b427bdfe2
-    sample_ids:
-      - '["product_family","BP15"]'
-    note: 使用者：EN 為合併包（Combined Set），在家族附商品連結即可

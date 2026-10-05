@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:bea53265b6555036efd2ee2a0347e0853ffb65cd6cbff251c4c03146b50bf38c
 records:
   - record_key: '["product_family","GFD01"]'
     kind: product_family
     filing_key: GFD01
+    state: confirmed
     data:
       id: GFD01
       code: gfd01
@@ -14,15 +14,3 @@ records:
         lang: en
         text: Gloryfinder Starter Deck "Luxheart Legends"
     evidence: []
-decisions:
-  - id: d:bea53265b6555036efd2ee2a0347e0853ffb65cd6cbff251c4c03146b50bf38c
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:bea53265b6555036efd2ee2a0347e0853ffb65cd6cbff251c4c03146b50bf38c
-    members:
-      -   - '["product_family","GFD01"]'
-          - sha256:dc06fa7a9c5a92d95376dddfc5235cbe0fdce2b6276c11dd9b71ce77afe93204
-    sample_ids:
-      - '["product_family","GFD01"]'

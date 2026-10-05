@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:6ea27e3eb3f1a3d867e90f1d34c3eca196457a2a03826ca003a6a2aab923acf3
 records:
   - record_key: face:f:569a511e13e05706915749fde91150c4
     kind: face
@@ -170,75 +169,3 @@ records:
       card_id: c:3a9acb2a492d501a9f82649c7b37944c
       ordinal: 0
       side: front
-decisions:
-  - id: d:6ea27e3eb3f1a3d867e90f1d34c3eca196457a2a03826ca003a6a2aab923acf3
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:6ea27e3eb3f1a3d867e90f1d34c3eca196457a2a03826ca003a6a2aab923acf3
-    members:
-      -   - face:f:0a80c91ad293553c8ed70145d9c4c12c
-          - sha256:30745e0ebf23b7ad29a5b510d9ea7e3ee4ab6392fb0f0c67fa5aea5e8c89bca2
-      -   - face:f:1fdae3da85fb5703a7748f23f45f74be
-          - sha256:a6859f350ebc03991c4e9c5d229187b09a7ce25495d2c0654990de30b1f4bea8
-      -   - face:f:4a85ce11fc3755dba98e8b966adfb32c
-          - sha256:f5ec7f072c3a73392b777f0505b0d4c6b2fc2e3c6055b568fe48a401ce6e7c44
-      -   - face:f:4c4d62281658524e8772edb3b119e83a
-          - sha256:7d29ee416a6d671ee5593a10b12699aac721715e714ea651603b65f91f837bd8
-      -   - face:f:4c9d7bad777a52ff935457bcd4178498
-          - sha256:43e5b91debcdc6e99b4fb6b7851d795198927456f37ea6e656d1dbd3c532df2a
-      -   - face:f:569a511e13e05706915749fde91150c4
-          - sha256:063577b4f178efe9f0e3ffb2a5ffaa55788e3a1984af6ff68443b34b0bdb25a7
-      -   - face:f:57d7a22e8a9a52bea0fa076302c9c8ac
-          - sha256:7750af3114cdee3ae458b4bf9e90551c8510ddfb2ae3c48584041b67886a75fe
-      -   - face:f:5ed536ea4b0951278f19f93373147f8d
-          - sha256:743e6e7155a17278bd5eedea955954e23f421eeb9122384c6d7f4f99dcae6598
-      -   - face:f:7747bd0d657c54909a03f23e63840929
-          - sha256:95f6fdaf102b32d45e8d9a98e3e52e5522442cd5be3538c7b3b7537a7fc9a47c
-      -   - face:f:8596878e7db3543a91d4b8c110f67f99
-          - sha256:47ce98050e3711c02c2dc813973f1f7e423392797136bc6cf3eb7996fa439b39
-      -   - face:f:93998ed9ee2b5946a638e1b51e0cbe0b
-          - sha256:6a0caf306b4cac33b5399bc434d0b49eda3c13be228de275993ac8d0333a2196
-      -   - face:f:96d6bb71a5775447b945a07e25cfb5e5
-          - sha256:2ddfe806d2ff4f9d4b301979c17567f33447ea0d4f106e6512f4133893ce3fcd
-      -   - face:f:9ca2ba46762c5f95bdef524aff6313c3
-          - sha256:1f8703b8a9415b8e408878c0e2c87c108812a55bf1d3dc188e78980fb60529bf
-      -   - face:f:a9683f1e5f745ca884b3371a1d16e905
-          - sha256:a14ddef0c281f231bf42f626b0d7aa85421870aba84aac455ea5462ad0b2e5f0
-      -   - face:f:b16506d3b4085b659a3d11e3998de231
-          - sha256:b365edb2fbee3b8235ffb1578c95e6d580e7f6291ebc242fbd8842fab7678f81
-      -   - face:f:b8beb38720245a07ab0f57fe7ceca62d
-          - sha256:930d49a0467bad3a5ae0c48736a809fff0e888cfc19dd020124f8ef967cc096b
-      -   - face:f:c5a6c8e257ee5e0caf42ad4c104c53f2
-          - sha256:c1edecaa9dbab289b3464443405e93eca6257bfbd6b7707569382f679fb1c607
-      -   - face:f:c74a32cfbbd853aab00b8adeb26cf9c5
-          - sha256:4cb2d4903b30a3ea645892ff70b1a77bb3551bf19d8887f8679027f8d31f4ac8
-      -   - face:f:d57a337f684c5b3bb4e45de19a465261
-          - sha256:6c512c32042ccfd75e063279e828856b3474983cbbf39146987ccbfdf0128bcf
-      -   - face:f:e9d31294f2a452478e5852d19cc16a83
-          - sha256:7d23ff6a751df17d707ca64e00de9adb2b3ef00a7991c9c60620087234182a8e
-      -   - face:f:f32ba9bf19925c428cc6ac003d7b77d4
-          - sha256:5aca1a69b84cbc0f3fc143af3bf81b8953e69f1d43566e7b4d033676704a316d
-    sample_ids:
-      - face:f:0a80c91ad293553c8ed70145d9c4c12c
-      - face:f:1fdae3da85fb5703a7748f23f45f74be
-      - face:f:4a85ce11fc3755dba98e8b966adfb32c
-      - face:f:4c4d62281658524e8772edb3b119e83a
-      - face:f:4c9d7bad777a52ff935457bcd4178498
-      - face:f:569a511e13e05706915749fde91150c4
-      - face:f:57d7a22e8a9a52bea0fa076302c9c8ac
-      - face:f:5ed536ea4b0951278f19f93373147f8d
-      - face:f:7747bd0d657c54909a03f23e63840929
-      - face:f:8596878e7db3543a91d4b8c110f67f99
-      - face:f:93998ed9ee2b5946a638e1b51e0cbe0b
-      - face:f:96d6bb71a5775447b945a07e25cfb5e5
-      - face:f:9ca2ba46762c5f95bdef524aff6313c3
-      - face:f:a9683f1e5f745ca884b3371a1d16e905
-      - face:f:b16506d3b4085b659a3d11e3998de231
-      - face:f:b8beb38720245a07ab0f57fe7ceca62d
-      - face:f:c5a6c8e257ee5e0caf42ad4c104c53f2
-      - face:f:c74a32cfbbd853aab00b8adeb26cf9c5
-      - face:f:d57a337f684c5b3bb4e45de19a465261
-      - face:f:e9d31294f2a452478e5852d19cc16a83
-      - face:f:f32ba9bf19925c428cc6ac003d7b77d4

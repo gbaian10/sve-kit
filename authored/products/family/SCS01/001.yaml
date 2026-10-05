@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:b3d4a148538bf00db9fde6b8096f7ac28b157f5d3577647883d02ffa41760677
 records:
   - record_key: '["product_family","SCS01"]'
     kind: product_family
     filing_key: SCS01
+    state: confirmed
     data:
       id: SCS01
       code: scs01
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: 「Special Card Selection Vol.1」
     evidence: []
-decisions:
-  - id: d:b3d4a148538bf00db9fde6b8096f7ac28b157f5d3577647883d02ffa41760677
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:b3d4a148538bf00db9fde6b8096f7ac28b157f5d3577647883d02ffa41760677
-    members:
-      -   - '["product_family","SCS01"]'
-          - sha256:e707ec3ede3e114cacc9ccb9697b8e296aed1945802f3a3b4dcb33663b2d1c10
-    sample_ids:
-      - '["product_family","SCS01"]'

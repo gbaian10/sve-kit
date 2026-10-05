@@ -1,10 +1,11 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:faed1d11ff6c7cbf05df246b59bab879df580788a946035975fb14f6fbdb8d91
 records:
   - record_key: '["product_family","PCS01"]'
     kind: product_family
     filing_key: PCS01
+    state: confirmed
+    note: 使用者：內容固定、額外販售的 Premium Card Set，歸特別商品。家族名稱用日版「プレミアムカードセット『プリンセスコネクト！Re:Dive』」；EN PCS01 是夏日卡包（Summer Edition Vol. 1），兩區內容不同，各區商品名稱照各自顯示
     data:
       id: PCS01
       code: pcs01
@@ -14,16 +15,3 @@ records:
         lang: ja
         text: プレミアムカードセット「プリンセスコネクト！Re:Dive」
     evidence: []
-decisions:
-  - id: d:faed1d11ff6c7cbf05df246b59bab879df580788a946035975fb14f6fbdb8d91
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:faed1d11ff6c7cbf05df246b59bab879df580788a946035975fb14f6fbdb8d91
-    members:
-      -   - '["product_family","PCS01"]'
-          - sha256:dcd95f2c6c609d7552122f523bb1a101054d2469241fe60fd0285b1954804f90
-    sample_ids:
-      - '["product_family","PCS01"]'
-    note: 使用者：內容固定、額外販售的 Premium Card Set，歸特別商品。家族名稱用日版「プレミアムカードセット『プリンセスコネクト！Re:Dive』」；EN PCS01 是夏日卡包（Summer Edition Vol. 1），兩區內容不同，各區商品名稱照各自顯示

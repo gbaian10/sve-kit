@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:1e3bcc1fccd7b42427469bafca645bc900d996dd37bf8c059eb8dbdf117a2ea3
 records:
   - record_key: card:c:b35328287313505bb6032ee86b9fc1a1
     kind: card
@@ -10,15 +9,3 @@ records:
       layout: single
       identity_state: confirmed
       home_set_id: EBD03
-decisions:
-  - id: d:1e3bcc1fccd7b42427469bafca645bc900d996dd37bf8c059eb8dbdf117a2ea3
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:1e3bcc1fccd7b42427469bafca645bc900d996dd37bf8c059eb8dbdf117a2ea3
-    members:
-      -   - card:c:b35328287313505bb6032ee86b9fc1a1
-          - sha256:13d41cec0a54490a82934505e85e7abf1240950e8c667cef803db046928b161a
-    sample_ids:
-      - card:c:b35328287313505bb6032ee86b9fc1a1

@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:521b9cc3e039c666335863d85cfa0151229dba5ff6afc814ef91ff9bb4f419c2
 records:
   - record_key: card_related:r:27f409369cfd59a2b01efe174dcfc317
     kind: card_related
@@ -173,21 +172,3 @@ records:
           observation_hash: sha256:7c19a28a9a278c98786705bbdd64456529512b79bd16d85664d39235b4816a4b
           rules_hash: sha256:983fa50b8103c61d83ea3c9fed95f8ab8a481ebac07094e2124099a3ce5bb558
           recipe: registry-observation-v1
-decisions:
-  - id: d:521b9cc3e039c666335863d85cfa0151229dba5ff6afc814ef91ff9bb4f419c2
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:521b9cc3e039c666335863d85cfa0151229dba5ff6afc814ef91ff9bb4f419c2
-    members:
-      -   - card_related:r:27f409369cfd59a2b01efe174dcfc317
-          - sha256:0d440be5780a6c2f308c88cd4a2b1a4ace62408e7934ae4607f5f2543c0912eb
-      -   - card_related:r:8b1900f7682350d6ac42a80f22425b85
-          - sha256:d267fe2c008bf527ce8eada09f8904911507b7e9ff546993ce9c93dba59d119f
-      -   - card_related:r:acade6ed64ac5b688c0a5244dafdef74
-          - sha256:013bb3174df2cf344463b9486aed1936daf661a1109cb4524dd0d19a00be89df
-    sample_ids:
-      - card_related:r:27f409369cfd59a2b01efe174dcfc317
-      - card_related:r:8b1900f7682350d6ac42a80f22425b85
-      - card_related:r:acade6ed64ac5b688c0a5244dafdef74

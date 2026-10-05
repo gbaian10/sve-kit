@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:b4038494bf64b7eb06911b560241851dd7f27ce38c431799ee6e5fc84bc57b34
 records:
   - record_key: card:c:359bcfd389015f2982e29f80c5152366
     kind: card
@@ -170,75 +169,3 @@ records:
       layout: single
       identity_state: confirmed
       home_set_id: GFE01
-decisions:
-  - id: d:b4038494bf64b7eb06911b560241851dd7f27ce38c431799ee6e5fc84bc57b34
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:b4038494bf64b7eb06911b560241851dd7f27ce38c431799ee6e5fc84bc57b34
-    members:
-      -   - card:c:051a4af5738e5a67a33835de82ccea2b
-          - sha256:b8ee9e2a5a4b3b047fa9be9be90e03635b8e6f97fa871dbe3c2c430f16d120f5
-      -   - card:c:082fc16f00d85018ba4a8722993e7eff
-          - sha256:e8bf7c46c3dd8704ddf7755e796dbce7458b7e2b68eb914d59dc7f8a747665dd
-      -   - card:c:0a89d1615ffc562c85e66d0711c05fe1
-          - sha256:64573e133fe857255e3c68edfaac9c5243fed3908ebb65e2f519d6ca76715707
-      -   - card:c:29fcdc3a37545a3b9f8ce12e8060ee29
-          - sha256:3324400fb13f13e4413ecd5e407e0cc8293bcbbd4668fb5a26bb43e6e0db05cf
-      -   - card:c:2cdc3c4359a95ce6969941a94eaf5d7f
-          - sha256:5c60e200a4ccc807c05784e1cd70d8e3c48c2a1e6124f618f3a848db1b9d6da0
-      -   - card:c:2da09e98179f54218133f776826b4084
-          - sha256:f48654c6d4a907c938a724e3d7a5f92b487099ed041453d34e217f0b59230d06
-      -   - card:c:345b782b2ea95ddeb5d2387905aca886
-          - sha256:699807a362c2564fbf9be2df7f5543aad7f9601d6cf73ede6df288183e6ca96c
-      -   - card:c:359bcfd389015f2982e29f80c5152366
-          - sha256:2e07199b81b8816cf8a84e822fd1c0a657d9b7fb28fd15b0b891ec5fa4103c72
-      -   - card:c:3a9acb2a492d501a9f82649c7b37944c
-          - sha256:f9fbfde54b203372db0342dd0307d1de6ef0a71b57cd4524ad3145f3efe3cdc6
-      -   - card:c:440b8e0b50bd5df8b5330f751d5e18cc
-          - sha256:4c283db7aa79a5dfcf7cf612730a754a8c8b6fad7b50af92877f3402f749c4e0
-      -   - card:c:47626d66ee915e578daa93068dc8c529
-          - sha256:8be67c00c1a340558de1c241e3bc8a2f5b471f3f82b4781d06b0b9302a52988b
-      -   - card:c:48264f83ff595af3aebcdb755f6d765a
-          - sha256:5b6da85acb7480cd67dd696c882785dae2fd9d52a7ca8c9e28c40cdfdebcb45e
-      -   - card:c:504f085673c958ac9aa4aeb9c6e89bbc
-          - sha256:f7560eff3e4fa0289c911d05f3895950f849bbd23853047f964819577433198d
-      -   - card:c:65cdec7235db56059d871403e4879a0e
-          - sha256:ce50889268972168c673cc0c118aba83aa5635000015daa378b0f6ba2f5b9f03
-      -   - card:c:6cc97ab394f05ca99b70439fdf50d0ba
-          - sha256:25b1e1e15148269669fd710e24c3eeb393bb69b66225e0d68a4d8d27851b4e3a
-      -   - card:c:6db3a51da46d515db8c1e302371b9104
-          - sha256:0e8ac13a8c138806243458714f5ec0fe111e17bfc87d7109d0413f4c3bb4ad6e
-      -   - card:c:70ce171777da52008aaa94c18bbd418a
-          - sha256:8493e3a9721c38410b2aafd853af02fc8da3014785c62528355863f71b2db657
-      -   - card:c:9750f1700a305c1f9a97595e518bf1f5
-          - sha256:ef5aa14e888d3b0e44a8a7b97c04c33f4a799e838ba3f709b7066bef7b33977a
-      -   - card:c:98a175ff131252e9a196ea48ed8faac1
-          - sha256:146f86d1f3e805364c762573bc638a878c708eb4932f0b2db22e0e7bd4a40c8c
-      -   - card:c:f404487267355cacbe046ba0946c2914
-          - sha256:784a7f7467ebe5990638ca45c61a2973fbe14c68a4807db4a10f171f9d1f7d55
-      -   - card:c:f44d1f8aaed45490933662e29140866e
-          - sha256:33a6bc98ce440a5f8f41f0c43150d8146f2bf05183de02ac0472635e5beed423
-    sample_ids:
-      - card:c:051a4af5738e5a67a33835de82ccea2b
-      - card:c:082fc16f00d85018ba4a8722993e7eff
-      - card:c:0a89d1615ffc562c85e66d0711c05fe1
-      - card:c:29fcdc3a37545a3b9f8ce12e8060ee29
-      - card:c:2cdc3c4359a95ce6969941a94eaf5d7f
-      - card:c:2da09e98179f54218133f776826b4084
-      - card:c:345b782b2ea95ddeb5d2387905aca886
-      - card:c:359bcfd389015f2982e29f80c5152366
-      - card:c:3a9acb2a492d501a9f82649c7b37944c
-      - card:c:440b8e0b50bd5df8b5330f751d5e18cc
-      - card:c:47626d66ee915e578daa93068dc8c529
-      - card:c:48264f83ff595af3aebcdb755f6d765a
-      - card:c:504f085673c958ac9aa4aeb9c6e89bbc
-      - card:c:65cdec7235db56059d871403e4879a0e
-      - card:c:6cc97ab394f05ca99b70439fdf50d0ba
-      - card:c:6db3a51da46d515db8c1e302371b9104
-      - card:c:70ce171777da52008aaa94c18bbd418a
-      - card:c:9750f1700a305c1f9a97595e518bf1f5
-      - card:c:98a175ff131252e9a196ea48ed8faac1
-      - card:c:f404487267355cacbe046ba0946c2914
-      - card:c:f44d1f8aaed45490933662e29140866e

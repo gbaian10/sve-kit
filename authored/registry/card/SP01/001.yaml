@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:2f927dc4f2dee9c2c987f38107b9899940bfc53b1a0ead994f769f6d0ff909d8
 records:
   - record_key: card:c:a31d3387d8845172ae5c62a1b54acb16
     kind: card
@@ -42,27 +41,3 @@ records:
       layout: single
       identity_state: confirmed
       home_set_id: SP01
-decisions:
-  - id: d:2f927dc4f2dee9c2c987f38107b9899940bfc53b1a0ead994f769f6d0ff909d8
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:2f927dc4f2dee9c2c987f38107b9899940bfc53b1a0ead994f769f6d0ff909d8
-    members:
-      -   - card:c:3df730eb1f9c525a9ea9456f4a739294
-          - sha256:ee9e883302a829d61db24929d29d14fd80b9df91754f48a99a5f140e771249de
-      -   - card:c:4d4c8839b4dd521eb15a6046a3d52ee2
-          - sha256:eec3e40a2d98bfc1a0d3ea124c9bc7f309c98d9ae6ce91c79919683151750b11
-      -   - card:c:70a6fa0385e25032bdc95d2b5185a905
-          - sha256:a9d6fa649375cd1b6111a5ed380b98dcc5468bda6b6ac2bbd36e550eb5f2cfca
-      -   - card:c:a31d3387d8845172ae5c62a1b54acb16
-          - sha256:4298fbb2467cbfdc9342910fb372970378f412aa112cd4417f1870ee92c5bc47
-      -   - card:c:a6db1a5133955fb895f07115494a7345
-          - sha256:aad71cba74ba5704dbb7c6f05e47278ed86fbc6cacc251c8bff75b7362781c6e
-    sample_ids:
-      - card:c:3df730eb1f9c525a9ea9456f4a739294
-      - card:c:4d4c8839b4dd521eb15a6046a3d52ee2
-      - card:c:70a6fa0385e25032bdc95d2b5185a905
-      - card:c:a31d3387d8845172ae5c62a1b54acb16
-      - card:c:a6db1a5133955fb895f07115494a7345

@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:1431ebc0bda0de86b68c50d4d98a18b751fa7328d8816491ed8a65d89d24d1ff
 records:
   - record_key: '["product_family","BP03"]'
     kind: product_family
     filing_key: BP03
+    state: confirmed
     data:
       id: BP03
       code: bp03
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」
     evidence: []
-decisions:
-  - id: d:1431ebc0bda0de86b68c50d4d98a18b751fa7328d8816491ed8a65d89d24d1ff
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:1431ebc0bda0de86b68c50d4d98a18b751fa7328d8816491ed8a65d89d24d1ff
-    members:
-      -   - '["product_family","BP03"]'
-          - sha256:949a13e857f761f98da28e5e4c9c3472ba456f465f47ca1490cc4544a416508a
-    sample_ids:
-      - '["product_family","BP03"]'

@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:bdc8cd1f2313c1bca1f157db35672f80d3e7d06557ebb47e295f31ab9246c30c
 records:
   - record_key: '["product_family","CP03"]'
     kind: product_family
     filing_key: CP03
+    state: confirmed
     data:
       id: CP03
       code: cp03
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: コラボパック「カードファイト!! ヴァンガード」
     evidence: []
-decisions:
-  - id: d:bdc8cd1f2313c1bca1f157db35672f80d3e7d06557ebb47e295f31ab9246c30c
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:bdc8cd1f2313c1bca1f157db35672f80d3e7d06557ebb47e295f31ab9246c30c
-    members:
-      -   - '["product_family","CP03"]'
-          - sha256:cc5e2fcd9d33b1c0c4e955ec2e6b30d900a68d00ae9b67cd102a13f422b9531f
-    sample_ids:
-      - '["product_family","CP03"]'

@@ -1,10 +1,11 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:14df9afe714ae6e235896913fa4fbf57b4d37c685c8f08626f49769e95093d55
 records:
   - record_key: '["product_family","BP13"]'
     kind: product_family
     filing_key: BP13
+    state: confirmed
+    note: 使用者：EN 為合併包（Combined Set），在家族附商品連結即可
     data:
       id: BP13
       code: bp13
@@ -14,16 +15,3 @@ records:
         lang: ja
         text: ブースターパック第13弾「暗黒降誕」
     evidence: []
-decisions:
-  - id: d:14df9afe714ae6e235896913fa4fbf57b4d37c685c8f08626f49769e95093d55
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:14df9afe714ae6e235896913fa4fbf57b4d37c685c8f08626f49769e95093d55
-    members:
-      -   - '["product_family","BP13"]'
-          - sha256:917d15bce73b70b3c4f58259cadce2a3475cfda242072cf0c988a3702fd4df0d
-    sample_ids:
-      - '["product_family","BP13"]'
-    note: 使用者：EN 為合併包（Combined Set），在家族附商品連結即可

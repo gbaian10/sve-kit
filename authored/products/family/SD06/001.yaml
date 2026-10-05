@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:764a77144f394ae183181002eca6b0b7e07cd9092e5e9feffa23fe3e6169e1e2
 records:
   - record_key: '["product_family","SD06"]'
     kind: product_family
     filing_key: SD06
+    state: confirmed
     data:
       id: SD06
       code: sd06
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: スターターデッキ第6弾「穢れし洗礼」
     evidence: []
-decisions:
-  - id: d:764a77144f394ae183181002eca6b0b7e07cd9092e5e9feffa23fe3e6169e1e2
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:764a77144f394ae183181002eca6b0b7e07cd9092e5e9feffa23fe3e6169e1e2
-    members:
-      -   - '["product_family","SD06"]'
-          - sha256:765b157334e83ced5d0552bfabb266821a4726a0ebe4cfb0a5d8ad699c9c9787
-    sample_ids:
-      - '["product_family","SD06"]'

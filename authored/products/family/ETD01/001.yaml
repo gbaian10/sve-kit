@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:5b8ee82c89478fbe85f1850f68b5c9afb377419ea964d6e7692dc50f665e3b3d
 records:
   - record_key: '["product_family","ETD01"]'
     kind: product_family
     filing_key: ETD01
+    state: confirmed
     data:
       id: ETD01
       code: etd01
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: エントリーデッキシャドウバースＦ第1弾「天竜ライト」
     evidence: []
-decisions:
-  - id: d:5b8ee82c89478fbe85f1850f68b5c9afb377419ea964d6e7692dc50f665e3b3d
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:5b8ee82c89478fbe85f1850f68b5c9afb377419ea964d6e7692dc50f665e3b3d
-    members:
-      -   - '["product_family","ETD01"]'
-          - sha256:e9c41c065eb0dc80743610d63503cf2176dfa775aa09237aae1bb4d36e138155
-    sample_ids:
-      - '["product_family","ETD01"]'

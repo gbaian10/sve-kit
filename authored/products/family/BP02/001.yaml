@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:3429019e25023d39f0a27eb0f06f6baf438f5670c9f12ee29e1dc7a85fdd586c
 records:
   - record_key: '["product_family","BP02"]'
     kind: product_family
     filing_key: BP02
+    state: confirmed
     data:
       id: BP02
       code: bp02
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: ブースターパック第2弾「黒銀のバハムート」
     evidence: []
-decisions:
-  - id: d:3429019e25023d39f0a27eb0f06f6baf438f5670c9f12ee29e1dc7a85fdd586c
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:3429019e25023d39f0a27eb0f06f6baf438f5670c9f12ee29e1dc7a85fdd586c
-    members:
-      -   - '["product_family","BP02"]'
-          - sha256:83a86d7bcea7af726c0af7411c9fa786c8e53c0700acc5999fd06b3ccbd92885
-    sample_ids:
-      - '["product_family","BP02"]'

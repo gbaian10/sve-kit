@@ -1,10 +1,11 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:848db23528e96340e6478079f2ed611cd6bf61710d07a37e5aa720417bd1bb3d
 records:
   - record_key: '["product_family","DSD01b"]'
     kind: product_family
     filing_key: DSD01b
+    state: confirmed
+    note: 使用者：預組（DXスターターデッキ）。代號在卡號上；部分卡的 EN 版收錄在 BP09（見卡號對照）
     data:
       id: DSD01b
       code: dsd01b
@@ -14,16 +15,3 @@ records:
         lang: ja
         text: DXスターターデッキ「学院に咲く双華」「武なる雷鳴」
     evidence: []
-decisions:
-  - id: d:848db23528e96340e6478079f2ed611cd6bf61710d07a37e5aa720417bd1bb3d
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:848db23528e96340e6478079f2ed611cd6bf61710d07a37e5aa720417bd1bb3d
-    members:
-      -   - '["product_family","DSD01b"]'
-          - sha256:bedd4d580beead187a1b1438b4cfc563e59623bcd9a4be37bde561aab0310853
-    sample_ids:
-      - '["product_family","DSD01b"]'
-    note: 使用者：預組（DXスターターデッキ）。代號在卡號上；部分卡的 EN 版收錄在 BP09（見卡號對照）

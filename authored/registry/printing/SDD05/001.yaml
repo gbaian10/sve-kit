@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:eaf63cb3f951512b23daf68805743f628659e879d8c1907d62843a8219c19835
 records:
   - record_key: printing:p:18d7980a39f352d48af0441a9ba646fc
     kind: printing
@@ -646,81 +645,3 @@ records:
           observation_hash: sha256:d0df873e44159d241d7ba8eb8843ac93661640f2ff1abd466c5e7b8c4d17c861
           rules_hash: sha256:16edbb868a4b8f02e68301c9fd64b6174693c610d4ea7dc61c3b0a5b3e0f14c2
           recipe: registry-observation-v1
-decisions:
-  - id: d:eaf63cb3f951512b23daf68805743f628659e879d8c1907d62843a8219c19835
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:eaf63cb3f951512b23daf68805743f628659e879d8c1907d62843a8219c19835
-    members:
-      -   - printing:p:05e3677dc6d153aea875cef2a99689eb
-          - sha256:e883b9d3ff48fb744dcb1cc7913ef97c57889b74ce53daf1ed0dc53b9946c907
-      -   - printing:p:17f2a5da53f858859514a20f9b8bccde
-          - sha256:8f7b9f0f84adc0054186a008defe1fa638e15d14479c37bec0843ccebacd90fe
-      -   - printing:p:183c69c2af8a5272ad0ea880ff5bf3b3
-          - sha256:3c31f5fc06d2657ca828bb471171efa8bb2e93060e91e4bb0298f17948ec26fc
-      -   - printing:p:18d7980a39f352d48af0441a9ba646fc
-          - sha256:26676ce27e5aa893c37c612d36b0d11da566bc4aaea23be0a550171daada7c64
-      -   - printing:p:1a7786b29fa55aa4ab2c4ff578d5faa8
-          - sha256:3324d84ae74a579409ff80046a4abeede1864eb192916539da64c9ed24c9803c
-      -   - printing:p:1d24497e49ad5c6b8a317d4157ea845d
-          - sha256:3e71944cd3c106f023951540ddc8c12e87317cc5677f96dbd43bd2e6438537e5
-      -   - printing:p:2cefbabecf4351eeab2c0dd45c4a1848
-          - sha256:bf6a4598769997768e966a7fad4e51646c626d6ab5291f31b5338043fc82007a
-      -   - printing:p:31bbfeeeb2ad5b22bc675628c15aece4
-          - sha256:13e09af62d0003c2f16ded63e48387aaab1c1e73e1bb70e3a5b1278cae882f1d
-      -   - printing:p:372b3acc9b005f519bb90586a4ef4b81
-          - sha256:14050d9663a6da1bfbed7d4d06e3bd465666cf307af5ef6b56cc3a1fe49fabec
-      -   - printing:p:4659b79737ac5af0974791ed3e3e59cb
-          - sha256:35ee17c2df83ab25fbc998effe4697afdab3d7b6757aa92072d9c8581d019840
-      -   - printing:p:4fa45e576f3c5a15b8bc2f41b79cf7d6
-          - sha256:3e6cdb7369d668974327dcc01ee5f06f7bd7292ae8ec3f42f674e1fd1bf39611
-      -   - printing:p:527b8980656751e5a567b173ce2fbf65
-          - sha256:378dbf90dfcdcca582f316781209a37e0d0d089358f81a2cec9ad6b37e31eee0
-      -   - printing:p:70c7e01cf4815d848068aff624fb7cf2
-          - sha256:e217144f1127f74972b70829e6e9a735a5b892c82bc611d7c32617603e5f41c3
-      -   - printing:p:7153871473125bf9b71e73a0b7ef1a3f
-          - sha256:989aeb72e356d166b1f5863b862bef6f3033d71eeba07a6c1cff6262999b0bed
-      -   - printing:p:74981901f6af588bae13f302c5dc77cb
-          - sha256:aa843ee77a206bf80f8cd3f1bc4724299ce254dcf8f5aac3efdc7df4c87fab21
-      -   - printing:p:81838b852f79539983a08c74e007b155
-          - sha256:b12c9e829162cdc56d6db2e41a32bf9d43c0dbf812b241667cc5dc9d6112657c
-      -   - printing:p:94ec201aa4375a169e50298129f2af33
-          - sha256:451a61309d8eed7d76a439df0dd33f467b470750bcebe0485f58b86ade21fcdc
-      -   - printing:p:aaa00d7e5b7f5a5cb53544efb723a367
-          - sha256:06a6eabbb4a74ed53a48ba2fe0bba51f2c815069d6079d319a66b9f099aa6d5f
-      -   - printing:p:b7500f9d16d45a11a915e791fa52e0c0
-          - sha256:bd8c8081e73c56b2d796c3f45303a1702fc9d01782e27ca112495659f6c07617
-      -   - printing:p:d6c378d77f335b1fb8198bbd4ffe9563
-          - sha256:ee7f87805a6ad55de48bd818beeab0f054e45ba93b8b1b759b4e0343ad283e1f
-      -   - printing:p:d8e6a546025157e5b18219f440f81237
-          - sha256:2cf4258397cd414bd9f28bf57603bf7d169c6689e95db522c879125d179cb9b1
-      -   - printing:p:e53513c1fb0f5dea81611ccf88a6e6de
-          - sha256:ed32a67a9010df390092319c226c339919b82fa7df31069e6e86df91e7a72f07
-      -   - printing:p:ecf2e990eb875e3e8e3bd3e59fa5ee23
-          - sha256:610c6048f858cf03309c7c4b00b3b0e22f4da24c7ff5519719c0bd397d47ba5b
-    sample_ids:
-      - printing:p:05e3677dc6d153aea875cef2a99689eb
-      - printing:p:17f2a5da53f858859514a20f9b8bccde
-      - printing:p:183c69c2af8a5272ad0ea880ff5bf3b3
-      - printing:p:18d7980a39f352d48af0441a9ba646fc
-      - printing:p:1a7786b29fa55aa4ab2c4ff578d5faa8
-      - printing:p:1d24497e49ad5c6b8a317d4157ea845d
-      - printing:p:2cefbabecf4351eeab2c0dd45c4a1848
-      - printing:p:31bbfeeeb2ad5b22bc675628c15aece4
-      - printing:p:372b3acc9b005f519bb90586a4ef4b81
-      - printing:p:4659b79737ac5af0974791ed3e3e59cb
-      - printing:p:4fa45e576f3c5a15b8bc2f41b79cf7d6
-      - printing:p:527b8980656751e5a567b173ce2fbf65
-      - printing:p:70c7e01cf4815d848068aff624fb7cf2
-      - printing:p:7153871473125bf9b71e73a0b7ef1a3f
-      - printing:p:74981901f6af588bae13f302c5dc77cb
-      - printing:p:81838b852f79539983a08c74e007b155
-      - printing:p:94ec201aa4375a169e50298129f2af33
-      - printing:p:aaa00d7e5b7f5a5cb53544efb723a367
-      - printing:p:b7500f9d16d45a11a915e791fa52e0c0
-      - printing:p:d6c378d77f335b1fb8198bbd4ffe9563
-      - printing:p:d8e6a546025157e5b18219f440f81237
-      - printing:p:e53513c1fb0f5dea81611ccf88a6e6de
-      - printing:p:ecf2e990eb875e3e8e3bd3e59fa5ee23

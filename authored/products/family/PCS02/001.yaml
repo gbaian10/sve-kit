@@ -1,10 +1,11 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:941279c5bd1ae0d05cb57a378975deb5adf65336241afb28f21ab053e201bb71
 records:
   - record_key: '["product_family","PCS02"]'
     kind: product_family
     filing_key: PCS02
+    state: confirmed
+    note: 使用者：內容固定的 Premium Card Set，歸特別商品。家族名稱用日版「プレミアムカードセット『サマーエディションvol.1』」；同一批卡的 EN 版卡號為 PCS01-001EN～003EN
     data:
       id: PCS02
       code: pcs02
@@ -14,16 +15,3 @@ records:
         lang: ja
         text: プレミアムカードセット「サマーエディションvol.1」
     evidence: []
-decisions:
-  - id: d:941279c5bd1ae0d05cb57a378975deb5adf65336241afb28f21ab053e201bb71
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:941279c5bd1ae0d05cb57a378975deb5adf65336241afb28f21ab053e201bb71
-    members:
-      -   - '["product_family","PCS02"]'
-          - sha256:53a0ba6e8edeae5be11835d595b8cbb148eaa28a87b3652264aac1a1d8a04db6
-    sample_ids:
-      - '["product_family","PCS02"]'
-    note: 使用者：內容固定的 Premium Card Set，歸特別商品。家族名稱用日版「プレミアムカードセット『サマーエディションvol.1』」；同一批卡的 EN 版卡號為 PCS01-001EN～003EN

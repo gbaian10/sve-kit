@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:845d79e7536d01e6829e06e0b22d292b5c94763e7f667e73c01eed1554d7d38c
 records:
   - record_key: '["product_family","LCS01"]'
     kind: product_family
     filing_key: LCS01
+    state: confirmed
     data:
       id: LCS01
       code: lcs01
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: 'リーダーカードセット 「Shadowverse: Worlds Beyond」'
     evidence: []
-decisions:
-  - id: d:845d79e7536d01e6829e06e0b22d292b5c94763e7f667e73c01eed1554d7d38c
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:845d79e7536d01e6829e06e0b22d292b5c94763e7f667e73c01eed1554d7d38c
-    members:
-      -   - '["product_family","LCS01"]'
-          - sha256:9fabeb24a5fa745b7909eafcc5316faf90cf318b40571f1e50efeff7e258c6d0
-    sample_ids:
-      - '["product_family","LCS01"]'

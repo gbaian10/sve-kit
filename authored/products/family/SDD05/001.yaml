@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:47b28066c5e08380f3eda99a8ebef4b3fa42927e377846d90fedb856d911c582
 records:
   - record_key: '["product_family","SDD05"]'
     kind: product_family
     filing_key: SDD05
+    state: confirmed
     data:
       id: SDD05
       code: sdd05
@@ -14,15 +14,3 @@ records:
         lang: en
         text: 'Showdown Deck: Abysscraft'
     evidence: []
-decisions:
-  - id: d:47b28066c5e08380f3eda99a8ebef4b3fa42927e377846d90fedb856d911c582
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:47b28066c5e08380f3eda99a8ebef4b3fa42927e377846d90fedb856d911c582
-    members:
-      -   - '["product_family","SDD05"]'
-          - sha256:e537e0e23969447089307d4c91b2a322e4dbfc2c6aa652472dce43ec01053b2b
-    sample_ids:
-      - '["product_family","SDD05"]'

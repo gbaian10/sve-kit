@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:2303cc06a36b55571c85413f299a695c2a7552b21edc6fb36b4de1d573e140f6
 records:
   - record_key: printing:p:e720e960b1c654b6a9c017a354e2328d
     kind: printing
@@ -198,33 +197,3 @@ records:
           observation_hash: sha256:ab2a6589c80e134fb7e6e8bacaa56c5e6f9decdeaf045b339874bc68a423efec
           rules_hash: sha256:6ce9cbfc38b3ad50d2364cb72301e9b798937129723fe8e065860c4e8566e861
           recipe: registry-observation-v1
-decisions:
-  - id: d:2303cc06a36b55571c85413f299a695c2a7552b21edc6fb36b4de1d573e140f6
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:2303cc06a36b55571c85413f299a695c2a7552b21edc6fb36b4de1d573e140f6
-    members:
-      -   - printing:p:03331b02dd2458838aa31ba65928e197
-          - sha256:e04991a9b4764657f369295d1c6d14786e9946b3a2d3dc50e2214372e702608c
-      -   - printing:p:22997778b37757e595f893319d510fcc
-          - sha256:95cb6772496464220a59793891c06c825fa90fb7f0abcd7fb123d91ed012100d
-      -   - printing:p:5a680b6ffe555273870adabcd1c38b97
-          - sha256:6a4ca2b4193d429c54231029a63e05d0e6648f657e1161d53cf0cb6b720ffb51
-      -   - printing:p:7f94bbefea0b5c45bf6abef6303b543d
-          - sha256:c6668f886ac67fb054047f1287ceb5deaeaa3fa35f82854e29528a76b0705a74
-      -   - printing:p:8cf49129800a50eebae0b8ee20f66507
-          - sha256:850f16457546915f094da7d8520945ab15965c2c946fa36287f04c7413259add
-      -   - printing:p:92386851bd5e553ea3b7b3b9403f0ab4
-          - sha256:84a35d8e5da5b2d069805a4a763474e0b314ca25dcfcd5bdea6e3d103462dea0
-      -   - printing:p:e720e960b1c654b6a9c017a354e2328d
-          - sha256:b302bc6408de8b49f854920cf0862581640fc8227c4ca223d6cdd87012ede535
-    sample_ids:
-      - printing:p:03331b02dd2458838aa31ba65928e197
-      - printing:p:22997778b37757e595f893319d510fcc
-      - printing:p:5a680b6ffe555273870adabcd1c38b97
-      - printing:p:7f94bbefea0b5c45bf6abef6303b543d
-      - printing:p:8cf49129800a50eebae0b8ee20f66507
-      - printing:p:92386851bd5e553ea3b7b3b9403f0ab4
-      - printing:p:e720e960b1c654b6a9c017a354e2328d

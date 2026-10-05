@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:62f3483e507fee279e6385471e675cb6b5ea94a2cee4131348c7e3bd7710fd3e
 records:
   - record_key: '["product_family","SS01"]'
     kind: product_family
     filing_key: SS01
+    state: confirmed
     data:
       id: SS01
       code: ss01
@@ -14,15 +14,3 @@ records:
         lang: en
         text: Worlds Beyond Swordcraft Starter Set
     evidence: []
-decisions:
-  - id: d:62f3483e507fee279e6385471e675cb6b5ea94a2cee4131348c7e3bd7710fd3e
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:62f3483e507fee279e6385471e675cb6b5ea94a2cee4131348c7e3bd7710fd3e
-    members:
-      -   - '["product_family","SS01"]'
-          - sha256:48ecd023759b76e2f8c9a3c8cf1ee585124d4b020b9965a7f6ffcace769f81af
-    sample_ids:
-      - '["product_family","SS01"]'

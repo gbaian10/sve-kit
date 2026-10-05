@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:aea48ef0537985c988ad891a0fc365cf6d8aeb09acb749d3bcc01afff73b0688
 records:
   - record_key: source_correction:x:95684aa0cb8059e49c425bac82293f09
     kind: source_correction
@@ -71,21 +70,3 @@ records:
           image_src: /wordpress/wp-content/images/cardlist/PR/pr-114.png
           region: jp
           locator: Card rules text box
-decisions:
-  - id: d:aea48ef0537985c988ad891a0fc365cf6d8aeb09acb749d3bcc01afff73b0688
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:aea48ef0537985c988ad891a0fc365cf6d8aeb09acb749d3bcc01afff73b0688
-    members:
-      -   - source_correction:x:95684aa0cb8059e49c425bac82293f09
-          - sha256:ea9f84117a1802a9fe21c11b8fba378cc6695ffdd2ad8fd16bb94e0d532d95d8
-      -   - source_correction:x:9ad87765dec35da1baefc68fbdd3b332
-          - sha256:124fd779dedba3fc39f615cdc0518f0ddd0b0822cc2aa57ada02b45718629db0
-      -   - source_correction:x:d8a9c3a94e465f08996614d65049600d
-          - sha256:b6c614d4deeb77bd77c4be198a7cfa57a7be03ffa87b0b9d33b7cfae14ab9cdc
-    sample_ids:
-      - source_correction:x:95684aa0cb8059e49c425bac82293f09
-      - source_correction:x:9ad87765dec35da1baefc68fbdd3b332
-      - source_correction:x:d8a9c3a94e465f08996614d65049600d

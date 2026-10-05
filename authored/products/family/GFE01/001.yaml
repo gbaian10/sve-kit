@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:5339b84c37707dd64254f605502fe7655dcbadbe59c7982148d382a062fc8b7f
 records:
   - record_key: '["product_family","GFE01"]'
     kind: product_family
     filing_key: GFE01
+    state: confirmed
     data:
       id: GFE01
       code: gfe01
@@ -14,15 +14,3 @@ records:
         lang: en
         text: Gloryfinder Events Vol. 1
     evidence: []
-decisions:
-  - id: d:5339b84c37707dd64254f605502fe7655dcbadbe59c7982148d382a062fc8b7f
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:5339b84c37707dd64254f605502fe7655dcbadbe59c7982148d382a062fc8b7f
-    members:
-      -   - '["product_family","GFE01"]'
-          - sha256:4b2309f54fd2bb9a185e04c53837a28256bcb6186a707bb423c29bf54ffb643b
-    sample_ids:
-      - '["product_family","GFE01"]'

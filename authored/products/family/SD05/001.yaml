@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:1231feef72da6772b124b2f4a92431d27ab84209d5089ce565446316ca66a540
 records:
   - record_key: '["product_family","SD05"]'
     kind: product_family
     filing_key: SD05
+    state: confirmed
     data:
       id: SD05
       code: sd05
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: スターターデッキ第5弾「永久なる定め」
     evidence: []
-decisions:
-  - id: d:1231feef72da6772b124b2f4a92431d27ab84209d5089ce565446316ca66a540
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:1231feef72da6772b124b2f4a92431d27ab84209d5089ce565446316ca66a540
-    members:
-      -   - '["product_family","SD05"]'
-          - sha256:5da1d536bb70a512e37f0e3a52ab8f45f2360bf30fddc5c4d67215210a6f1d37
-    sample_ids:
-      - '["product_family","SD05"]'

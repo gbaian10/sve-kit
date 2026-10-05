@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:39503ac09363dab6cddcbc4b4f8c8cfb12b2accf39b812bd5cd46b7d6d6b8e68
 records:
   - record_key: '["product_family","SD08"]'
     kind: product_family
     filing_key: SD08
+    state: confirmed
     data:
       id: SD08
       code: sd08
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: スターターデッキ「燃え尽きぬ炎」
     evidence: []
-decisions:
-  - id: d:39503ac09363dab6cddcbc4b4f8c8cfb12b2accf39b812bd5cd46b7d6d6b8e68
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:39503ac09363dab6cddcbc4b4f8c8cfb12b2accf39b812bd5cd46b7d6d6b8e68
-    members:
-      -   - '["product_family","SD08"]'
-          - sha256:ec6cb774334b0526dd53c93b00370afca0e4e72064c92808b26956e89f2b0414
-    sample_ids:
-      - '["product_family","SD08"]'

@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:47796d595c9161728a3b23a9470b08eca668db23b970a5f6f8c917891547b54b
 records:
   - record_key: '["product_family","BP18"]'
     kind: product_family
     filing_key: BP18
+    state: confirmed
     data:
       id: BP18
       code: bp18
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: ブースターパック「新約都市・透京」
     evidence: []
-decisions:
-  - id: d:47796d595c9161728a3b23a9470b08eca668db23b970a5f6f8c917891547b54b
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:47796d595c9161728a3b23a9470b08eca668db23b970a5f6f8c917891547b54b
-    members:
-      -   - '["product_family","BP18"]'
-          - sha256:a6c302bb30a2da2eb3929899b766ceca8170af5afe9197e5f57e3f1094ad4194
-    sample_ids:
-      - '["product_family","BP18"]'

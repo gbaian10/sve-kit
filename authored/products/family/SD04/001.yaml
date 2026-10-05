@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:327fffed307e83e4387feca17d7831088594af0849bbbc89cea09fe516595e78
 records:
   - record_key: '["product_family","SD04"]'
     kind: product_family
     filing_key: SD04
+    state: confirmed
     data:
       id: SD04
       code: sd04
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: スターターデッキ第4弾「蛇竜の爪牙」
     evidence: []
-decisions:
-  - id: d:327fffed307e83e4387feca17d7831088594af0849bbbc89cea09fe516595e78
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:327fffed307e83e4387feca17d7831088594af0849bbbc89cea09fe516595e78
-    members:
-      -   - '["product_family","SD04"]'
-          - sha256:7464a4f4d7356758e9e6862b326bc0ceb5b8d43993cb741dc884657c6f715e12
-    sample_ids:
-      - '["product_family","SD04"]'

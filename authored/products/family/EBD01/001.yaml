@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:7a77ffcf0fe01dfd4c708892ae98bb83d8835fdfb3e12a77d9c69914780a4f7d
 records:
   - record_key: '["product_family","EBD01"]'
     kind: product_family
     filing_key: EBD01
+    state: confirmed
     data:
       id: EBD01
       code: ebd01
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: EXビギナーデッキ「エルフ」
     evidence: []
-decisions:
-  - id: d:7a77ffcf0fe01dfd4c708892ae98bb83d8835fdfb3e12a77d9c69914780a4f7d
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:7a77ffcf0fe01dfd4c708892ae98bb83d8835fdfb3e12a77d9c69914780a4f7d
-    members:
-      -   - '["product_family","EBD01"]'
-          - sha256:14a8c6e90bc0a3b8f1c2da0ce92cdf67913061e62bdc6379ea5e35c38dd35f2c
-    sample_ids:
-      - '["product_family","EBD01"]'

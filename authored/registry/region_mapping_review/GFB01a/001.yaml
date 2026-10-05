@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:f0fc5efb9c7cede66a6b20b6d95ef6884d4557126a88f540a028656079d134f2
 records:
   - record_key: region_mapping_review:c:350f1491757a5aeea5e903732096ef02
     kind: region_mapping_review
@@ -294,63 +293,3 @@ records:
           observation_hash: sha256:cf7ddd3e5250188ef37ff52b5b76974e98e481f05aa96a18eed64e83aec5d811
           rules_hash: sha256:dda836740783da8322ded140b9df37f7efec3cb914d0a7307d5b1547e5720834
           recipe: registry-observation-v1
-decisions:
-  - id: d:f0fc5efb9c7cede66a6b20b6d95ef6884d4557126a88f540a028656079d134f2
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:f0fc5efb9c7cede66a6b20b6d95ef6884d4557126a88f540a028656079d134f2
-    members:
-      -   - region_mapping_review:c:04e2f74691dd56f68de8fcfd7e270f33
-          - sha256:19881e877c8c2a53c80da9e45f05eaa6b4f59b55b38f94f4c35e132e7b7675ff
-      -   - region_mapping_review:c:0a0c6b422f2f52e6834510a3e44f7ea8
-          - sha256:c4ae979f42773d1e7776c74664f0860c1ee668b1f7d4848d01da4d17f9657999
-      -   - region_mapping_review:c:221e81b981ca574bb53d16fe78aaa700
-          - sha256:750e79d9d73a6f84d31ba25416b8033259b7d79f373adad26eb1e4bf6dd8f775
-      -   - region_mapping_review:c:350f1491757a5aeea5e903732096ef02
-          - sha256:59b46349b7c2e6794a247f840023f6cd4da8fb4528769f3009aac0295f1faaf5
-      -   - region_mapping_review:c:3ffe7dad46d1550fafa6d9cbd151245a
-          - sha256:43a3d06d46c68e9c54daaa6609c3d618e9fe6343e2ce9ebd7a1c82c247e4229e
-      -   - region_mapping_review:c:598af1a499aa53c3b330afed184dbdda
-          - sha256:f7e9ff6d84d1b4706163c3392736d5b70832d27b128cc781436f455cd24a4eca
-      -   - region_mapping_review:c:6cc635019ab8511f90104b42ac0b7254
-          - sha256:07e5f034363ecf125e29324f85117f403184dd65020dcff2eef7da76a504a60a
-      -   - region_mapping_review:c:734b5e7661e6520cb94c989e33e15a58
-          - sha256:e7358337da7f5876a79aee73b3ab9d06f33ee60ea740e984099fe311aa41bfd7
-      -   - region_mapping_review:c:8781ddabe6b6554bb59ed01f553e7990
-          - sha256:dd5e6c9f797b8497f579639990a8992028e49f665fa9340957b8018ebd203995
-      -   - region_mapping_review:c:9963aee7cb5658d8ba2d4e0e3134c018
-          - sha256:fd158732909b45776ec2bb0c9894cf4034f0d0a896d7fb17e3f07169a8755f86
-      -   - region_mapping_review:c:b0c216ee62fa5784a9ad0c58a5b88273
-          - sha256:7253c7a6472f34207907c86be2ced71e38073bbb130761377de1654844e35100
-      -   - region_mapping_review:c:b50e6330c89e54ea86247c6c43fa43e8
-          - sha256:800946f036c7f342a6c2931d62659317960cc0dff1c7760b603d04160bddf9f4
-      -   - region_mapping_review:c:b8a8a17184dc57f0b684af970832f9b0
-          - sha256:e458d76282556ff1c8c415add0cc8871b7e37dffabb5eaeeb5403655e0a36881
-      -   - region_mapping_review:c:c709ad1f8169559aa00ce295618a7028
-          - sha256:019aaec4227b3df598fd22f34571b59cdf881f3834b0bc37848a77f83b521a93
-      -   - region_mapping_review:c:c75174f8443e515e9b3ddb22ce1e0ca4
-          - sha256:29838920302e7aac078d3c93eb08ee7f0c930985c782cc553cadeb8cdd606e25
-      -   - region_mapping_review:c:d8ee9156d3d05a9685c1fdb193692554
-          - sha256:08930f6a363b9bd7fdfe60e14378d63f18b2bca8398c50a9271bc9293a0cc430
-      -   - region_mapping_review:c:eacaa53248a1541ca97df4e54e5fc0a5
-          - sha256:55167c21dff5eb59140dfb70183701f1bae9d8cd32215a18e025643e4981a8c5
-    sample_ids:
-      - region_mapping_review:c:04e2f74691dd56f68de8fcfd7e270f33
-      - region_mapping_review:c:0a0c6b422f2f52e6834510a3e44f7ea8
-      - region_mapping_review:c:221e81b981ca574bb53d16fe78aaa700
-      - region_mapping_review:c:350f1491757a5aeea5e903732096ef02
-      - region_mapping_review:c:3ffe7dad46d1550fafa6d9cbd151245a
-      - region_mapping_review:c:598af1a499aa53c3b330afed184dbdda
-      - region_mapping_review:c:6cc635019ab8511f90104b42ac0b7254
-      - region_mapping_review:c:734b5e7661e6520cb94c989e33e15a58
-      - region_mapping_review:c:8781ddabe6b6554bb59ed01f553e7990
-      - region_mapping_review:c:9963aee7cb5658d8ba2d4e0e3134c018
-      - region_mapping_review:c:b0c216ee62fa5784a9ad0c58a5b88273
-      - region_mapping_review:c:b50e6330c89e54ea86247c6c43fa43e8
-      - region_mapping_review:c:b8a8a17184dc57f0b684af970832f9b0
-      - region_mapping_review:c:c709ad1f8169559aa00ce295618a7028
-      - region_mapping_review:c:c75174f8443e515e9b3ddb22ce1e0ca4
-      - region_mapping_review:c:d8ee9156d3d05a9685c1fdb193692554
-      - region_mapping_review:c:eacaa53248a1541ca97df4e54e5fc0a5

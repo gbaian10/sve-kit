@@ -1,10 +1,11 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:0e493dce69a7d2cf55c3ad0f0b183f60f66c83a31cbc3d9ce0a97a30cbcf813d
 records:
   - record_key: '["product_family","SP01"]'
     kind: product_family
     filing_key: SP01
+    state: confirmed
+    note: 使用者：隨機抽的特殊卡包（泳裝系列，商業價值高），新類型「特殊卡包」special_pack，放主要分類（不是補充包／合作／PR）。需先在規格與 schema 新增此 kind
     data:
       id: SP01
       code: sp01
@@ -14,16 +15,3 @@ records:
         lang: ja
         text: スペシャルパック「シーサイド・メモリーズ」
     evidence: []
-decisions:
-  - id: d:0e493dce69a7d2cf55c3ad0f0b183f60f66c83a31cbc3d9ce0a97a30cbcf813d
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:0e493dce69a7d2cf55c3ad0f0b183f60f66c83a31cbc3d9ce0a97a30cbcf813d
-    members:
-      -   - '["product_family","SP01"]'
-          - sha256:b8f68b0b87a708bb7109fb115525515f86350ddea7482896eeff7c82a6327146
-    sample_ids:
-      - '["product_family","SP01"]'
-    note: 使用者：隨機抽的特殊卡包（泳裝系列，商業價值高），新類型「特殊卡包」special_pack，放主要分類（不是補充包／合作／PR）。需先在規格與 schema 新增此 kind
