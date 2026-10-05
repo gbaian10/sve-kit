@@ -109,8 +109,11 @@ def parse_crops(data: bytes) -> tuple[CropRecord, ...]:
 
 def load_image_crops(authored: Path) -> ImageCrops:
     """Read the working-tree file, so an uncommitted box edit applies to the next build."""
+    path = authored / FILE
+    if authored.is_symlink() or path.is_symlink():
+        raise ValueError("Symlinks are forbidden in image crop inputs")
     records: dict[tuple[str, str], CropRecord] = {}
-    for record in parse_crops((authored / FILE).read_bytes()):
+    for record in parse_crops(path.read_bytes()):
         if record.key in records:
             raise ValueError("Duplicate image crop key")
         records[record.key] = record

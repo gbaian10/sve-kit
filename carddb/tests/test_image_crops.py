@@ -78,6 +78,25 @@ def test_missing_file_is_not_an_empty_set(tmp_path: Path) -> None:
     assert load_image_crops(tmp_path).records == {}
 
 
+@pytest.mark.parametrize("symlink_root", [False, True], ids=["file", "authored-root"])
+def test_symlinked_crop_input_is_rejected(tmp_path: Path, symlink_root: bool) -> None:
+    external = tmp_path / "external"
+    external.mkdir()
+    (external / "image-crops.yaml").write_text("[]\n")
+    authored = tmp_path / "authored"
+    authored.mkdir()
+    if symlink_root:
+        authored.rmdir()
+        authored.symlink_to(external, target_is_directory=True)
+    else:
+        (authored / "image-crops.yaml").symlink_to(external / "image-crops.yaml")
+
+    with pytest.raises(
+        ValueError, match=r"^Symlinks are forbidden in image crop inputs$"
+    ):
+        load_image_crops(authored)
+
+
 @pytest.mark.parametrize(
     ("field", "value", "location"),
     [
