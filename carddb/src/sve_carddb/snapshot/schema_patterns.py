@@ -65,7 +65,6 @@ def patterns() -> dict[str, str]:
         "Date": _date("-"),
         "Instant": _date("-") + "T" + clock + r"(?:\.[0-9]+)?Z",
         "DataVersion": "(preview-)?" + version,
-        "FormalDataVersion": version,
         "URL": _url(),
     }
     # Both regex engines allow $ before a trailing newline; require absolute end.

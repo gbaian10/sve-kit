@@ -67,7 +67,7 @@ Both the full Index validation and compatibility selection must be exercised.
 ## Producer-only checks
 
 Python additionally tests card/art independent changes, A→B→A, restored bytes
-getting a new version, retry identity, interrupted reservations, and post-write
+getting a new version, burned numbers of failed exports, and post-write
 WebP corruption before pointer activation. TS consumes these versions and does
 not allocate them. Those allocation/fault cases remain Python-only; a TS URL
 consumer still uses the positive group-version cases above.

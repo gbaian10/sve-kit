@@ -11,6 +11,7 @@ from pydantic import JsonValue
 from sve_carddb.snapshot.export.compression import compress
 from sve_carddb.snapshot.export.measure import measure
 from sve_carddb.snapshot.preview.images import require_confirmed
+from sve_carddb.snapshot.preview.media_state import commit
 from sve_carddb.snapshot.publication import require_preview
 from sve_carddb.snapshot.reader import read_snapshot, read_text_all
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, string
@@ -22,34 +23,37 @@ if TYPE_CHECKING:
     from sve_carddb.snapshot.project.source import Record
 
 
+POINTER = "snapshots/preview/current.json"
+
+
 @dataclass(frozen=True)
 class Roots:
     preview: Path
-    formal: Path
+    private: Path
 
     def verify(self) -> None:
-        """Resolve symlinks before checking both containment directions."""
-        if not self.preview.is_absolute():
-            raise ValueError("Preview root must be an absolute path")
-        preview, formal = self.preview.resolve(), self.formal.resolve()
-        if preview.is_relative_to(formal) or formal.is_relative_to(preview):
-            raise ValueError("Preview and formal roots must be disjoint")
+        """Keep private outputs outside the public root that gets served or uploaded."""
+        if not self.preview.is_absolute() or not self.private.is_absolute():
+            raise ValueError("Preview and private roots must be absolute paths")
+        preview, private = self.preview.resolve(), self.private.resolve()
+        if preview.is_relative_to(private) or private.is_relative_to(preview):
+            raise ValueError("Preview and private roots must be disjoint")
 
-    def destination(self, relative: str) -> Path:
-        """Internal symlinks must not turn a preview write into a formal write."""
+    def destination(self, relative: str, *, private: bool = False) -> Path:
+        """Internal symlinks must not redirect a preview write outside its root."""
         self.verify()
-        root = self.preview.resolve()
+        root = (self.private if private else self.preview).resolve()
         target = root / relative
         if not target.resolve().is_relative_to(root):
             raise ValueError("Preview destination escapes its root")
         return target
 
     def verify_image_source(self, source: Path | None) -> None:
-        """A copied library must never become an output or formal asset directory."""
+        """A copied library must never become a preview output directory."""
         if source is None:
             return
-        for output in (self.preview.resolve(), self.formal.resolve()):
-            root = source.resolve()
+        root = source.resolve()
+        for output in (self.preview.resolve(), self.private.resolve()):
             if output.is_relative_to(root) or root.is_relative_to(output):
                 raise ValueError(
                     "Preview image input and output roots must be disjoint"
@@ -70,8 +74,10 @@ def require_unknown_coverage(projection: Projection) -> None:
         raise ValueError("Unrequested ancillary sources cannot become public facts")
 
 
-def _write(roots: Roots, path: str, raw: bytes, *, immutable: bool) -> None:
-    target = roots.destination(path)
+def _write(
+    roots: Roots, path: str, raw: bytes, *, immutable: bool, private: bool = False
+) -> None:
+    target = roots.destination(path, private=private)
     target.parent.mkdir(parents=True, exist_ok=True)
     if immutable and target.exists():
         if target.read_bytes() != raw:
@@ -82,7 +88,7 @@ def _write(roots: Roots, path: str, raw: bytes, *, immutable: bool) -> None:
     try:
         with os.fdopen(descriptor, "wb") as stream:
             stream.write(raw)
-        roots.destination(path)
+        roots.destination(path, private=private)
         Path(temporary).replace(target)
     finally:
         Path(temporary).unlink(missing_ok=True)
@@ -168,16 +174,15 @@ def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary bi
         "compression_recipe": dict(snapshot.compression_recipe),
         "images": image_report,
     }
-    _write(roots, "reports/" + hashed[7:] + ".json", canonical(report), immutable=True)
-    _verify_written_images(roots, media_plan)
-    _write(roots, "snapshots/preview/current.json", canonical(pointer), immutable=False)
-    if media_plan is not None:
-        _write(
-            roots,
-            "private/media-committed.json",
-            canonical(media_plan.state),
-            immutable=False,
-        )
+    _write(
+        roots,
+        "reports/" + hashed[7:] + ".json",
+        canonical(report),
+        immutable=True,
+        private=True,
+    )
+    commit(roots, _verify_written_images(roots, media_plan).state)
+    _write(roots, POINTER, canonical(pointer), immutable=False)
     return report
 
 
@@ -186,13 +191,14 @@ def _write_brotli(roots: Roots, path: str, raw: bytes | None) -> None:
         _write(roots, path + ".br", raw, immutable=True)
 
 
-def _verify_written_images(roots: Roots, media_plan: MediaPlan | None) -> None:
+def _verify_written_images(roots: Roots, media_plan: MediaPlan | None) -> MediaPlan:
     if media_plan is None:
         raise ValueError("Preview requires the matching verified media plan")
     for asset in media_plan.assets:
         raw = roots.destination(string(asset["path"])).read_bytes()
         if digest(raw) != asset["sha256"] or len(raw) != asset["bytes"]:
             raise ValueError("Written media differs from sealed plan")
+    return media_plan
 
 
 def _publish_images(
@@ -210,13 +216,11 @@ def _publish_images(
     image_files, image_bytes = 0, 0
     if image_source is not None:
         for path, raw in media_plan.blobs(image_source):
+            target = roots.destination(path)
+            if target.exists() and target.read_bytes() != raw:
+                # The old pointer's versions no longer describe these bytes.
+                roots.destination(POINTER).unlink(missing_ok=True)
             _write(roots, path, raw, immutable=False)
             image_files += 1
             image_bytes += len(raw)
-    _write(
-        roots,
-        "private/media-plans/" + digest(canonical(media_plan.state))[7:] + ".json",
-        canonical({"state": media_plan.state, "assets": list(media_plan.assets)}),
-        immutable=True,
-    )
     return {"unique_files": image_files, "unique_bytes": image_bytes}

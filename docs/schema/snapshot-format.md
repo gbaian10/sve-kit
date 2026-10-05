@@ -17,7 +17,7 @@
 
 巢狀的 RegionView/PrintingFace/Section/FieldTranslation/Correction/Support 等記錄同樣用 tuple，types 以具名型別→columns 順序及引用型別描述（固定於 format）供載入器驗列長度；producer 以本文件的具名型別作型別名。`parameter_schema/corrected_from` 等值保持受限 JSON，不轉成位置陣列，值域依 [傳輸契約 §3.2–3.3](snapshot-transport.md#32-公開參數宣告)。純 ID/code 陣列亦保持原樣。每個分片只附用到的 types，producer 驗其與 format 定義一致；consumer 不執行資料提供的轉換程式。
 
-reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；啟動包轉 typed 索引後釋放原 tuples，只在畫面當前項目建立 view，不能全量展開成物件再多存一份。這項編碼主要節省未壓縮傳輸/快取大小；原型量測顯示 heap 並未因此降低，記憶體要靠 §3 的逐片解析/淘汰。每表按穩定主鍵排序、集合陣列按 ID/code 排序、有序段落保留 ordinal。payload 不含 `data_version/published_at`，未變內容跨版 bytes/hash 完全相同。完整文字包是同一分片 payload 的容器聯集，不能另做另一套 carddb。公共永久 ID 保持不透明字串；text ID 固定為 `t:{lang}:{sha256(exact UTF-8 text)[:16]}`，與耐久的已發布文字鍵索引 `(lang,short_id,full_digest)` 聯集檢查碰撞；該索引不依賴已回收的公開快照；碰撞停止發布，不能重配舊鍵或自動加長，快照不附完整 hash。
+reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；啟動包轉 typed 索引後釋放原 tuples，只在畫面當前項目建立 view，不能全量展開成物件再多存一份。這項編碼主要節省未壓縮傳輸/快取大小；原型量測顯示 heap 並未因此降低，記憶體要靠 §3 的逐片解析/淘汰。每表按穩定主鍵排序、集合陣列按 ID/code 排序、有序段落保留 ordinal。payload 不含 `data_version/published_at`，未變內容跨版 bytes/hash 完全相同。完整文字包是同一分片 payload 的容器聯集，不能另做另一套 carddb。公共永久 ID 保持不透明字串；text ID 固定為 `t:{lang}:{sha256(exact UTF-8 text)[:16]}`，同一份快照內同鍵不同內容即停止匯出，不能重配舊鍵或自動加長，快照不附完整 hash。不另保存跨版本的已發布文字鍵索引（[ADR-0020](../adr/0020-upload-from-export.md)）。
 
 下面列出的欄位全部存在，`?` 表示可 null，不表示任意省略。內嵌同型陣列可以空；未知與空的規則在 [build-db.md](build-db.md) 定義。顯示 label 參照 `text_unit`，介面通用提示留 app i18n。枚舉值與型別沿建置資料庫同名定義，投影新增型別於下節明列；不可帶出建置資料庫未列欄位。
 
@@ -207,7 +207,7 @@ row delta 延後，以替換不可變 JSON 分片更新。未知 format／規則
 card images 依完整 URL（含 v）快取或供已選牌組離線使用；啟用新版時改用新版 v，不回退舊圖，下載失敗明示 placeholder。尚未連線取得新版者明示資料時效，不宣稱圖片最新；看過不等於所有圖片離線備妥；雙面兩張皆列，追加區只抓玩家實選。音檔與圖片各自狀態，不影響文字完成判定。不預抓隱藏對手的卡，也不把未實作提示洩漏其牌組。
 
 身分修復的永久 printing／int_id、卡片入口舊 URL 與 split 玩家選擇，沿 build-db §13／§15；快照保留僅依下述 §4.1，
-建置端的追加封套與首次發布事件映射另見 [身分修復契約 §6](identity-repair.md#6-公開事件墓碑與路由)。
+建置端的追加封套與公開事件映射另見 [身分修復契約 §6](identity-repair.md#6-公開事件墓碑與路由)。
 §2 表格列現行 2.0 的公開形狀；實作撤回時在原欄序尾端
 追加 reverts_id，identity_change 新增 kind=revert 與 required nullable reverts_id，
 一般事件填 null，撤回列指原公開事件並保留原 old/new／printing 欄位，不代表反向邊。
@@ -223,11 +223,11 @@ Schema、欄序、golden 與 reader，不要求額外升版；正式凍結後才
 
 **卡圖 WebP 僅提供當前圖片，不保存歷史圖片版本。** previous 或更舊 metadata 中的圖片引用不使舊 WebP 成為必留資產；其 image hash／bytes 不構成永遠可取得同一圖片的承諾。圖片產製、來源核可、格式／尺寸／內容檢查仍在發布前驗證。新版快照須提供足以選取新圖片的版本 token 或新 path；client 啟用新版後，瀏覽器／CDN／SW 不得以舊版本圖片作快取回退。未完成下載顯示載入狀態，失敗明示，不以舊圖充作新版圖。
 
-版本入口是可更新的 current／previous 發布索引，revision 單調增加，不維護 append-only 全歷史 pages 或每代索引的公開歸檔。每個 entry 指向不可變 manifest 的 path／hash，並提供格式、最低 reader 版本與所需能力等准入資訊。data_version 不重用，同一版號不可改指另一份 manifest。索引必在新版所需內容及圖片新鮮度驗證完成後，以條件寫入原子切換；索引不得設為 immutable 快取。
+版本入口是可更新的 current／previous 發布索引，revision 單調增加，不維護 append-only 全歷史 pages 或每代索引的公開歸檔。每個 entry 指向不可變 manifest 的 path／hash，並提供格式、最低 reader 版本與所需能力等准入資訊。data_version 不重用，同一版號不可改指另一份 manifest；上傳只能對照遠端 current／previous，不保存更早的歷史。索引必在新版所需內容及圖片新鮮度驗證完成後，以條件寫入原子切換；索引不得設為 immutable 快取。
 
 客戶端由 current 更新；若其本機版本恰為 previous，可使用對應 changes 摘要及未變 hash 重用分片。落後多版、所需舊片已回收或缺少相容前版時，直接取得 current 的完整所需閉包，不要求補齊歷史鏈；未知格式／能力時提示更新 reader，不猜讀。previous 是有限的過渡退路，不保證永遠有可供舊 reader 下載的相容版本。裝置已有的完整快照可在更新失敗時保留為本機 active 並明示時效，但不使伺服器延長歷史保留。
 
-新版本提交成功後，回收不再被 current／previous 及合法在途發布引用的公開 snapshot 產物；卡圖回收只依**當前圖片集合**判斷。清理與發布使用同一 revision 邊界並重驗，不能刪到同時發布的新檔或仍被保留版本引用的共用 blob。中斷留下的未發布 staging 可另行清理，不列為第三個保留版本。失敗不得把半套新版宣告為 current。
+新版本提交成功後，回收不再被 current／previous 引用的公開 snapshot 產物；卡圖回收只依**當前圖片集合**判斷。回收在每次刪除前重讀索引，索引變動即停止；不在上傳進行中回收，因尚未進索引的新檔會被當成未引用。中斷留下的未發布檔案可清理後重傳，不列為第三個保留版本。失敗不得把半套新版宣告為 current。
 
 本階段不承諾任意歷史 data_version 的重新下載、對局重播或舊牌組載入當年卡表。相關能力待實際開發時另訂保留／匯入方式，不以此限制當前發布策略。永久 ID／int_id、必要路由 alias、authored 採納及凍結來源歸檔仍依各自契約，不因公開 snapshot 回收而改寫或刪除。
 
@@ -237,7 +237,7 @@ Entry 恰含 `data_version,published_at,format_version,min_reader_version,requir
 manifest_path 為 `snapshots/manifests/<64hex>.json`，manifest_sha256 為其 canonical bytes 的 Hash。
 payload 沿 `snapshots/blobs/<64hex>.json` 及 `.br`／`.gz`；兩版共用 blob 只存一次。
 revision 是正安全整數，current／previous 的 data_version 不同，previous 恰為直接前一發布版；首版為 null。
-發布配號與首次事件收據耐久保存，不以永久 CDN pages 維持唯一性；失敗嘗試預留的圖片版本號不得重用。
+卡圖版本號由匯出端的高水位整數配發，失敗的匯出也消耗號碼，不得重用；不另保存發布收據或首次事件收據。
 reader 只從 current、previous 或本機已驗完整 active 選相容者；index_format 不支援時提示更新，不能猜讀。
 
 changes 是相鄰發布摘要，不是重建鏈。previous manifest 引用的 changes blob 仍保留，
@@ -248,9 +248,9 @@ changes 是相鄰發布摘要，不是重建鏈。previous manifest 引用的 ch
 
 ### 4.2 預覽快照
 
-預覽快照是正式匯出器產生、與卡表快照同格式的開發產物；僅供非公開開發，不發布給使用者。預覽使用 `SVE_PREVIEW_DIR`，正式本機發布使用 `SVE_CDN_DIR`，兩個根目錄不得相同或互相包含。reader 須明確選擇資料根，預覽與正式版的 IndexedDB／Cache namespace 分開。
+預覽快照是正式匯出器產生、與卡表快照同格式的開發產物；僅供非公開開發，不發布給使用者。預覽使用 `SVE_PREVIEW_DIR`；web dev server 另以 `SVE_CDN_DIR` 掛載正式根，未設定時為合成 fixture。reader 須明確選擇資料根，預覽與正式版的 IndexedDB／Cache namespace 分開。
 
-預覽 `data_version` 使用 §1 定義的 `preview-` 命名空間，不屬於正式發布版號；不寫正式 `snapshots/versions/index.json`，不改正式 active，也不提供永久分享碼、公開 URL 或回放 pin 的相容保證。正式發布器拒收預覽版號；正式發布須重新建置並通過完整發布閘門，不能直接將預覽升為正式版。
+預覽 `data_version` 使用 §1 定義的 `preview-` 命名空間，不屬於正式發布版號；匯出只寫隔離根的 `snapshots/preview/current.json`，不改正式 active，也不提供永久分享碼、公開 URL 或回放 pin 的相容保證。`r2 upload-v2` 可把預覽上傳到開發桶，在該桶的 `snapshots/versions/index.json` 以 `preview-` 版號寫入 current／previous entry，Entry 形狀與正式相同；這是開發 entry，不是正式發布。正式發布須重新建置並通過完整發布閘門，不能直接將預覽升為正式版。
 
 建置參數、隔離檢查與前端接線見 [preview 建置與前端接線](preview-handoff.md)。
 

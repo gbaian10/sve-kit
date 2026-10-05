@@ -15,7 +15,7 @@ from sve_carddb.snapshot.export.wire import encode
 from sve_carddb.snapshot.generate_schema import generate
 from sve_carddb.snapshot.media import MAX_SAFE, image_path, image_url, prepare_media
 from sve_carddb.snapshot.preview import Roots, write_preview
-from sve_carddb.snapshot.preview.media_state import reservation
+from sve_carddb.snapshot.preview.media_state import STATE, reserve
 from sve_carddb.snapshot.profiles import MEDIA, profile
 from sve_carddb.snapshot.reader import read_index, read_snapshot, read_text_all
 from sve_carddb.snapshot.values import (
@@ -149,7 +149,7 @@ def test_project_export_and_preview(images: PublicImages, tmp_path: Path) -> Non
         {k: r[k] for k in ("size_key", "width", "height")}
         for r in images.projection.tables["image_variant"]
     ]
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
     report = write_preview(
         snapshot, roots, {}, image_source=images.library, media_plan=plan
     )
@@ -161,10 +161,7 @@ def test_project_export_and_preview(images: PublicImages, tmp_path: Path) -> Non
         p.relative_to(roots.preview).as_posix() for p in roots.preview.rglob("*.webp")
     } == {string(a["path"]) for a in plan.assets}
     assert not (roots.preview / "images/sha256").exists()
-    assert (
-        parse((roots.preview / "private/media-committed.json").read_bytes())
-        == plan.state
-    )
+    assert committed(roots) == plan.state
     files = {
         string(f["key"]): f
         for r in array(snapshot.manifest["files"])
@@ -329,22 +326,17 @@ def test_wire_token_domain(images: PublicImages, version: JsonValue) -> None:
     assert exc.value.validator in {"anyOf", "minimum", "maximum", "type"}
 
 
+def committed(roots: Roots) -> JsonValue:
+    return object_value(parse((roots.private / STATE).read_bytes()))["committed"]
+
+
 def test_failed_reservation_is_not_reused(tmp_path: Path) -> None:
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
-
-    def interrupt() -> None:
-        with reservation(roots) as (revision, previous):
-            assert revision == 1
-            assert previous is None
-            raise RuntimeError("synthetic interruption")
-
-    with pytest.raises(RuntimeError, match=r"^synthetic interruption$"):
-        interrupt()
-    with reservation(roots) as (revision, previous):
-        assert revision == 2
-        assert previous is None
-    with reservation(roots) as (revision, _):
-        assert revision == 3
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
+    assert reserve(roots) == (1, None)
+    # An export that fails after reserving never commits; its number stays burned.
+    assert reserve(roots) == (2, None)
+    assert reserve(roots)[0] == 3
+    assert not (roots.preview / STATE).exists()
 
 
 def test_revision_cannot_reuse_committed_number(images: PublicImages) -> None:
@@ -365,7 +357,7 @@ def test_v2_writer_requires_matching_plan(images: PublicImages, tmp_path: Path) 
     with pytest.raises(
         ValueError, match=r"^Preview requires the matching verified media plan$"
     ):
-        write_preview(snapshot, Roots(tmp_path / "preview", tmp_path / "formal"), {})
+        write_preview(snapshot, Roots(tmp_path / "preview", tmp_path / "private"), {})
 
 
 def test_index_two_window_and_no_recursive_changes_history() -> None:
@@ -539,7 +531,7 @@ def test_byte_change_after_sealing_rejected_before_activation(
     snapshot = export_snapshot(
         plan.projection, images.ownership, BATCH, format_version=MEDIA
     )
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
     with pytest.raises(ValueError, match=r"^Media plan source hash or bytes mismatch$"):
         write_preview(snapshot, roots, {}, image_source=library, media_plan=plan)
     assert not (roots.preview / "snapshots/preview/current.json").exists()
@@ -598,18 +590,6 @@ def test_prepare_requires_complete_verified_outputs(
         prepare_media(projection, images.library, revision=7)
 
 
-def test_local_reservation_fsync_before_yield(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    calls: list[int] = []
-    monkeypatch.setattr(
-        "sve_carddb.snapshot.preview.media_state.os.fsync", calls.append
-    )
-    with reservation(Roots(tmp_path / "preview", tmp_path / "formal")) as (revision, _):
-        assert revision == 1
-        assert calls
-
-
 def test_same_name_capability_nonempty_and_old_profile_rejects(
     images: PublicImages,
 ) -> None:
@@ -645,7 +625,7 @@ def test_failed_image_group_does_not_switch_pointer(
 ) -> None:
     import sve_carddb.snapshot.preview as writer  # ruff: ignore[import-outside-top-level] -- fault only the output writer boundary
 
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
     plan = prepare_media(images.projection, images.library, revision=7)
     snapshot = export_snapshot(
         plan.projection, images.ownership, BATCH, format_version=MEDIA
@@ -655,22 +635,21 @@ def test_failed_image_group_does_not_switch_pointer(
     observed = writer._write
     count = 0
 
-    def interrupted(roots: Roots, path: str, raw: bytes, *, immutable: bool) -> None:
+    def interrupted(
+        roots: Roots, path: str, raw: bytes, *, immutable: bool, private: bool = False
+    ) -> None:
         nonlocal count
         if path.startswith("images/"):
             count += 1
             if count == 3:
                 raise RuntimeError("synthetic interrupted group")
-        observed(roots, path, raw, immutable=immutable)
+        observed(roots, path, raw, immutable=immutable, private=private)
 
     monkeypatch.setattr(writer, "_write", interrupted)
     with pytest.raises(RuntimeError, match=r"^synthetic interrupted group$"):
         write_preview(snapshot, roots, {}, image_source=images.library, media_plan=plan)
     assert (roots.preview / "snapshots/preview/current.json").read_bytes() == pointer
-    assert (
-        parse((roots.preview / "private/media-committed.json").read_bytes())
-        == plan.state
-    )
+    assert committed(roots) == plan.state
 
 
 @pytest.mark.parametrize(("width", "height"), [(128, 96), (12, 16)])
@@ -730,7 +709,7 @@ def test_media_source_decoded_dimensions_and_length_are_verified(
 
 @pytest.mark.parametrize(
     "change",
-    ["revision", "fields", "fingerprint", "token", "binding", "active", "empty"],
+    ["revision", "fields", "fingerprint", "token", "binding", "empty"],
 )
 def test_committed_state_rejects_corruption(images: PublicImages, change: str) -> None:
     plan = prepare_media(images.projection, images.library, revision=7)
@@ -747,8 +726,6 @@ def test_committed_state_rejects_corruption(images: PublicImages, change: str) -
         row["card_version"] = 8
     elif change == "binding":
         array(row["binding"])[1] = True
-    elif change == "active":
-        row["active"] = False
     else:
         previous = {}
     with pytest.raises(ValueError, match=r"^Invalid committed media state$"):
@@ -955,7 +932,7 @@ def test_writer_rejects_mismatched_media_plan(
     images: PublicImages, tmp_path: Path
 ) -> None:
     plan = prepare_media(images.projection, images.library, revision=7)
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
     with pytest.raises(
         ValueError, match=r"^Preview requires the matching verified media plan$"
     ):
@@ -965,23 +942,50 @@ def test_writer_rejects_mismatched_media_plan(
     assert not (roots.preview / "snapshots/preview/current.json").exists()
 
 
-@pytest.mark.parametrize("revisions", [[1, 3], [1, 1]])
-def test_reservation_rejects_nonmonotonic_journal(
-    tmp_path: Path, revisions: list[int]
+@pytest.mark.parametrize(
+    "value",
+    [
+        {"high_water": 0, "committed": None},
+        {"high_water": 2, "committed": {"revision": 3, "members": {}}},
+        {"high_water": 1},
+    ],
+)
+def test_reservation_rejects_invalid_state(
+    tmp_path: Path, value: dict[str, JsonValue]
 ) -> None:
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
-    journal = roots.destination("private/media-revisions.jsonl")
-    journal.parent.mkdir(parents=True)
-    raw = b"".join(canonical({"revision": r}) + b"\n" for r in revisions)
-    journal.write_bytes(raw)
-    with (
-        pytest.raises(
-            ValueError, match=r"^Preview media reservation journal is not monotonic$"
-        ),
-        reservation(roots),
-    ):
-        pytest.fail("Corrupt journal must not yield a reservation")
-    assert journal.read_bytes() == raw
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
+    state = roots.destination(STATE, private=True)
+    state.parent.mkdir(parents=True)
+    state.write_bytes(canonical(value))
+    with pytest.raises(ValueError, match=r"^Invalid preview media state$"):
+        reserve(roots)
+    assert state.read_bytes() == canonical(value)
+
+
+def test_export_state_keeps_unchanged_tokens_and_burns_failed_numbers(
+    images: PublicImages, tmp_path: Path
+) -> None:
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
+    revision, previous = reserve(roots)
+    first = prepare_media(
+        images.projection, images.library, revision=revision, previous=previous
+    )
+    write_preview(
+        export_snapshot(first.projection, images.ownership, BATCH),
+        roots,
+        {},
+        image_source=images.library,
+        media_plan=first,
+    )
+    assert committed(roots) == first.state
+    reserve(roots)
+    revision, previous = reserve(roots)
+    assert (revision, previous) == (3, first.state)
+    text = deepcopy(images.projection)
+    text.tables["printing"][0]["rarity_raw"] = "Synthetic replacement rarity"
+    later = prepare_media(text, images.library, revision=revision, previous=previous)
+    media = later.projection.tables["printing_image"][0]
+    assert (media["card_version"], media["art_version"]) == (1, 1)
 
 
 def test_written_media_corruption_does_not_activate(
@@ -989,7 +993,7 @@ def test_written_media_corruption_does_not_activate(
 ) -> None:
     import sve_carddb.snapshot.preview as writer  # ruff: ignore[import-outside-top-level] -- corrupt only the sealed destination at the activation boundary
 
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
     old = prepare_media(images.projection, images.library, revision=7)
     old_snapshot = export_snapshot(
         old.projection, images.ownership, BATCH, format_version=MEDIA
@@ -1010,10 +1014,10 @@ def test_written_media_corruption_does_not_activate(
     corrupted = False
 
     def corrupt_after_sealing(
-        roots: Roots, path: str, raw: bytes, *, immutable: bool
+        roots: Roots, path: str, raw: bytes, *, immutable: bool, private: bool = False
     ) -> None:
         nonlocal corrupted
-        original(roots, path, raw, immutable=immutable)
+        original(roots, path, raw, immutable=immutable, private=private)
         if path.startswith("reports/"):
             assert pointer_path.read_bytes() == pointer
             assert all(
@@ -1029,7 +1033,4 @@ def test_written_media_corruption_does_not_activate(
         write_preview(snapshot, roots, {}, image_source=images.library, media_plan=new)
     assert corrupted
     assert pointer_path.read_bytes() == pointer
-    assert (
-        parse((roots.preview / "private/media-committed.json").read_bytes())
-        == old.state
-    )
+    assert committed(roots) == old.state

@@ -6,9 +6,9 @@ from urllib.parse import urlsplit
 
 import httpx
 
+from sve_carddb.r2_upload.boundary import UploadError
 from sve_carddb.r2_upload.v2.adapter import MAX_OBJECT
-from sve_carddb.snapshot.publish.plan import IMAGE_KEY
-from sve_carddb.snapshot.publish.storage import PublishError
+from sve_carddb.r2_upload.v2.export import IMAGE_KEY
 
 
 def body(response: httpx.Response, limit: int) -> bytes:
@@ -17,7 +17,7 @@ def body(response: httpx.Response, limit: int) -> bytes:
     for chunk in response.iter_raw():
         result.extend(chunk)
         if len(result) > limit:
-            raise PublishError("Remote response exceeds the configured byte limit")
+            raise UploadError("Remote response exceeds the configured byte limit")
     return bytes(result)
 
 
@@ -26,7 +26,7 @@ def cdn_root(value: str) -> str:
     try:
         split = urlsplit(value)
         if split.query or split.fragment:
-            raise PublishError("Explicit HTTPS CDN root required")
+            raise UploadError("Explicit HTTPS CDN root required")
         if (
             split.scheme != "https"
             or not split.netloc
@@ -34,10 +34,10 @@ def cdn_root(value: str) -> str:
             or split.password
             or not value.endswith("/")
         ):
-            raise PublishError("Explicit HTTPS CDN root required")
+            raise UploadError("Explicit HTTPS CDN root required")
         _ = split.port
     except ValueError:
-        raise PublishError("Explicit HTTPS CDN root required") from None
+        raise UploadError("Explicit HTTPS CDN root required") from None
     return value
 
 
@@ -51,7 +51,7 @@ class CDNFreshness:
         cdn_root(self.root)
 
     def get(self, url: str) -> bytes | None:
-        """The publisher compares returned full bytes against the sealed SHA/size."""
+        """The uploader compares returned full bytes against the exported image."""
         split = urlsplit(url)
         suffix = url.removeprefix(self.root)
         if (
@@ -60,7 +60,7 @@ class CDNFreshness:
             or split.fragment
             or not split.query
         ):
-            raise PublishError("CDN URL is outside the pinned query-bearing root")
+            raise UploadError("CDN URL is outside the pinned query-bearing root")
         try:
             request = httpx.Request("GET", url, headers={"accept-encoding": "identity"})
             response = self.client.send(
@@ -77,4 +77,4 @@ class CDNFreshness:
             finally:
                 response.close()
         except httpx.HTTPError, ValueError:
-            raise PublishError("CDN transport or protocol failed") from None
+            raise UploadError("CDN transport or protocol failed") from None

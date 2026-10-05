@@ -259,10 +259,9 @@ transition 分片最後寫入，因此中斷時已有新版次卻缺對應 trans
   事件 ID 以相同固定 namespace、canonical `["identity-revert-v1",transition.record_key,reverts_id]` 的 UUIDv5 配發。
   apply 事件的 reverts_id=null；revert 必須指先前非 revert 事件，全域唯一且 confirmed，整組事件原子撤回。
   公開不出私有 transition key，只出公開事件間的 reverts_id；consumer 先解析撤回再計有效圖。
-- data_version 是該事件**首次正式發布**版號。候選建置以目標版號暫填；發布流程以精簡的事件 ID→首次 data_version／manifest hash 收據固定，索引提交成功後確認收據；中斷以提交結果恢復，不把預留當已發布。
-  收據耐久保存並備份，後續重建驗它並沿用，不靠永久 CDN 索引／快照，不每版改時間；preview 不登錄首次正式發布。
-  無法取得歷史發布證據時拒絕發布，不把舊事件當首次發布。
-  同事件 ID 已公開但內容不同即拒絕。公開修復歷史與舊墓碑保留，changes 只列本次新增事件。
+- data_version 是產出該事件列的建置所填的版號，不承諾是該事件首次發布的版號；
+  不另保存事件首次發布的收據（[ADR-0020](../adr/0020-upload-from-export.md)）。reader 不能用它推斷事件首次出現在哪一版。
+  事件 ID 與其關係照上述規則永久保留。公開修復歷史與舊墓碑保留，changes 只列本次新增事件。
 - 卡片網址綁 printing；合併 card 不代表把該版次 URL 轉到另一個 printing。原卡號沒變就不新增 alias。
   確實改號時依 build-db §15 永久保留舊入口、展平 alias 到同 printing 的最新 canonical，
   禁止鏈／環、精確撞號、搶走舊入口與 provisional override。

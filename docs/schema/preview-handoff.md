@@ -3,8 +3,8 @@
 preview 僅供本機，匯出器預設產出 2.0。圖片投影依 [圖片發布契約](image-variants.md#20-圖片-url版本與新鮮度)
 與 [傳輸 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)：從建置 hash path
 產生固定 ID key，卡包 media 提供版本／尺寸；圖片可受控覆寫，JSON 不可變。
-preview 配號與快取仍隔離，不寫正式 current／previous 索引。正式 R2 發布另用 upload-v2
-與 2.0 凍結包，不能把 preview 直接升格。
+preview 的圖片版本狀態與快取放在公開根之外。`r2 upload-v2` 直接上傳這個公開根，
+在開發桶的 current／previous 索引寫入 `preview-` entry；這不是正式發布，不能把 preview 改名升格。
 
 preview 使用正式傳輸契約與共用匯出器，但不是正式發布。`data_version` 必須有
 `preview-` 前綴，`regions` 固定為 `en`、`jp`。payload 的欄位、分片 N、bootstrap/detail
@@ -16,22 +16,25 @@ preview 使用正式傳輸契約與共用匯出器，但不是正式發布。`da
 
 ```bash
 SVE_PREVIEW_DIR=/explicit/isolated/preview \
-SVE_CDN_DIR=/explicit/formal/cdn \
 uv --directory carddb run sve-carddb snapshot export-offline --inputs /private/inputs.json \
-  --bundle-dir /private/bundle
+  --private-dir /private/preview-state --bundle-dir /private/bundle
 ```
 
-若要接入已轉好的日英卡圖，同時提供 `--image-assets-dir /readonly/webp-library` 與
-`--image-cache-dir /readonly/recipe-cache`。前者指到含 `images/` 的那一層，後者指到含
-`image-variants/` 的那一層。兩者皆唯讀，只重用通過來源批次／配方／hash／解碼尺寸
-驗證的 #152 資產；缺件或快取不符即停止，不自動轉檔或修補。使用最多 4 個 worker。
-圖片庫與配方快取、preview／正式 root、repo／封存庫須為絕對路徑且彼此隔離，
-圖片輸入不可含 symlink。未提供這對選項時仍可建置文字 preview。
+`--private-dir` 必填，放輸入記錄、報告與卡圖版本狀態，須與 preview 根互不包含；
+它跨次匯出沿用，請隨既有備份保存。
 
-也可用 `--preview-dir`、`--cdn-dir` 明確指定；兩者都必填，preview 沒有預設位置。
+若要接入日英卡圖，同時提供已存在的 `--image-assets-dir /private/webp-library` 與
+`--image-cache-dir /private/recipe-cache`。前者指到含 `images/` 的那一層，後者指到含
+`image-variants/` 的那一層。通過來源批次／配方／hash／解碼尺寸驗證的快取直接重用；
+缺件或不符的來源當場轉檔，寫入這兩處，已存在的內容定址 blob 不改寫。
+`--workers` 預設 2、可設 1～4，輸出 bytes 與 worker 數無關。
+圖片庫與配方快取須為絕對路徑，不得彼此重疊，也不得與 preview、私有目錄、bundle、repo／封存庫或配方重疊；
+圖片根不可含 symlink。未提供這對選項時仍可建置文字 preview。
+
+也可用 `--preview-dir` 明確指定；此選項必填，preview 沒有預設位置。
 `SVE_PREVIEW_DIR` 指到含 `snapshots/` 的那一層，而非 `snapshots/` 或 `snapshots/preview/`。
-解析 symlink 後，兩個 root 不得相同或互相包含；preview 亦不得與輸入 repo／封存庫
-相同或互相包含。root 內的輸出 symlink 不得逸出 preview root。
+解析 symlink 後，preview 不得與輸入 repo／封存庫相同或互相包含，也不得包含配方；
+bundle 不得與 repo、封存庫或配方重疊。root 內的輸出 symlink 不得逸出 preview root。
 
 `--inputs` 是呼叫端明確提供的 JSON 配方，欄位如下；路徑與實際來源 pin 留在私人建置環境，
 不進 repo。配方、詞彙綁定與衍生產物可能含官方文字，適用相同的私人資料邊界。
@@ -64,27 +67,28 @@ gzip。`snapshot export-offline` 可用 `--brotli` 額外產生 `.br`；
 lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行檔 hash。
 不再提供 `--brotli-command` 或呼叫外部 encoder，亦不需準備系統 libbrotli。
 
-preview 的壓縮旁檔只供本機載入與容量檢查，不作 R2 發布輸入。
-R2 僅透過 `r2 upload-v2` 發布通過驗證的 2.0 凍結包；凍結包、ledger、checkpoint
-與 CDN 驗證條件依 [發布契約](snapshot-format.md#41-發布窗口圖片新鮮度與回收) 及 [R2 接線](../../carddb/src/sve_carddb/r2_upload/v2/README.md)。
+`r2 upload-v2` 原樣上傳清單所列的 raw／gzip／br，不重壓；選檔、標頭與 CDN 驗證見
+[R2 上傳](../../carddb/src/sve_carddb/r2_upload/v2/README.md)，保留窗口見 [發布契約](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
 
 建置輸入的 WebP 使用內容定址 hash path；preview 輸出為 2.0 的固定 ID key。先驗證／寫入圖片，再寫 images
 分片與其餘快照成員；只複製公開 `printing_image` 引用且可用、核可的變體，不以來源 hash 當公開 URL。
 不複製原始 PNG、數位卡圖或圖片庫的其他檔案。切換前再驗公開資產的 hash、bytes 與
-實際解碼格式／尺寸；中斷可以留下未引用的完整資產，但既有完整 preview 與指標不變。
+實際解碼格式／尺寸；中斷可以留下未引用的完整資產。要以不同 bytes 覆寫既有卡圖前，
+先刪除 preview 指標，所以中斷後若曾覆寫卡圖，就沒有指標可供載入或上傳，須重跑匯出；
+沒有覆寫卡圖時，既有完整 preview 與指標不變。
 
 清單存於 `snapshots/manifests/<sha256>.json`。所有不可變成員驗證／寫入後才原子更新
 `snapshots/preview/current.json`，內含 `manifest_path,manifest_sha256`。
-不寫 `snapshots/versions/index.json` 或 pages，也不碰正式 active／快取。
+匯出不寫 `snapshots/versions/index.json` 或 pages，也不碰正式 active／快取；index 只由上傳寫入。
 已有同名不可變檔案的 bytes 不符即停止，保留既有 preview 指標。
 
-`reports/<manifest-hash>.json` 保存輸入 hash、地區範圍、逐表數量、真正排除清單、
-未定卡文數、容量及未完成的正式閘門；輸入記錄留在 `private/inputs/<input-hash>.json`。
-preview 根下的 `private/` 與 `reports/` 不屬於公開內容；整個 preview 只供本機使用，
-沒有上傳入口。正式 R2 發布須使用另行建置的 2.0 凍結包。
+私有目錄的 `reports/<manifest-hash>.json` 保存輸入 hash、地區範圍、逐表數量、真正排除清單、
+未定卡文數、容量及未完成的正式閘門；輸入記錄在 `inputs/<input-hash>.json`，
+卡圖版本狀態在 `media-state.json`。這些都不在 preview 根內，不會被 dev server 提供或上傳。
 含圖建置另記 `image_assets` 的來源／綁定／變體數，以及 `images` 的公開去重檔數／bytes。
-實際執行時間與快取命中數放在命令 stdout 的 `image_execution`，不混入不可變清單或
-報告，確保相同輸入重建的逐檔 bytes 一致；唯讀重用的新轉檔時間為 0。
+實際執行時間、快取命中與新轉檔數放在命令 stdout 的 `image_execution`，不混入不可變清單或
+報告，確保相同輸入重建的逐檔 bytes 一致。各圖的重用／轉檔時間是逐圖加總，多 worker 時會重疊，
+整體耗時看 `wall_milliseconds`。
 這些檔案與輸出都不進 git、Actions cache／artifact 或測試 fixture。
 完整文字容量以批次的同一 File 聯集計算，完整文字包不與分片重複加總；卡圖另計。
 啟動則依使用者所選日版／英版各自以 Brotli 計完整新清單＋config＋首屏實際必載片／依賴，

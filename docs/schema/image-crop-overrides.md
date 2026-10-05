@@ -45,7 +45,7 @@ region／card_no 不參與來源查找、跨區配對或採納判定；已驗證
 
 先完整驗證整個檔案，再大量轉檔；未被選中的列列為未使用，不是錯誤。`build_regional_assets(region=…)` 明示 `jp` 或 `en`，只接受相符地區的 image batch。頁面綁定使用該地區萃取器的原始 `<img src>` 與人工 source_face_map。
 
-日英 `snapshot export-offline` 的 Inputs.sources 分別釘兩區 card／image batch 與 parser version，成對提供 `--image-assets-dir`、`--image-cache-dir` 才納入影像。入口以 `reuse_only` 驗證完整五檔快取，缺檔即失敗；產圖由上述 API 先完成。建置須重驗各區目前批次的完整成員，影像綁定及來源使用閉包同時進入 staging／sealed DB 重播；詳細參數見[離線建置入口](../../carddb/src/sve_carddb/snapshot/OFFLINE.md)。正式發布仍依既有來源涵蓋與 readiness 門檻。
+日英 `snapshot export-offline` 的 Inputs.sources 分別釘兩區 card／image batch 與 parser version，成對提供 `--image-assets-dir`、`--image-cache-dir` 才納入影像。入口對每區呼叫上述 API：通過驗證的完整五檔快取直接沿用，缺檔或過時（來源、框或 recipe 改變）的來源當場產圖，寫入圖片庫與快取。建置須重驗各區目前批次的完整成員，影像綁定及來源使用閉包同時進入 staging／sealed DB 重播；詳細參數見[離線建置入口](../../carddb/src/sve_carddb/snapshot/OFFLINE.md)。正式發布仍依既有來源涵蓋與 readiness 門檻。
 
 `export-offline` 消費外部傳入的 `ImageBuild` 時，`verify_asset_sources` 從同一個裁切檔重算每個來源應用的框（覆寫或預設），與 `VariantSet.crop_box` 比對後才可填 DB／輸出公開清單。僅在 `build_regional_assets` 產圖側驗證不夠；來源、recipe、五檔 hash 都有效但仍使用舊框的結果也必須拒絕。
 
@@ -74,10 +74,10 @@ region／card_no 不參與來源查找、跨區配對或採納判定；已驗證
 
 ## 5. 變體、快照與上傳的版本策略
 
-既有 recipe 已支援來源綁定的整數覆寫，新增採納資料不改 recipe_version；解碼、編碼、縮放或框演算法改變才按既有規則換 recipe。快取 key 包含來源 hash、實際框與完整 recipe：新框取得新 key，`reuse_only` 若沒有新框結果必須失敗，不得借用舊框的完整五檔。
+既有 recipe 已支援來源綁定的整數覆寫，新增採納資料不改 recipe_version；解碼、編碼、縮放或框演算法改變才按既有規則換 recipe。快取 key 包含來源 hash、實際框與完整 recipe：新框取得新 key，沒有新框結果時重新產製，不得借用舊框的完整五檔。
 
 新 key 下五檔會重新產製。在來源與 recipe 不變時，card 三檔輸入不變，內容定址後仍可共用原 blob；art 兩檔改為新 WebP hash／path。不改寫內容定址的建置 blob。`img:binding:` 不依賴裁切，來源／頁面 binding 不變時保持原值。2.0 的公開 key 固定、只換 art_version 並覆寫有變動的 art bytes，card 三檔版本沿用；欄序依 snapshot-format §2.1，不公開框。
 
-裁切檔變動後，須重產受影響的預覽、影像分片、清單、壓縮旁檔與 2.0 發布凍結包，不拿舊清單充作已完成覆寫。preview 只供本機使用；R2 僅透過 `r2 upload-v2` 發布 2.0 凍結包。發布須分開驗 current＋previous 的 metadata 聯集及僅 current 的圖片集合；previous 圖片引用不保留舊 WebP，不要求同 key 符合兩版輸出。新圖驗妥才切快照，再清理失去 current 引用的 key，合法在途 staging 另計；使用隔離 preview 根，不混入任意無引用檔案。
+裁切檔變動後，須重產受影響的預覽、影像分片、清單與壓縮旁檔，不拿舊清單充作已完成覆寫。`r2 upload-v2` 只上傳 preview 根目前清單的引用閉包與其卡圖。保留窗口分開看 current＋previous 的 metadata 聯集及僅 current 的圖片集合；previous 圖片引用不保留舊 WebP，不要求同 key 符合兩版輸出。新圖驗妥才切索引，之後由另行執行的回收清理失去 current 引用的 key；無引用的舊檔不會被上傳。
 
-資料入庫後先完成兩檔 art 的實際 WebP 檢視，再重產 2.0 發布凍結包並執行離線 dry-run；真正上傳 R2／公開仍需使用者另行同意。來源 raw 與來源歸檔證據依原契約保存，公開快照／WebP 依有限保留策略，不因新框已發布而刪除。
+資料入庫後先完成兩檔 art 的實際 WebP 檢視，再重新匯出並執行上傳的離線 dry-run；真正上傳 R2／公開仍需使用者另行同意。來源 raw 與來源歸檔證據依原契約保存，公開快照／WebP 依有限保留策略，不因新框已發布而刪除。

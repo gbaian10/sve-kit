@@ -15,7 +15,7 @@
 ### 1.1 版本與相容判斷
 
 - `format_version`、`min_reader_version` 為不含 prerelease/build 的 SemVer；後者屬獨立的快照 reader 契約版本，不是 web、Python 套件或 Git tag 版號。reader 明示自身契約版本、支援的 format 範圍及 capabilities。
-- 正式 `data_version` 為 `YYYYMMDDTHHMMSSZ-NNNN`，NNNN 是同 UTC 秒內從 0001 起的四位流水號。預覽為 `preview-YYYYMMDDTHHMMSSZ-NNNN`；只在隔離根中分配且不能進正式版本索引。`published_at` 是該批次 UTC Instant；預覽填產出時間，不代表公開發布。
+- 正式 `data_version` 為 `YYYYMMDDTHHMMSSZ-NNNN`，NNNN 是同 UTC 秒內從 0001 起的四位流水號。預覽為 `preview-YYYYMMDDTHHMMSSZ-NNNN`；只在隔離根中分配，只能進開發桶的版本索引，不能進正式版本索引。`published_at` 是該批次 UTC Instant；預覽填產出時間，不代表公開發布。
 - `required_capabilities` 是排序、唯一的非空 Code 陣列，2.0 的固定集合依 §5.4。reader 需同時滿足 format 範圍、最低契約版本、所有 capabilities，才能啟用；不因 major 相同就接受未知 minor。
 - 改 tuple 欄序／型別／nullable、移除欄、改 enum 語義、變動 canonical 規則或 join 語義，升 format major。新增可協商功能／新分片配置以 minor 升版並更新 Schema、共用 golden、reader 能力與最低版本。patch 只修正不改 wire bytes 解釋的規格問題。資料修字、來源新增與新卡只升 data_version。
 - 分片 bucket 的算法與數目由每個 format 版本的配置釘死；調整至少升 minor，不能只更換 data_version。`search.grammar_version/normalizer_version` 是搜尋契約的獨立 Code，不宣稱特定搜尋實作已完成；reader 必須明示支援這一對值，未知值停用搜尋並告知，不能用舊 normalizer 建錯索引。

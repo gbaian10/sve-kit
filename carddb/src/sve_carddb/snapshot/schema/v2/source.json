@@ -2557,10 +2557,7 @@
       "type": "object",
       "properties": {
         "data_version": {
-          "type": "string",
-          "pattern": {
-            "use": "FormalDataVersion"
-          }
+          "$ref": "#/$defs/DataVersion"
         },
         "published_at": {
           "$ref": "#/$defs/Instant"

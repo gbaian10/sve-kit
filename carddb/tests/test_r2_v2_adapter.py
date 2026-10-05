@@ -6,11 +6,10 @@ from typing import TYPE_CHECKING
 import httpx
 import pytest
 
+from sve_carddb.r2_upload.boundary import UploadError
 from sve_carddb.r2_upload.v2 import adapter
-from sve_carddb.r2_upload.v2.adapter import LEASE_HEADERS, LEASE_KEY, R2Store
+from sve_carddb.r2_upload.v2.adapter import R2Store, Stored
 from sve_carddb.r2_upload.v2.freshness import CDNFreshness, cdn_root
-from sve_carddb.snapshot.publish.storage import PublishError, Stored
-from sve_carddb.snapshot.values import canonical
 
 from .r2_sdk_fixtures import inventory, mock_client
 from .r2_v2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
@@ -42,7 +41,7 @@ def test_endpoint_rejects_prefix_or_suffix_injection_without_http(
     message: str,
 ) -> None:
     store, state, _transport = remote
-    with pytest.raises(PublishError, match="^" + message + "$"):
+    with pytest.raises(UploadError, match="^" + message + "$"):
         R2Store(account, bucket, CREDENTIALS, store.client)
     assert state.requests == []
 
@@ -55,7 +54,7 @@ def test_dot_segments_in_keys_are_rejected_before_signed_http(
     key: str,
 ) -> None:
     store, state, _transport = remote
-    with pytest.raises(PublishError, match=r"^Invalid S3 object key$"):
+    with pytest.raises(UploadError, match=r"^Invalid S3 object key$"):
         store.get(key)
     assert state.requests == []
 
@@ -64,22 +63,20 @@ def test_conditional_create_overwrite_and_stale_etag_are_atomic(
     remote: tuple[R2Store, ServerState, Loopback],
 ) -> None:
     store, state, _ = remote
-    with store.exclusive():
-        assert store.get(KEY) is None
-        assert store.put(KEY, b"old", META, expected=None)
-        first = store.get(KEY)
-        assert first is not None
-        assert first.raw == b"old"
-        assert not store.put(KEY, b"intruder", META, expected=None)
-        assert store.get(KEY) == first
-        assert store.put(KEY, b"new", META, expected=first.etag)
-        newer = store.get(KEY)
-        assert newer is not None
-        assert newer.raw == b"new"
-        assert newer.etag != first.etag
-        assert not store.put(KEY, b"stale", META, expected=first.etag)
-        assert store.get(KEY) == newer
-    assert state.objects[LEASE_KEY].raw == canonical({"format": 1, "owner": None})
+    assert store.get(KEY) is None
+    assert store.put(KEY, b"old", META, expected=None)
+    first = store.get(KEY)
+    assert first is not None
+    assert first.raw == b"old"
+    assert not store.put(KEY, b"intruder", META, expected=None)
+    assert store.get(KEY) == first
+    assert store.put(KEY, b"new", META, expected=first.etag)
+    newer = store.get(KEY)
+    assert newer is not None
+    assert newer.raw == b"new"
+    assert newer.etag != first.etag
+    assert not store.put(KEY, b"stale", META, expected=first.etag)
+    assert store.get(KEY) == newer
     assert [op[2] for op in state.operations if op[1] == KEY] == [
         "*",
         "*",
@@ -119,116 +116,24 @@ def test_list_pagination_signs_exact_query_and_preserves_key_names(
     assert "continuation-token=4" in state.requests[2][1]
 
 
-def test_cross_adapter_lease_excludes_second_writer_and_is_reusable(
-    remote: tuple[R2Store, ServerState, Loopback],
-) -> None:
-    first, state, _ = remote
-    second = R2Store(ACCOUNT, BUCKET, CREDENTIALS, first.client)
-    with (
-        first.exclusive(),
-        pytest.raises(
-            PublishError,
-            match=r"^Deployment writer lease is active or invalid; operator recovery required$",
-        ),
-    ):
-        with second.exclusive():
-            pytest.fail("concurrent lease acquired")
-    with second.exclusive():
-        assert state.objects[LEASE_KEY].raw != canonical({"format": 1, "owner": None})
-    assert state.objects[LEASE_KEY].raw == canonical({"format": 1, "owner": None})
-
-
-def test_stale_acquisition_cannot_overwrite_a_live_owner(
-    remote: tuple[R2Store, ServerState, Loopback],
-) -> None:
-    store, state, _ = remote
-    assert store.put(
-        LEASE_KEY, canonical({"format": 1, "owner": None}), LEASE_HEADERS, expected=None
-    )
-    idle = store.get(LEASE_KEY)
-    assert idle is not None
-    with store.exclusive():
-        owner = state.objects[LEASE_KEY]
-        assert not store.put(
-            LEASE_KEY, b"stale owner", LEASE_HEADERS, expected=idle.etag
-        )
-        assert state.objects[LEASE_KEY] == owner
-
-
-def test_lost_lease_put_response_never_retries_or_guesses_unlock(
-    remote: tuple[R2Store, ServerState, Loopback],
-) -> None:
-    store, state, transport = remote
-    transport.lose_next_put = True
-    with pytest.raises(PublishError, match=r"^R2 transport or protocol failed$"):
-        with store.exclusive():
-            pytest.fail("uncertain owner may not proceed")
-    assert len(state.operations) == 1
-    assert state.objects[LEASE_KEY].raw != canonical({"format": 1, "owner": None})
-    with pytest.raises(
-        PublishError,
-        match=r"^Deployment writer lease is active or invalid; operator recovery required$",
-    ):
-        with store.exclusive():
-            pytest.fail("no automatic takeover")
-
-
-def test_public_put_requires_intact_writer_lease(
-    remote: tuple[R2Store, ServerState, Loopback],
-) -> None:
-    store, state, _ = remote
-    with pytest.raises(
-        PublishError, match=r"^Deployment writer lease changed; stop and review$"
-    ):
-        store.put(KEY, b"x", META, expected=None)
-    assert state.operations == []
-
-    def external_change() -> None:
-        with store.exclusive():
-            state.objects[LEASE_KEY] = Stored(
-                b"foreign owner", '"foreign"', LEASE_HEADERS
-            )
-            store.put(KEY, b"x", META, expected=None)
-
-    with pytest.raises(
-        PublishError, match=r"^Deployment writer lease changed; stop and review$"
-    ):
-        external_change()
-    assert KEY not in state.objects
-    assert state.objects[LEASE_KEY].raw == b"foreign owner"
-
-
 @pytest.mark.parametrize("status", [301, 403, 409, 500, 501])
 def test_unsupported_or_failed_conditions_have_no_fallback_and_no_secret_output(
     remote: tuple[R2Store, ServerState, Loopback], status: int
 ) -> None:
     store, state, _ = remote
-    with store.exclusive():
-        state.fail_put = status
-        try:
-            with pytest.raises(
-                PublishError,
-                match=r"^R2 conditional PUT failed; no unconditional fallback$",
-            ) as exc:
-                store.put(KEY, b"candidate", META, expected=None)
-            assert "synthetic-secret" not in str(exc.value)
-            assert "synthetic-access" not in str(exc.value)
-            assert "Signature=" not in str(exc.value)
-        finally:
-            state.fail_put = None
+    state.fail_put = status
+    try:
+        with pytest.raises(
+            UploadError,
+            match=r"^R2 conditional PUT failed; no unconditional fallback$",
+        ) as exc:
+            store.put(KEY, b"candidate", META, expected=None)
+        assert "synthetic-secret" not in str(exc.value)
+        assert "synthetic-access" not in str(exc.value)
+        assert "Signature=" not in str(exc.value)
+    finally:
+        state.fail_put = None
     assert KEY not in state.objects
-
-
-def test_conditional_delete_is_disabled_without_even_a_read_or_delete(
-    remote: tuple[R2Store, ServerState, Loopback],
-) -> None:
-    store, state, _ = remote
-    with pytest.raises(
-        PublishError,
-        match=r"^R2 conditional DELETE is unverified; use separately approved GC$",
-    ):
-        store.delete(KEY, expected='"x"')
-    assert state.requests == []
 
 
 @pytest.mark.parametrize(
@@ -238,7 +143,7 @@ def test_inventory_cannot_expand_its_public_scope(
     remote: tuple[R2Store, ServerState, Loopback], prefix: str
 ) -> None:
     store, state, _ = remote
-    with pytest.raises(PublishError, match=r"^List prefix is not explicitly public$"):
+    with pytest.raises(UploadError, match=r"^List prefix is not explicitly public$"):
         store.keys(prefix)
     assert state.requests == []
 
@@ -262,7 +167,7 @@ def test_inventory_cannot_expand_its_public_scope(
 def test_inventory_xml_refuses_entities_unknown_root_and_malformed_bytes(
     xml: bytes, message: str
 ) -> None:
-    with pytest.raises(PublishError, match=r"^" + message + "$"):
+    with pytest.raises(UploadError, match=r"^" + message + "$"):
         inventory(xml, "snapshots/blobs/")
 
 
@@ -278,7 +183,7 @@ def test_inventory_xml_refuses_entities_unknown_root_and_malformed_bytes(
     ],
 )
 def test_cdn_root_rejects_secret_bearing_or_ambiguous_urls(root: str) -> None:
-    with pytest.raises(PublishError, match=r"^Explicit HTTPS CDN root required$"):
+    with pytest.raises(UploadError, match=r"^Explicit HTTPS CDN root required$"):
         cdn_root(root)
 
 
@@ -331,7 +236,7 @@ def test_cdn_refuses_unpinned_or_queryless_urls(
     with (
         httpx.Client(transport=transport, trust_env=False) as client,
         pytest.raises(
-            PublishError, match=r"^CDN URL is outside the pinned query-bearing root$"
+            UploadError, match=r"^CDN URL is outside the pinned query-bearing root$"
         ),
     ):
         CDNFreshness("https://cdn.invalid/", client).get(url)
@@ -357,7 +262,7 @@ def test_object_reads_require_strong_etag_and_bounded_bytes(
     if kind == "overflow":
         monkeypatch.setattr(adapter, "MAX_OBJECT", 4)
     with pytest.raises(
-        PublishError,
+        UploadError,
         match=r"^Remote response exceeds the configured byte limit$"
         if kind == "overflow"
         else r"^R2 object requires a strong opaque ETag$",
@@ -370,13 +275,12 @@ def test_put_refuses_non_object_preconditions_before_http(
     remote: tuple[R2Store, ServerState, Loopback], expected: str
 ) -> None:
     store, state, _ = remote
-    with store.exclusive():
-        count = len(state.operations)
-        with pytest.raises(
-            PublishError, match=r"^Conditional PUT requires an opaque object ETag$"
-        ):
-            store.put(KEY, b"x", META, expected=expected)
-        assert len(state.operations) == count
+    count = len(state.operations)
+    with pytest.raises(
+        UploadError, match=r"^Conditional PUT requires an opaque object ETag$"
+    ):
+        store.put(KEY, b"x", META, expected=expected)
+    assert len(state.operations) == count
 
 
 @pytest.mark.parametrize(
@@ -412,7 +316,7 @@ def test_inventory_rejects_out_of_scope_and_incomplete_pages(
             if change == "empty-flag"
             else "<IsTruncated>invalid</IsTruncated>",
         )
-    with pytest.raises(PublishError, match="^" + message + "$"):
+    with pytest.raises(UploadError, match="^" + message + "$"):
         inventory(raw.encode(), prefix)
 
 
@@ -443,44 +347,31 @@ def test_list_repeating_token_stops_without_infinite_requests() -> None:
             ),
         )
         with pytest.raises(
-            PublishError, match=r"^R2 inventory pagination repeats a token$"
+            UploadError, match=r"^R2 inventory pagination repeats a token$"
         ):
             store.keys("snapshots/blobs/")
     assert calls == 2
 
 
-def test_racing_lease_creation_stops_on_412_before_the_writer_enters(
+@pytest.mark.parametrize(
+    "key", ["private/x.json", "snapshots/versions/index.json", "images/card_s/0.webp"]
+)
+def test_delete_refuses_non_public_keys_before_http(
+    remote: tuple[R2Store, ServerState, Loopback], key: str
+) -> None:
+    store, state, _ = remote
+    with pytest.raises(
+        UploadError, match=r"^Deletion key is outside the public namespaces$"
+    ):
+        store.delete(key)
+    assert state.requests == []
+
+
+def test_delete_removes_one_public_object_without_condition(
     remote: tuple[R2Store, ServerState, Loopback],
 ) -> None:
     store, state, _ = remote
-    state.race_lease = True
-    with pytest.raises(
-        PublishError, match=r"^Deployment writer lease was acquired concurrently$"
-    ):
-        with store.exclusive():
-            pytest.fail("racing lease may not enter")
-    assert state.objects[LEASE_KEY].raw == b"foreign active owner"
-    assert all(op[1] == LEASE_KEY for op in state.operations)
-
-
-def test_acquisition_readback_must_match_claimed_owner(
-    remote: tuple[R2Store, ServerState, Loopback], monkeypatch: pytest.MonkeyPatch
-) -> None:
-    store, state, _ = remote
-    real_get = store.get
-    calls = 0
-
-    def get(key: str) -> Stored | None:
-        nonlocal calls
-        calls += 1
-        if calls == 2:
-            return Stored(b"foreign bytes", '"foreign"', LEASE_HEADERS)
-        return real_get(key)
-
-    monkeypatch.setattr(store, "get", get)
-    with pytest.raises(
-        PublishError, match=r"^Deployment writer lease acquisition is uncertain$"
-    ):
-        with store.exclusive():
-            pytest.fail("unverified owner may not enter")
-    assert state.objects[LEASE_KEY].raw != canonical({"format": 1, "owner": None})
+    state.objects[KEY] = Stored(b"x", '"x"', META)
+    store.delete(KEY)
+    assert KEY not in state.objects
+    assert state.operations == [("DELETE", KEY, None)]

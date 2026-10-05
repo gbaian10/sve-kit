@@ -60,25 +60,22 @@ class ImageReference:
 @dataclass(frozen=True)
 class PreviewRoots:
     preview: Path
-    cdn: Path
     cache: Path
 
-    def validate(self, archives: Iterable[Path]) -> None:
-        """Resolve aliases before rejecting public, private and source root overlap."""
-        roots = (self.preview, self.cdn, self.cache, *archives)
+    def validate(self, protected: Iterable[Path]) -> None:
+        """Resolve aliases before rejecting output, cache and protected input overlap."""
+        roots = (self.preview, self.cache, *protected)
         if any(not root.is_absolute() for root in roots):
             raise ValueError("Image roots must be absolute paths")
         if any(root.is_symlink() for root in roots):
             raise ValueError("Image roots must not be symlinks")
         resolved = tuple(root.resolve() for root in roots)
-        for index, root in enumerate(resolved[:3]):
+        for index, root in enumerate(resolved[:2]):
             if any(
                 root.is_relative_to(other) or other.is_relative_to(root)
                 for other in resolved[index + 1 :]
             ):
-                raise ValueError(
-                    "Preview, CDN, cache and archive roots must not overlap"
-                )
+                raise ValueError("Image output, cache and input roots must not overlap")
         for root in (self.preview, self.cache):
             if root.exists() and any(path.is_symlink() for path in root.rglob("*")):
                 raise ValueError("Image output roots must not contain symlinks")
@@ -90,6 +87,7 @@ class EncodedImage:
     raw_bytes: int
     result: VariantSet
     region: Region
+    elapsed_seconds: float
 
 
 @dataclass(frozen=True)
@@ -126,8 +124,6 @@ class ImageBuild:
             ),
             "unique_webp_files": len(blobs),
             "unique_webp_bytes": sum(blobs.values()),
-            "cache_hits": sum(item.result.cache_hit for item in self.images),
-            "elapsed_milliseconds": round(self.elapsed_seconds * 1000),
             "printing_faces": len(references),
             "mapped_printing_faces": sum(ref.source_url in urls for ref in references),
             "missing": [
@@ -143,6 +139,20 @@ class ImageBuild:
                         if item.source.url not in used
                     }
                 )
+            ),
+        }
+
+    def execution(self) -> dict[str, int]:
+        """Measure this run only; per-image times overlap when workers run in parallel."""
+        hits = [item for item in self.images if item.result.cache_hit]
+        encoded = [item for item in self.images if not item.result.cache_hit]
+        return {
+            "wall_milliseconds": round(self.elapsed_seconds * 1000),
+            "cache_hits": len(hits),
+            "new_encodings": len(encoded),
+            "reuse_milliseconds": round(sum(i.elapsed_seconds for i in hits) * 1000),
+            "new_encoding_milliseconds": round(
+                sum(i.elapsed_seconds for i in encoded) * 1000
             ),
         }
 
@@ -273,9 +283,8 @@ def build_regional_assets(
     region: Region,
     crops: ImageCrops,
     workers: int = 1,
-    reuse_only: bool = False,
 ) -> ImageBuild:
-    """Convert exactly one pinned regional image batch before public publication."""
+    """Convert one pinned regional image batch, reusing every verified cache hit."""
     if region not in PARSERS:
         raise ValueError("Unsupported image region")
     roots.validate((images.root,))
@@ -290,6 +299,7 @@ def build_regional_assets(
     start = perf_counter()
 
     def convert(version: str) -> EncodedImage:
+        began = perf_counter()
         source, raw, descriptor = images.read(
             version, parser_version=DEFAULT_RECIPE.version
         )
@@ -315,10 +325,11 @@ def build_regional_assets(
             ),
             blob_root=roots.preview,
             cache_root=roots.cache,
-            reuse_only=reuse_only,
             override=crops.box(descriptor),
         )
-        return EncodedImage(source, descriptor.raw_bytes, result, region)
+        return EncodedImage(
+            source, descriptor.raw_bytes, result, region, perf_counter() - began
+        )
 
     versions = tuple(
         sorted(item.source_version_id for item in images.inventory.current)

@@ -58,7 +58,7 @@ Schema descriptor 驗完整欄序、nullable、enum 與額外鍵，不以 SQL �
 
 所有非 null ID，包括 nested wording、譯文、裁定與印刷歷史，均須在同一公開投影可達。
 無用文字與翻譯不出貨；text ID 按 exact UTF-8 字串生成並驗碰撞，不重配舊鍵。
-新建的 glossary／譯文字串使用相同配號規則；歷史發布鍵的碰撞仍須由建置／發布流程提供完整聯集驗證。
+新建的 glossary／譯文字串使用相同配號規則；碰撞檢查只涵蓋同一份快照，不保存跨版本的發布鍵索引。
 
 ## 建置接點
 

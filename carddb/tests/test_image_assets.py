@@ -3,6 +3,7 @@
 import hashlib
 import shutil
 from dataclasses import replace
+from itertools import count
 from typing import TYPE_CHECKING
 
 import pytest
@@ -16,6 +17,7 @@ from sve_carddb.image_assets import (
     verify_assets,
 )
 from sve_carddb.manifest import Kind, Manifest, Region
+from sve_carddb.snapshot.values import object_value, parse
 from sve_carddb.source_archive import ArchiveError, seal_batch
 
 from .test_image_variants import png
@@ -43,7 +45,7 @@ def frozen(
 
 
 def roots(tmp_path: Path) -> PreviewRoots:
-    return PreviewRoots(tmp_path / "preview", tmp_path / "cdn", tmp_path / "cache")
+    return PreviewRoots(tmp_path / "preview", tmp_path / "cache")
 
 
 def bytes_by_path(build: ImageBuild, root: Path) -> dict[str, bytes]:
@@ -93,7 +95,6 @@ def test_serial_parallel_resume_and_hashes_use_only_frozen_bytes(
             path
             == f"images/sha256/{hashlib.sha256(data).hexdigest()[:2]}/{hashlib.sha256(data).hexdigest()}.webp"
         )
-    assert not serial_roots.cdn.exists()
     assert not (serial_roots.preview / "snapshots").exists()
     verify_asset_sources(serial, {frozen.store_id: frozen.root})
     assert before == {p: p.read_bytes() for p in frozen.root.rglob("*") if p.is_file()}
@@ -105,7 +106,7 @@ def test_serial_parallel_resume_and_hashes_use_only_frozen_bytes(
     resumed = build_regional_assets(
         frozen, serial_roots, workers=2, region="jp", crops=empty_crops
     )
-    assert resumed.report()["cache_hits"] == 3
+    assert resumed.execution()["cache_hits"] == 3
     assert bytes_by_path(resumed, serial_roots.preview) == blobs
 
 
@@ -150,8 +151,7 @@ def test_build_rechecks_blob_tampering_before_returning(
     "case",
     [
         "same",
-        "preview-in-cdn",
-        "cdn-in-preview",
+        "preview-in-cache",
         "cache-in-preview",
         "archive",
         "symlink",
@@ -169,11 +169,9 @@ def test_each_root_isolation_constraint_fails_before_writing(
     monkeypatch.chdir(tmp_path)
     output = roots(tmp_path)
     if case == "same":
-        output = replace(output, preview=output.cdn)
-    elif case == "preview-in-cdn":
-        output = replace(output, preview=output.cdn / "nested")
-    elif case == "cdn-in-preview":
-        output = replace(output, cdn=output.preview / "nested")
+        output = replace(output, preview=output.cache)
+    elif case == "preview-in-cache":
+        output = replace(output, preview=output.cache / "nested")
     elif case == "cache-in-preview":
         output = replace(output, cache=output.preview / "private")
     elif case == "archive":
@@ -353,76 +351,106 @@ def test_interrupted_conversion_resumes_complete_blobs(
     assert not (output.preview / "snapshots").exists()
     monkeypatch.setattr(image_assets, "build_variants", original)
     resumed = build_regional_assets(frozen, output, region="jp", crops=empty_crops)
-    hits = resumed.report()["cache_hits"]
-    assert isinstance(hits, int)
-    assert hits >= 1
+    assert resumed.execution()["cache_hits"] >= 1
     assert all(p.read_bytes() == data for p, data in before.items())
     assert len(resumed.images) == 3
 
 
 @pytest.fixture(scope="module")
-def readonly_images(
+def cached_images(
     empty_crops: ImageCrops,
     tmp_path_factory: pytest.TempPathFactory,
     image_archive_template: tuple[Path, str, str],
-) -> tuple[FrozenSources, PreviewRoots]:
+) -> tuple[FrozenSources, PreviewRoots, ImageBuild]:
     root, store_id, batch = image_archive_template
-    output = roots(tmp_path_factory.mktemp("readonly-images"))
+    output = roots(tmp_path_factory.mktemp("cached-images"))
     source = FrozenSources(root, store_id, batch)
-    build_regional_assets(source, output, region="jp", crops=empty_crops)
-    return source, output
+    build = build_regional_assets(source, output, region="jp", crops=empty_crops)
+    return source, output, build
+
+
+def tree(root: Path) -> dict[Path, bytes]:
+    return {p.relative_to(root): p.read_bytes() for p in root.rglob("*") if p.is_file()}
 
 
 @pytest.mark.parametrize("case", ["hit", "no-cache", "bad-cache", "no-blob"])
-def test_readonly_reuse_never_encodes_or_repairs_inputs(
+def test_cache_hits_are_reused_and_misses_are_encoded(
     empty_crops: ImageCrops,
-    readonly_images: tuple[FrozenSources, PreviewRoots],
+    cached_images: tuple[FrozenSources, PreviewRoots, ImageBuild],
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     case: str,
 ) -> None:
-    frozen, base = readonly_images
+    frozen, base, first = cached_images
     output = roots(tmp_path)
     shutil.copytree(base.preview, output.preview)
     shutil.copytree(base.cache, output.cache)
-    if case == "no-cache":
-        next(output.cache.rglob("*.json")).unlink()
-    elif case == "bad-cache":
-        next(output.cache.rglob("*.json")).write_bytes(b"{}")
+    stale: set[str] = set()
+    if case in {"no-cache", "bad-cache"}:
+        entry = next(output.cache.rglob("*.json"))
+        sha = object_value(parse(entry.read_bytes()))["source_sha256"]
+        stale = {
+            i.result.image_id for i in first.images if i.result.source_sha256 == sha
+        }
+        if case == "no-cache":
+            entry.unlink()
+        else:
+            entry.write_bytes(b"{}")
     elif case == "no-blob":
-        next(output.preview.rglob("*.webp")).unlink()
-    before = {
-        p: p.read_bytes()
-        for root in (frozen.root, output.preview, output.cache)
-        for p in root.rglob("*")
-        if p.is_file()
-    }
-
-    def forbidden(*_args: object, **_kwargs: object) -> None:
-        pytest.fail("read-only image reuse cannot encode or write")
-
-    monkeypatch.setattr(image_variants, "_encode", forbidden)
-    monkeypatch.setattr(image_variants, "_write_blob", forbidden)
-    monkeypatch.setattr(image_variants, "_write_cache", forbidden)
-    if case == "hit":
-        build = build_regional_assets(
-            frozen, output, workers=4, reuse_only=True, region="jp", crops=empty_crops
-        )
-        assert build.report()["cache_hits"] == len(build.images)
+        blob = next(output.preview.rglob("*.webp"))
+        path = blob.relative_to(output.preview).as_posix()
+        stale = {
+            item.result.image_id
+            for item in first.images
+            if any(variant.path == path for variant in item.result.variants)
+        }
+        blob.unlink()
     else:
-        with pytest.raises(ValueError, match="cache is incomplete"):
-            build_regional_assets(
-                frozen,
-                output,
-                workers=4,
-                reuse_only=True,
-                region="jp",
-                crops=empty_crops,
-            )
-    assert before == {
-        p: p.read_bytes()
-        for root in (frozen.root, output.preview, output.cache)
-        for p in root.rglob("*")
-        if p.is_file()
+
+        def forbidden(*_args: object, **_kwargs: object) -> None:
+            pytest.fail("a verified cache hit cannot encode or write")
+
+        for name in ("_encode", "_write_blob", "_write_cache"):
+            monkeypatch.setattr(image_variants, name, forbidden)
+    archive = tree(frozen.root)
+    build = build_regional_assets(
+        frozen, output, workers=4, region="jp", crops=empty_crops
+    )
+    # Identical sources share one cache key, so parallel workers may encode either copy.
+    misses = {i.result.image_id for i in build.images if not i.result.cache_hit}
+    assert misses <= stale
+    assert bool(misses) == bool(stale)
+    assert build.execution()["new_encodings"] == len(misses)
+    assert build.execution()["cache_hits"] == len(build.images) - len(misses)
+    assert [item.result.variants for item in build.images] == [
+        item.result.variants for item in first.images
+    ]
+    assert tree(output.preview) == tree(base.preview)
+    assert tree(output.cache) == tree(base.cache)
+    assert tree(frozen.root) == archive
+
+
+def test_execution_splits_reuse_and_encoding_time(
+    empty_crops: ImageCrops,
+    cached_images: tuple[FrozenSources, PreviewRoots, ImageBuild],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    frozen, base, _ = cached_images
+    output = roots(tmp_path)
+    shutil.copytree(base.preview, output.preview)
+    shutil.copytree(base.cache, output.cache)
+    next(output.cache.rglob("*.json")).unlink()
+    ticks = count()
+    # Each clock read advances one second, so every image spans exactly one second.
+    monkeypatch.setattr(image_assets, "perf_counter", lambda: float(next(ticks)))
+    build = build_regional_assets(
+        frozen, output, workers=1, region="jp", crops=empty_crops
+    )
+    assert build.execution() == {
+        "wall_milliseconds": (2 * len(build.images) + 1) * 1000,
+        "cache_hits": len(build.images) - 1,
+        "new_encodings": 1,
+        "reuse_milliseconds": (len(build.images) - 1) * 1000,
+        "new_encoding_milliseconds": 1000,
     }
-    assert not output.cdn.exists()

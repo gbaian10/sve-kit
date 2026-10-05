@@ -37,16 +37,20 @@ the original EN observation, with no new translation workflow.
 
 ```bash
 sve-carddb snapshot export-offline --inputs recipe.json \
-  --preview-dir /path/to/private-preview --cdn-dir /path/to/formal-cdn \
+  --preview-dir /path/to/public-preview \
+  --private-dir /path/to/preview-private \
   --bundle-dir /path/to/private-build-bundle
 ```
 
-All output roots must be disjoint from protected inputs and formal output. The
-bundle is a new private directory containing SQLite, inputs, report and seal.
+All output roots must be disjoint from the protected repo, archive and recipe.
+`--preview-dir` receives only public snapshot files and images. `--private-dir`
+is a separate, persistent directory for `inputs/<hash>.json`,
+`reports/<manifest-hash>.json` and `media-state.json`; keep it and back it up.
+The bundle is a new private directory containing SQLite, inputs, report and seal.
 Its complete source-use closure and archive pins are independently checked by
 `publish_bundle`; `verify_bundle` can recheck it. The snapshot writer verifies
-both shard and text-union readback before switching the private preview pointer.
-The bundle and reports are private: do not deploy them with public snapshots.
+both shard and text-union readback before switching the preview pointer.
+The bundle and private directory are never uploaded.
 
 This remains a `preview-` candidate, with no formal index or activation (#34).
 `export-offline` is the only export command. It selects EN and JP and permits
@@ -56,23 +60,28 @@ no image publication is claimed.
 
 ## Regional preview images
 
-Prepare a separate private image library and recipe cache before exporting.
-`build_regional_assets(FrozenSources(...), roots, region=pin.region, crops=crops,
-workers=2)` converts one exclusively regional image batch. `load_image_crops`
-reads `authored/image-crops.yaml` from the working tree, so uncommitted box edits apply.
+Pass an existing private image library and recipe cache directory together.
+For each pinned image batch, `export-offline` loads `authored/image-crops.yaml`
+from the working tree, so uncommitted box edits apply, and calls
+`build_regional_assets`. A verified five-size cache hit is reused; a missing or
+stale entry (new source bytes, crop box or recipe) is encoded into the library
+and cache. A new crop gets a new cache key, so an old crop is never substituted.
 Keep the JP and EN sealed batches independent, and retain each original PNG.
 
 ```bash
 sve-carddb snapshot export-offline --inputs recipe.json \
-  --preview-dir /path/to/new-preview --cdn-dir /path/to/formal-cdn \
+  --preview-dir /path/to/public-preview \
+  --private-dir /path/to/preview-private \
   --bundle-dir /path/to/new-private-build-bundle \
   --image-assets-dir /path/to/private-image-library \
-  --image-cache-dir /path/to/private-recipe-cache
+  --image-cache-dir /path/to/private-recipe-cache \
+  --workers 2
 ```
 
-The two image options must be provided together. CLI export only reuses validated
-five-size caches, with two workers, and never silently encodes or substitutes an
-old crop. The builder requires all current members of both pinned image batches,
+`--workers` defaults to 2 and accepts 1 to 4; output bytes do not depend on it.
+stdout `image_execution` reports wall time, cache hits, new encodings and the
+summed per-image reuse and encoding times, which overlap with several workers.
+The builder requires all current members of both pinned image batches,
 verifies PNG hashes and oriented dimensions, and binds pages using the region's
 extractor, exact original `img src` and adopted `source_face_map`. Card-number
 suffixes do not infer cross-region identity. Source uses are retained separately
@@ -85,9 +94,9 @@ original PNGs and recipe caches stay private. Reports include applied/unused
 crops, annotation mismatches and verified reprint candidates in both regions.
 Available assets remove the image integration gate from this preview report;
 formal activation and source coverage still require their existing gates.
-Preview exports remain local. R2 publication uses `r2 upload-v2` with a formally
-gated frozen snapshot 2.0 release and its existing ledger/checkpoint inputs;
-see [the publication guide](../r2_upload/v2/README.md).
+`r2 upload-v2` uploads the preview root's current manifest closure and images to
+the development bucket as a `preview-` index entry; see
+[the upload guide](../r2_upload/v2/README.md).
 
 ## Supplemental capabilities
 
@@ -156,14 +165,16 @@ the isolated preview writes only the five display sizes to
 `images/<size>/<int_id>[-f<ordinal>].webp`. `display_url` selects the card or art
 version from media, never from the card number or an array position.
 
-`private/media-revisions.jsonl` reserves local preview revisions under an exclusive
-lock and fsyncs before producing a candidate. Failed numbers remain reserved.
-`private/media-committed.json` supplies the last successful card/art comparison;
-removed bindings retain tombstones. Pure text changes preserve both versions,
-art-only changes preserve the card version, and restoration uses a new revision.
-These files are private preview state, not an R2
-publisher, backed-up production allocator, formal release receipt or CDN check.
-Do not upload `private/` or `reports/`.
+`media-state.json` in the private directory holds the high-water revision and
+the last export's card/art comparison. Each export first raises the high-water
+mark, so a failed export never reuses its number, and records its own groups
+before switching the pointer. Pure text changes preserve both versions, art-only
+changes preserve the card version, and a removed, restored or rebound image gets
+the new revision. Exports into one private directory run one at a time. A missing
+state file starts again at revision 1, which would reuse URLs a bucket may
+already cache, so restore it from backup instead. Before overwriting an image
+with different bytes, the writer removes the preview pointer; an interrupted
+export leaves no pointer and must be rerun before uploading.
 
 2.0 supports the same-name wire capability and rejects malformed nonempty links.
 The existing offline recipe still keeps policy browsing private: its public

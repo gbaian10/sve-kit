@@ -1,191 +1,125 @@
-# R2 publication of snapshot 2.0
+# R2 upload of snapshot 2.0
 
-`r2 upload-v2` connects the injected 2.0 publisher to signed S3 requests and ordinary
-CDN GETs. It accepts only an already formally gated, frozen **2.0** release;
-it never changes `preview-*` into a formal data version. Snapshot 1.x previews
-have no R2 upload command. No credentials or account, bucket or CDN hostname
-are stored in the repository or passed through CI.
-This restriction refers to the uploader; Worker deployment configuration declares
-its bound bucket and hostname, while credentials and account IDs remain outside the repository.
+`r2 upload-v2` uploads the public root that `snapshot export-offline` wrote
+(`--preview-dir`). It reads `snapshots/preview/current.json`, takes that manifest's
+closure and its referenced images, and nothing else. There is no separate release
+bundle, ledger, checkpoint, reservation or writer lease: one maintainer runs the
+export and then the upload on one machine. No credentials or account, bucket or
+CDN hostname are stored in the repository or passed through CI.
 
-## Offline preparation
+The data versions are `preview-…`, so the uploaded index entry is a development
+entry. Formal releases still need the gates tracked by #34; renaming a preview
+does not make it formal.
 
-The caller remains responsible for the source/adoption/publication gates in #34.
-Initialize the publisher's `Ledger(primary_root, backup_root)` explicitly only for
-a first deployment. Reserve a unique formal `data_version` before producing media,
-use the returned revision with `prepare_media`, export and formally gate the
-snapshot upstream, then call `snapshot.publish.plan.prepare`. Automatic promotion,
-initialization, recovery, supersession and allocation are intentionally absent
-from the upload CLI. Failed and unused reservations must remain in the ledger.
+## What is uploaded
 
-The helper `r2_upload.v2.bundle.write_bundle(empty_absolute_directory, release)`
-freezes a validated `Release` into:
+- `snapshots/manifests/<sha256>.json` and its `.gz`, plus `.br` when the export
+  wrote one;
+- every payload, the text union and changes listed by the manifest, with the
+  `.gz`/`.br` siblings it declares;
+- `images/<size>/<int_id>[-f<ordinal>].webp` for each available, approved
+  printing face size listed in the manifest's media rows;
+- `snapshots/versions/index.json`, written last.
 
-- `release.json`: private format-1 descriptor, manifest path, reserved media state,
-  verified assets/source hashes, image confirmation IDs and compression recipe;
-- `snapshots/blobs/` and `snapshots/manifests/`: exact immutable raw/gzip/optional
-  Brotli members, including adjacent changes when present;
-- `sources/`: verified, private content-addressed WebP inputs. Their upload keys
-  come from the permanent printing/face paths in the media plan.
+Older blobs left in the export root, the private directory (`--private-dir`:
+inputs, reports, media state), the DB bundle, the image library and recipe cache
+are never read for upload. Before any credential or HTTP access, the command
+checks the pointer's manifest hash, the schema, every payload hash and length,
+gzip/Brotli decoding, the reader join and each image's byte count, WebP format
+and dimensions. Symlinks and special files are refused. The join resolves the
+printing/face/media rows used to select image keys and checks their reference
+closure. Encoded siblings have no independent hash, so decoding checks that
+they carry the verified raw bytes; upload never recompresses them. The writer
+already checks the text union's equivalence to the shards. Upload checks its
+manifest hash and length without running a second full reader join.
 
-`release.json` and `sources/` are never uploaded. Keep this bundle outside git;
-it can contain official text. The loader validates closure, canonical hashes,
-encodings, image bytes/dimensions, reservation/committed basis and exact inventory;
-it refuses unexpected files, symlinks and preview manifests before credentials
-or HTTP clients. It does not open an archive, crawl manifest or latest cache.
-The bundle is a handoff boundary for a formally gated build, not a new build or
-an invented approval receipt.
+Headers come from the contract, not from file extensions:
 
-Save the ledger checkpoint **independently** with
-`r2_upload.v2.bundle.save_checkpoint(checkpoint_file, ledger)` after reservation
-and preparation. Use a mode-600 file with an existing absolute parent outside
-both ledger roots and an independently backed-up location. The uploader requires
-an exact current pin; it never replaces a missing/stale pin before execution.
-An invalid ledger/backup stops the command. Crash recovery still uses the verified
-publisher recovery API and independent evidence, not current/previous alone.
+| Object | Content-Type | Cache-Control | Content-Encoding |
+| --- | --- | --- | --- |
+| JSON | `application/json` | `public,max-age=31536000,immutable` | none, `gzip` or `br` for siblings |
+| WebP | `image/webp` | `public,max-age=86400,must-revalidate` | none |
+| index | `application/json` | `no-store` | none |
+
+## Dry-run
 
 ```bash
 uv --directory carddb run sve-carddb r2 upload-v2 \
-  --release-dir /explicit/frozen-release \
-  --ledger-dir /explicit/primary \
-  --backup-dir /independent/backup \
-  --checkpoint-file /third/checkpoints/release.json \
-  --cdn-base-url https://cdn.example.invalid/ --dry-run
+  --export-dir /explicit/preview-root --dry-run
 ```
 
-Dry-run is the default. It neither reads credentials, creates an HTTP client nor
-changes state/checkpoints. Counts and bytes are complete local **candidates**, not
-remote missing-object counts. Image `v` ranges distinguish all display tokens from
-the newly reserved token. Index size/previous come from durable receipts; execute
-must reconcile them with the real index. No remote inventory can be discovered
-without I/O. `would_collect` is empty because collection requires a separate
-per-run inventory and consent, rather than a guessed list of obsolete objects.
-Brotli bundles use the locked Python `brotli` package for bounded decompression against raw JSON.
-No external compressor or Brotli CLI option is required; frozen manifest and
-changes bytes are preserved without recompression.
+Dry-run is the default. It reads no credentials, opens no HTTP client and writes
+nothing. It prints the data version, manifest hash and local JSON/image counts
+and bytes; how many objects already exist remotely is unknown offline.
 
-## Explicit maintainer execution
+## Execute
 
-Add `--execute --confirm-maintainer-authorization` only after contemporary
-maintainer approval and separate development acceptance. Target selection uses
-explicit `--account-id`/`--bucket`, or `R2_ACCOUNT_ID`/`R2_DEV_BUCKET` only in execute
-mode. Credentials are read solely from `SVE_R2_ACCESS_KEY_ID` and
-`SVE_R2_SECRET_ACCESS_KEY`; missing values fail without HTTP. No env file, profile,
-metadata service or ambient AWS credentials are read. Production and development
-must have different operator-scoped credentials. Agents do not execute this
-against a real service. CI only runs the synthetic tests; no R2 secrets belong
-in Actions.
+```bash
+uv --directory carddb run sve-carddb r2 upload-v2 \
+  --export-dir /explicit/preview-root \
+  --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" \
+  --skip-cdn-verify --execute
+```
 
-The origin uses the shared typed boto3 boundary in `../sdk.py`; the CDN remains
-an unsigned httpx client. The HTTPS endpoint is derived from the account and
-bucket. The SDK applies SigV4 to the exact
-conditional headers, payload and sorted percent-encoded query parameters, including
-list continuation tokens. PUT uses `If-None-Match: *` or an opaque `If-Match` ETag;
-412 means a failed condition. Unsupported conditions/statuses, redirects and
-transport failures stop, with no plain-PUT fallback or write retry. GET preserves
-wire bytes of compressed siblings rather than transparently decoding them. Both
-clients disable proxies/ambient configuration and redirects; per-I/O timeout is
-30 seconds, with no whole-run deadline. Responses are bounded to 128 MiB per object
-and 2 MiB per inventory page; exceeding the bound fails, not truncates. Errors omit
-response bodies, request headers, credentials and signatures. Do not enable HTTP
-wire logging or `--showlocals` around execution.
+Target selection uses explicit `--account-id`/`--bucket`, or `R2_ACCOUNT_ID`/
+`R2_DEV_BUCKET` in execute mode. Credentials are read only from
+`SVE_R2_ACCESS_KEY_ID` and `SVE_R2_SECRET_ACCESS_KEY`; missing values fail
+without HTTP. No env file, profile, metadata service or ambient AWS credentials
+are read. Agents and CI do not run this against a real service.
 
-All cooperating publishers/collectors, including on other machines, share
-`coordination/snapshot-v2-writer.json`. It is a non-expiring CAS lease with a unique
-owner and `no-store` metadata. Unlock is another conditional PUT to the idle record;
-it never uses DELETE. Crash or uncertain acquisition leaves the active record and
-stops other writers; there is **no timed takeover**. Operator recovery must prove
-all writers stopped and reconcile origin/index/ledger before conditionally
-releasing a stuck lease. Other writers that ignore the lease remain forbidden.
-The uploader never automates that recovery or edits the existing local wrapper.
+The steps are:
 
-Origin images and immutable JSON are verified before the current/previous index
-CAS. CDN verification requests the exact full image URL including `?v=`, without
-authorization headers, redirects, cache bypass, cache busting or purge. HTTP denial
-(including Access), encoded or poisoned/negative-cache bytes block publication.
-Normal publication performs four CDN GETs per current image URL; an already
-committed retry performs two. This can be expensive and needs live acceptance.
-Use `--skip-cdn-verify` only for development environments where maintainers will
-check images in a browser; origin read-back and the remaining publication steps
-still run, and command output marks CDN verification as skipped.
+1. Read the remote index and decide the new one: first upload gets revision 1
+   and `previous=null`; later uploads get the next revision and the old
+   `current` as `previous`. An export that is already current changes nothing.
+   A different manifest under the current data version, or an export older than
+   current, is refused.
+2. For each image, then each JSON object, GET the remote object. Equal bytes and
+   headers count as read back. Otherwise PUT (`If-None-Match: *` for a new key,
+   `If-Match` for an image overwrite) and GET it again to compare bytes and
+   headers. Immutable JSON with different bytes or headers stops the run; it is
+   never overwritten.
+3. CDN check: two ordinary GETs of each full image URL with its `?v=` against
+   `--cdn-base-url`, without authorization, redirects, cache bypass or purge.
+   `--skip-cdn-verify` skips only this step (development behind Access, checked in
+   a browser); the output marks it as skipped.
+4. Check that the index is unchanged, write it with a conditional PUT, and read
+   it back.
 
-After successful or failed durable publication, the independent checkpoint is
-advanced and fsynced; failed attempts keep their reservation/sealed plan. If an
-uncertain process death occurs before this pin update, subsequent execution stops
-on the stale pin. Reconcile independent evidence with the operator instead of
-silently generating a replacement. Retry an unchanged bundle/version only after
-review; changed input or unknown external image bytes are refused. A failed write
-may have changed origin bytes without switching current, as defined by #297.
+An unchanged rerun makes no PUT. After a failure, current is unchanged; run the
+same command again to upload what is missing. A failed image overwrite can leave
+new origin bytes under a key that the old current still references; fixed image
+keys keep only current bytes (ADR-0015). Do not run an upload while an export
+writes the same root: `export-offline` removes the pointer before it overwrites
+a changed image, so an interrupted export has to be rerun before uploading.
 
-## Per-run collection and acceptance boundary
+The SDK applies SigV4 to the exact headers, payload and sorted query parameters.
+Unsupported conditions/statuses, redirects and transport failures stop, with no
+plain-PUT fallback or write retry. GET keeps compressed siblings' wire bytes.
+Both clients disable proxies/ambient configuration and redirects; each I/O has
+a 30 second timeout. Responses are bounded to 128 MiB per object and 2 MiB per
+inventory page. Errors omit response bodies, request headers, credentials and
+signatures. Do not enable HTTP wire logging or `--showlocals` around execution.
 
-Cloudflare's [S3 compatibility table](https://developers.cloudflare.com/r2/api/s3/api/)
-explicitly lists conditional PUT but does **not** promise atomic `If-Match` on
-`DeleteObject`. The generic conditional `R2Store.delete` still fails before HTTP;
-it never silently downgrades that contract. The separate `r2 gc-v2` workflow uses
-the maintainer-approved single cooperating writer model and **unconditional
-DELETE**, rather than claiming atomic conditional deletion. Every writer must
-honor the same lease, including maintenance scripts. A writer bypassing the lease
-can race between the final reads and DELETE; this workflow cannot protect against
-such non-cooperating writes.
-
-The default command only displays an already saved local approval list. It reads
-no credentials and performs no HTTP. Explicit `--inspect-remote` requires
-`--confirm-maintainer-authorization` and one or more exact `--namespace` flags.
-It checks the independently pinned ledger, acquires the writer lease, reconciles
-the remote current/previous index with durable receipts, and records unreferenced
-keys, ETags, hashes, counts and bytes in a new mode-600 `--plan-file`. Public objects
-are only read; acquiring/releasing the coordination lease uses conditional PUT.
-Only `snapshots/blobs/`, `snapshots/manifests/` and each explicit public image-size
-prefix are accepted. An irregular key aborts the entire inspection, rather than
-being skipped. Raw, inventory, crawl manifests, backups and authored data are
-outside these namespaces.
-
-If `snapshots/preview/current.json` exists, **the entire GC is refused**, including
-for a valid preview pointer. Previously uploaded previews can share these manifest/blob namespaces
-and have no writer lease. This collector does not try to interpret or
-discard their closure; malformed, unknown-format and legacy 1.x pointers also
-block deletion. Inspection and execution replan check the pointer under their
-lease, with another check before deletion. The operator must resolve previously uploaded previews separately;
-this command never removes the pointer.
-
-Both retained versions' JSON closures remain protected, but public images retain
-only the **current** image set (ADR-0016). Previous-only image paths are collectible;
-they are not required to exist when verifying the retained closure. Legal
-sealed/failed attempts' staged members and assets remain protected separately.
-A missing retained member stops collection. The
-collector must use the publisher's same complete ledger and backup; another
-machine's incomplete copy cannot prove the absence of unfinished releases.
-This matches the generic #297 `collect` retention rule. Its conditional deletion
-contract remains unsupported by R2Store; use the separately approved `gc-v2`
-workflow for R2 deployment collection.
-The inspection releases the lease while the maintainer reviews its saved list; it
-does not hold a lock across an unbounded human wait. Actual execution requires
-`--execute --confirm-maintainer-authorization --confirm-delete 'DELETE-V2 sha256:…'`,
-where the exact confirmation string is printed with that list. Execution acquires
-the lease and reproduces the full approved inventory under it. Any inventory,
-candidate, receipt or index change requires a new list and fresh consent.
-**The execution replan and every deletion share that single writer lease.**
-Immediately before each unconditional DELETE it rechecks candidate bytes/ETag,
-the full current/previous index and ownership of the lease. Lost ownership stops
-without deleting; a DELETE transport failure is never retried automatically.
-Partial completion requires another inspection and consent, not replaying a
-stale list. Collection is never automatic after publication.
+## Collection
 
 ```bash
 uv --directory carddb run sve-carddb r2 gc-v2 \
-  --plan-file /private/reviews/gc.json \
-  --ledger-dir /explicit/primary --backup-dir /independent/backup \
-  --checkpoint-file /third/checkpoints/release.json
+  --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" --dry-run
 ```
 
-This example is an offline display of an existing list; add the explicit remote
-flags only after authorization. Target/credential inputs follow `upload-v2`.
-ListObjectsV2 is prefix-restricted and checks bounded UTF-8 XML and pagination,
-but listing alone does not enable deletion. No actual R2 conditional support has been
-measured by these localhost tests.
+`gc-v2` reads the remote index and keeps the index, the JSON closures of
+`current` and `previous` (plus their manifest `.br` if present) and the images of
+`current` only (ADR-0016). `changes.from` never retains a third version.
+The dry-run lists every other object under `snapshots/blobs/`,
+`snapshots/manifests/` and the five image sizes; `--namespace` limits the list to
+some of those prefixes. `--execute` deletes them with plain DELETE (R2 does not
+promise `If-Match` on DeleteObject), checking before each one that the index has
+not changed. An irregular key in those prefixes, a missing retained object or a
+missing index stops it. Collection never runs automatically and must not run
+while an upload is in progress, because objects not yet in the index would be
+collected.
 
-Real R2 consistency/conditions, deployed Cache Rules, full-query cache separation,
-Access, browsers and SW still require separate authorized verification before
-use. Purge is a separate permission and absent here. Checkpoint/ledger backup,
-formal gates and a working public CDN path remain operator responsibilities.
+Real R2 behavior, deployed Cache Rules, query-key separation, Access, browsers
+and the service worker still need separate checks by the maintainer. Purge is a
+separate permission and is absent here.
