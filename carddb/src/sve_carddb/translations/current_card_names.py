@@ -34,7 +34,7 @@ class Candidate(RecordData):
     text: Text
     origin: Literal["project", "machine"]
     low_confidence: bool
-    source_claim: SourceClaim | None
+    source_claim: SourceClaim | None = None
     note: str = ""
 
 

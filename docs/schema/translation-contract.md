@@ -46,15 +46,15 @@ concept_evidence 的 concept_note 可省略，只保留有實際內容的說明�
 | kind | 選擇鍵 | data 完整欄位 |
 | --- | --- | --- |
 | glossary_term | id | `id,category,concept_key,source_ref,source_span,authored_source_ja,missing_source_reason` |
-| glossary_choice | term_id,lang | `term_id,lang,value,concept_evidence,source_claim` |
-| vocabulary_choice | vocabulary_kind,vocabulary_code,lang | `vocabulary_kind,vocabulary_code,lang,value,concept_evidence,source_claim` |
+| glossary_choice | term_id,lang | `term_id,lang,value,concept_evidence`（選填 `source_claim`） |
+| vocabulary_choice | vocabulary_kind,vocabulary_code,lang | `vocabulary_kind,vocabulary_code,lang,value,concept_evidence`（選填 `source_claim`） |
 | glossary_emphasis_choice | term_id | `term_id,value` |
 | symbol_localization_choice | symbol_id,lang | `symbol_id,lang,symbol_basis,value,concept_evidence`，完整值依[記號文案契約](catalog-route-adoption.md#6-卡文記號與三語文案) |
 | sentence_template | id | `id,inventory_id,source_span,source_lang,normalizer_version,semantic_variant,parameter_schema,content_hash,supersedes_id` |
 | template_translation | template_id,lang | `template_id,lang,text` |
 | template_translation_candidate | source_kind,candidate_id,lang | `source_kind,candidate_id,lang,text,inventory_ids,reasons`，未啟用原稿依 §2.1 |
 | template_translation_variant | template_id,lang,variant_key | `template_id,lang,variant_key,text` |
-| glossary_choice_variant | term_id,lang,variant_key | `term_id,lang,variant_key,value,concept_evidence,source_claim` |
+| glossary_choice_variant | term_id,lang,variant_key | `term_id,lang,variant_key,value,concept_evidence`（選填 `source_claim`） |
 | context_assignment | owner,field,ordinal | `owner,field,ordinal,source_hash,variant,concept_key,reason` |
 | card_name_concept | subject | `subject,term_id,source_ref,reason`；subject 恰為 `{card_id,face_id,source_lang,source_hash}`，不帶歷史 identity_basis |
 | template_match | context_key | `context_key,source_hash,matches` |
@@ -200,7 +200,7 @@ glossary 保留 `term:<concept_key>` 永久概念，category=keyword/ability/tra
 
 官方來源可使用 source_ref 重建文字，專案／機器詞用自寫 text；official 不能單憑相似字串判定。
 來源類別 official 與公開 authority 分開：數位官方名稱仍是 digital_official，整段效果機器翻譯仍 unofficial。
-既有 source_claim 只保留可公開的作品／URL／簡短未驗理由，不記本機證據；來源不明不得硬升 official。
+source_claim 只保留可公開的作品／URL／出處主張，不記本機證據；來源不明不得硬升 official。
 claimed_source 是選填的出處主張；沒有具體主張就省略，不用本機草稿套話代替。
 
 ## 6. 建置、穩定 ID 與失效

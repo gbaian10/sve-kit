@@ -383,7 +383,7 @@ cards:
             max: 1
   BP19-080:
     status: complete
-    review: 依 Q2595／Q2596／Q2621 與卡文複核；入場即誘發、解決時檢查保存的來源區域，同句兩組對象合為單一集合。
+    review: 依 Q2595／Q2596／Q2621：入場即誘發、解決時檢查保存的來源區域，同句兩組對象合為單一集合。
     abilities:
       - line: 1
         kind: trigger
@@ -646,7 +646,7 @@ cards:
         subject: self
   BP19-P21:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。 E22 依契約 10.6，同一選ぶ的多組對象使用單一平坦列表，以集合條件驗證各組人數。 E24 入場均先誘發，解決時依事件保存的入場來源判斷；ファンファーレ費用依契約 36（10.1.1.2.2、10.6.2.5、Q1982）在打出時支付。
+    review: E22 依契約 10.6，同一選ぶ的多組對象使用單一平坦列表，以集合條件驗證各組人數。 E24 入場均先誘發，解決時依事件保存的入場來源判斷；ファンファーレ費用依契約 36（10.1.1.2.2、10.6.2.5、Q1982）在打出時支付。
     abilities:
       - line: 1
         kind: trigger
@@ -817,7 +817,7 @@ cards:
             to: cemetery
   BP19-P31:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。 E27 「1枚を場に出してよい」以單次 min:0／max:1 選擇表達；不另插入是否執行的輸入點。
+    review: E27 「1枚を場に出してよい」以單次 min:0／max:1 選擇表達；不另插入是否執行的輸入點。
     abilities:
       - line: 1
         kind: trigger
@@ -1047,7 +1047,6 @@ cards:
             max: 2
   BP19-SL22:
     status: complete
-    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
     abilities:
       - line: 1
         kind: static

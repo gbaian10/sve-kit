@@ -79,7 +79,7 @@ class ChoiceData(RecordData):
     lang: Lang
     value: Annotated[AuthoredValue | SourceValue, Field(discriminator="kind")] | None
     concept_evidence: tuple[ConceptEvidence, ...]
-    source_claim: SourceClaim | None
+    source_claim: SourceClaim | None = None
 
 
 class VocabularyData(RecordData):
@@ -88,7 +88,7 @@ class VocabularyData(RecordData):
     lang: Lang
     value: Annotated[AuthoredValue | SourceValue, Field(discriminator="kind")] | None
     concept_evidence: tuple[ConceptEvidence, ...]
-    source_claim: SourceClaim | None
+    source_claim: SourceClaim | None = None
 
 
 class EmphasisData(RecordData):

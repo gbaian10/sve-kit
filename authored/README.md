@@ -10,20 +10,20 @@ Human-maintained data and permanent identity allocations, read by `carddb` at bu
 - `registry/source_correction/` — confirmed corrections and separately marked review candidates; raw observations remain unchanged
 - `effects/` — effect data in the DSL defined by `../dsl/`
 - `rulings/` — evidence-backed interpretations; see `../docs/adr/0011-rulings-evidence.md`
-- `translations/index.yaml`, `translations/glossary/<filing_key>/*.yaml` — checksummed glossary concepts and append-only translation adoptions
+- `translations/index.yaml`, `translations/glossary/<filing_key>/*.yaml` — checksummed glossary concepts and editable current translations
 
 The identity registry format is defined in [authored layout](../docs/schema/authored-layout.md).
 The former `card-ids.yaml` proposal is replaced by `registry/` and `ids/`.
 Run the offline generator with `python -m sve_carddb.registry --help` through the carddb uv environment.
-Never regenerate IDs from sorting, edit an adopted batch in place, or treat a `needs_review` correction as accepted.
+For identity registry batches, never regenerate IDs from sorting, edit an adopted batch in place,
+or treat a `needs_review` correction as accepted.
 
 The glossary input follows the [translation contract](../docs/schema/translation-contract.md)
 and [glossary adoption rules](../docs/schema/glossary-adoption.md). The index closes the input
 directory; keep documentation, candidates and audit reports outside `translations/`.
-Concept keys are permanent. Translation and emphasis corrections require a new adoption
-with its own receipt and predecessor; do not edit adopted records. Frozen evidence is
-replayed from external source stores, while unverified source claims remain project choices.
-Delegated receipts name the actual coordinator and do not count as personal maintainer approval.
+Concept keys are permanent. Edit translation YAML directly and review it in a PR; Git keeps the
+history (ADR-0018). Official wording stays out of git. Mark quality with `low_confidence`
+and `origin`; a `source_claim` is optional and only holds a work, URL or claimed source.
 
 Class and card-type labels use catalog vocabulary references `(kind, code)`, rather than
 glossary identities. Equal display text does not merge those references: resource EP/SEP

@@ -16,16 +16,15 @@ class Span(RecordData):
 
 
 class SourceClaim(RecordData):
-    source_work: Text | None
-    source_urls: tuple[Text, ...]
+    source_work: Text | None = None
+    source_urls: tuple[Text, ...] = ()
     claimed_source: Text | None = None
-    note: Text
 
     @model_validator(mode="after")
     def _claim(self) -> SourceClaim:
         if any(
             value is not None and not value.strip()
-            for value in (self.source_work, self.claimed_source, self.note)
+            for value in (self.source_work, self.claimed_source)
         ):
             raise ValueError("Source claim text must be nonblank")
         if self.source_urls != tuple(sorted(set(self.source_urls))):
