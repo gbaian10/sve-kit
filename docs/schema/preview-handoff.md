@@ -16,22 +16,22 @@ preview 使用正式傳輸契約與共用匯出器，但不是正式發布。`da
 
 ```bash
 SVE_PREVIEW_DIR=/explicit/isolated/preview \
-SVE_CDN_DIR=/explicit/formal/cdn \
 uv --directory carddb run sve-carddb snapshot export-offline --inputs /private/inputs.json \
   --bundle-dir /private/bundle
 ```
 
-若要接入已轉好的日英卡圖，同時提供 `--image-assets-dir /readonly/webp-library` 與
-`--image-cache-dir /readonly/recipe-cache`。前者指到含 `images/` 的那一層，後者指到含
-`image-variants/` 的那一層。兩者皆唯讀，只重用通過來源批次／配方／hash／解碼尺寸
-驗證的 #152 資產；缺件或快取不符即停止，不自動轉檔或修補。使用最多 4 個 worker。
-圖片庫與配方快取、preview／正式 root、repo／封存庫須為絕對路徑且彼此隔離，
-圖片輸入不可含 symlink。未提供這對選項時仍可建置文字 preview。
+若要接入日英卡圖，同時提供已存在的 `--image-assets-dir /private/webp-library` 與
+`--image-cache-dir /private/recipe-cache`。前者指到含 `images/` 的那一層，後者指到含
+`image-variants/` 的那一層。通過來源批次／配方／hash／解碼尺寸驗證的快取直接重用；
+缺件或不符的來源當場轉檔，寫入這兩處，已存在的內容定址 blob 不改寫。
+`--workers` 預設 2、可設 1～4，輸出 bytes 與 worker 數無關。
+圖片庫與配方快取須為絕對路徑，不得彼此重疊，也不得與 preview、bundle、repo／封存庫或配方重疊；
+圖片根不可含 symlink。未提供這對選項時仍可建置文字 preview。
 
-也可用 `--preview-dir`、`--cdn-dir` 明確指定；兩者都必填，preview 沒有預設位置。
+也可用 `--preview-dir` 明確指定；此選項必填，preview 沒有預設位置。
 `SVE_PREVIEW_DIR` 指到含 `snapshots/` 的那一層，而非 `snapshots/` 或 `snapshots/preview/`。
-解析 symlink 後，兩個 root 不得相同或互相包含；preview 亦不得與輸入 repo／封存庫
-相同或互相包含。root 內的輸出 symlink 不得逸出 preview root。
+解析 symlink 後，preview 不得與輸入 repo／封存庫相同或互相包含，也不得包含配方；
+bundle 不得與 repo、封存庫或配方重疊。root 內的輸出 symlink 不得逸出 preview root。
 
 `--inputs` 是呼叫端明確提供的 JSON 配方，欄位如下；路徑與實際來源 pin 留在私人建置環境，
 不進 repo。配方、詞彙綁定與衍生產物可能含官方文字，適用相同的私人資料邊界。
@@ -83,8 +83,9 @@ R2 僅透過 `r2 upload-v2` 發布通過驗證的 2.0 凍結包；凍結包、le
 preview 根下的 `private/` 與 `reports/` 不屬於公開內容；整個 preview 只供本機使用，
 沒有上傳入口。正式 R2 發布須使用另行建置的 2.0 凍結包。
 含圖建置另記 `image_assets` 的來源／綁定／變體數，以及 `images` 的公開去重檔數／bytes。
-實際執行時間與快取命中數放在命令 stdout 的 `image_execution`，不混入不可變清單或
-報告，確保相同輸入重建的逐檔 bytes 一致；唯讀重用的新轉檔時間為 0。
+實際執行時間、快取命中與新轉檔數放在命令 stdout 的 `image_execution`，不混入不可變清單或
+報告，確保相同輸入重建的逐檔 bytes 一致。各圖的重用／轉檔時間是逐圖加總，多 worker 時會重疊，
+整體耗時看 `wall_milliseconds`。
 這些檔案與輸出都不進 git、Actions cache／artifact 或測試 fixture。
 完整文字容量以批次的同一 File 聯集計算，完整文字包不與分片重複加總；卡圖另計。
 啟動則依使用者所選日版／英版各自以 Brotli 計完整新清單＋config＋首屏實際必載片／依賴，

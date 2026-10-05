@@ -248,7 +248,7 @@ changes 是相鄰發布摘要，不是重建鏈。previous manifest 引用的 ch
 
 ### 4.2 預覽快照
 
-預覽快照是正式匯出器產生、與卡表快照同格式的開發產物；僅供非公開開發，不發布給使用者。預覽使用 `SVE_PREVIEW_DIR`，正式本機發布使用 `SVE_CDN_DIR`，兩個根目錄不得相同或互相包含。reader 須明確選擇資料根，預覽與正式版的 IndexedDB／Cache namespace 分開。
+預覽快照是正式匯出器產生、與卡表快照同格式的開發產物；僅供非公開開發，不發布給使用者。預覽使用 `SVE_PREVIEW_DIR`；web dev server 另以 `SVE_CDN_DIR` 掛載正式根，未設定時為合成 fixture。reader 須明確選擇資料根，預覽與正式版的 IndexedDB／Cache namespace 分開。
 
 預覽 `data_version` 使用 §1 定義的 `preview-` 命名空間，不屬於正式發布版號；不寫正式 `snapshots/versions/index.json`，不改正式 active，也不提供永久分享碼、公開 URL 或回放 pin 的相容保證。正式發布器拒收預覽版號；正式發布須重新建置並通過完整發布閘門，不能直接將預覽升為正式版。
 

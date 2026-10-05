@@ -69,7 +69,7 @@ region／card_no 不參與來源查找、hash 推導、跨區配對或採納判�
 
 先完整驗證採納集合，再大量轉檔；未選中的列列為未使用，不是錯誤。`build_regional_assets(region=…)` 明示 `jp` 或 `en`，只接受相符地區的 image batch。頁面綁定使用該地區萃取器的原始 `<img src>` 與人工 source_face_map。
 
-日英 `snapshot export-offline` 的 Inputs.sources 分別釘兩區 card／image batch 與 parser version，成對提供 `--image-assets-dir`、`--image-cache-dir` 才納入影像。入口以 `reuse_only` 驗證完整五檔快取，缺檔即失敗；產圖由上述 API 先完成。建置須重驗各區目前批次的完整成員與全體裁切採納，影像綁定及來源使用閉包同時進入 staging／sealed DB 重播；詳細參數見[離線建置入口](../../carddb/src/sve_carddb/snapshot/OFFLINE.md)。正式發布仍依既有來源涵蓋與 readiness 門檻。
+日英 `snapshot export-offline` 的 Inputs.sources 分別釘兩區 card／image batch 與 parser version，成對提供 `--image-assets-dir`、`--image-cache-dir` 才納入影像。入口對每區呼叫上述 API：通過驗證的完整五檔快取直接沿用，缺檔或過時（來源、框或 recipe 改變）的來源當場產圖，寫入圖片庫與快取。建置須重驗各區目前批次的完整成員與全體裁切採納，影像綁定及來源使用閉包同時進入 staging／sealed DB 重播；詳細參數見[離線建置入口](../../carddb/src/sve_carddb/snapshot/OFFLINE.md)。正式發布仍依既有來源涵蓋與 readiness 門檻。
 
 現有採納為 JP 六列與 EN 六列，共 12 筆；各列是否套用依實際選中的來源判定，未選中者列為未使用。
 
@@ -100,7 +100,7 @@ F1 依[建置輸入紀錄](source-archive.md#221-建置輸入紀錄與完整使�
 
 ## 5. 變體、快照與上傳的版本策略
 
-既有 recipe 已支援來源綁定的整數覆寫，新增採納資料不改 recipe_version；解碼、編碼、縮放或框演算法改變才按既有規則換 recipe。快取 key 包含來源 hash、實際框與完整 recipe：新框取得新 key，`reuse_only` 若沒有新框結果必須失敗，不得借用舊框的完整五檔。
+既有 recipe 已支援來源綁定的整數覆寫，新增採納資料不改 recipe_version；解碼、編碼、縮放或框演算法改變才按既有規則換 recipe。快取 key 包含來源 hash、實際框與完整 recipe：新框取得新 key，沒有新框結果時重新產製，不得借用舊框的完整五檔。
 
 新 key 下五檔會重新產製。在來源與 recipe 不變時，card 三檔輸入不變，內容定址後仍可共用原 blob；art 兩檔改為新 WebP hash／path。不改寫內容定址的建置 blob。`img:binding:` 不依賴裁切，來源／頁面 binding 不變時保持原值。2.0 的公開 key 固定、只換 art_version 並覆寫有變動的 art bytes，card 三檔版本沿用；欄序依 snapshot-format §2.1，不公開框。
 
