@@ -284,13 +284,12 @@ def test_regional_build_projects_qa_related_and_reskin_with_complete_sources(
     assert joined == tables
     report = write_preview(
         snapshot,
-        Roots(tmp_path / "preview", tmp_path / "formal"),
+        Roots(tmp_path / "preview"),
         built.report,
         media_plan=prepare_media(built.projection, None, revision=1),
         regions=("en", "jp"),
     )
     assert report["pointer"]
-    assert not (tmp_path / "formal").exists()
     with pytest.raises(ValueError, match=r"^Preview requires exactly the JP region$"):
         require_preview(snapshot.manifest)
     with pytest.raises(
@@ -497,15 +496,11 @@ def test_offline_cli_writes_private_bundle_and_dual_preview(
             "--bundle-dir",
             str(tmp_path / "bundle"),
         ],
-        env={
-            "SVE_PREVIEW_DIR": str(tmp_path / "preview"),
-            "SVE_CDN_DIR": str(tmp_path / "formal"),
-        },
+        env={"SVE_PREVIEW_DIR": str(tmp_path / "preview")},
     )
     assert result.exit_code == 0, result.exception
     assert (tmp_path / "bundle/build.sqlite").is_file()
     assert (tmp_path / "preview/snapshots/preview/current.json").is_file()
-    assert not (tmp_path / "formal").exists()
 
     root = tmp_path / "preview"
     pointer = object_value(
@@ -531,7 +526,7 @@ def test_offline_cli_writes_private_bundle_and_dual_preview(
     assert startup["jp"] == startup["en"]
 
 
-@pytest.mark.parametrize("protected", ["repo", "archive", "formal", "relative"])
+@pytest.mark.parametrize("protected", ["repo", "archive", "relative"])
 def test_cli_preview_validates_output_before_build(
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
     tmp_path: Path,
@@ -541,11 +536,9 @@ def test_cli_preview_validates_output_before_build(
     recipe = prepared[1]
     path = tmp_path / "inputs.json"
     path.write_text(recipe.model_dump_json())
-    formal = tmp_path / "formal"
     targets = {
         "repo": recipe.repo / "output",
         "archive": recipe.archive / "output",
-        "formal": formal,
         "relative": tmp_path / "relative-preview",
     }
 
@@ -563,8 +556,6 @@ def test_cli_preview_validates_output_before_build(
             str(path),
             "--preview-dir",
             "relative-preview" if protected == "relative" else str(targets[protected]),
-            "--cdn-dir",
-            str(formal),
             "--bundle-dir",
             str(tmp_path / "bundle"),
         ],
@@ -572,7 +563,6 @@ def test_cli_preview_validates_output_before_build(
     messages = {
         "repo": "Preview output must be disjoint from immutable input roots",
         "archive": "Preview output must be disjoint from immutable input roots",
-        "formal": "Preview and formal roots must be disjoint",
         "relative": "Preview root must be an absolute path",
     }
     assert isinstance(result.exception, ValueError)
@@ -612,8 +602,6 @@ def test_cli_rejects_formal_export_before_preview_writes(
             str(path),
             "--preview-dir",
             str(tmp_path / "preview"),
-            "--cdn-dir",
-            str(tmp_path / "formal"),
             "--bundle-dir",
             str(tmp_path / "bundle"),
         ],
@@ -622,7 +610,6 @@ def test_cli_rejects_formal_export_before_preview_writes(
     assert str(result.exception).startswith("Preview requires")
     assert not (tmp_path / "preview/snapshots").exists()
     assert not (tmp_path / "preview/private/inputs").exists()
-    assert not (tmp_path / "formal").exists()
 
 
 @pytest.mark.parametrize("pins", [(), ("jp",), ("jp", "en"), ("en", "en")])
@@ -668,7 +655,7 @@ def test_api_bundle_cannot_write_inside_immutable_input(
         build(recipe, bundle_dir=root)
 
 
-@pytest.mark.parametrize("protected", ["repo", "archive", "formal"])
+@pytest.mark.parametrize("protected", ["repo", "archive", "recipe"])
 def test_cli_cannot_write_bundle_into_protected_roots(
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
     tmp_path: Path,
@@ -678,10 +665,10 @@ def test_cli_cannot_write_bundle_into_protected_roots(
     from sve_carddb.snapshot.preview import commands  # ruff: ignore[import-outside-top-level] -- spy only on this CLI boundary
 
     recipe = prepared[1]
-    path = tmp_path / "inputs.json"
+    path = tmp_path / "recipe" / "inputs.json"
+    path.parent.mkdir()
     path.write_bytes(canonical(recipe.model_dump(mode="json")))
-    formal = tmp_path / "formal"
-    target = formal if protected == "formal" else getattr(recipe, protected)
+    target = path.parent if protected == "recipe" else getattr(recipe, protected)
 
     def forbidden(*_args: object, **_kwargs: object) -> None:
         raise AssertionError("No build before output validation")
@@ -696,16 +683,13 @@ def test_cli_cannot_write_bundle_into_protected_roots(
             str(path),
             "--preview-dir",
             str(tmp_path / "preview"),
-            "--cdn-dir",
-            str(formal),
             "--bundle-dir",
             str(target),
         ],
     )
     assert isinstance(result.exception, ValueError)
     assert (
-        str(result.exception)
-        == "Offline bundle must be disjoint from protected inputs and formal output"
+        str(result.exception) == "Offline bundle must be disjoint from protected inputs"
     )
     assert not (tmp_path / "preview").exists()
 
@@ -799,8 +783,6 @@ def test_cli_preview_cannot_contain_its_recipe(
             str(path),
             "--preview-dir",
             str(path.parent),
-            "--cdn-dir",
-            str(tmp_path / "formal"),
             "--bundle-dir",
             str(tmp_path / "bundle"),
         ],

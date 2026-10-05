@@ -237,7 +237,6 @@ def test_original_src_double_faces_and_five_variants_are_projected(
             if row.values["kind"] != "authored"
         )
     assert encoded.report(refs)["mapped_printing_faces"] == 3
-    assert not output.cdn.exists()
 
 
 def test_adopted_source_map_is_used_instead_of_logical_face_order(

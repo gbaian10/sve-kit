@@ -60,11 +60,7 @@ class MountedImages:
             (*parents.uses, *self.assets.source_uses(), *reference_uses(references))
         )
         record.verify(db, context, expected)
-        report = {
-            key: value
-            for key, value in self.assets.report(references).items()
-            if key not in {"elapsed_milliseconds", "cache_hits"}
-        }
+        report = self.assets.report(references)
         report["crop_overrides"] = crop_report(self.crops, self.assets, references, db)
         return record, report
 

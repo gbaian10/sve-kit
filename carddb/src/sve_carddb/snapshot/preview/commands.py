@@ -6,7 +6,12 @@ from typing import TYPE_CHECKING, Annotated
 import typer
 
 from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.image_assets import ImageBuild, PreviewRoots, build_regional_assets
+from sve_carddb.image_assets import (
+    MAX_WORKERS,
+    ImageBuild,
+    PreviewRoots,
+    build_regional_assets,
+)
 from sve_carddb.image_crops import load_image_crops
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.export.compression import python_brotli
@@ -37,10 +42,9 @@ def verify_inputs(roots: Roots, inputs: Inputs) -> None:
 
 
 @app.command("export-offline")
-def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] -- CLI binds explicit recipe, isolated outputs, paired image roots and optional compressor
+def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] -- CLI binds explicit recipe, isolated outputs, paired image roots, worker count and optional compressor
     inputs: Annotated[Path, typer.Option(exists=True, dir_okay=False)],
     preview_dir: Annotated[Path, typer.Option(envvar="SVE_PREVIEW_DIR")],
-    cdn_dir: Annotated[Path, typer.Option(envvar="SVE_CDN_DIR")],
     bundle_dir: Annotated[Path, typer.Option()],
     brotli: Annotated[bool, typer.Option("--brotli/--no-brotli")] = False,
     image_assets_dir: Annotated[
@@ -49,19 +53,18 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
     image_cache_dir: Annotated[
         Path | None, typer.Option(exists=True, file_okay=False)
     ] = None,
+    workers: Annotated[int, typer.Option(min=1, max=MAX_WORKERS)] = 2,
     format_version: Annotated[str, typer.Option()] = MEDIA,
 ) -> None:
     """Export both launch regions to an isolated preview plus a verified private DB bundle."""
     profile(format_version)
-    roots = Roots(preview_dir, cdn_dir)
+    roots = Roots(preview_dir)
     recipe = Inputs.model_validate_json(inputs.read_bytes())
     verify_inputs(roots, recipe)
-    for protected in (recipe.repo, recipe.archive, cdn_dir, inputs):
+    for protected in (recipe.repo, recipe.archive, inputs):
         output, source = bundle_dir.resolve(), protected.resolve()
         if output.is_relative_to(source) or source.is_relative_to(output):
-            raise ValueError(
-                "Offline bundle must be disjoint from protected inputs and formal output"
-            )
+            raise ValueError("Offline bundle must be disjoint from protected inputs")
     if inputs.resolve().is_relative_to(preview_dir.resolve()):
         raise ValueError("Offline preview must be disjoint from recipe")
     codec = python_brotli() if brotli else None
@@ -69,10 +72,9 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
         raise typer.BadParameter(
             "Image asset and cache roots must be provided together"
         )
-    image_execution: dict[str, int] | None = None
     images = None
     if image_assets_dir is not None and image_cache_dir is not None:
-        image_roots = PreviewRoots(image_assets_dir, cdn_dir, image_cache_dir)
+        image_roots = PreviewRoots(image_assets_dir, image_cache_dir)
         image_roots.validate(
             (recipe.archive, recipe.repo, preview_dir, bundle_dir, inputs)
         )
@@ -85,8 +87,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
                 image_roots,
                 region=pin.region,
                 crops=crops,
-                workers=2,
-                reuse_only=True,
+                workers=workers,
             )
             for pin in recipe.sources
         )
@@ -94,12 +95,6 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
             tuple(item for part in regional for item in part.images),
             sum(part.elapsed_seconds for part in regional),
         )
-    if images is not None:
-        image_execution = {
-            "reuse_milliseconds": round(images.elapsed_seconds * 1000),
-            "cache_hits": sum(item.result.cache_hit for item in images.images),
-            "new_encoding_milliseconds": 0,
-        }
     built = build_offline(
         recipe, bundle_dir=bundle_dir, images=images, image_root=image_assets_dir
     )
@@ -109,7 +104,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
         recipe.batch(),
         codec,
         image_assets_dir,
-        image_execution,
+        None if images is None else images.execution() | {"workers": workers},
         format_version,
     )
 

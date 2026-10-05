@@ -25,18 +25,14 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class Roots:
     preview: Path
-    formal: Path
 
     def verify(self) -> None:
-        """Resolve symlinks before checking both containment directions."""
+        """A relative root would silently follow the caller's working directory."""
         if not self.preview.is_absolute():
             raise ValueError("Preview root must be an absolute path")
-        preview, formal = self.preview.resolve(), self.formal.resolve()
-        if preview.is_relative_to(formal) or formal.is_relative_to(preview):
-            raise ValueError("Preview and formal roots must be disjoint")
 
     def destination(self, relative: str) -> Path:
-        """Internal symlinks must not turn a preview write into a formal write."""
+        """Internal symlinks must not redirect a preview write outside its root."""
         self.verify()
         root = self.preview.resolve()
         target = root / relative
@@ -45,15 +41,12 @@ class Roots:
         return target
 
     def verify_image_source(self, source: Path | None) -> None:
-        """A copied library must never become an output or formal asset directory."""
+        """A copied library must never become the preview output directory."""
         if source is None:
             return
-        for output in (self.preview.resolve(), self.formal.resolve()):
-            root = source.resolve()
-            if output.is_relative_to(root) or root.is_relative_to(output):
-                raise ValueError(
-                    "Preview image input and output roots must be disjoint"
-                )
+        output, root = self.preview.resolve(), source.resolve()
+        if output.is_relative_to(root) or root.is_relative_to(output):
+            raise ValueError("Preview image input and output roots must be disjoint")
 
 
 def require_unknown_coverage(projection: Projection) -> None:

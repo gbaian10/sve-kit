@@ -37,11 +37,11 @@ the original EN observation, with no new translation workflow.
 
 ```bash
 sve-carddb snapshot export-offline --inputs recipe.json \
-  --preview-dir /path/to/private-preview --cdn-dir /path/to/formal-cdn \
+  --preview-dir /path/to/private-preview \
   --bundle-dir /path/to/private-build-bundle
 ```
 
-All output roots must be disjoint from protected inputs and formal output. The
+All output roots must be disjoint from the protected repo, archive and recipe. The
 bundle is a new private directory containing SQLite, inputs, report and seal.
 Its complete source-use closure and archive pins are independently checked by
 `publish_bundle`; `verify_bundle` can recheck it. The snapshot writer verifies
@@ -56,23 +56,28 @@ no image publication is claimed.
 
 ## Regional preview images
 
-Prepare a separate private image library and recipe cache before exporting.
-`build_regional_assets(FrozenSources(...), roots, region=pin.region, crops=crops,
-workers=2)` converts one exclusively regional image batch. Load the complete
-`authored/image-crops` closure at the same revision, including unused records.
-Keep the JP and EN sealed batches independent, and retain each original PNG.
+Pass an existing private image library and recipe cache directory together.
+For each pinned image batch, `export-offline` loads the complete
+`authored/image-crops` closure at the same revision, including unused records,
+and calls `build_regional_assets`. A verified five-size cache hit is reused; a
+missing or stale entry (new source bytes, crop box or recipe) is encoded into the
+library and cache. A new crop gets a new cache key, so an old crop is never
+substituted. Keep the JP and EN sealed batches independent, and retain each
+original PNG.
 
 ```bash
 sve-carddb snapshot export-offline --inputs recipe.json \
-  --preview-dir /path/to/new-preview --cdn-dir /path/to/formal-cdn \
+  --preview-dir /path/to/new-preview \
   --bundle-dir /path/to/new-private-build-bundle \
   --image-assets-dir /path/to/private-image-library \
-  --image-cache-dir /path/to/private-recipe-cache
+  --image-cache-dir /path/to/private-recipe-cache \
+  --workers 2
 ```
 
-The two image options must be provided together. CLI export only reuses validated
-five-size caches, with two workers, and never silently encodes or substitutes an
-old crop. The builder requires all current members of both pinned image batches,
+`--workers` defaults to 2 and accepts 1 to 4; output bytes do not depend on it.
+stdout `image_execution` reports wall time, cache hits, new encodings and the
+summed per-image reuse and encoding times, which overlap with several workers.
+The builder requires all current members of both pinned image batches,
 verifies PNG hashes and oriented dimensions, and binds pages using the region's
 extractor, exact original `img src` and adopted `source_face_map`. Card-number
 suffixes do not infer cross-region identity. Source uses are retained separately

@@ -6,9 +6,10 @@ and `docs/schema/image-crop-overrides.md` (adopted crop boxes).
 - `build_regional_assets(FrozenSources, PreviewRoots, region=, crops=, workers=)`
   converts every **current** source of one exclusively `jp` or `en` image batch to
   five WebP files under `images/sha256/<prefix>/<digest>.webp`, plus a private
-  recipe cache. It reads only `FrozenSources`, never live manifests or the network,
-  and gives identical bytes for one to four workers. Roots must be absolute and
-  disjoint; symlinks fail.
+  recipe cache. Verified cache hits are reused and only misses are encoded. It
+  reads only `FrozenSources`, never live manifests or the network, and gives
+  identical bytes for one to four workers. Roots must be absolute and disjoint;
+  symlinks fail.
 - `plan_regional_images(db, plan, cards, region=)` reads each face's actual `img src`
   through the adopted `source_face_map`, never from card numbers or face order.
 - `populate_assets(db, build, references, preview)` writes `image_asset`,
@@ -22,5 +23,5 @@ and `docs/schema/image-crop-overrides.md` (adopted crop boxes).
 
 Crops come from `image_crops.load_image_crops` and are selected by
 `(source_key, source_sha256)`. Reports never include official card text.
-The `export-offline` command is the only caller that wires these into a snapshot
-preview; see `snapshot/OFFLINE.md`.
+The `export-offline` command is the only caller: it encodes whatever the cache
+lacks and wires the result into a snapshot preview; see `snapshot/OFFLINE.md`.

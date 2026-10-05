@@ -83,7 +83,7 @@ def test_writer_rejects_non_preview_manifest(
     with pytest.raises(ValueError, match="Preview requires"):
         write_preview(
             invalid_preview,
-            Roots(tmp_path / "preview", tmp_path / "formal"),
+            Roots(tmp_path / "preview"),
             {},
         )
     assert list(tmp_path.iterdir()) == []
@@ -116,60 +116,24 @@ def test_preview_scope_is_exactly_jp(exported: Snapshot) -> None:
             require_preview(broken)
 
 
-@pytest.mark.parametrize("relation", ["equal", "preview_child", "formal_child"])
-def test_overlapping_roots_are_refused(tmp_path: Path, relation: str) -> None:
-    preview, formal = tmp_path / "root", tmp_path / "root"
-    if relation == "preview_child":
-        preview /= "child"
-    if relation == "formal_child":
-        formal /= "child"
-    with pytest.raises(ValueError, match="disjoint"):
-        Roots(preview, formal).verify()
-    assert not preview.exists()
-    assert not formal.exists()
-
-
-@pytest.mark.parametrize("relation", ["equal", "preview_child", "formal_child"])
-def test_direct_writer_refuses_overlapping_roots(
-    exported: Snapshot, tmp_path: Path, relation: str
-) -> None:
-    preview, formal = tmp_path / "root", tmp_path / "root"
-    if relation == "preview_child":
-        preview /= "child"
-    if relation == "formal_child":
-        formal /= "child"
-    with pytest.raises(ValueError, match="disjoint"):
-        write_preview(
-            exported, Roots(preview, formal), {}, media_plan=preview_plan(exported)
-        )
-    assert list(tmp_path.iterdir()) == []
-
-
-def test_symlink_roots_and_destinations_cannot_touch_formal(tmp_path: Path) -> None:
-    formal = tmp_path / "formal"
-    formal.mkdir()
-    alias = tmp_path / "alias"
-    alias.symlink_to(formal, target_is_directory=True)
-    with pytest.raises(ValueError, match="disjoint"):
-        Roots(alias / "nested", formal).verify()
+def test_symlinked_destinations_cannot_escape_preview(tmp_path: Path) -> None:
+    outside = tmp_path / "outside"
+    outside.mkdir()
     preview = tmp_path / "preview"
     preview.mkdir()
-    (preview / "snapshots").symlink_to(formal, target_is_directory=True)
-    roots = Roots(preview, formal)
+    (preview / "snapshots").symlink_to(outside, target_is_directory=True)
+    roots = Roots(preview)
     with pytest.raises(ValueError, match="escapes"):
         _write(roots, "snapshots/preview/current.json", b"{}", immutable=False)
     with pytest.raises(ValueError, match="escapes"):
-        roots.destination("../formal/index.json")
-    assert list(formal.iterdir()) == []
+        roots.destination("../outside/index.json")
+    assert list(outside.iterdir()) == []
 
 
-def test_writer_preserves_formal_state_and_independent_join(
+def test_writer_reads_back_an_independent_join(
     exported: Snapshot, logical: tuple[Projection, Ownership], tmp_path: Path
 ) -> None:
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
-    roots.formal.mkdir()
-    sentinel = roots.formal / "active-cache"
-    sentinel.write_bytes(b"formal state")
+    roots = Roots(tmp_path / "preview")
     report = write_preview(
         exported,
         roots,
@@ -191,8 +155,6 @@ def test_writer_preserves_formal_state_and_independent_join(
     )
     assert not (roots.preview / "snapshots/versions").exists()
     assert not (roots.preview / "pages").exists()
-    assert sentinel.read_bytes() == b"formal state"
-    assert list(roots.formal.iterdir()) == [sentinel]
     assert (
         write_preview(
             exported,
@@ -207,7 +169,7 @@ def test_writer_preserves_formal_state_and_independent_join(
 def test_failed_artifact_write_keeps_old_preview_pointer(
     exported: Snapshot, tmp_path: Path
 ) -> None:
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    roots = Roots(tmp_path / "preview")
     _write(roots, "snapshots/preview/current.json", b"old preview", immutable=False)
     first = object_value(array(exported.manifest["files"])[0])
     _write(roots, string(first["path"]), b"corrupt existing bytes", immutable=True)
@@ -229,7 +191,7 @@ def test_preview_pointer_follows_every_immutable_member(
     codec = python_brotli() if with_brotli else None
     if codec is not None:
         exported = export_snapshot(logical[0], logical[1], BATCH, brotli=codec)
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    roots = Roots(tmp_path / "preview")
     manifest_hash = digest(canonical(exported.manifest))[7:]
     raw_paths = {
         string(object_value(item)["path"]) for item in array(exported.manifest["files"])
@@ -271,7 +233,7 @@ def test_late_immutable_failure_preserves_old_pointer(
     monkeypatch: pytest.MonkeyPatch,
     late_member: str,
 ) -> None:
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    roots = Roots(tmp_path / "preview")
     _write(roots, "snapshots/preview/current.json", b"old preview", immutable=False)
 
     def failing_write(roots: Roots, path: str, raw: bytes, *, immutable: bool) -> None:
@@ -319,7 +281,6 @@ def test_roots_have_no_defaults() -> None:
         ["snapshot", "export-offline", "--inputs", __file__],
         env={
             "SVE_PREVIEW_DIR": "",
-            "SVE_CDN_DIR": "",
             "NO_COLOR": "1",
             "TERM": "dumb",
         },
@@ -367,8 +328,6 @@ def test_cli_rejects_retired_formats_before_inputs(
             format_version,
             "--preview-dir",
             str(preview),
-            "--cdn-dir",
-            str(tmp_path / "formal"),
         ],
     )
     assert result.exit_code != 0

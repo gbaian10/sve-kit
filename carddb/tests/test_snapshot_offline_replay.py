@@ -283,8 +283,6 @@ def test_export_offline_replays_current_sources_after_pinned_update(  # ruff: ig
             str(recipe),
             "--preview-dir",
             str(tmp_path / "preview"),
-            "--cdn-dir",
-            str(tmp_path / "formal"),
             "--bundle-dir",
             str(tmp_path / "bundle"),
             "--format-version",
@@ -353,7 +351,6 @@ def test_export_offline_replays_current_sources_after_pinned_update(  # ruff: ig
         assert pin["config_hash"] == digest(canonical({"provider": provider}))
     assert "carddb/pyproject.toml" in {pin.name for pin in record.context.dependencies}
     assert (tmp_path / "preview/snapshots/preview/current.json").is_file()
-    assert not (tmp_path / "formal").exists()
     assert signed == {
         p.relative_to(case.root).as_posix(): p.read_bytes()
         for p in (case.root / "catalog-adoptions").rglob("*.yaml")
@@ -506,8 +503,6 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
             str(path),
             "--preview-dir",
             str(tmp_path / "preview"),
-            "--cdn-dir",
-            str(tmp_path / "formal"),
             "--bundle-dir",
             str(tmp_path / "bundle"),
         ],
@@ -521,7 +516,6 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
     )
     assert manifest["format_version"] == "2.0.0"
     assert manifest["regions"] == ["en", "jp"]
-    assert not (tmp_path / "formal").exists()
     record = InputRecord.model_validate_json(
         (tmp_path / "bundle/inputs.json").read_bytes()
     )
