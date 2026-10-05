@@ -1,20 +1,6 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["template_translation_candidate","effect","Tf46dda10b6","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tf46dda10b6
-      lang: zh-Hant
-      text: 只要這張卡片在場，自己戰場上的全部{主教}從者獲得【突進】。
-      inventory_ids:
-        - inv:616105c5a7d5764b8f13231a52e7d704c52781f711f0a050d9a164897da23305
-        - inv:7607b5a47e2e475d42f1b6a362e336f72b7d9eac360a412a536f2a69113266a0
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tf4a0ecd5e3","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -218,20 +204,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tf88b562a3e","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tf88b562a3e
-      lang: zh-Hant
-      text: 【進化時】查看自己牌堆頂的N張卡片。可以從其中公開N張{精靈}法術並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
-      inventory_ids:
-        - inv:59d4fc0b73dec7fd563c8cb11df4db7fc6424d70fb2683408bebc500218b7aba
-        - inv:74e95166095df17a7bb6eb02dac9451e98aacd49a8df2fe7bc1e3287c31c1ed5
-      reasons:
-        - alignment_reference_label_missing
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tf890088ce6","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -245,20 +217,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tf9295bd92e","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tf9295bd92e
-      lang: zh-Hant
-      text: '{入場曲}如果為【覺醒】狀態，則查看自己牌堆頂的N張卡片。可以從其中公開N張原始消費N以上的{龍族}從者並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。'
-      inventory_ids:
-        - inv:88e56d2ad9e03cacfec8640b3c9a8d112489a745fa80502b5a2dbae746042368
-        - inv:a840a5b7744096ca3891f218be175538bcfcd0e285c592ff574e7e40eeb40b7a
-      reasons:
-        - alignment_reference_label_missing
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tf9354c6bc7","zh-Hant"]'
@@ -353,19 +311,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tfa50df9c6a","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tfa50df9c6a
-      lang: zh-Hant
-      text: '{入場曲}捨棄手牌中的N張{皇家護衛}卡片：抽取N張卡片。如果捨棄了法術，則轉變為N張。'
-      inventory_ids:
-        - inv:00caa7d22e83b246fbcbd40b765c8c29f82736a9b34f40212bdcf07a7687eb81
-      reasons:
-        - alignment_reference_label_missing
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tfa7765667f","zh-Hant"]'
@@ -533,20 +478,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tfc0994266f","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tfc0994266f
-      lang: zh-Hant
-      text: '{起動}{消費N}將這張卡片{橫置}並放置到墓場：指定自己的N個{精靈}從者。使其{生命值}+N。【連擊_N】再{攻擊力}+N。'
-      inventory_ids:
-        - inv:36b7ce3c96159bdc91aeae0c4f70f212026f693edfe071ff4e0c8aa0eb7e9653
-        - inv:ded14f35b1c04b63a2f94584c5fc871af309e0e2f47cf1c039974529ab2354dd
-      reasons:
-        - alignment_reference_label_missing
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tfc708af96a","zh-Hant"]'
