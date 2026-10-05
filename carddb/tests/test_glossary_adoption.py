@@ -82,7 +82,6 @@ def claim() -> dict[str, JsonValue]:
         "source_work": "合成作品",
         "source_urls": ["https://example.invalid/source"],
         "claimed_source": "尚未凍結的出處主張",
-        "note": "僅專案決定。",
     }
 
 
@@ -93,10 +92,14 @@ def test_source_claim_allows_omitted_attribution() -> None:
     assert result.claimed_source is None
     assert result.source_work == data["source_work"]
     assert list(result.source_urls) == data["source_urls"]
-    assert result.note == data["note"]
 
 
-@pytest.mark.parametrize("field", ["source_work", "claimed_source", "note"])
+def test_source_claim_rejects_empty() -> None:
+    with pytest.raises(ValueError, match=r"^Empty source claim must be omitted$"):
+        checked(SourceClaim, {"source_work": None, "source_urls": []})
+
+
+@pytest.mark.parametrize("field", ["source_work", "claimed_source"])
 def test_source_claim_nonblank(field: str) -> None:
     data = claim()
     data[field] = " "
