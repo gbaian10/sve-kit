@@ -28,8 +28,9 @@ glossary_choice.data 為 `{term_id,lang,value,concept_evidence}`，另有選填�
 value 非 null 時為 `{kind:authored,text}` 或 `{kind:source,source_ref,span}`；span=null 表示全字串。
 文字與來源語言必須正確，span 為 code-point 半開區間，不得越界。
 
-source_claim 可省略；有值時為 `{source_work,source_urls,claimed_source}`，至少要有一項具體內容，
-沒有作品、URL 或出處主張就整個省略。source_work／claimed_source 可省略，source_urls 是 HTTP(S) URL 陣列。不使用 URL 查詢、私人檔案或 hash 來證明核可。
+source_claim 可省略；有值時為 `{source_work,source_urls,claimed_source}`。
+沒有作品、URL 或出處主張時省略即可。
+source_work／claimed_source 可省略，source_urls 是 HTTP(S) URL 陣列。不使用 URL 查詢、私人檔案或 hash 來證明核可。
 既有未驗來源的專案採用詞仍 project，已知機器生成仍 machine；補到官方來源可直接修正為 official。
 分類簡化不抹去已知第三方來源，亦不把 project 分類當成權利聲明。
 
