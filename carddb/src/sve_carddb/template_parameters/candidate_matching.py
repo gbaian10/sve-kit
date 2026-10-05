@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from sve_carddb.snapshot.values import digest
 from sve_carddb.template_parameters.analysis import prepared, unsigned
 from sve_carddb.template_parameters.explicit_rules import EXPLICIT
+from sve_carddb.template_parameters.keyword_aliases import KEYWORD_ALIASES
 from sve_carddb.template_parameters.models import Range
 from sve_carddb.template_parameters.numeric_rules import (
     ASCII_AFTER,
@@ -179,6 +180,59 @@ def _signed_context(
     )
 
 
+def _explicit_context(
+    rule: Rule, text: str, hint: Hint, units: tuple[Unit, ...], edges: tuple[str, str]
+) -> Match | None:
+    before, after = edges
+    spec = EXPLICIT[rule.id]
+    prefix = re.search(spec.before, before)
+    suffix = re.match(spec.after, after)
+    if (
+        prefix is None
+        or suffix is None
+        or hint.value is None
+        or hint.value < spec.minimum
+    ):
+        return None
+    if spec.companion is not None:
+        match = prefix if spec.companion == "prefix" else suffix
+        offset = 0 if spec.companion == "prefix" else hint.occurrence.end
+        spans = _origins(
+            units, offset + match.start("companion"), offset + match.end("companion")
+        )
+        if unsigned(_raw(text, spans)) is None:
+            return None
+    return Match(
+        context=_origins(units, prefix.start(), hint.occurrence.end + suffix.end())
+    )
+
+
+def _alias_threshold(
+    rule: Rule,
+    text: str,
+    hint: Hint,
+    refs: References,
+    units: tuple[Unit, ...],
+    edges: tuple[str, str],
+) -> Match | None:
+    before, after = edges
+    alias = KEYWORD_ALIASES[rule.id]
+    head = "【" + alias.spelling + "_"
+    start = len(before) - len(head)
+    if not before.endswith(head) or not after.startswith("】"):
+        return None
+    if _raw(text, _origins(units, start, len(before))) != head:
+        return None
+    target = _exact_target(alias.full_name, refs, (alias.target,))
+    if target is None:
+        return None
+    return Match(
+        context=_origins(units, start, hint.occurrence.end + 1),
+        target_id=target[0],
+        target_hash=target[1],
+    )
+
+
 def _threshold(
     rule: Rule,
     text: str,
@@ -187,6 +241,8 @@ def _threshold(
     units: tuple[Unit, ...],
     edges: tuple[str, str],
 ) -> Match | None:
+    if rule.id in KEYWORD_ALIASES:
+        return _alias_threshold(rule, text, hint, refs, units, edges)
     before, after = edges
     match = re.search(KEYWORD_PATTERN, before)
     if match is None or not after.startswith("】"):
@@ -227,19 +283,7 @@ def _numeric_match(
 ) -> Match | None:
     before, after = edges
     if rule.id in EXPLICIT:
-        spec = EXPLICIT[rule.id]
-        prefix = re.search(spec.before, before)
-        suffix = re.match(spec.after, after)
-        if (
-            prefix is None
-            or suffix is None
-            or hint.value is None
-            or hint.value < spec.minimum
-        ):
-            return None
-        return Match(
-            context=_origins(units, prefix.start(), hint.occurrence.end + suffix.end())
-        )
+        return _explicit_context(rule, text, hint, units, edges)
     if rule.id in SUFFIXES:
         return _suffix(rule, hint, before, after)
     if rule.id in SIGNED or rule.id in SIGNED_CONTEXTS:
@@ -248,7 +292,7 @@ def _numeric_match(
             if rule.id in SIGNED_CONTEXTS
             else _signed(rule, text, refs, units, before, after)
         )
-    if rule.id.startswith("keyword_threshold_"):
+    if rule.id.startswith("keyword_threshold_") or rule.id in KEYWORD_ALIASES:
         return _threshold(rule, text, hint, refs, units, (before, after))
     choice = (
         rule.id == "bracket_choice_index"

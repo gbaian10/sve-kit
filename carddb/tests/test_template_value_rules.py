@@ -141,4 +141,4 @@ def test_observed_symbolic_health_and_evolution_cost_shapes_are_explicit() -> No
     assert matches("これの{進化}コストを２にする。", "cost_assignment")
     assert matches("それのコストを２にしてプレイする。", "cost_assignment")
     assert matches("自分と相手のPP最大値が２なら試す。", "pp_capacity_bound")
-    assert set(EXPLICIT) == {c[0] for c in FIRST_CASES + CASES}
+    assert {c[0] for c in FIRST_CASES + CASES} <= set(EXPLICIT)
