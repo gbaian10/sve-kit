@@ -4,10 +4,10 @@
 本清單由維護者親手操作；agent、CI 不取得 Cloudflare 憑證，不執行真實部署或上傳。
 資料契約見 [preview 建置與接線](../schema/preview-handoff.md)。
 
-本文未連外查證或部署。維護者提供官方依據的內容標為「依官方文件，未實測」；
-其餘控制台、Wrangler 語法、Access／網域／預覽與 R2 平台行為仍為
-**未驗證，需維護者實測**。範例是設定與驗收方案，不是已部署配置；官方連結
-供維護者查核，不代表本輪重新確認了當下的功能、方案或費率。
+第 5 節配置已查核官方文件並以 Wrangler 離線打包驗證，未部署；其餘維護者提供
+官方依據的內容標為「依官方文件，未實測」。控制台、Access／網域／預覽與 R2 平台行為仍為
+**未驗證，需維護者實測**。範例是設定與驗收方案，不是已部署配置；
+其餘官方連結供維護者查核，不代表本輪重新確認了當下的功能、方案或費率。
 
 ## 1. 同網域資料入口與環境表
 
@@ -102,25 +102,23 @@ Brotli 由鎖定的 Python 套件在行程內處理，不啟動外部壓縮子�
 
 Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另放
 `sim/web/wrangler.prod.jsonc`，不同 Worker／桶／網域，不共用開發部署配置。
-部署設定及 R2 讀取 handler 屬 `sim/web` 元件，須以該元件的 PR 納入與審核；這份 docs 清單
-不夾帶配置或程式。執行前須已有包含此工具的 carddb 版次、核可的 Wrangler 版本與配置。
-新增 Wrangler 依賴須依專案規則另作依賴 PR，不用會臨時下載任意最新版的命令。
+採 JSONC 是因為 Cloudflare 建議新專案使用此格式，並可引用已鎖定 Wrangler 的本機 schema。
+配置已關閉 `workers.dev` 與 preview URLs，僅綁 `dev.svekit.app`；gate 亦拒絕其他 origin。
+部署設定及 R2 讀取 handler 屬 `sim/web` 元件，Wrangler 依賴另作依賴 PR，核可後才由維護者部署。
 
-以下為同一個 Worker 提供靜態資源與 R2 讀取的配置示意；entrypoint 須先由
-獨立 sim/web 單位實作與審核。所有選項語法與行為未驗證，需維護者以已核可的
-Wrangler schema／官方文件核對並實測；不得直接視為已通過部署驗證：
+目前同一個 Worker 提供臨時首頁與 R2 讀取，配置如下；離線打包不代表通過部署驗收：
 
 ```jsonc
 {
   "name": "svekit-web-dev",
   "main": "src/cloudflare/worker.ts",
-  "compatibility_date": "2026-10-02",
+  "compatibility_date": "2026-10-06",
   "workers_dev": false,
   "preview_urls": false,
   "routes": [{ "pattern": "dev.svekit.app", "custom_domain": true }],
   "r2_buckets": [{ "binding": "PREVIEW_BUCKET", "bucket_name": "svekit-dev" }],
   "assets": {
-    "directory": "./dist",
+    "directory": "./cloudflare/dev-assets",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
     "run_worker_first": true
@@ -129,25 +127,27 @@ Wrangler schema／官方文件核對並實測；不得直接視為已通過部�
 ```
 
 `main` 指向受審的 Worker entrypoint，`PREVIEW_BUCKET` 綁開發桶，`ASSETS` 提供前端。
-示例以 `assets.run_worker_first: true` 讓 handler 在 SPA fallback 之前驗 host／授權，
+配置以 `assets.run_worker_first: true` 讓 handler 在 SPA fallback 之前驗 host，
 資料路徑讀 R2，其餘委派 `ASSETS.fetch`；所有靜態路徑亦會經過 Worker，可能有額外計費。
-實際配置與執行順序由後續 sim/web 單位核對、測試，平台行為未驗證，需維護者實測；
-不得讓缺少資料 handler 的 SPA 回 index.html 假稱資料可用。
+`/cdn-preview/` 僅接受 GET／HEAD 與 2.0 公開 JSON／五檔 WebP key，缺件或拒絕均不回 HTML；
+R2 壓縮旁檔依 [Response 官方文件](https://developers.cloudflare.com/workers/runtime-apis/response/)
+以 `encodeBody: "manual"` 保留 wire bytes。Access 保護與平台行為仍需維護者實測。
+沿用發布器設定的 Cache-Control，dev 改為 private（僅將 public 換成 private），其餘指令保持原樣。
+物件缺少 Cache-Control 時退回 `private, no-cache`。
 
 維護者以本機 Wrangler 登入或最小部署權限操作，登入方式／權限需依當下官方介面核對，
 未驗證，需維護者實測。部署登入只留本人本機，不把 R2 key pair 當部署 token，不交 CI／agent。
-下列 `bun run wrangler` 呼叫 sim/web 本機已核可的開發依賴，不依賴全域 PATH；
-尚未納入該依賴或 entrypoint 時先停止，不臨時下載工具。
-確認前端型別、測試與建置檢查後，在 repo 根執行：
+在 `sim/web` 執行 `bun run deploy:dev`，呼叫本機鎖定的 Wrangler 與開發設定檔，不依賴全域 PATH。
+確認型別、測試與建置檢查後，維護者亦可從 repo 根執行：
 
 ```bash
-mise exec -- bun run --cwd sim/web build
-cd sim/web
-mise exec -- bun run wrangler deploy --config wrangler.dev.jsonc
+mise exec -- bun run --cwd sim/web deploy:dev
 ```
 
-既有 build script 呼叫 Vite；`dist` 只含前端程式與介面資源，不混 preview root、來源庫、
-卡圖、private 或 reports。SPA 要設定未找到靜態檔案回 index.html；維護者登入後用
+目前資源來自 `sim/web/cloudflare/dev-assets`，臨時頁面提供版本索引連結。
+之後接正式前端時，先執行既有 Vite build，再將 `assets.directory` 改成 `./dist`；
+`dist` 只含前端程式與介面資源，不混 preview root、來源庫、卡圖、private 或 reports。
+SPA 設定未找到靜態檔案回 index.html；維護者登入後用
 `/cards` 及一條未對應實體檔的前端路由驗證 HTML／導航。資料路徑另驗 JSON、WebP 與缺件 404，
 不能拿 SPA fallback 當上傳成功證據。Wrangler deploy 不能替代本機型別或測試檢查。
 
