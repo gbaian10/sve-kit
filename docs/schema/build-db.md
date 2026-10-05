@@ -333,7 +333,8 @@ PR2／PR3 實作時須同步 DDL、表格、inventory 測試與 consumer。
 
 完整 translation_use owner 欄位為 face_revision_id、printing_id/face_id、qa_version_id、cr_clause_id、
 vocabulary_kind/vocabulary_code、keyword_id、product_family_id、product_id，恰一組非 null。
-來源 text 必須等於 context 原文；printing_face 只用自身已知 printed 名稱／效果／風味，unknown 不借 current。
+來源 text 必須等於 context 原文；printing_face 只用自身欄位的原文單元，不借 current。名稱只用已知 printed 字串；
+效果、section 與風味依原文 hash 套用，不等 printed_text_state 確認。
 ordinal 只用於 section/action_label，欄位合法組合依翻譯契約 §6.3；未實作能力不得假裝支援。
 
 所有句型包括單次出現者用模板，固定字／參數／片段不可漏。相同語義與參數保持同翻法，
