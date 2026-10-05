@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 
-from sve_carddb.registry.records import BatchDecision
 from sve_carddb.registry.snapshot import (
     RegistryRecord,
     RegistrySnapshot,
@@ -28,7 +27,6 @@ def detached_entries(entries: tuple[Entry, ...]) -> list[Entry]:
 
 
 class CachedRecord(BaseModel):
-    decision_id: str | None
     shard_path: str
     content: bytes
 
@@ -39,7 +37,6 @@ class CachedRecord(BaseModel):
             entry.kind,
             entry.owner,
             _data(entry),
-            self.decision_id,
             self.shard_path,
             self.content,
         )
@@ -48,14 +45,12 @@ class CachedRecord(BaseModel):
 class CachedRegistry(BaseModel):
     files: RegistryFiles
     records: tuple[CachedRecord, ...]
-    decisions: dict[str, BatchDecision]
 
     def snapshot(self) -> RegistrySnapshot:
         records = [item.record() for item in self.records]
         return RegistrySnapshot(
             self.files,
             MappingProxyType({record.record_key: record for record in records}),
-            MappingProxyType(self.decisions),
         )
 
 
@@ -82,13 +77,11 @@ def load_shared_registry(root: Path, cache: Path) -> RegistrySnapshot:
             files=snapshot.files,
             records=tuple(
                 CachedRecord(
-                    decision_id=record.decision_id,
                     shard_path=record.shard_path,
                     content=record.content,
                 )
                 for record in snapshot.records.values()
             ),
-            decisions=dict(snapshot.decisions),
         )
         cache.write_text(cached.model_dump_json(), encoding="utf-8")
         return snapshot

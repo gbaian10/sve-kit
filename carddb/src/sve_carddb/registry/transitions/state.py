@@ -19,8 +19,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class Entity:
     content: bytes
-    reference: Before | None
-    confirmed: bool
+    reference: Before
     permanent_content: bytes | None
 
     def entry(self) -> Entry | None:
@@ -40,26 +39,12 @@ class Entity:
         return model.model_validate_json(canonical(entry.data))
 
 
-def entity(
-    entry: Entry | None,
-    key: str,
-    decision: str | None,
-    transition: str | None,
-    confirmed: bool,
-) -> Entity:
-    """Pin exact semantic content and its actual producing receipt."""
+def entity(entry: Entry | None, key: str, transition: str | None) -> Entity:
+    """Pin exact semantic content and the transition that produced it."""
     raw = None if entry is None else entry.model_dump(mode="json")
     return Entity(
         canonical(raw),
-        None
-        if decision is None
-        else Before(
-            transition_key=transition,
-            record_key=key,
-            record_hash=digest(raw),
-            decision_id=decision,
-        ),
-        confirmed,
+        Before(transition_key=transition, record_key=key, record_hash=digest(raw)),
         None if entry is None else canonical(raw),
     )
 
@@ -87,7 +72,7 @@ class EffectiveRegistry:
         )
 
     def browse(self, kind: str) -> tuple[Entry, ...]:
-        """Exclude unconfirmed identities, tombstones and unused art from browsing.
+        """Exclude retired identities, tombstones and unused art from browsing.
 
         Wording/errata readiness is independent and cannot remove known identities.
         This view carries no current/DSL/default/artist or publication capability.
@@ -96,31 +81,24 @@ class EffectiveRegistry:
         cards = {
             str(e.data["id"])
             for e in entries
-            if e.kind == "card"
-            and e.data["identity_state"] != "retired"
-            and self.records[e.record_key].confirmed
+            if e.kind == "card" and e.data["identity_state"] != "retired"
         }
         faces = {
             str(e.data["id"])
             for e in entries
-            if e.kind == "face"
-            and e.data["card_id"] in cards
-            and self.records[e.record_key].confirmed
+            if e.kind == "face" and e.data["card_id"] in cards
         }
         printings = {
             str(e.data["id"])
             for e in entries
             if e.kind == "printing"
             and e.data["card_id"] in cards
-            and self.records[e.record_key].confirmed
             and all(m["face_id"] in faces for m in _maps(e))
         }
         return tuple(
             e
             for e in entries
-            if e.kind == kind
-            and self.records[e.record_key].confirmed
-            and _visible(e, cards, faces, printings)
+            if e.kind == kind and _visible(e, cards, faces, printings)
         )
 
     def resolve_int_id(self, int_id: int) -> RepairHint | None:

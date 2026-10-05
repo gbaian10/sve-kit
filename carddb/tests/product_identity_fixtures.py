@@ -1,4 +1,4 @@
-"""Synthetic sealed official HTML, independent envelope hashes and Git inputs."""
+"""Synthetic sealed official HTML and Git inputs."""
 
 import json
 import os
@@ -26,12 +26,12 @@ from sve_carddb.registry.preview import plan_preview
 from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
 from sve_carddb.registry.review import InitDecisions, Inputs
 from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.registry.storage import plan_files, read_yaml, write_files
+from sve_carddb.registry.storage import plan_files, write_files
 from sve_carddb.source_archive import seal_batch
 from sve_carddb.sources.official_jp import card_url
 
 from .identity_evidence_fixtures import MemoryEvidence
-from .product_fixtures import checksum, envelope, family, install, obj, sign, write_yaml
+from .product_fixtures import envelope, family, install, obj, write_yaml
 from .test_registry_preview_archive import RAW
 from .test_source_archive import _put, _resource, _store
 
@@ -143,32 +143,18 @@ def identity_record(
 
 
 def identity_envelope(records: list[dict[str, JsonValue]]) -> dict[str, JsonValue]:
-    shard = envelope(sorted(records, key=lambda row: str(row["record_key"])))
-    del shard["product_authored_format"]
-    shard.update(product_identity_format=1, kind="product_identity_shard")
-    review = obj(shard["decisions"][0]) if isinstance(shard["decisions"], list) else {}
-    review.update(category="product_identity", policy_id="product-identity-v1")
-    return shard
+    ordered = sorted(records, key=lambda row: str(row["record_key"]))
+    return {
+        "product_identity_format": 1,
+        "kind": "product_identity_shard",
+        "records": list[JsonValue](ordered),
+    }
 
 
 def install_identity(
-    root: Path, shard: dict[str, JsonValue], *, name: str = NAME, resign: bool = False
+    root: Path, shard: dict[str, JsonValue], *, name: str = NAME
 ) -> None:
-    if resign:
-        sign(shard)
     write_yaml(root / name, shard)
-    path = root / "product-identities/index.yaml"
-    index: dict[str, JsonValue] = (
-        obj(read_yaml(path))
-        if path.exists()
-        else {
-            "product_identity_format": 1,
-            "kind": "product_identity_index",
-            "includes": {},
-        }
-    )
-    obj(index["includes"])[name] = checksum(shard)
-    write_yaml(path, index)
 
 
 @dataclass

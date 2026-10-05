@@ -20,7 +20,6 @@ from sve_carddb.registry.records import (
 from sve_carddb.routes.codec import card_path
 
 ArtId = Annotated[str, Field(pattern=r"^a:[0-9a-f]{32}\Z")]
-DecisionId = Annotated[str, Field(pattern=r"^d:[0-9a-f]{64}\Z")]
 TargetKey = Annotated[
     str,
     Field(
@@ -47,7 +46,6 @@ def names_ordered(values: tuple[str, ...]) -> None:
 class Reference(RecordData):
     record_key: Text
     record_hash: Hash
-    decision_id: DecisionId
 
 
 class Before(Reference):
@@ -317,20 +315,10 @@ class Transition(RecordData):
         return self
 
 
-class Decision(RecordData):
-    id: DecisionId
-    state: Literal["confirmed"]
-    scope: Literal["batch"]
-    category: Literal["identity_transition"]
-    policy_id: Literal["identity-transition-v1"]
-    membership_hash: Hash
-    members: Annotated[tuple[tuple[Text, Hash], ...], Field(min_length=1, max_length=1)]
-    sample_ids: Annotated[tuple[Text, ...], Field(min_length=1, max_length=1)]
-    note: str
-
-
-class Envelope(RecordData):
+class Shard(RecordData):
     identity_transition_format: Literal[1]
+    kind: Literal["identity_transition_shard"]
+    records: Annotated[tuple[Transition, ...], Field(min_length=1, max_length=1)]
 
     @field_validator("identity_transition_format", mode="before")
     @classmethod
@@ -338,15 +326,3 @@ class Envelope(RecordData):
         if type(value) is not int:
             raise ValueError("Transition format must be integer 1")
         return value
-
-
-class Index(Envelope):
-    kind: Literal["identity_transition_index"]
-    includes: dict[str, Hash]
-
-
-class Shard(Envelope):
-    kind: Literal["identity_transition_shard"]
-    default_decision_id: DecisionId
-    records: Annotated[tuple[Transition, ...], Field(min_length=1, max_length=1)]
-    decisions: Annotated[tuple[Decision, ...], Field(min_length=1, max_length=1)]

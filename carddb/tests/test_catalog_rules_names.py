@@ -142,7 +142,6 @@ def test_two_faces_with_same_regional_name_share_group_without_merging_cards(
                 "card_id": "another-card",
                 "ordinal": 0,
                 "side": "front",
-                "decision_id": None,
             },
         )
         original = dict(db.rows("face_revision")[0].values)

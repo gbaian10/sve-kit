@@ -195,8 +195,8 @@ Presence projection precedes source correction: each physical observation keeps
 its untouched extractor face on `card.faces` and its presence-projected content;
 `corrected_observations` applies verified replacements to that projected content.
 Only corrected candidates carry `correction_keys`. Their revisions retain the
-original projected physical revision as `supersedes_id`, with the independent
-correction decision. Presence, correction comparison and image evidence uses all
+original projected physical revision as `supersedes_id`, and
+`correction_application` names the correction. Presence, correction comparison and image evidence uses all
 remain in F1. Correction reports distinguish `raw_face_hash` from
 `projected_face_hash`; neither a type correction nor its hash may erase the
 verified empty effect. Unknown effects still cannot acquire invented revisions.

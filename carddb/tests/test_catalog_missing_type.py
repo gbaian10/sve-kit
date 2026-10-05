@@ -78,7 +78,7 @@ def test_missing_type_uses_exact_confirmed_correction_and_preserves_both_revisio
             revisions[revision_id(candidate)],
         )
         assert initial["type_code"] == "ep"
-        assert initial["decision_id"] == applied.record.decision_id
+        assert initial["decision_id"] is None
         assert initial["source_id"] == raw.card.source.id
         assert initial["change_kind"] == "initial"
         assert initial["supersedes_id"] is None
@@ -142,7 +142,7 @@ def test_missing_type_rechecks_selected_correction_instead_of_trusting_status(
     case = correction.texts
     applied = application(correction)
     forged = replace(
-        applied, record=replace(applied.record, decision_id="d:" + "f" * 64)
+        applied, record=replace(applied.record, shard_path="registry/forged.yaml")
     )
     with pytest.raises(
         ValueError, match=r"^Correction record or application status mismatch$"

@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from sve_carddb.build_db import Database, Value
+    from sve_carddb.registry.preview.plan import Projection
     from sve_carddb.registry.records import Region
     from sve_carddb.text_observations import Vocabulary
     from sve_carddb.text_observations.plan import TextPlan
@@ -21,7 +22,6 @@ if TYPE_CHECKING:
 class _Graph:
     printings: Mapping[Value, Mapping[str, Value]]
     current: Mapping[tuple[Value, Value], Value]
-    links: frozenset[tuple[Value, Value]]
     faces: Mapping[Value, Value]
     rules: Mapping[str, bytes]
     vocabulary: Vocabulary
@@ -33,18 +33,12 @@ def applicable_reskin_regions(
     """Return only valid display regions; never propagate DSL or deck identity."""
     verify_plan(texts)
     rows = {row.values["id"]: row.values for row in db.rows("card_related")}
-    decisions = {row.values["id"]: row.values["state"] for row in db.rows("decision")}
     graph = _Graph(
         {row.values["id"]: row.values for row in db.rows("printing")},
         {
             (row.values["face_id"], row.values["region"]): row.values["revision_id"]
             for row in db.rows("face_current")
         },
-        frozenset(
-            (row.values["decision_id"], row.values["source_id"])
-            for row in db.rows("decision_source")
-            if row.values["role"] == "registry_observation_matched"
-        ),
         {row.values["id"]: row.values["card_id"] for row in db.rows("face")},
         actual_rules(db),
         vocabulary,
@@ -61,8 +55,6 @@ def applicable_reskin_regions(
         row = rows.get(data.id)
         if (
             row is None
-            or row["decision_id"] != record.decision_id
-            or decisions.get(record.decision_id) != "confirmed"
             or row["from_card_id"] != data.from_card_id
             or row["to_card_id"] != data.to_card_id
         ):
@@ -70,7 +62,7 @@ def applicable_reskin_regions(
         regions = tuple(
             region
             for region in projection.regions
-            if _region_valid(texts, data, region, record.decision_id, graph)
+            if _region_valid(texts, data, region, projection, graph)
         )
         if regions:
             result[data.id] = regions
@@ -81,7 +73,7 @@ def _region_valid(
     texts: TextPlan,
     data: RelatedData,
     region: Region,
-    decision_id: str | None,
+    projection: Projection,
     graph: _Graph,
 ) -> bool:
     endpoints = {data.from_card_id, data.to_card_id}
@@ -119,7 +111,10 @@ def _region_valid(
             proof is None
             or proof.source.id != item.card.source.id
             or proof.observation != item.card.observation
-            or (decision_id, item.card.source.id) not in graph.links
+            or not any(
+                check.status == "matched" and check.source_id == item.card.source.id
+                for check in projection.evidence
+            )
         ):
             return False
         if graph.current.get((item.face_id, region)) != revision_id(

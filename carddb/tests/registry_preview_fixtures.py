@@ -69,7 +69,7 @@ def parents(db: Database, plan: PreviewPlan) -> None:
     """Emulate separately verified product input, never production placeholders."""
     fixtures = rows()
     with db.transaction():
-        for name in ("decision", "language", "text_unit"):
+        for name in ("language", "text_unit"):
             db.insert(name, fixtures[name])
         required = {
             r.data.home_set_id

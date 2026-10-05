@@ -86,7 +86,6 @@ class PrintingOwner(RecordData):
 class IdentityBasis(RecordData):
     authored_revision: Revision
     registry_index_hash: Hash
-    transition_index_hash: Hash | None
 
 
 class ConceptSubject(RecordData):

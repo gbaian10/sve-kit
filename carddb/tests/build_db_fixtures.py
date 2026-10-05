@@ -53,7 +53,6 @@ def rows() -> dict[str, dict[str, Value]]:
             "old_card_id": "old_card",
             "new_card_id": "card",
             "data_version": "preview-20260929T000000Z-0001",
-            "decision_id": "decision",
             "reason": "Synthetic merge",
         },
         "card_int_id": {
@@ -77,7 +76,6 @@ def rows() -> dict[str, dict[str, Value]]:
             "public_code": "TEST",
             "kind": "other",
             "name_unit_id": "text",
-            "decision_id": "decision",
         },
         "product": {
             "id": "product",

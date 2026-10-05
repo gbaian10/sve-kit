@@ -28,7 +28,7 @@ _ACTIONS = {
 
 
 def review_queue(identity: PreviewPlan) -> list[JsonValue]:
-    """Find every decision affected by missing or changed exact observations."""
+    """Find every record affected by missing or changed exact observations."""
     queue: list[JsonValue] = []
     for projection in identity.projections:
         for check in projection.evidence:
@@ -38,8 +38,6 @@ def review_queue(identity: PreviewPlan) -> list[JsonValue]:
             queue.append(
                 {
                     "record_key": projection.record_key,
-                    "decision_id": projection.decision_id,
-                    "historic_decision_state": projection.decision_state,
                     "region": check.region,
                     "card_no": check.card_no,
                     "status": check.status,
@@ -159,8 +157,6 @@ def _printings(
                 "printing_id": data.id,
                 "card_id": data.card_id,
                 "card_no": data.card_no,
-                "decision_id": record.decision_id,
-                "historic_decision_state": projection.decision_state,
                 "status": status,
                 "action": _ACTIONS[status],
                 "expected": data.observation.model_dump(mode="json"),

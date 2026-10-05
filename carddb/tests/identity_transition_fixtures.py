@@ -30,33 +30,14 @@ def checksum(value: object) -> str:
 
 def reference(shard: dict[str, Any]) -> dict[str, Any]:
     record = shard["records"][0]
-    return {
-        "record_key": record["record_key"],
-        "record_hash": checksum(record),
-        "decision_id": shard["default_decision_id"],
-    }
+    return {"record_key": record["record_key"], "record_hash": checksum(record)}
 
 
 def pack(record: dict[str, Any]) -> dict[str, Any]:
-    members = [[record["record_key"], checksum(record)]]
-    membership = checksum(members)
-    decision = {
-        "id": "d:" + membership.removeprefix("sha256:"),
-        "state": "confirmed",
-        "scope": "batch",
-        "category": "identity_transition",
-        "policy_id": "identity-transition-v1",
-        "membership_hash": membership,
-        "members": members,
-        "sample_ids": [record["record_key"]],
-        "note": "Synthetic receipt only",
-    }
     return {
         "identity_transition_format": 1,
         "kind": "identity_transition_shard",
-        "default_decision_id": decision["id"],
         "records": [record],
-        "decisions": [decision],
     }
 
 
@@ -78,28 +59,14 @@ def chain(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "transition_key": record["record_key"],
                 "record_key": update["target_key"],
                 "record_hash": checksum(update["after"]),
-                "decision_id": shard["default_decision_id"],
             }
     return result
 
 
 def write_chain(root: Path, shards: list[dict[str, Any]]) -> None:
-    directory = root / "identity-transitions"
-    directory.mkdir(exist_ok=True)
-    includes = {}
+    (root / "identity-transitions").mkdir(exist_ok=True)
     for sequence, shard in enumerate(shards, start=1):
-        name = f"identity-transitions/{sequence:03}.yaml"
-        (root / name).write_bytes(wire(shard))
-        includes[name] = checksum(shard)
-    (directory / "index.yaml").write_bytes(
-        wire(
-            {
-                "identity_transition_format": 1,
-                "kind": "identity_transition_index",
-                "includes": includes,
-            }
-        )
-    )
+        (root / f"identity-transitions/{sequence:03}.yaml").write_bytes(wire(shard))
 
 
 def entry(kind: str, identifier: str, data: dict[str, Any]) -> dict[str, Any]:
@@ -118,7 +85,6 @@ def update(before: dict[str, Any], after: dict[str, Any]) -> dict[str, Any]:
             "transition_key": None,
             "record_key": before["record_key"],
             "record_hash": checksum(before),
-            "decision_id": "d:" + "0" * 64,
         },
         "after": after,
         "allocation_anchor": None,

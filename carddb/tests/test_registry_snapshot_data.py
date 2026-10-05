@@ -6,16 +6,9 @@ import pytest
 
 from sve_carddb.registry.build import build
 from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.registry.storage import (
-    Index,
-    Shard,
-    load,
-    plan_files,
-    read_yaml,
-    write_files,
-)
+from sve_carddb.registry.storage import Shard, load, plan_files, read_yaml, write_files
 
-from .registry_snapshot_fixtures import edit_record, rewrite
+from .registry_snapshot_fixtures import edit_record, kind_shard, rewrite
 from .registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- expose synthetic pytest fixture
 from .test_registry import card
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- expose dependency of the synthetic registry fixture
@@ -184,10 +177,7 @@ def test_face_identity_constraints(registry_root: Path, damage: str) -> None:
 
 def test_reskin_reverse_requires_independent_rejection(registry_root: Path) -> None:
 
-    index = Index.model_validate(read_yaml(registry_root / "ids/index.yaml"))
-    name = next(name for name in index.includes if "/card_related/" in name)
-    path = registry_root / name
-    shard = Shard.model_validate(read_yaml(path))
+    path, shard = kind_shard(registry_root, "card_related")
     reverse = shard.records[0].model_copy(deep=True)
     reverse.data["id"] = "r:" + "9" * 32
     reverse.record_key = "card_related:" + str(reverse.data["id"])
@@ -201,7 +191,7 @@ def test_reskin_reverse_requires_independent_rejection(registry_root: Path) -> N
         assert isinstance(item, dict)
         item["role"] = "to" if item["role"] == "from" else "from"
     shard.records.append(reverse)
-    rewrite(registry_root, path, shard, resign=True)
+    rewrite(path, shard)
     with pytest.raises(ValueError, match="Reverse reskin"):
         load_registry(registry_root)
 
@@ -237,7 +227,7 @@ def test_source_face_map_is_not_replaced_with_ordinal(
 
     shard = Shard.model_validate(read_yaml(path))
     swap(shard.records[0])
-    rewrite(tmp_path, path, shard, resign=True)
+    rewrite(path, shard)
     snapshot = load_registry(tmp_path)
     assert (
         snapshot.records[printing.record_key].entry().data["source_face_map"]
@@ -253,6 +243,6 @@ def test_en_only_cannot_carry_a_target_observation(registry_root: Path) -> None:
     assert isinstance(review, dict)
     assert review["target_jp_card_no"] is None
     review["target_observation"] = shard.records[0].data["observation"]
-    rewrite(registry_root, path, shard, resign=True)
+    rewrite(path, shard)
     with pytest.raises(ValueError, match="English-only review"):
         load_registry(registry_root)

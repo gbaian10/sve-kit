@@ -10,10 +10,8 @@ from pydantic import JsonValue, ValidationError
 
 from sve_carddb.products.models import (
     CatalogRecord,
-    Decision,
     FamilyRecord,
     InclusionRecord,
-    Index,
     ProductRecord,
     Shard,
 )
@@ -46,11 +44,9 @@ class LoadedShard:
 
 @dataclass(frozen=True)
 class ProductSnapshot:
-    index_content: bytes
     registry_index_content: bytes
     shards: tuple[LoadedShard, ...]
     records: Mapping[str, CatalogRecord]
-    decisions: Mapping[str, Decision]
 
     def report(self) -> dict[str, JsonValue]:
         """Report candidate/adopted identifiers without product names or card text."""
@@ -58,14 +54,12 @@ class ProductSnapshot:
             "records": [
                 {
                     "record_key": record.record_key,
-                    "decision_id": shard.envelope.default_decision_id,
-                    "state": shard.envelope.decisions[0].state,
+                    "state": record.state,
                     "disposition": (
-                        "confirmed_family"
+                        "candidate"
+                        if record.state == "proposed"
+                        else "confirmed_family"
                         if isinstance(record, FamilyRecord)
-                        and shard.envelope.decisions[0].state == "confirmed"
-                        else "candidate"
-                        if shard.envelope.decisions[0].state == "proposed"
                         else "projection_unimplemented"
                     ),
                 }
@@ -76,39 +70,22 @@ class ProductSnapshot:
 
 
 def load_products(root: Path, *, registry: RegistrySnapshot) -> ProductSnapshot:
-    """Read only indexed, stable authored inputs; do not allocate or write anything.
+    """Read every stable product shard; do not allocate or write anything.
 
     This validates the complete wire format and global references. Raw evidence
     verification belongs to the projection boundary; this snapshot alone does
     not attest an evidence locator or authorize product/inclusion projection.
     """
-    index_path = root / "products/index.yaml"
-    _safe_file(root, index_path)
-    raw_index = read_yaml(index_path)
-    index = _model(Index, raw_index)
-    _inventory(root, set(index.includes))
-    shards = tuple(
-        _load_shard(root, name, checksum)
-        for name, checksum in sorted(index.includes.items())
-    )
+    shards = tuple(_load_shard(root, name) for name in _inventory(root))
     records: dict[str, CatalogRecord] = {}
-    decisions: dict[str, Decision] = {}
     for shard in shards:
-        decision = shard.envelope.decisions[0]
-        if decision.id in decisions:
-            raise ValueError("Duplicate product decision")
-        decisions[decision.id] = decision
         for record in shard.envelope.records:
             if record.record_key in records:
                 raise ValueError("Duplicate product record or data primary key")
             records[record.record_key] = record
     _references(records, registry)
     return ProductSnapshot(
-        canonical(raw_index),
-        registry.files.index_content,
-        shards,
-        MappingProxyType(records),
-        MappingProxyType(decisions),
+        registry.files.index_content, shards, MappingProxyType(records)
     )
 
 
@@ -132,34 +109,29 @@ def _safe_file(root: Path, path: Path) -> None:
         raise ValueError("Missing product input file")
 
 
-def _inventory(root: Path, includes: set[str]) -> None:
-    for name in includes:
-        if _PATH.fullmatch(name) is None:
-            raise ValueError("Unsafe product include path")
+def _inventory(root: Path) -> list[str]:
     directory = root / "products"
-    present: set[str] = set()
+    if directory.is_symlink() or not directory.is_dir():
+        raise ValueError("Missing product input directory")
+    names: list[str] = []
     for file in directory.rglob("*"):
         if file.is_symlink():
             raise ValueError("Symlinks are forbidden in product inputs")
-        if (
-            file.suffix.lower() in {".yaml", ".yml"}
-            and file != directory / "index.yaml"
-        ):
-            present.add(file.relative_to(root).as_posix())
-    if present != includes:
-        raise ValueError("Product indexed file closure differs from disk")
+        if file.suffix.lower() in {".yaml", ".yml"}:
+            name = file.relative_to(root).as_posix()
+            if _PATH.fullmatch(name) is None:
+                raise ValueError("Unexpected product input path")
+            names.append(name)
+    return sorted(names)
 
 
-def _load_shard(root: Path, name: str, checksum: str) -> LoadedShard:
+def _load_shard(root: Path, name: str) -> LoadedShard:
     path = root / name
     _safe_file(root, path)
     raw = read_yaml(path)
-    if digest(raw) != checksum:
-        raise ValueError("Modified immutable product shard")
     shard = _model(Shard, raw)
     _check_records(shard, name)
-    _check_decision(shard)
-    return LoadedShard(name, checksum, canonical(raw), shard)
+    return LoadedShard(name, digest(raw), canonical(raw), shard)
 
 
 def _check_records(shard: Shard, path: str) -> None:
@@ -181,27 +153,6 @@ def _check_records(shard: Shard, path: str) -> None:
             raise ValueError("Duplicate product evidence")
         if not isinstance(record, FamilyRecord) and not record.evidence:
             raise ValueError("Product/inclusion evidence must be nonempty")
-
-
-def _check_decision(shard: Shard) -> None:
-    decision = shard.decisions[0]
-    members = tuple(
-        (record.record_key, digest(record.model_dump(mode="json")))
-        for record in shard.records
-    )
-    checksum = digest([[key, value] for key, value in members])
-    if decision.members != members:
-        raise ValueError("Product decision exact members disagree")
-    if decision.membership_hash != checksum:
-        raise ValueError("Product decision membership hash disagrees")
-    if decision.id != "d:" + checksum.removeprefix("sha256:"):
-        raise ValueError("Product decision ID disagrees with membership hash")
-    if shard.default_decision_id != decision.id:
-        raise ValueError("Product default decision ID disagrees")
-    if decision.state == "confirmed" and decision.sample_ids != tuple(
-        key for key, _ in members
-    ):
-        raise ValueError("Confirmed product decision must check every exact member")
 
 
 def _references(records: dict[str, CatalogRecord], registry: RegistrySnapshot) -> None:

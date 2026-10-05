@@ -80,14 +80,11 @@ def test_workers_share_one_source_load_and_exact_snapshot(
     assert load.call_count == 1
     assert first.files == second.files
     assert first.records == second.records
-    assert first.decisions == second.decisions
     assert first is not second
     assert cache.read_bytes()
     record = next(iter(second.records.values()))
     with pytest.raises(TypeError):
         second.records["polluted"] = record  # type: ignore[index]  # exercise restored mapping immutability
-    with pytest.raises(TypeError):
-        del second.decisions[next(iter(second.decisions))]  # type: ignore[attr-defined]  # exercise restored mapping immutability
     printing = next(
         record.data
         for record in second.records.values()

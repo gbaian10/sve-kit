@@ -26,9 +26,7 @@ from sve_carddb.snapshot.project import (
 )
 from sve_carddb.snapshot.project.closure import validate_closure
 from sve_carddb.snapshot.project.records import initial
-from sve_carddb.snapshot.project.regions import Dates, region_views
 from sve_carddb.snapshot.project.shape import tuple_value
-from sve_carddb.snapshot.project.source import Source
 from sve_carddb.snapshot.values import (
     array,
     canonical,
@@ -38,6 +36,7 @@ from sve_carddb.snapshot.values import (
     string,
 )
 
+from .build_db_fixtures import DATE
 from .snapshot_project_fixtures import SETTINGS, TEXT, decisions, populate, schema
 
 if TYPE_CHECKING:
@@ -45,7 +44,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.build_db import CompiledSchema, Database, Value
     from sve_carddb.snapshot.project import Projection
-    from sve_carddb.snapshot.project.source import Record
+    from sve_carddb.snapshot.project.source import Record, Source
 
 
 @pytest.fixture(scope="module")
@@ -1460,51 +1459,15 @@ def test_provisional_identity_with_two_regions_is_not_confirmed(db: Database) ->
         )
 
 
-@pytest.mark.parametrize(
-    "level", ["proposed", "model_reviewed", "sampled", "confirmed"]
-)
-def test_confirmed_none_requires_reviewed_mapping(db: Database, level: str) -> None:
-    result = projected(db)
-
-    def exercise() -> None:
-        with db.transaction():
-            db.update("decision", {"id": "mapping_decision"}, {"state": level})
-            source = Source(db)
-            region_views(
-                source, result.tables, "2026-10-01", Dates(source, result.tables), {}
-            )
-            assert region(result)["mapping_state"] == (
-                "confirmed_none" if level == "confirmed" else "pending"
-            )
-            if level != "confirmed":
-                projected(db)
-
-    if level == "confirmed":
-        exercise()
-    else:
-        with pytest.raises(sqlite3.IntegrityError, match="mapping_confirmed_none"):
-            exercise()
-
-
-def test_unreviewed_unlisted_is_not_released(db: Database) -> None:
+@pytest.mark.parametrize("state", ["pending", "confirmed_none"])
+def test_mapping_review_state_is_projected(db: Database, state: str) -> None:
     with db.transaction():
-        db.insert(
-            "decision",
-            dict(db.rows("decision")[0].values)
-            | {"id": "unreviewed", "state": "proposed"},
-        )
         db.update(
-            "printing",
-            {"id": "printing"},
-            {
-                "catalog_state": "unlisted",
-                "decision_id": "unreviewed",
-                "decklog_available": False,
-            },
+            "region_mapping_review",
+            {"card_id": "card", "target_region": "en", "as_of": DATE},
+            {"state": state},
         )
-    result = projected(db)
-    assert one(result, "printing")["review_level"] == "unreviewed"
-    assert region(result)["release_state"] == "unknown"
+    assert region(projected(db))["mapping_state"] == state
 
 
 @pytest.mark.parametrize("level", ["proposed", "model_reviewed", "sampled"])

@@ -6,15 +6,11 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.registry.build import build
-from sve_carddb.registry.inputs import digest
 from sve_carddb.registry.review import Correction
 from sve_carddb.registry.storage import (
     Entry,
-    Index,
     Shard,
     encode,
-    member_hash,
-    members,
     plan_files,
     read_yaml,
     write_files,
@@ -92,49 +88,38 @@ def restore_registry(
     return destination
 
 
-def rewrite(root: Path, path: Path, shard: Shard, *, resign: bool = False) -> None:
-    if resign and shard.decisions:
-        decision = shard.decisions[0]
-        decision.members = members(shard.records)
-        decision.membership_hash = member_hash(decision.members)
-        decision.id = "d:" + decision.membership_hash.removeprefix("sha256:")
-        decision.sample_ids = (
-            [key for key, _ in decision.members]
-            if decision.state == "confirmed"
-            else []
-        )
-        shard.default_decision_id = decision.id
+def shard_paths(root: Path) -> list[Path]:
+    index = root / "ids/index.yaml"
+    return sorted(
+        path
+        for area in ("registry", "ids")
+        for path in (root / area).rglob("*.yaml")
+        if path != index
+    )
+
+
+def rewrite(path: Path, shard: Shard) -> None:
     path.write_bytes(encode(shard))
-    index_path = root / "ids/index.yaml"
-    index = Index.model_validate(read_yaml(index_path))
-    index.includes[path.relative_to(root).as_posix()] = digest(read_yaml(path))
-    index_path.write_bytes(encode(index))
 
 
 def edit_record(
     root: Path, kind: str, edit: Callable[[Entry], None], *, region: str | None = None
 ) -> None:
-    index = Index.model_validate(read_yaml(root / "ids/index.yaml"))
-    for name in index.includes:
-        path = root / name
+    for path in shard_paths(root):
         shard = Shard.model_validate(read_yaml(path))
         for entry in shard.records:
             if entry.kind == kind and (
                 region is None or entry.data.get("region") == region
             ):
                 edit(entry)
-                rewrite(root, path, shard, resign=True)
+                rewrite(path, shard)
                 return
     raise AssertionError("Missing synthetic test record")
 
 
-def decision_shard(root: Path, *, proposed: bool = False) -> tuple[Path, Shard]:
-    index = Index.model_validate(read_yaml(root / "ids/index.yaml"))
-    for name in index.includes:
-        path = root / name
+def kind_shard(root: Path, kind: str) -> tuple[Path, Shard]:
+    for path in shard_paths(root):
         shard = Shard.model_validate(read_yaml(path))
-        if shard.decisions and shard.decisions[0].state == (
-            "proposed" if proposed else "confirmed"
-        ):
+        if shard.records[0].kind == kind:
             return path, shard
-    raise AssertionError("Missing synthetic test decision")
+    raise AssertionError("Missing synthetic test shard")

@@ -53,7 +53,6 @@ def rows(*, include_en: bool = True) -> dict[str, dict[str, Value]]:
             "corrected_value": Json("Synthetic text"),
             "expected_source_hash": HASH,
             "reason": "Synthetic correction",
-            "decision_id": "correction_decision",
             "reported_to_official": False,
             "state": "active",
         },
@@ -95,14 +94,12 @@ def rows(*, include_en: bool = True) -> dict[str, dict[str, Value]]:
             "to_card_id": "card",
             "relation": "same_rules_reskin",
             "source_kind": "authored",
-            "decision_id": "related_decision",
         },
         "art": {
             "id": "art",
             "card_id": "card",
             "face_id": "face",
             "classification": "unclassified",
-            "decision_id": "decision",
         },
         "region_mapping_review": {
             "card_id": "card2",
@@ -111,7 +108,6 @@ def rows(*, include_en: bool = True) -> dict[str, dict[str, Value]]:
             "as_of": DATE,
             "coverage_scope": "Synthetic scope",
             "source_id": "source",
-            "decision_id": "mapping_decision",
         },
         "region_text_review": {
             "card_id": "card",
@@ -146,7 +142,7 @@ def rows(*, include_en: bool = True) -> dict[str, dict[str, Value]]:
 def populate(db: Database, *, include_en: bool = True) -> None:
     populate_a(db)
     base = base_rows()
-    for prefix in ("errata", "correction", "related", "mapping", "text", "divergence"):
+    for prefix in ("errata", "text", "divergence"):
         db.insert("decision", base["decision"] | {"id": prefix + "_decision"})
     db.insert("card", base["card"] | {"id": "card2"})
     db.insert("face", base["face"] | {"id": "face2", "card_id": "card2"})

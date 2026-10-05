@@ -17,7 +17,7 @@ from sve_carddb.catalog.projection import CatalogProjection
 from sve_carddb.products import Language
 from sve_carddb.snapshot import offline
 from sve_carddb.snapshot.offline_names import Composer, composer
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.snapshot.values import array, digest, object_value
 from sve_carddb.text_observations import Binding, Vocabulary
 from sve_carddb.translations.importer import Inputs as TranslationInputs
 from sve_carddb.translations.importer import populate_glossary
@@ -58,17 +58,7 @@ def recipe(tmp_path_factory: pytest.TempPathFactory) -> offline.Inputs:
         "products/family/" + home + "/001.yaml",
         envelope([family(home, code="synthetic")]),
     )
-    identities = root / "authored/product-identities/index.yaml"
-    identities.parent.mkdir(parents=True)
-    identities.write_bytes(
-        canonical(
-            {
-                "product_identity_format": 1,
-                "kind": "product_identity_index",
-                "includes": {},
-            }
-        )
-    )
+    (root / "authored/product-identities").mkdir(parents=True)
     revision = commit(root)
     ref = fixture.owner().name_ref
     assert ref is not None

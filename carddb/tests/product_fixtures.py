@@ -1,6 +1,5 @@
-"""Independently signed synthetic product catalogs and isolated edit helpers."""
+"""Synthetic product catalogs and isolated edit helpers."""
 
-import hashlib
 import io
 import json
 from typing import TYPE_CHECKING
@@ -9,7 +8,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.products import Language
-from sve_carddb.registry.storage import read_yaml, yaml_parser
+from sve_carddb.registry.storage import yaml_parser
 
 from .fixture_files import FrozenFiles, freeze_files, restore_files
 
@@ -18,17 +17,6 @@ if TYPE_CHECKING:
 
 Object = dict[str, JsonValue]
 LANGUAGES = (Language(code="ja", fallback_order=(), display_name="Japanese"),)
-
-
-def checksum(value: JsonValue) -> str:
-    return (
-        "sha256:"
-        + hashlib.sha256(
-            json.dumps(
-                value, sort_keys=True, ensure_ascii=False, separators=(",", ":")
-            ).encode()
-        ).hexdigest()
-    )
 
 
 def obj(value: JsonValue) -> Object:
@@ -45,10 +33,6 @@ def first_record(shard: Object) -> Object:
     return obj(items(shard["records"])[0])
 
 
-def decision(shard: Object) -> Object:
-    return obj(items(shard["decisions"])[0])
-
-
 def family(
     identifier: str, *, code: str | None = None, text: str = "Synthetic family"
 ) -> Object:
@@ -56,6 +40,7 @@ def family(
         "kind": "product_family",
         "filing_key": identifier,
         "record_key": json.dumps(["product_family", identifier], separators=(",", ":")),
+        "state": "confirmed",
         "data": {
             "id": identifier,
             "code": identifier.lower() if code is None else code,
@@ -81,6 +66,7 @@ def product(*, region: str = "jp") -> Object:
         "kind": "product",
         "filing_key": "unassigned",
         "record_key": '["product","example"]',
+        "state": "confirmed",
         "data": {
             "id": "example",
             "region": region,
@@ -103,6 +89,7 @@ def inclusion(printing_id: str) -> Object:
         "record_key": json.dumps(
             ["printing_product", printing_id, "example"], separators=(",", ":")
         ),
+        "state": "confirmed",
         "data": {
             "printing_id": printing_id,
             "product_id": "example",
@@ -117,45 +104,11 @@ def inclusion(printing_id: str) -> Object:
 
 
 def envelope(records: list[Object]) -> Object:
-    shard: Object = {
+    return {
         "product_authored_format": 1,
         "kind": "product_shard",
-        "default_decision_id": "",
         "records": list[JsonValue](records),
-        "decisions": [
-            {
-                "id": "",
-                "state": "confirmed",
-                "scope": "batch",
-                "category": "product_catalog",
-                "policy_id": "product-authored-v1",
-                "membership_hash": "",
-                "members": [],
-                "sample_ids": [],
-                "note": "Synthetic review note",
-            }
-        ],
     }
-    sign(shard)
-    return shard
-
-
-def sign(shard: Object) -> None:
-    review = decision(shard)
-    members: list[JsonValue] = sorted(
-        [
-            [obj(record)["record_key"], checksum(record)]
-            for record in items(shard["records"])
-        ],
-        key=lambda item: str(items(item)[0]),
-    )
-    review["members"] = members
-    review["membership_hash"] = checksum(members)
-    review["id"] = "d:" + str(review["membership_hash"]).removeprefix("sha256:")
-    review["sample_ids"] = (
-        [items(item)[0] for item in members] if review["state"] == "confirmed" else []
-    )
-    shard["default_decision_id"] = review["id"]
 
 
 def write_yaml(path: Path, value: JsonValue) -> None:
@@ -165,22 +118,8 @@ def write_yaml(path: Path, value: JsonValue) -> None:
     path.write_text(stream.getvalue(), encoding="utf-8")
 
 
-def install(root: Path, name: str, shard: Object, *, resign: bool = False) -> None:
-    if resign:
-        sign(shard)
+def install(root: Path, name: str, shard: Object) -> None:
     write_yaml(root / name, shard)
-    index_path = root / "products/index.yaml"
-    index: Object = (
-        obj(read_yaml(index_path))
-        if index_path.exists()
-        else {
-            "product_authored_format": 1,
-            "kind": "product_index",
-            "includes": {},
-        }
-    )
-    obj(index["includes"])[name] = checksum(shard)
-    write_yaml(index_path, index)
 
 
 @pytest.fixture(scope="session")

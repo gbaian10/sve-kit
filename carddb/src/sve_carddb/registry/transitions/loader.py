@@ -1,4 +1,4 @@
-"""Validate exact transition membership and historical references without replay."""
+"""Validate transition chains and historical references without replay."""
 
 from typing import TYPE_CHECKING
 
@@ -16,23 +16,7 @@ def _reference(shard: Shard) -> Reference:
     return Reference(
         record_key=record.record_key,
         record_hash=digest(record.model_dump(mode="json")),
-        decision_id=shard.decisions[0].id,
     )
-
-
-def _decision(shard: Shard) -> None:
-    record = shard.records[0]
-    decision = shard.decisions[0]
-    members = ((record.record_key, digest(record.model_dump(mode="json"))),)
-    checksum = digest([[key, value] for key, value in members])
-    if (
-        decision.members != members
-        or decision.membership_hash != checksum
-        or decision.id != "d:" + checksum.removeprefix("sha256:")
-        or shard.default_decision_id != decision.id
-        or decision.sample_ids != (record.record_key,)
-    ):
-        raise ValueError("Identity transition exact decision membership mismatch")
 
 
 def _repair_uniqueness(record: Transition, known: set[str]) -> None:
@@ -108,7 +92,7 @@ def _revert(record: Transition, history: dict[str, Shard], reverted: set[str]) -
 
 
 def load_transitions(root: Path) -> TransitionFiles:
-    """Read the whole sequence, validating receipts and internal historical references.
+    """Read the whole sequence, validating its chain and internal historical references.
 
     This boundary does not verify Git registry bases, archived evidence, effective
     ownership, move completeness, or revert dependencies. It never writes data or
@@ -125,7 +109,6 @@ def load_transitions(root: Path) -> TransitionFiles:
     for loaded in files.shards:
         shard = loaded.envelope()
         record = shard.records[0]
-        _decision(shard)
         if record.previous != previous:
             raise ValueError(
                 "Identity transition previous must match the exact chain tail"
@@ -145,6 +128,5 @@ def load_transitions(root: Path) -> TransitionFiles:
                     if update.after is None
                     else update.after.model_dump(mode="json")
                 ),
-                decision_id=shard.decisions[0].id,
             )
     return files

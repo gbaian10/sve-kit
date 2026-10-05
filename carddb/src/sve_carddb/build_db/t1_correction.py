@@ -16,7 +16,6 @@ TABLES = (
             Column("corrected_value", Kind.JSON, json_schema="correction_value"),
             Column("expected_source_hash", Kind.TEXT, pattern=HASH),
             Column("reason", Kind.TEXT),
-            Column("decision_id", Kind.ID),
             Column("reported_to_official", Kind.BOOL),
             Column("reported_on", Kind.TEXT, nullable=True, pattern=DATE),
             Column("report_url", Kind.TEXT, nullable=True),
@@ -34,19 +33,10 @@ TABLES = (
                 ("printing_id", "face_id"), "printing_face", ("printing_id", "face_id")
             ),
             ForeignKey(("expected_source_unit_id",), "text_unit", ("id",)),
-            ForeignKey(("decision_id",), "decision", ("id",)),
         ),
         checks=(
             Check(
                 "sve_json_valid('change_values', json_array(face_id, field, json(expected_raw_value), json(corrected_value))) = 1"
-            ),
-        ),
-        query_checks=(
-            QueryCheck(
-                "correction_adoption",
-                "SELECT 1 FROM source_correction AS c JOIN decision AS d ON d.id = c.decision_id "
-                "WHERE c.state IN ('active', 'upstream_fixed') AND d.state != 'confirmed' LIMIT 1",
-                ("source_correction", "decision"),
             ),
         ),
     ),
@@ -115,8 +105,8 @@ TABLES = (
             QueryCheck(
                 "application_adoption",
                 "SELECT 1 FROM correction_application AS a JOIN source_correction AS c ON c.id = a.correction_id "
-                "JOIN decision AS d ON d.id = c.decision_id WHERE a.status != 'conflict' AND d.state != 'confirmed' LIMIT 1",
-                ("correction_application", "source_correction", "decision"),
+                "WHERE a.status != 'conflict' AND c.state NOT IN ('active', 'upstream_fixed') LIMIT 1",
+                ("correction_application", "source_correction"),
             ),
         ),
     ),

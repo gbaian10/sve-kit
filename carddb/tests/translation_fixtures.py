@@ -132,7 +132,6 @@ def template() -> DatabaseTemplate:
                     "public_code": "SYNTHETIC",
                     "kind": "other",
                     "name_unit_id": "family-name",
-                    "decision_id": "decision",
                 },
             )
             db.insert(

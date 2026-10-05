@@ -4,14 +4,9 @@ from dataclasses import replace
 from typing import TYPE_CHECKING, Protocol
 
 from sve_carddb.registry.inputs import canonical, digest
-from sve_carddb.registry.records import ArtData, BatchDecision, CardData, PrintingData
+from sve_carddb.registry.records import ArtData, CardData, PrintingData
 from sve_carddb.registry.snapshot import _printing_evidence
-from sve_carddb.registry.storage import (
-    Entry,
-    RegistryFiles,
-    _check_decision,
-    read_base_files,
-)
+from sve_carddb.registry.storage import Entry, RegistryFiles, read_base_files
 from sve_carddb.registry.transitions.loader import load_transitions
 from sve_carddb.registry.transitions.ownership import check_graph, typed, validate_moves
 from sve_carddb.registry.transitions.routing import (
@@ -75,31 +70,17 @@ _ALLOWED = {
 
 
 def _base(files: RegistryFiles) -> dict[str, Entity]:
-    if files.index().includes != {s.path: s.content_hash for s in files.shards}:
-        raise ValueError("Registry basis must contain its exact indexed closure")
     records: dict[str, Entity] = {}
     entries: list[Entry] = []
     for loaded in files.shards:
         shard = loaded.envelope()
-        _check_decision(shard)
         if digest(shard.model_dump(mode="json")) != loaded.content_hash:
             raise ValueError(
                 "Registry envelope serialization changed canonical content"
             )
-        decision = shard.decisions[0] if shard.decisions else None
-        if decision:
-            BatchDecision.model_validate_json(
-                canonical(decision.model_dump(mode="json"))
-            )
         for entry in shard.records:
             entries.append(entry)
-            records[entry.record_key] = entity(
-                entry,
-                entry.record_key,
-                shard.default_decision_id,
-                None,
-                decision is None or decision.state == "confirmed",
-            )
+            records[entry.record_key] = entity(entry, entry.record_key, None)
             records[entry.record_key].data()
     validate_structure(entries)
     check_cursors(files.index().next_int_id, entries)
@@ -122,9 +103,7 @@ def _append(
             != (shard.content, shard.exact_content)
             for path, shard in old_shards.items()
         ):
-            raise ValueError(
-                "Registry bases must retain exact old shards and decisions"
-            )
+            raise ValueError("Registry bases must retain exact old shards")
         old_entries = {
             e.record_key for s in previous.shards for e in s.envelope().records
         }
@@ -178,10 +157,7 @@ def _allocation_dependencies(record: Transition) -> None:
 
 
 def _updates(
-    records: dict[str, Entity],
-    record: Transition,
-    decision: str,
-    reserved: set[str],
+    records: dict[str, Entity], record: Transition, reserved: set[str]
 ) -> dict[str, Entity]:
     candidate = dict(records)
     _allocation_dependencies(record)
@@ -207,12 +183,8 @@ def _updates(
             _stable(
                 old.entry() or Entry.model_validate_json(old.permanent_content), after
             )
-        if old and not old.confirmed and after is None:
-            raise ValueError(
-                "Unconfirmed record cannot supply a confirmed repair premise"
-            )
         candidate[update.target_key] = entity(
-            after, update.target_key, decision, record.record_key, True
+            after, update.target_key, record.record_key
         )
         if old is not None:
             candidate[update.target_key] = replace(
@@ -244,29 +216,6 @@ def _closure(records: dict[str, Entity]) -> None:
             printings["printing:" + pid].observation for pid, _ in actual
         }:
             raise ValueError("Art observation must refer to one actual current use")
-
-
-def _confirmed_dependencies(records: dict[str, Entity], record: Transition) -> None:
-    for repair in record.repairs:
-        keys = {"card:" + repair.old_card_id}
-        keys.update("card:" + cid for cid in repair.new_card_ids)
-        for transfer in repair.face_moves:
-            keys.add("face:" + transfer.from_face_id)
-            keys.update("face:" + fid for fid in transfer.to_face_ids)
-        for art_transfer in repair.art_moves:
-            keys.add("art:" + art_transfer.from_art_id)
-            keys.update("art:" + target.to_art_id for target in art_transfer.targets)
-        for move in repair.printing_moves:
-            keys.add("printing:" + move.printing_id)
-            for face in move.faces:
-                keys.update(("face:" + face.from_face_id, "face:" + face.to_face_id))
-                keys.update(
-                    "art:" + aid
-                    for aid in (face.from_art_id, face.to_art_id)
-                    if aid is not None
-                )
-        if any(not records[key].confirmed for key in keys):
-            raise ValueError("Unconfirmed dependency cannot become a confirmed repair")
 
 
 def _route_step(
@@ -315,10 +264,9 @@ def _replay(root: Path, inputs: ReplayInputs) -> EffectiveRegistry:
         if routes is None:
             routes = project(derive(records, inputs.routes(None)), None)
         before = dict(records)
-        candidate = _updates(records, record, shard.decisions[0].id, reserved)
+        candidate = _updates(records, record, reserved)
         _closure(candidate)
         validate_moves(before, candidate, record)
-        _confirmed_dependencies(candidate, record)
         repairs += record.repairs
         check_graph(repairs)
         routes = _route_step(inputs, record, candidate, routes)

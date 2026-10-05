@@ -4,9 +4,6 @@ import hashlib
 import re
 from typing import TYPE_CHECKING
 
-from pydantic import JsonValue
-
-from sve_carddb.build_db import Json
 from sve_carddb.build_inputs import (
     BuildContext,
     InputRecord,
@@ -75,7 +72,6 @@ def populate_families(
             and record.data.name.lang not in texts.languages
         ):
             raise ValueError("Product text language is not registered")
-    links: set[tuple[str, str, str]] = set()
     for shard in catalog.shards:
         source_id = "authored:v1:" + digest(
             {
@@ -95,45 +91,9 @@ def populate_families(
                 "parser_version": "product-authored-v1",
             },
         )
-        decision = shard.envelope.decisions[0]
-        values = decision.model_dump(mode="json", exclude={"members"})
-        # DB has no precision/member columns; the immutable envelope retains both.
-        row: dict[str, Value] = {
-            key: value
-            for key, value in values.items()
-            if isinstance(value, str) or value is None
-        }
-        row["sample_ids"] = Json(list[JsonValue](decision.sample_ids))
-        db.insert("decision", row)
-        db.insert(
-            "decision_source",
-            {
-                "decision_id": decision.id,
-                "source_id": source_id,
-                "role": "product_envelope",
-                "locator": shard.path,
-            },
-        )
         for record in shard.envelope.records:
-            for ref in record.evidence:
-                checked = evidence[ref]
-                uses.append(_product_use(ref, checked))
-                role = "product_evidence:" + digest(
-                    ref.model_dump(mode="json")
-                ).removeprefix("sha256:")
-                key = decision.id, checked.source.id, role
-                if key not in links:
-                    db.insert(
-                        "decision_source",
-                        {
-                            "decision_id": decision.id,
-                            "source_id": checked.source.id,
-                            "role": role,
-                            "locator": ref.locator,
-                        },
-                    )
-                    links.add(key)
-            if decision.state == "confirmed" and isinstance(record, FamilyRecord):
+            uses.extend(_product_use(ref, evidence[ref]) for ref in record.evidence)
+            if record.state == "confirmed" and isinstance(record, FamilyRecord):
                 data = record.data
                 db.insert(
                     "product_family",
@@ -143,7 +103,6 @@ def populate_families(
                         "public_code": data.public_code,
                         "kind": data.kind,
                         "name_unit_id": texts.intern(data.name),
-                        "decision_id": decision.id,
                     },
                 )
 

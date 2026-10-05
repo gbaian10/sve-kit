@@ -1,4 +1,4 @@
-"""Strict YAML boundaries and append-only, checksummed registry shards."""
+"""Strict YAML boundaries and append-only registry shards."""
 
 import hashlib
 import io
@@ -18,7 +18,7 @@ from sve_carddb.registry.allocation import (
     cursors,
     region_allocations,
 )
-from sve_carddb.registry.inputs import JSON_VALUE, canonical, digest
+from sve_carddb.registry.inputs import JSON_VALUE, canonical
 from sve_carddb.registry.transitions.files import require_empty_transitions
 from sve_carddb.registry.yaml_reader import parse_yaml
 
@@ -46,25 +46,11 @@ class Entry(BaseModel):
     data: dict[str, JsonValue]
 
 
-class Decision(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    id: str
-    state: Literal["confirmed", "proposed"]
-    scope: Literal["batch"] = "batch"
-    category: Literal["identity_registry"] = "identity_registry"
-    policy_id: str
-    membership_hash: str
-    members: list[tuple[str, str]]
-    sample_ids: list[str]
-
-
 class Shard(BaseModel):
     model_config = ConfigDict(extra="forbid")
     authored_format: Literal[1] = 1
     kind: Literal["registry_shard"] = "registry_shard"
-    default_decision_id: str | None
     records: list[Entry]
-    decisions: list[Decision]
 
 
 class Index(BaseModel):
@@ -77,7 +63,6 @@ class Index(BaseModel):
             region: bounds.start for region, bounds in sorted(REGION_RANGES.items())
         }
     )
-    includes: dict[str, str] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def _known_ranges(self) -> Index:
@@ -160,19 +145,6 @@ def encode(model: BaseModel) -> bytes:
     return stream.getvalue().encode()
 
 
-def members(records: list[Entry]) -> list[tuple[str, str]]:
-    """Hash semantic records, excluding inherited decision pointers."""
-    return sorted(
-        (record.record_key, digest(record.model_dump(mode="json")))
-        for record in records
-    )
-
-
-def member_hash(items: list[tuple[str, str]]) -> str:
-    """Hash sorted (record key, semantic hash) pairs."""
-    return digest([[key, value] for key, value in items])
-
-
 @dataclass(frozen=True)
 class LoadedShard:
     path: str
@@ -197,7 +169,7 @@ class RegistryFiles:
 
 
 def read_registry_files(root: Path) -> RegistryFiles:
-    """Read checked envelopes once, without discarding their source or membership."""
+    """Read checked envelopes once, without discarding their source bytes."""
     require_empty_transitions(root)
     return read_base_files(root)
 
@@ -209,61 +181,40 @@ def read_base_files(root: Path) -> RegistryFiles:
     these files alone does not validate or apply the independent transition log.
     """
     path = root / "ids" / "index.yaml"
+    files = sorted(
+        (
+            file
+            for directory in (root / "registry", root / "ids")
+            for file in directory.rglob("*.yaml")
+            if file != path
+        ),
+        key=lambda file: file.relative_to(root).as_posix(),
+    )
     if not path.exists():
-        if any((root / "registry").glob("**/*.yaml")) or any(
-            (root / "ids").glob("**/*.yaml")
-        ):
-            raise ValueError("Unindexed registry files; recover before allocating IDs")
+        if files:
+            raise ValueError("Registry shards lack ids/index.yaml allocation cursors")
         return RegistryFiles(canonical(Index().model_dump(mode="json")), ())
     _safe_file(root, path)
     raw_index, index_content = _read_yaml_content(path)
     _wire_fields(
-        raw_index,
-        2,
-        {"authored_format", "kind", "allocation_policy", "next_int_id", "includes"},
+        raw_index, 2, {"authored_format", "kind", "allocation_policy", "next_int_id"}
     )
-    index = Index.model_validate(raw_index)
-    present = {
-        file.relative_to(root).as_posix()
-        for directory in (root / "registry", root / "ids")
-        for file in directory.rglob("*.yaml")
-        if file != path
-    }
-    if present != set(index.includes):
-        raise ValueError(
-            "Indexed file closure differs from disk; recover interrupted writes"
-        )
+    Index.model_validate(raw_index)
     shards = []
     keys: set[str] = set()
-    for name, checksum in sorted(index.includes.items()):
-        relative = Path(name)
-        if (
-            relative.is_absolute()
-            or not relative.parts
-            or ".." in relative.parts
-            or relative.parts[0] not in {"registry", "ids"}
-        ):
-            raise ValueError(f"Unsafe include: {name}")
-        file = root / relative
+    for file in files:
         _safe_file(root, file)
         raw, content = _read_yaml_content(file)
-        if "sha256:" + hashlib.sha256(content).hexdigest() != checksum:
-            raise ValueError(f"Modified immutable shard: {name}")
-        _wire_fields(
-            raw,
-            1,
-            {"authored_format", "kind", "default_decision_id", "records", "decisions"},
-        )
+        _wire_fields(raw, 1, {"authored_format", "kind", "records"})
         shard = Shard.model_validate(raw)
-        _check_decision(shard)
         for entry in shard.records:
             if entry.record_key in keys:
                 raise ValueError(f"Duplicate record: {entry.record_key}")
             keys.add(entry.record_key)
         shards.append(
             LoadedShard(
-                name,
-                checksum,
+                file.relative_to(root).as_posix(),
+                "sha256:" + hashlib.sha256(content).hexdigest(),
                 content,
                 shard.model_dump_json().encode(),
                 file.read_bytes(),
@@ -295,63 +246,6 @@ def load(root: Path) -> tuple[Index, dict[str, Entry]]:
         for shard in files.shards
         for entry in shard.envelope().records
     }
-
-
-def _check_decision(shard: Shard) -> None:
-    if all(record.kind == "card_int_id" for record in shard.records):
-        if shard.default_decision_id is not None or shard.decisions:
-            raise ValueError("Deterministic allocations must not carry a decision")
-        return
-    if any(record.kind == "card_int_id" for record in shard.records):
-        raise ValueError("Allocations cannot share a decision shard")
-    if len(shard.decisions) != 1:
-        raise ValueError("A shard needs exactly one batch decision")
-    decision = shard.decisions[0]
-    expected = members(shard.records)
-    if (
-        decision.id != "d:" + decision.membership_hash.removeprefix("sha256:")
-        or decision.id != shard.default_decision_id
-        or decision.members != expected
-        or decision.membership_hash != member_hash(expected)
-    ):
-        raise ValueError("Decision membership mismatch")
-    for record in shard.records:
-        if record.kind == "source_correction":
-            required = (
-                "proposed" if record.data["state"] == "needs_review" else "confirmed"
-            )
-            if decision.state != required:
-                raise ValueError("Correction state disagrees with decision")
-    _check_samples(decision, [key for key, _ in expected])
-
-
-def _check_samples(decision: Decision, checked: list[str]) -> None:
-    if len(set(decision.sample_ids)) != len(decision.sample_ids) or not set(
-        decision.sample_ids
-    ) <= set(checked):
-        raise ValueError("Checked members must be a unique subset of the batch")
-    if decision.state == "confirmed" and (decision.sample_ids != checked):
-        raise ValueError("Confirmed batch must explicitly check every member")
-
-
-def _shard(records: list[Entry]) -> Shard:
-    if records[0].kind == "card_int_id":
-        return Shard(default_decision_id=None, records=records, decisions=[])
-    items = members(records)
-    checksum = member_hash(items)
-    proposed = (
-        records[0].kind == "source_correction"
-        and records[0].data["state"] == "needs_review"
-    )
-    decision = Decision(
-        id="d:" + checksum.removeprefix("sha256:"),
-        state="proposed" if proposed else "confirmed",
-        policy_id="identity-init-2026-09-28-v1",
-        membership_hash=checksum,
-        members=items,
-        sample_ids=[] if proposed else [key for key, _ in items],
-    )
-    return Shard(default_decision_id=decision.id, records=records, decisions=[decision])
 
 
 def record_order(entries: list[Entry]) -> Callable[[Entry], tuple[str, ...]]:
@@ -466,12 +360,6 @@ def relayout(root: Path, entries: list[Entry]) -> dict[Path, bytes]:
 def _finish(
     root: Path, index: Index, entries: list[Entry], files: dict[Path, bytes]
 ) -> dict[Path, bytes]:
-    for path, data in files.items():
-        parsed: object = yaml_parser().load(data)
-        index.includes[path.relative_to(root).as_posix()] = digest(
-            JSON_VALUE.validate_python(parsed)
-        )
-    index.includes = dict(sorted(index.includes.items()))
     after = cursors(region_allocations(entries))
     if any(after[region] < index.next_int_id[region] for region in after):
         raise ValueError("Allocation high-water mark would move backwards")
@@ -509,7 +397,7 @@ def _fit(records: list[Entry]) -> tuple[int, bytes]:
 
     def size(count: int) -> int:
         if count not in cache:
-            cache[count] = encode(_shard(records[:count]))
+            cache[count] = encode(Shard(records=records[:count]))
         return len(cache[count])
 
     if size(len(records)) <= TARGET_BYTES:

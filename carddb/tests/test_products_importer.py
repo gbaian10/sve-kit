@@ -23,7 +23,6 @@ from sve_carddb.registry.storage import read_yaml
 
 from .product_fixtures import (
     LANGUAGES,
-    decision,
     envelope,
     family,
     first_record,
@@ -32,7 +31,6 @@ from .product_fixtures import (
     items,
     obj,
     product,
-    write_yaml,
 )
 from .product_fixtures import product_root as product_root  # ruff: ignore[useless-import-alias] -- shared fixture
 from .registry_preview_fixtures import BUILD, REVISION, evidence
@@ -50,8 +48,6 @@ AUDIT = (
     "language",
     "text_unit",
     "source_record",
-    "decision",
-    "decision_source",
     "product_family",
     "card",
     "face",
@@ -103,26 +99,11 @@ def test_confirmed_family_and_identity_are_one_graph(
             for row in db.rows("source_record")
             if row.values["parser_version"] == "product-authored-v1"
         }
-        decisions = {row.values["id"]: row.values for row in db.rows("decision")}
-        links = [
-            row.values
-            for row in db.rows("decision_source")
-            if row.values["role"] == "product_envelope"
-        ]
-        assert len(links) == len(catalog.shards)
+        assert not db.rows("decision")
+        assert not db.rows("decision_source")
         for shard in catalog.shards:
-            review = shard.envelope.decisions[0]
             assert sources["authored/" + shard.path]["sha256"] == shard.content_hash
             assert sources["authored/" + shard.path]["authored_revision"] == REVISION
-            assert decisions[review.id]["sample_ids"] == Json(list(review.sample_ids))
-            assert decisions[review.id]["note"] == review.note
-            assert decisions[review.id]["membership_hash"] == review.membership_hash
-            assert any(
-                link["source_id"] == sources["authored/" + shard.path]["id"]
-                and link["decision_id"] == review.id
-                and link["locator"] == shard.path
-                for link in links
-            )
         assert not db.rows("product")
         assert not db.rows("printing_product")
     assert before == {p: p.read_bytes() for p in before}
@@ -154,15 +135,9 @@ def test_missing_or_proposed_parent_keeps_existing_preview_rejection(
     path = product_root / NAME
     if parent == "missing":
         path.unlink()
-        index = obj(read_yaml(product_root / "products/index.yaml"))
-        del obj(index["includes"])[NAME]
-        write_yaml(product_root / "products/index.yaml", index)
     else:
         raw = obj(read_yaml(path))
-        decision(raw).update(
-            state="proposed",
-            sample_ids=[],
-        )
+        first_record(raw)["state"] = "proposed"
         install(product_root, NAME, raw)
     plan = plan_preview(product_root, evidence(inputs), regions=("jp",))
     catalog = load_products(product_root, registry=plan.snapshot)
@@ -180,12 +155,9 @@ def test_missing_or_proposed_parent_keeps_existing_preview_rejection(
             assert not db.rows(table)
 
 
-def test_proposed_retains_audit_without_adopted_parent(product_root: Path) -> None:
+def test_proposed_stays_a_candidate_without_adopted_parent(product_root: Path) -> None:
     raw = obj(read_yaml(product_root / NAME))
-    decision(raw).update(
-        state="proposed",
-        sample_ids=[],
-    )
+    first_record(raw)["state"] = "proposed"
     install(product_root, NAME, raw)
     catalog = load_products(product_root, registry=load_registry(product_root))
     assert any(
@@ -198,7 +170,7 @@ def test_proposed_retains_audit_without_adopted_parent(product_root: Path) -> No
         )
         assert "BP02" not in {r.values["id"] for r in db.rows("product_family")}
         assert len(db.rows("product_family")) == 2
-        assert len(db.rows("decision")) == 3
+        assert not db.rows("decision")
         assert len(db.rows("source_record")) == 3
 
 
@@ -279,7 +251,7 @@ def test_inconsistent_registry_input_cannot_be_composed(
 def test_language_must_be_registered(product_root: Path, language: str) -> None:
     raw = obj(read_yaml(product_root / NAME))
     obj(obj(first_record(raw)["data"])["name"])["lang"] = language
-    install(product_root, NAME, raw, resign=True)
+    install(product_root, NAME, raw)
     catalog = load_products(product_root, registry=load_registry(product_root))
     with create_database(compile_build()) as db:
         with (

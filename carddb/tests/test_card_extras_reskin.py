@@ -65,7 +65,6 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> Case:
         "current_trait_removed",
         "source_changed",
         "new_printing",
-        "decision_unpinned",
         "relation_removed",
         "endpoint_changed",
     ],
@@ -152,27 +151,6 @@ def test_reskin_requires_both_current_endpoints(
                 db.insert(
                     "printing",
                     dict(printing) | {"id": "new-printing", "card_no": "NEW-001EN"},
-                )
-            elif fault == "decision_unpinned":
-                link = next(
-                    row.values
-                    for row in db.rows("decision_source")
-                    if row.values["decision_id"] == related["decision_id"]
-                    and row.values["role"] == "registry_observation_matched"
-                    and row.values["source_id"]
-                    in {
-                        item.card.source.id
-                        for item in baseline.plan.observations
-                        if item.region == "en"
-                    }
-                )
-                db.delete(
-                    "decision_source",
-                    {
-                        "decision_id": link["decision_id"],
-                        "source_id": link["source_id"],
-                        "role": link["role"],
-                    },
                 )
             elif fault == "relation_removed":
                 db.delete("card_related", {"id": related["id"]})

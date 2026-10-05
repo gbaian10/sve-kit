@@ -46,8 +46,6 @@ class EvidenceCheck:
 @dataclass(frozen=True)
 class Projection:
     record_key: str
-    decision_id: str | None
-    decision_state: str | None
     disposition: Literal["included", "excluded", "deferred"]
     reasons: tuple[str, ...]
     evidence: tuple[EvidenceCheck, ...]
@@ -89,8 +87,6 @@ class PreviewPlan:
             "records": [
                 {
                     "record_key": item.record_key,
-                    "decision_id": item.decision_id,
-                    "historic_decision_state": item.decision_state,
                     "disposition": item.disposition,
                     "reasons": list[JsonValue](item.reasons),
                     "regions": list[JsonValue](item.regions),
@@ -208,13 +204,6 @@ class _Projector:
                 ):
                     raise ValueError("Source face map does not cover extracted faces")
 
-    def _confirmed(self, key: str) -> bool:
-        decision = self.snapshot.records[key].decision_id
-        return (
-            decision is not None
-            and self.snapshot.decisions[decision].state == "confirmed"
-        )
-
     def _printing_reasons(self, data: PrintingData) -> tuple[str, ...]:
         reasons: list[str] = []
         if data.region not in self.regions:
@@ -222,10 +211,6 @@ class _Projector:
         reasons.extend(
             sorted({c.status for c in self.checks[data.id] if c.status != "matched"})
         )
-        keys = ["printing:" + data.id, "card:" + data.card_id]
-        keys.extend("face:" + m.face_id for m in data.source_face_map)
-        if not all(self._confirmed(key) for key in keys):
-            reasons.append("identity_decision_not_confirmed")
         return tuple(reasons)
 
     def _art(
@@ -325,22 +310,10 @@ class _Projector:
         raise TypeError("Unsupported registry record kind")
 
     def projection(self, record: RegistryRecord) -> Projection:
-        """Keep historical decisions even when current source evidence is unavailable."""
+        """Keep every record even when current source evidence is unavailable."""
         reasons, used, regions = self._record(record)
-        state = (
-            self.snapshot.decisions[record.decision_id].state
-            if record.decision_id
-            else None
-        )
-        if (
-            not isinstance(record.data, (AllocationData, CorrectionData))
-            and state != "confirmed"
-        ):
-            reasons += ("decision_not_confirmed",)
         return Projection(
             record.record_key,
-            record.decision_id,
-            state,
             "deferred"
             if isinstance(record.data, CorrectionData)
             else "excluded"

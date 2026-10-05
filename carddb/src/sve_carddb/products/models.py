@@ -1,6 +1,6 @@
-"""Immutable product-authored-v1 wire types, independent of identity envelopes."""
+"""Immutable product-authored-v1 wire types, independent of identity shards."""
 
-from typing import Annotated, Literal, Self
+from typing import Annotated, Literal
 
 from pydantic import Field, field_validator, model_validator
 
@@ -104,6 +104,9 @@ class Evidence(RecordData):
 class _Record(RecordData):
     record_key: Text
     filing_key: Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]+\Z")]
+    # Proposed records stay candidates; only confirmed ones are projected.
+    state: Literal["proposed", "confirmed"]
+    note: str = ""
     evidence: tuple[Evidence, ...]
 
 
@@ -131,29 +134,10 @@ CatalogRecord = Annotated[
 ]
 
 
-class DecisionMetadata(RecordData):
-    id: Annotated[str, Field(pattern=r"^d:[0-9a-f]{64}\Z")]
-    state: Literal["proposed", "confirmed"]
-    scope: Literal["batch"]
-    membership_hash: Hash
-    members: tuple[tuple[Text, Hash], ...]
-    sample_ids: tuple[Text, ...]
-    note: str = ""
-
-    @model_validator(mode="after")
-    def _review(self) -> Self:
-        if self.state == "proposed" and self.sample_ids:
-            raise ValueError("Proposed decisions must have no checked members")
-        return self
-
-
-class Decision(DecisionMetadata):
-    category: Literal["product_catalog"]
-    policy_id: Literal["product-authored-v1"]
-
-
-class _Envelope(RecordData):
+class Shard(RecordData):
     product_authored_format: Literal[1]
+    kind: Literal["product_shard"]
+    records: Annotated[tuple[CatalogRecord, ...], Field(min_length=1)]
 
     @field_validator("product_authored_format", mode="before")
     @classmethod
@@ -161,15 +145,3 @@ class _Envelope(RecordData):
         if type(value) is not int:
             raise ValueError("Product format must be an integer")
         return value
-
-
-class Index(_Envelope):
-    kind: Literal["product_index"]
-    includes: dict[str, Hash]
-
-
-class Shard(_Envelope):
-    kind: Literal["product_shard"]
-    default_decision_id: Text
-    records: Annotated[tuple[CatalogRecord, ...], Field(min_length=1)]
-    decisions: Annotated[tuple[Decision, ...], Field(min_length=1, max_length=1)]

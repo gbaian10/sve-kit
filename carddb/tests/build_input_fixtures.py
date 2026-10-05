@@ -74,7 +74,7 @@ def reference_identity_source(root: Path, provider: MemoryEvidence) -> None:
             "role": "family review",
         }
     ]
-    install(root, NAME, raw, resign=True)
+    install(root, NAME, raw)
 
 
 def expected_uses(

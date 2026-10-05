@@ -64,7 +64,7 @@ def referenced_family(product_root: Path, tmp_path: Path) -> tuple[Path, str, st
             "role": "family review",
         }
     ]
-    install(product_root, NAME, raw, resign=True)
+    install(product_root, NAME, raw)
     return store.root, batch.batch_id, source
 
 
@@ -76,7 +76,7 @@ def test_family_evidence_uses_descriptor_raw_hash_and_original_locator(
     catalog = load_products(product_root, registry=load_registry(product_root))
     before = {p: p.read_bytes() for p in root.rglob("*") if p.is_file()}
     with create_database(compile_build()) as db, db.transaction():
-        populate_families(
+        inputs = populate_families(
             db,
             catalog,
             build=BUILD,
@@ -93,15 +93,9 @@ def test_family_evidence_uses_descriptor_raw_hash_and_original_locator(
         assert raw["url"] == "https://example.invalid/family"
         assert raw["fetched_at"] == "2026-09-29T00:00:00Z"
         assert raw["etag"] == "first-etag"
-        [link] = [
-            r.values
-            for r in db.rows("decision_source")
-            if r.values["source_id"] == source
-        ]
-        assert link["locator"] == "product block 0"
-        role = link["role"]
-        assert isinstance(role, str)
-        assert role.startswith("product_evidence:")
+        [use] = [use for use in inputs.uses if use.source.id == source]
+        assert use.usage == "product_evidence_closure"
+        assert json.loads(use.locator)["locator"] == "product block 0"
     assert before == {p: p.read_bytes() for p in before}
 
 
@@ -130,7 +124,7 @@ def test_each_evidence_closure_failure_is_atomic(
         evidence = first_record(raw)["evidence"]
         assert isinstance(evidence, list)
         obj(evidence[0])["source_version_id"] = "src:v1:" + "0" * 64
-        install(product_root, NAME, raw, resign=True)
+        install(product_root, NAME, raw)
     elif case.startswith("corrupt"):
         path = {
             "corrupt_raw": root / entry.blob.path,
@@ -157,11 +151,11 @@ def test_each_evidence_closure_failure_is_atomic(
                 languages=LANGUAGES,
                 stores={} if case == "unconfigured" else {"test-store": root},
             )
-        for table in ("language", "source_record", "decision", "product_family"):
+        for table in ("language", "source_record", "product_family"):
             assert not db.rows(table)
 
 
-def test_shared_evidence_links_are_deduplicated_and_distinct_locators_survive(
+def test_shared_evidence_uses_are_deduplicated_and_distinct_locators_survive(
     product_root: Path, referenced_family: tuple[Path, str, str]
 ) -> None:
     root, _, source = referenced_family
@@ -179,7 +173,7 @@ def test_shared_evidence_links_are_deduplicated_and_distinct_locators_survive(
     install(product_root, NAME, raw)
     catalog = load_products(product_root, registry=load_registry(product_root))
     with create_database(compile_build()) as db, db.transaction():
-        populate_families(
+        inputs = populate_families(
             db,
             catalog,
             build=BUILD,
@@ -187,13 +181,9 @@ def test_shared_evidence_links_are_deduplicated_and_distinct_locators_survive(
             languages=LANGUAGES,
             stores={"test-store": root},
         )
-        assert (
-            len(
-                [
-                    r
-                    for r in db.rows("decision_source")
-                    if r.values["source_id"] == source
-                ]
-            )
-            == 2
-        )
+        locators = [
+            json.loads(use.locator)["locator"]
+            for use in inputs.uses
+            if use.source.id == source
+        ]
+        assert sorted(locators) == ["product block 0", "product block 1"]

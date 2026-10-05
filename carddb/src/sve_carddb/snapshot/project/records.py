@@ -115,11 +115,12 @@ def printing_records(source: Source, view: dict[str, list[Record]]) -> None:
         row["printing_id"]: row["int_id"]
         for row in source.rows("card_int_id", "printing_id,int_id")
     }
-    internal = source.index("printing", "id,decision_id,decklog_source_id")
+    internal = source.index("printing", "id,decklog_source_id")
     for printing in view["printing"]:
         printing["int_id"] = integers[printing["id"]]
         details = internal[string(printing["id"])]
-        printing["review_level"] = source.review(details["decision_id"])
+        # Registry identities are manually confirmed; the registry has no other state.
+        printing["review_level"] = "confirmed"
         printing["decklog_source_url"] = source.url(details["decklog_source_id"])
         printing["reference_urls"] = (
             json_list(
@@ -250,9 +251,8 @@ def art_records(source: Source, view: dict[str, list[Record]]) -> None:
             use["art_id"] == row["id"] and use["printing_id"] in prints for use in uses
         )
     ]
-    decisions = source.index("art", "id,decision_id")
     for art in view["art"]:
-        art["review_level"] = source.review(decisions[string(art["id"])]["decision_id"])
+        art["review_level"] = "confirmed"
         art["regions"] = json_list(
             sorted(
                 {

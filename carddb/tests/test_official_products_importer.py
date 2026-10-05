@@ -166,16 +166,8 @@ def test_complete_graph_keeps_ids_owners_dates_region_and_raw_provenance(
             for row in db.rows("source_record")
             if row.values["kind"] == "authored"
         } == {"registry-envelope-v1", "product-authored-v1", "product-identity-v1"}
-        assert {row.values["category"] for row in db.rows("decision")} == {
-            "identity_registry",
-            "product_catalog",
-            "product_identity",
-        }
-        assert all(
-            row.values["source_id"] == fixture.pages[0].source.id
-            for row in db.rows("decision_source")
-            if str(row.values["role"]).startswith("product_identity_evidence:")
-        )
+        assert not db.rows("decision")
+        assert not db.rows("decision_source")
         db.verify()
 
 
@@ -368,8 +360,8 @@ def test_each_late_failure_rolls_back_complete_graph(
                 ),
             )
         else:
-            identities = replace(official.identities, index_hash="sha256:" + "0" * 64)
-            # The context pins the old hash; use the original fixture context explicitly.
+            identities = replace(official.identities, revision="0" * 40)
+            # The context pins the old revision; use the original fixture context explicitly.
             official = replace(official, identities=identities)
         context = fixture.context(fixture.load())
         with pytest.raises((ValueError, sqlite3.IntegrityError)):
@@ -782,18 +774,16 @@ def test_official_type_catalog_must_equal_imported_family_catalog(
 def test_proposed_family_does_not_supply_official_product_type(
     identity_fixture: IdentityFixture,
 ) -> None:
-    from .product_fixtures import decision, envelope, family, install, obj, sign  # ruff: ignore[import-outside-top-level] -- valid proposed input keeps the confirmed owner parent
+    from .product_fixtures import envelope, family, install, obj  # ruff: ignore[import-outside-top-level] -- valid proposed input keeps the confirmed owner parent
 
     fixture = identity_fixture
     confirmed = family("TEST")
     obj(confirmed["data"])["public_code"] = "Different"
     install(fixture.root, "products/family/TEST/001.yaml", envelope([confirmed]))
     proposed = family("PROPOSED")
+    proposed["state"] = "proposed"
     obj(proposed["data"]).update(public_code="Test-A", kind="deck")
-    shard = envelope([proposed])
-    decision(shard).update(state="proposed")
-    sign(shard)
-    install(fixture.root, "products/family/PROPOSED/001.yaml", shard)
+    install(fixture.root, "products/family/PROPOSED/001.yaml", envelope([proposed]))
     fixture.catalog = load_products(fixture.root, registry=fixture.preview.snapshot)
     fixture.revision = commit(fixture.root)
     official = fixture.official()
