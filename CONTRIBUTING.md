@@ -228,8 +228,11 @@ title). The Python, Rust and Web test jobs are skipped and `ci-ok` fails with a 
 were not run. Marking the PR ready for review starts the full run, which decides `ci-ok`.
 
 In pull requests the repository-wide hooks check only the files the PR changes, as the local
-commit hook does; the gitleaks scan still covers the PR's whole commit range. A PR that changes
-`.pre-commit-config.yaml` or `.github/ci/hooks.toml`, and every push to `main`, checks all files.
+commit hook does; the gitleaks scan still covers the PR's whole commit range. Changes to shared
+hook configuration, workflow/action metadata or Python lock inputs trigger a full scan, as do
+schema input deletions or renames. The `full_scan_inputs` list in `.github/workflows/ci.yml`
+includes Markdown, EditorConfig, Git attributes, gitleaks, Taplo and uv settings. Public pushes
+to `main` also check all files; private `main` keeps the cache-only behavior described below.
 
 Open **Actions → a workflow run → Summary** for test totals, passed/skipped/failed counts,
 elapsed time and coverage. Python and Web include the slowest 30 cases and counts/time per
