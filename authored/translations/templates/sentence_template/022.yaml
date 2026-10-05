@@ -1,0 +1,2413 @@
+translation_authored_format: 2
+kind: translation_shard
+records:
+  - record_key: '["sentence_template","T06b2387fbd07eab0"]'
+    kind: sentence_template
+    data:
+      id: T06b2387fbd07eab0
+      inventory_id: inv:b70709288c06b6f0b697ba84e371b6c6d83bac39b0c0b286f44f4b161ff400b1
+      source_span:
+        role: body
+        segments:
+          - start: 7
+            end: 29
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 7
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 18
+                end: 19
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:06b2387fbd07eab0e74458d54f1d4e003088cc86cd2b13ad00c5a3d84f84f7b1
+      supersedes_id: T106058c8a9
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T07194a4499e7790c"]'
+    kind: sentence_template
+    data:
+      id: T07194a4499e7790c
+      inventory_id: inv:4e485572481b82ec3f3e315150245d80f2bffa80212780a0b016204062c4e38a
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 49
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 16
+                end: 17
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 33
+                end: 36
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 38
+                end: 39
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: reference
+            occurrences:
+              - start: 41
+                end: 43
+            reference_kind: term
+            min:
+            max:
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 45
+                end: 46
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:07194a4499e7790c1ed70bccc06dc58f590937a6f1c8a25dae0abbb4062a8e22
+      supersedes_id: T7324def93e
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T0d4eb44b91176413"]'
+    kind: sentence_template
+    data:
+      id: T0d4eb44b91176413
+      inventory_id: inv:32b4e74a3e2abecdf93975033e75e0de0930e8e8240dfc0223e45d20a789b958
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 41
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 14
+                end: 16
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 37
+                end: 38
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:0d4eb44b911764135915f2ec58f5d7d80b467e850cf37a305ea8fe1b948dcf47
+      supersedes_id: T92e6f007a4
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T1142a045249a692f"]'
+    kind: sentence_template
+    data:
+      id: T1142a045249a692f
+      inventory_id: inv:31219cc3749992a3ff358f703ea715d6c4647ce5d9a691b9f9c4d14088fb1813
+      source_span:
+        role: body
+        segments:
+          - start: 5
+            end: 36
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 7
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 15
+                end: 16
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:1142a045249a692f2b2922b7186d20541990a862bf1ad8bfdcec95a7f12be1cd
+      supersedes_id: T53b5bd2059
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T1aee96039a923d42"]'
+    kind: sentence_template
+    data:
+      id: T1aee96039a923d42
+      inventory_id: inv:2174e5a4d89c9d18879f6ad800dc91a24d3d0a8a05511ad0574e36f40fca7882
+      source_span:
+        role: body
+        segments:
+          - start: 27
+            end: 43
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 12
+                end: 13
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:1aee96039a923d42bc13f104143c84acc3dfea62f5d902c1ac9f6a0fdecc44f3
+      supersedes_id: T2f3d528535
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T1df8954756cd7b48"]'
+    kind: sentence_template
+    data:
+      id: T1df8954756cd7b48
+      inventory_id: inv:428ab8f27536153e556e88b4e1d8ea4174af6130ee024ab6fd9e9dfad72271d7
+      source_span:
+        role: body
+        segments:
+          - start: 40
+            end: 82
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 8
+                end: 9
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 33
+                end: 34
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 37
+                end: 38
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:1df8954756cd7b488c92ef78208e0f24dda7981a5b678065543fc1d2de3a2204
+      supersedes_id: T570959a713
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T1f650968e09b7b71"]'
+    kind: sentence_template
+    data:
+      id: T1f650968e09b7b71
+      inventory_id: inv:355eb25c4b9545fc6e921c5e80ff6b3b52b9642f12ec6dc87bc6e75a3a839d0d
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 36
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 10
+                end: 11
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 23
+                end: 25
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 27
+                end: 28
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 31
+                end: 32
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:1f650968e09b7b71b28c01b9bdfae45498273cac7564946a85da9c160ac71d00
+      supersedes_id: T14c0fa6b6e
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T2719c51608e90aed"]'
+    kind: sentence_template
+    data:
+      id: T2719c51608e90aed
+      inventory_id: inv:272f7af18ac3cf5f97fc5f8834781ea4b532e3ecc14f6fc808265d9599bbb3bd
+      source_span:
+        role: body
+        segments:
+          - start: 31
+            end: 68
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 16
+                end: 17
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 29
+                end: 31
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 33
+                end: 34
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:2719c51608e90aed14d183c1c1c3d3db998443bb9c47a92c2e2ec1d5f879b41d
+      supersedes_id: Tce355334af
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T2de4b587daa299f0"]'
+    kind: sentence_template
+    data:
+      id: T2de4b587daa299f0
+      inventory_id: inv:25b6055e8450ab97e41089358ef3fc089b2580a9009fcfa85cb69bf0e84809ee
+      source_span:
+        role: body
+        segments:
+          - start: 39
+            end: 76
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 33
+                end: 34
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:2de4b587daa299f0bb6a64e068d266988c27f646956cc7eae99d3b0dae883cfc
+      supersedes_id: T85cef838b6
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T327c66325d6629db"]'
+    kind: sentence_template
+    data:
+      id: T327c66325d6629db
+      inventory_id: inv:311c6b89fc8223a9fc80fe7a00bbc9414d5f9b8bc3e7a019e5fe9ac86c66a0ab
+      source_span:
+        role: body
+        segments:
+          - start: 22
+            end: 56
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 30
+                end: 31
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:327c66325d6629dbd3012e498450ac72d3fc25f555deae9c731aaec9a4615154
+      supersedes_id: T8422d6981f
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T361003a01d39342e"]'
+    kind: sentence_template
+    data:
+      id: T361003a01d39342e
+      inventory_id: inv:0c947be0b4697eff9d2ed5b5dbfffd2801c034b56d964b73b6779928e9ff85cc
+      source_span:
+        role: body
+        segments:
+          - start: 7
+            end: 80
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 4
+                end: 5
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 14
+                end: 15
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 26
+                end: 27
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 35
+                end: 36
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 42
+                end: 43
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 69
+                end: 70
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:361003a01d39342e35ed33ca440896219e7c26a1e36ef471738a51d309a67be8
+      supersedes_id: T4180c7d16d
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T36aa24ddc0e25ea2"]'
+    kind: sentence_template
+    data:
+      id: T36aa24ddc0e25ea2
+      inventory_id: inv:0559165926c28bcc6e64c5cb900707f52d724d9cf20b17baeee84f82961baca1
+      source_span:
+        role: body
+        segments:
+          - start: 37
+            end: 77
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 36
+                end: 37
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:36aa24ddc0e25ea274a05c3fce2f423901bac4663319d88d31c22f7f4ebbeaa3
+      supersedes_id: T5801431d1a
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T49320551f4228b2f"]'
+    kind: sentence_template
+    data:
+      id: T49320551f4228b2f
+      inventory_id: inv:332eb481fe4245d3aaf81bf521cb736f88fa9025278ff16384510e043d928971
+      source_span:
+        role: body
+        segments:
+          - start: 29
+            end: 57
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 24
+                end: 25
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:49320551f4228b2f895357b17fa2e2d127d2cd76c87f6c05e2ea92511276fe75
+      supersedes_id: T37a8c53936
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T4a6522f41231730c"]'
+    kind: sentence_template
+    data:
+      id: T4a6522f41231730c
+      inventory_id: inv:3daf0292455aff55c525e105c15d91966f424790a25a422f7e4fec7699b139b8
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 67
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 35
+                end: 36
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 49
+                end: 50
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:4a6522f41231730c77a08696c0859a44410d78efc6e277a74113fa4e93337b1c
+      supersedes_id: T8877eceed0
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T4b072b5afe3787bb"]'
+    kind: sentence_template
+    data:
+      id: T4b072b5afe3787bb
+      inventory_id: inv:88e2b67727b6b9dabc1974f17f8ee2b723706b507993a990b55890cdf75ef336
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 31
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 27
+                end: 28
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:4b072b5afe3787bb5ec263ea30dc2ce0a74692d701f4e1c548e980a862f22b8d
+      supersedes_id: Tdbb65c2206
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T50685fa628db0398"]'
+    kind: sentence_template
+    data:
+      id: T50685fa628db0398
+      inventory_id: inv:60face042b44082ea0b36968001766c1b7f43815a515f12e6542bacf43a2de40
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 114
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 23
+                end: 24
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 30
+                end: 31
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 40
+                end: 41
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 53
+                end: 54
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 61
+                end: 62
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 81
+                end: 82
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_6
+            type: uint
+            occurrences:
+              - start: 88
+                end: 89
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+      content_hash: sha256:50685fa628db0398709e44388f4d30e0d39ac8ee37dd8ef2eb09c66153bddf39
+      supersedes_id: T1aa285dfc8
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T53f2fe504d13c41d"]'
+    kind: sentence_template
+    data:
+      id: T53f2fe504d13c41d
+      inventory_id: inv:9c6e07e1cb08f79ac363e464b634b73b68833cc5c7b25b88273f3f736cafbc4c
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 48
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 16
+                end: 17
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 44
+                end: 45
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:53f2fe504d13c41db8fd16032dd829efd45b0bf8c508a3318d3cc3e8f6b4352d
+      supersedes_id: T4365b4c57c
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T67983723183fb320"]'
+    kind: sentence_template
+    data:
+      id: T67983723183fb320
+      inventory_id: inv:000080e0e4b1956b1fa0c960b7abaee86eb115dd4537e8ea3619a3656be69d00
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 35
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 14
+                end: 15
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 31
+                end: 32
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:67983723183fb320bfa5bdc32d74f3b000f72b669c7160598e6956c9f6352da1
+      supersedes_id: T6a82d5246d
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T679c7c9a58b4dc6a"]'
+    kind: sentence_template
+    data:
+      id: T679c7c9a58b4dc6a
+      inventory_id: inv:9cba71cb7c6556bf3e01cf0ba6e597f4de8163a15494a3339461c4dc5921086c
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 42
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 9
+                end: 10
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 38
+                end: 39
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:679c7c9a58b4dc6af35de0eefa92cf9f4cd1bc1d06a25a22f96bd8b6679c176a
+      supersedes_id: Tdcd94e90e9
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T6a57179cfb39cef6"]'
+    kind: sentence_template
+    data:
+      id: T6a57179cfb39cef6
+      inventory_id: inv:367fe1fb95cc25fd0619d755c1bb3e9db7b1d9dd1d80557c8c50b39803d4ab4b
+      source_span:
+        role: body
+        segments:
+          - start: 29
+            end: 67
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 5
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 29
+                end: 30
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 33
+                end: 34
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6a57179cfb39cef6a8f0061d90f882417399d3822ba2bbb0e9315a4aae0b60bb
+      supersedes_id: T3f40c294f0
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T6a6f77c6d1c005a9"]'
+    kind: sentence_template
+    data:
+      id: T6a6f77c6d1c005a9
+      inventory_id: inv:2fa3f6c073cb8404f61f28815e59374406c66704ebf24d8a35aaa70b72f635ad
+      source_span:
+        role: body
+        segments:
+          - start: 42
+            end: 65
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 19
+                end: 20
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6a6f77c6d1c005a90017e14a4c0394920b7573f3efdfb6e261803f76754e6b2f
+      supersedes_id: T6130275f94
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T6bbe6bd9292d3868"]'
+    kind: sentence_template
+    data:
+      id: T6bbe6bd9292d3868
+      inventory_id: inv:7b8b2a24781c8dee32d3639e0710badbcdb3f9d4584d20b509de588139ece56d
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 38
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 34
+                end: 35
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6bbe6bd9292d3868989511bf9a7a19b63d54a714536d4d28dac772f212e98dd3
+      supersedes_id: Tf5441e39d2
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T6f8d9ff4d71e2741"]'
+    kind: sentence_template
+    data:
+      id: T6f8d9ff4d71e2741
+      inventory_id: inv:1c8e36cc4bc9f2c73caf4bd479da74c09456c1a2553f98832757863ba6054cdc
+      source_span:
+        role: body
+        segments:
+          - start: 39
+            end: 95
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 24
+                end: 25
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 52
+                end: 53
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6f8d9ff4d71e2741e448e3e17365d4aab77190ad4826716b62f2329abc2d5f3f
+      supersedes_id: Tc910d22878
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T74291261dc9d0551"]'
+    kind: sentence_template
+    data:
+      id: T74291261dc9d0551
+      inventory_id: inv:733f28d2519c2458b74a4670bf9f4b6871a24e3b0aa9bad8548431961931bf28
+      source_span:
+        role: body
+        segments:
+          - start: 9
+            end: 27
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 14
+                end: 15
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:74291261dc9d055155d7d1e0e815528e0d130493035501b13e53f083023367c0
+      supersedes_id: T8bd70fe822
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T74d1ae3b1118b721"]'
+    kind: sentence_template
+    data:
+      id: T74d1ae3b1118b721
+      inventory_id: inv:1c0ea889afe3b770deee735fa924b3565c46b48ca810da6c6753d80c5716c164
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 55
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 0
+                end: 1
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 51
+                end: 52
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:74d1ae3b1118b72122e4d48273b2455e7f19f014a183b467137bf2c5623d3f52
+      supersedes_id: T310d8e5e45
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T74ec0d04ff5bda28"]'
+    kind: sentence_template
+    data:
+      id: T74ec0d04ff5bda28
+      inventory_id: inv:a16c21ce164eab02c1939a1967e8c730c63f7d319e3c701ddbd7efdc85fb5ca3
+      source_span:
+        role: body
+        segments:
+          - start: 42
+            end: 93
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 43
+                end: 44
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:74ec0d04ff5bda28fdd0792725cfed1199bb93beca54802df14b21d311bf99d8
+      supersedes_id: T25cb265a62
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T7e2792d3c12c9afa"]'
+    kind: sentence_template
+    data:
+      id: T7e2792d3c12c9afa
+      inventory_id: inv:0a773ed8775feb072c259516598d83eb5a15cfc0baded78935083305f659f66b
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 33
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 29
+                end: 30
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:7e2792d3c12c9afa361c8bbea0f9644b8c738180083206bca4d228b4cb242460
+      supersedes_id: Tc3cd819f4f
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T7eeed32633a390b5"]'
+    kind: sentence_template
+    data:
+      id: T7eeed32633a390b5
+      inventory_id: inv:02b49629595b03c221040b41f57ec6ae5707e82b7b07afcd5f7c396a1170fb4e
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 28
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 24
+                end: 25
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:7eeed32633a390b5fdf13c8d284d353337864b2dc150d6669dfb3ba0e0148615
+      supersedes_id: T32fed284e7
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T87505a9102ab98fc"]'
+    kind: sentence_template
+    data:
+      id: T87505a9102ab98fc
+      inventory_id: inv:3a9e0d8a39e8dd0dbe5552cf2e208a144ae77cb392147e16f7a6815bdfb71f61
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 68
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 13
+                end: 14
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 23
+                end: 24
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 38
+                end: 39
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 43
+                end: 44
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 62
+                end: 63
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:87505a9102ab98fcd4ff5305d8d19f42dbbf47cbf4831f145af5c58417b2b295
+      supersedes_id: Tba8114f875
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T8a57dbcd155f0a31"]'
+    kind: sentence_template
+    data:
+      id: T8a57dbcd155f0a31
+      inventory_id: inv:158fa5e9aa206c15a5a7e62e841014e4470ebb4b870d1b9fee61234bcb7204b6
+      source_span:
+        role: body
+        segments:
+          - start: 10
+            end: 51
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 15
+                end: 16
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 28
+                end: 30
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 32
+                end: 33
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 36
+                end: 37
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:8a57dbcd155f0a315e3c5cd15ceec2272d582d5da2a12fb1cbc24d5960066e86
+      supersedes_id: T39b3282c55
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","T99f9eba0392fd5e7"]'
+    kind: sentence_template
+    data:
+      id: T99f9eba0392fd5e7
+      inventory_id: inv:fb1fdc20aedba9924b6b42b86503a706bcc7d675e46d19d655cf65b015f3f614
+      source_span:
+        role: body
+        segments:
+          - start: 5
+            end: 30
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 7
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 21
+                end: 22
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:99f9eba0392fd5e72b7cea6c1e78171b5ee5de2361f51b767047522c698a9b7b
+      supersedes_id: T4277e979e7
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Ta662cf7be04cde2c"]'
+    kind: sentence_template
+    data:
+      id: Ta662cf7be04cde2c
+      inventory_id: inv:90df58e22acf53e9fff95fbc2f25e10e4262734d02a65660b18936b6ca33ff81
+      source_span:
+        role: body
+        segments:
+          - start: 25
+            end: 74
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 18
+                end: 20
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 22
+                end: 23
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 45
+                end: 46
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:a662cf7be04cde2cd1a7bb55cf89e2eca62baa53137bdb60a85f7bb7e623fbad
+      supersedes_id: T0032d9c9b7
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Tb3a80f5490c3b001"]'
+    kind: sentence_template
+    data:
+      id: Tb3a80f5490c3b001
+      inventory_id: inv:2236f2107a15aac1758db12796b2c2b4cfdb7baa33deedafbfa759a5c8aee3d5
+      source_span:
+        role: body
+        segments:
+          - start: 39
+            end: 200
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 8
+                end: 11
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 17
+                end: 18
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 27
+                end: 28
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 40
+                end: 41
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 53
+                end: 54
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_6
+            type: uint
+            occurrences:
+              - start: 70
+                end: 71
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_7
+            type: reference
+            occurrences:
+              - start: 88
+                end: 89
+            reference_kind: term
+            min:
+            max:
+          - name: slot_8
+            type: uint
+            occurrences:
+              - start: 90
+                end: 91
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_9
+            type: uint
+            occurrences:
+              - start: 114
+                end: 115
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_10
+            type: uint
+            occurrences:
+              - start: 119
+                end: 120
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_11
+            type: reference
+            occurrences:
+              - start: 142
+                end: 145
+            reference_kind: term
+            min:
+            max:
+          - name: slot_12
+            type: uint
+            occurrences:
+              - start: 147
+                end: 148
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_13
+            type: reference
+            occurrences:
+              - start: 150
+                end: 152
+            reference_kind: term
+            min:
+            max:
+          - name: slot_14
+            type: uint
+            occurrences:
+              - start: 154
+                end: 155
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:b3a80f5490c3b0014b820cab0ea334300ed8aad3d64744e0f37cab5de98bacf7
+      supersedes_id: T3c5d22aacb
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Tb44c50c1e2540e24"]'
+    kind: sentence_template
+    data:
+      id: Tb44c50c1e2540e24
+      inventory_id: inv:c264d808894c5f20ef3699f7cf9f7318a07ae11f9b8908e9795210c0739eecff
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 39
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 14
+                end: 16
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 18
+                end: 19
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 35
+                end: 36
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:b44c50c1e2540e248ac153d50f126f016498811b7088039e59e93f1a386a94e1
+      supersedes_id: T9f30311791
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Tc05477f17853d6d5"]'
+    kind: sentence_template
+    data:
+      id: Tc05477f17853d6d5
+      inventory_id: inv:13ed97116bb067851a217171f19ec6a31ac4ef25133eaa70ca179abe3841c3d6
+      source_span:
+        role: body
+        segments:
+          - start: 20
+            end: 46
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 22
+                end: 23
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:c05477f17853d6d513304fb921ec971fe1efc920300af0eed52bda3eb7ffba5e
+      supersedes_id: T17264d8fd4
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Tc1b5a11d2d10bea8"]'
+    kind: sentence_template
+    data:
+      id: Tc1b5a11d2d10bea8
+      inventory_id: inv:49a9ee6b5de6c65de94baf6aabecc00f44ac52cf16ca8ab5eccd039e46583aed
+      source_span:
+        role: body
+        segments:
+          - start: 66
+            end: 126
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 8
+                end: 9
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 21
+                end: 22
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: reference
+            occurrences:
+              - start: 26
+                end: 30
+            reference_kind: vocabulary
+            min:
+            max:
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 34
+                end: 35
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 51
+                end: 52
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_6
+            type: uint
+            occurrences:
+              - start: 55
+                end: 56
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:c1b5a11d2d10bea88f5e12666c00ba3fa75927c6a4783d62972d2e7c7954cfa5
+      supersedes_id: Td90e9f91c1
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Tccfb601a100cd0de"]'
+    kind: sentence_template
+    data:
+      id: Tccfb601a100cd0de
+      inventory_id: inv:394cbef8e2fe6f0ab1d3877eb2e1afebdb430eb1bc0aa611f73838277ad00f1f
+      source_span:
+        role: body
+        segments:
+          - start: 37
+            end: 72
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 31
+                end: 32
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:ccfb601a100cd0debd0112a741200d1218d6895f13912aafb34d3e2a166ef098
+      supersedes_id: T724baa3286
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Tcd98944707e19a26"]'
+    kind: sentence_template
+    data:
+      id: Tcd98944707e19a26
+      inventory_id: inv:453cbb7cde32aa2048b99ab12001e292b511101a048db7e125f671a20718dc07
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 93
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 13
+                end: 14
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 25
+                end: 26
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 34
+                end: 35
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 39
+                end: 40
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_5
+            type: reference
+            occurrences:
+              - start: 50
+                end: 52
+            reference_kind: term
+            min:
+            max:
+          - name: slot_6
+            type: uint
+            occurrences:
+              - start: 54
+                end: 55
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_7
+            type: uint
+            occurrences:
+              - start: 59
+                end: 60
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_8
+            type: uint
+            occurrences:
+              - start: 61
+                end: 62
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_9
+            type: uint
+            occurrences:
+              - start: 67
+                end: 68
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_10
+            type: uint
+            occurrences:
+              - start: 86
+                end: 87
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:cd98944707e19a26014c8adcae157b4444c5039a36290c5c669a84262a7d7e49
+      supersedes_id: T67954c0f06
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Tcffb37c8f293d8a7"]'
+    kind: sentence_template
+    data:
+      id: Tcffb37c8f293d8a7
+      inventory_id: inv:089780988107b5a30e26f8f49974d7aa790d15d55ef539f13f067662803af948
+      source_span:
+        role: body
+        segments:
+          - start: 5
+            end: 29
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 20
+                end: 21
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:cffb37c8f293d8a7a4c058a160682728b1656b9bad310f1226a26a6f7dcf87da
+      supersedes_id: Tfa2b905c57
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Td31a4cfd7ad1213e"]'
+    kind: sentence_template
+    data:
+      id: Td31a4cfd7ad1213e
+      inventory_id: inv:107588bd7e0a93aae497bab78a0541844af8840c0863c50845a75e77f21a9310
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 22
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 18
+                end: 19
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:d31a4cfd7ad1213e0ecb23afd26cc96b5798d9182f28c2213ddd959301e54208
+      supersedes_id: Tbd2cb8ab71
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Tdbc4a1653ddaed64"]'
+    kind: sentence_template
+    data:
+      id: Tdbc4a1653ddaed64
+      inventory_id: inv:2b4af2b21303b31286fb9d2a68f0a12c19e132fe3b7b0059c57da08f9eeb37e0
+      source_span:
+        role: body
+        segments:
+          - start: 42
+            end: 128
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 9
+                end: 10
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 19
+                end: 20
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 31
+                end: 32
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 48
+                end: 49
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 53
+                end: 54
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 65
+                end: 66
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_6
+            type: uint
+            occurrences:
+              - start: 82
+                end: 83
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:dbc4a1653ddaed644f150577c66fe255dcf6ddeb011eb076cb8b41c7024d0b35
+      supersedes_id: T01ac4a25c4
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Te0e042e16736b365"]'
+    kind: sentence_template
+    data:
+      id: Te0e042e16736b365
+      inventory_id: inv:382ab65934d6d7d9a583889795d535c7097b10eecd0ea31c83c3a4aa7cf3b5e7
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 51
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 19
+                end: 20
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 28
+                end: 29
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 47
+                end: 48
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:e0e042e16736b365df8ac5b72dfcd58849429d21e9fa35ff95bf85ac52c80b33
+      supersedes_id: T6ba0274b93
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Te25bb3cfe9192a3e"]'
+    kind: sentence_template
+    data:
+      id: Te25bb3cfe9192a3e
+      inventory_id: inv:1557f44606f6060d25ccc1e5b4ef83749a7ec52953b9bb7bce78cd2e8cfbccb4
+      source_span:
+        role: body
+        segments:
+          - start: 29
+            end: 73
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 23
+                end: 24
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 40
+                end: 41
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:e25bb3cfe9192a3eb79c7b8645efb5ef3fcb3bc692432d09425807cd30a51352
+      supersedes_id: Tc3dff50147
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Te511b82e7f8c55b7"]'
+    kind: sentence_template
+    data:
+      id: Te511b82e7f8c55b7
+      inventory_id: inv:926e5d3c137df4c673c089dc2f951f2710fb73681943908d3a3ea49b0d9efda9
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 34
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 10
+                end: 11
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 30
+                end: 31
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:e511b82e7f8c55b7c6ee51a17a249d78f8009a2f1b2ff9b85f1d44ae88c3f94e
+      supersedes_id: Tce65fdd613
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Te883f3ae94949066"]'
+    kind: sentence_template
+    data:
+      id: Te883f3ae94949066
+      inventory_id: inv:17b064b9205e6b01d3595ea29da3557815d2f6d8d9bbabb4cd3b433f6a026b71
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 38
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 4
+                end: 5
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 14
+                end: 15
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 26
+                end: 27
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 31
+                end: 32
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 33
+                end: 34
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:e883f3ae949490662615c80f2d3d5339c25ffd83e8cff6b64755db3cb447a1b9
+      supersedes_id: T5114a8d6b5
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Tef660a3e8b2f419a"]'
+    kind: sentence_template
+    data:
+      id: Tef660a3e8b2f419a
+      inventory_id: inv:269ad7ec5b080f063829fd6011b74520195f30d221347f3b3b47c7bcf036ca31
+      source_span:
+        role: body
+        segments:
+          - start: 56
+            end: 108
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 22
+                end: 25
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 27
+                end: 28
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: reference
+            occurrences:
+              - start: 30
+                end: 32
+            reference_kind: term
+            min:
+            max:
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 34
+                end: 35
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 48
+                end: 49
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:ef660a3e8b2f419a93355a993094f512599ec556ce4f5bcd7f5e94a935a692e0
+      supersedes_id: T4689a0fee3
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Tf2d1d3e4e8d0819b"]'
+    kind: sentence_template
+    data:
+      id: Tf2d1d3e4e8d0819b
+      inventory_id: inv:1b1cbc6023c278bf44cd71372605597928877c74632a4eacaaf7ece5aa6970be
+      source_span:
+        role: body
+        segments:
+          - start: 7
+            end: 39
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 23
+                end: 24
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 27
+                end: 28
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:f2d1d3e4e8d0819ba5d2d476879752fe8b38ab099e504fe262ccbb5d311c4954
+      supersedes_id: T3346d1faf3
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Tf52d6411da19d37c"]'
+    kind: sentence_template
+    data:
+      id: Tf52d6411da19d37c
+      inventory_id: inv:8ad9e1c7bc2ea9da5c263d8691962f30c89632b7107c916070d2a2981c72b8dc
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 55
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 5
+                end: 7
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 12
+                end: 15
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 27
+                end: 28
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 51
+                end: 52
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:f52d6411da19d37cddb3b30db268d709345f8906eb3118f82a0bcb8fcff11455
+      supersedes_id: Tc972a11af6
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Tfad2924c70900426"]'
+    kind: sentence_template
+    data:
+      id: Tfad2924c70900426
+      inventory_id: inv:2530ce0f3951105e548e205cfb1f53780ee16ffea135d3af0ddfc38b3cb5c8de
+      source_span:
+        role: body
+        segments:
+          - start: 0
+            end: 100
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 4
+                end: 5
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 14
+                end: 15
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 26
+                end: 27
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: reference
+            occurrences:
+              - start: 39
+                end: 41
+            reference_kind: term
+            min:
+            max:
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 43
+                end: 44
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 48
+                end: 49
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_6
+            type: uint
+            occurrences:
+              - start: 59
+                end: 60
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_7
+            type: uint
+            occurrences:
+              - start: 76
+                end: 77
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_8
+            type: uint
+            occurrences:
+              - start: 88
+                end: 89
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:fad2924c709004260801a64e58ae089e0111e0c62d4838f60e3a49d28e43bcc7
+      supersedes_id: T2764453db0
+    origin: project
+    low_confidence: false
+  - record_key: '["sentence_template","Tfce4727ac4ee2e5a"]'
+    kind: sentence_template
+    data:
+      id: Tfce4727ac4ee2e5a
+      inventory_id: inv:5ba5fd85049ba8209233f5525618abb47402277f01d125759b180a25d72161ca
+      source_span:
+        role: body
+        segments:
+          - start: 72
+            end: 157
+        anchor:
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 4
+                end: 6
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 11
+                end: 12
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 17
+                end: 20
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 52
+                end: 53
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 75
+                end: 76
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:fce4727ac4ee2e5a91442f494d7219857bb4cc09206e05a141bc6e9fb36af4e8
+      supersedes_id: Tb133fe7808
+    origin: project
+    low_confidence: false
