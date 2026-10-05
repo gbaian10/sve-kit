@@ -83,7 +83,7 @@ hash recipe 固定：JSON 物件鍵排序、UTF-8（不 ASCII escape）、分隔
 
 每張 printing 的 `observation` 保存 `region/card_no/recipe/observation_hash/rules_hash`。`registry-observation-v1` 是工具 `Card` typed projection 的 canonical JSON；包括全部 faces 的 card name、職業、種類、數值、特性、原文、sections／speech、來源 img src，不含抓取時間或本機路徑。它是**萃取觀測 hash，不是原 HTML hash**。原始萃取仍留 repo 外；建置匯入需以同 recipe 驗證原始觀測並連到 source_record／decision_source，不能把它偽裝成官方 HTML 的 sha256。僅取得此 registry 不足以重建官方卡文。
 
-規則 hash 包含逐面 `name/text/speech/sections` 的原值。JP／EN 再錄措辭、提醒文字與標點差異可依本批人工政策共用 card，但各觀測分別保留；**不產生 confirmed 的 revision_semantics 或規則等義證明**，不沿用 DSL 驗證。未來來源變動須重新審核，不是忽略括號後自動通過。
+規則 hash 包含逐面 `name/text/speech/sections` 的原值。JP／EN 再錄措辭、提醒文字與標點差異可依本批人工政策共用 card，但各觀測分別保留；**不產生規則等義證明**，不沿用 DSL 驗證。未來來源變動須重新審核，不是忽略括號後自動通過。
 
 建置讀取先驗完整 index 與全區分片，再做地區投影；不得先濾 JP 再改寫 decision 成員、checked 集合或配號游標。讀取保留分片路徑、解析後 canonical 內容及 hash、record 的原 decision 指向與完整封套。格式／kind 等封套欄位必須明示；配號與帶 decision 的 record 不得混在同一分片。decision ID 必須由其完整 membership hash 決定；任何狀態的 sample_ids 都不可重複或含非成員，confirmed 仍須全部 checked。這些檢查驗歷史登錄一致性，不代表已對目前 raw 來源驗證 fresh 採納。
 
@@ -248,7 +248,7 @@ origin 與 authority 分開，本站效果翻譯仍 unofficial；機器譯文人
 
 ## 7. DSL 與拒絕輸入
 
-meta 保留 DSL 版本、rule-bundle-v2 source hash（原觀測 face-bundle-v1 另留追溯，遷移需重驗）、`written_by/reviews/status`、`verified_by_exam`、ruling IDs、QA IDs、macro 用途。審卡程式自動填，不要人工複製逐卡 hash。shared 是預設，EN exception 才 `scope=en_override`；DSL body 僅依 `dsl/` 真正 schema，不在此造示意 op。
+meta 保留 DSL 版本、實際來源觀測（正式規則新鮮度 hash recipe 尚未實作）、`written_by/reviews/status`、`verified_by_exam`、ruling IDs、QA IDs、macro 用途。審卡程式自動填，不要人工複製逐卡 hash。shared 是預設，EN exception 才 `scope=en_override`；DSL body 僅依 `dsl/` 真正 schema，不在此造示意 op。
 
 effects/index.yaml 提供 `card_id`＋scope＋file/record key；即使候選 YAML 解析失敗仍可定位卡。candidate hash 取 exact authored bytes，`load_report` 在建置層追加 accepted/rejected＋目標版本。valid AST 才進 `dsl_document`；無效候選不進公開附件，support 仍能列 `rejected_yaml`。
 
@@ -322,7 +322,7 @@ printing 的觀測不是印刷原文：保留自己的 revision／sections 與�
 
 F1 新增 usage=`effect_presence`，parser_version 為實際判別 parser pin；locator 為 `{printing_id,face_id,source_index,recipe,template_id,container_locator,state,reason_code,result_hash}` 的 canonical JSON。原始來源 metadata 與 archive pin 依 F1 保存，raw source_record.parser_version 仍為 null。所有 present／absent／unknown 的已讀來源均列此 use，未知／deferred 也不能漏掉；報告保存完整 result，輸出前從凍結來源獨立重跑判別並核對 result_hash／用途閉包。
 
-建置維持 `face_revision.effect_unit_id`、`printing_face_observation.revision_id`、`text_unit.text` NOT NULL。absent 可引用依既有語言＋exact 空字串 recipe 產生的 text_unit；來源證據留引用端／F1，不掛在共享空文字上。unknown 暫不建其 revision／觀測表列，report 明列 total／materialized／deferred 與理由。公開 effect_unit_id 仍非空；已證 absent 顯示無主文並照常呈現 sections。公開候選無 revision 時使用 §9.6 的明示待確認位置，不把 null 傳進 face_revision.effect_unit_id。
+建置維持 `face_revision.effect_unit_id`、`printing_face_observation.revision_id`、`text_unit.text` NOT NULL。absent 可引用依既有語言＋exact 空字串 recipe 產生的 text_unit；來源證據留引用端／F1，不掛在共享空文字上。unknown 暫不建其 revision／觀測表列，report 明列 total／materialized／deferred 與理由。公開 effect_unit_id 仍非空；已證 absent 顯示無主文並照常呈現 sections。公開候選無 revision 時使用 §9.1 的明示待確認位置，不把 null 傳進 face_revision.effect_unit_id。
 
 **A 未採用**：新增三態 DB 欄與 nullable effect FK 可讓 unknown 進 revision，但目前保存在 report／F1 已足夠，B 可沿用現有儲存與公開文字語意。A 若在候選 format 1.0.0 期間實作，依 [snapshot-contract](snapshot-contract.md) 可直接同步 Schema、descriptor、golden 與 reader，**不必因此升格式版本**；正式凍結後才另判相容性。B 本身不要求更動 DDL／公開 Schema；§9.1「表記未定」的公開欄位擴充則是另一項已核可顯示政策的實作工作，不能混算為 B 的成本。本 PR 只改文件，沒有修改上述機器契約或宣稱 absence 判別器已完成。
 

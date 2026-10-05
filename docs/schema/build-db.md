@@ -3,7 +3,7 @@
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
 專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../quotations.md)。
 
-建置資料庫的完整邏輯契約，共 121 表；這是設計規格，不是 migration。卡表快照的公開欄位見 [snapshot-format.md](snapshot-format.md)。DSL 語法只以 `dsl/` 的 JSON Schema 為權威。
+建置資料庫的完整邏輯契約，共 118 表；這是設計規格，不是 migration。卡表快照的公開欄位見 [snapshot-format.md](snapshot-format.md)。DSL 語法只以 `dsl/` 的 JSON Schema 為權威。
 
 ## 1. 兩層與範圍
 
@@ -144,9 +144,6 @@ art 屬 card/face；同圖換框或加簽名仍同 art。frame/signed/premium �
 | `face_special_kind`         | `revision_id→face_revision,special_kind_code:Code`；`PK(revision_id,special_kind_code)`                                                                                                                                                                                                                                                                                                                                                                                          |
 | `face_current`              | `face_id→face,region:Region,revision_id→face_revision,basis:dated_effective\|latest_observed_no_errata\|latest_adopted_wording\|reviewed_override,decision_id→decision?`；`PK(face_id,region)`，`FK(revision_id,face_id,region)→face_revision(id,face_id,region)`                                                                                                                                                                                                                |
 | `printing_face_observation` | `printing_id,face_id→printing_face,source_id→source_record,revision_id→face_revision,observed_at:Instant`；`PK(printing_id,face_id,source_id)`，revision 同 face/region；保留各版次頁面各次文字，不能只剩 current                                                                                                                                                                                                                                                                |
-| `face_semantics`            | `id:ID PK,face_id→face,region:Region,rule_text_unit_id→text_unit,rule_sections:Json,normalizer_version:Text,rule_hash:Hash,decision_id→decision?`；不可變等義規則表示，`rule_sections` 是有序 `text_unit` ID、建置逐項驗引用；數值/特性在 bundle 另列                                                                                                                                                                                                                            |
-| `revision_semantics`        | `revision_id→face_revision PK,semantic_id→face_semantics,decision_id→decision?`；同面同區；經採納等義表記可共 `semantic_id`，跨表記未核對不能共用；初始 exact 原文不省略規則的機械映射可無 decision                                                                                                                                                                                                                                                                              |
-| `semantic_reference`        | `semantic_id→face_semantics,target_face_id→face,relation:token_definition\|rule_reference`；`PK(semantic_id,target_face_id,relation)`，依賴閉包參與引擎來源 hash                                                                                                                                                                                                                                                                                                                 |
 | `source_coverage`           | `kind:errata\|qa\|cardlist\|cr,region:Region,scope_key:Text,from_date:Date,until_date:Date?,as_of:Date,state:complete\|partial,source_id→source_record,decision_id→decision?`；`PK(kind,region,scope_key,from_date,as_of)`，`scope_key` 明列來源涵蓋集合；until 為排他上界，null 不表示未來已爬完                                                                                                                                                                                |
 
 `text_unit` 依 `(lang,exact text bytes)` 去重，不讓單一 `source_id` 丟失再錄來源；`face_revision`、`printing_face`、QA 等引用端保留自己的 source。ID 固定為 `t:{lang}:{SHA256(exact UTF-8 text) 前16hex}`，同鍵不同完整內容一律停止發布，不自動加長新舊鍵；歷次已發布文字鍵從耐久的 `(lang,short_id,full_digest)` 發布鍵索引檢碰撞；發布前保留候選鍵、衝突即停止，失敗保留已占鍵，不能因 CDN 回收而遺失舊鍵。索引與發布收據備份驗回，不保存完整歷史文字到 R2。既有鍵不變，改規則需新 format/命名空間並保留舊引用。內容不可變，不把完整 hash 出貨。null 是缺資料；空字串是已確定無文字；原始 text=null 先檢查 type/sections/來源，不能直接當無能力。
@@ -157,19 +154,17 @@ art 屬 card/face；同圖換框或加簽名仍同 art。frame/signed/premium �
 
 type 明確包含 follower/spell/amulet/crest/equipment/leader/ep/sep；equipment＋token 對應已觀測的イクイップメント・トークン，這是資料分類，不代替 CR 規則。evolve/advance/token 是特殊標記；traits 不切斷〈ジオ・テオゴニア〉。sections 保留順序與分類，unknown 仍顯示完整原文，但不放行 verified DSL。數值 null 不補 Leader 體力 20。
 
-無差異的初始觀測可由工具建立一對一 semantics（保留全部規則），不另要求每卡人工 decision；只有移除提示/重複定義、跨文字認定等義才需已採納正規化政策或 confirmed batch。未知段落保持 unknown 並禁止 verified。
-
-現行文字先區分「觀測差異」與「語義衝突」。不同 printing 或同一 printing 的新觀測，都先保留 `printing_face_observation`，產 `change_kind=wording` 候選；時間變化本身不是衝突。工具列出主文/提示文/token 定義/數值/特性 diff，目前沒有表記採納輸入，也沒有產生 `face_semantics`／`revision_semantics` 的程式；建置時仍檢查這兩表已存在列的規則 hash。無新版採納時保留舊 current 並顯示有候選；沒有可用舊版仍可讀觀測、手動。
+現行文字先區分「觀測差異」與「語義衝突」。不同 printing 或同一 printing 的新觀測，都先保留 `printing_face_observation`，產 `change_kind=wording` 候選；時間變化本身不是衝突。工具列出主文/提示文/token 定義/數值/特性 diff，目前沒有表記採納輸入或規則等義投影。無新版採納時保留舊 current 並顯示有候選；沒有可用舊版仍可讀觀測、手動。
 
 active 更正先驗再比較投影內容，原始觀測保留。排序依可信發售日／更新證據，不用 fetched_at、卡號、hash 補順序。
 
 **使用者 2026-10-01 核可以下暫顯規則**：無新版採納仍保留有效舊 current；沒有可用舊版、觀測有差異時也公開可讀，不因此排除 card／printing。printing 顯示自己的觀測；face／card 依已知完整發售日的最新版次暫顯，同日不同內容／沒有可判日期時列候選，未知日期版本另列待問，全部標「表記未定」。暫顯不建立 face_current 或假 decision；公開欄位與決定演算法依 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。無 current 的區域以 wording_pending 阻止自動操作，但不影響依既有規則建牌與手動。#144 的診斷排除閉包不是發布閘門；真正來源損壞、已知更正／勘誤衝突仍受原本的完整性閘門約束。
 
-等義採納與 DSL 重用仍受 [semantics 能力分期](implementation-tiers.md) 約束；上述未採納觀測的暫顯不使用 semantic_id，無須先啟用 semantics。觀測、暫顯、已採納 current 與 printed 狀態分開，日期排序不填未知規則生效日。輸入 hash 錯或前件缺失為驗證失敗，不降成普通候選。
+觀測、暫顯、已採納 current 與 printed 狀態分開，日期排序不填未知規則生效日。暫顯不建立規則等義證明，也不放行 DSL 重用。
 
 無差異/勘誤/更正時仍可 `latest_observed_no_errata`，不虛構生效日期。已知官方勘誤按生效區間選；真實不相容、缺句/數值差異或同時互斥的有效來源才進衝突/來源更正/勘誤判讀。JP 內差異不濫用 `region_divergence`，該表只管跨區。未知日期不能回答歷史有效卡文。
 
-**規則本文正規化**：只把已識別並核對的提示文標 reminder，原始 effect/sections 原樣保存；不能用 regex 刪所有括號（可能是條件）。表記等義由 `revision_semantics` 對應到不可變規則表示，不把「字串不同」當「行為不同」。unknown 段落不允許 fresh verified。`token_definition` 只有已確認重複既有 token 規則時，主卡 bundle 不重複其顯示字串，但 `semantic_reference` 必引用 token 面規則；新/不同 token 定義或漏消滅句必改規則依賴、觸發 stale，不能一律刪掉。詳細 hash 在 §14。
+**規則本文**：原始 effect/sections 原樣保存；不能用 regex 刪所有括號（可能是條件），也不能一律刪除 token 定義或消滅句。unknown 段落不允許 fresh verified，字串差異本身不能判定規則等義。
 
 `source_coverage` complete 要有指定區域/來源集合/時間窗的分頁與解析無缺漏證據；只爬到一頁不算 complete。`derived_no_errata` 需相關發行至 `as_of` 的 scope 閉包已覆蓋，不能用普通 cardlist complete 代替 errata complete；`as_of` 之後不作未來保證。
 
@@ -481,17 +476,13 @@ canonical-json-v1：null/bool/Unicode string/安全整數/array/object；拒浮�
 
 `program_hash`＝canonical `{dsl_version,ast}`；macro `body_hash`＝`{dsl_version,body}`。既有 face-bundle-v1 保留完整觀測 recipe（含 revision ID、原始 name/effect/sections/kind、數值與特性），只作觀測追溯，不充當 DSL 新鮮度鍵。
 
-**rule-bundle-v2**：canonical `{recipe,card_id,region,normalizer_version,faces:[{face_id,semantic_id,rule_hash,class_code,type_code,cost,attack,defense,traits,titles,special_kinds,rules_names:[{official_name,role}]}],references:[{face_id,semantic_id,rule_hash,...同數值/特性欄位}]}`；faces/references 按 face ID 排序並去重，詞彙集合排序，`rules_names` 取該區已採納規則名稱/角色並排序，規則名稱改變也重驗；references 取同區 current 已採納 semantics 的 `semantic_reference` 傳遞閉包（visited 集合處理循環，不做遞迴自我 hash）。同一 `target_face` 若顯示 token 定義與所連規則矛盾，先隔離待更正/裁定，不能挑較方便版本；target 沒有可驗同區規則時不產 bundle。`rule_hash=canonical` `{rule_text,rule_sections}` 的 exact 規則內容 hash；不含顯示 `revision_id`、reminder 或已由 references 表達的重複 token 定義字串。未知分類/未解義/缺 target 禁止產生可驗證 bundle。
-
-`dsl_document.source_text_hash`、mechanic source hash、`dsl_load/exam` source hash 在 `hash_recipe=rule-bundle-v2` 的文件中均指此值；完整 raw 觀測另由 `dsl_source/printing_face_observation/face-bundle-v1` 追溯。已確認等義的新表記共 `semantic_id`，仍以新表記顯示及解讀，既有 AST/考題不因顯示修字變 stale；只有正規化規則、數值、特性、token 規則依賴或政策/引擎真改才重驗。把未知段落重新判為規則則必變 bundle，不能排除未知內容後沿用 pass。
-
-face-bundle-v1 → rule-bundle-v2 是明示遷移：以 face-bundle-v1 計算的既有證據保留，不能只改 recipe 名就沿用 verified；需建立已採納 `revision_semantics` 並依新政策重驗一次。之後純表記更新不連鎖重跑。翻譯仍比自己的 exact source/context，表記更新可能需重建字句；跨區 `region_text_review` 可用規則 bundle 判效果等義，卡名/display scope 仍核 exact 名稱版本。
+目前不提供規則等義 bundle 或跨表記重用 DSL 的建置能力；未實作的語義表與 hash recipe 已移除。未來啟用正式 DSL 驗證時，須依實際來源與消費端另定新鮮度契約，不能只改 recipe 名稱沿用舊驗證結果。翻譯仍比自己的 exact source/context。
 
 卡表快照不出逐列稽核 hash；`program_ref` 由快照清單的檔案雜湊驗證。發布 metadata 不能改寫歷史審核事實。
 
 ### 14.1 DSL 撰寫/題本的文字來源
 
-DSL 撰寫與題本規則來源是 `face_semantics` 的 immutable 規則表示及依賴閉包；工具同時顯示 current 最新表記與其 `revision_semantics` 對應，讓審核者看清兩者。`dsl_source` 保留當時採用的觀測 revision，不因 current 改字而改寫歷史證據。若要把更清楚的新表記換成 canonical 規則表示，建立新的 `semantic_id/rule_hash`，再對受影響 DSL/題本重驗一次；不能覆寫舊 semantic。單純採納等義顯示表記並共用既有 semantic，不觸發這次切換。ルゥ 引擎仍按已確認等義的最新規則意義解讀，舊 canonical 字句不是保留舊語義。
+DSL 撰寫與題本須保留實際使用的原文觀測及完整規則依賴。`dsl_source` 保留當時採用的觀測 revision，不因 current 改字而改寫歷史證據。沒有正式規則等義驗證時，暫顯或身分分組均不能作為沿用 DSL／題本驗證結果的依據。
 
 ## 15. 網址、搜尋、預設版次與記號
 

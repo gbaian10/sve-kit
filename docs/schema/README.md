@@ -11,7 +11,7 @@
 
 | 文件                                             | 內容                                                                              |
 | ------------------------------------------------ | --------------------------------------------------------------------------------- |
-| [建置資料庫 schema](build-db.md)                 | 建置資料庫 121 表的完整邏輯契約：欄位、鍵、約束、採納政策、雜湊與發布閘門         |
+| [建置資料庫 schema](build-db.md)                 | 建置資料庫 118 表的完整邏輯契約：欄位、鍵、約束、採納政策、雜湊與發布閘門         |
 | [卡表快照格式](snapshot-format.md)               | 發布給使用者的 40 個文字集合與 3 個影像集合的欄位白名單、快照清單、分片與更新規則 |
 | [快照傳輸契約](snapshot-transport.md)            | manifest、config、tuple descriptor、fragment 身分與欄序、版本及變動摘要           |
 | [機器契約](snapshot-contract.md)                 | Schema 資源、候選格式配置、Python reader 與 TS 驗收清單                           |
@@ -20,7 +20,7 @@
 | [來源歸檔與凍結輸入](source-archive.md)          | raw 歷史、版本 inventory、鎖與一致副本、保留及備份恢復                            |
 | [構築規則與禁限採納](construction-adoption.md)   | Standard 專用封套、來源登錄、有限 ref／CR 引用與 coverage／unknown 邊界           |
 | [容量與記憶體預算](size-budget.md)               | 卡表快照的容量門檻、量測方法與目前結論                                            |
-| [建置表實作分期](implementation-tiers.md)        | 121 表各自的實作 tier（T0～T3）與首發必要集合                                     |
+| [建置表實作分期](implementation-tiers.md)        | 118 表各自的實作 tier（T0～T3）與首發必要集合                                     |
 | [身分修復與決定續版](identity-repair.md)         | 已核可的不可變續版、指名撤回、完整面／插畫移轉與有效投影                          |
 | [authored 維護方式](authored-layout.md)          | `authored/` 已定案身分登錄、其餘配置提案與批次決定封套                            |
 | [詞彙與路由契約](catalog-route-adoption.md)      | 採納封套與覆寫；已核可稀有度白名單及繁中缺譯順序                                  |
@@ -48,7 +48,7 @@ flowchart LR
 
 - **build-db.md 是建置資料庫的權威**；snapshot-format.md 只描述投影出來的公開欄位。表名相同不代表欄位相同，快照沒有列出的欄位一律不出貨。
 - 卡表快照依 `AGENTS.md` 是卡片資料的唯一權威；前端可以快取它，但不另外維護卡表。
-- implementation-tiers.md 的逐表分配必須與 build-db.md 的 121 表完全一致；authored-layout.md 說明 `authored/` 如何匯入建置資料庫。
+- implementation-tiers.md 的逐表分配必須與 build-db.md 的 118 表完全一致；authored-layout.md 說明 `authored/` 如何匯入建置資料庫。
 - 效果 DSL 的語法以 `dsl/` 的 JSON Schema 與 [`docs/dsl/`](../dsl/README.md) 為準，這裡只記錄 DSL 文件、審核與載入結果的資料表。
 
 ## ER 圖
@@ -63,7 +63,7 @@ uv run docs/schema/er/build_er.py --serve    # 產生後在 localhost:8000 提�
 
 輸出在 `docs/schema/er/out/`（不進 git）：`schema-er.html` 是單檔頁面，`parse-report.txt` 是解析報告，`schema-model.json` 是從 Markdown 讀出的中間資料（除錯用）。`--out <路徑>/schema-er.html` 改輸出位置，`--artifact` 省略 doctype 外殼。有任何欄位無法解析、PK 無法標記、FK 目標不存在或分組錯誤時，不產生 HTML 並以非零狀態結束；修改 `docs/schema/` 時 pre-commit 會跑一次確認能產出。分組與快照欄名的引用對應寫在 `docs/schema/er/diagram.toml`，新增表或集合時要一起登記。
 
-建置資料庫的 121 表分成 12 組（來源與確認、身分與商品、插畫與加工、文字與勘誤、跨區與構築、問答與裁定、數位與語音、翻譯依賴、DSL 證據、機制、影像與更正、顯示與路由）；卡表快照的 43 個集合分成 6 組。
+建置資料庫的 118 表分成 12 組（來源與確認、身分與商品、插畫與加工、文字與勘誤、跨區與構築、問答與裁定、數位與語音、翻譯依賴、DSL 證據、機制、影像與更正、顯示與路由）；卡表快照的 43 個集合分成 6 組。
 圖中的箭頭表示「引用者 → 被引用者」，不是時序，也不表示基數；線條分三種：欄位宣告的 FK、約束 `FK(...)` 宣告的 FK（複合約束保留兩側完整欄組，以粗線標示）、依 `*_id` 欄名推斷的引用（卡表快照沒有 FK 記號，全部屬於這種，並包含內嵌陣列與物件裡的 ID）。正式的複合 FK、nullable 與部分唯一性以 build-db.md 為準；固定 `vocabulary` kind 的常數欄由 DDL 展開，不出現在邏輯表中。
 
 ## 待辦與待實作驗收
@@ -75,7 +75,6 @@ uv run docs/schema/er/build_er.py --serve    # 產生後在 localhost:8000 提�
 | 正式 DDL、匯出器              | 依本規格實作建置資料庫 DDL（含常數 kind 欄展開）、投影匯出器與發布閘門                                                                         | 沒有可發布的卡表快照；不能聲稱 FK、PWA 或容量已全數通過                                                     |
 | 永久登錄匯入與身分修復        | authored 永久 ID／配號工具已實作；待正式建置匯入器與 identity_change 執行流程                                                                  | 已配號只增不改；本機 registry 不能當作可發布快照                                                            |
 | 模板 ID 碰撞檢查              | 保留既有 10 hex 模板 ID、完整內容不可覆寫；normalizer 或參數改版時新 ID＋`supersedes`                                                          | 舊依賴不移動、標 stale 重驗；不能只升 hash 就保留 verified                                                  |
-| 雜湊遷移 ADR                  | 把 `rule-bundle-v2` 與既有 `face-bundle-v1` 證據的遷移規則寫成 ADR                                                                             | 依 build-db.md §14：以舊 recipe 計算的證據保留，但要重驗一次才能 verified                                   |
 | 引擎驗證政策                  | 第一版驗證政策須包含載入、基本局面與必要題本，並對應原錯誤碼                                                                                   | 卡表可先上線，缺證據一律手動處理；不能把 reviewed 當 `engine_passed`                                        |
 | Decklog 來源與外部 ID         | 研究 JP/EN Decklog 卡片清單來源或 API、完整範圍與精確版次 ID 對照；兩區各至少一份含普通、特殊、再錄與同號 variant 的匯入樣本                   | 不假設外部 ID 等於卡號；未查證依官方卡表收錄預設（收錄 true、未收錄 false）並標示；Decklog 匯入需求不標完成 |
 | 手機實測                      | 中階 Android 與 iPad 量測解析、搜尋、切換語言、更新與離線峰值（見 [size-budget.md](size-budget.md)）；多尺寸卡圖、2.5D 與動態 atlas 的尺寸實測 | 數字只是估算與預算；不全包常駐解析，卡表不加 sprite                                                         |

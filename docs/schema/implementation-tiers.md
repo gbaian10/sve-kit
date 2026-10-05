@@ -1,6 +1,6 @@
 # 建置表實作分期
 
-這是邏輯契約的實作次序，不是要求第一次發布就完成 121 表，也不是整張表隨意缺失時繼續執行 FK。[build-db.md](build-db.md) §18 的能力/依賴閉包規則適用；一次只實作受支援的子集與其匯入器/驗證器，編譯該階段 DDL 時不產尚未啟用的 nullable FK 欄位約束，待啟用即用 migration 補齊約束與驗證全部現有列。公開 schema required 欄位仍完整，從未啟用能力輸出明定 null/空/unknown；不能改成任意省略。
+這是邏輯契約的實作次序，不是要求第一次發布就完成 118 表，也不是整張表隨意缺失時繼續執行 FK。[build-db.md](build-db.md) §18 的能力/依賴閉包規則適用；一次只實作受支援的子集與其匯入器/驗證器，編譯該階段 DDL 時不產尚未啟用的 nullable FK 欄位約束，待啟用即用 migration 補齊約束與驗證全部現有列。公開 schema required 欄位仍完整，從未啟用能力輸出明定 null/空/unknown；不能改成任意省略。
 
 首發實際集合＝T0 全部 40 表＋下列 T1 子組 17 表，共 57 表；不是只有文字查卡集合就宣稱建牌可用。`identity_change` 在**第一次公開 `int_id` 之前**啟用，沒有修復事件時可以空，但 schema/匯入/驗證不能延後。逐地區版次的 Decklog 可用性欄位屬 printing（T0）；暫定身分不擋建牌。未查證按官方卡表收錄預設，首發不假造 Decklog 查證。
 
@@ -16,13 +16,13 @@ T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction�
 
 若首發納入現有 EN 登錄，另啟用 `region_mapping_review`、`art`、`region_text_review`、`region_divergence`，最低集合成為 61 表；61 是含 EN 條件組的結果，不是所有發布無條件必建的數量，其他非空引用仍須補齊閉包。
 
-首發不啟用 `face_semantics`／`revision_semantics`／`semantic_reference`；身分分組不視為規則等義證明。`astra/1` 原型不符合 [正式候選入口](authored-layout.md#7-dsl-與拒絕輸入) 與 DSL 1.0 Schema，不構成正式 DSL 候選；沒有正式候選的卡依 [build-db.md §10](build-db.md#10-dsl驗證與未實作卡片頁) 輸出 `missing_dsl`，`dsl_id/dsl_version` 為 null、`automatic=false`；未指定引擎時引擎目標為 null；公開 automatic 仍由支援狀態推導，不新增傳輸欄位。預覽快照通過其已啟用能力的驗證，不代表正式首發 57 表已驗收。
+目前不提供規則等義投影；身分分組不視為規則等義證明。`astra/1` 原型不符合 [正式候選入口](authored-layout.md#7-dsl-與拒絕輸入) 與 DSL 1.0 Schema，不構成正式 DSL 候選；沒有正式候選的卡依 [build-db.md §10](build-db.md#10-dsl驗證與未實作卡片頁) 輸出 `missing_dsl`，`dsl_id/dsl_version` 為 null、`automatic=false`；未指定引擎時引擎目標為 null；公開 automatic 仍由支援狀態推導，不新增傳輸欄位。預覽快照通過其已啟用能力的驗證，不代表正式首發 57 表已驗收。
 
 | `tier` | 用途                               | 啟用/未啟用行為                                                                                                                                                                          | 表數 |
 | ------ | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | T0     | 查卡與構築共同必要集合             | 必做；缺 DSL 仍輸出 `missing_dsl`。建置資料庫的 `card_engine_support` 未啟用引擎時 dsl/load/engine 欄為 null；`printing_face.art_id=null`、加工未知、printed unknown，頁面仍能顯示原文。 | 40   |
 | T1     | 來源/策展資料到齊才啟用            | 有該類來源即在該批發布前完成；SNC 需要 references、非官方 metadata；EN 需要 mapping review/語義核對；已知更正/勘誤不能因 tier 而丟掉。                                                   | 30   |
-| T2     | 翻譯、等義歸納、數位、裁定有資料時 | 首個已採納等義再錄就先實作 semantics 子組，首個翻譯就做 context/template 引用閉包；數位/語音/裁定可獨立啟用，未上線則 unknown/無提示，不假造翻譯。                                       | 34   |
+| T2     | 翻譯、數位、裁定有資料時           | 首個翻譯就做 context/template 引用閉包；數位/語音/裁定可獨立啟用，未上線則 unknown/無提示，不假造翻譯。                                                                                  | 31   |
 | T3     | 引擎/機制能力啟用前                | 首個 manual mechanism 可先做 keyword/action/coverage/projection 及其依賴；DSL/巨集/實跑子組有資料才做。沒實跑永不輸出 `engine_passed`，未檢查機制仍 unknown。                            | 17   |
 
 ## 逐表分配（每張恰一次）
@@ -63,9 +63,6 @@ T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction�
 | `face_special_kind`            | T0   |
 | `face_current`                 | T0   |
 | `printing_face_observation`    | T0   |
-| `face_semantics`               | T2   |
-| `revision_semantics`           | T2   |
-| `semantic_reference`           | T2   |
 | `source_coverage`              | T0   |
 | `errata`                       | T1   |
 | `errata_version`               | T1   |

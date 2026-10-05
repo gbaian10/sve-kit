@@ -124,7 +124,7 @@ DSL 程式包（`dsl-programs`）不是集合；封套及 AST 驗證統一依 [�
 
 ### 2.2 留在建置端與延後項
 
-建置資料庫才有 `source_record`、`printing_face_observation`、`face_semantics/revision_semantics/semantic_reference`、`translation_context/use`、`decision/decision_source`、`correction_evidence/application`、所有模板/術語/translation binding/history、ruling review/supersession/template、DSL load/exam/review/source/macro、`card_mechanic/coverage/override`、`digital_text/face/source` 對齊、`restriction_event`、`build_issue`。卡表快照的引用均投影成公開 ID/文字，不殘留指向建置資料庫的 FK。
+建置資料庫才有 `source_record`、`printing_face_observation`、`translation_context/use`、`decision/decision_source`、`correction_evidence/application`、所有模板/術語/translation binding/history、ruling review/supersession/template、DSL load/exam/review/source/macro、`card_mechanic/coverage/override`、`digital_text/face/source` 對齊、`restriction_event`、`build_issue`。卡表快照的引用均投影成公開 ID/文字，不殘留指向建置資料庫的 FK。
 
 只保留玩家查閱需要的歷史：face revision、勘誤、QA 歷史、被引用的 CR、裁定有效片段與被替代鏈。完整 CR 當前版與裁定引用的歷史 CR 條文進文字包；未被引用的舊 CR 全文可不出貨。已不用的翻譯/文字單元不出貨，避免累積所有建置歷史。
 

@@ -227,7 +227,6 @@ H 是 build-db §14 canonical-json-v1 的完整 SHA-256（64 小寫 hex）。命
 | context | `ctx:`＋H(`{recipe:context-v1,source_unit_id,semantic_variant}`) |
 | use | `use:`＋H(`{recipe:use-v1,owner,field,ordinal,context_id}`) |
 | binding | `bind:`＋H(`{recipe:binding-v1,context_id,ordinal,template_id,params,source_span}`) |
-| face_semantics | `sem:`＋H(`{recipe:semantics-v1,face_id,region,rule_text,rule_sections,normalizer_version}`)；exact 內容及有序 sections，語義引用另進 rule bundle |
 
 owner 為具名單一物件，恰有 kind 與 §6.3 該種類列出的鍵；不以未命名陣列或另一組別名表示。
 模板語義 ID 依 §3，term ID 依 §5。
@@ -272,7 +271,7 @@ record_key 是 `[kind,...選擇鍵,adoption_no]` 的 canonical JSON 字串，rev
 adoption_no 從 1 連續只增，predecessor 首筆 null，其後為上一筆 `{record_key,record_hash,decision_id}`；
 拒絕分叉、缺號、錯前件，舊分片及索引 hash 不改。本段只保留原門檻，不擴及翻譯 format 2。
 
-region_text_review.data 恰為 `{card_id,region,jp_hash,region_hash,hash_recipe,faces,display_checks,state,checked_at,adoption_no,predecessor}`。region=en，hash_recipe=rule-bundle-v2；faces 每項 `{face_id,jp_revision_id,region_revision_id,jp_semantic_id,region_semantic_id}`，涵蓋全部面、按 face_id 排序。jp_hash/region_hash 投影 source_jp_hash/source_region_hash；跨語 hash 不要求相等，state=aligned/divergent（pending 留候選）。aligned 需 sampled/confirmed 語義對照決定，兩端身分仍另須 confirmed。
+region_text_review 的語義對照來源 hash 與逐面對應格式須在正式規則驗證實作時另定；目前沒有規則等義 bundle 產出端，不提供此採納能力。跨語 hash 不要求相等；aligned 仍需 sampled/confirmed 語義對照決定，兩端身分另須 confirmed，不能把文字配對當作規則等義證明。
 
 display_checks 每項 `{face_id,field,jp_ordinal,region_ordinal,jp_ref,region_ref,state,reason,counterpart}`，field=name/effect/section/flavor，ref 為 §2 source_ref。預設同面同欄對照由工具列出，採納以雙端精確 hash 的 batch 決定釘住；只有非同欄／跨 ordinal 等例外逐項人工指定。state=aligned/divergent，aligned 的 reason 可空，其他必填；counterpart 為布林，true 僅在 aligned 且該對照已採納時允許。這項決定是 counterpart 原文配對的人工採納，不是把每個推導選用寫進 git。
 
@@ -294,8 +293,7 @@ shared_jp_unchecked 只限 target_lang=zh-Hant、EN 接收端、已確認同卡�
 
 已知 divergence 按 scope 隔離；不知道不等於英文獨有或已核對一致。
 來源／身分變動時重驗兩端及該 owner；counterpart 失效回有效本站詞或原文，不影響無關 owner。
-語義 bundle 的 face_semantics／revision_semantics／semantic_reference、表記核可與來源更正仍依
-[ADR-0013](../adr/0013-rule-bundle-migration.md)及 build-db §14；exact 字句對照不能由規則等義代替。
+目前沒有跨表記規則等義或 DSL 重用能力；exact 字句對照不能當作規則等義證明。來源更正仍依 build-db 的獨立入口驗證。
 
 ## 8. 公開投影與自動檢查
 
