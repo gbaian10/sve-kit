@@ -19,7 +19,8 @@
     "knip": "bun run schema:compile && knip",
     "fixture:build": "bun run schema:compile && bun run scripts/fixture/main.ts",
     "fixture:local": "bun run schema:compile && bun run scripts/fixture/local-main.ts",
-    "schema:compile": "bun run scripts/schema/main.ts"
+    "schema:compile": "bun run scripts/schema/main.ts",
+    "deploy:dev": "wrangler deploy --config wrangler.dev.jsonc"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.3.0",
@@ -68,6 +69,7 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.70.1",
     "vite": "^8.3.1",
-    "vitest": "^5.0.2"
+    "vitest": "^5.0.2",
+    "wrangler": "^4.147.0"
   }
 }
