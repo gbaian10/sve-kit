@@ -15,11 +15,11 @@
 | 定案 | 英文原創插畫 | `registry/art/<owner>/001.yaml` |
 | 定案 | 換皮卡 | `registry/card_related/<owner>/001.yaml` |
 | 定案 | 本批來源更正 | `registry/source_correction/active/<owner>/001.yaml`、`registry/source_correction/needs_review/<owner>/001.yaml` |
-| 定案（格式） | 歸檔類別、人工商品與收錄 | `products/index.yaml`、`products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
-| 定案（格式） | 官方商品身分對照 | `product-identities/index.yaml`、`product-identities/<region>/001.yaml`，見 §11；獨立於商品內容採納 |
+| 定案（格式） | 歸檔類別、人工商品與收錄 | `products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
+| 定案（格式） | 官方商品身分對照 | `product-identities/<region>/001.yaml`，見 §11；獨立於商品內容採納 |
 | 待審技術契約 | 人工序號版次／官方序號補充 | `manual-printings/index.yaml`、`manual-printings/{printings,serials}/<filing_key>/<sequence>.yaml`，見 manual-printings-v1；不表示已有採納資料 |
 | 已定案（ADR-0011） | 裁定 | `rulings/R-0001.yaml`，維持原格式 |
-| 定案（格式） | 身分修復與決定續版 | `identity-transitions/index.yaml`、`identity-transitions/<sequence>.yaml`，見 §12 |
+| 定案（格式） | 身分修復與決定續版 | `identity-transitions/<sequence>.yaml`，見 §12 |
 | 待審技術契約 | Standard 構築／禁限／角色與必要 CR 引用 | `construction-adoptions/index.yaml`、`construction-adoptions/<area>/<region>/standard/<sequence>.yaml`，roles／cr 為 `<area>/<region>/<sequence>.yaml` 整區共用；見[構築採納契約](construction-adoption.md)，尚無正式採納資料 |
 | 提案 | 其他策展、標誌 | `curation/BP01/001.yaml` |
 | 待審（技術契約） | 數位對應與查核覆蓋採納 | `digital-links/index.yaml`、`digital-links/{links,coverage}/<filing_key>/<sequence>.yaml`；見[數位對應採納契約](digital-link-adoption.md)，真人link入口已實作、尚無逐卡正式遷入；coverage未實作 |
@@ -32,7 +32,7 @@
 | 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `image-crops/<filing_key>/<sequence>.yaml`；無 index、全體查重，列不存 image_id，依[覆寫契約](image-crop-overrides.md)；不表示 loader 或資料已完成 |
 | 提案 | DSL、設定 | `effects/`、`macros/`、`config/` 等，見後續各節；跨區語義差異採納改走 translations/region-reviews |
 
-`owner` 是首次歸檔代號，保留大小寫（例如 BP01、DSD01a、PR），不是商品收錄證據。card 採首次配發代表版次的 owner；printing 與配號按自身 owner，跨包外鍵允許。檔名為只增序號，不因新增較早排序的卡而重新分片。每檔 **小於 1,048,576 bytes**，以 512 KiB（524,288 bytes）為目標：以**寫出後的完整分片 YAML**（含封套、decision 的 members／sample_ids）量測，依序裝入不超過目標的最多筆數；單筆就使分片達 1 MiB 時直接報錯。PR 同樣切序號檔，不造單一大檔。
+`owner` 是首次歸檔代號，保留大小寫（例如 BP01、DSD01a、PR），不是商品收錄證據。card 採首次配發代表版次的 owner；printing 與配號按自身 owner，跨包外鍵允許。檔名為只增序號，不因新增較早排序的卡而重新分片。每檔 **小於 1,048,576 bytes**，以 512 KiB（524,288 bytes）為目標：以**寫出後的完整分片 YAML**量測，依序裝入不超過目標的最多筆數；單筆就使分片達 1 MiB 時直接報錯。PR 同樣切序號檔，不造單一大檔。
 
 分片內記錄依對應 printing 的 `(region, card_no, variant_key, printing id)` 排序（`card_no` 為原樣字串的 code-point 字典序）：printing、配號、來源更正用自身或所指 printing；art 用第一個 use 的 printing；card、face、英文獨有查核、換皮卡用該 card 所有 printing 中最小的鍵（face 再加 ordinal）；最後一律以 `record_key` 收尾。排序只作用於**同一次寫入的新記錄**：正常追加只排序本次新增、寫到該 `(area, owner)` 的下一個序號檔，舊分片不動，所以同一 owner 的多個分片合起來不保證是全域卡號序。2026-09-28 首次公開前曾一次性全量重新分片（見 §3.2）；此後不再重排。
 
@@ -44,17 +44,13 @@ Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通
 
 構築採納另有獨立 `construction-policies/index.yaml` 與 `<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml` 政策閉包，見[構築採納 §1.2](construction-adoption.md#12-政策首輪抽查與核可收據載體)；不列採納 includes，不借翻譯政策授權。載體／loader 與真實首輪收據未到位時，不得政策採納。
 
-## 2. 分片、批次決定與來源
+## 2. 分片與來源
 
-本節決定封套用於仍採該格式的身分／商品等入口；翻譯 format 2、詞彙／語言 format 2 與名字當前規則
-依各自契約，不使用本節的 membership、sample_ids 或核可收據。共通 YAML、安全路徑、大小與引用檢查仍適用。
-
-每個身分登錄分片有 `authored_format: 1`（分片格式未變；`ids/index.yaml` 為 2，見下）、`kind: registry_shard`、`default_decision_id`、`records`、`decisions`。每筆 record 固定為 `record_key/kind/owner/data`；`data` 是該 kind 的資料。配號以外，匯入時將封套的 decision 展開成具體資料表 FK，不另建立 subject 真值表。配號分片的 decision 為 null，decisions 為空。
+每個身分登錄分片有 `authored_format: 1`、`kind: registry_shard` 與 `records`（`ids/index.yaml` 為 format 2，見下）。每筆 record 固定為 `record_key/kind/owner/data`；`data` 是該 kind 的資料。分片沒有決定封套：registry 只收人工確認的身分（card 另有 `identity_state`），來源更正以自身 `state` 區分 active／needs_review。確認經過由一般 PR 記錄，不在檔案內另存決定 ID、成員 hash 或核對清單。
 
 ```yaml
 authored_format: 1
 kind: registry_shard
-default_decision_id: "d:<64 hex>"
 records:
   - record_key: "card:c:<32 hex>"
     kind: card
@@ -64,28 +60,19 @@ records:
       layout: single
       identity_state: confirmed
       home_set_id: BP01
-decisions:
-  - id: "d:<64 hex>"
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: "sha256:<64 hex>"
-    members: [["card:c:<32 hex>", "sha256:<64 hex>"]]
-    sample_ids: ["card:c:<32 hex>"]
 ```
 
-這是格式示意，不是額外審核證據。2026-09-28 的採納依使用者整批確認與後續裁決；`sample_ids` 列**全部 checked record keys**，不是抽樣。決定不保存製作者／核對者姓名、時間或精度。本批新找出的更正候選用 proposed decision 與空 checked 集合，不能冒稱已確認。
+canonical hash recipe 固定：JSON 物件鍵排序、UTF-8（不 ASCII escape）、分隔符 `,`／`:`、無額外空白／尾端換行，不正規化 Unicode。觀測 hash、authored source_record 的內容 hash 與後續各節沿用此 recipe。
 
-hash recipe 固定：JSON 物件鍵排序、UTF-8（不 ASCII escape）、分隔符 `,`／`:`、無額外空白／尾端換行，不正規化 Unicode。先對完整 record（不含封套的 decision 指針）計 semantic hash；將 `(record_key,semantic_hash)` 二元素陣列按 key 排序，再計 membership hash。decision ID 使用完整 membership hash。任何新成員或內容變更都不得沿用舊決定。2026-09-28 的一次性重新分片讓部分 printing 分片合併，這些分片的 decision 依新成員重算 ID／members／membership_hash；政策與確認狀態沿用原成員的決定（原本就是同一次使用者整批確認），不是新的審核事件，也不保留舊 decision ID。
+**其他入口的批次決定**：catalog、display、digital-links、region-reviews 等仍採批次決定封套的入口，沿以下 recipe（registry、商品與商品身分對照不採）：先對完整 record（不含封套的決定指針）計 semantic hash；將 `(record_key,semantic_hash)` 二元素陣列按 key 排序作為 members，再計 membership hash；decision ID 為 `d:` 加完整 membership hash 的 64 hex；confirmed 的 sample_ids 恰為全部 members 的 record_key。任何新成員或內容變更都不得沿用舊決定。
 
-`ids/index.yaml` 的 `includes` 是 authored 根目錄相對路徑 → 分片**解析後 canonical JSON** hash；`authored_format: 2` 的 index 另有 `allocation_policy`（目前 `region-ranges-2026-09-28-v1`）與各地區游標 `next_int_id: {en: …, jp: …}`，每個游標是該區下一個未使用值；鍵必須恰為政策內的地區，值落在 `[start, end+1]`，`end+1` 表示該區已用盡。不認識的政策或格式直接拒絕。解析內容 hash 可容忍格式工具只調整 YAML 排版。入口列出所有登錄分片，不掃描未被納入的檔案作為有效資料；存在未索引的登錄檔時停止，避免中斷後重用配號。
+`ids/index.yaml`（`authored_format: 2`）只保存 `allocation_policy`（目前 `region-ranges-2026-09-28-v1`）與各地區游標 `next_int_id: {en: …, jp: …}`，每個游標是該區下一個未使用值；鍵必須恰為政策內的地區，值落在 `[start, end+1]`，`end+1` 表示該區已用盡。不認識的政策或格式直接拒絕。讀取掃描 `registry/` 與 `ids/` 下全部 YAML 分片，不另存檔案清單或檔案 hash，內容由 Git 保存；任何不是合法分片的 YAML 都會讓讀取失敗。有分片卻沒有 index 時停止，避免重用配號；寫入時先裝分片、最後才更新 index，中斷時多出的配號會使游標檢查失敗。
 
-每張 printing 的 `observation` 保存 `region/card_no/recipe/observation_hash/rules_hash`。`registry-observation-v1` 是工具 `Card` typed projection 的 canonical JSON；包括全部 faces 的 card name、職業、種類、數值、特性、原文、sections／speech、來源 img src，不含抓取時間或本機路徑。它是**萃取觀測 hash，不是原 HTML hash**。原始萃取仍留 repo 外；建置匯入需以同 recipe 驗證原始觀測並連到 source_record／decision_source，不能把它偽裝成官方 HTML 的 sha256。僅取得此 registry 不足以重建官方卡文。
+每張 printing 的 `observation` 保存 `region/card_no/recipe/observation_hash/rules_hash`。`registry-observation-v1` 是工具 `Card` typed projection 的 canonical JSON；包括全部 faces 的 card name、職業、種類、數值、特性、原文、sections／speech、來源 img src，不含抓取時間或本機路徑。它是**萃取觀測 hash，不是原 HTML hash**。原始萃取仍留 repo 外；建置匯入需以同 recipe 驗證原始觀測並連到 source_record，不能把它偽裝成官方 HTML 的 sha256。僅取得此 registry 不足以重建官方卡文。
 
 規則 hash 包含逐面 `name/text/speech/sections` 的原值。JP／EN 再錄措辭、提醒文字與標點差異可依本批人工政策共用 card，但各觀測分別保留；**不產生規則等義證明**，不沿用 DSL 驗證。未來來源變動須重新審核，不是忽略括號後自動通過。
 
-建置讀取先驗完整 index 與全區分片，再做地區投影；不得先濾 JP 再改寫 decision 成員、checked 集合或配號游標。讀取保留分片路徑、解析後 canonical 內容及 hash、record 的原 decision 指向與完整封套。格式／kind 等封套欄位必須明示；配號與帶 decision 的 record 不得混在同一分片。decision ID 必須由其完整 membership hash 決定；任何狀態的 sample_ids 都不可重複或含非成員，confirmed 仍須全部 checked。這些檢查驗歷史登錄一致性，不代表已對目前 raw 來源驗證 fresh 採納。
+建置讀取先驗全區分片，再做地區投影；不得先濾 JP 再改寫配號游標。讀取保留分片路徑與解析後 canonical 內容及 hash。格式／kind 等封套欄位必須明示，未知欄位一律拒絕。這些檢查驗歷史登錄一致性，不代表已對目前 raw 來源驗證 fresh 採納。
 
 ## 3. 永久身分、配號與策展
 
@@ -145,7 +132,7 @@ JP 初始分組依全部面同名／同職業／同種類／同數值／同特�
 
 2026-09-28（首次公開前）曾一次性重配全部 14,789 筆：各區依 `(region, owner, card_no 原樣字串, variant_key, printing id)` 自區段起點連續配發（JP 20001..27369、EN 60001..67420），並同時全量重新分片。字串 ID、地區、卡號與其他語義資料不變。這是公開前唯一的例外；此後只增不改。
 
-工具持有全域檔案鎖，先驗證全部輸入、既有索引／hash／外鍵、計畫與大小，再寫新分片，最後原子替換 index。重跑無變更時不寫檔。中斷留下未索引分片時停止；恢復者須從 git／備份核對完整批次，不能刪檔後猜 next-id。來源更新拒絕覆寫舊證據，另走來源版本與決定重審流程，不因文字更新產生 identity_change。父 card 改動或合併既有 card 才需 confirmed identity_change；此工具不實作身分修復或同號 variant 猜測。
+工具持有全域檔案鎖，先驗證全部輸入、既有分片／外鍵、計畫與大小，再寫新分片，最後原子替換 index 的游標。重跑無變更時不寫檔。中斷留下的配號分片會讓游標檢查失敗；恢復者須從 git／備份核對完整批次，不能刪檔後猜 next-id。來源更新拒絕覆寫舊證據，另走來源版本與人工重審流程，不因文字更新產生 identity_change。父 card 改動或合併既有 card 才需 confirmed identity_change；此工具不實作身分修復或同號 variant 猜測。
 
 ### 3.3 英文獨有、原創插畫與換皮卡
 
@@ -153,21 +140,21 @@ JP 初始分組依全部面同名／同職業／同種類／同數值／同特�
 
 `art` 的 `data` 為 `id/card_id/face_id/classification/uses/observation`，uses 是 printing_id＋face_id 陣列。本批原創插畫只掛已確認的 EN printing；未確認基準及跨版次同圖組，故 classification=unclassified，不造假 base／alternate 或 JP art。`art_id=null` 的其他 printing 不代表沒有插畫。
 
-`card_related` 的 `data` 為 `id/from_card_id/to_card_id/relation/source_kind/target_printing_id/suggested_count/dsl_id/evidence`。relation=same_rules_reskin、source_kind=authored，三個選用欄為 null。evidence 逐筆記 `role: from|to` 及全部兩端已採納版次的觀測；匯入 decision_source 釘兩端來源。相同換皮卡的普通／特殊 printing 只產一條關係，禁止自指、多目標與反向重複。只能在兩端都有版次且來源驗證仍匹配的地區投影；任一端目前來源改變就停止該地區投影，依 build-db §5 重審。不能繼承原卡 DSL 或構築張數。
+`card_related` 的 `data` 為 `id/from_card_id/to_card_id/relation/source_kind/target_printing_id/suggested_count/dsl_id/evidence`。relation=same_rules_reskin、source_kind=authored，三個選用欄為 null。evidence 逐筆記 `role: from|to` 及全部兩端已採納版次的觀測；匯入時逐地區比對兩端來源。相同換皮卡的普通／特殊 printing 只產一條關係，禁止自指、多目標與反向重複。只能在兩端都有版次且來源驗證仍匹配的地區投影；任一端目前來源改變就停止該地區投影，依 build-db §5 重審。不能繼承原卡 DSL 或構築張數。
 
-confirmed_none 與 same_rules_reskin 的決定不可因追加版次自動擴張。工具與獨立 validate 都逐筆比對 printing 的完整 observation（換皮關係另含 from／to），拒絕缺漏、重複、過期或多餘證據。新版次需要新的 review／relation 決定並釘住新觀測；v1 尚未啟用決定續版格式（[§12 的獨立封套](#12-身分修復與決定續版)已核可、待實作），因此現有工具追加既有 EN-only card 或換皮關係任一端的版次會直接失敗並提示重審，不改寫舊決定。
+confirmed_none 與 same_rules_reskin 記錄不可因追加版次自動擴張。工具與獨立 validate 都逐筆比對 printing 的完整 observation（換皮關係另含 from／to），拒絕缺漏、重複、過期或多餘證據。新版次需要人工重審並以新的 review／relation 記錄釘住新觀測；v1 尚未啟用續版格式（[§12 的獨立封套](#12-身分修復與決定續版)已核可、待實作），因此現有工具追加既有 EN-only card 或換皮關係任一端的版次會直接失敗並提示重審，不改寫舊記錄。
 
 登錄內的 printing.observation 必須與 printing 的地區及原樣卡號一致；有 EN 對應時 target_observation 必須與已登錄 JP 目標的完整 observation 相同，無目標時為 null。art 的 observation 必須對應其已登錄 use，uses 不可重複；換皮關係不可反向成對。這些是既有證據的引用一致性要求；實際來源版本的觀測比對、跨區採納新鮮度及發布投影仍由匯入器另驗。
 
-匯入器先驗完整登錄，再明示輸出地區；完整歷史決定與「凍結來源仍匹配」是兩個維度。來源缺失或變動時保留原封套及決定狀態，逐筆回報 record_key、決定與來源比對結果，不能把歷史 confirmed 當成重新確認。來源面數須與 source_face_map 完整覆蓋一致，每面欄位依原 source_index 取值；同一 printing＋face 不得同時採納兩個 art。未投影與暫緩的登錄亦保留於完整輸入，不得由區域子集重算 members／sample_ids／配號游標。
+匯入器先驗完整登錄，再明示輸出地區；登錄記錄與「凍結來源仍匹配」是兩個維度。來源缺失或變動時保留原記錄，逐筆回報 record_key 與來源比對結果，不能把歷史確認當成重新確認。來源面數須與 source_face_map 完整覆蓋一致，每面欄位依原 source_index 取值；同一 printing＋face 不得同時採納兩個 art。未投影與暫緩的登錄亦保留於完整輸入，不得由區域子集重算配號游標。
 
 ### 3.4 來源更正
 
 `source_correction` 的 `data` 保存 `id/printing_id/face_id/field/expected_raw_value/corrected_value/expected_source_hash/source_hash_recipe/reason/state/reported_to_official/reported_on/report_url/evidence`。本格式 field 白名單為 effect、card_type，分別映射效果文字與種類；公開 field／值型別依 [傳輸契約 §3.3](snapshot-transport.md#33-公開更正值)，不擴張此 authored 格式的兩欄白名單。expected_source_hash 採前述觀測 recipe，匯入仍須先匹配來源版本，不可直接替換 HTML 原文。
 
-evidence 元素為 `kind: card_image`、`sha256`、官網原樣 `image_src`、region、locator（卡面文字框／種類標記）。匯入以檔案 hash 與 URL 連到 image source_record，再寫 correction_evidence；不把圖片或本機路徑存進 git。BP07-P06 由協調者確認為 active；使用者於 2026-09-28 追加確認 JP PR-114、BP20-P42、BP20-P57、BP20-P67 與 EN BP15-P32EN、CP03-127EN、PR-388EN、PR-442EN，這八筆亦為 active，decision 為 confirmed，不保存確認者與流程日期。卡圖 hash 與原觀測不變。一般尚未確認的候選仍用 needs_review＋proposed decision，不得套用至 current／規則解讀。來源原始觀測永遠保留。卡圖已支持的同卡判定與來源欄位是否正式套用更正是不同採納事項。
+evidence 元素為 `kind: card_image`、`sha256`、官網原樣 `image_src`、region、locator（卡面文字框／種類標記）。匯入以檔案 hash 與 URL 連到 image source_record，再寫 correction_evidence；不把圖片或本機路徑存進 git。BP07-P06 由協調者確認為 active；使用者於 2026-09-28 追加確認 JP PR-114、BP20-P42、BP20-P57、BP20-P67 與 EN BP15-P32EN、CP03-127EN、PR-388EN、PR-442EN，這八筆亦為 active，不保存確認者與流程日期。卡圖 hash 與原觀測不變。一般尚未確認的候選仍用 needs_review，不得套用至 current／規則解讀。來源原始觀測永遠保留。卡圖已支持的同卡判定與來源欄位是否正式套用更正是不同採納事項。
 
-本批八筆候選升為 active 是使用者明示授權的來源更正採納，非一般追加：移至 active 分片、建立涵蓋精確內容的新 confirmed decision、同步更新 index。先前 proposed 分片與收據保留在 Git 歷史及舊批次資料中；其他永久登錄與決定不改動。一般產生工具仍拒絕修改既有記錄，不以自動升級取代人工確認。
+本批八筆候選升為 active 是使用者明示授權的來源更正採納，非一般追加：移至 active 分片並改 `state: active`。先前 needs_review 分片與收據保留在 Git 歷史及舊批次資料中；其他永久登錄不改動。一般產生工具仍拒絕修改既有記錄，不以自動升級取代人工確認。
 
 建置的 `registry.corrections.project_corrections` 對 active 更正比對原值與完整觀測 hash，匹配才產生更正值與欄位標記；原值已等於改值時回報 already_fixed，不重複套用，後續需警告並退役來源更正；其他差異為 conflict，不套用並阻擋 CLI 完成。needs_review 不產生投影。結果依 printing／face／field 定位，`corrections` 元素使用 snapshot-format 的 `{field, corrected_from, is_corrected: true, reason, source_url?}`；沒有可用官方頁 URL 時 source_url 仍存在、值為 null，不把卡圖 URL 冒充官方頁。此標記不附到共享文字上。
 
@@ -344,22 +331,21 @@ F1 新增 usage=`effect_presence`，parser_version 為實際判別 parser pin；
 
 官方萃取商品的永久 ID 另由 [§11 商品身分對照](#11-官方商品身分對照-product-identity-v1) 取得；確認 ID 對照不等於採納本節的人工商品內容。
 
-### 10.2 新定的路徑、索引與封套
+### 10.2 新定的路徑與封套
 
-以下是 **product-authored-v1 新定的格式選擇**；不修改 `ids/index.yaml`、`registry_shard`、永久配號或身分決定的內容。
+以下是 **product-authored-v1 新定的格式選擇**；不修改 `ids/index.yaml`、`registry_shard`、永久配號或身分登錄的內容。
 
 | 路徑（相對 authored 根目錄） | 內容 |
 | --- | --- |
-| `products/index.yaml` | 獨立商品入口：`product_authored_format: 1, kind: product_index, includes` |
 | `products/family/<filing_key>/001.yaml` | `product_family` 記錄 |
 | `products/product/<filing_key>/001.yaml` | 人工 `product` 記錄與選填的家族關係 |
 | `products/inclusion/<filing_key>/001.yaml` | 人工 `printing_product` 記錄 |
 
 `filing_key` 僅分檔，使用 `[A-Za-z0-9_-]+`，可以沿用既有 owner；不產生任何家族或收錄關係。無家族商品可用 `unassigned` 分檔，不能據此建立同名家族。檔名採只增的三位以上十進位序號；依 §1 的 512 KiB 目標及單檔嚴格小於 1 MiB 切檔。新分片按 `record_key` 字典序排列，不重排既有分片。
 
-`includes` 是 authored 相對路徑到解析後 canonical JSON Hash 的映射，hash recipe 沿 §2；只允許上述三類分片。不接受絕對路徑、`..`、symlink、重複索引或未索引的商品 YAML。讀取先驗全部商品 index／分片／決定，再作區域投影；缺檔、hash 不符、重複 record_key／資料主鍵都失敗。不將商品分片加進身分 registry 的 includes；商品匯入也不重配 printing 整數。
+讀取掃描 `products/` 下全部 YAML，只允許上述三類路徑；`products/` 不存在、symlink、其他路徑或副檔名的 YAML 都失敗，不另存檔案清單或檔案 hash。讀取先驗全部商品分片，再作區域投影；重複 record_key／資料主鍵都失敗。商品匯入不重配 printing 整數。
 
-每個分片恰有 `product_authored_format: 1, kind: product_shard, default_decision_id, records, decisions`；records 非空，同檔記錄只有一種 kind，共用一個決定，`decisions` 恰含該決定。每筆 record 恰有 `record_key, kind, filing_key, data, evidence`，不接受未知欄位。所有可空欄位也須明示 null；省略不是另一種未知狀態。YAML 解析限制沿 §1。
+每個分片恰有 `product_authored_format: 1, kind: product_shard, records`；records 非空，同檔記錄只有一種 kind。每筆 record 恰有 `record_key, kind, filing_key, state, data, evidence`，可附 `note`，不接受未知欄位。所有可空欄位也須明示 null；省略不是另一種未知狀態。YAML 解析限制沿 §1。
 
 `record_key` 是主鍵陣列的 canonical JSON **字串**：family 為 `["product_family",id]`，product 為 `["product",id]`，inclusion 為 `["printing_product",printing_id,product_id]`。例如 YAML 的 `'["product_family","EXAMPLE"]'`；不用可能相撞的字串分隔符拼複合鍵。`filing_key` 必須等於路徑的該段，但不須等於 family_id。
 
@@ -381,42 +367,39 @@ family 的 id、code、public_code 各自唯一；已被 home_set_id 引用的�
 
 `evidence` 是去重陣列，每項恰有 `{batch_id, source_version_id, locator, role}`。前兩個識別欄釘住 [source-archive](source-archive.md) 的已封存批次與其中來源版本；store 名稱及根目錄由執行端設定；locator 是非空人工定位字串（例如商品區塊序號），role 是非空證據用途。匯入須驗 batch／descriptor／receipt／raw 閉包並由 descriptor 取得原 URL／raw hash，不接受以 URL 或 hash 字串代替實際可驗來源，也不在 authored 存本機絕對路徑。locator 不是可執行查詢語言。
 
-商品與收錄的 evidence 不可空，且須支持該地區、商品及具體版次收錄的主張；卡片頁 products 區的共現只產候選，不能自動宣稱某家族、配布方式或完整收錄全集。純人工的歸檔家族可 evidence=[]，由下節精確成員的人工決定支持；若主張與真實商品對應，仍須該商品的來源證據及人工核對。商品頁 URL 可以是卡片頁記載的線索，但未封存該商品頁就不能宣稱已驗其內容。
+商品與收錄的 evidence 不可空，且須支持該地區、商品及具體版次收錄的主張；卡片頁 products 區的共現只產候選，不能自動宣稱某家族、配布方式或完整收錄全集。純人工的歸檔家族可 evidence=[]，由記錄的 confirmed 狀態表示已經人工確認；若主張與真實商品對應，仍須該商品的來源證據及人工核對。商品頁 URL 可以是卡片頁記載的線索，但未封存該商品頁就不能宣稱已驗其內容。
 
-### 10.4 新定的決定形式與匯入投影
+### 10.4 採納狀態與匯入投影
 
-每個商品分片使用 batch 決定，必須有 `id, state, scope, category, policy_id, membership_hash, members, sample_ids`，可附 `note`。scope 固定 `batch`、category 固定 `product_catalog`、policy_id 固定 `product-authored-v1`；state 限 `proposed/confirmed`。members 為排序唯一的 `[record_key,semantic_hash]` 二元素陣列，恰好包含本檔全部記錄；semantic_hash 對完整 record（含 evidence）套 §2 canonical recipe，membership_hash 對 members 套同 recipe，id 為 `d:` 加完整 membership hash 的 64 hex。default_decision_id 必須指向此 id。
+每筆記錄的 `state` 必填，限 `proposed/confirmed`：confirmed 表示使用者實際確認了這筆記錄，proposed 是候選。省略 state 是格式錯誤，不會預設為 confirmed。`note` 可省略，讀取時視為空字串；它保存真正的分類理由，不是核可收據，也不寫入 DB。記錄不保存姓名、時間或精度；確認經過由一般 PR 記錄。不能把來源頁重複次數當人工確認，或用 confidence 提升採納狀態。
 
-confirmed 的 sample_ids 恰為全體 members 的 record_key 集合（排序、無重複），不是抽查；proposed 的 sample_ids=[]。決定不保存姓名、時間或精度；note 可省略，讀取時視為空字串，若提供則為 Text（可空字串，不是 null）。不能沿用 identity_registry 的決定、把來源頁重複次數當人工確認，或用 confidence 提升採納狀態。
-
-這些欄位是本格式的明示人工採納收據，不新增 product／printing_product 的 DB decision_id 欄。匯入每個分片時以完整 authored revision、分片路徑及 canonical hash 建立 authored source_record；決定以 decision_source 指回完整封套及全部 evidence 的 raw source_record。product_family.decision_id 指該決定；人工 product／printing_product.source_id 指上述 authored source_record，沿 decision_source 可追回核對及原始證據。文字以既有 text_unit 邊界建立後填 name_unit_id／note_unit_id，不另建第二套文字真值。
+DB 不設 product／printing_product／product_family 的 decision_id 欄。匯入每個分片時以完整 authored revision、分片路徑及 canonical hash 建立 authored source_record；evidence 的 raw source_record 由建置輸入紀錄的使用閉包追溯。人工 product／printing_product.source_id 指上述 authored source_record。文字以既有 text_unit 邊界建立後填 name_unit_id／note_unit_id，不另建第二套文字真值。
 
 只有 confirmed 的資料可作已採納人工輸入；proposed 僅列候選診斷，不能補 FK 父列。驗證必須逐項檢查 family／product／printing 的引用、printing 與 product 的地區一致性、既有 owner 不變，以及來源與本次主張相符；同主鍵的官方觀測與人工內容衝突需報告，不任取最後一筆。這些檢查不因 SQL FK 通過而省略。
 
-本版定義初次採納與新增記錄；既有採納記錄的續版／替代選用須另定契約，不能覆寫舊決定、悄悄替換既有分片或追加重複主鍵來繞過它。新增資料另建分片及其精確決定，最後更新商品 index。機器產生的候選表不屬此採納輸入，沒有人工確認時不寫成 confirmed。格式文件、候選產生、實際採納與匯入器驗收是各自獨立的完成狀態。
+本版定義初次採納與新增記錄；既有採納記錄的續版／替代選用須另定契約，不能悄悄改寫已確認的記錄或追加重複主鍵來繞過它。新增資料另建分片。機器產生的候選表不屬此採納輸入，沒有人工確認時不寫成 confirmed。格式文件、候選產生、實際採納與匯入器驗收是各自獨立的完成狀態。
 
 ## 11. 官方商品身分對照 product-identity-v1
 
-**使用者核可（2026-10-01，商品 ID 方案 A）**：官方商品首次分配永久 ID，與可驗來源中的商品識別線索一起持久保存於 authored，建置釘住 revision／hash。此對照只確認「這個 ID 對到這個地區的這個官方商品」；名稱、日期、商品型別與收錄仍由正式 extractor 讀凍結 raw，不宣稱已被人工 confirmed。格式定案不代表個別對照已採納。
+**使用者核可（2026-10-01，商品 ID 方案 A）**：官方商品首次分配永久 ID，與可驗來源中的商品識別線索一起持久保存於 authored，建置釘住 revision 與分片 bytes。此對照只確認「這個 ID 對到這個地區的這個官方商品」；名稱、日期、商品型別與收錄仍由正式 extractor 讀凍結 raw，不宣稱已被人工 confirmed。格式定案不代表個別對照已採納。
 
-### 11.1 入口、封套與雜湊
+### 11.1 入口與封套
 
-使用獨立入口，避免擴充 §10 的 `product-authored-v1` kind 白名單或把 ID-only 輸入當成人工商品內容；沿用其封套、canonical hash 與全筆 checked 決定機制。
+使用獨立入口，避免擴充 §10 的 `product-authored-v1` kind 白名單或把 ID-only 輸入當成人工商品內容。
 
 | 路徑（相對 authored 根目錄） | 完整頂層欄位 |
 | --- | --- |
-| `product-identities/index.yaml` | `product_identity_format: 1, kind: product_identity_index, includes` |
-| `product-identities/<region>/<sequence>.yaml` | `product_identity_format: 1, kind: product_identity_shard, default_decision_id, records, decisions` |
+| `product-identities/<region>/<sequence>.yaml` | `product_identity_format: 1, kind: product_identity_shard, records` |
 
-region 恰為 jp/en，sequence 為只增的三位以上十進位序號。單檔大小、YAML 限制、路徑安全、缺檔／未索引檔拒絕及新分片排序沿 §1、§10.2；不改舊分片。includes 只允許本表分片，值是解析後完整分片的 §2 canonical JSON Hash；不納入 `products/index.yaml` 或 `ids/index.yaml`。未知格式／欄位、重複鍵、hash 錯誤均拒絕。先驗完整 index、全區分片、全部決定與證據，再作建置地區投影。
+region 恰為 jp/en，sequence 為只增的三位以上十進位序號。單檔大小、YAML 限制、路徑安全及新分片排序沿 §1、§10.2；不改舊分片。讀取掃描 `product-identities/` 下全部 YAML，只允許本表路徑；目錄不存在、其他路徑或副檔名的 YAML、未知格式／欄位、重複鍵均拒絕。先驗全區分片與全部證據，再作建置地區投影。
 
 每筆 record 恰有 `record_key, kind, filing_key, data, evidence`；kind 固定 `product_identity`，filing_key 等於路徑與 data.region。data 恰有 `product_id, region, match`；不含 name/date/family_id/product_type 或收錄。record_key 是 `["product_identity",region,match]` 的 §2 canonical JSON **字串**，match 為下節完整物件；不含 product_id，讓同一識別線索不能另配 ID 繞過重複鍵檢查。
 
 同一 `(region,match)` 全域只允許一筆記錄，即使目標 ID 相同也不能重複；同一 product_id 可以有多筆不同 match，但 region 必須一致。product_id 與 §10 人工 product 共用全域身分命名空間：同 ID 必須指同區同商品，不能另作配號池。對照記錄不是 product 父列；沒有正式商品內容與來源仍不得填 FK。
 
-每檔 records 非空，共用一個 default_decision_id，decisions 恰含該決定。決定欄位及 hash 計算沿 §10.4；本格式的 state 固定 `confirmed`，category 固定 `product_identity`、policy_id 固定 `product-identity-v1`。semantic_hash 包含完整 record 與 evidence；members 精確涵蓋本檔全部記錄，membership_hash 與 `d:<64hex>` 可重算。confirmed 表示使用者實際確認，sample_ids 恰為全部 checked record_key；決定不保存姓名／時間，工具不得自行宣稱已核對。既有 family／product_catalog／identity_registry 決定不能代簽商品身分。
+每檔 records 非空。分片內每筆記錄都是使用者實際確認的對照，因此不另設 state 欄；記錄不保存姓名／時間，工具不得自行宣稱已核對。family 或 registry 的確認不能代簽商品身分。
 
-**協調者決定（2026-10-01）**：商品身分對照只接受 confirmed 記錄；proposed 或其他 state 一律視為輸入驗證失敗。因 `(region,match)` 全域唯一且分片只增，不能先納入 proposed 再原地升級或追加同鍵的 confirmed。候選草稿一律留在 authored 外，經使用者逐筆確認後才首次寫入正式分片；本限制只適用於 §11，不改 §10 的既有格式。
+**協調者決定（2026-10-01）**：商品身分對照只收已確認的記錄。因 `(region,match)` 全域唯一且分片只增，不能先寫入候選再原地升級或追加同鍵的確認記錄。候選草稿一律留在 authored 外，經使用者逐筆確認後才首次寫入正式分片；本限制只適用於 §11，不改 §10 的既有格式。
 
 ### 11.2 永久 ID 與可驗識別線索
 
@@ -442,9 +425,9 @@ evidence 沿 §10.3 的 `{batch_id,source_version_id,locator,role}`，非空、�
 
 ### 11.3 首次採納、重建匹配與改址
 
-首次建立時，工具只產候選 ID、match、完整來源與疑難清單；使用者逐筆確認商品邊界與對應後，才另建 confirmed 分片、更新 index。草稿不直接變成正式輸入，通過格式檢查或來源閉包驗證也不是人工採納。
+首次建立時，工具只產候選 ID、match、完整來源與疑難清單；使用者逐筆確認商品邊界與對應後，才另建正式分片。草稿不直接變成正式輸入，通過格式檢查或來源閉包驗證也不是人工採納。
 
-對每個已驗凍結來源中的商品區塊，正式 extractor 產生可用的 product_link；沒有正式商品 URL 時才產生 expansion_link，另可產生該版本的 source_block。以 region 加完整 match 查找所有已驗證的 confirmed 對照，不作 fuzzy 比較；proposed 等非法狀態已在輸入驗證時拒絕：
+對每個已驗凍結來源中的商品區塊，正式 extractor 產生可用的 product_link；沒有正式商品 URL 時才產生 expansion_link，另可產生該版本的 source_block。以 region 加完整 match 查找所有已驗證的對照，不作 fuzzy 比較：
 
 | 結果 | 建置行為 |
 | --- | --- |
@@ -455,7 +438,7 @@ evidence 沿 §10.3 的 `{batch_id,source_version_id,locator,role}`，非空、�
 
 相同 ID 的多次官方觀測可以去重，但名稱、日期、商品型別等內容不一致時依既有商品衝突規則處理，不以身分 confirmed 當作選內容的授權。同名不等於同商品，同代號跨 region 亦不合併；owner 只作歸檔，不能參與商品識別或補收錄。
 
-URL／識別碼改動、相對連結解析結果變更或原本無 URL 後來補 URL 時，舊 match 保留。新線索零匹配即列待確認；使用者確認仍為同商品後，追加一筆指向**原 product_id** 的別名對照及新 evidence／decision，不改舊 record 或決定。別名直接指永久 ID，不指其他 match，沒有 alias chain。僅名稱／日期更正而 match 不變時直接沿用 ID，不要求重新確認內容。URL-only 對照若出現可驗的 URL 重用／不同商品證據，即列衝突，不因字串相同而放行。
+URL／識別碼改動、相對連結解析結果變更或原本無 URL 後來補 URL 時，舊 match 保留。新線索零匹配即列待確認；使用者確認仍為同商品後，追加一筆指向**原 product_id** 的別名對照及新 evidence，不改舊 record。別名直接指永久 ID，不指其他 match，沒有 alias chain。僅名稱／日期更正而 match 不變時直接沿用 ID，不要求重新確認內容。URL-only 對照若出現可驗的 URL 重用／不同商品證據，即列衝突，不因字串相同而放行。
 
 匯入器須在地區投影前檢查完整對照集合：同一 region 中，同一非空 expansion_code 出現在不同 product_id 的 product_link／expansion_link match 上時，發出 warning，列出代號、各 ID、match 與來源定位，提示可能把同一商品誤配為兩個 ID。例如 dev 連結改成正式商品 URL 後，新增對照應沿用原 ID；不同代號的 CSD02A／B／C 不觸發此警告。同 ID 的多筆別名不警告。此檢查只提示人工核對，不自動合併、重配 ID 或升為交易失敗，也不取代既有 exact match 衝突檢查。
 
@@ -463,17 +446,17 @@ URL／識別碼改動、相對連結解析結果變更或原本無 URL 後來補
 
 ### 11.4 建置追溯與既有契約邊界
 
-建置明示讀取兩個獨立商品入口；啟用官方商品匯入時不得把缺少 product-identities/index.yaml 當空對照。依 [source-archive §2.2.1](source-archive.md#221-建置輸入紀錄與完整使用閉包) 的既有 F1 context，configuration 的 `product_identity` 項保存 `{authored_revision,index_path,index_hash}`：完整 40 碼 revision、authored 相對入口路徑與 §2 canonical index hash；dependencies 以 repo 相對路徑釘住 index 與所有分片的 exact bytes hash。實際內容須與釘住 revision 相符，不能用 dirty 檔冒稱該 revision。兩種 hash 分別驗實體輸入及封套內容；所有歷史別名分片仍在 includes，不只留最新 match。
+建置明示讀取兩個獨立商品入口；啟用官方商品匯入時不得把缺少 `product-identities/` 當空對照。依 [source-archive §2.2.1](source-archive.md#221-建置輸入紀錄與完整使用閉包) 的既有 F1 context，configuration 的 `product_identity` 項保存 `{authored_revision}`（完整 40 碼 revision）；dependencies 以 repo 相對路徑釘住所有分片的 exact bytes hash。實際內容須與釘住 revision 相符，不能用 dirty 檔冒稱該 revision。所有歷史別名分片都要保留，不只留最新 match。
 
-每個分片以完整 authored revision、路徑與 canonical hash 建立 authored source_record，parser_version 使用本封套 recipe `product-identity-v1`；decision_source 連回完整封套及全部 evidence 的 raw source_record。這是新增 authored 封套 recipe，不改 F1 raw 共用列的 parser_version=null 規則。官方 product／printing_product.source_id 仍指萃取內容的 raw 來源，不改指身分對照以假裝內容經人工確認；不新增 DB 表或 decision_id 欄。對照到哪個 product_id 可由釘住封套重建。
+每個分片以完整 authored revision、路徑與 canonical hash 建立 authored source_record，parser_version 使用本封套 recipe `product-identity-v1`；evidence 的 raw source_record 由使用閉包追溯。這是新增 authored 封套 recipe，不改 F1 raw 共用列的 parser_version=null 規則。官方 product／printing_product.source_id 仍指萃取內容的 raw 來源，不改指身分對照以假裝內容經人工確認；不新增 DB 表或 decision_id 欄。對照到哪個 product_id 可由釘住分片重建。
 
 僅驗證 evidence 閉包的實際使用以 `product_identity_evidence_closure`／`archive-closure-v1` 登錄；為重現 match 而實際解析的使用另以 `official_product_identity`、正式 parser pin 及精確區塊 locator 登錄。官方內容／收錄的 parser 用途仍各自保存；共用 raw 不吞掉不同用途。零匹配、歧義或被 printing 身分閘門排除的區塊也是已讀輸入，仍納實際 uses。輸出前從釘住輸入獨立宣告並驗完整用途閉包，依 F1 保存 DB／inputs／report／seal；來源衝突與失敗不發布半套產物。
 
-商品身分確認不授權更動 family／owner、日期精度、收錄、EN 身分採納或公開快照白名單。家族關係不明可為 null；機器候選鍵只供本機核對。正式匯入器的驗收須包括同 URL 不同代號、無 URL、名稱／日期修正、改址追加、零／多重匹配、錯 region、proposed 輸入直接拒絕、expansion 參數缺值／空值／多值、同區同 expansion 跨 ID 的 warning、封套／來源 hash 錯及 F1 使用閉包缺漏；不能用本格式文件或候選盤點冒充已完成實作。
+商品身分確認不授權更動 family／owner、日期精度、收錄、EN 身分採納或公開快照白名單。家族關係不明可為 null；機器候選鍵只供本機核對。正式匯入器的驗收須包括同 URL 不同代號、無 URL、名稱／日期修正、改址追加、零／多重匹配、錯 region、多餘欄位直接拒絕、expansion 參數缺值／空值／多值、同區同 expansion 跨 ID 的 warning、來源 hash 錯及 F1 使用閉包缺漏；不能用本格式文件或候選盤點冒充已完成實作。
 
 ## 12. 身分修復與決定續版
 
-完整封套、精確成員 hash、merge／split／reassign 的 face／art 移轉與墓碑、來源更新、
+完整封套、前後引用、merge／split／reassign 的 face／art 移轉與墓碑、來源更新、
 confirmed_none／reskin 續版及有效投影順序見 [身分修復與決定續版](identity-repair.md)。
 **使用者 2026-10-01 核可**，含指名撤回修復；新增封套不修改 v1 舊記錄或 hash recipe，
 後續實作完成前既有工具的拒絕行為不變。
