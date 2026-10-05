@@ -10,19 +10,10 @@ from typing import TYPE_CHECKING
 from PIL import Image, ImageOps
 from pydantic import JsonValue
 
-from sve_carddb.build_bundle import publish_bundle
-from sve_carddb.build_inputs import (
-    InputRecord,
-    Source,
-    SourceUse,
-    input_record,
-    insert_raw_sources,
-    uses_sorted,
-)
+from sve_carddb.build_inputs import Source, SourceUse, insert_raw_sources, uses_sorted
 from sve_carddb.extract.official_en import extract_card as extract_en
 from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.image_crop_report import crop_report
 from sve_carddb.image_crops import conversion_image_id
 from sve_carddb.image_variants import (
     DEFAULT_RECIPE,
@@ -33,16 +24,15 @@ from sve_carddb.image_variants import (
     crop_box,
 )
 from sve_carddb.registry.records import PrintingData, Region
-from sve_carddb.snapshot.values import canonical, digest, parse
+from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.sources import official_en
 from sve_carddb.sources.official_jp import card_url, image_url
 from sve_carddb.store import resolve_within
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Mapping
+    from collections.abc import Iterable, Mapping
 
-    from sve_carddb.build_db import CompiledSchema, Database, Row, Value
-    from sve_carddb.build_inputs import BuildContext
+    from sve_carddb.build_db import Database, Row, Value
     from sve_carddb.image_crops import ImageCrops
     from sve_carddb.registry.preview import PreviewPlan
 
@@ -175,13 +165,6 @@ def _face_images(raw: bytes, number: str, region: Region) -> tuple[str, ...]:
     return tuple(face.image for face in record.faces)
 
 
-def plan_jp_images(
-    db: Database, plan: PreviewPlan, cards: FrozenSources
-) -> tuple[ImageReference, ...]:
-    """Keep the existing JP-only entry point explicit."""
-    return plan_regional_images(db, plan, cards, region="jp")
-
-
 def plan_regional_images(
     db: Database, plan: PreviewPlan, cards: FrozenSources, *, region: Region
 ) -> tuple[ImageReference, ...]:
@@ -276,20 +259,6 @@ def reference_uses(references: tuple[ImageReference, ...]) -> tuple[SourceUse, .
             ).decode(),
         )
         for ref in references
-    )
-
-
-def build_jp_assets(
-    images: FrozenSources,
-    roots: PreviewRoots,
-    *,
-    crops: ImageCrops,
-    workers: int = 1,
-    reuse_only: bool = False,
-) -> ImageBuild:
-    """Keep JP batch validation for existing callers."""
-    return build_regional_assets(
-        images, roots, region="jp", crops=crops, workers=workers, reuse_only=reuse_only
     )
 
 
@@ -411,20 +380,6 @@ def verify_assets(build: ImageBuild, preview: Path) -> None:
 
 def _public_variant(format_name: str, is_original: bool) -> bool:
     return format_name == "webp" and not is_original
-
-
-def populate_jp_assets(
-    db: Database,
-    build: ImageBuild,
-    references: tuple[ImageReference, ...],
-    preview: Path,
-) -> tuple[SourceUse, ...]:
-    """Retain the original JP-only composition boundary."""
-    if any(item.region != "jp" for item in build.images) or any(
-        ref.region != "jp" for ref in references
-    ):
-        raise ValueError("JP image composition requires only JP sources and bindings")
-    return populate_assets(db, build, references, preview)
 
 
 def _verify_binding(
@@ -607,57 +562,3 @@ def verify_asset_sources(
         )
         if item.result.crop_box != expected:
             raise ValueError("Image crop box differs from adopted source crop")
-
-
-def publish_jp_image_bundle(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] -- bind schema, inputs, assets, destinations and the caller-owned parent transaction
-    schema: CompiledSchema,
-    destination: Path,
-    context: BuildContext,
-    populate_parents: Callable[[Database], InputRecord],
-    build: ImageBuild,
-    references: tuple[ImageReference, ...],
-    roots: PreviewRoots,
-    *,
-    parent_uses: tuple[SourceUse, ...],
-    stores: Mapping[str, Path],
-    crops: ImageCrops,
-) -> InputRecord:
-    """Save a complete DB/input/report seal after immutable image assets are verified."""
-    roots.validate(stores.values())
-    if not destination.is_absolute() or any(
-        destination.resolve().is_relative_to(root.resolve())
-        or root.resolve().is_relative_to(destination.resolve())
-        for root in (roots.preview, roots.cdn, roots.cache, *stores.values())
-    ):
-        raise ValueError(
-            "Private image build bundle must be isolated from asset and source roots"
-        )
-    verify_asset_sources(build, stores, crops=crops)
-    config = parse(context.configuration.encode())
-    if (
-        not isinstance(config, dict)
-        or config.get("image_recipe") != DEFAULT_RECIPE.version
-    ):
-        raise ValueError("Build context must pin the exact image recipe")
-    crops.verify_context(context)
-    report = build.report(references)
-    expected = uses_sorted(
-        (*parent_uses, *build.source_uses(), *reference_uses(references))
-    )
-
-    def populate(db: Database) -> InputRecord:
-        parent_record = populate_parents(db)
-        parent_record.verify(db, context, parent_uses)
-        uses = populate_jp_assets(db, build, references, roots.preview)
-        report["crop_overrides"] = crop_report(crops, build, references, db)
-        return input_record(context, (*parent_record.uses, *uses))
-
-    return publish_bundle(
-        schema,
-        destination,
-        context,
-        expected,
-        populate,
-        report,
-        stores=stores,
-    )

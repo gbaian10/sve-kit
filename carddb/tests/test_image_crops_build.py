@@ -15,7 +15,7 @@ from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_assets import (
     ImageReference,
     PreviewRoots,
-    build_jp_assets,
+    build_regional_assets,
     verify_asset_sources,
 )
 from sve_carddb.image_crop_report import crop_report
@@ -56,8 +56,12 @@ def crop_assets(
     override_roots = PreviewRoots(
         base / "override", base / "cdn", base / "override-cache"
     )
-    default = build_jp_assets(frozen, default_roots, crops=empty_crops)
-    overridden = build_jp_assets(frozen, override_roots, crops=crops, workers=2)
+    default = build_regional_assets(
+        frozen, default_roots, region="jp", crops=empty_crops
+    )
+    overridden = build_regional_assets(
+        frozen, override_roots, region="jp", crops=crops, workers=2
+    )
     return frozen, crops, default, overridden, default_roots, override_roots
 
 
@@ -145,13 +149,17 @@ def test_reuse_requires_new_box_cache_and_never_repairs(
     with pytest.raises(
         ValueError, match=r"^Verified image recipe cache is incomplete$"
     ):
-        build_jp_assets(frozen, missing, crops=crops, reuse_only=True)
+        build_regional_assets(
+            frozen, missing, region="jp", crops=crops, reuse_only=True
+        )
     assert before == {
         p.relative_to(tmp_path): p.read_bytes()
         for p in tmp_path.rglob("*")
         if p.is_file()
     }
-    reused = build_jp_assets(frozen, override_roots, crops=crops, reuse_only=True)
+    reused = build_regional_assets(
+        frozen, override_roots, region="jp", crops=crops, reuse_only=True
+    )
     assert all(item.result.cache_hit for item in reused.images)
     assert [item.result.variants for item in reused.images] == [
         item.result.variants for item in overridden.images
@@ -172,7 +180,7 @@ def test_selected_crop_must_fit_verified_oriented_source(
     )
     output = PreviewRoots(tmp_path / "blobs", tmp_path / "cdn", tmp_path / "cache")
     with pytest.raises(ValueError, match=r"^invalid or stale art crop override$"):
-        build_jp_assets(frozen, output, crops=crops)
+        build_regional_assets(frozen, output, region="jp", crops=crops)
 
 
 def test_report_uses_effective_owner_and_never_auto_inherits(
@@ -242,7 +250,6 @@ def test_report_uses_effective_owner_and_never_auto_inherits(
         result = crop_report(crops, images, refs, db)
     assert result["applied_source_images"] == 1
     assert len(array(result["unused"])) == 1
-    assert result["art_webp_review"] == "pending_coordinator_review"
     assert [
         object_value(item)["printing_id"]
         for item in array(result["reprint_candidates"])

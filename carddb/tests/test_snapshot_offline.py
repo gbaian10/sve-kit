@@ -50,8 +50,9 @@ from sve_carddb.snapshot.values import (
 
 from .adoption_fixtures import REPO, commit
 from .catalog_vocabulary_fixtures import current_vocabulary_case, make_vocabulary_case
+from .test_snapshot_export import BATCH
 from .test_snapshot_export import exported as exported  # ruff: ignore[useless-import-alias] -- register shared export fixture
-from .test_snapshot_preview import EmptySources, prepare_build
+from .test_snapshot_preview import EmptySources
 from .test_snapshot_preview import logical as logical  # ruff: ignore[useless-import-alias] -- register the export fixture parent
 from .text_observation_fixtures import LANGUAGES
 
@@ -74,7 +75,9 @@ def prepared(
     default_text_case: TextCaseTemplate, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> tuple[Case, Inputs, tuple[CardPage, ...]]:
     case = default_text_case.copy(tmp_path / "synthetic")
-    original = prepare_build(case, tmp_path, monkeypatch)
+    repo = tmp_path / "repo"
+    (repo / "carddb/src/sve_carddb").mkdir(parents=True)
+    (repo / "carddb/uv.lock").write_bytes(b"synthetic lock")
     for name in (
         "carddb/pyproject.toml",
         "carddb/src/sve_carddb/extract/official_jp.py",
@@ -82,7 +85,7 @@ def prepared(
         "carddb/src/sve_carddb/snapshot/values.py",
         "carddb/src/sve_carddb/translations/sources.py",
     ):
-        target = original.repo / name
+        target = repo / name
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes((REPO / name).read_bytes())
     pins = tuple(
@@ -93,24 +96,24 @@ def prepared(
                 for (code, _), card in case.provider.cards.items()
                 if code == region
             ),
-            image_batch=original.image_batch,
+            image_batch="sha256:" + "b" * 64,
             parser_version="synthetic-v1",
         )
         for region in ("en", "jp")
     )
     recipe = Inputs(
-        **original.model_dump(
-            exclude={
-                "card_batch",
-                "image_batch",
-                "parser_version",
-                "vocabulary",
-                "languages",
-            }
-        ),
+        repo=repo,
+        archive=case.store,
+        store_id="test-store",
         sources=pins,
+        revision="a" * 40,
+        as_of="2026-10-02",
+        data_version=BATCH.data_version,
+        published_at=BATCH.published_at,
+        feedback_url="https://example.invalid/feedback",
+        grammar_version="synthetic-v1",
+        normalizer_version="synthetic-v1",
     )
-    original.vocabulary.unlink()
 
     class AdoptedInputs:
         def translation_inputs(self) -> None:

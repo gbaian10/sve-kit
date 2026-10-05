@@ -49,9 +49,8 @@ both shard and text-union readback before switching the private preview pointer.
 The bundle and reports are private: do not deploy them with public snapshots.
 
 This remains a `preview-` candidate, with no formal index or activation (#34).
-The old `snapshot export` stays JP-only and still rejects ancillary data. Only
-`export-offline` selects EN and JP and permits card-page Q&A and related links.
-Both recipes retain unknown source coverage: observations do not prove Q&A or
+`export-offline` is the only export command. It selects EN and JP and permits
+card-page Q&A and related links. The recipe retains unknown source coverage: observations do not prove Q&A or
 errata completeness, nor CR/restriction coverage. Without explicit image roots,
 no image publication is claimed.
 
@@ -61,7 +60,7 @@ Prepare a separate private image library and recipe cache before exporting.
 `build_regional_assets(FrozenSources(...), roots, region=pin.region, crops=crops,
 workers=2)` converts one exclusively regional image batch. Load the complete
 `authored/image-crops` closure at the same revision, including unused records.
-Keep the JP and EN sealed batches independent, and retain each original PNG. The existing `build_jp_assets` API remains JP-only.
+Keep the JP and EN sealed batches independent, and retain each original PNG.
 
 ```bash
 sve-carddb snapshot export-offline --inputs recipe.json \
@@ -162,8 +161,7 @@ lock and fsyncs before producing a candidate. Failed numbers remain reserved.
 `private/media-committed.json` supplies the last successful card/art comparison;
 removed bindings retain tombstones. Pure text changes preserve both versions,
 art-only changes preserve the card version, and restoration uses a new revision.
-A retry of a reserved plan must pass `MediaPlan.verify_retry`; changing bytes
-requires a fresh reservation. These files are private preview state, not an R2
+These files are private preview state, not an R2
 publisher, backed-up production allocator, formal release receipt or CDN check.
 Do not upload `private/` or `reports/`.
 

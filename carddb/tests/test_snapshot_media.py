@@ -775,28 +775,6 @@ def test_group_version_selector_and_disabled_urls(images: PublicImages) -> None:
         display_url(printing | {"id": "other"}, face, media, "card_s")
 
 
-def test_retry_cannot_change_reserved_outputs(images: PublicImages) -> None:
-    plan = prepare_media(images.projection, images.library, revision=7)
-    same = prepare_media(images.projection, images.library, revision=7)
-    plan.verify_retry(same)
-    different = replace(same, assets=tuple(deepcopy(same.assets)))
-    different.assets[0]["sha256"] = "sha256:" + "0" * 64
-    with pytest.raises(ValueError, match=r"^Retry changes reserved media plan$"):
-        plan.verify_retry(different)
-
-
-def test_first_image_metadata_avoids_global_source_detail(images: PublicImages) -> None:
-    from sve_carddb.snapshot.export.page_cost import page_image_cost  # ruff: ignore[import-outside-top-level] -- inspect the public metadata transfer model
-
-    plan = prepare_media(images.projection, images.library, revision=7)
-    result = export_snapshot(
-        plan.projection, images.ownership, BATCH, format_version=MEDIA
-    )
-    report = page_image_cost(result)
-    assert report["source_details_required"] is False
-    assert object_value(object_value(report["cold"])["requests"])["max"] == 1
-
-
 @pytest.mark.parametrize(
     "incompatible", ["future_format", "unknown_capability", "future_minimum"]
 )

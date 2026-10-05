@@ -1,6 +1,6 @@
 """Compose regional card-page supplements without granting formal release coverage."""
 
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
@@ -46,8 +46,7 @@ from sve_carddb.snapshot.contract import validate
 from sve_carddb.snapshot.export import Batch, Ownership
 from sve_carddb.snapshot.offline_images import prepare_images
 from sve_carddb.snapshot.offline_names import composer
-from sve_carddb.snapshot.preview.build import Built
-from sve_carddb.snapshot.project import Decisions, Settings, project
+from sve_carddb.snapshot.project import Decisions, Projection, Settings, project
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.source_corrections import FrozenImages
 from sve_carddb.text_observations import (
@@ -80,7 +79,6 @@ if TYPE_CHECKING:
     from sve_carddb.image_assets import ImageBuild
     from sve_carddb.products import ProductIdentities
     from sve_carddb.registry.records import CorrectionEvidence
-    from sve_carddb.snapshot.project import Projection
     from sve_carddb.translations.current_names import Names
 
 
@@ -118,6 +116,15 @@ class Inputs(RecordData):
     def batch(self) -> Batch:
         """Keep the launch scope explicit rather than deriving it from loaded rows."""
         return Batch(self.data_version, self.published_at, ("en", "jp"))
+
+
+@dataclass(frozen=True)
+class Built:
+    projection: Projection
+    ownership: Ownership
+    input_content: bytes
+    report: dict[str, JsonValue]
+    confirmed_images: frozenset[str] = frozenset()
 
 
 class RegionalImages:

@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.snapshot.export.compression import Blob, Brotli, compress
-from sve_carddb.snapshot.export.page_cost import page_image_cost
 from sve_carddb.snapshot.project.source import json_list
 from sve_carddb.snapshot.values import (
     array,
@@ -113,7 +112,6 @@ def measure(
         "bootstrap": bootstrap,
         "startup_by_region": startup,
         "images_metadata": {"file_count": len(images), **_sizes(images)},
-        "page_image_cost": page_image_cost(snapshot),
         "manifest": _sizes([manifest]),
         "text_all": _sizes([snapshot.text_all]),
         "shard_count": len(shards),

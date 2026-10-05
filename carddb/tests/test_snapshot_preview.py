@@ -8,17 +8,10 @@ from pydantic import JsonValue
 from typer.testing import CliRunner
 
 import sve_carddb.snapshot.preview as writer_module
-import sve_carddb.snapshot.preview.build as build_module
-import sve_carddb.snapshot.preview.commands as cli_module
 from sve_carddb.build_db import create_database
 from sve_carddb.cli import app
-from sve_carddb.products import load_products
-from sve_carddb.products.identities import ProductIdentities
-from sve_carddb.products.plan import OfficialProducts
-from sve_carddb.registry.records import PrintingData
-from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.snapshot.export import Ownership, export_snapshot
-from sve_carddb.snapshot.export.compression import python_brotli, verify_brotli
+from sve_carddb.snapshot.export.compression import python_brotli
 from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.preview import (
     Roots,
@@ -26,14 +19,6 @@ from sve_carddb.snapshot.preview import (
     require_unknown_coverage,
     write_preview,
 )
-from sve_carddb.snapshot.preview.build import (
-    Built,
-    Inputs,
-    build,
-    exclusions,
-    publication_printings,
-)
-from sve_carddb.snapshot.preview.commands import verify_inputs
 from sve_carddb.snapshot.project import Projection, project
 from sve_carddb.snapshot.project.records import art_records, initial
 from sve_carddb.snapshot.project.source import Source
@@ -47,24 +32,17 @@ from sve_carddb.snapshot.values import (
     parse,
     string,
 )
-from sve_carddb.text_observations import plan_text_observations
 
-from .registry_snapshot_fixtures import edit_record
 from .snapshot_project_fixtures import SETTINGS, populate, schema
 from .test_snapshot_export import BATCH
 from .test_snapshot_export import exported as exported  # ruff: ignore[useless-import-alias] -- register shared module fixture
 from .test_snapshot_project import projected
-from .text_observation_fixtures import LANGUAGES
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.registry.storage import Entry
     from sve_carddb.snapshot.export import Snapshot
     from sve_carddb.snapshot.media import MediaPlan
-
-    from .shared_case_fixtures import CorrectionCaseTemplate, TextCaseTemplate
-    from .text_observation_fixtures import Case
 
 
 @pytest.fixture(scope="module")
@@ -109,36 +87,6 @@ def test_writer_rejects_non_preview_manifest(
             {},
         )
     assert list(tmp_path.iterdir()) == []
-
-
-def test_export_entry_rejects_non_preview_manifest(
-    invalid_preview: Snapshot,
-    logical: tuple[Projection, Ownership],
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    path = tmp_path / "inputs.json"
-    path.write_bytes(canonical(cli_recipe(tmp_path)))
-    monkeypatch.setattr(
-        cli_module, "build", lambda _recipe: Built(logical[0], logical[1], b"input", {})
-    )
-    monkeypatch.setattr(
-        cli_module, "export_snapshot", lambda *_args, **_kw: invalid_preview
-    )
-    # Isolate the command's guard from the writer's independent guard.
-    monkeypatch.setattr(cli_module, "write_preview", lambda *_args, **_kw: {})
-    result = CliRunner().invoke(
-        app,
-        ["snapshot", "export", "--inputs", str(path)],
-        env={
-            "SVE_PREVIEW_DIR": str(tmp_path / "preview"),
-            "SVE_CDN_DIR": str(tmp_path / "formal"),
-        },
-    )
-    assert isinstance(result.exception, ValueError)
-    assert str(result.exception).startswith("Preview requires")
-    assert not (tmp_path / "preview/snapshots").exists()
-    assert not (tmp_path / "formal").exists()
 
 
 @pytest.mark.parametrize("version", ["20261002T010203Z-0001", "20261002T010203Z-0002"])
@@ -368,7 +316,7 @@ def test_missing_coverage_cannot_be_invented_complete(
 def test_roots_have_no_defaults() -> None:
     result = CliRunner().invoke(
         app,
-        ["snapshot", "export", "--inputs", __file__],
+        ["snapshot", "export-offline", "--inputs", __file__],
         env={
             "SVE_PREVIEW_DIR": "",
             "SVE_CDN_DIR": "",
@@ -378,167 +326,6 @@ def test_roots_have_no_defaults() -> None:
     )
     assert result.exit_code != 0
     assert "--preview-dir" in result.output
-
-
-@pytest.mark.parametrize("publish_printings", [True, False])
-def test_build_keeps_errata_pending_and_filters_diagnostic_identity(
-    default_text_case: TextCaseTemplate,
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    publish_printings: bool,
-) -> None:
-    case = default_text_case.copy(tmp_path / "synthetic")
-    cards = case.provider.cards.copy()
-    for key, card in cards.items():
-        if key[0] == "jp":
-            cards[key] = card.model_copy(update={"has_errata_link": True})
-    case.provider.cards = cards
-    case.plan = plan_text_observations(case.identity, case.provider)
-    assert case.plan.diagnostic_exclusions != case.plan.publication_identity()
-    pub = publication_printings(case.plan.publication_identity())
-    assert pub
-    assert exclusions(case.plan.publication_identity()) == []
-    recipe = prepare_build(case, tmp_path, monkeypatch)
-    if not publish_printings:
-        pub = frozenset()
-        monkeypatch.setattr(build_module, "publication_printings", lambda _plan: pub)
-    built = build(recipe)
-    assert {row["id"] for row in built.projection.tables["printing"]} == pub
-    assert built.report["errata_link_printings"] == len(pub)
-    if not publish_printings:
-        assert built.projection.tables["card"] == []
-        assert built.projection.tables["face"] == []
-        assert built.projection.tables["face_revision"] == []
-    assert bool(built.report["pending_face_regions"]) == publish_printings
-    assert built.report["excluded_printings"] == []
-    assert built.projection.metadata["source_windows"] == []
-    assert built.projection.metadata["restriction_coverage"] == []
-    assert built.report["input_sha256"] == digest(built.input_content)
-    snapshot = export_snapshot(
-        prepare_media(built.projection, None, revision=1).projection,
-        built.ownership,
-        recipe.batch(),
-    )
-    snapshot.verify(built.projection)
-    with pytest.raises(ValueError, match="immutable input"):
-        verify_inputs(Roots(recipe.repo / "output", tmp_path / "formal"), recipe)
-
-
-def prepare_build(
-    case: Case,
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    *,
-    revision: str = "a" * 40,
-) -> Inputs:
-    repo = tmp_path / "repo"
-    (repo / "carddb/src/sve_carddb").mkdir(parents=True, exist_ok=True)
-    (repo / "carddb/uv.lock").write_bytes(b"synthetic lock")
-    vocabulary = tmp_path / "vocabulary.json"
-    vocabulary.write_bytes(canonical(case.vocabulary.model_dump(mode="json")))
-    recipe = Inputs(
-        repo=repo,
-        archive=case.store,
-        store_id="test-store",
-        card_batch="sha256:" + "a" * 64,
-        image_batch="sha256:" + "b" * 64,
-        revision=revision,
-        parser_version="synthetic-v1",
-        vocabulary=vocabulary,
-        languages=LANGUAGES,
-        as_of="2026-10-02",
-        data_version=BATCH.data_version,
-        published_at=BATCH.published_at,
-        feedback_url="https://example.invalid/feedback",
-        grammar_version="synthetic-v1",
-        normalizer_version="synthetic-v1",
-    )
-    monkeypatch.setattr(
-        build_module, "plan_preview", lambda *_args, **_kwargs: case.identity
-    )
-    monkeypatch.setattr(
-        build_module, "plan_text_observations", lambda *_args, **_kwargs: case.plan
-    )
-    monkeypatch.setattr(
-        build_module, "load_products", lambda *_args, **_kwargs: case.catalog
-    )
-
-    identities = ProductIdentities(
-        recipe.revision, digest(b"{}"), b"{}", (), {}, {}, (), case.catalog
-    )
-    monkeypatch.setattr(
-        build_module, "load_product_identities", lambda *_args, **_kwargs: identities
-    )
-    for name in ("FrozenJP", "FrozenTexts", "FrozenImages", "FrozenProducts"):
-        monkeypatch.setattr(
-            build_module, name, lambda *_args, **_kwargs: EmptySources()
-        )
-    monkeypatch.setattr(
-        build_module,
-        "plan_official_products",
-        lambda *_args, **_kwargs: OfficialProducts(
-            identities, (), (), (), (), case.identity
-        ),
-    )
-    return recipe
-
-
-def test_build_rejects_invented_source_coverage(
-    default_text_case: TextCaseTemplate,
-    logical: tuple[Projection, Ownership],
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    recipe = prepare_build(
-        default_text_case.copy(tmp_path / "synthetic"), tmp_path, monkeypatch
-    )
-    poisoned = replace(
-        logical[0],
-        metadata=logical[0].metadata | {"source_windows": [{"state": "complete"}]},
-    )
-    monkeypatch.setattr(build_module, "project", lambda *_args, **_kwargs: poisoned)
-    monkeypatch.setattr(Ownership, "from_database", lambda _db, _projection: logical[1])
-    with pytest.raises(ValueError, match="Uncovered sources must remain empty windows"):
-        build(recipe)
-
-
-def test_build_excludes_conflicted_publication_but_retains_identity(
-    default_correction_case: CorrectionCaseTemplate,
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    fixture = default_correction_case.copy(tmp_path / "synthetic")
-    case = fixture.texts
-
-    def conflict(entry: Entry) -> None:
-        entry.data["expected_raw_value"] = "Wrong synthetic old value"
-
-    edit_record(case.root, "source_correction", conflict)
-    case.identity = replace(case.identity, snapshot=load_registry(case.root))
-    case.catalog = load_products(case.root, registry=case.identity.snapshot)
-    case.plan = plan_text_observations(
-        case.identity, case.provider, images=fixture.images
-    )
-    assert case.plan.corrections is not None
-    assert case.plan.corrections[0].status == "conflict"
-    diagnostic = publication_printings(case.identity)
-    publication = publication_printings(case.plan.publication_identity())
-    withheld = diagnostic - publication
-    assert withheld
-    recipe = prepare_build(case, tmp_path, monkeypatch)
-    built = build(recipe)
-    public = {row["id"] for row in built.projection.tables["printing"]}
-    assert public == publication
-    assert not public & withheld
-    assert built.report["excluded_printings"] == exclusions(
-        case.plan.publication_identity()
-    )
-    assert built.report["excluded_printings"]
-    export_snapshot(
-        prepare_media(built.projection, None, revision=1).projection,
-        built.ownership,
-        recipe.batch(),
-    ).verify(prepare_media(built.projection, None, revision=1).projection)
 
 
 def test_project_refuses_publication_printing_absent_from_build() -> None:
@@ -560,78 +347,6 @@ class EmptySources:
         return ()
 
 
-def cli_recipe(tmp_path: Path) -> dict[str, JsonValue]:
-    return {
-        "repo": str(tmp_path / "repo"),
-        "archive": str(tmp_path / "archive"),
-        "store_id": "synthetic",
-        "card_batch": "sha256:" + "a" * 64,
-        "image_batch": "sha256:" + "b" * 64,
-        "revision": "a" * 40,
-        "parser_version": "synthetic",
-        "vocabulary": str(tmp_path / "vocab"),
-        "languages": [],
-        "as_of": "2026-10-02",
-        "data_version": BATCH.data_version,
-        "published_at": BATCH.published_at,
-        "feedback_url": "https://example.invalid/feedback",
-        "grammar_version": "synthetic-v1",
-        "normalizer_version": "synthetic-v1",
-    }
-
-
-@pytest.mark.parametrize("format_version", [None, "2.0.0"])
-@pytest.mark.parametrize("with_brotli", [False, True])
-def test_cli_export_explicit_env_roots(
-    format_version: str | None,
-    with_brotli: bool,
-    logical: tuple[Projection, Ownership],
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    path = tmp_path / "inputs.json"
-    path.write_bytes(canonical(cli_recipe(tmp_path)))
-    monkeypatch.setattr(
-        cli_module,
-        "build",
-        lambda _recipe: Built(logical[0], logical[1], b"synthetic input", {}),
-    )
-    result = CliRunner().invoke(
-        app,
-        [
-            "snapshot",
-            "export",
-            "--inputs",
-            str(path),
-            *(["--format-version", format_version] if format_version else []),
-            "--brotli" if with_brotli else "--no-brotli",
-        ],
-        env={
-            "SVE_PREVIEW_DIR": str(tmp_path / "preview"),
-            "SVE_CDN_DIR": str(tmp_path / "formal"),
-        },
-    )
-    assert result.exit_code == 0, result.exception
-    assert (tmp_path / "preview/snapshots/preview/current.json").exists()
-    assert (
-        tmp_path / "preview/private/inputs" / (digest(b"synthetic input")[7:] + ".json")
-    ).read_bytes() == b"synthetic input"
-    assert not (tmp_path / "formal").exists()
-
-    root = tmp_path / "preview"
-    pointer = object_value(
-        parse((root / "snapshots/preview/current.json").read_bytes())
-    )
-    manifest = object_value(
-        parse((root / string(pointer["manifest_path"])).read_bytes())
-    )
-    assert manifest["format_version"] == "2.0.0"
-    br_files = list((root / "snapshots").rglob("*.json.br"))
-    assert bool(br_files) == with_brotli
-    for member in br_files:
-        verify_brotli(member.read_bytes(), member.with_suffix("").read_bytes())
-
-
 @pytest.mark.parametrize("format_version", ["1.0.0", "1.1.0", "1.2.0"])
 def test_cli_rejects_retired_formats_before_inputs(
     format_version: str, tmp_path: Path
@@ -643,9 +358,11 @@ def test_cli_rejects_retired_formats_before_inputs(
         app,
         [
             "snapshot",
-            "export",
+            "export-offline",
             "--inputs",
             str(path),
+            "--bundle-dir",
+            str(tmp_path / "bundle"),
             "--format-version",
             format_version,
             "--preview-dir",
@@ -683,44 +400,6 @@ def test_review_joins_follow_filtered_primary_keys() -> None:
         assert view["digital_link"][0]["review_level"] == "confirmed"
         assert view["art"][0]["review_level"] == "confirmed"
         assert view["digital_art_link"][0]["review_level"] == "confirmed"
-
-
-def test_exclusion_report_contains_only_genuine_jp_reasons(
-    default_text_case: TextCaseTemplate,
-) -> None:
-    plan = default_text_case.plan.publication_identity()
-    key = next(
-        record.record_key
-        for record in plan.included("printing")
-        if isinstance(record.data, PrintingData) and record.data.region == "jp"
-    )
-    en_key = next(
-        record.record_key
-        for record in plan.included("printing")
-        if isinstance(record.data, PrintingData) and record.data.region == "en"
-    )
-    changed = replace(
-        plan,
-        projections=tuple(
-            replace(
-                item,
-                disposition="excluded",
-                reasons=("synthetic_identity_not_adopted",),
-            )
-            if item.record_key in {key, en_key}
-            else item
-            for item in plan.projections
-        ),
-    )
-    result = exclusions(changed)
-    assert len(result) == 1
-    data = plan.snapshot.records[key].data
-    assert isinstance(data, PrintingData)
-    assert result[0] == {
-        "card_no": data.card_no,
-        "reasons": ["synthetic_identity_not_adopted"],
-    }
-    assert len(publication_printings(changed)) == len(publication_printings(plan)) - 1
 
 
 def test_renamed_preview_is_not_a_formal_release(
