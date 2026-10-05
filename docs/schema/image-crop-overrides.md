@@ -67,26 +67,26 @@ region／card_no 不參與來源查找、hash 推導、跨區配對或採納判�
 2. 有該 source_key，但新 raw hash 沒有有效採納：停止本批產圖，錯誤列出 source_key、新 hash 與已有 hash；不套舊框、不退回預設。同網址換圖且新版改回標準版型時，仍須新增該 hash 的採納列，座標填依新版尺寸算出的預設框。
 3. 有完全相符的鍵：核對來源版本與框內約束，推導產圖 ID 並傳入既有 `build_variants(override=…)`。任何失敗均停止，不跳過該列充作完成。
 
-先完整驗證採納集合，再大量轉檔；未選中的列列為未使用，不是錯誤。`build_regional_assets(region=…)` 明示 `jp` 或 `en`，只接受相符地區的 image batch；`build_jp_assets` 保留 JP 限制。頁面綁定使用該地區萃取器的原始 `<img src>` 與人工 source_face_map。
+先完整驗證採納集合，再大量轉檔；未選中的列列為未使用，不是錯誤。`build_regional_assets(region=…)` 明示 `jp` 或 `en`，只接受相符地區的 image batch。頁面綁定使用該地區萃取器的原始 `<img src>` 與人工 source_face_map。
 
 日英 `snapshot export-offline` 的 Inputs.sources 分別釘兩區 card／image batch 與 parser version，成對提供 `--image-assets-dir`、`--image-cache-dir` 才納入影像。入口以 `reuse_only` 驗證完整五檔快取，缺檔即失敗；產圖由上述 API 先完成。建置須重驗各區目前批次的完整成員與全體裁切採納，影像綁定及來源使用閉包同時進入 staging／sealed DB 重播；詳細參數見[離線建置入口](../../carddb/src/sve_carddb/snapshot/OFFLINE.md)。正式發布仍依既有來源涵蓋與 readiness 門檻。
 
-首次資料採納包含 JP 六列與 EN 六列，共 12 筆來源綁定的覆寫列。JP-only 建置會報告未用到的 EN 六列；日英建置依實際選中的來源判定各列是否套用。
+現有採納為 JP 六列與 EN 六列，共 12 筆；各列是否套用依實際選中的來源判定，未選中者列為未使用。
 
 F1 依[建置輸入紀錄](source-archive.md#221-建置輸入紀錄與完整使用閉包)釘完整 authored revision、所有覆寫分片的排序相對路徑和 exact bytes hash。`configuration.image_crop_overrides` 保存 `{image_crop_format,authored_revision,files}`，image_crop_format 為整數 `2`，revision 為完整 40 碼 Git SHA，files 為按 name 排序的 `{name,sha256}` 清單，name 是 checkout 相對路徑（`authored/image-crops/...`），sha256 為 `sha256:<64 小寫 hex>`；內容須與 dependencies 與該 revision 的目錄集合相符。呼叫端 pin 只作複核，不能代替 authored 覆寫列；無目錄的 revision 是明示的空集合，不能把本應存在的檔案遺失當空集合。
 
-只有帶影像的建置納入上述裁切 dependencies／configuration，與 `image_recipe` 一致；純文字建置不因裁切資料變動而換 input fingerprint。`build()` 消費外部傳入的 `ImageBuild` 時，必須從自身釘住的採納輸入重算每個來源應用的框（覆寫或預設），與 `VariantSet.crop_box` 比對後才可填 DB／輸出公開清單。僅在 `build_regional_assets` 產圖側驗證不夠；來源、recipe、五檔 hash 都有效但仍使用舊框的結果也必須拒絕。
+只有帶影像的建置納入上述裁切 dependencies／configuration，與 `image_recipe` 一致；純文字建置不因裁切資料變動而換 input fingerprint。`export-offline` 消費外部傳入的 `ImageBuild` 時，必須由 `verify_asset_sources` 從自身釘住的採納輸入重算每個來源應用的框（覆寫或預設），與 `VariantSet.crop_box` 比對後才可填 DB／輸出公開清單。僅在 `build_regional_assets` 產圖側驗證不夠；來源、recipe、五檔 hash 都有效但仍使用舊框的結果也必須拒絕。
 
 建置報告不含卡片原文或私人路徑，至少列出：
 
 - 套用覆寫的來源圖張數（按覆寫鍵去重，不把同圖多個 binding 重算）。
-- 未被本次選中來源用到的覆寫列：鍵與 region／card_no 標註，包含 JP-only 建置未選中的 EN 列。
+- 未被本次選中來源用到的覆寫列：鍵與 region／card_no 標註。
 - 標註與已驗證 binding 不符的列。
-- **不阻擋建置的重印診斷**：同一有效永久 card／face，在其他版次的已驗證來源有覆寫，而本版次的來源沒有覆寫時，列永久 ID、版次 ID 與來源鍵。只用已採納身分及已驗證 binding，不靠標註猜對應；未建 EN 的 binding 不假裝已查。這項診斷不自動繼承框，不將其他來源升格為已核可。
+- **不阻擋建置的重印診斷**：同一有效永久 card／face，在其他版次的已驗證來源有覆寫，而本版次的來源沒有覆寫時，列永久 ID、版次 ID 與來源鍵，提醒是否要補框。只用已採納身分及已驗證 binding，不靠標註猜對應；這項診斷不自動繼承框。
 
-## 4. 目前核可的精確框與掃描限制
+## 4. 目前採納的精確框
 
-**使用者 2026-10-03 核可**的倒吊版型只有以下 12 張，全部來源為 459×641。保留倒吊、不另旋轉；left=36、width=384、height=288 固定：
+倒吊版型的 12 張來源全部為 459×641，保留倒吊、不另旋轉；left=36、width=384、height=288 固定：
 
 | JP 卡號 | EN 卡號 | top | 半開框 |
 | --- | --- | --- | --- |
@@ -94,12 +94,9 @@ F1 依[建置輸入紀錄](source-archive.md#221-建置輸入紀錄與完整使�
 | BP10-U01 | BP10-U01EN | 232 | `[36,232,420,520)` |
 | BP15-PR01 | BP15-PR01EN | 256 | `[36,256,420,544)` |
 
-此表是已核可框的說明，不是卡號選框表，也不推導日英身分關聯；有效資料仍須有每張凍結來源的鍵、raw hash 與框。最後兩張為主戰者圖，與十張上置效果文字框的卡圖分開計數。
+此表說明已採納的框，不是卡號選框表，也不推導日英身分關聯；有效資料仍須有每張凍結來源的鍵、raw hash 與框。最後兩張為主戰者圖，與十張上置效果文字框的卡圖分開計數。畫內標誌／簽名的卡圖維持標準框。
 
-調查對凍結的 JP 7,383 張與 EN 7,437 張卡圖驗 hash／decode，再以字形及水平底帶判定篩選標準框附近的文字，補掃中下段。**程式篩選後由模型看縮圖總覽**；不是使用者逐張複核全圖庫。調查支持這批來源中倒吊版型為唯一須下移的一組，使用者另看過並同意上述 12 張實際大小的最終 RGB 裁切結果。畫內標誌／簽名的 13 張已決定不處理、保持標準框，不列待決事項。
-
-本次決定只採納上表 12 張來源的精確框；掃描僅供尋找候選，不作全圖庫無漏檢的證明，也不作自動選框規則。
-未見版型、淡底帶或淺底深字仍可能漏檢；日後發現其他例外仍須按來源採納，不擴大本次同意。
+這 12 張不是全圖庫無漏檢的結果，也不是自動選框規則；日後發現其他例外，仍按來源另行採納。
 
 ## 5. 變體、快照與上傳的版本策略
 
@@ -109,4 +106,4 @@ F1 依[建置輸入紀錄](source-archive.md#221-建置輸入紀錄與完整使�
 
 採納資料與 F1 的變動產生新的影像建置輸入指紋，須重產受影響的預覽、影像分片、清單、壓縮旁檔與 2.0 發布凍結包，不拿舊清單充作已完成覆寫。preview 只供本機使用；R2 僅透過 `r2 upload-v2` 發布 2.0 凍結包。發布須分開驗 current＋previous 的 metadata 聯集及僅 current 的圖片集合；previous 圖片引用不保留舊 WebP，不要求同 key 符合兩版輸出。新圖驗妥才切快照，再清理失去 current 引用的 key，合法在途 staging 另計；使用隔離 preview 根，不混入任意無引用檔案。
 
-資料入庫後先完成兩檔 art 的實際 WebP 檢視，再重產 2.0 發布凍結包並執行離線 dry-run；真正上傳 R2／公開仍需使用者另行同意。來源 raw、來源歸檔證據與必要發布收據依原契約保存，公開快照／WebP 依有限保留策略，不因新框已發布而刪除。
+資料入庫後先完成兩檔 art 的實際 WebP 檢視，再重產 2.0 發布凍結包並執行離線 dry-run；真正上傳 R2／公開仍需使用者另行同意。來源 raw 與來源歸檔證據依原契約保存，公開快照／WebP 依有限保留策略，不因新框已發布而刪除。

@@ -5,7 +5,7 @@
 
 卡表快照是由[建置資料庫](build-db.md)投影出的精簡契約。表名相同不代表欄位相同；本文件是出貨欄位白名單。精確 JSON 形狀、欄序、版本及分片規則見 [傳輸契約](snapshot-transport.md)。沒有指定的建置資料庫欄位不出貨，尤其 decision、`source_record`、逐列 hash、翻譯依賴、載入/考題報告與巨集。保留玩家可見的來源 URL、Q&A/CR 引文、印刷歷史、更正原值，不提供建置稽核包。
 
-本文件的 2.0.0 圖片與有限保留契約依 [ADR-0015](../adr/0015-image-url-version.md)／[ADR-0016](../adr/0016-snapshot-retention.md)。1.x 的既有機器資源維持原解讀；2.0.0 的 Schema、producer、reader 與發布器尚待同步實作，不因文件更新宣稱可出貨。
+本文件的 2.0.0 圖片與有限保留契約依 [ADR-0015](../adr/0015-image-url-version.md)／[ADR-0016](../adr/0016-snapshot-retention.md)。1.x 已退役，不保留相容讀寫。
 
 ## 1. 快照清單（manifest）、版本與容器
 
@@ -94,7 +94,7 @@ translation 僅輸出上述欄位，用 `text_unit_id` 取譯文；同一 chosen
 
 ### 2.1 獨立影像清單與 DSL 附件
 
-2.0.0 的三個影像集合如下。1.x 保留其原有三欄 printing_image 與含內容定址 path 的七欄 image_variant 解讀，不能用 2.0 accessor 猜讀。
+2.0.0 的三個影像集合如下。
 
 | 集合 | 公開欄位 | 鍵與用途（未註明 PK 者以首欄 `id` 為 PK） |
 | --- | --- | --- |
@@ -208,7 +208,7 @@ card images 依完整 URL（含 v）快取或供已選牌組離線使用；啟�
 
 身分修復的永久 printing／int_id、卡片入口舊 URL 與 split 玩家選擇，沿 build-db §13／§15；快照保留僅依下述 §4.1，
 建置端的追加封套與首次發布事件映射另見 [身分修復契約 §6](identity-repair.md#6-公開事件墓碑與路由)。
-**使用者 2026-10-01 核可**：§2 表格列現行 2.0 的公開形狀；實作撤回時在原欄序尾端
+§2 表格列現行 2.0 的公開形狀；實作撤回時在原欄序尾端
 追加 reverts_id，identity_change 新增 kind=revert 與 required nullable reverts_id，
 一般事件填 null，撤回列指原公開事件並保留原 old/new／printing 欄位，不代表反向邊。
 reader 先移除被指名的有效事件再解析修復圖；原事件與撤回事件皆保留，不改舊快照。
@@ -252,7 +252,7 @@ changes 是相鄰發布摘要，不是重建鏈。previous manifest 引用的 ch
 
 預覽 `data_version` 使用 §1 定義的 `preview-` 命名空間，不屬於正式發布版號；不寫正式 `snapshots/versions/index.json`，不改正式 active，也不提供永久分享碼、公開 URL 或回放 pin 的相容保證。正式發布器拒收預覽版號；正式發布須重新建置並通過完整發布閘門，不能直接將預覽升為正式版。
 
-建置參數、隔離檢查與前端接線見 [JP preview 建置與前端接線](preview-handoff.md)。
+建置參數、隔離檢查與前端接線見 [preview 建置與前端接線](preview-handoff.md)。
 
 預覽仍須驗已啟用能力、JSON Schema、公開引用閉包、分片 join、hash／counts，並提供容量與排除清單、尚未通過的正式閘門報告。來源覆蓋不足維持未知語意；`source_windows` 只用 §8 的 complete／partial 或空窗口，不因集合為空就宣稱 absent 或合法。已知且適用的更正仍須套用；真正不相容的勘誤／來源更正衝突仍按既有閘門隔離受影響結果並列原因。純觀測表記差異／順序未定依 §2.3 顯示，不因沒有 current 排除整卡；診斷排除集合不是發布閘門。
 

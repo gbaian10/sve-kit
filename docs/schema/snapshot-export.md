@@ -83,8 +83,7 @@ bootstrap，兩區數字相同，須寫明負擔，不按語言比例分攤。Br
 `bootstrap_br_1_mib`／`bootstrap_gzip_1_mib` 當正式發布閘門；缺 br 不算通過目標。
 
 逐檔 owner／bucket／partition 報所有 fragments 的集合，不只取第一個。
-另報全部 images metadata 的檔數／raw／br／gzip（不加進完整文字）、冷／暖頁
-`page_image_cost`、P50／P95／max、LRU pin／命中／淘汰與快取 footprint；metadata 與
+另報全部 images metadata 的檔數／raw／br／gzip（不加進完整文字）；metadata 與
 圖片 blob 分列，當頁小型 row 集合不能冒充實際下載量。首屏後背景全量 metadata 的
 成本仍算首次 session／離線下載；實際阻擋首屏者加回啟動量。
 
