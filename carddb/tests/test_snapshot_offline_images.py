@@ -180,7 +180,7 @@ def test_bilingual_images_bundle_snapshot_and_preview(
     snapshot = export_snapshot(
         plan.projection, built.ownership, recipe.batch(), format_version=format_version
     )
-    output = Roots(tmp_path / "preview")
+    output = Roots(tmp_path / "preview", tmp_path / "private")
     write_preview(
         snapshot,
         output,
@@ -205,6 +205,8 @@ def offline_arguments(recipe: Inputs, tmp_path: Path) -> list[str]:
         str(path),
         "--preview-dir",
         str(tmp_path / "preview"),
+        "--private-dir",
+        str(tmp_path / "private"),
         "--bundle-dir",
         str(tmp_path / "bundle"),
     ]

@@ -107,7 +107,7 @@ def test_writer_publishes_only_listed_webps_and_consistent_art_contract(
     shutil.copytree(images.library, library)
     (library / "original.png").write_bytes(png(8, 8))
     (library / "digital.webp").write_bytes(b"synthetic digital image")
-    roots = Roots(tmp_path / "preview")
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
     plan = images.plan()
     members = {
         string(asset["path"]): (library / string(asset["source"])).read_bytes()
@@ -115,10 +115,12 @@ def test_writer_publishes_only_listed_webps_and_consistent_art_contract(
     }
     sealed: set[str] = set()
 
-    def observed(roots: Roots, path: str, raw: bytes, *, immutable: bool) -> None:
+    def observed(
+        roots: Roots, path: str, raw: bytes, *, immutable: bool, private: bool = False
+    ) -> None:
         if path.startswith("snapshots/"):
             assert set(members) <= sealed
-        _write(roots, path, raw, immutable=immutable)
+        _write(roots, path, raw, immutable=immutable, private=private)
         sealed.add(path)
 
     monkeypatch.setattr(writer_module, "_write", observed)
@@ -151,7 +153,7 @@ def test_writer_publishes_only_listed_webps_and_consistent_art_contract(
     for row in images.projection.tables["image_variant"]:
         if row["size_key"] in {"art_s", "art_m"}:
             assert integer(row["width"]) * 3 == integer(row["height"]) * 4
-    again = Roots(tmp_path / "again")
+    again = Roots(tmp_path / "again", tmp_path / "again-private")
     assert (
         write_preview(
             images.snapshot(), again, {}, image_source=library, media_plan=images.plan()
@@ -180,7 +182,7 @@ def test_unavailable_or_unapproved_images_have_metadata_only(
     if state == "withdrawn":
         asset["withdrawal_reason"] = "Synthetic withdrawal"
     tables["image_variant"] = []
-    roots = Roots(tmp_path / "preview")
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
     report = write_preview(
         images.snapshot(tables), roots, {}, media_plan=images.plan(tables)
     )
@@ -202,7 +204,7 @@ def test_writer_refuses_incomplete_available_image_closure(
         for row in tables["image_variant"]
         if missing != "all" and row["size_key"] != missing
     ]
-    roots = Roots(tmp_path / "preview")
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
     with pytest.raises(ValueError, match="all five sizes"):
         write_preview(
             images.snapshot(tables),
@@ -221,7 +223,7 @@ def test_third_party_approval_requires_each_image_confirmed(
     tables = images.tables()
     tables["image_asset"][0]["origin"] = "third_party"
     confirmed = frozenset({"image" if state == "confirmed" else "other"})
-    roots = Roots(tmp_path / "preview")
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
     if state == "confirmed":
         assert write_preview(
             images.snapshot(tables, confirmed_images=confirmed),
@@ -387,7 +389,7 @@ def test_equal_length_webp_tamper_requires_content_hash(
 def test_interruption_keeps_old_complete_preview(
     images: PublicImages, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
 ) -> None:
-    roots = Roots(tmp_path / "preview")
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
     tables = images.tables()
     tables["image_variant"] = []
     tables["image_asset"][0].update(
@@ -397,7 +399,9 @@ def test_interruption_keeps_old_complete_preview(
     old = {p: p.read_bytes() for p in roots.preview.rglob("*") if p.is_file()}
     calls = 0
 
-    def failing(roots: Roots, path: str, raw: bytes, *, immutable: bool) -> None:
+    def failing(
+        roots: Roots, path: str, raw: bytes, *, immutable: bool, private: bool = False
+    ) -> None:
         nonlocal calls
         if path.startswith("images/"):
             calls += 1
@@ -405,7 +409,7 @@ def test_interruption_keeps_old_complete_preview(
                 raise OSError("synthetic image interruption")
         if failure == "manifest" and path.startswith("snapshots/manifests/"):
             raise OSError("synthetic manifest interruption")
-        _write(roots, path, raw, immutable=immutable)
+        _write(roots, path, raw, immutable=immutable, private=private)
         if failure == "late-tamper" and path.startswith("reports/"):
             (
                 roots.preview
@@ -438,7 +442,7 @@ def test_image_source_roots_must_be_disjoint(
     with pytest.raises(ValueError, match="disjoint"):
         write_preview(
             images.snapshot(),
-            Roots(preview),
+            Roots(preview, tmp_path / "private"),
             {},
             image_source=source,
             media_plan=images.plan(),
@@ -450,10 +454,12 @@ def test_writer_rejects_relative_preview_before_writes(
     images: PublicImages, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.chdir(tmp_path)
-    with pytest.raises(ValueError, match=r"^Preview root must be an absolute path$"):
+    with pytest.raises(
+        ValueError, match=r"^Preview and private roots must be absolute paths$"
+    ):
         write_preview(
             images.snapshot(),
-            Roots(Path("relative-preview")),
+            Roots(Path("relative-preview"), tmp_path / "private"),
             {},
             image_source=images.library,
             media_plan=images.plan(),

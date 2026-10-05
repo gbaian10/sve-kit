@@ -282,7 +282,7 @@ def test_regional_build_projects_qa_related_and_reskin_with_complete_sources(
     assert joined == tables
     report = write_preview(
         snapshot,
-        Roots(tmp_path / "preview"),
+        Roots(tmp_path / "preview", tmp_path / "private"),
         built.report,
         media_plan=prepare_media(built.projection, None, revision=1),
         regions=("en", "jp"),
@@ -491,6 +491,8 @@ def test_offline_cli_writes_private_bundle_and_dual_preview(
             format_version,
             "--inputs",
             str(path),
+            "--private-dir",
+            str(tmp_path / "private"),
             "--bundle-dir",
             str(tmp_path / "bundle"),
         ],
@@ -499,6 +501,12 @@ def test_offline_cli_writes_private_bundle_and_dual_preview(
     assert result.exit_code == 0, result.exception
     assert (tmp_path / "bundle/build.sqlite").is_file()
     assert (tmp_path / "preview/snapshots/preview/current.json").is_file()
+    assert {p.name for p in (tmp_path / "preview").iterdir()} == {"snapshots"}
+    assert {p.name for p in (tmp_path / "private").iterdir()} == {
+        "inputs",
+        "media-state.json",
+        "reports",
+    }
 
     root = tmp_path / "preview"
     pointer = object_value(
@@ -516,7 +524,9 @@ def test_offline_cli_writes_private_bundle_and_dual_preview(
     report = object_value(
         parse(
             (
-                root / "reports" / (string(pointer["manifest_sha256"])[7:] + ".json")
+                tmp_path
+                / "private/reports"
+                / (string(pointer["manifest_sha256"])[7:] + ".json")
             ).read_bytes()
         )
     )
@@ -554,6 +564,8 @@ def test_cli_preview_validates_output_before_build(
             str(path),
             "--preview-dir",
             "relative-preview" if protected == "relative" else str(targets[protected]),
+            "--private-dir",
+            str(tmp_path / "private"),
             "--bundle-dir",
             str(tmp_path / "bundle"),
         ],
@@ -561,7 +573,7 @@ def test_cli_preview_validates_output_before_build(
     messages = {
         "repo": "Preview output must be disjoint from immutable input roots",
         "archive": "Preview output must be disjoint from immutable input roots",
-        "relative": "Preview root must be an absolute path",
+        "relative": "Preview and private roots must be absolute paths",
     }
     assert isinstance(result.exception, ValueError)
     assert str(result.exception) == messages[protected]
@@ -600,6 +612,8 @@ def test_cli_rejects_formal_export_before_preview_writes(
             str(path),
             "--preview-dir",
             str(tmp_path / "preview"),
+            "--private-dir",
+            str(tmp_path / "private"),
             "--bundle-dir",
             str(tmp_path / "bundle"),
         ],
@@ -607,7 +621,7 @@ def test_cli_rejects_formal_export_before_preview_writes(
     assert isinstance(result.exception, ValueError)
     assert str(result.exception).startswith("Preview requires")
     assert not (tmp_path / "preview/snapshots").exists()
-    assert not (tmp_path / "preview/private/inputs").exists()
+    assert not (tmp_path / "private/inputs").exists()
 
 
 @pytest.mark.parametrize("pins", [(), ("jp",), ("jp", "en"), ("en", "en")])
@@ -681,6 +695,8 @@ def test_cli_cannot_write_bundle_into_protected_roots(
             str(path),
             "--preview-dir",
             str(tmp_path / "preview"),
+            "--private-dir",
+            str(tmp_path / "private"),
             "--bundle-dir",
             str(target),
         ],
@@ -781,6 +797,8 @@ def test_cli_preview_cannot_contain_its_recipe(
             str(path),
             "--preview-dir",
             str(path.parent),
+            "--private-dir",
+            str(tmp_path / "private"),
             "--bundle-dir",
             str(tmp_path / "bundle"),
         ],

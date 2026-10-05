@@ -5,10 +5,9 @@ from typing import TYPE_CHECKING
 import httpx
 import pytest
 
-from sve_carddb.r2_upload.v2.adapter import LEASE_HEADERS, LEASE_KEY, R2Store
+from sve_carddb.r2_upload.boundary import UploadError
+from sve_carddb.r2_upload.v2.adapter import R2Store
 from sve_carddb.r2_upload.v2.freshness import CDNFreshness
-from sve_carddb.snapshot.publish.storage import PublishError, Stored
-from sve_carddb.snapshot.values import canonical
 
 from .r2_sdk_fixtures import inventory, mock_client
 from .r2_v2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
@@ -32,7 +31,7 @@ def test_duplicate_rows_in_one_inventory_page_are_rejected() -> None:
         "<Contents><Key>snapshots/blobs/x</Key></Contents>"
         "<IsTruncated>false</IsTruncated></ListBucketResult>"
     )
-    with pytest.raises(PublishError, match=r"^R2 inventory contains invalid keys$"):
+    with pytest.raises(UploadError, match=r"^R2 inventory contains invalid keys$"):
         inventory(raw.encode(), PREFIX)
 
 
@@ -60,9 +59,7 @@ def test_duplicate_keys_across_inventory_pages_are_rejected() -> None:
                 client, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS
             ),
         )
-        with pytest.raises(
-            PublishError, match=r"^R2 inventory contains repeated keys$"
-        ):
+        with pytest.raises(UploadError, match=r"^R2 inventory contains repeated keys$"):
             store.keys(PREFIX)
     assert calls == 2
 
@@ -71,10 +68,7 @@ def test_public_put_refuses_noncontractual_metadata(
     remote: tuple[R2Store, ServerState, Loopback],
 ) -> None:
     store, state, _transport = remote
-    with (
-        store.exclusive(),
-        pytest.raises(PublishError, match=r"^Unsupported object metadata$"),
-    ):
+    with pytest.raises(UploadError, match=r"^Unsupported object metadata$"):
         store.put(
             KEY,
             b"synthetic",
@@ -83,28 +77,6 @@ def test_public_put_refuses_noncontractual_metadata(
         )
     assert KEY not in state.objects
     assert not any(op[1] == KEY for op in state.operations)
-
-
-def test_idle_lease_with_wrong_metadata_cannot_be_claimed(
-    remote: tuple[R2Store, ServerState, Loopback],
-) -> None:
-    store, state, _transport = remote
-    old = Stored(
-        canonical({"format": 1, "owner": None}),
-        '"idle"',
-        LEASE_HEADERS | {"cache-control": "public"},
-    )
-    state.objects[LEASE_KEY] = old
-    with (
-        pytest.raises(
-            PublishError,
-            match=r"^Deployment writer lease is active or invalid; operator recovery required$",
-        ),
-        store.exclusive(),
-    ):
-        pytest.fail("invalid idle metadata admitted a writer")
-    assert state.objects[LEASE_KEY] == old
-    assert state.operations == []
 
 
 def test_cdn_encoded_bytes_are_not_an_identity_image() -> None:

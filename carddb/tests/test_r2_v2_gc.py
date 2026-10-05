@@ -1,0 +1,175 @@
+"""GC keeps the remote current/previous JSON closures and current images only."""
+
+import json
+from copy import deepcopy
+from typing import TYPE_CHECKING
+
+import httpx
+import pytest
+from typer.testing import CliRunner
+
+from sve_carddb.cli import app
+from sve_carddb.r2_upload.boundary import UploadError
+from sve_carddb.r2_upload.v2 import gc
+from sve_carddb.r2_upload.v2.adapter import PUBLIC_PREFIXES, Stored
+from sve_carddb.r2_upload.v2.export import IMAGE_HEADERS, INDEX, load_export
+from sve_carddb.r2_upload.v2.publish import upload
+
+from .r2_sdk_fixtures import install_mock_sdk
+from .r2_v2_export_fixtures import export
+from .r2_v2_export_fixtures import images as images  # ruff: ignore[useless-import-alias] -- module-scoped synthetic corpus
+from .r2_v2_export_fixtures import roots as roots  # ruff: ignore[useless-import-alias] -- per-test public and private roots
+from .r2_v2_fixtures import ACCOUNT, BUCKET
+from .r2_v2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- isolated loopback server
+from .r2_v2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- dependency of remote
+
+pytestmark = pytest.mark.usefixtures("close_sdk_clients")
+
+if TYPE_CHECKING:
+    from sve_carddb.r2_upload.v2.adapter import R2Store
+    from sve_carddb.r2_upload.v2.export import Export
+    from sve_carddb.snapshot.preview import Roots
+
+    from .r2_v2_fixtures import Loopback, ServerState
+    from .test_snapshot_preview_images import PublicImages
+
+STRAY = "images/card_s/999.webp"
+
+
+def three_versions(
+    images: PublicImages, roots: Roots, store: R2Store
+) -> tuple[Export, ...]:
+    """Upload three text-only versions so the first one leaves the window."""
+    loaded = []
+    for step in range(3):
+        projection = deepcopy(images.projection)
+        projection.tables["printing"][0]["rarity_raw"] = f"Synthetic rarity {step}"
+        export(images, roots, step=step, projection=projection)
+        loaded.append(load_export(roots.preview))
+        upload(store, loaded[-1], None)
+    return tuple(loaded)
+
+
+def keys(loaded: Export) -> set[str]:
+    return {m.key for m in loaded.members} | {i.key for i in loaded.images}
+
+
+def test_collects_only_objects_outside_current_previous_and_current_images(
+    images: PublicImages,
+    roots: Roots,
+    remote: tuple[R2Store, ServerState, Loopback],
+) -> None:
+    store, state, _ = remote
+    first, second, third = three_versions(images, roots, store)
+    state.objects[STRAY] = Stored(b"stray", '"stray"', IMAGE_HEADERS)
+    expected = sorted((keys(first) - keys(second) - keys(third)) | {STRAY})
+    assert expected
+    dry = gc.collect(store, PUBLIC_PREFIXES, execute=False)
+    assert dry == {"mode": "dry_run", "candidates": expected, "deleted": []}
+    assert STRAY in state.objects
+    done = gc.collect(store, PUBLIC_PREFIXES, execute=True)
+    assert done["deleted"] == expected
+    assert set(state.objects) == keys(second) | keys(third) | {INDEX}
+    assert gc.collect(store, PUBLIC_PREFIXES, execute=False)["candidates"] == []
+
+
+def test_namespace_limits_candidates(
+    images: PublicImages,
+    roots: Roots,
+    remote: tuple[R2Store, ServerState, Loopback],
+) -> None:
+    store, state, _ = remote
+    three_versions(images, roots, store)
+    state.objects[STRAY] = Stored(b"stray", '"stray"', IMAGE_HEADERS)
+    result = gc.collect(store, frozenset({"images/card_s/"}), execute=True)
+    assert result["deleted"] == [STRAY]
+    with pytest.raises(UploadError, match=r"^GC namespace is not explicitly public$"):
+        gc.collect(store, frozenset({"snapshots/"}), execute=False)
+
+
+def test_missing_retained_member_stops_before_deletion(
+    images: PublicImages,
+    roots: Roots,
+    remote: tuple[R2Store, ServerState, Loopback],
+) -> None:
+    store, state, _ = remote
+    _first, second, _third = three_versions(images, roots, store)
+    state.objects[STRAY] = Stored(b"stray", '"stray"', IMAGE_HEADERS)
+    del state.objects[second.members[-1].key]
+    with pytest.raises(UploadError, match=r"^GC retained closure is incomplete$"):
+        gc.collect(store, PUBLIC_PREFIXES, execute=True)
+    assert STRAY in state.objects
+
+
+def test_index_change_stops_deletion(
+    images: PublicImages,
+    roots: Roots,
+    remote: tuple[R2Store, ServerState, Loopback],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store, state, _ = remote
+    three_versions(images, roots, store)
+    for number in range(2):
+        state.objects[f"images/card_s/99{number}.webp"] = Stored(
+            b"stray", '"stray"', IMAGE_HEADERS
+        )
+    original = store.delete
+
+    def delete_then_change(key: str) -> None:
+        original(key)
+        old = state.objects[INDEX]
+        state.objects[INDEX] = Stored(old.raw, '"changed"', old.headers)
+
+    monkeypatch.setattr(store, "delete", delete_then_change)
+    with pytest.raises(UploadError, match=r"^GC version index changed; run it again$"):
+        gc.collect(store, PUBLIC_PREFIXES, execute=True)
+    assert len([k for k in state.objects if k.startswith("images/card_s/99")]) == 1
+
+
+@pytest.mark.parametrize("case", ["no-index", "irregular"])
+def test_refuses_bucket_without_index_or_with_irregular_keys(
+    images: PublicImages,
+    roots: Roots,
+    remote: tuple[R2Store, ServerState, Loopback],
+    case: str,
+) -> None:
+    store, state, _ = remote
+    if case == "no-index":
+        message = "GC requires a published version index"
+    else:
+        three_versions(images, roots, store)
+        state.objects["images/card_s/stray.png"] = Stored(b"x", '"x"', IMAGE_HEADERS)
+        message = "GC inventory contains an irregular public key"
+    with pytest.raises(UploadError, match="^" + message + "$"):
+        gc.collect(store, PUBLIC_PREFIXES, execute=True)
+    assert not any(op == "DELETE" for op, _key, _ in state.operations)
+
+
+def test_cli_dry_run_lists_and_execute_deletes(
+    images: PublicImages,
+    roots: Roots,
+    remote: tuple[R2Store, ServerState, Loopback],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store, state, transport = remote
+    three_versions(images, roots, store)
+    state.objects[STRAY] = Stored(b"stray", '"stray"', IMAGE_HEADERS)
+    real_client = httpx.Client
+
+    def factory(**_kwargs: object) -> httpx.Client:
+        return real_client(transport=transport, trust_env=False, follow_redirects=False)
+
+    install_mock_sdk(monkeypatch, transport)
+    monkeypatch.setattr(httpx, "Client", factory)
+    monkeypatch.setenv("SVE_R2_ACCESS_KEY_ID", "synthetic-access")
+    monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", "synthetic-secret")
+    target = ["--account-id", ACCOUNT, "--bucket", BUCKET]
+    common = ["r2", "gc-v2", "--namespace", "images/card_s/", *target]
+    dry = CliRunner().invoke(app, common)
+    assert dry.exit_code == 0, dry.output
+    assert json.loads(dry.output)["candidates"] == [STRAY]
+    assert STRAY in state.objects
+    done = CliRunner().invoke(app, [*common, "--execute"])
+    assert done.exit_code == 0, done.output
+    assert json.loads(done.output)["deleted"] == [STRAY]
+    assert STRAY not in state.objects

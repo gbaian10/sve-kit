@@ -83,7 +83,7 @@ def test_writer_rejects_non_preview_manifest(
     with pytest.raises(ValueError, match="Preview requires"):
         write_preview(
             invalid_preview,
-            Roots(tmp_path / "preview"),
+            Roots(tmp_path / "preview", tmp_path / "private"),
             {},
         )
     assert list(tmp_path.iterdir()) == []
@@ -122,7 +122,7 @@ def test_symlinked_destinations_cannot_escape_preview(tmp_path: Path) -> None:
     preview = tmp_path / "preview"
     preview.mkdir()
     (preview / "snapshots").symlink_to(outside, target_is_directory=True)
-    roots = Roots(preview)
+    roots = Roots(preview, tmp_path / "private")
     with pytest.raises(ValueError, match="escapes"):
         _write(roots, "snapshots/preview/current.json", b"{}", immutable=False)
     with pytest.raises(ValueError, match="escapes"):
@@ -133,7 +133,7 @@ def test_symlinked_destinations_cannot_escape_preview(tmp_path: Path) -> None:
 def test_writer_reads_back_an_independent_join(
     exported: Snapshot, logical: tuple[Projection, Ownership], tmp_path: Path
 ) -> None:
-    roots = Roots(tmp_path / "preview")
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
     report = write_preview(
         exported,
         roots,
@@ -169,7 +169,7 @@ def test_writer_reads_back_an_independent_join(
 def test_failed_artifact_write_keeps_old_preview_pointer(
     exported: Snapshot, tmp_path: Path
 ) -> None:
-    roots = Roots(tmp_path / "preview")
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
     _write(roots, "snapshots/preview/current.json", b"old preview", immutable=False)
     first = object_value(array(exported.manifest["files"])[0])
     _write(roots, string(first["path"]), b"corrupt existing bytes", immutable=True)
@@ -191,7 +191,7 @@ def test_preview_pointer_follows_every_immutable_member(
     codec = python_brotli() if with_brotli else None
     if codec is not None:
         exported = export_snapshot(logical[0], logical[1], BATCH, brotli=codec)
-    roots = Roots(tmp_path / "preview")
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
     manifest_hash = digest(canonical(exported.manifest))[7:]
     raw_paths = {
         string(object_value(item)["path"]) for item in array(exported.manifest["files"])
@@ -202,28 +202,35 @@ def test_preview_pointer_follows_every_immutable_member(
     expected = raw_paths | {path + ".gz" for path in raw_paths}
     if codec is not None:
         expected |= {path + ".br" for path in raw_paths}
-    expected.add("reports/" + manifest_hash + ".json")
     sealed: set[str] = set()
     pointer_written = False
 
-    def observed_write(roots: Roots, path: str, raw: bytes, *, immutable: bool) -> None:
+    def observed_write(
+        roots: Roots, path: str, raw: bytes, *, immutable: bool, private: bool = False
+    ) -> None:
         nonlocal pointer_written
-        if path == "private/media-committed.json":
-            assert pointer_written
-        elif not immutable:
-            assert path == "snapshots/preview/current.json"
+        if not immutable:
+            assert (path, private) == ("snapshots/preview/current.json", False)
             assert expected <= sealed
             assert all((roots.preview / member).is_file() for member in expected)
+            assert (roots.private / "reports" / (manifest_hash + ".json")).is_file()
+            assert (roots.private / "media-state.json").is_file()
             pointer_written = True
         else:
             assert not pointer_written
-        _write(roots, path, raw, immutable=immutable)
-        if immutable:
+        _write(roots, path, raw, immutable=immutable, private=private)
+        if immutable and not private:
             sealed.add(path)
 
     monkeypatch.setattr(writer_module, "_write", observed_write)
     write_preview(exported, roots, {}, brotli=codec, media_plan=preview_plan(exported))
     assert pointer_written
+    public = {
+        p.relative_to(roots.preview).as_posix()
+        for p in roots.preview.rglob("*")
+        if p.is_file()
+    }
+    assert public == expected | {"snapshots/preview/current.json"}
 
 
 @pytest.mark.parametrize("late_member", ["snapshots/manifests/", "reports/"])
@@ -233,13 +240,15 @@ def test_late_immutable_failure_preserves_old_pointer(
     monkeypatch: pytest.MonkeyPatch,
     late_member: str,
 ) -> None:
-    roots = Roots(tmp_path / "preview")
+    roots = Roots(tmp_path / "preview", tmp_path / "private")
     _write(roots, "snapshots/preview/current.json", b"old preview", immutable=False)
 
-    def failing_write(roots: Roots, path: str, raw: bytes, *, immutable: bool) -> None:
+    def failing_write(
+        roots: Roots, path: str, raw: bytes, *, immutable: bool, private: bool = False
+    ) -> None:
         if path.startswith(late_member):
             raise OSError("Synthetic late immutable failure")
-        _write(roots, path, raw, immutable=immutable)
+        _write(roots, path, raw, immutable=immutable, private=private)
 
     monkeypatch.setattr(writer_module, "_write", failing_write)
     with pytest.raises(OSError, match="late immutable"):
@@ -328,6 +337,8 @@ def test_cli_rejects_retired_formats_before_inputs(
             format_version,
             "--preview-dir",
             str(preview),
+            "--private-dir",
+            str(tmp_path / "private"),
         ],
     )
     assert result.exit_code != 0

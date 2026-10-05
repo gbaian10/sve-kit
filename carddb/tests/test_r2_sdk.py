@@ -19,8 +19,8 @@ from botocore.stub import Stubber
 from sve_carddb.r2_upload import sdk
 from sve_carddb.r2_upload.boundary import UploadError
 from sve_carddb.r2_upload.sdk import BoundaryError, Credentials, bounded, sdk_client
-from sve_carddb.r2_upload.v2.adapter import LEASE_KEY, R2Store
-from sve_carddb.snapshot.publish.storage import PublishError, Stored
+from sve_carddb.r2_upload.v2.adapter import R2Store, Stored
+from sve_carddb.r2_upload.v2.export import INDEX
 
 from .r2_sdk_fixtures import MockHTTP, mock_client
 from .r2_v2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
@@ -64,12 +64,11 @@ def test_native_sdk_keeps_conditions_and_exact_compressed_bytes(
     with sdk_client(ACCOUNT, BUCKET, CREDENTIALS, http_session=native) as client:
         remote = R2Store(ACCOUNT, BUCKET, CREDENTIALS, client)
         headers = {"content-type": "application/json", "cache-control": "no-store"}
-        with remote.exclusive():
-            assert remote.put("synthetic.json", b"{}", headers, expected=None)
-            assert not remote.put("synthetic.json", b"changed", headers, expected=None)
-            first = remote.get("synthetic.json")
-            assert first is not None
-            assert remote.put("synthetic.json", b"new", headers, expected=first.etag)
+        assert remote.put("synthetic.json", b"{}", headers, expected=None)
+        assert not remote.put("synthetic.json", b"changed", headers, expected=None)
+        first = remote.get("synthetic.json")
+        assert first is not None
+        assert remote.put("synthetic.json", b"new", headers, expected=first.etag)
         raw = gzip.compress(b"synthetic compressed sibling", mtime=0)
         state.objects["synthetic.json.gz"] = Stored(
             raw,
@@ -96,22 +95,22 @@ def test_native_sdk_lost_write_response_is_not_replayed(
     native = NativeLoopback(loopback.root)
     native.lose_put = True
     with sdk_client(ACCOUNT, BUCKET, CREDENTIALS, http_session=native) as client:
-        with pytest.raises(PublishError, match=r"^R2 transport or protocol failed$"):
+        with pytest.raises(UploadError, match=r"^R2 transport or protocol failed$"):
             R2Store(ACCOUNT, BUCKET, CREDENTIALS, client).put(
-                LEASE_KEY,
+                INDEX,
                 b"{}",
                 {"content-type": "application/json"},
                 expected=None,
             )
     assert len(state.requests) == 1
-    assert state.objects[LEASE_KEY].raw == b"{}"
+    assert state.objects[INDEX].raw == b"{}"
 
 
 def test_typed_stubber_checks_both_put_conditions_and_metadata() -> None:
     with sdk_client(ACCOUNT, BUCKET, CREDENTIALS) as client, Stubber(client) as stub:
         expected = {
             "Bucket": BUCKET,
-            "Key": LEASE_KEY,
+            "Key": INDEX,
             "Body": b"{}",
             "ContentType": "application/json",
             "CacheControl": "no-store",
@@ -125,8 +124,8 @@ def test_typed_stubber_checks_both_put_conditions_and_metadata() -> None:
         )
         remote = R2Store(ACCOUNT, BUCKET, CREDENTIALS, client)
         headers = {"content-type": "application/json", "cache-control": "no-store"}
-        assert remote.put(LEASE_KEY, b"{}", headers, expected=None)
-        assert not remote.put(LEASE_KEY, b"{}", headers, expected='"opaque"')
+        assert remote.put(INDEX, b"{}", headers, expected=None)
+        assert not remote.put(INDEX, b"{}", headers, expected='"opaque"')
         stub.assert_no_pending_responses()
 
 
@@ -210,7 +209,7 @@ def test_sdk_debug_logging_cannot_print_auth_or_error_contents(
         with sdk_client(
             ACCOUNT, BUCKET, CREDENTIALS, http_session=MockHTTP(http)
         ) as client:
-            with pytest.raises(PublishError, match=r"^R2 object read failed$"):
+            with pytest.raises(UploadError, match=r"^R2 object read failed$"):
                 R2Store(ACCOUNT, BUCKET, CREDENTIALS, client).get("synthetic")
     assert "synthetic-access" not in caplog.text
     assert "synthetic-secret" not in caplog.text
@@ -239,7 +238,7 @@ def test_listing_is_bounded_before_sdk_xml_parsing(
             http, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS
         )
         with pytest.raises(
-            PublishError, match=r"^Remote response exceeds the configured byte limit$"
+            UploadError, match=r"^Remote response exceeds the configured byte limit$"
         ):
             R2Store(ACCOUNT, BUCKET, CREDENTIALS, client).keys("snapshots/blobs/")
 
@@ -284,10 +283,10 @@ def test_sdk_does_not_accept_noncontractual_success_status(
         operation = (
             partial(remote.get, "synthetic")
             if method == "GET"
-            else partial(remote.put, LEASE_KEY, b"x", {}, expected=None)
+            else partial(remote.put, INDEX, b"x", {}, expected=None)
         )
         with pytest.raises(
-            PublishError,
+            UploadError,
             match=(
                 r"^R2 object read failed$"
                 if method == "GET"
@@ -301,7 +300,7 @@ def test_sdk_does_not_accept_noncontractual_success_status(
 def test_injected_client_cannot_silently_select_another_account() -> None:
     with sdk_client(ACCOUNT, BUCKET, CREDENTIALS) as client:
         with pytest.raises(
-            PublishError, match=r"^S3 client differs from the explicit R2 account$"
+            UploadError, match=r"^S3 client differs from the explicit R2 account$"
         ):
             R2Store("e" * 32, BUCKET, CREDENTIALS, client)
 

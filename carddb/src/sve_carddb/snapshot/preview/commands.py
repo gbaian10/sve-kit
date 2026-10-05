@@ -19,7 +19,7 @@ from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.offline import Built, Inputs
 from sve_carddb.snapshot.offline import build as build_offline
 from sve_carddb.snapshot.preview import Roots, _write, write_preview
-from sve_carddb.snapshot.preview.media_state import reservation
+from sve_carddb.snapshot.preview.media_state import reserve
 from sve_carddb.snapshot.profiles import MEDIA, profile
 from sve_carddb.snapshot.publication import require_formal, require_preview
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
@@ -34,17 +34,20 @@ def verify_inputs(roots: Roots, inputs: Inputs) -> None:
     """No output may modify the input repo or archived immutable evidence."""
     roots.verify()
     for protected in (inputs.repo, inputs.archive):
-        root, source = roots.preview.resolve(), protected.resolve()
-        if root.is_relative_to(source) or source.is_relative_to(root):
-            raise ValueError(
-                "Preview output must be disjoint from immutable input roots"
-            )
+        source = protected.resolve()
+        for output in (roots.preview, roots.private):
+            root = output.resolve()
+            if root.is_relative_to(source) or source.is_relative_to(root):
+                raise ValueError(
+                    "Preview output must be disjoint from immutable input roots"
+                )
 
 
 @app.command("export-offline")
 def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] -- CLI binds explicit recipe, isolated outputs, paired image roots, worker count and optional compressor
     inputs: Annotated[Path, typer.Option(exists=True, dir_okay=False)],
     preview_dir: Annotated[Path, typer.Option(envvar="SVE_PREVIEW_DIR")],
+    private_dir: Annotated[Path, typer.Option()],
     bundle_dir: Annotated[Path, typer.Option()],
     brotli: Annotated[bool, typer.Option("--brotli/--no-brotli")] = False,
     image_assets_dir: Annotated[
@@ -58,14 +61,17 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
 ) -> None:
     """Export both launch regions to an isolated preview plus a verified private DB bundle."""
     profile(format_version)
-    roots = Roots(preview_dir)
+    roots = Roots(preview_dir, private_dir)
     recipe = Inputs.model_validate_json(inputs.read_bytes())
     verify_inputs(roots, recipe)
-    for protected in (recipe.repo, recipe.archive, inputs):
+    for protected in (recipe.repo, recipe.archive, inputs, preview_dir):
         output, source = bundle_dir.resolve(), protected.resolve()
         if output.is_relative_to(source) or source.is_relative_to(output):
             raise ValueError("Offline bundle must be disjoint from protected inputs")
-    if inputs.resolve().is_relative_to(preview_dir.resolve()):
+    if any(
+        inputs.resolve().is_relative_to(root.resolve())
+        for root in (preview_dir, private_dir)
+    ):
         raise ValueError("Offline preview must be disjoint from recipe")
     codec = python_brotli() if brotli else None
     if (image_assets_dir is None) != (image_cache_dir is None):
@@ -76,7 +82,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
     if image_assets_dir is not None and image_cache_dir is not None:
         image_roots = PreviewRoots(image_assets_dir, image_cache_dir)
         image_roots.validate(
-            (recipe.archive, recipe.repo, preview_dir, bundle_dir, inputs)
+            (recipe.archive, recipe.repo, preview_dir, private_dir, bundle_dir, inputs)
         )
         crops = load_image_crops(recipe.repo / "authored")
         regional = tuple(
@@ -129,9 +135,10 @@ def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] 
         require_preview(snapshot.manifest, regions=batch.regions)
         _write(
             roots,
-            "private/inputs/" + digest(built.input_content)[7:] + ".json",
+            "inputs/" + digest(built.input_content)[7:] + ".json",
             built.input_content,
             immutable=True,
+            private=True,
         )
         report = write_preview(
             snapshot,
@@ -147,16 +154,16 @@ def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] 
             report["image_execution"] = dict(image_execution)
         typer.echo(canonical(report).decode())
 
-    with reservation(roots) as (revision, previous):
-        seal(
-            prepare_media(
-                built.projection,
-                image_source,
-                revision=revision,
-                previous=previous,
-                confirmed_images=built.confirmed_images,
-            )
+    revision, previous = reserve(roots)
+    seal(
+        prepare_media(
+            built.projection,
+            image_source,
+            revision=revision,
+            previous=previous,
+            confirmed_images=built.confirmed_images,
         )
+    )
 
 
 @app.command("publish")

@@ -14,8 +14,7 @@ import httpx
 import pytest
 
 from sve_carddb.r2_upload.sdk import Credentials
-from sve_carddb.r2_upload.v2.adapter import R2Store
-from sve_carddb.snapshot.publish.storage import Stored
+from sve_carddb.r2_upload.v2.adapter import R2Store, Stored
 
 from .r2_sdk_fixtures import mock_client
 
@@ -37,9 +36,9 @@ class ServerState:
     sequence: int = 0
     status: int | None = None
     fail_put: int | None = None
+    fail_key: str | None = None
     delete_status: int | None = None
     cdn_status: int | None = None
-    race_lease: bool = False
     page_size: int = 2
     cdn: bool = False
     error_body: bytes = b"synthetic-secret synthetic-access Signature=DO-NOT-LOG"
@@ -178,16 +177,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def put_object(self, key: str, raw: bytes, headers: dict[str, str]) -> None:
         state = self.state
-        if state.race_lease and key == "coordination/snapshot-v2-writer.json":
-            state.race_lease = False
-            state.objects[key] = Stored(
-                b"foreign active owner",
-                '"foreign"',
-                {"content-type": "application/json", "cache-control": "no-store"},
-            )
         obj = state.objects.get(key)
-        if state.fail_put is not None and not key.startswith("coordination/"):
-            self.respond(state.fail_put, state.error_body)
+        if state.fail_put is not None or key == state.fail_key:
+            self.respond(state.fail_put or 500, state.error_body)
             return
         condition = headers.get("if-match")
         state.operations.append(("PUT", key, condition or headers.get("if-none-match")))

@@ -1,7 +1,7 @@
 """Verified 2.0 media projection and printing-face image revision comparison.
 
-The publisher supplies a durably reserved revision and the last committed state.
-This module does not allocate production revisions or publish remote assets.
+The caller supplies a new high-water revision and the last export's state.
+This module does not allocate revisions or publish remote assets.
 """
 
 import re
@@ -97,30 +97,19 @@ _BINDING_ARITY = 3
 
 
 def _member(member: Record, revision: int) -> None:
-    if (
-        set(member)
-        != {"active", "binding", "card", "art", "card_version", "art_version"}
-        or type(member["active"]) is not bool
-    ):
+    if set(member) != {"binding", "card", "art", "card_version", "art_version"}:
         raise ValueError("member")
-    if member["binding"] is not None:
-        binding = array(member["binding"])
-        if len(binding) != _BINDING_ARITY or not string(binding[0]):
-            raise ValueError("binding")
-        _uint(integer(binding[1]), positive=True)
-        _uint(integer(binding[2]), positive=False)
+    binding = array(member["binding"])
+    if len(binding) != _BINDING_ARITY or not string(binding[0]):
+        raise ValueError("binding")
+    _uint(integer(binding[1]), positive=True)
+    _uint(integer(binding[2]), positive=False)
     for group in ("card", "art"):
-        if member["active"]:
-            if (
-                member["binding"] is None
-                or re.fullmatch(r"sha256:[0-9a-f]{64}", string(member[group])) is None
-            ):
-                raise ValueError("fingerprint")
-            token = _uint(integer(member[group + "_version"]), positive=True)
-            if token > revision:
-                raise ValueError("token")
-        elif member[group] is not None or member[group + "_version"] is not None:
-            raise ValueError("tombstone")
+        if re.fullmatch(r"sha256:[0-9a-f]{64}", string(member[group])) is None:
+            raise ValueError("fingerprint")
+        token = _uint(integer(member[group + "_version"]), positive=True)
+        if token > revision:
+            raise ValueError("token")
 
 
 def _checked_state(value: JsonValue) -> Record:
@@ -188,7 +177,6 @@ def _tokens(
         prior_version = before.get(group + "_version")
         unchanged = (
             active
-            and before.get("active") is True
             and before.get("binding") == binding
             and before.get(group) == fingerprint
         )
@@ -212,9 +200,8 @@ def prepare_media(  # ruff: ignore[too-many-locals] -- indexes, validated source
 ) -> MediaPlan:
     """Verify private content-addressed outputs, then compare each card/art group.
 
-    Failed reservations are the caller's responsibility and must never be reused.
-    A previous state must come from the last committed release, not from a failed
-    candidate. Tombstones distinguish restoration from a never-seen binding.
+    The state keeps only this export's available members, so a removed or
+    restored image never matches and always receives the new revision.
     """
     _uint(revision, positive=True)
     old = _state(previous)
@@ -234,17 +221,7 @@ def prepare_media(  # ruff: ignore[too-many-locals] -- indexes, validated source
         variants.setdefault(string(row["image_id"]), []).append(row)
     result: list[Record] = []
     assets: list[dict[str, JsonValue]] = []
-    next_members: dict[str, JsonValue] = {
-        key: {
-            "active": False,
-            "binding": None,
-            "card": None,
-            "art": None,
-            "card_version": None,
-            "art_version": None,
-        }
-        for key in members
-    }
+    next_members: dict[str, JsonValue] = {}
     seen: set[str] = set()
     paths: set[str] = set()
     for row in projection.tables["printing_image"]:
@@ -279,12 +256,8 @@ def prepare_media(  # ruff: ignore[too-many-locals] -- indexes, validated source
             revision,
             integer(old["revision"]) if old else 0,
         )
-        next_members[key] = {
-            "active": active,
-            "binding": binding,
-            **fingerprints,
-            **versions,
-        }
+        if active:
+            next_members[key] = {"binding": binding, **fingerprints, **versions}
         result.append(
             row
             | {
