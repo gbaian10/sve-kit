@@ -85,7 +85,7 @@ def load(authored: Path) -> dict[Key, Entry]:
 
 
 def apply(db: Database, entries: dict[Key, Entry]) -> Report:
-    """Translate every printed face whose flavor hash matches; other faces keep the original."""
+    """Translate every face whose flavor hash matches, whatever its printed-text state."""
     applied = 0
     used: set[Key] = set()
     cards = {
@@ -96,11 +96,7 @@ def apply(db: Database, entries: dict[Key, Entry]) -> Report:
     for row in db.rows("printing_face"):
         values = row.values
         unit = values["flavor_unit_id"]
-        if (
-            unit is None
-            or values["card_id"] not in cards
-            or values["printed_text_state"] in {"unknown", "omitted"}
-        ):
+        if unit is None or values["card_id"] not in cards:
             continue
         source = db.select("text_unit", db.columns("text_unit"), where={"id": unit})
         if len(source) != 1:

@@ -34,6 +34,9 @@ coverage and never implies an adopted definition or an active translation.
 `current_references.adopted()` reads the shared current glossary and validates
 source-backed exact names before lookup. Card-name and term references require a
 unique exact concept; no trimming, NFKC, case folding or card-ID guessing occurs.
+The current build adapter resolves a recognized card-name reference without a
+concept to its own exact spelling, which verification checks against the source;
+an ambiguous concept remains pending.
 The current vocabulary adapter requires active derived catalog codes. Composite
 vocabulary keeps its separate roles, and unknown or ambiguous references remain
 pending. Substring mentions are diagnostics, not semantic bindings.

@@ -24,7 +24,7 @@ from sve_carddb.card_extras import (
     populate_card_extras,
     require_card_extras_ready,
 )
-from sve_carddb.catalog.adoption_sources import SOURCE_RECIPE_PATHS
+from sve_carddb.catalog.adoption_sources import SOURCE_RECIPE_PATHS, PinnedRepository
 from sve_carddb.image_variants import DEFAULT_RECIPE
 from sve_carddb.products import (
     FrozenProducts,
@@ -49,6 +49,14 @@ from sve_carddb.snapshot.offline_names import composer
 from sve_carddb.snapshot.project import Decisions, Projection, Settings, project
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.source_corrections import FrozenImages
+from sve_carddb.template_parameter_rules.current import load as load_rules
+from sve_carddb.template_parameters.current_references import adopted
+from sve_carddb.template_translations.current import read_templates, validate_templates
+from sve_carddb.template_translations.current_build import apply as apply_templates
+from sve_carddb.template_translations.current_references import (
+    References as TemplateReferences,
+)
+from sve_carddb.template_translations.current_sources import Sources as TemplateSources
 from sve_carddb.text_observations import (
     FrozenTexts,
     RegionalTexts,
@@ -80,7 +88,13 @@ if TYPE_CHECKING:
     from sve_carddb.image_assets import ImageBuild
     from sve_carddb.products import ProductIdentities
     from sve_carddb.registry.records import CorrectionEvidence
+    from sve_carddb.template_translations.current import Validated
+    from sve_carddb.text_observations.vocabulary import Vocabulary
     from sve_carddb.translations.current_names import Names
+
+
+# Templates and flavor translate Japanese source text into this display language.
+LANG = "zh-Hant"
 
 
 class RegionalInput(RecordData):
@@ -253,6 +267,32 @@ def _translation_uses(
     if inputs.translation_inputs() is None:
         return ()
     return uses_sorted(_translation_sources(inputs, build, stores)[1].uses)
+
+
+def _templates(
+    inputs: AdoptionInputs,
+    build: BuildContext,
+    stores: dict[str, Path],
+    vocabulary: Vocabulary,
+) -> Validated | None:
+    """Effect templates belong to the translation entry; validate them once per build."""
+    if inputs.translation_inputs() is None:
+        return None
+    repository = PinnedRepository(inputs.repository)
+    templates = read_templates(repository, inputs.authored_revision)
+    if not templates.records:
+        return None
+    found = adopted(
+        templates.glossary, TranslationSources(stores, inputs.repository, build)
+    )
+    references = TemplateReferences(
+        card_names=found.card_names,
+        terms=found.terms,
+        vocabulary=vocabulary,
+        pins=found.pins,
+    )
+    rules = load_rules(repository, inputs.authored_revision)
+    return validate_templates(templates, TemplateSources(stores, references, rules))
 
 
 def _prepare_catalog(
@@ -475,6 +515,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             "en",
             "translation_evidence",
             "translation_names",
+            "translation_templates",
         )
     )
     derived = _derive_adoptions(adoptions, context, stores)
@@ -482,6 +523,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     configuration |= text_configuration(texts, vocabulary, ())
     context = BuildContext.from_inputs(inputs.revision, dependencies, configuration)
     flavor = load_flavor(inputs.repo / "authored")
+    templates = _templates(adoptions, context, stores, vocabulary)
     adoption_uses = (
         *_adoption_uses(adoptions, context, stores),
         *_translation_uses(adoptions, context, stores),
@@ -545,6 +587,9 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     links=link_result,
                 )
             flavor_report = apply_flavor(db, flavor)
+            template_report = (
+                None if templates is None else apply_templates(db, templates, LANG)
+            )
             link_uses = () if link_result is None else link_result.record.uses
             name_uses = () if name_result is None else name_result.record.uses
             expected = uses_sorted(
@@ -661,6 +706,9 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         ],
     }
     report["flavor_translations"] = dict[str, JsonValue](flavor_report.payload())
+    report["effect_translations"] = (
+        None if template_report is None else template_report.payload()
+    )
     if name_result is not None:
         report["name_application"] = name_result.report
     if image_report is not None:
@@ -707,6 +755,8 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     links=replay_links,
                 )
             apply_flavor(target, flavor)
+            if templates is not None:
+                apply_templates(target, templates, LANG)
             complete = input_record(
                 context,
                 (

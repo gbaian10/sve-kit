@@ -5,19 +5,19 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import create_database
+from sve_carddb.build_db import Json, create_database
 from sve_carddb.build_db.current import compile_current_build
-from sve_carddb.snapshot.values import canonical, digest, parse
+from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_translations.current import validate_templates
-from sve_carddb.template_translations.current_build import populate, populate_field
+from sve_carddb.template_translations.current_build import apply, labels
 from sve_carddb.template_translations.current_models import (
     DefinitionRecord,
     Variant,
     VariantRecord,
 )
 from sve_carddb.template_translations.current_render import render
+from sve_carddb.translations.direct import write
 from sve_carddb.translations.loader import load_glossary
-from sve_carddb.translations.name_sources import NameOwner
 
 from .build_db_fixtures import seed
 from .test_template_current import Case, current_case
@@ -25,6 +25,7 @@ from .test_template_current import Case, current_case
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from sve_carddb.build_db import Database
     from sve_carddb.template_translations.current import Validated
 
 __all__ = ("current_case",)
@@ -40,7 +41,7 @@ def test_low_confidence_renders_numeric_and_updates_without_changing_source(
 ) -> None:
     member = verified.members[0]
     result = render(
-        verified, member.entry.source_ref, "ctx:test", member.field_text, "zh-Hant", ()
+        verified, member.entry.source_ref, "ctx:test", member.field_text, "zh-Hant", {}
     )
     assert result.rendered is not None
     assert result.rendered.text == "Synthetic 2"
@@ -56,7 +57,7 @@ def test_low_confidence_renders_numeric_and_updates_without_changing_source(
         "ctx:test",
         member.field_text,
         "zh-Hant",
-        (),
+        {},
     )
     assert other.rendered is not None
     assert other.rendered.identity() == old_id
@@ -75,7 +76,7 @@ def test_low_confidence_renders_numeric_and_updates_without_changing_source(
         "ctx:test",
         member.field_text,
         "zh-Hant",
-        (),
+        {},
     )
     assert other.rendered is not None
     assert other.rendered.identity() != old_id
@@ -91,7 +92,7 @@ def test_missing_or_unresolved_piece_falls_back_whole_field(
     )
     missing = replace(verified, inputs=replace(verified.inputs, records=definitions))
     assert render(
-        missing, member.entry.source_ref, "ctx:test", member.field_text, "zh-Hant", ()
+        missing, member.entry.source_ref, "ctx:test", member.field_text, "zh-Hant", {}
     ).issues == ("missing_template_translation",)
     assert render(
         replace(verified, matches=()),
@@ -99,13 +100,13 @@ def test_missing_or_unresolved_piece_falls_back_whole_field(
         "ctx:test",
         member.field_text,
         "zh-Hant",
-        (),
+        {},
     ).issues == ("unmatched_template_source",)
     with pytest.raises(
         ValueError, match=r"^Template field source hash differs from its context$"
     ):
         render(
-            verified, member.entry.source_ref, "ctx:test", "different", "zh-Hant", ()
+            verified, member.entry.source_ref, "ctx:test", "different", "zh-Hant", {}
         )
 
 
@@ -134,7 +135,7 @@ def test_variant_is_never_automatically_selected_and_pin_must_exist(
         inputs=replace(verified.inputs, records=(*verified.inputs.records, variant)),
     )
     result = render(
-        updated, member.entry.source_ref, "ctx:test", member.field_text, "zh-Hant", ()
+        updated, member.entry.source_ref, "ctx:test", member.field_text, "zh-Hant", {}
     )
     assert result.rendered is not None
     assert result.rendered.text == "Synthetic 2"
@@ -144,7 +145,7 @@ def test_variant_is_never_automatically_selected_and_pin_must_exist(
         "ctx:test",
         member.field_text,
         "zh-Hant",
-        (),
+        {},
         variants=((target.data.template_id, "test"),),
     )
     assert result.rendered is not None
@@ -158,7 +159,7 @@ def test_variant_is_never_automatically_selected_and_pin_must_exist(
             "ctx:test",
             member.field_text,
             "zh-Hant",
-            (),
+            {},
             variants=((target.data.template_id, "absent"),),
         )
 
@@ -169,46 +170,127 @@ def test_shared_glossary_reader_accepts_current_inventory(current_case: Case) ->
     assert not snapshot.current_records()
 
 
-def test_current_database_has_no_fake_decision_and_checks_real_owner(
+def seeded(db: Database, text: str) -> None:
+    seed(db)
+    with db.transaction():
+        db.update(
+            "text_unit",
+            {"id": "text"},
+            {"text": text, "content_hash": digest(text.encode())},
+        )
+
+
+def test_apply_renders_by_source_hash_and_counts_every_field(
     verified: Validated,
 ) -> None:
     member = verified.members[0]
     schema = compile_current_build(("translation_templates",))
     with create_database(schema) as db:
-        seed(db)
+        seeded(db, member.field_text)
         with db.transaction():
-            db.update(
+            report = apply(db, verified, "zh-Hant")
+        # The seeded unit is also both owners' section 0, which no template covers.
+        assert report.payload() == {
+            "fields": 3,
+            "translated": 1,
+            "original": 2,
+            "low_confidence": 1,
+            "fallback_reasons": {"unmatched_template_source": 2},
+            "pending_parameter_causes": {},
+        }
+        use = db.rows("translation_use")[0].values
+        assert (use["face_revision_id"], use["field"], use["ordinal"]) == (
+            "revision",
+            "effect",
+            None,
+        )
+        row = db.rows("translation")[0].values
+        assert (row["text"], row["origin"], row["low_confidence"]) == (
+            "Synthetic 2",
+            "machine",
+            True,
+        )
+        assert "decision_id" not in db.columns("sentence_template")
+        binding = db.rows("text_template_binding")[0].values
+        assert binding["params"] == Json({"slot_0": 2})
+
+
+def test_apply_keeps_unconfirmed_and_already_translated_sources_original(
+    verified: Validated,
+) -> None:
+    member = verified.members[0]
+    schema = compile_current_build(("translation_templates",))
+    with create_database(schema) as db:
+        seeded(db, member.field_text)
+        with db.transaction():
+            db.update("card", {"id": "card"}, {"identity_state": "provisional"})
+            assert apply(db, verified, "zh-Hant").reasons == {"unconfirmed_identity": 3}
+        assert db.rows("translation") == ()
+    with create_database(schema) as db:
+        seeded(db, member.field_text)
+        with db.transaction():
+            write(
+                db,
+                {"face_revision_id": "revision"},
+                field="name",
+                lang="zh-Hant",
+                source_unit_id="text",
+                text="名稱",
+                origin="machine",
+                low_confidence=False,
+            )
+            report = apply(db, verified, "zh-Hant")
+        assert report.translated == 0
+        assert report.reasons["shared_source_translated"] == 1
+        assert [r.values["text"] for r in db.rows("translation")] == ["名稱"]
+
+
+def test_labels_read_selected_vocabulary_and_name_translations(
+    verified: Validated,
+) -> None:
+    schema = compile_current_build(("translation_templates",))
+    with create_database(schema) as db:
+        seeded(db, verified.members[0].field_text)
+        with db.transaction():
+            db.insert(
                 "text_unit",
-                {"id": "text"},
                 {
-                    "text": member.field_text,
-                    "content_hash": digest(member.field_text.encode()),
+                    "id": "name",
+                    "lang": "ja",
+                    "text": "合成カード",
+                    "content_hash": digest("合成カード".encode()),
                 },
             )
-            populate(db, verified)
-            result = populate_field(
+            db.update("face_revision", {"id": "revision"}, {"name_unit_id": "name"})
+            write(
                 db,
-                verified,
-                member.entry.source_ref,
-                NameOwner("face_revision", "revision"),
-                "effect",
-                "zh-Hant",
+                {"face_revision_id": "revision"},
+                field="name",
+                lang="zh-Hant",
+                source_unit_id="name",
+                text="合成卡",
+                origin="machine",
+                low_confidence=True,
             )
-            assert result.rendered is not None
-            assert len(db.rows("text_template_binding")) == 1
-            assert db.rows("translation")[0].values["low_confidence"] is True
-            assert "decision_id" not in db.columns("sentence_template")
-            assert parse(result.rendered.bindings[0].params) == {"slot_0": 2}
-        with db.transaction():
-            unknown = populate_field(
+            vocabulary = db.rows("vocabulary")[0].values
+            write(
                 db,
-                verified,
-                member.entry.source_ref,
-                NameOwner("printing_face", "printing", "face"),
-                "effect",
-                "zh-Hant",
+                {
+                    "vocabulary_kind": str(vocabulary["kind"]),
+                    "vocabulary_code": str(vocabulary["code"]),
+                },
+                field="label",
+                lang="zh-Hant",
+                source_unit_id=str(vocabulary["label_unit_id"]),
+                text="詞彙",
+                origin="project",
+                low_confidence=False,
             )
-            assert unknown.issues == ("unknown_owner_source",)
+        found = labels(db, "zh-Hant")
+    name = found["card_name", "合成カード", "zh-Hant"]
+    assert (name.text, name.origin, name.low_confidence) == ("合成卡", "machine", True)
+    key = str(vocabulary["kind"]) + ":" + str(vocabulary["code"])
+    assert found["vocabulary", key, "zh-Hant"].text == "詞彙"
 
 
 def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore[too-many-locals] -- one sealed source field exercises the actual partition and renderer together
@@ -292,7 +374,7 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
     validated = validate_templates(inputs, sources)
     member = generated.entries[0]
     result = render(
-        validated, member.entry.source_ref, "ctx:test", member.field_text, "zh-Hant", ()
+        validated, member.entry.source_ref, "ctx:test", member.field_text, "zh-Hant", {}
     )
     assert result.rendered is not None
     assert result.rendered.text == "BODY 2REMINDER\nBODY 3"
@@ -308,6 +390,7 @@ def test_reference_interpolation_tracks_exact_positions_and_requires_target_labe
         Label,
         _fragment,
     )
+    from sve_carddb.template_translations.text import parse as parse_text  # ruff: ignore[import-outside-top-level] -- finite placeholder language
 
     definition = next(
         r for r in verified.inputs.records if isinstance(r, DefinitionRecord)
@@ -330,24 +413,17 @@ def test_reference_interpolation_tracks_exact_positions_and_requires_target_labe
         member,
         canonical({slot.name: {"kind": "term", "id": "term:synthetic"}}),
     )
-    target = verified.inputs.translations()[0]
-    target = target.model_copy(
-        update={
-            "data": target.data.model_copy(update={"text": "前{{slot_0}}後{{slot_0}}"})
-        }
-    )
-    assert _fragment(binding, target, "zh-Hant", ()) is None
+    parts = parse_text("前{{slot_0}}後{{slot_0}}", definition.data.parameter_schema)
+    assert _fragment(binding, parts, "zh-Hant", {}) is None
     label = Label("term", "term:synthetic", "zh-Hant", "參照", "machine", True, True)
-    result = _fragment(binding, target, "zh-Hant", (label,))
+    result = _fragment(
+        binding, parts, "zh-Hant", {("term", "term:synthetic", "zh-Hant"): label}
+    )
     assert result is not None
     text, positions = result
     assert text == "前參照後參照"
     assert [(p.start, p.end) for p in positions] == [(1, 3), (4, 6)]
     assert all(p.label.emphasis is True and p.label.low_confidence for p in positions)
-    with pytest.raises(
-        ValueError, match=r"^Current reference label selection must be unique$"
-    ):
-        _fragment(binding, target, "zh-Hant", (label, label))
 
 
 def test_current_package_splits_yaml_and_preserves_shared_closure(
@@ -377,3 +453,57 @@ def test_current_package_splits_yaml_and_preserves_shared_closure(
     )
     assert all(len(raw) < 1048576 for _, raw, _ in package.content)
     assert all(b"decisions:" not in raw for _, raw, _ in package.content)
+
+
+def test_invalid_placeholder_keeps_only_that_field_original(
+    verified: Validated,
+) -> None:
+    member = verified.members[0]
+    target = verified.inputs.translations()[0]
+    broken = target.model_copy(
+        update={"data": target.data.model_copy(update={"text": "壞{{unknown}}"})}
+    )
+    records = tuple(broken if r == target else r for r in verified.inputs.records)
+    result = render(
+        replace(verified, inputs=replace(verified.inputs, records=records)),
+        member.entry.source_ref,
+        "ctx:test",
+        member.field_text,
+        "zh-Hant",
+        {},
+    )
+    assert result.issues == ("invalid_template_translation",)
+
+
+@pytest.mark.parametrize("doubtful", [False, True])
+def test_low_confidence_recognition_rule_marks_the_rendered_field(
+    current_case: Case, *, doubtful: bool
+) -> None:
+    from sve_carddb.template_parameters.references import References  # ruff: ignore[import-outside-top-level] -- no synthetic terms
+    from sve_carddb.template_translations.current_sources import Sources  # ruff: ignore[import-outside-top-level] -- one current source scan
+
+    rules = current_case.sources.rules
+    rules = rules.model_copy(
+        update={
+            "rules": tuple(
+                r.model_copy(update={"low_confidence": doubtful}) for r in rules.rules
+            )
+        }
+    )
+    target = current_case.inputs.translations()[0]
+    certain = target.model_copy(update={"low_confidence": False})
+    inputs = replace(
+        current_case.inputs,
+        records=tuple(
+            certain if r == target else r for r in current_case.inputs.records
+        ),
+    )
+    sources = Sources(current_case.sources.stores, References(), rules)
+    found = validate_templates(inputs, sources)
+    member = found.members[0]
+    assert member.low_confidence is doubtful
+    result = render(
+        found, member.entry.source_ref, "ctx:test", member.field_text, "zh-Hant", {}
+    )
+    assert result.rendered is not None
+    assert result.rendered.low_confidence is doubtful

@@ -175,7 +175,7 @@ def test_candidate_never_renders_projects_or_bypasses_source_checks(
     assert record.record_key not in verified.low_confidence
     assert verified.target_records == {}
     assert render(
-        verified, member.entry.source_ref, "ctx:test", member.field_text, "zh-Hant", ()
+        verified, member.entry.source_ref, "ctx:test", member.field_text, "zh-Hant", {}
     ).issues == ("missing_template_translation",)
     with pytest.raises(
         ValueError, match=r"^Template pin references a missing current variant$"
@@ -186,7 +186,7 @@ def test_candidate_never_renders_projects_or_bypasses_source_checks(
             "ctx:test",
             member.field_text,
             "zh-Hant",
-            (),
+            {},
             variants=((definitions[0].data.id, record.data.candidate_id),),
         )
     with create_database(compile_current_build(("translation_templates",))) as db:

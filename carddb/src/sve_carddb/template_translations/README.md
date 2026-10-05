@@ -59,17 +59,23 @@ semantic interpreters have been removed. Git retains their history; current buil
 need no legacy template catalog or historical environment. Shared member, schema
 and family checks live in `members` and `definitions`.
 
-`current_build.populate()` projects the verified definitions and current targets
-into the shared current DB schema. `populate_field()` checks each face/printing
-field before writing contexts, uses, bindings and selections. `current_render`
-requires the whole field, appends anchored reminders once, preserves layout,
-and returns fallback issues instead of a partial translation when any fragment or
-reference label is missing. It returns exact reference positions and emphasis;
-low confidence propagates through actual template and label dependencies. Named
-variants are selected only by explicit pins. `render-v2` identity excludes notes,
-receipts and the representative source locator. Unofficial card text does not gain
-an official authority from an individual official reference label.
-
-The command/export consumers must select this current schema and synchronize
-public origin, confidence and emphasis fields before enabling current output. Frozen raw inputs for CI must come from the project's
+`current_build.apply()` is the export-offline consumer. It projects the verified
+definitions and current targets into the shared current DB schema, then renders
+every Japanese main text and section of face revisions and printed faces whose
+exact source hash a template source covers. Eligibility is the source hash and a
+confirmed card identity, not `printed_text_state`. One source text has one
+context and selection; a differing reading of an already translated text stays
+original. `current_render` requires the whole field, appends anchored reminders
+once, preserves layout, and returns fallback issues instead of a partial
+translation when any fragment, placeholder or reference label is missing. A
+translation with invalid placeholders falls back per field rather than failing
+the build. Reference labels come from glossary choices, selected vocabulary-label
+translations and selected name translations. A recognized card-name reference
+without a glossary concept keeps its own source spelling or that text's selected
+name translation and marks the field low confidence; an ambiguous concept stays
+pending. Low confidence propagates from definitions, translations, labels, low
+confidence recognition rules and these fallbacks. Named variants are selected only
+by explicit pins. `render-v2` identity excludes notes, receipts and the
+representative source locator. Unofficial card text does not gain an official
+authority from an individual official reference label. Frozen raw inputs for CI must come from the project's
 private testdata input, never a maintainer-only path or a live website.
