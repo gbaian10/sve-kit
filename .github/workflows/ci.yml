@@ -111,7 +111,26 @@ jobs:
         run: |
           SKIP="$(uv run .github/ci/hooks.py skip repo)"
           export SKIP GITLEAKS_RANGE="${BASE}..${HEAD}"
-          uv run --project carddb --locked --no-default-groups --group dev pre-commit run --all-files --hook-stage manual --show-diff-on-failure
+          # Shared configuration and action metadata can invalidate otherwise unchanged files.
+          full_scan_inputs=(
+            .pre-commit-config.yaml .github/ci/hooks.toml .github/ci/hooks.py
+            .github/workflows .github/actionlint.yaml .github/actionlint.yml
+            .github/zizmor.yml zizmor.yml
+            ':(glob)**/action.yml' ':(glob)**/action.yaml'
+            ':(glob)**/.markdownlint*' ':(glob)**/.editorconfig'
+            ':(glob)**/.gitattributes' ':(glob)**/.gitleaks*'
+            taplo.toml .taplo.toml uv.toml carddb/uv.toml
+            carddb/pyproject.toml carddb/uv.lock
+          )
+          scope=(--all-files)
+          # Deleted inputs never reach pre-commit's filename filters, but can break the ER build.
+          if [ "$GITHUB_EVENT_NAME" = pull_request ] &&
+            git diff --quiet "${BASE}...${HEAD}" -- "${full_scan_inputs[@]}" &&
+            git diff --quiet --no-renames --diff-filter=D "${BASE}...${HEAD}" -- docs/schema/; then
+            scope=(--from-ref "$BASE" --to-ref "$HEAD")
+          fi
+          echo "pre-commit scope: ${scope[*]}"
+          uv run --project carddb --locked --no-default-groups --group dev pre-commit run "${scope[@]}" --hook-stage manual --show-diff-on-failure
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
         with:
