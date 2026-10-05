@@ -5,6 +5,8 @@ CDN GETs. It accepts only an already formally gated, frozen **2.0** release;
 it never changes `preview-*` into a formal data version. Snapshot 1.x previews
 have no R2 upload command. No credentials or account, bucket or CDN hostname
 are stored in the repository or passed through CI.
+This restriction refers to the uploader; Worker deployment configuration declares
+its bound bucket and hostname, while credentials and account IDs remain outside the repository.
 
 ## Offline preparation
 
