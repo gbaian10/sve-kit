@@ -38,18 +38,13 @@ export interface Printing {
   readonly variant: "standard" | "alt" | "signed"
   readonly rarity: string | null
   readonly premium?: boolean
-  /**
-   * Source image per face ordinal, for the real-data build; the synthetic build paints colours.
-   * A null entry marks that face's image as missing instead of painting a placeholder.
-   */
-  readonly imagePaths?: readonly (string | null)[]
   readonly product: string
   readonly stamp?: string
   /** Image state for the front face; back faces reuse it. */
   readonly image?: "approved" | "pending" | "withdrawn" | "missing"
 }
 
-export interface Qa {
+interface Qa {
   readonly id: string
   readonly number: string
   readonly question: Text

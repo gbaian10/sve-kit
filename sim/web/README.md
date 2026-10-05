@@ -223,15 +223,6 @@ the generator that breaks the contract fails the tests, not the pages.
 (for a real local export), else the fixture. `SVE_PREVIEW_DIR` is served under `/cdn-preview`.
 The files are canonical JSON and are excluded from Prettier.
 
-`bun run fixture:local --limit 300 --sets BP01,BP02` builds a realistic local snapshot from the
-private Japanese card list (`SVE_TEST_SNAPSHOT`) and the crawled card images under `SVE_DATA_DIR`,
-into `SVE_CDN_DIR` (or `--out`), through the same generator (`scripts/fixture/local.ts`). It is
-for demos on this machine only: it never goes into git, and it goes away once real snapshots
-ship. Cards get one JP printing, no translations and no engine data; Q&A is shared between the
-cards it names; vocabulary is whatever the records use. The output directory must be outside the
-repository and the card list's directory, and must not contain `SVE_DATA_DIR`; an existing directory
-is only replaced when it carries the `.sve-local-snapshot` marker the tool writes.
-
 ## Search and the card list
 
 `/cards` is described by its URL alone (`docs/sim/web-architecture.md` §2.1): `src/domain/query/`
