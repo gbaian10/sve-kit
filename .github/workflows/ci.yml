@@ -111,7 +111,14 @@ jobs:
         run: |
           SKIP="$(uv run .github/ci/hooks.py skip repo)"
           export SKIP GITLEAKS_RANGE="${BASE}..${HEAD}"
-          uv run --project carddb --locked --no-default-groups --group dev pre-commit run --all-files --hook-stage manual --show-diff-on-failure
+          # PRs check only their changed files, like the local commit hook; YAML hooks over all of
+          # authored/ took most of this job. A hook config change or main still checks every file.
+          scope=(--all-files)
+          if [ "$GITHUB_EVENT_NAME" = pull_request ] && git diff --quiet "${BASE}...${HEAD}" -- .pre-commit-config.yaml .github/ci/hooks.toml; then
+            scope=(--from-ref "$BASE" --to-ref "$HEAD")
+          fi
+          echo "pre-commit scope: ${scope[*]}"
+          uv run --project carddb --locked --no-default-groups --group dev pre-commit run "${scope[@]}" --hook-stage manual --show-diff-on-failure
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
         with:
