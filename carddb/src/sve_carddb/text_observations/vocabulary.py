@@ -1,7 +1,7 @@
 """Exact raw-field bindings derived from adoptions or pinned for synthetic staging."""
 
-from sve_carddb.catalog.models import Term  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves the derived term models at runtime
-from sve_carddb.products.models import Code  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves constrained aliases at runtime
+from sve_carddb.catalog.models import Term
+from sve_carddb.products.models import Code
 from sve_carddb.registry.records import RecordData, Region
 
 

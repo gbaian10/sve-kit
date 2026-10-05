@@ -1,7 +1,5 @@
 """Editable current template values retain semantic identity without adoption receipts."""
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves constrained wire annotations
-
 from typing import Annotated, Literal, Self
 
 from pydantic import Field, field_validator, model_validator

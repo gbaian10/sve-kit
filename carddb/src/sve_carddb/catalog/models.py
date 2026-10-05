@@ -2,7 +2,6 @@
 
 from typing import Literal
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves nested models and constrained aliases at runtime
 from sve_carddb.catalog.symbols import Symbol
 from sve_carddb.products.models import Code, Lang, Language, LocalizedText
 from sve_carddb.registry.records import RecordData, Region, Text

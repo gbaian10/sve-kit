@@ -4,7 +4,6 @@ from typing import Literal
 
 from pydantic import JsonValue, model_validator
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves nested models at runtime.
 from sve_carddb.build_inputs import SourceUse, uses_sorted
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.registry.records import Date, RecordData, Region, Text, UInt

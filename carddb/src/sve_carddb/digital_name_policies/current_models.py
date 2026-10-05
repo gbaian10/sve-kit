@@ -1,7 +1,5 @@
 """Editable name rules contain business conditions, not an approval event graph."""
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves nested models at runtime
-
 from typing import Annotated, Literal
 
 from pydantic import Field, model_validator

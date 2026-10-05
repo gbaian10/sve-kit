@@ -1,7 +1,5 @@
 """Strict digital-link-adoption format 1; coverage is deliberately unsupported."""
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves nested annotations at runtime
-
 from typing import Annotated, Literal
 
 from pydantic import Field, field_validator, model_validator

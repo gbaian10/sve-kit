@@ -1,7 +1,5 @@
 """Closed portable policy envelopes, separate from human digital-link adoptions."""
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves constrained and nested annotations at runtime
-
 from typing import Annotated, Literal
 
 from pydantic import Field, JsonValue, field_validator

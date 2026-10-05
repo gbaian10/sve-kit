@@ -1,7 +1,5 @@
 """Shared source, subject and owner types for current translation inputs."""
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves annotations at runtime
-
 from typing import Annotated, Literal
 from urllib.parse import urlsplit
 

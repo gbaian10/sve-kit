@@ -4,11 +4,11 @@ from typing import Protocol
 
 from pydantic import Field, JsonValue
 
-from sve_carddb.build_inputs import Source  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves fields at runtime
+from sve_carddb.build_inputs import Source
 from sve_carddb.html import parse, select_all, select_one
 from sve_carddb.registry.records import Observation, RecordData, Region
 from sve_carddb.snapshot.values import canonical, digest
-from sve_carddb.text_observations.presence import EffectPresence  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves evidence fields
+from sve_carddb.text_observations.presence import EffectPresence
 
 
 class FaceContent(RecordData):

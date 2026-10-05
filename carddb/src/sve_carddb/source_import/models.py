@@ -8,7 +8,7 @@ from urllib.parse import urljoin, urlsplit
 
 from pydantic import Field, field_validator, model_validator
 
-from sve_carddb.build_inputs import FilePin, Revision  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves these nested models at runtime.
+from sve_carddb.build_inputs import FilePin, Revision
 from sve_carddb.registry.records import Hash, RecordData, Region, Text, UInt
 from sve_carddb.snapshot.values import canonical, digest, parse
 from sve_carddb.urls import canonicalize

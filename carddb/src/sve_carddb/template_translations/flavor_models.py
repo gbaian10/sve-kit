@@ -1,7 +1,5 @@
 """Independent flavor wire types do not alter the frozen effect recognition recipe."""
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves wire annotations
-
 from dataclasses import dataclass
 from typing import Annotated, Literal
 
