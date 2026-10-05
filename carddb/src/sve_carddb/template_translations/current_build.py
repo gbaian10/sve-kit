@@ -1,6 +1,10 @@
 """Project validated templates and their complete fields into the current build schema."""
 
+from collections import Counter
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
+from pydantic import JsonValue
 
 from sve_carddb.build_db import Json
 from sve_carddb.build_db.rows import insert_exact
@@ -11,10 +15,12 @@ from sve_carddb.template_translations.current_models import (
     TranslationRecord,
     VariantRecord,
 )
-from sve_carddb.template_translations.current_render import Label, Result, render
-from sve_carddb.translations.name_sources import NameOwner, _row
+from sve_carddb.template_translations.current_render import Label, render
+from sve_carddb.translations.name_sources import NameOwner
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from sve_carddb.build_db import Database, Value
     from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.template_translations.current import Validated
@@ -98,15 +104,16 @@ def populate(db: Database, validated: Validated) -> None:
             )
 
 
-def labels(db: Database, lang: str) -> tuple[Label, ...]:
-    """Read the already validated shared glossary and catalog, not a second word list."""
-    result = []
+def labels(db: Database, lang: str) -> dict[tuple[str, str, str], Label]:
+    """Read the already validated shared glossary, catalog and names, not a second word list."""
+    found: list[Label] = []
+    terms = {row.values["id"]: row.values for row in db.rows("glossary_term")}
     for choice in db.select(
         "glossary_translation", db.columns("glossary_translation"), where={"lang": lang}
     ):
         value = choice.values
-        term = _row(db, "glossary_term", str(value["term_id"]))
-        result.append(
+        term = terms[value["term_id"]]
+        found.append(
             Label(
                 "term",
                 str(value["term_id"]),
@@ -117,51 +124,193 @@ def labels(db: Database, lang: str) -> tuple[Label, ...]:
                 term["emphasis"] if isinstance(term["emphasis"], bool) else None,
             )
         )
-    for vocabulary in db.select("vocabulary", db.columns("vocabulary")):
-        value = vocabulary.values
+    units = {row.values["id"]: row.values for row in db.rows("text_unit")}
+    vocabulary, names = _selected_labels(db, lang, units)
+    for row in db.rows("vocabulary"):
+        value = row.values
         if not value["active"]:
             continue
-        unit = _row(db, "text_unit", str(value["label_unit_id"]))
-        if unit["lang"] != lang:
-            continue
-        result.append(
-            Label(
-                "vocabulary",
-                str(value["kind"]) + ":" + str(value["code"]),
-                lang,
+        key = str(value["kind"]) + ":" + str(value["code"])
+        unit = units[value["label_unit_id"]]
+        if unit["lang"] == lang:
+            text, origin, low = (
                 str(unit["text"]),
                 str(value["origin"] or "project"),
                 bool(value["low_confidence"]),
-                None,
             )
-        )
-    return tuple(result)
-
-
-def populate_field(  # ruff: ignore[too-many-arguments] -- source, physical owner, field and locale independently constrain one rendered use
-    db: Database,
-    validated: Validated,
-    ref: SourceRef,
-    owner: NameOwner,
-    field: str,
-    lang: str,
-    *,
-    ordinal: int | None = None,
-    variants: tuple[tuple[str, str], ...] = (),
-) -> Result:
-    """Recheck each actual owner; equal shared text never bypasses printed-field eligibility."""
-    source = _source(db, owner, field, ordinal)
-    if source is None:
-        return Result(None, ("unknown_owner_source",))
-    unit_id, text = source
-    ending = (
-        f"/sections/{ordinal}"
-        if field == "section"
-        else "/" + ("text" if field == "effect" else field)
+        elif key in vocabulary:
+            text, origin, low = vocabulary[key]
+            low = low or bool(value["low_confidence"])
+        else:
+            continue
+        found.append(Label("vocabulary", key, lang, text, origin, low, None))
+    found.extend(
+        Label("card_name", source, lang, text, origin, low, None)
+        for source, (text, origin, low) in sorted(names.items())
     )
-    if not ref.locator.endswith(ending) or ref.text_hash != digest(text.encode()):
-        raise ValueError("Template use must match its exact owner field and source")
-    context_id = (
+    # Glossary, vocabulary and name keys are primary keys of their own tables.
+    return {(label.kind, label.identifier, label.lang): label for label in found}
+
+
+def _selected_labels(
+    db: Database, lang: str, units: Mapping[Value, Mapping[str, Value]]
+) -> tuple[dict[str, tuple[str, str, bool]], dict[str, tuple[str, str, bool]]]:
+    """Selected vocabulary-label and name translations become reference labels."""
+    contexts = {
+        row.values["id"]: row.values["source_unit_id"]
+        for row in db.rows("translation_context")
+    }
+    translations = {row.values["id"]: row.values for row in db.rows("translation")}
+    selected = {
+        row.values["context_id"]: translations[row.values["translation_id"]]
+        for row in db.rows("translation_selection")
+        if row.values["target_lang"] == lang
+    }
+    vocabulary: dict[str, tuple[str, str, bool]] = {}
+    names: dict[str, tuple[str, str, bool]] = {}
+    for row in db.rows("translation_use"):
+        use = row.values
+        chosen = selected.get(use["context_id"])
+        if chosen is None:
+            continue
+        value = (
+            str(chosen["text"]),
+            str(chosen["origin"]),
+            bool(chosen["low_confidence"]),
+        )
+        if use["field"] == "label" and use["vocabulary_kind"] is not None:
+            vocabulary[
+                str(use["vocabulary_kind"]) + ":" + str(use["vocabulary_code"])
+            ] = value
+        elif use["field"] == "name":
+            source = units[contexts[use["context_id"]]]
+            if source["lang"] == "ja":
+                names[str(source["text"])] = value
+    return vocabulary, names
+
+
+@dataclass(frozen=True)
+class Report:
+    fields: int
+    translated: int
+    low_confidence: int
+    reasons: Counter[str]
+    pending: Counter[str]
+
+    def payload(self) -> dict[str, JsonValue]:
+        """Counts and reason codes only; the report never repeats card text."""
+        return {
+            "fields": self.fields,
+            "translated": self.translated,
+            "original": self.fields - self.translated,
+            "low_confidence": self.low_confidence,
+            "fallback_reasons": dict[str, JsonValue](sorted(self.reasons.items())),
+            "pending_parameter_causes": dict[str, JsonValue](
+                sorted(self.pending.items())
+            ),
+        }
+
+
+@dataclass(frozen=True)
+class _Field:
+    owner: NameOwner
+    card_id: Value
+    field: str
+    ordinal: int | None
+    unit_id: str
+
+
+def apply(db: Database, validated: Validated, lang: str) -> Report:
+    """Render each Japanese effect field whose exact source hash a template covers."""
+    populate(db, validated)
+    application = _Application(db, validated, lang)
+    for item in _fields(db):
+        application.field(item)
+    return application.report()
+
+
+class _Application:
+    def __init__(self, db: Database, validated: Validated, lang: str) -> None:
+        self.db, self.validated, self.lang = db, validated, lang
+        self.labels = labels(db, lang)
+        self.refs: dict[tuple[str, int | None, str], SourceRef] = {}
+        for ref in sorted(
+            validated.field_members, key=lambda r: (r.source_version_id, r.locator)
+        ):
+            head, _, section = ref.locator.partition("/sections/")
+            key = ("section", int(section)) if head != ref.locator else ("effect", None)
+            self.refs.setdefault((*key, ref.text_hash), ref)
+        self.units = {row.values["id"]: row.values for row in db.rows("text_unit")}
+        self.cards = {row.values["id"]: row.values for row in db.rows("card")}
+        self.taken = {
+            row.values["context_id"]
+            for row in db.rows("translation_selection")
+            if row.values["target_lang"] == lang
+        }
+        self.written: dict[str, tuple[tuple[str, int | None], Rendered]] = {}
+        self.reasons: Counter[str] = Counter()
+        self.pending: Counter[str] = Counter()
+        self.total = self.translated = self.low = 0
+
+    def report(self) -> Report:
+        return Report(self.total, self.translated, self.low, self.reasons, self.pending)
+
+    def field(self, item: _Field) -> None:
+        """Count every Japanese field; only a complete render replaces the original."""
+        unit = self.units[item.unit_id]
+        if unit["lang"] != "ja":
+            return
+        self.total += 1
+        text = str(unit["text"])
+        if unit["content_hash"] != digest(text.encode()):
+            raise ValueError("Template owner text has invalid exact hash")
+        ref = self.refs.get((item.field, item.ordinal, str(unit["content_hash"])))
+        if self.cards[item.card_id]["identity_state"] != "confirmed":
+            self.reasons["unconfirmed_identity"] += 1
+        elif ref is None:
+            self.reasons["unmatched_template_source"] += 1
+        else:
+            rendered = self._render(item, ref, text)
+            if rendered is not None:
+                _use(self.db, item, _context(item.unit_id))
+                self.translated += 1
+                self.low += rendered.low_confidence
+
+    def _render(self, item: _Field, ref: SourceRef, text: str) -> Rendered | None:
+        context_id = _context(item.unit_id)
+        previous = self.written.get(item.unit_id)
+        if previous is not None and previous[0] == (item.field, item.ordinal):
+            return previous[1]
+        result = render(self.validated, ref, context_id, text, self.lang, self.labels)
+        if result.rendered is None:
+            self.reasons[result.issues[0]] += 1
+            self.pending.update(result.issues[1:])
+            return None
+        # One source text has one selection; a differing reading of it stays original.
+        if (previous is None and context_id in self.taken) or (
+            previous is not None and previous[1].text != result.rendered.text
+        ):
+            self.reasons["shared_source_translated"] += 1
+            return None
+        if previous is not None:
+            return previous[1]
+        insert_exact(
+            self.db,
+            "translation_context",
+            {
+                "id": context_id,
+                "source_unit_id": item.unit_id,
+                "semantic_variant": "default",
+            },
+            ("id",),
+        )
+        _rendered(self.db, result.rendered)
+        self.written[item.unit_id] = ((item.field, item.ordinal), result.rendered)
+        return result.rendered
+
+
+def _context(unit_id: str) -> str:
+    return (
         "ctx:"
         + digest(
             canonical(
@@ -173,101 +322,91 @@ def populate_field(  # ruff: ignore[too-many-arguments] -- source, physical owne
             )
         )[7:]
     )
-    result = render(
-        validated, ref, context_id, text, lang, labels(db, lang), variants=variants
-    )
-    if result.rendered is None:
-        return result
-    insert_exact(
-        db,
-        "translation_context",
-        {"id": context_id, "source_unit_id": unit_id, "semantic_variant": "default"},
-        ("id",),
-    )
+
+
+def _use(db: Database, item: _Field, context_id: str) -> None:
     use_id = (
         "use:"
         + digest(
             canonical(
                 {
                     "recipe": "use-v1",
-                    "owner": owner.payload(),
-                    "field": field,
-                    "ordinal": ordinal,
+                    "owner": item.owner.payload(),
+                    "field": item.field,
+                    "ordinal": item.ordinal,
                     "context_id": context_id,
                 }
             )
         )[7:]
     )
     values: dict[str, Value] = {name: None for group in OWNERS for name in group}
-    values.update(id=use_id, context_id=context_id, field=field, ordinal=ordinal)
-    if owner.kind == "face_revision":
-        values["face_revision_id"] = owner.identifier
+    values.update(
+        id=use_id, context_id=context_id, field=item.field, ordinal=item.ordinal
+    )
+    if item.owner.kind == "face_revision":
+        values["face_revision_id"] = item.owner.identifier
     else:
-        values.update(printing_id=owner.identifier, face_id=owner.face_id)
+        values.update(printing_id=item.owner.identifier, face_id=item.owner.face_id)
     insert_exact(db, "translation_use", values, ("id",))
-    _rendered(db, result.rendered)
+
+
+def _fields(db: Database) -> list[_Field]:
+    """Every main text and section of face revisions and printed faces, whatever their state."""
+    faces = {row.values["id"]: row.values["card_id"] for row in db.rows("face")}
+    result: list[_Field] = []
+    sections: dict[tuple[Value, ...], list[tuple[int, Value]]] = {}
+    for row in db.rows("face_text_section"):
+        value = row.values
+        sections.setdefault((value["revision_id"],), []).append(
+            (int(str(value["ordinal"])), value["text_unit_id"])
+        )
+    for row in db.rows("printing_text_section"):
+        value = row.values
+        sections.setdefault((value["printing_id"], value["face_id"]), []).append(
+            (int(str(value["ordinal"])), value["text_unit_id"])
+        )
+    for row in db.rows("face_revision"):
+        value = row.values
+        owner = NameOwner("face_revision", str(value["id"]))
+        result.extend(
+            _owner_fields(
+                owner,
+                faces[value["face_id"]],
+                value["effect_unit_id"],
+                sections.get((value["id"],), []),
+            )
+        )
+    for row in db.rows("printing_face"):
+        value = row.values
+        owner = NameOwner(
+            "printing_face", str(value["printing_id"]), str(value["face_id"])
+        )
+        result.extend(
+            _owner_fields(
+                owner,
+                value["card_id"],
+                value["printed_effect_unit_id"],
+                sections.get((value["printing_id"], value["face_id"]), []),
+            )
+        )
     return result
 
 
-def _source(  # ruff: ignore[complex-structure] -- each physical owner branch reads only its own known fields
-    db: Database, owner: NameOwner, field: str, ordinal: int | None
-) -> tuple[str, str] | None:
-    if (field == "section") != (ordinal is not None) or field not in {
-        "effect",
-        "section",
-    }:
-        raise ValueError("Unsupported template owner field or ordinal")
-    if owner.kind == "face_revision":
-        row = _row(db, "face_revision", owner.identifier)
-        card = _row(db, "face", str(row["face_id"]))["card_id"]
-        unit = row["effect_unit_id"]
-        query: dict[str, Value] = {"revision_id": owner.identifier, "ordinal": ordinal}
-        table = "face_text_section"
-        region = row["region"]
-    else:
-        printing = _row(db, "printing", owner.identifier)
-        rows = db.select(
-            "printing_face",
-            db.columns("printing_face"),
-            where={"printing_id": owner.identifier, "face_id": owner.face_id},
-        )
-        if len(rows) != 1:
-            raise ValueError("Template printing face is absent")
-        row = dict(rows[0].values)
-        if (
-            row["card_id"] != printing["card_id"]
-            or _row(db, "face", str(owner.face_id))["card_id"] != printing["card_id"]
-        ):
-            raise ValueError("Template printing face belongs to another card")
-        if row["printed_text_state"] in {"unknown", "omitted"}:
-            return None
-        card = printing["card_id"]
-        unit = row["printed_effect_unit_id"]
-        table = "printing_text_section"
-        query = {
-            "printing_id": owner.identifier,
-            "face_id": owner.face_id,
-            "ordinal": ordinal,
-        }
-        region = printing["region"]
-    if _row(db, "card", str(card))["identity_state"] != "confirmed":
-        return None
-    if field == "section":
-        sections = db.select(table, db.columns(table), where=query)
-        if len(sections) != 1:
-            raise ValueError("Template owner section is absent")
-        unit = sections[0].values["text_unit_id"]
-    if unit is None:
-        return None
-    original = _row(db, "text_unit", str(unit))
-    text = original["text"]
-    if (
-        not isinstance(text, str)
-        or original["content_hash"] != digest(text.encode())
-        or original["lang"] != {"jp": "ja", "en": "en"}.get(str(region))
-    ):
-        raise ValueError("Template owner text has invalid exact hash or language")
-    return str(unit), text
+def _owner_fields(
+    owner: NameOwner,
+    card_id: Value,
+    effect: Value,
+    sections: list[tuple[int, Value]],
+) -> list[_Field]:
+    result = (
+        [] if effect is None else [_Field(owner, card_id, "effect", None, str(effect))]
+    )
+    result.extend(
+        _Field(owner, card_id, "section", ordinal, str(unit))
+        for ordinal, unit in sorted(sections)
+        if unit is not None
+    )
+    return result
 
 
 def _rendered(db: Database, rendered: Rendered) -> None:

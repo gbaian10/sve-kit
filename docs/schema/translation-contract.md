@@ -166,6 +166,10 @@ parameter_schema 固定 `{format:1,slots:[...]}`；每個 slot 恰為 `{name,typ
 
 術語引用 slot 可覆蓋 normalized_text 中原樣保留的名稱，不必換成佔位符；該模板的名稱固定、大括號仍 literal，舊指紋不變。只以唯一 exact 當前概念及 category 綁定；詞庫改動由當前清冊重產檢查歧義。四條能力門檻規則（combo／lesson／necrocharge／spell_chain）只將數字作 uint slot，已採納名稱只供 context 檢查、仍為 literal；不借此核可中文譯名或新增名稱引用。
 
+已辨識為卡名引用的 slot（本文的 `『X』` 與 token 標頭名稱）缺 glossary 卡名概念時，仍可匹配同句型的 term slot：
+建置內部參數為 `{kind:card_name,text}`，text 須等於該位置的原文拼寫；渲染時用該原文已選用的卡名譯名，
+沒有就照原文名稱輸出，整段標低信心。不自造 term ID、不推斷同卡；有歧義（多個 exact 概念）仍為 pending，整段回原文。
+
 數量／增減幅度的 schema 界值為 0..9007199254740991，序數為 1..9007199254740991；此為安全整數技術界值。原樣十進位／safe unsigned／序數非零等匹配條件仍須驗證；正負號留 literal，只以非負幅度綁 slot。完整欄位依賴（例如選項引導與全部標號）按各當前來源核對，不從同一舊 ID 的其他成員借證據。
 
 例（全為自撰）：原文 `N測試２` 重建 normalized=`N測試N`。唯一 uint slot `count` 的 occurrences=[{start:3,end:4}]、min=0、max=9007199254740991；第一個 N 是 literal。若另一成員在位置 0 也是數字，兩者不能共用此 schema，分新模板；不能依候選分組的字串相同合併。
@@ -180,14 +184,15 @@ parameter_schema 固定 `{format:1,slots:[...]}`；每個 slot 恰為 `{name,typ
 template_translation.data 恰為 `{template_id,lang,text}`，origin／low_confidence 在 record 外層。
 text 使用 `{{slot_name}}`，literal 的反斜線與左右大括號以反斜線跳脫；禁止未知 slot、
 未閉合括號與未使用的必要 slot，不支援運算式。slot 可重排，重複使用依 schema，
-不以裸 N 作替換語法。缺必要目標語詞庫時整個 context 回原文，列 missing_term_translation。
+不以裸 N 作替換語法。缺必要目標語詞庫時整個 context 回原文，列 missing_term_translation；
+譯文 placeholder 不合語法時不擋建置，使用它的欄位整段回原文，列 invalid_template_translation。
 
 首版在 sentence 層翻譯，包括只出現一次者；C ID 保留盤點，template_component 暫不啟用拼接。
 已有 component 仍驗無環及父子來源一致性；日後啟用拼接須先補參數映射契約，不能將未實作能力當成可用。
 
 新增卡包由工具產清冊、套用當前模板及詞庫、渲染譯文。只需一個資料 PR 和一張
 低信心／新句型／歧義／未匹配／缺譯清單，不需先完成固定數量人工樣本。
-低信心由輸入旗標及實際使用的譯文／詞庫依賴作 OR 傳播；機器來源不自動等於低信心。
+低信心由輸入旗標及實際使用的定義、譯文、詞庫、標為低信心的參數辨識規則與卡名退回作 OR 傳播；機器來源不自動等於低信心。
 加粗由概念引用及位置產生，不能事後搜尋同中文字串猜位置。
 
 ## 5. 概念選詞與數位證據
@@ -211,6 +216,11 @@ claimed_source 是選填的出處主張；沒有具體主張就省略，不用�
 不執行舊 producer、不重算舊採納歷史，也不保存新的核可證明。
 每次建置的同一組來源可共用解析結果；缺資料不得借最新官網或另一台機器的私人檔補洞。
 來源歸檔完整性及本次 build inputs 的追溯仍依[來源歸檔](source-archive.md)，不能代入假 decision。
+
+export-offline 在交易前讀當前模板、參數規則與 glossary 並驗證一次，再於交易內對每個 face_revision 與 printing_face 的日文主文與 section，
+以原文 hash 找到涵蓋它的模板來源並整段渲染，寫入 context、use、binding、translation 與 selection。
+資格只看原文 hash 與卡片身分已確認，不等 printed_text_state；同一原文只有一個 context 與選用，已有不同譯文者回原文。
+建置報告的 `effect_translations` 列欄位數、已翻、回原文、低信心與各退回原因的計數，不含卡文。
 
 context_assignment／卡名指派只對自己的 owner 與 exact 原文有效；來源改變時不搬到新字串。
 模板／術語修改後重算所有相依位置，受影響清單由工具列出；有效原文沒有變而只改 note 不造成語義變更。
@@ -238,13 +248,14 @@ dependency_key 是按種類及鍵排序的本次模板定義、譯文、詞庫�
 ### 6.3 來源 owner
 
 use 恰有一個有效 owner，context 原文等於該 owner 欄位；section/action_label 才有非 null ordinal。
-face_revision 用 name/effect/section；printing_face 另可用 flavor，且只用自己已知的 printed 文字。
+face_revision 用 name/effect/section；printing_face 另可用 flavor。printing_face 的 name 只用自己已知的 printed 文字；
+effect、section 與 flavor 只要自己欄位有原文單元，依原文 hash 套用，不等 printed_text_state 確認。
 qa_version 用 question/answer，cr_clause 用 effect，vocabulary／商品用 label；keyword 可用 label/effect/action_label。
 
 | owner.kind／鍵 | 合法 field |
 | --- | --- |
 | face_revision／revision_id | name、effect、section |
-| printing_face／printing_id,face_id | name、effect、flavor、section（只用該版已知 printed 字串） |
+| printing_face／printing_id,face_id | name（只用該版已知 printed 字串）、effect、flavor、section（該版自己的原文單元） |
 | qa_version／qa_version_id；cr_clause／cr_clause_id | 前者 question/answer；後者 effect（條文） |
 | vocabulary／vocabulary_kind,vocabulary_code；product_family／product_family_id；product／product_id | label |
 | keyword／keyword_id | label、effect（definition）、action_label |

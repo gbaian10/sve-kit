@@ -6,18 +6,15 @@ from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_parameters.references import References
 from sve_carddb.translations.current import semantic_hash
 from sve_carddb.translations.current_models import TermRecord
-from sve_carddb.translations.loader import load_glossary
 from sve_carddb.translations.sources import excerpt
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from sve_carddb.template_parameters.references import Evidence
+    from sve_carddb.translations.loader import Snapshot
 
 
-def adopted(root: Path, sources: Evidence) -> References:
+def adopted(snapshot: Snapshot, sources: Evidence) -> References:
     """Reuse the full glossary closure and frozen source validator before exact lookup."""
-    snapshot = load_glossary(root)
     result = References(pins={"glossary": snapshot.pins()})
     records = snapshot.current_records()
     for record in records:

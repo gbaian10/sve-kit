@@ -17,6 +17,14 @@ class References(LegacyReferences):
                 raise ValueError("Current references require a derived active catalog")
 
     @override
+    def quoted(self, raw: str) -> Resolution:
+        """A recognized name without a concept keeps its spelling; ambiguity stays unresolved."""
+        result = super().quoted(raw)
+        if result.issues == ("missing_card_name_concept",):
+            return Resolution({"kind": "term", "card_name": raw}, ())
+        return result
+
+    @override
     def proposed_vocabulary(self, kind: str, raw: str) -> Resolution:
         """The existing analyzer calls this hook; only verified current codes resolve it."""
         if self.vocabulary is None:

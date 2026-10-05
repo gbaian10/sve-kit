@@ -26,6 +26,18 @@ fail before preview or bundle publication. Glossary source uses are collected
 from current terms, concepts, choices and vocabulary values, including their
 source spans and same-concept evidence.
 
+Japanese effect text and flavor are translated in the same transaction. The
+current templates, parameter rules and glossary are read at the pinned revision
+and validated once; every Japanese main text or section of a face revision or
+printed face whose exact source hash a template source covers is rendered whole
+into a zh-Hant translation, selection and use. An uncovered fragment, invalid
+placeholder, unresolved parameter or missing reference label keeps the whole field
+original. Effect and flavor eligibility depends only on the source hash, not on
+`printed_text_state`; unconfirmed card identities stay original. The report's
+`effect_translations` counts fields, translated, original and low-confidence
+results with fallback reason codes, and `flavor_translations` counts applied and
+unused entries; neither repeats card text.
+
 The build itself pins `catalog_source_recipes`, `translation_recipes`,
 all package Python dependencies except generated `_version.py`, `uv.lock` and
 `pyproject.toml`. Translation recipes cover EN, JP, sv1 and svwb frozen projections;

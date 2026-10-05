@@ -105,7 +105,9 @@ def _value(raw: str, kind: str, hint: Hint) -> object:
         raise ValueError(
             "Reference parameter requires matching adopted concept evidence"
         )
-    if hint.reference_kind == "vocabulary" and _current_vocabulary(hint):
+    if (hint.reference_kind == "vocabulary" and _current_vocabulary(hint)) or (
+        hint.reference_kind == "term" and _card_name_fallback(raw, hint)
+    ):
         return hint.target
     if hint.reference_kind != "term":
         raise ValueError(
@@ -146,6 +148,19 @@ def verify_candidate(
         raise ValueError(
             "Parameter candidate must replay exact spans roles and semantic evidence"
         )
+
+
+def _card_name_fallback(raw: str, hint: Hint) -> bool:
+    """A recognized name without a concept may only carry its own exact source spelling."""
+    target = hint.target
+    if target is None or set(target) != {"kind", "card_name"}:
+        return False
+    if (
+        hint.semantic_role not in {"quoted_reference", "card_name"}
+        or target["card_name"] != raw
+    ):
+        raise ValueError("Card-name fallback must keep its exact quoted spelling")
+    return True
 
 
 def _current_vocabulary(hint: Hint) -> bool:

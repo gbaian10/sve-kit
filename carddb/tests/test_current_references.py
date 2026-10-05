@@ -8,6 +8,7 @@ from pydantic import JsonValue
 from sve_carddb.snapshot.values import canonical
 from sve_carddb.template_parameters.current_references import adopted
 from sve_carddb.translations.current_models import TermRecord
+from sve_carddb.translations.loader import load_glossary
 
 from .translation_fixtures import name_term, write
 
@@ -37,7 +38,7 @@ def test_current_reference_uses_full_current_glossary(tmp_path: Path) -> None:
             }
         },
     )
-    references = adopted(tmp_path, NoSources())
+    references = adopted(load_glossary(tmp_path), NoSources())
     assert references.quoted("Synthetic card").target is not None
     assert references.quoted("Different synthetic card").issues == (
         "missing_card_name_concept",

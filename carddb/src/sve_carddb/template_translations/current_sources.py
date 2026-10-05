@@ -1,7 +1,7 @@
 """Reconstruct the current full source closure once per build, without old producer replay."""
 
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
 from sve_carddb.frozen_sources import FrozenSources
@@ -98,6 +98,20 @@ class Sources:
             solved,
             pending,
             store_id=frozen.store_id,
+        )
+        doubtful = {rule.rule_id for rule in self.rules.rules if rule.low_confidence}
+        low = {key for key, row in solved.items() if row["rule_id"] in doubtful}
+        # A name kept in its source spelling or a doubtful rule makes the whole field uncertain.
+        effect = tuple(
+            replace(
+                member,
+                low_confidence=any(
+                    (member.entry.id, hint.name) in low
+                    or (hint.target is not None and "card_name" in hint.target)
+                    for hint in member.hints
+                ),
+            )
+            for member in effect
         )
         return Generated(
             tuple(sorted(effect, key=lambda member: member.entry.id)),

@@ -161,15 +161,21 @@ def test_apply_writes_a_flavor_use_with_machine_quality(
         assert row["target_lang"] == "zh-Hant"
 
 
-@pytest.mark.parametrize(
-    ("state", "unit"),
-    [("unknown", "text"), ("omitted", "text"), ("verified", None)],
-)
-def test_face_without_known_flavor_keeps_the_original(
-    template: DatabaseTemplate, state: str, unit: str | None
+@pytest.mark.parametrize("state", ["unknown", "omitted"])
+def test_matching_hash_applies_whatever_the_printed_text_state(
+    template: DatabaseTemplate, state: str
 ) -> None:
     with template.copy() as db:
-        flavored(db, state, unit)
+        flavored(db, state)
+        with db.transaction():
+            report = apply(db, ENTRIES)
+        assert report.applied == 1
+        assert db.rows("translation")[0].values["text"] == "風味譯文"
+
+
+def test_face_without_flavor_keeps_the_original(template: DatabaseTemplate) -> None:
+    with template.copy() as db:
+        flavored(db, unit=None)
         with db.transaction():
             report = apply(db, ENTRIES)
         assert report.applied == 0
@@ -218,7 +224,7 @@ def test_non_japanese_flavor_keeps_the_original(
 def flavored_text[**P](
     populate: Callable[Concatenate[Database, P], InputRecord],
 ) -> Callable[Concatenate[Database, P], InputRecord]:
-    """The synthetic pages carry no flavor, so give one JP face a Japanese text unit."""
+    """Give faces flavor text; their printed-text state stays unknown, as in real data."""
 
     def wrapped(db: Database, /, *args: P.args, **kwargs: P.kwargs) -> InputRecord:
         result = populate(db, *args, **kwargs)
@@ -242,7 +248,7 @@ def flavored_text[**P](
         db.update(
             "printing_face",
             {"printing_id": english["printing_id"], "face_id": english["face_id"]},
-            {"flavor_unit_id": EN_FLAVOR_UNIT, "printed_text_state": "verified"},
+            {"flavor_unit_id": EN_FLAVOR_UNIT},
         )
         row = next(
             r.values
@@ -264,7 +270,7 @@ def flavored_text[**P](
         db.update(
             "printing_face",
             {"printing_id": row["printing_id"], "face_id": row["face_id"]},
-            {"flavor_unit_id": FLAVOR_UNIT, "printed_text_state": "verified"},
+            {"flavor_unit_id": FLAVOR_UNIT},
         )
         return result
 
@@ -295,6 +301,7 @@ def test_offline_build_projects_flavor_translation_and_reports_counts(
     ]
     assert faces
     printing, face = faces[0]
+    assert face["printed_text_state"] == "unknown"
     shard(
         recipe.repo / "authored",
         "1.yaml",

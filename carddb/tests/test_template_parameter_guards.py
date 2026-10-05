@@ -15,6 +15,7 @@ from sve_carddb.template_parameters.models import Range, Schema, Slot, SourceSpa
 from sve_carddb.template_parameters.references import References
 from sve_carddb.template_parameters.verification import verify_values
 from sve_carddb.template_sources.normalizer import partition
+from sve_carddb.translations.loader import load_glossary
 
 from .test_template_parameters import HASH, candidate, numeric_fixture
 from .translation_fixtures import envelope, term, write
@@ -215,7 +216,7 @@ def test_adopted_exact_authored_concepts_reuse_the_full_glossary_loader(
             assert ref is not None
             pytest.fail("Authored concept must not invent frozen evidence")
 
-    refs = adopted(tmp_path, UnusedSources())
+    refs = adopted(load_glossary(tmp_path), UnusedSources())
     assert refs.quoted("Synthetic").issues == ()
     assert refs.quoted("Synthetic").target is not None
     assert refs.quoted("Synthetic ").issues == ("missing_card_name_concept",)
@@ -283,4 +284,4 @@ def test_adopted_concept_requires_japanese_and_nonempty_exact_frozen_text(
         else "Parameter concept source must be nonempty exact text"
     )
     with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
-        adopted(tmp_path, Sources())
+        adopted(load_glossary(tmp_path), Sources())

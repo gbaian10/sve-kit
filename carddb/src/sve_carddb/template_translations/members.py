@@ -37,6 +37,7 @@ class Reconstructed:
     hints: tuple[Hint, ...]
     roles: tuple[str, ...]
     pending: tuple[str, ...]
+    low_confidence: bool = False
 
     def verify_schema(self, schema: Schema) -> None:
         """Renaming or merging repeated slots cannot erase a source position or its role."""

@@ -13,6 +13,8 @@ from sve_carddb.template_translations.text import Literal, Parameter
 from sve_carddb.template_translations.text import parse as parse_text
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.template_translations.current import Validated
     from sve_carddb.template_translations.current_models import (
@@ -21,6 +23,8 @@ if TYPE_CHECKING:
         VariantRecord,
     )
     from sve_carddb.template_translations.members import Reconstructed
+
+    type Labels = Mapping[tuple[str, str, str], Label]
 
 
 @dataclass(frozen=True)
@@ -165,6 +169,9 @@ def _params(member: Reconstructed, definition: DefinitionRecord) -> bytes:
             target = hint.target
             if target is None:
                 raise ValueError("Verified template reference has no target")
+            if "card_name" in target:
+                result[slot.name] = {"kind": "card_name", "text": target["card_name"]}
+                continue
             keys = (
                 ("kind", "vocabulary_kind", "vocabulary_code")
                 if slot.reference_kind == "vocabulary"
@@ -180,14 +187,14 @@ def render(  # ruff: ignore[too-many-arguments] -- complete source, selected tar
     context_id: str,
     source_text: str,
     lang: str,
-    labels: tuple[Label, ...],
+    labels: Labels,
     *,
     variants: tuple[tuple[str, str], ...] = (),
 ) -> Result:
     """Missing labels or any fragment return the original context; low confidence stays active."""
     plan = bindings(validated, ref, context_id, source_text)
     if plan is None:
-        return Result(None, ("unmatched_template_source",))
+        return Result(None, ("unmatched_template_source", *_pending(validated, ref)))
     selected = dict(variants)
     if len(selected) != len(variants) or not set(selected) <= {
         b.definition.data.id for b in plan
@@ -196,23 +203,14 @@ def render(  # ruff: ignore[too-many-arguments] -- complete source, selected tar
     targets: list[TranslationRecord | VariantRecord] = []
     chunks: dict[int, tuple[str, tuple[ReferenceUse, ...]]] = {}
     for binding in plan:
-        definition = binding.definition
-        if lang == definition.data.source_lang:
-            return Result(None, ("same_source_language",))
-        variant = selected.get(definition.data.id, "default")
-        target = validated.target_records.get((definition.data.id, lang, variant))
-        if target is None:
-            if variant != "default":
-                raise ValueError("Template pin references a missing current variant")
-            return Result(None, ("missing_template_translation",))
-        rendered = _fragment(binding, target, lang, labels)
-        if rendered is None:
-            return Result(None, ("missing_term_translation",))
-        targets.append(target)
-        chunks[binding.ordinal] = rendered
+        chunk = _chunk(validated, binding, selected, lang, labels)
+        if isinstance(chunk, str):
+            return Result(None, (chunk,))
+        targets.append(chunk[0])
+        chunks[binding.ordinal] = chunk[1]
     text, uses = _assemble(plan, chunks)
     low = (
-        any(b.definition.low_confidence for b in plan)
+        any(b.definition.low_confidence or b.member.low_confidence for b in plan)
         or any(t.low_confidence for t in targets)
         or any(u.label.low_confidence for u in uses)
     )
@@ -277,40 +275,79 @@ def render(  # ruff: ignore[too-many-arguments] -- complete source, selected tar
     )
 
 
+def _pending(validated: Validated, ref: SourceRef) -> list[str]:
+    """Report why unmatched positions stayed unresolved, without their source text."""
+    return sorted(
+        {
+            cause
+            for member in validated.field_members.get(ref, ())
+            if member.entry.id not in validated.matched_definitions
+            for cause in member.pending
+        }
+    )
+
+
+def _chunk(
+    validated: Validated,
+    binding: Binding,
+    selected: dict[str, str],
+    lang: str,
+    labels: Labels,
+) -> (
+    tuple[TranslationRecord | VariantRecord, tuple[str, tuple[ReferenceUse, ...]]] | str
+):
+    """Render one binding or name the reason the whole field keeps its original."""
+    definition = binding.definition
+    if lang == definition.data.source_lang:
+        return "same_source_language"
+    variant = selected.get(definition.data.id, "default")
+    target = validated.target_records.get((definition.data.id, lang, variant))
+    if target is None:
+        if variant != "default":
+            raise ValueError("Template pin references a missing current variant")
+        return "missing_template_translation"
+    try:
+        parts = parse_text(target.data.text, definition.data.parameter_schema)
+    except ValueError:
+        return "invalid_template_translation"
+    rendered = _fragment(binding, parts, lang, labels)
+    return "missing_term_translation" if rendered is None else (target, rendered)
+
+
 def _fragment(
     binding: Binding,
-    target: TranslationRecord | VariantRecord,
+    parts: tuple[Literal | Parameter, ...],
     lang: str,
-    labels: tuple[Label, ...],
+    labels: Labels,
 ) -> tuple[str, tuple[ReferenceUse, ...]] | None:
     params = object_value(parse(binding.params))
     output = ""
     uses: list[ReferenceUse] = []
-    for part in parse_text(target.data.text, binding.definition.data.parameter_schema):
+    for part in parts:
         if isinstance(part, Literal):
             output += part.text
         elif isinstance(part, Parameter):
             value = params[part.name]
             if isinstance(value, dict):
                 kind = str(value["kind"])
-                identifier = (
-                    str(value["id"])
-                    if "id" in value
-                    else str(value["vocabulary_kind"])
-                    + ":"
-                    + str(value["vocabulary_code"])
-                )
-                found = [
-                    label
-                    for label in labels
-                    if (label.kind, label.identifier, label.lang, label.variant_key)
-                    == (kind, identifier, lang, "default")
-                ]
-                if len(found) > 1:
-                    raise ValueError("Current reference label selection must be unique")
-                if not found:
-                    return None
-                label = found[0]
+                if kind == "card_name":
+                    name = str(value["text"])
+                    # Without an existing translation the reader still gets the exact source name.
+                    label = labels.get((kind, name, lang)) or Label(
+                        kind, name, lang, name, "official", True, None
+                    )
+                else:
+                    identifier = (
+                        str(value["id"])
+                        if "id" in value
+                        else str(value["vocabulary_kind"])
+                        + ":"
+                        + str(value["vocabulary_code"])
+                    )
+                    found = labels.get((kind, identifier, lang))
+                    if found is None:
+                        return None
+                    label = found
                 uses.append(
                     ReferenceUse(label, len(output), len(output) + len(label.text))
                 )

@@ -19,7 +19,6 @@ from sve_carddb.template_translations.current_models import (
 )
 from sve_carddb.template_translations.definitions import _definitions, _matching_members
 from sve_carddb.template_translations.files import INVENTORY, SHARD, Files, read
-from sve_carddb.template_translations.text import parse as parse_text
 from sve_carddb.translations.loader import Snapshot as Glossary
 from sve_carddb.translations.loader import validate_snapshot
 
@@ -203,7 +202,6 @@ def _texts(
                 raise ValueError(
                     "Template translation language must differ from its source"
                 )
-            parse_text(record.data.text, target.data.parameter_schema)
 
 
 def read_templates(repository: PinnedRepository, revision: str) -> Inputs:
