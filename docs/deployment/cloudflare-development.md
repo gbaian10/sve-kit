@@ -112,7 +112,7 @@ Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另�
 {
   "name": "svekit-web-dev",
   "main": "src/cloudflare/worker.ts",
-  "compatibility_date": "2026-10-06",
+  "compatibility_date": "2026-10-01",
   "workers_dev": false,
   "preview_urls": false,
   "routes": [{ "pattern": "dev.svekit.app", "custom_domain": true }],
