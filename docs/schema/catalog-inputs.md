@@ -22,7 +22,7 @@ Catalog／Vocabulary 記憶體物件由此推導，不是另一份權威。
 | type | follower、spell、amulet、crest、equipment、leader、ep、sep |
 | special_kind | evolve、advance、token |
 
-保留 preview 已使用的六職業與 follower／spell／amulet／leader，修正 neutral 與其他基本卡種的暫碼。`raw_jp_…`／其他 `raw_…` 不繼承為永久 code；已有正式採納的 code 改動須另審遷移與資料改版。特殊標記不是基本卡種，不新增本次 vocabulary_choice 的 kind。
+保留 preview 已使用的六職業與 follower／spell／amulet／leader，修正 neutral 與其他基本卡種的暫碼。`raw_jp_…`／其他 `raw_…` 不繼承為永久 code；已有正式採納的 code 改動須另審遷移與資料改版。特殊標記不是基本卡種，不擴充本次 label 翻譯的 kind。
 
 ## 3. JP／EN 原文映射
 
