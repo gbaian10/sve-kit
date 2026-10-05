@@ -286,7 +286,7 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 | --- | --- |
 | `glossary_term` | `id:ID PK,category:keyword\|ability\|trait\|rule_term\|card_name,source_ja:Text,concept_key:Text UNIQUE,decision_id→decision` |
 | `glossary_translation` | `term_id→glossary_term,lang:Lang,text:Text,origin:official_svwb\|official_sv1\|project\|community\|machine,source_id→source_record?,decision_id→decision` `PK(term_id,lang)`；每概念語系一個選定譯法，候選留來源／決定紀錄 |
-| `sentence_template` | `id:ID PK,level:sentence\|clause,source_lang:Lang,normalized_text:Text,normalizer_version:Text,semantic_variant:Text,parameter_schema:Json,content_hash:Hash,supersedes_id→sentence_template?,decision_id→decision`；內容不可變，舊 10 hex ID 保留並檢查碰撞；新增版本用新 ID |
+| `sentence_template` | `id:ID PK,level:sentence\|clause,source_lang:Lang,normalized_text:Text,normalizer_version:Text,semantic_variant:Text,parameter_schema:Json,content_hash:Hash,decision_id→decision`；內容不可變，ID 由內容 hash 配發並檢查碰撞；新增版本用新 ID |
 | `template_translation` | `template_id→sentence_template,lang:Lang,revision:UInt,text:Text,status:draft\|reviewed,origin:project\|machine,decision_id→decision` `PK(template_id,lang,revision)`；不可變版本，當前發布選該精確模板修訂／lang 最高已審版本 |
 | `template_component` | `parent_id→sentence_template,ordinal:UInt,child_id→sentence_template` `PK(parent_id,ordinal)`；無環，父子都釘修訂 |
 | `text_template_binding` | `id:ID PK,context_id→translation_context,ordinal:UInt,template_id→sentence_template,params:Json,source_span:Json,decision_id→decision?`；D（人工只採納匹配例外），`UQ(context_id,ordinal)`；每次建置當前一組，source_span.segments 全體不重疊且涵蓋完整效果，params 中 card／term 引用建置驗 FK |
@@ -320,8 +320,7 @@ PR2／PR3 實作時須同步 DDL、表格、inventory 測試與 consumer。
   emphasis 為當前加粗推導值，rule_term 缺設定為 null，其餘固定 true。
 - glossary_translation 使用共用人工來源／品質欄，保留實際官方來源 source_id，移除新格式的 decision_id。
   增加 variant_key:Code，主鍵改為 (term_id,lang,variant_key)；default 為一般選詞，其餘為明示候選。
-- sentence_template 使用共用人工來源／品質欄，移除新格式的 decision_id；保留六欄語義指紋。
-  supersedes_id 改為 nullable ID，可指清冊未載入 DB 的舊鍵，不造假父列或套用現行自指外鍵。
+- sentence_template 使用共用人工來源／品質欄，移除新格式的 decision_id；保留六欄語義指紋，不設 supersedes_id。
 - template_translation 使用共用人工來源／品質欄，移除人工 revision、status 與 decision_id，增加 variant_key:Code；
   主鍵改為 (template_id,lang,variant_key)，只有可修改的當前值及明示候選。
 - translation_binding 移除 translation_revision，改用 variant_key:Code；(template_id,lang,variant_key)
@@ -475,7 +474,7 @@ card_route_alias 的有效轉址圖仍無環、展平到同 printing 的 canonic
 
 canonical-json-v1：null/bool/Unicode string/安全整數/array/object；拒浮點和未配對 surrogate。鍵以 Unicode code point 排序、無空白/BOM、UTF-8；控制字元一律小寫 `\u00xx`，其餘僅跳脫引號/反斜線，不正規化 Unicode。有序 array 不排序，集合依本契約排序。`source_record` 雜湊取 exact raw bytes，不重序列化。
 
-`text_unit` hash＝exact text UTF-8；相同 hash 仍比 bytes。`sentence_template` `content_hash`＝canonical `{level,source_lang,normalized_text,normalizer_version,semantic_variant,parameter_schema}`；既有 ID 的分類指紋與此完整內容 hash 分開，既有 ID 不變但每個 ID 必須固定完整內容。normalizer 升版用新 ID＋supersedes。
+`text_unit` hash＝exact text UTF-8；相同 hash 仍比 bytes。`sentence_template` `content_hash`＝canonical `{level,source_lang,normalized_text,normalizer_version,semantic_variant,parameter_schema}`；模板 ID 為 T／C＋此 hash 的前綴，每個 ID 固定完整內容；normalizer 升版即產生新 ID。
 
 `program_hash`＝canonical `{dsl_version,ast}`；macro `body_hash`＝`{dsl_version,body}`。既有 face-bundle-v1 保留完整觀測 recipe（含 revision ID、原始 name/effect/sections/kind、數值與特性），只作觀測追溯，不充當 DSL 新鮮度鍵。
 
