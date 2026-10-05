@@ -81,7 +81,7 @@ class Builder:
         groups: dict[str, list[tuple[str, Card]]] = defaultdict(list)
         jp_keys: dict[str, str] = {}
         for number, card in sorted(jp.items()):
-            key = self.inputs.receipt.separate_groups.get(
+            key = self.inputs.decisions.separate_groups.get(
                 "jp:" + number, card.structure_hash("jp")
             )
             jp_keys[number] = "jp:" + key
@@ -92,7 +92,7 @@ class Builder:
                 jp_keys[target]
                 if target is not None
                 else "en:"
-                + self.inputs.receipt.separate_groups.get(
+                + self.inputs.decisions.separate_groups.get(
                     "en:" + number, card.structure_hash("en")
                 )
             )
@@ -259,19 +259,19 @@ class Builder:
                     "card_id": card_id,
                     "target_region": "jp",
                     "state": "confirmed_none",
-                    "as_of": self.inputs.receipt.reviewed_on,
+                    "as_of": self.inputs.as_of.isoformat(),
                     "coverage_scope": "All Japanese official card extractions in the reviewed input batch",
-                    "coverage_hash": self.inputs.receipt.input_hashes["jp"],
+                    "coverage_hash": self.inputs.jp_hash,
                     "observations": observations,
                 },
             )
         self._arts()
         self._related()
-        for correction in self.inputs.receipt.corrections:
+        for correction in self.inputs.decisions.corrections:
             self._correction(correction)
 
     def _arts(self) -> None:
-        groups = self.inputs.receipt.art_groups
+        groups = self.inputs.decisions.art_groups
         grouped = [number for group in groups for number in group]
         if (
             len(grouped) != len(set(grouped))

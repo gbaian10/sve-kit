@@ -2,6 +2,7 @@
 
 import shutil
 from dataclasses import dataclass, replace
+from datetime import date
 from typing import TYPE_CHECKING
 
 import pytest
@@ -21,7 +22,7 @@ from sve_carddb.registry.build import build
 from sve_carddb.registry.inputs import Mapping as CardMapping
 from sve_carddb.registry.preview import FrozenEN, plan_preview
 from sve_carddb.registry.records import CorrectionData, CorrectionEvidence, PrintingData
-from sve_carddb.registry.review import Correction, Inputs, Receipt
+from sve_carddb.registry.review import Correction, InitDecisions, Inputs
 from sve_carddb.registry.storage import plan_files, write_files
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.source_archive import ArchiveError, seal_batch
@@ -89,7 +90,7 @@ def add_correction(store: ArchiveStore, inputs: Inputs) -> str:
     original = inputs.en[NUMBER]
     image = b"\x89PNG\r\n\x1a\nSynthetic back evidence"
     image_hash = digest(image)
-    inputs.receipt.corrections = [
+    inputs.decisions.corrections = [
         Correction(
             region="en",
             card_no=NUMBER,
@@ -149,12 +150,9 @@ def make_case(
         else {},
         en={NUMBER: original},
         mapping=CardMapping(targets={NUMBER: None}, original_art=set(), reskins={}),
-        receipt=Receipt(
-            policy="identity-init-2026-09-28-v1",
-            reviewed_by="synthetic-reviewer",
-            reviewed_on="2026-10-01",
-            input_hashes={"en": "sha256:" + "1" * 64, "jp": "sha256:" + "2" * 64},
-        ),
+        decisions=InitDecisions(),
+        as_of=date(2026, 10, 1),
+        jp_hash="sha256:" + "2" * 64,
     )
     if correction:
         batch = add_correction(store, inputs)

@@ -271,7 +271,7 @@ def test_changed_source_excludes_correction_parent_without_allowing_sibling_outp
         original.texts.root,
         MemoryEvidence(
             dict(changed.identity.evidence),
-            frozenset(inputs.receipt.input_hashes.values()),
+            frozenset({inputs.jp_hash}),
         ),
         regions=("jp", "en"),
     )

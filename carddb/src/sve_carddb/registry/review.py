@@ -1,4 +1,4 @@
-"""Explicit reviewed input receipts; never infer approval from confidence."""
+"""Explicit identity-init inputs; never infer pairing decisions from confidence."""
 
 import hashlib
 from datetime import date
@@ -26,12 +26,8 @@ class Correction(BaseModel):
     source_correction_status: Literal["pending_user_confirmation"] | None = None
 
 
-class Receipt(BaseModel):
+class InitDecisions(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    policy: Literal["identity-init-2026-09-28-v1"]
-    reviewed_by: str
-    reviewed_on: str
-    input_hashes: dict[str, str]
     corrections: list[Correction] = Field(default_factory=list)
     reskins: dict[str, str] = Field(default_factory=dict)
     separate_groups: dict[str, str] = Field(default_factory=dict)
@@ -48,7 +44,9 @@ class Inputs(BaseModel):
     jp: dict[str, Card]
     en: dict[str, Card]
     mapping: Mapping
-    receipt: Receipt
+    decisions: InitDecisions
+    as_of: date
+    jp_hash: str
 
 
 def file_hash(path: Path) -> str:
@@ -56,29 +54,28 @@ def file_hash(path: Path) -> str:
     return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def read_inputs(paths: dict[str, Path], receipt_path: Path, images: Path) -> Inputs:
-    """Require an explicit receipt matching every approved input snapshot."""
-    receipt = Receipt.model_validate_json(receipt_path.read_bytes())
-    if (
-        not receipt.reviewed_by.strip()
-        or date.fromisoformat(receipt.reviewed_on).isoformat() != receipt.reviewed_on
-    ):
-        raise ValueError("Receipt needs an explicit reviewer and complete ISO date")
-    if set(receipt.input_hashes) != set(paths):
-        raise ValueError("Receipt must cover exactly the supplied input roles")
-    for role, path in paths.items():
-        if file_hash(path) != receipt.input_hashes[role]:
-            raise ValueError(f"Unreviewed input change: {role}")
+def read_inputs(
+    paths: dict[str, Path], decisions_path: Path, images: Path, *, as_of: date
+) -> Inputs:
+    """Read local inputs; ``as_of`` dates new confirmed-absence mapping reviews."""
+    decisions = InitDecisions.model_validate_json(decisions_path.read_bytes())
     jp, en = read_cards(paths["jp"]), read_cards(paths["en"])
     mapping = read_mapping(paths["candidates"], paths["confirmations"])
     _check_art(paths["original_art"], mapping)
-    for number, target in receipt.reskins.items():
+    for number, target in decisions.reskins.items():
         if mapping.targets[number] is not None:
             raise ValueError(f"Reskin must have its own identity: {number}")
         mapping.reskins[number] = target
-    for correction in receipt.corrections:
+    for correction in decisions.corrections:
         _check_correction(correction, jp if correction.region == "jp" else en, images)
-    return Inputs(jp=jp, en=en, mapping=mapping, receipt=receipt)
+    return Inputs(
+        jp=jp,
+        en=en,
+        mapping=mapping,
+        decisions=decisions,
+        as_of=as_of,
+        jp_hash=file_hash(paths["jp"]),
+    )
 
 
 def _check_correction(
@@ -108,7 +105,7 @@ def validation_cards(inputs: Inputs) -> tuple[dict[str, Card], dict[str, Card]]:
     """
     jp = {number: card.model_copy(deep=True) for number, card in inputs.jp.items()}
     en = {number: card.model_copy(deep=True) for number, card in inputs.en.items()}
-    for correction in inputs.receipt.corrections:
+    for correction in inputs.decisions.corrections:
         if correction.field != "card_type":
             continue
         if correction.state == "needs_review" and (

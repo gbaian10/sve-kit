@@ -1,6 +1,7 @@
 """One complete synthetic JP flavor/identity closure per module; no private data."""
 
 from dataclasses import dataclass
+from datetime import date
 from typing import TYPE_CHECKING
 
 import pytest
@@ -10,7 +11,7 @@ from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.manifest import Kind
 from sve_carddb.registry.build import build as build_registry
 from sve_carddb.registry.inputs import Mapping
-from sve_carddb.registry.review import Inputs, Receipt
+from sve_carddb.registry.review import InitDecisions, Inputs
 from sve_carddb.registry.storage import plan_files, write_files
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.source_archive import seal_batch
@@ -67,13 +68,11 @@ def flavor_case(tmp_path_factory: pytest.TempPathFactory) -> Case:
         jp=jp,
         en={},
         mapping=Mapping(targets={}, original_art=set(), reskins={}),
-        receipt=Receipt(
-            policy="identity-init-2026-09-28-v1",
-            reviewed_by="Synthetic human",
-            reviewed_on="2026-09-28",
-            input_hashes={"jp": digest(b"synthetic flavor")},
+        decisions=InitDecisions(
             separate_groups={"jp:" + number: number for number in jp},
         ),
+        as_of=date(2026, 9, 28),
+        jp_hash=digest(b"synthetic flavor"),
     )
     write_files(plan_files(repository / "authored", build_registry(inputs, {})))
     index_file = repository / "authored/translations/index.yaml"

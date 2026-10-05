@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- isolated test Git repository for revision pin verification
 from dataclasses import dataclass, replace
+from datetime import date
 from typing import TYPE_CHECKING
 
 import pytest
@@ -23,7 +24,7 @@ from sve_carddb.registry.build import build
 from sve_carddb.registry.inputs import Mapping as CardMapping
 from sve_carddb.registry.preview import plan_preview
 from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
-from sve_carddb.registry.review import Inputs, Receipt
+from sve_carddb.registry.review import InitDecisions, Inputs
 from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.registry.storage import plan_files, read_yaml, write_files
 from sve_carddb.source_archive import seal_batch
@@ -252,12 +253,9 @@ def identity_template(tmp_path_factory: pytest.TempPathFactory) -> IdentityTempl
         jp={card.number: card},
         en={},
         mapping=CardMapping(targets={}, original_art=set(), reskins={}),
-        receipt=Receipt(
-            policy="identity-init-2026-09-28-v1",
-            reviewed_by="synthetic-reviewer",
-            reviewed_on="2026-09-30",
-            input_hashes={"jp": "sha256:" + "1" * 64},
-        ),
+        decisions=InitDecisions(),
+        as_of=date(2026, 9, 30),
+        jp_hash="sha256:" + "1" * 64,
     )
     write_files(plan_files(root, build(inputs, {})))
     family_record = family("TEST")

@@ -333,7 +333,7 @@ def test_source_correction_does_not_implicitly_adopt_or_apply_text(
     tmp_path: Path, inputs: Inputs, state: str
 ) -> None:
     inputs.jp["PR-001"].faces[0].text = "Rule."
-    inputs.receipt.corrections = [
+    inputs.decisions.corrections = [
         Correction(
             region="jp",
             card_no="BP02-071",

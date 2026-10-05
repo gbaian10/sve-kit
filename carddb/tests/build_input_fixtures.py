@@ -60,9 +60,7 @@ def frozen_provider(inputs: Inputs, temporary: Path) -> tuple[MemoryEvidence, Pa
             card,
             tuple(FaceEvidence("LG", None) for _ in card.faces),
         )
-    return MemoryEvidence(
-        found, frozenset(inputs.receipt.input_hashes.values())
-    ), store.root
+    return MemoryEvidence(found, frozenset({inputs.jp_hash})), store.root
 
 
 def reference_identity_source(root: Path, provider: MemoryEvidence) -> None:

@@ -2,6 +2,7 @@
 
 import shutil
 from dataclasses import dataclass, replace
+from datetime import date
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -18,8 +19,8 @@ from sve_carddb.products.models import LocalizedText
 from sve_carddb.registry.build import build as build_registry
 from sve_carddb.registry.inputs import Mapping
 from sve_carddb.registry.records import CardData, FaceData, PrintingData
+from sve_carddb.registry.review import InitDecisions
 from sve_carddb.registry.review import Inputs as RegistryInputs
-from sve_carddb.registry.review import Receipt
 from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.registry.storage import plan_files, read_yaml, write_files
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
@@ -259,15 +260,13 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
         ),
         en={},
         mapping=Mapping(targets={}, original_art=set(), reskins={}),
-        receipt=Receipt(
-            policy="identity-init-2026-09-28-v1",
-            reviewed_by="Synthetic human",
-            reviewed_on="2026-09-28",
-            input_hashes={"jp": digest(b"synthetic cards")},
+        decisions=InitDecisions(
             separate_groups={"jp:SYN-001": "synthetic-a", "jp:SYN-002": "synthetic-b"}
             if dual
             else {},
         ),
+        as_of=date(2026, 9, 28),
+        jp_hash=digest(b"synthetic cards"),
     )
     write_files(plan_files(root / "authored", build_registry(registry_inputs, {})))
     registry = load_registry(root / "authored")

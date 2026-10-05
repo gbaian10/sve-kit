@@ -93,25 +93,25 @@ def test_registry_restores_independent_correction_objects(
     first, second = make_inputs(), make_inputs()
     restore_registry(registry_template, first, tmp_path / "first")
     restore_registry(registry_template, second, tmp_path / "second")
-    assert first.receipt.corrections == second.receipt.corrections
-    assert first.receipt.corrections is not second.receipt.corrections
+    assert first.decisions.corrections == second.decisions.corrections
+    assert first.decisions.corrections is not second.decisions.corrections
     assert all(
         left is not right
         for left, right in zip(
-            first.receipt.corrections, second.receipt.corrections, strict=True
+            first.decisions.corrections, second.decisions.corrections, strict=True
         )
     )
-    expected = tuple(value.model_dump_json() for value in second.receipt.corrections)
-    first.receipt.corrections[0].corrected_value = "polluted"
-    first.receipt.corrections.clear()
+    expected = tuple(value.model_dump_json() for value in second.decisions.corrections)
+    first.decisions.corrections[0].corrected_value = "polluted"
+    first.decisions.corrections.clear()
     assert (
-        tuple(value.model_dump_json() for value in second.receipt.corrections)
+        tuple(value.model_dump_json() for value in second.decisions.corrections)
         == expected
     )
     third = make_inputs()
     restore_registry(registry_template, third, tmp_path / "third")
     assert (
-        tuple(value.model_dump_json() for value in third.receipt.corrections)
+        tuple(value.model_dump_json() for value in third.decisions.corrections)
         == expected
     )
     assert freeze_files(tmp_path / "third") == registry_template.files

@@ -1,6 +1,7 @@
-"""Offline identity, immutable allocation, receipt and YAML regression tests."""
+"""Offline identity, immutable allocation, input and YAML regression tests."""
 
 import json
+from datetime import date
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -21,8 +22,8 @@ from sve_carddb.registry.inputs import (
 )
 from sve_carddb.registry.review import (
     Correction,
+    InitDecisions,
     Inputs,
-    Receipt,
     file_hash,
     read_inputs,
     validation_cards,
@@ -97,12 +98,9 @@ def make_inputs() -> Inputs:
             original_art={"BP02-070EN"},
             reskins={"GF01-001EN": "BP02-071"},
         ),
-        receipt=Receipt(
-            policy="identity-init-2026-09-28-v1",
-            reviewed_by="test-reviewer",
-            reviewed_on="2026-09-28",
-            input_hashes={"jp": "sha256:" + "0" * 64},
-        ),
+        decisions=InitDecisions(),
+        as_of=date(2026, 9, 28),
+        jp_hash="sha256:" + "0" * 64,
     )
 
 
@@ -124,8 +122,8 @@ def test_rerun_and_append_preserve_all_old_ids(inputs: Inputs, tmp_path: Path) -
     inputs.jp["AA01-001"] = card("AA01-001", "名前")
     inputs.jp["AA01-002"] = card("AA01-002", "別名")
     inputs.jp["BP02-001"] = card("BP02-001", "別名")
-    inputs.receipt.reviewed_on = "2026-09-29"
-    inputs.receipt.input_hashes["jp"] = "sha256:" + "1" * 64
+    inputs.as_of = date(2026, 9, 29)
+    inputs.jp_hash = "sha256:" + "1" * 64
     second = build(inputs, old)
     validate(second)
     new = {entry.record_key: entry for entry in second}
@@ -291,21 +289,40 @@ def test_integrity_rejects_dangling_face_and_reused_integer(inputs: Inputs) -> N
         validate(entries)
 
 
-def test_receipt_detects_changed_rules_before_allocation(
+def test_read_inputs_dates_new_absence_reviews_from_explicit_inputs(
     inputs: Inputs, tmp_path: Path
 ) -> None:
     paths = {
         key: tmp_path / (key + ".jsonl")
         for key in ("jp", "en", "candidates", "confirmations", "original_art")
     }
-    for path in paths.values():
-        path.write_text("{}\n")
-    inputs.receipt.input_hashes = {key: file_hash(path) for key, path in paths.items()}
-    receipt = tmp_path / "receipt.json"
-    receipt.write_text(inputs.receipt.model_dump_json())
-    paths["en"].write_text('{"text":"Changed rules"}\n')
-    with pytest.raises(ValueError, match="Unreviewed input change: en"):
-        read_inputs(paths, receipt, tmp_path)
+    for key in ("jp", "en"):
+        cards = inputs.jp if key == "jp" else inputs.en
+        paths[key].write_text(
+            "".join(value.model_dump_json() + "\n" for value in cards.values())
+        )
+    paths["candidates"].write_text(
+        '{"en_no":"BP02-070EN","category":"A","jp_candidates":[{"jp_no":"BP02-071"}]}\n'
+        '{"en_no":"GF01-001EN","category":"C","jp_candidates":[]}\n'
+    )
+    paths["confirmations"].write_text(
+        "en_no\tjp_no\tverdict\tconfirmed_on\n"
+        "BP02-070EN\t\tconfirmed_en_original_art\t2026-09-28\n"
+    )
+    paths["original_art"].write_text(
+        '{"en_no":"BP02-070EN","verdict":"en_original_art"}\n'
+    )
+    inputs.decisions.reskins = {"GF01-001EN": "BP02-071"}
+    decisions = tmp_path / "decisions.json"
+    decisions.write_text(inputs.decisions.model_dump_json())
+    read = read_inputs(paths, decisions, tmp_path, as_of=date(2026, 10, 6))
+    assert read.mapping == inputs.mapping
+    assert read.jp_hash == file_hash(paths["jp"])
+    (review,) = (
+        entry for entry in build(read, {}) if entry.kind == "region_mapping_review"
+    )
+    assert review.data["as_of"] == "2026-10-06"
+    assert review.data["coverage_hash"] == read.jp_hash
 
 
 @pytest.fixture
@@ -407,7 +424,7 @@ def test_reviewed_art_group_shares_illustration_across_printings(
     inputs.en["PR-002EN"] = card("PR-002EN", "Name", english=True)
     inputs.mapping.targets["PR-002EN"] = "BP02-071"
     inputs.mapping.original_art.add("PR-002EN")
-    inputs.receipt.art_groups = [["BP02-070EN", "PR-002EN"]]
+    inputs.decisions.art_groups = [["BP02-070EN", "PR-002EN"]]
     entries = build(inputs, {})
     validate(entries)
     arts = [entry for entry in entries if entry.kind == "art"]
@@ -415,7 +432,7 @@ def test_reviewed_art_group_shares_illustration_across_printings(
     uses = arts[0].data["uses"]
     assert isinstance(uses, list)
     assert len(uses) == 2
-    inputs.receipt.art_groups.append(["PR-002EN"])
+    inputs.decisions.art_groups.append(["PR-002EN"])
     with pytest.raises(ValueError, match="disjoint"):
         build(inputs, {})
 
@@ -480,7 +497,7 @@ def test_pending_type_exception_requires_explicit_scope(inputs: Inputs) -> None:
         state="needs_review",
         reason="Image-supported candidate",
     )
-    inputs.receipt.corrections = [correction]
+    inputs.decisions.corrections = [correction]
     with pytest.raises(ValueError, match="identity-only scope"):
         validation_cards(inputs)
     correction.adoption_scope = "identity_check_only"
@@ -497,7 +514,7 @@ def test_pending_type_exception_requires_explicit_scope(inputs: Inputs) -> None:
 def test_correction_projection_preserves_observations(
     inputs: Inputs, scenario: str
 ) -> None:
-    inputs.receipt.corrections = [
+    inputs.decisions.corrections = [
         Correction(
             region="jp",
             card_no="BP02-071",
@@ -542,7 +559,7 @@ def test_correction_projection_preserves_observations(
 
 def test_confirmed_type_projection_has_field_local_badge(inputs: Inputs) -> None:
     inputs.en["GF01-001EN"].faces[0].info["Card Type"] = "Spell"
-    inputs.receipt.corrections = [
+    inputs.decisions.corrections = [
         Correction(
             region="en",
             card_no="GF01-001EN",

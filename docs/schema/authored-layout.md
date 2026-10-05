@@ -127,7 +127,7 @@ data:
 
 卡號保存官網原樣，含 `Ⓢ`、小寫 `a`。EN 的 target 來自已確認候選及有序覆寫，絕不以去 EN 自動配對；JP printing 不填 cross_region_review。有對應時兩端共用 card／face；target 卡號只是核對證據，不是第二張 region_mapping 真值。EN-only 仍有獨立 card 和 printing，target 及 target_observation 為 null。
 
-JP 初始分組依全部面同名／同職業／同種類／同數值／同特性，加上人工審閱規則差異的收據；不是只依同名自動採納。EP、SEP、CP03-125/126、ルゥ遵循 build-db §3.1。同欄位但實際卡面規則不同時，收據 `separate_groups` 指定不同群組。雙面的 source_index 是此次全體 checked 的面對應，不是以 ordinal 猜日英面對應。
+JP 初始分組依全部面同名／同職業／同種類／同數值／同特性，加上人工判定的規則差異；不是只依同名自動採納。EP、SEP、CP03-125/126、ルゥ遵循 build-db §3.1。同欄位但實際卡面規則不同時，由初始化決定檔的 `separate_groups` 指定不同群組。雙面的 source_index 是此次全體 checked 的面對應，不是以 ordinal 猜日英面對應。
 
 ### 3.2 UInt32
 
@@ -149,7 +149,7 @@ JP 初始分組依全部面同名／同職業／同種類／同數值／同特�
 
 ### 3.3 英文獨有、原創插畫與換皮卡
 
-`region_mapping_review` 的 `data` 為 `card_id/target_region/state/as_of/coverage_scope/coverage_hash/observations`。本批 target_region=jp、state=confirmed_none，coverage_hash 釘當次完整 JP 萃取輸入，observations 釘受審 EN 版次。匯入 source_id 指這份 immutable authored 查核紀錄；不是推論永遠不會出日版。
+`region_mapping_review` 的 `data` 為 `card_id/target_region/state/as_of/coverage_scope/coverage_hash/observations`。本批 target_region=jp、state=confirmed_none；新增記錄的 as_of 取 CLI 的 `--as-of`（JP 輸入的日期），coverage_hash 是當次完整 JP 萃取輸入檔的 SHA-256，observations 釘受審 EN 版次。匯入 source_id 指這份 immutable authored 查核紀錄；不是推論永遠不會出日版。
 
 `art` 的 `data` 為 `id/card_id/face_id/classification/uses/observation`，uses 是 printing_id＋face_id 陣列。本批原創插畫只掛已確認的 EN printing；未確認基準及跨版次同圖組，故 classification=unclassified，不造假 base／alternate 或 JP art。`art_id=null` 的其他 printing 不代表沒有插畫。
 
@@ -175,13 +175,13 @@ CLI 每次建置均驗證這個投影，可用 `--corrections-output <absolute-d
 
 ### 3.5 重跑與新卡包
 
-工具入口為 `uv --directory <absolute-carddb> run python -m sve_carddb.registry`；參數 `--jp/--en/--candidates/--confirmations/--original-art/--receipt/--images/--authored` 全為明示路徑，`--check` 要求現有輸出完全相同。全程只讀本機來源，不讀 manifest、不抓網路。
+工具入口為 `uv --directory <absolute-carddb> run python -m sve_carddb.registry`；參數 `--jp/--en/--candidates/--confirmations/--original-art/--decisions/--images/--authored` 全為明示路徑，`--as-of` 為 JP 輸入的 ISO 日期，`--check` 要求現有輸出完全相同。全程只讀本機來源，不讀 manifest、不抓網路。
 
-receipt 是本機審閱收據，JSON 欄位為 policy、reviewed_by、reviewed_on、input_hashes（五個完整輸入檔的 exact bytes SHA-256）、corrections、reskins、separate_groups、art_groups。policy 目前固定 identity-init-2026-09-28-v1。工具不從 confidence 產生 approval；操作者須在完成逐筆核對／本批政策審閱後建立收據。新包先產候選、核對所有面與差異、核圖實質增刪，再建立新收據；新增內容不能沿用舊輸入 hash。任何未核對的職業、種類、數值或英文同卡名稱衝突都失敗。
+decisions 是本機的初始化決定檔（`registry.review.InitDecisions`），JSON 欄位為 corrections、reskins、separate_groups、art_groups，只記人工配對決定。工具不從 confidence 產生配對決定；產生的登錄照一般 PR diff 審查。新包先產候選、核對所有面與差異、核圖實質增刪，再更新決定檔。任何未核對的職業、種類、數值或英文同卡名稱衝突都失敗。
 
-corrections 元素包含 region、card_no、face_index、field、expected_raw_value、corrected_value、image_sha256、locator、state、reason。needs_review 的 card_type 候選另須明示 `adoption_scope: identity_check_only` 與 `source_correction_status: pending_user_confirmation`，否則拒絕用於身分核對；這兩欄不會提升來源更正狀態，也不改寫原觀測或正式分片。reskins 是 EN 卡號 → JP 原卡號；separate_groups 是 `region:exact_card_no` → 明示分組鍵；art_groups 是已核對同幅插畫的 EN 卡號陣列集合，組間不得重疊、不能跨 card。未列入者各自登錄；本批 CP02-072EN／CP02-P57EN 依同圖不同簽名加工規則共用 art。receipt 不進 git，採納後的永久登錄與其精確成員決定才是維護狀態。新增 package 使用包含原觀測的完整輸入集合，不把變動的舊來源塞進追加工具；舊來源更新另走 source／identity 修復流程。
+corrections 元素包含 region、card_no、face_index、field、expected_raw_value、corrected_value、image_sha256、locator、state、reason。needs_review 的 card_type 候選另須明示 `adoption_scope: identity_check_only` 與 `source_correction_status: pending_user_confirmation`，否則拒絕用於身分核對；這兩欄不會提升來源更正狀態，也不改寫原觀測或正式分片。reskins 是 EN 卡號 → JP 原卡號；separate_groups 是 `region:exact_card_no` → 明示分組鍵；art_groups 是已核對同幅插畫的 EN 卡號陣列集合，組間不得重疊、不能跨 card。未列入者各自登錄；本批 CP02-072EN／CP02-P57EN 依同圖不同簽名加工規則共用 art。決定檔不進 git，採納後的永久登錄與其精確成員決定才是維護狀態。新增 package 使用包含原觀測的完整輸入集合，不把變動的舊來源塞進追加工具；舊來源更新另走 source／identity 修復流程。
 
-### 3.6 輸入保存與收據建立
+### 3.6 輸入保存
 
 每批在 repo 外的 `SVE_DATA_DIR/derived/registry/<batch-id>/` 建立新的永久目錄；不可覆寫舊批次。保存以下 exact bytes，不重新序列化或排序既有輸入：
 
@@ -192,18 +192,17 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 | candidates.jsonl | 取得本批已審候選；每行 en_no、category（A/B/C）、jp_candidates（含 jp_no）。新增批次須完整列出 EN 版次，人工確認 A/B 第一候選或 C 無對應 |
 | confirmations.tsv | 保存依序追加的人工裁決，欄位 en_no、jp_no、verdict、confirmed_on；後列覆蓋前列，不能重排 |
 | original_art.jsonl | 保存人工卡圖比對結果，每行含 en_no、verdict；en_original_art 是插畫確認證據 |
-| receipt-original.json | 原收據的 exact bytes 副本；供稽核比對，不能就地修訂 |
-| receipt.json | 本次使用的收據；若只補採納範圍，明記衍生自哪份原收據及新增欄位，不變更五個輸入 hash |
+| decisions.json | 本批使用的初始化決定檔，欄位見 §3.5 |
 
-舊批次的取得方式是從保存目錄或其備份複製上述檔案，使用 SHA256SUMS 驗證；不依賴 session 暫存檔、個人草稿或重新生成候選。本批先保留原收據與補充 scope 的收據；使用者確認後另建批次，五份輸入 exact bytes 相同，新 receipt 記 active 與 user／2026-09-28，移除不再適用的 pending scope。舊批次搭配確認前的 Git commit 重現。inventory.json 記各檔 hash、大小、來源及補充原因。SHA256SUMS 與收據都需納入批次備份；git 不存官方原文。
+舊批次的取得方式是從保存目錄或其備份複製上述檔案，使用 SHA256SUMS 驗證；不依賴 session 暫存檔、個人草稿或重新生成候選。舊批次搭配當時的 Git commit 重現。inventory.json 記各檔 hash、大小與來源。SHA256SUMS 與決定檔都需納入批次備份；git 不存官方原文。
 
 新批次依序執行：
 
 1. 取得完整日英萃取與所有候選／人工確認／插畫證據，依 §3.5 核對各面、規則差異及必要卡圖。保留原始欄位，不將候選更正寫回輸入。沒有 EN 萃取器時須先提供可審閱的完整 Card JSONL，不能省略原文或沿用 confidence 當決定。
 2. 建立全新 batch-id 目錄，複製五份輸入；以 SHA-256 比對來源與副本 exact bytes。原有卡片觀測若更新，走來源版本重審流程，不能覆寫舊批次。
-3. 人工完成核對後，建立符合 registry.review.Receipt 的 JSON：填 policy、reviewed_by、reviewed_on，input_hashes 的鍵恰為 jp/en/candidates/confirmations/original_art，值是 `sha256:` 加該副本的 hashlib.sha256(path.read_bytes()).hexdigest()。corrections／reskins／separate_groups／art_groups 依 §3.5 填寫；無資料則空集合，不能自行沿用上一批批准。
-4. 寫入 inventory.json 與 SHA256SUMS，記錄輸入取得方式、收據建立人與範圍。修改收據時另存新檔並保留原件，逐項說明差異；收據本身的 hash 也納入 SHA256SUMS。
-5. 將 §3.5 CLI 的五個輸入與 --receipt 全部指向此持久目錄，--images 指本機官方卡圖、--authored 指登錄目錄。先驗證輸入／計畫，完成後用相同命令加 --check 驗證零改寫。既有 EN-only／換皮卡追加需等待續版決定格式，不能透過新收據繞過拒絕。
+3. 人工完成核對後，建立符合 `registry.review.InitDecisions` 的 decisions.json：corrections／reskins／separate_groups／art_groups 依 §3.5 填寫；無資料則空集合，不能自行沿用上一批的決定。
+4. 寫入 inventory.json 與涵蓋本批全部檔案的 SHA256SUMS，記錄輸入取得方式。
+5. 將 §3.5 CLI 的五個輸入與 --decisions 全部指向此持久目錄，--as-of 填 JP 輸入的日期，--images 指本機官方卡圖、--authored 指登錄目錄。先驗證輸入／計畫，完成後用相同命令加 --check 驗證零改寫。既有 EN-only／換皮卡追加需等待續版決定格式，不能透過修改決定檔繞過拒絕。
 
 ## 4. 新卡包的人工作業量
 

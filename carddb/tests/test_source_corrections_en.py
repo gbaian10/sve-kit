@@ -46,7 +46,7 @@ def test_four_synthetic_english_corrections_have_distinct_evidence_and_rule_resu
         face.info["Card Type"] = "Spell"
         face.image = "/images/synthetic/" + number + ".png"
         raw_images[number] = b"\x89PNG\r\n\x1a\nSynthetic EN image " + number.encode()
-    inputs.receipt.corrections = [
+    inputs.decisions.corrections = [
         Correction(
             region="en",
             card_no=number,
