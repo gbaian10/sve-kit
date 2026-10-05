@@ -35,7 +35,6 @@ TABLES = (
             Column("source_kind", Kind.TEXT, choices=("official", "authored", "dsl")),
             Column("source_id", Kind.ID, nullable=True),
             Column("dsl_id", Kind.ID, nullable=True),
-            Column("decision_id", Kind.ID, nullable=True),
         ),
         ("id",),
         foreign_keys=(
@@ -47,24 +46,16 @@ TABLES = (
             ),
             ForeignKey(("source_id",), "source_record", ("id",)),
             ForeignKey(("dsl_id",), "dsl_document", ("id",)),
-            ForeignKey(("decision_id",), "decision", ("id",)),
         ),
         unique=(Unique(("from_card_id",), where="relation = 'same_rules_reskin'"),),
         checks=(
             Check("from_card_id != to_card_id"),
             Check("suggested_count IS NULL OR suggested_count > 0"),
             Check("relation != 'same_rules_reskin' OR source_kind = 'authored'"),
-            Check("relation != 'same_rules_reskin' OR decision_id IS NOT NULL"),
             Check("relation != 'same_rules_reskin' OR suggested_count IS NULL"),
             Check("relation != 'same_rules_reskin' OR dsl_id IS NULL"),
         ),
         query_checks=(
-            QueryCheck(
-                "reskin_confirmed",
-                "SELECT 1 FROM card_related AS r JOIN decision AS d ON d.id = r.decision_id "
-                "WHERE r.relation = 'same_rules_reskin' AND d.state != 'confirmed' LIMIT 1",
-                ("card_related", "decision"),
-            ),
             QueryCheck(
                 "reskin_reverse",
                 "SELECT 1 FROM card_related AS a JOIN card_related AS b ON a.from_card_id = b.to_card_id AND a.to_card_id = b.from_card_id "

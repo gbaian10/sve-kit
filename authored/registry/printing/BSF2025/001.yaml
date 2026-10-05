@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:88dfc3efab4f18a34549dda8698dc141f55db1fd080cce26d2eb814f0db59524
 records:
   - record_key: printing:p:a29287c6661e546aa7b5f21eea977b9c
     kind: printing
@@ -30,15 +29,3 @@ records:
           observation_hash: sha256:a3824153ecc72574f16f2c252ef52b100f3af64d744f682720ae17ed792fb66b
           rules_hash: sha256:ac6bab3d538c1a653495b2a5a329b7857eb17ad0d2782d086e9a4995bec51e85
           recipe: registry-observation-v1
-decisions:
-  - id: d:88dfc3efab4f18a34549dda8698dc141f55db1fd080cce26d2eb814f0db59524
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:88dfc3efab4f18a34549dda8698dc141f55db1fd080cce26d2eb814f0db59524
-    members:
-      -   - printing:p:a29287c6661e546aa7b5f21eea977b9c
-          - sha256:ccc949e9d7aca7c72d2a993ba6bc52db1977240ab9db0693f54d91494cc57842
-    sample_ids:
-      - printing:p:a29287c6661e546aa7b5f21eea977b9c

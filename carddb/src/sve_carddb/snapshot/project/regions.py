@@ -163,7 +163,7 @@ def region_views(
             )
             reviews = source.matching(
                 "region_mapping_review",
-                "card_id,target_region,state,as_of,coverage_scope,decision_id",
+                "card_id,target_region,state,as_of,coverage_scope",
                 card_id=card["id"],
                 target_region="jp" if region == "en" else "en",
             )
@@ -174,7 +174,6 @@ def region_views(
                 mapping = (
                     "confirmed_none"
                     if review["state"] == "confirmed_none"
-                    and source.review(review["decision_id"]) == "confirmed"
                     else "pending"
                 )
             release = (

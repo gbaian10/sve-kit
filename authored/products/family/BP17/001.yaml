@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:186934a547dcb74b63a5b7bcbe2fbe1b86c17907ec8b815913300257ed330933
 records:
   - record_key: '["product_family","BP17"]'
     kind: product_family
     filing_key: BP17
+    state: confirmed
     data:
       id: BP17
       code: bp17
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: ブースターパック「Convergent Destinies/コンヴァージェント・ディスティニー」
     evidence: []
-decisions:
-  - id: d:186934a547dcb74b63a5b7bcbe2fbe1b86c17907ec8b815913300257ed330933
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:186934a547dcb74b63a5b7bcbe2fbe1b86c17907ec8b815913300257ed330933
-    members:
-      -   - '["product_family","BP17"]'
-          - sha256:b4e410e74c7e20005fda04cdbbb8f8f8bae8e4b28c4a2ad5609cb9a055bacad7
-    sample_ids:
-      - '["product_family","BP17"]'

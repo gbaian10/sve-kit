@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:442bbd1a1587abbfe58f099d7dcaea5fdbc182ea80de5812ab477764f30c3a90
 records:
   - record_key: face:f:e188b10c81235e09b6174325f16ca8bd
     kind: face
@@ -98,48 +97,3 @@ records:
       card_id: c:774c1a2bc37c50fb99aa25c5083ee169
       ordinal: 0
       side: front
-decisions:
-  - id: d:442bbd1a1587abbfe58f099d7dcaea5fdbc182ea80de5812ab477764f30c3a90
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:442bbd1a1587abbfe58f099d7dcaea5fdbc182ea80de5812ab477764f30c3a90
-    members:
-      -   - face:f:5a616e9eb965595d80914b2ec402640d
-          - sha256:8da4afee29a0692731a4ca74a1d16e4862ab9864546d04a8af2c7333c3d3db68
-      -   - face:f:77f301bee7555e12bbd0dfff6bb69fda
-          - sha256:4d167b08203a0a15f5de18bd6e4d358e146937a31a973b259917bcf255ec683a
-      -   - face:f:7c35f1b3ad6c512993a3336065847df8
-          - sha256:28ad68bfbc8cd764aa901bcd9e066ead1c23e99b80217debc2a26f88f6c263b4
-      -   - face:f:91bae2b62fb05452924b27e2449c1531
-          - sha256:e37f7f0ca51d2ca8fa426087f20b14fe7daab9eb0d79b2d39dd246e07fcb60a3
-      -   - face:f:a741a15446df50dbb6429eace5030099
-          - sha256:3b0d772a17523721c736da09540c05533502f9faae47e4555d0cafa4413040bf
-      -   - face:f:b70a8d82056650348d330aa28f5066bf
-          - sha256:b07e06a0118b75981fd47456770e944c485a4751f27b19faa08283a7dc7ac583
-      -   - face:f:c025da9675a55194b547d59ce904735e
-          - sha256:404d756171610a3eabf88dd17490c994c76f2e0239680699a08418543cb350aa
-      -   - face:f:c6c6bae33f9155c8a3f8a00f3e18b9d0
-          - sha256:e7c44c7f9eef83603e14728648deb7b3cc32466e7a172e28b20390eb7969e626
-      -   - face:f:c8767848507b53c9a56a88fd1e86303a
-          - sha256:d140280908519b166642d1e48c91f57631cf43cdf36a46ac2a09e949814ae8b0
-      -   - face:f:e188b10c81235e09b6174325f16ca8bd
-          - sha256:bc6525d35fd1e6d7e193c028b3a4ef5e18f7b97e4304cb6e38ed5aa27df77674
-      -   - face:f:e257ee1ea8335dfea73faaa3cda23313
-          - sha256:0d46a1ea45204d0ac4ef2e0390214740936536f60954b4f8be6b4da399dfa827
-      -   - face:f:fea3f77e09ef5bb6b1160dea3c79d237
-          - sha256:6313000b27e841aafd3f73ca7f54d3503563635f0173fc0d27daa5bf8ed0d884
-    sample_ids:
-      - face:f:5a616e9eb965595d80914b2ec402640d
-      - face:f:77f301bee7555e12bbd0dfff6bb69fda
-      - face:f:7c35f1b3ad6c512993a3336065847df8
-      - face:f:91bae2b62fb05452924b27e2449c1531
-      - face:f:a741a15446df50dbb6429eace5030099
-      - face:f:b70a8d82056650348d330aa28f5066bf
-      - face:f:c025da9675a55194b547d59ce904735e
-      - face:f:c6c6bae33f9155c8a3f8a00f3e18b9d0
-      - face:f:c8767848507b53c9a56a88fd1e86303a
-      - face:f:e188b10c81235e09b6174325f16ca8bd
-      - face:f:e257ee1ea8335dfea73faaa3cda23313
-      - face:f:fea3f77e09ef5bb6b1160dea3c79d237

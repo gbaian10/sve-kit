@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:245325b368f29073d339b4518ed8c76fa5fbbfcaba596c2b6498157a1dc321d2
 records:
   - record_key: '["product_family","SDD03"]'
     kind: product_family
     filing_key: SDD03
+    state: confirmed
     data:
       id: SDD03
       code: sdd03
@@ -14,15 +14,3 @@ records:
         lang: en
         text: 'Showdown Deck: Runecraft'
     evidence: []
-decisions:
-  - id: d:245325b368f29073d339b4518ed8c76fa5fbbfcaba596c2b6498157a1dc321d2
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:245325b368f29073d339b4518ed8c76fa5fbbfcaba596c2b6498157a1dc321d2
-    members:
-      -   - '["product_family","SDD03"]'
-          - sha256:574d741a5f154f14338c60ec30948e11b73aab4bd8d5da861d2c468b71ecdba3
-    sample_ids:
-      - '["product_family","SDD03"]'

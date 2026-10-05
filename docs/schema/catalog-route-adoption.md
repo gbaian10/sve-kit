@@ -53,7 +53,7 @@ filing_key 為 `[A-Za-z0-9_-]+`，只作歸檔、不產生商品或地區真值�
 同片一種 record.kind、一個決定，records 非空並按 record_key 排序，decisions 恰含 default_decision_id 所指決定。
 
 YAML 1.2 邊界、單檔嚴格小於 1 MiB／512 KiB 目標、canonical recipe 沿
-[authored-layout §1／§2](authored-layout.md#2-分片批次決定與來源)。所有欄位必填，可空者明示 null；未知欄位拒絕。
+[authored-layout §1／§2](authored-layout.md#2-分片與來源)。所有欄位必填，可空者明示 null；未知欄位拒絕。
 includes 映射上述各自分片路徑到**完整解析內容**的 canonical hash；禁止絕對路徑、`..`、symlink、重複鍵、
 缺檔、未索引分片、跨入口偷載與 hash 不符。先驗全入口、全區、全部歷史，再投影本次範圍。
 歷史分片與 index 舊 entries 不改；新分片驗妥後原子追加 index。啟用入口時必有 index，空集合明示 includes={}。

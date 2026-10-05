@@ -199,7 +199,6 @@ def test_supersedes_stays_in_its_owner(
         ("errata_printing", "decision_id", None),
         ("region_text_review", "decision_id", None),
         ("region_divergence", "effect", "override_dsl"),
-        ("card_related", "decision_id", None),
         ("card_related", "source_kind", "official"),
         ("card_related", "suggested_count", 1),
         ("card_related", "to_card_id", "card2"),
@@ -216,8 +215,6 @@ def test_local_adoption_and_relation_checks(
     ("decision", "query"),
     [
         ("errata_decision", "errata_printing_confirmed"),
-        ("related_decision", "reskin_confirmed"),
-        ("mapping_decision", "mapping_confirmed_none"),
         ("divergence_decision", "divergence_confirmed"),
     ],
 )
@@ -250,32 +247,19 @@ def test_aligned_requires_adopted_review(db: Database, state: str) -> None:
         db.update("decision", {"id": "text_decision"}, {"state": "sampled"})
 
 
-@pytest.mark.parametrize("state", ["active", "upstream_fixed"])
-def test_correction_adoption_without_application(db: Database, state: str) -> None:
-    with db.transaction():
-        db.delete("correction_application", key("correction_application"))
-        db.update("source_correction", key("source_correction"), {"state": state})
-    with (
-        pytest.raises(sqlite3.IntegrityError, match="correction_adoption"),
-        db.transaction(),
-    ):
-        db.update("decision", {"id": "correction_decision"}, {"state": "sampled"})
-
-
+@pytest.mark.parametrize("state", ["needs_review", "retired"])
 @pytest.mark.parametrize("status", ["applied", "already_fixed"])
-def test_application_has_its_own_confirmed_gate(db: Database, status: str) -> None:
-    with db.transaction():
-        db.update(
-            "source_correction", key("source_correction"), {"state": "needs_review"}
-        )
-        db.update(
-            "correction_application", key("correction_application"), {"status": status}
-        )
+def test_unadopted_correction_cannot_be_applied(
+    db: Database, state: str, status: str
+) -> None:
     with (
         pytest.raises(sqlite3.IntegrityError, match="application_adoption"),
         db.transaction(),
     ):
-        db.update("decision", {"id": "correction_decision"}, {"state": "proposed"})
+        db.update(
+            "correction_application", key("correction_application"), {"status": status}
+        )
+        db.update("source_correction", key("source_correction"), {"state": state})
 
 
 @pytest.mark.parametrize("with_decision", [False, True])
@@ -296,7 +280,6 @@ def test_pending_records_and_conflicts_do_not_require_adoption(
         db.update(
             "region_mapping_review", key("region_mapping_review"), {"state": "pending"}
         )
-        db.update("decision", {"id": "mapping_decision"}, {"state": "proposed"})
         db.update(
             "region_text_review",
             key("region_text_review"),
@@ -308,7 +291,6 @@ def test_pending_records_and_conflicts_do_not_require_adoption(
         db.update(
             "source_correction", key("source_correction"), {"state": "needs_review"}
         )
-        db.update("decision", {"id": "correction_decision"}, {"state": "proposed"})
         db.update(
             "correction_application",
             key("correction_application"),
@@ -503,7 +485,6 @@ def test_other_relations_can_share_a_reskin_source_card(db: Database) -> None:
                 "id": "mention",
                 "relation": "mentions",
                 "to_card_id": "old_card",
-                "decision_id": None,
             },
         )
 

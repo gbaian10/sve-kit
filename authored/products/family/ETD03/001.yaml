@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:00cccdd96147fa0cdb1e545a715792f941865e23d52a10bb967981a5886c02dd
 records:
   - record_key: '["product_family","ETD03"]'
     kind: product_family
     filing_key: ETD03
+    state: confirmed
     data:
       id: ETD03
       code: etd03
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: エントリーデッキシャドウバースＦ第3弾「蜜田川イツキ」
     evidence: []
-decisions:
-  - id: d:00cccdd96147fa0cdb1e545a715792f941865e23d52a10bb967981a5886c02dd
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:00cccdd96147fa0cdb1e545a715792f941865e23d52a10bb967981a5886c02dd
-    members:
-      -   - '["product_family","ETD03"]'
-          - sha256:dfd827399f202148554de7b56068d9a9e244a669b63b6d28b41aee6780ed9127
-    sample_ids:
-      - '["product_family","ETD03"]'

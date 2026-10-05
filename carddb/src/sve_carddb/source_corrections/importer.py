@@ -43,7 +43,6 @@ def correction_values(application: Application) -> dict[str, Value]:
         "corrected_value": Json(data.corrected_value),
         "expected_source_hash": data.expected_source_hash,
         "reason": data.reason,
-        "decision_id": application.record.decision_id,
         "reported_to_official": data.reported_to_official,
         "reported_on": data.reported_on,
         "report_url": data.report_url,

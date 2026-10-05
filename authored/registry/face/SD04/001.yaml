@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:53f3a0e7c668bda4ddc479d3e6ae823ef27047b7539dbb83e9d48ce2d7db1194
 records:
   - record_key: face:f:4930cc111705548da6f2f88271ffd2d4
     kind: face
@@ -66,36 +65,3 @@ records:
       card_id: c:cd1afdb1a11b57678821196bb9c8cec7
       ordinal: 0
       side: front
-decisions:
-  - id: d:53f3a0e7c668bda4ddc479d3e6ae823ef27047b7539dbb83e9d48ce2d7db1194
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:53f3a0e7c668bda4ddc479d3e6ae823ef27047b7539dbb83e9d48ce2d7db1194
-    members:
-      -   - face:f:07d6c5ef76655306a475f6debe2c9a50
-          - sha256:3e96fcf425dd223681c267f9190969f27e946d9feceafa200b3eb4710b4eddec
-      -   - face:f:0d7fa765c381568882a754b9a570f3b1
-          - sha256:aa6431d998a96cb336c17df60c75c9b82bfd84a24523a4722bb6931cf484d175
-      -   - face:f:1f0effafdb5a54cd838ebf300827933d
-          - sha256:2cdd0071ffd4a515fe6e2d8c908799158c0b8afdcd65938962e7333ae74a5363
-      -   - face:f:4930cc111705548da6f2f88271ffd2d4
-          - sha256:0e481e23f8264784ec651e3337ff5b7de977b05a08da40eec8438f3c04882cfd
-      -   - face:f:5bb5e52eb52756e6b87518663e3fd871
-          - sha256:0b7a0d589449bfcd22c3c231b7384838dbe1cbe7cef8f124a76be491f182c8ea
-      -   - face:f:9b07ff621c4f59afb2fd5dec020dbd4b
-          - sha256:d11b6ceb72ba7ca16b0616befb26a5acb654dd8fedf28808d673847534f4430a
-      -   - face:f:b9dc20e94c5d5e8f9d9687b4f103a0c3
-          - sha256:fe143517f848426f244e4b4c2593cd49e2d8d00ceb73eec8d6b26e6736a27ea1
-      -   - face:f:d250be1fdf275eb6a778c336abd156f5
-          - sha256:48b9df9430180ad1db59f22f74c1ed01e099c21da5174a3fb4b4cdc10f36bcf0
-    sample_ids:
-      - face:f:07d6c5ef76655306a475f6debe2c9a50
-      - face:f:0d7fa765c381568882a754b9a570f3b1
-      - face:f:1f0effafdb5a54cd838ebf300827933d
-      - face:f:4930cc111705548da6f2f88271ffd2d4
-      - face:f:5bb5e52eb52756e6b87518663e3fd871
-      - face:f:9b07ff621c4f59afb2fd5dec020dbd4b
-      - face:f:b9dc20e94c5d5e8f9d9687b4f103a0c3
-      - face:f:d250be1fdf275eb6a778c336abd156f5

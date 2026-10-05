@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:9bc32e1dc0f6b6e0743de11ba0c65bcb70ee56933d0cdf33acb32aa0984618b3
 records:
   - record_key: '["product_family","BP08"]'
     kind: product_family
     filing_key: BP08
+    state: confirmed
     data:
       id: BP08
       code: bp08
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: ブースターパック第8弾「次元混沌」
     evidence: []
-decisions:
-  - id: d:9bc32e1dc0f6b6e0743de11ba0c65bcb70ee56933d0cdf33acb32aa0984618b3
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:9bc32e1dc0f6b6e0743de11ba0c65bcb70ee56933d0cdf33acb32aa0984618b3
-    members:
-      -   - '["product_family","BP08"]'
-          - sha256:37f5a02dcae8dcd267f6a52a49b0123bf594605893ac513d0f613d36ba812876
-    sample_ids:
-      - '["product_family","BP08"]'

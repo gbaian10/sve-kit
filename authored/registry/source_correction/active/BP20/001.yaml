@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:f22be718d0a6a9ac057b0c85eed4a9dc2d1bb2ebc7a9b1f25539aad2845d2dfc
 records:
   - record_key: source_correction:x:0f9180eb38865e18b388ed096b000237
     kind: source_correction
@@ -71,21 +70,3 @@ records:
           image_src: /wordpress/wp-content/images/cardlist/BP20/bp20-p67.png
           region: jp
           locator: Card rules text box
-decisions:
-  - id: d:f22be718d0a6a9ac057b0c85eed4a9dc2d1bb2ebc7a9b1f25539aad2845d2dfc
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:f22be718d0a6a9ac057b0c85eed4a9dc2d1bb2ebc7a9b1f25539aad2845d2dfc
-    members:
-      -   - source_correction:x:0f9180eb38865e18b388ed096b000237
-          - sha256:222dd5c8023a9633b7184ef8b2faf35be900017522e246d9c9d61cef429a6183
-      -   - source_correction:x:8e4b0430ce215f9c9a4b83c4befade0a
-          - sha256:1b3881f7f88b217936d95f46dfa2db8a840657714d4c4c71a3121ec821fd70ce
-      -   - source_correction:x:fb2b48ffd61d5befb124b00a6bf6adfa
-          - sha256:560cc459623f6c85a840441d068d36a7fa4b7778252d52ada3824466b35eac93
-    sample_ids:
-      - source_correction:x:0f9180eb38865e18b388ed096b000237
-      - source_correction:x:8e4b0430ce215f9c9a4b83c4befade0a
-      - source_correction:x:fb2b48ffd61d5befb124b00a6bf6adfa

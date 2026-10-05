@@ -503,7 +503,17 @@ class TestDefaultTextInputs:
         with create_database(schema) as db:
             with db.transaction():
                 case.stage(db)
-                decision = db.rows("decision")[0].values["id"]
+                decision = "route-decision"
+                db.insert(
+                    "decision",
+                    {
+                        "id": decision,
+                        "state": "confirmed",
+                        "scope": "record",
+                        "category": "route",
+                        "note": "",
+                    },
+                )
                 db.insert(
                     "product",
                     {

@@ -129,11 +129,6 @@ def verify_application(registry: RegistrySnapshot, application: Application) -> 
         != data
     ):
         raise ValueError("Correction typed data differs from its exact authored record")
-    decision = registry.decisions.get(application.record.decision_id or "")
-    if decision is None or (data.state == "active" and decision.state != "confirmed"):
-        raise ValueError("Correction adoption decision is not confirmed")
-    if (application.record.record_key, application.key()) not in decision.members:
-        raise ValueError("Correction decision does not bind the exact record")
     if len(data.evidence) != len(application.images):
         raise ValueError("Correction image evidence inventory mismatch")
     for evidence, source in zip(data.evidence, application.images, strict=True):

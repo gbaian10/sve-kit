@@ -1,10 +1,11 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:c801b782fbcd3ee73317f0fb0a5805a3c63235df7a6fc6b4e48cb503dbe12fab
 records:
   - record_key: '["product_family","BP19"]'
     kind: product_family
     filing_key: BP19
+    state: confirmed
+    note: 使用者：EN 為合併包（Combined Set），在家族附商品連結即可
     data:
       id: BP19
       code: bp19
@@ -14,16 +15,3 @@ records:
         lang: ja
         text: ブースターパック「天魔八虐」
     evidence: []
-decisions:
-  - id: d:c801b782fbcd3ee73317f0fb0a5805a3c63235df7a6fc6b4e48cb503dbe12fab
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:c801b782fbcd3ee73317f0fb0a5805a3c63235df7a6fc6b4e48cb503dbe12fab
-    members:
-      -   - '["product_family","BP19"]'
-          - sha256:5dfe2fba1693f46ce4245483ff17ccdf1e4d7fccb6135cb24eaaeb98a33f20c8
-    sample_ids:
-      - '["product_family","BP19"]'
-    note: 使用者：EN 為合併包（Combined Set），在家族附商品連結即可

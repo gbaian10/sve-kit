@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:85e28decb76a16f75d6626af39bb5afe4fcf9b2b8fc0e2d906b418ec54e643c0
 records:
   - record_key: '["product_family","PR"]'
     kind: product_family
     filing_key: PR
+    state: confirmed
     data:
       id: PR
       code: pr
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: PRカード
     evidence: []
-decisions:
-  - id: d:85e28decb76a16f75d6626af39bb5afe4fcf9b2b8fc0e2d906b418ec54e643c0
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:85e28decb76a16f75d6626af39bb5afe4fcf9b2b8fc0e2d906b418ec54e643c0
-    members:
-      -   - '["product_family","PR"]'
-          - sha256:212e597e9f2c6aa3e44e4c4093300cda5584a76676bbc08d5d3b1f617c40e263
-    sample_ids:
-      - '["product_family","PR"]'

@@ -12,7 +12,7 @@ from sve_carddb.registry.yaml_reader import parse_yaml
 from sve_carddb.template_parameter_rules.current import Rule, Rules, parse
 from sve_carddb.template_parameters.rule_candidates import BY_ID
 
-from .product_fixtures import decision, envelope, family
+from .product_fixtures import envelope, family, first_record
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -39,11 +39,11 @@ def test_parameter_rules_round_trip_omits_only_empty_note(note: str) -> None:
 
 
 @pytest.mark.parametrize("note", ["", "Keep this explanation"])
-def test_product_decision_round_trip_omits_only_empty_note(
+def test_product_record_round_trip_omits_only_empty_note(
     tmp_path: Path, note: str
 ) -> None:
     value = envelope([family("BP02")])
-    decision(value)["note"] = note
+    first_record(value)["note"] = note
     original = Shard.model_validate_json(json.dumps(value))
     raw = encode(original)
     assert (b"note:" in raw) == bool(note)

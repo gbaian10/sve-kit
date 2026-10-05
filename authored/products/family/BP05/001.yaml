@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:63c7712720fafcd0bf0f265272206667b02921cfda3a05986045263dcf44e559
 records:
   - record_key: '["product_family","BP05"]'
     kind: product_family
     filing_key: BP05
+    state: confirmed
     data:
       id: BP05
       code: bp05
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: ブースターパック第5弾「永劫なる絶傑」
     evidence: []
-decisions:
-  - id: d:63c7712720fafcd0bf0f265272206667b02921cfda3a05986045263dcf44e559
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:63c7712720fafcd0bf0f265272206667b02921cfda3a05986045263dcf44e559
-    members:
-      -   - '["product_family","BP05"]'
-          - sha256:d20008ece90d60544d7f8c04017f8924f4edd40ddca065c9b742dd8be7f970cd
-    sample_ids:
-      - '["product_family","BP05"]'

@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:c794997183a3adad1ec256c8f3ca29b1ff91c8eab7c190ee5d4bc706cee08848
 records:
   - record_key: '["product_family","SD02"]'
     kind: product_family
     filing_key: SD02
+    state: confirmed
     data:
       id: SD02
       code: sd02
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: スターターデッキ第2弾「怨讐刀鬼」
     evidence: []
-decisions:
-  - id: d:c794997183a3adad1ec256c8f3ca29b1ff91c8eab7c190ee5d4bc706cee08848
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:c794997183a3adad1ec256c8f3ca29b1ff91c8eab7c190ee5d4bc706cee08848
-    members:
-      -   - '["product_family","SD02"]'
-          - sha256:1f1cdc0047e88d3a652a60573ab17cd0609171737b184a11eb58f4fa23a1c7a2
-    sample_ids:
-      - '["product_family","SD02"]'

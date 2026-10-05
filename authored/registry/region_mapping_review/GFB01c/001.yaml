@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:34fd83e49112df4b49359a82a242bd5a00ff2ff5da43e53348bdd3df836ecfe1
 records:
   - record_key: region_mapping_review:c:e8078cea6a0d5258982639dec65a9bbd
     kind: region_mapping_review
@@ -252,57 +251,3 @@ records:
           observation_hash: sha256:98ffccd9aa58c05317603724e025a6f711b903425ad3a6d486626d87ac347166
           rules_hash: sha256:2ee536de4683f604e102b23b872be1f1f88b858b43066b6b5513f7c3473a77f5
           recipe: registry-observation-v1
-decisions:
-  - id: d:34fd83e49112df4b49359a82a242bd5a00ff2ff5da43e53348bdd3df836ecfe1
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:34fd83e49112df4b49359a82a242bd5a00ff2ff5da43e53348bdd3df836ecfe1
-    members:
-      -   - region_mapping_review:c:043ec4851f3d57b2b66f79b61598957d
-          - sha256:3daec1485f7ad69d1b1b0f39dc73f16b4f02db9d953f4d07c2ef870051a23a10
-      -   - region_mapping_review:c:39b8ed717ea15dd9bc8ceca87a5145df
-          - sha256:6dc197e65fa2cc7c2ad15fc22cfbef54e21c49245ff2bc0eae69752b7d760f7d
-      -   - region_mapping_review:c:3d9b4503939759b09d7fa2b574ac58a1
-          - sha256:0fc6516ca38670454afb86547f0e74e7bb9a5695c13347fa35680cf0dce58b10
-      -   - region_mapping_review:c:5aa3918c11175da99edd1bbe5fa6c3ed
-          - sha256:9ba0779489bcb3f101035fcc544a5bb5f785dbd840e4b810eb8f9f887302c421
-      -   - region_mapping_review:c:63a7606446685898862f424a6acbfd5f
-          - sha256:6ef6cc7aefae934438e47b53fbc1a2de7132c8d735b9aa70820674e59611fb42
-      -   - region_mapping_review:c:6e9b63df42415270a627648b6b7aa3fd
-          - sha256:59025eafe6b2c5a5a0bb2fd21fe4c868ee3dd16efa4c16598aa5cd92ba811a46
-      -   - region_mapping_review:c:776562bf7efc5294963c1b3c991347ce
-          - sha256:ea8c1d0003f8e3eecbd7d7f352a156614b63dffc6950c94330627e56c2c9f158
-      -   - region_mapping_review:c:88c0954e53315ff58ab4ea111c2fe4ea
-          - sha256:6c0f1b8cb6bfd074feef89745d31f4a81e9eaa6e708209dbe8b3a102359caa3b
-      -   - region_mapping_review:c:8d2051ffa3f95bf49a3baf392e7a44cd
-          - sha256:2023001e6c374940b50730d27dc6f5a93ed64e957ab6375bc49e229ecaf018d1
-      -   - region_mapping_review:c:b689054e0a5152aaa53f3f6323f39dea
-          - sha256:fe9f97f1508d4e4ea79895dd03db9705cf11544d4e65f84f55de0a14709fa032
-      -   - region_mapping_review:c:e4ddba56119f5efe92f71c0c65c2671b
-          - sha256:098666a5001adda9a78d60864830939143cfcb83d716658bb8dff4fc518bbb60
-      -   - region_mapping_review:c:e8078cea6a0d5258982639dec65a9bbd
-          - sha256:787993f63a28adec798a1f6e6dd34256ed5148e208866c8fdadd6b5f625337cb
-      -   - region_mapping_review:c:edd9d175b3a9557d8c05636f45391735
-          - sha256:f36d6ab81b3c8cd236ca506a2ac8b182f9fd3f726281d826a27345e6b9641e7c
-      -   - region_mapping_review:c:f1fe82f2597b50f3bd692f3df5f47879
-          - sha256:e3122606ec328669e41d7e622cbe11a1de3928d27c90a3ccbbe0b6e9eb5e9a9b
-      -   - region_mapping_review:c:fb85badd7b5c56d2a62fc3c95358285b
-          - sha256:5b12acf98ef7ff271c1a7d7b735d938ce3f5d166e263c37f6f4cbc5dc92a7188
-    sample_ids:
-      - region_mapping_review:c:043ec4851f3d57b2b66f79b61598957d
-      - region_mapping_review:c:39b8ed717ea15dd9bc8ceca87a5145df
-      - region_mapping_review:c:3d9b4503939759b09d7fa2b574ac58a1
-      - region_mapping_review:c:5aa3918c11175da99edd1bbe5fa6c3ed
-      - region_mapping_review:c:63a7606446685898862f424a6acbfd5f
-      - region_mapping_review:c:6e9b63df42415270a627648b6b7aa3fd
-      - region_mapping_review:c:776562bf7efc5294963c1b3c991347ce
-      - region_mapping_review:c:88c0954e53315ff58ab4ea111c2fe4ea
-      - region_mapping_review:c:8d2051ffa3f95bf49a3baf392e7a44cd
-      - region_mapping_review:c:b689054e0a5152aaa53f3f6323f39dea
-      - region_mapping_review:c:e4ddba56119f5efe92f71c0c65c2671b
-      - region_mapping_review:c:e8078cea6a0d5258982639dec65a9bbd
-      - region_mapping_review:c:edd9d175b3a9557d8c05636f45391735
-      - region_mapping_review:c:f1fe82f2597b50f3bd692f3df5f47879
-      - region_mapping_review:c:fb85badd7b5c56d2a62fc3c95358285b

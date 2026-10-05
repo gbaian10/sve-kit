@@ -78,30 +78,21 @@ def move_state(
 ) -> tuple[dict[str, Entity], dict[str, Entity], Transition]:
     before = _base(replay_base)
     record = checked(transaction(merge_record, replay_base))
-    after = _updates(before, record, "d:" + "0" * 64, set(before))
+    after = _updates(before, record, set(before))
     return before, after, record
 
 
-@pytest.mark.parametrize("damage", ["closure", "canonical"])
-def test_basis_boundary_rejections(replay_base: RegistryFiles, damage: str) -> None:
-    if damage == "closure":
-        files = replace(replay_base, shards=replay_base.shards[1:])
-        message = "Registry basis must contain its exact indexed closure"
-    else:
-        shards = (
-            replace(replay_base.shards[0], content_hash="sha256:" + "0" * 64),
-            *replay_base.shards[1:],
-        )
-        index = replay_base.index()
-        index.includes = {s.path: s.content_hash for s in shards}
-        files = replace(
-            replay_base,
-            shards=shards,
-            index_content=canonical(index.model_dump(mode="json")),
-        )
-        message = "Registry envelope serialization changed canonical content"
-    with pytest.raises(ValueError, match=f"^{message}$"):
-        _base(files)
+def test_basis_serialization_must_match_its_content_hash(
+    replay_base: RegistryFiles,
+) -> None:
+    shards = (
+        replace(replay_base.shards[0], content_hash="sha256:" + "0" * 64),
+        *replay_base.shards[1:],
+    )
+    with pytest.raises(
+        ValueError, match=r"^Registry envelope serialization changed canonical content$"
+    ):
+        _base(replace(replay_base, shards=shards))
 
 
 def test_appended_id_cannot_collide_with_effective_history(
@@ -113,21 +104,6 @@ def test_appended_id_cannot_collide_with_effective_history(
         match=r"^Appended registry ID collides with transition allocation history$",
     ):
         _append(None, replay_base, records, set(records))
-
-
-def test_unconfirmed_review_cannot_be_deactivated(
-    move_state: tuple[dict[str, Entity], dict[str, Entity], Transition],
-) -> None:
-    before, _, record = move_state
-    before = dict(before)
-    before["region_mapping_review:" + A] = replace(
-        before["region_mapping_review:" + A], confirmed=False
-    )
-    with pytest.raises(
-        ValueError,
-        match=r"^Unconfirmed record cannot supply a confirmed repair premise$",
-    ):
-        _updates(before, record, "d:" + "0" * 64, set(before))
 
 
 def test_retired_destination_cannot_be_allocated(
@@ -145,7 +121,7 @@ def test_retired_destination_cannot_be_allocated(
     with pytest.raises(
         ValueError, match=r"^Apply cannot allocate a retired destination card$"
     ):
-        _updates(before, checked(raw), "d:" + "0" * 64, set(before))
+        _updates(before, checked(raw), set(before))
 
 
 def test_retired_card_cannot_own_printings(
@@ -167,7 +143,7 @@ def test_art_use_cannot_be_shared_by_two_art(
     row.data["id"] = "a:" + "d" * 32
     row.record_key = "art:" + str(row.data["id"])
     records = dict(before)
-    records[row.record_key] = entity(row, row.record_key, None, None, True)
+    records[row.record_key] = entity(row, row.record_key, None)
     with pytest.raises(
         ValueError, match=r"^Art uses must be unique, not duplicated across art$"
     ):
@@ -313,7 +289,7 @@ def test_art_target_rejections(
         row.data["id"] = extra["to_art_id"]
         row.record_key = "art:" + extra["to_art_id"]
         after = dict(after)
-        after[row.record_key] = entity(row, row.record_key, None, None, True)
+        after[row.record_key] = entity(row, row.record_key, None)
         raw["targets"].append(extra)
     elif damage == "wrong_art":
         moved = {
@@ -387,12 +363,11 @@ def test_public_replay_reports_incomplete_dependencies(
         replay(tmp_path, inputs)
 
 
-def test_browse_hides_confirmed_descendants_of_unconfirmed_card(
+def test_browse_hides_descendants_of_retired_card(
     move_state: tuple[dict[str, Entity], dict[str, Entity], Transition],
 ) -> None:
     before, _, _ = move_state
-    records = dict(before)
-    records["card:" + A] = replace(records["card:" + A], confirmed=False)
+    records = change(before, "card:" + A, identity_state="retired")
     result = EffectiveRegistry(records, (), project({}, None))
     for kind, key in (("card", A), ("face", FA), ("printing", P), ("art", X)):
         assert key not in {e.data["id"] for e in result.browse(kind)}

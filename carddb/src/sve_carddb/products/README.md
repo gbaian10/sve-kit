@@ -1,40 +1,36 @@
 # Product inputs and frozen official staging
 
-`load_products(authored_root, registry=...)` reads the independent
-`products/index.yaml` defined in [authored-layout §10](../../../../docs/schema/authored-layout.md#10-歸檔類別商品與實際收錄).
+`load_products(authored_root, registry=...)` reads every shard under the independent
+`products/` directory defined in [authored-layout §10](../../../../docs/schema/authored-layout.md#10-歸檔類別商品與實際收錄).
 It never writes authored data, allocates IDs, reads latest cache or opens a live
 manifest. Supply a stable, verified authored checkout and the complete validated
 identity registry from that checkout.
 
-The reader checks all indexed family, product and inclusion shards before any
+The reader checks all family, product and inclusion shards before any
 projection: strict YAML, complete field sets, format versions, safe exact paths,
-file inventory, canonical parsed hashes, immutable typed records, data primary
-keys, per-shard kind/filing key, sorted records, global uniqueness, exact decision
-members/hashes/IDs and confirmed/proposed review metadata. Family references,
+immutable typed records, data primary keys, per-shard kind/filing key, sorted
+records, global uniqueness and each record's `proposed`/`confirmed` state.
+Unexpected YAML paths fail instead of being skipped. Family references,
 product/printing references and inclusion region equality are checked globally,
 including candidates and EN records. Filing keys do not create relationships.
 Unknown/month/year dates keep their original text and never gain a guessed day.
 
-`ProductSnapshot` retains the canonical index, complete canonical shard bytes,
-hashes, full typed envelopes, original decisions and the identity index used for
-reference checks. Record/decision mappings are read-only; nested models and
-arrays are immutable. `report()` contains identifiers and decision states only.
-It reports proposed inputs as candidates and confirmed product/inclusion inputs
-as unimplemented projections. Loading attests authored consistency, not the
+`ProductSnapshot` retains complete canonical shard bytes, hashes, full typed
+shards and the identity index used for reference checks. The record mapping is
+read-only; nested models and arrays are immutable. `report()` contains
+identifiers and record states only. It reports proposed inputs as candidates and
+confirmed product/inclusion inputs as unimplemented projections. Loading attests authored consistency, not the
 meaning of a locator, raw evidence closure or release eligibility.
 
 ## Family projection
 
 `populate_families` runs inside a caller-owned build transaction. It records each
 complete shard as an authored `source_record`, pinned by full Git SHA, path and
-canonical hash; every decision links back to that envelope. DB decision columns
-retain the supplied review time, membership hash, checked set and original note.
-An omitted decision note is read as an empty string; substantive notes remain unchanged.
-Review precision and full members remain accessible through the immutable
-source envelope, since the DB has no columns for them.
+canonical hash. A record's optional `note` keeps the maintainer's rationale in
+the authored shard; it is not copied into the DB.
 
-Only confirmed families become `product_family` rows. Proposed family decisions
-and their audit trail remain available, without creating parent rows. Any manual
+Only confirmed families become `product_family` rows. Proposed family records
+remain in the snapshot and report, without creating parent rows. Any manual
 product or inclusion record, including a proposed one, causes an explicit
 unsupported-projection error before writes. Manual product/inclusion projection
 remains separate work. Frozen official
@@ -56,10 +52,9 @@ verifies each sealed batch and its complete manifest/descriptor/receipt/raw
 closure, then resolves the referenced source version from that batch. Raw source
 IDs, URL, bytes hash and locator come from archived metadata; fetched time and
 HTTP metadata use the descriptor's first receipt. No URL or hash-only shortcut is
-accepted. Each distinct authored evidence reference has a `decision_source` link
-with its locator; its role is `product_evidence:<full-reference-hash>`, with the
-original evidence role and batch retained in the envelope. Shared references are
-deduplicated, while different locators survive. Metadata conflicts fail. Locators
+accepted. Every authored evidence reference becomes a
+`product_evidence_closure` use with its canonical reference as locator; the
+original evidence role and batch stay in the shard. Metadata conflicts fail. Locators
 remain human evidence descriptions, never executable queries or automatic
 proof of a real product relationship.
 
@@ -124,18 +119,18 @@ all four files and reads the closed DB without writes. See the
 
 `load_product_identities(authored_root, authored_revision=..., catalog=...,
 stores=...)` implements [authored-layout §11](../../../../docs/schema/authored-layout.md#11-官方商品身分對照-product-identity-v1).
-It validates the complete independent index and both regions before projection:
-closed fields, strict YAML, exact indexed file closure, canonical semantic hashes,
-path/filing/region agreement, sorted unique complete match keys, confirmed-only
-whole-shard decisions and independently recomputed members/checked sets. IDs
+It validates every shard under `product-identities/` and both regions before
+projection: closed fields, strict YAML, expected file paths, path/filing/region
+agreement and sorted unique complete match keys. Every record is a confirmed
+identity; the directory must exist, so a missing one never reads as empty. IDs
 share the manual product namespace and cannot cross regions. Different match
 aliases may share one ID; duplicate match records are forbidden even for one ID.
 
-The loader checks index/shard exact bytes against the supplied full Git revision
-and retains both physical dependency bytes and canonical index/shard hashes.
+The loader checks shard exact bytes against the supplied full Git revision
+and retains both physical dependency bytes and canonical shard hashes.
 Use `identities.dependencies()` in `BuildContext.from_inputs` and save
 `identities.configuration()` under its `product_identity` configuration key.
-Import checks every dependency and all three configuration fields. The checkout
+Import checks every dependency and the configured authored revision. The checkout
 must have Git available; dirty bytes cannot claim a committed authored revision.
 No input is written or signed by this loader.
 
@@ -229,10 +224,9 @@ def populate(db):
 ```
 
 Pass this callback and independently declared `expected` to `publish_bundle`.
-The single transaction includes families, the existing identity graph, complete
-identity envelopes/decisions/evidence links and official products/inclusions.
-Official content references raw sources, never an identity decision as a content
-approval. Authored identity sources use `product-identity-v1`; raw parsers remain
+The single transaction includes families, the existing identity graph, authored
+identity shard sources and official products/inclusions. Official content
+references raw sources, never an identity mapping as a content approval. Authored identity sources use `product-identity-v1`; raw parsers remain
 NULL. Exact evidence closure uses `product_identity_evidence_closure` with
 `archive-closure-v1`; reproduced matches use `official_product_identity` and the
 actual product parser. Page scans, product and inclusion processing each retain

@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:8879094280eeb6d6946fd86f9b6dd7606373557ec860a0b2634fe35102ca522e
 records:
   - record_key: printing:p:a6dcce3dc67c557f87d44d988a8b02c0
     kind: printing
@@ -173,39 +172,3 @@ records:
         observation_hash: sha256:d79b93a0dfab61f73567ec2d2ae0224821c1a34e39c0eed50e90163e5c8e5c4d
         rules_hash: sha256:5ae1544ddab730c20f5f726b6cc92cd781ae7b708d32ad696ae9fc16024cb26b
         recipe: registry-observation-v1
-decisions:
-  - id: d:8879094280eeb6d6946fd86f9b6dd7606373557ec860a0b2634fe35102ca522e
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:8879094280eeb6d6946fd86f9b6dd7606373557ec860a0b2634fe35102ca522e
-    members:
-      -   - printing:p:14edb6a1822a53cfa55f87084362e110
-          - sha256:ea169a9c3864fd2191dd525582660f0d62247be7359fb7c50a18ae655ec4ffda
-      -   - printing:p:15e7e55c206357ca8404f9c2a1e6bee3
-          - sha256:9a9c8b0c2e602854097926ddb2ac5853ec1685755c369f343ab1b30883250a4c
-      -   - printing:p:2453fdeaf4c150649abe1812a46c2d50
-          - sha256:229ab98239fe3aa684c7dba5349306d84c2d3c79502add818458a5e55a785920
-      -   - printing:p:572cbc05523a54d890a419afcd5790e5
-          - sha256:4493674ac94a5200da5950bca30213f8ab3fa2abc42100ba24630fcbc1cb6431
-      -   - printing:p:7af348bd93765dfcabbaebb73a76e43d
-          - sha256:a923d535498d860b9ea5b1779ab371f1414dec0245469267769d91adcf1d9700
-      -   - printing:p:a6dcce3dc67c557f87d44d988a8b02c0
-          - sha256:7366b1cdd5085d9fa9d091c9d0132d1bf2a330c7e606bce21505b7b630e4c57b
-      -   - printing:p:ba9bc266ae9f5ca489c8dc0ca37f334b
-          - sha256:5ef3fd8fb91777e6a41f89a08799abfd1899c04e890543152c357c81124d0c2d
-      -   - printing:p:d76001e272fd5c25857cadaae1d02f38
-          - sha256:5ccf2a2b94c382da760624c77b5250680221a315479111becf755fa9fe678161
-      -   - printing:p:feaedaa12a5c5023b2206afea35a37ca
-          - sha256:94dc5011eaf715543247f23fc1acc7ca4491be8e6c06d79766e24adb6c19cff1
-    sample_ids:
-      - printing:p:14edb6a1822a53cfa55f87084362e110
-      - printing:p:15e7e55c206357ca8404f9c2a1e6bee3
-      - printing:p:2453fdeaf4c150649abe1812a46c2d50
-      - printing:p:572cbc05523a54d890a419afcd5790e5
-      - printing:p:7af348bd93765dfcabbaebb73a76e43d
-      - printing:p:a6dcce3dc67c557f87d44d988a8b02c0
-      - printing:p:ba9bc266ae9f5ca489c8dc0ca37f334b
-      - printing:p:d76001e272fd5c25857cadaae1d02f38
-      - printing:p:feaedaa12a5c5023b2206afea35a37ca

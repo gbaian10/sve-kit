@@ -1,4 +1,4 @@
-"""Closed product-identity-v1 envelopes and exact source match types."""
+"""Closed product-identity-v1 shards and exact source match types."""
 
 from typing import Annotated, Literal
 from urllib.parse import parse_qsl, urlsplit
@@ -6,8 +6,8 @@ from urllib.parse import parse_qsl, urlsplit
 from pydantic import Field, field_validator, model_validator
 
 from sve_carddb.build_inputs import Version
-from sve_carddb.products.models import Code, DecisionMetadata, Evidence
-from sve_carddb.registry.records import Hash, RecordData, Region, Text
+from sve_carddb.products.models import Code, Evidence
+from sve_carddb.registry.records import RecordData, Region, Text
 
 
 def official_url(value: str, region: Region, purpose: str) -> bool:
@@ -99,14 +99,10 @@ class IdentityRecord(RecordData):
     evidence: Annotated[tuple[Evidence, ...], Field(min_length=1)]
 
 
-class IdentityDecision(DecisionMetadata):
-    state: Literal["confirmed"]
-    category: Literal["product_identity"]
-    policy_id: Literal["product-identity-v1"]
-
-
-class _Envelope(RecordData):
+class IdentityShard(RecordData):
     product_identity_format: Literal[1]
+    kind: Literal["product_identity_shard"]
+    records: Annotated[tuple[IdentityRecord, ...], Field(min_length=1)]
 
     @field_validator("product_identity_format", mode="before")
     @classmethod
@@ -114,17 +110,3 @@ class _Envelope(RecordData):
         if type(value) is not int:
             raise ValueError("Product identity format must be an integer")
         return value
-
-
-class IdentityIndex(_Envelope):
-    kind: Literal["product_identity_index"]
-    includes: dict[str, Hash]
-
-
-class IdentityShard(_Envelope):
-    kind: Literal["product_identity_shard"]
-    default_decision_id: Text
-    records: Annotated[tuple[IdentityRecord, ...], Field(min_length=1)]
-    decisions: Annotated[
-        tuple[IdentityDecision, ...], Field(min_length=1, max_length=1)
-    ]

@@ -1,10 +1,11 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:118b0cbb5434c4111b6981989a4f0c51763f2c5f53ae4a4f1cb6a7691143f7fa
 records:
   - record_key: '["product_family","CSD01"]'
     kind: product_family
     filing_key: CSD01
+    state: confirmed
+    note: 使用者：合作預組歸「預組」（放下拉選單）。合作作品：賽馬娘
     data:
       id: CSD01
       code: csd01
@@ -14,16 +15,3 @@ records:
         lang: ja
         text: コラボスターターデッキ「出走！ウマ娘！」
     evidence: []
-decisions:
-  - id: d:118b0cbb5434c4111b6981989a4f0c51763f2c5f53ae4a4f1cb6a7691143f7fa
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:118b0cbb5434c4111b6981989a4f0c51763f2c5f53ae4a4f1cb6a7691143f7fa
-    members:
-      -   - '["product_family","CSD01"]'
-          - sha256:d91ead30fa6b0cc350afa5f92cfe68b0a653afb7be2f35d5aeb70dc6b24d048f
-    sample_ids:
-      - '["product_family","CSD01"]'
-    note: 使用者：合作預組歸「預組」（放下拉選單）。合作作品：賽馬娘

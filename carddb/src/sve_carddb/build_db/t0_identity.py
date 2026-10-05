@@ -128,13 +128,9 @@ TABLES = (
                 choices=("confirmed", "provisional", "retired"),
             ),
             Column("home_set_id", Kind.ID),
-            Column("decision_id", Kind.ID, nullable=True),
         ),
         ("id",),
-        foreign_keys=(
-            ForeignKey(("home_set_id",), "product_family", ("id",)),
-            ForeignKey(("decision_id",), "decision", ("id",)),
-        ),
+        foreign_keys=(ForeignKey(("home_set_id",), "product_family", ("id",)),),
     ),
     Table(
         "face",
@@ -143,13 +139,9 @@ TABLES = (
             Column("card_id", Kind.ID),
             Column("ordinal", Kind.UINT),
             Column("side", Kind.TEXT, choices=("front", "back")),
-            Column("decision_id", Kind.ID, nullable=True),
         ),
         ("id",),
-        foreign_keys=(
-            ForeignKey(("card_id",), "card", ("id",)),
-            ForeignKey(("decision_id",), "decision", ("id",)),
-        ),
+        foreign_keys=(ForeignKey(("card_id",), "card", ("id",)),),
         unique=(
             Unique(("card_id", "ordinal")),
             Unique(("card_id", "side")),
@@ -165,7 +157,6 @@ TABLES = (
             Column("new_card_id", Kind.ID),
             Column("printing_id", Kind.ID, nullable=True),
             Column("data_version", Kind.TEXT),
-            Column("decision_id", Kind.ID),
             Column("reason", Kind.TEXT),
         ),
         ("id",),
@@ -173,7 +164,6 @@ TABLES = (
             ForeignKey(("old_card_id",), "card", ("id",)),
             ForeignKey(("new_card_id",), "card", ("id",)),
             ForeignKey(("printing_id",), "printing", ("id",)),
-            ForeignKey(("decision_id",), "decision", ("id",)),
         ),
         checks=(
             Check("old_card_id != new_card_id"),
@@ -242,13 +232,9 @@ TABLES = (
                 ),
             ),
             Column("name_unit_id", Kind.ID),
-            Column("decision_id", Kind.ID),
         ),
         ("id",),
-        foreign_keys=(
-            ForeignKey(("name_unit_id",), "text_unit", ("id",)),
-            ForeignKey(("decision_id",), "decision", ("id",)),
-        ),
+        foreign_keys=(ForeignKey(("name_unit_id",), "text_unit", ("id",)),),
         unique=(
             Unique(("code",)),
             Unique(("public_code",)),
@@ -309,7 +295,6 @@ TABLES = (
             Column("premium", Kind.BOOL, nullable=True),
             Column("serial_total", Kind.UINT, nullable=True),
             Column("source_id", Kind.ID),
-            Column("decision_id", Kind.ID, nullable=True),
             Column("rarity_kind", Kind.TEXT, fixed="rarity"),
         ),
         ("id",),
@@ -319,7 +304,6 @@ TABLES = (
             ForeignKey(("decklog_source_id",), "source_record", ("id",)),
             ForeignKey(("home_set_id",), "product_family", ("id",)),
             ForeignKey(("source_id",), "source_record", ("id",)),
-            ForeignKey(("decision_id",), "decision", ("id",)),
         ),
         unique=(
             Unique(("id", "card_id", "region")),

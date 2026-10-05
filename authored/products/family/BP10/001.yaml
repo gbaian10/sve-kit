@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:b2c43188e1986ad42efc9343ff00b4f6365bea3a9e63d5512736d18fd10a05ad
 records:
   - record_key: '["product_family","BP10"]'
     kind: product_family
     filing_key: BP10
+    state: confirmed
     data:
       id: BP10
       code: bp10
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: ブースターパック第10弾「Gods of the Arcana」
     evidence: []
-decisions:
-  - id: d:b2c43188e1986ad42efc9343ff00b4f6365bea3a9e63d5512736d18fd10a05ad
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:b2c43188e1986ad42efc9343ff00b4f6365bea3a9e63d5512736d18fd10a05ad
-    members:
-      -   - '["product_family","BP10"]'
-          - sha256:3f40c2a0de498e279b0137c3fb7cba224ac64973f9c5aa93836ded0cec8d45c0
-    sample_ids:
-      - '["product_family","BP10"]'

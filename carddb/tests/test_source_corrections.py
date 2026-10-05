@@ -24,7 +24,7 @@ from sve_carddb.text_observations.importer import revision_id
 from sve_carddb.text_observations.plan import verify_plan
 
 from .identity_evidence_fixtures import MemoryEvidence
-from .registry_snapshot_fixtures import edit_record, rewrite
+from .registry_snapshot_fixtures import edit_record
 from .source_correction_fixtures import make_correction_case
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared synthetic fixture
 from .text_observation_fixtures import make_case
@@ -148,10 +148,7 @@ def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: i
         assert units[revisions[revision_id(raw)]["effect_unit_id"]] == "Rule."
         assert revisions[revision_id(candidate)]["change_kind"] == "source_correction"
         assert revisions[revision_id(candidate)]["supersedes_id"] == revision_id(raw)
-        assert (
-            revisions[revision_id(candidate)]["decision_id"]
-            == application.record.decision_id
-        )
+        assert revisions[revision_id(candidate)]["decision_id"] is None
         if field == "effect":
             assert units[result["result_unit_id"]] == "Rule. (Reminder.)"
         else:
@@ -337,7 +334,17 @@ def test_conflict_closure_removes_routes_aliases_and_defaults_but_keeps_pending_
     with create_database(schema) as db:
         with db.transaction():
             case.stage(db)
-            decision = db.rows("decision")[0].values["id"]
+            decision = "route-decision"
+            db.insert(
+                "decision",
+                {
+                    "id": decision,
+                    "state": "confirmed",
+                    "scope": "record",
+                    "category": "route",
+                    "note": "",
+                },
+            )
             assert any(
                 row.values["namespace"] == "official"
                 and row.values["route_key"] == item.card_no
@@ -535,7 +542,6 @@ class TestDefaultCorrectionInputs:
             "url",
             "hash",
             "region",
-            "decision",
         ],
     )
     def test_each_altered_application_or_evidence_is_rejected_before_writes(
@@ -586,12 +592,6 @@ class TestDefaultCorrectionInputs:
             applications = (
                 replace(application, record=replace(application.record, data=data)),
             )
-        else:
-            applications = (
-                replace(
-                    application, record=replace(application.record, decision_id=None)
-                ),
-            )
         changed_plan = replace(case.plan, corrections=applications)
         with pytest.raises(ValueError, match="Correction"):
             verify_plan(changed_plan)
@@ -614,14 +614,6 @@ class TestDefaultCorrectionInputs:
             )
 
         edit_record(case.root, "source_correction", edit)
-        if field == "state":
-            from sve_carddb.registry.storage import Shard, read_yaml  # ruff: ignore[import-outside-top-level] -- only this case changes the independent authored decision envelope
-
-            assert old.corrections is not None
-            path = case.root / old.corrections[0].record.shard_path
-            shard = Shard.model_validate(read_yaml(path))
-            shard.decisions[0].state = "proposed"
-            rewrite(case.root, path, shard, resign=True)
         case.identity = replace(case.identity, snapshot=load_registry(case.root))
         case.catalog = load_products(case.root, registry=case.identity.snapshot)
         case.plan = plan_text_observations(

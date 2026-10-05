@@ -260,19 +260,10 @@ def test_yaml_size_boundary(tmp_path: Path) -> None:
         read_yaml(path)
 
 
-def test_shard_mutation_and_interrupted_write_rejected(
-    inputs: Inputs, tmp_path: Path
-) -> None:
-    files = plan_files(tmp_path, build(inputs, {}))
-    write_files(files)
-    orphan = tmp_path / "registry" / "card" / "unindexed.yaml"
-    orphan.write_text("orphan: true\n")
-    with pytest.raises(ValueError, match="closure"):
-        load(tmp_path)
-    orphan.unlink()
-    path = next(path for path in files if "printing" in path.parts)
-    path.write_text(path.read_text().replace("standard", "tampered"))
-    with pytest.raises(ValueError, match="Modified immutable shard"):
+def test_unexpected_registry_file_is_rejected(inputs: Inputs, tmp_path: Path) -> None:
+    write_files(plan_files(tmp_path, build(inputs, {})))
+    (tmp_path / "registry" / "card" / "orphan.yaml").write_text("orphan: true\n")
+    with pytest.raises(ValueError, match="envelope fields or format"):
         load(tmp_path)
 
 
@@ -585,7 +576,7 @@ def test_confirmed_type_projection_has_field_local_badge(inputs: Inputs) -> None
     assert inputs.en["GF01-001EN"].faces[0].info["Card Type"] == "Spell"
 
 
-def test_official_promotions_have_user_confirmed_decisions(
+def test_official_promotions_are_active_corrections(
     official_snapshot: RegistrySnapshot,
 ) -> None:
     root = Path(__file__).resolve().parents[2] / "authored/registry/source_correction"
@@ -594,13 +585,10 @@ def test_official_promotions_have_user_confirmed_decisions(
     shards = {shard.path: shard for shard in official_snapshot.files.shards}
     for path in (root / "active").rglob("*.yaml"):
         name = path.relative_to(root.parents[1]).as_posix()
-        shard = shards[name].envelope()
-        decision = shard.decisions[0]
-        assert decision.state == "confirmed"
-        if path.parent.name == "BP07":
-            continue
-        assert decision.sample_ids == [key for key, _ in decision.members]
-        promoted.extend(shard.records)
+        records = shards[name].envelope().records
+        assert all(record.data["state"] == "active" for record in records)
+        if path.parent.name != "BP07":
+            promoted.extend(records)
     assert len(promoted) == 8
 
 
@@ -738,7 +726,7 @@ def test_shards_fill_to_target_measured_on_final_yaml(
         ),
         key=storage.record_order(entries),
     )
-    envelope = storage._shard(printings[:4])
+    envelope = Shard(records=printings[:4])
     target = len(encode(envelope))
     monkeypatch.setattr(storage, "TARGET_BYTES", target)
     files = plan_files(tmp_path, entries)

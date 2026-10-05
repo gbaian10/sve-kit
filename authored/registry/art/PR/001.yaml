@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:17fec0f4743d3d9f5c16d2e272d2d736fc1d2d3f1dda3918ee0a9b622efce588
 records:
   - record_key: art:a:74792f19d37c589f911a6969fe426635
     kind: art
@@ -104,30 +103,3 @@ records:
         observation_hash: sha256:67e0109bb6c682f125fed89793628a1b992237e59c2945f047aba2faf8e2a3e7
         rules_hash: sha256:24e37e9b85a189d0828f9ff0dde7a254d5800b87a745c9abba8b4ac83679da3e
         recipe: registry-observation-v1
-decisions:
-  - id: d:17fec0f4743d3d9f5c16d2e272d2d736fc1d2d3f1dda3918ee0a9b622efce588
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:17fec0f4743d3d9f5c16d2e272d2d736fc1d2d3f1dda3918ee0a9b622efce588
-    members:
-      -   - art:a:31185240c9935cc89c2d54eeb33c6700
-          - sha256:344108e7006e4253c77171dd883b364ddaac5fc898d1ead4e8def35e4eb544a7
-      -   - art:a:3369de621f9e575db698ff4fe12f3293
-          - sha256:dd1e458918b74657e961815575d9dc250623d842ac6dc569637ea258a9aa14d2
-      -   - art:a:55019d4054e85dfcad18fd50dec40792
-          - sha256:5d79c3d37d6ad82aa38b02c91aa58e94596646bcf2c1f421cb50ba14305408ac
-      -   - art:a:74792f19d37c589f911a6969fe426635
-          - sha256:f72cbed713885b29fb7e531b113bc808c3afe5459c814b716245213b26f450b5
-      -   - art:a:bd7a74ff17d15e2eb1ae1f4f3041c48e
-          - sha256:5584d33030281422f85c942ce3a9093f7f497bf9be193801c79dd8ed6787a5f9
-      -   - art:a:c92dfdc5615052e892e1f1cd29d0773e
-          - sha256:55117401a19f84b2813e4f01035c569172863b7630ca179e97eafe01d9b1e6ef
-    sample_ids:
-      - art:a:31185240c9935cc89c2d54eeb33c6700
-      - art:a:3369de621f9e575db698ff4fe12f3293
-      - art:a:55019d4054e85dfcad18fd50dec40792
-      - art:a:74792f19d37c589f911a6969fe426635
-      - art:a:bd7a74ff17d15e2eb1ae1f4f3041c48e
-      - art:a:c92dfdc5615052e892e1f1cd29d0773e

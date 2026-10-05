@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:e64d6e718edec2011765610da6ed952e8a34488b788434aeeb3ee4e85631e1fc
 records:
   - record_key: '["product_family","BP11"]'
     kind: product_family
     filing_key: BP11
+    state: confirmed
     data:
       id: BP11
       code: bp11
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: ブースターパック第11弾「宿命の弾丸」
     evidence: []
-decisions:
-  - id: d:e64d6e718edec2011765610da6ed952e8a34488b788434aeeb3ee4e85631e1fc
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:e64d6e718edec2011765610da6ed952e8a34488b788434aeeb3ee4e85631e1fc
-    members:
-      -   - '["product_family","BP11"]'
-          - sha256:a627f5bbcc5167ee02f6449b4aa8c1b3758278796f6011c988be40df4b46e4c9
-    sample_ids:
-      - '["product_family","BP11"]'

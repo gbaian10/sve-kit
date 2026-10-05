@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:38e1108a99a542df40bbc8e0e5179907348d975ffc9f50166c144d604f2d8502
 records:
   - record_key: card:c:c6a27efffdc4551797a31cb932fd41ab
     kind: card
@@ -26,21 +25,3 @@ records:
       layout: single
       identity_state: confirmed
       home_set_id: ETD02
-decisions:
-  - id: d:38e1108a99a542df40bbc8e0e5179907348d975ffc9f50166c144d604f2d8502
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:38e1108a99a542df40bbc8e0e5179907348d975ffc9f50166c144d604f2d8502
-    members:
-      -   - card:c:8c66ff74798955fc9380a2be4a34d1e6
-          - sha256:050526b1154749331b250f0f1a0d885d19d04f99de1137305d821386fbb16512
-      -   - card:c:c6a27efffdc4551797a31cb932fd41ab
-          - sha256:131b0feff80f8188e8ebf4473d994e11a8de3bcbbcf3f5e0f13db52f822b2365
-      -   - card:c:f3fea19b48205083b19eb9b16c977d32
-          - sha256:7e6329df7fdb6b5e6f19fc4d27b8e0334579fb4163883bcef61ee40511c0cd73
-    sample_ids:
-      - card:c:8c66ff74798955fc9380a2be4a34d1e6
-      - card:c:c6a27efffdc4551797a31cb932fd41ab
-      - card:c:f3fea19b48205083b19eb9b16c977d32

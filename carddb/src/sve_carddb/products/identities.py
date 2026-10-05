@@ -14,7 +14,6 @@ from sve_carddb.build_inputs import BuildContext, Source, SourceUse
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.products.identity_models import (
     ExpansionLink,
-    IdentityIndex,
     IdentityRecord,
     IdentityShard,
     ProductLink,
@@ -37,7 +36,6 @@ if TYPE_CHECKING:
     from sve_carddb.registry.records import Region
 
 _PATH = re.compile(r"product-identities/(jp|en)/([0-9]{3,})\.yaml")
-INDEX_PATH = "product-identities/index.yaml"
 MAX_ORDINAL = 9_007_199_254_740_991
 
 
@@ -58,8 +56,6 @@ class IdentityEvidence:
 @dataclass(frozen=True)
 class ProductIdentities:
     revision: str
-    index_hash: str
-    index_bytes: bytes
     shards: tuple[IdentityFile, ...]
     records: Mapping[str, IdentityRecord]
     evidence: Mapping[Evidence, IdentityEvidence]
@@ -67,18 +63,12 @@ class ProductIdentities:
     catalog: ProductSnapshot
 
     def dependencies(self) -> dict[str, bytes]:
-        """Pin every historical alias shard's exact bytes, including the index."""
-        return {"authored/" + INDEX_PATH: self.index_bytes} | {
-            "authored/" + shard.path: shard.exact_bytes for shard in self.shards
-        }
+        """Pin every historical alias shard's exact bytes."""
+        return {"authored/" + shard.path: shard.exact_bytes for shard in self.shards}
 
     def configuration(self) -> dict[str, JsonValue]:
         """Declare the F1 configuration entry specified in authored-layout §11.4."""
-        return {
-            "authored_revision": self.revision,
-            "index_path": INDEX_PATH,
-            "index_hash": self.index_hash,
-        }
+        return {"authored_revision": self.revision}
 
     def verify_context(self, build: BuildContext) -> None:
         """Fail if physical or semantic authored pins differ from the validated input."""
@@ -162,24 +152,13 @@ def load_product_identities(
     """Validate the entire input before any regional selection, without writes."""
     if re.fullmatch(r"[0-9a-f]{40}", authored_revision) is None:
         raise ValueError("Product identity revision must be a full Git SHA")
-    _safe_file(root, root / INDEX_PATH)
-    raw = read_yaml(root / INDEX_PATH)
-    index = _model(IdentityIndex, raw)
-    _inventory(root, set(index.includes))
-    shards = tuple(
-        _shard(root, name, checksum)
-        for name, checksum in sorted(index.includes.items())
-    )
+    shards = tuple(_shard(root, name) for name in _inventory(root))
     records = _records(shards, catalog)
-    index_bytes = (root / INDEX_PATH).read_bytes()
-    _revision(root, INDEX_PATH, authored_revision, index_bytes)
     for shard in shards:
         _revision(root, shard.path, authored_revision, shard.exact_bytes)
     pages = _evidence(records, stores)
     return ProductIdentities(
         authored_revision,
-        digest(raw),
-        index_bytes,
         shards,
         MappingProxyType(records),
         MappingProxyType(pages),
@@ -200,29 +179,27 @@ def _model[T: RecordData](model: type[T], raw: JsonValue) -> T:
         raise ValueError("Invalid product identity fields: " + details) from None
 
 
-def _inventory(root: Path, includes: set[str]) -> None:
-    if any(_PATH.fullmatch(name) is None for name in includes):
-        raise ValueError("Unsafe product identity include path")
+def _inventory(root: Path) -> list[str]:
     directory = root / "product-identities"
-    present: set[str] = set()
+    # A missing directory must not read as an empty identity mapping.
+    if directory.is_symlink() or not directory.is_dir():
+        raise ValueError("Missing product identity input directory")
+    names: list[str] = []
     for path in directory.rglob("*"):
         if path.is_symlink():
             raise ValueError("Symlinks are forbidden in product identity inputs")
-        if (
-            path.suffix.lower() in {".yaml", ".yml"}
-            and path != directory / "index.yaml"
-        ):
-            present.add(path.relative_to(root).as_posix())
-    if present != includes:
-        raise ValueError("Product identity indexed file closure differs from disk")
+        if path.suffix.lower() in {".yaml", ".yml"}:
+            name = path.relative_to(root).as_posix()
+            if _PATH.fullmatch(name) is None:
+                raise ValueError("Unexpected product identity input path")
+            names.append(name)
+    return sorted(names)
 
 
-def _shard(root: Path, name: str, checksum: str) -> IdentityFile:
+def _shard(root: Path, name: str) -> IdentityFile:
     path = root / name
     _safe_file(root, path)
     raw = read_yaml(path)
-    if digest(raw) != checksum:
-        raise ValueError("Modified immutable product identity shard")
     envelope = _model(IdentityShard, raw)
     keys = tuple(record.record_key for record in envelope.records)
     if keys != tuple(sorted(set(keys))):
@@ -239,27 +216,7 @@ def _shard(root: Path, name: str, checksum: str) -> IdentityFile:
             raise ValueError("Duplicate product identity evidence")
         if not any(ref.role == "product_identity_match" for ref in record.evidence):
             raise ValueError("Product identity requires match evidence")
-    _decision(envelope, keys)
-    return IdentityFile(name, checksum, path.read_bytes(), envelope)
-
-
-def _decision(envelope: IdentityShard, keys: tuple[str, ...]) -> None:
-    decision = envelope.decisions[0]
-    members = tuple(
-        (record.record_key, digest(record.model_dump(mode="json")))
-        for record in envelope.records
-    )
-    membership_hash = digest([[key, checksum] for key, checksum in members])
-    if decision.members != members:
-        raise ValueError("Product identity exact members mismatch")
-    if decision.membership_hash != membership_hash:
-        raise ValueError("Product identity membership hash mismatch")
-    if decision.id != "d:" + membership_hash.removeprefix("sha256:"):
-        raise ValueError("Product identity decision ID mismatch")
-    if envelope.default_decision_id != decision.id:
-        raise ValueError("Product identity default decision mismatch")
-    if decision.sample_ids != keys:
-        raise ValueError("Product identity requires every exact member checked")
+    return IdentityFile(name, digest(raw), path.read_bytes(), envelope)
 
 
 def _records(
@@ -271,12 +228,7 @@ def _records(
         for record in catalog.records.values()
         if isinstance(record, ProductRecord)
     }
-    decisions: set[str] = set()
     for shard in shards:
-        identifier = shard.envelope.decisions[0].id
-        if identifier in decisions:
-            raise ValueError("Duplicate product identity decision")
-        decisions.add(identifier)
         for record in shard.envelope.records:
             if record.record_key in records:
                 raise ValueError("Duplicate global product identity match")

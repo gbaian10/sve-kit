@@ -330,7 +330,7 @@ def test_exact_full_faces_source_uses_and_history_never_authorize_release(
 
 
 @pytest.mark.parametrize("field", ["observation_hash", "rules_hash"])
-def test_each_hash_change_queues_every_affected_decision_without_replacing_it(
+def test_each_hash_change_queues_every_affected_record_without_replacing_it(
     case: Case, field: str
 ) -> None:
     evidence = case.identity.evidence["en", NUMBER]
@@ -367,17 +367,6 @@ def test_each_hash_change_queues_every_affected_decision_without_replacing_it(
     }
     assert {row["record_key"] for row in queue if isinstance(row, dict)} == affected
     assert queue
-    decisions = {
-        projection.record_key: projection.decision_id
-        for projection in identity.projections
-        if projection.record_key in affected
-    }
-    assert all(isinstance(value, str) and value for value in decisions.values())
-    assert all(
-        isinstance(row, dict)
-        and row["decision_id"] == decisions[str(row["record_key"])]
-        for row in queue
-    )
     assert all(
         isinstance(row, dict)
         and row["actual_" + field] == "sha256:" + "0" * 64

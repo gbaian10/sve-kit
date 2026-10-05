@@ -2,10 +2,9 @@
 
 `plan_preview(authored, provider, regions=("jp",))` first loads and validates the
 **complete** registry with `load_registry`. The region argument is mandatory.
-The returned immutable plan retains all indexed shards, full decisions, members,
-sample IDs, original permanent allocations and both high-water cursors. It does
-not write authored data or narrow decision membership. Only subsequent build
-rows are selected by region.
+The returned immutable plan retains all shards, original permanent allocations
+and both high-water cursors. It does not write authored data. Only subsequent
+build rows are selected by region.
 
 `FrozenJP(store, store_id, batch_id, parser_version=...)` verifies the sealed batch
 and its metadata/raw/immutable-manifest closure. It reads only pinned current
@@ -41,14 +40,13 @@ Neither provider reads historical JSONL or uses it as source evidence.
 has been independently pinned and verified. A batch of individual HTML sources
 is not that old JSONL input; `FrozenJP.coverage` therefore returns false.
 
-## Decisions and projection diagnostics
+## Projection diagnostics
 
-`plan.report()` contains record keys, historic decision IDs/states, selected
-regions, original cursors, missing/mismatching source diagnostics, source IDs,
-URLs and hashes. It contains neither card text nor correction values. Every
-registry record has one included/excluded/deferred result. The report and plan
-must accompany staging output; SQL's historic `decision.state=confirmed` alone
-is **not** a fresh-adoption claim.
+`plan.report()` contains record keys, selected regions, original cursors,
+missing/mismatching source diagnostics, source IDs, URLs and hashes. It contains
+neither card text nor correction values. Every registry record has one
+included/excluded/deferred result. The report and plan must accompany staging
+output; an imported identity row alone is **not** a fresh-adoption claim.
 
 - JP cards can retain their historic identity while unavailable EN evidence is
   reported. EN printing adoption requires its exact reviewed JP target source
@@ -63,7 +61,7 @@ is **not** a fresh-adoption claim.
   eligibility, rather than treating the regionless SQL relationship as valid in
   every region. Synthetic tests exercise EN; a JP-only graph cannot reference
   an excluded EN-only endpoint.
-- All source corrections and their decisions remain in `plan.snapshot` without
+- All source corrections remain in `plan.snapshot` without
   application, retirement or deletion. Their report status is deferred, including
   needs-review candidates. This staging API does not call `project_corrections`.
 
@@ -73,11 +71,10 @@ Use `import_preview(db, plan, authored_revision=<full Git SHA>, build=build_cont
 new build database, or `populate_preview` inside the transaction owned by
 `rebuild_database`. The caller supplies a stable, verified authored checkout and
 its full revision. Shard source IDs pin revision, path and the canonical envelope
-hash (`registry-envelope-v1`); `sha256` is the existing index's canonical JSON
-content hash, not YAML serialization bytes. Every original shard and decision is
-recorded, including excluded regions and deferred corrections. A decision's
-`registry_envelope` source retains access to its full members, not just imported
-rows. Available raw evidence has separate matched/mismatch decision-source roles.
+hash (`registry-envelope-v1`); `sha256` is the shard's canonical JSON content
+hash, not YAML serialization bytes. Every original shard is recorded, including
+excluded regions and deferred corrections. Matched and mismatched raw evidence
+stays in the plan's projection results.
 
 Before writing rows, the importer requires existing verified `product_family`
 parents for every selected card/printing. Product/vocabulary import is a caller
@@ -91,8 +88,8 @@ fails for review instead of choosing a value. Printed text/current/errata are
 not built here: text references are NULL and printed state is unknown. Raw face
 credits are retained, but no artist grouping is inferred.
 
-`import_preview` owns **one** transaction for sources, full historic decisions,
-links, selected identities, printings, face uses and permanent integer IDs.
+`import_preview` owns **one** transaction for sources, selected identities,
+printings, face uses and permanent integer IDs.
 Source-version metadata collisions, conflicting art uses, invalid rows, missing
 DDL or other errors propagate. At the end of the body, the existing typed DB
 boundary runs FK/integrity/schema/cross-table verification **before COMMIT**.
@@ -123,4 +120,4 @@ the entire raw source/use closure; populate checks its subset for later
 composition. Preserve the returned record and save completed staging DBs via
 [build bundles](../../build_db/README.md#saved-build-inputs); a bare SQLite file
 does not attest the build-input contract. Parser pins remain distinct from
-identity decisions and never bypass the existing adoption gates.
+identity mappings and never bypass the existing adoption gates.

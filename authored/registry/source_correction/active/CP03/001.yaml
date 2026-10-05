@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:11ac850e5c261a12a67395a88f67f591cfe9c38b0f636c6def0fd5ac8295830d
 records:
   - record_key: source_correction:x:55323a6a5b9550f79130283e61f223db
     kind: source_correction
@@ -25,15 +24,3 @@ records:
           image_src: /wordpress/wp-content/images/cardlist/CP03/CP03-127EN.png
           region: en
           locator: Card type label and evolved banner
-decisions:
-  - id: d:11ac850e5c261a12a67395a88f67f591cfe9c38b0f636c6def0fd5ac8295830d
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:11ac850e5c261a12a67395a88f67f591cfe9c38b0f636c6def0fd5ac8295830d
-    members:
-      -   - source_correction:x:55323a6a5b9550f79130283e61f223db
-          - sha256:ebbff59fa55e32e4712e82fd151cb845af6456143e45038ad0b7d64168e01601
-    sample_ids:
-      - source_correction:x:55323a6a5b9550f79130283e61f223db

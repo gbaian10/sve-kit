@@ -19,8 +19,9 @@ existing result and report a retirement warning.
 `correction_application` in the same transaction as the text graph. Successful
 effect corrections link their result text and revision; type corrections link
 their rule revision. Raw observations keep their original revisions. Corrected
-revisions have separate IDs, `change_kind=source_correction`, the correction
-decision and an original-revision `supersedes_id`; no effective date is invented.
+revisions have separate IDs, `change_kind=source_correction` and an
+original-revision `supersedes_id`; `correction_application` links each one back to
+its correction. No effective date is invented.
 Replacement occurs before candidate comparison, without filling printed text or
 claiming wording equivalence. All exact raw/current-bearing fields remain in the
 immutable input plan; missing effects still obey the existing report-only rule.
@@ -28,7 +29,7 @@ immutable input plan; missing effects still obey the existing report-only rule.
 F1 includes each correction comparison and image evidence use, with its exact
 locator, parser, batch, descriptor and first receipt. The pinned configuration
 includes the complete correction record hashes and image pins. Correction content,
-reason, membership or state changes require rebuilding and invalidate the old
+reason or state changes require rebuilding and invalidate the old
 candidate/configuration; this API does not consume or reuse wording `checked`
 receipts. `verify_corrections` checks table inventories, exact values, observation
 links and result content beyond the SQLite adoption/FK checks.

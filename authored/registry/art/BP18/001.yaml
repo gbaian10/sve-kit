@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:514aef92e36d8749fb2e21000b11183b4b526937e233d47670d5e22015f03a2a
 records:
   - record_key: art:a:5fa407c23ff65a0a865a9865e7b51d30
     kind: art
@@ -19,15 +18,3 @@ records:
         observation_hash: sha256:0b2aa957863eddcf5aaefbb1364231bfb4d8c55ca551f63b72a0014ee4b433f5
         rules_hash: sha256:34d5f75d34309db16ed5a4c7a0817d34c8861cd20dbcb699c460169d275d06a7
         recipe: registry-observation-v1
-decisions:
-  - id: d:514aef92e36d8749fb2e21000b11183b4b526937e233d47670d5e22015f03a2a
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:514aef92e36d8749fb2e21000b11183b4b526937e233d47670d5e22015f03a2a
-    members:
-      -   - art:a:5fa407c23ff65a0a865a9865e7b51d30
-          - sha256:479256415f4cc37c47a7f8e4b302f4674bd3b9fe0fb0d98e6c030b857283ecfd
-    sample_ids:
-      - art:a:5fa407c23ff65a0a865a9865e7b51d30

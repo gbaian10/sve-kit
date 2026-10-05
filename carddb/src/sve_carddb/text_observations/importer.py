@@ -103,14 +103,13 @@ def populate_vocabulary(
         existing[key] = values
 
 
-def populate_revision(  # ruff: ignore[too-many-arguments] -- the original and corrected variants share one writer with explicit adoption provenance
+def populate_revision(  # ruff: ignore[too-many-arguments] -- the original and corrected variants share one writer with explicit supersession
     db: Database,
     item: FaceObservation,
     ordinal: int,
     texts: TextInterner,
     vocabulary: Vocabulary,
     *,
-    decision_id: str | None = None,
     supersedes_id: str | None = None,
     plan: TextPlan | None = None,
 ) -> None:
@@ -121,8 +120,7 @@ def populate_revision(  # ruff: ignore[too-many-arguments] -- the original and c
     if plan is None:
         kind = vocabulary.lookup(item.region, "type", content.type_raw)
     else:
-        kind, classification_decision = type_binding(plan, item, vocabulary)
-        decision_id = decision_id or classification_decision
+        kind = type_binding(plan, item, vocabulary)
     card_class = (
         None
         if content.class_raw == "-"
@@ -158,7 +156,7 @@ def populate_revision(  # ruff: ignore[too-many-arguments] -- the original and c
             "attack": attack,
             "defense": defense,
             "source_id": item.card.source.id,
-            "decision_id": decision_id,
+            "decision_id": None,
             "supersedes_id": supersedes_id,
         },
     )
@@ -249,10 +247,6 @@ def _groups_to_database(
     raw_groups: dict[tuple[str, str], list[FaceObservation]] = {}
     for item in plan.observations:
         raw_groups.setdefault((item.face_id, item.region), []).append(item)
-    decisions = {
-        application.key(): application.record.decision_id
-        for application in plan.corrections or ()
-    }
     for group in plan.groups:
         variants: dict[str, FaceObservation] = {}
         raw = raw_groups[group.face_id, group.region]
@@ -277,9 +271,6 @@ def _groups_to_database(
                 ordinal,
                 texts,
                 vocabulary,
-                decision_id=decisions[item.correction_keys[-1]]
-                if item.correction_keys
-                else None,
                 supersedes_id=revision_id(original) if item.correction_keys else None,
                 plan=plan,
             )

@@ -34,13 +34,13 @@ Schema descriptor 驗完整欄序、nullable、enum 與額外鍵，不以 SQL �
 | --- | --- | --- |
 | `card.faces`、`face.current` | `face` 的永久 ordinal、`face_current`；current 僅含此次地區的公開 revision | 退役墓碑可缺現行面；缺 current 不偽造 revision |
 | `card.regions` | 同卡版次、`region_availability_override`、`region_mapping_review`、日期、預設版次與角色 | 兩區各一項；無發行證據為 unknown；mapping/release 獨立；nullable 日期／預設／角色不補值 |
-| `printing.review_level/reference_urls/int_id/decklog_source_url` | decision 公開等級、`printing_reference→source_record.url`、永久配號、Decklog 的 source URL | 官方 references=[]；unlisted 仍須 Schema 的非空公開 URL；所有版次必有配號；來源／查核日依 verified/unverified 約束 |
+| `printing.review_level/reference_urls/int_id/decklog_source_url` | registry 版次皆為人工確認身分，固定 `confirmed`；`printing_reference→source_record.url`、永久配號、Decklog 的 source URL | 官方 references=[]；unlisted 仍須 Schema 的非空公開 URL；所有版次必有配號；來源／查核日依 verified/unverified 約束 |
 | `printing.faces` | `printing_face` 加 section、stamp、觀測、翻譯、更正；按永久 face ordinal | 未知印刷原文維持 null/unknown；觀測不填回 printed 欄 |
 | `printing_product.available_on/date_precision/date_raw` | 三個 `first_available_*` 覆寫欄 | null precision 沿 product；unknown 明示未知；month/year 不補一日 |
 | `printing_product.first_inclusion_state`、debut | 同卡同區全部 inclusion 的有效日期 | 任一可能更早日期不明就 unknown，不把空 inclusion 宣稱 first |
 | 預設版次 | 直接使用 `routes.defaults.select_defaults` 的版次 ID／method；分類證據承接 `GeneralEvidence` | 依路由採納契約驗 override、home、一般版加工、競爭版次與日期；本投影不另寫選取算法 |
 | `card.regions.deck_role` | confirmed override，否則依同卡同區 current 的已識別 type／special kind 推導 | 未確認 override 不採用；未知代碼、沒有 current 或多面角色衝突為 null |
-| `art.regions/artists`、`artist` | 此次地區的現行 `printing_face` 使用關係、`art_artist` | 無現行用途的舊 art 與只被舊 art 引用的 artist 不出貨；被排除 art 的 nullable 引用留 null |
+| `art.review_level/regions/artists`、`artist` | registry 插畫固定 `confirmed`；此次地區的現行 `printing_face` 使用關係、`art_artist` | 無現行用途的舊 art 與只被舊 art 引用的 artist 不出貨；被排除 art 的 nullable 引用留 null |
 | `traits/titles/special_kinds/sections` | `face_trait/title/special_kind/text_section`、`printing_text_section` | ID/code 集合穩定排序；段落保留 ordinal；未有資料為 [] |
 | `translation.source_unit_id/text_unit_id`、各 owner 的 translations | `translation_use/context/selection` 的精確 owner/field/ordinal，chosen translation 的原文與譯文 | 未選、未 reviewed 不出；同 source 的不同 context 不合併；缺譯留原文 |
 | `qa.current_version_id`、`qa_version.cards` | 同 QA 最高 revision、`qa_card` | 無版本 null；原版本歷史保留；QA/errata 稀疏摘要空不代表 absent |

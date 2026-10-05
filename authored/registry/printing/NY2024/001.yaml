@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:4cff01a70a9e73a237ff9b04f26aa45e000b1f6533137e52ec7ed454f3e821a5
 records:
   - record_key: printing:p:71d7dcf68dbb5a3488876b2472194389
     kind: printing
@@ -25,15 +24,3 @@ records:
         checked: true
         target_jp_card_no:
         target_observation:
-decisions:
-  - id: d:4cff01a70a9e73a237ff9b04f26aa45e000b1f6533137e52ec7ed454f3e821a5
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:4cff01a70a9e73a237ff9b04f26aa45e000b1f6533137e52ec7ed454f3e821a5
-    members:
-      -   - printing:p:71d7dcf68dbb5a3488876b2472194389
-          - sha256:dbb9e78403e610fce49568cbd4b6d0a70ff21b240517ec77ea1ebce8f9b45922
-    sample_ids:
-      - printing:p:71d7dcf68dbb5a3488876b2472194389

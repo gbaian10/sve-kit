@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:734a26f441fbfc71c9ec8f72bfa81c645a8992e8b43394000cb647cfe2a0b473
 records:
   - record_key: face:f:0c856a7d8478554da07314d985306805
     kind: face
@@ -66,36 +65,3 @@ records:
       card_id: c:0580c8f05e6d53f8b88e0b71bd6018b7
       ordinal: 0
       side: front
-decisions:
-  - id: d:734a26f441fbfc71c9ec8f72bfa81c645a8992e8b43394000cb647cfe2a0b473
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:734a26f441fbfc71c9ec8f72bfa81c645a8992e8b43394000cb647cfe2a0b473
-    members:
-      -   - face:f:0c856a7d8478554da07314d985306805
-          - sha256:533bf098fd1f4a2c2cc0aa21e2c4e67f7a67f93cce489c23ed6febaca8c3ac60
-      -   - face:f:502f95301c045a56983538d581a8902c
-          - sha256:0dd1bfa412d8e6cb969a60f6667da8c423ab260e9867374b35acaf303b58cb44
-      -   - face:f:6be9c1a54de4569e9a7328297539c5a4
-          - sha256:05f0d9ef973864aba2421ac988f3bcbbf0043a135cd558e8a85896aceb1f493a
-      -   - face:f:70e3d3a62cc8551389c7b71a950eedbb
-          - sha256:109d5d57f724fea78349136b8f62c96429165642408e146e7e439c919b6458d4
-      -   - face:f:796ecc341d39508f9432e840c37a2ae9
-          - sha256:b7c49c71d07b7d38362ab141a9fe60cb2e0f068bf3ebe86346399a50c5ac3c28
-      -   - face:f:c53b3a7751fd5496a3ad5d01eab421cb
-          - sha256:2193fe3973b3144958b8488fe43371a51f41784c9dcd4bc26617f1b318f32134
-      -   - face:f:c64f05ffa3275458a2a57b88d47e48a0
-          - sha256:38e2949766d98153c26cea0ebc4dbdac52e71c9bba330e26e5591eed956d89aa
-      -   - face:f:cbb30377a3b0550f9d2a8a5306fc85c8
-          - sha256:05322b28861d88ffe97cc7a4a8907fe157ea7e769abe9d2b0fbd24c51540ee78
-    sample_ids:
-      - face:f:0c856a7d8478554da07314d985306805
-      - face:f:502f95301c045a56983538d581a8902c
-      - face:f:6be9c1a54de4569e9a7328297539c5a4
-      - face:f:70e3d3a62cc8551389c7b71a950eedbb
-      - face:f:796ecc341d39508f9432e840c37a2ae9
-      - face:f:c53b3a7751fd5496a3ad5d01eab421cb
-      - face:f:c64f05ffa3275458a2a57b88d47e48a0
-      - face:f:cbb30377a3b0550f9d2a8a5306fc85c8

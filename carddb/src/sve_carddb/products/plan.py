@@ -191,10 +191,8 @@ def plan_official_products(
     _check_observation_conflicts(identities, pages)
     family_types = {
         record.data.public_code: record.data.kind
-        for shard in identities.catalog.shards
-        if shard.envelope.decisions[0].state == "confirmed"
-        for record in shard.envelope.records
-        if isinstance(record, FamilyRecord)
+        for record in identities.catalog.records.values()
+        if isinstance(record, FamilyRecord) and record.state == "confirmed"
     }
     products: dict[str, list[ObservedProduct]] = {}
     inclusions: dict[tuple[str, str], list[ObservedInclusion]] = {}

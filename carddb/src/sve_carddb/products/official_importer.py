@@ -1,16 +1,13 @@
-"""Official product staging and the independently confirmed identity audit trail."""
+"""Official product staging keyed by independently confirmed product identities."""
 
 from typing import TYPE_CHECKING, Protocol
 
-from pydantic import JsonValue
-
-from sve_carddb.build_db import Json
 from sve_carddb.build_inputs import SourceUse, input_record, insert_raw_sources
 from sve_carddb.registry.inputs import digest
 from sve_carddb.snapshot.values import canonical
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import BuildContext, InputRecord
     from sve_carddb.products.identities import ProductIdentities
     from sve_carddb.products.models import LocalizedText
@@ -23,20 +20,19 @@ class TextInterner(Protocol):
         ...
 
 
-def _audit(db: Database, identities: ProductIdentities) -> list[SourceUse]:
-    uses: list[SourceUse] = []
+def _authored_sources(db: Database, identities: ProductIdentities) -> None:
     for shard in identities.shards:
-        source_id = "authored:v1:" + digest(
-            {
-                "path": shard.path,
-                "hash": shard.checksum,
-                "revision": identities.revision,
-            }
-        ).removeprefix("sha256:")
         db.insert(
             "source_record",
             {
-                "id": source_id,
+                "id": "authored:v1:"
+                + digest(
+                    {
+                        "path": shard.path,
+                        "hash": shard.checksum,
+                        "revision": identities.revision,
+                    }
+                ).removeprefix("sha256:"),
                 "kind": "authored",
                 "sha256": shard.checksum,
                 "authored_path": "authored/" + shard.path,
@@ -44,60 +40,6 @@ def _audit(db: Database, identities: ProductIdentities) -> list[SourceUse]:
                 "parser_version": "product-identity-v1",
             },
         )
-        decision = shard.envelope.decisions[0]
-        values = decision.model_dump(mode="json", exclude={"members"})
-        row: dict[str, Value] = {
-            key: value
-            for key, value in values.items()
-            if isinstance(value, str) or value is None
-        }
-        row["sample_ids"] = Json(list[JsonValue](decision.sample_ids))
-        db.insert("decision", row)
-        db.insert(
-            "decision_source",
-            {
-                "decision_id": decision.id,
-                "source_id": source_id,
-                "role": "product_identity_envelope",
-                "locator": shard.path,
-            },
-        )
-        links: set[tuple[str, str]] = set()
-        for record in shard.envelope.records:
-            for ref in record.evidence:
-                checked = identities.evidence[ref]
-                role = "product_identity_evidence:" + digest(
-                    ref.model_dump(mode="json")
-                ).removeprefix("sha256:")
-                if (checked.source.id, role) not in links:
-                    db.insert(
-                        "decision_source",
-                        {
-                            "decision_id": decision.id,
-                            "source_id": checked.source.id,
-                            "role": role,
-                            "locator": ref.locator,
-                        },
-                    )
-                    links.add((checked.source.id, role))
-                uses.append(
-                    SourceUse(
-                        source=checked.source.model_copy(
-                            update={"parser_version": "archive-closure-v1"}
-                        ),
-                        usage="product_identity_evidence_closure",
-                        locator=canonical(ref.model_dump(mode="json")).decode(),
-                    )
-                )
-                if ref.role == "product_identity_match":
-                    uses.append(
-                        SourceUse(
-                            source=checked.source,
-                            usage="official_product_identity",
-                            locator=ref.locator,
-                        )
-                    )
-    return uses
 
 
 def populate_official_products(
@@ -111,7 +53,8 @@ def populate_official_products(
     products.identities.verify_context(build)
     expected = products.source_uses()
     insert_raw_sources(db, (use.source for use in expected))
-    uses = _audit(db, products.identities)
+    _authored_sources(db, products.identities)
+    uses = list(products.identities.source_uses())
     for page in products.pages:
         uses.append(
             SourceUse(
@@ -123,17 +66,9 @@ def populate_official_products(
             )
         )
         for block in page.blocks:
-            uses.append(
-                SourceUse(
-                    source=page.source, usage="official_product", locator=block.locator
-                )
-            )
-            uses.append(
-                SourceUse(
-                    source=page.source,
-                    usage="official_printing_product",
-                    locator=block.locator,
-                )
+            uses.extend(
+                SourceUse(source=page.source, usage=usage, locator=block.locator)
+                for usage in ("official_product", "official_printing_product")
             )
     regions: dict[str, str] = {}
     for product in products.products:

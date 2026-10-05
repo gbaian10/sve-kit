@@ -84,15 +84,7 @@ class IdentityEvidence:
                 or digest(canonical(read_yaml(index))) != basis.registry_index_hash
             ):
                 raise ValueError("Name identity registry index hash mismatch")
-            transitions = read_transition_files(root)
-            checksum = (
-                None
-                if transitions.index_content is None
-                else digest(transitions.index_content)
-            )
-            if checksum != basis.transition_index_hash:
-                raise ValueError("Name identity transition index pin mismatch")
-            if transitions.shards:
+            if read_transition_files(root).shards:
                 raise ValueError(
                     "Name identity transitions require complete effective evidence replay"
                 )

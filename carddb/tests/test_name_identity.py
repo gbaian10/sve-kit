@@ -30,7 +30,6 @@ def basis(fixture: Fixture, revision: str | None = None) -> IdentityBasis:
         registry_index_hash=digest(
             canonical(read_yaml(fixture.root / "authored/ids/index.yaml"))
         ),
-        transition_index_hash=None,
     )
 
 
@@ -50,7 +49,6 @@ def test_current_identity_binds_exact_permanent_face(baseline: Fixture) -> None:
     [
         ("consumer", "Name identity basis differs from current authored revision"),
         ("hash", "Name identity registry index hash mismatch"),
-        ("transition", "Name identity transition index pin mismatch"),
         ("face", "Name override frozen evidence belongs to another card or face"),
         ("card", "Name override frozen evidence belongs to another card or face"),
         ("locator", "Evidence JSON Pointer is absent"),
@@ -65,14 +63,8 @@ def test_current_identity_pin_and_owner_refusals(
     card, face = baseline.card.id, baseline.face.id
     if fault == "consumer":
         consumer = "0" * 40
-    elif fault in {"hash", "transition"}:
-        current = current.model_copy(
-            update={
-                "registry_index_hash"
-                if fault == "hash"
-                else "transition_index_hash": digest(b"wrong")
-            }
-        )
+    elif fault == "hash":
+        current = current.model_copy(update={"registry_index_hash": digest(b"wrong")})
     elif fault == "face":
         face = "f:" + "0" * 32
     elif fault == "card":

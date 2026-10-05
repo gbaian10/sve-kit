@@ -26,7 +26,7 @@ from sve_carddb.snapshot import offline, offline_images
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.preview import Roots, write_preview
-from sve_carddb.snapshot.values import digest, object_value, parse
+from sve_carddb.snapshot.values import object_value, parse
 from sve_carddb.sources import official_en
 from sve_carddb.sources.official_jp import image_url
 
@@ -85,9 +85,7 @@ def regional_images(
             ),
         }
     )
-    identities = ProductIdentities(
-        revision, digest(b"{}"), b"{}", (), {}, {}, (), case.catalog
-    )
+    identities = ProductIdentities(revision, (), {}, {}, (), case.catalog)
     monkeypatch.setattr(
         offline, "load_product_identities", lambda *_args, **_kwargs: identities
     )

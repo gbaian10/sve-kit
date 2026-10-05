@@ -112,7 +112,6 @@ def prepare(
             registry_index_hash=digest(
                 canonical(read_yaml(inputs.root / "ids/index.yaml"))
             ),
-            transition_index_hash=None,
         )
         identity = IdentityEvidence(sources, inputs.authored_revision)
         for concept in concepts:

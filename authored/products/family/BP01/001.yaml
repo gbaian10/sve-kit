@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:2d8b1890fb231a0cc596a7d99e289e0333b010250e0b94c8bdf50714c14c8c47
 records:
   - record_key: '["product_family","BP01"]'
     kind: product_family
     filing_key: BP01
+    state: confirmed
     data:
       id: BP01
       code: bp01
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: ブースターパック第1弾「創世の夜明け」
     evidence: []
-decisions:
-  - id: d:2d8b1890fb231a0cc596a7d99e289e0333b010250e0b94c8bdf50714c14c8c47
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:2d8b1890fb231a0cc596a7d99e289e0333b010250e0b94c8bdf50714c14c8c47
-    members:
-      -   - '["product_family","BP01"]'
-          - sha256:71ee45c05f83ba5307c16a1fce145f8f7dedf69bf5eb708bf0c993ccdf209bcc
-    sample_ids:
-      - '["product_family","BP01"]'

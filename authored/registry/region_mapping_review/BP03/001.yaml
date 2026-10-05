@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:a9aa1c56d27c61db63b22baf4a7a20732a5a62646680e175e82b9b1d1b35e5d2
 records:
   - record_key: region_mapping_review:c:8a2a4b12ded850499fe4a8da903fb5f6
     kind: region_mapping_review
@@ -76,24 +75,3 @@ records:
           observation_hash: sha256:1b352d84c40a30815dad650169ab690693f42f01e06fea5bda2395fdc179e44b
           rules_hash: sha256:194210db546732485991c59acd1b13a3d49fa96b87b1f30b3482afe6f07ac1fd
           recipe: registry-observation-v1
-decisions:
-  - id: d:a9aa1c56d27c61db63b22baf4a7a20732a5a62646680e175e82b9b1d1b35e5d2
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:a9aa1c56d27c61db63b22baf4a7a20732a5a62646680e175e82b9b1d1b35e5d2
-    members:
-      -   - region_mapping_review:c:652b34451a725a34a18508107100c3f8
-          - sha256:ffc93fade615e993c39588e3e1a9df00ac1ec29efe210a9bc7d5001fd80b8ac7
-      -   - region_mapping_review:c:833992a4138c5d74a2641d5f9e8307df
-          - sha256:660f874c07a20a8b1afa606b244ff5a93e72f34e749a1437a217ae0a79b407b3
-      -   - region_mapping_review:c:8a2a4b12ded850499fe4a8da903fb5f6
-          - sha256:2ef32c4fa56a7b2e3c2486d7d0de34786fb6b6dca0850de9b17d1254b6c78aac
-      -   - region_mapping_review:c:af07f69660295dce9a80e9a00cae2329
-          - sha256:da87d78eb2015e8cbc59e1592793d48fca1ff844373b9cdb08d60cbecab19220
-    sample_ids:
-      - region_mapping_review:c:652b34451a725a34a18508107100c3f8
-      - region_mapping_review:c:833992a4138c5d74a2641d5f9e8307df
-      - region_mapping_review:c:8a2a4b12ded850499fe4a8da903fb5f6
-      - region_mapping_review:c:af07f69660295dce9a80e9a00cae2329

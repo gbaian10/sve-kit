@@ -115,10 +115,11 @@ is empty; separately verified coverage remains the coverage producer's input.
 Already adopted `same_rules_reskin` rows come from the existing registry importer.
 After current text staging, `applicable_reskin_regions(db, text_plan,
 vocabulary=...)` returns only regions with both complete endpoint printings,
-confirmed decisions, exact decision-source pins, unchanged physical evidence and
-matching current rules fields, sections and memberships. It recomputes these
-fields rather than trusting the revision ID alone. A changed current or source
-withholds that region until a new confirmed decision pins both endpoints. The
+matched identity evidence from the exact endpoint sources, unchanged physical
+evidence and matching current rules fields, sections and memberships. It
+recomputes these fields rather than trusting the revision ID alone. A changed
+current or source withholds that region until the registry reskin is re-reviewed
+against both endpoints. The
 result is solely a display projection input; DSL, mechanics, support results and
 construction identities are never inherited.
 

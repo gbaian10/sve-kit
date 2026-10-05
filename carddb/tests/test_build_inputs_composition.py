@@ -180,16 +180,7 @@ def test_family_and_identity_share_sealed_raw_and_keep_every_use(
             "archive-closure-v1",
             "synthetic-json-html-v1",
         }
-        assert (
-            len(
-                [
-                    row
-                    for row in db.rows("decision_source")
-                    if row.values["source_id"] == shared.id
-                ]
-            )
-            >= 2
-        )
+        assert not db.rows("decision_source")
         assert {
             row.values["parser_version"]
             for row in db.rows("source_record")

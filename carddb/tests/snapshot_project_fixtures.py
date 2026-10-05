@@ -357,14 +357,7 @@ def populate(db: Database, *, ancillary: bool = True, future: bool = True) -> No
 
 
 def _ancillary(db: Database, values: dict[str, dict[str, Value]]) -> None:
-    for prefix in (
-        "errata",
-        "correction",
-        "related",
-        "mapping",
-        "text",
-        "divergence",
-    ):
+    for prefix in ("errata", "text", "divergence"):
         db.insert("decision", values["decision"] | {"id": prefix + "_decision"})
     db.update(
         "printing_face",

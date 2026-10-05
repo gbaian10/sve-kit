@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:2e083415b7a731c1b615d051da57415035ae84eabef297dccc58e7878ad8ee3d
 records:
   - record_key: '["product_family","SDD02"]'
     kind: product_family
     filing_key: SDD02
+    state: confirmed
     data:
       id: SDD02
       code: sdd02
@@ -14,15 +14,3 @@ records:
         lang: en
         text: 'Showdown Deck: Swordcraft'
     evidence: []
-decisions:
-  - id: d:2e083415b7a731c1b615d051da57415035ae84eabef297dccc58e7878ad8ee3d
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:2e083415b7a731c1b615d051da57415035ae84eabef297dccc58e7878ad8ee3d
-    members:
-      -   - '["product_family","SDD02"]'
-          - sha256:f8f815e13552b65704f089dcbe9ca8722665dab380fb4376732711c8ebfd34b5
-    sample_ids:
-      - '["product_family","SDD02"]'

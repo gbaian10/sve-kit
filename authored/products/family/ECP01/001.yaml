@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:4f4fd2c4aacded75fb6b635de5efdbbfd74ef0e0af7a9c7aa044768ebf038f3c
 records:
   - record_key: '["product_family","ECP01"]'
     kind: product_family
     filing_key: ECP01
+    state: confirmed
     data:
       id: ECP01
       code: ecp01
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: EXコラボパック「ウマ娘 プリティーダービー」
     evidence: []
-decisions:
-  - id: d:4f4fd2c4aacded75fb6b635de5efdbbfd74ef0e0af7a9c7aa044768ebf038f3c
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:4f4fd2c4aacded75fb6b635de5efdbbfd74ef0e0af7a9c7aa044768ebf038f3c
-    members:
-      -   - '["product_family","ECP01"]'
-          - sha256:a351c7385b72a12b189365f68d81ee03e6bbe072b28186ed353ce81deff567ef
-    sample_ids:
-      - '["product_family","ECP01"]'

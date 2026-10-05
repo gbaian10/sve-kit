@@ -61,14 +61,12 @@ def effective_state(
 
 def fix_root_refs(second: dict[str, Any], files: RegistryFiles) -> None:
     original = {
-        e.record_key: (e.model_dump(mode="json"), s.envelope().default_decision_id)
+        e.record_key: e.model_dump(mode="json")
         for s in files.shards
         for e in s.envelope().records
     }
     for update in second["updates"]:
-        raw, decision = original[update["target_key"]]
-        update["before"]["decision_id"] = decision
-        update["before"]["record_hash"] = checksum(raw)
+        update["before"]["record_hash"] = checksum(original[update["target_key"]])
 
 
 def test_continuous_reassign_preserves_refs_and_history(
@@ -302,11 +300,6 @@ def jp_split(template: dict[str, Any], files: RegistryFiles) -> dict[str, Any]:
         for s in files.shards
         for e in s.envelope().records
     }
-    receipts = {
-        e.record_key: s.envelope().default_decision_id
-        for s in files.shards
-        for e in s.envelope().records
-    }
     after = copy.deepcopy(before)
     anchors = {}
     destinations = []
@@ -364,7 +357,6 @@ def jp_split(template: dict[str, Any], files: RegistryFiles) -> dict[str, Any]:
                         "transition_key": None,
                         "record_key": key,
                         "record_hash": checksum(before[key]),
-                        "decision_id": receipts[key],
                     },
                     "after": raw,
                     "allocation_anchor": anchors.get(key),

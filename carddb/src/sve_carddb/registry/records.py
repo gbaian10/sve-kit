@@ -142,17 +142,6 @@ class CorrectionData(RecordData):
     evidence: Annotated[tuple[CorrectionEvidence, ...], Field(min_length=1)]
 
 
-class BatchDecision(RecordData):
-    id: Annotated[str, Field(pattern=r"^d:[0-9a-f]{64}\Z")]
-    state: Literal["confirmed", "proposed"]
-    scope: Literal["batch"]
-    category: Literal["identity_registry"]
-    policy_id: Text
-    membership_hash: Hash
-    members: tuple[tuple[Text, Hash], ...]
-    sample_ids: tuple[Text, ...]
-
-
 DATA_MODELS: dict[str, type[RecordData]] = {
     "card": CardData,
     "face": FaceData,

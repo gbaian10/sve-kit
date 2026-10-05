@@ -3,7 +3,6 @@
 import re
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db import Json
 from sve_carddb.build_inputs import (
     BuildContext,
     InputRecord,
@@ -123,29 +122,6 @@ def _authored(db: Database, plan: PreviewPlan, revision: str) -> dict[str, str]:
                 "parser_version": "registry-envelope-v1",
             },
         )
-        for decision in shard.envelope().decisions:
-            db.insert(
-                "decision",
-                {
-                    "id": decision.id,
-                    "state": decision.state,
-                    "scope": decision.scope,
-                    "category": decision.category,
-                    "membership_hash": decision.membership_hash,
-                    "policy_id": decision.policy_id,
-                    "sample_ids": Json(list(decision.sample_ids)),
-                    "note": "Historic registry decision; source matching is recorded separately.",
-                },
-            )
-            db.insert(
-                "decision_source",
-                {
-                    "decision_id": decision.id,
-                    "source_id": source_id,
-                    "role": "registry_envelope",
-                    "locator": shard.path,
-                },
-            )
     return sources
 
 
@@ -159,29 +135,6 @@ def _evidence(db: Database, plan: PreviewPlan) -> tuple[SourceUse, ...]:
         for (region, number), item in sorted(plan.evidence.items())
     )
     insert_raw_sources(db, (use.source for use in uses))
-    links: set[tuple[str, str, str]] = set()
-    for item in plan.projections:
-        if item.decision_id is None:
-            continue
-        for check in item.evidence:
-            if check.source_id is not None:
-                links.add(
-                    (
-                        item.decision_id,
-                        check.source_id,
-                        "registry_observation_" + check.status,
-                    )
-                )
-    for decision_id, source_id, role in sorted(links):
-        db.insert(
-            "decision_source",
-            {
-                "decision_id": decision_id,
-                "source_id": source_id,
-                "role": role,
-            },
-        )
-
     return uses
 
 
@@ -193,7 +146,6 @@ def _identity(record: RegistryRecord, source_id: str) -> dict[str, Value]:
             "layout": data.layout,
             "identity_state": data.identity_state,
             "home_set_id": data.home_set_id,
-            "decision_id": record.decision_id,
         }
     if isinstance(data, FaceData):
         return {
@@ -201,7 +153,6 @@ def _identity(record: RegistryRecord, source_id: str) -> dict[str, Value]:
             "card_id": data.card_id,
             "ordinal": data.ordinal,
             "side": data.side,
-            "decision_id": record.decision_id,
         }
     if isinstance(data, AllocationData):
         return {
@@ -214,7 +165,6 @@ def _identity(record: RegistryRecord, source_id: str) -> dict[str, Value]:
             "card_id": data.card_id,
             "face_id": data.face_id,
             "classification": data.classification,
-            "decision_id": record.decision_id,
         }
     if isinstance(data, MappingReviewData):
         return {
@@ -224,7 +174,6 @@ def _identity(record: RegistryRecord, source_id: str) -> dict[str, Value]:
             "as_of": data.as_of,
             "coverage_scope": data.coverage_scope,
             "source_id": source_id,
-            "decision_id": record.decision_id,
         }
     if isinstance(data, RelatedData):
         return {
@@ -234,7 +183,6 @@ def _identity(record: RegistryRecord, source_id: str) -> dict[str, Value]:
             "relation": data.relation,
             "source_kind": data.source_kind,
             "source_id": source_id,
-            "decision_id": record.decision_id,
         }
     raise ValueError("Unsupported identity projection")
 
@@ -270,7 +218,6 @@ def _printing(
             "rarity_raw": rarity,
             "premium": True if rarity == "プレミアム" else None,
             "source_id": evidence.source.id,
-            "decision_id": record.decision_id,
         },
     )
     for mapping in data.source_face_map:

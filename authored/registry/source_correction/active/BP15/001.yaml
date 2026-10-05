@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:782f599c6a29160ddabef2300e2bd196e5a87f0a59b228669b451e1f7b716cc3
 records:
   - record_key: source_correction:x:03a97034259752bebbcf634f98ed9917
     kind: source_correction
@@ -25,15 +24,3 @@ records:
           image_src: /wordpress/wp-content/images/cardlist/BP15/BP15-P32EN.png
           region: en
           locator: Card type label and evolved banner
-decisions:
-  - id: d:782f599c6a29160ddabef2300e2bd196e5a87f0a59b228669b451e1f7b716cc3
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:782f599c6a29160ddabef2300e2bd196e5a87f0a59b228669b451e1f7b716cc3
-    members:
-      -   - source_correction:x:03a97034259752bebbcf634f98ed9917
-          - sha256:78f35eebcacd9ac21e2525883ffa19918ce70db487d7560cbb806d1b79e72d11
-    sample_ids:
-      - source_correction:x:03a97034259752bebbcf634f98ed9917

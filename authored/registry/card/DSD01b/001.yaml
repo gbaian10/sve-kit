@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:8a46f6181ce8960f3b6d5354c45294aedcde6a973192a7babdfac4fb6f245f4a
 records:
   - record_key: card:c:1af99a6e3ff350e9aa09baf15921c577
     kind: card
@@ -98,48 +97,3 @@ records:
       layout: single
       identity_state: confirmed
       home_set_id: DSD01b
-decisions:
-  - id: d:8a46f6181ce8960f3b6d5354c45294aedcde6a973192a7babdfac4fb6f245f4a
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:8a46f6181ce8960f3b6d5354c45294aedcde6a973192a7babdfac4fb6f245f4a
-    members:
-      -   - card:c:1af99a6e3ff350e9aa09baf15921c577
-          - sha256:ac3c09bfddc21b761ddd1b4c6271f58f7b5693608b026fab398f6e4dafb89b16
-      -   - card:c:4e5a28d89e9257a5ac4b930a8b0f3262
-          - sha256:d3c178cdbb8d0f55708002275e8ace25954f148dbe2cd1060e192a8ac728f80d
-      -   - card:c:4f6622e6688859a8a227925992d4f078
-          - sha256:faeffc2e5854694a7d066a441cbbf73f83fb15be0e350f0ad0bdee9fed2ddd4a
-      -   - card:c:7577cbd57ea95f21923df38e4c201dcc
-          - sha256:5ef4f89744e6c4b6634627d3af3c3f344b0f2cd57178a2fd791bacd62e63b09d
-      -   - card:c:9c47c8bb0f725a58a0eb2e8272313403
-          - sha256:6b18c9e0dd5a39ce2c66afa3d64bfb9c4db7c4e086ecbc7c7e0fc0784a6a95ff
-      -   - card:c:a8ef36814b59569c8d65f767867746ec
-          - sha256:7ac54b468e27859ba38ec1881529c2ca97d1d94efc2503f60772af91609dcd5a
-      -   - card:c:b9c6398e08995f4cb8b4a3e939f71bb2
-          - sha256:a2b576562f434fdc40f91301ffeb685de588e0023b1bd95719e81816e6d295be
-      -   - card:c:c0e5bac5b19e53b8b377f9d0b58096c8
-          - sha256:a75b31d25f58630851ba959e0128c6acf766f94b7fd3e25c6bf3f3b3bc84cfbd
-      -   - card:c:d59d4b76de165b4bb6b09f42dd5ef8a5
-          - sha256:b60decdb6e8bfeb8f8f59d26da980928953e4964418b4c6543c0f030037a59c4
-      -   - card:c:e8751085ed0f5ec08a28fa266b0b012e
-          - sha256:78402e3b68005d76b863c33b1691c7f94c48923477837c140415c661974752d4
-      -   - card:c:e8b86d2d7a965eadbb2837017a45142b
-          - sha256:8dfe2dc736e903285dd47a50012962490cd350d7ef270508a06c13e5dd46676a
-      -   - card:c:eb6905004e8353958f5cf6de7fbd3c22
-          - sha256:6ad0b9e5ea17a8e14da5422bf41e50256aaa31fef1f03326e68a592dff82657d
-    sample_ids:
-      - card:c:1af99a6e3ff350e9aa09baf15921c577
-      - card:c:4e5a28d89e9257a5ac4b930a8b0f3262
-      - card:c:4f6622e6688859a8a227925992d4f078
-      - card:c:7577cbd57ea95f21923df38e4c201dcc
-      - card:c:9c47c8bb0f725a58a0eb2e8272313403
-      - card:c:a8ef36814b59569c8d65f767867746ec
-      - card:c:b9c6398e08995f4cb8b4a3e939f71bb2
-      - card:c:c0e5bac5b19e53b8b377f9d0b58096c8
-      - card:c:d59d4b76de165b4bb6b09f42dd5ef8a5
-      - card:c:e8751085ed0f5ec08a28fa266b0b012e
-      - card:c:e8b86d2d7a965eadbb2837017a45142b
-      - card:c:eb6905004e8353958f5cf6de7fbd3c22

@@ -3,6 +3,7 @@
 import copy
 import json
 import re
+import shutil
 from typing import TYPE_CHECKING
 
 import pytest
@@ -11,17 +12,13 @@ from ruamel.yaml.error import YAMLError
 
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.products.identities import _model, _shard, load_product_identities
-from sve_carddb.products.identity_models import (
-    IdentityIndex,
-    IdentityShard,
-    ProductLink,
-)
+from sve_carddb.products.identity_models import IdentityShard, ProductLink
 from sve_carddb.products.official import parse_products as parse_verified_products
 from sve_carddb.registry.storage import MAX_BYTES, read_yaml
 from sve_carddb.snapshot.values import digest
 from sve_carddb.source_archive import ArchiveError
 
-from .product_fixtures import checksum, decision, first_record, items, obj, write_yaml
+from .product_fixtures import first_record, items, obj, write_yaml
 from .product_identity_fixtures import (
     NAME,
     IdentityFixture,
@@ -55,13 +52,11 @@ def wire_error(area: str, field: str) -> str:
         ("match", "kind"): "records.0.data.match:union_tag_invalid",
     }
     prefixes = {
-        "index": "Invalid product identity fields: ",
         "shard": "Invalid product identity fields: ",
         "record": "records.0.",
         "data": "records.0.data.",
         "match": "records.0.data.match.product_link.",
         "evidence": "records.0.evidence.0.",
-        "decision": "decisions.0.",
     }
     return overrides.get((area, field), prefixes[area] + field + ":")
 
@@ -69,50 +64,37 @@ def wire_error(area: str, field: str) -> str:
 @pytest.mark.parametrize(
     "constraint",
     [
-        "missing_index",
-        "missing_shard",
-        "unindexed",
+        "missing_directory",
+        "extra_shard",
         "yml",
-        "unsafe_path",
+        "unexpected_path",
         "wrong_sequence",
-        "hash",
         "symlink_shard",
         "symlink_directory",
         "oversized",
         "duplicate_key",
         "alias",
         "unknown_yaml_tag",
-        "dirty_index",
         "dirty_shard",
     ],
 )
-def test_inventory_yaml_and_revision_constraints(  # ruff: ignore[complex-structure, too-many-branches] -- independent filesystem and YAML counterexamples
+def test_inventory_yaml_and_revision_constraints(  # ruff: ignore[complex-structure] -- independent filesystem and YAML counterexamples
     identity_fixture: IdentityFixture, constraint: str
 ) -> None:
     fixture = identity_fixture
-    index_path = fixture.root / "product-identities/index.yaml"
     shard_path = fixture.root / NAME
-    index = obj(read_yaml(index_path))
-    if constraint == "missing_index":
-        index_path.unlink()
-    elif constraint == "missing_shard":
-        shard_path.unlink()
-    elif constraint in {"unindexed", "yml"}:
+    if constraint == "missing_directory":
+        shutil.rmtree(fixture.root / "product-identities")
+    elif constraint in {"extra_shard", "yml"}:
         (
             shard_path.parent / ("002.yml" if constraint == "yml" else "002.yaml")
         ).write_bytes(shard_path.read_bytes())
-    elif constraint == "unsafe_path":
-        index["includes"] = {"../escape.yaml": "sha256:" + "0" * 64}
-        write_yaml(index_path, index)
+    elif constraint == "unexpected_path":
+        other = fixture.root / "product-identities/cn/001.yaml"
+        other.parent.mkdir()
+        other.write_bytes(shard_path.read_bytes())
     elif constraint == "wrong_sequence":
         shard_path.rename(shard_path.parent / "01.yaml")
-        index["includes"] = {
-            "product-identities/jp/01.yaml": obj(index["includes"])[NAME]
-        }
-        write_yaml(index_path, index)
-    elif constraint == "hash":
-        obj(index["includes"])[NAME] = "sha256:" + "0" * 64
-        write_yaml(index_path, index)
     elif constraint == "symlink_shard":
         target = shard_path.with_suffix(".bak")
         shard_path.rename(target)
@@ -124,19 +106,19 @@ def test_inventory_yaml_and_revision_constraints(  # ruff: ignore[complex-struct
     elif constraint == "oversized":
         shard_path.write_bytes(b"x" * MAX_BYTES)
     elif constraint == "duplicate_key":
-        index_path.write_bytes(
-            index_path.read_bytes() + b"kind: product_identity_index\n"
+        shard_path.write_bytes(
+            shard_path.read_bytes() + b"kind: product_identity_shard\n"
         )
     elif constraint == "alias":
-        index_path.write_text(
-            "product_identity_format: &format 1\nkind: product_identity_index\nincludes: *format\n"
+        shard_path.write_text(
+            "product_identity_format: &format 1\nkind: product_identity_shard\nrecords: *format\n"
         )
     elif constraint == "unknown_yaml_tag":
-        index_path.write_text(
-            "product_identity_format: !!int 1\nkind: product_identity_index\nincludes: {}\n"
+        shard_path.write_text(
+            shard_path.read_text().replace(
+                "product_identity_format: 1", "product_identity_format: !custom 1"
+            )
         )
-    elif constraint == "dirty_index":
-        index_path.write_bytes(index_path.read_bytes() + b"# Dirty physical bytes\n")
     else:
         shard_path.write_bytes(shard_path.read_bytes() + b"# Dirty physical bytes\n")
     with pytest.raises((ValueError, TypeError, FileNotFoundError, YAMLError)):
@@ -196,7 +178,7 @@ def test_independent_evidence_constraints(
         path.write_bytes(path.read_bytes() + b"Corrupt bytes")
     elif constraint == "unsealed":
         next((fixture.store / "batches").rglob("seal.json")).unlink()
-    install_identity(fixture.root, shard, resign=True)
+    install_identity(fixture.root, shard)
     fixture.revision = commit(fixture.root)
     stores = {} if constraint == "unconfigured" else {"test-store": fixture.store}
     with pytest.raises((ValueError, ArchiveError)):
@@ -236,16 +218,14 @@ def test_same_match_cannot_be_appended_even_to_same_id(
         name="product-identities/jp/002.yaml",
     )
     fixture.revision = commit(fixture.root)
-    with pytest.raises(ValueError, match="Duplicate product identity decision"):
+    with pytest.raises(ValueError, match="Duplicate global product identity match"):
         fixture.load()
 
 
 @pytest.mark.parametrize(
     "area",
     [
-        "index_hash",
         "revision",
-        "path",
         "missing_config",
         "missing_dependency",
         "physical_hash",
@@ -255,14 +235,10 @@ def test_each_build_pin_is_required(
     identity_fixture: IdentityFixture, area: str
 ) -> None:
     identities = identity_fixture.load()
-    dependencies = identities.dependencies()
+    dependencies = identities.dependencies() | {"synthetic.lock": b"Synthetic"}
     config = identities.configuration()
-    if area == "index_hash":
-        config["index_hash"] = "sha256:" + "0" * 64
-    elif area == "revision":
+    if area == "revision":
         config["authored_revision"] = "0" * 40
-    elif area == "path":
-        config["index_path"] = "products/index.yaml"
     elif area == "missing_dependency":
         del dependencies["authored/" + NAME]
     elif area == "physical_hash":
@@ -397,7 +373,7 @@ def test_manual_product_shares_global_region_namespace(
         )
 
 
-def test_duplicate_match_same_id_with_distinct_decision_still_fails(
+def test_duplicate_match_same_id_with_distinct_evidence_still_fails(
     identity_fixture: IdentityFixture,
 ) -> None:
     fixture = identity_fixture
@@ -477,33 +453,18 @@ def test_expansion_match_requires_exact_verified_query(
         fixture.load()
 
 
-@pytest.mark.parametrize("target", ["records", "members"])
-def test_exact_order_is_checked_independently(
-    identity_fixture: IdentityFixture, target: str
-) -> None:
+def test_record_order_is_checked(identity_fixture: IdentityFixture) -> None:
     fixture = identity_fixture
     page = fixture.pages[0]
     shard = identity_envelope(
         [identity_record(page), identity_record(page, match_index=-1)]
     )
-    review = decision(shard)
-    if target == "records":
-        items(shard["records"]).reverse()
-        items(review["members"]).reverse()
-        items(review["sample_ids"]).reverse()
-    else:
-        items(review["members"]).reverse()
-    review["membership_hash"] = checksum(review["members"])
-    review["id"] = "d:" + str(review["membership_hash"]).removeprefix("sha256:")
-    shard["default_decision_id"] = review["id"]
+    items(shard["records"]).reverse()
     install_identity(fixture.root, shard)
     fixture.revision = commit(fixture.root)
-    message = (
-        "Product identity records must be sorted and unique"
-        if target == "records"
-        else "Product identity exact members mismatch"
-    )
-    with pytest.raises(ValueError, match=message):
+    with pytest.raises(
+        ValueError, match="Product identity records must be sorted and unique"
+    ):
         fixture.load()
 
 
@@ -546,35 +507,13 @@ def test_ambiguous_block_can_only_use_confirmed_exact_source_block(
     assert fixture.load().match("jp", page.blocks[0].matches) == "permanent-example"
 
 
-def test_proposed_identity_fails_its_state_constraint_with_valid_proposed_metadata(
+def test_state_field_is_not_part_of_the_identity_format(
     identity_fixture: IdentityFixture,
 ) -> None:
-    from pydantic import ValidationError  # ruff: ignore[import-outside-top-level] -- direct wire boundary isolates confirmed-only from membership checks
-
-    from sve_carddb.products.identity_models import IdentityDecision  # ruff: ignore[import-outside-top-level] -- independently test the closed decision state
-
     shard = obj(read_yaml(identity_fixture.root / NAME))
-    review = decision(shard)
-    review.update(
-        state="proposed",
-        sample_ids=[],
-    )
-    with pytest.raises(ValidationError, match="Input should be 'confirmed'"):
-        IdentityDecision.model_validate(review)
-
-
-def test_changed_shard_bytes_with_unchanged_pinned_content_hash_fail_only_hash(
-    identity_fixture: IdentityFixture,
-) -> None:
-    fixture = identity_fixture
-    path = fixture.root / NAME
-    original = path.read_bytes()
-    changed = original.replace(b"Synthetic review note", b"Changed review note")
-    assert changed != original
-    path.write_bytes(changed)
-    fixture.revision = commit(fixture.root)
-    with pytest.raises(ValueError, match="Modified immutable product identity shard"):
-        fixture.load()
+    first_record(shard)["state"] = "proposed"
+    with pytest.raises(ValueError, match=re.escape("records.0.state:extra_forbidden")):
+        _model(IdentityShard, shard)
 
 
 def test_comment_only_bytes_keep_semantic_hash_but_fail_exact_revision(
@@ -584,7 +523,7 @@ def test_comment_only_bytes_keep_semantic_hash_but_fail_exact_revision(
     path = fixture.root / NAME
     before = read_yaml(path)
     path.write_bytes(path.read_bytes() + b"# Physical-only edit\n")
-    assert checksum(read_yaml(path)) == checksum(before)
+    assert read_yaml(path) == before
     with pytest.raises(ValueError, match="bytes differ from pinned authored revision"):
         fixture.load()
 
@@ -617,10 +556,6 @@ def test_filing_path_is_checked_independently_of_data_region(
     fixture = identity_fixture
     shard = obj(read_yaml(fixture.root / NAME))
     (fixture.root / NAME).unlink()
-    index_path = fixture.root / "product-identities/index.yaml"
-    index = obj(read_yaml(index_path))
-    del obj(index["includes"])[NAME]
-    write_yaml(index_path, index)
     install_identity(fixture.root, shard, name="product-identities/en/001.yaml")
     fixture.revision = commit(fixture.root)
     with pytest.raises(
@@ -631,7 +566,7 @@ def test_filing_path_is_checked_independently_of_data_region(
 
 class TestIdentityWireConstraints:
     @pytest.fixture(scope="class")
-    def identity_wire(self) -> tuple[bytes, bytes]:
+    def identity_wire(self) -> bytes:
         match: dict[str, JsonValue] = {
             "kind": "product_link",
             "product_url": "https://shadowverse-evolve.com/products/synthetic/",
@@ -653,27 +588,18 @@ class TestIdentityWireConstraints:
                 }
             ],
         }
-        shard = identity_envelope([record])
-        index = {
-            "product_identity_format": 1,
-            "kind": "product_identity_index",
-            "includes": {NAME: checksum(shard)},
-        }
-        return json.dumps(index).encode(), json.dumps(shard).encode()
+        return json.dumps(identity_envelope([record])).encode()
 
     @pytest.mark.parametrize(
         ("area", "field", "value"),
         [
-            ("index", "product_identity_format", True),
-            ("index", "product_identity_format", 2),
-            ("index", "kind", "product_index"),
-            ("index", "extra", "unexpected"),
             ("shard", "product_identity_format", True),
             ("shard", "product_identity_format", 2),
             ("shard", "kind", "product_shard"),
             ("shard", "extra", "unexpected"),
             ("shard", "records", []),
             ("shard", "decisions", []),
+            ("shard", "default_decision_id", "d:" + "0" * 64),
             ("record", "kind", "product"),
             ("record", "filing_key", "en"),
             ("record", "record_key", '["product_identity","jp",{}]'),
@@ -711,49 +637,31 @@ class TestIdentityWireConstraints:
             ("evidence", "locator", ""),
             ("evidence", "role", ""),
             ("evidence", "extra", "unexpected"),
-            ("decision", "state", "proposed"),
-            ("decision", "state", "sampled"),
-            ("decision", "scope", "row"),
-            ("decision", "category", "product_catalog"),
-            ("decision", "category", "identity_registry"),
-            ("decision", "policy_id", "product-authored-v1"),
-            ("decision", "reviewed_by", None),
-            ("decision", "reviewed_by", "  "),
-            ("decision", "reviewed_at", None),
-            ("decision", "reviewed_at", "2026-09-30T12:00:00Z"),
-            ("decision", "reviewed_precision", None),
-            ("decision", "reviewed_precision", "month"),
-            ("decision", "authored_by", " "),
-            ("decision", "authored_at", "not-a-date"),
-            ("decision", "extra", "unexpected"),
+            ("record", "state", "confirmed"),
+            ("record", "note", "Synthetic review note"),
         ],
     )
     def test_each_wire_constraint(
         self,
-        identity_wire: tuple[bytes, bytes],
+        identity_wire: bytes,
         tmp_path: Path,
         area: str,
         field: str,
         value: JsonValue,
     ) -> None:
-        index = obj(json.loads(identity_wire[0]))
-        shard = obj(json.loads(identity_wire[1]))
-        if area == "index":
-            index[field] = value
-        else:
-            record = first_record(shard)
-            target = {
-                "shard": shard,
-                "record": record,
-                "data": obj(record["data"]),
-                "match": obj(obj(record["data"])["match"]),
-                "evidence": obj(items(record["evidence"])[0]),
-                "decision": decision(shard),
-            }[area]
-            target[field] = value
+        shard = obj(json.loads(identity_wire))
+        record = first_record(shard)
+        target = {
+            "shard": shard,
+            "record": record,
+            "data": obj(record["data"]),
+            "match": obj(obj(record["data"])["match"]),
+            "evidence": obj(items(record["evidence"])[0]),
+        }[area]
+        target[field] = value
         expected = wire_error(area, field)
         with pytest.raises(ValueError, match=re.escape(expected)):
-            check_wire(tmp_path, index, shard, area, field)
+            check_wire(tmp_path, shard, area, field)
 
     @pytest.mark.parametrize(
         ("area", "field"),
@@ -766,164 +674,87 @@ class TestIdentityWireConstraints:
         ],
     )
     def test_required_nullable_and_nonnullable_fields(
-        self, identity_wire: tuple[bytes, bytes], area: str, field: str
+        self, identity_wire: bytes, area: str, field: str
     ) -> None:
-        shard = obj(json.loads(identity_wire[1]))
+        shard = obj(json.loads(identity_wire))
         record = first_record(shard)
         target = {
             "record": record,
             "data": obj(record["data"]),
             "match": obj(obj(record["data"])["match"]),
-            "decision": decision(shard),
         }[area]
         del target[field]
         prefix = {
             "record": "records.0.",
             "data": "records.0.data.",
             "match": "records.0.data.match.product_link.",
-            "decision": "decisions.0.",
         }[area]
         with pytest.raises(ValueError, match=re.escape(prefix + field + ":missing")):
             _model(IdentityShard, shard)
 
-    @pytest.mark.parametrize(
-        "constraint",
-        [
-            "semantic_hash",
-            "members_missing",
-            "members_extra",
-            "members_reordered",
-            "membership_hash",
-            "decision_id",
-            "default_decision_id",
-            "samples_missing",
-            "samples_extra",
-            "samples_duplicate",
-            "duplicate_evidence",
-            "missing_match_role",
-        ],
-    )
-    def test_each_exact_membership_constraint(  # ruff: ignore[complex-structure] -- each independent mutation isolates a different envelope constraint
-        self, identity_wire: tuple[bytes, bytes], tmp_path: Path, constraint: str
+    @pytest.mark.parametrize("constraint", ["duplicate_evidence", "missing_match_role"])
+    def test_each_evidence_constraint(
+        self, identity_wire: bytes, tmp_path: Path, constraint: str
     ) -> None:
-        shard = obj(json.loads(identity_wire[1]))
-        review = decision(shard)
-        if constraint == "semantic_hash":
-            items(items(review["members"])[0])[1] = "sha256:" + "0" * 64
-        elif constraint == "members_missing":
-            review["members"] = []
-        elif constraint == "members_extra":
-            items(review["members"]).append(["extra", "sha256:" + "0" * 64])
-        elif constraint == "members_reordered":
-            items(review["members"]).insert(0, ["extra", "sha256:" + "0" * 64])
-        elif constraint == "membership_hash":
-            review["membership_hash"] = "sha256:" + "0" * 64
-        elif constraint == "decision_id":
-            review["id"] = "d:" + "0" * 64
-            shard["default_decision_id"] = review["id"]
-        elif constraint == "default_decision_id":
-            shard["default_decision_id"] = "d:" + "0" * 64
-        elif constraint == "samples_missing":
-            review["sample_ids"] = []
-        elif constraint == "samples_extra":
-            items(review["sample_ids"]).append("extra")
-        elif constraint == "samples_duplicate":
-            items(review["sample_ids"]).append(items(review["sample_ids"])[0])
-        elif constraint == "duplicate_evidence":
-            refs = items(first_record(shard)["evidence"])
+        shard = obj(json.loads(identity_wire))
+        refs = items(first_record(shard)["evidence"])
+        if constraint == "duplicate_evidence":
             refs.append(copy.deepcopy(refs[0]))
         else:
-            obj(items(first_record(shard)["evidence"])[0])["role"] = "family"
+            obj(refs[0])["role"] = "family"
         write_yaml(tmp_path / NAME, shard)
         message = {
-            "semantic_hash": "Product identity exact members mismatch",
-            "members_missing": "Product identity exact members mismatch",
-            "members_extra": "Product identity exact members mismatch",
-            "members_reordered": "Product identity exact members mismatch",
-            "membership_hash": "Product identity membership hash mismatch",
-            "decision_id": "Product identity decision ID mismatch",
-            "default_decision_id": "Product identity default decision mismatch",
-            "samples_missing": "Product identity requires every exact member checked",
-            "samples_extra": "Product identity requires every exact member checked",
-            "samples_duplicate": "Product identity requires every exact member checked",
             "duplicate_evidence": "Duplicate product identity evidence",
             "missing_match_role": "Product identity requires match evidence",
         }[constraint]
         with pytest.raises(ValueError, match=message):
-            _shard(tmp_path, NAME, checksum(shard))
+            _shard(tmp_path, NAME)
 
     def test_wire_base_is_valid_and_each_decode_is_private(
-        self, identity_wire: tuple[bytes, bytes], tmp_path: Path
+        self, identity_wire: bytes, tmp_path: Path
     ) -> None:
-        index = obj(json.loads(identity_wire[0]))
-        shard = obj(json.loads(identity_wire[1]))
-        _model(IdentityIndex, index)
+        shard = obj(json.loads(identity_wire))
         write_yaml(tmp_path / NAME, shard)
-        loaded = _shard(tmp_path, NAME, checksum(shard))
+        loaded = _shard(tmp_path, NAME)
         first_record(shard)["kind"] = "corrupt"
         assert (
-            first_record(obj(json.loads(identity_wire[1])))["kind"]
-            == "product_identity"
+            first_record(obj(json.loads(identity_wire)))["kind"] == "product_identity"
         )
         with pytest.raises(ValidationError, match="frozen"):
             loaded.envelope.records[0].data.product_id = "changed"  # type: ignore[misc]  # exercise the runtime frozen boundary
 
 
-@pytest.mark.parametrize(
-    "area",
-    ["index", "shard", "record", "data", "match", "evidence", "decision", "membership"],
-)
-def test_loader_runs_each_wire_and_membership_check(
+@pytest.mark.parametrize("area", ["shard", "record", "data", "match", "evidence"])
+def test_loader_runs_each_wire_check(
     identity_fixture: IdentityFixture, area: str
 ) -> None:
     fixture = identity_fixture
-    if area == "index":
-        index = obj(read_yaml(fixture.root / "product-identities/index.yaml"))
-        index["kind"] = "wrong"
-        write_yaml(fixture.root / "product-identities/index.yaml", index)
-        expected = wire_error("index", "kind")
-    else:
-        shard = obj(read_yaml(fixture.root / NAME))
-        record = first_record(shard)
-        target = {
-            "shard": shard,
-            "record": record,
-            "data": obj(record["data"]),
-            "match": obj(obj(record["data"])["match"]),
-            "evidence": obj(items(record["evidence"])[0]),
-            "decision": decision(shard),
-            "membership": decision(shard),
-        }[area]
-        field, value = {
-            "shard": ("kind", "wrong"),
-            "record": ("filing_key", "en"),
-            "data": ("product_id", "UPPER"),
-            "match": ("kind", "wrong"),
-            "evidence": ("role", ""),
-            "decision": ("state", "proposed"),
-            "membership": ("membership_hash", "sha256:" + "0" * 64),
-        }[area]
-        target[field] = value
-        install_identity(
-            fixture.root, shard, resign=area in {"record", "data", "match", "evidence"}
-        )
-        expected = (
-            "Product identity membership hash mismatch"
-            if area == "membership"
-            else wire_error(area, field)
-        )
+    shard = obj(read_yaml(fixture.root / NAME))
+    record = first_record(shard)
+    target = {
+        "shard": shard,
+        "record": record,
+        "data": obj(record["data"]),
+        "match": obj(obj(record["data"])["match"]),
+        "evidence": obj(items(record["evidence"])[0]),
+    }[area]
+    field, value = {
+        "shard": ("kind", "wrong"),
+        "record": ("filing_key", "en"),
+        "data": ("product_id", "UPPER"),
+        "match": ("kind", "wrong"),
+        "evidence": ("role", ""),
+    }[area]
+    target[field] = value
+    install_identity(fixture.root, shard)
     fixture.revision = commit(fixture.root)
-    with pytest.raises(ValueError, match=re.escape(expected)):
+    with pytest.raises(ValueError, match=re.escape(wire_error(area, field))):
         fixture.load()
 
 
-def check_wire(
-    root: Path, index: JsonValue, shard: JsonValue, area: str, field: str
-) -> None:
-    if area == "index":
-        _model(IdentityIndex, index)
-    elif area == "record" and field in {"filing_key", "record_key"}:
+def check_wire(root: Path, shard: JsonValue, area: str, field: str) -> None:
+    if area == "record" and field in {"filing_key", "record_key"}:
         write_yaml(root / NAME, shard)
-        _shard(root, NAME, checksum(shard))
+        _shard(root, NAME)
     else:
         _model(IdentityShard, shard)

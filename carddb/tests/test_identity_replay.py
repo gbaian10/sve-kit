@@ -7,13 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from sve_carddb.registry.storage import (
-    LoadedShard,
-    load,
-    plan_files,
-    read_registry_files,
-    relayout,
-)
+from sve_carddb.registry.storage import load, plan_files, read_registry_files, relayout
 from sve_carddb.registry.transitions.replay import replay
 
 from .identity_replay_fixtures import (
@@ -125,7 +119,7 @@ def test_empty_events_keep_identity_and_routes(
     assert route.printing_id == P
 
 
-@pytest.mark.parametrize("damage", ["hash", "decision", "key", "missing"])
+@pytest.mark.parametrize("damage", ["hash", "key", "missing"])
 def test_original_before_refs_are_exact(
     scenario: tuple[Path, RegistryFiles, dict[str, Any]], damage: str
 ) -> None:
@@ -133,8 +127,6 @@ def test_original_before_refs_are_exact(
     before = record["updates"][0]["before"]
     if damage == "hash":
         before["record_hash"] = "sha256:" + "0" * 64
-    elif damage == "decision":
-        before["decision_id"] = "d:" + "0" * 64
     elif damage == "key":
         before["record_key"] = "card:" + B
     else:
@@ -147,7 +139,6 @@ def test_original_before_refs_are_exact(
         ValueError,
         match={
             "hash": "^Transition before must match exact effective registry reference$",
-            "decision": "^Transition before must match exact effective registry reference$",
             "key": "^Invalid identity transition authored fields$",
             "missing": "^Transition before must match exact effective registry reference$",
         }[damage],
@@ -199,11 +190,6 @@ def test_permanent_fields_and_allocations_never_change(
         changed["data"]["card_id" if damage == "face_parent" else "int_id"] = (
             B if damage == "face_parent" else 60009
         )
-        decision = next(
-            s.envelope().default_decision_id
-            for s in files.shards
-            if any(e.record_key == raw["record_key"] for e in s.envelope().records)
-        )
         record["updates"].append(
             {
                 "target_key": raw["record_key"],
@@ -211,7 +197,6 @@ def test_permanent_fields_and_allocations_never_change(
                     "transition_key": None,
                     "record_key": raw["record_key"],
                     "record_hash": checksum(raw),
-                    "decision_id": decision,
                 },
                 "after": changed,
                 "allocation_anchor": None,
@@ -321,11 +306,6 @@ def renewal_record(record: dict[str, Any], files: RegistryFiles) -> dict[str, An
         for e in s.envelope().records
         if e.record_key == "printing:" + P
     )
-    decision = next(
-        s.envelope().default_decision_id
-        for s in files.shards
-        if any(e.record_key == original["record_key"] for e in s.envelope().records)
-    )
     result["updates"] = [
         {
             "target_key": original["record_key"],
@@ -333,7 +313,6 @@ def renewal_record(record: dict[str, Any], files: RegistryFiles) -> dict[str, An
                 "transition_key": None,
                 "record_key": original["record_key"],
                 "record_hash": checksum(original),
-                "decision_id": decision,
             },
             "after": original,
             "allocation_anchor": None,
@@ -499,7 +478,7 @@ def test_basis_hash_and_exact_original_bytes(
     path.write_bytes(b"# changed original bytes\n" + path.read_bytes())
     with pytest.raises(
         ValueError,
-        match=r"^Registry bases must retain exact old shards and decisions$",
+        match=r"^Registry bases must retain exact old shards$",
     ):
         replay(root, inputs)
 
@@ -515,43 +494,6 @@ def test_unknown_art_cannot_be_inferred(
         match=r"^Printing move art does not match actual old use$",
     ):
         replay(root, write_scenario(root, files, [record]))
-
-
-def test_unconfirmed_dependency_cannot_be_inferred(
-    scenario: tuple[Path, RegistryFiles, dict[str, Any]],
-) -> None:
-
-    root, files, record = scenario
-    shards = []
-    for loaded in files.shards:
-        shard = loaded.envelope()
-        if any(e.record_key == "face:" + FB for e in shard.records):
-            decision = shard.decisions[0]
-            decision.state = "proposed"
-            decision.sample_ids = []
-            raw = shard.model_dump(mode="json")
-            content = wire(raw)
-            shards.append(
-                LoadedShard(loaded.path, checksum(raw), content, content, content)
-            )
-        else:
-            shards.append(loaded)
-    index = files.index()
-    index.includes = {s.path: s.content_hash for s in shards}
-    unconfirmed = replace(
-        files, shards=tuple(shards), index_content=wire(index.model_dump(mode="json"))
-    )
-    for path in root.rglob("*.yaml"):
-        path.unlink()
-    (root / "ids/index.yaml").write_bytes(unconfirmed.index_content)
-    for loaded_shard in unconfirmed.shards:
-        (root / loaded_shard.path).write_bytes(loaded_shard.exact_content)
-    record["registry_basis"]["index_hash"] = checksum(index.model_dump(mode="json"))
-    with pytest.raises(
-        ValueError,
-        match=r"^Unconfirmed dependency cannot become a confirmed repair$",
-    ):
-        replay(root, write_scenario(root, unconfirmed, [record]))
 
 
 def test_original_id_allocation_collision(
@@ -671,9 +613,6 @@ def collision_update(
                         update["before"]["record_hash"] = checksum(
                             raw.model_dump(mode="json")
                         )
-                        update["before"]["decision_id"] = (
-                            shard.envelope().default_decision_id
-                        )
     record["updates"].sort(key=operator.itemgetter("target_key"))
 
 
@@ -690,13 +629,10 @@ def test_original_int_id_mapping_cannot_be_rewritten(
                 raw["records"][0]["data"]["int_id"],
             )
             (root / loaded.path).write_bytes(wire(raw))
-            index = files.index().model_dump(mode="json")
-            index["includes"][loaded.path] = checksum(raw)
-            (root / "ids/index.yaml").write_bytes(wire(index))
             break
     with pytest.raises(
         ValueError,
-        match=r"^Registry bases must retain exact old shards and decisions$",
+        match=r"^Registry bases must retain exact old shards$",
     ):
         replay(root, inputs)
 

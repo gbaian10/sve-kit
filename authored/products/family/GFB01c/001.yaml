@@ -1,10 +1,11 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:d12396f0e33282c644467f8552f4df6f74b9f21a71736f886b306b9212b0eccf
 records:
   - record_key: '["product_family","GFB01c"]'
     kind: product_family
     filing_key: GFB01c
+    state: confirmed
+    note: '使用者：改為預組。GFB01 = Gloryfinder Bundle #1 "Guide to Glory"（4 副固定預組同捆，USD 90，2024-07-19）；本代號牌組名：The Everlasting Garnet'
     data:
       id: GFB01c
       code: gfb01c
@@ -14,16 +15,3 @@ records:
         lang: en
         text: 'Gloryfinder Bundle #1 “Guide to Glory”'
     evidence: []
-decisions:
-  - id: d:d12396f0e33282c644467f8552f4df6f74b9f21a71736f886b306b9212b0eccf
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:d12396f0e33282c644467f8552f4df6f74b9f21a71736f886b306b9212b0eccf
-    members:
-      -   - '["product_family","GFB01c"]'
-          - sha256:fd7b80033ebcabe347b96473e5d83cbf0fb1735044df1b8f5fb763c816b2524b
-    sample_ids:
-      - '["product_family","GFB01c"]'
-    note: '使用者：改為預組。GFB01 = Gloryfinder Bundle #1 "Guide to Glory"（4 副固定預組同捆，USD 90，2024-07-19）；本代號牌組名：The Everlasting Garnet'

@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:1a5f0716cb622e71db9eb51617528a4804a2ecc19b07cea8e8019ea69d9870be
 records:
   - record_key: card:c:930b1ee5e7515c558324be00a8253585
     kind: card
@@ -66,36 +65,3 @@ records:
       layout: single
       identity_state: confirmed
       home_set_id: SD03
-decisions:
-  - id: d:1a5f0716cb622e71db9eb51617528a4804a2ecc19b07cea8e8019ea69d9870be
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:1a5f0716cb622e71db9eb51617528a4804a2ecc19b07cea8e8019ea69d9870be
-    members:
-      -   - card:c:0580c8f05e6d53f8b88e0b71bd6018b7
-          - sha256:0fb6dacdb97abe32f67e737e817b530523573f393f2efc99ec8dd48f0f471f10
-      -   - card:c:0cdcb8d8b7c9518586349d917a2dbf56
-          - sha256:bc56e3bbe2ead1638d4ce572b5cb96768c31bebf3bc79fa03c821c74a783072f
-      -   - card:c:1c6553eca8dd5313b1accaf5db44151d
-          - sha256:39276b36c8a817211e2da4a6c761dd9f15b82f4d4e36706a2c1fda81fdd7f2f2
-      -   - card:c:1dd5ca47fd495d1b98b5f16adb477306
-          - sha256:773aecdddea690ff9f6420a5e6770a33789afd23f5c37d8e50c617a2de0a3052
-      -   - card:c:21a77a42b29654a0b353acf8b195584e
-          - sha256:930f38c8ef6f7578102158a3f4cb4ebd1df4e8a395a300762b931ff558de367e
-      -   - card:c:930b1ee5e7515c558324be00a8253585
-          - sha256:a19cc35ca7cb4f399f597a184db4db19865b0e8a5d07963038fabb12e025e2fc
-      -   - card:c:af82b2320d3555738569eea3ee49a591
-          - sha256:197565cdaf67b676ad2285cf588703956931677dc9be5d95c114105921c3874c
-      -   - card:c:c8154a2a365658018abe3db18d7f592a
-          - sha256:4f7283d4dcf5180c8a3f40bc3ff84cb46ef4e361d13acf91a72393dfe93fa032
-    sample_ids:
-      - card:c:0580c8f05e6d53f8b88e0b71bd6018b7
-      - card:c:0cdcb8d8b7c9518586349d917a2dbf56
-      - card:c:1c6553eca8dd5313b1accaf5db44151d
-      - card:c:1dd5ca47fd495d1b98b5f16adb477306
-      - card:c:21a77a42b29654a0b353acf8b195584e
-      - card:c:930b1ee5e7515c558324be00a8253585
-      - card:c:af82b2320d3555738569eea3ee49a591
-      - card:c:c8154a2a365658018abe3db18d7f592a

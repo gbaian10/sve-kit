@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:a7399591b65db84c7c915ef99f521062ec241e1023302d6ff673e47e4e19e91e
 records:
   - record_key: '["product_family","CP04"]'
     kind: product_family
     filing_key: CP04
+    state: confirmed
     data:
       id: CP04
       code: cp04
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: コラボパック「プリンセスコネクト！Re:Dive」
     evidence: []
-decisions:
-  - id: d:a7399591b65db84c7c915ef99f521062ec241e1023302d6ff673e47e4e19e91e
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:a7399591b65db84c7c915ef99f521062ec241e1023302d6ff673e47e4e19e91e
-    members:
-      -   - '["product_family","CP04"]'
-          - sha256:d9b027dd139bb9c372b778338523ba4d584fc70b3857cc72fccd9767aea2510a
-    sample_ids:
-      - '["product_family","CP04"]'

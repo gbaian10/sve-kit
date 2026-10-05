@@ -6,7 +6,7 @@
 使用 `regions=("jp", "en")`。這個函式不寫 authored、不配號、不建立人工決定。
 
 報告對所有已登錄 EN printing 使用原樣卡號與全部 `source_face_map`，逐筆列出
-永久 printing/card/face/decision ID、兩個歷史／實際觀測 hash、來源完整 pin、
+永久 printing/card/face ID、兩個歷史／實際觀測 hash、來源完整 pin、
 商品來源吻合與收錄、文字面與更正結果。只有兩個 hash、recipe、地區與卡號都
 相同才列 `exact`；規則近似、規則 hash 單獨相同或缺欄位都不能通過。
 完整 extractor 保留的 speech、auxiliary sections、數值與圖片仍透過原觀測
@@ -15,7 +15,7 @@ recipe 核對，不能為吻合率丟欄位。
 | 分類 | 處理 |
 | --- | --- |
 | `exact` | 保留歷史身分；獨立執行文字對照、current、勘誤與發布閘門 |
-| `mismatch` | 列出所有依賴該觀測的歷史決定與原始／新 hash、來源 pin，待重審；不改舊 ID／決定 |
+| `mismatch` | 列出所有依賴該觀測的登錄記錄與原始／新 hash、來源 pin，待重審；不改舊 ID |
 | `missing_raw` | 保留分母、永久 ID 與所有面對應；補明確封存來源，不退回 latest 或線上 |
 | 解析／封存驗證失敗 | 既有 provider 直接失敗，不產生成功驗收報告；修 parser 或補正凍結輸入後重跑 |
 

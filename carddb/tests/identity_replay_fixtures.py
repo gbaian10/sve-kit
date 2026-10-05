@@ -217,11 +217,6 @@ def transaction(
         for s in files.shards
         for e in s.envelope().records
     }
-    decisions = {
-        e.record_key: s.envelope().default_decision_id
-        for s in files.shards
-        for e in s.envelope().records
-    }
     result = copy.deepcopy(template)
     result["registry_basis"] = {
         "authored_revision": REVISION,
@@ -329,7 +324,6 @@ def transaction(
                     "transition_key": None,
                     "record_key": key,
                     "record_hash": checksum(old),
-                    "decision_id": decisions[key],
                 },
                 "after": value,
                 "allocation_anchor": "synthetic-c-art" if old is None else None,
@@ -463,11 +457,6 @@ def subsequent(
         transfers.append(
             {"from_art_id": aid, "targets": targets, "remaining_uses": uses}
         )
-    decisions = {
-        u["target_key"]: u["before"]["decision_id"]
-        for u in template["updates"]
-        if u["before"] is not None
-    }
     changes = []
     for key, value in after.items():
         if state.get(key) != value:
@@ -478,7 +467,6 @@ def subsequent(
                         "transition_key": None,
                         "record_key": key,
                         "record_hash": checksum(state[key]),
-                        "decision_id": decisions.get(key, "d:" + "0" * 64),
                     },
                     "after": value,
                     "allocation_anchor": None,

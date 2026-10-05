@@ -209,7 +209,16 @@ class TestDefaultTextInputs:
         with create_database(schema) as db:
             with db.transaction():
                 case.stage(db)
-
+                db.insert(
+                    "decision",
+                    {
+                        "id": "route-decision",
+                        "state": "confirmed",
+                        "scope": "record",
+                        "category": "route",
+                        "note": "",
+                    },
+                )
                 db.insert(
                     "card_route_alias",
                     {
@@ -219,7 +228,7 @@ class TestDefaultTextInputs:
                         "target_key": item.card_no,
                         "reason": "renumbered",
                         "source_id": item.card.source.id,
-                        "decision_id": db.rows("decision")[0].values["id"],
+                        "decision_id": "route-decision",
                     },
                 )
             # Children before parents force a second pass rather than masking a one-pass bug.

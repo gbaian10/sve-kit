@@ -6,7 +6,7 @@ from pydantic import Field, JsonValue
 
 from sve_carddb.build_inputs import BuildContext, Revision, Version
 from sve_carddb.catalog.symbols import Spelling
-from sve_carddb.products.models import Code, DecisionMetadata, Lang
+from sve_carddb.products.models import Code, Lang
 from sve_carddb.registry.records import Hash, RecordData, Region, Text
 
 Kind = Literal[
@@ -315,8 +315,14 @@ Record = Annotated[
 ]
 
 
-class Decision(DecisionMetadata):
+class Decision(RecordData):
+    id: Annotated[str, Field(pattern=r"^d:[0-9a-f]{64}\Z")]
     state: Literal["confirmed"]
+    scope: Literal["batch"]
+    membership_hash: Hash
+    members: tuple[tuple[Text, Hash], ...]
+    sample_ids: tuple[Text, ...]
+    note: str = ""
     category: Kind
     policy_id: Text
 

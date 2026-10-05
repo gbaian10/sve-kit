@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:20144b395c33bb2c855708011f45f6d3de79fe9b0503fe9d1319942e6c12a233
 records:
   - record_key: '["product_family","BP16"]'
     kind: product_family
     filing_key: BP16
+    state: confirmed
     data:
       id: BP16
       code: bp16
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: ブースターパック「新たなる創世」
     evidence: []
-decisions:
-  - id: d:20144b395c33bb2c855708011f45f6d3de79fe9b0503fe9d1319942e6c12a233
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:20144b395c33bb2c855708011f45f6d3de79fe9b0503fe9d1319942e6c12a233
-    members:
-      -   - '["product_family","BP16"]'
-          - sha256:14471c14732e47624a081ab8af80f5d1b9b3301176724568effbea3e5fd09b38
-    sample_ids:
-      - '["product_family","BP16"]'

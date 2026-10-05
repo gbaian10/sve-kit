@@ -239,20 +239,18 @@ Successful text correction applications require a result text unit; structured
 rule-data corrections require a revision. Referenced revisions always match the
 correction face and printing region. Reskins have one confirmed target per source
 card, no reverse duplicate, no count or inherited DSL, and require authored
-provenance. Other relation kinds are not assigned those reskin-only restrictions.
+provenance from the confirmed registry. Other relation kinds are not assigned those reskin-only restrictions.
 
 Checks do not calculate bundle freshness or prove semantic equivalence, exact
-before/after/result content, confirmed batch membership, complete errata scope,
+before/after/result content, complete errata scope,
 reskin source evidence for all faces/regions, or adopted art baseline/alternate
 classification. Those domain validators and importers are still required before
 these DDL groups can pass `require_usable`. Source hashes and historic versions
 must come from pinned inputs; schema validation never invents missing evidence.
 
-Art rows referenced by `printing_face.art_id` require a sampled or confirmed
-decision (`art_use_adopted`). Unreferenced candidates remain storable. This check
-runs with the other query checks before COMMIT, including when only the decision
-is changed; failure rolls back the whole transaction. It does not prove art
-baseline, classification or raw evidence validity.
+Art rows come only from confirmed registry records; they carry no separate
+decision. The schema does not prove art baseline, classification or raw
+evidence validity.
 
 ## Saved build inputs
 

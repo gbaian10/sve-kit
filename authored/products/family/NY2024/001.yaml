@@ -1,10 +1,11 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:5d6414052dc4fd23d4978b9406d74e50203c67749443b62bada76e1d602d69b4
 records:
   - record_key: '["product_family","NY2024"]'
     kind: product_family
     filing_key: NY2024
+    state: confirmed
+    note: 使用者：歸 PR 類。代號印在 EN 卡號上（NY2024-001EN），保留自己的家族
     data:
       id: NY2024
       code: ny2024
@@ -14,16 +15,3 @@ records:
         lang: en
         text: Promo Cards
     evidence: []
-decisions:
-  - id: d:5d6414052dc4fd23d4978b9406d74e50203c67749443b62bada76e1d602d69b4
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:5d6414052dc4fd23d4978b9406d74e50203c67749443b62bada76e1d602d69b4
-    members:
-      -   - '["product_family","NY2024"]'
-          - sha256:dab1becb8091beef4a2c4383580ff5281fafc7d5b12939bbce74732c94121062
-    sample_ids:
-      - '["product_family","NY2024"]'
-    note: 使用者：歸 PR 類。代號印在 EN 卡號上（NY2024-001EN），保留自己的家族

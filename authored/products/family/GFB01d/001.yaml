@@ -1,10 +1,11 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:18f26907a290c6399777026385a5a2b597189d8b0a06d695440a1752377f45e4
 records:
   - record_key: '["product_family","GFB01d"]'
     kind: product_family
     filing_key: GFB01d
+    state: confirmed
+    note: '使用者：改為預組。GFB01 = Gloryfinder Bundle #1 "Guide to Glory"（4 副固定預組同捆，USD 90，2024-07-19）；本代號牌組名：The Eagle Eye'
     data:
       id: GFB01d
       code: gfb01d
@@ -14,16 +15,3 @@ records:
         lang: en
         text: 'Gloryfinder Bundle #1 “Guide to Glory”'
     evidence: []
-decisions:
-  - id: d:18f26907a290c6399777026385a5a2b597189d8b0a06d695440a1752377f45e4
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:18f26907a290c6399777026385a5a2b597189d8b0a06d695440a1752377f45e4
-    members:
-      -   - '["product_family","GFB01d"]'
-          - sha256:148c2a8b0964cf31b2796670e598110582e12aa9a864dabeba82723a16774793
-    sample_ids:
-      - '["product_family","GFB01d"]'
-    note: '使用者：改為預組。GFB01 = Gloryfinder Bundle #1 "Guide to Glory"（4 副固定預組同捆，USD 90，2024-07-19）；本代號牌組名：The Eagle Eye'

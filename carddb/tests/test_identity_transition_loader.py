@@ -1,7 +1,6 @@
 """Independent counterexamples for the read-only transition boundary."""
 
 import copy
-import json
 from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid5
 
@@ -43,20 +42,11 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-def test_explicit_empty_and_legacy_entrances(tmp_path: Path) -> None:
-    legacy = load_transitions(tmp_path)
-    assert legacy.index() is None
-    assert legacy.index_content is None
-    assert legacy.index_exact_content is None
-    assert legacy.shards == ()
+def test_missing_and_empty_directories_have_no_transitions(tmp_path: Path) -> None:
+    assert load_transitions(tmp_path).shards == ()
     assert load(tmp_path) == (RegistryIndex(), {})
     write_chain(tmp_path, [])
-    explicit = load_transitions(tmp_path)
-    index = explicit.index()
-    assert index is not None
-    assert not index.includes
-    assert explicit.index_content == explicit.index_exact_content
-    assert explicit.shards == ()
+    assert load_transitions(tmp_path).shards == ()
     assert load(tmp_path) == (RegistryIndex(), {})
 
 
@@ -113,14 +103,9 @@ def test_readers_do_not_silently_ignore_nonempty_transitions(
 @pytest.mark.parametrize(
     "damage",
     [
-        "missing_index",
-        "missing_shard",
-        "unindexed",
-        "unindexed_yml",
-        "modified",
-        "absolute",
-        "parent",
-        "normalized",
+        "missing_middle",
+        "extra_shard",
+        "extra_yml",
         "short_sequence",
         "zero",
         "gap",
@@ -128,53 +113,26 @@ def test_readers_do_not_silently_ignore_nonempty_transitions(
         "wrong_sequence",
     ],
 )
-def test_file_closure_and_paths(
+def test_file_inventory_and_paths(
     tmp_path: Path,
     merge_record: dict[str, Any],
     damage: str,
 ) -> None:
     write_chain(tmp_path, chain([merge_record]))
     directory = tmp_path / "identity-transitions"
-    index_path = directory / "index.yaml"
     shard_path = directory / "001.yaml"
-    index = json.loads(index_path.read_bytes())
-    if damage == "missing_index":
-        index_path.unlink()
-    elif damage == "missing_shard":
+    if damage == "missing_middle":
+        write_chain(tmp_path, chain([merge_record, renewal(merge_record)]))
         shard_path.unlink()
-    elif damage in {"unindexed", "unindexed_yml"}:
-        (
-            directory / ("002.yml" if damage == "unindexed_yml" else "002.yaml")
-        ).write_text("{}")
-    elif damage == "modified":
-        shard_path.write_bytes(
-            shard_path.read_bytes().replace(
-                b"Synthetic receipt only", b"Other receipt only"
-            )
+    elif damage in {"extra_shard", "extra_yml"}:
+        (directory / ("002.yml" if damage == "extra_yml" else "002.yaml")).write_text(
+            "{}"
         )
-    elif damage in {
-        "absolute",
-        "parent",
-        "normalized",
-        "short_sequence",
-        "zero",
-        "gap",
-    }:
-        name = {
-            "absolute": str(shard_path),
-            "parent": "identity-transitions/../001.yaml",
-            "normalized": "identity-transitions//001.yaml",
-            "short_sequence": "identity-transitions/01.yaml",
-            "zero": "identity-transitions/000.yaml",
-            "gap": "identity-transitions/002.yaml",
-        }[damage]
-        index["includes"] = {name: next(iter(index["includes"].values()))}
-        index_path.write_bytes(wire(index))
+    elif damage in {"short_sequence", "zero", "gap"}:
+        name = {"short_sequence": "01", "zero": "000", "gap": "002"}[damage]
+        shard_path.rename(directory / (name + ".yaml"))
     elif damage == "duplicate_sequence":
-        index["includes"]["identity-transitions/0001.yaml"] = next(
-            iter(index["includes"].values())
-        )
-        index_path.write_bytes(wire(index))
+        (directory / "0001.yaml").write_bytes(shard_path.read_bytes())
     elif damage == "wrong_sequence":
         record = copy.deepcopy(merge_record)
         record["sequence"] = 2
@@ -182,7 +140,7 @@ def test_file_closure_and_paths(
         write_chain(tmp_path, [pack(record)])
     with pytest.raises(
         ValueError,
-        match=r"identity transition|Identity transition|Symlinks|Modified|Unsafe|Duplicate|Route|Invalid",
+        match=r"identity transition|Identity transition|Symlinks|Unexpected|Duplicate|Route|Invalid",
     ):
         load_transitions(tmp_path)
 
@@ -192,27 +150,24 @@ def test_file_closure_and_paths(
     "name",
     ["003.yaml.tmp-abc", "index.yaml.tmp", ".DS_Store", "README.txt", "nested/raw"],
 )
-def test_every_unindexed_file_is_rejected(
+def test_every_unexpected_file_is_rejected(
     tmp_path: Path, merge_record: dict[str, Any], count: int, name: str
 ) -> None:
     write_chain(tmp_path, chain([merge_record] * count))
     extra = tmp_path / "identity-transitions" / name
     extra.parent.mkdir(parents=True, exist_ok=True)
     extra.write_bytes(b"unfinished input")
-    with pytest.raises(ValueError, match="indexed file closure"):
+    with pytest.raises(ValueError, match="Unexpected identity transition input path"):
         load_transitions(tmp_path)
 
 
-def test_sequence_gap_with_exact_file_closure(tmp_path: Path) -> None:
+def test_sequence_gap_is_rejected(tmp_path: Path) -> None:
     directory = tmp_path / "identity-transitions"
     directory.mkdir()
-    includes = {}
     for sequence in (1, 3):
-        name = f"identity-transitions/{sequence:03}.yaml"
-        (tmp_path / name).write_bytes(b"{}")
-        includes[name] = checksum({})
+        (directory / f"{sequence:03}.yaml").write_bytes(b"{}")
     with pytest.raises(ValueError, match="contiguous from 1"):
-        _inventory(tmp_path, includes)
+        _inventory(tmp_path)
 
 
 def test_extra_zero_padding_remains_accepted(
@@ -222,10 +177,6 @@ def test_extra_zero_padding_remains_accepted(
     write_chain(tmp_path, shards)
     directory = tmp_path / "identity-transitions"
     (directory / "001.yaml").rename(directory / "0001.yaml")
-    index_path = directory / "index.yaml"
-    index = json.loads(index_path.read_bytes())
-    index["includes"] = {"identity-transitions/0001.yaml": checksum(shards[0])}
-    index_path.write_bytes(wire(index))
     assert load_transitions(tmp_path).shards[0].path == "identity-transitions/0001.yaml"
 
 
@@ -239,9 +190,7 @@ def test_after_key_must_match_inner_identity(
         load_transitions(tmp_path)
 
 
-@pytest.mark.parametrize(
-    "damage", ["directory", "file", "index", "broken", "unindexed"]
-)
+@pytest.mark.parametrize("damage", ["directory", "file", "broken", "extra"])
 def test_all_symlink_inputs_are_rejected(
     tmp_path: Path, merge_record: dict[str, Any], damage: str
 ) -> None:
@@ -250,14 +199,14 @@ def test_all_symlink_inputs_are_rejected(
     if damage == "directory":
         directory.rename(tmp_path / "elsewhere")
         directory.symlink_to(tmp_path / "elsewhere", target_is_directory=True)
-    elif damage in {"file", "index"}:
-        path = directory / ("index.yaml" if damage == "index" else "001.yaml")
+    elif damage == "file":
+        path = directory / "001.yaml"
         backup = tmp_path / "copy"
         path.rename(backup)
         path.symlink_to(backup)
     elif damage == "broken":
-        (directory / "index.yaml").unlink()
-        (directory / "index.yaml").symlink_to(tmp_path / "absent")
+        (directory / "001.yaml").unlink()
+        (directory / "001.yaml").symlink_to(tmp_path / "absent")
     else:
         (directory / "extra").symlink_to(tmp_path / "absent")
     with pytest.raises(ValueError, match="Symlinks"):
@@ -280,25 +229,26 @@ def test_all_symlink_inputs_are_rejected(
 def test_yaml_restrictions_and_sanitized_errors(tmp_path: Path, value: str) -> None:
     directory = tmp_path / "identity-transitions"
     directory.mkdir()
-    (directory / "index.yaml").write_text(value)
+    (directory / "001.yaml").write_text(value)
     with pytest.raises(ValueError, match="Invalid identity transition"):
         load_transitions(tmp_path)
 
 
 @pytest.mark.parametrize("size", [1_048_575, 1_048_576])
-def test_strict_size_boundary(tmp_path: Path, size: int) -> None:
-    write_chain(tmp_path, [])
-    path = tmp_path / "identity-transitions/index.yaml"
+def test_strict_size_boundary(
+    tmp_path: Path, merge_record: dict[str, Any], size: int
+) -> None:
+    write_chain(tmp_path, chain([merge_record]))
+    path = tmp_path / "identity-transitions/001.yaml"
     content = path.read_bytes()
     path.write_bytes(content + b" " * (size - len(content)))
     if size == 1_048_575:
-        assert load_transitions(tmp_path).shards == ()
+        assert len(load_transitions(tmp_path).shards) == 1
     else:
         with pytest.raises(ValueError, match="smaller than 1 MiB"):
             load_transitions(tmp_path)
 
 
-@pytest.mark.parametrize("location", ["index", "shard"])
 @pytest.mark.parametrize(
     "damage",
     [
@@ -313,17 +263,9 @@ def test_strict_size_boundary(tmp_path: Path, size: int) -> None:
 def test_explicit_envelope_fields(
     tmp_path: Path,
     merge_record: dict[str, Any],
-    location: str,
     damage: str,
 ) -> None:
-    shard = pack(copy.deepcopy(merge_record))
-    write_chain(tmp_path, [shard])
-    path = tmp_path / (
-        "identity-transitions/index.yaml"
-        if location == "index"
-        else "identity-transitions/001.yaml"
-    )
-    raw = json.loads(path.read_bytes())
+    raw = pack(copy.deepcopy(merge_record))
     if damage in {"missing_format", "missing_kind"}:
         raw.pop("identity_transition_format" if damage == "missing_format" else "kind")
     elif damage == "extra":
@@ -334,10 +276,7 @@ def test_explicit_envelope_fields(
             "float_format": 1.0,
             "unknown_format": 2,
         }[damage]
-    if location == "shard":
-        write_chain(tmp_path, [raw])
-    else:
-        path.write_bytes(wire(raw))
+    write_chain(tmp_path, [raw])
     with pytest.raises(ValueError, match="authored fields"):
         load_transitions(tmp_path)
 
@@ -345,40 +284,13 @@ def test_explicit_envelope_fields(
 @pytest.mark.parametrize(
     "edits",
     [
-        pytest.param([("decisions.0.members.0.0", "set", "other")], id="members_key"),
-        pytest.param(
-            [("decisions.0.members.0.1", "set", "sha256:" + "0" * 64)],
-            id="members_hash",
-        ),
-        pytest.param(
-            [("decisions.0.membership_hash", "set", "sha256:" + "0" * 64)],
-            id="membership_hash",
-        ),
-        pytest.param([("decisions.0.id", "set", "d:" + "0" * 64)], id="id"),
-        pytest.param([("default_decision_id", "set", "d:" + "0" * 64)], id="default"),
-        pytest.param([("decisions.0.sample_ids", "set", ["other"])], id="sample"),
-        pytest.param([("decisions.0.state", "set", "proposed")], id="proposed"),
-        pytest.param(
-            [("decisions.0.category", "set", "identity_registry")], id="category"
-        ),
-        pytest.param([("decisions.0.policy_id", "set", "other")], id="policy"),
-        pytest.param([("decisions.0.scope", "set", "sample")], id="scope"),
-        pytest.param([("decisions.0.reviewed_by", "set", "   ")], id="reviewer"),
-        pytest.param([("decisions.0.authored_by", "set", "   ")], id="author"),
-        pytest.param(
-            [("decisions.0.reviewed_at", "set", "2026-02-30T00:00:00Z")], id="instant"
-        ),
-        pytest.param(
-            [("decisions.0.reviewed_at", "set", "2026-10-01T00:00:01Z")], id="day_time"
-        ),
-        pytest.param([("decisions.0.note", "delete", None)], id="note"),
         pytest.param([("records", "duplicate", None)], id="two_records"),
-        pytest.param([("decisions", "duplicate", None)], id="two_decisions"),
         pytest.param([("records", "set", [])], id="empty_records"),
-        pytest.param([("decisions", "set", [])], id="empty_decisions"),
+        pytest.param([("decisions", "set", [])], id="decisions"),
+        pytest.param([("default_decision_id", "set", "d:" + "0" * 64)], id="default"),
     ],
 )
-def test_confirmed_exact_receipts(
+def test_one_transition_per_shard_without_decision_envelope(
     tmp_path: Path,
     merge_record: dict[str, Any],
     edits: list[tuple[str, str, Any]],
@@ -386,7 +298,7 @@ def test_confirmed_exact_receipts(
     shard = pack(copy.deepcopy(merge_record))
     mutate(shard, edits)
     write_chain(tmp_path, [shard])
-    with pytest.raises(ValueError, match=r"authored fields|membership mismatch"):
+    with pytest.raises(ValueError, match="authored fields"):
         load_transitions(tmp_path)
 
 
@@ -494,11 +406,7 @@ def mutate(value: dict[str, Any], edits: list[tuple[str, str, Any]]) -> None:
                 (
                     "reverts",
                     "set",
-                    {
-                        "record_key": "other",
-                        "record_hash": "sha256:" + "0" * 64,
-                        "decision_id": "d:" + "0" * 64,
-                    },
+                    {"record_key": "other", "record_hash": "sha256:" + "0" * 64},
                 )
             ],
             id="apply_reverts",
@@ -512,11 +420,7 @@ def mutate(value: dict[str, Any], edits: list[tuple[str, str, Any]]) -> None:
                 (
                     "reverts",
                     "set",
-                    {
-                        "record_key": "other",
-                        "record_hash": "sha256:" + "0" * 64,
-                        "decision_id": "d:" + "0" * 64,
-                    },
+                    {"record_key": "other", "record_hash": "sha256:" + "0" * 64},
                 ),
             ],
             id="revert_repairs",
@@ -669,9 +573,7 @@ def test_transaction_uniqueness(
         load_transitions(tmp_path)
 
 
-@pytest.mark.parametrize(
-    "damage", ["key", "hash", "decision", "missing", "self", "first"]
-)
+@pytest.mark.parametrize("damage", ["key", "hash", "missing", "self", "first"])
 def test_exact_previous_chain(
     tmp_path: Path,
     merge_record: dict[str, Any],
@@ -689,15 +591,10 @@ def test_exact_previous_chain(
         elif damage == "self":
             record["previous"] = reference(shards[1])
         else:
-            field = {
-                "key": "record_key",
-                "hash": "record_hash",
-                "decision": "decision_id",
-            }[damage]
+            field = {"key": "record_key", "hash": "record_hash"}[damage]
             record["previous"][field] = {
                 "key": "other",
                 "hash": "sha256:" + "0" * 64,
-                "decision": "d:" + "0" * 64,
             }[damage]
         shards[1] = pack(record)
     write_chain(tmp_path, shards)
@@ -705,9 +602,7 @@ def test_exact_previous_chain(
         load_transitions(tmp_path)
 
 
-@pytest.mark.parametrize(
-    "damage", ["key", "hash", "decision", "future", "root", "stale"]
-)
+@pytest.mark.parametrize("damage", ["key", "hash", "future", "root", "stale"])
 def test_before_matches_latest_exact_producer(
     tmp_path: Path,
     merge_record: dict[str, Any],
@@ -723,13 +618,10 @@ def test_before_matches_latest_exact_producer(
     elif damage == "root":
         before["transition_key"] = None
     else:
-        before[
-            {"key": "transition_key", "hash": "record_hash", "decision": "decision_id"}[
-                damage
-            ]
-        ] = {"key": "other", "hash": "sha256:" + "0" * 64, "decision": "d:" + "0" * 64}[
-            damage
-        ]
+        before[{"key": "transition_key", "hash": "record_hash"}[damage]] = {
+            "key": "other",
+            "hash": "sha256:" + "0" * 64,
+        }[damage]
     shards[2] = pack(record)
     write_chain(tmp_path, shards)
     with pytest.raises(ValueError, match=r"stale|producer"):
@@ -832,7 +724,6 @@ def test_new_allocation_key_cannot_reuse_a_previously_updated_key(
         "transition_key": None,
         "record_key": existing["target_key"],
         "record_hash": checksum(existing["after"]),
-        "decision_id": "d:" + "0" * 64,
     }
     original = renewal(merge_record)
     original["updates"] = [existing]
@@ -856,7 +747,6 @@ def test_revert_action_guard_independently_of_repairs(
     target_ref = Reference(
         record_key=target_record.record_key,
         record_hash=checksum(target_record.model_dump(mode="json")),
-        decision_id=target.decisions[0].id,
     )
     revert = target_record.model_copy(update={"repairs": (), "reverts": target_ref})
     with pytest.raises(
@@ -867,7 +757,7 @@ def test_revert_action_guard_independently_of_repairs(
 
 @pytest.mark.parametrize(
     "damage",
-    [None, "hash", "decision", "future", "renewal", "partial", "twice", "revert"],
+    [None, "hash", "future", "renewal", "partial", "twice", "revert"],
 )
 def test_revert_reference_structure_only(
     tmp_path: Path,
@@ -881,15 +771,10 @@ def test_revert_reference_structure_only(
     revert = renewal(merge_record)
     revert["action"] = "revert"
     revert["reverts"] = reference(shards[0])
-    if damage in {"hash", "decision", "future"}:
-        field = {
-            "hash": "record_hash",
-            "decision": "decision_id",
-            "future": "record_key",
-        }[damage]
+    if damage in {"hash", "future"}:
+        field = {"hash": "record_hash", "future": "record_key"}[damage]
         revert["reverts"][field] = {
             "hash": "sha256:" + "0" * 64,
-            "decision": "d:" + "0" * 64,
             "future": '["identity_transition",3]',
         }[damage]
     elif damage == "partial":
@@ -1020,7 +905,6 @@ def test_before_can_reference_deactivated_record_hash(
                 "transition_key": None,
                 "record_key": key,
                 "record_hash": "sha256:" + "0" * 64,
-                "decision_id": "d:" + "0" * 64,
             },
             "after": None,
             "allocation_anchor": None,
@@ -1042,12 +926,9 @@ def test_sequence_uses_numeric_order_past_three_digits(
 ) -> None:
     directory = tmp_path / "identity-transitions"
     directory.mkdir()
-    includes = {}
     for sequence in range(1, 1002):
-        name = f"identity-transitions/{sequence:03}.yaml"
-        includes[name] = "sha256:" + "0" * 64
-        (tmp_path / name).touch()
-    ordered = _inventory(tmp_path, includes)
+        (directory / f"{sequence:03}.yaml").touch()
+    ordered = _inventory(tmp_path)
     assert ordered[998:1001] == [
         "identity-transitions/999.yaml",
         "identity-transitions/1000.yaml",

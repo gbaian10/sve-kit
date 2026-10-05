@@ -78,6 +78,37 @@ class PinnedRepository:
             self.cache[key] = result.stdout
         return self.cache[key]
 
+    def tree(self, revision: str, roots: tuple[str, ...]) -> tuple[str, ...]:
+        """List regular files under fixed roots of an immutable Git revision."""
+        if re.fullmatch(r"[0-9a-f]{40}", revision) is None:
+            raise ValueError("Immutable tree revision must be a full Git SHA")
+        result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- full SHA and fixed tree roots are closed inputs
+            [
+                self.executable,
+                "-C",
+                str(self.root),
+                "ls-tree",
+                "-r",
+                "--format=%(objectmode)%x09%(path)",
+                "-z",
+                revision,
+                "--",
+                *roots,
+            ],
+            check=False,
+            capture_output=True,
+        )
+        if result.returncode:
+            raise ValueError("Pinned immutable tree unavailable")
+        entries = [
+            entry.split("\t", 1)
+            for entry in result.stdout.decode().split("\0")
+            if entry
+        ]
+        if any(mode not in {"100644", "100755"} for mode, _ in entries):
+            raise ValueError("Pinned immutable tree contains a nonregular input")
+        return tuple(name for _, name in entries)
+
     def read_many(self, revision: str, names: tuple[str, ...]) -> dict[str, bytes]:
         """Read a dependency closure in one Git process, without extracting archive paths."""
         import io  # ruff: ignore[import-outside-top-level] -- batch framing is only needed by complete dependency replay
@@ -187,21 +218,14 @@ class AdoptionSources:
                 raw = read_yaml(root / "ids/index.yaml")
                 if digest(canonical(raw)) != pin["index_hash"]:
                     raise ValueError("Historical registry index hash mismatch")
-                includes = object_value(object_value(raw)["includes"])
-                for relative in includes:
-                    path = PurePosixPath(relative)
-                    if (
-                        path.is_absolute()
-                        or ".." in path.parts
-                        or path.as_posix() != relative
-                        or path.parts[0] not in {"ids", "registry"}
-                    ):
-                        raise ValueError("Unsafe historical registry shard")
-                    target = root / relative
+                for shard in self.repository.tree(
+                    revision, ("authored/ids", "authored/registry")
+                ):
+                    if shard == "authored/ids/index.yaml":
+                        continue
+                    target = root / shard.removeprefix("authored/")
                     target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_bytes(
-                        self.repository.read(revision, "authored/" + relative)
-                    )
+                    target.write_bytes(self.repository.read(revision, shard))
                 self.registries[key] = load_registry(root)
         return self.registries[key]
 

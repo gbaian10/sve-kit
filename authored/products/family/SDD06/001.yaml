@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:0b1bee285ce520e8483a28f7fb97d9387a52d3441fa263fcfdf641e5e0fe4771
 records:
   - record_key: '["product_family","SDD06"]'
     kind: product_family
     filing_key: SDD06
+    state: confirmed
     data:
       id: SDD06
       code: sdd06
@@ -14,15 +14,3 @@ records:
         lang: en
         text: 'Showdown Deck: Havencraft'
     evidence: []
-decisions:
-  - id: d:0b1bee285ce520e8483a28f7fb97d9387a52d3441fa263fcfdf641e5e0fe4771
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:0b1bee285ce520e8483a28f7fb97d9387a52d3441fa263fcfdf641e5e0fe4771
-    members:
-      -   - '["product_family","SDD06"]'
-          - sha256:dbfbfd2865b004c377a53ecdeacf739fe44ec9ed42ef62505606291a64d1d55b
-    sample_ids:
-      - '["product_family","SDD06"]'

@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:c2e6583e9a5cc2a2859232f39d1daf3af3d5d4a4663d824677c710f4bc1a1819
 records:
   - record_key: '["product_family","EBD02"]'
     kind: product_family
     filing_key: EBD02
+    state: confirmed
     data:
       id: EBD02
       code: ebd02
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: EXビギナーデッキ「ウィッチ」
     evidence: []
-decisions:
-  - id: d:c2e6583e9a5cc2a2859232f39d1daf3af3d5d4a4663d824677c710f4bc1a1819
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:c2e6583e9a5cc2a2859232f39d1daf3af3d5d4a4663d824677c710f4bc1a1819
-    members:
-      -   - '["product_family","EBD02"]'
-          - sha256:8210e2eccf6f339715ca2f80c7b651b0bae9eabf85291fe68104fc21f0f15de3
-    sample_ids:
-      - '["product_family","EBD02"]'

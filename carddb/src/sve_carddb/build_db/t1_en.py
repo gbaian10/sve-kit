@@ -23,25 +23,14 @@ TABLES = (
                 Kind.TEXT,
                 choices=("base", "alternate", "unclassified"),
             ),
-            Column("decision_id", Kind.ID),
         ),
         ("id",),
         foreign_keys=(
             ForeignKey(("card_id",), "card", ("id",)),
             ForeignKey(("face_id",), "face", ("id",)),
             ForeignKey(("face_id", "card_id"), "face", ("id", "card_id")),
-            ForeignKey(("decision_id",), "decision", ("id",)),
         ),
         unique=(Unique(("id", "face_id")),),
-        query_checks=(
-            QueryCheck(
-                "art_use_adopted",
-                "SELECT 1 FROM printing_face AS p JOIN art AS a ON a.id = p.art_id "
-                "JOIN decision AS d ON d.id = a.decision_id "
-                "WHERE d.state NOT IN ('sampled', 'confirmed') LIMIT 1",
-                ("printing_face", "art", "decision"),
-            ),
-        ),
     ),
     Table(
         "region_mapping_review",
@@ -52,21 +41,11 @@ TABLES = (
             Column("as_of", Kind.TEXT, pattern=DATE),
             Column("coverage_scope", Kind.TEXT),
             Column("source_id", Kind.ID),
-            Column("decision_id", Kind.ID),
         ),
         ("card_id", "target_region", "as_of"),
         foreign_keys=(
             ForeignKey(("card_id",), "card", ("id",)),
             ForeignKey(("source_id",), "source_record", ("id",)),
-            ForeignKey(("decision_id",), "decision", ("id",)),
-        ),
-        query_checks=(
-            QueryCheck(
-                "mapping_confirmed_none",
-                "SELECT 1 FROM region_mapping_review AS r JOIN decision AS d ON d.id = r.decision_id "
-                "WHERE r.state = 'confirmed_none' AND d.state != 'confirmed' LIMIT 1",
-                ("region_mapping_review", "decision"),
-            ),
         ),
     ),
     Table(

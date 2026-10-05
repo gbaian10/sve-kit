@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:e497ab5d63cfd13f79487f00ce3e845653be5c42f734fc352faf9f25dfa15898
 records:
   - record_key: '["product_family","BP06"]'
     kind: product_family
     filing_key: BP06
+    state: confirmed
     data:
       id: BP06
       code: bp06
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: ブースターパック第6弾「絶対なる覇者」
     evidence: []
-decisions:
-  - id: d:e497ab5d63cfd13f79487f00ce3e845653be5c42f734fc352faf9f25dfa15898
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:e497ab5d63cfd13f79487f00ce3e845653be5c42f734fc352faf9f25dfa15898
-    members:
-      -   - '["product_family","BP06"]'
-          - sha256:a2e48fd55bf6d8fa6251b0684fdbbd4cf049fa602773b99e6a11834787a7b029
-    sample_ids:
-      - '["product_family","BP06"]'

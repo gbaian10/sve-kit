@@ -10,7 +10,6 @@ from sve_carddb.registry.inputs import canonical
 from sve_carddb.registry.records import (
     DATA_MODELS,
     ArtData,
-    BatchDecision,
     EnglishPrintingData,
     PrintingData,
     RecordData,
@@ -30,7 +29,6 @@ class RegistryRecord:
     kind: str
     owner: str
     data: RecordData
-    decision_id: str | None
     shard_path: str
     content: bytes
 
@@ -43,11 +41,10 @@ class RegistryRecord:
 class RegistrySnapshot:
     files: RegistryFiles
     records: Mapping[str, RegistryRecord]
-    decisions: Mapping[str, BatchDecision]
 
 
 def load_registry(root: Path) -> RegistrySnapshot:
-    """Validate all indexed regions without allocating, filtering or writing data.
+    """Validate all regional shards without allocating, filtering or writing data.
 
     The caller must supply a stable authored checkout. This checks historic
     evidence consistency, not freshness against raw sources or release readiness.
@@ -56,32 +53,23 @@ def load_registry(root: Path) -> RegistrySnapshot:
         raise ValueError("Build input requires an existing registry index")
     files = read_registry_files(root)
     records: dict[str, RegistryRecord] = {}
-    decisions: dict[str, BatchDecision] = {}
     entries: list[Entry] = []
     for loaded in files.shards:
         shard = loaded.envelope()
         entries.extend(shard.records)
-        for decision in shard.decisions:
-            checked = _decision(canonical(decision.model_dump(mode="json")))
-            if checked.id in decisions:
-                raise ValueError("Duplicate registry decision")
-            decisions[checked.id] = checked
         for entry in shard.records:
             records[entry.record_key] = RegistryRecord(
                 record_key=entry.record_key,
                 kind=entry.kind,
                 owner=entry.owner,
                 data=_data(entry),
-                decision_id=shard.default_decision_id,
                 shard_path=loaded.path,
                 content=canonical(entry.model_dump(mode="json")),
             )
     validate(entries)
     check_cursors(files.index().next_int_id, entries)
     _evidence(records)
-    return RegistrySnapshot(
-        files, MappingProxyType(records), MappingProxyType(decisions)
-    )
+    return RegistrySnapshot(files, MappingProxyType(records))
 
 
 def _data(entry: Entry) -> RecordData:
@@ -93,13 +81,6 @@ def _data(entry: Entry) -> RecordData:
     except ValidationError:
         # Pydantic's default error text includes imported content.
         raise ValueError(f"Invalid registry data: {entry.record_key}") from None
-
-
-def _decision(content: bytes) -> BatchDecision:
-    try:
-        return BatchDecision.model_validate_json(content)
-    except ValidationError:
-        raise ValueError("Invalid registry decision fields") from None
 
 
 def _evidence(records: dict[str, RegistryRecord]) -> None:

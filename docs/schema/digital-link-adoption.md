@@ -23,7 +23,7 @@ registry 固定永久身分；`curation/` 尚無格式／loader。glossary 現�
 
 area 目前只有 `links`，`coverage` 路徑明確拒絕。filing_key 為 `[A-Za-z0-9_-]+`，只歸檔，不決定身分、商品或地區；可沿 card 的歸檔代號。sequence 從 001 起按 area/filing_key 連續，至少三位十進位。每片非空。
 
-沿 [authored-layout §1／§2](authored-layout.md#2-分片批次決定與來源) 的嚴格 YAML 1.2、canonical recipe、單檔 <1 MiB／512 KiB 目標。includes 映射完整分片路徑到**解析後 canonical 內容 hash**；完整 index／分片原始 bytes 另釘 F1。拒絕缺檔、hash 不符、重複 key、symlink、絕對路徑、`..`、跨入口引用及未索引檔案。先驗全入口，再按公開範圍投影；不能先濾 JP。啟用此能力時缺 index 必須失敗，空集合只能明示 includes={}；未支援的新格式不能當空集合。
+沿 [authored-layout §1／§2](authored-layout.md#2-分片與來源) 的嚴格 YAML 1.2、canonical recipe、單檔 <1 MiB／512 KiB 目標。includes 映射完整分片路徑到**解析後 canonical 內容 hash**；完整 index／分片原始 bytes 另釘 F1。拒絕缺檔、hash 不符、重複 key、symlink、絕對路徑、`..`、跨入口引用及未索引檔案。先驗全入口，再按公開範圍投影；不能先濾 JP。啟用此能力時缺 index 必須失敗，空集合只能明示 includes={}；未支援的新格式不能當空集合。
 
 record 恰為 `{subject,value,review_level,reason}`：
 

@@ -160,9 +160,7 @@ def prepared(
         "_populate_adoptions",
         lambda _db, _inputs, *, build, **_kwargs: input_record(build, adoption_uses),
     )
-    identities = ProductIdentities(
-        recipe.revision, digest(b"{}"), b"{}", (), {}, {}, (), case.catalog
-    )
+    identities = ProductIdentities(recipe.revision, (), {}, {}, (), case.catalog)
     monkeypatch.setattr(
         offline, "plan_preview", lambda *_args, **_kwargs: case.identity
     )

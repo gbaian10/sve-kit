@@ -1,10 +1,10 @@
 product_authored_format: 1
 kind: product_shard
-default_decision_id: d:665fe21b77e362a42af6fd4b9c663b429d4a74fdae8f738411e90309d89a07eb
 records:
   - record_key: '["product_family","BP21"]'
     kind: product_family
     filing_key: BP21
+    state: confirmed
     data:
       id: BP21
       code: bp21
@@ -14,15 +14,3 @@ records:
         lang: ja
         text: ブースターパック「Academy Royale/アカデミー・ロワイヤル」
     evidence: []
-decisions:
-  - id: d:665fe21b77e362a42af6fd4b9c663b429d4a74fdae8f738411e90309d89a07eb
-    state: confirmed
-    scope: batch
-    category: product_catalog
-    policy_id: product-authored-v1
-    membership_hash: sha256:665fe21b77e362a42af6fd4b9c663b429d4a74fdae8f738411e90309d89a07eb
-    members:
-      -   - '["product_family","BP21"]'
-          - sha256:4338070b03fb1bd4bde723509eba329e2b055ca60b6132b51fede1594ad02563
-    sample_ids:
-      - '["product_family","BP21"]'

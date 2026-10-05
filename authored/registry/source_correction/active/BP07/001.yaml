@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:147c578fecfc1ae8072e7bce8fc7c1d06346247c86b143b31eb32a15e936ab8e
 records:
   - record_key: source_correction:x:d529a2a90bd757f2be41c721eb0eaf4b
     kind: source_correction
@@ -25,15 +24,3 @@ records:
           image_src: /wordpress/wp-content/images/cardlist/BP07/bp07-p06.png
           region: jp
           locator: Card rules text box
-decisions:
-  - id: d:147c578fecfc1ae8072e7bce8fc7c1d06346247c86b143b31eb32a15e936ab8e
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:147c578fecfc1ae8072e7bce8fc7c1d06346247c86b143b31eb32a15e936ab8e
-    members:
-      -   - source_correction:x:d529a2a90bd757f2be41c721eb0eaf4b
-          - sha256:beae83ec23a6d18e19dbd8a118b40f09c81d51c31e3bcfa67033109abc4fecea
-    sample_ids:
-      - source_correction:x:d529a2a90bd757f2be41c721eb0eaf4b

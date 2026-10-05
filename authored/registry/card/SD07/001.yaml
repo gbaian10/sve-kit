@@ -1,6 +1,5 @@
 authored_format: 1
 kind: registry_shard
-default_decision_id: d:77fdefddd7aa2214397713ea7265a7ce12cc74e6a022aa44dbc4fc8789bfa969
 records:
   - record_key: card:c:8deed9529b125f0c9c041400f24f03d7
     kind: card
@@ -10,15 +9,3 @@ records:
       layout: single
       identity_state: confirmed
       home_set_id: SD07
-decisions:
-  - id: d:77fdefddd7aa2214397713ea7265a7ce12cc74e6a022aa44dbc4fc8789bfa969
-    state: confirmed
-    scope: batch
-    category: identity_registry
-    policy_id: identity-init-2026-09-28-v1
-    membership_hash: sha256:77fdefddd7aa2214397713ea7265a7ce12cc74e6a022aa44dbc4fc8789bfa969
-    members:
-      -   - card:c:8deed9529b125f0c9c041400f24f03d7
-          - sha256:785a9fcf1b4fd8e40b1efd436a0e763d2fb26afce30b40e6b6a29c87097bf82f
-    sample_ids:
-      - card:c:8deed9529b125f0c9c041400f24f03d7
