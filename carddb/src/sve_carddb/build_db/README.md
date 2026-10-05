@@ -214,8 +214,8 @@ concurrently. Source archives and frozen inputs are never replacement targets.
 `t1.compile_minimum()` selects T0 plus images, CR, errata, correction, QA and
 related: exactly 57 tables. `compile_minimum(include_en=True)` adds art and the
 three region review/divergence tables: exactly 61. The `en` group explicitly
-requires `art`; selecting `art` alone is also supported. No artist, baseline,
-semantics or DSL placeholder tables are created. All importer/validator readiness
+requires `art`; selecting `art` alone is also supported. No artist, baseline or DSL
+placeholder tables are created. All importer/validator readiness
 flags remain false. These counts attest DDL coverage, not release readiness.
 
 Errata and correction before/after values reuse the public `CorrectionValue` and
