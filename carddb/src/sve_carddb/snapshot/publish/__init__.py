@@ -168,7 +168,13 @@ def _write_image(
         raise PublishError("Origin image conditional overwrite failed")
 
 
-def _verify_images(store: ObjectStore, release: Release, freshness: Freshness) -> None:
+def _verify_images(
+    store: ObjectStore,
+    release: Release,
+    freshness: Freshness,
+    *,
+    verify_cdn: bool,
+) -> None:
     for asset in release.assets:
         origin = store.get(string(asset["path"]))
         if (
@@ -179,15 +185,16 @@ def _verify_images(store: ObjectStore, release: Release, freshness: Freshness) -
             != {"content-type": "image/webp", "cache-control": IMAGE_CACHE}
         ):
             raise PublishError("Origin image verification failed")
-        # Repeat ordinary GET to catch poisoned warm/negative query cache entries.
-        for _ in range(2):
-            raw = freshness.get(string(asset["url"]))
-            if (
-                raw is None
-                or len(raw) != asset["bytes"]
-                or digest(raw) != asset["sha256"]
-            ):
-                raise PublishError("CDN full-URL freshness verification failed")
+        if verify_cdn:
+            # Repeat ordinary GET to catch poisoned warm/negative query cache entries.
+            for _ in range(2):
+                raw = freshness.get(string(asset["url"]))
+                if (
+                    raw is None
+                    or len(raw) != asset["bytes"]
+                    or digest(raw) != asset["sha256"]
+                ):
+                    raise PublishError("CDN full-URL freshness verification failed")
 
 
 def _immutable(store: ObjectStore, release: Release) -> None:
@@ -242,6 +249,8 @@ def publish(
     store: ObjectStore,
     release: Release,
     freshness: Freshness,
+    *,
+    verify_cdn: bool = True,
 ) -> dict[str, JsonValue]:
     """Resume pinned writes, verify full URL bytes, and CAS the index last.
 
@@ -269,7 +278,7 @@ def publish(
         revision = integer(release.media.state["revision"])
         current = _index(store.get(INDEX))
         if current == plan["index"]:
-            _verify_images(store, release, freshness)
+            _verify_images(store, release, freshness, verify_cdn=verify_cdn)
             _immutable(store, release)
             _verify_current(store, plan)
             return _finish(ledger, release, plan)
@@ -281,9 +290,9 @@ def publish(
             assets = {string(a["path"]): a for a in release.assets}
             for key, raw in release.images():
                 _write_image(store, plan, assets[key], raw)
-            _verify_images(store, release, freshness)
+            _verify_images(store, release, freshness, verify_cdn=verify_cdn)
             _immutable(store, release)
-            _verify_images(store, release, freshness)
+            _verify_images(store, release, freshness, verify_cdn=verify_cdn)
             _unchanged_index(store, plan)
             ledger.verify_backup()
             _commit_index(store, plan)

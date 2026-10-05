@@ -441,6 +441,49 @@ def test_execute_and_identical_retry_use_v2_publisher_and_advance_checkpoint(
     ] == INDEX
 
 
+def test_execute_can_skip_cdn_verification_but_reads_images_from_origin(
+    frozen: Frozen,
+    server: tuple[ServerState, Loopback],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    state, transport = server
+    real_client = httpx.Client
+
+    def factory(**_kwargs: object) -> httpx.Client:
+        return real_client(transport=transport, trust_env=False, follow_redirects=False)
+
+    install_mock_sdk(monkeypatch, transport)
+    monkeypatch.setattr(httpx, "Client", factory)
+    monkeypatch.setenv("SVE_R2_ACCESS_KEY_ID", "synthetic-access")
+    monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", "synthetic-secret")
+    result = CliRunner().invoke(
+        app,
+        [
+            *frozen.args(),
+            "--execute",
+            "--skip-cdn-verify",
+            "--confirm-maintainer-authorization",
+            "--account-id",
+            ACCOUNT,
+            "--bucket",
+            BUCKET,
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    output = json.loads(result.output)
+    assert output["remote_existence"] == "verified"
+    assert output["cdn_verification"] == "skipped"
+    assert any(
+        method == "GET" and path.startswith(f"/{BUCKET}/images/")
+        for method, path, _headers in state.requests
+    )
+    assert not any(
+        headers.get("host") == "cdn.invalid"
+        for _method, _path, headers in state.requests
+    )
+    assert INDEX in state.objects
+
+
 @pytest.mark.parametrize("cause", ["cdn-denied", "lost-image-response"])
 def test_execute_failure_keeps_current_absent_records_checkpoint_and_resumes(
     frozen: Frozen,
@@ -467,6 +510,11 @@ def test_execute_failure_keeps_current_absent_records_checkpoint_and_resumes(
     args = [*frozen.args(), "--execute", "--confirm-maintainer-authorization"]
     result = CliRunner().invoke(app, args)
     assert result.exit_code == 2
+    if cause == "cdn-denied":
+        assert any(
+            headers.get("host") == "cdn.invalid"
+            for _method, _path, headers in state.requests
+        )
     assert INDEX not in state.objects
     assert "synthetic-secret" not in result.output
     assert "synthetic-access" not in result.output
