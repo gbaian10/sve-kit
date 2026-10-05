@@ -790,23 +790,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T126832557f","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T126832557f
-      lang: zh-Hant
-      text: 使用這張卡片之際，可以橫置戰場上任意張數的偶像歌手・卡片，作為追加消費。指定敵方戰場上的N個從者。給予其「作為這張卡片的追加消費而橫置的偶像歌手・卡片張數」的N倍傷害。
-      inventory_ids:
-        - inv:37befe1e5a2cce2014e4e3d86618daa91f992d3ff2e0a22c0c719f85ed480f34
-        - inv:392d93725863ae2e0f649d1e2543b3787d3a2ea9e9b21a111680ed79d927ca43
-        - inv:576cf38d6786d4cae0016fdd11229d446bc737329a3027b0999af84192a2ebb6
-        - inv:bc4391c7972adecad52ec8cb40bcfda580c4084f839ab71f937a967f17642f72
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T128447df9e","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -945,23 +928,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T150086b5ef","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T150086b5ef
-      lang: zh-Hant
-      text: 【進化時】指定敵方戰場上的N個從者。給予其「自己戰場上皇家聖騎士・從者的數量」的N倍傷害。
-      inventory_ids:
-        - inv:29b66e23939e53824e8c8c9cb492f297c5474c02cf1ffa90e8afa1213a7cf8e1
-        - inv:5d2ff07a5941f7e9095aafe33afff285a032dffbb42b03335c43fb685ea1af5b
-        - inv:cba190939324d9110d41b10017b5d5f66f6eaaf9849e43b4ebefee1acb332411
-        - inv:ee11c0b2df82d1c6453649bfe0fb5a51a03d44e7a4de8167fe9e3533187fa539
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1502bd87c0","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1051,20 +1017,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T165417f7ec","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T165417f7ec
-      lang: zh-Hant
-      text: '{入場曲}給予敵方的全部從者N點傷害。【魔力連鎖_N】轉變為N點傷害。【SC_N】給予敵方的全部主戰者N點傷害。（如果自己墓場的法術為N張以上，則【魔力連鎖_N】之後的能力發動。如果為N張以上，則【SC_N】之後的能力也會發動）'
-      inventory_ids:
-        - inv:335a184a45a2575c9f0bd1ac5637a1f17661068cd09afcfab77ac983241112d4
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_identifier_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T166cad5ee5","zh-Hant"]'
@@ -1187,21 +1139,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T1a95a4b229","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T1a95a4b229
-      lang: zh-Hant
-      text: '{入場曲}指定敵方戰場上的N個從者。如果自己EX區中卡片的原始消費種類數為N種以上，則給予其N點傷害。'
-      inventory_ids:
-        - inv:56fb29f0ba5ac7694af38ab53fd9253c1ad6b1233ac5fa14df5705011c5a9142
-        - inv:6484165ebb9bef0e89b292279b63388bba97a8191b2a34a624cede2794b14ff7
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1aadaa4e4b","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1278,38 +1215,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T1ccebf65b1","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T1ccebf65b1
-      lang: zh-Hant
-      text: 只要這張卡片在戰場上，自己戰場上的從者受到的N以上的傷害變為N。
-      inventory_ids:
-        - inv:4dc5269d5febbd482d7e29fc016330e12534946552110d61584db78ab8edbf3a
-        - inv:7d31adaad2a30166a19ee037ba5a164069abe9f7f8d6d4764432a3a04c4a5e43
-        - inv:ce351f48db2a3859a981be44cbe5de8cd8f9922a4b17aedc53c1120243b02126
-        - inv:de059e1d78fba82d8d595a1ca99a06f5f93a63e217a385e26cf41952ce77afb6
-        - inv:fb695668b623348a6edededf0f1700045718a0c95489daa28976c6995178e636
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T1ceb1748aa","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T1ceb1748aa
-      lang: zh-Hant
-      text: '{入場曲}如果自己墓場中{精靈}法術的卡片名稱種類數為N種以上，則指定敵方戰場上的N個從者。給予其N點傷害。'
-      inventory_ids:
-        - inv:6aa7cd5ea18522b645688339682510667b31a93b07cdec6a347fa5edf43aa335
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1d300ca428","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1324,21 +1229,6 @@ records:
         - alignment_definition_unavailable
         - numeric_identifier_requires_review
         - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T1d9bd94635","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T1d9bd94635
-      lang: zh-Hant
-      text: 指定敵方戰場上的N個從者。本回合，使其失去全部能力。如果自己墓場中卡片的原始消費種類數為N種以上，則自己的主戰者{生命值}+N。
-      inventory_ids:
-        - inv:3cb204c6c84ee85dc30c37bbd0fa3788dd073cce893b7d7ee46a4596827165a7
-        - inv:cbdb46c33b0aa9a89a4c845790d6097cf8f522061f4718b8deeda3509f3c52cb
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1dadcf11de","zh-Hant"]'
@@ -1608,21 +1498,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T22c69a35b8","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T22c69a35b8
-      lang: zh-Hant
-      text: 從下列之中選擇至多N項。【N】使墓場的N張{夜魔}從者消失：指定敵方戰場上的N個從者。給予其「藉此消失的{夜魔}從者的攻擊力」的N倍傷害。【N】使墓場的N張「非{夜魔}的從者」消失：指定敵方戰場上的N個從者。給予其與「藉此消失的「非{夜魔}的從者」的攻擊力」相同的傷害。
-      inventory_ids:
-        - inv:595be206e5d2779ce0d85b1a5ba6c241cb25eaec36226e73ecce50343e9c5da9
-        - inv:7a297010a46f25728aa040ba3b56e3b328ab1d6bb81a3101e3a6b351aee7d616
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T2305d24933","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1862,20 +1737,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T25a5b23052","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T25a5b23052
-      lang: zh-Hant
-      text: '{入場曲}【魔力連鎖_N】這張卡片{攻擊力}+N/{生命值}+N。【SC_N】這張卡片獲得【疾馳】。（如果自己墓場的法術為N張以上，則【魔力連鎖_N】之後的能力發動。如果為N張以上，則【SC_N】之後的能力也會發動）'
-      inventory_ids:
-        - inv:5840fd8e10e58e14a3b7dcb8bc7e05a1c5789fe13efeeac5419d1b69025b21e8
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_identifier_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T25c9491829","zh-Hant"]'
@@ -2370,21 +2231,6 @@ records:
         - inv:b7fc9141b94f6623ea4df5fc6d69bc926937c335b0eaede81562ac83aa62bb02
       reasons:
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T31f45d6205","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T31f45d6205
-      lang: zh-Hant
-      text: 【進化時】指定敵方戰場上的N個從者。給予其「自己戰場上魔法使・從者的數量」的N倍傷害。
-      inventory_ids:
-        - inv:31d6ae1dd50a4d5221ab2cf87e952c17de7cdd448d5417c1b0b6dc72d57ad9c6
-        - inv:bd8ca402855b408030baa5becbc7e8c95b617b91323879c0bdf76ac682f24625
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T32d588f527","zh-Hant"]'

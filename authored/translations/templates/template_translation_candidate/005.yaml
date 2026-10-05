@@ -193,21 +193,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tfa3301ee77","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tfa3301ee77
-      lang: zh-Hant
-      text: 【進化時】指定敵方戰場上的N個從者。給予其「自己EX區的紋章張數」的N倍傷害。
-      inventory_ids:
-        - inv:0d1e4c4fed9c550d0bbd8b8dd8fcaa794ea8d660107e336cc18cae32c0d41f21
-        - inv:e43d828cf4db68b5dcb7d6e341a10e3ecf65a8551fd34482bb606c5257e7ae58
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tfa501d9683","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -285,35 +270,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tfad793215c","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tfad793215c
-      lang: zh-Hant
-      text: '{入場曲}指定敵方戰場上的N個從者。給予其「自己戰場上目白家・卡片的張數」的N倍傷害。'
-      inventory_ids:
-        - inv:06a6df4766228666973b4bdac446392a6c9a8f89d30b8495e5d9a3adbb1f4e62
-        - inv:f3faf286d7838f88e43b851921debcdde0efd877c7601b5ee713f0309f559d8f
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tfafe0d9031","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tfafe0d9031
-      lang: zh-Hant
-      text: 【死靈充能_N】這張卡片獲得【指定攻擊】。【NC_N】這張卡片獲得【疾馳】【必殺】。
-      inventory_ids:
-        - inv:a0b3a94129d581668d0eca3aba2cef10c3a0b6fa8e16f321b0f642fbc42f5859
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_identifier_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tfb058a7972","zh-Hant"]'

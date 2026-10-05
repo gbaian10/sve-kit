@@ -1,23 +1,6 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["template_translation_candidate","effect","Tb70a633275","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tb70a633275
-      lang: zh-Hant
-      text: 使用這張卡片之際，消費-X。X為「自己戰場上的賽馬娘・卡片張數的N倍」。
-      inventory_ids:
-        - inv:3875367f22deb05092d4bbd6ebb99b6ceecb7966091189221cb5f7476c23cc09
-        - inv:5d94cd36171c7d42cb6462fc9d23e4e9130ec342db5a652c713eee03ba91b68e
-        - inv:bbc15f21f4494aaf194b5e1e473c6219761fdc64f7d74e723600ae97990b7f11
-        - inv:ef314c5ad703ff3589988c937a86d2c96a3576a48c15cc5217676a1d437b7501
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tb75cf1df4a","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -31,21 +14,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tb7edd3aec6","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tb7edd3aec6
-      lang: zh-Hant
-      text: 【進化時】指定敵方戰場上的N個從者。給予其「自己戰場上的宴樂・從者的數量」的N倍傷害。
-      inventory_ids:
-        - inv:84c2ad24c247db0d7b645ea5eb45076fddc137cabfd3785b6bf1ab2e7d6e7a88
-        - inv:ba45d7c1eae9b3fca72f1d2a75f3dd47bbf09c5a215a6d9c29f3f4151742c02d
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tb83983cdea","zh-Hant"]'
@@ -462,21 +430,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tc62290746b","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tc62290746b
-      lang: zh-Hant
-      text: '{Q}{起動}將這張卡片{橫置}並放置到墓場：本回合，自己的主戰者受到的N以上的傷害變為N。'
-      inventory_ids:
-        - inv:5041be69d8cc6f4a369349c7068dcd09fdf637106a64b25c384e67296ff6787d
-        - inv:99c8e1f744e37c0e115c35fd2af3ed3fb29a63d9d2342a33891954677557a0e6
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tc62d87de3d","zh-Hant"]'
@@ -1240,20 +1193,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Td419dc95f1","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Td419dc95f1
-      lang: zh-Hant
-      text: 【進化時】指定敵方戰場上的N個從者。如果自己墓場中卡片的原始消費種類數為N種以上，則給予其N點傷害。抽取N張卡片。捨棄自己的N張手牌。
-      inventory_ids:
-        - inv:96c37ecbe1601e45689146a6eecbe2eebb1ce2cf863443fb62f7df750ef4cc06
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","Td447b2fd7b","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1505,21 +1444,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tdb4b122ff7","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tdb4b122ff7
-      lang: zh-Hant
-      text: 給予敵方戰場上的全部從者N點傷害。如果自己墓場中{精靈}法術的卡片名稱種類數為N種以上，則轉變為N點傷害。給予敵方的全部主戰者N點傷害。
-      inventory_ids:
-        - inv:618f9f3f3cb2cedd054c263bf8250324ad2b4e787e7a50c9ef7c98fea7077399
-        - inv:b73aa118391803ec58e8773cf274c665991b9d01ac6e617a4c8b7ceaae5a4442
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tdc212c1dd2","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1549,21 +1473,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tdcaf23367e","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tdcaf23367e
-      lang: zh-Hant
-      text: '{入場曲}【魔力連鎖_N】給予敵方的全部主戰者與敵方的全部從者N點傷害。【SC_N】轉變為N點傷害。【SC_N】轉變為N點傷害。'
-      inventory_ids:
-        - inv:076d9033d239d7ae1afbef50db9e063f786edf97e10f52d52e3c6056872a33c2
-        - inv:2dfc55cef5fa27d7805e5de2cd5c72daf0c7902989fe22a667d6ffcc08278495
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_identifier_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tdcf074bc61","zh-Hant"]'
@@ -2516,21 +2425,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tee97ec7151","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tee97ec7151
-      lang: zh-Hant
-      text: 【進化時】指定敵方戰場上的N個從者。給予其「自己戰場上狂信・從者的數量」的N倍傷害。
-      inventory_ids:
-        - inv:17edf3fed095ce6e48993c957c6af9c3c83ce22dbcbd6c3e81cce3c315a09043
-        - inv:a164c46285eed4e1779a126727fb03eba706594905203ac71c5a8261208771fe
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Teed3e9cf65","zh-Hant"]'
