@@ -48,17 +48,10 @@ def validate_media(
 
 
 def _rows(view: View) -> None:
-    images = {string(r["id"]): r for r in view["image_asset"]}
     variants = {
         (string(r["image_id"]), string(r["size_key"])): r for r in view["image_variant"]
     }
     for row in view["printing_image"]:
-        image = images[string(row["image_id"])]
-        if any(
-            row[f] != image[f]
-            for f in ("publication_state", "availability", "withdrawal_reason")
-        ):
-            raise ValueError("Media status differs from source image")
         active = (
             row["publication_state"] == "approved"
             and row["availability"] == "available"

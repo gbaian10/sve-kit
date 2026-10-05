@@ -408,7 +408,7 @@ shared 預設、EN 真差異才 override；同樣的 region blocks 使共用機�
 
 | 表                   | 建置期欄位、鍵與約束                                                                                                                                                                                                                                                                                                                                                                           |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `image_asset`        | `id:ID PK,origin:official\|third_party,publication_state:pending\|approved\|withdrawn,withdrawal_reason:Text?,review_decision_id→decision?,source_id→source_record,source_url:Text,source_src_raw:Text,content_hash:Hash?,mime:Text?,width:UInt?,height:UInt?,bytes:UInt?,availability:available\|missing\|unfetched`；C，`source_src_raw` 原樣保存 HTML img src，URL 解析相對路徑但不由卡號猜 |
+| `image_asset`        | `id:ID PK,publication_state:pending\|approved,source_id→source_record,source_url:Text,source_src_raw:Text,content_hash:Hash?,mime:Text?,width:UInt?,height:UInt?,bytes:UInt?,availability:available\|missing\|unfetched`；C，`source_src_raw` 原樣保存 HTML img src，URL 解析相對路徑但不由卡號猜                                                                                              |
 | `printing_image`     | `printing_id,face_id→printing_face,image_id→image_asset`；`PK(printing_id,face_id)`，`FK(printing_id,face_id)→printing_face(printing_id,face_id)`；雙面每面一張，通用卡背屬 app shell                                                                                                                                                                                                          |
 | `image_variant`      | `image_id→image_asset,size_key:Code,format:Code,path:Text,width:UInt,height:UInt,bytes:UInt,sha256:Hash,recipe_version:Text` `PK(image_id,size_key,format)`，`FK(size_key)→image_size(key)`；D，寬高>0；只記公開衍生檔，不要求 original；直向與橫向均為固定五檔 WebP，裁切見下文                                                                                                               |
 | `image_size`         | `key:Code PK,purpose:Text,max_width:UInt?,max_height:UInt?,is_original:Bool`；A 設定，is_original 表示來源 bytes 直接副本；公開五檔均 false                                                                                                                                                                                                                                                    |
@@ -421,11 +421,11 @@ shared 預設、EN 真差異才 override；同樣的 region blocks 使共用機�
 建置約束將上述來源狀態與公開衍生檔政策具體化如下：
 
 - `availability=available` 必須有 `content_hash/mime/width/height/bytes`，mime 非空、寬高為正；這些 metadata 不代替實際 bytes 解碼與比對。
-- `publication_state=withdrawn` 必須有非空白 `withdrawal_reason`；官方 approved 必須 available，且 `review_decision_id` 為 null。第三方 approved 必須有 confirmed decision，`decision_source` 連回該圖的 `source_id`。
-- `image_variant.size_key` 以 FK 引用 `image_size.key`。每筆 variant 只能引用 available 且 approved 的 image_asset；pending／withdrawn／missing／unfetched 不得保有公開 variant 列。
+- approved 必須 available。
+- `image_variant.size_key` 以 FK 引用 `image_size.key`。每筆 variant 只能引用 available 且 approved 的 image_asset；pending／missing／unfetched 不得保有公開 variant 列。
 - 建置 variant 的 format 固定 webp，size 設定不得為 `is_original=true`；path 必須等於該列 sha256 推得的 `images/sha256/<前兩碼>/<64hex>.webp`。檔案實際 hash／尺寸／bytes 與完整檔位集合另由影像產製與發布驗證器核對。此 path 是建置內容定址位置；2.0 公開 ID key／query 由發布投影生成，不能把這個本機 path 當 2.0 圖片 URL，見 [image-variants](image-variants.md)。
 
-跨表條件在建置交易完成寫入後、提交前檢查最終資料圖；修改圖片、decision、decision_source 或 image_size 同樣必須重驗，不能只在新增 variant 時檢查。任一條件失敗即回滾整筆交易；可以在同一交易中撤下圖片並刪除其 variants。已有 available／approved 來源但尚未產 variants 是合法的建置中間狀態，不代表影像發布閉包已完成。
+跨表條件在建置交易完成寫入後、提交前檢查最終資料圖；修改圖片或 image_size 同樣必須重驗，不能只在新增 variant 時檢查。任一條件失敗即回滾整筆交易；可以在同一交易中把圖片改回 pending 並刪除其 variants。已有 available／approved 來源但尚未產 variants 是合法的建置中間狀態，不代表影像發布閉包已完成。
 
 尺寸、橫向長邊、4:3 裁切及取整／覆寫依 [卡圖衍生檔契約](image-variants.md)。原 PNG 不公開；`image_size.is_original` 不投影至 config，發布器拒收 true。card_l 同尺寸重新編碼仍為 false；recipe 與來源 hash 留建置端。
 
@@ -528,17 +528,17 @@ official route 由 `card_no_state=official` 的 printing 自動推導，舊號/�
 
 ## 17. 已決政策：非官方圖鏡像與地區 Decklog 建牌資格
 
-已定案採用 `mirror_reviewed` 與 `regional_decklog`；config 固定輸出這兩個值，沒有政策 pending 或替代模式。`publication_state` 為 pending/approved/withdrawn；單張圖片的 `publication_state=pending` 是「尚未通過適用的來源驗證／人工確認」，不是政策待決。
+已定案採用 `mirror_reviewed` 與 `regional_decklog`；config 固定輸出這兩個值，沒有政策 pending 或替代模式。`publication_state` 為 pending/approved；單張圖片的 `publication_state=pending` 是「尚未通過來源驗證」，不是政策待決。
 
 ### 17.1 `mirror_reviewed`
 
-非官方卡圖須由人確認來源與圖片內容後，才能鏡像至 R2、產生公開 `image_variant/path`。建置資料庫的 `image_asset` 保留 `source_url`、`source_id`、`content_hash` 與 `review_decision_id→decision`；`third_party` 且 approved 時此 FK 必填，decision.state=confirmed。確認釘住該 `image_asset` 的 `source_url/source_id/content_hash`，`decision_source` 連回原始來源；每張都須核對，可用全體 checked 的 confirmed batch，`sampled/model_reviewed` 不足以放行。圖片內容或來源換版需新 `image_asset`／新確認，不得沿用先前 approved。
+非官方卡圖須由人逐張確認來源與圖片內容後，才能鏡像至 R2、產生公開 `image_variant/path`；`sampled/model_reviewed` 不足以放行，圖片內容或來源換版需重新確認。目前只產生官方圖，建置資料庫沒有第三方來源或人工確認欄位；有第三方圖的產出端時再加入。
 
-`publication_state=pending` 時可保留來源 metadata 供查卡，但不出公開 variant/blob path、不以第三方圖 hotlink 代替；UI 顯示「圖片尚未確認」及來源連結/文字卡面。confirmed 後 approved 才可由 R2 顯示與依既有按需規則快取。官方圖的 approved 規則見下段。確認決定留建置資料庫，不把人名或 decision 稽核資料加入卡表快照；卡表快照仍保留 `source_url` 與 `publication_state`。
+`publication_state=pending` 時可保留來源 metadata 供查卡，但不出公開 variant/blob path、不 hotlink 來源圖；UI 顯示文字卡面與待確認標示。approved 才可由 R2 顯示與依既有按需規則快取。卡表快照保留 `image_asset.source_url`，狀態只放在 `printing_image` 的 media 列。
 
-`origin=official` 的圖在官方來源歸屬、頁面原樣 `img src` 與解析後來源 URL 的對應、實際取得 bytes 的來源 hash 及圖片解碼／寬高驗證均通過後，由建置器設為 `publication_state=approved`，`review_decision_id=null`，不要求逐圖人工 decision。尚未完成或驗證失敗為 pending，並留下建置診斷；availability 仍按抓取結果表示 available/missing/unfetched，不能把 pending 當 missing，也不能把只有 URL 的 unfetched 圖當已通過。來源或內容換版須重新驗證；withdrawn 不因再次驗證通過而自動恢復 approved。
+官方圖在官方來源歸屬、頁面原樣 `img src` 與解析後來源 URL 的對應、實際取得 bytes 的來源 hash 及圖片解碼／寬高驗證均通過後，由建置器設為 `publication_state=approved`，不要求逐圖人工確認。尚未完成或驗證失敗為 pending，並留下建置診斷；availability 仍按抓取結果表示 available/missing/unfetched，不能把 pending 當 missing，也不能把只有 URL 的 unfetched 圖當已通過。來源或內容換版須重新驗證。
 
-圖片事後有問題或來源要求撤下時，`publication_state=withdrawn`，`withdrawal_reason` 必填可公開原因，新快照不出該圖 variants/path，但保留 `image_asset` 與來源供說明；舊快照不可變。來源標示從 `source_url` 的 hostname 顯示站名並連回原網址，不捏造人工確認日期（不出貨）。「撤下」會阻止現行清單再引用，不能保證已離線下載的舊副本立即消失；current 提交後依 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收) 清理不再引用的公開卡圖；不因 previous 的圖片引用或未來重播需求保留舊 WebP。
+目前沒有撤圖的產出端，也沒有撤圖狀態與原因欄位；需要時再加入。圖片不再綁定或改回 pending 時，新快照即不出該圖 variants/path；舊快照不可變，已離線下載的舊副本也不保證立即消失。current 提交後依 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收) 清理不再引用的公開卡圖；不因 previous 的圖片引用或未來重播需求保留舊 WebP。
 
 ### 17.2 `regional_decklog`
 

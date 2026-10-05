@@ -319,7 +319,6 @@ def build_regional_assets(
                 source.sha256.removeprefix("sha256:"),
                 source.url,
                 "sve_card",
-                "official",
                 "approved",
                 "available",
             ),
@@ -485,10 +484,7 @@ def _asset(
 ) -> dict[str, Value]:
     return {
         "id": image_id,
-        "origin": "official",
         "publication_state": "pending" if item is None else "approved",
-        "withdrawal_reason": None,
-        "review_decision_id": None,
         "source_id": ref.page.id if item is None else item.source.id,
         "source_url": ref.source_url,
         "source_src_raw": ref.source_src_raw,

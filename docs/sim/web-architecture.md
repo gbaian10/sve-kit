@@ -232,7 +232,7 @@ idle → loading(version-index) → loading(manifest) → loading(bootstrap) →
 
 `components/card/CardImage.tsx`：由 `data/images.ts` 從 2.0 的卡包 `printing_image` media 取得版本／尺寸，配合 int_id／face.ordinal 組 `srcset`、`width`、`height`；不為首圖載 global `image_variant`；`alt` 三種語境
 （`identify`＝卡名＋版次；`redundant`＝旁邊已有同樣文字；`decorative`）；`sizes` 由呼叫端依版面給；`fit: cover | contain`（橫向卡用 contain）；
-固定比例、`loading="lazy"`、`decoding="async"`。載入中／缺圖／省流量共用同一張文字卡佔位，缺圖另加標示；`withdrawn` 顯示撤下原因與來源 hostname。
+固定比例、`loading="lazy"`、`decoding="async"`。載入中／缺圖／省流量共用同一張文字卡佔位，缺圖與待確認另加標示。
 列表與建議清單用整張卡圖檔位，放大層用最大檔位；查卡不用插畫裁切檔位。
 
 ## 7. RWD 與無障礙

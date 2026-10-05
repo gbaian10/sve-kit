@@ -99,8 +99,6 @@ const zhTW = {
     imageDownloadError: "卡圖載入失敗",
     imageError: "卡圖資訊載入失敗",
     imagePending: "卡圖待確認",
-    withdrawnNoSource: "卡圖已撤下：{{reason}}",
-    withdrawn: "卡圖已撤下：{{reason}}（來源 {{host}}）",
     noTranslation: "尚無譯名",
     loadImage: "載入卡圖",
   },

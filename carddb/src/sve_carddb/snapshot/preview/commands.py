@@ -146,7 +146,6 @@ def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] 
             dict(built.report),
             brotli=codec,
             image_source=image_source,
-            confirmed_images=built.confirmed_images,
             regions=batch.regions,
             media_plan=plan,
         )
@@ -161,7 +160,6 @@ def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] 
             image_source,
             revision=revision,
             previous=previous,
-            confirmed_images=built.confirmed_images,
         )
     )
 

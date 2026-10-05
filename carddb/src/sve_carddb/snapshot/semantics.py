@@ -271,13 +271,13 @@ def validate_view(view: View, manifest: Row, fragments: list[Fragment]) -> None:
         row["id"] for row in view["card"]
     }:
         raise ValueError("Every card requires support")
-    images = {string(row["id"]): row for row in view["image_asset"]}
+    active = {
+        string(row["image_id"])
+        for row in view["printing_image"]
+        if row["publication_state"] == "approved" and row["availability"] == "available"
+    }
     for row in view["image_variant"]:
-        asset = images[string(row["image_id"])]
-        if (
-            asset["publication_state"] != "approved"
-            or asset["availability"] != "available"
-        ):
+        if string(row["image_id"]) not in active:
             raise ValueError("Variant requires an approved available image")
     for row in view["printing_image"]:
         printing = next(p for p in view["printing"] if p["id"] == row["printing_id"])

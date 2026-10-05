@@ -28,7 +28,15 @@ export function validateMedia(row: Row): void {
 
 /** Only the complete logical reader has both display projection and optional source details. */
 export function validateMediaDetails(view: View): void {
-  const assets = new Map((view["image_asset"] ?? []).map((r) => [stringValue(r["id"]), r]))
+  // Publication state lives on the per-set media rows, so one detail file cannot check it alone.
+  const active = new Set(
+    (view["printing_image"] ?? [])
+      .filter((r) => r["publication_state"] === "approved" && r["availability"] === "available")
+      .map((r) => stringValue(r["image_id"])),
+  )
+  for (const row of view["image_variant"] ?? [])
+    if (!active.has(stringValue(row["image_id"])))
+      fail("image-variant-unapproved", "variant requires an approved available image")
   const variants = new Map(
     (view["image_variant"] ?? []).map((r) => [
       `${stringValue(r["image_id"])}\0${stringValue(r["size_key"])}`,
@@ -37,10 +45,6 @@ export function validateMediaDetails(view: View): void {
   )
   for (const row of view["printing_image"] ?? []) {
     validateMedia(row)
-    const asset = assets.get(stringValue(row["image_id"]))
-    for (const field of ["publication_state", "availability", "withdrawal_reason"])
-      if (!asset || canonicalText(asset[field] ?? null) !== canonicalText(row[field] ?? null))
-        fail("image-variant-unapproved", "media state differs from source details")
     for (const raw of arrayValue(row["variants"])) {
       const variant = objectValue(raw)
       const detail = variants.get(

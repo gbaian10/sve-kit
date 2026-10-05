@@ -51,7 +51,7 @@ Schema descriptor 驗完整欄序、nullable、enum 與額外鍵，不以 SQL �
 | `digital_art.digital_card_id/phase`、link/voice 的 phase | `digital_face` 的 parent/phase | nullable phase 保留 null；數位資訊只留被實體關聯、圖、語音引用的閉包 |
 | `keyword.name_unit_id/actions` | 同概念 `glossary_term.source_ja` 與 mechanic_action | 明列 glossary 概念；符號不推測機制；無能力集合為 [] |
 | `mechanic_projection/card_mechanic_coverage` | 建置端新鮮投影直投，驗最短 include/exclude 編碼 | 缺 coverage 為未知；partial 不證明 absent；EN block 不計 full |
-| `image_asset.format`、影像 variants | source mime 的 format、已核可且 available 的公開衍生檔 | null mime→null format；pending/withdrawn 無 variants/path，保留來源及撤下原因；不輸出原 PNG blob |
+| `image_asset.format`、影像 variants | source mime 的 format、已核可且 available 的公開衍生檔 | null mime→null format；pending 無 variants/path，保留來源；狀態只投影到 printing_image；不輸出原 PNG blob |
 | config | language、digital_endpoint、shop_link_template、固定五檔 image sizes、明示 search/feedback 設定 | 缺 optional 能力陣列為 []；固定政策與大小仍完整；normalizer 不一致拒絕 |
 | metadata | source_coverage 的公開 windows、restriction_coverage、QA/errata ID 集合、mechanic universe/coverage | 不造 complete；window 只准 region:* 或此次公開 product；target 三欄全 null；未實作 review/translation coverage 為 [] |
 | `card_engine_support` | R1 每 card 一列 missing_dsl，包括墓碑；再附缺來源、未核對、divergence、wording 等區域 block | 無 DSL／program；`effective_support` 先 override、後 block；automatic=false；passed 被 block 降 reviewed |

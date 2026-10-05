@@ -32,17 +32,8 @@ export interface CardImageProps {
   readonly imageWanted?: boolean
 }
 
-function hostOf(url: unknown): string {
-  if (typeof url !== "string") return ""
-  try {
-    return new URL(url).hostname
-  } catch {
-    return ""
-  }
-}
-
 // One fixed 63:88 slot: the text card sits underneath and the image fades in over it when it has
-// loaded, so nothing shifts. Missing, pending and withdrawn images keep the text card and say why.
+// loaded, so nothing shifts. Missing and pending images keep the text card and say why.
 export function CardImage({
   summary,
   name,
@@ -61,27 +52,18 @@ export function CardImage({
   const source = images?.cardImage(summary.printingId, summary.faceId)
   const availability = asset?.["availability"]
   const publication = asset?.["publication_state"]
-  const withdrawal = {
-    reason: typeof asset?.["withdrawal_reason"] === "string" ? asset["withdrawal_reason"] : "",
-    host: hostOf(asset?.["source_url"]),
-  }
-  const withdrawn = withdrawal.host
-    ? t("card.withdrawn", withdrawal)
-    : t("card.withdrawnNoSource", withdrawal)
   const tag =
     source !== undefined && failed === source.src
       ? t("card.imageDownloadError")
-      : publication === "withdrawn"
-        ? withdrawn
-        : availability === "missing"
-          ? t("card.noImage")
-          : publication === "pending" || availability === "unfetched"
-            ? t("card.imagePending")
-            : images?.failed && asset === undefined
-              ? t("card.imageError")
-              : images === undefined || images.known?.(summary.printingId, summary.faceId) === false
-                ? t("card.imageLoading")
-                : undefined
+      : availability === "missing"
+        ? t("card.noImage")
+        : publication === "pending" || availability === "unfetched"
+          ? t("card.imagePending")
+          : images?.failed && asset === undefined
+            ? t("card.imageError")
+            : images === undefined || images.known?.(summary.printingId, summary.faceId) === false
+              ? t("card.imageLoading")
+              : undefined
   const showImage = source !== undefined && tag === undefined && (!dataSaver || imageWanted)
   const isLoaded = source !== undefined && loaded === source.src
   // In identify mode the slot itself carries the name, so the card is announced with or without

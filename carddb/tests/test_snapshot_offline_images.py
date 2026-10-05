@@ -171,12 +171,7 @@ def test_bilingual_images_bundle_snapshot_and_preview(
         object_value(built.report["image_assets"])["crop_overrides"]
     )
     assert crop_report["applied_source_images"] == 1
-    plan = prepare_media(
-        built.projection,
-        roots.preview,
-        revision=1,
-        confirmed_images=built.confirmed_images,
-    )
+    plan = prepare_media(built.projection, roots.preview, revision=1)
     snapshot = export_snapshot(
         plan.projection, built.ownership, recipe.batch(), format_version=format_version
     )
@@ -188,7 +183,6 @@ def test_bilingual_images_bundle_snapshot_and_preview(
         regions=("en", "jp"),
         image_source=roots.preview,
         media_plan=plan,
-        confirmed_images=built.confirmed_images,
     )
     for path, raw in plan.blobs(roots.preview):
         assert (output.preview / path).read_bytes() == raw

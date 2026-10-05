@@ -16,6 +16,8 @@ def inputs() -> dict[str, dict[str, JsonValue]]:
             "printing_id": "p:synthetic",
             "face_id": "f:synthetic",
             "image_id": "i:synthetic",
+            "publication_state": "approved",
+            "availability": "available",
         },
         "image_variant": {
             "image_id": "i:synthetic",
@@ -42,6 +44,8 @@ def test_source_media_shape_is_valid(
         ("printing_image", "card_version", 1),
         ("printing_image", "face_id", None),
         ("printing_image", "image_id", False),
+        ("printing_image", "publication_state", "withdrawn"),
+        ("printing_image", "availability", None),
         ("image_variant", "card_version", 1),
         ("image_variant", "path", "../source.webp"),
         ("image_variant", "path", None),

@@ -108,7 +108,6 @@ function mutatedWire(item: JsonObject) {
 }
 
 const expectedCodes: Record<string, ReaderErrorCode> = {
-  "status-disagrees": "image-variant-unapproved",
   "available-missing-size": "image-variant-unapproved",
   "available-reverse-size": "image-variant-unapproved",
   "dimensions-disagree": "image-variant-unapproved",
@@ -116,7 +115,7 @@ const expectedCodes: Record<string, ReaderErrorCode> = {
   "missing-has-card_version": "image-variant-unapproved",
   "missing-has-art_version": "image-variant-unapproved",
   "missing-has-variants": "image-variant-unapproved",
-  "withdrawn-has-variants": "image-variant-unapproved",
+  "pending-has-variants": "image-variant-unapproved",
   "duplicate-int-id": "primary-key-duplicate",
   "duplicate-face-ordinal": "face-ordinal",
   "same-name-face_id-f:a": "schema",

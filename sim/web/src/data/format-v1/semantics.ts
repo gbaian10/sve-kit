@@ -351,16 +351,10 @@ export function validateDigitalLinks(view: View): void {
 
 /** Colocated asset/variant and printing-face checks also apply to an on-demand file. */
 export function validateImageRows(view: View): void {
-  const images = new Map((view["image_asset"] ?? []).map((row) => [stringValue(row["id"]), row]))
+  const images = new Set((view["image_asset"] ?? []).map((row) => stringValue(row["id"])))
   for (const row of view["image_variant"] ?? []) {
-    const asset = images.get(stringValue(row["image_id"]))
-    if (
-      !asset ||
-      asset["publication_state"] !== "approved" ||
-      asset["availability"] !== "available"
-    ) {
-      fail("image-variant-unapproved", "variant requires an approved available image")
-    }
+    if (!images.has(stringValue(row["image_id"])))
+      fail("image-variant-unapproved", "variant requires its colocated image")
   }
   const printings = new Map((view["printing"] ?? []).map((row) => [stringValue(row["id"]), row]))
   for (const row of view["printing_image"] ?? []) {

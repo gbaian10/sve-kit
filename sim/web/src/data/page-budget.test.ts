@@ -59,7 +59,6 @@ function page(extra: number) {
             image_id: `i:${String(i)}`,
             publication_state: "approved",
             availability: "available",
-            withdrawal_reason: null,
             card_version: 1,
             art_version: 1,
             variants: ["art_m", "art_s", "card_l", "card_m", "card_s"].map((size_key) => ({

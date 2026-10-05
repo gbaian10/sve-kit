@@ -8,14 +8,7 @@ TABLES = (
         "image_asset",
         (
             Column("id", Kind.ID),
-            Column("origin", Kind.TEXT, choices=("official", "third_party")),
-            Column(
-                "publication_state",
-                Kind.TEXT,
-                choices=("pending", "approved", "withdrawn"),
-            ),
-            Column("withdrawal_reason", Kind.TEXT, nullable=True),
-            Column("review_decision_id", Kind.ID, nullable=True),
+            Column("publication_state", Kind.TEXT, choices=("pending", "approved")),
             Column("source_id", Kind.ID),
             Column("source_url", Kind.TEXT),
             Column("source_src_raw", Kind.TEXT),
@@ -29,43 +22,12 @@ TABLES = (
             ),
         ),
         ("id",),
-        foreign_keys=(
-            ForeignKey(("review_decision_id",), "decision", ("id",)),
-            ForeignKey(("source_id",), "source_record", ("id",)),
-        ),
+        foreign_keys=(ForeignKey(("source_id",), "source_record", ("id",)),),
         checks=(
-            Check(
-                "publication_state != 'withdrawn' OR (withdrawal_reason IS NOT NULL AND length(trim(withdrawal_reason)) > 0)"
-            ),
             Check(
                 "availability != 'available' OR (content_hash IS NOT NULL AND mime IS NOT NULL AND length(mime) > 0 AND width IS NOT NULL AND width > 0 AND height IS NOT NULL AND height > 0 AND bytes IS NOT NULL)"
             ),
-            Check(
-                "publication_state != 'approved' OR origin != 'official' OR availability = 'available'"
-            ),
-            Check(
-                "publication_state != 'approved' OR origin != 'third_party' OR review_decision_id IS NOT NULL"
-            ),
-            Check(
-                "publication_state != 'approved' OR origin != 'official' OR review_decision_id IS NULL"
-            ),
-        ),
-        query_checks=(
-            QueryCheck(
-                "image_confirmed_review",
-                "SELECT 1 FROM image_asset AS a JOIN decision AS d ON d.id = a.review_decision_id "
-                "WHERE a.origin = 'third_party' AND a.publication_state = 'approved' "
-                "AND (d.state != 'confirmed') LIMIT 1",
-                ("image_asset", "decision"),
-            ),
-            QueryCheck(
-                "image_review_source",
-                "SELECT 1 FROM image_asset AS a WHERE a.origin = 'third_party' "
-                "AND a.publication_state = 'approved' AND NOT EXISTS "
-                "(SELECT 1 FROM decision_source AS s WHERE s.decision_id = a.review_decision_id "
-                "AND s.source_id = a.source_id) LIMIT 1",
-                ("image_asset", "decision_source"),
-            ),
+            Check("publication_state != 'approved' OR availability = 'available'"),
         ),
     ),
     Table(

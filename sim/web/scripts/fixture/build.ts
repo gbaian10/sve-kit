@@ -706,13 +706,8 @@ async function addImages(
   const imageId = `img:${printing.id.slice(2)}:${String(ordinal)}`
   builder.push("image_asset", GLOBAL, "detail", {
     id: imageId,
-    origin: "official",
-    publication_state:
-      state === "withdrawn" ? "withdrawn" : state === "pending" ? "pending" : "approved",
-    withdrawal_reason: state === "withdrawn" ? "Synthetic withdrawal for the fixture" : null,
     source_src_raw: `/synthetic/${printing.cardNo}-${String(ordinal)}.png`,
     source_url: `https://example.invalid/cards/${printing.cardNo}-${String(ordinal)}.png`,
-    availability: state === "missing" ? "missing" : state === "pending" ? "unfetched" : "available",
     width: state === "missing" ? null : 459,
     height: state === "missing" ? null : 641,
     format: state === "missing" ? null : "png",
@@ -721,10 +716,8 @@ async function addImages(
     printing_id: printing.id,
     face_id: face.id,
     image_id: imageId,
-    publication_state:
-      state === "withdrawn" ? "withdrawn" : state === "pending" ? "pending" : "approved",
+    publication_state: state === "approved" ? "approved" : "pending",
     availability: state === "missing" ? "missing" : state === "pending" ? "unfetched" : "available",
-    withdrawal_reason: state === "withdrawn" ? "Synthetic withdrawal for the fixture" : null,
     card_version: state === "approved" ? 1 : null,
     art_version: state === "approved" ? 1 : null,
     variants: [],

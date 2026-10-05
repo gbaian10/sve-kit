@@ -27,7 +27,7 @@
   "search_alias": [{"kind":"card","code":"card","lang":"ja","text":"Synthetic alias","normalized":"synthetic alias"}],
   "card_route_alias": [{"namespace":"provisional","old_key":"20001","target_namespace":"official","target_key":"TEST-001%E2%93%88a","reason":"provisional_corrected"}],
   "route_override": [{"route_key":"TEST-001%E2%93%88a","printing_id":"printing"}],
-  "image_asset": [{"id":"image","origin":"third_party","publication_state":"approved","withdrawal_reason":null,"source_src_raw":"../source.png","source_url":"https://example.invalid/source.png","availability":"available","width":459,"height":641,"format":"png"}],
-  "printing_image": [{"printing_id":"printing","face_id":"face","image_id":"image"}],
+  "image_asset": [{"id":"image","source_src_raw":"../source.png","source_url":"https://example.invalid/source.png","width":459,"height":641,"format":"png"}],
+  "printing_image": [{"printing_id":"printing","face_id":"face","image_id":"image","publication_state":"approved","availability":"available"}],
   "image_variant": [{"image_id":"image","size_key":"card_s","format":"webp","path":"images/sha256/aa/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.webp","width":128,"height":179,"bytes":99}]
 }

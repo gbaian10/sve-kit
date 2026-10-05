@@ -379,7 +379,7 @@ File key 仍用 §5.1 配方，不新增另一套手寫 URL 對照庫。
 media File.dependencies 恰為 config 加上該檔各 printing_id／face_id 所需的 printing、face bootstrap FileRef 聯集，按 key 排序去重；
 不依賴 global images 詳情，不用 row_index。全域影像詳情依賴 config；所有公開 FK 仍由 producer 整體驗證。
 printing.home_set_id 是建置所有權，不出貨新 printing 欄位；reader 由已驗 printing bootstrap fragment 的 owner 定位相同 home_set media。
-局部列冗餘狀態／尺寸是明示顯示投影，producer 驗其與 image_asset／image_variant 一致，不新增第二資料來源。
+圖片狀態只放在 media 列；局部列的尺寸是明示顯示投影，producer 驗其與 image_variant 一致，不新增第二資料來源。
 `ImageDisplayVariant` descriptor 固定為 `[Code,UInt,UInt]`，各 size_key 限 config 五檔且尺寸 >0；
 version 為 1..2^53−1 或 null，狀態／空陣列約束依 snapshot-format §2.1。
 
@@ -425,7 +425,7 @@ added/modified 的 key 必存在新快照；retired 指前版存在而新版不�
 
 support_changes 比較套用 override/block 後的有效狀態；同狀態但 reasons 或 manifest engine_support_target 改變也列出受影響卡區，reason 明示目標變動。changes_ref 為 null 不宣稱「無變更」。ETag／抓取時間改變但公開投影不變不列 modified；coverage 的查核日期變動屬公開投影變動。完整發布閘門仍驗兩版實際差異，摘要不能代替資料閉包驗證。
 
-2.0.0 的 printing_image changed_fields 包含 publication_state、availability、withdrawal_reason、card_version、art_version、variants；image_variant 不再接受 path。key 仍依各自 PK，不能把 URL 當 ID。changes 是摘要，不是 row delta；previous 引用的 changes blob 保留，但其 from_data_version 不構成對更早快照的遞迴保留依賴。落後多版或無法讀取跨格式摘要時全量取得 current，仍須通過格式准入；詳見 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
+2.0.0 的 printing_image changed_fields 包含 publication_state、availability、card_version、art_version、variants；image_variant 不再接受 path。key 仍依各自 PK，不能把 URL 當 ID。changes 是摘要，不是 row delta；previous 引用的 changes blob 保留，但其 from_data_version 不構成對更早快照的遞迴保留依賴。落後多版或無法讀取跨格式摘要時全量取得 current，仍須通過格式准入；詳見 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
 
 ## 數位同名規則的版本准入
 

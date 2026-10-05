@@ -114,7 +114,7 @@ Index 的 revision／Entry 欄位、JSON 閉包及 changes 非遞迴規則依 sn
 unknown index_format 必拒收，不能把它當成空 pages。
 
 Python／TS 共用合成向量須覆蓋 int_id、f0／f1、JP／EN、手動版次、card／art 分組版本、
-withdrawn／missing、狀態與詳情不一致、尺寸不足與 srcset、同 image_id 多 printing、回復 bytes 不重用 v。
+pending／missing、尺寸不足與 srcset、同 image_id 多 printing、回復 bytes 不重用 v。
 新增 changes 的 PK／changed_fields 白名單；V1→V2→V3 只保 V3／V2，V2.changes.from 不保留 V1。
 另驗無相容 current／previous、本機 active、落後多版全量更新、下載中輪替導致缺檔後重抓 current。
 JSON hash／canonical／FK／base 驗證維持；圖片 SHA 由產製／發布端驗，不用歷史圖 hash 拒絕新 bytes。

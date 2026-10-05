@@ -36,32 +36,16 @@ class PublicImages:
     ownership: Ownership
     library: Path
 
-    def plan(
-        self,
-        tables: dict[str, list[Record]] | None = None,
-        *,
-        confirmed_images: frozenset[str] = frozenset(),
-    ) -> MediaPlan:
+    def plan(self, tables: dict[str, list[Record]] | None = None) -> MediaPlan:
         projection = (
             self.projection
             if tables is None
             else replace(self.projection, tables=tables)
         )
-        return prepare_media(
-            projection, self.library, revision=1, confirmed_images=confirmed_images
-        )
+        return prepare_media(projection, self.library, revision=1)
 
-    def snapshot(
-        self,
-        tables: dict[str, list[Record]] | None = None,
-        *,
-        confirmed_images: frozenset[str] = frozenset(),
-    ) -> Snapshot:
-        return export_snapshot(
-            self.plan(tables, confirmed_images=confirmed_images).projection,
-            self.ownership,
-            BATCH,
-        )
+    def snapshot(self, tables: dict[str, list[Record]] | None = None) -> Snapshot:
+        return export_snapshot(self.plan(tables).projection, self.ownership, BATCH)
 
     def tables(self) -> dict[str, list[Record]]:
         return deepcopy(self.projection.tables)
@@ -78,9 +62,6 @@ def images(tmp_path_factory: pytest.TempPathFactory) -> PublicImages:
             populate(db)
         projection = projected(db)
         tables = projection.tables | {
-            "image_asset": [
-                row | {"origin": "official"} for row in projection.tables["image_asset"]
-            ],
             "image_variant": [
                 {
                     "image_id": "image",
@@ -171,16 +152,15 @@ def test_writer_publishes_only_listed_webps_and_consistent_art_contract(
     }
 
 
-@pytest.mark.parametrize("state", ["unfetched", "missing", "pending", "withdrawn"])
+@pytest.mark.parametrize("state", ["unfetched", "missing", "pending"])
 def test_unavailable_or_unapproved_images_have_metadata_only(
     images: PublicImages, tmp_path: Path, state: str
 ) -> None:
     tables = images.tables()
     asset = tables["image_asset"][0]
     field = "availability" if state in {"unfetched", "missing"} else "publication_state"
-    asset[field] = state
-    if state == "withdrawn":
-        asset["withdrawal_reason"] = "Synthetic withdrawal"
+    for row in tables["printing_image"]:
+        row[field] = state
     tables["image_variant"] = []
     roots = Roots(tmp_path / "preview", tmp_path / "private")
     report = write_preview(
@@ -214,36 +194,6 @@ def test_writer_refuses_incomplete_available_image_closure(
             media_plan=images.plan(tables),
         )
     assert not roots.preview.exists()
-
-
-@pytest.mark.parametrize("state", ["missing-proof", "other-image-proof", "confirmed"])
-def test_third_party_approval_requires_each_image_confirmed(
-    images: PublicImages, tmp_path: Path, state: str
-) -> None:
-    tables = images.tables()
-    tables["image_asset"][0]["origin"] = "third_party"
-    confirmed = frozenset({"image" if state == "confirmed" else "other"})
-    roots = Roots(tmp_path / "preview", tmp_path / "private")
-    if state == "confirmed":
-        assert write_preview(
-            images.snapshot(tables, confirmed_images=confirmed),
-            roots,
-            {},
-            image_source=images.library,
-            confirmed_images=confirmed,
-            media_plan=images.plan(tables, confirmed_images=confirmed),
-        )["images"]
-    else:
-        with pytest.raises(ValueError, match="individual confirmed"):
-            write_preview(
-                images.snapshot(tables, confirmed_images=confirmed),
-                roots,
-                {},
-                image_source=images.library,
-                confirmed_images=confirmed,
-                media_plan=images.plan(tables, confirmed_images=confirmed),
-            )
-        assert not roots.preview.exists()
 
 
 @pytest.mark.parametrize(
@@ -392,9 +342,8 @@ def test_interruption_keeps_old_complete_preview(
     roots = Roots(tmp_path / "preview", tmp_path / "private")
     tables = images.tables()
     tables["image_variant"] = []
-    tables["image_asset"][0].update(
-        {"availability": "unfetched", "publication_state": "pending"}
-    )
+    for row in tables["printing_image"]:
+        row.update({"availability": "unfetched", "publication_state": "pending"})
     write_preview(images.snapshot(tables), roots, {}, media_plan=images.plan(tables))
     old = {p: p.read_bytes() for p in roots.preview.rglob("*") if p.is_file()}
     calls = 0

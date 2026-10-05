@@ -19,9 +19,7 @@ def rows() -> dict[str, dict[str, Value]]:
     values: dict[str, dict[str, Value]] = {
         "image_asset": {
             "id": "image",
-            "origin": "third_party",
             "publication_state": "approved",
-            "review_decision_id": "decision",
             "source_id": "source",
             "source_url": "https://example.invalid/source.png",
             "source_src_raw": "../source.png",

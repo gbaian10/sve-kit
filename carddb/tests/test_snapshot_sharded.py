@@ -53,9 +53,6 @@ def fragments(snapshot: Snapshot) -> Iterator[tuple[str, str, dict[str, JsonValu
 @pytest.fixture(scope="module")
 def expanded(logical: tuple[Projection, Ownership]) -> tuple[Projection, Ownership]:
     projection, ownership = cloned(logical)
-    projection.tables["image_asset"][0].update(
-        availability="available", publication_state="approved", origin="official"
-    )
     projection.tables["image_variant"] = [
         {
             "image_id": "image",
@@ -412,31 +409,16 @@ def test_resealed_semantic_mutations_rejected(
         read_snapshot(manifest, blobs)
 
 
-@pytest.mark.parametrize(
-    ("availability", "state", "reason"),
-    [
-        ("unfetched", "pending", None),
-        ("missing", "approved", None),
-        ("missing", "withdrawn", "Synthetic withdrawal"),
-    ],
-)
+@pytest.mark.parametrize("availability", ["unfetched", "missing"])
 def test_non_available_images_retain_metadata_without_variants(
-    expanded: tuple[Projection, Ownership],
-    availability: str,
-    state: str,
-    reason: JsonValue,
+    expanded: tuple[Projection, Ownership], availability: str
 ) -> None:
     projection, ownership = cloned(expanded)
-    for image in projection.tables["image_asset"]:
-        image.update(
-            availability=availability, publication_state=state, withdrawal_reason=reason
-        )
     projection.tables["image_variant"] = []
     for binding in projection.tables["printing_image"]:
         binding.update(
             availability=availability,
-            publication_state=state,
-            withdrawal_reason=reason,
+            publication_state="pending",
             variants=[],
             card_version=None,
             art_version=None,

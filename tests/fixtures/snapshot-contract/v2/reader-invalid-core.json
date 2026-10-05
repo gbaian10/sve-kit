@@ -602,33 +602,63 @@
   },
   {
     "name": "variant-unapproved",
-    "target": "images/detail/global/global/band/55",
+    "target": "images/detail/home_set/set%3Aa/band/1",
     "path": [
       "tables",
-      "image_asset",
+      "printing_image",
       0,
       "rows",
       0,
-      2
+      3
     ],
     "value": "pending",
     "rehash": true,
-    "error": "approved available image"
+    "error": "approved available image",
+    "setup": [
+      {
+        "target": "images/detail/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "printing_image",
+          0,
+          "rows",
+          0,
+          3
+        ],
+        "value": "pending",
+        "rehash": true
+      }
+    ]
   },
   {
     "name": "variant-unavailable",
-    "target": "images/detail/global/global/band/55",
+    "target": "images/detail/home_set/set%3Aa/band/1",
     "path": [
       "tables",
-      "image_asset",
+      "printing_image",
       0,
       "rows",
       0,
-      6
+      4
     ],
     "value": "unfetched",
     "rehash": true,
-    "error": "approved available image"
+    "error": "approved available image",
+    "setup": [
+      {
+        "target": "images/detail/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "printing_image",
+          0,
+          "rows",
+          0,
+          4
+        ],
+        "value": "unfetched",
+        "rehash": true
+      }
+    ]
   },
   {
     "name": "published-hour-25",

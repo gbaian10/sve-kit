@@ -51,9 +51,9 @@ def logical() -> tuple[Projection, Ownership]:
             projection,
             tables=projection.tables
             | {
-                "image_asset": [
+                "printing_image": [
                     row | {"availability": "unfetched", "publication_state": "pending"}
-                    for row in projection.tables["image_asset"]
+                    for row in projection.tables["printing_image"]
                 ],
                 "image_variant": [],
             },

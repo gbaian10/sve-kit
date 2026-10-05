@@ -8551,53 +8551,6 @@
             "scalar": "ID"
           }
         },
-        "origin": {
-          "schema": {
-            "enum": [
-              "official",
-              "third_party"
-            ]
-          },
-          "descriptor": {
-            "enum": [
-              "official",
-              "third_party"
-            ]
-          }
-        },
-        "publication_state": {
-          "schema": {
-            "enum": [
-              "pending",
-              "approved",
-              "withdrawn"
-            ]
-          },
-          "descriptor": {
-            "enum": [
-              "pending",
-              "approved",
-              "withdrawn"
-            ]
-          }
-        },
-        "withdrawal_reason": {
-          "schema": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/Text"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "descriptor": {
-            "nullable": {
-              "scalar": "Text"
-            }
-          }
-        },
         "source_src_raw": {
           "schema": {
             "$ref": "#/$defs/Text"
@@ -8612,22 +8565,6 @@
           },
           "descriptor": {
             "scalar": "URL"
-          }
-        },
-        "availability": {
-          "schema": {
-            "enum": [
-              "available",
-              "missing",
-              "unfetched"
-            ]
-          },
-          "descriptor": {
-            "enum": [
-              "available",
-              "missing",
-              "unfetched"
-            ]
           }
         },
         "width": {
@@ -8685,96 +8622,6 @@
       "constraints": {
         "x-primary-key": [
           "id"
-        ],
-        "allOf": [
-          {
-            "if": {
-              "prefixItems": [
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {
-                  "const": "available"
-                },
-                {},
-                {},
-                {}
-              ]
-            },
-            "then": {
-              "prefixItems": [
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {
-                  "$ref": "#/$defs/Positive"
-                },
-                {
-                  "$ref": "#/$defs/Positive"
-                },
-                {
-                  "$ref": "#/$defs/Code"
-                }
-              ]
-            }
-          },
-          {
-            "if": {
-              "prefixItems": [
-                {},
-                {},
-                {
-                  "const": "withdrawn"
-                },
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {}
-              ]
-            },
-            "then": {
-              "prefixItems": [
-                {},
-                {},
-                {},
-                {
-                  "$ref": "#/$defs/Text"
-                },
-                {},
-                {},
-                {},
-                {},
-                {},
-                {}
-              ]
-            },
-            "else": {
-              "prefixItems": [
-                {},
-                {},
-                {},
-                {
-                  "type": "null"
-                },
-                {},
-                {},
-                {},
-                {},
-                {},
-                {}
-              ]
-            }
-          }
         ]
       }
     },
@@ -8808,15 +8655,13 @@
           "schema": {
             "enum": [
               "pending",
-              "approved",
-              "withdrawn"
+              "approved"
             ]
           },
           "descriptor": {
             "enum": [
               "pending",
-              "approved",
-              "withdrawn"
+              "approved"
             ]
           }
         },
@@ -8834,23 +8679,6 @@
               "missing",
               "unfetched"
             ]
-          }
-        },
-        "withdrawal_reason": {
-          "schema": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/Text"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "descriptor": {
-            "nullable": {
-              "scalar": "Text"
-            }
           }
         },
         "card_version": {
@@ -10500,22 +10328,10 @@
         "id": {
           "from": "image_asset"
         },
-        "origin": {
-          "from": "image_asset"
-        },
-        "publication_state": {
-          "from": "image_asset"
-        },
-        "withdrawal_reason": {
-          "from": "image_asset"
-        },
         "source_src_raw": {
           "from": "image_asset"
         },
         "source_url": {
-          "from": "image_asset"
-        },
-        "availability": {
           "from": "image_asset"
         },
         "width": {
@@ -10528,98 +10344,7 @@
           "from": "image_asset"
         }
       },
-      "constraints": {
-        "allOf": [
-          {
-            "if": {
-              "prefixItems": [
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {
-                  "const": "available"
-                },
-                {},
-                {},
-                {}
-              ]
-            },
-            "then": {
-              "prefixItems": [
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {
-                  "$ref": "#/$defs/Positive"
-                },
-                {
-                  "$ref": "#/$defs/Positive"
-                },
-                {
-                  "$ref": "#/$defs/Code"
-                }
-              ]
-            }
-          },
-          {
-            "if": {
-              "prefixItems": [
-                {},
-                {},
-                {
-                  "const": "withdrawn"
-                },
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {}
-              ]
-            },
-            "then": {
-              "prefixItems": [
-                {},
-                {},
-                {},
-                {
-                  "$ref": "#/$defs/Text"
-                },
-                {},
-                {},
-                {},
-                {},
-                {},
-                {}
-              ]
-            },
-            "else": {
-              "prefixItems": [
-                {},
-                {},
-                {},
-                {
-                  "type": "null"
-                },
-                {},
-                {},
-                {},
-                {},
-                {},
-                {}
-              ]
-            }
-          }
-        ]
-      }
+      "constraints": {}
     },
     "printing_image_detail": {
       "fields": {
@@ -10636,9 +10361,6 @@
           "from": "printing_image"
         },
         "availability": {
-          "from": "printing_image"
-        },
-        "withdrawal_reason": {
           "from": "printing_image"
         },
         "card_version": {

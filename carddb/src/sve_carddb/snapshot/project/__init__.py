@@ -138,12 +138,17 @@ def _rulings(view: dict[str, list[Record]], decisions: Decisions) -> None:
 
 
 def _images(source: Source, view: dict[str, list[Record]]) -> None:
+    assets = source.index("image_asset", "id,mime,publication_state,availability")
     for asset in view["image_asset"]:
-        mime = source.index("image_asset", "id,mime")[string(asset["id"])]["mime"]
+        mime = assets[string(asset["id"])]["mime"]
         asset["format"] = None if mime is None else string(mime).removeprefix("image/")
+    for row in view["printing_image"]:
+        state = assets[string(row["image_id"])]
+        row["publication_state"] = state["publication_state"]
+        row["availability"] = state["availability"]
     allowed = {
-        row["id"]
-        for row in view["image_asset"]
+        row["image_id"]
+        for row in view["printing_image"]
         if row["publication_state"] == "approved" and row["availability"] == "available"
     }
     view["image_variant"] = [

@@ -68,7 +68,6 @@ def source(data: bytes, *, image_id: str = "img:jp:1") -> ImageSource:
         source_sha256=hashlib.sha256(data).hexdigest(),
         source_src_raw=RAW_SRC,
         asset_kind="sve_card",
-        origin="official",
         publication_state="approved",
         availability="available",
     )

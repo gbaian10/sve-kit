@@ -1,0 +1,100 @@
+{
+  "format_version": "2.0.0",
+  "types": {
+    "ImageDisplayVariant": {
+      "columns": [
+        "size_key",
+        "width",
+        "height"
+      ],
+      "items": [
+        {
+          "enum": [
+            "card_s",
+            "card_m",
+            "card_l",
+            "art_s",
+            "art_m"
+          ]
+        },
+        {
+          "scalar": "UInt"
+        },
+        {
+          "scalar": "UInt"
+        }
+      ]
+    }
+  },
+  "tables": {
+    "printing_image": [
+      {
+        "owner": {
+          "kind": "home_set",
+          "id": "set:a"
+        },
+        "bucket": 29,
+        "partition": "detail",
+        "base": null,
+        "columns": [
+          "printing_id",
+          "face_id",
+          "image_id",
+          "publication_state",
+          "availability",
+          "card_version",
+          "art_version",
+          "variants"
+        ],
+        "rows": [
+          [
+            "p:a",
+            "f:a",
+            "img:a",
+            "approved",
+            "available",
+            7,
+            11,
+            [
+              [
+                "art_m",
+                384,
+                288
+              ],
+              [
+                "art_s",
+                160,
+                120
+              ],
+              [
+                "card_l",
+                459,
+                641
+              ],
+              [
+                "card_m",
+                320,
+                447
+              ],
+              [
+                "card_s",
+                128,
+                179
+              ]
+            ]
+          ],
+          [
+            "p:a",
+            "f:b",
+            "img:m",
+            "pending",
+            "missing",
+            null,
+            null,
+            []
+          ]
+        ]
+      }
+    ]
+  }
+}

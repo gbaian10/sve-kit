@@ -78,7 +78,6 @@ def test_schema_regeneration_and_frozen_column_boundaries() -> None:
         "image_id",
         "publication_state",
         "availability",
-        "withdrawal_reason",
         "card_version",
         "art_version",
         "variants",
@@ -199,25 +198,18 @@ def test_text_change_keeps_versions_and_same_payloads(images: PublicImages) -> N
     assert changed
 
 
-@pytest.mark.parametrize(
-    "missing", ["missing", "unfetched", "pending", "withdrawn", "removed"]
-)
+@pytest.mark.parametrize("missing", ["missing", "unfetched", "pending", "removed"])
 def test_restoration_uses_new_event_revision(
     images: PublicImages, missing: str
 ) -> None:
     first = prepare_media(images.projection, images.library, revision=7)
     absent = deepcopy(images.projection)
     absent.tables["image_variant"] = []
+    field = "publication_state" if missing == "pending" else "availability"
     if missing == "removed":
         absent.tables["printing_image"] = []
-    elif missing in {"pending", "withdrawn"}:
-        absent.tables["image_asset"][0]["publication_state"] = missing
-        if missing == "withdrawn":
-            absent.tables["image_asset"][0]["withdrawal_reason"] = (
-                "Synthetic withdrawal"
-            )
-    else:
-        absent.tables["image_asset"][0]["availability"] = missing
+    for row in absent.tables["printing_image"]:
+        row[field] = missing
     second = prepare_media(absent, None, revision=8, previous=first.state)
     for row in second.projection.tables["printing_image"]:
         assert row["card_version"] is None
@@ -283,7 +275,6 @@ def test_binding_and_a_b_a_never_reuse_token(
 @pytest.mark.parametrize(
     ("change", "message"),
     [
-        ("status", "Media status differs from source image"),
         ("version", "Available media requires both image versions"),
         ("missing_size", "Available media requires sorted five display variants"),
         ("duplicate_size", "Available media requires sorted five display variants"),
@@ -296,9 +287,7 @@ def test_independent_media_counterexamples(
 ) -> None:
     plan = prepare_media(images.projection, images.library, revision=7)
     row = plan.projection.tables["printing_image"][0]
-    if change == "status":
-        row["availability"] = "missing"
-    elif change == "version":
+    if change == "version":
         row["card_version"] = None
     elif change == "missing_size":
         array(row["variants"]).pop()
@@ -497,14 +486,11 @@ def test_two_printings_and_permanent_back_ordinal_share_source_not_target(
     # Unknown back text has no adopted observation; the image uses permanent ordinal 7.
     back_printing["observations"] = []
     array(another["faces"]).append(back_printing)
+    media = projection.tables["printing_image"][0]
     projection.tables["printing_image"].extend(
         [
-            {"printing_id": "printing:another", "face_id": "face", "image_id": "image"},
-            {
-                "printing_id": "printing:another",
-                "face_id": "face:back",
-                "image_id": "image",
-            },
+            media | {"printing_id": "printing:another", "face_id": "face"},
+            media | {"printing_id": "printing:another", "face_id": "face:back"},
         ]
     )
     plan = prepare_media(projection, images.library, revision=7)
@@ -558,8 +544,6 @@ def test_media_uses_printing_home_not_card_home(images: PublicImages) -> None:
 @pytest.mark.parametrize("field", ["card_version", "art_version", "variants"])
 def test_unavailable_media_never_offers_url(images: PublicImages, field: str) -> None:
     plan = prepare_media(deepcopy(images.projection), images.library, revision=7)
-    for row in plan.projection.tables["image_asset"]:
-        row["availability"] = "missing"
     plan.projection.tables["image_variant"] = []
     media = plan.projection.tables["printing_image"][0]
     media.update(

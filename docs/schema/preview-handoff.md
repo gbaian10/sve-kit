@@ -133,12 +133,8 @@ M3 畫面驗收與其餘正式閘門應分別確認，不因成功載入 preview
 猜測正反面。`printing_image` 以版次／面指向 `image_asset`，`image_variant` 提供每個
 尺寸的 WebP 格式／實際尺寸／bytes；公開 path 由永久 int_id、face ordinal 與 size_key 組成；images 分片描述與 config 的尺寸契約一致。
 
-`unfetched`／`missing` 只有 metadata，沒有變體或假路徑；`pending`／`withdrawn` 亦無
-公開變體。第三方 approved 圖片須通過 DB 的逐圖片 confirmed 審核與來源證據閘門；
-writer 必須拿到該圖片的已驗證審核集合，不能拿另一張的審核替代。官方來源的核可
-不等同於第三方審核，且 preview 不能繞過既有資料完整性規則。
-此集合由 builder 在 `project()` 完成 DB 驗證後取得；writer 只核對集合成員，
-不會獨立查核私人審核決定或來源證據。
+`unfetched`／`missing` 只有 metadata，沒有變體或假路徑；`pending` 亦無公開變體。
+目前只產生官方圖，preview 不能繞過既有資料完整性規則。
 
 M3 可直接選 `purpose=art` 的 `art_s`／`art_m`（上限 160×120／384×288，實際維持
 4:3，配方為 integer-4x3-v2），依 producer 的 media 版本組出固定 ID URL，無須再套用前端裁切公式。

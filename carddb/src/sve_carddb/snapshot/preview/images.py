@@ -20,21 +20,15 @@ if TYPE_CHECKING:
 PATH = re.compile(r"images/sha256/([0-9a-f]{2})/([0-9a-f]{64})\.webp\Z")
 
 
-def _members(
-    tables: dict[str, list[Record]], confirmed_images: frozenset[str]
-) -> dict[str, Record]:
-    """Require the caller's DB-verified review set, not an independent review audit."""
-    assets = {string(row["id"]): row for row in tables["image_asset"]}
-    require_confirmed(tables, confirmed_images)
-    bound = {string(row["image_id"]) for row in tables["printing_image"]}
+def _members(tables: dict[str, list[Record]]) -> dict[str, Record]:
+    active = {
+        string(row["image_id"])
+        for row in tables["printing_image"]
+        if row["availability"] == "available" and row["publication_state"] == "approved"
+    }
     members: dict[str, Record] = {}
     for variant in tables["image_variant"]:
-        asset = assets[string(variant["image_id"])]
-        if (
-            variant["image_id"] not in bound
-            or asset["availability"] != "available"
-            or asset["publication_state"] != "approved"
-        ):
+        if string(variant["image_id"]) not in active:
             raise ValueError("Only approved available printing images can be published")
         path = string(variant["path"])
         match = PATH.fullmatch(path)
@@ -46,13 +40,11 @@ def _members(
         ):
             raise ValueError("Shared image blob metadata disagrees")
         members[path] = variant
-    _require_sizes(assets, bound, tables["image_variant"])
+    _require_sizes(active, tables["image_variant"])
     return members
 
 
-def _require_sizes(
-    assets: dict[str, Record], bound: set[str], variants: list[Record]
-) -> None:
+def _require_sizes(active: set[str], variants: list[Record]) -> None:
     """Text-only or unapproved metadata must not claim a complete image result."""
     sizes: dict[str, set[str]] = {}
     for variant in variants:
@@ -60,23 +52,16 @@ def _require_sizes(
             string(variant["size_key"])
         )
     expected = {size.key for size in SIZES}
-    for identifier in bound:
-        asset = assets[identifier]
-        if (
-            asset["availability"] == "available"
-            and asset["publication_state"] == "approved"
-            and sizes.get(identifier, set()) != expected
-        ):
+    for identifier in active:
+        if sizes.get(identifier, set()) != expected:
             raise ValueError("Available preview printing image requires all five sizes")
 
 
 def image_blobs(
-    tables: dict[str, list[Record]],
-    source: Path | None,
-    confirmed_images: frozenset[str] = frozenset(),
+    tables: dict[str, list[Record]], source: Path | None
 ) -> Iterator[tuple[str, bytes]]:
-    """Check audit gates and stream deduplicated bytes without retaining the library."""
-    members = _members(tables, confirmed_images)
+    """Check public selection and stream deduplicated bytes without retaining the library."""
+    members = _members(tables)
     if members and source is None:
         raise ValueError("Preview images require an explicit asset source")
     if source is None:
@@ -97,19 +82,3 @@ def image_blobs(
                 raise ValueError("Preview image decoded format or dimensions mismatch")
             decoded.load()
         yield path, raw
-
-
-def require_confirmed(
-    tables: dict[str, list[Record]], confirmed_images: frozenset[str]
-) -> None:
-    """Keep the builder's DB-verified third-party review set at the output boundary."""
-    assets = {string(row["id"]): row for row in tables["image_asset"]}
-    for identifier, asset in assets.items():
-        if (
-            asset["origin"] == "third_party"
-            and asset["publication_state"] == "approved"
-            and identifier not in confirmed_images
-        ):
-            raise ValueError(
-                "Third-party preview image needs individual confirmed review"
-            )

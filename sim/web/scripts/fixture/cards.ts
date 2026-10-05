@@ -41,7 +41,7 @@ export interface Printing {
   readonly product: string
   readonly stamp?: string
   /** Image state for the front face; back faces reuse it. */
-  readonly image?: "approved" | "pending" | "withdrawn" | "missing"
+  readonly image?: "approved" | "pending" | "missing"
 }
 
 interface Qa {
@@ -642,7 +642,7 @@ export const CARDS: readonly Card[] = [
         },
       },
     ],
-    printings: [bp("bp01-040", "jp", 40, { image: "withdrawn" })],
+    printings: [bp("bp01-040", "jp", 40, { image: "pending" })],
     related: [{ to: "c:token-001", relation: "produces_token" }],
     keywords: [{ code: "lastword", relation: "has" }],
     coverage: "none",

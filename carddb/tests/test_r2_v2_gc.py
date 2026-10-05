@@ -87,7 +87,7 @@ def test_namespace_limits_candidates(
         gc.collect(store, frozenset({"snapshots/"}), execute=False)
 
 
-def test_previous_images_are_collected_when_current_withdraws_them(
+def test_previous_images_are_collected_when_current_drops_them(
     images: PublicImages,
     roots: Roots,
     remote: tuple[R2Store, ServerState, Loopback],
@@ -97,7 +97,8 @@ def test_previous_images_are_collected_when_current_withdraws_them(
     previous = load_export(roots.preview)
     upload(store, previous, None)
     absent = deepcopy(images.projection)
-    absent.tables["image_asset"][0]["availability"] = "missing"
+    for row in absent.tables["printing_image"]:
+        row["availability"] = "missing"
     absent.tables["image_variant"] = []
     export(images, roots, step=1, projection=absent)
     current = load_export(roots.preview)
