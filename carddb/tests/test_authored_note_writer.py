@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from sve_carddb.products.models import Shard
 from sve_carddb.registry.storage import encode, read_yaml
+from sve_carddb.registry.yaml_reader import parse_yaml
 from sve_carddb.template_parameter_rules.current import Rule, Rules, parse
 from sve_carddb.template_parameters.rule_candidates import BY_ID
 
@@ -56,6 +57,40 @@ def test_product_decision_round_trip_omits_only_empty_note(
 class RequiredNote(BaseModel):
     note: str
     enabled: bool = False
+
+
+class NullableValues(BaseModel):
+    required: str | None
+    optional: str | None = None
+
+
+def test_required_null_and_optional_value_round_trip() -> None:
+    original = NullableValues(required=None, optional="Keep this value")
+    raw = encode(original)
+    assert b"required:" in raw
+    assert b"optional: Keep this value" in raw
+    assert NullableValues.model_validate_json(json.dumps(parse_yaml(raw))) == original
+
+    empty = NullableValues(required=None)
+    raw = encode(empty)
+    assert b"required:" in raw
+    assert b"optional:" not in raw
+    assert NullableValues.model_validate_json(json.dumps(parse_yaml(raw))) == empty
+
+
+class CollectionDefaults(BaseModel):
+    items: list[str] = []
+    labels: dict[str, str] = {}
+
+
+def test_collection_defaults_remain_serializable() -> None:
+    original = CollectionDefaults()
+    raw = encode(original)
+    assert b"items: []" in raw
+    assert b"labels: {}" in raw
+    assert (
+        CollectionDefaults.model_validate_json(json.dumps(parse_yaml(raw))) == original
+    )
 
 
 def test_required_note_and_other_defaults_are_preserved() -> None:

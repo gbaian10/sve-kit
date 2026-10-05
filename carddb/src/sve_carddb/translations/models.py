@@ -27,8 +27,6 @@ class SourceClaim(RecordData):
             for value in (self.source_work, self.claimed_source)
         ):
             raise ValueError("Source claim text must be nonblank")
-        if not (self.source_work or self.source_urls or self.claimed_source):
-            raise ValueError("Empty source claim must be omitted")
         if self.source_urls != tuple(sorted(set(self.source_urls))):
             raise ValueError("Source claim URLs must be sorted and unique")
         for url in self.source_urls:

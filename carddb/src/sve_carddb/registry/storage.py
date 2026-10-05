@@ -125,9 +125,12 @@ def _empty_defaults(value: object) -> OmittedFields:
         omitted: dict[str, bool | OmittedFields] = {}
         for name, info in type(value).model_fields.items():
             item = getattr(value, name)
+            empty_default = info.default is None or (
+                isinstance(info.default, str) and not info.default
+            )
             if (
                 not info.is_required()
-                and info.default in {None, ""}
+                and empty_default
                 and type(item) is type(info.default)
                 and item == info.default
             ):

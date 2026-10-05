@@ -94,11 +94,6 @@ def test_source_claim_allows_omitted_attribution() -> None:
     assert list(result.source_urls) == data["source_urls"]
 
 
-def test_source_claim_rejects_empty() -> None:
-    with pytest.raises(ValueError, match=r"^Empty source claim must be omitted$"):
-        checked(SourceClaim, {"source_work": None, "source_urls": []})
-
-
 @pytest.mark.parametrize("field", ["source_work", "claimed_source"])
 def test_source_claim_nonblank(field: str) -> None:
     data = claim()
