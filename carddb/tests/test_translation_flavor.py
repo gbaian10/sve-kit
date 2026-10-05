@@ -33,6 +33,7 @@ if TYPE_CHECKING:
 H1 = "sha256:" + "1" * 64
 H2 = "sha256:" + "2" * 64
 FLAVOR_UNIT = "t:ja:" + digest("合成風味".encode())[7:23]
+EN_FLAVOR_UNIT = "t:en:" + digest(b"Synthetic flavor")[7:23]
 
 
 def entry(
@@ -193,7 +194,10 @@ def test_unconfirmed_card_keeps_the_original(template: DatabaseTemplate) -> None
             assert apply(db, ENTRIES).applied == 0
 
 
-def test_translating_non_japanese_text_is_rejected(template: DatabaseTemplate) -> None:
+@pytest.mark.parametrize("entries", [ENTRIES, {}])
+def test_non_japanese_flavor_keeps_the_original(
+    template: DatabaseTemplate, entries: dict[tuple[str, str], Entry]
+) -> None:
     with template.copy() as db:
         with db.transaction():
             db.insert(
@@ -205,8 +209,10 @@ def test_translating_non_japanese_text_is_rejected(template: DatabaseTemplate) -
                 {"id": "english", "lang": "en", "text": "Flavor", "content_hash": H2},
             )
         flavored(db, unit="english")
-        with db.transaction(), pytest.raises(ValueError, match="Japanese text"):
-            apply(db, ENTRIES)
+        with db.transaction():
+            assert apply(db, entries).applied == 0
+        assert db.rows("translation") == ()
+        assert db.rows("translation_use") == ()
 
 
 def flavored_text[**P](
@@ -216,6 +222,28 @@ def flavored_text[**P](
 
     def wrapped(db: Database, /, *args: P.args, **kwargs: P.kwargs) -> InputRecord:
         result = populate(db, *args, **kwargs)
+        english = next(
+            r.values
+            for r in db.rows("printing_face")
+            if db.select(
+                "printing", ("id", "region"), where={"id": r.values["printing_id"]}
+            )[0].values["region"]
+            == "en"
+        )
+        db.insert(
+            "text_unit",
+            {
+                "id": EN_FLAVOR_UNIT,
+                "lang": "en",
+                "text": "Synthetic flavor",
+                "content_hash": digest(b"Synthetic flavor"),
+            },
+        )
+        db.update(
+            "printing_face",
+            {"printing_id": english["printing_id"], "face_id": english["face_id"]},
+            {"flavor_unit_id": EN_FLAVOR_UNIT, "printed_text_state": "verified"},
+        )
         row = next(
             r.values
             for r in db.rows("printing_face")

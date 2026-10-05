@@ -103,8 +103,10 @@ def apply(db: Database, entries: dict[Key, Entry]) -> Report:
         ):
             continue
         source = db.select("text_unit", db.columns("text_unit"), where={"id": unit})
-        if len(source) != 1 or source[0].values["lang"] != "ja":
-            raise ValueError("Flavor owner must carry Japanese text")
+        if len(source) != 1:
+            raise ValueError("Flavor source text unit is absent")
+        if source[0].values["lang"] != "ja":
+            continue
         for lang in LANGS:
             key = (str(source[0].values["content_hash"]), lang)
             entry = entries.get(key)
