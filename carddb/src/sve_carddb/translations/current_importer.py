@@ -5,11 +5,7 @@ from typing import TYPE_CHECKING
 from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.build_inputs import input_record, insert_raw_sources
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
-from sve_carddb.translations.current_models import (
-    ChoiceRecord,
-    TermRecord,
-    VocabularyRecord,
-)
+from sve_carddb.translations.current_models import ChoiceRecord, TermRecord
 from sve_carddb.translations.importer import validate_choice
 from sve_carddb.translations.sources import Sources
 
@@ -80,12 +76,10 @@ def populate(  # ruff: ignore[complex-structure,too-many-branches] -- source val
             raise ValueError("Glossary concept requires exact Japanese source")
         originals[record.data.id] = text
     for record in records:
-        if isinstance(record, (ChoiceRecord, VocabularyRecord)):
+        if isinstance(record, ChoiceRecord):
             values[record.record_key] = validate_choice(
                 record,
-                original=originals.get(record.data.term_id)
-                if isinstance(record, ChoiceRecord)
-                else None,
+                original=originals.get(record.data.term_id),
                 sources=sources,
                 db=db,
             )
@@ -143,10 +137,6 @@ def populate(  # ruff: ignore[complex-structure,too-many-branches] -- source val
                         "low_confidence": record.low_confidence,
                     },
                 )
-        elif isinstance(record, VocabularyRecord):
-            raise TypeError(
-                "Vocabulary label projection belongs to catalog composition"
-            )
     result = input_record(build, sources.uses)
     result.verify(db, build, tuple(sources.uses), complete=False)
     return result

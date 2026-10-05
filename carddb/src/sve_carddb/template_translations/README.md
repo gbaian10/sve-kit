@@ -50,14 +50,6 @@ belong to the current program, not an approval/hash chain. Disabled rules leave
 positions pending. This does not relax unrelated identity, correction or registry
 adoption rules.
 
-Flavor uses the independent `flavor-exact-v1` normalizer: one whole field, code-point
-span, zero slots, no trimming, NFKC or N/X replacement. Unknown, exact empty and
-fixed-White_Space-only fields remain distinct. `current_owners.Owners` verifies each
-paragraph against its own confirmed printing and physical face observation, never
-another card's equal paragraph or the current effect. Missing owners stay pending.
-Final flavor display uses LF and rejects outer or trailing line whitespace;
-invalid bytes are not silently normalized.
-
 `text.parse()` retains the finite placeholder language. Parameters are exactly
 `{{slot_name}}`; braces and backslashes in literal text must be escaped. Unknown,
 unused or malformed slots fail. No expressions or global N/X substitutions exist.

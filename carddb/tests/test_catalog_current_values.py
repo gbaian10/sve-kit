@@ -50,6 +50,75 @@ def test_current_catalog_has_provenance_without_adoption_decisions(
             assert all(r.values["low_confidence"] is False for r in db.rows(table))
 
 
+def vocabulary_with_label(
+    base: Case, tmp_path: Path, label: dict[str, JsonValue]
+) -> Case:
+    root = tmp_path / "repository"
+    shutil.copytree(base.repository, root)
+    case = replace(base, repository=root, root=root / "authored")
+    path = "catalog-adoptions/vocabulary/shared/001.yaml"
+    raw = object_value(read_yaml(case.root / path))
+    row = next(
+        object_value(r)
+        for r in array(raw["records"])
+        if object_value(r)["kind"] == "vocabulary_adoption"
+    )
+    object_value(object_value(row["data"])["value"])["translations"] = [label]
+    (case.root / path).write_bytes(canonical(raw))
+    index_path = case.root / "catalog-adoptions/index.yaml"
+    index = object_value(read_yaml(index_path))
+    object_value(index["includes"])[path] = digest(canonical(raw))
+    index_path.write_bytes(canonical(index))
+    return replace(case, revision=commit(root))
+
+
+def test_vocabulary_label_translation_is_a_use_of_the_japanese_label(
+    current_baseline: Case, tmp_path: Path
+) -> None:
+    case = vocabulary_with_label(
+        current_baseline,
+        tmp_path,
+        {
+            "lang": "zh-Hant",
+            "text": "從者",
+            "origin": "machine",
+            "low_confidence": True,
+        },
+    )
+    schema = compile_current_build(("t0", "translation_evidence", "translation_names"))
+    with create_database(schema) as db:
+        with db.transaction():
+            _populate_adoptions(db, case.inputs(), build=case.build(), stores={})
+        vocabulary = db.rows("vocabulary")[0].values
+        use = db.rows("translation_use")[0].values
+        assert (use["vocabulary_kind"], use["vocabulary_code"], use["field"]) == (
+            vocabulary["kind"],
+            vocabulary["code"],
+            "label",
+        )
+        context = db.rows("translation_context")[0].values
+        assert context["source_unit_id"] == vocabulary["label_unit_id"]
+        translation = db.rows("translation")[0].values
+        assert translation["text"] == "從者"
+        assert (translation["origin"], translation["low_confidence"]) == (
+            "machine",
+            True,
+        )
+
+
+@pytest.mark.parametrize("lang", ["ja"])
+def test_label_translation_cannot_replace_the_japanese_base(
+    current_baseline: Case, tmp_path: Path, lang: str
+) -> None:
+    case = vocabulary_with_label(
+        current_baseline,
+        tmp_path,
+        {"lang": lang, "text": "x", "origin": "machine", "low_confidence": False},
+    )
+    with pytest.raises(ValueError, match="Invalid"):
+        load_adoptions(case.root, entry="catalog-adoptions").current_records()
+
+
 def test_current_fallback_is_still_checked(
     current_baseline: Case, tmp_path: Path
 ) -> None:

@@ -161,14 +161,6 @@ def populate_field(  # ruff: ignore[too-many-arguments] -- source, physical owne
     )
     if not ref.locator.endswith(ending) or ref.text_hash != digest(text.encode()):
         raise ValueError("Template use must match its exact owner field and source")
-    if field == "flavor" and not any(
-        m.entry.source_ref == ref
-        and m.owner is not None
-        and m.owner.printing_id == owner.identifier
-        and m.owner.face_id == owner.face_id
-        for m in validated.members
-    ):
-        raise ValueError("Flavor template use requires its own verified printing owner")
     context_id = (
         "ctx:"
         + digest(
@@ -222,13 +214,10 @@ def _source(  # ruff: ignore[complex-structure] -- each physical owner branch re
 ) -> tuple[str, str] | None:
     if (field == "section") != (ordinal is not None) or field not in {
         "effect",
-        "flavor",
         "section",
     }:
         raise ValueError("Unsupported template owner field or ordinal")
     if owner.kind == "face_revision":
-        if field == "flavor":
-            raise ValueError("Face revision cannot own flavor text")
         row = _row(db, "face_revision", owner.identifier)
         card = _row(db, "face", str(row["face_id"]))["card_id"]
         unit = row["effect_unit_id"]
@@ -253,11 +242,7 @@ def _source(  # ruff: ignore[complex-structure] -- each physical owner branch re
         if row["printed_text_state"] in {"unknown", "omitted"}:
             return None
         card = printing["card_id"]
-        unit = (
-            row["flavor_unit_id"]
-            if field == "flavor"
-            else row["printed_effect_unit_id"]
-        )
+        unit = row["printed_effect_unit_id"]
         table = "printing_text_section"
         query = {
             "printing_id": owner.identifier,

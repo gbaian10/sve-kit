@@ -62,9 +62,10 @@ from sve_carddb.translations.current_models import (
     ChoiceRecord,
     ConceptRecord,
     TermRecord,
-    VocabularyRecord,
 )
 from sve_carddb.translations.current_names import prepare as prepare_names
+from sve_carddb.translations.flavor import apply as apply_flavor
+from sve_carddb.translations.flavor import load as load_flavor
 from sve_carddb.translations.models import EffectTerm, SourceValue
 from sve_carddb.translations.sources import CODE_PATH as TRANSLATION_CODE
 from sve_carddb.translations.sources import Sources as TranslationSources
@@ -220,10 +221,7 @@ def _translation_sources(
             )
         elif isinstance(record, ConceptRecord):
             sources.text(record.data.source_ref)
-        elif (
-            isinstance(record, (ChoiceRecord, VocabularyRecord))
-            and record.data.value is not None
-        ):
+        elif isinstance(record, ChoiceRecord) and record.data.value is not None:
             if isinstance(record.data.value, SourceValue):
                 sources.text(record.data.value.source_ref, record.data.value.span)
             for relation in record.data.concept_evidence:
@@ -478,13 +476,14 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             *MINIMUM_CAPABILITIES,
             "en",
             "translation_evidence",
-            *(("translation_names",) if names is not None else ()),
+            "translation_names",
         )
     )
     derived = _derive_adoptions(adoptions, context, stores)
     vocabulary = derived.vocabulary
     configuration |= text_configuration(texts, vocabulary, ())
     context = BuildContext.from_inputs(inputs.revision, dependencies, configuration)
+    flavor = load_flavor(inputs.repo / "authored")
     adoption_uses = (
         *_adoption_uses(adoptions, context, stores),
         *_translation_uses(adoptions, context, stores),
@@ -547,6 +546,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     replay=replay,
                     links=link_result,
                 )
+            flavor_report = apply_flavor(db, flavor)
             link_uses = () if link_result is None else link_result.record.uses
             name_uses = () if name_result is None else name_result.record.uses
             expected = uses_sorted(
@@ -662,6 +662,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             "Web handoff and acceptance",
         ],
     }
+    report["flavor_translations"] = dict[str, JsonValue](flavor_report.payload())
     if name_result is not None:
         report["name_application"] = name_result.report
     if image_report is not None:
@@ -707,6 +708,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     replay=replay,
                     links=replay_links,
                 )
+            apply_flavor(target, flavor)
             complete = input_record(
                 context,
                 (

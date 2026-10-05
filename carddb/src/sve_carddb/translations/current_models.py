@@ -82,15 +82,6 @@ class ChoiceData(RecordData):
     source_claim: SourceClaim | None = None
 
 
-class VocabularyData(RecordData):
-    vocabulary_kind: Literal["class", "type"]
-    vocabulary_code: Text
-    lang: Lang
-    value: Annotated[AuthoredValue | SourceValue, Field(discriminator="kind")] | None
-    concept_evidence: tuple[ConceptEvidence, ...]
-    source_claim: SourceClaim | None = None
-
-
 class EmphasisData(RecordData):
     term_id: Text
     value: bool | None
@@ -148,11 +139,6 @@ class ChoiceRecord(Quality):
     data: ChoiceData
 
 
-class VocabularyRecord(Quality):
-    kind: Literal["vocabulary_choice"]
-    data: VocabularyData
-
-
 class EmphasisRecord(Quality):
     kind: Literal["glossary_emphasis_choice"]
     data: EmphasisData
@@ -169,12 +155,7 @@ class ConceptRecord(Quality):
 
 
 Record = Annotated[
-    TermRecord
-    | ChoiceRecord
-    | VocabularyRecord
-    | EmphasisRecord
-    | AssignmentRecord
-    | ConceptRecord,
+    TermRecord | ChoiceRecord | EmphasisRecord | AssignmentRecord | ConceptRecord,
     Field(discriminator="kind"),
 ]
 
@@ -192,13 +173,6 @@ def key(record: Record) -> str:
         fields = [record.kind, record.data.id]
     elif isinstance(record, ChoiceRecord):
         fields = [record.kind, record.data.term_id, record.data.lang]
-    elif isinstance(record, VocabularyRecord):
-        fields = [
-            record.kind,
-            record.data.vocabulary_kind,
-            record.data.vocabulary_code,
-            record.data.lang,
-        ]
     elif isinstance(record, EmphasisRecord):
         fields = [record.kind, record.data.term_id]
     elif isinstance(record, AssignmentRecord):

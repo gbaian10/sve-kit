@@ -13,7 +13,6 @@ from sve_carddb.build_db.model import (
 )
 from sve_carddb.snapshot.values import canonical, parse
 from sve_carddb.template_parameters.models import Schema, SourceSpan
-from sve_carddb.template_translations.flavor_models import FlavorSpan
 
 QUALITY = (
     Column("authored_source_id", Kind.ID),
@@ -121,7 +120,5 @@ def schemas() -> dict[str, JsonValue]:
     return {
         "TemplateParameters": parse(canonical(Schema.model_json_schema())),
         "TemplateValues": {"type": "object"},
-        "TemplateSpan": parse(
-            canonical(TypeAdapter(SourceSpan | FlavorSpan).json_schema())
-        ),
+        "TemplateSpan": parse(canonical(TypeAdapter(SourceSpan).json_schema())),
     }

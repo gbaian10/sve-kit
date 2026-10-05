@@ -519,9 +519,7 @@ def changed_build(frozen: Fixture, config: dict[str, JsonValue]) -> BuildContext
     )
 
 
-@pytest.mark.parametrize(
-    "fault", ["revision", "bytes", "configuration", "japanese", "vocabulary"]
-)
+@pytest.mark.parametrize("fault", ["revision", "bytes", "configuration", "japanese"])
 def test_immutable_authored_and_atomic_projection(
     frozen: Fixture, importer_template: DatabaseTemplate, tmp_path: Path, fault: str
 ) -> None:
@@ -530,7 +528,6 @@ def test_immutable_authored_and_atomic_projection(
     inputs = Inputs(repository / "authored", repository, frozen.authored)
     config = object_value(parse(frozen.build.configuration.encode()))
     message = ""
-    exception: type[Exception] = ValueError
     if fault == "revision":
         inputs = replace(inputs, authored_revision=frozen.authored[:7])
         message = "Translation authored revision must be a full Git SHA"
@@ -546,32 +543,19 @@ def test_immutable_authored_and_atomic_projection(
         shards = {
             name: object_value(parse(content)) for name, _, content in snapshot.shards
         }
-        if fault == "japanese":
-            name = "translations/glossary/concepts/001.yaml"
-            record = object_value(array(shards[name]["records"])[0])
-            object_value(record["data"])["source_ref"] = frozen.refs[1].model_dump(
-                mode="json"
-            )
-            shards[name] = envelope([record])
-            message = "Glossary concept requires exact Japanese source"
-        else:
-            record = choice()
-            record["kind"] = "vocabulary_choice"
-            record["record_key"] = canonical(
-                ["vocabulary_choice", "class", "elf", "zh-Hant"]
-            ).decode()
-            data = object_value(record["data"])
-            data.pop("term_id")
-            data.update({"vocabulary_kind": "class", "vocabulary_code": "elf"})
-            shards["translations/glossary/vocabulary/001.yaml"] = envelope([record])
-            exception = TypeError
-            message = "Vocabulary label projection belongs to catalog composition"
+        name = "translations/glossary/concepts/001.yaml"
+        record = object_value(array(shards[name]["records"])[0])
+        object_value(record["data"])["source_ref"] = frozen.refs[1].model_dump(
+            mode="json"
+        )
+        shards[name] = envelope([record])
+        message = "Glossary concept requires exact Japanese source"
         write(repository / "authored", shards)
         inputs = replace(inputs, authored_revision=commit(repository))
         config.update(inputs.configuration())
     with importer_template.copy() as db:
         before = {name: db.rows(name) for name in db._tables}
-        with pytest.raises(exception, match="^" + message + "$"):
+        with pytest.raises(ValueError, match="^" + message + "$"):
             import_glossary(
                 db,
                 inputs,

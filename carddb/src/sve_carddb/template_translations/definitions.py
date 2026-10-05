@@ -4,9 +4,7 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_parameters.analysis import VERSION_PARAMETERS
-from sve_carddb.template_sources.flavor import VERSION as FLAVOR_VERSION
 from sve_carddb.template_translations.current_models import DefinitionRecord
-from sve_carddb.template_translations.flavor_models import FlavorEntry
 
 if TYPE_CHECKING:
     from sve_carddb.template_translations.members import Reconstructed
@@ -99,12 +97,7 @@ def _definition(
         raise ValueError("Template definition references an absent inventory entry")
     if (
         data.source_lang != "ja"
-        or data.normalizer_version
-        != (
-            FLAVOR_VERSION
-            if isinstance(representative.entry, FlavorEntry)
-            else VERSION_PARAMETERS
-        )
+        or data.normalizer_version != VERSION_PARAMETERS
         or data.semantic_variant != "default"
     ):
         raise ValueError(
