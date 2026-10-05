@@ -231,8 +231,8 @@ In pull requests the repository-wide hooks check only the files the PR changes, 
 commit hook does; the gitleaks scan still covers the PR's whole commit range. Changes to shared
 hook configuration, workflow/action metadata or Python lock inputs trigger a full scan, as do
 schema input deletions or renames. The `full_scan_inputs` list in `.github/workflows/ci.yml`
-includes Markdown, EditorConfig, Git attributes, gitleaks, Taplo and uv settings. Public pushes
-to `main` also check all files; private `main` keeps the cache-only behavior described below.
+includes Markdown, EditorConfig, Git attributes, gitleaks, Taplo and uv settings. Pushes
+to `main` also check all files.
 
 Open **Actions → a workflow run → Summary** for test totals, passed/skipped/failed counts,
 elapsed time and coverage. Python and Web include the slowest 30 cases and counts/time per
@@ -248,34 +248,19 @@ messages, captured output, parameter values and arbitrary Web case descriptions;
 safe file/function location (or Web case ordinal) to reproduce failures locally. A missing
 report is reported explicitly and cannot make a failing test step pass.
 
-Every job uses GitHub-hosted `ubuntu-latest`. While the repository is private, a push to
-`main` does not rerun pytest, Rust tests/coverage or Vitest. **Before merging, the PR must
-be rebased onto the latest `main` and its CI must be green.** This is a merge prerequisite,
-not something the cache-maintenance run verifies: its green `ci-ok` means maintenance
-succeeded, not that checks or tests ran again on that commit. The private repository's ruleset
-does not enforce this prerequisite; the maintainer and merge coordinator must check it.
-When the repository becomes public, `github.event.repository.private` automatically restores
-the usual component tests on pushes to `main`, without another workflow edit.
-
-Private `main` starts only the existing `ci-ok` job. The other six jobs are skipped at job
-level. In `ci-ok`, a guarded local composite action installs Python dependencies and hook
-environments without running hooks, retains existing mypy data without running type checks,
-compiles coverage-instrumented Rust tests with `cargo test --no-run` only on a cache miss,
-and installs Web dependencies. Its final gate rejects failed, cancelled or incomplete
-maintenance. The job keeps the exact required-check name `ci-ok`; on PRs and public `main`
-it still aggregates the usual checks. No second maintenance gate job is started.
+Every job uses GitHub-hosted `ubuntu-latest`. **Before merging, the PR must be rebased onto
+the latest `main` and its CI must be green**; the ruleset does not enforce this prerequisite,
+so the maintainer and merge coordinator must check it.
 
 `CI_PYTEST_WORKERS` is an optional repository variable, default `4`, accepted range `1`–`4`.
 CI never uses `-n auto`; Cargo and Vitest are also limited to four workers. The existing
 jobs are retained rather than adding a job per test step, so summaries do not add per-job
 billing overhead. Concurrency cancels older PR runs; `main` runs are never cancelled by a
 newer push. Dependency caches retain their existing keys and only `main` writes them;
-PRs read the default-branch caches. Private `main` populates uv, pre-commit, mise/Bun and
-Cargo caches under the unchanged component cache keys. Each hook cache is restored,
+PRs read the default-branch caches. Each hook cache is restored,
 prepared and saved separately to avoid mixing pre-commit databases. Existing mypy data
 is carried forward; PR mypy still validates source hashes and checks changed modules,
-so a retained cache is never proof that current types passed. This does not refresh mypy
-data for changed code until a full `main` check runs after publication. Rust target caching remains
+so a retained cache is never proof that current types passed. Rust target caching remains
 enabled: official test data is read at runtime and is not embedded in the compiled tests.
 Private test data, raw reports and output are never cached. Checkout explicitly cleans
 the workspace so test execution does not depend on a previous job's outputs.

@@ -166,69 +166,21 @@ class DirectTestTests(unittest.TestCase):
             == "${{ github.event_name == 'pull_request' }}"
         )
 
-    def test_private_main_only_starts_ci_ok_and_missing_flag_runs_full_path(
-        self,
-    ) -> None:
-        """Evaluate job guards, including absent privacy data, before any runner starts."""
+    def test_jobs_run_on_every_event_and_tests_are_unconditional(self) -> None:
+        """Job guards use change outputs; selected components always execute their test step."""
         workflow = cast(
             "dict[str, object]",
             yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text()),
         )
         jobs = cast("dict[str, dict[str, object]]", workflow["jobs"])
-        for event, private, expected in (
-            ("pull_request", "true", set(jobs)),
-            ("pull_request", "false", set(jobs)),
-            ("push", "true", {"ci-ok"}),
-            ("push", "false", set(jobs)),
-            ("push", "", set(jobs)),
-            ("pull_request", "", set(jobs)),
-        ):
-            selected = {"ci-ok"}
-            for name, job in jobs.items():
-                if name == "ci-ok":
-                    assert job["if"] == "always()"
-                    continue
-                expression = str(job["if"]).removeprefix("${{ ").removesuffix(" }}")
-                expression = (
-                    expression.replace("github.event.repository.private", '"$PRIVATE"')
-                    .replace("github.event_name", '"$EVENT_NAME"')
-                    .replace("github.ref", '"$REF"')
-                    .replace("!(", "! (")
-                )
-                for component in ("python", "rust", "web"):
-                    expression = expression.replace(
-                        f"needs.changes.outputs.{component}", "'true'"
-                    )
-                result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- real guards with fixed synthetic context
-                    [shutil.which("bash") or "bash", "-c", f"[[ {expression} ]]"],
-                    env={
-                        **os.environ,
-                        "EVENT_NAME": event,
-                        "PRIVATE": private,
-                        "REF": "refs/heads/main",
-                    },
-                    capture_output=True,
-                    check=False,
-                )
-                assert result.returncode in {0, 1}
-                if result.returncode == 0:
-                    selected.add(name)
-            with self.subTest(event=event, private=private):
-                assert selected == expected
-        ci_steps = cast("list[dict[str, object]]", jobs["ci-ok"]["steps"])
-        assert ci_steps[0]["if"] == "env.MAIN_MAINTENANCE != 'true'"
-        maintenance = next(
-            step
-            for step in ci_steps
-            if step.get("uses") == "./.github/actions/main-maintenance"
-        )
-        assert maintenance["if"] == "env.MAIN_MAINTENANCE == 'true'"
-        mode = cast("dict[str, str]", jobs["ci-ok"]["env"])["MAIN_MAINTENANCE"]
-        assert (
-            mode
-            == "${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true }}"
-        )
+        assert jobs["ci-ok"]["if"] == "always()"
+        for name in ("changes", "repo", "commit"):
+            assert "if" not in jobs[name], name
         for component in ("python", "rust", "web"):
+            assert (
+                jobs[component]["if"]
+                == "${{ needs.changes.outputs." + component + " == 'true' }}"
+            )
             test = next(
                 step
                 for step in cast("list[dict[str, object]]", jobs[component]["steps"])
@@ -237,7 +189,7 @@ class DirectTestTests(unittest.TestCase):
             assert "if" not in test
 
     def test_cache_keys_targets_and_main_writers_are_preserved(self) -> None:
-        """Main maintenance keeps cache writers and preserves the existing Rust prefix."""
+        """Only main writes caches, and the Rust cache keeps its default prefix."""
         workflow = cast(
             "dict[str, object]",
             yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text()),
@@ -309,57 +261,6 @@ class DirectTestTests(unittest.TestCase):
             assert (root / "target/marker").exists()
             assert not (root / ".testdata").exists()
             assert not (root / "reports").exists()
-
-    def test_rust_cache_warming_compiles_only_and_preserves_failure(self) -> None:
-        """The real cache step uses coverage flags, never executes tests, and fails closed."""
-        action = cast(
-            "dict[str, object]",
-            yaml.safe_load(
-                (ROOT / ".github/actions/main-maintenance/action.yml").read_text()
-            ),
-        )
-        steps = cast(
-            "list[dict[str, object]]",
-            cast("dict[str, object]", action["runs"])["steps"],
-        )
-        step = next(step for step in steps if step.get("id") == "rust-compile")
-        assert step["if"] == "steps.rust-cache.outputs.cache-hit != 'true'"
-        with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
-            tool = root / "cargo"
-            tool.write_text(
-                '#!/bin/bash\nif [[ "$*" == "llvm-cov show-env --sh" ]]; then\n'
-                '  [[ "$FAKE_STATUS" == env-fail ]] && exit 7\n'
-                '  echo "export CARGO_LLVM_COV=1"\n'
-                'elif [[ "$*" == "test --locked --workspace -j 4 --no-run" ]]; then\n'
-                '  [[ "$FAKE_STATUS" == build-fail ]] && exit 8\n'
-                "else\n"
-                '  [[ "$CARGO_LLVM_COV" == 1 && "$*" == "test --locked --workspace -j 4 --target-dir $GITHUB_WORKSPACE/target/llvm-cov-target --no-run" ]] || exit 9\n'
-                '  [[ "$FAKE_STATUS" == build-fail ]] && exit 8\n'
-                "fi\nexit 0\n",
-                encoding="utf-8",
-            )
-            tool.chmod(0o700)
-            for status, expected in (("ok", 0), ("env-fail", 7), ("build-fail", 8)):
-                result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- workflow shell with synthetic cargo
-                    [
-                        shutil.which("bash") or "bash",
-                        "-eu",
-                        "-o",
-                        "pipefail",
-                        "-c",
-                        str(step["run"]),
-                    ],
-                    env={
-                        **os.environ,
-                        "PATH": f"{root}{os.pathsep}{os.environ['PATH']}",
-                        "FAKE_STATUS": status,
-                        "GITHUB_WORKSPACE": str(root),
-                    },
-                    capture_output=True,
-                    check=False,
-                )
-                assert result.returncode == expected
 
     def test_python_coverage_contract_remains_combined_ninety(self) -> None:
         """Read the actual config so changing line-only or lowering the bar fails."""
