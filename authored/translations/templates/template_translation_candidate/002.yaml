@@ -15,23 +15,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T39b3282c55","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T39b3282c55
-      lang: zh-Hant
-      text: 【進化時】自己的PP最大值+N。自己的主戰者{生命值}+N。抽取N張卡片。
-      inventory_ids:
-        - inv:158fa5e9aa206c15a5a7e62e841014e4470ebb4b870d1b9fee61234bcb7204b6
-        - inv:68214754cbfa8e028dd1db35288fd0285be682d6dc6f17a3885d05eac0d5a710
-        - inv:c51e8073776d4234968c6e718a6921b2b1e66894ec06cbb96ec052bf804240d0
-        - inv:dc0bbe6747e71bffaf48e32494e7b82c69b1e892469c891d0c9406ef3aae7469
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T39ccba9146","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -164,21 +147,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-        - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T3c5d22aacb","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T3c5d22aacb
-      lang: zh-Hant
-      text: '{起動}將這張卡片{橫置}：從下列之中選擇N項。【N】指定自己墓場的N張原始消費N以下的賽馬娘・從者。將其增加到手牌中。【N】指定自己進化牌堆中至多N張正面朝上的『X』。將其轉為背面朝上。自己的EP+N。【N】自己戰場上的全部其他賽馬娘・從者{攻擊力}+N/{生命值}+N。'
-      inventory_ids:
-        - inv:2236f2107a15aac1758db12796b2c2b4cfdb7baa33deedafbfa759a5c8aee3d5
-        - inv:6c745e291afa36c2629f19126954f58eaa63e337917b79ae5d89ce5cdf551013
-      reasons:
-        - alignment_definition_unavailable
         - signed_numeric_requires_review
     origin: machine
     low_confidence: false
@@ -327,21 +295,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T3f40c294f0","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T3f40c294f0
-      lang: zh-Hant
-      text: '{快速}本回合，自己的主戰者受到的傷害-N。抽取N張卡片。'
-      inventory_ids:
-        - inv:367fe1fb95cc25fd0619d755c1bb3e9db7b1d9dd1d80557c8c50b39803d4ab4b
-        - inv:a6d278f5a056024d5734e1c103d447d5fb3086d992dc51672072752d8b1bea07
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T40389a4e89","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -370,21 +323,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T4180c7d16d","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T4180c7d16d
-      lang: zh-Hant
-      text: 從下列之中選擇N項。【N】指定敵方戰場上的N個從者。給予其N點傷害。【N】本回合，自己的主戰者下一次受到的傷害-N。
-      inventory_ids:
-        - inv:0c947be0b4697eff9d2ed5b5dbfffd2801c034b56d964b73b6779928e9ff85cc
-        - inv:9dad9272de2bb9898d42406e4632e8aa6be31e2fd2458b07884c6585ea1b7983
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T41ed3ff7b4","zh-Hant"]'
@@ -433,20 +371,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T4277e979e7","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T4277e979e7
-      lang: zh-Hant
-      text: '{謝幕曲}自己戰場的【蓄積】+N。'
-      inventory_ids:
-        - inv:fb1fdc20aedba9924b6b42b86503a706bcc7d675e46d19d655cf65b015f3f614
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T4280020daa","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -473,21 +397,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T4365b4c57c","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T4365b4c57c
-      lang: zh-Hant
-      text: 【超進化時】指定敵方戰場上至多N個從者。將其破壞。自己戰場的【蓄積】+N。
-      inventory_ids:
-        - inv:9c6e07e1cb08f79ac363e464b634b73b68833cc5c7b25b88273f3f736cafbc4c
-        - inv:ca29d5c42298d7c059e142a95c38fe92cc44c33aa629becf11f37256371a4255
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T4379489df5","zh-Hant"]'
@@ -594,22 +503,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T4689a0fee3","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T4689a0fee3
-      lang: zh-Hant
-      text: '{入場曲}如果為【覺醒】狀態，則這張卡片{攻擊力}+N/{生命值}+N。自己的PP最大值+N。'
-      inventory_ids:
-        - inv:269ad7ec5b080f063829fd6011b74520195f30d221347f3b3b47c7bcf036ca31
-        - inv:65d381ee89c2d93c80259c4ae3ceba85295dc4bf3556f244c8117062914fb463
-        - inv:9a08e7288a200f66ff05de8ee70179c297801863fe63d6329b05f8b0cea56873
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T47112b7d32","zh-Hant"]'
@@ -1084,24 +977,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T5114a8d6b5","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T5114a8d6b5
-      lang: zh-Hant
-      text: 從下列之中選擇N項。【N】自己的PP最大值+N。【N】抽取N張卡片。
-      inventory_ids:
-        - inv:17b064b9205e6b01d3595ea29da3557815d2f6d8d9bbabb4cd3b433f6a026b71
-        - inv:317b1ac37c1031673eae297301718a6d3527f84b05e6b5ff9b380785bc4f6d9d
-        - inv:9cd5fdb316ee2a78fdef7c8dbabb8a0ba79cb4096da84e17ab7811668e43642a
-        - inv:daac4e8619ef70d576117c24e398a746067a500ef08ea5d897240e623ff3b1bd
-        - inv:dedad61a9a0c9a7119a280bf22e3657caba94bd86850ff62a9c33b87107b50d4
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T51bfcd6b22","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1165,21 +1040,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T53b5bd2059","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T53b5bd2059
-      lang: zh-Hant
-      text: '{謝幕曲}PP最大值-N：將這張卡片以橫置狀態召喚到戰場上。'
-      inventory_ids:
-        - inv:31219cc3749992a3ff358f703ea715d6c4647ce5d9a691b9f9c4d14088fb1813
-        - inv:8ff6389477af389a4ae197f26bf98d790c2e7dc7d28d75395918b31ec1ff437d
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T53b75f0382","zh-Hant"]'
@@ -1310,20 +1170,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T570959a713","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T570959a713
-      lang: zh-Hant
-      text: '{起動}{消費N}捨棄手牌中的這張卡片：自己戰場上的【蓄積】+N。抽取N張卡片。'
-      inventory_ids:
-        - inv:428ab8f27536153e556e88b4e1d8ea4174af6130ee024ab6fd9e9dfad72271d7
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T5744f746ec","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1414,21 +1260,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T5801431d1a","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T5801431d1a
-      lang: zh-Hant
-      text: '{入場曲}如果自己的戰場上有載具・卡片，則自己的PP最大值+N。'
-      inventory_ids:
-        - inv:0559165926c28bcc6e64c5cb900707f52d724d9cf20b17baeee84f82961baca1
-        - inv:b9a43423b71a2e6a8bb5b528aa89c5778da901ae316a547ba62968749cab2e70
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T584ea00169","zh-Hant"]'
@@ -1786,24 +1617,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T6130275f94","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T6130275f94
-      lang: zh-Hant
-      text: '{入場曲}自己的PP最大值+N。'
-      inventory_ids:
-        - inv:2fa3f6c073cb8404f61f28815e59374406c66704ebf24d8a35aaa70b72f635ad
-        - inv:b76857deea945d1ad1325afcc504f41f908cbc3070d029ba8fbceabfea62ae8f
-        - inv:be1573c3a7e2b07e570a9e3a9f1ad315dd0394b49324583cfdc22e09e7dac63b
-        - inv:d6dcb17199ec3e1b74acf07bfd2b9d3f08a47b90c30ba18baa1e48df53d16433
-        - inv:e8d2a2a0e5260793610eceaada7a2688f91b442e8aec9d428065e20ee4b7c1ab
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T61355e128b","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2083,25 +1896,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T67954c0f06","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T67954c0f06
-      lang: zh-Hant
-      text: '{入場曲}從下列之中選擇至多N項。【N】自己的EP+N。【N】自己的主戰者{生命值}+N。【N】抽取N張卡片。【N】敵方的全部玩家捨棄自身的N張手牌。'
-      inventory_ids:
-        - inv:453cbb7cde32aa2048b99ab12001e292b511101a048db7e125f671a20718dc07
-        - inv:4c2ebf40513edadb2ca913f4540b000cab5d426f0103c981024eddbe364e147e
-        - inv:729ba9a76feb46e8ce1d188dfffed4a1e162d658ce7228e46f9eb103123338cf
-        - inv:82cb20bcf28c8a9287d71ab96fbe81bec944db82c6fda5cccd82d7584ad3e64c
-        - inv:ae14ca24e5ed44941003bdabf74267c1f3e3ddc4c1854bc769af3db4bd7dd4fc
-        - inv:dc04e32b0b0ee46370ec2ae20781f657347a723fb53c2e5021a565914db1a2b1
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T67d5a5e347","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2235,21 +2029,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T6a82d5246d","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T6a82d5246d
-      lang: zh-Hant
-      text: 【進化時】捨棄手牌中的N張自然・卡片：自己的PP最大值+N。
-      inventory_ids:
-        - inv:000080e0e4b1956b1fa0c960b7abaee86eb115dd4537e8ea3619a3656be69d00
-        - inv:e61f33955e3fcdb162b693b9273c54375f852a1a99b838083a49ba4713380ed8
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T6ab8d43a0f","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2290,21 +2069,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T6ba0274b93","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T6ba0274b93
-      lang: zh-Hant
-      text: '{入場曲}指定敵方戰場上的N個從者。給予其N點傷害。自己戰場上的【蓄積】+N。'
-      inventory_ids:
-        - inv:382ab65934d6d7d9a583889795d535c7097b10eecd0ea31c83c3a4aa7cf3b5e7
-        - inv:cb38c89747b9cf44b54534acb00d311849f15f8ed7cd57fec07e600ae2dcf70f
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T6bc57b126d","zh-Hant"]'
@@ -2701,22 +2465,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T724baa3286","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T724baa3286
-      lang: zh-Hant
-      text: 只要這張卡片在場，自己戰場上的妖怪・從者給予的傷害+N。
-      inventory_ids:
-        - inv:394cbef8e2fe6f0ab1d3877eb2e1afebdb430eb1bc0aa611f73838277ad00f1f
-        - inv:b4552692e40b0da8335db090e4228acec0da4acdb1d0614cf8947d62bbaef9a9
-        - inv:e3e5faee1e2fecc46d402feedc09636c3be5924e408155bcc7d966c606ccd213
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T72b83e69d2","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2733,20 +2481,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T7324def93e","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T7324def93e
-      lang: zh-Hant
-      text: '{入場曲}自己的EP+N。如果為【覺醒】狀態，則這張卡片{攻擊力}+N/{生命值}+N。'
-      inventory_ids:
-        - inv:4e485572481b82ec3f3e315150245d80f2bffa80212780a0b016204062c4e38a
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T73b5ec7a73","zh-Hant"]'

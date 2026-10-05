@@ -33,21 +33,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tf5441e39d2","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tf5441e39d2
-      lang: zh-Hant
-      text: 巨像・從者進入自己的戰場時，自己戰場的【蓄積】+N。
-      inventory_ids:
-        - inv:7b8b2a24781c8dee32d3639e0710badbcdb3f9d4584d20b509de588139ece56d
-        - inv:7efa0c988d7c89bf81667f45986a212c081fbdce1c5178cc7d0e845ad6aec40c
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tf5fe27dd97","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -206,22 +191,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tfa2b905c57","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tfa2b905c57
-      lang: zh-Hant
-      text: 敵方的回合中，這張卡片給予的傷害+N。
-      inventory_ids:
-        - inv:089780988107b5a30e26f8f49974d7aa790d15d55ef539f13f067662803af948
-        - inv:696de502dd5c73d0c3f054ec01bcde35cc86962f2ea3cece3d1505b343838470
-        - inv:b1c3efff9ce01401552c84e214d372aefe01b688b771d2e6d21647c06c259c13
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tfa3301ee77","zh-Hant"]'

@@ -37,7 +37,23 @@ rules:
     enabled: true
     origin: project
     low_confidence: false
+  - rule_id: dealt_ability_damage_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: dealt_all_damage_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: dealt_combat_damage_delta
+    enabled: true
+    origin: project
+    low_confidence: false
   - rule_id: deck_top_ordinal
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: ep_delta
     enabled: true
     origin: project
     low_confidence: false
@@ -105,6 +121,14 @@ rules:
     enabled: true
     origin: project
     low_confidence: false
+  - rule_id: pp_capacity_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: pp_delta
+    enabled: true
+    origin: project
+    low_confidence: false
   - rule_id: pp_remaining_bound
     enabled: true
     origin: project
@@ -130,6 +154,22 @@ rules:
     origin: project
     low_confidence: false
   - rule_id: prefix_health_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: received_ability_damage_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: received_all_damage_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: received_combat_damage_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: stack_delta
     enabled: true
     origin: project
     low_confidence: false

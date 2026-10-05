@@ -674,22 +674,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T8422d6981f","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T8422d6981f
-      lang: zh-Hant
-      text: 只要這張卡片在戰場上，這張卡片與自己的主戰者受到的傷害-N。
-      inventory_ids:
-        - inv:311c6b89fc8223a9fc80fe7a00bbc9414d5f9b8bc3e7a019e5fe9ac86c66a0ab
-        - inv:c65be9231773c43d9b6a774070c092e4a576f1843e6f43921d4215fedaa6d124
-        - inv:f0e23fca73c1b9d78b8181fda89a796c27009cf03426a8065f788a447d46ad1a
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T849952879c","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -763,23 +747,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T85cef838b6","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T85cef838b6
-      lang: zh-Hant
-      text: 只要這張卡片在戰場上，自己戰場上的妖怪・從者給予的傷害+N。
-      inventory_ids:
-        - inv:25b6055e8450ab97e41089358ef3fc089b2580a9009fcfa85cb69bf0e84809ee
-        - inv:6e68b63f20d3566aea0379236bf8b9e1a7322023dbc2389ffecaf29a5fd045ee
-        - inv:c6fe2f03779ffb650a684586addec28803ab8a6fb40cbbb207d94b9957c5ebfc
-        - inv:d143e01d22ec0a3a391d8c49f6cc27189d19f8882936cc23e59d6188ff0d5e2e
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T862192568e","zh-Hant"]'
@@ -858,22 +825,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T8877eceed0","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T8877eceed0
-      lang: zh-Hant
-      text: 裝備這張卡片的從者獲得「只要該從者在戰場上，自己戰場上的該從者與『X』所給予的能力傷害+N」。
-      inventory_ids:
-        - inv:3daf0292455aff55c525e105c15d91966f424790a25a422f7e4fec7699b139b8
-        - inv:759c7ded84ca62e4a1d220abadae9947f2c82910d8349522ce43fb20ef034467
-        - inv:a287a3a1c20a58a1af7a721d4a54cec571f2f5db7616155b68518fa6846b0135
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T88923808f4","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -902,20 +853,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T8bd70fe822","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T8bd70fe822
-      lang: zh-Hant
-      text: 這張卡片受到的交戰傷害-N。
-      inventory_ids:
-        - inv:733f28d2519c2458b74a4670bf9f4b6871a24e3b0aa9bad8548431961931bf28
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T8c92904194","zh-Hant"]'
@@ -1247,22 +1184,6 @@ records:
         - alignment_definition_unavailable
         - missing_card_name_concept
         - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T92e6f007a4","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T92e6f007a4
-      lang: zh-Hant
-      text: 自己戰場上其他從者的{UB}能力發動時，自己的PP最大值+N。
-      inventory_ids:
-        - inv:32b4e74a3e2abecdf93975033e75e0de0930e8e8240dfc0223e45d20a789b958
-        - inv:811e2ccf654be49dfc8bb1e40c84e270677f4141f8e44c505d297314b488dff5
-        - inv:82acf71a0339e86164051200a8538dee1b6a59098c07b2b2fd70e0675366b73d
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T93300ab90f","zh-Hant"]'
@@ -1749,20 +1670,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T9f30311791","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T9f30311791
-      lang: zh-Hant
-      text: 【進化時】自己的主戰者{生命值}+N。自己戰場上的【蓄積】+N。
-      inventory_ids:
-        - inv:c264d808894c5f20ef3699f7cf9f7318a07ae11f9b8908e9795210c0739eecff
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T9f86f4ece0","zh-Hant"]'
@@ -2557,21 +2464,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tb133fe7808","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tb133fe7808
-      lang: zh-Hant
-      text: '{Q}{起動}{消費N}將這張卡片{橫置}並放置到墓場：本回合，自己的主戰者下一次受到的傷害-N。此能力在自己EX區的紋章為N張以上時可使用。'
-      inventory_ids:
-        - inv:5ba5fd85049ba8209233f5525618abb47402277f01d125759b180a25d72161ca
-        - inv:efdd530e02463b6e1c2252574ec57bae7d5c5055fb9354674e5df4ff7928e2c1
-      reasons:
-        - alignment_definition_unavailable
-        - signed_numeric_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tb1d575bcd3","zh-Hant"]'
