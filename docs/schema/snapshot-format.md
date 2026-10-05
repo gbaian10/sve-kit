@@ -98,11 +98,11 @@ translation 僅輸出上述欄位，用 `text_unit_id` 取譯文；同一 chosen
 
 | 集合 | 公開欄位 | 鍵與用途（未註明 PK 者以首欄 `id` 為 PK） |
 | --- | --- | --- |
-| `image_asset` | `id, origin, publication_state, withdrawal_reason?, source_src_raw, source_url, availability, width?, height?, format?` | PK(id)；來源／缺圖詳情，沿既有型別 |
-| `printing_image` | `printing_id, face_id, image_id, publication_state, availability, withdrawal_reason?, card_version?, art_version?, variants` | PK(printing_id,face_id)；卡包 media 的當頁顯圖投影 |
+| `image_asset` | `id, source_src_raw, source_url, width?, height?, format?` | PK(id)；來源詳情，沿既有型別 |
+| `printing_image` | `printing_id, face_id, image_id, publication_state, availability, card_version?, art_version?, variants` | PK(printing_id,face_id)；卡包 media 的當頁顯圖投影 |
 | `image_variant` | `image_id, size_key, format, width, height, bytes` | PK(前三欄)；當次輸出的詳情尺寸／大小，不含公開 path、不阻擋首圖 |
 
-printing_image 的狀態型別沿 image_asset，並須與該 image_id 一致；兩個 version 為正安全整數或 null。
+publication_state 為 `pending|approved`，availability 為 `available|missing|unfetched`；公開格式只在 printing_image 放狀態，image_asset 不重複。兩個 version 為正安全整數或 null。
 variants 是按 size_key 排序唯一的 `ImageDisplayVariant=[size_key:Code,width:UInt,height:UInt]` tuple 陣列，尺寸皆 >0。
 approved 且 available 時 card_version／art_version 均非 null、恰有五檔；其他狀態兩者均 null、variants=[]，不得組可用 URL。
 每個 display variant 與 image_variant 的尺寸一致；完整 bytes／SHA 由發布器核實，不能只驗 metadata。
@@ -292,7 +292,7 @@ changes 是內容定址的公開摘要 `{format_version,from_data_version,to_dat
 
 art.regions 由實際 `printing_face→printing.region` 唯一推導，`[en]` 顯示「目前收錄僅英版插畫」，不宣稱永不出日版。BP18-SP01 與 BP18-SP01EN 雖去尾碼相同仍是不同卡；Vania 必經人工連到 ヴァンピィ 的 card/face。精確 EN 原卡號保留，不能拿猜測後綴當已確認證據。
 
-`printing.int_id` 所有出貨列必填，發布後永久不改；依地區分段配發（[authored-layout.md](authored-layout.md) §3.2），但號段只是配號容量安排，地區一律讀 `printing.region`，不從號碼推算；解碼時一律查表取得版次，查無對應（含保留或未分配號段）即依下述未知 int 處理。`catalog_state/card_no_state/identity_state` 是獨立軸。`review_level=unreviewed/model_reviewed/sampled/confirmed`，由適用的 decision 推導，官方直抓未另審為 unreviewed，不把官方來源當人工確認。unlisted 才出已審可公開 `reference_urls`（至少一個）；official 為 []，一般來源圖網址另在影像清單。信心 `listing_confidence` 不等於 `review_level`。暫定號碼用 `/cards/_provisional/{int_id}`；官方 raw `card_no` 用 exact route；兩者改號 alias 分 namespace。非官方圖依 [build-db.md](build-db.md) §17 採 `mirror_reviewed`：卡表快照的 `publication_state` 為 pending/approved/withdrawn，單圖待確認不能出 variant/path；approved 必先通過建置資料庫的逐圖人工確認，來源 URL 保留，確認者/時間只留建置資料庫的 `review_decision_id→decision`。建牌准入採 `regional_decklog`：依 printing.region 與 `decklog_available` 判斷，provisional 卡號/身分不擋加入、分享或匯出。verified 必有 `decklog_source_url` 與 `decklog_checked_on`；unverified 的日期為 null，available 依 `catalog_state=official` 預設 true，unlisted 預設 false，來源 URL 可空且 UI 明示未查證。建置資料庫的來源 FK 投影成可公開來源網址，不出完整稽核紀錄。Decklog 證據覆蓋預設，日英不得互相套用。這四欄屬 printing 頂層啟動包主儲存，詳情分片不重複，邏輯欄位白名單必填 Bool 與 verification，nullable 來源/日期依上述約束。
+`printing.int_id` 所有出貨列必填，發布後永久不改；依地區分段配發（[authored-layout.md](authored-layout.md) §3.2），但號段只是配號容量安排，地區一律讀 `printing.region`，不從號碼推算；解碼時一律查表取得版次，查無對應（含保留或未分配號段）即依下述未知 int 處理。`catalog_state/card_no_state/identity_state` 是獨立軸。`review_level=unreviewed/model_reviewed/sampled/confirmed`，由適用的 decision 推導，官方直抓未另審為 unreviewed，不把官方來源當人工確認。unlisted 才出已審可公開 `reference_urls`（至少一個）；official 為 []，一般來源圖網址另在影像清單。信心 `listing_confidence` 不等於 `review_level`。暫定號碼用 `/cards/_provisional/{int_id}`；官方 raw `card_no` 用 exact route；兩者改號 alias 分 namespace。非官方圖依 [build-db.md](build-db.md) §17 採 `mirror_reviewed`，目前只產生官方圖：卡表快照 printing_image 的 `publication_state` 為 pending/approved，待確認不能出 variant/path；來源 URL 保留在 image_asset。建牌准入採 `regional_decklog`：依 printing.region 與 `decklog_available` 判斷，provisional 卡號/身分不擋加入、分享或匯出。verified 必有 `decklog_source_url` 與 `decklog_checked_on`；unverified 的日期為 null，available 依 `catalog_state=official` 預設 true，unlisted 預設 false，來源 URL 可空且 UI 明示未查證。建置資料庫的來源 FK 投影成可公開來源網址，不出完整稽核紀錄。Decklog 證據覆蓋預設，日英不得互相套用。這四欄屬 printing 頂層啟動包主儲存，詳情分片不重複，邏輯欄位白名單必填 Bool 與 verification，nullable 來源/日期依上述約束。
 
 人工限量序號版次沿 [manual-printings-v1](manual-printings.md#5-重建freshness-與公開呈現)：未確認一般版對應者仍有 provisional card／face，印刷原文狀態 unknown，不以人工名稱造官方文字或 current。官方 PR（含 PR-442）照常顯示卡文。人工名稱／公開來源類別與查核日的欄位方案只在該契約列為待實作；本 PR 不改公開白名單或 printing 欄序，須後續機器契約審核與版本／能力協商再實作。
 
@@ -310,7 +310,7 @@ art.regions 由實際 `printing_face→printing.region` 唯一推導，`[en]` �
 
 Spelling 與 RulingHint 的參數宣告、值域及拼法驗證依 [傳輸契約 §3.2](snapshot-transport.md#32-公開參數宣告)。`{Q}` 先登錄 literal、原樣文字顯示與複製，語意未查明前不賦予機制/引擎含義。文字 roundtrip 不以語意猜測為前提。
 
-withdrawn 圖片在新影像清單中保留 `id/source_url/withdrawal_reason`，variants 為空；UI 顯示撤下原因與來源 hostname/連結，不顯示未出貨的確認日期。舊快照不可變，已下載舊副本不保證立即移除；current 提交後按 §4.1 清理不再使用的卡圖 key；不因 previous metadata 引用而保留舊 WebP。`route_override` 僅作用於 official namespace，provisional 路由禁止覆寫。
+不再公開的圖片 variants 為空。舊快照不可變，已下載舊副本不保證立即移除；current 提交後按 §4.1 清理不再使用的卡圖 key；不因 previous metadata 引用而保留舊 WebP。`route_override` 僅作用於 official namespace，provisional 路由禁止覆寫。
 
 **使用者 2026-10-01 核可（身分修復投影）**：identity_state=retired 的墓碑 card 與原 faces
 只供 identity_change／歷史引用閉包，不進一般卡表、搜尋、卡包或插畫／繪師瀏覽；support 仍有 required
