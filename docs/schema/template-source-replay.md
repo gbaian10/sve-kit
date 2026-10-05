@@ -11,12 +11,11 @@ source_batches 是排序唯一的 `{batch_id}` 陣列，由呼叫端設定 store
 清冊以 translations index.inventories 的 canonical hash 索引，hash 只檢查檔案一致，不作核可證明。
 
 entry 沿用八欄 `{id,level,source_ref,line_ordinal,role,normalizer_id,normalized_hash,legacy_fingerprint}`。
-level 首版為 sentence（clause 盤點沿既有來源，尚不啟用子句拼接）；role=body/reminder/token_header/layout/name/label/flavor。
+level 首版為 sentence（clause 盤點沿既有來源，尚不啟用子句拼接）；role=body/reminder/token_header/layout/name/label。
 entry ID 沿既有來源位置配方：`inv:`＋H(`[source_ref,line_ordinal,role,[[start,end],...]]`)，
 H 為 canonical JSON 的完整 SHA-256，segments 由當前分段器依原文順序重建。
 它不是 T/C 模板 ID；同模板在不同位置有不同 entry。全入口 entry ID 唯一，命中仍比完整位置內容。
 normalizer_id 指本次支援的具名程式；normalized_hash 是 normalized_text exact UTF-8 的 SHA-256，模板 content_hash 另驗六欄 payload，不記舊 producer 程式／環境。
-flavor 為全段、level=sentence、line_ordinal=0、normalizer_id=flavor-exact-v1、legacy_fingerprint=null。
 來源片段的精確 segments、anchor、參數位置由當前解析結果與定義保留及驗證，不能只驗總筆數。
 舊 ID 撞不同內容或同位置出現兩個有效定義都需報錯／列歧義，不默默覆蓋。
 

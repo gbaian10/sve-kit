@@ -32,7 +32,7 @@ Catalog／Vocabulary 記憶體物件由此推導，不是另一份權威。
 
 ## 4. 15 筆繁中選詞
 
-七職業、八基本卡種的 zh-Hant 選詞屬 #51，沿 translations 的 `vocabulary_choice`，不塞進 catalog label。code 配發不授予翻譯權威；origin、低信心及撤回依[翻譯契約](translation-contract.md)。resource EP／SEP 與 type EP／SEP、trait 精霊與 class エルフ即使同譯仍分別定位，不合併 glossary。EN 原值映射不等於此次採納 EN 術語翻譯。
+七職業、八基本卡種的 zh-Hant 選詞屬 #51，存在該詞彙記錄 `value.translations`（`lang,text,origin,low_confidence`），label 仍只存日文基準。code 配發不授予翻譯權威；origin、低信心及撤回依[翻譯契約](translation-contract.md)。resource EP／SEP 與 type EP／SEP、trait 精霊與 class エルフ即使同譯仍分別定位，不合併 glossary。EN 原值映射不等於此次採納 EN 術語翻譯。
 
 缺有效繁中選詞時，模板的整個 context 回原文並報 `missing_term_translation`；UI fallback 不套用卡文。標籤翻譯選用投影屬 #53，必須驗有效 catalog 主體與當前選詞，不由相同字串或裸 FK 借用其他概念的翻譯。
 

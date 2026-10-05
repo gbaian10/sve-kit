@@ -185,7 +185,7 @@ F1 釘兩個入口與所有分片的 exact bytes／canonical hash、完整 autho
 
 本版 vocabulary.kind 白名單恰為 class/type/special_kind/rarity/trait/title/frame/stamp_series。
 class/type 的首批 code 清單與 preview 對照沿[正式 catalog 輸入](catalog-inputs.md)；
-special_kind 此次限 evolve/advance/token，用於基本卡種的明示特殊標記，不擴充 vocabulary_choice 的翻譯 kind。
+special_kind 此次限 evolve/advance/token，用於基本卡種的明示特殊標記，不擴充 label 翻譯的 kind。
 先做查卡所需的固定 enum；新增對照須明列來源表／欄、專用 kind 與完整 code 對照，更新受版控白名單後才能載入；
 不能由 caller 在 configuration 填任意 kind 就擴張。keyword/stamp/product_family/card 保留給各自目標表，不能冒充詞彙。
 raw_mappings 是排序唯一的 `{region,lang,raw,source_ref,special_kinds}` 陣列；region 為 jp/en，lang 須與來源一致。
@@ -209,8 +209,7 @@ format 2 的 special_kinds 仍必填；欄位缺漏是格式錯誤，不由 load
 稀有度／premium 的拆解是釘住 recipe 的來源投影，不能讓 raw_mappings 改寫 premium；未知組合不猜。
 技術預設 P3 分開篩選基礎 rarity 與 premium，顯示可組合；複合顯示別名不建立第二份稀有度真值。
 
-label 只保存一個基底原文／自撰標籤；其他語言由 translation-contract 的 vocabulary_choice 連同
-`(vocabulary_kind,vocabulary_code,lang)` 採納，不能在本檔再放一份三語翻譯表。
+label 只保存一個基底原文／自撰標籤；其他語言的選詞放在同一記錄的 `value.translations`（`lang,text,origin,low_confidence`，不得為 ja），建置時寫成 vocabulary 的 label 翻譯。
 若 trait 同時是 glossary 概念，只有明示同概念關係才可使用既有選詞，不能因字串相同合併概念。
 已核可譯名的數位／社群來源與 machine 標示沿翻譯契約，不重新要求逐卡確認。
 
