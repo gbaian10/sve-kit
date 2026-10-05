@@ -58,7 +58,7 @@ includes 映射上述各自分片路徑到**完整解析內容**的 canonical ha
 缺檔、未索引分片、跨入口偷載與 hash 不符。先驗全入口、全區、全部歷史，再投影本次範圍。
 歷史分片與 index 舊 entries 不改；新分片驗妥後原子追加 index。啟用入口時必有 index，空集合明示 includes={}。
 
-每片一份 review_context，沿 authored-layout §9.2 的 `{context,source_batches}`，釘核對時程式、依賴、設定、
+每片一份 review_context，釘核對時程式、依賴、設定、
 來源及已存在 authored 入口；同片 records 共用，核對背景不同時分片，不在每筆複製完整輸入。
 
 record 恰為 `{record_key,kind,filing_key,data,evidence}`。data 恰為

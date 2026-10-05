@@ -14,7 +14,7 @@ project documentation uses Apache-2.0 as shown below.
 | Path | License for our contributions | Excluded third-party material |
 | --- | --- | --- |
 | `carddb/`, `sim/`, `dsl/`, `.github/`, and `tests/`, except the more specific rows below | Apache-2.0 | Official names, card wording, rules, Q&A, source-derived text and other third-party material in literals, examples or fixtures |
-| `authored/effects/`, `authored/keywords.yaml`, `authored/wording-rules/`, `authored/engine-rules/` | Apache-2.0 | Official names in `name` and `ja`, copied wording, and other official or third-party material |
+| `authored/effects/`, `authored/keywords.yaml`, `authored/engine-rules/` | Apache-2.0 | Official names in `name` and `ja`, copied wording, and other official or third-party material |
 | All other paths under `authored/`, including translations, rulings, registry, IDs, products, catalog adoptions, and their indexes | CC0-1.0 | `evidence[].quote`; official or third-party translations, including values with `origin: official_*`; `expected_raw_value` and `corrected_value` containing source expression; official product names in `authored/products/` `text` values; official vocabulary in `authored/catalog-adoptions/` `raw` values; other identified third-party material |
 | `docs/`, README files at any level, `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, and project-owned legal documentation | Apache-2.0 | Real-card examples, official excerpts and source quotations, including those in `docs/dsl/` and `docs/m0/` |
 | Other repository-root configuration files, including dotfiles and lockfiles | Apache-2.0 | Third-party notices and material retain their own terms |

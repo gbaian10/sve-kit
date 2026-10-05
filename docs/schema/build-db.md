@@ -41,7 +41,7 @@ record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由�
 | ---------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | 日英卡片身分對應 | confirmed；每筆兩端與全部 face 都有人確認，可一次簽整批但須明示全體 checked | EN 可有獨立 provisional card；不合併 JP，不共用譯文/DSL |
 | 插畫、標誌、數位對應、序號 | sampled 或 confirmed，批次模型處理＋人抽查，例外另審 | `proposed/model_reviewed` 不進已採納功能；顯示未知 |
-| 再錄表記差異 | 已核可規則完整涵蓋或 confirmed batch 全體 checked；規則／人工證據依 authored-layout §9.5，工具不擴張規則範圍 | 未核對候選不替換已採納 current/DSL；無舊版時可讀來源並手動 |
+| 再錄表記差異 | 不提供採納封套；表記差異只留觀測並顯示 | 未核對候選不替換已採納 current/DSL；無舊版時可讀來源並手動 |
 | 確認無跨區對應 | confirmed，記查核範圍與 `as_of`；這是已查無對應，不是永遠不會發行 | 未查/證據不足維持 unmapped/pending |
 | JP 身分初始化 | 工具以所有面卡名/卡種/數值/效果/sections 產候選，批次採納，歧義逐項處理 | 依 §3.1 同卡通則；真語義歧義才隔離，不因插畫/表記差異拆 card |
 | 正式勘誤適用範圍、來源更正、身分修復、語義分歧 | confirmed，需精確來源證據 | 隔離衝突；不得自動執行受影響規則 |
@@ -151,7 +151,7 @@ art 屬 card/face；同圖換框或加簽名仍同 art。frame/signed/premium �
 
 `text_unit` 依 `(lang,exact text bytes)` 去重，不讓單一 `source_id` 丟失再錄來源；`face_revision`、`printing_face`、QA 等引用端保留自己的 source。ID 固定為 `t:{lang}:{SHA256(exact UTF-8 text) 前16hex}`，同鍵不同完整內容一律停止發布，不自動加長新舊鍵；歷次已發布文字鍵從耐久的 `(lang,short_id,full_digest)` 發布鍵索引檢碰撞；發布前保留候選鍵、衝突即停止，失敗保留已占鍵，不能因 CDN 回收而遺失舊鍵。索引與發布收據備份驗回，不保存完整歷史文字到 R2。既有鍵不變，改規則需新 format/命名空間並保留舊引用。內容不可變，不把完整 hash 出貨。null 是缺資料；空字串是已確定無文字；原始 text=null 先檢查 type/sections/來源，不能直接當無能力。
 
-**使用者 2026-10-01 核可 B**：依 [authored-layout §9.8](authored-layout.md#98-無主文的證據-recipe採用-b) 的 effect-presence-v1，能證明來源版本確定無主文時，以既有 exact 空字串 text_unit 表示；無法證明者保持 null，完整來源與判別結果留 report／F1、明列 deferred，不能借別版文字補 FK。這延續「空字串＝已確定無文字」，不是直接 null→空字串。face_revision.effect_unit_id、printing_face_observation.revision_id、text_unit.text 均維持 NOT NULL；absent 的來源證據不掛在共享空文字上。
+**使用者 2026-10-01 核可 B**：依 [authored-layout §9.2](authored-layout.md#92-無主文的證據-recipe採用-b) 的 effect-presence-v1，能證明來源版本確定無主文時，以既有 exact 空字串 text_unit 表示；無法證明者保持 null，完整來源與判別結果留 report／F1、明列 deferred，不能借別版文字補 FK。這延續「空字串＝已確定無文字」，不是直接 null→空字串。face_revision.effect_unit_id、printing_face_observation.revision_id、text_unit.text 均維持 NOT NULL；absent 的來源證據不掛在共享空文字上。
 
 `face_special_kind.special_kind_code` 以固定 `special_kind` 複合 FK 指向有效的 `vocabulary(kind=special_kind,code)`；標記由已採納的完整原值映射推導，契約見 [catalog-route-adoption §4.1](catalog-route-adoption.md#41-詞彙與語言)。
 
@@ -159,9 +159,9 @@ type 明確包含 follower/spell/amulet/crest/equipment/leader/ep/sep；equipmen
 
 無差異的初始觀測可由工具建立一對一 semantics（保留全部規則），不另要求每卡人工 decision；只有移除提示/重複定義、跨文字認定等義才需已採納正規化政策或 confirmed batch。未知段落保持 unknown 並禁止 verified。
 
-現行文字先區分「觀測差異」與「語義衝突」。不同 printing 或同一 printing 的新觀測，都先保留 `printing_face_observation`，產 `change_kind=wording` 候選；時間變化本身不是衝突。工具列出主文/提示文/token 定義/數值/特性 diff，使用者核可規則完整涵蓋或 confirmed batch 全體 checked 可採納等義表記；分類類別本身不是等義授權，規則 pin、機械全查與人工收據依 authored-layout §9.5 分開保存。當前選取依可信版次收錄日及來源更新證據選最新已採納表記，`basis=latest_adopted_wording`；日期精度不足/並列則封套明示順序，不能任取最後爬到者。已採納的新表記與舊表記共 `semantic_id` 時，不要求重新驗相同規則的 DSL。無新版採納時保留舊 current 並顯示有候選；沒有可用舊版仍可讀觀測、手動。
+現行文字先區分「觀測差異」與「語義衝突」。不同 printing 或同一 printing 的新觀測，都先保留 `printing_face_observation`，產 `change_kind=wording` 候選；時間變化本身不是衝突。工具列出主文/提示文/token 定義/數值/特性 diff，目前沒有表記採納輸入，也沒有產生 `face_semantics`／`revision_semantics` 的程式；建置時仍檢查這兩表已存在列的規則 hash。無新版採納時保留舊 current 並顯示有候選；沒有可用舊版仍可讀觀測、手動。
 
-current／wording 的封套格式見 [authored-layout §9.1–§9.7](authored-layout.md#91-currentwording-採納入口-wording-adoption-v1)，具體格式經使用者 2026-10-01 核可。active 更正先驗再比較投影內容，原始觀測保留，來源更正與表記決定互不代簽。排序依可信發售日／更新證據，未知或並列版本另問使用者、釘精確 reviewed_order，不用 fetched_at、卡號、hash 補順序；人工採納順序只供等義表記選取，basis=reviewed_override，不填官方生效日期。
+active 更正先驗再比較投影內容，原始觀測保留。排序依可信發售日／更新證據，不用 fetched_at、卡號、hash 補順序。
 
 **使用者 2026-10-01 核可以下暫顯規則**：無新版採納仍保留有效舊 current；沒有可用舊版、觀測有差異時也公開可讀，不因此排除 card／printing。printing 顯示自己的觀測；face／card 依已知完整發售日的最新版次暫顯，同日不同內容／沒有可判日期時列候選，未知日期版本另列待問，全部標「表記未定」。暫顯不建立 face_current 或假 decision；公開欄位與決定演算法依 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。無 current 的區域以 wording_pending 阻止自動操作，但不影響依既有規則建牌與手動。#144 的診斷排除閉包不是發布閘門；真正來源損壞、已知更正／勘誤衝突仍受原本的完整性閘門約束。
 
