@@ -261,9 +261,13 @@ def _threshold(
 
 
 def _match(
-    rule: Rule, text: str, part: Part, hint: Hint, refs: References
+    rule: Rule,
+    text: str,
+    traced: tuple[Part, tuple[Unit, ...]],
+    hint: Hint,
+    refs: References,
 ) -> Match | None:
-    template, units = prepared(text, part)
+    template, units = traced
     before = template.normalized[: hint.occurrence.start]
     after = template.normalized[hint.occurrence.end :]
     if rule.id.startswith("braced_"):
@@ -314,6 +318,7 @@ def recognize(
     if part.role not in {"body", "reminder"}:
         return ()
     results: list[dict[str, JsonValue]] = []
+    traced = None
     for hint in candidate.slots:
         if (
             hint.numeric_rule is not None
@@ -324,7 +329,10 @@ def recognize(
             rule = BY_ID[identifier]
             if rule.reason not in hint.issues:
                 continue
-            match = _match(rule, text, part, hint, refs)
+            # All rule attempts share the same immutable normalization provenance.
+            if traced is None:
+                traced = prepared(text, part)
+            match = _match(rule, text, traced, hint, refs)
             if match is None:
                 continue
             if any(r["slot"] == hint.name for r in results):

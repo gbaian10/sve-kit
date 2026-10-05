@@ -18,6 +18,7 @@ from sve_carddb.source_archive import seal_batch
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.template_parameter_rules.current import parse as parse_rules
 from sve_carddb.template_translations.current import read_templates, validate_templates
+from sve_carddb.template_translations.current_build import apply as apply_templates
 from sve_carddb.template_translations.current_models import (
     DefinitionRecord,
     Inventory,
@@ -43,9 +44,12 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
+    from sve_carddb.build_db import Database
+    from sve_carddb.build_db.database import Row
     from sve_carddb.card_extras import CardPage
     from sve_carddb.snapshot.offline import Built, Inputs
     from sve_carddb.template_translations.current import Validated
+    from sve_carddb.template_translations.current_build import Report
 
     from .text_observation_fixtures import Case
 
@@ -216,7 +220,30 @@ def test_offline_renders_whole_effects_and_keeps_uncovered_original(
     _, recipe, _ = prepared
     found = validated(sources, References())
     monkeypatch.setattr(offline, "_templates", lambda *_args, **_kwargs: found)
+    populations: list[dict[str, tuple[Row, ...]]] = []
+
+    def capture(db: Database, templates: Validated, lang: str) -> Report:
+        report = apply_templates(db, templates, lang)
+        populations.append(
+            {
+                name: db.rows(name)
+                for name in (
+                    "translation_context",
+                    "translation",
+                    "translation_selection",
+                    "translation_use",
+                    "text_template_binding",
+                    "translation_binding",
+                    "translation_term",
+                )
+            }
+        )
+        return report
+
+    monkeypatch.setattr(offline, "apply_templates", capture)
     built = build(recipe, bundle_dir=tmp_path / "bundle")
+    assert len(populations) == 2
+    assert populations[0] == populations[1]
     assert built.report["effect_translations"] == {
         "fields": 4,
         "translated": 3,

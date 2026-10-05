@@ -245,6 +245,18 @@ def test_apply_keeps_unconfirmed_and_already_translated_sources_original(
         assert [r.values["text"] for r in db.rows("translation")] == ["名稱"]
 
 
+def test_apply_keeps_changed_source_revision_original(verified: Validated) -> None:
+    schema = compile_current_build(("translation_templates",))
+    with create_database(schema) as db:
+        seeded(db, verified.members[0].field_text + "変更")
+        with db.transaction():
+            report = apply(db, verified, "zh-Hant")
+        assert report.translated == 0
+        assert report.reasons == {"unmatched_template_source": 3}
+        assert db.rows("translation_use") == ()
+        assert db.rows("translation_selection") == ()
+
+
 def test_labels_read_selected_vocabulary_and_name_translations(
     verified: Validated,
 ) -> None:
