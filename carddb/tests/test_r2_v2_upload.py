@@ -1,5 +1,6 @@
 """Upload of export-offline roots against the localhost S3/CDN server."""
 
+import gzip
 import json
 from copy import deepcopy
 from typing import TYPE_CHECKING
@@ -17,7 +18,7 @@ from sve_carddb.r2_upload.v2.freshness import CDNFreshness
 from sve_carddb.r2_upload.v2.publish import next_index, upload
 from sve_carddb.snapshot.export.compression import python_brotli
 from sve_carddb.snapshot.preview import POINTER
-from sve_carddb.snapshot.values import object_value, parse, string
+from sve_carddb.snapshot.values import canonical, object_value, parse, string
 
 from .r2_sdk_fixtures import install_mock_sdk
 from .r2_v2_export_fixtures import art_changed as art_changed  # ruff: ignore[useless-import-alias] -- module-scoped crop-change corpus
@@ -318,6 +319,28 @@ def test_interrupted_image_overwrite_leaves_no_pointer_to_upload(
         load_export(roots.preview)
 
 
+def test_manifest_filename_must_match_its_content_hash(
+    images: PublicImages, roots: Roots
+) -> None:
+    export(images, roots, step=0)
+    loaded = load_export(roots.preview)
+    source = string(loaded.entry["manifest_path"])
+    wrong_path = "snapshots/manifests/" + "0" * 64 + ".json"
+    (roots.preview / wrong_path).write_bytes((roots.preview / source).read_bytes())
+    (roots.preview / POINTER).write_bytes(
+        canonical(
+            {
+                "manifest_path": wrong_path,
+                "manifest_sha256": loaded.entry["manifest_sha256"],
+            }
+        )
+    )
+    with pytest.raises(
+        UploadError, match=r"^Manifest differs from the preview pointer$"
+    ):
+        load_export(roots.preview)
+
+
 def _cli(
     monkeypatch: pytest.MonkeyPatch, transport: Loopback, *args: str
 ) -> tuple[int, str]:
@@ -440,3 +463,152 @@ def test_dry_run_reads_no_credentials_and_opens_no_client(
         "remote": "not_checked",
     }
     assert {p: p.read_bytes() for p in before} == before
+
+
+@pytest.mark.parametrize(
+    ("current_fraction", "candidate_fraction", "accepted"),
+    [
+        ("", ".1", True),
+        (".1", "", False),
+        (".1000", ".1", True),
+        (".10000000002", ".10000000001", False),
+    ],
+)
+def test_index_compares_fractional_seconds_chronologically(
+    images: PublicImages,
+    roots: Roots,
+    current_fraction: str,
+    candidate_fraction: str,
+    *,
+    accepted: bool,
+) -> None:
+    export(images, roots, step=0)
+    first = load_export(roots.preview).entry
+    first |= {"published_at": "2026-10-04T01:02:03" + current_fraction + "Z"}
+    index = next_index(None, first)
+    candidate = first | {
+        "data_version": "preview-20261004T010203Z-0002",
+        "published_at": "2026-10-04T01:02:03" + candidate_fraction + "Z",
+    }
+    if accepted:
+        result = next_index(index, candidate)
+        assert result is not None
+        assert result["current"] == candidate
+        assert result["previous"] == first
+    else:
+        with pytest.raises(
+            UploadError, match=r"^Export is older than the remote current$"
+        ):
+            next_index(index, candidate)
+
+
+@pytest.mark.parametrize("retry_original", [False, True])
+def test_pointer_failure_after_state_commit_preserves_safe_image_versions(
+    images: PublicImages,
+    art_changed: PublicImages,
+    roots: Roots,
+    remote: tuple[R2Store, ServerState, Loopback],
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    retry_original: bool,
+) -> None:
+    import sve_carddb.snapshot.preview as writer  # ruff: ignore[import-outside-top-level] -- interrupt only the final pointer switch
+
+    store, state, _ = remote
+    export(images, roots, step=0)
+    upload(store, load_export(roots.preview), None)
+    original = writer._write
+
+    def interrupted(
+        roots: Roots, path: str, raw: bytes, *, immutable: bool, private: bool = False
+    ) -> None:
+        if path == POINTER:
+            raise OSError("synthetic pointer interruption")
+        original(roots, path, raw, immutable=immutable, private=private)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(writer, "_write", interrupted)
+        with pytest.raises(OSError, match=r"^synthetic pointer interruption$"):
+            export(art_changed, roots, step=1)
+    assert not (roots.preview / POINTER).exists()
+    saved = object_value(parse((roots.private / "media-state.json").read_bytes()))
+    assert saved["high_water"] == 2
+    assert object_value(saved["committed"])["revision"] == 2
+    retry = images if retry_original else art_changed
+    export(retry, roots, step=2)
+    loaded = load_export(roots.preview)
+    for image in loaded.images:
+        expected = (
+            (3 if retry_original else 2) if image.key.startswith("images/art_") else 1
+        )
+        assert image.url.endswith("?v=" + str(expected))
+    upload(store, loaded, None)
+    assert current(state) == loaded.entry
+
+
+def test_lost_index_put_response_reruns_without_another_revision(
+    images: PublicImages, roots: Roots, remote: tuple[R2Store, ServerState, Loopback]
+) -> None:
+    store, state, transport = remote
+    export(images, roots, step=0)
+    loaded = load_export(roots.preview)
+    transport.lose_key = INDEX
+    with pytest.raises(UploadError, match=r"^R2 transport or protocol failed$"):
+        upload(store, loaded, None)
+    committed = state.objects[INDEX]
+    before = len(state.operations)
+    result = upload(store, loaded, None)
+    assert puts(state, before) == []
+    assert state.objects[INDEX] == committed
+    assert result["index_revision"] == 1
+
+
+def test_index_cas_race_preserves_the_concurrent_index(
+    images: PublicImages,
+    roots: Roots,
+    remote: tuple[R2Store, ServerState, Loopback],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store, state, _ = remote
+    export(images, roots, step=0)
+    upload(store, load_export(roots.preview), None)
+    original_index = state.objects[INDEX]
+    export(images, roots, step=1)
+    original = store.put
+
+    def raced(
+        key: str, raw: bytes, headers: dict[str, str], *, expected: str | None
+    ) -> bool:
+        if key == INDEX:
+            state.objects[INDEX] = Stored(
+                original_index.raw, '"concurrent"', original_index.headers
+            )
+        return original(key, raw, headers, expected=expected)
+
+    monkeypatch.setattr(store, "put", raced)
+    with pytest.raises(UploadError, match=r"^Version index conditional write failed$"):
+        upload(store, load_export(roots.preview), None)
+    assert state.objects[INDEX].etag == '"concurrent"'
+    assert state.objects[INDEX].raw == original_index.raw
+
+
+@pytest.mark.parametrize("encoding", ["truncated", "different", "valid"])
+def test_gzip_sibling_checks_decoded_bytes_without_recompression(
+    images: PublicImages, roots: Roots, encoding: str
+) -> None:
+    export(images, roots, step=0)
+    loaded = load_export(roots.preview)
+    path = string(loaded.entry["manifest_path"]) + ".gz"
+    raw = canonical(loaded.entry)
+    if encoding == "valid":
+        raw = (roots.preview / string(loaded.entry["manifest_path"])).read_bytes()
+    encoded = gzip.compress(raw, compresslevel=1, mtime=123)
+    if encoding == "truncated":
+        encoded = encoded[:-4]
+    (roots.preview / path).write_bytes(encoded)
+    if encoding == "valid":
+        member = next(m for m in load_export(roots.preview).members if m.key == path)
+        assert member.raw == encoded
+    else:
+        with pytest.raises(UploadError, match=r"^Export gzip sibling"):
+            load_export(roots.preview)

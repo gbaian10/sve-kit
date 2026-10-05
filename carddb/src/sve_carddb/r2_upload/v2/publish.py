@@ -62,7 +62,7 @@ def next_index(
             if e is not None
         }:
             raise UploadError("Data version is already published with another manifest")
-        if string(entry["published_at"]) < string(current["published_at"]):
+        if _instant(entry["published_at"]) < _instant(current["published_at"]):
             raise UploadError("Export is older than the remote current")
         result = {
             "index_format": 2,
@@ -72,6 +72,12 @@ def next_index(
         }
     validate("Index", result, MEDIA)
     return result
+
+
+def _instant(value: JsonValue) -> tuple[str, str]:
+    """Schema-validated UTC instants can have absent or differently padded fractions."""
+    seconds, _, fraction = string(value).removesuffix("Z").partition(".")
+    return seconds, fraction.rstrip("0")
 
 
 def upload(

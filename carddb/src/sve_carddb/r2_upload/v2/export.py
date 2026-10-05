@@ -2,6 +2,7 @@
 
 import gzip
 import re
+import zlib
 from dataclasses import dataclass
 from io import BytesIO
 from typing import TYPE_CHECKING
@@ -15,7 +16,7 @@ from sve_carddb.snapshot.media import display_url
 from sve_carddb.snapshot.preview import POINTER
 from sve_carddb.snapshot.profiles import MEDIA
 from sve_carddb.snapshot.publication import require_preview
-from sve_carddb.snapshot.reader import read_snapshot, read_text_all
+from sve_carddb.snapshot.reader import read_snapshot
 from sve_carddb.snapshot.values import (
     array,
     canonical,
@@ -185,12 +186,6 @@ def _load(root: Path) -> Export:
         for f in map(object_value, array(manifest["files"]))
     }
     tables = read_snapshot(manifest, payloads)
-    if manifest["text_all"] is not None:
-        union = object_value(manifest["text_all"])
-        contained = {string(object_value(i)["key"]) for i in array(union["contains"])}
-        attachments = {k: v for k, v in payloads.items() if k not in contained}
-        if read_text_all(manifest, blobs[string(union["path"])], attachments) != tables:
-            raise UploadError("Export text union and shards differ")
     unique = {m.key: m for m in members}
     if set(unique) - {path + ".br"} != closure(path, manifest):
         raise UploadError("Export members differ from the manifest closure")
@@ -213,7 +208,12 @@ def _manifest(root: Path) -> tuple[str, bytes, dict[str, JsonValue]]:
     path = string(pointer["manifest_path"])
     raw = read_member(root, path)
     manifest = object_value(parse(raw))
-    if digest(raw) != pointer["manifest_sha256"] or canonical(manifest) != raw:
+    hashed = digest(raw)
+    if (
+        hashed != pointer["manifest_sha256"]
+        or path != "snapshots/manifests/" + hashed[7:] + ".json"
+        or canonical(manifest) != raw
+    ):
         raise UploadError("Manifest differs from the preview pointer")
     require_preview(manifest, regions=tuple(map(string, array(manifest["regions"]))))
     if manifest["format_version"] != MEDIA:
@@ -258,8 +258,12 @@ def _encoded(
     result = [Member(path, raw, JSON_HEADERS)]
     if gz:
         encoded = read_member(root, path + ".gz")
-        if encoded != gzip.compress(raw, compresslevel=9, mtime=0):
-            raise UploadError("Export gzip sibling is not the canonical encoding")
+        try:
+            with gzip.GzipFile(fileobj=BytesIO(encoded)) as stream:
+                if stream.read(len(raw) + 1) != raw:
+                    raise UploadError("Export gzip sibling differs from raw bytes")
+        except EOFError, OSError, zlib.error:
+            raise UploadError("Export gzip sibling is not readable") from None
         result.append(
             Member(path + ".gz", encoded, JSON_HEADERS | {"content-encoding": "gzip"})
         )

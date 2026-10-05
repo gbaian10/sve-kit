@@ -87,6 +87,29 @@ def test_namespace_limits_candidates(
         gc.collect(store, frozenset({"snapshots/"}), execute=False)
 
 
+def test_previous_images_are_collected_when_current_withdraws_them(
+    images: PublicImages,
+    roots: Roots,
+    remote: tuple[R2Store, ServerState, Loopback],
+) -> None:
+    store, state, _ = remote
+    export(images, roots, step=0)
+    previous = load_export(roots.preview)
+    upload(store, previous, None)
+    absent = deepcopy(images.projection)
+    absent.tables["image_asset"][0]["availability"] = "missing"
+    absent.tables["image_variant"] = []
+    export(images, roots, step=1, projection=absent)
+    current = load_export(roots.preview)
+    assert not current.images
+    upload(store, current, None)
+    result = gc.collect(store, PUBLIC_PREFIXES, execute=True)
+    assert result["deleted"] == sorted(i.key for i in previous.images)
+    assert set(state.objects) == {
+        m.key for e in (previous, current) for m in e.members
+    } | {INDEX}
+
+
 def test_missing_retained_member_stops_before_deletion(
     images: PublicImages,
     roots: Roots,
