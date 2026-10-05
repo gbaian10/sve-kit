@@ -176,8 +176,9 @@ uv --directory carddb run sve-carddb r2 upload-v2 \
 ```
 
 dry-run 在本機驗證指標、清單 hash、Schema、每個分片的 hash／長度、gzip 與 `.br` 解碼、
-reader 重接與完整文字包，以及每張卡圖的 bytes、WebP 格式與尺寸，再列出 JSON／卡圖的檔數與 bytes。
-`.br` 使用 lockfile 的 Python `brotli` 在行程內解碼核對，不重壓。
+reader 重接所需的引用閉包，以及每張卡圖的 bytes、WebP 格式與尺寸，再列出 JSON／卡圖的檔數與 bytes。
+gzip 與 `.br` 沒有獨立 hash，解碼核對其內容等於已驗證的 raw bytes，不重壓；`.br` 使用 lockfile 的 Python `brotli`。
+完整文字包與分片的等價性由匯出 writer 檢查，上傳只驗其清單 hash／長度，不再重跑第二次全量 reader 重接。
 離線數字是本機候選，遠端已有多少未知。dry-run 不讀憑證、不建立 HTTP client、不寫任何檔案。
 
 ## 7. 當次授權與上傳
