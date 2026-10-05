@@ -10,7 +10,7 @@ machine translations remain active values; consumers must mark them for review
 and let readers switch to the original source.
 
 Current template shards use `translation_authored_format: 2`. Each record has
-`record_key,kind,data,origin,low_confidence,note`. Definitions preserve their nine
+`record_key,kind,data,origin,low_confidence,note`. Definitions preserve their eight
 semantic/source fields; translations contain only `template_id,lang,text`.
 `origin` remains `machine` after review. Notes do not affect semantic identity.
 The shared glossary reader owns glossary/name values; template code uses that
@@ -37,11 +37,12 @@ source positions agree. Parsing an inventory is not a successful build.
 Definitions must reproduce the six-field semantic payload and its content hash,
 exact source spans, slot types, semantic roles, safe integer bounds, raw values
 and full positional coverage. Repeated slots require equal values and roles.
-Unknown references stay pending. One payload has one allocated ID, collisions
-compare full payload bytes, and a source position can match at most one current
-definition. Existing IDs stay allocated even when unused old collision definitions
-are removed. Supersedes links cannot cycle; an unloaded legacy parent does not
-create a fictitious foreign-key row.
+Unknown references stay pending. A definition ID is `T` followed by a prefix of
+its content hash; one payload has one allocated ID and collisions compare full
+payload bytes. A definition matches every source position with the same normalized
+text and role whose schema and slot roles also verify; a position with another
+schema or role stays unmatched rather than merged. A source position can match at
+most one current definition.
 
 `template_parameter_rules.current` reads registered, explicit enabled/disabled
 switches from `authored/template-parameter-rules/current.yaml`. Missing files fail;
@@ -57,7 +58,7 @@ unused or malformed slots fail. No expressions or global N/X substitutions exist
 Historical adoption loaders, inventory formats 1/2, approval receipts and frozen
 semantic interpreters have been removed. Git retains their history; current builds
 need no legacy template catalog or historical environment. Shared member, schema
-and family checks live in `members` and `definitions`.
+and matching checks live in `members` and `definitions`.
 
 `current_build.apply()` is the export-offline consumer. It projects the verified
 definitions and current targets into the shared current DB schema, then renders

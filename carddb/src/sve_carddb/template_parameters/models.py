@@ -135,7 +135,6 @@ class Candidate(RecordData):
     normalized_hash: Hash
     parameter_normalizer_id: Text
     template_normalized_hash: Hash
-    legacy_id: Text | None
     parameter_schema: Schema | None
     slots: tuple[Hint, ...]
     literal_trace: tuple[LiteralTrace, ...]
@@ -143,4 +142,3 @@ class Candidate(RecordData):
     signature_hash: Hash
     payload_hash: Hash | None
     adoption_status: Literal["candidate_only"] = "candidate_only"
-    supersedes_id: None = None

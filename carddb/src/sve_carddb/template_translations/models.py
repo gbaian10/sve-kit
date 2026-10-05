@@ -8,9 +8,7 @@ from sve_carddb.products.models import Code
 from sve_carddb.registry.records import Hash, RecordData, Text
 from sve_carddb.template_parameters.models import Schema, SourceSpan
 
-TemplateId = Annotated[
-    str, Field(pattern=r"^[TC](?:[0-9a-f]{10}|(?:[0-9a-f]{2}){8,32})\Z")
-]
+TemplateId = Annotated[str, Field(pattern=r"^[TC](?:[0-9a-f]{2}){8,32}\Z")]
 
 
 class Definition(RecordData):
@@ -22,4 +20,3 @@ class Definition(RecordData):
     semantic_variant: Code
     parameter_schema: Schema
     content_hash: Hash
-    supersedes_id: TemplateId | None

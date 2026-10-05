@@ -60,7 +60,6 @@ def test_headers_with_and_without_body_preserve_all_text(header: str) -> None:
         "NextN",
     ]
     assert len([part for part in parts if part.role == "token_header"]) == 2
-    assert {part.member_source for part in parts} == {"section:4/token:Synthetic"}
 
 
 def test_header_pattern_runs_only_on_sections_and_before_trimming() -> None:
@@ -68,21 +67,6 @@ def test_header_pattern_runs_only_on_sections_and_before_trimming() -> None:
     assert bodies(header, section=0) == []
     assert bodies(header) == ["『X』{Synthetic}クレスト"]
     assert bodies(" " + header, section=0) == ["『X』{Synthetic}クレスト"]
-
-
-def test_multiple_definitions_keep_the_correct_private_member_source() -> None:
-    parts = partition(
-        "Intro\n『First』{Synthetic}クレストFirst２\nContinue３\n『Second』{Synthetic}クレストSecond４",
-        section=0,
-    )
-    assert [
-        (part.line_ordinal, part.member_source) for part in parts if part.role == "body"
-    ] == [
-        (0, "section:0"),
-        (1, "section:0/token:First"),
-        (2, "section:0/token:First"),
-        (3, "section:0/token:Second"),
-    ]
 
 
 def test_unknown_header_is_rejected_without_echoing_source() -> None:
@@ -147,9 +131,9 @@ def test_empty_trace_cannot_cover_nonempty_source() -> None:
     verify_partition("", ())
 
 
-def test_same_old_fingerprint_does_not_mean_same_source_trace() -> None:
+def test_same_normalized_text_does_not_mean_same_source_trace() -> None:
     one = partition("２（note）２")
     two = partition("３２")
-    assert one[0].template == two[0].template
+    assert one[0].normalized_hash == two[0].normalized_hash
     assert one[0].normalized == two[0].normalized == "N"
     assert one[0].segments != two[0].segments

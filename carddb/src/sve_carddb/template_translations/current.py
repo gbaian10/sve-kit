@@ -17,12 +17,11 @@ from sve_carddb.template_translations.current_models import (
     TranslationRecord,
     VariantRecord,
 )
-from sve_carddb.template_translations.definitions import _definitions, _matching_members
+from sve_carddb.template_translations.definitions import _definitions
 from sve_carddb.template_translations.files import INVENTORY, SHARD, Files, read
 from sve_carddb.translations.loader import Snapshot as Glossary
 from sve_carddb.translations.loader import validate_snapshot
 
-LEGACY_ID_LENGTH = 11
 CURRENT_FORMAT = 2
 
 if TYPE_CHECKING:
@@ -170,13 +169,6 @@ def _references(records: dict[str, Record], entries: set[str]) -> None:
         if data.content_hash in payloads and payloads[data.content_hash] != identifier:
             raise ValueError("Template payload hash must have exactly one allocated ID")
         payloads[data.content_hash] = identifier
-        visited = {identifier}
-        parent = data.supersedes_id
-        while parent in definitions:
-            if parent in visited:
-                raise ValueError("Template supersedes chain must not contain a cycle")
-            visited.add(parent)
-            parent = definitions[parent].data.supersedes_id
     _texts(records, definitions)
 
 
@@ -213,7 +205,6 @@ def read_templates(repository: PinnedRepository, revision: str) -> Inputs:
 class Validated:
     inputs: Inputs
     frequencies: tuple[tuple[str, int], ...]
-    unadopted_parents: tuple[tuple[str, str], ...]
     unmatched_entries: tuple[str, ...]
     missing_translations: tuple[str, ...]
     low_confidence: tuple[str, ...]
@@ -290,32 +281,23 @@ def validate_templates(inputs: Inputs, sources: Sources) -> Validated:
         raise ValueError(
             "Current template inventory differs from its regenerated source"
         )
-    definitions, frequencies, parents = _definitions(
+    definitions, members, frequencies = _definitions(
         tuple(
-            (record, None)
-            for record in inputs.records
-            if isinstance(record, DefinitionRecord)
+            record for record in inputs.records if isinstance(record, DefinitionRecord)
         ),
         actual,
     )
-    retired = {record.data.supersedes_id for record in definitions.values()}
-    matched: set[str] = set()
-    matches: list[tuple[str, str]] = []
-    for identifier, record in definitions.items():
-        if identifier in retired:
-            continue
-        member = actual[record.data.inventory_id]
-        identifiers = _matching_members(
-            member, record, actual, old=len(identifier) == LEGACY_ID_LENGTH
-        )
-        matched.update(identifiers)
-        matches.extend((entry_id, identifier) for entry_id in identifiers)
+    matches = [
+        (entry_id, identifier)
+        for identifier, identifiers in members.items()
+        for entry_id in identifiers
+    ]
+    matched = {entry_id for entry_id, _ in matches}
     translated = {record.data.template_id for record in inputs.translations()}
-    missing = set(definitions) - retired - translated
+    missing = set(definitions) - translated
     return Validated(
         inputs,
         frequencies,
-        parents,
         tuple(sorted(set(actual) - matched)),
         tuple(sorted(missing)),
         tuple(

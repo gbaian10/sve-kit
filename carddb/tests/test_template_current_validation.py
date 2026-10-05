@@ -10,7 +10,7 @@ from sve_carddb.template_parameter_rules.current import resolve
 from sve_carddb.template_parameters.inventory import Candidates
 from sve_carddb.template_translations.current import validate_templates
 from sve_carddb.template_translations.current_models import DefinitionRecord
-from sve_carddb.template_translations.definitions import payload
+from sve_carddb.template_translations.definitions import _definitions, payload
 
 from .test_template_current import make_case
 
@@ -56,7 +56,7 @@ def current_case(tmp_path_factory: pytest.TempPathFactory) -> Case:
         (
             "id",
             "T" + "0" * 16,
-            "Template ID differs from its legacy fingerprint or allocated payload hash",
+            "Template ID differs from its allocated payload hash",
         ),
     ],
 )
@@ -123,12 +123,32 @@ def test_current_payload_has_one_id_and_each_source_has_one_definition(
         )
 
 
+@pytest.mark.parametrize("change", ["roles", "pending"])
+def test_equal_text_with_another_schema_or_role_stays_unmatched(
+    current_case: Case, change: str
+) -> None:
+    record = current_case.inputs.records[0]
+    assert isinstance(record, DefinitionRecord)
+    members = {m.entry.id: m for m in current_case.generated.entries}
+    member = members[record.data.inventory_id]
+    other = replace(
+        member,
+        entry=member.entry.model_copy(update={"id": "inv:other"}),
+        roles=("other_role",) * len(member.roles)
+        if change == "roles"
+        else member.roles,
+        pending=("unresolved",) if change == "pending" else member.pending,
+    )
+    _, matches, frequencies = _definitions((record,), {**members, "inv:other": other})
+    assert matches == {record.data.id: (member.entry.id,)}
+    assert frequencies == ((record.data.id, 1),)
+
+
 @pytest.mark.parametrize("duplicate", [False, True])
 def test_current_matcher_cannot_duplicate_or_reclaim_numeric_ownership(
     current_case: Case, *, duplicate: bool
 ) -> None:
     candidate = current_case.generated.entries[0].candidate
-    assert candidate.legacy_id is not None
     # The ordinary unit rule already owns this source position.
     row: dict[str, JsonValue] = {
         "inventory_id": candidate.inventory_id,
@@ -151,7 +171,6 @@ def test_current_matcher_requires_the_exact_unresolved_reason(
     current_case: Case,
 ) -> None:
     candidate = current_case.generated.entries[0].candidate
-    assert candidate.legacy_id is not None
     hint = candidate.slots[0].model_copy(update={"issues": ()})
     changed = candidate.model_copy(update={"slots": (hint,)})
     with pytest.raises(

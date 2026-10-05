@@ -1,4 +1,4 @@
-"""Whole-batch candidate replay and separate mechanical forks versus semantic review."""
+"""Whole-batch parameter candidate replay and summary counts."""
 
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.snapshot.values import array, digest, object_value
 from sve_carddb.template_parameters.analysis import (
     NUMERIC_RULE_PENDING,
     NUMERIC_RULES,
@@ -161,53 +161,8 @@ def _coverage(result: Candidates, scan: Scan) -> None:
         )
 
 
-def mechanical(candidate: Candidate) -> str:
-    """Literal N/X and actual replacement positions differ even with equal legacy bytes."""
-    return digest(
-        canonical(
-            [
-                [h.occurrence.model_dump(mode="json"), h.transformation]
-                for h in candidate.slots
-            ]
-        )
-    )
-
-
-def lineage(candidates: Candidates) -> tuple[dict[str, JsonValue], ...]:
-    """No old parent has approved payload here, so DB supersedes stays null."""
-    groups: dict[str, list[Candidate]] = defaultdict(list)
-    for item in candidates.entries:
-        if item.legacy_id is not None:
-            groups[item.legacy_id].append(item)
-    result: list[dict[str, JsonValue]] = []
-    for identifier, members in sorted(groups.items()):
-        if len({m.normalized_hash for m in members}) != 1:
-            raise ValueError(
-                "Legacy fingerprint collision must stop parameter candidate grouping"
-            )
-        variants: dict[str, list[JsonValue]] = defaultdict(list)
-        mechanical_variants: dict[str, list[JsonValue]] = defaultdict(list)
-        for member in members:
-            variants[member.signature_hash].append(member.inventory_id)
-            mechanical_variants[mechanical(member)].append(member.inventory_id)
-        result.append(
-            {
-                "legacy_id": identifier,
-                "normalized_hash": members[0].normalized_hash,
-                "members": len(members),
-                "mechanical_variants": dict(sorted(mechanical_variants.items())),
-                "candidate_variants": dict(sorted(variants.items())),
-                "requires_provenance_split": len(mechanical_variants) > 1,
-                "semantic_review_required": any(m.issues for m in members),
-                "supersedes_id": None,
-            }
-        )
-    return tuple(result)
-
-
 def summary(candidates: Candidates) -> dict[str, JsonValue]:
     """Do not equate byte replay, consistent placeholder roles or semantic adoption."""
-    parents = lineage(candidates)
     roles: dict[str, JsonValue] = {}
     for role in ("body", "reminder", "token_header", "layout"):
         members = [item for item in candidates.entries if item.source_span.role == role]
@@ -233,13 +188,6 @@ def summary(candidates: Candidates) -> dict[str, JsonValue]:
         "field_count": len(candidates.field_proofs),
         "source_span_roundtrip_complete": all(
             p["utf8_roundtrip"] is True for p in candidates.field_proofs
-        ),
-        "legacy_template_count": len(parents),
-        "legacy_provenance_forks": sum(
-            p["requires_provenance_split"] is True for p in parents
-        ),
-        "legacy_pending_semantics": sum(
-            p["semantic_review_required"] is True for p in parents
         ),
         "slot_counts": dict(
             Counter(h.semantic_role for m in candidates.entries for h in m.slots)

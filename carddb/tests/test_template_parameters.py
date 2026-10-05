@@ -1,4 +1,4 @@
-"""Invented independent uint, layout, concept, vocabulary and legacy-fork counterexamples."""
+"""Invented independent uint, layout, concept, vocabulary and literal-N counterexamples."""
 
 import re
 from dataclasses import replace
@@ -16,7 +16,7 @@ from sve_carddb.template_parameters.analysis import (
     schema,
     unsigned,
 )
-from sve_carddb.template_parameters.inventory import Candidates, lineage, summary
+from sve_carddb.template_parameters.inventory import Candidates, summary
 from sve_carddb.template_parameters.models import Range, Schema, Slot, SourceSpan
 from sve_carddb.template_parameters.references import References
 from sve_carddb.template_parameters.spans import locate
@@ -296,23 +296,11 @@ def test_layout_is_exact_whitespace_literal_and_reminders_are_not_approved_rules
     assert "legacy_parenthesis_classification_requires_review" in reminder.issues
 
 
-def test_literal_n_and_numeric_n_force_fork_without_fake_parent_payload() -> None:
+def test_literal_n_and_numeric_n_keep_distinct_schemas() -> None:
     ordinary = candidate("試験N枚")
     numeric = candidate("試験２枚")
-    assert ordinary.legacy_id == numeric.legacy_id
-    parents = lineage(Candidates(entries=[ordinary, numeric]))
-    assert parents[0]["requires_provenance_split"] is True
-    assert len(object_value(parents[0]["mechanical_variants"])) == 2
-    assert parents[0]["supersedes_id"] is None
-    assert (
-        summary(Candidates(entries=[ordinary, numeric]))["legacy_provenance_forks"] == 1
-    )
-    damaged = numeric.model_copy(update={"normalized_hash": HASH})
-    with pytest.raises(
-        ValueError,
-        match=r"\ALegacy fingerprint collision must stop parameter candidate grouping\Z",
-    ):
-        lineage(Candidates(entries=[ordinary, damaged]))
+    assert ordinary.normalized_hash == numeric.normalized_hash
+    assert ordinary.signature_hash != numeric.signature_hash
 
 
 @pytest.mark.parametrize(
