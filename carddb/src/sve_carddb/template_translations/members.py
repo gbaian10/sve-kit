@@ -26,6 +26,10 @@ POSITIVE_ROLES = {
     "turn_ordinal",
     "deck_top_ordinal",
     "counter_group_size",
+    "damage_count_multiplier",
+    "damage_attack_multiplier",
+    "count_formula_multiplier",
+    "attack_damage_multiplier",
 }
 
 

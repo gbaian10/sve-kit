@@ -174,6 +174,16 @@ def test_current_resolution_carries_role_and_rejects_weakened_numeric_bounds(
         )
     )
     m.verify_schema(schema)
+    if minimum == 1:
+        with pytest.raises(
+            ValueError,
+            match=r"^Template numeric bounds differ from the recognized role$",
+        ):
+            m.verify_schema(
+                schema.model_copy(
+                    update={"slots": (schema.slots[0].model_copy(update={"min": 0}),)}
+                )
+            )
     wrong = replace(m, roles=("card_ordinal" if minimum == 0 else "numeric",))
     with pytest.raises(
         ValueError, match=r"^Template numeric bounds differ from the recognized role$"

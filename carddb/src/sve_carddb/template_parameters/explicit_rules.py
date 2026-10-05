@@ -1,6 +1,7 @@
 """Finite lexical roles for explicit counters, people and deck positions."""
 
 from dataclasses import dataclass
+from typing import Literal
 
 
 @dataclass(frozen=True)
@@ -9,6 +10,7 @@ class ExplicitRule:
     before: str
     after: str
     minimum: int = 0
+    companion: Literal["prefix", "suffix"] | None = None
 
 
 # An unrecognized name must remain pending rather than borrowing a suffix of a known one.
@@ -115,5 +117,49 @@ EXPLICIT = {
     ),
     "attack_sum_bound": ExplicitRule(
         "attack_sum_bound", r"の攻撃力の合計が$", r"^(?:以上|以下)?なら"
+    ),
+    "distinct_card_name_count": ExplicitRule(
+        "distinct_card_name_count", r"のカード名の種類数が$", r"^種類以上なら"
+    ),
+    "distinct_original_cost_count": ExplicitRule(
+        "distinct_original_cost_count",
+        r"カードの元のコストの種類数が$",
+        r"^種類以上なら",
+    ),
+    "damage_count_multiplier": ExplicitRule(
+        "damage_count_multiplier",
+        r"「(?:[^「」]+の(?:数|枚数)|戻した枚数)」の$",
+        r"^倍のダメージ(?=[。:、）」])",
+        minimum=1,
+    ),
+    "damage_attack_multiplier": ExplicitRule(
+        "damage_attack_multiplier",
+        r"「[^「」]+の攻撃力」の$",
+        r"^倍のダメージ(?=[。:、）」])",
+        minimum=1,
+    ),
+    "count_formula_multiplier": ExplicitRule(
+        "count_formula_multiplier",
+        r"Xは「[^「」]+の(?:数|枚数)の$",
+        r"^倍」である(?=[。:、）)])",
+        minimum=1,
+    ),
+    "attack_damage_multiplier": ExplicitRule(
+        "attack_damage_multiplier",
+        r"が与える「リーダーへの攻撃ダメージ」と「交戦ダメージ」を$",
+        r"^倍にする(?=[。:、）)])",
+        minimum=1,
+    ),
+    "received_damage_lower_bound": ExplicitRule(
+        "received_damage_lower_bound",
+        r"が受ける$",
+        r"^以上のダメージを(?P<companion>N)にする(?=[。:、）」])",
+        companion="suffix",
+    ),
+    "received_damage_assignment": ExplicitRule(
+        "received_damage_assigned_value",
+        r"が受ける(?P<companion>N)以上のダメージを$",
+        r"^にする(?=[。:、）」])",
+        companion="prefix",
     ),
 }

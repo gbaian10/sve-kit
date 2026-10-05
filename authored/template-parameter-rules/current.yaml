@@ -9,6 +9,10 @@ rules:
     enabled: true
     origin: project
     low_confidence: false
+  - rule_id: attack_damage_multiplier
+    enabled: true
+    origin: project
+    low_confidence: false
   - rule_id: attack_health_assignment
     enabled: true
     origin: project
@@ -37,6 +41,18 @@ rules:
     enabled: true
     origin: project
     low_confidence: false
+  - rule_id: count_formula_multiplier
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: damage_attack_multiplier
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: damage_count_multiplier
+    enabled: true
+    origin: project
+    low_confidence: false
   - rule_id: dealt_ability_damage_delta
     enabled: true
     origin: project
@@ -53,11 +69,27 @@ rules:
     enabled: true
     origin: project
     low_confidence: false
+  - rule_id: distinct_card_name_count
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: distinct_original_cost_count
+    enabled: true
+    origin: project
+    low_confidence: false
   - rule_id: ep_delta
     enabled: true
     origin: project
     low_confidence: false
   - rule_id: health_assignment
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: keyword_alias_nc
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: keyword_alias_sc
     enabled: true
     origin: project
     low_confidence: false
@@ -166,6 +198,14 @@ rules:
     origin: project
     low_confidence: false
   - rule_id: received_combat_damage_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: received_damage_assignment
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: received_damage_lower_bound
     enabled: true
     origin: project
     low_confidence: false

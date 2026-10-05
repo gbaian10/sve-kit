@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_parameters.explicit_rules import EXPLICIT
+from sve_carddb.template_parameters.keyword_aliases import KEYWORD_ALIASES
 from sve_carddb.template_parameters.numeric_rules import (
     ASCII_AFTER,
     ASCII_BEFORE,
@@ -186,6 +187,16 @@ RULES += tuple(
     )
     for identifier, spec in SIGNED_CONTEXTS.items()
 )
+RULES += tuple(
+    Rule(
+        identifier,
+        alias.role,
+        "numeric_identifier_requires_review",
+        "closed raw alias and unique registered full ability",
+        (alias.target,),
+    )
+    for identifier, alias in KEYWORD_ALIASES.items()
+)
 BY_ID = {rule.id: rule for rule in RULES}
 
 
@@ -196,6 +207,23 @@ def selection(enabled: tuple[str, ...]) -> tuple[str, ...]:
     if any(rule not in BY_ID for rule in enabled):
         raise ValueError("Candidate rule selection contains an unknown rule")
     return tuple(sorted(enabled))
+
+
+def _explicit_conditions(identifier: str) -> dict[str, JsonValue]:
+    spec = EXPLICIT[identifier]
+    result: dict[str, JsonValue] = {
+        "explicit_evidence": {
+            "prefix_pattern": spec.before,
+            "suffix_pattern": spec.after,
+            "minimum": spec.minimum,
+            "maximum": 9007199254740991,
+            "raw_unsigned_decimal": True,
+            "context_includes_numeric_span": True,
+        }
+    }
+    if spec.companion is not None:
+        result["raw_safe_unsigned_companion"] = spec.companion
+    return result
 
 
 def conditions(rule: Rule) -> dict[str, JsonValue]:
@@ -214,14 +242,19 @@ def conditions(rule: Rule) -> dict[str, JsonValue]:
         "invalid_safe_unsigned_decimal": False,
     }
     if rule.id in EXPLICIT:
-        spec = EXPLICIT[rule.id]
-        result["explicit_evidence"] = {
-            "prefix_pattern": spec.before,
-            "suffix_pattern": spec.after,
-            "minimum": spec.minimum,
+        result.update(_explicit_conditions(rule.id))
+        return result
+    if rule.id in KEYWORD_ALIASES:
+        alias = KEYWORD_ALIASES[rule.id]
+        result["keyword_alias_evidence"] = {
+            "raw_prefix": "【" + alias.spelling + "_",
+            "raw_exact": True,
+            "full_registered_name": alias.full_name,
+            "target_id": alias.target,
+            "unique_ability": True,
+            "adjacent_closing_bracket": True,
+            "minimum": 0,
             "maximum": 9007199254740991,
-            "raw_unsigned_decimal": True,
-            "context_includes_numeric_span": True,
         }
         return result
     if rule.id in SIGNED_CONTEXTS:
