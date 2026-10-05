@@ -84,7 +84,6 @@ cards:
           name: bane
   BP03-078:
     status: complete
-    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
     abilities:
       - line: 1
         kind: static
@@ -121,7 +120,6 @@ cards:
         subject: self
   BP03-109:
     status: complete
-    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
     abilities:
       - line: 1
         kind: static
@@ -194,7 +192,6 @@ cards:
         subject: self
   BP03-119:
     status: complete
-    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
     abilities:
       - line: 1
         kind: evolve
@@ -222,7 +219,7 @@ cards:
             max: 1
   BP03-SL07:
     status: complete
-    review: 第三輪依 13.3.3.2 複核土の秘術：使用可選追加費用與 paid 條件；原稿誤寫為必要成本。完整卡文與其餘能力保持原義。
+    review: 土の秘術（13.3.3.2）是打出時的可選追加費用，效果只讀 paid 條件，不在解算中再次付費。
     abilities:
       - line: 1
         kind: trigger

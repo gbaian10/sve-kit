@@ -20,10 +20,9 @@ Never regenerate IDs from sorting, edit an adopted batch in place, or treat a `n
 The glossary input follows the [translation contract](../docs/schema/translation-contract.md)
 and [glossary adoption rules](../docs/schema/glossary-adoption.md). The index closes the input
 directory; keep documentation, candidates and audit reports outside `translations/`.
-Concept keys are permanent. Translation and emphasis corrections require a new adoption
-with its own receipt and predecessor; do not edit adopted records. Frozen evidence is
-replayed from external source stores, while unverified source claims remain project choices.
-Delegated receipts name the actual coordinator and do not count as personal maintainer approval.
+Concept keys are permanent. Edit translation YAML directly and review it in a PR; Git keeps the
+history (ADR-0018). Official wording stays out of git. Mark quality with `low_confidence`
+and `origin`; a `source_claim` is optional and only holds a work, URL or claimed source.
 
 Class and card-type labels use catalog vocabulary references `(kind, code)`, rather than
 glossary identities. Equal display text does not merge those references: resource EP/SEP

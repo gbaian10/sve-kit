@@ -2,7 +2,6 @@ version: astra/1
 cards:
   CP02-001:
     status: complete
-    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
     abilities:
       - line: 1
         kind: evolve
@@ -62,7 +61,6 @@ cards:
         subject: self
   CP02-003:
     status: complete
-    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
     abilities:
       - line: 1
         kind: trigger
@@ -94,7 +92,6 @@ cards:
             count: 1
   CP02-007:
     status: complete
-    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
     abilities:
       - line: 1
         kind: trigger
@@ -182,7 +179,6 @@ cards:
         limit: 1
   CP02-SL16:
     status: complete
-    review: 第三輪複核完整卡文：生命／第幾次攻擊的「なら」在結算時判斷，誘發時只判定事件主體；其餘能力保持原義。
     abilities:
       - line: 1
         kind: static
@@ -237,7 +233,6 @@ cards:
   CP02-T01:
     token_template: true
     status: complete
-    review: 本文是同名規則卡「魔法のアイテム」的外觀版本；section 的開局 5 枚配置由標題構築共通規則執行，不重複建立觸發。
     abilities:
       - line: 1
         kind: spell

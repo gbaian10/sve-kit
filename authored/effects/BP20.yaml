@@ -2,7 +2,6 @@ version: astra/1
 cards:
   BP20-020:
     status: complete
-    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
     abilities:
       - line: 1
         kind: evolve
@@ -441,7 +440,7 @@ cards:
         subject: self
   BP20-P59:
     status: complete
-    review: 第三輪依封存卡文及 Q2702／Q2685 複核；捨牌即誘發，場上マゼルベイン的存在於結算時判定；全部 sections 另列能力。
+    review: 依 Q2702／Q2685：捨牌即誘發，場上マゼルベイン的存在於結算時判定。
     abilities:
       - line: 1
         kind: trigger
@@ -730,7 +729,7 @@ cards:
             max: 1
   BP20-P70:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。 E24 結束階段先誘發，手牌張數條件在 body.if 結算時重讀。
+    review: E24 結束階段先誘發，手牌張數條件在 body.if 結算時重讀。
     abilities:
       - line: 1
         kind: trigger
