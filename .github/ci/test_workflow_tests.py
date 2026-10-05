@@ -167,17 +167,20 @@ class DirectTestTests(unittest.TestCase):
         )
 
     def test_jobs_run_on_every_event_and_tests_are_unconditional(self) -> None:
-        """Only ci-ok is unconditional; component tests are gated by changed paths, never by event."""
+        """Job guards use change outputs; selected components always execute their test step."""
         workflow = cast(
             "dict[str, object]",
             yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text()),
         )
         jobs = cast("dict[str, dict[str, object]]", workflow["jobs"])
         assert jobs["ci-ok"]["if"] == "always()"
-        assert "env" not in jobs["ci-ok"]
-        for name, job in jobs.items():
-            assert "repository.private" not in str(job.get("if", "")), name
+        for name in ("changes", "repo", "commit"):
+            assert "if" not in jobs[name], name
         for component in ("python", "rust", "web"):
+            assert (
+                jobs[component]["if"]
+                == "${{ needs.changes.outputs." + component + " == 'true' }}"
+            )
             test = next(
                 step
                 for step in cast("list[dict[str, object]]", jobs[component]["steps"])
