@@ -19,7 +19,14 @@ if TYPE_CHECKING:
         FlavorCandidate,
         FlavorOwner,
     )
-ORDINALS = {"choice_ordinal", "card_ordinal", "repetition_ordinal", "turn_ordinal"}
+POSITIVE_ROLES = {
+    "choice_ordinal",
+    "card_ordinal",
+    "repetition_ordinal",
+    "turn_ordinal",
+    "deck_top_ordinal",
+    "counter_group_size",
+}
 
 
 @dataclass(frozen=True)
@@ -61,7 +68,7 @@ class Reconstructed:
                 used.add(index)
                 hint = self.hints[index]
                 roles.add(self.roles[index])
-                lower = 1 if self.roles[index] in ORDINALS else 0
+                lower = 1 if self.roles[index] in POSITIVE_ROLES else 0
                 if slot.type == "uint" and (
                     slot.min != lower or slot.max != SAFE_INTEGER
                 ):

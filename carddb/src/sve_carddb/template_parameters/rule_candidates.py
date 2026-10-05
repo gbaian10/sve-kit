@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.template_parameters.explicit_rules import EXPLICIT
 from sve_carddb.template_parameters.numeric_rules import (
     ASCII_AFTER,
     ASCII_BEFORE,
@@ -43,7 +44,7 @@ class Rule:
     targets: tuple[str, ...] = ()
 
 
-RULES = (
+RULES: tuple[Rule, ...] = (
     Rule(
         "suffix_damage_amount",
         "damage_amount",
@@ -165,6 +166,15 @@ RULES = (
         ("term:action.engage",),
     ),
 )
+RULES += tuple(
+    Rule(
+        identifier,
+        spec.role,
+        "numeric_role_requires_review",
+        "finite explicit prefix and suffix",
+    )
+    for identifier, spec in EXPLICIT.items()
+)
 BY_ID = {rule.id: rule for rule in RULES}
 
 
@@ -192,6 +202,17 @@ def conditions(rule: Rule) -> dict[str, JsonValue]:
         "existing_numeric_rule": False,
         "invalid_safe_unsigned_decimal": False,
     }
+    if rule.id in EXPLICIT:
+        spec = EXPLICIT[rule.id]
+        result["explicit_evidence"] = {
+            "prefix_pattern": spec.before,
+            "suffix_pattern": spec.after,
+            "minimum": spec.minimum,
+            "maximum": 9007199254740991,
+            "raw_unsigned_decimal": True,
+            "context_includes_numeric_span": True,
+        }
+        return result
     if rule.targets:
         result["reference_evidence"] = {
             "raw_name_exact": True,

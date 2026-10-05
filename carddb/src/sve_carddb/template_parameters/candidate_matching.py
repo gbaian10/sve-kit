@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.snapshot.values import digest
 from sve_carddb.template_parameters.analysis import prepared, unsigned
+from sve_carddb.template_parameters.explicit_rules import EXPLICIT
 from sve_carddb.template_parameters.models import Range
 from sve_carddb.template_parameters.numeric_rules import (
     ASCII_AFTER,
@@ -185,6 +186,32 @@ def _match(
         return _braced(rule, text, hint, refs, before, after)
     if unsigned(_raw(text, hint.source_segments)) != hint.value or hint.value is None:
         return None
+    return _numeric_match(rule, text, hint, refs, units, (before, after))
+
+
+def _numeric_match(
+    rule: Rule,
+    text: str,
+    hint: Hint,
+    refs: References,
+    units: tuple[Unit, ...],
+    edges: tuple[str, str],
+) -> Match | None:
+    before, after = edges
+    if rule.id in EXPLICIT:
+        spec = EXPLICIT[rule.id]
+        prefix = re.search(spec.before, before)
+        suffix = re.match(spec.after, after)
+        if (
+            prefix is None
+            or suffix is None
+            or hint.value is None
+            or hint.value < spec.minimum
+        ):
+            return None
+        return Match(
+            context=_origins(units, prefix.start(), hint.occurrence.end + suffix.end())
+        )
     if rule.id in SUFFIXES:
         return _suffix(rule, hint, before, after)
     if rule.id in SIGNED:

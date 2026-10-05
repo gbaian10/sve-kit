@@ -1,21 +1,6 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["template_translation_candidate","effect","Tf4a0ecd5e3","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tf4a0ecd5e3
-      lang: zh-Hant
-      text: '{起動}將這張卡片{橫置}、移除這張卡片的N個加虐指示物：給予自己的主戰者N點傷害。如果這張卡片上沒有放置加虐指示物，則將這張卡片放置到墓場。'
-      inventory_ids:
-        - inv:89d71f8a51282f3d8afa1e655e4c16560e973c89c987519ccbabe43dfb111900
-        - inv:eb7366d4727869022e5030c9ee6f6f5dbd37305f88d76c96898f73f5f73e75d2
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tf4b8d69be8","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -166,20 +151,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tf7d5075e57","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tf7d5075e57
-      lang: zh-Hant
-      text: '{起動}{消費N}捨棄手牌中的這張卡片：自己的主戰者{生命值}+N。將這張卡片放置到自己牌堆從上數來第N張的位置。'
-      inventory_ids:
-        - inv:eff814d042daa1bda5076852011d3e720effb26a1f574965903b3379ec325f85
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tf801fd53a9","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -234,21 +205,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tf999a7c1d0","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tf999a7c1d0
-      lang: zh-Hant
-      text: '{起動}將這張卡片{橫置}：如果這張卡片或自己EX區的N張卡片的熱情指示物為N個以上，則給予敵方的全部主戰者與敵方戰場上的全部從者N點傷害。這張卡片{生命值}+N。'
-      inventory_ids:
-        - inv:9e0a20b757ea920006ff29af25186fafa3aa17156ea568cc3d705affaa5960fe
-        - inv:f40b27b6adf0ea68ee16d4ca86d056fcc4071781163c015af672f6f80e7e2c49
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tf9c64d67bb","zh-Hant"]'
@@ -602,21 +558,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tfe9cbb2bef","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tfe9cbb2bef
-      lang: zh-Hant
-      text: 自己的結束階段到來時，移除這張卡片的N個神湯指示物。如果這張卡片上沒有放置神湯指示物，則將這張卡片放置到墓場。給予敵方戰場上的全部從者N點傷害。
-      inventory_ids:
-        - inv:4ee8468eb505d454dcc472e2526343b571410518fe01303bc7e6d58ef4768ec7
-        - inv:5b81cf0e4b4857d9a9d22fc46a459810f39c5bf5a2542d4a02252006b9501ef6
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: true
   - record_key: '["template_translation_candidate","effect","Tfea69afb8d","zh-Hant"]'
     kind: template_translation_candidate
     data:
