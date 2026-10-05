@@ -420,7 +420,9 @@ def test_execute_without_cdn_url_or_skip_is_refused_before_reading(
 
     monkeypatch.setattr(Credentials, "environment", forbidden)
     result = CliRunner().invoke(
-        app, ["r2", "upload-v2", "--export-dir", str(roots.preview), "--execute"]
+        app,
+        ["r2", "upload-v2", "--export-dir", str(roots.preview), "--execute"],
+        env={"FORCE_COLOR": None, "NO_COLOR": "1", "TERM": "dumb"},
     )
     assert result.exit_code != 0
     assert "--skip-cdn-verify" in result.output
