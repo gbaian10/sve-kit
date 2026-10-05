@@ -1,4 +1,4 @@
-"""Opt-in immutable semantics for confirmed wording adoption, without DSL approval."""
+"""Opt-in immutable semantics for wording, without DSL approval."""
 
 from sve_carddb.build_db.domains import HASH
 from sve_carddb.build_db.model import Column, ForeignKey, Kind, QueryCheck, Table

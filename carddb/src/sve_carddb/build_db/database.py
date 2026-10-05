@@ -90,7 +90,7 @@ class Database:
         if "search_alias" in self._tables:
             self.verify_alias_targets()
         if "face_semantics" in self._tables:
-            from sve_carddb.wording_adoptions.semantics import verify_semantics  # ruff: ignore[import-outside-top-level] -- semantic validation uses the initialized typed database boundary
+            from sve_carddb.build_db.semantics import verify_semantics  # ruff: ignore[import-outside-top-level] -- semantic validation uses the initialized typed database boundary
 
             verify_semantics(self)
 

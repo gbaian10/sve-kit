@@ -94,7 +94,7 @@ covers that card's adopted faces in that region. An unresolved source
 printing uses `(region, region + ":" + raw_card_no)` as its staging scope key.
 It has `card_id=None` and an empty face list until identity is adopted.
 
-Following [authored-layout §9.6](../../../../docs/schema/authored-layout.md#96-未採納表記的顯示與來源更正),
+Following [authored-layout §9.1](../../../../docs/schema/authored-layout.md#91-未採納表記的顯示與來源更正),
 the default never rejects display or removes cards, printings or faces. Callers
 keep readable observations visible, mark wording pending/conflicted as appropriate,
 and limit affected faces to manual use. The function only reports restrictions;

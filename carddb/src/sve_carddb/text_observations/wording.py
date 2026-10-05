@@ -67,37 +67,6 @@ class WordingView(RecordData):
         ]
 
 
-class _AdoptedInventory(RecordData):
-    face_id: Text
-    region: Region
-    checked: tuple[Text, ...]
-    current: tuple[Text, ...]
-    candidates: tuple[tuple[Text, Text | None], ...]
-
-
-class _AdoptedInventories(RecordData):
-    items: tuple[_AdoptedInventory, ...]
-
-
-def _adopted_inventories(db: Database) -> dict[tuple[str, Region], _AdoptedInventory]:
-    receipts = {
-        row.values["decision_id"]: _AdoptedInventories.model_validate_json(
-            _string(row.values["locator"])
-        ).items
-        for row in db.rows("decision_source")
-        if row.values["role"] == "wording_adoption_checked"
-    }
-    return {
-        (_string(row.values["face_id"]), _region(row.values["region"])): next(
-            i
-            for i in receipts[row.values["decision_id"]]
-            if (i.face_id, i.region) == (row.values["face_id"], row.values["region"])
-        )
-        for row in db.rows("face_current")
-        if row.values["decision_id"] in receipts
-    }
-
-
 class ObservedText(RecordData):
     revision_id: Text | None
     state: Literal["available", "missing_effect", "correction_conflict"]
@@ -252,32 +221,17 @@ def wording_views(db: Database, plan: TextPlan) -> dict[str, tuple[WordingView, 
         if item.content.effect is not None
     }
     groups = {(g.face_id, g.region): g for g in plan.groups}
-    adopted = _adopted_inventories(db)
     result: dict[str, list[WordingView]] = defaultdict(list)
     for (face, region), printings in sorted(parents.items()):
         current = currents.get((face, region))
         group = groups.get((face, region))
-        inventory = adopted.get((face, region))
-        if inventory is not None and set(inventory.current) <= set(inventory.checked):
-            continue
-        if (
-            inventory is None
-            and current is not None
-            and group is not None
-            and not group.reasons
-        ):
+        if current is not None and group is not None and not group.reasons:
             continue
         candidates = tuple(
             WordingCandidate(printing_id=p, revision_id=r)
             for p in sorted(printings)
             for r in _revision_options(observations[p, face])
         )
-        if inventory is not None:
-            candidates = tuple(
-                WordingCandidate(printing_id=p, revision_id=r)
-                for p, r in inventory.candidates
-                if p in printings
-            )
         blocked = (
             frozenset(printings)
             if group is not None and "source_correction_pending" in group.reasons
