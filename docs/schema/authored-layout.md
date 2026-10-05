@@ -64,7 +64,7 @@ records:
 
 canonical hash recipe 固定：JSON 物件鍵排序、UTF-8（不 ASCII escape）、分隔符 `,`／`:`、無額外空白／尾端換行，不正規化 Unicode。觀測 hash、authored source_record 的內容 hash 與後續各節沿用此 recipe。
 
-**其他入口的批次決定**：catalog、display、digital-links、region-reviews 等仍採批次決定封套的入口，沿以下 recipe（registry、商品與商品身分對照不採）：先對完整 record（不含封套的決定指針）計 semantic hash；將 `(record_key,semantic_hash)` 二元素陣列按 key 排序作為 members，再計 membership hash；decision ID 為 `d:` 加完整 membership hash 的 64 hex；confirmed 的 sample_ids 恰為全部 members 的 record_key。任何新成員或內容變更都不得沿用舊決定。
+**其他入口的批次決定**：catalog、display、region-reviews 等仍採批次決定封套的入口，沿以下 recipe（registry、商品與商品身分對照不採）：先對完整 record（不含封套的決定指針）計 semantic hash；將 `(record_key,semantic_hash)` 二元素陣列按 key 排序作為 members，再計 membership hash；decision ID 為 `d:` 加完整 membership hash 的 64 hex；confirmed 的 sample_ids 恰為全部 members 的 record_key。任何新成員或內容變更都不得沿用舊決定。
 
 `ids/index.yaml`（`authored_format: 2`）只保存 `allocation_policy`（目前 `region-ranges-2026-09-28-v1`）與各地區游標 `next_int_id: {en: …, jp: …}`，每個游標是該區下一個未使用值；鍵必須恰為政策內的地區，值落在 `[start, end+1]`，`end+1` 表示該區已用盡。不認識的政策或格式直接拒絕。讀取掃描 `registry/` 與 `ids/` 下全部 YAML 分片，不另存檔案清單或檔案 hash，內容由 Git 保存；任何不是合法分片的 YAML 都會讓讀取失敗。有分片卻沒有 index 時停止，避免重用配號；寫入時先裝分片、最後才更新 index，中斷時多出的配號會使游標檢查失敗。
 
