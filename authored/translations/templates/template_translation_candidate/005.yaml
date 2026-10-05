@@ -92,21 +92,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tf6a43e66dd","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tf6a43e66dd
-      lang: zh-Hant
-      text: 【進化時】從自己的牌堆中搜尋原始消費合計為N以下的至多N張透京・從者，召喚到戰場上。
-      inventory_ids:
-        - inv:89651f85c1486a8aff741e073b6a250d78c3ccb721ce21b66938f1f6412861cd
-        - inv:99d503275f4b71b1e6d04aa426e7c38cc871c459602e3723642b5a430fc99d2a
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tf6d8dd8a6d","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -511,36 +496,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tfe4e8d3b7f","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tfe4e8d3b7f
-      lang: zh-Hant
-      text: 查看自己牌堆頂的N張卡片。可以從其中將原始消費合計為N以下、屬於學院・從者或野獸・從者的至多N張卡片召喚到戰場上。將其餘卡片以任意順序放置到牌堆底。自己戰場上的全部從者{攻擊力}+N/{生命值}+N。
-      inventory_ids:
-        - inv:18294c7b4da3814dee2257e04ad1db0d95ad8b43267d71301a97b4338d61e447
-        - inv:8e5401e29c022692d38122c3587bc25f75a81d495fc890a85eb666e54672db0d
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","Tfe552e1bab","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: Tfe552e1bab
-      lang: zh-Hant
-      text: '{入場曲}如果自己的PP最大值為N，則抽取N張卡片。'
-      inventory_ids:
-        - inv:0f949bf04bf593aee39e2d176a8e34b3c124a2d825a311da9d432f969dce4fb6
-        - inv:2fbe793684bfd89eedb5aed2ed3beaf83eac7c3b44ded0ad7b000deb272e05d7
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","Tfe72f4cfee","zh-Hant"]'

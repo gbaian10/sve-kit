@@ -375,7 +375,7 @@ def test_switches_cannot_implicitly_expand_to_unknown_or_duplicate_rules(
 
 
 def test_registry_is_closed_default_off_and_not_an_approval_receipt() -> None:
-    assert len(BY_ID) == 24
+    assert len(BY_ID) == 36
     config = configuration()
     assert config["enabled"] == []
     assert config["recognition_policy"] is None

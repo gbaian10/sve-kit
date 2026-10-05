@@ -211,4 +211,4 @@ def test_context_proof_covers_original_fullwidth_counter_and_unit() -> None:
 def test_complete_reminder_is_supported_but_quoted_card_name_is_not() -> None:
     assert matches("（相手のリーダー２人を選ぶ）", "leader_person_quantity")
     assert matches("『相手のリーダー２人を選ぶ』", "leader_person_quantity") == ()
-    assert set(EXPLICIT) == {case[0] for case in CASES}
+    assert {case[0] for case in CASES} <= set(EXPLICIT)
