@@ -107,9 +107,7 @@ def test_writer_publishes_only_listed_webps_and_consistent_art_contract(
     shutil.copytree(images.library, library)
     (library / "original.png").write_bytes(png(8, 8))
     (library / "digital.webp").write_bytes(b"synthetic digital image")
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
-    roots.formal.mkdir()
-    (roots.formal / "sentinel").write_bytes(b"formal unchanged")
+    roots = Roots(tmp_path / "preview")
     plan = images.plan()
     members = {
         string(asset["path"]): (library / string(asset["source"])).read_bytes()
@@ -137,8 +135,6 @@ def test_writer_publishes_only_listed_webps_and_consistent_art_contract(
     } == members
     assert not list(roots.preview.rglob("*.png"))
     assert not (roots.preview / "digital.webp").exists()
-    assert (roots.formal / "sentinel").read_bytes() == b"formal unchanged"
-    assert sorted(p.name for p in roots.formal.iterdir()) == ["sentinel"]
     config = images.projection.config["image_sizes"]
     assert config == [
         {
@@ -155,7 +151,7 @@ def test_writer_publishes_only_listed_webps_and_consistent_art_contract(
     for row in images.projection.tables["image_variant"]:
         if row["size_key"] in {"art_s", "art_m"}:
             assert integer(row["width"]) * 3 == integer(row["height"]) * 4
-    again = Roots(tmp_path / "again", roots.formal)
+    again = Roots(tmp_path / "again")
     assert (
         write_preview(
             images.snapshot(), again, {}, image_source=library, media_plan=images.plan()
@@ -184,7 +180,7 @@ def test_unavailable_or_unapproved_images_have_metadata_only(
     if state == "withdrawn":
         asset["withdrawal_reason"] = "Synthetic withdrawal"
     tables["image_variant"] = []
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    roots = Roots(tmp_path / "preview")
     report = write_preview(
         images.snapshot(tables), roots, {}, media_plan=images.plan(tables)
     )
@@ -206,7 +202,7 @@ def test_writer_refuses_incomplete_available_image_closure(
         for row in tables["image_variant"]
         if missing != "all" and row["size_key"] != missing
     ]
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    roots = Roots(tmp_path / "preview")
     with pytest.raises(ValueError, match="all five sizes"):
         write_preview(
             images.snapshot(tables),
@@ -225,7 +221,7 @@ def test_third_party_approval_requires_each_image_confirmed(
     tables = images.tables()
     tables["image_asset"][0]["origin"] = "third_party"
     confirmed = frozenset({"image" if state == "confirmed" else "other"})
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    roots = Roots(tmp_path / "preview")
     if state == "confirmed":
         assert write_preview(
             images.snapshot(tables, confirmed_images=confirmed),
@@ -391,7 +387,7 @@ def test_equal_length_webp_tamper_requires_content_hash(
 def test_interruption_keeps_old_complete_preview(
     images: PublicImages, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
 ) -> None:
-    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    roots = Roots(tmp_path / "preview")
     tables = images.tables()
     tables["image_variant"] = []
     tables["image_asset"][0].update(
@@ -427,25 +423,22 @@ def test_interruption_keeps_old_complete_preview(
         )
     assert all(p.read_bytes() == raw for p, raw in old.items())
     assert not (roots.preview / "snapshots/versions").exists()
-    assert not roots.formal.exists()
 
 
-@pytest.mark.parametrize("relation", ["same", "input-child", "output-child", "formal"])
+@pytest.mark.parametrize("relation", ["same", "input-child", "output-child"])
 def test_image_source_roots_must_be_disjoint(
     images: PublicImages, tmp_path: Path, relation: str
 ) -> None:
-    preview, formal = tmp_path / "preview", tmp_path / "formal"
+    preview = tmp_path / "preview"
     source = preview
     if relation == "input-child":
         source /= "library"
     elif relation == "output-child":
         preview /= "output"
-    elif relation == "formal":
-        source = formal
     with pytest.raises(ValueError, match="disjoint"):
         write_preview(
             images.snapshot(),
-            Roots(preview, formal),
+            Roots(preview),
             {},
             image_source=source,
             media_plan=images.plan(),
@@ -460,7 +453,7 @@ def test_writer_rejects_relative_preview_before_writes(
     with pytest.raises(ValueError, match=r"^Preview root must be an absolute path$"):
         write_preview(
             images.snapshot(),
-            Roots(Path("relative-preview"), tmp_path / "formal"),
+            Roots(Path("relative-preview")),
             {},
             image_source=images.library,
             media_plan=images.plan(),

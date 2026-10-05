@@ -57,10 +57,8 @@ def crop_assets(
     }
     install(repo / "authored", [row, en])
     crops = load_image_crops(repo / "authored")
-    default_roots = PreviewRoots(base / "default", base / "cdn", base / "default-cache")
-    override_roots = PreviewRoots(
-        base / "override", base / "cdn", base / "override-cache"
-    )
+    default_roots = PreviewRoots(base / "default", base / "default-cache")
+    override_roots = PreviewRoots(base / "override", base / "override-cache")
     default = build_regional_assets(
         frozen, default_roots, region="jp", crops=empty_crops
     )
@@ -133,41 +131,42 @@ def test_consumer_rejects_old_default_and_forged_box_metadata(
         verify_asset_sources(forged, stores, crops=crops)
 
 
-def test_reuse_requires_new_box_cache_and_never_repairs(
+def test_new_box_misses_cache_and_keeps_old_entries(
     crop_assets: tuple[
         FrozenSources, ImageCrops, ImageBuild, ImageBuild, PreviewRoots, PreviewRoots
     ],
     tmp_path: Path,
 ) -> None:
-    frozen, crops, _, overridden, default_roots, override_roots = crop_assets
-    missing = PreviewRoots(
-        tmp_path / "missing", tmp_path / "cdn", tmp_path / "missing-cache"
-    )
-    shutil.copytree(default_roots.preview, missing.preview)
-    shutil.copytree(default_roots.cache, missing.cache)
+    frozen, crops, _, overridden, default_roots, _ = crop_assets
+    stale = PreviewRoots(tmp_path / "stale", tmp_path / "stale-cache")
+    shutil.copytree(default_roots.preview, stale.preview)
+    shutil.copytree(default_roots.cache, stale.cache)
     before = {
         p.relative_to(tmp_path): p.read_bytes()
         for p in tmp_path.rglob("*")
         if p.is_file()
     }
-    with pytest.raises(
-        ValueError, match=r"^Verified image recipe cache is incomplete$"
-    ):
-        build_regional_assets(
-            frozen, missing, region="jp", crops=crops, reuse_only=True
-        )
-    assert before == {
+    rebuilt = build_regional_assets(frozen, stale, region="jp", crops=crops)
+    (chosen,) = (item for item in rebuilt.images if adopted(crops, item))
+    assert [item for item in rebuilt.images if not item.result.cache_hit] == [chosen]
+    assert [item.result.variants for item in rebuilt.images] == [
+        item.result.variants for item in overridden.images
+    ]
+    after = {
         p.relative_to(tmp_path): p.read_bytes()
         for p in tmp_path.rglob("*")
         if p.is_file()
     }
-    reused = build_regional_assets(
-        frozen, override_roots, region="jp", crops=crops, reuse_only=True
-    )
-    assert all(item.result.cache_hit for item in reused.images)
-    assert [item.result.variants for item in reused.images] == [
-        item.result.variants for item in overridden.images
-    ]
+    assert all(after[path] == raw for path, raw in before.items())
+    art = {
+        (stale.preview / v.path).relative_to(tmp_path)
+        for v in chosen.result.variants
+        if v.size_key.startswith("art_")
+    }
+    added = set(after) - set(before)
+    assert art <= added
+    assert len(added - art) == 1
+    assert {path.parts[0] for path in added - art} == {"stale-cache"}
 
 
 def test_selected_crop_must_fit_verified_oriented_source(
@@ -180,7 +179,7 @@ def test_selected_crop_must_fit_verified_oriented_source(
     descriptor = frozen.descriptor(frozen.inventory.current[0].source_version_id)
     install(tmp_path / "authored", [record(descriptor) | {"top": 1000}])
     crops = load_image_crops(tmp_path / "authored")
-    output = PreviewRoots(tmp_path / "blobs", tmp_path / "cdn", tmp_path / "cache")
+    output = PreviewRoots(tmp_path / "blobs", tmp_path / "cache")
     with pytest.raises(ValueError, match=r"^invalid art crop override$"):
         build_regional_assets(frozen, output, region="jp", crops=crops)
 

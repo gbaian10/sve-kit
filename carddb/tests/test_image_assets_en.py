@@ -151,7 +151,7 @@ def english_images(  # ruff: ignore[too-many-locals] -- seal the shared minimal 
         ],
     )
     crops = load_image_crops(crop_repo / "authored")
-    roots = PreviewRoots(base / "library", base / "formal", base / "cache")
+    roots = PreviewRoots(base / "library", base / "cache")
     encoded = build_regional_assets(images, roots, region="en", crops=crops, workers=2)
     return EnglishImages(
         Staged(jp.cards, plan, jp.context), cards, images, encoded, roots, crops
@@ -192,7 +192,6 @@ def test_en_original_src_double_faces_and_crop_report(
         region="en",
         crops=case.crops,
         workers=2,
-        reuse_only=True,
     )
     assert all(item.result.cache_hit for item in reused.images)
 

@@ -3,6 +3,7 @@
 import json
 import shutil
 from dataclasses import replace
+from itertools import count
 from typing import TYPE_CHECKING
 
 import pytest
@@ -20,13 +21,12 @@ from sve_carddb.image_assets import (
     populate_assets,
 )
 from sve_carddb.image_crops import FILE, load_image_crops
-from sve_carddb.image_variants import ImageVariantError
 from sve_carddb.products import OfficialProducts, ProductIdentities
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot import offline, offline_images
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.media import prepare_media
-from sve_carddb.snapshot.preview import Roots, write_preview
+from sve_carddb.snapshot.preview import Roots, commands, write_preview
 from sve_carddb.snapshot.values import object_value, parse
 from sve_carddb.sources import official_en
 from sve_carddb.sources.official_jp import image_url
@@ -39,10 +39,14 @@ from .test_snapshot_offline import prepared as prepared  # ruff: ignore[useless-
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from pydantic import JsonValue
+
     from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import SourceUse
     from sve_carddb.card_extras import CardPage
+    from sve_carddb.image_crops import ImageCrops
     from sve_carddb.registry.preview import PreviewPlan
+    from sve_carddb.registry.records import Region
     from sve_carddb.snapshot.offline import Inputs
 
     from .text_observation_fixtures import Case
@@ -96,7 +100,7 @@ def regional_images(
         ),
     )
     crops = load_image_crops(recipe.repo / "authored")
-    roots = PreviewRoots(tmp_path / "library", tmp_path / "formal", tmp_path / "cache")
+    roots = PreviewRoots(tmp_path / "library", tmp_path / "cache")
     parts = tuple(
         build_regional_assets(
             FrozenSources(recipe.archive, recipe.store_id, pin.image_batch),
@@ -176,7 +180,7 @@ def test_bilingual_images_bundle_snapshot_and_preview(
     snapshot = export_snapshot(
         plan.projection, built.ownership, recipe.batch(), format_version=format_version
     )
-    output = Roots(tmp_path / "preview", roots.cdn)
+    output = Roots(tmp_path / "preview")
     write_preview(
         snapshot,
         output,
@@ -191,26 +195,32 @@ def test_bilingual_images_bundle_snapshot_and_preview(
     assert (output.preview / "snapshots/preview/current.json").is_file()
 
 
-def test_offline_cli_reuses_both_caches_and_rejects_partial_roots(
-    regional_images: tuple[Inputs, ImageBuild, PreviewRoots],
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    recipe, _, roots = regional_images
+def offline_arguments(recipe: Inputs, tmp_path: Path) -> list[str]:
     path = tmp_path / "recipe.json"
     path.write_text(recipe.model_dump_json())
-    arguments = [
+    return [
         "snapshot",
         "export-offline",
         "--inputs",
         str(path),
         "--preview-dir",
         str(tmp_path / "preview"),
-        "--cdn-dir",
-        str(roots.cdn),
         "--bundle-dir",
         str(tmp_path / "bundle"),
     ]
+
+
+def image_execution(stdout: str) -> dict[str, JsonValue]:
+    return object_value(object_value(parse(stdout.encode()))["image_execution"])
+
+
+def test_offline_cli_reuses_both_caches_and_rejects_partial_roots(
+    regional_images: tuple[Inputs, ImageBuild, PreviewRoots],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    recipe, assets, roots = regional_images
+    arguments = offline_arguments(recipe, tmp_path)
     runner = CliRunner()
     for option, root in (
         ("--image-assets-dir", roots.preview),
@@ -225,7 +235,23 @@ def test_offline_cli_reuses_both_caches_and_rejects_partial_roots(
     def forbidden(*_args: object, **_kwargs: object) -> bytes:
         pytest.fail("CLI must reuse both complete five-size recipe caches")
 
+    seen: list[int] = []
+
+    def recorded(
+        images: FrozenSources,
+        output: PreviewRoots,
+        *,
+        region: Region,
+        crops: ImageCrops,
+        workers: int = 1,
+    ) -> ImageBuild:
+        seen.append(workers)
+        return build_regional_assets(
+            images, output, region=region, crops=crops, workers=workers
+        )
+
     monkeypatch.setattr("sve_carddb.image_variants._encode", forbidden)
+    monkeypatch.setattr(commands, "build_regional_assets", recorded)
     result = runner.invoke(
         app,
         [
@@ -238,10 +264,16 @@ def test_offline_cli_reuses_both_caches_and_rejects_partial_roots(
     )
     assert result.exit_code == 0, result.stdout
     assert (tmp_path / "preview/snapshots/preview/current.json").is_file()
+    assert seen == [2, 2]
+    execution = image_execution(result.stdout)
+    assert execution["cache_hits"] == len(assets.images)
+    assert execution["new_encodings"] == 0
+    assert execution["new_encoding_milliseconds"] == 0
+    assert execution["workers"] == 2
 
 
 @pytest.mark.parametrize("region", ["en", "jp"])
-def test_offline_cli_missing_cache_never_encodes_or_publishes(
+def test_offline_cli_encodes_missing_cache_and_reports_time(
     regional_images: tuple[Inputs, ImageBuild, PreviewRoots],
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -255,42 +287,106 @@ def test_offline_cli_missing_cache_never_encodes_or_publishes(
         if object_value(parse(path.read_bytes()))["source_sha256"]
         == image.result.source_sha256
     )
+    cached = cache.read_bytes()
     cache.unlink()
-    path = tmp_path / "recipe.json"
-    path.write_text(recipe.model_dump_json())
-    calls: list[None] = []
-
-    def forbidden(*_args: object, **_kwargs: object) -> bytes:
-        calls.append(None)
-        raise AssertionError("Missing cache must not trigger image encoding")
-
-    monkeypatch.setattr("sve_carddb.image_variants._encode", forbidden)
+    ticks = count()
+    # Each clock read advances one second, so every image spans exactly one second.
+    monkeypatch.setattr(
+        "sve_carddb.image_assets.perf_counter", lambda: float(next(ticks))
+    )
     result = CliRunner().invoke(
         app,
         [
-            "snapshot",
-            "export-offline",
-            "--inputs",
-            str(path),
-            "--preview-dir",
-            str(tmp_path / "preview"),
-            "--cdn-dir",
-            str(roots.cdn),
-            "--bundle-dir",
-            str(tmp_path / "bundle"),
+            *offline_arguments(recipe, tmp_path),
             "--image-assets-dir",
             str(roots.preview),
             "--image-cache-dir",
             str(roots.cache),
+            "--workers",
+            "1",
         ],
     )
-    assert result.exit_code != 0
-    assert isinstance(result.exception, ImageVariantError)
-    assert "Verified image recipe cache is incomplete" in str(result.exception)
-    assert calls == []
+    assert result.exit_code == 0, repr(result.exception)
+    total = len(assets.images)
+    assert image_execution(result.stdout) == {
+        "wall_milliseconds": (2 * total + 2) * 1000,
+        "cache_hits": total - 1,
+        "new_encodings": 1,
+        "reuse_milliseconds": (total - 1) * 1000,
+        "new_encoding_milliseconds": 1000,
+        "workers": 1,
+    }
+    assert cache.read_bytes() == cached
+    assert (tmp_path / "preview/snapshots/preview/current.json").is_file()
+
+
+def test_offline_cli_builds_every_image_into_empty_roots(
+    regional_images: tuple[Inputs, ImageBuild, PreviewRoots],
+    tmp_path: Path,
+) -> None:
+    recipe, assets, roots = regional_images
+    library, cache = tmp_path / "new-library", tmp_path / "new-cache"
+    library.mkdir()
+    cache.mkdir()
+    result = CliRunner().invoke(
+        app,
+        [
+            *offline_arguments(recipe, tmp_path),
+            "--image-assets-dir",
+            str(library),
+            "--image-cache-dir",
+            str(cache),
+            "--workers",
+            "4",
+        ],
+    )
+    assert result.exit_code == 0, repr(result.exception)
+    execution = image_execution(result.stdout)
+    keys = sorted(p.name for p in cache.rglob("*.json"))
+    assert keys == sorted(p.name for p in roots.cache.rglob("*.json"))
+    # Byte-identical sources share a cache key; a parallel peer may reuse it.
+    encoded = execution["new_encodings"]
+    assert isinstance(encoded, int)
+    assert len(keys) <= encoded <= len(assets.images)
+    assert execution["cache_hits"] == len(assets.images) - encoded
+    assert execution["workers"] == 4
+    assert {
+        p.relative_to(library): p.read_bytes() for p in library.rglob("*.webp")
+    } == {
+        p.relative_to(roots.preview): p.read_bytes()
+        for p in roots.preview.rglob("*.webp")
+    }
+    assert (tmp_path / "preview/snapshots/preview/current.json").is_file()
+
+
+@pytest.mark.parametrize("workers", ["0", "5"])
+def test_offline_cli_limits_workers_to_four(
+    regional_images: tuple[Inputs, ImageBuild, PreviewRoots],
+    tmp_path: Path,
+    workers: str,
+) -> None:
+    recipe, _, roots = regional_images
+    library = {p: p.read_bytes() for p in roots.preview.rglob("*") if p.is_file()}
+    result = CliRunner().invoke(
+        app,
+        [
+            *offline_arguments(recipe, tmp_path),
+            "--image-assets-dir",
+            str(roots.preview),
+            "--image-cache-dir",
+            str(roots.cache),
+            "--workers",
+            workers,
+        ],
+        env={"NO_COLOR": "1", "TERM": "dumb"},
+    )
+    assert result.exit_code == 2
+    assert "--workers" in result.output
     assert not (tmp_path / "preview").exists()
     assert not (tmp_path / "bundle").exists()
-    assert not cache.exists()
+    assert library == {
+        p: p.read_bytes() for p in roots.preview.rglob("*") if p.is_file()
+    }
 
 
 @pytest.mark.parametrize(
