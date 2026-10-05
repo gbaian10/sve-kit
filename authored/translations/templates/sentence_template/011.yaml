@@ -35,7 +35,6 @@ records:
             min:
             max:
       content_hash: sha256:8e0293b9d8c199c76194e730ea64cab3e0e40532950d362fd71fd5f518edb6d1
-      supersedes_id: T8b09d7ba5f
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8e02f66cfde1222f"]'
@@ -88,7 +87,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8e02f66cfde1222fe5fb4226524780fea90e8c5dabcff59a21e09572250d604a
-      supersedes_id: Tc06a29d17d
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8e0fdca811270f4f"]'
@@ -133,7 +131,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8e0fdca811270f4f6fff4455b5f77bee5c81917aa1dc65640973d3cfcd9a7cbb
-      supersedes_id: T6443035610
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8e14d181a3dc38c8"]'
@@ -164,7 +161,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8e14d181a3dc38c895c5f3eea41e3d35b9454ecadaa7f03acc27b5498ce5abaf
-      supersedes_id: Tdbbcaaab10
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8e15adad0236dfea"]'
@@ -185,7 +181,6 @@ records:
         format: 1
         slots: []
       content_hash: sha256:8e15adad0236dfea87debc01982ba095a54c3b9962f2dccb549959d1e1ca0ef1
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8e3a4963025a3437"]'
@@ -262,44 +257,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8e3a4963025a3437305f6502c647cecce84e7c15a1707434dbd7be05f22e1cab
-      supersedes_id: Td2e826a9cd
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T8e3a49dc56"]'
-    kind: sentence_template
-    data:
-      id: T8e3a49dc56
-      inventory_id: inv:00073a830bfbad702782464568276a62c5293e34e1aaef6d1a9b74b35b4c2fa7
-      source_span:
-        role: body
-        segments:
-          - start: 0
-            end: 19
-        anchor:
-      source_lang: ja
-      normalizer_version: template-parameters-jp-candidate-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots:
-          - name: slot_0
-            type: reference
-            occurrences:
-              - start: 1
-                end: 3
-            reference_kind: term
-            min:
-            max:
-          - name: slot_1
-            type: uint
-            occurrences:
-              - start: 8
-                end: 9
-            reference_kind:
-            min: 0
-            max: 9007199254740991
-      content_hash: sha256:3442aaef4494ac6d2570e940412daafd31eea7684d82b3f80ed1f5ee6eaa087f
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8e3c09a8a1d011b8"]'
@@ -344,7 +301,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8e3c09a8a1d011b81afe0a631a6032624007a74f7fbc21514a0ad8d2b8adbb16
-      supersedes_id: Tf84ba67bc5
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8e51b456aa7e7030"]'
@@ -381,7 +337,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8e51b456aa7e70301130dfb2ca14def909a74aed3aa394e1f77cfef028458c67
-      supersedes_id: Tc145d75f21
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8e6aca7315b29fb2"]'
@@ -426,7 +381,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8e6aca7315b29fb28bd2e5c855897e016cf5ba471fb84a700a62a833037a0812
-      supersedes_id: Td342093ded
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8e98df6aad0589bb"]'
@@ -471,7 +425,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8e98df6aad0589bb9c240e38651be8319560b6d99bbcf9c55a59fdfdb4ffd693
-      supersedes_id: Tdc23f08743
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8eacb5a08e65477f"]'
@@ -516,7 +469,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8eacb5a08e65477f5f5b1ca7eec3b6bbf3d14b170b0ee141063472dc933ae4fd
-      supersedes_id: Tbab93b5450
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8ec0f0dd1e767519"]'
@@ -569,7 +521,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8ec0f0dd1e767519642ed01113a399b6d3a7b3ccd9c045f9bdfde1268465ce20
-      supersedes_id: T49a690224f
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8edb47e5db0067fe"]'
@@ -638,7 +589,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8edb47e5db0067fe29ee18748601c8338408aeeb93addccb843577d8790627a3
-      supersedes_id: T697e424f07
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8edd8d87219299ae"]'
@@ -707,7 +657,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8edd8d87219299ae93772a4b2d14117fea4da9d8eeb348f44d638eeb58dca7c8
-      supersedes_id: T8c00d584a4
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8ef1de6a2a3e3015"]'
@@ -752,7 +701,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8ef1de6a2a3e30155d21c0c8e57a08f38a7f8dd8657e9d10e67eafd03c7782ad
-      supersedes_id: T2aaa88399f
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8f0f5b8ffc0db245"]'
@@ -805,7 +753,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8f0f5b8ffc0db24581a57777a3cecce6cdf54388dd2eac9270fc40b9cd04cc3f
-      supersedes_id: T048867dbd0
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8f30172f13bf4673"]'
@@ -850,7 +797,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8f30172f13bf4673097502b832b77d84575b78902cb98e91485b14afd7fd869a
-      supersedes_id: T6dbc5649fa
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8f3331fe864f9807"]'
@@ -879,7 +825,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8f3331fe864f98077949edb8b06561e391a227b20a5649235e8d6e31c7829574
-      supersedes_id: Tfa9a8c7b5b
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8f7c7dd3310623d7"]'
@@ -916,7 +861,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8f7c7dd3310623d7becd36e77bb962a4743391bd041a2405bb699995e4023101
-      supersedes_id: Tb81e00e86b
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8f7e6299c87e34ec"]'
@@ -977,7 +921,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8f7e6299c87e34ec63ba2394885ec5f9935f17d114356782874da25e22a16fb0
-      supersedes_id: T597c4feb09
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8f8ffbf6ae499253"]'
@@ -1038,7 +981,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8f8ffbf6ae499253fdbb0cae8463c92c0c109f59788890c588c54be3895faebf
-      supersedes_id: Te6c9abd569
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8fa595115eeff33f"]'
@@ -1115,7 +1057,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8fa595115eeff33f60c8dad6eaa1dfab46ca8e8d3daf35cccfc081e11db33df0
-      supersedes_id: Te34ac144a8
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8fc9f4297c9fd925"]'
@@ -1152,7 +1093,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8fc9f4297c9fd925bb15cc55c5b6a2fdf2fa6dee31f54bdbf43c3dbbd024f6e0
-      supersedes_id: Taf6727e46e
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8fdea587ddd5b23b"]'
@@ -1173,7 +1113,6 @@ records:
         format: 1
         slots: []
       content_hash: sha256:8fdea587ddd5b23bca641dd90d2690352d73cc7f6d8261aef1a8ec5af2c07445
-      supersedes_id: Tedb1a77b47
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T8fe580639f32121d"]'
@@ -1242,7 +1181,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:8fe580639f32121df2b8604a3a37b18e9970516df030d89d9c4b267c1e3baf26
-      supersedes_id: Te895e3ac24
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T902fca7924b01791"]'
@@ -1279,7 +1217,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:902fca7924b01791fb9d088710c0cf74417efbd8f52486a74f5fe41579201283
-      supersedes_id: T0de8711e2b
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9041b8763dd1b5da"]'
@@ -1316,7 +1253,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9041b8763dd1b5dabadaf76d12360140913974ba1832ada710d62e2f75109c97
-      supersedes_id: T0fabf2ce5c
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T90421867d9e07402"]'
@@ -1363,7 +1299,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:90421867d9e07402e53c9305905edeaa6394f4799647ad6693cc3198c0bcad75
-      supersedes_id: T5ac56a2a5e
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9065bc86f007e71c"]'
@@ -1434,7 +1369,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9065bc86f007e71cd4d0b432989f93205909b9550fc601337371f5f66dad1f88
-      supersedes_id: T23ef9c0ddb
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T90cb3862139ac22c"]'
@@ -1487,7 +1421,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:90cb3862139ac22c8c19f06854cc0b5b5074719bb3d8cd78e32d082b498c0177
-      supersedes_id: T9f42cba91e
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T910cd71ee6fa6d34"]'
@@ -1534,7 +1467,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:910cd71ee6fa6d34dee57d2b847f6dc884bae3709048c360a976bc2b337a09ef
-      supersedes_id: T1d511e9e4d
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T91139b68dea87b1a"]'
@@ -1571,7 +1503,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:91139b68dea87b1ac0a5e9841583da894d3a200e0e548d757ee22f8da8a19638
-      supersedes_id: Tf11ecc5268
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9139b257cff626cf"]'
@@ -1626,7 +1557,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9139b257cff626cf218b51dbee16745e6103dbdded3d238bc09bde38cf396ea1
-      supersedes_id: Tefea54fbfd
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T913c15bdafc763b0"]'
@@ -1671,7 +1601,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:913c15bdafc763b0dec2795497de3bc6311f6eb07dcfadb913e89aa3e6cc2606
-      supersedes_id: T25ad9d3cb8
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9176ede7423441fd"]'
@@ -1700,7 +1629,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9176ede7423441fdf5105370440798996c0227495467d17164fddeedda3f2b4b
-      supersedes_id: T420a3d02cf
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T918abf8661b0e142"]'
@@ -1721,7 +1649,6 @@ records:
         format: 1
         slots: []
       content_hash: sha256:918abf8661b0e1424395e6744c7b22a1c9693727afa02a860206b2e9e96a6100
-      supersedes_id: Tccc2761dfe
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9191c16b34e7caec"]'
@@ -1758,7 +1685,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9191c16b34e7caecb5871824a771d3d8e5a68f2fcbcdb6423528962a0828a785
-      supersedes_id: T15d1e754ac
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T91937fb831b1705d"]'
@@ -1835,7 +1761,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:91937fb831b1705da9e3a3d86ceed3244323aa558b597b580c8effd5d9a7cdb0
-      supersedes_id: T7eadab7a60
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T91a8eb52724bb743"]'
@@ -1872,7 +1797,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:91a8eb52724bb7436ba848a4535274e4dff25210da8a0dc0ea0b2096cfd842b6
-      supersedes_id: T39a8def14c
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T91d2d4e13b75bf7a"]'
@@ -1951,7 +1875,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:91d2d4e13b75bf7ad2d3d2525ca577b4e2e71d51a9ceb0591ddf804ba72acd5f
-      supersedes_id: Tc9156a952c
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T91fbd35bca01892b"]'
@@ -1982,7 +1905,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:91fbd35bca01892b4bc3a7c71022c2138805434827718efc21b82f53ee5a2351
-      supersedes_id: T914639c0ca
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T920331045333975a"]'
@@ -2035,7 +1957,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:920331045333975a463d4ca874343bb60560c3ff5a0901ca390581ec403bb73a
-      supersedes_id: T2c6c7412d3
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9208b49f6cbf2f46"]'
@@ -2064,28 +1985,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9208b49f6cbf2f4645c0af56e70338c3eff2dca5528179455ef43fb9b8920b82
-      supersedes_id: T62e92b4ca0
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T921ff9f9b9"]'
-    kind: sentence_template
-    data:
-      id: T921ff9f9b9
-      inventory_id: inv:00080c8bc6d55db864997afab0c8da4fe27e3f042843e6ae108fa91ae7d83d71
-      source_span:
-        role: body
-        segments:
-          - start: 20
-            end: 24
-        anchor:
-      source_lang: ja
-      normalizer_version: template-parameters-jp-candidate-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:b2d9797f135199cdd52ef720d8fd84457276ea24da6355d1354398b85c9f88c8
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T92206c0cd68d9cf4"]'
@@ -2122,7 +2021,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:92206c0cd68d9cf4eabf05892a6a5e48b026fc810650d714d07587a7d12c6110
-      supersedes_id: Tca7d066f20
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T92419264cb7afeee"]'
@@ -2175,7 +2073,6 @@ records:
             min:
             max:
       content_hash: sha256:92419264cb7afeeeb743ce9a44cec59f658d5c12a1d3ebd8ddc0041df42cb347
-      supersedes_id: T7f20d797b8
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9251e0766aba21e6"]'
@@ -2212,7 +2109,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9251e0766aba21e6030740e411112bcbddc8223eee2e7ac23ecdcbc20f0c0410
-      supersedes_id: T7ec9b78f94
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9262166552716ea8"]'
@@ -2241,7 +2137,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9262166552716ea83328cda1091e04eace28cc1c09ac02b40599aaef88042385
-      supersedes_id: Tf08d681221
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T92826154254f8933"]'
@@ -2314,7 +2209,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:92826154254f8933a6e84d4755bed318b4a3709e24aae2a4ff1f31832fd7f119
-      supersedes_id: Tc3e6e24ee1
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T92c330d39d8ac9f6"]'
@@ -2359,7 +2253,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:92c330d39d8ac9f64d90ee843c32b556f1a5e8c4b17d5de49d3f651d266a9b9b
-      supersedes_id: T4788c5641d
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T92d860774a5906a1"]'
@@ -2388,7 +2281,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:92d860774a5906a1bca352c2107fc11888517bb5eda0a86fd65d266a3b1ca90e
-      supersedes_id: T90b33e095e
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T92db2fae2b09a766"]'
@@ -2433,7 +2325,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:92db2fae2b09a766da39b0628cd81eb13785a05c3161bdebc7aafd5c5da233f4
-      supersedes_id: T2a468e3ddb
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T92f85f88537147e5"]'
@@ -2494,7 +2385,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:92f85f88537147e52f319e3035b41ae3aed4df308c9f532f56e27a5f521a9973
-      supersedes_id: T0a817d19aa
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9343c786274b4ff3"]'
@@ -2539,7 +2429,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9343c786274b4ff38d58a43d85ae962419e3f7b9475dafc767e1598c947a17a3
-      supersedes_id: T7b9fa09d7b
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T935f5f89c1a82191"]'
@@ -2610,7 +2499,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:935f5f89c1a821912434c25665b05316f925077726eb1d352cfd315fab5758d9
-      supersedes_id: T3cd20de914
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T936abdd9b4085d0e"]'
@@ -2663,7 +2551,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:936abdd9b4085d0e94326339ffabc7c7ac16c32ffa517d6ce8ca4af1fa5a58f2
-      supersedes_id: Tcb51306153
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T936ec7d8faf617d2"]'
@@ -2692,7 +2579,6 @@ records:
             min:
             max:
       content_hash: sha256:936ec7d8faf617d216edcfe230659b9b8f94f42c3c82b567ebce0fe2c30b390b
-      supersedes_id: T1762591867
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T93a2a41459208337"]'
@@ -2729,7 +2615,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:93a2a41459208337f14600f9c51610fb9111597c8bd379fd337cd8e1c4dda0be
-      supersedes_id: Tdb4219971d
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T93b1d16f0494932a"]'
@@ -2758,7 +2643,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:93b1d16f0494932aa12ec22bbaed091aa37c74e978c598546c3a46283f0cf9dc
-      supersedes_id: T2d89f545fb
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T93c9b04615621147"]'
@@ -2795,7 +2679,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:93c9b0461562114767b5315c9ee90eb1feae99db275780885f17b620b769c3a5
-      supersedes_id: Ta47e6bfcc9
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T940c3501df968eb9"]'
@@ -2816,7 +2699,6 @@ records:
         format: 1
         slots: []
       content_hash: sha256:940c3501df968eb945f789fbbb9709d32ef69706c7b80b42b38213086ad691e9
-      supersedes_id: Te7d40552a8
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T94287ac5d9efc831"]'
@@ -2877,7 +2759,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:94287ac5d9efc83164ea574df0c4d5bc782c13a742413a41a01702a82fdb5a7d
-      supersedes_id: T59fac89908
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T942add663b0883e5"]'
@@ -2914,7 +2795,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:942add663b0883e531c79a9db7c2a5496935f6bcd6961e94d42e0f2e5660cd70
-      supersedes_id: T567a9e00d8
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T943acf3c6a430023"]'
@@ -2959,7 +2839,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:943acf3c6a4300231f6108f1521d367e0b1324a5110cf87eda0881dbd85bbc1d
-      supersedes_id: Tfc838651fd
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T944d41432dbd1a6c"]'
@@ -3004,7 +2883,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:944d41432dbd1a6c9f411db447da6bbe9f214329bb6997b771c5ec230181474a
-      supersedes_id: Ted74d4b34e
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T946cbda9ee85fc5d"]'
@@ -3059,7 +2937,6 @@ records:
             min:
             max:
       content_hash: sha256:946cbda9ee85fc5d336c11e0195490e78e43fd169dc7d0d31e2154bfad365f88
-      supersedes_id: T4e4a9d443c
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T949967b58121e0f1"]'
@@ -3126,7 +3003,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:949967b58121e0f1b77108a1fe25aa04847a45507ddb07f4868ccb4c52296838
-      supersedes_id: Tbb7717d532
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T949bf4e0cf264adc"]'
@@ -3171,7 +3047,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:949bf4e0cf264adcaab0c1c1b3c368525b110445c4b3abf070c0b4cd2a505f33
-      supersedes_id: T1aeb01e605
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T94cd076a678b01b2"]'
@@ -3260,7 +3135,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:94cd076a678b01b2c0640bf1c72927d5cc681312682946fd842726d79099c00e
-      supersedes_id: Tc7c399407b
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T94d657e6d955baab"]'
@@ -3305,7 +3179,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:94d657e6d955baab1d664df39c50ad6ca0d0d11164781308a92361a1079a862f
-      supersedes_id: Tfd64c544b4
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T952c6471cae15203"]'
@@ -3350,7 +3223,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:952c6471cae15203dbb56158a874b8ee103dc9a0c6a7999a1f3aed134e01144e
-      supersedes_id: T75200ddbb7
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T95468ec7b7a86036"]'
@@ -3411,7 +3283,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:95468ec7b7a8603693bc305591fb7facaf05f9112229619b86f654dd4571ab2f
-      supersedes_id: T0ab9b8e659
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9547a3206288a588"]'
@@ -3440,7 +3311,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9547a3206288a588377ff880a1b35b4c360af6206c8475283bdadf226fda5713
-      supersedes_id: T884189d82c
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T955cd3ce84b4aa65"]'
@@ -3493,7 +3363,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:955cd3ce84b4aa65954e74c842321275fc807fd34cf00bd7eedaa525f05dd78d
-      supersedes_id: Tbc5684dbcd
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T95600f34f34aa9de"]'
@@ -3570,7 +3439,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:95600f34f34aa9de41731cf2e88992f4bf487ef2f70fa34ed803e456e9d6a1b9
-      supersedes_id: T5d0334eba7
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T956d9baacbba4050"]'
@@ -3623,7 +3491,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:956d9baacbba40502b5d2e71c5bb8d40e803881292ebf2a98949bd6b1f74f3a6
-      supersedes_id: T34422a4aa6
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T95738935d8147029"]'
@@ -3684,7 +3551,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:95738935d8147029421a94ceb0c82bd5eebc7c5e4873a4bdd0164b6fcf0f7fef
-      supersedes_id: T4bf0159c63
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T95b601304ebe0fe9"]'
@@ -3737,7 +3603,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:95b601304ebe0fe9d4cce0cb7f4745c15472c055e01bebaf003631c015f3a8ab
-      supersedes_id: Te25c57041c
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T95d5cafa49600345"]'
@@ -3798,7 +3663,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:95d5cafa49600345d5051eedc4fcb24e52e5aa71ffe14d9809962e1212ee03a3
-      supersedes_id: Td511fc45ef
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T95ea3a73e490f65d"]'
@@ -3851,7 +3715,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:95ea3a73e490f65d83cc47ae175933eb877a8c5de14b4d9ea1ee0d9119a4ea04
-      supersedes_id: Ta54abb0e6c
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T95f202264e7c3a5d"]'
@@ -3898,7 +3761,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:95f202264e7c3a5dd2f912cb9dea5be70f1922458f0e402ccb78e8501b93bb94
-      supersedes_id: Tcf2fee9cfc
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9602e53092f7bd25"]'
@@ -3951,7 +3813,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9602e53092f7bd25951e53d1176e6946ede35c12a7362c192bc498d456522aec
-      supersedes_id: Teb18c0f3aa
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9608dc27db0931c6"]'
@@ -3988,7 +3849,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9608dc27db0931c6f9266f5d88a05bfc2187733ee6935857af211bb4a0da60a2
-      supersedes_id: T64e39781d6
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9634e66ef694b7fb"]'
@@ -4069,7 +3929,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9634e66ef694b7fb30add05fc95d0671cd47258e36c40a97636e6f90d1098213
-      supersedes_id: T5dc8ceef44
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T96351b6d10c521e8"]'
@@ -4106,7 +3965,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:96351b6d10c521e814b9733a0dac56f518aa3708cb7de99714f99465f743ca9e
-      supersedes_id: Te68bf67b95
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T964946e5ea8469a9"]'
@@ -4183,7 +4041,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:964946e5ea8469a9f4d29975ffaed23d18c749147977949a9fa2399a8c641236
-      supersedes_id: T724c30b462
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T965973484020dcde"]'
@@ -4204,7 +4061,6 @@ records:
         format: 1
         slots: []
       content_hash: sha256:965973484020dcde3397249b1eec670c214238a5437cc1c8f46e34de78eab28c
-      supersedes_id: T5cc9fd53f3
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T96671a3cdc8c6019"]'
@@ -4233,7 +4089,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:96671a3cdc8c6019d2a2c00692bf64766d662f6a9d6e26ea788b6962d4fb9c9a
-      supersedes_id: Tf078f638c9
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9671a93ba414ddbf"]'
@@ -4270,7 +4125,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9671a93ba414ddbfc42426e7cdc0463b22f649e4ae1ca2564bddbaa435ac43e2
-      supersedes_id: Tafbcac7aa2
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T967fe4a37f77ce43"]'
@@ -4299,7 +4153,6 @@ records:
             min:
             max:
       content_hash: sha256:967fe4a37f77ce43014c4437978621d10561d3398d7eea30f1a69e606ef3a206
-      supersedes_id: T10d53fbd99
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9696abacffe9f047"]'
@@ -4344,7 +4197,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9696abacffe9f04767a2e32a47fe14b0676195dcdc7b337ce94c006402b6db4c
-      supersedes_id: T29b21e4731
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T969fc1ec8fb09f37"]'
@@ -4373,7 +4225,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:969fc1ec8fb09f3766d7bfdc3f7e6a16a1735d666a5e1f09655ba68e4aa8906d
-      supersedes_id: Td44ac835e4
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T96bb48c2e617303d"]'
@@ -4402,7 +4253,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:96bb48c2e617303d33556187dbef0045ef009a10f45ed6bf13d93bae4f3e9885
-      supersedes_id: Teabb0f6ae3
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T96ee97d45a5bf2ac"]'
@@ -4447,7 +4297,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:96ee97d45a5bf2ac6b7884890bc1421071bb4b3f4e92506e33fb882ff9b4b66a
-      supersedes_id: Taa46c6ef03
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T97089a63a26f2879"]'
@@ -4486,7 +4335,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:97089a63a26f287944166601a4d392adcda8dc035ec740cff1b92597f89b16ef
-      supersedes_id: Tec1cf7b023
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9722d9bfb1236d7a"]'
@@ -4579,7 +4427,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9722d9bfb1236d7a5c43d1676f6df4489e495c3251758cb81907c5edc8b28c17
-      supersedes_id: Te0b2c1b132
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T97386b74035f3925"]'
@@ -4648,7 +4495,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:97386b74035f39251b5b36a0841cb42546248ba8fa011a6cb92d8e61213d0b77
-      supersedes_id: T4c95e9f2d9
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T976c08cef29e9c31"]'
@@ -4685,7 +4531,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:976c08cef29e9c31e5b7a7bee4fae388102c79bef5e971b7f59b476ed5ba4555
-      supersedes_id: T0ffd95f8e3
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T976e40fb02d2bf95"]'
@@ -4730,7 +4575,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:976e40fb02d2bf95f864dc38ce8245ae17dfa26f476681f8cd04cf6215e4545f
-      supersedes_id: T5c4d67ba07
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T977f656d9d91ca3d"]'
@@ -4799,7 +4643,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:977f656d9d91ca3d49e4678b5c12a79223c77aa79737548cdc71f3212ce3bf5f
-      supersedes_id: T0847111ec6
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9781ef197410c9b9"]'
@@ -4844,7 +4687,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9781ef197410c9b9381e35cb35f873c4915971a804a7f4a0bdd37998d74b2a20
-      supersedes_id: T07c59aaeed
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9785de16a9fb9996"]'
@@ -4893,7 +4735,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9785de16a9fb9996176cf11c737e852ee0430095b388f14474de6c0d260d4af3
-      supersedes_id: T58c0448c52
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T97b4820dce429f00"]'
@@ -4930,7 +4771,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:97b4820dce429f0013aa4519db7c70fe827081a1a422c0ede515db58495dccac
-      supersedes_id: Tbe05216488
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T97b52102dd4c7704"]'
@@ -4983,7 +4823,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:97b52102dd4c7704717cb31fca1dbb6f2eb0f20656a48db7adbf75cf55d3fc54
-      supersedes_id: Tbd99cfac9e
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T97b577881f815a34"]'
@@ -5036,7 +4875,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:97b577881f815a3435d8e02581c2bfc4b4162b3a925ecc6997c953eb76fb6bb5
-      supersedes_id: T1db82e1643
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9805502484927750"]'
@@ -5089,7 +4927,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9805502484927750b3c1f45cce42be61803dd753d8533749634f3f8cd4e365ff
-      supersedes_id: Tfba8108c66
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T983c69d77fce97f7"]'
@@ -5126,7 +4963,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:983c69d77fce97f7283d523d292d7ba3068045250cc975c3c7b23b240c1ed9d1
-      supersedes_id: T6b84df2b27
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T983dd798747e3bdc"]'
@@ -5173,7 +5009,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:983dd798747e3bdc8fdba2db695838dfb5f0b334682ef38ab3d9fda713429106
-      supersedes_id: T50ad99d101
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T98620d982f2d4bb4"]'
@@ -5242,7 +5077,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:98620d982f2d4bb43290ad8acc6d087b7c57ee29ecfe9a80d52793aeb2ced278
-      supersedes_id: Tde7b99a8a9
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T98a0ad6f20faacc1"]'
@@ -5287,7 +5121,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:98a0ad6f20faacc113008d1232c40f17495827fd062b054cf84be57cec571045
-      supersedes_id: T89c47dd96d
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T98f56d839ca1e410"]'
@@ -5308,7 +5141,6 @@ records:
         format: 1
         slots: []
       content_hash: sha256:98f56d839ca1e410046e6c8f770123b506b5ef0a388085399c1eff24d6b1b394
-      supersedes_id: Tf85709937d
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T98f6289d464d5722"]'
@@ -5345,7 +5177,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:98f6289d464d57228c693704af294f021135fd772f588b4f4059857a1ff77d1a
-      supersedes_id: T0b7811a89b
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T992c6eaa738c1602"]'
@@ -5398,7 +5229,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:992c6eaa738c1602de9212132670f3d407609a31b7aba27284ce5a2e167db6fe
-      supersedes_id: Td5357a692d
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9933f406c7cbf2c3"]'
@@ -5453,7 +5283,6 @@ records:
             min:
             max:
       content_hash: sha256:9933f406c7cbf2c3ae5f93a198edd42d28631c5532ef940dfc36d10905a668f8
-      supersedes_id: Tb08984ec6d
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T995a94dd8786d3c3"]'
@@ -5514,7 +5343,6 @@ records:
             min: 1
             max: 9007199254740991
       content_hash: sha256:995a94dd8786d3c3e19d669096287591d71d6872f9f3116ba5eec1656454b064
-      supersedes_id: T7a081758bd
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9965f57c0d5e4f92"]'
@@ -5535,7 +5363,6 @@ records:
         format: 1
         slots: []
       content_hash: sha256:9965f57c0d5e4f920483b60e79c1b0f27c378f25162ccac23441086b9ca57686
-      supersedes_id: Tf0fbc4fb3e
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T99774186281a5fc0"]'
@@ -5572,7 +5399,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:99774186281a5fc0ed84271883056acd901179b762932aac01e3c35e53dc0ed8
-      supersedes_id: T890b52b018
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T998244aa9010934e"]'
@@ -5625,7 +5451,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:998244aa9010934e1327c8b32010462fffe3f04a754aaff2d13f4cf379322ed5
-      supersedes_id: T890b7aecf6
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T99922b4437208114"]'
@@ -5654,7 +5479,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:99922b44372081149d806784b71e8c8718ca7f5310c196aac6cd8e98b70f1a23
-      supersedes_id: Tbd0ccdba03
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9997523eae62de06"]'
@@ -5685,7 +5509,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9997523eae62de065142371673f7d5ee252a0e65cc92f57b554f87be869c6cdb
-      supersedes_id: T0d313297df
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T999a2927ea3904d4"]'
@@ -5762,7 +5585,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:999a2927ea3904d45a8b41760f4047ac04f8a09e88d6380d22519a5df0891344
-      supersedes_id: T06b437209e
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T99b04fe8c1866422"]'
@@ -5815,7 +5637,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:99b04fe8c1866422b7056921e260ef63cbf58d6530966080516af3870f330b17
-      supersedes_id: T009335e355
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9a184f19659de9f2"]'
@@ -5860,7 +5681,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9a184f19659de9f2152c200837015ae1d4c2d4109972fa3b78cf5d38b3f1bd75
-      supersedes_id: Tecae1f478a
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9a2eecbc12810d4e"]'
@@ -5921,7 +5741,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9a2eecbc12810d4ea29de019c382fc7274c64c068e9e80f22b91f0ef6c63f422
-      supersedes_id: T614a95a284
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9a4fdc5bfc1b35c6"]'
@@ -5982,7 +5801,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9a4fdc5bfc1b35c6dc0e44bc91ef3ca55e2663e20ec6010ae40e991a169097bb
-      supersedes_id: T037c06adcb
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9a626e8abd291b15"]'
@@ -6021,7 +5839,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9a626e8abd291b159efb4a24963b801171159b8e3fbe350439760c038d87de8c
-      supersedes_id: Te37ca4d7fc
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9a70fcc0a9ad58b0"]'
@@ -6076,7 +5893,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9a70fcc0a9ad58b01473f38f939fefaf7f2e1148185396b3deec6b73e6fec68e
-      supersedes_id: T55e615ab19
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9a733b999b891895"]'
@@ -6165,7 +5981,6 @@ records:
             min: 1
             max: 9007199254740991
       content_hash: sha256:9a733b999b891895fe569a53b2adb7c5614d71b49c6f3c71b5fee215670d3188
-      supersedes_id: T4b3324291f
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9a78ce72d311a24b"]'
@@ -6212,7 +6027,6 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9a78ce72d311a24b2d6978b0878a04690c3f16d8aa6a0b94526681d1891733b8
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T9a7ae33e80903d42"]'
@@ -6241,6 +6055,5 @@ records:
             min: 0
             max: 9007199254740991
       content_hash: sha256:9a7ae33e80903d428180f31816f8911b1548521f54aa25300e5cb2d931fac36a
-      supersedes_id: T0c4bf6b9f6
     origin: project
     low_confidence: false

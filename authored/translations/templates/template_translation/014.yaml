@@ -249,14 +249,6 @@ records:
       text: 裝備這張卡片的從者獲得「自己的結束階段到來時，自己的主戰者\{{{slot_0}}\}+{{slot_1}}」。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","Tc12c663028","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: Tc12c663028
-      lang: zh-Hant
-      text: 這張卡片離開戰場時，抽取{{slot_0}}張卡片。捨棄自己的{{slot_1}}張手牌。\{{{slot_2}}\}\{消費{{slot_3}}\}：將這張卡片放置到墓場。
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","Tc1581f7d3641221a","zh-Hant"]'
     kind: template_translation
     data:
@@ -832,14 +824,6 @@ records:
       template_id: Tca3ce2ba53d30c94
       lang: zh-Hant
       text: \{{{slot_0}}\}指定戰場上的{{slot_1}}個從者。如果為【覺醒】狀態，則給予其{{slot_2}}點傷害。自己的主戰者\{{{slot_3}}\}+{{slot_4}}。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tca6721d157","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: Tca6721d157
-      lang: zh-Hant
-      text: 【突進】
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","Tca70cbb60d25a134","zh-Hant"]'

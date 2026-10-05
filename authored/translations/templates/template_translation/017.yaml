@@ -417,14 +417,6 @@ records:
       text: \{{{slot_0}}\}可以將自己手牌中的{{slot_1}}張從者召喚到戰場上。無法使用其\{{{slot_0}}\}能力。本回合，其無法攻擊對手。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","Ted815258fe","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: Ted815258fe
-      lang: zh-Hant
-      text: 【突進】【指定攻擊】
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","Tedb39bd95c7b4b0b","zh-Hant"]'
     kind: template_translation
     data:
@@ -511,6 +503,14 @@ records:
       template_id: Tee51ed4d7c332c36
       lang: zh-Hant
       text: \{{{slot_0}}\}將戰場上的{{slot_1}}張偶像歌手・卡片\{{{slot_2}}\}：將這張卡片放置到墓場。
+    origin: machine
+    low_confidence: false
+  - record_key: '["template_translation","Teeb64eda71e96779","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: Teeb64eda71e96779
+      lang: zh-Hant
+      text: 【蓄積】
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","Teecad3167c0f8ccc","zh-Hant"]'
@@ -623,6 +623,14 @@ records:
       template_id: Tefe93e610190a550
       lang: zh-Hant
       text: 死者・從者進入自己的戰場時，自己的主戰者\{{{slot_0}}\}+{{slot_1}}。
+    origin: machine
+    low_confidence: false
+  - record_key: '["template_translation","Tefef846bd793761c","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: Tefef846bd793761c
+      lang: zh-Hant
+      text: \{{{slot_0}}\}\{消費{{slot_1}}\}：這張卡片獲得驅動。
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","Tf0085de3200f8610","zh-Hant"]'
@@ -905,6 +913,14 @@ records:
       text: \{{{slot_0}}\}如果自己墓場的Cute・卡片為{{slot_1}}張以上，則這張卡片\{{{slot_2}}\}+{{slot_3}}/\{{{slot_4}}\}+{{slot_5}}，並獲得【守護】。
     origin: machine
     low_confidence: false
+  - record_key: '["template_translation","Tf2e45d5944134149","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: Tf2e45d5944134149
+      lang: zh-Hant
+      text: 【指定攻擊】
+    origin: machine
+    low_confidence: false
   - record_key: '["template_translation","Tf2f1ec9d3669502d","zh-Hant"]'
     kind: template_translation
     data:
@@ -1159,6 +1175,14 @@ records:
       template_id: Tf53d3794ce2c5d27
       lang: zh-Hant
       text: \{{{slot_0}}\}使墓場的{{slot_1}}張墮天使・卡片消失：指定敵方的{{slot_2}}個從者。奪取其並重置。此能力{{slot_3}}回合中可使用{{slot_4}}次。
+    origin: machine
+    low_confidence: false
+  - record_key: '["template_translation","Tf57cf6abb99c9c50","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: Tf57cf6abb99c9c50
+      lang: zh-Hant
+      text: 對戰開始時，後攻玩家持有{{slot_0}}個EP。
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","Tf57fd7413f2ab297","zh-Hant"]'

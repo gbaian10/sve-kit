@@ -161,14 +161,6 @@ records:
       text: 自己的回合中，自己使用卡片時，如果是本回合中的第{{slot_0}}張卡片，則自己的主戰者\{{{slot_1}}\}+{{slot_2}}。如果是本回合中的第{{slot_3}}張卡片，則抽取{{slot_4}}張卡片。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T6a4dd20156","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T6a4dd20156
-      lang: zh-Hant
-      text: 自己支付\{進化\}或\{{{slot_0}}\}的消費時，可將{{slot_1}}個正面朝上的EP轉為背面朝上來支付{{slot_2}}PP。
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T6a63ed1a305b219e","zh-Hant"]'
     kind: template_translation
     data:
@@ -713,6 +705,14 @@ records:
       text: \{{{slot_0}}\}將手牌中的{{slot_1}}張公主連結・卡片放置到EX區：查看自己牌堆頂的{{slot_2}}張卡片。從其中將任意張數以任意順序放置到牌堆頂。將其餘卡片以任意順序放置到牌堆底。
     origin: machine
     low_confidence: false
+  - record_key: '["template_translation","T7247d719ca1094c7","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: T7247d719ca1094c7
+      lang: zh-Hant
+      text: 【疾馳】
+    origin: machine
+    low_confidence: false
   - record_key: '["template_translation","T724ad9edb86a2c42","zh-Hant"]'
     kind: template_translation
     data:
@@ -791,14 +791,6 @@ records:
       template_id: T7345de991d058900
       lang: zh-Hant
       text: 【進化時】將『{{slot_0}}』『{{slot_1}}』各{{slot_2}}張放置到EX區。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T7346dc50a8","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T7346dc50a8
-      lang: zh-Hant
-      text: \{{{slot_0}}\}將自己牌堆頂的{{slot_1}}張卡片放置到墓場。
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T73591f2080ea2ccf","zh-Hant"]'
