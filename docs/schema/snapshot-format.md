@@ -336,7 +336,7 @@ withdrawn 圖片在新影像清單中保留 `id/source_url/withdrawal_reason`，
 
 ## 9. format 2.0.0 同名規則瀏覽
 
-[數位名字政策](digital-name-policy.md) 核可 same_name 卡層瀏覽，使用
+[數位名字政策](digital-name-policy.md) 的 same_name 卡層瀏覽使用
 [傳輸契約 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片) 的 2.0 配置。
 公開欄序與引用閉包依 §2，relation 白名單、typed projector、Schema 與 reader 同步驗證。
 不另設中間格式或相容 reader。
@@ -346,7 +346,7 @@ same_name 的公開欄位仍依 §2 的 digital_link 欄序：
 face_id／digital_phase 皆 null、effect_similarity=null、review_level=unreviewed；
 它是一張實體卡到一個數位 game／official_id 的卡層連結，不展開面×phase。
 reader 必須拒絕 same_name 帶非 null 面／phase、效果相似度或非 unreviewed 的列。
-政策投影不能呼叫全域 Source.review 將私有機械 confirmed 轉成人工確認，其他 relation 的 review 映射不變。
+規則連結沒有真人決定，不能經全域 Source.review 投成人工確認；其他 relation 的 review 映射不變。
 畫面標「同名規則視為同卡，未逐筆確認」，不能拿它供官方取名、同概念、效果等義、DSL、art 或 voice。
 不增加 policy_checked、政策／收據欄位或新的公開 review_level。
 
@@ -355,13 +355,12 @@ wire 依既有 link.id 排序；UI 先 sv1 再 svwb，各代按原始 ASCII offi
 id 仍為 `dl:`＋H(`["digital-link-v1",subject]`)，subject 依 digital-link-adoption 的完整卡層鍵；
 relation、時間、政策／排除清單 hash 不參與。政策卡層升真人且 subject 完全相同時沿 ID，
 精確面的人審 subject 是另一 ID。有效真人同 card/game/ID 的任何合法關係優先，規則不得另出重複列；
-真人負面、withdrawn、stale terminal 不由一般規則復活。尚無可支持的 rule_resume 格式時保守抑制，
-不能以猜測的收據解鎖。
+刪除真人關係不會自動停用規則連結；要停用某卡對須在 links 政策的 excluded_targets 列出。
 
 names 與 links 政策／排除互相獨立。被排除的名字不能供規則連結證據；
-同一卡對仍有另一個未排除名字的有效證據時可保留，card_target 排除則移除整個規則卡對。
+同一卡對仍有另一個未排除名字的有效證據時可保留，excluded_targets 則移除整個規則卡對。
 此處指 links 的名字排除；names 的取名排除不撤真人連結，也不自動代簽 links 排除。
-排除與有效真人關係重疊只報告，真人按自己的採納決定顯示。
+排除與有效真人關係重疊只報告，真人按自己的 review_level 顯示。
 
 建置 digital_endpoint 不是新公開表：投影成既有 config.digital_endpoints，固定 sv1／svwb 兩列，
 欄位、排序、模板與語言對照依傳輸契約 §3／§5.4；不連網就保持 status=unknown。

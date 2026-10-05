@@ -56,7 +56,7 @@ record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由�
 
 sampled 與上述政策採納均不能顯示「逐筆人工確認」；卡表快照以 `review_level` 或快照清單的 coverage 區分人工抽查與政策檢查。非翻譯的 confidence 沿原用途；翻譯 low_confidence 亦供待校對呈現。
 
-獨立 same_name 政策的待啟用投影另依 [數位名字政策](digital-name-policy.md)：公開 unreviewed、relation 區分規則與真人，coverage 不代替政策依據；內部 confirmed 只表示完整 checked_by_rules，sample_ids=[] 與 wording 的原樣本語意分開；當前翻譯資料已不用 samples。
+獨立 same_name 規則的待啟用投影另依 [數位名字政策](digital-name-policy.md)：公開 unreviewed、relation 區分規則與真人，coverage 不代替規則依據；規則連結沒有真人決定。真人 digital-links 每筆以自己的 review_level（sampled／confirmed）產生 record 範圍決定列，見[數位對應採納 §2.1](digital-link-adoption.md#21-建置-db-的決定列)；當前翻譯資料已不用 samples。
 
 vocabulary 的 code 自身就是 `[a-z][a-z0-9_-]*`；官方 GR 等另留 raw。實作複合 FK 時，子欄另加普通 TEXT kind 欄、DEFAULT 與 CHECK 固定值，例如 `class_kind='class'`，`FK(class_kind,class_code)→vocabulary(kind,code)`。不依賴尚未實測的 generated column。全文邏輯表省略這些固定欄，DDL 產生器必須展開；可空 code 仍要 kind 非空且固定。
 
@@ -565,11 +565,10 @@ DDL 宣告可編譯、匯入器完成、領域驗證器完成是分開的狀態�
 
 ## 19. 數位名字政策的能力同步
 
-[數位名字政策](digital-name-policy.md) 的卡名與same_name瀏覽各自核可，不改§8現行權威欄位／枚舉表。
+[數位名字政策](digital-name-policy.md) 的卡名與same_name瀏覽各有可修改的規則，不改§8現行權威欄位／枚舉表。
 same_character/name_only不能**經該關係**直接供官方名或battle語音；自己獨立名字政策可供名，不授語音。
-政策same_name屬待啟用新relation，固定卡層級兩面null、effect_similarity=null，公開unreviewed；
-內部approved_rules application的confirmed僅表示完整checked_by_rules，不代表真人。sample_ids=[]是本新格式刻意規定，
-不改 wording 以全機械成員列 samples 的既有格式；翻譯 format 2 已不使用 samples。其餘review映射不變；政策與真人統計分開，coverage不能代policy basis。
+規則same_name屬待啟用新relation，固定卡層級兩面null、effect_similarity=null，公開unreviewed；
+規則連結不產生決定列，不代表真人。其餘review映射不變；規則與真人統計分開，coverage不能代規則依據。
 啟用前須程式PR同步DDL／schema／projector／reader與反例；卡名來源走本節翻譯表與source_record/F1，不造same_card或新的核可證明。
 digital_voice/card_voice與digital_art_link仍只驗自己的原合法證據，不因新relation放行。
 發布按§16／§18驗實際能力與非空引用閉包，不要求card/game都有coverage；unknown不當已查無。

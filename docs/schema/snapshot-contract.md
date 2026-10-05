@@ -96,8 +96,8 @@ CI 路徑分流須讓 `carddb/src/sve_carddb/snapshot/schema/**` 觸發 web 契�
 
 ## 數位名字政策的准入邊界
 
-名字依獨立核可政策取詞仍走既有translation／FieldTranslation；same_name瀏覽是另一個需明示能力與reader升級的路徑。
-兩份核可與初始清單依[digital-name-policy](digital-name-policy.md)，不因名字可用就推導真人same_card、coverage或圖／語音。
+名字依獨立規則取詞仍走既有translation／FieldTranslation；same_name瀏覽是另一個需明示能力與reader升級的路徑。
+兩份規則與排除清單依[digital-name-policy](digital-name-policy.md)，不因名字可用就推導真人same_card、coverage或圖／語音。
 新relation與機械／真人review的投影須同步producer／reader，未實作不發布、不略去不認識的能力。
 
 ## 2.0 圖片與有限保留的機器契約

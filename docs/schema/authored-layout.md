@@ -26,7 +26,7 @@
 | 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/index.yaml`、`translations/{templates,glossary,overrides,region-reviews}/<filing_key>/<sequence>.yaml`、`translations/template-sources/<sequence>.yaml`；推導結果不進 authored，見 §6 |
 | 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog-adoptions/index.yaml` 與分片，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與封套) |
 | 定案（技術契約） | 同號路由與預設版次覆寫 | `display-overrides/index.yaml` 與分片，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
-| 定案（新格式） | 數位名字／同名瀏覽政策 | `digital-name-policies/index.yaml`；名字用可修改的 current 規則，同名瀏覽維持獨立非翻譯入口，見[名字契約](digital-name-policy.md) |
+| 定案（新格式） | 數位名字／同名瀏覽政策 | `digital-name-policies/index.yaml`、`digital-name-policies/<policy_id>/current.yaml`；名字與同名瀏覽各一份可修改的 current 規則，同名瀏覽是獨立非翻譯入口，見[名字契約](digital-name-policy.md) |
 | legacy，僅供轉換 | 模板採納政策／核可收據 | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml`；無文字摘要進索引，首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用 |
 | 定案（新格式） | 模板參數辨識規則 | `template-parameter-rules/current.yaml`，format 2；規則與必要反例隨程式 PR 修改，不需 approval |
 | 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `image-crops/<filing_key>/<sequence>.yaml`；無 index、全體查重，列不存 image_id，依[覆寫契約](image-crop-overrides.md)；不表示 loader 或資料已完成 |
@@ -209,7 +209,7 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 確定性項目全自動：官方來源欄位、`face_current` 無衝突預設、`rules_name`、`deck_role`、route、default printing、int 配號、模板套用、projection/coverage 報告。
 
-人處理：新句型/語義衝突、JP 身分歧義、非規則數位/異畫/標誌批次抽查；獨立核可同名規則按完整條件產卡層same_name、不造真人樣本、新卡名/譯文抽查、EN 身分逐筆確認、必要裁定與手動 override。正常 JP 包不要求為每張卡寫 current/default/route/decision 四份檔；封套＋工具結果可一次審閱。
+人處理：新句型/語義衝突、JP 身分歧義、非規則數位/異畫/標誌批次抽查；同名規則按程式條件產卡層same_name、不造真人樣本、新卡名/譯文抽查、EN 身分逐筆確認、必要裁定與手動 override。正常 JP 包不要求為每張卡寫 current/default/route/decision 四份檔；封套＋工具結果可一次審閱。
 
 度量不是把人工語義壓到固定數量：每次報 `generated_rows`、`explicit_overrides`、`sampled_rows`、`individually_checked_rows`、新句型數、人工作業時間。200 個版次的普通 JP 包，以「0 筆手寫 route/current/default/int decision、策展按包批次、只有例外覆寫」為驗收。可把 `explicit_overrides`≤新卡數當觀察目標，超出要找自動化缺口，但不可因此略掉有必要的確認。EN 對應的全筆檢查單獨計，不能用 JP 指標減掉。
 
@@ -482,7 +482,7 @@ confirmed_none／reskin 續版及有效投影順序見 [身分修復與決定續
 
 ## 13. 數位名字與同名瀏覽政策
 
-[名字當前規則](digital-name-policy.md)用可修改的設定與當次完整來源供名，不再要求 approval 配對。
+[名字與同名瀏覽的當前規則](digital-name-policy.md)用可修改的設定與當次完整來源，不要求 approval 配對；同名瀏覽的條件在程式，資料檔只放來源批次與排除清單。
 名字取詞、同名瀏覽與真人 digital-links 的資格分開；格式支援不代表來源已齊或已有正式投影。
 不在 authored 維護另一份可機械重產的數位官方卡名表，也不以同名瀏覽授予同卡／效果／語音資格。
 
