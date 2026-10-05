@@ -163,25 +163,6 @@ class TestImageParentConstraints:
     @pytest.mark.parametrize(
         ("field", "value"),
         [
-            ("withdrawal_reason", None),
-            ("withdrawal_reason", ""),
-            ("withdrawal_reason", "   "),
-        ],
-    )
-    def test_withdrawn_requires_reason(
-        self, image_parent_database_template: DatabaseTemplate, field: str, value: Value
-    ) -> None:
-        with image_parent_database_template.copy() as db:
-            with pytest.raises(sqlite3.IntegrityError), db.transaction():
-                db.insert(
-                    "image_asset",
-                    rows()["image_asset"]
-                    | {"publication_state": "withdrawn", field: value},
-                )
-
-    @pytest.mark.parametrize(
-        ("field", "value"),
-        [
             ("content_hash", None),
             ("mime", None),
             ("mime", ""),
@@ -215,7 +196,6 @@ class TestImageParentConstraints:
                     | {
                         "availability": availability,
                         "publication_state": "pending",
-                        "review_decision_id": None,
                         "content_hash": None,
                         "mime": None,
                         "width": None,
@@ -225,45 +205,16 @@ class TestImageParentConstraints:
                 )
             assert not db.rows("image_variant")
 
-    @pytest.mark.parametrize(
-        ("origin", "decision", "availability"),
-        [
-            ("third_party", None, "available"),
-            ("official", "decision", "available"),
-            ("official", None, "unfetched"),
-            ("official", None, "missing"),
-        ],
-    )
-    def test_approved_local_policy(
-        self,
-        image_parent_database_template: DatabaseTemplate,
-        origin: str,
-        decision: str | None,
-        availability: str,
+    @pytest.mark.parametrize("availability", ["unfetched", "missing"])
+    def test_approved_requires_available(
+        self, image_parent_database_template: DatabaseTemplate, availability: str
     ) -> None:
         with image_parent_database_template.copy() as db:
             with pytest.raises(sqlite3.IntegrityError), db.transaction():
                 db.insert(
                     "image_asset",
-                    rows()["image_asset"]
-                    | {
-                        "origin": origin,
-                        "review_decision_id": decision,
-                        "availability": availability,
-                    },
+                    rows()["image_asset"] | {"availability": availability},
                 )
-
-    def test_official_available_without_variants_needs_no_human_decision(
-        self, image_parent_database_template: DatabaseTemplate
-    ) -> None:
-        with image_parent_database_template.copy() as db:
-            with db.transaction():
-                db.insert(
-                    "image_asset",
-                    rows()["image_asset"]
-                    | {"origin": "official", "review_decision_id": None},
-                )
-            assert not db.rows("image_variant")
 
 
 class TestConnectedGraphConstraints:
@@ -289,18 +240,11 @@ class TestConnectedGraphConstraints:
                     {field: value},
                 )
 
-    @pytest.mark.parametrize(
-        ("field", "value"),
-        [
-            ("publication_state", "pending"),
-            ("publication_state", "withdrawn"),
-            ("availability", "missing"),
-            ("availability", "unfetched"),
-        ],
-    )
+    @pytest.mark.parametrize("availability", ["available", "missing", "unfetched"])
     def test_variant_rechecks_parent_updates_and_rolls_back(
-        self, t1_database_template: DatabaseTemplate, field: str, value: Value
+        self, t1_database_template: DatabaseTemplate, availability: str
     ) -> None:
+        change = {"publication_state": "pending", "availability": availability}
         with t1_database_template.copy() as db:
             before = db.rows("image_asset")
             with (
@@ -309,11 +253,7 @@ class TestConnectedGraphConstraints:
                 ),
                 db.transaction(),
             ):
-                db.update(
-                    "image_asset",
-                    {"id": "image"},
-                    {field: value, "withdrawal_reason": "Synthetic withdrawal"},
-                )
+                db.update("image_asset", {"id": "image"}, change)
             assert db.rows("image_asset") == before
             assert db.rows("image_variant")
             with db.transaction():
@@ -321,69 +261,7 @@ class TestConnectedGraphConstraints:
                     "image_variant",
                     {"image_id": "image", "size_key": "card_s", "format": "webp"},
                 )
-                db.update(
-                    "image_asset",
-                    {"id": "image"},
-                    {field: value, "withdrawal_reason": "Synthetic withdrawal"},
-                )
-
-    @pytest.mark.parametrize(
-        "state", ["sampled", "model_reviewed", "proposed", "rejected", "disputed"]
-    )
-    def test_review_rechecked_after_parent_update(
-        self, t1_database_template: DatabaseTemplate, state: str
-    ) -> None:
-        with t1_database_template.copy() as db:
-            with (
-                pytest.raises(sqlite3.IntegrityError, match="image_confirmed_review"),
-                db.transaction(),
-            ):
-                db.update("decision", {"id": "decision"}, {"state": state})
-            assert db.rows("decision")[0].values["state"] == "confirmed"
-
-    def test_review_source_deletion_fails_and_rolls_back(
-        self, t1_database_template: DatabaseTemplate
-    ) -> None:
-        with t1_database_template.copy() as db:
-            with (
-                pytest.raises(sqlite3.IntegrityError, match="image_review_source"),
-                db.transaction(),
-            ):
-                db.delete(
-                    "decision_source",
-                    {
-                        "decision_id": "decision",
-                        "source_id": "source",
-                        "role": "synthetic",
-                    },
-                )
-            assert db.rows("decision_source")
-
-    def test_review_evidence_for_another_source_fails_and_rolls_back(
-        self, t1_database_template: DatabaseTemplate
-    ) -> None:
-        with t1_database_template.copy() as db:
-            with db.transaction():
-                db.insert(
-                    "source_record",
-                    dict(db.rows("source_record")[0].values)
-                    | {"id": "other_source", "sha256": "sha256:" + "b" * 64},
-                )
-            before = db.rows("decision_source")
-            with (
-                pytest.raises(sqlite3.IntegrityError, match="image_review_source"),
-                db.transaction(),
-            ):
-                db.update(
-                    "decision_source",
-                    {
-                        "decision_id": "decision",
-                        "source_id": "source",
-                        "role": "synthetic",
-                    },
-                    {"source_id": "other_source"},
-                )
-            assert db.rows("decision_source") == before
+                db.update("image_asset", {"id": "image"}, change)
 
     def test_variant_requires_an_existing_image_size(
         self, t1_database_template: DatabaseTemplate

@@ -7,12 +7,8 @@
         "bucket": 55,
         "columns": [
           "id",
-          "origin",
-          "publication_state",
-          "withdrawal_reason",
           "source_src_raw",
           "source_url",
-          "availability",
           "width",
           "height",
           "format"
@@ -25,12 +21,8 @@
         "rows": [
           [
             "img:a",
-            "official",
-            "approved",
-            null,
             "/synthetic.png",
             "https://example.invalid/synthetic.png",
-            "available",
             459,
             641,
             "png"

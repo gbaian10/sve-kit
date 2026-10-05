@@ -13,12 +13,8 @@
         "base": null,
         "columns": [
           "id",
-          "origin",
-          "publication_state",
-          "withdrawal_reason",
           "source_src_raw",
           "source_url",
-          "availability",
           "width",
           "height",
           "format"
@@ -26,27 +22,19 @@
         "rows": [
           [
             "img:m",
-            "official",
-            "approved",
-            null,
             "/synthetic.png",
             "https://example.invalid/synthetic.png",
-            "missing",
             459,
             641,
             "png"
           ],
           [
             "img:w",
-            "official",
-            "withdrawn",
-            "Synthetic withdrawal",
             "/synthetic.png",
             "https://example.invalid/synthetic.png",
-            "available",
-            459,
-            641,
-            "png"
+            null,
+            null,
+            null
           ]
         ]
       }

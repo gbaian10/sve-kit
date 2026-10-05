@@ -53,8 +53,7 @@ class ImageSource:
     source_sha256: str
     source_src_raw: str
     asset_kind: Literal["sve_card", "digital"]
-    origin: Literal["official", "third_party"]
-    publication_state: Literal["pending", "approved", "withdrawn"]
+    publication_state: Literal["pending", "approved"]
     availability: Literal["available", "missing", "unfetched"]
 
 
@@ -251,10 +250,7 @@ def _validate_source(source: ImageSource) -> None:
     if not source.image_id or not source.source_src_raw:
         msg = "image identity and original source URL are required"
         raise ImageVariantError(msg)
-    if source.asset_kind != "sve_card" or source.origin not in {
-        "official",
-        "third_party",
-    }:
+    if source.asset_kind != "sve_card":
         msg = "digital images cannot enter SVE card variants"
         raise ImageVariantError(msg)
     if source.publication_state != "approved" or source.availability != "available":

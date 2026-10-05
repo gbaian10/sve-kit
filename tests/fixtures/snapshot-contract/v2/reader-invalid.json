@@ -1,20 +1,5 @@
 [
   {
-    "name": "status-disagrees",
-    "target": "images/detail/home_set/set%3Aa/band/0",
-    "path": [
-      "tables",
-      "printing_image",
-      0,
-      "rows",
-      0,
-      4
-    ],
-    "value": "missing",
-    "rehash": true,
-    "error": "Media status differs from source image"
-  },
-  {
     "name": "available-missing-size",
     "target": "images/detail/home_set/set%3Aa/band/0",
     "path": [
@@ -23,7 +8,7 @@
       0,
       "rows",
       0,
-      8
+      7
     ],
     "value": [
       [
@@ -59,7 +44,7 @@
       0,
       "rows",
       0,
-      8
+      7
     ],
     "value": [
       [
@@ -100,7 +85,7 @@
       0,
       "rows",
       0,
-      8
+      7
     ],
     "value": [
       [
@@ -141,7 +126,7 @@
       0,
       "rows",
       0,
-      6
+      5
     ],
     "value": null,
     "rehash": true,
@@ -156,7 +141,7 @@
       0,
       "rows",
       1,
-      6
+      5
     ],
     "value": 7,
     "rehash": true,
@@ -171,7 +156,7 @@
       0,
       "rows",
       1,
-      7
+      6
     ],
     "value": 11,
     "rehash": true,
@@ -186,7 +171,7 @@
       0,
       "rows",
       1,
-      8
+      7
     ],
     "value": [
       [
@@ -219,7 +204,7 @@
     "error": "Unavailable media cannot provide image URLs"
   },
   {
-    "name": "withdrawn-has-variants",
+    "name": "pending-has-variants",
     "target": "images/detail/home_set/set%3Aa/band/1",
     "path": [
       "tables",
@@ -227,7 +212,7 @@
       0,
       "rows",
       1,
-      8
+      7
     ],
     "value": [
       [
@@ -642,7 +627,7 @@
       },
       {
         "key": "images/detail/global/global/band/12",
-        "sha256": "sha256:567f3cf21ae99a95f5a03688789ffd59d4db3d51fa0d717d261f128537ef57a5"
+        "sha256": "sha256:c089991570f1de62bf0eae27fa34f382b035b994d512875dfa104841e0d46839"
       }
     ],
     "rehash": false,

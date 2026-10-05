@@ -13,8 +13,8 @@ from `text-all.json` plus images/programs attachments.
 
 The golden has permanent printing identities 1/2, front/back ordinals 0/1,
 separate card/art versions 7/11, and two available printing bindings sharing one
-image. A missing front-printing back image and a withdrawn second-printing back
-image expose neither versions nor variants. Five display sizes retain their
+image. Pending back images, missing on the first printing and unfetched on the
+second, expose neither versions nor variants. Five display sizes retain their
 actual dimensions. Two synthetic card-level `same_name` links are unreviewed,
 with both sv1/svwb endpoints present and offline status unknown. They demonstrate
 wire capability only, not adoption of any real name-policy links.
@@ -34,7 +34,7 @@ text union is unnecessary. The expected rejection must follow byte and shape
 validation, not an unrelated stale hash. `error` identifies the Python message;
 TS must reject for the same reason without adopting Python exception wording.
 
-Cases cover status disagreement, incomplete/unsorted sizes, decoded metadata
+Cases cover incomplete/unsorted sizes, decoded metadata
 size disagreement, unavailable URLs, duplicate integer IDs and same-card face
 ordinals, non-card/human-reviewed same_name, duplicate/shadowed pairs, wrong
 endpoints, and exact media dependency closure. The ordinal case adds an unprinted

@@ -196,7 +196,6 @@ def prepare_media(  # ruff: ignore[too-many-locals] -- indexes, validated source
     *,
     revision: int,
     previous: JsonValue = None,
-    confirmed_images: frozenset[str] = frozenset(),
 ) -> MediaPlan:
     """Verify private content-addressed outputs, then compare each card/art group.
 
@@ -211,9 +210,8 @@ def prepare_media(  # ruff: ignore[too-many-locals] -- indexes, validated source
         raise ValueError("Media revision must advance the committed state")
     members = {} if not old else object_value(old["members"])
     # Decode each unique source once before accepting its filename digest as evidence.
-    for _path, _raw in image_blobs(projection.tables, source, confirmed_images):
+    for _path, _raw in image_blobs(projection.tables, source):
         pass
-    images = {string(r["id"]): r for r in projection.tables["image_asset"]}
     prints = {string(r["id"]): r for r in projection.tables["printing"]}
     faces = {string(r["id"]): r for r in projection.tables["face"]}
     variants: dict[str, list[Record]] = {}
@@ -237,10 +235,9 @@ def prepare_media(  # ruff: ignore[too-many-locals] -- indexes, validated source
             raise ValueError("Media face absent from printing")
         int_id, ordinal = integer(parent["int_id"]), integer(faces[face]["ordinal"])
         image_path(int_id, ordinal, "card_s")
-        asset = images[image]
         active = (
-            asset["publication_state"] == "approved"
-            and asset["availability"] == "available"
+            row["publication_state"] == "approved"
+            and row["availability"] == "available"
         )
         sizes = (
             sorted(variants.get(image, []), key=lambda r: string(r["size_key"]))
@@ -260,10 +257,6 @@ def prepare_media(  # ruff: ignore[too-many-locals] -- indexes, validated source
             next_members[key] = {"binding": binding, **fingerprints, **versions}
         result.append(
             row
-            | {
-                f: asset[f]
-                for f in ("publication_state", "availability", "withdrawal_reason")
-            }
             | versions
             | {
                 "variants": [

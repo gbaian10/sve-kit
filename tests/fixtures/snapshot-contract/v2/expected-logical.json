@@ -423,39 +423,27 @@
   "image_asset": [
     {
       "id": "img:a",
-      "origin": "official",
-      "publication_state": "approved",
-      "withdrawal_reason": null,
       "source_src_raw": "/synthetic.png",
       "source_url": "https://example.invalid/synthetic.png",
-      "availability": "available",
       "width": 459,
       "height": 641,
       "format": "png"
     },
     {
       "id": "img:m",
-      "origin": "official",
-      "publication_state": "approved",
-      "withdrawal_reason": null,
       "source_src_raw": "/synthetic.png",
       "source_url": "https://example.invalid/synthetic.png",
-      "availability": "missing",
       "width": 459,
       "height": 641,
       "format": "png"
     },
     {
       "id": "img:w",
-      "origin": "official",
-      "publication_state": "withdrawn",
-      "withdrawal_reason": "Synthetic withdrawal",
       "source_src_raw": "/synthetic.png",
       "source_url": "https://example.invalid/synthetic.png",
-      "availability": "available",
-      "width": 459,
-      "height": 641,
-      "format": "png"
+      "width": null,
+      "height": null,
+      "format": null
     }
   ],
   "printing_image": [
@@ -465,7 +453,6 @@
       "image_id": "img:a",
       "publication_state": "approved",
       "availability": "available",
-      "withdrawal_reason": null,
       "card_version": 7,
       "art_version": 11,
       "variants": [
@@ -500,9 +487,8 @@
       "printing_id": "p:a",
       "face_id": "f:b",
       "image_id": "img:m",
-      "publication_state": "approved",
+      "publication_state": "pending",
       "availability": "missing",
-      "withdrawal_reason": null,
       "card_version": null,
       "art_version": null,
       "variants": []
@@ -513,7 +499,6 @@
       "image_id": "img:a",
       "publication_state": "approved",
       "availability": "available",
-      "withdrawal_reason": null,
       "card_version": 7,
       "art_version": 11,
       "variants": [
@@ -548,9 +533,8 @@
       "printing_id": "p:b",
       "face_id": "f:b",
       "image_id": "img:w",
-      "publication_state": "withdrawn",
-      "availability": "available",
-      "withdrawal_reason": "Synthetic withdrawal",
+      "publication_state": "pending",
+      "availability": "unfetched",
       "card_version": null,
       "art_version": null,
       "variants": []

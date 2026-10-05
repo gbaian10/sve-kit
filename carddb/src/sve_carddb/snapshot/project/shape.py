@@ -31,13 +31,22 @@ def tuple_value(name: str, record: dict[str, JsonValue]) -> list[JsonValue]:
     return result
 
 
+_MEDIA_STATE = ("publication_state", "availability")
+
+
 def source_tuple(name: str, record: dict[str, JsonValue]) -> None:
     """Validate current build inputs before media versions are reserved."""
     if name == "printing_image":
-        if set(record) != {"printing_id", "face_id", "image_id"}:
+        if set(record) != {"printing_id", "face_id", "image_id", *_MEDIA_STATE}:
             raise ValueError("Source printing image whitelist mismatch")
-        for value in record.values():
-            validate("ID", value)
+        kinds = dict(
+            zip(columns(name), array(definition(name)["x-types"]), strict=True)
+        )
+        for field, value in record.items():
+            if field not in _MEDIA_STATE:
+                validate("ID", value)
+            elif value not in array(object_value(kinds[field])["enum"]):
+                raise ValueError("Source printing image state outside contract")
     elif name == "image_variant":
         if set(record) != {*columns(name), "path"}:
             raise ValueError("Source image variant whitelist mismatch")

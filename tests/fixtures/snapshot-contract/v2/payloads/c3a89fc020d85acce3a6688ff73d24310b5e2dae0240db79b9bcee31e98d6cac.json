@@ -33,7 +33,7 @@
           "kind": "home_set",
           "id": "set:a"
         },
-        "bucket": 29,
+        "bucket": 43,
         "partition": "detail",
         "base": null,
         "columns": [
@@ -42,19 +42,17 @@
           "image_id",
           "publication_state",
           "availability",
-          "withdrawal_reason",
           "card_version",
           "art_version",
           "variants"
         ],
         "rows": [
           [
-            "p:a",
+            "p:b",
             "f:a",
             "img:a",
             "approved",
             "available",
-            null,
             7,
             11,
             [
@@ -86,12 +84,11 @@
             ]
           ],
           [
-            "p:a",
+            "p:b",
             "f:b",
-            "img:m",
-            "approved",
-            "missing",
-            null,
+            "img:w",
+            "pending",
+            "unfetched",
             null,
             null,
             []

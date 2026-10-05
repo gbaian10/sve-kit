@@ -91,9 +91,9 @@ def test_unchecked_machine_translation_keeps_quality_and_source_closure(
         result,
         tables=result.tables
         | {
-            "image_asset": [
+            "printing_image": [
                 row | {"availability": "unfetched", "publication_state": "pending"}
-                for row in result.tables["image_asset"]
+                for row in result.tables["printing_image"]
             ],
             "image_variant": [],
         },

@@ -6398,40 +6398,10 @@
           "$ref": "#/$defs/ID"
         },
         {
-          "enum": [
-            "official",
-            "third_party"
-          ]
-        },
-        {
-          "enum": [
-            "pending",
-            "approved",
-            "withdrawn"
-          ]
-        },
-        {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Text"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        {
           "$ref": "#/$defs/Text"
         },
         {
           "$ref": "#/$defs/URL"
-        },
-        {
-          "enum": [
-            "available",
-            "missing",
-            "unfetched"
-          ]
         },
         {
           "anyOf": [
@@ -6465,16 +6435,12 @@
         }
       ],
       "items": false,
-      "minItems": 10,
-      "maxItems": 10,
+      "minItems": 6,
+      "maxItems": 6,
       "x-columns": [
         "id",
-        "origin",
-        "publication_state",
-        "withdrawal_reason",
         "source_src_raw",
         "source_url",
-        "availability",
         "width",
         "height",
         "format"
@@ -6484,35 +6450,10 @@
           "scalar": "ID"
         },
         {
-          "enum": [
-            "official",
-            "third_party"
-          ]
-        },
-        {
-          "enum": [
-            "pending",
-            "approved",
-            "withdrawn"
-          ]
-        },
-        {
-          "nullable": {
-            "scalar": "Text"
-          }
-        },
-        {
           "scalar": "Text"
         },
         {
           "scalar": "URL"
-        },
-        {
-          "enum": [
-            "available",
-            "missing",
-            "unfetched"
-          ]
         },
         {
           "nullable": {
@@ -6532,96 +6473,6 @@
       ],
       "x-primary-key": [
         "id"
-      ],
-      "allOf": [
-        {
-          "if": {
-            "prefixItems": [
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {
-                "const": "available"
-              },
-              {},
-              {},
-              {}
-            ]
-          },
-          "then": {
-            "prefixItems": [
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {
-                "$ref": "#/$defs/Positive"
-              },
-              {
-                "$ref": "#/$defs/Positive"
-              },
-              {
-                "$ref": "#/$defs/Code"
-              }
-            ]
-          }
-        },
-        {
-          "if": {
-            "prefixItems": [
-              {},
-              {},
-              {
-                "const": "withdrawn"
-              },
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {}
-            ]
-          },
-          "then": {
-            "prefixItems": [
-              {},
-              {},
-              {},
-              {
-                "$ref": "#/$defs/Text"
-              },
-              {},
-              {},
-              {},
-              {},
-              {},
-              {}
-            ]
-          },
-          "else": {
-            "prefixItems": [
-              {},
-              {},
-              {},
-              {
-                "type": "null"
-              },
-              {},
-              {},
-              {},
-              {},
-              {},
-              {}
-            ]
-          }
-        }
       ]
     },
     "printing_image": {
@@ -6639,8 +6490,7 @@
         {
           "enum": [
             "pending",
-            "approved",
-            "withdrawn"
+            "approved"
           ]
         },
         {
@@ -6648,16 +6498,6 @@
             "available",
             "missing",
             "unfetched"
-          ]
-        },
-        {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Text"
-            },
-            {
-              "type": "null"
-            }
           ]
         },
         {
@@ -6688,15 +6528,14 @@
         }
       ],
       "items": false,
-      "minItems": 9,
-      "maxItems": 9,
+      "minItems": 8,
+      "maxItems": 8,
       "x-columns": [
         "printing_id",
         "face_id",
         "image_id",
         "publication_state",
         "availability",
-        "withdrawal_reason",
         "card_version",
         "art_version",
         "variants"
@@ -6714,8 +6553,7 @@
         {
           "enum": [
             "pending",
-            "approved",
-            "withdrawn"
+            "approved"
           ]
         },
         {
@@ -6724,11 +6562,6 @@
             "missing",
             "unfetched"
           ]
-        },
-        {
-          "nullable": {
-            "scalar": "Text"
-          }
         },
         {
           "nullable": {
@@ -13027,40 +12860,10 @@
           "$ref": "#/$defs/ID"
         },
         {
-          "enum": [
-            "official",
-            "third_party"
-          ]
-        },
-        {
-          "enum": [
-            "pending",
-            "approved",
-            "withdrawn"
-          ]
-        },
-        {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Text"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        {
           "$ref": "#/$defs/Text"
         },
         {
           "$ref": "#/$defs/URL"
-        },
-        {
-          "enum": [
-            "available",
-            "missing",
-            "unfetched"
-          ]
         },
         {
           "anyOf": [
@@ -13094,16 +12897,12 @@
         }
       ],
       "items": false,
-      "minItems": 10,
-      "maxItems": 10,
+      "minItems": 6,
+      "maxItems": 6,
       "x-columns": [
         "id",
-        "origin",
-        "publication_state",
-        "withdrawal_reason",
         "source_src_raw",
         "source_url",
-        "availability",
         "width",
         "height",
         "format"
@@ -13113,35 +12912,10 @@
           "scalar": "ID"
         },
         {
-          "enum": [
-            "official",
-            "third_party"
-          ]
-        },
-        {
-          "enum": [
-            "pending",
-            "approved",
-            "withdrawn"
-          ]
-        },
-        {
-          "nullable": {
-            "scalar": "Text"
-          }
-        },
-        {
           "scalar": "Text"
         },
         {
           "scalar": "URL"
-        },
-        {
-          "enum": [
-            "available",
-            "missing",
-            "unfetched"
-          ]
         },
         {
           "nullable": {
@@ -13156,96 +12930,6 @@
         {
           "nullable": {
             "scalar": "Code"
-          }
-        }
-      ],
-      "allOf": [
-        {
-          "if": {
-            "prefixItems": [
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {
-                "const": "available"
-              },
-              {},
-              {},
-              {}
-            ]
-          },
-          "then": {
-            "prefixItems": [
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {
-                "$ref": "#/$defs/Positive"
-              },
-              {
-                "$ref": "#/$defs/Positive"
-              },
-              {
-                "$ref": "#/$defs/Code"
-              }
-            ]
-          }
-        },
-        {
-          "if": {
-            "prefixItems": [
-              {},
-              {},
-              {
-                "const": "withdrawn"
-              },
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {}
-            ]
-          },
-          "then": {
-            "prefixItems": [
-              {},
-              {},
-              {},
-              {
-                "$ref": "#/$defs/Text"
-              },
-              {},
-              {},
-              {},
-              {},
-              {},
-              {}
-            ]
-          },
-          "else": {
-            "prefixItems": [
-              {},
-              {},
-              {},
-              {
-                "type": "null"
-              },
-              {},
-              {},
-              {},
-              {},
-              {},
-              {}
-            ]
           }
         }
       ]
@@ -13268,12 +12952,8 @@
         "columns": {
           "const": [
             "id",
-            "origin",
-            "publication_state",
-            "withdrawal_reason",
             "source_src_raw",
             "source_url",
-            "availability",
             "width",
             "height",
             "format"
@@ -13311,8 +12991,7 @@
         {
           "enum": [
             "pending",
-            "approved",
-            "withdrawn"
+            "approved"
           ]
         },
         {
@@ -13320,16 +12999,6 @@
             "available",
             "missing",
             "unfetched"
-          ]
-        },
-        {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Text"
-            },
-            {
-              "type": "null"
-            }
           ]
         },
         {
@@ -13360,15 +13029,14 @@
         }
       ],
       "items": false,
-      "minItems": 9,
-      "maxItems": 9,
+      "minItems": 8,
+      "maxItems": 8,
       "x-columns": [
         "printing_id",
         "face_id",
         "image_id",
         "publication_state",
         "availability",
-        "withdrawal_reason",
         "card_version",
         "art_version",
         "variants"
@@ -13386,8 +13054,7 @@
         {
           "enum": [
             "pending",
-            "approved",
-            "withdrawn"
+            "approved"
           ]
         },
         {
@@ -13396,11 +13063,6 @@
             "missing",
             "unfetched"
           ]
-        },
-        {
-          "nullable": {
-            "scalar": "Text"
-          }
         },
         {
           "nullable": {
@@ -13441,7 +13103,6 @@
             "image_id",
             "publication_state",
             "availability",
-            "withdrawal_reason",
             "card_version",
             "art_version",
             "variants"
@@ -18138,12 +17799,8 @@
                     "items": {
                       "enum": [
                         "id",
-                        "origin",
-                        "publication_state",
-                        "withdrawal_reason",
                         "source_src_raw",
                         "source_url",
-                        "availability",
                         "width",
                         "height",
                         "format"
@@ -18194,7 +17851,6 @@
                         "image_id",
                         "publication_state",
                         "availability",
-                        "withdrawal_reason",
                         "card_version",
                         "art_version",
                         "variants"
@@ -20213,12 +19869,8 @@
                     "items": {
                       "enum": [
                         "id",
-                        "origin",
-                        "publication_state",
-                        "withdrawal_reason",
                         "source_src_raw",
                         "source_url",
-                        "availability",
                         "width",
                         "height",
                         "format"
@@ -20270,7 +19922,6 @@
                         "image_id",
                         "publication_state",
                         "availability",
-                        "withdrawal_reason",
                         "card_version",
                         "art_version",
                         "variants"
@@ -22251,12 +21902,8 @@
                     "items": {
                       "enum": [
                         "id",
-                        "origin",
-                        "publication_state",
-                        "withdrawal_reason",
                         "source_src_raw",
                         "source_url",
-                        "availability",
                         "width",
                         "height",
                         "format"
@@ -22307,7 +21954,6 @@
                         "image_id",
                         "publication_state",
                         "availability",
-                        "withdrawal_reason",
                         "card_version",
                         "art_version",
                         "variants"

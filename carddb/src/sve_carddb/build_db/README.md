@@ -172,11 +172,10 @@ and are not contained in `CompiledSchema.sql`; external/raw SQL writers must not
 treat executing DDL alone as validated build creation. Use the Database API and
 run complete domain validation before publication.
 
-The image checks enforce publishable variant parents, confirmed third-party
-review and its source link, and non-original output settings. Row-local checks
-cover required source metadata, withdrawal reasons, WebP format and hash-derived
-paths. Available/approved source metadata may have no variants yet. Physical
-source/bytes matching, decoding, review envelope and batch membership, exact
+The image checks enforce publishable variant parents and non-original output
+settings. Row-local checks cover required source metadata, approved images being
+available, WebP format and hash-derived paths. Available/approved source metadata
+may have no variants yet. Physical source/bytes matching, decoding, exact
 recipe output and the complete five-size image set for both orientations still require the future
 importer/image builder/domain validator. SQL checks do not attest those facts.
 

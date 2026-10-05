@@ -50,7 +50,7 @@ SCALARS = {
     "text_symbol": "id,code,parameter_schema,keyword_id,spellings,localizations",
     "card_route_alias": "namespace,old_key,target_namespace,target_key,reason",
     "route_override": "route_key,printing_id",
-    "image_asset": "id,origin,publication_state,withdrawal_reason,source_src_raw,source_url,availability,width,height",
+    "image_asset": "id,source_src_raw,source_url,width,height",
     "printing_image": "printing_id,face_id,image_id",
     "image_variant": "image_id,size_key,format,path,width,height,bytes",
 }

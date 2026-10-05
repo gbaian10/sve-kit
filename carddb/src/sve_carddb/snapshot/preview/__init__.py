@@ -10,7 +10,6 @@ from pydantic import JsonValue
 
 from sve_carddb.snapshot.export.compression import compress
 from sve_carddb.snapshot.export.measure import measure
-from sve_carddb.snapshot.preview.images import require_confirmed
 from sve_carddb.snapshot.preview.media_state import commit
 from sve_carddb.snapshot.publication import require_preview
 from sve_carddb.snapshot.reader import read_snapshot, read_text_all
@@ -101,7 +100,6 @@ def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary bi
     *,
     brotli: Brotli | None = None,
     image_source: Path | None = None,
-    confirmed_images: frozenset[str] = frozenset(),
     regions: tuple[str, ...] = ("jp",),
     media_plan: MediaPlan | None = None,
 ) -> dict[str, JsonValue]:
@@ -133,13 +131,7 @@ def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary bi
         string(object_value(item)["key"]): object_value(item)
         for item in array(snapshot.manifest["files"])
     }
-    image_report = _publish_images(
-        joined,
-        roots,
-        image_source,
-        confirmed_images,
-        media_plan,
-    )
+    image_report = _publish_images(joined, roots, image_source, media_plan)
     for key, blob in snapshot.payloads.items():
         path = string(descriptions[key]["path"])
         if path != "snapshots/blobs/" + digest(blob.raw)[7:] + ".json":
@@ -205,12 +197,10 @@ def _publish_images(
     tables: dict[str, list[Record]],
     roots: Roots,
     image_source: Path | None,
-    confirmed_images: frozenset[str],
     media_plan: MediaPlan | None,
 ) -> dict[str, JsonValue]:
     if media_plan is None or media_plan.projection.tables != tables:
         raise ValueError("Preview requires the matching verified media plan")
-    require_confirmed(tables, confirmed_images)
     if media_plan.assets and image_source is None:
         raise ValueError("Preview media requires an explicit asset source")
     image_files, image_bytes = 0, 0

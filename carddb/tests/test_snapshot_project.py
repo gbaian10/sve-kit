@@ -410,21 +410,9 @@ def test_historical_art_and_artist_are_pruned_with_tombstone(db: Database) -> No
     assert one(result, "art")["regions"] == ["jp"]
 
 
-@pytest.mark.parametrize("publication_state", ["pending", "withdrawn"])
-def test_unpublished_image_cannot_expose_variants(
-    db: Database, publication_state: str
-) -> None:
+def test_unpublished_image_cannot_expose_variants(db: Database) -> None:
     with db.transaction():
-        db.update(
-            "image_asset",
-            {"id": "image"},
-            {
-                "publication_state": publication_state,
-                "withdrawal_reason": "Synthetic withdrawal"
-                if publication_state == "withdrawn"
-                else None,
-            },
-        )
+        db.update("image_asset", {"id": "image"}, {"publication_state": "pending"})
         db.delete(
             "image_variant",
             {"image_id": "image", "size_key": "card_s", "format": "webp"},
@@ -433,6 +421,7 @@ def test_unpublished_image_cannot_expose_variants(
     assert (
         one(result, "image_asset")["source_url"] == "https://example.invalid/source.png"
     )
+    assert one(result, "printing_image")["publication_state"] == "pending"
     assert result.tables["image_variant"] == []
 
 

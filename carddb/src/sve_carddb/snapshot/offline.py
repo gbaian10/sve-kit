@@ -139,7 +139,6 @@ class Built:
     ownership: Ownership
     input_content: bytes
     report: dict[str, JsonValue]
-    confirmed_images: frozenset[str] = frozenset()
 
 
 class RegionalImages:
