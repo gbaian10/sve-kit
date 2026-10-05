@@ -118,7 +118,7 @@ def test_art_group_requires_sources_for_all_its_uses(
     inputs.en[second.number] = second
     inputs.mapping.targets[second.number] = "BP02-071"
     inputs.mapping.original_art.add(second.number)
-    inputs.receipt.art_groups = [["BP02-070EN", second.number]]
+    inputs.decisions.art_groups = [["BP02-070EN", second.number]]
     write_files(plan_files(tmp_path, build(inputs, {})))
     inputs.en["BP02-070EN"].faces[0].text = "Changed one art use only."
     plan = plan_preview(tmp_path, evidence(inputs), regions=("en",))

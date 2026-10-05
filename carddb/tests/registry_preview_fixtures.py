@@ -62,7 +62,7 @@ def evidence(inputs: Inputs, *, en: bool = True) -> MemoryEvidence:
         if region == "jp" or en
         for card in collection.values()
     }
-    return MemoryEvidence(cards, frozenset(inputs.receipt.input_hashes.values()))
+    return MemoryEvidence(cards, frozenset({inputs.jp_hash}))
 
 
 def parents(db: Database, plan: PreviewPlan) -> None:

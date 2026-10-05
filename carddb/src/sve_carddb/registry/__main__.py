@@ -1,10 +1,11 @@
-"""Offline entry point for reviewed identity registry generation."""
+"""Offline entry point for identity registry generation."""
 
 import argparse
 import fcntl
 import json
 import sys
 from collections import Counter
+from datetime import date
 from pathlib import Path
 
 from sve_carddb.registry.build import build
@@ -23,11 +24,17 @@ def main() -> None:
         "candidates",
         "confirmations",
         "original-art",
-        "receipt",
+        "decisions",
         "images",
         "authored",
     ):
         parser.add_argument("--" + name, type=Path, required=True)
+    parser.add_argument(
+        "--as-of",
+        type=date.fromisoformat,
+        required=True,
+        help="Date of the JP input batch, recorded on new confirmed-absence reviews",
+    )
     parser.add_argument(
         "--check",
         action="store_true",
@@ -51,7 +58,7 @@ def main() -> None:
             "confirmations": args.confirmations,
             "original_art": args.original_art,
         }
-        inputs = read_inputs(paths, args.receipt, args.images)
+        inputs = read_inputs(paths, args.decisions, args.images, as_of=args.as_of)
         index, existing = load(root)
         if existing:
             validate(list(existing.values()))

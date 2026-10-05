@@ -2,6 +2,7 @@
 
 import shutil
 from dataclasses import dataclass, replace
+from datetime import date
 from typing import TYPE_CHECKING
 
 import pytest
@@ -27,7 +28,7 @@ from sve_carddb.manifest import Kind, Region
 from sve_carddb.registry.build import build
 from sve_carddb.registry.inputs import Mapping
 from sve_carddb.registry.preview import FrozenEN, FrozenJP, FrozenRegions, plan_preview
-from sve_carddb.registry.review import Inputs, Receipt
+from sve_carddb.registry.review import InitDecisions, Inputs
 from sve_carddb.registry.storage import plan_files, write_files
 from sve_carddb.source_archive import ArchiveStore, Scope, seal_batch
 from sve_carddb.sources import official_en
@@ -125,12 +126,11 @@ def english_images(  # ruff: ignore[too-many-locals] -- seal the shared minimal 
         jp=jp_cards,
         en={NUMBER: legacy_en(extract_en(raw, number=NUMBER))},
         mapping=Mapping(targets={NUMBER: "TEST-002"}, original_art=set(), reskins={}),
-        receipt=Receipt(
+        decisions=InitDecisions(
             policy="identity-init-2026-09-28-v1",
-            reviewed_by="synthetic-reviewer",
-            reviewed_on="2026-09-29",
-            input_hashes={"jp": "sha256:" + "0" * 64},
         ),
+        as_of=date(2026, 9, 29),
+        jp_hash="sha256:" + "0" * 64,
     )
     write_files(plan_files(authored, build(registry, {})))
     plan = plan_preview(

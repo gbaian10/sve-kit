@@ -62,7 +62,7 @@ def make_correction_case(  # ruff: ignore[too-many-arguments] -- explicit before
         if field == "effect"
         else "Follower"
     )
-    inputs.receipt.corrections = [
+    inputs.decisions.corrections = [
         Correction(
             region=region,
             card_no=number,

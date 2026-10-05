@@ -1,5 +1,6 @@
 """One shared sealed synthetic baseline; mutations use fresh small SQLite graphs."""
 
+from datetime import date
 from typing import TYPE_CHECKING
 
 import pytest
@@ -8,7 +9,7 @@ from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.card_extras import applicable_reskin_regions
 from sve_carddb.registry.inputs import Mapping
-from sve_carddb.registry.review import Inputs, Receipt
+from sve_carddb.registry.review import InitDecisions, Inputs
 from sve_carddb.text_observations import populate_text_observations
 
 from .test_registry import card
@@ -43,12 +44,11 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> Case:
             original_art={"BP02-070EN"},
             reskins={"GF01-001EN": "BP02-071"},
         ),
-        receipt=Receipt(
+        decisions=InitDecisions(
             policy="identity-init-2026-09-28-v1",
-            reviewed_by="synthetic-reviewer",
-            reviewed_on="2026-09-28",
-            input_hashes={"jp": "sha256:" + "0" * 64},
         ),
+        as_of=date(2026, 9, 28),
+        jp_hash="sha256:" + "0" * 64,
     )
     for original in inputs.en.values():
         original.faces[0].sections = ["Synthetic auxiliary section"]

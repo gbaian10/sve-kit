@@ -2,6 +2,7 @@
 
 import shutil
 from dataclasses import replace
+from datetime import date
 from typing import TYPE_CHECKING
 
 import pytest
@@ -20,8 +21,8 @@ from sve_carddb.manifest import Kind, Region
 from sve_carddb.registry.build import build as build_identity
 from sve_carddb.registry.inputs import Card, Mapping
 from sve_carddb.registry.preview import plan_preview
+from sve_carddb.registry.review import InitDecisions
 from sve_carddb.registry.review import Inputs as IdentityInputs
-from sve_carddb.registry.review import Receipt
 from sve_carddb.registry.storage import Index, plan_files, write_files
 from sve_carddb.snapshot import offline
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
@@ -453,12 +454,11 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
             jp={"SYN-01": cards["jp"]},
             en={"SYN-02": cards["en"]},
             mapping=Mapping(targets={"SYN-02": None}, original_art=set(), reskins={}),
-            receipt=Receipt(
+            decisions=InitDecisions(
                 policy="identity-init-2026-09-28-v1",
-                reviewed_by="gbaian10",
-                reviewed_on="2026-10-02",
-                input_hashes={"jp": digest(b"synthetic JP coverage")},
             ),
+            as_of=date(2026, 10, 2),
+            jp_hash=digest(b"synthetic JP coverage"),
         ),
         {},
     )

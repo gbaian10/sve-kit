@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 
 def build_registry_root(inputs: Inputs, tmp_path: Path) -> Path:
-    inputs.receipt.corrections = [
+    inputs.decisions.corrections = [
         Correction(
             region="jp",
             card_no="BP02-071",
@@ -71,7 +71,7 @@ def registry_template(tmp_path_factory: pytest.TempPathFactory) -> RegistryTempl
     root = build_registry_root(inputs, tmp_path_factory.mktemp("registry-template"))
     return RegistryTemplate(
         freeze_files(root),
-        tuple(value.model_dump_json() for value in inputs.receipt.corrections),
+        tuple(value.model_dump_json() for value in inputs.decisions.corrections),
     )
 
 
@@ -85,7 +85,7 @@ def registry_root(
 def restore_registry(
     template: RegistryTemplate, inputs: Inputs, destination: Path
 ) -> Path:
-    inputs.receipt.corrections = [
+    inputs.decisions.corrections = [
         Correction.model_validate_json(value) for value in template.corrections
     ]
     restore_files(template.files, destination)

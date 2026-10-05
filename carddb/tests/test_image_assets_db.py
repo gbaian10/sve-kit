@@ -2,6 +2,7 @@
 
 import hashlib
 from dataclasses import dataclass, replace
+from datetime import date
 from typing import TYPE_CHECKING
 
 import pytest
@@ -27,7 +28,7 @@ from sve_carddb.registry.build import build
 from sve_carddb.registry.inputs import Mapping
 from sve_carddb.registry.preview import FrozenJP, plan_preview, populate_preview
 from sve_carddb.registry.records import PrintingData
-from sve_carddb.registry.review import Inputs, Receipt
+from sve_carddb.registry.review import InitDecisions, Inputs
 from sve_carddb.registry.storage import plan_files, write_files
 from sve_carddb.snapshot.values import object_value, parse
 from sve_carddb.source_archive import ArchiveStore, Scope, seal_batch
@@ -122,12 +123,11 @@ def make_staged(
         },
         en={},
         mapping=Mapping(targets={}, original_art=set(), reskins={}),
-        receipt=Receipt(
+        decisions=InitDecisions(
             policy="identity-init-2026-09-28-v1",
-            reviewed_by="synthetic-reviewer",
-            reviewed_on="2026-09-29",
-            input_hashes={"jp": "sha256:" + "0" * 64},
         ),
+        as_of=date(2026, 9, 29),
+        jp_hash="sha256:" + "0" * 64,
     )
     authored = tmp_path / "authored"
     write_files(plan_files(authored, build(inputs, {})))

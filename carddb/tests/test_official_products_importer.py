@@ -3,6 +3,7 @@
 import shutil
 import sqlite3
 from dataclasses import replace
+from datetime import date
 from typing import TYPE_CHECKING
 
 import pytest
@@ -29,7 +30,7 @@ from sve_carddb.registry.inputs import Mapping as CardMapping
 from sve_carddb.registry.preview import FrozenEN, FrozenJP, FrozenRegions, plan_preview
 from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
 from sve_carddb.registry.records import AllocationData, PrintingData
-from sve_carddb.registry.review import Inputs, Receipt
+from sve_carddb.registry.review import InitDecisions, Inputs
 from sve_carddb.registry.storage import plan_files, write_files
 from sve_carddb.source_archive import ArchiveError
 
@@ -520,12 +521,11 @@ def test_english_inclusions_obey_existing_identity_gate(
             original_art={en_card.number},
             reskins={},
         ),
-        receipt=Receipt(
+        decisions=InitDecisions(
             policy="identity-init-2026-09-28-v1",
-            reviewed_by="synthetic-reviewer",
-            reviewed_on="2026-09-30",
-            input_hashes={"jp": "sha256:" + "1" * 64},
         ),
+        as_of=date(2026, 9, 30),
+        jp_hash="sha256:" + "1" * 64,
     )
     for directory in ("ids", "registry"):
         shutil.rmtree(fixture.root / directory)

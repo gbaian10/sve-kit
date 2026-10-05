@@ -71,7 +71,7 @@ def frozen_registry(tmp_path: Path, inputs: Inputs) -> tuple[Path, FrozenRegions
             ),
             raw,
         )
-    inputs.receipt.corrections = [
+    inputs.decisions.corrections = [
         Correction(
             region="en",
             card_no="BP02-070EN",
