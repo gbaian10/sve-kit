@@ -7,9 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-import sve_carddb.catalog.adoption_sources as pinned_module
 import sve_carddb.digital_links.importer as importer_module
-import sve_carddb.translations.sources as sources_module
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.digital_links.evidence import (
     Evidence,
@@ -18,6 +16,7 @@ from sve_carddb.digital_links.evidence import (
     inventory,
 )
 from sve_carddb.digital_links.importer import Inputs, import_links, review_context
+from sve_carddb.digital_links.loader import decision_id
 from sve_carddb.digital_links.models import Record, SveName
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.products.models import LocalizedText
@@ -29,14 +28,12 @@ from sve_carddb.translations.digital import configuration, import_digital
 from sve_carddb.translations.name_sources import NameOwner
 from sve_carddb.translations.sources import Sources
 
-from .adoption_fixtures import commit
-from .digital_link_fixtures import envelope, write
 from .digital_link_import_fixtures import (
     Fixture,
     copied,
     current_api,
     make_fixture,
-    signed,
+    with_records,
 )
 from .translation_fixtures import template
 
@@ -46,7 +43,6 @@ if TYPE_CHECKING:
     from sve_carddb.build_db import Database
     from sve_carddb.catalog.adoption_models import ReviewContext
     from sve_carddb.digital_links.loader import Snapshot
-    from sve_carddb.digital_links.models import Shard
 
     from .database_fixtures import DatabaseTemplate
 
@@ -73,7 +69,7 @@ def test_real_entry_proves_relation_name_and_no_coverage(
             stores={"test-store": baseline.store},
         )
         assert len(result.fresh) == 1
-        assert result.stale == result.withdrawn == ()
+        assert result.stale == ()
         links = [
             row.values
             for row in db.rows("digital_link")
@@ -83,6 +79,25 @@ def test_real_entry_proves_relation_name_and_no_coverage(
         assert len(links) == 1
         link = links[0]
         assert link["relation"] == "same_card"
+        assert link["decision_id"] == decision_id(
+            Record.model_validate_json(baseline.record)
+        )
+        decision = next(
+            r.values
+            for r in db.rows("decision")
+            if r.values["id"] == link["decision_id"]
+        )
+        assert (decision["state"], decision["scope"], decision["sample_ids"]) == (
+            "confirmed",
+            "record",
+            None,
+        )
+        shard = next(
+            r.values
+            for r in db.rows("decision_source")
+            if r.values["decision_id"] == link["decision_id"]
+        )
+        assert shard["locator"] == "digital-links/links/synthetic/001.yaml"
         face = next(
             row.values
             for row in db.rows("digital_face")
@@ -154,8 +169,7 @@ def test_source_refusals_rollback(
 
     fixture = copied(baseline, tmp_path / "repo")
     record = object_value(parse(baseline.record))
-    data = object_value(record["data"])
-    value = object_value(data["value"])
+    value = object_value(record["value"])
     sve = object_value(array(value["sve_names"])[0])
     digital = [object_value(n) for n in array(value["digital_names"])]
     if fault == "source_hash":
@@ -173,28 +187,8 @@ def test_source_refusals_rollback(
     elif fault == "missing_language":
         value["digital_names"] = [digital[0]]
     elif fault == "target":
-        object_value(data["subject"])["official_id"] = "22345679"
-        record["record_key"] = canonical(
-            ["digital_link_adoption", data["subject"], 1]
-        ).decode()
-    record["evidence"] = list(
-        {
-            canonical(item): item
-            for item in sorted(
-                [
-                    {"source_ref": sve["name_ref"], "role": "sve_name"},
-                    *[
-                        dict[str, JsonValue](
-                            source_ref=object_value(n)["name_ref"], role="digital_name"
-                        )
-                        for n in array(value["digital_names"])
-                    ],
-                ],
-                key=canonical,
-            )
-        }.values()
-    )
-    fixture = signed(fixture, [record])
+        object_value(record["subject"])["official_id"] = "22345679"
+    fixture = with_records(fixture, [record])
     with database.copy() as db:
         fixture.publish(db)
         before = {
@@ -303,7 +297,7 @@ def test_equal_length_raw_tamper_and_complete_source_closure(
     ("change", "stale"),
     [("name", True), ("unrelated", False), ("missing_target", True)],
 )
-def test_current_replay_marks_changed_names_stale_without_resurrection(
+def test_current_catalogue_marks_changed_names_stale(
     baseline: Fixture,
     database: DatabaseTemplate,
     tmp_path: Path,
@@ -364,75 +358,6 @@ def test_current_api_selected_subset_is_not_complete_evidence(
                 build=baseline.changed(config),
                 stores={"test-store": baseline.store},
             )
-
-
-def test_withdrawal_is_terminal_but_preserves_historical_audit(
-    baseline: Fixture, database: DatabaseTemplate, tmp_path: Path
-) -> None:
-
-    fixture = copied(baseline, tmp_path / "repo")
-    first = object_value(parse(fixture.record))
-    shard = object_value(parse(fixture.shard))
-    second = object_value(parse(fixture.record))
-    data = object_value(second["data"])
-    data.update(
-        adoption_no=2,
-        predecessor={
-            "record_key": first["record_key"],
-            "record_hash": digest(canonical(first)),
-            "decision_id": shard["default_decision_id"],
-        },
-        value=None,
-    )
-    second["record_key"] = canonical(
-        ["digital_link_adoption", data["subject"], 2]
-    ).decode()
-    second["evidence"] = []
-    last = envelope([second])
-    last["review_context"] = shard["review_context"]
-    write(
-        fixture.root / "authored",
-        {
-            "digital-links/links/synthetic/001.yaml": shard,
-            "digital-links/links/synthetic/002.yaml": last,
-        },
-    )
-    fixture = replace(fixture, authored=commit(fixture.root))
-    config = object_value(parse(fixture.build.configuration.encode()))
-    config.update(
-        Inputs(
-            fixture.root / "authored", fixture.root, fixture.authored
-        ).configuration()
-    )
-    fixture = replace(fixture, build=fixture.changed(config))
-    with database.copy() as db:
-        fixture.publish(db)
-        result = import_links(
-            db,
-            fixture.inputs(),
-            build=fixture.build,
-            stores={"test-store": fixture.store},
-        )
-        assert result.withdrawn == (second["record_key"],)
-        assert result.fresh == ()
-        assert all(
-            r.values["card_id"] != fixture.card.id for r in db.rows("digital_link")
-        )
-        assert (
-            len(
-                [
-                    r
-                    for r in db.rows("decision")
-                    if r.values["category"] == "digital_link"
-                ]
-            )
-            == 2
-        )
-        assert any(
-            r.values["authored_path"]
-            == "authored/digital-links/links/synthetic/001.yaml"
-            for r in db.rows("source_record")
-        )
 
 
 @pytest.fixture(scope="module")
@@ -504,17 +429,41 @@ def test_authored_byte_pin_and_runtime_closure(
         Sources({"test-store": baseline.store}, baseline.root, build)
 
 
+def test_sampled_link_keeps_its_review_level(
+    baseline: Fixture, database: DatabaseTemplate, tmp_path: Path
+) -> None:
+    record = object_value(parse(baseline.record))
+    record["review_level"] = "sampled"
+    fixture = with_records(copied(baseline, tmp_path / "repo"), [record])
+    with database.copy() as db:
+        fixture.publish(db)
+        import_links(
+            db,
+            fixture.inputs(),
+            build=fixture.build,
+            stores={"test-store": fixture.store},
+        )
+        link = next(
+            r.values
+            for r in db.rows("digital_link")
+            if r.values["card_id"] == fixture.card.id
+        )
+        decision = next(
+            r.values
+            for r in db.rows("decision")
+            if r.values["id"] == link["decision_id"]
+        )
+        assert (decision["state"], decision["scope"]) == ("sampled", "record")
+
+
 def test_evolved_phase_is_explicit_and_not_inferred_from_sve_front(
     baseline: Fixture, database: DatabaseTemplate, tmp_path: Path
 ) -> None:
     record = object_value(parse(baseline.record))
-    data = object_value(record["data"])
-    subject = object_value(data["subject"])
-    subject["digital_phase"] = "evolved"
-    record["record_key"] = canonical(["digital_link_adoption", subject, 1]).decode()
-    for name in array(object_value(data["value"])["digital_names"]):
+    object_value(record["subject"])["digital_phase"] = "evolved"
+    for name in array(object_value(record["value"])["digital_names"]):
         object_value(name)["phase"] = "evolved"
-    fixture = signed(copied(baseline, tmp_path / "repo"), [record])
+    fixture = with_records(copied(baseline, tmp_path / "repo"), [record])
     with database.copy() as db:
         fixture.publish(db)
         result = import_links(
@@ -540,12 +489,9 @@ def test_composer_verifies_actual_raw_metadata_before_returning(
     original = importer_module._audit
 
     def corrupted(
-        db: Database,
-        snapshot: Snapshot,
-        inputs: Inputs,
-        resolved: list[tuple[Shard, Sources]],
+        db: Database, snapshot: Snapshot, inputs: Inputs, fresh: list[Record]
     ) -> None:
-        original(db, snapshot, inputs, resolved)
+        original(db, snapshot, inputs, fresh)
         source = next(
             r.values for r in db.rows("source_record") if r.values["kind"] != "authored"
         )
@@ -609,57 +555,6 @@ def test_jp_owner_does_not_probe_same_number_english_printing(
         assert result.eligible_owner(
             db, sources, NameOwner("face_revision", "link-revision")
         )
-
-
-@pytest.mark.parametrize("name", ["commands.py", "sources.py"])
-def test_historical_review_survives_new_runtime(
-    baseline: Fixture,
-    database: DatabaseTemplate,
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    name: str,
-) -> None:
-
-    fixture = copied(baseline, tmp_path / "repo")
-    relative = (
-        "carddb/src/sve_carddb/digital_links/commands.py"
-        if name == "commands.py"
-        else "carddb/src/sve_carddb/translations/sources.py"
-    )
-    path = fixture.root / relative
-    path.write_bytes(path.read_bytes() + b"\n# Synthetic later runtime revision.\n")
-    program = commit(fixture.root)
-    config = object_value(parse(fixture.build.configuration.encode()))
-    for recipe in object_value(config["translation_recipes"]).values():
-        pin = object_value(recipe)
-        pin["program_revision"] = program
-        pin["code_hash"] = digest((fixture.root / str(pin["code_path"])).read_bytes())
-    fixture = replace(fixture, program=program)
-    fixture = replace(fixture, build=fixture.changed(config))
-    monkeypatch.setattr(
-        sources_module,
-        "__file__",
-        str(fixture.root / "carddb/src/sve_carddb/translations/sources.py"),
-    )
-    monkeypatch.setattr(
-        pinned_module,
-        "__file__",
-        str(fixture.root / "carddb/src/sve_carddb/catalog/adoption_sources.py"),
-    )
-    with database.copy() as db:
-        fixture.publish(db)
-        result = import_links(
-            db,
-            fixture.inputs(),
-            build=fixture.build,
-            stores={"test-store": fixture.store},
-        )
-        assert len(result.fresh) == 1
-        assert result.stale == result.withdrawn == ()
-        assert result.eligible_owner(
-            db, fixture.sources(), NameOwner("face_revision", "link-revision")
-        )
-    assert fixture.inputs().load().shards == baseline.inputs().load().shards
 
 
 def test_authored_revision_must_be_full_sha(baseline: Fixture) -> None:
@@ -780,7 +675,7 @@ def test_sve_evidence_must_belong_to_same_card(dual: Fixture) -> None:
 
     record = Record.model_validate_json(dual.record)
     other_card, other_face, other_printing, other_ref = dual.others[0]
-    assert other_card.id != record.data.subject.card_id
+    assert other_card.id != record.subject.card_id
     evidence = Evidence(dual.sources())
     with pytest.raises(
         ValueError, match=r"^Digital-link SVE evidence belongs to another card$"
@@ -797,8 +692,7 @@ def test_sve_evidence_must_belong_to_same_card(dual: Fixture) -> None:
 def test_digital_locator_cannot_borrow_other_identical_name(dual: Fixture) -> None:
 
     record = Record.model_validate_json(dual.record)
-    assert record.data.value is not None
-    name = next(n for n in record.data.value.digital_names if n.lang == "ja")
+    name = next(n for n in record.value.digital_names if n.lang == "ja")
     ref = name.name_ref.model_copy(
         update={"locator": "/data/card_details/22345679/common/name"}
     )
@@ -818,8 +712,7 @@ def test_digital_locator_cannot_borrow_other_identical_name(dual: Fixture) -> No
 def test_digital_name_must_equal_supplied_frozen_inventory(baseline: Fixture) -> None:
 
     record = Record.model_validate_json(baseline.record)
-    assert record.data.value is not None
-    name = next(n for n in record.data.value.digital_names if n.lang == "ja")
+    name = next(n for n in record.value.digital_names if n.lang == "ja")
     sources = baseline.sources()
     names = inventory(
         sources, batch_refs(sources, review_context(sources).source_batches, "svwb")
@@ -838,14 +731,9 @@ def test_current_registry_cannot_omit_adopted_card(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     original = Evidence.index
-    historical = object_value(parse(baseline.shard))["review_context"]
 
     def index(self: Evidence, review: ReviewContext) -> RegistryIndex:
-
-        result = original(self, review)
-        if review.model_dump(mode="json") != historical:
-            return replace(result, cards={})
-        return result
+        return replace(original(self, review), cards={})
 
     monkeypatch.setattr(Evidence, "index", index)
     with database.copy() as db:
@@ -882,9 +770,7 @@ def test_legacy_digital_import_does_not_allow_declared_target_superset(
 
 
 @pytest.mark.parametrize("fault", ["dependency", "recipe"])
-def test_historical_mode_still_checks_immutable_git_pins(
-    baseline: Fixture, fault: str
-) -> None:
+def test_sources_check_immutable_git_pins(baseline: Fixture, fault: str) -> None:
     config = object_value(parse(baseline.build.configuration.encode()))
     build = baseline.build
     if fault == "recipe":
@@ -893,9 +779,7 @@ def test_historical_mode_still_checks_immutable_git_pins(
         )
         recipe["code_hash"] = digest(b"Synthetic wrong old parser")
         build = baseline.changed(config)
-        sources = Sources(
-            {"test-store": baseline.store}, baseline.root, build, historical=True
-        )
+        sources = Sources({"test-store": baseline.store}, baseline.root, build)
         with pytest.raises(ValueError, match=r"^Recipe program/config hash mismatch$"):
             sources.text(baseline.jp)
     else:
@@ -906,6 +790,4 @@ def test_historical_mode_still_checks_immutable_git_pins(
             update={"dependencies": (pin, *build.dependencies[1:])}
         )
         with pytest.raises(ValueError, match=r"^Review dependency hash mismatch$"):
-            Sources(
-                {"test-store": baseline.store}, baseline.root, build, historical=True
-            )
+            Sources({"test-store": baseline.store}, baseline.root, build)

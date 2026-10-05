@@ -1,4 +1,4 @@
-"""Compose signed relations with publication identity and one atomic provenance graph."""
+"""Compose authored relations with publication identity and current frozen names."""
 
 import re
 from dataclasses import dataclass
@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_db import Json
 from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.build_inputs import InputRecord, input_record, insert_raw_sources
 from sve_carddb.catalog.adoption_models import Batch, ReviewContext, SourceRef
@@ -19,9 +18,8 @@ from sve_carddb.digital_links.evidence import (
     configured_refs,
     inventory,
 )
-from sve_carddb.digital_links.loader import Snapshot, link_id, load_links
+from sve_carddb.digital_links.loader import Snapshot, decision_id, link_id, load_links
 from sve_carddb.digital_links.models import Record, Shard, SveName
-from sve_carddb.digital_links.models import Value as LinkValue
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.translations.digital import import_digital
@@ -86,25 +84,21 @@ def review_context(sources: Sources) -> ReviewContext:
 class Result:
     record: InputRecord
     fresh: tuple[bytes, ...]
-    stale: tuple[str, ...]
-    withdrawn: tuple[str, ...]
-    decisions: tuple[tuple[str, str], ...]
-    stale_reasons: tuple[tuple[str, str], ...]
-    checked_members: frozenset[str] = frozenset()
+    stale: tuple[tuple[str, str], ...]
 
     @cached_property
     def by_owner(self) -> Mapping[tuple[str, str | None], tuple[Record, ...]]:
-        """Parse immutable terminal records once for all publication owners."""
+        """Parse current records once for all publication owners."""
         grouped: dict[tuple[str, str | None], list[Record]] = {}
         for content in self.fresh:
             record = Record.model_validate_json(content)
-            subject = record.data.subject
+            subject = record.subject
             grouped.setdefault((subject.card_id, subject.face_id), []).append(record)
         return MappingProxyType(
             {key: tuple(records) for key, records in grouped.items()}
         )
 
-    def eligible_owner(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals] -- current printed state and frozen adoption are independent owner proofs
+    def eligible_owner(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals] -- current printed state and the authored relation are independent owner proofs
         self,
         db: Database,
         sources: Sources,
@@ -151,20 +145,16 @@ class Result:
             if p.region == "jp"
         )
         actual = {r.values["id"]: r.values for r in db.rows("digital_link")}
-        decisions = dict(self.decisions)
         eligible = set()
         for record in self.by_owner.get((str(face["card_id"]), str(face["id"])), ()):
-            subject, value = record.data.subject, record.data.value
+            subject, value = record.subject, record.value
             if (
-                value is None
-                or value.relation != "same_card"
+                value.relation != "same_card"
                 or subject.face_id != face["id"]
                 or subject.card_id != face["card_id"]
             ):
                 continue
-            if actual.get(link_id(record)) != _link_values(
-                record, decisions[record.record_key], value
-            ):
+            if actual.get(link_id(record)) != _link_values(record):
                 raise ValueError(
                     "Digital-link materialized relation differs from adoption"
                 )
@@ -224,7 +214,7 @@ class Result:
         return frozenset(eligible)
 
 
-def populate_links(  # ruff: ignore[complex-structure,too-many-branches,too-many-statements,too-many-locals] -- history and current closure are checked before one atomic materialization
+def populate_links(  # ruff: ignore[complex-structure,too-many-locals] -- every relation is checked before one atomic materialization
     db: Database, inputs: Inputs, *, build: BuildContext, stores: dict[str, Path]
 ) -> Result:
     """Validate before materializing; the composing caller owns the transaction."""
@@ -237,56 +227,36 @@ def populate_links(  # ruff: ignore[complex-structure,too-many-branches,too-many
         raise ValueError("Build configuration does not pin digital-link authored bytes")
     current = Sources(stores, inputs.repository, build)
     review = review_context(current)
-    current_registry = Evidence(current).index(review)
+    evidence = Evidence(current)
+    registry = evidence.index(review)
     names = inventory(current, configured_refs(current))
     available = {}
-    for game in sorted({r.data.subject.game for r, _ in snapshot.records()}):
+    for game in sorted({r.subject.game for r in snapshot.records()}):
         available.update(
             inventory(current, batch_refs(current, review.source_batches, game))
         )
-    history: dict[str, dict[tuple[str, str], str]] = {}
-    resolved = []
-    for shard in snapshot.envelopes():
-        # Historical pins prove the review; current code revalidates its frozen evidence.
-        sources = Sources(
-            stores, inputs.repository, shard.review_context.context, historical=True
-        )
-        evidence = Evidence(sources)
-        for record in shard.records:
-            history[record.record_key] = evidence.validate(record, shard.review_context)
-        resolved.append((shard, sources))
-    cards, faces = current_registry.cards, current_registry.faces
     published_cards = {r.values["id"] for r in db.rows("card")}
     published_faces = {r.values["id"]: r.values["card_id"] for r in db.rows("face")}
     fresh = []
     stale = []
-    stale_reasons = []
-    withdrawn = []
-    for record, decision in snapshot.effective():
-        value = record.data.value
-        if value is None:
-            withdrawn.append(record.record_key)
-            continue
-        subject = record.data.subject
-        if subject.card_id not in cards:
+    for record in snapshot.records():
+        subject, value = record.subject, record.value
+        if subject.card_id not in registry.cards:
             raise ValueError("Digital-link current registry card is unknown")
-        if cards[subject.card_id].identity_state == "retired":
-            stale.append(record.record_key)
-            stale_reasons.append((record.record_key, "current_identity_retired"))
+        if registry.cards[subject.card_id].identity_state == "retired":
+            stale.append((link_id(record), "current_identity_retired"))
             continue
         if subject.card_id not in published_cards or (
             subject.face_id is not None
             and (
-                subject.face_id not in faces
-                or faces[subject.face_id].card_id != subject.card_id
+                subject.face_id not in registry.faces
+                or registry.faces[subject.face_id].card_id != subject.card_id
                 or published_faces.get(subject.face_id) != subject.card_id
             )
         ):
-            stale.append(record.record_key)
-            stale_reasons.append(
-                (record.record_key, "outside_publication_or_face_changed")
-            )
+            stale.append((link_id(record), "outside_publication_or_face_changed"))
             continue
+        recorded = evidence.validate(record, review)
         phases = {name.phase for name in value.digital_names}
         expected = {
             (phase, lang): name.text
@@ -306,45 +276,26 @@ def populate_links(  # ruff: ignore[complex-structure,too-many-branches,too-many
         }
         if expected != known:
             raise ValueError("Digital-link current API name closure is incomplete")
-        if history[record.record_key] != expected:
-            stale.append(record.record_key)
-            stale_reasons.append(
-                (record.record_key, "digital_names_changed_or_removed")
-            )
+        if recorded != expected:
+            stale.append((link_id(record), "digital_names_changed_or_removed"))
             continue
-        fresh.append((record, decision, value))
-    targets = tuple(
-        sorted({(r.data.subject.game, r.data.subject.official_id) for r, _, _ in fresh})
-    )
+        fresh.append(record)
+    targets = tuple(sorted({(r.subject.game, r.subject.official_id) for r in fresh}))
     if targets:
         import_digital(
             db, current, configured_refs(current), targets, allow_subset=True
         )
-    for _, sources in resolved:
-        insert_raw_sources(db, (use.source for use in sources.uses))
     insert_raw_sources(db, (use.source for use in current.uses))
-    _audit(db, snapshot, inputs, resolved)
-    for record, decision, value in fresh:
-        insert_exact(db, "digital_link", _link_values(record, decision, value), ("id",))
-    uses = tuple(use for _, sources in resolved for use in sources.uses) + tuple(
-        current.uses
-    )
+    _audit(db, snapshot, inputs, fresh)
+    for record in fresh:
+        insert_exact(db, "digital_link", _link_values(record), ("id",))
+    uses = tuple(current.uses)
     result = input_record(build, uses)
     result.verify(db, build, uses, complete=False)
     return Result(
         result,
-        tuple(canonical(record.model_dump(mode="json")) for record, _, _ in fresh),
+        tuple(canonical(record.model_dump(mode="json")) for record in fresh),
         tuple(sorted(stale)),
-        tuple(sorted(withdrawn)),
-        tuple((record.record_key, decision) for record, decision, _ in fresh),
-        tuple(sorted(stale_reasons)),
-        frozenset(
-            key
-            for shard, _ in resolved
-            for decision in shard.decisions
-            for key in decision.sample_ids
-            if decision.state in {"sampled", "confirmed"}
-        ),
     )
 
 
@@ -357,44 +308,11 @@ def import_links(
 
 
 def _audit(
-    db: Database,
-    snapshot: Snapshot,
-    inputs: Inputs,
-    resolved: list[tuple[Shard, Sources]],
+    db: Database, snapshot: Snapshot, inputs: Inputs, fresh: list[Record]
 ) -> None:
-    index_id = (
-        "authored:digital-links:"
-        + digest(
-            canonical(
-                [
-                    inputs.authored_revision,
-                    "digital-links/index.yaml",
-                    digest(snapshot.index),
-                ]
-            )
-        )[7:]
-    )
-    insert_exact(
-        db,
-        "source_record",
-        {
-            "id": index_id,
-            "kind": "authored",
-            "url": None,
-            "raw_locator": None,
-            "etag": None,
-            "last_modified": None,
-            "fetched_at": None,
-            "sha256": digest(snapshot.index),
-            "authored_path": "authored/digital-links/index.yaml",
-            "authored_revision": inputs.authored_revision,
-            "parser_version": "digital-link-authored-v1",
-        },
-        ("id",),
-    )
-    for (path, exact, _), (shard, sources) in zip(
-        snapshot.shards, resolved, strict=True
-    ):
+    """Record the authored shard bytes behind each materialized relation."""
+    shard_of = {}
+    for path, exact, content in snapshot.shards:
         identifier = (
             "authored:digital-links:"
             + digest(canonical([inputs.authored_revision, path, digest(exact)]))[7:]
@@ -413,90 +331,47 @@ def _audit(
                 "sha256": digest(exact),
                 "authored_path": "authored/" + path,
                 "authored_revision": inputs.authored_revision,
-                "parser_version": "digital-link-authored-v1",
+                "parser_version": "digital-link-authored-v2",
             },
             ("id",),
         )
-        decision = shard.decisions[0]
-        values: dict[str, Value] = {
-            k: v
-            for k, v in decision.model_dump(
-                mode="json", exclude={"members", "sample_ids"}
-            ).items()
-            if isinstance(v, str) or v is None
-        }
-        values["sample_ids"] = Json(list[JsonValue](decision.sample_ids))
-        values["confidence"] = None
-        insert_exact(db, "decision", values, ("id",))
-        registry_sources = _registry_audit(db, sources)
-        for source_id, locator, role in [
-            *registry_sources,
-            (identifier, path, "digital_link_envelope"),
-            (index_id, "digital-links/index.yaml", "digital_link_index"),
-            *(
-                (
-                    use.source.id,
-                    use.locator,
-                    "digital_link_evidence:"
-                    + digest(canonical([use.source.id, use.locator]))[7:],
-                )
-                for use in sources.uses
-            ),
-        ]:
-            insert_exact(
-                db,
-                "decision_source",
-                {
-                    "decision_id": decision.id,
-                    "source_id": source_id,
-                    "role": role,
-                    "locator": locator,
-                    "quote": None,
-                },
-                ("decision_id", "source_id", "role"),
-            )
-
-
-def _registry_audit(db: Database, sources: Sources) -> list[tuple[str, str, str]]:
-    pin = object_value(
-        object_value(parse(sources.build.configuration.encode()))["catalog_registry"]
-    )
-    revision = str(pin["authored_revision"])
-    registry = Evidence(sources).registry(review_context(sources))
-    names = ["ids/index.yaml", *(shard.path for shard in registry.files.shards)]
-    result = []
-    for path in names:
-        raw = sources.repository.read(revision, "authored/" + path)
-        identifier = (
-            "authored:digital-registry:"
-            + digest(canonical([revision, path, digest(raw)]))[7:]
+        for raw in Shard.model_validate_json(content).records:
+            shard_of[canonical(raw.model_dump(mode="json"))] = identifier, path
+    for record in fresh:
+        source, path = shard_of[canonical(record.model_dump(mode="json"))]
+        decision = decision_id(record)
+        insert_exact(
+            db,
+            "decision",
+            {
+                "id": decision,
+                "state": record.review_level,
+                "scope": "record",
+                "category": "digital_link",
+                "membership_hash": None,
+                "policy_id": None,
+                "sample_ids": None,
+                "confidence": None,
+                "note": record.reason,
+            },
+            ("id",),
         )
         insert_exact(
             db,
-            "source_record",
+            "decision_source",
             {
-                "id": identifier,
-                "kind": "authored",
-                "url": None,
-                "raw_locator": None,
-                "etag": None,
-                "last_modified": None,
-                "fetched_at": None,
-                "sha256": digest(raw),
-                "authored_path": "authored/" + path,
-                "authored_revision": revision,
-                "parser_version": "digital-link-registry-v1",
+                "decision_id": decision,
+                "source_id": source,
+                "role": "digital_link_shard",
+                "locator": path,
+                "quote": None,
             },
-            ("id",),
+            ("decision_id", "source_id", "role"),
         )
-        result.append(
-            (identifier, path, "digital_link_registry:" + digest(path.encode())[7:])
-        )
-    return result
 
 
-def _link_values(record: Record, decision: str, value: LinkValue) -> dict[str, Value]:
-    subject = record.data.subject
+def _link_values(record: Record) -> dict[str, Value]:
+    subject, value = record.subject, record.value
     digital = f"digital:{subject.game}:{subject.official_id}"
     return {
         "id": link_id(record),
@@ -508,5 +383,5 @@ def _link_values(record: Record, decision: str, value: LinkValue) -> dict[str, V
         else digital + ":" + subject.digital_phase,
         "relation": value.relation,
         "effect_similarity": value.effect_similarity,
-        "decision_id": decision,
+        "decision_id": decision_id(record),
     }

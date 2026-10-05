@@ -40,8 +40,8 @@ missing emphasis, not false or a reason to discard the available wording.
 parents and recognized name faces/languages. Missing names remain missing;
 unrecognized or inconsistent face inventories fail. `name_proof()` verifies the
 actual frozen face and language. `counterparts.first_counterpart()` keeps sv1
-before svwb; ambiguous adopted names fail. Human digital-link adoption histories
-retain their separate evidence and membership requirements. Same-character or
+before svwb; ambiguous adopted names fail. Human digital links keep their own
+name evidence and are checked against the current catalogue. Same-character or
 same-name browsing cannot supply translation authority; a shared context never
 grants another owner eligibility.
 

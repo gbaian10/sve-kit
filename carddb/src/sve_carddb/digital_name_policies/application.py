@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_db import Json
-from sve_carddb.digital_links.loader import link_id
 from sve_carddb.digital_name_policies.loader import load
 from sve_carddb.translations.counterparts import NameCandidate
 from sve_carddb.translations.digital import name_proof
@@ -35,7 +33,7 @@ class Inputs:
     application_at: str = ""
 
     def load(self) -> Snapshot:
-        """Read the entire immutable authored closure, including historical versions."""
+        """Read the entire immutable authored policy closure."""
         return load(self.root, self.repository, self.authored_revision)
 
     def configuration(self) -> dict[str, JsonValue]:
@@ -96,7 +94,7 @@ def populate(
     )
 
 
-def _counterparts(  # ruff: ignore[too-many-locals] -- relation, actual sample membership and frozen name proof are separate gates
+def _counterparts(
     db: Database,
     sources: Sources,
     owner: NameOwner,
@@ -107,23 +105,6 @@ def _counterparts(  # ruff: ignore[too-many-locals] -- relation, actual sample m
     if links is None:
         return ()
     eligible = links.eligible_owner(db, sources, owner, name_ref=name_ref)
-    records = {r.values["id"]: r.values for r in db.rows("decision")}
-    fresh = {
-        k: r
-        for members in links.by_owner.values()
-        for r in members
-        for k in (r.record_key,)
-    }
-    decisions = dict(links.decisions)
-    checked = {
-        link_id(fresh[key])
-        for key, decision in decisions.items()
-        if key in fresh
-        and key in links.checked_members
-        and records[decision]["state"] in {"sampled", "confirmed"}
-        and isinstance(records[decision]["sample_ids"], Json)
-        and _sample_member(key, records[decision]["sample_ids"])
-    }
     faces = {r.values["id"]: r.values for r in db.rows("digital_face")}
     cards = {r.values["id"]: r.values for r in db.rows("digital_card")}
     units = {r.values["id"]: r.values for r in db.rows("text_unit")}
@@ -148,22 +129,14 @@ def _counterparts(  # ruff: ignore[too-many-locals] -- relation, actual sample m
             "zh-Hant",
             text,
         )
-        decision = records[link["decision_id"]]
         result.append(
             NameCandidate(
                 text,
                 "official_" + str(card["game"]),
                 "digital_official",
-                str(decision["id"]),
+                str(link["decision_id"]),
                 source,
                 (ref,),
-                counterpart_checked=str(link["id"]) in checked,
             )
         )
     return tuple(sorted(result, key=lambda c: (c.origin, c.text, c.decision_id or "")))
-
-
-def _sample_member(key: str, value: object) -> bool:
-    return (
-        isinstance(value, Json) and isinstance(value.value, list) and key in value.value
-    )

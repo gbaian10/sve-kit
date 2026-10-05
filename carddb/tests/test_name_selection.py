@@ -13,7 +13,6 @@ def candidate(text: str, origin: str = "machine") -> NameCandidate:
         "digital_official" if origin.startswith("official_") else "unofficial",
         "synthetic-decision",
         None,
-        counterpart_checked=origin.startswith("official_"),
     )
 
 

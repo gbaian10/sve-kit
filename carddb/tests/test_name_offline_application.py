@@ -253,13 +253,19 @@ def test_offline_detects_missing_name_application_source_use(
     assert not (tmp_path / "bundle").exists()
 
 
-def test_name_composition_requires_available_immutable_tree(
-    recipe: offline.Inputs,
+def test_name_composition_reads_link_entry_from_disk(
+    recipe: offline.Inputs, tmp_path: Path
 ) -> None:
-    with pytest.raises(
-        ValueError, match=r"^Name composition digital-link entry tree is unavailable$"
-    ):
-        composer(recipe.model_copy(update={"revision": "0" * 40}))
+    root = tmp_path / "checkout"
+    git(tmp_path, "clone", "--local", "--no-hardlinks", str(recipe.repo), str(root))
+    checkout = recipe.model_copy(update={"repo": root})
+    present = composer(checkout)
+    assert present is not None
+    assert present.links is not None
+    shutil.rmtree(root / "authored/digital-links")
+    absent = composer(checkout)
+    assert absent is not None
+    assert absent.links is None
 
 
 def test_name_composition_rejects_symlinked_authored_entry(
@@ -269,13 +275,10 @@ def test_name_composition_rejects_symlinked_authored_entry(
     git(tmp_path, "clone", "--local", "--no-hardlinks", str(recipe.repo), str(root))
     path = root / "authored/digital-links"
     target = root / "private-link-entry"
-    if path.exists():
-        path.rename(target)
-    else:
-        target.mkdir()
+    path.rename(target)
     path.symlink_to(target, target_is_directory=True)
-    with pytest.raises(
-        ValueError,
-        match=r"^Name composition digital-link entry differs from immutable tree$",
-    ):
-        composer(recipe.model_copy(update={"repo": root}))
+    checkout = recipe.model_copy(update={"repo": root})
+    names = composer(checkout)
+    assert names is not None
+    with pytest.raises(ValueError, match=r"^Symlink digital-link input$"):
+        names.configuration(checkout)

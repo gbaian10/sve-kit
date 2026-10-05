@@ -1,4 +1,4 @@
-"""Apply current name conditions to complete catalogues from this build's inputs."""
+"""Apply current name and link conditions to complete catalogues from this build's inputs."""
 
 from collections import defaultdict
 from dataclasses import dataclass
@@ -9,15 +9,16 @@ from typing import TYPE_CHECKING
 from sve_carddb.build_inputs import uses_sorted
 from sve_carddb.catalog.adoption_models import Batch, ReviewContext, SourceRef
 from sve_carddb.digital_links.catalogue import complete_inventory
+from sve_carddb.digital_links.evidence import Evidence
 from sve_carddb.digital_links.importer import review_context
-from sve_carddb.digital_name_policies.evaluate import FrozenName, _parents
+from sve_carddb.digital_name_policies.evaluate import LINK_GAMES, FrozenName, _parents
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from sve_carddb.build_inputs import SourceUse
-    from sve_carddb.digital_name_policies.current_models import Policy
+    from sve_carddb.digital_name_policies.current_models import LinkPolicy, Policy
     from sve_carddb.translations.sources import Sources
 
 
@@ -97,4 +98,48 @@ def catalogue(policy: Policy, sources: Sources) -> Catalogue:
             for e in policy.content.excluded_names
             if e.source_lang == policy.content.scope.source_lang
         ),
+    )
+
+
+def link_catalogue(policy: LinkPolicy, sources: Sources) -> Catalogue:
+    """Read the policy's own frozen catalogue batches with its editable exclusions."""
+    review = ReviewContext(
+        context=sources.build, source_batches=policy.content.source_batches
+    )
+    registry = Evidence(sources).index(review)
+    names: list[FrozenName] = []
+    for game in LINK_GAMES:
+        full = complete_inventory(sources, review, game)
+        _parents(full, game)
+        names.extend(
+            FrozenName(n.game, n.official_id, n.phase, n.lang, n.text, n.ref)
+            for _, n in sorted(full.items())
+        )
+    hashes = {digest(n.text.encode()) for n in names if n.lang == "ja" and n.text}
+    excluded = frozenset(e.source_name_hash for e in policy.content.excluded_names)
+    if not excluded <= hashes:
+        raise ValueError(
+            "Digital-name exclusion cannot locate its frozen Japanese name"
+        )
+    targets = frozenset(
+        (t.card_id, t.game, t.official_id) for t in policy.content.excluded_targets
+    )
+    if any(
+        card not in registry.cards
+        or not any(
+            n.game == game and n.official_id == official and n.lang == "ja"
+            for n in names
+        )
+        for card, game, official in targets
+    ):
+        raise ValueError("Digital-name exclusion cannot locate its card target")
+    return Catalogue(
+        digest(canonical(policy.model_dump(mode="json", exclude={"note"}))),
+        "links",
+        tuple(names),
+        uses_sorted(sources.uses),
+        frozenset(),
+        (),
+        excluded,
+        targets,
     )

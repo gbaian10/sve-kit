@@ -215,7 +215,7 @@ class Evidence:
         printings, faces, cards = index.printings, index.faces, index.cards
         printing = printings.get(name.printing_id)
         face = faces.get(name.face_id)
-        subject = record.data.subject
+        subject = record.subject
         if subject.card_id not in cards or printing is None or face is None:
             raise ValueError(
                 "Digital-link SVE identity is absent from reviewed registry"
@@ -245,7 +245,7 @@ class Evidence:
         names: dict[tuple[str, str, str, str], Name],
     ) -> str:
         """Recheck actual API target, phase, language and exact name field."""
-        subject = record.data.subject
+        subject = record.subject
         if name.name_ref.parser != "translation-" + subject.game + "-v1":
             raise ValueError("Digital-link name provider mismatch")
         lang, text, _ = self.sources.text(name.name_ref)
@@ -285,20 +285,22 @@ class Evidence:
     def validate(
         self, record: Record, review: ReviewContext
     ) -> dict[tuple[str, str], str]:
-        """Replay the complete historical name evidence and language closure."""
+        """Check the record's own name evidence and language closure in its batches."""
         if self.sources.build != review.context:
             raise ValueError(
                 "Digital-link evidence resolver differs from review context"
             )
-        value = record.data.value
-        if value is None:
-            return {}
+        value = record.value
         for name in value.sve_names:
             self.sve(name, record, review)
-        subject = record.data.subject
-        names = inventory(
-            self.sources, batch_refs(self.sources, review.source_batches, subject.game)
+        subject = record.subject
+        batches = tuple(
+            Batch(batch_id=batch)
+            for batch in sorted(
+                {name.name_ref.batch_id for name in value.digital_names}
+            )
         )
+        names = inventory(self.sources, batch_refs(self.sources, batches, subject.game))
         actual: dict[tuple[str, str], str] = {
             (name.phase, name.lang): self.digital(name, record, names)
             for name in value.digital_names

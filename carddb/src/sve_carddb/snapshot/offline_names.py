@@ -1,12 +1,10 @@
-"""Opt-in names composition; immutable entry absence is evidence, never a fake empty link set."""
+"""Opt-in names composition; an absent link entry means no human links, not an empty file."""
 
-import subprocess  # ruff: ignore[suspicious-subprocess-import] -- fixed immutable Git paths, no shell or network
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.digital_links.importer import Inputs as LinkInputs
 from sve_carddb.digital_links.importer import populate_links
 from sve_carddb.digital_name_policies.application import Inputs as NameInputs
@@ -36,12 +34,12 @@ class Composer:
 
     def configuration(self, recipe: Inputs) -> dict[str, JsonValue]:
         """Declare current registry and frozen source scopes separately from policy pins."""
-        loaded = self.inputs.load()
-        batches = [
-            pin.model_dump(mode="json")
-            for policy in loaded.policies
-            for pin in policy.catalogue().source_batches
-        ]
+        links = self.inputs.load().links
+        batches = (
+            []
+            if links is None
+            else [pin.model_dump(mode="json") for pin in links.content.source_batches]
+        )
         batches.extend({"batch_id": pin.card_batch} for pin in recipe.sources)
         registry = read_yaml(recipe.repo / "authored/ids/index.yaml")
         config = self.inputs.configuration() | {
@@ -65,7 +63,7 @@ class Composer:
                 sorted(
                     {
                         r
-                        for record, _ in snapshot.records()
+                        for record in snapshot.records()
                         for r in _refs(record.model_dump(mode="json"))
                         if r.parser in {"translation-sv1-v1", "translation-svwb-v1"}
                     },
@@ -75,9 +73,8 @@ class Composer:
             targets = tuple(
                 sorted(
                     {
-                        (r.data.subject.game, r.data.subject.official_id)
-                        for r, _ in snapshot.effective()
-                        if r.data.value is not None
+                        (r.subject.game, r.subject.official_id)
+                        for r in snapshot.records()
                     }
                 )
             )
@@ -85,7 +82,7 @@ class Composer:
         return config
 
     def dependencies(self) -> dict[str, bytes]:
-        """Include exact policy/receipt/list bytes, not only selected eligibility hashes."""
+        """Include exact policy bytes, not only selected eligibility hashes."""
         return {"authored/" + name: raw for name, raw in self.inputs.load().files}
 
     def populate_links(
@@ -132,36 +129,14 @@ class Composer:
 
 
 def composer(recipe: Inputs) -> Composer | None:
-    """Absence must agree on disk and in the declared immutable authored tree."""
+    """Human links are optional; the link loader validates an existing entry."""
     if recipe.name_policy is None:
         return None
-    repository = PinnedRepository(recipe.repo)
-    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- full Git SHA and a fixed entry path, no shell
-        [
-            repository.executable,
-            "-C",
-            str(recipe.repo),
-            "ls-tree",
-            "-r",
-            "--name-only",
-            recipe.revision,
-            "--",
-            "authored/digital-links",
-        ],
-        capture_output=True,
-        check=False,
-    )
-    if result.returncode:
-        raise ValueError("Name composition digital-link entry tree is unavailable")
-    present = bool(result.stdout)
-    path = recipe.repo / "authored/digital-links"
-    if path.is_symlink() or present != path.exists():
-        raise ValueError(
-            "Name composition digital-link entry differs from immutable tree"
-        )
+    entry = recipe.repo / "authored/digital-links"
     links = (
         LinkInputs(recipe.repo / "authored", recipe.repo, recipe.revision)
-        if present
+        # A dangling symlink still reaches the loader, which rejects symlinks.
+        if entry.exists() or entry.is_symlink()
         else None
     )
     return Composer(

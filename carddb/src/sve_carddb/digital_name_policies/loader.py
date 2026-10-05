@@ -1,74 +1,23 @@
-"""Validate an entire immutable authored entry before returning detached policies."""
+"""Validate an entire immutable authored entry before returning current policies."""
 
 import re
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- Git object enumeration uses a validated revision and argument vector
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING
 
 from pydantic import JsonValue, ValidationError
 
 from sve_carddb.catalog.adoption_sources import PinnedRepository
-from sve_carddb.digital_name_policies.current_models import CurrentEntry
-from sve_carddb.digital_name_policies.current_models import Index as CurrentIndex
+from sve_carddb.digital_name_policies.current_models import Index, LinkPolicy
 from sve_carddb.digital_name_policies.current_models import Policy as CurrentPolicy
-from sve_carddb.digital_name_policies.models import (
-    CardTargetExclusion,
-    CataloguePins,
-    Entry,
-    Exclusions,
-    Index,
-    LinkRegistryPins,
-    Policy,
-)
 from sve_carddb.registry.inputs import JSON_VALUE
 from sve_carddb.registry.records import RecordData
 from sve_carddb.registry.storage import MAX_BYTES
 from sve_carddb.registry.yaml_reader import parse_yaml
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
-
-if TYPE_CHECKING:
-    from sve_carddb.digital_name_policies.models import Purpose
+from sve_carddb.snapshot.values import canonical, digest, object_value
 
 INDEX = "digital-name-policies/index.yaml"
-DIRECTORIES = ("digital-name-policies", "digital-name-exclusions")
-CURRENT_FORMAT = 2
-
-CONTENT_KEYS = {
-    "links": frozenset(
-        [
-            "policy_id",
-            "actual_answers",
-            "rule",
-            "review",
-            "limits",
-            "precedence",
-            "exclusions",
-            "ids",
-            "catalogue_pins",
-            "registry_pins",
-            "warning_disclosure",
-            "coverage",
-            "publication",
-            "f1",
-            "versioning",
-            "plain_language_rules",
-            "visible_notices",
-            "fixed_receipt_disclosure",
-            "shared_answer_bindings",
-            "shared_future_scope_rules",
-            "proposed_clause_replacements",
-        ]
-    ),
-}
-# These identify the supported rule semantics, including the disclosed name wording.
-# Source pins and separately approved exclusion lists are checked independently.
-SEMANTICS = {
-    "links": "sha256:8514cf4a651bc8fb1881de24956c36896fa78eb07946a503fa63c883a51079ca",
-}
-ADOPTED_PROJECTIONS = {
-    "sha256:0742f89d50384f076eb3ab219b6a369af60708f3d5d52d3d1b53b33d98d1389d": "sha256:d070390485462df20759cacf0a20c1bef2aa632ebb433a0d6ab5b7e2f6501938",
-}
+DIRECTORIES = ("digital-name-policies",)
 
 
 def model[T: RecordData](kind: type[T], raw: JsonValue) -> T:
@@ -110,58 +59,12 @@ def _portable(name: str) -> bool:
     )
 
 
-def semantics(content: dict[str, JsonValue], purpose: str) -> str:
-    """Separate approved rule semantics from explicitly verified provenance pins."""
-    detached = object_value(parse(canonical(content)))
-    for key in ("policy_id", "catalogue_pins", "proposed_clause_replacements"):
-        detached.pop(key, None)
-    if purpose != "links":
-        raise ValueError("Versioned policy semantics are only defined for links")
-    detached.pop("registry_pins", None)
-    object_value(detached["exclusions"]).pop("initial_exclusions_hash", None)
-    object_value(object_value(detached["review"])["private_application"]).pop(
-        "policy_id", None
-    )
-    return digest(canonical(detached))
-
-
-@dataclass(frozen=True)
-class LoadedPolicy:
-    policy: bytes
-    exclusions: bytes
-
-    def document(self) -> Policy:
-        """Return a detached operation document."""
-        return model(Policy, parse(self.policy))
-
-    def excluded(self) -> Exclusions:
-        """Return the independently approved initial exclusion list."""
-        return model(Exclusions, parse(self.exclusions))
-
-    def catalogue(self) -> CataloguePins:
-        """Read the closed frozen source pins."""
-        return model(CataloguePins, self.document().content["catalogue_pins"])
-
-
 @dataclass(frozen=True)
 class Snapshot:
     authored_revision: str
     files: tuple[tuple[str, bytes], ...]
-    policies: tuple[LoadedPolicy, ...]
     current_names: tuple[CurrentPolicy, ...] = ()
-
-    def effective(self, purpose: Purpose) -> LoadedPolicy:
-        """Select one terminal policy per explicitly requested purpose."""
-        latest: dict[str, LoadedPolicy] = {}
-        for loaded in self.policies:
-            document = loaded.document()
-            if document.purpose == purpose:
-                latest[document.policy_id] = loaded
-        if len(latest) != 1:
-            raise ValueError(
-                "Digital-name policy purpose must select exactly one policy"
-            )
-        return next(iter(latest.values()))
+    links: LinkPolicy | None = None
 
     def pins(self) -> dict[str, JsonValue]:
         """Pin exact bytes separately from canonical policy values."""
@@ -228,160 +131,27 @@ def load(  # ruff: ignore[complex-structure,too-many-branches,too-many-statement
     if any((root / name).read_bytes() != raw for name, raw in files):
         raise ValueError("Digital-name policy bytes differ from authored revision")
     values = {name: decoded(raw) for name, raw in files}
-    raw_index = object_value(values[INDEX])
+    index = model(Index, values[INDEX])
     current_names = []
-    expected = {INDEX}
-    if raw_index.get("digital_name_policy_index_format") == CURRENT_FORMAT:
-        current_index = model(CurrentIndex, raw_index)
-        versioned_links: dict[str, JsonValue] = {}
-        for identifier, current_entry in current_index.policies.items():
-            if isinstance(current_entry, CurrentEntry):
-                current_path = f"digital-name-policies/{identifier}/current.yaml"
-                if current_entry.path != current_path or current_path not in values:
-                    raise ValueError("Current name policy indexed path mismatch")
-                if digest(canonical(values[current_path])) != current_entry.hash:
-                    raise ValueError("Current name policy indexed hash mismatch")
-                current_policy = model(CurrentPolicy, values[current_path])
-                if current_policy.policy_id != identifier:
-                    raise ValueError("Current name policy identity mismatch")
-                current_names.append(current_policy)
-                expected.add(current_path)
-            else:
-                versioned_links[identifier] = [
-                    e.model_dump(mode="json") for e in current_entry
-                ]
-        # This is a format-one view of the remaining links; no policy or proof is invented.
-        index = (
-            model(
-                Index,
-                {
-                    "digital_name_policy_index_format": 1,
-                    "kind": "digital_name_policy_index",
-                    "policies": versioned_links,
-                },
-            )
-            if versioned_links
-            else None
-        )
-    else:
-        index = model(Index, values[INDEX])
-    policies = []
-    for identifier, entries in sorted(
-        {}.items() if index is None else index.policies.items()
-    ):
-        if not entries or tuple(e.version for e in entries) != tuple(
-            range(1, len(entries) + 1)
-        ):
-            raise ValueError("Digital-name policy version sequence is incomplete")
-        previous: Entry | None = None
-        for entry in entries:
-            stem = f"{entry.version:03}"
-            policy_path = f"digital-name-policies/{identifier}/{stem}.policy.yaml"
-            exclusion_path = f"digital-name-exclusions/{identifier}/{stem}.yaml"
-            if entry.path != policy_path or entry.exclusions_path != exclusion_path:
-                raise ValueError("Digital-name policy indexed path mismatch")
-            predecessor = (
-                None
-                if previous is None
-                else digest(canonical(previous.model_dump(mode="json")))
-            )
-            if entry.predecessor != predecessor:
-                raise ValueError("Digital-name policy predecessor mismatch")
-            paths = (policy_path, exclusion_path)
-            if any(p not in values for p in paths):
-                raise ValueError("Digital-name policy indexed member is missing")
-            hashes = (entry.hash, entry.exclusions_hash)
-            if any(
-                digest(canonical(values[p])) != h
-                for p, h in zip(paths, hashes, strict=True)
-            ):
-                raise ValueError("Digital-name policy indexed hash mismatch")
-            policy, excluded = (
-                model(Policy, values[policy_path]),
-                model(Exclusions, values[exclusion_path]),
-            )
-            if (
-                any(
-                    v.policy_id != identifier or v.version != entry.version
-                    for v in (policy, excluded)
-                )
-                or excluded.purpose != policy.purpose
-            ):
-                raise ValueError("Digital-name policy envelope identity mismatch")
-            _content(policy)
-            _exclusions(policy, excluded)
-            expected.update(paths)
-            policies.append(LoadedPolicy(*(canonical(values[p]) for p in paths)))
-            previous = entry
-    if expected != set(values):
-        raise ValueError("Unindexed digital-name policy input")
-    if len(current_names) > 1:
-        raise ValueError("Current names must select exactly one policy")
-    return Snapshot(revision, files, tuple(policies), tuple(current_names))
-
-
-def _content(policy: Policy) -> None:
-    content = policy.content
-    if (
-        set(content) != CONTENT_KEYS[policy.purpose]
-        or content["policy_id"] != policy.policy_id
-    ):
-        raise ValueError("Digital-name policy content projection mismatch")
-    if ADOPTED_PROJECTIONS.get(
-        policy.approved_document_hash, digest(canonical(policy.model_dump(mode="json")))
-    ) != digest(canonical(policy.model_dump(mode="json"))):
-        raise ValueError("Previously adopted digital-name document projection changed")
-    if semantics(content, policy.purpose) != SEMANTICS[policy.purpose]:
-        raise ValueError("Unsupported digital-name policy rule semantics")
-    pins = model(CataloguePins, content["catalogue_pins"])
-    if (
-        pins.source_batches
-        != pins.parser_and_registry_configuration.digital_link_sources
-        or not pins.source_batches
-        or tuple(sorted({b.batch_id for b in pins.source_batches}))
-        != tuple(b.batch_id for b in pins.source_batches)
-    ):
-        raise ValueError("Digital-name policy catalogue batch closure mismatch")
-    recipes = pins.parser_and_registry_configuration.translation_recipes
-    if set(recipes) != {"translation-" + p + "-v1" for p in ("jp", "sv1", "svwb")}:
-        raise ValueError("Digital-name policy catalogue recipes are incomplete")
-    for provider in ("jp", "sv1", "svwb"):
-        recipe = recipes["translation-" + provider + "-v1"]
-        if (
-            recipe.version != "translation-" + provider + "-v1"
-            or recipe.code_path != "carddb/src/sve_carddb/translations/sources.py"
-            or recipe.config != {"provider": provider}
-        ):
-            raise ValueError("Unsupported digital-name policy catalogue recipe")
-    if policy.purpose == "links":
-        registry = model(LinkRegistryPins, content["registry_pins"])
-        expected = pins.parser_and_registry_configuration.catalog_registry
-        if (
-            registry.revision != expected.authored_revision
-            or registry.index_hash != expected.index_hash
-            or registry.source_replay_revision != pins.count_replay_main_revision
-        ):
-            raise ValueError("Digital-name link registry pins mismatch")
-
-
-def _exclusions(policy: Policy, exclusions: Exclusions) -> None:
-    final_hash = object_value(policy.content["exclusions"])["initial_exclusions_hash"]
-    if final_hash != exclusions.approved_list_hash:
-        raise ValueError("Digital-name approved exclusion hash mismatch")
-    keys: list[tuple[str, ...]] = []
-    for item in exclusions.entries:
-        if not item.reason.strip():
-            raise ValueError("Digital-name exclusion reason is blank")
-        if isinstance(item, CardTargetExclusion):
-            if (
-                re.fullmatch(
-                    r"[0-9]{9}" if item.game == "sv1" else r"[0-9]{8}", item.official_id
-                )
-                is None
-            ):
-                raise ValueError("Digital-name exclusion target ID mismatch")
-            keys.append((item.kind, item.card_id, item.game, item.official_id))
+    links = []
+    for identifier, entry in index.policies.items():
+        member = f"digital-name-policies/{identifier}/current.yaml"
+        if entry.path != member or member not in values:
+            raise ValueError("Digital-name policy indexed path mismatch")
+        if digest(canonical(values[member])) != entry.hash:
+            raise ValueError("Digital-name policy indexed hash mismatch")
+        if object_value(values[member]).get("purpose") == "links":
+            link = model(LinkPolicy, values[member])
+            if link.policy_id != identifier:
+                raise ValueError("Digital-name policy identity mismatch")
+            links.append(link)
         else:
-            keys.append(("name", item.source_lang, item.source_name_hash))
-    if keys != sorted(set(keys)):
-        raise ValueError("Digital-name exclusions must be sorted and unique")
+            policy = model(CurrentPolicy, values[member])
+            if policy.policy_id != identifier:
+                raise ValueError("Digital-name policy identity mismatch")
+            current_names.append(policy)
+    if {INDEX, *(e.path for e in index.policies.values())} != set(values):
+        raise ValueError("Unindexed digital-name policy input")
+    if len(current_names) > 1 or len(links) > 1:
+        raise ValueError("Digital-name policy purpose must select at most one policy")
+    return Snapshot(revision, files, tuple(current_names), links[0] if links else None)

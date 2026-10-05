@@ -1,15 +1,16 @@
-"""Editable name rules contain business conditions, not an approval event graph."""
+"""Editable name and link rules contain business conditions, not an approval event graph."""
 
 from typing import Annotated, Literal
 
 from pydantic import Field, model_validator
 
-from sve_carddb.digital_name_policies.models import Entry, PolicyId
+from sve_carddb.catalog.adoption_models import Batch
 from sve_carddb.products.models import Lang
-from sve_carddb.registry.records import Hash, RecordData, Text
+from sve_carddb.registry.records import CardId, Hash, RecordData, Text
 from sve_carddb.translations.current_models import Origin, Owner
 
 CodePoint = Annotated[int, Field(ge=0, le=0x10FFFF)]
+PolicyId = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]+\Z")]
 
 
 class Scope(RecordData):
@@ -91,6 +92,56 @@ class Policy(RecordData):
     note: str = ""
 
 
+class TargetExclusion(RecordData):
+    card_id: CardId
+    game: Literal["sv1", "svwb"]
+    official_id: Text
+    reason: Text
+
+    @model_validator(mode="after")
+    def _target(self) -> TargetExclusion:
+        if not self.reason.strip():
+            raise ValueError("Link exclusion requires a reason")
+        width = 9 if self.game == "sv1" else 8
+        if len(self.official_id) != width or not (
+            self.official_id.isascii() and self.official_id.isdecimal()
+        ):
+            raise ValueError("Link exclusion official ID width mismatch")
+        return self
+
+
+class LinkContent(RecordData):
+    source_batches: Annotated[tuple[Batch, ...], Field(min_length=1)]
+    excluded_names: tuple[Exclusion, ...]
+    excluded_targets: tuple[TargetExclusion, ...]
+
+    @model_validator(mode="after")
+    def _unique(self) -> LinkContent:
+        batches = tuple(b.batch_id for b in self.source_batches)
+        if batches != tuple(sorted(set(batches))):
+            raise ValueError("Link source batches must be sorted and unique")
+        if any(e.source_lang != "ja" for e in self.excluded_names):
+            raise ValueError("Link name exclusions compare Japanese names")
+        hashes = tuple(e.source_name_hash for e in self.excluded_names)
+        targets = tuple(
+            (t.card_id, t.game, t.official_id) for t in self.excluded_targets
+        )
+        if hashes != tuple(sorted(set(hashes))) or targets != tuple(
+            sorted(set(targets))
+        ):
+            raise ValueError("Link exclusions must be sorted and unique")
+        return self
+
+
+class LinkPolicy(RecordData):
+    digital_name_policy_format: Literal[2]
+    kind: Literal["digital_name_policy"]
+    policy_id: PolicyId
+    purpose: Literal["links"]
+    content: LinkContent
+    note: str = ""
+
+
 class CurrentEntry(RecordData):
     path: Text
     hash: Hash
@@ -99,6 +150,4 @@ class CurrentEntry(RecordData):
 class Index(RecordData):
     digital_name_policy_index_format: Literal[2]
     kind: Literal["digital_name_policy_index"]
-    policies: Annotated[
-        dict[PolicyId, CurrentEntry | tuple[Entry, ...]], Field(min_length=1)
-    ]
+    policies: Annotated[dict[PolicyId, CurrentEntry], Field(min_length=1)]

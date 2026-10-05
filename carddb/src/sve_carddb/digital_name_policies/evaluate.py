@@ -2,35 +2,29 @@
 
 from collections import defaultdict
 from dataclasses import dataclass
-from functools import cached_property
-from types import MappingProxyType
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import JsonValue, model_validator
 
-from sve_carddb.build_inputs import BuildContext, SourceUse, uses_sorted
+from sve_carddb.build_inputs import SourceUse, uses_sorted
 from sve_carddb.catalog.adoption_models import ReviewContext, SourceRef
-from sve_carddb.catalog.adoption_sources import PinnedRepository
-from sve_carddb.digital_links.catalogue import complete_inventory
 from sve_carddb.digital_links.evidence import Evidence
-from sve_carddb.digital_name_policies.models import CardTargetExclusion, NameExclusion
 from sve_carddb.extract.compare_jp import legacy_projection
 from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.registry.records import CardId, FaceId, PrintingId, RecordData, Text
 from sve_carddb.registry.review import observation
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.sources.official_jp import card_url
-from sve_carddb.translations.sources import Sources
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-    from pathlib import Path
-
     from sve_carddb.digital_links.evidence import Name
-    from sve_carddb.digital_name_policies.current_evaluate import (
-        Catalogue as CurrentCatalogue,
-    )
-    from sve_carddb.digital_name_policies.loader import LoadedPolicy
+    from sve_carddb.digital_name_policies.current_evaluate import Catalogue
+    from sve_carddb.translations.sources import Sources
+
+# The same-name rule lives in code; authored data only lists source batches and
+# exclusions, so changing the rule itself is a reviewed program change.
+LINK_RELATION = "same_name"
+LINK_GAMES = ("sv1", "svwb")
 
 
 class NameOwner(RecordData):
@@ -71,46 +65,6 @@ class FrozenName:
 
 
 @dataclass(frozen=True)
-class Catalogue:
-    policy_hash: str
-    purpose: str
-    names: tuple[FrozenName, ...]
-    uses: tuple[SourceUse, ...]
-    whitespace: frozenset[int]
-    kana: tuple[tuple[int, int], ...]
-    excluded_names: frozenset[str]
-    excluded_targets: frozenset[tuple[str, str, str]]
-
-    @cached_property
-    def japanese(self) -> Mapping[tuple[str, str], tuple[FrozenName, ...]]:
-        """Index hashes once while retaining complete strings for collision checks."""
-        groups: dict[tuple[str, str], list[FrozenName]] = defaultdict(list)
-        for name in self.names:
-            if name.lang == "ja" and name.text:
-                groups[name.game, digest(name.text.encode())].append(name)
-        return MappingProxyType({key: tuple(values) for key, values in groups.items()})
-
-    @cached_property
-    def translated(self) -> Mapping[tuple[str, str, str], FrozenName]:
-        """Retain every target and phase instead of a selected-target subset."""
-        return MappingProxyType(
-            {
-                (n.game, n.official_id, n.phase): n
-                for n in self.names
-                if n.lang == "zh-Hant"
-            }
-        )
-
-    def matching(self, text: str, game: str) -> tuple[FrozenName, ...]:
-        """Hash hits still require exact complete strings."""
-        return tuple(
-            n
-            for n in self.japanese.get((game, digest(text.encode())), ())
-            if n.text == text and text
-        )
-
-
-@dataclass(frozen=True)
 class NamePolicyResult:
     owner: NameOwner
     context_hash: str
@@ -144,107 +98,6 @@ class RuleLinkPlan:
             "official_id": self.official_id,
             "digital_phase": None,
         }
-
-
-def historical_sources(
-    loaded: LoadedPolicy, stores: Mapping[str, Path], repository: Path
-) -> Sources:
-    """Historical provenance uses immutable Git dependencies, never current runtime bytes."""
-    pins = loaded.catalogue()
-    pinned = PinnedRepository(repository)
-    names: list[str] = []
-    # The historical parser's existing dependency list is itself an immutable Git blob.
-    # Read the complete historical Python package, avoiding dependency growth on upgrade.
-    import subprocess  # ruff: ignore[import-outside-top-level,suspicious-subprocess-import] -- immutable dependency enumeration belongs to this replay boundary
-
-    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- validated full SHA and fixed paths, no shell
-        [
-            pinned.executable,
-            "-C",
-            str(repository),
-            "ls-tree",
-            "-r",
-            "--name-only",
-            pins.count_replay_main_revision,
-            "--",
-            "carddb/src/sve_carddb",
-            "carddb/uv.lock",
-            "carddb/pyproject.toml",
-        ],
-        check=False,
-        capture_output=True,
-    )
-    if result.returncode:
-        raise ValueError("Digital-name historical program tree is unavailable")
-    names.extend(
-        n
-        for n in result.stdout.decode().splitlines()
-        if n.endswith((".py", "uv.lock", "pyproject.toml"))
-    )
-    dependencies = pinned.read_many(pins.count_replay_main_revision, tuple(names))
-    context = BuildContext.from_inputs(
-        pins.count_replay_main_revision,
-        dependencies,
-        pins.parser_and_registry_configuration.model_dump(mode="json"),
-    )
-    return Sources(dict(stores), repository, context, historical=True)
-
-
-def catalogue(loaded: LoadedPolicy, sources: Sources) -> Catalogue:
-    """Replay both entire pinned games; missing translations remain explicit members."""
-    document = loaded.document()
-    pins = loaded.catalogue()
-    if (
-        object_value(parse(sources.build.configuration.encode()))
-        != pins.parser_and_registry_configuration.model_dump(mode="json")
-        or sources.build.program_revision != pins.count_replay_main_revision
-    ):
-        raise ValueError("Digital-name catalogue differs from approved frozen pins")
-    review = ReviewContext(context=sources.build, source_batches=pins.source_batches)
-    registry = Evidence(sources).index(review)
-    names: list[FrozenName] = []
-    for game in ("sv1", "svwb"):
-        full = complete_inventory(sources, review, game)
-        _parents(full, game)
-        names.extend(
-            FrozenName(n.game, n.official_id, n.phase, n.lang, n.text, n.ref)
-            for _, n in sorted(full.items())
-        )
-    excluded = loaded.excluded()
-    hashes = {digest(n.text.encode()) for n in names if n.lang == "ja" and n.text}
-    name_exclusions = frozenset(
-        item.source_name_hash
-        for item in excluded.entries
-        if isinstance(item, NameExclusion)
-    )
-    if not name_exclusions <= hashes:
-        raise ValueError(
-            "Digital-name exclusion cannot locate its frozen Japanese name"
-        )
-    targets = frozenset(
-        (item.card_id, item.game, item.official_id)
-        for item in excluded.entries
-        if isinstance(item, CardTargetExclusion)
-    )
-    if any(
-        card not in registry.cards
-        or not any(
-            n.game == game and n.official_id == official and n.lang == "ja"
-            for n in names
-        )
-        for card, game, official in targets
-    ):
-        raise ValueError("Digital-name exclusion cannot locate its card target")
-    return Catalogue(
-        digest(loaded.policy),
-        document.purpose,
-        tuple(names),
-        uses_sorted(sources.uses),
-        frozenset(),
-        (),
-        name_exclusions,
-        targets,
-    )
 
 
 def _parents(names: dict[tuple[str, str, str, str], Name], game: str) -> None:
@@ -319,9 +172,7 @@ def owner_text(
     )
 
 
-def name_result(
-    evidence: OwnerEvidence, frozen: Catalogue | CurrentCatalogue
-) -> NamePolicyResult:
+def name_result(evidence: OwnerEvidence, frozen: Catalogue) -> NamePolicyResult:
     """Pure eligibility after owner evidence validation; this is never human review."""
     owner, text, owner_uses = evidence.owner, evidence.text, evidence.uses
     if frozen.purpose != "names":
@@ -385,7 +236,7 @@ def name_result(
 
 
 def rule_links(
-    owners: tuple[OwnerEvidence, ...], frozen: Catalogue | CurrentCatalogue
+    owners: tuple[OwnerEvidence, ...], frozen: Catalogue
 ) -> tuple[RuleLinkPlan, ...]:
     """Propose deduplicated card/game/ID plans, never same_card human records."""
     if frozen.purpose != "links":
@@ -400,7 +251,7 @@ def rule_links(
         owner, text, uses = evidence.owner, evidence.text, evidence.uses
         if text is None or not text or digest(text.encode()) in frozen.excluded_names:
             continue
-        for game in ("sv1", "svwb"):
+        for game in LINK_GAMES:
             for match in frozen.matching(text, game):
                 key = owner.card_id, game, match.official_id
                 if key not in frozen.excluded_targets:

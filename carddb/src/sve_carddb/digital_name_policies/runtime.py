@@ -1,4 +1,4 @@
-"""Current checker closure is independent of a policy's historical background."""
+"""Current checker closure for the name and link policy evaluators."""
 
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -20,7 +20,6 @@ RUNTIME = tuple(
                 "carddb/src/sve_carddb/digital_name_policies/" + name + ".py"
                 for name in (
                     "__init__",
-                    "models",
                     "loader",
                     "evaluate",
                     "report",
@@ -39,10 +38,10 @@ RUNTIME = tuple(
 
 
 def require_runtime(sources: Sources) -> None:
-    """Verify loaded checker bytes; do not rewrite or invalidate historical recipes."""
+    """Verify loaded checker bytes against the declared build dependencies."""
     declared = {pin.name: pin.sha256 for pin in sources.build.dependencies}
     root = Path(__file__).resolve().parents[4]
-    if sources.historical or any(
+    if any(
         (root / name).is_symlink()
         or declared.get(name) != digest((root / name).read_bytes())
         for name in RUNTIME

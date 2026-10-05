@@ -18,7 +18,7 @@ from sve_carddb.digital_links.candidates import (
 from sve_carddb.digital_links.commands import output_path
 from sve_carddb.digital_links.evidence import batch_refs, inventory
 from sve_carddb.digital_links.importer import review_context
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
+from sve_carddb.snapshot.values import array, canonical, object_value, parse
 
 from .digital_link_import_fixtures import (
     Fixture,
@@ -55,17 +55,6 @@ def test_mechanical_tier_never_creates_adoption_or_leaks_names(
     summary = object_value(report["summary"])
     assert summary["tier1"] == 1
     assert summary["tier2"] == 0
-    unsigned = dict(report)
-    unsigned.pop("result_hash")
-    unsigned.pop("adoption_background")
-    assert digest(canonical(unsigned)) == report["result_hash"]
-    background = object_value(object_value(report["adoption_background"])["context"])
-    config = object_value(parse(str(background["configuration"]).encode()))
-    assert (
-        object_value(config["digital_candidate_report"])["result_hash"]
-        == report["result_hash"]
-    )
-    assert "digital_link_authored" not in config
     content = canonical(report)
     assert b"Synthetic card" not in content
     assert "合成測試名".encode() not in content

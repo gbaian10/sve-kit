@@ -4,21 +4,33 @@ This module implements the link entry of the digital-link adoption contract.
 Coverage intake is not implemented; no record means unknown. Candidate reports
 never adopt a relationship or manufacture a human receipt.
 
-Load the entire immutable authored entry with `load_links(authored_root)`.
-`Inputs` compares exact index/shard bytes with the declared full authored Git SHA,
-and `Inputs.configuration()` supplies the `digital_link_authored` build pin.
+Load the entry with `load_links(authored_root)`. Each record is the current
+relation for one subject: `subject`, `value` (relation, effect similarity and the
+SVE/digital name references), `review_level` (`sampled` for a batch the maintainer
+spot-checked, `confirmed` for an individually checked link) and a nonblank
+`reason`. Git keeps earlier versions;
+there are no adoption numbers, predecessors or batch decisions. `Inputs` compares
+exact index/shard bytes with the declared full authored Git SHA, and
+`Inputs.configuration()` supplies the `digital_link_authored` build pin.
 
 Build configuration also declares canonical-sorted unique `digital_link_sources`
 (store/batch pairs), `catalog_registry`, `translation_recipes`, and
 `digital_evidence` from `translations.digital.configuration()`.
-Within a caller-owned transaction call `populate_links()`. The composer in
-`snapshot/offline_names.py` passes its result as `links=result` to
+Within a caller-owned transaction call `populate_links()`. It checks every record
+once against the current build: the card must be known and published, the record's
+own SVE and digital name references must resolve exactly, and its digital names
+must still equal the current catalogue. A changed or removed digital name, a
+retired card or a card outside publication makes the relation stale; stale
+relations are reported and not materialized. Each materialized relation gets one
+record-level `decision` row with its `review_level` as state, as the build DB
+requires, linked to its authored shard.
+
+The composer in `snapshot/offline_names.py` passes the result as `links=result` to
 `digital_name_policies.application.prepare()` and `populate()`, which delegate to
-`current_application`. Standalone `import_links()` owns its transaction. Link
-results retain fresh, stale and withdrawn terminal records, decisions and the
-input usage record. The application consumes each owner's link proof through
+`current_application`. Standalone `import_links()` owns its transaction. The
+application consumes each owner's link proof through
 `DigitalLinkResult.eligible_owner(db, sources, owner, name_ref=...)`, independently
-revalidating its Japanese name, card, face, printing source and exact adopted
+revalidating its Japanese name, card, face, printing source and exact linked
 digital name. Missing coverage does not prevent an eligible name.
 
 `translations.current_names.prepare()` validates current concept associations
@@ -28,20 +40,8 @@ legal policy or counterpart candidates still require their own evidence.
 `translations.counterparts.first_counterpart()` selects sv1 before svwb and rejects
 different adopted names within the same game. The current application supports
 known printed owners and generates current translations, uses and display
-bindings. The old name intake has been removed; remaining #53 requirements must
-extend these current paths rather than restore historical name replay.
-
-Historical review contexts validate their declared dependencies and recipes
-against immutable Git blobs. They describe the past review, rather than requiring
-the current runtime to equal the old one. Current code revalidates frozen evidence;
-the current build separately pins and verifies the loaded runtime. Changed current
-digital names make a relation stale; a program version change alone does not.
-Complete builds must combine all stage usages and call
+bindings. Complete builds must combine all stage usages and call
 `input_record(...).verify(..., complete=True)` before export.
-
-Decisions do not store author or reviewer identities, and the loader does not
-check an account list. State and checked membership requirements still apply.
-Synthetic tests exercise this format without creating real adoption data.
 
 ## Offline candidates
 
@@ -70,7 +70,6 @@ adoption remains the authority for production classification.
 Reports contain IDs, references/hashes, row numbers and overlapping failure counts,
 without card names or wording. Per-game tier counts inherit whole-row failures;
 local counts describe that game's failures. Source occurrences count draft links,
-not adopted links. Phase candidates still require human assignment.
-The canonical result hash excludes result_hash/adoption_background; the resulting
-background binds recipe, draft, result and class-table hashes. Actual sampled or
-confirmed receipts require the maintainer's real review event.
+not adopted links. Phase candidates still require human assignment. A candidate
+never becomes a `same_card` record automatically; the maintainer writes the
+record after checking it.

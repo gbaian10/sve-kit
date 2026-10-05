@@ -25,169 +25,56 @@ NAMES = "draft-i51-names-v1"
 LINKS = "digital-name-links-v1"
 
 
-def _link_files(purpose: str) -> tuple[dict[str, JsonValue], ...]:
-    """Retain the adopted versioned links contract with synthetic provenance."""
-    business = object_value(
-        parse(
-            (
-                REPO / "carddb/tests/fixtures/digital-name-policy-legacy-business.json"
-            ).read_bytes()
-        )
-    )
-    content = object_value(business[purpose])
-    assert purpose == "links"
-    identifier = LINKS
-    checksum = digest(b"synthetic policy evidence; no actual approval")
-    revision = "a" * 40
-    batches: list[JsonValue] = [{"batch_id": checksum}]
-    registry: dict[str, JsonValue] = {
-        "authored_revision": revision,
-        "index_path": "authored/ids/index.yaml",
-        "index_hash": checksum,
-    }
-    recipes: dict[str, JsonValue] = {
-        "translation-" + provider + "-v1": {
-            "version": "translation-" + provider + "-v1",
-            "program_revision": revision,
-            "code_path": "carddb/src/sve_carddb/translations/sources.py",
-            "code_hash": checksum,
-            "config": {"provider": provider},
-            "config_hash": digest(canonical({"provider": provider})),
-        }
-        for provider in ("jp", "sv1", "svwb")
-    }
-    content["catalogue_pins"] = {
-        "approved_coverage_claim": False,
-        "candidate_counts": {},
-        "count_replay_main_revision": revision,
-        "extra_unicode_scan_hash": checksum,
-        "parser_and_registry_configuration": {
-            "catalog_registry": registry,
-            "digital_link_sources": batches,
-            "translation_recipes": recipes,
-        },
-        "private_name_list_hash": checksum,
-        "r2_inventory_evidence_hash": checksum,
-        "source_batches": batches,
-    }
-    content["proposed_clause_replacements"] = []
-    if purpose == "links":
-        content["registry_pins"] = {
-            "revision": revision,
-            "index_hash": checksum,
-            "card_projection_evidence_hash": checksum,
-            "source_replay_revision": revision,
-        }
-    approved = checksum
-    document: dict[str, JsonValue] = {
-        "digital_name_policy_format": 1,
-        "kind": "digital_name_policy",
-        "policy_id": identifier,
-        "version": 1,
-        "purpose": purpose,
-        "approved_document_hash": approved,
-        "projection_recipe": "approved-digital-name-document-v1",
-        "content": content,
-    }
-    excluded: dict[str, JsonValue] = {
-        "digital_name_exclusion_format": 1,
-        "kind": "digital_name_initial_exclusions",
-        "policy_id": identifier,
-        "version": 1,
-        "purpose": purpose,
-        "approved_list_hash": object_value(content["exclusions"])[
-            "initial_exclusions_hash"
-        ],
-        "entries": [],
-    }
-    return document, excluded
-
-
-def copy_policies(root: Path) -> None:
-    index: dict[str, JsonValue] = {
-        "digital_name_policy_index_format": 2,
-        "kind": "digital_name_policy_index",
-        "policies": {},
-    }
-    for purpose, identifier in (("links", LINKS),):
-        document, excluded = _link_files(purpose)
-        base = root / "authored/digital-name-policies" / identifier
-        base.mkdir(parents=True, exist_ok=True)
-        exclusions = root / "authored/digital-name-exclusions" / identifier
-        exclusions.mkdir(parents=True, exist_ok=True)
-        (base / "001.policy.yaml").write_bytes(canonical(document))
-        (exclusions / "001.yaml").write_bytes(canonical(excluded))
-        object_value(index["policies"])[identifier] = [
-            {
-                "version": 1,
-                "path": f"digital-name-policies/{identifier}/001.policy.yaml",
-                "hash": digest(canonical(document)),
-                "exclusions_path": f"digital-name-exclusions/{identifier}/001.yaml",
-                "exclusions_hash": digest(canonical(excluded)),
-                "predecessor": None,
-            }
-        ]
-    current = object_value(
-        read_yaml(REPO / "authored/digital-name-policies" / NAMES / "current.yaml")
-    )
-    current["note"] = "Synthetic current policy"
-    object_value(current["content"]).update(excluded_names=[], name_overrides=[])
-    base = root / "authored/digital-name-policies" / NAMES
-    base.mkdir(parents=True)
-    (base / "current.yaml").write_bytes(canonical(current))
-    object_value(index["policies"])[NAMES] = {
-        "path": f"digital-name-policies/{NAMES}/current.yaml",
-        "hash": digest(canonical(current)),
-    }
-    (root / "authored" / INDEX).write_bytes(canonical(index))
-
-
-def policy(root: Path, purpose: str) -> dict[str, JsonValue]:
+def current(root: Path, identifier: str) -> dict[str, JsonValue]:
     return object_value(
-        read_yaml(
-            root
-            / "authored/digital-name-policies"
-            / (NAMES if purpose == "names" else LINKS)
-            / "001.policy.yaml"
-        )
+        read_yaml(root / "authored/digital-name-policies" / identifier / "current.yaml")
     )
 
 
-def exclusion(root: Path, purpose: str) -> dict[str, JsonValue]:
-    return object_value(
-        read_yaml(
-            root
-            / "authored/digital-name-exclusions"
-            / (NAMES if purpose == "names" else LINKS)
-            / "001.yaml"
-        )
-    )
-
-
-def rewrite(
-    root: Path,
-    purpose: str,
-    document: dict[str, JsonValue] | None = None,
-    excluded: dict[str, JsonValue] | None = None,
-) -> None:
-    assert purpose == "links"
-    identifier = LINKS
+def rewrite(root: Path, identifier: str, document: dict[str, JsonValue]) -> None:
+    """Write one current policy and its index entry, as an editor would."""
     base = root / "authored/digital-name-policies" / identifier
-    document = document if document is not None else policy(root, purpose)
-    excluded = excluded if excluded is not None else exclusion(root, purpose)
-    for path, value in [
-        (base / "001.policy.yaml", document),
-        (root / "authored/digital-name-exclusions" / identifier / "001.yaml", excluded),
-    ]:
-        path.write_bytes(canonical(value))
+    base.mkdir(parents=True, exist_ok=True)
+    (base / "current.yaml").write_bytes(canonical(document))
     index_path = root / "authored" / INDEX
-    index = object_value(read_yaml(index_path))
-    entry = object_value(array(object_value(index["policies"])[identifier])[0])
-    entry.update(
-        hash=digest(canonical(document)),
-        exclusions_hash=digest(canonical(excluded)),
+    index: dict[str, JsonValue] = (
+        object_value(read_yaml(index_path))
+        if index_path.exists()
+        else {
+            "digital_name_policy_index_format": 2,
+            "kind": "digital_name_policy_index",
+            "policies": {},
+        }
     )
+    object_value(index["policies"])[identifier] = {
+        "path": f"digital-name-policies/{identifier}/current.yaml",
+        "hash": digest(canonical(document)),
+    }
     index_path.write_bytes(canonical(index))
+
+
+def copy_policies(root: Path, batches: list[JsonValue] | None = None) -> None:
+    rewrite(
+        root,
+        LINKS,
+        {
+            "digital_name_policy_format": 2,
+            "kind": "digital_name_policy",
+            "policy_id": LINKS,
+            "purpose": "links",
+            "content": {
+                "source_batches": batches
+                if batches is not None
+                else [{"batch_id": digest(b"synthetic catalogue batch")}],
+                "excluded_names": [],
+                "excluded_targets": [],
+            },
+        },
+    )
+    names = current(REPO, NAMES)
+    names["note"] = "Synthetic current policy"
+    object_value(names["content"]).update(excluded_names=[], name_overrides=[])
+    rewrite(root, NAMES, names)
 
 
 @dataclass(frozen=True)
@@ -234,9 +121,7 @@ def make_policy_fixture(
     digital = catalogue_fixture(
         original, game="sv1", languages=("ja", "zh-tw"), transform=translate
     )
-    copy_policies(root)
-    runtime_files = RUNTIME
-    for name in runtime_files:
+    for name in RUNTIME:
         target = root / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(REPO / name, target)
@@ -253,26 +138,9 @@ def make_policy_fixture(
         ],
         key=canonical,
     )
-    for purpose in ("links",):
-        document = policy(root, purpose)
-        document["approved_document_hash"] = digest(canonical(["synthetic", purpose]))
-        content = object_value(document["content"])
-        pins = object_value(content["catalogue_pins"])
-        pins.update(
-            count_replay_main_revision=digital.program,
-            parser_and_registry_configuration=configuration,
-            source_batches=configuration["digital_link_sources"],
-        )
-        if purpose == "links":
-            registry = object_value(configuration["catalog_registry"])
-            object_value(content["registry_pins"]).update(
-                revision=registry["authored_revision"],
-                index_hash=registry["index_hash"],
-                source_replay_revision=digital.program,
-            )
-        rewrite(root, purpose, document)
+    copy_policies(root, array(configuration["digital_link_sources"]))
     authored = commit(root)
-    dependencies = {n: (root / n).read_bytes() for n in (*RUNTIME, *runtime_files)}
+    dependencies = {n: (root / n).read_bytes() for n in RUNTIME}
     build = BuildContext.from_inputs(authored, dependencies, configuration)
     return PolicyFixture(replace(digital, program=authored, build=build), authored)
 

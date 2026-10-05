@@ -14,11 +14,11 @@ from sve_carddb.digital_links.importer import review_context
 from sve_carddb.digital_name_policies.current_evaluate import (
     catalogue as current_catalogue,
 )
+from sve_carddb.digital_name_policies.current_evaluate import link_catalogue
 from sve_carddb.digital_name_policies.evaluate import (
+    LINK_RELATION,
     FrozenName,
     NameOwner,
-    catalogue,
-    historical_sources,
     name_result,
     owner_text,
     rule_links,
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from sve_carddb.digital_name_policies.loader import Snapshot
     from sve_carddb.translations.sources import Sources
 
-RECIPE = "digital-name-policy-report-v1"
+RECIPE = "digital-name-policy-report-v2"
 
 
 def _baseline(content: bytes | None) -> frozenset[str]:
@@ -72,15 +72,10 @@ def generate(  # ruff: ignore[too-many-locals] -- diagnostic report retains inde
     review = review_context(sources)
     index = Evidence(sources).index(review)
     physical = sve_inventory(sources, review)
-    if len(snapshot.current_names) != 1:
-        raise ValueError("Name report needs one current name policy")
-    historic = sources
+    if len(snapshot.current_names) != 1 or snapshot.links is None:
+        raise ValueError("Name report needs one current name and one links policy")
     names = current_catalogue(snapshot.current_names[0], sources)
-    links_policy = snapshot.effective("links")
-    links_sources = historical_sources(
-        links_policy, sources.stores, sources.repository.root
-    )
-    links = catalogue(links_policy, links_sources)
+    links = link_catalogue(snapshot.links, sources)
     owners = []
     seen = set()
     rows: list[JsonValue] = []
@@ -133,6 +128,7 @@ def generate(  # ruff: ignore[too-many-locals] -- diagnostic report retains inde
     targets: list[JsonValue] = [
         {
             "subject": p.subject(),
+            "relation": LINK_RELATION,
             "owners": [o.owner_id for o in p.owners],
             "refs": [r.model_dump(mode="json") for r in p.refs],
             "policy_hash": p.policy_hash,
@@ -151,7 +147,7 @@ def generate(  # ruff: ignore[too-many-locals] -- diagnostic report retains inde
         "baseline_hash": None if baseline is None else digest(baseline),
         "baseline": "empty_first_run" if baseline is None else "previous_report",
         "summary": {
-            "policies": len(snapshot.policies) + len(snapshot.current_names),
+            "policies": len(snapshot.current_names) + 1,
             "owners_eligible": counts["eligible"],
             "owners_untranslated": counts["untranslated"],
             "owners_excluded": counts["excluded"],
@@ -164,7 +160,6 @@ def generate(  # ruff: ignore[too-many-locals] -- diagnostic report retains inde
             },
             "new_owners": sum(1 for row in rows if object_value(row)["new_owner"]),
             "multi_target_card_games": sum(1 for n in multiplicity.values() if n > 1),
-            "historical_warnings_unavailable": True,
             "human_precedence": "not_applied_diagnostic_plans_only",
             "published_links": 0,
             "published_translations": 0,
@@ -172,19 +167,7 @@ def generate(  # ruff: ignore[too-many-locals] -- diagnostic report retains inde
         },
         "owners": rows,
         "rule_link_plans": targets,
-        "owner_input_record": parse(
-            input_record(sources.build, sources.uses).content()
-        ),
-        "policy_catalogue_input_records": [
-            parse(input_record(s.build, s.uses).content())
-            for s in (historic,)
-            if s is links_sources
-        ]
-        if historic is links_sources
-        else [
-            parse(input_record(s.build, s.uses).content())
-            for s in (historic, links_sources)
-        ],
+        "input_record": parse(input_record(sources.build, sources.uses).content()),
         "newer_catalogue": new_catalogue,
     }
     report["report_hash"] = digest(canonical(report))
