@@ -212,8 +212,8 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 舊決定封套、membership、核可收據、採納鏈、歷史 producer／expected 只供轉換，不是新 reader 的必要輸入。
 資料可直接改，退回用 git revert；只記來源類別 official/project/machine、低信心及必要資料理由。
 
-模板功能全部保留：固定字、參數、句型比對、術語、卡名、風味、加粗、新卡自動套用及未匹配清單。
-[辨識規則](template-parameter-policy.md)由現行程式與當前設定提供；風味依[整段模板契約](flavor-translation.md)。
+效果模板保留固定字、參數、句型比對、術語、卡名引用、加粗、新卡自動套用及未匹配清單。
+[辨識規則](template-parameter-policy.md)由現行程式與當前設定提供；風味不走模板，依[直接對照表](flavor-translation.md)。
 純譯文／note 改字不換模板或術語 ID；真正固定字／參數語義改變才是另一模板。
 一般讀取驗結構與引用，CI／建置用本次固定來源重產清冊比檔案，不逐次回放 Git 祖先或舊環境。
 context/use/binding、渲染全文與 selection 由工具推導，不存另一份逐卡翻譯真值。

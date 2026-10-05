@@ -8,17 +8,12 @@ from sve_carddb.template_parameters.analysis import SAFE_INTEGER, prepared
 from sve_carddb.template_parameters.verification import verify_values
 from sve_carddb.template_sources.inventory import entry
 from sve_carddb.template_sources.normalizer import VERSION, partition
-from sve_carddb.template_translations.flavor_models import FlavorEntry
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.template_parameters.models import Candidate, Hint, Schema
     from sve_carddb.template_sources.models import Entry
-    from sve_carddb.template_translations.flavor_models import (
-        FlavorCandidate,
-        FlavorOwner,
-    )
 POSITIVE_ROLES = {
     "choice_ordinal",
     "card_ordinal",
@@ -35,14 +30,13 @@ POSITIVE_ROLES = {
 
 @dataclass(frozen=True)
 class Reconstructed:
-    entry: Entry | FlavorEntry
-    candidate: Candidate | FlavorCandidate
+    entry: Entry
+    candidate: Candidate
     normalized: str
     field_text: str
     hints: tuple[Hint, ...]
     roles: tuple[str, ...]
     pending: tuple[str, ...]
-    owner: FlavorOwner | None = None
 
     def verify_schema(self, schema: Schema) -> None:
         """Renaming or merging repeated slots cannot erase a source position or its role."""
@@ -50,10 +44,6 @@ class Reconstructed:
             raise ValueError(
                 "Template definition source has unresolved parameter roles"
             )
-        if isinstance(self.entry, FlavorEntry):
-            if schema.slots:
-                raise ValueError("Flavor template schema must have zero parameters")
-            return
         hints = []
         used = set()
         for slot in schema.slots:

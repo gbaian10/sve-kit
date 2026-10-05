@@ -23,8 +23,8 @@ origin／low_confidence／note 在 record 外層；source_ref 不保存私人 pa
 
 ## 3. 選詞的主張來源與 origin
 
-glossary_choice.data 為 `{term_id,lang,value,concept_evidence}`，另有選填的 source_claim；vocabulary_choice 將 term_id
-換成 vocabulary_kind/vocabulary_code。每個鍵只保存當前值，value=null 是撤回，不能偷偷退回歷史舊值。
+glossary_choice.data 為 `{term_id,lang,value,concept_evidence}`，另有選填的 source_claim。
+每個鍵只保存當前值，value=null 是撤回，不能偷偷退回歷史舊值。
 value 非 null 時為 `{kind:authored,text}` 或 `{kind:source,source_ref,span}`；span=null 表示全字串。
 文字與來源語言必須正確，span 為 code-point 半開區間，不得越界。
 

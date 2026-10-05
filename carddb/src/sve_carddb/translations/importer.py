@@ -11,9 +11,6 @@ from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.snapshot.values import canonical, object_value
 from sve_carddb.translations.current_models import ChoiceRecord as CurrentChoiceRecord
 from sve_carddb.translations.current_models import DigitalName as CurrentDigitalName
-from sve_carddb.translations.current_models import (
-    VocabularyRecord as CurrentVocabularyRecord,
-)
 from sve_carddb.translations.loader import Snapshot, load_glossary
 from sve_carddb.translations.models import (
     AuthoredValue,
@@ -66,7 +63,7 @@ class Inputs:
 
 
 def validate_choice(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals] -- independent source/concept guards cannot substitute for each other
-    record: CurrentChoiceRecord | CurrentVocabularyRecord,
+    record: CurrentChoiceRecord,
     *,
     original: str | None,
     sources: Sources,

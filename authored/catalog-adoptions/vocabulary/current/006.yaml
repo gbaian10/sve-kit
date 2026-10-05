@@ -148,6 +148,11 @@ records:
               text_hash: sha256:7f185ac6fad36fb1d7b4c0eb0049e64f7de38692f555a77a60734d66cbfe4d92
             special_kinds: []
         active: true
+        translations:
+          - lang: zh-Hant
+            text: 皇家護衛
+            origin: machine
+            low_confidence: false
       evidence:
         - source_ref:
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
@@ -592,6 +597,11 @@ records:
             special_kinds:
               - token
         active: true
+        translations:
+          - lang: zh-Hant
+            text: 法術
+            origin: machine
+            low_confidence: false
       evidence:
         - source_ref:
             batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4

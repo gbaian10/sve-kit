@@ -8,8 +8,7 @@ Every position has an exact source reference, code-point spans, role and hash.
 positions. Unknown presence never becomes an absent effect.
 
 `normalizer` retains the deterministic body/reminder/token-header/layout recipe
-and the established body fingerprint algorithm. `flavor` is an independent exact
-whole-field recipe without trimming, normalization or slots. `inventory.replay()`
+and the established body fingerprint algorithm. Flavor text is not inventoried; it is translated directly by source hash. `inventory.replay()`
 checks one current position against an already verified projected field; it is not
 historical producer replay.
 

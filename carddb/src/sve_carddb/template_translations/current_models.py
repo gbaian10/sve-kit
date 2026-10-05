@@ -8,7 +8,6 @@ from sve_carddb.catalog.adoption_models import Batch
 from sve_carddb.products.models import Code, Lang
 from sve_carddb.registry.records import RecordData, Text
 from sve_carddb.template_sources.models import Entry
-from sve_carddb.template_translations.flavor_models import FlavorEntry
 from sve_carddb.template_translations.models import Definition, TemplateId
 
 
@@ -37,7 +36,7 @@ class TranslationRecord(RecordData):
 
 
 class Candidate(RecordData):
-    source_kind: Literal["effect", "flavor"]
+    source_kind: Literal["effect"]
     candidate_id: Text
     lang: Lang
     text: Text
@@ -115,7 +114,7 @@ class Inventory(RecordData):
     template_source_format: Literal[3]
     kind: Literal["template_source_inventory"]
     source_batches: Annotated[tuple[Batch, ...], Field(min_length=1)]
-    entries: tuple[Annotated[Entry | FlavorEntry, Field(discriminator="role")], ...]
+    entries: tuple[Entry, ...]
 
     @field_validator("template_source_format", mode="before")
     @classmethod

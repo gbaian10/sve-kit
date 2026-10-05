@@ -1,27 +1,6 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["sentence_template","T54b8d75b4f709de3"]'
-    kind: sentence_template
-    data:
-      id: T54b8d75b4f709de3
-      inventory_id: inv:f4f76270037fde7759e4c278ab6152575e71c6841e6f2eef2b4a1303badefd61
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 37
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:54b8d75b4f709de34062754ae28ea7475d9ecea202416e4e75fdfb0b98907d61
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T54ce2a7ff6c4c998"]'
     kind: sentence_template
     data:
@@ -209,27 +188,6 @@ records:
       supersedes_id: T0196cb9457
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T54e5b6004db33657"]'
-    kind: sentence_template
-    data:
-      id: T54e5b6004db33657
-      inventory_id: inv:fd4a94966b854283b7abb80cfd06a8c34d49d55638bbff53eb7d5bc5d5ef8c1a
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 47
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:54e5b6004db3365743fa690ff198493c75ef2cba10be22c127f91ad8896b20e2
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T552ac83174882fdb"]'
     kind: sentence_template
     data:
@@ -391,48 +349,6 @@ records:
       supersedes_id: T7a5b3d8ae5
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T556f379857c0e572"]'
-    kind: sentence_template
-    data:
-      id: T556f379857c0e572
-      inventory_id: inv:0aebbfc8d68cff0289ac7b2a83467f5f33e95dbabd8cac3abb59e1c95892ca43
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 44
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:556f379857c0e5724eca8c412f8eb2ae91e5cafc9e3a484944a5c24cd6fd4522
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5573f0d6f058a72d"]'
-    kind: sentence_template
-    data:
-      id: T5573f0d6f058a72d
-      inventory_id: inv:6ec530f9fba6d83d68e7b84e6b703a621eea2b486eebbad5d4694f2a7f5e5c8f
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 49
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5573f0d6f058a72d15184dc8827a4692b51976d42dc82bf7fdc65c44ff9ce430
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T557b261a8f5178a7"]'
     kind: sentence_template
     data:
@@ -505,48 +421,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:5585315f542d829a05899768859fa5901de9b431611dcff6c7e04b5fd51def3c
       supersedes_id: T4fb18136cf
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T559c10366b2f1a9e"]'
-    kind: sentence_template
-    data:
-      id: T559c10366b2f1a9e
-      inventory_id: inv:b7dee58d1b1dc31a30ba5f58c9fcd7ad71842286cb88c8dfb6dc27860b93e50f
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 44
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:559c10366b2f1a9e76939d412ed7968f7feee48986973aea72c54e2e14220534
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T55cd884f046372b6"]'
-    kind: sentence_template
-    data:
-      id: T55cd884f046372b6
-      inventory_id: inv:0cb3ebea7c95570269b2972666145073c537598522d9c466f5fcf2b9bdd4f91a
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 32
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:55cd884f046372b644e0fa50bf8e87c13758dd10078f73f6a070327b570ef59c
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T55d540db9df76977"]'
@@ -690,69 +564,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:55deb55783845a1cc716a65f0e0b1538928a2171b3feef01d67f947b1d7fffaf
       supersedes_id: Te59dd37098
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T55df7b9268e84665"]'
-    kind: sentence_template
-    data:
-      id: T55df7b9268e84665
-      inventory_id: inv:18964e0c882eeb2a4f05938ca540b46252b13001e5a072cb47f203471ad1cb8b
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 39
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:55df7b9268e84665ece3a7afd614525d64b69e9adef47d84f3e0202b87b1eedd
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T55e4da139d3c9da2"]'
-    kind: sentence_template
-    data:
-      id: T55e4da139d3c9da2
-      inventory_id: inv:6fad4c6d2ad8dc97e66479edafd1560a32b157796a903eea69a4027a1a747443
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 50
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:55e4da139d3c9da2c90de749fd9deba9b2751c8a032c5bdd54725b86a7fdda82
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T55e76cb0de6b03d2"]'
-    kind: sentence_template
-    data:
-      id: T55e76cb0de6b03d2
-      inventory_id: inv:252648588c2578acdbd9af4b763195e665778f68adbc4117d20c3836eb651ca8
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 48
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:55e76cb0de6b03d2d3632302c078e5afffdb59258e09215e603b2d5c494a6eab
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T55f1a517e216ce5c"]'
@@ -905,48 +716,6 @@ records:
       supersedes_id: T5f826eaa82
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T560d0d7a89d0408f"]'
-    kind: sentence_template
-    data:
-      id: T560d0d7a89d0408f
-      inventory_id: inv:6de3347c346e5a7099a04f14406c64aed1322c25ee3483362211fec5421a70f5
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 45
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:560d0d7a89d0408f1c1e39a2a5423ca0bacf3bc20b6d6652fba387ebd087485e
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T56493f50ede5ba0a"]'
-    kind: sentence_template
-    data:
-      id: T56493f50ede5ba0a
-      inventory_id: inv:a36944859a27bbeb0870c6e42bac56c4c361c51e8668e3c93a21ac6538750452
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 47
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:56493f50ede5ba0aab1de3ce28123af719a0d7d166cb75f2e48d5158a6eed180
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T56791c9259ae738b"]'
     kind: sentence_template
     data:
@@ -1053,48 +822,6 @@ records:
       supersedes_id: Tdbca6058cb
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T568218f0c77e3bb8"]'
-    kind: sentence_template
-    data:
-      id: T568218f0c77e3bb8
-      inventory_id: inv:fbc8dccded0d2ec3341166b5637d552a4e645ea178abe84f2375c17349fe0c26
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 47
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:568218f0c77e3bb88962c0c5bb5547edf75027756350eaacbde4c47e1cc199cb
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T568578ef92d14f54"]'
-    kind: sentence_template
-    data:
-      id: T568578ef92d14f54
-      inventory_id: inv:b4273e3c87a9e419c20247bad4288274fb06c317d85dd5b809ab4bc9da2f6e50
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 49
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:568578ef92d14f543116d4242c84b6d49c3cd954e610836b499b3a6821de53b9
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T568f45168ef6575d"]'
     kind: sentence_template
     data:
@@ -1183,27 +910,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:56c7f85fc2f33e837be214001c7edd69a1d227cfc2084cddcda25879e505ee63
       supersedes_id: Tcbf522f0f8
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T56d451bb187fc567"]'
-    kind: sentence_template
-    data:
-      id: T56d451bb187fc567
-      inventory_id: inv:4f0755f38a807a264def92e4414f669330e312086e5934e20973827fa1f648c7
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 51
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:56d451bb187fc567d273aaf29634539a461245f88c68cfc921a617a34b3a086b
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T56da4dd1416443da"]'
@@ -1456,48 +1162,6 @@ records:
       supersedes_id: T1f1f85a454
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T5717c3f917fb95f2"]'
-    kind: sentence_template
-    data:
-      id: T5717c3f917fb95f2
-      inventory_id: inv:cde768a48dd2024199150a3e1a4dac91ef0ceab39da176b2fe9f1477886e53cf
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 44
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5717c3f917fb95f2a9d0fc2bbd69f8b8ca207c44eaf385c6271aaefd0fbb346e
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5726a76c61e02e5b"]'
-    kind: sentence_template
-    data:
-      id: T5726a76c61e02e5b
-      inventory_id: inv:53321129bd9c008a8c1f06f1f09cb46a2bb08b9851e9a29153c0552a660a0277
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 52
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5726a76c61e02e5b52ea912898202e8569e49b066cfa045804c7d3e5b148385b
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T572725be407b964d"]'
     kind: sentence_template
     data:
@@ -1588,69 +1252,6 @@ records:
       supersedes_id: T51bedca282
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T574e5ecdfa29ec59"]'
-    kind: sentence_template
-    data:
-      id: T574e5ecdfa29ec59
-      inventory_id: inv:1417df1a9dd51760dbb6f200411dcaab01fa2009846929fee0e4b91271340ae2
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 39
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:574e5ecdfa29ec59cd78ec958ca0ca88e847d4c8cf5ea3027d2df7d8c0fc5447
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T576f5822582bdc18"]'
-    kind: sentence_template
-    data:
-      id: T576f5822582bdc18
-      inventory_id: inv:3b185ec4fe5b529182b25af3e2c46c4e2fafae8e4f10c1cb23c7fa4cddf1a20c
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 49
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:576f5822582bdc1896425d9e78b2c6293630546cc905be1c77b3bbd1b2dc72a6
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5771ff1e6f67cc73"]'
-    kind: sentence_template
-    data:
-      id: T5771ff1e6f67cc73
-      inventory_id: inv:77c7ee107cbd0c2e6186873a9bead38dfe81250d6d26e7b8fed30cb516652a86
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 53
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5771ff1e6f67cc736610b1e0ba2db0ee5b469e0795f7c1a1978cf757d016d47c
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T57752f79fd0bad93"]'
     kind: sentence_template
     data:
@@ -1702,48 +1303,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:57752f79fd0bad9335296b0558a145a3c441f437770db04e5307b6e224b364b6
       supersedes_id: T47ba15557f
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T577534bc7f91210f"]'
-    kind: sentence_template
-    data:
-      id: T577534bc7f91210f
-      inventory_id: inv:5774fbf444d09956c42c7d3a9560f947c6699f250535d843d548a819d6f8d9d1
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 38
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:577534bc7f91210ff772850b133a77987c526bd2f4e66f9fffe71dd253f272e3
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T57822e0d9b698fa3"]'
-    kind: sentence_template
-    data:
-      id: T57822e0d9b698fa3
-      inventory_id: inv:055dd19ea288db424fe90be116e001850dcea427342e01acb5cd147b379f2cef
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 53
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:57822e0d9b698fa3b678c77be7aed848ba214502cdbf1e0fbb8e0ed5acde2cf9
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5787147bbcde11e5"]'
@@ -2075,48 +1634,6 @@ records:
       supersedes_id: T68688eecb0
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T57eaf53a2266bc92"]'
-    kind: sentence_template
-    data:
-      id: T57eaf53a2266bc92
-      inventory_id: inv:e2421ae3f6292063f269698650ff0f0dedeb804e0950a8f886b1304d24fb539e
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 29
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:57eaf53a2266bc92511e4fc60c1af4356a71d67bd28f8c4fd2e561374eee0851
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T580f2e3ef727b1af"]'
-    kind: sentence_template
-    data:
-      id: T580f2e3ef727b1af
-      inventory_id: inv:209b5d5d199738c4cda9a5001a399d6c309f04671b61165fad84c6a25aca4755
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 47
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:580f2e3ef727b1af328154cb6d5e6b1469e3cffb790abd0179b44d902591893d
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T581ebadc4d3d93dc"]'
     kind: sentence_template
     data:
@@ -2152,48 +1669,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:581ebadc4d3d93dcd2904cfdbd7989ac0928061ce330511cf1ac64716fb5a64a
       supersedes_id: T72da2faf84
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T581ee9a2a7d00efc"]'
-    kind: sentence_template
-    data:
-      id: T581ee9a2a7d00efc
-      inventory_id: inv:01564b58d74603b0727e1c0e659808369c4459f8d99b06f1bd5bb93e06d703c1
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 26
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:581ee9a2a7d00efc560c2024c68e5ae2d4954d0e2ea43d66f40e474f8ee5fc6c
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5822ac4c47b90ce5"]'
-    kind: sentence_template
-    data:
-      id: T5822ac4c47b90ce5
-      inventory_id: inv:32472f48d5f291e1caa5c0a5c9100b47a22f11efae76b705aba06f138a58ea4f
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 47
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5822ac4c47b90ce564b584208ca346086239dc7a8775b927de5b60c439a3dcbe
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T582e3eb146afebe9"]'
@@ -2278,27 +1753,6 @@ records:
         slots: []
       content_hash: sha256:5833025267e7ee1eee76524749b4c0df9399e25bb221295ceaaf28f5534cd641
       supersedes_id: Te29f251667
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T583ec2e0f2a42acc"]'
-    kind: sentence_template
-    data:
-      id: T583ec2e0f2a42acc
-      inventory_id: inv:29a5e95d9fcde6fd22e7efbc7e6d9d69cd666c852a0b1b984cdc487e3a7b94ab
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 35
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:583ec2e0f2a42accd181b0413f4dfdedbc11119eab28714a5eed1a75e1cddb69
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T585fb2e965340522"]'
@@ -2403,27 +1857,6 @@ records:
       supersedes_id: Tef6d2af5cd
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T588fe304d4d80fda"]'
-    kind: sentence_template
-    data:
-      id: T588fe304d4d80fda
-      inventory_id: inv:b08f77762f696ca75aad1bcb4cecfa4c7f82aacdd621b0cb1f439941c295d90a
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 46
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:588fe304d4d80fda714ba53a5bc09b19f34173e1fdcf6f045dc48b59e7319454
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T58982ef94bc9100a"]'
     kind: sentence_template
     data:
@@ -2467,27 +1900,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:58982ef94bc9100ac35a9e60ad9022846761932a4d4786e38412a4993c187ae0
       supersedes_id: T19c5441488
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T58a7cf2e4c1d1663"]'
-    kind: sentence_template
-    data:
-      id: T58a7cf2e4c1d1663
-      inventory_id: inv:71681d0e22dc6c87c7d4a5262e4ee577bc50d6ce286c3c1f2785c48282a1afa2
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 49
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:58a7cf2e4c1d1663fdc3fa831c7e6c4c52fdea39fd37f40b1f98bebeed5465e8
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T58a98c059116f7f3"]'
@@ -2678,69 +2090,6 @@ records:
       supersedes_id: T11d4c1f94e
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T58f7222d5a104b95"]'
-    kind: sentence_template
-    data:
-      id: T58f7222d5a104b95
-      inventory_id: inv:2d41af5b9034335b58afb386ad0da43c995c8efbaade0ad869d9b33934539e81
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 49
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:58f7222d5a104b95bc7d92527245230fa44dcbdf855fa783596d07932bf7f1eb
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T58fd3a80e90f25a5"]'
-    kind: sentence_template
-    data:
-      id: T58fd3a80e90f25a5
-      inventory_id: inv:032cccf5fd73451ebfb4983f5302d6eb8dcd7bf6d23665833bb43d9acc8af641
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 53
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:58fd3a80e90f25a5e07dc0f1b1f26d5f62630f73eddbcc2fd7b58ba83bb071ba
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T59064918b99d2087"]'
-    kind: sentence_template
-    data:
-      id: T59064918b99d2087
-      inventory_id: inv:c84be6d0f621e776e28bc7fa632cab1c41117660fd561b6583232815a7ea8ae3
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 32
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:59064918b99d208733391279ab7c61e18ba33d2b188104a3f11a967b2c8b0f23
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T5908f567ee9d83d4"]'
     kind: sentence_template
     data:
@@ -2826,69 +2175,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:591d9851f81a900878d2e9ac0ee9731933101b01488a160ec49df341993618e7
       supersedes_id: Te60c8621b3
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T591ff5c7c0a7db6c"]'
-    kind: sentence_template
-    data:
-      id: T591ff5c7c0a7db6c
-      inventory_id: inv:429006aa9145e6e168be0fe6e4e92fc131567cb21e3b6bb27d388fa812a2f38f
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 41
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:591ff5c7c0a7db6c0261328bdd18b8d137c8f84ddbd7a4a56fb3f55f516557b0
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T592f46a7673ab76b"]'
-    kind: sentence_template
-    data:
-      id: T592f46a7673ab76b
-      inventory_id: inv:98765430de3fd5db81c26e2fcf90a01828602981b825740abc79882f39b5e3ea
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 49
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:592f46a7673ab76b52d3fe734e089b1dee0a1e71e945ea1077daa40ff300c8ce
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T593b424b89603c69"]'
-    kind: sentence_template
-    data:
-      id: T593b424b89603c69
-      inventory_id: inv:5acc53fa62f1bbbdce9373ac0ce4c6b89f84e87d14a1146bf48a4f400919bc45
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 39
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:593b424b89603c6971fd3bae63578349504424e67d1f5b98087969a7d65c1b60
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T593d9c7692d07a15"]'
@@ -3089,48 +2375,6 @@ records:
       supersedes_id: T7b5e3d1532
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T59760aee1b1a9373"]'
-    kind: sentence_template
-    data:
-      id: T59760aee1b1a9373
-      inventory_id: inv:a8ed6c392cc74875a29322aa553ada401d23bde52026e42cd51bf0190ce66540
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 47
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:59760aee1b1a9373d640f3f44a96dfce8290a026a264cd153c2ef0b92e141881
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T59a697a8e9fbc0e3"]'
-    kind: sentence_template
-    data:
-      id: T59a697a8e9fbc0e3
-      inventory_id: inv:b269dc696a015c3b33b9b23a43298ee134f3616d109b298e3a78ccc43f440c7b
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 51
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:59a697a8e9fbc0e32cf7f8675df17f6ca4677866c91ce7b3d242b1895feb3375
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T59ab4d0f6213fc0f"]'
     kind: sentence_template
     data:
@@ -3166,27 +2410,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:59ab4d0f6213fc0fcd1160824adc259d14896e822f6c92d158dbea713981debf
       supersedes_id: Tac1a96f95f
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T59aedc04480efec6"]'
-    kind: sentence_template
-    data:
-      id: T59aedc04480efec6
-      inventory_id: inv:b5f00fc04fe6a19ef0688921f6638512745182e3a7c5b31754d2c39958232ee8
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 44
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:59aedc04480efec63f4d3f8539f77619e363e563a0a8d54021cdbc3672568c0c
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T59d01348997e3986"]'
@@ -3480,27 +2703,6 @@ records:
       supersedes_id: Tcc8ff9d5be
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T5a3b8d2ca6c8f726"]'
-    kind: sentence_template
-    data:
-      id: T5a3b8d2ca6c8f726
-      inventory_id: inv:b37ebd070db144d2d61bbb7dbbb6730df8295754c0227322818fd6076225ae9b
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 39
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5a3b8d2ca6c8f72696c7afec6f548e498437acc47c478d802dac744f56407538
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T5a3d9beae22a9ce4"]'
     kind: sentence_template
     data:
@@ -3639,27 +2841,6 @@ records:
       supersedes_id: T7986b026e7
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T5a68d73c7ee4c0b2"]'
-    kind: sentence_template
-    data:
-      id: T5a68d73c7ee4c0b2
-      inventory_id: inv:6024cfc054d8300d1ea064e2c373d71ecb4087a968e2b75c8cca027c48b8285f
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 51
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5a68d73c7ee4c0b244eb57a41c537acd6b087615a229e8f4f7b9b5b30b8e8051
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T5a6c50df73ebd6c7"]'
     kind: sentence_template
     data:
@@ -3735,27 +2916,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:5a6c50df73ebd6c71015c88c2ed34447639e3fe348323faca8c86fad5930038b
       supersedes_id: T284961ffbf
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5a6dffea8ca79ae4"]'
-    kind: sentence_template
-    data:
-      id: T5a6dffea8ca79ae4
-      inventory_id: inv:0984f6b7fad5375cb959bb263c0286a051db089b99c6af82da1f8712beac977d
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 50
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5a6dffea8ca79ae4781f477cb31be51722d69aec3140f87ea48bb5a7bd3440ad
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5a76ab519ee42ff1"]'
@@ -3943,48 +3103,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:5a9385ed8579d43f424a69d5499e073777a3ef151d92e386aad588d6225eac92
       supersedes_id: Tbc95d38e22
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5a976b2d2d6bfdda"]'
-    kind: sentence_template
-    data:
-      id: T5a976b2d2d6bfdda
-      inventory_id: inv:571085a4b05dca5f6721d5723f4bf3ff515129cfaa3287db897665a30b796bc2
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 58
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5a976b2d2d6bfdda19dddc02f6f16a9a036f7b28f74ac72dfeb71f8a374c3f66
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5a98984d66d42312"]'
-    kind: sentence_template
-    data:
-      id: T5a98984d66d42312
-      inventory_id: inv:086680903877bf6839096fdba6f509ad5721e71a5bf062c30e2a0c56a7ff82e3
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 40
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5a98984d66d423126caab53679f61fb530cad76f333df9634b6f83e6297083cb
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5a9ba616e2f36085"]'
@@ -4227,27 +3345,6 @@ records:
       supersedes_id: T3bc69caa14
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T5ae10af41da1903d"]'
-    kind: sentence_template
-    data:
-      id: T5ae10af41da1903d
-      inventory_id: inv:ccef8a9e137f26b414eef0633471af03d6c4ea4a2b6271143e3c75d9a4006388
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 12
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5ae10af41da1903d3afd6cd4e240edef1ecf14b398625363e3ca37424bc1ab87
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T5aee03c5bc731e55"]'
     kind: sentence_template
     data:
@@ -4287,27 +3384,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:5aee03c5bc731e55b23fa42dd9df8a1f2851c55e24b2daa32a27d9a88f02d176
       supersedes_id: T68e0850209
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5aefbbe8d438dbde"]'
-    kind: sentence_template
-    data:
-      id: T5aefbbe8d438dbde
-      inventory_id: inv:0bcb8e90fcc92f7e78e077e6f39ac1f9c930e7781ec7d9c616e125a24a801b2c
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 50
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5aefbbe8d438dbdef48e40e2b669798e17574433575eb5e2630363872b7e17b9
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5b058ea07016ee8e"]'
@@ -4448,27 +3524,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:5b0d7899dba808dda583d33759000f3a75b3f7ef232576dd7e6756577e72657d
       supersedes_id: T1e0d7af8c0
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5b18e2ac3ecf1443"]'
-    kind: sentence_template
-    data:
-      id: T5b18e2ac3ecf1443
-      inventory_id: inv:0ef7b4376af555196accde7dee576935d8e45e8c1e9333fcb1190ee163cfc5dd
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 50
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5b18e2ac3ecf144300905c530f59f5e401b5133b482871a3d4c26213a0d6d0e2
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5b2425692cdeaf12"]'
@@ -4614,27 +3669,6 @@ records:
       supersedes_id: Td6e9286315
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T5b4620f93c817249"]'
-    kind: sentence_template
-    data:
-      id: T5b4620f93c817249
-      inventory_id: inv:51ce0c68ec6892143aaa93572e8d310c7e6601bae03151585f34418680983f00
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 16
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5b4620f93c817249e1df152e987599852c8228cbead27998cbbe0c8ac88aee9e
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T5b474fb73b7eb54c"]'
     kind: sentence_template
     data:
@@ -4730,27 +3764,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:5b6be91987abac2b90eb4ddae84f8de8f62ea12e2a23ac710fd88828f1f0122c
       supersedes_id: T940013b01c
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5b75059a004bfd57"]'
-    kind: sentence_template
-    data:
-      id: T5b75059a004bfd57
-      inventory_id: inv:11e67f3719276e55dd79caee70246001bd544074bfa79d8867534d9c0867ddfe
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 25
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5b75059a004bfd5733234b981df7db870716d3862b66f3d69921c76d0d346e56
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5b7b68651686de01"]'
@@ -4903,27 +3916,6 @@ records:
       supersedes_id: T7506bf3e0f
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T5b92d2d507261267"]'
-    kind: sentence_template
-    data:
-      id: T5b92d2d507261267
-      inventory_id: inv:3575ecd439a877125558864472ecbc5e1ab841627c781b430de56de6a7422518
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 55
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5b92d2d50726126760001a1296a616170b5e0e590572ea9f1487855d0cbac7d5
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T5b9bc1831575c13e"]'
     kind: sentence_template
     data:
@@ -5017,69 +4009,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:5bcfb594f5c50531eae293bf682af0cbcc54a04f605fab272a731020de08caad
       supersedes_id: T92008a590c
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5beaf61e26e58f71"]'
-    kind: sentence_template
-    data:
-      id: T5beaf61e26e58f71
-      inventory_id: inv:42481efef4c43924c93a5515ac24c75fa8cd535ad2b304c53977e20e80180baf
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 37
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5beaf61e26e58f711d62e5309e4fe1afb34fa06ad0e6f3fb586834682f41f97c
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5c097fb6266a4291"]'
-    kind: sentence_template
-    data:
-      id: T5c097fb6266a4291
-      inventory_id: inv:03b2a845fc359e9636d6b065378697767e39bc85f9ad77c34048972a86bfbda0
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 49
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5c097fb6266a42912285794194359a94654b61edfbd135a3cbd8a2b91d5debe3
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5c229a64f7e96678"]'
-    kind: sentence_template
-    data:
-      id: T5c229a64f7e96678
-      inventory_id: inv:080c5055cf528604f14621ec0ec033c2fa99004ffa208ded3e7bcae923a369c5
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 48
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5c229a64f7e966780b6ae1d77fcbfd9527d0e8abf6dfd4fce0f5a6574f828b8f
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5c2aab51ea5adfa4"]'
@@ -5273,111 +4202,6 @@ records:
       supersedes_id: T9c59cfc06a
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T5c4e93f0a06b9c8a"]'
-    kind: sentence_template
-    data:
-      id: T5c4e93f0a06b9c8a
-      inventory_id: inv:6f0f0c04c102b7001a38e8fe51f57188ee1076f7d38a10181da69ee661cfd47d
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 46
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5c4e93f0a06b9c8a1a23146fd76b8a8253471d678af6c8b25429d4d7e4586e09
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5c566cd00afac022"]'
-    kind: sentence_template
-    data:
-      id: T5c566cd00afac022
-      inventory_id: inv:e9186a0186feb67e2d9ff6a71df4665b06ec297e3e4dc8d61826e644609a917f
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 41
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5c566cd00afac0226c5d935f45f4ecdd1c0763d8298d4bef69bb912067afb2fe
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5c7901c05f6f405a"]'
-    kind: sentence_template
-    data:
-      id: T5c7901c05f6f405a
-      inventory_id: inv:19566bc0f30075172dc44d8745557ad1623945329a51c4f5e1d1ccf896e9cd6e
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 23
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5c7901c05f6f405a20ca22f33094419a477740bcd8e9106625955e172ec86967
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5c913f9542012bc2"]'
-    kind: sentence_template
-    data:
-      id: T5c913f9542012bc2
-      inventory_id: inv:600e37a53630971f822479ae4657b4154d77fc40313235b9d1559c2295aef840
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 53
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5c913f9542012bc2ed89526dc0017c115c2a762beefbf6891514513c810c5c27
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5c9e7ac9897c270e"]'
-    kind: sentence_template
-    data:
-      id: T5c9e7ac9897c270e
-      inventory_id: inv:a2ac16a94de7dca081c0efdf0ab05679fed1969f02ec0e333f7b4468bd8c6dbe
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 46
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5c9e7ac9897c270efa588b7d7dbe14c60ed4cb18716728624a8d6fee1e499035
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T5ca33fc687cb297a"]'
     kind: sentence_template
     data:
@@ -5537,27 +4361,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:5cceeccce73195dc428bf594ebf4e211f39dcbc56b0e7160e2d8241aa7437683
       supersedes_id: T253e9943f7
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5ce47280d9c603fe"]'
-    kind: sentence_template
-    data:
-      id: T5ce47280d9c603fe
-      inventory_id: inv:18df9fa23f6cac4274ba1f29ec196bc666b48953f9c30383c5f0db0517a2d50a
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 44
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5ce47280d9c603fe6c1556530b1c664a78fe82bb03b2f76277e1f24d75964777
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5d15e8a719d10244"]'
@@ -5736,27 +4539,6 @@ records:
       supersedes_id: T9b762fa93a
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T5d5466fafbb0a742"]'
-    kind: sentence_template
-    data:
-      id: T5d5466fafbb0a742
-      inventory_id: inv:123b59d201b829b9fee93b7f99f6ac4c162badd2750c1e9222a8c3a146f6103f
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 51
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5d5466fafbb0a742aab4360919b5e38aef230afd57246bf2ecaf8200a97ae5aa
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T5d8456907137cfde"]'
     kind: sentence_template
     data:
@@ -5800,48 +4582,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:5d8456907137cfde7a2c17a289da3ff95bc91699546dd975f92b0b73e65555e9
       supersedes_id: Tf71c3f087b
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5d9415fec67b57af"]'
-    kind: sentence_template
-    data:
-      id: T5d9415fec67b57af
-      inventory_id: inv:a14ca00b086a69e0bfda191fe11f08814d3da8f0cad698477a3bccb4936fb96c
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 47
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5d9415fec67b57afb3966d430b4219930fd964b19286a5d412b42393f0a512a1
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5dca735fbf5604d3"]'
-    kind: sentence_template
-    data:
-      id: T5dca735fbf5604d3
-      inventory_id: inv:73777da80fc160c9ea2718991db91f09066cee542801c5747bc3ee6f1cd15cb8
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 48
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5dca735fbf5604d3c88c72e76d989ab3e2acda737c57292862bed3d84abb4ca1
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5dce14ce3fb0f4f6"]'
@@ -5918,48 +4658,6 @@ records:
       supersedes_id: Tc2083388d5
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T5e04ee7c818fa8e0"]'
-    kind: sentence_template
-    data:
-      id: T5e04ee7c818fa8e0
-      inventory_id: inv:83a3ef7d3a85cfe301a85cf2f89645330bdec038f1e4c5391a6b7dcfad2c6a3a
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 43
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5e04ee7c818fa8e09d9446f56c1788466f3733af32867f3928deeef349573c25
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5e0589451783988e"]'
-    kind: sentence_template
-    data:
-      id: T5e0589451783988e
-      inventory_id: inv:3ddc8fc98fe1eba55951ea6020723979f9068247a4ea0100fba114343d17a6b8
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 50
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5e0589451783988eefebb4a8eb0c3742f72998bfb624c0525d14b294a6fedcb1
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T5e162c73fa533e2d"]'
     kind: sentence_template
     data:
@@ -5979,48 +4677,6 @@ records:
         slots: []
       content_hash: sha256:5e162c73fa533e2d24824a328c2857f7933216bae1e206a62c21c75ab63dd220
       supersedes_id: T151ea50320
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5e1ddd407bece691"]'
-    kind: sentence_template
-    data:
-      id: T5e1ddd407bece691
-      inventory_id: inv:8404e5c278541205dda46e4eeeb872510508b2ddaf4bf78107f39f37535d4cad
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 33
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5e1ddd407bece691de67f3d56dddfea2132f17eb63a601912f0201790f684b54
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5e21eed9e09e4750"]'
-    kind: sentence_template
-    data:
-      id: T5e21eed9e09e4750
-      inventory_id: inv:95fbfb1a871e1ac0a99d438cd0e3d3143624669af8828d98ef46029b542755c1
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 44
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5e21eed9e09e47502024b911c8ec6409f4333bd73a6a1525dba1c2b80b67c66b
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5e2b53dc1ad01f8b"]'
@@ -6066,48 +4722,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:5e2b53dc1ad01f8b3c67eadb9abb95ec93bb36c428fe23ab389ed23c76264a30
       supersedes_id: T197e1b46d9
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5e352bea66b0e4ba"]'
-    kind: sentence_template
-    data:
-      id: T5e352bea66b0e4ba
-      inventory_id: inv:a2ce7cf05aa13ea1ceb5bd849606acb2391dc2fa1c1662b508325df089b10142
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 37
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5e352bea66b0e4ba3e6383f90b2ce9baa83666bd82132ec94445b632eeafbd7d
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5e39384023e1075e"]'
-    kind: sentence_template
-    data:
-      id: T5e39384023e1075e
-      inventory_id: inv:e78598bda0ca565c22da2361ee3bc30a114a17bdd83bfccfc261434656171803
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 49
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5e39384023e1075e3c633114aa81aa1d1490ccc144db8c7481ca3e3dee1b870c
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5e3cc2a416528cd9"]'
@@ -6243,27 +4857,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:5e7108dc981e5df84c14cc7e70125d876038cce72ed55fc0c272886435431543
       supersedes_id: T82acea1c52
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5e79c680bbba439d"]'
-    kind: sentence_template
-    data:
-      id: T5e79c680bbba439d
-      inventory_id: inv:280834e836ceb9d00c26e6069d302d44f30f511e421145ad61c79a63ce26586e
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 42
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5e79c680bbba439d0048dc9d85ffb9560de1aba72a384a1ec42c92611c8f7e2d
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5e8b76772209d9ac"]'
@@ -6430,48 +5023,6 @@ records:
       supersedes_id: T3a81707a25
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T5ed7a0925816ac1a"]'
-    kind: sentence_template
-    data:
-      id: T5ed7a0925816ac1a
-      inventory_id: inv:0f2e2e38720c3b2f58135f2de6db28690844caa067695669bcae024f0aa3ba88
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 52
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5ed7a0925816ac1a2ff7f1ebb6f856034f68d397fb49c0907fc219bbed37baff
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5ed85d5c8ea32d51"]'
-    kind: sentence_template
-    data:
-      id: T5ed85d5c8ea32d51
-      inventory_id: inv:f3e1ee171e55a4d2c4069f1c870d08983b3576ddb3db0f7e1ee6dbc1818bce0e
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 50
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5ed85d5c8ea32d5112e4153a3f5f0809f03d662b007bc4c0a676b96fca37438c
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T5f093dc529a88331"]'
     kind: sentence_template
     data:
@@ -6541,69 +5092,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:5f093dc529a883311e3bdd20fee19dc337cf269fae486526c591a9587028fb6e
       supersedes_id: Ta7776d380b
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5f12b04b20b52845"]'
-    kind: sentence_template
-    data:
-      id: T5f12b04b20b52845
-      inventory_id: inv:f28fcb173403387c165d517b5f26919200a65932ea4bea453b4afc47ea0f18d0
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 23
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5f12b04b20b528459623e8f9b7de70bb10617318752e19eaf94606eee6b1a812
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5f2e90f1645c9ade"]'
-    kind: sentence_template
-    data:
-      id: T5f2e90f1645c9ade
-      inventory_id: inv:60b02ee6567c2c50a5be0ac295837186004d7454686b9cc17182b8f642efea5b
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 55
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5f2e90f1645c9ade3afdecb9aaeb59ad6c8aeca5abcb1606fcab80fca6771987
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5f6051926ecf7b79"]'
-    kind: sentence_template
-    data:
-      id: T5f6051926ecf7b79
-      inventory_id: inv:a8148cc362e555fc370d160251c5de6cd844e0143745281a094514200f050647
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 32
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5f6051926ecf7b79a2a7e0f850fdb3fa44adf4468619e311f86d3afc89b4c9bf
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5f6d2b23cd0cd179"]'
@@ -6686,90 +5174,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:5f871672cfa91d48e6306a6a1ef7bfc361869f8b7f3b69ee6b24422716f968ee
       supersedes_id: Td9d35449ab
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5f8fcdb7025c99dc"]'
-    kind: sentence_template
-    data:
-      id: T5f8fcdb7025c99dc
-      inventory_id: inv:410483de6c3812f6f572421b510090e74fe9285d4acc4be660c7aa7b4e956d20
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 21
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5f8fcdb7025c99dca5d960707f3a8499d3499216d93fb59fba7a2139bb0b1670
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5f900c8a94f92c59"]'
-    kind: sentence_template
-    data:
-      id: T5f900c8a94f92c59
-      inventory_id: inv:845390606a5c1e2df11e20068d5abc889d89f817cc02f42a9cba4022bd465379
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 37
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5f900c8a94f92c59e011cdfb189dede898a2851da9778199308ab8d11a1c7e73
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5fa833b4acaf27e9"]'
-    kind: sentence_template
-    data:
-      id: T5fa833b4acaf27e9
-      inventory_id: inv:4c8c7c08c23c579eb2325671db1a34bcb1839cd3d4b1fb0769f5ecede9a9a75d
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 48
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5fa833b4acaf27e9fd6fe91af510ca0e8087c5b493d257c628c9f963b868f7ad
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5fadfda4f1bfc966"]'
-    kind: sentence_template
-    data:
-      id: T5fadfda4f1bfc966
-      inventory_id: inv:90fc6335ded37d9b1a09d6a4714c095144e0d93fc1694e9e4de49fd262a4c925
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 53
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5fadfda4f1bfc966dbed29f14d8d209a7ec7cb730869d5f1d4805fe6f64ed20a
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5faf1649a337d38c"]'
@@ -6891,27 +5295,6 @@ records:
       supersedes_id: Tcc8613cbff
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T5fb26dddbcb94794"]'
-    kind: sentence_template
-    data:
-      id: T5fb26dddbcb94794
-      inventory_id: inv:c0df9eac277ba3d0395273f70e175b715732cc47dc3f23ec8844ab729fbec398
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 35
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5fb26dddbcb94794e5ffd161d6bf4e59ffb3120ab6f89dd1238d1605fb6bf328
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T5fb4223200fd211a"]'
     kind: sentence_template
     data:
@@ -6947,48 +5330,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:5fb4223200fd211a26edf4d500eae2159c739596c9e592026f13798e0b55bc81
       supersedes_id: Tf9e3fd39b5
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5fb4658a0df658d3"]'
-    kind: sentence_template
-    data:
-      id: T5fb4658a0df658d3
-      inventory_id: inv:5740b053eb85d0e738b471d99cf11021c7677963ee5f0762723a251f05a1b439
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 52
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5fb4658a0df658d396ce3a9448bf3db1b875886c63a2680d7db7672b5ba67461
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T5fbae7f7937b7da1"]'
-    kind: sentence_template
-    data:
-      id: T5fbae7f7937b7da1
-      inventory_id: inv:661d775016b89334ffaec672553b6bf8f4d873fa28242c801b7d9b50f6d176ec
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 45
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5fbae7f7937b7da19f463ff167ba7f62219abd0b371d4f6244d11ac49d76e6e0
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T5fc540b5a44f6681"]'
@@ -7134,48 +5475,6 @@ records:
       supersedes_id: Ta055ad344c
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T5ff6f067de14ffd6"]'
-    kind: sentence_template
-    data:
-      id: T5ff6f067de14ffd6
-      inventory_id: inv:ac64559272f16231dbb4a5131663bf29e7a25b76b9320b4af291d12445c46f9a
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 46
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:5ff6f067de14ffd63ea8c297412abdca41870f85d3b9693a0f6322bf5ab64ab2
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T6009ba76d65204bd"]'
-    kind: sentence_template
-    data:
-      id: T6009ba76d65204bd
-      inventory_id: inv:8de3cbe551613f3a94022160147a357cc1698659cf0865aaf1b585e2c03c1cc1
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 50
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:6009ba76d65204bd68196e39ca83bd47b40230066e3f7d7e8571e07caa505427
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T601b2a8c808ab784"]'
     kind: sentence_template
     data:
@@ -7227,48 +5526,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:601b2a8c808ab78441cf0a5a6cf93186c9d51accc3d67a8a26ac45e1bbe09707
       supersedes_id: T6c3af962dd
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T6025ce1a2562830a"]'
-    kind: sentence_template
-    data:
-      id: T6025ce1a2562830a
-      inventory_id: inv:143be01ce8335cae68a8b0d4df35eeb00e676d7abb5671d9df93ac2e51542225
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 55
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:6025ce1a2562830a61808ea5f161fd286d9f4a079be8159a307c3cde1280b1cb
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T6027391fbd035e9d"]'
-    kind: sentence_template
-    data:
-      id: T6027391fbd035e9d
-      inventory_id: inv:2cc7b4f31101da7c42059217cf6c61d102006105b716e2a871664258736193e2
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 45
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:6027391fbd035e9dcfb51ab8f9a795ddc46b8b1373d9ad5e64bd48a56b0c8e7c
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T602e7589fd"]'
@@ -7636,27 +5893,6 @@ records:
       supersedes_id: T78a9913c89
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T6091ddda0441658a"]'
-    kind: sentence_template
-    data:
-      id: T6091ddda0441658a
-      inventory_id: inv:a8e8880c315620bdf1ccffdad3621c9fec1418f420b4234225a319b6598c3395
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 57
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:6091ddda0441658af5f647a67a6cbb02fe72a11bdccc91734cc3d4206e08964e
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T609e5443e5d151b6"]'
     kind: sentence_template
     data:
@@ -7734,90 +5970,6 @@ records:
       supersedes_id: T86c883949c
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T60ac20086d155ed8"]'
-    kind: sentence_template
-    data:
-      id: T60ac20086d155ed8
-      inventory_id: inv:1c9b165679cf9f53f075a60eb9e0f3f876c73cb69c5bf220df57fb5495680a28
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 54
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:60ac20086d155ed8150d1d94b02457419e7719018cf96046593e97812438b49a
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T60ad3f694c44c014"]'
-    kind: sentence_template
-    data:
-      id: T60ad3f694c44c014
-      inventory_id: inv:18b8845765f7c4269848a1f871e35e467a0a1151c6a1ec05746f4cfe19523889
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 23
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:60ad3f694c44c0140c44d1e4e3241a9917a6e48a233f12432e4d4c5217ec636b
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T60ad3fc07cbddd0e"]'
-    kind: sentence_template
-    data:
-      id: T60ad3fc07cbddd0e
-      inventory_id: inv:670ca7c668e526011af1dae00d8da4f3614cb11c031387da5442fc2e7d79d572
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 49
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:60ad3fc07cbddd0e359c40c672b627ce83719b43f74b7cabb0df8da6d0b75ffc
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T60b9493773c97396"]'
-    kind: sentence_template
-    data:
-      id: T60b9493773c97396
-      inventory_id: inv:e3d0707f4a78a60bf4698081bfc4d4a7985b213c3865af7e2dd0f851a95e09d4
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 49
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:60b9493773c9739669292af2e09f6f7ad819a020a2715b2b58f7574b433fec96
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T60bf5411274f20fa"]'
     kind: sentence_template
     data:
@@ -7874,27 +6026,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:60c2cfaba78e921d5172b055f9195de75f22efd1d67700f9411fc5d9f1a8fc24
       supersedes_id: Tdf8e55190a
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T60c576e3b50fbfe7"]'
-    kind: sentence_template
-    data:
-      id: T60c576e3b50fbfe7
-      inventory_id: inv:558c71e39f96f8548212ef3da7a943f7c3e4af340a063cb760d9311379b5af77
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 53
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:60c576e3b50fbfe79a1ce1b9235cfb9d2b57ec565b3741434f9eaa1985d18b14
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T60d1941e23edb0fe"]'
@@ -8040,48 +6171,6 @@ records:
       supersedes_id: T81d7132edd
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T60f8d63da35cd496"]'
-    kind: sentence_template
-    data:
-      id: T60f8d63da35cd496
-      inventory_id: inv:072901e6fc2b83b3556e810d2d4c5b2b3561976f6de9cde9bee49ad1db57bc59
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 51
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:60f8d63da35cd49699ed598051f4386c7bd79d8d25cfbe8a5d0d47c76ea8013d
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T60fdf33c674a7936"]'
-    kind: sentence_template
-    data:
-      id: T60fdf33c674a7936
-      inventory_id: inv:cbbb385810fec0226a1e186afe1b59a5fac9e79d6f5a3bbd2a10f4af7d256023
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 33
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:60fdf33c674a79360c7338035d8074229fb1ec5604433061cb55e5a6c227fe16
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T6116f4d3d6cd1af3"]'
     kind: sentence_template
     data:
@@ -8160,48 +6249,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:611addda67015c56ed61e932e2eee932303dc50e08d798303edab912b6f4b851
       supersedes_id: Td6b906d5c8
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T613190b5d3701384"]'
-    kind: sentence_template
-    data:
-      id: T613190b5d3701384
-      inventory_id: inv:b2da749cd017edad94150dd7894f530512dd9dfb774651b78b3800751d7b9629
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 43
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:613190b5d37013845fcff26a68440ac75beae546529419da8d8acaaadc179da2
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T613579ae715b6aa9"]'
-    kind: sentence_template
-    data:
-      id: T613579ae715b6aa9
-      inventory_id: inv:74687a4447939bc680bdf765e2cfb6394ba4802066112ad384d1537c855ba95a
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 56
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:613579ae715b6aa9594c85eed6648b5fde5e93decaf058a0940efe4828809c40
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T6149dfda652a9de4"]'
@@ -8334,27 +6381,6 @@ records:
             max: 9007199254740991
       content_hash: sha256:61732588dacdc1db587bbde30fb25ed25ce5519826152a624efcd2d4fc0dae28
       supersedes_id: T7c6f356d28
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T6182b47196df2013"]'
-    kind: sentence_template
-    data:
-      id: T6182b47196df2013
-      inventory_id: inv:1c69c49e0749a9f7ef400b2fae0f3fff58f346915a7e49d2f5263c7c66426ec7
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 47
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:6182b47196df2013ff17686bb130afdbb71e8dae5d47206e2df4313c0c63ddc6
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T6191f7da83b32e8f"]'
@@ -8605,111 +6631,6 @@ records:
       supersedes_id: T546b0678f9
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T620ff737ae57b3ea"]'
-    kind: sentence_template
-    data:
-      id: T620ff737ae57b3ea
-      inventory_id: inv:65bfdb99898b9b7f3abae0a192a638f44cb753690ccd8e6fe4a4980bc72b1853
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 37
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:620ff737ae57b3ea33b634f1597476c8a907ef42b4426acfe1988a1ae1b0a650
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T621cc4944eaa57df"]'
-    kind: sentence_template
-    data:
-      id: T621cc4944eaa57df
-      inventory_id: inv:4e11ad03d54276c2f915e152ff8824a88c491647341d1e768f05627b0aed55b4
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 53
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:621cc4944eaa57dfa488eadc4425c9a09e3a9fba92eead19693af54ee4c4852a
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T6222250735259b34"]'
-    kind: sentence_template
-    data:
-      id: T6222250735259b34
-      inventory_id: inv:c8180170247a5042e1c71baf481ee2952518aec847e3aa02bc34904a5400e15a
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 45
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:6222250735259b3444881ee53a63d4bdfa49694afb028e2e2928adadf710b167
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T62244edd79e6f492"]'
-    kind: sentence_template
-    data:
-      id: T62244edd79e6f492
-      inventory_id: inv:644ece83e8b4cb001a8900fec2104f31963e3e3a00361ecdaabe543df385708c
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 49
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:62244edd79e6f4927c66f0cdc1898690a55f632fea74eae8fb29bcb3f695b8ad
-      supersedes_id:
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T622bb3ebaf040398"]'
-    kind: sentence_template
-    data:
-      id: T622bb3ebaf040398
-      inventory_id: inv:1ea2b926924070bf38b18d023e5950244f0bd26f0abb11fa3163c2b79e4cfe46
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 46
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:622bb3ebaf04039852f46dbb8ccab50c837ae1feb49033293a400de2a414eb4b
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T622c2ec90258954a"]'
     kind: sentence_template
     data:
@@ -8782,27 +6703,6 @@ records:
         slots: []
       content_hash: sha256:62348af4e2915f8d5bc3209d9aee3f749ae27a79177a41a9606d6260b7a6824e
       supersedes_id: T898f82ee1e
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T624fc32ffdc57a9d"]'
-    kind: sentence_template
-    data:
-      id: T624fc32ffdc57a9d
-      inventory_id: inv:4abfa45c88bfd3889a892e68e575662a4b825fff3fcacc23ba6be5b7882b005e
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 55
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:624fc32ffdc57a9d58a9e6fbf86164d4273e4b8e7d4ab5929035563e4c5a8476
-      supersedes_id:
     origin: project
     low_confidence: false
   - record_key: '["sentence_template","T625411fc9ede45e0"]'
@@ -8932,27 +6832,6 @@ records:
       supersedes_id: Tffdaa1fbb9
     origin: project
     low_confidence: false
-  - record_key: '["sentence_template","T62a97ad98c30f3b3"]'
-    kind: sentence_template
-    data:
-      id: T62a97ad98c30f3b3
-      inventory_id: inv:99b042b1d7d7a2b596fbda44f88718286269953b6a9db7c64bf7ed9bab557057
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 54
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:62a97ad98c30f3b3ab5f5324fbe4614d08604bcc5788c77b046093eb85e63980
-      supersedes_id:
-    origin: project
-    low_confidence: false
   - record_key: '["sentence_template","T62b64611215fa4cd"]'
     kind: sentence_template
     data:
@@ -9004,26 +6883,5 @@ records:
             max: 9007199254740991
       content_hash: sha256:62b64611215fa4cd6e9053da2538e37490b3f68a2af596d10ad37c292d9e911c
       supersedes_id: T6b24cf0a7e
-    origin: project
-    low_confidence: false
-  - record_key: '["sentence_template","T62bc855b2a2628f9"]'
-    kind: sentence_template
-    data:
-      id: T62bc855b2a2628f9
-      inventory_id: inv:1abe0b4c40e67b72fa587a06680e9a73f3743c465075994250a07b27db80be51
-      source_span:
-        role: flavor
-        segments:
-          - start: 0
-            end: 51
-        anchor:
-      source_lang: ja
-      normalizer_version: flavor-exact-v1
-      semantic_variant: default
-      parameter_schema:
-        format: 1
-        slots: []
-      content_hash: sha256:62bc855b2a2628f91565223da7f546cef5282375c10adb2c2afd61e6390516ea
-      supersedes_id:
     origin: project
     low_confidence: false

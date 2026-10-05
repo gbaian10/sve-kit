@@ -10,7 +10,7 @@
 繁中以 JP 原文為主；日英已確認同卡且適用時共用 JP 譯文，已知差異及英文獨有欄位才用 EN 來源。
 跨區卡片 ID 對應仍須人工確認，不能靠同名或移除卡號後綴推算。
 EN 身分已確認而文字尚未核對時，沿 `shared_jp_unchecked` 顯示並標示；核對完成用 `shared_jp`，已知 divergence 不適用。
-卡名來源順序及資格見[數位名字規則](digital-name-policy.md)，風味見[風味契約](flavor-translation.md)。
+卡名來源順序及資格見[數位名字規則](digital-name-policy.md)，風味見[風味直接對照表](flavor-translation.md)。
 
 每筆資料只用 `origin: official|project|machine` 與 `low_confidence: Bool` 描述來源類別及信心，
 不保存誰點哪個按鈕、模型互審結果或私人證據 hash。machine 經審閱仍是 machine。
@@ -47,7 +47,6 @@ concept_evidence 的 concept_note 可省略，只保留有實際內容的說明�
 | --- | --- | --- |
 | glossary_term | id | `id,category,concept_key,source_ref,source_span,authored_source_ja,missing_source_reason` |
 | glossary_choice | term_id,lang | `term_id,lang,value,concept_evidence`（選填 `source_claim`） |
-| vocabulary_choice | vocabulary_kind,vocabulary_code,lang | `vocabulary_kind,vocabulary_code,lang,value,concept_evidence`（選填 `source_claim`） |
 | glossary_emphasis_choice | term_id | `term_id,value` |
 | symbol_localization_choice | symbol_id,lang | `symbol_id,lang,symbol_basis,value,concept_evidence`，完整值依[記號文案契約](catalog-route-adoption.md#6-卡文記號與三語文案) |
 | sentence_template | id | `id,inventory_id,source_span,source_lang,normalizer_version,semantic_variant,parameter_schema,content_hash,supersedes_id` |
@@ -103,8 +102,8 @@ text、reasons、note 不參與身分；同鍵原稿有不同文字時拒絕，�
 
 | data 欄位 | 型別與含義 |
 | --- | --- |
-| source_kind | effect/flavor |
-| candidate_id | 非空的原稿穩定識別，例如效果舊 T ID 或風味 exact ID；不是已驗證的模板 ID，不要求存在正式 definition |
+| source_kind | effect |
+| candidate_id | 非空的原稿穩定識別，例如效果舊 T ID；不是已驗證的模板 ID，不要求存在正式 definition |
 | lang | 沿既有 Lang 型別的目標語言 |
 | text | 非空 UTF-8 譯文草稿字串，保留最終原稿字元；不解析匿名 N/X 或套用可渲染譯文的 slot 語法 |
 | inventory_ids | 按 ID 排序、唯一的當前清冊 entry ID 陣列；來源確實缺失時可空，並在 reasons 記原因，不偽造定位 |
@@ -122,7 +121,7 @@ data 恰含上表六欄；record 及分片沿既有封閉結構、鍵唯一、�
 
 ## 3. 清冊與定義
 
-清冊是所有來源欄位及句型位置的完整盤點，保留 body、reminder、token_header、layout、name、label 與 flavor 角色。
+清冊是所有來源欄位及句型位置的完整盤點，保留 body、reminder、token_header、layout、name 與 label 角色；風味不在清冊內。
 缺來源、unknown、空字串與空白不能混為不存在；每個來源片段要有去向。
 固定文字和參數 schema 共同描述模板；辨識不能只把所有數字叫 N、所有引號內容叫 X 後當成同一句。
 
@@ -156,7 +155,7 @@ binding 由每次建置產生。source_span 固定 `{role,segments,anchor}`，se
 
 layout 不含待翻語義，可機械生成固定模板；reminder/token_header 是獨立句型，須像 body 一樣提供其譯本。版次欄位與 section 的完整覆蓋各自核對，不跨欄偷接；提示分類有疑義則保留原文／失敗清單，不擅自取語義等義。
 
-上表的一般卡文分段不套到 flavor。其非空整欄恰一個 flavor span，包含換行／空白／括號，不再分 layout 或 reminder；專屬 exact recipe 與零參數新 ID 依 [風味文字契約](flavor-translation.md#1-來源與清冊)。其餘欄位的完整覆蓋與分段規則不變。
+風味文字不經此分段，也不進清冊，直接以原文 hash 對照，見[風味文字契約](flavor-translation.md)。
 
 ### 4.2 參數 schema 與驗回來源
 

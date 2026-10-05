@@ -4,8 +4,6 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.template_sources.flavor import WHITE_SPACE
-
 if TYPE_CHECKING:
     from sve_carddb.template_parameters.models import Schema
 
@@ -68,27 +66,3 @@ def parse(text: str, schema: Schema) -> tuple[Literal | Parameter, ...]:  # ruff
     if used != declared:
         raise ValueError("Template text must use every declared parameter")
     return tuple(parts)
-
-
-def verify_flavor(text: str, schema: Schema) -> None:
-    """Validate both reviewed wire bytes and the literal display without normalizing either."""
-    if schema.slots:
-        raise ValueError("Flavor translation must have zero parameters")
-    parts = parse(text, schema)
-    if any(isinstance(part, Parameter) for part in parts):
-        raise ValueError("Flavor translation must have zero parameters")
-    display = "".join(part.text for part in parts if isinstance(part, Literal))
-    for value in (text, display):
-        if (
-            not value
-            or "\r" in value
-            or ord(value[0]) in WHITE_SPACE
-            or ord(value[-1]) in WHITE_SPACE
-        ):
-            raise ValueError(
-                "Flavor translation must be nonempty LF text without outer whitespace"
-            )
-        if any(line and ord(line[-1]) in WHITE_SPACE for line in value.split("\n")):
-            raise ValueError(
-                "Flavor translation nonempty lines cannot end in whitespace"
-            )

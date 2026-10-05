@@ -14,6 +14,7 @@ from sve_carddb.catalog.projection import CatalogProjection
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.text_observations.intern import TextInterner
 from sve_carddb.text_observations.vocabulary import Binding, Vocabulary
+from sve_carddb.translations.direct import write
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -176,3 +177,19 @@ def populate(  # ruff: ignore[complex-structure,too-many-branches] -- indexed pr
                     db.update("vocabulary", subject, values)
                 else:
                     db.insert("vocabulary", {**subject, **values})
+                for label in (
+                    record.data.value.translations if record.data.value else ()
+                ):
+                    write(
+                        db,
+                        {
+                            "vocabulary_kind": item_term.kind,
+                            "vocabulary_code": item_term.code,
+                        },
+                        field="label",
+                        lang=label.lang,
+                        source_unit_id=str(values["label_unit_id"]),
+                        text=label.text,
+                        origin=label.origin,
+                        low_confidence=label.low_confidence,
+                    )

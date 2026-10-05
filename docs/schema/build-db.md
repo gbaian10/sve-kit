@@ -340,7 +340,7 @@ ordinal 只用於 section/action_label，欄位合法組合依翻譯契約 §6.3
 真正歧義才用明示 semantic_variant；pin 只選已存在的具名替代值，不造假語義。
 name、effect、flavor 共用字串時仍逐 use 驗欄位資格。
 官名／counterpart 逐 owner 供選用，不因相同 context 讓第三張卡借到官方資格。
-風味的零參數整段比對與衝突降級沿[風味契約](flavor-translation.md)。
+風味以原文 hash 直接對照，沿[風味契約](flavor-translation.md)。
 
 context、use、binding、render ID 依[穩定 ID 契約](translation-contract.md#62-穩定-id)。
 origin 是來源類別，provider 留實際 source；authority 保留 sve_official/digital_official/unofficial。

@@ -115,24 +115,17 @@ def bindings(
     matches = validated.matched_definitions
     if any(m.entry.id not in matches for m in field):
         return None
-    if field[0].entry.role == "flavor":
-        span = field[0].candidate.source_span
-        if len(field) != 1 or [(s.start, s.end) for s in span.segments] != [
-            (0, len(text))
-        ]:
-            raise ValueError("Flavor binding must cover exactly its whole source field")
-    else:
-        verify(
-            text,
-            tuple(
-                Located(
-                    i,
-                    m.entry.line_ordinal,
-                    SourceSpan.model_validate(m.candidate.source_span.model_dump()),
-                )
-                for i, m in enumerate(field)
-            ),
-        )
+    verify(
+        text,
+        tuple(
+            Located(
+                i,
+                m.entry.line_ordinal,
+                SourceSpan.model_validate(m.candidate.source_span.model_dump()),
+            )
+            for i, m in enumerate(field)
+        ),
+    )
     result = []
     for ordinal, member in enumerate(field):
         definition = matches[member.entry.id]

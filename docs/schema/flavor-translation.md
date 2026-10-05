@@ -1,43 +1,40 @@
-# 風味文字的整段模板
+# 風味文字的直接對照表
 
-風味功能與效果模板並存，沿[翻譯契約](translation-contract.md)的當前定義／譯文格式，
-不另設採納政策、首輪抽查、核可收據、雙模型門檻或第二套 renderer。
+風味文字不走句型模板、不設參數。譯文是整段文字，直接以原文的 hash 對照；譯錯代價低，
+標 `origin: machine` 即可入庫，不設審核或採納流程。
 
-## 1. 來源與清冊
+## 1. 檔案
 
-來源恰為 printing_face 的 `(printing_id,face_id)`、field=flavor、ordinal=null。
-只使用該版次面已知的原文，不從 current 效果、另一版次或同名卡借用。
-文字相同可共用模板，各 owner 的 use 仍獨立；表記未定不抹去已知風味。
-source_ref 定位完整 flavor 字串；來源角色、語言、exact bytes 及 owner 自動驗證。
+`authored/flavor-translations/<hash 首位 16 進位字>.yaml`，每檔單一 `kind: flavor_translation_shard`，
+`entries` 依 `(source_hash, lang)` 排序且唯一，同一組合不得出現在兩個檔案。單檔小於 1 MiB。
 
-每段完整文字是一個 sentence 模板，normalizer=flavor-exact-v1、零參數、整段單一 code-point span。
-保留標點、數字、名字、換行、空白；不走 NFKC、N/X 或效果提醒文拆分。
-未知、exact 空字串、純空白分別列狀態；純空白不生成模板或假缺譯。
-所有風味模板採新 ID，不繼承草稿流水號或舊 10 hex 分類鍵；
-六欄 payload 的 level=sentence、normalizer_version=flavor-exact-v1、semantic_variant=default、
-parameter_schema={format:1,slots:[]}，normalized_text 等於 exact 原文。
-content_hash 取 canonical payload，normalized_hash 取原文 UTF-8；依翻譯契約 §3 的 T＋16 hex 及碰撞加長規則。
-清冊 entry 的 line_ordinal=0、role=flavor，source_span={role:flavor,segments:[{start:0,end:原文碼點數}],anchor:null}。
-清冊依[當前清冊契約](template-source-replay.md)重產，不重播歷史環境。
+| 欄位 | 含義 |
+| --- | --- |
+| source_hash | 該段日文風味原文 exact UTF-8 的 SHA-256；不存原文 |
+| lang | 目前只有 `zh-Hant` |
+| text | 整段譯文，直接顯示，沒有任何參數或跳脫 |
+| origin | `machine` 或 `project`；不使用 `official` |
+| low_confidence | 為真時前端顯示「待校對」，且可切回原文 |
 
-## 2. 譯文
+譯文使用 LF 換行，不得為空、不得有首尾空白或行尾空白。
 
-以 `(template_id,lang)` 保存當前整段譯文，修改直接覆寫該資料並由 Git 記錄。
-譯文使用同一有限文字語法；沒有 slot 時任何未跳脫的參數都錯誤。
-譯文拒絕空字串、純空白、CR、首尾空白及任一行尾空白；換行只用 LF，不在 loader 偷改文字。
-origin=machine 的草稿可以通過自動檢查後直接入庫；低信心顯示「待校對」且可切回原文。
-來源錯配者不渲染；缺譯回原文，不阻擋其他已有效的名稱／效果。
+角色名稱只需在翻譯時與 glossary 的卡名或角色譯名一致；沒有模板、替換或參數機制。
 
-## 3. 選用與加粗
+## 2. 套用
 
-flavor、name、effect 即使同 bytes、同 context，也必須逐 use 驗欄位資格；風味譯文不流到效果或卡名。
-若既有 selection 唯一鍵不能同時表示兩者，名稱／效果優先，衝突風味回原文並報 flavor_context_conflict_rows，
-不虛造語義 variant。此降級只針對選用衝突，不掩蓋錯 owner 或壞來源。
-風味中的術語引用及加粗仍走共用概念／位置資料，不把 HTML／Markdown 塞進 exact 譯文。
+離線建置對每個已知日文 printed 風味的 printing_face，以該風味文字單元的 `content_hash` 查表：
 
-## 4. 轉換與必要測試
+- 命中即寫入 `translation_context`（來源文字單元）、`translation_use`（printing_face，field=flavor）、
+  `translation` 與 `translation_selection`，authority 為 unofficial；
+- 原文相同的版次共用同一譯文，同卡異版只要原文不同，hash 就不同，是預期行為；
+- 英文風味保留原文，不套用日文對照表；
+- 未命中（缺譯、官網改字使 hash 不符）、printed 文字 unknown／omitted、卡片身分未確認時，
+  不寫譯文，前端退回原文；
+- 兩個語言不同的條目是不同的鍵；一段原文不能有兩個互相衝突的譯文。
 
-舊草稿以完整來源段落對應新模板；相同來源但不同譯文列衝突，不任取一筆。
-保留段落、版次面關聯與低信心旗標；來源已變者列待處理，不以舊文字覆蓋新來源。
-自動測試至少驗整段 exact、不參數化、owner／role 防串用、缺譯回原文及低信心呈現傳遞。
-舊政策／approval／model_review 僅供轉換，不能成為新格式入庫前置條件。
+建置報告的 `flavor_translations` 列出 `entries`（對照表筆數）、`applied`（實際套用的面數）與
+`unused`（沒有任何卡面使用的筆數，多半表示官網改字）。
+
+## 3. 測試
+
+自動測試涵蓋對照表載入與格式拒絕、缺譯與英文風味退回原文、匯出到快照的結構（translation 列與 own_source 綁定）。

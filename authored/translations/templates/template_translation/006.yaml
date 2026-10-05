@@ -9,14 +9,6 @@ records:
       text: \{{{slot_0}}\}如果自己的戰場上有護符，則給予敵方的全部主戰者{{slot_1}}點傷害。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4abf35104ab3e166","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4abf35104ab3e166
-      lang: zh-Hant
-      text: "「是神、是惡魔，還是人類。不管是什麼都無所謂。\n射穿心臟，僅此而已」"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4ac31c4c894c4233","zh-Hant"]'
     kind: template_translation
     data:
@@ -57,28 +49,12 @@ records:
       text: \{{{slot_0}}\}指定敵方戰場上至多{{slot_1}}個從者。將其橫置或重置。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4b1337b3c405dd48","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4b1337b3c405dd48
-      lang: zh-Hant
-      text: "真是的……沒有我在，就完全不行呢。\n沒辦法，我就陪著你吧。"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4b177e25bbd787cf","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T4b177e25bbd787cf
       lang: zh-Hant
       text: \{{{slot_0}}\}如果自己戰場上的從者為{{slot_1}}個以上，則這張卡片裝備{{slot_3}}張『{{slot_2}}』。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4b1820c7b0e6971f","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4b1820c7b0e6971f
-      lang: zh-Hant
-      text: "從指導中就感覺得到。就算是我這種沒才能的傢伙，\n教官們也想把我培育成英雄的那份心意！"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T4b1f52c3fddae119","zh-Hant"]'
@@ -89,14 +65,6 @@ records:
       text: 使用這張卡片之際，捨棄手牌中的{{slot_0}}張灰姑娘・卡片：消費-{{slot_1}}。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4b2a28854abecd6a","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4b2a28854abecd6a
-      lang: zh-Hant
-      text: "「用我的知識，活在剎那吧」\n——永劫欲求者‧關德溫"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4b32623872bfafb6","zh-Hant"]'
     kind: template_translation
     data:
@@ -105,68 +73,12 @@ records:
       text: \{{{slot_0}}\}【死靈充能_{{slot_1}}】這張卡片獲得【疾馳】。（如果自己的墓場為{{slot_2}}張以上，則【死靈充能_{{slot_1}}】之後的能力發動）
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4b4ae707e847926e","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4b4ae707e847926e
-      lang: zh-Hant
-      text: "你可能不知道喵，今年是貓咪年喵！\n那就和貓咪們一起打招呼！預備——，咕嚕喵～♪"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4b4be9dec2269c6d","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4b4be9dec2269c6d
-      lang: zh-Hant
-      text: "「我真的真的，可以相信你嗎？\n如果你允許我信賴你……我就能為了你努力！」"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4b4e6c2e6201b9bf","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T4b4e6c2e6201b9bf
       lang: zh-Hant
       text: \{{{slot_0}}\}自己的全部其他從者\{{{slot_1}}\}+{{slot_2}}/\{{{slot_3}}\}+{{slot_4}}。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4b579d4c97b8597a","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4b579d4c97b8597a
-      lang: zh-Hant
-      text: "古代的神王飼養那頭飛毛腿的野獸，作為狩獵的夥伴。\n在現代的神殿裡，牠披上聖鎧獵捕盜賊，看守祭壇。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4b6a1850cfd1cb6a","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4b6a1850cfd1cb6a
-      lang: zh-Hant
-      text: "哇～好棒！魚兒們，真的幫我蓋了一座城鎮呢！\n謝謝你們為了我這麼做。不眠不休，眼睛都黑了一圈呢！"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4b717e8656d98afa","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4b717e8656d98afa
-      lang: zh-Hant
-      text: "入學典禮。那半吊子的翅膀，被嘲笑為學園之恥。\n畢業典禮。那半吊子的翅膀，被表揚為學園之光。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4b78b7de542e071a","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4b78b7de542e071a
-      lang: zh-Hant
-      text: "血統、道義、漂亮話。全都跟垃圾沒兩樣。\n全部擰在一起輾碎——絞殺墜落吧，破蛇！"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4b7a0a2c35a7c823","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4b7a0a2c35a7c823
-      lang: zh-Hant
-      text: "走吧米米、禊！讓他們見識我們羈絆的力量！\n因為沒有【小小甜心】做不到的事！"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T4b833d235336bf9f","zh-Hant"]'
@@ -185,14 +97,6 @@ records:
       text: 【進化時】捨棄{{slot_0}}張手牌：查看自己牌堆頂的{{slot_1}}張卡片。可以從其中公開至多{{slot_2}}張絕傑・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4b9407c73d763cf8","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4b9407c73d763cf8
-      lang: zh-Hant
-      text: "「Honky-tonk、隨想曲，我的節奏就是瘋狂本身。\n讓心跳響起、狂亂彈奏吧……你的慘叫就是伴奏」"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4b9a1b1948a0f608","zh-Hant"]'
     kind: template_translation
     data:
@@ -207,14 +111,6 @@ records:
       template_id: T4bbabd3f3bb4ef32
       lang: zh-Hant
       text: 【守護】\{{{slot_0}}\}自己的主戰者\{{{slot_1}}\}+{{slot_2}}。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4bc486daeada3943","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4bc486daeada3943
-      lang: zh-Hant
-      text: "反抗吧，用那份熱度！\n——烈絕的顯現‧嘉魯蜜兒"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T4bcb009167422312","zh-Hant"]'
@@ -289,14 +185,6 @@ records:
       text: 這張卡片給予敵方的主戰者攻擊傷害時，自己贏得本場對戰。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4c1cbf63355bad1d","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4c1cbf63355bad1d
-      lang: zh-Hant
-      text: "她堆出來的雪人，全都很怕冷。\n因為它們忘不了被堆出來時的那份溫暖。"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4c1e0eb9359c2c72","zh-Hant"]'
     kind: template_translation
     data:
@@ -313,14 +201,6 @@ records:
       text: \{{{slot_0}}\}查看自己牌堆頂的{{slot_1}}張卡片。可以從其中將{{slot_2}}張機械・卡片放置到EX區。將其餘卡片以任意順序放置到牌堆底。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4c265617348a333a","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4c265617348a333a
-      lang: zh-Hant
-      text: "對人懷抱的強烈情感，去區分它根本是不解風情。\n怨恨，說穿了你不覺得就是愛嗎？"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4c34b6816b18794f","zh-Hant"]'
     kind: template_translation
     data:
@@ -335,14 +215,6 @@ records:
       template_id: T4c39e9a73763e3ec
       lang: zh-Hant
       text: \{{{slot_0}}\}指定自己的{{slot_1}}個從者。使其獲得【守護】。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4c46e4f4d7f09e4b","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4c46e4f4d7f09e4b
-      lang: zh-Hant
-      text: "入金：15萬／出金：13萬／借款餘額：2990萬雷克爾\n——『帳簿』，收支欄（國曆805年，金牛之月15日）"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T4c4f9669a525a64c","zh-Hant"]'
@@ -385,28 +257,12 @@ records:
       text: 指定敵方戰場上的{{slot_0}}個從者。將其破壞。如果為【真紅】狀態，則給予其主戰者{{slot_1}}點傷害。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4cb50260ca3d776b","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4cb50260ca3d776b
-      lang: zh-Hant
-      text: "啊啊，我真是太美了♪要表現我的美——\n不，用言語根本無法表現啊！"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4cb5653e1ad9d1c5","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T4cb5653e1ad9d1c5
       lang: zh-Hant
       text: 每回合{{slot_0}}次，自己使用機械・卡片時，指定敵方戰場上的{{slot_1}}個從者。給予其{{slot_2}}點傷害。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4cb5e8fbb51ae5f3","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4cb5e8fbb51ae5f3
-      lang: zh-Hant
-      text: "榮光、榮譽、榮華。天使對有光之人溫柔地微笑。\n「如果你以高處為目標……就把特別的力量給你！」"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T4ccc7e739d45b0ed","zh-Hant"]'
@@ -417,68 +273,12 @@ records:
       text: \{進化\}使墓場的{{slot_0}}張卡片消失：這張卡片進化。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4cd95152257d4cdc","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4cd95152257d4cdc
-      lang: zh-Hant
-      text: "沒有肉體。沒有命令。再也得不到榮譽。\n即使如此，那顆良善的心，仍不知止息。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4cf09d61c44dc05d","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4cf09d61c44dc05d
-      lang: zh-Hant
-      text: "你們想獵這傢伙的話我不會阻止……不過啊。\n獵幻獸的人，是我的獵物。也請做好被盯上的覺悟。"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4cf40149ccb5a029","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T4cf40149ccb5a029
       lang: zh-Hant
       text: 只要自己的墓場有{{slot_0}}張以上的武裝・卡片，這張卡片獲得【疾馳】。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4cf600812745bb4c","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4cf600812745bb4c
-      lang: zh-Hant
-      text: 據說在蒼月舉辦公演的國家，會接連發生離奇死亡與事件。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4d0a600b4b5677a4","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4d0a600b4b5677a4
-      lang: zh-Hant
-      text: "到處都是輸家，真令人同情呢。——但我不一樣。不擇手段，\n趁虛而入、踩在腳下、一把抓住。將手指搭上那空蕩蕩的王座。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4d1882a4c498fd65","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4d1882a4c498fd65
-      lang: zh-Hant
-      text: "活著，很痛苦對吧。我懂喔。我也一樣喔。\n所以啊，一起痛吧——我會把你，填得滿滿的。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4d3c17a2e142e2cf","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4d3c17a2e142e2cf
-      lang: zh-Hant
-      text: "「我想起來了。過去一起在森林裡奔跑的日子。\n拜迪，你還記得嗎。還是說，已經……」"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4d3faaec6a0733ec","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4d3faaec6a0733ec
-      lang: zh-Hant
-      text: "傭兵這種人就是四處漂流。對流行的東西很敏感。\n劍什麼的根本不是對手啦。現在果然還是這傢伙吧！"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T4d55e4f089124070","zh-Hant"]'
@@ -513,22 +313,6 @@ records:
       text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}：指定敵方戰場上的{{slot_2}}個從者。給予其{{slot_3}}點傷害。如果自己的戰場上有「與這張卡片同名者除外的商人・從者」，則轉變為{{slot_4}}點傷害。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4da8c1b9bd220853","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4da8c1b9bd220853
-      lang: zh-Hant
-      text: "太陽屬於樹木，我們只在樹蔭下撿拾落果——\n這就是我所依靠的大樹，綠傘會的仁義。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4daa67ba71e6ef4f","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4daa67ba71e6ef4f
-      lang: zh-Hant
-      text: "我想把土養好，做出新的肥料跟作物。\n我是個笨蛋，沒什麼自信，但總得報答這片土地的恩情啊。"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4dac9c070db01d67","zh-Hant"]'
     kind: template_translation
     data:
@@ -553,44 +337,12 @@ records:
       text: 【突進】（擁有【突進】的從者，從進入戰場的回合起即可攻擊敵方的從者）
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4dd81961479134a8","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4dd81961479134a8
-      lang: zh-Hant
-      text: "對人而言的道理，甚至對人而言的道理之外，\n一切都在那寬廣溫暖的手掌之上。"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4df6f953bf568731","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T4df6f953bf568731
       lang: zh-Hant
       text: 【進化時】指定敵方戰場上的{{slot_0}}個從者。將其橫置。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4df9c5100e6708cd","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4df9c5100e6708cd
-      lang: zh-Hant
-      text: "讓你見識見識打架專家的真本事！有哥兒們在可不能輸！\n不管是誰都打趴，證明本大爺才是最強的！"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4e1c3a19cc301cd4","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4e1c3a19cc301cd4
-      lang: zh-Hant
-      text: "聽說老爸早逝了。大哥一接手，整座城就搖搖晃晃。\n沒辦法。我潛入地下社會。從反面來統御、支撐它吧。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4e385ee3d94cd449","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4e385ee3d94cd449
-      lang: zh-Hant
-      text: "唱歌歡笑吧！在某處與某人相遇時就開心地乾杯！\n這就是所謂人生的醍醐味吧？"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T4e44dd9394ceaa61","zh-Hant"]'
@@ -625,44 +377,12 @@ records:
       text: \{{{slot_0}}\}指定自己的{{slot_1}}個其他「擁有【疾馳】或【守護】的從者」。使其\{{{slot_2}}\}+{{slot_3}}。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4e6fd827c647c252","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4e6fd827c647c252
-      lang: zh-Hant
-      text: "「啾！」「呃，肚子，餓了？」\n「吼嚕嗚！」「哇！幹嘛低吼啦！很可怕耶」"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4e756c41b9ac6c77","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4e756c41b9ac6c77
-      lang: zh-Hant
-      text: "外表雖然可愛，但當被捕食者已是前世的事了。\n「蹦蹦跳跳的，很可愛吧！」"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4e7e486447ef57d8","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T4e7e486447ef57d8
       lang: zh-Hant
       text: \{{{slot_0}}\}指定自己的{{slot_1}}個其他從者。使其\{{{slot_2}}\}+{{slot_3}}/\{{{slot_4}}\}+{{slot_5}}。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4e8c01aa09a30b92","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4e8c01aa09a30b92
-      lang: zh-Hant
-      text: "崇拜邪神的羔羊們啊！\n為我們的戰爭獻上一切，展現信仰之心吧！"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4e8efec89c0d3d9e","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4e8efec89c0d3d9e
-      lang: zh-Hant
-      text: "若求本質，當依機構所命，揮動全身。\n只管看向己之內在。那正中央有新的本質。"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T4ebe71eb26b9c73a","zh-Hant"]'
@@ -673,28 +393,12 @@ records:
       text: 指定自己的{{slot_0}}個從者。使其\{{{slot_1}}\}+{{slot_2}}。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4ee3ada6b0ed2b01","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4ee3ada6b0ed2b01
-      lang: zh-Hant
-      text: "女僕卯月的冒險，接下來會去哪裡呢？\n要是能像故事一樣，體驗各式各樣的事就好了呢！"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4ee690697e8b452a","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T4ee690697e8b452a
       lang: zh-Hant
       text: \{{{slot_0}}\}指定本回合中進入戰場的自己的{{slot_1}}個其他從者。使其\{{{slot_2}}\}+{{slot_3}}/\{{{slot_4}}\}+{{slot_5}}。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4ef4cf32e558bd12","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4ef4cf32e558bd12
-      lang: zh-Hant
-      text: "龍低吼之時，天空便風雨大作。\n獵物們因雨勢停下腳步，飢腸轆轆的龍翱翔天際。"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T4ef73aff61736fa2","zh-Hant"]'
@@ -721,22 +425,6 @@ records:
       text: \{{{slot_0}}\}【攻擊時】指定敵方戰場上的{{slot_1}}個從者。給予其{{slot_2}}點傷害。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4f14e54f8370a102","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4f14e54f8370a102
-      lang: zh-Hant
-      text: "妾身正是統御黑夜之人……。\n汝也來崇拜妾身、俯首跪拜吧。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4f29028508d471b9","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4f29028508d471b9
-      lang: zh-Hant
-      text: "古今中外，戰爭的理由都是「為了得到什麼」！\n高舉雙手前進吧！勝利與榮耀，一把抓住！"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4f3ff205329a00bc","zh-Hant"]'
     kind: template_translation
     data:
@@ -759,14 +447,6 @@ records:
       template_id: T4f544533625a5f91
       lang: zh-Hant
       text: \{{{slot_0}}\}使EX區的{{slot_1}}張妖精・從者消失：自己的主戰者\{{{slot_2}}\}+{{slot_3}}。抽取{{slot_1}}張卡片。此能力{{slot_5}}回合中可使用{{slot_6}}次。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4f544b439be83f0e","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4f544b439be83f0e
-      lang: zh-Hant
-      text: "浮現於半空的，露娜爾的魔法陣。其中有明顯的缺漏。\n葛芮妮指向佇立於學生們中央的魔導姬。"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T4f55c84521ca1e4c","zh-Hant"]'
@@ -825,28 +505,12 @@ records:
       text: \{{{slot_0}}\}\{消費{{slot_1}}\}將這張卡片\{{{slot_2}}\}：指定敵方的{{slot_3}}個從者。將其橫置。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T4f96ed9cd38ece3a","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4f96ed9cd38ece3a
-      lang: zh-Hant
-      text: "有人說是白。有人說是黑。\n不一樣是當然的——那頭龍，是映照內心的鏡子。"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T4fb2507827c41732","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T4fb2507827c41732
       lang: zh-Hant
       text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_2}}張消費{{slot_1}}的法術，增加到手牌中。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T4fbfe664854e199e","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T4fbfe664854e199e
-      lang: zh-Hant
-      text: "你有使命嗎。有足以取代性命的信念嗎。\n若你擁有，天空的霸者就助你一臂之力。"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T4fd58a21f2a9e91b","zh-Hant"]'
@@ -889,22 +553,6 @@ records:
       text: \{{{slot_0}}\}如果為【覺醒】狀態，則從下列之中選擇{{slot_1}}項。【{{slot_2}}】指定敵方戰場上的{{slot_3}}個從者。給予其{{slot_4}}點傷害。【{{slot_5}}】給予敵方戰場上的全部從者{{slot_6}}點傷害。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T5017a7712c5a7c07","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T5017a7712c5a7c07
-      lang: zh-Hant
-      text: "打掃，好。供花，好……等等那邊那位！？\n我們這裡，謝絕盜墓賊和死靈術師————！"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T501896ab96a57a0c","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T501896ab96a57a0c
-      lang: zh-Hant
-      text: "只是，向著彼方前進。因為肚子餓，因為飢餓。\n連根鑿穿的是大棍棒‧特托卡瑪利。眼前的一切都是獵物！"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T501d6709ba7affd8","zh-Hant"]'
     kind: template_translation
     data:
@@ -913,36 +561,12 @@ records:
       text: 「卡片名稱含有『{{slot_0}}』或『{{slot_1}}』的從者」進入自己的戰場時，使其\{{{slot_2}}\}+{{slot_3}}/\{{{slot_4}}\}+{{slot_5}}。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T502228cefeeb40d2","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T502228cefeeb40d2
-      lang: zh-Hant
-      text: "就算是好喝的靈藥，也不能喝太多喔？\n雖然比什麼藥都有效，但喝太多反而會……所以啦。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T503475c2f8e829d3","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T503475c2f8e829d3
-      lang: zh-Hant
-      text: "「你覺得只有可愛的東西，會在這種地方晃蕩嗎？」\n——荒野的冒險者"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T5040bb267b402df8","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T5040bb267b402df8
       lang: zh-Hant
       text: \{{{slot_0}}\}抽取{{slot_1}}張卡片。給予自己的主戰者{{slot_2}}點傷害。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T504974735c58aa9a","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T504974735c58aa9a
-      lang: zh-Hant
-      text: "「又吼又叫的，真是辛苦了。\n我跟四隻腳的龍不一樣。胡鬧瞎鬧恕不奉陪」"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T505051c281c8bc7e","zh-Hant"]'
@@ -959,22 +583,6 @@ records:
       template_id: T505787d93561ffe2
       lang: zh-Hant
       text: \{{{slot_0}}\}自己的全部其他哥布林・從者\{{{slot_1}}\}+{{slot_2}}/\{{{slot_3}}\}+{{slot_4}}。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T507941e61d00705f","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T507941e61d00705f
-      lang: zh-Hant
-      text: "苦／快樂。悲／開心。\n兩者都體會過的她的夏天，一定，既快樂又開心。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T50811ff5c20bcb32","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T50811ff5c20bcb32
-      lang: zh-Hant
-      text: "在瓦礫中。在裂縫中。在毀壞的景色中。感受到偶像的存在。\n但破壞完之後，腦中就感覺不到偶像了。"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T50b6700c9888b0ec","zh-Hant"]'
@@ -1009,28 +617,12 @@ records:
       text: \{{{slot_0}}\}將敵方牌堆頂的{{slot_1}}張卡片放置到墓場。之後，如果敵方的墓場為{{slot_2}}張以上，則將自己牌堆頂的{{slot_1}}張卡片放置到EX區。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T50e32fa0aea75f4e","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T50e32fa0aea75f4e
-      lang: zh-Hant
-      text: "俗世浮世，就此別過。\n歡迎來到，笑容的大旅館——天象旅籠，天地。"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T50edbb71936579a0","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T50edbb71936579a0
       lang: zh-Hant
       text: 指定自己墓場的原始消費{{slot_0}}的Passion・從者與原始消費{{slot_1}}的Passion・從者各至多{{slot_2}}張。將其召喚到戰場上。自己的主戰者\{{{slot_3}}\}+{{slot_4}}。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T510220c94d46ce00","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T510220c94d46ce00
-      lang: zh-Hant
-      text: "獨角少女為了替人們打氣而跳舞。就算跳得很爛。\n「獨、獨角子，會加油的！」"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T512f14327ceea779","zh-Hant"]'
@@ -1063,14 +655,6 @@ records:
       template_id: T515183424cf6bad5
       lang: zh-Hant
       text: \{{{slot_0}}\}\{消費{{slot_1}}\}：指定自己戰場上的{{slot_2}}個從者。給予其{{slot_3}}點傷害。此能力{{slot_4}}回合中可使用{{slot_5}}次。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T5193ec465b9a4c6d","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T5193ec465b9a4c6d
-      lang: zh-Hant
-      text: "說來慚愧，我很貪心。一滴一口，根本不夠。\n所以這些刺、薔薇之牙……一次流多一點吧。"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T519dc9ce5a06ccb7","zh-Hant"]'
@@ -1145,44 +729,12 @@ records:
       text: \{{{slot_0}}\}指定自己戰場上的{{slot_1}}個其他海洋・從者。使其\{{{slot_2}}\}+{{slot_3}}/\{{{slot_4}}\}+{{slot_5}}。如果這張卡片是從EX區使用，則轉變為\{{{slot_2}}\}+{{slot_7}}/\{{{slot_4}}\}+{{slot_9}}，並獲得【突進】【指定攻擊】。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T51fea32cefa48383","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T51fea32cefa48383
-      lang: zh-Hant
-      text: "哥布林們把撿到的那東西，各憑喜好地用到爛。\n尤其喜歡拿它來當雪橇。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T521485e270cd22d9","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T521485e270cd22d9
-      lang: zh-Hant
-      text: "我有個孩子。這孩子啊，是跟老公一個模子刻出來的獨苗。\n在把該交的東西交給他之前，看來是沒辦法退隱了。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T5231297679442d0b","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T5231297679442d0b
-      lang: zh-Hant
-      text: "咲戀育幼院是我的……不。\n是孩子們大家重要的地方。我絕對會守護它。"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T523158bdb042bc06","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T523158bdb042bc06
       lang: zh-Hant
       text: \{{{slot_0}}\}\{消費{{slot_1}}\}：給予敵方的全部主戰者{{slot_2}}點傷害。抽取{{slot_3}}張卡片。此能力在自己戰場上「卡片名稱各不相同的士兵・衍生物・從者」為{{slot_4}}個以上時，{{slot_5}}回合中可使用{{slot_6}}次。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T523285fdba974852","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T523285fdba974852
-      lang: zh-Hant
-      text: 非人之夜即將開始。
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T5233dad45b32245e","zh-Hant"]'
@@ -1193,28 +745,12 @@ records:
       text: \{{{slot_0}}\}將自己牌堆頂的{{slot_1}}張卡片放置到EX區。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T523edb1889027b33","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T523edb1889027b33
-      lang: zh-Hant
-      text: "幼時，我解剖了院裡的雞和雛雞。是為了實證臟腑的構造。\n步驟明明很完美，院長卻生氣了。「不要偏離人道」"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T52630b03b1346e98","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T52630b03b1346e98
       lang: zh-Hant
       text: 自己戰場上攻擊力{{slot_0}}以上的武鬥龍人・從者攻擊時，指定敵方戰場上的{{slot_1}}個從者。給予其與其主戰者{{slot_2}}點傷害。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T526c7633867e174f","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T526c7633867e174f
-      lang: zh-Hant
-      text: "只要願意好好相處，妖精就是人類的夥伴的說！\n你是壞人？還是好人？"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T527ae9ef1d4a2a7f","zh-Hant"]'
@@ -1225,22 +761,6 @@ records:
       text: 自己的結束階段到來時，指定敵方戰場上至多{{slot_0}}個從者。將其橫置。其在下一個其玩家的開始階段不會重置。自己的主戰者\{{{slot_1}}\}+{{slot_2}}。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T52a1597f89e56387","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T52a1597f89e56387
-      lang: zh-Hant
-      text: "啊等等等等等！汝等，想對那具木乃伊做什麼！\n年代久遠的珍品繃帶，會受損的啊啊啊啊！"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T52c90de66abea220","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T52c90de66abea220
-      lang: zh-Hant
-      text: "懷著往日的約定，魔導之華與友人一同綻放。\n「要是敢傷害古蕾婭，我絕不原諒！」"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T52d21e1667972941","zh-Hant"]'
     kind: template_translation
     data:
@@ -1249,28 +769,12 @@ records:
       text: \{{{slot_0}}\}查看自己牌堆頂的{{slot_1}}張卡片。從其中將{{slot_2}}張放置到墓場。將其餘卡片以任意順序放置到牌堆底。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T52dd152b01e13efd","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T52dd152b01e13efd
-      lang: zh-Hant
-      text: "我為什麼，會覺得自己「回到了」這座森林？\n——迷途的旅人"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T52e71adbe6e03a12","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T52e71adbe6e03a12
       lang: zh-Hant
       text: 【超進化時】指定自己墓場中卡片名稱各不相同的至多{{slot_0}}張法術。將其放置到EX區。本回合，使用該卡之際，消費-{{slot_1}}。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T52fc38c4a83fc369","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T52fc38c4a83fc369
-      lang: zh-Hant
-      text: "這傢伙給了選擇自盡的弓兵，一個重來的機會。\n我會用弓報恩……你們就用命回歸森林吧。"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T53037d5b49afb98a","zh-Hant"]'
@@ -1313,22 +817,6 @@ records:
       text: \{{{slot_0}}\}指定敵方的{{slot_1}}個從者。使其\{{{slot_2}}\}-{{slot_3}}/\{{{slot_4}}\}-{{slot_5}}。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T536ae27f8ed92e22","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T536ae27f8ed92e22
-      lang: zh-Hant
-      text: "……哎呀。那邊的魔物先生，你迷路闖進來了嗎？\n雖然很可憐，但就讓我用手刀懲治——喝！"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T537f3ab2aeae8f8f","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T537f3ab2aeae8f8f
-      lang: zh-Hant
-      text: "以欺瞞裝飾深奧。直到觸及那不可能存在的無邊之底。\n——那麼，就來繼續世界的試煉吧。"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T5389322b900da6cf","zh-Hant"]'
     kind: template_translation
     data:
@@ -1351,14 +839,6 @@ records:
       template_id: T538bb006798094f7
       lang: zh-Hant
       text: \{{{slot_0}}\}從下列之中選擇{{slot_1}}項。【{{slot_2}}】指定敵方戰場上的{{slot_1}}個護符。將其破壞。【{{slot_4}}】給予敵方的全部主戰者{{slot_5}}點傷害。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T538c880187992221","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T538c880187992221
-      lang: zh-Hant
-      text: "要這樣活啦要那樣做啦，別把沉重的東西套在我身上。\n我要走的路，我會用自己的風格蹦跳過去啦！"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T53960561ba5760b6","zh-Hant"]'
@@ -1393,22 +873,6 @@ records:
       text: 【進化時】指定自己戰場上的{{slot_0}}個從者。使其獲得【突進】【指定攻擊】。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T53b7373c2c2db2fa","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T53b7373c2c2db2fa
-      lang: zh-Hant
-      text: "即使屍積如山，也沒有其他能指望的活法。\n——為了活下去，非殺不可。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T53c059d78c6525a0","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T53c059d78c6525a0
-      lang: zh-Hant
-      text: "新舞蹈的關鍵是表現力！連感想都能傳達！\nOne、Two！One、Two！Two、Two、One、Two！"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T53c37e64ce0a8fa3","zh-Hant"]'
     kind: template_translation
     data:
@@ -1441,22 +905,6 @@ records:
       text: 將敵方牌堆頂的{{slot_0}}張卡片放置到墓場。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T542c190f2478a20b","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T542c190f2478a20b
-      lang: zh-Hant
-      text: "被帝國支配的村民們看見了。那果敢抵抗的四片羽翼。\n那羽翼向眾人展現一線希望，斬斷了心中的鳥籠。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T542dd0358a4b7c83","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T542dd0358a4b7c83
-      lang: zh-Hant
-      text: "刺骨的寒冷，化為傷痕。\n——不融的銀冰‧菲琳"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T544ad322a02325ef","zh-Hant"]'
     kind: template_translation
     data:
@@ -1465,52 +913,12 @@ records:
       text: 只要自己的戰場上有其他武鬥龍人・卡片，這張卡片獲得【突進】【指定攻擊】。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T544bda11b6eec60b","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T544bda11b6eec60b
-      lang: zh-Hant
-      text: "我到底配不配當女王，到現在偶爾還是會煩惱……\n但我會努力的。因為我不想背叛相信我的大家！"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T547f70acf76911b5","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T547f70acf76911b5
-      lang: zh-Hant
-      text: 神無所不在。正因如此，更當是唯一。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T54816ebb638b7472","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T54816ebb638b7472
-      lang: zh-Hant
-      text: "在這種地方拍攝，感覺像成了流行的中心。\n讓你看看。超越領袖魅力的，城崎美嘉的模樣★"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T548742a10280b934","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T548742a10280b934
       lang: zh-Hant
       text: \{{{slot_0}}\}捨棄手牌中的{{slot_1}}張指揮官・卡片：從自己的牌堆中搜尋{{slot_1}}張指揮官・卡片，增加到手牌中。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T54a2fbc4e47256bb","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T54a2fbc4e47256bb
-      lang: zh-Hant
-      text: "殭屍先生，不可以吃人類喔！\n明明那麼可愛為什麼要做壞事呢！"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T54b8d75b4f709de3","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T54b8d75b4f709de3
-      lang: zh-Hant
-      text: "變化忍法，入睡之術！\n呵呵呵……這是假裝睡著，再猛地撲上去的術喔！"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T54ce2a7ff6c4c998","zh-Hant"]'
@@ -1537,14 +945,6 @@ records:
       text: 從下列之中選擇{{slot_0}}項。【{{slot_1}}】指定敵方戰場上的{{slot_2}}個從者。給予其{{slot_3}}點傷害。【{{slot_4}}】捨棄手牌中的{{slot_5}}張闇影聖騎士・卡片：指定敵方戰場上的{{slot_2}}個從者。給予其{{slot_7}}點傷害。將自己牌堆頂的{{slot_5}}張卡片放置到墓場。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T54e5b6004db33657","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T54e5b6004db33657
-      lang: zh-Hant
-      text: "「流水交疊……簡直是水聲的清唱劇」\n旅行的指揮家一揮指揮棒，自然也成為樂曲的一節。"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T552ac83174882fdb","zh-Hant"]'
     kind: template_translation
     data:
@@ -1569,22 +969,6 @@ records:
       text: \{Q\}\{{{slot_0}}\}\{消費{{slot_1}}\}將這張卡片\{{{slot_2}}\}並放置到墓場：指定自己墓場中的{{slot_3}}張灰姑娘・從者。將其增加到手牌中。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T556f379857c0e572","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T556f379857c0e572
-      lang: zh-Hant
-      text: "沒錯！這笛聲就是你的支配者！\n從都市到鄉下、到森林、到懸崖，《大遊行》沒有終點！"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T5573f0d6f058a72d","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T5573f0d6f058a72d
-      lang: zh-Hant
-      text: "曾有個遙遠往昔的約定。如今，對象已不在。\n為了替遙遠往日做個了結，如今，只是不斷徬徨。"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T557b261a8f5178a7","zh-Hant"]'
     kind: template_translation
     data:
@@ -1599,22 +983,6 @@ records:
       template_id: T5585315f542d829a
       lang: zh-Hant
       text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_1}}張童話・卡片，增加到手牌中。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T559c10366b2f1a9e","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T559c10366b2f1a9e
-      lang: zh-Hant
-      text: "用歌改變作物味道的術式？好像很有趣！啦——啦啦——♪\n——『威札爾農業學校的留學體驗』"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T55cd884f046372b6","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T55cd884f046372b6
-      lang: zh-Hant
-      text: "只是盲目地學習，離神髓尚遠。\n知識會聚集到有智慧的人身上。"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T55d540db9df76977","zh-Hant"]'
@@ -1639,30 +1007,6 @@ records:
       template_id: T55deb55783845a1c
       lang: zh-Hant
       text: \{Q\}\{{{slot_0}}\}將這張卡片\{{{slot_1}}\}：指定敵方戰場上的{{slot_2}}個從者。給予其{{slot_3}}點傷害。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T55df7b9268e84665","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T55df7b9268e84665
-      lang: zh-Hant
-      text: "即使罪行受到制裁，受害者也未曾得救。\n是故——向神祈禱的人留了下來。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T55e4da139d3c9da2","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T55e4da139d3c9da2
-      lang: zh-Hant
-      text: "我埋葬了，過去的自己。新的我不用跳也能飛。\n為了私利而得到的自由。但是，不知為何很空虛。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T55e76cb0de6b03d2","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T55e76cb0de6b03d2
-      lang: zh-Hant
-      text: "極樂啊極樂啊。天地是何等美妙。\n正是桃源。先來一杯————啊啊，妙哉。"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T55f1a517e216ce5c","zh-Hant"]'
@@ -1697,22 +1041,6 @@ records:
       text: \{{{slot_0}}\}捨棄手牌中的{{slot_1}}張賽馬娘・卡片：抽取{{slot_1}}張卡片。如果捨棄了原始消費{{slot_3}}以上的賽馬娘・卡片，則轉變為{{slot_4}}張。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T560d0d7a89d0408f","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T560d0d7a89d0408f
-      lang: zh-Hant
-      text: "「強迫動力機關超載運作，突破極限領域。\n呵呵，總覺得湧起了一股親近感呢」"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T56493f50ede5ba0a","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T56493f50ede5ba0a
-      lang: zh-Hant
-      text: "今天的我，是只屬於你的美里老師喔～。\n要對孩子們保密喔？因為他們會吃醋的♪"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T56791c9259ae738b","zh-Hant"]'
     kind: template_translation
     data:
@@ -1729,22 +1057,6 @@ records:
       text: \{{{slot_0}}\}【課程_{{slot_1}}】：抽取{{slot_2}}張卡片。此能力{{slot_3}}回合中可使用{{slot_4}}次。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T568218f0c77e3bb8","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T568218f0c77e3bb8
-      lang: zh-Hant
-      text: "原本，受大地恩惠的森林之民並不需要魔力。\n他們只對玷汙大地之人動用那股力量。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T568578ef92d14f54","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T568578ef92d14f54
-      lang: zh-Hant
-      text: "被時光烤焦的綠色，染成褐色後便悠悠落葉。\n落葉溶解成為新芽的養分，新芽伸展又長出綠意。"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T568f45168ef6575d","zh-Hant"]'
     kind: template_translation
     data:
@@ -1759,14 +1071,6 @@ records:
       template_id: T56c7f85fc2f33e83
       lang: zh-Hant
       text: 自己在開始階段以外抽取{{slot_0}}張卡片時，這張卡片\{{{slot_1}}\}+{{slot_2}}/\{{{slot_3}}\}+{{slot_4}}。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T56d451bb187fc567","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T56d451bb187fc567
-      lang: zh-Hant
-      text: "魔力團塊從中庭闖入，氣勢洶洶地衝向派對會場。\n詭異的光芒逐漸成形，終於化為魔導生物。"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T56da4dd1416443da","zh-Hant"]'
@@ -1817,22 +1121,6 @@ records:
       text: 指定自己墓場的{{slot_1}}張原始消費{{slot_0}}以下的絕傑・魔法使・從者。將其召喚到戰場上。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T5717c3f917fb95f2","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T5717c3f917fb95f2
-      lang: zh-Hant
-      text: "森林與人是二而為一。相互交融的正是我們。\n只要人心繫森林，森林必定會回應。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T5726a76c61e02e5b","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T5726a76c61e02e5b
-      lang: zh-Hant
-      text: "熊熊燃燒的，紅色火焰。你知道比那更熱的顏色嗎？\n就是這個，蒼色火焰。然後把兩股力量合在一起的話……！"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T572725be407b964d","zh-Hant"]'
     kind: template_translation
     data:
@@ -1849,52 +1137,12 @@ records:
       text: \{{{slot_0}}\}如果為【覺醒】狀態，則這張卡片\{{{slot_1}}\}+{{slot_2}}/\{{{slot_3}}\}+{{slot_4}}。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T574e5ecdfa29ec59","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T574e5ecdfa29ec59
-      lang: zh-Hant
-      text: "——其為《魔術師》，所示為《創造》。\n由意念生出想像，由想像生出構築。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T576f5822582bdc18","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T576f5822582bdc18
-      lang: zh-Hant
-      text: "在放蕩汙穢的現世中盤旋的，凜冽的一陣風……。\n聽好了，我乃颶風。戰神的幻槍，格里姆尼爾！"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T5771ff1e6f67cc73","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T5771ff1e6f67cc73
-      lang: zh-Hant
-      text: "由我捕捉祭品，由龍吞食。然後輝石便到手。\n那麼，從今以後……犧牲會增加多少呢。"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T57752f79fd0bad93","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T57752f79fd0bad93
       lang: zh-Hant
       text: 指定敵方戰場上的{{slot_0}}個從者。給予其{{slot_1}}點傷害。如果自己墓場的學院・卡片為{{slot_2}}張以上，則轉變為{{slot_3}}點傷害。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T577534bc7f91210f","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T577534bc7f91210f
-      lang: zh-Hant
-      text: "跟奶奶學的降靈術……能順利成功嗎！？\n好——，要上囉——！"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T57822e0d9b698fa3","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T57822e0d9b698fa3
-      lang: zh-Hant
-      text: "正是在冰凍的冰晶宮，才有能感受到的溫暖。\n「雖然只有冰冷的東西……但至少讓我招待你」"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T5787147bbcde11e5","zh-Hant"]'
@@ -1953,44 +1201,12 @@ records:
       text: \{{{slot_0}}\}【進化時】指定敵方戰場上的{{slot_1}}個從者。使其\{{{slot_2}}\}-{{slot_3}}/\{{{slot_4}}\}-{{slot_5}}。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T57eaf53a2266bc92","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T57eaf53a2266bc92
-      lang: zh-Hant
-      text: "沒有流派，就是我的流派。\n禁術、祕術，什麼都儘管來。"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T580f2e3ef727b1af","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T580f2e3ef727b1af
-      lang: zh-Hant
-      text: "讓整個會場，開出大大的花吧！\n花壇裝不下的滿開華麗……送到大家身邊！"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T581ebadc4d3d93dc","zh-Hant"]'
     kind: template_translation
     data:
       template_id: T581ebadc4d3d93dc
       lang: zh-Hant
       text: 查看自己牌堆頂的{{slot_0}}張卡片。可以從其中公開{{slot_1}}張妖怪・從者並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T581ee9a2a7d00efc","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T581ee9a2a7d00efc
-      lang: zh-Hant
-      text: "向被告人，宣告判決！\n——神魔審判長‧瓦爾娜"
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T5822ac4c47b90ce5","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T5822ac4c47b90ce5
-      lang: zh-Hant
-      text: "我說啊。你，是不是有～點太囂張了？\n人家可是，超級無敵偉大的惡魔貴族喔？"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T582e3eb146afebe9","zh-Hant"]'
@@ -2009,14 +1225,6 @@ records:
       text: 【吸血】
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T583ec2e0f2a42acc","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T583ec2e0f2a42acc
-      lang: zh-Hant
-      text: "重要的是，一小片小小的勇氣。\n「可以……請你收下嗎？」"
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T585fb2e965340522","zh-Hant"]'
     kind: template_translation
     data:
@@ -2031,14 +1239,6 @@ records:
       template_id: T586f98b6ceb622a1
       lang: zh-Hant
       text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}、捨棄手牌中的{{slot_2}}張賽馬娘・卡片：指定敵方戰場上的{{slot_3}}個從者。給予其{{slot_4}}點傷害。如果捨棄了原始消費{{slot_5}}以上的賽馬娘・卡片，則抽取{{slot_2}}張卡片。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T588fe304d4d80fda","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T588fe304d4d80fda
-      lang: zh-Hant
-      text: "喂！那邊那位，你累癱了不是嗎！\n真沒出息！請給我振作一點！"
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T58982ef94bc9100a","zh-Hant"]'

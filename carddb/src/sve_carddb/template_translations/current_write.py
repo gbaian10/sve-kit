@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from sve_carddb.catalog.adoption_models import Batch
     from sve_carddb.template_sources.models import Entry
     from sve_carddb.template_translations.current_models import Record
-    from sve_carddb.template_translations.flavor_models import FlavorEntry
 
 
 CHUNK_VALUES = 256
@@ -47,7 +46,7 @@ def compose(
     files: Files,
     records: tuple[Record, ...],
     batches: tuple[Batch, ...],
-    entries: tuple[Entry | FlavorEntry, ...],
+    entries: tuple[Entry, ...],
 ) -> Files:
     """Replace only the template area; retain all indexed shared glossary and override bytes."""
     previous = Index.model_validate_json(json_bytes(files.index))
