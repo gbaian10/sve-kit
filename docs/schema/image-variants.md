@@ -51,34 +51,30 @@ f0 省略，其他面用永久 face.ordinal；printing.int_id 永不重配，不
 五個 size_key 固定；int_id／ordinal／version 的 URL 向量須由 Python／TS 共用合成測試驗證。
 
 版本由 printing.home_set 的 printing_image media 列提供。card 三檔共用 card_version，art 兩檔共用 art_version。
-使用發布配號器保留的單調正安全整數 revision，各組沿用最後變更號，不需每圖連號；純文字更新不全庫換 v。
+使用匯出端配發的單調正安全整數 revision，各組沿用最後變更號，不需每圖連號；純文字更新不全庫換 v。
 依輸出 bytes、尺寸、binding／可用性比較是否變更；crop 只換 art，組內一尺寸變更可使該組一起換 URL。
 缺圖／撤下後恢復、改面與 A→B→A 回復均配新號，不能回用古老 v；舊 query 冷讀可能已快取較新的 bytes。
-失敗預留號也不回收，相同計畫重試必須同號同輸出。此狀態耐久保存並備份，不由兩版 CDN 索引反推或重設。
 輸出 recipe、瀏覽器時間及每次全庫 data_version 都不能直接代替此事件版本。
 
-配號器使用 repo 外的**發布端耐久狀態檔**，與上傳計畫／發布收據同類，隨既有備份流程備份並驗還原；不是 authored 人工輸入，
-不放可丟棄建置快取、latest cache 或會按兩版回收的公開 snapshot namespace。
-至少保存已保留最高號 H、計畫識別、各組分配號與候選輸出完整 SHA，以及發布／失敗狀態；
-預留與備份確認完成後才可對外 PUT 或請求該 v，單一寫入者下原子推進 H。
+配號狀態是匯出私有目錄裡的 `media-state.json`，只有兩項：高水位整數 H，與最近一次成功匯出的各組
+binding／指紋／版本。每次匯出先把 H 加一並寫回，失敗的匯出也消耗該號；成功時在切換 preview 指標前
+寫入本次各組狀態，下一次匯出就與它比較。比較基準是最近一次匯出、不是最近一次上傳，所以上傳失敗後
+另做的匯出只要換圖就拿新號；同一份匯出重跑上傳則沿用同號補傳。
+此檔不是 authored 人工輸入，也不放在公開根；請隨既有備份保存。遺失時會從 1 重新配號，
+可能撞到已被快取的舊 URL，應從備份還原而非刪除重來。
 
-遺失時停止配號，從已驗備份及完整發布／預留收據恢復，含未發布、失敗與撤下號；
-安全下限 H 必須涵蓋所有曾使用或預留號，下一號嚴格大於 H，且仍在正安全整數範圍。
-R2 現存 current／previous media 的最大 v 是恢復時必須核對的下限，但 H 還須涵蓋未發布預留號。
-不能只取該最大值加任意安全間隔就宣稱不重用，因失敗／已回收的嘗試可能超過間隔；須由備份與完整收據證明上界。
-無法證明 H 完整時停止發布並恢復證據，不能猜時間戳、從 1 開始或把未知當零；到達上限亦停止，另訂版本策略。
+上傳流程（[R2 上傳](../../carddb/src/sve_carddb/r2_upload/v2/README.md)）：
 
-發布流程：
-
-1. 單一寫入者或等效鎖定，釘 current revision、候選內容 SHA／尺寸及 remote ETag，耐久記錄上傳計畫與保留 revision。
-2. 新圖片 key create-only，既有圖片以 If-Match 條件覆寫；只寫實際變動檔，未知 bytes／競爭停止。JSON／manifest 仍不可覆寫。
-3. 全組 origin bytes、尺寸驗妥，並逐一以普通 CDN GET 核對所有新 v URL 的完整輸出 SHA（含同組 bytes 未變而 URL 已換者）；不符依下述精確 URL purge 補救並重驗。全部通過後，寫入新版不可變 JSON／manifest，最後 CAS 切 current／previous 索引。失敗不發布半套 current。
-4. 提交後按 current 圖片集合清理撤下／不再使用 key，metadata 只保 current＋previous 聯集；GC 重驗 revision 並避開合法在途發布。
+1. 只選 preview 指標所指清單的引用閉包與其卡圖；私有目錄、建置 bundle 與圖片庫不上傳。
+2. 卡圖缺少或不同時才寫：新 key create-only，既有 key 以 If-Match 條件覆寫；JSON／manifest 不可覆寫，不同即停止。
+   每個檔案寫入後都從 origin 讀回比對 bytes 與標頭，未寫入的檔案以比較時的讀取為準。
+3. 以普通 CDN GET 核對所有帶 v 的卡圖完整 URL（含同組 bytes 未變而 URL 已換者）；開發環境可明示略過，origin 讀回照常。
+4. 確認索引未被改動後，最後條件切 current／previous 索引。失敗不發布半套 current，重跑只補傳缺少或不同的檔案。
+5. 回收另行執行，按 current 圖片集合與 current＋previous 的 JSON 閉包清理其餘 key。
 
 同一組多尺寸覆寫並非跨物件原子交易；舊快照在寫入途中可能看到新舊尺寸混合，新快照只在全組就緒後發布。
 previous 的舊 v 冷讀拿到目前 bytes 可接受，metadata 不重寫，也不要求 origin 同時符合兩版圖片 hash。
-中斷後先核對未完成計畫並向前恢復；不能只看 current manifest 的差異就忽略 origin 已寫入未發布 bytes。
-若改採另一批輸出，配新號再驗，不假設仍能取回舊圖。
+匯出要以不同 bytes 覆寫既有卡圖前先刪 preview 指標，中斷的匯出不會留下可上傳的舊指標。
 
 新快照啟用後，browser 的 src／srcset 和 SW cache key 一律切新 v；SW 禁止 ignoreSearch 或只按 ID／尺寸匹配，
 舊 response 晚到不得回寫新版 view。新圖下載／decode 未完成顯示 placeholder，失敗明示，不拿舊 v 當 fallback。
@@ -96,7 +92,7 @@ query 分離門檻已通過，未代驗瀏覽器／SW。正式網域核對設定
 不能用 bypass-cache 請求冒充通過。發布前不預暖尚未上傳的新 v；若新 v 已有錯 bytes／負快取，驗收失敗並停止切索引。
 確認 origin 正確後，對受影響的**完整 URL（含 v）做精確 URL purge**，再以普通 CDN GET 核 SHA、暖快取後重讀；
 所有新 v URL 通過才可提交。purge 涉及 Cloudflare 權杖與權限，由維護者執行或逐次明示同意後執行；
-權杖不得寫入文件、上傳計畫、報告或 log，不把一般上傳同意視為 purge 授權。
+權杖不得寫入文件、匯出目錄、報告或 log，不把一般上傳同意視為 purge 授權。
 無權限或 purge／重驗失敗時保留未發布狀態，不以 bypass-cache 成功代替，也不擴大成全 zone purge。
 purge 只清 CDN；若 browser／SW 已取得受污染的 v，須放棄該號、另配新號並重新驗證，不以 CDN purge 宣稱端點舊快取已消失。
 另驗 browser／SW 全暖、網路／quota 失敗、撤下、晚到舊請求與回復版本；opaque response 不能稱為已驗 SHA。

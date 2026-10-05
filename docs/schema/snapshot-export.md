@@ -1,8 +1,8 @@
 # 公開快照候選匯出器
 
 匯出器僅產出 2.0；圖片 URL、版本與新鮮度依 [圖片發布契約](image-variants.md#20-圖片-url版本與新鮮度)
-與 [傳輸 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)。預覽配號／快取隔離，
-不寫正式 current／previous 索引；正式發布仍須另行建置並通過發布閘門。
+與 [傳輸 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)。預覽配號狀態與快取放在公開根之外，
+匯出不寫 current／previous 索引；開發桶的索引由上傳寫入，正式發布仍須另行建置並通過發布閘門。
 
 本文件說明 Python producer 的邊界；公開欄位與分片語意以
 [snapshot-format.md](snapshot-format.md)、[snapshot-transport.md](snapshot-transport.md)
@@ -37,9 +37,8 @@ preview CLI 的 `export`／`export-offline` 用 `--brotli` 啟用；預設 `--no
 整個 decoder 的記憶體上限；不先一次性配置整份不可信的解壓輸出。
 驗證不要求重現 producer 的壓縮 bytes，亦不取代 manifest 的長度／hash／閉包檢查。
 
-正式 2.0 凍結包回讀與發布重試保留既有 manifest／changes 的 raw、gzip、br 表示，
-重驗後直接使用，不呼叫 producer 重壓。`load_bundle`、`write_bundle` 與 `publish`
-因此不需提供 producer codec；`prepare` 仍可用 Brotli 建立新的表示。遠端不可變物件
+上傳讀回匯出根時保留既有 manifest／changes 的 raw、gzip、br 表示，
+重驗後直接使用，不呼叫 producer 重壓，因此不需提供 producer codec。遠端不可變物件
 比對確切 bytes，不因兩份 `.br` 解壓內容相同就允許換編碼覆寫。
 
 ## 固定分片與裝檔

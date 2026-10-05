@@ -160,61 +160,65 @@ SPA 設定未找到靜態檔案回 index.html；維護者登入後用
 
 ## 6. 快照 2.0 的離線對帳
 
-R2 只發布快照 2.0。preview 僅在本機產出 2.0，沒有上傳入口；不能把 preview
-直接升格為正式版本。先依既有發布流程完成來源與採納守門、版本預留、圖片規劃及
-凍結包，保存發布 ledger 的主副本與獨立 checkpoint；命令不自動初始化或恢復。
-詳細格式與步驟見 [R2 2.0 發布](../../carddb/src/sve_carddb/r2_upload/v2/README.md)。
+R2 只收快照 2.0。上傳來源就是 `snapshot export-offline` 的公開匯出根（`--preview-dir`）：
+命令讀 `snapshots/preview/current.json`，只選該清單引用的公開 JSON 與卡圖，
+不讀私有目錄（`--private-dir` 的 inputs、reports、媒體狀態）、建置 bundle、圖片庫或配方快取。
+不另做凍結包，也沒有帳本、checkpoint 或預留號。資料版號仍是 `preview-…`，
+寫進開發桶 index 的是開發用 entry，不是正式發布；正式發布仍待 #34 的閘門。
+詳細流程見 [R2 2.0 上傳](../../carddb/src/sve_carddb/r2_upload/v2/README.md)。
 
-以下變數由維護者填入實際的凍結包、ledger 主副本與獨立 checkpoint；路徑須符合
-既有發布契約，不寫入 repo。`CDN_BASE_URL` 為該環境的資料入口。
+`EXPORT_DIR` 由維護者填入剛完成的匯出根，不寫入 repo。
 
 ```bash
 uv --directory carddb sync --locked
 uv --directory carddb run sve-carddb r2 upload-v2 \
-  --release-dir "$RELEASE_DIR" \
-  --ledger-dir "$LEDGER_DIR" --backup-dir "$BACKUP_DIR" \
-  --checkpoint-file "$CHECKPOINT_FILE" \
-  --cdn-base-url "$CDN_BASE_URL" --dry-run
+  --export-dir "$EXPORT_DIR" --dry-run
 ```
 
-`.br` 使用 lockfile 的 Python `brotli` 在行程內解碼並核對原始 JSON；凍結包的
-manifest／changes 壓縮表示原樣保留，不以新套件重壓。核對 candidate_files、
-candidate_bytes 與既有 ledger／checkpoint。離線數字是本機候選，遠端存在與否未知。
-dry-run 不讀憑證、不建立 HTTP client、不抓來源或開 live manifest，也不修改狀態。
+dry-run 在本機驗證指標、清單 hash、Schema、每個分片的 hash／長度、gzip 與 `.br` 解碼、
+reader 重接與完整文字包，以及每張卡圖的 bytes、WebP 格式與尺寸，再列出 JSON／卡圖的檔數與 bytes。
+`.br` 使用 lockfile 的 Python `brotli` 在行程內解碼核對，不重壓。
+離線數字是本機候選，遠端已有多少未知。dry-run 不讀憑證、不建立 HTTP client、不寫任何檔案。
 
-## 7. 當次授權與條件上傳
+## 7. 當次授權與上傳
 
 所有真實 Cloudflare 請求都由維護者當次同意後親手執行，agent 與 CI 不代跑。
-核對目標桶、當次 key pair、授權與離線數字後，使用同一組凍結輸入：
+核對目標桶、當次 key pair 與離線數字後，使用同一個匯出根：
 
 ```bash
 uv --directory carddb run sve-carddb r2 upload-v2 \
-  --release-dir "$RELEASE_DIR" \
-  --ledger-dir "$LEDGER_DIR" --backup-dir "$BACKUP_DIR" \
-  --checkpoint-file "$CHECKPOINT_FILE" \
-  --cdn-base-url "$CDN_BASE_URL" \
+  --export-dir "$EXPORT_DIR" \
   --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" \
-  --skip-cdn-verify \
-  --execute --confirm-maintainer-authorization
+  --skip-cdn-verify --execute
 ```
 
-發布與 GC 共用部署級 writer lease。上傳驗回圖片與不可變 JSON，並從 CDN 驗回帶
-版本查詢的圖片後，才以條件寫入更新 `snapshots/versions/index.json` 的 current／previous。
-條件或傳輸失敗就停止，不退回無條件 PUT，也不重送寫入；保留既有狀態與 checkpoint，
-由維護者核對後重跑。GC 為另外授權的 `r2 gc-v2`，不在上傳後自動刪除。
+上傳依序做：
 
-開發環境執行時加上 `--skip-cdn-verify`，略過 CDN GET 驗證；維護者須以瀏覽器檢查圖片。
-來源端讀回比對仍會執行，命令輸出會標示 CDN 驗證已略過。
+1. 讀遠端 `snapshots/versions/index.json`，決定新的 index：首次 revision=1、previous=null；
+   之後 revision 加一，previous 是原本的 current。已是 current 就不改 index；
+   同一 data_version 換了清單、或比 current 舊的匯出，直接拒絕。
+2. 先卡圖、後 JSON，逐檔 GET 遠端：bytes 與標頭都相同就算已讀回；否則條件 PUT
+   （新 key 用 `If-None-Match: *`，覆寫卡圖用 `If-Match`），再 GET 一次比對。
+   內容定址 JSON 已存在但不同時停止，不覆寫。
+3. CDN 驗證：每個帶 `?v=` 的卡圖完整 URL 各做兩次普通 GET。開發環境在 Access 之後，
+   加 `--skip-cdn-verify` 略過這一步、改以瀏覽器檢查；來源端讀回照常執行，輸出會標示已略過。
+4. 確認 index 沒被改動後，以條件寫入更新 index，再讀回確認。
+
+條件或傳輸失敗就停止，不退回無條件 PUT，也不重送寫入；此時 current 不變。
+修正原因後重跑同一個命令，只會補傳缺少或不同的檔案。沒有變動的重跑不會發出任何 PUT。
+GC 為另外執行的 `r2 gc-v2`，不在上傳後自動刪除，也不要在上傳期間執行。
 
 ## 8. 執行成本與恢復
 
-1.x 預覽的歷史檔數、請求數與耗時不適用於 2.0 發布。現行本機候選數量由 dry-run
-取得；一般發布每個 current 圖片 URL 需四次 CDN GET，已提交版本重試需兩次。
-實際網路、計費、Access 與快取行為須另行實測，不能把離線檢查當作部署驗收。
+一般上傳每個卡圖與 JSON 各一次 GET；有變動的檔案另加一次 PUT 與一次讀回 GET。
+不略過 CDN 驗證時，每個卡圖 URL 再加兩次 CDN GET。實際網路、計費、Access 與快取行為
+須另行實測，不能把離線檢查當作部署驗收。
 
-每段 I/O timeout 為 30 秒，沒有全程期限。失敗先核對既有 ledger、獨立 checkpoint、
-遠端 index 與 writer lease；不自動初始化、重置或定時接管 lease，不用通用 sync 或
-清桶繞過。恢復流程與每次 GC 的授權條件見上述發布文件。
+每段 I/O timeout 為 30 秒，沒有全程期限。失敗時直接重跑同一個匯出根即可；
+匯出若在覆寫卡圖途中中斷，匯出根不會留下指標，須先重跑匯出再上傳。
+`--private-dir` 的 `media-state.json` 記錄卡圖版本的高水位與最新比較狀態，
+請隨既有備份保存；遺失後版本會從 1 重來，可能撞到已被快取的舊 URL。
+GC 的保留規則與執行方式見上述上傳文件。
 
 ## 9. 每個入口的未登入驗法與預期結果
 
