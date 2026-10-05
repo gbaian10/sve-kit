@@ -130,21 +130,25 @@ EXPLICIT = {
         "damage_count_multiplier",
         r"「(?:[^「」]+の(?:数|枚数)|戻した枚数)」の$",
         r"^倍のダメージ(?=[。:、）」])",
+        minimum=1,
     ),
     "damage_attack_multiplier": ExplicitRule(
         "damage_attack_multiplier",
         r"「[^「」]+の攻撃力」の$",
         r"^倍のダメージ(?=[。:、）」])",
+        minimum=1,
     ),
     "count_formula_multiplier": ExplicitRule(
         "count_formula_multiplier",
         r"Xは「[^「」]+の(?:数|枚数)の$",
         r"^倍」である(?=[。:、）)])",
+        minimum=1,
     ),
     "attack_damage_multiplier": ExplicitRule(
         "attack_damage_multiplier",
         r"が与える「リーダーへの攻撃ダメージ」と「交戦ダメージ」を$",
         r"^倍にする(?=[。:、）)])",
+        minimum=1,
     ),
     "received_damage_lower_bound": ExplicitRule(
         "received_damage_lower_bound",

@@ -2,7 +2,7 @@
 
 import pytest
 
-from sve_carddb.snapshot.values import digest, object_value, parse, string
+from sve_carddb.snapshot.values import array, digest, object_value, parse, string
 from sve_carddb.template_parameter_rules.current import Rule, Rules, resolve
 from sve_carddb.template_parameters.candidate_matching import recognize
 from sve_carddb.template_parameters.explicit_rules import EXPLICIT
@@ -43,25 +43,25 @@ CASES = (
         "damage_count_multiplier",
         "「試験体の数」の２倍のダメージ。",
         "damage_count_multiplier",
-        0,
+        1,
     ),
     (
         "damage_attack_multiplier",
         "「試験体の攻撃力」の２倍のダメージ。",
         "damage_attack_multiplier",
-        0,
+        1,
     ),
     (
         "count_formula_multiplier",
         "Xは「試験体の数の２倍」である。",
         "count_formula_multiplier",
-        0,
+        1,
     ),
     (
         "attack_damage_multiplier",
         "これが与える「リーダーへの攻撃ダメージ」と「交戦ダメージ」を２倍にする。",
         "attack_damage_multiplier",
-        0,
+        1,
     ),
 )
 
@@ -72,7 +72,10 @@ def test_bounded_contexts_preserve_opt_in_raw_value_role_and_schema(
 ) -> None:
     check_match(identifier, text, role, minimum)
     check_resolution(identifier, text, role, minimum)
-    assert matches(text.replace("２", "０"), identifier)
+    if minimum == 1:
+        assert matches(text.replace("２", "０"), identifier) == ()
+    else:
+        assert matches(text.replace("２", "０"), identifier)
     assert matches(text.replace("２", "２猫"), identifier) == ()
 
 
@@ -310,3 +313,61 @@ def test_paired_caps_and_aliases_resolve_to_independent_roles_and_schema(
         update={"slots": tuple(h.model_copy(update={"value": 7}) for h in value.slots)}
     )
     assert recognize(text, partition(text)[0], changed, refs, identifiers) == ()
+
+
+@pytest.mark.parametrize(("identifier", "text", "role", "minimum"), CASES[2:])
+def test_zero_multiplier_stays_unresolved_at_definition_projection(
+    identifier: str, text: str, role: str, minimum: int
+) -> None:
+    del role
+    assert minimum == 1
+    text = text.replace("２", "０")
+    item = entry(entry_ref(), partition(text)[0], VERSION, store_id="synthetic")
+    value = candidate(text).model_copy(update={"inventory_id": item.id})
+    rows = recognize(text, partition(text)[0], value, References(), (identifier,))
+    assert rows == ()
+    policy = Rules(
+        parameter_rule_format=2,
+        kind="template_parameter_rules",
+        rules=(
+            Rule(
+                rule_id=identifier,
+                enabled=True,
+                origin="project",
+                low_confidence=False,
+                note="",
+            ),
+        ),
+    )
+    solved, remaining = resolve(policy, Candidates(entries=[value], rule_matches=[]))
+    assert solved == ()
+    assert len(remaining) == 1
+    issues = {string(x) for x in array(object_value(parse(remaining[0]))["issues"])}
+    assert issues == {"numeric_role_requires_review"}
+    member = _members(
+        (item,),
+        (value,),
+        {(item.source_ref.source_version_id, item.source_ref.locator): text},
+        {},
+        {item.id: issues},
+        store_id="synthetic",
+    )[0]
+    assert member.pending == ("numeric_role_requires_review",)
+    assert member.hints[0].value == 0
+    with pytest.raises(
+        ValueError, match=r"^Template definition source has unresolved parameter roles$"
+    ):
+        member.verify_schema(
+            Schema(
+                slots=(
+                    Slot(
+                        name="slot_0",
+                        type="uint",
+                        occurrences=(value.slots[0].occurrence,),
+                        reference_kind=None,
+                        min=1,
+                        max=9007199254740991,
+                    ),
+                )
+            )
+        )
