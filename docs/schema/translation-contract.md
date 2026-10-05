@@ -217,7 +217,7 @@ claimed_source 是選填的出處主張；沒有具體主張就省略，不用�
 每次建置的同一組來源可共用解析結果；缺資料不得借最新官網或另一台機器的私人檔補洞。
 來源歸檔完整性及本次 build inputs 的追溯仍依[來源歸檔](source-archive.md)，不能代入假 decision。
 
-export-offline 在同一交易內讀當前模板、參數規則與 glossary，驗證一次後，對每個 face_revision 與 printing_face 的日文主文與 section，
+export-offline 在交易前讀當前模板、參數規則與 glossary 並驗證一次，再於交易內對每個 face_revision 與 printing_face 的日文主文與 section，
 以原文 hash 找到涵蓋它的模板來源並整段渲染，寫入 context、use、binding、translation 與 selection。
 資格只看原文 hash 與卡片身分已確認，不等 printed_text_state；同一原文只有一個 context 與選用，已有不同譯文者回原文。
 建置報告的 `effect_translations` 列欄位數、已翻、回原文、低信心與各退回原因的計數，不含卡文。
