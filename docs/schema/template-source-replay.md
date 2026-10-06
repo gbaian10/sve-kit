@@ -8,7 +8,7 @@ authored 只保存定義與候選的綁定鍵（hash 與 role），不保存官�
 項目欄位為 `{id,level,source_ref,line_ordinal,role,normalizer_id,normalized_hash}`。
 level 首版為 sentence（clause 盤點沿既有來源，尚不啟用子句拼接）；role=body/reminder/token_header/layout。
 項目 ID 為 `inv:`＋H(`[source_ref 去掉 batch_id,line_ordinal,role,[[start,end],...]]`)，H 為 canonical JSON 的完整 SHA-256，segments 由當前分段器依原文順序重建。
-ID 不含 store 名稱與封存批次 ID。source_version_id 只由來源 URL 與原始檔 hash 決定，所以重新封存同一批頁面時 ID 不變。
+ID 不含 store 名稱與封存批次 ID。source_version_id 由來源 provider、kind、URL 與原始檔 hash 決定，所以重新封存同一批頁面時 ID 不變。
 項目 ID 不是 T/C 模板 ID；同一模板在不同位置有不同項目。同次建置內 ID 必須唯一。
 normalizer_id 指本次支援的具名程式；normalized_hash 是分段後正規化文字 exact UTF-8 的 SHA-256。
 
