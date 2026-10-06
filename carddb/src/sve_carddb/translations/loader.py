@@ -92,9 +92,7 @@ def load_glossary(root: Path) -> Snapshot:
     path = root / "translations/index.yaml"
     _safe(path)
     index = _model(Index, read_yaml(path))
-    if set(index.includes) & set(index.inventories):
-        raise ValueError("Template shard and inventory paths must be disjoint")
-    indexed = {**index.includes, **index.inventories}
+    indexed = index.includes
     present = set()
     for file in path.parent.rglob("*"):
         if file.is_symlink():
@@ -110,12 +108,7 @@ def load_glossary(root: Path) -> Snapshot:
             r"translations/(glossary|overrides|templates)/([A-Za-z0-9_-]+)/([0-9]{3,})\.yaml",
             name,
         )
-        inventory = re.fullmatch(
-            r"translations/template-sources/([0-9]{3,})\.yaml", name
-        )
-        if (name in index.includes and match is None) or (
-            name in index.inventories and inventory is None
-        ):
+        if match is None:
             raise ValueError("Unsafe or unsupported translation include")
         file = root / name
         _safe(file)
@@ -123,10 +116,9 @@ def load_glossary(root: Path) -> Snapshot:
         if digest(content) != checksum:
             raise ValueError("Translation shard hash mismatch")
         closure.append((name, file.read_bytes(), content))
-        if inventory is not None or (match is not None and match[1] == "templates"):
+        if match[1] == "templates":
             _template_input(name, content)
             continue
-        assert match is not None
         shards.append((name, file.read_bytes(), content))
     snapshot = Snapshot(path.read_bytes(), tuple(shards), tuple(closure))
     validate_snapshot(snapshot)

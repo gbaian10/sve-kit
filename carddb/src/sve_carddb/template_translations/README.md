@@ -10,39 +10,40 @@ machine translations remain active values; consumers must mark them for review
 and let readers switch to the original source.
 
 Current template shards use `translation_authored_format: 2`. Each record has
-`record_key,kind,data,origin,low_confidence,note`. Definitions preserve their eight
-semantic/source fields; translations contain only `template_id,lang,text`.
+`record_key,kind,data,origin,low_confidence,note`. Definitions hold
+`id,normalized_hash,role,source_lang,normalizer_version,semantic_variant,parameter_schema,content_hash`;
+translations contain only `template_id,lang,text`.
 `origin` remains `machine` after review. Notes do not affect semantic identity.
 The shared glossary reader owns glossary/name values; template code uses that
 snapshot instead of maintaining a parallel glossary.
 
 Unresolved original drafts use `template_translation_candidate` in their dedicated
 indexed shard area. Their source kind, stable draft ID, language, exact target text,
-current inventory IDs and sorted reason codes are closed data. Anonymous N/X and
+`normalized_hash`, `role` and sorted reason codes are closed data. Anonymous N/X and
 malformed placeholder syntax remain untouched; candidates need no definition ID.
 They never become active targets, variants, bindings, pins or translated coverage,
-even with low confidence false. Missing source counts remain unknown. Referenced
-inventory entries must exist and full builds still verify their entire raw closure.
+even with low confidence false. A full build fails when a candidate's pattern has
+no current source position.
 
-`current.validate_templates(inputs, sources)` is a separate full build operation.
-`current_sources.Sources` uses the installed parser, normalizer, reference data and
-explicit current rule switches to enumerate every declared frozen JP batch once.
-It reuses parsed documents within that build. Inventory format 3 contains only
-`template_source_format,kind,source_batches,entries`; no producer or output-manifest
-pin is needed. Every actual entry must appear exactly once and equal its declared
-source position. Full source coverage is reported separately from positional agreement:
-presence-v1 unknown pages still make coverage incomplete even when all known
-source positions agree. Parsing an inventory is not a successful build.
+`current.validate_templates(inputs, sources, batches)` is a separate full build
+operation. `current_sources.Sources` uses the installed parser, normalizer, reference
+data and explicit current rule switches to enumerate the build's own sealed JP batches
+once. Source positions are generated at build time and never stored in Git; their
+entry IDs exclude the store and archive batch, so resealing the same pages keeps them.
+Full source coverage is reported separately: presence-v1 unknown pages still make
+coverage incomplete.
 
-Definitions must reproduce the six-field semantic payload and its content hash,
-exact source spans, slot types, semantic roles, safe integer bounds, raw values
-and full positional coverage. Repeated slots require equal values and roles.
-Unknown references stay pending. A definition ID is `T` followed by a prefix of
-its content hash; one payload has one allocated ID and collisions compare full
-payload bytes. A definition matches every source position with the same normalized
-text and role whose schema and slot roles also verify; a position with another
-schema or role stays unmatched rather than merged. A source position can match at
-most one current definition.
+`normalized_hash` is the SHA-256 of the normalized pattern; with `role` it selects
+the source positions a definition can match. Authored files keep only this hash,
+never the official normalized text. A definition matches every position in that
+group whose schema verifies; a position with another schema stays unmatched rather
+than merged. The build fails when no position verifies, or when verified positions
+disagree on slot semantic roles. Definitions must reproduce the six-field semantic
+payload and its content hash, slot types, semantic roles, safe integer bounds, raw
+values and full positional coverage. Repeated slots require equal values and roles.
+Unknown references stay pending. A definition ID is `T` followed by a prefix of its
+content hash; one payload has one allocated ID and collisions compare full payload
+bytes. A source position can match at most one current definition.
 
 `template_parameter_rules.current` reads registered, explicit enabled/disabled
 switches from `authored/template-parameter-rules/current.yaml`. Missing files fail;
@@ -55,7 +56,7 @@ adoption rules.
 `{{slot_name}}`; braces and backslashes in literal text must be escaped. Unknown,
 unused or malformed slots fail. No expressions or global N/X substitutions exist.
 
-Historical adoption loaders, inventory formats 1/2, approval receipts and frozen
+Historical adoption loaders, stored inventories, approval receipts and frozen
 semantic interpreters have been removed. Git retains their history; current builds
 need no legacy template catalog or historical environment. Shared member, schema
 and matching checks live in `members` and `definitions`.

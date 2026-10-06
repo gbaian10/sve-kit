@@ -4,6 +4,7 @@
 sealed batch, validates frozen source identity and retains parsed documents for
 reuse in the same build. Source fields are partitioned by the installed normalizer.
 Every position has an exact source reference, code-point spans, role and hash.
+Positions exist only during a build; their IDs exclude the store and archive batch.
 `coverage()` reports missing or unknown fields independently of the enumerated
 positions. Unknown presence never becomes an absent effect.
 
@@ -13,5 +14,5 @@ checks one current position against an already verified projected field; it is n
 historical producer replay.
 
 The old diagnostic CLI, catalog comparison, frozen recipe/environment pins and
-v1 inventory writers have been removed. Current builds do not require a legacy
+inventory files in Git have been removed. Current builds do not require a legacy
 catalog file. Older implementations are available only in Git history.

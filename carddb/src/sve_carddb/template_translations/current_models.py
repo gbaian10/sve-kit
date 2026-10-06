@@ -4,10 +4,9 @@ from typing import Annotated, Literal, Self
 
 from pydantic import Field, field_validator, model_validator
 
-from sve_carddb.catalog.adoption_models import Batch
 from sve_carddb.products.models import Code, Lang
-from sve_carddb.registry.records import RecordData, Text
-from sve_carddb.template_sources.models import Entry
+from sve_carddb.registry.records import Hash, RecordData, Text
+from sve_carddb.template_sources.normalizer import Role
 from sve_carddb.template_translations.models import Definition, TemplateId
 
 
@@ -40,7 +39,8 @@ class Candidate(RecordData):
     candidate_id: Text
     lang: Lang
     text: Text
-    inventory_ids: tuple[Text, ...]
+    normalized_hash: Hash
+    role: Role
     reasons: Annotated[
         tuple[Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]*\Z")], ...],
         Field(min_length=1),
@@ -54,12 +54,8 @@ class Candidate(RecordData):
 
     @model_validator(mode="after")
     def _ordered(self) -> Self:
-        if self.inventory_ids != tuple(
-            sorted(set(self.inventory_ids))
-        ) or self.reasons != tuple(sorted(set(self.reasons))):
-            raise ValueError(
-                "Candidate references and reasons must be sorted and unique"
-            )
+        if self.reasons != tuple(sorted(set(self.reasons))):
+            raise ValueError("Candidate reasons must be sorted and unique")
         return self
 
 
@@ -108,31 +104,3 @@ class Shard(RecordData):
         if type(value) is not int:
             raise ValueError("Current template format must be integer two")
         return value
-
-
-class Inventory(RecordData):
-    template_source_format: Literal[3]
-    kind: Literal["template_source_inventory"]
-    source_batches: Annotated[tuple[Batch, ...], Field(min_length=1)]
-    entries: tuple[Entry, ...]
-
-    @field_validator("template_source_format", mode="before")
-    @classmethod
-    def _format(cls, value: object) -> object:
-        if type(value) is not int:
-            raise ValueError("Current inventory format must be integer three")
-        return value
-
-    @model_validator(mode="after")
-    def _order(self) -> Self:
-        keys = tuple(batch.batch_id for batch in self.source_batches)
-        identifiers = tuple(entry.id for entry in self.entries)
-        if keys != tuple(sorted(set(keys))) or identifiers != tuple(
-            sorted(set(identifiers))
-        ):
-            raise ValueError(
-                "Current inventory batches and entries must be sorted and unique"
-            )
-        if any(entry.source_ref.batch_id not in keys for entry in self.entries):
-            raise ValueError("Current inventory entry is outside its source batches")
-        return self

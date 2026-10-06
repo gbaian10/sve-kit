@@ -27,13 +27,13 @@ filing_key 為 `[A-Za-z0-9_-]+`，sequence 為三位以上十進位字串，記�
 
 | 檔案 | 完整頂層欄位 |
 | --- | --- |
-| `translations/index.yaml` | `translation_authored_format: 2, kind: translation_index, includes, inventories` |
+| `translations/index.yaml` | `translation_authored_format: 2, kind: translation_index, includes` |
 | `translations/{glossary,templates,overrides}/<filing_key>/<sequence>.yaml` | `translation_authored_format: 2, kind: translation_shard, records` |
-| `translations/template-sources/<sequence>.yaml` | 清冊 format 3，依[當前清冊契約](template-source-replay.md) |
 
-includes／inventories 均是 authored 相對路徑到解析後 canonical JSON SHA-256 的映射，由工具更新。
+includes 是 authored 相對路徑到解析後 canonical JSON SHA-256 的映射，由工具更新。
 它們只檢查檔案完整性，不是核可證明；index 不釘自身或同 PR 未來的 commit。
-翻譯入口只接受 format 2 分片與 format 3 清冊；glossary 與模板 reader 均驗整個入口的檔案閉包。
+翻譯入口只接受 format 2 分片；glossary 與模板 reader 均驗整個入口的檔案閉包。
+模板來源清冊在建置時產生，不進 Git，見[清冊契約](template-source-replay.md)。
 舊格式留在 Git 歷史，不作現行載入分支。
 
 record 欄位為 `{record_key,kind,data,origin,low_confidence}`，另可選填 note。
@@ -49,9 +49,9 @@ concept_evidence 的 concept_note 可省略，只保留有實際內容的說明�
 | glossary_choice | term_id,lang | `term_id,lang,value,concept_evidence`（選填 `source_claim`） |
 | glossary_emphasis_choice | term_id | `term_id,value` |
 | symbol_localization_choice | symbol_id,lang | `symbol_id,lang,symbol_basis,value,concept_evidence`，完整值依[記號文案契約](catalog-route-adoption.md#6-卡文記號與三語文案) |
-| sentence_template | id | `id,inventory_id,source_span,source_lang,normalizer_version,semantic_variant,parameter_schema,content_hash` |
+| sentence_template | id | `id,normalized_hash,role,source_lang,normalizer_version,semantic_variant,parameter_schema,content_hash` |
 | template_translation | template_id,lang | `template_id,lang,text` |
-| template_translation_candidate | source_kind,candidate_id,lang | `source_kind,candidate_id,lang,text,inventory_ids,reasons`，未啟用原稿依 §2.1 |
+| template_translation_candidate | source_kind,candidate_id,lang | `source_kind,candidate_id,lang,text,normalized_hash,role,reasons`，未啟用原稿依 §2.1 |
 | template_translation_variant | template_id,lang,variant_key | `template_id,lang,variant_key,text` |
 | glossary_choice_variant | term_id,lang,variant_key | `term_id,lang,variant_key,value,concept_evidence`（選填 `source_claim`） |
 | context_assignment | owner,field,ordinal | `owner,field,ordinal,source_hash,variant,concept_key,reason` |
@@ -106,13 +106,14 @@ text、reasons、note 不參與身分；同鍵原稿有不同文字時拒絕，�
 | candidate_id | 非空的原稿穩定識別，例如效果舊 T ID；不是已驗證的模板 ID，不要求存在正式 definition |
 | lang | 沿既有 Lang 型別的目標語言 |
 | text | 非空 UTF-8 譯文草稿字串，保留最終原稿字元；不解析匿名 N/X 或套用可渲染譯文的 slot 語法 |
-| inventory_ids | 按 ID 排序、唯一的當前清冊 entry ID 陣列；來源確實缺失時可空，並在 reasons 記原因，不偽造定位 |
+| normalized_hash | 參數正規化後 pattern 的 SHA-256；只存 hash，不存原文 |
+| role | body／reminder／token_header／layout |
 | reasons | 排序、唯一且非空的原因代號陣列，每項符合 ASCII `[a-z][a-z0-9_]*` |
 
-data 恰含上表六欄；record 及分片沿既有封閉結構、鍵唯一、安全路徑與引用檢查。
-所列 inventory_ids 必須存在；完整建置仍驗當前清冊的來源閉包，不能因資料是候選就跳過壞來源。
+data 恰含上表七欄；record 及分片沿既有封閉結構、鍵唯一、安全路徑與引用檢查。
+完整建置時 normalized_hash＋role 必須在本次清冊找得到位置；不能因資料是候選就跳過壞來源。
 原稿只存我們撰寫／生成的譯文，不保存官方原文、JP normalized、完整來源欄位、私人路徑、核可 hash 或事件。
-來源文字由清冊的 source_ref／locator 取得，不另抄進 text 或 note。
+來源文字由建置時清冊的 source_ref／locator 取得，不另抄進 text 或 note。
 
 候選不加入 active targets、bindings、renderer、pin 選用或公開翻譯投影，也不計為機械有效／已翻譯覆蓋。
 統一處理清單保留 candidate ID、各原因及受影響卡片數；來源未知時影響數記未知，不當成零。
@@ -122,6 +123,7 @@ data 恰含上表六欄；record 及分片沿既有封閉結構、鍵唯一、�
 ## 3. 清冊與定義
 
 清冊是所有來源欄位及句型位置的完整盤點，保留 body、reminder、token_header、layout、name 與 label 角色；風味不在清冊內。
+清冊每次建置從封存來源產生，不存 Git；定義與候選以 normalized_hash＋role 綁定，見[清冊契約](template-source-replay.md)。
 缺來源、unknown、空字串與空白不能混為不存在；每個來源片段要有去向。
 固定文字和參數 schema 共同描述模板；辨識不能只把所有數字叫 N、所有引號內容叫 X 後當成同一句。
 
@@ -133,7 +135,7 @@ ID 為 T（sentence）／C（clause）＋六欄 payload hash 前 16 hex；碰撞
 這是語義身分規則，不要求保存全部舊清冊／採納分片或遍歷 Git 祖先；未使用的舊定義可從當前檔移除。
 
 同一位置至多匹配一個有效定義；多個候選列歧義，不依檔名或 ID 大小任選。
-normalized_text 相同、但參數 schema 或 slot 角色不同的位置不匹配該定義，不依原文字串合一。
+normalized_text 相同、但參數 schema 不同的位置不匹配該定義，不依原文字串合一；schema 相符但 slot 角色不一致時建置失敗。
 所有句型包括只出現一次者仍用模板；子句組合無環，不另造每張卡自由翻譯覆寫。
 
 ## 4. 參數、譯文與自動套用
@@ -163,7 +165,7 @@ layout 不含待翻語義，可機械生成固定模板；reminder/token_header 
 
 parameter_schema 固定 `{format:1,slots:[...]}`；每個 slot 恰為 `{name,type,occurrences,reference_kind,min,max}`。name 為 `[a-z][a-z0-9_]*`，唯一；type=uint/literal/reference，reference_kind 為 card/term/vocabulary 或 null，uint 的 min/max 為安全非負整數，其餘為 null。occurrences 是 normalized_text 的不重疊 `{start,end}` 陣列；同 slot 多次出現值須一致。slot 陣列按首次位置排序。舊 `『X』` 的 slot 只覆蓋中間 X，左右引號仍是 literal；params 的 uint/literal 是整數／字串，reference 為 `{kind:card,id}`、`{kind:term,id}` 或 `{kind:vocabulary,vocabulary_kind,vocabulary_code}`，須符合宣告種類與 FK。數字正規化前的 raw 字串與數值分開保存；reference 綁永久概念 ID，不能靠顯示名猜同卡。literal 僅給明定的格式片段（例如 layout），不得包住整句外文冒充翻譯。
 
-術語引用 slot 可覆蓋 normalized_text 中原樣保留的名稱，不必換成佔位符；該模板的名稱固定、大括號仍 literal。只以唯一 exact 當前概念及 category 綁定；詞庫改動由當前清冊重產檢查歧義。四條能力門檻規則（combo／lesson／necrocharge／spell_chain）只將數字作 uint slot，已採納名稱只供 context 檢查、仍為 literal；不借此核可中文譯名或新增名稱引用。
+術語引用 slot 可覆蓋 normalized_text 中原樣保留的名稱，不必換成佔位符；該模板的名稱固定、大括號仍 literal。只以唯一 exact 當前概念及 category 綁定；詞庫改動由每次建置的清冊檢查歧義。四條能力門檻規則（combo／lesson／necrocharge／spell_chain）只將數字作 uint slot，已採納名稱只供 context 檢查、仍為 literal；不借此核可中文譯名或新增名稱引用。
 
 已辨識為卡名引用的 slot（本文的 `『X』` 與 token 標頭名稱）缺 glossary 卡名概念時，仍可匹配同句型的 term slot：
 建置內部參數為 `{kind:card_name,text}`，text 須等於該位置的原文拼寫；渲染時用該原文已選用的卡名譯名，
@@ -211,7 +213,7 @@ claimed_source 是選填的出處主張；沒有具體主張就省略，不用�
 ### 6.1 當前資料的建置
 
 一般 reader 只驗版本、型別、唯一鍵、索引及引用。建置使用本次來源與有效資料，
-產生 context、use、binding、translation、selection；完整當前清冊重產一次並比對檔案，
+產生 context、use、binding、translation、selection；清冊在本次建置產生一次，
 不執行舊 producer、不重算舊採納歷史，也不保存新的核可證明。
 每次建置的同一組來源可共用解析結果；缺資料不得借最新官網或另一台機器的私人檔補洞。
 來源歸檔完整性及本次 build inputs 的追溯仍依[來源歸檔](source-archive.md)，不能代入假 decision。
@@ -311,7 +313,7 @@ shared_jp_unchecked 只限 target_lang=zh-Hant、EN 接收端、已確認同卡�
 啟用時同步 snapshot-format、機器 Schema、tuple、Python／TS reader 及能力版本，不能只改資料版號或冒用 reviewed 表示人工看過。
 加粗／原文位置的公開承載依[術語契約 §6](glossary-adoption.md#6-公開快照影響與最小擴充提案)，內部支援不代表舊公開 tuple 已有該欄。
 
-CI 自動驗格式、key／ID 唯一、參數對齊、引用與 owner、來源覆蓋，並用固定輸入重新產生當前清冊比檔案。
+CI 自動驗格式、key／ID 唯一、參數對齊、引用與 owner、來源覆蓋，並用固定輸入產生清冊完成建置驗證。
 官方輸入存既有永久私有 testdata repo，公開 repo 只留 commit 與檔案 hash，依既有 deploy-key 流程取得；
 可信任 CI 缺資料失敗，fork 明示只跑合成檢查，不能宣稱完整資料驗收。
 CI 不讀個人檔案、不即時爬站；報告列 ID／原因，不在 log、cache 或 artifact 放官方全文。
@@ -320,4 +322,4 @@ CI 不讀個人檔案、不即時爬站；報告列 ID／原因，不在 log、c
 ## 9. 舊格式的保存
 
 當前資料保留有效模板、參數、選詞、加粗、來源類別、排除與撤回語義；無法無損綁定的譯文依 §2.1 保留候選原稿並列原因，不混入可渲染集合。
-舊決定、收據、修訂鏈及清冊環境留在 Git 歷史，現行入口不載入或重播，也不據此補造核可事件；原始來源歸檔的保存責任不變。
+舊決定、收據、修訂鏈、舊清冊檔及其環境留在 Git 歷史，現行入口不載入或重播，也不據此補造核可事件；原始來源歸檔的保存責任不變。

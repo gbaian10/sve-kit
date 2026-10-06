@@ -30,6 +30,10 @@ if TYPE_CHECKING:
 def populate(db: Database, validated: Validated) -> None:
     """The caller runs full validation once, before any current template rows are written."""
     members = {m.entry.id: m for m in validated.members}
+    # Every matched position of a definition has the same normalized pattern.
+    patterns = {
+        identifier: members[entry].normalized for entry, identifier in validated.matches
+    }
     audit = {}
     for path, exact, content in validated.inputs.files.content:
         if not path.startswith("translations/templates/"):
@@ -75,7 +79,7 @@ def populate(db: Database, validated: Validated) -> None:
                 id=data.id,
                 level="clause" if data.id.startswith("C") else "sentence",
                 source_lang=data.source_lang,
-                normalized_text=members[data.inventory_id].normalized,
+                normalized_text=patterns[data.id],
                 normalizer_version=data.normalizer_version,
                 semantic_variant=data.semantic_variant,
                 parameter_schema=Json(data.parameter_schema.model_dump(mode="json")),

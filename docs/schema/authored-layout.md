@@ -23,7 +23,7 @@
 | 待審技術契約 | Standard 構築／禁限／角色與必要 CR 引用 | `construction-adoptions/index.yaml`、`construction-adoptions/<area>/<region>/standard/<sequence>.yaml`，roles／cr 為 `<area>/<region>/<sequence>.yaml` 整區共用；見[構築採納契約](construction-adoption.md)，尚無正式採納資料 |
 | 提案 | 其他策展、標誌 | `curation/BP01/001.yaml` |
 | 待審（技術契約） | 數位對應與查核覆蓋採納 | `digital-links/index.yaml`、`digital-links/{links,coverage}/<filing_key>/<sequence>.yaml`；見[數位對應採納契約](digital-link-adoption.md)，真人link入口已實作、尚無逐卡正式遷入；coverage未實作 |
-| 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/index.yaml`、`translations/{templates,glossary,overrides,region-reviews}/<filing_key>/<sequence>.yaml`、`translations/template-sources/<sequence>.yaml`；推導結果不進 authored，見 §6 |
+| 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/index.yaml`、`translations/{templates,glossary,overrides,region-reviews}/<filing_key>/<sequence>.yaml`；推導結果不進 authored，見 §6 |
 | 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog-adoptions/index.yaml` 與分片，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與封套) |
 | 定案（技術契約） | 同號路由與預設版次覆寫 | `display-overrides/index.yaml` 與分片，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
 | 定案（新格式） | 數位名字／同名瀏覽政策 | `digital-name-policies/index.yaml`、`digital-name-policies/<policy_id>/current.yaml`；名字與同名瀏覽各一份可修改的 current 規則，同名瀏覽是獨立非翻譯入口，見[名字契約](digital-name-policy.md) |
@@ -207,15 +207,15 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 ## 6. 模板、翻譯與語義例外
 
-翻譯的 index／分片使用 `translation_authored_format:2`，清冊使用 `template_source_format:3`，
-完整欄位依[翻譯契約](translation-contract.md)與[清冊重產契約](template-source-replay.md)。
+翻譯的 index／分片使用 `translation_authored_format:2`；模板來源清冊在建置時產生，不進 authored。
+完整欄位依[翻譯契約](translation-contract.md)與[清冊契約](template-source-replay.md)。
 舊決定封套、membership、核可收據、採納鏈、歷史 producer／expected 只供轉換，不是新 reader 的必要輸入。
 資料可直接改，退回用 git revert；只記來源類別 official/project/machine、低信心及必要資料理由。
 
 效果模板保留固定字、參數、句型比對、術語、卡名引用、加粗、新卡自動套用及未匹配清單。
 [辨識規則](template-parameter-policy.md)由現行程式與當前設定提供；風味不走模板，依[直接對照表](flavor-translation.md)。
 純譯文／note 改字不換模板或術語 ID；真正固定字／參數語義改變才是另一模板。
-一般讀取驗結構與引用，CI／建置用本次固定來源重產清冊比檔案，不逐次回放 Git 祖先或舊環境。
+一般讀取驗結構與引用，CI／建置用本次固定來源產生清冊，不逐次回放 Git 祖先或舊環境。
 context/use/binding、渲染全文與 selection 由工具推導，不存另一份逐卡翻譯真值。
 
 context_assignment／card_name_concept 只對自己的 owner 與 exact 原文有效，建置驗目前身分與原文；

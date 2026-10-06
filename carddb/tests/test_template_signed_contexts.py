@@ -100,7 +100,7 @@ def test_signed_current_resolution_keeps_role_bounds_and_ownership(
     evidence = refs()
     c = candidate(text, evidence)
     ref = entry_ref()
-    e = entry(ref, partition(text)[0], VERSION, store_id="synthetic")
+    e = entry(ref, partition(text)[0], VERSION)
     c = c.model_copy(update={"inventory_id": e.id})
     rows = recognize(text, partition(text)[0], c, evidence, (identifier,))
     proposals = Candidates(entries=[c], rule_matches=list(rows))
@@ -123,7 +123,6 @@ def test_signed_current_resolution_keeps_role_bounds_and_ownership(
         {(ref.source_version_id, ref.locator): text},
         {(e.id, numeric.name): object_value(parse(solved[0]))},
         {},
-        store_id="synthetic",
     )[0]
     assert m.pending == ()
     assert (

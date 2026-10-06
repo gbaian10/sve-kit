@@ -10,12 +10,16 @@ from sve_carddb.template_parameter_rules.current import resolve
 from sve_carddb.template_parameters.inventory import Candidates
 from sve_carddb.template_translations.current import validate_templates
 from sve_carddb.template_translations.current_models import DefinitionRecord
-from sve_carddb.template_translations.definitions import _definitions, payload
+from sve_carddb.template_translations.definitions import _definitions, groups, payload
+from sve_carddb.template_translations.members import POSITIVE_ROLES
 
 from .test_template_current import make_case
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
+
+    from sve_carddb.template_translations.definitions import Groups
+    from sve_carddb.template_translations.members import Reconstructed
 
     from .test_template_current import Case
 
@@ -29,9 +33,14 @@ def current_case(tmp_path_factory: pytest.TempPathFactory) -> Case:
     ("field", "value", "message"),
     [
         (
-            "inventory_id",
-            "absent",
-            "Template definition references an absent inventory entry",
+            "normalized_hash",
+            "sha256:" + "0" * 64,
+            "Template definition pattern has no current source position",
+        ),
+        (
+            "role",
+            "reminder",
+            "Template definition pattern has no current source position",
         ),
         (
             "source_lang",
@@ -70,7 +79,9 @@ def test_current_definition_rejects_changed_semantic_identity(
     )
     with pytest.raises(ValueError, match="^" + message + "$"):
         validate_templates(
-            replace(current_case.inputs, records=(changed,)), current_case.sources
+            replace(current_case.inputs, records=(changed,)),
+            current_case.sources,
+            current_case.batches,
         )
 
 
@@ -90,6 +101,7 @@ def test_current_payload_has_one_id_and_each_source_has_one_definition(
         validate_templates(
             replace(current_case.inputs, records=(record, alternate)),
             current_case.sources,
+            current_case.batches,
         )
     slot = record.data.parameter_schema.slots[0].model_copy(update={"name": "amount"})
     alternate = record.model_copy(
@@ -120,28 +132,54 @@ def test_current_payload_has_one_id_and_each_source_has_one_definition(
         validate_templates(
             replace(current_case.inputs, records=(record, alternate)),
             current_case.sources,
+            current_case.batches,
         )
 
 
-@pytest.mark.parametrize("change", ["roles", "pending"])
-def test_equal_text_with_another_schema_or_role_stays_unmatched(
-    current_case: Case, change: str
-) -> None:
+def _with_other(
+    current_case: Case,
+    *,
+    roles: tuple[str, ...] | None = None,
+    pending: tuple[str, ...] = (),
+) -> tuple[DefinitionRecord, Reconstructed, Groups]:
     record = current_case.inputs.records[0]
     assert isinstance(record, DefinitionRecord)
     members = {m.entry.id: m for m in current_case.generated.entries}
-    member = members[record.data.inventory_id]
+    member = next(
+        m
+        for m in members.values()
+        if m.candidate.template_normalized_hash == record.data.normalized_hash
+    )
     other = replace(
         member,
         entry=member.entry.model_copy(update={"id": "inv:other"}),
-        roles=("other_role",) * len(member.roles)
-        if change == "roles"
-        else member.roles,
-        pending=("unresolved",) if change == "pending" else member.pending,
+        roles=member.roles if roles is None else roles,
+        pending=pending,
     )
-    _, matches, frequencies = _definitions((record,), {**members, "inv:other": other})
+    return record, member, groups({**members, "inv:other": other})
+
+
+def test_equal_text_with_another_schema_stays_unmatched(current_case: Case) -> None:
+    record, member, patterns = _with_other(current_case, pending=("unresolved",))
+    _, matches, frequencies = _definitions((record,), patterns)
     assert matches == {record.data.id: (member.entry.id,)}
     assert frequencies == ((record.data.id, 1),)
+
+
+def test_equal_schema_with_different_slot_roles_is_refused(current_case: Case) -> None:
+    member = current_case.generated.entries[0]
+    # Keep the numeric bound class so only the semantic role differs.
+    role = (
+        next(r for r in POSITIVE_ROLES if r != member.roles[0])
+        if member.roles[0] in POSITIVE_ROLES
+        else "other_role"
+    )
+    record, _, patterns = _with_other(current_case, roles=(role,) * len(member.roles))
+    with pytest.raises(
+        ValueError,
+        match=r"^Template definition positions disagree on slot semantic roles$",
+    ):
+        _definitions((record,), patterns)
 
 
 @pytest.mark.parametrize("duplicate", [False, True])

@@ -11,14 +11,13 @@ from sve_carddb.snapshot.values import canonical
 from sve_carddb.template_translations.current_models import (
     CandidateRecord,
     DefinitionRecord,
-    Inventory,
     Record,
     Shard,
     TranslationRecord,
     VariantRecord,
 )
-from sve_carddb.template_translations.definitions import _definitions
-from sve_carddb.template_translations.files import INVENTORY, SHARD, Files, read
+from sve_carddb.template_translations.definitions import _definitions, groups
+from sve_carddb.template_translations.files import SHARD, Files, read
 from sve_carddb.translations.loader import Snapshot as Glossary
 from sve_carddb.translations.loader import validate_snapshot
 
@@ -27,7 +26,7 @@ CURRENT_FORMAT = 2
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from sve_carddb.catalog.adoption_models import SourceRef
+    from sve_carddb.catalog.adoption_models import Batch, SourceRef
     from sve_carddb.catalog.adoption_sources import PinnedRepository
     from sve_carddb.template_translations.current_sources import Sources
     from sve_carddb.template_translations.members import Reconstructed
@@ -74,20 +73,9 @@ def shard(raw: bytes) -> Shard:
     return result
 
 
-def inventory(raw: bytes) -> Inventory:
-    """Format three describes only current source batches and positions."""
-    try:
-        return Inventory.model_validate_json(raw)
-    except ValidationError:
-        raise ValueError("Invalid current template inventory") from None
-
-
 def validate_foreign(path: str, raw: bytes) -> None:
     """Glossary readers may validate template shapes without reading frozen sources."""
-    if path.startswith("translations/template-sources/"):
-        inventory(raw)
-    else:
-        _candidate_path(path, shard(raw).records)
+    _candidate_path(path, shard(raw).records)
 
 
 @dataclass(frozen=True)
@@ -95,7 +83,6 @@ class Inputs:
     files: Files
     glossary: Glossary
     records: tuple[Record, ...]
-    inventories: tuple[Inventory, ...]
 
     def translations(self) -> tuple[TranslationRecord, ...]:
         """Low confidence affects presentation, not structural eligibility."""
@@ -116,44 +103,25 @@ def from_files(files: Files) -> Inputs:
         files.content,
     )
     validate_snapshot(glossary)
-    records, inventories, entries = _collect(files)
-    _references(records, entries)
-    return Inputs(
-        files, glossary, tuple(records[k] for k in sorted(records)), tuple(inventories)
-    )
+    records = _collect(files)
+    _references(records)
+    return Inputs(files, glossary, tuple(records[k] for k in sorted(records)))
 
 
-def _collect(files: Files) -> tuple[dict[str, Record], list[Inventory], set[str]]:
+def _collect(files: Files) -> dict[str, Record]:
     records: dict[str, Record] = {}
-    inventories = []
-    entries = set()
     for path, _, raw in files.content:
-        if INVENTORY.fullmatch(path):
-            current = inventory(raw)
-            for entry in current.entries:
-                if entry.id in entries:
-                    raise ValueError("Duplicate current template inventory entry")
-                entries.add(entry.id)
-            inventories.append(current)
-        elif SHARD.fullmatch(path) and path.startswith("translations/templates/"):
+        if SHARD.fullmatch(path) and path.startswith("translations/templates/"):
             values = shard(raw).records
             _candidate_path(path, values)
             for record in values:
                 if record.record_key in records:
                     raise ValueError("Duplicate current template selection key")
                 records[record.record_key] = record
-    return records, inventories, entries
+    return records
 
 
-def _references(records: dict[str, Record], entries: set[str]) -> None:
-    for record in records.values():
-        if (
-            isinstance(record, CandidateRecord)
-            and not set(record.data.inventory_ids) <= entries
-        ):
-            raise ValueError(
-                "Current template candidate references an absent inventory entry"
-            )
+def _references(records: dict[str, Record]) -> None:
     definitions = {
         record.data.id: record
         for record in records.values()
@@ -162,10 +130,6 @@ def _references(records: dict[str, Record], entries: set[str]) -> None:
     payloads: dict[str, str] = {}
     for identifier, definition in definitions.items():
         data = definition.data
-        if data.inventory_id not in entries:
-            raise ValueError(
-                "Current template definition references an absent inventory entry"
-            )
         if data.content_hash in payloads and payloads[data.content_hash] != identifier:
             raise ValueError("Template payload hash must have exactly one allocated ID")
         payloads[data.content_hash] = identifier
@@ -261,31 +225,26 @@ class Validated:
         )
 
 
-def validate_templates(inputs: Inputs, sources: Sources) -> Validated:
-    """One current build verifies every declared source before exposing usable definitions."""
-    batches = {
-        batch.batch_id: batch
-        for item in inputs.inventories
-        for batch in item.source_batches
-    }
-    generated = sources.generate(tuple(batches[key] for key in sorted(batches)))
+def validate_templates(
+    inputs: Inputs, sources: Sources, batches: tuple[Batch, ...]
+) -> Validated:
+    """The build's own sealed batches generate every source position; Git keeps none."""
+    generated = sources.generate(batches)
     actual = {member.entry.id: member for member in generated.entries}
-    declared = {
-        entry.id: entry for item in inputs.inventories for entry in item.entries
-    }
-    if set(actual) != set(declared):
+    patterns = groups(actual)
+    if any(
+        (record.data.normalized_hash, record.data.role) not in patterns
+        for record in inputs.records
+        if isinstance(record, CandidateRecord)
+    ):
         raise ValueError(
-            "Current template inventory must cover every source batch entry"
-        )
-    if any(declared[key] != member.entry for key, member in actual.items()):
-        raise ValueError(
-            "Current template inventory differs from its regenerated source"
+            "Current template candidate pattern has no current source position"
         )
     definitions, members, frequencies = _definitions(
         tuple(
             record for record in inputs.records if isinstance(record, DefinitionRecord)
         ),
-        actual,
+        patterns,
     )
     matches = [
         (entry_id, identifier)

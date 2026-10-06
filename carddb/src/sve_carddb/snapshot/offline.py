@@ -24,6 +24,7 @@ from sve_carddb.card_extras import (
     populate_card_extras,
     require_card_extras_ready,
 )
+from sve_carddb.catalog.adoption_models import Batch as SourceBatch
 from sve_carddb.catalog.adoption_sources import SOURCE_RECIPE_PATHS, PinnedRepository
 from sve_carddb.image_variants import DEFAULT_RECIPE
 from sve_carddb.products import (
@@ -273,8 +274,9 @@ def _templates(
     build: BuildContext,
     stores: dict[str, Path],
     vocabulary: Vocabulary,
+    batch: SourceBatch,
 ) -> Validated | None:
-    """Effect templates belong to the translation entry; validate them once per build."""
+    """Template source positions come from this build's sealed JP batch, not from Git."""
     if inputs.translation_inputs() is None:
         return None
     repository = PinnedRepository(inputs.repository)
@@ -291,7 +293,9 @@ def _templates(
         pins=found.pins,
     )
     rules = load_rules(repository, inputs.authored_revision)
-    return validate_templates(templates, TemplateSources(stores, references, rules))
+    return validate_templates(
+        templates, TemplateSources(stores, references, rules), (batch,)
+    )
 
 
 def _prepare_catalog(
@@ -522,7 +526,9 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     configuration |= text_configuration(texts, vocabulary, ())
     context = BuildContext.from_inputs(inputs.revision, dependencies, configuration)
     flavor = load_flavor(inputs.repo / "authored")
-    templates = _templates(adoptions, context, stores, vocabulary)
+    templates = _templates(
+        adoptions, context, stores, vocabulary, SourceBatch(batch_id=jp.card_batch)
+    )
     adoption_uses = (
         *_adoption_uses(adoptions, context, stores),
         *_translation_uses(adoptions, context, stores),

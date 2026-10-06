@@ -66,7 +66,7 @@ raw 來源的 `source_record.id` 使用 source_version_id，`sha256` 是 raw_sha
 
 #### 2.2.1 建置輸入紀錄與完整使用閉包
 
-翻譯 format 2 的清冊依[當前重產契約](template-source-replay.md)用本次程式及指定來源驗證，
+模板來源清冊依[清冊契約](template-source-replay.md)每次建置用本次程式及指定來源產生，
 不再保存或重播歷史 producer／expected。一般翻譯 reader 不呼叫來源重播；建置仍記當次實際輸入與用途。
 以下來源歸檔及既有 build bundle 的完整性規則不變，不為翻譯新增核可證明、事件收據或另一種封存容器。
 
@@ -122,7 +122,7 @@ Writer 的檔案替換與 SQLite transaction 不是同一原子交易：既有�
 
 ## 5. 只讀重建與缺失歷史
 
-模板歷史清冊依[清冊重算契約](template-source-replay.md)以凍結語義版本重算並逐項比對輸出 hash；
+模板來源清冊依[清冊契約](template-source-replay.md)每次建置重新產生，不保存也不比對歷史輸出；
 每次仍驗本節 sealed/raw 閉包，不借私人審核頁面的免重讀例外略過來源。
 只用一個 BuildContext／F1，實際 program_revision、完整程式／lock 如實記當次執行 H；
 逐群組保留歷史 producer R、凍結版本／manifest pins、context、預期／實際結果與實際環境差異。

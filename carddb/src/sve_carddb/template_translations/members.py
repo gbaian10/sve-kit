@@ -97,17 +97,13 @@ def _members(
     fields: dict[tuple[str, str], str],
     solved: dict[tuple[str, str], dict[str, JsonValue]],
     pending: dict[str, set[str]],
-    *,
-    store_id: str,
 ) -> tuple[Reconstructed, ...]:
     by_id = {e.id: e for e in entries}
     result = []
     for candidate in candidates:
         item = by_id[candidate.inventory_id]
         value = normalized(
-            item,
-            fields[item.source_ref.source_version_id, item.source_ref.locator],
-            store_id=store_id,
+            item, fields[item.source_ref.source_version_id, item.source_ref.locator]
         )
         hints, roles = [], []
         for hint in candidate.slots:
@@ -146,7 +142,7 @@ def _members(
     return tuple(result)
 
 
-def normalized(item: Entry, text: str, *, store_id: str) -> str:
+def normalized(item: Entry, text: str) -> str:
     """Rebuild one exact source part including the fixed layout parameter recipe."""
     section = (
         int(item.source_ref.locator.rsplit("/", 1)[-1])
@@ -154,6 +150,6 @@ def normalized(item: Entry, text: str, *, store_id: str) -> str:
         else None
     )
     for part in partition(text, section=section):
-        if entry(item.source_ref, part, VERSION, store_id=store_id).id == item.id:
+        if entry(item.source_ref, part, VERSION).id == item.id:
             return prepared(text, part)[0].normalized
-    raise ValueError("Formal template inventory entry is absent from its frozen field")
+    raise ValueError("Template source entry is absent from its frozen field")

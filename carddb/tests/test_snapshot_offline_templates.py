@@ -21,7 +21,6 @@ from sve_carddb.template_translations.current import read_templates, validate_te
 from sve_carddb.template_translations.current_build import apply as apply_templates
 from sve_carddb.template_translations.current_models import (
     DefinitionRecord,
-    Inventory,
     Translation,
     TranslationRecord,
 )
@@ -85,6 +84,7 @@ def default_text_case(tmp_path_factory: pytest.TempPathFactory) -> TextCaseTempl
 class Templates:
     repo: Path
     stores: dict[str, Path]
+    batch: Batch
 
 
 @pytest.fixture(scope="module")
@@ -108,19 +108,12 @@ def sources(tmp_path_factory: pytest.TempPathFactory) -> Templates:
         (batch,)
     )
     definitions: dict[str, DefinitionRecord] = {}
-    # The quoted-name family is defined by the card whose name stays unambiguous below.
-    for member in sorted(generated.entries, key=lambda m: "別名" in m.field_text):
+    for member in generated.entries:
         record = _current_definition(member)
         definitions.setdefault(record.data.id, record)
     records: list[DefinitionRecord | TranslationRecord] = sorted(
         [*definitions.values(), *map(translation, definitions.values())],
         key=lambda r: r.record_key,
-    )
-    inventory = Inventory(
-        template_source_format=3,
-        kind="template_source_inventory",
-        source_batches=(batch,),
-        entries=tuple(m.entry for m in generated.entries),
     )
     files: dict[str, JsonValue] = {
         "translations/templates/current/001.yaml": {
@@ -128,11 +121,10 @@ def sources(tmp_path_factory: pytest.TempPathFactory) -> Templates:
             "kind": "translation_shard",
             "records": [r.model_dump(mode="json") for r in records],
         },
-        "translations/template-sources/001.yaml": inventory.model_dump(mode="json"),
     }
     _write(repo, files)
     commit(repo)
-    return Templates(repo, {store.store_id: store.root})
+    return Templates(repo, {store.store_id: store.root}, batch)
 
 
 RULES = parse_rules(
@@ -178,7 +170,9 @@ def validated(found: Templates, references: References) -> Validated:
     inputs = read_templates(
         PinnedRepository(found.repo), git(found.repo, "rev-parse", "HEAD")
     )
-    return validate_templates(inputs, Sources(found.stores, references, RULES))
+    return validate_templates(
+        inputs, Sources(found.stores, references, RULES), (found.batch,)
+    )
 
 
 def effects(built: Built) -> dict[str, tuple[str | None, bool | None]]:
@@ -272,26 +266,30 @@ def test_offline_renders_whole_effects_and_keeps_uncovered_original(
     assert fields == ["effect"] * 3
 
 
+@pytest.mark.parametrize(("name", "number"), [("名前", "PR-001"), ("別名", "BP02-072")])
 def test_ambiguous_card_name_concept_is_reported_not_resolved(
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
     sources: Templates,
     monkeypatch: pytest.MonkeyPatch,
+    name: str,
+    number: str,
 ) -> None:
     _, recipe, _ = prepared
-    ambiguous = References(card_names={"別名": [("term:a", HASH), ("term:b", HASH)]})
+    ambiguous = References(card_names={name: [("term:a", HASH), ("term:b", HASH)]})
     found = validated(sources, ambiguous)
     monkeypatch.setattr(offline, "_templates", lambda *_args, **_kwargs: found)
     built = build(recipe)
     report = object_value(built.report["effect_translations"])
     assert (report["translated"], report["original"]) == (2, 2)
     assert report["pending_parameter_causes"] == {"ambiguous_card_name_concept": 1}
-    assert effects(built)["BP02-072"] == (None, None)
+    assert effects(built)[number] == (None, None)
 
 
-def test_ambiguous_representative_name_refuses_the_build(
+def test_pattern_with_only_ambiguous_positions_refuses_the_build(
     sources: Templates,
 ) -> None:
-    ambiguous = References(card_names={"名前": [("term:a", HASH), ("term:b", HASH)]})
+    pair = [("term:a", HASH), ("term:b", HASH)]
+    ambiguous = References(card_names={"名前": pair, "別名": pair})
     with pytest.raises(
         ValueError, match=r"^Template definition source has unresolved parameter roles$"
     ):

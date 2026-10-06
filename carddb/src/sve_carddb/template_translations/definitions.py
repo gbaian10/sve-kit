@@ -9,6 +9,8 @@ if TYPE_CHECKING:
     from sve_carddb.template_translations.current_models import DefinitionRecord
     from sve_carddb.template_translations.members import Reconstructed
 
+type Groups = dict[tuple[str, str], list[Reconstructed]]
+
 
 def payload(member: Reconstructed, record: DefinitionRecord) -> bytes:
     """Source locators are provenance; the six semantic fields identify content."""
@@ -25,8 +27,17 @@ def payload(member: Reconstructed, record: DefinitionRecord) -> bytes:
     )
 
 
+def groups(members: dict[str, Reconstructed]) -> Groups:
+    """Definitions bind to a normalized pattern and role, not to one source position."""
+    result: Groups = {}
+    for member in members.values():
+        key = (member.candidate.template_normalized_hash, member.entry.role)
+        result.setdefault(key, []).append(member)
+    return result
+
+
 def _definitions(
-    records: tuple[DefinitionRecord, ...], members: dict[str, Reconstructed]
+    records: tuple[DefinitionRecord, ...], patterns: Groups
 ) -> tuple[
     dict[str, DefinitionRecord],
     dict[str, tuple[str, ...]],
@@ -37,7 +48,7 @@ def _definitions(
     allocations: dict[str, str] = {}
     matches: dict[str, tuple[str, ...]] = {}
     for record in records:
-        representative, content = _definition(record, members)
+        matched, content = _definition(record, patterns)
         data = record.data
         if data.content_hash in payloads and payloads[data.content_hash] != content:
             raise ValueError("Template full payload hash collision")
@@ -48,7 +59,7 @@ def _definitions(
             raise ValueError("Template payload hash must have exactly one allocated ID")
         payloads[data.content_hash] = content
         allocations[data.content_hash] = data.id
-        matches[data.id] = _matching_members(representative, record, members)
+        matches[data.id] = tuple(member.entry.id for member in matched)
         definitions[data.id] = record
     return definitions, matches, _frequencies(matches)
 
@@ -70,12 +81,12 @@ def _frequencies(
 
 
 def _definition(
-    record: DefinitionRecord, members: dict[str, Reconstructed]
-) -> tuple[Reconstructed, bytes]:
+    record: DefinitionRecord, patterns: Groups
+) -> tuple[tuple[Reconstructed, ...], bytes]:
     data = record.data
-    representative = members.get(data.inventory_id)
-    if representative is None:
-        raise ValueError("Template definition references an absent inventory entry")
+    group = patterns.get((data.normalized_hash, data.role))
+    if not group:
+        raise ValueError("Template definition pattern has no current source position")
     if (
         data.source_lang != "ja"
         or data.normalizer_version != VERSION_PARAMETERS
@@ -84,38 +95,33 @@ def _definition(
         raise ValueError(
             "Template definition language normalizer or semantic variant is unsupported"
         )
-    if data.source_span != representative.candidate.source_span:
-        raise ValueError("Template definition span must match its exact inventory part")
-    representative.verify_schema(data.parameter_schema)
-    content = payload(representative, record)
+    matched = _matching_members(record, group)
+    if not matched:
+        # Re-run one check so the build reports why the schema fits no position.
+        group[0].verify_schema(data.parameter_schema)
+    if len({member.role_signature() for member in matched}) != 1:
+        raise ValueError(
+            "Template definition positions disagree on slot semantic roles"
+        )
+    content = payload(matched[0], record)
     if digest(content) != data.content_hash:
         raise ValueError(
             "Template definition content hash differs from its six-field payload"
         )
     if data.id != "T" + data.content_hash[7 : 7 + len(data.id) - 1]:
         raise ValueError("Template ID differs from its allocated payload hash")
-    return representative, content
+    return matched, content
 
 
 def _matching_members(
-    representative: Reconstructed,
-    record: DefinitionRecord,
-    members: dict[str, Reconstructed],
-) -> tuple[str, ...]:
-    """Equal text with another schema or slot role stays unmatched, not merged."""
-    schema = record.data.parameter_schema
-    signature = representative.role_signature()
+    record: DefinitionRecord, group: list[Reconstructed]
+) -> tuple[Reconstructed, ...]:
+    """Equal text with another schema stays unmatched, not merged."""
     matched = []
-    for identifier, member in members.items():
-        if (
-            member.normalized != representative.normalized
-            or member.entry.role != representative.entry.role
-        ):
-            continue
+    for member in group:
         try:
-            member.verify_schema(schema)
+            member.verify_schema(record.data.parameter_schema)
         except ValueError:
             continue
-        if member.role_signature() == signature:
-            matched.append(identifier)
+        matched.append(member)
     return tuple(matched)

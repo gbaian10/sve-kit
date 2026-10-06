@@ -131,7 +131,7 @@ def test_current_resolution_carries_role_and_rejects_weakened_numeric_bounds(
     c = candidate(text)
     part = partition(text)[0]
     ref = entry_ref()
-    e = entry(ref, part, VERSION, store_id="synthetic")
+    e = entry(ref, part, VERSION)
     c = c.model_copy(update={"inventory_id": e.id})
     rows = recognize(text, part, c, References(), (identifier,))
     proposals = Candidates(entries=[c], rule_matches=list(rows))
@@ -157,7 +157,6 @@ def test_current_resolution_carries_role_and_rejects_weakened_numeric_bounds(
         {(ref.source_version_id, ref.locator): text},
         {(e.id, c.slots[0].name): solution},
         {},
-        store_id="synthetic",
     )[0]
     assert m.pending == ()
     assert m.roles == (role,)

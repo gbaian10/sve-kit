@@ -1,6 +1,6 @@
 """Unresolved drafts remain editable data without becoming renderable translations."""
 
-from dataclasses import replace
+from typing import TYPE_CHECKING
 
 import pytest
 from pydantic import JsonValue
@@ -28,10 +28,16 @@ from .adoption_fixtures import commit
 from .build_db_fixtures import seed
 from .test_template_current import Case, current_case
 
+if TYPE_CHECKING:
+    from sve_carddb.template_sources.normalizer import Role
+
 __all__ = ("current_case",)
 
 
-def pending(entries: tuple[str, ...] = ()) -> CandidateRecord:
+ABSENT = "sha256:" + "0" * 64
+
+
+def pending(normalized_hash: str = ABSENT, role: Role = "body") -> CandidateRecord:
     return CandidateRecord(
         record_key=canonical(
             ["template_translation_candidate", "effect", "old-draft", "zh-Hant"]
@@ -42,7 +48,8 @@ def pending(entries: tuple[str, ...] = ()) -> CandidateRecord:
             candidate_id="old-draft",
             lang="zh-Hant",
             text="N 與『X』 {{未綁定",
-            inventory_ids=entries,
+            normalized_hash=normalized_hash,
+            role=role,
             reasons=("draft_anonymous_slot_ambiguous",),
         ),
         origin="machine",
@@ -63,7 +70,7 @@ def test_candidate_preserves_unparsed_final_draft_and_has_no_definition_fk() -> 
     record = pending()
     assert shard(canonical(wire(record))).records == (record,)
     assert record.data.text == "N 與『X』 {{未綁定"
-    assert record.data.inventory_ids == ()
+    assert (record.data.normalized_hash, record.data.role) == (ABSENT, "body")
     assert record.origin == "machine"
     assert not record.low_confidence
     assert record.record_key == (
@@ -77,8 +84,8 @@ def test_candidate_preserves_unparsed_final_draft_and_has_no_definition_fk() -> 
         ("text", ""),
         ("source_kind", "body"),
         ("candidate_id", ""),
-        ("inventory_ids", ["b", "a"]),
-        ("inventory_ids", ["a", "a"]),
+        ("normalized_hash", "inv:absent"),
+        ("role", "flavor"),
         ("reasons", []),
         ("reasons", ["b", "a"]),
         ("reasons", ["a", "a"]),
@@ -157,20 +164,14 @@ def test_candidate_never_renders_projects_or_bypasses_source_checks(
     current_case: Case,
 ) -> None:
     member = current_case.generated.entries[0]
-    record = pending((member.entry.id,))
+    record = pending(member.candidate.template_normalized_hash, member.entry.role)
     definitions = tuple(
         r for r in current_case.inputs.records if isinstance(r, DefinitionRecord)
     )
-    inventory = current_case.inputs.inventories[0]
-    package = compose(
-        current_case.inputs.files,
-        (*definitions, record),
-        inventory.source_batches,
-        inventory.entries,
-    )
+    package = compose(current_case.inputs.files, (*definitions, record))
     inputs = from_files(package)
     assert not inputs.translations()
-    verified = validate_templates(inputs, current_case.sources)
+    verified = validate_templates(inputs, current_case.sources, current_case.batches)
     assert verified.missing_translations == (definitions[0].data.id,)
     assert record.record_key not in verified.low_confidence
     assert verified.target_records == {}
@@ -206,28 +207,9 @@ def test_candidate_never_renders_projects_or_bypasses_source_checks(
     (directory / "translations/index.yaml").write_bytes(package.index)
     commit(current_case.repository)
     assert load_glossary(directory).current_records() == ()
-    bad = inventory.entries[0].model_copy(
-        update={"normalized_hash": "sha256:" + "0" * 64}
-    )
+    absent = from_files(compose(current_case.inputs.files, (*definitions, pending())))
     with pytest.raises(
         ValueError,
-        match=r"^Current template inventory differs from its regenerated source$",
+        match=r"^Current template candidate pattern has no current source position$",
     ):
-        validate_templates(
-            replace(
-                inputs, inventories=(inventory.model_copy(update={"entries": (bad,)}),)
-            ),
-            current_case.sources,
-        )
-    with pytest.raises(
-        ValueError,
-        match=r"^Current template candidate references an absent inventory entry$",
-    ):
-        from_files(
-            compose(
-                current_case.inputs.files,
-                (pending(("inv:absent",)),),
-                inventory.source_batches,
-                inventory.entries,
-            )
-        )
+        validate_templates(absent, current_case.sources, current_case.batches)
