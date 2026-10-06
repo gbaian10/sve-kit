@@ -85,7 +85,6 @@ def write(root: Path, shards: dict[str, dict[str, JsonValue]]) -> None:
         "translation_authored_format": 2,
         "kind": "translation_index",
         "includes": {p: digest(canonical(v)) for p, v in shards.items()},
-        "inventories": {},
     }
     for name, value in {"translations/index.yaml": index, **shards}.items():
         path = root / name

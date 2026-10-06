@@ -417,12 +417,11 @@ def test_field_replays_prior_line_choice_context_and_emits_hash_only_proposals()
         text_hash=digest(text.encode()),
     )
     context = Field(
-        "test-store",
         ref.source_version_id,
         ref.locator,
         text,
         None,
-        [entry(ref, p, VERSION, store_id="test-store") for p in partition(text)],
+        [entry(ref, p, VERSION) for p in partition(text)],
         {"faces": [{"text": text, "sections": []}]},
     )
     off = Candidates()
@@ -521,12 +520,11 @@ def choice_field(text: str) -> Candidates:
         text_hash=digest(text.encode()),
     )
     field = Field(
-        "test-store",
         ref.source_version_id,
         ref.locator,
         text,
         None,
-        [entry(ref, part, VERSION, store_id="test-store") for part in partition(text)],
+        [entry(ref, part, VERSION) for part in partition(text)],
         {"faces": [{"text": text, "sections": []}]},
     )
     result = Candidates(enabled_rules=("bracket_choice_index",))

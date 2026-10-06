@@ -33,7 +33,9 @@ __all__ = ("current_case",)
 
 @pytest.fixture
 def verified(current_case: Case) -> Validated:
-    return validate_templates(current_case.inputs, current_case.sources)
+    return validate_templates(
+        current_case.inputs, current_case.sources, current_case.batches
+    )
 
 
 def test_low_confidence_renders_numeric_and_updates_without_changing_source(
@@ -164,9 +166,11 @@ def test_variant_is_never_automatically_selected_and_pin_must_exist(
         )
 
 
-def test_shared_glossary_reader_accepts_current_inventory(current_case: Case) -> None:
+def test_shared_glossary_reader_accepts_current_templates(current_case: Case) -> None:
     snapshot = load_glossary(current_case.repository / "authored")
-    assert len(snapshot.closure) == 2
+    assert [path for path, _, _ in snapshot.closure] == [
+        "translations/templates/current/001.yaml"
+    ]
     assert not snapshot.current_records()
 
 
@@ -316,7 +320,6 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
     from sve_carddb.template_parameters.references import References  # ruff: ignore[import-outside-top-level] -- no synthetic terms
     from sve_carddb.template_translations.current import read_templates  # ruff: ignore[import-outside-top-level] -- current tree boundary
     from sve_carddb.template_translations.current_models import (  # ruff: ignore[import-outside-top-level] -- finite current data
-        Inventory,
         Translation,
         TranslationRecord,
     )
@@ -342,7 +345,7 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
     )
     targets: list[TranslationRecord] = []
     for definition in definitions:
-        role = definition.data.source_span.role
+        role = definition.data.role
         text = "BODY " if role == "body" else "REMINDER" if role == "reminder" else ""
         text += "".join(
             "{{" + slot.name + "}}" for slot in definition.data.parameter_schema.slots
@@ -364,12 +367,6 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
     records: list[DefinitionRecord | TranslationRecord] = sorted(
         [*definitions, *targets], key=lambda r: r.record_key
     )
-    inventory = Inventory(
-        template_source_format=3,
-        kind="template_source_inventory",
-        source_batches=(batch,),
-        entries=tuple(m.entry for m in generated.entries),
-    )
     _write(
         current_case.repository,
         {
@@ -378,12 +375,11 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
                 "kind": "translation_shard",
                 "records": [r.model_dump(mode="json") for r in records],
             },
-            "translations/template-sources/001.yaml": inventory.model_dump(mode="json"),
         },
     )
     revision = commit(current_case.repository)
     inputs = read_templates(PinnedRepository(current_case.repository), revision)
-    validated = validate_templates(inputs, sources)
+    validated = validate_templates(inputs, sources, (batch,))
     member = generated.entries[0]
     result = render(
         validated, member.entry.source_ref, "ctx:test", member.field_text, "zh-Hant", {}
@@ -449,19 +445,12 @@ def test_current_package_splits_yaml_and_preserves_shared_closure(
     monkeypatch.setattr(
         "sve_carddb.template_translations.current_write.TARGET_BYTES", 1
     )
-    inventory = current_case.inputs.inventories[0]
-    package = compose(
-        current_case.inputs.files,
-        current_case.inputs.records,
-        inventory.source_batches,
-        inventory.entries,
-    )
+    package = compose(current_case.inputs.files, current_case.inputs.records)
     assert from_files(package).records == current_case.inputs.records
     index = Index.model_validate_json(json_bytes(package.index))
     assert index.translation_authored_format == 2
     assert all(
-        digest(content) == {**index.includes, **index.inventories}[path]
-        for path, _, content in package.content
+        digest(content) == index.includes[path] for path, _, content in package.content
     )
     assert all(len(raw) < 1048576 for _, raw, _ in package.content)
     assert all(b"decisions:" not in raw for _, raw, _ in package.content)
@@ -511,7 +500,7 @@ def test_low_confidence_recognition_rule_marks_the_rendered_field(
         ),
     )
     sources = Sources(current_case.sources.stores, References(), rules)
-    found = validate_templates(inputs, sources)
+    found = validate_templates(inputs, sources, current_case.batches)
     member = found.members[0]
     assert member.low_confidence is doubtful
     result = render(

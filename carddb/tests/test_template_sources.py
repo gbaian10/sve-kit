@@ -43,25 +43,37 @@ def test_every_candidate_replays_the_pinned_complete_field(template_case: Case) 
         documents[source.id] = project(raw, source.url, "jp")[1]
     for item in template_case.scan.entries:
         assert (
-            digest(
-                replay(
-                    item,
-                    documents[item.source_ref.source_version_id],
-                    store_id="test-store",
-                ).encode()
-            )
+            digest(replay(item, documents[item.source_ref.source_version_id]).encode())
             == item.normalized_hash
         )
-        assert item.legacy_fingerprint == (
-            item.normalized_hash if item.role == "body" else None
-        )
+
+
+def test_entry_id_ignores_the_archive_batch(template_case: Case) -> None:
+    item = next(item for item in template_case.scan.entries if item.role == "body")
+    resealed = item.source_ref.model_copy(update={"batch_id": digest(b"resealed")})
+    sources = FrozenSources(template_case.store, "test-store", template_case.batch)
+    source, raw, _ = sources.read(
+        item.source_ref.source_version_id, parser_version=pins.PARSER
+    )
+    document = project(raw, source.url, "jp")[1]
+    field, section = next(
+        (value, section)
+        for locator, value, section in fields(document)
+        if locator == item.source_ref.locator
+    )
+    assert field is not None
+    part = next(
+        part
+        for part in partition(field, section=section)
+        if inventory.entry(item.source_ref, part, item.normalizer_id) == item
+    )
+    assert inventory.entry(resealed, part, item.normalizer_id).id == item.id
 
 
 @pytest.mark.parametrize(
     "change",
     [
         "hash",
-        "legacy_hash",
         "line",
         "role",
         "id",
@@ -82,16 +94,14 @@ def test_entry_replay_rejects_changed_hash_or_coordinates(
     )
     document = project(raw, source.url, "jp")[1]
     message = "Template entry cannot be replayed from the pinned field recipe"
-    if change in {"hash", "legacy_hash", "line", "role", "id", "normalizer"}:
+    if change in {"hash", "line", "role", "id", "normalizer"}:
         name = {
             "hash": "normalized_hash",
-            "legacy_hash": "legacy_fingerprint",
             "line": "line_ordinal",
             "normalizer": "normalizer_id",
         }.get(change, change)
         values: dict[str, JsonValue] = {
             "hash": digest(b"wrong"),
-            "legacy_hash": None,
             "line": 50,
             "role": "reminder",
             "id": "wrong",
@@ -128,9 +138,9 @@ def test_entry_replay_rejects_changed_hash_or_coordinates(
             update={"locator": "/faces/0/name", "text_hash": digest(b"Synthetic name")}
         )
         part = partition("Synthetic name")[0]
-        item = inventory.entry(ref, part, item.normalizer_id, store_id="test-store")
+        item = inventory.entry(ref, part, item.normalizer_id)
     with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
-        replay(item, document, store_id="test-store")
+        replay(item, document)
 
 
 @pytest.mark.parametrize(
@@ -237,10 +247,8 @@ def test_candidate_id_collision_is_refused_before_publication(
 ) -> None:
     original = inventory.entry
 
-    def colliding_entry(
-        ref: SourceRef, part: Part, normalizer_id: str, *, store_id: str
-    ) -> Entry:
-        return original(ref, part, normalizer_id, store_id=store_id).model_copy(
+    def colliding_entry(ref: SourceRef, part: Part, normalizer_id: str) -> Entry:
+        return original(ref, part, normalizer_id).model_copy(
             update={"id": "inv:synthetic-collision"}
         )
 

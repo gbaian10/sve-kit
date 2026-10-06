@@ -44,7 +44,6 @@ def test_index_rejects_unknown_or_noninteger_versions(version: JsonValue) -> Non
                     "translation_authored_format": version,
                     "kind": "translation_index",
                     "includes": {},
-                    "inventories": {},
                 }
             )
         )

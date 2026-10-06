@@ -97,7 +97,6 @@ class Sources:
             texts,
             solved,
             pending,
-            store_id=frozen.store_id,
         )
         doubtful = {rule.rule_id for rule in self.rules.rules if rule.low_confidence}
         low = {key for key, row in solved.items() if row["rule_id"] in doubtful}

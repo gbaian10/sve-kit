@@ -246,7 +246,7 @@ def test_alias_threshold_requires_closed_raw_prefix_and_registered_full_ability(
 def test_paired_caps_and_aliases_resolve_to_independent_roles_and_schema(
     text: str, identifiers: tuple[str, ...], roles: tuple[str, ...], refs: References
 ) -> None:
-    item = entry(entry_ref(), partition(text)[0], VERSION, store_id="synthetic")
+    item = entry(entry_ref(), partition(text)[0], VERSION)
     value = candidate(text, refs).model_copy(update={"inventory_id": item.id})
     assert recognize(text, partition(text)[0], value, refs) == ()
     proposals = Candidates(
@@ -278,7 +278,6 @@ def test_paired_caps_and_aliases_resolve_to_independent_roles_and_schema(
         {(item.source_ref.source_version_id, item.source_ref.locator): text},
         resolved,
         {},
-        store_id="synthetic",
     )[0]
     assert member.pending == ()
     assert member.roles == roles
@@ -322,7 +321,7 @@ def test_zero_multiplier_stays_unresolved_at_definition_projection(
     del role
     assert minimum == 1
     text = text.replace("２", "０")
-    item = entry(entry_ref(), partition(text)[0], VERSION, store_id="synthetic")
+    item = entry(entry_ref(), partition(text)[0], VERSION)
     value = candidate(text).model_copy(update={"inventory_id": item.id})
     rows = recognize(text, partition(text)[0], value, References(), (identifier,))
     assert rows == ()
@@ -350,7 +349,6 @@ def test_zero_multiplier_stays_unresolved_at_definition_projection(
         {(item.source_ref.source_version_id, item.source_ref.locator): text},
         {},
         {item.id: issues},
-        store_id="synthetic",
     )[0]
     assert member.pending == ("numeric_role_requires_review",)
     assert member.hints[0].value == 0

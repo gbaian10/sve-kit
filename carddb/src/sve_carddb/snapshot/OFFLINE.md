@@ -28,8 +28,10 @@ source spans and same-concept evidence.
 
 Japanese effect text and flavor are translated in the same transaction. The
 current templates, parameter rules and glossary are read at the pinned revision
-and validated once; every Japanese main text or section of a face revision or
-printed face whose exact source hash a template source covers is rendered whole
+and validated once against source positions generated from the recipe's JP card
+batch (Git stores no template source inventory); every Japanese main text or
+section of a face revision or printed face whose exact source hash a template
+source covers is rendered whole
 into a zh-Hant translation, selection and use. An uncovered fragment, invalid
 placeholder, unresolved parameter or missing reference label keeps the whole field
 original. Effect and flavor eligibility depends only on the source hash, not on

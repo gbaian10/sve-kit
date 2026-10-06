@@ -24,7 +24,6 @@ from sve_carddb.template_translations.current import (
 )
 from sve_carddb.template_translations.current_models import (
     DefinitionRecord,
-    Inventory,
     Shard,
     Translation,
     TranslationRecord,
@@ -54,6 +53,7 @@ class Case:
     inputs: Inputs
     sources: Sources
     generated: Generated
+    batches: tuple[Batch, ...]
 
 
 @pytest.fixture
@@ -89,22 +89,13 @@ def make_case(tmp_path: Path) -> Case:
     sources = Sources({store.store_id: store.root}, References(), rules)
     generated = sources.generate((batch,))
     records = _records(generated)
-    source_inventory = Inventory(
-        template_source_format=3,
-        kind="template_source_inventory",
-        source_batches=(batch,),
-        entries=tuple(m.entry for m in generated.entries),
-    )
     values: dict[str, JsonValue] = {
         "translations/templates/current/001.yaml": records.model_dump(mode="json"),
-        "translations/template-sources/001.yaml": source_inventory.model_dump(
-            mode="json"
-        ),
     }
     _write(root, values)
     revision = commit(root)
     inputs = read_templates(PinnedRepository(root), revision)
-    return Case(root, revision, inputs, sources, generated)
+    return Case(root, revision, inputs, sources, generated, (batch,))
 
 
 def _current_definition(member: Reconstructed) -> DefinitionRecord:
@@ -127,8 +118,8 @@ def _current_definition(member: Reconstructed) -> DefinitionRecord:
         kind="sentence_template",
         data=Definition(
             id="T" + "0" * 16,
-            inventory_id=member.entry.id,
-            source_span=member.candidate.source_span,
+            normalized_hash=member.candidate.template_normalized_hash,
+            role=member.entry.role,
             source_lang="ja",
             normalizer_version=VERSION_PARAMETERS,
             semantic_variant="default",
@@ -177,20 +168,8 @@ def _write(root: Path, values: dict[str, JsonValue]) -> None:
     index: dict[str, JsonValue] = {
         "translation_authored_format": 2,
         "kind": "translation_index",
-        "includes": {},
-        "inventories": {},
+        "includes": {name: digest(canonical(value)) for name, value in values.items()},
     }
-    includes: dict[str, JsonValue] = {
-        name: digest(canonical(value))
-        for name, value in values.items()
-        if "template-sources/" not in name
-    }
-    inventories: dict[str, JsonValue] = {
-        name: digest(canonical(value))
-        for name, value in values.items()
-        if "template-sources/" in name
-    }
-    index.update(includes=includes, inventories=inventories)
     for name, value in {"translations/index.yaml": index, **values}.items():
         path = root / "authored" / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -251,41 +230,28 @@ def test_new_commit_can_edit_text_and_note_without_receipt(current_case: Case) -
     revision = commit(current_case.repository)
     inputs = read_templates(PinnedRepository(current_case.repository), revision)
     assert inputs.translations()[0].data.text.startswith("Changed ")
-    verified = validate_templates(inputs, current_case.sources)
+    verified = validate_templates(inputs, current_case.sources, current_case.batches)
     assert verified.frequencies
     assert current_case.sources.generated_batches == 1
 
 
-def test_source_inventory_mismatch_is_refused_at_build(current_case: Case) -> None:
-    first, *rest = current_case.inputs.inventories[0].entries
-    bad = first.model_copy(update={"normalized_hash": digest(b"wrong")})
-    inputs = replace(
-        current_case.inputs,
-        inventories=(
-            current_case.inputs.inventories[0].model_copy(
-                update={"entries": (bad, *rest)}
-            ),
-        ),
+def test_definition_pattern_must_have_a_current_source(current_case: Case) -> None:
+    record = current_case.inputs.records[0]
+    assert isinstance(record, DefinitionRecord)
+    changed = record.model_copy(
+        update={
+            "data": record.data.model_copy(update={"normalized_hash": digest(b"none")})
+        }
     )
     with pytest.raises(
         ValueError,
-        match=r"^Current template inventory differs from its regenerated source$",
+        match=r"^Template definition pattern has no current source position$",
     ):
-        validate_templates(inputs, current_case.sources)
-
-
-def test_source_coverage_must_be_exact(current_case: Case) -> None:
-    inputs = replace(
-        current_case.inputs,
-        inventories=(
-            current_case.inputs.inventories[0].model_copy(update={"entries": ()}),
-        ),
-    )
-    with pytest.raises(
-        ValueError,
-        match=r"^Current template inventory must cover every source batch entry$",
-    ):
-        validate_templates(inputs, current_case.sources)
+        validate_templates(
+            replace(current_case.inputs, records=(changed,)),
+            current_case.sources,
+            current_case.batches,
+        )
 
 
 def test_numeric_bound_is_checked_against_source_role(current_case: Case) -> None:
@@ -306,7 +272,9 @@ def test_numeric_bound_is_checked_against_source_role(current_case: Case) -> Non
         ValueError, match=r"^Template numeric bounds differ from the recognized role$"
     ):
         validate_templates(
-            replace(current_case.inputs, records=tuple(records)), current_case.sources
+            replace(current_case.inputs, records=tuple(records)),
+            current_case.sources,
+            current_case.batches,
         )
 
 
@@ -369,8 +337,7 @@ def test_disabled_rules_leave_source_positions_pending(current_case: Case) -> No
         }
     )
     sources = Sources(current_case.sources.stores, References(), disabled)
-    batch = current_case.inputs.inventories[0].source_batches
-    result = sources.generate(batch)
+    result = sources.generate(current_case.batches)
     member = next(m for m in result.entries if m.entry.role == "body")
     assert member.pending == ("numeric_rule_pending_approval",)
 
@@ -394,7 +361,9 @@ def test_new_definition_uses_payload_id_and_verifies_its_source(
     record = _current_definition(current_case.generated.entries[0])
     assert record.data.id == "T" + record.data.content_hash[7:23]
     verified = validate_templates(
-        replace(current_case.inputs, records=(record,)), current_case.sources
+        replace(current_case.inputs, records=(record,)),
+        current_case.sources,
+        current_case.batches,
     )
     assert verified.frequencies == ((record.data.id, 1),)
     assert verified.missing_translations == (record.data.id,)
@@ -437,7 +406,7 @@ def test_current_build_does_not_require_legacy_catalog_or_environment_replay(
     fresh = Sources(
         current_case.sources.stores, References(), current_case.sources.rules
     )
-    verified = validate_templates(current_case.inputs, fresh)
+    verified = validate_templates(current_case.inputs, fresh, current_case.batches)
     assert not verified.missing_translations
     assert sum(count for _, count in verified.frequencies) == 1
     assert fresh.generated_batches == 1

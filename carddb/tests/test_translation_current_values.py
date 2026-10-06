@@ -38,7 +38,6 @@ def _write(root: Path, records: list[dict[str, JsonValue]]) -> None:
                 "includes": {
                     "translations/glossary/shared/001.yaml": digest(canonical(raw))
                 },
-                "inventories": {},
             }
         )
     )

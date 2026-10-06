@@ -20,7 +20,6 @@ DIRECTORY = "authored/translations"
 SHARD = re.compile(
     r"translations/(glossary|overrides|templates)/([A-Za-z0-9_-]+)/([0-9]{3,})\.yaml\Z"
 )
-INVENTORY = re.compile(r"translations/template-sources/([0-9]{3,})\.yaml\Z")
 LIMIT = 1048576
 
 
@@ -59,11 +58,7 @@ def tree(repository: PinnedRepository, commit: str) -> dict[str, str]:
         if name not in {"authored", DIRECTORY} and not name.startswith(DIRECTORY + "/"):
             continue
         relative = name.removeprefix("authored/")
-        supported = (
-            name == INDEX
-            or SHARD.fullmatch(relative) is not None
-            or INVENTORY.fullmatch(relative) is not None
-        )
+        supported = name == INDEX or SHARD.fullmatch(relative) is not None
         regular = mode == b"100644" and kind == b"blob" and size.isdigit()
         if not separator or not regular or not supported or int(size) >= LIMIT:
             raise ValueError(
@@ -87,19 +82,13 @@ def read(repository: PinnedRepository, commit: str) -> Files:
         raise ValueError("Template translation index must explicitly exist")
     raw = repository.read_many(commit, tuple(sorted(names)))
     index = _index(raw[INDEX])
-    if set(index.includes) & set(index.inventories):
-        raise ValueError("Template shard and inventory paths must be disjoint")
-    indexed = {**index.includes, **index.inventories}
+    indexed = index.includes
     if set(names) != {INDEX, *("authored/" + p for p in indexed)}:
         raise ValueError("Template indexed file closure differs from Git")
     sequences: dict[str, list[int]] = {}
     content = []
     for path, checksum in sorted(indexed.items()):
-        match = (
-            SHARD.fullmatch(path)
-            if path in index.includes
-            else INVENTORY.fullmatch(path)
-        )
+        match = SHARD.fullmatch(path)
         if match is None:
             raise ValueError("Template indexed path is unsafe or in the wrong area")
         number = int(match.groups()[-1])

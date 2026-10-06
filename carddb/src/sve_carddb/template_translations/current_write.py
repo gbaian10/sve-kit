@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.registry.storage import MAX_BYTES, TARGET_BYTES, encode
 from sve_carddb.snapshot.values import digest
-from sve_carddb.template_translations.current import inventory, shard
-from sve_carddb.template_translations.current_models import Inventory, Shard
+from sve_carddb.template_translations.current import shard
+from sve_carddb.template_translations.current_models import Shard
 from sve_carddb.template_translations.files import Files, json_bytes
 from sve_carddb.translations.models import Index
 
@@ -14,8 +14,6 @@ if TYPE_CHECKING:
 
     from pydantic import BaseModel
 
-    from sve_carddb.catalog.adoption_models import Batch
-    from sve_carddb.template_sources.models import Entry
     from sve_carddb.template_translations.current_models import Record
 
 
@@ -42,27 +40,19 @@ def _chunks(model: BaseModel, field: str) -> Iterator[bytes]:
         yield raw
 
 
-def compose(
-    files: Files,
-    records: tuple[Record, ...],
-    batches: tuple[Batch, ...],
-    entries: tuple[Entry, ...],
-) -> Files:
+def compose(files: Files, records: tuple[Record, ...]) -> Files:
     """Replace only the template area; retain all indexed shared glossary and override bytes."""
     previous = Index.model_validate_json(json_bytes(files.index))
     preserved = tuple(
         item
         for item in files.content
-        if not item[0].startswith(
-            ("translations/templates/", "translations/template-sources/")
-        )
+        if not item[0].startswith("translations/templates/")
     )
     includes = {
         path: checksum
         for path, checksum in previous.includes.items()
         if not path.startswith("translations/templates/")
     }
-    inventories = {}
     content = list(preserved)
     for kind in sorted({r.kind for r in records}):
         selected = tuple(
@@ -77,23 +67,8 @@ def compose(
             shard(parsed)
             includes[path] = digest(parsed)
             content.append((path, raw, parsed))
-    model_inventory = Inventory(
-        template_source_format=3,
-        kind="template_source_inventory",
-        source_batches=batches,
-        entries=tuple(sorted(entries, key=lambda e: e.id)),
-    )
-    for number, raw in enumerate(_chunks(model_inventory, "entries"), start=1):
-        path = f"translations/template-sources/{number:03d}.yaml"
-        parsed = json_bytes(raw)
-        inventory(parsed)
-        inventories[path] = digest(parsed)
-        content.append((path, raw, parsed))
     index = Index(
-        translation_authored_format=2,
-        kind="translation_index",
-        includes=includes,
-        inventories=inventories,
+        translation_authored_format=2, kind="translation_index", includes=includes
     )
     if len(encode(index)) >= MAX_BYTES:
         raise ValueError("Current translation index exceeds authored size limit")

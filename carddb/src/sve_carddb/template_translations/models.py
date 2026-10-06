@@ -5,16 +5,17 @@ from typing import Annotated, Literal
 from pydantic import Field
 
 from sve_carddb.products.models import Code
-from sve_carddb.registry.records import Hash, RecordData, Text
-from sve_carddb.template_parameters.models import Schema, SourceSpan
+from sve_carddb.registry.records import Hash, RecordData
+from sve_carddb.template_parameters.models import Schema
+from sve_carddb.template_sources.normalizer import Role
 
 TemplateId = Annotated[str, Field(pattern=r"^[TC](?:[0-9a-f]{2}){8,32}\Z")]
 
 
 class Definition(RecordData):
     id: TemplateId
-    inventory_id: Text
-    source_span: SourceSpan
+    normalized_hash: Hash
+    role: Role
     source_lang: Literal["ja", "en"]
     normalizer_version: Code
     semantic_variant: Code

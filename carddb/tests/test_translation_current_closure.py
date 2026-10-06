@@ -43,7 +43,6 @@ def test_current_closure_refusals(tmp_path: Path, fault: str, message: str) -> N
         "translation_authored_format": 2,
         "kind": "translation_index",
         "includes": {name: digest(canonical(shard))},
-        "inventories": {},
     }
     write(tmp_path, {name: shard})
     path = tmp_path / name

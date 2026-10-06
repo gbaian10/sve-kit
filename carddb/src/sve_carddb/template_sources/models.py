@@ -1,4 +1,4 @@
-"""Hash-only candidate inventories; none of these records asserts human adoption."""
+"""Build-time source positions; none of these records asserts human adoption."""
 
 from typing import Annotated, Literal
 
@@ -17,4 +17,3 @@ class Entry(RecordData):
     role: Role
     normalizer_id: Text
     normalized_hash: Hash
-    legacy_fingerprint: Hash | None

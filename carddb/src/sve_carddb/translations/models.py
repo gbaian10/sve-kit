@@ -110,4 +110,3 @@ class Index(Envelope):
     translation_authored_format: Literal[2]
     kind: Literal["translation_index"]
     includes: dict[str, Hash]
-    inventories: dict[str, Hash]
