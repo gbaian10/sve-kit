@@ -25,19 +25,10 @@ if TYPE_CHECKING:
     from sve_carddb.text_observations.presence import PresenceState
 
 
-@dataclass(frozen=True)
-class Occurrence:
-    template: str
-    normalized: str
-    member_hash: str
-    entry_id: str
-
-
 @dataclass
 class Scan:
     expected_versions: tuple[str, ...]
     entries: list[Entry] = field(default_factory=list)
-    occurrences: list[Occurrence] = field(default_factory=list)
     pages: list[dict[str, JsonValue]] = field(default_factory=list)
     fields: list[dict[str, JsonValue]] = field(default_factory=list)
     failures: list[dict[str, JsonValue]] = field(default_factory=list)
@@ -60,7 +51,7 @@ def entry(ref: SourceRef, part: Part, normalizer_id: str, *, store_id: str) -> E
         role=part.role,
         normalizer_id=normalizer_id,
         normalized_hash=part.normalized_hash,
-        legacy_fingerprint=part.normalized_hash if part.template else None,
+        legacy_fingerprint=part.normalized_hash if part.role == "body" else None,
     )
 
 
@@ -84,12 +75,7 @@ def fields(document: JsonValue) -> tuple[tuple[str, str | None, int | None], ...
 
 
 def _field(
-    scan: Scan,
-    source: Source,
-    locator: str,
-    text: str | None,
-    section: int | None,
-    number: str,
+    scan: Scan, source: Source, locator: str, text: str | None, section: int | None
 ) -> None:
     proof: dict[str, JsonValue] = {
         "source_version_id": source.id,
@@ -120,16 +106,9 @@ def _field(
         locator=locator,
         text_hash=digest(text.encode()),
     )
-    for part in parts:
-        item = entry(ref, part, VERSION, store_id=source.archive.store_id)
-        scan.entries.append(item)
-        if part.template:
-            member = f"{number}#{locator.split('/')[2]}/{part.member_source}/{part.line_ordinal}"
-            scan.occurrences.append(
-                Occurrence(
-                    part.template, part.normalized, digest(member.encode()), item.id
-                )
-            )
+    scan.entries.extend(
+        entry(ref, part, VERSION, store_id=source.archive.store_id) for part in parts
+    )
     proof["covered"] = True
     proof["code_points"] = len(text)
     proof["segments"] = [
@@ -207,7 +186,7 @@ def _scan(sources: FrozenSources) -> Scan:
             }
         )
         for locator, text, section in projected:
-            _field(scan, source, locator, text, section, number)
+            _field(scan, source, locator, text, section)
             if section is None:
                 _presence(
                     scan,

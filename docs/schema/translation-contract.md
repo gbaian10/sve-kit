@@ -49,7 +49,7 @@ concept_evidence 的 concept_note 可省略，只保留有實際內容的說明�
 | glossary_choice | term_id,lang | `term_id,lang,value,concept_evidence`（選填 `source_claim`） |
 | glossary_emphasis_choice | term_id | `term_id,value` |
 | symbol_localization_choice | symbol_id,lang | `symbol_id,lang,symbol_basis,value,concept_evidence`，完整值依[記號文案契約](catalog-route-adoption.md#6-卡文記號與三語文案) |
-| sentence_template | id | `id,inventory_id,source_span,source_lang,normalizer_version,semantic_variant,parameter_schema,content_hash,supersedes_id` |
+| sentence_template | id | `id,inventory_id,source_span,source_lang,normalizer_version,semantic_variant,parameter_schema,content_hash` |
 | template_translation | template_id,lang | `template_id,lang,text` |
 | template_translation_candidate | source_kind,candidate_id,lang | `source_kind,candidate_id,lang,text,inventory_ids,reasons`，未啟用原稿依 §2.1 |
 | template_translation_variant | template_id,lang,variant_key | `template_id,lang,variant_key,text` |
@@ -125,16 +125,15 @@ data 恰含上表六欄；record 及分片沿既有封閉結構、鍵唯一、�
 缺來源、unknown、空字串與空白不能混為不存在；每個來源片段要有去向。
 固定文字和參數 schema 共同描述模板；辨識不能只把所有數字叫 N、所有引號內容叫 X 後當成同一句。
 
-保留既有模板 ID 與內容指紋；semantic payload 為 level/source_lang/normalized_text/normalizer_version/semantic_variant/parameter_schema。
+模板 ID 由內容 hash 配發；semantic payload 為 level/source_lang/normalized_text/normalizer_version/semantic_variant/parameter_schema。
 content_hash 由工具對實際 payload 計算，用來抓錯配與碰撞，不含 note、來源收據或翻譯審查。
 純譯文、說明修正不換模板 ID；固定字、參數型別或語義分支真的改變時，形成另一個模板定義，並重算其使用位置。
-舊 T/C＋normalized UTF-8 SHA-256 前 10 hex 的 ID 不重配；短指紋撞異內容就失敗。
-新 ID 為 T（sentence）／C（clause）＋六欄 payload hash 前 16 hex；新鍵碰撞逐次加 2 碼至 64，
+ID 為 T（sentence）／C（clause）＋六欄 payload hash 前 16 hex；碰撞時逐次加 2 碼至 64，
 保留已配結果。完整 hash 相同仍比完整 payload，撞異 bytes 就失敗；來源換頁而 payload 相同可重用。
 這是語義身分規則，不要求保存全部舊清冊／採納分片或遍歷 Git 祖先；未使用的舊定義可從當前檔移除。
 
 同一位置至多匹配一個有效定義；多個候選列歧義，不依檔名或 ID 大小任選。
-supersedes_id 只記定義替代關係，不需收據；不得形成環，未載入的 legacy 父 ID 不建立假的 DB 外鍵。
+normalized_text 相同、但參數 schema 或 slot 角色不同的位置不匹配該定義，不依原文字串合一。
 所有句型包括只出現一次者仍用模板；子句組合無環，不另造每張卡自由翻譯覆寫。
 
 ## 4. 參數、譯文與自動套用
@@ -164,13 +163,13 @@ layout 不含待翻語義，可機械生成固定模板；reminder/token_header 
 
 parameter_schema 固定 `{format:1,slots:[...]}`；每個 slot 恰為 `{name,type,occurrences,reference_kind,min,max}`。name 為 `[a-z][a-z0-9_]*`，唯一；type=uint/literal/reference，reference_kind 為 card/term/vocabulary 或 null，uint 的 min/max 為安全非負整數，其餘為 null。occurrences 是 normalized_text 的不重疊 `{start,end}` 陣列；同 slot 多次出現值須一致。slot 陣列按首次位置排序。舊 `『X』` 的 slot 只覆蓋中間 X，左右引號仍是 literal；params 的 uint/literal 是整數／字串，reference 為 `{kind:card,id}`、`{kind:term,id}` 或 `{kind:vocabulary,vocabulary_kind,vocabulary_code}`，須符合宣告種類與 FK。數字正規化前的 raw 字串與數值分開保存；reference 綁永久概念 ID，不能靠顯示名猜同卡。literal 僅給明定的格式片段（例如 layout），不得包住整句外文冒充翻譯。
 
-術語引用 slot 可覆蓋 normalized_text 中原樣保留的名稱，不必換成佔位符；該模板的名稱固定、大括號仍 literal，舊指紋不變。只以唯一 exact 當前概念及 category 綁定；詞庫改動由當前清冊重產檢查歧義。四條能力門檻規則（combo／lesson／necrocharge／spell_chain）只將數字作 uint slot，已採納名稱只供 context 檢查、仍為 literal；不借此核可中文譯名或新增名稱引用。
+術語引用 slot 可覆蓋 normalized_text 中原樣保留的名稱，不必換成佔位符；該模板的名稱固定、大括號仍 literal。只以唯一 exact 當前概念及 category 綁定；詞庫改動由當前清冊重產檢查歧義。四條能力門檻規則（combo／lesson／necrocharge／spell_chain）只將數字作 uint slot，已採納名稱只供 context 檢查、仍為 literal；不借此核可中文譯名或新增名稱引用。
 
 已辨識為卡名引用的 slot（本文的 `『X』` 與 token 標頭名稱）缺 glossary 卡名概念時，仍可匹配同句型的 term slot：
 建置內部參數為 `{kind:card_name,text}`，text 須等於該位置的原文拼寫；渲染時用該原文已選用的卡名譯名，
 沒有就照原文名稱輸出，整段標低信心。不自造 term ID、不推斷同卡；有歧義（多個 exact 概念）仍為 pending，整段回原文。
 
-數量／增減幅度的 schema 界值為 0..9007199254740991，序數為 1..9007199254740991；此為安全整數技術界值。原樣十進位／safe unsigned／序數非零等匹配條件仍須驗證；正負號留 literal，只以非負幅度綁 slot。完整欄位依賴（例如選項引導與全部標號）按各當前來源核對，不從同一舊 ID 的其他成員借證據。
+數量／增減幅度的 schema 界值為 0..9007199254740991，序數為 1..9007199254740991；此為安全整數技術界值。原樣十進位／safe unsigned／序數非零等匹配條件仍須驗證；正負號留 literal，只以非負幅度綁 slot。完整欄位依賴（例如選項引導與全部標號）按各當前來源核對，不從同一模板的其他成員借證據。
 
 例（全為自撰）：原文 `N測試２` 重建 normalized=`N測試N`。唯一 uint slot `count` 的 occurrences=[{start:3,end:4}]、min=0、max=9007199254740991；第一個 N 是 literal。若另一成員在位置 0 也是數字，兩者不能共用此 schema，分新模板；不能依候選分組的字串相同合併。
 

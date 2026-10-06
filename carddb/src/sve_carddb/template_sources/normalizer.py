@@ -34,17 +34,11 @@ class Part:
     role: Role
     segments: tuple[Segment, ...]
     normalized: str
-    member_source: str
 
     @property
     def normalized_hash(self) -> str:
         """Hash complete UTF-8 bytes, including literal N/X already in the source."""
         return digest(self.normalized.encode())
-
-    @property
-    def template(self) -> str | None:
-        """Only nonempty legacy bodies have old T identifiers."""
-        return "T" + self.normalized_hash[7:17] if self.role == "body" else None
 
 
 def normalize(body: str) -> str:
@@ -64,9 +58,7 @@ def _ranges(positions: list[int]) -> tuple[Segment, ...]:
     return tuple(groups)
 
 
-def _line(
-    text: str, offset: int, ordinal: int, source: str, header_end: int
-) -> list[Part]:
+def _line(text: str, offset: int, ordinal: int, header_end: int) -> list[Part]:
     roles: list[Role] = ["layout"] * len(text)
     roles[:header_end] = ["token_header"] * header_end
     candidate = text[header_end:]
@@ -94,7 +86,6 @@ def _line(
                 "body",
                 _ranges([offset + i for i in kept]),
                 normalize("".join(text[i] for i in kept)),
-                source,
             )
         )
     result.extend(
@@ -103,7 +94,6 @@ def _line(
             "reminder",
             (Segment(offset + span.start, offset + span.end),),
             text[span.start : span.end],
-            source,
         )
         for span in reminders
     )
@@ -114,7 +104,6 @@ def _line(
                 role,
                 (Segment(offset + span.start, offset + span.end),),
                 text[span.start : span.end],
-                source,
             )
             for span in _ranges([i for i, actual in enumerate(roles) if actual == role])
         )
@@ -125,20 +114,20 @@ def partition(text: str, *, section: int | None = None) -> tuple[Part, ...]:
     """Reproduce LF splitting/header-before-trim while retaining every moved byte."""
     result: list[Part] = []
     offset = 0
-    source = "text" if section is None else f"section:{section}"
     for ordinal, line in enumerate(text.split("\n")):
         match = TOKEN_HEADER.match(line) if section is not None else None
-        if match is not None:
-            source = f"section:{section}/token:{match['name']}"
-        elif section is not None and line.startswith("『") and "』{" in line[:40]:
+        if (
+            match is None
+            and section is not None
+            and line.startswith("『")
+            and "』{" in line[:40]
+        ):
             # Never include an unknown header's official text in an exception.
             raise ValueError("Unrecognized legacy token header")
-        result.extend(_line(line, offset, ordinal, source, match.end() if match else 0))
+        result.extend(_line(line, offset, ordinal, match.end() if match else 0))
         offset += len(line)
         if offset < len(text):
-            result.append(
-                Part(ordinal, "layout", (Segment(offset, offset + 1),), "\n", source)
-            )
+            result.append(Part(ordinal, "layout", (Segment(offset, offset + 1),), "\n"))
             offset += 1
     parts = tuple(sorted(result, key=lambda part: part.segments[0].start))
     verify_partition(text, parts)

@@ -376,7 +376,6 @@ def analyze(
         normalized_hash=part.normalized_hash,
         parameter_normalizer_id=VERSION_PARAMETERS,
         template_normalized_hash=template_part.normalized_hash,
-        legacy_id=part.template,
         parameter_schema=parameter_schema,
         slots=hints,
         literal_trace=literals(text, units, hints),

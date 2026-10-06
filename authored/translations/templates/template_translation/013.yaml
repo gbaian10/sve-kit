@@ -321,6 +321,14 @@ records:
       text: \{{{slot_0}}\}如果為【覺醒】狀態，則給予敵方的全部主戰者{{slot_1}}點傷害。
     origin: machine
     low_confidence: false
+  - record_key: '["template_translation","Tb2d9797f135199cd","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: Tb2d9797f135199cd
+      lang: zh-Hant
+      text: 【守護】
+    origin: machine
+    low_confidence: false
   - record_key: '["template_translation","Tb2ec4965c07e26ce","zh-Hant"]'
     kind: template_translation
     data:
@@ -399,14 +407,6 @@ records:
       template_id: Tb3f9475a3c374308
       lang: zh-Hant
       text: \{{{slot_0}}\}如果為【覺醒】狀態，則查看自己牌堆頂的{{slot_1}}張卡片。可以從其中公開{{slot_2}}張龍人・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb4006380ea","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: Tb4006380ea
-      lang: zh-Hant
-      text: 【進化時】指定敵方戰場上的{{slot_0}}個從者。給予其{{slot_1}}點傷害。
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","Tb416acd844d21dab","zh-Hant"]'
@@ -817,14 +817,6 @@ records:
       text: \{{{slot_0}}\}自己的全部其他妖精・從者與自己EX區的全部妖精・從者\{{{slot_1}}\}+{{slot_2}}/\{{{slot_3}}\}+{{slot_4}}。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","Tb95ddef903","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: Tb95ddef903
-      lang: zh-Hant
-      text: \{{{slot_0}}\}指定敵方戰場上的{{slot_1}}個從者。給予其{{slot_2}}點傷害。
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","Tb9624d3d4d0a9bd8","zh-Hant"]'
     kind: template_translation
     data:
@@ -895,6 +887,14 @@ records:
       template_id: Tba2f713395d5ee1b
       lang: zh-Hant
       text: 【進化時】指定敵方戰場上的{{slot_1}}個原始消費{{slot_0}}以下的從者。使其消失。
+    origin: machine
+    low_confidence: false
+  - record_key: '["template_translation","Tba2fc2cac3fcea95","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: Tba2fc2cac3fcea95
+      lang: zh-Hant
+      text: \{{{slot_0}}\}將自己牌堆頂的{{slot_1}}張卡片放置到墓場。
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","Tba91c5456ac7b74e","zh-Hant"]'

@@ -89,14 +89,6 @@ records:
       text: \{{{slot_0}}\}查看自己牌堆頂的{{slot_1}}張卡片。可以從其中將{{slot_3}}張原始消費{{slot_2}}以下的狂信・卡片放置到EX區。將其餘卡片以任意順序放置到牌堆底。本回合，使用該卡之際，消費-{{slot_4}}。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T8854fba743","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T8854fba743
-      lang: zh-Hant
-      text: 【指定攻擊】
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T885a970f92affc57","zh-Hant"]'
     kind: template_translation
     data:
@@ -175,6 +167,14 @@ records:
       template_id: T8914d3a514f78cdf
       lang: zh-Hant
       text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_1}}張護符，增加到手牌中。
+    origin: machine
+    low_confidence: false
+  - record_key: '["template_translation","T8936e828011e3066","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: T8936e828011e3066
+      lang: zh-Hant
+      text: \{進化\}\{消費{{slot_0}}\}：這張卡片進化。
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T898f6846a80b1a55","zh-Hant"]'
@@ -633,14 +633,6 @@ records:
       text: \{{{slot_0}}\}\{消費{{slot_1}}\}：自己的主戰者\{{{slot_2}}\}+{{slot_3}}。此能力在自己戰場上「卡片名稱各不相同的士兵・衍生物・從者」為{{slot_4}}個以上時，{{slot_5}}回合中可使用{{slot_6}}次。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T8e3a49dc56","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T8e3a49dc56
-      lang: zh-Hant
-      text: \{{{slot_0}}\}\{消費{{slot_1}}\}：這張卡片參賽。
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T8e3c09a8a1d011b8","zh-Hant"]'
     kind: template_translation
     data:
@@ -903,14 +895,6 @@ records:
       template_id: T9208b49f6cbf2f46
       lang: zh-Hant
       text: 【進化時】指定敵方戰場上的{{slot_0}}個從者。給予其與「自己消失區的張數」相同的傷害。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T921ff9f9b9","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T921ff9f9b9
-      lang: zh-Hant
-      text: 【守護】
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T92206c0cd68d9cf4","zh-Hant"]'

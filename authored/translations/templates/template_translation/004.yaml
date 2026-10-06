@@ -569,6 +569,14 @@ records:
       text: \{{{slot_0}}\}\{{{slot_1}}\}\{消費{{slot_2}}\}將這張卡片\{{{slot_3}}\}：指定敵方戰場上的{{slot_4}}個從者。給予其{{slot_5}}點傷害。將這張卡片重置。此能力{{slot_6}}回合中可使用{{slot_7}}次。
     origin: machine
     low_confidence: false
+  - record_key: '["template_translation","T3442aaef4494ac6d","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: T3442aaef4494ac6d
+      lang: zh-Hant
+      text: \{{{slot_0}}\}\{消費{{slot_1}}\}：這張卡片參賽。
+    origin: machine
+    low_confidence: false
   - record_key: '["template_translation","T3446c4ba3547c126","zh-Hant"]'
     kind: template_translation
     data:
@@ -1073,6 +1081,14 @@ records:
       text: 【參賽時】這張卡片\{{{slot_0}}\}+{{slot_1}}/\{{{slot_2}}\}+{{slot_3}}。指定敵方至多{{slot_4}}個從者。將其返回手牌。
     origin: machine
     low_confidence: false
+  - record_key: '["template_translation","T399b148d1382fc3c","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: T399b148d1382fc3c
+      lang: zh-Hant
+      text: \{{{slot_0}}\}指定敵方戰場上的{{slot_1}}個從者。給予其{{slot_2}}點傷害。
+    origin: machine
+    low_confidence: false
   - record_key: '["template_translation","T39a3e788eb134910","zh-Hant"]'
     kind: template_translation
     data:
@@ -1191,6 +1207,14 @@ records:
       template_id: T3a8b317f3faac362
       lang: zh-Hant
       text: 【單重驅動】
+    origin: machine
+    low_confidence: false
+  - record_key: '["template_translation","T3a8f621ea0427443","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: T3a8f621ea0427443
+      lang: zh-Hant
+      text: 【進化時】指定敵方戰場上的{{slot_0}}個從者。給予其{{slot_1}}點傷害。
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T3a907699d4e181bf","zh-Hant"]'

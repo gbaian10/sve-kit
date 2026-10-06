@@ -134,7 +134,6 @@ def _current_definition(member: Reconstructed) -> DefinitionRecord:
             semantic_variant="default",
             parameter_schema=schema,
             content_hash="sha256:" + "0" * 64,
-            supersedes_id=None,
         ),
         origin="project",
         low_confidence=False,

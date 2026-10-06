@@ -337,6 +337,14 @@ records:
       text: 只要這張卡片在場，自己使用賽馬娘・法術之際，如果是本回合中的第{{slot_0}}張賽馬娘・法術，則消費-{{slot_1}}。
     origin: machine
     low_confidence: false
+  - record_key: '["template_translation","T123d844dc3df293b","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: T123d844dc3df293b
+      lang: zh-Hant
+      text: 【必殺】
+    origin: machine
+    low_confidence: false
   - record_key: '["template_translation","T12c34497a201b2c0","zh-Hant"]'
     kind: template_translation
     data:
@@ -1135,6 +1143,14 @@ records:
       template_id: T1c5c0929057dca25
       lang: zh-Hant
       text: \{{{slot_0}}\}\{消費{{slot_1}}\}捨棄手牌中的{{slot_3}}張『{{slot_2}}』：這張卡片\{{{slot_4}}\}+{{slot_5}}/\{{{slot_6}}\}+{{slot_7}}。
+    origin: machine
+    low_confidence: false
+  - record_key: '["template_translation","T1c9b7c5ff35dd98a","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: T1c9b7c5ff35dd98a
+      lang: zh-Hant
+      text: 這張卡片離開戰場時，抽取{{slot_0}}張卡片。捨棄自己的{{slot_1}}張手牌。\{{{slot_2}}\}\{消費{{slot_3}}\}：將這張卡片放置到墓場。
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T1c9c367702e4c004","zh-Hant"]'

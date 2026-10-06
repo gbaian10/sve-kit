@@ -761,6 +761,14 @@ records:
       text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}：指定敵方戰場上的{{slot_2}}個從者。給予其{{slot_3}}點傷害。此能力在自己的戰場上有其他陽炎・從者時可使用。
     origin: machine
     low_confidence: false
+  - record_key: '["template_translation","T803fe67454dbbde5","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: T803fe67454dbbde5
+      lang: zh-Hant
+      text: \{{{slot_0}}\}抽取{{slot_1}}張卡片。
+    origin: machine
+    low_confidence: false
   - record_key: '["template_translation","T804650076d4338ff","zh-Hant"]'
     kind: template_translation
     data:
@@ -1143,14 +1151,6 @@ records:
       template_id: T85eb626963c236ce
       lang: zh-Hant
       text: \{{{slot_0}}\}指定自己戰場上的{{slot_1}}個其他從者。給予其{{slot_2}}點傷害。這張卡片\{{{slot_3}}\}+{{slot_4}}/\{{{slot_5}}\}+{{slot_6}}，並獲得【突進】。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T85fc4f7014","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T85fc4f7014
-      lang: zh-Hant
-      text: \{{{slot_0}}\}\{消費{{slot_1}}\}：這張卡片獲得驅動。
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T8608aad23fe834ba","zh-Hant"]'

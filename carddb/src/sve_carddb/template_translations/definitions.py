@@ -1,18 +1,16 @@
-"""Semantic identity and family validation for current template definitions."""
+"""Semantic identity and source matching for current template definitions."""
 
 from typing import TYPE_CHECKING
 
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_parameters.analysis import VERSION_PARAMETERS
-from sve_carddb.template_translations.current_models import DefinitionRecord
 
 if TYPE_CHECKING:
+    from sve_carddb.template_translations.current_models import DefinitionRecord
     from sve_carddb.template_translations.members import Reconstructed
-DefinitionLike = DefinitionRecord
-LEGACY_WIDTH = 10
 
 
-def payload(member: Reconstructed, record: DefinitionLike) -> bytes:
+def payload(member: Reconstructed, record: DefinitionRecord) -> bytes:
     """Source locators are provenance; the six semantic fields identify content."""
     data = record.data
     return canonical(
@@ -28,31 +26,18 @@ def payload(member: Reconstructed, record: DefinitionLike) -> bytes:
 
 
 def _definitions(
-    records: tuple[tuple[DefinitionRecord, str | None], ...],
-    members: dict[str, Reconstructed],
+    records: tuple[DefinitionRecord, ...], members: dict[str, Reconstructed]
 ) -> tuple[
-    dict[str, DefinitionLike],
+    dict[str, DefinitionRecord],
+    dict[str, tuple[str, ...]],
     tuple[tuple[str, int], ...],
-    tuple[tuple[str, str], ...],
 ]:
     definitions = {}
-    legacy: dict[str, str] = {}
-    for member in members.values():
-        identifier = member.candidate.legacy_id
-        if identifier is not None:
-            checksum = digest(member.normalized.encode())
-            if identifier in legacy and legacy[identifier] != checksum:
-                raise ValueError(
-                    "Legacy template fingerprint collision across the full inventory"
-                )
-            legacy[identifier] = checksum
     payloads: dict[str, bytes] = {}
     allocations: dict[str, str] = {}
     matches: dict[str, tuple[str, ...]] = {}
-    for record, _ in records:
-        if not isinstance(record, DefinitionRecord):
-            continue
-        representative, content, old = _definition(record, members)
+    for record in records:
+        representative, content = _definition(record, members)
         data = record.data
         if data.content_hash in payloads and payloads[data.content_hash] != content:
             raise ValueError("Template full payload hash collision")
@@ -63,21 +48,17 @@ def _definitions(
             raise ValueError("Template payload hash must have exactly one allocated ID")
         payloads[data.content_hash] = content
         allocations[data.content_hash] = data.id
-        matches[data.id] = _matching_members(representative, record, members, old=old)
+        matches[data.id] = _matching_members(representative, record, members)
         definitions[data.id] = record
-    unadopted = _parent_chains(definitions, members)
-    return definitions, _current_frequencies(definitions, matches), unadopted
+    return definitions, matches, _frequencies(matches)
 
 
-def _current_frequencies(
-    definitions: dict[str, DefinitionLike], matches: dict[str, tuple[str, ...]]
+def _frequencies(
+    matches: dict[str, tuple[str, ...]],
 ) -> tuple[tuple[str, int], ...]:
-    retired = {r.data.supersedes_id for r in definitions.values()}
     claimed: dict[str, str] = {}
     frequencies = []
     for identifier, ids in matches.items():
-        if identifier in retired:
-            continue
         for member_id in ids:
             if member_id in claimed:
                 raise ValueError(
@@ -89,8 +70,8 @@ def _current_frequencies(
 
 
 def _definition(
-    record: DefinitionLike, members: dict[str, Reconstructed]
-) -> tuple[Reconstructed, bytes, bool]:
+    record: DefinitionRecord, members: dict[str, Reconstructed]
+) -> tuple[Reconstructed, bytes]:
     data = record.data
     representative = members.get(data.inventory_id)
     if representative is None:
@@ -111,84 +92,30 @@ def _definition(
         raise ValueError(
             "Template definition content hash differs from its six-field payload"
         )
-    old = len(data.id.removeprefix("T")) == LEGACY_WIDTH
-    if (old and data.id != representative.candidate.legacy_id) or (
-        not old and data.id != "T" + data.content_hash[7 : 7 + len(data.id) - 1]
-    ):
-        raise ValueError(
-            "Template ID differs from its legacy fingerprint or allocated payload hash"
-        )
-    return representative, content, old
+    if data.id != "T" + data.content_hash[7 : 7 + len(data.id) - 1]:
+        raise ValueError("Template ID differs from its allocated payload hash")
+    return representative, content
 
 
 def _matching_members(
     representative: Reconstructed,
-    record: DefinitionLike,
+    record: DefinitionRecord,
     members: dict[str, Reconstructed],
-    *,
-    old: bool,
 ) -> tuple[str, ...]:
-    data = record.data
-    family = [
-        (identifier, m)
-        for identifier, m in members.items()
-        if m.normalized == representative.normalized
-        and m.entry.role == representative.entry.role
-    ]
+    """Equal text with another schema or slot role stays unmatched, not merged."""
+    schema = record.data.parameter_schema
+    signature = representative.role_signature()
     matched = []
-    for identifier, member in family:
+    for identifier, member in members.items():
+        if (
+            member.normalized != representative.normalized
+            or member.entry.role != representative.entry.role
+        ):
+            continue
         try:
-            member.verify_schema(data.parameter_schema)
+            member.verify_schema(schema)
         except ValueError:
-            if old:
-                raise ValueError(
-                    "Legacy template members require one fully resolved schema"
-                ) from None
             continue
-        if member.role_signature() != representative.role_signature():
-            if old:
-                raise ValueError(
-                    "Legacy template members disagree on slot semantic roles"
-                )
-            continue
-        matched.append(identifier)
+        if member.role_signature() == signature:
+            matched.append(identifier)
     return tuple(matched)
-
-
-def _parent_chains(
-    definitions: dict[str, DefinitionLike], members: dict[str, Reconstructed]
-) -> tuple[tuple[str, str], ...]:
-    unadopted = []
-    for record in definitions.values():
-        representative = members[record.data.inventory_id]
-        direct = record.data.supersedes_id
-        if direct is not None and direct not in definitions:
-            if direct != representative.candidate.legacy_id:
-                raise ValueError(
-                    "Template supersedes requires an adopted parent or its verified legacy family"
-                )
-            unadopted.append((record.data.id, direct))
-        elif direct is not None and direct != record.data.id:
-            parent_member = members[definitions[direct].data.inventory_id]
-            same_family = representative.entry.role == parent_member.entry.role and (
-                (
-                    representative.candidate.legacy_id is not None
-                    and representative.candidate.legacy_id
-                    == parent_member.candidate.legacy_id
-                )
-                or representative.normalized == parent_member.normalized
-            )
-            if not same_family:
-                raise ValueError(
-                    "Template supersedes adopted parent belongs to another source family"
-                )
-        seen = {record.data.id}
-        parent = record.data.supersedes_id
-        while parent is not None:
-            if parent in seen:
-                raise ValueError("Template supersedes chain must not contain a cycle")
-            if parent not in definitions:
-                break
-            seen.add(parent)
-            parent = definitions[parent].data.supersedes_id
-    return tuple(sorted(unadopted))

@@ -377,14 +377,6 @@ records:
       text: 【進化時】如果為【真紅】狀態，則自己的主戰者\{{{slot_0}}\}+{{slot_1}}。抽取{{slot_2}}張卡片。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T3f4ec6dc23","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T3f4ec6dc23
-      lang: zh-Hant
-      text: 【疾馳】
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T3f5f3203950c846d","zh-Hant"]'
     kind: template_translation
     data:
@@ -1143,6 +1135,14 @@ records:
       template_id: T4a204f1516a31778
       lang: zh-Hant
       text: 【攻擊時】指定敵方戰場上的{{slot_0}}個從者。將其破壞。給予其主戰者{{slot_1}}點傷害。
+    origin: machine
+    low_confidence: false
+  - record_key: '["template_translation","T4a3693426bbd18c4","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: T4a3693426bbd18c4
+      lang: zh-Hant
+      text: 【突進】
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T4a581c89cae071a2","zh-Hant"]'

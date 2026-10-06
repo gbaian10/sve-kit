@@ -9,14 +9,6 @@ records:
       text: \{{{slot_0}}\}指定敵方戰場上的{{slot_1}}個從者。給予其{{slot_2}}點傷害。如果自己戰場上的護符為{{slot_3}}個以上，則轉變為{{slot_4}}點傷害。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T58b65ad3b8","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T58b65ad3b8
-      lang: zh-Hant
-      text: 【必殺】
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T58cd709d70b3708e","zh-Hant"]'
     kind: template_translation
     data:
@@ -199,14 +191,6 @@ records:
       template_id: T5ab002a6a9872cc0
       lang: zh-Hant
       text: \{{{slot_0}}\}指定敵方戰場上的{{slot_1}}個從者。給予其{{slot_2}}點傷害。將自己牌堆頂的{{slot_3}}張卡片放置到墓場。
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","T5acba189ad","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T5acba189ad
-      lang: zh-Hant
-      text: 【蓄積】
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T5acd5425a418ead3","zh-Hant"]'
@@ -617,14 +601,6 @@ records:
       text: \{{{slot_0}}\}\{消費{{slot_1}}\}將這張卡片\{{{slot_2}}\}、捨棄{{slot_3}}張手牌：將這張卡片放置到墓場。
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation","T602e7589fd","zh-Hant"]'
-    kind: template_translation
-    data:
-      template_id: T602e7589fd
-      lang: zh-Hant
-      text: \{{{slot_0}}\}抽取{{slot_1}}張卡片。
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation","T602f22df839265d4","zh-Hant"]'
     kind: template_translation
     data:
@@ -713,6 +689,14 @@ records:
       text: 【攻擊時】指定敵方的{{slot_0}}個從者。給予其{{slot_1}}點傷害。自己的主戰者\{{{slot_2}}\}+{{slot_3}}。
     origin: machine
     low_confidence: false
+  - record_key: '["template_translation","T60f30a35773d0e90","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: T60f30a35773d0e90
+      lang: zh-Hant
+      text: 自己支付\{進化\}或\{{{slot_0}}\}的消費時，可將{{slot_1}}個正面朝上的EP轉為背面朝上來支付{{slot_2}}PP。
+    origin: machine
+    low_confidence: false
   - record_key: '["template_translation","T6116f4d3d6cd1af3","zh-Hant"]'
     kind: template_translation
     data:
@@ -775,6 +759,14 @@ records:
       template_id: T61934c4d82ff83df
       lang: zh-Hant
       text: \{{{slot_0}}\}\{消費{{slot_1}}\}：將這張卡片召喚到戰場上。
+    origin: machine
+    low_confidence: false
+  - record_key: '["template_translation","T61a77a506ffb0985","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: T61a77a506ffb0985
+      lang: zh-Hant
+      text: \{{{slot_0}}\}自己的主戰者\{{{slot_1}}\}+{{slot_2}}。
     origin: machine
     low_confidence: false
   - record_key: '["template_translation","T61bc28b920bc07b8","zh-Hant"]'

@@ -42,7 +42,6 @@ TABLES = (
             Column("semantic_variant", Kind.ID),
             Column("parameter_schema", Kind.JSON, json_schema="TemplateParameters"),
             Column("content_hash", Kind.TEXT, pattern=HASH),
-            Column("supersedes_id", Kind.ID, nullable=True),
             *QUALITY,
         ),
         ("id",),

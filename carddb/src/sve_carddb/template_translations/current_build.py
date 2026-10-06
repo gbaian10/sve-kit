@@ -80,7 +80,6 @@ def populate(db: Database, validated: Validated) -> None:
                 semantic_variant=data.semantic_variant,
                 parameter_schema=Json(data.parameter_schema.model_dump(mode="json")),
                 content_hash=data.content_hash,
-                supersedes_id=data.supersedes_id,
             )
             insert_exact(db, "sentence_template", values, ("id",))
     for record in validated.inputs.records:

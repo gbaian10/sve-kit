@@ -241,6 +241,14 @@ records:
       text: 這張卡片不會受到能力傷害。這張卡片無法被能力破壞。
     origin: machine
     low_confidence: false
+  - record_key: '["template_translation","Td0251254476a7c92","zh-Hant"]'
+    kind: template_translation
+    data:
+      template_id: Td0251254476a7c92
+      lang: zh-Hant
+      text: 自己的主戰者\{{{slot_0}}\}+{{slot_1}}。抽取{{slot_2}}張卡片。
+    origin: machine
+    low_confidence: false
   - record_key: '["template_translation","Td03293a313945901","zh-Hant"]'
     kind: template_translation
     data:
