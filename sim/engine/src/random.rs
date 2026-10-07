@@ -3,7 +3,7 @@
 use alloc::boxed::Box;
 
 use rand::seq::SliceRandom as _;
-use rand::{Rng as _, SeedableRng as _};
+use rand::{RngExt as _, SeedableRng as _};
 use rand_chacha::ChaCha12Rng;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest as _, Sha256};
@@ -37,7 +37,8 @@ impl From<Random> for RandomWire {
         reason = "The two limbs retain every cursor bit."
     )]
     fn from(random: Random) -> Self {
-        let position = random.0.get_word_pos();
+        // rand_chacha 0.10 no longer wraps the cursor at the stream end itself.
+        let position = random.0.get_word_pos() & ((1_u128 << 68_u32) - 1);
         Self::ChaCha12(ChaChaState {
             seed: random.0.get_seed(),
             stream: random.0.get_stream(),

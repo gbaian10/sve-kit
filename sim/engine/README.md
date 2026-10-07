@@ -93,7 +93,7 @@ library builds for `wasm32-unknown-unknown` with `--no-default-features`; browse
 bindings, host time and execution have not been validated.
 
 New games and observation-based samples use `chacha12-sha256-rand09-v1`:
-`ChaCha12Rng` from rand_chacha 0.9.0, with rand 0.9.5's unbiased range sampler
+`ChaCha12Rng` from rand_chacha 0.10.0, with rand 0.10.3's unbiased range sampler
 and slice shuffle. These versions are pinned because sampling is part of the
 replay sequence. The seed is SHA-256 of the bytes
 `sve-engine/chacha12-sha256-rand09-v1\0` followed by the exact UTF-8 seed string;
