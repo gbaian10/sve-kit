@@ -1,5 +1,5 @@
 use super::Random;
-use rand::RngCore as _;
+use rand::Rng as _;
 use serde_json::json;
 
 #[test]
