@@ -1,7 +1,5 @@
 """Current registered matcher switches do not require historical approval envelopes."""
 
-# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves closed input annotations
-
 from typing import TYPE_CHECKING, Literal, Self
 
 from pydantic import ValidationError, field_validator, model_validator

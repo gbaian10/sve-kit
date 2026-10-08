@@ -134,7 +134,10 @@ class Sources:
         return self._build
 
     def stage(self, build: BuildContext) -> Sources:
-        """Share verified reads while keeping context and source uses stage-local."""
+        """Keep identity reads and source uses stage-local.
+
+        Share identity indexes, decoded projections and context keys.
+        """
         stage = Sources(
             self.stores, self.repository, build, self.identities.current_registry
         )
