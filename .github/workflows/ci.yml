@@ -193,10 +193,12 @@ jobs:
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: mypy-cache
         with:
-          path: carddb/.mypy_cache
-          key: mypy-${{ runner.os }}-py3.14-${{ hashFiles('carddb/uv.lock', 'carddb/pyproject.toml') }}-${{ github.sha }}
+          path: |
+            carddb/.mypy_cache
+            publish/.mypy_cache
+          key: mypy-${{ runner.os }}-py3.14-${{ hashFiles('carddb/uv.lock', 'carddb/pyproject.toml', 'publish/uv.lock', 'publish/pyproject.toml') }}-${{ github.sha }}
           restore-keys: |
-            mypy-${{ runner.os }}-py3.14-${{ hashFiles('carddb/uv.lock', 'carddb/pyproject.toml') }}-
+            mypy-${{ runner.os }}-py3.14-${{ hashFiles('carddb/uv.lock', 'carddb/pyproject.toml', 'publish/uv.lock', 'publish/pyproject.toml') }}-
             mypy-${{ runner.os }}-py3.14-
       - name: Runner CPU count
         run: nproc
@@ -282,7 +284,9 @@ jobs:
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.mypy-cache.outputs.cache-hit != 'true'
         with:
-          path: carddb/.mypy_cache
+          path: |
+            carddb/.mypy_cache
+            publish/.mypy_cache
           key: ${{ steps.mypy-cache.outputs.cache-primary-key }}
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'

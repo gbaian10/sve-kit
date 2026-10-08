@@ -252,6 +252,25 @@ class DirectTestTests(unittest.TestCase):
                         inputs["cache_save"]
                         == "${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}"
                     )
+        python_steps = cast("list[dict[str, object]]", jobs["python"]["steps"])
+        restore = next(step for step in python_steps if step.get("id") == "mypy-cache")
+        save = next(
+            step
+            for step in python_steps
+            if "steps.mypy-cache.outputs.cache-primary-key" in str(step.get("with", {}))
+        )
+        restore_inputs = cast("dict[str, object]", restore["with"])
+        save_inputs = cast("dict[str, object]", save["with"])
+        assert "if" not in restore
+        assert str(restore_inputs["path"]).splitlines() == [
+            "carddb/.mypy_cache",
+            "publish/.mypy_cache",
+        ]
+        assert save_inputs["path"] == restore_inputs["path"]
+        for project in ("carddb", "publish"):
+            for filename in ("uv.lock", "pyproject.toml"):
+                for cache_key in ("key", "restore-keys"):
+                    assert f"'{project}/{filename}'" in str(restore_inputs[cache_key])
         web_steps = cast("list[dict[str, object]]", jobs["web"]["steps"])
         install = next(
             step
