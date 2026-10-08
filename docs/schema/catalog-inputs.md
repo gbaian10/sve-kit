@@ -26,7 +26,7 @@ Catalog／Vocabulary 記憶體物件由此推導，不是另一份權威。
 
 ## 3. JP／EN 原文映射
 
-以既有有效映射為對照，不用私人 preview 檔作載入條件。JP／EN 在同一採納入口以 `{region,lang,raw,source_ref,special_kinds}` 保存完整 exact 原值；特殊標記的欄位、依賴與來源核對沿契約 §4.1。`registry/inputs.py::CLASSES` 只供一致性檢查，不是配發收據；`-` 沿缺值 recipe 投影 null，不配成職業、不冒作 neutral。
+以既有有效映射為對照，不用私人 preview 檔作載入條件。JP／EN 在同一採納入口以 `{region,lang,raw,source_ref,special_kinds}` 保存完整 exact 原值；特殊標記的欄位、依賴與來源核對沿契約 §4.1。`domains/registry/inputs.py::CLASSES` 只供一致性檢查，不是配發收據；`-` 沿缺值 recipe 投影 null，不配成職業、不冒作 neutral。
 
 例如經來源核對的「フォロワー・エボルヴ」／「Follower / Evolved」在 type:follower 的 raw_mappings 帶 `[evolve]`；「イクイップメント・トークン」在 type:equipment 帶 `[token]`。這些是示意，不宣稱實際資料已核對。每個完整 spelling 保留自己的凍結 source_ref，不切字後假造 ref。不靠通用 split／trim／大小寫轉換猜新對應；未知原值拒絕／列缺項，不生成暫碼。新增 spelling 或修訂標記直接改當前值，自動重驗唯一映射。
 

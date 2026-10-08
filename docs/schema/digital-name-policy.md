@@ -23,7 +23,7 @@ SVE 與數位完整日文名稱逐字相同，不 trim、normalize、casefold �
 ## 2. 同名規則瀏覽連結
 
 同名規則以非空 exact 日文名先視為同卡，新增待能力實作的 `relation=same_name`。
-規則條件固定在程式常數（`digital_name_policies.evaluate` 的 `LINK_RELATION`、`LINK_GAMES`），不放在資料檔：
+規則條件固定在程式常數（`domains.digital.name_policies.evaluate` 的 `LINK_RELATION`、`LINK_GAMES`），不放在資料檔：
 
 - 比完整日文名稱，不 trim、normalize 或 casefold；hash 相同仍比 exact 字串；
 - sv1 與 svwb 兩代都比，所有同名數位 ID 都列；

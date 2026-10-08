@@ -116,7 +116,7 @@ JP 初始分組依全部面同名／同職業／同種類／同數值／同特�
 
 ### 3.2 UInt32
 
-`card_int_id` 的 `data` 僅 `int_id/printing_id`；`record_key` 為 `card_int_id:<printing_id>`。已配發記錄不修改、不刪除、不重用，沒有 decision。型別上限仍是 UInt32（4294967295），可用號段由版本化配號政策 `region-ranges-2026-09-28-v1` 決定，程式唯一定義在 `sve_carddb.registry.allocation`：
+`card_int_id` 的 `data` 僅 `int_id/printing_id`；`record_key` 為 `card_int_id:<printing_id>`。已配發記錄不修改、不刪除、不重用，沒有 decision。型別上限仍是 UInt32（4294967295），可用號段由版本化配號政策 `region-ranges-2026-09-28-v1` 決定，程式唯一定義在 `sve_carddb.domains.registry.allocation`：
 
 | 號段（閉區間） | 用途 |
 | -------------- | ---- |
@@ -156,11 +156,11 @@ evidence 元素為 `kind: card_image`、`sha256`、官網原樣 `image_src`、re
 
 建置的 `registry.corrections.project_corrections` 對 active 更正比對原值與完整觀測 hash，匹配才產生更正值與欄位標記；原值已等於改值時回報 already_fixed，不重複套用，後續需警告並退役來源更正；其他差異為 conflict，不套用並阻擋 CLI 完成。needs_review 不產生投影。結果依 printing／face／field 定位，`corrections` 元素使用 snapshot-format 的 `{field, corrected_from, is_corrected: true, reason, source_url?}`；沒有可用官方頁 URL 時 source_url 仍存在、值為 null，不把卡圖 URL 冒充官方頁。此標記不附到共享文字上。
 
-CLI 每次建置均驗證這個投影，可用 `--corrections-output <absolute-derived-json>` 保存更正後的欄位 value、applied／already_fixed 狀態與顯示標記；加 --check 時只比對已存的投影，不寫檔。這個 CLI 輸出仍是欄位投影，不是完整 face_revision 或公開卡表快照。正式建置 staging 由 `source_corrections` 接入文字觀測匯入器：核對封存圖片後匯入三表，保留原始觀測並建立更正後 revision，再提供受影響引用者的公開 Correction 值；完整快照序列化與發布驗證另由匯出器處理。API 與 F1 使用閉包見 [來源更正實作說明](../../carddb/src/sve_carddb/source_corrections/README.md)。
+CLI 每次建置均驗證這個投影，可用 `--corrections-output <absolute-derived-json>` 保存更正後的欄位 value、applied／already_fixed 狀態與顯示標記；加 --check 時只比對已存的投影，不寫檔。這個 CLI 輸出仍是欄位投影，不是完整 face_revision 或公開卡表快照。正式建置 staging 由 `source_corrections` 接入文字觀測匯入器：核對封存圖片後匯入三表，保留原始觀測並建立更正後 revision，再提供受影響引用者的公開 Correction 值；完整快照序列化與發布驗證另由匯出器處理。API 與 F1 使用閉包見 [來源更正實作說明](../../carddb/src/sve_carddb/domains/source_corrections/README.md)。
 
 ### 3.5 重跑與新卡包
 
-工具入口為 `uv --directory <absolute-carddb> run python -m sve_carddb.registry`；參數 `--jp/--en/--candidates/--confirmations/--original-art/--decisions/--images/--authored` 全為明示路徑，`--as-of` 為 JP 輸入的 ISO 日期，`--check` 要求現有輸出完全相同。全程只讀本機來源，不讀 manifest、不抓網路。
+工具入口為 `uv --directory <absolute-carddb> run python -m sve_carddb.domains.registry`；參數 `--jp/--en/--candidates/--confirmations/--original-art/--decisions/--images/--authored` 全為明示路徑，`--as-of` 為 JP 輸入的 ISO 日期，`--check` 要求現有輸出完全相同。全程只讀本機來源，不讀 manifest、不抓網路。
 
 decisions 是本機的初始化決定檔（`registry.review.InitDecisions`），JSON 欄位為 corrections、reskins、separate_groups、art_groups，只記人工配對決定。工具不從 confidence 產生配對決定；產生的登錄照一般 PR diff 審查。新包先產候選、核對所有面與差異、核圖實質增刪，再更新決定檔。任何未核對的職業、種類、數值或英文同卡名稱衝突都失敗。
 
