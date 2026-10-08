@@ -14,8 +14,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import InputRecord
     from sve_carddb.catalog.adoption_models import SourceRef
+    from sve_carddb.core.provenance import InputRecord
     from sve_carddb.digital_links.importer import Result as LinkResult
     from sve_carddb.digital_name_policies.current_application import Plan
     from sve_carddb.digital_name_policies.loader import Snapshot

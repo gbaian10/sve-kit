@@ -6,11 +6,11 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import BuildContext
+from sve_carddb.core.json import array, canonical, digest, object_value, parse
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.digital_name_policies.evaluate import NameOwner
 from sve_carddb.digital_name_policies.loader import load
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 
 from .adoption_fixtures import REPO, commit, git
 from .digital_link_import_fixtures import Fixture, catalogue_fixture, make_fixture

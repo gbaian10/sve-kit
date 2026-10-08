@@ -1,7 +1,8 @@
 """Source correction records and their checked applications."""
 
-from sve_carddb.build_db.domains import DATE, HASH
+from sve_carddb.build_db.domains import HASH
 from sve_carddb.build_db.model import Check, Column, ForeignKey, Kind, QueryCheck, Table
+from sve_carddb.core.dates import DATE
 
 TABLES = (
     Table(

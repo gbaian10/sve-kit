@@ -5,7 +5,7 @@ from typing import Annotated, Literal, Self
 
 from pydantic import Field, JsonValue, field_validator, model_validator
 
-from sve_carddb.registry.records import Hash, RecordData, Text, UInt
+from sve_carddb.core.models import Hash, RecordData, Text, UInt
 from sve_carddb.template_sources.normalizer import Role
 
 NumericRule = Literal[

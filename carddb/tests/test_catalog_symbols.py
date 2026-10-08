@@ -4,7 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from sve_carddb.catalog.symbols import Localization, Spelling, Symbol, parse_symbol
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.core.json import canonical
 
 
 def symbol() -> Symbol:

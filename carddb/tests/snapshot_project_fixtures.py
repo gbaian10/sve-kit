@@ -8,8 +8,8 @@ from sve_carddb.build_db import Capability, Column, Json, Kind, Table, compile_s
 from sve_carddb.build_db.registry import Registry
 from sve_carddb.build_db.t1 import REGISTRY, compile_minimum
 from sve_carddb.build_db.t2_translation import TABLES as NAME_TABLES
+from sve_carddb.core.json import digest, parse
 from sve_carddb.snapshot.project import Decisions, Settings
-from sve_carddb.snapshot.values import digest, parse
 
 from .build_db_fixtures import rows as core_rows
 from .build_db_t1_fixtures import rows as image_rows

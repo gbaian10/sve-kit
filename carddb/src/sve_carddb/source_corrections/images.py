@@ -8,7 +8,7 @@ from sve_carddb.sources import official_en, official_jp
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
     from sve_carddb.registry.records import CorrectionEvidence
 
 

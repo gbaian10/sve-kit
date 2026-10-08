@@ -8,6 +8,7 @@ from pydantic import JsonValue
 from typer.testing import CliRunner
 
 from sve_carddb.cli import app
+from sve_carddb.core.json import array, canonical, object_value, parse
 from sve_carddb.digital_links.candidates import (
     CLASSES,
     complete_inventory,
@@ -18,7 +19,6 @@ from sve_carddb.digital_links.candidates import (
 from sve_carddb.digital_links.commands import output_path
 from sve_carddb.digital_links.evidence import batch_refs, inventory
 from sve_carddb.digital_links.importer import review_context
-from sve_carddb.snapshot.values import array, canonical, object_value, parse
 
 from .digital_link_import_fixtures import (
     Fixture,

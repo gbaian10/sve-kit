@@ -9,7 +9,7 @@ from pydantic import JsonValue
 from sve_carddb.build_db import Json
 from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.build_db.t2_translation import OWNERS
-from sve_carddb.snapshot.values import canonical, digest, parse
+from sve_carddb.core.json import canonical, digest, parse
 from sve_carddb.template_translations.current_models import (
     DefinitionRecord,
     TranslationRecord,

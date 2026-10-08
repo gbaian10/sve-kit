@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_crops import load_image_crops, parse_crops
 from sve_carddb.image_variants import CropBox
-from sve_carddb.registry.storage import MAX_BYTES
 
 from .image_crop_fixtures import install, record
 

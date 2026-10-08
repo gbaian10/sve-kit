@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.template_parameters.models import SourceSpan
 from sve_carddb.template_parameters.spans import Located, verify
 from sve_carddb.template_translations.definitions import payload

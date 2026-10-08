@@ -6,18 +6,18 @@ from urllib.parse import parse_qsl, urljoin, urlsplit
 
 from sve_carddb.card_extras.archive import _TITLE, _date
 from sve_carddb.card_extras.models import QABlock, QAEntry, QAPage, RelatedLink
+from sve_carddb.core.json import digest
 from sve_carddb.extract.official_en import _qa_text as en_text
 from sve_carddb.extract.official_jp import _qa_text as jp_text
 from sve_carddb.fetch.validate import ValidationError, decode_html
 from sve_carddb.html import attribute, parse, require_one, select_all, select_one
-from sve_carddb.snapshot.values import digest
 from sve_carddb.sources import official_en, official_jp
 from sve_carddb.urls import canonicalize
 
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode
 
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
     from sve_carddb.registry.records import Region
 
 PARSER = "official-qa-observations-v1"

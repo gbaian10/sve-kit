@@ -6,13 +6,13 @@ from typing import TYPE_CHECKING
 
 from PIL import Image
 
+from sve_carddb.core.json import digest
 from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.snapshot.values import digest
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
     from sve_carddb.image_variants import CropBox, VariantSet
 
 

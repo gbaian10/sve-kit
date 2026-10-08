@@ -1,6 +1,6 @@
 """Official errata versions, scoped changes and printing applicability."""
 
-from sve_carddb.build_db.domains import CODE, DATE
+from sve_carddb.build_db.domains import CODE
 from sve_carddb.build_db.model import (
     Check,
     Column,
@@ -10,6 +10,7 @@ from sve_carddb.build_db.model import (
     Table,
     Unique,
 )
+from sve_carddb.core.dates import DATE
 
 TABLES = (
     Table(

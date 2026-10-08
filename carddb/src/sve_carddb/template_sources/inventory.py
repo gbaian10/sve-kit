@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.catalog.adoption_models import SourceRef
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.template_sources.models import Entry
 from sve_carddb.template_sources.normalizer import (
     VERSION,
@@ -20,7 +20,7 @@ from sve_carddb.text_observations.presence import detect_presence
 from sve_carddb.translations.sources import pointer, project
 
 if TYPE_CHECKING:
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
     from sve_carddb.frozen_sources import FrozenSources
     from sve_carddb.text_observations.presence import PresenceState
 

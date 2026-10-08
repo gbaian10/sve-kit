@@ -8,9 +8,10 @@ import pytest
 import yamlrocks
 from pydantic import JsonValue, RootModel, ValidationError
 
+from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.registry import storage
 from sve_carddb.registry.inputs import canonical, digest
-from sve_carddb.registry.storage import MAX_BYTES, encode, read_yaml
+from sve_carddb.registry.storage import encode, read_yaml
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture

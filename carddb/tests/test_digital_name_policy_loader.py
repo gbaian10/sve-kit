@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
+from sve_carddb.core.json import digest, object_value
+from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.digital_name_policies.current_models import LinkPolicy
 from sve_carddb.digital_name_policies.loader import decoded, load, model
-from sve_carddb.registry.storage import MAX_BYTES
-from sve_carddb.snapshot.values import digest, object_value
 
 from .adoption_fixtures import commit
 from .digital_name_policy_fixtures import LINKS, current, loader_repository, rewrite

@@ -2,8 +2,8 @@
 
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.json import array, integer, object_value, string
 from sve_carddb.snapshot.project.source import json_list
-from sve_carddb.snapshot.values import array, integer, object_value, string
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

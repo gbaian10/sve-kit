@@ -11,7 +11,7 @@ from sve_carddb.catalog.adoption_sources import AdoptionSources
 from sve_carddb.catalog.current_models import LanguageRecord, Shard, VocabularyRecord
 from sve_carddb.catalog.models import Catalog
 from sve_carddb.catalog.projection import CatalogProjection
-from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.text_observations.intern import TextInterner
 from sve_carddb.text_observations.vocabulary import Binding, Vocabulary
 from sve_carddb.translations.direct import write
@@ -20,8 +20,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_db import Database, Value
-    from sve_carddb.build_inputs import BuildContext
     from sve_carddb.catalog.adoption_loader import AdoptionSnapshot
+    from sve_carddb.core.provenance import BuildContext
     from sve_carddb.registry.snapshot import RegistrySnapshot
 
 

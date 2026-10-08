@@ -1,8 +1,9 @@
 """T0 declarations from docs/schema/build-db.md; domain validation is separate."""
 
-from sve_carddb.build_db.domains import CODE, DATE, HASH, INSTANT, LANG
+from sve_carddb.build_db.domains import CODE, HASH, LANG
 from sve_carddb.build_db.model import Check, Column, ForeignKey, Kind, Table, Unique
 from sve_carddb.build_db.translation_evidence import QUALITY, SOURCE
+from sve_carddb.core.dates import DATE, INSTANT
 
 TABLES = (
     Table(

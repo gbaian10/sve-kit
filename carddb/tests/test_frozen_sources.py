@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.build_db.source_rows import source_values
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.manifest import Kind
 from sve_carddb.registry.preview import FrozenJP
@@ -45,7 +46,7 @@ def test_raw_kind_comes_from_verified_receipt_media(
     assert content == raw
     assert source.id == descriptor.id == version
     assert source.kind == kind
-    assert source.values()["parser_version"] is None
+    assert source_values(source)["parser_version"] is None
 
 
 def test_unrecognized_media_is_rejected_without_inferred_kind(tmp_path: Path) -> None:

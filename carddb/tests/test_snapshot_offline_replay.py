@@ -11,8 +11,9 @@ from typer.testing import CliRunner
 
 from sve_carddb.build_db.database import open_database
 from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES, compile_build
-from sve_carddb.build_inputs import InputRecord
 from sve_carddb.cli import app
+from sve_carddb.core.json import canonical, digest, object_value, parse
+from sve_carddb.core.provenance import InputRecord
 from sve_carddb.extract import official_en as extract_en
 from sve_carddb.extract import official_jp as extract_jp
 from sve_carddb.extract.compare_jp import legacy_projection
@@ -23,7 +24,6 @@ from sve_carddb.registry.review import InitDecisions
 from sve_carddb.registry.review import Inputs as IdentityInputs
 from sve_carddb.registry.storage import Index, plan_files, write_files
 from sve_carddb.snapshot import offline
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.source_archive import Scope, seal_batch
 from sve_carddb.sources import official_en, official_jp
 from sve_carddb.sources.official_jp import card_url

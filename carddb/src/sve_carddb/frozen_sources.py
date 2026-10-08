@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import ValidationError
 
-from sve_carddb.build_inputs import ArchivePin, RawKind, Source
-from sve_carddb.snapshot.values import digest
+from sve_carddb.core.json import digest
+from sve_carddb.core.provenance import ArchivePin, RawKind, Source
 from sve_carddb.source_archive import ArchiveError, Descriptor, Receipt, verify_batch
 from sve_carddb.store import resolve_within
 

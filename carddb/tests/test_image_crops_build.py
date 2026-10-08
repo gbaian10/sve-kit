@@ -11,6 +11,7 @@ from PIL import Image
 import sve_carddb.image_crop_report as report_module
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.core.json import array, object_value
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_assets import (
     ImageReference,
@@ -21,7 +22,6 @@ from sve_carddb.image_assets import (
 from sve_carddb.image_crop_report import crop_report
 from sve_carddb.image_crops import image_source_key, load_image_crops
 from sve_carddb.image_variants import CropBox
-from sve_carddb.snapshot.values import array, object_value
 
 from .image_crop_fixtures import install, record
 

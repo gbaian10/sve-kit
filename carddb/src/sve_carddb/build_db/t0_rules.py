@@ -1,6 +1,6 @@
 """T0 declarations from docs/schema/build-db.md; domain validation is separate."""
 
-from sve_carddb.build_db.domains import DATE, HASH
+from sve_carddb.build_db.domains import HASH
 from sve_carddb.build_db.model import (
     Check,
     Column,
@@ -10,6 +10,7 @@ from sve_carddb.build_db.model import (
     Table,
     Unique,
 )
+from sve_carddb.core.dates import DATE
 
 TABLES = (
     Table(

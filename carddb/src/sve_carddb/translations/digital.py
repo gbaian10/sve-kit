@@ -4,15 +4,16 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import SourceUse, insert_raw_sources
+from sve_carddb.build_db.source_rows import insert_raw_sources
 from sve_carddb.catalog.adoption_models import SourceRef
+from sve_carddb.core.json import array, canonical, digest, object_value, parse
+from sve_carddb.core.provenance import SourceUse
 from sve_carddb.products.models import LocalizedText
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.text_observations.intern import TextInterner
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
     from sve_carddb.translations.sources import Sources
 
 

@@ -5,7 +5,7 @@ import unicodedata
 from dataclasses import dataclass
 from typing import Literal
 
-from sve_carddb.snapshot.values import digest
+from sve_carddb.core.json import digest
 
 VERSION = "classification-jp-v0-v1"
 CODE_PATH = "carddb/src/sve_carddb/template_sources/normalizer.py"

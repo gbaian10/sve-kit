@@ -6,7 +6,7 @@ from pydantic import JsonValue
 
 from sve_carddb.build_db import Json, create_database
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.snapshot.values import canonical, digest, object_value
+from sve_carddb.core.json import canonical, digest, object_value
 
 from .database_fixtures import DatabaseTemplate
 

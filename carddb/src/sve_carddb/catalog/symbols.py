@@ -8,9 +8,9 @@ from pydantic import JsonValue, model_validator
 
 from sve_carddb.build_db.t0_json import schemas, symbol_valid
 from sve_carddb.build_db.validation import Rules
+from sve_carddb.core.json import array, canonical, integer, object_value, string
+from sve_carddb.core.models import RecordData, Text
 from sve_carddb.products.models import Code, Lang
-from sve_carddb.registry.records import RecordData, Text
-from sve_carddb.snapshot.values import array, canonical, integer, object_value, string
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

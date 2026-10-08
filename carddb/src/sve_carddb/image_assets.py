@@ -10,7 +10,9 @@ from typing import TYPE_CHECKING
 from PIL import Image, ImageOps
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import Source, SourceUse, insert_raw_sources, uses_sorted
+from sve_carddb.build_db.source_rows import insert_raw_sources, source_values
+from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.provenance import Source, SourceUse, uses_sorted
 from sve_carddb.extract.official_en import extract_card as extract_en
 from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.image_checks import ImageChecks
@@ -23,7 +25,6 @@ from sve_carddb.image_variants import (
     crop_box,
 )
 from sve_carddb.registry.records import PrintingData, Region
-from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.sources import official_en
 from sve_carddb.sources.official_jp import card_url, image_url
 from sve_carddb.store import resolve_within
@@ -217,10 +218,9 @@ def plan_regional_images(
             raise ValueError(
                 f"{region.upper()} image descriptor differs from the card page"
             )
-        if (
-            source.values() != evidence.source.values()
-            or source_rows.get(source.id) != source.values()
-        ):
+        if source_values(source) != source_values(evidence.source) or source_rows.get(
+            source.id
+        ) != source_values(source):
             raise ValueError(
                 f"{region.upper()} image page provenance differs from the identity input"
             )

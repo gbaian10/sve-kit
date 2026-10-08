@@ -9,9 +9,10 @@ from typing import TYPE_CHECKING, cast
 import pytest
 
 from sve_carddb.build_db import ForeignKey, Kind, Table
-from sve_carddb.build_db.domains import DATE, HASH, INSTANT, LANG
+from sve_carddb.build_db.domains import HASH, LANG
 from sve_carddb.build_db.t0 import TABLES
 from sve_carddb.build_db.t1 import TABLES as T1_TABLES
+from sve_carddb.core.dates import DATE, INSTANT
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, MutableMapping

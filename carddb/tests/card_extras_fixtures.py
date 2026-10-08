@@ -3,10 +3,10 @@
 from typing import TYPE_CHECKING
 
 from sve_carddb.build_db import Json
-from sve_carddb.build_inputs import ArchivePin, BuildContext, Source
 from sve_carddb.card_extras import CardPage, QAEntry
 from sve_carddb.card_extras.archive import PARSER
-from sve_carddb.snapshot.values import digest
+from sve_carddb.core.json import digest
+from sve_carddb.core.provenance import ArchivePin, BuildContext, Source
 from sve_carddb.sources import official_en, official_jp
 
 from .build_db_fixtures import rows

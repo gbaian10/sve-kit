@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.core.json import canonical
 from sve_carddb.template_parameters.analysis import SAFE_INTEGER, prepared
 from sve_carddb.template_parameters.verification import verify_values
 from sve_carddb.template_sources.inventory import entry

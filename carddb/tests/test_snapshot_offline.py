@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 import pytest
 from typer.testing import CliRunner
 
-from sve_carddb.build_inputs import InputRecord, SourceUse, input_record
 from sve_carddb.card_extras import (
     CardPage,
     ErrataChange,
@@ -22,6 +21,8 @@ from sve_carddb.catalog import adoption_importer
 from sve_carddb.catalog.models import Catalog
 from sve_carddb.catalog.projection import CatalogProjection
 from sve_carddb.cli import app
+from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
+from sve_carddb.core.provenance import InputRecord, SourceUse, input_record
 from sve_carddb.products import OfficialProducts, ProductIdentities
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot import offline
@@ -43,14 +44,6 @@ from sve_carddb.snapshot.preview import (
 from sve_carddb.snapshot.project import project
 from sve_carddb.snapshot.publication import require_preview
 from sve_carddb.snapshot.reader import read_snapshot
-from sve_carddb.snapshot.values import (
-    array,
-    canonical,
-    digest,
-    object_value,
-    parse,
-    string,
-)
 
 from .adoption_fixtures import REPO
 from .catalog_vocabulary_fixtures import make_vocabulary_case
@@ -84,7 +77,7 @@ def prepared(
         "carddb/pyproject.toml",
         "carddb/src/sve_carddb/extract/official_jp.py",
         "carddb/src/sve_carddb/extract/official_en.py",
-        "carddb/src/sve_carddb/snapshot/values.py",
+        "carddb/src/sve_carddb/core/json.py",
         "carddb/src/sve_carddb/translations/sources.py",
     ):
         target = repo / name

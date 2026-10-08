@@ -12,7 +12,6 @@ from sve_carddb.registry.records import (
     ArtData,
     EnglishPrintingData,
     PrintingData,
-    RecordData,
     RelatedData,
 )
 from sve_carddb.registry.storage import Entry, RegistryFiles, read_registry_files
@@ -21,6 +20,8 @@ from sve_carddb.registry.validate import check_cursors, validate
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from pathlib import Path
+
+    from sve_carddb.core.models import RecordData
 
 
 @dataclass(frozen=True)

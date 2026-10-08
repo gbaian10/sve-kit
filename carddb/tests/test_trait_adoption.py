@@ -14,7 +14,7 @@ from sve_carddb.catalog.adoption_models import RawMapping, ReviewContext, Source
 from sve_carddb.catalog.adoption_sources import AdoptionSources
 from sve_carddb.catalog.adoption_validation import term as validate_term
 from sve_carddb.catalog.current_models import VocabularyRecord
-from sve_carddb.snapshot.values import canonical, digest, object_value
+from sve_carddb.core.json import canonical, digest, object_value
 
 from .catalog_vocabulary_fixtures import save, vocabulary_record
 from .current_catalog_fixtures import prepare_case

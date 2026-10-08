@@ -24,9 +24,9 @@ from sve_carddb.catalog.adoption_models import (
     VocabularySubject,
     VocabularyValue,
 )
+from sve_carddb.core.json import canonical
+from sve_carddb.core.models import RecordData, Text
 from sve_carddb.products.models import Lang
-from sve_carddb.registry.records import RecordData, Text
-from sve_carddb.snapshot.values import canonical
 from sve_carddb.translations.current_models import Quality
 
 

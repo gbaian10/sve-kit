@@ -1,6 +1,6 @@
 """Optional #51 closure; no template renderer, art, voice or runtime routing."""
 
-from sve_carddb.build_db.domains import DATE, HASH, LANG
+from sve_carddb.build_db.domains import HASH, LANG
 from sve_carddb.build_db.model import (
     Check,
     Column,
@@ -10,6 +10,7 @@ from sve_carddb.build_db.model import (
     Table,
     Unique,
 )
+from sve_carddb.core.dates import DATE
 
 
 def _fk(column: str, table: str) -> ForeignKey:

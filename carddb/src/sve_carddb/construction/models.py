@@ -4,10 +4,11 @@ from typing import Literal
 
 from pydantic import JsonValue, model_validator
 
-from sve_carddb.build_inputs import SourceUse, uses_sorted
+from sve_carddb.core.json import canonical, parse
+from sve_carddb.core.models import Date, RecordData, Text, UInt
+from sve_carddb.core.provenance import SourceUse, uses_sorted
 from sve_carddb.products.models import LocalizedText
-from sve_carddb.registry.records import Date, RecordData, Region, Text, UInt
-from sve_carddb.snapshot.values import canonical, parse
+from sve_carddb.registry.records import Region
 
 
 class Evidence(RecordData):

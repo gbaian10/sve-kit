@@ -253,14 +253,14 @@ evidence validity.
 
 ## Saved build inputs
 
-The shared raw source boundary in `sve_carddb.build_inputs` reuses a source
+The shared raw source boundary in `sve_carddb.build_db.source_rows` reuses a source
 version only when all metadata matches, with `parser_version=NULL`. Each actual
 use keeps its own parser and archive pin in an immutable input record. The
 [approved contract](../../../../docs/schema/source-archive.md#22-建置-source_record-的投影)
 requires that record alongside the saved DB and report.
 
 ```python
-from sve_carddb.build_inputs import BuildContext
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.build_output import save
 
 context = BuildContext.from_inputs(program_revision, configuration)

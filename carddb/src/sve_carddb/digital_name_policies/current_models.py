@@ -5,8 +5,9 @@ from typing import Annotated, Literal
 from pydantic import Field, model_validator
 
 from sve_carddb.catalog.adoption_models import Batch
+from sve_carddb.core.models import Hash, RecordData, Text
 from sve_carddb.products.models import Lang
-from sve_carddb.registry.records import CardId, Hash, RecordData, Text
+from sve_carddb.registry.records import CardId
 from sve_carddb.translations.current_models import Origin, Owner
 
 CodePoint = Annotated[int, Field(ge=0, le=0x10FFFF)]
@@ -70,7 +71,7 @@ class Content(RecordData):
         hashes = tuple(e.source_name_hash for e in self.excluded_names)
         if hashes != tuple(sorted(set(hashes))):
             raise ValueError("Name exclusions must be sorted and unique")
-        from sve_carddb.snapshot.values import canonical  # ruff: ignore[import-outside-top-level] -- shared canonical owner keys prevent delimiter collisions
+        from sve_carddb.core.json import canonical  # ruff: ignore[import-outside-top-level] -- shared canonical owner keys prevent delimiter collisions
 
         keys = [
             canonical([o.owner.model_dump(mode="json"), o.source_hash])

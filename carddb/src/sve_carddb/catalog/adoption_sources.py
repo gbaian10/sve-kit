@@ -7,26 +7,27 @@ from urllib.parse import parse_qs, urlsplit
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import SourceUse
 from sve_carddb.catalog.adoption_models import (
     AuthoredText,
     ImageEvidence,
     SourceRef,
     SourceText,
 )
+from sve_carddb.core.authored import authored_root
+from sve_carddb.core.json import canonical, digest, parse
+from sve_carddb.core.provenance import SourceUse
+from sve_carddb.core.yaml import JSON_VALUE
 from sve_carddb.extract import official_en, official_jp
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.products.models import LocalizedText
-from sve_carddb.registry.inputs import JSON_VALUE
 from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.snapshot.values import canonical, digest, parse
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from pathlib import Path
 
-    from sve_carddb.build_inputs import Source
     from sve_carddb.catalog.adoption_models import ReviewContext, TextValue
+    from sve_carddb.core.provenance import Source
     from sve_carddb.registry.snapshot import RegistrySnapshot
 
 SOURCE_PARSERS = {"official-jp-exact-v1", "official-en-exact-v1", "exact-json-v1"}
@@ -49,7 +50,7 @@ class AdoptionSources:
     def registry(self) -> RegistrySnapshot:
         """Reuse the current registry; Git history cannot establish owner applicability."""
         if self.current_registry is None:
-            self.current_registry = load_registry(self.repository / "authored")
+            self.current_registry = load_registry(authored_root(self.repository))
         return self.current_registry
 
     def batch(self, batch: str) -> FrozenSources:

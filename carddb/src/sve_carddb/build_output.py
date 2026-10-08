@@ -5,7 +5,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING
 
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.core.json import canonical
 from sve_carddb.source_archive import _fsync_dir, _rename_no_replace
 
 if TYPE_CHECKING:

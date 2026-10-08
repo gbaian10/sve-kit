@@ -6,11 +6,12 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
+from sve_carddb.build_db.source_rows import source_values
+from sve_carddb.core.json import canonical, digest, parse
 from sve_carddb.html import parse as parse_html
 from sve_carddb.html import select_all
 from sve_carddb.manifest import Kind, Region
 from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.snapshot.values import canonical, digest, parse
 from sve_carddb.source_archive import seal_batch
 from sve_carddb.source_corrections.plan import corrected_observations
 from sve_carddb.sources import official_en, official_jp
@@ -318,7 +319,7 @@ def test_presence_use_and_report_bind_full_reference_evidence(
     assert locator["source_index"] == 0
     assert locator["result_hash"] == card.effect_presence[0].result_hash
     assert use.source.parser_version == PARSER
-    assert use.source.values()["parser_version"] is None
+    assert source_values(use.source)["parser_version"] is None
     assert use.source.archive == card.source.archive
     report = observation_report(item)
     assert report["effect_presence"] == card.effect_presence[0].value()

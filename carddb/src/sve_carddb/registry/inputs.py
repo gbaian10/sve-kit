@@ -6,12 +6,11 @@ import json
 from collections import defaultdict
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, TypeAdapter
+from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-JSON_VALUE: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
 CLASSES = {
     "エルフ": "Forestcraft",
     "ロイヤル": "Swordcraft",

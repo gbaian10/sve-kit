@@ -9,9 +9,9 @@ import pytest
 
 from sve_carddb.card_extras.errata_archive import FrozenErrataNotices
 from sve_carddb.card_extras.errata_parser import PARSER, associate_blocks, parse_notice
+from sve_carddb.core.json import digest
 from sve_carddb.manifest import Kind, Manifest
 from sve_carddb.manifest import Region as ManifestRegion
-from sve_carddb.snapshot.values import digest
 from sve_carddb.source_archive import ArchiveError, seal_batch
 
 from .card_extras_fixtures import source
@@ -20,7 +20,7 @@ from .test_source_archive import _put, _resource, _store
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
     from sve_carddb.registry.records import Region
     from sve_carddb.source_archive import ArchiveStore
 

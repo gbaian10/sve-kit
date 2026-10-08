@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_inputs import SourceUse
+from sve_carddb.core.provenance import SourceUse
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.manifest import Kind
 from sve_carddb.source_archive import seal_batch

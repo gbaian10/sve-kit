@@ -2,9 +2,9 @@
 
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.json import array, integer, object_value, string
 from sve_carddb.snapshot.contract import definition
 from sve_carddb.snapshot.project.source import Record, Source, json_list, pick
-from sve_carddb.snapshot.values import array, integer, object_value, string
 
 if TYPE_CHECKING:
     from pydantic import JsonValue

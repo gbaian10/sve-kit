@@ -9,12 +9,12 @@ from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.catalog.languages import register_languages
 from sve_carddb.catalog.models import Catalog
 from sve_carddb.catalog.rules_names import populate_rules_names, register_name
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.text_observations.intern import TextInterner
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import BuildContext
+    from sve_carddb.core.provenance import BuildContext
     from sve_carddb.products.models import LocalizedText
 
 

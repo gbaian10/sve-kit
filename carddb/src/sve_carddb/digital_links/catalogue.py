@@ -4,8 +4,8 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlsplit
 
+from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.digital_links.evidence import Name, PageRef, batch_refs, inventory
-from sve_carddb.snapshot.values import array, canonical, object_value
 
 if TYPE_CHECKING:
     from sve_carddb.catalog.adoption_models import ReviewContext

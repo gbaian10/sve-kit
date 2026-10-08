@@ -48,7 +48,7 @@ uv run --directory carddb python - <<'PY'
 import json
 import subprocess
 from pathlib import Path
-from sve_carddb.snapshot.values import digest
+from sve_carddb.core.json import digest
 from sve_carddb.source_import.importer import PROGRAM_FILES
 
 revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()

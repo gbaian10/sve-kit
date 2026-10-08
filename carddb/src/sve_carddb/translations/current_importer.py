@@ -3,8 +3,9 @@
 from typing import TYPE_CHECKING
 
 from sve_carddb.build_db.rows import insert_exact
-from sve_carddb.build_inputs import input_record, insert_raw_sources
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.build_db.source_rows import insert_raw_sources
+from sve_carddb.core.json import canonical, digest, object_value, parse
+from sve_carddb.core.provenance import input_record
 from sve_carddb.translations.current_models import ChoiceRecord, Shard, TermRecord
 from sve_carddb.translations.importer import validate_choice
 from sve_carddb.translations.sources import Sources
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import BuildContext, InputRecord
+    from sve_carddb.core.provenance import BuildContext, InputRecord
     from sve_carddb.translations.importer import Inputs
     from sve_carddb.translations.loader import Snapshot
 

@@ -12,7 +12,7 @@ from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.catalog.adoption_models import RawMapping
 from sve_carddb.catalog.adoption_validation import _mapping_metadata
-from sve_carddb.snapshot.values import canonical, object_value
+from sve_carddb.core.json import canonical, object_value
 from sve_carddb.text_observations.vocabulary import Vocabulary
 
 from .catalog_vocabulary_fixtures import (

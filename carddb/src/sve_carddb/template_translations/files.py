@@ -4,10 +4,9 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.authored_files import shards
-from sve_carddb.registry.inputs import JSON_VALUE
-from sve_carddb.registry.yaml_reader import parse_yaml
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.core.authored import authored_root, shards
+from sve_carddb.core.json import canonical
+from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -39,7 +38,7 @@ def read(root: Path, commit: str) -> Files:
     return Files(
         commit,
         shards(
-            root / "authored",
+            authored_root(root),
             (
                 "translations/glossary",
                 "translations/overrides",

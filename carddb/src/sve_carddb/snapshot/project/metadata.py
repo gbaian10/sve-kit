@@ -3,17 +3,10 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.snapshot.contract import definition, validate
 from sve_carddb.snapshot.project.source import Record, Source, json_list, pick
 from sve_carddb.snapshot.semantics import validate_config
-from sve_carddb.snapshot.values import (
-    array,
-    canonical,
-    digest,
-    object_value,
-    parse,
-    string,
-)
 
 if TYPE_CHECKING:
     from sve_carddb.snapshot.project.evidence import Decisions

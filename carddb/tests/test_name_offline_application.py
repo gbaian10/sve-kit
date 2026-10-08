@@ -12,10 +12,10 @@ from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES, compile_build
 from sve_carddb.catalog import adoption_importer
 from sve_carddb.catalog.models import Catalog
 from sve_carddb.catalog.projection import CatalogProjection
+from sve_carddb.core.json import array, digest, object_value
 from sve_carddb.products import Language
 from sve_carddb.snapshot import offline
 from sve_carddb.snapshot.offline_names import composer
-from sve_carddb.snapshot.values import array, digest, object_value
 from sve_carddb.text_observations import Binding, Vocabulary
 from sve_carddb.translations.importer import Inputs as TranslationInputs
 from sve_carddb.translations.importer import populate_glossary
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import BuildContext, InputRecord
+    from sve_carddb.core.provenance import BuildContext, InputRecord
 
 
 @pytest.fixture(scope="module")

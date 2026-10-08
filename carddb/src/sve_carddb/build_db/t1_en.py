@@ -1,6 +1,6 @@
 """Optional cross-region review and art ownership declarations."""
 
-from sve_carddb.build_db.domains import DATE, HASH, INSTANT
+from sve_carddb.build_db.domains import HASH
 from sve_carddb.build_db.model import (
     Check,
     Column,
@@ -10,6 +10,7 @@ from sve_carddb.build_db.model import (
     Table,
     Unique,
 )
+from sve_carddb.core.dates import DATE, INSTANT
 
 TABLES = (
     Table(

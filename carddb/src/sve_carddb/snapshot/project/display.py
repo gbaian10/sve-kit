@@ -3,8 +3,8 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.json import array, object_value, string
 from sve_carddb.snapshot.project.translations import source_unit
-from sve_carddb.snapshot.values import array, object_value, string
 
 if TYPE_CHECKING:
     from sve_carddb.snapshot.project.source import Record

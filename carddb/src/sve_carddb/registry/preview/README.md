@@ -107,7 +107,7 @@ pipeline still needs product, text, public projection and capability validation.
 
 ## Shared sources and build input records
 
-`Source` lives in `sve_carddb.build_inputs`. It retains each use's parser and
+`Source` lives in `sve_carddb.core.provenance`. It retains each use's parser and
 sealed archive pin (store, batch, descriptor and first receipt); `Source.values()`
 projects shared raw metadata with `parser_version=NULL`. Authored envelope
 sources keep `registry-envelope-v1`. No source ID is derived from a parser.

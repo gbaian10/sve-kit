@@ -8,8 +8,10 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import BuildContext, insert_raw_sources
+from sve_carddb.build_db.source_rows import insert_raw_sources
 from sve_carddb.catalog.adoption_models import SourceRef
+from sve_carddb.core.json import array, canonical, digest, object_value, parse
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.digital_links.importer import Inputs
 from sve_carddb.extract.compare_jp import legacy_projection
 from sve_carddb.extract.official_jp import extract_card
@@ -23,7 +25,6 @@ from sve_carddb.registry.review import InitDecisions
 from sve_carddb.registry.review import Inputs as RegistryInputs
 from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.registry.storage import plan_files, read_yaml, write_files
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.source_archive import seal_batch
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.text_observations.intern import TextInterner

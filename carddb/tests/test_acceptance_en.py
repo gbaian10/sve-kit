@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.extract.acceptance_en import acceptance_report, review_queue
 from sve_carddb.extract.official_en import extract_card, legacy_projection
 from sve_carddb.frozen_sources import FrozenSources
@@ -21,7 +22,6 @@ from sve_carddb.registry.preview import FrozenEN, plan_preview
 from sve_carddb.registry.records import CorrectionData, CorrectionEvidence, PrintingData
 from sve_carddb.registry.review import Correction, InitDecisions, Inputs
 from sve_carddb.registry.storage import plan_files, write_files
-from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.source_archive import ArchiveError, seal_batch
 from sve_carddb.source_corrections import FrozenImages
 from sve_carddb.source_corrections.images import evidence_url

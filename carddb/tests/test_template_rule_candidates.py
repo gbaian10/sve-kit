@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.catalog.adoption_models import SourceRef
-from sve_carddb.snapshot.values import array, canonical, digest, integer, object_value
+from sve_carddb.core.json import array, canonical, digest, integer, object_value
 from sve_carddb.template_parameters import candidate_matching as matching
 from sve_carddb.template_parameters.candidate_matching import recognize
 from sve_carddb.template_parameters.inventory import Candidates, Field, _field, summary

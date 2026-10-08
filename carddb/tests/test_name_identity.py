@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.core.json import digest, object_value
 from sve_carddb.registry.storage import load, relayout, write_files
-from sve_carddb.snapshot.values import digest, object_value
 from sve_carddb.translations.name_identity import IdentityEvidence
 
 from .adoption_fixtures import commit

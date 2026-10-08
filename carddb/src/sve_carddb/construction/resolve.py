@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import ConfigDict, TypeAdapter
 
-from sve_carddb.registry.records import Date
+from sve_carddb.core.models import Date
 
 _DATE = TypeAdapter(Date, config=ConfigDict(regex_engine="python-re", strict=True))
 

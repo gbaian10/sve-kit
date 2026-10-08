@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING, Literal, Self
 
 from pydantic import ValidationError, field_validator, model_validator
 
-from sve_carddb.authored_files import check_path
-from sve_carddb.registry.records import RecordData
-from sve_carddb.registry.storage import MAX_BYTES as LIMIT
+from sve_carddb.core.authored import authored_root, check_path
+from sve_carddb.core.models import RecordData
+from sve_carddb.core.yaml import MAX_BYTES as LIMIT
 from sve_carddb.template_parameter_rules.models import LEGACY_IDS, RuleId
 from sve_carddb.template_parameters.rule_candidates import BY_ID
 from sve_carddb.template_translations.files import json_bytes
@@ -61,7 +61,10 @@ def parse(raw: bytes) -> Rules:
 
 def load(repository: Path) -> Rules:
     """Read the current matcher switches in the working tree."""
-    return load_file(repository / PATH, root=repository / "authored")
+    return load_file(
+        authored_root(repository) / "template-parameter-rules/current.yaml",
+        root=authored_root(repository),
+    )
 
 
 def load_file(path: Path, *, root: Path) -> Rules:

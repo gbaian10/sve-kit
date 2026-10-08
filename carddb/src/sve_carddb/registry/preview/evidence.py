@@ -8,7 +8,7 @@ from sve_carddb.registry.records import Observation, Region
 from sve_carddb.registry.review import observation
 
 if TYPE_CHECKING:
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
 
 
 @dataclass(frozen=True)

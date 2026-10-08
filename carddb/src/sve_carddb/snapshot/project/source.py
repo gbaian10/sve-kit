@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.build_db import Json
-from sve_carddb.snapshot.values import string
+from sve_carddb.core.json import string
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

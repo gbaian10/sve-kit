@@ -8,9 +8,9 @@ from pydantic import JsonValue
 from typer.testing import CliRunner
 
 from sve_carddb.cli import app
+from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.digital_name_policies.commands import report_command
 from sve_carddb.digital_name_policies.report import generate
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 
 from .digital_name_policy_fixtures import PolicyFixture, make_policy_fixture
 

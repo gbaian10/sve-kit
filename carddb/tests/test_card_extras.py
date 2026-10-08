@@ -7,8 +7,8 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 from sve_carddb.build_db import create_database
+from sve_carddb.build_db.source_rows import source_values
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.build_inputs import input_record
 from sve_carddb.card_extras import (
     ErrataChange,
     ErrataPage,
@@ -19,7 +19,8 @@ from sve_carddb.card_extras import (
     populate_card_extras,
     require_card_extras_ready,
 )
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.core.json import canonical
+from sve_carddb.core.provenance import input_record
 
 from .card_extras_fixtures import context, page, seed, source
 
@@ -27,7 +28,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from sve_carddb.build_db import CompiledSchema, Database
-    from sve_carddb.build_inputs import BuildContext, InputRecord, SourceUse
+    from sve_carddb.core.provenance import BuildContext, InputRecord, SourceUse
 
 
 @pytest.fixture(scope="module")
@@ -422,7 +423,7 @@ def test_errata_rejects_invented_identity_or_confirmation(
         )
         if fault == "unconfirmed":
             with db.transaction():
-                db.insert("source_record", item.source.values())
+                db.insert("source_record", source_values(item.source))
                 db.insert(
                     "decision_source",
                     {
@@ -459,7 +460,7 @@ def test_confirmed_errata_requires_pinned_decision(db: Database) -> None:
     )
     plan = plan_card_extras(db, (), errata=(item,))
     with db.transaction():
-        populate_source = item.source.values()
+        populate_source = source_values(item.source)
         db.insert("source_record", populate_source)
         db.insert(
             "decision_source",

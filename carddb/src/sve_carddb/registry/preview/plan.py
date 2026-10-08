@@ -7,7 +7,8 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import SourceUse
+from sve_carddb.core.json import canonical
+from sve_carddb.core.provenance import SourceUse
 from sve_carddb.registry.records import (
     AllocationData,
     ArtData,
@@ -22,7 +23,6 @@ from sve_carddb.registry.records import (
     RelatedData,
 )
 from sve_carddb.registry.snapshot import RegistryRecord, RegistrySnapshot, load_registry
-from sve_carddb.snapshot.values import canonical
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

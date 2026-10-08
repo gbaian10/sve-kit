@@ -5,9 +5,10 @@ from urllib.parse import urlsplit
 
 from pydantic import JsonValue, model_validator
 
-from sve_carddb.build_inputs import Source
-from sve_carddb.registry.records import Date, RecordData, Region, Text
-from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.models import Date, RecordData, Text
+from sve_carddb.core.provenance import Source
+from sve_carddb.registry.records import Region
 from sve_carddb.sources import official_en, official_jp
 
 

@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.snapshot.values import array, integer, object_value, string
+from sve_carddb.core.json import array, integer, object_value, string
 
 if TYPE_CHECKING:
     from sve_carddb.snapshot.reader import Fragment, Row, View

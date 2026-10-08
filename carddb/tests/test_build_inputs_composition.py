@@ -6,8 +6,9 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build_db import create_database
+from sve_carddb.build_db.source_rows import insert_raw_sources, source_values
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.build_inputs import SourceUse, input_record, insert_raw_sources
+from sve_carddb.core.provenance import SourceUse, input_record
 from sve_carddb.products import (
     import_product_preview,
     load_products,
@@ -31,7 +32,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from pathlib import Path
 
-    from sve_carddb.build_inputs import BuildContext, InputRecord
+    from sve_carddb.core.provenance import BuildContext, InputRecord
     from sve_carddb.registry.review import Inputs
 
     from .identity_evidence_fixtures import MemoryEvidence
@@ -77,7 +78,7 @@ def test_family_and_identity_share_sealed_raw_and_keep_every_use(
             for row in db.rows("source_record")
             if row.values["id"] == shared.id
         ]
-        assert sources == [shared.values()]
+        assert sources == [source_values(shared)]
         shared_uses = [use for use in record.uses if use.source.id == shared.id]
         assert {use.usage for use in shared_uses} == {
             "product_evidence_closure",

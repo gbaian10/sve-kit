@@ -5,9 +5,9 @@ import unicodedata
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.extract.official_jp import _traits as parse_traits
 from sve_carddb.fetch.validate import ValidationError
-from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_parameters.models import (
     Candidate,
     Hint,

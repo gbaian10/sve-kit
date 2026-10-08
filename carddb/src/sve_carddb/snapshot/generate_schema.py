@@ -6,9 +6,9 @@ from pathlib import Path
 
 from pydantic import JsonValue
 
+from sve_carddb.core.json import array, object_value, parse, string
 from sve_carddb.snapshot.profiles import MEDIA, PROFILES, profile
 from sve_carddb.snapshot.schema_patterns import patterns
-from sve_carddb.snapshot.values import array, object_value, parse, string
 
 
 def _ref(name: str) -> dict[str, JsonValue]:

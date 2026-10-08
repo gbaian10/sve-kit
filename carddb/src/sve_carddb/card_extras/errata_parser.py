@@ -13,13 +13,13 @@ from urllib.parse import urljoin, urlsplit
 
 from sve_carddb.card_extras.dates import parse_en_date
 from sve_carddb.card_extras.errata_markup import NoticeMarkup, Piece, lines
+from sve_carddb.core.json import digest
 from sve_carddb.html import attribute, parse, select_all
-from sve_carddb.snapshot.values import digest
 
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode
 
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
     from sve_carddb.registry.records import Region
 
 PARSER = "official-errata-staging-v1"

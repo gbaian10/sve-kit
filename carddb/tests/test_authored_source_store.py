@@ -10,7 +10,7 @@ from sve_carddb.products.models import Evidence
 from sve_carddb.registry.transitions.models import Batch as TransitionBatch
 
 if TYPE_CHECKING:
-    from sve_carddb.registry.records import RecordData
+    from sve_carddb.core.models import RecordData
 
 
 @pytest.mark.parametrize("model", [Batch, SourceRef, Evidence, TransitionBatch])

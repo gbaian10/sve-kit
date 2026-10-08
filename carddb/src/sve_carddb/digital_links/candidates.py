@@ -7,13 +7,13 @@ from urllib.parse import parse_qs, urlsplit
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import input_record
+from sve_carddb.core.json import array, canonical, digest, object_value, parse
+from sve_carddb.core.provenance import input_record
 from sve_carddb.digital_links.catalogue import complete_inventory as complete_inventory  # ruff: ignore[useless-import-alias] -- preserve the existing typed triage import while sharing the catalogue boundary
 from sve_carddb.digital_links.evidence import Evidence
 from sve_carddb.digital_links.importer import review_context
 from sve_carddb.digital_links.models import SveName
 from sve_carddb.registry.records import PrintingData
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.translations.sources import Sources, pointer
 
 if TYPE_CHECKING:

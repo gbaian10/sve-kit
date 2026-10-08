@@ -9,6 +9,7 @@ import pytest
 from pydantic import JsonValue
 
 import sve_carddb.digital_name_policies.evaluate as module
+from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.digital_links.catalogue import complete_inventory
 from sve_carddb.digital_links.evidence import Evidence
 from sve_carddb.digital_links.importer import review_context
@@ -24,7 +25,6 @@ from sve_carddb.digital_name_policies.evaluate import (
     owner_text,
     rule_links,
 )
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
 
 from .digital_link_import_fixtures import catalogue_fixture
 from .digital_name_policy_fixtures import (
@@ -36,7 +36,7 @@ from .digital_name_policy_fixtures import (
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_inputs import SourceUse
+    from sve_carddb.core.provenance import SourceUse
     from sve_carddb.digital_name_policies.evaluate import NameOwner
 
 

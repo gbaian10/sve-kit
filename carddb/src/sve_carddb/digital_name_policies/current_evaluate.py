@@ -6,18 +6,18 @@ from functools import cached_property
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_inputs import uses_sorted
 from sve_carddb.catalog.adoption_models import Batch, ReviewContext, SourceRef
+from sve_carddb.core.json import array, canonical, digest, object_value, parse
+from sve_carddb.core.provenance import uses_sorted
 from sve_carddb.digital_links.catalogue import complete_inventory
 from sve_carddb.digital_links.evidence import Evidence
 from sve_carddb.digital_links.importer import review_context
 from sve_carddb.digital_name_policies.evaluate import LINK_GAMES, FrozenName, _parents
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from sve_carddb.build_inputs import SourceUse
+    from sve_carddb.core.provenance import SourceUse
     from sve_carddb.digital_name_policies.current_models import LinkPolicy, Policy
     from sve_carddb.translations.sources import Sources
 

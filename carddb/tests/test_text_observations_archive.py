@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.build_db.source_rows import source_values
 from sve_carddb.manifest import Kind, Manifest, Region
 from sve_carddb.source_archive import ArchiveError, seal_batch
 from sve_carddb.sources import official_en as en
@@ -73,7 +74,7 @@ def test_two_regions_keep_face_sections_source_pins_and_exact_numbers(
     assert english_card.faces[0].title == "Synthetic universe"
     assert english_card.has_errata_link
     assert english_card.source.archive.batch_id == sealed.batch_id
-    assert english_card.source.values()["parser_version"] is None
+    assert source_values(english_card.source)["parser_version"] is None
     assert provider.card("jp", "SYNⓈ-01aEN") is None
     assert provider.card("en", "SYN-01a") is None
 

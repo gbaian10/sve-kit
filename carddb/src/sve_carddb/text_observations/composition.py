@@ -2,8 +2,8 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_inputs import input_record
 from sve_carddb.catalog.rules_names import populate_rules_names
+from sve_carddb.core.provenance import input_record
 from sve_carddb.products import populate_product_preview, product_preview_uses
 from sve_carddb.text_observations.importer import populate_text_observations
 
@@ -12,8 +12,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import BuildContext, InputRecord, SourceUse
     from sve_carddb.catalog.models import Catalog
+    from sve_carddb.core.provenance import BuildContext, InputRecord, SourceUse
     from sve_carddb.products import Language
     from sve_carddb.products.loader import ProductSnapshot
     from sve_carddb.products.models import LocalizedText

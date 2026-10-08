@@ -1,8 +1,9 @@
 """Exact raw-field bindings derived from adoptions or pinned for synthetic staging."""
 
 from sve_carddb.catalog.models import Term
+from sve_carddb.core.models import RecordData
 from sve_carddb.products.models import Code
-from sve_carddb.registry.records import RecordData, Region
+from sve_carddb.registry.records import Region
 
 
 class Binding(RecordData):

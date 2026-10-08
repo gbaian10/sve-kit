@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.snapshot.values import array, canonical, object_value, string
+from sve_carddb.core.json import array, canonical, object_value, string
 
 if TYPE_CHECKING:
     from sve_carddb.snapshot.project.evidence import Decisions

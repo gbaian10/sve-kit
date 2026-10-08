@@ -9,8 +9,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import InputRecord
     from sve_carddb.catalog.current import Prepared
+    from sve_carddb.core.provenance import InputRecord
 
     from .adoption_fixtures import Case
 

@@ -3,13 +3,16 @@
 import re
 from typing import TYPE_CHECKING
 
-from sve_carddb.registry.inputs import JSON_VALUE
-from sve_carddb.registry.storage import MAX_BYTES
-from sve_carddb.registry.yaml_reader import parse_yaml
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.core.json import canonical
+from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, parse_yaml
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+
+def authored_root(repo: Path) -> Path:
+    """Locate shared human-maintained inputs from the explicit repository root."""
+    return repo / "authored"
 
 
 def check_path(root: Path, path: Path) -> None:

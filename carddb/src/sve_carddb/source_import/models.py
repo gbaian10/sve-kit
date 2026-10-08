@@ -8,9 +8,10 @@ from urllib.parse import urljoin, urlsplit
 
 from pydantic import Field, field_validator, model_validator
 
-from sve_carddb.build_inputs import FilePin, Revision
-from sve_carddb.registry.records import Hash, RecordData, Region, Text, UInt
-from sve_carddb.snapshot.values import canonical, digest, parse
+from sve_carddb.core.json import canonical, digest, parse
+from sve_carddb.core.models import Hash, RecordData, Text, UInt
+from sve_carddb.core.provenance import FilePin, Revision
+from sve_carddb.registry.records import Region
 from sve_carddb.urls import canonicalize
 
 _HOSTS = frozenset({"shadowverse-evolve.com", "en.shadowverse-evolve.com"})

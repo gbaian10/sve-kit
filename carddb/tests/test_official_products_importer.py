@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build_db import create_database
+from sve_carddb.build_db.source_rows import source_values
 from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.extract.compare_jp import legacy_projection
 from sve_carddb.extract.official_en import extract_card as extract_en
@@ -47,7 +48,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from sve_carddb.build_db import Database, Value
-    from sve_carddb.build_inputs import InputRecord
+    from sve_carddb.core.provenance import InputRecord
     from sve_carddb.products.official import ProductPage
     from sve_carddb.products.plan import OfficialProducts
     from sve_carddb.registry.records import Region
@@ -147,7 +148,7 @@ def test_complete_graph_keeps_ids_owners_dates_region_and_raw_provenance(
             for row in db.rows("source_record")
             if row.values["kind"] != "authored"
         ]
-        assert raw == [fixture.pages[0].source.values()]
+        assert raw == [source_values(fixture.pages[0].source)]
         assert {use.usage for use in record.uses} == {
             "registry_observation",
             "product_identity_evidence_closure",

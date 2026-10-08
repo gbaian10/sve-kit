@@ -5,9 +5,9 @@ from typing import Annotated, Literal
 from pydantic import Field, computed_field, field_validator, model_validator
 
 from sve_carddb.catalog.adoption_models import SourceRef
+from sve_carddb.core.json import canonical
+from sve_carddb.core.models import Hash, RecordData, Text
 from sve_carddb.products.models import Code, Lang
-from sve_carddb.registry.records import Hash, RecordData, Text
-from sve_carddb.snapshot.values import canonical
 from sve_carddb.translations.models import (
     AuthoredValue,
     ConceptSubject,

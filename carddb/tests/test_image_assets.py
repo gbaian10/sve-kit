@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb import image_assets, image_variants
+from sve_carddb.core.json import object_value, parse
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_assets import (
     PreviewRoots,
@@ -17,7 +18,6 @@ from sve_carddb.image_assets import (
     verify_assets,
 )
 from sve_carddb.manifest import Kind, Manifest, Region
-from sve_carddb.snapshot.values import object_value, parse
 from sve_carddb.source_archive import ArchiveError, seal_batch
 
 from .test_image_variants import png

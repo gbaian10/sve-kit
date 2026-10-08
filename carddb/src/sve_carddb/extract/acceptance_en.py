@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import uses_sorted
+from sve_carddb.build_db.source_rows import source_values
+from sve_carddb.core.provenance import uses_sorted
 from sve_carddb.products.plan import plan_official_products
 from sve_carddb.registry.records import CorrectionData, PrintingData
 from sve_carddb.text_observations.composition import text_preview_uses
@@ -173,7 +174,7 @@ def _printings(
                 "identity_reasons": list[JsonValue](projection.reasons),
                 "product_source_matches": page is not None
                 and evidence is not None
-                and page.source.values() == evidence.source.values(),
+                and source_values(page.source) == source_values(evidence.source),
                 "product_blocks": None if page is None else len(page.blocks),
                 "product_ids": list[JsonValue](sorted(inclusions[data.id])),
                 "product_diagnostics": diagnostics[data.card_no],

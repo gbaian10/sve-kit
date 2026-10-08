@@ -3,14 +3,10 @@
 from typing import TYPE_CHECKING
 
 from sve_carddb.build_db.rows import insert_exact
-from sve_carddb.build_inputs import (
-    BuildContext,
-    InputRecord,
-    input_record,
-    insert_raw_sources,
-)
+from sve_carddb.build_db.source_rows import insert_raw_sources
+from sve_carddb.core.json import SAFE_INTEGER, parse
+from sve_carddb.core.provenance import BuildContext, InputRecord, input_record
 from sve_carddb.products.models import LocalizedText
-from sve_carddb.snapshot.values import SAFE_INTEGER, parse
 from sve_carddb.source_corrections.importer import (
     populate_corrections,
     verify_corrections,

@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.digital_links.loader import decision_id, link_id, load_links
 from sve_carddb.digital_links.models import Record
-from sve_carddb.snapshot.values import array, canonical, object_value
 
 from .digital_link_fixtures import envelope, record, write
 

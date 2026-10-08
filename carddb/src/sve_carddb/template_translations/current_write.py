@@ -2,7 +2,8 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.registry.storage import MAX_BYTES, TARGET_BYTES, encode
+from sve_carddb.core.yaml import MAX_BYTES
+from sve_carddb.registry.storage import TARGET_BYTES, encode
 from sve_carddb.template_translations.current import shard
 from sve_carddb.template_translations.current_models import Shard
 from sve_carddb.template_translations.files import Files, json_bytes

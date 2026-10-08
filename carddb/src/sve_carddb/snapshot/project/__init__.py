@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.json import array, canonical, object_value, parse, string
 from sve_carddb.routes.defaults import select_defaults
 from sve_carddb.snapshot.contract import definition, tables, validate
 from sve_carddb.snapshot.project.closure import (
@@ -35,7 +36,6 @@ from sve_carddb.snapshot.project.shape import source_tuple
 from sve_carddb.snapshot.project.source import Record, Source, json_list
 from sve_carddb.snapshot.project.translations import Texts, keywords, translations
 from sve_carddb.snapshot.semantics import ordered_rows, validate_view
-from sve_carddb.snapshot.values import array, canonical, object_value, parse, string
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database

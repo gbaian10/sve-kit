@@ -1,19 +1,6 @@
 """Construct portable calendar and URI patterns without format-checker plugins."""
 
-
-def _date(separator: str) -> str:
-    year = r"(?!0000)[0-9]{4}"
-    leap = (
-        r"(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])"
-        r"|(?:0[48]|[2468][048]|[13579][26])00)"
-    )
-    return (
-        rf"(?:{year}{separator}(?:"
-        rf"(?:01|03|05|07|08|10|12){separator}(?:0[1-9]|[12][0-9]|3[01])|"
-        rf"(?:04|06|09|11){separator}(?:0[1-9]|[12][0-9]|30)|"
-        rf"02{separator}(?:0[1-9]|1[0-9]|2[0-8]))|"
-        rf"{leap}{separator}02{separator}29)"
-    )
+from sve_carddb.core.dates import DATE, INSTANT, date_pattern
 
 
 def _ipv6() -> str:
@@ -58,14 +45,13 @@ def _url() -> str:
 
 def patterns() -> dict[str, str]:
     """Return ASCII patterns that have the same Python and ECMAScript meaning."""
-    clock = r"(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]"
     compact_clock = r"(?:[01][0-9]|2[0-3])[0-5][0-9][0-5][0-9]"
-    version = _date("") + "T" + compact_clock + r"Z-(?!0000)[0-9]{4}"
+    version = date_pattern("") + "T" + compact_clock + r"Z-(?!0000)[0-9]{4}"
     values = {
-        "Date": _date("-"),
-        "Instant": _date("-") + "T" + clock + r"(?:\.[0-9]+)?Z",
         "DataVersion": "(preview-)?" + version,
         "URL": _url(),
     }
     # Both regex engines allow $ before a trailing newline; require absolute end.
-    return {key: "^" + value + r"$(?![\s\S])" for key, value in values.items()}
+    return {"Date": DATE, "Instant": INSTANT} | {
+        key: "^" + value + r"$(?![\s\S])" for key, value in values.items()
+    }

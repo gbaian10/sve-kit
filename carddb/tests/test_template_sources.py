@@ -9,9 +9,9 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
+from sve_carddb.core.json import digest
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.manifest import Kind
-from sve_carddb.snapshot.values import digest
 from sve_carddb.source_archive import ArchiveError, Scope, seal_batch
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.template_sources import inventory, pins

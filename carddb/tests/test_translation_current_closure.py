@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.core.json import canonical
 from sve_carddb.translations.loader import load_glossary
 
 from .translation_fixtures import choice, envelope, term, write

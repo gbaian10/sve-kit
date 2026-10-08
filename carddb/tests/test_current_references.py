@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.core.json import canonical
 from sve_carddb.template_parameters.current_references import adopted
 from sve_carddb.translations.current_models import TermRecord
 from sve_carddb.translations.loader import load_glossary
@@ -15,8 +15,8 @@ from .translation_fixtures import name_term, write
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_inputs import Source
     from sve_carddb.catalog.adoption_models import SourceRef
+    from sve_carddb.core.provenance import Source
 
 
 class NoSources:

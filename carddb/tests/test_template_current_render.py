@@ -7,7 +7,7 @@ import pytest
 
 from sve_carddb.build_db import Json, create_database
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.template_translations.current import validate_templates
 from sve_carddb.template_translations.current_build import apply, labels
 from sve_carddb.template_translations.current_models import (

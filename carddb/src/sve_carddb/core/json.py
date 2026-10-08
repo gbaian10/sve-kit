@@ -94,10 +94,3 @@ def canonical(value: JsonValue) -> bytes:
 def digest(data: bytes) -> str:
     """Return a prefixed SHA-256 digest of exact bytes."""
     return "sha256:" + hashlib.sha256(data).hexdigest()
-
-
-def bucket(key: list[JsonValue], count: int) -> int:
-    """Hash the canonical primary-key array using all 256 bits."""
-    if count <= 0:
-        raise ValueError("Bucket count must be positive")
-    return int.from_bytes(hashlib.sha256(canonical(key)).digest(), "big") % count

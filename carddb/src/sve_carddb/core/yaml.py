@@ -1,6 +1,10 @@
-"""Package YAML parsing with the authored version and single-document boundary."""
+"""Strict single-document YAML and bounded authored input constraints."""
 
 import yamlrocks
+from pydantic import JsonValue, TypeAdapter
+
+MAX_BYTES = 1_048_576
+JSON_VALUE: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
 
 _OPTIONS = (
     yamlrocks.OPT_DUPLICATE_KEYS_ERROR

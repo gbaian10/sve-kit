@@ -720,7 +720,7 @@ class Manifest:
     @classmethod
     def create_import(cls, path: Path, index: bytes, content: Content) -> Self:
         """Initialize only a new isolated v2 database, without touching a v1 manifest."""
-        from sve_carddb.snapshot.values import canonical, digest  # ruff: ignore[import-outside-top-level] -- Load build-layer validation only for explicit v2 operations.
+        from sve_carddb.core.json import canonical, digest  # ruff: ignore[import-outside-top-level] -- Load build-layer validation only for explicit v2 operations.
         from sve_carddb.source_import.models import Content, receipt_id  # ruff: ignore[import-outside-top-level] -- Keep v1 manifest imports independent of build-layer models.
 
         content = Content.model_validate_json(content.model_dump_json())
@@ -904,7 +904,7 @@ def _has_import_table(conn: sqlite3.Connection) -> bool:
 
 
 def _decode_import_receipt(conn: sqlite3.Connection) -> SourceImportReceipt:
-    from sve_carddb.snapshot.values import canonical, digest, parse  # ruff: ignore[import-outside-top-level] -- Defer build-layer validation until a v2 reader is requested.
+    from sve_carddb.core.json import canonical, digest, parse  # ruff: ignore[import-outside-top-level] -- Defer build-layer validation until a v2 reader is requested.
     from sve_carddb.source_import.models import Content, receipt_id, timestamp  # ruff: ignore[import-outside-top-level] -- Avoid a build-layer dependency at v1 module import.
 
     with sqlite3.connect(":memory:") as expected:

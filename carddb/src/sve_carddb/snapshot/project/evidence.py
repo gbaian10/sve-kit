@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING
 
-from sve_carddb.snapshot.values import object_value, parse
+from sve_carddb.core.json import object_value, parse
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence

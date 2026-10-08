@@ -1,6 +1,5 @@
 """Q&A identity and immutable source versions, including unnumbered entries."""
 
-from sve_carddb.build_db.domains import DATE, INSTANT
 from sve_carddb.build_db.model import (
     Column,
     ForeignKey,
@@ -9,6 +8,7 @@ from sve_carddb.build_db.model import (
     Table,
     Unique,
 )
+from sve_carddb.core.dates import DATE, INSTANT
 
 TABLES = (
     Table(

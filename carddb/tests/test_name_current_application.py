@@ -9,11 +9,11 @@ from pydantic import JsonValue
 
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.build_inputs import BuildContext
+from sve_carddb.core.json import canonical, digest, object_value, parse
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.digital_name_policies.application import Inputs, populate
 from sve_carddb.digital_name_policies.current_application import materialize, prepare
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.translations.current_models import (
     AssignmentData,
     AssignmentRecord,

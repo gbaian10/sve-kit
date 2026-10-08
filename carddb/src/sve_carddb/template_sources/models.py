@@ -5,7 +5,7 @@ from typing import Annotated, Literal
 from pydantic import Field
 
 from sve_carddb.catalog.adoption_models import SourceRef
-from sve_carddb.registry.records import Hash, RecordData, Text
+from sve_carddb.core.models import Hash, RecordData, Text
 from sve_carddb.template_sources.normalizer import Role
 
 

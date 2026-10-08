@@ -5,7 +5,9 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import SourceUse
+from sve_carddb.build_db.source_rows import source_values
+from sve_carddb.core.json import canonical
+from sve_carddb.core.provenance import SourceUse
 from sve_carddb.products.identity_models import ExpansionLink, ProductLink
 from sve_carddb.products.models import (
     FamilyRecord,
@@ -15,7 +17,6 @@ from sve_carddb.products.models import (
 )
 from sve_carddb.products.official import date_fields
 from sve_carddb.registry.records import PrintingData
-from sve_carddb.snapshot.values import canonical
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -280,7 +281,9 @@ def _inclusions(  # ruff: ignore[too-many-arguments] -- shared diagnostic and in
             )
             continue
         evidence = preview.evidence.get((page.region, page.card_no))
-        if evidence is None or evidence.source.values() != page.source.values():
+        if evidence is None or source_values(evidence.source) != source_values(
+            page.source
+        ):
             diagnostics.append(
                 _diagnostic(
                     page,

@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
-from sve_carddb.build_inputs import ArchivePin, Source
-from sve_carddb.snapshot.values import canonical, object_value
+from sve_carddb.core.json import canonical, object_value
+from sve_carddb.core.provenance import ArchivePin, Source
 from sve_carddb.template_parameters.analysis import header_positions, prepared
 from sve_carddb.template_parameters.current_references import adopted
 from sve_carddb.template_parameters.models import Range, Schema, Slot, SourceSpan
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.catalog.adoption_models import SourceRef
-    from sve_carddb.registry.records import RecordData
+    from sve_carddb.core.models import RecordData
 
 
 def checked(model: type[RecordData], data: dict[str, object]) -> None:

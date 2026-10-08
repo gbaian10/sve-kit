@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.snapshot.values import digest
+from sve_carddb.core.json import digest
 from sve_carddb.template_translations.current import validate_templates
 from sve_carddb.template_translations.current_models import DefinitionRecord
 from sve_carddb.template_translations.definitions import _definitions, groups, payload

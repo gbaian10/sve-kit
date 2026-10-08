@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.build_db.source_rows import source_values
 from sve_carddb.extract.compare_jp import legacy_projection
 from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.manifest import Kind, Manifest
@@ -82,7 +83,7 @@ def test_pins_version_url_hash_first_receipt_and_parser(
     assert (
         found.source.archive.first_receipt_id != latest.inventory.entries[0].receipt_id
     )
-    assert found.source.values()["parser_version"] is None
+    assert source_values(found.source)["parser_version"] is None
     expected = observation(
         legacy_projection(extract_card(RAW, number="TEST-001")), "jp"
     )

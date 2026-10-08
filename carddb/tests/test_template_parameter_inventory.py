@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.core.json import object_value
 from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.snapshot.values import object_value
 from sve_carddb.template_parameter_rules.models import LEGACY_IDS
 from sve_carddb.template_parameters import inventory
 from sve_carddb.template_parameters.inventory import Candidates, build, summary

@@ -6,9 +6,9 @@ import sys
 from typing import TYPE_CHECKING
 
 from sve_carddb import manifest as module
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.manifest import Manifest
 from sve_carddb.manifest_schema_v2 import SCHEMA_SQL
-from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.source_import.models import Content, receipt_id
 
 if TYPE_CHECKING:
@@ -63,7 +63,7 @@ from sve_carddb.manifest import Manifest
 with Manifest.open_empty() as manifest:
     assert manifest.schema_version == 1
 assert 'pydantic' not in sys.modules
-assert 'sve_carddb.build_inputs' not in sys.modules
+assert 'sve_carddb.core.provenance' not in sys.modules
 assert 'sve_carddb.source_import.models' not in sys.modules
 """
     result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- Fixed local Python code, with no shell or external I/O.

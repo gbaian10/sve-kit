@@ -14,7 +14,7 @@ from sve_carddb.build_db.model import (
     literal,
 )
 from sve_carddb.build_db.validation import BOUNDS, Rules
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.core.json import canonical
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

@@ -8,7 +8,6 @@ import pytest
 
 from sve_carddb.build_db import Json, create_database
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.importer import (
     catalog_configuration,
     populate_catalog,
@@ -16,6 +15,7 @@ from sve_carddb.catalog.importer import (
 )
 from sve_carddb.catalog.languages import register_languages
 from sve_carddb.catalog.models import Alias, Catalog, NameBinding, Term
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.products.models import Language, LocalizedText
 
 from .database_fixtures import DatabaseTemplate
