@@ -165,13 +165,13 @@ R2 只收快照 2.0。上傳來源就是 `snapshot export-offline` 的公開匯�
 不讀私有目錄（`--private-dir` 的 inputs、reports、媒體狀態）、建置 bundle、圖片庫或配方快取。
 不另做凍結包，也沒有帳本、checkpoint 或預留號。資料版號仍是 `preview-…`，
 寫進開發桶 index 的是開發用 entry，不是正式發布；正式發布仍待 #34 的閘門。
-詳細流程見 [R2 2.0 上傳](../../carddb/src/sve_carddb/r2_upload/v2/README.md)。
+詳細流程見 [R2 2.0 上傳](../../publish/README.md)。
 
 `EXPORT_DIR` 由維護者填入剛完成的匯出根，不寫入 repo。
 
 ```bash
 uv --directory carddb sync --locked
-uv --directory carddb run sve-carddb r2 upload-v2 \
+uv --directory publish run sve-publish upload \
   --export-dir "$EXPORT_DIR" --dry-run
 ```
 
@@ -187,7 +187,7 @@ gzip 與 `.br` 沒有獨立 hash，解碼核對其內容等於已驗證的 raw b
 核對目標桶、當次 key pair 與離線數字後，使用同一個匯出根：
 
 ```bash
-uv --directory carddb run sve-carddb r2 upload-v2 \
+uv --directory publish run sve-publish upload \
   --export-dir "$EXPORT_DIR" \
   --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" \
   --skip-cdn-verify --execute
@@ -207,7 +207,7 @@ uv --directory carddb run sve-carddb r2 upload-v2 \
 
 條件或傳輸失敗就停止，不退回無條件 PUT，也不重送寫入；此時 current 不變。
 修正原因後重跑同一個命令，只會補傳缺少或不同的檔案。沒有變動的重跑不會發出任何 PUT。
-GC 為另外執行的 `r2 gc-v2`，不在上傳後自動刪除，也不要在上傳期間執行。
+GC 為另外執行的 `sve-publish gc`，不在上傳後自動刪除，也不要在上傳期間執行。
 
 ## 8. 執行成本與恢復
 

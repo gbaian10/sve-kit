@@ -250,7 +250,7 @@ changes 是相鄰發布摘要，不是重建鏈。previous manifest 引用的 ch
 
 預覽快照是正式匯出器產生、與卡表快照同格式的開發產物；僅供非公開開發，不發布給使用者。匯出器的公開根由 `--preview-dir` 或 `SVE_EXPORT_DIR` 指定；web dev server 以 `SVE_EXPORT_DIR` 掛載 `/cdn`（未設定時為合成 fixture），另以 `SVE_PREVIEW_DIR` 掛載 `/cdn-preview`。reader 須明確選擇資料根，預覽與正式版的 IndexedDB／Cache namespace 分開。
 
-預覽 `data_version` 使用 §1 定義的 `preview-` 命名空間，不屬於正式發布版號；匯出只寫隔離根的 `snapshots/preview/current.json`，不改正式 active，也不提供永久分享碼、公開 URL 或回放 pin 的相容保證。`r2 upload-v2` 可把預覽上傳到開發桶，在該桶的 `snapshots/versions/index.json` 以 `preview-` 版號寫入 current／previous entry，Entry 形狀與正式相同；這是開發 entry，不是正式發布。正式發布須重新建置並通過完整發布閘門，不能直接將預覽升為正式版。
+預覽 `data_version` 使用 §1 定義的 `preview-` 命名空間，不屬於正式發布版號；匯出只寫隔離根的 `snapshots/preview/current.json`，不改正式 active，也不提供永久分享碼、公開 URL 或回放 pin 的相容保證。`sve-publish upload` 可把預覽上傳到開發桶，在該桶的 `snapshots/versions/index.json` 以 `preview-` 版號寫入 current／previous entry，Entry 形狀與正式相同；這是開發 entry，不是正式發布。正式發布須重新建置並通過完整發布閘門，不能直接將預覽升為正式版。
 
 建置參數、隔離檢查與前端接線見 [preview 建置與前端接線](preview-handoff.md)。
 
