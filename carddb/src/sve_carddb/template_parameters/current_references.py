@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_parameters.references import References
-from sve_carddb.translations.current import semantic_hash
 from sve_carddb.translations.current_models import TermRecord
 from sve_carddb.translations.sources import excerpt
 
@@ -32,10 +31,9 @@ def adopted(snapshot: Snapshot, sources: Evidence) -> References:
             raw = excerpt(text, data.source_span)
         if not isinstance(raw, str) or not raw:
             raise ValueError("Parameter concept source must be nonempty exact text")
-        checksum = semantic_hash(record)
-        result.terms.setdefault(raw, []).append((data.id, data.category, checksum))
+        result.terms.setdefault(raw, []).append((data.id, data.category))
         if data.category == "card_name":
-            result.card_names.setdefault(raw, []).append((data.id, checksum))
+            result.card_names.setdefault(raw, []).append(data.id)
     result.pins["exact_concepts_hash"] = digest(
         canonical(
             {

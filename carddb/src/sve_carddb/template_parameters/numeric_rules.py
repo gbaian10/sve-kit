@@ -3,8 +3,6 @@
 import re
 from typing import TYPE_CHECKING
 
-from sve_carddb.snapshot.values import canonical, digest
-
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
@@ -39,7 +37,7 @@ NUMERIC_RULES: tuple[NumericRule, ...] = (
     "prefix_field_pp",
     "prefix_field_level",
 )
-NUMERIC_RULE_PENDING = "numeric_rule_pending_approval"
+NUMERIC_RULE_DISABLED = "numeric_rule_disabled"
 
 SIGNS = ("-", "+", "−", "＋", "－")
 ASCII_BEFORE = r"[A-Za-z0-9_]$"
@@ -108,12 +106,10 @@ def conditions(rule: NumericRule) -> dict[str, JsonValue]:
 
 
 def definition(rule: NumericRule) -> dict[str, JsonValue]:
-    """Export the same condition object consumed by confirmation and future policies."""
+    """Export the lexical conditions used by the numeric classifier."""
     match_conditions = conditions(rule)
     return {
         "id": rule,
         "matcher_version": VERSION + ":" + rule,
         "match_conditions": match_conditions,
-        "condition_hash": digest(canonical(match_conditions)),
-        "status": "pending_approval",
     }

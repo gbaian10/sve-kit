@@ -5,13 +5,11 @@ from dataclasses import replace
 import pytest
 
 from sve_carddb.catalog.adoption_models import SourceRef
-from sve_carddb.snapshot.values import digest, object_value, parse
-from sve_carddb.template_parameter_rules.current import Rule, Rules, resolve
-from sve_carddb.template_parameters.candidate_matching import recognize
+from sve_carddb.template_parameters.candidate_matching import classify, recognize
 from sve_carddb.template_parameters.explicit_rules import EXPLICIT
-from sve_carddb.template_parameters.inventory import Candidates
 from sve_carddb.template_parameters.models import Schema, Slot
 from sve_carddb.template_parameters.references import References
+from sve_carddb.template_parameters.spans import locate
 from sve_carddb.template_sources.inventory import entry
 from sve_carddb.template_sources.normalizer import VERSION, partition
 from sve_carddb.template_sources.pins import PARSER
@@ -72,9 +70,11 @@ def test_explicit_match_requires_opt_in_exact_value_and_preserves_proposal(
     rows = matches(text, identifier)
     assert len(rows) == 1
     row = rows[0]
-    assert (row["rule_id"], row["proposed_role"], row["value"]) == (identifier, role, 2)
-    assert row["original_reason"] == "numeric_role_requires_review"
-    assert row["raw_hash"] == digest("２".encode())
+    assert (row["rule_id"], row["recognized_role"], row["value"]) == (
+        identifier,
+        role,
+        2,
+    )
     assert c.model_dump() == original
     assert c.parameter_schema is None
     assert matches(text.replace("２", "2"), identifier)
@@ -133,31 +133,11 @@ def test_current_resolution_carries_role_and_rejects_weakened_numeric_bounds(
     ref = entry_ref()
     e = entry(ref, part, VERSION)
     c = c.model_copy(update={"inventory_id": e.id})
-    rows = recognize(text, part, c, References(), (identifier,))
-    proposals = Candidates(entries=[c], rule_matches=list(rows))
-    rules = Rules(
-        parameter_rule_format=2,
-        kind="template_parameter_rules",
-        rules=(
-            Rule(
-                rule_id=identifier,
-                enabled=True,
-                origin="project",
-                low_confidence=False,
-                note="",
-            ),
-        ),
+    classified, matches = classify(
+        text, part, e, locate(text, (part,))[0], References(), (identifier,)
     )
-    solved, remaining = resolve(rules, proposals)
-    assert remaining == ()
-    solution = object_value(parse(solved[0]))
-    m = _members(
-        (e,),
-        (c,),
-        {(ref.source_version_id, ref.locator): text},
-        {(e.id, c.slots[0].name): solution},
-        {},
-    )[0]
+    assert len(matches) == 1
+    m = _members((e,), (classified,), {(ref.source_version_id, ref.locator): text})[0]
     assert m.pending == ()
     assert m.roles == (role,)
     schema = Schema(
@@ -188,8 +168,7 @@ def test_current_resolution_carries_role_and_rejects_weakened_numeric_bounds(
         ValueError, match=r"^Template numeric bounds differ from the recognized role$"
     ):
         wrong.verify_schema(schema)
-    assert resolve(rules.model_copy(update={"rules": ()}), proposals)[0] == ()
-    assert resolve(rules.model_copy(update={"rules": ()}), proposals)[1]
+    assert candidate(text).issues
     owned = c.model_copy(
         update={
             "slots": (
@@ -213,7 +192,6 @@ def entry_ref() -> SourceRef:
 def test_context_proof_covers_original_fullwidth_counter_and_unit() -> None:
     row = matches("これに雷カウンター２個を置く。", "named_counter_place")[0]
     assert row["context_segments"] == [{"start": 2, "end": 14}]
-    assert row["context_hash"] == digest("に雷カウンター２個を置く".encode())
     assert row["source_segments"] == [{"start": 9, "end": 10}]
 
 

@@ -5,9 +5,7 @@ from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
 from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
-from sve_carddb.template_parameter_rules.current import resolve
-from sve_carddb.template_parameter_rules.models import LEGACY_IDS as LEGACY_RULES
+from sve_carddb.snapshot.values import canonical, digest, parse
 from sve_carddb.template_parameters.inventory import build
 from sve_carddb.template_sources.inventory import coverage, scan_current
 from sve_carddb.template_translations.members import Reconstructed, _members
@@ -67,21 +65,8 @@ class Sources:
             frozen,
             scan,
             self.references,
-            enabled_rules=tuple(
-                key for key in self.rules.enabled() if key not in LEGACY_RULES
-            ),
+            enabled_rules=self.rules.enabled(),
         )
-        resolved, remaining = resolve(self.rules, candidates)
-        solved = {
-            (str(row["inventory_id"]), str(row["slot"])): row
-            for row in (object_value(parse(raw)) for raw in resolved)
-        }
-        pending: dict[str, set[str]] = {}
-        for raw in remaining:
-            row = object_value(parse(raw))
-            pending.setdefault(str(row["inventory_id"]), set()).update(
-                str(i) for i in array(row["issues"])
-            )
         texts = {}
         for item in scan.entries:
             ref = item.source_ref
@@ -95,17 +80,14 @@ class Sources:
             tuple(scan.entries),
             tuple(candidates.entries),
             texts,
-            solved,
-            pending,
         )
         doubtful = {rule.rule_id for rule in self.rules.rules if rule.low_confidence}
-        low = {key for key, row in solved.items() if row["rule_id"] in doubtful}
         # A name kept in its source spelling or a doubtful rule makes the whole field uncertain.
         effect = tuple(
             replace(
                 member,
                 low_confidence=any(
-                    (member.entry.id, hint.name) in low
+                    hint.rule_id in doubtful
                     or (hint.target is not None and "card_name" in hint.target)
                     for hint in member.hints
                 ),
@@ -118,7 +100,11 @@ class Sources:
                 {
                     "source_batch": batch.model_dump(mode="json"),
                     "effect_coverage": coverage(scan),
-                    "remaining_slots": [parse(raw) for raw in remaining],
+                    "remaining_slots": [
+                        {"inventory_id": c.inventory_id, "issues": list(c.issues)}
+                        for c in candidates.entries
+                        if c.issues
+                    ],
                 }
             ),
         )

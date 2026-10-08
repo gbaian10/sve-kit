@@ -3,15 +3,10 @@
 import re
 from typing import TYPE_CHECKING
 
-from sve_carddb.snapshot.values import digest
-from sve_carddb.template_parameters.analysis import analyze, prepared, unsigned
+from sve_carddb.template_parameters.analysis import unsigned
 
 if TYPE_CHECKING:
-    from sve_carddb.template_parameters.models import Candidate, Hint, Schema, Slot
-    from sve_carddb.template_parameters.references import References
-    from sve_carddb.template_parameters.spans import Located
-    from sve_carddb.template_sources.models import Entry
-    from sve_carddb.template_sources.normalizer import Part
+    from sve_carddb.template_parameters.models import Hint, Schema, Slot
 
 
 def verify_values(
@@ -47,7 +42,7 @@ def verify_values(
                 raise ValueError(
                     "Parameter schema requires matching resolved slot types"
                 )
-            values.append(_occurrence_value(text, normalized, slot, hint))
+            values.append(_occurrence_value(text, slot, hint))
         if any(value != values[0] for value in values[1:]):
             raise ValueError(
                 "Repeated parameter occurrences must have identical values"
@@ -58,19 +53,10 @@ def verify_values(
         )
 
 
-def _occurrence_value(text: str, normalized: str, slot: Slot, hint: Hint) -> object:
+def _occurrence_value(text: str, slot: Slot, hint: Hint) -> object:
     raw = "".join(text[s.start : s.end] for s in hint.source_segments)
-    if (
-        any(s.end > len(text) for s in hint.source_segments)
-        or digest(raw.encode()) != hint.raw_hash
-    ):
-        raise ValueError("Parameter raw spans must match exact source spelling hashes")
-    occurrence = hint.occurrence
-    if (
-        digest(normalized[occurrence.start : occurrence.end].encode())
-        != hint.normalized_hash
-    ):
-        raise ValueError("Parameter occurrence must match exact normalized hashes")
+    if not hint.source_segments or any(s.end > len(text) for s in hint.source_segments):
+        raise ValueError("Parameter source spans must be inside source text")
     value = _value(raw, slot.type, hint)
     if slot.type == "uint" and (
         slot.min is None
@@ -114,40 +100,15 @@ def _value(raw: str, kind: str, hint: Hint) -> object:
             "Reference parameter requires an implemented adopted evidence adapter"
         )
     identifier = hint.target.get("id")
-    checksum = hint.target.get("record_hash")
     if (
-        set(hint.target) != {"kind", "id", "record_hash"}
+        set(hint.target) != {"kind", "id"}
         or not isinstance(identifier, str)
         or re.fullmatch(r"term:[a-z][a-z0-9_.-]*", identifier) is None
-        or not isinstance(checksum, str)
-        or re.fullmatch(r"sha256:[0-9a-f]{64}", checksum) is None
     ):
         raise ValueError(
             "Reference parameter requires matching adopted concept evidence"
         )
     return hint.target
-
-
-def verify_candidate(
-    text: str,
-    part: Part,
-    entry: Entry,
-    located: Located,
-    refs: References,
-    candidate: Candidate,
-) -> None:
-    """Reject missed replacements or changed literal provenance, even if a local schema is valid."""
-    if candidate.normalized_hash != digest(part.normalized.encode()):
-        raise ValueError("Parameter candidate must match the pinned normalized hash")
-    if candidate.parameter_schema is not None:
-        template_part, _ = prepared(text, part)
-        verify_values(
-            text, template_part.normalized, candidate.parameter_schema, candidate.slots
-        )
-    if candidate != analyze(text, part, entry, located, refs):
-        raise ValueError(
-            "Parameter candidate must replay exact spans roles and semantic evidence"
-        )
 
 
 def _card_name_fallback(raw: str, hint: Hint) -> bool:

@@ -1,4 +1,4 @@
-"""Conservative slot proposals, with exact literal positions and unresolved semantic roles."""
+"""Source slot extraction with exact positions, safe values and unmatched reasons."""
 
 import re
 import unicodedata
@@ -21,7 +21,7 @@ from sve_carddb.template_parameters.numeric_rules import (
     ASCII_AFTER,
     ASCII_BEFORE,
     NUMERIC_PREFIX,
-    NUMERIC_RULE_PENDING,
+    NUMERIC_RULE_DISABLED,
     NUMERIC_RULES,
     NUMERIC_SUFFIX,
     RESOURCE_PREFIX_EXCEPTION,
@@ -44,7 +44,7 @@ if TYPE_CHECKING:
     from sve_carddb.template_sources.models import Entry
     from sve_carddb.template_sources.normalizer import Part
 
-__all__ = ("NUMERIC_PREFIX", "NUMERIC_RULES", "NUMERIC_RULE_PENDING", "NUMERIC_SUFFIX")
+__all__ = ("NUMERIC_PREFIX", "NUMERIC_RULES", "NUMERIC_RULE_DISABLED", "NUMERIC_SUFFIX")
 
 VERSION_PARAMETERS = "template-parameters-jp-candidate-v1"
 SAFE_INTEGER = 9007199254740991
@@ -190,7 +190,7 @@ def numeric_role(
     match = NUMERIC_SUFFIX.match(after) or NUMERIC_PREFIX.search(before)
     if match is not None:
         rule = next(rule for rule in NUMERIC_RULES if rule == match.lastgroup)
-        return rule, (NUMERIC_RULE_PENDING,)
+        return rule, (NUMERIC_RULE_DISABLED,)
     return None, ("numeric_role_requires_review",)
 
 
@@ -202,11 +202,10 @@ def hint(
     index: int,
     refs: References,
 ) -> Hint:
-    """Keep raw spelling hashes distinct from integer values and proposed reference targets."""
+    """Return source positions, safe values and exact reference targets."""
     selected = units[position.start : position.end]
     origins = merged(tuple(s for unit in selected for s in unit.origins))
     raw = "".join(text[s.start : s.end] for s in origins)
-    normalized = part.normalized[position.start : position.end]
     common = {
         "name": f"slot_{index}",
         "occurrence": Range(start=position.start, end=position.end),
@@ -214,8 +213,6 @@ def hint(
         "transformation": position.transformation,
         "semantic_role": position.semantic_role,
         "numeric_rule": None,
-        "raw_hash": digest(raw.encode()),
-        "normalized_hash": digest(normalized.encode()),
     }
     if position.semantic_role == "layout":
         return Hint.model_validate(
@@ -234,9 +231,9 @@ def hint(
             ("invalid_safe_unsigned_decimal",) if value is None else ()
         )
         if position.semantic_role == "numeric":
-            rule, pending = numeric_role(part.normalized, position)
+            rule, causes = numeric_role(part.normalized, position)
             common["numeric_rule"] = rule
-            issues += pending
+            issues += causes
         return Hint.model_validate(
             dict(
                 common,
@@ -271,7 +268,7 @@ def hint(
 
 
 def schema(hints: tuple[Hint, ...]) -> Schema | None:
-    """A pending or composite reference cannot masquerade as a complete slot schema."""
+    """A disabled rule or composite reference cannot masquerade as a complete slot schema."""
     if any(item.issues or item.type is None for item in hints):
         return None
     return Schema(
@@ -292,7 +289,7 @@ def schema(hints: tuple[Hint, ...]) -> Schema | None:
 
 
 def literals(
-    text: str, units: tuple[Unit, ...], hints: tuple[Hint, ...]
+    units: tuple[Unit, ...], hints: tuple[Hint, ...]
 ) -> tuple[LiteralTrace, ...]:
     """Fixed text is provenance, never a literal parameter that bypasses translation."""
     occupied = {i for h in hints for i in range(h.occurrence.start, h.occurrence.end)}
@@ -311,25 +308,16 @@ def literals(
             LiteralTrace(
                 occurrence=Range(start=start, end=end),
                 source_segments=origins,
-                raw_hash=digest(
-                    "".join(text[s.start : s.end] for s in origins).encode()
-                ),
-                normalized_hash=digest("".join(u.text for u in selected).encode()),
             )
         )
         start = end
     return tuple(result)
 
 
-def analyze(
-    text: str, part: Part, item: Entry, located: Located, refs: References
-) -> Candidate:
-    """A full payload is still a proposal, without permanent IDs or fake approved parents."""
-    template_part, units = prepared(text, part)
-    hints = tuple(
-        hint(text, template_part, units, position, index, refs)
-        for index, position in enumerate(positions(text, template_part, units, refs))
-    )
+def contract(
+    normalized: str, hints: tuple[Hint, ...]
+) -> tuple[Schema | None, str, str | None]:
+    """Derive diagnostic identities from the final classified slots."""
     shape: JsonValue = [
         [
             h.occurrence.model_dump(mode="json"),
@@ -349,13 +337,28 @@ def analyze(
                 {
                     "level": "sentence",
                     "source_lang": "ja",
-                    "normalized_text": template_part.normalized,
+                    "normalized_text": normalized,
                     "normalizer_version": VERSION_PARAMETERS,
                     "semantic_variant": "default",
                     "parameter_schema": parameter_schema.model_dump(mode="json"),
                 }
             )
         )
+    return parameter_schema, digest(canonical(shape)), payload_hash
+
+
+def analyze(
+    text: str, part: Part, item: Entry, located: Located, refs: References
+) -> Candidate:
+    """Extract source slots before applying the enabled contextual rules."""
+    template_part, units = prepared(text, part)
+    hints = tuple(
+        hint(text, template_part, units, position, index, refs)
+        for index, position in enumerate(positions(text, template_part, units, refs))
+    )
+    parameter_schema, signature_hash, payload_hash = contract(
+        template_part.normalized, hints
+    )
     issues = tuple(sorted({reason for h in hints for reason in h.issues}))
     if part.role == "reminder":
         issues += ("legacy_parenthesis_classification_requires_review",)
@@ -378,8 +381,8 @@ def analyze(
         template_normalized_hash=template_part.normalized_hash,
         parameter_schema=parameter_schema,
         slots=hints,
-        literal_trace=literals(text, units, hints),
+        literal_trace=literals(units, hints),
         issues=issues,
-        signature_hash=digest(canonical(shape)),
+        signature_hash=signature_hash,
         payload_hash=payload_hash,
     )

@@ -4,19 +4,18 @@ from dataclasses import replace
 
 import pytest
 
-from sve_carddb.snapshot.values import digest, integer, object_value, parse
-from sve_carddb.template_parameter_rules.current import Rule, Rules, resolve
-from sve_carddb.template_parameters.candidate_matching import recognize
-from sve_carddb.template_parameters.inventory import Candidates
+from sve_carddb.snapshot.values import integer, object_value
+from sve_carddb.template_parameters.candidate_matching import classify, recognize
 from sve_carddb.template_parameters.models import Schema, Slot
 from sve_carddb.template_parameters.references import References
 from sve_carddb.template_parameters.signed_contexts import SIGNED_CONTEXTS
+from sve_carddb.template_parameters.spans import locate
 from sve_carddb.template_sources.inventory import entry
 from sve_carddb.template_sources.normalizer import VERSION, partition
 from sve_carddb.template_translations.members import _members
 
 from .test_template_explicit_rules import entry_ref
-from .test_template_parameters import HASH, candidate
+from .test_template_parameters import candidate
 from .test_template_rule_candidates import matches
 
 CASES = (
@@ -33,7 +32,7 @@ CASES = (
 
 
 def refs() -> References:
-    return References(terms={"スタック": [("term:ability.stack", "ability", HASH)]})
+    return References(terms={"スタック": [("term:ability.stack", "ability")]})
 
 
 @pytest.mark.parametrize(("identifier", "text"), CASES)
@@ -49,10 +48,9 @@ def test_signed_roles_require_opt_in_and_raw_magnitude_keep_literal_sign(
         rows = matches(signed, identifier, evidence)
         assert len(rows) == 1
         row = rows[0]
-        assert (row["proposed_role"], row["value"], row["raw_hash"]) == (
+        assert (row["recognized_role"], row["value"]) == (
             identifier + "_magnitude",
             2,
-            digest("２".encode()),
         )
         segments = row["context_segments"]
         assert isinstance(segments, list)
@@ -61,15 +59,10 @@ def test_signed_roles_require_opt_in_and_raw_magnitude_keep_literal_sign(
             for s in segments
         )
         assert sign + "２する" in context
-        assert row["context_hash"] == digest(context.encode())
         if identifier == "stack_delta":
-            assert (row["target_id"], row["target_hash"]) == (
-                "term:ability.stack",
-                HASH,
-            )
+            assert row["target_id"] == "term:ability.stack"
         else:
             assert row["target_id"] is None
-            assert row["target_hash"] is None
     assert c.model_dump() == original
     assert c.parameter_schema is None
     assert matches(text.replace("２", "０"), identifier, evidence)
@@ -102,28 +95,13 @@ def test_signed_current_resolution_keeps_role_bounds_and_ownership(
     ref = entry_ref()
     e = entry(ref, partition(text)[0], VERSION)
     c = c.model_copy(update={"inventory_id": e.id})
-    rows = recognize(text, partition(text)[0], c, evidence, (identifier,))
-    proposals = Candidates(entries=[c], rule_matches=list(rows))
-    policy = Rules(
-        parameter_rule_format=2,
-        kind="template_parameter_rules",
-        rules=(
-            Rule(
-                rule_id=identifier, enabled=True, origin="project", low_confidence=False
-            ),
-        ),
+    part = partition(text)[0]
+    classified, matches = classify(
+        text, part, e, locate(text, (part,))[0], evidence, (identifier,)
     )
-    solved, pending = resolve(policy, proposals)
-    assert pending == ()
-    assert len(solved) == 1
+    assert len(matches) == 1
     numeric = next(h for h in c.slots if h.type == "uint")
-    m = _members(
-        (e,),
-        (c,),
-        {(ref.source_version_id, ref.locator): text},
-        {(e.id, numeric.name): object_value(parse(solved[0]))},
-        {},
-    )[0]
+    m = _members((e,), (classified,), {(ref.source_version_id, ref.locator): text})[0]
     assert m.pending == ()
     assert (
         next(r for h, r in zip(m.hints, m.roles, strict=True) if h.name == numeric.name)
@@ -155,7 +133,7 @@ def test_signed_current_resolution_keeps_role_bounds_and_ownership(
         ValueError, match=r"^Template numeric bounds differ from the recognized role$"
     ):
         wrong.verify_schema(schema)
-    assert resolve(policy.model_copy(update={"rules": ()}), proposals)[0] == ()
+    assert candidate(text, evidence).issues
     owned = c.model_copy(
         update={
             "slots": tuple(
@@ -204,9 +182,9 @@ def test_nearby_incomplete_contexts_stay_pending(identifier: str, text: str) -> 
     "evidence",
     [
         References(),
-        References(terms={"スタック": [("term:ability.combo", "ability", HASH)]}),
-        References(terms={"スタック": [("term:ability.stack", "rule_term", HASH)]}),
-        References(terms={"スタック": [("term:ability.stack", "ability", HASH)] * 2}),
+        References(terms={"スタック": [("term:ability.combo", "ability")]}),
+        References(terms={"スタック": [("term:ability.stack", "rule_term")]}),
+        References(terms={"スタック": [("term:ability.stack", "ability")] * 2}),
     ],
 )
 def test_stack_requires_unique_exact_adopted_ability(evidence: References) -> None:

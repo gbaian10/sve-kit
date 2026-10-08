@@ -110,10 +110,9 @@ class Hint(RecordData):
     transformation: Text
     semantic_role: Text
     numeric_rule: NumericRule | None
+    rule_id: Text | None = None
     type: Literal["uint", "literal", "reference"] | None
     reference_kind: Literal["card", "term", "vocabulary"] | None
-    raw_hash: Hash
-    normalized_hash: Hash
     value: UInt | None
     target: dict[str, JsonValue] | None
     issues: tuple[Text, ...]
@@ -122,8 +121,6 @@ class Hint(RecordData):
 class LiteralTrace(RecordData):
     occurrence: Range
     source_segments: tuple[Range, ...]
-    raw_hash: Hash
-    normalized_hash: Hash
 
 
 class Candidate(RecordData):

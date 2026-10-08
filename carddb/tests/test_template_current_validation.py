@@ -6,8 +6,6 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.snapshot.values import digest
-from sve_carddb.template_parameter_rules.current import resolve
-from sve_carddb.template_parameters.inventory import Candidates
 from sve_carddb.template_translations.current import validate_templates
 from sve_carddb.template_translations.current_models import DefinitionRecord
 from sve_carddb.template_translations.definitions import _definitions, groups, payload
@@ -16,8 +14,6 @@ from sve_carddb.template_translations.members import POSITIVE_ROLES
 from .test_template_current import make_case
 
 if TYPE_CHECKING:
-    from pydantic import JsonValue
-
     from sve_carddb.template_translations.definitions import Groups
     from sve_carddb.template_translations.members import Reconstructed
 
@@ -180,38 +176,3 @@ def test_equal_schema_with_different_slot_roles_is_refused(current_case: Case) -
         match=r"^Template definition positions disagree on slot semantic roles$",
     ):
         _definitions((record,), patterns)
-
-
-@pytest.mark.parametrize("duplicate", [False, True])
-def test_current_matcher_cannot_duplicate_or_reclaim_numeric_ownership(
-    current_case: Case, *, duplicate: bool
-) -> None:
-    candidate = current_case.generated.entries[0].candidate
-    # The ordinary unit rule already owns this source position.
-    row: dict[str, JsonValue] = {
-        "inventory_id": candidate.inventory_id,
-        "slot": candidate.slots[0].name,
-        "rule_id": "suffix_recovery_amount",
-    }
-    candidates = Candidates(
-        entries=[candidate], rule_matches=[row, row] if duplicate else [row]
-    )
-    message = (
-        "Recognition matches must have unique slot ownership"
-        if duplicate
-        else "Recognition new rules cannot claim old numeric ownership"
-    )
-    with pytest.raises(ValueError, match="^" + message + "$"):
-        resolve(current_case.sources.rules, candidates)
-
-
-def test_current_matcher_requires_the_exact_unresolved_reason(
-    current_case: Case,
-) -> None:
-    candidate = current_case.generated.entries[0].candidate
-    hint = candidate.slots[0].model_copy(update={"issues": ()})
-    changed = candidate.model_copy(update={"slots": (hint,)})
-    with pytest.raises(
-        ValueError, match=r"^Recognition matched slot lacks its exact pending reason$"
-    ):
-        resolve(current_case.sources.rules, Candidates(entries=[changed]))

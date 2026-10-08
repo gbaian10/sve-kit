@@ -7,16 +7,12 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.snapshot.values import array, digest, object_value
-from sve_carddb.template_parameters.analysis import (
-    NUMERIC_RULE_PENDING,
-    NUMERIC_RULES,
-    analyze,
-)
-from sve_carddb.template_parameters.candidate_matching import recognize
+from sve_carddb.template_parameter_rules.models import LEGACY_IDS
+from sve_carddb.template_parameters.analysis import NUMERIC_RULE_DISABLED, NUMERIC_RULES
+from sve_carddb.template_parameters.candidate_matching import classify
 from sve_carddb.template_parameters.numeric_rules import configuration
 from sve_carddb.template_parameters.rule_candidates import selection
 from sve_carddb.template_parameters.spans import locate
-from sve_carddb.template_parameters.verification import verify_candidate
 from sve_carddb.template_sources.inventory import entry, fields, replay
 from sve_carddb.template_sources.normalizer import VERSION, partition
 from sve_carddb.template_sources.pins import PARSER
@@ -59,7 +55,8 @@ def build(
     enabled_rules: tuple[str, ...] = (),
 ) -> Candidates:
     """Every first-checkpoint entry must reappear; null fields are never coerced to empty."""
-    result = Candidates(enabled_rules=selection(enabled_rules))
+    selection(tuple(k for k in enabled_rules if k not in LEGACY_IDS))
+    result = Candidates(enabled_rules=enabled_rules)
     by_field: dict[tuple[str, str], list[Entry]] = defaultdict(list)
     for item in scan.entries:
         by_field[item.source_ref.source_version_id, item.source_ref.locator].append(
@@ -121,12 +118,11 @@ def _candidate(
         raise ValueError(
             "Parameter source recipe must reproduce exact legacy normalized bytes"
         )
-    candidate = analyze(context.text, part, item, position, refs)
-    verify_candidate(context.text, part, item, position, refs, candidate)
-    result.entries.append(candidate)
-    result.rule_matches.extend(
-        recognize(context.text, part, candidate, refs, result.enabled_rules)
+    candidate, recognized = classify(
+        context.text, part, item, position, refs, result.enabled_rules
     )
+    result.entries.append(candidate)
+    result.rule_matches.extend(recognized)
     selected = "".join(context.text[s.start : s.end] for s in part.segments)
     mentions = refs.term_mentions(selected)
     if mentions:
@@ -170,11 +166,11 @@ def summary(candidates: Candidates) -> dict[str, JsonValue]:
                 {m.payload_hash for m in members if m.payload_hash is not None}
             ),
             "complete_schemas": sum(m.parameter_schema is not None for m in members),
-            "complete_without_numeric_rule_approval": sum(
+            "complete_without_disabled_rules": sum(
                 m.parameter_schema is not None and not m.issues for m in members
             ),
-            "complete_after_numeric_rule_approval": sum(
-                set(m.issues) == {NUMERIC_RULE_PENDING} for m in members
+            "blocked_only_by_disabled_numeric_rules": sum(
+                set(m.issues) == {NUMERIC_RULE_DISABLED} for m in members
             ),
             "review_required": sum(bool(m.issues) for m in members),
         }
