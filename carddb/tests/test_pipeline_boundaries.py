@@ -31,8 +31,10 @@ def within(module: str, prefix: str) -> bool:
     return module == prefix or module.startswith(prefix + ".")
 
 
-def forbidden_imports(source: str, package: str) -> set[str]:
-    imports = project_imports(source, package)
+def forbidden_imports(
+    source: str, module_name: str, *, package: str | None = None
+) -> set[str]:
+    imports = project_imports(source, package if package is not None else module_name)
     forbidden = {
         module
         for module in imports
@@ -45,18 +47,13 @@ def forbidden_imports(source: str, package: str) -> set[str]:
             )
         )
     }
-    if any(
-        within(package, prefix)
-        for prefix in (
-            "sve_carddb.ingest.http",
-            "sve_carddb.ingest.archive",
-            "sve_carddb.ingest.queries",
-        )
+    if within(module_name, "sve_carddb.ingest") and not within(
+        module_name, "sve_carddb.ingest.crawl"
     ):
         forbidden.update(
             module for module in imports if within(module, "sve_carddb.ingest.crawl")
         )
-    if within(package, "sve_carddb.parse"):
+    if within(module_name, "sve_carddb.parse"):
         forbidden.update(
             module
             for module in imports
@@ -81,12 +78,19 @@ def forbidden_imports(source: str, package: str) -> set[str]:
 def test_completed_pipeline_dependencies(path: Path) -> None:
     parts = path.relative_to(PACKAGE.parent).with_suffix("").parts
     package = ".".join(parts[:-1])
-    assert not forbidden_imports(path.read_text(encoding="utf-8"), package)
+    module_name = package if path.stem == "__init__" else ".".join(parts)
+    assert not forbidden_imports(
+        path.read_text(encoding="utf-8"), module_name, package=package
+    )
 
 
 @pytest.mark.parametrize(
-    ("package", "source"),
+    ("module_name", "source"),
     [
+        ("sve_carddb.ingest", "from sve_carddb.ingest.crawl import crawl"),
+        ("sve_carddb.ingest.queries", "from sve_carddb.ingest.crawl import crawl"),
+        ("sve_carddb.ingest.urls", "from sve_carddb.ingest.crawl import crawl"),
+        ("sve_carddb.ingest.config", "from sve_carddb.ingest import crawl"),
         ("sve_carddb.ingest.http", "from sve_carddb.ingest import crawl"),
         ("sve_carddb.ingest.archive", "from .. import crawl"),
         ("sve_carddb.ingest.archive", "from sve_carddb.workflows import extract"),
@@ -101,14 +105,15 @@ def test_completed_pipeline_dependencies(path: Path) -> None:
         ("sve_carddb.parse", "from sve_carddb.core import authored"),
         ("sve_carddb.parse", "from sve_carddb.ingest.http import client"),
         ("sve_carddb.parse", "from sve_carddb import cli_paths"),
+        ("sve_carddb.parse.html", "from sve_carddb.ingest import config"),
     ],
 )
-def test_boundary_detects_reverse_imports(package: str, source: str) -> None:
-    assert forbidden_imports(source, package)
+def test_boundary_detects_reverse_imports(module_name: str, source: str) -> None:
+    assert forbidden_imports(source, module_name)
 
 
 @pytest.mark.parametrize(
-    ("package", "source"),
+    ("module_name", "source"),
     [
         ("sve_carddb.parse", "from .pages import extract_en"),
         ("sve_carddb.parse", "from sve_carddb.ingest.http import validate"),
@@ -118,7 +123,25 @@ def test_boundary_detects_reverse_imports(package: str, source: str) -> None:
         ("sve_carddb.ingest.archive", "from sve_carddb.parse.html import parse"),
         ("sve_carddb.ingest.http", "from sve_carddb.ingest.archive import manifest"),
         ("sve_carddb.build", "from sve_carddb.contracts import snapshot"),
+        ("sve_carddb.ingest.crawl", "from . import crawl"),
+        (
+            "sve_carddb.ingest.crawl.crawl",
+            "from sve_carddb.ingest.crawl import crawl_sv1",
+        ),
     ],
 )
-def test_boundary_allows_shared_helpers(package: str, source: str) -> None:
-    assert not forbidden_imports(source, package)
+def test_boundary_allows_shared_helpers(module_name: str, source: str) -> None:
+    assert not forbidden_imports(source, module_name)
+
+
+def test_parse_cannot_reach_crawl_through_urls() -> None:
+    assert not forbidden_imports(
+        "from sve_carddb.ingest import urls",
+        "sve_carddb.parse.pages.official_qa",
+        package="sve_carddb.parse.pages",
+    )
+    assert forbidden_imports(
+        "from .crawl import crawl",
+        "sve_carddb.ingest.urls",
+        package="sve_carddb.ingest",
+    ) == {"sve_carddb.ingest.crawl", "sve_carddb.ingest.crawl.crawl"}

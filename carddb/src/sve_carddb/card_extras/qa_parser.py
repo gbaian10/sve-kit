@@ -10,8 +10,8 @@ from sve_carddb.core.json import digest
 from sve_carddb.ingest.http.validate import ValidationError, decode_html
 from sve_carddb.ingest.urls import canonicalize
 from sve_carddb.parse.html import attribute, parse, require_one, select_all, select_one
-from sve_carddb.parse.pages.extract_en import _qa_text as en_text
-from sve_carddb.parse.pages.extract_jp import _qa_text as jp_text
+from sve_carddb.parse.pages.extract_en import qa_text as en_text
+from sve_carddb.parse.pages.extract_jp import qa_text as jp_text
 from sve_carddb.parse.pages.official_qa import (
     DetailLink,
     Pagination,

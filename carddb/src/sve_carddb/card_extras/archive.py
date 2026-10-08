@@ -12,8 +12,8 @@ from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.http.validate import decode_html
 from sve_carddb.parse.html import attribute, parse, require_one, select_all
 from sve_carddb.parse.pages import official_en, official_jp
-from sve_carddb.parse.pages.extract_en import _qa_text as _en_qa_text
-from sve_carddb.parse.pages.extract_jp import _qa_text
+from sve_carddb.parse.pages.extract_en import qa_text as en_qa_text
+from sve_carddb.parse.pages.extract_jp import qa_text
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -52,7 +52,7 @@ def card_number(url: str, region: Region) -> str | None:
 def parse_card_page(raw: bytes, source: Source, *, region: Region = "jp") -> CardPage:
     """Validate physical identity before transcribing regional supplemental blocks."""
     adapter = official_jp if region == "jp" else official_en
-    renderer = _qa_text if region == "jp" else _en_qa_text
+    renderer = qa_text if region == "jp" else en_qa_text
     if source.sha256 != digest(raw) or source.parser_version != (
         PARSER if region == "jp" else EN_PARSER
     ):

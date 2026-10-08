@@ -280,14 +280,15 @@ def _qa(under: LexborNode | None) -> list[QA]:
             QA(
                 id=match["id"],
                 date=match["date"],
-                question=_qa_text(require_one(item, ".qa-List_Txt-Q")),
-                answer=_qa_text(require_one(item, ".qa-List_Txt-A")),
+                question=qa_text(require_one(item, ".qa-List_Txt-Q")),
+                answer=qa_text(require_one(item, ".qa-List_Txt-A")),
             )
         )
     return items
 
 
-def _qa_text(node: LexborNode) -> str:
+def qa_text(node: LexborNode) -> str:
+    """Render Q&A text without the decorative leading Q/A marker."""
     # Drop the decorative leading "Q" / "A" marker.
     marker = select_one(node, ".Garamond")
     text = _render(node) or ""

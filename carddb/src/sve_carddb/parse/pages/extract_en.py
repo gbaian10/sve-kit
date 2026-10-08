@@ -195,14 +195,15 @@ def _qa(tree: Queryable) -> list[QA]:
     return [
         QA(
             title=render(require_one(item, ".qa-List_Ttl")),
-            question=_qa_text(require_one(item, ".qa-List_Txt-Q")),
-            answer=_qa_text(require_one(item, ".qa-List_Txt-A")),
+            question=qa_text(require_one(item, ".qa-List_Txt-Q")),
+            answer=qa_text(require_one(item, ".qa-List_Txt-A")),
         )
         for item in select_all(tree, ".cardlist-Detail_QA .qa-List_Item")
     ]
 
 
-def _qa_text(node: LexborNode) -> str:
+def qa_text(node: LexborNode) -> str:
+    """Render Q&A text without the decorative leading Q/A marker."""
     marker = select_one(node, ".Garamond")
     text = render(node)
     return text.removeprefix(render(marker)).strip() if marker is not None else text
