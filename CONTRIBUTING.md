@@ -266,7 +266,13 @@ carddb keeps authored domain loaders in `src/sve_carddb/domains/`. Translation
 subpackages group glossary, names, templates, parameters and source inventory;
 digital subpackages group links and name policies. Pipeline boundary and fresh
 import tests check that parse, ingest and build do not load domain code and that
-parsers import without the archive locking implementation.
+parsers import without the archive locking implementation. Images live under
+`src/sve_carddb/images/`; DB projection, readers and snapshot export live under
+`src/sve_carddb/export/`, with transport encoding in `export/transport/`. Preview
+writing and version state stay in `export/preview/`. Boundary tests keep domains
+independent of export/publish and images/export independent of workflows/CLI.
+Fresh-process tests keep `export/read_api.py` free of build, domains, workflows,
+writers and R2 imports.
 
 Run them yourself when you change the code they cover:
 

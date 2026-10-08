@@ -41,6 +41,7 @@ sve-kit/
 │   │   ├── core/, contracts/     Shared foundations and snapshot contracts
 │   │   ├── ingest/, parse/       Source acquisition, archives and pure page parsers
 │   │   ├── build/                Typed SQLite schemas, rows and build output
+│   │   ├── images/, export/      Card images, DB projection and snapshot transport
 │   │   └── workflows/            Offline build, export, extraction and diagnostics
 │   ├── tests/
 │   ├── .cache/            Disposable temp files            (git-ignored, planned)

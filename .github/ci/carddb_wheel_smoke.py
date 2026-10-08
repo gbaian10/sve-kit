@@ -7,8 +7,8 @@ from pathlib import Path
 from sve_carddb.contracts.generate_schema import generate
 from sve_carddb.contracts.snapshot import schema
 from sve_carddb.core.json import array, canonical, object_value, parse, string
-from sve_carddb.snapshot.read_api import current_image_keys, read_index
-from sve_carddb.snapshot.reader import read_snapshot
+from sve_carddb.export.read_api import current_image_keys, read_index
+from sve_carddb.export.reader import read_snapshot
 
 
 def main() -> None:
@@ -25,10 +25,11 @@ def main() -> None:
             "sve_carddb.build",
             "sve_carddb.domains",
             "sve_carddb.workflows",
-            "sve_carddb.snapshot.export",
-            "sve_carddb.snapshot.preview",
-            "sve_carddb.snapshot.project",
+            "sve_carddb.export.transport",
+            "sve_carddb.export.preview",
+            "sve_carddb.export.project",
             "sve_carddb.r2_upload",
+            "sve_publish",
         )
     )
     manifest = object_value(parse((fixture / "manifest.json").read_bytes()))
