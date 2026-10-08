@@ -44,6 +44,18 @@ updates:
     commit-message:
       prefix: ⬆️ dep-bump(carddb)
 
+  - package-ecosystem: uv
+    directory: /publish
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      uv:
+        patterns: ['*']
+    commit-message:
+      prefix: ⬆️ dep-bump
+
   # Updates each hook's `rev:`; local hooks, additional_dependencies and language_version stay manual.
   - package-ecosystem: pre-commit
     directory: /

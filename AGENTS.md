@@ -20,6 +20,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 | 路徑        | 職責                                                                              | 技術        |
 | ----------- | --------------------------------------------------------------------------------- | ----------- |
 | `carddb/`   | 爬取、解析、合併 `authored/`、建置 SQLite、匯出 JSON 快照                         | Python、uv  |
+| `publish/`  | 讀已驗證的公開匯出根，上傳 R2 與遠端 GC；獨立 uv 專案                             | Python、uv  |
 | `authored/` | 人寫的資料：跨地區卡片 ID 對應、繁中翻譯、效果 DSL 資料、裁定登錄                 | YAML        |
 | `dsl/`      | 效果 DSL 的 JSON Schema，**語法的唯一權威**                                       | JSON Schema |
 | `sim/`      | 模擬器：`engine/`、`scenario-runner/`、`web/`；`server/` 尚未建立                 | Rust、TS    |
@@ -41,7 +42,8 @@ registry projection adapter 與 QA adapter 分別留在 `domains/registry/parser
 `images/` 保存卡圖資產、驗證、裁切與變體；`export/` 保存 DB 投影與快照讀取／匯出，
 `export/transport/` 封裝傳輸檔，`export/preview/` 只寫預覽與版本 state。
 `export/read_api.py` 是唯讀邊界，不載入 build、domains、workflows、
-匯出寫出端（export.transport、export.project、export.preview）或 R2／publish（r2_upload、sve_publish）。
+匯出寫出端（export.transport、export.project、export.preview）或 publish（sve_publish）。
+publish 的正式程式只可匯入 `sve_carddb.export.read_api`；不得直接匯入 carddb 的其他模組。
 images 與 export 不得匯入 workflows 或 CLI；domains 不得依賴 export 或 publish。
 `domains/` 保存各資料領域，翻譯歸於 `domains/translations/` 的 glossary、names、templates、parameters 與 source_inventory，
 數位版歸於 `domains/digital/` 的 links 與 name_policies；領域不得匯入 workflows 或 CLI。

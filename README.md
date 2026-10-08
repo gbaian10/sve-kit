@@ -47,6 +47,11 @@ sve-kit/
 │   ├── .cache/            Disposable temp files            (git-ignored, planned)
 │   └── dist/              Build output: SQLite, snapshots  (git-ignored, planned)
 │
+├── publish/               Verified public exports → R2 (Python, uv)
+│   ├── pyproject.toml     Package: sve-publish, path dependency on carddb
+│   ├── src/sve_publish/   Upload and remote GC
+│   └── tests/             Synthetic exports, SDK fakes and isolation guard
+│
 ├── authored/              Human-maintained data (YAML), split per card set
 │                          Cross-region card IDs, zh-Hant translations, effect DSL data
 ├── dsl/                   Effect DSL JSON Schema — the only authority for its grammar
@@ -62,6 +67,10 @@ sve-kit/
 The carddb package groups data domains under `sve_carddb.domains`; translation
 and digital modules have dedicated subpackages. Pure parsers and build
 infrastructure remain independent of authored domain loaders.
+
+R2 upload and remote collection live in the separate [publish project](publish/README.md),
+using `sve-publish upload` and `sve-publish gc`. Upload defaults to an offline dry-run;
+formal release gates remain unimplemented (#34).
 
 The authoritative game server (`sim/server/`) is planned and does not exist yet.
 The engine, scenario runner, and web client already exist; their presence does

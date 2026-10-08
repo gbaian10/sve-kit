@@ -45,7 +45,7 @@ reason = "Scans staged changes only, so it would scan nothing in a clean CI chec
 [hooks.gitleaks-range]
 job = "repo"
 
-[hooks.uv-lock]
+[hooks.uv-lock-carddb]
 job = "repo"
 
 [hooks.actionlint]
@@ -124,3 +124,13 @@ job = "commit"
 
 [hooks.conventional-gitmoji]
 job = "commit"
+
+[hooks.uv-lock-publish]
+job = "repo"
+
+[hooks.mypy-publish]
+job = "python"
+
+[hooks.pytest-publish]
+job = "python"
+direct = true

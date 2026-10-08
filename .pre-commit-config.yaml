@@ -55,9 +55,9 @@ repos:
       # docs/schema/er/ and .github/ci/ have ruff.toml files that extend the carddb settings.
       - id: ruff-format
         args: [--check]
-        files: ^(carddb|docs/schema/er|\.github/ci)/
+        files: ^(carddb|publish|docs/schema/er|\.github/ci)/
       - id: ruff-check
-        files: ^(carddb|docs/schema/er|\.github/ci)/
+        files: ^(carddb|publish|docs/schema/er|\.github/ci)/
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.23.3
@@ -91,10 +91,15 @@ repos:
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.12.20
     hooks:
-      # monorepo: the Python project lives in carddb/
+      # Each Python project maintains its own dependency lock.
       - id: uv-lock
+        alias: uv-lock-carddb
         args: [--project, carddb]
         files: ^carddb/(pyproject\.toml|uv\.lock)$
+      - id: uv-lock
+        alias: uv-lock-publish
+        args: [--project, publish]
+        files: ^(publish/(pyproject\.toml|uv\.lock)|carddb/(pyproject\.toml|uv\.lock))$
 
   # Workflow checks: actionlint for syntax and expressions, zizmor for security.
   - repo: https://github.com/rhysd/actionlint
@@ -213,7 +218,7 @@ repos:
       - id: pytest
         name: pytest (carddb)
         language: system
-        entry: uv run --directory carddb pytest -n auto --cov
+        entry: uv run --directory carddb pytest -n 4 --cov
         pass_filenames: false
         always_run: true
         stages: [manual]
@@ -258,3 +263,18 @@ repos:
         entry: bash -c 'out=$(mktemp -d) && trap "rm -rf \"$out\"" EXIT && uv run docs/schema/er/build_er.py --no-open --out "$out/schema-er.html"'
         pass_filenames: false
         files: ^docs/schema/
+
+      - id: mypy-publish
+        name: mypy (publish)
+        stages: [pre-push]
+        language: system
+        entry: uv --directory publish run mypy
+        pass_filenames: false
+        files: ^(publish/|carddb/)
+      - id: pytest-publish
+        name: pytest (publish, coverage >= 92%)
+        language: system
+        entry: uv --directory publish run pytest -n 4 --cov
+        pass_filenames: false
+        always_run: true
+        stages: [manual]

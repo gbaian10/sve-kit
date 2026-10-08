@@ -51,7 +51,8 @@ jobs:
               - 'mise.toml'
               - 'tests/fixtures/snapshot-contract/**' # shared snapshot contract, read by all three components
             python:
-              - 'carddb/**'
+              - 'carddb/**' # includes read_api, contracts and lock inputs used by publish
+              - 'publish/**'
               - 'docs/schema/**'
               - 'authored/**' # the registry tests load and validate the real authored data
             rust:
@@ -89,7 +90,9 @@ jobs:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           cache-suffix: ${{ github.job }}
-          cache-dependency-glob: carddb/uv.lock
+          cache-dependency-glob: |
+            carddb/uv.lock
+            publish/uv.lock
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: hook-cache
         with:
@@ -118,7 +121,7 @@ jobs:
             ':(glob)**/.markdownlint*' ':(glob)**/.editorconfig'
             ':(glob)**/.gitattributes' ':(glob)**/.gitleaks*'
             taplo.toml .taplo.toml uv.toml carddb/uv.toml
-            carddb/pyproject.toml carddb/uv.lock
+            carddb/pyproject.toml carddb/uv.lock publish/pyproject.toml publish/uv.lock
           )
           scope=(--all-files)
           # Deleted inputs never reach pre-commit's filename filters, but can break the ER build.
@@ -176,7 +179,9 @@ jobs:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           cache-suffix: ${{ github.job }}
-          cache-dependency-glob: carddb/uv.lock
+          cache-dependency-glob: |
+            carddb/uv.lock
+            publish/uv.lock
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: hook-cache
         with:
@@ -212,7 +217,14 @@ jobs:
           uv pip install --no-deps --python "${RUNNER_TEMP}/carddb-wheel-env/bin/python" "${RUNNER_TEMP}"/carddb-wheel/*.whl
           "${RUNNER_TEMP}/carddb-wheel-env/bin/python" -I -B .github/ci/carddb_wheel_smoke.py "$GITHUB_WORKSPACE/tests/fixtures/snapshot-contract/v2"
           "${RUNNER_TEMP}/carddb-wheel-env/bin/sve-carddb" --help > /dev/null
-          "${RUNNER_TEMP}/carddb-wheel-env/bin/sve-carddb" r2 upload-v2 --help > /dev/null
+      - name: Installed publish wheel smoke
+        run: |
+          uv build --wheel --project ./publish --out-dir "${RUNNER_TEMP}/publish-wheel"
+          UV_PROJECT_ENVIRONMENT="${RUNNER_TEMP}/publish-wheel-env" uv sync --project ./publish --locked --no-default-groups --no-install-project --no-install-package sve-carddb
+          uv pip install --no-deps --python "${RUNNER_TEMP}/publish-wheel-env/bin/python" "${RUNNER_TEMP}"/carddb-wheel/*.whl "${RUNNER_TEMP}"/publish-wheel/*.whl
+          "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" --help > /dev/null
+          "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" upload --help > /dev/null
+          "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" gc --help > /dev/null
       - name: pytest (coverage gate for the explicit test scope)
         id: tests
         env:
@@ -238,12 +250,35 @@ jobs:
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-python-reports
         run: python3 .github/ci/test_summary.py python "$REPORT_DIR"
+      - name: publish pytest (independent synthetic coverage gate)
+        id: publish-tests
+        if: ${{ !cancelled() }}
+        env:
+          TMPDIR: ${{ runner.temp }}
+          REPORT_DIR: ${{ runner.temp }}/sve-publish-reports
+        run: |
+          umask 077
+          mkdir -p "$REPORT_DIR"
+          start=$SECONDS
+          [[ "$PYTEST_WORKERS" =~ ^[1-4]$ ]] || { echo 'CI_PYTEST_WORKERS must be 1–4'; exit 1; }
+          status=0
+          uv --directory ./publish run --locked pytest -n "$PYTEST_WORKERS" --cov --durations=30 \
+            --junitxml="$REPORT_DIR/junit.xml" --cov-report="json:$REPORT_DIR/coverage.json" \
+            > "$REPORT_DIR/test.log" 2>&1 || status=$?
+          echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
+          echo "publish pytest exit status: $status (statistics in the next step)"
+          exit "$status"
+      - name: Publish test summary
+        if: ${{ !cancelled() && (steps.publish-tests.outcome == 'success' || steps.publish-tests.outcome == 'failure') }}
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-publish-reports
+        run: python3 .github/ci/test_summary.py publish "$REPORT_DIR"
       - name: Remove private Python reports and test data
         if: always()
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-python-reports
           SVE_DATA_DIR: ${{ runner.temp }}/sve-carddb-test-data
-        run: rm -rf "$REPORT_DIR" "$SVE_DATA_DIR" carddb/htmlcov carddb/.pytest_cache .testdata "${RUNNER_TEMP}"/pytest-of-*
+        run: rm -rf "$REPORT_DIR" "$SVE_DATA_DIR" carddb/htmlcov carddb/.pytest_cache publish/htmlcov publish/.pytest_cache "${RUNNER_TEMP}/sve-publish-reports" .testdata "${RUNNER_TEMP}"/pytest-of-*
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.mypy-cache.outputs.cache-hit != 'true'
         with:
@@ -307,7 +342,9 @@ jobs:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           cache-suffix: ${{ github.job }}
-          cache-dependency-glob: carddb/uv.lock
+          cache-dependency-glob: |
+            carddb/uv.lock
+            publish/uv.lock
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: hook-cache
         with:
@@ -432,7 +469,9 @@ jobs:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           cache-suffix: ${{ github.job }}
-          cache-dependency-glob: carddb/uv.lock
+          cache-dependency-glob: |
+            carddb/uv.lock
+            publish/uv.lock
       - name: cz check (pushed commit range)
         env:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}

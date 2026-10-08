@@ -187,7 +187,7 @@ workflow steps and does not depend on local mise configuration.
 | Variable | Purpose | Reader | Required / default |
 | --- | --- | --- | --- |
 | `SVE_DATA_DIR` | Latest source cache and manifest | carddb crawler and manifest commands | Required for live-data commands; no default; pytest replaces it with a temporary root |
-| `SVE_EXPORT_DIR` | Public export root | carddb `snapshot export-offline` (`--preview-dir`), `r2 upload-v2` (`--export-dir`), Web `/cdn` | Export/upload require CLI or env; no default; Web uses synthetic fixture when unset or empty |
+| `SVE_EXPORT_DIR` | Public export root | carddb `snapshot export-offline` (`--preview-dir`), publish `upload` (`--export-dir`), Web `/cdn` | Export/upload require CLI or env; no default; Web uses synthetic fixture when unset or empty |
 | `SVE_CARDDB_PRIVATE_DIR` | Inputs, reports and persistent `media-state.json` | carddb `snapshot export-offline` (`--private-dir`) | CLI or env required; no default; recipe and `--bundle-dir` remain explicit |
 | `SVE_PREVIEW_DIR` | Optional second local snapshot root | Web `/cdn-preview` | Optional; no default; unset or empty leaves the root unconfigured; exporter uses `SVE_EXPORT_DIR` |
 | `SVE_ARCHIVE_ROOT` | Immutable source store | carddb archive operations | Required when using archive configuration; no default |
@@ -205,8 +205,8 @@ workflow steps and does not depend on local mise configuration.
 | `SVE_PRIVATE_TESTDATA_DIR` | Private page fixtures | Python tests | Required in `required` mode; no default |
 | `SVE_CI_TEST_MODE` | Full or fork test scope | CI helpers and Rust tests | Set by CI; no mise default |
 | `SVE_CI_COVERAGE_THRESHOLD` | Coverage acceptance threshold | CI helpers | Set from CI policy; no mise default |
-| `SVE_R2_ACCESS_KEY_ID`, `SVE_R2_SECRET_ACCESS_KEY` | R2 credentials | carddb upload/remote GC SDK | Required for remote execution only; no default; keep secrets outside the repo |
-| `R2_ACCOUNT_ID`, `R2_DEV_BUCKET` | R2 account and target bucket | carddb upload/remote GC | Execution requires CLI or env; no default |
+| `SVE_R2_ACCESS_KEY_ID`, `SVE_R2_SECRET_ACCESS_KEY` | R2 credentials | publish upload/remote GC SDK | Required for remote execution only; no default; keep secrets outside the repo |
+| `R2_ACCOUNT_ID`, `R2_DEV_BUCKET` | R2 account and target bucket | publish upload/remote GC | Execution requires CLI or env; no default |
 | `SVE_PREVIEW_CONFIGURED` | Browser preview-root flag | Vite → Web UI | Derived by Vite; do not configure manually |
 | `SVE_VOICE_ORIGIN` | Planned voice source selection | No implemented reader (build-db design only) | Unimplemented; no default |
 
@@ -218,6 +218,7 @@ Then:
 
 ```bash
 uv --directory carddb sync --all-groups
+uv --directory publish sync
 cargo install --locked cargo-deny cargo-machete cargo-llvm-cov cargo-mutants
 uv tool install pre-commit
 pre-commit install
@@ -228,10 +229,12 @@ are manual hooks, because a full run takes minutes; CI runs each of them when a 
 that component or a shared input. The Python manual hook enforces 90% combined line and branch
 coverage; Rust tests enforce 90% line coverage. The same thresholds apply locally and to full CI runs; fork PRs use separate
 remaining-test thresholds described below.
+publish has its own 92% combined line and branch coverage gate, including fork PRs,
+and requires no private test data.
 Direct `pytest` runs do not enable coverage, so you can run selected files or tests without the
 full-suite gate; use the Python manual hook for the complete coverage check.
 
-All carddb tests use a session-wide isolation guard. It supplies a temporary
+carddb and publish tests each use their own session-wide isolation guard. It supplies a temporary
 `SVE_DATA_DIR` and requires file-backed SQLite databases and source writes to stay
 under the pytest temporary root, including resolved symlink targets. An unset or
 non-temporary `SVE_DATA_DIR` is rejected before data I/O. Each xdist worker permits
@@ -273,11 +276,12 @@ writing and version state stay in `export/preview/`. Boundary tests keep domains
 independent of export/publish and images/export independent of workflows/CLI.
 Fresh-process tests keep `export/read_api.py` free of build, domains, workflows,
 export output modules (`export.transport`, `export.project`, `export.preview`)
-and R2/publish modules (`r2_upload`, `sve_publish`).
+and R2/publish modules (`sve_publish`).
 
 Run them yourself when you change the code they cover:
 
 ```bash
+pre-commit run --hook-stage manual pytest-publish # publish tests with a separate 92% gate
 pre-commit run --hook-stage manual pytest       # carddb tests with the 90% combined line/branch gate
 pre-commit run --hook-stage manual cargo-test   # engine tests with the 90% line-coverage gate
 pre-commit run --hook-stage manual web-test     # sim/web Vitest (CI calls the same package scripts in separate steps)
@@ -387,7 +391,7 @@ code.
 | What                                                                | How it is updated                                                                                   |
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | GitHub Actions (pinned by commit SHA)                               | Dependabot, weekly (`.github/dependabot.yml`)                                                       |
-| Rust and Python (`carddb`) dependencies                             | Dependabot, weekly, one grouped pull request per ecosystem (version updates)                        |
+| Rust and Python (`carddb`, `publish`) dependencies                  | Dependabot, weekly, one grouped pull request per ecosystem (version updates)                        |
 | Bun dependencies (`sim/web`)                                        | `bun update` and `bun audit` by hand, monthly (Dependabot cannot read `bun.lock` version 2 yet)     |
 | pre-commit hook versions (`rev:`)                                   | Dependabot, weekly, one grouped pull request                                                        |
 | `cz-conventional-gitmoji` in the commitizen hook                    | Pinned in `.pre-commit-config.yaml`; bump it with its hook's `rev:` and the `carddb` dev dependency |
