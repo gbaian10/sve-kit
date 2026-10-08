@@ -6,7 +6,7 @@
 輸入批次／採納／freshness 的 domain 驗證仍由建置器負責。
 
 ```python
-from sve_carddb.snapshot.project import Decisions, Settings, project
+from sve_carddb.export.project import Decisions, Settings, project
 
 result = project(
     database,

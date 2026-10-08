@@ -76,7 +76,7 @@ error 釘住預期失敗原因；其他 reader 不要求相同訊息文字。所
 uv --directory carddb run pytest tests/test_snapshot_contract.py
 ```
 
-`sve_carddb.snapshot.reader.read_snapshot(manifest_value, payloads)` 接受已解析的 manifest 與邏輯鍵→未壓縮 canonical bytes；`read_text_all` 驗聯集後走相同 join。Schema 由套件資源讀取，不在執行期解析 Markdown、不抓網路、不寫版本索引。
+`sve_carddb.export.reader.read_snapshot(manifest_value, payloads)` 接受已解析的 manifest 與邏輯鍵→未壓縮 canonical bytes；`read_text_all` 驗聯集後走相同 join。Schema 由套件資源讀取，不在執行期解析 Markdown、不抓網路、不寫版本索引。
 
 這是供契約驗收的小型記憶體 reader：回傳完整 logical objects，便於比對獨立 oracle。前端正式 store 仍須遵守 snapshot-format 的逐片解析／淘汰規則。壓縮傳輸長度、資產本體下載、兩版 changes 差異及建置端證據屬對應下載／發布流程的驗收，不由這個已解壓 bytes 入口代驗。
 
