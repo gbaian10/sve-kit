@@ -34,6 +34,34 @@ if TYPE_CHECKING:
 
     from sve_carddb.export.reader import Row
 
+# JSON boundary helpers are part of the public reader contract for remote index consumers.
+__all__ = [
+    "IMAGE_KEY",
+    "INDEX",
+    "JSON_KEY",
+    "POINTER",
+    "Export",
+    "ExportError",
+    "ImageFile",
+    "Member",
+    "array",
+    "canonical",
+    "closure",
+    "current_image_keys",
+    "digest",
+    "directory",
+    "image_files",
+    "integer",
+    "load_export",
+    "object_value",
+    "parse",
+    "read_index",
+    "read_member",
+    "retained_manifest",
+    "string",
+    "validate_index",
+]
+
 POINTER = "snapshots/preview/current.json"
 INDEX = "snapshots/versions/index.json"
 JSON_KEY = re.compile(
@@ -223,7 +251,7 @@ def _manifest(root: Path) -> tuple[str, bytes, dict[str, JsonValue]]:
         raise ExportError("Manifest differs from the preview pointer")
     require_preview(manifest, regions=tuple(map(string, array(manifest["regions"]))))
     if manifest["format_version"] != MEDIA:
-        raise ExportError("Upload requires snapshot format 2.0.0")
+        raise ExportError("Export requires snapshot format 2.0.0")
     return path, raw, manifest
 
 
@@ -298,13 +326,13 @@ def read_index(raw: bytes) -> dict[str, JsonValue]:
 def retained_manifest(raw: bytes, entry: dict[str, JsonValue]) -> dict[str, JsonValue]:
     """Verify a retained manifest against its version index identity."""
     if digest(raw) != entry["manifest_sha256"]:
-        raise ExportError("GC requires intact retained manifests")
+        raise ExportError("Retained manifests must be intact")
     manifest = object_value(parse(raw))
     validate("Manifest", manifest, string(manifest["format_version"]))
     if raw != canonical(manifest) or any(
         manifest[k] != entry[k] for k in ("data_version", "published_at")
     ):
-        raise ExportError("GC manifest differs from its index entry")
+        raise ExportError("Manifest differs from its index entry")
     return manifest
 
 

@@ -85,15 +85,9 @@ def test_preview_cannot_accept_formal_version(exported: Snapshot, version: str) 
         require_preview(manifest)
 
 
-def test_formal_publish_refuses_preview(exported: Snapshot, tmp_path: Path) -> None:
+def test_formal_publish_refuses_preview(exported: Snapshot) -> None:
     with pytest.raises(ValueError, match="Formal publish refuses preview"):
         require_formal(exported.manifest)
-    path = tmp_path / "manifest.json"
-    path.write_bytes(canonical(exported.manifest))
-    result = CliRunner().invoke(app, ["snapshot", "publish", str(path)])
-    assert result.exit_code != 0
-    assert isinstance(result.exception, ValueError)
-    assert str(result.exception) == "Formal publish refuses preview artifacts"
     require_formal(exported.manifest | {"data_version": "20261002T010203Z-0001"})
 
 
@@ -367,19 +361,6 @@ def test_review_joins_follow_filtered_primary_keys() -> None:
         assert view["digital_link"][0]["review_level"] == "confirmed"
         assert view["art"][0]["review_level"] == "confirmed"
         assert view["digital_art_link"][0]["review_level"] == "confirmed"
-
-
-def test_renamed_preview_is_not_a_formal_release(
-    exported: Snapshot, tmp_path: Path
-) -> None:
-    path = tmp_path / "renamed.json"
-    path.write_bytes(
-        canonical(exported.manifest | {"data_version": "20261002T010203Z-0001"})
-    )
-    result = CliRunner().invoke(app, ["snapshot", "publish", str(path)])
-    assert result.exit_code != 0
-    assert "Formal release gates are not implemented yet (#34)" in result.output
-    assert sorted(p.name for p in tmp_path.iterdir()) == ["renamed.json"]
 
 
 def preview_plan(snapshot: Snapshot) -> MediaPlan:

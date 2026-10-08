@@ -65,7 +65,7 @@ for name in sys.modules:
     assert not any(name == prefix or name.startswith(prefix + '.') for prefix in (
         'sve_carddb.build', 'sve_carddb.domains', 'sve_carddb.export.transport',
         'sve_carddb.export.project', 'sve_carddb.export.preview',
-        'sve_carddb.workflows', 'sve_carddb.r2_upload', 'sve_publish',
+        'sve_carddb.workflows', 'sve_publish',
     )), name
 """
     )
