@@ -108,7 +108,7 @@ GC 使用 `retained_manifest(raw, entry)` 核對保留的 manifest、`closure(pa
 `directory(root)` 與 `read_member(root, key)` 保留非 symlink 的本機讀取限制。
 這個入口不載入 DB、建置流程、preview writer 或 R2 傳輸，也不在 import 時執行 I/O。
 
-共用格式的唯一權威位於 `sve_carddb.contracts`，包括 schema 資源、profiles、
+共用契約的唯一權威位於 `sve_carddb.contracts`，快照契約讀取／驗證位於 `contracts.snapshot`，包括 schema 資源、profiles、
 欄位 descriptor 與模板參數形狀；build 與 snapshot 均依賴它。
 CI 在既有 Python job 中建立 wheel，以獨立環境安裝後檢查資源、reader 與 CLI help，
 避免 editable install 掩蓋遺漏的套件資源。

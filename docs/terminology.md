@@ -10,6 +10,7 @@
 | 中文 | 英文（程式／檔名） | 指什麼 |
 | --- | --- | --- |
 | **共用基礎** | core | carddb 各層共用的 JSON／YAML 邊界、嚴格型別、日期、authored 路徑與純來源溯源資料；不依賴卡片語意或建置 DB |
+| **共用契約** | contracts | build 與 export 共用的公開快照 schema、profiles、欄位 descriptor 與模板參數形狀；只依賴共用基礎，不包含辨識規則或建置／匯出流程 |
 
 ## 資料的兩層
 
