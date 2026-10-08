@@ -7,18 +7,24 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
-from sve_carddb.registry.inputs import digest
-from sve_carddb.registry.records import CorrectionData, EnglishPrintingData
-from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.registry.storage import Index, encode, load, read_yaml, yaml_parser
+from sve_carddb.domains.registry.inputs import digest
+from sve_carddb.domains.registry.records import CorrectionData, EnglishPrintingData
+from sve_carddb.domains.registry.snapshot import load_registry
+from sve_carddb.domains.registry.storage import (
+    Index,
+    encode,
+    load,
+    read_yaml,
+    yaml_parser,
+)
 
 from .registry_snapshot_fixtures import edit_record, kind_shard
 from .registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- expose synthetic pytest fixture
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- expose dependency of the synthetic registry fixture
 
 if TYPE_CHECKING:
-    from sve_carddb.registry.snapshot import RegistrySnapshot
-    from sve_carddb.registry.storage import Entry
+    from sve_carddb.domains.registry.snapshot import RegistrySnapshot
+    from sve_carddb.domains.registry.storage import Entry
 
 
 def test_preserves_complete_global_envelopes(registry_root: Path) -> None:

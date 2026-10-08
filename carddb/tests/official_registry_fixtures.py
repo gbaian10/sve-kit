@@ -8,13 +8,13 @@ from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 
-from sve_carddb.registry.snapshot import (
+from sve_carddb.domains.registry.snapshot import (
     RegistryRecord,
     RegistrySnapshot,
     _data,
     load_registry,
 )
-from sve_carddb.registry.storage import Entry, RegistryFiles
+from sve_carddb.domains.registry.storage import Entry, RegistryFiles
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

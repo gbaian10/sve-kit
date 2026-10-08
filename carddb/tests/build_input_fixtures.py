@@ -3,16 +3,17 @@
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.domains.products.evidence import resolve_evidence
+from sve_carddb.domains.products.importer import product_source_uses
+from sve_carddb.domains.registry.inputs import Card
+from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
+from sve_carddb.domains.registry.storage import read_yaml
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
-from sve_carddb.ingest.archive.manifest import Kind, Region
+from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import seal_batch
 from sve_carddb.parse.pages import official_en
 from sve_carddb.parse.pages.official_jp import card_url
-from sve_carddb.products.evidence import resolve_evidence
-from sve_carddb.products.importer import product_source_uses
-from sve_carddb.registry.inputs import Card
-from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
-from sve_carddb.registry.storage import read_yaml
 
 from .identity_evidence_fixtures import MemoryEvidence
 from .product_fixtures import first_record, install, obj
@@ -22,10 +23,10 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.core.provenance import SourceUse
-    from sve_carddb.products.loader import ProductSnapshot
-    from sve_carddb.registry.preview import PreviewPlan
-    from sve_carddb.registry.records import Region as CardRegion
-    from sve_carddb.registry.review import Inputs
+    from sve_carddb.core.regions import Region as CardRegion
+    from sve_carddb.domains.products.loader import ProductSnapshot
+    from sve_carddb.domains.registry.preview import PreviewPlan
+    from sve_carddb.domains.registry.review import Inputs
 
 NAME = "products/family/BP02/001.yaml"
 

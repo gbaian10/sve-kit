@@ -3,18 +3,19 @@
 from typing import TYPE_CHECKING
 
 from sve_carddb.core.provenance import ArchivePin, BuildContext, Source
-from sve_carddb.registry.inputs import digest
-from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
-from sve_carddb.registry.records import CardData, PrintingData, Region
+from sve_carddb.domains.registry.inputs import digest
+from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
+from sve_carddb.domains.registry.records import CardData, PrintingData
 
 from .build_db_fixtures import rows
 from .identity_evidence_fixtures import MemoryEvidence
 
 if TYPE_CHECKING:
     from sve_carddb.build.database import Database
-    from sve_carddb.registry.inputs import Card
-    from sve_carddb.registry.preview import PreviewPlan
-    from sve_carddb.registry.review import Inputs
+    from sve_carddb.core.regions import Region
+    from sve_carddb.domains.registry.inputs import Card
+    from sve_carddb.domains.registry.preview import PreviewPlan
+    from sve_carddb.domains.registry.review import Inputs
 
 REVISION = "a" * 40
 BUILD = BuildContext.from_inputs(REVISION, {"synthetic": True})

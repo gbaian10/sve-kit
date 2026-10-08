@@ -9,13 +9,13 @@ from sve_carddb.build import create_database
 from sve_carddb.build.source_rows import insert_raw_sources, source_values
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.provenance import SourceUse, input_record
-from sve_carddb.products import (
+from sve_carddb.domains.products import (
     import_product_preview,
     load_products,
     populate_product_preview,
 )
-from sve_carddb.registry.preview import plan_preview
-from sve_carddb.registry.records import AllocationData, PrintingData
+from sve_carddb.domains.registry.preview import plan_preview
+from sve_carddb.domains.registry.records import AllocationData, PrintingData
 
 from .build_input_fixtures import (
     expected_uses,
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.core.provenance import BuildContext, InputRecord
-    from sve_carddb.registry.review import Inputs
+    from sve_carddb.domains.registry.review import Inputs
 
     from .identity_evidence_fixtures import MemoryEvidence
 

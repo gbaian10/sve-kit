@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.products import Language
-from sve_carddb.registry.storage import yaml_parser
+from sve_carddb.domains.products import Language
+from sve_carddb.domains.registry.storage import yaml_parser
 
 from .fixture_files import FrozenFiles, freeze_files, restore_files
 

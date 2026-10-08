@@ -15,18 +15,17 @@ from dataclasses import dataclass, replace
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.paths import UnsafePathError
 from sve_carddb.ingest.archive.manifest import (
     Kind,
     Manifest,
     Outcome,
-    Region,
     RequestResult,
     Resource,
     utcnow,
 )
 from sve_carddb.ingest.archive.store import (
     CorruptDataError,
-    UnsafePathError,
     compress,
     decompress,
     resolve_within,
@@ -35,6 +34,8 @@ from sve_carddb.ingest.archive.store import (
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
     from pathlib import Path, PurePosixPath
+
+    from sve_carddb.core.regions import SourceRegion as Region
 
 _TEMP_MARKER = ".tmp-"
 

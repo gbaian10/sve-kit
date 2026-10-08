@@ -6,10 +6,13 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.catalog.importer import catalog_configuration
-from sve_carddb.catalog.models import Alias, Catalog
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.text_observations import populate_text_preview, text_configuration
+from sve_carddb.domains.catalog.importer import catalog_configuration
+from sve_carddb.domains.catalog.models import Alias, Catalog
+from sve_carddb.domains.text_observations import (
+    populate_text_preview,
+    text_configuration,
+)
 
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared synthetic inputs
 from .text_observation_fixtures import LANGUAGES, make_case
@@ -17,7 +20,7 @@ from .text_observation_fixtures import LANGUAGES, make_case
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.registry.review import Inputs
+    from sve_carddb.domains.registry.review import Inputs
 
 
 @pytest.mark.parametrize("mode", ["catalog", "broken", "no_catalog"])

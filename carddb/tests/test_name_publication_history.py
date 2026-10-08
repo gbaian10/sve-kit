@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.digital_name_policies.owners import publication_owners
-from sve_carddb.text_observations import import_text_observations
-from sve_carddb.text_observations.models import candidate_revision_id
+from sve_carddb.domains.digital.name_policies.owners import publication_owners
+from sve_carddb.domains.text_observations import import_text_observations
+from sve_carddb.domains.text_observations.models import candidate_revision_id
 
 from .source_correction_fixtures import make_correction_case
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared synthetic fixture
@@ -14,7 +14,7 @@ from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.registry.review import Inputs
+    from sve_carddb.domains.registry.review import Inputs
 
 
 def test_raw_history_remains_eligible_after_effect_correction(

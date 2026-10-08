@@ -12,11 +12,12 @@ from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.ingest.archive.manifest import Kind, Region
+from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.domains.registry.storage import read_yaml
+from sve_carddb.domains.translations.sources import Sources
+from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import seal_batch
 from sve_carddb.parse.pages import official_en, official_jp
-from sve_carddb.registry.storage import read_yaml
-from sve_carddb.translations.sources import Sources
 from sve_carddb.workflows.offline import _populate_adoptions, _prepare_catalog
 
 from .adoption_fixtures import REPO, Case, commit, make_case, write
@@ -37,16 +38,16 @@ PARSERS = {
 RUNTIME = (
     "carddb/uv.lock",
     "carddb/pyproject.toml",
-    "carddb/src/sve_carddb/catalog/adoption_sources.py",
+    "carddb/src/sve_carddb/domains/catalog/adoption_sources.py",
     "carddb/src/sve_carddb/parse/html.py",
     "carddb/src/sve_carddb/ingest/http/validate.py",
     "carddb/src/sve_carddb/parse/pages/official_jp.py",
     "carddb/src/sve_carddb/parse/pages/official_en.py",
     "carddb/src/sve_carddb/parse/pages/extract_jp.py",
     "carddb/src/sve_carddb/parse/pages/extract_en.py",
-    "carddb/src/sve_carddb/registry/parser_adapters/official_jp.py",
-    "carddb/src/sve_carddb/registry/inputs.py",
-    "carddb/src/sve_carddb/registry/review.py",
+    "carddb/src/sve_carddb/domains/registry/parser_adapters/official_jp.py",
+    "carddb/src/sve_carddb/domains/registry/inputs.py",
+    "carddb/src/sve_carddb/domains/registry/review.py",
     "carddb/src/sve_carddb/core/json.py",
 )
 VOCABULARY = "catalog-adoptions/vocabulary/shared/001.yaml"

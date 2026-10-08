@@ -9,20 +9,20 @@ import pytest
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import canonical, digest
-from sve_carddb.products import load_products
-from sve_carddb.registry.preview import plan_preview
-from sve_carddb.registry.records import PrintingData
-from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.source_corrections.closure import correction_exclusions
-from sve_carddb.source_corrections.importer import verify_corrections
-from sve_carddb.source_corrections.plan import plan_applications
-from sve_carddb.source_corrections.projection import correction_references
-from sve_carddb.text_observations import (
+from sve_carddb.domains.products import load_products
+from sve_carddb.domains.registry.preview import plan_preview
+from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.registry.snapshot import load_registry
+from sve_carddb.domains.source_corrections.closure import correction_exclusions
+from sve_carddb.domains.source_corrections.importer import verify_corrections
+from sve_carddb.domains.source_corrections.plan import plan_applications
+from sve_carddb.domains.source_corrections.projection import correction_references
+from sve_carddb.domains.text_observations import (
     import_text_observations,
     plan_text_observations,
 )
-from sve_carddb.text_observations.importer import revision_id
-from sve_carddb.text_observations.plan import verify_plan
+from sve_carddb.domains.text_observations.importer import revision_id
+from sve_carddb.domains.text_observations.plan import verify_plan
 
 from .identity_evidence_fixtures import MemoryEvidence
 from .registry_snapshot_fixtures import edit_record
@@ -34,10 +34,11 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.core.provenance import Source
-    from sve_carddb.registry.records import CorrectionEvidence, Region
-    from sve_carddb.registry.review import Inputs
-    from sve_carddb.registry.storage import Entry
-    from sve_carddb.source_corrections.plan import Application
+    from sve_carddb.core.regions import Region
+    from sve_carddb.domains.registry.records import CorrectionEvidence
+    from sve_carddb.domains.registry.review import Inputs
+    from sve_carddb.domains.registry.storage import Entry
+    from sve_carddb.domains.source_corrections.plan import Application
 
     from .shared_case_fixtures import CorrectionCaseTemplate
 

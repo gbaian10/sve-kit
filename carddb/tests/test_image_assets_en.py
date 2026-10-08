@@ -9,6 +9,21 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
+from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.domains.registry.build import build
+from sve_carddb.domains.registry.inputs import Mapping
+from sve_carddb.domains.registry.parser_adapters.official_en import (
+    legacy_projection as legacy_en,
+)
+from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
+from sve_carddb.domains.registry.preview import (
+    FrozenEN,
+    FrozenJP,
+    FrozenRegions,
+    plan_preview,
+)
+from sve_carddb.domains.registry.review import InitDecisions, Inputs
+from sve_carddb.domains.registry.storage import plan_files, write_files
 from sve_carddb.image_assets import (
     ImageBuild,
     PreviewRoots,
@@ -20,21 +35,12 @@ from sve_carddb.image_assets import (
 from sve_carddb.image_crop_report import crop_report
 from sve_carddb.image_crops import load_image_crops
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
-from sve_carddb.ingest.archive.manifest import Kind, Region
+from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import ArchiveStore, Scope, seal_batch
 from sve_carddb.parse.pages import official_en
 from sve_carddb.parse.pages.extract_en import extract_card as extract_en
 from sve_carddb.parse.pages.extract_jp import extract_card
 from sve_carddb.parse.pages.official_jp import image_url
-from sve_carddb.registry.build import build
-from sve_carddb.registry.inputs import Mapping
-from sve_carddb.registry.parser_adapters.official_en import (
-    legacy_projection as legacy_en,
-)
-from sve_carddb.registry.parser_adapters.official_jp import legacy_projection
-from sve_carddb.registry.preview import FrozenEN, FrozenJP, FrozenRegions, plan_preview
-from sve_carddb.registry.review import InitDecisions, Inputs
-from sve_carddb.registry.storage import plan_files, write_files
 
 from .en_extract_fixtures import page
 from .image_crop_fixtures import install, record

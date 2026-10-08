@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
-from sve_carddb.catalog.adoption_models import Batch, SourceRef
-from sve_carddb.products.models import Evidence
-from sve_carddb.registry.transitions.models import Batch as TransitionBatch
+from sve_carddb.domains.catalog.adoption_models import Batch, SourceRef
+from sve_carddb.domains.products.models import Evidence
+from sve_carddb.domains.registry.transitions.models import Batch as TransitionBatch
 
 if TYPE_CHECKING:
     from sve_carddb.core.models import RecordData

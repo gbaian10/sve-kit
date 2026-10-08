@@ -8,21 +8,21 @@ from pydantic import JsonValue
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, canonical, object_value
-from sve_carddb.template_translations.current import (
+from sve_carddb.domains.translations.inputs import load_glossary
+from sve_carddb.domains.translations.templates.build import populate
+from sve_carddb.domains.translations.templates.loader import (
     from_files,
     shard,
     validate_foreign,
     validate_templates,
 )
-from sve_carddb.template_translations.current_build import populate
-from sve_carddb.template_translations.current_models import (
+from sve_carddb.domains.translations.templates.records import (
     Candidate,
     CandidateRecord,
     DefinitionRecord,
 )
-from sve_carddb.template_translations.current_render import render
-from sve_carddb.template_translations.current_write import compose
-from sve_carddb.translations.loader import load_glossary
+from sve_carddb.domains.translations.templates.render import render
+from sve_carddb.domains.translations.templates.writer import compose
 
 from .adoption_fixtures import commit
 from .build_db_fixtures import seed

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.source_corrections import FrozenImages
+from sve_carddb.domains.source_corrections import FrozenImages
 
 from .fixture_files import FrozenFiles, freeze_files, restore_files
 from .source_correction_fixtures import CorrectionCase, make_correction_case
@@ -15,10 +15,10 @@ from .text_observation_fixtures import Case, MemoryTexts, make_case
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.products.loader import ProductSnapshot
-    from sve_carddb.registry.preview import PreviewPlan
-    from sve_carddb.registry.records import Region
-    from sve_carddb.text_observations import TextCard, TextPlan, Vocabulary
+    from sve_carddb.core.regions import Region
+    from sve_carddb.domains.products.loader import ProductSnapshot
+    from sve_carddb.domains.registry.preview import PreviewPlan
+    from sve_carddb.domains.text_observations import TextCard, TextPlan, Vocabulary
 
 
 @dataclass(frozen=True)

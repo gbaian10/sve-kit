@@ -16,20 +16,16 @@ from typing import TYPE_CHECKING, Literal, cast
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from sve_carddb.core.json import canonical, digest, parse
+from sve_carddb.core.paths import UnsafePathError
+from sve_carddb.core.regions import SourceRegion as Region
 from sve_carddb.ingest.archive.manifest import (
     READABLE_SCHEMA_VERSIONS,
     ExclusiveLock,
     Kind,
     Manifest,
-    Region,
     Resource,
 )
-from sve_carddb.ingest.archive.store import (
-    CorruptDataError,
-    UnsafePathError,
-    decompress,
-    resolve_within,
-)
+from sve_carddb.ingest.archive.store import CorruptDataError, decompress, resolve_within
 from sve_carddb.ingest.http.writer import LocalState
 
 if TYPE_CHECKING:

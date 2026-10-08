@@ -8,12 +8,12 @@ import pytest
 from pydantic import JsonValue, ValidationError
 from ruamel.yaml.error import YAMLError
 
-from sve_carddb.products import load_products
-from sve_carddb.products.models import FamilyRecord
-from sve_carddb.registry.inputs import digest
-from sve_carddb.registry.records import PrintingData
-from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.registry.storage import read_yaml
+from sve_carddb.domains.products import load_products
+from sve_carddb.domains.products.models import FamilyRecord
+from sve_carddb.domains.registry.inputs import digest
+from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.registry.snapshot import load_registry
+from sve_carddb.domains.registry.storage import read_yaml
 
 from .product_fixtures import (
     envelope,
@@ -32,7 +32,7 @@ from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.products.loader import ProductSnapshot
+    from sve_carddb.domains.products.loader import ProductSnapshot
 
 NAME = "products/family/BP02/001.yaml"
 
@@ -416,7 +416,7 @@ def test_valid_date_precisions_preserve_original_text(
     obj(record["data"]).update(released_on=date, date_precision=precision, date_raw=raw)
     install(product_root, "products/product/unassigned/001.yaml", envelope([record]))
     loaded = load(product_root).records['["product","example"]']
-    from sve_carddb.products.models import ProductRecord  # ruff: ignore[import-outside-top-level] -- narrow union assertion
+    from sve_carddb.domains.products.models import ProductRecord  # ruff: ignore[import-outside-top-level] -- narrow union assertion
 
     assert isinstance(loaded, ProductRecord)
     assert loaded.data.released_on == date

@@ -8,17 +8,17 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb import cli
-from sve_carddb.ingest.archive.manifest import Region
+from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.domains.registry.inputs import Card
+from sve_carddb.domains.registry.parser_adapters.official_en import (
+    legacy_projection as legacy_en_projection,
+)
+from sve_carddb.domains.registry.review import observation
 from sve_carddb.ingest.http.validate import ValidationError
 from sve_carddb.ingest.http.writer import LocalState
 from sve_carddb.parse.html import MissingElementError, parse, require_one
 from sve_carddb.parse.pages import extract_en as official_en
 from sve_carddb.parse.pages import official_en as en
-from sve_carddb.registry.inputs import Card
-from sve_carddb.registry.parser_adapters.official_en import (
-    legacy_projection as legacy_en_projection,
-)
-from sve_carddb.registry.review import observation
 from sve_carddb.workflows import extract as jsonl
 
 from .en_extract_fixtures import face as make_face

@@ -14,19 +14,20 @@ from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, compile_build
 from sve_carddb.cli import app
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.core.provenance import InputRecord
-from sve_carddb.ingest.archive.manifest import Kind, Region
+from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.domains.registry.build import build as build_identity
+from sve_carddb.domains.registry.inputs import Card, Mapping
+from sve_carddb.domains.registry.parser_adapters.official_en import (
+    legacy_projection as legacy_en_projection,
+)
+from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
+from sve_carddb.domains.registry.review import InitDecisions
+from sve_carddb.domains.registry.review import Inputs as IdentityInputs
+from sve_carddb.domains.registry.storage import Index, plan_files, write_files
+from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import Scope, seal_batch
 from sve_carddb.parse.pages import extract_en, extract_jp, official_en, official_jp
 from sve_carddb.parse.pages.official_jp import card_url
-from sve_carddb.registry.build import build as build_identity
-from sve_carddb.registry.inputs import Card, Mapping
-from sve_carddb.registry.parser_adapters.official_en import (
-    legacy_projection as legacy_en_projection,
-)
-from sve_carddb.registry.parser_adapters.official_jp import legacy_projection
-from sve_carddb.registry.review import InitDecisions
-from sve_carddb.registry.review import Inputs as IdentityInputs
-from sve_carddb.registry.storage import Index, plan_files, write_files
 from sve_carddb.workflows import offline
 
 from .adoption_fixtures import REPO, commit, write
@@ -38,7 +39,7 @@ from .test_source_archive import _put, _resource, _store
 from .translation_fixtures import choice, envelope, term
 from .translation_fixtures import write as write_translations
 
-CODE_PATH = "carddb/src/sve_carddb/translations/sources.py"
+CODE_PATH = "carddb/src/sve_carddb/domains/translations/sources.py"
 RUNTIME = (CODE_PATH,)
 
 

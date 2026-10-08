@@ -8,25 +8,30 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.domains.products import load_product_identities, load_products
+from sve_carddb.domains.products.official import PARSER, parse_products
+from sve_carddb.domains.products.plan import plan_official_products
+from sve_carddb.domains.registry.build import build
+from sve_carddb.domains.registry.inputs import Mapping as CardMapping
+from sve_carddb.domains.registry.parser_adapters.official_en import legacy_projection
+from sve_carddb.domains.registry.preview import FrozenEN, plan_preview
+from sve_carddb.domains.registry.records import (
+    CorrectionData,
+    CorrectionEvidence,
+    PrintingData,
+)
+from sve_carddb.domains.registry.review import Correction, InitDecisions, Inputs
+from sve_carddb.domains.registry.storage import plan_files, write_files
+from sve_carddb.domains.source_corrections import FrozenImages
+from sve_carddb.domains.source_corrections.images import evidence_url
+from sve_carddb.domains.text_observations import FrozenTexts, plan_text_observations
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
-from sve_carddb.ingest.archive.manifest import Kind, Manifest, Region
+from sve_carddb.ingest.archive.manifest import Kind, Manifest
 from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
 from sve_carddb.parse.html import MissingElementError
 from sve_carddb.parse.pages.extract_en import extract_card
 from sve_carddb.parse.pages.official_en import card_url
-from sve_carddb.products import load_product_identities, load_products
-from sve_carddb.products.official import PARSER, parse_products
-from sve_carddb.products.plan import plan_official_products
-from sve_carddb.registry.build import build
-from sve_carddb.registry.inputs import Mapping as CardMapping
-from sve_carddb.registry.parser_adapters.official_en import legacy_projection
-from sve_carddb.registry.preview import FrozenEN, plan_preview
-from sve_carddb.registry.records import CorrectionData, CorrectionEvidence, PrintingData
-from sve_carddb.registry.review import Correction, InitDecisions, Inputs
-from sve_carddb.registry.storage import plan_files, write_files
-from sve_carddb.source_corrections import FrozenImages
-from sve_carddb.source_corrections.images import evidence_url
-from sve_carddb.text_observations import FrozenTexts, plan_text_observations
 from sve_carddb.workflows.diagnostics import acceptance_report, review_queue
 
 from .en_extract_fixtures import page
@@ -47,12 +52,12 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
+    from sve_carddb.core.regions import Region as RegistryRegion
+    from sve_carddb.domains.products.plan import OfficialProducts
+    from sve_carddb.domains.registry.preview import PreviewPlan
+    from sve_carddb.domains.registry.preview.evidence import CardEvidence
+    from sve_carddb.domains.text_observations import TextPlan
     from sve_carddb.ingest.archive.source_archive import ArchiveStore
-    from sve_carddb.products.plan import OfficialProducts
-    from sve_carddb.registry.preview import PreviewPlan
-    from sve_carddb.registry.preview.evidence import CardEvidence
-    from sve_carddb.registry.records import Region as RegistryRegion
-    from sve_carddb.text_observations import TextPlan
 
 NUMBER = "SYN-Ⓢ01aEN"
 

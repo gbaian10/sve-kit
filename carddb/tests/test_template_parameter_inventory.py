@@ -7,18 +7,22 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.core.json import object_value
+from sve_carddb.domains.translations.parameters import inventory
+from sve_carddb.domains.translations.parameters.inventory import (
+    Candidates,
+    build,
+    summary,
+)
+from sve_carddb.domains.translations.parameters.references import References
+from sve_carddb.domains.translations.parameters.rules import LEGACY_IDS
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
-from sve_carddb.template_parameter_rules.models import LEGACY_IDS
-from sve_carddb.template_parameters import inventory
-from sve_carddb.template_parameters.inventory import Candidates, build, summary
-from sve_carddb.template_parameters.references import References
 
 from .template_source_fixtures import template_case as template_case  # ruff: ignore[useless-import-alias] -- reusable immutable offline Git/archive fixture
 
 if TYPE_CHECKING:
-    from sve_carddb.template_parameters.inventory import Field
-    from sve_carddb.template_parameters.spans import Located
-    from sve_carddb.template_sources.normalizer import Part
+    from sve_carddb.domains.translations.parameters.inventory import Field
+    from sve_carddb.domains.translations.parameters.spans import Located
+    from sve_carddb.domains.translations.source_inventory.normalizer import Part
 
     from .template_source_fixtures import Case
 

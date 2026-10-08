@@ -2,7 +2,10 @@
 
 import pytest
 
-from sve_carddb.translations.counterparts import NameCandidate, first_counterpart
+from sve_carddb.domains.translations.names.counterparts import (
+    NameCandidate,
+    first_counterpart,
+)
 
 
 def candidate(text: str, origin: str = "machine") -> NameCandidate:

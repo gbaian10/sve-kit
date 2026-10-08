@@ -4,13 +4,17 @@ from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import digest
-from sve_carddb.ingest.archive.manifest import Region as SourceRegion
+from sve_carddb.core.regions import SourceRegion
+from sve_carddb.domains.registry.records import CorrectionData
+from sve_carddb.domains.registry.review import Correction
+from sve_carddb.domains.source_corrections import FrozenImages
+from sve_carddb.domains.source_corrections.images import evidence_url
+from sve_carddb.domains.text_observations import (
+    Binding,
+    Vocabulary,
+    plan_text_observations,
+)
 from sve_carddb.ingest.archive.source_archive import seal_batch
-from sve_carddb.registry.records import CorrectionData
-from sve_carddb.registry.review import Correction
-from sve_carddb.source_corrections import FrozenImages
-from sve_carddb.source_corrections.images import evidence_url
-from sve_carddb.text_observations import Binding, Vocabulary, plan_text_observations
 
 from .test_source_archive import _put, _resource, _store
 from .text_observation_fixtures import make_case
@@ -18,8 +22,8 @@ from .text_observation_fixtures import make_case
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.registry.records import Region
-    from sve_carddb.registry.review import Inputs
+    from sve_carddb.core.regions import Region
+    from sve_carddb.domains.registry.review import Inputs
 
     from .text_observation_fixtures import Case
 

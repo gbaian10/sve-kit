@@ -2,15 +2,15 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.translations.sources import Sources
+from sve_carddb.domains.translations.sources import Sources
 from sve_carddb.workflows.offline import _populate_adoptions, _prepare_catalog
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build import Database
-    from sve_carddb.catalog.current import Prepared
     from sve_carddb.core.provenance import InputRecord
+    from sve_carddb.domains.catalog.loader import Prepared
 
     from .adoption_fixtures import Case
 

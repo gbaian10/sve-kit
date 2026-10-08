@@ -11,8 +11,8 @@ from pydantic import Field, field_validator, model_validator
 from sve_carddb.core.json import canonical, digest, parse
 from sve_carddb.core.models import Hash, RecordData, Text, UInt
 from sve_carddb.core.provenance import FilePin, Revision
+from sve_carddb.core.regions import Region
 from sve_carddb.ingest.urls import canonicalize
-from sve_carddb.registry.records import Region
 
 _HOSTS = frozenset({"shadowverse-evolve.com", "en.shadowverse-evolve.com"})
 _REDIRECTS = frozenset({301, 302, 303, 307, 308})

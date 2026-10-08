@@ -8,15 +8,19 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.registry.records import AllocationData, PrintingData, RelatedData
-from sve_carddb.text_observations import (
+from sve_carddb.domains.registry.records import (
+    AllocationData,
+    PrintingData,
+    RelatedData,
+)
+from sve_carddb.domains.text_observations import (
     diagnostic_exclusion_report,
     import_text_observations,
     importer,
     plan_text_observations,
     populate_text_preview,
 )
-from sve_carddb.text_observations.exclusions import _close
+from sve_carddb.domains.text_observations.exclusions import _close
 
 from .registry_preview_fixtures import REVISION
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared synthetic fixture
@@ -26,7 +30,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build import Value
-    from sve_carddb.registry.review import Inputs
+    from sve_carddb.domains.registry.review import Inputs
 
     from .shared_case_fixtures import TextCaseTemplate
 

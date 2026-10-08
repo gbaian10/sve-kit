@@ -10,6 +10,8 @@ from typer.testing import CliRunner
 from sve_carddb.cli import app
 from sve_carddb.core.json import object_value, parse
 from sve_carddb.core.provenance import InputRecord
+from sve_carddb.domains.products import OfficialProducts, ProductIdentities
+from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.image_assets import (
     PARSERS,
     ImageBuild,
@@ -21,8 +23,6 @@ from sve_carddb.image_crops import FILE, load_image_crops
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.parse.pages import official_en
 from sve_carddb.parse.pages.official_jp import image_url
-from sve_carddb.products import OfficialProducts, ProductIdentities
-from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.preview import Roots, write_preview
@@ -40,11 +40,11 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.build import Database
-    from sve_carddb.card_extras import CardPage
+    from sve_carddb.core.regions import Region
+    from sve_carddb.domains.card_extras import CardPage
+    from sve_carddb.domains.registry.preview import PreviewPlan
     from sve_carddb.image_checks import ImageChecks
     from sve_carddb.image_crops import ImageCrops
-    from sve_carddb.registry.preview import PreviewPlan
-    from sve_carddb.registry.records import Region
     from sve_carddb.workflows.offline import Inputs
 
     from .text_observation_fixtures import Case

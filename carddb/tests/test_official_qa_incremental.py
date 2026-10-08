@@ -9,9 +9,9 @@ from typing import TYPE_CHECKING, cast
 import httpx
 import pytest
 
-from sve_carddb.card_extras.generation import root_key
-from sve_carddb.card_extras.incremental import QACrawler
-from sve_carddb.card_extras.qa_archive import FrozenOfficialExtras
+from sve_carddb.domains.card_extras.generation import root_key
+from sve_carddb.domains.card_extras.incremental import QACrawler
+from sve_carddb.domains.card_extras.qa_archive import FrozenOfficialExtras
 from sve_carddb.ingest.archive.manifest import (
     ExclusiveLock,
     GenerationStatus,
@@ -43,8 +43,8 @@ from .test_card_extras_archive import RAW
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.card_extras.models import QAPage
-    from sve_carddb.registry.records import Region
+    from sve_carddb.core.regions import Region
+    from sve_carddb.domains.card_extras.models import QAPage
 
 
 def store_at(root: Path) -> ArchiveStore:

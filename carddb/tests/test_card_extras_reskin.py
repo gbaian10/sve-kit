@@ -7,10 +7,10 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.card_extras import applicable_reskin_regions
-from sve_carddb.registry.inputs import Mapping
-from sve_carddb.registry.review import InitDecisions, Inputs
-from sve_carddb.text_observations import populate_text_observations
+from sve_carddb.domains.card_extras import applicable_reskin_regions
+from sve_carddb.domains.registry.inputs import Mapping
+from sve_carddb.domains.registry.review import InitDecisions, Inputs
+from sve_carddb.domains.text_observations import populate_text_observations
 
 from .test_registry import card
 from .text_observation_fixtures import make_case

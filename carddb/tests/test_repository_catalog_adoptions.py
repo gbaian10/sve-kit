@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from sve_carddb.catalog.adoption_loader import load_adoptions
+from sve_carddb.domains.catalog.adoption_loader import load_adoptions
 
 
 def test_repository_catalog_adoptions_load_without_private_sources() -> None:

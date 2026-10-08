@@ -6,19 +6,19 @@ from typing import TYPE_CHECKING
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import digest
-from sve_carddb.ingest.archive.manifest import Region
-from sve_carddb.ingest.archive.source_archive import seal_batch
-from sve_carddb.registry.records import CorrectionData
-from sve_carddb.registry.review import Correction
-from sve_carddb.source_corrections import FrozenImages
-from sve_carddb.source_corrections.images import evidence_url
-from sve_carddb.source_corrections.projection import correction_references
-from sve_carddb.text_observations import (
+from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.domains.registry.records import CorrectionData
+from sve_carddb.domains.registry.review import Correction
+from sve_carddb.domains.source_corrections import FrozenImages
+from sve_carddb.domains.source_corrections.images import evidence_url
+from sve_carddb.domains.source_corrections.projection import correction_references
+from sve_carddb.domains.text_observations import (
     Binding,
     Vocabulary,
     import_text_observations,
     plan_text_observations,
 )
+from sve_carddb.ingest.archive.source_archive import seal_batch
 
 from .test_registry import card
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared synthetic fixture
@@ -28,7 +28,7 @@ from .text_observation_fixtures import make_case
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.registry.review import Inputs
+    from sve_carddb.domains.registry.review import Inputs
 
 
 def test_four_synthetic_english_corrections_have_distinct_evidence_and_rule_results(

@@ -6,10 +6,15 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid5
 
-from sve_carddb.registry.inputs import canonical
-from sve_carddb.registry.records import PrintingData
-from sve_carddb.registry.storage import Entry, plan_files, read_base_files, write_files
-from sve_carddb.registry.transitions.routing import RouteFact
+from sve_carddb.domains.registry.inputs import canonical
+from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.registry.storage import (
+    Entry,
+    plan_files,
+    read_base_files,
+    write_files,
+)
+from sve_carddb.domains.registry.transitions.routing import RouteFact
 
 from .identity_transition_fixtures import (
     FA,
@@ -32,8 +37,8 @@ from .identity_transition_fixtures import (
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.registry.storage import RegistryFiles
-    from sve_carddb.registry.transitions.models import RegistryBasis, Transition
+    from sve_carddb.domains.registry.storage import RegistryFiles
+    from sve_carddb.domains.registry.transitions.models import RegistryBasis, Transition
 
 R = "p:" + "3" * 32
 S = "p:" + "4" * 32

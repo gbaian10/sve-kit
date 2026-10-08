@@ -6,6 +6,7 @@ from pathlib import Path, PurePosixPath
 
 import pytest
 
+from sve_carddb.core.regions import SourceRegion as Region
 from sve_carddb.ingest.archive.manifest import (
     AlreadyRunningError,
     ExclusiveLock,
@@ -13,7 +14,6 @@ from sve_carddb.ingest.archive.manifest import (
     Manifest,
     ManifestError,
     Outcome,
-    Region,
     RequestResult,
     RequestStart,
     Resource,

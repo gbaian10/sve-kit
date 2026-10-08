@@ -9,14 +9,14 @@ from pydantic import JsonValue
 
 from sve_carddb.build.database import open_database
 from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, compile_build
-from sve_carddb.catalog import adoption_importer
-from sve_carddb.catalog.models import Catalog
-from sve_carddb.catalog.projection import CatalogProjection
 from sve_carddb.core.json import array, digest, object_value
-from sve_carddb.products import Language
-from sve_carddb.text_observations import Binding, Vocabulary
-from sve_carddb.translations.importer import Inputs as TranslationInputs
-from sve_carddb.translations.importer import populate_glossary
+from sve_carddb.domains.catalog import adoption_importer
+from sve_carddb.domains.catalog.models import Catalog
+from sve_carddb.domains.catalog.projection import CatalogProjection
+from sve_carddb.domains.products import Language
+from sve_carddb.domains.text_observations import Binding, Vocabulary
+from sve_carddb.domains.translations.glossary.importer import populate_glossary
+from sve_carddb.domains.translations.inputs import Inputs as TranslationInputs
 from sve_carddb.workflows import offline
 from sve_carddb.workflows.offline_names import composer
 

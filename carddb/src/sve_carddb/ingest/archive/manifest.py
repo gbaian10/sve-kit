@@ -15,6 +15,7 @@ from enum import StrEnum
 from pathlib import Path, PurePosixPath
 from typing import IO, TYPE_CHECKING, Self
 
+from sve_carddb.core.regions import SourceRegion as Region
 from sve_carddb.ingest.archive.manifest_schema_v2 import SCHEMA_SQL as _SCHEMA_V2
 
 if TYPE_CHECKING:
@@ -137,14 +138,6 @@ class SourceImportReceipt:
     index_bytes: bytes
     content: Content
     registered_at: datetime
-
-
-class Region(StrEnum):
-    JP = "jp"
-    EN = "en"
-    # The digital games' official card lists, kept for mapping SVE cards to digital ones.
-    SV1 = "sv1"
-    SVWB = "svwb"
 
 
 class Kind(StrEnum):

@@ -7,13 +7,8 @@ from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
 from urllib.parse import unquote, urlsplit
 
-from sve_carddb.ingest.archive.manifest import (
-    Kind,
-    Manifest,
-    Outcome,
-    Region,
-    RequestResult,
-)
+from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.ingest.archive.manifest import Kind, Manifest, Outcome, RequestResult
 from sve_carddb.ingest.http.client import Client, FetchError, Request, StopCrawlError
 from sve_carddb.ingest.http.validate import ValidationError, require_media_type
 from sve_carddb.ingest.http.writer import Fetched, LocalState, Writer, sha256

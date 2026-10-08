@@ -7,19 +7,19 @@ from pydantic import JsonValue
 
 from sve_carddb.build.source_rows import source_values
 from sve_carddb.core.provenance import uses_sorted
-from sve_carddb.products.plan import plan_official_products
-from sve_carddb.registry.records import CorrectionData, PrintingData
-from sve_carddb.text_observations.composition import text_preview_uses
-from sve_carddb.text_observations.plan import verify_plan
+from sve_carddb.domains.products.plan import plan_official_products
+from sve_carddb.domains.registry.records import CorrectionData, PrintingData
+from sve_carddb.domains.text_observations.composition import text_preview_uses
+from sve_carddb.domains.text_observations.plan import verify_plan
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from pathlib import Path
 
-    from sve_carddb.products.plan import OfficialProducts
-    from sve_carddb.registry.preview.plan import PreviewPlan
-    from sve_carddb.text_observations.models import FaceObservation
-    from sve_carddb.text_observations.plan import TextPlan
+    from sve_carddb.domains.products.plan import OfficialProducts
+    from sve_carddb.domains.registry.preview.plan import PreviewPlan
+    from sve_carddb.domains.text_observations.models import FaceObservation
+    from sve_carddb.domains.text_observations.plan import TextPlan
 
 _ACTIONS = {
     "exact": "retain_historic_identity_separate_release_gates",

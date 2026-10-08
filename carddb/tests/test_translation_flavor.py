@@ -8,8 +8,8 @@ from pydantic import JsonValue
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, canonical, digest, object_value
-from sve_carddb.text_observations import populate_text_preview
-from sve_carddb.translations.flavor import Entry, apply, load
+from sve_carddb.domains.text_observations import populate_text_preview
+from sve_carddb.domains.translations.flavor import Entry, apply, load
 from sve_carddb.workflows import offline
 from sve_carddb.workflows.offline import build
 
@@ -24,8 +24,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build import Database
-    from sve_carddb.card_extras import CardPage
     from sve_carddb.core.provenance import InputRecord
+    from sve_carddb.domains.card_extras import CardPage
     from sve_carddb.workflows.offline import Inputs
 
     from .text_observation_fixtures import Case

@@ -5,11 +5,15 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import canonical
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.products import Language, load_products, populate_product_preview
-from sve_carddb.registry.build import build
-from sve_carddb.registry.preview import plan_preview
-from sve_carddb.registry.storage import plan_files, write_files
-from sve_carddb.text_observations import (
+from sve_carddb.domains.products import (
+    Language,
+    load_products,
+    populate_product_preview,
+)
+from sve_carddb.domains.registry.build import build
+from sve_carddb.domains.registry.preview import plan_preview
+from sve_carddb.domains.registry.storage import plan_files, write_files
+from sve_carddb.domains.text_observations import (
     Binding,
     FaceContent,
     TextCard,
@@ -26,12 +30,12 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build import Database
-    from sve_carddb.products.loader import ProductSnapshot
-    from sve_carddb.registry.inputs import Card
-    from sve_carddb.registry.preview import PreviewPlan
-    from sve_carddb.registry.records import Region
-    from sve_carddb.registry.review import Inputs
-    from sve_carddb.text_observations import TextPlan
+    from sve_carddb.core.regions import Region
+    from sve_carddb.domains.products.loader import ProductSnapshot
+    from sve_carddb.domains.registry.inputs import Card
+    from sve_carddb.domains.registry.preview import PreviewPlan
+    from sve_carddb.domains.registry.review import Inputs
+    from sve_carddb.domains.text_observations import TextPlan
 
 LANGUAGES = (
     Language(code="ja", fallback_order=(), display_name="Japanese"),

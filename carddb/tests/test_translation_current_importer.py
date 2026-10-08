@@ -10,9 +10,12 @@ from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.provenance import BuildContext, SourceUse
-from sve_carddb.registry.storage import read_yaml
-from sve_carddb.translations.importer import Inputs, import_glossary, populate_glossary
-from sve_carddb.translations.loader import load_glossary
+from sve_carddb.domains.registry.storage import read_yaml
+from sve_carddb.domains.translations.glossary.importer import (
+    import_glossary,
+    populate_glossary,
+)
+from sve_carddb.domains.translations.inputs import Inputs, load_glossary
 
 from .adoption_fixtures import commit
 from .build_db_fixtures import seed

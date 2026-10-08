@@ -5,24 +5,26 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.core.json import digest
-from sve_carddb.parse.pages import official_en, official_jp
-from sve_carddb.products.identity_models import (
+from sve_carddb.domains.products.identity_models import (
     ExpansionLink,
     ProductLink,
     SourceBlock,
     expansion,
 )
-from sve_carddb.products.official import date_fields
-from sve_carddb.products.official import parse_products as parse_verified_products
+from sve_carddb.domains.products.official import date_fields
+from sve_carddb.domains.products.official import (
+    parse_products as parse_verified_products,
+)
+from sve_carddb.parse.pages import official_en, official_jp
 
 from .product_identity_fixtures import IdentityFixture, html
 from .product_identity_fixtures import identity_fixture as identity_fixture  # ruff: ignore[useless-import-alias] -- shared fixture
 
 if TYPE_CHECKING:
     from sve_carddb.core.provenance import Source
-    from sve_carddb.products.models import Precision
-    from sve_carddb.products.official import ProductPage
-    from sve_carddb.registry.records import Region
+    from sve_carddb.core.regions import Region
+    from sve_carddb.domains.products.models import Precision
+    from sve_carddb.domains.products.official import ProductPage
 
 
 def parse_products(raw: bytes, source: Source, region: Region) -> ProductPage:

@@ -10,11 +10,15 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.catalog.adoption_models import RawMapping, ReviewContext, SourceRef
-from sve_carddb.catalog.adoption_sources import AdoptionSources
-from sve_carddb.catalog.adoption_validation import term as validate_term
-from sve_carddb.catalog.current_models import VocabularyRecord
 from sve_carddb.core.json import canonical, digest, object_value
+from sve_carddb.domains.catalog.adoption_models import (
+    RawMapping,
+    ReviewContext,
+    SourceRef,
+)
+from sve_carddb.domains.catalog.adoption_sources import AdoptionSources
+from sve_carddb.domains.catalog.adoption_validation import term as validate_term
+from sve_carddb.domains.catalog.records import VocabularyRecord
 
 from .catalog_vocabulary_fixtures import save, vocabulary_record
 from .current_catalog_fixtures import prepare_case
@@ -26,8 +30,8 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.build import CompiledSchema
-    from sve_carddb.catalog.projection import CatalogProjection
-    from sve_carddb.registry.records import Region
+    from sve_carddb.core.regions import Region
+    from sve_carddb.domains.catalog.projection import CatalogProjection
 
     from .trait_adoption_fixtures import TraitCase
 

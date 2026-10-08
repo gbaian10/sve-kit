@@ -63,7 +63,7 @@ def test_read_api_import_does_not_load_build_or_publish(tmp_path: Path) -> None:
         + """
 for name in sys.modules:
     assert not any(name == prefix or name.startswith(prefix + '.') for prefix in (
-        'sve_carddb.build', 'sve_carddb.snapshot.export',
+        'sve_carddb.build', 'sve_carddb.domains', 'sve_carddb.snapshot.export',
         'sve_carddb.snapshot.project', 'sve_carddb.snapshot.preview',
         'sve_carddb.workflows', 'sve_carddb.r2_upload',
     )), name
@@ -79,6 +79,42 @@ for name in sys.modules:
             str(SOURCE_ROOT),
             "sve_carddb.snapshot.read_api",
         ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize(
+    "module", [name for name in MODULES if name.startswith("sve_carddb.parse.")]
+)
+def test_parser_import_does_not_load_archive_or_posix_lock(
+    module: str, tmp_path: Path
+) -> None:
+    isolated = (
+        IMPORT.replace(
+            "importlib.import_module(sys.argv[2])",
+            """
+class WithoutPosixLock:
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname == 'fcntl':
+            raise ModuleNotFoundError('fcntl is unavailable on this platform')
+
+sys.meta_path.insert(0, WithoutPosixLock())
+importlib.import_module(sys.argv[2])
+""",
+        )
+        + """
+assert 'fcntl' not in sys.modules
+assert not any(name.startswith('sve_carddb.ingest.archive') for name in sys.modules)
+assert not any(name.startswith('sve_carddb.domains') for name in sys.modules)
+"""
+    )
+    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter without a shell
+        [sys.executable, "-I", "-B", "-c", isolated, str(SOURCE_ROOT), module],
         cwd=tmp_path,
         capture_output=True,
         text=True,

@@ -8,15 +8,15 @@ import pytest
 
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.catalog.importer import (
+from sve_carddb.core.provenance import BuildContext
+from sve_carddb.domains.catalog.importer import (
     catalog_configuration,
     populate_catalog,
     resolve_alias,
 )
-from sve_carddb.catalog.languages import register_languages
-from sve_carddb.catalog.models import Alias, Catalog, NameBinding, Term
-from sve_carddb.core.provenance import BuildContext
-from sve_carddb.products.models import Language, LocalizedText
+from sve_carddb.domains.catalog.languages import register_languages
+from sve_carddb.domains.catalog.models import Alias, Catalog, NameBinding, Term
+from sve_carddb.domains.products.models import Language, LocalizedText
 
 from .database_fixtures import DatabaseTemplate
 from .test_catalog_symbols import symbol
@@ -196,7 +196,9 @@ def test_symbol_cannot_bypass_pins_and_adoption(
             )
         elif mutation == "unknown_language":
             # Isolate downstream projection from the deliberately closed adoption gate.
-            monkeypatch.setattr("sve_carddb.catalog.importer._adopted", lambda *_: None)
+            monkeypatch.setattr(
+                "sve_carddb.domains.catalog.importer._adopted", lambda *_: None
+            )
             value = value.model_copy(
                 update={
                     "symbols": (
@@ -294,7 +296,7 @@ def test_existing_catalog_rows_require_identical_content(
     db: Database, row_kind: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     # A synthetic verifier isolates exact projection reuse; it grants no real adoption.
-    monkeypatch.setattr("sve_carddb.catalog.importer._adopted", lambda *_: None)
+    monkeypatch.setattr("sve_carddb.domains.catalog.importer._adopted", lambda *_: None)
     value = catalog().model_copy(update={"symbols": (symbol(),)})
     with db.transaction():
         populate_catalog(db, value, build=context(value), published=())

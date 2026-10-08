@@ -6,7 +6,8 @@ import httpx
 import orjson
 import pytest
 
-from sve_carddb.ingest.archive.manifest import Kind, Manifest, Region
+from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.ingest.archive.manifest import Kind, Manifest
 from sve_carddb.ingest.crawl.crawl import Crawler
 from sve_carddb.ingest.crawl.crawl_svwb import SVWB_SITE, cards, stored_image_urls
 from sve_carddb.ingest.http.client import Client, ClientPolicy, FetchError

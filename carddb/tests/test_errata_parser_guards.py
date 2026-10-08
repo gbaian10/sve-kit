@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.card_extras.errata_archive import FrozenErrataNotices
-from sve_carddb.card_extras.errata_markup import NoticeMarkup
-from sve_carddb.card_extras.errata_parser import associate_blocks, parse_notice
 from sve_carddb.core.json import digest
+from sve_carddb.core.regions import SourceRegion as ManifestRegion
+from sve_carddb.domains.card_extras.errata_archive import FrozenErrataNotices
+from sve_carddb.domains.card_extras.errata_markup import NoticeMarkup
+from sve_carddb.domains.card_extras.errata_parser import associate_blocks, parse_notice
 from sve_carddb.ingest.archive.manifest import Kind
-from sve_carddb.ingest.archive.manifest import Region as ManifestRegion
 from sve_carddb.ingest.archive.source_archive import seal_batch
 
 from .test_errata_parser import page

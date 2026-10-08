@@ -8,16 +8,20 @@ import pytest
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, object_value
-from sve_carddb.source_corrections.projection import correction_references
-from sve_carddb.text_observations import Binding, Vocabulary, import_text_observations
-from sve_carddb.text_observations.importer import revision_id
-from sve_carddb.text_observations.type_binding import type_binding
+from sve_carddb.domains.source_corrections.projection import correction_references
+from sve_carddb.domains.text_observations import (
+    Binding,
+    Vocabulary,
+    import_text_observations,
+)
+from sve_carddb.domains.text_observations.importer import revision_id
+from sve_carddb.domains.text_observations.type_binding import type_binding
 
 from .source_correction_fixtures import CorrectionCase, make_correction_case
 from .test_registry import make_inputs
 
 if TYPE_CHECKING:
-    from sve_carddb.source_corrections.plan import Application
+    from sve_carddb.domains.source_corrections.plan import Application
 
 
 @pytest.fixture(scope="module")

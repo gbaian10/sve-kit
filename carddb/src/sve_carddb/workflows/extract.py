@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Protocol
 
 import orjson
 
-from sve_carddb.ingest.archive.manifest import Region
+from sve_carddb.core.regions import SourceRegion as Region
 from sve_carddb.ingest.http.validate import ValidationError
 from sve_carddb.ingest.http.writer import LocalState
 from sve_carddb.ingest.queries import card_numbers

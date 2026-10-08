@@ -8,15 +8,20 @@ import pytest
 from pydantic import field_validator
 
 from sve_carddb.core.models import RecordData
-from sve_carddb.registry.storage import Index as RegistryIndex
-from sve_carddb.registry.storage import load, plan_files, read_registry_files, relayout
-from sve_carddb.registry.transitions.files import (
+from sve_carddb.domains.registry.storage import Index as RegistryIndex
+from sve_carddb.domains.registry.storage import (
+    load,
+    plan_files,
+    read_registry_files,
+    relayout,
+)
+from sve_carddb.domains.registry.transitions.files import (
     _inventory,
     checked_model,
     read_transition_files,
 )
-from sve_carddb.registry.transitions.loader import _revert, load_transitions
-from sve_carddb.registry.transitions.models import Reference, Shard
+from sve_carddb.domains.registry.transitions.loader import _revert, load_transitions
+from sve_carddb.domains.registry.transitions.models import Reference, Shard
 
 from .identity_transition_fixtures import (
     FA,

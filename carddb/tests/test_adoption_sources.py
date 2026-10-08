@@ -10,10 +10,13 @@ from pydantic import JsonValue
 
 from sve_carddb.build import CompiledSchema, create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.catalog.adoption_models import ReviewContext, SourceRef
-from sve_carddb.catalog.adoption_sources import pointer
 from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.core.provenance import BuildContext
+from sve_carddb.domains.catalog.adoption_models import ReviewContext, SourceRef
+from sve_carddb.domains.catalog.adoption_sources import pointer
+from sve_carddb.domains.registry.snapshot import load_registry
+from sve_carddb.domains.registry.storage import read_yaml
+from sve_carddb.domains.translations.sources import Sources
 from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import (
     ArchiveError,
@@ -21,9 +24,6 @@ from sve_carddb.ingest.archive.source_archive import (
     verify_batch,
 )
 from sve_carddb.parse.pages.official_jp import card_url
-from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.registry.storage import read_yaml
-from sve_carddb.translations.sources import Sources
 from sve_carddb.workflows.offline import _populate_adoptions, _prepare_catalog
 
 from .adoption_fixtures import (
@@ -45,7 +45,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 JSON_CODE = "carddb/src/sve_carddb/core/json.py"
-SOURCE_RUNTIME = "carddb/src/sve_carddb/catalog/adoption_sources.py"
+SOURCE_RUNTIME = "carddb/src/sve_carddb/domains/catalog/adoption_sources.py"
 
 
 @pytest.fixture(scope="module")

@@ -6,8 +6,8 @@ import pytest
 
 from sve_carddb.build import Row, create_database
 from sve_carddb.build.t0 import compile_t0
-from sve_carddb.routes import build_index, derive_routes, populate_routes
-from sve_carddb.routes.defaults import _inclusion_date, select_defaults
+from sve_carddb.domains.routes import build_index, derive_routes, populate_routes
+from sve_carddb.domains.routes.defaults import _inclusion_date, select_defaults
 
 from .build_db_fixtures import rows
 from .routes_fixtures import base, printing

@@ -4,13 +4,13 @@ import pytest
 from pydantic import ValidationError
 
 from sve_carddb.core.json import array, canonical, object_value
-from sve_carddb.template_parameters.analysis import (
+from sve_carddb.domains.translations.parameters.analysis import (
     NUMERIC_RULE_DISABLED,
     NUMERIC_SUFFIX,
 )
-from sve_carddb.template_parameters.inventory import Candidates, summary
-from sve_carddb.template_parameters.models import Hint
-from sve_carddb.template_parameters.numeric_rules import (
+from sve_carddb.domains.translations.parameters.inventory import Candidates, summary
+from sve_carddb.domains.translations.parameters.models import Hint
+from sve_carddb.domains.translations.parameters.numeric_rules import (
     NUMERIC_RULES,
     ORDINAL_PENDING,
     RECOVERY_PENDING,

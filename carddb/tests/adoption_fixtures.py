@@ -12,17 +12,17 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.catalog.adoption_importer import AdoptionInputs
-from sve_carddb.catalog.adoption_loader import load_adoptions
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.registry.storage import read_yaml
+from sve_carddb.domains.catalog.adoption_importer import AdoptionInputs
+from sve_carddb.domains.catalog.adoption_loader import load_adoptions
+from sve_carddb.domains.registry.storage import read_yaml
 
 if TYPE_CHECKING:
-    from sve_carddb.catalog.adoption_loader import Entry
+    from sve_carddb.domains.catalog.adoption_loader import Entry
 
 REPO = Path(__file__).resolve().parents[2]
-CODE = "carddb/src/sve_carddb/routes/codec.py"
+CODE = "carddb/src/sve_carddb/domains/routes/codec.py"
 
 
 def git(root: Path, *args: str) -> str:

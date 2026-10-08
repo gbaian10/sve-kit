@@ -14,9 +14,9 @@ from pydantic import (
 
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import Hash, RecordData
+from sve_carddb.core.regions import Region
 from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, parse_yaml
 from sve_carddb.image_variants import CropBox
-from sve_carddb.registry.records import Region
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

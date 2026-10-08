@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.core.json import canonical, digest, object_value
-from sve_carddb.digital_name_policies.current_evaluate import catalogue
-from sve_carddb.digital_name_policies.loader import load
-from sve_carddb.registry.storage import read_yaml
+from sve_carddb.domains.digital.name_policies.catalogue import catalogue
+from sve_carddb.domains.digital.name_policies.loader import load
+from sve_carddb.domains.registry.storage import read_yaml
 
 from .adoption_fixtures import commit
 from .digital_name_policy_fixtures import NAMES

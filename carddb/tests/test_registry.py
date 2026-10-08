@@ -8,11 +8,16 @@ from typing import TYPE_CHECKING
 import pytest
 from ruamel.yaml.error import YAMLError
 
-from sve_carddb.registry import allocation, storage
-from sve_carddb.registry.allocation import IdRange, region_allocations
-from sve_carddb.registry.build import allocation_order, build, permanent_id, string
-from sve_carddb.registry.corrections import project_corrections
-from sve_carddb.registry.inputs import (
+from sve_carddb.domains.registry import allocation, storage
+from sve_carddb.domains.registry.allocation import IdRange, region_allocations
+from sve_carddb.domains.registry.build import (
+    allocation_order,
+    build,
+    permanent_id,
+    string,
+)
+from sve_carddb.domains.registry.corrections import project_corrections
+from sve_carddb.domains.registry.inputs import (
     Card,
     Face,
     Mapping,
@@ -20,7 +25,7 @@ from sve_carddb.registry.inputs import (
     read_mapping,
     validate_mapping,
 )
-from sve_carddb.registry.review import (
+from sve_carddb.domains.registry.review import (
     Correction,
     InitDecisions,
     Inputs,
@@ -28,7 +33,7 @@ from sve_carddb.registry.review import (
     read_inputs,
     validation_cards,
 )
-from sve_carddb.registry.storage import (
+from sve_carddb.domains.registry.storage import (
     TARGET_BYTES,
     Entry,
     Index,
@@ -41,14 +46,14 @@ from sve_carddb.registry.storage import (
     write_files,
     yaml_parser,
 )
-from sve_carddb.registry.validate import check_cursors, validate
+from sve_carddb.domains.registry.validate import check_cursors, validate
 
 from .official_registry_fixtures import detached_entries
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
-    from sve_carddb.registry.snapshot import RegistrySnapshot
+    from sve_carddb.domains.registry.snapshot import RegistrySnapshot
 
 
 def card(number: str, name: str, *, english: bool = False, text: str = "Rule.") -> Card:

@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.ingest.archive.manifest import Region
+from sve_carddb.core.regions import SourceRegion as Region
 
 if TYPE_CHECKING:
     from sve_carddb.ingest.archive.manifest import Manifest

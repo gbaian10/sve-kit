@@ -9,8 +9,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from urllib.parse import quote, unquote, urljoin, urlsplit
 
-from sve_carddb.ingest.archive.manifest import Region
-from sve_carddb.ingest.archive.store import relpath
+from sve_carddb.core.paths import relpath
+from sve_carddb.core.regions import SourceRegion as Region
 from sve_carddb.ingest.http.validate import ValidationError, decode_html
 from sve_carddb.ingest.urls import canonicalize
 from sve_carddb.parse.html import (

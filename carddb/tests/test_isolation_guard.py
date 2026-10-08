@@ -14,8 +14,9 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb import cli
-from sve_carddb.ingest.archive.manifest import Kind, Manifest, Region, RequestStart
-from sve_carddb.ingest.archive.store import relpath
+from sve_carddb.core.paths import relpath
+from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.ingest.archive.manifest import Kind, Manifest, RequestStart
 from sve_carddb.ingest.config import Settings
 from sve_carddb.ingest.http.writer import Fetched, Writer
 

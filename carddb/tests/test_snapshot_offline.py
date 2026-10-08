@@ -7,7 +7,11 @@ from typing import TYPE_CHECKING
 import pytest
 from typer.testing import CliRunner
 
-from sve_carddb.card_extras import (
+from sve_carddb.cli import app
+from sve_carddb.core.compression import verify_brotli
+from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
+from sve_carddb.core.provenance import InputRecord, SourceUse, input_record
+from sve_carddb.domains.card_extras import (
     CardPage,
     ErrataChange,
     ErrataPage,
@@ -15,17 +19,13 @@ from sve_carddb.card_extras import (
     QAEntry,
     RelatedLink,
 )
-from sve_carddb.card_extras.archive import EN_PARSER, PARSER
-from sve_carddb.card_extras.importer import CardExtrasRestriction
-from sve_carddb.catalog import adoption_importer
-from sve_carddb.catalog.models import Catalog
-from sve_carddb.catalog.projection import CatalogProjection
-from sve_carddb.cli import app
-from sve_carddb.core.compression import verify_brotli
-from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
-from sve_carddb.core.provenance import InputRecord, SourceUse, input_record
-from sve_carddb.products import OfficialProducts, ProductIdentities
-from sve_carddb.registry.records import PrintingData
+from sve_carddb.domains.card_extras.archive import EN_PARSER, PARSER
+from sve_carddb.domains.card_extras.importer import CardExtrasRestriction
+from sve_carddb.domains.catalog import adoption_importer
+from sve_carddb.domains.catalog.models import Catalog
+from sve_carddb.domains.catalog.projection import CatalogProjection
+from sve_carddb.domains.products import OfficialProducts, ProductIdentities
+from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.preview import Roots, require_unknown_coverage, write_preview
@@ -74,7 +74,7 @@ def prepared(
         "carddb/src/sve_carddb/parse/pages/extract_jp.py",
         "carddb/src/sve_carddb/parse/pages/extract_en.py",
         "carddb/src/sve_carddb/core/json.py",
-        "carddb/src/sve_carddb/translations/sources.py",
+        "carddb/src/sve_carddb/domains/translations/sources.py",
     ):
         target = repo / name
         target.parent.mkdir(parents=True, exist_ok=True)

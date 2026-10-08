@@ -52,7 +52,7 @@ def test_core_imports_only_shared_foundations(path: Path) -> None:
     "source",
     [
         "import sve_carddb.snapshot.reader",
-        "from sve_carddb.registry import records",
+        "from sve_carddb.domains.registry import records",
         "from sve_carddb import registry",
         "def call():\n    from sve_carddb.build import Database",
         "if TYPE_CHECKING:\n    from sve_carddb.build import Value",

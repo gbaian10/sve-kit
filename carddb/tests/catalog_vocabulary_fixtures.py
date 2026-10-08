@@ -7,9 +7,10 @@ from pydantic import JsonValue
 
 from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.ingest.archive.manifest import Kind, Region
+from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.domains.registry.storage import read_yaml
+from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import seal_batch
-from sve_carddb.registry.storage import read_yaml
 
 from .adoption_fixtures import (
     CODE,
@@ -32,7 +33,7 @@ RUNTIME = (
     CODE,
     "carddb/uv.lock",
     "carddb/pyproject.toml",
-    "carddb/src/sve_carddb/catalog/adoption_sources.py",
+    "carddb/src/sve_carddb/domains/catalog/adoption_sources.py",
     "carddb/src/sve_carddb/core/json.py",
 )
 VOCABULARY_PATH = "catalog-adoptions/vocabulary/shared/001.yaml"

@@ -5,13 +5,13 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t0 import compile_t0
-from sve_carddb.routes import (
+from sve_carddb.domains.routes import (
     build_index,
     decode_segment,
     encode_segment,
     populate_routes,
 )
-from sve_carddb.routes.codec import card_path
+from sve_carddb.domains.routes.codec import card_path
 
 from .routes_fixtures import base, printing
 

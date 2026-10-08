@@ -6,8 +6,8 @@ import pytest
 from pydantic import JsonValue, ValidationError
 
 from sve_carddb.core.json import canonical, object_value
-from sve_carddb.translations.current_models import EmphasisData, TermData
-from sve_carddb.translations.models import SourceClaim
+from sve_carddb.domains.translations.glossary.records import EmphasisData, TermData
+from sve_carddb.domains.translations.models import SourceClaim
 
 from .translation_fixtures import term
 

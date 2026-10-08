@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
-from sve_carddb.products import load_products
-from sve_carddb.registry.review import Correction
-from sve_carddb.registry.snapshot import load_registry
+from sve_carddb.domains.products import load_products
+from sve_carddb.domains.registry.review import Correction
+from sve_carddb.domains.registry.snapshot import load_registry
 
 from .fixture_files import FrozenFiles, freeze_files, restore_files
 from .product_identity_fixtures import NAME, add_page, commit, html

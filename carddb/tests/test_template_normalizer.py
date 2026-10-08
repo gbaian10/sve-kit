@@ -5,7 +5,7 @@ from dataclasses import replace
 
 import pytest
 
-from sve_carddb.template_sources.normalizer import (
+from sve_carddb.domains.translations.source_inventory.normalizer import (
     Segment,
     normalize,
     partition,

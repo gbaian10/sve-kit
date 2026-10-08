@@ -17,6 +17,7 @@ from typer.testing import CliRunner
 import sve_carddb.ingest.archive.source_archive as archive
 from sve_carddb import cli
 from sve_carddb.core.json import canonical, parse
+from sve_carddb.core.regions import SourceRegion as Region
 from sve_carddb.ingest.archive.manifest import (
     AlreadyRunningError,
     ExclusiveLock,
@@ -24,7 +25,6 @@ from sve_carddb.ingest.archive.manifest import (
     Link,
     Manifest,
     Outcome,
-    Region,
     RequestResult,
     RequestStart,
     Resource,

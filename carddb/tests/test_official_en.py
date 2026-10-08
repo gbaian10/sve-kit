@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING
 import httpx
 import pytest
 
-from sve_carddb.ingest.archive.manifest import Kind, Manifest, Region
+from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.ingest.archive.manifest import Kind, Manifest
 from sve_carddb.ingest.crawl.crawl import EN_CATALOG, EN_SITE, Crawler, ListSummary
 from sve_carddb.ingest.http.client import Client, ClientPolicy, FetchError
 from sve_carddb.ingest.http.throttle import CircuitBreaker, Throttle

@@ -13,12 +13,12 @@ from rich.console import Console
 from typer.testing import CliRunner
 
 from sve_carddb import cli
+from sve_carddb.core.regions import SourceRegion as Region
 from sve_carddb.ingest.archive.manifest import (
     AlreadyRunningError,
     ExclusiveLock,
     Kind,
     Manifest,
-    Region,
     RequestStart,
 )
 from sve_carddb.ingest.config import Settings

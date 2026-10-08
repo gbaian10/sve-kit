@@ -7,14 +7,14 @@ from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import object_value, parse
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.digital_name_policies.application import Inputs
-from sve_carddb.registry.preview import FrozenJP, plan_preview
-from sve_carddb.text_observations import FrozenTexts, plan_text_observations
-from sve_carddb.text_observations.models import candidate_revision_id
-from sve_carddb.translations.current_names import Names
-from sve_carddb.translations.importer import Inputs as TranslationInputs
-from sve_carddb.translations.name_sources import NameOwner
-from sve_carddb.translations.sources import Sources
+from sve_carddb.domains.digital.name_policies.application import Inputs
+from sve_carddb.domains.registry.preview import FrozenJP, plan_preview
+from sve_carddb.domains.text_observations import FrozenTexts, plan_text_observations
+from sve_carddb.domains.text_observations.models import candidate_revision_id
+from sve_carddb.domains.translations.inputs import Inputs as TranslationInputs
+from sve_carddb.domains.translations.names.resolve import Names
+from sve_carddb.domains.translations.names.sources import NameOwner
+from sve_carddb.domains.translations.sources import Sources
 
 from .adoption_fixtures import commit
 from .build_db_fixtures import rows
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build import Database
-    from sve_carddb.text_observations import TextPlan
+    from sve_carddb.domains.text_observations import TextPlan
 
 
 @dataclass(frozen=True)

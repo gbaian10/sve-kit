@@ -4,9 +4,15 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.registry.build import build
-from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.registry.storage import Shard, load, plan_files, read_yaml, write_files
+from sve_carddb.domains.registry.build import build
+from sve_carddb.domains.registry.snapshot import load_registry
+from sve_carddb.domains.registry.storage import (
+    Shard,
+    load,
+    plan_files,
+    read_yaml,
+    write_files,
+)
 
 from .registry_snapshot_fixtures import edit_record, kind_shard, rewrite
 from .registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- expose synthetic pytest fixture
@@ -18,8 +24,8 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
-    from sve_carddb.registry.review import Inputs
-    from sve_carddb.registry.storage import Entry
+    from sve_carddb.domains.registry.review import Inputs
+    from sve_carddb.domains.registry.storage import Entry
 
 
 @pytest.mark.parametrize(

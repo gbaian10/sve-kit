@@ -15,13 +15,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import TYPE_CHECKING, NoReturn
 
-from sve_carddb.ingest.archive.manifest import (
-    Kind,
-    Link,
-    Outcome,
-    Region,
-    RequestResult,
-)
+from sve_carddb.ingest.archive.manifest import Kind, Link, Outcome, RequestResult
 from sve_carddb.ingest.http.client import FetchError, Request
 from sve_carddb.ingest.http.validate import (
     ValidationError,
@@ -38,6 +32,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import PurePosixPath
 
+    from sve_carddb.core.regions import SourceRegion as Region
     from sve_carddb.ingest.archive.manifest import Manifest
     from sve_carddb.ingest.http.client import Client, Response
     from sve_carddb.ingest.http.throttle import CircuitBreaker

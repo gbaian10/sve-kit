@@ -6,8 +6,8 @@ import pytest
 
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.text_observations import import_text_observations
-from sve_carddb.text_observations.wording import (
+from sve_carddb.domains.text_observations import import_text_observations
+from sve_carddb.domains.text_observations.wording import (
     ObservedText,
     WordingCandidate,
     _candidate_revisions,
@@ -26,7 +26,7 @@ from .text_observation_fixtures import make_case
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.registry.review import Inputs
+    from sve_carddb.domains.registry.review import Inputs
 
 
 def test_unresolved_correction_never_selects_latest_known_display(

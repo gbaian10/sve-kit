@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.registry.build import build
-from sve_carddb.registry.review import Correction
-from sve_carddb.registry.storage import (
+from sve_carddb.domains.registry.build import build
+from sve_carddb.domains.registry.review import Correction
+from sve_carddb.domains.registry.storage import (
     Entry,
     Shard,
     encode,
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
 
-    from sve_carddb.registry.review import Inputs
+    from sve_carddb.domains.registry.review import Inputs
 
 
 def build_registry_root(inputs: Inputs, tmp_path: Path) -> Path:

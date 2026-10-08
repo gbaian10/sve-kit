@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING, cast
 
 import pytest
 
-from sve_carddb.catalog.adoption_loader import load_adoptions
 from sve_carddb.core.json import array, object_value
-from sve_carddb.registry.storage import read_yaml
+from sve_carddb.domains.catalog.adoption_loader import load_adoptions
+from sve_carddb.domains.registry.storage import read_yaml
 
 from .adoption_fixtures import Case, envelope, make_case, record, write
 
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
-    from sve_carddb.catalog.adoption_loader import Entry
+    from sve_carddb.domains.catalog.adoption_loader import Entry
 
 
 @pytest.fixture(scope="module")
@@ -202,7 +202,7 @@ def test_editable_catalog_and_display_kinds(
 
 
 def test_offline_cannot_silently_discard_an_editable_alias(case: Case) -> None:
-    from sve_carddb.catalog.current import prepare  # ruff: ignore[import-outside-top-level] -- initialize the shared text interner before the catalog composer
+    from sve_carddb.domains.catalog.loader import prepare  # ruff: ignore[import-outside-top-level] -- initialize the shared text interner before the catalog composer
 
     row = record(
         "search_alias_adoption",

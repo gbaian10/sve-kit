@@ -6,27 +6,30 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
-from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.contracts.template_parameters import Range, Schema, Slot, SourceSpan
 from sve_carddb.core.json import digest, object_value
-from sve_carddb.template_parameters.analysis import (
+from sve_carddb.domains.catalog.adoption_models import SourceRef
+from sve_carddb.domains.text_observations.vocabulary import Binding, Vocabulary
+from sve_carddb.domains.translations.parameters.analysis import (
     NUMERIC_RULE_DISABLED,
     SAFE_INTEGER,
     analyze,
     schema,
     unsigned,
 )
-from sve_carddb.template_parameters.inventory import Candidates, summary
-from sve_carddb.template_parameters.references import References
-from sve_carddb.template_parameters.spans import locate
-from sve_carddb.template_parameters.verification import verify_values
-from sve_carddb.template_sources.inventory import entry
-from sve_carddb.template_sources.normalizer import VERSION, partition
-from sve_carddb.template_sources.pins import PARSER
-from sve_carddb.text_observations.vocabulary import Binding, Vocabulary
+from sve_carddb.domains.translations.parameters.inventory import Candidates, summary
+from sve_carddb.domains.translations.parameters.references import References
+from sve_carddb.domains.translations.parameters.spans import locate
+from sve_carddb.domains.translations.parameters.verification import verify_values
+from sve_carddb.domains.translations.source_inventory.inventory import entry
+from sve_carddb.domains.translations.source_inventory.normalizer import (
+    VERSION,
+    partition,
+)
+from sve_carddb.domains.translations.source_inventory.pins import PARSER
 
 if TYPE_CHECKING:
-    from sve_carddb.template_parameters.models import Candidate, Hint
+    from sve_carddb.domains.translations.parameters.models import Candidate, Hint
 
 HASH = "sha256:" + "a" * 64
 

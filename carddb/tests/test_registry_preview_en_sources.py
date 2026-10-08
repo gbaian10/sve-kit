@@ -7,29 +7,30 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.ingest.archive.manifest import Kind, Region
-from sve_carddb.ingest.archive.source_archive import seal_batch
-from sve_carddb.parse.pages import official_en as en
-from sve_carddb.parse.pages import official_jp as jp
-from sve_carddb.parse.pages.extract_en import extract_card as extract_en
-from sve_carddb.parse.pages.extract_jp import extract_card as extract_jp
-from sve_carddb.registry.build import build
-from sve_carddb.registry.parser_adapters.official_en import (
+from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.domains.registry.build import build
+from sve_carddb.domains.registry.parser_adapters.official_en import (
     legacy_projection as legacy_en,
 )
-from sve_carddb.registry.parser_adapters.official_jp import (
+from sve_carddb.domains.registry.parser_adapters.official_jp import (
     legacy_projection as legacy_jp,
 )
-from sve_carddb.registry.preview import (
+from sve_carddb.domains.registry.preview import (
     FrozenEN,
     FrozenJP,
     FrozenRegions,
     import_preview,
     plan_preview,
 )
-from sve_carddb.registry.records import CorrectionData, PrintingData
-from sve_carddb.registry.review import Correction
-from sve_carddb.registry.storage import plan_files, write_files
+from sve_carddb.domains.registry.records import CorrectionData, PrintingData
+from sve_carddb.domains.registry.review import Correction
+from sve_carddb.domains.registry.storage import plan_files, write_files
+from sve_carddb.ingest.archive.manifest import Kind
+from sve_carddb.ingest.archive.source_archive import seal_batch
+from sve_carddb.parse.pages import official_en as en
+from sve_carddb.parse.pages import official_jp as jp
+from sve_carddb.parse.pages.extract_en import extract_card as extract_en
+from sve_carddb.parse.pages.extract_jp import extract_card as extract_jp
 
 from .en_extract_fixtures import page
 from .registry_preview_fixtures import BUILD, REVISION, parents
@@ -40,9 +41,9 @@ from .test_source_archive import _put, _resource, _store
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.registry.preview.evidence import CardEvidence
-    from sve_carddb.registry.records import Region as RegistryRegion
-    from sve_carddb.registry.review import Inputs
+    from sve_carddb.core.regions import Region as RegistryRegion
+    from sve_carddb.domains.registry.preview.evidence import CardEvidence
+    from sve_carddb.domains.registry.review import Inputs
 
 
 @pytest.fixture

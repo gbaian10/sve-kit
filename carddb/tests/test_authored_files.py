@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.core.authored import read, shards
-from sve_carddb.translations.loader import load_glossary
+from sve_carddb.domains.translations.inputs import load_glossary
 
 if TYPE_CHECKING:
     from pathlib import Path

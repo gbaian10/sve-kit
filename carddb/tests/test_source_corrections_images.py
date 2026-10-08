@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.domains.source_corrections import FrozenImages
+from sve_carddb.domains.text_observations import plan_text_observations
 from sve_carddb.ingest.archive.source_archive import ArchiveError
-from sve_carddb.source_corrections import FrozenImages
-from sve_carddb.text_observations import plan_text_observations
 
 if TYPE_CHECKING:
     from pathlib import Path

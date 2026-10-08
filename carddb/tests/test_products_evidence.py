@@ -9,15 +9,15 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
+from sve_carddb.domains.products import load_products, populate_families
+from sve_carddb.domains.registry.snapshot import load_registry
+from sve_carddb.domains.registry.storage import read_yaml
 from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import (
     ArchiveError,
     seal_batch,
     verify_batch,
 )
-from sve_carddb.products import load_products, populate_families
-from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.registry.storage import read_yaml
 
 from .product_fixtures import LANGUAGES, envelope, family, first_record, install, obj
 from .product_fixtures import product_root as product_root  # ruff: ignore[useless-import-alias] -- shared fixture

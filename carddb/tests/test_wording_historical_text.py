@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.domains.text_observations import FrozenTexts
 from sve_carddb.ingest.archive.source_archive import ArchiveError
-from sve_carddb.text_observations import FrozenTexts
 
 from .test_effect_presence import card_from_raw, page
 

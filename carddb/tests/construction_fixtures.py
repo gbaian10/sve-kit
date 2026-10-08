@@ -1,6 +1,7 @@
 """Tiny construction graphs and frozen-source metadata; all text is synthetic."""
 
-from sve_carddb.construction import (
+from sve_carddb.core.provenance import BuildContext, SourceUse
+from sve_carddb.domains.construction import (
     Clause,
     Construction,
     Coverage,
@@ -10,8 +11,7 @@ from sve_carddb.construction import (
     ProfileRevision,
     Restriction,
 )
-from sve_carddb.core.provenance import BuildContext, SourceUse
-from sve_carddb.products.models import LocalizedText
+from sve_carddb.domains.products.models import LocalizedText
 
 from .card_extras_fixtures import REVISION, source
 

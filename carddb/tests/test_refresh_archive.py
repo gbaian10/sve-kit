@@ -18,6 +18,8 @@ from typer.testing import CliRunner
 
 from sve_carddb import cli
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.paths import UnsafePathError
+from sve_carddb.core.regions import SourceRegion as Region
 from sve_carddb.ingest.archive import source_archive as archive
 from sve_carddb.ingest.archive.manifest import (
     AlreadyRunningError,
@@ -26,7 +28,6 @@ from sve_carddb.ingest.archive.manifest import (
     Link,
     Manifest,
     Outcome,
-    Region,
     RequestStart,
     Resource,
 )
@@ -41,12 +42,7 @@ from sve_carddb.ingest.archive.source_archive import (
     seal_batch,
     verify_batch,
 )
-from sve_carddb.ingest.archive.store import (
-    UnsafePathError,
-    compress,
-    decompress,
-    resolve_within,
-)
+from sve_carddb.ingest.archive.store import compress, decompress, resolve_within
 from sve_carddb.ingest.config import Settings
 from sve_carddb.ingest.http import refresh
 from sve_carddb.ingest.http.refresh import RefreshWriter, Replacement

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.translations.name_sources import NameOwner, name_source
+from sve_carddb.domains.translations.names.sources import NameOwner, name_source
 
 from .name_build_fixtures import template
 

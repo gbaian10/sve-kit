@@ -8,15 +8,15 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.registry.inputs import canonical
-from sve_carddb.registry.records import PrintingData
-from sve_carddb.registry.transitions.models import (
+from sve_carddb.domains.registry.inputs import canonical
+from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.registry.transitions.models import (
     ArtTransfer,
     Repair,
     Route,
     Transition,
 )
-from sve_carddb.registry.transitions.ownership import (
+from sve_carddb.domains.registry.transitions.ownership import (
     _art_uses,
     _faces,
     _repair,
@@ -24,7 +24,7 @@ from sve_carddb.registry.transitions.ownership import (
     _transfer_arts,
     typed,
 )
-from sve_carddb.registry.transitions.replay import (
+from sve_carddb.domains.registry.transitions.replay import (
     _append,
     _base,
     _closure,
@@ -32,8 +32,12 @@ from sve_carddb.registry.transitions.replay import (
     _updates,
     replay,
 )
-from sve_carddb.registry.transitions.routing import derive, project
-from sve_carddb.registry.transitions.state import EffectiveRegistry, Entity, entity
+from sve_carddb.domains.registry.transitions.routing import derive, project
+from sve_carddb.domains.registry.transitions.state import (
+    EffectiveRegistry,
+    Entity,
+    entity,
+)
 
 from .identity_replay_fixtures import (
     basis,
@@ -53,7 +57,7 @@ from .test_identity_replay_history import effective_state, fix_root_refs
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.registry.storage import RegistryFiles
+    from sve_carddb.domains.registry.storage import RegistryFiles
 
 
 def checked(record: dict[str, Any]) -> Transition:

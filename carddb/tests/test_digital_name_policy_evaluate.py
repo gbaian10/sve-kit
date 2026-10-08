@@ -8,23 +8,23 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-import sve_carddb.digital_name_policies.evaluate as module
+import sve_carddb.domains.digital.name_policies.evaluate as module
 from sve_carddb.core.json import array, canonical, digest, object_value
-from sve_carddb.digital_links.catalogue import complete_inventory
-from sve_carddb.digital_links.evidence import Evidence
-from sve_carddb.digital_links.importer import review_context
-from sve_carddb.digital_name_policies.current_evaluate import Catalogue, link_catalogue
-from sve_carddb.digital_name_policies.current_evaluate import (
+from sve_carddb.domains.digital.links.catalogue import complete_inventory
+from sve_carddb.domains.digital.links.evidence import Evidence
+from sve_carddb.domains.digital.links.importer import review_context
+from sve_carddb.domains.digital.name_policies.catalogue import Catalogue, link_catalogue
+from sve_carddb.domains.digital.name_policies.catalogue import (
     catalogue as current_catalogue,
 )
-from sve_carddb.digital_name_policies.current_models import LinkPolicy
-from sve_carddb.digital_name_policies.evaluate import (
+from sve_carddb.domains.digital.name_policies.evaluate import (
     LINK_GAMES,
     OwnerEvidence,
     name_result,
     owner_text,
     rule_links,
 )
+from sve_carddb.domains.digital.name_policies.records import LinkPolicy
 
 from .digital_link_import_fixtures import catalogue_fixture
 from .digital_name_policy_fixtures import (
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.core.provenance import SourceUse
-    from sve_carddb.digital_name_policies.evaluate import NameOwner
+    from sve_carddb.domains.digital.name_policies.evaluate import NameOwner
 
 
 @pytest.fixture(scope="module")
@@ -403,8 +403,8 @@ def test_rule_plans_reject_cross_build_owners(
 def test_unknown_owner_with_borrowed_reference_is_rejected(
     baseline: PolicyFixture,
 ) -> None:
-    from sve_carddb.digital_name_policies.evaluate import NameOwner  # ruff: ignore[import-outside-top-level] -- model validation requires the runtime type
-    from sve_carddb.digital_name_policies.loader import model  # ruff: ignore[import-outside-top-level] -- test enters the sanitized model boundary
+    from sve_carddb.domains.digital.name_policies.evaluate import NameOwner  # ruff: ignore[import-outside-top-level] -- model validation requires the runtime type
+    from sve_carddb.domains.digital.name_policies.loader import model  # ruff: ignore[import-outside-top-level] -- test enters the sanitized model boundary
 
     raw = baseline.owner().model_dump(mode="json")
     raw["state"] = "unknown"
@@ -414,7 +414,7 @@ def test_unknown_owner_with_borrowed_reference_is_rejected(
 
 @pytest.mark.parametrize("fault", ["name", "target", "parent"])
 def test_catalogue_refusals_are_reachable(baseline: PolicyFixture, fault: str) -> None:
-    from sve_carddb.digital_name_policies.evaluate import _parents  # ruff: ignore[import-outside-top-level] -- checks the catalogue parent boundary directly
+    from sve_carddb.domains.digital.name_policies.evaluate import _parents  # ruff: ignore[import-outside-top-level] -- checks the catalogue parent boundary directly
 
     links = baseline.snapshot().links
     assert links is not None

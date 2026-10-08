@@ -16,8 +16,8 @@ from urllib.parse import unquote, urljoin, urlsplit, urlunsplit
 
 import orjson
 
-from sve_carddb.ingest.archive.manifest import Region
-from sve_carddb.ingest.archive.store import relpath
+from sve_carddb.core.paths import relpath
+from sve_carddb.core.regions import SourceRegion as Region
 from sve_carddb.ingest.http.validate import ValidationError, decode_html
 from sve_carddb.ingest.urls import canonicalize
 from sve_carddb.parse.html import attribute, parse, require_one, select_all, select_one

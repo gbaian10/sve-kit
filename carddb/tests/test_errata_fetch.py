@@ -15,16 +15,17 @@ import stamina
 from typer.testing import CliRunner
 
 from sve_carddb import cli
+from sve_carddb.core.paths import UnsafePathError
+from sve_carddb.core.regions import SourceRegion as Region
 from sve_carddb.ingest.archive.manifest import (
     ExclusiveLock,
     Kind,
     Manifest,
     Outcome,
-    Region,
     RequestResult,
     RequestStart,
 )
-from sve_carddb.ingest.archive.store import UnsafePathError, decompress
+from sve_carddb.ingest.archive.store import decompress
 from sve_carddb.ingest.crawl.errata_fetch import (
     ErrataInputError,
     _validate_body,

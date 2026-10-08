@@ -6,7 +6,8 @@ import httpx
 import orjson
 import pytest
 
-from sve_carddb.ingest.archive.manifest import Kind, Link, Manifest, Outcome, Region
+from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.ingest.archive.manifest import Kind, Link, Manifest, Outcome
 from sve_carddb.ingest.crawl.crawl import Crawler, LimitReachedError
 from sve_carddb.ingest.crawl.crawl_sv1 import (
     SV1_SITE,

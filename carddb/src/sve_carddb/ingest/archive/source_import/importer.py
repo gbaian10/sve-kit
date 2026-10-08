@@ -39,7 +39,12 @@ PROGRAM_FILES = (
     "carddb/src/sve_carddb/core/dates.py",
     "carddb/src/sve_carddb/core/json.py",
     "carddb/src/sve_carddb/core/models.py",
+    "carddb/src/sve_carddb/core/paths.py",
     "carddb/src/sve_carddb/core/provenance.py",
+    "carddb/src/sve_carddb/core/regions.py",
+    "carddb/src/sve_carddb/domains/__init__.py",
+    "carddb/src/sve_carddb/domains/registry/__init__.py",
+    "carddb/src/sve_carddb/domains/registry/records.py",
     "carddb/src/sve_carddb/ingest/__init__.py",
     "carddb/src/sve_carddb/ingest/archive/__init__.py",
     "carddb/src/sve_carddb/ingest/archive/manifest.py",
@@ -53,7 +58,6 @@ PROGRAM_FILES = (
     "carddb/src/sve_carddb/ingest/urls.py",
     "carddb/src/sve_carddb/parse/__init__.py",
     "carddb/src/sve_carddb/parse/html.py",
-    "carddb/src/sve_carddb/registry/records.py",
     "carddb/uv.lock",
 )
 

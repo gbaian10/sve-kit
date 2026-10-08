@@ -11,7 +11,7 @@ import pytest
 from .test_core_boundary import project_imports
 
 PACKAGE = Path(__file__).resolve().parents[1] / "src/sve_carddb"
-COMPLETED = ("core", "contracts", "ingest", "parse", "build", "snapshot")
+COMPLETED = ("core", "contracts", "ingest", "parse", "build", "snapshot", "domains")
 PATHS = sorted(
     [path for name in COMPLETED for path in (PACKAGE / name).rglob("*.py")]
     + list(PACKAGE.glob("image_*.py"))
@@ -21,8 +21,6 @@ PARSE_ALLOWED = (
     "sve_carddb.contracts",
     "sve_carddb.parse",
     "sve_carddb.ingest.urls",
-    "sve_carddb.ingest.archive.manifest",
-    "sve_carddb.ingest.archive.store",
     "sve_carddb.ingest.http.validate",
 )
 
@@ -65,11 +63,17 @@ def forbidden_imports(
                     not in {
                         "sve_carddb.ingest",
                         "sve_carddb.ingest.http",
-                        "sve_carddb.ingest.archive",
                     }
                     and not any(within(module, prefix) for prefix in PARSE_ALLOWED)
                 )
             )
+        )
+    if any(
+        within(module_name, "sve_carddb." + layer)
+        for layer in ("parse", "ingest", "build")
+    ):
+        forbidden.update(
+            module for module in imports if within(module, "sve_carddb.domains")
         )
     return forbidden
 
@@ -100,9 +104,16 @@ def test_completed_pipeline_dependencies(path: Path) -> None:
             "sve_carddb.parse.pages",
             "if TYPE_CHECKING:\n    from sve_carddb.build import Database",
         ),
-        ("sve_carddb.parse", "from sve_carddb.registry import inputs"),
-        ("sve_carddb.parse", "from sve_carddb.translations import importer"),
+        ("sve_carddb.parse", "from sve_carddb.domains.registry import inputs"),
+        ("sve_carddb.parse", "from sve_carddb.domains.translations import importer"),
         ("sve_carddb.parse", "from sve_carddb.core import authored"),
+        ("sve_carddb.parse", "from sve_carddb.ingest.archive.manifest import Region"),
+        ("sve_carddb.parse", "from sve_carddb.ingest.archive.store import relpath"),
+        ("sve_carddb.domains.catalog", "from sve_carddb.workflows import offline"),
+        ("sve_carddb.domains.registry", "from sve_carddb import cli"),
+        ("sve_carddb.ingest.archive", "from sve_carddb.domains.registry import inputs"),
+        ("sve_carddb.build", "from sve_carddb.domains.translations import inputs"),
+        ("sve_carddb.ingest", "from sve_carddb import domains"),
         ("sve_carddb.parse", "from sve_carddb.ingest.http import client"),
         ("sve_carddb.parse", "from sve_carddb import cli_paths"),
         ("sve_carddb.parse.html", "from sve_carddb.ingest import config"),
@@ -119,7 +130,7 @@ def test_boundary_detects_reverse_imports(module_name: str, source: str) -> None
         ("sve_carddb.parse", "from sve_carddb.ingest.http import validate"),
         ("sve_carddb.parse", "from sve_carddb.ingest import urls"),
         ("sve_carddb.parse", "from sve_carddb.ingest.http.validate import decode_html"),
-        ("sve_carddb.parse", "from sve_carddb.ingest.archive.manifest import Region"),
+        ("sve_carddb.parse", "from sve_carddb.core.regions import Region"),
         ("sve_carddb.ingest.archive", "from sve_carddb.parse.html import parse"),
         ("sve_carddb.ingest.http", "from sve_carddb.ingest.archive import manifest"),
         ("sve_carddb.build", "from sve_carddb.contracts import snapshot"),
