@@ -82,7 +82,40 @@ recorded in the squash commit. Use `Acked-by` only when the maintainer personall
 approved that change. See [AGENTS.md](AGENTS.md) for automated contribution and
 review procedures.
 
-## Code comments
+## Coding standards
+
+Reviewers apply this section to every pull request. Formatting, lint, types and
+the commit format are enforced by tools and are not repeated here.
+
+### Design
+
+- Prefer deep modules: a small interface over substantial behaviour. Merge modules
+  that only forward calls to each other.
+- Nothing has shipped yet: replace an old format or algorithm outright and regenerate
+  its fixtures, without a compatibility path.
+- The project has one maintainer on one machine. Add locks, ledgers, receipts, replay
+  or extra verification layers only for a stated requirement the maintainer agreed to.
+- Keep one-off migration and conversion scripts out of the repository.
+- Do not bind code to the maintainer's machine: no system libraries where a package
+  exists, and no local paths or host names. Linux is the supported platform; record
+  new macOS or Windows blockers on #315 or #316.
+
+### Names and interfaces
+
+- One name, one meaning: do not import a type under the name of a different type
+  (for example `SourceRegion as Region`).
+- Import only public names from another module; make a helper public before reusing it.
+
+### Tests
+
+- Test behaviour through the public interface. A test that restates the
+  implementation (copied constants, private call order or counts, source text) is a defect.
+- Do not mock the code under test.
+- Architecture boundary, fresh-import and isolation tests are deliberate structural
+  checks. A new boundary rule comes with a negative case that proves it fails.
+- Never print official card wording in test output.
+
+### Comments
 
 AI-generated code tends to over-comment. Keep comments few and short:
 
@@ -94,6 +127,25 @@ AI-generated code tends to over-comment. Keep comments few and short:
 ```python
 # Evolution swaps base stats without a stat-change event; only super evolution's +1 counts (see ADR-0008).
 ```
+
+### Documentation
+
+- Every module, class, file or command a document names must exist.
+- A document must not promise more than the tests guarantee.
+
+### Choosing libraries
+
+Use the standard library or a maintained, mature package for general-purpose
+parsers, schema validation, signatures, locks, queues and CLI plumbing. Keep
+project-specific rules at the package boundary rather than writing a parser or
+reimplementing those general-purpose facilities. Avoiding a dependency is not
+itself a reason to write a replacement.
+
+Record only the license, Linux and macOS support, required behavior, performance
+and size, and maintenance status when choosing a library. If available libraries
+cannot meet the requirements, document the specific gaps for review. Add a new
+dependency in a small dependency-only PR before integrating it into application
+code.
 
 ## Lint and types
 
@@ -265,18 +317,9 @@ guard covers Python I/O in each pytest worker; it is not an operating-system
 sandbox for subprocesses. Existing Git fixture subprocesses operate offline on
 synthetic repositories. Do not add tests that invoke external network tools.
 
-carddb keeps authored domain loaders in `src/sve_carddb/domains/`. Translation
-subpackages group glossary, names, templates, parameters and source inventory;
-digital subpackages group links and name policies. Pipeline boundary and fresh
-import tests check that parse, ingest and build do not load domain code and that
-parsers import without the archive locking implementation. Images live under
-`src/sve_carddb/images/`; DB projection, readers and snapshot export live under
-`src/sve_carddb/export/`, with transport encoding in `export/transport/`. Preview
-writing and version state stay in `export/preview/`. Boundary tests keep domains
-independent of export/publish and images/export independent of workflows/CLI.
-Fresh-process tests keep `export/read_api.py` free of build, domains, workflows,
-export output modules (`export.transport`, `export.project`, `export.preview`)
-and R2/publish modules (`sve_publish`).
+Layer directions in carddb and publish are enforced by `carddb/tests/test_core_boundary.py`,
+`test_contracts_boundary.py`, `test_pipeline_boundaries.py`, `test_module_imports.py` and
+`publish/tests/test_import_boundary.py`; those tests are the authority.
 
 Run them yourself when you change the code they cover:
 
@@ -371,20 +414,6 @@ is a bug the tests would not notice; add a test, or explain why it cannot change
 ```bash
 pre-commit run --hook-stage manual cargo-mutants
 ```
-
-## Choosing libraries
-
-Use the standard library or a maintained, mature package for general-purpose
-parsers, schema validation, signatures, locks, queues and CLI plumbing. Keep
-project-specific rules at the package boundary rather than writing a parser or
-reimplementing those general-purpose facilities. Avoiding a dependency is not
-itself a reason to write a replacement.
-
-Record only the license, Linux and macOS support, required behavior, performance
-and size, and maintenance status when choosing a library. If available libraries
-cannot meet the requirements, document the specific gaps for review. Add a new
-dependency in a small dependency-only PR before integrating it into application
-code.
 
 ## Keeping tools up to date
 
