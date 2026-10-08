@@ -54,11 +54,10 @@ ID 仍為 `dl:`＋H(`["digital-link-v1",subject]`)，relation、時間與政策 
 
 | 檔案 | 完整頂層欄位 |
 | --- | --- |
-| `digital-name-policies/index.yaml` | `digital_name_policy_index_format:2,kind:digital_name_policy_index,policies` |
 | `digital-name-policies/<policy_id>/current.yaml`（names） | `digital_name_policy_format:2,kind:digital_name_policy,policy_id,purpose,content,origin,low_confidence,note` |
 | `digital-name-policies/<policy_id>/current.yaml`（links） | `digital_name_policy_format:2,kind:digital_name_policy,policy_id,purpose,content,note` |
 
-policies 的值是 `{path,hash}`，hash 是 canonical 檔案完整性檢查，不是核可文件 hash。
+只讀當前工作樹的 `digital-name-policies/*/current.yaml`，policy_id 須等於目錄名；不使用 checksum index 或 Git bytes 守門。
 names 與 links 各至多一份；note 可省略並預設為空字串。
 
 ### 3.1 names

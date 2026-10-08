@@ -21,18 +21,16 @@ EN 身分已確認而文字尚未核對時，沿 `shared_jp_unchecked` 顯示並
 ## 2. 當前資料入口
 
 沿用 `authored/translations/`，分片按卡包或共用類別歸檔，單檔小於 1 MiB；序號只是檔名，不是修訂鏈。
-沿 authored-layout §1 的嚴格 YAML、未知欄位拒絕、禁止 symlink／跳脫路徑及全入口完整索引；
-filing_key 為 `[A-Za-z0-9_-]+`，sequence 為三位以上十進位字串，記錄按 record_key 排序。
-空集合明示 includes/inventories 空映射，缺 index 不當成空資料。
+沿 authored-layout §1 的嚴格 YAML、未知欄位拒絕、禁止 symlink／跳脫路徑。
+filing_key 為 `[A-Za-z0-9_-]+`，sequence 為三位以上十進位字串；不要求連號或預先排序。
+讀取當前工作樹的固定 glossary／templates／overrides 子目錄一次，載入後依 record_key 排序；重複鍵拒絕。
+沒有內部 checksum index；其他目錄的私人草稿不納入輸入。空目錄表示空集合。
 
 | 檔案 | 完整頂層欄位 |
 | --- | --- |
-| `translations/index.yaml` | `translation_authored_format: 2, kind: translation_index, includes` |
 | `translations/{glossary,templates,overrides}/<filing_key>/<sequence>.yaml` | `translation_authored_format: 2, kind: translation_shard, records` |
 
-includes 是 authored 相對路徑到解析後 canonical JSON SHA-256 的映射，由工具更新。
-它們只檢查檔案完整性，不是核可證明；index 不釘自身或同 PR 未來的 commit。
-翻譯入口只接受 format 2 分片；glossary 與模板 reader 均驗整個入口的檔案閉包。
+翻譯入口只接受 format 2 分片；glossary 與模板 reader 共用已載入的資料。
 模板來源清冊在建置時產生，不進 Git，見[清冊契約](template-source-replay.md)。
 舊格式留在 Git 歷史，不作現行載入分支。
 

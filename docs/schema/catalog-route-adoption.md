@@ -7,10 +7,9 @@
 
 ## 0. 詞彙與語言 format 2
 
-catalog-adoptions/index.yaml 為 `{catalog_adoption_format:2,kind:catalog_adoption_index,includes}`；
 vocabulary／languages 分片為 `{catalog_adoption_format:2,kind:catalog_adoption_shard,records}`。
-includes 的 canonical hash 只驗檔案完整；過渡期可索引其他 area 的 format 1 分片，按各檔版本分派。
-不再掃全部歷史，當前目錄仍須完整索引、安全路徑、唯一鍵、無缺檔／多檔且每檔小於 1 MiB。
+讀當前工作樹的固定 catalog area，一次載入後排序，不另存 checksum index。
+安全路徑、唯一鍵、必要引用及每檔小於 1 MiB 的限制維持；不要求分片連號或 record_key 預先排序。
 
 record 欄位為 `{record_key,kind,data,origin,low_confidence}`，note 可省略；品質欄位沿翻譯契約。
 kind 為 vocabulary_adoption/language_adoption；record_key 是 `[kind,subject]` canonical JSON 字串。
@@ -42,24 +41,19 @@ DB 由當前 record 投影並指回 authored_source_id，不能建立假 confirm
 
 | 入口／分片 | 完整頂層欄位 |
 | --- | --- |
-| `catalog-adoptions/index.yaml` | `catalog_adoption_format: 1, kind: catalog_adoption_index, includes` |
 | `catalog-adoptions/<area>/<filing_key>/<sequence>.yaml` | `catalog_adoption_format: 1, kind: catalog_adoption_shard, review_context, default_decision_id, records, decisions` |
-| `display-overrides/index.yaml` | `display_override_format: 1, kind: display_override_index, includes` |
 | `display-overrides/<area>/<filing_key>/<sequence>.yaml` | `display_override_format: 1, kind: display_override_shard, review_context, default_decision_id, records, decisions` |
 
 catalog 的 area 為 `vocabulary/symbols/aliases/rules-names/languages`；display 的 area 為 `routes/defaults`。
 filing_key 為 `[A-Za-z0-9_-]+`，只作歸檔、不產生商品或地區真值；卡片相關可沿既有 owner，
-共用資料可用 `shared`。sequence 為每個 area/filing_key 從 001 起連續只增的三位以上序號。
-同片一種 record.kind、一個決定，records 非空並按 record_key 排序，decisions 恰含 default_decision_id 所指決定。
+共用資料可用 `shared`。sequence 為三位以上序號，允許缺號。
+同片一種 record.kind、一個決定，records 非空；載入後排序，重複 record_key 拒絕，decisions 恰含 default_decision_id 所指決定。
 
 YAML 1.2 邊界、單檔嚴格小於 1 MiB／512 KiB 目標、canonical recipe 沿
 [authored-layout §1／§2](authored-layout.md#2-分片與來源)。所有欄位必填，可空者明示 null；未知欄位拒絕。
-includes 映射上述各自分片路徑到**完整解析內容**的 canonical hash；禁止絕對路徑、`..`、symlink、重複鍵、
-缺檔、未索引分片、跨入口偷載與 hash 不符。先驗全入口、全區、全部歷史，再投影本次範圍。
-歷史分片與 index 舊 entries 不改；新分片驗妥後原子追加 index。啟用入口時必有 index，空集合明示 includes={}。
-
-每片一份 review_context，釘核對時程式、依賴、設定、
-來源及已存在 authored 入口；同片 records 共用，核對背景不同時分片，不在每筆複製完整輸入。
+只掃上述固定 area 的當前工作樹檔案；禁止 symlink、跳脫路徑、重複鍵及跨入口偷載。
+載入一次後檢查必要引用，再投影本次範圍，不驗 Git bytes 或內部 checksum index。
+每片一份 review_context 記載核對設定與來源，同片 records 共用；執行本次程式，不鎖程式或依賴 bytes。
 
 record 恰為 `{record_key,kind,filing_key,data,evidence}`。data 恰為
 `{subject,adoption_no,predecessor,value,review_context_hash,dependencies,reason}`：
@@ -131,13 +125,13 @@ evidence 為排序去重的 `{source_ref,role}` 陣列；source_ref 沿
 兩種 ref 恰擇一；role 非空，不將圖片 hash 當作文字 hash。format 1 的批次列入 review_context.source_batches；format 2 由本次建置來源集合提供。
 純自撰的 code、別名或介面配置可 evidence=[]；format 1 仍須依賴與核對收據，format 2 不含這些欄位；聲稱官方原值／名稱／記號者必有來源。
 
-每個實際使用的 source version 都驗 batch/descriptor/receipt/raw 閉包、parser 程式與設定 pin、locator 和 exact bytes。
+每個實際使用的 source version 都驗 batch/descriptor/receipt/raw 閉包、當前 parser 的 locator 與 exact 文字 hash。
 人工依賴解析到的有效版本須驗完整 decision/member/hash 與來源，但 hash 改變本身不使引用者 stale。
 版次依賴重驗當前 registry 的相關身分、區域、面與卡號。核對時 context 可重播不代表新輸入必然適用；
 本次相關原值、symbol_basis、name_basis_hash 或 §5 候選集合改變時，按各 kind 的條件停止選用／重新採納。
 新 raw/parser 只要能從當次凍結輸入驗回相同的相關 exact 內容，詞彙映射與 §4.3 名稱可機械重驗，不要求重簽；
 不能據此忽略真正相關的規則依據、身分或來源變化。
-無論是否重用，都須可驗原 recipe 與原來源；不能只換 recipe 名。
+無論是否重用，都須以支援的 parser 驗原始來源與精確欄位。
 
 詞彙原值映射只授權已核對的 `(kind,region,lang,raw exact bytes)`，可用於本次其他相同原值的觀測，
 但每次都要從當次凍結觀測驗明 exact 相同；不能延伸到新 spelling、被切半的 trait 或新類別。
@@ -228,7 +222,7 @@ canonical code 仍先 exact 查找，正規化只作用別名查找，不修改�
 技術預設 P5 的算法為先 NFKC、再 casefold；不 trim／合併空白、不折假名、不去標點。
 Unicode 資料版本隨 normalizer 實作／配置釘住，不使用系統未明示的版本。
 
-normalizer 恰為 `{version,program_revision,code_path,code_hash,config,config_hash}`，釘可重現的版控實作與 canonical 配置。
+normalizer 恰為 `{version,config}`，由目前實作套用明示配置。
 loader 重算 normalized，不能信 caller 傳字串；同次查找索引只接受建置配置指定的同一 normalizer pin。
 改版本需對全部有效 aliases 重算並逐項續版／採納，不能把舊 normalized 配上新版本。
 自動由官方原名推導的 alias 可依既有 DB 契約無 decision，但必須有獨立釘住的推導 recipe 與來源；
@@ -429,7 +423,7 @@ production 採納／觀測數、合成案例、實跑 mutants 分開報，未知
 
 | 編號 | 單一反例／定向突變 | 必要結果 |
 | --- | --- | --- |
-| C01 | 缺 index／缺分片／未索引／symlink／跨入口／未知欄／重複 YAML key；各移除一個 guard | 各自拒絕，啟用空集合只認明示空 index |
+| C01 | symlink／跨入口／未知欄／重複 YAML key／重複 record_key | 各自拒絕；允許分片缺號與未排序記錄，空目錄為空集合 |
 | C02 | 一筆 value 改一字／新增成員／改 evidence／換共享 review_context 卻留舊 hash | 三層重算檢出，不能沿用舊決定 |
 | C03 | confirmed 的 category／policy 換成合法但不適用的其他類別 | 拒絕；即使有 authored source 也不放行 |
 | C04 | 借同 kind 別筆的 decision／漏一成員／多一成員／重複 member | 精確集合驗證拒絕 |

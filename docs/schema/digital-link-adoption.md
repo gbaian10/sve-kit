@@ -23,7 +23,7 @@ registry 固定永久身分；`curation/` 尚無格式／loader。glossary 現�
 
 area 目前只有 `links`，`coverage` 路徑明確拒絕。filing_key 為 `[A-Za-z0-9_-]+`，只歸檔，不決定身分、商品或地區；可沿 card 的歸檔代號。sequence 從 001 起按 area/filing_key 連續，至少三位十進位。每片非空。
 
-沿 [authored-layout §1／§2](authored-layout.md#2-分片與來源) 的嚴格 YAML 1.2、canonical recipe、單檔 <1 MiB／512 KiB 目標。includes 映射完整分片路徑到**解析後 canonical 內容 hash**；完整 index／分片原始 bytes 另釘 F1。拒絕缺檔、hash 不符、重複 key、symlink、絕對路徑、`..`、跨入口引用及未索引檔案。先驗全入口，再按公開範圍投影；不能先濾 JP。啟用此能力時缺 index 必須失敗，空集合只能明示 includes={}；未支援的新格式不能當空集合。
+沿 [authored-layout §1／§2](authored-layout.md#2-分片與來源) 的嚴格 YAML 1.2、canonical recipe、單檔 <1 MiB／512 KiB 目標。includes 映射完整分片路徑到**解析後 canonical 內容 hash**；當前分片直接從工作樹讀取。拒絕缺檔、hash 不符、重複 key、symlink、絕對路徑、`..`、跨入口引用及未索引檔案。先驗全入口，再按公開範圍投影；不能先濾 JP。啟用此能力時缺 index 必須失敗，空集合只能明示 includes={}；未支援的新格式不能當空集合。
 
 record 恰為 `{subject,value,review_level,reason}`：
 
@@ -112,7 +112,7 @@ SVE 新面／相異名稱 hash 或數位目錄成員／名稱 hash 變動、link
 5. materialize fresh link 與其 §2.1 決定列；驗 coverage 的完整來源、範圍與 link 集合，再 materialize 適用的 coverage。引用未知永久 ID 或偽造來源不能當合法退役略過。所有 stale／partial 與待件原因列私人建置報告。
 6. 此後 glossary `digital_name` concept_evidence 及名稱產生者才能引用它們；仍重驗精確 face、decision、JP／目標語 SourceRef，不以 FK 存在替代。所有 DB 寫入在 caller-owned transaction 內；任一步失敗 rollback，不能留下半批 link／coverage／翻譯。對外獨立匯入包裝才擁有 transaction。
 
-authored source_record 保存分片 bytes 與 authored commit，decision_source 把決定列連到分片；名稱和 coverage 的目錄 raw、batch descriptor／receipt、parser 程式／設定、來源 usage 全部納入 F1。loader 返回可按 link id 查核的型別化結果，供匯入、glossary 與逐 owner 驗證共享；依據可由釘住的 authored／F1 重播，不新建一張平行名稱表，也不從 translation.id 解碼所有者。後續新 loader／validator／importer 須加進 recipe runtime 依賴閉包。最後由完整建置的 `record.verify` 驗實際 DB source 使用閉包，不能只用各子匯入器的 partial verify 宣稱完成。
+authored source_record 保存當前分片來源，decision_source 連到該分片。loader 的型別化結果由匯入、glossary 與逐 owner 驗證共享；凍結 raw 與 metadata 在來源邊界驗證，來源／語言／owner 在 plan 檢查。建置保留實際用途摘要，同一 transaction 填 DB 一次後直接保存，不鎖 runtime bytes 或驗 expected 使用閉包。
 
 官方原文／數位譯名只從凍結 SourceRef 重建，不抄入 authored、測試或報告；目錄只存 ID／phase hash 引用。研究草稿、網站 URL、latest cache、live manifest、網路補抓都不是 runtime 輸入。缺凍結前置先停止遷入，不擅自封存或更新 sv1。公開仍用既有 digital_link／digital_link_coverage 欄位白名單，不公開源文件。
 
@@ -247,4 +247,4 @@ context 是既有 BuildContext JSON，含上述來源批次、registry 與 trans
 真正 same_card 的兩層排審、明示職業對照與 sampled／confirmed 不改；same_name 不把 84 同角色草稿記成 same_card。
 93 個警訊與 232 待確認依維護者選的「照規則連」處理，但不算真人樣本；候選指令仍只產排審報告。
 coverage 仍不採納；未來完整集合須含有效規則連結，不能以此簽 reviewed_none。
-當批 caller transaction 及 complete record.verify 沿 §5／§8，不以 partial 驗證代替正式發布。
+當批 caller transaction 與來源／owner 檢查沿 §5／§8，完成後保存本次 DB 與輸入摘要。

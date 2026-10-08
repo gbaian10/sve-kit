@@ -23,10 +23,10 @@
 | 待審技術契約 | Standard 構築／禁限／角色與必要 CR 引用 | `construction-adoptions/index.yaml`、`construction-adoptions/<area>/<region>/standard/<sequence>.yaml`，roles／cr 為 `<area>/<region>/<sequence>.yaml` 整區共用；見[構築採納契約](construction-adoption.md)，尚無正式採納資料 |
 | 提案 | 其他策展、標誌 | `curation/BP01/001.yaml` |
 | 待審（技術契約） | 數位對應與查核覆蓋採納 | `digital-links/index.yaml`、`digital-links/{links,coverage}/<filing_key>/<sequence>.yaml`；見[數位對應採納契約](digital-link-adoption.md)，真人link入口已實作、尚無逐卡正式遷入；coverage未實作 |
-| 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/index.yaml`、`translations/{templates,glossary,overrides,region-reviews}/<filing_key>/<sequence>.yaml`；推導結果不進 authored，見 §6 |
-| 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog-adoptions/index.yaml` 與分片，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與封套) |
-| 定案（技術契約） | 同號路由與預設版次覆寫 | `display-overrides/index.yaml` 與分片，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
-| 定案（新格式） | 數位名字／同名瀏覽政策 | `digital-name-policies/index.yaml`、`digital-name-policies/<policy_id>/current.yaml`；名字與同名瀏覽各一份可修改的 current 規則，同名瀏覽是獨立非翻譯入口，見[名字契約](digital-name-policy.md) |
+| 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/{templates,glossary,overrides}/<filing_key>/<sequence>.yaml`；推導結果不進 authored，見 §6 |
+| 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog-adoptions/<area>/<filing_key>/<sequence>.yaml`，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與封套) |
+| 定案（技術契約） | 同號路由與預設版次覆寫 | `display-overrides/<area>/<filing_key>/<sequence>.yaml`，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
+| 定案（新格式） | 數位名字／同名瀏覽政策 | `digital-name-policies/<policy_id>/current.yaml`；名字與同名瀏覽各一份可修改的 current 規則，同名瀏覽是獨立非翻譯入口，見[名字契約](digital-name-policy.md) |
 | legacy，僅供轉換 | 模板採納政策／核可收據 | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml`；無文字摘要進索引，首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用 |
 | 定案（新格式） | 模板參數辨識規則 | `template-parameter-rules/current.yaml`，format 2；規則與必要反例隨程式 PR 修改，不需 approval |
 | 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `image-crops.yaml` 單檔，無封套、全檔查重，依[覆寫契約](image-crop-overrides.md) |
@@ -446,13 +446,11 @@ URL／識別碼改動、相對連結解析結果變更或原本無 URL 後來補
 
 ### 11.4 建置追溯與既有契約邊界
 
-建置明示讀取兩個獨立商品入口；啟用官方商品匯入時不得把缺少 `product-identities/` 當空對照。依 [source-archive §2.2.1](source-archive.md#221-建置輸入紀錄與完整使用閉包) 的既有 F1 context，configuration 的 `product_identity` 項保存 `{authored_revision}`（完整 40 碼 revision）；dependencies 以 repo 相對路徑釘住所有分片的 exact bytes hash。實際內容須與釘住 revision 相符，不能用 dirty 檔冒稱該 revision。所有歷史別名分片都要保留，不只留最新 match。
-
-每個分片以完整 authored revision、路徑與 canonical hash 建立 authored source_record，parser_version 使用本封套 recipe `product-identity-v1`；evidence 的 raw source_record 由使用閉包追溯。這是新增 authored 封套 recipe，不改 F1 raw 共用列的 parser_version=null 規則。官方 product／printing_product.source_id 仍指萃取內容的 raw 來源，不改指身分對照以假裝內容經人工確認；不新增 DB 表或 decision_id 欄。對照到哪個 product_id 可由釘住分片重建。
-
-僅驗證 evidence 閉包的實際使用以 `product_identity_evidence_closure`／`archive-closure-v1` 登錄；為重現 match 而實際解析的使用另以 `official_product_identity`、正式 parser pin 及精確區塊 locator 登錄。官方內容／收錄的 parser 用途仍各自保存；共用 raw 不吞掉不同用途。零匹配、歧義或被 printing 身分閘門排除的區塊也是已讀輸入，仍納實際 uses。輸出前從釘住輸入獨立宣告並驗完整用途閉包，依 F1 保存 DB／inputs／report／seal；來源衝突與失敗不發布半套產物。
-
-商品身分確認不授權更動 family／owner、日期精度、收錄、EN 身分採納或公開快照白名單。家族關係不明可為 null；機器候選鍵只供本機核對。正式匯入器的驗收須包括同 URL 不同代號、無 URL、名稱／日期修正、改址追加、零／多重匹配、錯 region、多餘欄位直接拒絕、expansion 參數缺值／空值／多值、同區同 expansion 跨 ID 的 warning、來源 hash 錯及 F1 使用閉包缺漏；不能用本格式文件或候選盤點冒充已完成實作。
+建置明示讀取兩個獨立商品入口；啟用官方商品匯入時不得把缺少 `product-identities/` 當空對照。
+configuration 的 `product_identity` 保存 `{authored_revision}` 作為追蹤資訊；分片讀當前工作樹，
+不釘 Git exact bytes 或 dependency hash。所有歷史別名分片仍保留，重複 match 拒絕。
+來源 evidence 仍驗 sealed batch、descriptor、first receipt、raw hash、區塊及地區／owner 適用性。
+各 parser／用途保留實際 uses，完成交易的 DB 與 inputs／report 直接保存，不再驗 expected 使用閉包或 build seal。
 
 ## 12. 身分修復與決定續版
 
