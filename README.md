@@ -58,6 +58,10 @@ sve-kit/
 └── docs/                  ADRs (docs/adr), DSL specs (docs/dsl), terminology and schema
 ```
 
+The carddb package groups data domains under `sve_carddb.domains`; translation
+and digital modules have dedicated subpackages. Pure parsers and build
+infrastructure remain independent of authored domain loaders.
+
 The authoritative game server (`sim/server/`) is planned and does not exist yet.
 The engine, scenario runner, and web client already exist; their presence does
 not imply that the complete battle service or public deployment is ready.

@@ -262,6 +262,12 @@ guard covers Python I/O in each pytest worker; it is not an operating-system
 sandbox for subprocesses. Existing Git fixture subprocesses operate offline on
 synthetic repositories. Do not add tests that invoke external network tools.
 
+carddb keeps authored domain loaders in `src/sve_carddb/domains/`. Translation
+subpackages group glossary, names, templates, parameters and source inventory;
+digital subpackages group links and name policies. Pipeline boundary and fresh
+import tests check that parse, ingest and build do not load domain code and that
+parsers import without the archive locking implementation.
+
 Run them yourself when you change the code they cover:
 
 ```bash
