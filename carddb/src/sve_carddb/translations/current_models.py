@@ -202,8 +202,3 @@ class Shard(RecordData):
     translation_authored_format: Literal[2]
     kind: Literal["translation_shard"]
     records: Annotated[tuple[Record, ...], Field(min_length=1)]
-
-
-def key(record: Record) -> str:
-    """Expose the selection key derived from immutable identity fields."""
-    return record.record_key

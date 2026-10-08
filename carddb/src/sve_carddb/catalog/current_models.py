@@ -243,8 +243,3 @@ class DisplayShard(RecordData):
     display_override_format: Literal[2]
     kind: Literal["display_override_shard"]
     records: Annotated[tuple[Record, ...], Field(min_length=1)]
-
-
-def key(record: Record) -> str:
-    """Expose the selection key derived from the subject."""
-    return record.record_key

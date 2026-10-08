@@ -129,6 +129,8 @@ def _empty_defaults(value: object) -> OmittedFields:
         omitted: dict[str, bool | OmittedFields] = {}
         for name, info in type(value).model_fields.items():
             item = getattr(value, name)
+            # Only these three names extend empty-default omission to keep other defaults explicit.
+            # A value must match its declared default and type to preserve the model's meaning.
             empty_default = (
                 (name in {"origin", "low_confidence", "missing_source_reason"})
                 or info.default is None
@@ -320,7 +322,9 @@ _ANCHORS = {
 
 def _text(data: dict[str, JsonValue], key: str) -> str:
     value = data.get(key)
-    return value if isinstance(value, str) else ""
+    if not isinstance(value, str):
+        raise ValueError(f"Registry field {key} must be a string")  # ruff: ignore[type-check-without-type-error] -- invalid authored fields use the registry's ValueError boundary
+    return value
 
 
 def _area(entry: Entry) -> str:

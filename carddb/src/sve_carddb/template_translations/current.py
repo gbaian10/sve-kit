@@ -31,11 +31,6 @@ if TYPE_CHECKING:
     from sve_carddb.template_translations.members import Reconstructed
 
 
-def key(record: Record) -> str:
-    """Return the derived selection key."""
-    return record.record_key
-
-
 def shard(raw: bytes) -> Shard:
     """Closed current records do not permit stray old receipts or private evidence fields."""
     try:
