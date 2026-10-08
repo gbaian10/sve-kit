@@ -23,7 +23,11 @@ class DirectTestTests(unittest.TestCase):
     def test_direct_hooks_skip_precommit(self) -> None:
         """Every direct hook is still owned, but omitted from its owner's hook run."""
         owned = owners()
-        for hook_id, job in (("pytest", "python"), ("cargo-test", "rust")):
+        for hook_id, job in (
+            ("pytest", "python"),
+            ("pytest-publish", "python"),
+            ("cargo-test", "rust"),
+        ):
             assert owned[hook_id].job == job
             assert owned[hook_id].direct
             output = io.StringIO()
@@ -32,6 +36,32 @@ class DirectTestTests(unittest.TestCase):
             assert hook_id in output.getvalue().strip().split(",")
         assert not owned["mypy"].direct
         assert main(["check"]) == 0
+
+    def test_publish_is_in_the_python_job_with_independent_coverage(self) -> None:
+        """Reader changes and fork PRs must retain the complete publisher tests."""
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        filters = yaml.safe_load(
+            next(
+                step["with"]["filters"]
+                for step in workflow["jobs"]["changes"]["steps"]
+                if step.get("id") == "filter"
+            )
+        )
+        assert "carddb/**" in filters["python"]
+        assert "publish/**" in filters["python"]
+        steps = workflow["jobs"]["python"]["steps"]
+        tests = next(step for step in steps if step.get("id") == "publish-tests")
+        assert tests["if"] == "${{ !cancelled() }}"
+        assert "--locked pytest" in tests["run"]
+        assert "SVE_CI_COVERAGE_THRESHOLD" not in tests["run"]
+        config = tomllib.loads((ROOT / "publish/pyproject.toml").read_text())
+        assert config["tool"]["coverage"]["run"]["branch"] is True
+        assert config["tool"]["coverage"]["report"]["fail_under"] == 92
+        summary = next(
+            step for step in steps if step.get("name") == "Publish test summary"
+        )
+        assert "steps.publish-tests.outcome" in summary["if"]
+        assert 'test_summary.py publish "$REPORT_DIR"' in summary["run"]
 
     def test_workflow_test_and_cleanup_contract(self) -> None:
         """Check exact commands and ensure failure summaries/cleanup still run."""
@@ -222,6 +252,25 @@ class DirectTestTests(unittest.TestCase):
                         inputs["cache_save"]
                         == "${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}"
                     )
+        python_steps = cast("list[dict[str, object]]", jobs["python"]["steps"])
+        restore = next(step for step in python_steps if step.get("id") == "mypy-cache")
+        save = next(
+            step
+            for step in python_steps
+            if "steps.mypy-cache.outputs.cache-primary-key" in str(step.get("with", {}))
+        )
+        restore_inputs = cast("dict[str, object]", restore["with"])
+        save_inputs = cast("dict[str, object]", save["with"])
+        assert "if" not in restore
+        assert str(restore_inputs["path"]).splitlines() == [
+            "carddb/.mypy_cache",
+            "publish/.mypy_cache",
+        ]
+        assert save_inputs["path"] == restore_inputs["path"]
+        for project in ("carddb", "publish"):
+            for filename in ("uv.lock", "pyproject.toml"):
+                for cache_key in ("key", "restore-keys"):
+                    assert f"'{project}/{filename}'" in str(restore_inputs[cache_key])
         web_steps = cast("list[dict[str, object]]", jobs["web"]["steps"])
         install = next(
             step

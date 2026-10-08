@@ -7,20 +7,19 @@ from typing import TYPE_CHECKING, Annotated
 
 import httpx
 import typer
+from sve_carddb.export.read_api import ExportError, load_export
 
-from sve_carddb.cli_paths import required_root
-from sve_carddb.export.read_api import ExportError as UploadError
-from sve_carddb.export.read_api import load_export
-from sve_carddb.r2_upload.sdk import Credentials, sdk_client
-from sve_carddb.r2_upload.v2.adapter import R2Store
-from sve_carddb.r2_upload.v2.freshness import CDNFreshness, cdn_root
-from sve_carddb.r2_upload.v2.publish import report, upload
+from sve_publish.adapter import R2Store
+from sve_publish.cli_paths import required_root
+from sve_publish.freshness import CDNFreshness, cdn_root
+from sve_publish.publish import report, upload
+from sve_publish.sdk import Credentials, sdk_client
 
 if TYPE_CHECKING:
     from sve_carddb.export.read_api import Export
 
 
-def upload_v2(
+def upload_command(
     *,
     export_dir: Annotated[Path | None, typer.Option(envvar="SVE_EXPORT_DIR")] = None,
     cdn_base_url: Annotated[str | None, typer.Option()] = None,
@@ -40,7 +39,7 @@ def upload_v2(
                 export, None if skip_cdn_verify else root, account_id, bucket
             )
         typer.echo(json.dumps(result, sort_keys=True, separators=(",", ":")))
-    except UploadError as error:
+    except ExportError as error:
         raise typer.BadParameter(str(error)) from None
     except OSError, ValueError, TypeError, KeyError:
         raise typer.BadParameter("Local upload preparation failed") from None
@@ -48,7 +47,7 @@ def upload_v2(
 
 def _cdn(value: str | None, *, required: bool) -> str | None:
     if value is None and required:
-        raise UploadError(
+        raise ExportError(
             "CDN verification needs --cdn-base-url, or pass --skip-cdn-verify"
         )
     return None if value is None else cdn_root(value)
@@ -76,5 +75,5 @@ def target_values(account_id: str | None, bucket: str | None) -> tuple[str, str]
     account = account_id or os.environ.get("R2_ACCOUNT_ID", "")
     target = bucket or os.environ.get("R2_DEV_BUCKET", "")
     if not account or not target:
-        raise UploadError("Execution requires an explicit R2 account ID and bucket")
+        raise ExportError("Execution requires an explicit R2 account ID and bucket")
     return account, target

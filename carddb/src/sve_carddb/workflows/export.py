@@ -8,11 +8,11 @@ import typer
 from sve_carddb.cli_paths import required_root
 from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.core.authored import authored_root
-from sve_carddb.core.json import canonical, digest, object_value, parse
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.preview import Roots, _write, write_preview
 from sve_carddb.export.preview.media_state import reserve
-from sve_carddb.export.publication import require_formal, require_preview
+from sve_carddb.export.publication import require_preview
 from sve_carddb.export.transport import export_snapshot
 from sve_carddb.export.transport.compression import python_brotli
 from sve_carddb.images.assets import (
@@ -178,15 +178,6 @@ def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] 
             checks=checks,
         )
     )
-
-
-@app.command("publish")
-def publish_command(
-    manifest: Annotated[Path, typer.Argument(exists=True, dir_okay=False)],
-) -> None:
-    """Reject preview first; complete formal release gates are tracked by #34."""
-    require_formal(object_value(parse(manifest.read_bytes())))
-    raise typer.BadParameter("Formal release gates are not implemented yet (#34)")
 
 
 def require_unknown_coverage(projection: Projection) -> None:

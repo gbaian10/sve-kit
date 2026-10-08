@@ -13,8 +13,8 @@ from xml.sax.saxutils import escape
 import httpx
 import pytest
 
-from sve_carddb.r2_upload.sdk import Credentials
-from sve_carddb.r2_upload.v2.adapter import R2Store, Stored
+from sve_publish.adapter import R2Store, Stored
+from sve_publish.sdk import Credentials
 
 from .r2_sdk_fixtures import mock_client
 

@@ -20,8 +20,7 @@ from botocore.exceptions import BotoCoreError, ClientError
 from botocore.httpsession import URLLib3Session
 from botocore.loaders import Loader
 from botocore.session import Session as CoreSession
-
-from sve_carddb.export.read_api import ExportError as UploadError
+from sve_carddb.export.read_api import ExportError
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
@@ -46,16 +45,16 @@ class Credentials:
         access = os.environ.get("SVE_R2_ACCESS_KEY_ID", "")
         secret = os.environ.get("SVE_R2_SECRET_ACCESS_KEY", "")
         if not access or not secret:
-            raise UploadError("Explicit local R2 credentials are required")
+            raise ExportError("Explicit local R2 credentials are required")
         return cls(access, secret)
 
 
 def validate_target(account: str, bucket: str) -> None:
     """Reject endpoint injection before creating an SDK or reading credentials."""
     if not re.fullmatch(r"[0-9a-f]{32}", account):
-        raise UploadError("R2 account ID must be 32 lowercase hexadecimal characters")
+        raise ExportError("R2 account ID must be 32 lowercase hexadecimal characters")
     if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,61}[a-z0-9]", bucket):
-        raise UploadError("Invalid R2 bucket name")
+        raise ExportError("Invalid R2 bucket name")
 
 
 def validate_key(key: str) -> None:
@@ -66,7 +65,7 @@ def validate_key(key: str) -> None:
         or "\\" in key
         or "\0" in key
     ):
-        raise UploadError("Invalid object key")
+        raise ExportError("Invalid object key")
 
 
 class BoundaryError(Exception):
@@ -237,7 +236,7 @@ def _open_client(
         "",
         "DISABLED",
     }:
-        raise UploadError("Ambient SDK plugins are forbidden")
+        raise ExportError("Ambient SDK plugins are forbidden")
     core = CoreSession()
     core.register_component(
         "data_loader",
@@ -331,7 +330,7 @@ def sdk_client(
             ) as client:
                 yield client
         except BotoCoreError:
-            raise UploadError("R2 SDK initialization or transport failed") from None
+            raise ExportError("R2 SDK initialization or transport failed") from None
 
 
 def status(error: ClientError) -> int:

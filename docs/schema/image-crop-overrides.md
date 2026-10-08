@@ -78,6 +78,6 @@ region／card_no 不參與來源查找、跨區配對或採納判定；已驗證
 
 新 key 下五檔會重新產製。在來源與 recipe 不變時，card 三檔輸入不變，內容定址後仍可共用原 blob；art 兩檔改為新 WebP hash／path。不改寫內容定址的建置 blob。`img:binding:` 不依賴裁切，來源／頁面 binding 不變時保持原值。2.0 的公開 key 固定、只換 art_version 並覆寫有變動的 art bytes，card 三檔版本沿用；欄序依 snapshot-format §2.1，不公開框。
 
-裁切檔變動後，須重產受影響的預覽、影像分片、清單與壓縮旁檔，不拿舊清單充作已完成覆寫。`r2 upload-v2` 只上傳 preview 根目前清單的引用閉包與其卡圖。保留窗口分開看 current＋previous 的 metadata 聯集及僅 current 的圖片集合；previous 圖片引用不保留舊 WebP，不要求同 key 符合兩版輸出。新圖驗妥才切索引，之後由另行執行的回收清理失去 current 引用的 key；無引用的舊檔不會被上傳。
+裁切檔變動後，須重產受影響的預覽、影像分片、清單與壓縮旁檔，不拿舊清單充作已完成覆寫。`sve-publish upload` 只上傳 preview 根目前清單的引用閉包與其卡圖。保留窗口分開看 current＋previous 的 metadata 聯集及僅 current 的圖片集合；previous 圖片引用不保留舊 WebP，不要求同 key 符合兩版輸出。新圖驗妥才切索引，之後由另行執行的回收清理失去 current 引用的 key；無引用的舊檔不會被上傳。
 
 資料入庫後先完成兩檔 art 的實際 WebP 檢視，再重新匯出並執行上傳的離線 dry-run；真正上傳 R2／公開仍需使用者另行同意。來源 raw 與來源歸檔證據依原契約保存，公開快照／WebP 依有限保留策略，不因新框已發布而刪除。

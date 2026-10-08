@@ -94,7 +94,6 @@ from sve_carddb.ingest.queries import card_numbers, current_sets
 from sve_carddb.parse.pages import official_sv1 as sv1
 from sve_carddb.parse.pages import official_svwb as svwb
 from sve_carddb.parse.pages.official_jp import parse_list_first
-from sve_carddb.r2_upload.commands import app as r2_app
 from sve_carddb.workflows.export import app as snapshot_app
 from sve_carddb.workflows.extract import extract_cards
 
@@ -121,7 +120,6 @@ archive_app = typer.Typer(
 )
 app.add_typer(archive_app, name="archive")
 app.add_typer(snapshot_app, name="snapshot")
-app.add_typer(r2_app, name="r2")
 app.add_typer(source_import_app, name="source-import")
 
 console = Console(soft_wrap=True)

@@ -105,8 +105,10 @@ def coverage(path: Path, *, rust: bool) -> float:
     return number(totals_python["percent_covered"])
 
 
-def coverage_scope() -> tuple[str, float]:
+def coverage_scope(kind: str = "python") -> tuple[str, float]:
     """Scope comes from the event classifier, never from missing private files."""
+    if kind == "publish":
+        return "synthetic", 92
     selected = os.environ.get("SVE_CI_TEST_MODE", "full")
     raw = os.environ.get(
         "SVE_CI_COVERAGE_THRESHOLD", "90" if selected == "full" else ""
@@ -121,9 +123,11 @@ def coverage_scope() -> tuple[str, float]:
     return selected, minimum
 
 
-def scope_description() -> str:
+def scope_description(kind: str = "python") -> str:
     """Distinguish remaining-test coverage from complete acceptance."""
-    selected, _ = coverage_scope()
+    selected, _ = coverage_scope(kind)
+    if selected == "synthetic":
+        return "Test scope: **synthetic publish tests**; no private test data required, including fork PRs."
     if selected == "full":
         return "Test scope: **full**; private test data required."
     return (
@@ -132,9 +136,9 @@ def scope_description() -> str:
     )
 
 
-def coverage_description(folder: Path, *, rust: bool) -> str:
+def coverage_description(folder: Path, *, rust: bool, kind: str = "python") -> str:
     """Keep failure counts visible even when failing tests prevented coverage export."""
-    _, minimum = coverage_scope()
+    _, minimum = coverage_scope(kind)
     label = "Line" if rust else "Combined line + branch"
     try:
         percent = coverage(folder / "coverage.json", rust=rust)
@@ -156,7 +160,7 @@ def failure_section(locations: list[str]) -> list[str]:
 
 def junit_summary(kind: str, folder: Path) -> str:
     """Render counts, timings and safe locations for Python or Web."""
-    cases, elapsed = junit(folder / "junit.xml", python=kind == "python")
+    cases, elapsed = junit(folder / "junit.xml", python=kind in {"python", "publish"})
     if not cases:
         msg = "Report has no test cases"
         raise ValueError(msg)
@@ -175,8 +179,13 @@ def junit_summary(kind: str, folder: Path) -> str:
         lines.append(
             f"Command wall time (including startup/coverage): **{wall:.2f} s**."
         )
-    if kind == "python":
-        lines.extend([scope_description(), coverage_description(folder, rust=False)])
+    if kind in {"python", "publish"}:
+        lines.extend(
+            [
+                scope_description(kind),
+                coverage_description(folder, rust=False, kind=kind),
+            ]
+        )
     lines.extend(
         failure_section(
             [f"{case.file}::{case.name}" for case in cases if case.state == "failed"]
@@ -242,8 +251,15 @@ def rust_summary(folder: Path) -> str:
 
 def main(argv: list[str]) -> int:
     """Append safe statistics to the job summary, including an explicit missing-report failure."""
-    if len(argv) != EXPECTED_ARGS or argv[0] not in {"python", "web", "rust"}:
-        sys.stderr.write("Usage: test_summary.py python|web|rust REPORT_DIRECTORY\n")
+    if len(argv) != EXPECTED_ARGS or argv[0] not in {
+        "python",
+        "publish",
+        "web",
+        "rust",
+    }:
+        sys.stderr.write(
+            "Usage: test_summary.py python|publish|web|rust REPORT_DIRECTORY\n"
+        )
         return 2
     kind, directory = argv
     status = 0
@@ -254,7 +270,7 @@ def main(argv: list[str]) -> int:
         )
         if kind != "web":
             try:
-                _, minimum = coverage_scope()
+                _, minimum = coverage_scope(kind)
                 status = int(
                     coverage(folder / "coverage.json", rust=kind == "rust") < minimum
                 )

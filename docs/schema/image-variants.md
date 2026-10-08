@@ -63,7 +63,7 @@ binding／指紋／版本。每次匯出先把 H 加一並寫回，失敗的匯�
 此檔不是 authored 人工輸入，也不放在公開根；請隨既有備份保存。遺失時會從 1 重新配號，
 可能撞到已被快取的舊 URL，應從備份還原而非刪除重來。
 
-上傳流程（[R2 上傳](../../carddb/src/sve_carddb/r2_upload/v2/README.md)）：
+上傳流程（[R2 上傳](../../publish/README.md)）：
 
 1. 只選 preview 指標所指清單的引用閉包與其卡圖；私有目錄、建置 bundle 與圖片庫不上傳。
 2. 卡圖缺少或不同時才寫：新 key create-only，既有 key 以 If-Match 條件覆寫；JSON／manifest 不可覆寫，不同即停止。

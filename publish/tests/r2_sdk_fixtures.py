@@ -16,9 +16,9 @@ from botocore.exceptions import (
 )
 from botocore.httpsession import URLLib3Session
 
-from sve_carddb.r2_upload import sdk
-from sve_carddb.r2_upload.sdk import Credentials, sdk_client
-from sve_carddb.r2_upload.v2.adapter import R2Store
+from sve_publish import sdk
+from sve_publish.adapter import R2Store
+from sve_publish.sdk import Credentials, sdk_client
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

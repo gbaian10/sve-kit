@@ -3,11 +3,10 @@
 from typing import TYPE_CHECKING
 
 import pytest
+from sve_carddb.export.read_api import ExportError, read_member
 from typer.testing import CliRunner
 
-from sve_carddb.cli import app
-from sve_carddb.export.read_api import ExportError as UploadError
-from sve_carddb.export.read_api import read_member
+from sve_publish.cli import app
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -15,7 +14,7 @@ if TYPE_CHECKING:
 
 @pytest.mark.parametrize("key", ["/absolute", "../outside", "nested/../member"])
 def test_member_read_rejects_escaping_keys(tmp_path: Path, key: str) -> None:
-    with pytest.raises(UploadError, match=r"^Invalid public member key$"):
+    with pytest.raises(ExportError, match=r"^Invalid public member key$"):
         read_member(tmp_path, key)
 
 
@@ -33,7 +32,7 @@ def test_member_read_rejects_aliases_and_nonfiles(tmp_path: Path, kind: str) -> 
     else:
         key = "source"
     with pytest.raises(
-        UploadError, match=r"^Public member is not a regular non-symlink file$"
+        ExportError, match=r"^Public member is not a regular non-symlink file$"
     ):
         read_member(tmp_path, key)
 
@@ -46,7 +45,7 @@ def test_member_read_preserves_exact_bytes(tmp_path: Path) -> None:
 
 def test_r2_cli_has_only_current_publication_and_collection() -> None:
     runner = CliRunner()
-    for command in ("upload-v2", "gc-v2"):
-        assert runner.invoke(app, ["r2", command, "--help"]).exit_code == 0
-    result = runner.invoke(app, ["r2", "upload-preview"])
+    for command in ("upload", "gc"):
+        assert runner.invoke(app, [command, "--help"]).exit_code == 0
+    result = runner.invoke(app, ["unsupported-command"])
     assert result.exit_code == 2

@@ -3,7 +3,7 @@
 preview 僅供本機，匯出器預設產出 2.0。圖片投影依 [圖片發布契約](image-variants.md#20-圖片-url版本與新鮮度)
 與 [傳輸 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)：從建置 hash path
 產生固定 ID key，卡包 media 提供版本／尺寸；圖片可受控覆寫，JSON 不可變。
-preview 的圖片版本狀態與快取放在公開根之外。`r2 upload-v2` 直接上傳這個公開根，
+preview 的圖片版本狀態與快取放在公開根之外。`sve-publish upload` 直接上傳這個公開根，
 在開發桶的 current／previous 索引寫入 `preview-` entry；這不是正式發布，不能把 preview 改名升格。
 
 preview 使用正式傳輸契約與共用匯出器，但不是正式發布。`data_version` 必須有
@@ -69,8 +69,8 @@ gzip。`snapshot export-offline` 可用 `--brotli` 額外產生 `.br`；
 lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行檔 hash。
 不再提供 `--brotli-command` 或呼叫外部 encoder，亦不需準備系統 libbrotli。
 
-`r2 upload-v2` 原樣上傳清單所列的 raw／gzip／br，不重壓；選檔、標頭與 CDN 驗證見
-[R2 上傳](../../carddb/src/sve_carddb/r2_upload/v2/README.md)，保留窗口見 [發布契約](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
+`sve-publish upload` 原樣上傳清單所列的 raw／gzip／br，不重壓；選檔、標頭與 CDN 驗證見
+[R2 上傳](../../publish/README.md)，保留窗口見 [發布契約](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
 
 建置輸入的 WebP 使用內容定址 hash path；preview 輸出為 2.0 的固定 ID key。先驗證／寫入圖片，再寫 images
 分片與其餘快照成員；只複製公開 `printing_image` 引用且可用、核可的變體，不以來源 hash 當公開 URL。
@@ -103,8 +103,8 @@ lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行�
 只載可見面的卡包 media 與圖片；全域來源詳情按需，不全量預取圖片或建立全庫影像索引。
 未完成的下載須標進度，CacheStorage 已驗 bytes 保存成功且未清除時，暖頁 metadata 不向外重抓。
 
-`snapshot publish MANIFEST` 在任何寫入前拒絕 `preview-` 產物。正式發布其餘閘門與
-current／previous 版本索引依 snapshot-format §4.1，屬 #34 的發布工作；目前命令在正式版號下也會停止；改掉前綴不能把 preview
+正式發布閘門尚未實作（#34）；目前僅支援開發桶的 preview 上傳。正式發布的閘門與
+current／previous 版本索引依 snapshot-format §4.1，屬 #34 的發布工作；上傳僅接受受支援的 preview；改掉前綴不能把 preview
 直接升為正式發布，正式批次須重新建置並通過完整發布閘門。
 
 Cloudflare 開發部署、R2 2.0 發布與未登入入口驗收，見

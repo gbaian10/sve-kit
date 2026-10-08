@@ -111,9 +111,9 @@ original PNGs and recipe caches stay private. Reports include applied/unused
 crops, annotation mismatches and verified reprint candidates in both regions.
 Available assets remove the image integration gate from this preview report;
 formal activation and source coverage still require their existing gates.
-`r2 upload-v2` uploads the preview root's current manifest closure and images to
+`sve-publish upload` uploads the preview root's current manifest closure and images to
 the development bucket as a `preview-` index entry; see
-[the upload guide](../r2_upload/v2/README.md).
+[the upload guide](../../../../publish/README.md).
 
 ## Supplemental capabilities
 

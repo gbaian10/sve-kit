@@ -1,0 +1,113 @@
+[project]
+name = "sve-publish"
+version = "0.1.0"
+description = "Publish verified SVE offline previews to R2"
+license = "Apache-2.0"
+requires-python = ">=3.14.7,<3.15"
+dependencies = [
+    "sve-carddb",
+    "boto3>=1.43.108",
+    "httpx>=0.28.1",
+    "jsonschema>=4.26.0",
+    "pydantic>=2.13.5",
+    "typer>=0.27.2",
+]
+
+[project.scripts]
+sve-publish = "sve_publish.cli:main"
+
+[tool.uv.sources]
+sve-carddb = { path = "../carddb", editable = true }
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.8",
+    "mypy>=2.3.1",
+    "types-boto3[s3]>=1.43.108",
+    "types-jsonschema>=4.26.0.20260518",
+    "brotli-stubs>=1.2.0",
+]
+test = [
+    "pytest>=9.1.1",
+    "pytest-xdist>=3.8.0",
+    "pytest-cov>=7.1.0",
+    "pytest-asyncio>=1.4.0",
+]
+
+[tool.uv]
+default-groups = ["dev", "test"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sve_publish"]
+
+[tool.ruff]
+extend = "../carddb/pyproject.toml"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = [
+    "D",
+    "relative-imports",
+    "private-member-access",
+    "magic-value-comparison",
+    "no-self-use",
+    "import-private-name",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+    "--import-mode=importlib",
+    "--strict-markers",
+    "--maxfail=3",
+    "--cov-config=pyproject.toml",
+    "--cov-report=term-missing",
+]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.coverage.run]
+source = ["./src/"]
+omit = []
+data_file = "htmlcov/.coverage"
+branch = true
+
+[tool.coverage.report]
+skip_covered = true
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "@overload",
+    "@(abc\\.)?abstractmethod",
+    "raise NotImplementedError",
+    "raise AssertionError",
+    "class .*\\bProtocol\\):",
+]
+fail_under = 92
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+
+[tool.mypy]
+python_version = "3.14"
+plugins = ["pydantic.mypy"]
+files = ["."]
+strict = true
+pretty = true
+# <https://mypy.readthedocs.io/en/stable/error_code_list2.html>
+enable_error_code = [
+    "ignore-without-code",
+    "possibly-undefined",
+    "truthy-bool",
+    "truthy-iterable",
+    "redundant-expr",
+    "explicit-override",
+    "mutable-override",
+    "unused-awaitable",
+    "unimported-reveal",
+]

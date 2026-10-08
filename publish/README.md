@@ -1,6 +1,6 @@
-# R2 upload of snapshot 2.0
+# sve-publish
 
-`r2 upload-v2` uploads the public root that `snapshot export-offline` wrote
+`sve-publish upload` uploads the public root that `snapshot export-offline` wrote
 (`--preview-dir`). It reads `snapshots/preview/current.json`, takes that manifest's
 closure and its referenced images, and nothing else. There is no separate release
 bundle, ledger, checkpoint, reservation or writer lease: one maintainer runs the
@@ -44,7 +44,7 @@ Headers come from the contract, not from file extensions:
 ## Dry-run
 
 ```bash
-uv --directory carddb run sve-carddb r2 upload-v2 \
+uv --directory publish run sve-publish upload \
   --export-dir /explicit/preview-root --dry-run
 ```
 
@@ -58,7 +58,7 @@ and bytes; how many objects already exist remotely is unknown offline.
 ## Execute
 
 ```bash
-uv --directory carddb run sve-carddb r2 upload-v2 \
+uv --directory publish run sve-publish upload \
   --export-dir /explicit/preview-root \
   --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" \
   --skip-cdn-verify --execute
@@ -107,11 +107,11 @@ signatures. Do not enable HTTP wire logging or `--showlocals` around execution.
 ## Collection
 
 ```bash
-uv --directory carddb run sve-carddb r2 gc-v2 \
+uv --directory publish run sve-publish gc \
   --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" --dry-run
 ```
 
-`gc-v2` reads the remote index and keeps the index, the JSON closures of
+`gc` reads the remote index and keeps the index, the JSON closures of
 `current` and `previous` (plus their manifest `.br` if present) and the images of
 `current` only (ADR-0016). `changes.from` never retains a third version.
 The dry-run lists every other object under `snapshots/blobs/`,
@@ -126,3 +126,30 @@ collected.
 Real R2 behavior, deployed Cache Rules, query-key separation, Access, browsers
 and the service worker still need separate checks by the maintainer. Purge is a
 separate permission and is absent here.
+
+## Development
+
+```bash
+uv --directory publish sync
+uv --directory publish run ruff check
+uv --directory publish run ruff format --check
+uv --directory publish run mypy
+uv --directory publish run pytest -n 4 --cov
+```
+
+The editable path dependency on `../carddb` supplies one public reader and
+validator: production code imports only `sve_carddb.export.read_api`. Synthetic
+test fixtures use the real exporter to generate temporary previews, without
+reading authored data or private test data. The test session independently
+blocks external networking and writes outside pytest temporary roots, except
+coverage and bytecode artifacts. SDK fake clients are closed after every test.
+Combined line and branch coverage is required to reach 92% independently of
+carddb, including fork PRs.
+
+| Variable | Purpose | Required / default |
+| --- | --- | --- |
+| `SVE_EXPORT_DIR` | Public preview root; overridden by `--export-dir` | Upload requires CLI or env; no default |
+| `R2_ACCOUNT_ID` | R2 account; overridden by `--account-id` | Remote operations only; no default |
+| `R2_DEV_BUCKET` | R2 bucket; overridden by `--bucket` | Remote operations only; no default |
+| `SVE_R2_ACCESS_KEY_ID` | R2 access credential | Remote operations only; no default |
+| `SVE_R2_SECRET_ACCESS_KEY` | R2 secret credential | Remote operations only; no default |

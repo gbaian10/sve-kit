@@ -15,19 +15,18 @@ from botocore.awsrequest import AWSPreparedRequest, AWSRequest, AWSResponse
 from botocore.exceptions import ReadTimeoutError
 from botocore.httpsession import URLLib3Session
 from botocore.stub import Stubber
+from sve_carddb.export.read_api import INDEX, ExportError
 
-from sve_carddb.export.read_api import INDEX
-from sve_carddb.export.read_api import ExportError as UploadError
-from sve_carddb.r2_upload import sdk
-from sve_carddb.r2_upload.sdk import BoundaryError, Credentials, bounded, sdk_client
-from sve_carddb.r2_upload.v2.adapter import R2Store, Stored
+from sve_publish import sdk
+from sve_publish.adapter import R2Store, Stored
+from sve_publish.sdk import BoundaryError, Credentials, bounded, sdk_client
 
+from .r2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
+from .r2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- register independent loopback server
 from .r2_sdk_fixtures import MockHTTP, mock_client
-from .r2_v2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
-from .r2_v2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- register independent loopback server
 
 if TYPE_CHECKING:
-    from .r2_v2_fixtures import Loopback, ServerState
+    from .r2_fixtures import Loopback, ServerState
 
 pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
@@ -95,7 +94,7 @@ def test_native_sdk_lost_write_response_is_not_replayed(
     native = NativeLoopback(loopback.root)
     native.lose_put = True
     with sdk_client(ACCOUNT, BUCKET, CREDENTIALS, http_session=native) as client:
-        with pytest.raises(UploadError, match=r"^R2 transport or protocol failed$"):
+        with pytest.raises(ExportError, match=r"^R2 transport or protocol failed$"):
             R2Store(ACCOUNT, BUCKET, CREDENTIALS, client).put(
                 INDEX,
                 b"{}",
@@ -209,7 +208,7 @@ def test_sdk_debug_logging_cannot_print_auth_or_error_contents(
         with sdk_client(
             ACCOUNT, BUCKET, CREDENTIALS, http_session=MockHTTP(http)
         ) as client:
-            with pytest.raises(UploadError, match=r"^R2 object read failed$"):
+            with pytest.raises(ExportError, match=r"^R2 object read failed$"):
                 R2Store(ACCOUNT, BUCKET, CREDENTIALS, client).get("synthetic")
     assert "synthetic-access" not in caplog.text
     assert "synthetic-secret" not in caplog.text
@@ -221,7 +220,7 @@ def test_ambient_plugins_fail_before_client_creation(
 ) -> None:
     monkeypatch.setenv("BOTOCORE_EXPERIMENTAL__PLUGINS", "synthetic=forbidden")
     with (
-        pytest.raises(UploadError, match=r"^Ambient SDK plugins are forbidden$"),
+        pytest.raises(ExportError, match=r"^Ambient SDK plugins are forbidden$"),
         sdk_client(ACCOUNT, BUCKET, Credentials("x", "y")),
     ):
         pytest.fail("plugin-enabled SDK opened")
@@ -238,7 +237,7 @@ def test_listing_is_bounded_before_sdk_xml_parsing(
             http, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS
         )
         with pytest.raises(
-            UploadError, match=r"^Remote response exceeds the configured byte limit$"
+            ExportError, match=r"^Remote response exceeds the configured byte limit$"
         ):
             R2Store(ACCOUNT, BUCKET, CREDENTIALS, client).keys("snapshots/blobs/")
 
@@ -286,7 +285,7 @@ def test_sdk_does_not_accept_noncontractual_success_status(
             else partial(remote.put, INDEX, b"x", {}, expected=None)
         )
         with pytest.raises(
-            UploadError,
+            ExportError,
             match=(
                 r"^R2 object read failed$"
                 if method == "GET"
@@ -300,7 +299,7 @@ def test_sdk_does_not_accept_noncontractual_success_status(
 def test_injected_client_cannot_silently_select_another_account() -> None:
     with sdk_client(ACCOUNT, BUCKET, CREDENTIALS) as client:
         with pytest.raises(
-            UploadError, match=r"^S3 client differs from the explicit R2 account$"
+            ExportError, match=r"^S3 client differs from the explicit R2 account$"
         ):
             R2Store("e" * 32, BUCKET, CREDENTIALS, client)
 
@@ -317,6 +316,6 @@ def test_ambient_aws_credentials_never_complete_a_partial_r2_pair(
     monkeypatch.setenv("AWS_ACCESS_KEY_ID", "synthetic-fallback-access")
     monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "synthetic-fallback-secret")
     with pytest.raises(
-        UploadError, match=r"^Explicit local R2 credentials are required$"
+        ExportError, match=r"^Explicit local R2 credentials are required$"
     ):
         Credentials.environment()

@@ -7,27 +7,34 @@ from typing import TYPE_CHECKING
 
 import httpx
 import pytest
+from sve_carddb.export.read_api import (
+    INDEX,
+    POINTER,
+    ExportError,
+    canonical,
+    load_export,
+    object_value,
+    parse,
+    string,
+)
+from sve_carddb.export.transport.compression import python_brotli
 from typer.testing import CliRunner
 
-from sve_carddb.cli import app
-from sve_carddb.core.json import canonical, object_value, parse, string
-from sve_carddb.export.read_api import INDEX, POINTER, load_export
-from sve_carddb.export.read_api import ExportError as UploadError
-from sve_carddb.export.transport.compression import python_brotli
-from sve_carddb.r2_upload.sdk import Credentials
-from sve_carddb.r2_upload.v2.adapter import Stored
-from sve_carddb.r2_upload.v2.freshness import CDNFreshness
-from sve_carddb.r2_upload.v2.headers import member_headers
-from sve_carddb.r2_upload.v2.publish import next_index, upload
+from sve_publish.adapter import Stored
+from sve_publish.cli import app
+from sve_publish.freshness import CDNFreshness
+from sve_publish.headers import member_headers
+from sve_publish.publish import next_index, upload
+from sve_publish.sdk import Credentials
 
+from .r2_export_fixtures import art_changed as art_changed  # ruff: ignore[useless-import-alias] -- module-scoped crop-change corpus
+from .r2_export_fixtures import export
+from .r2_export_fixtures import images as images  # ruff: ignore[useless-import-alias] -- module-scoped synthetic corpus
+from .r2_export_fixtures import roots as roots  # ruff: ignore[useless-import-alias] -- per-test public and private roots
+from .r2_fixtures import ACCOUNT, BUCKET
+from .r2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- isolated loopback server
+from .r2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- dependency of remote
 from .r2_sdk_fixtures import install_mock_sdk
-from .r2_v2_export_fixtures import art_changed as art_changed  # ruff: ignore[useless-import-alias] -- module-scoped crop-change corpus
-from .r2_v2_export_fixtures import export
-from .r2_v2_export_fixtures import images as images  # ruff: ignore[useless-import-alias] -- module-scoped synthetic corpus
-from .r2_v2_export_fixtures import roots as roots  # ruff: ignore[useless-import-alias] -- per-test public and private roots
-from .r2_v2_fixtures import ACCOUNT, BUCKET
-from .r2_v2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- isolated loopback server
-from .r2_v2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- dependency of remote
 
 pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
@@ -35,12 +42,12 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from pydantic import JsonValue
-
     from sve_carddb.export.preview import Roots
-    from sve_carddb.r2_upload.v2.adapter import R2Store
 
-    from .r2_v2_fixtures import Loopback, ServerState
-    from .test_snapshot_preview_images import PublicImages
+    from sve_publish.adapter import R2Store
+
+    from .r2_fixtures import Loopback, ServerState
+    from .synthetic_images import PublicImages
 
 CDN = "https://cdn.invalid/"
 
@@ -149,7 +156,7 @@ def test_partial_failure_keeps_old_index_and_rerun_uploads_the_rest(
         else string(loaded.entry["manifest_path"])
     )
     state.fail_key = key
-    with pytest.raises(UploadError, match="no unconditional fallback"):
+    with pytest.raises(ExportError, match="no unconditional fallback"):
         upload(store, loaded, None)
     assert INDEX not in state.objects
     done = set(state.objects)
@@ -208,7 +215,7 @@ def test_failed_cdn_check_keeps_index_and_rerun_switches_it(
     export(images, roots, step=1, projection=text)
     second = load_export(roots.preview)
     state.cdn_status = 404
-    with pytest.raises(UploadError, match=r"^CDN full-URL verification failed$"):
+    with pytest.raises(ExportError, match=r"^CDN full-URL verification failed$"):
         upload(store, second, cdn)
     assert current(state) == first.entry
     state.cdn_status = None
@@ -225,7 +232,7 @@ def test_conflicting_immutable_json_is_never_overwritten(
     member = loaded.members[0]
     state.objects[member.key] = Stored(b"other", '"other"', member_headers(member))
     with pytest.raises(
-        UploadError, match=r"^Immutable JSON object differs from the export$"
+        ExportError, match=r"^Immutable JSON object differs from the export$"
     ):
         upload(store, loaded, None)
     assert state.objects[member.key].raw == b"other"
@@ -261,16 +268,16 @@ def test_index_refuses_reused_or_older_versions() -> None:
         "previous": None,
     }
     assert next_index(index, entry) is None
-    with pytest.raises(UploadError, match=r"^Data version is already published"):
+    with pytest.raises(ExportError, match=r"^Data version is already published"):
         next_index(index, entry | {"manifest_path": "other"})
     newer = entry | {"data_version": "preview-20261005T010203Z-0001"}
-    with pytest.raises(UploadError, match=r"^Data version is already published"):
+    with pytest.raises(ExportError, match=r"^Data version is already published"):
         next_index(index | {"current": newer, "previous": entry}, entry | {"x": 1})
     older = entry | {
         "data_version": "preview-20261003T010203Z-0001",
         "published_at": "2026-10-03T01:02:03Z",
     }
-    with pytest.raises(UploadError, match=r"^Export is older than the remote current$"):
+    with pytest.raises(ExportError, match=r"^Export is older than the remote current$"):
         next_index(index, older)
 
 
@@ -288,7 +295,7 @@ def test_tampered_export_is_rejected_before_any_request(
         path = roots.preview / POINTER
     raw = path.read_bytes()
     path.write_bytes(raw[:-1] if target == "image" else raw[:-1] + b"!")
-    with pytest.raises(UploadError):
+    with pytest.raises(ExportError):
         load_export(roots.preview)
 
 
@@ -315,7 +322,7 @@ def test_interrupted_image_overwrite_leaves_no_pointer_to_upload(
     with pytest.raises(OSError, match=r"^synthetic interruption$"):
         export(art_changed, roots, step=1, library=art_changed.library)
     assert not (roots.preview / POINTER).exists()
-    with pytest.raises(UploadError, match=r"^Export validation failed$"):
+    with pytest.raises(ExportError, match=r"^Export validation failed$"):
         load_export(roots.preview)
 
 
@@ -336,7 +343,7 @@ def test_manifest_filename_must_match_its_content_hash(
         )
     )
     with pytest.raises(
-        UploadError, match=r"^Manifest differs from the preview pointer$"
+        ExportError, match=r"^Manifest differs from the preview pointer$"
     ):
         load_export(roots.preview)
 
@@ -355,7 +362,7 @@ def _cli(
     monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", "synthetic-secret")
     result = CliRunner().invoke(
         app,
-        ["r2", "upload-v2", *args, "--account-id", ACCOUNT, "--bucket", BUCKET],
+        ["upload", *args, "--account-id", ACCOUNT, "--bucket", BUCKET],
     )
     return result.exit_code, result.output
 
@@ -421,7 +428,7 @@ def test_execute_without_cdn_url_or_skip_is_refused_before_reading(
     monkeypatch.setattr(Credentials, "environment", forbidden)
     result = CliRunner().invoke(
         app,
-        ["r2", "upload-v2", "--export-dir", str(roots.preview), "--execute"],
+        ["upload", "--export-dir", str(roots.preview), "--execute"],
         env={"FORCE_COLOR": None, "NO_COLOR": "1", "TERM": "dumb"},
     )
     assert result.exit_code != 0
@@ -438,13 +445,12 @@ def test_dry_run_reads_no_credentials_and_opens_no_client(
 
     monkeypatch.setattr(Credentials, "environment", forbidden)
     monkeypatch.setattr(httpx, "Client", forbidden)
-    monkeypatch.setattr("sve_carddb.r2_upload.sdk.Session", forbidden)
+    monkeypatch.setattr("sve_publish.sdk.Session", forbidden)
     before = {p: p.read_bytes() for p in roots.preview.rglob("*") if p.is_file()}
     result = CliRunner().invoke(
         app,
         [
-            "r2",
-            "upload-v2",
+            "upload",
             "--export-dir",
             str(roots.preview),
             "--cdn-base-url",
@@ -499,7 +505,7 @@ def test_index_compares_fractional_seconds_chronologically(
         assert result["previous"] == first
     else:
         with pytest.raises(
-            UploadError, match=r"^Export is older than the remote current$"
+            ExportError, match=r"^Export is older than the remote current$"
         ):
             next_index(index, candidate)
 
@@ -555,7 +561,7 @@ def test_lost_index_put_response_reruns_without_another_revision(
     export(images, roots, step=0)
     loaded = load_export(roots.preview)
     transport.lose_key = INDEX
-    with pytest.raises(UploadError, match=r"^R2 transport or protocol failed$"):
+    with pytest.raises(ExportError, match=r"^R2 transport or protocol failed$"):
         upload(store, loaded, None)
     committed = state.objects[INDEX]
     before = len(state.operations)
@@ -588,7 +594,7 @@ def test_index_cas_race_preserves_the_concurrent_index(
         return original(key, raw, headers, expected=expected)
 
     monkeypatch.setattr(store, "put", raced)
-    with pytest.raises(UploadError, match=r"^Version index conditional write failed$"):
+    with pytest.raises(ExportError, match=r"^Version index conditional write failed$"):
         upload(store, load_export(roots.preview), None)
     assert state.objects[INDEX].etag == '"concurrent"'
     assert state.objects[INDEX].raw == original_index.raw
@@ -612,5 +618,5 @@ def test_gzip_sibling_checks_decoded_bytes_without_recompression(
         member = next(m for m in load_export(roots.preview).members if m.key == path)
         assert member.raw == encoded
     else:
-        with pytest.raises(UploadError, match=r"^Export gzip sibling"):
+        with pytest.raises(ExportError, match=r"^Export gzip sibling"):
             load_export(roots.preview)

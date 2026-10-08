@@ -2,18 +2,26 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.core.json import canonical, digest, integer, object_value, string
-from sve_carddb.export.read_api import INDEX, validate_index
-from sve_carddb.export.read_api import ExportError as UploadError
+from sve_carddb.export.read_api import (
+    INDEX,
+    ExportError,
+    canonical,
+    digest,
+    integer,
+    object_value,
+    string,
+    validate_index,
+)
 from sve_carddb.export.read_api import read_index as read_index_bytes
-from sve_carddb.r2_upload.v2.headers import IMAGE_HEADERS, INDEX_HEADERS, member_headers
+
+from sve_publish.headers import IMAGE_HEADERS, INDEX_HEADERS, member_headers
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
-
     from sve_carddb.export.read_api import Export
-    from sve_carddb.r2_upload.v2.adapter import R2Store, Stored
-    from sve_carddb.r2_upload.v2.freshness import CDNFreshness
+
+    from sve_publish.adapter import R2Store, Stored
+    from sve_publish.freshness import CDNFreshness
 
 
 def read_index(remote: Stored | None) -> dict[str, JsonValue] | None:
@@ -21,7 +29,7 @@ def read_index(remote: Stored | None) -> dict[str, JsonValue] | None:
     if remote is None:
         return None
     if remote.headers != INDEX_HEADERS:
-        raise UploadError("Version index metadata differs from contract")
+        raise ExportError("Version index metadata differs from contract")
     return read_index_bytes(remote.raw)
 
 
@@ -45,9 +53,9 @@ def next_index(
             for e in (index["current"], index["previous"])
             if e is not None
         }:
-            raise UploadError("Data version is already published with another manifest")
+            raise ExportError("Data version is already published with another manifest")
         if _instant(entry["published_at"]) < _instant(current["published_at"]):
-            raise UploadError("Export is older than the remote current")
+            raise ExportError("Export is older than the remote current")
         result = {
             "index_format": 2,
             "revision": integer(index["revision"]) + 1,
@@ -86,7 +94,7 @@ def upload(
         _commit(store, remote, index)
     final = read_index(store.get(INDEX))
     if final is None or object_value(final["current"]) != export.entry:
-        raise UploadError("Version index read-back differs from this export")
+        raise ExportError("Version index read-back differs from this export")
     return {
         "mode": "execute",
         "written_files": written,
@@ -103,19 +111,19 @@ def _verify_cdn(cdn: CDNFreshness, export: Export, digests: dict[str, str]) -> N
         for _ in range(2):
             raw = cdn.get(cdn.root + item.url)
             if raw is None or digest(raw) != digests[item.key]:
-                raise UploadError("CDN full-URL verification failed")
+                raise ExportError("CDN full-URL verification failed")
 
 
 def _commit(store: R2Store, remote: Stored | None, index: dict[str, JsonValue]) -> None:
     if store.get(INDEX) != remote:
-        raise UploadError("Version index changed during upload")
+        raise ExportError("Version index changed during upload")
     if not store.put(
         INDEX,
         canonical(index),
         INDEX_HEADERS,
         expected=None if remote is None else remote.etag,
     ):
-        raise UploadError("Version index conditional write failed")
+        raise ExportError("Version index conditional write failed")
 
 
 def _sync(
@@ -126,14 +134,14 @@ def _sync(
     if existing is not None and existing.raw == raw and existing.headers == headers:
         return 0
     if existing is not None and not overwrite:
-        raise UploadError("Immutable JSON object differs from the export")
+        raise ExportError("Immutable JSON object differs from the export")
     if not store.put(
         key, raw, headers, expected=None if existing is None else existing.etag
     ):
-        raise UploadError("Conditional PUT failed; the object changed concurrently")
+        raise ExportError("Conditional PUT failed; the object changed concurrently")
     stored = store.get(key)
     if stored is None or stored.raw != raw or stored.headers != headers:
-        raise UploadError("Origin read-back differs from the export")
+        raise ExportError("Origin read-back differs from the export")
     return 1
 
 

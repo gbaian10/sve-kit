@@ -6,33 +6,33 @@ from typing import TYPE_CHECKING
 
 import httpx
 import pytest
+from sve_carddb.export.read_api import INDEX, ExportError, load_export
 from typer.testing import CliRunner
 
-from sve_carddb.cli import app
-from sve_carddb.export.read_api import INDEX, load_export
-from sve_carddb.export.read_api import ExportError as UploadError
-from sve_carddb.r2_upload.v2 import gc
-from sve_carddb.r2_upload.v2.adapter import PUBLIC_PREFIXES, Stored
-from sve_carddb.r2_upload.v2.headers import IMAGE_HEADERS
-from sve_carddb.r2_upload.v2.publish import upload
+from sve_publish import gc
+from sve_publish.adapter import PUBLIC_PREFIXES, Stored
+from sve_publish.cli import app
+from sve_publish.headers import IMAGE_HEADERS
+from sve_publish.publish import upload
 
+from .r2_export_fixtures import export
+from .r2_export_fixtures import images as images  # ruff: ignore[useless-import-alias] -- module-scoped synthetic corpus
+from .r2_export_fixtures import roots as roots  # ruff: ignore[useless-import-alias] -- per-test public and private roots
+from .r2_fixtures import ACCOUNT, BUCKET
+from .r2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- isolated loopback server
+from .r2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- dependency of remote
 from .r2_sdk_fixtures import install_mock_sdk
-from .r2_v2_export_fixtures import export
-from .r2_v2_export_fixtures import images as images  # ruff: ignore[useless-import-alias] -- module-scoped synthetic corpus
-from .r2_v2_export_fixtures import roots as roots  # ruff: ignore[useless-import-alias] -- per-test public and private roots
-from .r2_v2_fixtures import ACCOUNT, BUCKET
-from .r2_v2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- isolated loopback server
-from .r2_v2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- dependency of remote
 
 pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
 if TYPE_CHECKING:
     from sve_carddb.export.preview import Roots
     from sve_carddb.export.read_api import Export
-    from sve_carddb.r2_upload.v2.adapter import R2Store
 
-    from .r2_v2_fixtures import Loopback, ServerState
-    from .test_snapshot_preview_images import PublicImages
+    from sve_publish.adapter import R2Store
+
+    from .r2_fixtures import Loopback, ServerState
+    from .synthetic_images import PublicImages
 
 STRAY = "images/card_s/999.webp"
 
@@ -84,7 +84,7 @@ def test_namespace_limits_candidates(
     state.objects[STRAY] = Stored(b"stray", '"stray"', IMAGE_HEADERS)
     result = gc.collect(store, frozenset({"images/card_s/"}), execute=True)
     assert result["deleted"] == [STRAY]
-    with pytest.raises(UploadError, match=r"^GC namespace is not explicitly public$"):
+    with pytest.raises(ExportError, match=r"^GC namespace is not explicitly public$"):
         gc.collect(store, frozenset({"snapshots/"}), execute=False)
 
 
@@ -121,7 +121,7 @@ def test_missing_retained_member_stops_before_deletion(
     _first, second, _third = three_versions(images, roots, store)
     state.objects[STRAY] = Stored(b"stray", '"stray"', IMAGE_HEADERS)
     del state.objects[second.members[-1].key]
-    with pytest.raises(UploadError, match=r"^GC retained closure is incomplete$"):
+    with pytest.raises(ExportError, match=r"^GC retained closure is incomplete$"):
         gc.collect(store, PUBLIC_PREFIXES, execute=True)
     assert STRAY in state.objects
 
@@ -146,7 +146,7 @@ def test_index_change_stops_deletion(
         state.objects[INDEX] = Stored(old.raw, '"changed"', old.headers)
 
     monkeypatch.setattr(store, "delete", delete_then_change)
-    with pytest.raises(UploadError, match=r"^GC version index changed; run it again$"):
+    with pytest.raises(ExportError, match=r"^GC version index changed; run it again$"):
         gc.collect(store, PUBLIC_PREFIXES, execute=True)
     assert len([k for k in state.objects if k.startswith("images/card_s/99")]) == 1
 
@@ -165,7 +165,7 @@ def test_refuses_bucket_without_index_or_with_irregular_keys(
         three_versions(images, roots, store)
         state.objects["images/card_s/stray.png"] = Stored(b"x", '"x"', IMAGE_HEADERS)
         message = "GC inventory contains an irregular public key"
-    with pytest.raises(UploadError, match="^" + message + "$"):
+    with pytest.raises(ExportError, match="^" + message + "$"):
         gc.collect(store, PUBLIC_PREFIXES, execute=True)
     assert not any(op == "DELETE" for op, _key, _ in state.operations)
 
@@ -189,7 +189,7 @@ def test_cli_dry_run_lists_and_execute_deletes(
     monkeypatch.setenv("SVE_R2_ACCESS_KEY_ID", "synthetic-access")
     monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", "synthetic-secret")
     target = ["--account-id", ACCOUNT, "--bucket", BUCKET]
-    common = ["r2", "gc-v2", "--namespace", "images/card_s/", *target]
+    common = ["gc", "--namespace", "images/card_s/", *target]
     dry = CliRunner().invoke(app, common)
     assert dry.exit_code == 0, dry.output
     assert json.loads(dry.output)["candidates"] == [STRAY]

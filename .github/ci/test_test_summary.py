@@ -61,6 +61,27 @@ class SummaryTests(unittest.TestCase):
         assert PRIVATE not in summary
         assert "[" not in summary
 
+    def test_publish_keeps_its_gate_in_fork_mode(self) -> None:
+        """Publisher coverage never borrows carddb's remaining-test threshold."""
+        self.write_junit()
+        with patch.dict(
+            os.environ,
+            {"SVE_CI_TEST_MODE": "fork", "SVE_CI_COVERAGE_THRESHOLD": "70"},
+        ):
+            assert coverage_scope("publish") == ("synthetic", 92)
+            summary = junit_summary("publish", self.folder)
+            assert "required **92%**" in summary
+            assert "no private test data required" in summary
+            assert "tests/test_alpha.py::test_fail" in summary
+            assert PRIVATE not in summary
+            with contextlib.redirect_stdout(io.StringIO()):
+                assert main(["publish", str(self.folder)]) == 1
+                (self.folder / "coverage.json").write_text(
+                    json.dumps({"totals": {"percent_covered": 92.5}}),
+                    encoding="utf-8",
+                )
+                assert main(["publish", str(self.folder)]) == 0
+
     def test_fork_coverage_uses_its_own_gate_and_disclosure(self) -> None:
         """The same report can fail the full gate and pass the remaining-test gate."""
         self.write_junit()

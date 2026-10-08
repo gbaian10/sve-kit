@@ -5,21 +5,21 @@ from typing import TYPE_CHECKING
 
 import httpx
 import pytest
+from sve_carddb.export.read_api import ExportError
 
-from sve_carddb.export.read_api import ExportError as UploadError
-from sve_carddb.r2_upload.v2 import adapter
-from sve_carddb.r2_upload.v2.adapter import R2Store, Stored
-from sve_carddb.r2_upload.v2.freshness import CDNFreshness, cdn_root
+from sve_publish import adapter
+from sve_publish.adapter import R2Store, Stored
+from sve_publish.freshness import CDNFreshness, cdn_root
 
+from .r2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
+from .r2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- register shared pytest fixture
+from .r2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- register shared pytest fixture
 from .r2_sdk_fixtures import inventory, mock_client
-from .r2_v2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
-from .r2_v2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- register shared pytest fixture
-from .r2_v2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- register shared pytest fixture
 
 pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
 if TYPE_CHECKING:
-    from .r2_v2_fixtures import Loopback, ServerState
+    from .r2_fixtures import Loopback, ServerState
 
 META = {"content-type": "application/json", "cache-control": "no-store"}
 KEY = "snapshots/blobs/" + "a" * 64 + ".json"
@@ -41,7 +41,7 @@ def test_endpoint_rejects_prefix_or_suffix_injection_without_http(
     message: str,
 ) -> None:
     store, state, _transport = remote
-    with pytest.raises(UploadError, match="^" + message + "$"):
+    with pytest.raises(ExportError, match="^" + message + "$"):
         R2Store(account, bucket, CREDENTIALS, store.client)
     assert state.requests == []
 
@@ -54,7 +54,7 @@ def test_dot_segments_in_keys_are_rejected_before_signed_http(
     key: str,
 ) -> None:
     store, state, _transport = remote
-    with pytest.raises(UploadError, match=r"^Invalid S3 object key$"):
+    with pytest.raises(ExportError, match=r"^Invalid S3 object key$"):
         store.get(key)
     assert state.requests == []
 
@@ -124,7 +124,7 @@ def test_unsupported_or_failed_conditions_have_no_fallback_and_no_secret_output(
     state.fail_put = status
     try:
         with pytest.raises(
-            UploadError,
+            ExportError,
             match=r"^R2 conditional PUT failed; no unconditional fallback$",
         ) as exc:
             store.put(KEY, b"candidate", META, expected=None)
@@ -143,7 +143,7 @@ def test_inventory_cannot_expand_its_public_scope(
     remote: tuple[R2Store, ServerState, Loopback], prefix: str
 ) -> None:
     store, state, _ = remote
-    with pytest.raises(UploadError, match=r"^List prefix is not explicitly public$"):
+    with pytest.raises(ExportError, match=r"^List prefix is not explicitly public$"):
         store.keys(prefix)
     assert state.requests == []
 
@@ -167,7 +167,7 @@ def test_inventory_cannot_expand_its_public_scope(
 def test_inventory_xml_refuses_entities_unknown_root_and_malformed_bytes(
     xml: bytes, message: str
 ) -> None:
-    with pytest.raises(UploadError, match=r"^" + message + "$"):
+    with pytest.raises(ExportError, match=r"^" + message + "$"):
         inventory(xml, "snapshots/blobs/")
 
 
@@ -183,7 +183,7 @@ def test_inventory_xml_refuses_entities_unknown_root_and_malformed_bytes(
     ],
 )
 def test_cdn_root_rejects_secret_bearing_or_ambiguous_urls(root: str) -> None:
-    with pytest.raises(UploadError, match=r"^Explicit HTTPS CDN root required$"):
+    with pytest.raises(ExportError, match=r"^Explicit HTTPS CDN root required$"):
         cdn_root(root)
 
 
@@ -236,7 +236,7 @@ def test_cdn_refuses_unpinned_or_queryless_urls(
     with (
         httpx.Client(transport=transport, trust_env=False) as client,
         pytest.raises(
-            UploadError, match=r"^CDN URL is outside the pinned query-bearing root$"
+            ExportError, match=r"^CDN URL is outside the pinned query-bearing root$"
         ),
     ):
         CDNFreshness("https://cdn.invalid/", client).get(url)
@@ -262,7 +262,7 @@ def test_object_reads_require_strong_etag_and_bounded_bytes(
     if kind == "overflow":
         monkeypatch.setattr(adapter, "MAX_OBJECT", 4)
     with pytest.raises(
-        UploadError,
+        ExportError,
         match=r"^Remote response exceeds the configured byte limit$"
         if kind == "overflow"
         else r"^R2 object requires a strong opaque ETag$",
@@ -277,7 +277,7 @@ def test_put_refuses_non_object_preconditions_before_http(
     store, state, _ = remote
     count = len(state.operations)
     with pytest.raises(
-        UploadError, match=r"^Conditional PUT requires an opaque object ETag$"
+        ExportError, match=r"^Conditional PUT requires an opaque object ETag$"
     ):
         store.put(KEY, b"x", META, expected=expected)
     assert len(state.operations) == count
@@ -316,7 +316,7 @@ def test_inventory_rejects_out_of_scope_and_incomplete_pages(
             if change == "empty-flag"
             else "<IsTruncated>invalid</IsTruncated>",
         )
-    with pytest.raises(UploadError, match="^" + message + "$"):
+    with pytest.raises(ExportError, match="^" + message + "$"):
         inventory(raw.encode(), prefix)
 
 
@@ -347,7 +347,7 @@ def test_list_repeating_token_stops_without_infinite_requests() -> None:
             ),
         )
         with pytest.raises(
-            UploadError, match=r"^R2 inventory pagination repeats a token$"
+            ExportError, match=r"^R2 inventory pagination repeats a token$"
         ):
             store.keys("snapshots/blobs/")
     assert calls == 2
@@ -361,7 +361,7 @@ def test_delete_refuses_non_public_keys_before_http(
 ) -> None:
     store, state, _ = remote
     with pytest.raises(
-        UploadError, match=r"^Deletion key is outside the public namespaces$"
+        ExportError, match=r"^Deletion key is outside the public namespaces$"
     ):
         store.delete(key)
     assert state.requests == []

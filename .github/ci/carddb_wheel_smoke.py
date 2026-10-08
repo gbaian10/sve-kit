@@ -28,7 +28,6 @@ def main() -> None:
             "sve_carddb.export.transport",
             "sve_carddb.export.preview",
             "sve_carddb.export.project",
-            "sve_carddb.r2_upload",
             "sve_publish",
         )
     )
