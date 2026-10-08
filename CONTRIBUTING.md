@@ -96,9 +96,13 @@ the commit format are enforced by tools and are not repeated here.
 - The project has one maintainer on one machine. Add locks, ledgers, receipts, replay
   or extra verification layers only for a stated requirement the maintainer agreed to.
 - Keep one-off migration and conversion scripts out of the repository.
-- Do not bind code to the maintainer's machine: no system libraries where a package
-  exists, and no local paths or host names. Linux is the supported platform; record
-  new macOS or Windows blockers on #315 or #316.
+- Manage dependencies through package managers and lockfiles rather than assuming
+  the maintainer's system library versions. Pass machine-specific paths and host
+  names through configuration.
+- Linux is currently supported for development, tests and builds. macOS work is
+  deferred to [#315](https://github.com/gbaian10/sve-kit/issues/315); Windows is
+  unsupported, with known blockers recorded in [#316](https://github.com/gbaian10/sve-kit/issues/316).
+  This does not limit the platforms of Web users.
 
 ### Names and interfaces
 
@@ -130,8 +134,10 @@ AI-generated code tends to over-comment. Keep comments few and short:
 
 ### Documentation
 
-- Every module, class, file or command a document names must exist.
-- A document must not promise more than the tests guarantee.
+- Verify references to implemented modules, classes, files and commands; label
+  planned ones explicitly.
+- Keep claims about current behaviour within what the tests guarantee. Distinguish
+  design requirements from implemented guarantees.
 
 ### Choosing libraries
 
