@@ -40,21 +40,6 @@ records:
               text_hash: sha256:bd82298bdb6d91f869b4bdd90f0d9f2430d2c07ef49234762f3b35cbaa728ba3
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:79bcbb1cfd676d0b4d0cc7b922593cb304b178893c867748b8e7107003cbab80
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:bd82298bdb6d91f869b4bdd90f0d9f2430d2c07ef49234762f3b35cbaa728ba3
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:a2ea55be8f4a1f647c8647a455b853d61476958a9a1d343d05600ad1c4a7e599
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:c1aade8253979ee2f3959f043676c44454925643d62f6baef75a45afc170b666
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"commander","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -94,21 +79,6 @@ records:
               text_hash: sha256:b2fa958fff76cb95cdaadb368ae75b16d26c9e65e7b40237994dfbb3301ffde9
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:a696d6170d5bbd840699dee9576489571610c70aeca089bfac41fb07466ad127
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:b2fa958fff76cb95cdaadb368ae75b16d26c9e65e7b40237994dfbb3301ffde9
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:ccf024384a803db481a9583fdcfde33fcd942767fffa886ea2c89f6e07761359
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:16af7be312e1840be546c1a0a34d965c6a42d0babf44e215a30cec9b114f1974
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"condemned","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -148,21 +118,6 @@ records:
               text_hash: sha256:a68873a66a5ad5eafc918481944bc2f4c4e7e48f892a780fb77ac0eb7e74d6d4
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:cb9a9e788984cf9e0cad734e5cff728220b7d9e8b0b55deb46594fd2a4bcd0e2
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:a68873a66a5ad5eafc918481944bc2f4c4e7e48f892a780fb77ac0eb7e74d6d4
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:817d6711f93d43d5997183dfa243d8ee31c38265def53b95c6b4ce79cfde619a
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:b071289a56b9ba00e6c63413b23bccf27f0dcbe70183b77c60cf6566affd86bf
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"cool","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -202,21 +157,6 @@ records:
               text_hash: sha256:5c86b9605c25bded2e0e79d689925d9982ea1cd002052b27a7d841e4d93e29be
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:b44bb6f474329b77f2c03dac1e84e9b4bfddefe14acd45ca2b3407ebb91b6073
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:5c86b9605c25bded2e0e79d689925d9982ea1cd002052b27a7d841e4d93e29be
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:13a54780c787e2bff7949528cc24b0e462394aa21d4200864b58bce374a9b526
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:0b0fd31e2478cff0d3c5bf526a0f8f1c780abfb435eec0a8f2c9beed0eaa6bc4
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"crest","kind":"type"}]'
     origin: project
     low_confidence: false
@@ -254,21 +194,6 @@ records:
             special_kinds:
               - token
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:6300e511b901143080b14a20e3ec2fb35415c140874b438916665e4d9ad9bc79
-            parser: official-jp-exact-v1
-            locator: /faces/0/card_type
-            text_hash: sha256:19d744bbdaa081cb18c2464eb5a25efeef3077815f95361c54cd0db21c88563f
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:6abe3a14d279ed16d31e5567b4977f565daff86aeba7d180e4baa437464ba0f9
-            parser: official-en-exact-v1
-            locator: /faces/0/info/Card Type
-            text_hash: sha256:175b3ceb0051b46cc27588fa423665cbe774568b37675928aee1d819fa94b751
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"crystalian","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -308,21 +233,6 @@ records:
               text_hash: sha256:f2b6409acdaa184d3d4ad02744160e04eeaf02c3ebf4eff0d36bb61917d75aa2
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:cbcfed567a55252d7d07719741fa3ffc106449fd0df9e4b7fc264fcd543322e9
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:f2b6409acdaa184d3d4ad02744160e04eeaf02c3ebf4eff0d36bb61917d75aa2
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:eb33589cd51c3975e43c11766da7f4982a4ba22f55dab809ac5b81dbd072a9c0
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:bee62015ee01018fb589add5556f3c5a689b710741c295159cf82b9a947e1c3d
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"cute","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -362,21 +272,6 @@ records:
               text_hash: sha256:364b39c23d4b9fce3579fe268c5888c41d3b9a472ef5fe2f82e2faeb88876960
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:d9c7f75bcee1dfa587c888ab0db7f1320db2799297077d5e82dcfba99d48e2a5
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:364b39c23d4b9fce3579fe268c5888c41d3b9a472ef5fe2f82e2faeb88876960
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:e623be18f3dcba2522c092dadb61333a17221eccd15c32f1b79e84edc7fb8d5f
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:e656d7a9d47dc4ce3d73f77dce2701311589e06d9df039f5b890ea6d593dfb7c
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"cutthroat","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -416,21 +311,6 @@ records:
               text_hash: sha256:e2f499a91591dd38b9309c79267a97372bd22d82191d9d9f0cab13255a8eaff7
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:06df166b728c4c8dfcea2b83bc5fae9cb88a6f2aa9eb19079ac8c147d5836026
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:e2f499a91591dd38b9309c79267a97372bd22d82191d9d9f0cab13255a8eaff7
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:b7458a9b750a45178d224c7ccc8e2f638abd6ae5ecb630d128056401845e566c
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:f4a1d1e2d598a7e3d788ad7bb1db1b3ebd05b5cffe1c4ec67200bd5cc4405d8d
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"dancer","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -470,21 +350,6 @@ records:
               text_hash: sha256:8f724165a3e697f7f04d01a93884ae73a1ce3550a7a86a7e2985391089b0655b
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:4ae4acdc1c5a319a6259bc7ef6d4de10c635ef817a540580d453d8f3198dfc42
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:8f724165a3e697f7f04d01a93884ae73a1ce3550a7a86a7e2985391089b0655b
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:3cf2069e4f0d59b317368fed20047b44587e75b2617bd626bfe413378fce53af
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:7bb4123af444269c16a94dd1947e285bccb1a9c9d82523e047980a0ff092d4d9
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"deity","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -524,21 +389,6 @@ records:
               text_hash: sha256:e942f64de3176352e28c27e4635e946f8cacf28dde46221c8218c993618c7d19
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:1ece1e2328e37646ec49afce81acba91f280eee64dd649d191d933917dcdebb7
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:e942f64de3176352e28c27e4635e946f8cacf28dde46221c8218c993618c7d19
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:2662804bde9d568f18a2b71ef2578d017de8fb06086695631e310b9b43f780e5
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:f81219cabecc128ee69d412e7b2fed74069569d65448f88f68892f068606347e
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"demon","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -578,21 +428,6 @@ records:
               text_hash: sha256:a26bbcd919080da533643c25fd735f43043a6c5a9a625ffed77c1666b42e7c76
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:61aecfb0f3c75dd1737f3a429930692e9c7c40b09b6fca8d89c94dcbbc53bc3c
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:a26bbcd919080da533643c25fd735f43043a6c5a9a625ffed77c1666b42e7c76
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:7bd357245bf80f86528cb3e8696c34afd7171aec74ff24f87e3572864f5ccba9
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:83bd77844403b5f4cc44e0a304b4b5b0e7442cf0f07e1f22f6260f6a24778431
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"departed","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -632,21 +467,6 @@ records:
               text_hash: sha256:3429a3a4795b93135698ed2726ced10edb048176586d2efb57fd7dce97d3bc01
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:98b295ce52c14b8073976cda859cc8726ba1d341aeeb296ce98f0f0187a1d6ae
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:3429a3a4795b93135698ed2726ced10edb048176586d2efb57fd7dce97d3bc01
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:f9745b3817d9b015be1e0f90862a54e0765ca2d547f972b0b62e90d0a1236e22
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:5ec74c8829b96e618ac4860c9676c6fefadca5367df773cee5f966e27e00342c
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"detective","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -686,21 +506,6 @@ records:
               text_hash: sha256:63c8f0603610637610bdbd0375a5c48af715bdb234af1493c5b89c660561a0fa
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:39273a48f2f5a2fca3f69e3ea1e968016bc1f7857d458d4fa087427cdf9a2b74
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:63c8f0603610637610bdbd0375a5c48af715bdb234af1493c5b89c660561a0fa
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:e0f3122be618d89af04644b68c6a0727802c67787e947c472facd2c8b371d48a
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:2653ceeec1fd951707a31d9e357218ea41a511db896747a7a41bb6528d927b09
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"diabolos","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -740,21 +545,6 @@ records:
               text_hash: sha256:a50333067cf599b0ca222b855e33b28bab78733e7872b5ade917dd3705c876f8
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:4d8f11af4bb50875cc75f78e7cd31dd963b747753b207ccf8228250e2d439803
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:a50333067cf599b0ca222b855e33b28bab78733e7872b5ade917dd3705c876f8
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:865d9b6c74765199cbfd5574d744bb141b6c652b361add5612410f5d0581f8ac
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:4c4e59a799fbfe217c7e8dd35e49fb144782087b3288c10f2465554c18cff5d3
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"draconic_duelist","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -794,21 +584,6 @@ records:
               text_hash: sha256:0ea6ca82dd6fe0cd00789245fb9f704118647fd6a554f9195860e5546be2db55
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:482fe92f29aa597bb9cbc2d5e6137b81a2ac349ec2792cea259df261d3ca6aae
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:0ea6ca82dd6fe0cd00789245fb9f704118647fd6a554f9195860e5546be2db55
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:c7344ec7aeef4bbe07170b464bdc442014500a2152467d1ae13478166fa8b532
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:e783d9ce6eabe915a9d8a6b2e01d80a9fbf68135eca1b867a6c62a965374b3cc
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"dragon","kind":"class"}]'
     origin: official
     low_confidence: false
@@ -853,21 +628,6 @@ records:
             text: 龍族
             origin: machine
             low_confidence: false
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:49507dfe1cf2a0b42c7bf9d4355f7d1acef495dbd05e15ed2c18c92efa436f2f
-            parser: official-jp-exact-v1
-            locator: /faces/0/card_class
-            text_hash: sha256:1a74dc9a77a1a5db052b0c1bc6efee1cd14ac3052cfbe64445060b180773fd24
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:f6266178ca508fc9a49b2cd014d168f9bb8be832ac2df00358c1e09daacf9726
-            parser: official-en-exact-v1
-            locator: /faces/0/info/Class
-            text_hash: sha256:729453b024912c4e0adecbbcbfa1d398a8b88b3360eea92fa1fd2f157ccaed2b
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"dragonewt","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -907,21 +667,6 @@ records:
               text_hash: sha256:dec343788a6e8ff6c080a986a8ecc402bfa555b60fc4beaa1b287623e3adbf26
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:e982bb3e0bc3298e6b10eb15d675746cbd4617921b973b1378e79c239b1b15cf
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:dec343788a6e8ff6c080a986a8ecc402bfa555b60fc4beaa1b287623e3adbf26
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:c5a532f044612c59a80c0b4d844e072caa24037f69637fe9555ad7375e85860e
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:ffcbed7bb7ec8947d1177247e527350780d29bd385254abf5e92c78211eea8d7
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"dragonheart","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -961,21 +706,6 @@ records:
               text_hash: sha256:0b40955231d89255613c0391b379c303af3330b929dd9da416217f994dbd3e12
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:49507dfe1cf2a0b42c7bf9d4355f7d1acef495dbd05e15ed2c18c92efa436f2f
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:0b40955231d89255613c0391b379c303af3330b929dd9da416217f994dbd3e12
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:f6266178ca508fc9a49b2cd014d168f9bb8be832ac2df00358c1e09daacf9726
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:06ae98beb712cf52b4afdea355b60c97fec26049fe3a8fdde12c96e3ffc5e1b0
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"dragons_nest","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -1025,28 +755,6 @@ records:
               text_hash: sha256:b7ff2c1bf3b120eed657e18319ec0b8dd18d503f2ae50b9accdd6ceee8fde135
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:151b407e66bd71bcc5a71d51c4b35e4c91178ef303774f992a0820b444e58360
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:b7ff2c1bf3b120eed657e18319ec0b8dd18d503f2ae50b9accdd6ceee8fde135
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:004b2a0334d0edb9b038461131cfac102aef53d0420f23805858d887b6a9097d
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:e3e03d7999f2d6edb6fcfab91a1257819251e75238af394994a3518ad0bed9ff
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:3abeb8f143900d4e700ff4672e0dbad45dacf2dbf73ea5c4dec2c6fc4cd81d68
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:5f82288f6e49ec4f5a6a0bd3e994a2ca71b24855e46cfdbf7548105a644a6498
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"earth_sigil","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -1086,21 +794,6 @@ records:
               text_hash: sha256:fc174e1e6cad056ecd393cfd6508adc23a14b3e9fcd6a4574ec0bf48d222d3b8
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:6c83b8c3c4cc2e18e64fc0f1c222a9a7366c28be0efcd6b3b66ae32d4921b3be
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:fc174e1e6cad056ecd393cfd6508adc23a14b3e9fcd6a4574ec0bf48d222d3b8
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:9fc3be1217be848fa679f8163d5b185de1fc2925f7e24b6cc40e3cc34cf3c380
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:5a44b21be4f5303ae7142eb9bd14b6ab9eaf2dbb5de69b06f3e27f392e28421c
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"eidolon","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -1140,21 +833,6 @@ records:
               text_hash: sha256:06de849b348c77e208666af4db0671c942fbf3aa07aee9ad798c492ceec3fff9
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:0f0f6af76cf1d9f35f0a8b60dbe77085a936a6aa4d0a04ba5944f8b9022365d6
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:06de849b348c77e208666af4db0671c942fbf3aa07aee9ad798c492ceec3fff9
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:2f630741b9205a94573fb213cfee021c95bb0b191f83dd17b46ede89d52be414
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:ae605450fae6dedd0d8406c25ded3904398687e7fa561d2d9bb14cb7a624e016
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"elf","kind":"class"}]'
     origin: official
     low_confidence: false
@@ -1199,21 +877,6 @@ records:
             text: 精靈
             origin: machine
             low_confidence: false
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:3c9c3c40699dfdf432392f432967fc805cc97b04e3a0750456205eae9922bf8d
-            parser: official-jp-exact-v1
-            locator: /faces/0/card_class
-            text_hash: sha256:916ba150c0487d6a1562b4667af22d231907b04a98949e1e4b7bf030db18be85
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:962c0f7408288fc1535d7b7229ea8066a9d573a50be6794e1f2ce6c49d7e059f
-            parser: official-en-exact-v1
-            locator: /faces/0/info/Class
-            text_hash: sha256:448db8ea296f4446c8b5835ed9714cf7bd6638923450b09acecd21ffdbe73e9b
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"elf","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -1253,21 +916,6 @@ records:
               text_hash: sha256:f72c2e7033e3c256ea99ec7c1f131917366d79b052042fd00db866a572a57aa6
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:cddd9e634e2bbeab2a9c6c04159a21b0e14a506ca46f2ba61159ae6e16a7c914
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:f72c2e7033e3c256ea99ec7c1f131917366d79b052042fd00db866a572a57aa6
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:1850bb0c5ac7eb58ed65803b76cafeeaf51b247687637934503755581ca3c76f
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/0
-            text_hash: sha256:698d9ad03b1af5f1cc28a01f1d21e872699b526223939816b4da0d470776e77e
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"elizabeth_park","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -1307,18 +955,3 @@ records:
               text_hash: sha256:cac487c05cc98101ec6717f40b150cfc600685e404ceebb42e1f368239ec1384
             special_kinds: []
         active: true
-      evidence:
-        - source_ref:
-            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-            source_version_id: src:v1:edd7efda0e187599355673932592d507b9aba89b7b0b4e670f397b185430c8c3
-            parser: official-jp-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:cac487c05cc98101ec6717f40b150cfc600685e404ceebb42e1f368239ec1384
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
-        - source_ref:
-            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-            source_version_id: src:v1:3e9d8615ccd3d9f5e31e4b0c542e74e616adb7542f45b88b4e64bdee1e21fded
-            parser: official-en-exact-v1
-            locator: /faces/0/traits/1
-            text_hash: sha256:a91bafdc2d5456728e3b3f936841a3874b56f9e3b9fb72aae03a952cee130a79
-          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
