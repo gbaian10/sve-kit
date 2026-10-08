@@ -6,10 +6,10 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
-from sve_carddb.registry import snapshot, storage
-from sve_carddb.registry.inputs import digest
-from sve_carddb.registry.records import PrintingData
-from sve_carddb.registry.storage import Entry
+from sve_carddb.domains.registry import snapshot, storage
+from sve_carddb.domains.registry.inputs import digest
+from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.registry.storage import Entry
 
 from . import official_registry_fixtures as shared
 from .registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- expose synthetic pytest fixture
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
 
-    from sve_carddb.registry.snapshot import RegistrySnapshot
+    from sve_carddb.domains.registry.snapshot import RegistrySnapshot
 
 
 def test_legacy_fixture_cannot_pollute_later_consumers() -> None:

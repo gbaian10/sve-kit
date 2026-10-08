@@ -6,7 +6,7 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.translations.direct import write
+from sve_carddb.domains.translations.direct import write
 
 from .build_db_fixtures import seed
 from .database_fixtures import DatabaseTemplate

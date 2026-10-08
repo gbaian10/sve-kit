@@ -3,8 +3,13 @@
 import pytest
 from pydantic import ValidationError
 
-from sve_carddb.catalog.symbols import Localization, Spelling, Symbol, parse_symbol
 from sve_carddb.core.json import canonical
+from sve_carddb.domains.catalog.symbols import (
+    Localization,
+    Spelling,
+    Symbol,
+    parse_symbol,
+)
 
 
 def symbol() -> Symbol:

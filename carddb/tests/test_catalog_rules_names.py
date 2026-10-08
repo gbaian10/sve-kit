@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING, Literal
 import pytest
 
 from sve_carddb.build import Json
-from sve_carddb.catalog.models import NameBinding
-from sve_carddb.catalog.rules_names import populate_rules_names, register_name
-from sve_carddb.products.models import LocalizedText
-from sve_carddb.text_observations.intern import TextInterner
+from sve_carddb.domains.catalog.models import NameBinding
+from sve_carddb.domains.catalog.rules_names import populate_rules_names, register_name
+from sve_carddb.domains.products.models import LocalizedText
+from sve_carddb.domains.text_observations.intern import TextInterner
 
 from .database_fixtures import DatabaseTemplate
 
@@ -168,7 +168,7 @@ def test_construction_name_hash_collision_is_not_silently_reused(
     db: Database, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(
-        "sve_carddb.catalog.rules_names.digest", lambda _: "sha256:" + "a" * 64
+        "sve_carddb.domains.catalog.rules_names.digest", lambda _: "sha256:" + "a" * 64
     )
     with db.transaction():
         populate_rules_names(db)

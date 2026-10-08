@@ -9,14 +9,14 @@ from pydantic import ValidationError
 from sve_carddb.build import Database, Value, create_database
 from sve_carddb.build.source_rows import source_values
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.construction import (
+from sve_carddb.core.json import canonical
+from sve_carddb.domains.construction import (
     DeckRoleOverride,
     load_construction,
     populate_construction,
     resolve_construction,
 )
-from sve_carddb.core.json import canonical
-from sve_carddb.products.models import LocalizedText
+from sve_carddb.domains.products.models import LocalizedText
 
 from .build_db_fixtures import rows
 from .card_extras_fixtures import seed

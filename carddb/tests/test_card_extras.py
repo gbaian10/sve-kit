@@ -9,7 +9,9 @@ from pydantic import JsonValue, ValidationError
 from sve_carddb.build import create_database
 from sve_carddb.build.source_rows import source_values
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.card_extras import (
+from sve_carddb.core.json import canonical
+from sve_carddb.core.provenance import input_record
+from sve_carddb.domains.card_extras import (
     ErrataChange,
     ErrataPage,
     ErrataPrinting,
@@ -19,8 +21,6 @@ from sve_carddb.card_extras import (
     populate_card_extras,
     require_card_extras_ready,
 )
-from sve_carddb.core.json import canonical
-from sve_carddb.core.provenance import input_record
 
 from .card_extras_fixtures import context, page, seed, source
 

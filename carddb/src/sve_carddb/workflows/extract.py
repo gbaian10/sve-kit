@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Protocol
 
 import orjson
 
-from sve_carddb.ingest.archive.manifest import Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.http.validate import ValidationError
 from sve_carddb.ingest.http.writer import LocalState
 from sve_carddb.ingest.queries import card_numbers
@@ -44,16 +44,20 @@ class ExtractReport:
 
 
 def extract_cards(
-    manifest: Manifest, writer: RawReader, dest: Path, *, region: Region = jp.REGION
+    manifest: Manifest,
+    writer: RawReader,
+    dest: Path,
+    *,
+    region: SourceRegion = jp.REGION,
 ) -> ExtractReport:
     """Transcribe every trusted card page of the current lists into `dest`.
 
     `dest` is replaced atomically, so a failed run never leaves half a file.
     """
-    if region not in {Region.JP, Region.EN}:
+    if region not in {SourceRegion.JP, SourceRegion.EN}:
         raise ValueError("Card extraction supports only JP and EN")
     report = ExtractReport()
-    catalog = jp if region is Region.JP else en
+    catalog = jp if region is SourceRegion.JP else en
     dest.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp_name = tempfile.mkstemp(dir=dest.parent, prefix=".tmp-", suffix=".jsonl")
     tmp = Path(tmp_name)
@@ -68,7 +72,7 @@ def extract_cards(
                     raw = writer.read(url)
                     record = (
                         extract_card(raw, number=number)
-                        if region is Region.JP
+                        if region is SourceRegion.JP
                         else official_en.extract_card(raw, number=number)
                     )
                 except (ValidationError, MissingElementError) as exc:

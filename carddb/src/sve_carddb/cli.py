@@ -16,14 +16,17 @@ import typer
 from pydantic import ValidationError as SettingsError
 from rich.console import Console
 
-from sve_carddb.digital_links.commands import app as digital_links_app
-from sve_carddb.digital_name_policies.commands import app as digital_name_policies_app
+from sve_carddb.core.paths import UnsafePathError
+from sve_carddb.core.regions import SourceRegion
+from sve_carddb.domains.digital.links.commands import app as digital_links_app
+from sve_carddb.domains.digital.name_policies.commands import (
+    app as digital_name_policies_app,
+)
 from sve_carddb.ingest.archive.manifest import (
     AlreadyRunningError,
     ExclusiveLock,
     Manifest,
     ManifestError,
-    Region,
 )
 from sve_carddb.ingest.archive.source_archive import (
     ArchiveError,
@@ -40,7 +43,6 @@ from sve_carddb.ingest.archive.source_archive import (
     verify_batch,
 )
 from sve_carddb.ingest.archive.source_import.commands import app as source_import_app
-from sve_carddb.ingest.archive.store import UnsafePathError
 from sve_carddb.ingest.config import Settings
 from sve_carddb.ingest.crawl.crawl import (
     EN_CATALOG,
@@ -696,10 +698,10 @@ def archive_extract_cards(
     store_id: Annotated[str, typer.Option(help="Stable archive store name.")],
     batch_id: str,
     dest: Path,
-    region: Region = Region.JP,
+    region: SourceRegion = SourceRegion.JP,
 ) -> None:
     """Extract JP or EN cards solely from one verified sealed input batch."""
-    if region not in {Region.JP, Region.EN}:
+    if region not in {SourceRegion.JP, SourceRegion.EN}:
         console.print("[red]stopped:[/red] Card extraction supports only JP and EN")
         raise typer.Exit(1)
     try:

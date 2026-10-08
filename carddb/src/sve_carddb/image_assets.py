@@ -13,6 +13,7 @@ from pydantic import JsonValue
 from sve_carddb.build.source_rows import insert_raw_sources, source_values
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import Source, SourceUse, uses_sorted
+from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.image_checks import ImageChecks
 from sve_carddb.image_variants import (
     DEFAULT_RECIPE,
@@ -27,15 +28,15 @@ from sve_carddb.parse.pages import official_en
 from sve_carddb.parse.pages.extract_en import extract_card as extract_en
 from sve_carddb.parse.pages.extract_jp import extract_card
 from sve_carddb.parse.pages.official_jp import card_url, image_url
-from sve_carddb.registry.records import PrintingData, Region
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
 
     from sve_carddb.build import Database, Row, Value
+    from sve_carddb.core.regions import Region
+    from sve_carddb.domains.registry.preview import PreviewPlan
     from sve_carddb.image_crops import ImageCrops
     from sve_carddb.ingest.archive.frozen_sources import FrozenSources
-    from sve_carddb.registry.preview import PreviewPlan
 
 PARSER = "jp-image-links-v1"
 EN_PARSER = "en-image-links-v1"

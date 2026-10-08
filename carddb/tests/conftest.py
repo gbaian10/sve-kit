@@ -29,8 +29,8 @@ pytest_plugins = ("tests.private_pages_plugin",)
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from sve_carddb.registry.snapshot import RegistrySnapshot
-    from sve_carddb.registry.storage import Entry
+    from sve_carddb.domains.registry.snapshot import RegistrySnapshot
+    from sve_carddb.domains.registry.storage import Entry
 
 
 @pytest.fixture(scope="session", autouse=True)  # ruff: ignore[pytest-fixture-autouse] -- safety must cover every test and session fixture

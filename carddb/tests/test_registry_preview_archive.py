@@ -8,15 +8,15 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build.source_rows import source_values
+from sve_carddb.domains.registry.inputs import canonical
+from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
+from sve_carddb.domains.registry.preview import FrozenJP
+from sve_carddb.domains.registry.records import Observation
+from sve_carddb.domains.registry.review import observation
 from sve_carddb.ingest.archive.manifest import Kind, Manifest
 from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
 from sve_carddb.parse.pages.extract_jp import extract_card
 from sve_carddb.parse.pages.official_jp import card_url
-from sve_carddb.registry.inputs import canonical
-from sve_carddb.registry.parser_adapters.official_jp import legacy_projection
-from sve_carddb.registry.preview import FrozenJP
-from sve_carddb.registry.records import Observation
-from sve_carddb.registry.review import observation
 
 from .test_source_archive import NOW, _put, _resource, _store
 

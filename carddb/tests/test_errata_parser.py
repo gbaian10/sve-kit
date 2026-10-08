@@ -7,11 +7,15 @@ from typing import TYPE_CHECKING, cast
 import httpx
 import pytest
 
-from sve_carddb.card_extras.errata_archive import FrozenErrataNotices
-from sve_carddb.card_extras.errata_parser import PARSER, associate_blocks, parse_notice
 from sve_carddb.core.json import digest
+from sve_carddb.core.regions import SourceRegion
+from sve_carddb.domains.card_extras.errata_archive import FrozenErrataNotices
+from sve_carddb.domains.card_extras.errata_parser import (
+    PARSER,
+    associate_blocks,
+    parse_notice,
+)
 from sve_carddb.ingest.archive.manifest import Kind, Manifest
-from sve_carddb.ingest.archive.manifest import Region as ManifestRegion
 from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
 
 from .card_extras_fixtures import source
@@ -21,8 +25,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.core.provenance import Source
+    from sve_carddb.core.regions import Region
     from sve_carddb.ingest.archive.source_archive import ArchiveStore
-    from sve_carddb.registry.records import Region
 
 
 def page(
@@ -230,7 +234,7 @@ def sealed(tmp_path_factory: pytest.TempPathFactory) -> tuple[ArchiveStore, str]
     raw, pin = page()
     resource = replace(
         _resource(pin.url, "raw/notice.html", raw, Kind.ERRATA),
-        region=ManifestRegion.EN,
+        region=SourceRegion.EN,
     )
     _put(store, resource, raw)
     return store, seal_batch(store).batch_id

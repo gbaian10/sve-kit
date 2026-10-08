@@ -7,23 +7,25 @@ from pydantic import JsonValue
 
 from sve_carddb.core.authored import authored_root
 from sve_carddb.core.json import canonical, object_value, parse
-from sve_carddb.digital_links.importer import Inputs as LinkInputs
-from sve_carddb.digital_links.importer import populate_links
-from sve_carddb.digital_name_policies.application import Inputs as NameInputs
-from sve_carddb.digital_name_policies.application import populate
-from sve_carddb.translations.digital import configuration as digital_configuration
-from sve_carddb.translations.importer import _refs
+from sve_carddb.domains.digital.links.importer import Inputs as LinkInputs
+from sve_carddb.domains.digital.links.importer import populate_links
+from sve_carddb.domains.digital.name_policies.application import Inputs as NameInputs
+from sve_carddb.domains.digital.name_policies.application import populate
+from sve_carddb.domains.translations.digital import (
+    configuration as digital_configuration,
+)
+from sve_carddb.domains.translations.glossary.evidence import _refs
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build import Database
     from sve_carddb.core.provenance import BuildContext
-    from sve_carddb.digital_links.importer import Result as LinkResult
-    from sve_carddb.digital_name_policies.application import Result as NameResult
-    from sve_carddb.text_observations.plan import TextPlan
-    from sve_carddb.translations.current_names import Names
-    from sve_carddb.translations.sources import Sources
+    from sve_carddb.domains.digital.links.importer import Result as LinkResult
+    from sve_carddb.domains.digital.name_policies.results import Result as NameResult
+    from sve_carddb.domains.text_observations.plan import TextPlan
+    from sve_carddb.domains.translations.names.resolve import Names
+    from sve_carddb.domains.translations.sources import Sources
     from sve_carddb.workflows.offline import Inputs
 
 

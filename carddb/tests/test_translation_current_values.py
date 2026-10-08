@@ -7,11 +7,15 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.core.json import canonical, digest, object_value
-from sve_carddb.registry.storage import read_yaml
-from sve_carddb.translations.current import semantic_hash
-from sve_carddb.translations.current_models import ChoiceRecord, Shard, TermRecord
-from sve_carddb.translations.loader import load_glossary
-from sve_carddb.translations.models import AuthoredValue
+from sve_carddb.domains.registry.storage import read_yaml
+from sve_carddb.domains.translations.glossary.records import (
+    ChoiceRecord,
+    Shard,
+    TermRecord,
+)
+from sve_carddb.domains.translations.glossary.validate import semantic_hash
+from sve_carddb.domains.translations.inputs import load_glossary
+from sve_carddb.domains.translations.models import AuthoredValue
 
 from .translation_fixtures import choice, term
 

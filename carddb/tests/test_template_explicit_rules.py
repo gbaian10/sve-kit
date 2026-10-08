@@ -4,16 +4,22 @@ from dataclasses import replace
 
 import pytest
 
-from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.contracts.template_parameters import Schema, Slot
-from sve_carddb.template_parameters.candidate_matching import classify, recognize
-from sve_carddb.template_parameters.explicit_rules import EXPLICIT
-from sve_carddb.template_parameters.references import References
-from sve_carddb.template_parameters.spans import locate
-from sve_carddb.template_sources.inventory import entry
-from sve_carddb.template_sources.normalizer import VERSION, partition
-from sve_carddb.template_sources.pins import PARSER
-from sve_carddb.template_translations.members import _members
+from sve_carddb.domains.catalog.adoption_models import SourceRef
+from sve_carddb.domains.translations.parameters.candidate_matching import (
+    classify,
+    recognize,
+)
+from sve_carddb.domains.translations.parameters.explicit_rules import EXPLICIT
+from sve_carddb.domains.translations.parameters.references import References
+from sve_carddb.domains.translations.parameters.spans import locate
+from sve_carddb.domains.translations.source_inventory.inventory import entry
+from sve_carddb.domains.translations.source_inventory.normalizer import (
+    VERSION,
+    partition,
+)
+from sve_carddb.domains.translations.source_inventory.pins import PARSER
+from sve_carddb.domains.translations.templates.members import _members
 
 from .test_template_parameters import candidate
 from .test_template_rule_candidates import matches

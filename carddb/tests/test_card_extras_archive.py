@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING, cast
 import httpx
 import pytest
 
-from sve_carddb.card_extras import FrozenCardExtras, parse_card_page
-from sve_carddb.card_extras.archive import EN_PARSER, PARSER, card_number
 from sve_carddb.core.json import digest
+from sve_carddb.core.regions import SourceRegion
+from sve_carddb.domains.card_extras import FrozenCardExtras, parse_card_page
+from sve_carddb.domains.card_extras.archive import EN_PARSER, PARSER, card_number
 from sve_carddb.ingest.archive.manifest import Kind, Manifest
-from sve_carddb.ingest.archive.manifest import Region as ManifestRegion
 from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
 from sve_carddb.parse.html import MissingElementError
 from sve_carddb.parse.pages import official_en, official_jp
@@ -23,10 +23,10 @@ from .test_source_archive import _put, _resource, _store
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.card_extras import CardPage
     from sve_carddb.core.provenance import Source
+    from sve_carddb.core.regions import Region
+    from sve_carddb.domains.card_extras import CardPage
     from sve_carddb.ingest.archive.source_archive import ArchiveStore
-    from sve_carddb.registry.records import Region
 
 
 RAW = (
@@ -323,7 +323,7 @@ def sealed_en(tmp_path_factory: pytest.TempPathFactory) -> tuple[ArchiveStore, s
     store = _store(tmp_path_factory.mktemp("extras-en-sealed"))
     resource = replace(
         _resource(official_en.card_url("TEST-001Ⓢa"), "raw/en.html", EN_RAW, Kind.CARD),
-        region=ManifestRegion.EN,
+        region=SourceRegion.EN,
     )
     _put(store, resource, EN_RAW)
     return store, seal_batch(store).batch_id

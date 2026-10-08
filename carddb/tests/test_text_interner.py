@@ -7,8 +7,8 @@ import pytest
 
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t0 import compile_t0
-from sve_carddb.products.models import LocalizedText
-from sve_carddb.text_observations.intern import TextInterner
+from sve_carddb.domains.products.models import LocalizedText
+from sve_carddb.domains.text_observations.intern import TextInterner
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database
@@ -74,7 +74,9 @@ def test_published_union_catches_an_unreferenced_historic_collision(
     with create_database(compile_t0()) as db:
         with db.transaction():
             register(db)
-        monkeypatch.setattr("sve_carddb.text_observations.intern.hashlib.sha256", Hash)
+        monkeypatch.setattr(
+            "sve_carddb.domains.text_observations.intern.hashlib.sha256", Hash
+        )
         texts = TextInterner(
             db, published=(LocalizedText(lang="ja", text="Historic unreferenced"),)
         )

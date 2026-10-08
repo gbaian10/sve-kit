@@ -9,8 +9,8 @@ from typer.testing import CliRunner
 
 from sve_carddb.cli import app
 from sve_carddb.core.json import array, canonical, digest, object_value, parse
-from sve_carddb.digital_name_policies.commands import report_command
-from sve_carddb.digital_name_policies.report import generate
+from sve_carddb.domains.digital.name_policies.commands import report_command
+from sve_carddb.domains.digital.name_policies.report import generate
 
 from .digital_name_policy_fixtures import PolicyFixture, make_policy_fixture
 
@@ -191,8 +191,8 @@ def test_newer_translation_change_is_reported_without_activation(
     baseline: PolicyFixture,
 ) -> None:
     comparing = baseline.digital.sources()
-    from sve_carddb.digital_links.catalogue import complete_inventory  # ruff: ignore[import-outside-top-level] -- only this diagnostic uses a deliberately changed detached projection
-    from sve_carddb.digital_links.importer import review_context  # ruff: ignore[import-outside-top-level] -- same explicit context as the comparison source
+    from sve_carddb.domains.digital.links.catalogue import complete_inventory  # ruff: ignore[import-outside-top-level] -- only this diagnostic uses a deliberately changed detached projection
+    from sve_carddb.domains.digital.links.importer import review_context  # ruff: ignore[import-outside-top-level] -- same explicit context as the comparison source
 
     complete_inventory(comparing, review_context(comparing), "sv1")
     for (_, _, parser), (lang, document, _) in comparing.cache.items():

@@ -22,9 +22,9 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import Database
     from sve_carddb.core.provenance import BuildContext, InputRecord
+    from sve_carddb.domains.registry.preview import PreviewPlan
     from sve_carddb.image_assets import ImageBuild
     from sve_carddb.image_crops import ImageCrops
-    from sve_carddb.registry.preview import PreviewPlan
     from sve_carddb.workflows.offline import Inputs
 
 

@@ -6,16 +6,20 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.core.json import digest
-from sve_carddb.template_translations.current import validate_templates
-from sve_carddb.template_translations.current_models import DefinitionRecord
-from sve_carddb.template_translations.definitions import _definitions, groups, payload
-from sve_carddb.template_translations.members import POSITIVE_ROLES
+from sve_carddb.domains.translations.templates.definitions import (
+    _definitions,
+    groups,
+    payload,
+)
+from sve_carddb.domains.translations.templates.loader import validate_templates
+from sve_carddb.domains.translations.templates.members import POSITIVE_ROLES
+from sve_carddb.domains.translations.templates.records import DefinitionRecord
 
 from .test_template_current import make_case
 
 if TYPE_CHECKING:
-    from sve_carddb.template_translations.definitions import Groups
-    from sve_carddb.template_translations.members import Reconstructed
+    from sve_carddb.domains.translations.templates.definitions import Groups
+    from sve_carddb.domains.translations.templates.members import Reconstructed
 
     from .test_template_current import Case
 

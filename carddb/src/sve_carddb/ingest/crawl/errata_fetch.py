@@ -7,13 +7,8 @@ from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
 from urllib.parse import unquote, urlsplit
 
-from sve_carddb.ingest.archive.manifest import (
-    Kind,
-    Manifest,
-    Outcome,
-    Region,
-    RequestResult,
-)
+from sve_carddb.core.regions import SourceRegion
+from sve_carddb.ingest.archive.manifest import Kind, Manifest, Outcome, RequestResult
 from sve_carddb.ingest.http.client import Client, FetchError, Request, StopCrawlError
 from sve_carddb.ingest.http.validate import ValidationError, require_media_type
 from sve_carddb.ingest.http.writer import Fetched, LocalState, Writer, sha256
@@ -30,8 +25,8 @@ if TYPE_CHECKING:
 
 _ANNOUNCEMENT = re.compile(r"/errata/([^/]+)/?\Z")
 _REGIONS = {
-    "shadowverse-evolve.com": Region.JP,
-    "en.shadowverse-evolve.com": Region.EN,
+    "shadowverse-evolve.com": SourceRegion.JP,
+    "en.shadowverse-evolve.com": SourceRegion.EN,
 }
 _WRAPPER = (
     "div.st-Container > div.st-Container_Inner > div.sw-Lower > div.sw-Lower_Wrapper"
@@ -83,7 +78,7 @@ def raw_path(url: str) -> PurePosixPath:
     )
 
 
-def url_region(url: str) -> Region:
+def url_region(url: str) -> SourceRegion:
     """Derive region only from the validated exact official host."""
     validate_urls((url,))
     return _REGIONS[urlsplit(url).netloc]
@@ -135,7 +130,7 @@ def _validate_body(response: Response) -> None:
     document = parse(response.body.decode("utf-8"))
     title = select_one(document, "title")
     # JP's misspelling is observed; EN's corresponding detail class needs a pilot.
-    prefix = "eratta" if url_region(response.url) is Region.JP else "errata"
+    prefix = "eratta" if url_region(response.url) is SourceRegion.JP else "errata"
     detail = (
         _WRAPPER
         + f" > div.sw-Lower_Container > div.{prefix}-Detail > div.{prefix}-Detail_Inner"

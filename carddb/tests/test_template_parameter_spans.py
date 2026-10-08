@@ -7,8 +7,8 @@ from dataclasses import replace
 import pytest
 
 from sve_carddb.contracts.template_parameters import Range
-from sve_carddb.template_parameters import provenance, spans
-from sve_carddb.template_sources.normalizer import partition
+from sve_carddb.domains.translations.parameters import provenance, spans
+from sve_carddb.domains.translations.source_inventory.normalizer import partition
 
 
 def test_reminder_anchor_and_multirange_body_preserve_all_crlf_bytes() -> None:

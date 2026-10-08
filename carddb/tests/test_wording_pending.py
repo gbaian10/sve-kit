@@ -9,13 +9,13 @@ import pytest
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.contracts.snapshot import validate
-from sve_carddb.products import load_products
-from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.text_observations import (
+from sve_carddb.domains.products import load_products
+from sve_carddb.domains.registry.snapshot import load_registry
+from sve_carddb.domains.text_observations import (
     import_text_observations,
     plan_text_observations,
 )
-from sve_carddb.text_observations.wording import (
+from sve_carddb.domains.text_observations.wording import (
     printing_dates,
     printing_observed_texts,
     wording_region_blocks,
@@ -32,10 +32,10 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build import Database
-    from sve_carddb.registry.review import Inputs
-    from sve_carddb.registry.storage import Entry
-    from sve_carddb.text_observations.plan import TextPlan
-    from sve_carddb.text_observations.wording import WordingView
+    from sve_carddb.domains.registry.review import Inputs
+    from sve_carddb.domains.registry.storage import Entry
+    from sve_carddb.domains.text_observations.plan import TextPlan
+    from sve_carddb.domains.text_observations.wording import WordingView
 
 
 def product(

@@ -14,19 +14,20 @@ from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, compile_build
 from sve_carddb.cli import app
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.core.provenance import InputRecord
-from sve_carddb.ingest.archive.manifest import Kind, Region
+from sve_carddb.core.regions import SourceRegion
+from sve_carddb.domains.registry.build import build as build_identity
+from sve_carddb.domains.registry.inputs import Card, Mapping
+from sve_carddb.domains.registry.parser_adapters.official_en import (
+    legacy_projection as legacy_en_projection,
+)
+from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
+from sve_carddb.domains.registry.review import InitDecisions
+from sve_carddb.domains.registry.review import Inputs as IdentityInputs
+from sve_carddb.domains.registry.storage import Index, plan_files, write_files
+from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import Scope, seal_batch
 from sve_carddb.parse.pages import extract_en, extract_jp, official_en, official_jp
 from sve_carddb.parse.pages.official_jp import card_url
-from sve_carddb.registry.build import build as build_identity
-from sve_carddb.registry.inputs import Card, Mapping
-from sve_carddb.registry.parser_adapters.official_en import (
-    legacy_projection as legacy_en_projection,
-)
-from sve_carddb.registry.parser_adapters.official_jp import legacy_projection
-from sve_carddb.registry.review import InitDecisions
-from sve_carddb.registry.review import Inputs as IdentityInputs
-from sve_carddb.registry.storage import Index, plan_files, write_files
 from sve_carddb.workflows import offline
 
 from .adoption_fixtures import REPO, commit, write
@@ -38,7 +39,7 @@ from .test_source_archive import _put, _resource, _store
 from .translation_fixtures import choice, envelope, term
 from .translation_fixtures import write as write_translations
 
-CODE_PATH = "carddb/src/sve_carddb/translations/sources.py"
+CODE_PATH = "carddb/src/sve_carddb/domains/translations/sources.py"
 RUNTIME = (CODE_PATH,)
 
 
@@ -71,7 +72,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
     payloads = {
         card_url("SYN-01"): (
             page("jp", '<div class="detail">Synthetic frozen term</div>'),
-            Region.JP,
+            SourceRegion.JP,
             Kind.CARD,
         ),
         "https://shadowverse-wb.com/web/CardList/cardList?lang=ja&offset=0": (
@@ -87,7 +88,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
                     },
                 }
             ),
-            Region.SVWB,
+            SourceRegion.SVWB,
             Kind.API,
         ),
         "https://shadowverse-wb.com/web/CardList/cardList?lang=cht&offset=0": (
@@ -103,7 +104,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
                     },
                 }
             ),
-            Region.SVWB,
+            SourceRegion.SVWB,
             Kind.API,
         ),
     }
@@ -186,11 +187,11 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
     store = _store(tmp_path / "card-sources")
     batches: dict[str, str] = {}
     cards: dict[str, Card] = {}
-    for region in (Region.EN, Region.JP):
-        adapter = official_jp if region == Region.JP else official_en
-        number = "SYN-01" if region == Region.JP else "SYN-02"
+    for region in (SourceRegion.EN, SourceRegion.JP):
+        adapter = official_jp if region == SourceRegion.JP else official_en
+        number = "SYN-01" if region == SourceRegion.JP else "SYN-02"
         raw = page(
-            "jp" if region == Region.JP else "en",
+            "jp" if region == SourceRegion.JP else "en",
             '<div class="detail">Synthetic native card effect</div>',
         ).replace(b"SYN-01", number.encode())
         resource = replace(
@@ -202,7 +203,7 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
         _put(store, resource, raw)
         card = (
             legacy_projection(extract_jp.extract_card(raw, number=number))
-            if region == Region.JP
+            if region == SourceRegion.JP
             else legacy_en_projection(extract_en.extract_card(raw, number=number))
         )
         cards[region.value] = card

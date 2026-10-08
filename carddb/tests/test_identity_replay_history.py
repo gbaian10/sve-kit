@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from sve_carddb.registry.transitions.replay import replay
+from sve_carddb.domains.registry.transitions.replay import replay
 
 from .identity_replay_fixtures import (
     allocated,
@@ -40,7 +40,7 @@ from .test_identity_replay import scenario as scenario  # ruff: ignore[useless-i
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.registry.storage import RegistryFiles
+    from sve_carddb.domains.registry.storage import RegistryFiles
 
 
 def effective_state(

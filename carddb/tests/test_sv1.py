@@ -6,7 +6,8 @@ import httpx
 import orjson
 import pytest
 
-from sve_carddb.ingest.archive.manifest import Kind, Link, Manifest, Outcome, Region
+from sve_carddb.core.regions import SourceRegion
+from sve_carddb.ingest.archive.manifest import Kind, Link, Manifest, Outcome
 from sve_carddb.ingest.crawl.crawl import Crawler, LimitReachedError
 from sve_carddb.ingest.crawl.crawl_sv1 import (
     SV1_SITE,
@@ -178,7 +179,7 @@ async def test_api_is_stored_as_json_and_recorded(
     assert resource is not None
     assert resource.path == PurePosixPath("raw/sv1/api/cards-zh-tw.json")
     assert (resource.region, resource.kind, resource.etag) == (
-        Region.SV1,
+        SourceRegion.SV1,
         Kind.API,
         ETAG,
     )
@@ -213,7 +214,7 @@ async def test_images_come_from_the_template(
     assert portal.calls == [sv1.image_url(FOLLOWER, face) for face in sv1.FACES]
     resource = manifest.resources.get(url)
     assert resource is not None
-    assert (resource.region, resource.kind) == (Region.SV1, Kind.IMAGE)
+    assert (resource.region, resource.kind) == (SourceRegion.SV1, Kind.IMAGE)
     assert resource.path == PurePosixPath(
         f"media/images/sv1/image/card/phase2/common/E/E_{FOLLOWER}.png"
     )

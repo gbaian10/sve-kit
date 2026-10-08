@@ -7,13 +7,18 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.core.json import array, canonical, digest, integer, object_value
-from sve_carddb.template_parameters import candidate_matching as matching
-from sve_carddb.template_parameters.candidate_matching import recognize
-from sve_carddb.template_parameters.inventory import Candidates, Field, _field, summary
-from sve_carddb.template_parameters.references import References
-from sve_carddb.template_parameters.rule_candidates import (
+from sve_carddb.domains.catalog.adoption_models import SourceRef
+from sve_carddb.domains.translations.parameters import candidate_matching as matching
+from sve_carddb.domains.translations.parameters.candidate_matching import recognize
+from sve_carddb.domains.translations.parameters.inventory import (
+    Candidates,
+    Field,
+    _field,
+    summary,
+)
+from sve_carddb.domains.translations.parameters.references import References
+from sve_carddb.domains.translations.parameters.rule_candidates import (
     BY_ID,
     RULES,
     SUFFIXES,
@@ -22,9 +27,12 @@ from sve_carddb.template_parameters.rule_candidates import (
     definition,
     selection,
 )
-from sve_carddb.template_sources.inventory import entry
-from sve_carddb.template_sources.normalizer import VERSION, partition
-from sve_carddb.template_sources.pins import PARSER
+from sve_carddb.domains.translations.source_inventory.inventory import entry
+from sve_carddb.domains.translations.source_inventory.normalizer import (
+    VERSION,
+    partition,
+)
+from sve_carddb.domains.translations.source_inventory.pins import PARSER
 
 from .test_template_parameters import HASH, candidate
 
@@ -677,7 +685,7 @@ def test_rule_specific_conditions_exclude_unrelated_family_syntax(
 ) -> None:
     before = {rule.id: conditions(rule) for rule in RULES}
     monkeypatch.setattr(
-        "sve_carddb.template_parameters.rule_candidates.INTRO_PATTERN",
+        "sve_carddb.domains.translations.parameters.rule_candidates.INTRO_PATTERN",
         "altered choice introduction",
     )
     after = {rule.id: conditions(rule) for rule in RULES}

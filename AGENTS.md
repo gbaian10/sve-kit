@@ -35,9 +35,12 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 `carddb/src/sve_carddb/` 的共用基礎為 `core/`，共用契約為 `contracts/`；
 `ingest/` 分為抓取協調 `crawl/`、低階 HTTP `http/` 與來源保全 `archive/`，
 原 Settings 位於 `ingest/config.py`，只管來源取得設定。`parse/` 保存 HTML 邊界及純頁面解析；
-registry projection adapter 與 QA adapter 分別留在 registry 與 card_extras。
+registry projection adapter 與 QA adapter 分別留在 `domains/registry/parser_adapters/` 與 `domains/card_extras/qa_parser.py`。
 `build/` 保存 DB 基礎設施，詞法值域位於 `build/scalars.py`。
 `workflows/` 串接離線建置、名稱／圖片組合、匯出與診斷；下層不得匯入 workflows 或 CLI。
+`domains/` 保存各資料領域，翻譯歸於 `domains/translations/` 的 glossary、names、templates、parameters 與 source_inventory，
+數位版歸於 `domains/digital/` 的 links 與 name_policies；領域不得匯入 workflows 或 CLI。
+parse、ingest 與 build 不得反向依賴領域；Region 型別與純相對路徑驗證分別位於 `core/regions.py`、`core/paths.py`。
 抓取協調可呼叫 parser；低階 HTTP／archive 不得匯入 crawler，parser 不得依賴 DB 或 authored loader。
 
 ### 前端與部署邊界

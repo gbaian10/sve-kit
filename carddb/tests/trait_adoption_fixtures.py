@@ -8,7 +8,8 @@ from pydantic import JsonValue
 
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.ingest.archive.manifest import Kind, Region
+from sve_carddb.core.regions import SourceRegion
+from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import seal_batch
 
 from .adoption_fixtures import REPO, commit, index, make_case
@@ -101,7 +102,7 @@ def trait_baseline(tmp_path_factory: pytest.TempPathFactory) -> TraitCase:
                 raw,
                 Kind.CARD,
             ),
-            region=Region(region),
+            region=SourceRegion(region),
             content_type="application/json",
         )
         _put(store, resource, raw)

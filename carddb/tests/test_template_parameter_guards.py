@@ -10,12 +10,15 @@ from pydantic import ValidationError
 from sve_carddb.contracts.template_parameters import Range, Schema, Slot, SourceSpan
 from sve_carddb.core.json import canonical, object_value
 from sve_carddb.core.provenance import ArchivePin, Source
-from sve_carddb.template_parameters.analysis import header_positions, prepared
-from sve_carddb.template_parameters.current_references import adopted
-from sve_carddb.template_parameters.references import References
-from sve_carddb.template_parameters.verification import verify_values
-from sve_carddb.template_sources.normalizer import partition
-from sve_carddb.translations.loader import load_glossary
+from sve_carddb.domains.translations.inputs import load_glossary
+from sve_carddb.domains.translations.parameters.adopted_references import adopted
+from sve_carddb.domains.translations.parameters.analysis import (
+    header_positions,
+    prepared,
+)
+from sve_carddb.domains.translations.parameters.references import References
+from sve_carddb.domains.translations.parameters.verification import verify_values
+from sve_carddb.domains.translations.source_inventory.normalizer import partition
 
 from .test_template_parameters import HASH, candidate, numeric_fixture
 from .translation_fixtures import envelope, term, write
@@ -23,8 +26,8 @@ from .translation_fixtures import envelope, term, write
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.core.models import RecordData
+    from sve_carddb.domains.catalog.adoption_models import SourceRef
 
 
 def checked(model: type[RecordData], data: dict[str, object]) -> None:

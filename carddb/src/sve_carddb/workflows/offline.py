@@ -10,75 +10,87 @@ from sve_carddb.build import create_database
 from sve_carddb.build.output import save as save_build
 from sve_carddb.build.source_rows import insert_raw_sources
 from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, compile_build
-from sve_carddb.card_extras import (
+from sve_carddb.contracts.snapshot import validate
+from sve_carddb.core.authored import authored_root
+from sve_carddb.core.json import array, digest, object_value, parse
+from sve_carddb.core.models import Hash, Instant, RecordData, Text
+from sve_carddb.core.provenance import BuildContext, Revision, input_record
+from sve_carddb.core.regions import Region
+from sve_carddb.domains.card_extras import (
     FrozenCardExtras,
     applicable_reskin_regions,
     plan_card_extras,
     populate_card_extras,
     require_card_extras_ready,
 )
-from sve_carddb.catalog.adoption_models import Batch as SourceBatch
-from sve_carddb.contracts.snapshot import validate
-from sve_carddb.core.authored import authored_root
-from sve_carddb.core.json import array, digest, object_value, parse
-from sve_carddb.core.models import Hash, Instant, RecordData, Text
-from sve_carddb.core.provenance import BuildContext, Revision, input_record
-from sve_carddb.image_checks import ImageChecks
-from sve_carddb.image_variants import DEFAULT_RECIPE
-from sve_carddb.products import (
+from sve_carddb.domains.catalog.adoption_models import Batch as SourceBatch
+from sve_carddb.domains.products import (
     FrozenProducts,
     load_product_identities,
     load_products,
     plan_official_products,
 )
-from sve_carddb.products.models import Date
-from sve_carddb.registry.preview import FrozenEN, FrozenJP, FrozenRegions, plan_preview
-from sve_carddb.registry.records import PrintingData, Region
-from sve_carddb.snapshot.export import Batch, Ownership
-from sve_carddb.snapshot.project import Decisions, Projection, Settings, project
-from sve_carddb.source_corrections import FrozenImages
-from sve_carddb.template_parameter_rules.current import load as load_rules
-from sve_carddb.template_parameters.current_references import adopted
-from sve_carddb.template_translations.current import from_files, validate_templates
-from sve_carddb.template_translations.current_build import apply as apply_templates
-from sve_carddb.template_translations.current_references import (
-    References as TemplateReferences,
+from sve_carddb.domains.products.models import Date
+from sve_carddb.domains.registry.preview import (
+    FrozenEN,
+    FrozenJP,
+    FrozenRegions,
+    plan_preview,
 )
-from sve_carddb.template_translations.current_sources import Sources as TemplateSources
-from sve_carddb.template_translations.files import Files
-from sve_carddb.text_observations import (
+from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.source_corrections import FrozenImages
+from sve_carddb.domains.text_observations import (
     FrozenTexts,
     RegionalTexts,
     plan_text_observations,
     populate_text_preview,
     text_configuration,
 )
-from sve_carddb.text_observations.wording import printing_observed_texts, wording_views
-from sve_carddb.translations.current_models import (
+from sve_carddb.domains.text_observations.wording import (
+    printing_observed_texts,
+    wording_views,
+)
+from sve_carddb.domains.translations.flavor import apply as apply_flavor
+from sve_carddb.domains.translations.flavor import load as load_flavor
+from sve_carddb.domains.translations.glossary.records import (
     ChoiceRecord,
     ConceptRecord,
     TermRecord,
 )
-from sve_carddb.translations.current_names import prepare as prepare_names
-from sve_carddb.translations.flavor import apply as apply_flavor
-from sve_carddb.translations.flavor import load as load_flavor
-from sve_carddb.translations.models import EffectTerm, SourceValue
-from sve_carddb.translations.sources import Sources as TranslationSources
+from sve_carddb.domains.translations.models import EffectTerm, SourceValue
+from sve_carddb.domains.translations.names.resolve import prepare as prepare_names
+from sve_carddb.domains.translations.parameters.adopted_references import adopted
+from sve_carddb.domains.translations.parameters.rules import load as load_rules
+from sve_carddb.domains.translations.sources import Sources as TranslationSources
+from sve_carddb.domains.translations.templates.build import apply as apply_templates
+from sve_carddb.domains.translations.templates.files import Files
+from sve_carddb.domains.translations.templates.loader import (
+    from_files,
+    validate_templates,
+)
+from sve_carddb.domains.translations.templates.references import (
+    References as TemplateReferences,
+)
+from sve_carddb.domains.translations.templates.sources import Sources as TemplateSources
+from sve_carddb.image_checks import ImageChecks
+from sve_carddb.image_variants import DEFAULT_RECIPE
+from sve_carddb.snapshot.export import Batch, Ownership
+from sve_carddb.snapshot.project import Decisions, Projection, Settings, project
 from sve_carddb.workflows.offline_images import prepare_images
 from sve_carddb.workflows.offline_names import composer
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database
-    from sve_carddb.card_extras import ErrataPage, ExtrasPlan
-    from sve_carddb.catalog.adoption_importer import AdoptionInputs
-    from sve_carddb.catalog.current import Prepared
     from sve_carddb.core.provenance import InputRecord, Source
+    from sve_carddb.domains.card_extras import ErrataPage, ExtrasPlan
+    from sve_carddb.domains.catalog.adoption_importer import AdoptionInputs
+    from sve_carddb.domains.catalog.loader import Prepared
+    from sve_carddb.domains.registry.records import CorrectionEvidence
+    from sve_carddb.domains.registry.snapshot import RegistrySnapshot
+    from sve_carddb.domains.text_observations.vocabulary import Vocabulary
+    from sve_carddb.domains.translations.names.resolve import Names
+    from sve_carddb.domains.translations.templates.loader import Validated
     from sve_carddb.image_assets import ImageBuild
-    from sve_carddb.registry.records import CorrectionEvidence
-    from sve_carddb.registry.snapshot import RegistrySnapshot
-    from sve_carddb.template_translations.current import Validated
-    from sve_carddb.text_observations.vocabulary import Vocabulary
-    from sve_carddb.translations.current_names import Names
 
 
 # Templates and flavor translate Japanese source text into this display language.
@@ -245,7 +257,7 @@ def _prepare_catalog(
     registry: RegistrySnapshot | None = None,
 ) -> Prepared:
     """Native offline builds consume current values, never receipt envelopes."""
-    from sve_carddb.catalog.current import prepare  # ruff: ignore[import-outside-top-level] -- initialize the shared text interner before catalog modules
+    from sve_carddb.domains.catalog.loader import prepare  # ruff: ignore[import-outside-top-level] -- initialize the shared text interner before catalog modules
 
     snapshots = inputs.load()
     if any(snapshot.entry != "catalog-adoptions" for snapshot in snapshots):
@@ -268,8 +280,8 @@ def _populate_adoptions(
     sources: TranslationSources,
 ) -> InputRecord:
     """Write the current catalog and glossary under the current schema only."""
-    from sve_carddb.catalog.current import populate  # ruff: ignore[import-outside-top-level] -- initialize the shared text interner before catalog modules
-    from sve_carddb.translations.importer import populate_glossary  # ruff: ignore[import-outside-top-level] -- glossary import shares the catalog/text boundary
+    from sve_carddb.domains.catalog.loader import populate  # ruff: ignore[import-outside-top-level] -- initialize the shared text interner before catalog modules
+    from sve_carddb.domains.translations.glossary.importer import populate_glossary  # ruff: ignore[import-outside-top-level] -- glossary import shares the catalog/text boundary
 
     insert_raw_sources(db, (use.source for use in prepared.sources.uses))
     populate(db, prepared.snapshots, prepared, inputs.authored_revision)
@@ -317,7 +329,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     image_checks: ImageChecks | None = None,
 ) -> Built:
     """Build both regions from sealed sources, retaining every diagnostic source use."""
-    from sve_carddb.catalog.adoption_importer import AdoptionInputs  # ruff: ignore[import-outside-top-level] -- load after text modules initialize the shared interner
+    from sve_carddb.domains.catalog.adoption_importer import AdoptionInputs  # ruff: ignore[import-outside-top-level] -- load after text modules initialize the shared interner
 
     if bundle_dir is not None:
         for protected in (inputs.repo, inputs.archive):

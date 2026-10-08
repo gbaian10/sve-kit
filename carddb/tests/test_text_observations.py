@@ -7,19 +7,19 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.products.models import LocalizedText
-from sve_carddb.registry.review import Correction
-from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.text_observations import (
+from sve_carddb.domains.products.models import LocalizedText
+from sve_carddb.domains.registry.review import Correction
+from sve_carddb.domains.registry.snapshot import load_registry
+from sve_carddb.domains.text_observations import (
     Binding,
     Vocabulary,
     diagnostic_exclusion_report,
     import_text_observations,
     plan_text_observations,
 )
-from sve_carddb.text_observations.importer import stat
-from sve_carddb.text_observations.intern import TextInterner
-from sve_carddb.text_observations.plan import verify_plan
+from sve_carddb.domains.text_observations.importer import stat
+from sve_carddb.domains.text_observations.intern import TextInterner
+from sve_carddb.domains.text_observations.plan import verify_plan
 
 from .registry_snapshot_fixtures import edit_record
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared synthetic fixture
@@ -28,8 +28,8 @@ from .text_observation_fixtures import make_case
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.registry.review import Inputs
-    from sve_carddb.registry.storage import Entry
+    from sve_carddb.domains.registry.review import Inputs
+    from sve_carddb.domains.registry.storage import Entry
 
     from .shared_case_fixtures import TextCaseTemplate
 

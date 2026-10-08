@@ -15,8 +15,8 @@ from urllib.parse import parse_qs, urlsplit
 
 import orjson
 
-from sve_carddb.ingest.archive.manifest import Region
-from sve_carddb.ingest.archive.store import relpath
+from sve_carddb.core.paths import relpath
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.http.validate import ValidationError
 from sve_carddb.ingest.urls import canonicalize
 
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 HOST = "shadowverse-wb.com"
 BASE = f"https://{HOST}"
-REGION = Region.SVWB
+REGION = SourceRegion.SVWB
 # The site's own codes; `cht` is Traditional Chinese.
 LANGUAGES = ("ja", "en", "cht")
 PAGE_SIZE = 30

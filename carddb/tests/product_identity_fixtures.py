@@ -11,23 +11,23 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.core.provenance import BuildContext
+from sve_carddb.domains.products import Language, load_products
+from sve_carddb.domains.products.identities import load_product_identities
+from sve_carddb.domains.products.official import PARSER, parse_products
+from sve_carddb.domains.products.plan import plan_official_products
+from sve_carddb.domains.registry.build import build
+from sve_carddb.domains.registry.inputs import Mapping as CardMapping
+from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
+from sve_carddb.domains.registry.preview import plan_preview
+from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
+from sve_carddb.domains.registry.review import InitDecisions, Inputs
+from sve_carddb.domains.registry.snapshot import load_registry
+from sve_carddb.domains.registry.storage import plan_files, write_files
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import seal_batch
 from sve_carddb.parse.pages.extract_jp import extract_card
 from sve_carddb.parse.pages.official_jp import card_url
-from sve_carddb.products import Language, load_products
-from sve_carddb.products.identities import load_product_identities
-from sve_carddb.products.official import PARSER, parse_products
-from sve_carddb.products.plan import plan_official_products
-from sve_carddb.registry.build import build
-from sve_carddb.registry.inputs import Mapping as CardMapping
-from sve_carddb.registry.parser_adapters.official_jp import legacy_projection
-from sve_carddb.registry.preview import plan_preview
-from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
-from sve_carddb.registry.review import InitDecisions, Inputs
-from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.registry.storage import plan_files, write_files
 
 from .identity_evidence_fixtures import MemoryEvidence
 from .product_fixtures import envelope, family, install, obj, write_yaml
@@ -37,11 +37,11 @@ from .test_source_archive import _put, _resource, _store
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.products.identities import ProductIdentities
-    from sve_carddb.products.loader import ProductSnapshot
-    from sve_carddb.products.official import ProductPage
-    from sve_carddb.products.plan import OfficialProducts
-    from sve_carddb.registry.preview import PreviewPlan
+    from sve_carddb.domains.products.identities import ProductIdentities
+    from sve_carddb.domains.products.loader import ProductSnapshot
+    from sve_carddb.domains.products.official import ProductPage
+    from sve_carddb.domains.products.plan import OfficialProducts
+    from sve_carddb.domains.registry.preview import PreviewPlan
 
 NAME = "product-identities/jp/001.yaml"
 LANGUAGES = (
@@ -266,7 +266,7 @@ def add_page(
     number: str = "TEST-002",
 ) -> ProductPage:
     """Append a separately sealed synthetic version without touching old evidence."""
-    from sve_carddb.ingest.archive.manifest import Region  # ruff: ignore[import-outside-top-level] -- fixture-only archive construction
+    from sve_carddb.core.regions import SourceRegion  # ruff: ignore[import-outside-top-level] -- fixture-only archive construction
     from sve_carddb.ingest.archive.source_archive import ArchiveStore  # ruff: ignore[import-outside-top-level] -- fixture-only archive construction
     from sve_carddb.parse.pages import official_en  # ruff: ignore[import-outside-top-level] -- fixture-only EN source
 
@@ -282,7 +282,7 @@ def add_page(
     url = card_url(number) if region == "jp" else official_en.card_url(number)
     resource = replace(
         _resource(url, f"raw/{region}-{number}.html", raw, Kind.CARD),
-        region=Region.JP if region == "jp" else Region.EN,
+        region=SourceRegion.JP if region == "jp" else SourceRegion.EN,
     )
     _put(store, resource, raw)
     sealed = seal_batch(store)

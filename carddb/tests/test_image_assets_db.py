@@ -10,6 +10,13 @@ import pytest
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.provenance import BuildContext, InputRecord
+from sve_carddb.domains.registry.build import build
+from sve_carddb.domains.registry.inputs import Mapping
+from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
+from sve_carddb.domains.registry.preview import FrozenJP, plan_preview, populate_preview
+from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.registry.review import InitDecisions, Inputs
+from sve_carddb.domains.registry.storage import plan_files, write_files
 from sve_carddb.image_assets import (
     build_regional_assets,
     plan_regional_images,
@@ -21,13 +28,6 @@ from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import ArchiveStore, Scope, seal_batch
 from sve_carddb.parse.pages.extract_jp import extract_card
 from sve_carddb.parse.pages.official_jp import card_url
-from sve_carddb.registry.build import build
-from sve_carddb.registry.inputs import Mapping
-from sve_carddb.registry.parser_adapters.official_jp import legacy_projection
-from sve_carddb.registry.preview import FrozenJP, plan_preview, populate_preview
-from sve_carddb.registry.records import PrintingData
-from sve_carddb.registry.review import InitDecisions, Inputs
-from sve_carddb.registry.storage import plan_files, write_files
 
 from .build_db_fixtures import rows
 from .test_image_assets import frozen as frozen  # ruff: ignore[useless-import-alias] -- reuse only synthetic archive fixture
@@ -41,10 +41,10 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import Database
     from sve_carddb.core.provenance import Source
+    from sve_carddb.domains.registry.preview import PreviewPlan
     from sve_carddb.image_assets import ImageReference
     from sve_carddb.image_crops import ImageCrops
     from sve_carddb.ingest.archive.source_archive import Descriptor
-    from sve_carddb.registry.preview import PreviewPlan
 
 REVISION = "a" * 40
 

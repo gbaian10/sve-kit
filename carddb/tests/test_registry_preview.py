@@ -8,10 +8,10 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.registry.preview import import_preview, plan_preview
-from sve_carddb.registry.preview.evidence import FaceEvidence
-from sve_carddb.registry.records import CorrectionData, PrintingData
-from sve_carddb.registry.storage import Shard, read_yaml
+from sve_carddb.domains.registry.preview import import_preview, plan_preview
+from sve_carddb.domains.registry.preview.evidence import FaceEvidence
+from sve_carddb.domains.registry.records import CorrectionData, PrintingData
+from sve_carddb.domains.registry.storage import Shard, read_yaml
 
 from .registry_preview_fixtures import BUILD, REVISION, evidence, parents
 from .registry_snapshot_fixtures import edit_record, rewrite
@@ -21,8 +21,8 @@ from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.registry.review import Inputs
-    from sve_carddb.registry.storage import Entry
+    from sve_carddb.domains.registry.review import Inputs
+    from sve_carddb.domains.registry.storage import Entry
 
 
 def test_jp_projection_preserves_all_history_and_explains_en(

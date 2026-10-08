@@ -47,7 +47,7 @@ store. Missing/failed sources stay in the report, and the CLI exits nonzero.
 Parse failures report exception types without echoing source text.
 
 These records are extraction inputs, not public snapshots or new authored
-truth. Use the [regional evidence providers](../registry/preview/README.md) to
+truth. Use the [regional evidence providers](../domains/registry/preview/README.md) to
 verify legacy identity observations and preserve the shared raw-source/build
 input contract. Matching both observation hashes does not establish cross-region
 text equivalence, correction adoption, review scope or release readiness.

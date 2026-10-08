@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.snapshot import definition, tables, validate
 from sve_carddb.core.json import array, canonical, object_value, parse, string
-from sve_carddb.routes.defaults import select_defaults
+from sve_carddb.domains.routes.defaults import select_defaults
 from sve_carddb.snapshot.project.closure import (
     prune,
     select_regions,

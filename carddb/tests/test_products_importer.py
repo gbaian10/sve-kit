@@ -9,17 +9,17 @@ import pytest
 
 from sve_carddb.build import Json, create_database, rebuild_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.products import (
+from sve_carddb.domains.products import (
     Language,
     import_product_preview,
     load_products,
     populate_families,
     populate_product_preview,
 )
-from sve_carddb.registry.preview import plan_preview
-from sve_carddb.registry.records import PrintingData
-from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.registry.storage import read_yaml
+from sve_carddb.domains.registry.preview import plan_preview
+from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.registry.snapshot import load_registry
+from sve_carddb.domains.registry.storage import read_yaml
 
 from .product_fixtures import (
     LANGUAGES,
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build.database import Database
-    from sve_carddb.registry.review import Inputs
+    from sve_carddb.domains.registry.review import Inputs
 
 NAME = "products/family/BP02/001.yaml"
 AUDIT = (

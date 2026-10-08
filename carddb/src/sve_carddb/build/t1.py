@@ -1,7 +1,6 @@
 """Implemented T1 DDL groups; none yet claim a complete import/validation pipeline."""
 
 from sve_carddb.build import (
-    current_templates,
     t0,
     t1_correction,
     t1_cr,
@@ -12,6 +11,7 @@ from sve_carddb.build import (
     t1_qa,
     t1_related,
     t2_translation,
+    templates,
     translation_evidence,
 )
 from sve_carddb.build.compiler import CompiledSchema, compile_schema
@@ -31,7 +31,7 @@ TABLES = (
     *t1_en.TABLES,
     *translation_evidence.TABLES,
     *t2_translation.TABLES,
-    *current_templates.TABLES,
+    *templates.TABLES,
 )
 REGISTRY = Registry(
     tables=(*t0.TABLES, *TABLES),
@@ -54,7 +54,7 @@ REGISTRY = Registry(
         ),
         Capability(
             "translation_templates",
-            tuple(table.name for table in current_templates.TABLES),
+            tuple(table.name for table in templates.TABLES),
             requires=("translation_names",),
         ),
         Capability("art", ("art",)),
@@ -79,7 +79,7 @@ def compile_build(requested: tuple[str, ...] = ("t0",)) -> CompiledSchema:
         requested,
         schemas()
         | t1_json.schemas()
-        | current_templates.schemas()
+        | templates.schemas()
         | {"TranslationTokens": {"type": "null"}},
         version=SCHEMA_VERSION,
     )

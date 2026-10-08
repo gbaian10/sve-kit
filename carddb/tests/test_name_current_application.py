@@ -11,18 +11,18 @@ from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.digital_name_policies.application import Inputs, populate
-from sve_carddb.digital_name_policies.current_application import materialize, prepare
-from sve_carddb.registry.storage import read_yaml
-from sve_carddb.translations.current_models import (
+from sve_carddb.domains.digital.name_policies.application import Inputs, populate
+from sve_carddb.domains.digital.name_policies.projection import materialize, prepare
+from sve_carddb.domains.registry.storage import read_yaml
+from sve_carddb.domains.translations.glossary.records import (
     AssignmentData,
     AssignmentRecord,
     ChoiceRecord,
     TermRecord,
 )
-from sve_carddb.translations.current_names import prepare as prepare_names
-from sve_carddb.translations.importer import Inputs as TranslationInputs
-from sve_carddb.translations.models import PrintingOwner, RevisionOwner
+from sve_carddb.domains.translations.inputs import Inputs as TranslationInputs
+from sve_carddb.domains.translations.models import PrintingOwner, RevisionOwner
+from sve_carddb.domains.translations.names.resolve import prepare as prepare_names
 
 from .adoption_fixtures import commit
 from .database_fixtures import DatabaseTemplate

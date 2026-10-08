@@ -9,8 +9,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from urllib.parse import quote, unquote, urljoin, urlsplit
 
-from sve_carddb.ingest.archive.manifest import Region
-from sve_carddb.ingest.archive.store import relpath
+from sve_carddb.core.paths import relpath
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.http.validate import ValidationError, decode_html
 from sve_carddb.ingest.urls import canonicalize
 from sve_carddb.parse.html import (
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 HOST = "shadowverse-evolve.com"
 BASE = f"https://{HOST}"
 CARD_DIR = f"{BASE}/cardlist/"
-REGION = Region.JP
+REGION = SourceRegion.JP
 PAGE_SIZE = 15
 MIN_PAGE_BYTES = 1000
 
@@ -123,7 +123,7 @@ def card_path(card_number: str) -> PurePosixPath:
     return relpath("raw", REGION.value, "card", f"{card_number}.html.zst")
 
 
-def image_path(url: str, region: Region = REGION) -> PurePosixPath:
+def image_path(url: str, region: SourceRegion = REGION) -> PurePosixPath:
     """Where an image is stored: the official path below `cardlist/`, unchanged."""
     marker = "/wp-content/images/cardlist/"
     path = urlsplit(url).path

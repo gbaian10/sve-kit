@@ -8,16 +8,16 @@ import pytest
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import canonical, digest
-from sve_carddb.template_translations.current import validate_templates
-from sve_carddb.template_translations.current_build import apply, labels
-from sve_carddb.template_translations.current_models import (
+from sve_carddb.domains.translations.direct import write
+from sve_carddb.domains.translations.inputs import load_glossary
+from sve_carddb.domains.translations.templates.build import apply, labels
+from sve_carddb.domains.translations.templates.loader import validate_templates
+from sve_carddb.domains.translations.templates.records import (
     DefinitionRecord,
     Variant,
     VariantRecord,
 )
-from sve_carddb.template_translations.current_render import render
-from sve_carddb.translations.direct import write
-from sve_carddb.translations.loader import load_glossary
+from sve_carddb.domains.translations.templates.render import render
 
 from .build_db_fixtures import seed
 from .test_template_current import Case, current_case
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build import Database
-    from sve_carddb.template_translations.current import Validated
+    from sve_carddb.domains.translations.templates.loader import Validated
 
 __all__ = ("current_case",)
 
@@ -309,17 +309,17 @@ def test_labels_read_selected_vocabulary_and_name_translations(
 def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore[too-many-locals] -- one sealed source field exercises the actual partition and renderer together
     current_case: Case, tmp_path: Path
 ) -> None:
-    from sve_carddb.catalog.adoption_models import Batch  # ruff: ignore[import-outside-top-level] -- minimal source fixture
-    from sve_carddb.ingest.archive.manifest import Kind  # ruff: ignore[import-outside-top-level] -- minimal source fixture
-    from sve_carddb.ingest.archive.source_archive import seal_batch  # ruff: ignore[import-outside-top-level] -- minimal source fixture
-    from sve_carddb.parse.pages.official_jp import card_url  # ruff: ignore[import-outside-top-level] -- synthetic source URL
-    from sve_carddb.template_parameters.references import References  # ruff: ignore[import-outside-top-level] -- no synthetic terms
-    from sve_carddb.template_translations.current import read_templates  # ruff: ignore[import-outside-top-level] -- current tree boundary
-    from sve_carddb.template_translations.current_models import (  # ruff: ignore[import-outside-top-level] -- finite current data
+    from sve_carddb.domains.catalog.adoption_models import Batch  # ruff: ignore[import-outside-top-level] -- minimal source fixture
+    from sve_carddb.domains.translations.parameters.references import References  # ruff: ignore[import-outside-top-level] -- no synthetic terms
+    from sve_carddb.domains.translations.templates.loader import read_templates  # ruff: ignore[import-outside-top-level] -- current tree boundary
+    from sve_carddb.domains.translations.templates.records import (  # ruff: ignore[import-outside-top-level] -- finite current data
         Translation,
         TranslationRecord,
     )
-    from sve_carddb.template_translations.current_sources import Sources  # ruff: ignore[import-outside-top-level] -- one current source scan
+    from sve_carddb.domains.translations.templates.sources import Sources  # ruff: ignore[import-outside-top-level] -- one current source scan
+    from sve_carddb.ingest.archive.manifest import Kind  # ruff: ignore[import-outside-top-level] -- minimal source fixture
+    from sve_carddb.ingest.archive.source_archive import seal_batch  # ruff: ignore[import-outside-top-level] -- minimal source fixture
+    from sve_carddb.parse.pages.official_jp import card_url  # ruff: ignore[import-outside-top-level] -- synthetic source URL
 
     from .adoption_fixtures import commit  # ruff: ignore[import-outside-top-level] -- isolated author fixture
     from .test_effect_presence import page  # ruff: ignore[import-outside-top-level] -- synthetic page
@@ -388,12 +388,12 @@ def test_reference_interpolation_tracks_exact_positions_and_requires_target_labe
     verified: Validated,
 ) -> None:
     from sve_carddb.contracts.template_parameters import Schema  # ruff: ignore[import-outside-top-level] -- synthetic typed reference schema
-    from sve_carddb.template_translations.current_render import (  # ruff: ignore[import-outside-top-level] -- finite interpolation unit boundary
+    from sve_carddb.domains.translations.templates.render import (  # ruff: ignore[import-outside-top-level] -- finite interpolation unit boundary
         Binding,
         Label,
         _fragment,
     )
-    from sve_carddb.template_translations.text import parse as parse_text  # ruff: ignore[import-outside-top-level] -- finite placeholder language
+    from sve_carddb.domains.translations.templates.text import parse as parse_text  # ruff: ignore[import-outside-top-level] -- finite placeholder language
 
     definition = next(
         r for r in verified.inputs.records if isinstance(r, DefinitionRecord)
@@ -432,11 +432,11 @@ def test_reference_interpolation_tracks_exact_positions_and_requires_target_labe
 def test_current_package_splits_yaml_and_preserves_shared_closure(
     current_case: Case, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from sve_carddb.template_translations.current import from_files  # ruff: ignore[import-outside-top-level] -- reconstructed package readback
-    from sve_carddb.template_translations.current_write import compose  # ruff: ignore[import-outside-top-level] -- current packaging boundary
+    from sve_carddb.domains.translations.templates.loader import from_files  # ruff: ignore[import-outside-top-level] -- reconstructed package readback
+    from sve_carddb.domains.translations.templates.writer import compose  # ruff: ignore[import-outside-top-level] -- current packaging boundary
 
     monkeypatch.setattr(
-        "sve_carddb.template_translations.current_write.TARGET_BYTES", 1
+        "sve_carddb.domains.translations.templates.writer.TARGET_BYTES", 1
     )
     package = compose(current_case.inputs.files, current_case.inputs.records)
     assert from_files(package).records == current_case.inputs.records
@@ -468,8 +468,8 @@ def test_invalid_placeholder_keeps_only_that_field_original(
 def test_low_confidence_recognition_rule_marks_the_rendered_field(
     current_case: Case, *, doubtful: bool
 ) -> None:
-    from sve_carddb.template_parameters.references import References  # ruff: ignore[import-outside-top-level] -- no synthetic terms
-    from sve_carddb.template_translations.current_sources import Sources  # ruff: ignore[import-outside-top-level] -- one current source scan
+    from sve_carddb.domains.translations.parameters.references import References  # ruff: ignore[import-outside-top-level] -- no synthetic terms
+    from sve_carddb.domains.translations.templates.sources import Sources  # ruff: ignore[import-outside-top-level] -- one current source scan
 
     rules = current_case.sources.rules
     rules = rules.model_copy(

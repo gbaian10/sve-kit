@@ -23,6 +23,7 @@ def main() -> None:
         for name in sys.modules
         for prefix in (
             "sve_carddb.build",
+            "sve_carddb.domains",
             "sve_carddb.workflows",
             "sve_carddb.snapshot.export",
             "sve_carddb.snapshot.preview",

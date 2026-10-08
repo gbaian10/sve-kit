@@ -2,7 +2,7 @@
 
 import pytest
 
-from sve_carddb.template_parameters.explicit_rules import EXPLICIT
+from sve_carddb.domains.translations.parameters.explicit_rules import EXPLICIT
 
 from .test_template_explicit_rules import CASES as FIRST_CASES
 from .test_template_explicit_rules import (

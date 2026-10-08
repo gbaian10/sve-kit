@@ -6,15 +6,21 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue, ValidationError
 
-from sve_carddb.catalog.current_models import Shard as CatalogShard
 from sve_carddb.core.json import array, canonical, object_value
-from sve_carddb.products.identity_models import IdentityShard
-from sve_carddb.products.models import Shard as ProductShard
-from sve_carddb.registry.storage import Entry, Index, encode, read_base_files, read_yaml
-from sve_carddb.registry.storage import Shard as RegistryShard
-from sve_carddb.registry.transitions.models import After, Transition
-from sve_carddb.template_translations.current_models import Shard as TemplateShard
-from sve_carddb.translations.current_models import Shard, TermRecord
+from sve_carddb.domains.catalog.records import Shard as CatalogShard
+from sve_carddb.domains.products.identity_models import IdentityShard
+from sve_carddb.domains.products.models import Shard as ProductShard
+from sve_carddb.domains.registry.storage import (
+    Entry,
+    Index,
+    encode,
+    read_base_files,
+    read_yaml,
+)
+from sve_carddb.domains.registry.storage import Shard as RegistryShard
+from sve_carddb.domains.registry.transitions.models import After, Transition
+from sve_carddb.domains.translations.glossary.records import Shard, TermRecord
+from sve_carddb.domains.translations.templates.records import Shard as TemplateShard
 
 from .translation_fixtures import choice, name_term, term
 

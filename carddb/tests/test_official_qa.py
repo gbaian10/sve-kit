@@ -7,12 +7,12 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.card_extras import plan_card_extras, populate_card_extras
-from sve_carddb.card_extras.changes import DownstreamUse, changes, conflicts
-from sve_carddb.card_extras.generation import Observation, closure
-from sve_carddb.card_extras.models import RelatedLink
-from sve_carddb.card_extras.qa_parser import PARSER, materialize, parse_qa
 from sve_carddb.core.json import digest
+from sve_carddb.domains.card_extras import plan_card_extras, populate_card_extras
+from sve_carddb.domains.card_extras.changes import DownstreamUse, changes, conflicts
+from sve_carddb.domains.card_extras.generation import Observation, closure
+from sve_carddb.domains.card_extras.models import RelatedLink
+from sve_carddb.domains.card_extras.qa_parser import PARSER, materialize, parse_qa
 from sve_carddb.parse.pages import official_en, official_jp
 
 from .card_extras_fixtures import context, seed, source
@@ -22,8 +22,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from sve_carddb.build import CompiledSchema, Database
-    from sve_carddb.card_extras.models import QAPage
-    from sve_carddb.registry.records import Region
+    from sve_carddb.core.regions import Region
+    from sve_carddb.domains.card_extras.models import QAPage
 
 
 @pytest.fixture(scope="module")

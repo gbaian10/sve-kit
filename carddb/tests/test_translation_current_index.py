@@ -2,8 +2,8 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.template_translations.files import read
-from sve_carddb.translations.loader import load_glossary
+from sve_carddb.domains.translations.inputs import load_glossary
+from sve_carddb.domains.translations.templates.files import read
 
 from .translation_fixtures import envelope, term, write
 

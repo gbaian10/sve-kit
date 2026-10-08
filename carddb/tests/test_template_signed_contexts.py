@@ -6,13 +6,19 @@ import pytest
 
 from sve_carddb.contracts.template_parameters import Schema, Slot
 from sve_carddb.core.json import integer, object_value
-from sve_carddb.template_parameters.candidate_matching import classify, recognize
-from sve_carddb.template_parameters.references import References
-from sve_carddb.template_parameters.signed_contexts import SIGNED_CONTEXTS
-from sve_carddb.template_parameters.spans import locate
-from sve_carddb.template_sources.inventory import entry
-from sve_carddb.template_sources.normalizer import VERSION, partition
-from sve_carddb.template_translations.members import _members
+from sve_carddb.domains.translations.parameters.candidate_matching import (
+    classify,
+    recognize,
+)
+from sve_carddb.domains.translations.parameters.references import References
+from sve_carddb.domains.translations.parameters.signed_contexts import SIGNED_CONTEXTS
+from sve_carddb.domains.translations.parameters.spans import locate
+from sve_carddb.domains.translations.source_inventory.inventory import entry
+from sve_carddb.domains.translations.source_inventory.normalizer import (
+    VERSION,
+    partition,
+)
+from sve_carddb.domains.translations.templates.members import _members
 
 from .test_template_explicit_rules import entry_ref
 from .test_template_parameters import candidate

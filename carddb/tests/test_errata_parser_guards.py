@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.card_extras.errata_archive import FrozenErrataNotices
-from sve_carddb.card_extras.errata_markup import NoticeMarkup
-from sve_carddb.card_extras.errata_parser import associate_blocks, parse_notice
 from sve_carddb.core.json import digest
+from sve_carddb.core.regions import SourceRegion
+from sve_carddb.domains.card_extras.errata_archive import FrozenErrataNotices
+from sve_carddb.domains.card_extras.errata_markup import NoticeMarkup
+from sve_carddb.domains.card_extras.errata_parser import associate_blocks, parse_notice
 from sve_carddb.ingest.archive.manifest import Kind
-from sve_carddb.ingest.archive.manifest import Region as ManifestRegion
 from sve_carddb.ingest.archive.source_archive import seal_batch
 
 from .test_errata_parser import page
@@ -261,7 +261,7 @@ def wrong_kind_batch(
     store = _store(tmp_path_factory.mktemp("errata-wrong-kind"))
     raw, pin = page()
     resource = replace(
-        _resource(pin.url, "raw/notice.html", raw, Kind.RULES), region=ManifestRegion.EN
+        _resource(pin.url, "raw/notice.html", raw, Kind.RULES), region=SourceRegion.EN
     )
     _put(store, resource, raw)
     return store, seal_batch(store).batch_id
@@ -289,7 +289,7 @@ def historical_batch(
         raw, pin = page(date=value)
         resource = replace(
             _resource(pin.url, "raw/notice.html", raw, Kind.ERRATA),
-            region=ManifestRegion.EN,
+            region=SourceRegion.EN,
         )
         _put(store, resource, raw)
         batches.append(seal_batch(store).batch_id)

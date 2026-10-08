@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.translations.current_card_names import Candidate, prepare
-from sve_carddb.translations.loader import load_glossary
+from sve_carddb.domains.translations.inputs import load_glossary
+from sve_carddb.domains.translations.names.candidates import Candidate, prepare
 
 from .translation_fixtures import reference, write
 

@@ -7,33 +7,34 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.ingest.archive.frozen_sources import FrozenSources
-from sve_carddb.ingest.archive.manifest import Kind, Region
-from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
-from sve_carddb.translations.current_models import ChoiceRecord, DigitalName
-from sve_carddb.translations.digital import (
+from sve_carddb.core.regions import SourceRegion
+from sve_carddb.domains.catalog.adoption_models import SourceRef
+from sve_carddb.domains.translations.digital import (
     _phases,
     configuration,
     import_digital,
     name_proof,
 )
-from sve_carddb.translations.importer import (
-    Inputs,
+from sve_carddb.domains.translations.glossary.evidence import (
     _digital_evidence,
     _digital_location,
-    import_glossary,
     validate_choice,
 )
-from sve_carddb.translations.sources import Sources
+from sve_carddb.domains.translations.glossary.importer import import_glossary
+from sve_carddb.domains.translations.glossary.records import ChoiceRecord, DigitalName
+from sve_carddb.domains.translations.inputs import Inputs
+from sve_carddb.domains.translations.sources import Sources
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.manifest import Kind
+from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
 
 from .adoption_fixtures import commit, git
 from .test_source_archive import _put, _resource, _store
 from .translation_fixtures import choice, envelope, template, term, write
 
-CODE_PATH = "carddb/src/sve_carddb/translations/sources.py"
+CODE_PATH = "carddb/src/sve_carddb/domains/translations/sources.py"
 RUNTIME = (CODE_PATH,)
 
 
@@ -115,7 +116,7 @@ def frozen(  # ruff: ignore[too-many-locals] -- two sealed language sources shar
                 raw,
                 Kind.API,
             ),
-            region=Region.SVWB,
+            region=SourceRegion.SVWB,
             content_type="application/json",
         )
         _put(store, resource, raw)

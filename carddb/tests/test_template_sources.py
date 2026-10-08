@@ -10,14 +10,19 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.core.json import digest
+from sve_carddb.domains.translations.source_inventory import inventory, pins
+from sve_carddb.domains.translations.source_inventory.inventory import (
+    coverage,
+    fields,
+    replay,
+    scan_current,
+)
+from sve_carddb.domains.translations.source_inventory.normalizer import partition
+from sve_carddb.domains.translations.sources import project
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import ArchiveError, Scope, seal_batch
 from sve_carddb.parse.pages.official_jp import card_url
-from sve_carddb.template_sources import inventory, pins
-from sve_carddb.template_sources.inventory import coverage, fields, replay, scan_current
-from sve_carddb.template_sources.normalizer import partition
-from sve_carddb.translations.sources import project
 
 from .template_source_fixtures import template_case as template_case  # ruff: ignore[useless-import-alias] -- register reusable synthetic inputs
 from .test_effect_presence import page
@@ -26,9 +31,9 @@ from .test_source_archive import _put, _resource, _store
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.catalog.adoption_models import SourceRef
-    from sve_carddb.template_sources.models import Entry
-    from sve_carddb.template_sources.normalizer import Part
+    from sve_carddb.domains.catalog.adoption_models import SourceRef
+    from sve_carddb.domains.translations.source_inventory.models import Entry
+    from sve_carddb.domains.translations.source_inventory.normalizer import Part
 
     from .template_source_fixtures import Case
 

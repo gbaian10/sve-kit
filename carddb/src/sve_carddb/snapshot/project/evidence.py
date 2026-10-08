@@ -10,10 +10,10 @@ if TYPE_CHECKING:
 
     from pydantic import BaseModel
 
-    from sve_carddb.card_extras.importer import CardExtrasRestriction
-    from sve_carddb.routes.defaults import GeneralEvidence
+    from sve_carddb.domains.card_extras.importer import CardExtrasRestriction
+    from sve_carddb.domains.routes.defaults import GeneralEvidence
+    from sve_carddb.domains.translations.names.bindings import DisplayBinding
     from sve_carddb.snapshot.project.source import Record
-    from sve_carddb.translations.bindings import DisplayBinding
 
 
 @dataclass(frozen=True)

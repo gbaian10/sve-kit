@@ -1,11 +1,11 @@
 # Build DB core
 
 This package compiles code-authored declarations into SQLite DDL and owns the
-SQLite boundary. The [product family staging importer](../products/README.md)
+SQLite boundary. The [product family staging importer](../domains/products/README.md)
 can supply verified family parents and compose with identity staging in one
 transaction. `t0.compile_t0()` supplies the forty production T0 tables from
 `docs/schema/build-db.md`. The regional identity staging importer is described in
-[registry/preview](../registry/preview/README.md); there is no complete build CLI.
+[registry/preview](../domains/registry/preview/README.md); there is no complete build CLI.
 
 ```python
 from sve_carddb.build import (

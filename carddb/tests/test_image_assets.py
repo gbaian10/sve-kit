@@ -10,6 +10,7 @@ import pytest
 
 from sve_carddb import image_assets, image_variants
 from sve_carddb.core.json import object_value, parse
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.image_assets import (
     PreviewRoots,
     build_regional_assets,
@@ -17,7 +18,7 @@ from sve_carddb.image_assets import (
     verify_assets,
 )
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
-from sve_carddb.ingest.archive.manifest import Kind, Manifest, Region
+from sve_carddb.ingest.archive.manifest import Kind, Manifest
 from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
 
 from .test_image_variants import png
@@ -202,7 +203,7 @@ def test_wrong_batch_provider_or_kind_is_rejected(
     data = png(80, 112)
     resource = _resource("https://example.invalid/image.png", "raw/image.png", data)
     if case == "en":
-        resource = replace(resource, region=Region.EN)
+        resource = replace(resource, region=SourceRegion.EN)
     elif case == "card":
         resource = replace(resource, kind=Kind.CARD, content_type="text/html")
     _put(store, resource, data)

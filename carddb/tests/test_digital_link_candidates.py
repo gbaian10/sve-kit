@@ -9,16 +9,16 @@ from typer.testing import CliRunner
 
 from sve_carddb.cli import app
 from sve_carddb.core.json import array, canonical, object_value, parse
-from sve_carddb.digital_links.candidates import (
+from sve_carddb.domains.digital.links.candidates import (
     CLASSES,
     complete_inventory,
     generate,
     read_draft,
     sve_inventory,
 )
-from sve_carddb.digital_links.commands import output_path
-from sve_carddb.digital_links.evidence import batch_refs, inventory
-from sve_carddb.digital_links.importer import review_context
+from sve_carddb.domains.digital.links.commands import output_path
+from sve_carddb.domains.digital.links.evidence import batch_refs, inventory
+from sve_carddb.domains.digital.links.importer import review_context
 
 from .digital_link_import_fixtures import (
     Fixture,

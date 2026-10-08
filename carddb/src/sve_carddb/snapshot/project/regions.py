@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
-    from sve_carddb.routes.defaults import DefaultPrinting
+    from sve_carddb.domains.routes.defaults import DefaultPrinting
     from sve_carddb.snapshot.project.evidence import Decisions
     from sve_carddb.snapshot.project.source import Record, Source
 

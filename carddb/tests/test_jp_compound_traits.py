@@ -3,12 +3,12 @@ from typing import TYPE_CHECKING, cast
 
 import pytest
 
+from sve_carddb.domains.registry.inputs import Card, Face
+from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
+from sve_carddb.domains.registry.review import observation
+from sve_carddb.domains.text_observations.archive import jp_face
 from sve_carddb.ingest.http.validate import ValidationError
 from sve_carddb.parse.pages.extract_jp import extract_card
-from sve_carddb.registry.inputs import Card, Face
-from sve_carddb.registry.parser_adapters.official_jp import legacy_projection
-from sve_carddb.registry.review import observation
-from sve_carddb.text_observations.archive import jp_face
 
 if TYPE_CHECKING:
     from sve_carddb.parse.pages.extract_jp import CardRecord

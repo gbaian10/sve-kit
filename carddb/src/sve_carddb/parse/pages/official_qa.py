@@ -1,7 +1,7 @@
 """Pure Q&A URL and pagination parsing, without adopted records."""
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 from urllib.parse import parse_qsl, urljoin, urlsplit
 
 from sve_carddb.ingest.http.validate import ValidationError
@@ -12,7 +12,7 @@ from sve_carddb.parse.pages import official_en, official_jp
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode
 
-Region = Literal["jp", "en"]
+    from sve_carddb.core.regions import Region
 
 
 def allowed(url: str, region: Region) -> bool:

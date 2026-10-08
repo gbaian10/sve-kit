@@ -7,10 +7,10 @@ import pytest
 
 from sve_carddb.core.json import array, canonical, object_value, parse
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.digital_links.importer import Inputs, populate_links
-from sve_carddb.digital_name_policies.application import _counterparts
-from sve_carddb.translations.digital import configuration
-from sve_carddb.translations.name_sources import NameOwner
+from sve_carddb.domains.digital.links.importer import Inputs, populate_links
+from sve_carddb.domains.digital.name_policies.application import _counterparts
+from sve_carddb.domains.translations.digital import configuration
+from sve_carddb.domains.translations.names.sources import NameOwner
 
 from .adoption_fixtures import commit
 from .digital_link_fixtures import envelope, write

@@ -8,7 +8,7 @@
 
 另有獨立的 [名字／同名瀏覽政策](digital-name-policy.md)：卡名只採用合格官方字串；同名連結另產卡層級 same_name，依規則先視為同卡但未逐筆確認，只作瀏覽，不作同概念、效果、圖或語音證據。新能力未實作前不能寫入真人入口。
 
-現有 `translations/digital.py` 的 `import_digital()` 可重建指定數位卡、父卡與名稱面／語言的最小閉包。`workflows/offline_names.py` 的 composer 將 link 結果交給 `digital_name_policies.application`，由 `current_application` 產生 current 名稱與公開 bindings；真人同卡候選先經 `DigitalLinkResult.eligible_owner()` 逐 owner 驗證，再沿 `translations/counterparts.py` 的 sv1→svwb 順位選取。`translations/current_names.py` 以 current 概念與語義指派解析 owner，`translations/importer.py` 驗 glossary 的 `digital_name` 證據，不建立 link。舊名稱入口已移除；#53 的後續 owner-aware 工作須接上述 current 路徑，不能恢復歷史名稱重播。逐 owner 的採納結果界線見 §8。
+現有 `domains/translations/digital.py` 的 `import_digital()` 可重建指定數位卡、父卡與名稱面／語言的最小閉包。`workflows/offline_names.py` 的 composer 將 link 結果交給 `domains.digital.name_policies.application`，由 `domains.digital.name_policies.projection` 產生 current 名稱與公開 bindings；真人同卡候選先經 `DigitalLinkResult.eligible_owner()` 逐 owner 驗證，再沿 `domains/translations/names/counterparts.py` 的 sv1→svwb 順位選取。`domains/translations/names/resolve.py` 以 current 概念與語義指派解析 owner，`domains/translations/glossary/evidence.py` 驗 glossary 的 `digital_name` 證據，不建立 link。舊名稱入口已移除；#53 的後續 owner-aware 工作須接上述 current 路徑，不能恢復歷史名稱重播。逐 owner 的採納結果界線見 §8。
 
 registry 固定永久身分；`curation/` 尚無格式／loader。glossary 現行入口只收 current format 2，不能混入本入口的 kind。本契約採獨立的 digital-links format 2 入口：每筆就是一個 subject 的現行關係，沿既有 YAML、canonical hash、SourceRef、凍結 parser 與 F1；沒有批次決定、採納序號或前件鏈，修改歷史由 Git 保存。
 
@@ -124,12 +124,12 @@ authored source_record 保存當前分片來源，decision_source 連到該分�
 2. 找到本次 fresh、sampled/confirmed、relation=same_card 且精確兩面皆有值的 link。它的 card_id／face_id 必與此 owner 相同；digital_face 必屬宣告 digital_card。不同版次可共用同永久 card/face 的 link，但仍各自驗自己的來源，不能用另一張卡同名當身分證據。
 3. 重播 link 的 SVE 名稱依據與 owner 自己的凍結名稱。owner 的完整 exact 名稱必等於此同 card/face 的至少一項已採納 sve_names；可由同卡同面再錄的另一來源證明相同名字，不要求原 raw 頁永不更新，但不能只比共用 context／顯示名。印刷名與 current 不同時，印刷名須有自己的已採納名稱依據，不能繼承 current 的結果。
 4. 重播該 link 的 digital_names：同 game／official_id／phase 的 ja 及目標語名字須與本次數位 DB 完整字串相符；目標語缺少仍缺少。digital ja 與 SVE ja 不必相等，但這一對 exact 名稱必在同概念人工核對依據內。不得借另一數位面、base 卡或另一語言的名字。
-5. 依 [數位名字政策 §1](digital-name-policy.md#1-名稱採用與關係分開) 的完整順位，先處理有效的逐 owner 選詞覆寫，再取合格政策名字；政策因目錄同名異譯／缺譯而不合格時，才取前述自己的真人同卡精確面候選。逐名排除不得借任何真人 link 繞回自動官方名。現行選取由 `digital_name_policies.current_application` 處理；政策路徑只有一代完全無此名才直接用二代，真人路徑由 `counterparts.first_counterpart()` 在沒有合格一代候選時退合格二代，同一遊戲多個相異已採納名字則拒絕。凍結名稱證據、`origin=official`／`authority=digital_official`、品質旗標與 current 穩定 ID 都由 current 路徑產生，不帶舊名稱選取的決定欄位。純譯名字串差異按總順位取勝出名字並報差異，不退回原文；真正語義歧義仍須指派，不按 ID、hash 或 confidence 任取。兩條皆無合法來源才走其他合法選詞或 pending／原文。
+5. 依 [數位名字政策 §1](digital-name-policy.md#1-名稱採用與關係分開) 的完整順位，先處理有效的逐 owner 選詞覆寫，再取合格政策名字；政策因目錄同名異譯／缺譯而不合格時，才取前述自己的真人同卡精確面候選。逐名排除不得借任何真人 link 繞回自動官方名。現行選取由 `domains.digital.name_policies.projection` 處理；政策路徑只有一代完全無此名才直接用二代，真人路徑由 `counterparts.first_counterpart()` 在沒有合格一代候選時退合格二代，同一遊戲多個相異已採納名字則拒絕。凍結名稱證據、`origin=official`／`authority=digital_official`、品質旗標與 current 穩定 ID 都由 current 路徑產生，不帶舊名稱選取的決定欄位。純譯名字串差異按總順位取勝出名字並報差異，不退回原文；真正語義歧義仍須指派，不按 ID、hash 或 confidence 任取。兩條皆無合法來源才走其他合法選詞或 pending／原文。
 6. 只有此 owner 的產生呼叫返回的 translation 才可建立 use／FieldTranslation；不能先有 translation_selection 就跳過前五步。即使其他 owner 共用 source_unit/context 且已有官方譯文，沒有自己有效政策證明或真人 link 的第三張卡仍缺譯。
 
-**現有函式的界線**：`DigitalLinkResult.eligible_owner()` 接受 face_revision 或 printing_face 的 `NameOwner` 與可選的精確 `name_ref`，逐 owner 驗自己的原文與 link 證據。`current_names.prepare()` 驗當次概念／語義指派；`current_application` 選取並產生 current translation/use 與 display bindings。#53 須在這些 current 接點補其餘需求，不另實作一套排序，也不能把全域 DB 暫改後假裝只剩某 owner 的合格候選。link 入口匯入通過不能宣稱 #53 全部需求或所有 owner 已完成供名。
+**現有函式的界線**：`DigitalLinkResult.eligible_owner()` 接受 face_revision 或 printing_face 的 `NameOwner` 與可選的精確 `name_ref`，逐 owner 驗自己的原文與 link 證據。`names.resolve.prepare()` 驗當次概念／語義指派；`domains.digital.name_policies.projection` 選取並產生 current translation/use 與 display bindings。#53 須在這些 current 接點補其餘需求，不另實作一套排序，也不能把全域 DB 暫改後假裝只剩某 owner 的合格候選。link 入口匯入通過不能宣稱 #53 全部需求或所有 owner 已完成供名。
 
-兩張同 JP 原文、不同改編概念／官方譯名，須有有效的 current `context_assignment` 釘每個 owner 的 source_hash／variant／concept_key 與同字異義理由，分開 context。`current_names.prepare()` 驗指派與當次來源，返回的 resolver 在概念不唯一／缺少時分別回報 `ambiguous_name_concept`／`missing_name_concept`；這是 current 診斷，不是舊入口的例外訊息。不能據此按 card ID 自動開 variant 或任選概念；沒有確定概念便不能取該概念的 glossary choice，其他合法政策／真人候選仍各自驗證。`counterparts.first_counterpart()` 對同一遊戲多個相異已採納名字另以「Ambiguous adopted digital names」拒絕。#53 須沿這些 current 診斷與供名閘門接線；第三張沒有自己的同卡 link 且政策目錄不合格時，仍不能借用任一份。
+兩張同 JP 原文、不同改編概念／官方譯名，須有有效的 current `context_assignment` 釘每個 owner 的 source_hash／variant／concept_key 與同字異義理由，分開 context。`names.resolve.prepare()` 驗指派與當次來源，返回的 resolver 在概念不唯一／缺少時分別回報 `ambiguous_name_concept`／`missing_name_concept`；這是 current 診斷，不是舊入口的例外訊息。不能據此按 card ID 自動開 variant 或任選概念；沒有確定概念便不能取該概念的 glossary choice，其他合法政策／真人候選仍各自驗證。`counterparts.first_counterpart()` 對同一遊戲多個相異已採納名字另以「Ambiguous adopted digital names」拒絕。#53 須沿這些 current 診斷與供名閘門接線；第三張沒有自己的同卡 link 且政策目錄不合格時，仍不能借用任一份。
 
 `glossary_choice.concept_evidence.digital_name` 沿既有 `{digital_face_id,sve_owner,jp_ref,target_ref,decision_id}`，其中 sve_owner 是永久 SVE face；jp_ref／target_ref 是數位 JA／目標語名稱，不等於 owner 的 SVE 名稱依據。匯入器須同時驗本契約的 fresh link 及其 SVE 證據；不能因 glossary choice 有官方 origin 就放行另一 owner。card_name 概念的預設指派另依翻譯契約／後續 intake，不在這裡靠字串生成 term ID。
 
@@ -173,7 +173,7 @@ authored source_record 保存當前分片來源，decision_source 連到該分�
 | svwb | 6 | bishop | bishop |
 | svwb | 7 | nemesis | 無對應 |
 
-維護者於 2026-10-02T17:33:18+08:00 經協調者對話確認：比對數位對應時，sv1 的 necromancer／vampire 各自對到 SVE nightmare。這是多對一的比較規則，不把兩個數位職業互相視為相同，也**不代表任何一筆 link 已採納**；其餘四個條件及實際真人 sampled／confirmed 門檻照常。新增或變更本表任何對照須維護者確認並進版控（`digital_links.candidates.CLASSES`），不由工具沿新枚舉猜對照。
+維護者於 2026-10-02T17:33:18+08:00 經協調者對話確認：比對數位對應時，sv1 的 necromancer／vampire 各自對到 SVE nightmare。這是多對一的比較規則，不把兩個數位職業互相視為相同，也**不代表任何一筆 link 已採納**；其餘四個條件及實際真人 sampled／confirmed 門檻照常。新增或變更本表任何對照須維護者確認並進版控（`domains.digital.links.candidates.CLASSES`），不由工具沿新枚舉猜對照。
 
 第一層先機械全查並出候選報告；正式建置只讀 authored record 與 frozen 證據，不把研究草稿變成 runtime 來源。維護者親自看非空樣本、確認該批同卡關係後，整批以 `review_level: sampled` 寫入；樣本數由他決定，工具不得預填 30／50 或假稱看滿固定數量，也不由模型代看。工具可按穩定排序提供抽樣候選；實際抽樣前只留候選，不能先寫 sampled。抽查名單與事件不進 authored，PR 審核與 Git 歷史就是修改紀錄。
 
@@ -210,11 +210,11 @@ docs 階段只審上述形狀與邊界；程式階段再測嚴格入口、交易
 
 ## 8. 實作入口與離線候選報告
 
-`digital_links.loader.load_links(authored_root)` 驗全入口並返回不可變 snapshot；每次取封套得到獨立的型別化值。第一版只接受 links，coverage 路徑／kind 明確拒絕，沒有紀錄即未知。`digital_links.importer.Inputs` 讀取本次工作樹入口；index／分片的 exact 與 canonical hash 描述本次 `digital_link_authored` 輸入，不再要求它們與 Git commit bytes 相同。authored revision 用來記錄來源版本，不提供執行期鎖定。
+`domains.digital.links.loader.load_links(authored_root)` 驗全入口並返回不可變 snapshot；每次取封套得到獨立的型別化值。第一版只接受 links，coverage 路徑／kind 明確拒絕，沒有紀錄即未知。`domains.digital.links.importer.Inputs` 讀取本次工作樹入口；index／分片的 exact 與 canonical hash 描述本次 `digital_link_authored` 輸入，不再要求它們與 Git commit bytes 相同。authored revision 用來記錄來源版本，不提供執行期鎖定。
 
 建置設定另需 `digital_link_sources`：按 canonical 值排序唯一的 `{batch_id}` 陣列，列本次明示凍結來源。`catalog_registry` 記錄 authored revision，實際 owner 檢查重用本次載入的 registry。每筆 link 的引用由目前解析器驗原始來源 hash、完整 API 名稱目錄與兩端名稱；`digital_evidence` 列明示 API refs 與 targets，不能只交目標語或已選目標的子集。
 
-在 caller-owned transaction 內先呼叫 `populate_links()`；`workflows/offline_names.Composer` 將結果以 `links=result` 交給 `digital_name_policies.application.populate()`，委派 `current_application` 產生一次已檢查的 current 名稱計畫並填入 DB。獨立的 `import_links()` 包裝才開 transaction。link 結果含 fresh records、stale 的 link id 與原因及 input record，並按 card／face 索引 fresh records。application 的 `_counterparts()` 經 `result.eligible_owner(db, sources, owner, name_ref=...)` 每次重驗此 owner 的 JP hash、registry/source_face_map、實際 frozen printing 來源與採納的兩端名字，並比對 materialized link 的完整 subject／值／decision；`counterparts.first_counterpart()` 只在此證據範圍內選真人候選，不另建名稱算法。
+在 caller-owned transaction 內先呼叫 `populate_links()`；`workflows/offline_names.Composer` 將結果以 `links=result` 交給 `domains.digital.name_policies.application.populate()`，委派 `domains.digital.name_policies.projection` 產生一次已檢查的 current 名稱計畫並填入 DB。獨立的 `import_links()` 包裝才開 transaction。link 結果含 fresh records、stale 的 link id 與原因及 input record，並按 card／face 索引 fresh records。application 的 `_counterparts()` 經 `result.eligible_owner(db, sources, owner, name_ref=...)` 每次重驗此 owner 的 JP hash、registry/source_face_map、實際 frozen printing 來源與採納的兩端名字，並比對 materialized link 的完整 subject／值／decision；`counterparts.first_counterpart()` 只在此證據範圍內選真人候選，不另建名稱算法。
 
 離線 composer 以本機 `authored/digital-links` 是否存在判定是否匯入 link；入口存在時由 loader 驗全入口，沒有入口不偽造空採納結果。沒有 link result 時，不提供真人同卡候選；政策名字仍按其獨立條件判斷。另一 owner 不因已有 context／translation 得到權限；同原文異譯而未有 context_assignment 時回報上述概念診斷，不任選概念。pending wording 的 JP revision 同樣可驗；printed owner、語義指派與 current translation/use／bindings 已有現行接點，#53 的其餘需求須沿此路徑接續，不能用 link API 宣稱全部完成。
 

@@ -10,11 +10,12 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.catalog.adoption_models import RawMapping
-from sve_carddb.catalog.adoption_validation import _mapping_metadata
 from sve_carddb.core.json import canonical, object_value
-from sve_carddb.text_observations.vocabulary import Vocabulary
+from sve_carddb.domains.catalog.adoption_models import RawMapping
+from sve_carddb.domains.catalog.adoption_validation import _mapping_metadata
+from sve_carddb.domains.text_observations.vocabulary import Vocabulary
 
+from .catalog_adoption_fixtures import populate_case, prepare_case
 from .catalog_vocabulary_fixtures import (
     VocabularyCase,
     make_vocabulary_case,
@@ -23,7 +24,6 @@ from .catalog_vocabulary_fixtures import (
     save,
     vocabulary_record,
 )
-from .current_catalog_fixtures import populate_case, prepare_case
 from .test_glossary_adoption import checked
 
 if TYPE_CHECKING:

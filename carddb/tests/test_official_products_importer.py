@@ -11,27 +11,32 @@ import pytest
 from sve_carddb.build import create_database
 from sve_carddb.build.source_rows import source_values
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.parse.pages.extract_en import extract_card as extract_en
-from sve_carddb.parse.pages.extract_jp import extract_card
-from sve_carddb.products import (
+from sve_carddb.domains.products import (
     import_product_preview,
     load_products,
     populate_product_preview,
     product_preview_uses,
 )
-from sve_carddb.products.archive import FrozenProducts
-from sve_carddb.products.plan import plan_official_products
-from sve_carddb.registry.build import build
-from sve_carddb.registry.inputs import Mapping as CardMapping
-from sve_carddb.registry.parser_adapters.official_en import (
+from sve_carddb.domains.products.archive import FrozenProducts
+from sve_carddb.domains.products.plan import plan_official_products
+from sve_carddb.domains.registry.build import build
+from sve_carddb.domains.registry.inputs import Mapping as CardMapping
+from sve_carddb.domains.registry.parser_adapters.official_en import (
     legacy_projection as legacy_en,
 )
-from sve_carddb.registry.parser_adapters.official_jp import legacy_projection
-from sve_carddb.registry.preview import FrozenEN, FrozenJP, FrozenRegions, plan_preview
-from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
-from sve_carddb.registry.records import AllocationData, PrintingData
-from sve_carddb.registry.review import InitDecisions, Inputs
-from sve_carddb.registry.storage import plan_files, write_files
+from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
+from sve_carddb.domains.registry.preview import (
+    FrozenEN,
+    FrozenJP,
+    FrozenRegions,
+    plan_preview,
+)
+from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
+from sve_carddb.domains.registry.records import AllocationData, PrintingData
+from sve_carddb.domains.registry.review import InitDecisions, Inputs
+from sve_carddb.domains.registry.storage import plan_files, write_files
+from sve_carddb.parse.pages.extract_en import extract_card as extract_en
+from sve_carddb.parse.pages.extract_jp import extract_card
 
 from .identity_evidence_fixtures import MemoryEvidence
 from .product_identity_fixtures import (
@@ -51,9 +56,9 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import Database, Value
     from sve_carddb.core.provenance import InputRecord
-    from sve_carddb.products.official import ProductPage
-    from sve_carddb.products.plan import OfficialProducts
-    from sve_carddb.registry.records import Region
+    from sve_carddb.core.regions import Region
+    from sve_carddb.domains.products.official import ProductPage
+    from sve_carddb.domains.products.plan import OfficialProducts
 
 
 def changed_page(fixture: IdentityFixture, raw: bytes) -> ProductPage:

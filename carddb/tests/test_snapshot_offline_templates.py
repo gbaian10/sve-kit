@@ -7,21 +7,24 @@ import pytest
 
 from sve_carddb.build.database import open_database
 from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, compile_build
-from sve_carddb.catalog.adoption_models import Batch
 from sve_carddb.core.json import array, canonical, object_value
-from sve_carddb.ingest.archive.manifest import Kind
-from sve_carddb.ingest.archive.source_archive import seal_batch
-from sve_carddb.parse.pages.official_jp import card_url
-from sve_carddb.template_parameter_rules.current import parse as parse_rules
-from sve_carddb.template_translations.current import read_templates, validate_templates
-from sve_carddb.template_translations.current_build import apply as apply_templates
-from sve_carddb.template_translations.current_models import (
+from sve_carddb.domains.catalog.adoption_models import Batch
+from sve_carddb.domains.translations.parameters.rules import parse as parse_rules
+from sve_carddb.domains.translations.templates.build import apply as apply_templates
+from sve_carddb.domains.translations.templates.loader import (
+    read_templates,
+    validate_templates,
+)
+from sve_carddb.domains.translations.templates.records import (
     DefinitionRecord,
     Translation,
     TranslationRecord,
 )
-from sve_carddb.template_translations.current_references import References
-from sve_carddb.template_translations.current_sources import Sources
+from sve_carddb.domains.translations.templates.references import References
+from sve_carddb.domains.translations.templates.sources import Sources
+from sve_carddb.ingest.archive.manifest import Kind
+from sve_carddb.ingest.archive.source_archive import seal_batch
+from sve_carddb.parse.pages.official_jp import card_url
 from sve_carddb.workflows import offline
 from sve_carddb.workflows.offline import build
 
@@ -43,9 +46,9 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import Database
     from sve_carddb.build.database import Row
-    from sve_carddb.card_extras import CardPage
-    from sve_carddb.template_translations.current import Validated
-    from sve_carddb.template_translations.current_build import Report
+    from sve_carddb.domains.card_extras import CardPage
+    from sve_carddb.domains.translations.templates.build import Report
+    from sve_carddb.domains.translations.templates.loader import Validated
     from sve_carddb.workflows.offline import Built, Inputs
 
     from .text_observation_fixtures import Case

@@ -6,31 +6,34 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.catalog.adoption_models import Batch
 from sve_carddb.contracts.template_parameters import Schema, Slot
 from sve_carddb.core.json import canonical, digest, object_value, parse
-from sve_carddb.ingest.archive.manifest import Kind
-from sve_carddb.ingest.archive.source_archive import seal_batch
-from sve_carddb.parse.pages.official_jp import card_url
-from sve_carddb.template_parameter_rules.current import PATH, load, load_file
-from sve_carddb.template_parameter_rules.current import parse as parse_rules
-from sve_carddb.template_parameters.analysis import SAFE_INTEGER, VERSION_PARAMETERS
-from sve_carddb.template_parameters.references import References
-from sve_carddb.template_translations.current import (
+from sve_carddb.domains.catalog.adoption_models import Batch
+from sve_carddb.domains.translations.parameters.analysis import (
+    SAFE_INTEGER,
+    VERSION_PARAMETERS,
+)
+from sve_carddb.domains.translations.parameters.references import References
+from sve_carddb.domains.translations.parameters.rules import PATH, load, load_file
+from sve_carddb.domains.translations.parameters.rules import parse as parse_rules
+from sve_carddb.domains.translations.templates.definition_models import Definition
+from sve_carddb.domains.translations.templates.definitions import payload
+from sve_carddb.domains.translations.templates.loader import (
     read_templates,
     shard,
     validate_templates,
 )
-from sve_carddb.template_translations.current_models import (
+from sve_carddb.domains.translations.templates.members import POSITIVE_ROLES
+from sve_carddb.domains.translations.templates.records import (
     DefinitionRecord,
     Shard,
     Translation,
     TranslationRecord,
 )
-from sve_carddb.template_translations.current_sources import Generated, Sources
-from sve_carddb.template_translations.definitions import payload
-from sve_carddb.template_translations.members import POSITIVE_ROLES
-from sve_carddb.template_translations.models import Definition
+from sve_carddb.domains.translations.templates.sources import Generated, Sources
+from sve_carddb.ingest.archive.manifest import Kind
+from sve_carddb.ingest.archive.source_archive import seal_batch
+from sve_carddb.parse.pages.official_jp import card_url
 
 from .adoption_fixtures import commit, git
 from .test_effect_presence import page
@@ -41,8 +44,8 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
 
-    from sve_carddb.template_translations.current import Inputs
-    from sve_carddb.template_translations.members import Reconstructed
+    from sve_carddb.domains.translations.templates.loader import Inputs
+    from sve_carddb.domains.translations.templates.members import Reconstructed
 
 
 @dataclass(frozen=True)
@@ -408,12 +411,12 @@ def test_new_definition_uses_payload_id_and_verifies_its_source(
 
 
 def test_current_vocabulary_requires_catalog_authority_and_retains_composites() -> None:
-    from sve_carddb.catalog.models import Term  # ruff: ignore[import-outside-top-level] -- explicit synthetic catalog authority
-    from sve_carddb.products.models import LocalizedText  # ruff: ignore[import-outside-top-level] -- synthetic labels
-    from sve_carddb.template_translations.current_references import (  # ruff: ignore[import-outside-top-level] -- current reference adapter
+    from sve_carddb.domains.catalog.models import Term  # ruff: ignore[import-outside-top-level] -- explicit synthetic catalog authority
+    from sve_carddb.domains.products.models import LocalizedText  # ruff: ignore[import-outside-top-level] -- synthetic labels
+    from sve_carddb.domains.text_observations.vocabulary import Binding, Vocabulary  # ruff: ignore[import-outside-top-level] -- synthetic permanent codes
+    from sve_carddb.domains.translations.templates.references import (  # ruff: ignore[import-outside-top-level] -- local synthetic catalog validation fixture
         References as CurrentReferences,
     )
-    from sve_carddb.text_observations.vocabulary import Binding, Vocabulary  # ruff: ignore[import-outside-top-level] -- synthetic permanent codes
 
     binding = Binding(region="jp", kind="class", raw="SyntheticClass", code="test")
     with pytest.raises(

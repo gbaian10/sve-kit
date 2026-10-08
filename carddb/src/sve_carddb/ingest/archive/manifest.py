@@ -15,6 +15,7 @@ from enum import StrEnum
 from pathlib import Path, PurePosixPath
 from typing import IO, TYPE_CHECKING, Self
 
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.archive.manifest_schema_v2 import SCHEMA_SQL as _SCHEMA_V2
 
 if TYPE_CHECKING:
@@ -139,14 +140,6 @@ class SourceImportReceipt:
     registered_at: datetime
 
 
-class Region(StrEnum):
-    JP = "jp"
-    EN = "en"
-    # The digital games' official card lists, kept for mapping SVE cards to digital ones.
-    SV1 = "sv1"
-    SVWB = "svwb"
-
-
 class Kind(StrEnum):
     SETS = "sets"
     LIST = "list"
@@ -192,7 +185,7 @@ class Resource:
     """The latest successful state of one canonical URL."""
 
     url: str
-    region: Region
+    region: SourceRegion
     kind: Kind
     path: PurePosixPath
     sha256: str
@@ -967,7 +960,7 @@ def _import_resources(index: bytes, content: Content) -> tuple[Resource, ...]:
     return tuple(
         Resource(
             url=mapping.url,
-            region=Region(mapping.provider),
+            region=SourceRegion(mapping.provider),
             kind=Kind(mapping.kind),
             path=PurePosixPath(mapping.path),
             sha256=observation.sha256,
@@ -1049,7 +1042,7 @@ def _generation(row: tuple[object, ...]) -> Generation:
 def _resource(row: tuple[object, ...]) -> Resource:
     return Resource(
         url=_str(row[0]),
-        region=Region(_str(row[1])),
+        region=SourceRegion(_str(row[1])),
         kind=Kind(_str(row[2])),
         path=PurePosixPath(_str(row[3])),
         sha256=_str(row[4]),
