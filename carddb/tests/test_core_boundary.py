@@ -1,4 +1,7 @@
-"""Keep shared foundations independent of every higher project layer."""
+"""Keep shared foundations independent of every higher project layer.
+
+Only static imports are checked; importlib.import_module and __import__ are excluded.
+"""
 
 import ast
 from importlib.util import resolve_name
