@@ -15,12 +15,13 @@ preview 使用正式傳輸契約與共用匯出器，但不是正式發布。`da
 從 repo 根目錄執行：
 
 ```bash
-SVE_PREVIEW_DIR=/explicit/isolated/preview \
+SVE_EXPORT_DIR=/explicit/isolated/preview \
+SVE_CARDDB_PRIVATE_DIR=/private/preview-state \
 uv --directory carddb run sve-carddb snapshot export-offline --inputs /private/inputs.json \
-  --private-dir /private/preview-state --bundle-dir /private/bundle
+  --bundle-dir /private/bundle
 ```
 
-`--private-dir` 必填，放輸入記錄、報告與卡圖版本狀態，須與 preview 根互不包含；
+`--private-dir` 或 `SVE_CARDDB_PRIVATE_DIR` 必填（CLI 優先），放輸入記錄、報告與卡圖版本狀態，須與 preview 根互不包含；
 它跨次匯出沿用，請隨既有備份保存。
 
 若要接入日英卡圖，同時提供已存在的 `--image-assets-dir /private/webp-library` 與
@@ -31,8 +32,9 @@ uv --directory carddb run sve-carddb snapshot export-offline --inputs /private/i
 圖片庫與配方快取須為絕對路徑，不得彼此重疊，也不得與 preview、私有目錄、bundle、repo／封存庫或配方重疊；
 圖片根不可含 symlink。未提供這對選項時仍可建置文字 preview。
 
-也可用 `--preview-dir` 明確指定；此選項必填，preview 沒有預設位置。
-`SVE_PREVIEW_DIR` 指到含 `snapshots/` 的那一層，而非 `snapshots/` 或 `snapshots/preview/`。
+也可用 `--preview-dir` 明確指定（優先於 `SVE_EXPORT_DIR`）；兩者至少提供一個，preview 沒有預設位置。
+`SVE_EXPORT_DIR` 指到含 `snapshots/` 的那一層，而非 `snapshots/` 或 `snapshots/preview/`。
+`SVE_PREVIEW_DIR` 只供 Web 的 `/cdn-preview` 使用，不再作為匯出器的環境變數。
 解析 symlink 後，preview 不得與輸入 repo／封存庫相同或互相包含，也不得包含配方；
 bundle 不得與 repo、封存庫或配方重疊。root 內的輸出 symlink 不得逸出 preview root。
 
@@ -111,7 +113,7 @@ Cloudflare 開發部署、R2 2.0 發布與未登入入口驗收，見
 ## M3 載入
 
 ```bash
-SVE_CDN_DIR=/explicit/formal/cdn \
+SVE_EXPORT_DIR=/explicit/formal/cdn \
 SVE_PREVIEW_DIR=/explicit/isolated/preview \
 mise exec -- bun run --cwd sim/web dev
 ```

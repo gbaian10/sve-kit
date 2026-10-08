@@ -136,7 +136,7 @@ interface QueryState {
 ### 4.1 位址
 
 - `VITE_CDN_BASE`（建置時）決定 CDN 根目錄；沒設時預設同源 `/cdn`，所以建置與檢查不需要環境變數。
-- 本機開發：`vite.config.ts` 把 `SVE_CDN_DIR` 掛在 `/cdn`（沒設就掛 `fixtures/snapshot/`，clone 下來就有資料）、`SVE_PREVIEW_DIR` 掛在 `/cdn-preview`。
+- 本機開發：`vite.config.ts` 把 `SVE_EXPORT_DIR` 掛在 `/cdn`（沒設就掛 `fixtures/snapshot/`，clone 下來就有資料）、`SVE_PREVIEW_DIR` 掛在 `/cdn-preview`。
 - 根目錄的版面依快照格式 §4.1 與卡圖的內容定址路徑。介面用的官方職業／卡文圖示與 logo 放在 `src/assets/official/`（附來源與版權說明，
   不在 repo 授權範圍內），不走 CDN。
 - **預覽快照**（快照格式 §4.2）：另一個根目錄（`SVE_PREVIEW_DIR`）、`data_version` 帶 `preview-` 前綴、不寫版本索引。reader 明確選擇資料根：
