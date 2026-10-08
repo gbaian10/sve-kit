@@ -350,8 +350,6 @@ jobs:
           key: ${{ steps.hook-cache.outputs.cache-primary-key }}
 
   web:
-    env:
-      SVE_EXPORT_DIR: ${{ github.workspace }}/sim/web/fixtures/snapshot
     needs: changes
     if: ${{ needs.changes.outputs.web == 'true' }}
     runs-on: ubuntu-latest

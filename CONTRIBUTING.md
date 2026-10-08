@@ -172,7 +172,12 @@ SVE_TEST_SNAPSHOT = "{{ get_env(name='SVE_TEST_SNAPSHOT', default='/absolute/loc
 
 These paths are examples; replace them in private configuration. An activated
 shell can retain old values: restart it or explicitly export updated values after
-changing configuration. CLI roots must be non-empty absolute paths. Export keeps
+changing configuration. Empty `SVE_EXPORT_DIR`, `SVE_CARDDB_PRIVATE_DIR` and
+`SVE_PREVIEW_DIR` environment values are treated as unset.
+Web uses the synthetic fixture for an empty `SVE_EXPORT_DIR` and leaves
+`/cdn-preview` unconfigured for an empty `SVE_PREVIEW_DIR`. carddb still requires
+an explicit CLI root when its environment value is empty; an empty CLI value is
+rejected. Non-empty roots must be absolute paths. Export keeps
 its existing resolved-path checks separating public output, private state and
 immutable inputs; reuse the same private root across exports and back it up.
 Missing configuration fails only commands that require it. Help, readers and
@@ -182,9 +187,9 @@ workflow steps and does not depend on local mise configuration.
 | Variable | Purpose | Reader | Required / default |
 | --- | --- | --- | --- |
 | `SVE_DATA_DIR` | Latest source cache and manifest | carddb crawler and manifest commands | Required for live-data commands; no default; pytest replaces it with a temporary root |
-| `SVE_EXPORT_DIR` | Public export root | carddb `snapshot export-offline` (`--preview-dir`), `r2 upload-v2` (`--export-dir`), Web `/cdn` | Export/upload require CLI or env; no default; Web uses synthetic fixture when unset |
+| `SVE_EXPORT_DIR` | Public export root | carddb `snapshot export-offline` (`--preview-dir`), `r2 upload-v2` (`--export-dir`), Web `/cdn` | Export/upload require CLI or env; no default; Web uses synthetic fixture when unset or empty |
 | `SVE_CARDDB_PRIVATE_DIR` | Inputs, reports and persistent `media-state.json` | carddb `snapshot export-offline` (`--private-dir`) | CLI or env required; no default; recipe and `--bundle-dir` remain explicit |
-| `SVE_PREVIEW_DIR` | Optional second local snapshot root | Web `/cdn-preview` | Optional; no default; exporter uses `SVE_EXPORT_DIR` |
+| `SVE_PREVIEW_DIR` | Optional second local snapshot root | Web `/cdn-preview` | Optional; no default; unset or empty leaves the root unconfigured; exporter uses `SVE_EXPORT_DIR` |
 | `SVE_ARCHIVE_ROOT` | Immutable source store | carddb archive operations | Required when using archive configuration; no default |
 | `SVE_ARCHIVE_STORE_ID` | Archive store identity | carddb archive operations | Required by configured archive operations; no default |
 | `SVE_ARCHIVE_BACKUP_ROOT` | Immutable source backup | carddb seal/backup operations | Required as applicable; no default |
