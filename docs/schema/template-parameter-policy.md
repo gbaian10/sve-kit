@@ -1,7 +1,7 @@
 # 模板參數辨識規則
 
 參數辨識是翻譯工具的功能，規則版本與修改交給程式／資料 PR；不另設核可收據或採納前置條件。
-所有既有型別、語義角色、比對及未解參數清單保留，定義依[翻譯契約 §4](translation-contract.md#4-參數譯文與自動套用)。
+所有既有型別、語義角色、比對及未匹配原因保留，定義依[翻譯契約 §4](translation-contract.md#4-參數譯文與自動套用)。
 
 ## 1. 當前規則格式
 
@@ -22,6 +22,16 @@ rule_id 必須對到現行程式已登錄的具名規則；條件、適用語言
 - 術語、卡名、vocabulary 引用存在且不歧義；不把名字字串當 card ID。
 - 全來源片段都有去向，body／reminder／token_header／layout 分開；風味不走效果正規化。
 - 改規則時比較新舊匹配位置、值及未解清單，不用總筆數相同代替正確性；不要求結果永遠只能增加。
+
+辨識器依當前開關直接回傳 slot 的型別、語義角色、來源／正規化位置、值與引用目標；
+未匹配的 slot 保留具體原因。辨識不先產生 `pending_approval`，也不透過第二次 resolve
+刪除指定原因來證明成功。數字與術語／卡名仍由原有文法、精確來源拼字及唯一概念查詢辨識，
+不另包每個 slot 的 raw／normalized hash、condition hash 或引用目標的 record hash。
+定義選取用的 pattern hash、完整來源欄位的 hash 與來源歸檔保持原有用途。
+
+`pending_parameter_causes` 仍統計退回原文時未匹配位置的原因；
+原 `numeric_rule_pending_approval` 改為 `numeric_rule_disabled`，表示該位置的數字文法已辨識，
+但對應規則未啟用。其他原因不變；啟用規則不能消除不匹配、歧義或不安全值。
 
 ## 3. 舊規則的保存
 
