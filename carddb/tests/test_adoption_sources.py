@@ -11,8 +11,10 @@ from pydantic import JsonValue
 from sve_carddb.build_db import CompiledSchema, create_database
 from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_inputs import BuildContext
+from sve_carddb.catalog.adoption_models import ReviewContext, SourceRef
 from sve_carddb.catalog.adoption_sources import pointer
 from sve_carddb.manifest import Kind
+from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.offline import _populate_adoptions, _prepare_catalog
 from sve_carddb.snapshot.values import array, canonical, digest, object_value
@@ -32,6 +34,8 @@ from .adoption_fixtures import (
     write,
 )
 from .current_catalog_fixtures import current_case, populate_case
+from .registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- expose synthetic pytest fixture
+from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- expose registry fixture dependency
 from .test_source_archive import _put, _resource, _store
 
 if TYPE_CHECKING:
@@ -163,6 +167,43 @@ def test_exact_frozen_field_source_and_f1(
         assert any(
             r.values["text"] == "Synthetic source name" for r in db.rows("text_unit")
         )
+
+
+def test_identity_sources_are_stage_local(
+    case: tuple[Case, Path, str], registry_root: Path
+) -> None:
+    inputs, archive, version = case
+    registry = load_registry(registry_root)
+    sources = Sources(
+        {"test-store": archive}, inputs.repository, inputs.build(), registry
+    )
+    review = ReviewContext.model_validate_json(canonical(inputs.review))
+    ref = SourceRef(
+        batch_id=str(
+            object_value(array(inputs.review["source_batches"])[0])["batch_id"]
+        ),
+        source_version_id=version,
+        parser="exact-json-v1",
+        locator="/faces/0/name",
+        text_hash=digest(b"Synthetic source name"),
+    )
+    sources.identities.text(ref, review)
+    first = sources.stage(inputs.build())
+    second = first.stage(inputs.build())
+    for stage in (first, second):
+        assert stage.identities is not sources.identities
+        assert stage.identities.registry() is registry
+        assert stage.identity_indexes is sources.identity_indexes
+        assert stage.cache is sources.cache
+        assert not stage.identities.uses
+        assert stage.identities.text(ref, review)[0].text == "Synthetic source name"
+        assert len(stage.identities.uses) == 1
+        stage.identities.text(ref, review)
+        assert len(stage.identities.uses) == 1
+    assert first.identities is not second.identities
+    assert len(sources.identities.uses) == 1
+    assert len(first.identities.uses) == 1
+    assert len(second.identities.uses) == 1
 
 
 @pytest.mark.parametrize(

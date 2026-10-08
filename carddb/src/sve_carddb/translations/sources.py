@@ -135,8 +135,9 @@ class Sources:
 
     def stage(self, build: BuildContext) -> Sources:
         """Share verified reads while keeping context and source uses stage-local."""
-        stage = Sources(self.stores, self.repository, build)
-        stage.identities = self.identities
+        stage = Sources(
+            self.stores, self.repository, build, self.identities.current_registry
+        )
         stage.identity_indexes = self.identity_indexes
         stage.context_keys = self.context_keys
         stage.batches = self.batches

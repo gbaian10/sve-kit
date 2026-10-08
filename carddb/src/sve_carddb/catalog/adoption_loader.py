@@ -152,7 +152,10 @@ def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:
     paths = tuple(entry + "/" + area for area in areas)
     loaded = []
     # Each adoption kind is independently optional within the required entry.
-    for name, exact, encoded in shards(root, paths, optional=paths):
+    inputs = shards(root, paths, optional=paths)
+    if not any((root / path).is_dir() for path in paths):
+        raise ValueError("Adoption entry must contain at least one known data area")
+    for name, exact, encoded in inputs:
         content = parse(encoded)
         _format(content, field)
         if (

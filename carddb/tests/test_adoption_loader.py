@@ -52,7 +52,28 @@ def test_complete_entry_and_explicit_empty(case: Case) -> None:
     snapshot = load_adoptions(case.root, entry="catalog-adoptions")
     assert len(snapshot.effective()) == 6
     index(case.root, entry="display-overrides")
+    (case.root / "display-overrides/routes").mkdir()
     assert not load_adoptions(case.root, entry="display-overrides").effective()
+
+
+@pytest.mark.parametrize("entry", ["catalog-adoptions", "display-overrides"])
+@pytest.mark.parametrize("typo", [False, True])
+def test_entry_requires_known_area(tmp_path: Path, entry: Entry, *, typo: bool) -> None:
+    directory = tmp_path / entry
+    directory.mkdir()
+    if typo:
+        (directory / "misspelled-area").mkdir()
+    with pytest.raises(ValueError, match="at least one known data area"):
+        load_adoptions(tmp_path, entry=entry)
+
+
+@pytest.mark.parametrize(
+    ("entry", "area"),
+    [("catalog-adoptions", "vocabulary"), ("display-overrides", "defaults")],
+)
+def test_empty_known_area_is_explicit(tmp_path: Path, entry: Entry, area: str) -> None:
+    (tmp_path / entry / area).mkdir(parents=True)
+    assert not load_adoptions(tmp_path, entry=entry).shards
 
 
 @pytest.mark.parametrize(
