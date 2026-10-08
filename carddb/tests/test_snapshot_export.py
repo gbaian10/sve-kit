@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 from pydantic import JsonValue
 
-from sve_carddb.build_db import create_database
+from sve_carddb.build import create_database
 from sve_carddb.core.json import array, canonical, object_value, parse, string
 from sve_carddb.snapshot.buckets import bucket
 from sve_carddb.snapshot.export import (

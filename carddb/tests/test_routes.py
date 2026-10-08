@@ -3,8 +3,8 @@
 
 import pytest
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t0 import compile_t0
+from sve_carddb.build import create_database
+from sve_carddb.build.t0 import compile_t0
 from sve_carddb.routes import (
     build_index,
     decode_segment,

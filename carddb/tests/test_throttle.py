@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.fetch.throttle import CircuitBreaker, CircuitOpenError, Throttle
+from sve_carddb.ingest.http.throttle import CircuitBreaker, CircuitOpenError, Throttle
 
 if TYPE_CHECKING:
     from .conftest import FakeClock

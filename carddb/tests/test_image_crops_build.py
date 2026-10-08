@@ -8,10 +8,9 @@ from typing import TYPE_CHECKING
 import pytest
 from PIL import Image
 
-from sve_carddb.build_db import Row, create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import Row, create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, object_value
-from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_assets import (
     ImageReference,
     PreviewRoots,
@@ -21,6 +20,7 @@ from sve_carddb.image_assets import (
 from sve_carddb.image_crop_report import crop_report
 from sve_carddb.image_crops import image_source_key, load_image_crops
 from sve_carddb.image_variants import CropBox
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
 from .image_crop_fixtures import install, record
 

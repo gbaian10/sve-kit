@@ -8,7 +8,7 @@ from sve_carddb.core.json import digest
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
 
 
 @dataclass(frozen=True)

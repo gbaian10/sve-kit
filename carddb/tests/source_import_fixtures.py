@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from sve_carddb.core.json import digest
-from sve_carddb.source_import.importer import PROGRAM_FILES
+from sve_carddb.ingest.archive.source_import.importer import PROGRAM_FILES
 
 REPO = Path(__file__).resolve().parents[2]
 HTML = b"<!doctype html><html><head><title>Sample bulletin</title></head><body><p>Synthetic rules example.</p></body></html>"

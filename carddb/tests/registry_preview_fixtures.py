@@ -11,7 +11,7 @@ from .build_db_fixtures import rows
 from .identity_evidence_fixtures import MemoryEvidence
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db.database import Database
+    from sve_carddb.build.database import Database
     from sve_carddb.registry.inputs import Card
     from sve_carddb.registry.preview import PreviewPlan
     from sve_carddb.registry.review import Inputs

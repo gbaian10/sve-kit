@@ -195,11 +195,11 @@ workflow steps and does not depend on local mise configuration.
 | `SVE_ARCHIVE_BACKUP_ROOT` | Immutable source backup | carddb seal/backup operations | Required as applicable; no default |
 | `SVE_ARCHIVE_RESTORE_ROOT` | Restore-check destination | carddb restore-check | Required as applicable; no default |
 | `SVE_EXTRA_ROOTS` | Read-only symlink target allowlist (`os.pathsep` separated) | carddb manifest check | Optional; Settings defaults to no extra roots |
-| `SVE_INTERVAL` | HTTP request interval | carddb Settings | Optional; 2.5 seconds, minimum 2 |
-| `SVE_JITTER` | HTTP request jitter | carddb Settings | Optional; 0.5 seconds, non-negative |
-| `SVE_TIMEOUT` | HTTP timeout | carddb Settings | Optional; 30 seconds, positive |
-| `SVE_USER_AGENT` | Browser User-Agent | carddb Settings | Optional; existing browser UA |
-| `SVE_BREAKER_THRESHOLD` | HTTP circuit breaker threshold | carddb Settings | Optional; 5, positive integer |
+| `SVE_INTERVAL` | HTTP request interval | carddb `ingest.config.Settings` | Optional; 2.5 seconds, minimum 2 |
+| `SVE_JITTER` | HTTP request jitter | carddb `ingest.config.Settings` | Optional; 0.5 seconds, non-negative |
+| `SVE_TIMEOUT` | HTTP timeout | carddb `ingest.config.Settings` | Optional; 30 seconds, positive |
+| `SVE_USER_AGENT` | Browser User-Agent | carddb `ingest.config.Settings` | Optional; existing browser UA |
+| `SVE_BREAKER_THRESHOLD` | HTTP circuit breaker threshold | carddb `ingest.config.Settings` | Optional; 5, positive integer |
 | `SVE_TEST_SNAPSHOT` | Private card list JSONL | Rust card tests | Required for full/required CI; optional local tests skip when unset; no default |
 | `SVE_PRIVATE_TESTDATA_MODE` | Private fixture policy | Python/Rust tests | CI explicitly sets `required` or `excluded`; local Python unset runs synthetic tests and reports exclusion |
 | `SVE_PRIVATE_TESTDATA_DIR` | Private page fixtures | Python tests | Required in `required` mode; no default |
@@ -211,7 +211,7 @@ workflow steps and does not depend on local mise configuration.
 | `SVE_VOICE_ORIGIN` | Planned voice source selection | No implemented reader (build-db design only) | Unimplemented; no default |
 
 `SVE_CDN_DIR` has been replaced by `SVE_EXPORT_DIR`. HTTP tuning defaults and
-validation stay in carddb Settings, rather than being duplicated in mise.
+validation stay in carddb `ingest.config.Settings`, rather than being duplicated in mise.
 Local paths and R2 credentials must never be injected into browser code.
 
 Then:

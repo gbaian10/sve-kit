@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import (
+from sve_carddb.build import (
     Capability,
     Column,
     Kind,
@@ -16,17 +16,17 @@ from sve_carddb.build_db import (
     compile_schema,
     create_database,
 )
-from sve_carddb.build_db.t0 import TABLES as T0_TABLES
-from sve_carddb.build_db.t0 import compile_t0
-from sve_carddb.build_db.t1 import REGISTRY, compile_build
-from sve_carddb.build_db.t1_cr import TABLES as CR_TABLES
-from sve_carddb.build_db.t1_images import TABLES as IMAGE_TABLES
+from sve_carddb.build.t0 import TABLES as T0_TABLES
+from sve_carddb.build.t0 import compile_t0
+from sve_carddb.build.t1 import REGISTRY, compile_build
+from sve_carddb.build.t1_cr import TABLES as CR_TABLES
+from sve_carddb.build.t1_images import TABLES as IMAGE_TABLES
 
 from .build_db_fixtures import seed
 from .build_db_t1_fixtures import populate, rows
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Value
+    from sve_carddb.build import Value
 
     from .database_fixtures import DatabaseTemplate
 

@@ -16,18 +16,19 @@ from sve_carddb.card_extras.generation import (
     links,
     root_key,
 )
+from sve_carddb.card_extras.qa_parser import PARSER, materialize, parse_qa
 from sve_carddb.core.json import digest
-from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.manifest import GenerationStatus, Manifest
-from sve_carddb.sources.official_qa import PARSER, allowed, materialize, parse_qa
-from sve_carddb.store import resolve_within
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.manifest import GenerationStatus, Manifest
+from sve_carddb.ingest.archive.store import resolve_within
+from sve_carddb.parse.pages.official_qa import allowed
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
 
     from sve_carddb.card_extras.models import CardPage, QAPage
-    from sve_carddb.manifest import Link
+    from sve_carddb.ingest.archive.manifest import Link
     from sve_carddb.registry.records import Region
 
 

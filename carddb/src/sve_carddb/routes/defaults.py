@@ -10,7 +10,7 @@ from sve_carddb.routes.plan import confirmed, text
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from sve_carddb.build_db.database import Database, Row
+    from sve_carddb.build.database import Database, Row
     from sve_carddb.routes.rarity_policy import RarityWhitelist
 
 

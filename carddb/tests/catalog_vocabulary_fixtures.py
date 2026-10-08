@@ -7,9 +7,9 @@ from pydantic import JsonValue
 
 from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.manifest import Kind, Region
+from sve_carddb.ingest.archive.manifest import Kind, Region
+from sve_carddb.ingest.archive.source_archive import seal_batch
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.source_archive import seal_batch
 
 from .adoption_fixtures import (
     CODE,

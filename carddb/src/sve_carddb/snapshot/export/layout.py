@@ -14,7 +14,7 @@ from sve_carddb.snapshot.project.source import Source
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.snapshot.project import Projection
 
 type Record = dict[str, JsonValue]

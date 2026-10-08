@@ -8,7 +8,7 @@
 
 另有獨立的 [名字／同名瀏覽政策](digital-name-policy.md)：卡名只採用合格官方字串；同名連結另產卡層級 same_name，依規則先視為同卡但未逐筆確認，只作瀏覽，不作同概念、效果、圖或語音證據。新能力未實作前不能寫入真人入口。
 
-現有 `translations/digital.py` 的 `import_digital()` 可重建指定數位卡、父卡與名稱面／語言的最小閉包。`snapshot/offline_names.py` 的 composer 將 link 結果交給 `digital_name_policies.application`，由 `current_application` 產生 current 名稱與公開 bindings；真人同卡候選先經 `DigitalLinkResult.eligible_owner()` 逐 owner 驗證，再沿 `translations/counterparts.py` 的 sv1→svwb 順位選取。`translations/current_names.py` 以 current 概念與語義指派解析 owner，`translations/importer.py` 驗 glossary 的 `digital_name` 證據，不建立 link。舊名稱入口已移除；#53 的後續 owner-aware 工作須接上述 current 路徑，不能恢復歷史名稱重播。逐 owner 的採納結果界線見 §8。
+現有 `translations/digital.py` 的 `import_digital()` 可重建指定數位卡、父卡與名稱面／語言的最小閉包。`workflows/offline_names.py` 的 composer 將 link 結果交給 `digital_name_policies.application`，由 `current_application` 產生 current 名稱與公開 bindings；真人同卡候選先經 `DigitalLinkResult.eligible_owner()` 逐 owner 驗證，再沿 `translations/counterparts.py` 的 sv1→svwb 順位選取。`translations/current_names.py` 以 current 概念與語義指派解析 owner，`translations/importer.py` 驗 glossary 的 `digital_name` 證據，不建立 link。舊名稱入口已移除；#53 的後續 owner-aware 工作須接上述 current 路徑，不能恢復歷史名稱重播。逐 owner 的採納結果界線見 §8。
 
 registry 固定永久身分；`curation/` 尚無格式／loader。glossary 現行入口只收 current format 2，不能混入本入口的 kind。本契約採獨立的 digital-links format 2 入口：每筆就是一個 subject 的現行關係，沿既有 YAML、canonical hash、SourceRef、凍結 parser 與 F1；沒有批次決定、採納序號或前件鏈，修改歷史由 Git 保存。
 
@@ -214,7 +214,7 @@ docs 階段只審上述形狀與邊界；程式階段再測嚴格入口、交易
 
 建置設定另需 `digital_link_sources`：按 canonical 值排序唯一的 `{batch_id}` 陣列，列本次明示凍結來源。`catalog_registry` 記錄 authored revision，實際 owner 檢查重用本次載入的 registry。每筆 link 的引用由目前解析器驗原始來源 hash、完整 API 名稱目錄與兩端名稱；`digital_evidence` 列明示 API refs 與 targets，不能只交目標語或已選目標的子集。
 
-在 caller-owned transaction 內先呼叫 `populate_links()`；`snapshot/offline_names.Composer` 將結果以 `links=result` 交給 `digital_name_policies.application.populate()`，委派 `current_application` 產生一次已檢查的 current 名稱計畫並填入 DB。獨立的 `import_links()` 包裝才開 transaction。link 結果含 fresh records、stale 的 link id 與原因及 input record，並按 card／face 索引 fresh records。application 的 `_counterparts()` 經 `result.eligible_owner(db, sources, owner, name_ref=...)` 每次重驗此 owner 的 JP hash、registry/source_face_map、實際 frozen printing 來源與採納的兩端名字，並比對 materialized link 的完整 subject／值／decision；`counterparts.first_counterpart()` 只在此證據範圍內選真人候選，不另建名稱算法。
+在 caller-owned transaction 內先呼叫 `populate_links()`；`workflows/offline_names.Composer` 將結果以 `links=result` 交給 `digital_name_policies.application.populate()`，委派 `current_application` 產生一次已檢查的 current 名稱計畫並填入 DB。獨立的 `import_links()` 包裝才開 transaction。link 結果含 fresh records、stale 的 link id 與原因及 input record，並按 card／face 索引 fresh records。application 的 `_counterparts()` 經 `result.eligible_owner(db, sources, owner, name_ref=...)` 每次重驗此 owner 的 JP hash、registry/source_face_map、實際 frozen printing 來源與採納的兩端名字，並比對 materialized link 的完整 subject／值／decision；`counterparts.first_counterpart()` 只在此證據範圍內選真人候選，不另建名稱算法。
 
 離線 composer 以本機 `authored/digital-links` 是否存在判定是否匯入 link；入口存在時由 loader 驗全入口，沒有入口不偽造空採納結果。沒有 link result 時，不提供真人同卡候選；政策名字仍按其獨立條件判斷。另一 owner 不因已有 context／translation 得到權限；同原文異譯而未有 context_assignment 時回報上述概念診斷，不任選概念。pending wording 的 JP revision 同樣可驗；printed owner、語義指派與 current translation/use／bindings 已有現行接點，#53 的其餘需求須沿此路徑接續，不能用 link API 宣稱全部完成。
 

@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.core.provenance import SourceUse
-from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.manifest import Kind
-from sve_carddb.source_archive import seal_batch
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.manifest import Kind
+from sve_carddb.ingest.archive.source_archive import seal_batch
 
 from .test_source_archive import NOW, _put, _resource, _store
 

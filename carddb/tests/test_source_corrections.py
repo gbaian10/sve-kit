@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import Json, create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import Json, create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.products import load_products
 from sve_carddb.registry.preview import plan_preview

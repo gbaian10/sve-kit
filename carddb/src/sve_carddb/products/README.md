@@ -102,9 +102,9 @@ a product relationship. Identity evidence keeps its actual parser pin.
 
 Each staging entry point requires a `BuildContext` and returns an `InputRecord`
 summarizing actual source uses. Save the already completed database with
-`build_output.save` together with its inputs and report. The helper uses SQLite
+`build.output.save` together with its inputs and report. The helper uses SQLite
 backup and a temporary directory with no-overwrite rename; it does not populate
-a second database. See the [build DB example](../build_db/README.md#saved-build-inputs).
+a second database. See the [build DB example](../build/README.md#saved-build-inputs).
 
 ## Confirmed permanent official product identities
 

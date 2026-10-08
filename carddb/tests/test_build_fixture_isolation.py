@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.core.provenance import SourceUse
-    from sve_carddb.frozen_sources import FrozenSources
+    from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
     from .database_fixtures import DatabaseTemplate
 

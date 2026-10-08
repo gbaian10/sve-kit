@@ -6,7 +6,7 @@ from urllib.parse import parse_qs, urlsplit
 
 import httpx
 
-from sve_carddb.sources import official_jp as jp
+from sve_carddb.parse.pages import official_jp as jp
 
 PADDING = "<!--" + "x" * 1200 + "-->"
 IMG = "/wordpress/wp-content/images/cardlist"

@@ -2,14 +2,14 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db.t1_cr import TABLES as CR_TABLES
-from sve_carddb.build_db.t1_images import TABLES as IMAGE_TABLES
+from sve_carddb.build.t1_cr import TABLES as CR_TABLES
+from sve_carddb.build.t1_images import TABLES as IMAGE_TABLES
 
 from .build_db_fixtures import DATE, HASH
 from .build_db_fixtures import rows as t0_rows
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
 
 
 TABLES = (*CR_TABLES, *IMAGE_TABLES)

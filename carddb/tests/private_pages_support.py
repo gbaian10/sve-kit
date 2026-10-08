@@ -12,12 +12,11 @@ from dataclasses import asdict, dataclass
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, override
 
-from sve_carddb.extract import official_en as extract_en
-from sve_carddb.extract import official_jp as extract_jp
-from sve_carddb.sources import official_en as en
-from sve_carddb.sources import official_jp as jp
-from sve_carddb.sources import official_sv1 as sv1
-from sve_carddb.sources import official_svwb as wb
+from sve_carddb.parse.pages import extract_en, extract_jp
+from sve_carddb.parse.pages import official_en as en
+from sve_carddb.parse.pages import official_jp as jp
+from sve_carddb.parse.pages import official_sv1 as sv1
+from sve_carddb.parse.pages import official_svwb as wb
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

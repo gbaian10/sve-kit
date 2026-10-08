@@ -172,7 +172,7 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 | 檔名 | 取得方式與內容 |
 | ---- | -------------- |
-| jp.jsonl | 取得已核對的 JP 萃取快照；每行 Card 的 number 與完整 faces。一般 JP 萃取由 extract/jsonl.py 產生；本工具不讀 manifest、不執行萃取 |
+| jp.jsonl | 取得已核對的 JP 萃取快照；每行 Card 的 number 與完整 faces。一般 JP 萃取由 workflows/extract.py 產生；本工具不讀 manifest、不執行萃取 |
 | en.jsonl | 取得審閱批次的完整 EN 萃取快照；每行同樣符合 registry.inputs.Card。目前沒有正式 EN 萃取 CLI，不可假定重新解析 HTML 能還原舊批次 exact bytes |
 | candidates.jsonl | 取得本批已審候選；每行 en_no、category（A/B/C）、jp_candidates（含 jp_no）。新增批次須完整列出 EN 版次，人工確認 A/B 第一候選或 C 無對應 |
 | confirmations.tsv | 保存依序追加的人工裁決，欄位 en_no、jp_no、verdict、confirmed_on；後列覆蓋前列，不能重排 |

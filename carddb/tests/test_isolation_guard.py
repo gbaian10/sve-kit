@@ -14,10 +14,10 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb import cli
-from sve_carddb.config import Settings
-from sve_carddb.fetch.writer import Fetched, Writer
-from sve_carddb.manifest import Kind, Manifest, Region, RequestStart
-from sve_carddb.store import relpath
+from sve_carddb.ingest.archive.manifest import Kind, Manifest, Region, RequestStart
+from sve_carddb.ingest.archive.store import relpath
+from sve_carddb.ingest.config import Settings
+from sve_carddb.ingest.http.writer import Fetched, Writer
 
 from .isolation_guard import IsolationGuard
 from .isolation_guard import TestIsolationError as IsolationError

@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.catalog.adoption_models import RawMapping, ReviewContext, SourceRef
 from sve_carddb.catalog.adoption_sources import AdoptionSources
 from sve_carddb.catalog.adoption_validation import term as validate_term
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
-    from sve_carddb.build_db import CompiledSchema
+    from sve_carddb.build import CompiledSchema
     from sve_carddb.catalog.projection import CatalogProjection
     from sve_carddb.registry.records import Region
 

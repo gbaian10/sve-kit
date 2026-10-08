@@ -13,7 +13,7 @@ from sve_carddb.translations.digital import name_proof
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.core.provenance import InputRecord
     from sve_carddb.digital_links.importer import Result as LinkResult

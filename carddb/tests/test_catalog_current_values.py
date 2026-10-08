@@ -7,14 +7,14 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.catalog.adoption_loader import load_adoptions
 from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.core.provenance import BuildContext
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.offline import _populate_adoptions, _prepare_catalog
 from sve_carddb.translations.sources import Sources
+from sve_carddb.workflows.offline import _populate_adoptions, _prepare_catalog
 
 from .adoption_fixtures import commit, make_case
 

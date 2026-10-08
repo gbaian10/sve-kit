@@ -4,13 +4,13 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.extract.jsonl import extract_cards
-from sve_carddb.extract.official_jp import QA, extract_card
-from sve_carddb.fetch.validate import ValidationError
-from sve_carddb.fetch.writer import Writer
+from sve_carddb.ingest.http.validate import ValidationError
+from sve_carddb.ingest.http.writer import Writer
+from sve_carddb.parse.pages.extract_jp import QA, extract_card
+from sve_carddb.workflows.extract import extract_cards
 
 if TYPE_CHECKING:
-    from sve_carddb.manifest import Manifest
+    from sve_carddb.ingest.archive.manifest import Manifest
 
 FIXTURES = Path(__file__).parent / "fixtures" / "synthetic_jp"
 

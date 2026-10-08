@@ -40,7 +40,7 @@ class MediaPlan:
 
     def blobs(self, source: Path) -> Iterator[tuple[str, bytes]]:
         """Recheck full bytes so a changed build cache cannot corrupt a sealed plan."""
-        from sve_carddb.store import resolve_within  # ruff: ignore[import-outside-top-level] -- keep the read-only filesystem boundary local
+        from sve_carddb.ingest.archive.store import resolve_within  # ruff: ignore[import-outside-top-level] -- keep the read-only filesystem boundary local
 
         for asset in self.assets:
             raw = resolve_within(

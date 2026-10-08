@@ -10,8 +10,8 @@ from sve_carddb.catalog.adoption_models import Batch, ReviewContext, SourceRef
 from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.models import Text
 from sve_carddb.core.provenance import SourceUse, Version
+from sve_carddb.parse.pages.official_jp import card_url
 from sve_carddb.registry.records import CardData, FaceData, PrintingData
-from sve_carddb.sources.official_jp import card_url
 from sve_carddb.translations.digital import _phases
 from sve_carddb.translations.sources import Sources, pointer
 

@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db.rows import insert_exact
+from sve_carddb.build.rows import insert_exact
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Value
+    from sve_carddb.build import Value
 
     from .database_fixtures import DatabaseTemplate
 

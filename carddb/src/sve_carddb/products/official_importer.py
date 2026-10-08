@@ -2,13 +2,13 @@
 
 from typing import TYPE_CHECKING, Protocol
 
-from sve_carddb.build_db.source_rows import insert_raw_sources
+from sve_carddb.build.source_rows import insert_raw_sources
 from sve_carddb.core.json import canonical
 from sve_carddb.core.provenance import SourceUse, input_record
 from sve_carddb.registry.inputs import digest
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.core.provenance import BuildContext, InputRecord
     from sve_carddb.products.identities import ProductIdentities
     from sve_carddb.products.models import LocalizedText

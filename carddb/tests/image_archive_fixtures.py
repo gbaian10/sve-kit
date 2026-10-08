@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.source_archive import Scope, seal_batch
+from sve_carddb.ingest.archive.source_archive import Scope, seal_batch
 
 from .test_image_variants import png
 from .test_source_archive import _put, _resource, _store

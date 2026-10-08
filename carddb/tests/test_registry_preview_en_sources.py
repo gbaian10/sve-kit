@@ -5,14 +5,21 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.extract.compare_jp import legacy_projection as legacy_jp
-from sve_carddb.extract.official_en import extract_card as extract_en
-from sve_carddb.extract.official_en import legacy_projection as legacy_en
-from sve_carddb.extract.official_jp import extract_card as extract_jp
-from sve_carddb.manifest import Kind, Region
+from sve_carddb.build import create_database
+from sve_carddb.build.t1 import compile_build
+from sve_carddb.ingest.archive.manifest import Kind, Region
+from sve_carddb.ingest.archive.source_archive import seal_batch
+from sve_carddb.parse.pages import official_en as en
+from sve_carddb.parse.pages import official_jp as jp
+from sve_carddb.parse.pages.extract_en import extract_card as extract_en
+from sve_carddb.parse.pages.extract_jp import extract_card as extract_jp
 from sve_carddb.registry.build import build
+from sve_carddb.registry.parser_adapters.official_en import (
+    legacy_projection as legacy_en,
+)
+from sve_carddb.registry.parser_adapters.official_jp import (
+    legacy_projection as legacy_jp,
+)
 from sve_carddb.registry.preview import (
     FrozenEN,
     FrozenJP,
@@ -23,9 +30,6 @@ from sve_carddb.registry.preview import (
 from sve_carddb.registry.records import CorrectionData, PrintingData
 from sve_carddb.registry.review import Correction
 from sve_carddb.registry.storage import plan_files, write_files
-from sve_carddb.source_archive import seal_batch
-from sve_carddb.sources import official_en as en
-from sve_carddb.sources import official_jp as jp
 
 from .en_extract_fixtures import page
 from .registry_preview_fixtures import BUILD, REVISION, parents

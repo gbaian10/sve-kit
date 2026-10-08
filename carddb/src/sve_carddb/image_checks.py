@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from PIL import Image
 
 from sve_carddb.core.json import digest
-from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
 if TYPE_CHECKING:
     from pathlib import Path

@@ -10,18 +10,19 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb import cli
-from sve_carddb.build_db.source_rows import source_values
-from sve_carddb.crawl import list_root, sets_root
-from sve_carddb.extract.official_en import extract_card, legacy_projection
-from sve_carddb.fetch.validate import ValidationError
-from sve_carddb.manifest import Kind, Link, Manifest, Region
+from sve_carddb.build.source_rows import source_values
+from sve_carddb.ingest.archive.manifest import Kind, Link, Manifest, Region
+from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
+from sve_carddb.ingest.http.validate import ValidationError
+from sve_carddb.ingest.queries import list_root, sets_root
+from sve_carddb.parse.pages import official_en as en
+from sve_carddb.parse.pages import official_jp as jp
+from sve_carddb.parse.pages.extract_en import extract_card
 from sve_carddb.registry.inputs import canonical
+from sve_carddb.registry.parser_adapters.official_en import legacy_projection
 from sve_carddb.registry.preview import FrozenEN, FrozenJP, FrozenRegions
 from sve_carddb.registry.records import Observation
 from sve_carddb.registry.review import observation
-from sve_carddb.source_archive import ArchiveError, seal_batch
-from sve_carddb.sources import official_en as en
-from sve_carddb.sources import official_jp as jp
 
 from .en_extract_fixtures import page
 from .test_registry_preview_archive import RAW as JP_RAW

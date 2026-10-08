@@ -33,7 +33,7 @@ def test_contracts_import_only_core_and_contracts(path: Path) -> None:
         "import sve_carddb.snapshot.reader",
         "from sve_carddb import build_db",
         "from .. import translations",
-        "if TYPE_CHECKING:\n    from sve_carddb.build_db import Database",
+        "if TYPE_CHECKING:\n    from sve_carddb.build import Database",
         "def call():\n    from ..snapshot import reader",
     ],
 )

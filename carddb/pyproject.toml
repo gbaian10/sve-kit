@@ -93,6 +93,10 @@ git_describe_command = [
 [tool.hatch.build.hooks.vcs]
 version-file = "src/sve_carddb/_version.py"
 
+[tool.hatch.build]
+# Hatch excludes directories named build by default; this one contains source code.
+artifacts = ["src/sve_carddb/build/*.py"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/sve_carddb"]
 
@@ -228,8 +232,8 @@ runtime-evaluated-base-classes = [
     "sve_carddb.products.models.DecisionMetadata",
     "sve_carddb.products.models.Evidence",
     "sve_carddb.core.models.RecordData",
-    "sve_carddb.source_archive._Model",
-    "sve_carddb.source_import.models.Observation",
+    "sve_carddb.ingest.archive.source_archive._Model",
+    "sve_carddb.ingest.archive.source_import.models.Observation",
 ]
 
 [tool.ruff.lint.pylint]

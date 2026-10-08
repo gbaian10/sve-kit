@@ -6,16 +6,16 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import create_database, rebuild_database
-from sve_carddb.build_db.compiler import compile_schema
-from sve_carddb.build_db.t0 import REGISTRY, compile_t0
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import create_database, rebuild_database
+from sve_carddb.build.compiler import compile_schema
+from sve_carddb.build.t0 import REGISTRY, compile_t0
+from sve_carddb.build.t1 import compile_build
 
 from .build_db_fixtures import seed
 from .build_db_t1_fixtures import populate
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
 
 
 def test_rebuild_upgrades_offline_file_and_adds_real_cr_fk(tmp_path: Path) -> None:

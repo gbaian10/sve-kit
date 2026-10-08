@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db.source_rows import source_values
-from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.manifest import Kind
+from sve_carddb.build.source_rows import source_values
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.manifest import Kind
+from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
+from sve_carddb.parse.pages.official_jp import card_url
 from sve_carddb.registry.preview import FrozenJP
-from sve_carddb.source_archive import ArchiveError, seal_batch
-from sve_carddb.sources.official_jp import card_url
 
 from .test_source_archive import _put, _resource, _store
 

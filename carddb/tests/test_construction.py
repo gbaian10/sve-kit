@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
-from sve_carddb.build_db import Database, Value, create_database
-from sve_carddb.build_db.source_rows import source_values
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import Database, Value, create_database
+from sve_carddb.build.source_rows import source_values
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.construction import (
     DeckRoleOverride,
     load_construction,
@@ -25,7 +25,7 @@ from .construction_fixtures import context, evidence, plan
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from sve_carddb.build_db.compiler import CompiledSchema
+    from sve_carddb.build.compiler import CompiledSchema
 
 REFS = frozenset({"synthetic-construction-v1"})
 

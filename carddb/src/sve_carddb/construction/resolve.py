@@ -10,7 +10,7 @@ from sve_carddb.core.models import Date
 _DATE = TypeAdapter(Date, config=ConfigDict(regex_engine="python-re", strict=True))
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
 
 
 @dataclass(frozen=True)

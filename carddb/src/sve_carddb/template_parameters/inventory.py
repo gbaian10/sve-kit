@@ -19,7 +19,7 @@ from sve_carddb.template_sources.pins import PARSER
 from sve_carddb.translations.sources import project
 
 if TYPE_CHECKING:
-    from sve_carddb.frozen_sources import FrozenSources
+    from sve_carddb.ingest.archive.frozen_sources import FrozenSources
     from sve_carddb.template_parameters.models import Candidate
     from sve_carddb.template_parameters.references import References
     from sve_carddb.template_parameters.spans import Located

@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.card_extras import applicable_reskin_regions
 from sve_carddb.registry.inputs import Mapping
 from sve_carddb.registry.review import InitDecisions, Inputs
@@ -18,7 +18,7 @@ from .text_observation_fixtures import make_case
 if TYPE_CHECKING:
     from collections.abc import Mapping as RowMapping
 
-    from sve_carddb.build_db import CompiledSchema, Database, Value
+    from sve_carddb.build import CompiledSchema, Database, Value
 
     from .text_observation_fixtures import Case
 

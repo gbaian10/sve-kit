@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import Json, create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import Json, create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.catalog.importer import (
     catalog_configuration,
     populate_catalog,
@@ -24,7 +24,7 @@ from .test_catalog_symbols import symbol
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
 
 
 @pytest.fixture(scope="module")

@@ -296,7 +296,7 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 
 ### 9.2 當前翻譯投影
 
-[翻譯 current 契約](translation-contract.md)與 §9.1 使用相同 DDL，透過 `build_db.t1.compile_build()` 編譯。
+[翻譯 current 契約](translation-contract.md)與 §9.1 使用相同 DDL，透過 `build.t1.compile_build()` 編譯。
 模板功能、術語／名字／風味、owner/use、來源 hash 與跨區適用檢查保留。
 人工輸入的 authored_source_id、record_key、origin 與 low_confidence 定位本次來源與品質，沒有另建核可表。
 language／vocabulary 的四欄可為 null，以容納程式提供的配置；從 authored 讀入的值都須填齊。

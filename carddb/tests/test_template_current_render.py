@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import Json, create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import Json, create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.template_translations.current import validate_templates
 from sve_carddb.template_translations.current_build import apply, labels
@@ -25,7 +25,7 @@ from .test_template_current import Case, current_case
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.template_translations.current import Validated
 
 __all__ = ("current_case",)
@@ -310,9 +310,9 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
     current_case: Case, tmp_path: Path
 ) -> None:
     from sve_carddb.catalog.adoption_models import Batch  # ruff: ignore[import-outside-top-level] -- minimal source fixture
-    from sve_carddb.manifest import Kind  # ruff: ignore[import-outside-top-level] -- minimal source fixture
-    from sve_carddb.source_archive import seal_batch  # ruff: ignore[import-outside-top-level] -- minimal source fixture
-    from sve_carddb.sources.official_jp import card_url  # ruff: ignore[import-outside-top-level] -- synthetic source URL
+    from sve_carddb.ingest.archive.manifest import Kind  # ruff: ignore[import-outside-top-level] -- minimal source fixture
+    from sve_carddb.ingest.archive.source_archive import seal_batch  # ruff: ignore[import-outside-top-level] -- minimal source fixture
+    from sve_carddb.parse.pages.official_jp import card_url  # ruff: ignore[import-outside-top-level] -- synthetic source URL
     from sve_carddb.template_parameters.references import References  # ruff: ignore[import-outside-top-level] -- no synthetic terms
     from sve_carddb.template_translations.current import read_templates  # ruff: ignore[import-outside-top-level] -- current tree boundary
     from sve_carddb.template_translations.current_models import (  # ruff: ignore[import-outside-top-level] -- finite current data

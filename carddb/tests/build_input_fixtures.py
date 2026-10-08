@@ -3,16 +3,16 @@
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
-from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.manifest import Kind, Region
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.manifest import Kind, Region
+from sve_carddb.ingest.archive.source_archive import seal_batch
+from sve_carddb.parse.pages import official_en
+from sve_carddb.parse.pages.official_jp import card_url
 from sve_carddb.products.evidence import resolve_evidence
 from sve_carddb.products.importer import product_source_uses
 from sve_carddb.registry.inputs import Card
 from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.source_archive import seal_batch
-from sve_carddb.sources import official_en
-from sve_carddb.sources.official_jp import card_url
 
 from .identity_evidence_fixtures import MemoryEvidence
 from .product_fixtures import first_record, install, obj

@@ -9,16 +9,16 @@ from urllib.parse import unquote, urlsplit
 
 import httpx
 
-from sve_carddb.fetch.writer import Writer
-from sve_carddb.manifest import Manifest
+from sve_carddb.ingest.archive.manifest import Manifest
+from sve_carddb.ingest.http.writer import Writer
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
     import pytest
 
-    from sve_carddb.fetch.writer import Fetched, WriteResult
-    from sve_carddb.manifest import Resource
+    from sve_carddb.ingest.archive.manifest import Resource
+    from sve_carddb.ingest.http.writer import Fetched, WriteResult
 
 
 class TestIsolationError(RuntimeError):

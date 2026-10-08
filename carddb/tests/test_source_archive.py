@@ -14,12 +14,10 @@ import pytest
 from rich.console import Console
 from typer.testing import CliRunner
 
-import sve_carddb.source_archive as archive
+import sve_carddb.ingest.archive.source_archive as archive
 from sve_carddb import cli
 from sve_carddb.core.json import canonical, parse
-from sve_carddb.crawl import list_root, sets_root
-from sve_carddb.extract.jsonl import extract_cards
-from sve_carddb.manifest import (
+from sve_carddb.ingest.archive.manifest import (
     AlreadyRunningError,
     ExclusiveLock,
     Kind,
@@ -31,7 +29,7 @@ from sve_carddb.manifest import (
     RequestStart,
     Resource,
 )
-from sve_carddb.source_archive import (
+from sve_carddb.ingest.archive.source_archive import (
     ArchiveError,
     ArchiveRaceError,
     ArchiveReader,
@@ -45,8 +43,10 @@ from sve_carddb.source_archive import (
     seal_batch,
     verify_batch,
 )
-from sve_carddb.sources import official_jp as jp
-from sve_carddb.store import compress
+from sve_carddb.ingest.archive.store import compress
+from sve_carddb.ingest.queries import list_root, sets_root
+from sve_carddb.parse.pages import official_jp as jp
+from sve_carddb.workflows.extract import extract_cards
 
 NOW = datetime(2026, 9, 29, tzinfo=UTC)
 

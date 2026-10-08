@@ -14,6 +14,8 @@ __pycache__/
 .Python
 carddb/src/sve_carddb/_version.py
 build/
+# This build package is source code, not generated output.
+!/carddb/src/sve_carddb/build/
 develop-eggs/
 dist/
 downloads/

@@ -22,7 +22,8 @@ def main() -> None:
         name == prefix or name.startswith(prefix + ".")
         for name in sys.modules
         for prefix in (
-            "sve_carddb.build_db",
+            "sve_carddb.build",
+            "sve_carddb.workflows",
             "sve_carddb.snapshot.export",
             "sve_carddb.snapshot.preview",
             "sve_carddb.snapshot.project",

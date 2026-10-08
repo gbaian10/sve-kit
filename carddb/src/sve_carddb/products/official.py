@@ -7,8 +7,9 @@ from typing import TYPE_CHECKING
 from urllib.parse import parse_qsl, urljoin, urlsplit
 
 from sve_carddb.core.json import canonical, digest
-from sve_carddb.fetch.validate import decode_html
-from sve_carddb.html import attribute, parse, select_all
+from sve_carddb.ingest.http.validate import decode_html
+from sve_carddb.parse.html import attribute, parse, select_all
+from sve_carddb.parse.pages import official_en, official_jp
 from sve_carddb.products.identity_models import (
     ExpansionLink,
     ProductLink,
@@ -16,7 +17,6 @@ from sve_carddb.products.identity_models import (
     expansion,
     official_url,
 )
-from sve_carddb.sources import official_en, official_jp
 
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode

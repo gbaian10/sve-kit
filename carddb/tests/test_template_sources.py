@@ -10,10 +10,10 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.core.json import digest
-from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.manifest import Kind
-from sve_carddb.source_archive import ArchiveError, Scope, seal_batch
-from sve_carddb.sources.official_jp import card_url
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.manifest import Kind
+from sve_carddb.ingest.archive.source_archive import ArchiveError, Scope, seal_batch
+from sve_carddb.parse.pages.official_jp import card_url
 from sve_carddb.template_sources import inventory, pins
 from sve_carddb.template_sources.inventory import coverage, fields, replay, scan_current
 from sve_carddb.template_sources.normalizer import partition

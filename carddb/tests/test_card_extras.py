@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue, ValidationError
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.source_rows import source_values
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import create_database
+from sve_carddb.build.source_rows import source_values
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.card_extras import (
     ErrataChange,
     ErrataPage,
@@ -27,7 +27,7 @@ from .card_extras_fixtures import context, page, seed, source
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from sve_carddb.build_db import CompiledSchema, Database
+    from sve_carddb.build import CompiledSchema, Database
     from sve_carddb.core.provenance import BuildContext, InputRecord, SourceUse
 
 

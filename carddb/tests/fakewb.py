@@ -5,7 +5,7 @@ from urllib.parse import parse_qs, urlsplit
 import httpx
 import orjson
 
-from sve_carddb.sources import official_svwb as svwb
+from sve_carddb.parse.pages import official_svwb as svwb
 
 from .fakesite import PNG
 

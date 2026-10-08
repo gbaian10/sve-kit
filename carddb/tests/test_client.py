@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING
 import httpx
 import pytest
 
-from sve_carddb.fetch.client import (
+from sve_carddb.ingest.archive.manifest import Manifest, Outcome
+from sve_carddb.ingest.http.client import (
     BudgetExhaustedError,
     Client,
     ClientPolicy,
@@ -14,8 +15,7 @@ from sve_carddb.fetch.client import (
     StopCrawlError,
     retry_after_seconds,
 )
-from sve_carddb.fetch.throttle import Throttle
-from sve_carddb.manifest import Manifest, Outcome
+from sve_carddb.ingest.http.throttle import Throttle
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator

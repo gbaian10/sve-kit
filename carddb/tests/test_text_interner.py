@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import Json, create_database
-from sve_carddb.build_db.t0 import compile_t0
+from sve_carddb.build import Json, create_database
+from sve_carddb.build.t0 import compile_t0
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.text_observations.intern import TextInterner
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
 
 
 def register(db: Database) -> None:

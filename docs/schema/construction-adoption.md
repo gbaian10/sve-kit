@@ -91,7 +91,7 @@ restriction.state 的 confirmed／announced／withdrawn 是限制的生命周期
 
 ## 2. 一次性抓回原檔如何正式登錄與釘版
 
-此節定義 carddb 已提供的**離線登錄能力**，入口為 [`source-import register`](../../carddb/src/sve_carddb/source_import/README.md)，預設只檢查，明示 `--execute` 才登錄；程式合併與本契約均不授權真實執行。輸入是維護者認可的一次性來源集合：index 記 URL／final URL／status／sha256／bytes／fetched_at／content_type／ETag／Last-Modified／chain，raw 以內容 hash 保存。原始 index 與 raw 保留不動，登錄不會對任何外部服務發請求，不開 live manifest 或以它補 metadata。
+此節定義 carddb 已提供的**離線登錄能力**，入口為 [`source-import register`](../../carddb/src/sve_carddb/ingest/archive/source_import/README.md)，預設只檢查，明示 `--execute` 才登錄；程式合併與本契約均不授權真實執行。輸入是維護者認可的一次性來源集合：index 記 URL／final URL／status／sha256／bytes／fetched_at／content_type／ETag／Last-Modified／chain，raw 以內容 hash 保存。原始 index 與 raw 保留不動，登錄不會對任何外部服務發請求，不開 live manifest 或以它補 metadata。
 
 1. 唯讀驗完整 index 與全部 raw：唯一 canonical requested URL、200 成功狀態、原始 URL／最終 URL／chain 一致、HTTPS／官方 host、有效 UTC 時間、media type、exact raw hash／bytes。禁止 symlink 越界、未知欄位、缺檔、重複衝突、未結束鏈及不符合用途的 HTML／PDF。URL 只沿既有 canonicalizer，不推測 PDF 版號或用來源路徑配 region。把來源清單、原 index exact hash、原 metadata 與本次用途分類釘在獨立登錄收據；它留來源歸檔 metadata 閉包，不進 git。
 2. 建立**全新的隔離 manifest／staging**，不複製或接管 live manifest。provider 依核對後來源用途明示 jp/en（EN PDF 即使由共享官方 host 供應仍是 en）；抓取 kind 使用現有 rules（規則入口／CR PDF）、limit（禁限入口）、news（新聞索引／公告），不把 PDF 虛構成 card。Resource.url 取 canonical requested URL；final_url／chain 保留登錄收據，不能把兩者互換或默默合併別的 URL 身分。
@@ -101,7 +101,7 @@ restriction.state 的 confirmed／announced／withdrawn 是限制的生命周期
 
 隔離 manifest 保存 `source_import_receipt` 登錄紀錄，與 fetch_log 分開：保存原 index exact bytes（BLOB）、index_sha256、canonical `{source_mappings,program_revision,dependencies}`、該內容的 receipt_id 與 registered_at；此收據不是 archive observation receipt，不能代替 descriptor.first_receipt_id。source_mappings 恰列每個 canonical URL／provider／kind／raw hash／安全相對 path，原 final_url／chain／抓取 metadata 由 index bytes 保留。receipt_id 對 index_sha256 與 canonical 登錄內容計 H，不以私人路徑或時間配號；相同收據重跑保留原 registered_at、逐欄比對，不覆寫。此表由隔離 manifest 的 SQLite backup hash 一起釘住，故可驗原 index 與 raw 的登錄關係，不向 inventory／Resource 塞未知欄位。現行 carddb 已接入相應 schema／reader 驗證；只有舊 seal 工具或多放一個未被 hash 引用的旁檔不算完成此邊界。入口驗證明示的程式 revision 與列出的依賴 pins，這份固定清單不宣稱涵蓋完整執行閉包。
 
-此隔離格式使用 manifest `PRAGMA user_version=2`，inventory.manifest.schema_version 亦為 2；不是在版本 1 偷加一張表。v2 完整 schema 獨立凍結於 `carddb/src/sve_carddb/manifest_schema_v2.py`，不隨 live v1 schema 演進而重定義。現行 reader 分版本驗表／欄位／約束、收據與完整 source_mappings：版本 2 缺表、缺欄、缺收據或 Resource 無對應均拒絕，不以 CREATE IF NOT EXISTS 修補已釘副本。僅支援版本 1 的舊 reader 必須拒絕版本 2。現行工具保留版本 1 的讀取／live 寫入能力，live writer 拒絕版本 2；來源登錄的版本 2 writer 僅用於全新隔離 DB，本功能不自動升 live，也不遷移／重寫已 sealed 的版本 1 批次。兩種版本的副本都用唯讀 open_snapshot 驗證，不能只把全域 SCHEMA_VERSION 換成 2 而丟掉舊批次相容性。
+此隔離格式使用 manifest `PRAGMA user_version=2`，inventory.manifest.schema_version 亦為 2；不是在版本 1 偷加一張表。v2 完整 schema 獨立凍結於 `carddb/src/sve_carddb/ingest/archive/manifest_schema_v2.py`，不隨 live v1 schema 演進而重定義。現行 reader 分版本驗表／欄位／約束、收據與完整 source_mappings：版本 2 缺表、缺欄、缺收據或 Resource 無對應均拒絕，不以 CREATE IF NOT EXISTS 修補已釘副本。僅支援版本 1 的舊 reader 必須拒絕版本 2。現行工具保留版本 1 的讀取／live 寫入能力，live writer 拒絕版本 2；來源登錄的版本 2 writer 僅用於全新隔離 DB，本功能不自動升 live，也不遷移／重寫已 sealed 的版本 1 批次。兩種版本的副本都用唯讀 open_snapshot 驗證，不能只把全域 SCHEMA_VERSION 換成 2 而丟掉舊批次相容性。
 
 seal、獨立備份及 restore-check 通過後，已引用的隔離 manifest backup、index／登錄收據與 raw 閉包永久保留；工作 manifest／其 sidecars 與原一次性輸入不自動刪除。只有協調者確認全部引用已在獨立備份可驗回、沒有未完成或失敗工作後，才可另行授權清理未被引用的工作複本，不能刪 sealed 副本／歷史收據。
 

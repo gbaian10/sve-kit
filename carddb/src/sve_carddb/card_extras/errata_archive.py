@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING
 
 from sve_carddb.card_extras.errata_parser import PARSER, parse_notice
-from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

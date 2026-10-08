@@ -15,7 +15,7 @@ from sve_carddb.core.provenance import SourceUse, uses_sorted
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
 
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
     from sve_carddb.registry.records import Region
 
 

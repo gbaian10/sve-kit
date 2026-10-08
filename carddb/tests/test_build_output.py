@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb import build_output
-from sve_carddb.build_db import create_database
-from sve_carddb.build_output import save
+from sve_carddb.build import create_database
+from sve_carddb.build import output as build_output
+from sve_carddb.build.output import save
 
 from .test_build_db import compiled
 

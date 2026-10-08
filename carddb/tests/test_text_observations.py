@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.registry.review import Correction
 from sve_carddb.registry.snapshot import load_registry

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Literal
 
 import pytest
 
-from sve_carddb.build_db import Json
+from sve_carddb.build import Json
 from sve_carddb.catalog.models import NameBinding
 from sve_carddb.catalog.rules_names import populate_rules_names, register_name
 from sve_carddb.products.models import LocalizedText
@@ -17,7 +17,7 @@ from .database_fixtures import DatabaseTemplate
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
 
 
 @pytest.fixture(scope="module")

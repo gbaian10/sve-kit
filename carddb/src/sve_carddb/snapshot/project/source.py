@@ -4,13 +4,13 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_db import Json
+from sve_carddb.build import Json
 from sve_carddb.core.json import string
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
 
 
 type Record = dict[str, JsonValue]

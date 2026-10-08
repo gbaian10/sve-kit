@@ -2,17 +2,17 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db import Json
+from sve_carddb.build import Json
 from sve_carddb.card_extras import CardPage, QAEntry
 from sve_carddb.card_extras.archive import PARSER
 from sve_carddb.core.json import digest
 from sve_carddb.core.provenance import ArchivePin, BuildContext, Source
-from sve_carddb.sources import official_en, official_jp
+from sve_carddb.parse.pages import official_en, official_jp
 
 from .build_db_fixtures import rows
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.card_extras import ExtrasPlan
     from sve_carddb.registry.records import Region
 

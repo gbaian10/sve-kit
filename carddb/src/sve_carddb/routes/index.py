@@ -18,7 +18,7 @@ from sve_carddb.routes.plan import (
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from sve_carddb.build_db.database import Database
+    from sve_carddb.build.database import Database
 
 
 @dataclass(frozen=True)

@@ -2,9 +2,9 @@ from pathlib import Path, PurePosixPath
 
 import pytest
 
-from sve_carddb.fetch.validate import ValidationError
-from sve_carddb.html import MissingElementError
-from sve_carddb.sources import official_jp as jp
+from sve_carddb.ingest.http.validate import ValidationError
+from sve_carddb.parse.html import MissingElementError
+from sve_carddb.parse.pages import official_jp as jp
 
 FIXTURES = Path(__file__).parent / "fixtures" / "synthetic_jp"
 MAINTENANCE = (

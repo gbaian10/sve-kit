@@ -10,7 +10,7 @@ import pytest
 from jsonschema import SchemaError, ValidationError
 from pydantic import JsonValue
 
-from sve_carddb.build_db import (
+from sve_carddb.build import (
     Capability,
     Check,
     Column,
@@ -23,13 +23,13 @@ from sve_carddb.build_db import (
     compile_schema,
     create_database,
 )
-from sve_carddb.build_db.database import _raw_rows, install_functions
-from sve_carddb.build_db.validation import BOUNDS, Rules, decode
+from sve_carddb.build.database import _raw_rows, install_functions
+from sve_carddb.build.validation import BOUNDS, Rules, decode
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_db import CompiledSchema, Value
+    from sve_carddb.build import CompiledSchema, Value
 
 SAFE = 9007199254740991
 JSON_SCHEMAS: dict[str, JsonValue] = {

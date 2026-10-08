@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import Database, create_database
-from sve_carddb.build_db.database import install_functions
-from sve_carddb.build_db.t0 import compile_t0
-from sve_carddb.build_db.t1 import compile_build, compile_minimum
+from sve_carddb.build import Database, create_database
+from sve_carddb.build.database import install_functions
+from sve_carddb.build.t0 import compile_t0
+from sve_carddb.build.t1 import compile_build, compile_minimum
 
 from .build_db_fixtures import seed
 from .build_db_t1_fixtures import populate as populate_t1
@@ -19,7 +19,7 @@ from .build_db_t1b_fixtures import populate as populate_t1b
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from sve_carddb.build_db import CompiledSchema
+    from sve_carddb.build import CompiledSchema
 
 
 @dataclass(frozen=True)

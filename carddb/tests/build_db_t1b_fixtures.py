@@ -2,15 +2,15 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db import Json
-from sve_carddb.build_db.t1 import TABLES
+from sve_carddb.build import Json
+from sve_carddb.build.t1 import TABLES
 
 from .build_db_fixtures import DATE, HASH, INSTANT
 from .build_db_fixtures import rows as base_rows
 from .build_db_t1_fixtures import populate as populate_a
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
 
 EN_TABLES = {"art", "region_mapping_review", "region_text_review", "region_divergence"}
 

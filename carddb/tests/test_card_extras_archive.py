@@ -10,11 +10,11 @@ import pytest
 from sve_carddb.card_extras import FrozenCardExtras, parse_card_page
 from sve_carddb.card_extras.archive import EN_PARSER, PARSER, card_number
 from sve_carddb.core.json import digest
-from sve_carddb.html import MissingElementError
-from sve_carddb.manifest import Kind, Manifest
-from sve_carddb.manifest import Region as ManifestRegion
-from sve_carddb.source_archive import ArchiveError, seal_batch
-from sve_carddb.sources import official_en, official_jp
+from sve_carddb.ingest.archive.manifest import Kind, Manifest
+from sve_carddb.ingest.archive.manifest import Region as ManifestRegion
+from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
+from sve_carddb.parse.html import MissingElementError
+from sve_carddb.parse.pages import official_en, official_jp
 
 from .card_extras_fixtures import source
 from .en_extract_fixtures import page as en_page
@@ -25,8 +25,8 @@ if TYPE_CHECKING:
 
     from sve_carddb.card_extras import CardPage
     from sve_carddb.core.provenance import Source
+    from sve_carddb.ingest.archive.source_archive import ArchiveStore
     from sve_carddb.registry.records import Region
-    from sve_carddb.source_archive import ArchiveStore
 
 
 RAW = (

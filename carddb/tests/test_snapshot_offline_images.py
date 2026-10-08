@@ -10,7 +10,6 @@ from typer.testing import CliRunner
 from sve_carddb.cli import app
 from sve_carddb.core.json import object_value, parse
 from sve_carddb.core.provenance import InputRecord
-from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_assets import (
     PARSERS,
     ImageBuild,
@@ -19,14 +18,16 @@ from sve_carddb.image_assets import (
     build_regional_assets,
 )
 from sve_carddb.image_crops import FILE, load_image_crops
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.parse.pages import official_en
+from sve_carddb.parse.pages.official_jp import image_url
 from sve_carddb.products import OfficialProducts, ProductIdentities
 from sve_carddb.registry.records import PrintingData
-from sve_carddb.snapshot import offline, offline_images
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.media import prepare_media
-from sve_carddb.snapshot.preview import Roots, commands, write_preview
-from sve_carddb.sources import official_en
-from sve_carddb.sources.official_jp import image_url
+from sve_carddb.snapshot.preview import Roots, write_preview
+from sve_carddb.workflows import export as commands
+from sve_carddb.workflows import offline, offline_images
 
 from .image_crop_fixtures import install, record
 from .test_image_assets_en import FRONT, EnglishImages
@@ -38,13 +39,13 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.card_extras import CardPage
     from sve_carddb.image_checks import ImageChecks
     from sve_carddb.image_crops import ImageCrops
     from sve_carddb.registry.preview import PreviewPlan
     from sve_carddb.registry.records import Region
-    from sve_carddb.snapshot.offline import Inputs
+    from sve_carddb.workflows.offline import Inputs
 
     from .text_observation_fixtures import Case
 

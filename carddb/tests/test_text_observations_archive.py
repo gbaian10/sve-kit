@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db.source_rows import source_values
-from sve_carddb.manifest import Kind, Manifest, Region
-from sve_carddb.source_archive import ArchiveError, seal_batch
-from sve_carddb.sources import official_en as en
-from sve_carddb.sources import official_jp as jp
+from sve_carddb.build.source_rows import source_values
+from sve_carddb.ingest.archive.manifest import Kind, Manifest, Region
+from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
+from sve_carddb.parse.pages import official_en as en
+from sve_carddb.parse.pages import official_jp as jp
 from sve_carddb.text_observations import FrozenTexts, RegionalTexts
 
 from .en_extract_fixtures import page

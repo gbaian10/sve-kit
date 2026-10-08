@@ -8,7 +8,7 @@ from pydantic import JsonValue
 from typer.testing import CliRunner
 
 import sve_carddb.snapshot.preview as writer_module
-from sve_carddb.build_db import create_database
+from sve_carddb.build import create_database
 from sve_carddb.cli import app
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.snapshot.export import Ownership, export_snapshot

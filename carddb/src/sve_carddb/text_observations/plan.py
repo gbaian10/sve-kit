@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_db.source_rows import source_values
+from sve_carddb.build.source_rows import source_values
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import SourceUse
 from sve_carddb.registry.records import CorrectionData, FaceData, PrintingData, Region

@@ -23,8 +23,7 @@ def project_imports(source: str, package: str) -> set[str]:
             if node.level:
                 module = resolve_name("." * node.level + module, package)
             modules.add(module)
-            if module in {"sve_carddb", "sve_carddb.core", "sve_carddb.contracts"}:
-                modules.update(module + "." + alias.name for alias in node.names)
+            modules.update(module + "." + alias.name for alias in node.names)
     return {
         module
         for module in modules
@@ -55,8 +54,8 @@ def test_core_imports_only_shared_foundations(path: Path) -> None:
         "import sve_carddb.snapshot.reader",
         "from sve_carddb.registry import records",
         "from sve_carddb import registry",
-        "def call():\n    from sve_carddb.build_db import Database",
-        "if TYPE_CHECKING:\n    from sve_carddb.build_db import Value",
+        "def call():\n    from sve_carddb.build import Database",
+        "if TYPE_CHECKING:\n    from sve_carddb.build import Value",
         "from ..registry import records",
         "from .. import registry",
     ],

@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t0 import compile_t0
+from sve_carddb.build import create_database
+from sve_carddb.build.t0 import compile_t0
 from sve_carddb.routes import build_index, populate_routes
 from sve_carddb.routes.defaults import GeneralEvidence, select_defaults
 
@@ -14,7 +14,7 @@ from .build_db_fixtures import rows
 from .routes_fixtures import base, printing
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
 
 ORDINARY = GeneralEvidence(True, True, False)
 

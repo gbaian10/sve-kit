@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.manifest import Manifest
+from sve_carddb.ingest.archive.manifest import Manifest
 
 from .database_fixtures import (
     image_parent_database_template as image_parent_database_template,  # ruff: ignore[useless-import-alias] -- register shared immutable database template

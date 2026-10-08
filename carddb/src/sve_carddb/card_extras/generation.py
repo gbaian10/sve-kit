@@ -4,13 +4,13 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import digest
-from sve_carddb.manifest import Kind, Link
+from sve_carddb.ingest.archive.manifest import Kind, Link
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+    from sve_carddb.card_extras.qa_parser import ParsedQA
     from sve_carddb.registry.records import Region
-    from sve_carddb.sources.official_qa import ParsedQA
 
 
 @dataclass(frozen=True)

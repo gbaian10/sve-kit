@@ -4,7 +4,7 @@ import hashlib
 import re
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db.source_rows import insert_raw_sources
+from sve_carddb.build.source_rows import insert_raw_sources
 from sve_carddb.catalog.languages import register_languages
 from sve_carddb.core.json import canonical
 from sve_carddb.core.provenance import (
@@ -23,8 +23,8 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
     from pathlib import Path
 
-    from sve_carddb.build_db import Value
-    from sve_carddb.build_db.database import Database
+    from sve_carddb.build import Value
+    from sve_carddb.build.database import Database
     from sve_carddb.products.loader import ProductSnapshot
     from sve_carddb.products.plan import OfficialProducts
     from sve_carddb.registry.preview import PreviewPlan

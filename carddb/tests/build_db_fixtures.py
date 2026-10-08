@@ -2,11 +2,11 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db import Json, Value
-from sve_carddb.build_db.t0 import TABLES
+from sve_carddb.build import Json, Value
+from sve_carddb.build.t0 import TABLES
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db.database import Database
+    from sve_carddb.build.database import Database
 
 HASH = "sha256:" + "a" * 64
 DATE = "2026-09-29"

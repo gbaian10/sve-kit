@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from .build_db_fixtures import rows
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
 
 
 def base(db: Database) -> dict[str, dict[str, Value]]:

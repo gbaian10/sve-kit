@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import (
+from sve_carddb.build import (
     Column,
     Kind,
     Table,
@@ -14,9 +14,9 @@ from sve_carddb.build_db import (
     create_database,
     rebuild_database,
 )
-from sve_carddb.build_db.t0_json import schemas as t0_schemas
-from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES, REGISTRY, compile_minimum
-from sve_carddb.build_db.t1_json import schemas as t1_schemas
+from sve_carddb.build.t0_json import schemas as t0_schemas
+from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, REGISTRY, compile_minimum
+from sve_carddb.build.t1_json import schemas as t1_schemas
 
 from .build_db_t1_fixtures import populate as populate_a
 from .build_db_t1b_fixtures import populate, rows
@@ -26,7 +26,7 @@ from .test_build_db_t1b import key
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_db import CompiledSchema, Database
+    from sve_carddb.build import CompiledSchema, Database
 
 
 def future_dsl() -> CompiledSchema:

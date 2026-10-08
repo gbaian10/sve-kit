@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from sve_carddb.core.json import integer, string
 from sve_carddb.image_checks import ImageChecks
 from sve_carddb.image_variants import SIZES
-from sve_carddb.store import resolve_within
+from sve_carddb.ingest.archive.store import resolve_within
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

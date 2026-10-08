@@ -10,15 +10,15 @@ import pytest
 
 from sve_carddb import image_assets, image_variants
 from sve_carddb.core.json import object_value, parse
-from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_assets import (
     PreviewRoots,
     build_regional_assets,
     verify_asset_sources,
     verify_assets,
 )
-from sve_carddb.manifest import Kind, Manifest, Region
-from sve_carddb.source_archive import ArchiveError, seal_batch
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.manifest import Kind, Manifest, Region
+from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
 
 from .test_image_variants import png
 from .test_registry_preview_archive import RAW

@@ -14,7 +14,7 @@ from urllib.parse import urljoin, urlsplit
 from sve_carddb.card_extras.dates import parse_en_date
 from sve_carddb.card_extras.errata_markup import NoticeMarkup, Piece, lines
 from sve_carddb.core.json import digest
-from sve_carddb.html import attribute, parse, select_all
+from sve_carddb.parse.html import attribute, parse, select_all
 
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode

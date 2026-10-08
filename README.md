@@ -38,6 +38,10 @@ sve-kit/
 ├── carddb/                Card data pipeline (Python, uv)
 │   ├── pyproject.toml     Package: sve-carddb
 │   ├── src/sve_carddb/    Crawl → parse → merge authored/ → build SQLite → export JSON
+│   │   ├── core/, contracts/     Shared foundations and snapshot contracts
+│   │   ├── ingest/, parse/       Source acquisition, archives and pure page parsers
+│   │   ├── build/                Typed SQLite schemas, rows and build output
+│   │   └── workflows/            Offline build, export, extraction and diagnostics
 │   ├── tests/
 │   ├── .cache/            Disposable temp files            (git-ignored, planned)
 │   └── dist/              Build output: SQLite, snapshots  (git-ignored, planned)

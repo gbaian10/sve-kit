@@ -6,14 +6,14 @@ import httpx
 import orjson
 import pytest
 
-from sve_carddb.crawl import Crawler
-from sve_carddb.crawl_svwb import SVWB_SITE, cards, stored_image_urls
-from sve_carddb.fetch.client import Client, ClientPolicy, FetchError
-from sve_carddb.fetch.throttle import CircuitBreaker, Throttle
-from sve_carddb.fetch.validate import ValidationError
-from sve_carddb.fetch.writer import Writer
-from sve_carddb.manifest import Kind, Manifest, Region
-from sve_carddb.sources import official_svwb as svwb
+from sve_carddb.ingest.archive.manifest import Kind, Manifest, Region
+from sve_carddb.ingest.crawl.crawl import Crawler
+from sve_carddb.ingest.crawl.crawl_svwb import SVWB_SITE, cards, stored_image_urls
+from sve_carddb.ingest.http.client import Client, ClientPolicy, FetchError
+from sve_carddb.ingest.http.throttle import CircuitBreaker, Throttle
+from sve_carddb.ingest.http.validate import ValidationError
+from sve_carddb.ingest.http.writer import Writer
+from sve_carddb.parse.pages import official_svwb as svwb
 
 from .fakewb import FakeWb, image_hash
 

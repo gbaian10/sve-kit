@@ -12,7 +12,7 @@ from sve_carddb.core.json import parse
 from sve_carddb.core.models import RecordData
 from sve_carddb.core.provenance import BuildContext, Source, SourceUse
 from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, parse_yaml
-from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.products.identity_models import (
     ExpansionLink,
     IdentityRecord,

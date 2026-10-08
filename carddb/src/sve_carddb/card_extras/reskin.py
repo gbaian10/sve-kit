@@ -11,7 +11,7 @@ from sve_carddb.text_observations.plan import verify_plan
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
     from sve_carddb.registry.preview.plan import Projection
     from sve_carddb.registry.records import Region
     from sve_carddb.text_observations import Vocabulary

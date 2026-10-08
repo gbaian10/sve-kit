@@ -32,6 +32,14 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 `carddb` 匯出的有版號快照是卡片資料的**唯一權威**。`sim/` 可以載入、打包或快取快照（例如 PWA 離線），
 但**不要維護另一份獨立的卡表**。
 
+`carddb/src/sve_carddb/` 的共用基礎為 `core/`，共用契約為 `contracts/`；
+`ingest/` 分為抓取協調 `crawl/`、低階 HTTP `http/` 與來源保全 `archive/`，
+原 Settings 位於 `ingest/config.py`，只管來源取得設定。`parse/` 保存 HTML 邊界及純頁面解析；
+registry projection adapter 與 QA adapter 分別留在 registry 與 card_extras。
+`build/` 保存 DB 基礎設施，詞法值域位於 `build/scalars.py`。
+`workflows/` 串接離線建置、名稱／圖片組合、匯出與診斷；下層不得匯入 workflows 或 CLI。
+抓取協調可呼叫 parser；低階 HTTP／archive 不得匯入 crawler，parser 不得依賴 DB 或 authored loader。
+
 ### 前端與部署邊界
 
 - **查卡、建牌、對戰是同一個前端**（`sim/web`），放在同一個主網域，用路徑區分（例如 `/cards`、`/decks`、`/play`）。不要另外做一個查卡網站
@@ -76,7 +84,7 @@ fork PR 使用 `.github/ci/fork-coverage.json` 針對剩餘測試配置的獨立
   （實測 BP02 從 070 起錯一號、BP18-SP01 日英是不同卡、PR 編號各自獨立）
 - **地區只有 `jp` 與 `en`**，不收簡體中文版
 - **卡號照官網原樣保存**（含 `Ⓢ`、小寫 `a`）；卡圖網址**從頁面 `<img src>` 原樣抓**，不能由卡號推算
-  - 例外：一代數位版官網 shadowverse-portal.com（`sources/official_sv1.py`，只用來對應數位卡）的卡圖網址格式固定，
+  - 例外：一代數位版官網 shadowverse-portal.com（`parse/pages/official_sv1.py`，只用來對應數位卡）的卡圖網址格式固定，
     用模板組網址；抓不到（官網會 302 轉到 HTML 頁，或 404）就改抓該卡的卡片頁、取實際的 `<img src>` 再試。
     合成頁測試模板與 fallback；私有真實頁測試驗證已鎖定的來源欄位
 - **SQLite 只在建置時用來檢查資料完整性**，使用者拿到的是 JSON 快照
@@ -86,10 +94,10 @@ fork PR 使用 `.github/ci/fork-coverage.json` 針對剩餘測試配置的獨立
 
 以下函式庫的回傳型別不可信，**一律透過邊界函式存取**，其他程式碼不直接使用原始回傳值：
 
-| 函式庫     | 問題                                                                  | 做法                                                                                |
+| 函式庫 | 問題 | 做法 |
 | ---------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| selectolax | `css_first(query)` 的型別是 `LexborNode`，找不到元素時實際回傳 `None` | 使用 `sve_carddb.html` 的 `select_one`／`require_one`，**不要直接呼叫 `css_first`** |
-| sqlite3    | 查詢結果是 `Any`，型別檢查在這裡失效                                  | 各 SQLite 邊界模組（manifest、建置資料庫等）做執行期檢查並轉成型別物件              |
+| selectolax | `css_first(query)` 的型別是 `LexborNode`，找不到元素時實際回傳 `None` | 使用 `sve_carddb.parse.html` 的 `select_one`／`require_one`，**不要直接呼叫 `css_first`** |
+| sqlite3 | 查詢結果是 `Any`，型別檢查在這裡失效 | 各 SQLite 邊界模組（manifest、建置資料庫等）做執行期檢查並轉成型別物件 |
 
 SQLite 的原始 `Any` 不得離開邊界模組；其他層只使用已驗證的型別物件。
 

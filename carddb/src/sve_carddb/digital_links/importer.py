@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_db.rows import insert_exact
-from sve_carddb.build_db.source_rows import insert_raw_sources
+from sve_carddb.build.rows import insert_exact
+from sve_carddb.build.source_rows import insert_raw_sources
 from sve_carddb.catalog.adoption_models import Batch, ReviewContext, SourceRef
 from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.provenance import InputRecord, input_record
@@ -20,7 +20,7 @@ from sve_carddb.digital_links.evidence import (
 )
 from sve_carddb.digital_links.loader import Snapshot, decision_id, link_id, load_links
 from sve_carddb.digital_links.models import Record, Shard, SveName
-from sve_carddb.sources.official_jp import card_url
+from sve_carddb.parse.pages.official_jp import card_url
 from sve_carddb.translations.digital import import_digital
 from sve_carddb.translations.name_sources import NameOwner, name_source
 from sve_carddb.translations.sources import Sources
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
     from pathlib import Path
 
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
     from sve_carddb.core.provenance import BuildContext
 
 
