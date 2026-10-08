@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Literal, Self
 
 from pydantic import ValidationError, field_validator, model_validator
 
+from sve_carddb.authored_files import check_path
 from sve_carddb.registry.records import RecordData
 from sve_carddb.registry.storage import MAX_BYTES as LIMIT
 from sve_carddb.template_parameter_rules.models import LEGACY_IDS, RuleId
@@ -60,15 +61,12 @@ def parse(raw: bytes) -> Rules:
 
 def load(repository: Path) -> Rules:
     """Read the current matcher switches in the working tree."""
-    return load_file(repository / PATH)
+    return load_file(repository / PATH, root=repository / "authored")
 
 
-def load_file(path: Path) -> Rules:
-    """Local tool inputs require ordinary bounded files, including all parent paths."""
-    if (
-        not path.is_file()
-        or any(p.is_symlink() for p in (path, *path.parents))
-        or path.stat().st_size >= LIMIT
-    ):
+def load_file(path: Path, *, root: Path) -> Rules:
+    """Only links at or below the data root can redirect an authored input."""
+    check_path(root, path)
+    if not path.is_file() or path.stat().st_size >= LIMIT:
         raise ValueError("Missing or symlink current parameter rules")
     return parse(path.read_bytes())

@@ -136,7 +136,7 @@ class Sources:
     def stage(self, build: BuildContext) -> Sources:
         """Keep identity reads and source uses stage-local.
 
-        Share identity indexes, decoded projections and context keys.
+        Share identity indexes, decoded projections, context keys and verified batches.
         """
         stage = Sources(
             self.stores, self.repository, build, self.identities.current_registry
