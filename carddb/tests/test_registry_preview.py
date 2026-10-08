@@ -331,7 +331,6 @@ def test_conflicting_art_uses_fail_atomically(
     original = shard.records[0]
     copy = original.model_copy(deep=True)
     copy.data["id"] = "a:" + "f" * 32
-    copy.record_key = "art:" + str(copy.data["id"])
     shard.records.append(copy)
     rewrite(path, shard)
     plan = plan_preview(registry_root, evidence(inputs), regions=("en",))

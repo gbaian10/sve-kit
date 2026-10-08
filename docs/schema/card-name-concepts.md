@@ -16,7 +16,7 @@ context_assignment 只處理真實同字異義；構築 rules_name／face_rules_
 ## 2. card_name_concept 當前格式
 
 只記需要明示的例外，存 `translations/overrides/<filing_key>/<sequence>.yaml`。
-record 六欄沿翻譯 format 2，record_key 為 `["card_name_concept",subject]` 的 canonical JSON 字串。
+record 欄位沿翻譯 format 2，origin／low_confidence 可省略為 project／false；record_key 不存檔，載入時計算為 `["card_name_concept",subject]` 的 canonical JSON 字串。
 data 恰為 `{subject,term_id,source_ref,reason}`：
 
 | 欄位 | 定義 |

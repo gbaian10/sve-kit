@@ -1,6 +1,5 @@
 """Synthetic sealed official HTML and Git inputs."""
 
-import json
 import os
 import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- isolated test Git repository for revision pin verification
@@ -120,14 +119,12 @@ def identity_record(
     match_index: int = 0,
     ordinal: int = 0,
 ) -> dict[str, JsonValue]:
-    match = page.blocks[ordinal].matches[match_index].model_dump(mode="json")
+    match = (
+        page.blocks[ordinal]
+        .matches[match_index]
+        .model_dump(mode="json", round_trip=True)
+    )
     return {
-        "record_key": json.dumps(
-            ["product_identity", page.region, match],
-            sort_keys=True,
-            ensure_ascii=False,
-            separators=(",", ":"),
-        ),
         "kind": "product_identity",
         "filing_key": page.region,
         "data": {"product_id": product_id, "region": page.region, "match": match},
@@ -143,7 +140,7 @@ def identity_record(
 
 
 def identity_envelope(records: list[dict[str, JsonValue]]) -> dict[str, JsonValue]:
-    ordered = sorted(records, key=lambda row: str(row["record_key"]))
+    ordered = records
     return {
         "product_identity_format": 1,
         "kind": "product_identity_shard",

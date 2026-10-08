@@ -46,14 +46,13 @@ Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通
 
 ## 2. 分片與來源
 
-每個身分登錄分片有 `authored_format: 1`、`kind: registry_shard` 與 `records`（`ids/index.yaml` 為 format 2，見下）。每筆 record 固定為 `record_key/kind/owner/data`；`data` 是該 kind 的資料。分片沒有決定封套：registry 只收人工確認的身分（card 另有 `identity_state`），來源更正以自身 `state` 區分 active／needs_review。確認經過由一般 PR 記錄，不在檔案內另存決定 ID、成員 hash 或核對清單。
+每個身分登錄分片有 `authored_format: 1`、`kind: registry_shard` 與 `records`（`ids/index.yaml` 為 format 2，見下）。每筆 record 固定為 `kind/owner/data`；record_key 由 kind 與 data 的永久 ID 載入時計算，不接受存檔欄位；`data` 是該 kind 的資料。分片沒有決定封套：registry 只收人工確認的身分（card 另有 `identity_state`），來源更正以自身 `state` 區分 active／needs_review。確認經過由一般 PR 記錄，不在檔案內另存決定 ID、成員 hash 或核對清單。
 
 ```yaml
 authored_format: 1
 kind: registry_shard
 records:
-  - record_key: "card:c:<32 hex>"
-    kind: card
+  - kind: card
     owner: BP01
     data:
       id: "c:<32 hex>"
@@ -83,7 +82,6 @@ ID 使用 `c:`／`f:`／`p:`／`a:`／`r:`／`x:` 加 UUIDv5 的 32 小寫 hex�
 card 的 `data` 如前例。face 的 `data` 為 `id/card_id/ordinal/side`，single 恰一個 front，double_faced 恰 front/back；一般進化前後不同種類，因此不同 card。printing 格式：
 
 ```yaml
-record_key: "printing:p:<32 hex>"
 kind: printing
 owner: BP02
 data:
@@ -345,9 +343,9 @@ F1 新增 usage=`effect_presence`，parser_version 為實際判別 parser pin；
 
 讀取掃描 `products/` 下全部 YAML，只允許上述三類路徑；`products/` 不存在、symlink、其他路徑或副檔名的 YAML 都失敗，不另存檔案清單或檔案 hash。讀取先驗全部商品分片，再作區域投影；重複 record_key／資料主鍵都失敗。商品匯入不重配 printing 整數。
 
-每個分片恰有 `product_authored_format: 1, kind: product_shard, records`；records 非空，同檔記錄只有一種 kind。每筆 record 恰有 `record_key, kind, filing_key, state, data, evidence`，可附 `note`，不接受未知欄位。所有可空欄位也須明示 null；省略不是另一種未知狀態。YAML 解析限制沿 §1。
+每個分片恰有 `product_authored_format: 1, kind: product_shard, records`；records 非空，同檔記錄只有一種 kind。每筆 record 恰有 `kind, filing_key, state, data, evidence`，可附 `note`，不接受未知欄位。所有可空欄位也須明示 null；省略不是另一種未知狀態。YAML 解析限制沿 §1。
 
-`record_key` 是主鍵陣列的 canonical JSON **字串**：family 為 `["product_family",id]`，product 為 `["product",id]`，inclusion 為 `["printing_product",printing_id,product_id]`。例如 YAML 的 `'["product_family","EXAMPLE"]'`；不用可能相撞的字串分隔符拼複合鍵。`filing_key` 必須等於路徑的該段，但不須等於 family_id。
+`record_key` 不存檔，載入時計算為主鍵陣列的 canonical JSON **字串**：family 為 `["product_family",id]`，product 為 `["product",id]`，inclusion 為 `["printing_product",printing_id,product_id]`。例如推導結果為 `'["product_family","EXAMPLE"]'`；不用可能相撞的字串分隔符拼複合鍵。`filing_key` 必須等於路徑的該段，但不須等於 family_id。
 
 ### 10.3 新定的記錄欄位與證據
 
@@ -393,7 +391,7 @@ DB 不設 product／printing_product／product_family 的 decision_id 欄。匯�
 
 region 恰為 jp/en，sequence 為只增的三位以上十進位序號。單檔大小、YAML 限制、路徑安全及新分片排序沿 §1、§10.2；不改舊分片。讀取掃描 `product-identities/` 下全部 YAML，只允許本表路徑；目錄不存在、其他路徑或副檔名的 YAML、未知格式／欄位、重複鍵均拒絕。先驗全區分片與全部證據，再作建置地區投影。
 
-每筆 record 恰有 `record_key, kind, filing_key, data, evidence`；kind 固定 `product_identity`，filing_key 等於路徑與 data.region。data 恰有 `product_id, region, match`；不含 name/date/family_id/product_type 或收錄。record_key 是 `["product_identity",region,match]` 的 §2 canonical JSON **字串**，match 為下節完整物件；不含 product_id，讓同一識別線索不能另配 ID 繞過重複鍵檢查。
+每筆 record 恰有 `kind, filing_key, data, evidence`；kind 固定 `product_identity`，filing_key 等於路徑與 data.region。data 恰有 `product_id, region, match`；不含 name/date/family_id/product_type 或收錄。record_key 不存檔，載入時計算為 `["product_identity",region,match]` 的 §2 canonical JSON **字串**，match 為下節完整物件；不含 product_id，讓同一識別線索不能另配 ID 繞過重複鍵檢查。
 
 同一 `(region,match)` 全域只允許一筆記錄，即使目標 ID 相同也不能重複；同一 product_id 可以有多筆不同 match，但 region 必須一致。product_id 與 §10 人工 product 共用全域身分命名空間：同 ID 必須指同區同商品，不能另作配號池。對照記錄不是 product 父列；沒有正式商品內容與來源仍不得填 FK。
 

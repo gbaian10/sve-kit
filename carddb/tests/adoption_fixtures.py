@@ -16,7 +16,7 @@ from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.adoption_importer import AdoptionInputs
 from sve_carddb.catalog.adoption_loader import load_adoptions
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import canonical, digest, object_value
+from sve_carddb.snapshot.values import canonical, digest
 
 if TYPE_CHECKING:
     from sve_carddb.catalog.adoption_loader import Entry
@@ -72,7 +72,6 @@ def record(
     kind: str, subject: dict[str, JsonValue], value: JsonValue
 ) -> dict[str, JsonValue]:
     return {
-        "record_key": canonical([kind, subject]).decode(),
         "kind": kind,
         "data": {"subject": subject, "value": value},
         "origin": "project",
@@ -87,7 +86,7 @@ def envelope(
     return {
         prefix + "_format": 2,
         "kind": prefix + "_shard",
-        "records": sorted(records, key=lambda r: str(object_value(r)["record_key"])),
+        "records": records,
     }
 
 
@@ -147,7 +146,7 @@ def make_case(root: Path) -> Case:
     revision = commit(root)
     context = BuildContext.from_inputs(revision, {})
     review: dict[str, JsonValue] = {
-        "context": context.model_dump(mode="json"),
+        "context": context.model_dump(mode="json", round_trip=True),
         "source_batches": [],
     }
     config: dict[str, JsonValue] = {"unicode_version": unicodedata.unidata_version}

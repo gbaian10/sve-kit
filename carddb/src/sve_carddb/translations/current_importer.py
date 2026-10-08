@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.build_inputs import input_record, insert_raw_sources
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
-from sve_carddb.translations.current_models import ChoiceRecord, TermRecord
+from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.translations.current_models import ChoiceRecord, Shard, TermRecord
 from sve_carddb.translations.importer import validate_choice
 from sve_carddb.translations.sources import Sources
 
@@ -39,8 +39,8 @@ def authored_sources(db: Database, snapshot: Snapshot, revision: str) -> dict[st
             },
             ("id",),
         )
-        for raw_record in array(object_value(parse(content))["records"]):
-            result[str(object_value(raw_record)["record_key"])] = identifier
+        for record in Shard.model_validate_json(content).records:
+            result[record.record_key] = identifier
     return result
 
 

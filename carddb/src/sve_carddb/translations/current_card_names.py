@@ -18,7 +18,6 @@ from sve_carddb.translations.current_models import (
     Shard,
     TermData,
     TermRecord,
-    key,
 )
 from sve_carddb.translations.loader import Snapshot
 from sve_carddb.translations.models import AuthoredValue, SourceClaim
@@ -71,7 +70,6 @@ def prepare(  # ruff: ignore[complex-structure] -- independent permanent key, ex
         if not c.text.strip():
             raise ValueError("Card-name translation must be nonblank")
         term = TermRecord(
-            record_key="pending",
             kind="glossary_term",
             data=TermData(
                 id="term:" + c.concept_key,
@@ -87,7 +85,6 @@ def prepare(  # ruff: ignore[complex-structure] -- independent permanent key, ex
             note=c.note,
         )
         choice = ChoiceRecord(
-            record_key="pending",
             kind="glossary_choice",
             data=ChoiceData(
                 term_id=term.data.id,
@@ -100,12 +97,7 @@ def prepare(  # ruff: ignore[complex-structure] -- independent permanent key, ex
             low_confidence=c.low_confidence,
             note=c.note,
         )
-        records.extend(
-            (
-                term.model_copy(update={"record_key": key(term)}),
-                choice.model_copy(update={"record_key": key(choice)}),
-            )
-        )
+        records.extend((term, choice))
     # Split record kinds for the existing filing contract; no batch decision is required.
     output = []
     for kind in ("glossary_term", "glossary_choice"):

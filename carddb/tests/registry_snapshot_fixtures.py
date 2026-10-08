@@ -67,7 +67,10 @@ def registry_template(tmp_path_factory: pytest.TempPathFactory) -> RegistryTempl
     root = build_registry_root(inputs, tmp_path_factory.mktemp("registry-template"))
     return RegistryTemplate(
         freeze_files(root),
-        tuple(value.model_dump_json() for value in inputs.decisions.corrections),
+        tuple(
+            value.model_dump_json(round_trip=True)
+            for value in inputs.decisions.corrections
+        ),
     )
 
 

@@ -39,9 +39,6 @@ ABSENT = "sha256:" + "0" * 64
 
 def pending(normalized_hash: str = ABSENT, role: Role = "body") -> CandidateRecord:
     return CandidateRecord(
-        record_key=canonical(
-            ["template_translation_candidate", "effect", "old-draft", "zh-Hant"]
-        ).decode(),
         kind="template_translation_candidate",
         data=Candidate(
             source_kind="effect",
@@ -62,7 +59,7 @@ def wire(record: CandidateRecord) -> dict[str, JsonValue]:
     return {
         "translation_authored_format": 2,
         "kind": "translation_shard",
-        "records": [record.model_dump(mode="json")],
+        "records": [record.model_dump(mode="json", round_trip=True)],
     }
 
 
@@ -143,13 +140,10 @@ def test_candidate_dedicated_path_is_checked_by_both_readers(
     ):
         validate_foreign("translations/templates/template_translation/001.yaml", raw)
     mixed = wire(record)
-    mixed["records"] = sorted(
-        [
-            record.model_dump(mode="json"),
-            current_case.inputs.records[0].model_dump(mode="json"),
-        ],
-        key=lambda row: str(object_value(row)["record_key"]),
-    )
+    mixed["records"] = [
+        record.model_dump(mode="json", round_trip=True),
+        current_case.inputs.records[0].model_dump(mode="json", round_trip=True),
+    ]
     with pytest.raises(
         ValueError,
         match=r"^Current template candidates require their dedicated shard area$",

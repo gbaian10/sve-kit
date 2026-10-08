@@ -146,7 +146,9 @@ def frozen(  # ruff: ignore[too-many-locals] -- two sealed language sources shar
         r for r in refs if "lang=cht" in sources.descriptor(r.source_version_id).url
     )
     definition = term()
-    object_value(definition["data"])["source_ref"] = ja.model_dump(mode="json")
+    object_value(definition["data"])["source_ref"] = ja.model_dump(
+        mode="json", round_trip=True
+    )
     selected = choice(value="合成乙")
     data = object_value(selected["data"])
     selected["origin"] = "official"
@@ -155,8 +157,8 @@ def frozen(  # ruff: ignore[too-many-locals] -- two sealed language sources shar
             "kind": "dictionary_entry",
             "dictionary_kind": "skill_names",
             "entry_key": "1",
-            "jp_ref": ja.model_dump(mode="json"),
-            "target_ref": zh.model_dump(mode="json"),
+            "jp_ref": ja.model_dump(mode="json", round_trip=True),
+            "target_ref": zh.model_dump(mode="json", round_trip=True),
             "concept_note": "Same synthetic dictionary key.",
         }
     ]
@@ -279,7 +281,7 @@ def test_source_and_concept_guards_are_independent(
     record = next(
         r for r in inputs.load().current_records() if isinstance(r, ChoiceRecord)
     )
-    content = record.model_dump(mode="json")
+    content = record.model_dump(mode="json", round_trip=True)
     data = object_value(content["data"])
     evidence = object_value(array(data["concept_evidence"])[0])
     if fault == "same_concept":
@@ -367,15 +369,15 @@ def test_digital_name_requires_exact_adopted_face(
         "kind": "digital_name",
         "digital_face_id": "digital:svwb:22345678:normal",
         "sve_owner": "front",
-        "jp_ref": ja.model_dump(mode="json"),
-        "target_ref": zh.model_dump(mode="json"),
+        "jp_ref": ja.model_dump(mode="json", round_trip=True),
+        "target_ref": zh.model_dump(mode="json", round_trip=True),
     }
     if fault == "wrong_face":
         evidence["digital_face_id"] = "digital:svwb:22345678:evolved"
     if fault == "alias_field":
         evidence["target_ref"] = zh.model_copy(
             update={"locator": "/data/card_details/22345678/common/alias"}
-        ).model_dump(mode="json")
+        ).model_dump(mode="json", round_trip=True)
     data["concept_evidence"] = [evidence]
     record = ChoiceRecord.model_validate_json(canonical(content))
     with importer_template.copy() as db:
@@ -450,8 +452,8 @@ def test_effect_excerpt_has_exact_role_and_concept(
     )
     evidence: dict[str, JsonValue] = {
         "kind": "effect_term",
-        "jp_ref": ja.model_dump(mode="json"),
-        "target_ref": zh.model_dump(mode="json"),
+        "jp_ref": ja.model_dump(mode="json", round_trip=True),
+        "target_ref": zh.model_dump(mode="json", round_trip=True),
         "jp_span": {"start": 1, "end": 4},
         "target_span": {"start": 1, "end": 4},
         "concept_note": "Synthetic adopted excerpt alignment.",
@@ -459,7 +461,7 @@ def test_effect_excerpt_has_exact_role_and_concept(
     if fault == "dictionary_field":
         evidence["jp_ref"] = next(
             r for r in frozen.refs if r.text_hash == digest("合成甲".encode())
-        ).model_dump(mode="json")
+        ).model_dump(mode="json", round_trip=True)
         evidence["jp_span"] = {"start": 0, "end": 3}
     elif fault == "outside_span":
         evidence["target_span"] = {"start": 1, "end": 6}
@@ -516,7 +518,7 @@ def test_immutable_authored_and_atomic_projection(
         name = "translations/glossary/concepts/001.yaml"
         record = object_value(array(shards[name]["records"])[0])
         object_value(record["data"])["source_ref"] = frozen.refs[1].model_dump(
-            mode="json"
+            round_trip=True, mode="json"
         )
         shards[name] = envelope([record])
         message = "Glossary concept requires exact Japanese source"
@@ -553,7 +555,7 @@ def test_choice_source_matches_adopted_evidence(
         .current_records()
         if isinstance(r, ChoiceRecord)
     )
-    content = record.model_dump(mode="json")
+    content = record.model_dump(mode="json", round_trip=True)
     data = object_value(content["data"])
     ref = frozen.refs[1]
     if fault == "language":
@@ -569,10 +571,10 @@ def test_choice_source_matches_adopted_evidence(
     else:
         object_value(array(data["concept_evidence"])[0])["jp_ref"] = frozen.refs[
             1
-        ].model_dump(mode="json")
+        ].model_dump(mode="json", round_trip=True)
     data["value"] = {
         "kind": "source",
-        "source_ref": ref.model_dump(mode="json"),
+        "source_ref": ref.model_dump(mode="json", round_trip=True),
         "span": {"start": 1, "end": 4} if fault == "outside_evidence" else None,
     }
     with (

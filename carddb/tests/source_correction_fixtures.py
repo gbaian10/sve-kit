@@ -42,6 +42,7 @@ def make_correction_case(  # ruff: ignore[too-many-arguments] -- explicit before
     state: str = "active",
     corrected: str | None = None,
     raw_type: str = "Spell",
+    reason: str = "Synthetic source transcription correction",
 ) -> CorrectionCase:
     number = "BP02-071" if region == "jp" else "BP02-070EN"
     original = (inputs.jp if region == "jp" else inputs.en)[number].faces[0]
@@ -72,7 +73,7 @@ def make_correction_case(  # ruff: ignore[too-many-arguments] -- explicit before
             image_sha256=digest(RAW_IMAGE),
             locator="Synthetic field box",
             state=state,
-            reason="Synthetic source transcription correction",
+            reason=reason,
         )
     ]
     case = make_case(root / "authored", inputs)

@@ -1,10 +1,7 @@
 catalog_adoption_format: 2
 kind: catalog_adoption_shard
 records:
-  - record_key: '["language_adoption",{"code":"en"}]'
-    origin: project
-    low_confidence: false
-    kind: language_adoption
+  - kind: language_adoption
     data:
       subject:
         code: en
@@ -12,10 +9,7 @@ records:
         display_name: English
         fallback_order:
           - ja
-  - record_key: '["language_adoption",{"code":"ja"}]'
-    origin: project
-    low_confidence: false
-    kind: language_adoption
+  - kind: language_adoption
     data:
       subject:
         code: ja
@@ -23,10 +17,7 @@ records:
         display_name: 日本語
         fallback_order:
           - en
-  - record_key: '["language_adoption",{"code":"zh-Hant"}]'
-    origin: project
-    low_confidence: false
-    kind: language_adoption
+  - kind: language_adoption
     data:
       subject:
         code: zh-Hant

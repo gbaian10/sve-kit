@@ -1,10 +1,7 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["glossary_choice","term:name.mitsuki","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.mitsuki
       lang: zh-Hant
@@ -16,10 +13,7 @@ records:
         source_work: Princess Connect Re Dive
         source_urls:
           - https://github.com/Expugn/priconne-database
-  - record_key: '["glossary_choice","term:name.miu_yaguchi","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.miu_yaguchi
       lang: zh-Hant
@@ -30,10 +24,7 @@ records:
       source_claim:
         source_work: Shadowverse or collaboration names
         source_urls: []
-  - record_key: '["glossary_choice","term:name.miyako","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.miyako
       lang: zh-Hant
@@ -45,10 +36,7 @@ records:
         source_work: Princess Connect Re Dive
         source_urls:
           - https://github.com/Expugn/priconne-database
-  - record_key: '["glossary_choice","term:name.miyu_mifune_parfum_g_ranium","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.miyu_mifune_parfum_g_ranium
       lang: zh-Hant
@@ -60,10 +48,7 @@ records:
         source_work: Shadowverse or collaboration names
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.miyu_mifune_rouge_couture","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.miyu_mifune_rouge_couture
       lang: zh-Hant
@@ -75,10 +60,7 @@ records:
         source_work: Shadowverse or collaboration names
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.mizuki_kawashima","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.mizuki_kawashima
       lang: zh-Hant
@@ -90,9 +72,7 @@ records:
         source_work: The Idolmaster Cinderella Girls
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.mizuki_kawashima_ambivalent_act","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.mizuki_kawashima_ambivalent_act
@@ -105,9 +85,7 @@ records:
         source_work: The Idolmaster Cinderella Girls
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.mode_estivale","zh-Hant"]'
-    origin: project
-    low_confidence: true
+  - low_confidence: true
     kind: glossary_choice
     data:
       term_id: term:name.mode_estivale
@@ -119,9 +97,7 @@ records:
       source_claim:
         source_work: The Idolmaster Cinderella Girls
         source_urls: []
-  - record_key: '["glossary_choice","term:name.momo_a_new_adventure","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.momo_a_new_adventure
@@ -130,9 +106,7 @@ records:
         kind: authored
         text: 嶄新的啟程‧小桃
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.momoka_sakurai","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.momoka_sakurai
@@ -141,9 +115,7 @@ records:
         kind: authored
         text: 櫻井桃華
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.monochromatic_destruction","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.monochromatic_destruction
@@ -152,10 +124,7 @@ records:
         kind: authored
         text: 白之章‧黑之章
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.mr_c_b","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.mr_c_b
       lang: zh-Hant
@@ -167,8 +136,7 @@ records:
         source_work: Shadowverse or collaboration names
         source_urls:
           - https://gametora.com/zh-tw/umamusume/characters
-  - record_key: '["glossary_choice","term:name.ms_tart_man","zh-Hant"]'
-    origin: machine
+  - origin: machine
     low_confidence: true
     kind: glossary_choice
     data:
@@ -178,10 +146,7 @@ records:
         kind: authored
         text: 木桶子超人
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.muimi","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.muimi
       lang: zh-Hant
@@ -193,9 +158,7 @@ records:
         source_work: Princess Connect Re Dive
         source_urls:
           - https://github.com/Expugn/priconne-database
-  - record_key: '["glossary_choice","term:name.my_life_my_sounds","zh-Hant"]'
-    origin: project
-    low_confidence: true
+  - low_confidence: true
     kind: glossary_choice
     data:
       term_id: term:name.my_life_my_sounds
@@ -207,10 +170,7 @@ records:
       source_claim:
         source_work: The Idolmaster Cinderella Girls
         source_urls: []
-  - record_key: '["glossary_choice","term:name.my_solo_drawn_to_raindrop_drums","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.my_solo_drawn_to_raindrop_drums
       lang: zh-Hant
@@ -222,10 +182,7 @@ records:
         source_work: Uma Musume
         source_urls:
           - https://gametora.com/zh-tw/umamusume/supports
-  - record_key: '["glossary_choice","term:name.nagi_hisakawa","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.nagi_hisakawa
       lang: zh-Hant
@@ -237,9 +194,7 @@ records:
         source_work: The Idolmaster Cinderella Girls
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.nagi_hisakawa_everyday_fairy_tale","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.nagi_hisakawa_everyday_fairy_tale
@@ -252,10 +207,7 @@ records:
         source_work: Shadowverse or collaboration names
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.nakayama_festa","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.nakayama_festa
       lang: zh-Hant
@@ -267,10 +219,7 @@ records:
         source_work: Uma Musume
         source_urls:
           - https://gametora.com/zh-tw/umamusume/characters
-  - record_key: '["glossary_choice","term:name.nana_abe","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.nana_abe
       lang: zh-Hant
@@ -282,10 +231,7 @@ records:
         source_work: The Idolmaster Cinderella Girls
         source_urls:
           - https://forum.gamer.com.tw/C.php?bsn=29330&snA=20394
-  - record_key: '["glossary_choice","term:name.nana_abe_cinderella_girl","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.nana_abe_cinderella_girl
       lang: zh-Hant
@@ -297,10 +243,7 @@ records:
         source_work: Shadowverse or collaboration names
         source_urls:
           - https://forum.gamer.com.tw/C.php?bsn=29330&snA=20394
-  - record_key: '["glossary_choice","term:name.nanaka","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.nanaka
       lang: zh-Hant
@@ -312,10 +255,7 @@ records:
         source_work: Princess Connect Re Dive
         source_urls:
           - https://github.com/Expugn/priconne-database
-  - record_key: '["glossary_choice","term:name.nao_kamiya","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.nao_kamiya
       lang: zh-Hant
@@ -327,9 +267,7 @@ records:
         source_work: The Idolmaster Cinderella Girls
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.nao_kamiya_over_the_rainbow","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.nao_kamiya_over_the_rainbow

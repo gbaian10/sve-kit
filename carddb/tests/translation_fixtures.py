@@ -33,7 +33,6 @@ def term(
     identifier: str = "rule.test", *, category: str = "rule_term"
 ) -> dict[str, JsonValue]:
     return {
-        "record_key": canonical(["glossary_term", "term:" + identifier]).decode(),
         "kind": "glossary_term",
         "origin": "project",
         "low_confidence": False,
@@ -54,9 +53,6 @@ def choice(
     identifier: str = "rule.test", *, value: JsonValue = "同名"
 ) -> dict[str, JsonValue]:
     return {
-        "record_key": canonical(
-            ["glossary_choice", "term:" + identifier, "zh-Hant"]
-        ).decode(),
         "kind": "glossary_choice",
         "origin": "project",
         "low_confidence": False,
@@ -72,7 +68,7 @@ def choice(
 
 
 def envelope(records: list[dict[str, JsonValue]]) -> dict[str, JsonValue]:
-    ordered = sorted(records, key=lambda record: str(record["record_key"]))
+    ordered = records
     return {
         "translation_authored_format": 2,
         "kind": "translation_shard",

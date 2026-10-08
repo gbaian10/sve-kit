@@ -1,10 +1,7 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["glossary_choice","term:trait.draconic_duelist","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.draconic_duelist
       lang: zh-Hant
@@ -12,10 +9,7 @@ records:
         kind: authored
         text: 武鬥龍人
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.dragonewt","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.dragonewt
       lang: zh-Hant
@@ -23,10 +17,7 @@ records:
         kind: authored
         text: 龍人
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.dragonheart","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.dragonheart
       lang: zh-Hant
@@ -34,10 +25,7 @@ records:
         kind: authored
         text: 馭龍使
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.dragons_nest","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.dragons_nest
       lang: zh-Hant
@@ -50,9 +38,7 @@ records:
         source_urls:
           - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:trait.earth_sigil","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:trait.earth_sigil
@@ -82,10 +68,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/27
             text_hash: sha256:e5cb358c714c3e691b0d7678174068eb180d495367e9d0a9b44b5a64ab101cec
-  - record_key: '["glossary_choice","term:trait.eidolon","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.eidolon
       lang: zh-Hant
@@ -93,10 +76,7 @@ records:
         kind: authored
         text: 偶像
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.elf","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.elf
       lang: zh-Hant
@@ -104,10 +84,7 @@ records:
         kind: authored
         text: 精靈族
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.elizabeth_park","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.elizabeth_park
       lang: zh-Hant
@@ -121,9 +98,7 @@ records:
           - https://www.princessconnect.so-net.tw/role
           - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:trait.encroacher","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:trait.encroacher
@@ -153,10 +128,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/tribe_names/19
             text_hash: sha256:8472ffffdaecacee21859eec1d235c392d7aa08bd768975e967ab7a70a1935a3
-  - record_key: '["glossary_choice","term:trait.fable","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.fable
       lang: zh-Hant
@@ -164,10 +136,7 @@ records:
         kind: authored
         text: 童話
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.fae_touched","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.fae_touched
       lang: zh-Hant
@@ -175,9 +144,7 @@ records:
         kind: authored
         text: 精靈
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.faith","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:trait.faith
@@ -207,10 +174,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/39
             text_hash: sha256:3e2b0c578db1df14d82fa1251782e12a63945ddc6ac13cd23dcc3506c9640fbf
-  - record_key: '["glossary_choice","term:trait.fallen_angel","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.fallen_angel
       lang: zh-Hant
@@ -218,10 +182,7 @@ records:
         kind: authored
         text: 墮天使
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.festive","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.festive
       lang: zh-Hant
@@ -233,10 +194,7 @@ records:
         source_work: Shadowverse
         source_urls: []
         claimed_source: 數位版 sv1 的繁中術語主張
-  - record_key: '["glossary_choice","term:trait.fiend","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.fiend
       lang: zh-Hant
@@ -244,10 +202,7 @@ records:
         kind: authored
         text: 惡魔
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.forbidden","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.forbidden
       lang: zh-Hant
@@ -255,10 +210,7 @@ records:
         kind: authored
         text: 禁忌
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.forestier","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.forestier
       lang: zh-Hant
@@ -272,10 +224,7 @@ records:
           - https://www.princessconnect.so-net.tw/role
           - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:trait.friendship_club","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.friendship_club
       lang: zh-Hant
@@ -288,10 +237,7 @@ records:
         source_urls:
           - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:trait.geo_gehenna","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.geo_gehenna
       lang: zh-Hant
@@ -304,10 +250,7 @@ records:
         source_urls:
           - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:trait.geo_niflhel","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.geo_niflhel
       lang: zh-Hant
@@ -320,10 +263,7 @@ records:
         source_urls:
           - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:trait.geo_theogonia","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.geo_theogonia
       lang: zh-Hant
@@ -336,10 +276,7 @@ records:
         source_urls:
           - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:trait.gigant","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.gigant
       lang: zh-Hant
@@ -347,10 +284,7 @@ records:
         kind: authored
         text: 巨人
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.goblinoid","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.goblinoid
       lang: zh-Hant
@@ -358,9 +292,7 @@ records:
         kind: authored
         text: 哥布林
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.golem","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:trait.golem

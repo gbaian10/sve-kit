@@ -9,7 +9,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    JsonValue,
+    computed_field,
+    model_validator,
+)
 from ruamel.yaml import YAML
 
 from sve_carddb.registry.allocation import (
@@ -31,7 +38,6 @@ TARGET_BYTES = 524_288
 
 class Entry(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
-    record_key: str
     kind: Literal[
         "card",
         "face",
@@ -44,6 +50,19 @@ class Entry(BaseModel):
     ]
     owner: str
     data: dict[str, JsonValue]
+
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        identity = (
+            "printing_id"
+            if self.kind == "card_int_id"
+            else "card_id"
+            if self.kind == "region_mapping_review"
+            else "id"
+        )
+        return self.kind + ":" + _text(self.data, identity)
 
 
 class Shard(BaseModel):
@@ -110,8 +129,12 @@ def _empty_defaults(value: object) -> OmittedFields:
         omitted: dict[str, bool | OmittedFields] = {}
         for name, info in type(value).model_fields.items():
             item = getattr(value, name)
-            empty_default = info.default is None or (
-                isinstance(info.default, str) and not info.default
+            # Only these three names extend empty-default omission to keep other defaults explicit.
+            # A value must match its declared default and type to preserve the model's meaning.
+            empty_default = (
+                (name in {"origin", "low_confidence", "missing_source_reason"})
+                or info.default is None
+                or (isinstance(info.default, str) and not info.default)
             )
             if (
                 not info.is_required()
@@ -140,8 +163,11 @@ def encode(model: BaseModel) -> bytes:
     yaml.width = 1000
     yaml.indent(mapping=2, sequence=4, offset=2)
     stream = io.StringIO()
-    # Only empty optional values are omitted; other defaults can be required wire fields.
-    yaml.dump(model.model_dump(mode="json", exclude=_empty_defaults(model)), stream)
+    # Required nulls remain meaningful; only declared optional defaults are omitted.
+    yaml.dump(
+        model.model_dump(mode="json", round_trip=True, exclude=_empty_defaults(model)),
+        stream,
+    )
     return stream.getvalue().encode()
 
 
@@ -216,7 +242,7 @@ def read_base_files(root: Path) -> RegistryFiles:
                 file.relative_to(root).as_posix(),
                 "sha256:" + hashlib.sha256(content).hexdigest(),
                 content,
-                shard.model_dump_json().encode(),
+                shard.model_dump_json(round_trip=True).encode(),
                 file.read_bytes(),
             )
         )
@@ -296,7 +322,9 @@ _ANCHORS = {
 
 def _text(data: dict[str, JsonValue], key: str) -> str:
     value = data.get(key)
-    return value if isinstance(value, str) else ""
+    if not isinstance(value, str):
+        raise ValueError(f"Registry field {key} must be a string")  # ruff: ignore[type-check-without-type-error] -- invalid authored fields use the registry's ValueError boundary
+    return value
 
 
 def _area(entry: Entry) -> str:

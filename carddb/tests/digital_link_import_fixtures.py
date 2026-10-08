@@ -87,8 +87,8 @@ class Fixture:
                         "public_code": "LINKFIXTURE",
                     },
                 )
-            db.insert("card", self.card.model_dump(mode="json"))
-            db.insert("face", self.face.model_dump(mode="json"))
+            db.insert("card", self.card.model_dump(mode="json", round_trip=True))
+            db.insert("face", self.face.model_dump(mode="json", round_trip=True))
             source = self.sources().text(self.jp)[2]
             insert_raw_sources(db, (source,))
             unit = TextInterner(db).intern(
@@ -125,8 +125,8 @@ class Fixture:
             )
 
             for index, (card, face, _, ref) in enumerate(self.others, 1):
-                db.insert("card", card.model_dump(mode="json"))
-                db.insert("face", face.model_dump(mode="json"))
+                db.insert("card", card.model_dump(mode="json", round_trip=True))
+                db.insert("face", face.model_dump(mode="json", round_trip=True))
                 source = self.sources().text(ref)[2]
                 insert_raw_sources(db, (source,))
                 primary = next(
@@ -319,7 +319,9 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
     for provider in ("jp", "svwb"):
         parser = "translation-" + provider + "-v1"
         recipes[parser] = {"version": parser, "config": {"provider": provider}}
-    refs = sorted(refs, key=lambda r: canonical(r.model_dump(mode="json")))
+    refs = sorted(
+        refs, key=lambda r: canonical(r.model_dump(mode="json", round_trip=True))
+    )
     config.update(
         configuration(
             tuple(refs),
@@ -335,7 +337,7 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
         {
             "printing_id": printing.id,
             "face_id": face.id,
-            "name_ref": jp.model_dump(mode="json"),
+            "name_ref": jp.model_dump(mode="json", round_trip=True),
         }
     ]
     value["digital_names"] = sorted(
@@ -345,7 +347,7 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
                 "lang": "ja"
                 if "lang=ja" in frozen.descriptor(ref.source_version_id).url
                 else "zh-Hant",
-                "name_ref": ref.model_dump(mode="json"),
+                "name_ref": ref.model_dump(mode="json", round_trip=True),
             }
             for ref in refs
         ],
@@ -362,7 +364,7 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
             {
                 "printing_id": other_printing.id,
                 "face_id": other_face.id,
-                "name_ref": other_ref.model_dump(mode="json"),
+                "name_ref": other_ref.model_dump(mode="json", round_trip=True),
             }
         ]
         for digital_name in array(other_value["digital_names"]):
@@ -458,7 +460,9 @@ def current_api(  # ruff: ignore[too-many-locals] -- synthetic resealing preserv
                     )
                 )
                 break
-    refs = sorted(refs, key=lambda r: canonical(r.model_dump(mode="json")))
+    refs = sorted(
+        refs, key=lambda r: canonical(r.model_dump(mode="json", round_trip=True))
+    )
     config.update(configuration(tuple(refs), (("svwb", "22345678"),)))
     return replace(
         fixture, store=store.root, refs=tuple(refs), build=fixture.changed(config)

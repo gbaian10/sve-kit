@@ -140,7 +140,9 @@ def test_official_snapshot_preserves_all_allocations_and_nine_corrections(
         for r in corrections
     )
     for record in corrections:
-        assert record.entry().data == record.data.model_dump(mode="json")
+        assert record.entry().data == record.data.model_dump(
+            mode="json", round_trip=True
+        )
     assert before == {p: hashlib.sha256(p.read_bytes()).digest() for p in paths}
 
 

@@ -79,8 +79,9 @@ def test_current_file_boundary_guards(case: Case, mutation: str) -> None:
         message = "integer two"
         write(case.root, path.relative_to(case.root).as_posix(), raw)
     else:
-        message = "key or area mismatch"
+        message = "area mismatch"
         if mutation == "key":
+            message = "Invalid current catalog fields"
             row["record_key"] = "wrong"
             write(case.root, path.relative_to(case.root).as_posix(), raw)
         else:

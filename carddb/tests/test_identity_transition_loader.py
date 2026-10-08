@@ -31,6 +31,7 @@ from .identity_transition_fixtures import (
     checksum,
     entry,
     pack,
+    record_key,
     reference,
     renewal,
     wire,
@@ -80,7 +81,9 @@ def test_read_only_supported_shapes(
     assert files.shards[0].content_hash == checksum(shards[0])
     assert files.shards[0].content == wire(shards[0])
     assert files.shards[0].exact_content == wire(shards[0])
-    assert files.shards[0].envelope().model_dump(mode="json") == shards[0]
+    assert (
+        files.shards[0].envelope().model_dump(mode="json", round_trip=True) == shards[0]
+    )
     detached = files.shards[0].envelope().records[0].updates[0].after
     assert detached is not None
     detached.data.clear()
@@ -305,7 +308,6 @@ def test_one_transition_per_shard_without_decision_envelope(
 @pytest.mark.parametrize(
     "path",
     [
-        ["record_key"],
         ["kind"],
         ["action"],
         ["reverts"],
@@ -651,7 +653,7 @@ def new_card(anchor: str) -> dict[str, Any]:
         {"layout": "single", "identity_state": "confirmed", "home_set_id": "EXAMPLE"},
     )
     return {
-        "target_key": card["record_key"],
+        "target_key": record_key(card),
         "before": None,
         "after": card,
         "allocation_anchor": anchor,
@@ -668,7 +670,7 @@ def test_allocation_recipe_and_never_reuse(
     record["updates"] = [new_card("synthetic-card")]
     if damage == "id":
         record["updates"][0]["after"]["data"]["id"] = A
-        record["updates"][0]["after"]["record_key"] = "card:" + A
+
         record["updates"][0]["target_key"] = "card:" + A
     shards = chain([record])
     if damage in {"anchor", "key"}:
@@ -703,7 +705,7 @@ def test_allocation_anchor_cannot_be_reused_for_a_different_kind(
     face = entry("face", face_id, {"card_id": A, "ordinal": 0, "side": "front"})
     face_record["updates"] = [
         {
-            "target_key": face["record_key"],
+            "target_key": record_key(face),
             "before": None,
             "after": face,
             "allocation_anchor": anchor,
@@ -746,7 +748,7 @@ def test_revert_action_guard_independently_of_repairs(
     target = target.model_copy(update={"records": (target_record,)})
     target_ref = Reference(
         record_key=target_record.record_key,
-        record_hash=checksum(target_record.model_dump(mode="json")),
+        record_hash=checksum(target_record.model_dump(mode="json", round_trip=True)),
     )
     revert = target_record.model_copy(update={"repairs": (), "reverts": target_ref})
     with pytest.raises(

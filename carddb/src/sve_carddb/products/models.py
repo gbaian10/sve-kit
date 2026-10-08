@@ -2,10 +2,11 @@
 
 from typing import Annotated, Literal
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, computed_field, field_validator, model_validator
 
 from sve_carddb.build_db.domains import CODE, DATE, INSTANT, LANG
 from sve_carddb.registry.records import Hash, PrintingId, RecordData, Region, Text
+from sve_carddb.snapshot.values import canonical
 
 Code = Annotated[str, Field(pattern="^" + CODE + r"\Z")]
 Lang = Annotated[str, Field(pattern="^" + LANG + r"\Z")]
@@ -102,7 +103,6 @@ class Evidence(RecordData):
 
 
 class _Record(RecordData):
-    record_key: Text
     filing_key: Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]+\Z")]
     # Proposed records stay candidates; only confirmed ones are projected.
     state: Literal["proposed", "confirmed"]
@@ -114,6 +114,12 @@ class FamilyRecord(_Record):
     kind: Literal["product_family"]
     data: FamilyData
 
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical([self.kind, self.data.id]).decode()
+
 
 class AuthoredProductData(ProductData):
     product_type: Code
@@ -123,10 +129,24 @@ class ProductRecord(_Record):
     kind: Literal["product"]
     data: AuthoredProductData
 
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical([self.kind, self.data.id]).decode()
+
 
 class InclusionRecord(_Record):
     kind: Literal["printing_product"]
     data: InclusionData
+
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical(
+            [self.kind, self.data.printing_id, self.data.product_id]
+        ).decode()
 
 
 CatalogRecord = Annotated[

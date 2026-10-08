@@ -1,7 +1,6 @@
 """Synthetic product catalogs and isolated edit helpers."""
 
 import io
-import json
 from typing import TYPE_CHECKING
 
 import pytest
@@ -39,7 +38,6 @@ def family(
     return {
         "kind": "product_family",
         "filing_key": identifier,
-        "record_key": json.dumps(["product_family", identifier], separators=(",", ":")),
         "state": "confirmed",
         "data": {
             "id": identifier,
@@ -65,7 +63,6 @@ def product(*, region: str = "jp") -> Object:
     return {
         "kind": "product",
         "filing_key": "unassigned",
-        "record_key": '["product","example"]',
         "state": "confirmed",
         "data": {
             "id": "example",
@@ -86,9 +83,6 @@ def inclusion(printing_id: str) -> Object:
     return {
         "kind": "printing_product",
         "filing_key": "unassigned",
-        "record_key": json.dumps(
-            ["printing_product", printing_id, "example"], separators=(",", ":")
-        ),
         "state": "confirmed",
         "data": {
             "printing_id": printing_id,

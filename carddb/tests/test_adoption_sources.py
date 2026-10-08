@@ -76,7 +76,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> tuple[Case, Path, str]
         {"catalog_source_recipes": {"exact-json-v1": recipe}},
     )
     review: dict[str, JsonValue] = {
-        "context": context.model_dump(mode="json"),
+        "context": context.model_dump(mode="json", round_trip=True),
         "source_batches": [{"batch_id": sealed.batch_id}],
     }
 
@@ -238,9 +238,6 @@ def test_source_single_guard_rejection(
             if mutation == "trait"
             else "frame"
         )
-        member["record_key"] = canonical(
-            ["vocabulary_adoption", data["subject"]]
-        ).decode()
     elif mutation == "half_raw":
         mapping["raw"] = "Synthetic source"
     else:

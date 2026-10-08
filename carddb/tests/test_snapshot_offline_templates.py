@@ -117,7 +117,7 @@ def sources(tmp_path_factory: pytest.TempPathFactory) -> Templates:
         "translations/templates/current/001.yaml": {
             "translation_authored_format": 2,
             "kind": "translation_shard",
-            "records": [r.model_dump(mode="json") for r in records],
+            "records": [r.model_dump(mode="json", round_trip=True) for r in records],
         },
     }
     _write(repo, files)
@@ -153,9 +153,6 @@ def translation(definition: DefinitionRecord) -> TranslationRecord:
         else "抽{{" + number + "}}張卡。"
     )
     return TranslationRecord(
-        record_key=canonical(
-            ["template_translation", definition.data.id, "zh-Hant"]
-        ).decode(),
         kind="template_translation",
         data=Translation(template_id=definition.data.id, lang="zh-Hant", text=text),
         origin="machine",

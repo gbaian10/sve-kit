@@ -98,7 +98,6 @@ def printing(pid: str, cid: str, fid: str, number: str) -> dict[str, Any]:
 
 def review(cid: str, printings: list[dict[str, Any]]) -> dict[str, Any]:
     return {
-        "record_key": "region_mapping_review:" + cid,
         "kind": "region_mapping_review",
         "owner": "EXAMPLE",
         "data": {
@@ -148,7 +147,6 @@ def seed() -> list[dict[str, Any]]:
         pid = row["data"]["id"]
         rows.append(
             {
-                "record_key": "card_int_id:" + pid,
                 "kind": "card_int_id",
                 "owner": "EXAMPLE",
                 "data": {
@@ -213,7 +211,7 @@ def transaction(
     template: dict[str, Any], files: RegistryFiles, *, kind: str = "merge"
 ) -> dict[str, Any]:
     records = {
-        e.record_key: e.model_dump(mode="json")
+        e.record_key: e.model_dump(mode="json", round_trip=True)
         for s in files.shards
         for e in s.envelope().records
     }
@@ -221,7 +219,7 @@ def transaction(
     result["registry_basis"] = {
         "authored_revision": REVISION,
         "index_path": "ids/index.yaml",
-        "index_hash": checksum(files.index().model_dump(mode="json")),
+        "index_hash": checksum(files.index().model_dump(mode="json", round_trip=True)),
     }
     destinations = (
         {P: B, Q: C}

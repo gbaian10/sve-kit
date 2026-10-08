@@ -38,7 +38,7 @@ def checked_model[T: RecordData](model: type[T], raw: JsonValue) -> T:
         checked = model.model_validate_json(canonical(raw))
     except ValueError:
         raise ValueError("Invalid identity transition authored fields") from None
-    if canonical(checked.model_dump(mode="json")) != canonical(raw):
+    if canonical(checked.model_dump(mode="json", round_trip=True)) != canonical(raw):
         raise ValueError("Identity transition normalization changed canonical input")
     return checked
 

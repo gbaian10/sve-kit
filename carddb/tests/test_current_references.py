@@ -26,7 +26,9 @@ class NoSources:
 
 def test_current_reference_uses_full_current_glossary(tmp_path: Path) -> None:
     values = [
-        TermRecord.model_validate_json(canonical(name_term())).model_dump(mode="json")
+        TermRecord.model_validate_json(canonical(name_term())).model_dump(
+            mode="json", round_trip=True
+        )
     ]
     write(
         tmp_path,

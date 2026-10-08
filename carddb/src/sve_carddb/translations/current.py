@@ -11,7 +11,6 @@ from sve_carddb.translations.current_models import (
     Record,
     Shard,
     TermRecord,
-    key,
 )
 
 if TYPE_CHECKING:
@@ -48,8 +47,6 @@ def validate(snapshot: Snapshot) -> None:  # ruff: ignore[complex-structure,too-
     if len(set(concepts)) != len(concepts):
         raise ValueError("Duplicate current glossary concept key")
     for record in current:
-        if record.record_key != key(record):
-            raise ValueError("Current translation selection key mismatch")
         if isinstance(record, TermRecord):
             if record.data.id != "term:" + record.data.concept_key:
                 raise ValueError("Permanent term ID differs from concept key")

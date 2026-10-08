@@ -118,9 +118,6 @@ def test_variant_is_never_automatically_selected_and_pin_must_exist(
     member = verified.members[0]
     target = verified.inputs.translations()[0]
     variant = VariantRecord(
-        record_key=canonical(
-            ["template_translation_variant", target.data.template_id, "zh-Hant", "test"]
-        ).decode(),
         kind="template_translation_variant",
         data=Variant(
             template_id=target.data.template_id,
@@ -351,9 +348,6 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
         )
         targets.append(
             TranslationRecord(
-                record_key=canonical(
-                    ["template_translation", definition.data.id, "zh-Hant"]
-                ).decode(),
                 kind="template_translation",
                 data=Translation(
                     template_id=definition.data.id, lang="zh-Hant", text=text
@@ -372,7 +366,9 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
             "translations/templates/current/001.yaml": {
                 "translation_authored_format": 2,
                 "kind": "translation_shard",
-                "records": [r.model_dump(mode="json") for r in records],
+                "records": [
+                    r.model_dump(mode="json", round_trip=True) for r in records
+                ],
             },
         },
     )

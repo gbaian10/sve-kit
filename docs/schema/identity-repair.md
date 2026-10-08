@@ -29,11 +29,11 @@ sequence 是從 1 開始、至少三位十進位數字的連續序號；每片�
 禁止絕對路徑、`..`、symlink 逃逸、缺號、其他檔案、重複鍵與未知欄位。分片只增不改；
 不另存檔案清單或 hash，內容由 Git 保存。
 
-每筆 transition 恰有 `{record_key,kind,action,reverts,sequence,previous,registry_basis,review_context,updates,repairs,routes,evidence,reason}`：
+每筆 transition 恰有 `{kind,action,reverts,sequence,previous,registry_basis,review_context,updates,repairs,routes,evidence,reason}`：
 
 | 欄位 | 完整定義 |
 | --- | --- |
-| record_key | `["identity_transition",sequence]` 的 canonical JSON 字串，全域唯一 |
+| record_key（推導值，不存檔） | `["identity_transition",sequence]` 的 canonical JSON 字串，全域唯一；存檔欄位拒絕 |
 | kind | 固定 `identity_transition` |
 | action, reverts | action 為 `apply/revert`；apply 的 reverts=null，revert 指名 `{record_key,record_hash}`，見 §4.2 |
 | routes | 完整路由變動陣列，無變動為 []；見 §4.2，參與本次 record hash |
@@ -50,7 +50,7 @@ sequence 是從 1 開始、至少三位十進位數字的連續序號；每片�
 全部面與證據。草稿留在 authored 外，不先寫入再原地改內容。確認經過由一般 PR 記錄，
 分片不另存決定封套、成員 hash、核對者或時間。
 
-`H(x)` 指 authored-layout §2 的 canonical JSON SHA-256（含 `sha256:` 前綴）；record_hash=H(完整 transition)。
+`H(x)` 指 authored-layout §2 的 canonical JSON SHA-256（含 `sha256:` 前綴）；record_hash=H(含推導鍵的完整 transition)。
 完整 after、前件 refs、移轉清單與 evidence 都在 hash 內；不是只 hash 永久 ID 或新增 printing 的差集。
 沒有 record 自我引用。新的核對必須是新的 transition，不沿用舊 transition 冒充這次核對。
 
@@ -65,7 +65,8 @@ before 為 `{transition_key,record_key,record_hash}` 或 null：
 - before=null 只用於新增 card／face／art；其 ID、record_key 與配發 anchor 全域未使用。
   新 printing 與 int_id 仍走既有 registry 追加交易，再由本格式核對其對相關 review／relation 的影響。
   allocation_anchor 只在 before=null 時為非空、全域未用的人工配發字串，其餘一律 null。
-- after 是完整 `{record_key,kind,owner,data}`，不接受局部 patch；record_key=target_key。
+- after 是完整 `{kind,owner,data}`，不接受局部 patch；載入時計算的 record_key=target_key。
+  before／previous／reverts 的 record_key 是不含完整目標資料的參照，仍須存檔。
   null 表示明示停止選用，只允許 region_mapping_review／card_related，仍保留其歷史記錄。
   card 退役使用完整 after 且 identity_state=retired，不刪永久實體。
 
@@ -282,6 +283,8 @@ transition 分片最後寫入，因此中斷時已有新版次卻缺對應 trans
 context 仍遵守 source-archive §2.2.1：dependencies 非空，configuration 是 canonical JSON 字串。
 真實輸入必須能重建 context／raw 閉包。舊 registry 已另追加第二張 printing，此次重新核對兩張全部觀測。
 
+以下程式先建立含推導鍵的記憶體語義物件來計算 hash；輸出存檔資料時省略推導鍵，參照鍵保留。
+
 ```python
 import copy
 import hashlib
@@ -295,6 +298,16 @@ def canonical(value):
 
 def digest(value):
     return "sha256:" + hashlib.sha256(canonical(value)).hexdigest()
+
+
+def stored(value):
+    if isinstance(value, list):
+        return [stored(item) for item in value]
+    if isinstance(value, dict):
+        derived = "kind" in value and ("data" in value or value["kind"] == "identity_transition")
+        return {key: stored(item) for key, item in value.items()
+                if key != "record_key" or not derived}
+    return value
 
 
 def observation(number, digit):
@@ -344,17 +357,17 @@ record = {
 shard = {"identity_transition_format": 1, "kind": "identity_transition_shard",
          "records": [record]}
 assert digest(old) != digest(new)
-print(json.dumps({"old_record": old, "shard": shard}, ensure_ascii=False, indent=2))
+print(json.dumps(stored({"old_record": old, "shard": shard}), ensure_ascii=False, indent=2))
 ```
 
-可重算的完整 hash（與上述程式輸出一致）：
+可重算的完整 hash（由上述含推導鍵的語義物件計算，不是存檔 bytes 的 hash）：
 
 | 輸入 | SHA-256（省略 `sha256:`） |
 | --- | --- |
 | old record | `eb2e777e37086e85161fdcf71f90ce6ae30a2705c283f9daa6b64fb63f33d10e` |
 | new record | `b5e9034517d9fd97a48fa3c44482c91dc8c761aa730a276dd70cddfb24d21995` |
 | 完整 transition record | `185fe35f93ad5f6772a3da4c91ea0d1effd053c91c8a543cd6510c6c37ff90e5` |
-| 完整 shard | `ce2ad58b2596e2e8a9060af64c1adfdf37ceca2b3890073a8a684dfbdbfd36dc` |
+| 完整 shard（含推導鍵的語義物件） | `ce2ad58b2596e2e8a9060af64c1adfdf37ceca2b3890073a8a684dfbdbfd36dc` |
 
 此例的 old_record 是重建測試前件，不寫入新分片；原 registry 仍需存在於被釘住的輸入。
 下一次新增版次時 sequence=2，previous 釘第一筆 record hash，update.before 指第一筆
@@ -429,7 +442,7 @@ assert digest(apply) != digest(revert)
 active_edges = {"repair:example-merge": (A, B)}
 active_edges.pop(apply["repairs"][0]["id"])
 assert active_edges == {}
-print(json.dumps({"apply": apply_shard, "revert": revert_shard},
+print(json.dumps(stored({"apply": apply_shard, "revert": revert_shard}),
                  ensure_ascii=False, indent=2))
 ```
 

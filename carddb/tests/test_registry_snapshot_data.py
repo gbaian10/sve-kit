@@ -180,7 +180,6 @@ def test_reskin_reverse_requires_independent_rejection(registry_root: Path) -> N
     path, shard = kind_shard(registry_root, "card_related")
     reverse = shard.records[0].model_copy(deep=True)
     reverse.data["id"] = "r:" + "9" * 32
-    reverse.record_key = "card_related:" + str(reverse.data["id"])
     reverse.data["from_card_id"], reverse.data["to_card_id"] = (
         reverse.data["to_card_id"],
         reverse.data["from_card_id"],

@@ -451,7 +451,7 @@ def test_offline_cli_writes_private_bundle_and_dual_preview(
 ) -> None:
     recipe = prepared[1]
     path = tmp_path / "inputs.json"
-    path.write_bytes(canonical(recipe.model_dump(mode="json")))
+    path.write_bytes(canonical(recipe.model_dump(mode="json", round_trip=True)))
     result = CliRunner().invoke(
         app,
         [
@@ -514,7 +514,7 @@ def test_cli_preview_validates_output_before_build(
 ) -> None:
     recipe = prepared[1]
     path = tmp_path / "inputs.json"
-    path.write_text(recipe.model_dump_json())
+    path.write_text(recipe.model_dump_json(round_trip=True))
     targets = {
         "repo": recipe.repo / "output",
         "archive": recipe.archive / "output",
@@ -573,7 +573,7 @@ def test_cli_rejects_formal_export_before_preview_writes(
 
     monkeypatch.setattr(commands, "write_preview", forbidden)
     path = tmp_path / "inputs.json"
-    path.write_text(recipe.model_dump_json())
+    path.write_text(recipe.model_dump_json(round_trip=True))
     result = CliRunner().invoke(
         app,
         [
@@ -600,9 +600,9 @@ def test_offline_requires_explicit_dual_region_pins(
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]], pins: tuple[str, ...]
 ) -> None:
     recipe = prepared[1]
-    values = recipe.model_dump(mode="json")
+    values = recipe.model_dump(mode="json", round_trip=True)
     values["sources"] = [
-        recipe.sources[0].model_dump(mode="json") | {"region": region}
+        recipe.sources[0].model_dump(mode="json", round_trip=True) | {"region": region}
         for region in pins
     ]
     with pytest.raises(
@@ -615,7 +615,7 @@ def test_offline_requires_explicit_dual_region_pins(
 def test_offline_rejects_formal_version_or_missing_language_before_io(
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]], field: str
 ) -> None:
-    values = prepared[1].model_dump(mode="json")
+    values = prepared[1].model_dump(mode="json", round_trip=True)
     values[field] = "20261002T010203Z-0001" if field == "data_version" else []
     message = (
         "Offline composition requires a preview- data version"
@@ -650,7 +650,7 @@ def test_cli_cannot_write_bundle_into_protected_roots(
     recipe = prepared[1]
     path = tmp_path / "recipe" / "inputs.json"
     path.parent.mkdir()
-    path.write_bytes(canonical(recipe.model_dump(mode="json")))
+    path.write_bytes(canonical(recipe.model_dump(mode="json", round_trip=True)))
     target = path.parent if protected == "recipe" else getattr(recipe, protected)
 
     def forbidden(*_args: object, **_kwargs: object) -> None:
@@ -757,7 +757,7 @@ def test_cli_preview_cannot_contain_its_recipe(
 ) -> None:
     path = tmp_path / "preview" / "inputs.json"
     path.parent.mkdir()
-    content = canonical(prepared[1].model_dump(mode="json"))
+    content = canonical(prepared[1].model_dump(mode="json", round_trip=True))
     path.write_bytes(content)
     result = CliRunner().invoke(
         app,
@@ -784,7 +784,9 @@ def test_recipe_cannot_supply_private_vocabulary_or_languages(
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
 ) -> None:
     for name in ("vocabulary", "languages"):
-        values = prepared[1].model_dump(mode="json") | {name: "invented"}
+        values = prepared[1].model_dump(mode="json", round_trip=True) | {
+            name: "invented"
+        }
         with pytest.raises(ValueError, match="Extra inputs are not permitted"):
             Inputs.model_validate_json(canonical(values))
 

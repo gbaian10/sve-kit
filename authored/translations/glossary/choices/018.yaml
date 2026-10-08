@@ -1,8 +1,7 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["glossary_choice","term:name.grim_reaper","zh-Hant"]'
-    origin: machine
+  - origin: machine
     low_confidence: true
     kind: glossary_choice
     data:
@@ -12,9 +11,7 @@ records:
         kind: authored
         text: 死神
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.guiding_words","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.guiding_words
@@ -23,9 +20,7 @@ records:
         kind: authored
         text: 先導者的談話
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.guren_revolt","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.guren_revolt
@@ -34,8 +29,7 @@ records:
         kind: authored
         text: 紅蓮的反叛
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.gururubau","zh-Hant"]'
-    origin: machine
+  - origin: machine
     low_confidence: true
     kind: glossary_choice
     data:
@@ -45,9 +39,7 @@ records:
         kind: authored
         text: 咕嚕嚕汪
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.hades_hypnotist","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.hades_hypnotist
@@ -56,8 +48,7 @@ records:
         kind: authored
         text: 冥界的催眠術師
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.hagoromo_komachi","zh-Hant"]'
-    origin: machine
+  - origin: machine
     low_confidence: true
     kind: glossary_choice
     data:
@@ -67,9 +58,7 @@ records:
         kind: authored
         text: 羽衣小町
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.hajime_fujiwara_pink_blossom_dream","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.hajime_fujiwara_pink_blossom_dream
@@ -82,10 +71,7 @@ records:
         source_work: Shadowverse or collaboration names
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.hakui_koyori","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.hakui_koyori
       lang: zh-Hant
@@ -96,10 +82,7 @@ records:
       source_claim:
         source_work: Shadowverse or collaboration names
         source_urls: []
-  - record_key: '["glossary_choice","term:name.hakui_koyori_clear_mind","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.hakui_koyori_clear_mind
       lang: zh-Hant
@@ -110,9 +93,7 @@ records:
       source_claim:
         source_work: Shadowverse or collaboration names
         source_urls: []
-  - record_key: '["glossary_choice","term:name.hare_of_illusions","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.hare_of_illusions
@@ -121,10 +102,7 @@ records:
         kind: authored
         text: 夢想的白兔
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.haru_urara","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.haru_urara
       lang: zh-Hant
@@ -136,10 +114,7 @@ records:
         source_work: Uma Musume
         source_urls:
           - https://gametora.com/zh-tw/umamusume/characters
-  - record_key: '["glossary_choice","term:name.haru_urara_sunny_passion","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.haru_urara_sunny_passion
       lang: zh-Hant
@@ -151,10 +126,7 @@ records:
         source_work: Shadowverse or collaboration names
         source_urls:
           - https://gametora.com/zh-tw/umamusume/supports
-  - record_key: '["glossary_choice","term:name.haru_yuuki","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.haru_yuuki
       lang: zh-Hant
@@ -166,9 +138,7 @@ records:
         source_work: The Idolmaster Cinderella Girls
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.haru_yuuki_secret_blue_rose","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.haru_yuuki_secret_blue_rose
@@ -181,10 +151,7 @@ records:
         source_work: Shadowverse or collaboration names
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.hatsune","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.hatsune
       lang: zh-Hant
@@ -196,8 +163,7 @@ records:
         source_work: Princess Connect Re Dive
         source_urls:
           - https://github.com/Expugn/priconne-database
-  - record_key: '["glossary_choice","term:name.heavenly_castle","zh-Hant"]'
-    origin: machine
+  - origin: machine
     low_confidence: true
     kind: glossary_choice
     data:
@@ -207,9 +173,7 @@ records:
         kind: authored
         text: 御天空城
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.hermit_of_lust","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.hermit_of_lust
@@ -218,9 +182,7 @@ records:
         kind: authored
         text: 欲望的隱者
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.high_dog_breeder_akane","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.high_dog_breeder_akane
@@ -229,10 +191,7 @@ records:
         kind: authored
         text: 高階馴犬師 茜
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.hina_araki","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.hina_araki
       lang: zh-Hant
@@ -244,9 +203,7 @@ records:
         source_work: The Idolmaster Cinderella Girls
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.hinako_kita_true_dream","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.hinako_kita_true_dream
@@ -259,9 +216,7 @@ records:
         source_work: Shadowverse or collaboration names
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.hiromi_seki_twinkle_in_my_eye","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.hiromi_seki_twinkle_in_my_eye
@@ -274,10 +229,7 @@ records:
         source_work: Shadowverse or collaboration names
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.hishi_akebono","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.hishi_akebono
       lang: zh-Hant
@@ -289,10 +241,7 @@ records:
         source_work: Uma Musume
         source_urls:
           - https://gametora.com/zh-tw/umamusume/characters
-  - record_key: '["glossary_choice","term:name.hishi_amazon","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.hishi_amazon
       lang: zh-Hant
@@ -304,10 +253,7 @@ records:
         source_work: Uma Musume
         source_urls:
           - https://gametora.com/zh-tw/umamusume/characters
-  - record_key: '["glossary_choice","term:name.hishi_miracle","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.hishi_miracle
       lang: zh-Hant

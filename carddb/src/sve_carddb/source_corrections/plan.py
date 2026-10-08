@@ -7,8 +7,9 @@ from pydantic import JsonValue
 
 from sve_carddb.build_inputs import SourceUse
 from sve_carddb.registry.corrections import Status, correction_status
+from sve_carddb.registry.inputs import digest as registry_digest
 from sve_carddb.registry.records import CorrectionData, PrintingData, Region
-from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.snapshot.values import canonical
 from sve_carddb.source_corrections.images import evidence_url
 
 if TYPE_CHECKING:
@@ -34,7 +35,7 @@ class Application:
 
     def key(self) -> str:
         """Invalidate candidate/review identity on every authored correction change."""
-        return digest(self.record.content)
+        return registry_digest(self.record.entry().model_dump(mode="json"))
 
     def uses(self) -> tuple[SourceUse, ...]:
         """Pin both the observation comparison and every exact image locator."""

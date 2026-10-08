@@ -1,8 +1,7 @@
 authored_format: 1
 kind: registry_shard
 records:
-  - record_key: card_related:r:27f409369cfd59a2b01efe174dcfc317
-    kind: card_related
+  - kind: card_related
     owner: BP03
     data:
       id: r:27f409369cfd59a2b01efe174dcfc317
@@ -62,8 +61,7 @@ records:
           observation_hash: sha256:548fae75785ebe1e5917df59040c324233b37a49754830a60006b40743aef8dc
           rules_hash: sha256:ae00a45fd6d3af59e22f4ba771137c7fd8c9b46efe2727a316e2bd1df2affa7f
           recipe: registry-observation-v1
-  - record_key: card_related:r:acade6ed64ac5b688c0a5244dafdef74
-    kind: card_related
+  - kind: card_related
     owner: BP03
     data:
       id: r:acade6ed64ac5b688c0a5244dafdef74
@@ -105,8 +103,7 @@ records:
           observation_hash: sha256:f0f96d1c70bdb597dc7e149168b9c4d9959d53b4bc49e012b595ac2b44832b73
           rules_hash: sha256:ecbaf33a410a4b973b23236aa374cb2527b1645e213e5788eb12bb248e58da98
           recipe: registry-observation-v1
-  - record_key: card_related:r:8b1900f7682350d6ac42a80f22425b85
-    kind: card_related
+  - kind: card_related
     owner: BP03
     data:
       id: r:8b1900f7682350d6ac42a80f22425b85

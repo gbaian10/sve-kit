@@ -64,12 +64,13 @@ class Builder:
         """Reject inconsistent repeated definitions before writing any files."""
         entry = Entry.model_validate(
             {
-                "record_key": kind + ":" + identifier,
                 "kind": kind,
                 "owner": home,
                 "data": data,
             }
         )
+        if entry.record_key != kind + ":" + identifier:
+            raise ValueError("Registry identifier disagrees with data")
         if entry.record_key in self.entries and self.entries[entry.record_key] != entry:
             raise ValueError(f"Conflicting definition: {entry.record_key}")
         self.entries[entry.record_key] = entry

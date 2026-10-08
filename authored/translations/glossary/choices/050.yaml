@@ -1,9 +1,7 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["glossary_choice","term:trait.marine","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:trait.marine
@@ -33,10 +31,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/tribe_names/17
             text_hash: sha256:44467431f287c6168cbbac6b069f676f66b943031a7ddf93db8e36b6e4de8ec9
-  - record_key: '["glossary_choice","term:trait.mejiro_family","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.mejiro_family
       lang: zh-Hant
@@ -49,10 +44,7 @@ records:
         source_urls:
           - https://zh.wikipedia.org/zh-tw/賽馬娘_Pretty_Derby
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:trait.mercenary","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.mercenary
       lang: zh-Hant
@@ -60,10 +52,7 @@ records:
         kind: authored
         text: 傭兵
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.merchant","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.merchant
       lang: zh-Hant
@@ -71,10 +60,7 @@ records:
         kind: authored
         text: 商人
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.mercurius_foundation","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.mercurius_foundation
       lang: zh-Hant
@@ -88,10 +74,7 @@ records:
           - https://www.princessconnect.so-net.tw/role
           - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:trait.mount","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.mount
       lang: zh-Hant
@@ -99,10 +82,7 @@ records:
         kind: authored
         text: 載具
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.musical","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.musical
       lang: zh-Hant
@@ -110,10 +90,7 @@ records:
         kind: authored
         text: 歌手
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.natura","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.natura
       lang: zh-Hant
@@ -125,10 +102,7 @@ records:
         source_work: Shadowverse
         source_urls: []
         claimed_source: 數位版 sv1 的繁中術語主張
-  - record_key: '["glossary_choice","term:trait.necromancer","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.necromancer
       lang: zh-Hant
@@ -136,10 +110,7 @@ records:
         kind: authored
         text: 死靈術師
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.nightmare","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.nightmare
       lang: zh-Hant
@@ -153,10 +124,7 @@ records:
           - https://www.princessconnect.so-net.tw/role
           - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:trait.ninja","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.ninja
       lang: zh-Hant
@@ -164,10 +132,7 @@ records:
         kind: authored
         text: 忍者
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.noble","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.noble
       lang: zh-Hant
@@ -175,9 +140,7 @@ records:
         kind: authored
         text: 貴族
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.officer","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:trait.officer
@@ -207,10 +170,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/tribe_names/2
             text_hash: sha256:eaa8dd04fd6812c86800f56d49beea7370c5acd08ac2f97d19cc335820c03abc
-  - record_key: '["glossary_choice","term:trait.omen","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.omen
       lang: zh-Hant
@@ -218,10 +178,7 @@ records:
         kind: authored
         text: 絕傑
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.onmyoji","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.onmyoji
       lang: zh-Hant
@@ -229,10 +186,7 @@ records:
         kind: authored
         text: 陰陽師
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.oracle_think_tank","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.oracle_think_tank
       lang: zh-Hant
@@ -244,10 +198,7 @@ records:
         source_work: 卡片戰鬥先導者
         source_urls: []
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:trait.pale_moon","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.pale_moon
       lang: zh-Hant
@@ -259,10 +210,7 @@ records:
         source_work: 卡片戰鬥先導者
         source_urls: []
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:trait.passion","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.passion
       lang: zh-Hant
@@ -274,10 +222,7 @@ records:
         source_work: 偶像大師 灰姑娘女孩
         source_urls: []
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:trait.phoenix","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.phoenix
       lang: zh-Hant
@@ -285,9 +230,7 @@ records:
         kind: authored
         text: 不死鳥
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.pixie","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:trait.pixie
@@ -317,10 +260,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/tribe_names/5
             text_hash: sha256:3602014779bdc7396fd097da57ee2b4735d9994edd331b2a4d469448966b71a8
-  - record_key: '["glossary_choice","term:trait.priconne","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.priconne
       lang: zh-Hant
@@ -334,10 +274,7 @@ records:
           - https://www.princessconnect.so-net.tw/news/newsDetail/3350
           - https://www.princessconnect.so-net.tw/role
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:trait.prince","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.prince
       lang: zh-Hant
@@ -345,10 +282,7 @@ records:
         kind: authored
         text: 王子
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.princess","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:trait.princess
       lang: zh-Hant
@@ -356,9 +290,7 @@ records:
         kind: authored
         text: 公主
       concept_evidence: []
-  - record_key: '["glossary_choice","term:trait.puppetry","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:trait.puppetry

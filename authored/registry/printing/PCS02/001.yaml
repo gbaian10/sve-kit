@@ -1,8 +1,7 @@
 authored_format: 1
 kind: registry_shard
 records:
-  - record_key: printing:p:ff0c3d5df3275c7ca57a0b08ab1237be
-    kind: printing
+  - kind: printing
     owner: PCS02
     data:
       id: p:ff0c3d5df3275c7ca57a0b08ab1237be
@@ -20,8 +19,7 @@ records:
         observation_hash: sha256:37ed8eb11db2ee26e6019995424101c5d6a18e09da20e1df179ece8d5d53644e
         rules_hash: sha256:327bd1f3680d05f406d6765a0b6632bb2b981701d2b25909553c93e20f3694bc
         recipe: registry-observation-v1
-  - record_key: printing:p:9d2ef2222df75914b2e1be2fb42d90b4
-    kind: printing
+  - kind: printing
     owner: PCS02
     data:
       id: p:9d2ef2222df75914b2e1be2fb42d90b4
@@ -39,8 +37,7 @@ records:
         observation_hash: sha256:87086cc587f219606e123221f4dfc5379cfe9f5e0b50dd1b0c314c830d088698
         rules_hash: sha256:14e18055801998d777d0386218b63ec72e52bc9321d4bf4d4e554def8813c62e
         recipe: registry-observation-v1
-  - record_key: printing:p:e8878265aeba5a6d85622fe0ac37d57c
-    kind: printing
+  - kind: printing
     owner: PCS02
     data:
       id: p:e8878265aeba5a6d85622fe0ac37d57c

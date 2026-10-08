@@ -41,10 +41,16 @@ class Entity:
 
 def entity(entry: Entry | None, key: str, transition: str | None) -> Entity:
     """Pin exact semantic content and the transition that produced it."""
-    raw = None if entry is None else entry.model_dump(mode="json")
+    raw = None if entry is None else entry.model_dump(mode="json", round_trip=True)
     return Entity(
         canonical(raw),
-        Before(transition_key=transition, record_key=key, record_hash=digest(raw)),
+        Before(
+            transition_key=transition,
+            record_key=key,
+            record_hash=digest(
+                None if entry is None else entry.model_dump(mode="json")
+            ),
+        ),
         None if entry is None else canonical(raw),
     )
 

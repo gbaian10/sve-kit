@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import Field, JsonValue, field_validator, model_validator
+from pydantic import Field, JsonValue, computed_field, field_validator, model_validator
 
 from sve_carddb.build_inputs import BuildContext, Revision, Version
 from sve_carddb.registry.inputs import canonical
@@ -79,7 +79,6 @@ class ReviewContext(RecordData):
 
 
 class After(RecordData):
-    record_key: TargetKey
     kind: Literal[
         "card", "face", "printing", "art", "region_mapping_review", "card_related"
     ]
@@ -91,12 +90,21 @@ class After(RecordData):
         model = DATA_MODELS[self.kind]
         if self.kind == "printing" and self.data.get("region") == "en":
             model = EnglishPrintingData
-        checked = model.model_validate_json(canonical(self.data))
-        values = checked.model_dump(mode="json")
-        identifier = values["card_id" if self.kind == "region_mapping_review" else "id"]
-        if self.record_key != self.kind + ":" + identifier:
-            raise ValueError("Transition after key disagrees with record identity")
+        model.model_validate_json(canonical(self.data))
+
         return self
+
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return (
+            self.kind
+            + ":"
+            + str(
+                self.data["card_id" if self.kind == "region_mapping_review" else "id"]
+            )
+        )
 
 
 class Update(RecordData):
@@ -280,7 +288,6 @@ class RouteUpdate(RecordData):
 
 
 class Transition(RecordData):
-    record_key: Text
     kind: Literal["identity_transition"]
     action: Literal["apply", "revert"]
     reverts: Reference | None
@@ -296,11 +303,6 @@ class Transition(RecordData):
 
     @model_validator(mode="after")
     def _structure(self) -> Transition:
-        if (
-            self.record_key
-            != canonical(["identity_transition", self.sequence]).decode()
-        ):
-            raise ValueError("Transition key disagrees with sequence")
         if (self.action == "apply" and self.reverts is not None) or (
             self.action == "revert" and (self.reverts is None or self.repairs)
         ):
@@ -313,6 +315,12 @@ class Transition(RecordData):
         if any(Batch(batch_id=item.batch_id) not in batches for item in self.evidence):
             raise ValueError("Transition evidence batch missing from review context")
         return self
+
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical([self.kind, self.sequence]).decode()
 
 
 class Shard(RecordData):
