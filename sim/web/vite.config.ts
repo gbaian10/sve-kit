@@ -73,9 +73,24 @@ function serveSnapshotRoot(prefix: string, dir: string | undefined): Plugin {
   }
 }
 
-// Local snapshot roots: SVE_CDN_DIR (else the committed fixture) at /cdn, SVE_PREVIEW_DIR at /cdn-preview.
-const cdnDir = process.env["SVE_CDN_DIR"] ?? path.join(import.meta.dirname, "fixtures/snapshot")
-const previewDir = process.env["SVE_PREVIEW_DIR"]
+// Local snapshot roots: SVE_EXPORT_DIR (else the committed fixture) at /cdn, SVE_PREVIEW_DIR at /cdn-preview.
+export function snapshotRoots(environment: NodeJS.ProcessEnv): { cdn: string; preview?: string } {
+  const root = (name: string): string | undefined => {
+    const value = environment[name]
+    if (value === undefined || value === "") return undefined
+    if (!path.isAbsolute(value)) {
+      throw new Error(`${name} must be an absolute path when set`)
+    }
+    return value
+  }
+  const preview = root("SVE_PREVIEW_DIR")
+  return {
+    cdn: root("SVE_EXPORT_DIR") ?? path.join(import.meta.dirname, "fixtures/snapshot"),
+    ...(preview === undefined ? {} : { preview }),
+  }
+}
+
+const { cdn: cdnDir, preview: previewDir } = snapshotRoots(process.env)
 
 export default defineConfig({
   resolve: {

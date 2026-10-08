@@ -2,3 +2,6 @@
 bun = "1.4.2"
 # bun run executes the Node-shebang CLIs (Vite, Vitest, ESLint) with Node; jsdom needs ^22.22.2 || ^24.15.0.
 node = "24.19.0"
+
+# Shared environment variables are documented in CONTRIBUTING.md; none has a repo default.
+# Put machine-specific values in private parent configuration or mise.local.toml.

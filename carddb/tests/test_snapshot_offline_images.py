@@ -372,7 +372,7 @@ def test_offline_cli_limits_workers_to_four(
             "--workers",
             workers,
         ],
-        env={"NO_COLOR": "1", "TERM": "dumb"},
+        env={"FORCE_COLOR": None, "NO_COLOR": "1", "TERM": "dumb"},
     )
     assert result.exit_code == 2
     assert "--workers" in result.output

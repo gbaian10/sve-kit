@@ -146,17 +146,73 @@ Install these tools with their own installers (each is one command; see the link
 | -------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------- |
 | [rustup](https://rustup.rs)      | Rust; the toolchain version is pinned in `rust-toolchain.toml` | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
 | [uv](https://docs.astral.sh/uv/) | Python (`carddb`, `docs/schema/er`)                            | `curl -LsSf https://astral.sh/uv/install.sh \| sh`                |
-| [mise](https://mise.jdx.dev)     | Bun and Node.js, pinned in `mise.toml`                         | `curl https://mise.run \| sh`, then `mise install` in the repo    |
+| [mise](https://mise.jdx.dev)     | Bun and Node.js plus shared project environment variables      | `curl https://mise.run \| sh`, then `mise install` in the repo    |
 
-Only Bun and Node.js are managed by mise; do not add Rust or Python to `mise.toml`,
-so rustup and uv stay in charge of them. Machine-specific paths such as `SVE_DATA_DIR`
-go in `mise.local.toml` (ignored by git), for example:
+mise manages Bun and Node.js versions and shared project environment variables.
+Rust and Python toolchains remain managed by rustup and uv; do not add them to
+`mise.toml`. Machine-specific paths and secrets stay in ignored `mise.local.toml`
+or a private parent-directory mise configuration. No project variable currently
+has a repo-level mise default: export roots must be outside the repo, and source
+history, backups and image version state need explicit persistent locations.
+Do not declare unset variables as empty strings or placeholder paths.
+
+Precedence is explicit CLI option > caller environment > `mise.local.toml` >
+private parent configuration > repo default. For future approved repo defaults,
+use `{{ env.X | default(value=…) }}` so values from parent mise configuration
+survive. Private and local settings use `get_env`, which checks the caller's
+OS environment and preserves overrides supplied by a shell or CI:
 
 ```toml
 [env]
-SVE_DATA_DIR = "/path/to/sve-kit-data"
-SVE_TEST_SNAPSHOT = "/path/to/cards.jsonl"   # fixed card list the engine card tests read
+SVE_DATA_DIR = "{{ get_env(name='SVE_DATA_DIR', default='/absolute/local/data') }}"
+SVE_EXPORT_DIR = "{{ get_env(name='SVE_EXPORT_DIR', default='/absolute/local/export') }}"
+SVE_CARDDB_PRIVATE_DIR = "{{ get_env(name='SVE_CARDDB_PRIVATE_DIR', default='/absolute/local/carddb-private') }}"
+SVE_TEST_SNAPSHOT = "{{ get_env(name='SVE_TEST_SNAPSHOT', default='/absolute/local/cards.jsonl') }}"
 ```
+
+These paths are examples; replace them in private configuration. An activated
+shell can retain old values: restart it or explicitly export updated values after
+changing configuration. Empty `SVE_EXPORT_DIR`, `SVE_CARDDB_PRIVATE_DIR` and
+`SVE_PREVIEW_DIR` environment values are treated as unset.
+Web uses the synthetic fixture for an empty `SVE_EXPORT_DIR` and leaves
+`/cdn-preview` unconfigured for an empty `SVE_PREVIEW_DIR`. carddb still requires
+an explicit CLI root when its environment value is empty; an empty CLI value is
+rejected. Non-empty roots must be absolute paths. Export keeps
+its existing resolved-path checks separating public output, private state and
+immutable inputs; reuse the same private root across exports and back it up.
+Missing configuration fails only commands that require it. Help, readers and
+synthetic tests work without private roots. CI sets its own required values in
+workflow steps and does not depend on local mise configuration.
+
+| Variable | Purpose | Reader | Required / default |
+| --- | --- | --- | --- |
+| `SVE_DATA_DIR` | Latest source cache and manifest | carddb crawler and manifest commands | Required for live-data commands; no default; pytest replaces it with a temporary root |
+| `SVE_EXPORT_DIR` | Public export root | carddb `snapshot export-offline` (`--preview-dir`), `r2 upload-v2` (`--export-dir`), Web `/cdn` | Export/upload require CLI or env; no default; Web uses synthetic fixture when unset or empty |
+| `SVE_CARDDB_PRIVATE_DIR` | Inputs, reports and persistent `media-state.json` | carddb `snapshot export-offline` (`--private-dir`) | CLI or env required; no default; recipe and `--bundle-dir` remain explicit |
+| `SVE_PREVIEW_DIR` | Optional second local snapshot root | Web `/cdn-preview` | Optional; no default; unset or empty leaves the root unconfigured; exporter uses `SVE_EXPORT_DIR` |
+| `SVE_ARCHIVE_ROOT` | Immutable source store | carddb archive operations | Required when using archive configuration; no default |
+| `SVE_ARCHIVE_STORE_ID` | Archive store identity | carddb archive operations | Required by configured archive operations; no default |
+| `SVE_ARCHIVE_BACKUP_ROOT` | Immutable source backup | carddb seal/backup operations | Required as applicable; no default |
+| `SVE_ARCHIVE_RESTORE_ROOT` | Restore-check destination | carddb restore-check | Required as applicable; no default |
+| `SVE_EXTRA_ROOTS` | Read-only symlink target allowlist (`os.pathsep` separated) | carddb manifest check | Optional; Settings defaults to no extra roots |
+| `SVE_INTERVAL` | HTTP request interval | carddb Settings | Optional; 2.5 seconds, minimum 2 |
+| `SVE_JITTER` | HTTP request jitter | carddb Settings | Optional; 0.5 seconds, non-negative |
+| `SVE_TIMEOUT` | HTTP timeout | carddb Settings | Optional; 30 seconds, positive |
+| `SVE_USER_AGENT` | Browser User-Agent | carddb Settings | Optional; existing browser UA |
+| `SVE_BREAKER_THRESHOLD` | HTTP circuit breaker threshold | carddb Settings | Optional; 5, positive integer |
+| `SVE_TEST_SNAPSHOT` | Private card list JSONL | Rust card tests | Required for full/required CI; optional local tests skip when unset; no default |
+| `SVE_PRIVATE_TESTDATA_MODE` | Private fixture policy | Python/Rust tests | CI explicitly sets `required` or `excluded`; local Python unset runs synthetic tests and reports exclusion |
+| `SVE_PRIVATE_TESTDATA_DIR` | Private page fixtures | Python tests | Required in `required` mode; no default |
+| `SVE_CI_TEST_MODE` | Full or fork test scope | CI helpers and Rust tests | Set by CI; no mise default |
+| `SVE_CI_COVERAGE_THRESHOLD` | Coverage acceptance threshold | CI helpers | Set from CI policy; no mise default |
+| `SVE_R2_ACCESS_KEY_ID`, `SVE_R2_SECRET_ACCESS_KEY` | R2 credentials | carddb upload/remote GC SDK | Required for remote execution only; no default; keep secrets outside the repo |
+| `R2_ACCOUNT_ID`, `R2_DEV_BUCKET` | R2 account and target bucket | carddb upload/remote GC | Execution requires CLI or env; no default |
+| `SVE_PREVIEW_CONFIGURED` | Browser preview-root flag | Vite → Web UI | Derived by Vite; do not configure manually |
+| `SVE_VOICE_ORIGIN` | Planned voice source selection | No implemented reader (build-db design only) | Unimplemented; no default |
+
+`SVE_CDN_DIR` has been replaced by `SVE_EXPORT_DIR`. HTTP tuning defaults and
+validation stay in carddb Settings, rather than being duplicated in mise.
+Local paths and R2 credentials must never be injected into browser code.
 
 Then:
 
