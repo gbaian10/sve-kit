@@ -51,7 +51,11 @@ def test_export_rejects_invalid_roots_before_reading_recipe(
     if source.endswith("cli"):
         arguments.extend([option, "" if source == "empty-cli" else "relative"])
         env[environment] = str(tmp_path / "unused-env")
-    result = CliRunner().invoke(app, arguments, env=env)
+    result = CliRunner().invoke(
+        app,
+        arguments,
+        env=env | {"FORCE_COLOR": None, "NO_COLOR": "1", "TERM": "dumb"},
+    )
     assert result.exit_code == 2
     assert environment in result.output
     assert option in result.output
@@ -70,7 +74,11 @@ def test_upload_rejects_invalid_root(source: str, tmp_path: Path) -> None:
     if source.endswith("cli"):
         arguments.extend(["--export-dir", "" if source == "empty-cli" else "relative"])
         env["SVE_EXPORT_DIR"] = str(tmp_path / "unused-env")
-    result = CliRunner().invoke(app, arguments, env=env)
+    result = CliRunner().invoke(
+        app,
+        arguments,
+        env=env | {"FORCE_COLOR": None, "NO_COLOR": "1", "TERM": "dumb"},
+    )
     assert result.exit_code == 2
     assert "SVE_EXPORT_DIR" in result.output
     assert "--export-dir" in result.output
@@ -96,6 +104,10 @@ def test_upload_root_precedence(
         if source == "cli"
         else {"SVE_EXPORT_DIR": str(root if source == "env" else tmp_path / "unused")}
     )
-    result = CliRunner().invoke(app, arguments, env=env)
+    result = CliRunner().invoke(
+        app,
+        arguments,
+        env=env | {"FORCE_COLOR": None, "NO_COLOR": "1", "TERM": "dumb"},
+    )
     assert "synthetic stop before reading" in result.output
     assert selected == [root]
