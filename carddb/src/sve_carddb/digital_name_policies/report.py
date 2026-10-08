@@ -23,7 +23,6 @@ from sve_carddb.digital_name_policies.evaluate import (
     owner_text,
     rule_links,
 )
-from sve_carddb.digital_name_policies.runtime import require_runtime
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 
 if TYPE_CHECKING:
@@ -66,7 +65,6 @@ def generate(  # ruff: ignore[too-many-locals] -- diagnostic report retains inde
     comparison: Sources | None = None,
 ) -> dict[str, JsonValue]:
     """Use exact frozen sources, with explicit empty or previously sealed report baseline."""
-    require_runtime(sources)
     _configuration(sources)
     previous = _baseline(baseline)
     review = review_context(sources)
@@ -143,7 +141,7 @@ def generate(  # ruff: ignore[too-many-locals] -- diagnostic report retains inde
     report: dict[str, JsonValue] = {
         "recipe": RECIPE,
         "scope": "frozen_source_diagnostic_not_publication",
-        "policy_inputs": snapshot.pins(),
+        "policy_inputs": snapshot.configuration(),
         "baseline_hash": None if baseline is None else digest(baseline),
         "baseline": "empty_first_run" if baseline is None else "previous_report",
         "summary": {
@@ -180,7 +178,6 @@ def _comparison(
     comparison: Sources,
 ) -> dict[str, JsonValue]:
     """Diagnose a newer catalogue without certifying continuation or replacing pins."""
-    require_runtime(comparison)
     _configuration(comparison)
     comparing = review_context(comparison)
     differences: list[JsonValue] = []

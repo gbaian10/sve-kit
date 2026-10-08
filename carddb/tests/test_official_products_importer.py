@@ -8,10 +8,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_bundle import publish_bundle, verify_bundle
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.build_inputs import input_record
 from sve_carddb.extract.compare_jp import legacy_projection
 from sve_carddb.extract.official_en import extract_card as extract_en
 from sve_carddb.extract.official_en import legacy_projection as legacy_en
@@ -19,7 +17,6 @@ from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.products import (
     import_product_preview,
     load_products,
-    official_importer,
     populate_product_preview,
     product_preview_uses,
 )
@@ -32,7 +29,6 @@ from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
 from sve_carddb.registry.records import AllocationData, PrintingData
 from sve_carddb.registry.review import InitDecisions, Inputs
 from sve_carddb.registry.storage import plan_files, write_files
-from sve_carddb.source_archive import ArchiveError
 
 from .identity_evidence_fixtures import MemoryEvidence
 from .product_identity_fixtures import (
@@ -48,11 +44,10 @@ from .product_identity_fixtures import (
 from .product_identity_fixtures import identity_fixture as identity_fixture  # ruff: ignore[useless-import-alias] -- shared fixture
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping
-    from pathlib import Path
+    from collections.abc import Mapping
 
     from sve_carddb.build_db import Database, Value
-    from sve_carddb.build_inputs import BuildContext, InputRecord, SourceUse
+    from sve_carddb.build_inputs import InputRecord
     from sve_carddb.products.official import ProductPage
     from sve_carddb.products.plan import OfficialProducts
     from sve_carddb.registry.records import Region
@@ -377,102 +372,6 @@ def test_each_late_failure_rolls_back_complete_graph(
             )
         for table in schema.tables:
             assert not db.rows(table.name)
-
-
-@pytest.mark.parametrize(
-    "usage",
-    [
-        "product_identity_evidence_closure",
-        "official_product_identity",
-        "official_product_page",
-        "official_product",
-        "official_printing_product",
-    ],
-)
-def test_each_omitted_actual_use_fails_and_rolls_back(
-    identity_fixture: IdentityFixture, monkeypatch: pytest.MonkeyPatch, usage: str
-) -> None:
-    fixture = identity_fixture
-
-    def omit(context: BuildContext, uses: Iterable[SourceUse]) -> InputRecord:
-        return input_record(context, (use for use in uses if use.usage != usage))
-
-    monkeypatch.setattr(official_importer, "input_record", omit)
-    schema = compile_build()
-    with create_database(schema) as db:
-        with pytest.raises(ValueError, match="use closure"):
-            imported(fixture, db, fixture.official())
-        for table in schema.tables:
-            assert not db.rows(table.name)
-
-
-def test_complete_bundle_saved_reverified_and_never_overwritten(
-    identity_fixture: IdentityFixture, tmp_path: Path
-) -> None:
-    fixture = identity_fixture
-    official = fixture.official()
-    context = fixture.context(official.identities)
-    expected = product_preview_uses(
-        fixture.catalog,
-        fixture.preview,
-        {"test-store": fixture.store},
-        official=official,
-    )
-    destination = tmp_path / "bundle"
-    schema = compile_build()
-    record = publish_bundle(
-        schema,
-        destination,
-        context,
-        expected,
-        lambda db: populate(fixture, db, official),
-        {"official": official.report()},
-        stores={"test-store": fixture.store},
-    )
-    assert (
-        verify_bundle(
-            schema, destination, context, expected, stores={"test-store": fixture.store}
-        )
-        == record
-    )
-    before = {path: path.read_bytes() for path in destination.iterdir()}
-    with pytest.raises(FileExistsError, match="exists"):
-        publish_bundle(
-            schema,
-            destination,
-            context,
-            expected,
-            lambda db: populate(fixture, db, official),
-            {},
-            stores={"test-store": fixture.store},
-        )
-    assert before == {path: path.read_bytes() for path in before}
-
-
-def test_missing_raw_after_planning_publishes_nothing(
-    identity_fixture: IdentityFixture, tmp_path: Path
-) -> None:
-    fixture = identity_fixture
-    official = fixture.official()
-    expected = product_preview_uses(
-        fixture.catalog,
-        fixture.preview,
-        {"test-store": fixture.store},
-        official=official,
-    )
-    next((fixture.store / "raw").rglob("*.raw")).unlink()
-    destination = tmp_path / "bundle"
-    with pytest.raises((ArchiveError, FileNotFoundError)):
-        publish_bundle(
-            compile_build(),
-            destination,
-            fixture.context(official.identities),
-            expected,
-            lambda db: populate(fixture, db, official),
-            {},
-            stores={"test-store": fixture.store},
-        )
-    assert not destination.exists()
 
 
 @pytest.mark.parametrize(

@@ -172,7 +172,6 @@ def merge_record() -> dict[str, Any]:
         "review_context": {
             "context": {
                 "program_revision": "5" * 40,
-                "dependencies": [{"name": "uv.lock", "sha256": "sha256:" + "6" * 64}],
                 "configuration": wire({"registry": basis}).decode(),
             },
             "source_batches": [batch],

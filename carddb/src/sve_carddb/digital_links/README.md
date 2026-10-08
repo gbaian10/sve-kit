@@ -9,9 +9,8 @@ relation for one subject: `subject`, `value` (relation, effect similarity and th
 SVE/digital name references), `review_level` (`sampled` for a batch the maintainer
 spot-checked, `confirmed` for an individually checked link) and a nonblank
 `reason`. Git keeps earlier versions;
-there are no adoption numbers, predecessors or batch decisions. `Inputs` compares
-exact index/shard bytes with the declared full authored Git SHA, and
-`Inputs.configuration()` supplies the `digital_link_authored` build pin.
+there are no adoption numbers, predecessors or batch decisions. `Inputs` reads the current working tree once and
+`Inputs.configuration()` supplies descriptive `digital_link_authored` settings.
 
 Build configuration also declares canonical-sorted unique `digital_link_sources`
 (store/batch pairs), `catalog_registry`, `translation_recipes`, and
@@ -40,8 +39,8 @@ legal policy or counterpart candidates still require their own evidence.
 `translations.counterparts.first_counterpart()` selects sv1 before svwb and rejects
 different adopted names within the same game. The current application supports
 known printed owners and generates current translations, uses and display
-bindings. Complete builds must combine all stage usages and call
-`input_record(...).verify(..., complete=True)` before export.
+bindings. Complete builds retain actual stage usages in the input summary;
+source and owner checks happen while preparing and applying their plans.
 
 ## Offline candidates
 

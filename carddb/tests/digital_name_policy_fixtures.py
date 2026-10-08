@@ -8,13 +8,14 @@ from pydantic import JsonValue
 
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.digital_name_policies.evaluate import NameOwner
-from sve_carddb.digital_name_policies.loader import INDEX, load
-from sve_carddb.digital_name_policies.runtime import RUNTIME
+from sve_carddb.digital_name_policies.loader import load
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 
 from .adoption_fixtures import REPO, commit, git
 from .digital_link_import_fixtures import Fixture, catalogue_fixture, make_fixture
+
+INDEX = "digital-name-policies/index.yaml"
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -87,7 +88,7 @@ class PolicyFixture:
         return self.digital.root
 
     def snapshot(self) -> Snapshot:
-        return load(self.root / "authored", self.root, self.authored)
+        return load(self.root / "authored", self.authored)
 
     def owner(self, *, state: str = "known") -> NameOwner:
         config = object_value(parse(self.digital.build.configuration.encode()))
@@ -121,10 +122,6 @@ def make_policy_fixture(
     digital = catalogue_fixture(
         original, game="sv1", languages=("ja", "zh-tw"), transform=translate
     )
-    for name in RUNTIME:
-        target = root / name
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(REPO / name, target)
     configuration = object_value(parse(digital.build.configuration.encode()))
     configuration = {
         k: configuration[k]
@@ -140,8 +137,7 @@ def make_policy_fixture(
     )
     copy_policies(root, array(configuration["digital_link_sources"]))
     authored = commit(root)
-    dependencies = {n: (root / n).read_bytes() for n in RUNTIME}
-    build = BuildContext.from_inputs(authored, dependencies, configuration)
+    build = BuildContext.from_inputs(authored, configuration)
     return PolicyFixture(replace(digital, program=authored, build=build), authored)
 
 

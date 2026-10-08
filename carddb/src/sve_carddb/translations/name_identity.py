@@ -1,110 +1,39 @@
 """Verify current permanent identities against each frozen physical source face."""
 
-import re
-import subprocess  # ruff: ignore[suspicious-subprocess-import] -- fixed immutable Git tree enumeration, never a shell
-import tempfile
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from sve_carddb.build_inputs import SourceUse
 from sve_carddb.registry.records import CardData, FaceData, PrintingData
-from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.registry.storage import read_yaml
-from sve_carddb.registry.transitions.files import read_transition_files
-from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.snapshot.values import canonical
 from sve_carddb.sources import official_en, official_jp
 from sve_carddb.text_observations.archive import FrozenTexts
 
 if TYPE_CHECKING:
     from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.registry.snapshot import RegistrySnapshot
-    from sve_carddb.translations.models import IdentityBasis
     from sve_carddb.translations.sources import Sources
 
 
 class IdentityEvidence:
     def __init__(self, sources: Sources, authored_revision: str) -> None:
-        if re.fullmatch(r"[0-9a-f]{40}", authored_revision) is None:
-            raise ValueError("Name identity consumer revision must be a full Git SHA")
         self.sources = sources
         self.authored_revision = authored_revision
-        self.cache: dict[bytes, RegistrySnapshot] = {}
         self.providers: dict[tuple[str, str], FrozenTexts] = {}
         self.uses: list[SourceUse] = []
-        self.authored_uses: list[tuple[str, str, str]] = []
 
-    def registry(self, basis: IdentityBasis) -> RegistrySnapshot:
-        """An absent transition index must be absent in the immutable tree, not disk."""
-        key = canonical(basis.model_dump(mode="json"))
-        if key in self.cache:
-            return self.cache[key]
-        repository = self.sources.repository
-        result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- full SHA and fixed tree roots are closed inputs
-            [
-                repository.executable,
-                "-C",
-                str(repository.root),
-                "ls-tree",
-                "-r",
-                "--format=%(objectmode)%x09%(path)",
-                "-z",
-                basis.authored_revision,
-                "--",
-                "authored/ids",
-                "authored/registry",
-                "authored/identity-transitions",
-            ],
-            check=False,
-            capture_output=True,
-        )
-        if result.returncode:
-            raise ValueError("Name identity immutable tree is unavailable")
-        entries = [
-            entry.split("\t", 1)
-            for entry in result.stdout.decode().split("\0")
-            if entry
-        ]
-        if any(mode not in {"100644", "100755"} for mode, _ in entries):
-            raise ValueError("Name identity immutable tree contains a nonregular input")
-        if basis.authored_revision != self.authored_revision:
-            raise ValueError(
-                "Name identity basis differs from current authored revision"
-            )
-        names = tuple(name for _, name in entries)
-        files = repository.read_many(basis.authored_revision, names)
-        with tempfile.TemporaryDirectory(prefix="name-identity-") as folder:
-            root = Path(folder)
-            for name, raw in files.items():
-                target = root / name.removeprefix("authored/")
-                target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_bytes(raw)
-            index = root / "ids/index.yaml"
-            if (
-                not index.is_file()
-                or digest(canonical(read_yaml(index))) != basis.registry_index_hash
-            ):
-                raise ValueError("Name identity registry index hash mismatch")
-            if read_transition_files(root).shards:
-                raise ValueError(
-                    "Name identity transitions require complete effective evidence replay"
-                )
-            registry = load_registry(root)
-        for path, raw in files.items():
-            # Authored evidence pins are included separately by the importer audit.
-            self.authored_uses.append((basis.authored_revision, path, digest(raw)))
-        self.cache[key] = registry
-        return registry
+    def registry(self) -> RegistrySnapshot:
+        """Owner associations use the same current registry as this command's source resolver."""
+        return self.sources.identities.registry()
 
     def association(
         self,
-        basis: IdentityBasis,
         ref: SourceRef,
         *,
         card_id: str | None = None,
         face_id: str | None = None,
     ) -> tuple[str, str, str, str]:
         """Bind raw URL, complete observation and physical source index to permanent keys."""
-        registry = self.registry(basis)
+        registry = self.registry()
         lang, text, source = self.sources.text(ref)
         expected_region = "jp" if lang == "ja" else "en"
         if ref.parser != "translation-" + expected_region + "-v1" or lang not in {

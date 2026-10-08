@@ -1,6 +1,5 @@
 """Compose authored relations with publication identity and current frozen names."""
 
-import re
 from dataclasses import dataclass
 from functools import cached_property
 from types import MappingProxyType
@@ -11,7 +10,6 @@ from pydantic import JsonValue
 from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.build_inputs import InputRecord, input_record, insert_raw_sources
 from sve_carddb.catalog.adoption_models import Batch, ReviewContext, SourceRef
-from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.digital_links.evidence import (
     Evidence,
     batch_refs,
@@ -40,21 +38,14 @@ class Inputs:
     repository: Path
     authored_revision: str
 
+    @cached_property
+    def snapshot(self) -> Snapshot:
+        """Reuse current inputs within this command."""
+        return load_links(self.root)
+
     def load(self) -> Snapshot:
-        """Require a clean immutable authored entry, not merely matching canonical data."""
-        if re.fullmatch(r"[0-9a-f]{40}", self.authored_revision) is None:
-            raise ValueError("Digital-link authored revision must be full Git SHA")
-        snapshot = load_links(self.root)
-        repository = PinnedRepository(self.repository)
-        for name, exact in [
-            ("digital-links/index.yaml", snapshot.index),
-            *((p, e) for p, e, _ in snapshot.shards),
-        ]:
-            if repository.read(self.authored_revision, "authored/" + name) != exact:
-                raise ValueError(
-                    "Digital-link bytes differ from immutable authored revision"
-                )
-        return snapshot
+        """Reuse current inputs within this command."""
+        return self.snapshot
 
     def configuration(self) -> dict[str, JsonValue]:
         """Declare exact authored input pins for the composing build."""
@@ -215,7 +206,12 @@ class Result:
 
 
 def populate_links(  # ruff: ignore[complex-structure,too-many-locals] -- every relation is checked before one atomic materialization
-    db: Database, inputs: Inputs, *, build: BuildContext, stores: dict[str, Path]
+    db: Database,
+    inputs: Inputs,
+    *,
+    build: BuildContext,
+    stores: dict[str, Path],
+    sources: Sources | None = None,
 ) -> Result:
     """Validate before materializing; the composing caller owns the transaction."""
     snapshot = inputs.load()
@@ -225,7 +221,7 @@ def populate_links(  # ruff: ignore[complex-structure,too-many-locals] -- every 
         != inputs.configuration()["digital_link_authored"]
     ):
         raise ValueError("Build configuration does not pin digital-link authored bytes")
-    current = Sources(stores, inputs.repository, build)
+    current = sources or Sources(stores, inputs.repository, build)
     review = review_context(current)
     evidence = Evidence(current)
     registry = evidence.index(review)
@@ -291,7 +287,6 @@ def populate_links(  # ruff: ignore[complex-structure,too-many-locals] -- every 
         insert_exact(db, "digital_link", _link_values(record), ("id",))
     uses = tuple(current.uses)
     result = input_record(build, uses)
-    result.verify(db, build, uses, complete=False)
     return Result(
         result,
         tuple(canonical(record.model_dump(mode="json")) for record in fresh),

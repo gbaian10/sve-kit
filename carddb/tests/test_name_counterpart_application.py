@@ -44,7 +44,6 @@ def links_case(case: ApplicationCase, root: Path) -> ApplicationCase:
     )
     context = BuildContext.from_inputs(
         changed.context.program_revision,
-        {p.name: (root / p.name).read_bytes() for p in changed.context.dependencies},
         config,
     )
     return replace(changed, context=context)

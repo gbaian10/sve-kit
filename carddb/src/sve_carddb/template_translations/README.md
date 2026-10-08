@@ -1,6 +1,6 @@
 # Current template definitions and translations
 
-`current.read_templates(repository, revision)` reads the indexed current Git tree.
+`current.read_templates(repository, revision)` reads the fixed working-tree directories once.
 It checks safe regular files, strict YAML, canonical include hashes, complete file
 closure, closed record shapes, unique selection keys and structural references.
 It does not read raw sources, traverse ancestors, or require adoption receipts,

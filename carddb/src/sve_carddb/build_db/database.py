@@ -105,6 +105,18 @@ class Database:
                 self._connection.execute("ROLLBACK")
             raise
 
+    def save(self, path: Path) -> None:
+        """Save the completed transaction without reconstructing domain rows."""
+        if self._connection.in_transaction:
+            raise RuntimeError("Cannot save an unfinished build transaction")
+        with path.open("xb"):
+            pass
+        target = sqlite3.connect(path)
+        try:
+            self._connection.backup(target)
+        finally:
+            target.close()
+
     def _writable(self, table: str) -> Table:
         if not self._connection.in_transaction:
             raise RuntimeError("Writes require an explicit transaction")

@@ -117,20 +117,11 @@ def trait_baseline(tmp_path_factory: pytest.TempPathFactory) -> TraitCase:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes((REPO / name).read_bytes())
     revision = commit(case.repository)
-    path = "carddb/src/sve_carddb/snapshot/values.py"
     context = BuildContext.from_inputs(
         revision,
-        {name: (REPO / name).read_bytes() for name in RUNTIME},
         {
             "catalog_source_recipes": {
-                "exact-json-v1": {
-                    "version": "exact-json-v1",
-                    "program_revision": revision,
-                    "code_path": path,
-                    "code_hash": digest((REPO / path).read_bytes()),
-                    "config": {},
-                    "config_hash": digest(canonical({})),
-                }
+                "exact-json-v1": {"version": "exact-json-v1", "config": {}}
             }
         },
     )

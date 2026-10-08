@@ -28,13 +28,17 @@ from sve_carddb.source_archive import seal_batch
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.text_observations.intern import TextInterner
 from sve_carddb.translations.digital import configuration
-from sve_carddb.translations.sources import CODE_PATH, RUNTIME, Sources
+from sve_carddb.translations.sources import Sources
 
 from .adoption_fixtures import commit, git
 from .digital_link_fixtures import envelope, record, write
 from .test_registry_preview_archive import RAW
 from .test_source_archive import _put, _resource, _store
 from .translation_fixtures import INSTANT
+
+CODE_PATH = "carddb/src/sve_carddb/translations/sources.py"
+RUNTIME = (CODE_PATH,)
+
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -67,10 +71,6 @@ class Fixture:
     def changed(self, config: dict[str, JsonValue]) -> BuildContext:
         return BuildContext.from_inputs(
             self.program,
-            {
-                p.name: (self.root / p.name).read_bytes()
-                for p in self.build.dependencies
-            },
             config,
         )
 
@@ -318,14 +318,7 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
     recipes = object_value(config["translation_recipes"])
     for provider in ("jp", "svwb"):
         parser = "translation-" + provider + "-v1"
-        recipes[parser] = {
-            "version": parser,
-            "program_revision": program,
-            "code_path": CODE_PATH,
-            "code_hash": digest((root / CODE_PATH).read_bytes()),
-            "config": {"provider": provider},
-            "config_hash": digest(canonical({"provider": provider})),
-        }
+        recipes[parser] = {"version": parser, "config": {"provider": provider}}
     refs = sorted(refs, key=lambda r: canonical(r.model_dump(mode="json")))
     config.update(
         configuration(
@@ -383,9 +376,7 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
     write(root / "authored", {"digital-links/links/synthetic/001.yaml": shard})
     authored = commit(root)
     config.update(Inputs(root / "authored", root, authored).configuration())
-    build = BuildContext.from_inputs(
-        program, {name: (root / name).read_bytes() for name in RUNTIME}, config
-    )
+    build = BuildContext.from_inputs(program, config)
     return Fixture(
         root,
         store.root,
@@ -544,7 +535,6 @@ def catalogue_fixture(
     recipe.update(
         version="translation-" + game + "-v1",
         config={"provider": game},
-        config_hash=digest(canonical({"provider": game})),
     )
     recipes["translation-" + game + "-v1"] = recipe
     return replace(fixture, store=store.root, build=fixture.changed(config))

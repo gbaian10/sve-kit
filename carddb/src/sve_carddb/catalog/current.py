@@ -7,7 +7,7 @@ from sve_carddb.build_db import Json
 from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.catalog import adoption_validation as validate
 from sve_carddb.catalog.adoption_models import Batch, ReviewContext, TextEvidence
-from sve_carddb.catalog.adoption_sources import AdoptionSources, PinnedRepository
+from sve_carddb.catalog.adoption_sources import AdoptionSources
 from sve_carddb.catalog.current_models import LanguageRecord, Shard, VocabularyRecord
 from sve_carddb.catalog.models import Catalog
 from sve_carddb.catalog.projection import CatalogProjection
@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from sve_carddb.build_inputs import BuildContext
     from sve_carddb.catalog.adoption_loader import AdoptionSnapshot
     from sve_carddb.catalog.current_models import Record
+    from sve_carddb.registry.snapshot import RegistrySnapshot
 
 
 CURRENT_FORMAT = 2
@@ -41,10 +42,11 @@ def prepare(
     repository: Path,
     build: BuildContext,
     stores: dict[str, Path],
+    registry: RegistrySnapshot | None = None,
 ) -> Prepared:
     """Use current parser pins and exact mappings, not superseded review contexts."""
     records = tuple(r for snapshot in snapshots for r in snapshot.current_records())
-    sources = AdoptionSources(stores, PinnedRepository(repository))
+    sources = AdoptionSources(stores, repository, registry)
     batches = {
         e.source_ref.batch_id
         for r in records

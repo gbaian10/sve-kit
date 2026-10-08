@@ -1,8 +1,6 @@
 """Bilingual text, verified image closure, private bundle and preview export."""
 
-import json
 import shutil
-from dataclasses import replace
 from itertools import count
 from typing import TYPE_CHECKING
 
@@ -18,7 +16,6 @@ from sve_carddb.image_assets import (
     ImageReference,
     PreviewRoots,
     build_regional_assets,
-    populate_assets,
 )
 from sve_carddb.image_crops import FILE, load_image_crops
 from sve_carddb.products import OfficialProducts, ProductIdentities
@@ -42,8 +39,8 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import SourceUse
     from sve_carddb.card_extras import CardPage
+    from sve_carddb.image_checks import ImageChecks
     from sve_carddb.image_crops import ImageCrops
     from sve_carddb.registry.preview import PreviewPlan
     from sve_carddb.registry.records import Region
@@ -240,10 +237,11 @@ def test_offline_cli_reuses_both_caches_and_rejects_partial_roots(
         region: Region,
         crops: ImageCrops,
         workers: int = 1,
+        checks: ImageChecks | None = None,
     ) -> ImageBuild:
         seen.append(workers)
         return build_regional_assets(
-            images, output, region=region, crops=crops, workers=workers
+            images, output, region=region, crops=crops, workers=workers, checks=checks
         )
 
     monkeypatch.setattr("sve_carddb.image_variants._encode", forbidden)
@@ -383,92 +381,6 @@ def test_offline_cli_limits_workers_to_four(
     assert library == {
         p: p.read_bytes() for p in roots.preview.rglob("*") if p.is_file()
     }
-
-
-@pytest.mark.parametrize(
-    "failure",
-    [
-        "partial-batch",
-        "wrong-pin",
-        "missing-use",
-        "old-box",
-        "raw-bytes",
-        "edited-crop",
-    ],
-)
-def test_offline_image_closure_failures_publish_nothing(
-    regional_images: tuple[Inputs, ImageBuild, PreviewRoots],
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    failure: str,
-) -> None:
-    recipe, assets, roots = regional_images
-    if failure == "partial-batch":
-        assets = replace(assets, images=assets.images[1:])
-    elif failure == "wrong-pin":
-        recipe = recipe.model_copy(
-            update={
-                "sources": tuple(
-                    pin.model_copy(update={"image_batch": "sha256:" + "0" * 64})
-                    if pin.region == "en"
-                    else pin
-                    for pin in recipe.sources
-                )
-            }
-        )
-    elif failure == "old-box":
-        item = next(item for item in assets.images if item.region == "en")
-        crop = item.result.crop_box
-        forged = replace(
-            item, result=replace(item.result, crop_box=replace(crop, top=0))
-        )
-        assets = replace(
-            assets,
-            images=tuple(forged if image is item else image for image in assets.images),
-        )
-    elif failure == "raw-bytes":
-        item = assets.images[0]
-        assets = replace(
-            assets,
-            images=(replace(item, raw_bytes=item.raw_bytes + 1), *assets.images[1:]),
-        )
-    elif failure == "edited-crop":
-        # An uncommitted edit is read directly, so images built from the old box no longer match.
-        path = recipe.repo / "authored" / FILE
-        rows = json.loads(path.read_text())
-        rows[0]["top"] -= 1
-        path.write_text(json.dumps(rows))
-    else:
-
-        def omit(
-            db: Database,
-            images: ImageBuild,
-            refs: tuple[ImageReference, ...],
-            root: Path,
-        ) -> tuple[SourceUse, ...]:
-            return tuple(
-                use
-                for use in populate_assets(db, images, refs, root)
-                if use.usage != "en_image_link"
-            )
-
-        monkeypatch.setattr(offline_images, "populate_assets", omit)
-    messages = {
-        "partial-batch": "Offline images must cover every current regional source",
-        "wrong-pin": "Offline images differ from the pinned regional image batches",
-        "missing-use": "Build input use closure or context mismatch",
-        "old-box": "Image crop box differs from adopted source crop",
-        "raw-bytes": "Image source bytes or oriented dimensions mismatch",
-        "edited-crop": "Image crop box differs from adopted source crop",
-    }
-    with pytest.raises(ValueError, match="^" + messages[failure] + "$"):
-        offline.build(
-            recipe,
-            images=assets,
-            image_root=roots.preview,
-            bundle_dir=tmp_path / "bundle",
-        )
-    assert not (tmp_path / "bundle").exists()
 
 
 def test_text_only_offline_does_not_depend_on_crop_data(

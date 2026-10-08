@@ -17,9 +17,7 @@ if TYPE_CHECKING:
     from sve_carddb.registry.review import Inputs
 
 REVISION = "a" * 40
-BUILD = BuildContext.from_inputs(
-    REVISION, {"synthetic.lock": b"synthetic dependencies"}, {"synthetic": True}
-)
+BUILD = BuildContext.from_inputs(REVISION, {"synthetic": True})
 
 
 def observed(card: Card, region: Region) -> CardEvidence:

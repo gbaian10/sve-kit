@@ -6,11 +6,9 @@ from typing import TYPE_CHECKING, Literal, Self
 
 from pydantic import ValidationError, field_validator, model_validator
 
-from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.registry.records import RecordData
+from sve_carddb.registry.storage import MAX_BYTES as LIMIT
 from sve_carddb.template_parameter_rules.models import LEGACY_IDS, RuleId
-from sve_carddb.template_parameter_rules.repository import LIMIT, git
-from sve_carddb.template_parameter_rules.repository import revision as check_revision
 from sve_carddb.template_parameters.rule_candidates import BY_ID
 from sve_carddb.template_translations.files import json_bytes
 
@@ -62,23 +60,9 @@ def parse(raw: bytes) -> Rules:
         raise ValueError("Invalid current parameter rules") from None
 
 
-def load(repository: PinnedRepository, revision: str) -> Rules:
-    """Read the current tree, never walk policy/approval ancestors."""
-    check_revision(repository, revision)
-    entry = git(repository, "ls-tree", "-l", "-z", revision, "--", PATH).rstrip(b"\0")
-    header, separator, path = entry.partition(b"\t")
-    fields = header.split()
-    if (
-        not separator
-        or path != PATH.encode()
-        or len(fields) != len(("mode", "kind", "oid", "size"))
-        or fields[:2] != [b"100644", b"blob"]
-        or not fields[3].isdigit()
-    ):
-        raise ValueError("Missing or unsafe current parameter rules")
-    if int(fields[3]) >= LIMIT:
-        raise ValueError("Current parameter rules must be smaller than one MiB")
-    return parse(repository.read(revision, PATH))
+def load(repository: Path) -> Rules:
+    """Read the current matcher switches in the working tree."""
+    return load_file(repository / PATH)
 
 
 def load_file(path: Path) -> Rules:

@@ -7,22 +7,18 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-import sve_carddb.digital_links.importer as importer_module
-from sve_carddb.build_inputs import BuildContext
 from sve_carddb.digital_links.evidence import (
     Evidence,
     RegistryIndex,
     batch_refs,
     inventory,
 )
-from sve_carddb.digital_links.importer import Inputs, import_links, review_context
+from sve_carddb.digital_links.importer import import_links, review_context
 from sve_carddb.digital_links.loader import decision_id
 from sve_carddb.digital_links.models import Record, SveName
-from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.registry.records import EnglishPrintingData
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
-from sve_carddb.source_archive import ArchiveError
 from sve_carddb.text_observations.intern import TextInterner
 from sve_carddb.translations.digital import configuration, import_digital
 from sve_carddb.translations.name_sources import NameOwner
@@ -40,9 +36,7 @@ from .translation_fixtures import template
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_db import Database
     from sve_carddb.catalog.adoption_models import ReviewContext
-    from sve_carddb.digital_links.loader import Snapshot
 
     from .database_fixtures import DatabaseTemplate
 
@@ -240,59 +234,6 @@ def test_owner_source_must_replay_its_printing(
             )
 
 
-def test_equal_length_raw_tamper_and_complete_source_closure(
-    baseline: Fixture, database: DatabaseTemplate, tmp_path: Path
-) -> None:
-
-    with database.copy() as db:
-        baseline.publish(db)
-        result = import_links(
-            db,
-            baseline.inputs(),
-            build=baseline.build,
-            stores={"test-store": baseline.store},
-        )
-        with pytest.raises(
-            ValueError, match=r"^Build input use closure or context mismatch$"
-        ):
-            result.record.verify(db, baseline.build, result.record.uses[:-1])
-        result.record.verify(db, baseline.build, result.record.uses)
-        with db.transaction():
-            source = dict(
-                next(
-                    r.values
-                    for r in db.rows("source_record")
-                    if r.values["kind"] != "authored"
-                )
-            )
-            source["id"] = "synthetic:unrelated-source"
-            db.insert("source_record", source)
-        # The composing build must account for unrelated raw inputs too.
-        with pytest.raises(
-            ValueError, match=r"^Build input raw source closure mismatch$"
-        ):
-            result.record.verify(db, baseline.build, result.record.uses)
-    fixture = copied(baseline, tmp_path / "repo")
-    frozen = FrozenSources(fixture.store, "test-store", fixture.jp.batch_id)
-    path = fixture.store / frozen.entries[fixture.jp.source_version_id].blob.path
-    raw = path.read_bytes()
-    changed = raw.replace(b"Synthetic card", b"Synthetix card")
-    assert len(changed) == len(raw)
-    assert changed != raw
-    path.write_bytes(changed)
-    with database.copy() as db:
-        with pytest.raises(
-            ArchiveError,
-            match="^" + re.escape(f"archive file hash or size mismatch: {path}") + "$",
-        ):
-            import_links(
-                db,
-                fixture.inputs(),
-                build=fixture.build,
-                stores={"test-store": fixture.store},
-            )
-
-
 @pytest.mark.parametrize(
     ("change", "stale"),
     [("name", True), ("unrelated", False), ("missing_target", True)],
@@ -396,39 +337,6 @@ def test_owner_rechecks_materialized_target_against_adoption(
             )
 
 
-def test_authored_byte_pin_and_runtime_closure(
-    baseline: Fixture, tmp_path: Path
-) -> None:
-    fixture = copied(baseline, tmp_path / "repo")
-    shard = fixture.root / "authored/digital-links/links/synthetic/001.yaml"
-    shard.write_bytes(shard.read_bytes() + b"\n")
-    with pytest.raises(
-        ValueError,
-        match=r"^Digital-link bytes differ from immutable authored revision$",
-    ):
-        fixture.inputs().load()
-    # New validator/candidate files cannot be omitted while the old parser pin stays valid.
-    pin = next(
-        p
-        for p in baseline.build.dependencies
-        if p.name.endswith("digital_links/candidates.py")
-    )
-    config = object_value(parse(baseline.build.configuration.encode()))
-    build = BuildContext.from_inputs(
-        baseline.program,
-        {
-            p.name: (baseline.root / p.name).read_bytes()
-            for p in baseline.build.dependencies
-            if p != pin
-        },
-        config,
-    )
-    with pytest.raises(
-        ValueError, match=r"^Translation runtime/dependency closure cannot be replayed$"
-    ):
-        Sources({"test-store": baseline.store}, baseline.root, build)
-
-
 def test_sampled_link_keeps_its_review_level(
     baseline: Fixture, database: DatabaseTemplate, tmp_path: Path
 ) -> None:
@@ -483,38 +391,6 @@ def test_evolved_phase_is_explicit_and_not_inferred_from_sve_front(
         )
 
 
-def test_composer_verifies_actual_raw_metadata_before_returning(
-    baseline: Fixture, database: DatabaseTemplate, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    original = importer_module._audit
-
-    def corrupted(
-        db: Database, snapshot: Snapshot, inputs: Inputs, fresh: list[Record]
-    ) -> None:
-        original(db, snapshot, inputs, fresh)
-        source = next(
-            r.values for r in db.rows("source_record") if r.values["kind"] != "authored"
-        )
-        db.update(
-            "source_record",
-            {"id": source["id"]},
-            {"etag": "Synthetic unexpected metadata"},
-        )
-
-    monkeypatch.setattr(importer_module, "_audit", corrupted)
-    with database.copy() as db:
-        baseline.publish(db)
-        before = db.rows("source_record")
-        with pytest.raises(ValueError, match=r"^Conflicting raw source metadata$"):
-            import_links(
-                db,
-                baseline.inputs(),
-                build=baseline.build,
-                stores={"test-store": baseline.store},
-            )
-        assert db.rows("source_record") == before
-
-
 def test_jp_owner_does_not_probe_same_number_english_printing(
     baseline: Fixture, database: DatabaseTemplate
 ) -> None:
@@ -555,14 +431,6 @@ def test_jp_owner_does_not_probe_same_number_english_printing(
         assert result.eligible_owner(
             db, sources, NameOwner("face_revision", "link-revision")
         )
-
-
-def test_authored_revision_must_be_full_sha(baseline: Fixture) -> None:
-    inputs = replace(baseline.inputs(), authored_revision=baseline.authored[:7])
-    with pytest.raises(
-        ValueError, match=r"^Digital-link authored revision must be full Git SHA$"
-    ):
-        inputs.load()
 
 
 @pytest.mark.parametrize("fault", ["missing", "changed"])
@@ -767,27 +635,3 @@ def test_legacy_digital_import_does_not_allow_declared_target_superset(
             ValueError, match=r"^Build configuration does not pin digital inputs$"
         ):
             import_digital(db, sources, baseline.refs, (("svwb", "22345678"),))
-
-
-@pytest.mark.parametrize("fault", ["dependency", "recipe"])
-def test_sources_check_immutable_git_pins(baseline: Fixture, fault: str) -> None:
-    config = object_value(parse(baseline.build.configuration.encode()))
-    build = baseline.build
-    if fault == "recipe":
-        recipe = object_value(
-            object_value(config["translation_recipes"])["translation-jp-v1"]
-        )
-        recipe["code_hash"] = digest(b"Synthetic wrong old parser")
-        build = baseline.changed(config)
-        sources = Sources({"test-store": baseline.store}, baseline.root, build)
-        with pytest.raises(ValueError, match=r"^Recipe program/config hash mismatch$"):
-            sources.text(baseline.jp)
-    else:
-        pin = build.dependencies[0].model_copy(
-            update={"sha256": digest(b"Synthetic wrong old dependency")}
-        )
-        build = build.model_copy(
-            update={"dependencies": (pin, *build.dependencies[1:])}
-        )
-        with pytest.raises(ValueError, match=r"^Review dependency hash mismatch$"):
-            Sources({"test-store": baseline.store}, baseline.root, build)

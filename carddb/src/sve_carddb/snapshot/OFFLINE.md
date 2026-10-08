@@ -9,25 +9,22 @@ The recipe is JSON matching `sve_carddb.snapshot.offline.Inputs`: `repo`, `archi
 `store_id`, sorted `sources` for `en` then `jp` (each has `region`, `card_batch`,
 `image_batch`, `parser_version`), `revision`, `as_of`,
 `data_version`, `published_at`, `feedback_url`, `grammar_version` and
-`normalizer_version`. Vocabulary and UI languages are derived from the complete
-`authored/catalog-adoptions` entry at the pinned revision by
-`catalog.current.prepare` and written by `catalog.current.populate`. The catalog
-index and every shard must use format 2. No caller vocabulary JSON or language
-settings are accepted. Adopted EN and JA languages are required. The complete
-existing `authored/translations` entry is explicitly enabled with its current
-format 2 glossary. `compile_current_build` compiles the current catalog and
-glossary evidence tables for both the initial build and bundle reconstruction.
+`normalizer_version`. Vocabulary and UI languages come from the current working
+files in `authored/catalog-adoptions`. The catalog is prepared once and the same
+checked plan supplies vocabulary, languages and DB rows. Offline catalogs use
+format 2 shards; adopted EN and JA languages are required. The current format 2
+translation entry is loaded once for glossary, templates and name overrides.
+Readers scan only the dedicated data directories, validate types, size limits,
+unique keys and references, then sort records. Shard numbers need not be contiguous
+and records need not arrive sorted. Permanent registry allocation order is unchanged.
 
-Authored input bytes are checked against the immutable Git revision. Catalog
-and glossary frozen evidence is validated against the current `BuildContext`
-and its parser recipes. Their complete expected source-use closure is checked
-independently of database insertion; missing imported catalog or glossary uses
-fail before preview or bundle publication. Glossary source uses are collected
-from current terms, concepts, choices and vocabulary values, including their
-source spans and same-concept evidence.
+The revision identifies the checkout for provenance; uncommitted authored edits
+apply. Builds use the running parser and current configuration directly. Frozen
+raw hashes, archive metadata, exact text, source language and owner applicability
+remain checked before projection. The input record summarizes actual source uses.
 
 Japanese effect text and flavor are translated in the same transaction. The
-current templates, parameter rules and glossary are read at the pinned revision
+current templates, parameter rules and glossary are read from the working tree
 and validated once against source positions generated from the recipe's JP card
 batch (Git stores no template source inventory); every Japanese main text or
 section of a face revision or printed face whose exact source hash a template
@@ -40,11 +37,9 @@ original. Effect and flavor eligibility depends only on the source hash, not on
 results with fallback reason codes, and `flavor_translations` counts applied and
 unused entries; neither repeats card text.
 
-The build itself pins `catalog_source_recipes`, `translation_recipes`,
-all package Python dependencies except generated `_version.py`, `uv.lock` and
-`pyproject.toml`. Translation recipes cover EN, JP, sv1 and svwb frozen projections;
-they do not grant digital same-card eligibility. Missing
-trait/title or other raw-field adoptions fail closed rather than generating codes.
+Translation parsers cover EN, JP, sv1 and svwb frozen projections; they do not
+grant digital same-card eligibility. Missing trait/title or other raw-field
+adoptions fail rather than generating codes.
 Image batches always verify authored correction evidence. Image publication is
 optional and requires the two explicit image roots below; EN card text remains
 the original EN observation, with no new translation workflow.
@@ -60,11 +55,12 @@ All output roots must be disjoint from the protected repo, archive and recipe.
 `--preview-dir` receives only public snapshot files and images. `--private-dir`
 is a separate, persistent directory for `inputs/<hash>.json`,
 `reports/<manifest-hash>.json` and `media-state.json`; keep it and back it up.
-The bundle is a new private directory containing SQLite, inputs, report and seal.
-Its complete source-use closure and archive pins are independently checked by
-`publish_bundle`; `verify_bundle` can recheck it. The snapshot writer verifies
+The build directory is new and private. It contains `build.sqlite`, `inputs.json`
+and `report.json`. The database is backed up from the completed transaction, with
+no second population or build seal. Files are written in a temporary directory,
+fsynced and installed through a no-overwrite rename. The snapshot writer verifies
 both shard and text-union readback before switching the preview pointer.
-The bundle and private directory are never uploaded.
+The build directory and private directory are never uploaded.
 
 This remains a `preview-` candidate, with no formal index or activation (#34).
 `export-offline` is the only export command. It selects EN and JP and permits
@@ -101,8 +97,10 @@ extractor, exact original `img src` and adopted `source_face_map`. Card-number
 suffixes do not infer cross-region identity. Source uses are retained separately
 as `jp_image_link` / `en_image_link` and `jp_image_variant` / `en_image_variant`.
 
-The same transaction and private bundle replay include the image rows, complete
-source-use closure, exact recipe and crop adoption dependencies. Snapshot output
+Image rows belong to the same transaction. One command shares inspection results
+by unique blob through conversion, preparation and population. New commands verify
+external files again; source/crop applicability and actual output bytes are checked.
+Snapshot output
 copies only referenced content-addressed WebP blobs; orphan library entries,
 original PNGs and recipe caches stay private. Reports include applied/unused
 crops, annotation mismatches and verified reprint candidates in both regions.
@@ -162,14 +160,10 @@ actual frozen providers, compiler and catalog composition without adapters or
 monkeypatching. Assertions cover both regions, physical card rows, current
 authored provenance and retained catalog/glossary source uses.
 
-Focused replay tests use an empty physical inventory to isolate current
-catalog/glossary evidence and recipe pins. They independently check the complete
-source-use closure and reject missing catalog or glossary uses before output.
-Supplemental tests exercise card observations with mocked catalog composition.
-These synthetic tests do not claim complete real-card, catalog and translation acceptance.
-When real raw-field adoptions block the build, later-stage diagnostic runs must
-be identified separately; an empty substitute for a blocked phase does not
-prove the original phase or authorize a candidate for publication.
+Focused tests cover working-tree edits, shard gaps, unordered records, duplicate
+keys, exact source evidence and owner mismatches. Supplemental tests exercise card
+observations with mocked catalog composition. Synthetic tests do not claim complete
+real-card, catalog and translation acceptance.
 
 ## 2.0 media previews
 

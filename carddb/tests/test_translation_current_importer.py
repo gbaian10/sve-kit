@@ -13,7 +13,6 @@ from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.translations.importer import Inputs, import_glossary
 from sve_carddb.translations.loader import load_glossary
-from sve_carddb.translations.sources import RUNTIME
 
 from .adoption_fixtures import commit
 from .build_db_fixtures import seed
@@ -77,9 +76,7 @@ def test_current_import_rechecks_source_without_creating_decision(
     inputs = Inputs(root / "authored", root, revision)
     config = object_value(parse(frozen.build.configuration.encode()))
     config.update(inputs.configuration())
-    build = BuildContext.from_inputs(
-        frozen.program, {name: (root / name).read_bytes() for name in RUNTIME}, config
-    )
+    build = BuildContext.from_inputs(frozen.program, config)
     with importer_template.copy() as db:
         if bad_source:
             with pytest.raises(

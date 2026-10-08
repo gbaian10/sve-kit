@@ -138,7 +138,7 @@ def sve_inventory(  # ruff: ignore[complex-structure] -- multiple printing varia
     sources: Sources, review: ReviewContext
 ) -> dict[str, list[tuple[SveName, dict[str, JsonValue]]]]:
     """Map frozen pages through explicit registry mappings, never infer face ordinal."""
-    registry = Evidence(sources).registry(review)
+    registry = Evidence(sources).registry()
     printings: dict[str, list[PrintingData]] = defaultdict(list)
     for record in registry.records.values():
         if isinstance(record.data, PrintingData) and record.data.region == "jp":

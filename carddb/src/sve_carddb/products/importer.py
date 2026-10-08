@@ -106,9 +106,7 @@ def populate_families(
                     },
                 )
 
-    inputs = input_record(build, uses)
-    inputs.verify(db, build, product_source_uses(catalog, evidence), complete=False)
-    return inputs
+    return input_record(build, uses)
 
 
 def _product_use(reference: Evidence, checked: CheckedSource) -> SourceUse:
@@ -172,9 +170,6 @@ def populate_product_preview(  # ruff: ignore[too-many-arguments] -- compose exp
         raise ValueError("Product catalog and preview must use the same registry input")
     if official is not None and official.identities.revision != authored_revision:
         raise ValueError("Product identity authored revision mismatch")
-    expected = product_preview_uses(
-        catalog, plan, {} if stores is None else stores, official=official
-    )
     family_inputs = populate_families(
         db,
         catalog,
@@ -193,11 +188,9 @@ def populate_product_preview(  # ruff: ignore[too-many-arguments] -- compose exp
             db, official, build=build, texts=_Texts(db)
         ).uses
     )
-    inputs = input_record(
+    return input_record(
         build, (*family_inputs.uses, *identity_inputs.uses, *official_inputs)
     )
-    inputs.verify(db, build, expected)
-    return inputs
 
 
 def import_product_preview(  # ruff: ignore[too-many-arguments] -- transaction owner forwards the complete pinned inputs

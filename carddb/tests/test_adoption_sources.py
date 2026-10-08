@@ -14,10 +14,11 @@ from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.adoption_sources import pointer
 from sve_carddb.manifest import Kind
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.offline import _populate_adoptions
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
+from sve_carddb.snapshot.offline import _populate_adoptions, _prepare_catalog
+from sve_carddb.snapshot.values import array, canonical, digest, object_value
 from sve_carddb.source_archive import ArchiveError, seal_batch, verify_batch
 from sve_carddb.sources.official_jp import card_url
+from sve_carddb.translations.sources import Sources
 
 from .adoption_fixtures import (
     CODE,
@@ -66,17 +67,9 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> tuple[Case, Path, str]
         target.write_bytes((REPO / name).read_bytes())
     revision = commit(case.repository)
     config: dict[str, JsonValue] = {}
-    recipe: dict[str, JsonValue] = {
-        "version": "exact-json-v1",
-        "program_revision": revision,
-        "code_path": JSON_CODE,
-        "code_hash": digest((REPO / JSON_CODE).read_bytes()),
-        "config": config,
-        "config_hash": digest(canonical(config)),
-    }
+    recipe: dict[str, JsonValue] = {"version": "exact-json-v1", "config": config}
     context = BuildContext.from_inputs(
         revision,
-        {name: (REPO / name).read_bytes() for name in paths},
         {"catalog_source_recipes": {"exact-json-v1": recipe}},
     )
     review: dict[str, JsonValue] = {
@@ -179,8 +172,6 @@ def test_exact_frozen_field_source_and_f1(
         ("text_hash", "exact text hash mismatch"),
         ("raw", "hash"),
         ("missing_raw", "Missing|missing|absent|No such file"),
-        ("parser_hash", "program/config hash mismatch"),
-        ("runtime_pin", "runtime/dependency closure"),
         ("wrong_kind", "source field does not match kind"),
         ("half_raw", "exact raw/region/language mismatch"),
         ("evidence_missing", "mapping lacks approved source evidence"),
@@ -191,7 +182,7 @@ def test_exact_frozen_field_source_and_f1(
         ),
     ],
 )
-def test_source_single_guard_rejection(  # ruff: ignore[too-many-locals,complex-structure] -- independent mutations of one tiny sealed-source baseline
+def test_source_single_guard_rejection(  # ruff: ignore[too-many-locals] -- independent mutations of one tiny sealed-source baseline
     case: tuple[Case, Path, str], schema: CompiledSchema, mutation: str, message: str
 ) -> None:
     inputs, archive, _ = case
@@ -209,13 +200,6 @@ def test_source_single_guard_rejection(  # ruff: ignore[too-many-locals,complex-
             blob.write_bytes(b"Changed synthetic source")
         else:
             blob.unlink()
-    elif mutation == "runtime_pin":
-        context = object_value(review["context"])
-        context["dependencies"] = [
-            p
-            for p in array(context["dependencies"])
-            if object_value(p)["name"] != SOURCE_RUNTIME
-        ]
     elif mutation in {"wrong_kind", "trait", "disabled_recipe"}:
         object_value(data["subject"])["kind"] = (
             "class"
@@ -235,7 +219,7 @@ def test_source_single_guard_rejection(  # ruff: ignore[too-many-locals,complex-
             for e in array(member["evidence"])
             if object_value(e)["source_ref"] != reference
         ]
-    elif mutation != "parser_hash":
+    else:
         reference["locator" if mutation == "locator" else "text_hash"] = (
             "/missing" if mutation == "locator" else "sha256:" + "e" * 64
         )
@@ -249,24 +233,18 @@ def test_source_single_guard_rejection(  # ruff: ignore[too-many-locals,complex-
     revised = replace(inputs, revision=commit(inputs.repository), review=review)
     revised = current_case(revised)
     build = revised.build()
-    if mutation == "parser_hash":
-        config = object_value(parse(build.configuration.encode()))
-        object_value(object_value(config["catalog_source_recipes"])["exact-json-v1"])[
-            "code_hash"
-        ] = "sha256:" + "e" * 64
-        build = BuildContext.from_inputs(
-            build.program_revision,
-            {
-                pin.name: (revised.repository / pin.name).read_bytes()
-                for pin in build.dependencies
-            },
-            config,
-        )
     with create_database(schema) as db:
         with pytest.raises((ValueError, OSError, ArchiveError), match=message):
             with db.transaction():
                 _populate_adoptions(
-                    db, revised.inputs(), build=build, stores={"test-store": archive}
+                    db,
+                    revised.inputs(),
+                    build=build,
+                    stores={"test-store": archive},
+                    prepared=_prepare_catalog(
+                        revised.inputs(), build, {"test-store": archive}
+                    ),
+                    sources=Sources({"test-store": archive}, revised.repository, build),
                 )
         assert not db.rows("source_record")
 

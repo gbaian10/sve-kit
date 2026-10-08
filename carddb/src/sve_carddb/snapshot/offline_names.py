@@ -8,23 +8,22 @@ from pydantic import JsonValue
 from sve_carddb.digital_links.importer import Inputs as LinkInputs
 from sve_carddb.digital_links.importer import populate_links
 from sve_carddb.digital_name_policies.application import Inputs as NameInputs
-from sve_carddb.digital_name_policies.application import populate, prepare
-from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.digital_name_policies.application import populate
+from sve_carddb.snapshot.values import canonical, object_value, parse
 from sve_carddb.translations.digital import configuration as digital_configuration
 from sve_carddb.translations.importer import _refs
-from sve_carddb.translations.sources import Sources
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import BuildContext, SourceUse
+    from sve_carddb.build_inputs import BuildContext
     from sve_carddb.digital_links.importer import Result as LinkResult
     from sve_carddb.digital_name_policies.application import Result as NameResult
     from sve_carddb.snapshot.offline import Inputs
     from sve_carddb.text_observations.plan import TextPlan
     from sve_carddb.translations.current_names import Names
+    from sve_carddb.translations.sources import Sources
 
 
 @dataclass(frozen=True)
@@ -41,12 +40,10 @@ class Composer:
             else [pin.model_dump(mode="json") for pin in links.content.source_batches]
         )
         batches.extend({"batch_id": pin.card_batch} for pin in recipe.sources)
-        registry = read_yaml(recipe.repo / "authored/ids/index.yaml")
         config = self.inputs.configuration() | {
             "catalog_registry": {
                 "authored_revision": recipe.revision,
                 "index_path": "authored/ids/index.yaml",
-                "index_hash": digest(canonical(registry)),
             },
             "digital_link_sources": [
                 object_value(parse(value))
@@ -81,48 +78,33 @@ class Composer:
             config |= self.links.configuration() | digital_configuration(refs, targets)
         return config
 
-    def dependencies(self) -> dict[str, bytes]:
-        """Include exact policy bytes, not only selected eligibility hashes."""
-        return {"authored/" + name: raw for name, raw in self.inputs.load().files}
-
     def populate_links(
-        self, db: Database, *, context: BuildContext, stores: dict[str, Path]
+        self,
+        db: Database,
+        *,
+        context: BuildContext,
+        stores: dict[str, Path],
+        sources: Sources,
     ) -> LinkResult | None:
         """Import existing human data into the private DB only when its entry exists."""
         return (
             None
             if self.links is None
-            else populate_links(db, self.links, build=context, stores=stores)
+            else populate_links(
+                db, self.links, build=context, stores=stores, sources=sources
+            )
         )
-
-    def expected(
-        self,
-        db: Database,
-        texts: TextPlan,
-        *,
-        context: BuildContext,
-        stores: dict[str, Path],
-        replay: Names,
-        links: LinkResult | None,
-    ) -> tuple[SourceUse, ...]:
-        """Replay expectations independently before the writing stage."""
-        sources = Sources(stores, self.inputs.repository, context)
-        return prepare(
-            db, self.inputs, texts, sources=sources, replay=replay, links=links
-        ).uses
 
     def populate(
         self,
         db: Database,
         texts: TextPlan,
         *,
-        context: BuildContext,
-        stores: dict[str, Path],
         replay: Names,
         links: LinkResult | None,
+        sources: Sources,
     ) -> NameResult:
         """Compose owner-local names without enabling public digital browse data."""
-        sources = Sources(stores, self.inputs.repository, context)
         return populate(
             db, self.inputs, texts, sources=sources, replay=replay, links=links
         )

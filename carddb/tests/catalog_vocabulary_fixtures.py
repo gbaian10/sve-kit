@@ -48,7 +48,6 @@ class VocabularyCase:
     def build(self) -> BuildContext:
         return BuildContext.from_inputs(
             self.case.revision,
-            {name: (self.case.repository / name).read_bytes() for name in RUNTIME},
             source_configuration(self.case, self.case.inputs().configuration()),
         )
 
@@ -173,18 +172,9 @@ def make_vocabulary_case(root: Path) -> VocabularyCase:  # ruff: ignore[too-many
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes((REPO / name).read_bytes())
     revision = commit(case.repository)
-    path = "carddb/src/sve_carddb/snapshot/values.py"
-    recipe: dict[str, JsonValue] = {
-        "version": "exact-json-v1",
-        "program_revision": revision,
-        "code_path": path,
-        "code_hash": digest((REPO / path).read_bytes()),
-        "config": {},
-        "config_hash": digest(canonical({})),
-    }
+    recipe: dict[str, JsonValue] = {"version": "exact-json-v1", "config": {}}
     context = BuildContext.from_inputs(
         revision,
-        {name: (REPO / name).read_bytes() for name in RUNTIME},
         {"catalog_source_recipes": {"exact-json-v1": recipe}},
     )
     review: dict[str, JsonValue] = {

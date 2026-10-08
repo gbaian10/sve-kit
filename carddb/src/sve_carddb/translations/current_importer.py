@@ -51,6 +51,7 @@ def populate(  # ruff: ignore[complex-structure,too-many-branches] -- source val
     *,
     build: BuildContext,
     stores: dict[str, Path],
+    sources: Sources | None = None,
 ) -> InputRecord:
     """Read sources once for every currently used value before projection."""
     configuration = object_value(parse(build.configuration.encode()))
@@ -59,7 +60,7 @@ def populate(  # ruff: ignore[complex-structure,too-many-branches] -- source val
         != inputs.configuration()["translation_authored"]
     ):
         raise ValueError("Build configuration does not pin translation authored bytes")
-    sources = Sources(stores, inputs.repository, build)
+    sources = sources or Sources(stores, inputs.repository, build)
     records = snapshot.current_records()
     originals: dict[str, str] = {}
     values: dict[str, tuple[str, str | None] | None] = {}
@@ -137,6 +138,4 @@ def populate(  # ruff: ignore[complex-structure,too-many-branches] -- source val
                         "low_confidence": record.low_confidence,
                     },
                 )
-    result = input_record(build, sources.uses)
-    result.verify(db, build, tuple(sources.uses), complete=False)
-    return result
+    return input_record(build, sources.uses)

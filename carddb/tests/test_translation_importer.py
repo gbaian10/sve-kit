@@ -27,11 +27,15 @@ from sve_carddb.translations.importer import (
     import_glossary,
     validate_choice,
 )
-from sve_carddb.translations.sources import CODE_PATH, RUNTIME, Sources
+from sve_carddb.translations.sources import Sources
 
 from .adoption_fixtures import commit, git
 from .test_source_archive import _put, _resource, _store
 from .translation_fixtures import choice, envelope, template, term, write
+
+CODE_PATH = "carddb/src/sve_carddb/translations/sources.py"
+RUNTIME = (CODE_PATH,)
+
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -168,19 +172,13 @@ def frozen(  # ruff: ignore[too-many-locals] -- two sealed language sources shar
         "translation_recipes": {
             "translation-svwb-v1": {
                 "version": "translation-svwb-v1",
-                "program_revision": program,
-                "code_path": CODE_PATH,
-                "code_hash": digest((root / CODE_PATH).read_bytes()),
                 "config": {"provider": "svwb"},
-                "config_hash": digest(canonical({"provider": "svwb"})),
             }
         }
     }
     config.update(configuration((ja, zh), (("svwb", "22345678"),)))
     config.update(Inputs(root / "authored", root, authored).configuration())
-    build = BuildContext.from_inputs(
-        program, {name: (root / name).read_bytes() for name in RUNTIME}, config
-    )
+    build = BuildContext.from_inputs(program, config)
     return Fixture(root, store.root, program, authored, (ja, zh), build)
 
 
@@ -229,7 +227,6 @@ def test_human_review_preserves_machine_origin(
     config.update(inputs.configuration())
     build = BuildContext.from_inputs(
         frozen.program,
-        {name: (repository / name).read_bytes() for name in RUNTIME},
         config,
     )
     with importer_template.copy() as db:
@@ -330,25 +327,6 @@ def test_source_and_concept_guards_are_independent(
         pytest.raises((ValueError, ArchiveError), match=messages[fault]),
     ):
         validate_choice(invalid, original="合成甲", sources=sources, db=db)
-
-
-def test_name_source_runtime_is_required(frozen: Fixture) -> None:
-    build = BuildContext.model_validate_json(
-        canonical(
-            {
-                **frozen.build.model_dump(mode="json"),
-                "dependencies": [
-                    p.model_dump(mode="json")
-                    for p in frozen.build.dependencies
-                    if p.name != "carddb/src/sve_carddb/translations/name_sources.py"
-                ],
-            }
-        )
-    )
-    with pytest.raises(
-        ValueError, match=r"^Translation runtime/dependency closure cannot be replayed$"
-    ):
-        frozen.sources(build=build)
 
 
 def test_raw_tamper_never_falls_back_to_draft(frozen: Fixture, tmp_path: Path) -> None:
@@ -514,12 +492,11 @@ def test_effect_excerpt_has_exact_role_and_concept(
 def changed_build(frozen: Fixture, config: dict[str, JsonValue]) -> BuildContext:
     return BuildContext.from_inputs(
         frozen.program,
-        {name: (frozen.root / name).read_bytes() for name in RUNTIME},
         config,
     )
 
 
-@pytest.mark.parametrize("fault", ["revision", "bytes", "configuration", "japanese"])
+@pytest.mark.parametrize("fault", ["configuration", "japanese"])
 def test_immutable_authored_and_atomic_projection(
     frozen: Fixture, importer_template: DatabaseTemplate, tmp_path: Path, fault: str
 ) -> None:
@@ -528,14 +505,7 @@ def test_immutable_authored_and_atomic_projection(
     inputs = Inputs(repository / "authored", repository, frozen.authored)
     config = object_value(parse(frozen.build.configuration.encode()))
     message = ""
-    if fault == "revision":
-        inputs = replace(inputs, authored_revision=frozen.authored[:7])
-        message = "Translation authored revision must be a full Git SHA"
-    elif fault == "bytes":
-        index = repository / "authored/translations/index.yaml"
-        index.write_bytes(index.read_bytes() + b"\n")
-        message = "Translation bytes differ from immutable authored revision"
-    elif fault == "configuration":
+    if fault == "configuration":
         config.pop("translation_authored")
         message = "Build configuration does not pin translation authored bytes"
     else:
@@ -711,7 +681,6 @@ def test_digital_input_closure_refusals(  # ruff: ignore[complex-structure] -- m
     ("fault", "message"),
     [
         ("recipe", "Unsupported translation source recipe"),
-        ("provider", "Translation recipe/provider mismatch"),
         ("descriptor_provider", "Frozen evidence provider/kind mismatch"),
         ("descriptor_kind", "Frozen evidence provider/kind mismatch"),
     ],
@@ -719,16 +688,14 @@ def test_digital_input_closure_refusals(  # ruff: ignore[complex-structure] -- m
 def test_source_recipe_and_descriptor_refusals(
     frozen: Fixture, monkeypatch: pytest.MonkeyPatch, fault: str, message: str
 ) -> None:
-    config = object_value(parse(frozen.build.configuration.encode()))
-    recipe = object_value(
-        object_value(config["translation_recipes"])["translation-svwb-v1"]
-    )
     if fault == "recipe":
-        recipe["version"] = "unsupported-v1"
-    elif fault == "provider":
-        recipe["config"] = {"provider": "sv1"}
-        recipe["config_hash"] = digest(canonical(recipe["config"]))
-    sources = frozen.sources(build=changed_build(frozen, config))
+        sources = frozen.sources()
+        with pytest.raises(ValueError, match=message):
+            sources.document(
+                frozen.refs[0].model_copy(update={"parser": "unsupported-v1"})
+            )
+        return
+    sources = frozen.sources()
     if fault.startswith("descriptor"):
         read = FrozenSources.read
 

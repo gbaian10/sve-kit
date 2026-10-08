@@ -129,7 +129,6 @@ def make_staged(
     assert len(plan.included("printing")) == 2
     context = BuildContext.from_inputs(
         REVISION,
-        {"synthetic.lock": b"synthetic"},
         {"image_recipe": DEFAULT_RECIPE.version},
     )
     return Staged(frozen_cards, plan, context)

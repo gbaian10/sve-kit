@@ -250,11 +250,7 @@ def test_valid_webp_must_match_manifest_dimensions_and_bytes(
     for row in tables["image_variant"]:
         if row["path"] == path:
             row[field] = integer(row[field]) + 1
-    message = (
-        "Preview image hash or bytes mismatch"
-        if field == "bytes"
-        else "Preview image decoded format or dimensions mismatch"
-    )
+    message = "Preview image hash, bytes, format or dimensions mismatch"
     with pytest.raises(ValueError, match=f"^{message}$"):
         list(image_blobs(tables, images.library))
 
@@ -331,7 +327,9 @@ def test_equal_length_webp_tamper_requires_content_hash(
         assert decoded.format == "WEBP"
         assert decoded.size == (integer(variant["width"]), integer(variant["height"]))
     blob.write_bytes(changed)
-    with pytest.raises(ValueError, match=r"^Preview image hash or bytes mismatch$"):
+    with pytest.raises(
+        ValueError, match=r"^Preview image hash, bytes, format or dimensions mismatch$"
+    ):
         list(image_blobs(images.projection.tables, library))
 
 

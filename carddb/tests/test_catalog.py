@@ -79,9 +79,7 @@ def catalog() -> Catalog:
 
 
 def context(value: Catalog) -> BuildContext:
-    return BuildContext.from_inputs(
-        "a" * 40, {"synthetic.lock": b"lock"}, catalog_configuration(value)
-    )
+    return BuildContext.from_inputs("a" * 40, catalog_configuration(value))
 
 
 def test_catalog_aliases_are_multivalued_and_canonical_codes_win(db: Database) -> None:
@@ -165,7 +163,7 @@ def test_symbol_cannot_bypass_pins_and_adoption(
     value = catalog().model_copy(update={"symbols": (symbol(),)})
     build = context(value)
     if mutation == "unpinned":
-        build = BuildContext.from_inputs("a" * 40, {"synthetic.lock": b"lock"}, {})
+        build = BuildContext.from_inputs("a" * 40, {})
     with (
         pytest.raises(
             ValueError,

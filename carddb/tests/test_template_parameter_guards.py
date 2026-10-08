@@ -217,7 +217,7 @@ def test_adopted_exact_authored_concepts_reuse_the_full_glossary_loader(
     assert refs.quoted("Synthetic").target is not None
     assert refs.quoted("Synthetic ").issues == ("missing_card_name_concept",)
     assert len(refs.term_mentions("Synthetic")) == len(records)
-    assert "glossary" in refs.pins
+    assert "exact_concepts_hash" in refs.pins
     assert canonical(refs.pins)
 
 

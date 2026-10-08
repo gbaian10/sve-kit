@@ -60,7 +60,7 @@ def report_command(  # ruff: ignore[too-many-arguments,too-many-positional-argum
         *(p for p in (baseline, compare_context) if p is not None),
     )
     output_path(output, protected)
-    snapshot = load(authored, repository, authored_revision)
+    snapshot = load(authored, authored_revision)
     sources = Sources(
         stores, repository, BuildContext.model_validate_json(context.read_bytes())
     )

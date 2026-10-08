@@ -143,7 +143,9 @@ def test_build_rechecks_blob_tampering_before_returning(
         return result
 
     monkeypatch.setattr(image_assets, "build_variants", corrupt_after_encoding)
-    with pytest.raises(ValueError, match="blob hash or bytes mismatch"):
+    with pytest.raises(
+        ValueError, match="blob hash, bytes, dimensions or format mismatch"
+    ):
         build_regional_assets(frozen, output, region="jp", crops=empty_crops)
 
 
@@ -311,7 +313,9 @@ def test_source_dimensions_and_raw_bytes_are_checked_independently(
             item, result=replace(item.result, source_width=item.result.source_width + 1)
         )
     build = replace(build, images=(item, *build.images[1:]))
-    with pytest.raises(ValueError, match=r"source bytes|not configured"):
+    with pytest.raises(
+        ValueError, match=r"source bytes|not configured|crop box differs"
+    ):
         verify_asset_sources(
             build, {} if case == "unconfigured" else {frozen.store_id: frozen.root}
         )

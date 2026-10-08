@@ -26,6 +26,7 @@ from sve_carddb.snapshot.values import (
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+    from sve_carddb.image_checks import ImageChecks
     from sve_carddb.snapshot.project import Projection
     from sve_carddb.snapshot.project.source import Record
 
@@ -196,6 +197,7 @@ def prepare_media(  # ruff: ignore[too-many-locals] -- indexes, validated source
     *,
     revision: int,
     previous: JsonValue = None,
+    checks: ImageChecks | None = None,
 ) -> MediaPlan:
     """Verify private content-addressed outputs, then compare each card/art group.
 
@@ -210,7 +212,7 @@ def prepare_media(  # ruff: ignore[too-many-locals] -- indexes, validated source
         raise ValueError("Media revision must advance the committed state")
     members = {} if not old else object_value(old["members"])
     # Decode each unique source once before accepting its filename digest as evidence.
-    for _path, _raw in image_blobs(projection.tables, source):
+    for _path, _raw in image_blobs(projection.tables, source, checks=checks):
         pass
     prints = {string(r["id"]): r for r in projection.tables["printing"]}
     faces = {string(r["id"]): r for r in projection.tables["face"]}

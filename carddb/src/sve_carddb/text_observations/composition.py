@@ -51,7 +51,6 @@ def populate_text_preview(  # ruff: ignore[too-many-arguments] -- one transactio
     catalog_config: Catalog | None = None,
 ) -> InputRecord:
     """Retain diagnostic parents for quarantined observations inside the bundle transaction."""
-    expected = text_preview_uses(catalog, plan, stores, official=official)
     identity = populate_product_preview(
         db,
         catalog,
@@ -70,6 +69,4 @@ def populate_text_preview(  # ruff: ignore[too-many-arguments] -- one transactio
         from sve_carddb.catalog.importer import populate_catalog  # ruff: ignore[import-outside-top-level] -- the optional catalog importer shares the text interner
 
         populate_catalog(db, catalog_config, build=build, published=published)
-    result = input_record(build, (*identity.uses, *texts.uses))
-    result.verify(db, build, expected)
-    return result
+    return input_record(build, (*identity.uses, *texts.uses))

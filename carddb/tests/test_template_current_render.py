@@ -313,7 +313,6 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
     current_case: Case, tmp_path: Path
 ) -> None:
     from sve_carddb.catalog.adoption_models import Batch  # ruff: ignore[import-outside-top-level] -- minimal source fixture
-    from sve_carddb.catalog.adoption_sources import PinnedRepository  # ruff: ignore[import-outside-top-level] -- source-free current reader
     from sve_carddb.manifest import Kind  # ruff: ignore[import-outside-top-level] -- minimal source fixture
     from sve_carddb.source_archive import seal_batch  # ruff: ignore[import-outside-top-level] -- minimal source fixture
     from sve_carddb.sources.official_jp import card_url  # ruff: ignore[import-outside-top-level] -- synthetic source URL
@@ -378,7 +377,7 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
         },
     )
     revision = commit(current_case.repository)
-    inputs = read_templates(PinnedRepository(current_case.repository), revision)
+    inputs = read_templates(current_case.repository, revision)
     validated = validate_templates(inputs, sources, (batch,))
     member = generated.entries[0]
     result = render(
@@ -439,19 +438,12 @@ def test_current_package_splits_yaml_and_preserves_shared_closure(
 ) -> None:
     from sve_carddb.template_translations.current import from_files  # ruff: ignore[import-outside-top-level] -- reconstructed package readback
     from sve_carddb.template_translations.current_write import compose  # ruff: ignore[import-outside-top-level] -- current packaging boundary
-    from sve_carddb.template_translations.files import json_bytes  # ruff: ignore[import-outside-top-level] -- shared canonical YAML hash
-    from sve_carddb.translations.models import Index  # ruff: ignore[import-outside-top-level] -- shared index wire
 
     monkeypatch.setattr(
         "sve_carddb.template_translations.current_write.TARGET_BYTES", 1
     )
     package = compose(current_case.inputs.files, current_case.inputs.records)
     assert from_files(package).records == current_case.inputs.records
-    index = Index.model_validate_json(json_bytes(package.index))
-    assert index.translation_authored_format == 2
-    assert all(
-        digest(content) == index.includes[path] for path, _, content in package.content
-    )
     assert all(len(raw) < 1048576 for _, raw, _ in package.content)
     assert all(b"decisions:" not in raw for _, raw, _ in package.content)
 

@@ -7,15 +7,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_bundle import publish_bundle, verify_bundle
-from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.build_inputs import BuildContext, input_record
 from sve_carddb.extract.acceptance_en import acceptance_report, review_queue
 from sve_carddb.extract.official_en import extract_card, legacy_projection
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.html import MissingElementError
 from sve_carddb.manifest import Kind, Manifest, Region
-from sve_carddb.products import Language, load_product_identities, load_products
+from sve_carddb.products import load_product_identities, load_products
 from sve_carddb.products.official import PARSER, parse_products
 from sve_carddb.products.plan import plan_official_products
 from sve_carddb.registry.build import build
@@ -29,16 +26,7 @@ from sve_carddb.source_archive import ArchiveError, seal_batch
 from sve_carddb.source_corrections import FrozenImages
 from sve_carddb.source_corrections.images import evidence_url
 from sve_carddb.sources.official_en import card_url
-from sve_carddb.text_observations import (
-    Binding,
-    FrozenTexts,
-    Vocabulary,
-    importer,
-    plan_text_observations,
-    populate_text_preview,
-    text_configuration,
-    text_preview_uses,
-)
+from sve_carddb.text_observations import FrozenTexts, plan_text_observations
 
 from .en_extract_fixtures import page
 from .identity_evidence_fixtures import MemoryEvidence
@@ -54,13 +42,10 @@ from .test_source_archive import _put, _resource, _store
 from .text_observation_fixtures import MemoryTexts
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
     from pathlib import Path
 
     from pydantic import JsonValue
 
-    from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import InputRecord, SourceUse
     from sve_carddb.products.plan import OfficialProducts
     from sve_carddb.registry.preview import PreviewPlan
     from sve_carddb.registry.preview.evidence import CardEvidence
@@ -666,119 +651,3 @@ def test_omitted_back_face_is_rejected(case: Case) -> None:
             case.official,
             {case.store.store_id: case.store.root},
         )
-
-
-@pytest.mark.parametrize(
-    "change", [None, "omit_back", "parser", "usage", "locator", "archive"]
-)
-def test_en_bundle_checks_each_source_use_dimension_and_never_publishes_on_failure(
-    case: Case, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, change: str | None
-) -> None:
-    vocabulary = Vocabulary(
-        bindings=(
-            Binding(region="en", kind="class", raw="Synthetic class", code="synthetic"),
-            Binding(region="en", kind="type", raw="Synthetic type", code="synthetic"),
-            Binding(region="en", kind="trait", raw="Alpha", code="alpha"),
-            Binding(region="en", kind="trait", raw="Beta", code="beta"),
-            Binding(
-                region="en", kind="title", raw="Synthetic universe", code="synthetic"
-            ),
-        )
-    )
-    context = BuildContext.from_inputs(
-        case.official.identities.revision,
-        case.official.identities.dependencies()
-        | {"synthetic.lock": b"Test dependencies"},
-        {
-            "product_identity": case.official.identities.configuration(),
-            **text_configuration(case.texts, vocabulary, ()),
-        },
-    )
-    stores = {case.store.store_id: case.store.root}
-    expected = text_preview_uses(
-        case.official.identities.catalog, case.texts, stores, official=case.official
-    )
-
-    def corrupt(build: BuildContext, uses: Iterable[SourceUse]) -> InputRecord:
-        values = list(uses)
-        use = next(
-            use
-            for use in values
-            if use.usage == "face_text_observation" and '"face_index":1' in use.locator
-        )
-        values.remove(use)
-        if change == "archive":
-            use = use.model_copy(
-                update={
-                    "source": use.source.model_copy(
-                        update={
-                            "archive": use.source.archive.model_copy(
-                                update={"batch_id": "sha256:" + "0" * 64}
-                            )
-                        }
-                    )
-                }
-            )
-        elif change == "parser":
-            use = use.model_copy(
-                update={
-                    "source": use.source.model_copy(
-                        update={"parser_version": "changed"}
-                    )
-                }
-            )
-        elif change in {"usage", "locator"}:
-            use = use.model_copy(update={change: "changed"})
-        if change != "omit_back":
-            values.append(use)
-        return input_record(build, values)
-
-    if change is not None:
-        monkeypatch.setattr(importer, "input_record", corrupt)
-
-    def populate(db: Database) -> InputRecord:
-        return populate_text_preview(
-            db,
-            case.official.identities.catalog,
-            case.texts,
-            authored_revision=case.official.identities.revision,
-            build=context,
-            vocabulary=vocabulary,
-            published=(),
-            languages=(
-                Language(code="en", fallback_order=(), display_name="English"),
-                Language(code="ja", fallback_order=(), display_name="Japanese"),
-            ),
-            stores=stores,
-            official=case.official,
-        )
-
-    destination = tmp_path / "bundle"
-    schema = compile_build(("en",))
-    if change is None:
-        record = publish_bundle(
-            schema,
-            destination,
-            context,
-            expected,
-            populate,
-            case.report(),
-            stores=stores,
-        )
-        assert (
-            verify_bundle(schema, destination, context, expected, stores=stores)
-            == record
-        )
-        assert b"Synthetic front" not in (destination / "report.json").read_bytes()
-    else:
-        with pytest.raises(ValueError, match="use closure"):
-            publish_bundle(
-                schema,
-                destination,
-                context,
-                expected,
-                populate,
-                case.report(),
-                stores=stores,
-            )
-        assert not destination.exists()

@@ -29,11 +29,9 @@ recipe 核對，不能為吻合率丟欄位。
 缺歷史來源、parser 不支援與真來源更新必須分開診斷；hash 差異本身不證明
 是哪一種，不自動撤回、更正或採納任何歷史決定。
 
-`expected_source_uses` 來自 `text_preview_uses` 的完整輸入聯集，包括未採納／
-缺效果的觀測、current 比較、商品頁／區塊、商品身分證據、更正比較與圖片。
-不同用途、面索引、locator、parser、batch、descriptor、first receipt 均保留。
-這只是獨立宣告的 **expected** 閉包；必須再用 `populate_text_preview`、
-`publish_bundle` 與 `verify_bundle` 對照實際 DB 和來源，才是 F1 驗收。
+本次實際來源用途保存於 inputs 摘要；原始 bytes 與來源 metadata 在讀取時驗證，
+面索引與 owner 適用性在 plan 檢查。`populate_text_preview` 在同一交易填 DB 一次，
+完成後直接保存該 DB，不再執行 build seal 或 expected 使用閉包重播。
 只有身分／商品 bundle 不表示文字／更正 DB 匯入通過；plan 的 `applied`
 也不表示更正已 materialize。`raw_effect_present` 保留 extractor 原始值；`effect_present` 是既有 presence
 投影後的值，完整 `effect_presence` 證據與 raw／projected hash 分開列出。只有

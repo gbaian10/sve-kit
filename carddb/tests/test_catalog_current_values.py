@@ -12,8 +12,9 @@ from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.adoption_loader import load_adoptions
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.offline import _populate_adoptions
+from sve_carddb.snapshot.offline import _populate_adoptions, _prepare_catalog
 from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.translations.sources import Sources
 
 from .adoption_fixtures import commit, make_case
 from .current_catalog_fixtures import current_case
@@ -39,7 +40,14 @@ def test_current_catalog_has_provenance_without_adoption_decisions(
     assert len(snapshot.current_records()) == 4
     with create_database(compile_current_build()) as db:
         with db.transaction():
-            _populate_adoptions(db, case.inputs(), build=case.build(), stores={})
+            _populate_adoptions(
+                db,
+                case.inputs(),
+                build=case.build(),
+                stores={},
+                prepared=_prepare_catalog(case.inputs(), case.build(), {}),
+                sources=Sources({}, case.inputs().repository, case.build()),
+            )
         assert len(db.rows("vocabulary")) == 1
         assert len(db.rows("language")) == 3
         assert not db.rows("decision")
@@ -88,7 +96,14 @@ def test_vocabulary_label_translation_is_a_use_of_the_japanese_label(
     schema = compile_current_build(("t0", "translation_evidence", "translation_names"))
     with create_database(schema) as db:
         with db.transaction():
-            _populate_adoptions(db, case.inputs(), build=case.build(), stores={})
+            _populate_adoptions(
+                db,
+                case.inputs(),
+                build=case.build(),
+                stores={},
+                prepared=_prepare_catalog(case.inputs(), case.build(), {}),
+                sources=Sources({}, case.inputs().repository, case.build()),
+            )
         vocabulary = db.rows("vocabulary")[0].values
         use = db.rows("translation_use")[0].values
         assert (use["vocabulary_kind"], use["vocabulary_code"], use["field"]) == (
@@ -147,12 +162,17 @@ def test_current_fallback_is_still_checked(
         ),
     ):
         with db.transaction():
-            _populate_adoptions(db, case.inputs(), build=case.build(), stores={})
+            _populate_adoptions(
+                db,
+                case.inputs(),
+                build=case.build(),
+                stores={},
+                prepared=_prepare_catalog(case.inputs(), case.build(), {}),
+                sources=Sources({}, case.inputs().repository, case.build()),
+            )
 
 
-@pytest.mark.parametrize(
-    "mutation", ["short_sha", "empty_entries", "duplicate_entries"]
-)
+@pytest.mark.parametrize("mutation", ["empty_entries", "duplicate_entries"])
 def test_current_inputs_require_explicit_immutable_pins(
     current_baseline: Case, mutation: str
 ) -> None:
@@ -169,7 +189,7 @@ def test_current_inputs_require_explicit_immutable_pins(
         inputs.load()
 
 
-@pytest.mark.parametrize("mutation", ["configuration", "uncommitted"])
+@pytest.mark.parametrize("mutation", ["configuration"])
 def test_native_current_entry_rejects_unpinned_catalog(
     current_baseline: Case, tmp_path: Path, mutation: str
 ) -> None:
@@ -178,9 +198,7 @@ def test_native_current_entry_rejects_unpinned_catalog(
     case = replace(current_baseline, repository=root, root=root / "authored")
     build = case.build()
     if mutation == "configuration":
-        build = BuildContext.from_inputs(
-            build.program_revision, {"synthetic.lock": b"lock"}, {}
-        )
+        build = BuildContext.from_inputs(build.program_revision, {})
         message = "^Build configuration does not pin adoption inputs$"
     else:
         path = case.root / "catalog-adoptions/languages/shared/001.yaml"
@@ -188,7 +206,14 @@ def test_native_current_entry_rejects_unpinned_catalog(
         message = "^Adoption bytes differ from immutable authored revision$"
     with create_database(compile_current_build()) as db:
         with pytest.raises(ValueError, match=message), db.transaction():
-            _populate_adoptions(db, case.inputs(), build=build, stores={})
+            _populate_adoptions(
+                db,
+                case.inputs(),
+                build=build,
+                stores={},
+                prepared=_prepare_catalog(case.inputs(), build, {}),
+                sources=Sources({}, case.inputs().repository, build),
+            )
         assert not db.rows("source_record")
         assert not db.rows("language")
         assert not db.rows("vocabulary")
@@ -246,5 +271,12 @@ def test_current_ui_fallback_closure_and_policy(
     case = replace(case, revision=commit(root))
     with create_database(compile_current_build()) as db:
         with pytest.raises(ValueError, match="^" + message + "$"), db.transaction():
-            _populate_adoptions(db, case.inputs(), build=case.build(), stores={})
+            _populate_adoptions(
+                db,
+                case.inputs(),
+                build=case.build(),
+                stores={},
+                prepared=_prepare_catalog(case.inputs(), case.build(), {}),
+                sources=Sources({}, case.inputs().repository, case.build()),
+            )
         assert not db.rows("source_record")

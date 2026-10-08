@@ -16,7 +16,7 @@ from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.adoption_importer import AdoptionInputs
 from sve_carddb.catalog.adoption_loader import load_adoptions
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
+from sve_carddb.snapshot.values import array, canonical, digest, object_value
 
 if TYPE_CHECKING:
     from sve_carddb.catalog.adoption_loader import Entry
@@ -179,33 +179,15 @@ class Case:
     def build(self) -> BuildContext:
         return BuildContext.from_inputs(
             self.revision,
-            {
-                str(object_value(pin)["name"]): (
-                    self.repository / str(object_value(pin)["name"])
-                ).read_bytes()
-                for pin in array(object_value(self.review["context"])["dependencies"])
-            },
             source_configuration(self, self.inputs().configuration()),
         )
 
 
 def source_configuration(
-    case: Case, config: dict[str, JsonValue]
+    _case: Case, config: dict[str, JsonValue]
 ) -> dict[str, JsonValue]:
     """Give the build its own current recipes without touching signed historical context."""
-    reviewed = object_value(
-        parse(str(object_value(case.review["context"])["configuration"]).encode())
-    )
-    if "catalog_source_recipes" not in reviewed:
-        return config
-    recipes = object_value(reviewed["catalog_source_recipes"])
-    for value in recipes.values():
-        recipe = object_value(value)
-        recipe["program_revision"] = case.revision
-        recipe["code_hash"] = digest(
-            (case.repository / str(recipe["code_path"])).read_bytes()
-        )
-    return config | {"catalog_source_recipes": recipes}
+    return config
 
 
 def make_case(root: Path) -> Case:
@@ -214,20 +196,13 @@ def make_case(root: Path) -> Case:
     (root / CODE).parent.mkdir(parents=True)
     (root / CODE).write_bytes((REPO / CODE).read_bytes())
     revision = commit(root)
-    context = BuildContext.from_inputs(revision, {CODE: (root / CODE).read_bytes()}, {})
+    context = BuildContext.from_inputs(revision, {})
     review: dict[str, JsonValue] = {
         "context": context.model_dump(mode="json"),
         "source_batches": [],
     }
     config: dict[str, JsonValue] = {"unicode_version": unicodedata.unidata_version}
-    normalizer: dict[str, JsonValue] = {
-        "version": "nfkc-casefold-v1",
-        "program_revision": revision,
-        "code_path": CODE,
-        "code_hash": digest((root / CODE).read_bytes()),
-        "config": config,
-        "config_hash": digest(canonical(config)),
-    }
+    normalizer: dict[str, JsonValue] = {"version": "nfkc-casefold-v1", "config": config}
     authored = root / "authored"
     languages: list[JsonValue] = [
         record(

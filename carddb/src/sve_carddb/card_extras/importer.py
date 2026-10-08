@@ -66,9 +66,7 @@ def populate_card_extras(
                 "source_id": gap.source_id,
             },
         )
-    record = input_record(build, expected)
-    record.verify(db, build, expected, complete=False)
-    return record
+    return input_record(build, expected)
 
 
 def _questions(db: Database, plan: ExtrasPlan, texts: TextInterner) -> None:

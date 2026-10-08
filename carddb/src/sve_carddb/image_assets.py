@@ -13,7 +13,7 @@ from pydantic import JsonValue
 from sve_carddb.build_inputs import Source, SourceUse, insert_raw_sources, uses_sorted
 from sve_carddb.extract.official_en import extract_card as extract_en
 from sve_carddb.extract.official_jp import extract_card
-from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.image_checks import ImageChecks
 from sve_carddb.image_variants import (
     DEFAULT_RECIPE,
     SIZES,
@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
 
     from sve_carddb.build_db import Database, Row, Value
+    from sve_carddb.frozen_sources import FrozenSources
     from sve_carddb.image_crops import ImageCrops
     from sve_carddb.registry.preview import PreviewPlan
 
@@ -283,6 +284,7 @@ def build_regional_assets(
     region: Region,
     crops: ImageCrops,
     workers: int = 1,
+    checks: ImageChecks | None = None,
 ) -> ImageBuild:
     """Convert one pinned regional image batch, reusing every verified cache hit."""
     if region not in PARSERS:
@@ -296,6 +298,10 @@ def build_regional_assets(
         raise ValueError(
             f"Image conversion requires an exclusively {region.upper()} image batch"
         )
+    checks = checks or ImageChecks()
+    checks.batches.setdefault(
+        (images.root.resolve(), images.store_id, images.batch_id), images
+    )
     start = perf_counter()
 
     def convert(version: str) -> EncodedImage:
@@ -325,7 +331,19 @@ def build_regional_assets(
             blob_root=roots.preview,
             cache_root=roots.cache,
             override=crops.box(descriptor),
+            checks=checks,
         )
+        with checks.lock:
+            checks.sources.add(
+                (
+                    source,
+                    descriptor.raw_bytes,
+                    result.source_width,
+                    result.source_height,
+                    result.crop_box,
+                    region,
+                )
+            )
         return EncodedImage(
             source, descriptor.raw_bytes, result, region, perf_counter() - began
         )
@@ -339,12 +357,15 @@ def build_regional_assets(
         with ThreadPoolExecutor(max_workers=workers) as executor:
             results = tuple(executor.map(convert, versions, buffersize=workers))
     result = ImageBuild(results, perf_counter() - start)
-    verify_assets(result, roots.preview)
+    verify_assets(result, roots.preview, checks=checks)
     return result
 
 
-def verify_assets(build: ImageBuild, preview: Path) -> None:
+def verify_assets(
+    build: ImageBuild, preview: Path, *, checks: ImageChecks | None = None
+) -> None:
     """Recheck five-size closure, provenance and actual decoded blob metadata."""
+    checks = checks or ImageChecks()
     ids = [item.result.image_id for item in build.images]
     urls = [item.source.url for item in build.images]
     if len(set(ids)) != len(ids) or len(set(urls)) != len(urls):
@@ -374,17 +395,18 @@ def verify_assets(build: ImageBuild, preview: Path) -> None:
             expected_path = f"images/sha256/{variant.sha256[:2]}/{variant.sha256}.webp"
             if variant.path != expected_path:
                 raise ValueError("Image variant path is not content addressed")
-            data = resolve_within(preview, PurePosixPath(variant.path)).read_bytes()
-            if len(data) != variant.bytes or digest(data) != "sha256:" + variant.sha256:
-                raise ValueError("Image variant blob hash or bytes mismatch")
-            with Image.open(BytesIO(data)) as decoded:
-                if decoded.format != "WEBP" or decoded.size != (
-                    variant.width,
-                    variant.height,
-                ):
-                    raise ValueError(
-                        "Image variant decoded dimensions or format mismatch"
-                    )
+            metadata = checks.inspect(
+                resolve_within(preview, PurePosixPath(variant.path))
+            )
+            if metadata != (
+                variant.bytes,
+                "sha256:" + variant.sha256,
+                "WEBP",
+                (variant.width, variant.height),
+            ):
+                raise ValueError(
+                    "Image variant blob hash, bytes, dimensions or format mismatch"
+                )
 
 
 def _public_variant(format_name: str, is_original: bool) -> bool:
@@ -420,9 +442,11 @@ def populate_assets(
     build: ImageBuild,
     references: tuple[ImageReference, ...],
     preview: Path,
+    *,
+    checks: ImageChecks | None = None,
 ) -> tuple[SourceUse, ...]:
     """Populate only verified bindings in the caller's bundle transaction after blobs."""
-    verify_assets(build, preview)
+    verify_assets(build, preview, checks=checks)
     if len({(ref.printing_id, ref.face_id) for ref in references}) != len(references):
         raise ValueError("Duplicate printing image binding")
     printing_rows = {row.values["id"]: row for row in db.rows("printing")}
@@ -515,10 +539,15 @@ def _variants(db: Database, result: VariantSet, image_id: str) -> None:
         )
 
 
-def verify_asset_sources(
-    build: ImageBuild, stores: Mapping[str, Path], *, crops: ImageCrops | None = None
+def verify_asset_sources(  # ruff: ignore[complex-structure] -- batch membership, crop applicability and source metadata are independent checks
+    build: ImageBuild,
+    stores: Mapping[str, Path],
+    *,
+    crops: ImageCrops | None = None,
+    checks: ImageChecks | None = None,
 ) -> None:
     """Compare retained source size and oriented dimensions with the sealed PNGs."""
+    checks = checks or ImageChecks()
     batches: dict[tuple[str, str], FrozenSources] = {}
     current: dict[tuple[str, str], set[str]] = {}
     for item in build.images:
@@ -528,10 +557,31 @@ def verify_asset_sources(
             root = stores.get(pin.store_id)
             if root is None:
                 raise ValueError("Image source store is not configured")
-            batches[key] = FrozenSources(root, *key)
+            batches[key] = checks.batch(root, *key)
             current[key] = {
                 entry.source_version_id for entry in batches[key].inventory.current
             }
+        descriptor = batches[key].descriptor(item.source.id)
+        dimensions = item.result.source_width, item.result.source_height
+        expected = crop_box(
+            *dimensions, None if crops is None else crops.box(descriptor)
+        )
+        signature = (
+            item.source,
+            item.raw_bytes,
+            *dimensions,
+            item.result.crop_box,
+            item.region,
+        )
+        if item.source.id not in current[key] or (
+            descriptor.provider,
+            descriptor.kind,
+        ) != (item.region, "image"):
+            raise ValueError("Image source is not current in its regional batch")
+        if item.result.crop_box != expected:
+            raise ValueError("Image crop box differs from adopted source crop")
+        if signature in checks.sources:
+            continue
         source, raw, descriptor = batches[key].read(
             item.source.id, parser_version=DEFAULT_RECIPE.version
         )
@@ -540,10 +590,13 @@ def verify_asset_sources(
             descriptor.kind,
         ) != (item.region, "image"):
             raise ValueError("Image source is not current in its regional batch")
-        with Image.open(BytesIO(raw)) as opened:
-            oriented = ImageOps.exif_transpose(opened)
-            dimensions = oriented.size
-            source_format = opened.format
+        metadata = checks.png.get(source.sha256)
+        if metadata is None:
+            with Image.open(BytesIO(raw)) as opened:
+                oriented = ImageOps.exif_transpose(opened)
+                metadata = opened.format, oriented.size
+            checks.png[source.sha256] = metadata
+        source_format, dimensions = metadata
         if (
             source != item.source
             or descriptor.raw_bytes != item.raw_bytes
@@ -556,3 +609,4 @@ def verify_asset_sources(
         )
         if item.result.crop_box != expected:
             raise ValueError("Image crop box differs from adopted source crop")
+        checks.sources.add(signature)

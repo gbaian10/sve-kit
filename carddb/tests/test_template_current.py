@@ -7,7 +7,6 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.catalog.adoption_models import Batch
-from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.manifest import Kind
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.source_archive import seal_batch
@@ -94,7 +93,7 @@ def make_case(tmp_path: Path) -> Case:
     }
     _write(root, values)
     revision = commit(root)
-    inputs = read_templates(PinnedRepository(root), revision)
+    inputs = read_templates(root, revision)
     return Case(root, revision, inputs, sources, generated, (batch,))
 
 
@@ -182,9 +181,7 @@ def test_read_is_source_free_and_low_confidence_stays_active(
     mocker.patch.object(
         current_case.sources, "generate", side_effect=AssertionError("No raw reads")
     )
-    inputs = read_templates(
-        PinnedRepository(current_case.repository), current_case.revision
-    )
+    inputs = read_templates(current_case.repository, current_case.revision)
     assert len(inputs.translations()) == 1
     assert inputs.translations()[0].low_confidence
     assert inputs.translations()[0].origin == "machine"
@@ -228,7 +225,7 @@ def test_new_commit_can_edit_text_and_note_without_receipt(current_case: Case) -
     )
     index_path.write_bytes(canonical(index))
     revision = commit(current_case.repository)
-    inputs = read_templates(PinnedRepository(current_case.repository), revision)
+    inputs = read_templates(current_case.repository, revision)
     assert inputs.translations()[0].data.text.startswith("Changed ")
     verified = validate_templates(inputs, current_case.sources, current_case.batches)
     assert verified.frequencies
@@ -348,11 +345,11 @@ def test_current_rule_git_mode_is_checked(current_case: Case) -> None:
     path = current_case.repository / PATH
     path.parent.mkdir(parents=True)
     path.symlink_to("../translations/index.yaml")
-    revision = commit(current_case.repository)
+    commit(current_case.repository)
     with pytest.raises(
-        ValueError, match=r"^Missing or unsafe current parameter rules$"
+        ValueError, match=r"^Missing or symlink current parameter rules$"
     ):
-        load(PinnedRepository(current_case.repository), revision)
+        load(current_case.repository)
 
 
 def test_new_definition_uses_payload_id_and_verifies_its_source(

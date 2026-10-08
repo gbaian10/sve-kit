@@ -10,7 +10,6 @@ import pytest
 from pydantic import JsonValue, ValidationError
 from ruamel.yaml.error import YAMLError
 
-from sve_carddb.build_inputs import BuildContext
 from sve_carddb.products.identities import _model, _shard, load_product_identities
 from sve_carddb.products.identity_models import IdentityShard, ProductLink
 from sve_carddb.products.official import parse_products as parse_verified_products
@@ -75,7 +74,6 @@ def wire_error(area: str, field: str) -> str:
         "duplicate_key",
         "alias",
         "unknown_yaml_tag",
-        "dirty_shard",
     ],
 )
 def test_inventory_yaml_and_revision_constraints(  # ruff: ignore[complex-structure] -- independent filesystem and YAML counterexamples
@@ -220,36 +218,6 @@ def test_same_match_cannot_be_appended_even_to_same_id(
     fixture.revision = commit(fixture.root)
     with pytest.raises(ValueError, match="Duplicate global product identity match"):
         fixture.load()
-
-
-@pytest.mark.parametrize(
-    "area",
-    [
-        "revision",
-        "missing_config",
-        "missing_dependency",
-        "physical_hash",
-    ],
-)
-def test_each_build_pin_is_required(
-    identity_fixture: IdentityFixture, area: str
-) -> None:
-    identities = identity_fixture.load()
-    dependencies = identities.dependencies() | {"synthetic.lock": b"Synthetic"}
-    config = identities.configuration()
-    if area == "revision":
-        config["authored_revision"] = "0" * 40
-    elif area == "missing_dependency":
-        del dependencies["authored/" + NAME]
-    elif area == "physical_hash":
-        dependencies["authored/" + NAME] += b"Changed"
-    context = BuildContext.from_inputs(
-        identity_fixture.revision,
-        dependencies,
-        {} if area == "missing_config" else {"product_identity": config},
-    )
-    with pytest.raises(ValueError, match="pin mismatch"):
-        identities.verify_context(context)
 
 
 def test_name_and_date_changes_keep_id_new_url_needs_alias(
@@ -453,7 +421,7 @@ def test_expansion_match_requires_exact_verified_query(
         fixture.load()
 
 
-def test_record_order_is_checked(identity_fixture: IdentityFixture) -> None:
+def test_unsorted_records_are_accepted(identity_fixture: IdentityFixture) -> None:
     fixture = identity_fixture
     page = fixture.pages[0]
     shard = identity_envelope(
@@ -462,10 +430,7 @@ def test_record_order_is_checked(identity_fixture: IdentityFixture) -> None:
     items(shard["records"]).reverse()
     install_identity(fixture.root, shard)
     fixture.revision = commit(fixture.root)
-    with pytest.raises(
-        ValueError, match="Product identity records must be sorted and unique"
-    ):
-        fixture.load()
+    assert len(fixture.load().records) == 2
 
 
 def test_evidence_region_is_not_assumed_from_match_region(
@@ -516,7 +481,7 @@ def test_state_field_is_not_part_of_the_identity_format(
         _model(IdentityShard, shard)
 
 
-def test_comment_only_bytes_keep_semantic_hash_but_fail_exact_revision(
+def test_comment_only_working_tree_edit_keeps_semantic_hash(
     identity_fixture: IdentityFixture,
 ) -> None:
     fixture = identity_fixture
@@ -524,8 +489,7 @@ def test_comment_only_bytes_keep_semantic_hash_but_fail_exact_revision(
     before = read_yaml(path)
     path.write_bytes(path.read_bytes() + b"# Physical-only edit\n")
     assert read_yaml(path) == before
-    with pytest.raises(ValueError, match="bytes differ from pinned authored revision"):
-        fixture.load()
+    assert fixture.load().records
 
 
 @pytest.mark.parametrize("field", ["source_version_id", "product_block_ordinal"])

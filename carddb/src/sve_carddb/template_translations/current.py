@@ -25,9 +25,9 @@ CURRENT_FORMAT = 2
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+    from pathlib import Path
 
     from sve_carddb.catalog.adoption_models import Batch, SourceRef
-    from sve_carddb.catalog.adoption_sources import PinnedRepository
     from sve_carddb.template_translations.current_sources import Sources
     from sve_carddb.template_translations.members import Reconstructed
 
@@ -66,7 +66,7 @@ def shard(raw: bytes) -> Shard:
     except ValidationError:
         raise ValueError("Invalid current template shard") from None
     keys = tuple(record.record_key for record in result.records)
-    if keys != tuple(sorted(set(keys))) or any(
+    if len(keys) != len(set(keys)) or any(
         record.record_key != key(record) for record in result.records
     ):
         raise ValueError("Current template selection keys must be unique and exact")
@@ -94,7 +94,6 @@ class Inputs:
 def from_files(files: Files) -> Inputs:
     """A current-tree snapshot never becomes a successful build just by parsing."""
     glossary = Glossary(
-        files.index,
         tuple(
             f
             for f in files.content
@@ -160,8 +159,8 @@ def _texts(
                 )
 
 
-def read_templates(repository: PinnedRepository, revision: str) -> Inputs:
-    """Read only current Git blobs; source/owner checks belong to full build validation."""
+def read_templates(repository: Path, revision: str) -> Inputs:
+    """Read current working-tree values; source/owner checks belong to full validation."""
     return from_files(read(repository, revision))
 
 

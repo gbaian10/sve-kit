@@ -25,7 +25,7 @@ bases, F1 program/dependency/configuration reconstruction, archived evidence,
 effective face/art ownership and move coverage, effective repair graphs, source
 freshness, or semantic revert dependencies/inverse states. Loading a transition
 means its envelope is valid; it does not mean these claims have been verified. The example program in the contract uses illustrative F1 pins; real
-inputs follow `BuildContext` (nonempty dependency pins and canonical JSON text
+inputs follow `BuildContext` (program revision and canonical JSON text
 configuration), as required by source-archive §2.2.1.
 
 Until effective projection is implemented, existing registry readers and append

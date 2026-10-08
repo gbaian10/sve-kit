@@ -5,9 +5,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.registry.storage import load, read_yaml, relayout, write_files
-from sve_carddb.snapshot.values import canonical, digest, object_value
-from sve_carddb.translations.models import IdentityBasis
+from sve_carddb.registry.storage import load, relayout, write_files
+from sve_carddb.snapshot.values import digest, object_value
 from sve_carddb.translations.name_identity import IdentityEvidence
 
 from .adoption_fixtures import commit
@@ -24,31 +23,19 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> Fixture:
     return make_fixture(tmp_path_factory.mktemp("current-name-identity"))
 
 
-def basis(fixture: Fixture, revision: str | None = None) -> IdentityBasis:
-    return IdentityBasis(
-        authored_revision=revision or fixture.authored,
-        registry_index_hash=digest(
-            canonical(read_yaml(fixture.root / "authored/ids/index.yaml"))
-        ),
-    )
-
-
 def test_current_identity_binds_exact_permanent_face(baseline: Fixture) -> None:
-    current = basis(baseline)
-    identity = IdentityEvidence(baseline.sources(), current.authored_revision)
+    identity = IdentityEvidence(baseline.sources(), baseline.authored)
     result = identity.association(
-        current, baseline.jp, card_id=baseline.card.id, face_id=baseline.face.id
+        baseline.jp, card_id=baseline.card.id, face_id=baseline.face.id
     )
     assert result == ("ja", "Synthetic card", baseline.card.id, baseline.face.id)
     assert identity.uses[0].usage == "name_identity"
-    assert identity.registry(current) is identity.registry(current)
+    assert identity.registry() is identity.registry()
 
 
 @pytest.mark.parametrize(
     ("fault", "message"),
     [
-        ("consumer", "Name identity basis differs from current authored revision"),
-        ("hash", "Name identity registry index hash mismatch"),
         ("face", "Name override frozen evidence belongs to another card or face"),
         ("card", "Name override frozen evidence belongs to another card or face"),
         ("locator", "Evidence JSON Pointer is absent"),
@@ -57,15 +44,10 @@ def test_current_identity_binds_exact_permanent_face(baseline: Fixture) -> None:
 def test_current_identity_pin_and_owner_refusals(
     baseline: Fixture, fault: str, message: str
 ) -> None:
-    current = basis(baseline)
     ref = baseline.jp
-    consumer = current.authored_revision
+    consumer = baseline.authored
     card, face = baseline.card.id, baseline.face.id
-    if fault == "consumer":
-        consumer = "0" * 40
-    elif fault == "hash":
-        current = current.model_copy(update={"registry_index_hash": digest(b"wrong")})
-    elif fault == "face":
+    if fault == "face":
         face = "f:" + "0" * 32
     elif fault == "card":
         card = "c:" + "0" * 32
@@ -73,7 +55,7 @@ def test_current_identity_pin_and_owner_refusals(
         ref = ref.model_copy(update={"locator": "/faces/9/name"})
     with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
         IdentityEvidence(baseline.sources(), consumer).association(
-            current, ref, card_id=card, face_id=face
+            ref, card_id=card, face_id=face
         )
 
 
@@ -101,8 +83,8 @@ def test_current_physical_observation_and_identity(
                 b"wrong"
             )
     write_files(relayout(root, list(entries.values())))
-    current = basis(fixture, commit(fixture.root))
+    revision = commit(fixture.root)
     with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
-        IdentityEvidence(fixture.sources(), current.authored_revision).association(
-            current, fixture.jp
+        IdentityEvidence(fixture.sources(), revision).association(
+            fixture.jp, card_id=fixture.card.id, face_id=fixture.face.id
         )

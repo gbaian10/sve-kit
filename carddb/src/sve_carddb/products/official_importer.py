@@ -118,6 +118,4 @@ def populate_official_products(
                 "source_id": inclusion.page.source.id,
             },
         )
-    inputs = input_record(build, uses)
-    inputs.verify(db, build, expected, complete=False)
-    return inputs
+    return input_record(build, uses)

@@ -75,10 +75,7 @@ def ready_db(
             for table, values in baseline:
                 database.insert(table, values)
             staging = plan()
-            record = populate_construction(database, staging, build=context(staging))
-            record.verify(
-                database, context(staging), staging.source_uses(), complete=False
-            )
+            populate_construction(database, staging, build=context(staging))
         yield database
 
 

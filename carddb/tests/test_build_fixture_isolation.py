@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
-from .test_build_bundle import sealed_uses as sealed_uses  # ruff: ignore[useless-import-alias] -- exercise the actual per-test fixture
-from .test_build_bundle import sealed_uses_template as sealed_uses_template  # ruff: ignore[useless-import-alias] -- register module fixture dependency
+from .build_source_fixtures import sealed_uses as sealed_uses  # ruff: ignore[useless-import-alias] -- exercise the actual per-test fixture
+from .build_source_fixtures import sealed_uses_template as sealed_uses_template  # ruff: ignore[useless-import-alias] -- register module fixture dependency
 from .test_image_assets import frozen as frozen  # ruff: ignore[useless-import-alias] -- exercise the actual per-test fixture
 
 if TYPE_CHECKING:

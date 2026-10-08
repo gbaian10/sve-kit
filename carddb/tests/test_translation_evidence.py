@@ -136,13 +136,12 @@ def test_identical_labels_coexist_across_glossary_and_vocabulary(
 @pytest.mark.parametrize(
     "filename", ["003.yaml.tmp-abc", "notes.txt", "unindexed.yaml"]
 )
-def test_every_unindexed_file_is_rejected(
+def test_nondata_files_are_ignored(
     glossary: tuple[Path, dict[str, dict[str, JsonValue]]], filename: str
 ) -> None:
     root, _ = glossary
     (root / "translations" / filename).write_text("synthetic")
-    with pytest.raises(ValueError, match="closure"):
-        load_glossary(root)
+    assert load_glossary(root).current_records()
 
 
 @pytest.mark.parametrize("state", ["proposed", "model_reviewed"])
@@ -237,8 +236,11 @@ def test_index_must_be_regular_input(tmp_path: Path, mode: str) -> None:
             (root / "translations").symlink_to(
                 target / "translations", target_is_directory=True
             )
-    with pytest.raises(ValueError, match=r"^Missing or symlink translation input$"):
-        load_glossary(root)
+    if mode == "parent_link":
+        with pytest.raises(ValueError, match=r"^Symlink authored data area$"):
+            load_glossary(root)
+    else:
+        assert not load_glossary(root).current_records()
 
 
 @pytest.mark.parametrize(

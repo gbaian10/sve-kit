@@ -35,11 +35,9 @@ def import_preview(
 ) -> InputRecord:
     """Own one transaction; missing supplied product parents fail without partial import."""
     with db.transaction():
-        record = populate_preview(
+        return populate_preview(
             db, plan, authored_revision=authored_revision, build=build
         )
-        record.verify(db, build, plan.source_uses())
-    return record
 
 
 def populate_preview(
@@ -95,9 +93,7 @@ def populate_identity_rows(
                 art_uses[key] = data.id
     for record in plan.included("printing"):
         _printing(db, plan, record, art_uses)
-    inputs = input_record(build, uses)
-    inputs.verify(db, build, plan.source_uses(), complete=False)
-    return inputs
+    return input_record(build, uses)
 
 
 def _authored(db: Database, plan: PreviewPlan, revision: str) -> dict[str, str]:

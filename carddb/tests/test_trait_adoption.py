@@ -16,7 +16,7 @@ from sve_carddb.catalog.adoption_models import (
     SourceRef,
     VocabularyRecord,
 )
-from sve_carddb.catalog.adoption_sources import AdoptionSources, PinnedRepository
+from sve_carddb.catalog.adoption_sources import AdoptionSources
 from sve_carddb.catalog.adoption_validation import term as validate_term
 from sve_carddb.snapshot.values import canonical, digest, object_value
 
@@ -147,7 +147,7 @@ def test_trait_locator_is_an_exact_ascii_component_path(
         object_value(mapping["source_ref"])["text_hash"] = digest(raw.encode())
     sources = AdoptionSources(
         {"test-store": case.vocabulary.archive},
-        PinnedRepository(case.vocabulary.case.repository),
+        case.vocabulary.case.repository,
     )
     record = VocabularyRecord.model_validate_json(canonical(term(case, mapping)))
     review = ReviewContext.model_validate_json(canonical(case.vocabulary.case.review))
@@ -298,7 +298,7 @@ def test_trait_projection_shape_is_checked_independently_of_the_text_resolver(
     mapping = case.mapping()
     sources = AdoptionSources(
         {"test-store": case.vocabulary.archive},
-        PinnedRepository(case.vocabulary.case.repository),
+        case.vocabulary.case.repository,
     )
     record = VocabularyRecord.model_validate_json(canonical(term(case, mapping)))
     review = ReviewContext.model_validate_json(canonical(case.vocabulary.case.review))

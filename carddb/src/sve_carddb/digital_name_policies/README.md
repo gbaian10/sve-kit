@@ -5,16 +5,12 @@ This module reads the editable name and link policies defined by
 applications or receipts. The explicit offline name application is described
 below.
 
-`load(authored, repository, authored_revision)` requires a full immutable Git SHA,
-regular indexed files, exact checkout bytes and complete closure. The index lists
-one `current.yaml` per policy. Names hold business conditions and quality fields.
-Links hold only the frozen digital catalogue batches and the editable name and
-card-target exclusion lists; the same-name rule itself is fixed in code
-(`evaluate.LINK_RELATION`, `evaluate.LINK_GAMES`). Changing the rule is a code
-change reviewed in a PR. Approval receipts are not an input or a loading gate.
-
-`require_runtime()` checks the currently loaded evaluator and source dependency
-bytes against the build context.
+`load(authored, authored_revision)` reads only `digital-name-policies/*/current.yaml`
+from the working tree, once. Policy IDs match their directories and purposes are
+unique; strict YAML, safe paths, file size, types and references remain checked.
+Names hold business conditions and quality fields. Links hold frozen catalogue
+batches and editable exclusions. The same-name rule uses the current code.
+There is no checksum index or runtime-byte gate.
 
 `current_evaluate.catalogue()` and `link_catalogue()` reuse complete frozen API
 inventory traversal. Null or missing translations remain members; uniqueness is
@@ -26,7 +22,7 @@ identity observation and exact name field and returns frozen `OwnerEvidence`.
 `rule_links()` produces separate card-level `RuleLinkPlan` values. They are not
 human links, have no review authority and cannot supply a name. Different
 build contexts cannot be combined. The composing build must still validate its
-real owner revision/printed state and complete input use closure before applying
+real owner revision/printed state and source applicability before applying
 any result; the explicit name application below supplies that integration.
 
 ## Offline private report
@@ -42,8 +38,7 @@ sve-carddb digital-name-policies report \
   --output /absolute/private/report.json
 ```
 
-The context is an existing `BuildContext` with the complete current runtime
-closure and exactly `catalog_registry`, `digital_link_sources` and
+The context is an existing `BuildContext` with exactly `catalog_registry`, `digital_link_sources` and
 `translation_recipes` in its configuration. Names use the context's batches;
 link plans use the links policy's own batches. All stores are read-only; no
 network or live manifest is used. Output must be absolute, not symlinked, and
@@ -67,7 +62,7 @@ scratch tooling outside this module and git.
 ## Owner-local name application
 
 Current names use one format-two policy plus the current glossary and explicit
-owner/source overrides. `Inputs.configuration()` pins the complete authored
+owner/source overrides. `Inputs.configuration()` describes the current authored
 closure; application checks current runtime bytes and whole frozen catalogues.
 Each published JP face revision and known printing face uses its own verified
 `TextPlan` observation. Unknown printed names remain unavailable.

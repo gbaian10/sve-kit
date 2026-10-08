@@ -1,78 +1,25 @@
-"""Replay exact glossary evidence from sealed sources and pinned parser bytes."""
+"""Resolve exact glossary evidence from verified frozen sources."""
 
 import dataclasses
-from pathlib import Path
 from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlsplit
 
 from pydantic import JsonValue
 
 from sve_carddb.build_inputs import SourceUse
-from sve_carddb.catalog.adoption_models import Normalizer
-from sve_carddb.catalog.adoption_sources import AdoptionSources, PinnedRepository
+from sve_carddb.catalog.adoption_sources import AdoptionSources
 from sve_carddb.extract import official_en, official_jp
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from sve_carddb.build_inputs import BuildContext, Source
     from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.digital_links.evidence import RegistryIndex
+    from sve_carddb.registry.snapshot import RegistrySnapshot
     from sve_carddb.translations.models import Span
-
-CODE_PATH = "carddb/src/sve_carddb/translations/sources.py"
-RUNTIME = (
-    "carddb/src/sve_carddb/translations/current.py",
-    "carddb/src/sve_carddb/translations/current_models.py",
-    "carddb/src/sve_carddb/translations/current_importer.py",
-    "carddb/src/sve_carddb/translations/current_names.py",
-    "carddb/uv.lock",
-    "carddb/pyproject.toml",
-    CODE_PATH,
-    "carddb/src/sve_carddb/translations/digital.py",
-    "carddb/src/sve_carddb/translations/importer.py",
-    "carddb/src/sve_carddb/translations/loader.py",
-    "carddb/src/sve_carddb/translations/models.py",
-    "carddb/src/sve_carddb/translations/name_identity.py",
-    "carddb/src/sve_carddb/translations/name_sources.py",
-    "carddb/src/sve_carddb/translations/counterparts.py",
-    "carddb/src/sve_carddb/text_observations/archive.py",
-    "carddb/src/sve_carddb/text_observations/models.py",
-    "carddb/src/sve_carddb/text_observations/presence.py",
-    "carddb/src/sve_carddb/extract/official_en.py",
-    "carddb/src/sve_carddb/extract/compare_jp.py",
-    "carddb/src/sve_carddb/sources/official_en.py",
-    "carddb/src/sve_carddb/catalog/adoption_sources.py",
-    "carddb/src/sve_carddb/extract/official_jp.py",
-    "carddb/src/sve_carddb/sources/official_jp.py",
-    "carddb/src/sve_carddb/html.py",
-    "carddb/src/sve_carddb/fetch/validate.py",
-    "carddb/src/sve_carddb/snapshot/values.py",
-    "carddb/src/sve_carddb/frozen_sources.py",
-    "carddb/src/sve_carddb/source_archive.py",
-    "carddb/src/sve_carddb/build_inputs.py",
-    "carddb/src/sve_carddb/text_observations/intern.py",
-    "carddb/src/sve_carddb/catalog/importer.py",
-    "carddb/src/sve_carddb/digital_links/candidates.py",
-    "carddb/src/sve_carddb/digital_links/catalogue.py",
-    "carddb/src/sve_carddb/digital_links/commands.py",
-    "carddb/src/sve_carddb/catalog/adoption_models.py",
-    "carddb/src/sve_carddb/catalog/adoption_loader.py",
-    "carddb/src/sve_carddb/products/models.py",
-    "carddb/src/sve_carddb/digital_links/models.py",
-    "carddb/src/sve_carddb/digital_links/loader.py",
-    "carddb/src/sve_carddb/digital_links/evidence.py",
-    "carddb/src/sve_carddb/digital_links/importer.py",
-    "carddb/src/sve_carddb/registry/snapshot.py",
-    "carddb/src/sve_carddb/registry/review.py",
-    "carddb/src/sve_carddb/registry/storage.py",
-    "carddb/src/sve_carddb/registry/records.py",
-    "carddb/src/sve_carddb/registry/validate.py",
-    "carddb/src/sve_carddb/registry/inputs.py",
-    "carddb/src/sve_carddb/registry/allocation.py",
-    "carddb/src/sve_carddb/registry/yaml_reader.py",
-    "carddb/src/sve_carddb/registry/transitions/files.py",
-)
 
 
 def excerpt(text: str, span: Span | None) -> str:
@@ -169,26 +116,14 @@ class Sources:
         stores: dict[str, Path],
         repository: Path,
         build: BuildContext,
+        registry: RegistrySnapshot | None = None,
     ) -> None:
         self.stores = stores
-        self.repository = PinnedRepository(repository)
+        self.repository = repository
         self.build = build
-        # One immutable batch avoids a Git process for each dependency on every owner replay.
-        self.repository.read_many(
-            build.program_revision, tuple(pin.name for pin in build.dependencies)
-        )
-        self.repository.context(build)
-        self.identities = AdoptionSources(stores, self.repository)
+        self.identities = AdoptionSources(stores, repository, registry)
         self.identity_indexes: dict[bytes, RegistryIndex] = {}
         self.context_keys: dict[BuildContext, bytes] = {}
-        dependencies = {pin.name: pin.sha256 for pin in build.dependencies}
-        runtime = Path(__file__).resolve().parents[4]
-        for name in RUNTIME:
-            file = runtime / name
-            if file.is_symlink() or dependencies.get(name) != digest(file.read_bytes()):
-                raise ValueError(
-                    "Translation runtime/dependency closure cannot be replayed"
-                )
         self.batches: dict[str, FrozenSources] = {}
         self.cache: dict[tuple[str, str, str], tuple[str, JsonValue, Source]] = {}
         self.uses: list[SourceUse] = []
@@ -213,22 +148,13 @@ class Sources:
         self, batch_id: str, version: str, parser: str
     ) -> tuple[str, JsonValue, Source]:
         """Replay a complete page without inventing a text locator or text hash."""
-        config = parse(self.build.configuration.encode())
-        if not isinstance(config, dict) or not isinstance(
-            recipes := config.get("translation_recipes"), dict
-        ):
-            raise ValueError("Translation source recipes must be an object")  # ruff: ignore[type-check-without-type-error] -- a malformed build recipe is a domain refusal rather than an incidental boundary TypeError
-        pin = Normalizer.model_validate_json(canonical(recipes.get(parser)))
-        if (
-            pin.version != parser
-            or pin.code_path != CODE_PATH
-            or set(pin.config) != {"provider"}
-        ):
+        providers = {
+            "translation-" + provider + "-v1": provider
+            for provider in ("jp", "en", "sv1", "svwb")
+        }
+        provider = providers.get(parser)
+        if provider is None:
             raise ValueError("Unsupported translation source recipe")
-        self.repository.implementation(pin, self.build)
-        provider = pin.config["provider"]
-        if not isinstance(provider, str) or parser != "translation-" + provider + "-v1":
-            raise ValueError("Translation recipe/provider mismatch")
         cache_key = (batch_id, version, parser)
         if cache_key not in self.cache:
             source, raw, descriptor = self.batch(batch_id).read(

@@ -44,7 +44,6 @@ def test_catalog_composes_with_both_regional_sources(
     )
     build = BuildContext.from_inputs(
         "a" * 40,
-        {"synthetic.lock": b"dependencies"},
         text_configuration(case.plan, case.vocabulary, ())
         | catalog_configuration(config),
     )

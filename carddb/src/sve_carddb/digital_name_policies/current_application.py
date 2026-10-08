@@ -11,13 +11,10 @@ from sve_carddb.digital_name_policies.application import Result, _counterparts
 from sve_carddb.digital_name_policies.current_evaluate import catalogue
 from sve_carddb.digital_name_policies.evaluate import name_result, owner_text
 from sve_carddb.digital_name_policies.owners import publication_owners
-from sve_carddb.digital_name_policies.runtime import require_runtime
 from sve_carddb.snapshot.project.evidence import DisplayBinding
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.translations.counterparts import first_counterpart
 from sve_carddb.translations.current_models import ChoiceRecord, TermRecord
-from sve_carddb.translations.current_names import prepare as prepare_names
-from sve_carddb.translations.importer import Inputs as NameInputs
 from sve_carddb.translations.importer import validate_choice
 from sve_carddb.translations.name_sources import name_source
 
@@ -25,7 +22,7 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.build_db import Database, Value
-    from sve_carddb.build_inputs import Source, SourceUse
+    from sve_carddb.build_inputs import BuildContext, Source, SourceUse
     from sve_carddb.digital_links.importer import Result as LinkResult
     from sve_carddb.digital_name_policies.application import Inputs
     from sve_carddb.digital_name_policies.loader import Snapshot
@@ -158,7 +155,6 @@ def prepare(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals
     links: LinkResult | None = None,
 ) -> Plan:
     """Complete catalogues and each own source are checked in the current build."""
-    require_runtime(sources)
     snapshot = inputs.load()
     if len(snapshot.current_names) != 1:
         raise ValueError("Current name application needs one current name policy")
@@ -173,13 +169,6 @@ def prepare(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals
     review = review_context(sources)
     owners: list[Selected] = []
     originals = dict(replay.originals)
-    replay = prepare_names(
-        replay.snapshot,
-        originals,
-        NameInputs(inputs.root, inputs.repository, inputs.authored_revision),
-        sources,
-        db,
-    )
     for owner, policy_owner in publication_owners(db, texts):
         evidence = owner_text(policy_owner, sources, review)
         outcome = name_result(evidence, frozen)
@@ -280,6 +269,11 @@ def populate(
 ) -> Result:
     """Generate current IDs and bindings without any review event or decision row."""
     plan = prepare(db, inputs, texts, sources=sources, replay=replay, links=links)
+    return apply(db, plan, sources.build)
+
+
+def apply(db: Database, plan: Plan, build: BuildContext) -> Result:
+    """Project one checked owner-name plan into the build database."""
     insert_raw_sources(db, (u.source for u in plan.uses))
     bindings = []
     for owner in plan.owners:
@@ -339,9 +333,7 @@ def populate(
         bindings.append(
             DisplayBinding(use, destination, "zh-Hant", "own_source", translation)
         )
-    return Result(
-        input_record(sources.build, plan.uses), tuple(bindings), plan.report()
-    )
+    return Result(input_record(build, plan.uses), tuple(bindings), plan.report())
 
 
 def materialize(

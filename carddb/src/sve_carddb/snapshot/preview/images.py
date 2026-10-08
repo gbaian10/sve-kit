@@ -1,14 +1,12 @@
 """Verify only public printing WebPs while keeping image inputs read-only."""
 
 import re
-from io import BytesIO
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
 
-from PIL import Image
-
+from sve_carddb.image_checks import ImageChecks
 from sve_carddb.image_variants import SIZES
-from sve_carddb.snapshot.values import digest, integer, string
+from sve_carddb.snapshot.values import integer, string
 from sve_carddb.store import resolve_within
 
 if TYPE_CHECKING:
@@ -58,9 +56,13 @@ def _require_sizes(active: set[str], variants: list[Record]) -> None:
 
 
 def image_blobs(
-    tables: dict[str, list[Record]], source: Path | None
+    tables: dict[str, list[Record]],
+    source: Path | None,
+    *,
+    checks: ImageChecks | None = None,
 ) -> Iterator[tuple[str, bytes]]:
     """Check public selection and stream deduplicated bytes without retaining the library."""
+    checks = checks or ImageChecks()
     members = _members(tables)
     if members and source is None:
         raise ValueError("Preview images require an explicit asset source")
@@ -70,15 +72,12 @@ def image_blobs(
         raise ValueError("Preview image input must be an absolute non-symlink root")
     for path, variant in sorted(members.items()):
         raw = resolve_within(source, PurePosixPath(path)).read_bytes()
-        if digest(raw)[7:] != PurePosixPath(path).stem or len(raw) != integer(
-            variant["bytes"]
+        metadata = checks.inspect(resolve_within(source, PurePosixPath(path)))
+        if metadata != (
+            integer(variant["bytes"]),
+            "sha256:" + PurePosixPath(path).stem,
+            "WEBP",
+            (integer(variant["width"]), integer(variant["height"])),
         ):
-            raise ValueError("Preview image hash or bytes mismatch")
-        with Image.open(BytesIO(raw)) as decoded:
-            if decoded.format != "WEBP" or decoded.size != (
-                integer(variant["width"]),
-                integer(variant["height"]),
-            ):
-                raise ValueError("Preview image decoded format or dimensions mismatch")
-            decoded.load()
+            raise ValueError("Preview image hash, bytes, format or dimensions mismatch")
         yield path, raw
