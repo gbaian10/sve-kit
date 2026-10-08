@@ -1,10 +1,7 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["glossary_term","term:event.turn_end"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:event.turn_end
       category: rule_term
@@ -19,11 +16,7 @@ records:
         start: 96
         end: 102
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:event.turn_start"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:event.turn_start
       category: rule_term
@@ -32,10 +25,7 @@ records:
       source_span:
       authored_source_ja: ターン開始時
       missing_source_reason: 首輪凍結 JP／數位字典未找到此 exact JA；依專案採納的規則詞名稱登錄，不捏造 raw locator，也不視為官方證據。
-  - record_key: '["glossary_term","term:keyword.ambush"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:keyword.ambush
       category: keyword
@@ -48,11 +38,7 @@ records:
         text_hash: sha256:e6fbf34bb330e3e6fb965602ad6b2172fc79fc5d51acf8009cc948b689b408d9
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:keyword.assail"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:keyword.assail
       category: keyword
@@ -67,11 +53,7 @@ records:
         start: 5
         end: 9
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:keyword.aura"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:keyword.aura
       category: keyword
@@ -86,11 +68,7 @@ records:
         start: 74
         end: 77
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:keyword.bane"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:keyword.bane
       category: keyword
@@ -105,11 +83,7 @@ records:
         start: 7
         end: 9
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:keyword.barrier"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:keyword.barrier
       category: keyword
@@ -122,11 +96,7 @@ records:
         text_hash: sha256:b56060ed03bce38cc0d8b6d92bdac3f3ab4513b0c4bbb1121317307988843266
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:keyword.drain"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:keyword.drain
       category: keyword
@@ -141,11 +111,7 @@ records:
         start: 42
         end: 46
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:keyword.intimidate"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:keyword.intimidate
       category: keyword
@@ -160,11 +126,7 @@ records:
         start: 1
         end: 3
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:keyword.rush"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:keyword.rush
       category: keyword
@@ -179,11 +141,7 @@ records:
         start: 21
         end: 23
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:keyword.storm"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:keyword.storm
       category: keyword
@@ -198,11 +156,7 @@ records:
         start: 25
         end: 27
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:keyword.ward"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:keyword.ward
       category: keyword
@@ -217,11 +171,7 @@ records:
         start: 21
         end: 23
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:name.a_class_pyromancy"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:name.a_class_pyromancy
       category: card_name
@@ -234,11 +184,7 @@ records:
         text_hash: sha256:4b23382f6161b744567c16218dca41365911e1a5284d02154c195d742564b661
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:name.a_more_marvelous_world"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:name.a_more_marvelous_world
       category: card_name
@@ -251,11 +197,7 @@ records:
         text_hash: sha256:88875a5803e467a96deb02bdc4a5bdf5fd497ec04f537b5a9e0aa7b92eaabacc
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:name.a_single_vessel"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:name.a_single_vessel
       category: card_name
@@ -268,11 +210,7 @@ records:
         text_hash: sha256:40ed22b30041000e3b95c290dd65fc279f84be9212526caf0edd92e4f2537d2a
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:name.a_super_successful_event"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:name.a_super_successful_event
       category: card_name
@@ -285,11 +223,7 @@ records:
         text_hash: sha256:129ce6153baf45736748b9df5196f0f9debd6b0c51e77a39a1fb1be27b8ffba1
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:name.a_sweet_romantic_summer"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:name.a_sweet_romantic_summer
       category: card_name
@@ -302,11 +236,7 @@ records:
         text_hash: sha256:6d5d57c4005e0e07b81de0f8cc4285ff1f883d059fe3c685518ef0da04337178
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:name.abyss_freezer"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:name.abyss_freezer
       category: card_name
@@ -319,11 +249,7 @@ records:
         text_hash: sha256:2b12d07ce67eb4f11bb9fe791d8c4121a8d9db16d16bf033898838f9ace95cc5
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:name.abyss_healer"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:name.abyss_healer
       category: card_name
@@ -336,11 +262,7 @@ records:
         text_hash: sha256:21c304c73486729b46c2fe5135ac73e16ed1c766cb537662452ae05a1093f1f8
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:name.admire_vega"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:name.admire_vega
       category: card_name
@@ -353,11 +275,7 @@ records:
         text_hash: sha256:bf6811ccc48f304a9d224083fd538f731e371d011c23c0bd0adace8e904f1dc8
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:name.adorn_with_jewels"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:name.adorn_with_jewels
       category: card_name
@@ -370,11 +288,7 @@ records:
         text_hash: sha256:becad554720b416a0cf9f2fe811cb63b52dfabf354b3cd6f6d172703ea2b458e
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:name.aenea_gentle_amethyst"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:name.aenea_gentle_amethyst
       category: card_name
@@ -387,11 +301,7 @@ records:
         text_hash: sha256:354a3a8b09a07cf81257180e0725c5a9e3c2a18de80c1ca1c17039cc67f14c3a
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:name.aerial_slash"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:name.aerial_slash
       category: card_name
@@ -404,11 +314,7 @@ records:
         text_hash: sha256:b054b495112d73f8035c613320abdddeadcc6cc1f307e96adc0f796e0d6f8af8
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:name.after_school_break"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:name.after_school_break
       category: card_name
@@ -421,4 +327,3 @@ records:
         text_hash: sha256:1ed1e041bd702cc0f210afd20994068315457aa0d9cfec71f35841ac9bfce957
       source_span:
       authored_source_ja:
-      missing_source_reason:

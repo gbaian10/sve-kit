@@ -1,10 +1,7 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["glossary_term","term:zone.battlefield"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:zone.battlefield
       category: rule_term
@@ -19,11 +16,7 @@ records:
         start: 34
         end: 35
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:zone.cemetery"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:zone.cemetery
       category: rule_term
@@ -38,11 +31,7 @@ records:
         start: 35
         end: 37
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:zone.deck"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:zone.deck
       category: rule_term
@@ -57,11 +46,7 @@ records:
         start: 26
         end: 29
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:zone.deck_bottom"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:zone.deck_bottom
       category: rule_term
@@ -76,11 +61,7 @@ records:
         start: 58
         end: 63
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:zone.deck_top"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:zone.deck_top
       category: rule_term
@@ -95,11 +76,7 @@ records:
         start: 26
         end: 31
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:zone.evolve_deck"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:zone.evolve_deck
       category: rule_term
@@ -114,11 +91,7 @@ records:
         start: 20
         end: 27
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:zone.ex"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:zone.ex
       category: rule_term
@@ -133,11 +106,7 @@ records:
         start: 12
         end: 17
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:zone.hand"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:zone.hand
       category: rule_term
@@ -152,4 +121,3 @@ records:
         start: 44
         end: 46
       authored_source_ja:
-      missing_source_reason:

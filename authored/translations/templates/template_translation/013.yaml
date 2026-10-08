@@ -1,1123 +1,843 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["template_translation","Taf7533f66213382e","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Taf7533f66213382e
       lang: zh-Hant
       text: 從下列之中選擇{{slot_0}}項。【{{slot_1}}】指定戰場上的{{slot_2}}個從者。將其返回手牌。【{{slot_3}}】自己的主戰者\{{{slot_4}}\}+{{slot_5}}。【{{slot_6}}】抽取{{slot_7}}張卡片。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Taf8e0b9aa7b735c5","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Taf8e0b9aa7b735c5
       lang: zh-Hant
       text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}：指定敵方戰場上的{{slot_2}}個從者。給予其{{slot_3}}點傷害。此能力在自己戰場上的武鬥龍人・卡片為{{slot_4}}張以上時可使用。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Taf98f9374963df6c","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Taf98f9374963df6c
       lang: zh-Hant
       text: \{{{slot_0}}\}將手牌中的{{slot_1}}張海洋・卡片放置到EX區：回復自己的PP {{slot_2}}點。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Taf9a82c5068c1b0d","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Taf9a82c5068c1b0d
       lang: zh-Hant
       text: 自己的每個回合{{slot_0}}次，自己使用護符時，回復自己的PP {{slot_1}}點。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tafb12445165f9de9","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tafb12445165f9de9
       lang: zh-Hant
       text: 使用這張卡片之際，消費-X。X為「自己墓場中卡片的原始消費種類數」。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tafcdadd04884595e","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tafcdadd04884595e
       lang: zh-Hant
       text: 【超進化時】\{消費{{slot_0}}\}：從自己的牌堆中搜尋{{slot_2}}張「與這張卡片同名者除外的原始消費{{slot_1}}以下的絕傑・狂信・從者」，召喚到戰場上。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tafcdf53d43a04b96","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tafcdf53d43a04b96
       lang: zh-Hant
       text: 捨棄手牌中的{{slot_0}}張公主連結・卡片：抽取{{slot_1}}張卡片。如果自己的戰場上有好朋友社・從者，則自己的主戰者\{{{slot_2}}\}+{{slot_3}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tafd0f9c895a71026","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tafd0f9c895a71026
       lang: zh-Hant
       text: 【進化時】指定自己墓場的{{slot_0}}張「與這張卡片同名者除外的透京・從者」。將其增加到手牌中。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tafde79cef50f922a","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tafde79cef50f922a
       lang: zh-Hant
       text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_1}}張野獸・從者，增加到手牌中。如果其為消費{{slot_2}}以下，則可以轉變為召喚到戰場上。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tafe4a959c8e36ab6","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tafe4a959c8e36ab6
       lang: zh-Hant
       text: 只要這張卡片在場，自己使用禁忌・衍生物之際，如果為本回合中的第{{slot_0}}張禁忌・衍生物，則消費-{{slot_1}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb00aa020bea6d981","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb00aa020bea6d981
       lang: zh-Hant
       text: 裝備這張卡片的從者獲得【疾馳】與「【攻擊時】指定敵方戰場上至多{{slot_0}}個從者。給予其{{slot_1}}點傷害」。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb00bfae3dd517677","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb00bfae3dd517677
       lang: zh-Hant
       text: 使用這張卡片之際，如果自己的戰場上有原始消費{{slot_0}}的從者，則消費-{{slot_1}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb00ed5e6dce73323","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb00ed5e6dce73323
       lang: zh-Hant
       text: 【獲得驅動時】這張卡片\{{{slot_0}}\}+{{slot_1}}/\{{{slot_2}}\}+{{slot_3}}。查看自己牌堆頂的{{slot_4}}張卡片。可以從其中公開{{slot_4}}張並增加到手牌中。如果公開了皇家聖騎士・卡片，則給予敵方的全部主戰者{{slot_6}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb024d8194fa87ac9","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb024d8194fa87ac9
       lang: zh-Hant
       text: 【攻擊時】如果自己的戰場上有「卡片名稱含有『{{slot_0}}』的從者」，則這張卡片\{{{slot_1}}\}+{{slot_2}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb043b258eef05690","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb043b258eef05690
       lang: zh-Hant
       text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}：指定敵方戰場上的{{slot_2}}個從者。給予其與「自己EX區中卡片的原始消費種類數」相同的傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb04bce4073ba37d1","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb04bce4073ba37d1
       lang: zh-Hant
       text: 【進化時】本回合，自己下一次使用宴樂・卡片之際，消費-{{slot_0}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb05ca9c978cd5d84","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb05ca9c978cd5d84
       lang: zh-Hant
       text: 【進化時】指定自己戰場上的{{slot_0}}個其他妖怪・從者。使其獲得【疾馳】。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb068d165947a98f2","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb068d165947a98f2
       lang: zh-Hant
       text: \{{{slot_0}}\}\{消費{{slot_1}}\}移除這張卡片的{{slot_2}}個童話指示物：指定敵方的{{slot_3}}個從者。將其破壞。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb06f7b1be55e6eba","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb06f7b1be55e6eba
       lang: zh-Hant
       text: 【攻擊時】移除這張卡片的{{slot_0}}個童話指示物：查看自己牌堆頂的{{slot_1}}張卡片。可以從其中將{{slot_3}}張消費{{slot_2}}以下的從者召喚到戰場上。將其餘卡片放置到墓場。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb0725ab6a0b30941","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb0725ab6a0b30941
       lang: zh-Hant
       text: 【進化時】指定敵方墓場的{{slot_0}}張卡片。將其放置到自己的EX區。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb0be92c9bd273a5c","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb0be92c9bd273a5c
       lang: zh-Hant
       text: \{{{slot_0}}\}指定敵方戰場上的{{slot_1}}個從者。使其\{{{slot_2}}\}-{{slot_3}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb0c00147f7cb953b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb0c00147f7cb953b
       lang: zh-Hant
       text: 自己使用精靈・卡片時，自己的主戰者\{{{slot_0}}\}+{{slot_1}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb0e34c35bb63c278","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb0e34c35bb63c278
       lang: zh-Hant
       text: 從下列之中選擇{{slot_0}}項。如果已使消費+{{slot_1}}，則轉變為至多{{slot_2}}項。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb0e5560ccf3c9f42","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb0e5560ccf3c9f42
       lang: zh-Hant
       text: 【進化時】主戰者的\{{{slot_0}}\}-{{slot_1}}：指定敵方戰場上的{{slot_2}}個從者。給予其與「本回合中自己主戰者的生命值減少的次數」相同的傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb0ea25672decf7ad","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb0ea25672decf7ad
       lang: zh-Hant
       text: 自己的主戰者受到能力傷害時，將這張卡片放置到墓場：自己的主戰者\{{{slot_0}}\}+{{slot_1}}。抽取{{slot_2}}張卡片。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb10fa5479c6656fa","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb10fa5479c6656fa
       lang: zh-Hant
       text: 【進化時】查看自己牌堆頂的{{slot_0}}張卡片。可以從其中將{{slot_2}}張原始消費{{slot_1}}以下的從者放置到EX區。將其餘卡片以任意順序放置到牌堆底。本回合，使用該卡之際，消費-{{slot_3}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb11e9b4214e4e5b6","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb11e9b4214e4e5b6
       lang: zh-Hant
       text: \{{{slot_0}}\}\{{{slot_1}}\}自己的主戰者\{{{slot_2}}\}+{{slot_3}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb152e6768feaecd5","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb152e6768feaecd5
       lang: zh-Hant
       text: \{{{slot_0}}\}【課程_{{slot_1}}】：查看自己牌堆頂的{{slot_2}}張卡片。可以從其中公開{{slot_2}}張灰姑娘・卡片並增加到手牌中。此能力{{slot_4}}回合中可使用{{slot_5}}次。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb17578a07899b270","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb17578a07899b270
       lang: zh-Hant
       text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_1}}張「與這張卡片同名者除外的伊麗莎白牧場・卡片」，放置到EX區。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb192dfb93b613f43","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb192dfb93b613f43
       lang: zh-Hant
       text: 【參賽時】這張卡片\{{{slot_0}}\}+{{slot_1}}/\{{{slot_2}}\}+{{slot_3}}。指定敵方至多{{slot_4}}個從者。給予其{{slot_5}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb1f8f554dd789fdc","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb1f8f554dd789fdc
       lang: zh-Hant
       text: 【進化時】將{{slot_0}}個從者放置到墓場：指定敵方的{{slot_0}}個從者。將其破壞。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb1f9d4228ac26131","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb1f9d4228ac26131
       lang: zh-Hant
       text: 只要這張卡片在戰場上，自己戰場上的全部其他妖精・從者獲得【突進】。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb20c19c033438776","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb20c19c033438776
       lang: zh-Hant
       text: 只要這張卡片在場，自己戰場上的全部妖精・衍生物獲得【疾馳】【指定攻擊】。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb21891e18e236326","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb21891e18e236326
       lang: zh-Hant
       text: 【進化時】破壞敵方戰場上的全部從者。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb22cacdbe413b302","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb22cacdbe413b302
       lang: zh-Hant
       text: 查看自己牌堆頂的{{slot_0}}張卡片。可以從其中公開{{slot_1}}張法術並增加到手牌中。可以將{{slot_1}}張法術放置到墓場。將其餘卡片以任意順序放置到牌堆底。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb23248a8b0b1b46d","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb23248a8b0b1b46d
       lang: zh-Hant
       text: \{{{slot_0}}\}指定敵方戰場上的{{slot_2}}個原始消費{{slot_1}}以下的從者。【死靈充能_{{slot_3}}】將其破壞。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb2331bff390056d5","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb2331bff390056d5
       lang: zh-Hant
       text: \{Q\}\{{{slot_0}}\}【土之秘術】：本回合，自己下一次使用法術之際，消費-{{slot_1}}。此能力{{slot_2}}回合中可使用{{slot_3}}次。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb233c5b6020ea7f1","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb233c5b6020ea7f1
       lang: zh-Hant
       text: 裝備這張卡片時，指定敵方戰場上的{{slot_0}}個從者。將其橫置。裝備這張卡片的從者\{{{slot_1}}\}+{{slot_2}}/\{{{slot_3}}\}+{{slot_4}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb2638354956d391b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb2638354956d391b
       lang: zh-Hant
       text: \{{{slot_0}}\}查看自己牌堆頂的{{slot_1}}張卡片。可以從其中將{{slot_2}}張放置到EX區。將其餘卡片以任意順序放置到牌堆底。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb2bfa0ad89d2296b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb2bfa0ad89d2296b
       lang: zh-Hant
       text: \{{{slot_0}}\}如果為【覺醒】狀態，則給予敵方的全部主戰者{{slot_1}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb2d9797f135199cd","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb2d9797f135199cd
       lang: zh-Hant
       text: 【守護】
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb2ec4965c07e26ce","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb2ec4965c07e26ce
       lang: zh-Hant
       text: 裝備這張卡片的從者獲得「每回合{{slot_0}}次，自己使用法術時，給予敵方的全部主戰者與「該從者攻擊力的一半」相同的傷害」。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb318f0f5d7d2afef","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb318f0f5d7d2afef
       lang: zh-Hant
       text: \{{{slot_0}}\}【攻擊時】本回合，這張卡片不會受到傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb32d773c3f6a882b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb32d773c3f6a882b
       lang: zh-Hant
       text: \{{{slot_0}}\}從下列之中選擇{{slot_1}}項。【{{slot_2}}】給予敵方戰場上的全部從者{{slot_3}}點傷害。【{{slot_4}}】自己的主戰者\{{{slot_5}}\}+{{slot_6}}。抽取{{slot_7}}張卡片。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb33b2e3dbc533fba","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb33b2e3dbc533fba
       lang: zh-Hant
       text: \{{{slot_0}}\}\{消費{{slot_1}}\}將這張卡片\{{{slot_2}}\}並放置到墓場：可以將自己手牌中任意張數擁有【疾馳】的從者召喚到戰場上。使其\{{{slot_3}}\}+{{slot_4}}/\{{{slot_5}}\}+{{slot_6}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb35dc884d530a0bf","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb35dc884d530a0bf
       lang: zh-Hant
       text: \{{{slot_0}}\}指定自己墓場的{{slot_2}}張消費{{slot_1}}以下的「賽馬娘・從者或賽馬娘・護符」。將其召喚到戰場上。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb39b143af7e7b078","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb39b143af7e7b078
       lang: zh-Hant
       text: \{{{slot_0}}\}從下列之中選擇{{slot_1}}項。【{{slot_2}}】指定敵方戰場上的{{slot_3}}個從者。給予其{{slot_4}}點傷害。將自己牌堆頂的{{slot_5}}張卡片放置到墓場。【{{slot_6}}】指定自己墓場的{{slot_5}}張「與這張卡片同名者除外的妖怪・從者」。將其增加到手牌中。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb3d005b04ef630e1","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb3d005b04ef630e1
       lang: zh-Hant
       text: 使用這張卡片之際，如果自己戰場上「卡片名稱各不相同的士兵・衍生物・從者」為{{slot_0}}個以上，則消費-{{slot_1}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb3d3280820ec6883","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb3d3280820ec6883
       lang: zh-Hant
       text: 自己的結束階段到來時，如果為【真紅】狀態，則抽取{{slot_0}}張卡片。捨棄自己的{{slot_0}}張手牌。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb3e586ae2ce96b20","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb3e586ae2ce96b20
       lang: zh-Hant
       text: 【進化時】指定敵方戰場上的{{slot_0}}個從者。如果自己進化牌堆中正面朝上的進化從者為{{slot_1}}張以上，則給予其{{slot_2}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb3f9475a3c374308","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb3f9475a3c374308
       lang: zh-Hant
       text: \{{{slot_0}}\}如果為【覺醒】狀態，則查看自己牌堆頂的{{slot_1}}張卡片。可以從其中公開{{slot_2}}張龍人・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb416acd844d21dab","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb416acd844d21dab
       lang: zh-Hant
       text: \{{{slot_0}}\}\{消費{{slot_1}}\}：這張卡片\{{{slot_2}}\}+{{slot_3}}/\{{{slot_4}}\}+{{slot_5}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb42160a5de35d440","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb42160a5de35d440
       lang: zh-Hant
       text: \{{{slot_0}}\}指定敵方戰場上的{{slot_2}}張原始消費{{slot_1}}以下的卡片。將其破壞。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb4301cf3d14cde3f","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb4301cf3d14cde3f
       lang: zh-Hant
       text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}並放置到墓場：指定敵方戰場上的{{slot_2}}個從者。給予其X點傷害。X為「自己戰場與自己EX區的妖精・衍生物・從者張數合計」。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb4362fc97d5314e0","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb4362fc97d5314e0
       lang: zh-Hant
       text: 【超進化時】抽取{{slot_0}}張卡片。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb460911872ce093a","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb460911872ce093a
       lang: zh-Hant
       text: 只要這張卡片在場，自己的回合中，自己的主戰者與自己戰場上的全部其他從者不會受到能力造成的傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb466143015c32f78","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb466143015c32f78
       lang: zh-Hant
       text: 敵方的主要階段到來時，指定敵方戰場上的{{slot_0}}個從者。給予其{{slot_1}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb47b20884e829ec2","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb47b20884e829ec2
       lang: zh-Hant
       text: 裝備這張卡片的從者獲得「\{{{slot_0}}\}\{{{slot_1}}\}\{消費{{slot_2}}\}將該從者\{{{slot_3}}\}：自己戰場上的全部原始消費{{slot_2}}的從者\{{{slot_5}}\}+{{slot_6}}」。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb47d0186a75286be","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb47d0186a75286be
       lang: zh-Hant
       text: 只要自己的戰場上有{{slot_0}}個以上的Cute・從者，這張卡片獲得【突進】。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb4a6f8196383cd2d","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb4a6f8196383cd2d
       lang: zh-Hant
       text: 【參賽時】這張卡片\{{{slot_0}}\}+{{slot_1}}/\{{{slot_2}}\}+{{slot_3}}。本回合，這張卡片不會受到傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb4ba6be3384001fd","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb4ba6be3384001fd
       lang: zh-Hant
       text: 其他從者進入自己的戰場時，自己的主戰者\{{{slot_0}}\}+{{slot_1}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb4c5be88f5dc8d7b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb4c5be88f5dc8d7b
       lang: zh-Hant
       text: 從下列之中選擇{{slot_0}}項。【{{slot_1}}】指定敵方戰場上的{{slot_2}}個從者。給予其{{slot_3}}點傷害。【{{slot_4}}】捨棄手牌中的{{slot_5}}張皇家聖騎士・卡片：指定敵方戰場上的{{slot_2}}個從者。給予其{{slot_7}}點傷害。自己的主戰者\{{{slot_8}}\}+{{slot_9}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb4c79f6c5526ed9b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb4c79f6c5526ed9b
       lang: zh-Hant
       text: \{{{slot_0}}\}\{消費{{slot_1}}\}【課程_{{slot_2}}】：指定敵方戰場上的{{slot_3}}個從者。給予其{{slot_4}}點傷害。此能力{{slot_5}}回合中可使用{{slot_6}}次。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb4d93ba9198a0663","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb4d93ba9198a0663
       lang: zh-Hant
       text: \{{{slot_0}}\}指定自己進化牌堆中正面朝上放置的{{slot_2}}張『{{slot_1}}』。將其轉為背面朝上。抽取{{slot_2}}張卡片。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb5024140c82c2f5f","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb5024140c82c2f5f
       lang: zh-Hant
       text: \{{{slot_0}}\}從下列之中選擇{{slot_1}}項。【{{slot_2}}】指定敵方戰場上的{{slot_1}}個護符。將其破壞。【{{slot_4}}】抽取{{slot_5}}張卡片。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb5073061287546fe","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb5073061287546fe
       lang: zh-Hant
       text: 【進化時】指定敵方戰場上的{{slot_0}}個從者。在本回合與下一個敵方的回合中，使其失去全部能力。其無法攻擊對手。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb5108c1666fb1dc3","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb5108c1666fb1dc3
       lang: zh-Hant
       text: \{{{slot_0}}\}敵方的全部玩家捨棄自身的{{slot_1}}張手牌。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb561b0122158ca05","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb561b0122158ca05
       lang: zh-Hant
       text: 【進化時】捨棄{{slot_0}}張手牌：指定自己墓場中的{{slot_1}}張從者。將其增加到手牌中。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb567d0771204a4f2","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb567d0771204a4f2
       lang: zh-Hant
       text: \{{{slot_0}}\}指定敵方戰場上的{{slot_1}}個從者。如果自己的戰場上有其他魔法使・從者，則給予其{{slot_2}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb570916ad876540a","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb570916ad876540a
       lang: zh-Hant
       text: 自己戰場上的從者進化時，從下列之中選擇{{slot_0}}項。【{{slot_1}}】指定敵方戰場上的{{slot_2}}個從者。給予其{{slot_3}}點傷害。【{{slot_4}}】自己的主戰者\{{{slot_5}}\}+{{slot_6}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb57e2913d4c69d60","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb57e2913d4c69d60
       lang: zh-Hant
       text: 【進化時】給予敵方戰場上的全部從者{{slot_0}}點傷害。給予敵方的全部主戰者{{slot_1}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb59d7273b0c6ad7c","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb59d7273b0c6ad7c
       lang: zh-Hant
       text: \{進化\}\{消費{{slot_0}}\}使墓場的{{slot_2}}張『{{slot_1}}』與{{slot_2}}張『{{slot_3}}』消失：這張卡片進化為『{{slot_5}}』。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb5aae3af8736b930","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb5aae3af8736b930
       lang: zh-Hant
       text: \{{{slot_0}}\}本回合，自己下一次使用原始消費{{slot_1}}以下的法術之際，消費-{{slot_2}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb5adce989fdcc710","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb5adce989fdcc710
       lang: zh-Hant
       text: \{{{slot_0}}\}【進化時】從自己的牌堆中搜尋{{slot_1}}張慈樂之音・卡片，增加到手牌中。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb5bc646c523bc4c7","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb5bc646c523bc4c7
       lang: zh-Hant
       text: \{{{slot_0}}\}指定自己戰場上的{{slot_1}}個其他Cool・從者。使其\{{{slot_2}}\}+{{slot_3}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb5bd5d70a92ae134","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb5bd5d70a92ae134
       lang: zh-Hant
       text: \{{{slot_0}}\}主戰者的\{{{slot_1}}\}-{{slot_2}}：這張卡片獲得【必殺】。此能力{{slot_3}}回合中可使用{{slot_4}}次。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb5d335eadded1d7b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb5d335eadded1d7b
       lang: zh-Hant
       text: 【攻擊時】抽取{{slot_0}}張卡片。捨棄自己的{{slot_0}}張手牌。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb5eeab331da4851f","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb5eeab331da4851f
       lang: zh-Hant
       text: \{{{slot_0}}\}\{{{slot_1}}\}從自己的牌堆中搜尋至多{{slot_3}}張原始消費{{slot_2}}以下且卡片名稱各不相同的好朋友社・卡片，放置到EX區。本回合，使用該卡之際，消費-{{slot_4}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb604ddf8f3f0e040","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb604ddf8f3f0e040
       lang: zh-Hant
       text: 【參賽時】這張卡片\{{{slot_0}}\}+{{slot_1}}/\{{{slot_2}}\}+{{slot_3}}。如果自己墓場的賽馬娘・卡片為{{slot_4}}張以上，則回復自己的PP {{slot_5}}點。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb613625699013a4e","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb613625699013a4e
       lang: zh-Hant
       text: 裝備這張卡片的從者獲得「【攻擊時】將該從者重置。抽取{{slot_0}}張卡片。此能力{{slot_1}}回合中至多發動{{slot_2}}次」。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb62fd9c67f0b35ac","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb62fd9c67f0b35ac
       lang: zh-Hant
       text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}、將戰場或EX區的{{slot_2}}張魔界・衍生物放置到墓場：指定敵方戰場上的{{slot_3}}個從者。將其破壞。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb653c9136b8858e1","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb653c9136b8858e1
       lang: zh-Hant
       text: 每回合{{slot_0}}次，使自己主戰者的\{{{slot_1}}\}增加時，自己戰場上的全部其他從者\{{{slot_2}}\}+{{slot_3}}/\{{{slot_1}}\}+{{slot_5}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb67b1292a5720100","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb67b1292a5720100
       lang: zh-Hant
       text: 從自己的手牌捨棄這張卡片時，指定敵方戰場上的{{slot_0}}個從者。給予其{{slot_1}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb68557d664976d5c","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb68557d664976d5c
       lang: zh-Hant
       text: 【進化時】指定敵方戰場上的{{slot_0}}個從者。給予其{{slot_1}}點傷害。將自己牌堆頂的{{slot_2}}張卡片放置到墓場。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb693ff0a3786a866","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb693ff0a3786a866
       lang: zh-Hant
       text: 自己戰場上的盜賊・從者攻擊時，指定敵方戰場上的{{slot_0}}個從者。給予其{{slot_1}}點傷害。將其玩家牌堆頂的{{slot_2}}張卡片放置到墓場。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb6d472a8f15d59f1","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb6d472a8f15d59f1
       lang: zh-Hant
       text: 指定敵方戰場上的{{slot_0}}個從者。給予其{{slot_1}}點傷害。如果自己的戰場上有『{{slot_2}}』，則給予其主戰者{{slot_3}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb6fd7e3b4c76a315","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb6fd7e3b4c76a315
       lang: zh-Hant
       text: \{{{slot_0}}\}捨棄{{slot_1}}張手牌：給予敵方的全部主戰者{{slot_2}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb73731e388b47f85","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb73731e388b47f85
       lang: zh-Hant
       text: 【進化時】指定自己墓場中的{{slot_0}}張護符。將其增加到手牌中。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb74bc73a8b94ce6b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb74bc73a8b94ce6b
       lang: zh-Hant
       text: 【進化時】回復自己的PP，回復量與「自己進化牌堆中正面朝上放置的進化從者的張數」相同。將其轉為背面朝上。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb797ed42bcab286b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb797ed42bcab286b
       lang: zh-Hant
       text: \{{{slot_0}}\}查看自己牌堆頂的{{slot_1}}張卡片。可以從其中公開{{slot_2}}張學院・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb79dcc3ce0d6d2f6","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb79dcc3ce0d6d2f6
       lang: zh-Hant
       text: 從下列之中選擇{{slot_0}}項。【{{slot_1}}】查看自己牌堆頂的{{slot_2}}張卡片。從其中將任意張數以任意順序放置到牌堆頂。將其餘卡片以任意順序放置到牌堆底。【{{slot_3}}】指定自己墓場的{{slot_4}}張擁有觸發的從者。將其返回牌堆，並洗牌。抽取{{slot_5}}張卡片。回復自己的PP {{slot_6}}點。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb7da37ed707f867a","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb7da37ed707f867a
       lang: zh-Hant
       text: 這張卡片無法從手牌以外使用。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb7f503d5ee9d1466","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb7f503d5ee9d1466
       lang: zh-Hant
       text: \{{{slot_0}}\}自己的主戰者\{{{slot_1}}\}+{{slot_2}}。如果自己的戰場上有『{{slot_3}}』，則這張卡片進化。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb8418f5e2172e8cd","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb8418f5e2172e8cd
       lang: zh-Hant
       text: 【超進化時】自己戰場上與自己EX區的全部妖精・衍生物・從者\{{{slot_0}}\}+{{slot_1}}/\{{{slot_2}}\}+{{slot_3}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb85458d19df8daf4","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb85458d19df8daf4
       lang: zh-Hant
       text: \{{{slot_0}}\}指定敵方戰場上的{{slot_1}}個從者。將其破壞。自己的主戰者\{{{slot_2}}\}+{{slot_3}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb86e15c35859bfeb","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb86e15c35859bfeb
       lang: zh-Hant
       text: \{{{slot_0}}\}如果為【覺醒】狀態，則這張卡片\{{{slot_1}}\}+{{slot_2}}/\{{{slot_3}}\}+{{slot_4}}，並獲得【威懾】。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb89f4577b0bb6de9","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb89f4577b0bb6de9
       lang: zh-Hant
       text: 【進化時】指定敵方戰場上的{{slot_0}}個從者。給予其{{slot_1}}點傷害。給予其主戰者{{slot_2}}點傷害。自己的主戰者\{{{slot_3}}\}+{{slot_4}}。將自己牌堆頂的{{slot_5}}張卡片放置到EX區。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb8c6f6c47d68a647","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb8c6f6c47d68a647
       lang: zh-Hant
       text: \{Q\}\{{{slot_0}}\}將這張卡片\{{{slot_1}}\}【土之秘術】：指定敵方的{{slot_2}}個從者。使其\{{{slot_3}}\}-{{slot_4}}/\{{{slot_5}}\}-{{slot_6}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb90231e46643e31c","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb90231e46643e31c
       lang: zh-Hant
       text: 【攻擊時】指定自己的{{slot_0}}個其他從者。使其\{{{slot_1}}\}+{{slot_2}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb92c6053d619ac29","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb92c6053d619ac29
       lang: zh-Hant
       text: 敵方的主要階段到來時，回復自己的PP {{slot_0}}點。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb945d8bbe7dd71fc","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb945d8bbe7dd71fc
       lang: zh-Hant
       text: \{{{slot_0}}\}指定敵方的{{slot_2}}個生命值{{slot_1}}以下的從者。使其消失。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb949f702c39f77c0","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb949f702c39f77c0
       lang: zh-Hant
       text: \{{{slot_0}}\}自己的全部其他妖精・從者與自己EX區的全部妖精・從者\{{{slot_1}}\}+{{slot_2}}/\{{{slot_3}}\}+{{slot_4}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb9624d3d4d0a9bd8","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb9624d3d4d0a9bd8
       lang: zh-Hant
       text: \{{{slot_0}}\}指定自己戰場上的{{slot_1}}個其他武鬥龍人・從者。使其\{{{slot_2}}\}+{{slot_3}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb96fa4a10b8655af","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb96fa4a10b8655af
       lang: zh-Hant
       text: 自己的回合中，自己主戰者的生命值減少時，從下列之中選擇{{slot_0}}項。本回合，無法再選擇已藉由此能力選擇過的選項。【{{slot_1}}】指定敵方戰場上的{{slot_2}}個從者。給予其與「本回合中自己主戰者的生命值減少的次數」相同的傷害。【{{slot_3}}】這張卡片\{{{slot_4}}\}+{{slot_5}}/\{{{slot_6}}\}+{{slot_7}}。【{{slot_8}}】這張卡片獲得【疾馳】。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb988b8db318e7088","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb988b8db318e7088
       lang: zh-Hant
       text: 藉由用餐，該賽馬娘・從者參賽。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb989a752ac37b16b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb989a752ac37b16b
       lang: zh-Hant
       text: \{{{slot_0}}\}各玩家抽取{{slot_1}}張卡片。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb9d97df87781f549","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb9d97df87781f549
       lang: zh-Hant
       text: 【進化時】指定敵方戰場上至多{{slot_0}}個從者。將其橫置或重置。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb9e39f1400004ed6","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb9e39f1400004ed6
       lang: zh-Hant
       text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_1}}張賽馬娘・法術，增加到手牌中。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tb9ead794bd431261","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tb9ead794bd431261
       lang: zh-Hant
       text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}：指定自己戰場上的{{slot_2}}個學院・從者。使其\{{{slot_3}}\}+{{slot_4}}/\{{{slot_5}}\}+{{slot_6}}。此能力在本回合曾使自己主戰者的\{{{slot_5}}\}增加的情況下可使用。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tba0ee1d9e2881559","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tba0ee1d9e2881559
       lang: zh-Hant
       text: \{{{slot_0}}\}\{消費{{slot_1}}\}：這張卡片獲得【必殺】。（與擁有【必殺】的從者交戰的敵方從者，在互相給予傷害後會被破壞）
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tba2f713395d5ee1b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tba2f713395d5ee1b
       lang: zh-Hant
       text: 【進化時】指定敵方戰場上的{{slot_1}}個原始消費{{slot_0}}以下的從者。使其消失。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tba2fc2cac3fcea95","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tba2fc2cac3fcea95
       lang: zh-Hant
       text: \{{{slot_0}}\}將自己牌堆頂的{{slot_1}}張卡片放置到墓場。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tba91c5456ac7b74e","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tba91c5456ac7b74e
       lang: zh-Hant
       text: 從下列之中選擇{{slot_0}}項。【{{slot_1}}】指定敵方戰場上的{{slot_2}}個從者。給予其{{slot_3}}點傷害。【{{slot_4}}】指定敵方戰場上的{{slot_5}}個從者。如果自己墓場的學院・卡片為{{slot_6}}張以上，則給予其{{slot_3}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbab763e9e653b924","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbab763e9e653b924
       lang: zh-Hant
       text: 只要這張卡片在戰場上，自己戰場上的全部『{{slot_0}}』獲得【守護】。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbabb3db3c2c4a393","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbabb3db3c2c4a393
       lang: zh-Hant
       text: \{{{slot_0}}\}捨棄手牌中的{{slot_1}}張學院・卡片：指定敵方戰場上的{{slot_2}}個從者。給予其{{slot_3}}點傷害。抽取{{slot_1}}張卡片。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbb1edb8cba840382","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbb1edb8cba840382
       lang: zh-Hant
       text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}、使EX區的{{slot_2}}張卡片消失：指定敵方戰場上的{{slot_3}}個從者。將其返回手牌。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbb365085e047b010","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbb365085e047b010
       lang: zh-Hant
       text: \{{{slot_0}}\}擲骰子。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbb37dd43cc70f908","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbb37dd43cc70f908
       lang: zh-Hant
       text: 【進化時】捨棄{{slot_0}}張手牌：指定敵方戰場上的{{slot_1}}個從者。給予其{{slot_2}}點傷害。如果捨棄了塔羅・卡片，則抽取{{slot_0}}張卡片。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbb54470ad5b37a74","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbb54470ad5b37a74
       lang: zh-Hant
       text: \{{{slot_0}}\}\{{{slot_1}}\}捨棄手牌中的{{slot_2}}張法術：指定敵方戰場上的{{slot_3}}個從者。給予其{{slot_4}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbb7121765f2e95ee","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbb7121765f2e95ee
       lang: zh-Hant
       text: 使用這張卡片之際，如果為【真紅】狀態，則消費-{{slot_0}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbbb575d46afef59b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbbb575d46afef59b
       lang: zh-Hant
       text: 【進化時】可以將自己手牌中的{{slot_0}}張魔法使・法術放置到EX區。本回合，使用該卡之際，消費-{{slot_1}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbbba9b614d97046f","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbbba9b614d97046f
       lang: zh-Hant
       text: 敵方的從者被破壞時，給予其主戰者{{slot_0}}點傷害。自己的主戰者\{{{slot_1}}\}+{{slot_2}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbbf85d7bbbfa9a6c","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbbf85d7bbbfa9a6c
       lang: zh-Hant
       text: \{{{slot_0}}\}指定敵方戰場上的{{slot_1}}個從者。給予其{{slot_2}}點傷害。如果自己的戰場上有其他英雄・從者，則轉變為{{slot_3}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbc017c50cc7b8b8b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbc017c50cc7b8b8b
       lang: zh-Hant
       text: 這張卡片離開戰場時，抽取{{slot_0}}張卡片。捨棄自己的{{slot_0}}張手牌。\{{{slot_2}}\}\{消費{{slot_3}}\}將這張卡片放置到墓場。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbc0dd7adeaea1e87","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbc0dd7adeaea1e87
       lang: zh-Hant
       text: \{{{slot_0}}\}從下列之中選擇{{slot_1}}項。【{{slot_2}}】指定敵方戰場上的{{slot_3}}個從者。給予其{{slot_4}}點傷害。【{{slot_5}}】給予敵方戰場上的全部從者{{slot_6}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbc1fb93b0182d261","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbc1fb93b0182d261
       lang: zh-Hant
       text: \{{{slot_0}}\}\{消費{{slot_1}}\}將這張卡片\{{{slot_2}}\}並放置到墓場：從下列之中選擇{{slot_3}}項。【{{slot_4}}】指定自己戰場上的{{slot_5}}個從者。使其獲得【突進】。【{{slot_6}}】指定自己戰場上的{{slot_5}}個從者。使其獲得【指定攻擊】。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbc3ec2663f24acde","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbc3ec2663f24acde
       lang: zh-Hant
       text: \{{{slot_0}}\}指定敵方戰場上的{{slot_1}}個從者。使其\{{{slot_2}}\}-{{slot_3}}/\{{{slot_4}}\}-{{slot_5}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbc568781610f00b1","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbc568781610f00b1
       lang: zh-Hant
       text: 【獲得驅動時】這張卡片\{{{slot_0}}\}+{{slot_1}}/\{{{slot_2}}\}+{{slot_3}}。從自己的牌堆中搜尋卡片名稱各不相同的至多{{slot_5}}張原始消費{{slot_4}}的水藍軍隊・從者，增加到手牌中。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbc5defd3ff7796d4","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbc5defd3ff7796d4
       lang: zh-Hant
       text: 【進化時】查看自己牌堆頂的{{slot_0}}張卡片。可以從其中公開{{slot_1}}張荒野・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbc873094e75f64f4","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbc873094e75f64f4
       lang: zh-Hant
       text: \{{{slot_0}}\}指定敵方戰場上的{{slot_1}}個從者。給予其與「自己戰場上的其他Passion・從者的數量」相同的傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbc99c552cbb8e11b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbc99c552cbb8e11b
       lang: zh-Hant
       text: 【進化時】從自己的牌堆中搜尋{{slot_2}}張「卡片名稱含有『{{slot_0}}』或『{{slot_1}}』的從者」，放置到EX區。本回合，使用該卡之際，消費-{{slot_3}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbca34d32c201e65d","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbca34d32c201e65d
       lang: zh-Hant
       text: 指定敵方的{{slot_0}}個從者。將其破壞。【魔力連鎖_{{slot_1}}】給予其主戰者{{slot_2}}點傷害。（如果自己墓場的法術為{{slot_3}}張以上，則【魔力連鎖_{{slot_1}}】之後的能力會發動）
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbca95d1607b1304c","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbca95d1607b1304c
       lang: zh-Hant
       text: 自己的結束階段到來時，自己戰場上的全部其他機械・從者\{{{slot_0}}\}+{{slot_1}}/\{{{slot_2}}\}+{{slot_3}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbcada81b66e6fb0b","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbcada81b66e6fb0b
       lang: zh-Hant
       text: \{{{slot_0}}\}如果為【真紅】狀態，則這張卡片獲得【疾馳】。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbcb56eaab5b9e477","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbcb56eaab5b9e477
       lang: zh-Hant
       text: 【進化時】將戰場上的{{slot_0}}張其他卡片返回手牌：這張卡片\{{{slot_1}}\}+{{slot_2}}/\{{{slot_3}}\}+{{slot_4}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbcbead0afb837e67","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbcbead0afb837e67
       lang: zh-Hant
       text: \{{{slot_0}}\}\{消費{{slot_1}}\}捨棄手牌中的{{slot_2}}張哥布林・卡片：指定敵方戰場上的{{slot_3}}個從者。給予其{{slot_4}}點傷害。這張卡片\{{{slot_5}}\}+{{slot_6}}/\{{{slot_7}}\}+{{slot_8}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbcd09d8f376c0f4c","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbcd09d8f376c0f4c
       lang: zh-Hant
       text: 從下列之中選擇{{slot_0}}項。【{{slot_1}}】捨棄手牌中的{{slot_2}}張天使・從者：指定敵方的{{slot_3}}個從者。將其破壞。【{{slot_4}}】捨棄手牌中的{{slot_2}}張墮天使・從者：自己的主戰者\{{{slot_6}}\}+{{slot_7}}。抽取{{slot_2}}張卡片。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbcd1f93291a40168","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbcd1f93291a40168
       lang: zh-Hant
       text: \{{{slot_0}}\}如果自己的戰場上有護符，則這張卡片\{{{slot_1}}\}+{{slot_2}}/\{{{slot_3}}\}+{{slot_4}}。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbce372c4e4fe277a","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbce372c4e4fe277a
       lang: zh-Hant
       text: \{{{slot_0}}\}指定敵方戰場上至多{{slot_1}}個從者。給予其{{slot_2}}點傷害。如果自己的EX區有荒野・卡片，則給予敵方的全部主戰者{{slot_3}}點傷害。
     origin: machine
-    low_confidence: false
-  - record_key: '["template_translation","Tbceb743017232e0e","zh-Hant"]'
-    kind: template_translation
+  - kind: template_translation
     data:
       template_id: Tbceb743017232e0e
       lang: zh-Hant
       text: \{{{slot_0}}\}將戰場上的{{slot_1}}張其他卡片放置到EX區：指定敵方戰場上的{{slot_2}}個從者。將其橫置。
     origin: machine
-    low_confidence: false

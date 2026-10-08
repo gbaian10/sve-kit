@@ -1,9 +1,7 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["glossary_choice","term:ability.accelerate","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:ability.accelerate
@@ -33,10 +31,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/22
             text_hash: sha256:415607ae76ddc4b5b4be96e8ab95804e621583b60c77be1531e1d2271c83922a
-  - record_key: '["glossary_choice","term:ability.activation","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:ability.activation
       lang: zh-Hant
@@ -44,10 +39,7 @@ records:
         kind: authored
         text: 起動
       concept_evidence: []
-  - record_key: '["glossary_choice","term:ability.advance_activation","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:ability.advance_activation
       lang: zh-Hant
@@ -55,10 +47,7 @@ records:
         kind: authored
         text: 進階起動
       concept_evidence: []
-  - record_key: '["glossary_choice","term:ability.box_packing","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:ability.box_packing
       lang: zh-Hant
@@ -66,10 +55,7 @@ records:
         kind: authored
         text: 裝箱
       concept_evidence: []
-  - record_key: '["glossary_choice","term:ability.choice","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:ability.choice
       lang: zh-Hant
@@ -81,9 +67,7 @@ records:
         source_work: Shadowverse
         source_urls: []
         claimed_source: 數位版 sv1 的繁中術語主張
-  - record_key: '["glossary_choice","term:ability.combo","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:ability.combo
@@ -113,9 +97,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/29
             text_hash: sha256:1039da93a371e467cc8fb79dd46a2196672a8c252e055ceef65721e642ba4559
-  - record_key: '["glossary_choice","term:ability.countdown","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:ability.countdown
@@ -145,10 +127,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/13
             text_hash: sha256:9169ac082036ee8c8fb02f92fd9f17f95cb060a6a4a484caff845baee212110c
-  - record_key: '["glossary_choice","term:ability.crimson","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:ability.crimson
       lang: zh-Hant
@@ -156,9 +135,7 @@ records:
         kind: authored
         text: 真紅
       concept_evidence: []
-  - record_key: '["glossary_choice","term:ability.crystallize","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:ability.crystallize
@@ -188,9 +165,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/24
             text_hash: sha256:91e1d418fb6f091ea47a3089dcc4090814afc382a09153058128548f0920d6ea
-  - record_key: '["glossary_choice","term:ability.earth_rite","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:ability.earth_rite
@@ -220,9 +195,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/15
             text_hash: sha256:a250818b578af85560d9b64e2a3b626deec20bd24b905bd818b8ed558fdc953f
-  - record_key: '["glossary_choice","term:ability.enhance","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:ability.enhance
@@ -252,9 +225,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/18
             text_hash: sha256:8ce31ad9864b1dd139d8962c8c92f428d2b62b3522644cace41cc78897ead549
-  - record_key: '["glossary_choice","term:ability.fanfare","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:ability.fanfare
@@ -284,10 +255,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/1
             text_hash: sha256:ec43a79ee33e30e0f9f1de2f9035b7004ef3144a8b28d927169f7fa604594c48
-  - record_key: '["glossary_choice","term:ability.feed","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:ability.feed
       lang: zh-Hant
@@ -299,9 +267,7 @@ records:
         source_work: 賽馬娘
         source_urls: []
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:ability.fusion","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:ability.fusion
@@ -331,9 +297,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/25
             text_hash: sha256:b9419eb861de3c799d1579cec12ddc51a6951ec0742f92556c9793feb165e271
-  - record_key: '["glossary_choice","term:ability.invocation","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:ability.invocation
@@ -363,9 +327,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/23
             text_hash: sha256:c62929f6a8bd14fd39361499ebf75a6c3c63077d420e10d9105d3db20d024e36
-  - record_key: '["glossary_choice","term:ability.last_words","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:ability.last_words
@@ -395,10 +357,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/2
             text_hash: sha256:827c642e85bf991b313c7286d56ec128a3b179996ffb2cfee22dd09f3227d3fb
-  - record_key: '["glossary_choice","term:ability.lesson","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:ability.lesson
       lang: zh-Hant
@@ -413,9 +372,7 @@ records:
           - https://forum.gamer.com.tw/C.php?bsn=28688&snA=4476
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩_星光舞台
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:ability.mode","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:ability.mode
@@ -445,10 +402,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/34
             text_hash: sha256:47a270081ab2892f63d740bc61cd7b17b04d9d3947b3123be8db9e0d97c12c83
-  - record_key: '["glossary_choice","term:ability.necrocharge","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:ability.necrocharge
       lang: zh-Hant
@@ -456,9 +410,7 @@ records:
         kind: authored
         text: 死靈充能
       concept_evidence: []
-  - record_key: '["glossary_choice","term:ability.necromancy","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:ability.necromancy
@@ -488,9 +440,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/14
             text_hash: sha256:a36884931b5ace1d296696ab25e0763b1bfc5ca408d00d577e9d9c1af3f89b17
-  - record_key: '["glossary_choice","term:ability.overflow","zh-Hant"]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: glossary_choice
     data:
       term_id: term:ability.overflow
@@ -520,10 +470,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/10
             text_hash: sha256:d8957cc196786cb81b98f4c157cb63aa6e97e8beeed56cfa32d8e58165d93fb3
-  - record_key: '["glossary_choice","term:ability.possession","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:ability.possession
       lang: zh-Hant
@@ -535,10 +482,7 @@ records:
         source_work: 卡片戰鬥先導者
         source_urls: []
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-  - record_key: '["glossary_choice","term:ability.quick","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:ability.quick
       lang: zh-Hant
@@ -546,10 +490,7 @@ records:
         kind: authored
         text: Quick
       concept_evidence: []
-  - record_key: '["glossary_choice","term:ability.race","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:ability.race
       lang: zh-Hant

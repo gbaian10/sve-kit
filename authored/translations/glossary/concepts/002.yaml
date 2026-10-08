@@ -1,10 +1,7 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["glossary_term","term:ability.rally"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:ability.rally
       category: ability
@@ -17,11 +14,7 @@ records:
         text_hash: sha256:e73b7be6f0d5c286a5674414f162c4bde8742f86fc0d5e5cf9058935634a5f83
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:ability.reanimate"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:ability.reanimate
       category: ability
@@ -34,11 +27,7 @@ records:
         text_hash: sha256:95b556eb014217b8fe0f95de425611f14d33ff08542376ffdb96990cf9c12478
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:ability.secret_art"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:ability.secret_art
       category: ability
@@ -51,11 +40,7 @@ records:
         text_hash: sha256:af05d63b616675a9c44d95f3cd1dd231ef54e0e2aedb682ee40769fcdf81b10c
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:ability.single_drive"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:ability.single_drive
       category: ability
@@ -70,11 +55,7 @@ records:
         start: 21
         end: 29
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:ability.spell_boost"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:ability.spell_boost
       category: ability
@@ -83,10 +64,7 @@ records:
       source_span:
       authored_source_ja: スペルブースト
       missing_source_reason: 首輪凍結 JP／數位字典未找到此 exact JA；依專案採納的規則詞名稱登錄，不捏造 raw locator，也不視為官方證據。
-  - record_key: '["glossary_term","term:ability.spell_chain"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:ability.spell_chain
       category: ability
@@ -101,11 +79,7 @@ records:
         start: 11
         end: 18
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:ability.stack"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:ability.stack
       category: ability
@@ -120,11 +94,7 @@ records:
         start: 1
         end: 5
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:ability.twin_drive"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:ability.twin_drive
       category: ability
@@ -139,11 +109,7 @@ records:
         start: 47
         end: 54
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:ability.union_burst"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:ability.union_burst
       category: ability
@@ -158,11 +124,7 @@ records:
         start: 1
         end: 3
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:ability.unleashed_secret_art"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:ability.unleashed_secret_art
       category: ability
@@ -175,11 +137,7 @@ records:
         text_hash: sha256:b7cd3fd52dc042f88f67b0c186f5bdddcf018545e25e0f558a4e0e37e1e39773
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:ability.vengeance"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:ability.vengeance
       category: ability
@@ -194,11 +152,7 @@ records:
         start: 0
         end: 2
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.add_to_deck"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.add_to_deck
       category: rule_term
@@ -207,10 +161,7 @@ records:
       source_span:
       authored_source_ja: デッキに加える
       missing_source_reason: 首輪凍結 JP／數位字典未找到此 exact JA；依專案採納的規則詞名稱登錄，不捏造 raw locator，也不視為官方證據。
-  - record_key: '["glossary_term","term:action.add_to_hand"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.add_to_hand
       category: rule_term
@@ -225,11 +176,7 @@ records:
         start: 31
         end: 37
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.banish"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.banish
       category: rule_term
@@ -244,11 +191,7 @@ records:
         start: 83
         end: 88
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.choose"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.choose
       category: rule_term
@@ -263,11 +206,7 @@ records:
         start: 32
         end: 34
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.destroy"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.destroy
       category: rule_term
@@ -282,11 +221,7 @@ records:
         start: 38
         end: 42
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.discard"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.discard
       category: rule_term
@@ -301,11 +236,7 @@ records:
         start: 14
         end: 17
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.distribute"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.distribute
       category: rule_term
@@ -320,11 +251,7 @@ records:
         start: 31
         end: 35
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.draw"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.draw
       category: rule_term
@@ -339,11 +266,7 @@ records:
         start: 31
         end: 35
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.drive_check"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.drive_check
       category: rule_term
@@ -358,11 +281,7 @@ records:
         start: 11
         end: 19
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.engage"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.engage
       category: ability
@@ -377,11 +296,7 @@ records:
         start: 60
         end: 63
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.equip"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.equip
       category: rule_term
@@ -396,11 +311,7 @@ records:
         start: 57
         end: 59
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.evolve"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.evolve
       category: rule_term
@@ -415,11 +326,7 @@ records:
         start: 14
         end: 18
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.ignore"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.ignore
       category: rule_term
@@ -434,4 +341,3 @@ records:
         start: 13
         end: 17
       authored_source_ja:
-      missing_source_reason:

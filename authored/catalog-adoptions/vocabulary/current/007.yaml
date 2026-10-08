@@ -1,9 +1,7 @@
 catalog_adoption_format: 2
 kind: catalog_adoption_shard
 records:
-  - record_key: '["vocabulary_adoption",{"code":"weissflugel","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -40,9 +38,7 @@ records:
               text_hash: sha256:2f9ce6e93f4606913171880417345670d1b97af230c07eb96617db36a3ce8b3a
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"witch","kind":"class"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -83,10 +79,7 @@ records:
           - lang: zh-Hant
             text: 巫師
             origin: machine
-            low_confidence: false
-  - record_key: '["vocabulary_adoption",{"code":"wyrmkin","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -123,9 +116,7 @@ records:
               text_hash: sha256:6919754fd7967782a7c5e4f87a99eaf1c36b17e7a0f4bde6306b511fe8a79307
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"yokai","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -162,9 +153,7 @@ records:
               text_hash: sha256:d15c9b5eb5ba7aa26e804ccb6f8abb916f8e45b8e29d55343c6f80f0d83ba3b0
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"zealot","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:

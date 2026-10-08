@@ -1,8 +1,7 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["glossary_choice","term:name.self_proclaimed_fan_favorite","zh-Hant"]'
-    origin: machine
+  - origin: machine
     low_confidence: true
     kind: glossary_choice
     data:
@@ -12,9 +11,7 @@ records:
         kind: authored
         text: 自稱‧街上的紅人
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.servant_of_lust","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.servant_of_lust
@@ -23,10 +20,7 @@ records:
         kind: authored
         text: 欲望的隨從
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.seven_more_centimeters","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.seven_more_centimeters
       lang: zh-Hant
@@ -38,9 +32,7 @@ records:
         source_work: Uma Musume
         source_urls:
           - https://gametora.com/zh-tw/umamusume/supports
-  - record_key: '["glossary_choice","term:name.shared_memories","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.shared_memories
@@ -49,8 +41,7 @@ records:
         kind: authored
         text: 兩人的追憶
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.sharon_seaside_nymph","zh-Hant"]'
-    origin: machine
+  - origin: machine
     low_confidence: true
     kind: glossary_choice
     data:
@@ -60,10 +51,7 @@ records:
         kind: authored
         text: 水邊的寧芙‧夏蓉
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.sheffy","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.sheffy
       lang: zh-Hant
@@ -75,10 +63,7 @@ records:
         source_work: Princess Connect Re Dive
         source_urls:
           - https://github.com/Expugn/priconne-database
-  - record_key: '["glossary_choice","term:name.sheffy_princess_form","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.sheffy_princess_form
       lang: zh-Hant
@@ -90,10 +75,7 @@ records:
         source_work: Princess Connect Re Dive
         source_urls:
           - https://github.com/Expugn/priconne-database
-  - record_key: '["glossary_choice","term:name.shiki_ichinose","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.shiki_ichinose
       lang: zh-Hant
@@ -105,9 +87,7 @@ records:
         source_work: The Idolmaster Cinderella Girls
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.shiki_ichinose_budding_flower","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.shiki_ichinose_budding_flower
@@ -120,9 +100,7 @@ records:
         source_work: Shadowverse or collaboration names
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.shiki_ichinose_mystic_elixir","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.shiki_ichinose_mystic_elixir
@@ -135,10 +113,7 @@ records:
         source_work: Shadowverse or collaboration names
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.shin_sato","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.shin_sato
       lang: zh-Hant
@@ -150,9 +125,7 @@ records:
         source_work: The Idolmaster Cinderella Girls
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.shin_sato_gutsy_reporter","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.shin_sato_gutsy_reporter
@@ -165,10 +138,7 @@ records:
         source_work: Shadowverse or collaboration names
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.shinko_windy","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.shinko_windy
       lang: zh-Hant
@@ -180,10 +150,7 @@ records:
         source_work: Uma Musume
         source_urls:
           - https://gametora.com/zh-tw/umamusume/characters
-  - record_key: '["glossary_choice","term:name.shinobu","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.shinobu
       lang: zh-Hant
@@ -195,10 +162,7 @@ records:
         source_work: Princess Connect Re Dive
         source_urls:
           - https://github.com/Expugn/priconne-database
-  - record_key: '["glossary_choice","term:name.shinobu_kudo","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.shinobu_kudo
       lang: zh-Hant
@@ -210,8 +174,7 @@ records:
         source_work: The Idolmaster Cinderella Girls
         source_urls:
           - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
-  - record_key: '["glossary_choice","term:name.shinra_all_discerning","zh-Hant"]'
-    origin: machine
+  - origin: machine
     low_confidence: true
     kind: glossary_choice
     data:
@@ -221,10 +184,7 @@ records:
         kind: authored
         text: 全識的六銘傳‧森羅
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.shiori","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.shiori
       lang: zh-Hant
@@ -236,9 +196,7 @@ records:
         source_work: Princess Connect Re Dive
         source_urls:
           - https://github.com/Expugn/priconne-database
-  - record_key: '["glossary_choice","term:name.shizuku_oikawa","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.shizuku_oikawa
@@ -247,10 +205,7 @@ records:
         kind: authored
         text: 及川雫
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.shizuru","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.shizuru
       lang: zh-Hant
@@ -262,10 +217,7 @@ records:
         source_work: Princess Connect Re Dive
         source_urls:
           - https://github.com/Expugn/priconne-database
-  - record_key: '["glossary_choice","term:name.shizuru_rino","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.shizuru_rino
       lang: zh-Hant
@@ -277,9 +229,7 @@ records:
         source_work: Shadowverse or collaboration names
         source_urls:
           - https://github.com/Expugn/priconne-database
-  - record_key: '["glossary_choice","term:name.show_of_loyalty","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.show_of_loyalty
@@ -288,10 +238,7 @@ records:
         kind: authored
         text: 展現忠義
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.silent_tom","zh-Hant"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_choice
+  - kind: glossary_choice
     data:
       term_id: term:name.silent_tom
       lang: zh-Hant
@@ -302,9 +249,7 @@ records:
       source_claim:
         source_work: Cardfight Vanguard
         source_urls: []
-  - record_key: '["glossary_choice","term:name.silver_thorn_dragon_tamer_luquier","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.silver_thorn_dragon_tamer_luquier
@@ -313,9 +258,7 @@ records:
         kind: authored
         text: 銀荊棘的馭龍使 露綺耶
       concept_evidence: []
-  - record_key: '["glossary_choice","term:name.sincere_masquerade_ghost","zh-Hant"]'
-    origin: machine
-    low_confidence: false
+  - origin: machine
     kind: glossary_choice
     data:
       term_id: term:name.sincere_masquerade_ghost

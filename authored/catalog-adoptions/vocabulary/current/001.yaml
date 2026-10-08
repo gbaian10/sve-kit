@@ -1,9 +1,7 @@
 catalog_adoption_format: 2
 kind: catalog_adoption_shard
 records:
-  - record_key: '["vocabulary_adoption",{"code":"academic","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -40,10 +38,7 @@ records:
               text_hash: sha256:33a172fee29a530195f64e66aa4fddf025edb95e52fc1459b0c224c40d19272d
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"advance","kind":"special_kind"}]'
-    origin: project
-    low_confidence: false
-    kind: vocabulary_adoption
+  - kind: vocabulary_adoption
     data:
       subject:
         kind: special_kind
@@ -55,9 +50,7 @@ records:
           text: アドバンス
         raw_mappings: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"alchemist","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -94,9 +87,7 @@ records:
               text_hash: sha256:5925e5d3c91983d5c0a9703dda39fe4d22c83e6402f1cac3a5e29360cd32b933
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"alter_maiden","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -133,9 +124,7 @@ records:
               text_hash: sha256:342be1e44668dd1522148fd2ae00a9ff08a401d02e66f46d50109e55a3c3a566
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"amulet","kind":"type"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -216,9 +205,7 @@ records:
             special_kinds:
               - token
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"anathema","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -255,9 +242,7 @@ records:
               text_hash: sha256:de085998559110e83a095ed68359d74b8fea014e86ec886fe55d2d29acde6eee
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"angel","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -294,9 +279,7 @@ records:
               text_hash: sha256:970d69ad21de1cc8915dc4025b619cbd5a1f55b358b73cfa93e044678b8c7b00
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"aqua_force","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -333,9 +316,7 @@ records:
               text_hash: sha256:be860cf5e6ed63ded9244de3ec4e9ab14f6d938087702667338e0192f467eb48
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"arcana","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -372,9 +353,7 @@ records:
               text_hash: sha256:d9acfae51005a12f663823b609d3d166ad3c6082b41e0a38d84e3e48bc779d53
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"arcanaform","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -411,9 +390,7 @@ records:
               text_hash: sha256:69a7e0550f8fded72319db75c509867000dc7b8fcc8041a8a02479c872481845
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"archfiend","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -450,9 +427,7 @@ records:
               text_hash: sha256:be6c90e2b1cb4ea9f9ccf237b14d25c67dad397f4a210ea517ab7cd8bd1f7361
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"arena","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -489,9 +464,7 @@ records:
               text_hash: sha256:cd54617f2e646192bd5af9353e75a87aa69d491ef0e57d8120059c06bfc01cb8
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"armed","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -528,9 +501,7 @@ records:
               text_hash: sha256:4fce919e28a75417a8c0c0282a32ce0a72dd6b7c33e7a6cbeccce251466a754e
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"arthurian","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -567,9 +538,7 @@ records:
               text_hash: sha256:11080acf1aa666511f6a9b9d506d7c20c1a598c4ab8616bf66db9d04f3eaeac2
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"assassin","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -606,9 +575,7 @@ records:
               text_hash: sha256:22b3857fee7c003665bac5713e10977b540c12de536780eb24466a4625166279
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"avian","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -645,9 +612,7 @@ records:
               text_hash: sha256:c961a47d8f6b698ed399f8d7f0000474a36246bc501a921fd252f3de47afed2a
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"beast","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -684,9 +649,7 @@ records:
               text_hash: sha256:6dd2e4b41c2f4af4bef612e9865bf59753d2095f83c29a8f2d77dfa5f2d19f40
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"bishop","kind":"class"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -727,10 +690,7 @@ records:
           - lang: zh-Hant
             text: 主教
             origin: machine
-            low_confidence: false
-  - record_key: '["vocabulary_adoption",{"code":"bnw","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -767,9 +727,7 @@ records:
               text_hash: sha256:f0c6ff8d2e5f4fd43a090a326c4fc4b9e5cb1a0d952c826a690c58d95bba9368
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"caon","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -806,9 +764,7 @@ records:
               text_hash: sha256:d69a255995f3a9c7bff498cfae700c5b98409ffd71b729773024d7e023d854a1
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"cardfight_vanguard","kind":"title"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -845,9 +801,7 @@ records:
               text_hash: sha256:76d7f85a03d57469ab81a0f920354a1c7533592eefe281ec2fd923aebbf9c94d
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"carmina","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -884,9 +838,7 @@ records:
               text_hash: sha256:fa67b5f1dd7e00b4757f7d3c4be3a97d11a1694c3001828db345bbaaa27669f6
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"celestial","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:
@@ -923,9 +875,7 @@ records:
               text_hash: sha256:433d4bb510d8512372fe2939da6ed78a6ede5733485e7c448bdbe2ac7683fc8f
             special_kinds: []
         active: true
-  - record_key: '["vocabulary_adoption",{"code":"chef","kind":"trait"}]'
-    origin: official
-    low_confidence: false
+  - origin: official
     kind: vocabulary_adoption
     data:
       subject:

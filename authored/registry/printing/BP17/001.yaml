@@ -1,8 +1,7 @@
 authored_format: 1
 kind: registry_shard
 records:
-  - record_key: printing:p:c629dd1000bb573a9eec9db2975d3f1d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c629dd1000bb573a9eec9db2975d3f1d
@@ -29,8 +28,7 @@ records:
           observation_hash: sha256:f31dfde11d0d099484de4404464a760a2544715705e6c9669b92f38d47d55891
           rules_hash: sha256:7d88c40fd1a44cdb95c017623d23a7e077603dec490310223cfc4a5f31de871b
           recipe: registry-observation-v1
-  - record_key: printing:p:a2a4bea759ba54f2aedaf891be22642a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a2a4bea759ba54f2aedaf891be22642a
@@ -57,8 +55,7 @@ records:
           observation_hash: sha256:6e6e1211a7554d9fcfe7832ce855679239d3e2a829fae809051aeea5798ebce6
           rules_hash: sha256:163f16c5eef50a69bb79bf4318e8cd338a1333bd278ada12bfd736a8ba81444f
           recipe: registry-observation-v1
-  - record_key: printing:p:6b3a8d3d361f527b9e2c5178c071d32e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:6b3a8d3d361f527b9e2c5178c071d32e
@@ -85,8 +82,7 @@ records:
           observation_hash: sha256:e2525e482038b2b6e96e5e9d89f0d47c1a541f5892338ef8482b0539859f1565
           rules_hash: sha256:e3db1eaa2d2ddfecb08ea45d9ded6f5d8e249a800e88f90909303b48633ce2b9
           recipe: registry-observation-v1
-  - record_key: printing:p:f6c940343a835344b01c27538a7f67f0
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f6c940343a835344b01c27538a7f67f0
@@ -113,8 +109,7 @@ records:
           observation_hash: sha256:dd0c87d15d0e6386fd96a4b95b4f9d6c6f0f3699a0b7bfff995c6ae47f5f5a74
           rules_hash: sha256:6dae6a875c7fffb159c91bb90e1d69d647c7a23450b9fc32fcb76a3c4fc455ef
           recipe: registry-observation-v1
-  - record_key: printing:p:0be9d2d51f7b5b78b9e69d838d12c3dd
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0be9d2d51f7b5b78b9e69d838d12c3dd
@@ -141,8 +136,7 @@ records:
           observation_hash: sha256:3c929aa3dbdb5fcbb6ede3da67726a9ec66a1f9e3381910df730c629c149ff39
           rules_hash: sha256:f3a5964ba55c5616438cf65bff33c3d71cef70143154ef9beb54ce2a6c74f3b9
           recipe: registry-observation-v1
-  - record_key: printing:p:39f838cbf4735cccafe62afdfeb04dee
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:39f838cbf4735cccafe62afdfeb04dee
@@ -169,8 +163,7 @@ records:
           observation_hash: sha256:ac07ec0a74d1909602ba54c2758b26743e057545d881694b969251732b89914d
           rules_hash: sha256:e4cca85f997b79ac2fef50b7839302c009239ce1c872e173b0c1ff1e0f366dbb
           recipe: registry-observation-v1
-  - record_key: printing:p:86a92b2da3f05ec49c37c533d0ba988d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:86a92b2da3f05ec49c37c533d0ba988d
@@ -197,8 +190,7 @@ records:
           observation_hash: sha256:f33da51231485a84154b2695b2396ed41dfcabae9bac8645432f6c06e0cc7cac
           rules_hash: sha256:6f68c10bc388a277bf85be40efd3800748f428b5870839ea46bfaab13cd8f3b4
           recipe: registry-observation-v1
-  - record_key: printing:p:1fa51c37e25e5395b6b111a48fd5837c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:1fa51c37e25e5395b6b111a48fd5837c
@@ -225,8 +217,7 @@ records:
           observation_hash: sha256:68826baf1e3a3f3f31cba11109b423a22def4eff0fce7675b1d9291473695dd6
           rules_hash: sha256:3b546cc2abda35e1082ee75fe2f6f8853c03632c6cf0bef3daa64d8d0a2d6979
           recipe: registry-observation-v1
-  - record_key: printing:p:d842ab11f81350a68f796694e1fb8812
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d842ab11f81350a68f796694e1fb8812
@@ -253,8 +244,7 @@ records:
           observation_hash: sha256:66f38b99a45385f38463f10c76fa264e2d4677aa876ef86442309b15e6dba376
           rules_hash: sha256:3a9dfbda64844594fbf084dada362a33b46838e2c244056055221da8549f4857
           recipe: registry-observation-v1
-  - record_key: printing:p:d1f73eab2f805768a2bfe4bd7a5d6c68
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d1f73eab2f805768a2bfe4bd7a5d6c68
@@ -281,8 +271,7 @@ records:
           observation_hash: sha256:b432bf9584b1e75c1135feb520779de65c02b6f3988922226dd65558ba9ca37a
           rules_hash: sha256:6353de759c4e43faa19b38b1c0588bb0db58104106b66c39eb16d98b41eb3cb7
           recipe: registry-observation-v1
-  - record_key: printing:p:56837d26dfa252be8a87e1ee45986b41
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:56837d26dfa252be8a87e1ee45986b41
@@ -309,8 +298,7 @@ records:
           observation_hash: sha256:b8ebc501dee2015b4d3d3b73ef03ff28062770ee720acc1d0ae98ddc5b0b5e6c
           rules_hash: sha256:8a3b76774afaebbc4dc7e1fab95959be6f1c35082106bc43ea422a177f99e324
           recipe: registry-observation-v1
-  - record_key: printing:p:badfbe104fc05a08b25147f01a90592f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:badfbe104fc05a08b25147f01a90592f
@@ -337,8 +325,7 @@ records:
           observation_hash: sha256:496b2c6ec38d88646003bdd5e346ee0a8010fb08601f68fed9dfaa8a3934602d
           rules_hash: sha256:e2f8b35f725622c39df1a7093096997d304894a6f991029eb72d5df498360df2
           recipe: registry-observation-v1
-  - record_key: printing:p:0fe60aaa3e4c557ebf758eafa3a17069
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0fe60aaa3e4c557ebf758eafa3a17069
@@ -365,8 +352,7 @@ records:
           observation_hash: sha256:d7df3c67232854b967929ac48a50ceb45b4c656f23ba88ddce2c167fd7d20dea
           rules_hash: sha256:ff1fb9b4d7d2c46dbeb86938a5ff6de07280b0e6ce7c139face7f34f3fc2b523
           recipe: registry-observation-v1
-  - record_key: printing:p:4e240323b4145dc9a6337e4207b36713
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4e240323b4145dc9a6337e4207b36713
@@ -393,8 +379,7 @@ records:
           observation_hash: sha256:a5395a9dd13c1237c9419324fb5bb642a8d288501b7d8370f03dca7a5603d2c9
           rules_hash: sha256:a25e581a17abf419fc76f04f127828d8b2125a11a75e85f9f9ae85058e4fadb6
           recipe: registry-observation-v1
-  - record_key: printing:p:8c578d51eb405663b2ff58ce2c1af43e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:8c578d51eb405663b2ff58ce2c1af43e
@@ -421,8 +406,7 @@ records:
           observation_hash: sha256:69193adefb91f0cc55e039b6577c4f222fece8fe55d628cb615cfa6d42136439
           rules_hash: sha256:8e53ffefe5aa2b0d3af186676bc40d8296ff326ed468d61a3a59c55b66e55281
           recipe: registry-observation-v1
-  - record_key: printing:p:148f0a6185405ae3a6c5796c2aa03f8b
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:148f0a6185405ae3a6c5796c2aa03f8b
@@ -449,8 +433,7 @@ records:
           observation_hash: sha256:704dbbb9104ecd28deab0d7a217a07f739ec216dc25d5046377686fc6911090f
           rules_hash: sha256:fe6ea1345b16d817a624e2b90e829e63a186c922836327cd10a5ef439d9a59f7
           recipe: registry-observation-v1
-  - record_key: printing:p:0c69787b76425c768c19bac2a4a71591
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0c69787b76425c768c19bac2a4a71591
@@ -477,8 +460,7 @@ records:
           observation_hash: sha256:5267ec1719428e11850054da38dd3c74b42912e71f2136bb5c77bcafd837dc0d
           rules_hash: sha256:a58a9dfac25e653c037739ae738af9430065fc354936a943612d8e2abcfbab56
           recipe: registry-observation-v1
-  - record_key: printing:p:df388d92a4da55e2aed58a79d8e08609
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:df388d92a4da55e2aed58a79d8e08609
@@ -505,8 +487,7 @@ records:
           observation_hash: sha256:6ddf88f8ad5ec63a9a51535f8d175e445b59f154cde99171682829ca6c2f5eee
           rules_hash: sha256:ea8038b61da0c6ca92d9c4659fbdfc9208434a4f04017f068b773b584dfbd24d
           recipe: registry-observation-v1
-  - record_key: printing:p:c6aaec2f21de59d8860d22038499c2db
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c6aaec2f21de59d8860d22038499c2db
@@ -533,8 +514,7 @@ records:
           observation_hash: sha256:1aadae404a01cafca04538fea4310c29e3f28a2d73c1e9690df6559c9f5662db
           rules_hash: sha256:b7c5b5b6712235b52c36f60ec6b5ce92bc4e08181a8c57863dedd0b463c7f525
           recipe: registry-observation-v1
-  - record_key: printing:p:640268ab8f2f512b9bf60588a54b59b7
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:640268ab8f2f512b9bf60588a54b59b7
@@ -561,8 +541,7 @@ records:
           observation_hash: sha256:83d9d5f8f457c5f6098265c27986c70ec3047bda62c598fdbc2b33caad863879
           rules_hash: sha256:10fafecba127e48c71b790cb2b571949553cd1298d1ddd27e0af4b0765959993
           recipe: registry-observation-v1
-  - record_key: printing:p:a19a1c97a1cb5bf29d2a0b7e92d81d53
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a19a1c97a1cb5bf29d2a0b7e92d81d53
@@ -589,8 +568,7 @@ records:
           observation_hash: sha256:8b56e147489f5b75c70b7f34df9082a2dfb6203753ab82b174c15330cedefb13
           rules_hash: sha256:5b72172499a3ee38e568f41020540352859c5b764074cd8210ebd29a904f9312
           recipe: registry-observation-v1
-  - record_key: printing:p:54205e927b125a9d8b31895c25137756
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:54205e927b125a9d8b31895c25137756
@@ -617,8 +595,7 @@ records:
           observation_hash: sha256:31c5b96221071f06bb0b39cf2cadeac0d9f357dcb28d4f4ec9f80027b68ff087
           rules_hash: sha256:55c8e5dd8c7106394d3748b18399ed5cba5808429d799d0f639516f5ca91833e
           recipe: registry-observation-v1
-  - record_key: printing:p:7f2abe95d43059ecba88cc772b84f3c5
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7f2abe95d43059ecba88cc772b84f3c5
@@ -645,8 +622,7 @@ records:
           observation_hash: sha256:fce4784cd07c6cd88f9771abbc959e1ac9fa08f4f42913c48d1dc31e6568265d
           rules_hash: sha256:74a27c5849c9e1d81f45c099faeda4391baac34de46a67ca65f0fb0e6313d3e0
           recipe: registry-observation-v1
-  - record_key: printing:p:2949da2d57895c6cad2b4ca71ef103df
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:2949da2d57895c6cad2b4ca71ef103df
@@ -673,8 +649,7 @@ records:
           observation_hash: sha256:f21831cd8f578b4576d05c76070c23d0127ba8b686db16a4cfdc8998601a57e3
           rules_hash: sha256:43a3ec7b30bfbcec5c19d8a920b949132d92b3cfaf213145724a3c16229ac281
           recipe: registry-observation-v1
-  - record_key: printing:p:54d093757ad959aeabe13910889a25cc
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:54d093757ad959aeabe13910889a25cc
@@ -701,8 +676,7 @@ records:
           observation_hash: sha256:eff3afa27ede57bc1e535822b15f36edfbbcdc3ab41342c70f5852918db64f51
           rules_hash: sha256:59df8bd870aeca47bfa33b850c855bdd45783aa68151e18af136c1f87d6e03eb
           recipe: registry-observation-v1
-  - record_key: printing:p:6dfcd0de112455af9ffb27d52d091aa7
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:6dfcd0de112455af9ffb27d52d091aa7
@@ -729,8 +703,7 @@ records:
           observation_hash: sha256:10efbd915928e0874e27d8cf516b91db3eb7724d09ca3f268add18011604f01f
           rules_hash: sha256:af452aa7fba34f6ac8c26e99bc847d4f55a5a9321757bc105e0793fdf9c8f5e6
           recipe: registry-observation-v1
-  - record_key: printing:p:480fdeefb62d5cb8ba32fca830bdb672
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:480fdeefb62d5cb8ba32fca830bdb672
@@ -757,8 +730,7 @@ records:
           observation_hash: sha256:922286020136ac48f5e53ddb187b836492cd6bb755aa6d1f2cd4f1be65a62d56
           rules_hash: sha256:bc34c7c679f33a0c780acfd5422970b8f34cf33adaee8feb401844b99ce86b08
           recipe: registry-observation-v1
-  - record_key: printing:p:a8f967fb9b455658b22a186930ecd40d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a8f967fb9b455658b22a186930ecd40d
@@ -785,8 +757,7 @@ records:
           observation_hash: sha256:43f517ca3aebb0b90b4323157f4dab068d07fd978545eb592c1c0766e4b01c88
           rules_hash: sha256:15f312514471aaaf1f598987e6dee9480993774013b134f7a28d52e9bfb1bf25
           recipe: registry-observation-v1
-  - record_key: printing:p:e23064a1d0365b34a9c851eab8ac65af
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e23064a1d0365b34a9c851eab8ac65af
@@ -813,8 +784,7 @@ records:
           observation_hash: sha256:a2bc86e1ddff8d6443dd5809c052f7a2fca990726a53c1743aa276f34903e346
           rules_hash: sha256:b5b627c8a41d7aa4d3d37955a50f05d85485af4a95a5b19602b2377bf8de40a1
           recipe: registry-observation-v1
-  - record_key: printing:p:eae885450923521d8c306bbb24d05534
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:eae885450923521d8c306bbb24d05534
@@ -841,8 +811,7 @@ records:
           observation_hash: sha256:b430163f3b683d708b9e7f4a44fb0ec02d129729809a2204a0d40da0207342dc
           rules_hash: sha256:bee50ee3b0d59ff1a6a2ace5ab05f46e18886af07c0d81d4ecc3d41d9af99ad3
           recipe: registry-observation-v1
-  - record_key: printing:p:09cf41515d47536996fbc3d0307e7dd4
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:09cf41515d47536996fbc3d0307e7dd4
@@ -869,8 +838,7 @@ records:
           observation_hash: sha256:e30e74577cc60825a3ddc3b1e476a329c474abb73ca05952855173ccf9efd507
           rules_hash: sha256:0e3d249abf637bab3908c9d65bdc83aa8c1b9cf0cc86793d0143d5d46100864c
           recipe: registry-observation-v1
-  - record_key: printing:p:ffdf156691665e078ce927d0f4878947
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:ffdf156691665e078ce927d0f4878947
@@ -897,8 +865,7 @@ records:
           observation_hash: sha256:2c599fec5f2dc9e495401f20c307bd20cb5057258ff7ef5d189f268fcbfc4a4e
           rules_hash: sha256:0dd25282fbbfa4fa7aa2f5affb442f2b24752b5827e3992c01ce0f965b972798
           recipe: registry-observation-v1
-  - record_key: printing:p:866ec4986fff5286840af6e1d819185e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:866ec4986fff5286840af6e1d819185e
@@ -925,8 +892,7 @@ records:
           observation_hash: sha256:f7256be0caf1677fbe09d70b34ed0d4b397d135e21dabb2d90178bedc2f768d1
           rules_hash: sha256:b80a1befb344ecf13f88617f186238a6aa851fd228a4f28fd23a11f9f1a662f0
           recipe: registry-observation-v1
-  - record_key: printing:p:4d6fc080b0735153b309f4e0e0595cf0
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4d6fc080b0735153b309f4e0e0595cf0
@@ -953,8 +919,7 @@ records:
           observation_hash: sha256:6bdb1a98cf93a568f00128be601f667398d704bf7fdfd40815782ceafc371763
           rules_hash: sha256:d5b872399a417960f49843a330cb969542898650dff8e200d046a0d6da0dc318
           recipe: registry-observation-v1
-  - record_key: printing:p:2eb9067db9d55f40928f62405b641a75
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:2eb9067db9d55f40928f62405b641a75
@@ -981,8 +946,7 @@ records:
           observation_hash: sha256:075bdc4ec6c96480d1d12a0261ad4e924fb0e8006336cfb31ad08637298cfcad
           rules_hash: sha256:e1d1ccedb749088008f40e95ccac352cd6fc4a8023e7ecb86b400ed3046559cd
           recipe: registry-observation-v1
-  - record_key: printing:p:120c92c0ffba554fb567d376626e5196
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:120c92c0ffba554fb567d376626e5196
@@ -1009,8 +973,7 @@ records:
           observation_hash: sha256:3219e3528e57ff40778e9c4d0d38516b8f3ae326e37852a3064458b092c0bc44
           rules_hash: sha256:98672dddde759328c2c96431c2f56c0575e3bdfa3ab5b06b43dbda75421d0b2a
           recipe: registry-observation-v1
-  - record_key: printing:p:c704dcd9a4dd51c3b7f4afce3d9d977e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c704dcd9a4dd51c3b7f4afce3d9d977e
@@ -1037,8 +1000,7 @@ records:
           observation_hash: sha256:aef3b4e902e3aa94640b6acbf575bd6932fdf668a7c71d2b0e592b6ee7882bc2
           rules_hash: sha256:867074f4a9e16b442c2dc16f884c9d1834bd860f65777ed5cd654f5c6c473bdb
           recipe: registry-observation-v1
-  - record_key: printing:p:301fae48e6f651a1952f4142e9b285ed
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:301fae48e6f651a1952f4142e9b285ed
@@ -1065,8 +1027,7 @@ records:
           observation_hash: sha256:d4567f208407f3986629113566561a9b1975fb66b8a0372314ea5b6427af92dc
           rules_hash: sha256:010d3dd5f81d73e189efd2682265974ee395f41ffa1695c29a093a4520901daf
           recipe: registry-observation-v1
-  - record_key: printing:p:51f2874794115c228a6363e0410065e2
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:51f2874794115c228a6363e0410065e2
@@ -1093,8 +1054,7 @@ records:
           observation_hash: sha256:9f4f60928adcab4dcf914ec1f00dff0261982120e22d7c8e3ba9b088aca7788b
           rules_hash: sha256:53905789cd209374d85897b4bc632753cfb743362851182c78b6ccd47d648728
           recipe: registry-observation-v1
-  - record_key: printing:p:d5ee8bf799e352dfad645a54376d844a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d5ee8bf799e352dfad645a54376d844a
@@ -1121,8 +1081,7 @@ records:
           observation_hash: sha256:0bb49462d0bc5521fb07045062c1afc223b0d7e94882639880d29525d61be22c
           rules_hash: sha256:c400bb83076bdaf71c7a1588e1bfa6fbd62a475acc9e56179f5d4befacdeedf2
           recipe: registry-observation-v1
-  - record_key: printing:p:b1bf691bc2e5583d819046969bb2952b
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b1bf691bc2e5583d819046969bb2952b
@@ -1149,8 +1108,7 @@ records:
           observation_hash: sha256:f308bddba975e960ea6e238409c1222ad85dccaa11a36f27823a6eee78790f79
           rules_hash: sha256:b1d7c6ee2c8b74985b1ea682c61058b5d644ef4852504183df3a4a48ade1f222
           recipe: registry-observation-v1
-  - record_key: printing:p:3ce95c95018459038b54bbc512f4c6dc
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:3ce95c95018459038b54bbc512f4c6dc
@@ -1177,8 +1135,7 @@ records:
           observation_hash: sha256:86360dae49d1b3de95a01392d90002005d807dfe04874e25e5db00f13baf2322
           rules_hash: sha256:783549a6b77e9ec0948a48c63aa5a60763a52aa5ecb5b93f1d65123e67bc61b5
           recipe: registry-observation-v1
-  - record_key: printing:p:5fc35ec604815ba99f6ec3274f519536
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:5fc35ec604815ba99f6ec3274f519536
@@ -1205,8 +1162,7 @@ records:
           observation_hash: sha256:b0c33e95f875363b7160d4980dd0596c399bc2e3e5f51fc8f5efe1862bf33c87
           rules_hash: sha256:c2075a8d4db90f53302c69d09e17ccdb71db0b960b83c492f37842e757b30f13
           recipe: registry-observation-v1
-  - record_key: printing:p:c1486510d44155f89075d9318eb3de28
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c1486510d44155f89075d9318eb3de28
@@ -1233,8 +1189,7 @@ records:
           observation_hash: sha256:4c5bead48c1e55050666e6223adcc7ff4c40ff5e733bface928d447258ba0c0e
           rules_hash: sha256:3c493f2a7a19ca9eca3a41adbd7b880dc353d8716f266661d46d3b857a8a40cd
           recipe: registry-observation-v1
-  - record_key: printing:p:20b7ded4ef1e54fca0c48e5a45d76613
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:20b7ded4ef1e54fca0c48e5a45d76613
@@ -1261,8 +1216,7 @@ records:
           observation_hash: sha256:571842d9e1c62af4a5ff6e72b6c3c04b5e0585b996358b8a878f54f40b7f70f3
           rules_hash: sha256:03734048e3a08a8c293a5486bd6a5d0efca0e2bbc526b923631d1740752fc5b1
           recipe: registry-observation-v1
-  - record_key: printing:p:cf15041ced5e52fda7eee84e4834d294
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:cf15041ced5e52fda7eee84e4834d294
@@ -1289,8 +1243,7 @@ records:
           observation_hash: sha256:846483aabfc597efb49fcbaee199b98918eb830257394ac06feac6602bb84dea
           rules_hash: sha256:bd6786309022ee87e2e7a2dc9af70418d9d397b4c18612cf2ed3a61d831e6b05
           recipe: registry-observation-v1
-  - record_key: printing:p:f292fe2d8e26552a869e42fc81753f7c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f292fe2d8e26552a869e42fc81753f7c
@@ -1317,8 +1270,7 @@ records:
           observation_hash: sha256:59ecdc03a394b7d9cee5fcf0640b2f62f7b21f0eaaee6d44155585a379744740
           rules_hash: sha256:4495131f72e88f7aa021187790834ea28fc925eb4a42617c13a015899195de2e
           recipe: registry-observation-v1
-  - record_key: printing:p:9f032e4d97285956bcbf6b6e36f555dc
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:9f032e4d97285956bcbf6b6e36f555dc
@@ -1345,8 +1297,7 @@ records:
           observation_hash: sha256:ed8f71ccc59e659d6dceb46db888434cc46a064bf8b5f4ca3f6cfa1e29fb68b8
           rules_hash: sha256:78575c532beced82eb7fc4f65578ab1d31681fd50c7ea5bb081739698fd9ec4a
           recipe: registry-observation-v1
-  - record_key: printing:p:78c4a59035d950f199637dccf941c1e1
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:78c4a59035d950f199637dccf941c1e1
@@ -1373,8 +1324,7 @@ records:
           observation_hash: sha256:6a4063f563d2167eb44644040e91d9033588e9165d50d8ebe24702d412a0ad55
           rules_hash: sha256:f29c927f4862aa8b6acfdf94f6e94804934e6f0bc931b05f569c11ed9adc3f3d
           recipe: registry-observation-v1
-  - record_key: printing:p:6e580168177f5030955237df965b55e2
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:6e580168177f5030955237df965b55e2
@@ -1401,8 +1351,7 @@ records:
           observation_hash: sha256:e751467e2b20a0314f714a67b89ff1d1d4fb6e4d767af93fc1496028f453a8c5
           rules_hash: sha256:93de6e1613a2b3ee0cf4dcc087086073f0d3f5cd214243a04a036b14da77640d
           recipe: registry-observation-v1
-  - record_key: printing:p:24d36f3187a35021b9dad538e6099162
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:24d36f3187a35021b9dad538e6099162
@@ -1429,8 +1378,7 @@ records:
           observation_hash: sha256:614d369628ea6062d4f2eb250148390cc9bdb5a9b0623cd9f55b407e4693edd9
           rules_hash: sha256:6cef3ddc3d1c44c6a9b4899ca2ee96a1b5f9b5c4fbefc58575a29428cc3ab861
           recipe: registry-observation-v1
-  - record_key: printing:p:0385b2c7601859ffae239683423992aa
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0385b2c7601859ffae239683423992aa
@@ -1457,8 +1405,7 @@ records:
           observation_hash: sha256:1a027b2ebc69d572c42bcccbc3679acce2cdd6cef6852727914fdbf40a673e81
           rules_hash: sha256:1d13564f08275e63e48a82ee4f308e83e2e7793f5af06b1315c8ee443e9a5700
           recipe: registry-observation-v1
-  - record_key: printing:p:99d0d6b375275adc9d5f02c73744f126
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:99d0d6b375275adc9d5f02c73744f126
@@ -1485,8 +1432,7 @@ records:
           observation_hash: sha256:8b75ffa8b728e950db30842aae6e92a9e0b3232cdb8d35c99902256a5625ce45
           rules_hash: sha256:b6953bc4a5a3980084239b6ab08bdbdea740353f1bbb5809e40b1ff166dbb17a
           recipe: registry-observation-v1
-  - record_key: printing:p:6991813caec355c0941962be5b905a7a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:6991813caec355c0941962be5b905a7a
@@ -1513,8 +1459,7 @@ records:
           observation_hash: sha256:bc47b4812be8cfd1f40cca1c502b4fe5bfc8b530b9aa533db8caeaf1e60d1ef8
           rules_hash: sha256:6e3993f4495d746caa6893ce1c08e25e0e44e49a6dbde9b356b9edcb7a8638ce
           recipe: registry-observation-v1
-  - record_key: printing:p:554b389091045d63b9425496e769d1db
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:554b389091045d63b9425496e769d1db
@@ -1541,8 +1486,7 @@ records:
           observation_hash: sha256:6f500c9b61158829025027f557e74a4713b0eae69948e8c4b78d13e734fc14e8
           rules_hash: sha256:766084307eb61dd2aa8ef8647fb929480306a443157f59a35a527c1bb7927691
           recipe: registry-observation-v1
-  - record_key: printing:p:d84df4c5df1e5bb9a75668a2c7cd22b3
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d84df4c5df1e5bb9a75668a2c7cd22b3
@@ -1569,8 +1513,7 @@ records:
           observation_hash: sha256:28cefff3ef6fdb760e5f130b7fca57a5bfe2a5dbb6f8fe1edf1b6a037c48fbb9
           rules_hash: sha256:babad2cc4d7b3e834731112d4f797e7782d41e2159ccce4c1c30bdfd494683c2
           recipe: registry-observation-v1
-  - record_key: printing:p:0e6847c9b1765889aea60a0b87b51046
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0e6847c9b1765889aea60a0b87b51046
@@ -1597,8 +1540,7 @@ records:
           observation_hash: sha256:09a9794aa5bbc41f10d4e671f6183fcbecdf2daf8cea7f324e80b4bc2e1d8779
           rules_hash: sha256:3e2739daedb59c573a371b644030075eeb0bea52fb1bb8651b78e3f8d7d74b06
           recipe: registry-observation-v1
-  - record_key: printing:p:8d3a603ac56f5d8199275844bc26509b
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:8d3a603ac56f5d8199275844bc26509b
@@ -1625,8 +1567,7 @@ records:
           observation_hash: sha256:ae864bed900c2698aa8b5f09b5ebbc7828d1ce1c15f3d9b88f93984949d1e68f
           rules_hash: sha256:3ad308a8a3d22021000b8ef1079e6f66e03d9e4e161398eb1a42d04aa377f6df
           recipe: registry-observation-v1
-  - record_key: printing:p:9a47b3053fb8566280bd53be5d847b83
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:9a47b3053fb8566280bd53be5d847b83
@@ -1653,8 +1594,7 @@ records:
           observation_hash: sha256:be8ad6a9a16fc98852773ae62cf8de4eadfc9d2861c5ee761b9b9f18bf10d53d
           rules_hash: sha256:387eb5ba2204a5dc02967df63b4e2273f9f7d8d8f6841f2461073042ea39eaa1
           recipe: registry-observation-v1
-  - record_key: printing:p:dabc43d0e0b351758d61a3490a60804e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:dabc43d0e0b351758d61a3490a60804e
@@ -1681,8 +1621,7 @@ records:
           observation_hash: sha256:a17c69689966ad8645a6acaa32070954e8100c5c830d0d62cfdfee9fa9d365b9
           rules_hash: sha256:28d2d777bd524cbba8e371f6fe7e06d442bf777b333481e69ceebda320efc3e6
           recipe: registry-observation-v1
-  - record_key: printing:p:ba7bde91f6d156ed818b1280f7779e8d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:ba7bde91f6d156ed818b1280f7779e8d
@@ -1709,8 +1648,7 @@ records:
           observation_hash: sha256:5ca9bc8213692650c84af3b5086dc9df3f62429ef564c2db0e8ed4e841720119
           rules_hash: sha256:5a2632a2b741265d0b4469ab72279b6f606eee73f0444819e875d464518ef792
           recipe: registry-observation-v1
-  - record_key: printing:p:794cb1ae3332525c9a84269f05ea5bbb
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:794cb1ae3332525c9a84269f05ea5bbb
@@ -1737,8 +1675,7 @@ records:
           observation_hash: sha256:887236629ce681d022dc09895bc428c7de90a69c353e8d1f85224eafdbb72021
           rules_hash: sha256:84ffde8adb8757dce01431490e048192099068f59c00721de08c9e172ef67919
           recipe: registry-observation-v1
-  - record_key: printing:p:5cf3e04c4b015ac8b0901145316b571e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:5cf3e04c4b015ac8b0901145316b571e
@@ -1765,8 +1702,7 @@ records:
           observation_hash: sha256:bbc47cd660bc59e1702c16c66765c617302193b2735d2bef9dc728d4ae4157da
           rules_hash: sha256:76b8722129550388ecbf4707e897b115aaf99e8a802c9c44e5f64768d79ba504
           recipe: registry-observation-v1
-  - record_key: printing:p:0e19c0a064405a5db2125d875e1a5c99
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0e19c0a064405a5db2125d875e1a5c99
@@ -1793,8 +1729,7 @@ records:
           observation_hash: sha256:21ce384fcd743ba88a8d55536f4821b2de55b2a2599ba2d9a11b79ebdd4e6035
           rules_hash: sha256:b1133a0a0e2c9757320a5cf9f995b9e11e16d9b0a249603da1a4fff08b56b93f
           recipe: registry-observation-v1
-  - record_key: printing:p:5540b23b5b645a959d447aab1a9b79b1
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:5540b23b5b645a959d447aab1a9b79b1
@@ -1821,8 +1756,7 @@ records:
           observation_hash: sha256:6fa61c8800538f8a2d5406cc7184e49554217ab222fc78e9f537d245d1e9ac9c
           rules_hash: sha256:247ad42520e9e4c22f49a6693db74b6ca2236f7c7fb5929a9c677493a8ab110f
           recipe: registry-observation-v1
-  - record_key: printing:p:4d336159967154aea410b4c5a44147cd
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4d336159967154aea410b4c5a44147cd
@@ -1849,8 +1783,7 @@ records:
           observation_hash: sha256:e2f47a0cff21966d9c255473c4f701e7a67319767449d84cfd6ae18c4ff31593
           rules_hash: sha256:7571590e79674e9c6e6b07f2a435622652be03fac39c9d43cb6b7613dd34db4d
           recipe: registry-observation-v1
-  - record_key: printing:p:c719e3bd8b4c59a588075bbeacaa1a08
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c719e3bd8b4c59a588075bbeacaa1a08
@@ -1877,8 +1810,7 @@ records:
           observation_hash: sha256:fa1b3f41e5854c11636176a5359fb81c8ef371169ee5e68221139c55bd38e78f
           rules_hash: sha256:d8e96d709606d761754c04b1ef6510f82fe84731eb27099c5ad40990364f088a
           recipe: registry-observation-v1
-  - record_key: printing:p:19e8e568839954c6ac3e68096576d312
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:19e8e568839954c6ac3e68096576d312
@@ -1905,8 +1837,7 @@ records:
           observation_hash: sha256:3c4c7fea1b155a143fd61a385de5e6cce55273fe65c333304fab66046130f774
           rules_hash: sha256:bf3a675f1656432e4ba73bd40cf9a9faf608257bba6a3e32c1cde4941f27dec2
           recipe: registry-observation-v1
-  - record_key: printing:p:3944a00a52085409b883f35a2aa6c319
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:3944a00a52085409b883f35a2aa6c319
@@ -1933,8 +1864,7 @@ records:
           observation_hash: sha256:fbd071e22d0933c9cf1d120cbc21cda3ac33b1d0a42cca5cc9bdb4cee8f4d79c
           rules_hash: sha256:1aded468d221d6f0eeaa6c1f9e8d74b2b850a788a0119aab52dea1de8c766584
           recipe: registry-observation-v1
-  - record_key: printing:p:d8e4483468835c059cb8af84885f0fe9
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d8e4483468835c059cb8af84885f0fe9
@@ -1961,8 +1891,7 @@ records:
           observation_hash: sha256:e7faab9079b0a03523ca36af84096dddf40d58f072f721f0f384fdfae8c3442a
           rules_hash: sha256:e3b4aecbbe8f4db77bc8f71543cd358b1ef4aa9b71083e140a76e340d80e0a00
           recipe: registry-observation-v1
-  - record_key: printing:p:8774fbab4d735c72924c8e8323b4a6bb
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:8774fbab4d735c72924c8e8323b4a6bb
@@ -1989,8 +1918,7 @@ records:
           observation_hash: sha256:45a6a462c0ef141dfbc21665bee542b620ee1778f85dc4e1b92f5921b164eb00
           rules_hash: sha256:24b4d7caccd73874a1af6a6d284339c9cd52f174738cea4bd9f4b13f59e9ad56
           recipe: registry-observation-v1
-  - record_key: printing:p:4ec96c228ada53d9bfbe87f5ef3ce0f8
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4ec96c228ada53d9bfbe87f5ef3ce0f8
@@ -2017,8 +1945,7 @@ records:
           observation_hash: sha256:15b60f9c9f01fa023f7da46dc9303ed2c8146cedec9e3423d96f8a21b31fd855
           rules_hash: sha256:048b66aed3d339d0eb3cfe42626c4389849c5516a6c6198c5d921af490947868
           recipe: registry-observation-v1
-  - record_key: printing:p:65dd723fad4759f58772f0f735a9afbb
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:65dd723fad4759f58772f0f735a9afbb
@@ -2045,8 +1972,7 @@ records:
           observation_hash: sha256:c08246d8aca9066cb9bca6cff2e14b2199e8e476121563999ebfbd843e8eaf4d
           rules_hash: sha256:357489cf207976cf7279725a2fe33c1f1d26f49cb2a47b9775f129e8aa779eb6
           recipe: registry-observation-v1
-  - record_key: printing:p:1e44910731625b42a6c087a0c505767e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:1e44910731625b42a6c087a0c505767e
@@ -2073,8 +1999,7 @@ records:
           observation_hash: sha256:ebbadbf0a29cb15e7a5e7b0ca61980f938b1ea5682058664b4dc0ad8e795975b
           rules_hash: sha256:9788cca1df30d7987db108991858ed272fcb90a1d8d0de2ee5984572d69576fe
           recipe: registry-observation-v1
-  - record_key: printing:p:fa269e2cf72552e08ab7c5827703f690
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:fa269e2cf72552e08ab7c5827703f690
@@ -2101,8 +2026,7 @@ records:
           observation_hash: sha256:edbc89373a0ea4a73d181c117e81418259971e646ec4cee11d3c62c3b923528b
           rules_hash: sha256:c62c659025e6abc4925ae6d86cb4884fc6cb66e88e7da7ff26edda2c79168dfb
           recipe: registry-observation-v1
-  - record_key: printing:p:f4e511ba07085587a089c5a9bcee3480
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f4e511ba07085587a089c5a9bcee3480
@@ -2129,8 +2053,7 @@ records:
           observation_hash: sha256:f0f781cac218a4f97ac8a5ccee7357cd11b41a5a71e3002d4d95098692b4f63a
           rules_hash: sha256:8b5c84cbc5980918a24f56ad6b948a1501a6fb673dd45aaa7c9304ce8f31286c
           recipe: registry-observation-v1
-  - record_key: printing:p:98dceb4ee3b85917995db3b152e51fd7
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:98dceb4ee3b85917995db3b152e51fd7
@@ -2157,8 +2080,7 @@ records:
           observation_hash: sha256:b04201fbf81a0d46b6e0c2877cc067afa57526a67b868da3f84496e4aa341c02
           rules_hash: sha256:afae8d2b683cb5a6a8c2d600cb8d45eeaff2ca9e272cd2da0874c594aba8339d
           recipe: registry-observation-v1
-  - record_key: printing:p:67ac9be2c8d05300a2f8e69a5032c536
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:67ac9be2c8d05300a2f8e69a5032c536
@@ -2185,8 +2107,7 @@ records:
           observation_hash: sha256:3df953f0b37b505ad099bf4e033c5f5f1d85bed5580c2c28f159a3d0e7390808
           rules_hash: sha256:1dd6908422c28145dbb2acafb5409ed2514137cc4cca4564ae6961a4193ba658
           recipe: registry-observation-v1
-  - record_key: printing:p:1ec5ebec60bd5dbb88eef005ff6e28bc
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:1ec5ebec60bd5dbb88eef005ff6e28bc
@@ -2213,8 +2134,7 @@ records:
           observation_hash: sha256:432576e0524c0795334454f0ff6d59e408fb3fa3491031464e56910165af61de
           rules_hash: sha256:810b0370098148efea30c3869ea0b964f6739927a7fdde593df99519e4ab5dfb
           recipe: registry-observation-v1
-  - record_key: printing:p:e3175a2aa7795b478ef8d60cacf4beab
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e3175a2aa7795b478ef8d60cacf4beab
@@ -2241,8 +2161,7 @@ records:
           observation_hash: sha256:60a8e00ccb9927e4c6f6977769bac79c868cc8905600c8d6105bfc6ed9d3a039
           rules_hash: sha256:b8a5e9798fe14ac7b7fa7d68f428436fe0c081977b2c6b42af9b21d6f03598fa
           recipe: registry-observation-v1
-  - record_key: printing:p:2560ec1891fd54c9b64b844fa49549e6
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:2560ec1891fd54c9b64b844fa49549e6
@@ -2269,8 +2188,7 @@ records:
           observation_hash: sha256:6571cb8f560cc581d51f2efacdb282d812bf658fb19dae755e1941f588dc342e
           rules_hash: sha256:18166eb01c44ce70ac5837f2c9ed37603c8c2f54e747c2b810b2063ca3eb9318
           recipe: registry-observation-v1
-  - record_key: printing:p:7bcc260febe6590bbe2157a072e2844a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7bcc260febe6590bbe2157a072e2844a
@@ -2297,8 +2215,7 @@ records:
           observation_hash: sha256:8edb65d87f0e35f86b6ca81988dd99eeace9a75ae944967256b7c80e5ba132f9
           rules_hash: sha256:6e54cbf61bbb8763cf45c64483475971169310bd9098f8092fa87a77c6764e94
           recipe: registry-observation-v1
-  - record_key: printing:p:a99487a328125321adbdc0191fe886c1
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a99487a328125321adbdc0191fe886c1
@@ -2325,8 +2242,7 @@ records:
           observation_hash: sha256:e781f0cabd42a3e94d89fbf940e9edd310078db197bd6e77bcc6ed5302434ef8
           rules_hash: sha256:fe4418ca08af2a1c01e4df4e7ef8ec3ac3163c8b617942564fb4c9c591a4b213
           recipe: registry-observation-v1
-  - record_key: printing:p:d9049d1893ac5bb4b8f505c7724e4bf7
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d9049d1893ac5bb4b8f505c7724e4bf7
@@ -2353,8 +2269,7 @@ records:
           observation_hash: sha256:ce78e014f4e6b2aa944f315b9de414545c9dee29e606cd891b16143afd814b22
           rules_hash: sha256:c833a22e3a80aa6b61517766184cca68d92ae9fe01d467bf8b5335dfe15b1f9c
           recipe: registry-observation-v1
-  - record_key: printing:p:0c3fc3ec8fc35ee4b2c2e80f921e2eb6
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0c3fc3ec8fc35ee4b2c2e80f921e2eb6
@@ -2381,8 +2296,7 @@ records:
           observation_hash: sha256:5f64867bd73bdb07319c71f05ccc5c993cbce6adad5ea93b4e93d58d256671b6
           rules_hash: sha256:9239b903aa3f905535a65d4ccab9b6e2b7326724a85f2707ad9b9f73e3a71bdb
           recipe: registry-observation-v1
-  - record_key: printing:p:91f8219d62d65f8d9f6cedc132bb30d9
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:91f8219d62d65f8d9f6cedc132bb30d9
@@ -2409,8 +2323,7 @@ records:
           observation_hash: sha256:b0a762fa368df01cba24930448ef3a76abfeeafa139addb9d6243518b12575d2
           rules_hash: sha256:ec69d0f0eaebb3569e5e22e4fda5ba57dd27cb8a0ce56efa686f7429b7d0b5b0
           recipe: registry-observation-v1
-  - record_key: printing:p:f9d0000a799454d48ecd072a4137e099
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f9d0000a799454d48ecd072a4137e099
@@ -2437,8 +2350,7 @@ records:
           observation_hash: sha256:2830785f17f32f87b500b4bbb09fee00e2ecff3b67b34d497d2a9d22484dfec6
           rules_hash: sha256:4aa49f04ec4a3cfa0d8c3726797dc08720e70abb2192ead7195619e64478ca4d
           recipe: registry-observation-v1
-  - record_key: printing:p:35189ac1c6805ec19b47c487ec95a244
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:35189ac1c6805ec19b47c487ec95a244
@@ -2465,8 +2377,7 @@ records:
           observation_hash: sha256:f42c98f72e63d04010467c7d36fd68079c18abe73639435c3551b4d03bc216af
           rules_hash: sha256:3210a138a99d37da24355ad3d3b5774517690128052f207b0c9b977d12dc140a
           recipe: registry-observation-v1
-  - record_key: printing:p:6ec4c5b695375cb88c0864cbf2195021
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:6ec4c5b695375cb88c0864cbf2195021
@@ -2493,8 +2404,7 @@ records:
           observation_hash: sha256:6c6df52e1d95f8af4eac59ce701bf32f3922d5e071501ca8351627d541f84735
           rules_hash: sha256:bef0384e96095e2aa08d4ecb1c676d6aec45f0132b85b6d4c85e7fc8800330a2
           recipe: registry-observation-v1
-  - record_key: printing:p:2581c2a359085edf995afad759f1649e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:2581c2a359085edf995afad759f1649e
@@ -2521,8 +2431,7 @@ records:
           observation_hash: sha256:9726dcd3a7e0bd2ec99ad6d0660262c2463758e7c808c12332c55405e41df197
           rules_hash: sha256:d0556b730a0545f05a8c9b03ec6c25ccfad91becedaf84d2c1b51312ae357768
           recipe: registry-observation-v1
-  - record_key: printing:p:e5a053f5a52759abba4b0af4415186da
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e5a053f5a52759abba4b0af4415186da
@@ -2549,8 +2458,7 @@ records:
           observation_hash: sha256:9f61d5c30fed87ba582bdbbd298a985d134f118bec415ff4cc3dece9eaf4da1b
           rules_hash: sha256:9b160fdb0349945c3a37ec3e0470d8c7343dc96a1d78db8344625b52b8676126
           recipe: registry-observation-v1
-  - record_key: printing:p:1ff219de437f59679590f3945b66d535
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:1ff219de437f59679590f3945b66d535
@@ -2577,8 +2485,7 @@ records:
           observation_hash: sha256:813051a35dffc208ffffc1722601b9ef7386248dd9d6279574ba054ff1ef9999
           rules_hash: sha256:1e84b1879854ecaaaad8788812838f3ceed9be89de2afb97e784775934f6abce
           recipe: registry-observation-v1
-  - record_key: printing:p:992a05f4f8a85645963ac7c652ad5070
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:992a05f4f8a85645963ac7c652ad5070
@@ -2605,8 +2512,7 @@ records:
           observation_hash: sha256:e05cc502b9d7466f275e8d398c076b5c5d40803b37bb03d3a5845c77ed86ad29
           rules_hash: sha256:00f526af371cd2a6c4dc33d5a32e0203bca33582f9235f18ebd6cef611df21af
           recipe: registry-observation-v1
-  - record_key: printing:p:64cf20644f9d50dba060e991ae31c657
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:64cf20644f9d50dba060e991ae31c657
@@ -2633,8 +2539,7 @@ records:
           observation_hash: sha256:0d9ea3a1f75628ee99041731ad392cdf5d219b6650dcd2228830058118e56ca8
           rules_hash: sha256:1977a2e60afb42ea4f1dac5287f6d09a68a9a1fff89f1148403e0c4fbab4fcc6
           recipe: registry-observation-v1
-  - record_key: printing:p:c59c1143934f5ec2805e74ced52ec5a8
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c59c1143934f5ec2805e74ced52ec5a8
@@ -2661,8 +2566,7 @@ records:
           observation_hash: sha256:a91f34b378516c831514c7f0f8d71a037966a3e11ea0f00a22de90550d634343
           rules_hash: sha256:ed8062bcb3a27c8ca36f9b16084a01fbf076638a1a67c1e7c430612e5372ee43
           recipe: registry-observation-v1
-  - record_key: printing:p:b716ac5bf50e5e7695222f0925dd2df7
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b716ac5bf50e5e7695222f0925dd2df7
@@ -2689,8 +2593,7 @@ records:
           observation_hash: sha256:75327c2d362de5b3d08ab545c6e52ab1ded27530a8f8040e1e27ebf6ff9f5b79
           rules_hash: sha256:2253ccbf53075665f1a686f3aaa499fce3ed4a043c82e0b242ab2dc1ea4cf69c
           recipe: registry-observation-v1
-  - record_key: printing:p:0dabd1eff0665bcdbffdd69b72f46ff2
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0dabd1eff0665bcdbffdd69b72f46ff2
@@ -2717,8 +2620,7 @@ records:
           observation_hash: sha256:bddbc02183899e51766598c3301af3581586eed672114cafbac15ab247db05f7
           rules_hash: sha256:fc245537deaa0b83a341a7250ac3b329e6912f302e8a7b0656042e56abe45ab5
           recipe: registry-observation-v1
-  - record_key: printing:p:b6d1bb811bf35adaa2565cf949ceebdc
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b6d1bb811bf35adaa2565cf949ceebdc
@@ -2745,8 +2647,7 @@ records:
           observation_hash: sha256:cf70175899b71a3c45797c87d9e0d2d41fd357c9dad45b6eea15b0ca35fb0df6
           rules_hash: sha256:110b86f0eaba37a78f17fab6c074cefe1fe9269ce8d9136414e1c7ecfa58d6cd
           recipe: registry-observation-v1
-  - record_key: printing:p:8437e81f188d547fb4ae204525692edd
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:8437e81f188d547fb4ae204525692edd
@@ -2773,8 +2674,7 @@ records:
           observation_hash: sha256:f8fe4bb9f617e841a24e4f64f8dec9d7a928274ac586df6e3cc7a233fd50652b
           rules_hash: sha256:a13a992781838a9effc5671e864ba757cf3ac35ac6a7399d9884307bbcef8575
           recipe: registry-observation-v1
-  - record_key: printing:p:9746e3ae4fed5ed5a488bf645d3c1d2e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:9746e3ae4fed5ed5a488bf645d3c1d2e
@@ -2801,8 +2701,7 @@ records:
           observation_hash: sha256:3e2fccf4d4dd1b8dc2a38f5c1bea1bddb4da1d748dc57fdc1dc02dde0dc12bfe
           rules_hash: sha256:eed1efef15c1468bea0a4ac643b2039714748fc7c8bd44aee4933be738c1114c
           recipe: registry-observation-v1
-  - record_key: printing:p:d09d7365584753d6a2bd9947d7601006
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d09d7365584753d6a2bd9947d7601006
@@ -2829,8 +2728,7 @@ records:
           observation_hash: sha256:fdfdc616d1c4d22f245aea0a11d03be6d80785ec3a9c79ebe219f7a48278d382
           rules_hash: sha256:5f83e0954cca203c362ff21576b7cdb21835a2be168fb929b0a7ee29fcb641b7
           recipe: registry-observation-v1
-  - record_key: printing:p:831f6627f77159c2b287db54d417ab31
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:831f6627f77159c2b287db54d417ab31
@@ -2857,8 +2755,7 @@ records:
           observation_hash: sha256:4c61c8f7a0bb269f48f29316a126af0b09f227dc609c8bc87542d9a8ca1d31d7
           rules_hash: sha256:70dd593542e52dd8019b865455977bd01630f1acf346d55f36d74b510e103f7e
           recipe: registry-observation-v1
-  - record_key: printing:p:d77cc2ab410f5a35ae8c65c5e3bdb9ee
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d77cc2ab410f5a35ae8c65c5e3bdb9ee
@@ -2885,8 +2782,7 @@ records:
           observation_hash: sha256:01c731741a730827e3d9c85f754beffe0225f4dc14d88ecf02356374288ae640
           rules_hash: sha256:4569413079636e72729e650fa2eebc102d57a62f1d32335163a2febb07754d21
           recipe: registry-observation-v1
-  - record_key: printing:p:f533848a3cec5fa08a8fcb6e7173116a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f533848a3cec5fa08a8fcb6e7173116a
@@ -2913,8 +2809,7 @@ records:
           observation_hash: sha256:21fc27e3460c85184858738bf04d55d95b823c1b0d8b9c0ca7e5f535731a589c
           rules_hash: sha256:7559797ebfcb3c1381fe8c9cf4ccd2fd7b9606dfe438608c229090fc889e9948
           recipe: registry-observation-v1
-  - record_key: printing:p:da1e623d812d5e1e82304cd4261ca093
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:da1e623d812d5e1e82304cd4261ca093
@@ -2941,8 +2836,7 @@ records:
           observation_hash: sha256:13a1f20b059f710c9e1631fb530861ea2dc400da062e7986ab1b3b17c25b719f
           rules_hash: sha256:3c4d82a0f8fda1d9af994c153eb5f65115b4c528c85bd6055a78a90d70d3d31a
           recipe: registry-observation-v1
-  - record_key: printing:p:cdb9af8a9ce052c9ab9e814c9f06d7b8
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:cdb9af8a9ce052c9ab9e814c9f06d7b8
@@ -2969,8 +2863,7 @@ records:
           observation_hash: sha256:1c9d2a485033b5f5c7a9ae99383eeb23250261a89a3d29764c46d75f359b6234
           rules_hash: sha256:c53155d35c8a38a8906dcc2fc8276f3b3a142c0e854b2fb16c1d36c294c33241
           recipe: registry-observation-v1
-  - record_key: printing:p:7a89bc039cd75d03a32266c854489e75
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7a89bc039cd75d03a32266c854489e75
@@ -2997,8 +2890,7 @@ records:
           observation_hash: sha256:4b85d49aa5afe2343de4726a7032d75fffd53e38dd322d222f2326675dc23723
           rules_hash: sha256:3ba92c6da371e33f07f861aa262fc2f3745459d268cc84bd129a9098211c9713
           recipe: registry-observation-v1
-  - record_key: printing:p:a947956b9e0c5bc59c2ade19c735a239
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a947956b9e0c5bc59c2ade19c735a239
@@ -3025,8 +2917,7 @@ records:
           observation_hash: sha256:7301c3261d03ecf1b7bbd8ef9b3fc6c3cc29f99de6644d89861932752dd27cce
           rules_hash: sha256:a47ebc023ed54a1c4d358a8055ef2f141f04910f132b8bd50f125047274c0d6a
           recipe: registry-observation-v1
-  - record_key: printing:p:ea579196d7025b5fbde385957fc9fb6e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:ea579196d7025b5fbde385957fc9fb6e
@@ -3053,8 +2944,7 @@ records:
           observation_hash: sha256:0e054b353c2abd56d4698d68194f7922c264efd480391c8296d2b647b733cb44
           rules_hash: sha256:ba5da1175dbea4172fef54c644779a8ef751da52c3a5cc906e676995f45ca24b
           recipe: registry-observation-v1
-  - record_key: printing:p:fd3710039183512bb8e0094410ec505c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:fd3710039183512bb8e0094410ec505c
@@ -3081,8 +2971,7 @@ records:
           observation_hash: sha256:9f5f6e69de6b52237c8417471e773fa3a7bd53deca39485df52128b141dc54e5
           rules_hash: sha256:d5d34735e0c6528ddaceaa78e311f75a8541038def4379c6c15aec7a5d1bf004
           recipe: registry-observation-v1
-  - record_key: printing:p:e16141204cb7599f82da21b26f2cbbf7
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e16141204cb7599f82da21b26f2cbbf7
@@ -3109,8 +2998,7 @@ records:
           observation_hash: sha256:aa25f05989cfc46c9d243ba2140c73504b78745e0199fd2f5fcf3a96f773b162
           rules_hash: sha256:3c0f7a2a85eb1e3a273f95c7f6f372dec02517ff239759bf6810837520e3626f
           recipe: registry-observation-v1
-  - record_key: printing:p:acfee81e565959c7a1bd83ff830b521f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:acfee81e565959c7a1bd83ff830b521f
@@ -3137,8 +3025,7 @@ records:
           observation_hash: sha256:74babcdb98aa7e7a445d94706f588c959e8cf1add580ad22f92b3926312afa8d
           rules_hash: sha256:0162fd7f0f999231fd08fd1207faa033ad145ce56a5dd63bed305f08ed749379
           recipe: registry-observation-v1
-  - record_key: printing:p:b1d7e3a1251a5c5ab2bc888868896347
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b1d7e3a1251a5c5ab2bc888868896347
@@ -3165,8 +3052,7 @@ records:
           observation_hash: sha256:64531135050a40172155e8c459c58bf1dad082a14c106100001dbd94c4202dca
           rules_hash: sha256:9d4707d93ee417a5a5f012c78113a0a78c9bd81d922f69e3bf2449dc1eec08d5
           recipe: registry-observation-v1
-  - record_key: printing:p:ff26f7f64ad2564383035d3f5c5b9f9e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:ff26f7f64ad2564383035d3f5c5b9f9e
@@ -3193,8 +3079,7 @@ records:
           observation_hash: sha256:7641c42b8bd410b0c7064267fddd8a685eba13ff53c47fc753ef20d269b6bfe3
           rules_hash: sha256:90701bec6c1efa2adbaeb270fc2335c6ed2a92b5fb3366130facc17f6f4ee781
           recipe: registry-observation-v1
-  - record_key: printing:p:5d08f9239e4d548097d09d130ece9433
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:5d08f9239e4d548097d09d130ece9433
@@ -3221,8 +3106,7 @@ records:
           observation_hash: sha256:eeb4f2bcb4fa2e82801dd08cdf969d0d1ad3bf9b235b8a78b67da5758b19cb2c
           rules_hash: sha256:983c4317297722fa0305fffad0c035730ef051ca2a125aa4393e320c0ceafba8
           recipe: registry-observation-v1
-  - record_key: printing:p:e2c35c9958d35f229ab7f805bb3473f8
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e2c35c9958d35f229ab7f805bb3473f8
@@ -3249,8 +3133,7 @@ records:
           observation_hash: sha256:d686c7f2371e9af02eb8799f3d3c4479c863d4b36032cb86ea0dd38a2d70b4ee
           rules_hash: sha256:bbb72880f1dfb5cbf9676b56f5198a540e76883c9a2600382475738e4d347d23
           recipe: registry-observation-v1
-  - record_key: printing:p:31a6d613afad5727911be8a96a4384c4
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:31a6d613afad5727911be8a96a4384c4
@@ -3277,8 +3160,7 @@ records:
           observation_hash: sha256:3a9e1086bd505f0b0916bd955d1e5ae1e0c8541bbbf2b370df3eb0f97ea4a14a
           rules_hash: sha256:940cf4610247a05ff87d2ac8d0f81e5cce11e794bcf3ee334cf6fc9c5299797e
           recipe: registry-observation-v1
-  - record_key: printing:p:d933a883e91559c9912764b6ad639b17
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d933a883e91559c9912764b6ad639b17
@@ -3305,8 +3187,7 @@ records:
           observation_hash: sha256:28f3e870766a75da94bb567d6e80ee7306c8be78b502a7a1091fe7ad3becad21
           rules_hash: sha256:aad8a0070aafb089bc0593b25e244124d4b933f7c37837b47ed95a5df2dc621d
           recipe: registry-observation-v1
-  - record_key: printing:p:df466869975151aaa9df8598703187d3
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:df466869975151aaa9df8598703187d3
@@ -3333,8 +3214,7 @@ records:
           observation_hash: sha256:5ffcf88a88c592d10f3a5acd123b06885d51bd3476570802ff8ac73768130bba
           rules_hash: sha256:b6446603f1480c57e23957528a578a2056dce41564db9db3559223952fdc1627
           recipe: registry-observation-v1
-  - record_key: printing:p:992e82eb796156108365407e1f8b4cd9
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:992e82eb796156108365407e1f8b4cd9
@@ -3361,8 +3241,7 @@ records:
           observation_hash: sha256:2db300528163b3a56b6c9e371d5d8bdd534c3ff3a82b518a98d07eb43bd40047
           rules_hash: sha256:3b546cc2abda35e1082ee75fe2f6f8853c03632c6cf0bef3daa64d8d0a2d6979
           recipe: registry-observation-v1
-  - record_key: printing:p:c7e03b3d49685d7db60b933c7b6d5a42
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c7e03b3d49685d7db60b933c7b6d5a42
@@ -3389,8 +3268,7 @@ records:
           observation_hash: sha256:5c8993f8c9af213aa393126e4d421a825aad338dcba569969c8ce85f516a52e1
           rules_hash: sha256:3a9dfbda64844594fbf084dada362a33b46838e2c244056055221da8549f4857
           recipe: registry-observation-v1
-  - record_key: printing:p:68403bdf8dd95292aa50bd1aba750b68
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:68403bdf8dd95292aa50bd1aba750b68
@@ -3417,8 +3295,7 @@ records:
           observation_hash: sha256:d1aae70f43da21d814164090ccd6fe9e8162a46b96b31c407ea0902047e904eb
           rules_hash: sha256:6353de759c4e43faa19b38b1c0588bb0db58104106b66c39eb16d98b41eb3cb7
           recipe: registry-observation-v1
-  - record_key: printing:p:b79571b799d45edf98b5e202c999904b
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b79571b799d45edf98b5e202c999904b
@@ -3445,8 +3322,7 @@ records:
           observation_hash: sha256:c6c21a9ef74f49fd9e8be95fde275b8e00ea9c91535ccba7c763841d97eeb179
           rules_hash: sha256:a58a9dfac25e653c037739ae738af9430065fc354936a943612d8e2abcfbab56
           recipe: registry-observation-v1
-  - record_key: printing:p:0222e22d21e45643b3ce9fd51421a805
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0222e22d21e45643b3ce9fd51421a805
@@ -3473,8 +3349,7 @@ records:
           observation_hash: sha256:5214d42392d5811065687625323ab367af472c13affc9c748af232e1d1a1ad65
           rules_hash: sha256:af452aa7fba34f6ac8c26e99bc847d4f55a5a9321757bc105e0793fdf9c8f5e6
           recipe: registry-observation-v1
-  - record_key: printing:p:2c3b05eb5d5d59b4b7316b047a68321d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:2c3b05eb5d5d59b4b7316b047a68321d
@@ -3501,8 +3376,7 @@ records:
           observation_hash: sha256:83301cf3d4fe8b033f377038a51f3102ee3e644301763e5301c60b118f97595e
           rules_hash: sha256:b5b627c8a41d7aa4d3d37955a50f05d85485af4a95a5b19602b2377bf8de40a1
           recipe: registry-observation-v1
-  - record_key: printing:p:897d65c6fc855e85b2abbbd4f00fa38b
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:897d65c6fc855e85b2abbbd4f00fa38b
@@ -3529,8 +3403,7 @@ records:
           observation_hash: sha256:000c4a60f051aff512418a4936b88abe260536c1ef29fef5ad873721b5d33feb
           rules_hash: sha256:0e3d249abf637bab3908c9d65bdc83aa8c1b9cf0cc86793d0143d5d46100864c
           recipe: registry-observation-v1
-  - record_key: printing:p:225f44e1534c55838ef90ddc7d196ce5
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:225f44e1534c55838ef90ddc7d196ce5
@@ -3557,8 +3430,7 @@ records:
           observation_hash: sha256:27038fe34d4018d7d9aade5a80bc43b747dea97796d8c41282f8832b5a68ca9f
           rules_hash: sha256:0dd25282fbbfa4fa7aa2f5affb442f2b24752b5827e3992c01ce0f965b972798
           recipe: registry-observation-v1
-  - record_key: printing:p:77e9aa23d3d755a89cd932178d263f19
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:77e9aa23d3d755a89cd932178d263f19
@@ -3585,8 +3457,7 @@ records:
           observation_hash: sha256:2a39997cc3ae8a7200e80dd192b2e868ea67b6f91b7e42d60457643a0af016e3
           rules_hash: sha256:b1d7c6ee2c8b74985b1ea682c61058b5d644ef4852504183df3a4a48ade1f222
           recipe: registry-observation-v1
-  - record_key: printing:p:e5c14bc864555d58a99456e16049382a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e5c14bc864555d58a99456e16049382a
@@ -3613,8 +3484,7 @@ records:
           observation_hash: sha256:8e8b421c2efaea197f27a5984b9c4a64dcce27addaf7d516dc0576d260e96ea3
           rules_hash: sha256:783549a6b77e9ec0948a48c63aa5a60763a52aa5ecb5b93f1d65123e67bc61b5
           recipe: registry-observation-v1
-  - record_key: printing:p:f887b59c389558f1959dc1c1c4a9839f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f887b59c389558f1959dc1c1c4a9839f
@@ -3641,8 +3511,7 @@ records:
           observation_hash: sha256:8b21a25f94f2013479dd974a0d30b82e946064a28ca439e7700bd2683bab2fcb
           rules_hash: sha256:3c493f2a7a19ca9eca3a41adbd7b880dc353d8716f266661d46d3b857a8a40cd
           recipe: registry-observation-v1
-  - record_key: printing:p:9f1a961ebb915cc4b57c272e173ba1a2
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:9f1a961ebb915cc4b57c272e173ba1a2
@@ -3669,8 +3538,7 @@ records:
           observation_hash: sha256:4ebfc3fbb10770b43f7d6bf92ecc9f47d5ab1afb602db1d4937b55867ea0aec8
           rules_hash: sha256:4495131f72e88f7aa021187790834ea28fc925eb4a42617c13a015899195de2e
           recipe: registry-observation-v1
-  - record_key: printing:p:433b06673c8c5b1d90e8f8ef24a1abdb
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:433b06673c8c5b1d90e8f8ef24a1abdb
@@ -3697,8 +3565,7 @@ records:
           observation_hash: sha256:a14f99acc563cd28a49eaf97bc2b94ab849985479436e6f4de8126eb84fc6aef
           rules_hash: sha256:6e3993f4495d746caa6893ce1c08e25e0e44e49a6dbde9b356b9edcb7a8638ce
           recipe: registry-observation-v1
-  - record_key: printing:p:2866f72d8fcd57e7916b33ff0fe531bf
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:2866f72d8fcd57e7916b33ff0fe531bf
@@ -3725,8 +3592,7 @@ records:
           observation_hash: sha256:b150bde270b50b1584cb75e56c8ab0f227a6e06e8596b2b342992b4eadb7d6f3
           rules_hash: sha256:387eb5ba2204a5dc02967df63b4e2273f9f7d8d8f6841f2461073042ea39eaa1
           recipe: registry-observation-v1
-  - record_key: printing:p:619e488ee9925d1bb279ee4cb82bbfec
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:619e488ee9925d1bb279ee4cb82bbfec
@@ -3753,8 +3619,7 @@ records:
           observation_hash: sha256:d6775a470b237cc886879d4123e15d07020028bbbfdee662ada186d0a298071f
           rules_hash: sha256:28d2d777bd524cbba8e371f6fe7e06d442bf777b333481e69ceebda320efc3e6
           recipe: registry-observation-v1
-  - record_key: printing:p:224e45beaa1c5b758fdebc49c044b800
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:224e45beaa1c5b758fdebc49c044b800
@@ -3781,8 +3646,7 @@ records:
           observation_hash: sha256:533e496ac67a13942c52b6b7a01cf80a98c798bb8189787c868bb67bf0d0adff
           rules_hash: sha256:84ffde8adb8757dce01431490e048192099068f59c00721de08c9e172ef67919
           recipe: registry-observation-v1
-  - record_key: printing:p:b2ecab21af715d409a31fdc90ee7f4d2
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b2ecab21af715d409a31fdc90ee7f4d2
@@ -3809,8 +3673,7 @@ records:
           observation_hash: sha256:e6fe3ae15af6349d96523152cae1c8c4a15e99005c65a551dcebdd0dfe77d5a7
           rules_hash: sha256:24b4d7caccd73874a1af6a6d284339c9cd52f174738cea4bd9f4b13f59e9ad56
           recipe: registry-observation-v1
-  - record_key: printing:p:7d71cfaf5dae5e7b97082fcfac43b916
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7d71cfaf5dae5e7b97082fcfac43b916
@@ -3837,8 +3700,7 @@ records:
           observation_hash: sha256:dd0009ce87a93d56383fe0f464bfc0f9072d688d36d986d83b409dedf3264ab9
           rules_hash: sha256:810b0370098148efea30c3869ea0b964f6739927a7fdde593df99519e4ab5dfb
           recipe: registry-observation-v1
-  - record_key: printing:p:4f0e9deb6742582f904743f9de9951e5
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4f0e9deb6742582f904743f9de9951e5
@@ -3865,8 +3727,7 @@ records:
           observation_hash: sha256:f51459f71867f7c8b6538fc12dfd03b34b03a8b99c29849268f6392d4ca7c7cf
           rules_hash: sha256:18166eb01c44ce70ac5837f2c9ed37603c8c2f54e747c2b810b2063ca3eb9318
           recipe: registry-observation-v1
-  - record_key: printing:p:0716f17a4c1a580f8d78d288ab4f9954
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0716f17a4c1a580f8d78d288ab4f9954
@@ -3893,8 +3754,7 @@ records:
           observation_hash: sha256:7287cb1ab2fe3a5c8d3e1b749848c2b292b27d74c8473bbd789e8e583351995e
           rules_hash: sha256:6e54cbf61bbb8763cf45c64483475971169310bd9098f8092fa87a77c6764e94
           recipe: registry-observation-v1
-  - record_key: printing:p:965c497852965ba9bac343a5eb42c09c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:965c497852965ba9bac343a5eb42c09c
@@ -3921,8 +3781,7 @@ records:
           observation_hash: sha256:3ad2f34ef3c92c0635dbba191e5da20fe7440cc1ccc04f687891f1b271d19603
           rules_hash: sha256:c833a22e3a80aa6b61517766184cca68d92ae9fe01d467bf8b5335dfe15b1f9c
           recipe: registry-observation-v1
-  - record_key: printing:p:bef0d6d0137f5b2f8afe0806cae5fd64
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:bef0d6d0137f5b2f8afe0806cae5fd64
@@ -3949,8 +3808,7 @@ records:
           observation_hash: sha256:a7b1d763f35b8dd42e19bcf9ab02952a2bdc6fa8e1e089f32430175ac08fa794
           rules_hash: sha256:2253ccbf53075665f1a686f3aaa499fce3ed4a043c82e0b242ab2dc1ea4cf69c
           recipe: registry-observation-v1
-  - record_key: printing:p:d9f3f48e0dd05ad9a0b7d253f3437006
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d9f3f48e0dd05ad9a0b7d253f3437006
@@ -3977,8 +3835,7 @@ records:
           observation_hash: sha256:e74f859a69ac36231799f2aa712a0e39e0d3d6d184971585b30057a3c702acf3
           rules_hash: sha256:fc245537deaa0b83a341a7250ac3b329e6912f302e8a7b0656042e56abe45ab5
           recipe: registry-observation-v1
-  - record_key: printing:p:87b760ec2f43525eb0e09ed9f4cce6d4
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:87b760ec2f43525eb0e09ed9f4cce6d4
@@ -4005,8 +3862,7 @@ records:
           observation_hash: sha256:ec5f5e1d01083a4a27f346dac722c2185b7dd7b51f93f4f832b1c00d923f6129
           rules_hash: sha256:110b86f0eaba37a78f17fab6c074cefe1fe9269ce8d9136414e1c7ecfa58d6cd
           recipe: registry-observation-v1
-  - record_key: printing:p:31728f19e0f45ae793bdfc0efa2b557c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:31728f19e0f45ae793bdfc0efa2b557c
@@ -4033,8 +3889,7 @@ records:
           observation_hash: sha256:05a6054b4637d519bf10dc4e419e9ad16194206842bb468dc3b830bed6b5b5d3
           rules_hash: sha256:c53155d35c8a38a8906dcc2fc8276f3b3a142c0e854b2fb16c1d36c294c33241
           recipe: registry-observation-v1
-  - record_key: printing:p:87caa7781f3257fe82f6338d92892649
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:87caa7781f3257fe82f6338d92892649
@@ -4061,8 +3916,7 @@ records:
           observation_hash: sha256:d66b3c731ce12642f5b898c374ec46456ca7c727bdad16536fa80fac33bf9fc1
           rules_hash: sha256:ba5da1175dbea4172fef54c644779a8ef751da52c3a5cc906e676995f45ca24b
           recipe: registry-observation-v1
-  - record_key: printing:p:1c1b52feed6b55e8b5ef8f783b11e7a1
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:1c1b52feed6b55e8b5ef8f783b11e7a1
@@ -4089,8 +3943,7 @@ records:
           observation_hash: sha256:9a2465265f420f68ed3a93b8b116b2a5c07cb995e48bfd9f2d686ca5e3aa0a34
           rules_hash: sha256:940cf4610247a05ff87d2ac8d0f81e5cce11e794bcf3ee334cf6fc9c5299797e
           recipe: registry-observation-v1
-  - record_key: printing:p:4b6b3761bc27569ba3f2b7875e30b985
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4b6b3761bc27569ba3f2b7875e30b985
@@ -4117,8 +3970,7 @@ records:
           observation_hash: sha256:0b9147d22bd27401083b2e2acb995dda7a00378d2f9dbfd7fd9d8ea42fbb264d
           rules_hash: sha256:b6446603f1480c57e23957528a578a2056dce41564db9db3559223952fdc1627
           recipe: registry-observation-v1
-  - record_key: printing:p:bffed5119f7a5a1c86f1ae173c95ac8f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:bffed5119f7a5a1c86f1ae173c95ac8f
@@ -4145,8 +3997,7 @@ records:
           observation_hash: sha256:c8e78f464658c0cfadbeeb686bbd15ce274c83c5bbfac55c88a52b1bc3c29b64
           rules_hash: sha256:276d7ae04dca910362fec9974f8094d2918e9e4f9c480f4916e46bc0638b56d4
           recipe: registry-observation-v1
-  - record_key: printing:p:09592774bfb35cdeab6e3f0f8a41b6cb
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:09592774bfb35cdeab6e3f0f8a41b6cb
@@ -4173,8 +4024,7 @@ records:
           observation_hash: sha256:332aae1afd0fc7fb63f38959eeda1b120f4f850df52df54a85cb590d6afd74eb
           rules_hash: sha256:d24dde76537b89461b69e548afb3f52dc50731c96238ba0d53f9e5aac6bc7c1c
           recipe: registry-observation-v1
-  - record_key: printing:p:ef1bb13d890350a8b576ee464a301d3a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:ef1bb13d890350a8b576ee464a301d3a
@@ -4201,8 +4051,7 @@ records:
           observation_hash: sha256:34b4e182ab9e3bbef38b895c27fa068415089b585d9be962c4e6bb51d8a774e1
           rules_hash: sha256:5d8d2f7c01c2426e635390e4827bef02f0a8c60aa2b61e1c7b093287d48cb793
           recipe: registry-observation-v1
-  - record_key: printing:p:3c58d3b42a5457f4a9e18feca639825c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:3c58d3b42a5457f4a9e18feca639825c
@@ -4229,8 +4078,7 @@ records:
           observation_hash: sha256:7c1d1196a98f8081cdee6817e23e96607de57dc10a8eff2b19c2293a23c35749
           rules_hash: sha256:e1f7207c9d3f4ee4c32601d991c4bba368060eb5dc3520308ca38bdafa007613
           recipe: registry-observation-v1
-  - record_key: printing:p:04151aeaecb4519880c701c8b57484c2
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:04151aeaecb4519880c701c8b57484c2
@@ -4257,8 +4105,7 @@ records:
           observation_hash: sha256:96272dafa27628f3778099677a5b3409725f78e3c1e3f1d9a2dacc8141ec0464
           rules_hash: sha256:a9630ed225ae825026466fc5f817508715d5573e9617db23d8afdb81c9732b99
           recipe: registry-observation-v1
-  - record_key: printing:p:2edc90e348b1565184c381240907ea98
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:2edc90e348b1565184c381240907ea98
@@ -4285,8 +4132,7 @@ records:
           observation_hash: sha256:b579208e2b6d9f2d9c0f6d0a636245dc4ebf2f4a23d7116d7093ce6af91c24bc
           rules_hash: sha256:dcc9b540be8f305060a4b8957c3e9c7eb6b6e40663c2117757ed0cd89bd43791
           recipe: registry-observation-v1
-  - record_key: printing:p:cb3a090234fb5730b8f0cf6b53a7a818
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:cb3a090234fb5730b8f0cf6b53a7a818
@@ -4313,8 +4159,7 @@ records:
           observation_hash: sha256:20d9435b29e2ac26ac30b6d21fc8116683daed976ead08dcbf362d88cba67cd0
           rules_hash: sha256:dfd4c54bcb348179465c389aca276e0184727489701ddad49e254797537a66bd
           recipe: registry-observation-v1
-  - record_key: printing:p:caeecb762dc65a55b33a46b27572d916
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:caeecb762dc65a55b33a46b27572d916
@@ -4341,8 +4186,7 @@ records:
           observation_hash: sha256:98be63da67eee6e2612a5d6305d93506ff5ba34e4d8dd19ba2a2c475ff152ec3
           rules_hash: sha256:7d88c40fd1a44cdb95c017623d23a7e077603dec490310223cfc4a5f31de871b
           recipe: registry-observation-v1
-  - record_key: printing:p:6e27f735a75f5399af2ceb8b31924ba8
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:6e27f735a75f5399af2ceb8b31924ba8
@@ -4369,8 +4213,7 @@ records:
           observation_hash: sha256:f7f9401e596d11911952bea8dac8a145e0eec8d7e0750579d57e738d5cc5a980
           rules_hash: sha256:163f16c5eef50a69bb79bf4318e8cd338a1333bd278ada12bfd736a8ba81444f
           recipe: registry-observation-v1
-  - record_key: printing:p:49a06488353859a8b8993a562312c69c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:49a06488353859a8b8993a562312c69c
@@ -4397,8 +4240,7 @@ records:
           observation_hash: sha256:01fa4b1ded3bf9beeb2b1adc0427f7cef2890b21743529211e79352952360772
           rules_hash: sha256:e3db1eaa2d2ddfecb08ea45d9ded6f5d8e249a800e88f90909303b48633ce2b9
           recipe: registry-observation-v1
-  - record_key: printing:p:7b83538689ff591e984ebdce893ea1a1
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7b83538689ff591e984ebdce893ea1a1
@@ -4425,8 +4267,7 @@ records:
           observation_hash: sha256:116d27b8c3c9ba8b6d911610fbd4716365587667d92f3229ec930e63c0a52e9f
           rules_hash: sha256:6dae6a875c7fffb159c91bb90e1d69d647c7a23450b9fc32fcb76a3c4fc455ef
           recipe: registry-observation-v1
-  - record_key: printing:p:428e2a74785150ff87433bbc49e7cbec
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:428e2a74785150ff87433bbc49e7cbec
@@ -4453,8 +4294,7 @@ records:
           observation_hash: sha256:24b871e0e93db92c8c5fb59ddad5cd7d6396dda5a78ff3e614eaaf3df750e088
           rules_hash: sha256:b7c5b5b6712235b52c36f60ec6b5ce92bc4e08181a8c57863dedd0b463c7f525
           recipe: registry-observation-v1
-  - record_key: printing:p:0b5092e4268f51feb5162d6d0b0e207c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0b5092e4268f51feb5162d6d0b0e207c
@@ -4481,8 +4321,7 @@ records:
           observation_hash: sha256:8a9d0a070960a729ab795818c1b17f657c8f70188e7249ac98664608b60a7bd1
           rules_hash: sha256:10fafecba127e48c71b790cb2b571949553cd1298d1ddd27e0af4b0765959993
           recipe: registry-observation-v1
-  - record_key: printing:p:947dc9c1f6dc539a83ef42904a22cea2
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:947dc9c1f6dc539a83ef42904a22cea2
@@ -4509,8 +4348,7 @@ records:
           observation_hash: sha256:fec8ec43dc8d1dc70d9e5f532ee1a3705d3655719b195d3bdd3d2784fe94ae20
           rules_hash: sha256:5b72172499a3ee38e568f41020540352859c5b764074cd8210ebd29a904f9312
           recipe: registry-observation-v1
-  - record_key: printing:p:c63af470cf285868b37cec377e8ad47c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c63af470cf285868b37cec377e8ad47c
@@ -4537,8 +4375,7 @@ records:
           observation_hash: sha256:18c749e14e12e29a3bc97c041bebfba1f4cbe995539da641c6ef286646f91716
           rules_hash: sha256:55c8e5dd8c7106394d3748b18399ed5cba5808429d799d0f639516f5ca91833e
           recipe: registry-observation-v1
-  - record_key: printing:p:b9a8e0c439995e48b3565b5ae85bf10f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b9a8e0c439995e48b3565b5ae85bf10f
@@ -4565,8 +4402,7 @@ records:
           observation_hash: sha256:202ad448a7efb50e6ce48b175fdf504b79f3f8de77b5660f411528df4dd28127
           rules_hash: sha256:867074f4a9e16b442c2dc16f884c9d1834bd860f65777ed5cd654f5c6c473bdb
           recipe: registry-observation-v1
-  - record_key: printing:p:6103244b741b51d3ba3d9aab4b38a606
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:6103244b741b51d3ba3d9aab4b38a606
@@ -4593,8 +4429,7 @@ records:
           observation_hash: sha256:3003b6e3ac4aa506c8f08f68d5122ac4535139788c01973e1c8eac54f5f08453
           rules_hash: sha256:010d3dd5f81d73e189efd2682265974ee395f41ffa1695c29a093a4520901daf
           recipe: registry-observation-v1
-  - record_key: printing:p:9c3c66d333ff5f1183f0fd5dbce4e770
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:9c3c66d333ff5f1183f0fd5dbce4e770
@@ -4621,8 +4456,7 @@ records:
           observation_hash: sha256:722ea528fb1824a45ab294babc1b859812f99430a74788daa4cde18d8f3b164c
           rules_hash: sha256:53905789cd209374d85897b4bc632753cfb743362851182c78b6ccd47d648728
           recipe: registry-observation-v1
-  - record_key: printing:p:e3e3152e25fe5654bcb9f2994ad24ceb
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e3e3152e25fe5654bcb9f2994ad24ceb
@@ -4649,8 +4483,7 @@ records:
           observation_hash: sha256:8937403e8a3b964a99c5eac8112c61356156481f23c19679c8d237e9c6238e5d
           rules_hash: sha256:c400bb83076bdaf71c7a1588e1bfa6fbd62a475acc9e56179f5d4befacdeedf2
           recipe: registry-observation-v1
-  - record_key: printing:p:a2045062b3d5543186659a3140f0ae4d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a2045062b3d5543186659a3140f0ae4d
@@ -4677,8 +4510,7 @@ records:
           observation_hash: sha256:c3991e1feabfb5a3e3ca24a6aa87a62311087292f5adee40caa7d7cfdc2d8aa9
           rules_hash: sha256:766084307eb61dd2aa8ef8647fb929480306a443157f59a35a527c1bb7927691
           recipe: registry-observation-v1
-  - record_key: printing:p:57916f96632f52eab2a90e2c12d9b29c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:57916f96632f52eab2a90e2c12d9b29c
@@ -4705,8 +4537,7 @@ records:
           observation_hash: sha256:a7eed19566e325dfa16ba9e31c5c4de539862a3e94e58e42aa77af85f9e58654
           rules_hash: sha256:babad2cc4d7b3e834731112d4f797e7782d41e2159ccce4c1c30bdfd494683c2
           recipe: registry-observation-v1
-  - record_key: printing:p:46969a1b8040531fbb57c0a01c92ea04
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:46969a1b8040531fbb57c0a01c92ea04
@@ -4733,8 +4564,7 @@ records:
           observation_hash: sha256:3e01dc6cecbbb4aea2801644f0b46677c8af0c8b6e62992cc55f16925e380603
           rules_hash: sha256:3e2739daedb59c573a371b644030075eeb0bea52fb1bb8651b78e3f8d7d74b06
           recipe: registry-observation-v1
-  - record_key: printing:p:73d53552d9d85558845929e80195220c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:73d53552d9d85558845929e80195220c
@@ -4761,8 +4591,7 @@ records:
           observation_hash: sha256:2260d8551354106e6d9331871874664339efdce546a5a22c2de30f72da7b1fb0
           rules_hash: sha256:3ad308a8a3d22021000b8ef1079e6f66e03d9e4e161398eb1a42d04aa377f6df
           recipe: registry-observation-v1
-  - record_key: printing:p:05d5eeaaeadb58b4aa559d8fa0f3056f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:05d5eeaaeadb58b4aa559d8fa0f3056f
@@ -4789,8 +4618,7 @@ records:
           observation_hash: sha256:ae61a20a34a6edc0d524d7a709f5aff5c8b45af51cb14bc2abef266fa748a46f
           rules_hash: sha256:357489cf207976cf7279725a2fe33c1f1d26f49cb2a47b9775f129e8aa779eb6
           recipe: registry-observation-v1
-  - record_key: printing:p:99193fabd8dd5c728c0e1b5c7c5ef399
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:99193fabd8dd5c728c0e1b5c7c5ef399
@@ -4817,8 +4645,7 @@ records:
           observation_hash: sha256:ebf0716cd8eaf9514b9e0049df9754651ff8b28288291f320fba8a3b4f70c82f
           rules_hash: sha256:9788cca1df30d7987db108991858ed272fcb90a1d8d0de2ee5984572d69576fe
           recipe: registry-observation-v1
-  - record_key: printing:p:a6aadea6caf25cd6bb2b88addf0d0964
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a6aadea6caf25cd6bb2b88addf0d0964
@@ -4845,8 +4672,7 @@ records:
           observation_hash: sha256:f2eae76efaf8e18c56b0b5611c1b0edc8f6c15304bc4960f71b96cab68d93de4
           rules_hash: sha256:c62c659025e6abc4925ae6d86cb4884fc6cb66e88e7da7ff26edda2c79168dfb
           recipe: registry-observation-v1
-  - record_key: printing:p:3c9606e2465d5b358ac1d76b80fc78cc
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:3c9606e2465d5b358ac1d76b80fc78cc
@@ -4873,8 +4699,7 @@ records:
           observation_hash: sha256:fc40a45b67ed546aa3c27e4ff43e83b4316e44cada2cc1a2c4f2517a52383050
           rules_hash: sha256:8b5c84cbc5980918a24f56ad6b948a1501a6fb673dd45aaa7c9304ce8f31286c
           recipe: registry-observation-v1
-  - record_key: printing:p:c142c6c349a45223bfa395439e3d1aeb
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c142c6c349a45223bfa395439e3d1aeb
@@ -4901,8 +4726,7 @@ records:
           observation_hash: sha256:1b179889c9ca018b7e11cfb9a6f9e1968e5b4489a24b945aefe83d332d7b5068
           rules_hash: sha256:9b160fdb0349945c3a37ec3e0470d8c7343dc96a1d78db8344625b52b8676126
           recipe: registry-observation-v1
-  - record_key: printing:p:eb5c2e8a85e15c85997484bc7a22787a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:eb5c2e8a85e15c85997484bc7a22787a
@@ -4929,8 +4753,7 @@ records:
           observation_hash: sha256:471b466789bcb9dc8643caf8d5b09f873ea713f70d81d51525ee8f8f1bd9460a
           rules_hash: sha256:1e84b1879854ecaaaad8788812838f3ceed9be89de2afb97e784775934f6abce
           recipe: registry-observation-v1
-  - record_key: printing:p:6015521b9e125a9d9c1191b0e475b0f3
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:6015521b9e125a9d9c1191b0e475b0f3
@@ -4957,8 +4780,7 @@ records:
           observation_hash: sha256:faad956797bcf4b1fd587b212bb0dd35c90fa15e6dd8fd64778600c8cb57c9d0
           rules_hash: sha256:00f526af371cd2a6c4dc33d5a32e0203bca33582f9235f18ebd6cef611df21af
           recipe: registry-observation-v1
-  - record_key: printing:p:d36bad4a8e38556aadc84c907c12849c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d36bad4a8e38556aadc84c907c12849c
@@ -4985,8 +4807,7 @@ records:
           observation_hash: sha256:1f107fe576c7a77d3c4f77d94722c09c3c4978e1dd04e653a6e24742af3342e9
           rules_hash: sha256:1977a2e60afb42ea4f1dac5287f6d09a68a9a1fff89f1148403e0c4fbab4fcc6
           recipe: registry-observation-v1
-  - record_key: printing:p:f04aaaf5ee2957e4b1c6d7274a63294a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f04aaaf5ee2957e4b1c6d7274a63294a
@@ -5013,8 +4834,7 @@ records:
           observation_hash: sha256:daab759559dea3a61da897cd4560edb068e1296bf52ada4cc474077e0ccce8a6
           rules_hash: sha256:ed8062bcb3a27c8ca36f9b16084a01fbf076638a1a67c1e7c430612e5372ee43
           recipe: registry-observation-v1
-  - record_key: printing:p:e0255ce0f1b95714983a3ccb825a0100
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e0255ce0f1b95714983a3ccb825a0100
@@ -5041,8 +4861,7 @@ records:
           observation_hash: sha256:a55c28eed12f6843e4f8a949dcee4e3d07ea8f48a3483013a285e3fb9308d740
           rules_hash: sha256:d5d34735e0c6528ddaceaa78e311f75a8541038def4379c6c15aec7a5d1bf004
           recipe: registry-observation-v1
-  - record_key: printing:p:83eefc22946e5d39af5e9e398d75d853
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:83eefc22946e5d39af5e9e398d75d853
@@ -5069,8 +4888,7 @@ records:
           observation_hash: sha256:db9fd879daef294328ced7ead42e5e33bc5f01ab1fb4da4a670048cdf8547897
           rules_hash: sha256:3c0f7a2a85eb1e3a273f95c7f6f372dec02517ff239759bf6810837520e3626f
           recipe: registry-observation-v1
-  - record_key: printing:p:4e6c1c70b0055910b131edb10f567775
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4e6c1c70b0055910b131edb10f567775
@@ -5097,8 +4915,7 @@ records:
           observation_hash: sha256:e7f69e599b9bb303e30262333d3eab8dd99f2f3d573bb4047f46d63c38a1ad55
           rules_hash: sha256:0162fd7f0f999231fd08fd1207faa033ad145ce56a5dd63bed305f08ed749379
           recipe: registry-observation-v1
-  - record_key: printing:p:a452510674815cdaaa158e0125099133
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a452510674815cdaaa158e0125099133
@@ -5125,8 +4942,7 @@ records:
           observation_hash: sha256:d0dd595b4873cd696cf8fd14278216e35ea689cf89b81aef065e6ca169d21485
           rules_hash: sha256:357489cf207976cf7279725a2fe33c1f1d26f49cb2a47b9775f129e8aa779eb6
           recipe: registry-observation-v1
-  - record_key: printing:p:7f1f78fc8c7e5fbe8c973201f3a80c39
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7f1f78fc8c7e5fbe8c973201f3a80c39
@@ -5153,8 +4969,7 @@ records:
           observation_hash: sha256:705c13d78af3fdb34a0b7a57eb6ba19b820fcf658bacffc9e26013b42ec4c0f2
           rules_hash: sha256:c7c5b6c87af2c51671b6666e1b213b5be26e0f9179dc4b9e67c6beb1c38081aa
           recipe: registry-observation-v1
-  - record_key: printing:p:0880cc2c31d652049301792b53caa2f6
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0880cc2c31d652049301792b53caa2f6
@@ -5181,8 +4996,7 @@ records:
           observation_hash: sha256:0540adf7f9a60ac2d787ba92126a93765978b63c04b203ec13f6218fc953ace3
           rules_hash: sha256:276d7ae04dca910362fec9974f8094d2918e9e4f9c480f4916e46bc0638b56d4
           recipe: registry-observation-v1
-  - record_key: printing:p:0d723deb7588528f9b0b410c6c4bb3b4
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0d723deb7588528f9b0b410c6c4bb3b4
@@ -5209,8 +5023,7 @@ records:
           observation_hash: sha256:20dbde4d0128693f73d85649c6644991129ca40c3792165ffd819aac9816b250
           rules_hash: sha256:d24dde76537b89461b69e548afb3f52dc50731c96238ba0d53f9e5aac6bc7c1c
           recipe: registry-observation-v1
-  - record_key: printing:p:1946bfa5ae1659c8bca9d099528b9b50
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:1946bfa5ae1659c8bca9d099528b9b50
@@ -5237,8 +5050,7 @@ records:
           observation_hash: sha256:6ac58b1c77200f867ef27f6f1172125e9fa39531498a2406ef93e430a52cb252
           rules_hash: sha256:5d8d2f7c01c2426e635390e4827bef02f0a8c60aa2b61e1c7b093287d48cb793
           recipe: registry-observation-v1
-  - record_key: printing:p:24bea7bc43cf571ebbd01893a160a794
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:24bea7bc43cf571ebbd01893a160a794
@@ -5265,8 +5077,7 @@ records:
           observation_hash: sha256:9f60b036f979ea33ceda6e0bd4977b7bb079db4268e48f49395df0af01569526
           rules_hash: sha256:e1f7207c9d3f4ee4c32601d991c4bba368060eb5dc3520308ca38bdafa007613
           recipe: registry-observation-v1
-  - record_key: printing:p:14008f284b155d9384820990b8766b2e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:14008f284b155d9384820990b8766b2e
@@ -5293,8 +5104,7 @@ records:
           observation_hash: sha256:3116d5bc182dc5f9f62895dfae7b06b963e211782e309f11f462d1c2a3ac61f1
           rules_hash: sha256:a9630ed225ae825026466fc5f817508715d5573e9617db23d8afdb81c9732b99
           recipe: registry-observation-v1
-  - record_key: printing:p:6a3f5a57bf375db7a70c03fecfa0770e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:6a3f5a57bf375db7a70c03fecfa0770e
@@ -5321,8 +5131,7 @@ records:
           observation_hash: sha256:a856fad2bad8e21966ea4d46c21b6fd73954e475bcf646d39083f326de3bc191
           rules_hash: sha256:dcc9b540be8f305060a4b8957c3e9c7eb6b6e40663c2117757ed0cd89bd43791
           recipe: registry-observation-v1
-  - record_key: printing:p:a2c3ba8e14d959e1a19c8f1fc7ce2105
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a2c3ba8e14d959e1a19c8f1fc7ce2105
@@ -5349,8 +5158,7 @@ records:
           observation_hash: sha256:eb86054a4b53cce07efbd18c0eedb4eca743deb35ea93fa9e9f0e3cdce53edc5
           rules_hash: sha256:dfd4c54bcb348179465c389aca276e0184727489701ddad49e254797537a66bd
           recipe: registry-observation-v1
-  - record_key: printing:p:2ed5df2dfac6508682d39e7b130ffe53
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:2ed5df2dfac6508682d39e7b130ffe53
@@ -5377,8 +5185,7 @@ records:
           observation_hash: sha256:55a6c2e7c54aa5ac97a10959036a35635fcfe2da73a91cd2be35f1cdeab06959
           rules_hash: sha256:ce00d11d7a356a1c457d4601ab375d3d9363565cfe55181def0b7c090a85c7e8
           recipe: registry-observation-v1
-  - record_key: printing:p:4782ab7b519f525e804760486f15af2a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4782ab7b519f525e804760486f15af2a
@@ -5405,8 +5212,7 @@ records:
           observation_hash: sha256:202f487a2bb5547e40306936875858859049ee0dce58ba285c39e7350f56a880
           rules_hash: sha256:b125b81f0118bc9d9300d0d1db6552fde8d9c6004e064da479015249b785917b
           recipe: registry-observation-v1
-  - record_key: printing:p:40bca60b540555ff80ba5da8455eba4d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:40bca60b540555ff80ba5da8455eba4d
@@ -5433,8 +5239,7 @@ records:
           observation_hash: sha256:2541d1bb8ddfb0e1022bc3198c54b7b219b0c874dc8d81102e4e2409c06e0363
           rules_hash: sha256:2df83c7ac18f709ce053fffdfda6e4e6066262d4e5681130c17c1294051c89c9
           recipe: registry-observation-v1
-  - record_key: printing:p:f42357f44c4751ab92695e1861e70409
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f42357f44c4751ab92695e1861e70409
@@ -5461,8 +5266,7 @@ records:
           observation_hash: sha256:e2eb78a9ed3fbf1e88abb90c67e5d038a69aace811d0bdce35d012a97c179a2b
           rules_hash: sha256:f6862976f7f768acc4ff2d197e4c67efa047552890de298fab64a46f7b059400
           recipe: registry-observation-v1
-  - record_key: printing:p:68d6b492668b51ef897fc44f6b370a69
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:68d6b492668b51ef897fc44f6b370a69
@@ -5489,8 +5293,7 @@ records:
           observation_hash: sha256:a0adde4ef7222aab7a2df05d49b10c09b634edb26cb71415f543b62a1ca76291
           rules_hash: sha256:8678eb87ebd6ff74682ea0dfa11b3b979ba6ce6bb4b227158eeba9be742e878c
           recipe: registry-observation-v1
-  - record_key: printing:p:e7ef6147126e51a5953fbf4f236f198e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e7ef6147126e51a5953fbf4f236f198e
@@ -5517,8 +5320,7 @@ records:
           observation_hash: sha256:18e329011f8826529d0fe5ae5c9c6d79da5386f24cb451ca7207bc61713caa16
           rules_hash: sha256:7129b95037a649c420632d634085e4122111cb6880a231027eb0c25b1a00bd21
           recipe: registry-observation-v1
-  - record_key: printing:p:4cd1abba94295a34930b9ca277cce9ed
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4cd1abba94295a34930b9ca277cce9ed
@@ -5545,8 +5347,7 @@ records:
           observation_hash: sha256:8d3a77fd01cf45006fbc53fa811069775d32488ff5222b17052341cb66cce31b
           rules_hash: sha256:63e0bcf95b4c20e8d144088641ef6166e8f1ce64d53d944bd83425c0c5d3ed7d
           recipe: registry-observation-v1
-  - record_key: printing:p:624ba769f8205d9abfbd64e2d4f53513
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:624ba769f8205d9abfbd64e2d4f53513
@@ -5573,8 +5374,7 @@ records:
           observation_hash: sha256:ead3d48e2a139333dc3dbe97d9f20380b481f82805039f43e1f12e7904ab2429
           rules_hash: sha256:19796736c3265680b99eb354f914ea22759bae286a687bed6570c1e9f2274672
           recipe: registry-observation-v1
-  - record_key: printing:p:bdfaf2bfe9ed5cebbcf363f8c5978d54
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:bdfaf2bfe9ed5cebbcf363f8c5978d54
@@ -5601,8 +5401,7 @@ records:
           observation_hash: sha256:2a26b4b65d8405b4a2e469e724772405f7068cfaed003f2bc5b7c1200592acb1
           rules_hash: sha256:fd20e70919f970e4dcd34b7faabe7359cd206e79ba540e32b1769f881504c346
           recipe: registry-observation-v1
-  - record_key: printing:p:4781bf3c8dc25180a49a7ca9322ec88b
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4781bf3c8dc25180a49a7ca9322ec88b
@@ -5629,8 +5428,7 @@ records:
           observation_hash: sha256:1b8ebb7cbb7c1392e48c7c86ee788998d30cdc69ae7e2464037b2b41fbda0460
           rules_hash: sha256:d064f176940db56ee80b693e89caac3bdcc56b05929b9ef9eab13338c249bd3a
           recipe: registry-observation-v1
-  - record_key: printing:p:a22142691bc75020a9c8a2831b75782e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a22142691bc75020a9c8a2831b75782e
@@ -5657,8 +5455,7 @@ records:
           observation_hash: sha256:4415098fb5cb2a34775788667781128aa7f2f2896ca43d296352b4d32294c571
           rules_hash: sha256:be9a946185d743621b684430856dba2b0ed73661f5a28b354838660220bd143a
           recipe: registry-observation-v1
-  - record_key: printing:p:db96bdb8f50850bcba4d1b4a19609f0b
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:db96bdb8f50850bcba4d1b4a19609f0b
@@ -5685,8 +5482,7 @@ records:
           observation_hash: sha256:07f38f5c75346b9ef413e805d99e969ba23dd10a6bec4434f46eba5f7b059c37
           rules_hash: sha256:7d88c40fd1a44cdb95c017623d23a7e077603dec490310223cfc4a5f31de871b
           recipe: registry-observation-v1
-  - record_key: printing:p:6de6ae1bc17d5af8a23abf26e8537699
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:6de6ae1bc17d5af8a23abf26e8537699
@@ -5713,8 +5509,7 @@ records:
           observation_hash: sha256:482df7e44106e761d67991a07d439dc7b0237990e581fc5e49fef417bc379613
           rules_hash: sha256:e3db1eaa2d2ddfecb08ea45d9ded6f5d8e249a800e88f90909303b48633ce2b9
           recipe: registry-observation-v1
-  - record_key: printing:p:ef42261127b05f7d94f592cfcadf4dbc
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:ef42261127b05f7d94f592cfcadf4dbc
@@ -5741,8 +5536,7 @@ records:
           observation_hash: sha256:7c58c136ca643f3108fe5bf977749189ce31ce56d5ba681121c965e61d3b36fd
           rules_hash: sha256:b7c5b5b6712235b52c36f60ec6b5ce92bc4e08181a8c57863dedd0b463c7f525
           recipe: registry-observation-v1
-  - record_key: printing:p:1945448a28d9542591451015b5d70d1d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:1945448a28d9542591451015b5d70d1d
@@ -5769,8 +5563,7 @@ records:
           observation_hash: sha256:7ac0267ba5c2b2e574b7b4931f353c4efd84dc2a3445caccd8b3997c85129fd0
           rules_hash: sha256:53905789cd209374d85897b4bc632753cfb743362851182c78b6ccd47d648728
           recipe: registry-observation-v1
-  - record_key: printing:p:c02ebfa5eab55450bcc521c3935d8acf
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c02ebfa5eab55450bcc521c3935d8acf
@@ -5797,8 +5590,7 @@ records:
           observation_hash: sha256:c58282602a3ef7fbed734cffc9f705692367264c19c065e079103bcb43e1d4e4
           rules_hash: sha256:783549a6b77e9ec0948a48c63aa5a60763a52aa5ecb5b93f1d65123e67bc61b5
           recipe: registry-observation-v1
-  - record_key: printing:p:e945fb312e435c799b22ab7abfb3c330
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e945fb312e435c799b22ab7abfb3c330
@@ -5825,8 +5617,7 @@ records:
           observation_hash: sha256:f2f40edf887097e67321d0c8a47872606f6f5b3ec27d83ae539c239f037ab968
           rules_hash: sha256:766084307eb61dd2aa8ef8647fb929480306a443157f59a35a527c1bb7927691
           recipe: registry-observation-v1
-  - record_key: printing:p:1674f524b3da593a8de43b099b64b7af
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:1674f524b3da593a8de43b099b64b7af
@@ -5853,8 +5644,7 @@ records:
           observation_hash: sha256:05a35768de4f32b754b3baa475944d4b0d255a7df51a95619a82ac800b13fa8d
           rules_hash: sha256:357489cf207976cf7279725a2fe33c1f1d26f49cb2a47b9775f129e8aa779eb6
           recipe: registry-observation-v1
-  - record_key: printing:p:ba82c987f1f05c399a6bc87cf63228da
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:ba82c987f1f05c399a6bc87cf63228da
@@ -5881,8 +5671,7 @@ records:
           observation_hash: sha256:7a0ef7f560ece116ad73520fd328b0cacb8d1cc66334ab77670ef7f1ae19fd46
           rules_hash: sha256:9b160fdb0349945c3a37ec3e0470d8c7343dc96a1d78db8344625b52b8676126
           recipe: registry-observation-v1
-  - record_key: printing:p:fdf89f1bc4e656aa89e9d7025c20fbcf
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:fdf89f1bc4e656aa89e9d7025c20fbcf
@@ -5909,8 +5698,7 @@ records:
           observation_hash: sha256:698a411ea17630e770d20003143045f138f031b0704fc7e54895448551bb43b1
           rules_hash: sha256:3c0f7a2a85eb1e3a273f95c7f6f372dec02517ff239759bf6810837520e3626f
           recipe: registry-observation-v1
-  - record_key: printing:p:0e5a32a9e69c57179ded86f09f9d8928
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0e5a32a9e69c57179ded86f09f9d8928
@@ -5928,8 +5716,7 @@ records:
         observation_hash: sha256:f31dfde11d0d099484de4404464a760a2544715705e6c9669b92f38d47d55891
         rules_hash: sha256:7d88c40fd1a44cdb95c017623d23a7e077603dec490310223cfc4a5f31de871b
         recipe: registry-observation-v1
-  - record_key: printing:p:81240fd839325bbfa7875c446191a7a7
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:81240fd839325bbfa7875c446191a7a7
@@ -5947,8 +5734,7 @@ records:
         observation_hash: sha256:6e6e1211a7554d9fcfe7832ce855679239d3e2a829fae809051aeea5798ebce6
         rules_hash: sha256:163f16c5eef50a69bb79bf4318e8cd338a1333bd278ada12bfd736a8ba81444f
         recipe: registry-observation-v1
-  - record_key: printing:p:cb2da515b7e85dfd91ed3b711671ad48
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:cb2da515b7e85dfd91ed3b711671ad48
@@ -5966,8 +5752,7 @@ records:
         observation_hash: sha256:e2525e482038b2b6e96e5e9d89f0d47c1a541f5892338ef8482b0539859f1565
         rules_hash: sha256:e3db1eaa2d2ddfecb08ea45d9ded6f5d8e249a800e88f90909303b48633ce2b9
         recipe: registry-observation-v1
-  - record_key: printing:p:adb4bb9f8da65aa880aed270096c666b
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:adb4bb9f8da65aa880aed270096c666b
@@ -5985,8 +5770,7 @@ records:
         observation_hash: sha256:dd0c87d15d0e6386fd96a4b95b4f9d6c6f0f3699a0b7bfff995c6ae47f5f5a74
         rules_hash: sha256:6dae6a875c7fffb159c91bb90e1d69d647c7a23450b9fc32fcb76a3c4fc455ef
         recipe: registry-observation-v1
-  - record_key: printing:p:3fc81aae52d759e3a9b5830b289e6a8e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:3fc81aae52d759e3a9b5830b289e6a8e
@@ -6004,8 +5788,7 @@ records:
         observation_hash: sha256:3c929aa3dbdb5fcbb6ede3da67726a9ec66a1f9e3381910df730c629c149ff39
         rules_hash: sha256:f3a5964ba55c5616438cf65bff33c3d71cef70143154ef9beb54ce2a6c74f3b9
         recipe: registry-observation-v1
-  - record_key: printing:p:14c331b4e2de51ea89853465b86874a0
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:14c331b4e2de51ea89853465b86874a0
@@ -6023,8 +5806,7 @@ records:
         observation_hash: sha256:ac07ec0a74d1909602ba54c2758b26743e057545d881694b969251732b89914d
         rules_hash: sha256:e4cca85f997b79ac2fef50b7839302c009239ce1c872e173b0c1ff1e0f366dbb
         recipe: registry-observation-v1
-  - record_key: printing:p:5238e477fdc654659e4a860d8cd6826c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:5238e477fdc654659e4a860d8cd6826c
@@ -6042,8 +5824,7 @@ records:
         observation_hash: sha256:f33da51231485a84154b2695b2396ed41dfcabae9bac8645432f6c06e0cc7cac
         rules_hash: sha256:6f68c10bc388a277bf85be40efd3800748f428b5870839ea46bfaab13cd8f3b4
         recipe: registry-observation-v1
-  - record_key: printing:p:e815ea6a0d555af8b54a2f0fb89cba71
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e815ea6a0d555af8b54a2f0fb89cba71
@@ -6061,8 +5842,7 @@ records:
         observation_hash: sha256:68826baf1e3a3f3f31cba11109b423a22def4eff0fce7675b1d9291473695dd6
         rules_hash: sha256:3b546cc2abda35e1082ee75fe2f6f8853c03632c6cf0bef3daa64d8d0a2d6979
         recipe: registry-observation-v1
-  - record_key: printing:p:7286238a0d8c56a8b6ae8db568d644f7
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7286238a0d8c56a8b6ae8db568d644f7
@@ -6080,8 +5860,7 @@ records:
         observation_hash: sha256:66f38b99a45385f38463f10c76fa264e2d4677aa876ef86442309b15e6dba376
         rules_hash: sha256:3a9dfbda64844594fbf084dada362a33b46838e2c244056055221da8549f4857
         recipe: registry-observation-v1
-  - record_key: printing:p:54d6e9b4e81f54caa4a31374ecbb2e9e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:54d6e9b4e81f54caa4a31374ecbb2e9e
@@ -6099,8 +5878,7 @@ records:
         observation_hash: sha256:b432bf9584b1e75c1135feb520779de65c02b6f3988922226dd65558ba9ca37a
         rules_hash: sha256:6353de759c4e43faa19b38b1c0588bb0db58104106b66c39eb16d98b41eb3cb7
         recipe: registry-observation-v1
-  - record_key: printing:p:ca72395770f05a28b09fd05ff7abf703
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:ca72395770f05a28b09fd05ff7abf703
@@ -6118,8 +5896,7 @@ records:
         observation_hash: sha256:b8ebc501dee2015b4d3d3b73ef03ff28062770ee720acc1d0ae98ddc5b0b5e6c
         rules_hash: sha256:8a3b76774afaebbc4dc7e1fab95959be6f1c35082106bc43ea422a177f99e324
         recipe: registry-observation-v1
-  - record_key: printing:p:4c28b6eb2fa8521b931c960d9e213728
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4c28b6eb2fa8521b931c960d9e213728
@@ -6137,8 +5914,7 @@ records:
         observation_hash: sha256:496b2c6ec38d88646003bdd5e346ee0a8010fb08601f68fed9dfaa8a3934602d
         rules_hash: sha256:e2f8b35f725622c39df1a7093096997d304894a6f991029eb72d5df498360df2
         recipe: registry-observation-v1
-  - record_key: printing:p:65d438caa42b5559b645e0db59fac952
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:65d438caa42b5559b645e0db59fac952
@@ -6156,8 +5932,7 @@ records:
         observation_hash: sha256:d7df3c67232854b967929ac48a50ceb45b4c656f23ba88ddce2c167fd7d20dea
         rules_hash: sha256:ff1fb9b4d7d2c46dbeb86938a5ff6de07280b0e6ce7c139face7f34f3fc2b523
         recipe: registry-observation-v1
-  - record_key: printing:p:32f920898d535ee0a8f47782ef9d18b4
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:32f920898d535ee0a8f47782ef9d18b4
@@ -6175,8 +5950,7 @@ records:
         observation_hash: sha256:a5395a9dd13c1237c9419324fb5bb642a8d288501b7d8370f03dca7a5603d2c9
         rules_hash: sha256:a25e581a17abf419fc76f04f127828d8b2125a11a75e85f9f9ae85058e4fadb6
         recipe: registry-observation-v1
-  - record_key: printing:p:1c9a0c0f7c41502ab98a0c9ea1b7fc3e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:1c9a0c0f7c41502ab98a0c9ea1b7fc3e
@@ -6194,8 +5968,7 @@ records:
         observation_hash: sha256:69193adefb91f0cc55e039b6577c4f222fece8fe55d628cb615cfa6d42136439
         rules_hash: sha256:8e53ffefe5aa2b0d3af186676bc40d8296ff326ed468d61a3a59c55b66e55281
         recipe: registry-observation-v1
-  - record_key: printing:p:d79f063c32b650c1b1a001cbce2d7f49
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d79f063c32b650c1b1a001cbce2d7f49
@@ -6213,8 +5986,7 @@ records:
         observation_hash: sha256:704dbbb9104ecd28deab0d7a217a07f739ec216dc25d5046377686fc6911090f
         rules_hash: sha256:fe6ea1345b16d817a624e2b90e829e63a186c922836327cd10a5ef439d9a59f7
         recipe: registry-observation-v1
-  - record_key: printing:p:782a5b1cf44e540897494cbfda50fe0f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:782a5b1cf44e540897494cbfda50fe0f
@@ -6232,8 +6004,7 @@ records:
         observation_hash: sha256:5267ec1719428e11850054da38dd3c74b42912e71f2136bb5c77bcafd837dc0d
         rules_hash: sha256:a58a9dfac25e653c037739ae738af9430065fc354936a943612d8e2abcfbab56
         recipe: registry-observation-v1
-  - record_key: printing:p:af771b9bb68c54f783acff335c395158
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:af771b9bb68c54f783acff335c395158
@@ -6251,8 +6022,7 @@ records:
         observation_hash: sha256:6ddf88f8ad5ec63a9a51535f8d175e445b59f154cde99171682829ca6c2f5eee
         rules_hash: sha256:ea8038b61da0c6ca92d9c4659fbdfc9208434a4f04017f068b773b584dfbd24d
         recipe: registry-observation-v1
-  - record_key: printing:p:af20a90fd9215f9a8ee137bf65469de6
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:af20a90fd9215f9a8ee137bf65469de6
@@ -6270,8 +6040,7 @@ records:
         observation_hash: sha256:1aadae404a01cafca04538fea4310c29e3f28a2d73c1e9690df6559c9f5662db
         rules_hash: sha256:b7c5b5b6712235b52c36f60ec6b5ce92bc4e08181a8c57863dedd0b463c7f525
         recipe: registry-observation-v1
-  - record_key: printing:p:da488aff5db155d4a7de1b16183a84a7
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:da488aff5db155d4a7de1b16183a84a7
@@ -6289,8 +6058,7 @@ records:
         observation_hash: sha256:83d9d5f8f457c5f6098265c27986c70ec3047bda62c598fdbc2b33caad863879
         rules_hash: sha256:10fafecba127e48c71b790cb2b571949553cd1298d1ddd27e0af4b0765959993
         recipe: registry-observation-v1
-  - record_key: printing:p:a5199ac2dfb351d2896f5026d9291fc3
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a5199ac2dfb351d2896f5026d9291fc3
@@ -6308,8 +6076,7 @@ records:
         observation_hash: sha256:8b56e147489f5b75c70b7f34df9082a2dfb6203753ab82b174c15330cedefb13
         rules_hash: sha256:5b72172499a3ee38e568f41020540352859c5b764074cd8210ebd29a904f9312
         recipe: registry-observation-v1
-  - record_key: printing:p:c2287ab72a7d5b8ba4d51a6525726532
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c2287ab72a7d5b8ba4d51a6525726532
@@ -6327,8 +6094,7 @@ records:
         observation_hash: sha256:31c5b96221071f06bb0b39cf2cadeac0d9f357dcb28d4f4ec9f80027b68ff087
         rules_hash: sha256:55c8e5dd8c7106394d3748b18399ed5cba5808429d799d0f639516f5ca91833e
         recipe: registry-observation-v1
-  - record_key: printing:p:35c3d7f8770055d9be0348a81dc09476
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:35c3d7f8770055d9be0348a81dc09476
@@ -6346,8 +6112,7 @@ records:
         observation_hash: sha256:fce4784cd07c6cd88f9771abbc959e1ac9fa08f4f42913c48d1dc31e6568265d
         rules_hash: sha256:74a27c5849c9e1d81f45c099faeda4391baac34de46a67ca65f0fb0e6313d3e0
         recipe: registry-observation-v1
-  - record_key: printing:p:09c82e2f7a035cb087fba33382724197
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:09c82e2f7a035cb087fba33382724197
@@ -6365,8 +6130,7 @@ records:
         observation_hash: sha256:f21831cd8f578b4576d05c76070c23d0127ba8b686db16a4cfdc8998601a57e3
         rules_hash: sha256:43a3ec7b30bfbcec5c19d8a920b949132d92b3cfaf213145724a3c16229ac281
         recipe: registry-observation-v1
-  - record_key: printing:p:07ac46d0674553999d0350adf129198f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:07ac46d0674553999d0350adf129198f
@@ -6384,8 +6148,7 @@ records:
         observation_hash: sha256:eff3afa27ede57bc1e535822b15f36edfbbcdc3ab41342c70f5852918db64f51
         rules_hash: sha256:59df8bd870aeca47bfa33b850c855bdd45783aa68151e18af136c1f87d6e03eb
         recipe: registry-observation-v1
-  - record_key: printing:p:cc9e83993d9756939d8f17e8d0d89e89
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:cc9e83993d9756939d8f17e8d0d89e89
@@ -6403,8 +6166,7 @@ records:
         observation_hash: sha256:10efbd915928e0874e27d8cf516b91db3eb7724d09ca3f268add18011604f01f
         rules_hash: sha256:af452aa7fba34f6ac8c26e99bc847d4f55a5a9321757bc105e0793fdf9c8f5e6
         recipe: registry-observation-v1
-  - record_key: printing:p:a115a735558f5bbc998d43f3c3131c1d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a115a735558f5bbc998d43f3c3131c1d
@@ -6422,8 +6184,7 @@ records:
         observation_hash: sha256:922286020136ac48f5e53ddb187b836492cd6bb755aa6d1f2cd4f1be65a62d56
         rules_hash: sha256:bc34c7c679f33a0c780acfd5422970b8f34cf33adaee8feb401844b99ce86b08
         recipe: registry-observation-v1
-  - record_key: printing:p:9a5e704a6af851fdb2a2ff9ce813da42
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:9a5e704a6af851fdb2a2ff9ce813da42
@@ -6441,8 +6202,7 @@ records:
         observation_hash: sha256:43f517ca3aebb0b90b4323157f4dab068d07fd978545eb592c1c0766e4b01c88
         rules_hash: sha256:15f312514471aaaf1f598987e6dee9480993774013b134f7a28d52e9bfb1bf25
         recipe: registry-observation-v1
-  - record_key: printing:p:3c5518675577526ba0eae330a8f17a0e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:3c5518675577526ba0eae330a8f17a0e
@@ -6460,8 +6220,7 @@ records:
         observation_hash: sha256:a2bc86e1ddff8d6443dd5809c052f7a2fca990726a53c1743aa276f34903e346
         rules_hash: sha256:b5b627c8a41d7aa4d3d37955a50f05d85485af4a95a5b19602b2377bf8de40a1
         recipe: registry-observation-v1
-  - record_key: printing:p:7c6c1e1fa2ce55a58704056e69141b35
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7c6c1e1fa2ce55a58704056e69141b35
@@ -6479,8 +6238,7 @@ records:
         observation_hash: sha256:b430163f3b683d708b9e7f4a44fb0ec02d129729809a2204a0d40da0207342dc
         rules_hash: sha256:bee50ee3b0d59ff1a6a2ace5ab05f46e18886af07c0d81d4ecc3d41d9af99ad3
         recipe: registry-observation-v1
-  - record_key: printing:p:1068455e7a7055179e482a7b3a8fb853
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:1068455e7a7055179e482a7b3a8fb853
@@ -6498,8 +6256,7 @@ records:
         observation_hash: sha256:e30e74577cc60825a3ddc3b1e476a329c474abb73ca05952855173ccf9efd507
         rules_hash: sha256:0e3d249abf637bab3908c9d65bdc83aa8c1b9cf0cc86793d0143d5d46100864c
         recipe: registry-observation-v1
-  - record_key: printing:p:8d21663a9b4c5583a60ca5702ff2e6f3
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:8d21663a9b4c5583a60ca5702ff2e6f3
@@ -6517,8 +6274,7 @@ records:
         observation_hash: sha256:2c599fec5f2dc9e495401f20c307bd20cb5057258ff7ef5d189f268fcbfc4a4e
         rules_hash: sha256:0dd25282fbbfa4fa7aa2f5affb442f2b24752b5827e3992c01ce0f965b972798
         recipe: registry-observation-v1
-  - record_key: printing:p:8a1373031b185a0ebbb7e64694b0650d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:8a1373031b185a0ebbb7e64694b0650d
@@ -6536,8 +6292,7 @@ records:
         observation_hash: sha256:f7256be0caf1677fbe09d70b34ed0d4b397d135e21dabb2d90178bedc2f768d1
         rules_hash: sha256:b80a1befb344ecf13f88617f186238a6aa851fd228a4f28fd23a11f9f1a662f0
         recipe: registry-observation-v1
-  - record_key: printing:p:b4bf5ac3dbdf5daaafe4ca1519f739da
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b4bf5ac3dbdf5daaafe4ca1519f739da
@@ -6555,8 +6310,7 @@ records:
         observation_hash: sha256:6bdb1a98cf93a568f00128be601f667398d704bf7fdfd40815782ceafc371763
         rules_hash: sha256:d5b872399a417960f49843a330cb969542898650dff8e200d046a0d6da0dc318
         recipe: registry-observation-v1
-  - record_key: printing:p:536c29fa48ad5e3f8d6b30821522b4ff
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:536c29fa48ad5e3f8d6b30821522b4ff
@@ -6574,8 +6328,7 @@ records:
         observation_hash: sha256:075bdc4ec6c96480d1d12a0261ad4e924fb0e8006336cfb31ad08637298cfcad
         rules_hash: sha256:e1d1ccedb749088008f40e95ccac352cd6fc4a8023e7ecb86b400ed3046559cd
         recipe: registry-observation-v1
-  - record_key: printing:p:21d67781054a5c48b96cd5d5c826a28e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:21d67781054a5c48b96cd5d5c826a28e
@@ -6593,8 +6346,7 @@ records:
         observation_hash: sha256:3219e3528e57ff40778e9c4d0d38516b8f3ae326e37852a3064458b092c0bc44
         rules_hash: sha256:98672dddde759328c2c96431c2f56c0575e3bdfa3ab5b06b43dbda75421d0b2a
         recipe: registry-observation-v1
-  - record_key: printing:p:cbe24b472d7d579494aea5af55c32fd6
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:cbe24b472d7d579494aea5af55c32fd6
@@ -6612,8 +6364,7 @@ records:
         observation_hash: sha256:aef3b4e902e3aa94640b6acbf575bd6932fdf668a7c71d2b0e592b6ee7882bc2
         rules_hash: sha256:867074f4a9e16b442c2dc16f884c9d1834bd860f65777ed5cd654f5c6c473bdb
         recipe: registry-observation-v1
-  - record_key: printing:p:2f383e1db8f3548598e0251fc34861c6
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:2f383e1db8f3548598e0251fc34861c6
@@ -6631,8 +6382,7 @@ records:
         observation_hash: sha256:d4567f208407f3986629113566561a9b1975fb66b8a0372314ea5b6427af92dc
         rules_hash: sha256:010d3dd5f81d73e189efd2682265974ee395f41ffa1695c29a093a4520901daf
         recipe: registry-observation-v1
-  - record_key: printing:p:24a22caf49755f21b46369f0437d660c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:24a22caf49755f21b46369f0437d660c
@@ -6650,8 +6400,7 @@ records:
         observation_hash: sha256:9f4f60928adcab4dcf914ec1f00dff0261982120e22d7c8e3ba9b088aca7788b
         rules_hash: sha256:53905789cd209374d85897b4bc632753cfb743362851182c78b6ccd47d648728
         recipe: registry-observation-v1
-  - record_key: printing:p:99749248af0c5378b2749289ed393228
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:99749248af0c5378b2749289ed393228
@@ -6669,8 +6418,7 @@ records:
         observation_hash: sha256:0bb49462d0bc5521fb07045062c1afc223b0d7e94882639880d29525d61be22c
         rules_hash: sha256:c400bb83076bdaf71c7a1588e1bfa6fbd62a475acc9e56179f5d4befacdeedf2
         recipe: registry-observation-v1
-  - record_key: printing:p:398c165d00c35ef7bc3347a76506f2b3
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:398c165d00c35ef7bc3347a76506f2b3
@@ -6688,8 +6436,7 @@ records:
         observation_hash: sha256:f308bddba975e960ea6e238409c1222ad85dccaa11a36f27823a6eee78790f79
         rules_hash: sha256:b1d7c6ee2c8b74985b1ea682c61058b5d644ef4852504183df3a4a48ade1f222
         recipe: registry-observation-v1
-  - record_key: printing:p:1fe64e7c75805c628dccfb3609576634
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:1fe64e7c75805c628dccfb3609576634
@@ -6707,8 +6454,7 @@ records:
         observation_hash: sha256:86360dae49d1b3de95a01392d90002005d807dfe04874e25e5db00f13baf2322
         rules_hash: sha256:783549a6b77e9ec0948a48c63aa5a60763a52aa5ecb5b93f1d65123e67bc61b5
         recipe: registry-observation-v1
-  - record_key: printing:p:01f9890abfa959488d2a8df806014764
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:01f9890abfa959488d2a8df806014764
@@ -6726,8 +6472,7 @@ records:
         observation_hash: sha256:b0c33e95f875363b7160d4980dd0596c399bc2e3e5f51fc8f5efe1862bf33c87
         rules_hash: sha256:c2075a8d4db90f53302c69d09e17ccdb71db0b960b83c492f37842e757b30f13
         recipe: registry-observation-v1
-  - record_key: printing:p:fce52ddaa7185d45a7347c256f24e897
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:fce52ddaa7185d45a7347c256f24e897
@@ -6745,8 +6490,7 @@ records:
         observation_hash: sha256:4c5bead48c1e55050666e6223adcc7ff4c40ff5e733bface928d447258ba0c0e
         rules_hash: sha256:3c493f2a7a19ca9eca3a41adbd7b880dc353d8716f266661d46d3b857a8a40cd
         recipe: registry-observation-v1
-  - record_key: printing:p:162bf18952c759b585c72e27c86422c6
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:162bf18952c759b585c72e27c86422c6
@@ -6764,8 +6508,7 @@ records:
         observation_hash: sha256:571842d9e1c62af4a5ff6e72b6c3c04b5e0585b996358b8a878f54f40b7f70f3
         rules_hash: sha256:03734048e3a08a8c293a5486bd6a5d0efca0e2bbc526b923631d1740752fc5b1
         recipe: registry-observation-v1
-  - record_key: printing:p:41b1047a3bd15c46b85dc029cd8f2ca2
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:41b1047a3bd15c46b85dc029cd8f2ca2
@@ -6783,8 +6526,7 @@ records:
         observation_hash: sha256:846483aabfc597efb49fcbaee199b98918eb830257394ac06feac6602bb84dea
         rules_hash: sha256:bd6786309022ee87e2e7a2dc9af70418d9d397b4c18612cf2ed3a61d831e6b05
         recipe: registry-observation-v1
-  - record_key: printing:p:dc03f3e67db6512990302a32bd9de8d1
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:dc03f3e67db6512990302a32bd9de8d1
@@ -6802,8 +6544,7 @@ records:
         observation_hash: sha256:59ecdc03a394b7d9cee5fcf0640b2f62f7b21f0eaaee6d44155585a379744740
         rules_hash: sha256:4495131f72e88f7aa021187790834ea28fc925eb4a42617c13a015899195de2e
         recipe: registry-observation-v1
-  - record_key: printing:p:61fff6efc581577ea00bc517273ad2cc
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:61fff6efc581577ea00bc517273ad2cc
@@ -6821,8 +6562,7 @@ records:
         observation_hash: sha256:ed8f71ccc59e659d6dceb46db888434cc46a064bf8b5f4ca3f6cfa1e29fb68b8
         rules_hash: sha256:78575c532beced82eb7fc4f65578ab1d31681fd50c7ea5bb081739698fd9ec4a
         recipe: registry-observation-v1
-  - record_key: printing:p:e0cc5b3f7e4154e2bf70f26dff9dc2eb
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e0cc5b3f7e4154e2bf70f26dff9dc2eb
@@ -6840,8 +6580,7 @@ records:
         observation_hash: sha256:6a4063f563d2167eb44644040e91d9033588e9165d50d8ebe24702d412a0ad55
         rules_hash: sha256:f29c927f4862aa8b6acfdf94f6e94804934e6f0bc931b05f569c11ed9adc3f3d
         recipe: registry-observation-v1
-  - record_key: printing:p:a8c9faa0981c5dfab969d677f0a3b9ce
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a8c9faa0981c5dfab969d677f0a3b9ce
@@ -6859,8 +6598,7 @@ records:
         observation_hash: sha256:e751467e2b20a0314f714a67b89ff1d1d4fb6e4d767af93fc1496028f453a8c5
         rules_hash: sha256:93de6e1613a2b3ee0cf4dcc087086073f0d3f5cd214243a04a036b14da77640d
         recipe: registry-observation-v1
-  - record_key: printing:p:ce28be81b3225accb04f53ada69c5e34
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:ce28be81b3225accb04f53ada69c5e34
@@ -6878,8 +6616,7 @@ records:
         observation_hash: sha256:614d369628ea6062d4f2eb250148390cc9bdb5a9b0623cd9f55b407e4693edd9
         rules_hash: sha256:6cef3ddc3d1c44c6a9b4899ca2ee96a1b5f9b5c4fbefc58575a29428cc3ab861
         recipe: registry-observation-v1
-  - record_key: printing:p:cfdd5cac64d25a04970aa7198fda8992
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:cfdd5cac64d25a04970aa7198fda8992
@@ -6897,8 +6634,7 @@ records:
         observation_hash: sha256:1a027b2ebc69d572c42bcccbc3679acce2cdd6cef6852727914fdbf40a673e81
         rules_hash: sha256:1d13564f08275e63e48a82ee4f308e83e2e7793f5af06b1315c8ee443e9a5700
         recipe: registry-observation-v1
-  - record_key: printing:p:45a8d4aecb4c54c391160fd8aa037163
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:45a8d4aecb4c54c391160fd8aa037163
@@ -6916,8 +6652,7 @@ records:
         observation_hash: sha256:8b75ffa8b728e950db30842aae6e92a9e0b3232cdb8d35c99902256a5625ce45
         rules_hash: sha256:b6953bc4a5a3980084239b6ab08bdbdea740353f1bbb5809e40b1ff166dbb17a
         recipe: registry-observation-v1
-  - record_key: printing:p:e7b0541bea5f531288c75b40e377968c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e7b0541bea5f531288c75b40e377968c
@@ -6935,8 +6670,7 @@ records:
         observation_hash: sha256:bc47b4812be8cfd1f40cca1c502b4fe5bfc8b530b9aa533db8caeaf1e60d1ef8
         rules_hash: sha256:6e3993f4495d746caa6893ce1c08e25e0e44e49a6dbde9b356b9edcb7a8638ce
         recipe: registry-observation-v1
-  - record_key: printing:p:a63612b06fe357378e70554f91297db6
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a63612b06fe357378e70554f91297db6
@@ -6954,8 +6688,7 @@ records:
         observation_hash: sha256:6f500c9b61158829025027f557e74a4713b0eae69948e8c4b78d13e734fc14e8
         rules_hash: sha256:766084307eb61dd2aa8ef8647fb929480306a443157f59a35a527c1bb7927691
         recipe: registry-observation-v1
-  - record_key: printing:p:e0c742d60efe56c38fe8ef14bfacfc7f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e0c742d60efe56c38fe8ef14bfacfc7f
@@ -6973,8 +6706,7 @@ records:
         observation_hash: sha256:28cefff3ef6fdb760e5f130b7fca57a5bfe2a5dbb6f8fe1edf1b6a037c48fbb9
         rules_hash: sha256:babad2cc4d7b3e834731112d4f797e7782d41e2159ccce4c1c30bdfd494683c2
         recipe: registry-observation-v1
-  - record_key: printing:p:2d002c152c8d5d4bb4c3e84c2a80f07c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:2d002c152c8d5d4bb4c3e84c2a80f07c
@@ -6992,8 +6724,7 @@ records:
         observation_hash: sha256:09a9794aa5bbc41f10d4e671f6183fcbecdf2daf8cea7f324e80b4bc2e1d8779
         rules_hash: sha256:3e2739daedb59c573a371b644030075eeb0bea52fb1bb8651b78e3f8d7d74b06
         recipe: registry-observation-v1
-  - record_key: printing:p:55a8b925bc9156eab3d23f6d7c6c9696
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:55a8b925bc9156eab3d23f6d7c6c9696
@@ -7011,8 +6742,7 @@ records:
         observation_hash: sha256:ae864bed900c2698aa8b5f09b5ebbc7828d1ce1c15f3d9b88f93984949d1e68f
         rules_hash: sha256:3ad308a8a3d22021000b8ef1079e6f66e03d9e4e161398eb1a42d04aa377f6df
         recipe: registry-observation-v1
-  - record_key: printing:p:f3d9c3ba53eb510c9d81093e90102a6f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f3d9c3ba53eb510c9d81093e90102a6f
@@ -7030,8 +6760,7 @@ records:
         observation_hash: sha256:be8ad6a9a16fc98852773ae62cf8de4eadfc9d2861c5ee761b9b9f18bf10d53d
         rules_hash: sha256:387eb5ba2204a5dc02967df63b4e2273f9f7d8d8f6841f2461073042ea39eaa1
         recipe: registry-observation-v1
-  - record_key: printing:p:85683362af54542a9a2817ecb8250762
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:85683362af54542a9a2817ecb8250762
@@ -7049,8 +6778,7 @@ records:
         observation_hash: sha256:a17c69689966ad8645a6acaa32070954e8100c5c830d0d62cfdfee9fa9d365b9
         rules_hash: sha256:28d2d777bd524cbba8e371f6fe7e06d442bf777b333481e69ceebda320efc3e6
         recipe: registry-observation-v1
-  - record_key: printing:p:25110bea1a4c55448511bf1c542fe631
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:25110bea1a4c55448511bf1c542fe631
@@ -7068,8 +6796,7 @@ records:
         observation_hash: sha256:5ca9bc8213692650c84af3b5086dc9df3f62429ef564c2db0e8ed4e841720119
         rules_hash: sha256:5a2632a2b741265d0b4469ab72279b6f606eee73f0444819e875d464518ef792
         recipe: registry-observation-v1
-  - record_key: printing:p:a9a47ae5b0695054a0f4b3520ba59e2a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a9a47ae5b0695054a0f4b3520ba59e2a
@@ -7087,8 +6814,7 @@ records:
         observation_hash: sha256:887236629ce681d022dc09895bc428c7de90a69c353e8d1f85224eafdbb72021
         rules_hash: sha256:84ffde8adb8757dce01431490e048192099068f59c00721de08c9e172ef67919
         recipe: registry-observation-v1
-  - record_key: printing:p:773e8934f79e5d07854ed4a729425fab
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:773e8934f79e5d07854ed4a729425fab
@@ -7106,8 +6832,7 @@ records:
         observation_hash: sha256:bbc47cd660bc59e1702c16c66765c617302193b2735d2bef9dc728d4ae4157da
         rules_hash: sha256:76b8722129550388ecbf4707e897b115aaf99e8a802c9c44e5f64768d79ba504
         recipe: registry-observation-v1
-  - record_key: printing:p:5093c90c499251de982928daaa78fc15
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:5093c90c499251de982928daaa78fc15
@@ -7125,8 +6850,7 @@ records:
         observation_hash: sha256:21ce384fcd743ba88a8d55536f4821b2de55b2a2599ba2d9a11b79ebdd4e6035
         rules_hash: sha256:b1133a0a0e2c9757320a5cf9f995b9e11e16d9b0a249603da1a4fff08b56b93f
         recipe: registry-observation-v1
-  - record_key: printing:p:cc5957e9143f54dfaa69872d5d6082a9
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:cc5957e9143f54dfaa69872d5d6082a9
@@ -7144,8 +6868,7 @@ records:
         observation_hash: sha256:6fa61c8800538f8a2d5406cc7184e49554217ab222fc78e9f537d245d1e9ac9c
         rules_hash: sha256:247ad42520e9e4c22f49a6693db74b6ca2236f7c7fb5929a9c677493a8ab110f
         recipe: registry-observation-v1
-  - record_key: printing:p:0f8909b0c9c7582d951721d28f1d1392
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0f8909b0c9c7582d951721d28f1d1392
@@ -7163,8 +6886,7 @@ records:
         observation_hash: sha256:e2f47a0cff21966d9c255473c4f701e7a67319767449d84cfd6ae18c4ff31593
         rules_hash: sha256:7571590e79674e9c6e6b07f2a435622652be03fac39c9d43cb6b7613dd34db4d
         recipe: registry-observation-v1
-  - record_key: printing:p:66ababa5a1575df888b269c0e28bd035
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:66ababa5a1575df888b269c0e28bd035
@@ -7182,8 +6904,7 @@ records:
         observation_hash: sha256:fa1b3f41e5854c11636176a5359fb81c8ef371169ee5e68221139c55bd38e78f
         rules_hash: sha256:d8e96d709606d761754c04b1ef6510f82fe84731eb27099c5ad40990364f088a
         recipe: registry-observation-v1
-  - record_key: printing:p:f7f3c6e55d4551afba0534fbd62324a7
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f7f3c6e55d4551afba0534fbd62324a7
@@ -7201,8 +6922,7 @@ records:
         observation_hash: sha256:3c4c7fea1b155a143fd61a385de5e6cce55273fe65c333304fab66046130f774
         rules_hash: sha256:bf3a675f1656432e4ba73bd40cf9a9faf608257bba6a3e32c1cde4941f27dec2
         recipe: registry-observation-v1
-  - record_key: printing:p:a688a6ce386053bfb903948ede2630a0
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a688a6ce386053bfb903948ede2630a0
@@ -7220,8 +6940,7 @@ records:
         observation_hash: sha256:fbd071e22d0933c9cf1d120cbc21cda3ac33b1d0a42cca5cc9bdb4cee8f4d79c
         rules_hash: sha256:1aded468d221d6f0eeaa6c1f9e8d74b2b850a788a0119aab52dea1de8c766584
         recipe: registry-observation-v1
-  - record_key: printing:p:f0c804491e7b5d6d8be07b60cd89dfae
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f0c804491e7b5d6d8be07b60cd89dfae
@@ -7239,8 +6958,7 @@ records:
         observation_hash: sha256:e7faab9079b0a03523ca36af84096dddf40d58f072f721f0f384fdfae8c3442a
         rules_hash: sha256:e3b4aecbbe8f4db77bc8f71543cd358b1ef4aa9b71083e140a76e340d80e0a00
         recipe: registry-observation-v1
-  - record_key: printing:p:ca1183af016757be83a748cf7c883ac5
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:ca1183af016757be83a748cf7c883ac5
@@ -7258,8 +6976,7 @@ records:
         observation_hash: sha256:45a6a462c0ef141dfbc21665bee542b620ee1778f85dc4e1b92f5921b164eb00
         rules_hash: sha256:24b4d7caccd73874a1af6a6d284339c9cd52f174738cea4bd9f4b13f59e9ad56
         recipe: registry-observation-v1
-  - record_key: printing:p:1056843db22f57ff88a1b3ba173b86f0
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:1056843db22f57ff88a1b3ba173b86f0
@@ -7277,8 +6994,7 @@ records:
         observation_hash: sha256:15b60f9c9f01fa023f7da46dc9303ed2c8146cedec9e3423d96f8a21b31fd855
         rules_hash: sha256:048b66aed3d339d0eb3cfe42626c4389849c5516a6c6198c5d921af490947868
         recipe: registry-observation-v1
-  - record_key: printing:p:4b900109e11a52eca5d031fe5b5c760b
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4b900109e11a52eca5d031fe5b5c760b
@@ -7296,8 +7012,7 @@ records:
         observation_hash: sha256:c08246d8aca9066cb9bca6cff2e14b2199e8e476121563999ebfbd843e8eaf4d
         rules_hash: sha256:357489cf207976cf7279725a2fe33c1f1d26f49cb2a47b9775f129e8aa779eb6
         recipe: registry-observation-v1
-  - record_key: printing:p:073ff3d11a0156a7be91dc8759332522
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:073ff3d11a0156a7be91dc8759332522
@@ -7315,8 +7030,7 @@ records:
         observation_hash: sha256:ebbadbf0a29cb15e7a5e7b0ca61980f938b1ea5682058664b4dc0ad8e795975b
         rules_hash: sha256:9788cca1df30d7987db108991858ed272fcb90a1d8d0de2ee5984572d69576fe
         recipe: registry-observation-v1
-  - record_key: printing:p:7aeede105e2b5aa48d8dd311a680b68d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7aeede105e2b5aa48d8dd311a680b68d
@@ -7334,8 +7048,7 @@ records:
         observation_hash: sha256:edbc89373a0ea4a73d181c117e81418259971e646ec4cee11d3c62c3b923528b
         rules_hash: sha256:c62c659025e6abc4925ae6d86cb4884fc6cb66e88e7da7ff26edda2c79168dfb
         recipe: registry-observation-v1
-  - record_key: printing:p:f7148941c20f543cb75ed17cf1840307
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f7148941c20f543cb75ed17cf1840307
@@ -7353,8 +7066,7 @@ records:
         observation_hash: sha256:f0f781cac218a4f97ac8a5ccee7357cd11b41a5a71e3002d4d95098692b4f63a
         rules_hash: sha256:8b5c84cbc5980918a24f56ad6b948a1501a6fb673dd45aaa7c9304ce8f31286c
         recipe: registry-observation-v1
-  - record_key: printing:p:d021b93a47ae55bcabf4cf813f277a60
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d021b93a47ae55bcabf4cf813f277a60
@@ -7372,8 +7084,7 @@ records:
         observation_hash: sha256:b04201fbf81a0d46b6e0c2877cc067afa57526a67b868da3f84496e4aa341c02
         rules_hash: sha256:afae8d2b683cb5a6a8c2d600cb8d45eeaff2ca9e272cd2da0874c594aba8339d
         recipe: registry-observation-v1
-  - record_key: printing:p:24c21d0c2dfc56b696b2bc2efdfea234
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:24c21d0c2dfc56b696b2bc2efdfea234
@@ -7391,8 +7102,7 @@ records:
         observation_hash: sha256:3df953f0b37b505ad099bf4e033c5f5f1d85bed5580c2c28f159a3d0e7390808
         rules_hash: sha256:1dd6908422c28145dbb2acafb5409ed2514137cc4cca4564ae6961a4193ba658
         recipe: registry-observation-v1
-  - record_key: printing:p:180158c05fa8572fa71f527a74e1763c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:180158c05fa8572fa71f527a74e1763c
@@ -7410,8 +7120,7 @@ records:
         observation_hash: sha256:432576e0524c0795334454f0ff6d59e408fb3fa3491031464e56910165af61de
         rules_hash: sha256:810b0370098148efea30c3869ea0b964f6739927a7fdde593df99519e4ab5dfb
         recipe: registry-observation-v1
-  - record_key: printing:p:34278b2ce05f52d3bd911b1bd66e66f8
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:34278b2ce05f52d3bd911b1bd66e66f8
@@ -7429,8 +7138,7 @@ records:
         observation_hash: sha256:60a8e00ccb9927e4c6f6977769bac79c868cc8905600c8d6105bfc6ed9d3a039
         rules_hash: sha256:b8a5e9798fe14ac7b7fa7d68f428436fe0c081977b2c6b42af9b21d6f03598fa
         recipe: registry-observation-v1
-  - record_key: printing:p:ba2711bd15825ddbb5bf9fde25a91bd5
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:ba2711bd15825ddbb5bf9fde25a91bd5
@@ -7448,8 +7156,7 @@ records:
         observation_hash: sha256:6571cb8f560cc581d51f2efacdb282d812bf658fb19dae755e1941f588dc342e
         rules_hash: sha256:18166eb01c44ce70ac5837f2c9ed37603c8c2f54e747c2b810b2063ca3eb9318
         recipe: registry-observation-v1
-  - record_key: printing:p:270cefd83bd350d3a0ced2e2c83fdfb1
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:270cefd83bd350d3a0ced2e2c83fdfb1
@@ -7467,8 +7174,7 @@ records:
         observation_hash: sha256:8edb65d87f0e35f86b6ca81988dd99eeace9a75ae944967256b7c80e5ba132f9
         rules_hash: sha256:6e54cbf61bbb8763cf45c64483475971169310bd9098f8092fa87a77c6764e94
         recipe: registry-observation-v1
-  - record_key: printing:p:aa70545d95345feda04fc7e4935b49af
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:aa70545d95345feda04fc7e4935b49af
@@ -7486,8 +7192,7 @@ records:
         observation_hash: sha256:e781f0cabd42a3e94d89fbf940e9edd310078db197bd6e77bcc6ed5302434ef8
         rules_hash: sha256:fe4418ca08af2a1c01e4df4e7ef8ec3ac3163c8b617942564fb4c9c591a4b213
         recipe: registry-observation-v1
-  - record_key: printing:p:edc5146c1e4855a1b36d6bc42ddaae55
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:edc5146c1e4855a1b36d6bc42ddaae55
@@ -7505,8 +7210,7 @@ records:
         observation_hash: sha256:ce78e014f4e6b2aa944f315b9de414545c9dee29e606cd891b16143afd814b22
         rules_hash: sha256:c833a22e3a80aa6b61517766184cca68d92ae9fe01d467bf8b5335dfe15b1f9c
         recipe: registry-observation-v1
-  - record_key: printing:p:f2fa22a610d851049750ac11fde0482d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f2fa22a610d851049750ac11fde0482d
@@ -7524,8 +7228,7 @@ records:
         observation_hash: sha256:5f64867bd73bdb07319c71f05ccc5c993cbce6adad5ea93b4e93d58d256671b6
         rules_hash: sha256:9239b903aa3f905535a65d4ccab9b6e2b7326724a85f2707ad9b9f73e3a71bdb
         recipe: registry-observation-v1
-  - record_key: printing:p:4ce8346f1d1e5641b6d26a009e2ccd81
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4ce8346f1d1e5641b6d26a009e2ccd81
@@ -7543,8 +7246,7 @@ records:
         observation_hash: sha256:b0a762fa368df01cba24930448ef3a76abfeeafa139addb9d6243518b12575d2
         rules_hash: sha256:ec69d0f0eaebb3569e5e22e4fda5ba57dd27cb8a0ce56efa686f7429b7d0b5b0
         recipe: registry-observation-v1
-  - record_key: printing:p:8eea659f8e445d7aa34e4f33ca203f82
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:8eea659f8e445d7aa34e4f33ca203f82
@@ -7562,8 +7264,7 @@ records:
         observation_hash: sha256:2830785f17f32f87b500b4bbb09fee00e2ecff3b67b34d497d2a9d22484dfec6
         rules_hash: sha256:4aa49f04ec4a3cfa0d8c3726797dc08720e70abb2192ead7195619e64478ca4d
         recipe: registry-observation-v1
-  - record_key: printing:p:c50f907b8ce354d8950a0489746c5433
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c50f907b8ce354d8950a0489746c5433
@@ -7581,8 +7282,7 @@ records:
         observation_hash: sha256:f42c98f72e63d04010467c7d36fd68079c18abe73639435c3551b4d03bc216af
         rules_hash: sha256:3210a138a99d37da24355ad3d3b5774517690128052f207b0c9b977d12dc140a
         recipe: registry-observation-v1
-  - record_key: printing:p:009a2b9f13b35126881c8cc1a05e614a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:009a2b9f13b35126881c8cc1a05e614a
@@ -7600,8 +7300,7 @@ records:
         observation_hash: sha256:6c6df52e1d95f8af4eac59ce701bf32f3922d5e071501ca8351627d541f84735
         rules_hash: sha256:bef0384e96095e2aa08d4ecb1c676d6aec45f0132b85b6d4c85e7fc8800330a2
         recipe: registry-observation-v1
-  - record_key: printing:p:737eed77a051596eb17660abbd2eaa9a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:737eed77a051596eb17660abbd2eaa9a
@@ -7619,8 +7318,7 @@ records:
         observation_hash: sha256:9726dcd3a7e0bd2ec99ad6d0660262c2463758e7c808c12332c55405e41df197
         rules_hash: sha256:d0556b730a0545f05a8c9b03ec6c25ccfad91becedaf84d2c1b51312ae357768
         recipe: registry-observation-v1
-  - record_key: printing:p:ce1376ee02415eb599ea1f2b4f0bfe5c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:ce1376ee02415eb599ea1f2b4f0bfe5c
@@ -7638,8 +7336,7 @@ records:
         observation_hash: sha256:9f61d5c30fed87ba582bdbbd298a985d134f118bec415ff4cc3dece9eaf4da1b
         rules_hash: sha256:9b160fdb0349945c3a37ec3e0470d8c7343dc96a1d78db8344625b52b8676126
         recipe: registry-observation-v1
-  - record_key: printing:p:e49a8b02efec58ecb0e78a728e881e6f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e49a8b02efec58ecb0e78a728e881e6f
@@ -7657,8 +7354,7 @@ records:
         observation_hash: sha256:813051a35dffc208ffffc1722601b9ef7386248dd9d6279574ba054ff1ef9999
         rules_hash: sha256:1e84b1879854ecaaaad8788812838f3ceed9be89de2afb97e784775934f6abce
         recipe: registry-observation-v1
-  - record_key: printing:p:f7d8dccb15965309bc0ff88c98a6155f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f7d8dccb15965309bc0ff88c98a6155f
@@ -7676,8 +7372,7 @@ records:
         observation_hash: sha256:e05cc502b9d7466f275e8d398c076b5c5d40803b37bb03d3a5845c77ed86ad29
         rules_hash: sha256:00f526af371cd2a6c4dc33d5a32e0203bca33582f9235f18ebd6cef611df21af
         recipe: registry-observation-v1
-  - record_key: printing:p:7f5011bd4f965030acdcf6379b136e96
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7f5011bd4f965030acdcf6379b136e96
@@ -7695,8 +7390,7 @@ records:
         observation_hash: sha256:0d9ea3a1f75628ee99041731ad392cdf5d219b6650dcd2228830058118e56ca8
         rules_hash: sha256:1977a2e60afb42ea4f1dac5287f6d09a68a9a1fff89f1148403e0c4fbab4fcc6
         recipe: registry-observation-v1
-  - record_key: printing:p:a009b0a2286557e69cee5189c594b4ab
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a009b0a2286557e69cee5189c594b4ab
@@ -7714,8 +7408,7 @@ records:
         observation_hash: sha256:a91f34b378516c831514c7f0f8d71a037966a3e11ea0f00a22de90550d634343
         rules_hash: sha256:ed8062bcb3a27c8ca36f9b16084a01fbf076638a1a67c1e7c430612e5372ee43
         recipe: registry-observation-v1
-  - record_key: printing:p:b6fb1be17b015fe08b482155a6f458e8
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b6fb1be17b015fe08b482155a6f458e8
@@ -7733,8 +7426,7 @@ records:
         observation_hash: sha256:75327c2d362de5b3d08ab545c6e52ab1ded27530a8f8040e1e27ebf6ff9f5b79
         rules_hash: sha256:2253ccbf53075665f1a686f3aaa499fce3ed4a043c82e0b242ab2dc1ea4cf69c
         recipe: registry-observation-v1
-  - record_key: printing:p:fb55d976fa115cac8431813e4b913d74
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:fb55d976fa115cac8431813e4b913d74
@@ -7752,8 +7444,7 @@ records:
         observation_hash: sha256:bddbc02183899e51766598c3301af3581586eed672114cafbac15ab247db05f7
         rules_hash: sha256:fc245537deaa0b83a341a7250ac3b329e6912f302e8a7b0656042e56abe45ab5
         recipe: registry-observation-v1
-  - record_key: printing:p:a22a48bc1bba586ab039b90525c92b39
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a22a48bc1bba586ab039b90525c92b39
@@ -7771,8 +7462,7 @@ records:
         observation_hash: sha256:cf70175899b71a3c45797c87d9e0d2d41fd357c9dad45b6eea15b0ca35fb0df6
         rules_hash: sha256:110b86f0eaba37a78f17fab6c074cefe1fe9269ce8d9136414e1c7ecfa58d6cd
         recipe: registry-observation-v1
-  - record_key: printing:p:bbbcd01fbab15f10ae1e33f3688f3558
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:bbbcd01fbab15f10ae1e33f3688f3558
@@ -7790,8 +7480,7 @@ records:
         observation_hash: sha256:f8fe4bb9f617e841a24e4f64f8dec9d7a928274ac586df6e3cc7a233fd50652b
         rules_hash: sha256:a13a992781838a9effc5671e864ba757cf3ac35ac6a7399d9884307bbcef8575
         recipe: registry-observation-v1
-  - record_key: printing:p:69ce5051d06959db8c9a26c58bdf9615
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:69ce5051d06959db8c9a26c58bdf9615
@@ -7809,8 +7498,7 @@ records:
         observation_hash: sha256:3e2fccf4d4dd1b8dc2a38f5c1bea1bddb4da1d748dc57fdc1dc02dde0dc12bfe
         rules_hash: sha256:eed1efef15c1468bea0a4ac643b2039714748fc7c8bd44aee4933be738c1114c
         recipe: registry-observation-v1
-  - record_key: printing:p:d824d589d3ff5f1291ed2bb0520cb711
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d824d589d3ff5f1291ed2bb0520cb711
@@ -7828,8 +7516,7 @@ records:
         observation_hash: sha256:fdfdc616d1c4d22f245aea0a11d03be6d80785ec3a9c79ebe219f7a48278d382
         rules_hash: sha256:5f83e0954cca203c362ff21576b7cdb21835a2be168fb929b0a7ee29fcb641b7
         recipe: registry-observation-v1
-  - record_key: printing:p:5b1dca8a0be85feaad5aa0fa23e818b5
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:5b1dca8a0be85feaad5aa0fa23e818b5
@@ -7847,8 +7534,7 @@ records:
         observation_hash: sha256:4c61c8f7a0bb269f48f29316a126af0b09f227dc609c8bc87542d9a8ca1d31d7
         rules_hash: sha256:70dd593542e52dd8019b865455977bd01630f1acf346d55f36d74b510e103f7e
         recipe: registry-observation-v1
-  - record_key: printing:p:75985ec96be65c34b02507daf0404247
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:75985ec96be65c34b02507daf0404247
@@ -7866,8 +7552,7 @@ records:
         observation_hash: sha256:01c731741a730827e3d9c85f754beffe0225f4dc14d88ecf02356374288ae640
         rules_hash: sha256:4569413079636e72729e650fa2eebc102d57a62f1d32335163a2febb07754d21
         recipe: registry-observation-v1
-  - record_key: printing:p:235c767e782f592e9848f521fb1f24b8
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:235c767e782f592e9848f521fb1f24b8
@@ -7885,8 +7570,7 @@ records:
         observation_hash: sha256:21fc27e3460c85184858738bf04d55d95b823c1b0d8b9c0ca7e5f535731a589c
         rules_hash: sha256:7559797ebfcb3c1381fe8c9cf4ccd2fd7b9606dfe438608c229090fc889e9948
         recipe: registry-observation-v1
-  - record_key: printing:p:9e9fd4c2455f569195b8cad4fb66de44
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:9e9fd4c2455f569195b8cad4fb66de44
@@ -7904,8 +7588,7 @@ records:
         observation_hash: sha256:13a1f20b059f710c9e1631fb530861ea2dc400da062e7986ab1b3b17c25b719f
         rules_hash: sha256:3c4d82a0f8fda1d9af994c153eb5f65115b4c528c85bd6055a78a90d70d3d31a
         recipe: registry-observation-v1
-  - record_key: printing:p:ee5d26f413fc502b87607f49025d7947
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:ee5d26f413fc502b87607f49025d7947
@@ -7923,8 +7606,7 @@ records:
         observation_hash: sha256:1c9d2a485033b5f5c7a9ae99383eeb23250261a89a3d29764c46d75f359b6234
         rules_hash: sha256:c53155d35c8a38a8906dcc2fc8276f3b3a142c0e854b2fb16c1d36c294c33241
         recipe: registry-observation-v1
-  - record_key: printing:p:9a6709954ff458d5b9ee8ab6b7f13e0d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:9a6709954ff458d5b9ee8ab6b7f13e0d
@@ -7942,8 +7624,7 @@ records:
         observation_hash: sha256:4b85d49aa5afe2343de4726a7032d75fffd53e38dd322d222f2326675dc23723
         rules_hash: sha256:3ba92c6da371e33f07f861aa262fc2f3745459d268cc84bd129a9098211c9713
         recipe: registry-observation-v1
-  - record_key: printing:p:23aa090eedf8572097162a0f4b5e3489
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:23aa090eedf8572097162a0f4b5e3489
@@ -7961,8 +7642,7 @@ records:
         observation_hash: sha256:7301c3261d03ecf1b7bbd8ef9b3fc6c3cc29f99de6644d89861932752dd27cce
         rules_hash: sha256:a47ebc023ed54a1c4d358a8055ef2f141f04910f132b8bd50f125047274c0d6a
         recipe: registry-observation-v1
-  - record_key: printing:p:54bbe43f5ad85252998f6627e8e45f2b
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:54bbe43f5ad85252998f6627e8e45f2b
@@ -7980,8 +7660,7 @@ records:
         observation_hash: sha256:0e054b353c2abd56d4698d68194f7922c264efd480391c8296d2b647b733cb44
         rules_hash: sha256:ba5da1175dbea4172fef54c644779a8ef751da52c3a5cc906e676995f45ca24b
         recipe: registry-observation-v1
-  - record_key: printing:p:d4ffcbbcd3445752ae7cbc53147f2970
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d4ffcbbcd3445752ae7cbc53147f2970
@@ -7999,8 +7678,7 @@ records:
         observation_hash: sha256:9f5f6e69de6b52237c8417471e773fa3a7bd53deca39485df52128b141dc54e5
         rules_hash: sha256:d5d34735e0c6528ddaceaa78e311f75a8541038def4379c6c15aec7a5d1bf004
         recipe: registry-observation-v1
-  - record_key: printing:p:4812fa16f3f35e239470da780c3425b2
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4812fa16f3f35e239470da780c3425b2
@@ -8018,8 +7696,7 @@ records:
         observation_hash: sha256:aa25f05989cfc46c9d243ba2140c73504b78745e0199fd2f5fcf3a96f773b162
         rules_hash: sha256:3c0f7a2a85eb1e3a273f95c7f6f372dec02517ff239759bf6810837520e3626f
         recipe: registry-observation-v1
-  - record_key: printing:p:8ce7e998fd5b521db4378ca8c7caf952
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:8ce7e998fd5b521db4378ca8c7caf952
@@ -8037,8 +7714,7 @@ records:
         observation_hash: sha256:74babcdb98aa7e7a445d94706f588c959e8cf1add580ad22f92b3926312afa8d
         rules_hash: sha256:0162fd7f0f999231fd08fd1207faa033ad145ce56a5dd63bed305f08ed749379
         recipe: registry-observation-v1
-  - record_key: printing:p:118422fffabc52fdb819921d26c7b7bd
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:118422fffabc52fdb819921d26c7b7bd
@@ -8056,8 +7732,7 @@ records:
         observation_hash: sha256:64531135050a40172155e8c459c58bf1dad082a14c106100001dbd94c4202dca
         rules_hash: sha256:9d4707d93ee417a5a5f012c78113a0a78c9bd81d922f69e3bf2449dc1eec08d5
         recipe: registry-observation-v1
-  - record_key: printing:p:37dbfbe63adb5c5e96f7f577f4a911b5
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:37dbfbe63adb5c5e96f7f577f4a911b5
@@ -8075,8 +7750,7 @@ records:
         observation_hash: sha256:7641c42b8bd410b0c7064267fddd8a685eba13ff53c47fc753ef20d269b6bfe3
         rules_hash: sha256:90701bec6c1efa2adbaeb270fc2335c6ed2a92b5fb3366130facc17f6f4ee781
         recipe: registry-observation-v1
-  - record_key: printing:p:a520578f46c2550f8aeb6604e06004e5
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a520578f46c2550f8aeb6604e06004e5
@@ -8094,8 +7768,7 @@ records:
         observation_hash: sha256:eeb4f2bcb4fa2e82801dd08cdf969d0d1ad3bf9b235b8a78b67da5758b19cb2c
         rules_hash: sha256:983c4317297722fa0305fffad0c035730ef051ca2a125aa4393e320c0ceafba8
         recipe: registry-observation-v1
-  - record_key: printing:p:637734ed42005648b32543f13282b26c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:637734ed42005648b32543f13282b26c
@@ -8113,8 +7786,7 @@ records:
         observation_hash: sha256:d686c7f2371e9af02eb8799f3d3c4479c863d4b36032cb86ea0dd38a2d70b4ee
         rules_hash: sha256:bbb72880f1dfb5cbf9676b56f5198a540e76883c9a2600382475738e4d347d23
         recipe: registry-observation-v1
-  - record_key: printing:p:6632a95089515c188046fa79b5dad450
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:6632a95089515c188046fa79b5dad450
@@ -8132,8 +7804,7 @@ records:
         observation_hash: sha256:3a9e1086bd505f0b0916bd955d1e5ae1e0c8541bbbf2b370df3eb0f97ea4a14a
         rules_hash: sha256:940cf4610247a05ff87d2ac8d0f81e5cce11e794bcf3ee334cf6fc9c5299797e
         recipe: registry-observation-v1
-  - record_key: printing:p:089a2f12aa88577b8a96532564d4de7f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:089a2f12aa88577b8a96532564d4de7f
@@ -8151,8 +7822,7 @@ records:
         observation_hash: sha256:28f3e870766a75da94bb567d6e80ee7306c8be78b502a7a1091fe7ad3becad21
         rules_hash: sha256:aad8a0070aafb089bc0593b25e244124d4b933f7c37837b47ed95a5df2dc621d
         recipe: registry-observation-v1
-  - record_key: printing:p:0a9fe6c4474b51c39be5f1d1fee3315d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0a9fe6c4474b51c39be5f1d1fee3315d
@@ -8170,8 +7840,7 @@ records:
         observation_hash: sha256:5ffcf88a88c592d10f3a5acd123b06885d51bd3476570802ff8ac73768130bba
         rules_hash: sha256:b6446603f1480c57e23957528a578a2056dce41564db9db3559223952fdc1627
         recipe: registry-observation-v1
-  - record_key: printing:p:2cd309ab870a59fea685816d78485b5b
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:2cd309ab870a59fea685816d78485b5b
@@ -8189,8 +7858,7 @@ records:
         observation_hash: sha256:2db300528163b3a56b6c9e371d5d8bdd534c3ff3a82b518a98d07eb43bd40047
         rules_hash: sha256:3b546cc2abda35e1082ee75fe2f6f8853c03632c6cf0bef3daa64d8d0a2d6979
         recipe: registry-observation-v1
-  - record_key: printing:p:dc1f4ff2f77d5039905055af8163da42
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:dc1f4ff2f77d5039905055af8163da42
@@ -8208,8 +7876,7 @@ records:
         observation_hash: sha256:5c8993f8c9af213aa393126e4d421a825aad338dcba569969c8ce85f516a52e1
         rules_hash: sha256:3a9dfbda64844594fbf084dada362a33b46838e2c244056055221da8549f4857
         recipe: registry-observation-v1
-  - record_key: printing:p:50ebecff30ca5134ac85dc215900cb74
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:50ebecff30ca5134ac85dc215900cb74
@@ -8227,8 +7894,7 @@ records:
         observation_hash: sha256:d1aae70f43da21d814164090ccd6fe9e8162a46b96b31c407ea0902047e904eb
         rules_hash: sha256:6353de759c4e43faa19b38b1c0588bb0db58104106b66c39eb16d98b41eb3cb7
         recipe: registry-observation-v1
-  - record_key: printing:p:d045f29156ce58a79a2709bba604ae92
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d045f29156ce58a79a2709bba604ae92
@@ -8246,8 +7912,7 @@ records:
         observation_hash: sha256:c6c21a9ef74f49fd9e8be95fde275b8e00ea9c91535ccba7c763841d97eeb179
         rules_hash: sha256:a58a9dfac25e653c037739ae738af9430065fc354936a943612d8e2abcfbab56
         recipe: registry-observation-v1
-  - record_key: printing:p:32f7496be7da5d4fbeedf4432efc15f1
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:32f7496be7da5d4fbeedf4432efc15f1
@@ -8265,8 +7930,7 @@ records:
         observation_hash: sha256:5214d42392d5811065687625323ab367af472c13affc9c748af232e1d1a1ad65
         rules_hash: sha256:af452aa7fba34f6ac8c26e99bc847d4f55a5a9321757bc105e0793fdf9c8f5e6
         recipe: registry-observation-v1
-  - record_key: printing:p:5d3db427345e5daea457e665ccb45d7c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:5d3db427345e5daea457e665ccb45d7c
@@ -8284,8 +7948,7 @@ records:
         observation_hash: sha256:83301cf3d4fe8b033f377038a51f3102ee3e644301763e5301c60b118f97595e
         rules_hash: sha256:b5b627c8a41d7aa4d3d37955a50f05d85485af4a95a5b19602b2377bf8de40a1
         recipe: registry-observation-v1
-  - record_key: printing:p:04a86643b5545007b8e2fe6f84b0da2a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:04a86643b5545007b8e2fe6f84b0da2a
@@ -8303,8 +7966,7 @@ records:
         observation_hash: sha256:000c4a60f051aff512418a4936b88abe260536c1ef29fef5ad873721b5d33feb
         rules_hash: sha256:0e3d249abf637bab3908c9d65bdc83aa8c1b9cf0cc86793d0143d5d46100864c
         recipe: registry-observation-v1
-  - record_key: printing:p:267f20bec698504cba212da560f7c8e1
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:267f20bec698504cba212da560f7c8e1
@@ -8322,8 +7984,7 @@ records:
         observation_hash: sha256:27038fe34d4018d7d9aade5a80bc43b747dea97796d8c41282f8832b5a68ca9f
         rules_hash: sha256:0dd25282fbbfa4fa7aa2f5affb442f2b24752b5827e3992c01ce0f965b972798
         recipe: registry-observation-v1
-  - record_key: printing:p:7474977407f650cb9aff6935a88bb05d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7474977407f650cb9aff6935a88bb05d
@@ -8341,8 +8002,7 @@ records:
         observation_hash: sha256:2a39997cc3ae8a7200e80dd192b2e868ea67b6f91b7e42d60457643a0af016e3
         rules_hash: sha256:b1d7c6ee2c8b74985b1ea682c61058b5d644ef4852504183df3a4a48ade1f222
         recipe: registry-observation-v1
-  - record_key: printing:p:66bbdd87dbb45eb8a69355d046509d0f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:66bbdd87dbb45eb8a69355d046509d0f
@@ -8360,8 +8020,7 @@ records:
         observation_hash: sha256:8e8b421c2efaea197f27a5984b9c4a64dcce27addaf7d516dc0576d260e96ea3
         rules_hash: sha256:783549a6b77e9ec0948a48c63aa5a60763a52aa5ecb5b93f1d65123e67bc61b5
         recipe: registry-observation-v1
-  - record_key: printing:p:14724db0732f5af69e8a27f0ca29bc2c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:14724db0732f5af69e8a27f0ca29bc2c
@@ -8379,8 +8038,7 @@ records:
         observation_hash: sha256:8b21a25f94f2013479dd974a0d30b82e946064a28ca439e7700bd2683bab2fcb
         rules_hash: sha256:3c493f2a7a19ca9eca3a41adbd7b880dc353d8716f266661d46d3b857a8a40cd
         recipe: registry-observation-v1
-  - record_key: printing:p:b4c5d25bfe7e51b381bb80be769c277c
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b4c5d25bfe7e51b381bb80be769c277c
@@ -8398,8 +8056,7 @@ records:
         observation_hash: sha256:4ebfc3fbb10770b43f7d6bf92ecc9f47d5ab1afb602db1d4937b55867ea0aec8
         rules_hash: sha256:4495131f72e88f7aa021187790834ea28fc925eb4a42617c13a015899195de2e
         recipe: registry-observation-v1
-  - record_key: printing:p:c8f4871cc69756439362868638fa8db6
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c8f4871cc69756439362868638fa8db6
@@ -8417,8 +8074,7 @@ records:
         observation_hash: sha256:a14f99acc563cd28a49eaf97bc2b94ab849985479436e6f4de8126eb84fc6aef
         rules_hash: sha256:6e3993f4495d746caa6893ce1c08e25e0e44e49a6dbde9b356b9edcb7a8638ce
         recipe: registry-observation-v1
-  - record_key: printing:p:96d8e8a7ab075c888772e96279afe98f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:96d8e8a7ab075c888772e96279afe98f
@@ -8436,8 +8092,7 @@ records:
         observation_hash: sha256:b150bde270b50b1584cb75e56c8ab0f227a6e06e8596b2b342992b4eadb7d6f3
         rules_hash: sha256:387eb5ba2204a5dc02967df63b4e2273f9f7d8d8f6841f2461073042ea39eaa1
         recipe: registry-observation-v1
-  - record_key: printing:p:7e259ec896e253ee845ac4da069f9cc8
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7e259ec896e253ee845ac4da069f9cc8
@@ -8455,8 +8110,7 @@ records:
         observation_hash: sha256:d6775a470b237cc886879d4123e15d07020028bbbfdee662ada186d0a298071f
         rules_hash: sha256:28d2d777bd524cbba8e371f6fe7e06d442bf777b333481e69ceebda320efc3e6
         recipe: registry-observation-v1
-  - record_key: printing:p:67e738eb08645ba5ae733fe09b72af3d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:67e738eb08645ba5ae733fe09b72af3d
@@ -8474,8 +8128,7 @@ records:
         observation_hash: sha256:533e496ac67a13942c52b6b7a01cf80a98c798bb8189787c868bb67bf0d0adff
         rules_hash: sha256:84ffde8adb8757dce01431490e048192099068f59c00721de08c9e172ef67919
         recipe: registry-observation-v1
-  - record_key: printing:p:70011c18109756eb80c035244b3d3028
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:70011c18109756eb80c035244b3d3028
@@ -8493,8 +8146,7 @@ records:
         observation_hash: sha256:e6fe3ae15af6349d96523152cae1c8c4a15e99005c65a551dcebdd0dfe77d5a7
         rules_hash: sha256:24b4d7caccd73874a1af6a6d284339c9cd52f174738cea4bd9f4b13f59e9ad56
         recipe: registry-observation-v1
-  - record_key: printing:p:fb2e956c417b5909a1e7a6589420559d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:fb2e956c417b5909a1e7a6589420559d
@@ -8512,8 +8164,7 @@ records:
         observation_hash: sha256:dd0009ce87a93d56383fe0f464bfc0f9072d688d36d986d83b409dedf3264ab9
         rules_hash: sha256:810b0370098148efea30c3869ea0b964f6739927a7fdde593df99519e4ab5dfb
         recipe: registry-observation-v1
-  - record_key: printing:p:99df920490a053e8aaf76f823926ab40
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:99df920490a053e8aaf76f823926ab40
@@ -8531,8 +8182,7 @@ records:
         observation_hash: sha256:f51459f71867f7c8b6538fc12dfd03b34b03a8b99c29849268f6392d4ca7c7cf
         rules_hash: sha256:18166eb01c44ce70ac5837f2c9ed37603c8c2f54e747c2b810b2063ca3eb9318
         recipe: registry-observation-v1
-  - record_key: printing:p:d6677f93a2a653839f4596fdd0bdcdc4
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d6677f93a2a653839f4596fdd0bdcdc4
@@ -8550,8 +8200,7 @@ records:
         observation_hash: sha256:7287cb1ab2fe3a5c8d3e1b749848c2b292b27d74c8473bbd789e8e583351995e
         rules_hash: sha256:6e54cbf61bbb8763cf45c64483475971169310bd9098f8092fa87a77c6764e94
         recipe: registry-observation-v1
-  - record_key: printing:p:3014b2f10fd454ef82fad0f19e362e83
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:3014b2f10fd454ef82fad0f19e362e83
@@ -8569,8 +8218,7 @@ records:
         observation_hash: sha256:3ad2f34ef3c92c0635dbba191e5da20fe7440cc1ccc04f687891f1b271d19603
         rules_hash: sha256:c833a22e3a80aa6b61517766184cca68d92ae9fe01d467bf8b5335dfe15b1f9c
         recipe: registry-observation-v1
-  - record_key: printing:p:b93f67a5b6cf59cea95f138a105d749a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b93f67a5b6cf59cea95f138a105d749a
@@ -8588,8 +8236,7 @@ records:
         observation_hash: sha256:a7b1d763f35b8dd42e19bcf9ab02952a2bdc6fa8e1e089f32430175ac08fa794
         rules_hash: sha256:2253ccbf53075665f1a686f3aaa499fce3ed4a043c82e0b242ab2dc1ea4cf69c
         recipe: registry-observation-v1
-  - record_key: printing:p:98b9a0d0e97a58059f1718654487f505
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:98b9a0d0e97a58059f1718654487f505
@@ -8607,8 +8254,7 @@ records:
         observation_hash: sha256:e74f859a69ac36231799f2aa712a0e39e0d3d6d184971585b30057a3c702acf3
         rules_hash: sha256:fc245537deaa0b83a341a7250ac3b329e6912f302e8a7b0656042e56abe45ab5
         recipe: registry-observation-v1
-  - record_key: printing:p:f3388c3412835f7ba1b058d9cafaa95f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f3388c3412835f7ba1b058d9cafaa95f
@@ -8626,8 +8272,7 @@ records:
         observation_hash: sha256:ec5f5e1d01083a4a27f346dac722c2185b7dd7b51f93f4f832b1c00d923f6129
         rules_hash: sha256:110b86f0eaba37a78f17fab6c074cefe1fe9269ce8d9136414e1c7ecfa58d6cd
         recipe: registry-observation-v1
-  - record_key: printing:p:7b0fa62734b65d9fa16482f730a046e5
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7b0fa62734b65d9fa16482f730a046e5
@@ -8645,8 +8290,7 @@ records:
         observation_hash: sha256:05a6054b4637d519bf10dc4e419e9ad16194206842bb468dc3b830bed6b5b5d3
         rules_hash: sha256:c53155d35c8a38a8906dcc2fc8276f3b3a142c0e854b2fb16c1d36c294c33241
         recipe: registry-observation-v1
-  - record_key: printing:p:2f831243572b5a28a30b419a3bdb08d6
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:2f831243572b5a28a30b419a3bdb08d6
@@ -8664,8 +8308,7 @@ records:
         observation_hash: sha256:d66b3c731ce12642f5b898c374ec46456ca7c727bdad16536fa80fac33bf9fc1
         rules_hash: sha256:ba5da1175dbea4172fef54c644779a8ef751da52c3a5cc906e676995f45ca24b
         recipe: registry-observation-v1
-  - record_key: printing:p:9bcb39a6bd755a40ac2eff37d2a03f18
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:9bcb39a6bd755a40ac2eff37d2a03f18
@@ -8683,8 +8326,7 @@ records:
         observation_hash: sha256:9a2465265f420f68ed3a93b8b116b2a5c07cb995e48bfd9f2d686ca5e3aa0a34
         rules_hash: sha256:940cf4610247a05ff87d2ac8d0f81e5cce11e794bcf3ee334cf6fc9c5299797e
         recipe: registry-observation-v1
-  - record_key: printing:p:240821706dbc549fbbe963ca3c55ba51
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:240821706dbc549fbbe963ca3c55ba51
@@ -8702,8 +8344,7 @@ records:
         observation_hash: sha256:0b9147d22bd27401083b2e2acb995dda7a00378d2f9dbfd7fd9d8ea42fbb264d
         rules_hash: sha256:b6446603f1480c57e23957528a578a2056dce41564db9db3559223952fdc1627
         recipe: registry-observation-v1
-  - record_key: printing:p:40d99a2d42ad5ee1ba71045a6912276d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:40d99a2d42ad5ee1ba71045a6912276d
@@ -8721,8 +8362,7 @@ records:
         observation_hash: sha256:c8e78f464658c0cfadbeeb686bbd15ce274c83c5bbfac55c88a52b1bc3c29b64
         rules_hash: sha256:276d7ae04dca910362fec9974f8094d2918e9e4f9c480f4916e46bc0638b56d4
         recipe: registry-observation-v1
-  - record_key: printing:p:9418d0b08305570f849c6abfdae5ca79
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:9418d0b08305570f849c6abfdae5ca79
@@ -8740,8 +8380,7 @@ records:
         observation_hash: sha256:332aae1afd0fc7fb63f38959eeda1b120f4f850df52df54a85cb590d6afd74eb
         rules_hash: sha256:d24dde76537b89461b69e548afb3f52dc50731c96238ba0d53f9e5aac6bc7c1c
         recipe: registry-observation-v1
-  - record_key: printing:p:de31aea39ce658e3bdb49ca383144f1b
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:de31aea39ce658e3bdb49ca383144f1b
@@ -8759,8 +8398,7 @@ records:
         observation_hash: sha256:34b4e182ab9e3bbef38b895c27fa068415089b585d9be962c4e6bb51d8a774e1
         rules_hash: sha256:5d8d2f7c01c2426e635390e4827bef02f0a8c60aa2b61e1c7b093287d48cb793
         recipe: registry-observation-v1
-  - record_key: printing:p:57514c908e455cb99a0ab6aee172498f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:57514c908e455cb99a0ab6aee172498f
@@ -8778,8 +8416,7 @@ records:
         observation_hash: sha256:7c1d1196a98f8081cdee6817e23e96607de57dc10a8eff2b19c2293a23c35749
         rules_hash: sha256:e1f7207c9d3f4ee4c32601d991c4bba368060eb5dc3520308ca38bdafa007613
         recipe: registry-observation-v1
-  - record_key: printing:p:92e07e7cf8105bb088b01a592dea42b5
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:92e07e7cf8105bb088b01a592dea42b5
@@ -8797,8 +8434,7 @@ records:
         observation_hash: sha256:96272dafa27628f3778099677a5b3409725f78e3c1e3f1d9a2dacc8141ec0464
         rules_hash: sha256:a9630ed225ae825026466fc5f817508715d5573e9617db23d8afdb81c9732b99
         recipe: registry-observation-v1
-  - record_key: printing:p:66019c73a9f15ae48806df023a1f1d40
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:66019c73a9f15ae48806df023a1f1d40
@@ -8816,8 +8452,7 @@ records:
         observation_hash: sha256:b579208e2b6d9f2d9c0f6d0a636245dc4ebf2f4a23d7116d7093ce6af91c24bc
         rules_hash: sha256:dcc9b540be8f305060a4b8957c3e9c7eb6b6e40663c2117757ed0cd89bd43791
         recipe: registry-observation-v1
-  - record_key: printing:p:4b62293914ba5a168ff2ba261c7baa01
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4b62293914ba5a168ff2ba261c7baa01
@@ -8835,8 +8470,7 @@ records:
         observation_hash: sha256:20d9435b29e2ac26ac30b6d21fc8116683daed976ead08dcbf362d88cba67cd0
         rules_hash: sha256:dfd4c54bcb348179465c389aca276e0184727489701ddad49e254797537a66bd
         recipe: registry-observation-v1
-  - record_key: printing:p:b87ed3e757805b708a382ff942f44ea6
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b87ed3e757805b708a382ff942f44ea6
@@ -8854,8 +8488,7 @@ records:
         observation_hash: sha256:98be63da67eee6e2612a5d6305d93506ff5ba34e4d8dd19ba2a2c475ff152ec3
         rules_hash: sha256:7d88c40fd1a44cdb95c017623d23a7e077603dec490310223cfc4a5f31de871b
         recipe: registry-observation-v1
-  - record_key: printing:p:b663a38a41fb5e1bbf42e19ea804b3e8
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b663a38a41fb5e1bbf42e19ea804b3e8
@@ -8873,8 +8506,7 @@ records:
         observation_hash: sha256:f7f9401e596d11911952bea8dac8a145e0eec8d7e0750579d57e738d5cc5a980
         rules_hash: sha256:163f16c5eef50a69bb79bf4318e8cd338a1333bd278ada12bfd736a8ba81444f
         recipe: registry-observation-v1
-  - record_key: printing:p:2ac6e4948269558abed6c664a20000bf
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:2ac6e4948269558abed6c664a20000bf
@@ -8892,8 +8524,7 @@ records:
         observation_hash: sha256:01fa4b1ded3bf9beeb2b1adc0427f7cef2890b21743529211e79352952360772
         rules_hash: sha256:e3db1eaa2d2ddfecb08ea45d9ded6f5d8e249a800e88f90909303b48633ce2b9
         recipe: registry-observation-v1
-  - record_key: printing:p:7d52099627f15c3c9a1754488e22d101
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7d52099627f15c3c9a1754488e22d101
@@ -8911,8 +8542,7 @@ records:
         observation_hash: sha256:116d27b8c3c9ba8b6d911610fbd4716365587667d92f3229ec930e63c0a52e9f
         rules_hash: sha256:6dae6a875c7fffb159c91bb90e1d69d647c7a23450b9fc32fcb76a3c4fc455ef
         recipe: registry-observation-v1
-  - record_key: printing:p:3e1879047dbe5fdfa1495ad909997460
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:3e1879047dbe5fdfa1495ad909997460
@@ -8930,8 +8560,7 @@ records:
         observation_hash: sha256:24b871e0e93db92c8c5fb59ddad5cd7d6396dda5a78ff3e614eaaf3df750e088
         rules_hash: sha256:b7c5b5b6712235b52c36f60ec6b5ce92bc4e08181a8c57863dedd0b463c7f525
         recipe: registry-observation-v1
-  - record_key: printing:p:81408b749e7558788ebbde085ebbb594
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:81408b749e7558788ebbde085ebbb594
@@ -8949,8 +8578,7 @@ records:
         observation_hash: sha256:8a9d0a070960a729ab795818c1b17f657c8f70188e7249ac98664608b60a7bd1
         rules_hash: sha256:10fafecba127e48c71b790cb2b571949553cd1298d1ddd27e0af4b0765959993
         recipe: registry-observation-v1
-  - record_key: printing:p:6c2b0b62475f5001bd48e1cbd7943f7f
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:6c2b0b62475f5001bd48e1cbd7943f7f
@@ -8968,8 +8596,7 @@ records:
         observation_hash: sha256:fec8ec43dc8d1dc70d9e5f532ee1a3705d3655719b195d3bdd3d2784fe94ae20
         rules_hash: sha256:5b72172499a3ee38e568f41020540352859c5b764074cd8210ebd29a904f9312
         recipe: registry-observation-v1
-  - record_key: printing:p:fc8e0e8637835af8bb779307073dbd8b
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:fc8e0e8637835af8bb779307073dbd8b
@@ -8987,8 +8614,7 @@ records:
         observation_hash: sha256:18c749e14e12e29a3bc97c041bebfba1f4cbe995539da641c6ef286646f91716
         rules_hash: sha256:55c8e5dd8c7106394d3748b18399ed5cba5808429d799d0f639516f5ca91833e
         recipe: registry-observation-v1
-  - record_key: printing:p:b356e75ce503524b8ff08c8a657df40e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b356e75ce503524b8ff08c8a657df40e
@@ -9006,8 +8632,7 @@ records:
         observation_hash: sha256:202ad448a7efb50e6ce48b175fdf504b79f3f8de77b5660f411528df4dd28127
         rules_hash: sha256:867074f4a9e16b442c2dc16f884c9d1834bd860f65777ed5cd654f5c6c473bdb
         recipe: registry-observation-v1
-  - record_key: printing:p:959caab6e278578abbe1165f4d73f978
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:959caab6e278578abbe1165f4d73f978
@@ -9025,8 +8650,7 @@ records:
         observation_hash: sha256:3003b6e3ac4aa506c8f08f68d5122ac4535139788c01973e1c8eac54f5f08453
         rules_hash: sha256:010d3dd5f81d73e189efd2682265974ee395f41ffa1695c29a093a4520901daf
         recipe: registry-observation-v1
-  - record_key: printing:p:0c46c053ad505e35affe0ce7f46cc8bc
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0c46c053ad505e35affe0ce7f46cc8bc
@@ -9044,8 +8668,7 @@ records:
         observation_hash: sha256:722ea528fb1824a45ab294babc1b859812f99430a74788daa4cde18d8f3b164c
         rules_hash: sha256:53905789cd209374d85897b4bc632753cfb743362851182c78b6ccd47d648728
         recipe: registry-observation-v1
-  - record_key: printing:p:526b010ea935572a84dc0b67ae4cf451
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:526b010ea935572a84dc0b67ae4cf451
@@ -9063,8 +8686,7 @@ records:
         observation_hash: sha256:8937403e8a3b964a99c5eac8112c61356156481f23c19679c8d237e9c6238e5d
         rules_hash: sha256:c400bb83076bdaf71c7a1588e1bfa6fbd62a475acc9e56179f5d4befacdeedf2
         recipe: registry-observation-v1
-  - record_key: printing:p:465de53381bb5e3c9d66b37dae553f4d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:465de53381bb5e3c9d66b37dae553f4d
@@ -9082,8 +8704,7 @@ records:
         observation_hash: sha256:c3991e1feabfb5a3e3ca24a6aa87a62311087292f5adee40caa7d7cfdc2d8aa9
         rules_hash: sha256:766084307eb61dd2aa8ef8647fb929480306a443157f59a35a527c1bb7927691
         recipe: registry-observation-v1
-  - record_key: printing:p:442442bc30805cd0821c107b5676efb3
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:442442bc30805cd0821c107b5676efb3
@@ -9101,8 +8722,7 @@ records:
         observation_hash: sha256:a7eed19566e325dfa16ba9e31c5c4de539862a3e94e58e42aa77af85f9e58654
         rules_hash: sha256:babad2cc4d7b3e834731112d4f797e7782d41e2159ccce4c1c30bdfd494683c2
         recipe: registry-observation-v1
-  - record_key: printing:p:6a853c4c8a1151bcb349cca1b458f3bc
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:6a853c4c8a1151bcb349cca1b458f3bc
@@ -9120,8 +8740,7 @@ records:
         observation_hash: sha256:3e01dc6cecbbb4aea2801644f0b46677c8af0c8b6e62992cc55f16925e380603
         rules_hash: sha256:3e2739daedb59c573a371b644030075eeb0bea52fb1bb8651b78e3f8d7d74b06
         recipe: registry-observation-v1
-  - record_key: printing:p:75d489f24eac51349e516c6db324fc49
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:75d489f24eac51349e516c6db324fc49
@@ -9139,8 +8758,7 @@ records:
         observation_hash: sha256:2260d8551354106e6d9331871874664339efdce546a5a22c2de30f72da7b1fb0
         rules_hash: sha256:3ad308a8a3d22021000b8ef1079e6f66e03d9e4e161398eb1a42d04aa377f6df
         recipe: registry-observation-v1
-  - record_key: printing:p:ceb6aac1f26854be84df16c232d5f0f1
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:ceb6aac1f26854be84df16c232d5f0f1
@@ -9158,8 +8776,7 @@ records:
         observation_hash: sha256:ae61a20a34a6edc0d524d7a709f5aff5c8b45af51cb14bc2abef266fa748a46f
         rules_hash: sha256:357489cf207976cf7279725a2fe33c1f1d26f49cb2a47b9775f129e8aa779eb6
         recipe: registry-observation-v1
-  - record_key: printing:p:5fc962a5be33542eacf372bf1e486b27
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:5fc962a5be33542eacf372bf1e486b27
@@ -9177,8 +8794,7 @@ records:
         observation_hash: sha256:ebf0716cd8eaf9514b9e0049df9754651ff8b28288291f320fba8a3b4f70c82f
         rules_hash: sha256:9788cca1df30d7987db108991858ed272fcb90a1d8d0de2ee5984572d69576fe
         recipe: registry-observation-v1
-  - record_key: printing:p:158f50375d315bc78587eb0995f35d61
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:158f50375d315bc78587eb0995f35d61
@@ -9196,8 +8812,7 @@ records:
         observation_hash: sha256:f2eae76efaf8e18c56b0b5611c1b0edc8f6c15304bc4960f71b96cab68d93de4
         rules_hash: sha256:c62c659025e6abc4925ae6d86cb4884fc6cb66e88e7da7ff26edda2c79168dfb
         recipe: registry-observation-v1
-  - record_key: printing:p:c9e1f38617695a0ab67fbba0fe777ad0
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c9e1f38617695a0ab67fbba0fe777ad0
@@ -9215,8 +8830,7 @@ records:
         observation_hash: sha256:fc40a45b67ed546aa3c27e4ff43e83b4316e44cada2cc1a2c4f2517a52383050
         rules_hash: sha256:8b5c84cbc5980918a24f56ad6b948a1501a6fb673dd45aaa7c9304ce8f31286c
         recipe: registry-observation-v1
-  - record_key: printing:p:e212ce819cdd52f2a7b7f492d3bd2197
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e212ce819cdd52f2a7b7f492d3bd2197
@@ -9234,8 +8848,7 @@ records:
         observation_hash: sha256:1b179889c9ca018b7e11cfb9a6f9e1968e5b4489a24b945aefe83d332d7b5068
         rules_hash: sha256:9b160fdb0349945c3a37ec3e0470d8c7343dc96a1d78db8344625b52b8676126
         recipe: registry-observation-v1
-  - record_key: printing:p:48a032d6062d56908c0a27dfa42cd92a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:48a032d6062d56908c0a27dfa42cd92a
@@ -9253,8 +8866,7 @@ records:
         observation_hash: sha256:471b466789bcb9dc8643caf8d5b09f873ea713f70d81d51525ee8f8f1bd9460a
         rules_hash: sha256:1e84b1879854ecaaaad8788812838f3ceed9be89de2afb97e784775934f6abce
         recipe: registry-observation-v1
-  - record_key: printing:p:d4f8ddb1d6875f44bb0d64b0c2a20317
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d4f8ddb1d6875f44bb0d64b0c2a20317
@@ -9272,8 +8884,7 @@ records:
         observation_hash: sha256:faad956797bcf4b1fd587b212bb0dd35c90fa15e6dd8fd64778600c8cb57c9d0
         rules_hash: sha256:00f526af371cd2a6c4dc33d5a32e0203bca33582f9235f18ebd6cef611df21af
         recipe: registry-observation-v1
-  - record_key: printing:p:3a1a3da7e40a5fccbc56dd1b82f4cbbb
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:3a1a3da7e40a5fccbc56dd1b82f4cbbb
@@ -9291,8 +8902,7 @@ records:
         observation_hash: sha256:1f107fe576c7a77d3c4f77d94722c09c3c4978e1dd04e653a6e24742af3342e9
         rules_hash: sha256:1977a2e60afb42ea4f1dac5287f6d09a68a9a1fff89f1148403e0c4fbab4fcc6
         recipe: registry-observation-v1
-  - record_key: printing:p:2f741377e5d257e3ac3baac5342aad5a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:2f741377e5d257e3ac3baac5342aad5a
@@ -9310,8 +8920,7 @@ records:
         observation_hash: sha256:daab759559dea3a61da897cd4560edb068e1296bf52ada4cc474077e0ccce8a6
         rules_hash: sha256:ed8062bcb3a27c8ca36f9b16084a01fbf076638a1a67c1e7c430612e5372ee43
         recipe: registry-observation-v1
-  - record_key: printing:p:40c57c9578d4571ca7df9d1f810d68c3
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:40c57c9578d4571ca7df9d1f810d68c3
@@ -9329,8 +8938,7 @@ records:
         observation_hash: sha256:a55c28eed12f6843e4f8a949dcee4e3d07ea8f48a3483013a285e3fb9308d740
         rules_hash: sha256:d5d34735e0c6528ddaceaa78e311f75a8541038def4379c6c15aec7a5d1bf004
         recipe: registry-observation-v1
-  - record_key: printing:p:0781adb1a047520299e62e40541fd8ce
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0781adb1a047520299e62e40541fd8ce
@@ -9348,8 +8956,7 @@ records:
         observation_hash: sha256:db9fd879daef294328ced7ead42e5e33bc5f01ab1fb4da4a670048cdf8547897
         rules_hash: sha256:3c0f7a2a85eb1e3a273f95c7f6f372dec02517ff239759bf6810837520e3626f
         recipe: registry-observation-v1
-  - record_key: printing:p:dff6b34fa4045124be6f418a369f2087
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:dff6b34fa4045124be6f418a369f2087
@@ -9367,8 +8974,7 @@ records:
         observation_hash: sha256:e7f69e599b9bb303e30262333d3eab8dd99f2f3d573bb4047f46d63c38a1ad55
         rules_hash: sha256:0162fd7f0f999231fd08fd1207faa033ad145ce56a5dd63bed305f08ed749379
         recipe: registry-observation-v1
-  - record_key: printing:p:c4f5228e4c135d6c80d0026197cb91fe
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c4f5228e4c135d6c80d0026197cb91fe
@@ -9386,8 +8992,7 @@ records:
         observation_hash: sha256:d0dd595b4873cd696cf8fd14278216e35ea689cf89b81aef065e6ca169d21485
         rules_hash: sha256:357489cf207976cf7279725a2fe33c1f1d26f49cb2a47b9775f129e8aa779eb6
         recipe: registry-observation-v1
-  - record_key: printing:p:4c8425e83118592482fd795d9089124e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4c8425e83118592482fd795d9089124e
@@ -9405,8 +9010,7 @@ records:
         observation_hash: sha256:705c13d78af3fdb34a0b7a57eb6ba19b820fcf658bacffc9e26013b42ec4c0f2
         rules_hash: sha256:c7c5b6c87af2c51671b6666e1b213b5be26e0f9179dc4b9e67c6beb1c38081aa
         recipe: registry-observation-v1
-  - record_key: printing:p:e2cb66b06d895f47af8b01f607b92ac5
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e2cb66b06d895f47af8b01f607b92ac5
@@ -9424,8 +9028,7 @@ records:
         observation_hash: sha256:0540adf7f9a60ac2d787ba92126a93765978b63c04b203ec13f6218fc953ace3
         rules_hash: sha256:276d7ae04dca910362fec9974f8094d2918e9e4f9c480f4916e46bc0638b56d4
         recipe: registry-observation-v1
-  - record_key: printing:p:d9a3ba45197157b7a94c8c975633572d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:d9a3ba45197157b7a94c8c975633572d
@@ -9443,8 +9046,7 @@ records:
         observation_hash: sha256:20dbde4d0128693f73d85649c6644991129ca40c3792165ffd819aac9816b250
         rules_hash: sha256:d24dde76537b89461b69e548afb3f52dc50731c96238ba0d53f9e5aac6bc7c1c
         recipe: registry-observation-v1
-  - record_key: printing:p:7518ddd9ab6d51e7ae188a8507a280bf
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:7518ddd9ab6d51e7ae188a8507a280bf
@@ -9462,8 +9064,7 @@ records:
         observation_hash: sha256:6ac58b1c77200f867ef27f6f1172125e9fa39531498a2406ef93e430a52cb252
         rules_hash: sha256:5d8d2f7c01c2426e635390e4827bef02f0a8c60aa2b61e1c7b093287d48cb793
         recipe: registry-observation-v1
-  - record_key: printing:p:0ac5e4296dd15a288bd74124e2bbf148
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:0ac5e4296dd15a288bd74124e2bbf148
@@ -9481,8 +9082,7 @@ records:
         observation_hash: sha256:9f60b036f979ea33ceda6e0bd4977b7bb079db4268e48f49395df0af01569526
         rules_hash: sha256:e1f7207c9d3f4ee4c32601d991c4bba368060eb5dc3520308ca38bdafa007613
         recipe: registry-observation-v1
-  - record_key: printing:p:dfdf0ea1812659808c459c9e2a0bafcb
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:dfdf0ea1812659808c459c9e2a0bafcb
@@ -9500,8 +9100,7 @@ records:
         observation_hash: sha256:3116d5bc182dc5f9f62895dfae7b06b963e211782e309f11f462d1c2a3ac61f1
         rules_hash: sha256:a9630ed225ae825026466fc5f817508715d5573e9617db23d8afdb81c9732b99
         recipe: registry-observation-v1
-  - record_key: printing:p:bbdaa5741eff5f5d80ea1852f4adcb98
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:bbdaa5741eff5f5d80ea1852f4adcb98
@@ -9519,8 +9118,7 @@ records:
         observation_hash: sha256:a856fad2bad8e21966ea4d46c21b6fd73954e475bcf646d39083f326de3bc191
         rules_hash: sha256:dcc9b540be8f305060a4b8957c3e9c7eb6b6e40663c2117757ed0cd89bd43791
         recipe: registry-observation-v1
-  - record_key: printing:p:afd06ed3942f512a96415a5dbb7f182a
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:afd06ed3942f512a96415a5dbb7f182a
@@ -9538,8 +9136,7 @@ records:
         observation_hash: sha256:eb86054a4b53cce07efbd18c0eedb4eca743deb35ea93fa9e9f0e3cdce53edc5
         rules_hash: sha256:dfd4c54bcb348179465c389aca276e0184727489701ddad49e254797537a66bd
         recipe: registry-observation-v1
-  - record_key: printing:p:8cd19ea908fe582ebee33311a7031f0e
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:8cd19ea908fe582ebee33311a7031f0e
@@ -9557,8 +9154,7 @@ records:
         observation_hash: sha256:55a6c2e7c54aa5ac97a10959036a35635fcfe2da73a91cd2be35f1cdeab06959
         rules_hash: sha256:ce00d11d7a356a1c457d4601ab375d3d9363565cfe55181def0b7c090a85c7e8
         recipe: registry-observation-v1
-  - record_key: printing:p:4ffa890fdf6b5eff8f8684033312ea16
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:4ffa890fdf6b5eff8f8684033312ea16
@@ -9576,8 +9172,7 @@ records:
         observation_hash: sha256:202f487a2bb5547e40306936875858859049ee0dce58ba285c39e7350f56a880
         rules_hash: sha256:b125b81f0118bc9d9300d0d1db6552fde8d9c6004e064da479015249b785917b
         recipe: registry-observation-v1
-  - record_key: printing:p:22ee618e171551bcbcca5781c98b0586
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:22ee618e171551bcbcca5781c98b0586
@@ -9595,8 +9190,7 @@ records:
         observation_hash: sha256:2541d1bb8ddfb0e1022bc3198c54b7b219b0c874dc8d81102e4e2409c06e0363
         rules_hash: sha256:2df83c7ac18f709ce053fffdfda6e4e6066262d4e5681130c17c1294051c89c9
         recipe: registry-observation-v1
-  - record_key: printing:p:a8bf07b818c85aeeadea13b3e38261d5
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:a8bf07b818c85aeeadea13b3e38261d5
@@ -9614,8 +9208,7 @@ records:
         observation_hash: sha256:e2eb78a9ed3fbf1e88abb90c67e5d038a69aace811d0bdce35d012a97c179a2b
         rules_hash: sha256:f6862976f7f768acc4ff2d197e4c67efa047552890de298fab64a46f7b059400
         recipe: registry-observation-v1
-  - record_key: printing:p:77df2546589551c9ae368ce295eb0343
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:77df2546589551c9ae368ce295eb0343
@@ -9633,8 +9226,7 @@ records:
         observation_hash: sha256:a0adde4ef7222aab7a2df05d49b10c09b634edb26cb71415f543b62a1ca76291
         rules_hash: sha256:8678eb87ebd6ff74682ea0dfa11b3b979ba6ce6bb4b227158eeba9be742e878c
         recipe: registry-observation-v1
-  - record_key: printing:p:8b88a48a51ce5497a6541bedb483b155
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:8b88a48a51ce5497a6541bedb483b155
@@ -9652,8 +9244,7 @@ records:
         observation_hash: sha256:18e329011f8826529d0fe5ae5c9c6d79da5386f24cb451ca7207bc61713caa16
         rules_hash: sha256:7129b95037a649c420632d634085e4122111cb6880a231027eb0c25b1a00bd21
         recipe: registry-observation-v1
-  - record_key: printing:p:914cea89ee0557008c32930d9ef3a909
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:914cea89ee0557008c32930d9ef3a909
@@ -9671,8 +9262,7 @@ records:
         observation_hash: sha256:8d3a77fd01cf45006fbc53fa811069775d32488ff5222b17052341cb66cce31b
         rules_hash: sha256:63e0bcf95b4c20e8d144088641ef6166e8f1ce64d53d944bd83425c0c5d3ed7d
         recipe: registry-observation-v1
-  - record_key: printing:p:9bbf2c9ed9495d79a8df330bd2477723
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:9bbf2c9ed9495d79a8df330bd2477723
@@ -9690,8 +9280,7 @@ records:
         observation_hash: sha256:ead3d48e2a139333dc3dbe97d9f20380b481f82805039f43e1f12e7904ab2429
         rules_hash: sha256:19796736c3265680b99eb354f914ea22759bae286a687bed6570c1e9f2274672
         recipe: registry-observation-v1
-  - record_key: printing:p:238231ada0bb5f6fbfb0f0ce98ee34c5
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:238231ada0bb5f6fbfb0f0ce98ee34c5
@@ -9709,8 +9298,7 @@ records:
         observation_hash: sha256:2a26b4b65d8405b4a2e469e724772405f7068cfaed003f2bc5b7c1200592acb1
         rules_hash: sha256:fd20e70919f970e4dcd34b7faabe7359cd206e79ba540e32b1769f881504c346
         recipe: registry-observation-v1
-  - record_key: printing:p:c93e4aa8547e5370bc313051d87022fb
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:c93e4aa8547e5370bc313051d87022fb
@@ -9728,8 +9316,7 @@ records:
         observation_hash: sha256:1b8ebb7cbb7c1392e48c7c86ee788998d30cdc69ae7e2464037b2b41fbda0460
         rules_hash: sha256:d064f176940db56ee80b693e89caac3bdcc56b05929b9ef9eab13338c249bd3a
         recipe: registry-observation-v1
-  - record_key: printing:p:f74f7cad7dc35270b9e33d760b5a7e3b
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:f74f7cad7dc35270b9e33d760b5a7e3b
@@ -9747,8 +9334,7 @@ records:
         observation_hash: sha256:4415098fb5cb2a34775788667781128aa7f2f2896ca43d296352b4d32294c571
         rules_hash: sha256:be9a946185d743621b684430856dba2b0ed73661f5a28b354838660220bd143a
         recipe: registry-observation-v1
-  - record_key: printing:p:70a3c295b1555d6baf3095e8ee98ab1d
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:70a3c295b1555d6baf3095e8ee98ab1d
@@ -9766,8 +9352,7 @@ records:
         observation_hash: sha256:07f38f5c75346b9ef413e805d99e969ba23dd10a6bec4434f46eba5f7b059c37
         rules_hash: sha256:7d88c40fd1a44cdb95c017623d23a7e077603dec490310223cfc4a5f31de871b
         recipe: registry-observation-v1
-  - record_key: printing:p:b08310b1aa3c5e63a800e8b1049b6e31
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b08310b1aa3c5e63a800e8b1049b6e31
@@ -9785,8 +9370,7 @@ records:
         observation_hash: sha256:482df7e44106e761d67991a07d439dc7b0237990e581fc5e49fef417bc379613
         rules_hash: sha256:e3db1eaa2d2ddfecb08ea45d9ded6f5d8e249a800e88f90909303b48633ce2b9
         recipe: registry-observation-v1
-  - record_key: printing:p:5168301fe55e550ab3c9aa01fb318567
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:5168301fe55e550ab3c9aa01fb318567
@@ -9804,8 +9388,7 @@ records:
         observation_hash: sha256:7c58c136ca643f3108fe5bf977749189ce31ce56d5ba681121c965e61d3b36fd
         rules_hash: sha256:b7c5b5b6712235b52c36f60ec6b5ce92bc4e08181a8c57863dedd0b463c7f525
         recipe: registry-observation-v1
-  - record_key: printing:p:da95b80a07a559af948e840017f6fce9
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:da95b80a07a559af948e840017f6fce9
@@ -9823,8 +9406,7 @@ records:
         observation_hash: sha256:7ac0267ba5c2b2e574b7b4931f353c4efd84dc2a3445caccd8b3997c85129fd0
         rules_hash: sha256:53905789cd209374d85897b4bc632753cfb743362851182c78b6ccd47d648728
         recipe: registry-observation-v1
-  - record_key: printing:p:8d928ec117675016b430eec2655da607
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:8d928ec117675016b430eec2655da607
@@ -9842,8 +9424,7 @@ records:
         observation_hash: sha256:c58282602a3ef7fbed734cffc9f705692367264c19c065e079103bcb43e1d4e4
         rules_hash: sha256:783549a6b77e9ec0948a48c63aa5a60763a52aa5ecb5b93f1d65123e67bc61b5
         recipe: registry-observation-v1
-  - record_key: printing:p:142b3d98eb22563aa1e0f3771248e282
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:142b3d98eb22563aa1e0f3771248e282
@@ -9861,8 +9442,7 @@ records:
         observation_hash: sha256:f2f40edf887097e67321d0c8a47872606f6f5b3ec27d83ae539c239f037ab968
         rules_hash: sha256:766084307eb61dd2aa8ef8647fb929480306a443157f59a35a527c1bb7927691
         recipe: registry-observation-v1
-  - record_key: printing:p:b9450817cb0f51fba109675fd246a0b3
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:b9450817cb0f51fba109675fd246a0b3
@@ -9880,8 +9460,7 @@ records:
         observation_hash: sha256:05a35768de4f32b754b3baa475944d4b0d255a7df51a95619a82ac800b13fa8d
         rules_hash: sha256:357489cf207976cf7279725a2fe33c1f1d26f49cb2a47b9775f129e8aa779eb6
         recipe: registry-observation-v1
-  - record_key: printing:p:3b2a80f572bb587ebec00fecb70eb379
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:3b2a80f572bb587ebec00fecb70eb379
@@ -9899,8 +9478,7 @@ records:
         observation_hash: sha256:7a0ef7f560ece116ad73520fd328b0cacb8d1cc66334ab77670ef7f1ae19fd46
         rules_hash: sha256:9b160fdb0349945c3a37ec3e0470d8c7343dc96a1d78db8344625b52b8676126
         recipe: registry-observation-v1
-  - record_key: printing:p:e77285b0ea445ef88e3f59d5d0e378df
-    kind: printing
+  - kind: printing
     owner: BP17
     data:
       id: p:e77285b0ea445ef88e3f59d5d0e378df

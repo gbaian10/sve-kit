@@ -1,8 +1,7 @@
 product_authored_format: 1
 kind: product_shard
 records:
-  - record_key: '["product_family","SP01"]'
-    kind: product_family
+  - kind: product_family
     filing_key: SP01
     state: confirmed
     note: 使用者：隨機抽的特殊卡包（泳裝系列，商業價值高），新類型「特殊卡包」special_pack，放主要分類（不是補充包／合作／PR）。需先在規格與 schema 新增此 kind

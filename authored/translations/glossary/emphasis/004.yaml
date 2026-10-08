@@ -1,87 +1,51 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["glossary_emphasis_choice","term:state.engaged"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_emphasis_choice
+  - kind: glossary_emphasis_choice
     data:
       term_id: term:state.engaged
       value: true
-  - record_key: '["glossary_emphasis_choice","term:state.face_down"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_emphasis_choice
+  - kind: glossary_emphasis_choice
     data:
       term_id: term:state.face_down
       value: false
-  - record_key: '["glossary_emphasis_choice","term:state.face_up"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_emphasis_choice
+  - kind: glossary_emphasis_choice
     data:
       term_id: term:state.face_up
       value: false
-  - record_key: '["glossary_emphasis_choice","term:zone.banishment"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_emphasis_choice
+  - kind: glossary_emphasis_choice
     data:
       term_id: term:zone.banishment
       value: true
-  - record_key: '["glossary_emphasis_choice","term:zone.battlefield"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_emphasis_choice
+  - kind: glossary_emphasis_choice
     data:
       term_id: term:zone.battlefield
       value: true
-  - record_key: '["glossary_emphasis_choice","term:zone.cemetery"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_emphasis_choice
+  - kind: glossary_emphasis_choice
     data:
       term_id: term:zone.cemetery
       value: true
-  - record_key: '["glossary_emphasis_choice","term:zone.deck"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_emphasis_choice
+  - kind: glossary_emphasis_choice
     data:
       term_id: term:zone.deck
       value: true
-  - record_key: '["glossary_emphasis_choice","term:zone.deck_bottom"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_emphasis_choice
+  - kind: glossary_emphasis_choice
     data:
       term_id: term:zone.deck_bottom
       value: true
-  - record_key: '["glossary_emphasis_choice","term:zone.deck_top"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_emphasis_choice
+  - kind: glossary_emphasis_choice
     data:
       term_id: term:zone.deck_top
       value: true
-  - record_key: '["glossary_emphasis_choice","term:zone.evolve_deck"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_emphasis_choice
+  - kind: glossary_emphasis_choice
     data:
       term_id: term:zone.evolve_deck
       value: true
-  - record_key: '["glossary_emphasis_choice","term:zone.ex"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_emphasis_choice
+  - kind: glossary_emphasis_choice
     data:
       term_id: term:zone.ex
       value: true
-  - record_key: '["glossary_emphasis_choice","term:zone.hand"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_emphasis_choice
+  - kind: glossary_emphasis_choice
     data:
       term_id: term:zone.hand
       value: true

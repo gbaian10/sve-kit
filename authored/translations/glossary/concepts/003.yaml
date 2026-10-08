@@ -1,10 +1,7 @@
 translation_authored_format: 2
 kind: translation_shard
 records:
-  - record_key: '["glossary_term","term:action.leave_play"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.leave_play
       category: rule_term
@@ -19,11 +16,7 @@ records:
         start: 60
         end: 65
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.look"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.look
       category: rule_term
@@ -38,11 +31,7 @@ records:
         start: 20
         end: 22
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.lose"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.lose
       category: rule_term
@@ -57,11 +46,7 @@ records:
         start: 51
         end: 53
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.place"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.place
       category: rule_term
@@ -76,11 +61,7 @@ records:
         start: 34
         end: 36
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.play"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.play
       category: rule_term
@@ -95,11 +76,7 @@ records:
         start: 67
         end: 70
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.put_into_play"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.put_into_play
       category: rule_term
@@ -114,11 +91,7 @@ records:
         start: 71
         end: 75
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.restore"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.restore
       category: rule_term
@@ -133,11 +106,7 @@ records:
         start: 97
         end: 99
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.return_to_deck"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.return_to_deck
       category: rule_term
@@ -146,10 +115,7 @@ records:
       source_span:
       authored_source_ja: デッキに戻す
       missing_source_reason: 首輪凍結 JP／數位字典未找到此 exact JA；依專案採納的規則詞名稱登錄，不捏造 raw locator，也不視為官方證據。
-  - record_key: '["glossary_term","term:action.return_to_hand"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.return_to_hand
       category: rule_term
@@ -164,11 +130,7 @@ records:
         start: 44
         end: 49
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.reveal"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.reveal
       category: rule_term
@@ -183,11 +145,7 @@ records:
         start: 55
         end: 57
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.search"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.search
       category: rule_term
@@ -202,11 +160,7 @@ records:
         start: 28
         end: 30
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.shuffle"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.shuffle
       category: rule_term
@@ -221,11 +175,7 @@ records:
         start: 21
         end: 26
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.stand"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.stand
       category: rule_term
@@ -240,11 +190,7 @@ records:
         start: 12
         end: 16
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:action.super_evolve"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.super_evolve
       category: rule_term
@@ -253,10 +199,7 @@ records:
       source_span:
       authored_source_ja: 超進化する
       missing_source_reason: 首輪凍結 JP／數位字典未找到此 exact JA；依專案採納的規則詞名稱登錄，不捏造 raw locator，也不視為官方證據。
-  - record_key: '["glossary_term","term:action.transform"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:action.transform
       category: rule_term
@@ -271,11 +214,7 @@ records:
         start: 46
         end: 48
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:duration.per_turn"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:duration.per_turn
       category: rule_term
@@ -290,11 +229,7 @@ records:
         start: 51
         end: 56
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:duration.this_turn"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:duration.this_turn
       category: rule_term
@@ -309,11 +244,7 @@ records:
         start: 57
         end: 62
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:duration.until_turn_end"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:duration.until_turn_end
       category: rule_term
@@ -322,10 +253,7 @@ records:
       source_span:
       authored_source_ja: ターン終了まで
       missing_source_reason: 首輪凍結 JP／數位字典未找到此 exact JA；依專案採納的規則詞名稱登錄，不捏造 raw locator，也不視為官方證據。
-  - record_key: '["glossary_term","term:event.attack"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:event.attack
       category: ability
@@ -340,11 +268,7 @@ records:
         start: 6
         end: 9
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:event.combat"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:event.combat
       category: ability
@@ -357,11 +281,7 @@ records:
         text_hash: sha256:98106325662221d932b2e382d782e471eb7d0f11955c2ccf60f5693fc84ab06a
       source_span:
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:event.enter_play"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:event.enter_play
       category: rule_term
@@ -376,11 +296,7 @@ records:
         start: 36
         end: 42
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:event.evolve"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:event.evolve
       category: ability
@@ -395,11 +311,7 @@ records:
         start: 6
         end: 9
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:event.gain_drive"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:event.gain_drive
       category: ability
@@ -414,11 +326,7 @@ records:
         start: 24
         end: 31
       authored_source_ja:
-      missing_source_reason:
-  - record_key: '["glossary_term","term:event.super_evolve"]'
-    origin: project
-    low_confidence: false
-    kind: glossary_term
+  - kind: glossary_term
     data:
       id: term:event.super_evolve
       category: ability
@@ -433,4 +341,3 @@ records:
         start: 22
         end: 26
       authored_source_ja:
-      missing_source_reason:
