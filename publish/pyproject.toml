@@ -86,7 +86,6 @@ exclude_also = [
     "raise NotImplementedError",
     "raise AssertionError",
     "class .*\\bProtocol\\):",
-    "if settings.is_dev()",
 ]
 fail_under = 92
 

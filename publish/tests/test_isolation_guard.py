@@ -3,6 +3,7 @@
 import importlib.util
 import os
 import socket
+import sqlite3
 import sys
 import tempfile
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -24,6 +25,147 @@ URL = "https://example.invalid/test-only"
 def forbidden_root(guard: IsolationGuard, tmp_path: Path) -> Path:
     # The sentinel is outside the approved root but still under the system test directory.
     return guard.temporary_root.parent / f"{tmp_path.name}-not-approved-data"
+
+
+def test_default_environment_stays_isolated_after_undo(
+    test_isolation_guard: IsolationGuard, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("SVE_DATA_DIR", "synthetic-unapproved")
+    monkeypatch.setenv("SVE_EXPORT_DIR", "synthetic-unapproved")
+    monkeypatch.setenv("SVE_CARDDB_PRIVATE_DIR", "synthetic-unapproved")
+    monkeypatch.undo()
+    assert (
+        Path(os.environ["SVE_DATA_DIR"])
+        .resolve()
+        .is_relative_to(test_isolation_guard.temporary_root)
+    )
+    assert "SVE_EXPORT_DIR" not in os.environ
+    assert "SVE_CARDDB_PRIVATE_DIR" not in os.environ
+
+
+@pytest.mark.parametrize("event", ["socket.sendto", "socket.sendmsg"])
+def test_non_loopback_udp_destinations_are_blocked(event: str) -> None:
+    with (
+        socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sender,
+        pytest.raises(IsolationError, match="external socket"),
+    ):
+        # A native audit event cannot send packets if the guard regresses.
+        sys.audit(event, sender, ("203.0.113.1", 9))
+
+
+@pytest.mark.parametrize("method", ["sendto", "sendmsg", "connected-sendmsg"])
+def test_real_udp_loopback_delivery_is_allowed(method: str) -> None:
+    if method != "sendto" and not hasattr(socket.socket, "sendmsg"):
+        pytest.skip("sendmsg is unavailable")
+    with (
+        socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as receiver,
+        socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sender,
+    ):
+        receiver.bind(("127.0.0.1", 0))
+        receiver.settimeout(1)
+        address = receiver.getsockname()
+        if method == "sendto":
+            sent = sender.sendto(b"synthetic", address)
+        elif method == "sendmsg":
+            sent = sender.sendmsg([b"synthetic"], [], 0, address)
+        else:
+            sender.connect(address)
+            sent = sender.sendmsg([b"synthetic"])
+        assert sent == len(b"synthetic")
+        assert receiver.recv(32) == b"synthetic"
+
+
+@pytest.mark.skipif(not hasattr(socket, "AF_UNIX"), reason="Unix sockets unavailable")
+@pytest.mark.parametrize("method", ["bind", "connect", "sendto", "sendmsg"])
+def test_unix_socket_destinations_outside_temp_are_blocked(
+    test_isolation_guard: IsolationGuard, tmp_path: Path, method: str
+) -> None:
+    outside = forbidden_root(test_isolation_guard, tmp_path)
+    with (
+        socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as connection,
+        pytest.raises(IsolationError, match="outside the pytest temporary root"),
+    ):
+        # Avoid touching a forbidden path even if the guard regresses.
+        sys.audit(f"socket.{method}", connection, str(outside))
+
+
+@pytest.mark.skipif(not hasattr(socket, "AF_UNIX"), reason="Unix sockets unavailable")
+def test_real_unix_stream_bind_and_connect_inside_temp_are_allowed(
+    test_isolation_guard: IsolationGuard,
+) -> None:
+    # Short names stay within native Unix socket address limits.
+    with (
+        tempfile.TemporaryDirectory(dir=test_isolation_guard.temporary_root) as root,
+        socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as receiver,
+        socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sender,
+    ):
+        address = str(Path(root) / "r")
+        receiver.bind(address)
+        receiver.listen(1)
+        receiver.settimeout(1)
+        sender.settimeout(1)
+        sender.connect(address)
+        with receiver.accept()[0] as accepted:
+            accepted.settimeout(1)
+            sender.sendall(b"synthetic")
+            assert accepted.recv(32) == b"synthetic"
+
+
+@pytest.mark.skipif(not hasattr(socket, "AF_UNIX"), reason="Unix sockets unavailable")
+@pytest.mark.parametrize("method", ["sendto", "sendmsg", "connected-sendmsg"])
+def test_real_unix_datagram_delivery_inside_temp_is_allowed(
+    test_isolation_guard: IsolationGuard, method: str
+) -> None:
+    if method != "sendto" and not hasattr(socket.socket, "sendmsg"):
+        pytest.skip("sendmsg is unavailable")
+    with (
+        tempfile.TemporaryDirectory(dir=test_isolation_guard.temporary_root) as root,
+        socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as receiver,
+        socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as sender,
+    ):
+        address = str(Path(root) / "r")
+        receiver.bind(address)
+        sender.bind(str(Path(root) / "s"))
+        receiver.settimeout(1)
+        if method == "sendto":
+            sent = sender.sendto(b"synthetic", address)
+        elif method == "sendmsg":
+            sent = sender.sendmsg([b"synthetic"], [], 0, address)
+        else:
+            sender.connect(address)
+            sent = sender.sendmsg([b"synthetic"])
+        assert sent == len(b"synthetic")
+        assert receiver.recv(32) == b"synthetic"
+
+
+@pytest.mark.parametrize("uri", [False, True])
+def test_sqlite_outside_temp_is_blocked(
+    test_isolation_guard: IsolationGuard, tmp_path: Path, *, uri: bool
+) -> None:
+    outside = forbidden_root(test_isolation_guard, tmp_path)
+    address = outside.as_uri() if uri else str(outside)
+    with pytest.raises(IsolationError, match="outside the pytest temporary root"):
+        sqlite3.connect(address, uri=uri)
+    assert not outside.exists()
+
+
+@pytest.mark.parametrize("uri", [False, True])
+def test_sqlite_inside_temp_is_allowed(tmp_path: Path, *, uri: bool) -> None:
+    path = tmp_path / "synthetic.sqlite"
+    address = path.as_uri() if uri else str(path)
+    with sqlite3.connect(address, uri=uri) as connection:
+        connection.execute("CREATE TABLE synthetic (value TEXT)")
+    connection.close()
+    assert path.is_file()
+
+
+@pytest.mark.parametrize(
+    "address", [":memory:", "file::memory:", "file:synthetic?mode=memory&cache=shared"]
+)
+def test_in_memory_sqlite_is_allowed(address: str) -> None:
+    with sqlite3.connect(address, uri=True) as connection:
+        connection.execute("CREATE TABLE synthetic (value TEXT)")
+    connection.close()
 
 
 def test_standard_library_tempdirs_stay_isolated_after_undo(
