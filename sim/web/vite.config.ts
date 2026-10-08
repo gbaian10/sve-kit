@@ -77,8 +77,9 @@ function serveSnapshotRoot(prefix: string, dir: string | undefined): Plugin {
 export function snapshotRoots(environment: NodeJS.ProcessEnv): { cdn: string; preview?: string } {
   const root = (name: string): string | undefined => {
     const value = environment[name]
-    if (value !== undefined && (value === "" || !path.isAbsolute(value))) {
-      throw new Error(`${name} must be a non-empty absolute path`)
+    if (value === undefined || value === "") return undefined
+    if (!path.isAbsolute(value)) {
+      throw new Error(`${name} must be an absolute path when set`)
     }
     return value
   }

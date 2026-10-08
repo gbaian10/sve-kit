@@ -221,8 +221,9 @@ the generator that breaks the contract fails the tests, not the pages.
 
 `bun run dev` and `bun run preview` serve a snapshot root under `/cdn`: `SVE_EXPORT_DIR` when set
 (for a real local export), else the fixture. `SVE_PREVIEW_DIR` is served under `/cdn-preview`.
-Configured roots must be non-empty absolute paths. Local paths stay in the Vite
-server configuration; only the derived preview flag reaches browser code.
+Unset or empty `SVE_EXPORT_DIR` uses the fixture; unset or empty `SVE_PREVIEW_DIR`
+leaves `/cdn-preview` unconfigured. Non-empty roots must be absolute paths. Local
+paths stay in the Vite server configuration; only the derived preview flag reaches browser code.
 The files are canonical JSON and are excluded from Prettier.
 
 ## Search and the card list

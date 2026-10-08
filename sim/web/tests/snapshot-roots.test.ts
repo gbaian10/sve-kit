@@ -22,11 +22,23 @@ describe("local snapshot roots", () => {
     expect(snapshotRoots({ SVE_CDN_DIR: "/unused" })).toEqual(snapshotRoots({}))
   })
 
-  it.each(["SVE_EXPORT_DIR", "SVE_PREVIEW_DIR"])("rejects empty or relative %s", (name) => {
-    for (const value of ["", "relative"]) {
-      expect(() => snapshotRoots({ [name]: value })).toThrow(
-        `${name} must be a non-empty absolute path`,
-      )
-    }
+  it.each(["SVE_EXPORT_DIR", "SVE_PREVIEW_DIR"])("treats empty %s as unset", (name) => {
+    expect(snapshotRoots({ [name]: "" })).toEqual(snapshotRoots({}))
+  })
+
+  it("treats both empty roots as unset", () => {
+    expect(snapshotRoots({ SVE_EXPORT_DIR: "", SVE_PREVIEW_DIR: "" })).toEqual(snapshotRoots({}))
+  })
+
+  it("keeps a configured export root when the preview root is empty", () => {
+    expect(snapshotRoots({ SVE_EXPORT_DIR: "/export", SVE_PREVIEW_DIR: "" })).toEqual({
+      cdn: "/export",
+    })
+  })
+
+  it.each(["SVE_EXPORT_DIR", "SVE_PREVIEW_DIR"])("rejects relative %s", (name) => {
+    expect(() => snapshotRoots({ [name]: "relative" })).toThrow(
+      `${name} must be an absolute path when set`,
+    )
   })
 })
