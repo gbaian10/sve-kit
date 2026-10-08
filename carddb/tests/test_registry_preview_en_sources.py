@@ -7,7 +7,7 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.registry.build import build
 from sve_carddb.domains.registry.parser_adapters.official_en import (
     legacy_projection as legacy_en,
@@ -72,7 +72,7 @@ def frozen_registry(tmp_path: Path, inputs: Inputs) -> tuple[Path, FrozenRegions
             store,
             replace(
                 _resource(en.card_url(number), f"raw/{number}.html", raw, Kind.CARD),
-                region=Region.EN,
+                region=SourceRegion.EN,
             ),
             raw,
         )

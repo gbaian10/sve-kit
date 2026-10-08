@@ -12,7 +12,7 @@ from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.registry.storage import read_yaml
 from sve_carddb.domains.translations.sources import Sources
 from sve_carddb.ingest.archive.manifest import Kind
@@ -113,7 +113,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> PageCase:
             urls[region + ":" + variant] = suffix
             resource = replace(
                 _resource(suffix, f"raw/{region}-{variant}.html", raw, Kind.CARD),
-                region=Region.JP if region == "jp" else Region.EN,
+                region=SourceRegion.JP if region == "jp" else SourceRegion.EN,
             )
             _put(store, resource, raw)
     _put(store, _resource(IMAGE_URL, "raw/image.png", IMAGE_RAW), IMAGE_RAW)

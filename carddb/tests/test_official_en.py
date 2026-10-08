@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 import httpx
 import pytest
 
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.archive.manifest import Kind, Manifest
 from sve_carddb.ingest.crawl.crawl import EN_CATALOG, EN_SITE, Crawler, ListSummary
 from sve_carddb.ingest.http.client import Client, ClientPolicy, FetchError
@@ -170,7 +170,7 @@ async def test_p0_to_p2_store_under_the_english_region(
     )
     resource = manifest.resources.get(en.card_url("BP01-001EN"))
     assert resource is not None
-    assert (resource.region, resource.kind) == (Region.EN, Kind.CARD)
+    assert (resource.region, resource.kind) == (SourceRegion.EN, Kind.CARD)
     assert resource.path == en.card_path("BP01-001EN")
     assert (tmp_path / en.list_path("BP01", 2)).is_file()
 
@@ -181,10 +181,10 @@ async def test_english_and_japanese_generations_are_separate(
     await make_crawler(
         manifest, tmp_path, clock, FakeSite({"BP01": 3}, english=True)
     ).discover_sets()
-    assert current_sets(manifest, Region.EN) == ["BP01"]
+    assert current_sets(manifest, SourceRegion.EN) == ["BP01"]
     assert current_sets(manifest) == []
-    assert manifest.generations.current(sets_root(Region.JP)) is None
-    assert manifest.generations.current(list_root("BP01", Region.EN)) is None
+    assert manifest.generations.current(sets_root(SourceRegion.JP)) is None
+    assert manifest.generations.current(list_root("BP01", SourceRegion.EN)) is None
 
 
 async def test_a_japanese_page_on_the_english_site_is_rejected(

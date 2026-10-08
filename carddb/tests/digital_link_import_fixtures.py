@@ -11,7 +11,7 @@ from pydantic import JsonValue
 from sve_carddb.build.source_rows import insert_raw_sources
 from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.catalog.adoption_models import SourceRef
 from sve_carddb.domains.digital.links.importer import Inputs
 from sve_carddb.domains.products.models import LocalizedText
@@ -210,7 +210,7 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
                 raw,
                 Kind.API,
             ),
-            region=Region.SVWB,
+            region=SourceRegion.SVWB,
             content_type="application/json",
         )
         _put(store, resource, raw)
@@ -431,7 +431,7 @@ def current_api(  # ruff: ignore[too-many-locals] -- synthetic resealing preserv
         resource = replace(
             _resource(str(source.url), f"raw/api-{i}.json", raw, Kind.API),
             content_type="application/json",
-            region=Region.SVWB,
+            region=SourceRegion.SVWB,
         )
         _put(store, resource, raw)
     batch = seal_batch(store)
@@ -501,7 +501,7 @@ def catalogue_fixture(
                 "https://shadowverse-portal.com/api/v1/cards?format=json&lang="
                 + language
             )
-            region = Region.SV1
+            region = SourceRegion.SV1
             document: dict[str, JsonValue] = {"data": data}
         else:
             data = {
@@ -522,7 +522,7 @@ def catalogue_fixture(
                 "https://shadowverse-wb.com/web/CardList/cardList?"
                 "include_token=1&offset=0&lang=" + language
             )
-            region = Region.SVWB
+            region = SourceRegion.SVWB
             document = {"data_headers": {"result_code": 1}, "data": data}
         if transform is not None:
             transform(data, language)

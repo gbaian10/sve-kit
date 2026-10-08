@@ -6,7 +6,7 @@ from pathlib import Path, PurePosixPath
 
 import pytest
 
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.archive.manifest import (
     AlreadyRunningError,
     ExclusiveLock,
@@ -28,7 +28,7 @@ def make_resource(
 ) -> Resource:
     return Resource(
         url=url,
-        region=Region.JP,
+        region=SourceRegion.JP,
         kind=Kind.CARD,
         path=PurePosixPath(path),
         sha256="a" * 64,

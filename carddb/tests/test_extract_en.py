@@ -8,7 +8,7 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb import cli
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.registry.inputs import Card
 from sve_carddb.domains.registry.parser_adapters.official_en import (
     legacy_projection as legacy_en_projection,
@@ -340,8 +340,8 @@ def test_back_face_image_without_src_fails_after_valid_front_face() -> None:
 def test_en_jsonl_uses_exact_region_urls_and_serializes_record(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def numbers(_manifest: Manifest, *, region: Region) -> list[str]:
-        assert region is Region.EN
+    def numbers(_manifest: Manifest, *, region: SourceRegion) -> list[str]:
+        assert region is SourceRegion.EN
         return ["SYNⓈ-01aEN", "MISSING", "BAD"]
 
     class Reader:
@@ -359,7 +359,7 @@ def test_en_jsonl_uses_exact_region_urls_and_serializes_record(
     monkeypatch.setattr(jsonl, "card_numbers", numbers)
     out = tmp_path / "output.jsonl"
     report = jsonl.extract_cards(
-        cast("Manifest", object()), Reader(), out, region=Region.EN
+        cast("Manifest", object()), Reader(), out, region=SourceRegion.EN
     )
     assert report.written == 1
     assert report.missing == ["MISSING"]
@@ -370,9 +370,9 @@ def test_en_jsonl_uses_exact_region_urls_and_serializes_record(
     assert record["number"] == "SYNⓈ-01aEN"
 
 
-@pytest.mark.parametrize("region", [Region.SV1, Region.SVWB])
+@pytest.mark.parametrize("region", [SourceRegion.SV1, SourceRegion.SVWB])
 def test_digital_regions_rejected_before_writing(
-    tmp_path: Path, region: Region
+    tmp_path: Path, region: SourceRegion
 ) -> None:
     out = tmp_path / "output.jsonl"
     with pytest.raises(ValueError, match="only JP and EN"):

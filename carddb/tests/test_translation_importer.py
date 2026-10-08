@@ -9,7 +9,7 @@ import pytest
 
 from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.catalog.adoption_models import SourceRef
 from sve_carddb.domains.translations.digital import (
     _phases,
@@ -116,7 +116,7 @@ def frozen(  # ruff: ignore[too-many-locals] -- two sealed language sources shar
                 raw,
                 Kind.API,
             ),
-            region=Region.SVWB,
+            region=SourceRegion.SVWB,
             content_type="application/json",
         )
         _put(store, resource, raw)

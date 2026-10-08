@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import digest
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.registry.records import CorrectionData
 from sve_carddb.domains.registry.review import Correction
 from sve_carddb.domains.source_corrections import FrozenImages
@@ -82,7 +82,7 @@ def test_four_synthetic_english_corrections_have_distinct_evidence_and_rule_resu
                         "images/" + evidence.sha256.removeprefix("sha256:") + ".png",
                         raw,
                     ),
-                    region=Region.EN,
+                    region=SourceRegion.EN,
                 ),
                 raw,
             )

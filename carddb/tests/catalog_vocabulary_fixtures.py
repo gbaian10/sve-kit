@@ -7,7 +7,7 @@ from pydantic import JsonValue
 
 from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.registry.storage import read_yaml
 from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import seal_batch
@@ -139,7 +139,7 @@ def make_vocabulary_case(root: Path) -> VocabularyCase:
                 raw,
                 Kind.CARD,
             ),
-            region=Region(region),
+            region=SourceRegion(region),
             content_type="application/json",
         )
         _put(store, resource, raw)

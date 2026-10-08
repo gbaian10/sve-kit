@@ -266,7 +266,7 @@ def add_page(
     number: str = "TEST-002",
 ) -> ProductPage:
     """Append a separately sealed synthetic version without touching old evidence."""
-    from sve_carddb.core.regions import SourceRegion as Region  # ruff: ignore[import-outside-top-level] -- fixture-only archive construction
+    from sve_carddb.core.regions import SourceRegion  # ruff: ignore[import-outside-top-level] -- fixture-only archive construction
     from sve_carddb.ingest.archive.source_archive import ArchiveStore  # ruff: ignore[import-outside-top-level] -- fixture-only archive construction
     from sve_carddb.parse.pages import official_en  # ruff: ignore[import-outside-top-level] -- fixture-only EN source
 
@@ -282,7 +282,7 @@ def add_page(
     url = card_url(number) if region == "jp" else official_en.card_url(number)
     resource = replace(
         _resource(url, f"raw/{region}-{number}.html", raw, Kind.CARD),
-        region=Region.JP if region == "jp" else Region.EN,
+        region=SourceRegion.JP if region == "jp" else SourceRegion.EN,
     )
     _put(store, resource, raw)
     sealed = seal_batch(store)

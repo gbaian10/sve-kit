@@ -15,7 +15,7 @@ from typer.testing import CliRunner
 
 from sve_carddb import cli
 from sve_carddb.core.paths import relpath
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.archive.manifest import Kind, Manifest, RequestStart
 from sve_carddb.ingest.config import Settings
 from sve_carddb.ingest.http.writer import Fetched, Writer
@@ -144,7 +144,7 @@ def test_source_writer_outside_temp_is_rejected(
     )
     fetched = Fetched(
         URL,
-        Region.JP,
+        SourceRegion.JP,
         Kind.CARD,
         relpath("raw", "test.html"),
         b"synthetic",
@@ -184,7 +184,7 @@ def test_source_writer_checks_environment_at_write_time(
     monkeypatch.delenv("SVE_DATA_DIR")
     fetched = Fetched(
         URL,
-        Region.JP,
+        SourceRegion.JP,
         Kind.CARD,
         relpath("raw", "test.html"),
         b"synthetic",
@@ -218,7 +218,7 @@ def test_metadata_only_source_write_cannot_bypass_environment_guard(
     writer = Writer(tmp_path / "data", manifest)
     fetched = Fetched(
         URL,
-        Region.JP,
+        SourceRegion.JP,
         Kind.CARD,
         relpath("raw", "test.html"),
         b"synthetic",

@@ -3,6 +3,7 @@
 from enum import StrEnum
 from typing import Literal
 
+# Physical region literals keep shared I/O independent of card rule semantics.
 Region = Literal["jp", "en"]
 
 

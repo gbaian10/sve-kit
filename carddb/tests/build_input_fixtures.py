@@ -3,7 +3,7 @@
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.products.evidence import resolve_evidence
 from sve_carddb.domains.products.importer import product_source_uses
 from sve_carddb.domains.registry.inputs import Card
@@ -42,7 +42,7 @@ def frozen_provider(inputs: Inputs, temporary: Path) -> tuple[MemoryEvidence, Pa
             store,
             replace(
                 _resource(url, f"raw/{region}-{number}.html", raw, Kind.CARD),
-                region=Region.JP if region == "jp" else Region.EN,
+                region=SourceRegion.JP if region == "jp" else SourceRegion.EN,
             ),
             raw,
         )

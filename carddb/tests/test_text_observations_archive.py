@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build.source_rows import source_values
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.text_observations import FrozenTexts, RegionalTexts
 from sve_carddb.ingest.archive.manifest import Kind, Manifest
 from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
@@ -31,7 +31,7 @@ def test_two_regions_keep_face_sections_source_pins_and_exact_numbers(
         store,
         replace(
             _resource(en.card_url("SYNⓈ-01aEN"), "raw/en.html", english, Kind.CARD),
-            region=Region.EN,
+            region=SourceRegion.EN,
         ),
         english,
     )

@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from sve_carddb.build.source_rows import source_values
 from sve_carddb.core.json import canonical, digest, parse
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.source_corrections.plan import corrected_observations
 from sve_carddb.domains.text_observations import FrozenTexts, presence
@@ -75,7 +75,7 @@ def card_from_raw(
     url = (official_jp if region == "jp" else official_en).card_url(number)
     resource = replace(
         _resource(url, "raw/synthetic.html", raw, Kind.CARD),
-        region=Region.JP if region == "jp" else Region.EN,
+        region=SourceRegion.JP if region == "jp" else SourceRegion.EN,
     )
     _put(store, resource, raw)
     sealed = seal_batch(store)

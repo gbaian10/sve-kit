@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Literal
 from urllib.parse import urljoin
 
 from sve_carddb.core.json import digest
-from sve_carddb.core.regions import SourceRegion as ManifestRegion
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.card_extras.archive import card_number
 from sve_carddb.domains.card_extras.generation import (
     Closure,
@@ -52,7 +52,7 @@ class QACrawler:
         self.region = region
         manifest = writer.manifest
         site = Site(
-            ManifestRegion(region),
+            SourceRegion(region),
             lambda url: allowed(url, region),
             self.path,
         )

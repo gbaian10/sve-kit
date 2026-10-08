@@ -11,7 +11,7 @@ from typer.testing import CliRunner
 
 from sve_carddb import cli
 from sve_carddb.build.source_rows import source_values
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.registry.inputs import canonical
 from sve_carddb.domains.registry.parser_adapters.official_en import legacy_projection
 from sve_carddb.domains.registry.preview import FrozenEN, FrozenJP, FrozenRegions
@@ -43,7 +43,7 @@ def test_double_face_rarity_is_read_from_each_face(tmp_path: Path) -> None:
         store,
         replace(
             _resource(en.card_url(NUMBER), "raw/card.html", raw, Kind.CARD),
-            region=Region.EN,
+            region=SourceRegion.EN,
         ),
         raw,
     )
@@ -63,7 +63,7 @@ def test_exact_en_source_pins_first_receipt_and_recomputes_both_hashes(
     store = _store(tmp_path)
     resource = replace(
         _resource(en.card_url(NUMBER), "raw/card.html", raw, Kind.CARD),
-        region=Region.EN,
+        region=SourceRegion.EN,
         etag="original-etag",
         first_fetched_at=NOW - timedelta(days=4),
         last_changed_at=NOW - timedelta(days=2),
@@ -123,7 +123,7 @@ def test_en_rechecks_each_pinned_file_after_construction(
     store = _store(tmp_path)
     resource = replace(
         _resource(en.card_url(NUMBER), "raw/card.html", raw, Kind.CARD),
-        region=Region.EN,
+        region=SourceRegion.EN,
     )
     _put(store, resource, raw)
     sealed = seal_batch(store)
@@ -144,10 +144,10 @@ def test_en_refuses_wrong_source_identity_and_page_number(
     store = _store(tmp_path)
     resource = replace(
         _resource(en.card_url(NUMBER), "raw/card.html", raw, Kind.CARD),
-        region=Region.EN,
+        region=SourceRegion.EN,
     )
     if mismatch == "provider":
-        resource = replace(resource, region=Region.JP)
+        resource = replace(resource, region=SourceRegion.JP)
     elif mismatch == "kind":
         resource = replace(resource, kind=Kind.IMAGE)
     elif mismatch == "media":
@@ -168,7 +168,7 @@ def test_en_rejects_unsealed_batch(tmp_path: Path) -> None:
         store,
         replace(
             _resource(en.card_url(NUMBER), "raw/card.html", raw, Kind.CARD),
-            region=Region.EN,
+            region=SourceRegion.EN,
         ),
         raw,
     )
@@ -184,7 +184,7 @@ def test_back_face_rule_change_is_a_new_mismatching_observation(tmp_path: Path) 
     store = _store(tmp_path)
     resource = replace(
         _resource(en.card_url(NUMBER), "raw/card.html", raw, Kind.CARD),
-        region=Region.EN,
+        region=SourceRegion.EN,
     )
     _put(store, resource, raw)
     first = seal_batch(store)
@@ -228,7 +228,7 @@ def test_composition_dispatches_explicit_regions_without_cross_region_fallback(
         store,
         replace(
             _resource(en.card_url(NUMBER), "raw/en.html", raw, Kind.CARD),
-            region=Region.EN,
+            region=SourceRegion.EN,
         ),
         raw,
     )
@@ -258,11 +258,12 @@ def test_archive_cli_extracts_en_twice_without_mutating_the_sealed_input(
     store = _store(tmp_path)
     raw = page(double=True)
     resource = replace(
-        _resource(en.card_url(NUMBER), "raw/en.html", raw, Kind.CARD), region=Region.EN
+        _resource(en.card_url(NUMBER), "raw/en.html", raw, Kind.CARD),
+        region=SourceRegion.EN,
     )
     _put(store, resource, raw)
     with Manifest.open(store.manifest_path) as manifest:
-        sets = manifest.generations.start(sets_root(Region.EN))
+        sets = manifest.generations.start(sets_root(SourceRegion.EN))
         with manifest.transaction():
             manifest.generations.add_page(
                 sets.id,
@@ -271,7 +272,7 @@ def test_archive_cli_extracts_en_twice_without_mutating_the_sealed_input(
                 [Link(en.list_url("SYN", 1), Kind.LIST, 0, "SYN")],
             )
         manifest.generations.validate(sets.id, declared_total=1)
-        cards = manifest.generations.start(list_root("SYN", Region.EN))
+        cards = manifest.generations.start(list_root("SYN", SourceRegion.EN))
         with manifest.transaction():
             manifest.generations.add_page(
                 cards.id,

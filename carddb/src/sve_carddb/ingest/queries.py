@@ -2,26 +2,28 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 
 if TYPE_CHECKING:
     from sve_carddb.ingest.archive.manifest import Manifest
 
 
-def sets_root(region: Region) -> str:
+def sets_root(region: SourceRegion) -> str:
     """The generation root of a region's product list."""
     return f"{region.value}:sets"
 
 
-SETS_ROOT = sets_root(Region.JP)
+SETS_ROOT = sets_root(SourceRegion.JP)
 
 
-def list_root(set_code: str, region: Region = Region.JP) -> str:
+def list_root(set_code: str, region: SourceRegion = SourceRegion.JP) -> str:
     """The generation root of a product's list."""
     return f"{region.value}:list:{set_code}"
 
 
-def current_sets(manifest: Manifest, region: Region = Region.JP) -> list[str]:
+def current_sets(
+    manifest: Manifest, region: SourceRegion = SourceRegion.JP
+) -> list[str]:
     """Product codes from the validated product generation."""
     current = manifest.generations.current(sets_root(region))
     if current is None:
@@ -32,7 +34,7 @@ def current_sets(manifest: Manifest, region: Region = Region.JP) -> list[str]:
 def card_numbers(
     manifest: Manifest,
     set_codes: list[str] | None = None,
-    region: Region = Region.JP,
+    region: SourceRegion = SourceRegion.JP,
 ) -> list[str]:
     """Card numbers from validated list generations, deduplicated, in list order."""
     numbers: dict[str, None] = {}

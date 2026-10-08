@@ -13,7 +13,7 @@ from rich.console import Console
 from typer.testing import CliRunner
 
 from sve_carddb import cli
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.archive.manifest import (
     AlreadyRunningError,
     ExclusiveLock,
@@ -418,7 +418,7 @@ def store_images(data_dir: Path) -> None:
             url = media_url(rel)
             item = Fetched(
                 url=url,
-                region=Region.SV1,
+                region=SourceRegion.SV1,
                 kind=Kind.IMAGE,
                 path=PurePosixPath(rel),
                 body=body,

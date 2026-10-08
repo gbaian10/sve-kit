@@ -5,7 +5,7 @@ from pathlib import Path, PurePosixPath
 import pytest
 
 from sve_carddb.core.paths import UnsafePathError
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.archive.manifest import (
     Kind,
     Manifest,
@@ -38,7 +38,7 @@ def fetched(
 ) -> Fetched:
     return Fetched(
         url=url,
-        region=Region.JP,
+        region=SourceRegion.JP,
         kind=Kind.CARD,
         path=path,
         body=body,

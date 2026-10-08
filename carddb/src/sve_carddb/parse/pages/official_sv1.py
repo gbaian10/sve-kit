@@ -17,7 +17,7 @@ from urllib.parse import unquote, urljoin, urlsplit, urlunsplit
 import orjson
 
 from sve_carddb.core.paths import relpath
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.http.validate import ValidationError, decode_html
 from sve_carddb.ingest.urls import canonicalize
 from sve_carddb.parse.html import attribute, parse, require_one, select_all, select_one
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 HOST = "shadowverse-portal.com"
 BASE = f"https://{HOST}"
-REGION = Region.SV1
+REGION = SourceRegion.SV1
 LANGUAGES = ("ja", "en", "zh-tw")
 CARD_PAGE_LANGUAGE = "ja"
 FOLLOWER = 1

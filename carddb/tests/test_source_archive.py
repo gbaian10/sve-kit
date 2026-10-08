@@ -17,7 +17,7 @@ from typer.testing import CliRunner
 import sve_carddb.ingest.archive.source_archive as archive
 from sve_carddb import cli
 from sve_carddb.core.json import canonical, parse
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.archive.manifest import (
     AlreadyRunningError,
     ExclusiveLock,
@@ -67,7 +67,7 @@ def _store(tmp_path: Path, *, read_roots: tuple[Path, ...] = ()) -> ArchiveStore
 def _resource(url: str, path: str, raw: bytes, kind: Kind = Kind.IMAGE) -> Resource:
     return Resource(
         url=url,
-        region=Region.JP,
+        region=SourceRegion.JP,
         kind=kind,
         path=PurePosixPath(path),
         sha256=hashlib.sha256(raw).hexdigest(),
@@ -823,7 +823,7 @@ def test_offline_extract_repeats_without_touching_sources(tmp_path: Path) -> Non
     )
     _put(store, resource, stored)
     with Manifest.open(store.manifest_path) as manifest:
-        sets = manifest.generations.start(sets_root(Region.JP))
+        sets = manifest.generations.start(sets_root(SourceRegion.JP))
         with manifest.transaction():
             manifest.generations.add_page(
                 sets.id,

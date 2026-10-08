@@ -9,7 +9,7 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.registry.build import build
 from sve_carddb.domains.registry.inputs import Mapping
 from sve_carddb.domains.registry.parser_adapters.official_en import (
@@ -101,7 +101,7 @@ def english_images(  # ruff: ignore[too-many-locals] -- seal the shared minimal 
         store,
         replace(
             _resource(official_en.card_url(NUMBER), "raw/en.html", raw, Kind.CARD),
-            region=Region.EN,
+            region=SourceRegion.EN,
         ),
         raw,
     )
@@ -117,7 +117,7 @@ def english_images(  # ruff: ignore[too-many-locals] -- seal the shared minimal 
                     f"raw/en-{index}.png",
                     data,
                 ),
-                region=Region.EN,
+                region=SourceRegion.EN,
             ),
             data,
         )

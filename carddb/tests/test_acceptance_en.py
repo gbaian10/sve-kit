@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.core.json import canonical, digest
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.products import load_product_identities, load_products
 from sve_carddb.domains.products.official import PARSER, parse_products
 from sve_carddb.domains.products.plan import plan_official_products
@@ -105,7 +105,8 @@ def add_correction(store: ArchiveStore, inputs: Inputs) -> str:
     _put(
         store,
         replace(
-            _resource(evidence_url(proof), "images/en.png", image), region=Region.EN
+            _resource(evidence_url(proof), "images/en.png", image),
+            region=SourceRegion.EN,
         ),
         image,
     )
@@ -129,7 +130,8 @@ def make_case(
     _put(
         store,
         replace(
-            _resource(card_url(NUMBER), "raw/en.html", raw, Kind.CARD), region=Region.EN
+            _resource(card_url(NUMBER), "raw/en.html", raw, Kind.CARD),
+            region=SourceRegion.EN,
         ),
         raw,
     )
@@ -394,7 +396,8 @@ def test_real_changed_bytes_are_mismatch_even_when_rules_remain_equal(
     _put(
         case.store,
         replace(
-            _resource(card_url(NUMBER), "raw/en.html", raw, Kind.CARD), region=Region.EN
+            _resource(card_url(NUMBER), "raw/en.html", raw, Kind.CARD),
+            region=SourceRegion.EN,
         ),
         raw,
     )
@@ -478,7 +481,8 @@ def test_proven_absence_keeps_raw_and_projected_effect_separate(
     _put(
         case.store,
         replace(
-            _resource(card_url(NUMBER), "raw/en.html", raw, Kind.CARD), region=Region.EN
+            _resource(card_url(NUMBER), "raw/en.html", raw, Kind.CARD),
+            region=SourceRegion.EN,
         ),
         raw,
     )
@@ -541,7 +545,7 @@ def test_invalid_frozen_source_aborts_before_success_report(
             case.store,
             replace(
                 _resource(card_url(NUMBER), "raw/en.html", raw, Kind.CARD),
-                region=Region.EN,
+                region=SourceRegion.EN,
             ),
             raw,
         )

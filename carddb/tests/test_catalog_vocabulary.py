@@ -15,6 +15,7 @@ from sve_carddb.domains.catalog.adoption_models import RawMapping
 from sve_carddb.domains.catalog.adoption_validation import _mapping_metadata
 from sve_carddb.domains.text_observations.vocabulary import Vocabulary
 
+from .catalog_adoption_fixtures import populate_case, prepare_case
 from .catalog_vocabulary_fixtures import (
     VocabularyCase,
     make_vocabulary_case,
@@ -23,7 +24,6 @@ from .catalog_vocabulary_fixtures import (
     save,
     vocabulary_record,
 )
-from .current_catalog_fixtures import populate_case, prepare_case
 from .test_glossary_adoption import checked
 
 if TYPE_CHECKING:

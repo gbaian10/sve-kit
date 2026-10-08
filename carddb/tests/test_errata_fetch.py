@@ -16,7 +16,7 @@ from typer.testing import CliRunner
 
 from sve_carddb import cli
 from sve_carddb.core.paths import UnsafePathError
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.archive.manifest import (
     ExclusiveLock,
     Kind,
@@ -65,8 +65,8 @@ EN_URL = f"{EN_HOST}/errata/synthetic-one/"
 EN_OTHER = f"{EN_HOST}/errata/synthetic-two/"
 
 
-def notice_body(region: Region = Region.JP) -> bytes:
-    prefix = "eratta" if region is Region.JP else "errata"
+def notice_body(region: SourceRegion = SourceRegion.JP) -> bytes:
+    prefix = "eratta" if region is SourceRegion.JP else "errata"
     return (
         "<html><head><title>Synthetic notice</title></head><body>"
         '<div class="st-Container"><div class="st-Container_Inner">'
@@ -85,7 +85,7 @@ BODY = notice_body()
 runner = CliRunner()
 
 
-def ok(region: Region = Region.JP) -> httpx.Response:
+def ok(region: SourceRegion = SourceRegion.JP) -> httpx.Response:
     return httpx.Response(
         200,
         content=notice_body(region),
@@ -250,15 +250,15 @@ def test_dedup_preserves_percent_encoding_and_trailing_slash_distinction(
     ]
 
 
-@pytest.mark.parametrize("region", [Region.JP, Region.EN])
+@pytest.mark.parametrize("region", [SourceRegion.JP, SourceRegion.EN])
 def test_detail_template_requires_the_full_announcement_structure(
-    region: Region,
+    region: SourceRegion,
 ) -> None:
-    url = URL if region is Region.JP else EN_URL
+    url = URL if region is SourceRegion.JP else EN_URL
     _validate_body(Response(1, url, 200, "text/html", None, None, notice_body(region)))
 
 
-@pytest.mark.parametrize("region", [Region.JP, Region.EN])
+@pytest.mark.parametrize("region", [SourceRegion.JP, SourceRegion.EN])
 @pytest.mark.parametrize(
     "damage",
     [
@@ -277,11 +277,11 @@ def test_detail_template_requires_the_full_announcement_structure(
     ],
 )
 def test_shared_layout_and_generic_containers_cannot_pass_as_a_notice(
-    case: Case, region: Region, damage: str
+    case: Case, region: SourceRegion, damage: str
 ) -> None:
-    url = URL if region is Region.JP else EN_URL
+    url = URL if region is SourceRegion.JP else EN_URL
     body = notice_body(region)
-    prefix = b"eratta" if region is Region.JP else b"errata"
+    prefix = b"eratta" if region is SourceRegion.JP else b"errata"
     replacements = {
         "outer-chain": (b"st-Container_Inner", b"st-Other"),
         "layout-heading": (b"sw-Lower_Heading", b"sw-Other"),
@@ -295,7 +295,7 @@ def test_shared_layout_and_generic_containers_cannot_pass_as_a_notice(
         "empty-contents": (b"Synthetic body", b" "),
         "other-region-template": (
             prefix,
-            b"errata" if region is Region.JP else b"eratta",
+            b"errata" if region is SourceRegion.JP else b"eratta",
         ),
     }
     if damage == "misplaced-detail":
@@ -336,7 +336,7 @@ def test_mixed_selection_keeps_exact_urls_and_region_specific_raw(case: Case) ->
     assert [str(r.url) for _, r in case.server.calls] == [URL, EN_URL]
     assert all(b[0] - a[0] >= 2.5 for a, b in pairwise(case.server.calls))
     with case.manifest() as manifest:
-        for url, region in ((URL, Region.JP), (EN_URL, Region.EN)):
+        for url, region in ((URL, SourceRegion.JP), (EN_URL, SourceRegion.EN)):
             resource = manifest.resources.get(url)
             assert resource is not None
             assert resource.region is region
@@ -397,17 +397,22 @@ def test_en_original_href_with_trailing_junk_is_rejected_without_repair(
     assert not case.root.exists()
 
 
-@pytest.mark.parametrize("region", [Region.JP, Region.EN])
+@pytest.mark.parametrize("region", [SourceRegion.JP, SourceRegion.EN])
 def test_same_slug_and_raw_region_never_imply_cross_region_trust(
-    case: Case, region: Region
+    case: Case, region: SourceRegion
 ) -> None:
-    url = URL if region is Region.JP else EN_URL
+    url = URL if region is SourceRegion.JP else EN_URL
     assert case.invoke((url,)).exit_code == 0
     with case.manifest() as manifest, manifest.transaction():
         resource = manifest.resources.get(url)
         assert resource is not None
         manifest.resources.put(
-            replace(resource, region=Region.EN if region is Region.JP else Region.JP)
+            replace(
+                resource,
+                region=SourceRegion.EN
+                if region is SourceRegion.JP
+                else SourceRegion.JP,
+            )
         )
     assert case.invoke((url,)).exit_code == 1
     assert len(case.server.calls) == 1
@@ -429,7 +434,7 @@ def test_success_has_exact_raw_metadata_no_discovery_and_trusted_skip(
         resource = manifest.resources.get(URL)
         assert resource is not None
         assert resource.kind is Kind.ERRATA
-        assert resource.region is Region.JP
+        assert resource.region is SourceRegion.JP
         assert resource.path == raw_path(URL)
         assert resource.sha256 == sha256(BODY)
         assert resource.raw_bytes == len(BODY)
@@ -489,11 +494,11 @@ def test_all_redirects_stop_without_contacting_target_or_next_source(
         httpx.ConnectError("synthetic connection"),
     ],
 )
-@pytest.mark.parametrize("region", [Region.JP, Region.EN])
+@pytest.mark.parametrize("region", [SourceRegion.JP, SourceRegion.EN])
 def test_only_three_attempts_then_continue_next_url(
-    case: Case, failure: httpx.Response | BaseException, region: Region
+    case: Case, failure: httpx.Response | BaseException, region: SourceRegion
 ) -> None:
-    url, other = (URL, OTHER) if region is Region.JP else (EN_URL, EN_OTHER)
+    url, other = (URL, OTHER) if region is SourceRegion.JP else (EN_URL, EN_OTHER)
     case.server.responses = [failure] * 3 + [ok(region)]
     result = case.invoke((url, other))
     assert result.exit_code == 1, result.output
@@ -679,7 +684,7 @@ def test_recorded_untrusted_source_never_repaired(case: Case, damage: str) -> No
             elif damage == "wrong-kind":
                 resource = replace(resource, kind=Kind.CARD)
             else:
-                resource = replace(resource, region=Region.EN)
+                resource = replace(resource, region=SourceRegion.EN)
             manifest.resources.put(resource)
     before = path.read_bytes() if path.exists() else None
     result = case.invoke((OTHER, URL))

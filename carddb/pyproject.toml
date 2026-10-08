@@ -229,7 +229,6 @@ runtime-evaluated-base-classes = [
     "pydantic.RootModel",
     "pydantic_settings.BaseSettings",
     "sve_carddb.domains.catalog.adoption_models.Batch",
-    "sve_carddb.domains.products.models.DecisionMetadata",
     "sve_carddb.domains.products.models.Evidence",
     "sve_carddb.core.models.RecordData",
     "sve_carddb.ingest.archive.source_archive._Model",

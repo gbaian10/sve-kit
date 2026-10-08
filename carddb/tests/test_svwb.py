@@ -6,7 +6,7 @@ import httpx
 import orjson
 import pytest
 
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.archive.manifest import Kind, Manifest
 from sve_carddb.ingest.crawl.crawl import Crawler
 from sve_carddb.ingest.crawl.crawl_svwb import SVWB_SITE, cards, stored_image_urls
@@ -165,7 +165,7 @@ async def test_every_page_of_every_language_is_stored(
     assert (last, "en") in site.calls
     resource = manifest.resources.get(last)
     assert resource is not None
-    assert (resource.region, resource.kind) == (Region.SVWB, Kind.API)
+    assert (resource.region, resource.kind) == (SourceRegion.SVWB, Kind.API)
     body = orjson.loads((tmp_path / resource.path).read_bytes())
     assert body["data"]["card_details"][str(site.ids[-1])]["common"]["name"].startswith(
         "en "

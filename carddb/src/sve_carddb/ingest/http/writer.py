@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
     from pathlib import Path, PurePosixPath
 
-    from sve_carddb.core.regions import SourceRegion as Region
+    from sve_carddb.core.regions import SourceRegion
 
 _TEMP_MARKER = ".tmp-"
 
@@ -60,7 +60,7 @@ class Fetched:
     """Content that passed validation and is ready to store."""
 
     url: str
-    region: Region
+    region: SourceRegion
     kind: Kind
     path: PurePosixPath
     body: bytes

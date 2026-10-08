@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import PurePosixPath
 
-    from sve_carddb.core.regions import SourceRegion as Region
+    from sve_carddb.core.regions import SourceRegion
     from sve_carddb.ingest.archive.manifest import Manifest
     from sve_carddb.ingest.http.client import Client, Response
     from sve_carddb.ingest.http.throttle import CircuitBreaker
@@ -56,7 +56,7 @@ class Mode(StrEnum):
 class Site:
     """What the crawler needs to know about one source site."""
 
-    region: Region
+    region: SourceRegion
     allowed: Callable[[str], bool]
     image_path: Callable[[str], PurePosixPath]
     headers: Callable[[str], tuple[tuple[str, str], ...]] = lambda _url: ()
@@ -83,7 +83,7 @@ class Catalog:
     parse_card: Callable[[bytes, str], jp.CardPage]
 
     @property
-    def region(self) -> Region:
+    def region(self) -> SourceRegion:
         """The region the stored pages are recorded under."""
         return self.site.region
 

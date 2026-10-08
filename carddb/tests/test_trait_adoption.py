@@ -20,8 +20,8 @@ from sve_carddb.domains.catalog.adoption_sources import AdoptionSources
 from sve_carddb.domains.catalog.adoption_validation import term as validate_term
 from sve_carddb.domains.catalog.records import VocabularyRecord
 
+from .catalog_adoption_fixtures import prepare_case
 from .catalog_vocabulary_fixtures import save, vocabulary_record
-from .current_catalog_fixtures import prepare_case
 from .trait_adoption_fixtures import trait_baseline as trait_baseline  # ruff: ignore[useless-import-alias] -- register the shared immutable archive fixture
 
 if TYPE_CHECKING:

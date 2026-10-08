@@ -36,7 +36,7 @@ from .adoption_fixtures import (
     make_case,
     write,
 )
-from .current_catalog_fixtures import populate_case
+from .catalog_adoption_fixtures import populate_case
 from .registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- expose synthetic pytest fixture
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- expose registry fixture dependency
 from .test_source_archive import _put, _resource, _store

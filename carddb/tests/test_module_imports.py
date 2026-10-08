@@ -89,7 +89,12 @@ for name in sys.modules:
 
 
 @pytest.mark.parametrize(
-    "module", [name for name in MODULES if name.startswith("sve_carddb.parse.")]
+    "module",
+    [
+        name
+        for name in MODULES
+        if name == "sve_carddb.parse" or name.startswith("sve_carddb.parse.")
+    ],
 )
 def test_parser_import_does_not_load_archive_or_posix_lock(
     module: str, tmp_path: Path

@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from urllib.parse import quote, urlsplit
 
 from sve_carddb.core.paths import relpath
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.urls import canonicalize
 from sve_carddb.parse.pages import official_jp as jp
 
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 HOST = "en.shadowverse-evolve.com"
 BASE = f"https://{HOST}"
 CARD_DIR = f"{BASE}/cards/"
-REGION = Region.EN
+REGION = SourceRegion.EN
 
 
 def allowed(url: str) -> bool:

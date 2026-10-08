@@ -17,7 +17,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 from sve_carddb.core.json import canonical, digest, parse
 from sve_carddb.core.paths import UnsafePathError
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.archive.manifest import (
     READABLE_SCHEMA_VERSIONS,
     ExclusiveLock,
@@ -423,7 +423,7 @@ def _scope(
         else {(item.provider, item.kind) for item in requested}
     )
     if not values or not values <= {
-        (region.value, kind.value) for region in Region for kind in Kind
+        (region.value, kind.value) for region in SourceRegion for kind in Kind
     }:
         msg = "scope must contain valid provider/kind pairs"
         raise ArchiveError(msg)

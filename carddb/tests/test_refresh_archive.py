@@ -19,7 +19,7 @@ from typer.testing import CliRunner
 from sve_carddb import cli
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.paths import UnsafePathError
-from sve_carddb.core.regions import SourceRegion as Region
+from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.archive import source_archive as archive
 from sve_carddb.ingest.archive.manifest import (
     AlreadyRunningError,
@@ -63,7 +63,15 @@ PATH = PurePosixPath("raw/jp/qa/one.html.zst")
 
 def fetched(body: bytes = b"synthetic-A", *, compressed: bool = True) -> Fetched:
     return Fetched(
-        URL, Region.JP, Kind.CARD, PATH, body, "text/html", "etag-A", None, compressed
+        URL,
+        SourceRegion.JP,
+        Kind.CARD,
+        PATH,
+        body,
+        "text/html",
+        "etag-A",
+        None,
+        compressed,
     )
 
 
@@ -1052,7 +1060,7 @@ def test_finish_batch_leaves_uncovered_observations_pending(
     write(writer, fetched())
     other = replace(
         fetched(),
-        region=Region.EN,
+        region=SourceRegion.EN,
         url="https://example.invalid/other",
         path=PurePosixPath("raw/en/other.html.zst"),
     )
@@ -1102,7 +1110,7 @@ def test_finish_refresh_ignores_unrelated_missing_scope(
     ordinary = Writer(store.data_root, writer._manifest)
     other = replace(
         fetched(),
-        region=Region.JP,
+        region=SourceRegion.JP,
         kind=Kind.IMAGE,
         url="https://example.invalid/other",
         path=PurePosixPath("media/other.png"),
