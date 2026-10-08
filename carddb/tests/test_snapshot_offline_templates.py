@@ -275,7 +275,7 @@ def test_ambiguous_card_name_concept_is_reported_not_resolved(
     number: str,
 ) -> None:
     _, recipe, _ = prepared
-    ambiguous = References(card_names={name: [("term:a", HASH), ("term:b", HASH)]})
+    ambiguous = References(card_names={name: ["term:a", "term:b"]})
     found = validated(sources, ambiguous)
     monkeypatch.setattr(offline, "_templates", lambda *_args, **_kwargs: found)
     built = build(recipe)
@@ -288,7 +288,7 @@ def test_ambiguous_card_name_concept_is_reported_not_resolved(
 def test_pattern_with_only_ambiguous_positions_refuses_the_build(
     sources: Templates,
 ) -> None:
-    pair = [("term:a", HASH), ("term:b", HASH)]
+    pair = ["term:a", "term:b"]
     ambiguous = References(card_names={"名前": pair, "別名": pair})
     with pytest.raises(
         ValueError, match=r"^Template definition source has unresolved parameter roles$"
@@ -297,13 +297,10 @@ def test_pattern_with_only_ambiguous_positions_refuses_the_build(
 
 
 def test_current_references_fall_back_only_for_a_missing_name() -> None:
-    references = References(
-        card_names={"名前": [("term:a", HASH)], "別名": [("term:a", HASH)] * 2}
-    )
+    references = References(card_names={"名前": ["term:a"], "別名": ["term:a"] * 2})
     assert references.quoted("名前").target == {
         "kind": "term",
         "id": "term:a",
-        "record_hash": HASH,
     }
     missing = references.quoted("第三")
     assert (missing.target, missing.issues) == (

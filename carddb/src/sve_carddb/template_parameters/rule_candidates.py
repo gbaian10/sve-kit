@@ -1,9 +1,8 @@
-"""Closed, opt-in recognition proposals; these definitions grant no adoption authority."""
+"""Closed, opt-in recognition rules with finite lexical conditions."""
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_parameters.explicit_rules import EXPLICIT
 from sve_carddb.template_parameters.keyword_aliases import KEYWORD_ALIASES
 from sve_carddb.template_parameters.numeric_rules import (
@@ -201,7 +200,7 @@ BY_ID = {rule.id: rule for rule in RULES}
 
 
 def selection(enabled: tuple[str, ...]) -> tuple[str, ...]:
-    """An explicit switch selects proposals, never a policy or an implicit whole family."""
+    """An explicit switch selects only the named rules."""
     if len(enabled) != len(set(enabled)):
         raise ValueError("Candidate rule selection must be unique")
     if any(rule not in BY_ID for rule in enabled):
@@ -227,10 +226,9 @@ def _explicit_conditions(identifier: str) -> dict[str, JsonValue]:
 
 
 def conditions(rule: Rule) -> dict[str, JsonValue]:
-    """Only matching inputs and role evidence belong to the maintainer condition hash."""
+    """Expose the lexical inputs and role used by the registered matcher."""
     result: dict[str, JsonValue] = {
-        "required_issue": rule.reason,
-        "proposed_role": rule.role,
+        "recognized_role": rule.role,
         "scope": {
             "region": "jp",
             "roles": ["body"]
@@ -279,7 +277,6 @@ def conditions(rule: Rule) -> dict[str, JsonValue]:
                 target: STAT_CATEGORIES.get(target, "ability")
                 for target in rule.targets
             },
-            "record_hash": True,
         }
     if rule.id.startswith("braced_"):
         result["braced_evidence"] = {
@@ -322,22 +319,15 @@ def conditions(rule: Rule) -> dict[str, JsonValue]:
     return result
 
 
-def condition_hash(rule: Rule) -> str:
-    """Descriptions, publication status and matcher version do not alter lexical conditions."""
-    return digest(canonical(conditions(rule)))
-
-
 def definition(rule: Rule) -> dict[str, JsonValue]:
     """Keep display metadata separate from the exact matching contract."""
     return {
         "id": rule.id,
         "matcher_version": VERSION + ":" + rule.id,
-        "proposed_role": rule.role,
-        "original_reason": rule.reason,
+        "recognized_role": rule.role,
+        "unmatched_reason": rule.reason,
         "condition": rule.condition,
         "match_conditions": conditions(rule),
-        "condition_hash": condition_hash(rule),
-        "status": "pending_approval",
     }
 
 
@@ -347,8 +337,6 @@ def configuration(enabled: tuple[str, ...] = ()) -> dict[str, JsonValue]:
     return {
         "version": VERSION,
         "enabled": list(selected),
-        "recognition_policy": None,
-        "status": "pending_approval",
         "region": "jp",
         "roles": ["body", "reminder"],
         "rules": [definition(rule) for rule in RULES],

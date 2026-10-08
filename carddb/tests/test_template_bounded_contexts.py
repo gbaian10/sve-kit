@@ -2,14 +2,12 @@
 
 import pytest
 
-from sve_carddb.snapshot.values import array, digest, object_value, parse, string
-from sve_carddb.template_parameter_rules.current import Rule, Rules, resolve
-from sve_carddb.template_parameters.candidate_matching import recognize
+from sve_carddb.template_parameters.candidate_matching import classify, recognize
 from sve_carddb.template_parameters.explicit_rules import EXPLICIT
-from sve_carddb.template_parameters.inventory import Candidates
 from sve_carddb.template_parameters.keyword_aliases import KEYWORD_ALIASES
 from sve_carddb.template_parameters.models import Schema, Slot
 from sve_carddb.template_parameters.references import References
+from sve_carddb.template_parameters.spans import locate
 from sve_carddb.template_sources.inventory import entry
 from sve_carddb.template_sources.normalizer import VERSION, partition
 from sve_carddb.template_translations.members import _members
@@ -22,7 +20,7 @@ from .test_template_explicit_rules import (
 from .test_template_explicit_rules import (
     test_explicit_match_requires_opt_in_exact_value_and_preserves_proposal as check_match,
 )
-from .test_template_parameters import HASH, candidate
+from .test_template_parameters import candidate
 from .test_template_rule_candidates import matches
 from .test_template_value_rules import CASES as VALUE_CASES
 
@@ -147,11 +145,11 @@ def test_damage_cap_slots_are_distinct_and_both_numbers_require_raw_evidence() -
     bound = matches(text, "received_damage_lower_bound")
     assigned = matches(text, "received_damage_assignment")
     assert len(bound) == len(assigned) == 1
-    assert (bound[0]["value"], bound[0]["proposed_role"]) == (
+    assert (bound[0]["value"], bound[0]["recognized_role"]) == (
         2,
         "received_damage_lower_bound",
     )
-    assert (assigned[0]["value"], assigned[0]["proposed_role"]) == (
+    assert (assigned[0]["value"], assigned[0]["recognized_role"]) == (
         5,
         "received_damage_assigned_value",
     )
@@ -174,8 +172,8 @@ def test_damage_cap_slots_are_distinct_and_both_numbers_require_raw_evidence() -
 def evidence() -> References:
     return References(
         terms={
-            "ネクロチャージ": [("term:ability.necrocharge", "ability", HASH)],
-            "スペルチェイン": [("term:ability.spell_chain", "ability", HASH)],
+            "ネクロチャージ": [("term:ability.necrocharge", "ability")],
+            "スペルチェイン": [("term:ability.spell_chain", "ability")],
         }
     )
 
@@ -196,11 +194,9 @@ def test_alias_threshold_requires_closed_raw_prefix_and_registered_full_ability(
     row = rows[0]
     assert (
         row["value"],
-        row["proposed_role"],
+        row["recognized_role"],
         row["target_id"],
-        row["target_hash"],
-    ) == (2, role, target, HASH)
-    assert row["raw_hash"] == digest("２".encode())
+    ) == (2, role, target)
     for bad in ("②", "+２", "-２", "9007199254740992", "２猫", "２ "):
         assert matches(text.replace("２", bad), identifier, evidence()) == ()
     for bad in (alias.lower(), "X" + alias, "ＮＣ" if alias == "NC" else "ＳＣ"):
@@ -212,10 +208,10 @@ def test_alias_threshold_requires_closed_raw_prefix_and_registered_full_ability(
     full = KEYWORD_ALIASES[identifier].full_name
     for raw in (
         References(),
-        References(terms={alias: [(target, "ability", HASH)]}),
-        References(terms={full: [(target, "trait", HASH)]}),
-        References(terms={full: [("term:ability.quick", "ability", HASH)]}),
-        References(terms={full: [(target, "ability", HASH)] * 2}),
+        References(terms={alias: [(target, "ability")]}),
+        References(terms={full: [(target, "trait")]}),
+        References(terms={full: [("term:ability.quick", "ability")]}),
+        References(terms={full: [(target, "ability")] * 2}),
     ):
         assert matches(text, identifier, raw) == ()
 
@@ -249,35 +245,15 @@ def test_paired_caps_and_aliases_resolve_to_independent_roles_and_schema(
     item = entry(entry_ref(), partition(text)[0], VERSION)
     value = candidate(text, refs).model_copy(update={"inventory_id": item.id})
     assert recognize(text, partition(text)[0], value, refs) == ()
-    proposals = Candidates(
-        entries=[value],
-        rule_matches=list(
-            recognize(text, partition(text)[0], value, refs, identifiers)
-        ),
+    part = partition(text)[0]
+    classified, matches = classify(
+        text, part, item, locate(text, (part,))[0], refs, identifiers
     )
-    policy = Rules(
-        parameter_rule_format=2,
-        kind="template_parameter_rules",
-        rules=tuple(
-            Rule(
-                rule_id=i, enabled=True, origin="project", low_confidence=False, note=""
-            )
-            for i in sorted(identifiers)
-        ),
-    )
-    solved, remaining = resolve(policy, proposals)
-    assert not remaining
-    assert len(solved) == len(roles)
-    resolved = {
-        (item.id, string(object_value(parse(raw))["slot"])): object_value(parse(raw))
-        for raw in solved
-    }
+    assert len(matches) == len(roles)
     member = _members(
         (item,),
-        (value,),
+        (classified,),
         {(item.source_ref.source_version_id, item.source_ref.locator): text},
-        resolved,
-        {},
     )[0]
     assert member.pending == ()
     assert member.roles == roles
@@ -297,7 +273,7 @@ def test_paired_caps_and_aliases_resolve_to_independent_roles_and_schema(
             )
         )
     )
-    assert resolve(policy.model_copy(update={"rules": ()}), proposals)[0] == ()
+    assert candidate(text, refs).issues
     assert value.parameter_schema is None
     owned = value.model_copy(
         update={
@@ -325,30 +301,15 @@ def test_zero_multiplier_stays_unresolved_at_definition_projection(
     value = candidate(text).model_copy(update={"inventory_id": item.id})
     rows = recognize(text, partition(text)[0], value, References(), (identifier,))
     assert rows == ()
-    policy = Rules(
-        parameter_rule_format=2,
-        kind="template_parameter_rules",
-        rules=(
-            Rule(
-                rule_id=identifier,
-                enabled=True,
-                origin="project",
-                low_confidence=False,
-                note="",
-            ),
-        ),
+    part = partition(text)[0]
+    classified, matches = classify(
+        text, part, item, locate(text, (part,))[0], References(), (identifier,)
     )
-    solved, remaining = resolve(policy, Candidates(entries=[value], rule_matches=[]))
-    assert solved == ()
-    assert len(remaining) == 1
-    issues = {string(x) for x in array(object_value(parse(remaining[0]))["issues"])}
-    assert issues == {"numeric_role_requires_review"}
+    assert matches == ()
     member = _members(
         (item,),
-        (value,),
+        (classified,),
         {(item.source_ref.source_version_id, item.source_ref.locator): text},
-        {},
-        {item.id: issues},
     )[0]
     assert member.pending == ("numeric_role_requires_review",)
     assert member.hints[0].value == 0

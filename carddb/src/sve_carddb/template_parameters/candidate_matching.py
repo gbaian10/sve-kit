@@ -1,11 +1,16 @@
-"""Match only unowned pending slots and preserve their original candidate payloads."""
+"""Classify enabled rules directly from source values and surrounding grammar."""
 
 import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.snapshot.values import digest
-from sve_carddb.template_parameters.analysis import prepared, unsigned
+from sve_carddb.template_parameter_rules.models import LEGACY_IDS
+from sve_carddb.template_parameters.analysis import (
+    analyze,
+    contract,
+    prepared,
+    unsigned,
+)
 from sve_carddb.template_parameters.explicit_rules import EXPLICIT
 from sve_carddb.template_parameters.keyword_aliases import KEYWORD_ALIASES
 from sve_carddb.template_parameters.models import Range
@@ -25,7 +30,6 @@ from sve_carddb.template_parameters.rule_candidates import (
     STAT_CATEGORIES,
     SUFFIXES,
     VERSION,
-    condition_hash,
     selection,
 )
 from sve_carddb.template_parameters.signed_contexts import SIGNED_CONTEXTS
@@ -38,6 +42,8 @@ if TYPE_CHECKING:
     from sve_carddb.template_parameters.provenance import Unit
     from sve_carddb.template_parameters.references import References
     from sve_carddb.template_parameters.rule_candidates import Rule
+    from sve_carddb.template_parameters.spans import Located
+    from sve_carddb.template_sources.models import Entry
     from sve_carddb.template_sources.normalizer import Part
 
 INTRO = re.compile(INTRO_PATTERN)
@@ -49,22 +55,19 @@ ASCII = re.compile(ASCII_AFTER)
 class Match:
     context: tuple[Range, ...] = ()
     target_id: str | None = None
-    target_hash: str | None = None
 
 
 def _raw(text: str, spans: tuple[Range, ...]) -> str:
     return "".join(text[s.start : s.end] for s in spans)
 
 
-def _exact_target(
-    raw: str, refs: References, targets: tuple[str, ...]
-) -> tuple[str, str] | None:
+def _exact_target(raw: str, refs: References, targets: tuple[str, ...]) -> str | None:
     found = refs.terms.get(raw, [])
     if len(found) != 1 or found[0][0] not in targets:
         return None
-    identifier, category, checksum = found[0]
+    identifier, category = found[0]
     expected = STAT_CATEGORIES.get(identifier, "ability")
-    return (identifier, checksum) if category == expected else None
+    return identifier if category == expected else None
 
 
 def _origins(units: tuple[Unit, ...], start: int, end: int) -> tuple[Range, ...]:
@@ -115,11 +118,10 @@ def _braced(
     target = _exact_target(_raw(text, hint.source_segments), refs, rule.targets)
     if target is None or hint.target != {
         "kind": "term",
-        "id": target[0],
-        "record_hash": target[1],
+        "id": target,
     }:
         return None
-    return Match(target_id=target[0], target_hash=target[1])
+    return Match(target_id=target)
 
 
 def _suffix(rule: Rule, hint: Hint, before: str, after: str) -> Match | None:
@@ -146,11 +148,7 @@ def _signed(
         return Match(context=context)
     spans = _origins(units, match.start() + 1, match.end() - len("}+"))
     target = _exact_target(_raw(text, spans), refs, rule.targets)
-    return (
-        None
-        if target is None
-        else Match(context=context, target_id=target[0], target_hash=target[1])
-    )
+    return None if target is None else Match(context=context, target_id=target)
 
 
 def _signed_context(
@@ -175,8 +173,7 @@ def _signed_context(
             return None
     return Match(
         context=_origins(units, prefix.start(), hint.occurrence.end + suffix.end()),
-        target_id=target[0] if target else None,
-        target_hash=target[1] if target else None,
+        target_id=target or None,
     )
 
 
@@ -228,8 +225,7 @@ def _alias_threshold(
         return None
     return Match(
         context=_origins(units, start, hint.occurrence.end + 1),
-        target_id=target[0],
-        target_hash=target[1],
+        target_id=target,
     )
 
 
@@ -254,8 +250,7 @@ def _threshold(
         if target is None
         else Match(
             context=_origins(units, match.start(), hint.occurrence.end + 1),
-            target_id=target[0],
-            target_hash=target[1],
+            target_id=target,
         )
     )
 
@@ -313,7 +308,7 @@ def recognize(
     refs: References,
     enabled: tuple[str, ...] = (),
 ) -> tuple[dict[str, JsonValue], ...]:
-    """An opt-in match stays pending; it cannot rewrite issues, schema or old ownership."""
+    """Return enabled lexical matches with roles, types and exact positions."""
     selected = selection(enabled)
     if part.role not in {"body", "reminder"}:
         return ()
@@ -341,25 +336,78 @@ def recognize(
                 {
                     "inventory_id": candidate.inventory_id,
                     "slot": hint.name,
+                    "type": hint.type,
+                    "reference_kind": hint.reference_kind,
                     "rule_id": identifier,
                     "matcher_version": VERSION + ":" + identifier,
-                    "condition_hash": condition_hash(rule),
-                    "proposed_role": rule.role,
-                    "original_reason": rule.reason,
-                    "status": "pending_approval",
+                    "recognized_role": rule.role,
                     "role": part.role,
                     "normalized_occurrence": hint.occurrence.model_dump(mode="json"),
                     "source_segments": [
                         s.model_dump(mode="json") for s in hint.source_segments
                     ],
-                    "raw_hash": hint.raw_hash,
                     "value": hint.value,
                     "target_id": match.target_id,
-                    "target_hash": match.target_hash,
                     "context_segments": [
                         s.model_dump(mode="json") for s in match.context
                     ],
-                    "context_hash": digest(_raw(text, match.context).encode()),
                 }
             )
     return tuple(results)
+
+
+def classify(
+    text: str,
+    part: Part,
+    item: Entry,
+    located: Located,
+    refs: References,
+    enabled: tuple[str, ...] = (),
+) -> tuple[Candidate, tuple[dict[str, JsonValue], ...]]:
+    """Classify once; disabled or unmatched positions retain their failure reasons."""
+    candidate = analyze(text, part, item, located, refs)
+    rows = recognize(
+        text, part, candidate, refs, tuple(k for k in enabled if k not in LEGACY_IDS)
+    )
+    matched = {str(row["slot"]): row for row in rows}
+    hints = []
+    for original in candidate.slots:
+        hint = original
+        row = matched.get(hint.name)
+        if row is not None:
+            hint = hint.model_copy(
+                update={
+                    "issues": tuple(
+                        reason
+                        for reason in hint.issues
+                        if reason != BY_ID[str(row["rule_id"])].reason
+                    ),
+                    "semantic_role": str(row["recognized_role"]),
+                    "rule_id": str(row["rule_id"]),
+                }
+            )
+        elif (
+            hint.numeric_rule in enabled
+            and part.role in {"body", "reminder"}
+            and hint.value is not None
+        ):
+            hint = hint.model_copy(update={"issues": (), "rule_id": hint.numeric_rule})
+        hints.append(hint)
+    field_issues = set(candidate.issues) - {
+        reason for hint in candidate.slots for reason in hint.issues
+    }
+    issues = tuple(
+        sorted(field_issues | {reason for hint in hints for reason in hint.issues})
+    )
+    parameter_schema, signature_hash, payload_hash = contract(
+        prepared(text, part)[0].normalized, tuple(hints)
+    )
+    return candidate.model_copy(
+        update={
+            "slots": tuple(hints),
+            "issues": issues,
+            "parameter_schema": parameter_schema,
+            "signature_hash": signature_hash,
+            "payload_hash": payload_hash,
+        }
+    ), rows

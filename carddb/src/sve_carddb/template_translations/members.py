@@ -3,15 +3,13 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.snapshot.values import array, canonical
+from sve_carddb.snapshot.values import canonical
 from sve_carddb.template_parameters.analysis import SAFE_INTEGER, prepared
 from sve_carddb.template_parameters.verification import verify_values
 from sve_carddb.template_sources.inventory import entry
 from sve_carddb.template_sources.normalizer import VERSION, partition
 
 if TYPE_CHECKING:
-    from pydantic import JsonValue
-
     from sve_carddb.template_parameters.models import Candidate, Hint, Schema
     from sve_carddb.template_sources.models import Entry
 POSITIVE_ROLES = {
@@ -95,8 +93,6 @@ def _members(
     entries: tuple[Entry, ...],
     candidates: tuple[Candidate, ...],
     fields: dict[tuple[str, str], str],
-    solved: dict[tuple[str, str], dict[str, JsonValue]],
-    pending: dict[str, set[str]],
 ) -> tuple[Reconstructed, ...]:
     by_id = {e.id: e for e in entries}
     result = []
@@ -105,27 +101,10 @@ def _members(
         value = normalized(
             item, fields[item.source_ref.source_version_id, item.source_ref.locator]
         )
-        hints, roles = [], []
-        for hint in candidate.slots:
-            solution = solved.get((item.id, hint.name))
-            hints.append(
-                hint
-                if solution is None
-                else hint.model_copy(
-                    update={
-                        "issues": tuple(
-                            str(i) for i in array(solution["remaining_issues"])
-                        )
-                    }
-                )
-            )
-            roles.append(
-                hint.semantic_role
-                if solution is None
-                else str(solution["recognized_role"])
-            )
+        hints = candidate.slots
+        roles = tuple(h.semantic_role for h in hints)
         # Defining reminder boundaries remains a human decision, not recognition consent.
-        causes = pending.get(item.id, set()) - {
+        causes = set(candidate.issues) - {
             "legacy_parenthesis_classification_requires_review"
         }
         result.append(

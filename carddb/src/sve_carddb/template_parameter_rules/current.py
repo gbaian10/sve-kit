@@ -11,8 +11,6 @@ from sve_carddb.registry.records import RecordData
 from sve_carddb.template_parameter_rules.models import LEGACY_IDS, RuleId
 from sve_carddb.template_parameter_rules.repository import LIMIT, git
 from sve_carddb.template_parameter_rules.repository import revision as check_revision
-from sve_carddb.template_parameter_rules.resolve import resolve_roles
-from sve_carddb.template_parameters.inventory import Candidates
 from sve_carddb.template_parameters.rule_candidates import BY_ID
 from sve_carddb.template_translations.files import json_bytes
 
@@ -92,14 +90,3 @@ def load_file(path: Path) -> Rules:
     ):
         raise ValueError("Missing or symlink current parameter rules")
     return parse(path.read_bytes())
-
-
-def resolve(
-    rules: Rules, candidates: Candidates
-) -> tuple[tuple[bytes, ...], tuple[bytes, ...]]:
-    """Keep positional, raw, reference and role checks in the existing matching algorithm."""
-    roles = {
-        key: "numeric" if key in LEGACY_IDS else BY_ID[key].role
-        for key in rules.enabled()
-    }
-    return resolve_roles(candidates, roles, roles=("body", "reminder"))

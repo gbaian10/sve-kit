@@ -339,7 +339,7 @@ def test_disabled_rules_leave_source_positions_pending(current_case: Case) -> No
     sources = Sources(current_case.sources.stores, References(), disabled)
     result = sources.generate(current_case.batches)
     member = next(m for m in result.entries if m.entry.role == "body")
-    assert member.pending == ("numeric_rule_pending_approval",)
+    assert member.pending == ("numeric_rule_disabled",)
 
 
 def test_current_rule_git_mode_is_checked(current_case: Case) -> None:

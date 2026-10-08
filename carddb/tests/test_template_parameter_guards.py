@@ -8,7 +8,7 @@ import pytest
 from pydantic import ValidationError
 
 from sve_carddb.build_inputs import ArchivePin, Source
-from sve_carddb.snapshot.values import canonical, digest, object_value
+from sve_carddb.snapshot.values import canonical, object_value
 from sve_carddb.template_parameters.analysis import header_positions, prepared
 from sve_carddb.template_parameters.current_references import adopted
 from sve_carddb.template_parameters.models import Range, Schema, Slot, SourceSpan
@@ -132,7 +132,6 @@ def test_literal_parameter_cannot_hide_a_foreign_sentence() -> None:
     assert result.parameter_schema is not None
     hint = result.slots[0].model_copy(
         update={
-            "raw_hash": digest(b"Synthetic foreign sentence"),
             "source_segments": (Range(start=0, end=len("Synthetic foreign sentence")),),
         }
     )
@@ -155,7 +154,6 @@ def test_literal_parameter_cannot_hide_a_foreign_sentence() -> None:
     [
         ("target", "Reference parameter requires matching adopted concept evidence"),
         ("id", "Reference parameter requires matching adopted concept evidence"),
-        ("hash", "Reference parameter requires matching adopted concept evidence"),
         (
             "card",
             "Reference parameter requires an implemented adopted evidence adapter",
@@ -167,7 +165,7 @@ def test_reference_value_requires_matching_kind_id_and_adopted_evidence(
     change: str, message: str
 ) -> None:
     text = "『Synthetic』"
-    refs = References(card_names={"Synthetic": [("term:name.synthetic", HASH)]})
+    refs = References(card_names={"Synthetic": ["term:name.synthetic"]})
     result = candidate(text, refs)
     assert result.parameter_schema is not None
     hint = result.slots[0]
@@ -178,12 +176,10 @@ def test_reference_value_requires_matching_kind_id_and_adopted_evidence(
         target["kind"] = "vocabulary"
     elif change == "id":
         target["id"] = "guessed"
-    elif change == "hash":
-        target["record_hash"] = "not-approved"
     elif change == "extra":
         target["face_id"] = "f:" + "a" * 32
     else:
-        target = {"kind": "card", "id": "c:" + "a" * 32, "record_hash": HASH}
+        target = {"kind": "card", "id": "c:" + "a" * 32}
         hint = hint.model_copy(update={"reference_kind": "card"})
         schema = Schema(
             slots=(schema.slots[0].model_copy(update={"reference_kind": "card"}),)

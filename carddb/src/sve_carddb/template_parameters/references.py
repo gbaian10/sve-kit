@@ -27,8 +27,8 @@ class Resolution:
 
 @dataclass
 class References:
-    card_names: dict[str, list[tuple[str, str]]] = field(default_factory=dict)
-    terms: dict[str, list[tuple[str, str, str]]] = field(default_factory=dict)
+    card_names: dict[str, list[str]] = field(default_factory=dict)
+    terms: dict[str, list[tuple[str, str]]] = field(default_factory=dict)
     vocabulary: Vocabulary | None = None
     pins: dict[str, JsonValue] = field(default_factory=dict)
 
@@ -40,10 +40,8 @@ class References:
                 "ambiguous_card_name_concept" if found else "missing_card_name_concept"
             )
             return Resolution(None, (reason,))
-        identifier, checksum = found[0]
-        return Resolution(
-            {"kind": "term", "id": identifier, "record_hash": checksum}, ()
-        )
+        identifier = found[0]
+        return Resolution({"kind": "term", "id": identifier}, ())
 
     def proposed_vocabulary(self, kind: str, raw: str) -> Resolution:
         """Maintainer confirmation permits proposals, not an adopted FK or renderer input."""
@@ -70,9 +68,9 @@ class References:
         found = self.terms.get(raw, [])
         if len(found) != 1:
             return Resolution(None, ("ambiguous_or_missing_term_concept",))
-        identifier, _, checksum = found[0]
+        identifier, _ = found[0]
         return Resolution(
-            {"kind": "term", "id": identifier, "record_hash": checksum},
+            {"kind": "term", "id": identifier},
             ("term_role_requires_review",),
         )
 
@@ -81,10 +79,8 @@ class References:
         found = self.terms.get(raw, [])
         if len(found) != 1 or found[0][1] != "trait":
             return Resolution(None, ("unknown_or_ambiguous_header_trait",))
-        identifier, _, checksum = found[0]
-        return Resolution(
-            {"kind": "term", "id": identifier, "record_hash": checksum}, ()
-        )
+        identifier, _ = found[0]
+        return Resolution({"kind": "term", "id": identifier}, ())
 
     @staticmethod
     def unclassified_header() -> Resolution:
@@ -98,10 +94,9 @@ class References:
                 "source_name_hash": digest(name.encode()),
                 "id": identifier,
                 "category": category,
-                "record_hash": checksum,
                 "reason": "term_mention_requires_semantic_role_review",
             }
             for name in sorted(self.terms)
             if name in raw
-            for identifier, category, checksum in self.terms[name]
+            for identifier, category in self.terms[name]
         )
