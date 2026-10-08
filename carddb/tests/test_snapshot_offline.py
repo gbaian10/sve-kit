@@ -551,7 +551,6 @@ def test_cli_preview_validates_output_before_build(
             "--bundle-dir",
             str(tmp_path / "bundle"),
         ],
-        env={"FORCE_COLOR": None, "NO_COLOR": "1", "TERM": "dumb"},
     )
     messages = {
         "repo": "Preview output must be disjoint from immutable input roots",

@@ -172,10 +172,8 @@ def test_maintainer_enum_is_explicit(
 
 
 def test_cli_writes_only_private_report_under_color(
-    baseline: Fixture, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    baseline: Fixture, tmp_path: Path
 ) -> None:
-    monkeypatch.setenv("NO_COLOR", "1")
-    monkeypatch.setenv("TERM", "dumb")
     private_draft = tmp_path / "draft.json"
     private_context = tmp_path / "context.json"
     output = tmp_path / "report.json"

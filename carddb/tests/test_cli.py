@@ -9,7 +9,6 @@ import httpx
 import orjson
 import pytest
 import stamina
-from rich.console import Console
 from typer.testing import CliRunner
 
 from sve_carddb import cli
@@ -44,16 +43,7 @@ if TYPE_CHECKING:
     from sve_carddb.workflows.extract import ExtractReport
 
 runner = CliRunner()
-pytestmark = pytest.mark.usefixtures("no_retry_waits", "plain_cli_output")
-
-
-@pytest.fixture
-def plain_cli_output(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("NO_COLOR", "1")
-    monkeypatch.delenv("FORCE_COLOR", raising=False)
-    monkeypatch.setenv("TERM", "dumb")
-    # The imported console has already cached the caller's color mode.
-    monkeypatch.setattr(cli, "console", Console(soft_wrap=True, color_system=None))
+pytestmark = pytest.mark.usefixtures("no_retry_waits")
 
 
 @pytest.fixture

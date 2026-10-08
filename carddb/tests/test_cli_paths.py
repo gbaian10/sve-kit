@@ -48,7 +48,7 @@ def test_export_rejects_invalid_roots_before_reading_recipe(
     result = CliRunner().invoke(
         app,
         arguments,
-        env=env | {"FORCE_COLOR": None, "NO_COLOR": "1", "TERM": "dumb"},
+        env=env,
     )
     assert result.exit_code == 2
     assert environment in result.output
