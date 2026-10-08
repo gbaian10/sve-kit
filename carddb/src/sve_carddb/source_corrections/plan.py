@@ -34,7 +34,7 @@ class Application:
 
     def key(self) -> str:
         """Invalidate candidate/review identity on every authored correction change."""
-        return digest(self.record.content)
+        return digest(canonical(self.record.entry().model_dump(mode="json")))
 
     def uses(self) -> tuple[SourceUse, ...]:
         """Pin both the observation comparison and every exact image locator."""
