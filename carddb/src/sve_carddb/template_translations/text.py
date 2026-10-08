@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from sve_carddb.template_parameters.models import Schema
+    from sve_carddb.contracts.template_parameters import Schema
 
 NAME = re.compile(r"[a-z][a-z0-9_]*\Z")
 

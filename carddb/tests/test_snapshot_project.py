@@ -13,12 +13,11 @@ import sve_carddb.snapshot.project as project_module
 from sve_carddb.build_db import Json, create_database
 from sve_carddb.build_db.database import open_database
 from sve_carddb.build_db.t0 import compile_t0
+from sve_carddb.contracts.contract import tables
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.routes.defaults import GeneralEvidence, select_defaults
-from sve_carddb.snapshot.contract import tables
 from sve_carddb.snapshot.project import (
     Decisions,
-    DisplayBinding,
     DisplayCheck,
     DisplayText,
     display_text,
@@ -28,6 +27,7 @@ from sve_carddb.snapshot.project import (
 from sve_carddb.snapshot.project.closure import validate_closure
 from sve_carddb.snapshot.project.records import initial
 from sve_carddb.snapshot.project.shape import tuple_value
+from sve_carddb.translations.bindings import DisplayBinding
 
 from .build_db_fixtures import DATE
 from .snapshot_project_fixtures import SETTINGS, TEXT, decisions, populate, schema

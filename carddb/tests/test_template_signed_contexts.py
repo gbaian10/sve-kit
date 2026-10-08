@@ -4,9 +4,9 @@ from dataclasses import replace
 
 import pytest
 
+from sve_carddb.contracts.template_parameters import Schema, Slot
 from sve_carddb.core.json import integer, object_value
 from sve_carddb.template_parameters.candidate_matching import classify, recognize
-from sve_carddb.template_parameters.models import Schema, Slot
 from sve_carddb.template_parameters.references import References
 from sve_carddb.template_parameters.signed_contexts import SIGNED_CONTEXTS
 from sve_carddb.template_parameters.spans import locate

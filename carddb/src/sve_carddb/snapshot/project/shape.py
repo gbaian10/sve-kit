@@ -4,8 +4,8 @@ import re
 
 from pydantic import JsonValue
 
+from sve_carddb.contracts.contract import columns, definition, validate
 from sve_carddb.core.json import array, object_value, string
-from sve_carddb.snapshot.contract import columns, definition, validate
 
 
 def _value(kind: dict[str, JsonValue], value: JsonValue) -> JsonValue:

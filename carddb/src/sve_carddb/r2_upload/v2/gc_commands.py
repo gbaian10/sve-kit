@@ -5,11 +5,11 @@ from typing import Annotated
 
 import typer
 
-from sve_carddb.r2_upload.boundary import UploadError
 from sve_carddb.r2_upload.sdk import Credentials, sdk_client
 from sve_carddb.r2_upload.v2 import gc
 from sve_carddb.r2_upload.v2.adapter import PUBLIC_PREFIXES, R2Store
 from sve_carddb.r2_upload.v2.commands import target_values
+from sve_carddb.snapshot.read_api import ExportError as UploadError
 
 
 def gc_v2(

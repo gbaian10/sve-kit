@@ -7,6 +7,7 @@ import pytest
 from pydantic import ValidationError
 
 from sve_carddb.catalog.adoption_models import SourceRef
+from sve_carddb.contracts.template_parameters import Range, Schema, Slot, SourceSpan
 from sve_carddb.core.json import digest, object_value
 from sve_carddb.template_parameters.analysis import (
     NUMERIC_RULE_DISABLED,
@@ -16,7 +17,6 @@ from sve_carddb.template_parameters.analysis import (
     unsigned,
 )
 from sve_carddb.template_parameters.inventory import Candidates, summary
-from sve_carddb.template_parameters.models import Range, Schema, Slot, SourceSpan
 from sve_carddb.template_parameters.references import References
 from sve_carddb.template_parameters.spans import locate
 from sve_carddb.template_parameters.verification import verify_values

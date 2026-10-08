@@ -476,7 +476,7 @@ def test_foreign_printing_home_is_rejected(
 def test_name_translation_and_facet_dictionary_closure(
     logical: tuple[Projection, Ownership], exported: Snapshot
 ) -> None:
-    from sve_carddb.snapshot.contract import decode, row_type  # ruff: ignore[import-outside-top-level] -- decode fixed schema independently of exporter selection
+    from sve_carddb.contracts.contract import decode, row_type  # ruff: ignore[import-outside-top-level] -- decode fixed schema independently of exporter selection
 
     records: dict[str, list[dict[str, JsonValue]]] = {}
     for key, blob in exported.payloads.items():

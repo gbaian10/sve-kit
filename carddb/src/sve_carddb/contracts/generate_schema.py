@@ -6,9 +6,9 @@ from pathlib import Path
 
 from pydantic import JsonValue
 
+from sve_carddb.contracts.profiles import MEDIA, PROFILES, profile
+from sve_carddb.contracts.schema_patterns import patterns
 from sve_carddb.core.json import array, object_value, parse, string
-from sve_carddb.snapshot.profiles import MEDIA, PROFILES, profile
-from sve_carddb.snapshot.schema_patterns import patterns
 
 
 def _ref(name: str) -> dict[str, JsonValue]:
@@ -122,7 +122,7 @@ def generate(format_version: str = MEDIA) -> bytes:
     """Regenerate schema bytes solely from the packaged declarative source."""
     source = object_value(
         parse(
-            files("sve_carddb.snapshot")
+            files("sve_carddb.contracts")
             .joinpath("schema/" + profile(format_version).resource + "/source.json")
             .read_bytes()
         )

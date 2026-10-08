@@ -9,8 +9,9 @@ from sve_carddb.build_db import create_database
 from sve_carddb.core.json import array, object_value
 from sve_carddb.snapshot.export import Batch, Ownership, export_snapshot
 from sve_carddb.snapshot.media import prepare_media
-from sve_carddb.snapshot.project import DisplayBinding, DisplayCheck, project
+from sve_carddb.snapshot.project import DisplayCheck, project
 from sve_carddb.snapshot.reader import read_snapshot, read_text_all
+from sve_carddb.translations.bindings import DisplayBinding
 
 from .snapshot_project_fixtures import SETTINGS, TEXT, decisions, populate, schema
 from .test_snapshot_project import EN_TEXT, dual_project, dual_region, one, projected

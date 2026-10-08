@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 import httpx
 import pytest
 
-from sve_carddb.r2_upload.boundary import UploadError
 from sve_carddb.r2_upload.v2.adapter import R2Store
 from sve_carddb.r2_upload.v2.freshness import CDNFreshness
+from sve_carddb.snapshot.read_api import ExportError as UploadError
 
 from .r2_sdk_fixtures import inventory, mock_client
 from .r2_v2_fixtures import ACCOUNT, BUCKET, CREDENTIALS

@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.template_parameters.models import Range, SourceSpan
+from sve_carddb.contracts.template_parameters import Range, SourceSpan
 
 if TYPE_CHECKING:
     from sve_carddb.template_sources.normalizer import Part

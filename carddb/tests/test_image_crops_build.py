@@ -8,8 +8,7 @@ from typing import TYPE_CHECKING
 import pytest
 from PIL import Image
 
-import sve_carddb.image_crop_report as report_module
-from sve_carddb.build_db import create_database
+from sve_carddb.build_db import Row, create_database
 from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.core.json import array, object_value
 from sve_carddb.frozen_sources import FrozenSources
@@ -234,16 +233,16 @@ def test_report_uses_effective_owner_and_never_auto_inherits(
     )
 
     class Owners:
-        def rows(self, *_args: object) -> list[dict[str, str]]:
-            return [
-                {"id": "first", "card_id": "effective"},
-                {"id": "reprint", "card_id": "effective"},
-                {"id": "other-owner", "card_id": "unrelated"},
-                {"id": "other-face", "card_id": "effective"},
-            ]
+        def select(self, *_args: object) -> tuple[Row, ...]:
+            return (
+                Row("printing", {"id": "first", "card_id": "effective"}),
+                Row("printing", {"id": "reprint", "card_id": "effective"}),
+                Row("printing", {"id": "other-owner", "card_id": "unrelated"}),
+                Row("printing", {"id": "other-face", "card_id": "effective"}),
+            )
 
-    monkeypatch.setattr(report_module, "Source", lambda _db: Owners())
     with create_database(compile_build(("images",))) as db:
+        monkeypatch.setattr(db, "select", Owners().select)
         result = crop_report(crops, images, refs, db)
     assert result["applied_source_images"] == 1
     assert len(array(result["unused"])) == 1
@@ -261,6 +260,7 @@ def test_report_uses_effective_owner_and_never_auto_inherits(
         },
     )
     with create_database(compile_build(("images",))) as db:
+        monkeypatch.setattr(db, "select", Owners().select)
         reported = crop_report(wrong, images, refs, db)
     assert len(array(reported["annotation_mismatches"])) == 1
     assert reported["reprint_candidates"] == result["reprint_candidates"]
@@ -286,13 +286,14 @@ def _diagnostics(
     )
 
     class Owners:
-        def rows(self, *_args: object) -> list[dict[str, str]]:
-            return [
-                {"id": printing, "card_id": card} for _index, printing, card in bindings
-            ]
+        def select(self, *_args: object) -> tuple[Row, ...]:
+            return tuple(
+                Row("printing", {"id": printing, "card_id": card})
+                for _index, printing, card in bindings
+            )
 
-    monkeypatch.setattr(report_module, "Source", lambda _db: Owners())
     with create_database(compile_build(("images",))) as db:
+        monkeypatch.setattr(db, "select", Owners().select)
         return dict(crop_report(crops, images, refs, db))
 
 

@@ -13,6 +13,7 @@ from sve_carddb.snapshot.export.compression import compress
 from sve_carddb.snapshot.export.measure import measure
 from sve_carddb.snapshot.preview.media_state import commit
 from sve_carddb.snapshot.publication import require_preview
+from sve_carddb.snapshot.read_api import POINTER
 from sve_carddb.snapshot.reader import read_snapshot, read_text_all
 
 if TYPE_CHECKING:
@@ -20,9 +21,6 @@ if TYPE_CHECKING:
     from sve_carddb.snapshot.media import MediaPlan
     from sve_carddb.snapshot.project import Projection
     from sve_carddb.snapshot.project.source import Record
-
-
-POINTER = "snapshots/preview/current.json"
 
 
 @dataclass(frozen=True)

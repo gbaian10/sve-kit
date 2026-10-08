@@ -55,3 +55,34 @@ def test_module_first_import_in_fresh_process(module: str, tmp_path: Path) -> No
         check=False,
     )
     assert result.returncode == 0, f"First import failed for {module}: {result.stderr}"
+
+
+def test_read_api_import_does_not_load_build_or_publish(tmp_path: Path) -> None:
+    isolated = (
+        IMPORT
+        + """
+for name in sys.modules:
+    assert not any(name == prefix or name.startswith(prefix + '.') for prefix in (
+        'sve_carddb.build_db', 'sve_carddb.snapshot.export',
+        'sve_carddb.snapshot.project', 'sve_carddb.snapshot.preview',
+        'sve_carddb.snapshot.offline', 'sve_carddb.r2_upload',
+    )), name
+"""
+    )
+    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter without a shell
+        [
+            sys.executable,
+            "-I",
+            "-B",
+            "-c",
+            isolated,
+            str(SOURCE_ROOT),
+            "sve_carddb.snapshot.read_api",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr

@@ -18,6 +18,7 @@ from sve_carddb.card_extras import (
     require_card_extras_ready,
 )
 from sve_carddb.catalog.adoption_models import Batch as SourceBatch
+from sve_carddb.contracts.contract import validate
 from sve_carddb.core.authored import authored_root
 from sve_carddb.core.json import array, digest, object_value, parse
 from sve_carddb.core.models import Hash, Instant, RecordData, Text
@@ -33,7 +34,6 @@ from sve_carddb.products import (
 from sve_carddb.products.models import Date
 from sve_carddb.registry.preview import FrozenEN, FrozenJP, FrozenRegions, plan_preview
 from sve_carddb.registry.records import PrintingData, Region
-from sve_carddb.snapshot.contract import validate
 from sve_carddb.snapshot.export import Batch, Ownership
 from sve_carddb.snapshot.offline_images import prepare_images
 from sve_carddb.snapshot.offline_names import composer

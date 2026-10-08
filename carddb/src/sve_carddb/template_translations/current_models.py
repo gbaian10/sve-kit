@@ -4,10 +4,10 @@ from typing import Annotated, Literal, Self
 
 from pydantic import Field, computed_field, field_validator, model_validator
 
+from sve_carddb.contracts.template_parameters import Role
 from sve_carddb.core.json import canonical
 from sve_carddb.core.models import Hash, RecordData, Text
 from sve_carddb.products.models import Code, Lang
-from sve_carddb.template_sources.normalizer import Role
 from sve_carddb.template_translations.models import Definition, TemplateId
 
 

@@ -11,14 +11,14 @@ from typer.testing import CliRunner
 
 from sve_carddb.cli import app
 from sve_carddb.core.json import canonical, object_value, parse, string
-from sve_carddb.r2_upload.boundary import UploadError
 from sve_carddb.r2_upload.sdk import Credentials
 from sve_carddb.r2_upload.v2.adapter import Stored
-from sve_carddb.r2_upload.v2.export import INDEX, load_export
 from sve_carddb.r2_upload.v2.freshness import CDNFreshness
+from sve_carddb.r2_upload.v2.headers import member_headers
 from sve_carddb.r2_upload.v2.publish import next_index, upload
 from sve_carddb.snapshot.export.compression import python_brotli
-from sve_carddb.snapshot.preview import POINTER
+from sve_carddb.snapshot.read_api import INDEX, POINTER, load_export
+from sve_carddb.snapshot.read_api import ExportError as UploadError
 
 from .r2_sdk_fixtures import install_mock_sdk
 from .r2_v2_export_fixtures import art_changed as art_changed  # ruff: ignore[useless-import-alias] -- module-scoped crop-change corpus
@@ -105,9 +105,9 @@ def test_first_upload_selects_only_the_public_closure_and_writes_index_last(
         "cache-control": "no-store",
     }
     for member in loaded.members:
-        assert state.objects[member.key].headers == member.headers
+        assert state.objects[member.key].headers == member_headers(member)
     gz = next(m for m in loaded.members if m.key.endswith(".gz"))
-    assert gz.headers["content-encoding"] == "gzip"
+    assert member_headers(gz)["content-encoding"] == "gzip"
     image = state.objects[loaded.images[0].key]
     assert image.headers == {
         "content-type": "image/webp",
@@ -223,7 +223,7 @@ def test_conflicting_immutable_json_is_never_overwritten(
     export(images, roots, step=0)
     loaded = load_export(roots.preview)
     member = loaded.members[0]
-    state.objects[member.key] = Stored(b"other", '"other"', member.headers)
+    state.objects[member.key] = Stored(b"other", '"other"', member_headers(member))
     with pytest.raises(
         UploadError, match=r"^Immutable JSON object differs from the export$"
     ):

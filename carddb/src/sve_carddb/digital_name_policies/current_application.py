@@ -13,7 +13,7 @@ from sve_carddb.digital_name_policies.application import Result, _counterparts
 from sve_carddb.digital_name_policies.current_evaluate import catalogue
 from sve_carddb.digital_name_policies.evaluate import name_result, owner_text
 from sve_carddb.digital_name_policies.owners import publication_owners
-from sve_carddb.snapshot.project.evidence import DisplayBinding
+from sve_carddb.translations.bindings import DisplayBinding
 from sve_carddb.translations.counterparts import first_counterpart
 from sve_carddb.translations.current_models import ChoiceRecord, TermRecord
 from sve_carddb.translations.importer import validate_choice

@@ -6,8 +6,8 @@ from dataclasses import replace
 
 import pytest
 
+from sve_carddb.contracts.template_parameters import Range
 from sve_carddb.template_parameters import provenance, spans
-from sve_carddb.template_parameters.models import Range
 from sve_carddb.template_sources.normalizer import partition
 
 

@@ -4,10 +4,9 @@ from typing import Annotated, Literal
 
 from pydantic import Field
 
+from sve_carddb.contracts.template_parameters import Role, Schema
 from sve_carddb.core.models import Hash, RecordData
 from sve_carddb.products.models import Code
-from sve_carddb.template_parameters.models import Schema
-from sve_carddb.template_sources.normalizer import Role
 
 TemplateId = Annotated[str, Field(pattern=r"^[TC](?:[0-9a-f]{2}){8,32}\Z")]
 

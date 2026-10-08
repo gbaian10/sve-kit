@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
+from sve_carddb.contracts.contract import columns, definition
+from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.core.json import array, object_value, string
 from sve_carddb.snapshot.buckets import bucket
-from sve_carddb.snapshot.contract import columns, definition
-from sve_carddb.snapshot.profiles import MEDIA, profile
 from sve_carddb.snapshot.project.source import Source
 
 if TYPE_CHECKING:
