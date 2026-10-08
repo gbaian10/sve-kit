@@ -53,7 +53,8 @@ def test_entry_requires_known_area(tmp_path: Path, entry: Entry, *, typo: bool) 
 
 
 @pytest.mark.parametrize(
-    "mutation", ["duplicate", "symlink", "unknown", "bool_format", "key", "area"]
+    "mutation",
+    ["duplicate", "symlink", "unknown", "kind", "bool_format", "key", "area"],
 )
 def test_current_file_boundary_guards(case: Case, mutation: str) -> None:
     path = case.root / "catalog-adoptions/vocabulary/shared/001.yaml"
@@ -69,6 +70,9 @@ def test_current_file_boundary_guards(case: Case, mutation: str) -> None:
         message = "Symlink|symlink"
     elif mutation == "unknown":
         object_value(row["data"])["unknown"] = True
+        write(case.root, path.relative_to(case.root).as_posix(), raw)
+    elif mutation == "kind":
+        row["kind"] = "unknown_adoption"
         write(case.root, path.relative_to(case.root).as_posix(), raw)
     elif mutation == "bool_format":
         raw["catalog_adoption_format"] = True
