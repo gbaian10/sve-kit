@@ -1,6 +1,6 @@
 # 快照機器契約與共用樣本
 
-欄位語意依 [快照格式](snapshot-format.md)，傳輸與版本規則依 [傳輸契約](snapshot-transport.md)。機器資源位於 `carddb/src/sve_carddb/snapshot/schema/v2/contract.schema.json`，隨 carddb wheel 打包；採 JSON Schema Draft 2020-12，識別為 `urn:sve-kit:snapshot:2.0.0`，所有 `$ref` 都在檔內。
+欄位語意依 [快照格式](snapshot-format.md)，傳輸與版本規則依 [傳輸契約](snapshot-transport.md)。機器資源位於 `carddb/src/sve_carddb/contracts/schema/v2/contract.schema.json`，隨 carddb wheel 打包；採 JSON Schema Draft 2020-12，識別為 `urn:sve-kit:snapshot:2.0.0`，所有 `$ref` 都在檔內。
 
 此資源釘候選 format `2.0.0`、bucket_count=64；它是可核算的契約配置，不宣稱正式容量凍結。正式配置仍依傳輸契約 §5 量測；更換配置須依其版本規則同步 Schema、樣本與 reader 支援表。
 
@@ -37,12 +37,12 @@ Schema 驗欄序、tuple 長度、required-nullable、額外欄及 enum。跨值
 
 ## Schema 產生與維護
 
-`contract.schema.json` 是提交並隨套件發布的產生結果，不直接手改。`schema/v2/source.json` 保存物件定義、tuple 欄位與約束；欄位的 `from` 指向完整邏輯 tuple，讓分割列共用型別與 descriptor。產生器 `sve_carddb.snapshot.generate_schema` 展開固定長度、欄序、Types、fragment 與 changes 的主鍵／欄位白名單；`schema_patterns.py` 組合日期與 URI pattern，來源中的 `pattern: {use: ...}` 只供產生器使用，不會出現在公開 Schema。
+`contract.schema.json` 是提交並隨套件發布的產生結果，不直接手改。`schema/v2/source.json` 保存物件定義、tuple 欄位與約束；欄位的 `from` 指向完整邏輯 tuple，讓分割列共用型別與 descriptor。產生器 `sve_carddb.contracts.generate_schema` 展開固定長度、欄序、Types、fragment 與 changes 的主鍵／欄位白名單；`schema_patterns.py` 組合日期與 URI pattern，來源中的 `pattern: {use: ...}` 只供產生器使用，不會出現在公開 Schema。
 
 修改對應的來源定義或 pattern 後，從 repo 根目錄重產：
 
 ```bash
-uv --directory carddb run python -m sve_carddb.snapshot.generate_schema
+uv --directory carddb run python -m sve_carddb.contracts.generate_schema
 uv --directory carddb run pytest tests/test_snapshot_contract.py
 ```
 
@@ -92,7 +92,7 @@ M3 的 TS reader／harness 使用相同資源和樣本，不建立第二份 gold
 - 對照 current/history 集合、translation 的欄位分割與合併鍵、公開 ID／詞彙引用閉包；不得跨快照查最新目標補洞。另驗參數上下界、名稱唯一及排序，Spelling 必須引用已宣告且啟用對應域的參數，同一裁定的多語 hints 必須有完全相同的參數宣告。
 - 個別下載與 text_all 都恰等於 expected-logical；完整遍歷 43 集合，不忽略空集合、null 或巢狀陣列次序。對替代容器另驗 contains／members／依賴閉包，不能拿聯集逃避單檔 hash 驗證。
 
-CI 路徑分流須讓 `carddb/src/sve_carddb/snapshot/schema/**` 觸發 web 契約測試，讓 `tests/fixtures/snapshot-contract/**` 觸發 Python 與 web 共用契約測試；這些路徑亦供引擎測試接線使用。TS 實作與 CI job 的接線由各元件維護，這份文件只固定共用入口及驗收責任。
+CI 路徑分流須讓 `carddb/src/sve_carddb/contracts/schema/**` 觸發 web 契約測試，讓 `tests/fixtures/snapshot-contract/**` 觸發 Python 與 web 共用契約測試；這些路徑亦供引擎測試接線使用。TS 實作與 CI job 的接線由各元件維護，這份文件只固定共用入口及驗收責任。
 
 ## 數位名字政策的准入邊界
 
