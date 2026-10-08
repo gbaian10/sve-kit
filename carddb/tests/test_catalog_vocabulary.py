@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, cast
 import pytest
 
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.catalog.adoption_models import RawMapping
 from sve_carddb.catalog.adoption_validation import _mapping_metadata
 from sve_carddb.snapshot.values import canonical, object_value
@@ -23,7 +23,7 @@ from .catalog_vocabulary_fixtures import (
     save,
     vocabulary_record,
 )
-from .current_catalog_fixtures import current_case, populate_case, prepare_case
+from .current_catalog_fixtures import populate_case, prepare_case
 from .test_glossary_adoption import checked
 
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope="module")
 def schema() -> CompiledSchema:
-    return compile_current_build()
+    return compile_build()
 
 
 @pytest.fixture(scope="module")
@@ -62,7 +62,6 @@ def test_native_current_catalog_has_bilingual_bindings_and_empty_marker_definiti
     case: VocabularyCase,
     schema: CompiledSchema,
 ) -> None:
-    case = replace(case, case=current_case(case.case))
     with create_database(schema) as db:
         derived = prepare_case(case.case, {"test-store": case.archive}).projection
         assert not db.rows("vocabulary")
@@ -83,8 +82,8 @@ def test_inactive_type_retains_its_key_but_cannot_bind_a_frozen_spelling(
     case = save(
         case,
         [
-            vocabulary_record(case, "type", "follower", []),
-            vocabulary_record(case, "type", "spell", [mapping(case)], active=False),
+            vocabulary_record("type", "follower", []),
+            vocabulary_record("type", "spell", [mapping(case)], active=False),
         ],
     )
     derived = prepare_case(case.case, {"test-store": case.archive}).projection
@@ -99,7 +98,7 @@ def test_inactive_type_retains_its_key_but_cannot_bind_a_frozen_spelling(
 @pytest.mark.parametrize(
     ("mutation", "message"),
     [
-        ("missing_markers", "Invalid adoption fields"),
+        ("missing_markers", "Invalid current catalog fields"),
         ("duplicate_markers", "Adopted special kinds must be sorted and unique"),
         ("unsorted_markers", "Adopted special kinds must be sorted and unique"),
         ("unknown_marker", "Unsupported adopted type special kind"),
@@ -153,12 +152,12 @@ def test_compound_adoption_single_rejection(  # ruff: ignore[complex-structure,t
         elif mutation == "inactive_marker":
             object_value(object_value(marker["data"])["value"])["active"] = False
         elif mutation == "unknown_definition":
-            items.append(vocabulary_record(case, "special_kind", "advanced", []))
+            items.append(vocabulary_record("special_kind", "advanced", []))
         else:
             object_value(object_value(marker["data"])["value"])["raw_mappings"] = [
                 mapping(case)
             ]
-            marker["evidence"] = [
+            object_value(marker["data"])["evidence"] = [
                 {
                     "source_ref": mapping(case)["source_ref"],
                     "role": "Synthetic complete field",
@@ -166,9 +165,7 @@ def test_compound_adoption_single_rejection(  # ruff: ignore[complex-structure,t
             ]
     elif mutation == "same_raw_other_code":
         items.append(
-            vocabulary_record(
-                case, "type", "spell", [mapping(case, markers=("evolve",))]
-            )
+            vocabulary_record("type", "spell", [mapping(case, markers=("evolve",))])
         )
     else:
         kind = (
@@ -205,14 +202,12 @@ def test_compound_adoption_single_rejection(  # ruff: ignore[complex-structure,t
                 )
             )
         if mutation == "missing_markers":
-            replacement = vocabulary_record(
-                case, kind, code, [mapping(case, kind=kind)]
-            )
+            replacement = vocabulary_record(kind, code, [mapping(case, kind=kind)])
             object_value(object_value(replacement["data"])["value"])["raw_mappings"] = (
                 list(mappings)
             )
         else:
-            replacement = vocabulary_record(case, kind, code, mappings)
+            replacement = vocabulary_record(kind, code, mappings)
         items[items.index(base)] = replacement
     case = save(case, items)
     with create_database(schema) as db:

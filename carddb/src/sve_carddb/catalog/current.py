@@ -11,7 +11,7 @@ from sve_carddb.catalog.adoption_sources import AdoptionSources
 from sve_carddb.catalog.current_models import LanguageRecord, Shard, VocabularyRecord
 from sve_carddb.catalog.models import Catalog
 from sve_carddb.catalog.projection import CatalogProjection
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.text_observations.intern import TextInterner
 from sve_carddb.text_observations.vocabulary import Binding, Vocabulary
 from sve_carddb.translations.direct import write
@@ -22,17 +22,13 @@ if TYPE_CHECKING:
     from sve_carddb.build_db import Database, Value
     from sve_carddb.build_inputs import BuildContext
     from sve_carddb.catalog.adoption_loader import AdoptionSnapshot
-    from sve_carddb.catalog.current_models import Record
     from sve_carddb.registry.snapshot import RegistrySnapshot
-
-
-CURRENT_FORMAT = 2
 
 
 @dataclass(frozen=True)
 class Prepared:
     snapshots: tuple[AdoptionSnapshot, ...]
-    records: tuple[Record, ...]
+    records: tuple[LanguageRecord | VocabularyRecord, ...]
     sources: AdoptionSources
     projection: CatalogProjection
 
@@ -44,8 +40,17 @@ def prepare(
     stores: dict[str, Path],
     registry: RegistrySnapshot | None = None,
 ) -> Prepared:
-    """Use current parser pins and exact mappings, not superseded review contexts."""
-    records = tuple(r for snapshot in snapshots for r in snapshot.current_records())
+    """Validate mappings against this build's frozen sources."""
+    loaded = tuple(r for snapshot in snapshots for r in snapshot.current_records())
+    if any(
+        not isinstance(record, (LanguageRecord, VocabularyRecord)) for record in loaded
+    ):
+        raise ValueError("Offline catalog supports vocabulary and language values")
+    records = tuple(
+        record
+        for record in loaded
+        if isinstance(record, (LanguageRecord, VocabularyRecord))
+    )
     sources = AdoptionSources(stores, repository, registry)
     batches = {
         e.source_ref.batch_id
@@ -75,7 +80,7 @@ def prepare(
             language = validate.language(record, registered)
             if language is not None:
                 languages.append(language)
-        else:
+        elif isinstance(record, VocabularyRecord):
             term = validate.term(record, review, sources)
             if term is not None:
                 terms.append(term)
@@ -109,15 +114,10 @@ def populate(  # ruff: ignore[complex-structure,too-many-branches] -- indexed pr
     prepared: Prepared,
     revision: str,
 ) -> None:
-    """Point current values at their indexed authored source, without decisions."""
+    """Point current values at the authored source read by this build."""
     audit: dict[str, str] = {}
     for snapshot in snapshots:
         for shard in snapshot.shards:
-            if (
-                object_value(parse(shard.content)).get("catalog_adoption_format")
-                != CURRENT_FORMAT
-            ):
-                continue
             identifier = (
                 "authored:catalog-current:"
                 + digest(canonical([revision, shard.path, digest(shard.exact)]))[7:]

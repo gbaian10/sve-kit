@@ -1,4 +1,4 @@
-"""Small versioned, exclusively synthetic adoption receipts."""
+"""Current catalog fixtures containing exclusively synthetic values."""
 
 # ruff: file-ignore[suspicious-subprocess-import,subprocess-without-shell-equals-true] -- synthetic Git histories use argument vectors and no shell
 
@@ -16,7 +16,7 @@ from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.adoption_importer import AdoptionInputs
 from sve_carddb.catalog.adoption_loader import load_adoptions
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.snapshot.values import canonical, digest, object_value
 
 if TYPE_CHECKING:
     from sve_carddb.catalog.adoption_loader import Entry
@@ -68,77 +68,26 @@ def commit(root: Path) -> str:
     return git(root, "rev-parse", "HEAD")
 
 
-def dependency(table: str, **key: str) -> dict[str, JsonValue]:
-    return {"table": table, "key": dict(key)}
-
-
-def record(  # ruff: ignore[too-many-arguments] -- synthetic data explicitly supplies revision and predecessor
-    kind: str,
-    subject: dict[str, JsonValue],
-    value: JsonValue,
-    review: dict[str, JsonValue],
-    dependencies: list[JsonValue] | None = None,
-    *,
-    number: int = 1,
-    previous: JsonValue = None,
+def record(
+    kind: str, subject: dict[str, JsonValue], value: JsonValue
 ) -> dict[str, JsonValue]:
     return {
-        "record_key": canonical([kind, subject, number]).decode(),
+        "record_key": canonical([kind, subject]).decode(),
         "kind": kind,
-        "filing_key": "shared",
-        "data": {
-            "subject": subject,
-            "value": value,
-            "adoption_no": number,
-            "predecessor": previous,
-            "review_context_hash": digest(canonical(review)),
-            "dependencies": sorted(dependencies or [], key=canonical),
-            "reason": "Synthetic human selection.",
-        },
-        "evidence": [],
+        "data": {"subject": subject, "value": value},
+        "origin": "project",
+        "low_confidence": False,
     }
 
 
 def envelope(
-    records: list[JsonValue],
-    review: dict[str, JsonValue],
-    *,
-    entry: Entry = "catalog-adoptions",
+    records: list[JsonValue], *, entry: Entry = "catalog-adoptions"
 ) -> dict[str, JsonValue]:
-    records = sorted(records, key=lambda r: str(object_value(r)["record_key"]))
-    members: list[JsonValue] = [
-        [object_value(r)["record_key"], digest(canonical(r))] for r in records
-    ]
-    checksum = digest(canonical(members))
-    category = str(object_value(records[0])["kind"])
-    policy = {
-        "vocabulary_adoption": "catalog-vocabulary-v1",
-        "language_adoption": "catalog-language-v1",
-        "search_alias_adoption": "catalog-alias-v1",
-        "text_symbol_adoption": "catalog-symbol-v1",
-        "rules_name_adoption": "catalog-rules-name-v1",
-        "route_override_adoption": "display-route-v1",
-        "default_printing_adoption": "display-default-v1",
-    }[category]
-    decision: dict[str, JsonValue] = {
-        "id": "d:" + checksum.removeprefix("sha256:"),
-        "state": "confirmed",
-        "scope": "batch",
-        "category": category,
-        "policy_id": policy,
-        "membership_hash": checksum,
-        "members": members,
-        "sample_ids": [object_value(r)["record_key"] for r in records],
-        "note": "Synthetic data only.",
-    }
     prefix = "catalog_adoption" if entry == "catalog-adoptions" else "display_override"
     return {
-        prefix + "_format": 1,
+        prefix + "_format": 2,
         "kind": prefix + "_shard",
-        "review_context": review,
-        "default_decision_id": decision["id"],
-        "records": records,
-        "decisions": [decision],
+        "records": sorted(records, key=lambda r: str(object_value(r)["record_key"])),
     }
 
 
@@ -159,7 +108,7 @@ def index(root: Path, *, entry: Entry = "catalog-adoptions") -> None:
     write(
         root,
         entry + "/index.yaml",
-        {prefix + "_format": 1, "kind": prefix + "_index", "includes": includes},
+        {prefix + "_format": 2, "kind": prefix + "_index", "includes": includes},
     )
 
 
@@ -209,8 +158,6 @@ def make_case(root: Path) -> Case:
             "language_adoption",
             {"code": lang},
             {"display_name": lang, "fallback_order": list[JsonValue](fallback)},
-            review,
-            [dependency("language", code=target) for target in fallback],
         )
         for lang, fallback in (
             ("ja", ("en",)),
@@ -221,7 +168,7 @@ def make_case(root: Path) -> Case:
     write(
         authored,
         "catalog-adoptions/languages/shared/001.yaml",
-        envelope(languages, review),
+        envelope(languages),
     )
     term = record(
         "vocabulary_adoption",
@@ -231,106 +178,15 @@ def make_case(root: Path) -> Case:
             "raw_mappings": [],
             "active": True,
         },
-        review,
-        [dependency("language", code="ja")],
     )
     write(
         authored,
         "catalog-adoptions/vocabulary/shared/001.yaml",
-        envelope([term], review),
+        envelope([term]),
     )
-    item_alias = record(
-        "search_alias_adoption",
-        {
-            "kind": "type",
-            "code": "follower",
-            "lang": "ja",
-            "text": "ＳＹＮＴＨＥＴＩＣ ",
-        },
-        {"normalized": "synthetic ", "normalizer": normalizer},
-        review,
-        [
-            dependency("vocabulary", kind="type", code="follower"),
-            dependency("language", code="ja"),
-        ],
-    )
-    write(
-        authored,
-        "catalog-adoptions/aliases/shared/001.yaml",
-        envelope([item_alias], review),
-    )
-    item_symbol = record(
-        "text_symbol_adoption",
-        {"id": "symbol:synthetic"},
-        {
-            "code": "synthetic",
-            "parameter_schema": {"parameters": []},
-            "keyword_id": None,
-            "spellings": [
-                {
-                    "lang": "ja",
-                    "literal_prefix": "Q",
-                    "literal_suffix": "",
-                    "parameter_name": None,
-                    "parse_kind": "literal",
-                }
-            ],
-            "source_localization": {
-                "lang": "ja",
-                "name": {"kind": "authored", "lang": "ja", "text": "Synthetic Q"},
-                "tooltip": {"kind": "authored", "lang": "ja", "text": "Synthetic tip"},
-                "copy_pattern": {"kind": "authored", "lang": "ja", "text": "Q"},
-            },
-        },
-        review,
-        [dependency("language", code="ja")],
-    )
-    write(
-        authored,
-        "catalog-adoptions/symbols/shared/001.yaml",
-        envelope([item_symbol], review),
-    )
+    for area in ("aliases", "symbols"):
+        (authored / "catalog-adoptions" / area).mkdir()
     index(authored)
     final = commit(root)
     load_adoptions(authored, entry="catalog-adoptions")
     return Case(root, authored, review, normalizer, final)
-
-
-def fields(
-    shard: dict[str, JsonValue],
-) -> tuple[dict[str, JsonValue], dict[str, JsonValue], dict[str, JsonValue]]:
-    member = object_value(array(shard["records"])[0])
-    return (
-        member,
-        object_value(member["data"]),
-        object_value(array(shard["decisions"])[0]),
-    )
-
-
-def successor(
-    root: Path, area: str, value: JsonValue, *, entry: Entry = "catalog-adoptions"
-) -> None:
-    old = object_value(read_yaml(root / f"{entry}/{area}/shared/001.yaml"))
-    member, data, _ = fields(old)
-    review = object_value(old["review_context"])
-    previous = {
-        "record_key": member["record_key"],
-        "record_hash": digest(canonical(member)),
-        "decision_id": old["default_decision_id"],
-    }
-    revised = record(
-        str(member["kind"]),
-        object_value(data["subject"]),
-        value,
-        review,
-        [] if value is None else array(data["dependencies"]),
-        number=2,
-        previous=previous,
-    )
-    revised["evidence"] = [] if value is None else member["evidence"]
-    write(
-        root,
-        f"{entry}/{area}/shared/002.yaml",
-        envelope([revised], review, entry=entry),
-    )
-    index(root, entry=entry)

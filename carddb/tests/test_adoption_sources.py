@@ -9,7 +9,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.build_db import CompiledSchema, create_database
-from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.adoption_models import ReviewContext, SourceRef
 from sve_carddb.catalog.adoption_sources import pointer
@@ -28,12 +28,11 @@ from .adoption_fixtures import (
     Case,
     commit,
     envelope,
-    fields,
     index,
     make_case,
     write,
 )
-from .current_catalog_fixtures import current_case, populate_case
+from .current_catalog_fixtures import populate_case
 from .registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- expose synthetic pytest fixture
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- expose registry fixture dependency
 from .test_source_archive import _put, _resource, _store
@@ -98,7 +97,6 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> tuple[Case, Path, str]
         for item in members:
             member = object_value(item)
             data = object_value(member["data"])
-            data["review_context_hash"] = digest(canonical(review))
             if member["kind"] == "vocabulary_adoption":
                 label_ref = ref("/faces/0/name", "Synthetic source name")
                 type_ref = ref("/faces/0/card_type", "Synthetic source type")
@@ -113,16 +111,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> tuple[Case, Path, str]
                         "special_kinds": [],
                     }
                 ]
-                member["evidence"] = sorted(
-                    [
-                        {"source_ref": label_ref, "role": "synthetic label review"},
-                        {"source_ref": type_ref, "role": "synthetic mapping review"},
-                    ],
-                    key=canonical,
-                )
-        write(
-            case.root, path.relative_to(case.root).as_posix(), envelope(members, review)
-        )
+        write(case.root, path.relative_to(case.root).as_posix(), envelope(members))
     index(case.root)
     return (
         replace(case, revision=commit(case.repository), review=review),
@@ -152,10 +141,10 @@ def case(tmp_path: Path, baseline: tuple[Case, Path, str]) -> tuple[Case, Path, 
 
 @pytest.fixture(scope="module")
 def schema() -> CompiledSchema:
-    return compile_current_build()
+    return compile_build()
 
 
-def test_exact_frozen_field_source_and_f1(
+def test_exact_frozen_fields_derive_evidence_from_values(
     case: tuple[Case, Path, str], schema: CompiledSchema
 ) -> None:
     inputs, archive, version = case
@@ -215,7 +204,6 @@ def test_identity_sources_are_stage_local(
         ("missing_raw", "Missing|missing|absent|No such file"),
         ("wrong_kind", "source field does not match kind"),
         ("half_raw", "exact raw/region/language mismatch"),
-        ("evidence_missing", "mapping lacks approved source evidence"),
         ("trait", "^Vocabulary mapping source field does not match kind$"),
         (
             "disabled_recipe",
@@ -223,13 +211,14 @@ def test_identity_sources_are_stage_local(
         ),
     ],
 )
-def test_source_single_guard_rejection(  # ruff: ignore[too-many-locals] -- independent mutations of one tiny sealed-source baseline
+def test_source_single_guard_rejection(
     case: tuple[Case, Path, str], schema: CompiledSchema, mutation: str, message: str
 ) -> None:
     inputs, archive, _ = case
     name = "catalog-adoptions/vocabulary/shared/001.yaml"
     shard = object_value(read_yaml(inputs.root / name))
-    member, data, _ = fields(shard)
+    member = object_value(array(shard["records"])[0])
+    data = object_value(member["data"])
     value = object_value(data["value"])
     mapping = object_value(array(value["raw_mappings"])[0])
     reference = object_value(mapping["source_ref"])
@@ -250,29 +239,17 @@ def test_source_single_guard_rejection(  # ruff: ignore[too-many-locals] -- inde
             else "frame"
         )
         member["record_key"] = canonical(
-            ["vocabulary_adoption", data["subject"], 1]
+            ["vocabulary_adoption", data["subject"]]
         ).decode()
     elif mutation == "half_raw":
         mapping["raw"] = "Synthetic source"
-    elif mutation == "evidence_missing":
-        member["evidence"] = [
-            e
-            for e in array(member["evidence"])
-            if object_value(e)["source_ref"] != reference
-        ]
     else:
         reference["locator" if mutation == "locator" else "text_hash"] = (
             "/missing" if mutation == "locator" else "sha256:" + "e" * 64
         )
-        for evidence in array(member["evidence"]):
-            old = object_value(object_value(evidence)["source_ref"])
-            if old["locator"] == "/faces/0/card_type":
-                old.update(reference)
-        member["evidence"] = sorted(array(member["evidence"]), key=canonical)
-    write(inputs.root, name, envelope([member], review))
+    write(inputs.root, name, envelope([member]))
     index(inputs.root)
     revised = replace(inputs, revision=commit(inputs.repository), review=review)
-    revised = current_case(revised)
     build = revised.build()
     with create_database(schema) as db:
         with pytest.raises((ValueError, OSError, ArchiveError), match=message):

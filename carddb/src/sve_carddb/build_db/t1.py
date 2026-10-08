@@ -1,6 +1,7 @@
 """Implemented T1 DDL groups; none yet claim a complete import/validation pipeline."""
 
 from sve_carddb.build_db import (
+    current_templates,
     t0,
     t1_correction,
     t1_cr,
@@ -18,7 +19,7 @@ from sve_carddb.build_db.model import Capability
 from sve_carddb.build_db.registry import Registry
 from sve_carddb.build_db.t0_json import schemas
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 MINIMUM_CAPABILITIES = ("t0", "images", "cr", "errata", "correction", "qa", "related")
 TABLES = (
     *t1_images.TABLES,
@@ -30,6 +31,7 @@ TABLES = (
     *t1_en.TABLES,
     *translation_evidence.TABLES,
     *t2_translation.TABLES,
+    *current_templates.TABLES,
 )
 REGISTRY = Registry(
     tables=(*t0.TABLES, *TABLES),
@@ -49,6 +51,11 @@ REGISTRY = Registry(
             "translation_names",
             tuple(table.name for table in t2_translation.TABLES),
             requires=("t0", "translation_evidence"),
+        ),
+        Capability(
+            "translation_templates",
+            tuple(table.name for table in current_templates.TABLES),
+            requires=("translation_names",),
         ),
         Capability("art", ("art",)),
         Capability(
@@ -70,7 +77,10 @@ def compile_build(requested: tuple[str, ...] = ("t0",)) -> CompiledSchema:
     return compile_schema(
         REGISTRY,
         requested,
-        schemas() | t1_json.schemas() | {"TranslationTokens": {"type": "null"}},
+        schemas()
+        | t1_json.schemas()
+        | current_templates.schemas()
+        | {"TranslationTokens": {"type": "null"}},
         version=SCHEMA_VERSION,
     )
 

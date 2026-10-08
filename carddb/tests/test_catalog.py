@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build_db import Json, create_database
-from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.importer import (
     catalog_configuration,
@@ -464,7 +464,7 @@ def test_alias_resolution_is_scoped_to_requested_language(db: Database) -> None:
 def test_current_language_registration_preserves_provenance_and_rejects_conflicts(
     column: str,
 ) -> None:
-    with create_database(compile_current_build()) as db:
+    with create_database(compile_build()) as db:
         languages = (Language(code="ja", display_name="Japanese", fallback_order=()),)
         with db.transaction():
             register_languages(db, languages)

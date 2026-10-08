@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build_db import Json, create_database
-from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_translations.current import validate_templates
 from sve_carddb.template_translations.current_build import apply, labels
@@ -188,7 +188,7 @@ def test_apply_renders_by_source_hash_and_counts_every_field(
     verified: Validated,
 ) -> None:
     member = verified.members[0]
-    schema = compile_current_build(("translation_templates",))
+    schema = compile_build(("translation_templates",))
     with create_database(schema) as db:
         seeded(db, member.field_text)
         with db.transaction():
@@ -223,7 +223,7 @@ def test_apply_keeps_unconfirmed_and_already_translated_sources_original(
     verified: Validated,
 ) -> None:
     member = verified.members[0]
-    schema = compile_current_build(("translation_templates",))
+    schema = compile_build(("translation_templates",))
     with create_database(schema) as db:
         seeded(db, member.field_text)
         with db.transaction():
@@ -250,7 +250,7 @@ def test_apply_keeps_unconfirmed_and_already_translated_sources_original(
 
 
 def test_apply_keeps_changed_source_revision_original(verified: Validated) -> None:
-    schema = compile_current_build(("translation_templates",))
+    schema = compile_build(("translation_templates",))
     with create_database(schema) as db:
         seeded(db, verified.members[0].field_text + "変更")
         with db.transaction():
@@ -264,7 +264,7 @@ def test_apply_keeps_changed_source_revision_original(verified: Validated) -> No
 def test_labels_read_selected_vocabulary_and_name_translations(
     verified: Validated,
 ) -> None:
-    schema = compile_current_build(("translation_templates",))
+    schema = compile_build(("translation_templates",))
     with create_database(schema) as db:
         seeded(db, verified.members[0].field_text)
         with db.transaction():

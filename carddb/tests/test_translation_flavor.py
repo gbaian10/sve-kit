@@ -6,7 +6,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.build_db import Json, create_database
-from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.snapshot import offline
 from sve_carddb.snapshot.offline import build
 from sve_carddb.snapshot.values import array, canonical, digest, object_value
@@ -114,7 +114,7 @@ def test_directory_holds_only_yaml_files(tmp_path: Path) -> None:
 
 @pytest.fixture(scope="module")
 def template() -> DatabaseTemplate:
-    schema = compile_current_build(("t0", "translation_evidence", "translation_names"))
+    schema = compile_build(("t0", "translation_evidence", "translation_names"))
     with create_database(schema) as db:
         seed(db)
         return DatabaseTemplate(schema, db._connection.serialize())

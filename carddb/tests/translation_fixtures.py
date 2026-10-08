@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.build_db import Json, create_database
-from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.snapshot.values import canonical, digest, object_value
 
 from .database_fixtures import DatabaseTemplate
@@ -94,7 +94,7 @@ def write(root: Path, shards: dict[str, dict[str, JsonValue]]) -> None:
 
 
 def template() -> DatabaseTemplate:
-    schema = compile_current_build(("t0", "translation_evidence"))
+    schema = compile_build(("t0", "translation_evidence"))
     with create_database(schema) as db:
         with db.transaction():
             db.insert(

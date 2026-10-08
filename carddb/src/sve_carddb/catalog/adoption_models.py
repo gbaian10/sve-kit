@@ -1,4 +1,4 @@
-"""Strict catalog/display adoption wire types; candidates never enter this boundary."""
+"""Source references and editable catalog values."""
 
 from typing import Annotated, Literal
 
@@ -73,36 +73,6 @@ class SourceText(RecordData):
 TextValue = Annotated[AuthoredText | SourceText, Field(discriminator="kind")]
 
 
-class Predecessor(RecordData):
-    record_key: Text
-    record_hash: Hash
-    decision_id: Text
-
-
-class Dependency(RecordData):
-    table: Literal[
-        "vocabulary",
-        "language",
-        "text_symbol",
-        "keyword",
-        "stamp",
-        "product_family",
-        "card",
-        "face",
-        "printing",
-        "rules_name",
-    ]
-    key: dict[str, JsonValue]
-
-
-class AdoptionData(RecordData):
-    adoption_no: Annotated[int, Field(ge=1)]
-    predecessor: Predecessor | None
-    review_context_hash: Hash
-    dependencies: tuple[Dependency, ...]
-    reason: Text
-
-
 class VocabularySubject(RecordData):
     kind: VocabularyKind
     code: Code
@@ -122,11 +92,6 @@ class VocabularyValue(RecordData):
     active: bool
 
 
-class VocabularyData(AdoptionData):
-    subject: VocabularySubject
-    value: VocabularyValue | None
-
-
 class LanguageSubject(RecordData):
     code: Lang
 
@@ -134,11 +99,6 @@ class LanguageSubject(RecordData):
 class LanguageValue(RecordData):
     display_name: Text
     fallback_order: tuple[Lang, ...]
-
-
-class LanguageData(AdoptionData):
-    subject: LanguageSubject
-    value: LanguageValue | None
 
 
 class AliasSubject(RecordData):
@@ -158,11 +118,6 @@ class AliasValue(RecordData):
     normalizer: Normalizer
 
 
-class AliasData(AdoptionData):
-    subject: AliasSubject
-    value: AliasValue | None
-
-
 class SymbolSubject(RecordData):
     id: Text
 
@@ -180,11 +135,6 @@ class SymbolValue(RecordData):
     keyword_id: Text | None
     spellings: Annotated[tuple[Spelling, ...], Field(min_length=1)]
     source_localization: SourceLocalization
-
-
-class SymbolData(AdoptionData):
-    subject: SymbolSubject
-    value: SymbolValue | None
 
 
 class NameSubject(RecordData):
@@ -211,11 +161,6 @@ class NameValue(RecordData):
     name_basis_hash: Hash
 
 
-class NameData(AdoptionData):
-    subject: NameSubject
-    value: NameValue | None
-
-
 class RouteSubject(RecordData):
     region: Region
     route_key: Text
@@ -228,18 +173,12 @@ class RouteCandidate(RecordData):
     card_no: Text
     card_no_state: Literal["official"]
     variant_key: Text
-    identity_ref: Predecessor
 
 
 class RouteValue(RecordData):
     printing_id: Text
     candidates: Annotated[tuple[RouteCandidate, ...], Field(min_length=2)]
     candidates_hash: Hash
-
-
-class RouteData(AdoptionData):
-    subject: RouteSubject
-    value: RouteValue | None
 
 
 class DefaultSubject(RecordData):
@@ -251,90 +190,3 @@ class DefaultValue(RecordData):
     printing_id: Text
     candidates: Annotated[tuple[Text, ...], Field(min_length=1)]
     candidates_hash: Hash
-
-
-class DefaultData(AdoptionData):
-    subject: DefaultSubject
-    value: DefaultValue | None
-
-
-class AdoptionRecord(RecordData):
-    record_key: Text
-    filing_key: Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]+\Z")]
-    evidence: tuple[Evidence, ...]
-
-
-class VocabularyRecord(AdoptionRecord):
-    kind: Literal["vocabulary_adoption"]
-    data: VocabularyData
-
-
-class LanguageRecord(AdoptionRecord):
-    kind: Literal["language_adoption"]
-    data: LanguageData
-
-
-class AliasRecord(AdoptionRecord):
-    kind: Literal["search_alias_adoption"]
-    data: AliasData
-
-
-class SymbolRecord(AdoptionRecord):
-    kind: Literal["text_symbol_adoption"]
-    data: SymbolData
-
-
-class NameRecord(AdoptionRecord):
-    kind: Literal["rules_name_adoption"]
-    data: NameData
-
-
-class RouteRecord(AdoptionRecord):
-    kind: Literal["route_override_adoption"]
-    data: RouteData
-
-
-class DefaultRecord(AdoptionRecord):
-    kind: Literal["default_printing_adoption"]
-    data: DefaultData
-
-
-Record = Annotated[
-    VocabularyRecord
-    | LanguageRecord
-    | AliasRecord
-    | SymbolRecord
-    | NameRecord
-    | RouteRecord
-    | DefaultRecord,
-    Field(discriminator="kind"),
-]
-
-
-class Decision(RecordData):
-    id: Annotated[str, Field(pattern=r"^d:[0-9a-f]{64}\Z")]
-    state: Literal["confirmed"]
-    scope: Literal["batch"]
-    membership_hash: Hash
-    members: tuple[tuple[Text, Hash], ...]
-    sample_ids: tuple[Text, ...]
-    note: str = ""
-    category: Kind
-    policy_id: Text
-
-
-class Shard(RecordData):
-    review_context: ReviewContext
-    default_decision_id: Text
-    records: Annotated[tuple[Record, ...], Field(min_length=1)]
-    decisions: Annotated[tuple[Decision, ...], Field(min_length=1, max_length=1)]
-
-
-class CatalogShard(Shard):
-    catalog_adoption_format: Literal[1]
-    kind: Literal["catalog_adoption_shard"]
-
-
-class DisplayShard(Shard):
-    display_override_format: Literal[1]
-    kind: Literal["display_override_shard"]

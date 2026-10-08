@@ -1,59 +1,44 @@
-"""Each mutation changes one signed invariant; no official strings are fixtures."""
+"""Current catalog boundaries over invented values, without revision fixtures."""
 
 import copy
-import re
 import shutil
+from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 
 import pytest
 
 from sve_carddb.catalog.adoption_loader import load_adoptions
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.snapshot.values import array, object_value
 
-from .adoption_fixtures import (
-    Case,
-    dependency,
-    envelope,
-    fields,
-    index,
-    make_case,
-    record,
-    write,
-)
+from .adoption_fixtures import Case, envelope, make_case, record, write
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.catalog.adoption_loader import Entry
+    from pydantic import JsonValue
 
-from pydantic import JsonValue
+    from sve_carddb.catalog.adoption_loader import Entry
 
 
 @pytest.fixture(scope="module")
 def baseline(tmp_path_factory: pytest.TempPathFactory) -> Case:
-    return make_case(tmp_path_factory.mktemp("adoption") / "repository")
+    return make_case(tmp_path_factory.mktemp("catalog-loader") / "repository")
 
 
 @pytest.fixture
 def case(tmp_path: Path, baseline: Case) -> Case:
-
-    shutil.copytree(baseline.root, tmp_path / "authored")
-    return Case(
-        baseline.repository,
-        tmp_path / "authored",
-        copy.deepcopy(baseline.review),
-        copy.deepcopy(baseline.normalizer),
-        baseline.revision,
-    )
+    repository = tmp_path / "repository"
+    shutil.copytree(baseline.repository, repository)
+    return replace(baseline, repository=repository, root=repository / "authored")
 
 
 def test_complete_entry_and_explicit_empty(case: Case) -> None:
-    snapshot = load_adoptions(case.root, entry="catalog-adoptions")
-    assert len(snapshot.effective()) == 6
-    index(case.root, entry="display-overrides")
-    (case.root / "display-overrides/routes").mkdir()
-    assert not load_adoptions(case.root, entry="display-overrides").effective()
+    assert (
+        len(load_adoptions(case.root, entry="catalog-adoptions").current_records()) == 4
+    )
+    (case.root / "display-overrides/routes").mkdir(parents=True)
+    assert not load_adoptions(case.root, entry="display-overrides").current_records()
 
 
 @pytest.mark.parametrize("entry", ["catalog-adoptions", "display-overrides"])
@@ -68,352 +53,162 @@ def test_entry_requires_known_area(tmp_path: Path, entry: Entry, *, typo: bool) 
 
 
 @pytest.mark.parametrize(
-    ("entry", "area"),
-    [("catalog-adoptions", "vocabulary"), ("display-overrides", "defaults")],
+    "mutation", ["duplicate", "symlink", "unknown", "bool_format", "key", "area"]
 )
-def test_empty_known_area_is_explicit(tmp_path: Path, entry: Entry, area: str) -> None:
-    (tmp_path / entry / area).mkdir(parents=True)
-    assert not load_adoptions(tmp_path, entry=entry).shards
-
-
-@pytest.mark.parametrize(
-    ("mutation", "message"),
-    [
-        ("unindexed", "Duplicate adoption decision"),
-        ("symlink", "Symlink|symlink"),
-        ("unknown", "Invalid adoption fields"),
-        ("duplicate", "Invalid authored YAML input"),
-        ("bool_format", "integer one"),
-    ],
-)
-def test_file_boundary_guards(case: Case, mutation: str, message: str) -> None:
-    path = case.root / "catalog-adoptions/symbols/shared/001.yaml"
-    if mutation == "index":
-        (case.root / "catalog-adoptions/index.yaml").unlink()
-    elif mutation == "missing":
-        path.unlink()
-    elif mutation == "unindexed":
+def test_current_file_boundary_guards(case: Case, mutation: str) -> None:
+    path = case.root / "catalog-adoptions/vocabulary/shared/001.yaml"
+    raw = object_value(read_yaml(path))
+    row = object_value(array(raw["records"])[0])
+    message = "Invalid current catalog fields"
+    if mutation == "duplicate":
         path.with_name("002.yaml").write_bytes(path.read_bytes())
+        message = "Duplicate current catalog selection key"
     elif mutation == "symlink":
         path.rename(path.with_suffix(".bak"))
         path.symlink_to(path.with_suffix(".bak"))
-    elif mutation == "duplicate":
-        path.write_bytes(b"catalog_adoption_format: 1\ncatalog_adoption_format: 1\n")
-    elif mutation == "sequence":
-        path.rename(path.with_name("002.yaml"))
-        index(case.root)
-    elif mutation in {"cross_entry", "absolute"}:
-        raw = object_value(read_yaml(case.root / "catalog-adoptions/index.yaml"))
-        includes = object_value(raw["includes"])
-        value = includes.pop("catalog-adoptions/symbols/shared/001.yaml")
-        includes[
-            "display-overrides/symbols/shared/001.yaml"
-            if mutation == "cross_entry"
-            else str(path)
-        ] = value
-        write(case.root, "catalog-adoptions/index.yaml", raw)
+        message = "Symlink|symlink"
+    elif mutation == "unknown":
+        object_value(row["data"])["unknown"] = True
+        write(case.root, path.relative_to(case.root).as_posix(), raw)
+    elif mutation == "bool_format":
+        raw["catalog_adoption_format"] = True
+        message = "integer two"
+        write(case.root, path.relative_to(case.root).as_posix(), raw)
     else:
-        raw = object_value(read_yaml(path))
-        raw["extra"] = True if mutation == "unknown" else None
-        if mutation == "bool_format":
-            raw.pop("extra")
-            raw["catalog_adoption_format"] = True
-        write(case.root, "catalog-adoptions/symbols/shared/001.yaml", raw)
-        index(case.root)
+        message = "key or area mismatch"
+        if mutation == "key":
+            row["record_key"] = "wrong"
+            write(case.root, path.relative_to(case.root).as_posix(), raw)
+        else:
+            path.rename(case.root / "catalog-adoptions/languages/shared/002.yaml")
     with pytest.raises(ValueError, match=message):
-        load_adoptions(case.root, entry="catalog-adoptions")
-
-
-@pytest.mark.parametrize(
-    ("mutation", "message"),
-    [
-        ("value", "exact decision members"),
-        ("evidence", "exact decision members"),
-        ("member", "exact decision members"),
-        ("context", "review context hash"),
-        ("category", "category/policy"),
-        ("policy", "category/policy"),
-        ("member_missing", "exact decision members"),
-        ("member_extra", "exact decision members"),
-        ("member_duplicate", "exact decision members"),
-        ("membership_hash", "membership hash"),
-        ("id", "Adoption decision ID mismatch"),
-        ("default", "default decision ID"),
-        ("checked", "checked members"),
-        ("proposed", "Invalid adoption fields"),
-        ("sampled", "Invalid adoption fields"),
-        ("reviewer", "Invalid adoption fields"),
-        ("time", "Invalid adoption fields"),
-        ("policy_exception", "Invalid adoption fields"),
-        ("unknown_data", "Invalid adoption fields"),
-    ],
-)
-def test_exact_member_and_receipt_guards(  # ruff: ignore[complex-structure,too-many-branches] -- independent mutations of the same minimal envelope
-    case: Case, mutation: str, message: str
-) -> None:
-    name = "catalog-adoptions/symbols/shared/001.yaml"
-    raw = object_value(read_yaml(case.root / name))
-    member, data, decision = fields(raw)
-    if mutation == "value":
-        object_value(object_value(data["value"])["source_localization"])["name"] = {
-            "kind": "authored",
-            "lang": "ja",
-            "text": "Changed synthetic",
-        }
-    elif mutation == "evidence":
-        data["reason"] = "Changed evidence rationale."
-    elif mutation == "member":
-        extra = copy.deepcopy(member)
-        extra_data = object_value(extra["data"])
-        extra_data["subject"] = {"id": "symbol:another"}
-        extra["record_key"] = canonical(
-            ["text_symbol_adoption", extra_data["subject"], 1]
-        ).decode()
-        raw["records"] = sorted(
-            [member, extra], key=lambda item: str(object_value(item)["record_key"])
-        )
-    elif mutation == "context":
-        object_value(object_value(raw["review_context"])["context"])[
-            "configuration"
-        ] = '{"changed":true}'
-    elif mutation in {"category", "policy"}:
-        decision["category" if mutation == "category" else "policy_id"] = (
-            "vocabulary_adoption" if mutation == "category" else "catalog-vocabulary-v1"
-        )
-    elif mutation.startswith("member_"):
-        members = array(decision["members"])
-        decision["members"] = (
-            []
-            if mutation == "member_missing"
-            else members
-            + (
-                members
-                if mutation == "member_duplicate"
-                else [["extra", "sha256:" + "e" * 64]]
-            )
-        )
-    elif mutation == "membership_hash":
-        decision["membership_hash"] = "sha256:" + "e" * 64
-    elif mutation in {"id", "default"}:
-        (decision if mutation == "id" else raw)[
-            "id" if mutation == "id" else "default_decision_id"
-        ] = "d:" + "e" * 64
-        if mutation == "id":
-            raw["default_decision_id"] = decision["id"]
-    elif mutation == "checked":
-        decision["sample_ids"] = []
-    elif mutation in {"proposed", "sampled"}:
-        decision["state"] = mutation
-    elif mutation in {"reviewer", "time"}:
-        decision["reviewed_by" if mutation == "reviewer" else "reviewed_at"] = (
-            "" if mutation == "reviewer" else None
-        )
-    elif mutation == "policy_exception":
-        raw["adoption_review"] = {"mode": "approved_policy"}
-    else:
-        data["hidden"] = True
-    write(case.root, name, raw)
-    index(case.root)
-    with pytest.raises(ValueError, match=message):
-        load_adoptions(case.root, entry="catalog-adoptions")
-
-
-@pytest.mark.parametrize(
-    ("mutation", "message"),
-    [
-        ("record_key", "Adoption record key does not match subject/revision"),
-        ("filing", "Adoption kind/filing key does not match path"),
-        ("kind", "Adoption kind/filing key does not match path"),
-        ("dependency_fields", "Adoption dependency primary key fields mismatch"),
-        ("dependency_value", "Adoption dependency keys must be nonempty text"),
-        ("dependency_order", "Adoption array must be unique"),
-        ("evidence_batch", "Adoption evidence batch absent from review context"),
-        ("duplicate_decision", "Duplicate adoption decision"),
-        ("duplicate_record", "Duplicate adoption record"),
-        ("symbol_owner", "Symbol code/id must be one-to-one across history"),
-        ("alias_pins", "Effective aliases cannot mix normalizer pins"),
-    ],
-)
-def test_review_envelope_single_guard(  # ruff: ignore[complex-structure,too-many-branches] -- each signed mutation isolates one review finding
-    case: Case, mutation: str, message: str
-) -> None:
-    area = (
-        "languages"
-        if mutation == "record_order"
-        else "aliases"
-        if mutation == "alias_pins"
-        else "symbols"
-    )
-    path = f"catalog-adoptions/{area}/shared/001.yaml"
-    raw = object_value(read_yaml(case.root / path))
-    member, data, _ = fields(raw)
-    members = array(raw["records"])
-    if mutation == "hash":
-        indexed = object_value(read_yaml(case.root / "catalog-adoptions/index.yaml"))
-        object_value(indexed["includes"])[path] = "sha256:" + "f" * 64
-        write(case.root, "catalog-adoptions/index.yaml", indexed)
-    elif mutation == "duplicate_decision":
-        write(case.root, "catalog-adoptions/symbols/shared/002.yaml", raw)
-        index(case.root)
-    else:
-        if mutation == "record_key":
-            member["record_key"] = "synthetic:wrong-key"
-        elif mutation == "filing":
-            member["filing_key"] = "other"
-        elif mutation == "kind":
-            path = "catalog-adoptions/languages/shared/001.yaml"
-        elif mutation == "dependency_fields":
-            object_value(object_value(array(data["dependencies"])[0])["key"])[
-                "extra"
-            ] = "unexpected"
-        elif mutation == "dependency_value":
-            object_value(object_value(array(data["dependencies"])[0])["key"])[
-                "code"
-            ] = ""
-        elif mutation == "dependency_order":
-            data["dependencies"] = [
-                dependency("language", code="ja"),
-                dependency("language", code="ja"),
-            ]
-        elif mutation == "evidence_batch":
-            member["evidence"] = [
-                {
-                    "source_ref": {
-                        "batch_id": "sha256:" + "a" * 64,
-                        "source_version_id": "src:v1:" + "b" * 64,
-                        "parser": "exact-json-v1",
-                        "locator": "/faces/0/name",
-                        "text_hash": "sha256:" + "c" * 64,
-                    },
-                    "role": "Synthetic evidence",
-                }
-            ]
-        elif mutation in {"duplicate_record", "symbol_owner", "alias_pins"}:
-            extra = copy.deepcopy(member)
-            extra_data = object_value(extra["data"])
-            subject = object_value(extra_data["subject"])
-            subject["text" if mutation == "alias_pins" else "id"] = "synthetic:second"
-            extra["record_key"] = canonical([extra["kind"], subject, 1]).decode()
-            if mutation == "alias_pins":
-                object_value(object_value(extra_data["value"])["normalizer"])[
-                    "version"
-                ] = "synthetic-other"
-            elif mutation == "duplicate_record":
-                object_value(extra_data["value"])["code"] = "another-code"
-                path = "catalog-adoptions/symbols/shared/002.yaml"
-            members.append(extra)
-        rewritten = envelope(members, case.review)
-        if mutation == "kind":
-            decision = object_value(array(rewritten["decisions"])[0])
-            decision["category"] = "language_adoption"
-            decision["policy_id"] = "catalog-language-v1"
-        if mutation == "record_order":
-            rewritten["records"] = list(reversed(array(rewritten["records"])))
-        write(case.root, path, rewritten)
-        index(case.root)
-    with pytest.raises(ValueError, match=rf"^{re.escape(message)}$"):
         load_adoptions(case.root, entry="catalog-adoptions")
 
 
 def test_unknown_entry(case: Case) -> None:
-    with pytest.raises(ValueError, match=r"^Unknown adoption entry$"):
+    with pytest.raises(ValueError, match="Unknown adoption entry"):
         load_adoptions(case.root, entry=cast("Entry", "other"))
 
 
-@pytest.mark.parametrize("indexed", [False, True])
-def test_symlink_entry_and_unindexed_file(case: Case, indexed: bool) -> None:
-    path = (
-        case.root / "catalog-adoptions/index.yaml"
-        if indexed
-        else case.root / "catalog-adoptions/unindexed.txt"
+def test_unordered_files_and_records_load_current_values(case: Case) -> None:
+    path = case.root / "catalog-adoptions/languages/shared/001.yaml"
+    raw = object_value(read_yaml(path))
+    raw["records"] = list(reversed(array(raw["records"])))
+    path.unlink()
+    write(case.root, "catalog-adoptions/languages/shared/019.yaml", raw)
+    records = load_adoptions(case.root, entry="catalog-adoptions").current_records()
+    assert tuple(r.record_key for r in records) == tuple(
+        sorted(r.record_key for r in records)
     )
-    if indexed:
-        path.rename(case.root / "original-index")
-    path.symlink_to(case.root / "original-index")
-    assert load_adoptions(case.root, entry="catalog-adoptions").effective()
 
 
-def test_symlink_parent_directory(case: Case) -> None:
-    target = case.root.with_name("original-authored")
-    case.root.rename(target)
-    case.root.symlink_to(target, target_is_directory=True)
-    with pytest.raises(ValueError, match=r"^Symlink authored data area$"):
-        load_adoptions(case.root, entry="catalog-adoptions")
-
-
-def test_withdraw_restore_and_exact_predecessor(case: Case) -> None:
-    first = object_value(
-        read_yaml(case.root / "catalog-adoptions/symbols/shared/001.yaml")
-    )
-    previous, data, decision = fields(first)
+def test_current_withdrawal_and_edit(case: Case) -> None:
+    path = "catalog-adoptions/vocabulary/shared/001.yaml"
+    raw = object_value(read_yaml(case.root / path))
+    row = object_value(array(raw["records"])[0])
+    data = object_value(row["data"])
     original = copy.deepcopy(data["value"])
-    subject = object_value(data["subject"])
-    for number, value in ((2, None), (3, original)):
-        successor = record(
-            "text_symbol_adoption",
-            subject,
-            value,
-            case.review,
-            array(data["dependencies"]) if value is not None else [],
-            number=number,
-            previous={
-                "record_key": previous["record_key"],
-                "record_hash": digest(canonical(previous)),
-                "decision_id": decision["id"],
-            },
-        )
-        shard = envelope([successor], case.review)
-        write(case.root, f"catalog-adoptions/symbols/shared/{number:03}.yaml", shard)
-        previous, data, decision = fields(shard)
-    index(case.root)
-    terminal = [
-        r
-        for r, _ in load_adoptions(case.root, entry="catalog-adoptions").effective()
-        if r.kind == "text_symbol_adoption"
-    ]
-    assert terminal[0].data.adoption_no == 3
+    data["value"] = None
+    write(case.root, path, raw)
+    assert (
+        next(
+            r
+            for r in load_adoptions(
+                case.root, entry="catalog-adoptions"
+            ).current_records()
+            if r.kind == "vocabulary_adoption"
+        ).data.value
+        is None
+    )
+    data["value"] = original
+    write(case.root, path, raw)
+    assert (
+        next(
+            r
+            for r in load_adoptions(
+                case.root, entry="catalog-adoptions"
+            ).current_records()
+            if r.kind == "vocabulary_adoption"
+        ).data.value
+        is not None
+    )
 
 
 @pytest.mark.parametrize(
-    ("change", "message"),
+    ("entry", "area", "kind", "subject", "value"),
     [
-        ("hash", "predecessor"),
-        ("decision", "predecessor"),
-        ("gap", "sequence"),
-        ("code", "stable code"),
+        (
+            "catalog-adoptions",
+            "aliases",
+            "search_alias_adoption",
+            {"kind": "type", "code": "follower", "lang": "ja", "text": "Synthetic"},
+            {
+                "normalized": "synthetic",
+                "normalizer": {"version": "nfkc-casefold-v1", "config": {}},
+            },
+        ),
+        (
+            "catalog-adoptions",
+            "rules-names",
+            "rules_name_adoption",
+            {"face_id": "face", "region": "jp", "role": "collab"},
+            None,
+        ),
+        (
+            "catalog-adoptions",
+            "symbols",
+            "text_symbol_adoption",
+            {"id": "symbol:synthetic"},
+            None,
+        ),
+        (
+            "display-overrides",
+            "routes",
+            "route_override_adoption",
+            {"region": "jp", "route_key": "synthetic"},
+            None,
+        ),
+        (
+            "display-overrides",
+            "defaults",
+            "default_printing_adoption",
+            {"card_id": "card", "region": "jp"},
+            {
+                "printing_id": "printing",
+                "candidates": ["printing"],
+                "candidates_hash": "sha256:" + "a" * 64,
+            },
+        ),
     ],
 )
-def test_revision_single_guard(case: Case, change: str, message: str) -> None:
-    raw = object_value(
-        read_yaml(case.root / "catalog-adoptions/symbols/shared/001.yaml")
+def test_editable_catalog_and_display_kinds(
+    case: Case,
+    entry: Entry,
+    area: str,
+    kind: str,
+    subject: dict[str, JsonValue],
+    value: JsonValue,
+) -> None:
+    row = record(kind, subject, value)
+    write(case.root, f"{entry}/{area}/current/001.yaml", envelope([row], entry=entry))
+    assert any(
+        r.kind == kind for r in load_adoptions(case.root, entry=entry).current_records()
     )
-    previous, data, decision = fields(raw)
-    reference: dict[str, JsonValue] = {
-        "record_key": previous["record_key"],
-        "record_hash": digest(canonical(previous)),
-        "decision_id": decision["id"],
-    }
-    if change in {"hash", "decision"}:
-        reference["record_hash" if change == "hash" else "decision_id"] = (
-            "sha256:" + "e" * 64 if change == "hash" else "d:" + "e" * 64
-        )
-    value = copy.deepcopy(data["value"])
-    if change == "code":
-        object_value(value)["code"] = "changed"
-    successor = record(
-        "text_symbol_adoption",
-        object_value(data["subject"]),
-        value,
-        case.review,
-        array(data["dependencies"]),
-        number=3 if change == "gap" else 2,
-        previous=reference,
+
+
+def test_offline_cannot_silently_discard_an_editable_alias(case: Case) -> None:
+    from sve_carddb.catalog.current import prepare  # ruff: ignore[import-outside-top-level] -- initialize the shared text interner before the catalog composer
+
+    row = record(
+        "search_alias_adoption",
+        {"kind": "type", "code": "follower", "lang": "ja", "text": "Synthetic"},
+        {
+            "normalized": "synthetic",
+            "normalizer": {"version": "nfkc-casefold-v1", "config": {}},
+        },
     )
-    write(
-        case.root,
-        "catalog-adoptions/symbols/shared/002.yaml",
-        envelope([successor], case.review),
-    )
-    index(case.root)
-    with pytest.raises(ValueError, match=message):
-        load_adoptions(case.root, entry="catalog-adoptions")
+    write(case.root, "catalog-adoptions/aliases/current/001.yaml", envelope([row]))
+    with pytest.raises(
+        ValueError, match="Offline catalog supports vocabulary and language values"
+    ):
+        prepare(case.inputs().load(), case.repository, case.build(), {})

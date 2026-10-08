@@ -5,10 +5,9 @@ from itertools import starmap
 from typing import TYPE_CHECKING
 
 from sve_carddb.build_db import Capability, Column, Json, Kind, Table, compile_schema
-from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_db.registry import Registry
 from sve_carddb.build_db.t1 import REGISTRY, compile_minimum
-from sve_carddb.build_db.t2_translation import TABLES as ORIGINAL_NAME_TABLES
+from sve_carddb.build_db.t2_translation import TABLES as NAME_TABLES
 from sve_carddb.snapshot.project import Decisions, Settings
 from sve_carddb.snapshot.values import digest, parse
 
@@ -18,15 +17,6 @@ from .build_db_t1b_fixtures import rows as ancillary_rows
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import CompiledSchema, Database, Value
-
-CURRENT = compile_current_build(("t0", "translation_names"))
-CURRENT_NAMES = {table.name: table for table in CURRENT.tables}
-NAME_TABLES = tuple(
-    CURRENT_NAMES[table.name]
-    if table.name in {"translation", "translation_context", "translation_selection"}
-    else table
-    for table in ORIGINAL_NAME_TABLES
-)
 
 TEXT = "t:ja:" + digest(b"Synthetic text")[7:23]
 SETTINGS = Settings("https://example.invalid/feedback", "synthetic-v1", "synthetic-v1")
@@ -289,7 +279,7 @@ def schema(*, nullable_observation: bool = False) -> CompiledSchema:
         for name, row in extras().items()
         if name not in {table.name for table in NAME_TABLES}
     ) + tuple(replace(table, query_checks=()) for table in NAME_TABLES)
-    # These projector fixtures also cover non-name fields; only names builds enable the name-only query checks.
+    # The projector owns field eligibility checks; these fixtures also exercise invalid field inputs.
     base_tables = tuple(
         replace(
             table,

@@ -9,15 +9,11 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.current import compile_current_build
-from sve_carddb.catalog.adoption_models import (
-    RawMapping,
-    ReviewContext,
-    SourceRef,
-    VocabularyRecord,
-)
+from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.catalog.adoption_models import RawMapping, ReviewContext, SourceRef
 from sve_carddb.catalog.adoption_sources import AdoptionSources
 from sve_carddb.catalog.adoption_validation import term as validate_term
+from sve_carddb.catalog.current_models import VocabularyRecord
 from sve_carddb.snapshot.values import canonical, digest, object_value
 
 from .catalog_vocabulary_fixtures import save, vocabulary_record
@@ -43,7 +39,7 @@ SEPARATOR = "Trait source component contains an unprotected separator"
 
 @pytest.fixture(scope="module")
 def schema() -> CompiledSchema:
-    return compile_current_build()
+    return compile_build()
 
 
 @pytest.fixture
@@ -79,12 +75,11 @@ def derive(
 
 
 def term(
-    case: TraitCase,
     mapping: dict[str, JsonValue],
     kind: str = "trait",
     code: str = "synthetic_compound",
 ) -> dict[str, JsonValue]:
-    return vocabulary_record(case.vocabulary, kind, code, [mapping])
+    return vocabulary_record(kind, code, [mapping])
 
 
 def rejects(
@@ -95,14 +90,14 @@ def rejects(
     kind: str = "trait",
 ) -> None:
     with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
-        derive(case, schema, [term(case, mapping, kind)])
+        derive(case, schema, [term(mapping, kind)])
 
 
 def test_complete_protected_component_and_two_exact_english_spellings(
     case: TraitCase, schema: CompiledSchema
 ) -> None:
     mappings = [case.mapping(), case.mapping("en", 0, 0), case.mapping("en", 1, 0)]
-    record = vocabulary_record(case.vocabulary, "trait", "synthetic_compound", mappings)
+    record = vocabulary_record("trait", "synthetic_compound", mappings)
     result = derive(case, schema, [record])
     for mapping in mappings:
         typed = RawMapping.model_validate_json(canonical(mapping))
@@ -149,7 +144,7 @@ def test_trait_locator_is_an_exact_ascii_component_path(
         {"test-store": case.vocabulary.archive},
         case.vocabulary.case.repository,
     )
-    record = VocabularyRecord.model_validate_json(canonical(term(case, mapping)))
+    record = VocabularyRecord.model_validate_json(canonical(term(mapping)))
     review = ReviewContext.model_validate_json(canonical(case.vocabulary.case.review))
     # Exercise this layer before a source guard can mask its own field check.
     with pytest.raises(ValueError, match="^" + re.escape(FIELD) + "$"):
@@ -232,7 +227,7 @@ def test_trait_does_not_gain_type_special_markers(
 def test_same_exact_trait_cannot_get_two_codes(
     case: TraitCase, schema: CompiledSchema
 ) -> None:
-    records = [term(case, case.mapping(), code=code) for code in ("first", "second")]
+    records = [term(case.mapping(), code=code) for code in ("first", "second")]
     with pytest.raises(
         ValueError,
         match=r"^Duplicate vocabulary binding$",
@@ -244,7 +239,7 @@ def test_unadopted_apostrophe_is_not_an_implicit_alias(
     case: TraitCase, schema: CompiledSchema
 ) -> None:
     result = derive(
-        case, schema, [term(case, case.mapping("en", 0, 0), code="synthetic_nest")]
+        case, schema, [term(case.mapping("en", 0, 0), code="synthetic_nest")]
     )
     message = (
         "Missing or ambiguous explicit vocabulary binding: kind='trait', region='en', "
@@ -266,7 +261,7 @@ def test_title_still_binds_its_entire_native_field(
         "title" if region == "jp" else "info/Universe"
     )
     reference["text_hash"] = digest(b"Synthetic title")
-    result = derive(case, schema, [term(case, mapping, "title", "synthetic_title")])
+    result = derive(case, schema, [term(mapping, "title", "synthetic_title")])
     assert (
         result.vocabulary.lookup(region, "title", "Synthetic title").code
         == "synthetic_title"
@@ -300,7 +295,7 @@ def test_trait_projection_shape_is_checked_independently_of_the_text_resolver(
         {"test-store": case.vocabulary.archive},
         case.vocabulary.case.repository,
     )
-    record = VocabularyRecord.model_validate_json(canonical(term(case, mapping)))
+    record = VocabularyRecord.model_validate_json(canonical(term(mapping)))
     review = ReviewContext.model_validate_json(canonical(case.vocabulary.case.review))
     ref = SourceRef.model_validate_json(canonical(mapping["source_ref"]))
     text, source, _ = sources.text(ref, review)
@@ -309,7 +304,7 @@ def test_trait_projection_shape_is_checked_independently_of_the_text_resolver(
         validate_term(record, review, sources)
 
 
-@pytest.mark.parametrize("mutation", ["region", "language", "evidence"])
+@pytest.mark.parametrize("mutation", ["region", "language"])
 def test_trait_keeps_the_existing_exact_source_guards(
     case: TraitCase, schema: CompiledSchema, mutation: str
 ) -> None:
@@ -318,10 +313,7 @@ def test_trait_keeps_the_existing_exact_source_guards(
         mapping["region"] = "en"
     elif mutation == "language":
         mapping["lang"] = "en"
-    record = term(case, mapping)
+    record = term(mapping)
     message = "Vocabulary mapping exact raw/region/language mismatch"
-    if mutation == "evidence":
-        record["evidence"] = []
-        message = "Vocabulary raw mapping lacks approved source evidence"
     with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
         derive(case, schema, [record])

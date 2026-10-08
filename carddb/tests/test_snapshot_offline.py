@@ -24,7 +24,6 @@ from sve_carddb.catalog.projection import CatalogProjection
 from sve_carddb.cli import app
 from sve_carddb.products import OfficialProducts, ProductIdentities
 from sve_carddb.registry.records import PrintingData
-from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot import offline
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.export.compression import verify_brotli
@@ -53,8 +52,8 @@ from sve_carddb.snapshot.values import (
     string,
 )
 
-from .adoption_fixtures import REPO, commit
-from .catalog_vocabulary_fixtures import current_vocabulary_case, make_vocabulary_case
+from .adoption_fixtures import REPO
+from .catalog_vocabulary_fixtures import make_vocabulary_case
 from .test_snapshot_export import BATCH
 from .test_snapshot_export import exported as exported  # ruff: ignore[useless-import-alias] -- register shared export fixture
 from .test_snapshot_preview import EmptySources
@@ -818,9 +817,7 @@ def test_missing_adopted_language_fails_before_population(
 
 @pytest.fixture(scope="module")
 def immutable_adoptions(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
-    return current_vocabulary_case(
-        make_vocabulary_case(tmp_path_factory.mktemp("offline-adoptions"))
-    )
+    return make_vocabulary_case(tmp_path_factory.mktemp("offline-adoptions"))
 
 
 def test_offline_adapter_uses_real_checked_bilingual_adoptions(
@@ -865,22 +862,4 @@ def test_adoption_adapter_rejects_an_unpinned_configuration(
             case.case.inputs(),
             build,
             {"test-store": case.archive},
-        )
-
-
-@pytest.mark.parametrize("index_format", [1, 2])
-def test_native_offline_rejects_receipt_catalog(
-    tmp_path: Path, index_format: int
-) -> None:
-    case = make_vocabulary_case(tmp_path)
-    path = case.case.root / "catalog-adoptions/index.yaml"
-    index = object_value(read_yaml(path))
-    index["catalog_adoption_format"] = index_format
-    path.write_bytes(canonical(index))
-    case = replace(case, case=replace(case.case, revision=commit(case.case.repository)))
-    with pytest.raises(
-        ValueError, match=r"^Offline catalog requires current format 2 inputs$"
-    ):
-        offline._prepare_catalog(
-            case.case.inputs(), case.build(), {"test-store": case.archive}
         )

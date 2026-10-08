@@ -6,32 +6,19 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.catalog.adoption_loader import ordered
-from sve_carddb.catalog.adoption_models import (
-    LanguageRecord,
-    RawMapping,
-    TextEvidence,
-    VocabularyRecord,
-)
 from sve_carddb.catalog.models import Term
 from sve_carddb.products.models import Language
 
 if TYPE_CHECKING:
-    from sve_carddb.catalog.adoption_models import ReviewContext
+    from sve_carddb.catalog.adoption_models import RawMapping, ReviewContext
     from sve_carddb.catalog.adoption_sources import AdoptionSources
-    from sve_carddb.catalog.current_models import (
-        LanguageRecord as CurrentLanguageRecord,
-    )
-    from sve_carddb.catalog.current_models import (
-        VocabularyRecord as CurrentVocabularyRecord,
-    )
+    from sve_carddb.catalog.current_models import LanguageRecord, VocabularyRecord
 
 _FIELD_PARTS = 4
 _UI = {"zh-Hant": ("ja", "en"), "ja": ("en",), "en": ("ja",)}
 
 
-def language(
-    record: LanguageRecord | CurrentLanguageRecord, registered: set[str]
-) -> Language | None:
+def language(record: LanguageRecord, registered: set[str]) -> Language | None:
     """Validate a complete UI fallback list against the approved policy."""
     value = record.data.value
     if value is None:
@@ -51,7 +38,7 @@ def language(
 
 
 def term(
-    record: VocabularyRecord | CurrentVocabularyRecord,
+    record: VocabularyRecord,
     review: ReviewContext,
     sources: AdoptionSources,
 ) -> Term | None:
@@ -71,11 +58,6 @@ def term(
         raise ValueError("Special-kind definitions cannot declare raw mappings")
     for mapping in value.raw_mappings:
         _mapping_metadata(kind, mapping)
-        if not any(
-            isinstance(e, TextEvidence) and e.source_ref == mapping.source_ref
-            for e in record.evidence
-        ):
-            raise ValueError("Vocabulary raw mapping lacks approved source evidence")
         if (
             kind == "trait"
             and re.fullmatch(
@@ -105,7 +87,7 @@ def term(
     return Term(
         kind=record.data.subject.kind,
         code=record.data.subject.code,
-        label=sources.value(value.label, record, review),
+        label=sources.value(value.label, review),
         active=value.active,
     )
 
