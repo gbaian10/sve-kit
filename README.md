@@ -30,8 +30,8 @@ Main paths only. Items marked _(planned)_ do not exist yet.
 ```text
 sve-kit/
 ├── AGENTS.md              Project architecture and data rules (for AI coding agents)
-├── CONTRIBUTING.md        Language, commit and comment conventions
-├── CLAUDE.md              Imports AGENTS.md and CONTRIBUTING.md for Claude Code
+├── CONTRIBUTING.md        Language and commit conventions, setup, coding standards
+├── CLAUDE.md              Imports AGENTS.md for Claude Code
 ├── .cz.toml               Commit message rules (commitizen, gitmoji)
 ├── .pre-commit-config.yaml
 │
