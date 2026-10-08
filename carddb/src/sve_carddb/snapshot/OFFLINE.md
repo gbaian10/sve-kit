@@ -51,6 +51,11 @@ sve-carddb snapshot export-offline --inputs recipe.json \
   --bundle-dir /path/to/private-build-bundle
 ```
 
+`--preview-dir` can read `SVE_EXPORT_DIR`; `--private-dir` can read
+`SVE_CARDDB_PRIVATE_DIR`. CLI options take precedence, neither root has a default,
+and both must be non-empty absolute paths. `--inputs` and `--bundle-dir` remain
+explicit. `SVE_PREVIEW_DIR` configures only the Web `/cdn-preview` root.
+
 All output roots must be disjoint from the protected repo, archive and recipe.
 `--preview-dir` receives only public snapshot files and images. `--private-dir`
 is a separate, persistent directory for `inputs/<hash>.json`,

@@ -284,12 +284,19 @@ def test_missing_coverage_cannot_be_invented_complete(
             )
 
 
-def test_roots_have_no_defaults() -> None:
+def test_roots_have_no_defaults(tmp_path: Path) -> None:
     result = CliRunner().invoke(
         app,
-        ["snapshot", "export-offline", "--inputs", __file__],
+        [
+            "snapshot",
+            "export-offline",
+            "--inputs",
+            __file__,
+            "--bundle-dir",
+            str(tmp_path / "bundle"),
+        ],
         env={
-            "SVE_PREVIEW_DIR": "",
+            "SVE_EXPORT_DIR": "",
             "NO_COLOR": "1",
             "TERM": "dumb",
         },

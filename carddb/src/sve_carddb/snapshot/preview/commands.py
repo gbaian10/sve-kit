@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Annotated
 
 import typer
 
+from sve_carddb.cli_paths import required_root
 from sve_carddb.image_assets import (
     MAX_WORKERS,
     ImageBuild,
@@ -46,9 +47,11 @@ def verify_inputs(roots: Roots, inputs: Inputs) -> None:
 @app.command("export-offline")
 def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] -- CLI binds explicit recipe, isolated outputs, paired image roots, worker count and optional compressor
     inputs: Annotated[Path, typer.Option(exists=True, dir_okay=False)],
-    preview_dir: Annotated[Path, typer.Option(envvar="SVE_PREVIEW_DIR")],
-    private_dir: Annotated[Path, typer.Option()],
     bundle_dir: Annotated[Path, typer.Option()],
+    preview_dir: Annotated[Path | None, typer.Option(envvar="SVE_EXPORT_DIR")] = None,
+    private_dir: Annotated[
+        Path | None, typer.Option(envvar="SVE_CARDDB_PRIVATE_DIR")
+    ] = None,
     brotli: Annotated[bool, typer.Option("--brotli/--no-brotli")] = False,
     image_assets_dir: Annotated[
         Path | None, typer.Option(exists=True, file_okay=False)
@@ -60,6 +63,8 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
     format_version: Annotated[str, typer.Option()] = MEDIA,
 ) -> None:
     """Export both launch regions to an isolated preview plus a verified private DB bundle."""
+    preview_dir = required_root(preview_dir, "--preview-dir", "SVE_EXPORT_DIR")
+    private_dir = required_root(private_dir, "--private-dir", "SVE_CARDDB_PRIVATE_DIR")
     profile(format_version)
     roots = Roots(preview_dir, private_dir)
     recipe = Inputs.model_validate_json(inputs.read_bytes())

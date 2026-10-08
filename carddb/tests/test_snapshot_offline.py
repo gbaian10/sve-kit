@@ -441,9 +441,11 @@ def test_offline_coverage_remains_unknown(
         require_offline_coverage(poisoned, errata=False)
 
 
+@pytest.mark.parametrize("source", ["env", "cli", "cli-over-env"])
 @pytest.mark.parametrize("format_version", ["2.0.0"])
 @pytest.mark.parametrize("with_brotli", [False, True])
 def test_offline_cli_writes_private_bundle_and_dual_preview(
+    source: str,
     format_version: str,
     with_brotli: bool,
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
@@ -462,14 +464,33 @@ def test_offline_cli_writes_private_bundle_and_dual_preview(
             format_version,
             "--inputs",
             str(path),
-            "--private-dir",
-            str(tmp_path / "private"),
             "--bundle-dir",
             str(tmp_path / "bundle"),
+            *(
+                []
+                if source == "env"
+                else [
+                    "--preview-dir",
+                    str(tmp_path / "preview"),
+                    "--private-dir",
+                    str(tmp_path / "private"),
+                ]
+            ),
         ],
-        env={"SVE_PREVIEW_DIR": str(tmp_path / "preview")},
+        env={}
+        if source == "cli"
+        else {
+            "SVE_EXPORT_DIR": str(
+                tmp_path / ("preview" if source == "env" else "unused-public")
+            ),
+            "SVE_CARDDB_PRIVATE_DIR": str(
+                tmp_path / ("private" if source == "env" else "unused-private")
+            ),
+        },
     )
     assert result.exit_code == 0, result.exception
+    assert not (tmp_path / "unused-public").exists()
+    assert not (tmp_path / "unused-private").exists()
     assert (tmp_path / "bundle/build.sqlite").is_file()
     assert (tmp_path / "preview/snapshots/preview/current.json").is_file()
     assert {p.name for p in (tmp_path / "preview").iterdir()} == {"snapshots"}
@@ -546,8 +567,13 @@ def test_cli_preview_validates_output_before_build(
         "archive": "Preview output must be disjoint from immutable input roots",
         "relative": "Preview and private roots must be absolute paths",
     }
-    assert isinstance(result.exception, ValueError)
-    assert str(result.exception) == messages[protected]
+    if protected == "relative":
+        assert result.exit_code == 2
+        assert "SVE_EXPORT_DIR / --preview-dir" in result.output
+        assert "non-empty absolute path" in result.output
+    else:
+        assert isinstance(result.exception, ValueError)
+        assert str(result.exception) == messages[protected]
     assert not targets[protected].exists()
     assert not (tmp_path / "bundle").exists()
 

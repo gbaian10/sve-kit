@@ -47,6 +47,8 @@ def test_isolation_guard(
     # This patch belongs to the session, so a test's undo cannot release it.
     with pytest.MonkeyPatch.context() as protection:
         protection.setenv("SVE_DATA_DIR", str(temporary / "isolated-default-data"))
+        protection.delenv("SVE_EXPORT_DIR", raising=False)
+        protection.delenv("SVE_CARDDB_PRIVATE_DIR", raising=False)
         protection.setenv("TMPDIR", str(standard_temporary))
         protection.setattr(tempfile, "tempdir", str(standard_temporary))
         guard.protect_sources(protection)

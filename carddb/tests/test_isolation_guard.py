@@ -34,6 +34,11 @@ def forbidden_root(guard: IsolationGuard, tmp_path: Path) -> Path:
 
 
 def test_default_environment_is_isolated(test_isolation_guard: IsolationGuard) -> None:
+    assert Path(os.environ["SVE_DATA_DIR"]) == (
+        test_isolation_guard.temporary_root / "isolated-default-data"
+    )
+    assert "SVE_EXPORT_DIR" not in os.environ
+    assert "SVE_CARDDB_PRIVATE_DIR" not in os.environ
     assert (
         Settings()
         .data_dir.resolve()

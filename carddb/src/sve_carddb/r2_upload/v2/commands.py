@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Annotated
 import httpx
 import typer
 
+from sve_carddb.cli_paths import required_root
 from sve_carddb.r2_upload.boundary import UploadError
 from sve_carddb.r2_upload.sdk import Credentials, sdk_client
 from sve_carddb.r2_upload.v2.adapter import R2Store
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
 
 def upload_v2(
     *,
-    export_dir: Annotated[Path, typer.Option()],
+    export_dir: Annotated[Path | None, typer.Option(envvar="SVE_EXPORT_DIR")] = None,
     cdn_base_url: Annotated[str | None, typer.Option()] = None,
     execute: Annotated[bool, typer.Option("--execute/--dry-run")] = False,
     skip_cdn_verify: Annotated[bool, typer.Option("--skip-cdn-verify")] = False,
@@ -29,6 +30,7 @@ def upload_v2(
     bucket: Annotated[str | None, typer.Option()] = None,
 ) -> None:
     """Dry-run validates the export without credentials or network access."""
+    export_dir = required_root(export_dir, "--export-dir", "SVE_EXPORT_DIR")
     try:
         root = _cdn(cdn_base_url, required=execute and not skip_cdn_verify)
         export = load_export(export_dir)

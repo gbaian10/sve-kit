@@ -48,6 +48,9 @@ uv --directory carddb run sve-carddb r2 upload-v2 \
   --export-dir /explicit/preview-root --dry-run
 ```
 
+`--export-dir` can read `SVE_EXPORT_DIR`; the CLI option takes precedence.
+The root has no default and must be a non-empty absolute path.
+
 Dry-run is the default. It reads no credentials, opens no HTTP client and writes
 nothing. It prints the data version, manifest hash and local JSON/image counts
 and bytes; how many objects already exist remotely is unknown offline.
