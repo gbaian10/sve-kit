@@ -11,8 +11,8 @@ import pytest
 from jsonschema import ValidationError
 from pydantic import JsonValue
 
-from sve_carddb.contracts.contract import validate
 from sve_carddb.contracts.profiles import MEDIA, profile
+from sve_carddb.contracts.snapshot import validate
 from sve_carddb.core.json import (
     array,
     canonical,

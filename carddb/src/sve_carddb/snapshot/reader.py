@@ -11,7 +11,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.contract import (
+from sve_carddb.contracts.profiles import MEDIA, profile
+from sve_carddb.contracts.snapshot import (
     decode,
     definition,
     descriptor,
@@ -20,7 +21,6 @@ from sve_carddb.contracts.contract import (
     tables,
     validate,
 )
-from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.core.json import (
     array,
     canonical,

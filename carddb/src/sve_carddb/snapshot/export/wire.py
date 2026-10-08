@@ -2,14 +2,14 @@
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.contract import (
+from sve_carddb.contracts.profiles import MEDIA
+from sve_carddb.contracts.snapshot import (
     columns,
     definition,
     descriptor,
     required_types,
     row_type,
 )
-from sve_carddb.contracts.profiles import MEDIA
 from sve_carddb.core.json import array, object_value, string
 
 

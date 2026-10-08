@@ -5,8 +5,8 @@ from urllib.parse import quote, urlsplit
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.contract import definition
 from sve_carddb.contracts.profiles import profile
+from sve_carddb.contracts.snapshot import definition
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
 from sve_carddb.snapshot.buckets import bucket
 

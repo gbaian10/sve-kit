@@ -2,7 +2,7 @@
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.contract import definition
+from sve_carddb.contracts.snapshot import definition
 
 
 def schemas() -> dict[str, JsonValue]:

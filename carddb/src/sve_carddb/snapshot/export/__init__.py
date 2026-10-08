@@ -6,15 +6,15 @@ from urllib.parse import quote
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.contract import (
+from sve_carddb.contracts.profiles import MEDIA
+from sve_carddb.contracts.profiles import profile as profile_for
+from sve_carddb.contracts.snapshot import (
     columns,
     definition,
     row_type,
     tables,
     validate,
 )
-from sve_carddb.contracts.profiles import MEDIA
-from sve_carddb.contracts.profiles import profile as profile_for
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
 from sve_carddb.snapshot.export.compression import Blob, Brotli, compress, recipe
 from sve_carddb.snapshot.export.layout import Group, Layout, Ownership, references

@@ -13,7 +13,7 @@ from sve_carddb.build_db.model import identifier
 from sve_carddb.build_db.t0 import TABLES, compile_t0
 from sve_carddb.build_db.t0_json import symbol_valid
 from sve_carddb.build_db.validation import Rules
-from sve_carddb.contracts.contract import validate
+from sve_carddb.contracts.snapshot import validate
 from sve_carddb.core.dates import DATE as DATE_PATTERN
 from sve_carddb.core.dates import INSTANT as INSTANT_PATTERN
 from sve_carddb.core.json import canonical

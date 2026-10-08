@@ -4,7 +4,7 @@ import re
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.contract import columns, definition, validate
+from sve_carddb.contracts.snapshot import columns, definition, validate
 from sve_carddb.core.json import array, object_value, string
 
 

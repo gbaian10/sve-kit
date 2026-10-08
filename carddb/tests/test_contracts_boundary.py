@@ -44,7 +44,7 @@ def test_contracts_detect_reverse_imports(source: str) -> None:
 @pytest.mark.parametrize(
     "source",
     [
-        "from . import contract",
+        "from . import snapshot",
         "from sve_carddb import contracts",
         "from sve_carddb.core import json",
         "from pydantic import BaseModel",

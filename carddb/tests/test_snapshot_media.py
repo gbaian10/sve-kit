@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING, cast
 import pytest
 from jsonschema import Draft202012Validator, ValidationError
 
-from sve_carddb.contracts.contract import columns, schema, validate
 from sve_carddb.contracts.generate_schema import generate
 from sve_carddb.contracts.profiles import MEDIA, profile
+from sve_carddb.contracts.snapshot import columns, schema, validate
 from sve_carddb.core.json import (
     array,
     canonical,

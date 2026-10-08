@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING
 from jsonschema import ValidationError as SchemaError
 from PIL import Image
 
-from sve_carddb.contracts.contract import validate
 from sve_carddb.contracts.profiles import MEDIA
+from sve_carddb.contracts.snapshot import validate
 from sve_carddb.core.compression import verify_brotli
 from sve_carddb.core.json import (
     array,

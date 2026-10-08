@@ -18,7 +18,7 @@ from sve_carddb.card_extras import (
     require_card_extras_ready,
 )
 from sve_carddb.catalog.adoption_models import Batch as SourceBatch
-from sve_carddb.contracts.contract import validate
+from sve_carddb.contracts.snapshot import validate
 from sve_carddb.core.authored import authored_root
 from sve_carddb.core.json import array, digest, object_value, parse
 from sve_carddb.core.models import Hash, Instant, RecordData, Text

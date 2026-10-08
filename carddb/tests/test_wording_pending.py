@@ -8,7 +8,7 @@ import pytest
 
 from sve_carddb.build_db import Json, create_database
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.contracts.contract import validate
+from sve_carddb.contracts.snapshot import validate
 from sve_carddb.products import load_products
 from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.text_observations import (
