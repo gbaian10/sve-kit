@@ -1,6 +1,6 @@
 # Current template definitions and translations
 
-`current.read_templates(repository, revision)` reads the fixed working-tree directories once.
+`loader.read_templates(repository, revision)` reads the fixed working-tree directories once.
 It checks safe regular files, strict YAML, canonical include hashes, complete file
 closure, closed record shapes, unique selection keys and structural references.
 It does not read raw sources, traverse ancestors, or require adoption receipts,
@@ -27,7 +27,7 @@ They never become active targets, variants, bindings, pins or translated coverag
 even with low confidence false. A full build fails when a candidate's pattern has
 no current source position.
 
-`current.validate_templates(inputs, sources, batches)` is a separate full build
+`loader.validate_templates(inputs, sources, batches)` is a separate full build
 operation. `sources.Sources` uses the installed parser, normalizer, reference
 data and explicit current rule switches to enumerate the build's own sealed JP batches
 once. Source positions are generated at build time and never stored in Git; their
@@ -47,7 +47,7 @@ Unknown references stay pending. A definition ID is `T` followed by a prefix of 
 content hash; one payload has one allocated ID and collisions compare full payload
 bytes. A source position can match at most one current definition.
 
-`template_parameter_rules.current` reads registered, explicit enabled/disabled
+`parameters.rules` reads registered, explicit enabled/disabled
 switches from `authored/template-parameter-rules/current.yaml`. Missing files fail;
 an empty rule list does not enable all matchers. Conditions and recognition roles
 belong to the current program, not an approval/hash chain. Disabled rules leave
