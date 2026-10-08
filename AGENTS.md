@@ -40,7 +40,8 @@ registry projection adapter 與 QA adapter 分別留在 `domains/registry/parser
 `workflows/` 串接離線建置、名稱／圖片組合、匯出與診斷；下層不得匯入 workflows 或 CLI。
 `images/` 保存卡圖資產、驗證、裁切與變體；`export/` 保存 DB 投影與快照讀取／匯出，
 `export/transport/` 封裝傳輸檔，`export/preview/` 只寫預覽與版本 state。
-`export/read_api.py` 是唯讀邊界，不載入 build、domains、workflows、writer 或 R2。
+`export/read_api.py` 是唯讀邊界，不載入 build、domains、workflows、
+匯出寫出端（export.transport、export.project、export.preview）或 R2／publish（r2_upload、sve_publish）。
 images 與 export 不得匯入 workflows 或 CLI；domains 不得依賴 export 或 publish。
 `domains/` 保存各資料領域，翻譯歸於 `domains/translations/` 的 glossary、names、templates、parameters 與 source_inventory，
 數位版歸於 `domains/digital/` 的 links 與 name_policies；領域不得匯入 workflows 或 CLI。

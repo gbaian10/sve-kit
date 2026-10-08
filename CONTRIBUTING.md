@@ -272,7 +272,8 @@ parsers import without the archive locking implementation. Images live under
 writing and version state stay in `export/preview/`. Boundary tests keep domains
 independent of export/publish and images/export independent of workflows/CLI.
 Fresh-process tests keep `export/read_api.py` free of build, domains, workflows,
-writers and R2 imports.
+export output modules (`export.transport`, `export.project`, `export.preview`)
+and R2/publish modules (`r2_upload`, `sve_publish`).
 
 Run them yourself when you change the code they cover:
 
