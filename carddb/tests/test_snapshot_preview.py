@@ -297,6 +297,7 @@ def test_roots_have_no_defaults(tmp_path: Path) -> None:
         ],
         env={
             "SVE_EXPORT_DIR": "",
+            "FORCE_COLOR": None,
             "NO_COLOR": "1",
             "TERM": "dumb",
         },
