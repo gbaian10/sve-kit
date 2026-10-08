@@ -1,5 +1,6 @@
 """Independent counterexamples for correction provenance, application and reference scope."""
 
+import json
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
@@ -83,7 +84,13 @@ def test_conflict_is_the_only_pending_reason_and_prevents_mechanical_current(
 def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: ignore[too-many-statements] -- validates independent SQL, source, current and public reference boundaries in one transaction
     tmp_path: Path, inputs: Inputs, region: Region, field: str
 ) -> None:
-    fixture = make_correction_case(tmp_path, inputs, region=region, field=field)
+    fixture = make_correction_case(
+        tmp_path,
+        inputs,
+        region=region,
+        field=field,
+        reason="Synthetic source\ntranscription correction",
+    )
     case = fixture.texts
     assert case.plan.corrections is not None
     application = case.plan.corrections[0]
@@ -97,14 +104,18 @@ def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: i
     assert revision_id(raw) != revision_id(candidate)
     assert candidate.correction_keys == (
         digest(
-            canonical(
+            json.dumps(
                 {
                     "record_key": "source_correction:" + application.data.id,
                     "kind": "source_correction",
                     "owner": application.record.owner,
                     "data": application.data.model_dump(mode="json"),
-                }
-            )
+                },
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+                allow_nan=False,
+            ).encode()
         ),
     )
     assert application.key() == candidate.correction_keys[0]
@@ -180,7 +191,7 @@ def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: i
                         "field": field,
                         "corrected_from": "Rule." if field == "effect" else "Spell",
                         "is_corrected": True,
-                        "reason": "Synthetic source transcription correction",
+                        "reason": "Synthetic source\ntranscription correction",
                         "source_url": raw.card.source.url,
                     }
                 ],
