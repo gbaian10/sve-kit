@@ -6,7 +6,7 @@ from pathlib import Path, PurePosixPath
 
 from pydantic import JsonValue, ValidationError
 
-from sve_carddb.authored_files import read
+from sve_carddb.authored_files import read, require_directory
 from sve_carddb.digital_name_policies.current_models import LinkPolicy
 from sve_carddb.digital_name_policies.current_models import Policy as CurrentPolicy
 from sve_carddb.registry.inputs import JSON_VALUE
@@ -73,8 +73,7 @@ class Snapshot:
 def load(root: Path, revision: str) -> Snapshot:
     """Read only current policies in the dedicated data area."""
     directory = root / "digital-name-policies"
-    if any(p.is_symlink() for p in (directory, *directory.parents)):
-        raise ValueError("Symlink digital-name policy input")
+    require_directory(root, directory)
     files = []
     current_names = []
     links = []
@@ -86,7 +85,7 @@ def load(root: Path, revision: str) -> Snapshot:
         path = group / "current.yaml"
         if not path.exists():
             continue
-        exact, content = read(path)
+        exact, content = read(path, root=root)
         value = object_value(JSON_VALUE.validate_json(content))
         policy = (
             model(LinkPolicy, value)

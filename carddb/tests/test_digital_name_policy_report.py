@@ -96,8 +96,10 @@ def test_diagnostic_refusals(
     elif fault == "context":
         config = object_value(parse(sources.build.configuration.encode()))
         config["unreviewed_extra"] = True
-        sources.build = sources.build.model_copy(
-            update={"configuration": canonical(config).decode()}
+        sources = sources.stage(
+            sources.build.model_copy(
+                update={"configuration": canonical(config).decode()}
+            )
         )
     with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
         generate(baseline.snapshot(), sources, canonical(raw))

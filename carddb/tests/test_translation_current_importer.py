@@ -8,10 +8,10 @@ from pydantic import JsonValue
 
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.current import compile_current_build
-from sve_carddb.build_inputs import BuildContext
+from sve_carddb.build_inputs import BuildContext, SourceUse
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
-from sve_carddb.translations.importer import Inputs, import_glossary
+from sve_carddb.translations.importer import Inputs, import_glossary, populate_glossary
 from sve_carddb.translations.loader import load_glossary
 
 from .adoption_fixtures import commit
@@ -23,6 +23,8 @@ synthetic_frozen = _frozen_fixture
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from sve_carddb.build_inputs import InputRecord
 
     from .test_translation_importer import Fixture
 
@@ -99,3 +101,29 @@ def test_current_import_rechecks_source_without_creating_decision(
             assert row["origin"] == "official"
             assert row["low_confidence"] is True
             assert len(result.uses) == 2
+            _assert_stage_uses(importer_template, inputs, build, frozen, result)
+
+
+def _assert_stage_uses(
+    template: DatabaseTemplate,
+    inputs: Inputs,
+    build: BuildContext,
+    frozen: Fixture,
+    result: InputRecord,
+) -> None:
+    sources = frozen.sources(build=build)
+    _, _, source = sources.text(frozen.refs[0])
+    sources.uses.append(
+        SourceUse(source=source, usage="prior_stage", locator="synthetic-prior-stage")
+    )
+    previous = tuple(sources.uses)
+    with template.copy() as db, db.transaction():
+        isolated = populate_glossary(
+            db,
+            inputs,
+            build=build,
+            stores={"test-store": frozen.store},
+            sources=sources,
+        )
+    assert isolated.uses == result.uses
+    assert tuple(sources.uses) == previous

@@ -250,7 +250,6 @@ def test_offline_renders_whole_effects_and_keeps_uncovered_original(
         UNCOVERED: (None, None),
     }
     assert "カード" not in canonical(built.report["effect_translations"]).decode()
-    # The private bundle is rebuilt by its own population and keeps the same uses.
     with open_database(
         compile_current_build(SCHEMA), tmp_path / "bundle/build.sqlite"
     ) as db:

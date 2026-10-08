@@ -504,12 +504,10 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     "card_extras": extras.configuration(),
                 },
             )
-            translation_sources.build = context
+            name_sources = translation_sources.stage(context)
             added = populate_card_extras(db, extras, build=context)
             if names is not None:
-                replay = _current_names(
-                    adoptions, context, stores, db, translation_sources
-                )
+                replay = _current_names(adoptions, context, stores, db, name_sources)
                 assert replay is not None
                 if link_result is not None:
                     link_result = replace(
@@ -521,7 +519,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     texts,
                     replay=replay,
                     links=link_result,
-                    sources=translation_sources,
+                    sources=name_sources,
                 )
             flavor_report = apply_flavor(db, flavor)
             template_report = (

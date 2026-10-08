@@ -120,13 +120,28 @@ class Sources:
     ) -> None:
         self.stores = stores
         self.repository = repository
-        self.build = build
+        self._build = build
         self.identities = AdoptionSources(stores, repository, registry)
         self.identity_indexes: dict[bytes, RegistryIndex] = {}
         self.context_keys: dict[BuildContext, bytes] = {}
         self.batches: dict[str, FrozenSources] = {}
         self.cache: dict[tuple[str, str, str], tuple[str, JsonValue, Source]] = {}
         self.uses: list[SourceUse] = []
+
+    @property
+    def build(self) -> BuildContext:
+        """One stage keeps its construction context for every owner check."""
+        return self._build
+
+    def stage(self, build: BuildContext) -> Sources:
+        """Share verified reads while keeping context and source uses stage-local."""
+        stage = Sources(self.stores, self.repository, build)
+        stage.identities = self.identities
+        stage.identity_indexes = self.identity_indexes
+        stage.context_keys = self.context_keys
+        stage.batches = self.batches
+        stage.cache = self.cache
+        return stage
 
     def batch(self, batch_id: str) -> FrozenSources:
         """Verify the configured archive ownership before exposing any source member."""

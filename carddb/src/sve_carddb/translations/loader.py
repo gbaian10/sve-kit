@@ -71,6 +71,7 @@ def load_glossary(root: Path) -> Snapshot:
     closure = shards(
         root,
         ("translations/glossary", "translations/overrides", "translations/templates"),
+        optional=("translations/overrides", "translations/templates"),
     )
     selected = []
     for name, exact, content in closure:

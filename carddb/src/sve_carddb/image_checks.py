@@ -25,8 +25,12 @@ class ImageChecks:
         ] = {}
         self.decoded: dict[str, tuple[str | None, tuple[int, int]]] = {}
         self.sources: set[tuple[Source, int, int, int, CropBox, str]] = set()
-        self.variants: dict[tuple[str, str, CropBox | None, Path], VariantSet] = {}
-        self.variant_locks: dict[tuple[str, str, CropBox | None, Path], RLock] = {}
+        self.variants: dict[
+            tuple[str, str, CropBox | None, Path, Path], VariantSet
+        ] = {}
+        self.variant_locks: dict[
+            tuple[str, str, CropBox | None, Path, Path], RLock
+        ] = {}
         self.png: dict[str, tuple[str | None, tuple[int, int]]] = {}
         self.lock = RLock()
         self.batches: dict[tuple[Path, str, str], FrozenSources] = {}

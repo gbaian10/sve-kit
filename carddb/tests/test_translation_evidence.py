@@ -228,7 +228,7 @@ def test_index_must_be_regular_input(tmp_path: Path, mode: str) -> None:
         write(target, {})
         root.mkdir()
         if mode == "file_link":
-            (root / "translations").mkdir()
+            (root / "translations/glossary").mkdir(parents=True)
             (root / "translations/index.yaml").symlink_to(
                 target / "translations/index.yaml"
             )
@@ -238,6 +238,9 @@ def test_index_must_be_regular_input(tmp_path: Path, mode: str) -> None:
             )
     if mode == "parent_link":
         with pytest.raises(ValueError, match=r"^Symlink authored data area$"):
+            load_glossary(root)
+    elif mode == "absent":
+        with pytest.raises(ValueError, match="Missing authored data area"):
             load_glossary(root)
     else:
         assert not load_glossary(root).current_records()

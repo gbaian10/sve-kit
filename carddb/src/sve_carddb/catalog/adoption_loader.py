@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import JsonValue, ValidationError
 
-from sve_carddb.authored_files import shards
+from sve_carddb.authored_files import require_directory, shards
 from sve_carddb.catalog.adoption_models import (
     AliasRecord,
     CatalogShard,
@@ -148,10 +148,11 @@ def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:
         if entry == "catalog-adoptions"
         else ("routes", "defaults")
     )
+    require_directory(root, root / entry)
+    paths = tuple(entry + "/" + area for area in areas)
     loaded = []
-    for name, exact, encoded in shards(
-        root, tuple(entry + "/" + area for area in areas)
-    ):
+    # Each adoption kind is independently optional within the required entry.
+    for name, exact, encoded in shards(root, paths, optional=paths):
         content = parse(encoded)
         _format(content, field)
         if (

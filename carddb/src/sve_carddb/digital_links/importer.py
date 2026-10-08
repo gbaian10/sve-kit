@@ -221,7 +221,11 @@ def populate_links(  # ruff: ignore[complex-structure,too-many-locals] -- every 
         != inputs.configuration()["digital_link_authored"]
     ):
         raise ValueError("Build configuration does not pin digital-link authored bytes")
-    current = sources or Sources(stores, inputs.repository, build)
+    current = (
+        sources.stage(build)
+        if sources is not None
+        else Sources(stores, inputs.repository, build)
+    )
     review = review_context(current)
     evidence = Evidence(current)
     registry = evidence.index(review)

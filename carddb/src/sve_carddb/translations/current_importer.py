@@ -60,7 +60,11 @@ def populate(  # ruff: ignore[complex-structure,too-many-branches] -- source val
         != inputs.configuration()["translation_authored"]
     ):
         raise ValueError("Build configuration does not pin translation authored bytes")
-    sources = sources or Sources(stores, inputs.repository, build)
+    sources = (
+        sources.stage(build)
+        if sources is not None
+        else Sources(stores, inputs.repository, build)
+    )
     records = snapshot.current_records()
     originals: dict[str, str] = {}
     values: dict[str, tuple[str, str | None] | None] = {}

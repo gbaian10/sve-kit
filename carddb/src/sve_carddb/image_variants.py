@@ -186,7 +186,13 @@ def build_variants(
     _validate_source(source)
     _validate_recipe(recipe)
     checks = checks or ImageChecks()
-    key = (source.source_sha256, recipe.version, override, blob_root.resolve())
+    key = (
+        source.source_sha256,
+        recipe.version,
+        override,
+        blob_root.resolve(),
+        cache_root.resolve(),
+    )
     with checks.lock:
         lock = checks.variant_locks.setdefault(key, RLock())
     with lock:

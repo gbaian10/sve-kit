@@ -646,7 +646,7 @@ def test_digital_input_closure_refusals(  # ruff: ignore[complex-structure] -- m
     config.update(configuration(refs, targets))
     if fault == "pins":
         config.pop("digital_evidence")
-    sources.build = changed_build(frozen, config)
+    sources = sources.stage(changed_build(frozen, config))
     document = sources.document
 
     def projected(ref: SourceRef) -> tuple[str, JsonValue, Source]:
@@ -830,3 +830,26 @@ def test_project_receipt_and_rawless_concept_import_atomically(
         ]
         assert len(audit) == 3
         assert all(row.values["kind"] == "authored" for row in audit)
+
+
+def test_source_stages_share_reads_without_accumulating_uses(
+    frozen: Fixture, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    parent = frozen.sources()
+    expected = parent.text(frozen.refs[0])
+    original_uses = tuple(parent.uses)
+    context = BuildContext.from_inputs(frozen.program, {"phase": "names"})
+    first = parent.stage(context)
+    second = parent.stage(frozen.build)
+
+    def unexpected_batch(_self: Sources, _batch: str) -> FrozenSources:
+        pytest.fail("Stage must reuse the already verified source projection")
+
+    monkeypatch.setattr(Sources, "batch", unexpected_batch)
+    assert first.text(frozen.refs[0]) == second.text(frozen.refs[0]) == expected
+    assert tuple(parent.uses) == original_uses
+    assert first.uses == second.uses == list(original_uses)
+    first.uses.clear()
+    assert second.uses == parent.uses == list(original_uses)
+    assert first.build == context
+    assert second.build == parent.build == frozen.build

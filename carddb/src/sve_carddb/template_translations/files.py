@@ -45,5 +45,6 @@ def read(root: Path, commit: str) -> Files:
                 "translations/overrides",
                 "translations/templates",
             ),
+            optional=("translations/overrides", "translations/templates"),
         ),
     )

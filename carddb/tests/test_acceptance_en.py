@@ -304,7 +304,7 @@ def test_exact_full_faces_source_uses_and_history_never_authorize_release(
     assert report["snapshot_output_authorized"] is False
     assert report["release_status"] == "blocked"
     assert (
-        report["source_closure"] == "expected_inputs_only_requires_bundle_verification"
+        report["source_closure"] == "planned_inputs_without_independent_closure_replay"
     )
     assert not report["review_queue"]
     encoded = canonical(report)

@@ -92,3 +92,23 @@ def test_image_stages_share_the_verified_source_batch(
     verify_asset_sources(
         assets, {frozen.store_id: frozen.root}, crops=empty_crops, checks=checks
     )
+
+
+def test_shared_checks_fill_each_cache_root(tmp_path: Path) -> None:
+    checks = ImageChecks()
+    item = source(png(80, 112))
+    blobs = tmp_path / "blobs"
+    first_cache = tmp_path / "first-cache"
+    second_cache = tmp_path / "second-cache"
+    first = build_variants(item, blob_root=blobs, cache_root=first_cache, checks=checks)
+    second = build_variants(
+        item, blob_root=blobs, cache_root=second_cache, checks=checks
+    )
+    assert not first.cache_hit
+    assert not second.cache_hit
+    assert first.variants == second.variants
+    assert list((first_cache / "image-variants").glob("*.json"))
+    assert list((second_cache / "image-variants").glob("*.json"))
+    assert build_variants(
+        item, blob_root=blobs, cache_root=second_cache, checks=checks
+    ).cache_hit

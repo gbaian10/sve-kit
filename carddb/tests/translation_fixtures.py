@@ -81,6 +81,7 @@ def envelope(records: list[dict[str, JsonValue]]) -> dict[str, JsonValue]:
 
 
 def write(root: Path, shards: dict[str, dict[str, JsonValue]]) -> None:
+    (root / "translations/glossary").mkdir(parents=True, exist_ok=True)
     index: dict[str, JsonValue] = {
         "translation_authored_format": 2,
         "kind": "translation_index",

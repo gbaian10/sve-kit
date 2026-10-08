@@ -164,6 +164,7 @@ def _records(generated: Generated) -> Shard:
 
 
 def _write(root: Path, values: dict[str, JsonValue]) -> None:
+    (root / "authored/translations/glossary").mkdir(parents=True, exist_ok=True)
     index: dict[str, JsonValue] = {
         "translation_authored_format": 2,
         "kind": "translation_index",
