@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from sve_carddb.snapshot.read_api import Member
+    from sve_carddb.export.read_api import Member
 
 JSON_HEADERS = {
     "content-type": "application/json",

@@ -5,15 +5,16 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb import image_checks, image_variants
 from sve_carddb.core.json import digest
-from sve_carddb.image_assets import (
+from sve_carddb.images import checks as checks_module
+from sve_carddb.images import variants
+from sve_carddb.images.assets import (
     PreviewRoots,
     build_regional_assets,
     verify_asset_sources,
 )
-from sve_carddb.image_checks import ImageChecks
-from sve_carddb.image_variants import build_variants
+from sve_carddb.images.checks import ImageChecks
+from sve_carddb.images.variants import build_variants
 
 from .test_image_assets import frozen as frozen  # ruff: ignore[useless-import-alias] -- register the shared immutable image fixture
 from .test_image_variants import png, source
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
 
     from PIL import Image
 
-    from sve_carddb.image_crops import ImageCrops
+    from sve_carddb.images.crops import ImageCrops
     from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
 
@@ -31,7 +32,7 @@ def test_unique_source_decode_and_shared_variant_inspection(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     checks = ImageChecks()
-    original = image_variants._decode
+    original = variants._decode
     decoded = 0
 
     def decode(raw: bytes) -> Image.Image:
@@ -39,7 +40,7 @@ def test_unique_source_decode_and_shared_variant_inspection(
         decoded += 1
         return original(raw)
 
-    monkeypatch.setattr(image_variants, "_decode", decode)
+    monkeypatch.setattr(variants, "_decode", decode)
     item = source(png(80, 112))
     first = build_variants(
         item, blob_root=tmp_path / "blobs", cache_root=tmp_path / "cache", checks=checks
@@ -60,7 +61,7 @@ def test_unique_source_decode_and_shared_variant_inspection(
         hashed += 1
         return digest(raw)
 
-    monkeypatch.setattr(image_checks, "digest", counted)
+    monkeypatch.setattr(checks_module, "digest", counted)
     path = tmp_path / "blobs" / first.variants[0].path
     assert checks.inspect(path) == checks.inspect(path)
     assert hashed == 1
@@ -88,7 +89,7 @@ def test_image_stages_share_the_verified_source_batch(
     def unexpected(*_args: object, **_kwargs: object) -> None:
         pytest.fail("Image verification must reuse this command's verified batch")
 
-    monkeypatch.setattr(image_checks, "FrozenSources", unexpected)
+    monkeypatch.setattr(checks_module, "FrozenSources", unexpected)
     verify_asset_sources(
         assets, {frozen.store_id: frozen.root}, crops=empty_crops, checks=checks
     )

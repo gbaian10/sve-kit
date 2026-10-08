@@ -7,24 +7,20 @@ import pytest
 from pydantic import JsonValue
 from typer.testing import CliRunner
 
-import sve_carddb.snapshot.preview as writer_module
+import sve_carddb.export.preview as writer_module
 from sve_carddb.build import create_database
 from sve_carddb.cli import app
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
-from sve_carddb.snapshot.export import Ownership, export_snapshot
-from sve_carddb.snapshot.export.compression import python_brotli
-from sve_carddb.snapshot.media import prepare_media
-from sve_carddb.snapshot.preview import (
-    Roots,
-    _write,
-    require_unknown_coverage,
-    write_preview,
-)
-from sve_carddb.snapshot.project import Projection, project
-from sve_carddb.snapshot.project.records import art_records, initial
-from sve_carddb.snapshot.project.source import Source
-from sve_carddb.snapshot.publication import require_formal, require_preview
-from sve_carddb.snapshot.reader import read_snapshot
+from sve_carddb.export.media import prepare_media
+from sve_carddb.export.preview import Roots, _write, write_preview
+from sve_carddb.export.project import Projection, project
+from sve_carddb.export.project.records import art_records, initial
+from sve_carddb.export.project.source import Source
+from sve_carddb.export.publication import require_formal, require_preview
+from sve_carddb.export.reader import read_snapshot
+from sve_carddb.export.transport import Ownership, export_snapshot
+from sve_carddb.export.transport.compression import python_brotli
+from sve_carddb.workflows.export import require_unknown_coverage
 
 from .snapshot_project_fixtures import SETTINGS, populate, schema
 from .test_snapshot_export import BATCH
@@ -34,8 +30,8 @@ from .test_snapshot_project import projected
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.snapshot.export import Snapshot
-    from sve_carddb.snapshot.media import MediaPlan
+    from sve_carddb.export.media import MediaPlan
+    from sve_carddb.export.transport import Snapshot
 
 
 @pytest.fixture(scope="module")

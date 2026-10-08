@@ -8,10 +8,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb import image_assets, image_variants
 from sve_carddb.core.json import object_value, parse
 from sve_carddb.core.regions import SourceRegion
-from sve_carddb.image_assets import (
+from sve_carddb.images import assets, variants
+from sve_carddb.images.assets import (
     PreviewRoots,
     build_regional_assets,
     verify_asset_sources,
@@ -29,9 +29,9 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
 
-    from sve_carddb.image_assets import ImageBuild
-    from sve_carddb.image_crops import ImageCrops
-    from sve_carddb.image_variants import VariantSet
+    from sve_carddb.images.assets import ImageBuild
+    from sve_carddb.images.crops import ImageCrops
+    from sve_carddb.images.variants import VariantSet
 
 
 @pytest.fixture
@@ -103,7 +103,7 @@ def test_serial_parallel_resume_and_hashes_use_only_frozen_bytes(
     def unexpected_encode(*_args: object, **_kwargs: object) -> bytes:
         pytest.fail("resume must reuse validated image cache")
 
-    monkeypatch.setattr(image_variants, "_encode", unexpected_encode)
+    monkeypatch.setattr(variants, "_encode", unexpected_encode)
     resumed = build_regional_assets(
         frozen, serial_roots, workers=2, region="jp", crops=empty_crops
     )
@@ -130,7 +130,7 @@ def test_build_rechecks_blob_tampering_before_returning(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     output = roots(tmp_path)
-    original: Callable[..., VariantSet] = image_variants.build_variants
+    original: Callable[..., VariantSet] = variants.build_variants
     calls = 0
 
     def corrupt_after_encoding(*args: object, **kwargs: object) -> VariantSet:
@@ -143,7 +143,7 @@ def test_build_rechecks_blob_tampering_before_returning(
             path.write_bytes(data[:-1] + bytes([data[-1] ^ 1]))
         return result
 
-    monkeypatch.setattr(image_assets, "build_variants", corrupt_after_encoding)
+    monkeypatch.setattr(assets, "build_variants", corrupt_after_encoding)
     with pytest.raises(
         ValueError, match="blob hash, bytes, dimensions or format mismatch"
     ):
@@ -338,23 +338,23 @@ def test_interrupted_conversion_resumes_complete_blobs(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     output = roots(tmp_path)
-    original: Callable[..., image_variants.VariantSet] = image_variants.build_variants
+    original: Callable[..., variants.VariantSet] = variants.build_variants
     calls = 0
 
-    def interrupted(*args: object, **kwargs: object) -> image_variants.VariantSet:
+    def interrupted(*args: object, **kwargs: object) -> variants.VariantSet:
         nonlocal calls
         calls += 1
         if calls == 2:
             raise OSError("synthetic disk full")
         return original(*args, **kwargs)
 
-    monkeypatch.setattr(image_assets, "build_variants", interrupted)
+    monkeypatch.setattr(assets, "build_variants", interrupted)
     with pytest.raises(OSError, match="disk full"):
         build_regional_assets(frozen, output, workers=1, region="jp", crops=empty_crops)
     before = {p: p.read_bytes() for p in output.preview.rglob("*.webp")}
     assert before
     assert not (output.preview / "snapshots").exists()
-    monkeypatch.setattr(image_assets, "build_variants", original)
+    monkeypatch.setattr(assets, "build_variants", original)
     resumed = build_regional_assets(frozen, output, region="jp", crops=empty_crops)
     assert resumed.execution()["cache_hits"] >= 1
     assert all(p.read_bytes() == data for p, data in before.items())
@@ -416,7 +416,7 @@ def test_cache_hits_are_reused_and_misses_are_encoded(
             pytest.fail("a verified cache hit cannot encode or write")
 
         for name in ("_encode", "_write_blob", "_write_cache"):
-            monkeypatch.setattr(image_variants, name, forbidden)
+            monkeypatch.setattr(variants, name, forbidden)
     archive = tree(frozen.root)
     build = build_regional_assets(
         frozen, output, workers=4, region="jp", crops=empty_crops
@@ -448,7 +448,7 @@ def test_execution_splits_reuse_and_encoding_time(
     next(output.cache.rglob("*.json")).unlink()
     ticks = count()
     # Each clock read advances one second, so every image spans exactly one second.
-    monkeypatch.setattr(image_assets, "perf_counter", lambda: float(next(ticks)))
+    monkeypatch.setattr(assets, "perf_counter", lambda: float(next(ticks)))
     build = build_regional_assets(
         frozen, output, workers=1, region="jp", crops=empty_crops
     )

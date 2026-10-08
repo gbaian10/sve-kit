@@ -3,17 +3,17 @@
 from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import canonical, digest, integer, object_value, string
+from sve_carddb.export.read_api import INDEX, validate_index
+from sve_carddb.export.read_api import ExportError as UploadError
+from sve_carddb.export.read_api import read_index as read_index_bytes
 from sve_carddb.r2_upload.v2.headers import IMAGE_HEADERS, INDEX_HEADERS, member_headers
-from sve_carddb.snapshot.read_api import INDEX, validate_index
-from sve_carddb.snapshot.read_api import ExportError as UploadError
-from sve_carddb.snapshot.read_api import read_index as read_index_bytes
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
+    from sve_carddb.export.read_api import Export
     from sve_carddb.r2_upload.v2.adapter import R2Store, Stored
     from sve_carddb.r2_upload.v2.freshness import CDNFreshness
-    from sve_carddb.snapshot.read_api import Export
 
 
 def read_index(remote: Stored | None) -> dict[str, JsonValue] | None:

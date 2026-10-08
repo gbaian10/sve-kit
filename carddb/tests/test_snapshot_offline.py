@@ -26,14 +26,15 @@ from sve_carddb.domains.catalog.models import Catalog
 from sve_carddb.domains.catalog.projection import CatalogProjection
 from sve_carddb.domains.products import OfficialProducts, ProductIdentities
 from sve_carddb.domains.registry.records import PrintingData
-from sve_carddb.snapshot.export import export_snapshot
-from sve_carddb.snapshot.media import prepare_media
-from sve_carddb.snapshot.preview import Roots, require_unknown_coverage, write_preview
-from sve_carddb.snapshot.project import project
-from sve_carddb.snapshot.publication import require_preview
-from sve_carddb.snapshot.reader import read_snapshot
+from sve_carddb.export.media import prepare_media
+from sve_carddb.export.preview import Roots, write_preview
+from sve_carddb.export.project import project
+from sve_carddb.export.publication import require_preview
+from sve_carddb.export.reader import read_snapshot
+from sve_carddb.export.transport import export_snapshot
 from sve_carddb.workflows import export as commands
 from sve_carddb.workflows import offline
+from sve_carddb.workflows.export import require_unknown_coverage
 from sve_carddb.workflows.offline import (
     Inputs,
     RegionalInput,
@@ -53,8 +54,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build import Database
-    from sve_carddb.snapshot.export import Snapshot
-    from sve_carddb.snapshot.project import Decisions, Projection, Settings
+    from sve_carddb.export.project import Decisions, Projection, Settings
+    from sve_carddb.export.transport import Snapshot
 
     from .catalog_vocabulary_fixtures import VocabularyCase
     from .shared_case_fixtures import TextCaseTemplate

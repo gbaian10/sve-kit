@@ -4,7 +4,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.core.json import array, object_value
-from sve_carddb.snapshot.reader import _files
+from sve_carddb.export.reader import _files
 
 
 def manifest(graph: dict[str, list[str]]) -> dict[str, JsonValue]:

@@ -16,11 +16,11 @@ from botocore.exceptions import ReadTimeoutError
 from botocore.httpsession import URLLib3Session
 from botocore.stub import Stubber
 
+from sve_carddb.export.read_api import INDEX
+from sve_carddb.export.read_api import ExportError as UploadError
 from sve_carddb.r2_upload import sdk
 from sve_carddb.r2_upload.sdk import BoundaryError, Credentials, bounded, sdk_client
 from sve_carddb.r2_upload.v2.adapter import R2Store, Stored
-from sve_carddb.snapshot.read_api import INDEX
-from sve_carddb.snapshot.read_api import ExportError as UploadError
 
 from .r2_sdk_fixtures import MockHTTP, mock_client
 from .r2_v2_fixtures import ACCOUNT, BUCKET, CREDENTIALS

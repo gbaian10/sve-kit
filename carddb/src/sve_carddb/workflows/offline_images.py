@@ -7,15 +7,15 @@ from pydantic import JsonValue
 
 from sve_carddb.core.authored import authored_root
 from sve_carddb.core.provenance import input_record
-from sve_carddb.image_assets import (
+from sve_carddb.images.assets import (
     plan_regional_images,
     populate_assets,
     verify_asset_sources,
     verify_assets,
 )
-from sve_carddb.image_checks import ImageChecks
-from sve_carddb.image_crop_report import crop_report
-from sve_carddb.image_crops import load_image_crops
+from sve_carddb.images.checks import ImageChecks
+from sve_carddb.images.crop_report import crop_report
+from sve_carddb.images.crops import load_image_crops
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -23,8 +23,8 @@ if TYPE_CHECKING:
     from sve_carddb.build import Database
     from sve_carddb.core.provenance import BuildContext, InputRecord
     from sve_carddb.domains.registry.preview import PreviewPlan
-    from sve_carddb.image_assets import ImageBuild
-    from sve_carddb.image_crops import ImageCrops
+    from sve_carddb.images.assets import ImageBuild
+    from sve_carddb.images.crops import ImageCrops
     from sve_carddb.workflows.offline import Inputs
 
 

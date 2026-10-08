@@ -9,7 +9,7 @@ import pytest
 from jsonschema import ValidationError
 from pydantic import JsonValue, RootModel
 
-import sve_carddb.snapshot.project as project_module
+import sve_carddb.export.project as project_module
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.database import open_database
 from sve_carddb.build.t0 import compile_t0
@@ -17,7 +17,7 @@ from sve_carddb.contracts.snapshot import tables
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.domains.routes.defaults import GeneralEvidence, select_defaults
 from sve_carddb.domains.translations.names.bindings import DisplayBinding
-from sve_carddb.snapshot.project import (
+from sve_carddb.export.project import (
     Decisions,
     DisplayCheck,
     DisplayText,
@@ -25,9 +25,9 @@ from sve_carddb.snapshot.project import (
     effective_support,
     project,
 )
-from sve_carddb.snapshot.project.closure import validate_closure
-from sve_carddb.snapshot.project.records import initial
-from sve_carddb.snapshot.project.shape import tuple_value
+from sve_carddb.export.project.closure import validate_closure
+from sve_carddb.export.project.records import initial
+from sve_carddb.export.project.shape import tuple_value
 
 from .build_db_fixtures import DATE
 from .snapshot_project_fixtures import SETTINGS, TEXT, decisions, populate, schema
@@ -36,8 +36,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from sve_carddb.build import CompiledSchema, Database, Value
-    from sve_carddb.snapshot.project import Projection
-    from sve_carddb.snapshot.project.source import Record, Source
+    from sve_carddb.export.project import Projection
+    from sve_carddb.export.project.source import Record, Source
 
 
 @pytest.fixture(scope="module")
@@ -1354,7 +1354,7 @@ def test_logical_projection_runs_shared_a_semantic_checks(
         view["face_revision"][0]["type_code"] = "missing-vocabulary"
         return view
 
-    monkeypatch.setattr("sve_carddb.snapshot.project.initial", broken)
+    monkeypatch.setattr("sve_carddb.export.project.initial", broken)
     with pytest.raises(ValueError, match="Vocabulary reference"):
         projected(db)
 

@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, TypedDict
 import pytest
 from PIL import Image, ImageCms, ImageDraw, features
 
-from sve_carddb import image_variants
-from sve_carddb.image_variants import (
+from sve_carddb.images import variants
+from sve_carddb.images.variants import (
     DEFAULT_RECIPE,
     CropBox,
     ImageSource,
@@ -79,7 +79,7 @@ def build(
     *,
     override: CropBox | None = None,
     recipe: Recipe = DEFAULT_RECIPE,
-) -> image_variants.VariantSet:
+) -> variants.VariantSet:
     return build_variants(
         item,
         blob_root=root / "blobs",
@@ -261,7 +261,7 @@ def test_cache_skips_encoding_and_clean_runs_match(
     def unexpected_encode(*_args: object, **_kwargs: object) -> bytes:
         pytest.fail("cache hit re-encoded the image")
 
-    monkeypatch.setattr(image_variants, "_encode", unexpected_encode)
+    monkeypatch.setattr(variants, "_encode", unexpected_encode)
     cached = build(item, tmp_path / "first")
     assert cached.cache_hit
     assert cached.variants == first.variants

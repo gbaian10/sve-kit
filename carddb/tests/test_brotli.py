@@ -4,7 +4,7 @@ import brotli
 import pytest
 
 from sve_carddb.core.compression import verify_brotli
-from sve_carddb.snapshot.export.compression import python_brotli, recipe
+from sve_carddb.export.transport.compression import python_brotli, recipe
 
 
 @pytest.mark.parametrize(

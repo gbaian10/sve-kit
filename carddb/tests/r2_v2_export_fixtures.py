@@ -10,11 +10,11 @@ import pytest
 from PIL import Image
 
 from sve_carddb.contracts.profiles import MEDIA
-from sve_carddb.image_variants import build_variants
-from sve_carddb.snapshot.export import Batch, export_snapshot
-from sve_carddb.snapshot.media import prepare_media
-from sve_carddb.snapshot.preview import Roots, write_preview
-from sve_carddb.snapshot.preview.media_state import reserve
+from sve_carddb.export.media import prepare_media
+from sve_carddb.export.preview import Roots, write_preview
+from sve_carddb.export.preview.media_state import reserve
+from sve_carddb.export.transport import Batch, export_snapshot
+from sve_carddb.images.variants import build_variants
 
 from .test_image_variants import source
 from .test_snapshot_preview_images import PublicImages
@@ -23,8 +23,8 @@ from .test_snapshot_preview_images import images as images  # ruff: ignore[usele
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.snapshot.export import Brotli
-    from sve_carddb.snapshot.project import Projection
+    from sve_carddb.export.project import Projection
+    from sve_carddb.export.transport import Brotli
 
 
 def export(

@@ -12,20 +12,20 @@ from sve_carddb.core.json import object_value, parse
 from sve_carddb.core.provenance import InputRecord
 from sve_carddb.domains.products import OfficialProducts, ProductIdentities
 from sve_carddb.domains.registry.records import PrintingData
-from sve_carddb.image_assets import (
+from sve_carddb.export.media import prepare_media
+from sve_carddb.export.preview import Roots, write_preview
+from sve_carddb.export.transport import export_snapshot
+from sve_carddb.images.assets import (
     PARSERS,
     ImageBuild,
     ImageReference,
     PreviewRoots,
     build_regional_assets,
 )
-from sve_carddb.image_crops import FILE, load_image_crops
+from sve_carddb.images.crops import FILE, load_image_crops
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.parse.pages import official_en
 from sve_carddb.parse.pages.official_jp import image_url
-from sve_carddb.snapshot.export import export_snapshot
-from sve_carddb.snapshot.media import prepare_media
-from sve_carddb.snapshot.preview import Roots, write_preview
 from sve_carddb.workflows import export as commands
 from sve_carddb.workflows import offline, offline_images
 
@@ -43,8 +43,8 @@ if TYPE_CHECKING:
     from sve_carddb.core.regions import Region
     from sve_carddb.domains.card_extras import CardPage
     from sve_carddb.domains.registry.preview import PreviewPlan
-    from sve_carddb.image_checks import ImageChecks
-    from sve_carddb.image_crops import ImageCrops
+    from sve_carddb.images.checks import ImageChecks
+    from sve_carddb.images.crops import ImageCrops
     from sve_carddb.workflows.offline import Inputs
 
     from .text_observation_fixtures import Case
@@ -245,7 +245,7 @@ def test_offline_cli_reuses_both_caches_and_rejects_partial_roots(
             images, output, region=region, crops=crops, workers=workers, checks=checks
         )
 
-    monkeypatch.setattr("sve_carddb.image_variants._encode", forbidden)
+    monkeypatch.setattr("sve_carddb.images.variants._encode", forbidden)
     monkeypatch.setattr(commands, "build_regional_assets", recorded)
     result = runner.invoke(
         app,
@@ -287,7 +287,7 @@ def test_offline_cli_encodes_missing_cache_and_reports_time(
     ticks = count()
     # Each clock read advances one second, so every image spans exactly one second.
     monkeypatch.setattr(
-        "sve_carddb.image_assets.perf_counter", lambda: float(next(ticks))
+        "sve_carddb.images.assets.perf_counter", lambda: float(next(ticks))
     )
     result = CliRunner().invoke(
         app,

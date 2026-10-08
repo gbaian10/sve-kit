@@ -30,11 +30,11 @@ def test_contracts_import_only_core_and_contracts(path: Path) -> None:
 @pytest.mark.parametrize(
     "source",
     [
-        "import sve_carddb.snapshot.reader",
+        "import sve_carddb.export.reader",
         "from sve_carddb import build_db",
         "from .. import translations",
         "if TYPE_CHECKING:\n    from sve_carddb.build import Database",
-        "def call():\n    from ..snapshot import reader",
+        "def call():\n    from ..export import reader",
     ],
 )
 def test_contracts_detect_reverse_imports(source: str) -> None:

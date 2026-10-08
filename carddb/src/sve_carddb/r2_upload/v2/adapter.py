@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING
 from botocore.exceptions import BotoCoreError, ClientError
 from botocore.parsers import ResponseParserError
 
+from sve_carddb.export.read_api import IMAGE_KEY, JSON_KEY
+from sve_carddb.export.read_api import ExportError as UploadError
 from sve_carddb.r2_upload.sdk import (
     BoundaryError,
     Credentials,
@@ -18,8 +20,6 @@ from sve_carddb.r2_upload.sdk import (
     status,
     validate_key,
 )
-from sve_carddb.snapshot.read_api import IMAGE_KEY, JSON_KEY
-from sve_carddb.snapshot.read_api import ExportError as UploadError
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

@@ -6,9 +6,9 @@ from urllib.parse import urlsplit
 
 import httpx
 
+from sve_carddb.export.read_api import IMAGE_KEY
+from sve_carddb.export.read_api import ExportError as UploadError
 from sve_carddb.r2_upload.v2.adapter import MAX_OBJECT
-from sve_carddb.snapshot.read_api import IMAGE_KEY
-from sve_carddb.snapshot.read_api import ExportError as UploadError
 
 
 def body(response: httpx.Response, limit: int) -> bytes:

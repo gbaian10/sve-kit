@@ -9,25 +9,26 @@ from sve_carddb.cli_paths import required_root
 from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.core.authored import authored_root
 from sve_carddb.core.json import canonical, digest, object_value, parse
-from sve_carddb.image_assets import (
+from sve_carddb.export.media import prepare_media
+from sve_carddb.export.preview import Roots, _write, write_preview
+from sve_carddb.export.preview.media_state import reserve
+from sve_carddb.export.publication import require_formal, require_preview
+from sve_carddb.export.transport import export_snapshot
+from sve_carddb.export.transport.compression import python_brotli
+from sve_carddb.images.assets import (
     MAX_WORKERS,
     ImageBuild,
     PreviewRoots,
     build_regional_assets,
 )
-from sve_carddb.image_checks import ImageChecks
-from sve_carddb.image_crops import load_image_crops
-from sve_carddb.snapshot.export import export_snapshot
-from sve_carddb.snapshot.export.compression import python_brotli
-from sve_carddb.snapshot.media import prepare_media
-from sve_carddb.snapshot.preview import Roots, _write, write_preview
-from sve_carddb.snapshot.preview.media_state import reserve
-from sve_carddb.snapshot.publication import require_formal, require_preview
+from sve_carddb.images.checks import ImageChecks
+from sve_carddb.images.crops import load_image_crops
 from sve_carddb.workflows.offline import Built, Inputs
 from sve_carddb.workflows.offline import build as build_offline
 
 if TYPE_CHECKING:
-    from sve_carddb.snapshot.export import Brotli
+    from sve_carddb.export.project import Projection
+    from sve_carddb.export.transport import Brotli
 
 app = typer.Typer(no_args_is_help=True, help="Export isolated offline previews.")
 
@@ -127,8 +128,8 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
 
 
 if TYPE_CHECKING:
-    from sve_carddb.snapshot.export import Batch
-    from sve_carddb.snapshot.media import MediaPlan
+    from sve_carddb.export.media import MediaPlan
+    from sve_carddb.export.transport import Batch
 
 
 def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] -- common sealing boundary receives the explicit codec, verified build, roots and profile
@@ -186,3 +187,17 @@ def publish_command(
     """Reject preview first; complete formal release gates are tracked by #34."""
     require_formal(object_value(parse(manifest.read_bytes())))
     raise typer.BadParameter("Formal release gates are not implemented yet (#34)")
+
+
+def require_unknown_coverage(projection: Projection) -> None:
+    """This input recipe contains no QA/errata/CR/restriction source coverage."""
+    if (
+        projection.metadata["source_windows"]
+        or projection.metadata["restriction_coverage"]
+    ):
+        raise ValueError("Uncovered sources must remain empty windows / unknown")
+    if any(
+        projection.tables[table]
+        for table in ("qa", "errata", "cr_version", "restriction")
+    ):
+        raise ValueError("Unrequested ancillary sources cannot become public facts")

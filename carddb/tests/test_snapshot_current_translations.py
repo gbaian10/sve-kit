@@ -8,10 +8,10 @@ import pytest
 from sve_carddb.build import create_database
 from sve_carddb.core.json import array, object_value
 from sve_carddb.domains.translations.names.bindings import DisplayBinding
-from sve_carddb.snapshot.export import Batch, Ownership, export_snapshot
-from sve_carddb.snapshot.media import prepare_media
-from sve_carddb.snapshot.project import DisplayCheck, project
-from sve_carddb.snapshot.reader import read_snapshot, read_text_all
+from sve_carddb.export.media import prepare_media
+from sve_carddb.export.project import DisplayCheck, project
+from sve_carddb.export.reader import read_snapshot, read_text_all
+from sve_carddb.export.transport import Batch, Ownership, export_snapshot
 
 from .snapshot_project_fixtures import SETTINGS, TEXT, decisions, populate, schema
 from .test_snapshot_project import EN_TEXT, dual_project, dual_region, one, projected
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from sve_carddb.build import CompiledSchema, Database
-    from sve_carddb.snapshot.project import Decisions
+    from sve_carddb.export.project import Decisions
 
 
 @pytest.fixture(scope="module")

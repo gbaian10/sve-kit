@@ -72,10 +72,10 @@ from sve_carddb.domains.translations.templates.references import (
     References as TemplateReferences,
 )
 from sve_carddb.domains.translations.templates.sources import Sources as TemplateSources
-from sve_carddb.image_checks import ImageChecks
-from sve_carddb.image_variants import DEFAULT_RECIPE
-from sve_carddb.snapshot.export import Batch, Ownership
-from sve_carddb.snapshot.project import Decisions, Projection, Settings, project
+from sve_carddb.export.project import Decisions, Projection, Settings, project
+from sve_carddb.export.transport import Batch, Ownership
+from sve_carddb.images.checks import ImageChecks
+from sve_carddb.images.variants import DEFAULT_RECIPE
 from sve_carddb.workflows.offline_images import prepare_images
 from sve_carddb.workflows.offline_names import composer
 
@@ -90,7 +90,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.text_observations.vocabulary import Vocabulary
     from sve_carddb.domains.translations.names.resolve import Names
     from sve_carddb.domains.translations.templates.loader import Validated
-    from sve_carddb.image_assets import ImageBuild
+    from sve_carddb.images.assets import ImageBuild
 
 
 # Templates and flavor translate Japanese source text into this display language.

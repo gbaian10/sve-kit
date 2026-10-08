@@ -6,7 +6,7 @@ import pytest
 from jsonschema import ValidationError
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.project.shape import source_tuple
+from sve_carddb.export.project.shape import source_tuple
 
 
 @pytest.fixture(scope="module")
