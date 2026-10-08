@@ -34,7 +34,11 @@ filing_key 為 `[A-Za-z0-9_-]+`，sequence 為三位以上十進位字串；不�
 模板來源清冊在建置時產生，不進 Git，見[清冊契約](template-source-replay.md)。
 舊格式留在 Git 歷史，不作現行載入分支。
 
-record 欄位為 `{record_key,kind,data,origin,low_confidence}`，另可選填 note。
+record 必填欄位為 `{kind,data}`，另可選填 origin、low_confidence、note。
+省略 origin 時為 project，省略 low_confidence 時為 false；顯式填預設值可讀，寫出端省略。
+真實譯文的 official／machine 與 true 仍照常讀出、驗證及投影，不從譯文內容猜品質。
+record_key 由 kind 與 data 載入時計算，不接受存檔欄位；重複選擇鍵仍拒絕。
+`missing_source_reason` 缺欄位時為 null，寫出省略 null；`value: null` 的缺譯／撤回語意仍須保留。
 record_key 是下表選擇鍵前加 kind 的 canonical JSON 陣列字串；全入口唯一，不再包含 adoption_no 或 revision。
 note 省略時為空字串，僅寫簡短資料理由，不參與 ID 或決定狀態。來源、owner、參數等結構欄位不是審查欄位。
 concept_evidence 的 concept_note 可省略，只保留有實際內容的說明；精確來源核對不依賴套話。
@@ -90,7 +94,7 @@ text_hash 對定位到的完整 UTF-8 字串計算；span 使用 Unicode code po
 ### 2.1 無法綁定 slot 的候選原稿
 
 `template_translation_candidate` 保存尚無完整參數定義或無法無損綁定的專案譯文草稿。
-沿用 format 2 的六欄 record，origin 限 project/machine，low_confidence 保留原值；
+沿用 format 2 的 kind/data record 與可省略品質欄位，origin 限 project/machine，low_confidence 保留原值；
 它始終未啟用，不因低信心旗標為 false 而成為可渲染譯文，也不能用 template_translation_variant 代替。
 
 路徑固定為 `authored/translations/templates/template_translation_candidate/<sequence>.yaml`，

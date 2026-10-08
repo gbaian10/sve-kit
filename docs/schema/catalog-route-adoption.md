@@ -31,8 +31,10 @@ filing 只作檔案整理，沒有地區或商品語意；sequence 允許缺號�
 YAML、單檔小於 1 MiB、路徑安全與固定目錄掃描依 [authored-layout](authored-layout.md#2-分片與來源)。
 拒絕未知欄位、重複 YAML 鍵、symlink 及跨入口資料；載入後排序，不要求作者先排序。
 
-record 為 `{record_key,kind,data,origin,low_confidence}`，note 可省略。品質欄位沿翻譯契約。
-record_key 是 `[kind,subject]` 的 canonical JSON 字串，同入口全域唯一，不含修訂號。
+record 必填 `{kind,data}`；origin／low_confidence／note 可省略。品質預設 project／false，
+顯式預設值可讀，寫出端省略；非預設品質值與 `value: null` 保留。
+record_key 載入時計算，存檔欄位拒絕；品質欄位沿翻譯契約。
+推導的 record_key 是 `[kind,subject]` 的 canonical JSON 字串，同入口全域唯一，不含修訂號。
 data 為 `{subject,value,evidence?}`；subject/value 見 §4–§6；value=null 表示停止使用當前值。
 evidence 預設空陣列，只保存值本身沒有引用的額外文字或圖片證據。
 
@@ -103,7 +105,7 @@ special_kinds 必填；欄位缺漏是格式錯誤。
 稀有度／premium 的拆解是釘住 recipe 的來源投影，不能讓 raw_mappings 改寫 premium；未知組合不猜。
 技術預設 P3 分開篩選基礎 rarity 與 premium，顯示可組合；複合顯示別名不建立第二份稀有度真值。
 
-label 只保存一個基底原文／自撰標籤；其他語言的選詞放在同一記錄的 `value.translations`（`lang,text,origin,low_confidence`，不得為 ja），建置時寫成 vocabulary 的 label 翻譯。
+label 只保存一個基底原文／自撰標籤；其他語言的選詞放在同一記錄的 `value.translations`（`lang,text,origin,low_confidence`，不得為 ja），建置時寫成 vocabulary 的 label 翻譯；此處 origin／low_confidence 也可省略為 project／false，寫出端省略預設值。
 若 trait 同時是 glossary 概念，只有明示同概念關係才可使用既有選詞，不能因字串相同合併概念。
 已核可譯名的數位／社群來源與 machine 標示沿翻譯契約，不重新要求逐卡確認。
 

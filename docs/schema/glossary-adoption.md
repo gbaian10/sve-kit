@@ -17,6 +17,7 @@ TermReference 恰為 `{kind,key}`：glossary 的 key 為 term ID，vocabulary �
 ## 2. 概念來源
 
 glossary_term.data 為 `{id,category,concept_key,source_ref,source_span,authored_source_ja,missing_source_reason}`。
+missing_source_reason 缺欄位時為 null，寫出省略 null；自撰來源的非空原因仍必須保存。
 source_ref 非 null 時以其 exact 字串及可空的 span 重建日文名稱，後兩欄均 null；
 沒有來源定位的專案概念則 ref/span 均 null，後兩欄為非空名稱與簡短理由，不造假 locator。
 origin／low_confidence／note 在 record 外層；source_ref 不保存私人 pathname 或核可頁引用。
