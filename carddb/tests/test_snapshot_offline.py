@@ -15,7 +15,6 @@ from sve_carddb.card_extras import (
     ErrataPrinting,
     QAEntry,
     RelatedLink,
-    populate_card_extras,
 )
 from sve_carddb.card_extras.archive import EN_PARSER, PARSER
 from sve_carddb.card_extras.importer import CardExtrasRestriction
@@ -66,8 +65,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import BuildContext
-    from sve_carddb.card_extras import ExtrasPlan
     from sve_carddb.snapshot.export import Snapshot
     from sve_carddb.snapshot.project import Decisions, Projection, Settings
 
@@ -154,7 +151,6 @@ def prepared(
             locator="synthetic-adoption-field",
         ),
     )
-    monkeypatch.setattr(offline, "_adoption_uses", lambda *_args: adoption_uses)
     monkeypatch.setattr(
         offline,
         "_populate_adoptions",
@@ -263,7 +259,6 @@ def test_regional_build_projects_qa_related_and_reskin_with_complete_sources(
         "build.sqlite",
         "inputs.json",
         "report.json",
-        "seal.json",
     }
     assert (tmp_path / "bundle/inputs.json").read_bytes() == built.input_content
     assert "Synthetic answer." not in canonical(built.report).decode()
@@ -423,29 +418,6 @@ def test_errata_fragments_dates_and_multiple_notices_remain_independent(
         built.ownership,
         recipe.batch(),
     ).verify(built.projection)
-
-
-@pytest.mark.parametrize(
-    "usage", ["official_qa", "card_extras_page", "official_related"]
-)
-def test_missing_returned_use_is_rejected(
-    prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
-    monkeypatch: pytest.MonkeyPatch,
-    usage: str,
-) -> None:
-    def incomplete(
-        db: Database, plan: ExtrasPlan, *, build: BuildContext
-    ) -> InputRecord:
-        record = populate_card_extras(db, plan, build=build)
-        return record.model_copy(
-            update={"uses": tuple(use for use in record.uses if use.usage != usage)}
-        )
-
-    monkeypatch.setattr(offline, "populate_card_extras", incomplete)
-    with pytest.raises(
-        ValueError, match=r"^Build input use closure or context mismatch$"
-    ):
-        build(prepared[1])
 
 
 @pytest.mark.parametrize(
@@ -844,21 +816,6 @@ def test_missing_adopted_language_fails_before_population(
         build(prepared[1])
 
 
-def test_lost_adoption_evidence_is_rejected_by_complete_closure(
-    prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr(
-        offline,
-        "_populate_adoptions",
-        lambda _db, _inputs, *, build, **_kwargs: input_record(build, ()),
-    )
-    with pytest.raises(
-        ValueError, match=r"^Build input use closure or context mismatch$"
-    ):
-        build(prepared[1])
-
-
 @pytest.fixture(scope="module")
 def immutable_adoptions(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
     return current_vocabulary_case(
@@ -870,26 +827,30 @@ def test_offline_adapter_uses_real_checked_bilingual_adoptions(
     immutable_adoptions: VocabularyCase,
 ) -> None:
     case = immutable_adoptions
-    derived = offline._derive_adoptions(
+    derived = offline._prepare_catalog(
         case.case.inputs(),
         case.build(),
         {"test-store": case.archive},
     )
-    assert {item.code for item in derived.catalog.languages} == {"en", "ja", "zh-Hant"}
+    assert {item.code for item in derived.projection.catalog.languages} == {
+        "en",
+        "ja",
+        "zh-Hant",
+    }
     for region in ("en", "jp"):
-        binding = derived.vocabulary.lookup(region, "type", "Synthetic type")
+        binding = derived.projection.vocabulary.lookup(region, "type", "Synthetic type")
         assert binding.code == "follower"
         assert binding.special_kinds == ("evolve",)
-    uses = offline._adoption_uses(
+    uses = offline._prepare_catalog(
         case.case.inputs(), case.build(), {"test-store": case.archive}
     )
-    assert uses
-    assert {use.usage for use in uses} == {"catalog_exact_text"}
-    assert {use.source.url for use in uses} == {
+    assert uses.sources.uses
+    assert {use.usage for use in uses.sources.uses} == {"catalog_exact_text"}
+    assert {use.source.url for use in uses.sources.uses} == {
         "https://example.invalid/en",
         "https://example.invalid/jp",
     }
-    assert derived.catalog.terms[0].label.text != "Synthetic type"
+    assert derived.projection.catalog.terms[0].label.text != "Synthetic type"
 
 
 def test_adoption_adapter_rejects_an_unpinned_configuration(
@@ -900,7 +861,7 @@ def test_adoption_adapter_rejects_an_unpinned_configuration(
     with pytest.raises(
         ValueError, match=r"^Build configuration does not pin adoption inputs$"
     ):
-        offline._derive_adoptions(
+        offline._prepare_catalog(
             case.case.inputs(),
             build,
             {"test-store": case.archive},
@@ -920,6 +881,6 @@ def test_native_offline_rejects_receipt_catalog(
     with pytest.raises(
         ValueError, match=r"^Offline catalog requires current format 2 inputs$"
     ):
-        offline._derive_adoptions(
+        offline._prepare_catalog(
             case.case.inputs(), case.build(), {"test-store": case.archive}
         )

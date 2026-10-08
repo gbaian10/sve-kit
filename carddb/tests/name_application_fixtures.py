@@ -7,7 +7,6 @@ from sve_carddb.build_db import create_database
 from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.digital_name_policies.application import Inputs
-from sve_carddb.digital_name_policies.runtime import RUNTIME
 from sve_carddb.registry.preview import FrozenJP, plan_preview
 from sve_carddb.snapshot.values import object_value, parse
 from sve_carddb.text_observations import FrozenTexts, plan_text_observations
@@ -22,6 +21,9 @@ from .build_db_fixtures import rows
 from .database_fixtures import DatabaseTemplate
 from .digital_name_policy_fixtures import PolicyFixture, make_policy_fixture
 from .translation_fixtures import template, write
+
+RUNTIME: tuple[str, ...] = ()
+
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -59,9 +61,7 @@ def application_case(
         | inputs.configuration()
     )
     object_value(config["catalog_registry"])["authored_revision"] = revision
-    context = BuildContext.from_inputs(
-        revision, {name: (root / name).read_bytes() for name in RUNTIME}, config
-    )
+    context = BuildContext.from_inputs(revision, config)
     owner = fixture.owner()
     assert owner.name_ref is not None
     batch = owner.name_ref.batch_id

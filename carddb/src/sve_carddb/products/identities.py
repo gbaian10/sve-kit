@@ -1,8 +1,6 @@
-"""Validate all confirmed product IDs, pinned authored bytes and frozen evidence."""
+"""Validate current confirmed product IDs against frozen evidence."""
 
 import re
-import shutil
-import subprocess  # ruff: ignore[suspicious-subprocess-import] -- verify exact authored bytes against an immutable Git object
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
@@ -22,10 +20,10 @@ from sve_carddb.products.identity_models import (
 from sve_carddb.products.loader import _safe_file
 from sve_carddb.products.models import Evidence, ProductRecord
 from sve_carddb.products.official import PARSER, ProductPage, parse_products
-from sve_carddb.registry.inputs import canonical, digest
+from sve_carddb.registry.inputs import JSON_VALUE, canonical, digest
 from sve_carddb.registry.records import RecordData
-from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import digest as digest_bytes
+from sve_carddb.registry.storage import MAX_BYTES
+from sve_carddb.registry.yaml_reader import parse_yaml
 from sve_carddb.snapshot.values import parse
 
 if TYPE_CHECKING:
@@ -62,10 +60,6 @@ class ProductIdentities:
     warnings: tuple[JsonValue, ...]
     catalog: ProductSnapshot
 
-    def dependencies(self) -> dict[str, bytes]:
-        """Pin every historical alias shard's exact bytes."""
-        return {"authored/" + shard.path: shard.exact_bytes for shard in self.shards}
-
     def configuration(self) -> dict[str, JsonValue]:
         """Declare the F1 configuration entry specified in authored-layout §11.4."""
         return {"authored_revision": self.revision}
@@ -78,12 +72,6 @@ class ProductIdentities:
             or configuration.get("product_identity") != self.configuration()
         ):
             raise ValueError("Product identity configuration pin mismatch")
-        pins = {pin.name: pin.sha256 for pin in build.dependencies}
-        if any(
-            pins.get(name) != digest_bytes(content)
-            for name, content in self.dependencies().items()
-        ):
-            raise ValueError("Product identity dependency pin mismatch")
 
     def source_uses(self) -> tuple[SourceUse, ...]:
         """Declare closure and actual match-reproduction uses from all evidence records."""
@@ -129,19 +117,6 @@ def match_key(region: Region, match: Match) -> str:
     ).decode()
 
 
-def _revision(root: Path, name: str, revision: str, content: bytes) -> None:
-    executable = shutil.which("git")
-    if executable is None:
-        raise ValueError("Git is required to verify product identity revision")
-    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- invoke Git without a shell on validated object paths
-        [executable, "-C", str(root.parent), "show", revision + ":authored/" + name],
-        capture_output=True,
-        check=False,
-    )
-    if result.returncode != 0 or result.stdout != content:
-        raise ValueError("Product identity bytes differ from pinned authored revision")
-
-
 def load_product_identities(
     root: Path,
     *,
@@ -154,8 +129,6 @@ def load_product_identities(
         raise ValueError("Product identity revision must be a full Git SHA")
     shards = tuple(_shard(root, name) for name in _inventory(root))
     records = _records(shards, catalog)
-    for shard in shards:
-        _revision(root, shard.path, authored_revision, shard.exact_bytes)
     pages = _evidence(records, stores)
     return ProductIdentities(
         authored_revision,
@@ -199,10 +172,13 @@ def _inventory(root: Path) -> list[str]:
 def _shard(root: Path, name: str) -> IdentityFile:
     path = root / name
     _safe_file(root, path)
-    raw = read_yaml(path)
+    exact = path.read_bytes()
+    if len(exact) >= MAX_BYTES:
+        raise ValueError("Product identity shard exceeds size limit")
+    raw = JSON_VALUE.validate_python(parse_yaml(exact), strict=True)
     envelope = _model(IdentityShard, raw)
     keys = tuple(record.record_key for record in envelope.records)
-    if keys != tuple(sorted(set(keys))):
+    if len(keys) != len(set(keys)):
         raise ValueError("Product identity records must be sorted and unique")
     for record in envelope.records:
         if (
@@ -216,7 +192,7 @@ def _shard(root: Path, name: str) -> IdentityFile:
             raise ValueError("Duplicate product identity evidence")
         if not any(ref.role == "product_identity_match" for ref in record.evidence):
             raise ValueError("Product identity requires match evidence")
-    return IdentityFile(name, digest(raw), path.read_bytes(), envelope)
+    return IdentityFile(name, digest(raw), exact, envelope)
 
 
 def _records(

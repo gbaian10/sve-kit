@@ -140,14 +140,3 @@ class LinkPolicy(RecordData):
     purpose: Literal["links"]
     content: LinkContent
     note: str = ""
-
-
-class CurrentEntry(RecordData):
-    path: Text
-    hash: Hash
-
-
-class Index(RecordData):
-    digital_name_policy_index_format: Literal[2]
-    kind: Literal["digital_name_policy_index"]
-    policies: Annotated[dict[PolicyId, CurrentEntry], Field(min_length=1)]

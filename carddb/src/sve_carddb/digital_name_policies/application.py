@@ -1,6 +1,7 @@
 """Current name application inputs and its atomic write boundary."""
 
 from dataclasses import dataclass
+from functools import cached_property
 from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
@@ -32,9 +33,14 @@ class Inputs:
     authored_revision: str
     application_at: str = ""
 
+    @cached_property
+    def snapshot(self) -> Snapshot:
+        """Reuse current inputs within this command."""
+        return load(self.root, self.authored_revision)
+
     def load(self) -> Snapshot:
-        """Read the entire immutable authored policy closure."""
-        return load(self.root, self.repository, self.authored_revision)
+        """Reuse current inputs within this command."""
+        return self.snapshot
 
     def configuration(self) -> dict[str, JsonValue]:
         """Declare the selected policy and the explicit first-application baseline."""
@@ -44,7 +50,7 @@ class Inputs:
         return {
             "digital_name_application": {
                 "recipe": "owner-name-current-v2",
-                **snapshot.pins(),
+                **snapshot.configuration(),
             }
         }
 

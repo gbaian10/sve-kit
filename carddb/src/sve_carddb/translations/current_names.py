@@ -3,15 +3,13 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
-from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.translations.current import semantic_hash
 from sve_carddb.translations.current_models import (
     AssignmentRecord,
     ConceptRecord,
     TermRecord,
 )
-from sve_carddb.translations.models import IdentityBasis, PrintingOwner
+from sve_carddb.translations.models import PrintingOwner
 from sve_carddb.translations.name_identity import IdentityEvidence
 from sve_carddb.translations.name_sources import NameOwner, NameSource, name_source
 
@@ -106,17 +104,9 @@ def prepare(
     records = snapshot.current_records()
     concepts = [r for r in records if isinstance(r, ConceptRecord)]
     if concepts:
-        # This is the actual current identity input, not an authored approval background.
-        basis = IdentityBasis(
-            authored_revision=inputs.authored_revision,
-            registry_index_hash=digest(
-                canonical(read_yaml(inputs.root / "ids/index.yaml"))
-            ),
-        )
         identity = IdentityEvidence(sources, inputs.authored_revision)
         for concept in concepts:
             lang, _, _, _ = identity.association(
-                basis,
                 concept.data.source_ref,
                 card_id=concept.data.subject.card_id,
                 face_id=concept.data.subject.face_id,

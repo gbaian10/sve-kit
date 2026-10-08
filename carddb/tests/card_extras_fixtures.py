@@ -72,7 +72,6 @@ def page(
 def context(plan: ExtrasPlan) -> BuildContext:
     return BuildContext.from_inputs(
         REVISION,
-        {"synthetic.lock": b"synthetic dependencies"},
         {"card_extras": plan.configuration()},
     )
 

@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING, Annotated
 
 import typer
 
-from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_assets import (
     MAX_WORKERS,
     ImageBuild,
     PreviewRoots,
     build_regional_assets,
 )
+from sve_carddb.image_checks import ImageChecks
 from sve_carddb.image_crops import load_image_crops
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.export.compression import python_brotli
@@ -79,6 +79,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
             "Image asset and cache roots must be provided together"
         )
     images = None
+    checks = ImageChecks()
     if image_assets_dir is not None and image_cache_dir is not None:
         image_roots = PreviewRoots(image_assets_dir, image_cache_dir)
         image_roots.validate(
@@ -87,11 +88,12 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
         crops = load_image_crops(recipe.repo / "authored")
         regional = tuple(
             build_regional_assets(
-                FrozenSources(recipe.archive, recipe.store_id, pin.image_batch),
+                checks.batch(recipe.archive, recipe.store_id, pin.image_batch),
                 image_roots,
                 region=pin.region,
                 crops=crops,
                 workers=workers,
+                checks=checks,
             )
             for pin in recipe.sources
         )
@@ -100,7 +102,11 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
             sum(part.elapsed_seconds for part in regional),
         )
     built = build_offline(
-        recipe, bundle_dir=bundle_dir, images=images, image_root=image_assets_dir
+        recipe,
+        bundle_dir=bundle_dir,
+        images=images,
+        image_root=image_assets_dir,
+        image_checks=checks,
     )
     _finish(
         built,
@@ -110,6 +116,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
         image_assets_dir,
         None if images is None else images.execution() | {"workers": workers},
         format_version,
+        checks,
     )
 
 
@@ -126,6 +133,7 @@ def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] 
     image_source: Path | None,
     image_execution: dict[str, int] | None,
     version: str,
+    checks: ImageChecks | None = None,
 ) -> None:
     def seal(plan: MediaPlan) -> None:
         projection = plan.projection
@@ -160,6 +168,7 @@ def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] 
             image_source,
             revision=revision,
             previous=previous,
+            checks=checks,
         )
     )
 

@@ -1,11 +1,12 @@
 # Glossary and digital names
 
-The translation entry accepts format 2 only. Indexed shards contain
-`record_key/kind/data/origin/low_confidence` with an optional `note`, with no decisions, revision
-chains or approval events. `Snapshot.current_records()` exposes the complete
-current glossary and name overrides. Selection keys and concept IDs stay stable
-when wording or notes change. Every unindexed file, including temporary files,
-is rejected; index and shard bytes must match the declared immutable Git revision.
+The translation entry accepts format 2 only. Shards contain
+`record_key/kind/data/origin/low_confidence` with an optional `note`.
+Readers load the current working tree once from the dedicated glossary/templates/
+overrides directories. They validate size, types, unique keys and references,
+then sort; shard gaps and unordered records are accepted. There is no checksum
+index or Git-byte gate. Selection keys and concept IDs stay stable when wording
+or notes change.
 
 Use `build_db.current.compile_current_build()` for current imports.
 `import_glossary()` owns an atomic transaction; `populate_glossary()` composes
@@ -23,7 +24,7 @@ is usable. A project source claim never grants official authority.
 It verifies confirmed identity, exact language and content hash. Known printed
 names can differ from current names; unknown or omitted printed text cannot borrow
 another source. `name_identity.IdentityEvidence` binds current concept associations
-to immutable registry bytes, the physical source-face map and its complete frozen
+to the already loaded current registry, the physical source-face map and its complete frozen
 observation. Nonempty identity transitions still require a complete supported
 adapter. `current_names.prepare()` checks current assignments against this build;
 a changed source cannot inherit a stale assignment. Homonyms need explicit semantic

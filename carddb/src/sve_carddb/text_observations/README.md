@@ -108,59 +108,16 @@ Raw vocabulary bindings are an explicit caller input, not inferred translations
 or a new authored format. `Vocabulary` requires exact unique regional bindings
 and declared special-kind references. Missing/conflicting bindings fail before
 publication. Pin the complete configuration with `text_configuration`, alongside
-program/dependency pins and any existing product-identity configuration.
+program revision and any existing product-identity configuration.
 
-## Inseparable F1 bundle
+## Completed build output
 
-```python
-from sve_carddb.build_bundle import publish_bundle, verify_bundle
-from sve_carddb.build_inputs import BuildContext
-from sve_carddb.text_observations import (
-    diagnostic_exclusion_report,
-    populate_text_preview,
-    text_configuration,
-    text_preview_uses,
-)
-
-configuration.update(text_configuration(plan, vocabulary, published_texts))
-context = BuildContext.from_inputs(program_revision, dependency_bytes, configuration)
-expected = text_preview_uses(catalog, plan, stores, official=official_products)
-report = plan.report()
-
-
-def populate(db):
-    inputs = populate_text_preview(
-        db,
-        catalog,
-        plan,
-        authored_revision=authored_revision,
-        build=context,
-        vocabulary=vocabulary,
-        published=published_texts,
-        languages=languages,
-        stores=stores,
-        official=official_products,
-    )
-    report["exclusion_closure"] = diagnostic_exclusion_report(db, schema, plan)
-    return inputs
-
-
-publish_bundle(schema, destination, context, expected, populate, report, stores=stores)
-verify_bundle(schema, destination, context, expected, stores=stores)
-```
-
-The existing F1 container publishes `build.sqlite`, `inputs.json`, `report.json`
-and `seal.json` together and verifies source/use closure independently of row
-insertion. Null observations are included in the expected uses. Raw sources keep
-`parser_version=NULL`; parser recipes belong to each use. Failures roll back the
-whole graph and leave the destination unpublished. Redacted differences contain
-hashes, byte lengths and character edit offsets, never official card wording.
-
-This segment does not create an adoption input format, export a public snapshot
-or declare release readiness. Human current adoption,
-errata coverage and publication remain separate gates. Correction staging is an
-explicit optional input; scoped known corrections require verified image evidence
-before the importer can proceed.
+`BuildContext.from_inputs(program_revision, configuration)` retains explicit
+configuration and provenance. Populate text once inside the combined build
+transaction, then save that completed DB and its actual input record/report with
+`build_output.save`. Source reads verify archived raw hashes and metadata; domain
+planning verifies current source ownership and observation applicability. There
+is no separate expected-use comparison, build seal or second DB population.
 
 ## Frozen effect presence
 

@@ -682,11 +682,7 @@ def test_media_source_decoded_dimensions_and_length_are_verified(
         r for r in projection.tables["image_variant"] if r["size_key"] == "card_s"
     )
     variant[field] = integer(variant[field]) + 1
-    message = (
-        "Preview image decoded format or dimensions mismatch"
-        if field == "width"
-        else "Preview image hash or bytes mismatch"
-    )
+    message = "Preview image hash, bytes, format or dimensions mismatch"
     with pytest.raises(ValueError, match="^" + message + "$"):
         prepare_media(projection, images.library, revision=7)
 

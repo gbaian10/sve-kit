@@ -40,7 +40,7 @@ def test_current_policy_comment_changes_no_rules(
     )
     index_path.write_bytes(canonical(index))
     revision = commit(case.inputs.repository)
-    changed = load(case.inputs.root, case.inputs.repository, revision)
+    changed = load(case.inputs.root, revision)
     second = catalogue(changed.current_names[0], case.sources())
     assert first.policy_hash == second.policy_hash
     assert first.names == second.names
@@ -79,4 +79,4 @@ def test_current_policy_refuses_invalid_fields(
     index_path.write_bytes(canonical(index))
     revision = commit(case.inputs.repository)
     with pytest.raises(ValueError, match=r"^Invalid digital-name policy fields$"):
-        load(case.inputs.root, case.inputs.repository, revision)
+        load(case.inputs.root, revision)

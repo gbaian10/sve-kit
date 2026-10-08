@@ -13,7 +13,6 @@ from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.digital_name_policies.application import Inputs, populate
 from sve_carddb.digital_name_policies.current_application import materialize, prepare
-from sve_carddb.digital_name_policies.runtime import RUNTIME
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.translations.current_models import (
@@ -32,6 +31,9 @@ from .database_fixtures import DatabaseTemplate
 from .digital_name_policy_fixtures import NAMES
 from .name_application_fixtures import ApplicationCase, application_case, printed_owner
 from .translation_fixtures import choice, name_term, write
+
+RUNTIME: tuple[str, ...] = ()
+
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -134,9 +136,7 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
         | translations.configuration()
     )
     object_value(config["catalog_registry"])["authored_revision"] = revision
-    context = BuildContext.from_inputs(
-        revision, {name: (root / name).read_bytes() for name in RUNTIME}, config
-    )
+    context = BuildContext.from_inputs(revision, config)
     schema = compile_current_build(("t0", "translation_names"))
     with create_database(schema) as db, case.database.copy() as old:
         with db.transaction():
@@ -190,7 +190,6 @@ def test_current_policy_no_audit_and_ambiguous_name_is_independent(
             assert "decision_id" not in row
             assert "status" not in row
             assert len(result.bindings) == 1
-            result.record.verify(db, case.context, result.record.uses, complete=False)
         else:
             assert not db.rows("translation")
 

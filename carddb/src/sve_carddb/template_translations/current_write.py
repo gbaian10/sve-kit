@@ -1,13 +1,11 @@
-"""Compose editable, bounded template YAML using the shared translation index."""
+"""Compose editable, bounded template YAML in fixed data areas."""
 
 from typing import TYPE_CHECKING
 
 from sve_carddb.registry.storage import MAX_BYTES, TARGET_BYTES, encode
-from sve_carddb.snapshot.values import digest
 from sve_carddb.template_translations.current import shard
 from sve_carddb.template_translations.current_models import Shard
 from sve_carddb.template_translations.files import Files, json_bytes
-from sve_carddb.translations.models import Index
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -42,17 +40,11 @@ def _chunks(model: BaseModel, field: str) -> Iterator[bytes]:
 
 def compose(files: Files, records: tuple[Record, ...]) -> Files:
     """Replace only the template area; retain all indexed shared glossary and override bytes."""
-    previous = Index.model_validate_json(json_bytes(files.index))
     preserved = tuple(
         item
         for item in files.content
         if not item[0].startswith("translations/templates/")
     )
-    includes = {
-        path: checksum
-        for path, checksum in previous.includes.items()
-        if not path.startswith("translations/templates/")
-    }
     content = list(preserved)
     for kind in sorted({r.kind for r in records}):
         selected = tuple(
@@ -65,17 +57,5 @@ def compose(files: Files, records: tuple[Record, ...]) -> Files:
             path = f"translations/templates/{kind}/{number:03d}.yaml"
             parsed = json_bytes(raw)
             shard(parsed)
-            includes[path] = digest(parsed)
             content.append((path, raw, parsed))
-    index = Index(
-        translation_authored_format=2, kind="translation_index", includes=includes
-    )
-    if len(encode(index)) >= MAX_BYTES:
-        raise ValueError("Current translation index exceeds authored size limit")
-    if (
-        set(previous.includes)
-        - set(includes)
-        - {p for p in previous.includes if p.startswith("translations/templates/")}
-    ):
-        raise ValueError("Current template composition cannot remove shared inputs")
-    return Files(files.revision, encode(index), tuple(sorted(content)))
+    return Files(files.revision, tuple(sorted(content)))

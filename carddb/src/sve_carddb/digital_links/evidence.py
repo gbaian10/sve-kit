@@ -173,16 +173,15 @@ class Evidence:
         self.sources = sources
         self.registries = sources.identities
 
-    def registry(self, review: ReviewContext) -> RegistrySnapshot:
+    def registry(self) -> RegistrySnapshot:
         """Replay the pinned registry before trusting its identity associations."""
-        self.sources.repository.context(review.context)
-        return self.registries.registry(review)
+        return self.registries.registry()
 
     def index(self, review: ReviewContext) -> RegistryIndex:
         """Index one verified registry per resolver, rather than scan it for every owner."""
         key = self.sources.context_key(review.context)
         if key not in self.sources.identity_indexes:
-            registry = self.registry(review)
+            registry = self.registry()
             cards = {
                 r.data.id: r.data
                 for r in registry.records.values()

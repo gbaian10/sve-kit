@@ -1,6 +1,5 @@
 """Read complete immutable adoption histories before deriving any effective selection."""
 
-import re
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -8,12 +7,11 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import JsonValue, ValidationError
 
+from sve_carddb.authored_files import require_directory, shards
 from sve_carddb.catalog.adoption_models import (
     AliasRecord,
-    CatalogIndex,
     CatalogShard,
     DefaultRecord,
-    DisplayIndex,
     DisplayShard,
     Record,
     RouteRecord,
@@ -23,7 +21,6 @@ from sve_carddb.catalog.adoption_models import (
 )
 from sve_carddb.catalog.current_models import Shard as CurrentShard
 from sve_carddb.catalog.current_models import key as current_key
-from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
 if TYPE_CHECKING:
@@ -62,8 +59,8 @@ def _json(model: RecordData) -> JsonValue:
 def ordered(values: tuple[RecordData, ...]) -> None:
     """Reject rather than normalize signed ordering or duplicate evidence."""
     keys = [canonical(_json(item)) for item in values]
-    if keys != sorted(set(keys)):
-        raise ValueError("Adoption array must be sorted and unique")
+    if len(keys) != len(set(keys)):
+        raise ValueError("Adoption array must be unique")
 
 
 @dataclass(frozen=True)
@@ -84,18 +81,21 @@ class LoadedShard:
 @dataclass(frozen=True)
 class AdoptionSnapshot:
     entry: Entry
-    index_exact: bytes
-    index_content: bytes
     shards: tuple[LoadedShard, ...]
 
     def current_records(self) -> tuple[CurrentRecord, ...]:
         """Read current vocabulary values without creating adoption envelopes."""
         return tuple(
-            r
-            for s in self.shards
-            if object_value(parse(s.content)).get("catalog_adoption_format")
-            == CURRENT_FORMAT
-            for r in CurrentShard.model_validate_json(s.content).records
+            sorted(
+                (
+                    r
+                    for s in self.shards
+                    if object_value(parse(s.content)).get("catalog_adoption_format")
+                    == CURRENT_FORMAT
+                    for r in CurrentShard.model_validate_json(s.content).records
+                ),
+                key=lambda r: r.record_key,
+            )
         )
 
     def records(self) -> tuple[tuple[Record, str], ...]:
@@ -121,34 +121,10 @@ class AdoptionSnapshot:
                 latest[key] = record, decision
         return tuple(latest[key] for key in sorted(latest))
 
-    def pins(self) -> dict[str, JsonValue]:
-        """Keep exact YAML bytes distinct from canonical membership hashes."""
-        return {
-            "entry": self.entry,
-            "index_hash": digest(self.index_exact),
-            "index_canonical_hash": digest(self.index_content),
-            "shards": [
-                {
-                    "path": shard.path,
-                    "exact_hash": digest(shard.exact),
-                    "canonical_hash": shard.content_hash,
-                }
-                for shard in self.shards
-            ],
-        }
-
 
 def subject_key(record: Record) -> bytes:
     """Avoid delimiter collisions and exclude revision from a stable subject key."""
     return canonical([record.kind, _json(record.data.subject)])
-
-
-def _safe(root: Path, path: Path) -> None:
-    for part in (path, *path.parents):
-        if part.is_symlink():
-            raise ValueError("Symlink adoption input")
-    if not path.is_relative_to(root) or not path.is_file():
-        raise ValueError("Missing or unsafe adoption input")
 
 
 def _model[T: RecordData](model: type[T], raw: JsonValue) -> T:
@@ -158,62 +134,38 @@ def _model[T: RecordData](model: type[T], raw: JsonValue) -> T:
         raise ValueError("Invalid adoption fields") from None
 
 
-def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:  # ruff: ignore[complex-structure,too-many-locals,too-many-branches,too-many-statements] -- complete entry closure is validated before projection
+def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:
     """Validate the entire enabled entry, including every area and historical revision."""
     if entry not in {"catalog-adoptions", "display-overrides"}:
         raise ValueError("Unknown adoption entry")
-    root = root.absolute()
-    directory = root / entry
-    path = directory / "index.yaml"
-    _safe(root, path)
-    raw = read_yaml(path)
     field = (
         "catalog_adoption_format"
         if entry == "catalog-adoptions"
         else "display_override_format"
     )
-    _format(raw, field)
-    index = (
-        _model(CatalogIndex, raw)
-        if entry == "catalog-adoptions"
-        else _model(DisplayIndex, raw)
-    )
-    present: set[str] = set()
-    for file in directory.rglob("*"):
-        if file.is_symlink():
-            raise ValueError("Symlink adoption input")
-        if not file.is_dir() and file != path:
-            present.add(file.relative_to(root).as_posix())
     areas = (
-        "vocabulary|languages|aliases|symbols|rules-names"
+        ("vocabulary", "languages", "aliases", "symbols", "rules-names")
         if entry == "catalog-adoptions"
-        else "routes|defaults"
+        else ("routes", "defaults")
     )
-    pattern = re.compile(rf"{entry}/({areas})/([A-Za-z0-9_-]+)/([0-9]{{3,}})\.yaml")
-    sequences: dict[tuple[str, str], list[int]] = defaultdict(list)
-    for name in index.includes:
-        match = pattern.fullmatch(name)
-        if match is None:
-            raise ValueError("Unsafe or cross-entry adoption include")
-        sequences[match[1], match[2]].append(int(match[3]))
-    if present != set(index.includes):
-        raise ValueError("Adoption indexed file closure differs from disk")
-    shards = []
-    for name, checksum in sorted(index.includes.items()):
-        file = root / name
-        _safe(root, file)
-        content = read_yaml(file)
+    require_directory(root, root / entry)
+    paths = tuple(entry + "/" + area for area in areas)
+    loaded = []
+    # Each adoption kind is independently optional within the required entry.
+    inputs = shards(root, paths, optional=paths)
+    if not any((root / path).is_dir() for path in paths):
+        raise ValueError("Adoption entry must contain at least one known data area")
+    for name, exact, encoded in inputs:
+        content = parse(encoded)
         _format(content, field)
-        if digest(canonical(content)) != checksum:
-            raise ValueError("Adoption shard canonical hash mismatch")
         if (
             entry == "catalog-adoptions"
             and object_value(content)[field] == CURRENT_FORMAT
         ):
             current = _model(CurrentShard, content)
             keys = [r.record_key for r in current.records]
-            if keys != sorted(set(keys)):
-                raise ValueError("Current catalog records must be sorted and unique")
+            if len(keys) != len(set(keys)):
+                raise ValueError("Current catalog records must be unique")
             for record in current.records:
                 area = (
                     "vocabulary"
@@ -224,31 +176,13 @@ def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:  # ruff: ig
                     record
                 ):
                     raise ValueError("Current catalog key or area mismatch")
-            shards.append(
-                LoadedShard(name, file.read_bytes(), checksum, canonical(content))
+        else:
+            shard = _model(
+                CatalogShard if entry == "catalog-adoptions" else DisplayShard, content
             )
-            continue
-        shard = (
-            _model(CatalogShard, content)
-            if entry == "catalog-adoptions"
-            else _model(DisplayShard, content)
-        )
-        _check_shard(shard, name)
-        shards.append(
-            LoadedShard(name, file.read_bytes(), checksum, canonical(content))
-        )
-    current_groups = {
-        tuple(shard.path.split("/")[1:3])
-        for shard in shards
-        if object_value(parse(shard.content)).get("catalog_adoption_format")
-        == CURRENT_FORMAT
-    }
-    for group, numbers in sequences.items():
-        if group not in current_groups and sorted(numbers) != list(
-            range(1, len(numbers) + 1)
-        ):
-            raise ValueError("Adoption shard sequence must start at one without gaps")
-    snapshot = AdoptionSnapshot(entry, path.read_bytes(), canonical(raw), tuple(shards))
+            _check_shard(shard, name)
+        loaded.append(LoadedShard(name, exact, digest(encoded), encoded))
+    snapshot = AdoptionSnapshot(entry, tuple(loaded))
     _chains(snapshot)
     keys = [r.record_key for r in snapshot.current_records()]
     legacy_keys = [subject_key(r).decode() for r, _ in snapshot.effective()]
@@ -274,8 +208,8 @@ def _check_shard(shard: Shard, path: str) -> None:  # ruff: ignore[complex-struc
     if decision.category != kind or decision.policy_id != policy:
         raise ValueError("Adoption category/policy does not match area")
     keys = [record.record_key for record in shard.records]
-    if keys != sorted(set(keys)):
-        raise ValueError("Adoption record keys must be sorted and unique")
+    if len(keys) != len(set(keys)):
+        raise ValueError("Adoption record keys must be unique")
     ordered(shard.review_context.source_batches)
     for record in shard.records:
         if record.kind != kind or record.filing_key != filing:
@@ -398,7 +332,7 @@ def _chains(snapshot: AdoptionSnapshot) -> None:  # ruff: ignore[complex-structu
         if isinstance(record, DefaultRecord) and record.data.value is not None:
             candidates = record.data.value.candidates
             if candidates != tuple(sorted(set(candidates))):
-                raise ValueError("Default candidates must be sorted and unique")
+                raise ValueError("Default candidates must be unique")
     if len(normalizers) > 1:
         raise ValueError("Effective aliases cannot mix normalizer pins")
 

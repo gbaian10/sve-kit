@@ -1,49 +1,23 @@
-"""Glossary and template readers share one current index."""
+"""Glossary and template readers consume fixed working-tree data areas."""
 
 from typing import TYPE_CHECKING
 
-import pytest
-from pydantic import JsonValue, ValidationError
-
-from sve_carddb.catalog.adoption_sources import PinnedRepository
-from sve_carddb.snapshot.values import canonical
 from sve_carddb.template_translations.files import read
 from sve_carddb.translations.loader import load_glossary
-from sve_carddb.translations.models import Index
 
-from .adoption_fixtures import commit, git
 from .translation_fixtures import envelope, term, write
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
-def test_format_two_index_is_shared_by_glossary_and_template_readers(
-    tmp_path: Path,
-) -> None:
+def test_shared_working_tree_without_index_or_git(tmp_path: Path) -> None:
     authored = tmp_path / "authored"
-    write(
-        authored,
-        {"translations/glossary/concepts/001.yaml": envelope([term()])},
-    )
+    write(authored, {"translations/glossary/concepts/007.yaml": envelope([term()])})
+    (authored / "translations/index.yaml").unlink()
     glossary = load_glossary(authored)
-    git(tmp_path, "init")
-    revision = commit(tmp_path)
-    templates = read(PinnedRepository(tmp_path), revision)
-    assert templates.index == glossary.index
+    templates = read(tmp_path, "a" * 40)
     assert templates.content == glossary.closure
     assert len(glossary.current_records()) == 1
-
-
-@pytest.mark.parametrize("version", [True, 0, 1, 3, "2"])
-def test_index_rejects_unknown_or_noninteger_versions(version: JsonValue) -> None:
-    with pytest.raises(ValidationError, match="translation_authored_format"):
-        Index.model_validate_json(
-            canonical(
-                {
-                    "translation_authored_format": version,
-                    "kind": "translation_index",
-                    "includes": {},
-                }
-            )
-        )
+    (authored / "translations/private-draft.yaml").write_text("not a data shard")
+    assert load_glossary(authored).current_records() == glossary.current_records()

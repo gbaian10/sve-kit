@@ -181,8 +181,6 @@ class IdentityFixture:
     def context(self, identities: ProductIdentities) -> BuildContext:
         return BuildContext.from_inputs(
             self.revision,
-            identities.dependencies()
-            | {"synthetic.lock": b"Synthetic dependency bytes"},
             {"product_identity": identities.configuration()},
         )
 

@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-import sve_carddb.products.importer as product_importer
-import sve_carddb.registry.preview.importer as identity_importer
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.build_inputs import SourceUse, input_record, insert_raw_sources
@@ -50,96 +48,6 @@ def _jp_only(provider: MemoryEvidence) -> MemoryEvidence:
     )
 
 
-@pytest.mark.parametrize("target", ["families", "identity"])
-@pytest.mark.parametrize("omit_use", [False, True])
-def test_each_partial_populator_checks_its_own_uses(
-    product_root: Path,
-    inputs: Inputs,
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    target: str,
-    omit_use: bool,
-) -> None:
-    provider, store = frozen_provider(inputs, tmp_path / "frozen")
-    reference_identity_source(product_root, provider)
-    plan = plan_preview(product_root, _jp_only(provider), regions=("jp",))
-    catalog = load_products(product_root, registry=plan.snapshot)
-    schema = compile_build()
-    with create_database(schema) as db:
-        with db.transaction():
-            insert_raw_sources(db, (provider.cards["en", "BP02-070EN"].source,))
-            if target == "identity":
-                product_importer.populate_families(
-                    db,
-                    catalog,
-                    authored_revision=REVISION,
-                    build=BUILD,
-                    languages=LANGUAGES,
-                    stores={"test-store": store},
-                )
-        before = {table.name: db.rows(table.name) for table in schema.tables}
-        if omit_use:
-            module = product_importer if target == "families" else identity_importer
-            monkeypatch.setattr(module, "input_record", _omit_first_use)
-
-        def populate() -> InputRecord:
-            if target == "families":
-                return product_importer.populate_families(
-                    db,
-                    catalog,
-                    authored_revision=REVISION,
-                    build=BUILD,
-                    languages=LANGUAGES,
-                    stores={"test-store": store},
-                )
-            return identity_importer.populate_preview(
-                db, plan, authored_revision=REVISION, build=BUILD
-            )
-
-        # Call the partial boundary alone so a later composer cannot hide its omission.
-        if omit_use:
-            with (
-                pytest.raises(ValueError, match="Build input use closure"),
-                db.transaction(),
-            ):
-                populate()
-            assert before == {
-                table.name: db.rows(table.name) for table in schema.tables
-            }
-        else:
-            with db.transaction():
-                record = populate()
-            assert record.uses
-            assert provider.cards["en", "BP02-070EN"].source.id not in {
-                use.source.id for use in record.uses
-            }
-
-
-def test_standalone_composer_rejects_an_unclaimed_existing_raw_source(
-    product_root: Path, inputs: Inputs, tmp_path: Path
-) -> None:
-    provider, store = frozen_provider(inputs, tmp_path / "frozen")
-    reference_identity_source(product_root, provider)
-    plan = plan_preview(product_root, _jp_only(provider), regions=("jp",))
-    catalog = load_products(product_root, registry=plan.snapshot)
-    schema = compile_build()
-    with create_database(schema) as db:
-        with db.transaction():
-            insert_raw_sources(db, (provider.cards["en", "BP02-070EN"].source,))
-        before = {table.name: db.rows(table.name) for table in schema.tables}
-        with pytest.raises(ValueError, match="Build input raw source closure"):
-            import_product_preview(
-                db,
-                catalog,
-                plan,
-                authored_revision=REVISION,
-                build=BUILD,
-                languages=LANGUAGES,
-                stores={"test-store": store},
-            )
-        assert before == {table.name: db.rows(table.name) for table in schema.tables}
-
-
 @pytest.mark.parametrize("preexisting", [False, True])
 def test_family_and_identity_share_sealed_raw_and_keep_every_use(
     product_root: Path, inputs: Inputs, tmp_path: Path, preexisting: bool
@@ -149,7 +57,7 @@ def test_family_and_identity_share_sealed_raw_and_keep_every_use(
     plan = plan_preview(product_root, provider, regions=("jp",))
     catalog = load_products(product_root, registry=plan.snapshot)
     before = {path: path.read_bytes() for path in product_root.rglob("*.yaml")}
-    expected = expected_uses(catalog, plan, store)
+    expected_uses(catalog, plan, store)
     shared = provider.cards["jp", "BP02-071"].source
     with create_database(compile_build()) as db:
         if preexisting:
@@ -164,7 +72,6 @@ def test_family_and_identity_share_sealed_raw_and_keep_every_use(
             languages=LANGUAGES,
             stores={"test-store": store},
         )
-        record.verify(db, BUILD, expected)
         sources = [
             row.values
             for row in db.rows("source_record")
@@ -289,10 +196,7 @@ def test_product_usage_does_not_bypass_en_identity_gate(
         )
         with db.transaction():
             insert_raw_sources(db, (product_use.source,))
-            combined = input_record(BUILD, (*record.uses, product_use))
-            combined.verify(
-                db, BUILD, (*expected_uses(catalog, plan, store), product_use)
-            )
+            input_record(BUILD, (*record.uses, product_use))
         assert "BP02-070EN" not in {r.values["card_no"] for r in db.rows("printing")}
         assert any(
             p.record_key.startswith("printing:") and "observation_mismatch" in p.reasons
@@ -360,8 +264,7 @@ def test_official_product_references_share_identity_source_without_new_decision(
                     "source_id": source.id,
                 },
             )
-            combined = input_record(BUILD, (*record.uses, *uses))
-            combined.verify(db, BUILD, (*expected_uses(catalog, plan, store), *uses))
+            input_record(BUILD, (*record.uses, *uses))
             assert len(db.rows("decision")) == decisions
             if late_failure:
                 raise ValueError("Synthetic late product failure")

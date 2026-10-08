@@ -1,7 +1,6 @@
 """Offline entry composes real policy/raw owners and verifies both bundle reconstructions."""
 
 import shutil
-from dataclasses import replace
 from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
@@ -16,7 +15,7 @@ from sve_carddb.catalog.models import Catalog
 from sve_carddb.catalog.projection import CatalogProjection
 from sve_carddb.products import Language
 from sve_carddb.snapshot import offline
-from sve_carddb.snapshot.offline_names import Composer, composer
+from sve_carddb.snapshot.offline_names import composer
 from sve_carddb.snapshot.values import array, digest, object_value
 from sve_carddb.text_observations import Binding, Vocabulary
 from sve_carddb.translations.importer import Inputs as TranslationInputs
@@ -31,12 +30,10 @@ from .translation_fixtures import write
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from pytest_mock import MockerFixture
+
     from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import BuildContext, InputRecord
-    from sve_carddb.digital_links.importer import Result as LinkResult
-    from sve_carddb.digital_name_policies.application import Result
-    from sve_carddb.text_observations import TextPlan
-    from sve_carddb.translations.current_names import Names
 
 
 @pytest.fixture(scope="module")
@@ -150,7 +147,6 @@ def catalogue(monkeypatch: pytest.MonkeyPatch) -> None:
         ),
         vocabulary,
     )
-    monkeypatch.setattr(offline, "_adoption_uses", lambda *_args: ())
     monkeypatch.setattr(adoption_importer, "AdoptionInputs", CatalogInputs)
     monkeypatch.setattr(
         offline,
@@ -161,12 +157,17 @@ def catalogue(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_offline_name_policy_reconstructs_identical_bundle(
-    recipe: offline.Inputs, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    recipe: offline.Inputs,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mocker: MockerFixture,
 ) -> None:
     catalogue(monkeypatch)
+    prepared = mocker.spy(offline, "prepare_names")
     first = offline.build(recipe, bundle_dir=tmp_path / "first")
     second = offline.build(recipe, bundle_dir=tmp_path / "second")
     assert first == second
+    assert prepared.call_count == 2
     files = {
         p.relative_to(tmp_path / "first"): p.read_bytes()
         for p in (tmp_path / "first").rglob("*")
@@ -201,46 +202,6 @@ def test_offline_name_policy_reconstructs_identical_bundle(
             r.values["category"] == "digital_name_policy" for r in db.rows("decision")
         )
     assert digest(first.input_content) == first.report["input_sha256"]
-
-
-def test_offline_detects_missing_name_application_source_use(
-    recipe: offline.Inputs, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    catalogue(monkeypatch)
-    original = Composer.populate
-
-    def omitted(  # ruff: ignore[too-many-arguments] -- mirror the independently checked producer signature
-        self: Composer,
-        db: Database,
-        texts: TextPlan,
-        *,
-        context: BuildContext,
-        stores: dict[str, Path],
-        replay: Names,
-        links: LinkResult | None,
-    ) -> Result:
-        result = original(
-            self, db, texts, context=context, stores=stores, replay=replay, links=links
-        )
-        return replace(
-            result,
-            record=result.record.model_copy(
-                update={
-                    "uses": tuple(
-                        u
-                        for u in result.record.uses
-                        if u.usage != "digital_policy_owner_name"
-                    )
-                }
-            ),
-        )
-
-    monkeypatch.setattr(Composer, "populate", omitted)
-    with pytest.raises(
-        ValueError, match=r"^Build input use closure or context mismatch$"
-    ):
-        offline.build(recipe, bundle_dir=tmp_path / "bundle")
-    assert not (tmp_path / "bundle").exists()
 
 
 def test_name_composition_reads_link_entry_from_disk(

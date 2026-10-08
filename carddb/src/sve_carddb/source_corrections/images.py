@@ -27,8 +27,23 @@ class ImageProvider(Protocol):
 
 
 class FrozenImages:
-    def __init__(self, root: Path, store_id: str, batch_id: str) -> None:
-        self.sources = FrozenSources(root, store_id, batch_id)
+    def __init__(
+        self,
+        root: Path,
+        store_id: str,
+        batch_id: str,
+        *,
+        sources: FrozenSources | None = None,
+    ) -> None:
+        self.sources = sources or FrozenSources(root, store_id, batch_id)
+        if (
+            self.sources.root.resolve(),
+            self.sources.store_id,
+            self.sources.batch_id,
+        ) != (root.resolve(), store_id, batch_id):
+            raise ValueError(
+                "Correction image source batch differs from configured input"
+            )
         self.versions: dict[tuple[str, str, str], str] = {}
         for entry in self.sources.inventory.entries:
             descriptor = self.sources.descriptor(entry.source_version_id)

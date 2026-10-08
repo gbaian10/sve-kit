@@ -9,7 +9,6 @@ from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_db.database import open_database
 from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES
 from sve_carddb.catalog.adoption_models import Batch
-from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.manifest import Kind
 from sve_carddb.snapshot import offline
 from sve_carddb.snapshot.offline import build
@@ -167,9 +166,7 @@ def translation(definition: DefinitionRecord) -> TranslationRecord:
 
 
 def validated(found: Templates, references: References) -> Validated:
-    inputs = read_templates(
-        PinnedRepository(found.repo), git(found.repo, "rev-parse", "HEAD")
-    )
+    inputs = read_templates(found.repo, git(found.repo, "rev-parse", "HEAD"))
     return validate_templates(
         inputs, Sources(found.stores, references, RULES), (found.batch,)
     )
@@ -236,8 +233,7 @@ def test_offline_renders_whole_effects_and_keeps_uncovered_original(
 
     monkeypatch.setattr(offline, "apply_templates", capture)
     built = build(recipe, bundle_dir=tmp_path / "bundle")
-    assert len(populations) == 2
-    assert populations[0] == populations[1]
+    assert len(populations) == 1
     assert built.report["effect_translations"] == {
         "fields": 4,
         "translated": 3,
@@ -254,7 +250,6 @@ def test_offline_renders_whole_effects_and_keeps_uncovered_original(
         UNCOVERED: (None, None),
     }
     assert "カード" not in canonical(built.report["effect_translations"]).decode()
-    # The private bundle is rebuilt by its own population and keeps the same uses.
     with open_database(
         compile_current_build(SCHEMA), tmp_path / "bundle/build.sqlite"
     ) as db:

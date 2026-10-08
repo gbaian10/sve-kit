@@ -61,7 +61,7 @@ def review_queue(identity: PreviewPlan) -> list[JsonValue]:
 def acceptance_report(
     texts: TextPlan, official: OfficialProducts, stores: Mapping[str, Path]
 ) -> dict[str, JsonValue]:
-    """Compose verified plans and their expected F1 uses; never attest release readiness."""
+    """Describe planned source uses without attesting materialization or release readiness."""
     if "en" not in texts.identity.regions:
         raise ValueError("EN acceptance requires explicit EN output selection")
     verify_plan(texts)
@@ -96,7 +96,7 @@ def acceptance_report(
         "review_queue": review_queue(texts.identity),
         "expected_source_uses": [use.model_dump(mode="json") for use in uses],
         "expected_source_use_counts": dict(Counter(use.usage for use in uses)),
-        "source_closure": "expected_inputs_only_requires_bundle_verification",
+        "source_closure": "planned_inputs_without_independent_closure_replay",
         "publication_gate": False,
         "snapshot_output_authorized": False,
         "release_status": "blocked",

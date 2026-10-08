@@ -64,22 +64,25 @@ raw 來源的 `source_record.id` 使用 source_version_id，`sha256` 是 raw_sha
 
 換 parser 重新產生建置 DB，不改 raw 版本。QA 同官號、CR 同官方版本號但 raw hash 改變仍是不同來源版本；下游 QA／CR revision 另按建置契約追加，不由「官方版號沒改」覆寫歷史。
 
-#### 2.2.1 建置輸入紀錄與完整使用閉包
+#### 2.2.1 建置輸入紀錄
 
-模板來源清冊依[清冊契約](template-source-replay.md)每次建置用本次程式及指定來源產生，
-不再保存或重播歷史 producer／expected。一般翻譯 reader 不呼叫來源重播；建置仍記當次實際輸入與用途。
-以下來源歸檔及既有 build bundle 的完整性規則不變，不為翻譯新增核可證明、事件收據或另一種封存容器。
+模板來源清冊依[清冊契約](template-source-replay.md)每次建置用本次程式及指定來源產生。
+建置輸入紀錄為 `input_format: 1`，包含 `context` 與排序唯一的實際 `uses`，採 canonical-json-v1。
+它是本次輸入摘要，不作逐欄 expected 使用閉包的驗收證明；不含卡片效果文或私人絕對路徑。
 
-F1 的建置輸入紀錄使用 `input_format: 1`，由 `context` 與排序唯一的 `uses` 組成，採 canonical-json-v1，完整 hash 可重算。紀錄不含卡片效果文或私人絕對路徑。
+- `context` 保存完整 40 碼 `program_revision` 與明示設定的 canonical JSON 字串 `configuration`。
+  authored 讀當前工作樹，revision 只供追蹤；不驗 Git exact bytes、程式 bytes 或依賴 hash。
+- 每個 use 為 `{source,usage,locator}`。source 保存來源 metadata、parser_version 與
+  `archive:{store_id,batch_id,descriptor_sha256,first_receipt_id}`；source.id 即 source_version_id。
+  按完整 canonical bytes 排序去重，同版本不同 parser／用途／batch／定位保留。
+- raw 仍從具名 sealed batch 讀取，驗 descriptor、first receipt、metadata 與原始 bytes hash。
+  同 raw 版本的 DB source_record 只共用 metadata 完全相同的列；parser_version 為 null。
+  來源、文字 hash、語言與 owner 適用性在各入口檢查，DB 保留 STRICT、FK 與 transaction。
 
-- `context` 保存完整 40 碼 `program_revision`、非空的 `dependencies` 與 `configuration`。依賴項恰有 `{name, sha256}`，name 為來源 checkout／工具輸入內可追回的 canonical 相對路徑，按 name 排序唯一，hash 對 exact bytes 計算；呼叫端釘住實際依賴鎖定檔及相關輸入，不能以套件顯示版本代替。configuration 是完整 canonical JSON 字串，保留明示設定輸入；不能從 authored revision 猜程式 revision 或使用預設機器設定補值。
-- 每個 use 恰有 `{source, usage, locator}`。source 保存來源 metadata、該使用端的非空 parser_version，及 `archive:{store_id,batch_id,descriptor_sha256,first_receipt_id}`；source.id 即 source_version_id。按 use 的完整 canonical bytes 排序，完全相同才去重；同版本不同 parser／用途／batch／定位都須保留。
-- 身分用途為 `registry_observation`，locator 保存精確 region／card_no 的 canonical JSON；讀取成功但被身分閘門排除的來源也已被實際使用，須保留。人工商品 evidence 僅驗來源閉包時，用途為 `product_evidence_closure`、parser pin 為 `archive-closure-v1`，locator 保存原 evidence 的完整 canonical 物件，不冒稱解析過商品內容或取得人工採納。後續官方商品／收錄解析以各自實際 parser 與精確區塊定位登錄；不要求或偽造人工 decision。
-- 輸出前必須與**從釘住的身分／商品輸入獨立宣告**的完整使用集合比對，再與實際 DB raw source_record 集合及全部 metadata 比對。缺／多用途、錯 parser／來源／定位／archive pin、依賴／設定／程式 revision 不符皆失敗。不能只對紀錄本身重算 hash，或拿實際登錄結果作為唯一 expected 集合。
-
-正式保存此 staging 產物時，以同一新目錄保存 `build.sqlite`、`inputs.json`、`report.json`、`seal.json`；report 外層保存 `build_inputs_hash` 及原報告，seal 保存 DB／inputs／report 的 exact bytes hash 與 `bundle_format:1`。交易及完整使用閉包驗證通過，所有檔案／目錄耐久寫入後才以不覆寫目標的原子 rename 發布。失敗不得發布只有 DB 或只有紀錄的半套產物；既有 bundle 不覆寫。這是建置期保存邊界，不是公開快照或永久來源歸檔。
-
-讀取先驗四檔閉包、canonical metadata、全部 hash 及 report 的 inputs 引用，再以唯讀 immutable 方式驗關閉且無 sidecars 的 DB；另用具名 store 重驗紀錄中的 sealed batch／descriptor／first receipt／raw 閉包與 metadata。缺任一檔案、來源或用途即失敗，不聯網或回查 live/latest 補資料。低階 populate 可回傳局部使用紀錄，但完整產物仍須由呼叫端合併並驗證完整閉包；in-memory 測試或失敗中的 staging 不冒稱保存完成。
+保存完成的建置時，直接用 SQLite backup API 複製本次已提交的 DB，與 `inputs.json`、
+`report.json` 一起在新暫存目錄寫入及 fsync，再以不覆寫目標的 rename 安裝。
+沒有 build seal、第二次填 DB 或 bundle 重播。失敗不發布半套目錄，既有目錄不覆寫。
+這是可重建的建置產物；不可重建來源歸檔的 inventory、seal、備份與 restore 驗證規則維持不變。
 
 ## 3. 鎖定、準備與封存
 
@@ -128,8 +131,8 @@ Writer 的檔案替換與 SQLite transaction 不是同一原子交易：既有�
 逐群組保留歷史 producer R、凍結版本／manifest pins、context、預期／實際結果與實際環境差異。
 環境值不同不先拒絕也不進語義 root；缺閉包／凍結 bytes 或輸出漂移仍拒絕。
 同 raw 一列 source_record，不以 parser／producer 重配 raw ID；同 parser 跨 producer 的用途及 pin 歸屬
-保留群組映射，不以最後一筆覆蓋。caller 獨立 expected uses、DB 與 archive pins、F1 四檔 bundle 驗證不變，
-自算摘要不能代替獨立閉包，不增父子 executor。
+保留群組映射，不以最後一筆覆蓋。建置交易完成後直接保存 DB、inputs 與 report；
+不另計 expected uses 閉包，也不重播 bundle。
 
 建置／離線 extract 接受 sealed inventory 的 hash，先驗 seal、DB、副本 schema、所有 metadata 與 raw 閉包。只用 `Manifest.open_snapshot()`（`mode=ro&immutable=1`）讀關閉的副本，不跑 DDL／journal pragma；parser／extractor 只能透過 archive locator 讀來源，不能回查 live/latest 補資料。既有 extract 持鎖讀 live 是另一種受控入口；不能把該輸出自動稱為 sealed 重建。
 

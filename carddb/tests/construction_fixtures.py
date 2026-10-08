@@ -124,6 +124,4 @@ def plan() -> Construction:
 
 
 def context(staging: Construction) -> BuildContext:
-    return BuildContext.from_inputs(
-        REVISION, {"synthetic.lock": b"synthetic"}, staging.configuration()
-    )
+    return BuildContext.from_inputs(REVISION, staging.configuration())

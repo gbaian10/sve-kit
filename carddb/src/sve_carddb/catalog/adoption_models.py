@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, JsonValue
 
-from sve_carddb.build_inputs import BuildContext, Revision, Version
+from sve_carddb.build_inputs import BuildContext, Version
 from sve_carddb.catalog.symbols import Spelling
 from sve_carddb.products.models import Code, Lang
 from sve_carddb.registry.records import Hash, RecordData, Region, Text
@@ -150,11 +150,7 @@ class AliasSubject(RecordData):
 
 class Normalizer(RecordData):
     version: Text
-    program_revision: Revision
-    code_path: Text
-    code_hash: Hash
     config: dict[str, JsonValue]
-    config_hash: Hash
 
 
 class AliasValue(RecordData):
@@ -342,15 +338,3 @@ class CatalogShard(Shard):
 class DisplayShard(Shard):
     display_override_format: Literal[1]
     kind: Literal["display_override_shard"]
-
-
-class CatalogIndex(RecordData):
-    catalog_adoption_format: Literal[1, 2]
-    kind: Literal["catalog_adoption_index"]
-    includes: dict[str, Hash]
-
-
-class DisplayIndex(RecordData):
-    display_override_format: Literal[1]
-    kind: Literal["display_override_index"]
-    includes: dict[str, Hash]

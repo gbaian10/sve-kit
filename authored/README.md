@@ -10,7 +10,7 @@ Human-maintained data and permanent identity allocations, read by `carddb` at bu
 - `registry/source_correction/` — confirmed corrections and separately marked review candidates; raw observations remain unchanged
 - `effects/` — effect data in the DSL defined by `../dsl/`
 - `rulings/` — evidence-backed interpretations; see `../docs/adr/0011-rulings-evidence.md`
-- `translations/index.yaml`, `translations/glossary/<filing_key>/*.yaml` — checksummed glossary concepts and editable current translations
+- `translations/glossary/<filing_key>/*.yaml` — current glossary concepts and editable current translations
 - `flavor-translations/<hash digit>.yaml` — whole-paragraph flavor translations keyed by the source text's SHA-256; see [flavor translation](../docs/schema/flavor-translation.md)
 
 The identity registry format is defined in [authored layout](../docs/schema/authored-layout.md).
@@ -21,8 +21,7 @@ or treat a `needs_review` correction as accepted. Identities are written only af
 confirmation; the PR review records how they were checked.
 
 The glossary input follows the [translation contract](../docs/schema/translation-contract.md)
-and [glossary adoption rules](../docs/schema/glossary-adoption.md). The index closes the input
-directory; keep documentation, candidates and audit reports outside `translations/`.
+and [glossary adoption rules](../docs/schema/glossary-adoption.md). Readers load the dedicated working-tree data directories once; keep documentation, candidates and audit reports outside `translations/`.
 Concept keys are permanent. Edit translation YAML directly and review it in a PR; Git keeps the
 history (ADR-0018). Official wording stays out of git. Mark quality with `low_confidence`
 and `origin`; a `source_claim` is optional and only holds a work, URL or claimed source.

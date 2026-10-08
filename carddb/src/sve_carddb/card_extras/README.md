@@ -71,10 +71,10 @@ from sve_carddb.card_extras import plan_card_extras, populate_card_extras
 
 plan = plan_card_extras(db, pinned_pages, errata=pinned_announcements)
 configuration = {**other_configuration, "card_extras": plan.configuration()}
-context = BuildContext.from_inputs(program_revision, dependency_bytes, configuration)
+context = BuildContext.from_inputs(program_revision, configuration)
 extra_inputs = populate_card_extras(db, plan, build=context)
 combined = input_record(context, (*other_inputs.uses, *extra_inputs.uses))
-combined.verify(db, context, (*expected_other_uses, *plan.source_uses()))
+save(db, new_build_directory, combined.content(), report)
 ```
 
 The configuration pins complete input semantics by hash. Population reconstructs

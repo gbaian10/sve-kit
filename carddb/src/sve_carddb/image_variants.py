@@ -5,14 +5,17 @@ import json
 import os
 import re
 import tempfile
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from io import BytesIO
 from pathlib import Path
+from threading import RLock
 from typing import TYPE_CHECKING, Literal
 
 from PIL import Image, ImageCms, ImageOps, UnidentifiedImageError, features
 from PIL import __version__ as pillow_version
 from pydantic import BaseModel, ConfigDict, ValidationError
+
+from sve_carddb.image_checks import ImageChecks
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -177,11 +180,50 @@ def build_variants(
     cache_root: Path,
     override: CropBox | None = None,
     recipe: Recipe = DEFAULT_RECIPE,
+    checks: ImageChecks | None = None,
 ) -> VariantSet:
     """Build or reuse WebP variants without reading any project data directory."""
     _validate_source(source)
     _validate_recipe(recipe)
+    checks = checks or ImageChecks()
+    key = (
+        source.source_sha256,
+        recipe.version,
+        override,
+        blob_root.resolve(),
+        cache_root.resolve(),
+    )
+    with checks.lock:
+        lock = checks.variant_locks.setdefault(key, RLock())
+    with lock:
+        previous = checks.variants.get(key)
+        reused = previous is not None
+        if previous is None:
+            previous = _build_variants(
+                source, blob_root, cache_root, override, recipe, checks
+            )
+            checks.variants[key] = previous
+        return replace(
+            previous,
+            cache_hit=previous.cache_hit or reused,
+            image_id=source.image_id,
+            source_src_raw=source.source_src_raw,
+            variants=tuple(
+                replace(v, image_id=source.image_id) for v in previous.variants
+            ),
+        )
+
+
+def _build_variants(
+    source: ImageSource,
+    blob_root: Path,
+    cache_root: Path,
+    override: CropBox | None,
+    recipe: Recipe,
+    checks: ImageChecks,
+) -> VariantSet:
     image = _decode(source.source_bytes)
+    checks.png["sha256:" + source.source_sha256] = "PNG", image.size
     crop = crop_box(image.width, image.height, override)
     cache_key = hashlib.sha256(
         _canonical(
@@ -193,7 +235,9 @@ def build_variants(
         )
     ).hexdigest()
     cache_path = cache_root / "image-variants" / f"{cache_key}.json"
-    cached = _read_cache(cache_path, source, image, crop, recipe, blob_root)
+    cached = _read_cache(
+        cache_path, source, image, crop, recipe, blob_root, checks=checks
+    )
     if cached is not None:
         return cached
 
@@ -444,13 +488,15 @@ def _verify_blob(path: Path, digest: str, byte_count: int) -> None:
         raise ImageVariantError(msg)
 
 
-def _read_cache(
+def _read_cache(  # ruff: ignore[too-many-arguments] -- source geometry, recipe and shared blob inspection determine a cache hit
     path: Path,
     source: ImageSource,
     image: Image.Image,
     crop: CropBox,
     recipe: Recipe,
     blob_root: Path,
+    *,
+    checks: ImageChecks,
 ) -> VariantSet | None:
     try:
         entry = _CacheEntry.model_validate_json(path.read_bytes())
@@ -475,6 +521,7 @@ def _read_cache(
         source,
         recipe,
         blob_root,
+        checks=checks,
     )
     if variants is None:
         return None
@@ -491,13 +538,15 @@ def _read_cache(
     )
 
 
-def _cached_variants(
+def _cached_variants(  # ruff: ignore[too-many-arguments] -- each cache row is bound to source geometry and the command inspection cache
     entries: Iterable[tuple[_CachedVariant, SizeSpec]],
     image: Image.Image,
     crop: CropBox,
     source: ImageSource,
     recipe: Recipe,
     blob_root: Path,
+    *,
+    checks: ImageChecks,
 ) -> list[ImageVariant] | None:
     variants: list[ImageVariant] = []
     for item, size in entries:
@@ -512,7 +561,17 @@ def _cached_variants(
         blob = blob_root / _blob_path(item.sha256)
         if not blob.exists():
             return None
-        _verify_blob(blob, item.sha256, item.bytes)
+        try:
+            byte_count, checksum, format_name, actual_dimensions = checks.inspect(blob)
+        except OSError:
+            raise ImageVariantError("Cached WebP blob is corrupt") from None
+        if (byte_count, checksum, format_name, actual_dimensions) != (
+            item.bytes,
+            "sha256:" + item.sha256,
+            "WEBP",
+            dimensions,
+        ):
+            raise ImageVariantError("Cached WebP metadata differs from actual bytes")
         variants.append(
             ImageVariant(
                 image_id=source.image_id,

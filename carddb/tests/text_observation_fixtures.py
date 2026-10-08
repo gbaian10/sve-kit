@@ -60,7 +60,6 @@ class Case:
     def context(self) -> BuildContext:
         return BuildContext.from_inputs(
             REVISION,
-            {"synthetic.lock": b"synthetic dependencies"},
             text_configuration(self.plan, self.vocabulary, ()),
         )
 

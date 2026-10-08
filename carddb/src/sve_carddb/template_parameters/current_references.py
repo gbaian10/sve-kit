@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 def adopted(snapshot: Snapshot, sources: Evidence) -> References:
     """Reuse the full glossary closure and frozen source validator before exact lookup."""
-    result = References(pins={"glossary": snapshot.pins()})
+    result = References()
     records = snapshot.current_records()
     for record in records:
         if not isinstance(record, TermRecord):

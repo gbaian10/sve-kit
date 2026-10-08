@@ -79,7 +79,6 @@ def test_comparison_does_not_replace_policy_inputs(
             "context",
             "Digital-name report context must contain only source configuration",
         ),
-        ("runtime", "Digital-name policy runtime dependency closure mismatch"),
     ],
 )
 def test_diagnostic_refusals(
@@ -97,18 +96,10 @@ def test_diagnostic_refusals(
     elif fault == "context":
         config = object_value(parse(sources.build.configuration.encode()))
         config["unreviewed_extra"] = True
-        sources.build = sources.build.model_copy(
-            update={"configuration": canonical(config).decode()}
-        )
-    else:
-        sources.build = sources.build.model_copy(
-            update={
-                "dependencies": tuple(
-                    p
-                    for p in sources.build.dependencies
-                    if not p.name.endswith("digital_name_policies/evaluate.py")
-                )
-            }
+        sources = sources.stage(
+            sources.build.model_copy(
+                update={"configuration": canonical(config).decode()}
+            )
         )
     with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
         generate(baseline.snapshot(), sources, canonical(raw))
@@ -142,7 +133,7 @@ def test_cli_color_and_repeated_report_are_deterministic(
     context = tmp_path / "context.json"
     output = tmp_path / "report.json"
     context.write_text(baseline.digital.build.model_dump_json())
-    before = baseline.snapshot().pins()
+    before = baseline.snapshot().configuration()
     runner = CliRunner()
     result = runner.invoke(
         app, [*cli_args(baseline, context, output), "--baseline-empty"]
@@ -157,7 +148,7 @@ def test_cli_color_and_repeated_report_are_deterministic(
         == 0
     )
     assert output.read_bytes() == first
-    assert baseline.snapshot().pins() == before
+    assert baseline.snapshot().configuration() == before
 
 
 @pytest.mark.parametrize(

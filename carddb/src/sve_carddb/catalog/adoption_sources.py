@@ -1,21 +1,16 @@
-"""Replay pinned source recipes from sealed inputs, never from a latest cache."""
+"""Resolve supported source fields from sealed inputs, never from a latest cache."""
 
 import dataclasses
 import re
-import shutil
-import subprocess  # ruff: ignore[suspicious-subprocess-import] -- immutable Git blobs are read with an argument vector and no shell
-import tempfile
-from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlsplit
 
-from pydantic import JsonValue, ValidationError
+from pydantic import JsonValue
 
 from sve_carddb.build_inputs import SourceUse
 from sve_carddb.catalog.adoption_models import (
     AuthoredText,
     ImageEvidence,
-    Normalizer,
     SourceRef,
     SourceText,
     TextEvidence,
@@ -25,209 +20,41 @@ from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.registry.inputs import JSON_VALUE
 from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.snapshot.values import canonical, digest, parse
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+    from pathlib import Path
 
-    from sve_carddb.build_inputs import BuildContext, Source
+    from sve_carddb.build_inputs import Source
     from sve_carddb.catalog.adoption_models import Record, ReviewContext, TextValue
     from sve_carddb.catalog.current_models import (
         VocabularyRecord as CurrentVocabularyRecord,
     )
     from sve_carddb.registry.snapshot import RegistrySnapshot
 
-SOURCE_RECIPE_PATHS = {
-    "official-jp-exact-v1": "carddb/src/sve_carddb/extract/official_jp.py",
-    "official-en-exact-v1": "carddb/src/sve_carddb/extract/official_en.py",
-    "exact-json-v1": "carddb/src/sve_carddb/snapshot/values.py",
-}
-
-
-class PinnedRepository:
-    def __init__(self, root: Path) -> None:
-        self.root = root
-        self.cache: dict[tuple[str, str], bytes] = {}
-        executable = shutil.which("git")
-        if executable is None:
-            raise ValueError("Git is required for immutable recipe replay")
-        self.executable = executable
-
-    def read(self, revision: str, name: str) -> bytes:
-        """Read immutable Git blobs without executing code or following filesystem links."""
-        path = PurePosixPath(name)
-        if path.is_absolute() or ".." in path.parts or path.as_posix() != name:
-            raise ValueError("Unsafe recipe/dependency code path")
-        key = revision, name
-        if key not in self.cache:
-            result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- no shell; revision and portable path are validated inputs
-                [
-                    self.executable,
-                    "-C",
-                    str(self.root),
-                    "cat-file",
-                    "blob",
-                    f"{revision}:{name}",
-                ],
-                check=False,
-                capture_output=True,
-            )
-            if result.returncode:
-                raise ValueError("Pinned immutable dependency unavailable")
-            self.cache[key] = result.stdout
-        return self.cache[key]
-
-    def tree(self, revision: str, roots: tuple[str, ...]) -> tuple[str, ...]:
-        """List regular files under fixed roots of an immutable Git revision."""
-        if re.fullmatch(r"[0-9a-f]{40}", revision) is None:
-            raise ValueError("Immutable tree revision must be a full Git SHA")
-        result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- full SHA and fixed tree roots are closed inputs
-            [
-                self.executable,
-                "-C",
-                str(self.root),
-                "ls-tree",
-                "-r",
-                "--format=%(objectmode)%x09%(path)",
-                "-z",
-                revision,
-                "--",
-                *roots,
-            ],
-            check=False,
-            capture_output=True,
-        )
-        if result.returncode:
-            raise ValueError("Pinned immutable tree unavailable")
-        entries = [
-            entry.split("\t", 1)
-            for entry in result.stdout.decode().split("\0")
-            if entry
-        ]
-        if any(mode not in {"100644", "100755"} for mode, _ in entries):
-            raise ValueError("Pinned immutable tree contains a nonregular input")
-        return tuple(name for _, name in entries)
-
-    def read_many(self, revision: str, names: tuple[str, ...]) -> dict[str, bytes]:
-        """Read a dependency closure in one Git process, without extracting archive paths."""
-        import io  # ruff: ignore[import-outside-top-level] -- batch framing is only needed by complete dependency replay
-
-        if re.fullmatch(r"[0-9a-f]{40}", revision) is None:
-            raise ValueError("Immutable batch revision must be a full Git SHA")
-        missing = tuple(name for name in names if (revision, name) not in self.cache)
-        for name in missing:
-            path = PurePosixPath(name)
-            if (
-                path.is_absolute()
-                or ".." in path.parts
-                or path.as_posix() != name
-                or any(c in name for c in "\r\n\x00")
-            ):
-                raise ValueError("Unsafe batch dependency path")
-        if missing:
-            result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed Git batch process; immutable object names are validated
-                [self.executable, "-C", str(self.root), "cat-file", "--batch"],
-                input="".join(f"{revision}:{name}\n" for name in missing).encode(),
-                check=False,
-                capture_output=True,
-            )
-            if result.returncode:
-                raise ValueError("Immutable dependency batch is unavailable")
-            stream = io.BytesIO(result.stdout)
-            content = {}
-            for name in missing:
-                header = stream.readline().rstrip(b"\n").split(b" ")
-                if (
-                    len(header) != len(("oid", "kind", "size"))
-                    or header[1] != b"blob"
-                    or not header[2].isdigit()
-                ):
-                    raise ValueError(
-                        "Immutable dependency batch contains a missing/non-blob object"
-                    )
-                raw = stream.read(int(header[2]))
-                if len(raw) != int(header[2]) or stream.read(1) != b"\n":
-                    raise ValueError("Invalid immutable Git batch framing")
-                content[revision, name] = raw
-            if stream.read():
-                raise ValueError("Unexpected immutable Git batch output")
-            self.cache.update(content)
-        return {name: self.cache[revision, name] for name in names}
-
-    def context(self, context: BuildContext) -> None:
-        """Verify every explicitly declared program/dependency byte pin."""
-        for pin in context.dependencies:
-            if digest(self.read(context.program_revision, pin.name)) != pin.sha256:
-                raise ValueError("Review dependency hash mismatch")
-
-    def implementation(self, pin: Normalizer, context: BuildContext) -> None:
-        """Verify immutable recipe provenance and the loaded code."""
-        content = self.read(pin.program_revision, pin.code_path)
-        if (
-            digest(content) != pin.code_hash
-            or digest(canonical(pin.config)) != pin.config_hash
-        ):
-            raise ValueError("Recipe program/config hash mismatch")
-        expected = {p.name: p.sha256 for p in context.dependencies}
-        if expected.get(pin.code_path) != pin.code_hash:
-            raise ValueError("Recipe code is absent from review dependencies")
-        path = Path(__file__).resolve().parents[4] / pin.code_path
-        if (
-            path.is_symlink()
-            or not path.is_file()
-            or digest(path.read_bytes()) != pin.code_hash
-        ):
-            raise ValueError("Historical recipe implementation cannot be replayed")
+SOURCE_PARSERS = {"official-jp-exact-v1", "official-en-exact-v1", "exact-json-v1"}
 
 
 class AdoptionSources:
     def __init__(
         self,
         stores: Mapping[str, Path],
-        repository: PinnedRepository,
+        repository: Path,
+        registry: RegistrySnapshot | None = None,
     ) -> None:
         self.stores = dict(stores)
         self.repository = repository
         self.batches: dict[str, FrozenSources] = {}
         self.uses: list[SourceUse] = []
         self.cache: dict[bytes, tuple[LocalizedText, Source, JsonValue]] = {}
-        self.registries: dict[bytes, RegistrySnapshot] = {}
+        self.current_registry = registry
 
-    def registry(self, review: ReviewContext) -> RegistrySnapshot:
-        """Replay the complete reviewed registry from its immutable authored revision."""
-        configuration = object_value(parse(review.context.configuration.encode()))
-        pin = object_value(configuration.get("catalog_registry"))
-        if (
-            set(pin) != {"authored_revision", "index_path", "index_hash"}
-            or pin["index_path"] != "authored/ids/index.yaml"
-        ):
-            raise ValueError("Historical adoption registry pin is incomplete")
-        key = canonical(pin)
-        if key not in self.registries:
-            revision = pin["authored_revision"]
-            if not isinstance(revision, str) or not re.fullmatch(
-                r"[0-9a-f]{40}", revision
-            ):
-                raise ValueError("Historical registry revision must be a full Git SHA")
-            content = self.repository.read(revision, "authored/ids/index.yaml")
-            with tempfile.TemporaryDirectory(prefix="catalog-review-") as name:
-                root = Path(name)
-                (root / "ids").mkdir()
-                (root / "ids/index.yaml").write_bytes(content)
-                raw = read_yaml(root / "ids/index.yaml")
-                if digest(canonical(raw)) != pin["index_hash"]:
-                    raise ValueError("Historical registry index hash mismatch")
-                for shard in self.repository.tree(
-                    revision, ("authored/ids", "authored/registry")
-                ):
-                    if shard == "authored/ids/index.yaml":
-                        continue
-                    target = root / shard.removeprefix("authored/")
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_bytes(self.repository.read(revision, shard))
-                self.registries[key] = load_registry(root)
-        return self.registries[key]
+    def registry(self) -> RegistrySnapshot:
+        """Reuse the current registry; Git history cannot establish owner applicability."""
+        if self.current_registry is None:
+            self.current_registry = load_registry(self.repository / "authored")
+        return self.current_registry
 
     def batch(self, batch: str) -> FrozenSources:
         """Validate the complete descriptor/receipt/raw closure once per frozen batch."""
@@ -241,24 +68,22 @@ class AdoptionSources:
         """Resolve JSON Pointer and hash the exact nonempty UTF-8 string."""
         key = canonical([ref.model_dump(mode="json"), review.model_dump(mode="json")])
         if key not in self.cache:
-            config = parse(review.context.configuration.encode())
-            if not isinstance(config, dict) or not isinstance(
-                recipes := config.get("catalog_source_recipes"), dict
-            ):
-                raise ValueError("Catalog source recipes must be an object")
-            try:
-                pin = Normalizer.model_validate_json(canonical(recipes.get(ref.parser)))
-            except ValidationError:
-                raise ValueError("Invalid pinned source recipe fields") from None
-            if pin.version != ref.parser:
-                raise ValueError("Source parser recipe ID mismatch")
-            self.repository.implementation(pin, review.context)
-            self._runtime(pin, review.context)
+            if ref.parser not in SOURCE_PARSERS:
+                raise ValueError("Unsupported source parser recipe")
             source, raw, descriptor = self.batch(ref.batch_id).read(
                 ref.source_version_id,
-                parser_version=pin.version,
+                parser_version=ref.parser,
             )
-            projection = self._projection(pin, raw, descriptor.url)
+            expected_provider = {
+                "official-jp-exact-v1": "jp",
+                "official-en-exact-v1": "en",
+            }.get(ref.parser)
+            if expected_provider is not None and (
+                descriptor.provider,
+                descriptor.kind,
+            ) != (expected_provider, "card"):
+                raise ValueError("Catalog source provider/kind mismatch")
+            projection = self._projection(ref.parser, raw, descriptor.url)
             value = pointer(projection, ref.locator)
             if (
                 not isinstance(value, str)
@@ -274,45 +99,8 @@ class AdoptionSources:
         return self.cache[key]
 
     @staticmethod
-    def _projection(pin: Normalizer, raw: bytes, url: str) -> JsonValue:
-        """Historical provenance is checked separately from fixed installed execution."""
-        return _projection(pin, raw, url)
-
-    @staticmethod
-    def _runtime(pin: Normalizer, context: BuildContext) -> None:
-        # Recipe dependency closures cannot grow without a new recipe version.
-        required = {
-            "carddb/uv.lock",
-            "carddb/pyproject.toml",
-            "carddb/src/sve_carddb/catalog/adoption_sources.py",
-        }
-        if pin.version != "exact-json-v1":
-            required.update(
-                {
-                    "carddb/src/sve_carddb/html.py",
-                    "carddb/src/sve_carddb/fetch/validate.py",
-                    "carddb/src/sve_carddb/sources/official_jp.py",
-                    "carddb/src/sve_carddb/extract/official_jp.py",
-                    "carddb/src/sve_carddb/extract/compare_jp.py",
-                    "carddb/src/sve_carddb/registry/inputs.py",
-                    "carddb/src/sve_carddb/registry/review.py",
-                }
-            )
-        if pin.version == "official-en-exact-v1":
-            required.add("carddb/src/sve_carddb/sources/official_en.py")
-        required.add(pin.code_path)
-        dependencies = {p.name: p.sha256 for p in context.dependencies}
-        runtime = Path(__file__).resolve().parents[4]
-        for name in required:
-            path = runtime / name
-            if (
-                path.is_symlink()
-                or not path.is_file()
-                or dependencies.get(name) != digest(path.read_bytes())
-            ):
-                raise ValueError(
-                    "Source parser runtime/dependency closure cannot be replayed"
-                )
+    def _projection(parser: str, raw: bytes, url: str) -> JsonValue:
+        return _projection(parser, raw, url)
 
     def value(
         self,
@@ -374,23 +162,17 @@ def pointer(value: JsonValue, locator: str) -> JsonValue:
     return value
 
 
-def _source_recipe(pin: Normalizer) -> None:
-    if pin.config:
-        raise ValueError("Unsupported source recipe configuration")
-    if SOURCE_RECIPE_PATHS.get(pin.version) != pin.code_path:
+def _projection(parser: str, raw: bytes, url: str) -> JsonValue:
+    if parser not in SOURCE_PARSERS:
         raise ValueError("Unsupported source parser recipe")
-
-
-def _projection(pin: Normalizer, raw: bytes, url: str) -> JsonValue:
-    _source_recipe(pin)
-    if pin.version == "exact-json-v1":
+    if parser == "exact-json-v1":
         return parse(raw)
     number = parse_qs(urlsplit(url).query).get("cardno", [])
     if len(number) != 1:
         raise ValueError("Card source lacks exact official number")
     result = (
         official_jp.extract_card(raw, number=number[0])
-        if pin.version == "official-jp-exact-v1"
+        if parser == "official-jp-exact-v1"
         else official_en.extract_card(raw, number=number[0])
     )
     return JSON_VALUE.validate_python(dataclasses.asdict(result), strict=True)

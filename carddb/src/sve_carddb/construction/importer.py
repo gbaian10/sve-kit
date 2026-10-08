@@ -102,9 +102,7 @@ def populate_construction(
     _coverage(db)
     _clauses(db)
     db.verify()
-    record = input_record(build, expected)
-    record.verify(db, build, expected, complete=False)
-    return record
+    return input_record(build, expected)
 
 
 def _cr(db: Database, staging: Construction, texts: TextInterner) -> None:

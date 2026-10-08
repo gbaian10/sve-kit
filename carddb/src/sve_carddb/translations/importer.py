@@ -2,12 +2,12 @@
 
 import re
 from dataclasses import dataclass
+from functools import cached_property
 from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
 from sve_carddb.catalog.adoption_models import SourceRef
-from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.snapshot.values import canonical, object_value
 from sve_carddb.translations.current_models import ChoiceRecord as CurrentChoiceRecord
 from sve_carddb.translations.current_models import DigitalName as CurrentDigitalName
@@ -36,30 +36,18 @@ class Inputs:
     repository: Path
     authored_revision: str
 
+    @cached_property
+    def snapshot(self) -> Snapshot:
+        """Share one working-tree read across all consumers in this command."""
+        return load_glossary(self.root)
+
     def load(self) -> Snapshot:
-        """Re-read complete signed inputs and compare their immutable Git bytes."""
-        if not re.fullmatch(r"[0-9a-f]{40}", self.authored_revision):
-            raise ValueError("Translation authored revision must be a full Git SHA")
-        snapshot = load_glossary(self.root)
-        repository = PinnedRepository(self.repository)
-        for name, exact in [
-            ("translations/index.yaml", snapshot.index),
-            *((p, e) for p, e, _ in snapshot.shards),
-        ]:
-            if repository.read(self.authored_revision, "authored/" + name) != exact:
-                raise ValueError(
-                    "Translation bytes differ from immutable authored revision"
-                )
-        return snapshot
+        """Reuse current inputs within this command."""
+        return self.snapshot
 
     def configuration(self) -> dict[str, JsonValue]:
-        """Pin the full adopted entry in F1 rather than trusting caller models."""
-        return {
-            "translation_authored": {
-                "authored_revision": self.authored_revision,
-                **self.load().pins(),
-            }
-        }
+        """Describe enabled input areas without locking mutable authored bytes."""
+        return {"translation_authored": {"authored_revision": self.authored_revision}}
 
 
 def validate_choice(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals] -- independent source/concept guards cannot substitute for each other
@@ -211,20 +199,34 @@ def _digital_evidence(
 
 
 def populate_glossary(
-    db: Database, inputs: Inputs, *, build: BuildContext, stores: dict[str, Path]
+    db: Database,
+    inputs: Inputs,
+    *,
+    build: BuildContext,
+    stores: dict[str, Path],
+    sources: Sources | None = None,
 ) -> InputRecord:
     """Compose current values with verified publication identity and frozen sources."""
     from sve_carddb.translations.current_importer import populate  # ruff: ignore[import-outside-top-level] -- the projection reuses this module's independent evidence validators
 
-    return populate(db, inputs, inputs.load(), build=build, stores=stores)
+    return populate(
+        db, inputs, inputs.load(), build=build, stores=stores, sources=sources
+    )
 
 
 def import_glossary(
-    db: Database, inputs: Inputs, *, build: BuildContext, stores: dict[str, Path]
+    db: Database,
+    inputs: Inputs,
+    *,
+    build: BuildContext,
+    stores: dict[str, Path],
+    sources: Sources | None = None,
 ) -> InputRecord:
     """Own an atomic transaction for glossary rows and their entire provenance."""
     with db.transaction():
-        return populate_glossary(db, inputs, build=build, stores=stores)
+        return populate_glossary(
+            db, inputs, build=build, stores=stores, sources=sources
+        )
 
 
 def _refs(value: JsonValue) -> tuple[SourceRef, ...]:

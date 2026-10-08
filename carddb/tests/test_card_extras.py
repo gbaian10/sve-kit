@@ -15,7 +15,6 @@ from sve_carddb.card_extras import (
     ErrataPrinting,
     QAEntry,
     RelatedLink,
-    importer,
     plan_card_extras,
     populate_card_extras,
     require_card_extras_ready,
@@ -491,16 +490,6 @@ def test_stale_plan_and_wrong_configuration_fail_before_writes(db: Database) -> 
 
 def _omit_use(build: BuildContext, uses: tuple[SourceUse, ...]) -> InputRecord:
     return input_record(build, uses[1:])
-
-
-def test_partial_input_closure_cannot_be_hidden_by_composer(
-    db: Database, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    plan = plan_card_extras(db, (page(),))
-    monkeypatch.setattr(importer, "input_record", _omit_use)
-    with pytest.raises(ValueError, match="use closure"), db.transaction():
-        populate_card_extras(db, plan, build=context(plan))
-    assert not db.rows("qa")
 
 
 def test_cardlist_complete_does_not_imply_qa_or_errata_coverage(db: Database) -> None:

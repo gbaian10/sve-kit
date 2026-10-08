@@ -344,9 +344,7 @@ def populate_text_observations(
     if plan.corrections is not None:
         verify_corrections(db, plan, vocabulary)
     mark_wording_pending(db, plan)
-    record = input_record(build, expected)
-    record.verify(db, build, plan.source_uses(), complete=False)
-    return record
+    return input_record(build, expected)
 
 
 def import_text_observations(

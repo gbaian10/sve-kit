@@ -100,20 +100,11 @@ sealed-source metadata boundary; product evidence records `archive-closure-v1`
 under `product_evidence_closure`, since checking bytes does not parse or adopt
 a product relationship. Identity evidence keeps its actual parser pin.
 
-Each staging entry point requires an explicit `BuildContext` and returns an
-immutable `InputRecord`. `product_preview_uses(catalog, plan, stores)` declares
-expected uses independently of writes. Import verifies the complete combined
-raw source/use closure; standalone populate operations verify their own subset,
-which the caller must include in a final complete record.
-
-Save a completed staging build using `build_bundle.publish_bundle`: it owns the
-transaction, checks an independently supplied context/use plan, rechecks archive
-closure and publishes DB, inputs and report together. Its population callback
-uses `populate_product_preview`, not the transaction-owning import function.
-`verify_bundle` requires the same pinned expected inputs and named stores, checks
-all four files and reads the closed DB without writes. See the
-[build DB example](../build_db/README.md#saved-build-inputs) and the
-[approved source contract](../../../../docs/schema/source-archive.md#221-建置輸入紀錄與完整使用閉包).
+Each staging entry point requires a `BuildContext` and returns an `InputRecord`
+summarizing actual source uses. Save the already completed database with
+`build_output.save` together with its inputs and report. The helper uses SQLite
+backup and a temporary directory with no-overwrite rename; it does not populate
+a second database. See the [build DB example](../build_db/README.md#saved-build-inputs).
 
 ## Confirmed permanent official product identities
 
@@ -121,18 +112,15 @@ all four files and reads the closed DB without writes. See the
 stores=...)` implements [authored-layout §11](../../../../docs/schema/authored-layout.md#11-官方商品身分對照-product-identity-v1).
 It validates every shard under `product-identities/` and both regions before
 projection: closed fields, strict YAML, expected file paths, path/filing/region
-agreement and sorted unique complete match keys. Every record is a confirmed
+agreement and unique complete match keys. Every record is a confirmed
 identity; the directory must exist, so a missing one never reads as empty. IDs
 share the manual product namespace and cannot cross regions. Different match
 aliases may share one ID; duplicate match records are forbidden even for one ID.
 
-The loader checks shard exact bytes against the supplied full Git revision
-and retains both physical dependency bytes and canonical shard hashes.
-Use `identities.dependencies()` in `BuildContext.from_inputs` and save
-`identities.configuration()` under its `product_identity` configuration key.
-Import checks every dependency and the configured authored revision. The checkout
-must have Git available; dirty bytes cannot claim a committed authored revision.
-No input is written or signed by this loader.
+The loader reads current working-tree files once, validates unique match keys,
+size, types and references, then sorts. `identities.configuration()` supplies
+`product_identity` configuration with a provenance revision. Uncommitted edits
+apply; no Git or dependency bytes are compared.
 
 Every evidence reference resolves through the sealed archive boundary. For
 `product_identity_match`, the canonical block ordinal must reproduce the complete
@@ -204,10 +192,8 @@ identities = load_product_identities(
 official = plan_official_products(identities, frozen_pages, plan)
 context = BuildContext.from_inputs(
     program_revision,
-    dependency_bytes | identities.dependencies(),
     configuration | {"product_identity": identities.configuration()},
 )
-expected = product_preview_uses(catalog, plan, stores, official=official)
 
 
 def populate(db):
@@ -223,13 +209,12 @@ def populate(db):
     )
 ```
 
-Pass this callback and independently declared `expected` to `publish_bundle`.
+Call this population inside the build transaction, then save that database.
 The single transaction includes families, the existing identity graph, authored
 identity shard sources and official products/inclusions. Official content
 references raw sources, never an identity mapping as a content approval. Authored identity sources use `product-identity-v1`; raw parsers remain
 NULL. Exact evidence closure uses `product_identity_evidence_closure` with
 `archive-closure-v1`; reproduced matches use `official_product_identity` and the
 actual product parser. Page scans, product and inclusion processing each retain
-their own usage, including zero matches and printing-gate exclusions. Standalone
-and composed input checks reject omissions; bundle verification rechecks the
-actual archived bytes and complete F1 closure before saving all four artifacts.
+their own usage, including zero matches and printing-gate exclusions. Source reads verify archived bytes and metadata; owner and reference checks
+apply during planning and population. Save the completed DB with inputs/report.

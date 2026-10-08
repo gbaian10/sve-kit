@@ -1,4 +1,4 @@
-"""Shared raw metadata and immutable, independently checkable build use records."""
+"""Shared raw metadata and summaries of actual build source uses."""
 
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, Annotated, Literal
@@ -6,10 +6,10 @@ from typing import TYPE_CHECKING, Annotated, Literal
 from pydantic import Field, JsonValue, field_validator, model_validator
 
 from sve_carddb.registry.records import Hash, Instant, RecordData, Text
-from sve_carddb.snapshot.values import canonical, digest, parse
+from sve_carddb.snapshot.values import canonical, parse
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping
+    from collections.abc import Iterable
 
     from sve_carddb.build_db import Database, Value
 
@@ -76,15 +76,11 @@ class FilePin(RecordData):
 
 class BuildContext(RecordData):
     program_revision: Revision
-    dependencies: tuple[FilePin, ...]
     configuration: Text
 
     @model_validator(mode="after")
     def check_inputs(self) -> BuildContext:
-        """Require explicit dependency pins and canonical immutable configuration."""
-        names = tuple(pin.name for pin in self.dependencies)
-        if not names or names != tuple(sorted(set(names))):
-            raise ValueError("Dependency inputs must be nonempty, sorted and unique")
+        """Require canonical configuration for the current build summary."""
         if canonical(parse(self.configuration.encode())).decode() != self.configuration:
             raise ValueError("Build configuration must be canonical JSON")
         return self
@@ -93,16 +89,11 @@ class BuildContext(RecordData):
     def from_inputs(
         cls,
         program_revision: str,
-        dependencies: Mapping[str, bytes],
         configuration: JsonValue,
     ) -> BuildContext:
-        """Pin exact dependency bytes and an explicit configuration, without defaults."""
+        """Describe the current program revision and explicit configuration."""
         return cls(
             program_revision=program_revision,
-            dependencies=tuple(
-                FilePin(name=name, sha256=digest(content))
-                for name, content in sorted(dependencies.items())
-            ),
             configuration=canonical(configuration).decode(),
         )
 
@@ -146,34 +137,9 @@ class InputRecord(RecordData):
         """Serialize without card text or machine-local paths."""
         return canonical(self.model_dump(mode="json"))
 
-    def verify(
-        self,
-        db: Database,
-        context: BuildContext,
-        expected: tuple[SourceUse, ...],
-        *,
-        complete: bool = True,
-    ) -> None:
-        """Compare against independently declared inputs and the actual database graph."""
-        if self.context != context or self.uses != uses_sorted(expected):
-            raise ValueError("Build input use closure or context mismatch")
-        required = raw_values(use.source for use in expected)
-        actual = {
-            row.values["id"]: row.values
-            for row in db.rows("source_record")
-            if row.values["kind"] != "authored"
-        }
-        if (
-            complete and actual.keys() != required.keys()
-        ) or not required.keys() <= actual.keys():
-            raise ValueError("Build input raw source closure mismatch")
-        for source_id, values in required.items():
-            if actual[source_id] != values:
-                raise ValueError("Conflicting raw source metadata")
-
 
 def input_record(context: BuildContext, uses: Iterable[SourceUse]) -> InputRecord:
-    """Create a canonical record; callers must verify it against their input plans."""
+    """Summarize the sources consumed by this build."""
     return InputRecord(context=context, uses=uses_sorted(uses))
 
 

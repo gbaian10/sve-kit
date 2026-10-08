@@ -5,7 +5,6 @@ from urllib.parse import urlsplit
 
 from pydantic import Field, field_validator, model_validator
 
-from sve_carddb.build_inputs import Revision
 from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.registry.records import Hash, RecordData, Text
 
@@ -83,11 +82,6 @@ class PrintingOwner(RecordData):
     face_id: Text
 
 
-class IdentityBasis(RecordData):
-    authored_revision: Revision
-    registry_index_hash: Hash
-
-
 class ConceptSubject(RecordData):
     card_id: Text
     face_id: Text
@@ -104,9 +98,3 @@ class Envelope(RecordData):
         if type(value) is not int:
             raise ValueError("Translation format must be an integer")
         return value
-
-
-class Index(Envelope):
-    translation_authored_format: Literal[2]
-    kind: Literal["translation_index"]
-    includes: dict[str, Hash]

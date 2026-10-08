@@ -5,15 +5,14 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import input_record, uses_sorted
-from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.build_inputs import input_record
 from sve_carddb.image_assets import (
     plan_regional_images,
     populate_assets,
-    reference_uses,
     verify_asset_sources,
     verify_assets,
 )
+from sve_carddb.image_checks import ImageChecks
 from sve_carddb.image_crop_report import crop_report
 from sve_carddb.image_crops import load_image_crops
 
@@ -33,6 +32,7 @@ class MountedImages:
     assets: ImageBuild
     root: Path
     crops: ImageCrops
+    checks: ImageChecks
 
     def populate(
         self,
@@ -42,30 +42,31 @@ class MountedImages:
         context: BuildContext,
         parents: InputRecord,
     ) -> tuple[InputRecord, dict[str, JsonValue]]:
-        """Replay exact page bindings in both staging and sealed bundle databases."""
+        """Bind verified regional image sources inside the one build transaction."""
         references = tuple(
             ref
             for pin in inputs.sources
             for ref in plan_regional_images(
                 db,
                 identity,
-                FrozenSources(inputs.archive, inputs.store_id, pin.card_batch),
+                self.checks.batch(inputs.archive, inputs.store_id, pin.card_batch),
                 region=pin.region,
             )
         )
-        added = populate_assets(db, self.assets, references, self.root)
-        record = input_record(context, (*parents.uses, *added))
-        expected = uses_sorted(
-            (*parents.uses, *self.assets.source_uses(), *reference_uses(references))
+        added = populate_assets(
+            db, self.assets, references, self.root, checks=self.checks
         )
-        record.verify(db, context, expected)
+        record = input_record(context, (*parents.uses, *added))
         report = self.assets.report(references)
         report["crop_overrides"] = crop_report(self.crops, self.assets, references, db)
         return record, report
 
 
 def prepare_images(
-    inputs: Inputs, assets: ImageBuild | None, root: Path | None
+    inputs: Inputs,
+    assets: ImageBuild | None,
+    root: Path | None,
+    checks: ImageChecks | None = None,
 ) -> MountedImages | None:
     """Require complete current membership in both explicit regional image pins."""
     if (assets is None) != (root is None):
@@ -88,8 +89,9 @@ def prepare_images(
         for item in assets.images
     ):
         raise ValueError("Offline images differ from the pinned regional image batches")
+    checks = checks or ImageChecks()
     for pin in inputs.sources:
-        frozen = FrozenSources(inputs.archive, inputs.store_id, pin.image_batch)
+        frozen = checks.batch(inputs.archive, inputs.store_id, pin.image_batch)
         if {(scope.provider, scope.kind) for scope in frozen.inventory.scope} != {
             (pin.region, "image")
         }:
@@ -97,6 +99,8 @@ def prepare_images(
         actual = {item.source.id for item in assets.images if item.region == pin.region}
         if actual != {entry.source_version_id for entry in frozen.inventory.current}:
             raise ValueError("Offline images must cover every current regional source")
-    verify_assets(assets, root)
-    verify_asset_sources(assets, {inputs.store_id: inputs.archive}, crops=crops)
-    return MountedImages(assets, root, crops)
+    verify_assets(assets, root, checks=checks)
+    verify_asset_sources(
+        assets, {inputs.store_id: inputs.archive}, crops=crops, checks=checks
+    )
+    return MountedImages(assets, root, crops, checks)

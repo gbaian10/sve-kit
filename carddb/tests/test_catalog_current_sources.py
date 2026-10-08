@@ -1,7 +1,6 @@
 """Current composer checks real extractors over invented sealed JP/EN pages."""
 
 import copy
-import re
 import shutil
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
@@ -14,10 +13,11 @@ from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.manifest import Kind, Region
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.offline import _populate_adoptions
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
+from sve_carddb.snapshot.offline import _populate_adoptions, _prepare_catalog
+from sve_carddb.snapshot.values import array, canonical, digest, object_value
 from sve_carddb.source_archive import seal_batch
 from sve_carddb.sources import official_en, official_jp
+from sve_carddb.translations.sources import Sources
 
 from .adoption_fixtures import REPO, Case, commit, make_case, write
 from .current_catalog_fixtures import current_case
@@ -67,17 +67,12 @@ class PageCase:
         config["catalog_source_recipes"] = {
             "official-" + region + "-exact-v1": {
                 "version": "official-" + region + "-exact-v1",
-                "program_revision": self.case.revision,
-                "code_path": path,
-                "code_hash": digest((self.case.repository / path).read_bytes()),
                 "config": {},
-                "config_hash": digest(canonical({})),
             }
-            for region, path in PARSERS.items()
+            for region in PARSERS
         }
         return BuildContext.from_inputs(
             self.case.revision,
-            {name: (self.case.repository / name).read_bytes() for name in RUNTIME},
             config,
         )
 
@@ -217,6 +212,16 @@ def populate(
             case.case.inputs(),
             build=case.build() if build is None else build,
             stores={"test-store": case.archive},
+            prepared=_prepare_catalog(
+                case.case.inputs(),
+                case.build() if build is None else build,
+                {"test-store": case.archive},
+            ),
+            sources=Sources(
+                {"test-store": case.archive},
+                case.case.inputs().repository,
+                case.build() if build is None else build,
+            ),
         )
 
 
@@ -255,66 +260,6 @@ def test_page_recipe_needs_one_exact_card_number(
             ValueError, match=r"^Card source lacks exact official number$"
         ):
             populate(db, case)
-        assert not db.rows("source_record")
-
-
-@pytest.mark.parametrize(
-    ("mutation", "message"),
-    [
-        ("config", "Unsupported source recipe configuration"),
-        ("path", "Unsupported source parser recipe"),
-        ("loaded_code", "Historical recipe implementation cannot be replayed"),
-        ("runtime", "Source parser runtime/dependency closure cannot be replayed"),
-    ],
-)
-def test_current_page_recipe_refusals(
-    case: PageCase, schema: CompiledSchema, mutation: str, message: str
-) -> None:
-    if mutation == "loaded_code":
-        path = case.case.repository / PARSERS["en"]
-        path.write_bytes(path.read_bytes() + b"\n# Invented prior implementation.\n")
-        case = replace(
-            case, case=replace(case.case, revision=commit(case.case.repository))
-        )
-    build = case.build()
-    config = object_value(parse(build.configuration.encode()))
-    pin = object_value(
-        object_value(config["catalog_source_recipes"])["official-en-exact-v1"]
-    )
-    if mutation == "config":
-        pin["config"] = {"unsupported": True}
-        pin["config_hash"] = digest(canonical(pin["config"]))
-    elif mutation == "path":
-        pin["code_path"] = RUNTIME[-1]
-        pin["code_hash"] = digest((case.case.repository / RUNTIME[-1]).read_bytes())
-    dependencies = {
-        p.name: (case.case.repository / p.name).read_bytes() for p in build.dependencies
-    }
-    if mutation == "runtime":
-        del dependencies["carddb/src/sve_carddb/sources/official_en.py"]
-    build = BuildContext.from_inputs(build.program_revision, dependencies, config)
-    with create_database(schema) as db:
-        with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
-            populate(db, case, build)
-        assert not db.rows("source_record")
-
-
-@pytest.mark.parametrize("recipes", [None, [], "invalid", 1, "absent"])
-def test_current_catalog_recipes_require_object(
-    case: PageCase, schema: CompiledSchema, recipes: JsonValue
-) -> None:
-    build = case.build()
-    config = object_value(parse(build.configuration.encode()))
-    if recipes == "absent":
-        del config["catalog_source_recipes"]
-    else:
-        config["catalog_source_recipes"] = recipes
-    build = build.model_copy(update={"configuration": canonical(config).decode()})
-    with create_database(schema) as db:
-        with pytest.raises(
-            ValueError, match=r"^Catalog source recipes must be an object$"
-        ):
-            populate(db, case, build)
         assert not db.rows("source_record")
 
 

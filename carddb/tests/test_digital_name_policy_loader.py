@@ -8,9 +8,9 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.digital_name_policies.current_models import LinkPolicy
-from sve_carddb.digital_name_policies.loader import INDEX, decoded, load, model
-from sve_carddb.registry.storage import MAX_BYTES, read_yaml
-from sve_carddb.snapshot.values import canonical, digest, object_value
+from sve_carddb.digital_name_policies.loader import decoded, load, model
+from sve_carddb.registry.storage import MAX_BYTES
+from sve_carddb.snapshot.values import digest, object_value
 
 from .adoption_fixtures import commit
 from .digital_name_policy_fixtures import LINKS, current, loader_repository, rewrite
@@ -31,18 +31,18 @@ def copied(baseline: tuple[Path, str], root: Path) -> Path:
 
 def reject(root: Path, message: str) -> None:
     with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
-        load(root / "authored", root, commit(root))
+        load(root / "authored", commit(root))
 
 
 def test_complete_entry_reads_names_and_links(baseline: tuple[Path, str]) -> None:
     root, revision = baseline
-    snapshot = load(root / "authored", root, revision)
-    assert len(snapshot.files) == 3
+    snapshot = load(root / "authored", revision)
+    assert len(snapshot.files) == 2
     assert len(snapshot.current_names) == 1
     assert snapshot.links is not None
     assert snapshot.links.content.excluded_names == ()
     assert snapshot.links.content.excluded_targets == ()
-    assert snapshot.pins()["authored_revision"] == revision
+    assert snapshot.configuration()["authored_revision"] == revision
 
 
 @pytest.mark.parametrize(
@@ -120,79 +120,6 @@ def test_unknown_policy_fields_are_not_ignored(
 
 
 @pytest.mark.parametrize(
-    ("fault", "message"),
-    [
-        ("path", "Digital-name policy indexed path mismatch"),
-        ("hash", "Digital-name policy indexed hash mismatch"),
-        ("missing", "Digital-name policy indexed path mismatch"),
-        ("orphan", "Unindexed digital-name policy input"),
-        ("identity", "Digital-name policy identity mismatch"),
-        ("second", "Digital-name policy purpose must select at most one policy"),
-    ],
-)
-def test_entry_closure(
-    baseline: tuple[Path, str], tmp_path: Path, fault: str, message: str
-) -> None:
-    root = copied(baseline, tmp_path / "repo")
-    index_path = root / "authored" / INDEX
-    index = object_value(read_yaml(index_path))
-    entry = object_value(object_value(index["policies"])[LINKS])
-    if fault in {"path", "hash"}:
-        entry[fault] = "../outside.yaml" if fault == "path" else digest(b"invalid")
-        index_path.write_bytes(canonical(index))
-    elif fault == "missing":
-        (root / "authored" / str(entry["path"])).unlink()
-    elif fault == "orphan":
-        (root / "authored/digital-name-policies/orphan.yaml").write_text("{}")
-    elif fault == "identity":
-        raw = current(root, LINKS)
-        raw["policy_id"] = "synthetic-other"
-        rewrite(root, LINKS, raw)
-    else:
-        raw = current(root, LINKS)
-        raw["policy_id"] = "synthetic-other-links"
-        rewrite(root, "synthetic-other-links", raw)
-    reject(root, message)
-
-
-@pytest.mark.parametrize(
-    ("fault", "message"),
-    [
-        ("revision", "Policy authored revision must be a full Git SHA"),
-        ("absent", "Digital-name policy index is missing"),
-        ("disk", "Digital-name policy bytes differ from authored revision"),
-        ("extra_disk", "Digital-name policy disk closure differs from immutable tree"),
-        ("git_symlink", "Unsafe immutable digital-name policy file"),
-        ("disk_symlink", "Symlink digital-name policy input"),
-    ],
-)
-def test_git_and_disk_are_both_immutable(
-    baseline: tuple[Path, str], tmp_path: Path, fault: str, message: str
-) -> None:
-    root = copied(baseline, tmp_path / "repo")
-    revision = baseline[1]
-    target = root / "authored/digital-name-policies" / LINKS / "current.yaml"
-    if fault == "revision":
-        revision = "HEAD"
-    elif fault == "absent":
-        (root / "authored" / INDEX).unlink()
-        revision = commit(root)
-    elif fault == "disk":
-        target.write_bytes(target.read_bytes() + b"\n# different bytes\n")
-    elif fault == "extra_disk":
-        (target.parent / "orphan.yaml").write_text("{}")
-    else:
-        copy = tmp_path / "file.yaml"
-        copy.write_bytes(target.read_bytes())
-        target.unlink()
-        target.symlink_to(copy)
-        if fault == "git_symlink":
-            revision = commit(root)
-    with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
-        load(root / "authored", root, revision)
-
-
-@pytest.mark.parametrize(
     "fault",
     [
         "no_batches",
@@ -256,12 +183,6 @@ def test_link_exclusions_are_read_directly(
         }
     ]
     rewrite(root, LINKS, raw)
-    links = load(root / "authored", root, commit(root)).links
+    links = load(root / "authored", commit(root)).links
     assert links is not None
     assert [t.official_id for t in links.content.excluded_targets] == ["22345678"]
-
-
-def test_missing_immutable_revision_is_rejected(baseline: tuple[Path, str]) -> None:
-    root, _ = baseline
-    with pytest.raises(ValueError, match=r"^Policy immutable tree is unavailable$"):
-        load(root / "authored", root, "0" * 40)

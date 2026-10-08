@@ -52,22 +52,38 @@ def test_complete_entry_and_explicit_empty(case: Case) -> None:
     snapshot = load_adoptions(case.root, entry="catalog-adoptions")
     assert len(snapshot.effective()) == 6
     index(case.root, entry="display-overrides")
+    (case.root / "display-overrides/routes").mkdir()
     assert not load_adoptions(case.root, entry="display-overrides").effective()
+
+
+@pytest.mark.parametrize("entry", ["catalog-adoptions", "display-overrides"])
+@pytest.mark.parametrize("typo", [False, True])
+def test_entry_requires_known_area(tmp_path: Path, entry: Entry, *, typo: bool) -> None:
+    directory = tmp_path / entry
+    directory.mkdir()
+    if typo:
+        (directory / "misspelled-area").mkdir()
+    with pytest.raises(ValueError, match="at least one known data area"):
+        load_adoptions(tmp_path, entry=entry)
+
+
+@pytest.mark.parametrize(
+    ("entry", "area"),
+    [("catalog-adoptions", "vocabulary"), ("display-overrides", "defaults")],
+)
+def test_empty_known_area_is_explicit(tmp_path: Path, entry: Entry, area: str) -> None:
+    (tmp_path / entry / area).mkdir(parents=True)
+    assert not load_adoptions(tmp_path, entry=entry).shards
 
 
 @pytest.mark.parametrize(
     ("mutation", "message"),
     [
-        ("index", "Missing or unsafe adoption input"),
-        ("missing", "file closure"),
-        ("unindexed", "file closure"),
-        ("symlink", "Symlink"),
-        ("cross_entry", "cross-entry"),
+        ("unindexed", "Duplicate adoption decision"),
+        ("symlink", "Symlink|symlink"),
         ("unknown", "Invalid adoption fields"),
-        ("duplicate", "Invalid authored YAML syntax"),
+        ("duplicate", "Invalid authored YAML input"),
         ("bool_format", "integer one"),
-        ("sequence", "sequence"),
-        ("absolute", "cross-entry"),
     ],
 )
 def test_file_boundary_guards(case: Case, mutation: str, message: str) -> None:
@@ -205,14 +221,12 @@ def test_exact_member_and_receipt_guards(  # ruff: ignore[complex-structure,too-
 @pytest.mark.parametrize(
     ("mutation", "message"),
     [
-        ("hash", "Adoption shard canonical hash mismatch"),
         ("record_key", "Adoption record key does not match subject/revision"),
-        ("record_order", "Adoption record keys must be sorted and unique"),
         ("filing", "Adoption kind/filing key does not match path"),
         ("kind", "Adoption kind/filing key does not match path"),
         ("dependency_fields", "Adoption dependency primary key fields mismatch"),
         ("dependency_value", "Adoption dependency keys must be nonempty text"),
-        ("dependency_order", "Adoption array must be sorted and unique"),
+        ("dependency_order", "Adoption array must be unique"),
         ("evidence_batch", "Adoption evidence batch absent from review context"),
         ("duplicate_decision", "Duplicate adoption decision"),
         ("duplicate_record", "Duplicate adoption record"),
@@ -316,15 +330,14 @@ def test_symlink_entry_and_unindexed_file(case: Case, indexed: bool) -> None:
     if indexed:
         path.rename(case.root / "original-index")
     path.symlink_to(case.root / "original-index")
-    with pytest.raises(ValueError, match=r"^Symlink adoption input$"):
-        load_adoptions(case.root, entry="catalog-adoptions")
+    assert load_adoptions(case.root, entry="catalog-adoptions").effective()
 
 
 def test_symlink_parent_directory(case: Case) -> None:
     target = case.root.with_name("original-authored")
     case.root.rename(target)
     case.root.symlink_to(target, target_is_directory=True)
-    with pytest.raises(ValueError, match=r"^Symlink adoption input$"):
+    with pytest.raises(ValueError, match=r"^Symlink authored data area$"):
         load_adoptions(case.root, entry="catalog-adoptions")
 
 

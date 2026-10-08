@@ -204,7 +204,6 @@ def test_candidate_never_renders_projects_or_bypasses_source_checks(
         destination = directory / path
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(exact)
-    (directory / "translations/index.yaml").write_bytes(package.index)
     commit(current_case.repository)
     assert load_glossary(directory).current_records() == ()
     absent = from_files(compose(current_case.inputs.files, (*definitions, pending())))

@@ -7,12 +7,11 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.catalog.adoption_models import Batch
-from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.manifest import Kind
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.source_archive import seal_batch
 from sve_carddb.sources.official_jp import card_url
-from sve_carddb.template_parameter_rules.current import load_file
+from sve_carddb.template_parameter_rules.current import PATH, load, load_file
 from sve_carddb.template_parameter_rules.current import parse as parse_rules
 from sve_carddb.template_parameters.analysis import SAFE_INTEGER, VERSION_PARAMETERS
 from sve_carddb.template_parameters.models import Schema, Slot
@@ -94,7 +93,7 @@ def make_case(tmp_path: Path) -> Case:
     }
     _write(root, values)
     revision = commit(root)
-    inputs = read_templates(PinnedRepository(root), revision)
+    inputs = read_templates(root, revision)
     return Case(root, revision, inputs, sources, generated, (batch,))
 
 
@@ -165,6 +164,7 @@ def _records(generated: Generated) -> Shard:
 
 
 def _write(root: Path, values: dict[str, JsonValue]) -> None:
+    (root / "authored/translations/glossary").mkdir(parents=True, exist_ok=True)
     index: dict[str, JsonValue] = {
         "translation_authored_format": 2,
         "kind": "translation_index",
@@ -182,9 +182,7 @@ def test_read_is_source_free_and_low_confidence_stays_active(
     mocker.patch.object(
         current_case.sources, "generate", side_effect=AssertionError("No raw reads")
     )
-    inputs = read_templates(
-        PinnedRepository(current_case.repository), current_case.revision
-    )
+    inputs = read_templates(current_case.repository, current_case.revision)
     assert len(inputs.translations()) == 1
     assert inputs.translations()[0].low_confidence
     assert inputs.translations()[0].origin == "machine"
@@ -228,7 +226,7 @@ def test_new_commit_can_edit_text_and_note_without_receipt(current_case: Case) -
     )
     index_path.write_bytes(canonical(index))
     revision = commit(current_case.repository)
-    inputs = read_templates(PinnedRepository(current_case.repository), revision)
+    inputs = read_templates(current_case.repository, revision)
     assert inputs.translations()[0].data.text.startswith("Changed ")
     verified = validate_templates(inputs, current_case.sources, current_case.batches)
     assert verified.frequencies
@@ -323,10 +321,57 @@ def test_closed_formats_refuse_receipts_and_unknown_switches() -> None:
 def test_local_rule_input_rejects_symlinks(tmp_path: Path) -> None:
     path = tmp_path / "current.yaml"
     path.symlink_to(tmp_path / "other.yaml")
-    with pytest.raises(
-        ValueError, match=r"^Missing or symlink current parameter rules$"
-    ):
-        load_file(path)
+    with pytest.raises(ValueError, match=r"^Symlink authored data area$"):
+        load_file(path, root=tmp_path)
+
+
+@pytest.fixture
+def current_rule_file(tmp_path: Path) -> Path:
+    path = tmp_path / "real/repository" / PATH
+    path.parent.mkdir(parents=True)
+    path.write_bytes(
+        canonical(
+            {
+                "parameter_rule_format": 2,
+                "kind": "template_parameter_rules",
+                "rules": [],
+            }
+        )
+    )
+    return path
+
+
+@pytest.mark.parametrize("ancestor", ["parent", "repository"])
+def test_current_rule_repository_below_symlink_is_readable(
+    tmp_path: Path, current_rule_file: Path, ancestor: str
+) -> None:
+    repository = current_rule_file.parents[2]
+    linked = tmp_path / "linked"
+    linked.symlink_to(
+        repository.parent if ancestor == "parent" else repository,
+        target_is_directory=True,
+    )
+    linked_repository = linked / repository.name if ancestor == "parent" else linked
+    assert load(linked_repository).enabled() == ()
+
+
+@pytest.mark.parametrize(
+    "part", ["authored", "template-parameter-rules", "current.yaml"]
+)
+def test_current_rule_internal_symlink_is_rejected(
+    tmp_path: Path, current_rule_file: Path, part: str
+) -> None:
+    repository = current_rule_file.parents[2]
+    target = next(
+        path
+        for path in (current_rule_file, *current_rule_file.parents)
+        if path.name == part
+    )
+    moved = tmp_path / "moved"
+    target.rename(moved)
+    target.symlink_to(moved, target_is_directory=moved.is_dir())
+    with pytest.raises(ValueError, match=r"^Symlink authored data area$"):
+        load(repository)
 
 
 def test_disabled_rules_leave_source_positions_pending(current_case: Case) -> None:
@@ -342,17 +387,12 @@ def test_disabled_rules_leave_source_positions_pending(current_case: Case) -> No
     assert member.pending == ("numeric_rule_disabled",)
 
 
-def test_current_rule_git_mode_is_checked(current_case: Case) -> None:
-    from sve_carddb.template_parameter_rules.current import PATH, load  # ruff: ignore[import-outside-top-level] -- isolate the current rule reader
-
+def test_current_rule_symlink_is_rejected(current_case: Case) -> None:
     path = current_case.repository / PATH
     path.parent.mkdir(parents=True)
     path.symlink_to("../translations/index.yaml")
-    revision = commit(current_case.repository)
-    with pytest.raises(
-        ValueError, match=r"^Missing or unsafe current parameter rules$"
-    ):
-        load(PinnedRepository(current_case.repository), revision)
+    with pytest.raises(ValueError, match=r"^Symlink authored data area$"):
+        load(current_case.repository)
 
 
 def test_new_definition_uses_payload_id_and_verifies_its_source(
