@@ -199,24 +199,26 @@ reason 如實寫「名稱／職業／卡種機械相符、同遊戲完整目錄�
 | D10／I | coverage links 漏列一個 same_character、指已刪除的 link 或多列一個他卡 link | 完整集合／精確 link id 驗證失敗；不得因名稱不可用就不計該關係 |
 | D11／I | 新增同卡同面同名再錄；另對照新增相異名稱／背面／目錄成員 | 同名再錄不使 coverage stale、仍重驗來源；相異名稱／新面／目錄變更依 §4 標 stale，不改 as_of 或自動造 partial 決定 |
 | D12／I | 同 subject 兩筆、改分片未更新 index hash、未索引分片 | 全入口拒絕；失敗交易不留半批 DB 寫入 |
-| D13／I | 只改 frozen 名稱一個字但維持長度、錯 parser／batch，或刪掉某來源 usage | exact 名稱／來源 pin／完整 F1 使用閉包必須抓到，不以 byte 長度或子匯入器 verify 取代 |
+| D13／I | 只改 frozen 名稱一個字但維持長度、錯 parser／batch，或引用不在宣告批次內的來源 | exact 名稱／來源 hash／明示批次驗證必須抓到，不以 byte 長度取代 |
 | D14／I | needs_decision=true、confidence=high 或 model_reviewed 被工具直接寫成採納 | loader 只收 sampled／confirmed，工具不寫 authored；待決候選不取得官方名 |
 | D15／I | 草稿所選同名卡只有一個繁中名，但完整目錄另有同名不同譯名／缺繁中項 | 第一層不通過，留第二層逐筆確認／擱置，不以子集的唯一結果分批採納 |
 | D16／I | 五個機械條件通過但未實際抽樣 | 不寫 sampled；reason 不假稱逐筆確認 |
 | D17／I、N | fresh 已採納 link 與名稱證據完整，但完全沒有 coverage 紀錄 | 官方名不因缺 coverage 被拒；公開 required coverage 集合為 []／未知，不補造決定；其他發布閘門照常驗證 |
 | D18／I | sv1 代碼 5／6 對 SVE nightmare；另對照未列的新代碼、nemesis 或對到 SVE 其他職業 | 前者僅通過職業分層條件，仍驗其餘條件與真人採納；後者不通過，不由工具補表或以 null 相等放行 |
 
-docs 階段只審上述形狀與邊界；程式階段再測嚴格入口、交易、來源重播、閉包及名稱呼叫接線。真實遷入另報能重驗的採納數、232 筆待決及新增待件、覆蓋範圍／as_of，不用合成測試數或草稿信心當人工採納數。
+docs 階段只審上述形狀與邊界；程式階段再測嚴格入口、交易、凍結來源驗證及名稱呼叫接線。真實遷入另報能重驗的採納數、232 筆待決及新增待件、覆蓋範圍／as_of，不用合成測試數或草稿信心當人工採納數。
 
 ## 8. 實作入口與離線候選報告
 
-`digital_links.loader.load_links(authored_root)` 驗全入口並返回不可變 snapshot；每次取封套得到獨立的型別化值。第一版只接受 links，coverage 路徑／kind 明確拒絕，沒有紀錄即未知。`digital_links.importer.Inputs` 驗本機入口 bytes 與明示 authored commit 完全相同，再把 index／分片 exact 與 canonical hash 納入 `digital_link_authored` 設定。不以目前 working tree 或單一分片代替全入口。
+`digital_links.loader.load_links(authored_root)` 驗全入口並返回不可變 snapshot；每次取封套得到獨立的型別化值。第一版只接受 links，coverage 路徑／kind 明確拒絕，沒有紀錄即未知。`digital_links.importer.Inputs` 讀取本次工作樹入口；index／分片的 exact 與 canonical hash 描述本次 `digital_link_authored` 輸入，不再要求它們與 Git commit bytes 相同。authored revision 用來記錄來源版本，不提供執行期鎖定。
 
-建置設定另需 `digital_link_sources`：按 canonical 值排序唯一的 `{batch_id}` 陣列，列本次明示凍結來源。`catalog_registry` 沿既有 registry pin；`translation_recipes` 沿既有凍結 parser pin。`digital_evidence` 沿既有 `translations.digital.configuration()`，列明示 API refs 與 targets。目前建置驗載入的執行期；每筆 link 的引用以目前解析器重驗，名稱閉包也與本次來源比較，不能只交目標語或已選目標的子集。
+建置設定另需 `digital_link_sources`：按 canonical 值排序唯一的 `{batch_id}` 陣列，列本次明示凍結來源。`catalog_registry` 記錄 authored revision，實際 owner 檢查重用本次載入的 registry。每筆 link 的引用由目前解析器驗原始來源 hash、完整 API 名稱目錄與兩端名稱；`digital_evidence` 列明示 API refs 與 targets，不能只交目標語或已選目標的子集。
 
-在 caller-owned transaction 內先呼叫 `populate_links()`；`snapshot/offline_names.Composer` 將結果以 `links=result` 交給 `digital_name_policies.application.prepare()`／`populate()`，再委派 `current_application` 驗期望來源閉包與產生 current 名稱。獨立的 `import_links()` 包裝才開 transaction。link 結果含 fresh records、stale 的 link id 與原因及 F1 input record，並按 card／face 索引 fresh records。application 的 `_counterparts()` 經 `result.eligible_owner(db, sources, owner, name_ref=...)` 每次重驗此 owner 的 JP hash、registry/source_face_map、實際 frozen printing 來源與採納的兩端名字，並比對 materialized link 的完整 subject／值／decision；`counterparts.first_counterpart()` 只在此證據範圍內選真人候選，不另建名稱算法。
+在 caller-owned transaction 內先呼叫 `populate_links()`；`snapshot/offline_names.Composer` 將結果以 `links=result` 交給 `digital_name_policies.application.populate()`，委派 `current_application` 產生一次已檢查的 current 名稱計畫並填入 DB。獨立的 `import_links()` 包裝才開 transaction。link 結果含 fresh records、stale 的 link id 與原因及 input record，並按 card／face 索引 fresh records。application 的 `_counterparts()` 經 `result.eligible_owner(db, sources, owner, name_ref=...)` 每次重驗此 owner 的 JP hash、registry/source_face_map、實際 frozen printing 來源與採納的兩端名字，並比對 materialized link 的完整 subject／值／decision；`counterparts.first_counterpart()` 只在此證據範圍內選真人候選，不另建名稱算法。
 
-離線 composer 以本機 `authored/digital-links` 是否存在判定是否匯入 link；入口存在時由 loader 驗全入口與 authored commit bytes，沒有入口不偽造空採納結果。沒有 link result 時，不提供真人同卡候選；政策名字仍按其獨立條件判斷。另一 owner 不因已有 context／translation 得到權限；同原文異譯而未有 context_assignment 時回報上述概念診斷，不任選概念。pending wording 的 JP revision 同樣可驗；printed owner、語義指派與 current translation/use／bindings 已有現行接點，#53 的其餘需求須沿此路徑接續，不能用 link API 宣稱全部完成。匯入器只做 partial F1 verify；完整建置必須把 result.record.uses、逐 owner 的 sources.uses 及其他階段使用合併，用 `input_record(...).verify(..., complete=True)` 驗實際 DB raw source 閉包後才輸出。
+離線 composer 以本機 `authored/digital-links` 是否存在判定是否匯入 link；入口存在時由 loader 驗全入口，沒有入口不偽造空採納結果。沒有 link result 時，不提供真人同卡候選；政策名字仍按其獨立條件判斷。另一 owner 不因已有 context／translation 得到權限；同原文異譯而未有 context_assignment 時回報上述概念診斷，不任選概念。pending wording 的 JP revision 同樣可驗；printed owner、語義指派與 current translation/use／bindings 已有現行接點，#53 的其餘需求須沿此路徑接續，不能用 link API 宣稱全部完成。
+
+各階段維持自己的來源用途紀錄與固定 build context，共用的只有已驗證來源／解析快取。完整建置合併 link、名稱及其他階段的實際用途，交易完成後直接保存該 DB、inputs 與 report，先寫暫存目錄再 rename；不另計 expected 閉包、不執行 build seal 或第二次 DB 填入。原始來源 hash、owner 適用性、DB FK／STRICT 與 transaction 檢查仍保留。
 
 ### 8.1 候選工具
 
