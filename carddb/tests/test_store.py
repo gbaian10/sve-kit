@@ -2,7 +2,7 @@ from pathlib import Path, PurePosixPath
 
 import pytest
 
-from sve_carddb.store import (
+from sve_carddb.ingest.archive.store import (
     CorruptDataError,
     UnsafePathError,
     compress,

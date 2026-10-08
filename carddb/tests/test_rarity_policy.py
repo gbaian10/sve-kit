@@ -2,8 +2,8 @@
 
 import pytest
 
-from sve_carddb.build_db import CompiledSchema, create_database
-from sve_carddb.build_db.t0 import compile_t0
+from sve_carddb.build import CompiledSchema, create_database
+from sve_carddb.build.t0 import compile_t0
 from sve_carddb.routes.defaults import GeneralEvidence, select_defaults
 from sve_carddb.routes.rarity_policy import APPROVED_GENERAL_RARITIES, RarityWhitelist
 

@@ -8,16 +8,16 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.core.yaml import MAX_BYTES
-from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_crops import load_image_crops, parse_crops
 from sve_carddb.image_variants import CropBox
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
 from .image_crop_fixtures import install, record
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
-    from sve_carddb.source_archive import Descriptor
+    from sve_carddb.ingest.archive.source_archive import Descriptor
 
 AUTHORED = Path(__file__).resolve().parents[2] / "authored"
 # Adopted tops from the former sharded format, where every row spelled out 36/384/288.

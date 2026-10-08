@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import CompiledSchema, Database, Row, Table, Value
+    from sve_carddb.build import CompiledSchema, Database, Row, Table, Value
     from sve_carddb.registry.preview import PreviewPlan
     from sve_carddb.registry.records import Region
     from sve_carddb.text_observations.plan import TextPlan

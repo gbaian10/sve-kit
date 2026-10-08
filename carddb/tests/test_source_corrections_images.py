@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.source_archive import ArchiveError
+from sve_carddb.ingest.archive.source_archive import ArchiveError
 from sve_carddb.source_corrections import FrozenImages
 from sve_carddb.text_observations import plan_text_observations
 

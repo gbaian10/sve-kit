@@ -17,19 +17,9 @@ from rich.console import Console
 from typer.testing import CliRunner
 
 from sve_carddb import cli
-from sve_carddb import source_archive as archive
-from sve_carddb.config import Settings
 from sve_carddb.core.json import canonical, digest
-from sve_carddb.fetch import refresh
-from sve_carddb.fetch.refresh import RefreshWriter, Replacement
-from sve_carddb.fetch.writer import (
-    DiskFullError,
-    Fetched,
-    PathConflictError,
-    Writer,
-    sha256,
-)
-from sve_carddb.manifest import (
+from sve_carddb.ingest.archive import source_archive as archive
+from sve_carddb.ingest.archive.manifest import (
     AlreadyRunningError,
     ExclusiveLock,
     Kind,
@@ -40,7 +30,7 @@ from sve_carddb.manifest import (
     RequestStart,
     Resource,
 )
-from sve_carddb.source_archive import (
+from sve_carddb.ingest.archive.source_archive import (
     ArchiveError,
     ArchiveRaceError,
     ArchiveStore,
@@ -51,7 +41,22 @@ from sve_carddb.source_archive import (
     seal_batch,
     verify_batch,
 )
-from sve_carddb.store import UnsafePathError, compress, decompress, resolve_within
+from sve_carddb.ingest.archive.store import (
+    UnsafePathError,
+    compress,
+    decompress,
+    resolve_within,
+)
+from sve_carddb.ingest.config import Settings
+from sve_carddb.ingest.http import refresh
+from sve_carddb.ingest.http.refresh import RefreshWriter, Replacement
+from sve_carddb.ingest.http.writer import (
+    DiskFullError,
+    Fetched,
+    PathConflictError,
+    Writer,
+    sha256,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

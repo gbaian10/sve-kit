@@ -2,14 +2,14 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db.source_rows import insert_raw_sources
+from sve_carddb.build.source_rows import insert_raw_sources
 from sve_carddb.construction.models import Construction
 from sve_carddb.core.json import parse
 from sve_carddb.core.provenance import input_record
 from sve_carddb.text_observations.intern import TextInterner
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
     from sve_carddb.core.models import RecordData
     from sve_carddb.core.provenance import BuildContext, InputRecord
 

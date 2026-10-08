@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import canonical
 from sve_carddb.core.provenance import SourceUse
+from sve_carddb.parse.pages import official_en, official_jp
 from sve_carddb.registry.records import CardData, FaceData, PrintingData
-from sve_carddb.sources import official_en, official_jp
 from sve_carddb.text_observations.archive import FrozenTexts
 
 if TYPE_CHECKING:

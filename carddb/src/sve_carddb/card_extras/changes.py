@@ -9,7 +9,7 @@ from pydantic import JsonValue
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.card_extras.models import QAPage
     from sve_carddb.card_extras.plan import ExtrasPlan
 

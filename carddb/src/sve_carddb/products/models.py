@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, computed_field, field_validator, model_validator
 
-from sve_carddb.build_db.domains import CODE, LANG
+from sve_carddb.build.scalars import CODE, LANG
 from sve_carddb.core.dates import DATE, INSTANT
 from sve_carddb.core.json import canonical
 from sve_carddb.core.models import Hash, RecordData, Text

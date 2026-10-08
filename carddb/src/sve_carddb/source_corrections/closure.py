@@ -8,7 +8,7 @@ from sve_carddb.text_observations.exclusions import reference_exclusions
 from sve_carddb.text_observations.plan import verify_plan
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import CompiledSchema, Database
+    from sve_carddb.build import CompiledSchema, Database
     from sve_carddb.text_observations.plan import TextPlan
 
 

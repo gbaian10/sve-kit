@@ -1,0 +1,107 @@
+"""Bind optional regional images to the same sealed offline build transaction."""
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+from pydantic import JsonValue
+
+from sve_carddb.core.authored import authored_root
+from sve_carddb.core.provenance import input_record
+from sve_carddb.image_assets import (
+    plan_regional_images,
+    populate_assets,
+    verify_asset_sources,
+    verify_assets,
+)
+from sve_carddb.image_checks import ImageChecks
+from sve_carddb.image_crop_report import crop_report
+from sve_carddb.image_crops import load_image_crops
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from sve_carddb.build import Database
+    from sve_carddb.core.provenance import BuildContext, InputRecord
+    from sve_carddb.image_assets import ImageBuild
+    from sve_carddb.image_crops import ImageCrops
+    from sve_carddb.registry.preview import PreviewPlan
+    from sve_carddb.workflows.offline import Inputs
+
+
+@dataclass(frozen=True)
+class MountedImages:
+    assets: ImageBuild
+    root: Path
+    crops: ImageCrops
+    checks: ImageChecks
+
+    def populate(
+        self,
+        db: Database,
+        inputs: Inputs,
+        identity: PreviewPlan,
+        context: BuildContext,
+        parents: InputRecord,
+    ) -> tuple[InputRecord, dict[str, JsonValue]]:
+        """Bind verified regional image sources inside the one build transaction."""
+        references = tuple(
+            ref
+            for pin in inputs.sources
+            for ref in plan_regional_images(
+                db,
+                identity,
+                self.checks.batch(inputs.archive, inputs.store_id, pin.card_batch),
+                region=pin.region,
+            )
+        )
+        added = populate_assets(
+            db, self.assets, references, self.root, checks=self.checks
+        )
+        record = input_record(context, (*parents.uses, *added))
+        report = self.assets.report(references)
+        report["crop_overrides"] = crop_report(self.crops, self.assets, references, db)
+        return record, report
+
+
+def prepare_images(
+    inputs: Inputs,
+    assets: ImageBuild | None,
+    root: Path | None,
+    checks: ImageChecks | None = None,
+) -> MountedImages | None:
+    """Require complete current membership in both explicit regional image pins."""
+    if (assets is None) != (root is None):
+        raise ValueError("Image build and asset root must be provided together")
+    if assets is None or root is None:
+        return None
+    if not root.is_absolute() or root.is_symlink():
+        raise ValueError("Image asset root must be absolute and not a symlink")
+    for protected in (inputs.repo, inputs.archive):
+        if root.resolve().is_relative_to(
+            protected.resolve()
+        ) or protected.resolve().is_relative_to(root.resolve()):
+            raise ValueError("Image asset root overlaps protected offline inputs")
+    crops = load_image_crops(authored_root(inputs.repo))
+    pins = {pin.region: pin.image_batch for pin in inputs.sources}
+    if any(
+        item.region not in pins
+        or (item.source.archive.store_id, item.source.archive.batch_id)
+        != (inputs.store_id, pins[item.region])
+        for item in assets.images
+    ):
+        raise ValueError("Offline images differ from the pinned regional image batches")
+    checks = checks or ImageChecks()
+    for pin in inputs.sources:
+        frozen = checks.batch(inputs.archive, inputs.store_id, pin.image_batch)
+        if {(scope.provider, scope.kind) for scope in frozen.inventory.scope} != {
+            (pin.region, "image")
+        }:
+            raise ValueError("Offline image pin must be exclusively regional images")
+        actual = {item.source.id for item in assets.images if item.region == pin.region}
+        if actual != {entry.source_version_id for entry in frozen.inventory.current}:
+            raise ValueError("Offline images must cover every current regional source")
+    verify_assets(assets, root, checks=checks)
+    verify_asset_sources(
+        assets, {inputs.store_id: inputs.archive}, crops=crops, checks=checks
+    )
+    return MountedImages(assets, root, crops, checks)

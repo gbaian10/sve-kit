@@ -13,11 +13,11 @@ from ruamel.yaml.error import YAMLError
 
 from sve_carddb.core.json import digest
 from sve_carddb.core.yaml import MAX_BYTES
+from sve_carddb.ingest.archive.source_archive import ArchiveError
 from sve_carddb.products.identities import _model, _shard, load_product_identities
 from sve_carddb.products.identity_models import IdentityShard, ProductLink
 from sve_carddb.products.official import parse_products as parse_verified_products
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.source_archive import ArchiveError
 
 from .product_fixtures import first_record, items, obj, write_yaml
 from .product_identity_fixtures import (

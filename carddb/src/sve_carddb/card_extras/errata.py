@@ -3,7 +3,7 @@
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db import Json
+from sve_carddb.build import Json
 from sve_carddb.card_extras.models import key
 from sve_carddb.card_extras.plan import printing_index
 from sve_carddb.products.models import LocalizedText
@@ -11,7 +11,7 @@ from sve_carddb.products.models import LocalizedText
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.card_extras.models import ErrataPage
     from sve_carddb.text_observations.intern import TextInterner
 

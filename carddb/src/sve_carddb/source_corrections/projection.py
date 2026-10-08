@@ -9,7 +9,7 @@ from sve_carddb.text_observations.importer import revision_id
 from sve_carddb.text_observations.plan import verify_plan
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.text_observations.plan import TextPlan
     from sve_carddb.text_observations.vocabulary import Vocabulary
 

@@ -9,8 +9,9 @@ from pydantic import JsonValue
 from sve_carddb.catalog.adoption_sources import AdoptionSources
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.core.provenance import SourceUse
-from sve_carddb.extract import official_en, official_jp
-from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.parse.pages import extract_en as official_en
+from sve_carddb.parse.pages import extract_jp as official_jp
 
 if TYPE_CHECKING:
     from pathlib import Path

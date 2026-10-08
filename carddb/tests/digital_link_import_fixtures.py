@@ -8,25 +8,25 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_db.source_rows import insert_raw_sources
+from sve_carddb.build.source_rows import insert_raw_sources
 from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.provenance import BuildContext
 from sve_carddb.digital_links.importer import Inputs
-from sve_carddb.extract.compare_jp import legacy_projection
-from sve_carddb.extract.official_jp import extract_card
-from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.manifest import Kind, Region
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.manifest import Kind, Region
+from sve_carddb.ingest.archive.source_archive import seal_batch
+from sve_carddb.parse.pages.extract_jp import extract_card
+from sve_carddb.parse.pages.official_jp import card_url
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.registry.build import build as build_registry
 from sve_carddb.registry.inputs import Mapping
+from sve_carddb.registry.parser_adapters.official_jp import legacy_projection
 from sve_carddb.registry.records import CardData, FaceData, PrintingData
 from sve_carddb.registry.review import InitDecisions
 from sve_carddb.registry.review import Inputs as RegistryInputs
 from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.registry.storage import plan_files, read_yaml, write_files
-from sve_carddb.source_archive import seal_batch
-from sve_carddb.sources.official_jp import card_url
 from sve_carddb.text_observations.intern import TextInterner
 from sve_carddb.translations.digital import configuration
 from sve_carddb.translations.sources import Sources
@@ -44,7 +44,7 @@ RUNTIME = (CODE_PATH,)
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
 
 
 @dataclass(frozen=True)

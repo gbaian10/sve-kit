@@ -24,7 +24,7 @@ relations are reported and not materialized. Each materialized relation gets one
 record-level `decision` row with its `review_level` as state, as the build DB
 requires, linked to its authored shard.
 
-The composer in `snapshot/offline_names.py` passes the result as `links=result` to
+The composer in `workflows/offline_names.py` passes the result as `links=result` to
 `digital_name_policies.application.prepare()` and `populate()`, which delegate to
 `current_application`. Standalone `import_links()` owns its transaction. The
 application consumes each owner's link proof through

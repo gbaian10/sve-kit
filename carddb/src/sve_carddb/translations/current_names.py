@@ -14,7 +14,7 @@ from sve_carddb.translations.name_identity import IdentityEvidence
 from sve_carddb.translations.name_sources import NameOwner, NameSource, name_source
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.translations.importer import Inputs
     from sve_carddb.translations.loader import Snapshot
     from sve_carddb.translations.sources import Sources

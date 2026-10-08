@@ -11,11 +11,11 @@ from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import RecordData, Text
 from sve_carddb.core.provenance import SourceUse, uses_sorted
 from sve_carddb.digital_links.evidence import Evidence
-from sve_carddb.extract.compare_jp import legacy_projection
-from sve_carddb.extract.official_jp import extract_card
+from sve_carddb.parse.pages.extract_jp import extract_card
+from sve_carddb.parse.pages.official_jp import card_url
+from sve_carddb.registry.parser_adapters.official_jp import legacy_projection
 from sve_carddb.registry.records import CardId, FaceId, PrintingId
 from sve_carddb.registry.review import observation
-from sve_carddb.sources.official_jp import card_url
 
 if TYPE_CHECKING:
     from sve_carddb.digital_links.evidence import Name

@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING, Literal
 from jsonschema import ValidationError
 from pydantic import JsonValue, model_validator
 
-from sve_carddb.build_db.t0_json import schemas, symbol_valid
-from sve_carddb.build_db.validation import Rules
+from sve_carddb.build.t0_json import schemas, symbol_valid
+from sve_carddb.build.validation import Rules
 from sve_carddb.core.json import array, canonical, integer, object_value, string
 from sve_carddb.core.models import RecordData, Text
 from sve_carddb.products.models import Code, Lang

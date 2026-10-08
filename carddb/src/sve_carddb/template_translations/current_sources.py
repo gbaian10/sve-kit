@@ -5,7 +5,7 @@ from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import canonical, digest, parse
-from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.template_parameters.inventory import build
 from sve_carddb.template_sources.inventory import coverage, scan_current
 from sve_carddb.template_translations.members import Reconstructed, _members

@@ -8,13 +8,11 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.source_rows import source_values
-from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.extract.compare_jp import legacy_projection
-from sve_carddb.extract.official_en import extract_card as extract_en
-from sve_carddb.extract.official_en import legacy_projection as legacy_en
-from sve_carddb.extract.official_jp import extract_card
+from sve_carddb.build import create_database
+from sve_carddb.build.source_rows import source_values
+from sve_carddb.build.t1 import compile_build
+from sve_carddb.parse.pages.extract_en import extract_card as extract_en
+from sve_carddb.parse.pages.extract_jp import extract_card
 from sve_carddb.products import (
     import_product_preview,
     load_products,
@@ -25,6 +23,10 @@ from sve_carddb.products.archive import FrozenProducts
 from sve_carddb.products.plan import plan_official_products
 from sve_carddb.registry.build import build
 from sve_carddb.registry.inputs import Mapping as CardMapping
+from sve_carddb.registry.parser_adapters.official_en import (
+    legacy_projection as legacy_en,
+)
+from sve_carddb.registry.parser_adapters.official_jp import legacy_projection
 from sve_carddb.registry.preview import FrozenEN, FrozenJP, FrozenRegions, plan_preview
 from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
 from sve_carddb.registry.records import AllocationData, PrintingData
@@ -47,7 +49,7 @@ from .product_identity_fixtures import identity_fixture as identity_fixture  # r
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
     from sve_carddb.core.provenance import InputRecord
     from sve_carddb.products.official import ProductPage
     from sve_carddb.products.plan import OfficialProducts

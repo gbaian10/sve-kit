@@ -6,7 +6,7 @@ from html import escape
 import httpx
 
 from sve_carddb.core.json import digest
-from sve_carddb.sources import official_en, official_jp
+from sve_carddb.parse.pages import official_en, official_jp
 
 ROOT = f"https://{official_jp.HOST}/qa/synthetic/"
 SECOND = ROOT + "?page=2"

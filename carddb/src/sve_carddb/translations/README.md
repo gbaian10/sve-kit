@@ -11,7 +11,7 @@ then sort; shard gaps and unordered records are accepted. There is no checksum
 index or Git-byte gate. Selection keys and concept IDs stay stable when wording
 or notes change.
 
-Use `build_db.t1.compile_build()` for current imports.
+Use `build.t1.compile_build()` for current imports.
 `import_glossary()` owns an atomic transaction; `populate_glossary()` composes
 inside a caller's transaction. Exact frozen sources, language, code-point spans,
 owner applicability and official same-concept evidence are checked before

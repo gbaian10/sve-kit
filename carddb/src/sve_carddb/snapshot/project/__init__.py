@@ -38,7 +38,7 @@ from sve_carddb.snapshot.project.translations import Texts, keywords, translatio
 from sve_carddb.snapshot.semantics import ordered_rows, validate_view
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
 
 __all__ = [
     "Decisions",

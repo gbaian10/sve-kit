@@ -2,8 +2,8 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db.rows import insert_exact
-from sve_carddb.build_db.source_rows import insert_raw_sources
+from sve_carddb.build.rows import insert_exact
+from sve_carddb.build.source_rows import insert_raw_sources
 from sve_carddb.core.json import SAFE_INTEGER, parse
 from sve_carddb.core.provenance import BuildContext, InputRecord, input_record
 from sve_carddb.products.models import LocalizedText
@@ -22,7 +22,7 @@ from sve_carddb.text_observations.wording import mark_wording_pending
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
     from sve_carddb.text_observations.models import FaceObservation
     from sve_carddb.text_observations.plan import TextPlan
     from sve_carddb.text_observations.vocabulary import Vocabulary

@@ -3,20 +3,19 @@ from typing import TYPE_CHECKING
 import httpx
 import pytest
 
-from sve_carddb.crawl import (
-    SETS_ROOT,
+from sve_carddb.ingest.archive.manifest import Manifest, Outcome
+from sve_carddb.ingest.crawl.crawl import (
     Crawler,
     LimitReachedError,
     ListInconsistentError,
     ListSummary,
     Mode,
-    list_root,
 )
-from sve_carddb.fetch.client import Client, ClientPolicy, FetchError
-from sve_carddb.fetch.throttle import CircuitBreaker, Throttle
-from sve_carddb.fetch.writer import LocalState, Writer
-from sve_carddb.manifest import Manifest, Outcome
-from sve_carddb.sources import official_jp as jp
+from sve_carddb.ingest.http.client import Client, ClientPolicy, FetchError
+from sve_carddb.ingest.http.throttle import CircuitBreaker, Throttle
+from sve_carddb.ingest.http.writer import LocalState, Writer
+from sve_carddb.ingest.queries import SETS_ROOT, list_root
+from sve_carddb.parse.pages import official_jp as jp
 
 from .fakesite import IMG, FakeSite
 

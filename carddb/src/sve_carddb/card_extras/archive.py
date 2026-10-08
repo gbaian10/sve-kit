@@ -8,12 +8,12 @@ from urllib.parse import parse_qsl, urljoin, urlsplit
 from sve_carddb.card_extras.dates import parse_en_date
 from sve_carddb.card_extras.models import CardPage, QAEntry, RelatedLink
 from sve_carddb.core.json import digest
-from sve_carddb.extract.official_en import _qa_text as _en_qa_text
-from sve_carddb.extract.official_jp import _qa_text
-from sve_carddb.fetch.validate import decode_html
-from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.html import attribute, parse, require_one, select_all
-from sve_carddb.sources import official_en, official_jp
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.http.validate import decode_html
+from sve_carddb.parse.html import attribute, parse, require_one, select_all
+from sve_carddb.parse.pages import official_en, official_jp
+from sve_carddb.parse.pages.extract_en import _qa_text as _en_qa_text
+from sve_carddb.parse.pages.extract_jp import _qa_text
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

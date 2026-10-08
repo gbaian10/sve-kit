@@ -4,7 +4,16 @@ from pathlib import Path, PurePosixPath
 
 import pytest
 
-from sve_carddb.fetch.writer import (
+from sve_carddb.ingest.archive.manifest import (
+    Kind,
+    Manifest,
+    Outcome,
+    Region,
+    RequestStart,
+    Resource,
+)
+from sve_carddb.ingest.archive.store import UnsafePathError, decompress
+from sve_carddb.ingest.http.writer import (
     DiskFullError,
     Fetched,
     LocalState,
@@ -14,8 +23,6 @@ from sve_carddb.fetch.writer import (
     WriteResult,
     remove_temp_files,
 )
-from sve_carddb.manifest import Kind, Manifest, Outcome, Region, RequestStart, Resource
-from sve_carddb.store import UnsafePathError, decompress
 
 URL = "https://shadowverse-evolve.com/cardlist/?cardno=BP01-001"
 PATH = PurePosixPath("raw/jp/card/BP01-001.html.zst")

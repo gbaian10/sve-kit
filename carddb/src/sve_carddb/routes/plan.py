@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Literal
 from sve_carddb.routes.codec import card_path
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db.database import Database, Row
+    from sve_carddb.build.database import Database, Row
 
 Namespace = Literal["official", "provisional"]
 

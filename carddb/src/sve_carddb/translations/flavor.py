@@ -13,7 +13,7 @@ from sve_carddb.translations.direct import write
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
 
 DIRECTORY = "flavor-translations"
 type Key = tuple[str, str]

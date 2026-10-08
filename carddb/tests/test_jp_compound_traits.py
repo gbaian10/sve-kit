@@ -3,15 +3,15 @@ from typing import TYPE_CHECKING, cast
 
 import pytest
 
-from sve_carddb.extract.compare_jp import legacy_projection
-from sve_carddb.extract.official_jp import extract_card
-from sve_carddb.fetch.validate import ValidationError
+from sve_carddb.ingest.http.validate import ValidationError
+from sve_carddb.parse.pages.extract_jp import extract_card
 from sve_carddb.registry.inputs import Card, Face
+from sve_carddb.registry.parser_adapters.official_jp import legacy_projection
 from sve_carddb.registry.review import observation
 from sve_carddb.text_observations.archive import jp_face
 
 if TYPE_CHECKING:
-    from sve_carddb.extract.official_jp import CardRecord
+    from sve_carddb.parse.pages.extract_jp import CardRecord
 
 
 @dataclass(frozen=True)

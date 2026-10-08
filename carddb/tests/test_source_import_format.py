@@ -5,11 +5,11 @@ import subprocess  # ruff: ignore[suspicious-subprocess-import] -- A fresh inter
 import sys
 from typing import TYPE_CHECKING
 
-from sve_carddb import manifest as module
 from sve_carddb.core.json import canonical, digest
-from sve_carddb.manifest import Manifest
-from sve_carddb.manifest_schema_v2 import SCHEMA_SQL
-from sve_carddb.source_import.models import Content, receipt_id
+from sve_carddb.ingest.archive import manifest as module
+from sve_carddb.ingest.archive.manifest import Manifest
+from sve_carddb.ingest.archive.manifest_schema_v2 import SCHEMA_SQL
+from sve_carddb.ingest.archive.source_import.models import Content, receipt_id
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -59,12 +59,12 @@ def test_live_schema_evolution_cannot_redefine_sealed_v2(
 def test_v1_import_does_not_load_build_models() -> None:
     script = """
 import sys
-from sve_carddb.manifest import Manifest
+from sve_carddb.ingest.archive.manifest import Manifest
 with Manifest.open_empty() as manifest:
     assert manifest.schema_version == 1
 assert 'pydantic' not in sys.modules
 assert 'sve_carddb.core.provenance' not in sys.modules
-assert 'sve_carddb.source_import.models' not in sys.modules
+assert 'sve_carddb.ingest.archive.source_import.models' not in sys.modules
 """
     result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- Fixed local Python code, with no shell or external I/O.
         [sys.executable, "-c", script], capture_output=True, check=False

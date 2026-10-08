@@ -11,23 +11,23 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.extract.compare_jp import legacy_projection
-from sve_carddb.extract.official_jp import extract_card
-from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.manifest import Kind
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.manifest import Kind
+from sve_carddb.ingest.archive.source_archive import seal_batch
+from sve_carddb.parse.pages.extract_jp import extract_card
+from sve_carddb.parse.pages.official_jp import card_url
 from sve_carddb.products import Language, load_products
 from sve_carddb.products.identities import load_product_identities
 from sve_carddb.products.official import PARSER, parse_products
 from sve_carddb.products.plan import plan_official_products
 from sve_carddb.registry.build import build
 from sve_carddb.registry.inputs import Mapping as CardMapping
+from sve_carddb.registry.parser_adapters.official_jp import legacy_projection
 from sve_carddb.registry.preview import plan_preview
 from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
 from sve_carddb.registry.review import InitDecisions, Inputs
 from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.registry.storage import plan_files, write_files
-from sve_carddb.source_archive import seal_batch
-from sve_carddb.sources.official_jp import card_url
 
 from .identity_evidence_fixtures import MemoryEvidence
 from .product_fixtures import envelope, family, install, obj, write_yaml
@@ -266,9 +266,9 @@ def add_page(
     number: str = "TEST-002",
 ) -> ProductPage:
     """Append a separately sealed synthetic version without touching old evidence."""
-    from sve_carddb.manifest import Region  # ruff: ignore[import-outside-top-level] -- fixture-only archive construction
-    from sve_carddb.source_archive import ArchiveStore  # ruff: ignore[import-outside-top-level] -- fixture-only archive construction
-    from sve_carddb.sources import official_en  # ruff: ignore[import-outside-top-level] -- fixture-only EN source
+    from sve_carddb.ingest.archive.manifest import Region  # ruff: ignore[import-outside-top-level] -- fixture-only archive construction
+    from sve_carddb.ingest.archive.source_archive import ArchiveStore  # ruff: ignore[import-outside-top-level] -- fixture-only archive construction
+    from sve_carddb.parse.pages import official_en  # ruff: ignore[import-outside-top-level] -- fixture-only EN source
 
     data = fixture.store.parent / "data"
     store = ArchiveStore(

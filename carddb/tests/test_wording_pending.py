@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import Json, create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import Json, create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.contracts.snapshot import validate
 from sve_carddb.products import load_products
 from sve_carddb.registry.snapshot import load_registry
@@ -31,7 +31,7 @@ from .text_observation_fixtures import make_case
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.registry.review import Inputs
     from sve_carddb.registry.storage import Entry
     from sve_carddb.text_observations.plan import TextPlan

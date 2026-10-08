@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING, Concatenate
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.build_db import Json, create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import Json, create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, canonical, digest, object_value
-from sve_carddb.snapshot import offline
-from sve_carddb.snapshot.offline import build
 from sve_carddb.text_observations import populate_text_preview
 from sve_carddb.translations.flavor import Entry, apply, load
+from sve_carddb.workflows import offline
+from sve_carddb.workflows.offline import build
 
 from .build_db_fixtures import HASH, seed
 from .database_fixtures import DatabaseTemplate
@@ -23,10 +23,10 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.card_extras import CardPage
     from sve_carddb.core.provenance import InputRecord
-    from sve_carddb.snapshot.offline import Inputs
+    from sve_carddb.workflows.offline import Inputs
 
     from .text_observation_fixtures import Case
 

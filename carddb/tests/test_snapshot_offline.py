@@ -26,24 +26,20 @@ from sve_carddb.core.json import array, canonical, digest, object_value, parse, 
 from sve_carddb.core.provenance import InputRecord, SourceUse, input_record
 from sve_carddb.products import OfficialProducts, ProductIdentities
 from sve_carddb.registry.records import PrintingData
-from sve_carddb.snapshot import offline
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.media import prepare_media
-from sve_carddb.snapshot.offline import (
+from sve_carddb.snapshot.preview import Roots, require_unknown_coverage, write_preview
+from sve_carddb.snapshot.project import project
+from sve_carddb.snapshot.publication import require_preview
+from sve_carddb.snapshot.reader import read_snapshot
+from sve_carddb.workflows import export as commands
+from sve_carddb.workflows import offline
+from sve_carddb.workflows.offline import (
     Inputs,
     RegionalInput,
     build,
     require_offline_coverage,
 )
-from sve_carddb.snapshot.preview import (
-    Roots,
-    commands,
-    require_unknown_coverage,
-    write_preview,
-)
-from sve_carddb.snapshot.project import project
-from sve_carddb.snapshot.publication import require_preview
-from sve_carddb.snapshot.reader import read_snapshot
 
 from .adoption_fixtures import REPO
 from .catalog_vocabulary_fixtures import make_vocabulary_case
@@ -56,7 +52,7 @@ from .text_observation_fixtures import LANGUAGES
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.snapshot.export import Snapshot
     from sve_carddb.snapshot.project import Decisions, Projection, Settings
 
@@ -75,8 +71,8 @@ def prepared(
     (repo / "carddb/uv.lock").write_bytes(b"synthetic lock")
     for name in (
         "carddb/pyproject.toml",
-        "carddb/src/sve_carddb/extract/official_jp.py",
-        "carddb/src/sve_carddb/extract/official_en.py",
+        "carddb/src/sve_carddb/parse/pages/extract_jp.py",
+        "carddb/src/sve_carddb/parse/pages/extract_en.py",
         "carddb/src/sve_carddb/core/json.py",
         "carddb/src/sve_carddb/translations/sources.py",
     ):
@@ -665,7 +661,7 @@ def test_cli_cannot_write_bundle_into_protected_roots(
     protected: str,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from sve_carddb.snapshot.preview import commands  # ruff: ignore[import-outside-top-level] -- spy only on this CLI boundary
+    from sve_carddb.workflows import export as commands  # ruff: ignore[import-outside-top-level] -- spy only on this CLI boundary
 
     recipe = prepared[1]
     path = tmp_path / "recipe" / "inputs.json"

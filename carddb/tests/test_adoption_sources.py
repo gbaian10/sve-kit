@@ -8,19 +8,23 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.build_db import CompiledSchema, create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import CompiledSchema, create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.catalog.adoption_models import ReviewContext, SourceRef
 from sve_carddb.catalog.adoption_sources import pointer
 from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.manifest import Kind
+from sve_carddb.ingest.archive.manifest import Kind
+from sve_carddb.ingest.archive.source_archive import (
+    ArchiveError,
+    seal_batch,
+    verify_batch,
+)
+from sve_carddb.parse.pages.official_jp import card_url
 from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.offline import _populate_adoptions, _prepare_catalog
-from sve_carddb.source_archive import ArchiveError, seal_batch, verify_batch
-from sve_carddb.sources.official_jp import card_url
 from sve_carddb.translations.sources import Sources
+from sve_carddb.workflows.offline import _populate_adoptions, _prepare_catalog
 
 from .adoption_fixtures import (
     CODE,

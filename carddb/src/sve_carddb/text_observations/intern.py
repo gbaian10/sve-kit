@@ -4,7 +4,7 @@ import hashlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
     from sve_carddb.products.models import LocalizedText
 
 

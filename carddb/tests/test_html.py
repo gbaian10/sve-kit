@@ -3,7 +3,7 @@ from typing import assert_type
 import pytest
 from selectolax.lexbor import LexborNode
 
-from sve_carddb.html import (
+from sve_carddb.parse.html import (
     MissingElementError,
     attribute,
     parse,

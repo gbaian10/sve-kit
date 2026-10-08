@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import Json, create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import Json, create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.text_observations import import_text_observations
 from sve_carddb.text_observations.wording import (
     ObservedText,

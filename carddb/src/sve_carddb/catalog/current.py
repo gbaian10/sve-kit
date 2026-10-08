@@ -3,8 +3,8 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db import Json
-from sve_carddb.build_db.rows import insert_exact
+from sve_carddb.build import Json
+from sve_carddb.build.rows import insert_exact
 from sve_carddb.catalog import adoption_validation as validate
 from sve_carddb.catalog.adoption_models import Batch, ReviewContext, TextEvidence
 from sve_carddb.catalog.adoption_sources import AdoptionSources
@@ -19,7 +19,7 @@ from sve_carddb.translations.direct import write
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
     from sve_carddb.catalog.adoption_loader import AdoptionSnapshot
     from sve_carddb.core.provenance import BuildContext
     from sve_carddb.registry.snapshot import RegistrySnapshot

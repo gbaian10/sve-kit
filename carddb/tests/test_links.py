@@ -1,6 +1,6 @@
 import pytest
 
-from sve_carddb.manifest import Kind, Link, Manifest, ManifestError
+from sve_carddb.ingest.archive.manifest import Kind, Link, Manifest, ManifestError
 
 CARD = "https://shadowverse-evolve.com/cardlist/?cardno=BP08-003"
 IMG = "https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP08"

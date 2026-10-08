@@ -13,11 +13,7 @@ from rich.console import Console
 from typer.testing import CliRunner
 
 from sve_carddb import cli
-from sve_carddb.config import Settings
-from sve_carddb.extract.jsonl import extract_cards
-from sve_carddb.fetch.throttle import Throttle
-from sve_carddb.fetch.writer import Fetched, Writer
-from sve_carddb.manifest import (
+from sve_carddb.ingest.archive.manifest import (
     AlreadyRunningError,
     ExclusiveLock,
     Kind,
@@ -25,10 +21,14 @@ from sve_carddb.manifest import (
     Region,
     RequestStart,
 )
-from sve_carddb.sources import official_en as en
-from sve_carddb.sources import official_jp as jp
-from sve_carddb.sources import official_sv1 as sv1
-from sve_carddb.sources import official_svwb as svwb
+from sve_carddb.ingest.config import Settings
+from sve_carddb.ingest.http.throttle import Throttle
+from sve_carddb.ingest.http.writer import Fetched, Writer
+from sve_carddb.parse.pages import official_en as en
+from sve_carddb.parse.pages import official_jp as jp
+from sve_carddb.parse.pages import official_sv1 as sv1
+from sve_carddb.parse.pages import official_svwb as svwb
+from sve_carddb.workflows.extract import extract_cards
 
 from .conftest import FakeClock
 from .fakeportal import FakePortal, card_id
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
 
     from typer.testing import Result
 
-    from sve_carddb.extract.jsonl import ExtractReport
+    from sve_carddb.workflows.extract import ExtractReport
 
 runner = CliRunner()
 pytestmark = pytest.mark.usefixtures("no_retry_waits", "plain_cli_output")

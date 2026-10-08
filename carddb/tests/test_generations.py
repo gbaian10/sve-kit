@@ -2,7 +2,7 @@ import sqlite3
 
 import pytest
 
-from sve_carddb.manifest import (
+from sve_carddb.ingest.archive.manifest import (
     Edge,
     GenerationStatus,
     Kind,

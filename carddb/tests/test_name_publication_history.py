@@ -2,8 +2,8 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.digital_name_policies.owners import publication_owners
 from sve_carddb.text_observations import import_text_observations
 from sve_carddb.text_observations.models import candidate_revision_id

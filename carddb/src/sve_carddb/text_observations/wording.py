@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import JsonValue, model_validator
 
-from sve_carddb.build_db import Json
+from sve_carddb.build import Json
 from sve_carddb.core.json import string
 from sve_carddb.core.models import RecordData, Text
 from sve_carddb.products.models import Date, Precision, check_date
@@ -14,7 +14,7 @@ from sve_carddb.text_observations.models import candidate_revision_id
 from sve_carddb.text_observations.plan import verify_plan
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
     from sve_carddb.text_observations.plan import TextPlan
 
 

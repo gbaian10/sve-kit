@@ -2,8 +2,8 @@
 
 from typing import TYPE_CHECKING, Protocol
 
-from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.sources import official_en, official_jp
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.parse.pages import official_en, official_jp
 
 if TYPE_CHECKING:
     from pathlib import Path

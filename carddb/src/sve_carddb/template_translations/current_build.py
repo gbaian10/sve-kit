@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_db import Json
-from sve_carddb.build_db.rows import insert_exact
-from sve_carddb.build_db.t2_translation import OWNERS
+from sve_carddb.build import Json
+from sve_carddb.build.rows import insert_exact
+from sve_carddb.build.t2_translation import OWNERS
 from sve_carddb.core.json import canonical, digest, parse
 from sve_carddb.template_translations.current_models import (
     DefinitionRecord,
@@ -21,7 +21,7 @@ from sve_carddb.translations.name_sources import NameOwner
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
     from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.template_translations.current import Validated
     from sve_carddb.template_translations.current_render import Rendered

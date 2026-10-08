@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, cast
 
 import pytest
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.catalog.adoption_models import RawMapping
 from sve_carddb.catalog.adoption_validation import _mapping_metadata
 from sve_carddb.core.json import canonical, object_value
@@ -29,7 +29,7 @@ from .test_glossary_adoption import checked
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_db import CompiledSchema
+    from sve_carddb.build import CompiledSchema
 
 
 @pytest.fixture(scope="module")

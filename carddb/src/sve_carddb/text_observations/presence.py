@@ -8,7 +8,7 @@ from pydantic import JsonValue, model_validator
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import Hash, RecordData, Text, UInt
 from sve_carddb.core.provenance import Version
-from sve_carddb.html import attribute, parse, select_all, select_one
+from sve_carddb.parse.html import attribute, parse, select_all, select_one
 
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode

@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.source_rows import insert_raw_sources, source_values
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import create_database
+from sve_carddb.build.source_rows import insert_raw_sources, source_values
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.provenance import SourceUse, input_record
 from sve_carddb.products import (
     import_product_preview,

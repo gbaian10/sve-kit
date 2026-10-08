@@ -10,9 +10,9 @@ import pytest
 from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.provenance import BuildContext
-from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.manifest import Kind, Region
-from sve_carddb.source_archive import ArchiveError, seal_batch
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.manifest import Kind, Region
+from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
 from sve_carddb.translations.current_models import ChoiceRecord, DigitalName
 from sve_carddb.translations.digital import (
     _phases,
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.core.provenance import Source
-    from sve_carddb.source_archive import Descriptor
+    from sve_carddb.ingest.archive.source_archive import Descriptor
 
     from .database_fixtures import DatabaseTemplate
 

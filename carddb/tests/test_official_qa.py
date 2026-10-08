@@ -5,15 +5,15 @@ from typing import TYPE_CHECKING, Literal
 
 import pytest
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.card_extras import plan_card_extras, populate_card_extras
 from sve_carddb.card_extras.changes import DownstreamUse, changes, conflicts
 from sve_carddb.card_extras.generation import Observation, closure
 from sve_carddb.card_extras.models import RelatedLink
+from sve_carddb.card_extras.qa_parser import PARSER, materialize, parse_qa
 from sve_carddb.core.json import digest
-from sve_carddb.sources import official_en, official_jp
-from sve_carddb.sources.official_qa import PARSER, materialize, parse_qa
+from sve_carddb.parse.pages import official_en, official_jp
 
 from .card_extras_fixtures import context, seed, source
 from .official_qa_fixtures import DETAIL, ROOT, SECOND, block, bodies, listing
@@ -21,7 +21,7 @@ from .official_qa_fixtures import DETAIL, ROOT, SECOND, block, bodies, listing
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from sve_carddb.build_db import CompiledSchema, Database
+    from sve_carddb.build import CompiledSchema, Database
     from sve_carddb.card_extras.models import QAPage
     from sve_carddb.registry.records import Region
 

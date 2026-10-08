@@ -9,7 +9,7 @@ from sve_carddb.core.json import canonical, digest
 from sve_carddb.routes.defaults import GeneralEvidence
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
 
 _GENERAL = {
     "jp": ("BR", "GR", "LG", "SR"),

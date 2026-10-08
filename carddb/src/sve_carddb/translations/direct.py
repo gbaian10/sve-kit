@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import JsonValue
 
-from sve_carddb.build_db.rows import insert_exact
-from sve_carddb.build_db.t2_translation import OWNERS
+from sve_carddb.build.rows import insert_exact
+from sve_carddb.build.t2_translation import OWNERS
 from sve_carddb.core.json import canonical, digest
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
 
 _OWNER_COLUMNS = frozenset(name for group in OWNERS for name in group)
 

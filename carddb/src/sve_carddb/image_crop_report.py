@@ -7,7 +7,7 @@ from pydantic import JsonValue
 from sve_carddb.image_crops import image_source_key
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.image_assets import ImageBuild, ImageReference
     from sve_carddb.image_crops import CropRecord, ImageCrops
 

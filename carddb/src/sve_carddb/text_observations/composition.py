@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
     from pathlib import Path
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.catalog.models import Catalog
     from sve_carddb.core.provenance import BuildContext, InputRecord, SourceUse
     from sve_carddb.products import Language

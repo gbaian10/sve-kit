@@ -2,11 +2,12 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.extract.official_en import extract_card, legacy_projection
-from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.source_archive import ArchiveError
+from sve_carddb.parse.pages.extract_en import extract_card
+from sve_carddb.parse.pages.official_en import card_url
+from sve_carddb.registry.parser_adapters.official_en import legacy_projection
 from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
-from sve_carddb.source_archive import ArchiveError
-from sve_carddb.sources.official_en import card_url
 
 if TYPE_CHECKING:
     from pathlib import Path

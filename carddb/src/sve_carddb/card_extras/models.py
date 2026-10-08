@@ -8,8 +8,8 @@ from pydantic import JsonValue, model_validator
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import Date, RecordData, Text
 from sve_carddb.core.provenance import Source
+from sve_carddb.parse.pages import official_en, official_jp
 from sve_carddb.registry.records import Region
-from sve_carddb.sources import official_en, official_jp
 
 
 def key(namespace: str, value: JsonValue) -> str:

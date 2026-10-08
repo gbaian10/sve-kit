@@ -25,7 +25,7 @@ from .registry_preview_fixtures import REVISION
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.products.loader import ProductSnapshot
     from sve_carddb.registry.inputs import Card
     from sve_carddb.registry.preview import PreviewPlan

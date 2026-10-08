@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
-    from sve_carddb.source_archive import Descriptor
+    from sve_carddb.ingest.archive.source_archive import Descriptor
 
 
 @pytest.fixture(scope="session")

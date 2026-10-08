@@ -3,8 +3,8 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import object_value, parse
 from sve_carddb.core.provenance import BuildContext
 from sve_carddb.digital_name_policies.application import Inputs
@@ -28,7 +28,7 @@ RUNTIME: tuple[str, ...] = ()
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.text_observations import TextPlan
 
 

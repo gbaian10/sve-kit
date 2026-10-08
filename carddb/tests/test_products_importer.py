@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import Json, create_database, rebuild_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import Json, create_database, rebuild_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.products import (
     Language,
     import_product_preview,
@@ -40,7 +40,7 @@ from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_db.database import Database
+    from sve_carddb.build.database import Database
     from sve_carddb.registry.review import Inputs
 
 NAME = "products/family/BP02/001.yaml"

@@ -10,7 +10,7 @@ build rows are selected by region.
 and its metadata/raw/immutable-manifest closure. It reads only pinned current
 entries in that batch, rechecking descriptor, first receipt and blob hashes on
 access. It never opens a live manifest, accesses latest cache or downloads data.
-JP extraction uses `extract.official_jp` and the existing `legacy_projection` for
+JP extraction uses `parse.pages.extract_jp` and the existing `legacy_projection` for
 `registry-observation-v1`; region, exact card number, recipe, observation hash
 and rules hash must all match. Original source face indices select face metadata.
 An EN suffix is never used to infer an identity or source.
@@ -34,7 +34,7 @@ with the production EN extractor and its measured legacy projection.
 by explicit region; it never infers counterparts from suffixes. EN exact page
 number, region, descriptor kind, HTML media type and both observation hashes are
 checked. Face rarity/credits come from the original source face index.
-See [offline extraction](../../extract/README.md) for the EN rendering contract.
+See [offline extraction](../../parse/README.md) for the EN rendering contract.
 Neither provider reads historical JSONL or uses it as source evidence.
 `coverage(hash)` means the **complete historic review input** with that exact hash
 has been independently pinned and verified. A batch of individual HTML sources
@@ -108,7 +108,7 @@ pipeline still needs product, text, public projection and capability validation.
 ## Shared sources and build input records
 
 `Source` lives in `sve_carddb.core.provenance`. It retains each use's parser and
-sealed archive pin (store, batch, descriptor and first receipt); `build_db.source_rows.source_values(source)`
+sealed archive pin (store, batch, descriptor and first receipt); `build.source_rows.source_values(source)`
 projects shared raw metadata with `parser_version=NULL`. Authored envelope
 sources keep `registry-envelope-v1`. No source ID is derived from a parser.
 `FrozenJP` and product evidence use the same `FrozenSources` metadata reader.
@@ -118,6 +118,6 @@ Both import and populate require an explicit `BuildContext` and return an
 read observation, including evidence used to exclude a printing. Import checks
 the entire raw source/use closure; populate checks its subset for later
 composition. Preserve the returned record and save completed staging DBs via
-[build bundles](../../build_db/README.md#saved-build-inputs); a bare SQLite file
+[build bundles](../../build/README.md#saved-build-inputs); a bare SQLite file
 does not attest the build-input contract. Parser pins remain distinct from
 identity mappings and never bypass the existing adoption gates.

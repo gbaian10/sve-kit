@@ -1,6 +1,6 @@
 import pytest
 
-from sve_carddb.urls import canonicalize
+from sve_carddb.ingest.urls import canonicalize
 
 JP = "https://shadowverse-evolve.com"
 

@@ -23,8 +23,8 @@ if TYPE_CHECKING:
 
     from PIL import Image
 
-    from sve_carddb.frozen_sources import FrozenSources
     from sve_carddb.image_crops import ImageCrops
+    from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
 
 def test_unique_source_decode_and_shared_variant_inspection(

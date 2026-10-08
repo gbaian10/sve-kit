@@ -9,13 +9,13 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db import Json, Value, compile_schema, create_database
-from sve_carddb.build_db.t0 import REGISTRY
-from sve_carddb.build_db.t0_json import schemas
+from sve_carddb.build import Json, Value, compile_schema, create_database
+from sve_carddb.build.t0 import REGISTRY
+from sve_carddb.build.t0_json import schemas
 from sve_carddb.core.json import digest
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import CompiledSchema
+    from sve_carddb.build import CompiledSchema
 
 
 def _rows(count: int, text_bytes: int) -> list[dict[str, Value]]:

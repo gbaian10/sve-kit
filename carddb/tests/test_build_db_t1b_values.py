@@ -6,13 +6,13 @@ from typing import TYPE_CHECKING
 import pytest
 from jsonschema import ValidationError
 
-from sve_carddb.build_db import Json
+from sve_carddb.build import Json
 
 from .test_build_db_t1b import db as db  # ruff: ignore[useless-import-alias] -- explicitly re-export the pytest fixture
 from .test_build_db_t1b import key
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
 
 
 @pytest.mark.parametrize(

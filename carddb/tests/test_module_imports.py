@@ -63,9 +63,9 @@ def test_read_api_import_does_not_load_build_or_publish(tmp_path: Path) -> None:
         + """
 for name in sys.modules:
     assert not any(name == prefix or name.startswith(prefix + '.') for prefix in (
-        'sve_carddb.build_db', 'sve_carddb.snapshot.export',
+        'sve_carddb.build', 'sve_carddb.snapshot.export',
         'sve_carddb.snapshot.project', 'sve_carddb.snapshot.preview',
-        'sve_carddb.snapshot.offline', 'sve_carddb.r2_upload',
+        'sve_carddb.workflows', 'sve_carddb.r2_upload',
     )), name
 """
     )

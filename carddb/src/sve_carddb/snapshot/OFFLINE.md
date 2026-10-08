@@ -5,7 +5,7 @@ It reuses the identity, product, text-observation and supplemental importers; no
 crawler settings, latest cache or live manifest are opened. Card IDs remain
 manually adopted. Raw card numbers are matched only within their own region.
 
-The recipe is JSON matching `sve_carddb.snapshot.offline.Inputs`: `repo`, `archive`,
+The recipe is JSON matching `sve_carddb.workflows.offline.Inputs`: `repo`, `archive`,
 `store_id`, sorted `sources` for `en` then `jp` (each has `region`, `card_batch`,
 `image_batch`, `parser_version`), `revision`, `as_of`,
 `data_version`, `published_at`, `feedback_url`, `grammar_version` and

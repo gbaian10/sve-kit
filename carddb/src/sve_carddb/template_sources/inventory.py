@@ -21,7 +21,7 @@ from sve_carddb.translations.sources import pointer, project
 
 if TYPE_CHECKING:
     from sve_carddb.core.provenance import Source
-    from sve_carddb.frozen_sources import FrozenSources
+    from sve_carddb.ingest.archive.frozen_sources import FrozenSources
     from sve_carddb.text_observations.presence import PresenceState
 
 

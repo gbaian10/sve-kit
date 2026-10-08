@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import Database, Json, create_database
-from sve_carddb.build_db.t0 import TABLES as T0_TABLES
-from sve_carddb.build_db.t1 import (
+from sve_carddb.build import Database, Json, create_database
+from sve_carddb.build.t0 import TABLES as T0_TABLES
+from sve_carddb.build.t1 import (
     MINIMUM_CAPABILITIES,
     REGISTRY,
     compile_build,
@@ -20,7 +20,7 @@ from .build_db_t1b_fixtures import populate, rows
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from sve_carddb.build_db import Value
+    from sve_carddb.build import Value
 
     from .database_fixtures import DatabaseTemplate
 

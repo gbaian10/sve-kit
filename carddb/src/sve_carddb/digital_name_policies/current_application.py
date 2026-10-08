@@ -3,9 +3,9 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db.rows import insert_exact
-from sve_carddb.build_db.source_rows import insert_raw_sources
-from sve_carddb.build_db.t2_translation import OWNERS
+from sve_carddb.build.rows import insert_exact
+from sve_carddb.build.source_rows import insert_raw_sources
+from sve_carddb.build.t2_translation import OWNERS
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.core.provenance import input_record, uses_sorted
 from sve_carddb.digital_links.importer import review_context
@@ -22,7 +22,7 @@ from sve_carddb.translations.name_sources import name_source
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
     from sve_carddb.core.provenance import BuildContext, Source, SourceUse
     from sve_carddb.digital_links.importer import Result as LinkResult
     from sve_carddb.digital_name_policies.application import Inputs

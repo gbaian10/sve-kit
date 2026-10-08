@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.products.official import PARSER, ProductPage, parse_products
 
 if TYPE_CHECKING:

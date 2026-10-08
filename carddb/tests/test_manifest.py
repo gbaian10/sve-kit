@@ -6,7 +6,7 @@ from pathlib import Path, PurePosixPath
 
 import pytest
 
-from sve_carddb.manifest import (
+from sve_carddb.ingest.archive.manifest import (
     AlreadyRunningError,
     ExclusiveLock,
     Kind,

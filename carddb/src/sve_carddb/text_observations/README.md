@@ -115,7 +115,7 @@ program revision and any existing product-identity configuration.
 `BuildContext.from_inputs(program_revision, configuration)` retains explicit
 configuration and provenance. Populate text once inside the combined build
 transaction, then save that completed DB and its actual input record/report with
-`build_output.save`. Source reads verify archived raw hashes and metadata; domain
+`build.output.save`. Source reads verify archived raw hashes and metadata; domain
 planning verifies current source ownership and observation applicability. There
 is no separate expected-use comparison, build seal or second DB population.
 

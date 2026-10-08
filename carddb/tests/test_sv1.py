@@ -6,21 +6,21 @@ import httpx
 import orjson
 import pytest
 
-from sve_carddb.crawl import Crawler, LimitReachedError
-from sve_carddb.crawl_sv1 import (
+from sve_carddb.ingest.archive.manifest import Kind, Link, Manifest, Outcome, Region
+from sve_carddb.ingest.crawl.crawl import Crawler, LimitReachedError
+from sve_carddb.ingest.crawl.crawl_sv1 import (
     SV1_SITE,
     ImageResult,
     Sv1Crawler,
     image_jobs,
     stored_cards,
 )
-from sve_carddb.fetch.client import Client, ClientPolicy, FetchError
-from sve_carddb.fetch.throttle import CircuitBreaker, CircuitOpenError, Throttle
-from sve_carddb.fetch.validate import ValidationError
-from sve_carddb.fetch.writer import LocalState, Writer
-from sve_carddb.html import MissingElementError
-from sve_carddb.manifest import Kind, Link, Manifest, Outcome, Region
-from sve_carddb.sources import official_sv1 as sv1
+from sve_carddb.ingest.http.client import Client, ClientPolicy, FetchError
+from sve_carddb.ingest.http.throttle import CircuitBreaker, CircuitOpenError, Throttle
+from sve_carddb.ingest.http.validate import ValidationError
+from sve_carddb.ingest.http.writer import LocalState, Writer
+from sve_carddb.parse.html import MissingElementError
+from sve_carddb.parse.pages import official_sv1 as sv1
 
 from .fakeportal import ETAG, FakePortal, card_id
 from .fakesite import page

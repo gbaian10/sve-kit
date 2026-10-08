@@ -4,15 +4,15 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.translations.direct import write
 
 from .build_db_fixtures import seed
 from .database_fixtures import DatabaseTemplate
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
 
 FOLLOWER = {"vocabulary_kind": "type", "vocabulary_code": "follower"}
 SYNTHETIC = {"vocabulary_kind": "class", "vocabulary_code": "synthetic"}

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
     from pathlib import Path
 
-    from sve_carddb.source_archive import Descriptor
+    from sve_carddb.ingest.archive.source_archive import Descriptor
 
 FILE = "image-crops.yaml"
 HexHash = Annotated[str, Field(pattern=r"^[0-9a-f]{64}\Z")]

@@ -15,26 +15,7 @@ import stamina
 from typer.testing import CliRunner
 
 from sve_carddb import cli
-from sve_carddb.errata_fetch import (
-    ErrataInputError,
-    _validate_body,
-    fetch_new,
-    load_urls,
-    raw_path,
-    url_region,
-    validate_urls,
-)
-from sve_carddb.fetch.client import (
-    BudgetExhaustedError,
-    Client,
-    Request,
-    Response,
-    StopCrawlError,
-)
-from sve_carddb.fetch.throttle import CircuitBreaker, Throttle
-from sve_carddb.fetch.validate import ValidationError
-from sve_carddb.fetch.writer import PathConflictError, Writer, sha256
-from sve_carddb.manifest import (
+from sve_carddb.ingest.archive.manifest import (
     ExclusiveLock,
     Kind,
     Manifest,
@@ -43,7 +24,26 @@ from sve_carddb.manifest import (
     RequestResult,
     RequestStart,
 )
-from sve_carddb.store import UnsafePathError, decompress
+from sve_carddb.ingest.archive.store import UnsafePathError, decompress
+from sve_carddb.ingest.crawl.errata_fetch import (
+    ErrataInputError,
+    _validate_body,
+    fetch_new,
+    load_urls,
+    raw_path,
+    url_region,
+    validate_urls,
+)
+from sve_carddb.ingest.http.client import (
+    BudgetExhaustedError,
+    Client,
+    Request,
+    Response,
+    StopCrawlError,
+)
+from sve_carddb.ingest.http.throttle import CircuitBreaker, Throttle
+from sve_carddb.ingest.http.validate import ValidationError
+from sve_carddb.ingest.http.writer import PathConflictError, Writer, sha256
 
 from .conftest import FakeClock
 
@@ -53,8 +53,8 @@ if TYPE_CHECKING:
 
     from typer.testing import Result
 
-    from sve_carddb.config import Settings
-    from sve_carddb.errata_fetch import ErrataResult
+    from sve_carddb.ingest.config import Settings
+    from sve_carddb.ingest.crawl.errata_fetch import ErrataResult
 
 HOST = "https://shadowverse-evolve.com"
 URL = f"{HOST}/errata/synthetic-one/"
@@ -969,7 +969,7 @@ def test_created_temp_name_collision_never_deletes_another_file(
 
     monkeypatch.setattr(Writer, "check_new", add_temp_after_preflight)
     monkeypatch.setattr(
-        "sve_carddb.fetch.writer.secrets.token_hex", lambda _count: "collision"
+        "sve_carddb.ingest.http.writer.secrets.token_hex", lambda _count: "collision"
     )
     result = case.invoke()
     assert result.exit_code == 1, result.output

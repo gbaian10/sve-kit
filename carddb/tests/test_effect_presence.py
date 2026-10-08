@@ -6,15 +6,15 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
-from sve_carddb.build_db.source_rows import source_values
+from sve_carddb.build.source_rows import source_values
 from sve_carddb.core.json import canonical, digest, parse
-from sve_carddb.html import parse as parse_html
-from sve_carddb.html import select_all
-from sve_carddb.manifest import Kind, Region
+from sve_carddb.ingest.archive.manifest import Kind, Region
+from sve_carddb.ingest.archive.source_archive import seal_batch
+from sve_carddb.parse.html import parse as parse_html
+from sve_carddb.parse.html import select_all
+from sve_carddb.parse.pages import official_en, official_jp
 from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.source_archive import seal_batch
 from sve_carddb.source_corrections.plan import corrected_observations
-from sve_carddb.sources import official_en, official_jp
 from sve_carddb.text_observations import FrozenTexts, presence
 from sve_carddb.text_observations import plan as planning
 from sve_carddb.text_observations.archive import verify_card

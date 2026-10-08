@@ -12,13 +12,22 @@ import pytest
 from sve_carddb.card_extras.generation import root_key
 from sve_carddb.card_extras.incremental import QACrawler
 from sve_carddb.card_extras.qa_archive import FrozenOfficialExtras
-from sve_carddb.config import Settings
-from sve_carddb.fetch.client import FetchError
-from sve_carddb.fetch.refresh import RefreshWriter
-from sve_carddb.fetch.writer import Writer
-from sve_carddb.manifest import ExclusiveLock, GenerationStatus, Kind, Manifest
-from sve_carddb.source_archive import ArchiveError, ArchiveStore, seal_batch
-from sve_carddb.sources import official_en, official_jp
+from sve_carddb.ingest.archive.manifest import (
+    ExclusiveLock,
+    GenerationStatus,
+    Kind,
+    Manifest,
+)
+from sve_carddb.ingest.archive.source_archive import (
+    ArchiveError,
+    ArchiveStore,
+    seal_batch,
+)
+from sve_carddb.ingest.config import Settings
+from sve_carddb.ingest.http.client import FetchError
+from sve_carddb.ingest.http.refresh import RefreshWriter
+from sve_carddb.ingest.http.writer import Writer
+from sve_carddb.parse.pages import official_en, official_jp
 
 from .official_qa_fixtures import (
     DETAIL,

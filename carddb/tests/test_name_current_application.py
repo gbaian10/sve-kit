@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build import create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.core.provenance import BuildContext
 from sve_carddb.digital_name_policies.application import Inputs, populate

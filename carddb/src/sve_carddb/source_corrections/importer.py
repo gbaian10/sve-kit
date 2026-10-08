@@ -2,12 +2,12 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db import Json
+from sve_carddb.build import Json
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.source_corrections.plan import verify_applications
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build import Database, Value
     from sve_carddb.source_corrections.plan import Application
     from sve_carddb.text_observations.intern import TextInterner
     from sve_carddb.text_observations.plan import TextPlan

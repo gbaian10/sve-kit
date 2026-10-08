@@ -3,7 +3,7 @@
 import re
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db.source_rows import insert_raw_sources
+from sve_carddb.build.source_rows import insert_raw_sources
 from sve_carddb.core.json import canonical
 from sve_carddb.core.provenance import (
     BuildContext,
@@ -24,8 +24,8 @@ from sve_carddb.registry.records import (
 from sve_carddb.routes import populate_routes
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Value
-    from sve_carddb.build_db.database import Database
+    from sve_carddb.build import Value
+    from sve_carddb.build.database import Database
     from sve_carddb.registry.preview.plan import PreviewPlan
     from sve_carddb.registry.snapshot import RegistryRecord
 

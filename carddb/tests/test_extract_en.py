@@ -8,20 +8,24 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb import cli
-from sve_carddb.extract import jsonl, official_en
-from sve_carddb.fetch.validate import ValidationError
-from sve_carddb.fetch.writer import LocalState
-from sve_carddb.html import MissingElementError, parse, require_one
-from sve_carddb.manifest import Region
+from sve_carddb.ingest.archive.manifest import Region
+from sve_carddb.ingest.http.validate import ValidationError
+from sve_carddb.ingest.http.writer import LocalState
+from sve_carddb.parse.html import MissingElementError, parse, require_one
+from sve_carddb.parse.pages import extract_en as official_en
+from sve_carddb.parse.pages import official_en as en
 from sve_carddb.registry.inputs import Card
+from sve_carddb.registry.parser_adapters.official_en import (
+    legacy_projection as legacy_en_projection,
+)
 from sve_carddb.registry.review import observation
-from sve_carddb.sources import official_en as en
+from sve_carddb.workflows import extract as jsonl
 
 from .en_extract_fixtures import face as make_face
 from .en_extract_fixtures import page
 
 if TYPE_CHECKING:
-    from sve_carddb.manifest import Manifest
+    from sve_carddb.ingest.archive.manifest import Manifest
 
 
 FULL_TEXT = "First {synthetic.badge|[badge]}\nNext\n-----\nAuxiliary\n------\nLast"
@@ -95,7 +99,7 @@ def test_static_synthetic_page_has_an_independent_full_record(
     assert record.qa == []
     assert record.products == []
     assert record.related_cards == []
-    assert official_en.legacy_projection(record) == Card.model_validate(
+    assert legacy_en_projection(record) == Card.model_validate(
         {
             "number": number,
             "faces": [
@@ -172,7 +176,7 @@ def test_legacy_projection_matches_independently_written_full_card() -> None:
             ],
         }
     )
-    actual = official_en.legacy_projection(record)
+    actual = legacy_en_projection(record)
     assert actual == expected
     assert observation(actual, "en") == observation(expected, "en")
 
@@ -269,7 +273,7 @@ def test_missing_and_empty_text_are_distinct(
     assert record.faces[0].text == text
     assert record.faces[0].sections == []
     assert record.faces[0].speech == speech
-    assert official_en.legacy_projection(record).faces[0].text == text
+    assert legacy_en_projection(record).faces[0].text == text
 
 
 def test_unknown_info_and_empty_auxiliary_section_are_retained() -> None:
@@ -281,7 +285,7 @@ def test_unknown_info_and_empty_auxiliary_section_are_retained() -> None:
     record = official_en.extract_card(raw, number="SYNⓈ-01aEN")
     assert record.faces[0].info["Future label"] == "Synthetic universe"
     assert record.faces[0].sections == ["", "Last"]
-    assert "Future label" in official_en.legacy_projection(record).faces[0].info
+    assert "Future label" in legacy_en_projection(record).faces[0].info
 
 
 def test_markup_rendering_handles_nested_breaks_whitespace_and_exact_stem() -> None:
@@ -312,7 +316,7 @@ def test_section_separator_requires_at_least_five_symbols(
     text = "First {synthetic.badge|[badge]}\nNext"
     complete = text + "\n" + separator + "\nAuxiliary"
     assert record.faces[0].raw_text == complete
-    assert official_en.legacy_projection(record).faces[0].text == complete
+    assert legacy_en_projection(record).faces[0].text == complete
     assert record.faces[0].text == (text if length == 5 else complete)
     assert record.faces[0].sections == (["Auxiliary"] if length == 5 else [])
 
@@ -406,4 +410,4 @@ def test_explicit_empty_trait_retains_empty_value_instead_of_failing_or_inventin
     assert record.faces[0].trait_raw == empty_value
     assert record.faces[0].traits == []
     assert record.faces[0].info["Trait"] == empty_value
-    assert official_en.legacy_projection(record).faces[0].info["Trait"] == empty_value
+    assert legacy_en_projection(record).faces[0].info["Trait"] == empty_value

@@ -10,7 +10,7 @@ from sve_carddb.text_observations.plan import verify_plan
 from sve_carddb.translations.name_sources import NameOwner, name_source
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database
+    from sve_carddb.build import Database
     from sve_carddb.text_observations.models import FaceObservation
     from sve_carddb.text_observations.plan import TextPlan
 

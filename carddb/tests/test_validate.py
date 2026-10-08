@@ -3,7 +3,7 @@ import zlib
 
 import pytest
 
-from sve_carddb.fetch.validate import (
+from sve_carddb.ingest.http.validate import (
     ValidationError,
     check_image,
     check_jpeg,

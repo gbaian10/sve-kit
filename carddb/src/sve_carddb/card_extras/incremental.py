@@ -14,17 +14,18 @@ from sve_carddb.card_extras.generation import (
     links,
     root_key,
 )
+from sve_carddb.card_extras.qa_parser import parse_qa
 from sve_carddb.core.json import digest
-from sve_carddb.crawl import EN_CATALOG, JP_CATALOG, Crawler, Mode, Site
-from sve_carddb.fetch.client import Client
-from sve_carddb.fetch.refresh import RefreshWriter
-from sve_carddb.fetch.throttle import CircuitBreaker, Throttle
-from sve_carddb.fetch.validate import decode_html
-from sve_carddb.html import attribute, parse, select_all
-from sve_carddb.manifest import GenerationStatus, Kind, Link
-from sve_carddb.manifest import Region as ManifestRegion
-from sve_carddb.sources.official_qa import allowed, parse_qa
-from sve_carddb.urls import canonicalize
+from sve_carddb.ingest.archive.manifest import GenerationStatus, Kind, Link
+from sve_carddb.ingest.archive.manifest import Region as ManifestRegion
+from sve_carddb.ingest.crawl.crawl import EN_CATALOG, JP_CATALOG, Crawler, Mode, Site
+from sve_carddb.ingest.http.client import Client
+from sve_carddb.ingest.http.refresh import RefreshWriter
+from sve_carddb.ingest.http.throttle import CircuitBreaker, Throttle
+from sve_carddb.ingest.http.validate import decode_html
+from sve_carddb.ingest.urls import canonicalize
+from sve_carddb.parse.html import attribute, parse, select_all
+from sve_carddb.parse.pages.official_qa import allowed
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable

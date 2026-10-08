@@ -4,21 +4,18 @@ import hashlib
 import json
 import shutil
 import sqlite3
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 import pytest
-
-if TYPE_CHECKING:
-    from pathlib import Path
 from pydantic import ValidationError
 from typer.testing import CliRunner
 
-from sve_carddb import manifest as manifest_module
-from sve_carddb import source_archive as archive
 from sve_carddb.cli import app
 from sve_carddb.core.json import canonical, digest
-from sve_carddb.manifest import Manifest, ManifestError
-from sve_carddb.source_archive import (
+from sve_carddb.ingest.archive import manifest as manifest_module
+from sve_carddb.ingest.archive import source_archive as archive
+from sve_carddb.ingest.archive.manifest import Manifest, ManifestError
+from sve_carddb.ingest.archive.source_archive import (
     ArchiveError,
     ArchiveStore,
     backup_batch,
@@ -26,8 +23,12 @@ from sve_carddb.source_archive import (
     seal_batch,
     verify_batch,
 )
-from sve_carddb.source_import import importer
-from sve_carddb.source_import.importer import SourceImportError, prepare, register
+from sve_carddb.ingest.archive.source_import import importer
+from sve_carddb.ingest.archive.source_import.importer import (
+    SourceImportError,
+    prepare,
+    register,
+)
 
 from .source_import_fixtures import (
     HTML,
@@ -754,3 +755,15 @@ def test_cli_diagnostic_is_specific_without_input_values(
     assert "PRIVATE_INPUT_VALUE_DO_NOT_PRINT" not in result.output
     assert str(inputs.input_dir) not in result.output
     assert not (tmp_path / "isolated").exists()
+
+
+def test_current_program_paths_match_checkout() -> None:
+    repo = Path(__file__).resolve().parents[2]
+    assert repo == importer._REPO
+    assert tuple(sorted(set(importer.PROGRAM_FILES))) == importer.PROGRAM_FILES
+    assert all((repo / name).is_file() for name in importer.PROGRAM_FILES)
+    assert (
+        "carddb/src/sve_carddb/ingest/archive/source_import/importer.py"
+        in importer.PROGRAM_FILES
+    )
+    assert "carddb/src/sve_carddb/parse/html.py" in importer.PROGRAM_FILES

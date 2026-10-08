@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import create_database
+from sve_carddb.build import create_database
 from sve_carddb.core.json import array, object_value
 from sve_carddb.snapshot.export import Batch, Ownership, export_snapshot
 from sve_carddb.snapshot.media import prepare_media
@@ -19,7 +19,7 @@ from .test_snapshot_project import EN_TEXT, dual_project, dual_region, one, proj
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from sve_carddb.build_db import CompiledSchema, Database
+    from sve_carddb.build import CompiledSchema, Database
     from sve_carddb.snapshot.project import Decisions
 
 
