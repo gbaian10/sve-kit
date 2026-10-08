@@ -8,14 +8,16 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-    from sve_carddb.snapshot.project import Projection
+    from sve_carddb.export.project import Projection
 
 from pydantic import JsonValue
 
 from sve_carddb.build import create_database
 from sve_carddb.core.json import array, canonical, object_value, parse, string
-from sve_carddb.snapshot.buckets import bucket
-from sve_carddb.snapshot.export import (
+from sve_carddb.export.buckets import bucket
+from sve_carddb.export.media import prepare_media
+from sve_carddb.export.reader import read_text_all
+from sve_carddb.export.transport import (
     Batch,
     Ownership,
     Snapshot,
@@ -23,11 +25,9 @@ from sve_carddb.snapshot.export import (
     _ordered,
     export_snapshot,
 )
-from sve_carddb.snapshot.export.compression import compress
-from sve_carddb.snapshot.export.layout import Layout
-from sve_carddb.snapshot.export.measure import measure, update
-from sve_carddb.snapshot.media import prepare_media
-from sve_carddb.snapshot.reader import read_text_all
+from sve_carddb.export.transport.compression import compress
+from sve_carddb.export.transport.layout import Layout
+from sve_carddb.export.transport.measure import measure, update
 
 from .snapshot_project_fixtures import populate, schema
 from .test_snapshot_project import projected
@@ -322,7 +322,7 @@ def test_printing_uses_registered_home_even_when_card_has_another_home(
 
 
 def test_pending_display_name_and_facets_are_bootstrapped_without_current() -> None:
-    from sve_carddb.snapshot.project import Projection  # ruff: ignore[import-outside-top-level] -- construct a public view independently of the producer
+    from sve_carddb.export.project import Projection  # ruff: ignore[import-outside-top-level] -- construct a public view independently of the producer
 
     from .snapshot_contract_fixtures import fixture  # ruff: ignore[import-outside-top-level] -- shared golden contains only synthetic text
     from .test_snapshot_wording import pending_view  # ruff: ignore[import-outside-top-level] -- independent accepted public pending case
@@ -450,7 +450,7 @@ def test_explicit_compressor_recipe_and_bytes_are_used(
 ) -> None:
     import zlib  # ruff: ignore[import-outside-top-level] -- a synthetic codec tests injection without adding a Brotli dependency
 
-    from sve_carddb.snapshot.export import Brotli  # ruff: ignore[import-outside-top-level] -- real Brotli q11 is exercised by the private capacity run
+    from sve_carddb.export.transport import Brotli  # ruff: ignore[import-outside-top-level] -- real Brotli q11 is exercised by the private capacity run
 
     codec = Brotli("synthetic-test-codec-v1", zlib.compress)
     first = export_snapshot(*logical, BATCH, brotli=codec)
@@ -552,7 +552,7 @@ def test_manifest_cannot_claim_a_different_public_region(
 
 
 def test_extra_nested_audit_field_is_not_silently_removed() -> None:
-    from sve_carddb.snapshot.export.wire import encode  # ruff: ignore[import-outside-top-level] -- test the independent fixed tuple boundary with a hand-written record
+    from sve_carddb.export.transport.wire import encode  # ruff: ignore[import-outside-top-level] -- test the independent fixed tuple boundary with a hand-written record
 
     with pytest.raises(ValueError, match="whitelist"):
         encode(
@@ -574,7 +574,7 @@ def test_single_oversized_fragment_is_reported_instead_of_silently_dropped(
     logical: tuple[Projection, Ownership],
 ) -> None:
     from sve_carddb.core.json import digest  # ruff: ignore[import-outside-top-level] -- retain the exact text-ID contract after the mutation
-    from sve_carddb.snapshot.export.measure import SHARD_LIMIT  # ruff: ignore[import-outside-top-level] -- synthetic data exercises the real shard gate
+    from sve_carddb.export.transport.measure import SHARD_LIMIT  # ruff: ignore[import-outside-top-level] -- synthetic data exercises the real shard gate
 
     projection, ownership = cloned(logical)
     physical = object_value(array(projection.tables["printing"][0]["faces"])[0])

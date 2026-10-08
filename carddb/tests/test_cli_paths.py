@@ -6,13 +6,13 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb.cli import app
+from sve_carddb.export.read_api import ExportError as UploadError
 from sve_carddb.r2_upload.v2 import commands
-from sve_carddb.snapshot.read_api import ExportError as UploadError
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.snapshot.read_api import Export
+    from sve_carddb.export.read_api import Export
 
 
 @pytest.mark.parametrize(

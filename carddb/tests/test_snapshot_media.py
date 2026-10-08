@@ -20,14 +20,14 @@ from sve_carddb.core.json import (
     parse,
     string,
 )
-from sve_carddb.snapshot.export import export_snapshot
-from sve_carddb.snapshot.export.measure import update
-from sve_carddb.snapshot.export.wire import encode
-from sve_carddb.snapshot.media import prepare_media
-from sve_carddb.snapshot.media_urls import MAX_SAFE, display_url, image_path, image_url
-from sve_carddb.snapshot.preview import Roots, write_preview
-from sve_carddb.snapshot.preview.media_state import STATE, reserve
-from sve_carddb.snapshot.reader import read_index, read_snapshot, read_text_all
+from sve_carddb.export.media import prepare_media
+from sve_carddb.export.media_urls import MAX_SAFE, display_url, image_path, image_url
+from sve_carddb.export.preview import Roots, write_preview
+from sve_carddb.export.preview.media_state import STATE, reserve
+from sve_carddb.export.reader import read_index, read_snapshot, read_text_all
+from sve_carddb.export.transport import export_snapshot
+from sve_carddb.export.transport.measure import update
+from sve_carddb.export.transport.wire import encode
 
 from .test_snapshot_export import BATCH
 from .test_snapshot_preview_images import images as images  # ruff: ignore[useless-import-alias] -- share module-scoped synthetic WebP library
@@ -396,7 +396,7 @@ def test_index_two_window_and_no_recursive_changes_history() -> None:
 def _changed_payload(
     snapshot: object, *, add_dependency: bool
 ) -> tuple[dict[str, JsonValue], dict[str, bytes]]:
-    from sve_carddb.snapshot.export import Snapshot  # ruff: ignore[import-outside-top-level] -- explicit synthetic helper type boundary
+    from sve_carddb.export.transport import Snapshot  # ruff: ignore[import-outside-top-level] -- explicit synthetic helper type boundary
 
     assert isinstance(snapshot, Snapshot)
     manifest = deepcopy(snapshot.manifest)
@@ -525,7 +525,7 @@ def test_byte_change_after_sealing_rejected_before_activation(
 
 
 def test_media_uses_printing_home_not_card_home(images: PublicImages) -> None:
-    from sve_carddb.snapshot.export import Ownership  # ruff: ignore[import-outside-top-level] -- independent build-only ownership input
+    from sve_carddb.export.transport import Ownership  # ruff: ignore[import-outside-top-level] -- independent build-only ownership input
 
     projection = deepcopy(images.projection)
     family = deepcopy(projection.tables["product_family"][0])
@@ -608,7 +608,7 @@ def test_same_name_capability_nonempty_and_old_profile_rejects(
 def test_failed_image_group_does_not_switch_pointer(
     images: PublicImages, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    import sve_carddb.snapshot.preview as writer  # ruff: ignore[import-outside-top-level] -- fault only the output writer boundary
+    import sve_carddb.export.preview as writer  # ruff: ignore[import-outside-top-level] -- fault only the output writer boundary
 
     roots = Roots(tmp_path / "preview", tmp_path / "private")
     plan = prepare_media(images.projection, images.library, revision=7)
@@ -641,7 +641,7 @@ def test_failed_image_group_does_not_switch_pointer(
 def test_landscape_and_tiny_images_expose_actual_dimensions(
     images: PublicImages, tmp_path: Path, width: int, height: int
 ) -> None:
-    from sve_carddb.image_variants import build_variants  # ruff: ignore[import-outside-top-level] -- reuse the production transform for synthetic inputs
+    from sve_carddb.images.variants import build_variants  # ruff: ignore[import-outside-top-level] -- reuse the production transform for synthetic inputs
 
     from .test_image_variants import png, source  # ruff: ignore[import-outside-top-level] -- generated pixels, no real cards
 
@@ -738,7 +738,7 @@ def test_group_version_selector_and_disabled_urls(images: PublicImages) -> None:
 def test_index_future_current_is_not_corruption_and_compatible_previous_is_readable(
     incompatible: str,
 ) -> None:
-    from sve_carddb.snapshot.reader import select_index_entry  # ruff: ignore[import-outside-top-level] -- neutral index negotiation boundary
+    from sve_carddb.export.reader import select_index_entry  # ruff: ignore[import-outside-top-level] -- neutral index negotiation boundary
 
     manifest = object_value(parse((GOLDEN / "manifest.json").read_bytes()))
     manifest["data_version"] = string(manifest["data_version"]).removeprefix("preview-")
@@ -857,7 +857,7 @@ def test_v2_offline_endpoints_are_present_without_policy_links(
 def test_v2_reader_rejects_endpoint_config_even_without_links(
     images: PublicImages, failure: str
 ) -> None:
-    from sve_carddb.snapshot.reader_media import validate_digital  # ruff: ignore[import-outside-top-level] -- independently exercise the reader without exporter rewriting
+    from sve_carddb.export.reader_media import validate_digital  # ruff: ignore[import-outside-top-level] -- independently exercise the reader without exporter rewriting
 
     plan = prepare_media(images.projection, images.library, revision=7)
     config = deepcopy(plan.projection.config)
@@ -971,7 +971,7 @@ def test_export_state_keeps_unchanged_tokens_and_burns_failed_numbers(
 def test_written_media_corruption_does_not_activate(
     images: PublicImages, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    import sve_carddb.snapshot.preview as writer  # ruff: ignore[import-outside-top-level] -- corrupt only the sealed destination at the activation boundary
+    import sve_carddb.export.preview as writer  # ruff: ignore[import-outside-top-level] -- corrupt only the sealed destination at the activation boundary
 
     roots = Roots(tmp_path / "preview", tmp_path / "private")
     old = prepare_media(images.projection, images.library, revision=7)

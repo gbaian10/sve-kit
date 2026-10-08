@@ -9,15 +9,15 @@ import httpx
 import typer
 
 from sve_carddb.cli_paths import required_root
+from sve_carddb.export.read_api import ExportError as UploadError
+from sve_carddb.export.read_api import load_export
 from sve_carddb.r2_upload.sdk import Credentials, sdk_client
 from sve_carddb.r2_upload.v2.adapter import R2Store
 from sve_carddb.r2_upload.v2.freshness import CDNFreshness, cdn_root
 from sve_carddb.r2_upload.v2.publish import report, upload
-from sve_carddb.snapshot.read_api import ExportError as UploadError
-from sve_carddb.snapshot.read_api import load_export
 
 if TYPE_CHECKING:
-    from sve_carddb.snapshot.read_api import Export
+    from sve_carddb.export.read_api import Export
 
 
 def upload_v2(

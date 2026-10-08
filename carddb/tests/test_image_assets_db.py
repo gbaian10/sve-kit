@@ -17,12 +17,12 @@ from sve_carddb.domains.registry.preview import FrozenJP, plan_preview, populate
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.review import InitDecisions, Inputs
 from sve_carddb.domains.registry.storage import plan_files, write_files
-from sve_carddb.image_assets import (
+from sve_carddb.images.assets import (
     build_regional_assets,
     plan_regional_images,
     populate_assets,
 )
-from sve_carddb.image_variants import DEFAULT_RECIPE
+from sve_carddb.images.variants import DEFAULT_RECIPE
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import ArchiveStore, Scope, seal_batch
@@ -42,8 +42,8 @@ if TYPE_CHECKING:
     from sve_carddb.build import Database
     from sve_carddb.core.provenance import Source
     from sve_carddb.domains.registry.preview import PreviewPlan
-    from sve_carddb.image_assets import ImageReference
-    from sve_carddb.image_crops import ImageCrops
+    from sve_carddb.images.assets import ImageReference
+    from sve_carddb.images.crops import ImageCrops
     from sve_carddb.ingest.archive.source_archive import Descriptor
 
 REVISION = "a" * 40

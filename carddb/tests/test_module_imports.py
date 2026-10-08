@@ -63,9 +63,9 @@ def test_read_api_import_does_not_load_build_or_publish(tmp_path: Path) -> None:
         + """
 for name in sys.modules:
     assert not any(name == prefix or name.startswith(prefix + '.') for prefix in (
-        'sve_carddb.build', 'sve_carddb.domains', 'sve_carddb.snapshot.export',
-        'sve_carddb.snapshot.project', 'sve_carddb.snapshot.preview',
-        'sve_carddb.workflows', 'sve_carddb.r2_upload',
+        'sve_carddb.build', 'sve_carddb.domains', 'sve_carddb.export.transport',
+        'sve_carddb.export.project', 'sve_carddb.export.preview',
+        'sve_carddb.workflows', 'sve_carddb.r2_upload', 'sve_publish',
     )), name
 """
     )
@@ -77,7 +77,7 @@ for name in sys.modules:
             "-c",
             isolated,
             str(SOURCE_ROOT),
-            "sve_carddb.snapshot.read_api",
+            "sve_carddb.export.read_api",
         ],
         cwd=tmp_path,
         capture_output=True,

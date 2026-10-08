@@ -124,7 +124,7 @@ declares them (list a rule twice when it fires twice). Update the fixtures toget
 [docs/schema/snapshot-format.md](../../docs/schema/snapshot-format.md),
 [snapshot-transport.md](../../docs/schema/snapshot-transport.md) and
 [snapshot-contract.md](../../docs/schema/snapshot-contract.md), and mirrors the Python reference
-reader in `carddb/src/sve_carddb/snapshot/`.
+reader in `carddb/src/sve_carddb/export/`.
 
 - `json.ts`: the strict JSON boundary (canonical-json-v1). Microsoft jsonc-parser visits decoded keys and tokens
   with comments and trailing commas disabled; every parser error is rejected. The visitor rejects

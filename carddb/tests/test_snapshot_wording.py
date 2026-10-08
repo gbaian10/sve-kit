@@ -6,13 +6,13 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.core.json import array, object_value, parse, string
-from sve_carddb.snapshot.reader import _container, _current
-from sve_carddb.snapshot.semantics import _wording_display, validate_view
+from sve_carddb.export.reader import _container, _current
+from sve_carddb.export.semantics import _wording_display, validate_view
 
 from .snapshot_contract_fixtures import fixture, payloads
 
 if TYPE_CHECKING:
-    from sve_carddb.snapshot.reader import Fragment, Row, View
+    from sve_carddb.export.reader import Fragment, Row, View
 
 
 def pending_view() -> tuple[View, Row, list[Fragment]]:

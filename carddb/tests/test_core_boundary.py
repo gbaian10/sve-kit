@@ -27,7 +27,8 @@ def project_imports(source: str, package: str) -> set[str]:
     return {
         module
         for module in modules
-        if module == "sve_carddb" or module.startswith("sve_carddb.")
+        if module in {"sve_carddb", "sve_publish"}
+        or module.startswith(("sve_carddb.", "sve_publish."))
     }
 
 
@@ -51,7 +52,7 @@ def test_core_imports_only_shared_foundations(path: Path) -> None:
 @pytest.mark.parametrize(
     "source",
     [
-        "import sve_carddb.snapshot.reader",
+        "import sve_carddb.export.reader",
         "from sve_carddb.domains.registry import records",
         "from sve_carddb import registry",
         "def call():\n    from sve_carddb.build import Database",

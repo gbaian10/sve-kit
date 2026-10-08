@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.image_crops import FILE, ImageCrops
+from sve_carddb.images.crops import FILE, ImageCrops
 
 if TYPE_CHECKING:
     from pathlib import Path

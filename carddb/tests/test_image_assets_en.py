@@ -24,7 +24,7 @@ from sve_carddb.domains.registry.preview import (
 )
 from sve_carddb.domains.registry.review import InitDecisions, Inputs
 from sve_carddb.domains.registry.storage import plan_files, write_files
-from sve_carddb.image_assets import (
+from sve_carddb.images.assets import (
     ImageBuild,
     PreviewRoots,
     build_regional_assets,
@@ -32,8 +32,8 @@ from sve_carddb.image_assets import (
     populate_assets,
     verify_asset_sources,
 )
-from sve_carddb.image_crop_report import crop_report
-from sve_carddb.image_crops import load_image_crops
+from sve_carddb.images.crop_report import crop_report
+from sve_carddb.images.crops import load_image_crops
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import ArchiveStore, Scope, seal_batch
@@ -51,7 +51,7 @@ from .test_source_archive import _put, _resource
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.image_crops import ImageCrops
+    from sve_carddb.images.crops import ImageCrops
 
 NUMBER = "TEST-01ⓈaEN"
 FRONT = "/synthetic/front .png"

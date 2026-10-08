@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.core.yaml import MAX_BYTES
-from sve_carddb.image_crops import load_image_crops, parse_crops
-from sve_carddb.image_variants import CropBox
+from sve_carddb.images.crops import load_image_crops, parse_crops
+from sve_carddb.images.variants import CropBox
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
 from .image_crop_fixtures import install, record

@@ -9,7 +9,7 @@ from sve_carddb.build.registry import Registry
 from sve_carddb.build.t1 import REGISTRY, compile_minimum
 from sve_carddb.build.t2_translation import TABLES as NAME_TABLES
 from sve_carddb.core.json import digest, parse
-from sve_carddb.snapshot.project import Decisions, Settings
+from sve_carddb.export.project import Decisions, Settings
 
 from .build_db_fixtures import rows as core_rows
 from .build_db_t1_fixtures import rows as image_rows

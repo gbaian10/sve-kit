@@ -9,8 +9,8 @@ from pydantic import JsonValue
 from sve_carddb.contracts.generate_schema import generate
 from sve_carddb.contracts.snapshot import definition, schema, tables, validate
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
-from sve_carddb.snapshot.buckets import bucket
-from sve_carddb.snapshot.reader import read_snapshot, read_text_all
+from sve_carddb.export.buckets import bucket
+from sve_carddb.export.reader import read_snapshot, read_text_all
 
 from .snapshot_contract_fixtures import (
     _replace,

@@ -11,14 +11,14 @@ from typer.testing import CliRunner
 
 from sve_carddb.cli import app
 from sve_carddb.core.json import canonical, object_value, parse, string
+from sve_carddb.export.read_api import INDEX, POINTER, load_export
+from sve_carddb.export.read_api import ExportError as UploadError
+from sve_carddb.export.transport.compression import python_brotli
 from sve_carddb.r2_upload.sdk import Credentials
 from sve_carddb.r2_upload.v2.adapter import Stored
 from sve_carddb.r2_upload.v2.freshness import CDNFreshness
 from sve_carddb.r2_upload.v2.headers import member_headers
 from sve_carddb.r2_upload.v2.publish import next_index, upload
-from sve_carddb.snapshot.export.compression import python_brotli
-from sve_carddb.snapshot.read_api import INDEX, POINTER, load_export
-from sve_carddb.snapshot.read_api import ExportError as UploadError
 
 from .r2_sdk_fixtures import install_mock_sdk
 from .r2_v2_export_fixtures import art_changed as art_changed  # ruff: ignore[useless-import-alias] -- module-scoped crop-change corpus
@@ -36,8 +36,8 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
+    from sve_carddb.export.preview import Roots
     from sve_carddb.r2_upload.v2.adapter import R2Store
-    from sve_carddb.snapshot.preview import Roots
 
     from .r2_v2_fixtures import Loopback, ServerState
     from .test_snapshot_preview_images import PublicImages
@@ -298,7 +298,7 @@ def test_interrupted_image_overwrite_leaves_no_pointer_to_upload(
     roots: Roots,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    import sve_carddb.snapshot.preview as writer  # ruff: ignore[import-outside-top-level] -- fault only the output writer boundary
+    import sve_carddb.export.preview as writer  # ruff: ignore[import-outside-top-level] -- fault only the output writer boundary
 
     export(images, roots, step=0)
     original = writer._write
@@ -514,7 +514,7 @@ def test_pointer_failure_after_state_commit_preserves_safe_image_versions(
     *,
     retry_original: bool,
 ) -> None:
-    import sve_carddb.snapshot.preview as writer  # ruff: ignore[import-outside-top-level] -- interrupt only the final pointer switch
+    import sve_carddb.export.preview as writer  # ruff: ignore[import-outside-top-level] -- interrupt only the final pointer switch
 
     store, state, _ = remote
     export(images, roots, step=0)

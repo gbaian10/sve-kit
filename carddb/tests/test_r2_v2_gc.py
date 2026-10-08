@@ -9,12 +9,12 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb.cli import app
+from sve_carddb.export.read_api import INDEX, load_export
+from sve_carddb.export.read_api import ExportError as UploadError
 from sve_carddb.r2_upload.v2 import gc
 from sve_carddb.r2_upload.v2.adapter import PUBLIC_PREFIXES, Stored
 from sve_carddb.r2_upload.v2.headers import IMAGE_HEADERS
 from sve_carddb.r2_upload.v2.publish import upload
-from sve_carddb.snapshot.read_api import INDEX, load_export
-from sve_carddb.snapshot.read_api import ExportError as UploadError
 
 from .r2_sdk_fixtures import install_mock_sdk
 from .r2_v2_export_fixtures import export
@@ -27,9 +27,9 @@ from .r2_v2_fixtures import server as server  # ruff: ignore[useless-import-alia
 pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
 if TYPE_CHECKING:
+    from sve_carddb.export.preview import Roots
+    from sve_carddb.export.read_api import Export
     from sve_carddb.r2_upload.v2.adapter import R2Store
-    from sve_carddb.snapshot.preview import Roots
-    from sve_carddb.snapshot.read_api import Export
 
     from .r2_v2_fixtures import Loopback, ServerState
     from .test_snapshot_preview_images import PublicImages

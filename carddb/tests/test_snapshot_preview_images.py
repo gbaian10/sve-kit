@@ -10,14 +10,14 @@ from typing import TYPE_CHECKING
 import pytest
 from PIL import Image
 
-import sve_carddb.snapshot.preview as writer_module
+import sve_carddb.export.preview as writer_module
 from sve_carddb.build import create_database
 from sve_carddb.core.json import digest, integer, string
-from sve_carddb.image_variants import SIZES, build_variants
-from sve_carddb.snapshot.export import Ownership, export_snapshot
-from sve_carddb.snapshot.media import MediaPlan, prepare_media
-from sve_carddb.snapshot.preview import Roots, _write, write_preview
-from sve_carddb.snapshot.preview.images import image_blobs
+from sve_carddb.export.media import MediaPlan, prepare_media
+from sve_carddb.export.media_images import image_blobs
+from sve_carddb.export.preview import Roots, _write, write_preview
+from sve_carddb.export.transport import Ownership, export_snapshot
+from sve_carddb.images.variants import SIZES, build_variants
 
 from .snapshot_project_fixtures import populate, schema
 from .test_image_variants import png, source
@@ -25,9 +25,9 @@ from .test_snapshot_export import BATCH
 from .test_snapshot_project import projected
 
 if TYPE_CHECKING:
-    from sve_carddb.snapshot.export import Snapshot
-    from sve_carddb.snapshot.project import Projection
-    from sve_carddb.snapshot.project.source import Record
+    from sve_carddb.export.project import Projection
+    from sve_carddb.export.project.source import Record
+    from sve_carddb.export.transport import Snapshot
 
 
 @dataclass(frozen=True)

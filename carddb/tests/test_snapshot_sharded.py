@@ -22,12 +22,12 @@ from sve_carddb.core.json import (
     parse,
     string,
 )
-from sve_carddb.snapshot.buckets import bucket
-from sve_carddb.snapshot.export import Brotli, Ownership, Snapshot, export_snapshot
-from sve_carddb.snapshot.export.layout import Group, Layout
-from sve_carddb.snapshot.export.measure import measure, update
-from sve_carddb.snapshot.project import Projection
-from sve_carddb.snapshot.reader import read_snapshot, read_text_all
+from sve_carddb.export.buckets import bucket
+from sve_carddb.export.project import Projection
+from sve_carddb.export.reader import read_snapshot, read_text_all
+from sve_carddb.export.transport import Brotli, Ownership, Snapshot, export_snapshot
+from sve_carddb.export.transport.layout import Group, Layout
+from sve_carddb.export.transport.measure import measure, update
 
 from .snapshot_contract_fixtures import fixture
 from .test_snapshot_export import BATCH, cloned
@@ -574,7 +574,7 @@ def test_reader_detects_missing_types_and_payload(
     payload = object_value(parse(sharded.payloads[string(file["key"])].raw))
     assert payload["types"]
     payload["types"] = {}
-    from sve_carddb.snapshot.reader import _container  # ruff: ignore[import-outside-top-level] -- exercise type-closure rejection before byte resealing
+    from sve_carddb.export.reader import _container  # ruff: ignore[import-outside-top-level] -- exercise type-closure rejection before byte resealing
 
     with pytest.raises(
         ValueError, match=r"^Missing, unused or altered nested descriptor$"

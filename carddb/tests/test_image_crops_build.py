@@ -11,15 +11,15 @@ from PIL import Image
 from sve_carddb.build import Row, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, object_value
-from sve_carddb.image_assets import (
+from sve_carddb.images.assets import (
     ImageReference,
     PreviewRoots,
     build_regional_assets,
     verify_asset_sources,
 )
-from sve_carddb.image_crop_report import crop_report
-from sve_carddb.image_crops import image_source_key, load_image_crops
-from sve_carddb.image_variants import CropBox
+from sve_carddb.images.crop_report import crop_report
+from sve_carddb.images.crops import image_source_key, load_image_crops
+from sve_carddb.images.variants import CropBox
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
 from .image_crop_fixtures import install, record
@@ -27,8 +27,8 @@ from .image_crop_fixtures import install, record
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.image_assets import EncodedImage, ImageBuild
-    from sve_carddb.image_crops import ImageCrops
+    from sve_carddb.images.assets import EncodedImage, ImageBuild
+    from sve_carddb.images.crops import ImageCrops
 
 
 def adopted(crops: ImageCrops, item: EncodedImage) -> bool:

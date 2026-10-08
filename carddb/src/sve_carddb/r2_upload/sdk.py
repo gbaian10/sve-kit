@@ -21,7 +21,7 @@ from botocore.httpsession import URLLib3Session
 from botocore.loaders import Loader
 from botocore.session import Session as CoreSession
 
-from sve_carddb.snapshot.read_api import ExportError as UploadError
+from sve_carddb.export.read_api import ExportError as UploadError
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator

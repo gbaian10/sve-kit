@@ -11,8 +11,8 @@ from jsonschema import ValidationError
 from sve_carddb.contracts.profiles import MEDIA
 from sve_carddb.contracts.snapshot import validate
 from sve_carddb.core.json import array, canonical, object_value, parse, string
-from sve_carddb.snapshot.media_urls import image_url
-from sve_carddb.snapshot.reader import read_index, read_snapshot, select_index_entry
+from sve_carddb.export.media_urls import image_url
+from sve_carddb.export.reader import read_index, read_snapshot, select_index_entry
 
 from .snapshot_contract_fixtures import _replace, _reseal
 from .snapshot_contract_fixtures import wire as wire  # ruff: ignore[useless-import-alias] -- share one immutable golden input per module

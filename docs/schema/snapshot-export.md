@@ -10,7 +10,7 @@
 
 ## 輸入與輸出
 
-`sve_carddb.snapshot.export.export_snapshot(projection, ownership, batch, brotli=...)`
+`sve_carddb.export.transport.export_snapshot(projection, ownership, batch, brotli=...)`
 接受公開 `Projection`、建置端的版次歸屬與預覽批次。`Ownership.from_database`
 透過已驗證 SQLite 邊界讀取永久 `printing.home_set_id`；不能從卡號、商品收錄或
 `card.home_set_id` 補猜版次歸屬，也不把此建置欄加入公開列。
@@ -24,7 +24,7 @@
 mtime=0、無 filename 的 bytes。沒有提供 Brotli 時，快照清單的 br 長度明示 null，
 容量量測也不宣稱 br 閘門通過。Brotli 由呼叫端提供釘住版本、固定 quality 11 的
 `Brotli(version, compress)`；版本與參數屬建置 recipe，不放進可重用的資料 payload。
-`sve_carddb.snapshot.export.compression.python_brotli()` 提供使用 `uv.lock` 鎖定的
+`sve_carddb.export.transport.compression.python_brotli()` 提供使用 `uv.lock` 鎖定的
 PyPI `brotli` 的實作，固定 generic mode、quality 11、lgwin 22，recipe 記錄套件版本。
 preview CLI 的 `export`／`export-offline` 用 `--brotli` 啟用；預設 `--no-brotli`。
 不依賴系統 libbrotli、外部壓縮命令或執行檔 hash。呼叫端須將這份 recipe 與其他建置
@@ -96,7 +96,7 @@ JP 量測不足以凍結正式配置；正式前還須量 EN、雙區與完整�
 
 ## 唯讀匯出邊界
 
-`carddb` 的 `sve_carddb.snapshot.read_api` 提供發布端使用的唯讀入口。
+`carddb` 的 `sve_carddb.export.read_api` 提供發布端使用的唯讀入口。
 `load_export(root)` 驗證 preview 指標、canonical JSON、檔名與內容 hash、完整分片引用、
 壓縮旁檔及圖片尺寸／格式，再回傳 `Export`。`members` 包含公開 key、原始 bytes 與
 `encoding`；`images` 包含永久 key、版本化 URL、尺寸與 bytes，`Export.image(item)`
