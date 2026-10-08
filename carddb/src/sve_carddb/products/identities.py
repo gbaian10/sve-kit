@@ -1,4 +1,4 @@
-"""Validate all confirmed product IDs, pinned authored bytes and frozen evidence."""
+"""Validate current confirmed product IDs against frozen evidence."""
 
 import re
 from dataclasses import dataclass
@@ -20,9 +20,10 @@ from sve_carddb.products.identity_models import (
 from sve_carddb.products.loader import _safe_file
 from sve_carddb.products.models import Evidence, ProductRecord
 from sve_carddb.products.official import PARSER, ProductPage, parse_products
-from sve_carddb.registry.inputs import canonical, digest
+from sve_carddb.registry.inputs import JSON_VALUE, canonical, digest
 from sve_carddb.registry.records import RecordData
-from sve_carddb.registry.storage import read_yaml
+from sve_carddb.registry.storage import MAX_BYTES
+from sve_carddb.registry.yaml_reader import parse_yaml
 from sve_carddb.snapshot.values import parse
 
 if TYPE_CHECKING:
@@ -171,7 +172,10 @@ def _inventory(root: Path) -> list[str]:
 def _shard(root: Path, name: str) -> IdentityFile:
     path = root / name
     _safe_file(root, path)
-    raw = read_yaml(path)
+    exact = path.read_bytes()
+    if len(exact) >= MAX_BYTES:
+        raise ValueError("Product identity shard exceeds size limit")
+    raw = JSON_VALUE.validate_python(parse_yaml(exact), strict=True)
     envelope = _model(IdentityShard, raw)
     keys = tuple(record.record_key for record in envelope.records)
     if len(keys) != len(set(keys)):
@@ -188,7 +192,7 @@ def _shard(root: Path, name: str) -> IdentityFile:
             raise ValueError("Duplicate product identity evidence")
         if not any(ref.role == "product_identity_match" for ref in record.evidence):
             raise ValueError("Product identity requires match evidence")
-    return IdentityFile(name, digest(raw), path.read_bytes(), envelope)
+    return IdentityFile(name, digest(raw), exact, envelope)
 
 
 def _records(

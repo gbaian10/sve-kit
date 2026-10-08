@@ -4,6 +4,7 @@ import copy
 import json
 import re
 import shutil
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
@@ -30,8 +31,6 @@ from .product_identity_fixtures import (
 from .product_identity_fixtures import identity_fixture as identity_fixture  # ruff: ignore[useless-import-alias] -- shared fixture
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from sve_carddb.build_inputs import Source
     from sve_carddb.products.official import ProductPage
     from sve_carddb.registry.records import Region
@@ -722,3 +721,18 @@ def check_wire(root: Path, shard: JsonValue, area: str, field: str) -> None:
         _shard(root, NAME)
     else:
         _model(IdentityShard, shard)
+
+
+def test_working_tree_shard_is_read_once(
+    identity_fixture: IdentityFixture, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    read = Path.read_bytes
+    seen: list[Path] = []
+
+    def watched(path: Path) -> bytes:
+        seen.append(path)
+        return read(path)
+
+    monkeypatch.setattr(Path, "read_bytes", watched)
+    identity_fixture.load()
+    assert seen.count(identity_fixture.root / NAME) == 1
