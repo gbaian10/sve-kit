@@ -4,8 +4,8 @@ import sys
 from importlib.resources import files
 from pathlib import Path
 
-from sve_carddb.contracts.contract import schema
 from sve_carddb.contracts.generate_schema import generate
+from sve_carddb.contracts.snapshot import schema
 from sve_carddb.core.json import array, canonical, object_value, parse, string
 from sve_carddb.snapshot.read_api import current_image_keys, read_index
 from sve_carddb.snapshot.reader import read_snapshot
