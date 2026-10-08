@@ -1,7 +1,7 @@
 # AGENTS.md
 
 給 AI 開發工具（Claude Code、Codex 等）的專案說明。**這份是專案架構與資料規則的權威**；
-語言、commit、註解規則以 `CONTRIBUTING.md` 為準。`CLAUDE.md` 只負責引用這兩份，不要在其他地方重複寫規則。
+語言、commit 與寫法規範以 `CONTRIBUTING.md` 為準。`CLAUDE.md` 只引用這份，不要在其他地方重複寫規則。
 
 這份會進版控，只寫**任何 clone 這個 repo 的人都適用**的規則。
 個人機器上的路徑、本機限定的檔案、個人工作流程，**不要寫進這裡**。
@@ -33,22 +33,9 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 `carddb` 匯出的有版號快照是卡片資料的**唯一權威**。`sim/` 可以載入、打包或快取快照（例如 PWA 離線），
 但**不要維護另一份獨立的卡表**。
 
-`carddb/src/sve_carddb/` 的共用基礎為 `core/`，共用契約為 `contracts/`；
-`ingest/` 分為抓取協調 `crawl/`、低階 HTTP `http/` 與來源保全 `archive/`，
-原 Settings 位於 `ingest/config.py`，只管來源取得設定。`parse/` 保存 HTML 邊界及純頁面解析；
-registry projection adapter 與 QA adapter 分別留在 `domains/registry/parser_adapters/` 與 `domains/card_extras/qa_parser.py`。
-`build/` 保存 DB 基礎設施，詞法值域位於 `build/scalars.py`。
-`workflows/` 串接離線建置、名稱／圖片組合、匯出與診斷；下層不得匯入 workflows 或 CLI。
-`images/` 保存卡圖資產、驗證、裁切與變體；`export/` 保存 DB 投影與快照讀取／匯出，
-`export/transport/` 封裝傳輸檔，`export/preview/` 只寫預覽與版本 state。
-`export/read_api.py` 是唯讀邊界，不載入 build、domains、workflows、
-匯出寫出端（export.transport、export.project、export.preview）或 publish（sve_publish）。
-publish 的正式程式只可匯入 `sve_carddb.export.read_api`；不得直接匯入 carddb 的其他模組。
-images 與 export 不得匯入 workflows 或 CLI；domains 不得依賴 export 或 publish。
-`domains/` 保存各資料領域，翻譯歸於 `domains/translations/` 的 glossary、names、templates、parameters 與 source_inventory，
-數位版歸於 `domains/digital/` 的 links 與 name_policies；領域不得匯入 workflows 或 CLI。
-parse、ingest 與 build 不得反向依賴領域；Region 型別與純相對路徑驗證分別位於 `core/regions.py`、`core/paths.py`。
-抓取協調可呼叫 parser；低階 HTTP／archive 不得匯入 crawler，parser 不得依賴 DB 或 authored loader。
+`carddb/src/sve_carddb/` 依階段分層：基礎 `core/`、`contracts/`；來源 `ingest/`（`crawl/`、`http/`、`archive/`）、`parse/`；
+建置 `build/`；資料領域 `domains/`；產出 `images/`、`export/`；最上層 `workflows/` 與 CLI。
+`publish/` 只透過 `sve_carddb.export.read_api` 讀匯出。匯入方向由 CONTRIBUTING〈Setup〉列出的邊界測試強制，規則以測試為準。
 
 ### 前端與部署邊界
 
@@ -142,8 +129,8 @@ Rust 工具鏈版本釘在 `rust-toolchain.toml`，升級時一併改 `Cargo.tom
 
 ### 語言、commit、註解
 
-**以 `CONTRIBUTING.md` 為準**（必讀），這裡不重複。重點：註解用英文且只寫「為什麼」、
-ADR 與設計文件用繁體中文、commit 格式由 commitizen 檢查。
+以 `CONTRIBUTING.md` 為準，這裡不重複：註解用英文且只寫「為什麼」、ADR 與設計文件用繁體中文、
+commit 格式由 commitizen 檢查。審核依 CONTRIBUTING 的〈Coding standards〉。
 
 ### i18n
 
