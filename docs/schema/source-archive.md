@@ -131,8 +131,8 @@ Writer 的檔案替換與 SQLite transaction 不是同一原子交易：既有�
 逐群組保留歷史 producer R、凍結版本／manifest pins、context、預期／實際結果與實際環境差異。
 環境值不同不先拒絕也不進語義 root；缺閉包／凍結 bytes 或輸出漂移仍拒絕。
 同 raw 一列 source_record，不以 parser／producer 重配 raw ID；同 parser 跨 producer 的用途及 pin 歸屬
-保留群組映射，不以最後一筆覆蓋。caller 獨立 expected uses、DB 與 archive pins、F1 四檔 bundle 驗證不變，
-自算摘要不能代替獨立閉包，不增父子 executor。
+保留群組映射，不以最後一筆覆蓋。建置交易完成後直接保存 DB、inputs 與 report；
+不另計 expected uses 閉包，也不重播 bundle。
 
 建置／離線 extract 接受 sealed inventory 的 hash，先驗 seal、DB、副本 schema、所有 metadata 與 raw 閉包。只用 `Manifest.open_snapshot()`（`mode=ro&immutable=1`）讀關閉的副本，不跑 DDL／journal pragma；parser／extractor 只能透過 archive locator 讀來源，不能回查 live/latest 補資料。既有 extract 持鎖讀 live 是另一種受控入口；不能把該輸出自動稱為 sealed 重建。
 
