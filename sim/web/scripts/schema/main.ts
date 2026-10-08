@@ -6,7 +6,7 @@ import { build } from "vite"
 import { compileSchemas } from "./compile"
 
 const webRoot = path.resolve(import.meta.dirname, "../..")
-const schemaDir = path.resolve(webRoot, "../../carddb/src/sve_carddb/snapshot/schema")
+const schemaDir = path.resolve(webRoot, "../../carddb/src/sve_carddb/contracts/schema")
 const output = path.join(webRoot, "node_modules/.cache/sve-schema")
 const roots: Record<string, object> = {}
 for (const version of ["v2"]) {

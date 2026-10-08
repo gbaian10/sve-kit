@@ -1,6 +1,6 @@
 import compiled from "#snapshot-validators"
 
-import contract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v2/contract.schema.json"
+import contract from "../../../../../carddb/src/sve_carddb/contracts/schema/v2/contract.schema.json"
 import { fail } from "./errors"
 import {
   arrayValue,

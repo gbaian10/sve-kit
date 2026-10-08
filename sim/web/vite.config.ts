@@ -10,7 +10,7 @@ import { defineConfig } from "vitest/config"
 // The reader loads the published contract schema from carddb (one source of truth, no copy).
 const contractSchemaDir = path.resolve(
   import.meta.dirname,
-  "../../carddb/src/sve_carddb/snapshot/schema",
+  "../../carddb/src/sve_carddb/contracts/schema",
 )
 
 const MIME: Record<string, string> = { ".json": "application/json", ".webp": "image/webp" }
