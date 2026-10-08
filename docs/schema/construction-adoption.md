@@ -14,7 +14,7 @@
 
 area 恰為 profiles／revisions／refs／restrictions／coverage／roles／cr；region 恰為 jp/en。roles／cr 是整區共用實體，不帶賽制目錄：角色沿既有 `PK(card_id,region)`，CR 可供裁定及多個賽制引用，不為每個賽制重建一列。其餘五個 area 帶 standard；sequence 按 area／region／賽制（共用 area 無賽制）從 001 起連續只增，至少三位十進位；一片非空、單一 kind／核對背景／決定。首批拒絕其他 format_code，不把 Crossover、Cross Craft、Gloryfinder 併成 Standard 或填合法；共用角色的覆寫不得假裝能表達賽制專屬差異，遇此需求先改契約。擴大 scope 須改契約與驗證，再採納真實資料。
 
-共用 [catalog 採納 §2–§2.1](catalog-route-adoption.md#2-入口分片與封套) 的嚴格 YAML 1.2、單檔 <1 MiB／512 KiB 目標、canonical H、index 與安全路徑、review_context 及完整 decision 欄位。includes 值為分片解析後的完整 canonical hash；本次建置另釘完整 immutable authored revision、index／所有歷史分片的 exact bytes hash。啟用入口缺 index 拒絕，空集合須明示 includes={}；未知欄位／格式、重複鍵、symlink、跨入口引用、未索引檔、缺檔或 hash 不符皆拒絕。先驗全部地區與歷史再投影，不能縮小決定成員。
+本入口採用 [authored-layout](authored-layout.md#2-分片與來源) 的嚴格 YAML 1.2、單檔 <1 MiB／512 KiB 目標、canonical H、index 與安全路徑、本文件的 review_context 及 decision 欄位。includes 值為分片解析後的完整 canonical hash；本次建置另釘完整 immutable authored revision、index／所有歷史分片的 exact bytes hash。啟用入口缺 index 拒絕，空集合須明示 includes={}；未知欄位／格式、重複鍵、symlink、跨入口引用、未索引檔、缺檔或 hash 不符皆拒絕。先驗全部地區與歷史再投影，不能縮小決定成員。
 
 record 恰為 `{record_key,kind,filing_key,data,evidence,review,adoption_review}`；filing_key 在賽制 area 為 `jp-standard`／`en-standard`，整區共用 area 為 `jp`／`en`，均符合共用 `[A-Za-z0-9_-]+`，不使用冒號。data 恰有 `{subject,adoption_no,predecessor,value,review_context_hash,dependencies,reason}`，subject 依下表；record_key 為 `[kind,subject,adoption_no]` 的 canonical JSON 字串。每個 subject 的 adoption_no 從 1 起連續增加；predecessor 首筆 null，後筆 `{record_key,record_hash,decision_id}` 必指前一採納。value 完整替換，不作 patch；續版 null 明示撤回。有效值先按全歷史續版解出，再匯入一份新的建置 DB，不把前版主鍵內容直接覆寫；相同列僅可逐欄 exact 重用。不能原地修改歷史／重用原決定，同一主體不得分成多條互相搶值的鏈。
 

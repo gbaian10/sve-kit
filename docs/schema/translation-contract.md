@@ -186,7 +186,7 @@ text 使用 `{{slot_name}}`，literal 的反斜線與左右大括號以反斜線
 不以裸 N 作替換語法。缺必要目標語詞庫時整個 context 回原文，列 missing_term_translation；
 譯文 placeholder 不合語法時不擋建置，使用它的欄位整段回原文，列 invalid_template_translation。
 
-首版在 sentence 層翻譯，包括只出現一次者；C ID 保留盤點，template_component 暫不啟用拼接。
+首版在 sentence 層翻譯，包括只出現一次者；C ID 保留盤點，首版不啟用子句拼接。
 已有 component 仍驗無環及父子來源一致性；日後啟用拼接須先補參數映射契約，不能將未實作能力當成可用。
 
 新增卡包由工具產清冊、套用當前模板及詞庫、渲染譯文。只需一個資料 PR 和一張

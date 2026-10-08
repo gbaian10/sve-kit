@@ -11,7 +11,7 @@
 
 | 文件                                             | 內容                                                                              |
 | ------------------------------------------------ | --------------------------------------------------------------------------------- |
-| [建置資料庫 schema](build-db.md)                 | 建置資料庫 118 表的完整邏輯契約：欄位、鍵、約束、採納政策、雜湊與發布閘門         |
+| [建置資料庫 schema](build-db.md)                 | 建置資料庫 117 表的完整邏輯契約：欄位、鍵、約束、採納政策、雜湊與發布閘門         |
 | [卡表快照格式](snapshot-format.md)               | 發布給使用者的 40 個文字集合與 3 個影像集合的欄位白名單、快照清單、分片與更新規則 |
 | [快照傳輸契約](snapshot-transport.md)            | manifest、config、tuple descriptor、fragment 身分與欄序、版本及變動摘要           |
 | [機器契約](snapshot-contract.md)                 | Schema 資源、候選格式配置、Python reader 與 TS 驗收清單                           |
@@ -20,10 +20,10 @@
 | [來源歸檔與凍結輸入](source-archive.md)          | raw 歷史、版本 inventory、鎖與一致副本、保留及備份恢復                            |
 | [構築規則與禁限採納](construction-adoption.md)   | Standard 專用封套、來源登錄、有限 ref／CR 引用與 coverage／unknown 邊界           |
 | [容量與記憶體預算](size-budget.md)               | 卡表快照的容量門檻、量測方法與目前結論                                            |
-| [建置表實作分期](implementation-tiers.md)        | 118 表各自的實作 tier（T0～T3）與首發必要集合                                     |
+| [建置表實作分期](implementation-tiers.md)        | 117 表各自的實作 tier（T0～T3）與首發必要集合                                     |
 | [身分修復與決定續版](identity-repair.md)         | 已核可的不可變續版、指名撤回、完整面／插畫移轉與有效投影                          |
 | [authored 維護方式](authored-layout.md)          | `authored/` 已定案身分登錄與其餘配置提案                                          |
-| [詞彙與路由契約](catalog-route-adoption.md)      | 採納封套與覆寫；已核可稀有度白名單及繁中缺譯順序                                  |
+| [詞彙與路由契約](catalog-route-adoption.md)      | current 詞彙與展示覆寫；已核可稀有度白名單及繁中缺譯順序                          |
 | [正式 catalog 輸入](catalog-inputs.md)           | 職業／基本卡種永久 code、YAML caller 資料、JP／EN binding 與 preview 重建         |
 | [術語採納與加粗](glossary-adoption.md)           | 概念引用、來源主張／委託收據、可修訂加粗與公開格式擴充影響                        |
 | [數位對應採納契約](digital-link-adoption.md)     | 真人 link 入口、凍結名稱與逐 owner 使用；政策連結見獨立契約                       |
@@ -48,7 +48,7 @@ flowchart LR
 
 - **build-db.md 是建置資料庫的權威**；snapshot-format.md 只描述投影出來的公開欄位。表名相同不代表欄位相同，快照沒有列出的欄位一律不出貨。
 - 卡表快照依 `AGENTS.md` 是卡片資料的唯一權威；前端可以快取它，但不另外維護卡表。
-- implementation-tiers.md 的逐表分配必須與 build-db.md 的 118 表完全一致；authored-layout.md 說明 `authored/` 如何匯入建置資料庫。
+- implementation-tiers.md 的逐表分配必須與 build-db.md 的 117 表完全一致；authored-layout.md 說明 `authored/` 如何匯入建置資料庫。
 - 效果 DSL 的語法以 `dsl/` 的 JSON Schema 與 [`docs/dsl/`](../dsl/README.md) 為準，這裡只記錄 DSL 文件、審核與載入結果的資料表。
 
 ## ER 圖
@@ -63,7 +63,7 @@ uv run docs/schema/er/build_er.py --serve    # 產生後在 localhost:8000 提�
 
 輸出在 `docs/schema/er/out/`（不進 git）：`schema-er.html` 是單檔頁面，`parse-report.txt` 是解析報告，`schema-model.json` 是從 Markdown 讀出的中間資料（除錯用）。`--out <路徑>/schema-er.html` 改輸出位置，`--artifact` 省略 doctype 外殼。有任何欄位無法解析、PK 無法標記、FK 目標不存在或分組錯誤時，不產生 HTML 並以非零狀態結束；修改 `docs/schema/` 時 pre-commit 會跑一次確認能產出。分組與快照欄名的引用對應寫在 `docs/schema/er/diagram.toml`，新增表或集合時要一起登記。
 
-建置資料庫的 118 表分成 12 組（來源與確認、身分與商品、插畫與加工、文字與勘誤、跨區與構築、問答與裁定、數位與語音、翻譯依賴、DSL 證據、機制、影像與更正、顯示與路由）；卡表快照的 43 個集合分成 6 組。
+建置資料庫的 117 表分成 12 組（來源與確認、身分與商品、插畫與加工、文字與勘誤、跨區與構築、問答與裁定、數位與語音、翻譯依賴、DSL 證據、機制、影像與更正、顯示與路由）；卡表快照的 43 個集合分成 6 組。
 圖中的箭頭表示「引用者 → 被引用者」，不是時序，也不表示基數；線條分三種：欄位宣告的 FK、約束 `FK(...)` 宣告的 FK（複合約束保留兩側完整欄組，以粗線標示）、依 `*_id` 欄名推斷的引用（卡表快照沒有 FK 記號，全部屬於這種，並包含內嵌陣列與物件裡的 ID）。正式的複合 FK、nullable 與部分唯一性以 build-db.md 為準；固定 `vocabulary` kind 的常數欄由 DDL 展開，不出現在邏輯表中。
 
 ## 待辦與待實作驗收
