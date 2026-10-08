@@ -2,8 +2,11 @@
 
 Static AST imports include conditional and function-local imports. Dynamic
 importlib and __import__ calls are outside this check.
+
+It also keeps selectolax's mistyped `css_first` behind `parse.html`.
 """
 
+import ast
 from pathlib import Path
 
 import pytest
@@ -22,6 +25,7 @@ COMPLETED = (
     "export",
 )
 PATHS = sorted(path for name in COMPLETED for path in (PACKAGE / name).rglob("*.py"))
+CSS_FIRST_HOME = PACKAGE / "parse/html.py"
 PARSE_ALLOWED = (
     "sve_carddb.core",
     "sve_carddb.contracts",
@@ -187,3 +191,38 @@ def test_parse_cannot_reach_crawl_through_urls() -> None:
         "sve_carddb.ingest.urls",
         package="sve_carddb.ingest",
     ) == {"sve_carddb.ingest.crawl", "sve_carddb.ingest.crawl.crawl"}
+
+
+def css_first_lines(source: str) -> list[int]:
+    return sorted(
+        node.lineno
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Attribute) and node.attr == "css_first"
+    )
+
+
+def test_css_first_stays_inside_parse_html() -> None:
+    violations = [
+        f"{path.relative_to(PACKAGE)}:{line}"
+        for path in sorted(PACKAGE.rglob("*.py"))
+        if path != CSS_FIRST_HOME
+        for line in css_first_lines(path.read_text(encoding="utf-8"))
+    ]
+    assert not violations, (
+        "css_first is typed LexborNode but returns None when nothing matches; "
+        "use select_one or require_one from sve_carddb.parse.html instead: "
+        + ", ".join(violations)
+    )
+
+
+def test_css_first_check_detects_direct_calls() -> None:
+    source = 'def find(node):\n    return node.css_first("x")\n'
+    assert css_first_lines(source) == [2]
+    assert css_first_lines("class A:\n    pick = other.css_first\n") == [2]
+
+
+def test_css_first_check_ignores_comments_and_docstrings() -> None:
+    source = (
+        '"""Do not call css_first directly."""\n# css_first is wrapped\nvalue = 1\n'
+    )
+    assert css_first_lines(source) == []
