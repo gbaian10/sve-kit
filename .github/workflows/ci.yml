@@ -337,7 +337,7 @@ jobs:
       - uses: taiki-e/install-action@83ac0ad63c0167e6f06796fab0fce28db1bf3db0 # v2.87.22
         with:
           tool: cargo-llvm-cov@0.9.1,cargo-deny@0.19.9,cargo-machete@0.9.2
-      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+      - uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
         with:
           install: false
           cache: false
@@ -412,7 +412,7 @@ jobs:
           persist-credentials: false
           clean: true
       # Bun and Node versions come from mise.toml.
-      - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+      - uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
         with:
           cache: true
           cache_save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
