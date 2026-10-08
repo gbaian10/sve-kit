@@ -69,7 +69,7 @@ jobs:
               - 'docs/m0/*.yaml'
             web:
               - 'sim/web/**'
-              - 'carddb/src/sve_carddb/snapshot/schema/**' # the web reader validates against the published schema
+              - 'carddb/src/sve_carddb/contracts/schema/**' # the web reader validates against the published schema
 
   repo:
     runs-on: ubuntu-latest
@@ -205,6 +205,14 @@ jobs:
             uv run --project carddb --locked pre-commit run --all-files --hook-stage "$stage" --show-diff-on-failure
             echo "::endgroup::"
           done
+      - name: Installed carddb wheel smoke
+        run: |
+          uv build --wheel carddb --out-dir "${RUNNER_TEMP}/carddb-wheel"
+          UV_PROJECT_ENVIRONMENT="${RUNNER_TEMP}/carddb-wheel-env" uv sync --project carddb --locked --no-default-groups --no-install-project
+          uv pip install --no-deps --python "${RUNNER_TEMP}/carddb-wheel-env/bin/python" "${RUNNER_TEMP}"/carddb-wheel/*.whl
+          "${RUNNER_TEMP}/carddb-wheel-env/bin/python" -I -B .github/ci/carddb_wheel_smoke.py "$GITHUB_WORKSPACE/tests/fixtures/snapshot-contract/v2"
+          "${RUNNER_TEMP}/carddb-wheel-env/bin/sve-carddb" --help > /dev/null
+          "${RUNNER_TEMP}/carddb-wheel-env/bin/sve-carddb" r2 upload-v2 --help > /dev/null
       - name: pytest (coverage gate for the explicit test scope)
         id: tests
         env:
