@@ -2,6 +2,7 @@
 
 import gzip
 import re
+import stat
 import zlib
 from dataclasses import dataclass
 from io import BytesIO
@@ -10,6 +11,9 @@ from typing import TYPE_CHECKING
 from jsonschema import ValidationError as SchemaError
 from PIL import Image
 
+from sve_carddb.contracts.profiles import MEDIA
+from sve_carddb.contracts.snapshot import validate
+from sve_carddb.core.compression import verify_brotli
 from sve_carddb.core.json import (
     array,
     canonical,
@@ -19,11 +23,7 @@ from sve_carddb.core.json import (
     parse,
     string,
 )
-from sve_carddb.r2_upload.boundary import UploadError, read_member
-from sve_carddb.snapshot.export.compression import verify_brotli
-from sve_carddb.snapshot.media import display_url
-from sve_carddb.snapshot.preview import POINTER
-from sve_carddb.snapshot.profiles import MEDIA
+from sve_carddb.snapshot.media_urls import display_url
 from sve_carddb.snapshot.publication import require_preview
 from sve_carddb.snapshot.reader import read_snapshot
 
@@ -32,8 +32,9 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
-    from sve_carddb.snapshot.project.source import Record
+    from sve_carddb.snapshot.reader import Row
 
+POINTER = "snapshots/preview/current.json"
 INDEX = "snapshots/versions/index.json"
 JSON_KEY = re.compile(
     r"snapshots/(?:blobs|manifests)/[0-9a-f]{64}\.json(?:\.(?:br|gz))?\Z"
@@ -41,15 +42,6 @@ JSON_KEY = re.compile(
 IMAGE_KEY = re.compile(
     r"images/(?:card_[sml]|art_[sm])/[1-9][0-9]*(?:-f[1-9][0-9]*)?\.webp\Z"
 )
-JSON_HEADERS = {
-    "content-type": "application/json",
-    "cache-control": "public,max-age=31536000,immutable",
-}
-IMAGE_HEADERS = {
-    "content-type": "image/webp",
-    "cache-control": "public,max-age=86400,must-revalidate",
-}
-INDEX_HEADERS = {"content-type": "application/json", "cache-control": "no-store"}
 _ENTRY = (
     "data_version",
     "published_at",
@@ -60,11 +52,25 @@ _ENTRY = (
 )
 
 
+class ExportError(ValueError):
+    """A redacted local contract or publication error safe for operator logs."""
+
+
+def read_member(root: Path, key: str) -> bytes:
+    """Reject symlinks and special files before reading a public member."""
+    if key.startswith("/") or ".." in key.split("/"):
+        raise ExportError("Invalid public member key")
+    target = root / key
+    if target.resolve() != target or not stat.S_ISREG(target.lstat().st_mode):
+        raise ExportError("Public member is not a regular non-symlink file")
+    return target.read_bytes()
+
+
 @dataclass(frozen=True, repr=False)
 class Member:
     key: str
     raw: bytes
-    headers: dict[str, str]
+    encoding: str | None = None
 
 
 @dataclass(frozen=True)
@@ -89,23 +95,23 @@ class Export:
         """Catch a stray file; the writer drops the pointer before overwriting images."""
         raw = read_member(self.root, item.key)
         if len(raw) != item.bytes:
-            raise UploadError("Export image differs from its manifest metadata")
+            raise ExportError("Export image differs from its manifest metadata")
         try:
             with Image.open(BytesIO(raw)) as decoded:
                 if decoded.format != "WEBP" or decoded.size != (
                     item.width,
                     item.height,
                 ):
-                    raise UploadError("Export image differs from its manifest metadata")
+                    raise ExportError("Export image differs from its manifest metadata")
         except OSError:
-            raise UploadError("Export image is not a readable WebP") from None
+            raise ExportError("Export image is not a readable WebP") from None
         return raw
 
 
 def directory(root: Path) -> None:
     """Keep explicit input paths from following symlink aliases."""
     if not root.is_absolute() or root.resolve() != root or not root.is_dir():
-        raise UploadError("Explicit existing non-symlink directory required")
+        raise ExportError("Explicit existing non-symlink directory required")
 
 
 def closure(manifest_path: str, manifest: dict[str, JsonValue]) -> set[str]:
@@ -115,7 +121,7 @@ def closure(manifest_path: str, manifest: dict[str, JsonValue]) -> set[str]:
         or not manifest_path.startswith("snapshots/manifests/")
         or not manifest_path.endswith(".json")
     ):
-        raise UploadError("Invalid public manifest path")
+        raise ExportError("Invalid public manifest path")
     keys = {manifest_path, manifest_path + ".gz"}
     for row in _descriptions(manifest):
         path = string(row["path"])
@@ -127,7 +133,7 @@ def closure(manifest_path: str, manifest: dict[str, JsonValue]) -> set[str]:
     return keys
 
 
-def image_files(tables: dict[str, list[Record]]) -> tuple[ImageFile, ...]:
+def image_files(tables: dict[str, list[Row]]) -> tuple[ImageFile, ...]:
     """Permanent keys and versioned URLs of every displayable size, never a hash path."""
     prints = {string(r["id"]): r for r in tables["printing"]}
     faces = {string(r["id"]): r for r in tables["face"]}
@@ -147,10 +153,10 @@ def image_files(tables: dict[str, list[Record]]) -> tuple[ImageFile, ...]:
                 size,
             )
             if url is None:
-                raise UploadError("Unavailable media cannot list display variants")
+                raise ExportError("Unavailable media cannot list display variants")
             key = url.split("?", 1)[0]
             if key in result or not IMAGE_KEY.fullmatch(key):
-                raise UploadError("Duplicate or invalid permanent image key")
+                raise ExportError("Duplicate or invalid permanent image key")
             result[key] = ImageFile(
                 key,
                 url,
@@ -166,10 +172,10 @@ def load_export(root: Path) -> Export:
     directory(root)
     try:
         return _load(root)
-    except UploadError:
+    except ExportError:
         raise
     except ValueError, OSError, KeyError, TypeError, SchemaError:
-        raise UploadError("Export validation failed") from None
+        raise ExportError("Export validation failed") from None
 
 
 def _load(root: Path) -> Export:
@@ -188,7 +194,7 @@ def _load(root: Path) -> Export:
     tables = read_snapshot(manifest, payloads)
     unique = {m.key: m for m in members}
     if set(unique) - {path + ".br"} != closure(path, manifest):
-        raise UploadError("Export members differ from the manifest closure")
+        raise ExportError("Export members differ from the manifest closure")
     export = Export(
         root,
         {k: manifest[k] for k in _ENTRY}
@@ -204,7 +210,7 @@ def _load(root: Path) -> Export:
 def _manifest(root: Path) -> tuple[str, bytes, dict[str, JsonValue]]:
     pointer = object_value(parse(read_member(root, POINTER)))
     if set(pointer) != {"manifest_path", "manifest_sha256"}:
-        raise UploadError("Invalid preview pointer")
+        raise ExportError("Invalid preview pointer")
     path = string(pointer["manifest_path"])
     raw = read_member(root, path)
     manifest = object_value(parse(raw))
@@ -214,10 +220,10 @@ def _manifest(root: Path) -> tuple[str, bytes, dict[str, JsonValue]]:
         or path != "snapshots/manifests/" + hashed[7:] + ".json"
         or canonical(manifest) != raw
     ):
-        raise UploadError("Manifest differs from the preview pointer")
+        raise ExportError("Manifest differs from the preview pointer")
     require_preview(manifest, regions=tuple(map(string, array(manifest["regions"]))))
     if manifest["format_version"] != MEDIA:
-        raise UploadError("Upload requires snapshot format 2.0.0")
+        raise ExportError("Upload requires snapshot format 2.0.0")
     return path, raw, manifest
 
 
@@ -225,14 +231,14 @@ def _blob(root: Path, row: dict[str, JsonValue]) -> tuple[bytes, tuple[Member, .
     path = string(row["path"])
     raw = read_member(root, path)
     if digest(raw) != row["sha256"] or len(raw) != row["bytes"]:
-        raise UploadError("Export payload differs from its manifest")
+        raise ExportError("Export payload differs from its manifest")
     lengths = object_value(row["compressed_bytes"])
     encoded = _encoded(
         root, path, raw, gz=lengths["gzip"] is not None, br=lengths["br"] is not None
     )
     actual = {m.key.removeprefix(path): len(m.raw) for m in encoded}
     if (actual.get(".gz"), actual.get(".br")) != (lengths["gzip"], lengths["br"]):
-        raise UploadError("Export encoded length differs from its manifest")
+        raise ExportError("Export encoded length differs from its manifest")
     return raw, encoded
 
 
@@ -248,29 +254,62 @@ def _descriptions(manifest: dict[str, JsonValue]) -> list[dict[str, JsonValue]]:
             string(row["path"])
             != "snapshots/blobs/" + string(row["sha256"])[7:] + ".json"
         ):
-            raise UploadError("Invalid immutable payload path")
+            raise ExportError("Invalid immutable payload path")
     return rows
 
 
 def _encoded(
     root: Path, path: str, raw: bytes, *, gz: bool, br: bool
 ) -> tuple[Member, ...]:
-    result = [Member(path, raw, JSON_HEADERS)]
+    result = [Member(path, raw)]
     if gz:
         encoded = read_member(root, path + ".gz")
         try:
             with gzip.GzipFile(fileobj=BytesIO(encoded)) as stream:
                 if stream.read(len(raw) + 1) != raw:
-                    raise UploadError("Export gzip sibling differs from raw bytes")
+                    raise ExportError("Export gzip sibling differs from raw bytes")
         except EOFError, OSError, zlib.error:
-            raise UploadError("Export gzip sibling is not readable") from None
-        result.append(
-            Member(path + ".gz", encoded, JSON_HEADERS | {"content-encoding": "gzip"})
-        )
+            raise ExportError("Export gzip sibling is not readable") from None
+        result.append(Member(path + ".gz", encoded, "gzip"))
     if br:
         encoded = read_member(root, path + ".br")
         verify_brotli(encoded, raw)
-        result.append(
-            Member(path + ".br", encoded, JSON_HEADERS | {"content-encoding": "br"})
-        )
+        result.append(Member(path + ".br", encoded, "br"))
     return tuple(result)
+
+
+def validate_index(value: dict[str, JsonValue]) -> None:
+    """Validate the public current/previous version index shape."""
+    validate("Index", value, MEDIA)
+
+
+def read_index(raw: bytes) -> dict[str, JsonValue]:
+    """Read canonical version index bytes independently of transport metadata."""
+    try:
+        value = object_value(parse(raw))
+        validate_index(value)
+    except ValueError, TypeError, KeyError, SchemaError:
+        raise ExportError("Invalid public version index") from None
+    if raw != canonical(value):
+        raise ExportError("Version index is not canonical")
+    return value
+
+
+def retained_manifest(raw: bytes, entry: dict[str, JsonValue]) -> dict[str, JsonValue]:
+    """Verify a retained manifest against its version index identity."""
+    if digest(raw) != entry["manifest_sha256"]:
+        raise ExportError("GC requires intact retained manifests")
+    manifest = object_value(parse(raw))
+    validate("Manifest", manifest, string(manifest["format_version"]))
+    if raw != canonical(manifest) or any(
+        manifest[k] != entry[k] for k in ("data_version", "published_at")
+    ):
+        raise ExportError("GC manifest differs from its index entry")
+    return manifest
+
+
+def current_image_keys(
+    manifest: dict[str, JsonValue], payloads: dict[str, bytes]
+) -> set[str]:
+    """Images follow current only; callers supply verified retained payload bytes."""
+    return {item.key for item in image_files(read_snapshot(manifest, payloads))}

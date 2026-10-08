@@ -11,8 +11,8 @@ from sve_carddb.build_db.model import (
     Table,
     Unique,
 )
+from sve_carddb.contracts.template_parameters import Schema, SourceSpan
 from sve_carddb.core.json import canonical, parse
-from sve_carddb.template_parameters.models import Schema, SourceSpan
 
 QUALITY = (
     Column("authored_source_id", Kind.ID),

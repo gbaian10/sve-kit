@@ -4,8 +4,8 @@ import unicodedata
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
+from sve_carddb.contracts.template_parameters import Range
 from sve_carddb.core.json import digest
-from sve_carddb.template_parameters.models import Range
 from sve_carddb.template_sources.normalizer import DIGITS, QUOTED
 
 if TYPE_CHECKING:

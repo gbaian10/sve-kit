@@ -11,6 +11,16 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
+from sve_carddb.contracts.profiles import MEDIA, profile
+from sve_carddb.contracts.snapshot import (
+    decode,
+    definition,
+    descriptor,
+    required_types,
+    row_type,
+    tables,
+    validate,
+)
 from sve_carddb.core.json import (
     array,
     canonical,
@@ -20,16 +30,6 @@ from sve_carddb.core.json import (
     parse,
     string,
 )
-from sve_carddb.snapshot.contract import (
-    decode,
-    definition,
-    descriptor,
-    required_types,
-    row_type,
-    tables,
-    validate,
-)
-from sve_carddb.snapshot.profiles import MEDIA, profile
 from sve_carddb.snapshot.reader_media import validate_digital, validate_media
 from sve_carddb.snapshot.semantics import (
     validate_config,

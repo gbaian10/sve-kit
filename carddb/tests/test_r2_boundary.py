@@ -6,7 +6,8 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb.cli import app
-from sve_carddb.r2_upload.boundary import UploadError, read_member
+from sve_carddb.snapshot.read_api import ExportError as UploadError
+from sve_carddb.snapshot.read_api import read_member
 
 if TYPE_CHECKING:
     from pathlib import Path

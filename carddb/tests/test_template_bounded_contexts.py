@@ -2,10 +2,10 @@
 
 import pytest
 
+from sve_carddb.contracts.template_parameters import Schema, Slot
 from sve_carddb.template_parameters.candidate_matching import classify, recognize
 from sve_carddb.template_parameters.explicit_rules import EXPLICIT
 from sve_carddb.template_parameters.keyword_aliases import KEYWORD_ALIASES
-from sve_carddb.template_parameters.models import Schema, Slot
 from sve_carddb.template_parameters.references import References
 from sve_carddb.template_parameters.spans import locate
 from sve_carddb.template_sources.inventory import entry

@@ -7,6 +7,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.catalog.adoption_models import Batch
+from sve_carddb.contracts.template_parameters import Schema, Slot
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.manifest import Kind
 from sve_carddb.source_archive import seal_batch
@@ -14,7 +15,6 @@ from sve_carddb.sources.official_jp import card_url
 from sve_carddb.template_parameter_rules.current import PATH, load, load_file
 from sve_carddb.template_parameter_rules.current import parse as parse_rules
 from sve_carddb.template_parameters.analysis import SAFE_INTEGER, VERSION_PARAMETERS
-from sve_carddb.template_parameters.models import Schema, Slot
 from sve_carddb.template_parameters.references import References
 from sve_carddb.template_translations.current import (
     read_templates,

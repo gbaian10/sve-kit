@@ -21,13 +21,13 @@ from sve_carddb.catalog import adoption_importer
 from sve_carddb.catalog.models import Catalog
 from sve_carddb.catalog.projection import CatalogProjection
 from sve_carddb.cli import app
+from sve_carddb.core.compression import verify_brotli
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.core.provenance import InputRecord, SourceUse, input_record
 from sve_carddb.products import OfficialProducts, ProductIdentities
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot import offline
 from sve_carddb.snapshot.export import export_snapshot
-from sve_carddb.snapshot.export.compression import verify_brotli
 from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.offline import (
     Inputs,

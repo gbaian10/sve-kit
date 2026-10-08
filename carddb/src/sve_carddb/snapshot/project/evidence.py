@@ -13,17 +13,7 @@ if TYPE_CHECKING:
     from sve_carddb.card_extras.importer import CardExtrasRestriction
     from sve_carddb.routes.defaults import GeneralEvidence
     from sve_carddb.snapshot.project.source import Record
-
-
-@dataclass(frozen=True)
-class DisplayBinding:
-    """Reuse an exact source use on an explicitly verified display owner."""
-
-    source_use_id: str
-    destination: tuple[str, ...]
-    target_lang: str
-    basis: str
-    translation_id: str | None = None
+    from sve_carddb.translations.bindings import DisplayBinding
 
 
 @dataclass(frozen=True)

@@ -2,8 +2,8 @@
 
 from typing import TYPE_CHECKING
 
+from sve_carddb.contracts.snapshot import definition
 from sve_carddb.core.json import array, integer, object_value, string
-from sve_carddb.snapshot.contract import definition
 from sve_carddb.snapshot.project.source import Record, Source, json_list, pick
 
 if TYPE_CHECKING:

@@ -2,8 +2,8 @@
 
 from pydantic import JsonValue
 
+from sve_carddb.contracts.snapshot import validate
 from sve_carddb.core.json import string
-from sve_carddb.snapshot.contract import validate
 
 
 def require_formal(manifest: dict[str, JsonValue]) -> None:

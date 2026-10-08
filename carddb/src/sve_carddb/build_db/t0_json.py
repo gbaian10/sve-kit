@@ -3,8 +3,8 @@
 from pydantic import JsonValue
 
 from sve_carddb.build_db.domains import CODE, LANG
+from sve_carddb.contracts.snapshot import definition
 from sve_carddb.core.json import array, integer, object_value, parse, string
-from sve_carddb.snapshot.contract import definition
 
 
 def _object(properties: dict[str, JsonValue]) -> dict[str, JsonValue]:

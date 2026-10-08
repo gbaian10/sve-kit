@@ -29,7 +29,7 @@ from .build_db_fixtures import seed
 from .test_template_current import Case, current_case
 
 if TYPE_CHECKING:
-    from sve_carddb.template_sources.normalizer import Role
+    from sve_carddb.contracts.template_parameters import Role
 
 __all__ = ("current_case",)
 

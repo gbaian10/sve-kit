@@ -11,6 +11,8 @@ import pytest
 from jsonschema import ValidationError
 from pydantic import JsonValue
 
+from sve_carddb.contracts.profiles import MEDIA, profile
+from sve_carddb.contracts.snapshot import validate
 from sve_carddb.core.json import (
     array,
     canonical,
@@ -21,11 +23,9 @@ from sve_carddb.core.json import (
     string,
 )
 from sve_carddb.snapshot.buckets import bucket
-from sve_carddb.snapshot.contract import validate
 from sve_carddb.snapshot.export import Brotli, Ownership, Snapshot, export_snapshot
 from sve_carddb.snapshot.export.layout import Group, Layout
 from sve_carddb.snapshot.export.measure import measure, update
-from sve_carddb.snapshot.profiles import MEDIA, profile
 from sve_carddb.snapshot.project import Projection
 from sve_carddb.snapshot.reader import read_snapshot, read_text_all
 

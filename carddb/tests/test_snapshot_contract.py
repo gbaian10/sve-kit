@@ -6,10 +6,10 @@ import pytest
 from jsonschema import Draft202012Validator, ValidationError
 from pydantic import JsonValue
 
+from sve_carddb.contracts.generate_schema import generate
+from sve_carddb.contracts.snapshot import definition, schema, tables, validate
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.snapshot.buckets import bucket
-from sve_carddb.snapshot.contract import definition, schema, tables, validate
-from sve_carddb.snapshot.generate_schema import generate
 from sve_carddb.snapshot.reader import read_snapshot, read_text_all
 
 from .snapshot_contract_fixtures import (
@@ -33,7 +33,7 @@ def test_schema_is_valid_and_covers_every_collection() -> None:
 def test_schema_regeneration_matches_committed_bytes() -> None:
     resource = (
         Path(__file__).resolve().parents[1]
-        / "src/sve_carddb/snapshot/schema/v2/contract.schema.json"
+        / "src/sve_carddb/contracts/schema/v2/contract.schema.json"
     )
     assert generate() == resource.read_bytes()
 

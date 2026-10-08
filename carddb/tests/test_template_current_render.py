@@ -387,7 +387,7 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
 def test_reference_interpolation_tracks_exact_positions_and_requires_target_label(
     verified: Validated,
 ) -> None:
-    from sve_carddb.template_parameters.models import Schema  # ruff: ignore[import-outside-top-level] -- synthetic typed reference schema
+    from sve_carddb.contracts.template_parameters import Schema  # ruff: ignore[import-outside-top-level] -- synthetic typed reference schema
     from sve_carddb.template_translations.current_render import (  # ruff: ignore[import-outside-top-level] -- finite interpolation unit boundary
         Binding,
         Label,

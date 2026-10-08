@@ -2,20 +2,18 @@
 
 from typing import TYPE_CHECKING
 
-from jsonschema import ValidationError as SchemaError
-
-from sve_carddb.core.json import canonical, digest, integer, object_value, parse, string
-from sve_carddb.r2_upload.boundary import UploadError
-from sve_carddb.r2_upload.v2.export import IMAGE_HEADERS, INDEX, INDEX_HEADERS
-from sve_carddb.snapshot.contract import validate
-from sve_carddb.snapshot.profiles import MEDIA
+from sve_carddb.core.json import canonical, digest, integer, object_value, string
+from sve_carddb.r2_upload.v2.headers import IMAGE_HEADERS, INDEX_HEADERS, member_headers
+from sve_carddb.snapshot.read_api import INDEX, validate_index
+from sve_carddb.snapshot.read_api import ExportError as UploadError
+from sve_carddb.snapshot.read_api import read_index as read_index_bytes
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.r2_upload.v2.adapter import R2Store, Stored
-    from sve_carddb.r2_upload.v2.export import Export
     from sve_carddb.r2_upload.v2.freshness import CDNFreshness
+    from sve_carddb.snapshot.read_api import Export
 
 
 def read_index(remote: Stored | None) -> dict[str, JsonValue] | None:
@@ -24,14 +22,7 @@ def read_index(remote: Stored | None) -> dict[str, JsonValue] | None:
         return None
     if remote.headers != INDEX_HEADERS:
         raise UploadError("Version index metadata differs from contract")
-    try:
-        value = object_value(parse(remote.raw))
-        validate("Index", value, MEDIA)
-    except ValueError, TypeError, KeyError, SchemaError:
-        raise UploadError("Invalid public version index") from None
-    if remote.raw != canonical(value):
-        raise UploadError("Version index is not canonical")
-    return value
+    return read_index_bytes(remote.raw)
 
 
 def next_index(
@@ -63,7 +54,7 @@ def next_index(
             "current": entry,
             "previous": current,
         }
-    validate("Index", result, MEDIA)
+    validate_index(result)
     return result
 
 
@@ -86,7 +77,9 @@ def upload(
         digests[item.key] = digest(raw)
         written += _sync(store, item.key, raw, IMAGE_HEADERS, overwrite=True)
     for member in export.members:
-        written += _sync(store, member.key, member.raw, member.headers, overwrite=False)
+        written += _sync(
+            store, member.key, member.raw, member_headers(member), overwrite=False
+        )
     if cdn is not None:
         _verify_cdn(cdn, export, digests)
     if index is not None:

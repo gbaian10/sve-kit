@@ -21,6 +21,7 @@ from sve_carddb.core.json import (
     string,
 )
 from sve_carddb.snapshot.media_config import offline_configuration
+from sve_carddb.snapshot.media_urls import _uint, image_path
 from sve_carddb.snapshot.preview.images import image_blobs
 
 if TYPE_CHECKING:
@@ -29,31 +30,6 @@ if TYPE_CHECKING:
     from sve_carddb.image_checks import ImageChecks
     from sve_carddb.snapshot.project import Projection
     from sve_carddb.snapshot.project.source import Record
-
-MAX_SAFE = 9007199254740991
-SIZE_KEYS = ("art_m", "art_s", "card_l", "card_m", "card_s")
-
-
-def _uint(value: int, *, positive: bool) -> int:
-    if type(value) is not int or not (1 if positive else 0) <= value <= MAX_SAFE:
-        raise ValueError("Image URL integer outside safe domain")
-    return value
-
-
-def image_path(int_id: int, ordinal: int, size: str) -> str:
-    """Use permanent identities, never a card number or face array position."""
-    _uint(int_id, positive=True)
-    _uint(ordinal, positive=False)
-    if size not in SIZE_KEYS:
-        raise ValueError("Unknown image size")
-    suffix = "" if ordinal == 0 else "-f" + str(ordinal)
-    return "images/" + size + "/" + str(int_id) + suffix + ".webp"
-
-
-def image_url(int_id: int, ordinal: int, size: str, version: int) -> str:
-    """The query version belongs to the card or art group, not the file key."""
-    _uint(version, positive=True)
-    return image_path(int_id, ordinal, size) + "?v=" + str(version)
 
 
 @dataclass(frozen=True)
@@ -73,24 +49,6 @@ class MediaPlan:
             if digest(raw) != asset["sha256"] or len(raw) != integer(asset["bytes"]):
                 raise ValueError("Media plan source hash or bytes mismatch")
             yield string(asset["path"]), raw
-
-
-def display_url(printing: Record, face: Record, media: Record, size: str) -> str | None:
-    """Select the group's version only after validating the exact printing face."""
-    if media["printing_id"] != printing["id"] or media["face_id"] != face["id"]:
-        raise ValueError("Image URL media belongs to another printing face")
-    if size not in SIZE_KEYS:
-        raise ValueError("Unknown image size")
-    if media["publication_state"] != "approved" or media["availability"] != "available":
-        return None
-    if size not in {object_value(v)["size_key"] for v in array(media["variants"])}:
-        raise ValueError("Image URL size has no verified display variant")
-    version = integer(
-        media["art_version" if size.startswith("art_") else "card_version"]
-    )
-    return image_url(
-        integer(printing["int_id"]), integer(face["ordinal"]), size, version
-    )
 
 
 _SUBJECT_ARITY = 2

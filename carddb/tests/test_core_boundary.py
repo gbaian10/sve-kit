@@ -23,7 +23,7 @@ def project_imports(source: str, package: str) -> set[str]:
             if node.level:
                 module = resolve_name("." * node.level + module, package)
             modules.add(module)
-            if module in {"sve_carddb", "sve_carddb.core"}:
+            if module in {"sve_carddb", "sve_carddb.core", "sve_carddb.contracts"}:
                 modules.update(module + "." + alias.name for alias in node.names)
     return {
         module

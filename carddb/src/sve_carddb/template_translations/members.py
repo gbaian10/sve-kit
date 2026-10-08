@@ -10,7 +10,8 @@ from sve_carddb.template_sources.inventory import entry
 from sve_carddb.template_sources.normalizer import VERSION, partition
 
 if TYPE_CHECKING:
-    from sve_carddb.template_parameters.models import Candidate, Hint, Schema
+    from sve_carddb.contracts.template_parameters import Schema
+    from sve_carddb.template_parameters.models import Candidate, Hint
     from sve_carddb.template_sources.models import Entry
 POSITIVE_ROLES = {
     "choice_ordinal",

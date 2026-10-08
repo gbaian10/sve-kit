@@ -19,8 +19,8 @@ if TYPE_CHECKING:
     from sve_carddb.digital_links.importer import Result as LinkResult
     from sve_carddb.digital_name_policies.current_application import Plan
     from sve_carddb.digital_name_policies.loader import Snapshot
-    from sve_carddb.snapshot.project.evidence import DisplayBinding
     from sve_carddb.text_observations.plan import TextPlan
+    from sve_carddb.translations.bindings import DisplayBinding
     from sve_carddb.translations.current_names import Names
     from sve_carddb.translations.name_sources import NameOwner
     from sve_carddb.translations.sources import Sources

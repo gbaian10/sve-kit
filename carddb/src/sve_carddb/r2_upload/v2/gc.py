@@ -4,19 +4,18 @@ from typing import TYPE_CHECKING
 
 from jsonschema import ValidationError as SchemaError
 
-from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
-from sve_carddb.r2_upload.boundary import UploadError
+from sve_carddb.core.json import array, digest, object_value, string
 from sve_carddb.r2_upload.v2.adapter import PUBLIC_PREFIXES
-from sve_carddb.r2_upload.v2.export import (
+from sve_carddb.r2_upload.v2.publish import read_index
+from sve_carddb.snapshot.read_api import (
     IMAGE_KEY,
     INDEX,
     JSON_KEY,
     closure,
-    image_files,
+    current_image_keys,
+    retained_manifest,
 )
-from sve_carddb.r2_upload.v2.publish import read_index
-from sve_carddb.snapshot.contract import validate
-from sve_carddb.snapshot.reader import read_snapshot
+from sve_carddb.snapshot.read_api import ExportError as UploadError
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -29,13 +28,7 @@ def _manifest(store: R2Store, entry: dict[str, JsonValue]) -> dict[str, JsonValu
     remote = store.get(path)
     if remote is None or digest(remote.raw) != entry["manifest_sha256"]:
         raise UploadError("GC requires intact retained manifests")
-    manifest = object_value(parse(remote.raw))
-    validate("Manifest", manifest, string(manifest["format_version"]))
-    if remote.raw != canonical(manifest) or any(
-        manifest[k] != entry[k] for k in ("data_version", "published_at")
-    ):
-        raise UploadError("GC manifest differs from its index entry")
-    return manifest
+    return retained_manifest(remote.raw, entry)
 
 
 def _current_images(store: R2Store, manifest: dict[str, JsonValue]) -> set[str]:
@@ -47,7 +40,7 @@ def _current_images(store: R2Store, manifest: dict[str, JsonValue]) -> set[str]:
         if remote is None or digest(remote.raw) != row["sha256"]:
             raise UploadError("GC requires intact retained payloads")
         payloads[string(row["key"])] = remote.raw
-    return {item.key for item in image_files(read_snapshot(manifest, payloads))}
+    return current_image_keys(manifest, payloads)
 
 
 def retained(store: R2Store) -> tuple[Stored, set[str], set[str]]:

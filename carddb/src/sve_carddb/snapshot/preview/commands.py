@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Annotated
 import typer
 
 from sve_carddb.cli_paths import required_root
+from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.core.authored import authored_root
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.image_assets import (
@@ -23,7 +24,6 @@ from sve_carddb.snapshot.offline import Built, Inputs
 from sve_carddb.snapshot.offline import build as build_offline
 from sve_carddb.snapshot.preview import Roots, _write, write_preview
 from sve_carddb.snapshot.preview.media_state import reserve
-from sve_carddb.snapshot.profiles import MEDIA, profile
 from sve_carddb.snapshot.publication import require_formal, require_preview
 
 if TYPE_CHECKING:

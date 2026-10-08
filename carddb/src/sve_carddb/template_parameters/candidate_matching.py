@@ -4,6 +4,7 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from sve_carddb.contracts.template_parameters import Range
 from sve_carddb.template_parameter_rules.models import LEGACY_IDS
 from sve_carddb.template_parameters.analysis import (
     analyze,
@@ -13,7 +14,6 @@ from sve_carddb.template_parameters.analysis import (
 )
 from sve_carddb.template_parameters.explicit_rules import EXPLICIT
 from sve_carddb.template_parameters.keyword_aliases import KEYWORD_ALIASES
-from sve_carddb.template_parameters.models import Range
 from sve_carddb.template_parameters.numeric_rules import (
     ASCII_AFTER,
     ASCII_BEFORE,

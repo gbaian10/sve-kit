@@ -93,3 +93,22 @@ bootstrap，兩區數字相同，須寫明負擔，不按語言比例分攤。Br
 JP 量測不足以凍結正式配置；正式前還須量 EN、雙區與完整三語名字／facet 閉包，
 包含零 pending、實際分布、全 pending、最大片與增量重建量。手機的 48/80 MiB
 常駐／更新記憶體與解析時間仍按 [size-budget.md](size-budget.md) 獨立驗收。
+
+## 唯讀匯出邊界
+
+`carddb` 的 `sve_carddb.snapshot.read_api` 提供發布端使用的唯讀入口。
+`load_export(root)` 驗證 preview 指標、canonical JSON、檔名與內容 hash、完整分片引用、
+壓縮旁檔及圖片尺寸／格式，再回傳 `Export`。`members` 包含公開 key、原始 bytes 與
+`encoding`；`images` 包含永久 key、版本化 URL、尺寸與 bytes，`Export.image(item)`
+每次重新讀取並核對圖片。傳輸 header 由發布端決定。
+
+`read_index(raw)` 驗證 canonical 版本索引；`validate_index(value)` 驗證索引形狀。
+GC 使用 `retained_manifest(raw, entry)` 核對保留的 manifest、`closure(path, manifest)`
+取得 JSON 引用閉包，及 `current_image_keys(manifest, payloads)` 取得 current 圖片 keys。
+`directory(root)` 與 `read_member(root, key)` 保留非 symlink 的本機讀取限制。
+這個入口不載入 DB、建置流程、preview writer 或 R2 傳輸，也不在 import 時執行 I/O。
+
+共用契約的唯一權威位於 `sve_carddb.contracts`，快照契約讀取／驗證位於 `contracts.snapshot`，包括 schema 資源、profiles、
+欄位 descriptor 與模板參數形狀；build 與 snapshot 均依賴它。
+CI 在既有 Python job 中建立 wheel，以獨立環境安裝後檢查資源、reader 與 CLI help，
+避免 editable install 掩蓋遺漏的套件資源。

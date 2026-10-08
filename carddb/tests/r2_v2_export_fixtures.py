@@ -9,12 +9,12 @@ from typing import TYPE_CHECKING
 import pytest
 from PIL import Image
 
+from sve_carddb.contracts.profiles import MEDIA
 from sve_carddb.image_variants import build_variants
 from sve_carddb.snapshot.export import Batch, export_snapshot
 from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.preview import Roots, write_preview
 from sve_carddb.snapshot.preview.media_state import reserve
-from sve_carddb.snapshot.profiles import MEDIA
 
 from .test_image_variants import source
 from .test_snapshot_preview_images import PublicImages

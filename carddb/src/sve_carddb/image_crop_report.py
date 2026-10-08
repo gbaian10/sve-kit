@@ -4,9 +4,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.core.json import string
 from sve_carddb.image_crops import image_source_key
-from sve_carddb.snapshot.project.source import Source
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database
@@ -37,10 +35,12 @@ def crop_report(
         for item in images.images
     }
     applied = {record.key for record in by_url.values() if record is not None}
-    printings = {
-        string(row["id"]): string(row["card_id"])
-        for row in Source(db).rows("printing", "id,card_id")
-    }
+    printings: dict[str, str] = {}
+    for row in db.select("printing", ("id", "card_id")):
+        printing_id, card_id = row.values["id"], row.values["card_id"]
+        if not isinstance(printing_id, str) or not isinstance(card_id, str):
+            raise TypeError("Expected printing and card identifiers")
+        printings[printing_id] = card_id
     covered: dict[tuple[str, str], set[str]] = {}
     for ref in references:
         if by_url.get(ref.source_url) is not None:

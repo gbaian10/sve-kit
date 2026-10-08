@@ -8,6 +8,9 @@ from typing import TYPE_CHECKING, cast
 import pytest
 from jsonschema import Draft202012Validator, ValidationError
 
+from sve_carddb.contracts.generate_schema import generate
+from sve_carddb.contracts.profiles import MEDIA, profile
+from sve_carddb.contracts.snapshot import columns, schema, validate
 from sve_carddb.core.json import (
     array,
     canonical,
@@ -17,15 +20,13 @@ from sve_carddb.core.json import (
     parse,
     string,
 )
-from sve_carddb.snapshot.contract import columns, schema, validate
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.export.measure import update
 from sve_carddb.snapshot.export.wire import encode
-from sve_carddb.snapshot.generate_schema import generate
-from sve_carddb.snapshot.media import MAX_SAFE, image_path, image_url, prepare_media
+from sve_carddb.snapshot.media import prepare_media
+from sve_carddb.snapshot.media_urls import MAX_SAFE, display_url, image_path, image_url
 from sve_carddb.snapshot.preview import Roots, write_preview
 from sve_carddb.snapshot.preview.media_state import STATE, reserve
-from sve_carddb.snapshot.profiles import MEDIA, profile
 from sve_carddb.snapshot.reader import read_index, read_snapshot, read_text_all
 
 from .test_snapshot_export import BATCH
@@ -69,7 +70,7 @@ def test_schema_regeneration_and_frozen_column_boundaries() -> None:
         generate(MEDIA)
         == (
             Path(__file__).resolve().parents[1]
-            / "src/sve_carddb/snapshot/schema/v2/contract.schema.json"
+            / "src/sve_carddb/contracts/schema/v2/contract.schema.json"
         ).read_bytes()
     )
     assert columns("printing_image", MEDIA) == [
@@ -713,7 +714,6 @@ def test_committed_state_rejects_corruption(images: PublicImages, change: str) -
 
 
 def test_group_version_selector_and_disabled_urls(images: PublicImages) -> None:
-    from sve_carddb.snapshot.media import display_url  # ruff: ignore[import-outside-top-level] -- test the visible-row accessor without a producer
 
     plan = prepare_media(images.projection, images.library, revision=7)
     media = plan.projection.tables["printing_image"][0]

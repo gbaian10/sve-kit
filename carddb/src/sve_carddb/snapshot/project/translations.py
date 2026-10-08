@@ -8,11 +8,8 @@ from sve_carddb.snapshot.project.source import Record, Source, pick
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
-    from sve_carddb.snapshot.project.evidence import (
-        Decisions,
-        DisplayBinding,
-        DisplayCheck,
-    )
+    from sve_carddb.snapshot.project.evidence import Decisions, DisplayCheck
+    from sve_carddb.translations.bindings import DisplayBinding
 
 
 class Texts:

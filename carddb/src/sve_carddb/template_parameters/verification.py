@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING
 from sve_carddb.template_parameters.analysis import unsigned
 
 if TYPE_CHECKING:
-    from sve_carddb.template_parameters.models import Hint, Schema, Slot
+    from sve_carddb.contracts.template_parameters import Schema, Slot
+    from sve_carddb.template_parameters.models import Hint
 
 
 def verify_values(

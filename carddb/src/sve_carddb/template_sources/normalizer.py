@@ -3,9 +3,12 @@
 import re
 import unicodedata
 from dataclasses import dataclass
-from typing import Literal
+from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import digest
+
+if TYPE_CHECKING:
+    from sve_carddb.contracts.template_parameters import Role
 
 VERSION = "classification-jp-v0-v1"
 CODE_PATH = "carddb/src/sve_carddb/template_sources/normalizer.py"
@@ -19,7 +22,6 @@ TOKEN_HEADER = re.compile(
 REMINDER = re.compile(r"（[^（）]*）")
 DIGITS = re.compile(r"[0-9０-９]+")
 QUOTED = re.compile(r"『[^』]*』")
-type Role = Literal["body", "reminder", "token_header", "layout"]
 
 
 @dataclass(frozen=True)

@@ -1,1 +1,1 @@
-"""Public snapshot contract resources and independent reference reader."""
+"""Snapshot projection, export and independent read APIs."""
