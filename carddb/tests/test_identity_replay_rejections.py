@@ -68,7 +68,9 @@ def change(
     row = old.entry()
     assert row is not None
     row.data.update(data)
-    result[key] = replace(old, content=canonical(row.model_dump(mode="json")))
+    result[key] = replace(
+        old, content=canonical(row.model_dump(mode="json", round_trip=True))
+    )
     return result
 
 
@@ -110,12 +112,12 @@ def test_retired_destination_cannot_be_allocated(
     move_state: tuple[dict[str, Entity], dict[str, Entity], Transition],
 ) -> None:
     before, _, record = move_state
-    raw = record.model_dump(mode="json")
+    raw = record.model_dump(mode="json", round_trip=True)
     update = next(u for u in raw["updates"] if u["target_key"] == "card:" + A)
     update["target_key"] = "card:" + B
     update["before"] = None
     update["allocation_anchor"] = "synthetic-new-card"
-    update["after"]["record_key"] = "card:" + B
+
     update["after"]["data"]["id"] = B
     raw["updates"].sort(key=operator.itemgetter("target_key"))
     with pytest.raises(
@@ -141,7 +143,6 @@ def test_art_use_cannot_be_shared_by_two_art(
     row = before["art:" + X].entry()
     assert row is not None
     row.data["id"] = "a:" + "d" * 32
-    row.record_key = "art:" + str(row.data["id"])
     records = dict(before)
     records[row.record_key] = entity(row, row.record_key, None)
     with pytest.raises(
@@ -200,7 +201,7 @@ def test_original_ownership_rejections(
     if damage == "retired":
         before = after
     elif damage in {"partial", "foreign"}:
-        raw = repair.model_dump(mode="json")
+        raw = repair.model_dump(mode="json", round_trip=True)
         raw["printing_moves"] = raw["printing_moves"][:1]
         if damage == "foreign":
             raw["printing_moves"][0]["printing_id"] = "p:" + "3" * 32
@@ -208,7 +209,7 @@ def test_original_ownership_rejections(
     elif damage == "remaining":
         after = before
     elif damage == "nonretiring_empty":
-        raw = repair.model_dump(mode="json")
+        raw = repair.model_dump(mode="json", round_trip=True)
         raw["kind"] = "reassign_printing"
         raw["printing_moves"] = raw["printing_moves"][:1]
         raw["retire_old"] = False
@@ -221,7 +222,7 @@ def test_remaining_art_uses_are_exact(
     move_state: tuple[dict[str, Entity], dict[str, Entity], Transition],
 ) -> None:
     before, after, record = move_state
-    raw = record.repairs[0].model_dump(mode="json")
+    raw = record.repairs[0].model_dump(mode="json", round_trip=True)
     raw["art_moves"][0]["remaining_uses"] = [{"printing_id": Q, "face_id": FA}]
     repair = Repair.model_validate_json(canonical(raw))
     with pytest.raises(
@@ -264,7 +265,7 @@ def test_art_target_rejections(
         for m in repair.printing_moves
         for f in m.faces
     }
-    raw = repair.art_moves[0].model_dump(mode="json")
+    raw = repair.art_moves[0].model_dump(mode="json", round_trip=True)
     target = raw["targets"][0]
     original = {(P, FA), (Q, FA)}
     if damage == "duplicate_target":
@@ -287,7 +288,6 @@ def test_art_target_rejections(
         row = after["art:" + Y].entry()
         assert row is not None
         row.data["id"] = extra["to_art_id"]
-        row.record_key = "art:" + extra["to_art_id"]
         after = dict(after)
         after[row.record_key] = entity(row, row.record_key, None)
         raw["targets"].append(extra)
@@ -442,7 +442,6 @@ def test_post_review_append_needs_new_route_evidence(
             },
         ),
         {
-            "record_key": "card_int_id:" + pid,
             "kind": "card_int_id",
             "owner": "EXAMPLE",
             "data": {"int_id": 20001, "printing_id": pid},
@@ -534,7 +533,7 @@ def test_face_transfer_destination_has_parent_and_declaration(
     if damage == "parent":
         after = change(after, "face:" + FB, card_id=C)
     else:
-        raw = repair.model_dump(mode="json")
+        raw = repair.model_dump(mode="json", round_trip=True)
         raw["face_moves"][0]["to_face_ids"] = [FC]
         repair = Repair.model_validate_json(canonical(raw))
     with pytest.raises(
@@ -548,7 +547,7 @@ def test_face_transfer_cannot_list_unused_destination(
     move_state: tuple[dict[str, Entity], dict[str, Entity], Transition],
 ) -> None:
     before, after, record = move_state
-    raw = record.repairs[0].model_dump(mode="json")
+    raw = record.repairs[0].model_dump(mode="json", round_trip=True)
     raw["face_moves"][0]["to_face_ids"] = sorted([FB, FC])
     repair = Repair.model_validate_json(canonical(raw))
     with pytest.raises(
@@ -562,7 +561,7 @@ def test_unused_face_transfer_stays_within_repair_cards(
     move_state: tuple[dict[str, Entity], dict[str, Entity], Transition],
 ) -> None:
     before, after, record = move_state
-    raw = record.repairs[0].model_dump(mode="json")
+    raw = record.repairs[0].model_dump(mode="json", round_trip=True)
     raw["face_moves"].append({"from_face_id": FC, "to_face_ids": [FA]})
     raw["face_moves"].sort(key=canonical)
     repair = Repair.model_validate_json(canonical(raw))

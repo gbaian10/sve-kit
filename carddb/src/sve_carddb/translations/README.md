@@ -1,7 +1,10 @@
 # Glossary and digital names
 
 The translation entry accepts format 2 only. Shards contain
-`record_key/kind/data/origin/low_confidence` with an optional `note`.
+`kind/data` with optional `origin/low_confidence/note`. Omitted quality values
+are `project` and `false`. Selection keys are derived on load; stored `record_key`
+fields are rejected. YAML writers omit these defaults and a null
+`missing_source_reason`, while retaining meaningful `value: null`.
 Readers load the current working tree once from the dedicated glossary/templates/
 overrides directories. They validate size, types, unique keys and references,
 then sort; shard gaps and unordered records are accepted. There is no checksum

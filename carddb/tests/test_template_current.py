@@ -89,7 +89,9 @@ def make_case(tmp_path: Path) -> Case:
     generated = sources.generate((batch,))
     records = _records(generated)
     values: dict[str, JsonValue] = {
-        "translations/templates/current/001.yaml": records.model_dump(mode="json"),
+        "translations/templates/current/001.yaml": records.model_dump(
+            mode="json", round_trip=True
+        ),
     }
     _write(root, values)
     revision = commit(root)
@@ -113,7 +115,6 @@ def _current_definition(member: Reconstructed) -> DefinitionRecord:
     )
     member.verify_schema(schema)
     record = DefinitionRecord(
-        record_key="temporary",
         kind="sentence_template",
         data=Definition(
             id="T" + "0" * 16,
@@ -133,7 +134,6 @@ def _current_definition(member: Reconstructed) -> DefinitionRecord:
     identifier = "T" + checksum[7:23]
     return record.model_copy(
         update={
-            "record_key": canonical(["sentence_template", identifier]).decode(),
             "data": record.data.model_copy(
                 update={"id": identifier, "content_hash": checksum}
             ),
@@ -147,9 +147,6 @@ def _records(generated: Generated) -> Shard:
     schema = target.data.parameter_schema
     text = "Synthetic " + " ".join("{{" + s.name + "}}" for s in schema.slots)
     translation = TranslationRecord(
-        record_key=canonical(
-            ["template_translation", target.data.id, "zh-Hant"]
-        ).decode(),
         kind="template_translation",
         data=Translation(template_id=target.data.id, lang="zh-Hant", text=text),
         origin="machine",
@@ -198,7 +195,8 @@ def test_new_commit_can_edit_text_and_note_without_receipt(current_case: Case) -
                     "translation_authored_format": 2,
                     "kind": "translation_shard",
                     "records": [
-                        r.model_dump(mode="json") for r in current_case.inputs.records
+                        r.model_dump(mode="json", round_trip=True)
+                        for r in current_case.inputs.records
                     ],
                 }
             )
@@ -218,7 +216,7 @@ def test_new_commit_can_edit_text_and_note_without_receipt(current_case: Case) -
     value = Shard(
         translation_authored_format=2, kind="translation_shard", records=tuple(records)
     )
-    path.write_bytes(canonical(value.model_dump(mode="json")))
+    path.write_bytes(canonical(value.model_dump(mode="json", round_trip=True)))
     index_path = current_case.repository / "authored/translations/index.yaml"
     index = object_value(parse(index_path.read_bytes()))
     object_value(index["includes"])["translations/templates/current/001.yaml"] = digest(

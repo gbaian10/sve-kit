@@ -74,7 +74,10 @@ def _base(files: RegistryFiles) -> dict[str, Entity]:
     entries: list[Entry] = []
     for loaded in files.shards:
         shard = loaded.envelope()
-        if digest(shard.model_dump(mode="json")) != loaded.content_hash:
+        if (
+            digest(shard.model_dump(mode="json", round_trip=True))
+            != loaded.content_hash
+        ):
             raise ValueError(
                 "Registry envelope serialization changed canonical content"
             )
@@ -176,7 +179,7 @@ def _updates(
             None
             if update.after is None
             else Entry.model_validate_json(
-                canonical(update.after.model_dump(mode="json"))
+                canonical(update.after.model_dump(mode="json", round_trip=True))
             )
         )
         if old and old.permanent_content is not None and after is not None:

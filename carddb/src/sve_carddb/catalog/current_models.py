@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, computed_field, model_validator
 
 from sve_carddb.catalog.adoption_models import (
     AliasSubject,
@@ -33,8 +33,8 @@ from sve_carddb.translations.current_models import Quality
 class LabelTranslation(RecordData):
     lang: Lang
     text: Text
-    origin: Literal["project", "machine"]
-    low_confidence: bool
+    origin: Literal["project", "machine"] = "project"
+    low_confidence: bool = False
 
 
 class CurrentVocabularyValue(VocabularyValue):
@@ -99,6 +99,14 @@ class VocabularyRecord(Quality):
         )
         return _evidence(self.data.evidence, refs)
 
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical(
+            [self.kind, self.data.subject.model_dump(mode="json")]
+        ).decode()
+
 
 class LanguageRecord(Quality):
     kind: Literal["language_adoption"]
@@ -108,6 +116,14 @@ class LanguageRecord(Quality):
     def evidence(self) -> tuple[Evidence, ...]:
         """Retain additional sources that are not referenced by a value."""
         return self.data.evidence
+
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical(
+            [self.kind, self.data.subject.model_dump(mode="json")]
+        ).decode()
 
 
 class AliasData(RecordData):
@@ -120,6 +136,14 @@ class AliasRecord(Quality):
     kind: Literal["search_alias_adoption"]
     data: AliasData
 
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical(
+            [self.kind, self.data.subject.model_dump(mode="json")]
+        ).decode()
+
 
 class SymbolData(RecordData):
     subject: SymbolSubject
@@ -130,6 +154,14 @@ class SymbolData(RecordData):
 class SymbolRecord(Quality):
     kind: Literal["text_symbol_adoption"]
     data: SymbolData
+
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical(
+            [self.kind, self.data.subject.model_dump(mode="json")]
+        ).decode()
 
 
 class NameData(RecordData):
@@ -142,6 +174,14 @@ class NameRecord(Quality):
     kind: Literal["rules_name_adoption"]
     data: NameData
 
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical(
+            [self.kind, self.data.subject.model_dump(mode="json")]
+        ).decode()
+
 
 class RouteData(RecordData):
     subject: RouteSubject
@@ -153,6 +193,14 @@ class RouteRecord(Quality):
     kind: Literal["route_override_adoption"]
     data: RouteData
 
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical(
+            [self.kind, self.data.subject.model_dump(mode="json")]
+        ).decode()
+
 
 class DefaultData(RecordData):
     subject: DefaultSubject
@@ -163,6 +211,14 @@ class DefaultData(RecordData):
 class DefaultRecord(Quality):
     kind: Literal["default_printing_adoption"]
     data: DefaultData
+
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical(
+            [self.kind, self.data.subject.model_dump(mode="json")]
+        ).decode()
 
 
 Record = Annotated[
@@ -190,7 +246,5 @@ class DisplayShard(RecordData):
 
 
 def key(record: Record) -> str:
-    """Subject identity excludes mutable labels and file sequence numbers."""
-    return canonical(
-        [record.kind, record.data.subject.model_dump(mode="json")]
-    ).decode()
+    """Expose the selection key derived from the subject."""
+    return record.record_key

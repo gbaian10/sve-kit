@@ -147,9 +147,6 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> PageCase:
     )
     rows: list[JsonValue] = [
         {
-            "record_key": canonical(
-                ["vocabulary_adoption", {"kind": "type", "code": "synthetic_" + region}]
-            ).decode(),
             "kind": "vocabulary_adoption",
             "data": {
                 "subject": {"kind": "type", "code": "synthetic_" + region},

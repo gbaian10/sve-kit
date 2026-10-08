@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import Field, JsonValue, field_validator, model_validator
+from pydantic import Field, computed_field, field_validator, model_validator
 
 from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.products.models import Code, Lang
@@ -31,7 +31,7 @@ class TermData(RecordData):
     source_ref: SourceRef | None
     source_span: Span | None
     authored_source_ja: Text | None
-    missing_source_reason: Text | None
+    missing_source_reason: Text | None = None
 
     @model_validator(mode="after")
     def _source_mode(self) -> TermData:
@@ -123,9 +123,8 @@ class ConceptData(RecordData):
 
 
 class Quality(RecordData):
-    record_key: Text
-    origin: Origin
-    low_confidence: bool
+    origin: Origin = "project"
+    low_confidence: bool = False
     note: str = ""
 
 
@@ -133,25 +132,64 @@ class TermRecord(Quality):
     kind: Literal["glossary_term"]
     data: TermData
 
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical([self.kind, self.data.id]).decode()
+
 
 class ChoiceRecord(Quality):
     kind: Literal["glossary_choice"]
     data: ChoiceData
+
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical([self.kind, self.data.term_id, self.data.lang]).decode()
 
 
 class EmphasisRecord(Quality):
     kind: Literal["glossary_emphasis_choice"]
     data: EmphasisData
 
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical([self.kind, self.data.term_id]).decode()
+
 
 class AssignmentRecord(Quality):
     kind: Literal["context_assignment"]
     data: AssignmentData
 
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical(
+            [
+                self.kind,
+                self.data.owner.model_dump(mode="json"),
+                self.data.field,
+                self.data.ordinal,
+            ]
+        ).decode()
+
 
 class ConceptRecord(Quality):
     kind: Literal["card_name_concept"]
     data: ConceptData
+
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical(
+            [self.kind, self.data.subject.model_dump(mode="json")]
+        ).decode()
 
 
 Record = Annotated[
@@ -167,21 +205,5 @@ class Shard(RecordData):
 
 
 def key(record: Record) -> str:
-    """Stable selection keys do not contain mutable text, notes or revisions."""
-    fields: list[JsonValue]
-    if isinstance(record, TermRecord):
-        fields = [record.kind, record.data.id]
-    elif isinstance(record, ChoiceRecord):
-        fields = [record.kind, record.data.term_id, record.data.lang]
-    elif isinstance(record, EmphasisRecord):
-        fields = [record.kind, record.data.term_id]
-    elif isinstance(record, AssignmentRecord):
-        fields = [
-            record.kind,
-            record.data.owner.model_dump(mode="json"),
-            record.data.field,
-            record.data.ordinal,
-        ]
-    else:
-        fields = [record.kind, record.data.subject.model_dump(mode="json")]
-    return canonical(fields).decode()
+    """Expose the selection key derived from immutable identity fields."""
+    return record.record_key

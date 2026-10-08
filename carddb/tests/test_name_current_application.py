@@ -2,7 +2,6 @@
 
 import shutil
 from dataclasses import replace
-from operator import itemgetter
 from typing import TYPE_CHECKING
 
 import pytest
@@ -20,7 +19,6 @@ from sve_carddb.translations.current_models import (
     AssignmentRecord,
     ChoiceRecord,
     TermRecord,
-    key,
 )
 from sve_carddb.translations.current_names import prepare as prepare_names
 from sve_carddb.translations.importer import Inputs as TranslationInputs
@@ -103,7 +101,7 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
     for identifier in ["name.test", "name.other"] if ambiguous else ["name.test"]:
         values.append(  # ruff: ignore[manual-list-comprehension] -- synthetic source construction keeps each concept identifier explicit
             TermRecord.model_validate_json(canonical(name_term(identifier))).model_dump(
-                mode="json"
+                round_trip=True, mode="json"
             )
         )
     if choice_text is not None:
@@ -113,9 +111,9 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
         values.append(
             selected.model_copy(
                 update={"origin": "machine", "low_confidence": True}
-            ).model_dump(mode="json")
+            ).model_dump(mode="json", round_trip=True)
         )
-    ordered = sorted(values, key=itemgetter("record_key"))
+    ordered = values
     write(
         root / "authored",
         {
@@ -268,7 +266,6 @@ def test_current_variant_cannot_select_two_concepts(
         assignments = []
         for owner, concept in zip(owners, ("name.test", "name.other"), strict=True):
             record = AssignmentRecord(
-                record_key="pending",
                 kind="context_assignment",
                 origin="project",
                 low_confidence=False,
@@ -283,12 +280,8 @@ def test_current_variant_cannot_select_two_concepts(
                     reason="Synthetic homonym selection",
                 ),
             )
-            assignments.append(
-                record.model_copy(update={"record_key": key(record)}).model_dump(
-                    mode="json"
-                )
-            )
-        ordered_assignments = sorted(assignments, key=itemgetter("record_key"))
+            assignments.append(record.model_dump(mode="json", round_trip=True))
+        ordered_assignments = assignments
         content = canonical(
             {
                 "translation_authored_format": 2,

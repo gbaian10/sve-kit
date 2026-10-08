@@ -24,13 +24,51 @@ def wire(value: object) -> bytes:
     ).encode()
 
 
+def record_key(value: dict[str, Any]) -> str:
+    if value.get("kind") == "identity_transition":
+        return wire([value["kind"], value["sequence"]]).decode()
+    if "kind" in value and "data" in value:
+        field = (
+            "card_id"
+            if value["kind"] == "region_mapping_review"
+            else "printing_id"
+            if value["kind"] == "card_int_id"
+            else "id"
+        )
+        return str(value["kind"]) + ":" + str(value["data"][field])
+    return str(value["record_key"])
+
+
+def semantic(value: object) -> object:
+    if isinstance(value, list):
+        return [semantic(item) for item in value]
+    if isinstance(value, dict):
+        result = {key: semantic(item) for key, item in value.items()}
+        if "kind" in value and (
+            "data" in value or value["kind"] == "identity_transition"
+        ):
+            result["record_key"] = record_key(value)
+        return result
+    return value
+
+
 def checksum(value: object) -> str:
-    return "sha256:" + hashlib.sha256(wire(value)).hexdigest()
+    return (
+        "sha256:"
+        + hashlib.sha256(
+            wire(
+                value
+                if isinstance(value, dict)
+                and value.get("kind") == "identity_transition_shard"
+                else semantic(value)
+            )
+        ).hexdigest()
+    )
 
 
 def reference(shard: dict[str, Any]) -> dict[str, Any]:
     record = shard["records"][0]
-    return {"record_key": record["record_key"], "record_hash": checksum(record)}
+    return {"record_key": record_key(record), "record_hash": checksum(record)}
 
 
 def pack(record: dict[str, Any]) -> dict[str, Any]:
@@ -47,7 +85,7 @@ def chain(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for sequence, original in enumerate(records, start=1):
         record = copy.deepcopy(original)
         record["sequence"] = sequence
-        record["record_key"] = wire(["identity_transition", sequence]).decode()
+
         record["previous"] = reference(result[-1]) if result else None
         for update in record["updates"]:
             if update["target_key"] in latest:
@@ -56,7 +94,7 @@ def chain(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         result.append(shard)
         for update in record["updates"]:
             latest[update["target_key"]] = {
-                "transition_key": record["record_key"],
+                "transition_key": record_key(record),
                 "record_key": update["target_key"],
                 "record_hash": checksum(update["after"]),
             }
@@ -71,7 +109,6 @@ def write_chain(root: Path, shards: list[dict[str, Any]]) -> None:
 
 def entry(kind: str, identifier: str, data: dict[str, Any]) -> dict[str, Any]:
     return {
-        "record_key": kind + ":" + identifier,
         "kind": kind,
         "owner": "EXAMPLE",
         "data": {"id": identifier, **data},
@@ -80,10 +117,10 @@ def entry(kind: str, identifier: str, data: dict[str, Any]) -> dict[str, Any]:
 
 def update(before: dict[str, Any], after: dict[str, Any]) -> dict[str, Any]:
     return {
-        "target_key": before["record_key"],
+        "target_key": record_key(before),
         "before": {
             "transition_key": None,
-            "record_key": before["record_key"],
+            "record_key": record_key(before),
             "record_hash": checksum(before),
         },
         "after": after,
@@ -162,7 +199,6 @@ def merge_record() -> dict[str, Any]:
     }
     batch = {"batch_id": "sha256:" + "4" * 64}
     return {
-        "record_key": '["identity_transition",1]',
         "kind": "identity_transition",
         "action": "apply",
         "reverts": None,

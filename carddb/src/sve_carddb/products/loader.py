@@ -142,13 +142,6 @@ def _check_records(shard: Shard, path: str) -> None:
     for record in shard.records:
         if record.kind != _KINDS[area] or record.filing_key != filing:
             raise ValueError("Product record kind/filing key disagrees with path")
-        primary: list[JsonValue] = [record.kind]
-        if isinstance(record, InclusionRecord):
-            primary.extend((record.data.printing_id, record.data.product_id))
-        else:
-            primary.append(record.data.id)
-        if canonical(primary).decode() != record.record_key:
-            raise ValueError("Product record key disagrees with data primary key")
         if len(set(record.evidence)) != len(record.evidence):
             raise ValueError("Duplicate product evidence")
         if not isinstance(record, FamilyRecord) and not record.evidence:

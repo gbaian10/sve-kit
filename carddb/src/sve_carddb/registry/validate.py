@@ -259,10 +259,7 @@ def _fields(entry: Entry) -> None:
         else "id"
     )
     identifier = string(entry.data, key)
-    if (
-        entry.record_key != entry.kind + ":" + identifier
-        or re.fullmatch(r"[cfparx]:[0-9a-f]{32}", identifier) is None
-    ):
+    if re.fullmatch(r"[cfparx]:[0-9a-f]{32}", identifier) is None:
         raise ValueError(f"Invalid record identity: {entry.record_key}")
 
 

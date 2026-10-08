@@ -14,7 +14,6 @@ from sve_carddb.catalog.current_models import (
     Record,
     Shard,
     SymbolRecord,
-    key,
 )
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
@@ -100,10 +99,8 @@ def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:
         except ValidationError:
             raise ValueError("Invalid current catalog fields") from None
         for record in shard.records:
-            if record.kind != _AREAS[Path(name).parts[1]] or record.record_key != key(
-                record
-            ):
-                raise ValueError("Current catalog key or area mismatch")
+            if record.kind != _AREAS[Path(name).parts[1]]:
+                raise ValueError("Current catalog area mismatch")
         loaded.append(LoadedShard(name, exact, digest(encoded), encoded))
     snapshot = AdoptionSnapshot(entry, tuple(loaded))
     records = snapshot.current_records()

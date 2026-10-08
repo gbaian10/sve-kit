@@ -171,8 +171,12 @@ def test_explicit_version_type(product_root: Path, value: JsonValue) -> None:
     ("field", "value", "message"),
     [
         ("filing_key", "PR", "filing key"),
-        ("record_key", "product_family:BP02", "primary key"),
-        ("record_key", '[ "product_family", "BP02" ]', "primary key"),
+        ("record_key", "product_family:BP02", "Invalid product authored fields"),
+        (
+            "record_key",
+            '[ "product_family", "BP02" ]',
+            "Invalid product authored fields",
+        ),
         ("evidence", [reference(), reference()], "Duplicate product evidence"),
     ],
 )

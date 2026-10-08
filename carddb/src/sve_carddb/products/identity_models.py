@@ -3,11 +3,12 @@
 from typing import Annotated, Literal
 from urllib.parse import parse_qsl, urlsplit
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, computed_field, field_validator, model_validator
 
 from sve_carddb.build_inputs import Version
 from sve_carddb.products.models import Code, Evidence
 from sve_carddb.registry.records import RecordData, Region, Text
+from sve_carddb.snapshot.values import canonical
 
 
 def official_url(value: str, region: Region, purpose: str) -> bool:
@@ -92,11 +93,18 @@ class IdentityData(RecordData):
 
 
 class IdentityRecord(RecordData):
-    record_key: Text
     kind: Literal["product_identity"]
     filing_key: Region
     data: IdentityData
     evidence: Annotated[tuple[Evidence, ...], Field(min_length=1)]
+
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical(
+            [self.kind, self.data.region, self.data.match.model_dump(mode="json")]
+        ).decode()
 
 
 class IdentityShard(RecordData):

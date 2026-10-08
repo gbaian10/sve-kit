@@ -1,7 +1,6 @@
 """Current glossary values keep semantics without receipt or revision gates."""
 
 import copy
-from operator import itemgetter
 from typing import TYPE_CHECKING
 
 import pytest
@@ -23,7 +22,7 @@ if TYPE_CHECKING:
 def _write(root: Path, records: list[dict[str, JsonValue]]) -> None:
     path = root / "translations/glossary/shared/001.yaml"
     path.parent.mkdir(parents=True, exist_ok=True)
-    ordered = sorted(records, key=itemgetter("record_key"))
+    ordered = records
     raw: dict[str, JsonValue] = {
         "translation_authored_format": 2,
         "kind": "translation_shard",
@@ -45,7 +44,7 @@ def _write(root: Path, records: list[dict[str, JsonValue]]) -> None:
 
 def _records() -> list[dict[str, JsonValue]]:
     return [
-        r.model_dump(mode="json")
+        r.model_dump(mode="json", round_trip=True)
         for r in (
             TermRecord.model_validate_json(canonical(term())),
             ChoiceRecord.model_validate_json(canonical(choice())),
@@ -109,7 +108,10 @@ def test_withdrawal_is_not_replaced_by_an_old_choice(tmp_path: Path) -> None:
     [
         ("duplicate", "Duplicate current translation selection key"),
         ("absent_term", "Glossary choice references an absent concept"),
-        ("wrong_key", "Current translation selection key mismatch"),
+        (
+            "wrong_key",
+            "Invalid translation authored fields at records.1.glossary_choice.record_key",
+        ),
         ("official", "Official choice lacks same-concept evidence"),
     ],
 )

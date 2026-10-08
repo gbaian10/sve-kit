@@ -45,7 +45,7 @@ def parse_products(raw: bytes, source: Source, region: Region) -> ProductPage:
 def wire_error(area: str, field: str) -> str:
     overrides = {
         ("record", "filing_key"): "Product identity filing/path/region mismatch",
-        ("record", "record_key"): "Product identity record key mismatch",
+        ("record", "record_key"): "Invalid product identity fields",
         ("match", "product_url"): "records.0.data:value_error",
         ("match", "kind"): "records.0.data.match:union_tag_invalid",
     }
@@ -156,9 +156,6 @@ def test_independent_evidence_constraints(
         }[constraint]
     elif constraint == "wrong_match":
         obj(obj(record["data"])["match"])["expansion_code"] = "Other"
-        record["record_key"] = (
-            '["product_identity","jp",{"expansion_code":"Other","kind":"product_link","product_url":"https://shadowverse-evolve.com/products/synthetic/"}]'
-        )
     elif constraint == "absent_version":
         ref["source_version_id"] = "src:v1:" + "0" * 64
     elif constraint.startswith("corrupt"):
@@ -328,7 +325,6 @@ def test_manual_product_shares_global_region_namespace(
     manual = product(region="en")
     data = obj(manual["data"])
     data.update(id="permanent-example", family_id="TEST")
-    manual["record_key"] = '["product","permanent-example"]'
     install(fixture.root, "products/product/unassigned/001.yaml", envelope([manual]))
     catalog = load_products(fixture.root, registry=fixture.preview.snapshot)
     with pytest.raises(ValueError, match="across regions"):
@@ -435,16 +431,12 @@ def test_unsorted_records_are_accepted(identity_fixture: IdentityFixture) -> Non
 def test_evidence_region_is_not_assumed_from_match_region(
     identity_fixture: IdentityFixture,
 ) -> None:
-    import json  # ruff: ignore[import-outside-top-level] -- independent canonical key signer
 
     fixture = identity_fixture
     record = identity_record(fixture.pages[0], match_index=-1, product_id="english-id")
     record["filing_key"] = "en"
     data = obj(record["data"])
     data["region"] = "en"
-    record["record_key"] = json.dumps(
-        ["product_identity", "en", data["match"]], sort_keys=True, separators=(",", ":")
-    )
     install_identity(
         fixture.root, identity_envelope([record]), name="product-identities/en/001.yaml"
     )
@@ -495,16 +487,12 @@ def test_comment_only_working_tree_edit_keeps_semantic_hash(
 def test_source_block_version_and_ordinal_match_the_evidence_reference(
     identity_fixture: IdentityFixture, field: str
 ) -> None:
-    import json  # ruff: ignore[import-outside-top-level] -- independent canonical match key, not the production helper
 
     fixture = identity_fixture
     record = identity_record(fixture.pages[0], match_index=-1)
     data = obj(record["data"])
     match = obj(data["match"])
     match[field] = "src:v1:" + "1" * 64 if field == "source_version_id" else 1
-    record["record_key"] = json.dumps(
-        ["product_identity", "jp", match], sort_keys=True, separators=(",", ":")
-    )
     install_identity(fixture.root, identity_envelope([record]))
     fixture.revision = commit(fixture.root)
     with pytest.raises(
@@ -536,9 +524,6 @@ class TestIdentityWireConstraints:
             "expansion_code": "Test-A",
         }
         record: dict[str, JsonValue] = {
-            "record_key": json.dumps(
-                ["product_identity", "jp", match], sort_keys=True, separators=(",", ":")
-            ),
             "kind": "product_identity",
             "filing_key": "jp",
             "data": {"product_id": "permanent-example", "region": "jp", "match": match},

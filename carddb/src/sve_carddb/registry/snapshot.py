@@ -64,7 +64,7 @@ def load_registry(root: Path) -> RegistrySnapshot:
                 owner=entry.owner,
                 data=_data(entry),
                 shard_path=loaded.path,
-                content=canonical(entry.model_dump(mode="json")),
+                content=canonical(entry.model_dump(mode="json", round_trip=True)),
             )
     validate(entries)
     check_cursors(files.index().next_int_id, entries)

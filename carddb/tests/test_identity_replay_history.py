@@ -47,7 +47,7 @@ def effective_state(
     files: RegistryFiles, first: dict[str, Any]
 ) -> dict[str, dict[str, Any]]:
     state = {
-        e.record_key: e.model_dump(mode="json")
+        e.record_key: e.model_dump(mode="json", round_trip=True)
         for s in files.shards
         for e in s.envelope().records
     }
@@ -61,7 +61,7 @@ def effective_state(
 
 def fix_root_refs(second: dict[str, Any], files: RegistryFiles) -> None:
     original = {
-        e.record_key: e.model_dump(mode="json")
+        e.record_key: e.model_dump(mode="json", round_trip=True)
         for s in files.shards
         for e in s.envelope().records
     }
@@ -108,7 +108,7 @@ def test_new_art_allocation_is_explicit_and_stable(
     target["target_key"] = "art:" + aid
     target["before"] = None
     target["allocation_anchor"] = "new-confirmed-art"
-    target["after"]["record_key"] = target["target_key"]
+
     target["after"]["data"]["id"] = aid
     target["after"]["data"]["uses"] = [
         u for u in target["after"]["data"]["uses"] if u["printing_id"] in {P, Q}
@@ -150,7 +150,6 @@ def double_base(tmp_path_factory: pytest.TempPathFactory) -> RegistryFiles:
     for cid, fid in ((A, FA), (B, FB), (C, "f:" + "c" * 32)):
         rows.append(
             {
-                "record_key": "face:" + fid[:-1] + "0",
                 "kind": "face",
                 "owner": "EXAMPLE",
                 "data": {
@@ -222,7 +221,7 @@ def test_retired_card_cannot_be_restored_by_apply(
     root, files, first = scenario
     second = copy.deepcopy(first)
     old = next(
-        e.model_dump(mode="json")
+        e.model_dump(mode="json", round_trip=True)
         for s in files.shards
         for e in s.envelope().records
         if e.record_key == "card:" + A
@@ -244,7 +243,7 @@ def test_inactive_review_cannot_change_permanent_owner(
     root, files, first = scenario
     second = copy.deepcopy(first)
     raw = next(
-        e.model_dump(mode="json")
+        e.model_dump(mode="json", round_trip=True)
         for s in files.shards
         for e in s.envelope().records
         if e.record_key == "region_mapping_review:" + A
@@ -293,10 +292,10 @@ def jp_split(template: dict[str, Any], files: RegistryFiles) -> dict[str, Any]:
     record = copy.deepcopy(template)
     record["registry_basis"]["authored_revision"] = "2" * 40
     record["registry_basis"]["index_hash"] = checksum(
-        files.index().model_dump(mode="json")
+        files.index().model_dump(mode="json", round_trip=True)
     )
     before = {
-        e.record_key: e.model_dump(mode="json")
+        e.record_key: e.model_dump(mode="json", round_trip=True)
         for s in files.shards
         for e in s.envelope().records
     }
@@ -310,7 +309,6 @@ def jp_split(template: dict[str, Any], files: RegistryFiles) -> dict[str, Any]:
         anchors["face:" + fid] = suffix + "-face"
         destinations.append(cid)
         after["card:" + cid] = {
-            "record_key": "card:" + cid,
             "kind": "card",
             "owner": "EXAMPLE",
             "data": {
@@ -321,7 +319,6 @@ def jp_split(template: dict[str, Any], files: RegistryFiles) -> dict[str, Any]:
             },
         }
         after["face:" + fid] = {
-            "record_key": "face:" + fid,
             "kind": "face",
             "owner": "EXAMPLE",
             "data": {"id": fid, "card_id": cid, "ordinal": 0, "side": "front"},
@@ -416,7 +413,6 @@ def test_pure_renewal_cannot_allocate_unrelated_entities(
             "target_key": "card:" + cid,
             "before": None,
             "after": {
-                "record_key": "card:" + cid,
                 "kind": "card",
                 "owner": "EXAMPLE",
                 "data": {
@@ -435,7 +431,6 @@ def test_pure_renewal_cannot_allocate_unrelated_entities(
             "target_key": "face:" + fid,
             "before": None,
             "after": {
-                "record_key": "face:" + fid,
                 "kind": "face",
                 "owner": "EXAMPLE",
                 "data": {"id": fid, "card_id": cid, "ordinal": 0, "side": "front"},

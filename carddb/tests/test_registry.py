@@ -215,7 +215,7 @@ def test_last_confirmation_revokes_mapping_and_art(tmp_path: Path) -> None:
 
 def test_duplicate_source_numbers_are_not_overwritten(tmp_path: Path) -> None:
     path = tmp_path / "cards.jsonl"
-    row = card("BP01-001", "Name").model_dump_json() + "\n"
+    row = card("BP01-001", "Name").model_dump_json(round_trip=True) + "\n"
     path.write_text(row * 2)
     with pytest.raises(ValueError, match="Duplicate card number"):
         read_cards(path)
@@ -290,7 +290,10 @@ def test_read_inputs_dates_new_absence_reviews_from_explicit_inputs(
     for key in ("jp", "en"):
         cards = inputs.jp if key == "jp" else inputs.en
         paths[key].write_text(
-            "".join(value.model_dump_json() + "\n" for value in cards.values())
+            "".join(
+                value.model_dump_json(round_trip=True) + "\n"
+                for value in cards.values()
+            )
         )
     paths["candidates"].write_text(
         '{"en_no":"BP02-070EN","category":"A","jp_candidates":[{"jp_no":"BP02-071"}]}\n'
@@ -305,7 +308,7 @@ def test_read_inputs_dates_new_absence_reviews_from_explicit_inputs(
     )
     inputs.decisions.reskins = {"GF01-001EN": "BP02-071"}
     decisions = tmp_path / "decisions.json"
-    decisions.write_text(inputs.decisions.model_dump_json())
+    decisions.write_text(inputs.decisions.model_dump_json(round_trip=True))
     read = read_inputs(paths, decisions, tmp_path, as_of=date(2026, 10, 6))
     assert read.mapping == inputs.mapping
     assert read.jp_hash == file_hash(paths["jp"])
@@ -433,7 +436,7 @@ def test_append_requires_new_printing_evidence(inputs: Inputs, side: str) -> Non
     if side == "en_only":
         inputs.mapping.reskins = {}
     old = {entry.record_key: entry for entry in build(inputs, {})}
-    before = {key: entry.model_dump_json() for key, entry in old.items()}
+    before = {key: entry.model_dump_json(round_trip=True) for key, entry in old.items()}
     if side == "reskin_to":
         inputs.jp["PR-002"] = card("PR-002", "名前")
     else:
@@ -441,7 +444,9 @@ def test_append_requires_new_printing_evidence(inputs: Inputs, side: str) -> Non
         inputs.mapping.targets["GF01-002EN"] = None
     with pytest.raises(ValueError, match="requires re-review"):
         build(inputs, old)
-    assert {key: entry.model_dump_json() for key, entry in old.items()} == before
+    assert {
+        key: entry.model_dump_json(round_trip=True) for key, entry in old.items()
+    } == before
     expanded = build(inputs, {})
     for index, entry in enumerate(expanded):
         if entry.kind == (
@@ -523,9 +528,9 @@ def test_correction_projection_preserves_observations(
         inputs.jp["BP02-071"].faces[0].text = "Corrected rule."
     elif scenario == "conflict":
         inputs.jp["BP02-071"].faces[0].name = "Changed source with unchanged raw effect"
-    before = inputs.model_dump_json()
+    before = inputs.model_dump_json(round_trip=True)
     projected = project_corrections(inputs, entries)
-    assert inputs.model_dump_json() == before
+    assert inputs.model_dump_json(round_trip=True) == before
     if scenario == "needs_review":
         assert projected == []
         return
@@ -604,7 +609,6 @@ def test_first_batch_starts_each_region_range(inputs: Inputs) -> None:
 def test_allocation_order_ties_break_on_owner_raw_number_variant_and_id() -> None:
     def printing(owner: str, number: str, variant: str, identifier: str) -> Entry:
         return Entry(
-            record_key="printing:" + identifier,
             kind="printing",
             owner=owner,
             data={

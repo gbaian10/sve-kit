@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 from pydantic import ValidationError
 
-from sve_carddb.snapshot.values import canonical
 from sve_carddb.template_translations.current_models import (
     CandidateRecord,
     DefinitionRecord,
@@ -33,30 +32,8 @@ if TYPE_CHECKING:
 
 
 def key(record: Record) -> str:
-    """Current selection keys exclude translated text, notes and adoption metadata."""
-    if isinstance(record, CandidateRecord):
-        return canonical(
-            [
-                record.kind,
-                record.data.source_kind,
-                record.data.candidate_id,
-                record.data.lang,
-            ]
-        ).decode()
-    if isinstance(record, VariantRecord):
-        return canonical(
-            [
-                record.kind,
-                record.data.template_id,
-                record.data.lang,
-                record.data.variant_key,
-            ]
-        ).decode()
-    return canonical(
-        [record.kind, record.data.id]
-        if isinstance(record, DefinitionRecord)
-        else [record.kind, record.data.template_id, record.data.lang]
-    ).decode()
+    """Return the derived selection key."""
+    return record.record_key
 
 
 def shard(raw: bytes) -> Shard:
@@ -66,9 +43,7 @@ def shard(raw: bytes) -> Shard:
     except ValidationError:
         raise ValueError("Invalid current template shard") from None
     keys = tuple(record.record_key for record in result.records)
-    if len(keys) != len(set(keys)) or any(
-        record.record_key != key(record) for record in result.records
-    ):
+    if len(keys) != len(set(keys)):
         raise ValueError("Current template selection keys must be unique and exact")
     return result
 

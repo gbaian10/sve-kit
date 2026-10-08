@@ -52,7 +52,7 @@ def test_current_import_rechecks_source_without_creating_decision(
     includes = object_value(index["includes"])
     for path, _, _ in old.shards:
         rows = [
-            r.model_dump(mode="json")
+            r.model_dump(mode="json", round_trip=True)
             for r in old.current_records()
             if (r.kind == "glossary_term") == ("concepts" in path)
         ]

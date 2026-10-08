@@ -17,7 +17,20 @@ from .identity_replay_fixtures import (
     transaction,
     write_scenario,
 )
-from .identity_transition_fixtures import FA, FB, A, B, C, P, Q, X, Y, checksum, wire
+from .identity_transition_fixtures import (
+    FA,
+    FB,
+    A,
+    B,
+    C,
+    P,
+    Q,
+    X,
+    Y,
+    checksum,
+    record_key,
+    wire,
+)
 from .identity_transition_fixtures import merge_record as merge_record  # ruff: ignore[useless-import-alias] -- expose the shared synthetic receipt fixture
 
 if TYPE_CHECKING:
@@ -132,7 +145,7 @@ def test_original_before_refs_are_exact(
     else:
         record["updates"][0]["target_key"] = "art:a:" + "f" * 32
         before["record_key"] = record["updates"][0]["target_key"]
-        record["updates"][0]["after"]["record_key"] = before["record_key"]
+
         record["updates"][0]["after"]["data"]["id"] = "a:" + "f" * 32
         record["updates"].sort(key=operator.itemgetter("target_key"))
     with pytest.raises(
@@ -180,7 +193,7 @@ def test_permanent_fields_and_allocations_never_change(
         updates["card:" + A]["after"]["data"]["layout"] = "double_faced"
     else:
         raw = next(
-            e.model_dump(mode="json")
+            e.model_dump(mode="json", round_trip=True)
             for s in files.shards
             for e in s.envelope().records
             if e.record_key
@@ -192,10 +205,10 @@ def test_permanent_fields_and_allocations_never_change(
         )
         record["updates"].append(
             {
-                "target_key": raw["record_key"],
+                "target_key": record_key(raw),
                 "before": {
                     "transition_key": None,
-                    "record_key": raw["record_key"],
+                    "record_key": record_key(raw),
                     "record_hash": checksum(raw),
                 },
                 "after": changed,
@@ -301,17 +314,17 @@ def renewal_record(record: dict[str, Any], files: RegistryFiles) -> dict[str, An
     result = copy.deepcopy(record)
     result["repairs"] = []
     original = next(
-        e.model_dump(mode="json")
+        e.model_dump(mode="json", round_trip=True)
         for s in files.shards
         for e in s.envelope().records
         if e.record_key == "printing:" + P
     )
     result["updates"] = [
         {
-            "target_key": original["record_key"],
+            "target_key": record_key(original),
             "before": {
                 "transition_key": None,
-                "record_key": original["record_key"],
+                "record_key": record_key(original),
                 "record_hash": checksum(original),
             },
             "after": original,
@@ -471,7 +484,7 @@ def test_basis_hash_and_exact_original_bytes(
     ):
         replay(root, write_scenario(root, files, [record]))
     record["registry_basis"]["index_hash"] = checksum(
-        files.index().model_dump(mode="json")
+        files.index().model_dump(mode="json", round_trip=True)
     )
     inputs = write_scenario(root, files, [record])
     path = root / files.shards[0].path
@@ -505,8 +518,7 @@ def test_original_id_allocation_collision(
     aid = allocated("a", "synthetic-original-art")
     original = copy.deepcopy(seed())
     for row in original:
-        if row["record_key"] == "art:" + Y:
-            row["record_key"] = "art:" + aid
+        if record_key(row) == "art:" + Y:
             row["data"]["id"] = aid
     other_root = root / "other-base"
     other_root.mkdir()
@@ -525,7 +537,7 @@ def test_original_id_allocation_collision(
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(shard.exact_content)
     record["registry_basis"]["index_hash"] = checksum(
-        collision_files.index().model_dump(mode="json")
+        collision_files.index().model_dump(mode="json", round_trip=True)
     )
     collision_update(record, aid, collision_files)
     with pytest.raises(
@@ -600,7 +612,7 @@ def collision_update(
             update["target_key"] = "art:" + aid
             update["before"] = None
             update["allocation_anchor"] = "synthetic-original-art"
-            update["after"]["record_key"] = update["target_key"]
+
             update["after"]["data"]["id"] = aid
     for move in record["repairs"][0]["printing_moves"]:
         move["faces"][0]["to_art_id"] = aid
@@ -611,7 +623,7 @@ def collision_update(
                 for raw in shard.envelope().records:
                     if raw.record_key == update["target_key"]:
                         update["before"]["record_hash"] = checksum(
-                            raw.model_dump(mode="json")
+                            raw.model_dump(mode="json", round_trip=True)
                         )
     record["updates"].sort(key=operator.itemgetter("target_key"))
 
@@ -622,7 +634,7 @@ def test_original_int_id_mapping_cannot_be_rewritten(
     root, files, record = scenario
     inputs = write_scenario(root, files, [record])
     for loaded in files.shards:
-        raw = loaded.envelope().model_dump(mode="json")
+        raw = loaded.envelope().model_dump(mode="json", round_trip=True)
         if raw["records"][0]["kind"] == "card_int_id":
             raw["records"][0]["data"]["int_id"], raw["records"][1]["data"]["int_id"] = (
                 raw["records"][1]["data"]["int_id"],

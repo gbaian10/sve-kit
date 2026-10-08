@@ -2,10 +2,11 @@
 
 from typing import Annotated, Literal, Self
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, computed_field, field_validator, model_validator
 
 from sve_carddb.products.models import Code, Lang
 from sve_carddb.registry.records import Hash, RecordData, Text
+from sve_carddb.snapshot.values import canonical
 from sve_carddb.template_sources.normalizer import Role
 from sve_carddb.template_translations.models import Definition, TemplateId
 
@@ -17,21 +18,31 @@ class Translation(RecordData):
 
 
 class DefinitionRecord(RecordData):
-    record_key: Text
     kind: Literal["sentence_template"]
     data: Definition
-    origin: Literal["official", "project", "machine"]
-    low_confidence: bool
+    origin: Literal["official", "project", "machine"] = "project"
+    low_confidence: bool = False
     note: str = ""
+
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical([self.kind, self.data.id]).decode()
 
 
 class TranslationRecord(RecordData):
-    record_key: Text
     kind: Literal["template_translation"]
     data: Translation
-    origin: Literal["official", "project", "machine"]
-    low_confidence: bool
+    origin: Literal["official", "project", "machine"] = "project"
+    low_confidence: bool = False
     note: str = ""
+
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical([self.kind, self.data.template_id, self.data.lang]).decode()
 
 
 class Candidate(RecordData):
@@ -60,12 +71,19 @@ class Candidate(RecordData):
 
 
 class CandidateRecord(RecordData):
-    record_key: Text
     kind: Literal["template_translation_candidate"]
     data: Candidate
-    origin: Literal["project", "machine"]
-    low_confidence: bool
+    origin: Literal["project", "machine"] = "project"
+    low_confidence: bool = False
     note: str = ""
+
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical(
+            [self.kind, self.data.source_kind, self.data.candidate_id, self.data.lang]
+        ).decode()
 
 
 class Variant(Translation):
@@ -79,12 +97,19 @@ class Variant(Translation):
 
 
 class VariantRecord(RecordData):
-    record_key: Text
     kind: Literal["template_translation_variant"]
     data: Variant
-    origin: Literal["official", "project", "machine"]
-    low_confidence: bool
+    origin: Literal["official", "project", "machine"] = "project"
+    low_confidence: bool = False
     note: str = ""
+
+    @computed_field  # type: ignore[prop-decorator]  # Pydantic serializes this property; mypy cannot compose property decorators.
+    @property
+    def record_key(self) -> str:
+        """Derive identity independently of mutable values and authored metadata."""
+        return canonical(
+            [self.kind, self.data.template_id, self.data.lang, self.data.variant_key]
+        ).decode()
 
 
 Record = Annotated[

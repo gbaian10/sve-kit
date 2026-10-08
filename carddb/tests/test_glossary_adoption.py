@@ -33,9 +33,6 @@ def authored(
 
 def emphasis(*, value: JsonValue = True) -> dict[str, JsonValue]:
     return {
-        "record_key": canonical(
-            ["glossary_emphasis_choice", "term:rule.test"]
-        ).decode(),
         "kind": "glossary_emphasis_choice",
         "origin": "project",
         "low_confidence": False,

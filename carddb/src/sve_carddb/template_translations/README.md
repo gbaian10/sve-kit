@@ -10,7 +10,9 @@ machine translations remain active values; consumers must mark them for review
 and let readers switch to the original source.
 
 Current template shards use `translation_authored_format: 2`. Each record has
-`record_key,kind,data,origin,low_confidence,note`. Definitions hold
+`kind,data` plus optional `origin,low_confidence,note`. Omitted quality values
+are `project` and `false`; YAML writers omit them. Selection keys are derived
+from identity fields, and stored `record_key` fields are rejected. Definitions hold
 `id,normalized_hash,role,source_lang,normalizer_version,semantic_variant,parameter_schema,content_hash`;
 translations contain only `template_id,lang,text`.
 `origin` remains `machine` after review. Notes do not affect semantic identity.

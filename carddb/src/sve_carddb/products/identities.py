@@ -186,8 +186,6 @@ def _shard(root: Path, name: str) -> IdentityFile:
             or record.filing_key != record.data.region
         ):
             raise ValueError("Product identity filing/path/region mismatch")
-        if record.record_key != match_key(record.data.region, record.data.match):
-            raise ValueError("Product identity record key mismatch")
         if len(set(record.evidence)) != len(record.evidence):
             raise ValueError("Duplicate product identity evidence")
         if not any(ref.role == "product_identity_match" for ref in record.evidence):

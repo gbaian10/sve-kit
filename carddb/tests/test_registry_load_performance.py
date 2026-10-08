@@ -26,7 +26,6 @@ if TYPE_CHECKING:
 def test_legacy_fixture_cannot_pollute_later_consumers() -> None:
     source = (
         Entry(
-            record_key="synthetic",
             kind="printing",
             owner="BP01",
             data={"source_face_map": [{"face_id": "original"}]},
