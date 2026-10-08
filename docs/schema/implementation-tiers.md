@@ -1,6 +1,6 @@
 # 建置表實作分期
 
-這是邏輯契約的實作次序，不是要求第一次發布就完成 118 表，也不是整張表隨意缺失時繼續執行 FK。[build-db.md](build-db.md) §18 的能力/依賴閉包規則適用；一次只實作受支援的子集與其匯入器/驗證器，編譯該階段 DDL 時不產尚未啟用的 nullable FK 欄位約束，待啟用即用 migration 補齊約束與驗證全部現有列。公開 schema required 欄位仍完整，從未啟用能力輸出明定 null/空/unknown；不能改成任意省略。
+這是邏輯契約的實作次序，不是要求第一次發布就完成 117 表，也不是整張表隨意缺失時繼續執行 FK。[build-db.md](build-db.md) §18 的能力/依賴閉包規則適用；一次只實作受支援的子集與其匯入器/驗證器，編譯該階段 DDL 時不產尚未啟用的 nullable FK 欄位約束，待啟用即用 migration 補齊約束與驗證全部現有列。公開 schema required 欄位仍完整，從未啟用能力輸出明定 null/空/unknown；不能改成任意省略。
 
 首發實際集合＝T0 全部 40 表＋下列 T1 子組 17 表，共 57 表；不是只有文字查卡集合就宣稱建牌可用。`identity_change` 在**第一次公開 `int_id` 之前**啟用，沒有修復事件時可以空，但 schema/匯入/驗證不能延後。逐地區版次的 Decklog 可用性欄位屬 printing（T0）；暫定身分不擋建牌。未查證按官方卡表收錄預設，首發不假造 Decklog 查證。
 
@@ -22,7 +22,7 @@ T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction�
 | ------ | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | T0     | 查卡與構築共同必要集合             | 必做；缺 DSL 仍輸出 `missing_dsl`。建置資料庫的 `card_engine_support` 未啟用引擎時 dsl/load/engine 欄為 null；`printing_face.art_id=null`、加工未知、printed unknown，頁面仍能顯示原文。 | 40   |
 | T1     | 來源/策展資料到齊才啟用            | 有該類來源即在該批發布前完成；SNC 需要 references、非官方 metadata；EN 需要 mapping review/語義核對；已知更正/勘誤不能因 tier 而丟掉。                                                   | 30   |
-| T2     | 翻譯、數位、裁定有資料時           | 首個翻譯就做 context/template 引用閉包；數位/語音/裁定可獨立啟用，未上線則 unknown/無提示，不假造翻譯。                                                                                  | 31   |
+| T2     | 翻譯、數位、裁定有資料時           | 首個翻譯就做 context/template 引用閉包；數位/語音/裁定可獨立啟用，未上線則 unknown/無提示，不假造翻譯。                                                                                  | 30   |
 | T3     | 引擎/機制能力啟用前                | 首個 manual mechanism 可先做 keyword/action/coverage/projection 及其依賴；DSL/巨集/實跑子組有資料才做。沒實跑永不輸出 `engine_passed`，未檢查機制仍 unknown。                            | 17   |
 
 ## 逐表分配（每張恰一次）
@@ -106,7 +106,6 @@ T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction�
 | `glossary_translation`         | T2   |
 | `sentence_template`            | T2   |
 | `template_translation`         | T2   |
-| `template_component`           | T2   |
 | `text_template_binding`        | T2   |
 | `translation`                  | T2   |
 | `translation_binding`          | T2   |

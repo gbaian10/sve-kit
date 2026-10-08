@@ -8,7 +8,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.adoption_loader import load_adoptions
 from sve_carddb.registry.storage import read_yaml
@@ -17,7 +17,6 @@ from sve_carddb.snapshot.values import array, canonical, digest, object_value
 from sve_carddb.translations.sources import Sources
 
 from .adoption_fixtures import commit, make_case
-from .current_catalog_fixtures import current_case
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -27,9 +26,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope="module")
 def current_baseline(tmp_path_factory: pytest.TempPathFactory) -> Case:
-    return current_case(
-        make_case(tmp_path_factory.mktemp("catalog-current") / "repository")
-    )
+    return make_case(tmp_path_factory.mktemp("catalog-current") / "repository")
 
 
 def test_current_catalog_has_provenance_without_adoption_decisions(
@@ -38,7 +35,7 @@ def test_current_catalog_has_provenance_without_adoption_decisions(
     case = current_baseline
     snapshot = load_adoptions(case.root, entry="catalog-adoptions")
     assert len(snapshot.current_records()) == 4
-    with create_database(compile_current_build()) as db:
+    with create_database(compile_build()) as db:
         with db.transaction():
             _populate_adoptions(
                 db,
@@ -93,7 +90,7 @@ def test_vocabulary_label_translation_is_a_use_of_the_japanese_label(
             "low_confidence": True,
         },
     )
-    schema = compile_current_build(("t0", "translation_evidence", "translation_names"))
+    schema = compile_build(("t0", "translation_evidence", "translation_names"))
     with create_database(schema) as db:
         with db.transaction():
             _populate_adoptions(
@@ -155,7 +152,7 @@ def test_current_fallback_is_still_checked(
     index_path.write_bytes(canonical(index))
     case = replace(case, revision=commit(root))
     with (
-        create_database(compile_current_build()) as db,
+        create_database(compile_build()) as db,
         pytest.raises(
             ValueError,
             match=r"^Japanese/English UI cannot fall back to Traditional Chinese$",
@@ -204,7 +201,7 @@ def test_native_current_entry_rejects_unpinned_catalog(
         path = case.root / "catalog-adoptions/languages/shared/001.yaml"
         path.write_bytes(path.read_bytes() + b"\n")
         message = "^Adoption bytes differ from immutable authored revision$"
-    with create_database(compile_current_build()) as db:
+    with create_database(compile_build()) as db:
         with pytest.raises(ValueError, match=message), db.transaction():
             _populate_adoptions(
                 db,
@@ -269,7 +266,7 @@ def test_current_ui_fallback_closure_and_policy(
     object_value(index["includes"])[path] = digest(canonical(payload))
     index_path.write_bytes(canonical(index))
     case = replace(case, revision=commit(root))
-    with create_database(compile_current_build()) as db:
+    with create_database(compile_build()) as db:
         with pytest.raises(ValueError, match="^" + message + "$"), db.transaction():
             _populate_adoptions(
                 db,

@@ -2,6 +2,7 @@
 
 from sve_carddb.build_db.domains import CODE, DATE, HASH, INSTANT, LANG
 from sve_carddb.build_db.model import Check, Column, ForeignKey, Kind, Table, Unique
+from sve_carddb.build_db.translation_evidence import QUALITY, SOURCE
 
 TABLES = (
     Table(
@@ -103,8 +104,13 @@ TABLES = (
             Column("code", Kind.ID, pattern=LANG),
             Column("fallback_order", Kind.JSON, json_schema="language_fallback_order"),
             Column("display_name", Kind.TEXT),
+            *(
+                Column(c.name, c.kind, nullable=True, choices=c.choices)
+                for c in QUALITY
+            ),
         ),
         ("code",),
+        foreign_keys=(SOURCE,),
     ),
     Table(
         "vocabulary",
@@ -113,9 +119,13 @@ TABLES = (
             Column("code", Kind.ID, pattern=CODE),
             Column("label_unit_id", Kind.ID),
             Column("active", Kind.BOOL),
+            *(
+                Column(c.name, c.kind, nullable=True, choices=c.choices)
+                for c in QUALITY
+            ),
         ),
         ("kind", "code"),
-        foreign_keys=(ForeignKey(("label_unit_id",), "text_unit", ("id",)),),
+        foreign_keys=(ForeignKey(("label_unit_id",), "text_unit", ("id",)), SOURCE),
     ),
     Table(
         "card",

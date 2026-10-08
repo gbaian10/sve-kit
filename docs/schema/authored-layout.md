@@ -24,7 +24,7 @@
 | 提案 | 其他策展、標誌 | `curation/BP01/001.yaml` |
 | 待審（技術契約） | 數位對應與查核覆蓋採納 | `digital-links/index.yaml`、`digital-links/{links,coverage}/<filing_key>/<sequence>.yaml`；見[數位對應採納契約](digital-link-adoption.md)，真人link入口已實作、尚無逐卡正式遷入；coverage未實作 |
 | 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/{templates,glossary,overrides}/<filing_key>/<sequence>.yaml`；推導結果不進 authored，見 §6 |
-| 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog-adoptions/<area>/<filing_key>/<sequence>.yaml`，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與封套) |
+| 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog-adoptions/<area>/<filing_key>/<sequence>.yaml`，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與當前值) |
 | 定案（技術契約） | 同號路由與預設版次覆寫 | `display-overrides/<area>/<filing_key>/<sequence>.yaml`，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
 | 定案（新格式） | 數位名字／同名瀏覽政策 | `digital-name-policies/<policy_id>/current.yaml`；名字與同名瀏覽各一份可修改的 current 規則，同名瀏覽是獨立非翻譯入口，見[名字契約](digital-name-policy.md) |
 | legacy，僅供轉換 | 模板採納政策／核可收據 | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml`；無文字摘要進索引，首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用 |
@@ -64,7 +64,7 @@ records:
 
 canonical hash recipe 固定：JSON 物件鍵排序、UTF-8（不 ASCII escape）、分隔符 `,`／`:`、無額外空白／尾端換行，不正規化 Unicode。觀測 hash、authored source_record 的內容 hash 與後續各節沿用此 recipe。
 
-**其他入口的批次決定**：catalog、display、region-reviews 等仍採批次決定封套的入口，沿以下 recipe（registry、商品與商品身分對照不採）：先對完整 record（不含封套的決定指針）計 semantic hash；將 `(record_key,semantic_hash)` 二元素陣列按 key 排序作為 members，再計 membership hash；decision ID 為 `d:` 加完整 membership hash 的 64 hex；confirmed 的 sample_ids 恰為全部 members 的 record_key。任何新成員或內容變更都不得沿用舊決定。
+**其他入口的批次決定**：region-reviews 等仍採批次決定封套的入口，沿以下 recipe（catalog、display、registry、商品與商品身分對照不採）：先對完整 record（不含封套的決定指針）計 semantic hash；將 `(record_key,semantic_hash)` 二元素陣列按 key 排序作為 members，再計 membership hash；decision ID 為 `d:` 加完整 membership hash 的 64 hex；confirmed 的 sample_ids 恰為全部 members 的 record_key。任何新成員或內容變更都不得沿用舊決定。
 
 `ids/index.yaml`（`authored_format: 2`）只保存 `allocation_policy`（目前 `region-ranges-2026-09-28-v1`）與各地區游標 `next_int_id: {en: …, jp: …}`，每個游標是該區下一個未使用值；鍵必須恰為政策內的地區，值落在 `[start, end+1]`，`end+1` 表示該區已用盡。不認識的政策或格式直接拒絕。讀取掃描 `registry/` 與 `ids/` 下全部 YAML 分片，不另存檔案清單或檔案 hash，內容由 Git 保存；任何不是合法分片的 YAML 都會讓讀取失敗。有分片卻沒有 index 時停止，避免重用配號；寫入時先裝分片、最後才更新 index，中斷時多出的配號會使游標檢查失敗。
 

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.translations.direct import write
 
 from .build_db_fixtures import seed
@@ -20,7 +20,7 @@ SYNTHETIC = {"vocabulary_kind": "class", "vocabulary_code": "synthetic"}
 
 @pytest.fixture(scope="module")
 def template() -> DatabaseTemplate:
-    schema = compile_current_build(("t0", "translation_evidence", "translation_names"))
+    schema = compile_build(("t0", "translation_evidence", "translation_names"))
     with create_database(schema) as db:
         seed(db)
         return DatabaseTemplate(schema, db._connection.serialize())

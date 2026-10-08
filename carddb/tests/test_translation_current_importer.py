@@ -7,7 +7,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.build_inputs import BuildContext, SourceUse
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope="module")
 def importer_template() -> DatabaseTemplate:
-    schema = compile_current_build(("translation_evidence",))
+    schema = compile_build(("translation_evidence",))
     with create_database(schema) as db:
         seed(db)
         return DatabaseTemplate(schema, db._connection.serialize())

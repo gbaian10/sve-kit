@@ -5,9 +5,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_db.database import open_database
-from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES
+from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES, compile_build
 from sve_carddb.catalog.adoption_models import Batch
 from sve_carddb.manifest import Kind
 from sve_carddb.snapshot import offline
@@ -250,9 +249,7 @@ def test_offline_renders_whole_effects_and_keeps_uncovered_original(
         UNCOVERED: (None, None),
     }
     assert "カード" not in canonical(built.report["effect_translations"]).decode()
-    with open_database(
-        compile_current_build(SCHEMA), tmp_path / "bundle/build.sqlite"
-    ) as db:
+    with open_database(compile_build(SCHEMA), tmp_path / "bundle/build.sqlite") as db:
         fields = sorted(
             str(row.values["field"])
             for row in db.rows("translation_use")

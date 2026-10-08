@@ -1,6 +1,6 @@
 """Optional #51 closure; no template renderer, art, voice or runtime routing."""
 
-from sve_carddb.build_db.domains import DATE, HASH, INSTANT, LANG
+from sve_carddb.build_db.domains import DATE, HASH, LANG
 from sve_carddb.build_db.model import (
     Check,
     Column,
@@ -15,6 +15,14 @@ from sve_carddb.build_db.model import (
 def _fk(column: str, table: str) -> ForeignKey:
     return ForeignKey((column,), table, ("id",))
 
+
+QUALITY = (
+    Column("authored_source_id", Kind.ID),
+    Column("record_key", Kind.TEXT),
+    Column("origin", Kind.TEXT, choices=("official", "project", "machine")),
+    Column("low_confidence", Kind.BOOL),
+)
+SOURCE = ForeignKey(("authored_source_id",), "source_record", ("id",))
 
 TABLES = (
     Table(
@@ -163,19 +171,13 @@ TABLES = (
             ),
             Column("source_ja", Kind.TEXT),
             Column("concept_key", Kind.TEXT, pattern=r"[a-z][a-z0-9_.-]*"),
-            Column("decision_id", Kind.ID),
+            Column("emphasis", Kind.BOOL, nullable=True),
+            *QUALITY,
         ),
         ("id",),
-        foreign_keys=(_fk("decision_id", "decision"),),
+        foreign_keys=(SOURCE,),
         unique=(Unique(("concept_key",)),),
         checks=(Check("id = 'term:' || concept_key"),),
-        query_checks=(
-            QueryCheck(
-                "glossary_term_adopted",
-                "SELECT 1 FROM glossary_term AS t JOIN decision AS d ON d.id=t.decision_id WHERE d.state NOT IN ('sampled','confirmed') LIMIT 1",
-                ("glossary_term", "decision"),
-            ),
-        ),
     ),
     Table(
         "glossary_translation",
@@ -183,37 +185,14 @@ TABLES = (
             Column("term_id", Kind.ID),
             Column("lang", Kind.ID, pattern=LANG),
             Column("text", Kind.TEXT),
-            Column(
-                "origin",
-                Kind.TEXT,
-                choices=(
-                    "official_svwb",
-                    "official_sv1",
-                    "project",
-                    "community",
-                    "machine",
-                ),
-            ),
             Column("source_id", Kind.ID, nullable=True),
-            Column("decision_id", Kind.ID),
+            *QUALITY,
         ),
         ("term_id", "lang"),
         foreign_keys=(
-            _fk("term_id", "glossary_term"),
-            _fk("source_id", "source_record"),
-            _fk("decision_id", "decision"),
-        ),
-        checks=(
-            Check(
-                "origin NOT IN ('official_svwb','official_sv1') OR source_id IS NOT NULL"
-            ),
-        ),
-        query_checks=(
-            QueryCheck(
-                "glossary_translation_adopted",
-                "SELECT 1 FROM glossary_translation AS t JOIN decision AS d ON d.id=t.decision_id WHERE d.state NOT IN ('sampled','confirmed') LIMIT 1",
-                ("glossary_translation", "decision"),
-            ),
+            ForeignKey(("term_id",), "glossary_term", ("id",)),
+            ForeignKey(("source_id",), "source_record", ("id",)),
+            SOURCE,
         ),
     ),
     Table(
@@ -222,15 +201,10 @@ TABLES = (
             Column("id", Kind.ID),
             Column("source_unit_id", Kind.ID),
             Column("semantic_variant", Kind.ID),
-            Column("decision_id", Kind.ID, nullable=True),
         ),
         ("id",),
-        foreign_keys=(
-            _fk("source_unit_id", "text_unit"),
-            _fk("decision_id", "decision"),
-        ),
+        foreign_keys=(ForeignKey(("source_unit_id",), "text_unit", ("id",)),),
         unique=(Unique(("source_unit_id", "semantic_variant")),),
-        checks=(Check("semantic_variant = 'default' OR decision_id IS NOT NULL"),),
     ),
     Table(
         "translation",
@@ -241,54 +215,21 @@ TABLES = (
             Column("revision", Kind.UINT),
             Column("text", Kind.TEXT),
             Column("tokens", Kind.JSON, nullable=True, json_schema="TranslationTokens"),
-            Column(
-                "origin",
-                Kind.TEXT,
-                choices=(
-                    "official_sve",
-                    "official_svwb",
-                    "official_sv1",
-                    "project",
-                    "machine",
-                    "community",
-                ),
-            ),
+            Column("origin", Kind.TEXT, choices=("official", "project", "machine")),
             Column(
                 "authority",
                 Kind.TEXT,
                 choices=("sve_official", "digital_official", "unofficial"),
             ),
-            Column("status", Kind.TEXT, choices=("draft", "reviewed", "stale")),
+            Column("low_confidence", Kind.BOOL),
             Column("source_hash", Kind.TEXT, pattern=HASH),
             Column("source_id", Kind.ID, nullable=True),
-            Column("translated_by", Kind.TEXT),
-            Column("translated_at", Kind.TEXT, pattern=INSTANT),
-            Column("decision_id", Kind.ID, nullable=True),
         ),
         ("id",),
         foreign_keys=(
-            _fk("context_id", "translation_context"),
-            _fk("source_id", "source_record"),
-            _fk("decision_id", "decision"),
+            ForeignKey(("context_id",), "translation_context", ("id",)),
+            ForeignKey(("source_id",), "source_record", ("id",)),
         ),
         unique=(Unique(("context_id", "target_lang", "revision")),),
-        checks=(
-            Check("tokens IS NULL"),
-            Check(
-                "(origin = 'official_sve' AND authority='sve_official') OR (origin IN ('official_svwb','official_sv1') AND authority='digital_official') OR (origin IN ('project','machine','community') AND authority='unofficial')"
-            ),
-        ),
-        query_checks=(
-            QueryCheck(
-                "translation_reviewed",
-                "SELECT 1 FROM translation AS t LEFT JOIN decision AS d ON d.id=t.decision_id WHERE t.status='reviewed' AND (d.id IS NULL OR d.state NOT IN ('sampled','confirmed')) LIMIT 1",
-                ("translation", "decision"),
-            ),
-            QueryCheck(
-                "translation_source_hash",
-                "SELECT 1 FROM translation AS t JOIN translation_context AS c ON c.id=t.context_id JOIN text_unit AS u ON u.id=c.source_unit_id WHERE t.source_hash != u.content_hash LIMIT 1",
-                ("translation", "translation_context", "text_unit"),
-            ),
-        ),
     ),
 )

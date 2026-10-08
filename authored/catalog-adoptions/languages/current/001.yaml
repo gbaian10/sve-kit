@@ -12,7 +12,6 @@ records:
         display_name: English
         fallback_order:
           - ja
-      evidence: []
   - record_key: '["language_adoption",{"code":"ja"}]'
     origin: project
     low_confidence: false
@@ -24,7 +23,6 @@ records:
         display_name: 日本語
         fallback_order:
           - en
-      evidence: []
   - record_key: '["language_adoption",{"code":"zh-Hant"}]'
     origin: project
     low_confidence: false
@@ -37,4 +35,3 @@ records:
         fallback_order:
           - ja
           - en
-      evidence: []

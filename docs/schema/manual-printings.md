@@ -22,7 +22,7 @@
 
 area 恰為 `printings` 或 `serials`，分別對應上述兩種 kind；filing_key 是首次明示歸檔 family code，不是卡號前綴，續版保留原 filing_key。sequence 從 001 起按 area／filing_key 連續只增，至少三位十進位。每片非空、單一 kind、單一核對背景與決定，records 按 record_key 排序。
 
-共用 [catalog 採納 §2–§2.1](catalog-route-adoption.md#2-入口分片與封套) 的嚴格 YAML 1.2、單檔 <1 MiB／512 KiB 目標、路徑安全、review_context、完整 decision 欄位及 canonical H recipe。includes 值為完整分片解析後的 canonical hash；本次建置另釘 index／分片 **exact bytes hash** 與 immutable authored revision。拒絕未知欄位／格式、重複鍵、symlink、跨入口／絕對／`..` 路徑、缺檔、未索引分片或 hash 不符。啟用時缺 index 必須失敗；明示空集合才使用 includes={}。先驗全部地區、全部歷史，再投影，不能過濾掉決定的成員。
+本入口採用 [authored-layout](authored-layout.md#2-分片與來源) 的嚴格 YAML 1.2、單檔 <1 MiB／512 KiB 目標、路徑安全、本文件的 review_context、decision 欄位及 canonical H recipe。includes 值為完整分片解析後的 canonical hash；本次建置另釘 index／分片 **exact bytes hash** 與 immutable authored revision。拒絕未知欄位／格式、重複鍵、symlink、跨入口／絕對／`..` 路徑、缺檔、未索引分片或 hash 不符。啟用時缺 index 必須失敗；明示空集合才使用 includes={}。先驗全部地區、全部歷史，再投影，不能過濾掉決定的成員。
 
 record 恰為 `{record_key,kind,filing_key,data,evidence}`；data 恰為 `{subject,adoption_no,predecessor,value,review_context_hash,dependencies,reason}`。subject 恰為 `{printing_id}`；record_key 是 `[kind,printing_id,adoption_no]` 的 canonical JSON 字串。adoption_no 同 subject 從 1 起連續增加；predecessor 首筆為 null，後筆為 `{record_key,record_hash,decision_id}`，必精確指向前一採納。value 是完整替換值，不是 patch；首筆非 null，後筆 null 表示撤回人工採納，但永久 ID／配號／已發布網址仍保留。
 

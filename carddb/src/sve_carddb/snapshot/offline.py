@@ -7,8 +7,7 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import JsonValue, model_validator
 
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.current import compile_current_build
-from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES
+from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES, compile_build
 from sve_carddb.build_inputs import (
     BuildContext,
     Revision,
@@ -255,19 +254,11 @@ def _prepare_catalog(
     registry: RegistrySnapshot | None = None,
 ) -> Prepared:
     """Native offline builds consume current values, never receipt envelopes."""
-    from sve_carddb.catalog.current import CURRENT_FORMAT, prepare  # ruff: ignore[import-outside-top-level] -- initialize the shared text interner before catalog modules
+    from sve_carddb.catalog.current import prepare  # ruff: ignore[import-outside-top-level] -- initialize the shared text interner before catalog modules
 
     snapshots = inputs.load()
-    if any(
-        snapshot.entry != "catalog-adoptions"
-        or any(
-            object_value(parse(shard.content)).get("catalog_adoption_format")
-            != CURRENT_FORMAT
-            for shard in snapshot.shards
-        )
-        for snapshot in snapshots
-    ):
-        raise ValueError("Offline catalog requires current format 2 inputs")
+    if any(snapshot.entry != "catalog-adoptions" for snapshot in snapshots):
+        raise ValueError("Offline catalog requires catalog-adoptions inputs")
     configuration = object_value(parse(build.configuration.encode()))
     if any(
         configuration.get(key) != value for key, value in inputs.configuration().items()
@@ -441,7 +432,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     if mounted is not None:
         configuration["image_recipe"] = DEFAULT_RECIPE.version
     context = BuildContext.from_inputs(inputs.revision, configuration)
-    schema = compile_current_build(
+    schema = compile_build(
         (
             *MINIMUM_CAPABILITIES,
             "en",

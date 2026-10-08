@@ -6,7 +6,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.snapshot.values import array, canonical, object_value
 from sve_carddb.template_translations.current import (
     from_files,
@@ -190,7 +190,7 @@ def test_candidate_never_renders_projects_or_bypasses_source_checks(
             {},
             variants=((definitions[0].data.id, record.data.candidate_id),),
         )
-    with create_database(compile_current_build(("translation_templates",))) as db:
+    with create_database(compile_build(("translation_templates",))) as db:
         seed(db)
         with db.transaction():
             populate(db, verified)

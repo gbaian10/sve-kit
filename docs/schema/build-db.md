@@ -24,10 +24,10 @@ A＝authored 人寫或工具輔助採納，C＝爬取，D＝推導，M＝混合�
 | `source_record` | `id:ID PK,kind:official_page\|official_api\|official_pdf\|image\|third_party_page\|third_party_audio\|authored,url:Text?,raw_locator:Text?,fetched_at:Instant?,etag:Text?,last_modified:Text?,sha256:Hash,parser_version:Text?,authored_path:Text?,authored_revision:Text?`；每次內容版本另存；抓取 URL/時間/hash 必填，ETag 可空；不取代抓取 manifest |
 | `decision` | `id:ID PK,state:proposed\|model_reviewed\|sampled\|confirmed\|rejected\|disputed,scope:record\|batch,category:Code,membership_hash:Hash?,policy_id:Code?,sample_ids:Json?,confidence:high\|medium\|low?,note:Text`；sampled/confirmed 須有實際 checked 成員；batch 另須精確成員集合；決定不可覆寫 |
 | `decision_source` | `decision_id→decision,source_id→source_record,role:Text,locator:Text?,quote:Text?`；`PK(decision_id,source_id,role)` |
-| `language` | `code:Lang PK,fallback_order:Json,display_name:Text`；fallback 只供介面詞彙，不套用卡文 |
-| `vocabulary` | `kind:Code,code:Code,label_unit_id→text_unit,active:Bool`；`PK(kind,code)`，code 是固定小寫英文搜尋代碼 |
+| `language` | `code:Lang PK,fallback_order:Json,display_name:Text,authored_source_id→source_record?,record_key:Text?,origin:official\|project\|machine?,low_confidence:Bool?`；fallback 只供介面詞彙，不套用卡文 |
+| `vocabulary` | `kind:Code,code:Code,label_unit_id→text_unit,active:Bool,authored_source_id→source_record?,record_key:Text?,origin:official\|project\|machine?,low_confidence:Bool?`；`PK(kind,code)`，code 是永久搜尋代碼 |
 
-本節表格保留現行 DDL；language／vocabulary 的 format 2 來源與品質欄位尚未實作，見 §9.2。
+language／vocabulary 的來源與品質欄位為 current DDL 的一部分，填值規則見 §9.2。
 
 `text_unit.lang` 與 `search_alias.lang` 必須以 `FK(lang)→language(code)` 引用已登錄語言，避免文字或搜尋別名缺少對應的語言配置。新增語言先登錄 `language`，不把外鍵限縮成初始三語的 enum；此規則不將其他 Lang 欄或 JSON 成員自動轉成 SQL FK。
 
@@ -278,57 +278,32 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 
 ### 9.1 現行 DDL 表格
 
-下表維持現行建置 schema，供文件／DDL 一致性檢查；其中 legacy 的 decision、revision、status
-與來源枚舉不代表 format 2 仍需核可封套。新格式目標見 §9.2，實作 PR 更新 DDL 時須同步改表，
-不能先改此表宣稱新欄位或鍵已可用。
+下表為唯一的 current 建置 DDL；人工資料保存來源與品質，不包含翻譯核可封套。
 
 | 表 | 建置期欄位、鍵與約束 |
 | --- | --- |
-| `glossary_term` | `id:ID PK,category:keyword\|ability\|trait\|rule_term\|card_name,source_ja:Text,concept_key:Text UNIQUE,decision_id→decision` |
-| `glossary_translation` | `term_id→glossary_term,lang:Lang,text:Text,origin:official_svwb\|official_sv1\|project\|community\|machine,source_id→source_record?,decision_id→decision` `PK(term_id,lang)`；每概念語系一個選定譯法，候選留來源／決定紀錄 |
-| `sentence_template` | `id:ID PK,level:sentence\|clause,source_lang:Lang,normalized_text:Text,normalizer_version:Text,semantic_variant:Text,parameter_schema:Json,content_hash:Hash,decision_id→decision`；內容不可變，ID 由內容 hash 配發並檢查碰撞；新增版本用新 ID |
-| `template_translation` | `template_id→sentence_template,lang:Lang,revision:UInt,text:Text,status:draft\|reviewed,origin:project\|machine,decision_id→decision` `PK(template_id,lang,revision)`；不可變版本，當前發布選該精確模板修訂／lang 最高已審版本 |
-| `template_component` | `parent_id→sentence_template,ordinal:UInt,child_id→sentence_template` `PK(parent_id,ordinal)`；無環，父子都釘修訂 |
-| `text_template_binding` | `id:ID PK,context_id→translation_context,ordinal:UInt,template_id→sentence_template,params:Json,source_span:Json,decision_id→decision?`；D（人工只採納匹配例外），`UQ(context_id,ordinal)`；每次建置當前一組，source_span.segments 全體不重疊且涵蓋完整效果，params 中 card／term 引用建置驗 FK |
-| `translation` | `id:ID PK,context_id→translation_context,target_lang:Lang,revision:UInt,text:Text,tokens:Json?,origin:official_sve\|official_svwb\|official_sv1\|project\|machine\|community,authority:sve_official\|digital_official\|unofficial,status:draft\|reviewed\|stale,source_hash:Hash,source_id→source_record?,translated_by:Text,translated_at:Instant,decision_id→decision?`；`UQ(context_id,target_lang,revision)` |
-| `translation_binding` | `translation_id→translation,binding_id→text_template_binding,template_id→sentence_template,lang:Lang,translation_revision:UInt` `PK(前兩欄)`；`FK(template_id,lang,translation_revision)→template_translation`；`template_id` 必須等於 binding 的值，lang 必須等於 `translation.target_lang`；`binding.context_id` 必須等於 `translation.context_id`；D |
-| `translation_term` | `translation_id→translation,term_id→glossary_term` `PK(兩欄)`；D，支援術語變更反查 |
-| `translation_selection` | `context_id→translation_context,target_lang:Lang,translation_id→translation` `PK(前兩欄)`；D，`target_lang` 與 `context_id` 必須與選中的 translation 一致，僅選未 stale 的發布版本 |
-| `translation_context` | `id:ID PK,source_unit_id→text_unit,semantic_variant:Code,decision_id→decision?`；`UQ(source_unit_id,semantic_variant)`，default 為無歧義通用語意，非 default 須採納理由 |
+| `glossary_term` | `id:ID PK,category:keyword\|ability\|trait\|rule_term\|card_name,source_ja:Text,concept_key:Text UNIQUE,emphasis:Bool?,authored_source_id→source_record,record_key:Text,origin:official\|project\|machine,low_confidence:Bool` |
+| `glossary_translation` | `term_id→glossary_term,lang:Lang,text:Text,source_id→source_record?,authored_source_id→source_record,record_key:Text,origin:official\|project\|machine,low_confidence:Bool` `PK(term_id,lang)`；每概念語系一個當前選定譯法 |
+| `sentence_template` | `id:ID PK,level:sentence\|clause,source_lang:Lang,normalized_text:Text,normalizer_version:Text,semantic_variant:ID,parameter_schema:Json,content_hash:Hash UNIQUE,authored_source_id→source_record,record_key:Text,origin:official\|project\|machine,low_confidence:Bool`；語義內容 hash 決定 ID |
+| `template_translation` | `template_id→sentence_template,lang:Lang,variant_key:ID,text:Text,authored_source_id→source_record,record_key:Text,origin:official\|project\|machine,low_confidence:Bool` `PK(template_id,lang,variant_key)`；當前值與明示候選 |
+| `text_template_binding` | `id:ID PK,context_id→translation_context,ordinal:UInt,template_id→sentence_template,params:Json,source_span:Json`；`UQ(context_id,ordinal)`，來源覆蓋與參數檢查保持 |
+| `translation` | `id:ID PK,context_id→translation_context,target_lang:Lang,revision:UInt,text:Text,tokens:Json?,origin:official\|project\|machine,authority:sve_official\|digital_official\|unofficial,low_confidence:Bool,source_hash:Hash,source_id→source_record?`；`UQ(context_id,target_lang,revision)` |
+| `translation_binding` | `translation_id→translation,binding_id→text_template_binding,template_id:ID,lang:Lang,variant_key:ID` `PK(translation_id,binding_id)`；`FK(template_id,lang,variant_key)→template_translation(template_id,lang,variant_key)`；模板、context 與語言須一致 |
+| `translation_term` | `translation_id→translation,term_id→glossary_term` `PK(translation_id,term_id)`；支援術語反查 |
+| `translation_selection` | `context_id→translation_context,target_lang:Lang,translation_id→translation` `PK(context_id,target_lang)`；context 與語言須與選中的譯文一致 |
+| `translation_context` | `id:ID PK,source_unit_id→text_unit,semantic_variant:ID`；`UQ(source_unit_id,semantic_variant)` |
 | `translation_use` | `id:ID PK,context_id→translation_context,field:Code,ordinal:UInt?,face_revision_id→face_revision?,printing_id:ID?,face_id:ID?,qa_version_id→qa_version?,cr_clause_id→cr_clause?,vocabulary_kind:Code?,vocabulary_code:Code?,keyword_id→keyword?,product_family_id→product_family?,product_id→product?`；恰一 owner 組非空；`FK(printing_id,face_id)→printing_face(printing_id,face_id)`，`FK(vocabulary_kind,vocabulary_code)→vocabulary(kind,code)`；owner/field/ordinal 條件唯一，來源 text 必須同 context |
 
-### 9.2 format 2 待實作
+### 9.2 當前翻譯投影
 
-以下為[翻譯 format 2](translation-contract.md)的目標建置模型，尚未反映於 §2／§9.1 的現行表格。
-PR2／PR3 實作時須同步 DDL、表格、inventory 測試與 consumer。
-模板功能、術語／名字／風味、owner/use 與跨區適用檢查保留；取消人工採納鏈及歷史重播門檻。
-不要求首輪抽查、雙模型 agreed 或合併前人工命令；資料可在普通 PR 直接修改。
-
-一般譯文／選詞投影 variant_key=default；具名候選帶自己的 key，不當成不可變 revision。
-沒有候選能力的過渡 consumer 不得忽略非空候選或 pin；啟用前須同步 loader、DDL、依賴鍵與 renderer。
-
-人工輸入列共用 `authored_source_id→source_record,record_key,origin:official|project|machine,low_confidence:Bool`。
-來源記本次讀到的檔案／版本，record_key 定位該檔內記錄；不是新的核可表。
-新格式不含決定封套與樣本欄位。過渡 DDL 可保留 nullable decision_id 供 legacy 列，
-兩種來源須互斥且各驗原格式；新列不得造假 decision。wording、digital-links 等其他表的 decision FK 不變；registry 與商品表已不設 decision_id（見 §2）。
-
-各表的目標差異如下；這些是待實作設計，不是現行 DDL 宣告：
-
-- language／vocabulary 新增 authored_source_id（source_record 外鍵）、record_key:Text、origin（official/project/machine）、low_confidence:Bool。
-  format 2 輸入四欄均非 null；尚未轉換的既有配置可暫允許前三欄 null，不能用過渡空值輸入新的無來源資料。
-- glossary_term 新增共用人工來源／品質欄與 emphasis:Bool?，移除新格式的 decision_id；永久概念 ID／concept_key 唯一性不變。
-  emphasis 為當前加粗推導值，rule_term 缺設定為 null，其餘固定 true。
-- glossary_translation 使用共用人工來源／品質欄，保留實際官方來源 source_id，移除新格式的 decision_id。
-  增加 variant_key:Code，主鍵改為 (term_id,lang,variant_key)；default 為一般選詞，其餘為明示候選。
-- sentence_template 使用共用人工來源／品質欄，移除新格式的 decision_id；保留六欄語義指紋，不設 supersedes_id。
-- template_translation 使用共用人工來源／品質欄，移除人工 revision、status 與 decision_id，增加 variant_key:Code；
-  主鍵改為 (template_id,lang,variant_key)，只有可修改的當前值及明示候選。
-- translation_binding 移除 translation_revision，改用 variant_key:Code；(template_id,lang,variant_key)
-  外鍵指向 template_translation 的同名三欄。原有 (translation_id,binding_id) 主鍵及模板／context／語言一致性保持。
-- translation_context／text_template_binding 移除新格式的 decision_id；主鍵、唯一組合與來源覆蓋／參數檢查保持。
-- translation 的 origin 改為 official/project/machine，新增 low_confidence:Bool；移除 status、translated_by、translated_at、decision_id。
-  id、(context_id,target_lang,revision) 唯一鍵及 authority 不變；revision 取 render-v2 的 52-bit 產物內容鍵，首版 tokens=null。
-- template_component、translation_term、translation_selection、translation_use 的欄位與鍵保持；component 首版只驗無環及來源一致，不啟用子句拼接。
+[翻譯 current 契約](translation-contract.md)與 §9.1 使用相同 DDL，透過 `build_db.t1.compile_build()` 編譯。
+模板功能、術語／名字／風味、owner/use、來源 hash 與跨區適用檢查保留。
+人工輸入的 authored_source_id、record_key、origin 與 low_confidence 定位本次來源與品質，沒有另建核可表。
+language／vocabulary 的四欄可為 null，以容納程式提供的配置；從 authored 讀入的值都須填齊。
+模板與 glossary 的人工來源欄位必填，真實官方來源另保留 source_id。
+模板譯文以 `(template_id,lang,variant_key)` 唯一；glossary 選詞以 `(term_id,lang)` 唯一。
+translation 的 revision 是 render-v2 的 52-bit 內容鍵，首版 tokens=null，不代表人工採納序列。
+其他元件仍有用途的 decision FK 不由翻譯的 current schema 移除。
 
 完整 translation_use owner 欄位為 face_revision_id、printing_id/face_id、qa_version_id、cr_clause_id、
 vocabulary_kind/vocabulary_code、keyword_id、product_family_id、product_id，恰一組非 null。

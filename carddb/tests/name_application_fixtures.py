@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.digital_name_policies.application import Inputs
 from sve_carddb.registry.preview import FrozenJP, plan_preview
@@ -87,7 +87,7 @@ def application_case(
     )
     translation = TranslationInputs(root / "authored", root, revision)
     replay = Names(translation.load(), ())
-    schema = compile_current_build(("t0", "translation_names"))
+    schema = compile_build(("t0", "translation_names"))
     with create_database(schema) as db, template().copy() as original:
         with db.transaction():
             for table in schema.tables:

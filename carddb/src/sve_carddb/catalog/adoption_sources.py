@@ -13,7 +13,6 @@ from sve_carddb.catalog.adoption_models import (
     ImageEvidence,
     SourceRef,
     SourceText,
-    TextEvidence,
 )
 from sve_carddb.extract import official_en, official_jp
 from sve_carddb.frozen_sources import FrozenSources
@@ -27,10 +26,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_inputs import Source
-    from sve_carddb.catalog.adoption_models import Record, ReviewContext, TextValue
-    from sve_carddb.catalog.current_models import (
-        VocabularyRecord as CurrentVocabularyRecord,
-    )
+    from sve_carddb.catalog.adoption_models import ReviewContext, TextValue
     from sve_carddb.registry.snapshot import RegistrySnapshot
 
 SOURCE_PARSERS = {"official-jp-exact-v1", "official-en-exact-v1", "exact-json-v1"}
@@ -105,18 +101,12 @@ class AdoptionSources:
     def value(
         self,
         value: TextValue,
-        record: Record | CurrentVocabularyRecord,
         review: ReviewContext,
     ) -> LocalizedText:
-        """Source TextValues must be part of the same human-approved evidence set."""
+        """Resolve the actual source reference stored in the value."""
         if isinstance(value, AuthoredText):
             return LocalizedText(lang=value.lang, text=value.text)
         assert isinstance(value, SourceText)
-        if not any(
-            isinstance(e, TextEvidence) and e.source_ref == value.source_ref
-            for e in record.evidence
-        ):
-            raise ValueError("Source TextValue is absent from adoption evidence")
         return self.text(value.source_ref, review)[0]
 
     def image(self, evidence: ImageEvidence) -> Source:

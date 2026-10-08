@@ -16,7 +16,6 @@ from .adoption_fixtures import (
     REPO,
     Case,
     commit,
-    dependency,
     envelope,
     index,
     make_case,
@@ -73,23 +72,13 @@ def mapping(
 
 
 def vocabulary_record(
-    case: VocabularyCase,
     kind: str,
     code: str,
     mappings: list[dict[str, JsonValue]],
     *,
     active: bool = True,
 ) -> dict[str, JsonValue]:
-    dependencies = {canonical(dependency("language", code="ja"))}
-    for item in mappings:
-        dependencies.add(canonical(dependency("language", code=str(item["lang"]))))
-        dependencies.update(
-            canonical(dependency("vocabulary", kind="special_kind", code=str(marker)))
-            for marker in array(item["special_kinds"])
-        )
-    from sve_carddb.snapshot.values import parse  # ruff: ignore[import-outside-top-level] -- detached signed dependencies reuse canonical deduplication
-
-    result = record(
+    return record(
         "vocabulary_adoption",
         {"kind": kind, "code": code},
         {
@@ -101,24 +90,14 @@ def vocabulary_record(
             "raw_mappings": sorted(list[JsonValue](mappings), key=canonical),
             "active": active,
         },
-        case.case.review,
-        [parse(value) for value in sorted(dependencies)],
     )
-    result["evidence"] = sorted(
-        [
-            {"source_ref": item["source_ref"], "role": "Synthetic complete field"}
-            for item in mappings
-        ],
-        key=canonical,
-    )
-    return result
 
 
 def save(case: VocabularyCase, records: list[dict[str, JsonValue]]) -> VocabularyCase:
     write(
         case.case.root,
         VOCABULARY_PATH,
-        envelope(list[JsonValue](records), case.case.review),
+        envelope(list[JsonValue](records)),
     )
     index(case.case.root)
     return replace(case, case=replace(case.case, revision=commit(case.case.repository)))
@@ -133,7 +112,7 @@ def records(case: VocabularyCase) -> list[dict[str, JsonValue]]:
     ]
 
 
-def make_vocabulary_case(root: Path) -> VocabularyCase:  # ruff: ignore[too-many-locals,complex-structure] -- one shared bilingual archive and immutable recipe closure
+def make_vocabulary_case(root: Path) -> VocabularyCase:
     store = _store(root / "archive")
     versions = {}
     for region in ("jp", "en"):
@@ -181,17 +160,6 @@ def make_vocabulary_case(root: Path) -> VocabularyCase:  # ruff: ignore[too-many
         "context": context.model_dump(mode="json"),
         "source_batches": [{"batch_id": batch.batch_id}],
     }
-    for file in (case.root / "catalog-adoptions").rglob("*.yaml"):
-        if file.name == "index.yaml":
-            continue
-        members = array(object_value(read_yaml(file))["records"])
-        for value in members:
-            object_value(object_value(value)["data"])["review_context_hash"] = digest(
-                canonical(review)
-            )
-        write(
-            case.root, file.relative_to(case.root).as_posix(), envelope(members, review)
-        )
     references: dict[tuple[str, str, int], dict[str, JsonValue]] = {}
     for region in ("jp", "en"):
         for kind in ("type", "class"):
@@ -217,9 +185,8 @@ def make_vocabulary_case(root: Path) -> VocabularyCase:  # ruff: ignore[too-many
     return save(
         result,
         [
-            vocabulary_record(result, "special_kind", "evolve", []),
+            vocabulary_record("special_kind", "evolve", []),
             vocabulary_record(
-                result,
                 "type",
                 "follower",
                 [
@@ -228,7 +195,6 @@ def make_vocabulary_case(root: Path) -> VocabularyCase:  # ruff: ignore[too-many
                 ],
             ),
             vocabulary_record(
-                result,
                 "class",
                 "elf",
                 [
@@ -238,50 +204,3 @@ def make_vocabulary_case(root: Path) -> VocabularyCase:  # ruff: ignore[too-many
             ),
         ],
     )
-
-
-def current_vocabulary_case(case: VocabularyCase) -> VocabularyCase:
-    """Replace synthetic receipt vocabulary with the native current entry."""
-    includes: dict[str, JsonValue] = {}
-    for path in (case.case.root / "catalog-adoptions").rglob("*.yaml"):
-        if path.name == "index.yaml":
-            continue
-        relative = path.relative_to(case.case.root).as_posix()
-        if "/vocabulary/" not in relative and "/languages/" not in relative:
-            path.unlink()
-            continue
-        rows: list[JsonValue] = []
-        for raw in array(object_value(read_yaml(path))["records"]):
-            record = object_value(raw)
-            data = object_value(record["data"])
-            rows.append(
-                {
-                    "record_key": canonical([record["kind"], data["subject"]]).decode(),
-                    "kind": record["kind"],
-                    "data": {
-                        "subject": data["subject"],
-                        "value": data["value"],
-                        "evidence": record["evidence"],
-                    },
-                    "origin": "project",
-                    "low_confidence": False,
-                    "note": "Synthetic current value",
-                }
-            )
-        payload: dict[str, JsonValue] = {
-            "catalog_adoption_format": 2,
-            "kind": "catalog_adoption_shard",
-            "records": sorted(rows, key=lambda r: str(object_value(r)["record_key"])),
-        }
-        path.write_bytes(canonical(payload))
-        includes[relative] = digest(canonical(payload))
-    write(
-        case.case.root,
-        "catalog-adoptions/index.yaml",
-        {
-            "catalog_adoption_format": 2,
-            "kind": "catalog_adoption_index",
-            "includes": dict(sorted(includes.items())),
-        },
-    )
-    return replace(case, case=replace(case.case, revision=commit(case.case.repository)))

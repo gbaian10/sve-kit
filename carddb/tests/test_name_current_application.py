@@ -9,7 +9,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.digital_name_policies.application import Inputs, populate
 from sve_carddb.digital_name_policies.current_application import materialize, prepare
@@ -137,7 +137,7 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
     )
     object_value(config["catalog_registry"])["authored_revision"] = revision
     context = BuildContext.from_inputs(revision, config)
-    schema = compile_current_build(("t0", "translation_names"))
+    schema = compile_build(("t0", "translation_names"))
     with create_database(schema) as db, case.database.copy() as old:
         with db.transaction():
             for table in schema.tables:

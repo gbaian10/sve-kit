@@ -7,9 +7,8 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_db.database import open_database
-from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES
+from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES, compile_build
 from sve_carddb.catalog import adoption_importer
 from sve_carddb.catalog.models import Catalog
 from sve_carddb.catalog.projection import CatalogProjection
@@ -193,7 +192,7 @@ def test_offline_name_policy_reconstructs_identical_bundle(
     )
     assert not first.projection.tables["digital_link"]
     assert first.projection.config["digital_endpoints"] == []
-    schema = compile_current_build(
+    schema = compile_build(
         (*MINIMUM_CAPABILITIES, "en", "translation_evidence", "translation_names")
     )
     with open_database(schema, tmp_path / "first/build.sqlite") as db:

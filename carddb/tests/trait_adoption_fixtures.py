@@ -8,11 +8,10 @@ from pydantic import JsonValue
 
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.manifest import Kind, Region
-from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.source_archive import seal_batch
 
-from .adoption_fixtures import REPO, commit, envelope, index, make_case, write
+from .adoption_fixtures import REPO, commit, index, make_case
 from .catalog_vocabulary_fixtures import RUNTIME, VocabularyCase
 from .test_source_archive import _put, _resource, _store
 
@@ -129,17 +128,6 @@ def trait_baseline(tmp_path_factory: pytest.TempPathFactory) -> TraitCase:
         "context": context.model_dump(mode="json"),
         "source_batches": [{"batch_id": batch.batch_id}],
     }
-    for file in (case.root / "catalog-adoptions").rglob("*.yaml"):
-        if file.name == "index.yaml":
-            continue
-        members = array(object_value(read_yaml(file))["records"])
-        for value in members:
-            object_value(object_value(value)["data"])["review_context_hash"] = digest(
-                canonical(review)
-            )
-        write(
-            case.root, file.relative_to(case.root).as_posix(), envelope(members, review)
-        )
     shutil.rmtree(case.root / "catalog-adoptions/aliases")
     shutil.rmtree(case.root / "catalog-adoptions/symbols")
     index(case.root)

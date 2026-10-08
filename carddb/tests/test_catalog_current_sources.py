@@ -9,7 +9,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.manifest import Kind, Region
 from sve_carddb.registry.storage import read_yaml
@@ -20,7 +20,6 @@ from sve_carddb.sources import official_en, official_jp
 from sve_carddb.translations.sources import Sources
 
 from .adoption_fixtures import REPO, Case, commit, make_case, write
-from .current_catalog_fixtures import current_case
 from .en_extract_fixtures import page as english_page
 from .test_registry_preview_archive import RAW as JAPANESE_PAGE
 from .test_source_archive import _put, _resource, _store
@@ -129,7 +128,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> PageCase:
         }
         for key, url in urls.items()
     }
-    case = current_case(make_case(root / "repository"))
+    case = make_case(root / "repository")
     for path in RUNTIME:
         target = case.repository / path
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -200,7 +199,7 @@ def case(tmp_path: Path, baseline: PageCase) -> PageCase:
 
 @pytest.fixture(scope="module")
 def schema() -> CompiledSchema:
-    return compile_current_build()
+    return compile_build()
 
 
 def populate(

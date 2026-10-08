@@ -9,9 +9,8 @@ import pytest
 from pydantic import JsonValue
 from typer.testing import CliRunner
 
-from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_db.database import open_database
-from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES
+from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES, compile_build
 from sve_carddb.build_inputs import InputRecord
 from sve_carddb.cli import app
 from sve_carddb.extract import official_en as extract_en
@@ -30,7 +29,7 @@ from sve_carddb.sources import official_en, official_jp
 from sve_carddb.sources.official_jp import card_url
 
 from .adoption_fixtures import REPO, commit, write
-from .catalog_vocabulary_fixtures import current_vocabulary_case, make_vocabulary_case
+from .catalog_vocabulary_fixtures import make_vocabulary_case
 from .product_fixtures import envelope as product_envelope
 from .product_fixtures import family, install
 from .test_effect_presence import page
@@ -171,8 +170,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
             "translations/glossary/choices/001.yaml": envelope([selected]),
         },
     )
-    case = replace(case, archive=store.root)
-    return current_vocabulary_case(case)
+    return replace(case, archive=store.root)
 
 
 def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore[too-many-locals] -- full native CLI binds real synthetic identities, current catalog and frozen regional sources
@@ -297,7 +295,7 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
         "translation_evidence",
     }
     with open_database(
-        compile_current_build((*MINIMUM_CAPABILITIES, "en", "translation_evidence")),
+        compile_build((*MINIMUM_CAPABILITIES, "en", "translation_evidence")),
         tmp_path / "bundle/build.sqlite",
     ) as db:
         assert len(db.rows("card")) == 2
