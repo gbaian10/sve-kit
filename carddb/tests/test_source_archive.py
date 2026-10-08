@@ -4,9 +4,11 @@ import errno
 import hashlib
 import os
 import sqlite3
+import sys
 from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
+from types import SimpleNamespace
 
 import pytest
 from rich.console import Console
@@ -891,3 +893,33 @@ def test_cross_device_copy_and_replace_race(
     with pytest.raises(ArchiveRaceError):
         seal_batch(another, retries=0)
     assert not (another.root / "batches").exists()
+
+
+def test_reflink_is_skipped_off_linux(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "source"
+    source.write_bytes(b"raw")
+    target = tmp_path / "target"
+    monkeypatch.setattr(sys, "platform", "win32")
+    with source.open("rb") as handle:
+        assert archive._try_reflink(handle.fileno(), target) is False  # pyright: ignore[reportPrivateUsage] -- fallback contract
+    assert not target.exists()
+
+
+def test_failed_reflink_leaves_no_partial_target(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "source"
+    source.write_bytes(b"raw")
+    target = tmp_path / "target"
+    monkeypatch.setattr(sys, "platform", "linux")
+
+    def unsupported(*_args: object) -> None:
+        raise OSError(errno.EOPNOTSUPP, "synthetic reflink failure")
+
+    # A stand-in module keeps this test runnable where fcntl does not exist.
+    monkeypatch.setitem(sys.modules, "fcntl", SimpleNamespace(ioctl=unsupported))
+    with source.open("rb") as handle:
+        assert archive._try_reflink(handle.fileno(), target) is False  # pyright: ignore[reportPrivateUsage] -- fallback contract
+    assert not target.exists()

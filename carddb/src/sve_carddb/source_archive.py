@@ -2,11 +2,11 @@
 
 import ctypes
 import errno
-import fcntl
 import hashlib
 import os
 import shutil
 import stat
+import sys
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -495,6 +495,10 @@ def _pin(  # ruff: ignore[complex-structure] -- pinning handles link, clone and 
 
 
 def _try_reflink(source_fd: int, target: Path) -> bool:
+    if not sys.platform.startswith("linux"):
+        return False
+    import fcntl  # ruff: ignore[import-outside-top-level] -- fcntl does not exist on Windows.
+
     try:
         with target.open("xb") as output:
             fcntl.ioctl(output.fileno(), _FICLONE, source_fd)
