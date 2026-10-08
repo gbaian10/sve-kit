@@ -93,6 +93,64 @@ def test_suffixes_do_not_remove_sign_or_identifier_guards(
     assert matches(prefix + positive[2:], rule) == ()
 
 
+@pytest.mark.parametrize("rule", ["suffix_damage_amount", "leader_person_quantity"])
+@pytest.mark.parametrize(
+    ("text", "reason"),
+    [
+        ("ID_２ダメージ", "numeric_identifier_requires_review"),
+        ("+２ダメージ", "signed_numeric_requires_review"),
+    ],
+)
+def test_general_matchers_cannot_claim_vetoed_positions_even_if_grammar_matches(
+    monkeypatch: pytest.MonkeyPatch, rule: str, text: str, reason: str
+) -> None:
+    value = candidate(text)
+    assert value.slots[0].issues == (reason,)
+    monkeypatch.setattr(matching, "_match", lambda *_: matching.Match())
+    assert recognize(text, partition(text)[0], value, References(), (rule,)) == ()
+
+
+@pytest.mark.parametrize(
+    "reason", ["numeric_identifier_requires_review", "signed_numeric_requires_review"]
+)
+def test_classification_removes_only_the_matched_rules_reason(
+    monkeypatch: pytest.MonkeyPatch, reason: str
+) -> None:
+    text = "試験２ダメージ"
+    value = candidate(text)
+    issues = (*value.slots[0].issues, reason)
+    guarded = value.model_copy(
+        update={
+            "slots": (value.slots[0].model_copy(update={"issues": issues}),),
+            "issues": issues,
+        }
+    )
+    monkeypatch.setattr(matching, "analyze", lambda *_: guarded)
+    ref = SourceRef(
+        batch_id=HASH,
+        source_version_id="src:v1:" + "b" * 64,
+        parser=PARSER,
+        locator="/faces/0/text",
+        text_hash=digest(text.encode()),
+    )
+    context = Field(
+        ref.source_version_id,
+        ref.locator,
+        text,
+        None,
+        [entry(ref, p, VERSION) for p in partition(text)],
+        {"faces": [{"text": text, "sections": []}]},
+    )
+    result = Candidates(enabled_rules=("suffix_damage_amount",))
+    _field(result, context, References())
+    classified = result.entries[0]
+    assert len(result.rule_matches) == 1
+    assert classified.slots[0].semantic_role == "damage_amount"
+    assert classified.slots[0].issues == (reason,)
+    assert classified.issues == (reason,)
+    assert classified.parameter_schema is None
+
+
 @pytest.mark.parametrize(("rule", "positive", "negative", "role"), SUFFIX_CASES)
 def test_invalid_raw_digit_or_overflow_never_becomes_a_proposal(
     rule: str, positive: str, negative: str, role: str

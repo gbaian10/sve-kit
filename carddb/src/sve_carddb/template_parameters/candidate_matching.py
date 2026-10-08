@@ -322,6 +322,8 @@ def recognize(
             continue
         for identifier in selected:
             rule = BY_ID[identifier]
+            if rule.reason not in hint.issues:
+                continue
             # All rule attempts share the same immutable normalization provenance.
             if traced is None:
                 traced = prepared(text, part)
@@ -375,7 +377,11 @@ def classify(
         if row is not None:
             hint = hint.model_copy(
                 update={
-                    "issues": (),
+                    "issues": tuple(
+                        reason
+                        for reason in hint.issues
+                        if reason != BY_ID[str(row["rule_id"])].reason
+                    ),
                     "semantic_role": str(row["recognized_role"]),
                     "rule_id": str(row["rule_id"]),
                 }

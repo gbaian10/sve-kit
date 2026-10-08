@@ -11,8 +11,10 @@ from sve_carddb.template_parameters.analysis import (
 from sve_carddb.template_parameters.inventory import Candidates, summary
 from sve_carddb.template_parameters.models import Hint
 from sve_carddb.template_parameters.numeric_rules import (
+    NUMERIC_RULES,
     ORDINAL_PENDING,
     RECOVERY_PENDING,
+    conditions,
     configuration,
 )
 
@@ -152,8 +154,6 @@ def test_excluded_matchers_are_anchored_at_the_position_and_not_general_substrin
 
 
 def test_numeric_definitions_expose_conditions_without_approval_wrappers() -> None:
-    from sve_carddb.template_parameters.numeric_rules import NUMERIC_RULES, conditions  # ruff: ignore[import-outside-top-level] -- inspect lexical metadata
-
     rows = [object_value(row) for row in array(configuration()["rules"])]
     assert [row["id"] for row in rows] == list(NUMERIC_RULES)
     for rule, row in zip(NUMERIC_RULES, rows, strict=True):

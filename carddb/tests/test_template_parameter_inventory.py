@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.snapshot.values import object_value
+from sve_carddb.template_parameter_rules.models import LEGACY_IDS
 from sve_carddb.template_parameters import inventory
 from sve_carddb.template_parameters.inventory import Candidates, build, summary
 from sve_carddb.template_parameters.references import References
@@ -54,6 +56,52 @@ def test_inventory_cannot_shrink_or_duplicate_first_checkpoint_inputs(
 def test_term_diagnostics_do_not_turn_into_bindings_or_false_completion() -> None:
     result = summary(Candidates())
     assert result["term_mentions_are_bindings"] is False
+
+
+@pytest.mark.parametrize(
+    ("enabled", "message"),
+    [
+        (
+            (LEGACY_IDS[0], LEGACY_IDS[0]),
+            "Candidate rule selection must be unique",
+        ),
+        (
+            ("suffix_damage_amount", "suffix_damage_amount", LEGACY_IDS[0]),
+            "Candidate rule selection must be unique",
+        ),
+        (
+            (LEGACY_IDS[0], "unknown"),
+            "Candidate rule selection contains an unknown rule",
+        ),
+    ],
+)
+def test_inventory_validates_the_entire_enabled_rule_selection(
+    template_case: Case, enabled: tuple[str, ...], message: str
+) -> None:
+    with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
+        build(
+            FrozenSources(template_case.store, "test-store", template_case.batch),
+            template_case.scan,
+            References(),
+            enabled_rules=enabled,
+        )
+
+
+def test_inventory_sorts_all_switches_but_counts_only_contextual_matchers(
+    template_case: Case,
+) -> None:
+    enabled = ("suffix_damage_amount", LEGACY_IDS[0], "bracket_choice_index")
+    result = build(
+        FrozenSources(template_case.store, "test-store", template_case.batch),
+        template_case.scan,
+        References(),
+        enabled_rules=enabled,
+    )
+    assert result.enabled_rules == tuple(sorted(enabled))
+    assert list(object_value(summary(result)["candidate_rule_counts"])) == [
+        "bracket_choice_index",
+        "suffix_damage_amount",
+    ]
 
 
 @pytest.mark.parametrize("change", ["missing", "extra", "duplicate"])

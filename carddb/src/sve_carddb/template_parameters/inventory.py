@@ -11,7 +11,7 @@ from sve_carddb.template_parameter_rules.models import LEGACY_IDS
 from sve_carddb.template_parameters.analysis import NUMERIC_RULE_DISABLED, NUMERIC_RULES
 from sve_carddb.template_parameters.candidate_matching import classify
 from sve_carddb.template_parameters.numeric_rules import configuration
-from sve_carddb.template_parameters.rule_candidates import selection
+from sve_carddb.template_parameters.rule_candidates import BY_ID
 from sve_carddb.template_parameters.spans import locate
 from sve_carddb.template_sources.inventory import entry, fields, replay
 from sve_carddb.template_sources.normalizer import VERSION, partition
@@ -55,8 +55,11 @@ def build(
     enabled_rules: tuple[str, ...] = (),
 ) -> Candidates:
     """Every first-checkpoint entry must reappear; null fields are never coerced to empty."""
-    selection(tuple(k for k in enabled_rules if k not in LEGACY_IDS))
-    result = Candidates(enabled_rules=enabled_rules)
+    if len(enabled_rules) != len(set(enabled_rules)):
+        raise ValueError("Candidate rule selection must be unique")
+    if any(rule not in BY_ID and rule not in LEGACY_IDS for rule in enabled_rules):
+        raise ValueError("Candidate rule selection contains an unknown rule")
+    result = Candidates(enabled_rules=tuple(sorted(enabled_rules)))
     by_field: dict[tuple[str, str], list[Entry]] = defaultdict(list)
     for item in scan.entries:
         by_field[item.source_ref.source_version_id, item.source_ref.locator].append(
@@ -214,6 +217,7 @@ def summary(candidates: Candidates) -> dict[str, JsonValue]:
                 ),
             }
             for rule in candidates.enabled_rules
+            if rule in BY_ID
         },
         "unresolved_reasons": dict(
             Counter(reason for m in candidates.entries for reason in m.issues)

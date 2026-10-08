@@ -22,14 +22,16 @@ spelled with the times unit. Numeric values use JavaScript's safe unsigned range
 ordinal roles start at one, other magnitudes at zero. Signs remain literal text.
 Header roles follow the full named grammar rather than nearby-character guesses.
 Conditions and closed vocabularies are tested against synthetic positive/negative
-cases. They belong to the installed program, not an approval
-receipt or a frozen producer revision.
+cases. They belong to the installed program, not an approval receipt or a frozen
+producer revision.
 
 The enabled switches in `template_parameter_rules.current` control recognition.
-An empty selection enables no rules. Enabled rules directly classify the exact source position; unmatched reasons
-remain on the slot. Disabled ordinary numeric rules report `numeric_rule_disabled`.
-There is no serialized resolution step, approval status or per-slot hash wrapper. Candidate completeness is separate from full source
-coverage and never implies an adopted definition or an active translation.
+An empty selection enables no rules. Enabled rules directly classify the exact
+source position; unmatched reasons remain on the slot. Disabled ordinary numeric
+rules report `numeric_rule_disabled`. There is no serialized resolution step,
+approval status or per-slot hash wrapper. Candidate completeness is separate from
+full source coverage and never implies an adopted definition or an active
+translation.
 
 `current_references.adopted()` reads the shared current glossary and validates
 source-backed exact names before lookup. Card-name and term references require a
