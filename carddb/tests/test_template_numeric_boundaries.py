@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from sve_carddb.snapshot.values import array, canonical, object_value
+from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.template_parameters.analysis import (
     NUMERIC_RULE_DISABLED,
     NUMERIC_SUFFIX,

@@ -10,6 +10,7 @@ from typer.testing import CliRunner
 import sve_carddb.snapshot.preview as writer_module
 from sve_carddb.build_db import create_database
 from sve_carddb.cli import app
+from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.snapshot.export import Ownership, export_snapshot
 from sve_carddb.snapshot.export.compression import python_brotli
 from sve_carddb.snapshot.media import prepare_media
@@ -24,14 +25,6 @@ from sve_carddb.snapshot.project.records import art_records, initial
 from sve_carddb.snapshot.project.source import Source
 from sve_carddb.snapshot.publication import require_formal, require_preview
 from sve_carddb.snapshot.reader import read_snapshot
-from sve_carddb.snapshot.values import (
-    array,
-    canonical,
-    digest,
-    object_value,
-    parse,
-    string,
-)
 
 from .snapshot_project_fixtures import SETTINGS, populate, schema
 from .test_snapshot_export import BATCH

@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
-from sve_carddb.snapshot.values import digest
+from sve_carddb.core.json import digest
 
 if TYPE_CHECKING:
     from pydantic import JsonValue

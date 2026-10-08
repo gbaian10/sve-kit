@@ -4,15 +4,16 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.build_db.rows import insert_exact
+from sve_carddb.build_db.source_rows import insert_raw_sources
 from sve_carddb.build_db.t2_translation import OWNERS
-from sve_carddb.build_inputs import input_record, insert_raw_sources, uses_sorted
+from sve_carddb.core.json import canonical, digest, object_value, parse
+from sve_carddb.core.provenance import input_record, uses_sorted
 from sve_carddb.digital_links.importer import review_context
 from sve_carddb.digital_name_policies.application import Result, _counterparts
 from sve_carddb.digital_name_policies.current_evaluate import catalogue
 from sve_carddb.digital_name_policies.evaluate import name_result, owner_text
 from sve_carddb.digital_name_policies.owners import publication_owners
 from sve_carddb.snapshot.project.evidence import DisplayBinding
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.translations.counterparts import first_counterpart
 from sve_carddb.translations.current_models import ChoiceRecord, TermRecord
 from sve_carddb.translations.importer import validate_choice
@@ -22,7 +23,7 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.build_db import Database, Value
-    from sve_carddb.build_inputs import BuildContext, Source, SourceUse
+    from sve_carddb.core.provenance import BuildContext, Source, SourceUse
     from sve_carddb.digital_links.importer import Result as LinkResult
     from sve_carddb.digital_name_policies.application import Inputs
     from sve_carddb.digital_name_policies.loader import Snapshot

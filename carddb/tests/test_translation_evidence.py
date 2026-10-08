@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.core.json import canonical
 from sve_carddb.products.models import LocalizedText
-from sve_carddb.snapshot.values import canonical
 from sve_carddb.text_observations.intern import TextInterner
 from sve_carddb.translations.loader import load_glossary
 from sve_carddb.translations.models import Span

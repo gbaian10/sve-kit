@@ -5,10 +5,11 @@ from urllib.parse import parse_qsl, urlsplit
 
 from pydantic import Field, computed_field, field_validator, model_validator
 
-from sve_carddb.build_inputs import Version
+from sve_carddb.core.json import canonical
+from sve_carddb.core.models import RecordData, Text
+from sve_carddb.core.provenance import Version
 from sve_carddb.products.models import Code, Evidence
-from sve_carddb.registry.records import RecordData, Region, Text
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.registry.records import Region
 
 
 def official_url(value: str, region: Region, purpose: str) -> bool:

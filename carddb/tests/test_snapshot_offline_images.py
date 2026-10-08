@@ -7,8 +7,9 @@ from typing import TYPE_CHECKING
 import pytest
 from typer.testing import CliRunner
 
-from sve_carddb.build_inputs import InputRecord
 from sve_carddb.cli import app
+from sve_carddb.core.json import object_value, parse
+from sve_carddb.core.provenance import InputRecord
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_assets import (
     PARSERS,
@@ -24,7 +25,6 @@ from sve_carddb.snapshot import offline, offline_images
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.preview import Roots, commands, write_preview
-from sve_carddb.snapshot.values import object_value, parse
 from sve_carddb.sources import official_en
 from sve_carddb.sources.official_jp import image_url
 

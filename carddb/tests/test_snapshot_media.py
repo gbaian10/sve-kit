@@ -8,6 +8,15 @@ from typing import TYPE_CHECKING, cast
 import pytest
 from jsonschema import Draft202012Validator, ValidationError
 
+from sve_carddb.core.json import (
+    array,
+    canonical,
+    digest,
+    integer,
+    object_value,
+    parse,
+    string,
+)
 from sve_carddb.snapshot.contract import columns, schema, validate
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.export.measure import update
@@ -18,15 +27,6 @@ from sve_carddb.snapshot.preview import Roots, write_preview
 from sve_carddb.snapshot.preview.media_state import STATE, reserve
 from sve_carddb.snapshot.profiles import MEDIA, profile
 from sve_carddb.snapshot.reader import read_index, read_snapshot, read_text_all
-from sve_carddb.snapshot.values import (
-    array,
-    canonical,
-    digest,
-    integer,
-    object_value,
-    parse,
-    string,
-)
 
 from .test_snapshot_export import BATCH
 from .test_snapshot_preview_images import images as images  # ruff: ignore[useless-import-alias] -- share module-scoped synthetic WebP library

@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import BuildContext
+from sve_carddb.core.json import array, canonical, digest, object_value
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.manifest import Kind, Region
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
 from sve_carddb.source_archive import seal_batch
 
 from .adoption_fixtures import (
@@ -33,7 +33,7 @@ RUNTIME = (
     "carddb/uv.lock",
     "carddb/pyproject.toml",
     "carddb/src/sve_carddb/catalog/adoption_sources.py",
-    "carddb/src/sve_carddb/snapshot/values.py",
+    "carddb/src/sve_carddb/core/json.py",
 )
 VOCABULARY_PATH = "catalog-adoptions/vocabulary/shared/001.yaml"
 

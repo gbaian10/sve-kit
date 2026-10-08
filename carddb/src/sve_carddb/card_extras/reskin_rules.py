@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
+from sve_carddb.core.json import canonical
 from sve_carddb.products.models import LocalizedText
-from sve_carddb.snapshot.values import canonical
 from sve_carddb.text_observations.importer import stat
 from sve_carddb.text_observations.intern import text_values
 

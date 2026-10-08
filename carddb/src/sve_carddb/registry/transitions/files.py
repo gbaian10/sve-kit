@@ -6,10 +6,10 @@ from pathlib import Path
 
 from pydantic import JsonValue
 
-from sve_carddb.registry.inputs import JSON_VALUE, canonical, digest
-from sve_carddb.registry.records import RecordData
+from sve_carddb.core.models import RecordData
+from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
+from sve_carddb.registry.inputs import canonical, digest
 from sve_carddb.registry.transitions.models import Shard
-from sve_carddb.registry.yaml_reader import parse_yaml
 
 MAX_BYTES = 1_048_576
 _PATH = re.compile(r"identity-transitions/([0-9]{3,})\.yaml")

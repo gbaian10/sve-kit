@@ -8,12 +8,12 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
+from sve_carddb.core.json import array, canonical, digest, object_value, string
 from sve_carddb.snapshot.export.compression import compress
 from sve_carddb.snapshot.export.measure import measure
 from sve_carddb.snapshot.preview.media_state import commit
 from sve_carddb.snapshot.publication import require_preview
 from sve_carddb.snapshot.reader import read_snapshot, read_text_all
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, string
 
 if TYPE_CHECKING:
     from sve_carddb.snapshot.export import Brotli, Snapshot

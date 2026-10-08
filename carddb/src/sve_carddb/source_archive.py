@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Literal, cast
 
 from pydantic import BaseModel, ConfigDict, ValidationError
 
+from sve_carddb.core.json import canonical, digest, parse
 from sve_carddb.fetch.writer import LocalState
 from sve_carddb.manifest import (
     READABLE_SCHEMA_VERSIONS,
@@ -24,7 +25,6 @@ from sve_carddb.manifest import (
     Region,
     Resource,
 )
-from sve_carddb.snapshot.values import canonical, digest, parse
 from sve_carddb.store import (
     CorruptDataError,
     UnsafePathError,

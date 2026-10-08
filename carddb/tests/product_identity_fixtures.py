@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import BuildContext
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.extract.compare_jp import legacy_projection
 from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.frozen_sources import FrozenSources

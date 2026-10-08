@@ -7,7 +7,7 @@ from jsonschema import Draft202012Validator, ValidationError
 from pydantic import JsonValue
 
 from sve_carddb.build_db.model import Column, Json, Kind, Value
-from sve_carddb.snapshot.values import SAFE_INTEGER, canonical, parse
+from sve_carddb.core.json import SAFE_INTEGER, canonical, parse
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping

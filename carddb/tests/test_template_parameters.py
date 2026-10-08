@@ -7,7 +7,7 @@ import pytest
 from pydantic import ValidationError
 
 from sve_carddb.catalog.adoption_models import SourceRef
-from sve_carddb.snapshot.values import digest, object_value
+from sve_carddb.core.json import digest, object_value
 from sve_carddb.template_parameters.analysis import (
     NUMERIC_RULE_DISABLED,
     SAFE_INTEGER,

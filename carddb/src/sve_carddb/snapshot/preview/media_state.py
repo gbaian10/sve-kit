@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.snapshot.values import canonical, integer, object_value, parse
+from sve_carddb.core.json import canonical, integer, object_value, parse
 
 if TYPE_CHECKING:
     from pydantic import JsonValue

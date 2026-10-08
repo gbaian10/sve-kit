@@ -6,9 +6,9 @@ from dataclasses import dataclass, replace
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import BuildContext
+from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.manifest import Kind, Region
-from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.source_archive import seal_batch
 
 from .adoption_fixtures import REPO, commit, index, make_case

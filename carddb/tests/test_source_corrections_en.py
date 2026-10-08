@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.core.json import digest
 from sve_carddb.manifest import Region
 from sve_carddb.registry.records import CorrectionData
 from sve_carddb.registry.review import Correction
-from sve_carddb.snapshot.values import digest
 from sve_carddb.source_archive import seal_batch
 from sve_carddb.source_corrections import FrozenImages
 from sve_carddb.source_corrections.images import evidence_url

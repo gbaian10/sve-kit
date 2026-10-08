@@ -4,18 +4,11 @@ from typing import TYPE_CHECKING
 
 from jsonschema import ValidationError as SchemaError
 
+from sve_carddb.core.json import canonical, digest, integer, object_value, parse, string
 from sve_carddb.r2_upload.boundary import UploadError
 from sve_carddb.r2_upload.v2.export import IMAGE_HEADERS, INDEX, INDEX_HEADERS
 from sve_carddb.snapshot.contract import validate
 from sve_carddb.snapshot.profiles import MEDIA
-from sve_carddb.snapshot.values import (
-    canonical,
-    digest,
-    integer,
-    object_value,
-    parse,
-    string,
-)
 
 if TYPE_CHECKING:
     from pydantic import JsonValue

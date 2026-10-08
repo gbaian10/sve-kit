@@ -12,11 +12,11 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.adoption_importer import AdoptionInputs
 from sve_carddb.catalog.adoption_loader import load_adoptions
+from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import canonical, digest
 
 if TYPE_CHECKING:
     from sve_carddb.catalog.adoption_loader import Entry

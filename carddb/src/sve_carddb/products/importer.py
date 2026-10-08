@@ -4,20 +4,20 @@ import hashlib
 import re
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_inputs import (
+from sve_carddb.build_db.source_rows import insert_raw_sources
+from sve_carddb.catalog.languages import register_languages
+from sve_carddb.core.json import canonical
+from sve_carddb.core.provenance import (
     BuildContext,
     InputRecord,
     SourceUse,
     input_record,
-    insert_raw_sources,
 )
-from sve_carddb.catalog.languages import register_languages
 from sve_carddb.products.evidence import CheckedSource, resolve_evidence
 from sve_carddb.products.models import Evidence, FamilyRecord, Language, LocalizedText
 from sve_carddb.products.official_importer import populate_official_products
 from sve_carddb.registry.inputs import digest
 from sve_carddb.registry.preview import populate_preview
-from sve_carddb.snapshot.values import canonical
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

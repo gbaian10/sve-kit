@@ -4,10 +4,11 @@ from typing import Annotated, Literal
 
 from pydantic import Field, JsonValue
 
-from sve_carddb.build_inputs import BuildContext, Version
 from sve_carddb.catalog.symbols import Spelling
+from sve_carddb.core.models import Hash, RecordData, Text
+from sve_carddb.core.provenance import BuildContext, Version
 from sve_carddb.products.models import Code, Lang
-from sve_carddb.registry.records import Hash, RecordData, Region, Text
+from sve_carddb.registry.records import Region
 
 Kind = Literal[
     "vocabulary_adoption",

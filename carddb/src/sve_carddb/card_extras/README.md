@@ -66,7 +66,7 @@ Compose the importer after identity and language staging, in the same caller-own
 transaction:
 
 ```python
-from sve_carddb.build_inputs import BuildContext, input_record
+from sve_carddb.core.provenance import BuildContext, input_record
 from sve_carddb.card_extras import plan_card_extras, populate_card_extras
 
 plan = plan_card_extras(db, pinned_pages, errata=pinned_announcements)

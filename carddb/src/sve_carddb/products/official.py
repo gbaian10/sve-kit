@@ -6,6 +6,7 @@ from datetime import date
 from typing import TYPE_CHECKING
 from urllib.parse import parse_qsl, urljoin, urlsplit
 
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.fetch.validate import decode_html
 from sve_carddb.html import attribute, parse, select_all
 from sve_carddb.products.identity_models import (
@@ -15,13 +16,12 @@ from sve_carddb.products.identity_models import (
     expansion,
     official_url,
 )
-from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.sources import official_en, official_jp
 
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode
 
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
     from sve_carddb.products.identity_models import Match
     from sve_carddb.products.models import Precision
     from sve_carddb.registry.records import Region

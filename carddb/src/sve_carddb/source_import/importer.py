@@ -10,10 +10,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.json import canonical, digest, parse
 from sve_carddb.html import parse as html_parse
 from sve_carddb.html import select_one
 from sve_carddb.manifest import Manifest, ManifestError
-from sve_carddb.snapshot.values import canonical, digest, parse
 from sve_carddb.source_archive import _fsync_dir, _rename_no_replace
 from sve_carddb.source_import.models import (
     Content,
@@ -34,14 +34,16 @@ _RAW_LIMIT = 64 * 1024 * 1024
 _REPO = Path(__file__).resolve().parents[4]
 PROGRAM_FILES = (
     "carddb/pyproject.toml",
-    "carddb/src/sve_carddb/build_db/domains.py",
-    "carddb/src/sve_carddb/build_inputs.py",
     "carddb/src/sve_carddb/cli.py",
+    "carddb/src/sve_carddb/core/__init__.py",
+    "carddb/src/sve_carddb/core/dates.py",
+    "carddb/src/sve_carddb/core/json.py",
+    "carddb/src/sve_carddb/core/models.py",
+    "carddb/src/sve_carddb/core/provenance.py",
     "carddb/src/sve_carddb/html.py",
     "carddb/src/sve_carddb/manifest.py",
     "carddb/src/sve_carddb/manifest_schema_v2.py",
     "carddb/src/sve_carddb/registry/records.py",
-    "carddb/src/sve_carddb/snapshot/values.py",
     "carddb/src/sve_carddb/source_archive.py",
     "carddb/src/sve_carddb/source_import/__init__.py",
     "carddb/src/sve_carddb/source_import/commands.py",

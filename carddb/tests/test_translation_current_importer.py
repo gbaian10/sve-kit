@@ -8,9 +8,9 @@ from pydantic import JsonValue
 
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.build_inputs import BuildContext, SourceUse
+from sve_carddb.core.json import array, canonical, digest, object_value, parse
+from sve_carddb.core.provenance import BuildContext, SourceUse
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.translations.importer import Inputs, import_glossary, populate_glossary
 from sve_carddb.translations.loader import load_glossary
 
@@ -24,7 +24,7 @@ synthetic_frozen = _frozen_fixture
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_inputs import InputRecord
+    from sve_carddb.core.provenance import InputRecord
 
     from .test_translation_importer import Fixture
 

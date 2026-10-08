@@ -19,20 +19,19 @@ from pydantic import (
 )
 from ruamel.yaml import YAML
 
+from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, parse_yaml
 from sve_carddb.registry.allocation import (
     ALLOCATION_POLICY,
     REGION_RANGES,
     cursors,
     region_allocations,
 )
-from sve_carddb.registry.inputs import JSON_VALUE, canonical
+from sve_carddb.registry.inputs import canonical
 from sve_carddb.registry.transitions.files import require_empty_transitions
-from sve_carddb.registry.yaml_reader import parse_yaml
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-MAX_BYTES = 1_048_576
 TARGET_BYTES = 524_288
 
 

@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING, Protocol
 
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.values import digest
+from sve_carddb.core.json import digest
 
 if TYPE_CHECKING:
-    from sve_carddb.build_inputs import Source
     from sve_carddb.catalog.adoption_models import SourceRef
+    from sve_carddb.core.provenance import Source
     from sve_carddb.text_observations.vocabulary import Vocabulary
 
 

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.core.json import canonical, digest
 
 from .translation_fixtures import reference
 

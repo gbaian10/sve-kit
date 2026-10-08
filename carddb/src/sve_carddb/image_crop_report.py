@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
+from sve_carddb.core.json import string
 from sve_carddb.image_crops import image_source_key
 from sve_carddb.snapshot.project.source import Source
-from sve_carddb.snapshot.values import string
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database

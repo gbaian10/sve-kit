@@ -7,10 +7,10 @@ from urllib.parse import urljoin
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import SourceUse, uses_sorted
 from sve_carddb.card_extras.archive import card_number
 from sve_carddb.card_extras.models import CardPage, ErrataPage, QAEntry, QAPage, key
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.core.json import canonical
+from sve_carddb.core.provenance import SourceUse, uses_sorted
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping

@@ -4,8 +4,8 @@ from typing import Annotated, Literal
 
 from pydantic import Field
 
+from sve_carddb.core.models import Hash, RecordData
 from sve_carddb.products.models import Code
-from sve_carddb.registry.records import Hash, RecordData
 from sve_carddb.template_parameters.models import Schema
 from sve_carddb.template_sources.normalizer import Role
 

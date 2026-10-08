@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb import image_checks, image_variants
+from sve_carddb.core.json import digest
 from sve_carddb.image_assets import (
     PreviewRoots,
     build_regional_assets,
@@ -13,7 +14,6 @@ from sve_carddb.image_assets import (
 )
 from sve_carddb.image_checks import ImageChecks
 from sve_carddb.image_variants import build_variants
-from sve_carddb.snapshot.values import digest
 
 from .test_image_assets import frozen as frozen  # ruff: ignore[useless-import-alias] -- register the shared immutable image fixture
 from .test_image_variants import png, source

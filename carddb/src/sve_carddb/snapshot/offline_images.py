@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import input_record
+from sve_carddb.core.authored import authored_root
+from sve_carddb.core.provenance import input_record
 from sve_carddb.image_assets import (
     plan_regional_images,
     populate_assets,
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import BuildContext, InputRecord
+    from sve_carddb.core.provenance import BuildContext, InputRecord
     from sve_carddb.image_assets import ImageBuild
     from sve_carddb.image_crops import ImageCrops
     from sve_carddb.registry.preview import PreviewPlan
@@ -80,7 +81,7 @@ def prepare_images(
             protected.resolve()
         ) or protected.resolve().is_relative_to(root.resolve()):
             raise ValueError("Image asset root overlaps protected offline inputs")
-    crops = load_image_crops(inputs.repo / "authored")
+    crops = load_image_crops(authored_root(inputs.repo))
     pins = {pin.region: pin.image_batch for pin in inputs.sources}
     if any(
         item.region not in pins

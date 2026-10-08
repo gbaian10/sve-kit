@@ -6,9 +6,10 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import SourceUse
+from sve_carddb.build_db.source_rows import source_values
+from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.provenance import SourceUse
 from sve_carddb.registry.records import CorrectionData, FaceData, PrintingData, Region
-from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.source_corrections.plan import (
     corrected_observations,
     plan_applications,
@@ -333,7 +334,7 @@ def plan_text_observations(
         evidence = preview.evidence.get((data.region, data.card_no))
         if (
             evidence is None
-            or evidence.source.values() != card.source.values()
+            or source_values(evidence.source) != source_values(card.source)
             or evidence.observation != card.observation
         ):
             raise ValueError(
@@ -442,7 +443,7 @@ def _verify_source(plan: TextPlan, item: FaceObservation) -> None:
     evidence = plan.identity.evidence.get((item.region, item.card_no))
     if (
         evidence is None
-        or item.card.source.values() != evidence.source.values()
+        or source_values(item.card.source) != source_values(evidence.source)
         or item.card.observation != evidence.observation
     ):
         raise ValueError("Text observation source inventory mismatch")

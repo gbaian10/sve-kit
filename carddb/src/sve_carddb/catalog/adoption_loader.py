@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import ValidationError
 
-from sve_carddb.authored_files import require_directory, shards
 from sve_carddb.catalog.current_models import (
     AliasRecord,
     DefaultRecord,
@@ -15,10 +14,11 @@ from sve_carddb.catalog.current_models import (
     Shard,
     SymbolRecord,
 )
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.core.authored import require_directory, shards
+from sve_carddb.core.json import canonical, digest, object_value, parse
 
 if TYPE_CHECKING:
-    from sve_carddb.registry.records import RecordData
+    from sve_carddb.core.models import RecordData
 
 CURRENT_FORMAT = 2
 Entry = Literal["catalog-adoptions", "display-overrides"]

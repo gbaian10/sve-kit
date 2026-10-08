@@ -2,13 +2,13 @@
 
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.json import digest
 from sve_carddb.extract import official_en, official_jp
 from sve_carddb.extract.compare_jp import legacy_projection
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.registry.inputs import canonical
 from sve_carddb.registry.records import Observation, Region
 from sve_carddb.registry.review import observation
-from sve_carddb.snapshot.values import digest
 from sve_carddb.sources import official_en as en
 from sve_carddb.sources import official_jp as jp
 from sve_carddb.text_observations.models import FaceContent, TextCard

@@ -21,7 +21,7 @@ from .test_source_archive import _put, _resource, _store
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_inputs import SourceUse
+    from sve_carddb.core.provenance import SourceUse
     from sve_carddb.products.loader import ProductSnapshot
     from sve_carddb.registry.preview import PreviewPlan
     from sve_carddb.registry.records import Region as CardRegion

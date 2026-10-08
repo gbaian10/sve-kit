@@ -11,6 +11,15 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
+from sve_carddb.core.json import (
+    array,
+    canonical,
+    digest,
+    integer,
+    object_value,
+    parse,
+    string,
+)
 from sve_carddb.snapshot.contract import (
     decode,
     definition,
@@ -27,15 +36,6 @@ from sve_carddb.snapshot.semantics import (
     validate_fragments,
     validate_placement,
     validate_view,
-)
-from sve_carddb.snapshot.values import (
-    array,
-    canonical,
-    digest,
-    integer,
-    object_value,
-    parse,
-    string,
 )
 
 if TYPE_CHECKING:

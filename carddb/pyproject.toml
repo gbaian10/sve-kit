@@ -227,7 +227,7 @@ runtime-evaluated-base-classes = [
     "sve_carddb.catalog.adoption_models.Batch",
     "sve_carddb.products.models.DecisionMetadata",
     "sve_carddb.products.models.Evidence",
-    "sve_carddb.registry.records.RecordData",
+    "sve_carddb.core.models.RecordData",
     "sve_carddb.source_archive._Model",
     "sve_carddb.source_import.models.Observation",
 ]

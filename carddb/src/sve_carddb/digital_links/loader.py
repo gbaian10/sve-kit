@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue, ValidationError
 
+from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.models import RecordData
 from sve_carddb.digital_links.models import Index, Record, Shard
-from sve_carddb.registry.records import RecordData
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import canonical, digest
 
 if TYPE_CHECKING:
     from pathlib import Path

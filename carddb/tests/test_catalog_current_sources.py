@@ -10,11 +10,11 @@ from pydantic import JsonValue
 
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.build_inputs import BuildContext
+from sve_carddb.core.json import array, canonical, digest, object_value
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.manifest import Kind, Region
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.offline import _populate_adoptions, _prepare_catalog
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
 from sve_carddb.source_archive import seal_batch
 from sve_carddb.sources import official_en, official_jp
 from sve_carddb.translations.sources import Sources
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_db import CompiledSchema, Database
-    from sve_carddb.build_inputs import InputRecord
+    from sve_carddb.core.provenance import InputRecord
 
 PARSERS = {
     "jp": "carddb/src/sve_carddb/extract/official_jp.py",
@@ -47,7 +47,7 @@ RUNTIME = (
     "carddb/src/sve_carddb/extract/compare_jp.py",
     "carddb/src/sve_carddb/registry/inputs.py",
     "carddb/src/sve_carddb/registry/review.py",
-    "carddb/src/sve_carddb/snapshot/values.py",
+    "carddb/src/sve_carddb/core/json.py",
 )
 VOCABULARY = "catalog-adoptions/vocabulary/shared/001.yaml"
 IMAGE_RAW = b"Invented image evidence bytes"

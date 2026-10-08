@@ -4,18 +4,15 @@ from typing import Annotated, Literal
 
 from pydantic import Field, JsonValue, computed_field, field_validator, model_validator
 
-from sve_carddb.build_inputs import BuildContext, Revision, Version
+from sve_carddb.core.models import Hash, RecordData, Text, UInt
+from sve_carddb.core.provenance import BuildContext, Revision, Version
 from sve_carddb.registry.inputs import canonical
 from sve_carddb.registry.records import (
     DATA_MODELS,
     CardId,
     EnglishPrintingData,
     FaceId,
-    Hash,
     PrintingId,
-    RecordData,
-    Text,
-    UInt,
 )
 from sve_carddb.routes.codec import card_path
 

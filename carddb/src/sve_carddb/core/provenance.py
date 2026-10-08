@@ -5,13 +5,12 @@ from typing import TYPE_CHECKING, Annotated, Literal
 
 from pydantic import Field, JsonValue, field_validator, model_validator
 
-from sve_carddb.registry.records import Hash, Instant, RecordData, Text
-from sve_carddb.snapshot.values import canonical, parse
+from sve_carddb.core.json import canonical, parse
+from sve_carddb.core.models import Hash, Instant, RecordData, Text
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from sve_carddb.build_db import Database, Value
 
 Revision = Annotated[str, Field(pattern=r"^[0-9a-f]{40}\Z")]
 Version = Annotated[str, Field(pattern=r"^src:v1:[0-9a-f]{64}\Z")]
@@ -43,22 +42,6 @@ class Source(RecordData):
     last_modified: str | None = None
     parser_version: Text
     archive: ArchivePin
-
-    def values(self) -> dict[str, Value]:
-        """Project only version metadata; parser provenance belongs to each use."""
-        return {
-            "id": self.id,
-            "kind": self.kind,
-            "url": self.url,
-            "raw_locator": self.raw_locator,
-            "sha256": self.sha256,
-            "fetched_at": self.fetched_at,
-            "etag": self.etag,
-            "last_modified": self.last_modified,
-            "parser_version": None,
-            "authored_path": None,
-            "authored_revision": None,
-        }
 
 
 class FilePin(RecordData):
@@ -141,28 +124,3 @@ class InputRecord(RecordData):
 def input_record(context: BuildContext, uses: Iterable[SourceUse]) -> InputRecord:
     """Summarize the sources consumed by this build."""
     return InputRecord(context=context, uses=uses_sorted(uses))
-
-
-def raw_values(sources: Iterable[Source]) -> dict[str, dict[str, Value]]:
-    """Validate repeated version metadata before any database writes."""
-    result: dict[str, dict[str, Value]] = {}
-    for original in sources:
-        source = Source.model_validate_json(original.model_dump_json())
-        values = source.values()
-        if source.id in result and result[source.id] != values:
-            raise ValueError("Conflicting raw source metadata")
-        result[source.id] = values
-    return result
-
-
-def insert_raw_sources(db: Database, sources: Iterable[Source]) -> None:
-    """Reuse exact metadata only; never discard a conflicting version or its provenance."""
-    required = raw_values(sources)
-    for source_id, values in required.items():
-        previous = db.select(
-            "source_record", db.columns("source_record"), where={"id": source_id}
-        )
-        if not previous:
-            db.insert("source_record", values)
-        elif previous[0].values != values:
-            raise ValueError("Conflicting raw source metadata")

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.values import array, digest, object_value
+from sve_carddb.core.json import array, digest, object_value
 from sve_carddb.template_parameter_rules.models import LEGACY_IDS
 from sve_carddb.template_parameters.analysis import NUMERIC_RULE_DISABLED, NUMERIC_RULES
 from sve_carddb.template_parameters.candidate_matching import classify

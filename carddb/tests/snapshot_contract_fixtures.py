@@ -6,14 +6,7 @@ from pathlib import Path
 import pytest
 from pydantic import JsonValue, TypeAdapter
 
-from sve_carddb.snapshot.values import (
-    array,
-    canonical,
-    digest,
-    object_value,
-    parse,
-    string,
-)
+from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 
 GOLDEN = Path(__file__).resolve().parents[2] / "tests/fixtures/snapshot-contract/v2"
 ADAPTER: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)

@@ -11,9 +11,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.media_config import offline_configuration
-from sve_carddb.snapshot.preview.images import image_blobs
-from sve_carddb.snapshot.values import (
+from sve_carddb.core.json import (
     array,
     canonical,
     digest,
@@ -22,6 +20,8 @@ from sve_carddb.snapshot.values import (
     parse,
     string,
 )
+from sve_carddb.snapshot.media_config import offline_configuration
+from sve_carddb.snapshot.preview.images import image_blobs
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

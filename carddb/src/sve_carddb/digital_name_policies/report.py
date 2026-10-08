@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import input_record
+from sve_carddb.core.json import array, canonical, digest, object_value, parse
+from sve_carddb.core.provenance import input_record
 from sve_carddb.digital_links.candidates import sve_inventory
 from sve_carddb.digital_links.catalogue import complete_inventory
 from sve_carddb.digital_links.evidence import Evidence
@@ -23,7 +24,6 @@ from sve_carddb.digital_name_policies.evaluate import (
     owner_text,
     rule_links,
 )
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 
 if TYPE_CHECKING:
     from sve_carddb.digital_name_policies.current_evaluate import (

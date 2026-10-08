@@ -14,6 +14,7 @@ from sve_carddb.card_extras.generation import (
     links,
     root_key,
 )
+from sve_carddb.core.json import digest
 from sve_carddb.crawl import EN_CATALOG, JP_CATALOG, Crawler, Mode, Site
 from sve_carddb.fetch.client import Client
 from sve_carddb.fetch.refresh import RefreshWriter
@@ -22,7 +23,6 @@ from sve_carddb.fetch.validate import decode_html
 from sve_carddb.html import attribute, parse, select_all
 from sve_carddb.manifest import GenerationStatus, Kind, Link
 from sve_carddb.manifest import Region as ManifestRegion
-from sve_carddb.snapshot.values import digest
 from sve_carddb.sources.official_qa import allowed, parse_qa
 from sve_carddb.urls import canonicalize
 

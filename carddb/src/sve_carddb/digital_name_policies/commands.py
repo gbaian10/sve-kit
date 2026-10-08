@@ -7,11 +7,11 @@ from typing import Annotated
 
 import typer
 
-from sve_carddb.build_inputs import BuildContext
+from sve_carddb.core.json import canonical
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.digital_links.commands import output_path
 from sve_carddb.digital_name_policies.loader import load
 from sve_carddb.digital_name_policies.report import generate
-from sve_carddb.snapshot.values import canonical
 from sve_carddb.translations.sources import Sources
 
 app = typer.Typer(

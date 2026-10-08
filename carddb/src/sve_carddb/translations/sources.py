@@ -6,17 +6,17 @@ from urllib.parse import parse_qs, urlsplit
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import SourceUse
 from sve_carddb.catalog.adoption_sources import AdoptionSources
+from sve_carddb.core.json import canonical, digest, object_value, parse
+from sve_carddb.core.provenance import SourceUse
 from sve_carddb.extract import official_en, official_jp
 from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_inputs import BuildContext, Source
     from sve_carddb.catalog.adoption_models import SourceRef
+    from sve_carddb.core.provenance import BuildContext, Source
     from sve_carddb.digital_links.evidence import RegistryIndex
     from sve_carddb.registry.snapshot import RegistrySnapshot
     from sve_carddb.translations.models import Span

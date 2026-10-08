@@ -10,6 +10,7 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb.cli import app
+from sve_carddb.core.json import canonical, object_value, parse, string
 from sve_carddb.r2_upload.boundary import UploadError
 from sve_carddb.r2_upload.sdk import Credentials
 from sve_carddb.r2_upload.v2.adapter import Stored
@@ -18,7 +19,6 @@ from sve_carddb.r2_upload.v2.freshness import CDNFreshness
 from sve_carddb.r2_upload.v2.publish import next_index, upload
 from sve_carddb.snapshot.export.compression import python_brotli
 from sve_carddb.snapshot.preview import POINTER
-from sve_carddb.snapshot.values import canonical, object_value, parse, string
 
 from .r2_sdk_fixtures import install_mock_sdk
 from .r2_v2_export_fixtures import art_changed as art_changed  # ruff: ignore[useless-import-alias] -- module-scoped crop-change corpus

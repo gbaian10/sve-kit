@@ -8,11 +8,11 @@ import pytest
 
 from sve_carddb.build_db import Json, create_database
 from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.products import load_products
 from sve_carddb.registry.preview import plan_preview
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.source_corrections.closure import correction_exclusions
 from sve_carddb.source_corrections.importer import verify_corrections
 from sve_carddb.source_corrections.plan import plan_applications
@@ -33,7 +33,7 @@ from .text_observation_fixtures import make_case
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
     from sve_carddb.registry.records import CorrectionEvidence, Region
     from sve_carddb.registry.review import Inputs
     from sve_carddb.registry.storage import Entry

@@ -1,6 +1,5 @@
 """Versioned comprehensive rules; same version labels may identify different sources."""
 
-from sve_carddb.build_db.domains import DATE
 from sve_carddb.build_db.model import (
     Column,
     ForeignKey,
@@ -9,6 +8,7 @@ from sve_carddb.build_db.model import (
     Table,
     Unique,
 )
+from sve_carddb.core.dates import DATE
 
 TABLES = (
     Table(

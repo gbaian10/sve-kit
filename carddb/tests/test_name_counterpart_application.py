@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_inputs import BuildContext
+from sve_carddb.core.json import array, canonical, object_value, parse
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.digital_links.importer import Inputs, populate_links
 from sve_carddb.digital_name_policies.application import _counterparts
-from sve_carddb.snapshot.values import array, canonical, object_value, parse
 from sve_carddb.translations.digital import configuration
 from sve_carddb.translations.name_sources import NameOwner
 

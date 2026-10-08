@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from sve_carddb.build_inputs import Source
     from sve_carddb.catalog.adoption_models import SourceRef
+    from sve_carddb.core.provenance import Source
 
 
 GAME_PRIORITY = ("sv1", "svwb")

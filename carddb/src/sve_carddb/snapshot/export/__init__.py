@@ -6,6 +6,7 @@ from urllib.parse import quote
 
 from pydantic import JsonValue
 
+from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
 from sve_carddb.snapshot.contract import columns, definition, row_type, tables, validate
 from sve_carddb.snapshot.export.compression import Blob, Brotli, compress, recipe
 from sve_carddb.snapshot.export.layout import Group, Layout, Ownership, references
@@ -14,14 +15,6 @@ from sve_carddb.snapshot.profiles import MEDIA
 from sve_carddb.snapshot.profiles import profile as profile_for
 from sve_carddb.snapshot.project.source import json_list
 from sve_carddb.snapshot.reader import read_snapshot
-from sve_carddb.snapshot.values import (
-    array,
-    canonical,
-    digest,
-    integer,
-    object_value,
-    string,
-)
 
 if TYPE_CHECKING:
     from sve_carddb.snapshot.project import Projection

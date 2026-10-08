@@ -8,7 +8,10 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue, ValidationError
 
-from sve_carddb.build_inputs import BuildContext, Source, SourceUse
+from sve_carddb.core.json import parse
+from sve_carddb.core.models import RecordData
+from sve_carddb.core.provenance import BuildContext, Source, SourceUse
+from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, parse_yaml
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.products.identity_models import (
     ExpansionLink,
@@ -20,11 +23,7 @@ from sve_carddb.products.identity_models import (
 from sve_carddb.products.loader import _safe_file
 from sve_carddb.products.models import Evidence, ProductRecord
 from sve_carddb.products.official import PARSER, ProductPage, parse_products
-from sve_carddb.registry.inputs import JSON_VALUE, canonical, digest
-from sve_carddb.registry.records import RecordData
-from sve_carddb.registry.storage import MAX_BYTES
-from sve_carddb.registry.yaml_reader import parse_yaml
-from sve_carddb.snapshot.values import parse
+from sve_carddb.registry.inputs import canonical, digest
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

@@ -19,6 +19,7 @@ from typer.testing import CliRunner
 from sve_carddb import cli
 from sve_carddb import source_archive as archive
 from sve_carddb.config import Settings
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.fetch import refresh
 from sve_carddb.fetch.refresh import RefreshWriter, Replacement
 from sve_carddb.fetch.writer import (
@@ -39,7 +40,6 @@ from sve_carddb.manifest import (
     RequestStart,
     Resource,
 )
-from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.source_archive import (
     ArchiveError,
     ArchiveRaceError,

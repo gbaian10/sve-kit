@@ -11,7 +11,7 @@ from sve_carddb.card_extras import plan_card_extras, populate_card_extras
 from sve_carddb.card_extras.changes import DownstreamUse, changes, conflicts
 from sve_carddb.card_extras.generation import Observation, closure
 from sve_carddb.card_extras.models import RelatedLink
-from sve_carddb.snapshot.values import digest
+from sve_carddb.core.json import digest
 from sve_carddb.sources import official_en, official_jp
 from sve_carddb.sources.official_qa import PARSER, materialize, parse_qa
 

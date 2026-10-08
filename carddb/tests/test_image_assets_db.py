@@ -9,7 +9,7 @@ import pytest
 
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.build_inputs import BuildContext, InputRecord
+from sve_carddb.core.provenance import BuildContext, InputRecord
 from sve_carddb.extract.compare_jp import legacy_projection
 from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.frozen_sources import FrozenSources
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
     from sve_carddb.image_assets import ImageReference
     from sve_carddb.image_crops import ImageCrops
     from sve_carddb.registry.preview import PreviewPlan

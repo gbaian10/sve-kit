@@ -7,9 +7,9 @@ from typing import Annotated
 
 import typer
 
-from sve_carddb.build_inputs import BuildContext
+from sve_carddb.core.json import canonical
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.digital_links.candidates import generate
-from sve_carddb.snapshot.values import canonical
 from sve_carddb.translations.sources import Sources
 
 app = typer.Typer(no_args_is_help=True, help="Review offline digital-link candidates.")

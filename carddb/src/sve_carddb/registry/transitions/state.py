@@ -5,13 +5,14 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Literal
 
 from sve_carddb.registry.inputs import canonical, digest
-from sve_carddb.registry.records import DATA_MODELS, EnglishPrintingData, RecordData
+from sve_carddb.registry.records import DATA_MODELS, EnglishPrintingData
 from sve_carddb.registry.storage import Entry
 from sve_carddb.registry.transitions.models import Before
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+    from sve_carddb.core.models import RecordData
     from sve_carddb.registry.transitions.models import Repair
     from sve_carddb.registry.transitions.routing import RouteProjection
 

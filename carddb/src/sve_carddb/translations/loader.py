@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue, ValidationError
 
-from sve_carddb.authored_files import shards
-from sve_carddb.registry.records import RecordData
-from sve_carddb.snapshot.values import canonical, parse
+from sve_carddb.core.authored import shards
+from sve_carddb.core.json import canonical, parse
+from sve_carddb.core.models import RecordData
 from sve_carddb.translations.current import records as current_records
 from sve_carddb.translations.current import validate as validate_current
 from sve_carddb.translations.current_models import Shard as CurrentShard

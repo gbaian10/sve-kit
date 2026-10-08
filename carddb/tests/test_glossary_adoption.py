@@ -5,14 +5,14 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue, ValidationError
 
-from sve_carddb.snapshot.values import canonical, object_value
+from sve_carddb.core.json import canonical, object_value
 from sve_carddb.translations.current_models import EmphasisData, TermData
 from sve_carddb.translations.models import SourceClaim
 
 from .translation_fixtures import term
 
 if TYPE_CHECKING:
-    from sve_carddb.registry.records import RecordData
+    from sve_carddb.core.models import RecordData
 
 NOTE = "維護者委託；協調者決定；不是維護者親自核可"
 

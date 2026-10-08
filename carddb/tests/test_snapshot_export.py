@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 from pydantic import JsonValue
 
 from sve_carddb.build_db import create_database
+from sve_carddb.core.json import array, canonical, object_value, parse, string
+from sve_carddb.snapshot.buckets import bucket
 from sve_carddb.snapshot.export import (
     Batch,
     Ownership,
@@ -26,14 +28,6 @@ from sve_carddb.snapshot.export.layout import Layout
 from sve_carddb.snapshot.export.measure import measure, update
 from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.reader import read_text_all
-from sve_carddb.snapshot.values import (
-    array,
-    bucket,
-    canonical,
-    object_value,
-    parse,
-    string,
-)
 
 from .snapshot_project_fixtures import populate, schema
 from .test_snapshot_project import projected
@@ -579,8 +573,8 @@ def test_single_oversized_fragment_is_reported_instead_of_silently_dropped(
     format_version: str,
     logical: tuple[Projection, Ownership],
 ) -> None:
+    from sve_carddb.core.json import digest  # ruff: ignore[import-outside-top-level] -- retain the exact text-ID contract after the mutation
     from sve_carddb.snapshot.export.measure import SHARD_LIMIT  # ruff: ignore[import-outside-top-level] -- synthetic data exercises the real shard gate
-    from sve_carddb.snapshot.values import digest  # ruff: ignore[import-outside-top-level] -- retain the exact text-ID contract after the mutation
 
     projection, ownership = cloned(logical)
     physical = object_value(array(projection.tables["printing"][0]["faces"])[0])

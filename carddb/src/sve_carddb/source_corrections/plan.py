@@ -5,15 +5,15 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import SourceUse
+from sve_carddb.core.json import canonical
+from sve_carddb.core.provenance import SourceUse
 from sve_carddb.registry.corrections import Status, correction_status
 from sve_carddb.registry.inputs import digest as registry_digest
 from sve_carddb.registry.records import CorrectionData, PrintingData, Region
-from sve_carddb.snapshot.values import canonical
 from sve_carddb.source_corrections.images import evidence_url
 
 if TYPE_CHECKING:
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
     from sve_carddb.registry.preview import PreviewPlan
     from sve_carddb.registry.snapshot import RegistryRecord, RegistrySnapshot
     from sve_carddb.source_corrections.images import ImageProvider

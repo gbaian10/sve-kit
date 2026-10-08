@@ -7,13 +7,8 @@ from typing import TYPE_CHECKING, Literal
 from pydantic import JsonValue, model_validator
 
 from sve_carddb.build_db import create_database
+from sve_carddb.build_db.source_rows import insert_raw_sources
 from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES, compile_build
-from sve_carddb.build_inputs import (
-    BuildContext,
-    Revision,
-    input_record,
-    insert_raw_sources,
-)
 from sve_carddb.build_output import save as save_build
 from sve_carddb.card_extras import (
     FrozenCardExtras,
@@ -23,6 +18,10 @@ from sve_carddb.card_extras import (
     require_card_extras_ready,
 )
 from sve_carddb.catalog.adoption_models import Batch as SourceBatch
+from sve_carddb.core.authored import authored_root
+from sve_carddb.core.json import array, digest, object_value, parse
+from sve_carddb.core.models import Hash, Instant, RecordData, Text
+from sve_carddb.core.provenance import BuildContext, Revision, input_record
 from sve_carddb.image_checks import ImageChecks
 from sve_carddb.image_variants import DEFAULT_RECIPE
 from sve_carddb.products import (
@@ -33,20 +32,12 @@ from sve_carddb.products import (
 )
 from sve_carddb.products.models import Date
 from sve_carddb.registry.preview import FrozenEN, FrozenJP, FrozenRegions, plan_preview
-from sve_carddb.registry.records import (
-    Hash,
-    Instant,
-    PrintingData,
-    RecordData,
-    Region,
-    Text,
-)
+from sve_carddb.registry.records import PrintingData, Region
 from sve_carddb.snapshot.contract import validate
 from sve_carddb.snapshot.export import Batch, Ownership
 from sve_carddb.snapshot.offline_images import prepare_images
 from sve_carddb.snapshot.offline_names import composer
 from sve_carddb.snapshot.project import Decisions, Projection, Settings, project
-from sve_carddb.snapshot.values import array, digest, object_value, parse
 from sve_carddb.source_corrections import FrozenImages
 from sve_carddb.template_parameter_rules.current import load as load_rules
 from sve_carddb.template_parameters.current_references import adopted
@@ -78,10 +69,10 @@ from sve_carddb.translations.sources import Sources as TranslationSources
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import InputRecord, Source
     from sve_carddb.card_extras import ErrataPage, ExtrasPlan
     from sve_carddb.catalog.adoption_importer import AdoptionInputs
     from sve_carddb.catalog.current import Prepared
+    from sve_carddb.core.provenance import InputRecord, Source
     from sve_carddb.image_assets import ImageBuild
     from sve_carddb.registry.records import CorrectionEvidence
     from sve_carddb.registry.snapshot import RegistrySnapshot
@@ -349,7 +340,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         raise ValueError("Offline bundle and image assets must be disjoint")
     en, jp = inputs.sources
     identity = plan_preview(
-        inputs.repo / "authored",
+        authored_root(inputs.repo),
         FrozenRegions(
             en=FrozenEN(
                 inputs.archive,
@@ -388,10 +379,10 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         for record in publication.included("printing")
         if isinstance(record.data, PrintingData)
     )
-    catalog = load_products(inputs.repo / "authored", registry=identity.snapshot)
+    catalog = load_products(authored_root(inputs.repo), registry=identity.snapshot)
     stores = {inputs.store_id: inputs.archive}
     identities = load_product_identities(
-        inputs.repo / "authored",
+        authored_root(inputs.repo),
         authored_revision=inputs.revision,
         catalog=catalog,
         stores=stores,
@@ -415,7 +406,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         ).pages()
     )
     adoptions = AdoptionInputs(
-        inputs.repo / "authored",
+        authored_root(inputs.repo),
         inputs.repo,
         inputs.revision,
         ("catalog-adoptions",),
@@ -448,7 +439,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     vocabulary = derived.vocabulary
     configuration |= text_configuration(texts, vocabulary, ())
     context = BuildContext.from_inputs(inputs.revision, configuration)
-    flavor = load_flavor(inputs.repo / "authored")
+    flavor = load_flavor(authored_root(inputs.repo))
     templates = _templates(
         adoptions, context, stores, vocabulary, SourceBatch(batch_id=jp.card_batch)
     )

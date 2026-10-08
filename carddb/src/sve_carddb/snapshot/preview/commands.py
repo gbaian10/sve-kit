@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING, Annotated
 import typer
 
 from sve_carddb.cli_paths import required_root
+from sve_carddb.core.authored import authored_root
+from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.image_assets import (
     MAX_WORKERS,
     ImageBuild,
@@ -23,7 +25,6 @@ from sve_carddb.snapshot.preview import Roots, _write, write_preview
 from sve_carddb.snapshot.preview.media_state import reserve
 from sve_carddb.snapshot.profiles import MEDIA, profile
 from sve_carddb.snapshot.publication import require_formal, require_preview
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
 if TYPE_CHECKING:
     from sve_carddb.snapshot.export import Brotli
@@ -90,7 +91,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
         image_roots.validate(
             (recipe.archive, recipe.repo, preview_dir, private_dir, bundle_dir, inputs)
         )
-        crops = load_image_crops(recipe.repo / "authored")
+        crops = load_image_crops(authored_root(recipe.repo))
         regional = tuple(
             build_regional_assets(
                 checks.batch(recipe.archive, recipe.store_id, pin.image_batch),

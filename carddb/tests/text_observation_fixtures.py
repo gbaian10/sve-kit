@@ -3,12 +3,12 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_inputs import BuildContext
+from sve_carddb.core.json import canonical
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.products import Language, load_products, populate_product_preview
 from sve_carddb.registry.build import build
 from sve_carddb.registry.preview import plan_preview
 from sve_carddb.registry.storage import plan_files, write_files
-from sve_carddb.snapshot.values import canonical
 from sve_carddb.text_observations import (
     Binding,
     FaceContent,

@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.template_parameters.references import References
 from sve_carddb.translations.current_models import TermRecord
 from sve_carddb.translations.sources import excerpt

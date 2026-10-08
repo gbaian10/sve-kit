@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue, ValidationError
 
+from sve_carddb.core.models import RecordData
 from sve_carddb.products.models import (
     CatalogRecord,
     FamilyRecord,
@@ -16,7 +17,7 @@ from sve_carddb.products.models import (
     Shard,
 )
 from sve_carddb.registry.inputs import canonical, digest
-from sve_carddb.registry.records import PrintingData, RecordData
+from sve_carddb.registry.records import PrintingData
 from sve_carddb.registry.storage import read_yaml
 
 if TYPE_CHECKING:

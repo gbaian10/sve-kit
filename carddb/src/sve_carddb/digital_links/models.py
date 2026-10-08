@@ -5,15 +5,9 @@ from typing import Annotated, Literal
 from pydantic import Field, field_validator, model_validator
 
 from sve_carddb.catalog.adoption_models import SourceRef
+from sve_carddb.core.models import Hash, RecordData, Text
 from sve_carddb.products.models import Lang
-from sve_carddb.registry.records import (
-    CardId,
-    FaceId,
-    Hash,
-    PrintingId,
-    RecordData,
-    Text,
-)
+from sve_carddb.registry.records import CardId, FaceId, PrintingId
 
 Game = Literal["sv1", "svwb"]
 Phase = Literal["normal", "evolved"]

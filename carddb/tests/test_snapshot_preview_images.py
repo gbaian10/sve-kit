@@ -12,12 +12,12 @@ from PIL import Image
 
 import sve_carddb.snapshot.preview as writer_module
 from sve_carddb.build_db import create_database
+from sve_carddb.core.json import digest, integer, string
 from sve_carddb.image_variants import SIZES, build_variants
 from sve_carddb.snapshot.export import Ownership, export_snapshot
 from sve_carddb.snapshot.media import MediaPlan, prepare_media
 from sve_carddb.snapshot.preview import Roots, _write, write_preview
 from sve_carddb.snapshot.preview.images import image_blobs
-from sve_carddb.snapshot.values import digest, integer, string
 
 from .snapshot_project_fixtures import populate, schema
 from .test_image_variants import png, source

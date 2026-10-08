@@ -7,7 +7,7 @@ import pytest
 
 from sve_carddb.build_db import Json, create_database
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.snapshot.values import array, object_value
+from sve_carddb.core.json import array, object_value
 from sve_carddb.source_corrections.projection import correction_references
 from sve_carddb.text_observations import Binding, Vocabulary, import_text_observations
 from sve_carddb.text_observations.importer import revision_id

@@ -7,7 +7,7 @@ from uuid import UUID, uuid5
 import pytest
 from pydantic import field_validator
 
-from sve_carddb.registry.records import RecordData
+from sve_carddb.core.models import RecordData
 from sve_carddb.registry.storage import Index as RegistryIndex
 from sve_carddb.registry.storage import load, plan_files, read_registry_files, relayout
 from sve_carddb.registry.transitions.files import (

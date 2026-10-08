@@ -16,9 +16,9 @@ from sve_carddb.card_extras.generation import (
     links,
     root_key,
 )
+from sve_carddb.core.json import digest
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.manifest import GenerationStatus, Manifest
-from sve_carddb.snapshot.values import digest
 from sve_carddb.sources.official_qa import PARSER, allowed, materialize, parse_qa
 from sve_carddb.store import resolve_within
 

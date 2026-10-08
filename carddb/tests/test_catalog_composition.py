@@ -6,9 +6,9 @@ import pytest
 
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.importer import catalog_configuration
 from sve_carddb.catalog.models import Alias, Catalog
+from sve_carddb.core.provenance import BuildContext
 from sve_carddb.text_observations import populate_text_preview, text_configuration
 
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared synthetic inputs

@@ -10,6 +10,7 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb import cli
+from sve_carddb.build_db.source_rows import source_values
 from sve_carddb.crawl import list_root, sets_root
 from sve_carddb.extract.official_en import extract_card, legacy_projection
 from sve_carddb.fetch.validate import ValidationError
@@ -93,7 +94,7 @@ def test_exact_en_source_pins_first_receipt_and_recomputes_both_hashes(
     assert found.source.etag == "original-etag"
     assert found.source.fetched_at == "2026-09-27T00:00:00Z"
     assert found.source.parser_version == "en-test-pin"
-    assert found.source.values()["parser_version"] is None
+    assert source_values(found.source)["parser_version"] is None
     assert found.source.archive.batch_id == latest.batch_id
     assert (
         found.source.archive.first_receipt_id != latest.inventory.entries[0].receipt_id

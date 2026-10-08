@@ -7,20 +7,15 @@ import pytest
 from pydantic import ValidationError
 
 from sve_carddb.build_db import create_database
+from sve_carddb.build_db.source_rows import insert_raw_sources, source_values
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.build_inputs import (
-    FilePin,
-    InputRecord,
-    SourceUse,
-    input_record,
-    insert_raw_sources,
-)
+from sve_carddb.core.provenance import FilePin, InputRecord, SourceUse, input_record
 
 from .registry_preview_fixtures import BUILD, observed
 from .test_registry import card
 
 if TYPE_CHECKING:
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
 
 
 @pytest.fixture
@@ -48,7 +43,7 @@ def test_many_parsers_and_uses_share_one_raw_row(source: Source, reverse: bool) 
             insert_raw_sources(db, (use.source,))
         record = input_record(BUILD, (*uses, uses[0]))
         [row] = db.rows("source_record")
-        assert row.values == source.values()
+        assert row.values == source_values(source)
         assert row.values["parser_version"] is None
         assert len(record.uses) == 3
         assert {use.source.parser_version for use in record.uses} == {
@@ -88,7 +83,7 @@ def test_each_shared_metadata_field_conflicts_independently(
             insert_raw_sources(db, (other,) if existing else (source, other))
         assert len(db.rows("source_record")) == int(existing)
         if existing:
-            assert db.rows("source_record")[0].values == source.values()
+            assert db.rows("source_record")[0].values == source_values(source)
 
 
 @pytest.mark.parametrize(

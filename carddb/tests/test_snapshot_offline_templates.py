@@ -8,10 +8,10 @@ import pytest
 from sve_carddb.build_db.database import open_database
 from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES, compile_build
 from sve_carddb.catalog.adoption_models import Batch
+from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.manifest import Kind
 from sve_carddb.snapshot import offline
 from sve_carddb.snapshot.offline import build
-from sve_carddb.snapshot.values import array, canonical, object_value
 from sve_carddb.source_archive import seal_batch
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.template_parameter_rules.current import parse as parse_rules

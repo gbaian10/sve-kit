@@ -12,6 +12,7 @@ from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Literal, override
 
 from sve_carddb import source_archive as archive
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.fetch.writer import (
     DiskFullError,
     Fetched,
@@ -21,7 +22,6 @@ from sve_carddb.fetch.writer import (
     sha256,
 )
 from sve_carddb.manifest import ExclusiveLock, Manifest, Resource, utcnow
-from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.store import (
     CorruptDataError,
     UnsafePathError,

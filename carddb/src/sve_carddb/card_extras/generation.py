@@ -3,8 +3,8 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.json import digest
 from sve_carddb.manifest import Kind, Link
-from sve_carddb.snapshot.values import digest
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.routes.defaults import GeneralEvidence
-from sve_carddb.snapshot.values import canonical, digest
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database

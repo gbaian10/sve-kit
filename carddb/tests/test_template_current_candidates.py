@@ -7,7 +7,7 @@ from pydantic import JsonValue
 
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.snapshot.values import array, canonical, object_value
+from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.template_translations.current import (
     from_files,
     shard,

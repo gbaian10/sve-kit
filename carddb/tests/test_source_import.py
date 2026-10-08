@@ -16,8 +16,8 @@ from typer.testing import CliRunner
 from sve_carddb import manifest as manifest_module
 from sve_carddb import source_archive as archive
 from sve_carddb.cli import app
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.manifest import Manifest, ManifestError
-from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.source_archive import (
     ArchiveError,
     ArchiveStore,

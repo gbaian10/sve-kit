@@ -7,19 +7,19 @@ from urllib.parse import parse_qsl, urljoin, urlsplit
 
 from sve_carddb.card_extras.dates import parse_en_date
 from sve_carddb.card_extras.models import CardPage, QAEntry, RelatedLink
+from sve_carddb.core.json import digest
 from sve_carddb.extract.official_en import _qa_text as _en_qa_text
 from sve_carddb.extract.official_jp import _qa_text
 from sve_carddb.fetch.validate import decode_html
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.html import attribute, parse, require_one, select_all
-from sve_carddb.snapshot.values import digest
 from sve_carddb.sources import official_en, official_jp
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
 
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
     from sve_carddb.registry.records import Region
 
 PARSER = "official-card-extras-jp-v1"

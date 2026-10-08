@@ -2,26 +2,15 @@
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
-from sve_carddb.build_db.domains import DATE, INSTANT
+from sve_carddb.core.models import Date, Hash, RecordData, Text, UInt
 
-Text = Annotated[str, Field(min_length=1)]
-Hash = Annotated[str, Field(pattern=r"^sha256:[0-9a-f]{64}\Z")]
-Date = Annotated[str, Field(pattern="^" + DATE + "$")]
-Instant = Annotated[str, Field(pattern="^" + INSTANT + "$")]
 CardId = Annotated[str, Field(pattern=r"^c:[0-9a-f]{32}\Z")]
 FaceId = Annotated[str, Field(pattern=r"^f:[0-9a-f]{32}\Z")]
 PrintingId = Annotated[str, Field(pattern=r"^p:[0-9a-f]{32}\Z")]
-UInt = Annotated[int, Field(ge=0, le=9007199254740991)]
 Region = Literal["jp", "en"]
 Recipe = Literal["registry-observation-v1"]
-
-
-class RecordData(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid", strict=True, frozen=True, regex_engine="python-re"
-    )
 
 
 class Observation(RecordData):

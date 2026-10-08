@@ -13,7 +13,7 @@ from .test_image_assets import frozen as frozen  # ruff: ignore[useless-import-a
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_inputs import SourceUse
+    from sve_carddb.core.provenance import SourceUse
     from sve_carddb.frozen_sources import FrozenSources
 
     from .database_fixtures import DatabaseTemplate

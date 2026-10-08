@@ -3,8 +3,9 @@
 from typing import Literal
 
 from sve_carddb.catalog.symbols import Symbol
+from sve_carddb.core.models import RecordData, Text
 from sve_carddb.products.models import Code, Lang, Language, LocalizedText
-from sve_carddb.registry.records import RecordData, Region, Text
+from sve_carddb.registry.records import Region
 
 
 class Term(RecordData):

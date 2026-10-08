@@ -8,7 +8,7 @@ import subprocess  # ruff: ignore[suspicious-subprocess-import] -- Only an isola
 from dataclasses import dataclass
 from pathlib import Path
 
-from sve_carddb.snapshot.values import digest
+from sve_carddb.core.json import digest
 from sve_carddb.source_import.importer import PROGRAM_FILES
 
 REPO = Path(__file__).resolve().parents[2]

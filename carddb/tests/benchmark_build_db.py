@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from sve_carddb.build_db import Json, Value, compile_schema, create_database
 from sve_carddb.build_db.t0 import REGISTRY
 from sve_carddb.build_db.t0_json import schemas
-from sve_carddb.snapshot.values import digest
+from sve_carddb.core.json import digest
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import CompiledSchema

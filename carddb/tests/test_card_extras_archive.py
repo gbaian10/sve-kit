@@ -9,10 +9,10 @@ import pytest
 
 from sve_carddb.card_extras import FrozenCardExtras, parse_card_page
 from sve_carddb.card_extras.archive import EN_PARSER, PARSER, card_number
+from sve_carddb.core.json import digest
 from sve_carddb.html import MissingElementError
 from sve_carddb.manifest import Kind, Manifest
 from sve_carddb.manifest import Region as ManifestRegion
-from sve_carddb.snapshot.values import digest
 from sve_carddb.source_archive import ArchiveError, seal_batch
 from sve_carddb.sources import official_en, official_jp
 
@@ -23,8 +23,8 @@ from .test_source_archive import _put, _resource, _store
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_inputs import Source
     from sve_carddb.card_extras import CardPage
+    from sve_carddb.core.provenance import Source
     from sve_carddb.registry.records import Region
     from sve_carddb.source_archive import ArchiveStore
 

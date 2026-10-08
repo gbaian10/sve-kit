@@ -5,15 +5,16 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import JsonValue, model_validator
 
-from sve_carddb.build_inputs import Version
+from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.models import Hash, RecordData, Text, UInt
+from sve_carddb.core.provenance import Version
 from sve_carddb.html import attribute, parse, select_all, select_one
-from sve_carddb.registry.records import Hash, RecordData, Region, Text, UInt
-from sve_carddb.snapshot.values import canonical, digest
 
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode
 
-    from sve_carddb.build_inputs import Source
+    from sve_carddb.core.provenance import Source
+    from sve_carddb.registry.records import Region
 
 PARSER: Literal["effect-presence-v1/detail-v1"] = "effect-presence-v1/detail-v1"
 _TEMPLATE = {"jp": "jp-card-detail-v1", "en": "en-card-detail-v1"}

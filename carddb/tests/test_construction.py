@@ -7,6 +7,7 @@ import pytest
 from pydantic import ValidationError
 
 from sve_carddb.build_db import Database, Value, create_database
+from sve_carddb.build_db.source_rows import source_values
 from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.construction import (
     DeckRoleOverride,
@@ -14,8 +15,8 @@ from sve_carddb.construction import (
     populate_construction,
     resolve_construction,
 )
+from sve_carddb.core.json import canonical
 from sve_carddb.products.models import LocalizedText
-from sve_carddb.snapshot.values import canonical
 
 from .build_db_fixtures import rows
 from .card_extras_fixtures import seed
@@ -220,7 +221,7 @@ def test_source_metadata_conflict_rolls_back(db: Database) -> None:
     with db.transaction():
         db.insert(
             "source_record",
-            evidence().source.values() | {"sha256": "sha256:" + "b" * 64},
+            source_values(evidence().source) | {"sha256": "sha256:" + "b" * 64},
         )
     with pytest.raises(ValueError, match="Conflicting raw source"), db.transaction():
         populate_construction(db, staging, build=context(staging))

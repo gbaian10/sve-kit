@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING, Annotated, Literal, Self
 
 from pydantic import Field, ValidationError, field_validator, model_validator
 
-from sve_carddb.registry.records import Hash, RecordData, Text
+from sve_carddb.core.json import canonical
+from sve_carddb.core.models import Hash, RecordData, Text
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import canonical
 from sve_carddb.translations.direct import write
 
 if TYPE_CHECKING:

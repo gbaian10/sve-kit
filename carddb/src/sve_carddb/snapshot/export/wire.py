@@ -2,6 +2,7 @@
 
 from pydantic import JsonValue
 
+from sve_carddb.core.json import array, object_value, string
 from sve_carddb.snapshot.contract import (
     columns,
     definition,
@@ -10,7 +11,6 @@ from sve_carddb.snapshot.contract import (
     row_type,
 )
 from sve_carddb.snapshot.profiles import MEDIA
-from sve_carddb.snapshot.values import array, object_value, string
 
 
 def _value(

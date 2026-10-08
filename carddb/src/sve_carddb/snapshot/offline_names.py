@@ -5,11 +5,12 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
+from sve_carddb.core.authored import authored_root
+from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.digital_links.importer import Inputs as LinkInputs
 from sve_carddb.digital_links.importer import populate_links
 from sve_carddb.digital_name_policies.application import Inputs as NameInputs
 from sve_carddb.digital_name_policies.application import populate
-from sve_carddb.snapshot.values import canonical, object_value, parse
 from sve_carddb.translations.digital import configuration as digital_configuration
 from sve_carddb.translations.importer import _refs
 
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import BuildContext
+    from sve_carddb.core.provenance import BuildContext
     from sve_carddb.digital_links.importer import Result as LinkResult
     from sve_carddb.digital_name_policies.application import Result as NameResult
     from sve_carddb.snapshot.offline import Inputs
@@ -114,16 +115,19 @@ def composer(recipe: Inputs) -> Composer | None:
     """Human links are optional; the link loader validates an existing entry."""
     if recipe.name_policy is None:
         return None
-    entry = recipe.repo / "authored/digital-links"
+    entry = authored_root(recipe.repo) / "digital-links"
     links = (
-        LinkInputs(recipe.repo / "authored", recipe.repo, recipe.revision)
+        LinkInputs(authored_root(recipe.repo), recipe.repo, recipe.revision)
         # A dangling symlink still reaches the loader, which rejects symlinks.
         if entry.exists() or entry.is_symlink()
         else None
     )
     return Composer(
         NameInputs(
-            recipe.repo / "authored", recipe.repo, recipe.revision, recipe.published_at
+            authored_root(recipe.repo),
+            recipe.repo,
+            recipe.revision,
+            recipe.published_at,
         ),
         links,
     )

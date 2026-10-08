@@ -9,9 +9,9 @@ from typing import Annotated, Literal
 from pydantic import Field
 
 from sve_carddb.catalog.adoption_models import SourceRef
-from sve_carddb.registry.records import RecordData, Text
-from sve_carddb.registry.storage import MAX_BYTES
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.core.json import canonical
+from sve_carddb.core.models import RecordData, Text
+from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.translations.current_models import (
     ChoiceData,
     ChoiceRecord,

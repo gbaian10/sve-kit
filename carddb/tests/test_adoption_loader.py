@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, cast
 import pytest
 
 from sve_carddb.catalog.adoption_loader import load_adoptions
+from sve_carddb.core.json import array, object_value
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import array, object_value
 
 from .adoption_fixtures import Case, envelope, make_case, record, write
 

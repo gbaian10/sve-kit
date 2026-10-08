@@ -11,7 +11,7 @@ from sve_carddb.build_db.model import (
     Table,
     Unique,
 )
-from sve_carddb.snapshot.values import canonical, parse
+from sve_carddb.core.json import canonical, parse
 from sve_carddb.template_parameters.models import Schema, SourceSpan
 
 QUALITY = (
