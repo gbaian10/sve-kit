@@ -19,7 +19,7 @@
 | --- | --- |
 | A：authored reader | 讀當前輸入一次，驗版本、封閉欄位、型別、鍵唯一、target 語法、可在輸入閉包判定的引用；壞資料拒絕載入 |
 | B：建置 validator | 從固定來源驗 owner／face、hash、角色、trace、葉值、適用域、完整覆蓋及使用閉包；已知錯配拒絕建置交易，不任選或靜默忽略 |
-| D：DB 邊界 | 寫入及讀回時驗 SQL 的 PK／FK、nullable、enum、Json 的具名型別及跨列一致性；原始 Any 不得流出邊界；FL-027 |
+| C：DB 邊界 | 寫入及讀回時驗 SQL 的 PK／FK、nullable、enum、Json 的具名型別及跨列一致性；原始 Any 不得流出邊界；FL-027 |
 
 每張表的「失敗／案例」列給出可判定原因；案例 ID 指向[固定案例](four-layer-cases.md)。
 尚未辨識的合法來源用 pending／未匹配清單保存；缺譯用整欄原文退回。
@@ -51,7 +51,7 @@ glossary_choice_variant 與 translation_override 沿原欄位與來源規則；�
 | kind／路徑（相對 authored/translations） | 選擇鍵 | data 的完整形狀／差異 |
 | --- | --- | --- |
 | sentence_template；templates/definitions | id | §3 Frame authored 欄位；移除舊 normalized_hash、parameter_schema，改 source、leaf_schema |
-| template_translation；templates/values | template_id,lang | `{template_id:FrameID,lang:Lang,target:Target}`；text 改 target，A/B/D 驗引用與完整使用，FL-005 |
+| template_translation；templates/values | template_id,lang | `{template_id:FrameID,lang:Lang,target:Target}`；text 改 target，A/B/C 驗引用與完整使用，FL-005 |
 | template_translation_variant；templates/values | template_id,lang,variant_key | 上列加 `variant_key:Code`，不可 default；不是 semantic_variant，FL-001／FL-005 |
 | template_translation_candidate；templates/candidates | source_kind,candidate_id,lang | 保留未啟用的七欄草稿，依翻譯契約 §2.1；不能被 LeafRef／pin 引用，FL-029 |
 | translation_form；forms | id,lang | §5 FormDefinition；封閉文法表，不保存官方全文，FL-012 |
@@ -70,16 +70,16 @@ Frame 是整行的語義定義，句中 reminder 可拆出並以 anchor 接回�
 
 | authored 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
-| id | FrameID，`frame:`＋完整 content_hash | A/B/D；格式或重算不符；FL-001／FL-002 |
+| id | FrameID，`frame:`＋完整 content_hash | A/B/C；格式或重算不符；FL-001／FL-002 |
 | source | `{source_lang,canonical_hash,normalizer_version}`，如下三欄 | A/B；來源描述不完整；FL-007 |
 | source.source_lang | 固定 ja | A/B；EN 冒充 JP 拒絕；FL-023 |
-| source.canonical_hash | Hash；建置重建 canonical_source 的 UTF-8 hash | B/D；模式錯配；FL-007 |
+| source.canonical_hash | Hash；建置重建 canonical_source 的 UTF-8 hash | B/C；模式錯配；FL-007 |
 | source.normalizer_version | Code；本次具名、釘版且受支援的 normalizer | A/B；不支援拒絕，版本變更重鍵；FL-002 |
-| role | body/reminder/token_header/layout/name/label | A/B/D；角色錯配；FL-006 |
-| semantic_variant | `{state,key,scope}`，依下段 | A/B/D；未解卻共用、分類錯配；FL-002／FL-006 |
-| leaf_schema | `{format:2,slots:[LeafSlot]}`，§4，依首次 canonical 位置排序 | A/B/D；重名、域或角色錯配；FL-004／FL-005 |
-| projection | §7 的 Projection | A/B/D；未知當 none、介面越 scope；FL-006／FL-022 |
-| content_hash | Hash；完整語義 payload hash | B/D；同 hash 異 bytes 必失敗；FL-002 |
+| role | body/reminder/token_header/layout/name/label | A/B/C；角色錯配；FL-006 |
+| semantic_variant | `{state,key,scope}`，依下段 | A/B/C；未解卻共用、分類錯配；FL-002／FL-006 |
+| leaf_schema | `{format:2,slots:[LeafSlot]}`，§4，依首次 canonical 位置排序 | A/B/C；重名、域或角色錯配；FL-004／FL-005 |
+| projection | §7 的 Projection | A/B/C；未知當 none、介面越 scope；FL-006／FL-022 |
+| content_hash | Hash；完整語義 payload hash | B/C；同 hash 異 bytes 必失敗；FL-002 |
 
 `semantic_variant.state` 是 resolved/pending；`key:Code?` 在 resolved 時必填非空，pending 時 null；
 `scope:OccurrenceKey?` 在 resolved 時 null，pending 時必指自身精確來源 occurrence（§6）。
@@ -94,10 +94,16 @@ ID 使用 build-db §14 的 canonical-json-v1，payload 恰為：
 
 ```text
 {recipe:"frame-v1",source_lang,canonical_source,normalizer_version,
- role,leaf_schema,semantic_variant,projection}
+ role,leaf_schema,semantic_variant,
+ projection:{projection_kind,discriminator}}
 ```
 
-projection 的分類、介面型別及 scope 也有語義，故入 payload；DSL 本體／body version 不入此 hash。
+projection 只有 `projection_kind` 與 `discriminator` 入 frame hash；`scopes/imports/exports` 由 §7 的 interface_key 追蹤。
+來源語義相同時，補足或調整 DSL 接口描述不應使譯文、binding 與裁定映射重鍵；相依 DSL 必須重驗接口（FL-001／FL-016）。
+這不容許用接口改動偷換來源語義：選取／付款時點、能力或分支作用域、跨句關係改變，
+仍須反映到 canonical source、葉角色／域、semantic_variant 或投影分類，重鍵後依 §9 處理引用（FL-002／FL-022）。
+未知來源語義轉為已確認也須按 semantic_variant 重鍵；只新增已知語義的 adapter 支援則不必。
+DSL 本體／body version 不入 frame hash。
 變體 key 的含義改變須改分類器版本，不能原 key 偷換語義。
 葉的實值、來源卡片／頁面（resolved 時）、譯文、form、NP 分組、加粗與 note 不入 frame hash。
 新增語義槽、改合法域／canonical pattern／正規化規則須新 ID；只開關 NP、修中文形式或改選詞不換 ID。
@@ -107,10 +113,10 @@ projection 的分類、介面型別及 scope 也有語義，故入 payload；DSL
 
 | LeafSlot 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
-| name | Code；同 frame 唯一 | A/D；重名或未知引用；FL-005 |
-| type | 下表封閉型別名稱 | A/B/D；不可泛用 term 吞所有角色；FL-004 |
+| name | Code；同 frame 唯一 | A/C；重名或未知引用；FL-005 |
+| type | 下表封閉型別名稱 | A/B/C；不可泛用 term 吞所有角色；FL-004 |
 | role | Code；type 對應的具名語義角色 | A/B；同字不同角色不合併；FL-004／FL-021 |
-| domain | `{values:[Scalar],min:UInt?,max:UInt?}` | A/B/D；引用值域或數值界限不符；FL-004 |
+| domain | `{values:[Scalar],min:UInt?,max:UInt?}` | A/B/C；引用值域或數值界限不符；FL-004 |
 | required | Bool；true 必須綁值且被 target 使用 | A/B；遺失、Literal 偽裝引用；FL-005 |
 | occurrences | 排序且不重疊的 canonical_source Span 陣列；一般非空，只有具名來源規則推導的省略槽可空 | A/B；越界、空槽沒有推導規則或角色不符；FL-008／FL-020 |
 
@@ -138,7 +144,7 @@ may 是 frame 控制語義，不等於 up_to 或選零個。random 屬 frame，�
 `QuantityExpr` 恰為 `{kind:constant,value:UInt}`、`{kind:bound,import:Code}` 或
 `{kind:expression,expression_id:Code,leaves:[Code]}`；import 引用 §7，expression_id 引用具名純運算描述，leaves 引用本 frame 槽。
 最後一支只是保留來源表達式的接口，不授予執行能力；未支援表達式保留 pending，不強轉非負常數。
-所有上述巢狀欄位由 A 驗結構、B 驗型別／使用處及來源、D 驗讀回，失敗按 FL-004／FL-019／FL-022。
+所有上述巢狀欄位由 A 驗結構、B 驗型別／使用處及來源、C 驗讀回，失敗按 FL-004／FL-019／FL-022。
 
 來源語義角色與遊戲型別用一份 binding，renderer 不另抽一次值，DSL adapter 也不能從中文猜值。
 Player／ZoneKind／Phase／Stat／TokenStatus 等 Code 的顯示名稱，須在該型別登錄中明示 value→TermReference 的對照；
@@ -155,8 +161,8 @@ Literal 的內容就是文字，不再解析 `{{slot}}`；既有譯文切換時�
 | Node 完整欄位 | 型別／引用與限制 | 驗證者；失敗／案例 |
 | --- | --- | --- |
 | `{kind:Literal,text}` | text:Text，僅專案譯文固定語句／標點；不可替代必要葉引用 | A/B；required 葉被藏入文字；FL-005 |
-| `{kind:LeafRef,slot}` | slot:Code，引用本 frame LeafSlot；以基礎 label／數值呈現 | A/B/D；懸空或錯型別；FL-005 |
-| `{kind:Form,form_id,args}` | form_id:Code，args 為該形式簽章要求的具名 slot 引用 map | A/B/D；缺形式、錯格／動詞簽章；FL-012／FL-017 |
+| `{kind:LeafRef,slot}` | slot:Code，引用本 frame LeafSlot；以基礎 label／數值呈現 | A/B/C；懸空或錯型別；FL-005 |
+| `{kind:Form,form_id,args}` | form_id:Code，args 為該形式簽章要求的具名 slot 引用 map | A/B/C；缺形式、錯格／動詞簽章；FL-012／FL-017 |
 | `{kind:NP,constructor,args}` | constructor=CardNP/UnionNP/CountExpr，args 依下表；只引用葉或有限子 NP，不另存 raw／值 | A/B；未知 constructor、重抽值；FL-001／FL-018 |
 
 args 中每個葉引用固定 `{slot:Code}`；NP 子節點仍為上表 NP 物件。無環，不容任意 target 塞進 NP。
@@ -178,10 +184,10 @@ NP 不另占來源 span；它的葉各自有來源位置。NP 移除或新增只
 
 | FormDefinition 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
-| id | Code；具名形式，如 zone.locative、zone.allative、zone.ablative、zone.add_to_hand、zone.return_to_hand、keyword.display、quantity.classifier | A/B/D；未知形式拒絕；FL-012 |
-| lang | Lang；和 target 相同 | A/B/D；錯語言；FL-012 |
+| id | Code；具名形式，如 zone.locative、zone.allative、zone.ablative、zone.add_to_hand、zone.return_to_hand、keyword.display、quantity.classifier | A/B/C；未知形式拒絕；FL-012 |
+| lang | Lang；和 target 相同 | A/B/C；錯語言；FL-012 |
 | signature | 非空 `{name:Code,type:Code,role:Code}` 陣列，name 唯一，引用 §4 型別／角色 | A/B；參數不合；FL-004／FL-012 |
-| rule | Code；引用釘版 renderer 的有限規則，不接受程式 | A/B/D；未知或超域；FL-012 |
+| rule | Code；引用釘版 renderer 的有限規則，不接受程式 | A/B/C；未知或超域；FL-012 |
 | cases | 非空 `{case_code:[FormPart]}` mapping；case_code 限 rule 登錄的分支，FormPart 是 `{kind:Literal,text:Text}`／`{kind:Label,arg:Code}`，每分支有序 | A/B；分支缺失／未知、Label 不引用 signature 拒絕；基礎名稱來自當前選詞；FL-012／FL-015 |
 
 rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章合法域，不能把選詞或語義值複製到規則內。
@@ -216,12 +222,12 @@ SourceDescriptor 定位完整來源欄位，不用同 text hash 取代 owner 身
 
 | SourceDescriptor 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
-| owner | 翻譯契約 §6.3 的具名 owner；恰一種，FK 必存在 | B/D；錯 card／owner；FL-007 |
-| field | §6.3 合法 Code；effect/section 等分開 | A/B/D；借另一欄來源；FL-007 |
-| ordinal | UInt?；只有 section/action_label 非 null | A/B/D；錯段落；FL-023 |
-| source_unit_id | text_unit ID；必為該 owner 自己的 exact 字串 | B/D；同字異 owner 未驗；FL-007 |
-| source_hash | Hash；完整欄位 UTF-8 bytes | B/D；過期／錯原文；FL-007 |
-| source_ref | `{batch_id,source_version_id,parser,locator,text_hash}`；翻譯契約 §2 來源定位 | B/D；缺封存來源、錯面、hash 不符；FL-007 |
+| owner | 翻譯契約 §6.3 的具名 owner；恰一種，FK 必存在 | B/C；錯 card／owner；FL-007 |
+| field | §6.3 合法 Code；effect/section 等分開 | A/B/C；借另一欄來源；FL-007 |
+| ordinal | UInt?；只有 section/action_label 非 null | A/B/C；錯段落；FL-023 |
+| source_unit_id | text_unit ID；必為該 owner 自己的 exact 字串 | B/C；同字異 owner 未驗；FL-007 |
+| source_hash | Hash；完整欄位 UTF-8 bytes | B/C；過期／錯原文；FL-007 |
+| source_ref | `{batch_id,source_version_id,parser,locator,text_hash}`；翻譯契約 §2 來源定位 | B/C；缺封存來源、錯面、hash 不符；FL-007 |
 
 source_ref 的前三個識別為非空 Text，locator 是指向該完整欄位的 JSON Pointer，text_hash=source_hash；
 parser 必為本次支援的釘版解析器。batch 與版本 FK 對固定輸入 inventory，不存私人 store／路徑。
@@ -229,15 +235,15 @@ parser 必為本次支援的釘版解析器。batch 與版本 FK 對固定輸入
 
 | SourceBinding 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
-| id | `bind:`＋H(binding-v2 payload，見下文) | B/D；ID 錯配；FL-008 |
-| source | 上述 SourceDescriptor | B/D；錯來源；FL-007 |
-| ordinal | UInt；該來源欄位中按第一個 segment.start 由零連續 | B/D；重複／漏序；FL-008 |
-| line_ordinal | UInt；完整欄位原行號，由分段器重建 | B/D；移到別行；FL-008 |
-| frame_id | FrameID FK | A/B/D；懸空或變體不符；FL-002／FL-005 |
-| source_span | `{role,segments:[Span],anchor:UInt?}`，沿翻譯契約 §4.1 | B/D；頂層重疊／漏字／壞 anchor；FL-008 |
-| values | `{slot_name:TypedValue}`；槽的 type 決定 §4 值形狀 | A/B/D；缺必要值、多餘值、錯域；FL-004／FL-005 |
-| occurrences | 下述 LeafOccurrence 陣列，依 raw 起點與 slot 排序 | B/D；漏掉重複引用或範圍錯；FL-008／FL-014 |
-| trace | TracePiece 陣列，依來源位置排序；非空 binding 不可空 | B/D；不能回復 exact bytes 或 canonical_source；FL-008 |
+| id | `bind:`＋H(binding-v2 payload，見下文) | B/C；ID 錯配；FL-008 |
+| source | 上述 SourceDescriptor | B/C；錯來源；FL-007 |
+| ordinal | UInt；該來源欄位中按第一個 segment.start 由零連續 | B/C；重複／漏序；FL-008 |
+| line_ordinal | UInt；完整欄位原行號，由分段器重建 | B/C；移到別行；FL-008 |
+| frame_id | FrameID FK | A/B/C；懸空或變體不符；FL-002／FL-005 |
+| source_span | `{role,segments:[Span],anchor:UInt?}`，沿翻譯契約 §4.1 | B/C；頂層重疊／漏字／壞 anchor；FL-008 |
+| values | `{slot_name:TypedValue}`；槽的 type 決定 §4 值形狀 | A/B/C；缺必要值、多餘值、錯域；FL-004／FL-005 |
+| occurrences | 下述 LeafOccurrence 陣列，依 raw 起點與 slot 排序 | B/C；漏掉重複引用或範圍錯；FL-008／FL-014 |
+| trace | TracePiece 陣列，依來源位置排序；非空 binding 不可空 | B/C；不能回復 exact bytes 或 canonical_source；FL-008 |
 
 OccurrenceKey 恰為 `{owner,field,ordinal,source_hash,line_ordinal,role,segments}`，各型別沿上述；
 它指來源實例，不含新 frame ID，故 pending 語義身分不循環。相同實例的 source_ref 改封存批次不會重配語義身分。
@@ -246,15 +252,15 @@ source_ref／source_unit_id 仍驗來源並存 DB，但不是封存批次改名�
 
 | 位置／trace 子物件欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
-| LeafOccurrence.slot | Code；本 frame 槽引用 | B/D；懸空；FL-005 |
-| LeafOccurrence.ordinal | UInt；該槽按來源次序由零連續，同槽值須一致 | B/D；漏 occurrence／不同值塞同槽；FL-014 |
-| LeafOccurrence.raw_spans | 排序非空 Span 陣列；完整欄位座標 | B/D；越界／把 normalized offset 當 raw；FL-008 |
-| LeafOccurrence.canonical_spans | 排序非空 Span 陣列；canonical_source 座標，對應 LeafSlot.occurrences | B/D；schema 錯配；FL-008 |
+| LeafOccurrence.slot | Code；本 frame 槽引用 | B/C；懸空；FL-005 |
+| LeafOccurrence.ordinal | UInt；該槽按來源次序由零連續，同槽值須一致 | B/C；漏 occurrence／不同值塞同槽；FL-014 |
+| LeafOccurrence.raw_spans | 排序非空 Span 陣列；完整欄位座標 | B/C；越界／把 normalized offset 當 raw；FL-008 |
+| LeafOccurrence.canonical_spans | 排序非空 Span 陣列；canonical_source 座標，對應 LeafSlot.occurrences | B/C；schema 錯配；FL-008 |
 | LeafOccurrence.source_unit | Text?；數量有單位時必為 exact 單位，其他 null | B；單位與語境不符拒絕結構合併；FL-003 |
 | LeafOccurrence.source_presence | explicit/omitted | B；省略卻造 raw span；FL-020 |
 | LeafOccurrence.resolution_rule | Code?；omitted 必須指具名解析規則或保持語義 pending | B；擅自默認 self；FL-020 |
-| TracePiece.raw_span | Span；完整欄位座標 | B/D；遺漏、越界或重疊；FL-008 |
-| TracePiece.canonical_spans | Span 陣列，可空（排版／移出提示）；多對多可共指同一 canonical 區間 | B/D；未記 NFKC 展開；FL-008 |
+| TracePiece.raw_span | Span；完整欄位座標 | B/C；遺漏、越界或重疊；FL-008 |
+| TracePiece.canonical_spans | Span 陣列，可空（排版／移出提示）；多對多可共指同一 canonical 區間 | B/C；未記 NFKC 展開；FL-008 |
 | TracePiece.rule | Code；normalizer 內已登錄規則，含 identity／layout／unit／alias | B；未知改寫或吞語義；FL-008／FL-021 |
 
 omitted occurrence 的 raw_spans 與 canonical_spans 都為空（上述非空規則的唯一例外），
@@ -271,9 +277,9 @@ NFKC 的前後字元由 raw_span 與 canonical_spans 取出，允許多對多，
 
 | Projection 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
-| projection_kind | ability_body/ability_flag/card_field/none/pending | A/B/D；未知分類須 pending；FL-006 |
+| projection_kind | ability_body/ability_flag/card_field/none/pending | A/B/C；未知分類須 pending；FL-006 |
 | discriminator | Code?；resolved 類別的具名分類規則，pending 時 null | A/B；無規則卻標 none；FL-006 |
-| scopes | 依 id 排序的 `{id:Code,parent:Code?,kind:ability/branch/sequence}` 陣列；id 唯一，parent 引用本陣列，根 parent=null，父子無環 | A/B/D；未知或循環作用域；FL-022 |
+| scopes | 依 id 排序的 `{id:Code,parent:Code?,kind:ability/branch/sequence}` 陣列；id 唯一，parent 引用本陣列，根 parent=null，父子無環 | A/B/C；未知或循環作用域；FL-022 |
 | imports | Port 陣列，依 name 排序唯一 | A/B；錯型別、未知先行詞；FL-022 |
 | exports | Port 陣列，依 name 排序唯一 | A/B；結果越 scope；FL-022 |
 
@@ -283,6 +289,13 @@ source_role 限該分類規則明列的 selected_objects/action_result/paid_resu
 scope 指同 frame 宣告的 ability／branch／sequence 作用域。A 驗簽章，B 驗實際來源上下文與支配／可見範圍（FL-022）。
 同一 scope 代碼的具體能力實例由來源 owner／行位置限定，不跨卡共享值。
 尚未支援的 type／scope 關係保持 pending、拒絕相依可執行投影，不假裝 adapter 已完成。
+
+`interface_key:Hash` 是由 B 從已驗 Projection 推導的 DSL 依賴鍵，不是 authored 欄位或 frame 身分；
+其 canonical-json-v1 payload 恰為 `{recipe:"frame-interface-v1",frame_id,scopes,imports,exports}`，取完整 SHA-256。
+陣列沿上表排序；同 key 仍比完整 payload bytes，碰撞拒絕。C 驗 DB 讀回的組成欄位，B 重算鍵（FL-001／FL-016／FL-022）。
+每個使用該 frame 的 DSL 依賴必納入此鍵；更動任一 port／scope 都須重驗所有使用處的型別、來源與可見範圍。
+移除仍被 QuantityExpr.import 或相依接口引用的 port 是壞引用，須拒絕；key 改變本身不代表新接口有效。
+只有來源語義及既有引用仍有效的接口描述調整，才可保持 frame、binding 與 render 身分；不保存歷次接口帳本。
 
 | 類別 | 必要語義及結果 | 案例 |
 | --- | --- | --- |
@@ -299,24 +312,24 @@ scope 指同 frame 宣告的 ability／branch／sequence 作用域。A 驗簽章
 ## 8. 建置 DB、render projection 與依賴
 
 以下是[build-db §9.3](../build/build-db.md#93-四層資料的目標契約)的**目標邏輯列**，不是宣稱既有 DDL 已有這些欄／表。
-所有新 Json 欄均使用本文件具名型別，D 逐層驗證後才能交給其他層。
+所有新 Json 欄均使用本文件具名型別，C 逐層驗證後才能交給其他層。
 現有 authored_source_id／record_key／origin／low_confidence 與真實 source_id 的型別及 nullable 保留。
 
 | 邏輯列／鍵 | 四層欄位、引用與差異 | 驗證者；失敗／案例 |
 | --- | --- | --- |
-| sentence_template；PK id | §3 Frame＋建置才有的 canonical_source:Text；source 描述拆欄或型別 Json；取代舊六欄 payload | B/D；hash／域錯配；FL-002／FL-004 |
-| template_translation；PK template_id,lang,variant_key | target:Target 取代 text；其餘品質欄保留；template_id FK、variant_key=default 表一般值 | A/B/D；壞 target；FL-005 |
-| glossary_term、glossary_translation；鍵不變 | 基礎概念／選詞及 emphasis 保留；形式不把基礎名字複製成多份 translation | A/B/D；引用錯配；FL-013／FL-015 |
-| translation_form；PK id,lang | §5 FormDefinition＋人工來源／品質欄；rule 隨 renderer pin，signature／cases 有型別 | A/B/D；壞 form；FL-012 |
-| text_template_binding；PK id，UQ use_id,ordinal | §6 SourceBinding；use_id FK translation_use 取代 context_id，context 沿 use 取得；owner 不同即各驗來源 | B/D；錯 owner／錯面／同字串借用；FL-007／FL-028 |
-| binding_leaf_occurrence；PK binding_id,slot,ordinal | LeafOccurrence 拆列；binding_id FK text_template_binding；不能以 translation_term 去重掉次數 | B/D；位置漏失；FL-008／FL-014 |
-| render_leaf_occurrence；PK translation_id,binding_id,node_path | `{translation_id:ID,binding_id:ID,node_path:[UInt],slot:Code,source_ordinals:[UInt],ranges:[Span]}`；前兩欄 FK，slot／source_ordinals 指該 binding 的葉 occurrence，node_path 為 target／form 展開後的唯一節點路徑，ranges 指輸出；所有陣列非空 | B/D；來源／輸出位置失聯，重複引用被去重；FL-014 |
-| translation；PK id | 原 context/target_lang/text/origin/authority/low_confidence/source_hash/source_id 保留；render-v3 內容鍵，tokens 不作隱藏承載 | B/D；依賴不一致；FL-015 |
-| translation_binding；PK translation_id,binding_id | translation_id／binding_id FK 及 (template_id,lang,variant_key) FK 保留；frame／語言／source context 一致 | B/D；引用失配；FL-005／FL-007 |
-| translation_term；PK translation_id,term_id | 保留去重反查索引；不是位置表、不能據此搜中文字串補 span | B/D；卡名內誤加粗；FL-013 |
-| annotation_set；PK id | `{id:ID,text_unit_id:ID,occurrences:[Annotation]}`；text_unit_id FK；相同文字不同概念須不同 id | B/D；錯 text identity／去重語義；FL-013／FL-014 |
-| translation_annotation；PK translation_id | `{translation_id:ID,annotation_set_id:ID}`；兩欄 FK，text 必等 translation.text | B/D；錯目標字串；FL-014 |
-| translation_use_annotation；PK use_id | `{use_id:ID,annotation_set_id:ID}`；兩欄 FK，text 必等 use 的來源；沒有譯文也能存在 | B/D；JP offsets 套 EN；FL-023 |
+| sentence_template；PK id | §3 Frame＋建置才有的 canonical_source:Text；source 描述拆欄或型別 Json；取代舊六欄 payload | B/C；hash／域錯配；FL-002／FL-004 |
+| template_translation；PK template_id,lang,variant_key | target:Target 取代 text；其餘品質欄保留；template_id FK、variant_key=default 表一般值 | A/B/C；壞 target；FL-005 |
+| glossary_term、glossary_translation；鍵不變 | 基礎概念／選詞及 emphasis 保留；形式不把基礎名字複製成多份 translation | A/B/C；引用錯配；FL-013／FL-015 |
+| translation_form；PK id,lang | §5 FormDefinition＋人工來源／品質欄；rule 隨 renderer pin，signature／cases 有型別 | A/B/C；壞 form；FL-012 |
+| text_template_binding；PK id，UQ use_id,ordinal | §6 SourceBinding；use_id FK translation_use 取代 context_id，context 沿 use 取得；owner 不同即各驗來源 | B/C；錯 owner／錯面／同字串借用；FL-007／FL-028 |
+| binding_leaf_occurrence；PK binding_id,slot,ordinal | LeafOccurrence 拆列；binding_id FK text_template_binding；不能以 translation_term 去重掉次數 | B/C；位置漏失；FL-008／FL-014 |
+| render_leaf_occurrence；PK translation_id,binding_id,node_path | `{translation_id:ID,binding_id:ID,node_path:[UInt],slot:Code,source_ordinals:[UInt],ranges:[Span]}`；前兩欄 FK，slot／source_ordinals 指該 binding 的葉 occurrence，node_path 為 target／form 展開後的唯一節點路徑，ranges 指輸出；所有陣列非空 | B/C；來源／輸出位置失聯，重複引用被去重；FL-014 |
+| translation；PK id | 原 context/target_lang/text/origin/authority/low_confidence/source_hash/source_id 保留；render-v3 內容鍵，tokens 不作隱藏承載 | B/C；依賴不一致；FL-015 |
+| translation_binding；PK translation_id,binding_id | translation_id／binding_id FK 及 (template_id,lang,variant_key) FK 保留；frame／語言／source context 一致 | B/C；引用失配；FL-005／FL-007 |
+| translation_term；PK translation_id,term_id | 保留去重反查索引；不是位置表、不能據此搜中文字串補 span | B/C；卡名內誤加粗；FL-013 |
+| annotation_set；PK id | `{id:ID,text_unit_id:ID,occurrences:[Annotation]}`；text_unit_id FK；相同文字不同概念須不同 id | B/C；錯 text identity／去重語義；FL-013／FL-014 |
+| translation_annotation；PK translation_id | `{translation_id:ID,annotation_set_id:ID}`；兩欄 FK，text 必等 translation.text | B/C；錯目標字串；FL-014 |
+| translation_use_annotation；PK use_id | `{use_id:ID,annotation_set_id:ID}`；兩欄 FK，text 必等 use 的來源；沒有譯文也能存在 | B/C；JP offsets 套 EN；FL-023 |
 
 render_leaf_occurrence 的 node_path 以零起算子節點索引逐層定位；同 form 多個 Label 各有不同路徑。
 source_ordinals 排序唯一；同葉值多處來源共同供一次呈現時可列多筆，輸出重複兩次時必有兩列。
@@ -326,16 +339,16 @@ translation_context 仍以 source_unit_id 與 semantic_variant 唯一，後者�
 `cv:`＋H(`{recipe:"context-variant-v2",assignment,bindings:[{frame_id,values,source_span}]}`)，
 assignment 為既有 context_assignment 的 variant（沒有時 default），bindings 依來源 ordinal 排序。
 它不是單一 Frame.semantic_variant 物件；同字異概念會因 values 不同分 context，NP／form 改動不分 context。
-兩欄均必填，D 驗 FK／唯一，B 驗聚合重算（FL-013／FL-015）。
+兩欄均必填，C 驗 FK／唯一，B 驗聚合重算（FL-013／FL-015）。
 
 Annotation 的每欄如下；set 是 exact 文字的語義位置，binding 對應從來源 occurrence 與渲染節點路徑保留，不靠文字搜尋。
 
 | 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
-| ordinal | UInt；同 set 依 start/end/reference 排序後由零連續 | B/D；重複／跳號；FL-014 |
-| reference | TermReference 或 CardName 引用，FK 依 §4 | B/D；同字冒充同概念；FL-013 |
-| ranges | 非空、排序、互不重疊 Span 陣列，對 exact text_unit | B/D；負值、越界、UTF-16 混用；FL-008／FL-014 |
-| bold | Bool?；glossary 規則推導，未定 emphasis 為 null 並列原因 | B/D；未定偽裝 false；FL-015 |
+| ordinal | UInt；同 set 依 start/end/reference 排序後由零連續 | B/C；重複／跳號；FL-014 |
+| reference | TermReference 或 CardName 引用，FK 依 §4 | B/C；同字冒充同概念；FL-013 |
+| ranges | 非空、排序、互不重疊 Span 陣列，對 exact text_unit | B/C；負值、越界、UTF-16 混用；FL-008／FL-014 |
+| bold | Bool?；glossary 規則推導，未定 emphasis 為 null 並列原因 | B/C；未定偽裝 false；FL-015 |
 
 同一 set 各 occurrence 不得重疊；同一概念出現兩次保留兩筆，單次跨段可有多個 range。
 NP 範圍不是 annotation，卡名內的同字不另套術語 annotation。form 的括號／後綴通常不含在概念 range。
@@ -343,12 +356,13 @@ NP 範圍不是 annotation，卡名內的同字不另套術語 annotation。form
 純字串去重 text_unit 不代表共用 annotation_set；無翻譯時原文 set 仍存在，公開如何承載由 #496 決定。
 
 `render projection` 在建置內恰有 `{text:Text,annotation_set_id:ID,dependency_key:Hash}`，皆必填；
-set 引用上表、text 必相同，B/D 驗閉包（FL-014／FL-015）。
+set 引用上表、text 必相同，B/C 驗閉包（FL-014／FL-015）。
 render-v3 使用 `{recipe:"render-v3",context_id,target_lang,dependency_key,text,origin,authority,low_confidence}` 取 H，
 translation.id=`tr:`＋完整 hash，revision 為前 13 hex 的 52-bit 數；同 revision 異 hash 拒絕。
 dependency_key 是下列實際使用值的 canonical hash，包含 target／form／label／emphasis 及來源 binding 的呈現值、renderer 版本、
 選中的 variant_key、origin／authority／low_confidence；排除 note、時鐘與私人路徑，不加核可快取。
 binding 的呈現值恰為 `{source_hash,frame_id,values,source_span,occurrences,trace}`，不含 owner／封存批次；
+interface_key 及 scopes/imports/exports 不入 render 依賴，相關引用仍須通過 §7 驗證才能重用既有呈現。
 同 context 可共用相同 render，但所有來源 use 仍各驗 owner 並以 translation_binding 記用途。
 官方 counterpart 的逐 owner 依賴另依翻譯契約 §7.2，不用此去重規則借用官方資格。
 
@@ -356,7 +370,8 @@ binding 的呈現值恰為 `{source_hash,frame_id,values,source_span,occurrences
 | --- | --- | --- | --- |
 | 選詞、form 中文風格、target NP 覆蓋、emphasis、品質旗標 | 所有依賴 render／annotation／selection；文字未變但 bold 改也重算 annotation | frame ID、葉值與 DSL 語義審查 | FL-001／FL-015 |
 | source owner／face／hash、葉值或原單位 | 該來源 binding、use、render、裁定用途及相依 DSL freshness | 無關來源；resolved frame 語義 payload 相同可重用 ID | FL-007／FL-016 |
-| canonical、normalizer、slot role/domain、semantic_variant、projection 介面 | frame 重鍵、全用途 binding／render／裁定映射／相依 DSL 重驗 | 永久卡片身分 | FL-002／FL-016 |
+| canonical、normalizer、slot role/domain、semantic_variant、projection_kind／discriminator | frame 重鍵、全用途 binding／render／裁定映射／相依 DSL 重驗 | 永久卡片身分 | FL-002／FL-016 |
+| 來源語義與既有引用不變，只調整 scopes／imports／exports 描述 | interface_key 重算；相依 DSL 的接口連接、用途審查與實跑資格失效並重驗 | frame ID、binding／context、target、render／annotation、裁定映射及永久卡片身分 | FL-001／FL-016／FL-022 |
 | DSL body 或 adapter lowering | 其 body version／用途審查與實跑資格 | 純呈現與未改的 frame 語義身分 | FL-016 |
 
 依賴反查可由本次型別列建索引；不用每詞採納收據或永久失效帳本。建置每次產生新 DB，舊快照不原地修補。
@@ -371,7 +386,7 @@ binding 的呈現值恰為 `{source_hash,frame_id,values,source_span,occurrences
 | legacy_namespace | Code；明示舊 ID recipe 與 normalizer 版本 | A/B；不同版本 T ID 混用；FL-024 |
 | legacy_template_id | ID；該命名空間的實際舊定義 | B；不存在；FL-024 |
 | occurrence | OccurrenceKey；精確舊適用來源 | B；不屬舊模板範圍；FL-025 |
-| frame_id | FrameID FK | B/D；目標不存在；FL-026 |
+| frame_id | FrameID FK | B/C；目標不存在；FL-026 |
 | semantic_variant | 與 frame.semantic_variant 相同 | B；變體不符；FL-024 |
 | scope | `{role:Code,domain:Code}`；具名來源角色及舊適用域的交集 | B；擴大適用域；FL-025 |
 
@@ -383,9 +398,9 @@ binding 的呈現值恰為 `{source_hash,frame_id,values,source_span,occurrences
 | --- | --- | --- |
 | ruling_ref | `{id:ID,revision:UInt,reference_ordinal:UInt}`；指實際裁定版本及其中一個舊引用，revision > 0 | A/B；漏引用、重複或不存在；FL-026 |
 | legacy | `{namespace:Code,template_id:ID,occurrence:OccurrenceKey}` | A/B；舊引用錯誤／範圍未知；FL-024 |
-| status | resolved/pending | A/B/D；第三種狀態拒絕；FL-026 |
-| target | `{frame_id:FrameID,semantic_variant,scope,occurrence}` 或 null | B/D；resolved 必非 null，且唯一精確映射、不擴域；FL-024／FL-025 |
-| candidates | 排序唯一的 target 形狀陣列；每一候選 FK／來源亦須可驗 | B/D；pending 可空但不得假造有效目標；FL-026 |
+| status | resolved/pending | A/B/C；第三種狀態拒絕；FL-026 |
+| target | `{frame_id:FrameID,semantic_variant,scope,occurrence}` 或 null | B/C；resolved 必非 null，且唯一精確映射、不擴域；FL-024／FL-025 |
+| candidates | 排序唯一的 target 形狀陣列；每一候選 FK／來源亦須可驗 | B/C；pending 可空但不得假造有效目標；FL-026 |
 | reason | Code? | A/B；resolved=null 且 candidates=[]；pending 必有原因且 target=null；FL-026 |
 
 pending 原因至少包含 no_candidate、ambiguous_variant、unknown_legacy_scope、source_changed、unsupported_relation。

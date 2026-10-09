@@ -6,8 +6,8 @@
 
 公開 enum 是固定集合，新增值會讓持有舊 Schema 的 reader 拒收含新值的快照。format `2.0.0` 仍為候選、尚無正式發布快照，候選期間直接修訂 Schema 與 golden；正式凍結後，同類新增值須依傳輸契約 §1.1 升 minor 並提高 `min_reader_version`，同步 reader 支援，不改變既有 enum 值的語義。
 
-既有 Schema 的 `shared_jp_unchecked` 是 2026-10-01 加入的切換前 basis。
-2026-10-10 起的 JP 唯一一般來源政策依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)，
+**使用者決定 2026-10-10（JP 唯一一般來源，#495）**：既有 Schema 的 `shared_jp_unchecked` 是 2026-10-01 加入的切換前 basis。
+新來源政策依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)，
 不再以已知 divergence 或日英段落數不同禁止有效 JP 繁中；段落不同取完整 JP 效果，不按 EN ordinal 拼接。
 新版 basis、annotation、版本、golden 與 Python／TS reader 的同步責任交
 [#496](https://github.com/gbaian10/sve-kit/issues/496)／#498，本段不改現有 wire，也不宣稱 reader 已支援新政策。

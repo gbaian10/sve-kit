@@ -344,7 +344,7 @@ EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；�
 
 | 現有資料 | 四層後的欄位差異與責任 |
 | --- | --- |
-| sentence_template | Frame 身分包含 canonical source、型別／角色／域、語義變體、normalizer 及投影接口；舊六欄 payload 改版，NP/form 不入身分 |
+| sentence_template | Frame 身分包含 canonical source、型別／角色／域、語義變體、normalizer 及投影分類；scopes/imports/exports 由 DSL 的 interface_key 追蹤；舊六欄 payload 改版，NP/form 不入身分 |
 | template_translation／glossary_translation | 前者 text 改有型別 Target；後者繼續保存單一基礎選詞，translation_form 以引用組合形式，不複製每種文法形的名字 |
 | text_template_binding | 改為逐 use 的 SourceBinding；新增 owner／來源定位、trace、typed values 與每葉 occurrence，不能只按 context 去重 |
 | translation_context／translation | context 的變體鍵聚合來源 frame／values；render-v3 包含實際 target、形式、選詞／加粗、位置與 renderer 版本的依賴 |

@@ -15,7 +15,11 @@ input 的 `fixture` 指 fixtures 的 key，先深複製 fixture，再套用 `cha
 `remove` 列的 JSON Pointer 表示刪除欄位。若有 `changes`，比較原值與變更後值；不是把替換後結果當基準。
 其他 input 欄位是該操作的直接參數，不隱含預設值。沒有 fixture 的操作只讀自己 input。
 JSON 中的 fixture owner／concept／domain ID 是合成登錄，測試須在隔離資料根建立，不連官網。
-`identity_base` 的 `semantic` 是完整 frame-v1 hash payload，render 部分不入 hash；
+`identity_base` 的 `semantic` 是完整 frame-v1 hash payload，projection 只含分類；
+同層 `projection_interface` 存 scopes／imports／exports，與 frame_id 組成共用契約 §7 的 frame-interface-v1 payload。
+frame_identity 同時驗 frame ID 與 interface_key 的固定 hash；render 部分不入這兩個 hash。
+expected 的 before_interface_hash／after_interface_hash 就是前後 interface_key 的完整 SHA-256 值。
+此操作只比較已分類合成 payload 的身分；來源分類與接口是否合法另由 FL-006／FL-022 驗證。
 其中的 normalizer／domain／discriminator 是測試專用具名規則，不宣稱正式 parser 已接受這種自撰來源語法。
 
 operation 是測試責任名稱，不是要求實作同名 production 函式。#498 可用實際 public reader／builder 入口建立相同情境，
@@ -27,22 +31,22 @@ expected 的 reason 是本規格原因碼，實作可映射既有公開診斷，
 
 | 組／operation | 固定輸入的重點 | 必須驗到的結果 |
 | --- | --- | --- |
-| FL-001／frame_identity | 同來源與葉 schema，只開關 NP、改 form／note／中文 | frame ID 相同；NP on/off 的葉值不變 |
-| FL-002／frame_identity | targets/choose、cost/effect 變體、normalizer、域或 canonical 改動 | frame ID 必不同；固定完整 hash 可獨立核對 |
+| FL-001／frame_identity | 同來源與葉 schema，只開關 NP、改 form／note／中文或有效的接口描述 | frame ID 相同；葉值不變；只有接口描述改動會改 interface_key |
+| FL-002／frame_identity | targets/choose、cost/effect 變體、normalizer、域、canonical 或投影分類改動 | frame ID 必不同，interface_key 隨之改變；固定完整 hash 可獨立核對 |
 | FL-003／source_unit | 計數物、計數時區域集合、token、角色與實際單位 | EX 体、跨區枚、護符つ／枚、主戰者人通過；錯單位拒絕合併 |
 | FL-004／leaf_domain | 數量、次數、傷害、序數、布林與域 | 錯型別／角色或超界拒絕，不因數字相同合併 |
 | FL-005／target_references | 完整 target、缺葉、錯概念、required 被 literal 取代 | 完整引用通過；必要葉遺失／懸空拒絕 |
 | FL-006／projection | ability body/flag、card field、已知提示／layout、未知 | 五類分開；unknown 保留 pending，不當 none |
 | FL-007／source_identity | exact owner／face／field／hash／來源版本 | 錯 card、面、欄、hash、過期或缺來源拒絕 |
 | FL-008／source_positions | 自撰非 BMP、全形數字與 CRLF 的 raw／canonical trace | raw 重建不漏 byte；UTF-16 偏移、重疊、漏 CR、假 layout 拒絕 |
-| FL-009／record_shape | 缺必填、未知欄、重複鍵 | A／D 各自拒絕，不靠最後讀入覆蓋 |
+| FL-009／record_shape | 缺必填、未知欄、重複鍵 | A／C 各自拒絕，不靠最後讀入覆蓋 |
 | FL-010／authored_entry | 新封套、舊 kind、品質欄 | format 3 通過；source_exception、舊格式、非法型別拒絕 |
 | FL-011／missing_translation | 結構正確而選詞缺譯／撤回 | 整欄 fallback；不輸出半中半日，也不擅取 variant |
 | FL-012／form_signature | locative／allative／ablative、未知 form、錯語言 | 合法形式通過，缺形式或錯參數拒絕 |
 | FL-013／annotation_identity | 卡名內同字、相同 text 不同概念 | 卡名與術語不互套 span；不同概念產生不同 set／context |
 | FL-014／occurrences | 重複詞、多個輸出與原文單獨顯示 | 保留每次位置；不同 exact text、越界或缺關聯拒絕 |
 | FL-015／render_dependencies | 改 label、form、bold、target、品質或 note | 真正依賴重算 render／annotation，note 不失效，frame 不變 |
-| FL-016／semantic_dependencies | 改來源、frame 語義、本體版本 | 精確失效用途／DSL；不因中文風格重審規則 |
+| FL-016／semantic_dependencies | 改來源、frame 語義、接口描述、本體版本 | 精確失效用途／DSL；接口描述只失效相依 DSL，不重鍵翻譯；中文風格不重審規則 |
 | FL-017／zone_forms | 在／到／從、加入／回到手牌、計數來源與目的地 | 格與融合形式分清；目的地不改來源量詞，頂底不當普通 zone |
 | FL-018／partial_np | 部分修飾、分支限定、異種聯集、特性／token／職業 | 未覆蓋可翻譯但不造已支援 DSL；不拉平 scope／型別 |
 | FL-019／quantity | exact/up_to/at_least/all/any/X/may/random | 構造分工不互換；缺 import／不合法 expression 拒絕 |
@@ -53,7 +57,7 @@ expected 的 reason 是本規格原因碼，實作可映射既有公開診斷，
 | FL-024／ruling_mapping | 舊模板拆分、新框架合併、版本命名空間 | 按 occurrence 唯一 resolved，不按文字或 ID 前綴 |
 | FL-025／ruling_mapping | 唯一候選但適用域擴大、舊域未知 | 不得 active；保持 pending 或拒絕假 resolved |
 | FL-026／ruling_resolution | 無候選、多候選、漏引用、懸空或狀態矛盾 | 原因／候選保留，active 懸空為零 |
-| FL-027／db_boundary | SQL Json 錯 shape、錯 FK、必填 null | D 拒絕原始 Any；不可因 authored 先驗過而略過 |
+| FL-027／db_boundary | SQL Json 錯 shape、錯 FK、必填 null | C 拒絕原始 Any；不可因 authored 先驗過而略過 |
 | FL-028／translation_use | 同字串不同欄位／owner 的合法性 | 逐 use 驗來源；共享 context 不借官方資格 |
 | FL-029／candidate | 未完整綁定的譯文草稿、嘗試 pin／render | 可保留候選，不得進 active 或算完整覆蓋 |
 
