@@ -1,7 +1,6 @@
 """Deterministic, content-addressed WebP variants for approved SVE card images."""
 
 import hashlib
-import json
 import os
 import re
 import tempfile
@@ -15,10 +14,13 @@ from PIL import Image, ImageCms, ImageOps, UnidentifiedImageError, features
 from PIL import __version__ as pillow_version
 from pydantic import BaseModel, ConfigDict, ValidationError
 
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.images.checks import ImageChecks
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
+    from pydantic import JsonValue
 
 PILLOW_VERSION = "12.3.0"
 LIBWEBP_VERSION = "1.6.0"
@@ -80,7 +82,7 @@ class Recipe:
     method: int = 6
     exact_alpha: bool = True
 
-    def definition(self) -> dict[str, object]:
+    def definition(self) -> dict[str, JsonValue]:
         """Return every setting that can affect the encoded bytes."""
         return {
             "algorithm": "sve-webp-v2",
@@ -118,7 +120,7 @@ class Recipe:
     @property
     def version(self) -> str:
         """Hash the complete encoding and geometry recipe."""
-        return "sha256:" + hashlib.sha256(_canonical(self.definition())).hexdigest()
+        return digest(canonical(self.definition()))
 
 
 DEFAULT_RECIPE = Recipe()
@@ -225,15 +227,15 @@ def _build_variants(
     image = _decode(source.source_bytes)
     checks.png["sha256:" + source.source_sha256] = "PNG", image.size
     crop = crop_box(image.width, image.height, override)
-    cache_key = hashlib.sha256(
-        _canonical(
+    cache_key = digest(
+        canonical(
             {
                 "source_sha256": source.source_sha256,
                 "crop": list(crop.bounds),
                 "recipe": recipe.definition(),
             }
         )
-    ).hexdigest()
+    ).removeprefix("sha256:")
     cache_path = cache_root / "image-variants" / f"{cache_key}.json"
     cached = _read_cache(
         cache_path, source, image, crop, recipe, blob_root, checks=checks
@@ -254,9 +256,9 @@ def _build_variants(
                 dimensions, Image.Resampling.LANCZOS, reducing_gap=None
             )
         encoded = _encode(pixels, recipe)
-        digest = hashlib.sha256(encoded).hexdigest()
-        path = _blob_path(digest)
-        _write_blob(blob_root / path, encoded, digest)
+        checksum = hashlib.sha256(encoded).hexdigest()
+        path = _blob_path(checksum)
+        _write_blob(blob_root / path, encoded, checksum)
         generated.append(
             ImageVariant(
                 image_id=source.image_id,
@@ -266,7 +268,7 @@ def _build_variants(
                 width=dimensions[0],
                 height=dimensions[1],
                 bytes=len(encoded),
-                sha256=digest,
+                sha256=checksum,
                 recipe_version=recipe.version,
             )
         )
@@ -286,10 +288,6 @@ def _build_variants(
     return result
 
 
-def _canonical(value: object) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
-
-
 def _validate_source(source: ImageSource) -> None:
     if not source.image_id or not source.source_src_raw:
         msg = "image identity and original source URL are required"
@@ -300,8 +298,8 @@ def _validate_source(source: ImageSource) -> None:
     if source.publication_state != "approved" or source.availability != "available":
         msg = "only approved, available SVE card images can have public variants"
         raise ImageVariantError(msg)
-    digest = hashlib.sha256(source.source_bytes).hexdigest()
-    if not _HASH.fullmatch(source.source_sha256) or digest != source.source_sha256:
+    checksum = hashlib.sha256(source.source_bytes).hexdigest()
+    if not _HASH.fullmatch(source.source_sha256) or checksum != source.source_sha256:
         msg = "source SHA-256 does not match the frozen image bytes"
         raise ImageVariantError(msg)
 
@@ -457,14 +455,14 @@ def _encode(image: Image.Image, recipe: Recipe) -> bytes:
     return target.getvalue()
 
 
-def _blob_path(digest: str) -> str:
-    if not _HASH.fullmatch(digest):
+def _blob_path(checksum: str) -> str:
+    if not _HASH.fullmatch(checksum):
         msg = "invalid WebP blob SHA-256"
         raise ImageVariantError(msg)
-    return f"images/sha256/{digest[:2]}/{digest}.webp"
+    return f"images/sha256/{checksum[:2]}/{checksum}.webp"
 
 
-def _write_blob(path: Path, data: bytes, digest: str) -> None:
+def _write_blob(path: Path, data: bytes, checksum: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temp_name = tempfile.mkstemp(prefix=".webp-", dir=path.parent)
     temporary = Path(temp_name)
@@ -476,14 +474,14 @@ def _write_blob(path: Path, data: bytes, digest: str) -> None:
         try:
             os.link(temporary, path)
         except FileExistsError:
-            _verify_blob(path, digest, len(data))
+            _verify_blob(path, checksum, len(data))
     finally:
         temporary.unlink(missing_ok=True)
 
 
-def _verify_blob(path: Path, digest: str, byte_count: int) -> None:
+def _verify_blob(path: Path, checksum: str, byte_count: int) -> None:
     data = path.read_bytes()
-    if len(data) != byte_count or hashlib.sha256(data).hexdigest() != digest:
+    if len(data) != byte_count or hashlib.sha256(data).hexdigest() != checksum:
         msg = f"content-addressed WebP blob is corrupt: {path}"
         raise ImageVariantError(msg)
 
@@ -612,7 +610,7 @@ def _write_cache(path: Path, result: VariantSet, key: str) -> None:
     temporary = Path(temp_name)
     try:
         with os.fdopen(fd, "wb") as file:
-            file.write(_canonical(entry.model_dump(mode="json")))
+            file.write(canonical(entry.model_dump(mode="json")))
             file.flush()
             os.fsync(file.fileno())
         temporary.replace(path)
