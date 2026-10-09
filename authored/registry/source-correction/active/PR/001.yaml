@@ -1,0 +1,69 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: source_correction
+    owner: PR
+    data:
+      id: x:95684aa0cb8059e49c425bac82293f09
+      printing_id: p:682d9aaefe425f34b3f01fe82c81c831
+      face_id: f:31c7d998836b5d858f4c4510c849dcfe
+      field: card_type
+      expected_raw_value: '-'
+      corrected_value: Evolution Point
+      expected_source_hash: sha256:f07346677a4271db9c36a60b1eadaa9bf9d187014a7af5591bd21a3198d9401e
+      source_hash_recipe: registry-observation-v2
+      reason: Official page transcription differs from the printed card image.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:d0d9b571d6e0dc8b6f357c44a62de92d5bbbdad4eadc3eabcfeb1d0e9672edc8
+          image_src: /wordpress/wp-content/images/cardlist/PR/PR-388EN.png
+          region: en
+          locator: Card type label and evolved banner
+  - kind: source_correction
+    owner: PR
+    data:
+      id: x:9ad87765dec35da1baefc68fbdd3b332
+      printing_id: p:35d063a4a7665dedbfecbfcee6ed62bd
+      face_id: f:31c7d998836b5d858f4c4510c849dcfe
+      field: card_type
+      expected_raw_value: '-'
+      corrected_value: Evolution Point
+      expected_source_hash: sha256:902ee86efccf6c52df8f8282c3d116519c3d5a77555bcbc2bea4fba166fee7ca
+      source_hash_recipe: registry-observation-v2
+      reason: Official page transcription differs from the printed card image.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:2f7f4a75f30403a911863f3fcf3f08518344bc26f4ba1489f9a9ada9214d558c
+          image_src: /wordpress/wp-content/images/cardlist/PR/PR-442EN.png
+          region: en
+          locator: Card type label and evolved banner
+  - kind: source_correction
+    owner: PR
+    data:
+      id: x:d8a9c3a94e465f08996614d65049600d
+      printing_id: p:ad519fe804bd57faa496afd5234c60bf
+      face_id: f:73273aecebd45d9a81196a7e6613eed5
+      field: effect
+      expected_raw_value: 【疾走】
+      corrected_value: "【疾走】\n自分のエンドフェイズが来たとき、これは消滅する。"
+      expected_source_hash: sha256:daae2afa3464a8882766c4da357ffdd91c143b96fba626a59490210ea354313c
+      source_hash_recipe: registry-observation-v2
+      reason: Official page transcription differs from the printed card image.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:32a12bf6b0cccd667b8d38e162ba90261a08cd32f4efe769881c919199e69793
+          image_src: /wordpress/wp-content/images/cardlist/PR/pr-114.png
+          region: jp
+          locator: Card rules text box

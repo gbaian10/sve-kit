@@ -1,0 +1,113 @@
+format: 1
+kind: effect_set
+cards:
+  EBD02-004:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 2
+      - line: 2
+        kind: trigger
+        body:
+          op: search
+          select:
+            zone: deck
+            side: self
+            type: spell
+          min: 0
+          max: 1
+          to: hand
+        event: enter
+        subject: self
+  EBD02-005:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: play_card
+          subjects: target.1
+          set_cost: 0
+        event: evolve
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: cemetery
+              side: self
+              type: spell
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 3
+            min: 1
+            max: 1
+  EBD02-007:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          set: 7
+          condition:
+            read: paid.grave
+      - line: 2
+        kind: spell
+        body:
+          op: extra_turn
+          side: self
+          count: 1
+        additional_costs:
+          - key: grave
+            cost_selections:
+              - key: '1'
+                select:
+                  side: self
+                  zone: cemetery
+                  type: spell
+                min: 10
+                max: 10
+            costs:
+              - op: banish
+                subjects: cost.1
+  EBD02-015:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: damage
+          subjects: target.1
+          amount: 3
+          split: '1'
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 0
+            max: 2
+            distribute: 3
+  EBD02-T01:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: stack

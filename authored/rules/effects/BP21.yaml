@@ -1,0 +1,402 @@
+format: 1
+kind: effect_set
+cards:
+  BP21-016:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self
+              keywords:
+                - storm
+            - op: draw
+              count: 1
+        event: enter
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              trait: 獣
+              not_name: self
+            min: 1
+            max: 1
+        costs:
+          - op: move
+            subjects: cost.1
+            to: hand
+  BP21-P37:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: assail
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: bane
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: opponent.leader
+          amount: 2
+        event: attack
+        subject: self
+  BP21-P38:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 5
+            - op: modify
+              subjects: self.leader
+              hp: 2
+        event: ex_enter
+        subject:
+          side: self
+          zone: ex
+          where:
+            fn: ne
+            args:
+              - read: item.class
+              - ドラゴン
+        limit: 1
+        limit_at: trigger
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: per
+          count: 2
+          body:
+            op: move
+            subjects:
+              side: self
+              zone: deck
+              top: 1
+            to: ex
+        event: enter
+        subject: self
+  BP21-P56:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: hp_increase
+        subject: self
+        limit: 1
+        limit_at: trigger
+      - line: 2
+        kind: activated
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 1
+        play_if:
+          fn: gt
+          args:
+            - count:
+                side: self
+                zone: field
+                type: follower
+                trait: 学院
+                other: true
+            - 0
+        costs:
+          - op: act
+            subjects: self
+  BP21-P60:
+    status: complete
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: opponent.leader
+              amount: 1
+            - op: modify
+              subjects: self.leader
+              hp: 1
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: amulet
+            min: 1
+            max: 1
+        costs:
+          - op: act
+            subjects: self
+          - op: move
+            subjects: cost.1
+            to: cemetery
+  BP21-P70:
+    status: complete
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - count:
+                  side: self
+                  zone: field
+                  type: follower
+                  keyword: guard
+              - 3
+          then:
+            op: modify
+            subjects: target.1
+            power:
+              if:
+                fn: eq
+                args:
+                  - count:
+                      side: self
+                      zone: field
+                      type: follower
+                      keyword: guard
+                  - 5
+              then: 2
+              else: 1
+            hp:
+              if:
+                fn: eq
+                args:
+                  - count:
+                      side: self
+                      zone: field
+                      type: follower
+                      keyword: guard
+                  - 5
+              then: 2
+              else: 1
+        active_zones:
+          - ex
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              keyword: guard
+            min: 1
+            max: 1
+        costs:
+          - op: pp
+            amount: 0
+        limit: 1
+  BP21-PR04:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: search
+          select:
+            zone: deck
+            side: self
+            where:
+              fn: and
+              args:
+                - fn: eq
+                  args:
+                    - read: item.cost
+                    - 1
+                - fn: eq
+                  args:
+                    - read: item.class
+                    - ロイヤル
+          min: 0
+          max: 1
+          to: ex
+        event: enter
+        subject: self
+      - line: 2
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: act
+              subjects: target.1
+            - op: box
+              subjects: target.1
+              until: next-controller-end
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+        costs:
+          - op: pp
+            amount: 0
+        limit: 1
+  BP21-PR05:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 2
+      - line: 2
+        kind: static
+        body:
+          op: aura
+          subjects: self
+          keywords:
+            - intimidate
+            - aura
+          condition:
+            fn: not
+            args:
+              - read: self.acted
+      - line: 3
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount: 1
+        event: end
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP21-PR11:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 4
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 3
+        kind: trigger
+        body:
+          op: adjust_cost
+          subjects:
+            zone: any
+            side: self
+            trait: 武闘竜人
+          amount: -3
+          until: end-of-turn
+          uses: 1
+          consume_on: play
+        event: enter
+        subject: self
+  BP21-SL08:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: choice
+          min: 1
+          max:
+            if:
+              fn: ge
+              args:
+                - count:
+                    side: self
+                    zone: cemetery
+                    trait: レヴィオン
+                - 5
+            then: 3
+            else: 1
+          modes:
+            - op: destroy
+              subjects: target.1
+            - op: damage
+              subjects: opponent.leader
+              amount: 3
+            - op: seq
+              steps:
+                - op: draw
+                  count: 2
+                - op: seq
+                  steps:
+                    - op: select
+                      select:
+                        side: self
+                        zone: hand
+                      by: self
+                      min: 1
+                      max: 1
+                      bind: discarded
+                    - op: discard
+                      subjects: discarded
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+            modes:
+              - 1
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+              trait: レヴィオン
+            min: 2
+            max: 2
+        costs:
+          - op: reveal
+            subjects: cost.1
+            to: all
+  BP21-T11:
+    status: complete
+    abilities: []

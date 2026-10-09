@@ -1,0 +1,712 @@
+format: 1
+kind: effect_set
+cards:
+  BP14-022:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: aura
+          subjects:
+            zone: field
+            side: self
+            type: follower
+            trait: 宴楽
+            other: true
+          keywords:
+            - storm
+      - line: 3
+        kind: trigger
+        body:
+          op: create
+          name: 輝く金貨
+          count: 1
+          to: ex
+        event: enter
+        subject: self
+  BP14-023:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: aura
+          subjects:
+            zone: field
+            side: self
+            type: follower
+            trait: 宴楽
+            other: true
+          keywords:
+            - storm
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: look
+              count: 5
+              bind: looked
+            - op: optional
+              selection:
+                select:
+                  from: looked
+                  trait: 宴楽
+                  where:
+                    fn: le
+                    args:
+                      - read: item.cost
+                      - 3
+                min: 1
+                max: 1
+                bind: chosen
+              then:
+                op: move
+                subjects: chosen
+                to: ex
+            - op: select
+              select:
+                difference:
+                  - looked
+                  - chosen
+              min:
+                count:
+                  difference:
+                    - looked
+                    - chosen
+              max:
+                count:
+                  difference:
+                    - looked
+                    - chosen
+              bind: ordered
+              order: true
+            - op: move
+              subjects: ordered
+              to: deck
+              position: bottom
+            - op: adjust_cost
+              subjects: chosen
+              amount: -3
+              until: end-of-turn
+        event: evolve
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              zone: ex
+              side: self
+              name: 輝く金貨
+            min: 2
+            max: 2
+        costs:
+          - op: banish
+            subjects: cost.1
+      - line: 3
+        kind: activated
+        body:
+          op: play_ability
+          subjects: self
+          event: evolve
+        costs:
+          - op: pp
+            amount: 1
+  BP14-024:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - count:
+                  side: self
+                  zone: cemetery
+                  type: follower
+                  where:
+                    fn: eq
+                    args:
+                      - read: item.class
+                      - ロイヤル
+              - 5
+          then:
+            op: modify
+            subjects: self
+            power: 1
+            keywords:
+              - rush
+        event: enter
+        subject: self
+      - line: 2
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: field_to_cemetery
+        subject: self
+        keyword: last_words
+  BP14-026:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: create
+              name: 輝く金貨
+              count: 1
+              to: ex
+            - op: if
+              condition:
+                fn: gt
+                args:
+                  - count:
+                      zone: field
+                      side: self
+                      name: 天下の大泥棒・ジエモン
+                  - 0
+              then:
+                op: modify
+                subjects: self.leader
+                hp: 3
+        event: enter
+        subject: self
+  BP14-027:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 3
+            - op: damage
+              subjects: target.1.leader
+              amount: 1
+        event: ex_enter
+        subject:
+          side: self
+          zone: ex
+          name: 輝く金貨
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: 輝く金貨
+          count: 1
+          to: ex
+        event: evolve
+        subject: self
+  BP14-030:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: create
+              name: 輝く金貨
+              count: 1
+              to: ex
+            - op: if
+              condition:
+                fn: gt
+                args:
+                  - count:
+                      zone: field
+                      side: self
+                      name: 天下の大泥棒・ジエモン
+                  - 0
+              then:
+                op: evolve
+                subjects: self
+        event: enter
+        subject: self
+  BP14-032:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
+  BP14-034:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: choice
+          min: 1
+          max: 1
+          modes:
+            - op: seq
+              steps:
+                - op: damage
+                  subjects: target.1
+                  amount: 2
+                - op: create
+                  name: 輝く金貨
+                  count: 1
+                  to: ex
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - count:
+                      zone: ex
+                      side: self
+                      trait: 宴楽
+                  - 3
+              then:
+                op: damage
+                subjects: target.2
+                amount: 4
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+            modes:
+              - 1
+          - key: '2'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+            modes:
+              - 2
+  BP14-050:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 5
+            - op: if
+              condition:
+                read: paid.earth
+              then:
+                op: damage
+                subjects: target.1.leader
+                amount: 2
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+        additional_costs:
+          - key: earth
+            costs:
+              - op: earth_rite
+                count: 1
+  BP14-074:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: optional
+          then:
+            op: move
+            subjects: self
+            to: ex
+        event: discard
+        subject: self
+        active_zones:
+          - hand
+      - line: 1
+        kind: trigger
+        body:
+          op: optional
+          then:
+            op: move
+            subjects: self
+            to: ex
+        event: banish
+        subject: self
+        active_zones:
+          - hand
+      - line: 2
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+  BP14-075:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: look
+              count: 4
+              bind: seen
+            - op: optional
+              selection:
+                select:
+                  from: seen
+                  trait: 宴楽
+                min: 1
+                max: 1
+                bind: chosen
+              then:
+                op: move
+                subjects: chosen
+                to: ex
+                bind: placed
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    difference:
+                      - seen
+                      - placed
+                  min:
+                    count:
+                      difference:
+                        - seen
+                        - placed
+                  max:
+                    count:
+                      difference:
+                        - seen
+                        - placed
+                  bind: ordered
+                  order: true
+                - op: move
+                  subjects: ordered
+                  to: deck
+                  position: bottom
+        event: evolve
+        subject: self
+  BP14-076:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: banish
+          subjects: self
+        event: field_to_cemetery
+        subject: self
+      - line: 2
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: move
+              subjects: target.1
+              to: field
+              bind: entered
+            - op: modify
+              subjects: entered
+              set_power: 1
+              set_hp: 1
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: cemetery
+              type: follower
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 8
+            min: 1
+            max: 1
+        costs:
+          - op: act
+            subjects: self
+  BP14-081:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: modify
+          subjects: target.1
+          keywords:
+            - bane
+        event: discard
+        subject: self
+        active_zones:
+          - hand
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              where:
+                fn: eq
+                args:
+                  - read: item.class
+                  - ナイトメア
+            min: 1
+            max: 1
+      - line: 1
+        kind: trigger
+        body:
+          op: modify
+          subjects: target.1
+          keywords:
+            - bane
+        event: banish
+        subject: self
+        active_zones:
+          - hand
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              where:
+                fn: eq
+                args:
+                  - read: item.class
+                  - ナイトメア
+            min: 1
+            max: 1
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: move
+              subjects: target.1
+              to: field
+              bind: entered
+            - op: if
+              condition:
+                fn: gt
+                args:
+                  - count:
+                      from: entered
+                      name: 因果の迷い子・アンサージュ
+                  - 0
+              then:
+                op: modify
+                subjects: entered
+                power: 1
+                keywords:
+                  - storm
+        section: 0
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: cemetery
+              type: follower
+              trait: 宴楽
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 2
+            min: 1
+            max: 1
+  BP14-090:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: static
+        body:
+          op: restrict
+          subjects: self
+          action: ability_destroy
+      - line: 3
+        kind: static
+        body:
+          op: replace_damage
+          subjects:
+            union:
+              - self
+              - self.leader
+          amount: -1
+          kind: any
+      - line: 4
+        kind: trigger
+        body:
+          op: create
+          name: 水銀の断絶
+          count: 1
+          to: ex
+        event: enter
+        subject: self
+  BP14-098:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: banish
+          subjects: target.1
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP14-P20:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: le
+            args:
+              - count:
+                  side: self
+                  zone: hand
+              - 2
+          then:
+            op: seq
+            steps:
+              - op: modify
+                subjects: self
+                power: 1
+              - op: if
+                condition:
+                  fn: eq
+                  args:
+                    - count:
+                        side: self
+                        zone: hand
+                    - 0
+                then:
+                  op: modify
+                  subjects: self
+                  keywords:
+                    - storm
+        event: enter
+        subject: self
+  BP14-T02:
+    token_template: true
+    status: complete
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self.leader
+              hp: 1
+            - op: draw
+              count: 1
+        active_zones:
+          - ex
+        cost_selections:
+          - key: '1'
+            select:
+              zone: ex
+              side: self
+              name: 輝く金貨
+              other: true
+            min: 2
+            max: 2
+        costs:
+          - op: pp
+            amount: 1
+          - op: banish
+            subjects:
+              union:
+                - self
+                - cost.1
+  BP14-T07:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: replace_damage
+              subjects: self.leader
+              amount: -1
+              kind: any
+              until: end-of-turn
+            - op: draw
+              count: 1

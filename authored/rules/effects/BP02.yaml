@@ -1,0 +1,286 @@
+format: 1
+kind: effect_set
+cards:
+  BP02-041:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - at: resolution-start
+                value:
+                  count:
+                    side: self
+                    zone: cemetery
+                    type: spell
+              - 10
+          then:
+            op: move
+            subjects: target.1
+            to: deck
+            position: top
+          else:
+            op: move
+            subjects: target.1
+            to: hand
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+              where:
+                fn: eq
+                args:
+                  - read: item.evolved
+                  - false
+            min: 1
+            max: 1
+  BP02-062:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: gt
+            args:
+              - read: self.turn.discarded
+              - 0
+          then:
+            op: damage
+            subjects: target.1
+            amount: 2
+        event: end
+        targets:
+          - key: '1'
+            select:
+              union:
+                - side: opponent
+                  zone: field
+                  type: follower
+                - opponent.leader
+            min: 1
+            max: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 1
+        event: enter
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+            min: 1
+            max: 1
+        costs:
+          - op: discard
+            subjects: cost.1
+  BP02-063:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount: -2
+          condition:
+            fn: gt
+            args:
+              - read: self.turn.discarded
+              - 0
+  BP02-089:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 2
+      - line: 2
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+            min: 3
+            max: 3
+        costs:
+          - op: discard
+            subjects: cost.1
+      - line: 3
+        kind: static
+        body:
+          op: macro
+          name: aura
+      - line: 4
+        kind: static
+        body:
+          op: restrict
+          subjects: self
+          action: ability_destroy
+  BP02-090:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: aura
+      - line: 2
+        kind: static
+        body:
+          op: restrict
+          subjects: self
+          action: ability_destroy
+      - line: 3
+        kind: trigger
+        body:
+          op: replace_damage
+          subjects: self
+          prevent: true
+          kind: any
+          until: next-opponent-turn-end
+        event: evolve
+        subject: self
+  BP02-120:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 5
+            - op: damage
+              subjects: target.1.leader
+              amount: 2
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP02-SL16:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 2
+      - line: 2
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+            min: 3
+            max: 3
+        costs:
+          - op: discard
+            subjects: cost.1
+      - line: 3
+        kind: static
+        body:
+          op: macro
+          name: aura
+      - line: 4
+        kind: static
+        body:
+          op: restrict
+          subjects: self
+          action: ability_destroy
+  BP02-SL17:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: aura
+      - line: 2
+        kind: static
+        body:
+          op: restrict
+          subjects: self
+          action: ability_destroy
+      - line: 3
+        kind: trigger
+        body:
+          op: replace_damage
+          subjects: self
+          prevent: true
+          kind: any
+          until: next-opponent-turn-end
+        event: evolve
+        subject: self
+  BP02-SL20:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 0
+      - line: 2
+        kind: static
+        body:
+          op: restrict
+          action: attack_leader
+          subjects: self
+          condition:
+            fn: ge
+            args:
+              - count:
+                  side: opponent
+                  zone: field
+                  type: follower
+              - 2
+      - line: 3
+        kind: trigger
+        body:
+          op: destroy
+          subjects:
+            side: both
+            zone: field
+            type: follower
+            other: true
+        event: enter
+        subject: self

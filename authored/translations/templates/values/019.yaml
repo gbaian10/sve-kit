@@ -1,0 +1,861 @@
+format: 2
+kind: translation_shard
+records:
+  - kind: template_translation
+    data:
+      template_id: T02c6d09f8baba88a
+      lang: zh-Hant
+      text: 自己使用\{{{slot_0}}\}卡片時，給予敵方的全部主戰者{{slot_1}}點傷害。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T02d90fd9c0efd163
+      lang: zh-Hant
+      text: 只要這張卡片在場，計算自己的【魔力連鎖】之際，計算自己墓場的法術與\{{{slot_0}}\}從者的合計。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T06333eecef798f78
+      lang: zh-Hant
+      text: \{{{slot_0}}\}公開自己牌堆頂的{{slot_1}}張卡片。如果公開的卡片為\{{{slot_2}}\}從者，則將其召喚到戰場上。如果公開的卡片不是\{{{slot_2}}\}從者，則抽取{{slot_1}}張卡片。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T067d871238613dbe
+      lang: zh-Hant
+      text: \{{{slot_0}}\}指定自己戰場上的{{slot_2}}個其他\{{{slot_1}}\}從者。使其\{{{slot_3}}\}+{{slot_4}}，並獲得【指定攻擊】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T076d031c8e53d1a2
+      lang: zh-Hant
+      text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_3}}張原始消費{{slot_1}}以下的\{{{slot_2}}\}法術，增加到手牌中。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T0c4bdd188b346ea8
+      lang: zh-Hant
+      text: \{{{slot_0}}\}衍生物・從者進入自己的戰場時，自己的主戰者\{{{slot_1}}\}+{{slot_2}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T0fb3c2af0fb95100
+      lang: zh-Hant
+      text: 其他消費{{slot_0}}以下的\{{{slot_1}}\}從者進入自己的戰場時，指定敵方的{{slot_2}}個從者。給予其{{slot_3}}點傷害。給予其主戰者{{slot_4}}點傷害。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T10a806f4c7a38e8c
+      lang: zh-Hant
+      text: \{{{slot_0}}\}查看自己牌堆頂的{{slot_1}}張卡片。可以從其中將卡片名稱各不相同的至多{{slot_4}}張原始消費{{slot_2}}以下的\{{{slot_3}}\}從者召喚到戰場上。將其餘卡片以任意順序放置到牌堆底。破壞藉此召喚到戰場上的全部從者。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T10bd7697b3c476d5
+      lang: zh-Hant
+      text: 使用這張卡片之際，消費-X。X為「自己戰場上\{{{slot_0}}\}卡片的張數」。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T13f378a7cf1168de
+      lang: zh-Hant
+      text: \{{{slot_0}}\}使墓場的{{slot_2}}張\{{{slot_1}}\}從者消失：自己戰場上的全部其他從者\{{{slot_3}}\}+{{slot_4}}/\{{{slot_5}}\}+{{slot_6}}。此能力{{slot_7}}回合中可使用{{slot_8}}次。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T140f145040e5ef02
+      lang: zh-Hant
+      text: \{{{slot_0}}\}\{消費{{slot_1}}\}使這張卡片消失：可以將自己進化牌堆的{{slot_3}}張『{{slot_2}}』召喚到戰場上。此能力在自己墓場的宴樂・卡片為{{slot_4}}張以上或自己墓場的\{{{slot_5}}\}卡片為{{slot_6}}張以上時可使用。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T14b4b32562e9a43b
+      lang: zh-Hant
+      text: \{{{slot_0}}\}指定自己墓場的{{slot_3}}張「與這張卡片同名者除外的原始消費{{slot_1}}以下的\{{{slot_2}}\}從者」。【死靈充能_{{slot_4}}】將其召喚到戰場上。使其獲得【守護】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T15502b16d59e29da
+      lang: zh-Hant
+      text: 只要這張卡片在場，自己的全部\{{{slot_0}}\}從者獲得【突進】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T16ea4252a9130598
+      lang: zh-Hant
+      text: 指定自己墓場的{{slot_3}}張原始消費{{slot_0}}以下且擁有\{{{slot_1}}\}的\{{{slot_2}}\}從者。將其召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T197488adb0f679b5
+      lang: zh-Hant
+      text: \{{{slot_0}}\}如果為【覺醒】狀態，則查看自己牌堆頂的{{slot_1}}張卡片。可以從其中將{{slot_3}}張\{{{slot_2}}\}從者放置到EX區。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T1a52e759460c8c3e
+      lang: zh-Hant
+      text: \{{{slot_0}}\}如果自己墓場的\{{{slot_1}}\}從者為{{slot_2}}張以上，則指定敵方戰場上的{{slot_3}}個從者。將其破壞。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T1a9ca8a7cf2bdb1a
+      lang: zh-Hant
+      text: \{{{slot_0}}\}指定敵方戰場上的{{slot_1}}個從者。將自己牌堆頂的{{slot_2}}張卡片放置到墓場。如果將「非\{{{slot_3}}\}的卡片」放置到墓場，則給予其{{slot_4}}點傷害。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T1b3740f34c1dd665
+      lang: zh-Hant
+      text: \{{{slot_0}}\}查看自己牌堆頂的{{slot_1}}張卡片。可以從其中公開{{slot_3}}張\{{{slot_2}}\}從者並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T1c3187804c7183d5
+      lang: zh-Hant
+      text: 【攻擊時】指定自己戰場上的{{slot_2}}個原始消費{{slot_0}}以下的\{{{slot_1}}\}從者。使其\{{{slot_3}}\}+{{slot_4}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T1cfe3b1cb28e450a
+      lang: zh-Hant
+      text: 【進化時】從下列之中選擇{{slot_0}}項。【{{slot_1}}】召喚{{slot_3}}個『{{slot_2}}』到戰場上。【{{slot_4}}】這張卡片獲得【疾馳】。自己戰場上的全部\{{{slot_5}}\}絕傑・從者\{{{slot_6}}\}+{{slot_7}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T2156c3bf5e182ddd
+      lang: zh-Hant
+      text: 只要這張卡片在場，自己戰場上的全部其他\{{{slot_0}}\}從者獲得【守護】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T21a1f78c71b45a37
+      lang: zh-Hant
+      text: 給予敵方的全部主戰者與敵方戰場上的全部從者與「自己戰場上\{{{slot_0}}\}從者的數量」相同的傷害。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T236bcfc0c3bdc145
+      lang: zh-Hant
+      text: 【進化時】從下列之中選擇{{slot_0}}項。【{{slot_1}}】指定敵方戰場上的{{slot_2}}個從者。給予其{{slot_3}}點傷害。【{{slot_4}}】指定自己墓場的{{slot_7}}張原始消費{{slot_5}}以下的\{{{slot_6}}\}絕傑・從者。將其召喚到戰場上。【{{slot_8}}】自己戰場上的全部\{{{slot_6}}\}絕傑・從者\{{{slot_10}}\}+{{slot_11}}/\{{{slot_12}}\}+{{slot_13}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T25a73d9b7fe146e4
+      lang: zh-Hant
+      text: \{{{slot_0}}\}\{消費{{slot_1}}\}捨棄手牌中的這張卡片與{{slot_4}}張原始消費{{slot_2}}以上的\{{{slot_3}}\}卡片：自己的主戰者\{{{slot_5}}\}+{{slot_6}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T28195632eba95688
+      lang: zh-Hant
+      text: 自己的回合中，\{{{slot_0}}\}衍生物・從者進入自己的戰場時，指定敵方戰場上的{{slot_1}}個從者。給予其{{slot_2}}點傷害。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T29a3702e628f7064
+      lang: zh-Hant
+      text: \{{{slot_0}}\}將戰場上的{{slot_1}}個護符放置到墓場：可以將自己手牌中{{slot_6}}張原始消費{{slot_2}}以下的\{{{slot_3}}\}從者或原始消費{{slot_2}}以下的\{{{slot_3}}\}護符召喚到戰場上。此能力{{slot_7}}回合中可使用{{slot_8}}次。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T2a4be322cec6f3e2
+      lang: zh-Hant
+      text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}：本回合，自己戰場上的全部\{{{slot_2}}\}從者獲得【突進】【指定攻擊】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T2f440b7e7e159392
+      lang: zh-Hant
+      text: \{{{slot_0}}\}如果自己戰場上與自己EX區的\{{{slot_1}}\}從者合計為{{slot_2}}張以上，則使敵方戰場上的全部從者消失。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T31226446cbff755e
+      lang: zh-Hant
+      text: 自己的結束階段到來時，如果自己墓場的\{{{slot_0}}\}從者為{{slot_1}}張以上，則自己戰場上的全部從者\{{{slot_2}}\}+{{slot_3}}/\{{{slot_4}}\}+{{slot_5}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T318ed2b056e41a11
+      lang: zh-Hant
+      text: \{{{slot_0}}\}可以將自己手牌中{{slot_2}}張消費X以下的\{{{slot_1}}\}從者召喚到戰場上。X為「自己的PP最大值」。使其獲得「自己的結束階段到來時，將該從者放置到牌堆底」。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T31bb954a27cb749e
+      lang: zh-Hant
+      text: \{{{slot_0}}\}將自己牌堆頂的{{slot_1}}張卡片放置到墓場。如果將「非\{{{slot_2}}\}的卡片」放置到了墓場，則抽取{{slot_3}}張卡片。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T32c049d50c941d6e
+      lang: zh-Hant
+      text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}並放置到墓場：指定自己的{{slot_3}}個\{{{slot_2}}\}從者。使其\{{{slot_4}}\}+{{slot_5}}，並獲得武裝・類型。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T337f95e176cd8e5a
+      lang: zh-Hant
+      text: \{{{slot_0}}\}捨棄{{slot_1}}張手牌：自己的主戰者\{{{slot_2}}\}+{{slot_3}}。如果捨棄了\{{{slot_4}}\}法術，則抽取{{slot_1}}張卡片。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T35fec14f042e20d6
+      lang: zh-Hant
+      text: 指定自己戰場上的{{slot_1}}張\{{{slot_0}}\}卡片與敵方戰場上的{{slot_2}}個從者。將前者返回手牌。給予後者{{slot_3}}點傷害。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T3617bb896c6fe471
+      lang: zh-Hant
+      text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_2}}張「與這張卡片同名者除外，原始消費低於自己PP最大值的\{{{slot_1}}\}從者」，召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T364286b39e7a9c25
+      lang: zh-Hant
+      text: \{{{slot_0}}\}如果自己的戰場上有「非\{{{slot_1}}\}的從者」，則這張卡片\{{{slot_2}}\}+{{slot_3}}/\{{{slot_4}}\}+{{slot_5}}，並獲得【突進】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T386c7984ab003edd
+      lang: zh-Hant
+      text: 【進化時】指定自己墓場的{{slot_1}}張\{{{slot_0}}\}從者。將其增加到手牌中。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T3b5b51d68914b656
+      lang: zh-Hant
+      text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_2}}張「與這張卡片同名者除外，消費低於自己PP最大值的\{{{slot_1}}\}從者」，召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T3b67963a50347737
+      lang: zh-Hant
+      text: 【超進化時】指定自己墓場的{{slot_2}}張原始消費{{slot_0}}以下的\{{{slot_1}}\}法術。將其放置到EX區。本回合，使用該卡之際，消費-{{slot_3}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T4307fcebd1664efb
+      lang: zh-Hant
+      text: \{{{slot_0}}\}指定自己墓場的{{slot_3}}張原始消費{{slot_1}}以下的\{{{slot_2}}\}從者。將其放置到EX區。本回合，使用該卡之際，消費-{{slot_4}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T4316034920f54f27
+      lang: zh-Hant
+      text: 【進化時】指定自己的{{slot_1}}個其他\{{{slot_0}}\}從者。將其返回手牌。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T43949c4c7d85dc5e
+      lang: zh-Hant
+      text: 【進化時】查看自己牌堆頂的{{slot_0}}張卡片。可以從其中公開{{slot_2}}張\{{{slot_1}}\}法術並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T45289d19c161a9b1
+      lang: zh-Hant
+      text: \{{{slot_0}}\}衍生物・從者進入自己的戰場時，指定敵方戰場上的{{slot_1}}個從者。將其橫置。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T473d21196bd6cbac
+      lang: zh-Hant
+      text: 【進化時】從下列之中選擇{{slot_0}}項。【{{slot_1}}】捨棄手牌中的{{slot_3}}張\{{{slot_2}}\}卡片：自己的主戰者\{{{slot_4}}\}+{{slot_5}}。【{{slot_6}}】捨棄手牌中的{{slot_3}}張「非\{{{slot_2}}\}的卡片」：指定敵方戰場上的{{slot_9}}個從者。給予其{{slot_10}}點傷害。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T4755d8e22c753092
+      lang: zh-Hant
+      text: \{{{slot_0}}\}自己的全部\{{{slot_1}}\}從者\{{{slot_2}}\}+{{slot_3}}/\{{{slot_4}}\}+{{slot_5}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T47bd54ce038cdaca
+      lang: zh-Hant
+      text: \{{{slot_0}}\}查看自己牌堆頂的{{slot_1}}張卡片。可以從其中將{{slot_3}}張「與這張卡片同名者除外的\{{{slot_2}}\}從者」召喚到戰場上。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T484d58e93a1ffe5a
+      lang: zh-Hant
+      text: 【進化時】指定自己墓場中至多{{slot_2}}張原始消費{{slot_0}}以下的\{{{slot_1}}\}從者。將其召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T499bdfb560bf4aa3
+      lang: zh-Hant
+      text: 自己的每個回合{{slot_0}}次，自己捨棄手牌中的\{{{slot_1}}\}法術時，抽取{{slot_2}}張卡片。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T51a6c3d770ff4888
+      lang: zh-Hant
+      text: 【進化時】指定自己墓場的{{slot_2}}張原始消費{{slot_0}}以下的「非\{{{slot_1}}\}的從者」與{{slot_2}}張原始消費{{slot_3}}以下的「非\{{{slot_1}}\}的從者」。將其召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T538cb1a57956af3a
+      lang: zh-Hant
+      text: \{{{slot_0}}\}如果自己墓場的\{{{slot_1}}\}從者為{{slot_2}}張以上，則這張卡片\{{{slot_3}}\}+{{slot_4}}，並獲得【突進】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T544183ded7698865
+      lang: zh-Hant
+      text: 將戰場上的{{slot_1}}個\{{{slot_0}}\}從者\{{{slot_2}}\}：指定敵方戰場上的{{slot_1}}個從者。將其破壞。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T5a3d9beae22a9ce4
+      lang: zh-Hant
+      text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}：指定敵方戰場上的{{slot_2}}個從者。給予其{{slot_3}}點傷害。此能力在自己墓場中原始消費{{slot_4}}以上的\{{{slot_5}}\}卡片為{{slot_6}}張以上時可使用。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T5ab74f5c57665111
+      lang: zh-Hant
+      text: 【進化時】查看自己牌堆頂的{{slot_0}}張卡片。可以從其中公開{{slot_3}}張原始消費{{slot_1}}以上的\{{{slot_2}}\}卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T5b0d7899dba808dd
+      lang: zh-Hant
+      text: 【攻擊時】指定自己墓場的{{slot_1}}張\{{{slot_0}}\}從者。將其增加到手牌中。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T5f871672cfa91d48
+      lang: zh-Hant
+      text: 只要自己的墓場有{{slot_1}}張以上\{{{slot_0}}\}從者，這張卡片獲得【疾馳】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T609e5443e5d151b6
+      lang: zh-Hant
+      text: \{{{slot_0}}\}\{消費{{slot_1}}\}將這張卡片\{{{slot_2}}\}並放置到墓場：查看自己牌堆頂的{{slot_3}}張卡片。可以從其中公開{{slot_6}}張消費{{slot_4}}以下的\{{{slot_5}}\}從者並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T622c2ec90258954a
+      lang: zh-Hant
+      text: 查看自己牌堆頂的{{slot_0}}張卡片。可以從其中公開至多{{slot_3}}張原始消費{{slot_1}}以上的\{{{slot_2}}\}卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T63e8c600b59f375e
+      lang: zh-Hant
+      text: 從自己的手牌捨棄這張卡片時，或這張卡片從自己的手牌消失時，指定自己戰場上的{{slot_1}}個\{{{slot_0}}\}從者。使其獲得【必殺】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T64f2046301e24b26
+      lang: zh-Hant
+      text: 【進化時】指定自己墓場的{{slot_2}}張原始消費{{slot_0}}以下的\{{{slot_1}}\}從者。將其召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T655a08a92e83e094
+      lang: zh-Hant
+      text: 指定敵方戰場上的{{slot_0}}個從者。將其破壞。從自己的牌堆中搜尋{{slot_2}}張\{{{slot_1}}\}從者，增加到手牌中。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T68304c0b693b2e71
+      lang: zh-Hant
+      text: \{{{slot_0}}\}指定敵方戰場上的{{slot_1}}個從者。給予其與「自己墓場的\{{{slot_2}}\}法術的張數」相同的傷害。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T68e163f12701fd2c
+      lang: zh-Hant
+      text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_2}}張\{{{slot_1}}\}從者，增加到手牌中。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T6cf3dcf42432509c
+      lang: zh-Hant
+      text: \{{{slot_0}}\}\{消費{{slot_1}}\}捨棄手牌中的這張卡片與{{slot_4}}張原始消費{{slot_2}}以上的\{{{slot_3}}\}卡片：抽取{{slot_5}}張卡片。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T6e141c03a0d91799
+      lang: zh-Hant
+      text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}：指定自己戰場上的{{slot_4}}個原始消費{{slot_2}}以下的\{{{slot_3}}\}從者。使其\{{{slot_5}}\}+{{slot_6}}/\{{{slot_7}}\}+{{slot_8}}，並獲得【疾馳】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T6ee79dfd8e64a735
+      lang: zh-Hant
+      text: \{{{slot_0}}\}指定自己墓場的{{slot_3}}張原始消費{{slot_1}}以下的\{{{slot_2}}\}從者。將其召喚到戰場上。使其\{{{slot_4}}\}+{{slot_5}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T70ec2d0230868c2b
+      lang: zh-Hant
+      text: \{{{slot_0}}\}查看自己牌堆頂的{{slot_1}}張卡片。可以從其中將{{slot_3}}張\{{{slot_2}}\}從者召喚到戰場上。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T71f3c368ee370795
+      lang: zh-Hant
+      text: 從下列之中選擇{{slot_0}}項。【{{slot_1}}】指定自己的{{slot_2}}個從者。使其\{{{slot_3}}\}+{{slot_4}}。可以在其上放置{{slot_0}}個童話指示物。【{{slot_6}}】指定自己墓場至多{{slot_8}}張\{{{slot_7}}\}從者。將其返回牌堆並洗牌。抽取{{slot_9}}張卡片。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T739d4d15496dc73e
+      lang: zh-Hant
+      text: 【進化時】查看自己牌堆頂的{{slot_0}}張卡片。可以從其中公開{{slot_2}}張\{{{slot_1}}\}從者並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T73e8a8f1ad7b3ff0
+      lang: zh-Hant
+      text: 從自己的手牌捨棄這張卡片時，查看自己牌堆頂的{{slot_0}}張卡片。可以從其中公開{{slot_3}}張原始消費{{slot_1}}以上的\{{{slot_2}}\}卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T7650cd95ab4cf9f9
+      lang: zh-Hant
+      text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_5}}張原始消費{{slot_1}}以下的\{{{slot_2}}\}法術或原始消費{{slot_3}}以下的「非\{{{slot_2}}\}的法術」，放置到EX區。本回合，使用該卡之際，消費-{{slot_6}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T77cd0806bdc7c734
+      lang: zh-Hant
+      text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_3}}張消費{{slot_1}}的\{{{slot_2}}\}從者，召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T78f2cb61db26262d
+      lang: zh-Hant
+      text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}：可以將自己手牌中的{{slot_3}}張\{{{slot_2}}\}法術放置到EX區。本回合，使用該卡之際，消費-{{slot_4}}。此能力在自己墓場的魔法使・從者為{{slot_5}}張以上時可使用。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T79881924629dd3b8
+      lang: zh-Hant
+      text: 使用這張卡片之際，可以作為追加消費捨棄手牌中的{{slot_2}}張原始消費{{slot_0}}以上的\{{{slot_1}}\}卡片。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T7ac86cca8c5b2c10
+      lang: zh-Hant
+      text: 【進化時】查看自己牌堆頂的{{slot_0}}張卡片。可以從其中將{{slot_3}}張原始消費{{slot_1}}以下的\{{{slot_2}}\}從者放置到EX區。將其餘卡片以任意順序放置到牌堆底。使其\{{{slot_4}}\}+{{slot_5}}/\{{{slot_6}}\}+{{slot_7}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T7dbeeb8d1dd3248f
+      lang: zh-Hant
+      text: 【超進化時】指定自己墓場中的{{slot_1}}張\{{{slot_0}}\}絕傑・從者。將其召喚到戰場上。其進化。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T7de479d131ba0fff
+      lang: zh-Hant
+      text: \{{{slot_0}}\}\{消費{{slot_1}}\}將這張卡片\{{{slot_2}}\}並放置到墓場：指定自己的{{slot_4}}個\{{{slot_3}}\}從者。使其\{{{slot_5}}\}+{{slot_6}}。【連擊_{{slot_7}}】再\{{{slot_8}}\}+{{slot_9}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T7e24706da6ac8216
+      lang: zh-Hant
+      text: 只要這張卡片在場，自己戰場上的全部\{{{slot_0}}\}從者獲得【突進】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T7e79a62fd0af77d9
+      lang: zh-Hant
+      text: \{{{slot_0}}\}可以將自己手牌中{{slot_3}}張原始消費{{slot_1}}以下的「非\{{{slot_2}}\}的從者」召喚到戰場上。使其獲得【突進】【指定攻擊】與「自己的結束階段到來時，將該從者返回手牌」。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T7eb0ea80e026ab8c
+      lang: zh-Hant
+      text: 指定自己戰場上的{{slot_1}}個\{{{slot_0}}\}從者。使其\{{{slot_2}}\}+{{slot_3}}。如果自己的手牌為{{slot_4}}張，則使其獲得【疾馳】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T7fc2e1a51d42a718
+      lang: zh-Hant
+      text: \{{{slot_0}}\}查看自己牌堆頂的{{slot_1}}張卡片。可以從其中公開{{slot_3}}張\{{{slot_2}}\}絕傑・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T806190fec5bc0413
+      lang: zh-Hant
+      text: \{{{slot_0}}\}查看自己牌堆頂的{{slot_1}}張卡片。可以從其中公開任意張數的原始消費{{slot_2}}以上的\{{{slot_3}}\}卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T817e411dfe6379eb
+      lang: zh-Hant
+      text: 【攻擊時】如果自己戰場上與自己EX區的\{{{slot_0}}\}從者合計為{{slot_1}}張，則將這張卡片重置。此能力{{slot_2}}回合中至多發動{{slot_3}}次。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T848e2c8dd7a03ad7
+      lang: zh-Hant
+      text: \{{{slot_0}}\}捨棄手牌中的{{slot_2}}張\{{{slot_1}}\}卡片：抽取{{slot_2}}張卡片。如果捨棄了法術，則轉變為{{slot_4}}張。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T856a3618d00af28d
+      lang: zh-Hant
+      text: \{{{slot_0}}\}自己墓場中每有{{slot_3}}張原始消費{{slot_1}}以上的\{{{slot_2}}\}卡片，便指定敵方戰場上至多{{slot_4}}個從者。使其消失。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T87145c0d0cfc3b6f
+      lang: zh-Hant
+      text: \{{{slot_0}}\}指定自己戰場上的{{slot_2}}個其他擁有【守護】的\{{{slot_1}}\}從者。如果自己戰場上擁有【守護】的從者為{{slot_3}}個以上，則使其獲得【疾馳】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T89a66189485412bc
+      lang: zh-Hant
+      text: \{{{slot_0}}\}使墓場的{{slot_2}}張\{{{slot_1}}\}卡片消失：抽取{{slot_2}}張卡片。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T8b2aa38a7bbf4e1f
+      lang: zh-Hant
+      text: \{{{slot_0}}\}從者進入自己的戰場時，使其\{{{slot_1}}\}+{{slot_2}}/\{{{slot_3}}\}+{{slot_4}}，並獲得【突進】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T8bf44decd6986951
+      lang: zh-Hant
+      text: \{{{slot_0}}\}查看自己牌堆頂的{{slot_1}}張卡片。可以從其中公開\{{{slot_2}}\}從者與\{{{slot_2}}\}法術各至多{{slot_4}}張並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。【連擊_{{slot_5}}】回復自己的PP {{slot_6}}點。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T8c17e7e088d653c0
+      lang: zh-Hant
+      text: \{{{slot_0}}\}回復自己的PP，回復量與「自己墓場的\{{{slot_1}}\}法術張數」相同。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T8eacb5a08e65477f
+      lang: zh-Hant
+      text: 使用這張卡片之際，將戰場上的{{slot_2}}個原始消費{{slot_0}}以上的\{{{slot_1}}\}從者橫置，作為追加消費。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T8fc9f4297c9fd925
+      lang: zh-Hant
+      text: 【進化時】指定自己墓場的{{slot_1}}張\{{{slot_0}}\}從者。將其增加到手牌中。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T8fe580639f32121d
+      lang: zh-Hant
+      text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}：指定自己戰場上至多{{slot_3}}個其他\{{{slot_2}}\}從者。使其\{{{slot_4}}\}+{{slot_5}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T91d2d4e13b75bf7a
+      lang: zh-Hant
+      text: 【進化時】指定自己戰場上的{{slot_1}}個其他\{{{slot_0}}\}從者或自己EX區的{{slot_3}}張\{{{slot_0}}\}從者。使其\{{{slot_4}}\}+{{slot_5}}/\{{{slot_6}}\}+{{slot_7}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T942add663b0883e5
+      lang: zh-Hant
+      text: 自己的回合中，自己使用\{{{slot_0}}\}法術時，\{消費{{slot_1}}\}：將自己墓場的這張卡片召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T949967b58121e0f1
+      lang: zh-Hant
+      text: \{{{slot_0}}\}查看自己牌堆頂的{{slot_1}}張卡片。可以從其中公開{{slot_4}}張原始消費{{slot_2}}以下的\{{{slot_3}}\}卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。如果公開了原始消費{{slot_2}}以下的\{{{slot_3}}\}卡片，則捨棄自己的{{slot_4}}張手牌。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T97386b74035f3925
+      lang: zh-Hant
+      text: \{{{slot_0}}\}自己戰場上的全部其他\{{{slot_1}}\}從者\{{{slot_2}}\}+{{slot_3}}/\{{{slot_4}}\}+{{slot_5}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T9933f406c7cbf2c3
+      lang: zh-Hant
+      text: \{{{slot_0}}\}使EX區的{{slot_1}}張妖精・衍生物消失：查看自己牌堆頂的{{slot_2}}張卡片。可以從其中公開{{slot_1}}張\{{{slot_3}}\}卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T998244aa9010934e
+      lang: zh-Hant
+      text: \{{{slot_0}}\}指定自己墓場的{{slot_3}}張原始消費{{slot_1}}以下的\{{{slot_2}}\}從者。將其召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T9b2eea60a8e1e692
+      lang: zh-Hant
+      text: 「非\{{{slot_0}}\}的從者」進入自己的戰場時，指定敵方戰場上的{{slot_1}}個從者。給予其{{slot_2}}點傷害。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T9d0caa895a3dbd94
+      lang: zh-Hant
+      text: \{{{slot_0}}\}可以將自己手牌中的{{slot_2}}張\{{{slot_1}}\}從者召喚到戰場上。使其獲得「自己的結束階段到來時，將該從者返回手牌」。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: T9ecad79623c1ae97
+      lang: zh-Hant
+      text: \{{{slot_0}}\}\{消費{{slot_1}}\}捨棄手牌中的這張卡片與{{slot_4}}張原始消費{{slot_2}}以上的\{{{slot_3}}\}卡片：指定敵方戰場上的{{slot_5}}個從者。給予其{{slot_6}}點傷害。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Ta03d6457d96f48a3
+      lang: zh-Hant
+      text: 【進化時】查看自己牌堆頂的{{slot_0}}張卡片。可以從其中將{{slot_4}}張原始消費{{slot_1}}以下的\{{{slot_2}}\}卡片或原始消費{{slot_1}}以下的透京・卡片放置到EX區。將其餘卡片以任意順序放置到牌堆底。本回合，使用該卡之際，消費-{{slot_5}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Ta23524e04b90e1a3
+      lang: zh-Hant
+      text: \{{{slot_0}}\}指定自己墓場中至多{{slot_3}}張原始消費{{slot_1}}以下的\{{{slot_2}}\}從者。將其召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Ta23c215f3a94504f
+      lang: zh-Hant
+      text: 自己的回合中，自己使用\{{{slot_0}}\}法術時，給予敵方戰場上的全部從者{{slot_1}}點傷害。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Ta32927c334aa42dc
+      lang: zh-Hant
+      text: \{{{slot_0}}\}將自己牌堆頂的{{slot_1}}張卡片放置到墓場。如果自己的墓場有「非\{{{slot_2}}\}的卡片」，則自己的主戰者\{{{slot_3}}\}+{{slot_4}}。抽取{{slot_5}}張卡片。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Ta4c91cfbeb1a17b8
+      lang: zh-Hant
+      text: 查看自己牌堆頂的{{slot_0}}張卡片。可以從其中公開{{slot_3}}張消費{{slot_1}}以上的\{{{slot_2}}\}卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tab114396609905df
+      lang: zh-Hant
+      text: \{{{slot_0}}\}指定自己墓場的{{slot_3}}張原始消費{{slot_1}}以下的\{{{slot_2}}\}從者。將其召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tab205e7802493a1d
+      lang: zh-Hant
+      text: 【攻擊時】如果自己戰場上的\{{{slot_0}}\}卡片為{{slot_1}}張，則這張卡片\{{{slot_2}}\}+{{slot_3}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tb01fb099aa4e2e75
+      lang: zh-Hant
+      text: 查看自己牌堆頂的{{slot_0}}張卡片。可以從其中將{{slot_2}}張\{{{slot_1}}\}從者放置到EX區。將其餘卡片以任意順序放置到牌堆底。如果為【覺醒】狀態，則本回合，使用該卡之際，消費-{{slot_3}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tb0de416e5aefd7ff
+      lang: zh-Hant
+      text: \{{{slot_0}}\}如果為【覺醒】狀態，則查看自己牌堆頂的{{slot_1}}張卡片。可以從其中公開{{slot_4}}張原始消費{{slot_2}}以上的\{{{slot_3}}\}從者並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tb0e0d5eea5eac187
+      lang: zh-Hant
+      text: 使用這張卡片之際，將戰場上{{slot_1}}張重置狀態的\{{{slot_0}}\}卡片放置到墓場，或者，使EX區的{{slot_1}}張\{{{slot_0}}\}卡片消失：消費-{{slot_4}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tb1ec70d7ed800f19
+      lang: zh-Hant
+      text: 查看自己牌堆頂的{{slot_0}}張卡片。可以從其中公開{{slot_2}}張\{{{slot_1}}\}從者並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。【魔力連鎖_{{slot_3}}】回復自己的PP {{slot_4}}點。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tb26b26226b1b19c5
+      lang: zh-Hant
+      text: 使用這張卡片之際，如果自己墓場的原始消費{{slot_0}}以上的\{{{slot_1}}\}卡片為{{slot_2}}張以上，則消費-{{slot_3}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tb7c3be6b22ee58e2
+      lang: zh-Hant
+      text: 【進化時】可以將自己手牌中的{{slot_1}}張\{{{slot_0}}\}法術放置到EX區。本回合，使用該卡之際，消費-{{slot_2}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tc20ab2f75b2a062c
+      lang: zh-Hant
+      text: 【進化時】可以將自己手牌中{{slot_2}}張原始消費{{slot_0}}以下的\{{{slot_1}}\}從者召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tc245de0b494a954f
+      lang: zh-Hant
+      text: 每回合{{slot_0}}次，「非\{{{slot_1}}\}的卡片」被放置到自己的EX區時，指定敵方戰場上的{{slot_2}}個從者。給予其{{slot_3}}點傷害。自己的主戰者\{{{slot_4}}\}+{{slot_5}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tc3fc09e0d2e6057f
+      lang: zh-Hant
+      text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_3}}張原始消費{{slot_1}}的\{{{slot_2}}\}卡片，放置到EX區。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tc4d6232d56d29143
+      lang: zh-Hant
+      text: \{{{slot_0}}\}從自己的牌堆中搜尋至多{{slot_2}}張卡片名稱各不相同的\{{{slot_1}}\}法術，增加到手牌中。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tca0e89e65f145f60
+      lang: zh-Hant
+      text: \{{{slot_0}}\}指定敵方戰場上的{{slot_1}}個從者。如果自己墓場的\{{{slot_2}}\}從者為{{slot_3}}張以上，則將其破壞。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tcc10388768eda627
+      lang: zh-Hant
+      text: 【進化時】查看自己牌堆頂的{{slot_0}}張卡片。可以從其中公開{{slot_2}}張\{{{slot_1}}\}法術並增加到手牌中。可以將{{slot_2}}張\{{{slot_1}}\}法術放置到墓場。將其餘卡片以任意順序放置到牌堆底。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tcce7852b2e7e4cd7
+      lang: zh-Hant
+      text: 【進化時】可以將自己手牌中{{slot_2}}張原始消費{{slot_0}}以下的\{{{slot_1}}\}從者召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tcd65ab5eb472d0ea
+      lang: zh-Hant
+      text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}並放置到墓場：指定自己戰場上的{{slot_3}}個\{{{slot_2}}\}從者。使其\{{{slot_4}}\}+{{slot_5}}，並獲得武裝・類型。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Td395f9b5385ed6f5
+      lang: zh-Hant
+      text: 指定敵方的{{slot_0}}個從者。將其破壞。從自己的牌堆中搜尋{{slot_2}}張\{{{slot_1}}\}從者，增加到手牌中。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tdb8b553b4e94c469
+      lang: zh-Hant
+      text: 【進化時】可以將自己手牌中{{slot_3}}張原始消費{{slot_0}}以下的透京・從者或原始消費{{slot_0}}以下的\{{{slot_2}}\}護符召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tdceb0901f812f576
+      lang: zh-Hant
+      text: \{{{slot_0}}\}\{消費{{slot_1}}\}：將這張卡片重置。此能力在自己墓場的\{{{slot_2}}\}從者為{{slot_3}}張以上時，{{slot_4}}回合中可使用{{slot_5}}次。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tdd7d7947483535a3
+      lang: zh-Hant
+      text: 如果自己墓場的機械・卡片為{{slot_0}}張以上，則從自己的牌堆中搜尋{{slot_2}}張原始消費{{slot_1}}以下的機械・從者與{{slot_2}}張原始消費{{slot_3}}的\{{{slot_4}}\}法術，將前者召喚到戰場上。將後者放置到EX區。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Te19e45361c04e4c3
+      lang: zh-Hant
+      text: \{{{slot_0}}\}\{消費{{slot_1}}\}使這張卡片消失：可以將自己進化牌堆中的{{slot_3}}張『{{slot_2}}』召喚到戰場上。此能力在自己墓場的宴樂・卡片為{{slot_4}}張以上，或自己墓場的\{{{slot_5}}\}卡片為{{slot_6}}張以上時可使用。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Te25c3e9fc3d2170e
+      lang: zh-Hant
+      text: \{{{slot_0}}\}如果自己墓場的\{{{slot_1}}\}從者為{{slot_2}}張以上，則抽取{{slot_3}}張卡片。如果為{{slot_4}}張以上，則這張卡片獲得【疾馳】。自己的主戰者\{{{slot_5}}\}+{{slot_6}}。如果為{{slot_7}}張以上，則這張卡片獲得【威懾】【光紋】。如果為{{slot_8}}張以上，則這張卡片\{{{slot_9}}\}+{{slot_10}}/\{{{slot_5}}\}+{{slot_12}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Te682923a76a1c070
+      lang: zh-Hant
+      text: 自己的結束階段到來時，如果自己墓場的原始消費{{slot_0}}以上的\{{{slot_1}}\}卡片為{{slot_2}}張以上，則給予敵方的全部主戰者{{slot_3}}點傷害。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Te683a7f78be03da7
+      lang: zh-Hant
+      text: \{{{slot_0}}\}從者進入自己的戰場時，使其\{{{slot_1}}\}+{{slot_2}}/\{{{slot_3}}\}+{{slot_4}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Te7bfdcc46f51aaf0
+      lang: zh-Hant
+      text: \{{{slot_0}}\}如果為【覺醒】狀態，則從自己的牌堆中搜尋{{slot_3}}張原始消費{{slot_1}}的\{{{slot_2}}\}從者，增加到手牌中。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Te832bed5dcef23b6
+      lang: zh-Hant
+      text: 這張卡片從戰場返回手牌時，可以將自己手牌中的{{slot_2}}張消費{{slot_0}}以下的\{{{slot_1}}\}從者召喚到戰場上。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Te89a6cc1a7203b7f
+      lang: zh-Hant
+      text: 只要這張卡片在戰場上，自己戰場上的全部\{{{slot_0}}\}衍生物獲得【突進】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Te979abc07d786268
+      lang: zh-Hant
+      text: 指定自己墓場的{{slot_2}}張原始消費{{slot_0}}以下的\{{{slot_1}}\}從者。將其召喚到戰場上。使其獲得【突進】與「自己的結束階段到來時，破壞該從者」。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Teac67a2f8cf63523
+      lang: zh-Hant
+      text: 【進化時】從自己的牌堆中搜尋{{slot_2}}張原始消費{{slot_0}}以上的\{{{slot_1}}\}從者，增加到手牌中。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Teb2e88bb351aef4c
+      lang: zh-Hant
+      text: \{{{slot_0}}\}將這張卡片\{{{slot_1}}\}：指定自己墓場的{{slot_4}}張「與這張卡片同名者除外的原始消費{{slot_2}}以下的\{{{slot_3}}\}從者」。將其增加到手牌中。此能力在自己的墓場為{{slot_5}}張以上時可使用。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tef9384c9d8276f04
+      lang: zh-Hant
+      text: \{{{slot_0}}\}這張卡片\{{{slot_1}}\}+X。X為「自己墓場的\{{{slot_2}}\}從者的數量」。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tefbb770263109f4f
+      lang: zh-Hant
+      text: 查看自己牌堆頂的{{slot_0}}張卡片。可以從其中將{{slot_3}}張消費{{slot_1}}以下的\{{{slot_2}}\}從者召喚到戰場上。將其餘卡片以任意順序放置到牌堆底。如果其為英雄・從者，則使其\{{{slot_4}}\}+{{slot_5}}/\{{{slot_6}}\}+{{slot_7}}。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tf1d8d7e43e3eee35
+      lang: zh-Hant
+      text: \{{{slot_0}}\}指定自己戰場上的{{slot_2}}個其他\{{{slot_1}}\}從者。使其獲得【必殺】。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tf27d4fff89b5bd12
+      lang: zh-Hant
+      text: 【進化時】從自己的牌堆中搜尋{{slot_2}}張原始消費{{slot_0}}以下的\{{{slot_1}}\}法術，增加到手牌中。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tf8f1e94636c7bdaf
+      lang: zh-Hant
+      text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_2}}張\{{{slot_1}}\}法術，增加到手牌中。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tfba208f0cbeb2e2b
+      lang: zh-Hant
+      text: 從下列之中選擇{{slot_0}}項。【{{slot_1}}】抽取{{slot_2}}張卡片。【{{slot_3}}】如果自己的戰場上有公主・從者，則從自己的牌堆中搜尋{{slot_2}}張\{{{slot_4}}\}從者，增加到手牌中。
+    origin: machine
+  - kind: template_translation
+    data:
+      template_id: Tff728f900a18dfc4
+      lang: zh-Hant
+      text: \{{{slot_0}}\}從自己的牌堆中搜尋{{slot_3}}張原始消費{{slot_1}}的\{{{slot_2}}\}法術，增加到手牌中。
+    origin: machine

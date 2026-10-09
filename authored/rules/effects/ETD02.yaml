@@ -1,0 +1,63 @@
+format: 1
+kind: effect_set
+cards:
+  ETD02-015:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: choice
+          min: 1
+          max:
+            if:
+              fn: ge
+              args:
+                - at: play-start
+                  value:
+                    count:
+                      side: self
+                      zone: cemetery
+                - 10
+            then: 2
+            else: 1
+          modes:
+            - op: move
+              subjects: target.1
+              to: field
+            - op: create
+              name: ゴースト
+              count: 2
+              to: field
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: cemetery
+              type: follower
+              where:
+                fn: le
+                args:
+                  - read: item.current_cost
+                  - 2
+            min: 1
+            max: 1
+            modes:
+              - 1
+  ETD02-019:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: damage
+          subjects:
+            side: opponent
+            zone: field
+            type: follower
+          amount: 1

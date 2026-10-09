@@ -1,0 +1,145 @@
+format: 1
+kind: engine_rules
+scope:
+  region: jp
+  rules_version: 1.28.0
+  rules_source_version_id: src:v1:eda95e42abcb58c1fab043fbb193d5977219825a3adfb5958ab4865a66d09bfc
+input:
+  kind: legacy-jp
+  snapshot_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+titles:
+  - title_code: cardfight_vanguard
+    anchor:
+      kind: legacy-face
+      region: jp
+      card_no: CSD03a-001
+      face_ordinal: 0
+    capabilities:
+      - kind: opening_start_amulet
+    evidence:
+      - start_amulet_rules
+  - title_code: idolmaster_cinderella_girls
+    anchor:
+      kind: legacy-face
+      region: jp
+      card_no: ECP02-001
+      face_ordinal: 0
+    capabilities:
+      - kind: opening_ex_resource
+        resource_role: lesson_item
+        count: 5
+        zone: ex
+    evidence:
+      - lesson_rules
+  - title_code: princess_connect_re_dive
+    anchor:
+      kind: legacy-face
+      region: jp
+      card_no: CP04-001
+      face_ordinal: 0
+    capabilities:
+      - kind: ub_enabled
+    evidence:
+      - ub_rules
+  - title_code: umamusume_pretty_derby
+    anchor:
+      kind: legacy-face
+      region: jp
+      card_no: ECP01-001
+      face_ordinal: 0
+    capabilities: []
+    evidence:
+      - meal_rules
+resources:
+  - role: lesson_item
+    names:
+      - kind: legacy-name
+        face:
+          kind: legacy-face
+          region: jp
+          card_no: CP02-T01
+          face_ordinal: 0
+        name_source: rules
+    template:
+      kind: legacy-face
+      region: jp
+      card_no: CP02-T01
+      face_ordinal: 0
+    evidence:
+      - lesson_rules
+  - role: meal_item
+    names:
+      - kind: legacy-name
+        face:
+          kind: legacy-face
+          region: jp
+          card_no: CSD01-032
+          face_ordinal: 0
+        name_source: printed
+    evidence:
+      - meal_rules
+  - role: drive_point
+    names:
+      - kind: legacy-name
+        face:
+          kind: legacy-face
+          region: jp
+          card_no: CSD03a-017
+          face_ordinal: 0
+        name_source: printed
+    evidence:
+      - drive_rules
+  - role: stack_base
+    names:
+      - kind: legacy-name
+        face:
+          kind: legacy-face
+          region: jp
+          card_no: EBD02-T01
+          face_ordinal: 0
+        name_source: printed
+    template:
+      kind: legacy-face
+      region: jp
+      card_no: EBD02-T01
+      face_ordinal: 0
+    evidence:
+      - stack_rules
+evidence:
+  - id: drive_rules
+    source_version_id: src:v1:eda95e42abcb58c1fab043fbb193d5977219825a3adfb5958ab4865a66d09bfc
+    rule_refs:
+      - 4.14.1
+      - 14.4.9.2
+      - 14.4.9.4
+    checked_on: '2026-10-03'
+  - id: lesson_rules
+    source_version_id: src:v1:eda95e42abcb58c1fab043fbb193d5977219825a3adfb5958ab4865a66d09bfc
+    rule_refs:
+      - 14.3.1.1
+      - 14.3.1.2
+      - 14.3.2.1
+    checked_on: '2026-10-03'
+  - id: meal_rules
+    source_version_id: src:v1:eda95e42abcb58c1fab043fbb193d5977219825a3adfb5958ab4865a66d09bfc
+    rule_refs:
+      - 4.13.1
+      - 14.2.1.1
+    checked_on: '2026-10-03'
+  - id: stack_rules
+    source_version_id: src:v1:eda95e42abcb58c1fab043fbb193d5977219825a3adfb5958ab4865a66d09bfc
+    rule_refs:
+      - 13.3.2.1
+      - 13.3.2.4
+    checked_on: '2026-10-03'
+  - id: start_amulet_rules
+    source_version_id: src:v1:eda95e42abcb58c1fab043fbb193d5977219825a3adfb5958ab4865a66d09bfc
+    rule_refs:
+      - 14.4.3.1
+      - 14.4.3.2
+    checked_on: '2026-10-03'
+  - id: ub_rules
+    source_version_id: src:v1:eda95e42abcb58c1fab043fbb193d5977219825a3adfb5958ab4865a66d09bfc
+    rule_refs:
+      - 14.5.1.2
+    checked_on: '2026-10-03'

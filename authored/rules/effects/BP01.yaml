@@ -1,0 +1,667 @@
+format: 1
+kind: effect_set
+cards:
+  BP01-001:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: transform
+          subjects: target.1
+          name: 薔薇の一撃
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: ex
+              type: follower
+              trait: 妖精
+            min: 0
+            max: 5
+      - line: 2
+        kind: activated
+        body:
+          op: recover_pp
+          amount:
+            count:
+              side: self
+              zone: ex
+              name: 薔薇の一撃
+        costs:
+          - op: act
+            subjects: self
+  BP01-013:
+    status: complete
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self.leader
+              hp: 3
+            - op: draw
+              count: 1
+        limit: 1
+        cost_selections:
+          - key: '1'
+            select:
+              zone: ex
+              side: self
+              type: follower
+              trait: 妖精
+            min: 1
+            max: 1
+        costs:
+          - op: banish
+            subjects: cost.1
+  BP01-015:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: move
+              subjects: target.1
+              to: hand
+            - op: draw
+              count: 1
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: self
+            min: 1
+            max: 1
+  BP01-037:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: modify
+          subjects:
+            zone: field
+            side: self
+            type: follower
+            other: true
+          power: 1
+          hp: 1
+        event: enter
+        subject: self
+  BP01-042:
+    status: complete
+    abilities: []
+  BP01-046:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+  BP01-056:
+    status: complete
+    review: 依 Q189／Q190：補 EX 的第二段與登錄下次結束延遲的第三段各保留印刷行號，延遲不依來源仍在場。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: repeat
+          body:
+            op: move
+            subjects:
+              side: self
+              zone: deck
+              top: 1
+            to: ex
+          until:
+            fn: ge
+            args:
+              - count:
+                  side: self
+                  zone: ex
+              - 5
+      - line: 3
+        kind: spell
+        body:
+          op: delay
+          event: end
+          body:
+            op: banish
+            subjects:
+              side: self
+              zone: ex
+          once: true
+  BP01-065:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: draw
+              count: 2
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - count:
+                      zone: cemetery
+                      side: self
+                      type: spell
+                  - 10
+              then:
+                op: recover_pp
+                amount: 1
+  BP01-073:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: destroy
+              subjects: target.1
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - at: resolution-start
+                    value:
+                      count:
+                        side: self
+                        zone: cemetery
+                        type: spell
+                  - 10
+              then:
+                op: damage
+                subjects: target.1.leader
+                amount: 3
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP01-096:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: intimidate
+  BP01-099:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: damage
+          subjects:
+            side: both
+            zone: field
+            type: follower
+          amount:
+            if:
+              fn: ge
+              args:
+                - read: self.pp.max
+                - 7
+            then: 3
+            else: 2
+  BP01-105:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: modify
+            subjects: self.leader
+            hp: -3
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: bane
+  BP01-110:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+  BP01-115:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: move
+              subjects: target.1
+              to: field
+              bind: revived
+            - op: modify
+              subjects: revived
+              keywords:
+                - guard
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: cemetery
+              type: follower
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 8
+            min: 1
+            max: 1
+  BP01-125:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: self.leader
+              amount: 2
+            - op: damage
+              subjects: target.1
+              amount: 3
+        targets:
+          - key: '1'
+            select:
+              union:
+                - side: opponent
+                  zone: field
+                  type: follower
+                - opponent.leader
+            min: 1
+            max: 1
+  BP01-131:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: destroy
+          subjects:
+            side: both
+            zone: field
+            type: follower
+  BP01-139:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: banish
+          subjects: target.1
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+              where:
+                fn: le
+                args:
+                  - read: item.hp
+                  - 3
+            min: 1
+            max: 1
+  BP01-144:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: aura
+  BP01-149:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: modify
+          subjects: target.1
+          keywords:
+            - guard
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: self
+              type: follower
+            min: 1
+            max: 1
+      - line: 2
+        kind: activated
+        body:
+          op: modify
+          subjects: target.1
+          power: 2
+          hp: 2
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: self
+              type: follower
+              keyword: guard
+            min: 1
+            max: 1
+        costs:
+          - op: pp
+            amount: 2
+          - op: act
+            subjects: self
+          - op: move
+            subjects: self
+            to: cemetery
+  BP01-152:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 0
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 3
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 4
+        event: end
+  BP01-158:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
+  BP01-163:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: assail
+  BP01-168:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: damage
+          subjects: target.1
+          amount: 3
+        targets:
+          - key: '1'
+            select:
+              union:
+                - side: opponent
+                  zone: field
+                  type: follower
+                - opponent.leader
+            min: 1
+            max: 1
+  BP01-169:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: destroy
+          subjects: target.1
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+            min: 1
+            max: 1
+  BP01-170:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: discard
+        subject: self
+        active_zones:
+          - hand
+      - line: 1
+        kind: spell
+        body:
+          op: draw
+          count: 1
+        section: 0
+  BP01-171:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 4
+  BP01-172:
+    status: complete
+    abilities: []
+  BP01-173:
+    status: complete
+    abilities: []
+  BP01-174:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 2
+  BP01-175:
+    status: complete
+    abilities: []
+  BP01-176:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+  BP01-177:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 1
+        event: enter
+        subject: self
+  BP01-179:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: damage
+          subjects: target.1
+          amount: 2
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP01-180:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: damage
+          subjects:
+            side: opponent
+            zone: field
+            type: follower
+          amount: 1
+  BP01-P10:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
+  BP01-P23:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: self.leader
+              amount: 2
+            - op: reveal
+              subjects:
+                zone: hand
+                side: opponent
+              to: all
+            - op: select
+              select:
+                zone: hand
+                side: opponent
+              min: 1
+              max: 1
+              bind: chosen
+            - op: discard
+              subjects: chosen
+        event: evolve
+        subject: self
+  BP01-P25:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects: both.leaders
+          amount: 2
+        event: field_to_cemetery
+        subject: self
+  BP01-T03:
+    token_template: true
+    status: complete
+    abilities: []
+  BP01-T15:
+    status: complete
+    abilities: []

@@ -1,0 +1,25 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: source_correction
+    owner: CP03
+    data:
+      id: x:55323a6a5b9550f79130283e61f223db
+      printing_id: p:c441734f8357590da8e3d6d818006885
+      face_id: f:27c28687d18b51a09f73bbf9dca8d5dd
+      field: card_type
+      expected_raw_value: Spell
+      corrected_value: Spell / Evolved
+      expected_source_hash: sha256:9608671f801a238c854752a7995f7815ee2b36cc6e622c4a08714a7b9a2f0f6e
+      source_hash_recipe: registry-observation-v2
+      reason: Official page transcription differs from the printed card image.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:892aba55b6e78e97b9a6157992537e73ae477c0b08ed50e4a2840c4da9d581f3
+          image_src: /wordpress/wp-content/images/cardlist/CP03/CP03-127EN.png
+          region: en
+          locator: Card type label and evolved banner

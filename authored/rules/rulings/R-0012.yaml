@@ -1,0 +1,14 @@
+format: 1
+kind: ruling
+id: R-0012
+question: 同一個指示同時增加一體從者的攻擊力與體力，「《攻撃力》か《体力》を+したとき」要誘發幾次？
+decision: 一次：同一指示對同一主體只有一個事實（一個 OriginFactId），攻擊力與體力是這個事實的兩個 facet；or 條件只匹配一次。
+evidence:
+  - {ref: Q2075, kind: supporting, quote: はい。誘発します。, question: このフォロワーが超進化した場合、「これの《攻撃力》か《体力》を+したとき、～」という能力は誘発しますか？, date: '2025-06-23', note: 只證明會誘發，沒有回答次數}
+  - {ref: project, kind: project, reason: 保留指示粒度，避免同一事實重複計次；沒有直接規定次數的 Q&A。, date: '2026-09-27'}
+strength: inferred
+decided_on: 2026-09-27
+applies_to: [E.stat-change]
+hint:
+  zh-TW: 本專案解讀：同一個效果同時增加攻擊力與體力，只算一次「+した」，「攻撃力か体力を+したとき」只誘發一次。
+  ja: 本プロジェクトの解釈：1つの効果で攻撃力と体力が同時に増えた場合、「+した」は1回として扱い、「《攻撃力》か《体力》を+したとき」は1回だけ誘発します。

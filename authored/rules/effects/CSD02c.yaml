@@ -1,0 +1,28 @@
+format: 1
+kind: effect_set
+cards:
+  CSD02c-018:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: static
+        body:
+          op: replace_damage
+          subjects: self
+          kind: any
+          set: 3
+          condition:
+            fn: ge
+            args:
+              - read: damage.amount
+              - 4

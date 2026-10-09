@@ -1,0 +1,32 @@
+format: 1
+kind: effect_set
+cards:
+  DSD01b-004:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 2
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: storm
+  DSD01b-005:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: aura

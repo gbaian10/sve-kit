@@ -1,0 +1,102 @@
+format: 1
+kind: effect_set
+cards:
+  SP01-046:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: choice
+          min: 1
+          max: 2
+          modes:
+            - op: ep
+              side: self
+              amount: 1
+            - op: modify
+              subjects: self.leader
+              hp: 3
+            - op: draw
+              count: 1
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    side: opponent
+                    zone: hand
+                  by: opponent
+                  min: 1
+                  max: 1
+                  bind: discarded
+                - op: discard
+                  subjects: discarded
+        event: enter
+        subject: self
+  SP01-SP30:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: enter
+        subject: self
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ne
+            args:
+              - read: self.entered_from
+              - hand
+          then:
+            op: move
+            subjects: target.1
+            to: ex
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 4
+            min: 1
+            max: 1
+  SP01-U23:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: self.turn.leader_hp_increased
+              - 4
+          then:
+            op: seq
+            steps:
+              - op: destroy
+                subjects: target.1
+              - op: draw
+                count: 1
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
