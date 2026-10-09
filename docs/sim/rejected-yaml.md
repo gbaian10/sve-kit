@@ -31,6 +31,8 @@ cargo run --locked -p sve-engine --bin sve-prototype -- "$SVE_TEST_SNAPSHOT" . v
 
 ## 尚未涵蓋（會靜默不做或回 null／0，載入期還抓不到）
 
+進度與後續由 [#478](https://github.com/gbaian10/sve-kit/issues/478) 追蹤；「預定」欄是當時的規劃，不是承諾。
+
 | 構造 | 執行期結果 | 預定 |
 | --- | --- | --- |
 | 選擇器的 `trait`、`name`、`name_contains` 拼錯（不存在的種族或卡名） | 永遠沒有候選 | M2：對照卡表快照的種族、卡名、token 名 |
@@ -40,9 +42,9 @@ cargo run --locked -p sve-engine --bin sve-prototype -- "$SVE_TEST_SNAPSHOT" . v
 | 一般的「宣告了但沒有程式讀取」欄位 | 靜默忽略 | 目前靠手動盤點（見下）；M2 以型別化 IR 的 `deny_unknown_fields` 取代 |
 | CR 10.7.6 的狀態誘發 | 若寫成 `trigger_if` 會被 R-0009 規則以錯誤理由拒絕（見 known-errors KE-28） | 遇到時另設構造 |
 
-## 既有 422 張的結果
+## 既有 422 張的結果（歷史紀錄）
 
-421 張通過，1 張拒絕（審核第 1 輪加嚴檢查後，另外抓到 BP03-078、SCS01-007，已修 YAML，見下）：
+以下是當時的結果，卡表或 YAML 變動後以 `tests/engine/rejected-yaml.yaml` 為準：421 張通過，1 張拒絕（審核第 1 輪加嚴檢查後，另外抓到 BP03-078、SCS01-007，已修 YAML，見下）：
 
 | 卡 | 位置 | 原因 | 處理 |
 | --- | --- | --- | --- |
