@@ -246,9 +246,16 @@ def test_historic_human_absence_requires_full_replayed_inputs(
     assert coverage["changed_card_numbers"] == ["BP02-071"]
 
 
-@pytest.mark.parametrize("change", ["hash", "missing_en", "changed_en"])
+@pytest.mark.parametrize(
+    ("change", "reason"),
+    [
+        ("hash", "historical_jp_baseline_hash_mismatch"),
+        ("missing_en", "en_source_or_face_unavailable"),
+        ("changed_en", "historical_en_observations_changed_or_missing"),
+    ],
+)
 def test_historic_absence_rejects_wrong_baseline_or_en_observations(
-    registry_root: Path, inputs: Inputs, change: str
+    registry_root: Path, inputs: Inputs, change: str, reason: str
 ) -> None:
     jp, en = batch("jp", inputs.jp), batch("en", inputs.en)
     reviewed = ReviewedJP(inputs.jp_hash, inputs.jp)
@@ -260,11 +267,7 @@ def test_historic_absence_rejects_wrong_baseline_or_en_observations(
         en.cards["GF01-001EN"].faces[0].text = "Changed synthetic rule."
     row = rows(inventory(load_registry(registry_root), jp, en, reviewed_jp=reviewed))[0]
     assert row["classification"] == "unresolved"
-    assert row["reason"] in {
-        "historical_jp_baseline_hash_mismatch",
-        "historical_en_observations_changed_or_missing",
-        "en_source_or_face_unavailable",
-    }
+    assert row["reason"] == reason
 
 
 def test_private_reviewed_jp_file_is_pinned_by_exact_bytes(
