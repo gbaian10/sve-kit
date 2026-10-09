@@ -27,7 +27,7 @@ fn snapshot() -> String {
 }
 
 fn registry() -> String {
-    json!({"version":"astra/1","keywords":{
+    json!({"format":1_u8,"kind":"keyword_registry","keywords":{
         "guard":{"ja":"守護","rule":"12.8","expansion":{"op":"keyword","name":"guard"}},
         "fanfare":{"ja":"ファンファーレ","role":"ability-label"},
         "last_words":{"ja":"ラストワード","role":"ability-label"}
@@ -36,7 +36,7 @@ fn registry() -> String {
 }
 
 fn document(follower: &Value, spell: &Value) -> Value {
-    json!({"version":"astra/1","cards":{
+    json!({"format":1_u8,"kind":"effect_set","cards":{
         "unit-follower":{"status":"complete","review":"synthetic","abilities":follower},
         "unit-spell":{"status":"complete","review":"synthetic","abilities":spell}
     }})

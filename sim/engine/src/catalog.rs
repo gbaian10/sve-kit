@@ -61,7 +61,7 @@ impl Catalog {
         authored: &Path,
         identity: &EngineIdentityInput,
     ) -> Result<Self> {
-        let mut paths: Vec<_> = read_dir(authored.join("effects"))
+        let mut paths: Vec<_> = read_dir(authored.join("rules/effects"))
             .map_err(invalid)?
             .map(|entry| entry.map(|entry| entry.path()).map_err(invalid))
             .collect::<Result<_>>()?;
@@ -78,9 +78,9 @@ impl Catalog {
             .collect::<Result<Vec<_>>>()?;
         Self::from_documents_with_rules(
             &read_to_string(snapshot).map_err(invalid)?,
-            &read_to_string(authored.join("keywords.yaml")).map_err(invalid)?,
+            &read_to_string(authored.join("rules/keywords.yaml")).map_err(invalid)?,
             &documents,
-            &read_to_string(authored.join("engine-rules/index.yaml")).map_err(invalid)?,
+            &read_to_string(authored.join("rules/engine/index.yaml")).map_err(invalid)?,
             identity,
         )
     }
@@ -128,8 +128,8 @@ impl Catalog {
             }
         }
         let registry: Value = yaml(keywords)?;
-        if registry["version"] != "astra/1" {
-            return Err(invalid("unknown keyword registry version"));
+        if !registry["format"].is_u64() {
+            return Err(invalid("keyword registry format must be an integer"));
         }
         catalog.keywords = serde_json::from_value(registry["keywords"].clone()).map_err(invalid)?;
         let schema: Value = serde_json::from_str(include_str!("../../../dsl/effects.schema.json"))
@@ -143,6 +143,9 @@ impl Catalog {
         let validator = validator_for(&schema).map_err(invalid)?;
         for (name, text) in documents {
             let document: Value = yaml(text)?;
+            if !document["format"].is_u64() {
+                return Err(invalid("effect document format must be an integer"));
+            }
             validator
                 .validate(&document)
                 .map_err(|error| EngineFailure::Invalid(format!("{name}: {error}")))?;
@@ -155,7 +158,7 @@ impl Catalog {
                 }
                 let program = expand(program, &catalog.keywords, 0)?;
                 validator
-                    .validate(&json!({"version":"astra/1","cards":{number:program}}))
+                    .validate(&json!({"format":1_u8,"kind":"effect_set","cards":{number:program}}))
                     .map_err(invalid)?;
                 if catalog.programs.contains_key(number) || catalog.rejected.contains_key(number) {
                     return Err(invalid(format!("duplicate program: {number}")));

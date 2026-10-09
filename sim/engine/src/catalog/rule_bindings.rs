@@ -224,6 +224,9 @@ impl RuleBindings {
     ) -> Result<Self> {
         let rules: Value =
             yaml(document).map_err(|_private_error| invalid("invalid engine rules YAML"))?;
+        if !rules["format"].is_u64() {
+            return Err(invalid("engine rules format must be an integer"));
+        }
         let schema: Value =
             serde_json::from_str(include_str!("../../../../dsl/engine-rules.schema.json"))
                 .map_err(invalid)?;
@@ -270,7 +273,10 @@ impl RuleBindings {
             json!({"region":region,"kind":rules["input"]["kind"],"snapshot_sha256":snapshot_hash,
             "settings_sha256":digest(document.as_bytes()),"authored_sha256":authored_digest,
             "identity_sha256":digest(&serde_json::to_vec(identity).map_err(invalid)?),
-            "schema_versions":{"effects":"astra/1","engine_rules":"engine-rules/1"},
+            "schema_versions":{
+                "effects":{"kind":"effect_set","format":1_u8,"schema_id":"urn:sve-kit:effects:astra:1"},
+                "keywords":{"kind":"keyword_registry","format":1_u8,"schema_id":"urn:sve-kit:effects:astra:1"},
+                "engine_rules":{"kind":"engine_rules","format":1_u8,"schema_id":schema["$id"]}},
             "schemas_sha256":digest(&serde_json::to_vec(&json!({"effects":include_str!("../../../../dsl/effects.schema.json"),"engine_rules":include_str!("../../../../dsl/engine-rules.schema.json")})).map_err(invalid)?),
             "scope":rules["scope"]}),
         );

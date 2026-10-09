@@ -50,7 +50,7 @@ fn snapshot() -> String {
 }
 
 fn registry() -> String {
-    json!({"version":"astra/1","keywords":{
+    json!({"format":1_u8,"kind":"keyword_registry","keywords":{
         "guard":{"ja":"守護","rule":"12.8","expansion":{"op":"keyword","name":"guard"}},
         "fusion":{"ja":"融合","role":"ability-label"}
     }})
@@ -67,7 +67,7 @@ fn catalog(programs: &Value) -> Catalog {
             json!({"status":"complete","review":"synthetic","abilities":abilities}),
         );
     }
-    let document = json!({"version":"astra/1","cards":cards});
+    let document = json!({"format":1_u8,"kind":"effect_set","cards":cards});
     let loaded = Catalog::from_documents(
         &snapshot(),
         &registry(),
@@ -159,7 +159,7 @@ fn yaml_document(body: &str) -> String {
 }
 
 fn yaml_document_for(card: &str, body: &str) -> String {
-    let mut text = String::from("version: astra/1\ncards:\n");
+    let mut text = String::from("format: 1\nkind: effect_set\ncards:\n");
     for (number, ..) in CARDS {
         if *number == card {
             text.push_str(&format!(
@@ -588,7 +588,7 @@ fn r2_every_accepted_selector_field_filters_or_is_rejected() {
     // A field outside the schema never reaches the engine at all.
     let mut selector = base;
     selector["colour"] = json!("red");
-    let document = json!({"version":"astra/1","cards":{"f-a":{"status":"complete","review":"x","abilities":[
+    let document = json!({"format":1_u8,"kind":"effect_set","cards":{"f-a":{"status":"complete","review":"x","abilities":[
         {"line":1,"kind":"spell","body":{"op":"damage","subjects":selector,"amount":1}}]}}});
     Catalog::from_documents(
         &snapshot(),
