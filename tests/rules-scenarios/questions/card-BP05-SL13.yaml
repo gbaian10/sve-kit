@@ -65,26 +65,14 @@ scenarios:
               - {filler: 20}
     decisions:
       - {n: 1, by: P1, at: main, do: play, card: a1}
-      - {n: 2, by: P1, at: main, do: play, card: a2, options: [2]}
-      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, choice: execute}
-      - {n: 4, by: P1, at: main, do: play, card: a3, options: [2]}
-      - {n: 5, by: P1, at: resolve, of: {decision: 4, occurrence: 1}, do: resolve-choice, choice: execute}
-      - {n: 6, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
-      - {n: 7, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
-      - {n: 8, by: P2, at: quick, do: pass}
+      - {n: 2, by: P1, at: main, do: play, card: a2, options: [2], optional_costs: {mode_2: {pp: 1}}}
+      - {n: 3, by: P1, at: main, do: play, card: a3, options: [2], optional_costs: {mode_2: {pp: 1}}}
+      - {n: 4, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
+      - {n: 5, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+      - {n: 6, by: P2, at: quick, do: pass}
     random: {}
     expected:
-      - at: after-decision-2
-        view: omniscient
-        outcome: paused
-        awaiting:
-          by: P1
-          choices:
-            - {do: resolve-choice, choice: execute}
-            - {do: resolve-choice, choice: decline}
-        assert:
-          P1.pp.current: 2
-      - at: after-decision-5
+      - at: after-decision-3
         view: omniscient
         outcome: resolved
         assert:
@@ -96,7 +84,7 @@ scenarios:
           - {kind: 引く, player: P1, object: d1}
           - {kind: ダメージ, source: a3, target: P1.leader, amount: 1}
           - {kind: 引く, player: P1, object: d2}
-      - at: after-decision-6
+      - at: after-decision-4
         view: omniscient
         outcome: resolved
         awaiting:
@@ -105,7 +93,7 @@ scenarios:
             - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
         assert:
           P1.field.a1: {acted: true}
-      - at: after-decision-7
+      - at: after-decision-5
         view: omniscient
         outcome: resolved
         assert:
@@ -113,7 +101,7 @@ scenarios:
           P1.field.a1: {power: 4, hp: 4}
         events:
           - {kind: ダメージ, source: a1, target: P2.leader, amount: 2}
-      - at: after-decision-8
+      - at: after-decision-6
         view: omniscient
         outcome: resolved
         assert:

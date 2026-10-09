@@ -319,7 +319,15 @@ impl Game {
                 return Ok(None);
             }
         }
-        let cost = forced_cost.map_or_else(|| self.play_cost_context(source, &frame), Ok)?;
+        let cost = forced_cost.map_or_else(
+            || self.play_cost_context(source, &frame),
+            |base| {
+                Ok(base.saturating_add(int(frame
+                    .values
+                    .get("additional_pp")
+                    .unwrap_or(&Value::Null))))
+            },
+        )?;
         if int(&self.player(controller)?.pp["current"]) < cost {
             return Ok(None);
         }
