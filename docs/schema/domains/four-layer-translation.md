@@ -11,6 +11,8 @@
 下文物件均為封閉結構：未列欄位、重複鍵、錯型別拒絕；未標 `?` 的欄位必填且不可 null。
 `T?` 表示**必填、可 null**，不是可省略；僅明寫「可省略」才有預設值。空集合使用 `[]`／`{}`。
 `Code` 是非空 ASCII `[a-z][a-z0-9_.-]*`，`ID` 是對應登錄的非空識別，`Hash` 是 64 位小寫 SHA-256。
+`TypeName` 是封閉型別名稱，ASCII `[A-Z][A-Za-z0-9]*`，只接受該 normalizer 版本登錄的名稱。
+它不是 `Code`；兩者不互相轉換，也不自動映射大小寫。
 `UInt` 是 0..9007199254740991 的整數且不接受 Bool，`Ordinal` 是 UInt，`Lang` 沿建置 DB 的語言登錄。
 `Span={start:UInt,end:UInt}` 以 **Unicode code point** 計數，半開區間，要求 start < end；空字串不造零長 span。
 陣列的排序、唯一與非空條件在各欄明定，不能用 JSON 的物件順序代替來源順序。
@@ -114,7 +116,7 @@ DSL 本體／body version 不入 frame hash。
 | LeafSlot 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
 | name | Code；同 frame 唯一 | A/C；重名或未知引用；FL-005 |
-| type | 下表封閉型別名稱 | A/B/C；不可泛用 term 吞所有角色；FL-004 |
+| type | TypeName；下表封閉型別名稱 | A/B/C；不可泛用 term 吞所有角色；FL-004 |
 | role | Code；type 對應的具名語義角色 | A/B；同字不同角色不合併；FL-004／FL-021 |
 | domain | `{values:[Scalar],min:UInt?,max:UInt?}` | A/B/C；引用值域或數值界限不符；FL-004 |
 | required | Bool；true 必須綁值且被 target 使用 | A/B；遺失、Literal 偽裝引用；FL-005 |
@@ -186,7 +188,7 @@ NP 不另占來源 span；它的葉各自有來源位置。NP 移除或新增只
 | --- | --- | --- |
 | id | Code；具名形式，如 zone.locative、zone.allative、zone.ablative、zone.add_to_hand、zone.return_to_hand、keyword.display、quantity.classifier | A/B/C；未知形式拒絕；FL-012 |
 | lang | Lang；和 target 相同 | A/B/C；錯語言；FL-012 |
-| signature | 非空 `{name:Code,type:Code,role:Code}` 陣列，name 唯一，引用 §4 型別／角色 | A/B；參數不合；FL-004／FL-012 |
+| signature | 非空 `{name:Code,type:TypeName,role:Code}` 陣列，name 唯一，type 引用 §4 葉型別，role 引用其角色 | A/B；參數不合；FL-004／FL-012 |
 | rule | Code；引用釘版 renderer 的有限規則，不接受程式 | A/B/C；未知或超域；FL-012 |
 | cases | 非空 `{case_code:[FormPart]}` mapping；case_code 限 rule 登錄的分支，FormPart 是 `{kind:Literal,text:Text}`／`{kind:Label,arg:Code}`，每分支有序 | A/B；分支缺失／未知、Label 不引用 signature 拒絕；基礎名稱來自當前選詞；FL-012／FL-015 |
 
@@ -283,7 +285,7 @@ NFKC 的前後字元由 raw_span 與 canonical_spans 取出，允許多對多，
 | imports | Port 陣列，依 name 排序唯一 | A/B；錯型別、未知先行詞；FL-022 |
 | exports | Port 陣列，依 name 排序唯一 | A/B；結果越 scope；FL-022 |
 
-Port 恰有 `{name:Code,type:Code,source_role:Code,scope:Code}`，皆必填；type 是具名語義型別，
+Port 恰有 `{name:Code,type:TypeName,source_role:Code,scope:Code}`，皆必填；type 引用該分類規則版本的封閉接口型別登錄，
 例如 ObjectSet、PlayerRef、ReceiptId、CapturedValue、QuantityExpr，不允許 Any／任意 it 字串。
 source_role 限該分類規則明列的 selected_objects/action_result/paid_result/selection_snapshot/count_value 等；
 scope 指同 frame 宣告的 ability／branch／sequence 作用域。A 驗簽章，B 驗實際來源上下文與支配／可見範圍（FL-022）。
