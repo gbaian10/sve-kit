@@ -1,9 +1,9 @@
 # 職業、卡種的正式 catalog 輸入
 
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
-專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../quotations.md)。
+專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../../quotations.md)。
 
-本文件細化[詞彙當前格式](catalog-route-adoption.md#0-詞彙與語言-format-2)，不新增第二份代碼表。
+本文件細化[詞彙當前格式](catalog-route-adoption.md#41-詞彙與語言)，不新增第二份代碼表。
 
 ## 1. 唯一入口與建置
 
@@ -40,4 +40,4 @@ Catalog／Vocabulary 記憶體物件由此推導，不是另一份權威。
 
 以有效採納推導的 JP／EN 映射重建 preview，保留舊版，逐項列出保留 code、暫碼替換、新增標記及未覆蓋原值，重驗 class/type/special_kind 引用閉包。其餘 preview 詞彙不能因本次職業／卡種採納而自動升為正式資料。
 
-前端核對職業快速列、卡種篩選、特殊標記及牌組條件，包含 neutral、ep／sep、equipment／crest、進化／進階／衍生物實例；寫死暫碼或靠原文猜卡種的地方須清掉。JP／EN 同概念同 code，未知 raw 拒絕，缺譯降級分別驗收。公開欄位及格式版本不變、資料版本更新，詳見 [snapshot-format](snapshot-format.md)。
+前端核對職業快速列、卡種篩選、特殊標記及牌組條件，包含 neutral、ep／sep、equipment／crest、進化／進階／衍生物實例；寫死暫碼或靠原文猜卡種的地方須清掉。JP／EN 同概念同 code，未知 raw 拒絕，缺譯降級分別驗收。公開欄位及格式版本不變、資料版本更新，詳見 [snapshot-format](../export/snapshot-format.md)。

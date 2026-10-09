@@ -64,7 +64,7 @@ unrelated dated products exist. The caller supplies the intended display/publica
 subset as build rows; this module does not infer a separate publication policy.
 The inheritance rule follows build-db §3.2 and snapshot-format §8.
 
-[Catalog-route adoption §7](../../../../../docs/schema/catalog-route-adoption.md#7-預設版次與一般版分類)
+[Catalog-route adoption §7](../../../../../docs/schema/domains/catalog-route-adoption.md#7-預設版次與一般版分類)
 defines the approved general-rarity policy and the evidence required for ordinary
 processing. The classifier supplies that policy from pinned authored/configuration
 inputs; this package does not hardcode its whitelist. Unknown frame or stamp

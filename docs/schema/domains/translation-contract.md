@@ -68,7 +68,7 @@ matches 為 null（回自動比對）或 `{template_id,source_span,params}` 陣�
 context_assignment 的 concept_key 可 null；非 default variant 須非空理由。card_name_concept 的 term_id 可 null，表示撤回指派。
 owner／field／ordinal 的組合及來源雜湊由本次有效身分與原文自動核對，不再要求歷史背景在 base main 的祖先。
 同名不代表同概念。region-reviews 中的 region_text_review／region_divergence 同時控制 DSL／機制，
-保留原格式與 build-db §5 的決定及 freshness 檢查，不轉成本節 record；區域核對的獨立讀取不得忽略它們。
+封套尚未落地，見 §7.1；保留 build-db §5 的決定及 freshness 檢查，不轉成本節 record；區域核對的獨立讀取不得忽略它們。
 counterpart 仍須兩側精確原文及有效同卡／面關係。
 
 translation_override 的 pin 以 templates=`[{template_id,lang,variant_key}]`、
@@ -219,7 +219,7 @@ claimed_source 是選填的出處主張；沒有具體主張就省略，不用�
 產生 context、use、binding、translation、selection；清冊在本次建置產生一次，
 不執行舊 producer、不重算舊採納歷史，也不保存新的核可證明。
 每次建置的同一組來源可共用解析結果；缺資料不得借最新官網或另一台機器的私人檔補洞。
-來源歸檔完整性及本次 build inputs 的追溯仍依[來源歸檔](source-archive.md)，不能代入假 decision。
+來源歸檔完整性及本次 build inputs 的追溯仍依[來源歸檔](../ingest/source-archive.md)，不能代入假 decision。
 
 export-offline 在交易前讀當前模板、參數規則與 glossary 並驗證一次，再於交易內對每個 face_revision 與 printing_face 的日文主文與 section，
 以原文 hash 找到涵蓋它的模板來源並整段渲染，寫入 context、use、binding、translation 與 selection。
@@ -276,14 +276,15 @@ qa_version 用 question/answer，cr_clause 用 effect，vocabulary／商品用 l
 
 ### 7.1 非翻譯區域核對保留原入口
 
-region_text_review／region_divergence 會控制 DSL／機制，保留 region-reviews 的 format 1，
-不使用 §2 新 record。分片為 `{format:1,kind:translation_shard,default_decision_id,records,decisions}`；
-record 為 `{record_key,kind,filing_key,data,evidence}`，同片單 kind／單決定，decisions 恰含 default 所指 batch。
+region_text_review／region_divergence 會控制 DSL／機制；region-reviews 尚未落地，目前沒有 reader 或資料。
+落地時再定分片封套、format、kind 與索引，不使用 §2 的翻譯 record，也不預定為 translation_shard。
+以下保留採納門檻與資料語義，不宣稱已有可讀取的封套。
+
 evidence 為排序唯一 `{source_ref,role}`；decision 沿 authored-layout §2 的完整封套與精確成員 hash。
 record_key 是 `[kind,...選擇鍵,adoption_no]` 的 canonical JSON 字串，review 選擇鍵為
 `card_id,region,jp_hash,region_hash`，divergence 為 `card_id,region,field_scope`。
 adoption_no 從 1 連續只增，predecessor 首筆 null，其後為上一筆 `{record_key,record_hash,decision_id}`；
-拒絕分叉、缺號、錯前件，舊分片及索引 hash 不改。本段只保留原門檻，不擴及翻譯 format 2。
+拒絕分叉、缺號、錯前件，舊分片及索引 hash 不改。這些門檻不擴及翻譯 format 2。
 
 region_text_review 的語義對照來源 hash 與逐面對應格式須在正式規則驗證實作時另定；目前沒有規則等義 bundle 產出端，不提供此採納能力。跨語 hash 不要求相等；aligned 仍需 sampled/confirmed 語義對照決定，兩端身分另須 confirmed，不能把文字配對當作規則等義證明。
 

@@ -57,7 +57,7 @@ manual_printing.value 恰有以下欄位；可空欄仍須明示 null。
 
 counterpart 非 null 時 identity 的 card／所有 face 必精確等於經逐張、全體面核對的一般版。同區可讀其有效 current，序號卡自身 printed_text_state 仍 unknown，不假裝有官方卡頁；沒有 current 時按表記未定規則。一般進化前後仍是不同 card，樣圖是哪一面須核對。已先建 provisional card 者，後續確認對應要走既有 identity-transition 完整面／插畫移轉與墓碑收據，不在續版裡默默改 card_id；printing ID／int_id 不變。後續 carddb PR 須將身分修復的查核與重播擴充至「官方 registry＋完整 manual-printings 歷史」的聯集，涵蓋人工入口建立的 card／face／printing 及其插畫關聯，與下述整數配號的 lookup 邊界一致；不能只查 registry 而漏掉人工 provisional card。此擴充須同步 identity-repair 的入口範圍與來源／前件釘版，未實作前不得宣稱人工條目已有身分修復能力。
 
-引用另一區時不允許直接填 counterpart；日英同卡仍另走既有全體面身分採納。補正卡號或歸屬不重算 initial_anchor／printing_id／int_id；暫定路由直接依 [build-db §15](build-db.md#15-網址搜尋預設版次與記號) 的 `/cards/_provisional/{int_id}` 與 provisional_corrected 永久 alias 規則，禁止劫持現役官方鍵，不另定另一套入口。後續官方卡表出現此版次須採明示身分／路由修復並保留原 printing ID，不能以新的號碼 recipe 重建第二筆。
+引用另一區時不允許直接填 counterpart；日英同卡仍另走既有全體面身分採納。補正卡號或歸屬不重算 initial_anchor／printing_id／int_id；暫定路由直接依 [build-db §15](../build/build-db.md#15-網址搜尋預設版次與記號) 的 `/cards/_provisional/{int_id}` 與 provisional_corrected 永久 alias 規則，禁止劫持現役官方鍵，不另定另一套入口。後續官方卡表出現此版次須採明示身分／路由修復並保留原 printing ID，不能以新的號碼 recipe 重建第二筆。
 
 serial_supplement.value 恰為 `{region,serial_total,serial_note,references}`。目標 printing_id 必須已存在且為 official，同區 region 必一致；references 的 roles 僅允許 number／serial，distribution 必為 null；serial_total 可正整數或 null，撤回已知值必須以續版明示並留原因。只投影上述序號補充，不改已有內容／觀測；既有三張 PR 不複製為新人工版次。supplement 不新增 int_id。兩種 kind 不可共同搶同一 subject；已存在的版次禁止 manual_printing create。全域永久 ID、配號、reference 與 FK 衝突整次回滾。
 
@@ -106,6 +106,6 @@ unlisted 頁面明示「非官方整理，可能不完整」、信心、暫定�
 
 printing_reference 擬新增 url／source_class／checked_on 及配送欄位，唯一鍵擬為 `(printing_id,source_id,url,role)`，正式欄名／型別與 CHECK 在改表定義的 carddb PR 同步權威列。人工名稱／序號註記的建置欄位及公開 manual_metadata 亦須在後續 PR 同步 DDL、機器 Schema、types、合成 golden、producer／reader 及 ER 引用閉包；前端實作另拆 sim/web 單位。不能只改 Markdown 後宣稱已支援。新增 SNC／WB family 與真實記錄留 authored PR，先有正式來源及維護者逐筆核對；圖片留 #210，張數／EN 查證留 #211。本 docs PR 不授權來源抓取或資料發布。
 
-公開卡圖及快照保留依 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
+公開卡圖及快照保留依 [snapshot-format §4.1](../export/snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
 此限制不刪 predecessor／adoption 歷史、永久 printing.int_id 或人可見路由 alias；上述建置重播不是對局回放服務。
 卡圖 2.0 使用 int_id＋永久 face.ordinal 的背景 URL 與卡包版本，不以 manual source image_id 當公開 key。

@@ -1,7 +1,7 @@
 # Offline source registration
 
 This module implements the isolated registration boundary in
-[construction adoption §2](../../../../../../docs/schema/construction-adoption.md#2-一次性抓回原檔如何正式登錄與釘版).
+[construction adoption §2](../../../../../../docs/schema/domains/construction-adoption.md#2-一次性抓回原檔如何正式登錄與釘版).
 It reads an already acquired set without creating an HTTP client or opening the
 configured live manifest. Registration does not adopt rule meanings, prove source
 coverage, extract CR clauses, or replace sealing and independent backup checks.

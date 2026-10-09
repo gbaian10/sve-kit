@@ -1,7 +1,7 @@
 # Product inputs and frozen official staging
 
 `load_products(authored_root, registry=...)` reads every shard under the independent
-`products/` directory defined in [authored-layout §10](../../../../../docs/schema/authored-layout.md#10-歸檔類別商品與實際收錄).
+`products/` directory defined in [authored-layout §10](../../../../../docs/schema/domains/authored-layout.md#10-商品人工輸入-product-authored-v1).
 It never writes authored data, allocates IDs, reads latest cache or opens a live
 manifest. Supply a stable, verified authored checkout and the complete validated
 identity registry from that checkout.
@@ -112,7 +112,7 @@ a second database. See the [build DB example](../../build/README.md#saved-build-
 ## Confirmed permanent official product identities
 
 `load_product_identities(authored_root, authored_revision=..., catalog=...,
-stores=...)` implements [authored-layout §11](../../../../../docs/schema/authored-layout.md#11-官方商品身分對照-product-identity-v1).
+stores=...)` implements [authored-layout §11](../../../../../docs/schema/domains/authored-layout.md#11-官方商品身分對照-product-identity-v1).
 It validates every shard under `products/identities/` and both regions before
 projection: closed fields, strict YAML, expected file paths, path/filing/region
 agreement and unique complete match keys. Every record is a confirmed
@@ -162,7 +162,7 @@ Names/dates can change without changing a link-based permanent identity; a
 source-block identity remains pinned to its exact raw version. New URLs need a
 separately confirmed alias to the existing ID.
 
-Product type follows the approved [build DB rule](../../../../../docs/schema/build-db.md#32-商品與發行).
+Product type follows the approved [build DB rule](../../../../../docs/schema/build/build-db.md#32-商品與發行).
 An exact, case-sensitive match between the block's complete expansion code and
 one confirmed family's `public_code` supplies that family's `kind`; `code` is
 not a fallback and compound codes are not split. Missing, ambiguous or unmatched

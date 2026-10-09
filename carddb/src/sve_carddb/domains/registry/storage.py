@@ -1,7 +1,7 @@
 """Strict YAML boundaries and append-only registry shards.
 
 The #474 evidence and #476 envelope migrations are one-time exceptions defined
-in docs/schema/authored-layout.md; daily append tools retain their invariants.
+in docs/schema/domains/authored-layout.md; daily append tools retain their invariants.
 """
 
 import io

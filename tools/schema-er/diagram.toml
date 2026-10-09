@@ -276,7 +276,7 @@ tables = [
 # An empty string means the field is an identifier but not a reference to a snapshot collection.
 [snapshot.references]
 "qa.current_version_id" = "qa_version"
-"stamp.series_code" = "vocabulary"          # snapshot-format.md §8
+"stamp.series_code" = "vocabulary"          # export/snapshot-format.md §8
 family_id = "product_family"
 home_set_id = "product_family"
 image_id = "image_asset"

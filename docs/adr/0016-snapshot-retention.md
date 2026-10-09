@@ -29,7 +29,7 @@ current 的 changes 描述 previous→current；previous 所引用的 changes bl
 
 文字 ID 碰撞檢查改用耐久的精簡 `(lang,short_id,full_digest)` 發布鍵索引，事件首次 data_version 用發布收據固定；
 不能因 R2 只保兩版就遺失碰撞／首次發布證據，也不為此保存完整歷史快照。
-完整保留及過渡契約見 [snapshot-format §4.1](../schema/snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
+完整保留及過渡契約見 [snapshot-format §4.1](../schema/export/snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
 
 ## 考慮過的選項
 

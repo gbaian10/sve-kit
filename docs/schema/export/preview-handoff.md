@@ -1,6 +1,6 @@
 # preview 建置與前端接線
 
-preview 僅供本機，匯出器預設產出 2.0。圖片投影依 [圖片發布契約](image-variants.md#20-圖片-url版本與新鮮度)
+preview 僅供本機，匯出器預設產出 2.0。圖片投影依 [圖片發布契約](../images/image-variants.md#20-圖片-url版本與新鮮度)
 與 [傳輸 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)：從建置 hash path
 產生固定 ID key，卡包 media 提供版本／尺寸；圖片可受控覆寫，JSON 不可變。
 preview 的圖片版本狀態與快取放在公開根之外。`sve-publish upload` 直接上傳這個公開根，
@@ -70,7 +70,7 @@ lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行�
 不再提供 `--brotli-command` 或呼叫外部 encoder，亦不需準備系統 libbrotli。
 
 `sve-publish upload` 原樣上傳清單所列的 raw／gzip／br，不重壓；選檔、標頭與 CDN 驗證見
-[R2 上傳](../../publish/README.md)，保留窗口見 [發布契約](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
+[R2 上傳](../../../publish/README.md)，保留窗口見 [發布契約](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
 
 建置輸入的 WebP 使用內容定址 hash path；preview 輸出為 2.0 的固定 ID key。先驗證／寫入圖片，再寫 images
 分片與其餘快照成員；只複製公開 `printing_image` 引用且可用、核可的變體，不以來源 hash 當公開 URL。
@@ -108,7 +108,7 @@ current／previous 版本索引依 snapshot-format §4.1，屬 #34 的發布工�
 直接升為正式發布，正式批次須重新建置並通過完整發布閘門。
 
 Cloudflare 開發部署、R2 2.0 發布與未登入入口驗收，見
-[Cloudflare 開發環境設定清單](../deployment/cloudflare-development.md)。
+[Cloudflare 開發環境設定清單](../../deployment/cloudflare-development.md)。
 
 ## M3 載入
 

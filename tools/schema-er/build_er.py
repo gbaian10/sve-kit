@@ -1,7 +1,7 @@
 # /// script
 # requires-python = ">=3.14"
 # ///
-"""Build the interactive schema ER page from docs/schema/*.md and open it in a browser."""
+"""Build the interactive schema ER page from the layered docs/schema/ documents and open it in a browser."""
 
 import argparse
 import functools

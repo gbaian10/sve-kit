@@ -32,7 +32,7 @@ flowchart TD
 依 [AGENTS](../../AGENTS.md)，`carddb` 匯出的有版號卡表快照是卡片資料的唯一權威。
 前端與引擎可以載入、打包或快取快照，但不另建獨立卡表。
 建置 SQLite 不交給玩家；公開欄位與傳輸契約分別見
-[快照格式](../schema/snapshot-format.md) 與 [快照傳輸](../schema/snapshot-transport.md)。
+[快照格式](../schema/export/snapshot-format.md) 與 [快照傳輸](../schema/export/snapshot-transport.md)。
 
 公開快照與卡圖的保留窗口依 [ADR-0016](../adr/0016-snapshot-retention.md)，
 不由對戰部署設計擴大為永久歷史服務。回放與歷史資料的關係見 [回放契約](replays.md)。

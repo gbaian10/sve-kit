@@ -16,6 +16,8 @@ carddb/src/sve_carddb/_version.py
 build/
 # This build package is source code, not generated output.
 !/carddb/src/sve_carddb/build/
+# Build schema documents are maintained source files.
+!/docs/schema/build/
 develop-eggs/
 dist/
 downloads/

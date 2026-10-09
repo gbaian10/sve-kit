@@ -10,8 +10,8 @@ from er_model import Diagnostics, RawTable, SchemaModel
 if TYPE_CHECKING:
     from pathlib import Path
 
-BUILD_DOC = "build-db.md"
-SNAPSHOT_DOC = "snapshot-format.md"
+BUILD_DOC = "build/build-db.md"
+SNAPSHOT_DOC = "export/snapshot-format.md"
 
 # Header cells that mark the tables holding declarations; other tables in the documents are prose.
 BUILD_HEADER = ("表", "建置期欄位、鍵與約束")
@@ -63,13 +63,13 @@ def _unquote(cell: str) -> str:
     return cell.strip().strip("`")
 
 
-def _read_build(path: Path, diag: Diagnostics) -> list[RawTable]:
+def _read_build(path: Path, source: str, diag: Diagnostics) -> list[RawTable]:
     out: list[RawTable] = []
     for table in iter_tables(path.read_text(encoding="utf-8")):
         if tuple(table.header[:2]) != BUILD_HEADER:
             continue
         for line, cells in table.rows:
-            where = f"{path.name}:{line}"
+            where = f"{source}:{line}"
             name = _unquote(cells[0]) if cells else ""
             m = (
                 _LEADING_CODE.fullmatch(cells[1])
@@ -81,12 +81,12 @@ def _read_build(path: Path, diag: Diagnostics) -> list[RawTable]:
                     f"{where}: 讀不出表名與宣告（應為「`表名` | `欄位宣告`約束」）"
                 )
                 continue
-            out.append(RawTable(name, m.group(1), m.group(2).strip(), path.name, line))
+            out.append(RawTable(name, m.group(1), m.group(2).strip(), source, line))
     return out
 
 
 def _read_snapshot(
-    path: Path, diag: Diagnostics
+    path: Path, source: str, diag: Diagnostics
 ) -> tuple[list[RawTable], list[RawTable]]:
     collections: list[RawTable] = []
     nested: list[RawTable] = []
@@ -97,20 +97,20 @@ def _read_snapshot(
                 or SNAPSHOT_PK_RULE not in table.header[2]
             ):
                 diag.errors.append(
-                    f"{path.name}: 集合表頭沒有寫「{SNAPSHOT_PK_RULE}」，預設 PK 規則不能套用"
+                    f"{source}: 集合表頭沒有寫「{SNAPSHOT_PK_RULE}」，預設 PK 規則不能套用"
                 )
-            collections.extend(_read_rows(path, table, NAME_RE, diag))
+            collections.extend(_read_rows(source, table, NAME_RE, diag))
         elif table.header[:1] == [NESTED_HEADER]:
-            nested.extend(_read_rows(path, table, NESTED_NAME_RE, diag))
+            nested.extend(_read_rows(source, table, NESTED_NAME_RE, diag))
     return collections, nested
 
 
 def _read_rows(
-    path: Path, table: MdTable, name_re: re.Pattern[str], diag: Diagnostics
+    source: str, table: MdTable, name_re: re.Pattern[str], diag: Diagnostics
 ) -> list[RawTable]:
     out: list[RawTable] = []
     for line, cells in table.rows:
-        where = f"{path.name}:{line}"
+        where = f"{source}:{line}"
         name = _unquote(cells[0]) if cells else ""
         m = (
             _LEADING_CODE.fullmatch(cells[1])
@@ -129,9 +129,7 @@ def _read_rows(
         )
         if rest and notes:
             diag.errors.append(f"{where}: 欄位格在宣告之後還有文字 `{rest}`")
-        out.append(
-            RawTable(name, m.group(1), notes or rest.lstrip("；"), path.name, line)
-        )
+        out.append(RawTable(name, m.group(1), notes or rest.lstrip("；"), source, line))
     return out
 
 
@@ -150,8 +148,8 @@ def read_model(schema_dir: Path, diag: Diagnostics) -> SchemaModel:
     """Extract the raw declarations of both layers from the schema documents."""
     build_path = schema_dir / BUILD_DOC
     snapshot_path = schema_dir / SNAPSHOT_DOC
-    build = _read_build(build_path, diag)
-    snapshot, nested = _read_snapshot(snapshot_path, diag)
+    build = _read_build(build_path, BUILD_DOC, diag)
+    snapshot, nested = _read_snapshot(snapshot_path, SNAPSHOT_DOC, diag)
     _check_unique(build, "建置資料庫", diag)
     _check_unique(snapshot, "卡表快照", diag)
     _check_unique(nested, "巢狀型別", diag)

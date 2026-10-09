@@ -4,7 +4,7 @@ This package compiles code-authored declarations into SQLite DDL and owns the
 SQLite boundary. The [product family staging importer](../domains/products/README.md)
 can supply verified family parents and compose with identity staging in one
 transaction. `t0.compile_t0()` supplies the forty production T0 tables from
-`docs/schema/build-db.md`. The regional identity staging importer is described in
+`docs/schema/build/build-db.md`. The regional identity staging importer is described in
 [registry/preview](../domains/registry/preview/README.md); there is no complete build CLI.
 
 ```python
@@ -87,7 +87,7 @@ T0 keeps five future nullable references (art, CR version, DSL document/load and
 keyword) as NULL-only columns. The registry reserves their targets without
 creating empty tables. T0 support rows require `missing_dsl`, null candidate/DSL/
 engine fields, `not_applicable`, nonempty sorted reasons and `automatic=false`.
-The nonempty reasons check implements [snapshot-format §7](../../../../docs/schema/snapshot-format.md#7-發布閘門與變動報告),
+The nonempty reasons check implements [snapshot-format §7](../../../../docs/schema/export/snapshot-format.md#7-發布閘門與變動報告),
 which requires reasons for every non-passed support state. These are derived
 support rows for snapshot construction (build-db §10), not raw candidate input.
 The fixture's `missing_dsl` reason code is an example, not a required value or
@@ -121,8 +121,8 @@ printing by the validator. Passing this schema is not a release acceptance gate.
 
 See SQLite's [foreign key rules](https://www.sqlite.org/foreignkeys.html) and
 [STRICT tables](https://www.sqlite.org/stricttables.html) for native constraint
-semantics. Project table requirements remain in `docs/schema/build-db.md` and
-`docs/schema/implementation-tiers.md`.
+semantics. Project table requirements remain in `docs/schema/build/build-db.md` and
+`docs/schema/build/implementation-tiers.md`.
 
 ## Optional T1 DDL and pipeline readiness
 
@@ -256,7 +256,7 @@ evidence validity.
 The shared raw source boundary in `sve_carddb.build.source_rows` reuses a source
 version only when all metadata matches, with `parser_version=NULL`. Each actual
 use keeps its own parser and archive pin in an immutable input record. The
-[approved contract](../../../../docs/schema/source-archive.md#22-建置-source_record-的投影)
+[approved contract](../../../../docs/schema/ingest/source-archive.md#22-建置-source_record-的投影)
 requires that record alongside the saved DB and report.
 
 ```python

@@ -1,6 +1,6 @@
 # 數位對應採納與名稱證據入口
 
-本文件細化 [build-db §8](build-db.md#8-數位對應與語音) 的 `digital_link`／`digital_link_coverage` 人工入口，及 [翻譯契約 §5／§6](translation-contract.md#5-概念選詞與數位證據) 的名稱使用條件。入口與離線候選工具的實作邊界見 §8；**尚未遷入正式採納資料**，不代表維護者已核可任何新關係。永久身分、數位建置表及公開欄位沿既有契約，不增設平行卡名詞典。本文名稱與驗收情境皆為合成資料。
+本文件細化 [build-db §8](../build/build-db.md#8-數位對應與語音) 的 `digital_link`／`digital_link_coverage` 人工入口，及 [翻譯契約 §5／§6](translation-contract.md#5-概念選詞與數位證據) 的名稱使用條件。入口與離線候選工具的實作邊界見 §8；**尚未遷入正式採納資料**，不代表維護者已核可任何新關係。永久身分、數位建置表及公開欄位沿既有契約，不增設平行卡名詞典。本文名稱與驗收情境皆為合成資料。
 
 ## 1. 範圍與既有接點
 
@@ -99,7 +99,7 @@ links 為排序唯一的 link id（`dl:`…）陣列，恰指本 card/game 本�
 
 SVE 新面／相異名稱 hash 或數位目錄成員／名稱 hash 變動、link 修改／新增／刪除使原 links 精確集合不再相符時，舊完整 coverage 不適用本次範圍；列 stale 原因，不自動改寫成 partial／none。名稱集合、目錄相關內容及 link 集合都未變時，新增同名再錄版次、raw 頁其他欄或建置程式版本改變不要求重新簽 coverage；本次來源仍完整驗回並納入 F1。重新查核後更新 coverage 記錄，舊內容由 Git 保存。as_of 不保證其後新卡仍查完；sv1 仍 frozen，svwb 新來源只用另行封存的明示輸入，不在匯入時連外。
 
-**首批只遷 link，不採納 coverage**，入口不產生 coverage 分片，不為每個 card/game 填 unreviewed 決定。沒有紀錄即未知；官方名稱的選取依 §6 的 fresh link，不以 coverage 是否存在／完成為前提。公開 required 集合仍輸出 `digital_link_coverage=[]`。發布按 [build-db §16／§18](build-db.md#16-發布閘門與投影邊界) 與 [snapshot-format §7](snapshot-format.md#7-發布閘門與變動報告) 驗已啟用能力、已有列及非空引用閉包，不要求每個 card/game 都有 coverage 紀錄。日後若要採納覆蓋，仍沿本節真人門檻；不先放寬 reviewed_none 成純機械採納。
+**首批只遷 link，不採納 coverage**，入口不產生 coverage 分片，不為每個 card/game 填 unreviewed 決定。沒有紀錄即未知；官方名稱的選取依 §6 的 fresh link，不以 coverage 是否存在／完成為前提。公開 required 集合仍輸出 `digital_link_coverage=[]`。發布按 [build-db §16／§18](../build/build-db.md#16-發布閘門與投影邊界) 與 [snapshot-format §7](../export/snapshot-format.md#7-發布閘門與變動報告) 驗已啟用能力、已有列及非空引用閉包，不要求每個 card/game 都有 coverage 紀錄。日後若要採納覆蓋，仍沿本節真人門檻；不先放寬 reviewed_none 成純機械採納。
 
 ## 5. 匯入順序、來源與原子性
 

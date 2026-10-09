@@ -2,7 +2,7 @@ format: 1
 kind: image_crop_overrides
 records:
   # left、width、height 省略時為 36、384、288（倒吊版型 459×641 的共同框）。
-  # 格式見 docs/schema/image-crop-overrides.md。
+  # 格式見 docs/schema/images/image-crop-overrides.md。
   - source_key: sha256:1f9f6e4e05b7af8378c45d7bd5bde1a72d46e2017abe8a6196363aecf1075b02
     source_sha256: d25ea31a34e648e50c16ee47122ffae138a77ed0cd2ad640187106f22317e700
     top: 184

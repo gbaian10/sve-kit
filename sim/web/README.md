@@ -121,9 +121,9 @@ declares them (list a rule twice when it fires twice). Update the fixtures toget
 ## Snapshot reader
 
 `src/data/format-v1/` is the pure core of the card-data reader: no `fetch`, no DOM. It follows
-[docs/schema/snapshot-format.md](../../docs/schema/snapshot-format.md),
-[snapshot-transport.md](../../docs/schema/snapshot-transport.md) and
-[snapshot-contract.md](../../docs/schema/snapshot-contract.md), and mirrors the Python reference
+[docs/schema/export/snapshot-format.md](../../docs/schema/export/snapshot-format.md),
+[snapshot-transport.md](../../docs/schema/export/snapshot-transport.md) and
+[snapshot-contract.md](../../docs/schema/export/snapshot-contract.md), and mirrors the Python reference
 reader in `carddb/src/sve_carddb/export/`.
 
 - `json.ts`: the strict JSON boundary (canonical-json-v1). Microsoft jsonc-parser visits decoded keys and tokens

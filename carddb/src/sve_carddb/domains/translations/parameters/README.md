@@ -5,7 +5,7 @@ parser's scan of explicit sealed JP card batches. It receives reference data and
 an explicit enabled-rule selection, returning candidates, field/span proofs,
 matched rules and remaining causes. It does not allocate IDs, adopt definitions,
 write translations or infer missing concepts. The public field contract remains
-[translation-contract §4](../../../../../../docs/schema/translation-contract.md).
+[translation-contract §4](../../../../../../docs/schema/domains/translation-contract.md).
 
 The historical CLI, catalog comparison, producer/environment pins and evidence
 writers have been removed. No old catalog file or historical replay is required.

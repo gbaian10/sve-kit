@@ -1,6 +1,6 @@
 # identity-transition-v1 loader
 
-The wire contract is [identity repair](../../../../../../docs/schema/identity-repair.md).
+The wire contract is [identity repair](../../../../../../docs/schema/domains/identity-repair.md).
 `load_transitions(authored_root)` is a read-only boundary for the complete
 `identity-transitions/` directory. It does not apply repairs or authorize
 publication. The caller supplies an immutable checkout or holds the existing global

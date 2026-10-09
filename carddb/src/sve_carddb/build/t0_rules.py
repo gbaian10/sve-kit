@@ -1,4 +1,4 @@
-"""T0 declarations from docs/schema/build-db.md; domain validation is separate."""
+"""T0 declarations from docs/schema/build/build-db.md; domain validation is separate."""
 
 from sve_carddb.build.model import (
     Check,

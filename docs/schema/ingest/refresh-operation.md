@@ -29,7 +29,7 @@
 既有不可信來源、目的檔案或未完成任務則停止。即使四項設定完整，也不自動封存或備份；
 部分配置仍在開啟 manifest、連網前拒絕非 dry-run 執行。真實抓取須另獲維護者授權，
 操作方須在抓取前後備份 manifest，抓取後明確 seal 對應 scope、獨立 backup 與本批 restore-check。
-URL、轉址、重試與中斷限制見 [README](../../README.md#adding-reviewed-jp-and-en-errata-sources)。
+URL、轉址、重試與中斷限制見 [README](../../../README.md#adding-reviewed-jp-and-en-errata-sources)。
 
 ### 勘誤新增入口的單一 URL 試跑
 

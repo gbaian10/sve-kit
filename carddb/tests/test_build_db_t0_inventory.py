@@ -17,7 +17,7 @@ from sve_carddb.core.dates import DATE, INSTANT
 if TYPE_CHECKING:
     from collections.abc import Mapping, MutableMapping
 
-DOCS = Path(__file__).resolve().parents[2] / "docs" / "schema"
+DOCS = Path(__file__).resolve().parents[2] / "docs" / "schema" / "build"
 
 
 def _rows() -> dict[str, str]:
