@@ -40,7 +40,7 @@ cards:
 
 各頻次框架均可保存有版本的 DSL 本體；本體版本、精確 frame／semantic_variant、適用域及所有來源用途須可追蹤，不能只記巨集名稱。來源綁定與投影接口依[四層契約 §6／§7](../schema/domains/four-layer-translation.md#6-sourcebindingtrace-與逐-occurrence-位置)，仍組裝既有 A.card／A.ability，不另建每卡語法。body version 不入 frame 身分；呈現、來源語義與本體的版本／失效責任依[四層契約 §8](../schema/domains/four-layer-translation.md#8-建置-dbrender-projection-與依賴)。
 
-每個使用 frame 的 DSL 依賴必納入 §7 的 `interface_key`。建置重算不符即使相依 DSL 的接口連接、用途審查與實跑資格失效並重驗；來源語義及既有引用仍有效的接口描述調整，不重鍵翻譯。存放承載與 stale 比較位置由 [#498](https://github.com/gbaian10/sve-kit/issues/498) 的後續實作定，本節不指定表或新增 meta 欄位。
+每個使用 frame 的 DSL 依賴必納入[四層契約 §7](../schema/domains/four-layer-translation.md#7-規則投影接口)的 `interface_key`。建置重算不符即使相依 DSL 的接口連接、用途審查與實跑資格失效並重驗；來源語義及既有引用仍有效的接口描述調整，不重鍵翻譯。存放承載與 stale 比較位置由 [#498](https://github.com/gbaian10/sve-kit/issues/498) 的後續實作定，本節不指定表或新增 meta 欄位。
 
 ## 2. 能力頭與來源
 

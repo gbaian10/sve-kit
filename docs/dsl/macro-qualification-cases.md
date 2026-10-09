@@ -21,7 +21,9 @@ input 恰含 `fixture` 與 `changes`。先深複製指定 fixture，再依 chang
 | boundary_test | 可 null；非 null 恰為 `{body_version,applicability_scope,result,current,covered_boundaries}`。result=pass/fail，current 為 Bool，covered_boundaries 為唯一字串陣列 |
 | application | 可 null；qualification 案例為 null；use_review 時為下節的逐用途檢查事實 |
 
-frame_id 為完整 `frame:`＋SHA-256 形狀；合成 fixture 視為已驗且存在的 frame 登錄，不聲稱其 hash 是從官方來源算出。所有 resolved key、projection_kind 與 pending scope 沿四層契約，錯來源／引用／型別由該契約拒絕，不以忽略壞列取得資格。
+frame_id 為完整 `frame:`＋SHA-256 形狀；合成 fixture 視為已驗且存在的 frame 登錄，不聲稱其 hash 是從官方來源算出。
+frame hash 含語義變體與 projection_kind，因此同一 frame_id 在全檔只對應一組 semantic_variant 與 projection_kind。
+所有 resolved key、projection_kind 與 pending scope 沿四層契約，錯來源／引用／型別由該契約拒絕，不以忽略壞列取得資格。
 
 applicability_scope 引用合成已審範圍 `fixture.scope`；`fixture.other_scope` 是另一個不適用的範圍。這批案例只測精確登錄範圍的適用與不適用，不定義新的範圍包含算法。written_by 與 model 採測試用模型識別，沒有真實審核者或核可紀錄。
 

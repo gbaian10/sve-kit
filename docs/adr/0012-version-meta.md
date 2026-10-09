@@ -2,8 +2,6 @@
 
 狀態：已採用（2026-09-28）。規則版本：CR 1.27.0。
 
-2026-10-10 依 [#497](https://github.com/gbaian10/sve-kit/issues/497) 修訂框架存放與巨集資格；共用接口依 [ADR-0021](0021-four-layer-translation.md)。本修訂不代表作者 1.0 Schema 或資格 consumer 已實作。
-
 ## 背景
 
 BP21-P53 的進化誘發理解可因 Q2758 得到澄清，CP04-P86 的 UB 歷史需依 Q2391 修改模型。卡文未變不表示解譯未變；只有 review:ok 無法分辨這張卡依哪份規則、哪版 lowering 測過。BP01-T10 的 Stack 說明依 CR 13.3.2.2–.3 是規則展開，不是另一個 destroy 能力，R-0008 的更新也必須能觸發受影響卡重驗。
@@ -12,17 +10,13 @@ DSL 格式、卡表快照與規則證據的版本服務不同目的。把三者�
 
 ## 決定
 
+2026-10-10 [#497](https://github.com/gbaian10/sve-kit/issues/497) 修訂註記（以下原文為歷史決定）：框架存放、合格巨集資格、reviewed 條件與反向索引改依[〈2026-10-10 框架存放與巨集資格〉](#2026-10-10-框架存放與巨集資格)，與原文衝突處以該節為準；版本分工、meta 欄位與其餘決定不變。
+
 DSL 用主版.次版，schema=sve-author/1.0。次版只能相容新增：舊資料無須修改且降低語義不變；不相容 IR 或既有語法語義變更升主版。不能以 bugfix 名義在次版悄悄改變既有卡行為。卡表快照版本、CR／裁定版本與引擎版本獨立記錄。
 
 每卡 meta 必有 dsl、source、written_by、reviewed_by、status；另保存 verified_by_exam、rulings。generated_by 於巨集產物必填 macro ID、version、params。source 為卡文／面／token 歸屬依指定正規化版本產生的 hash，資料集 provenance 另存完整快照 hash 和 CR 版本。日期與身份由工具從真實作業填入，不預填未發生的審查。
 
-各頻次框架都可存放及重用有版本的 DSL 本體；版本、精確 frame／語義變體、適用域與所有來源用途須可追蹤。1～2 張不同卡的本體與每個用途依逐卡標準接受與作者不同模型的獨立語義審核，不因共用存放而自動 reviewed。同一 resolved 語義變體達至少 3 張不同卡（卡名概念＋是否進化；重印／異圖不累計），且完成兩個不同模型各自獨立審核、適用邊界測試及版本／適用域登錄，才取得合格巨集資格；作者不得自審。非本體行及 pending 語義不累計資格，純術語／形式／顯示 NP 不屬巨集，詳見[作者語法 §10](../dsl/author-syntax-1.0.md#10-巨集規範)。
-
-狀態為 draft、reviewed、verified、disputed。reviewed 需上述逐用途獨立審核，或已合格巨集的每用途三項檢查：精確 frame／variant 與已審適用域、完整 typed 參數及來源角色、由實際 DSL 構造生成的反向日文與來源一致；不能回放原文代替反譯。任一不通過、超域或有未解語義就退回逐用途審核。verified 需該版本引擎實跑證據。主版遷移後 verified 至少降 reviewed 並標 review_required；如果語義映射有歧義，降 draft／disputed，而不是假裝仍已審妥。原 draft 不升 reviewed，原 disputed 不消失。
-
-2→3 張時升級同一版本本體的資格，不搬移本體；只有對該版本、該適用域仍有效的審核與測試可採計。本體、來源語義或適用域改動須按反向用途索引重驗；中文形式、譯名字串與 NP 覆蓋改動不自動改 DSL 語義。body version 不入 frame 身分，呈現與語義依賴分開。
-
-依[四層契約 §7／§8](../schema/domains/four-layer-translation.md#7-規則投影接口)，每個使用 frame 的 DSL 依賴必納入 `interface_key`；建置重算不符即使相依 DSL 的接口連接、用途審查與實跑資格失效並重驗。來源語義與既有引用仍有效的接口描述調整，不重鍵翻譯。存放承載與 stale 比較位置由 [#498](https://github.com/gbaian10/sve-kit/issues/498) 後續實作定，不在此選表或新增 meta 欄位。
+狀態為 draft、reviewed、verified、disputed。reviewed 需獨立審核或已合格巨集逐卡三項檢查；verified 需該版本引擎實跑證據。主版遷移後 verified 至少降 reviewed 並標 review_required；如果語義映射有歧義，降 draft／disputed，而不是假裝仍已審妥。原 draft 不升 reviewed，原 disputed 不消失。
 
 來源／裁定／巨集變動依依賴反查需要重審者。舊測試結果保存其版本，不能繼續作為新版 verified 的證據。自動執行只使用 capability 與驗收狀態滿足要求的能力；未驗收者明示可用範圍，不用人工旗標冒充規則支援。
 
@@ -37,8 +31,22 @@ DSL 用主版.次版，schema=sve-author/1.0。次版只能相容新增：舊資
 
 ## 後果
 
-工具需來源正規化版本、框架本體／版本的反向用途索引與裁定適用索引；巨集資格與逐用途 reviewed／verified 分別判定。資格的固定輸入／預期見[資格案例規格](../dsl/macro-qualification-cases.md)，後續 consumer 尚須實作與驗收。沒有正式 v0 卡片 YAML 時不假造卡片 meta 遷移成果；分類標註轉換只建立新的 draft／needs_review 記錄。
+工具需來源正規化版本、巨集反向索引與裁定適用索引。沒有正式 v0 卡片 YAML 時不假造卡片 meta 遷移成果；分類標註轉換只建立新的 draft／needs_review 記錄。
 
 ## 未決事項
 
 repo 各產物 tag、快照語義版號及發布節奏需另訂 release policy；此處只固定 DSL 相容承諾。verified 的自動降級規則與依賴粒度待工具實作，但任何缺證據狀態均不可冒填實跑結果。
+
+## 2026-10-10 框架存放與巨集資格
+
+依 [#497](https://github.com/gbaian10/sve-kit/issues/497) 修訂，共用接口依 [ADR-0021](0021-four-layer-translation.md)；本節取代上列的 reviewed 條件與後果中的巨集反向索引。本修訂不代表作者 1.0 Schema 或資格 consumer 已實作。
+
+各頻次框架都可存放及重用有版本的 DSL 本體；版本、精確 frame／語義變體、適用域與所有來源用途須可追蹤。1～2 張不同卡的本體與每個用途依逐卡標準接受與作者不同模型的獨立語義審核，不因共用存放而自動 reviewed。同一 resolved 語義變體達至少 3 張不同卡（卡名概念＋是否進化；重印／異圖不累計），且完成兩個不同模型各自獨立審核、適用邊界測試及版本／適用域登錄，才取得合格巨集資格；作者不得自審。非本體行及 pending 語義不累計資格，純術語／形式／顯示 NP 不屬巨集，詳見[作者語法 §10](../dsl/author-syntax-1.0.md#10-巨集規範)。
+
+reviewed 需上述逐用途獨立審核，或已合格巨集的每用途三項檢查：精確 frame／variant 與已審適用域、完整 typed 參數及來源角色、由實際 DSL 構造生成的反向日文與來源一致；不能回放原文代替反譯。任一不通過、超域或有未解語義就退回逐用途審核。verified 仍需該版本引擎實跑證據，主版遷移的降級規則不變。
+
+2→3 張時升級同一版本本體的資格，不搬移本體；只有對該版本、該適用域仍有效的審核與測試可採計。本體、來源語義或適用域改動須按反向用途索引重驗；中文形式、譯名字串與 NP 覆蓋改動不自動改 DSL 語義。body version 不入 frame 身分，呈現與語義依賴分開。
+
+依[四層契約 §7／§8](../schema/domains/four-layer-translation.md#7-規則投影接口)，每個使用 frame 的 DSL 依賴必納入 `interface_key`；建置重算不符即使相依 DSL 的接口連接、用途審查與實跑資格失效並重驗。來源語義與既有引用仍有效的接口描述調整，不重鍵翻譯。存放承載與 stale 比較位置由 [#498](https://github.com/gbaian10/sve-kit/issues/498) 後續實作定，不在此選表或新增 meta 欄位。
+
+工具需框架本體／版本的反向用途索引；巨集資格與逐用途 reviewed／verified 分別判定。資格的固定輸入／預期見[資格案例規格](../dsl/macro-qualification-cases.md)，後續 consumer 尚須實作與驗收。
