@@ -6,7 +6,8 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "version",
+    "format",
+    "kind",
     "scope",
     "input",
     "titles",
@@ -14,8 +15,12 @@
     "evidence"
   ],
   "properties": {
-    "version": {
-      "const": "engine-rules/1"
+    "format": {
+      "type": "integer",
+      "const": 1
+    },
+    "kind": {
+      "const": "engine_rules"
     },
     "scope": {
       "type": "object",
