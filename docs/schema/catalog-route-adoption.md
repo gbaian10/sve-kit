@@ -27,7 +27,7 @@
 | `catalog/overrides/<area>/<sequence>.yaml` | `format: 2, kind: display_override_shard, records` |
 
 catalog 的 area 為 vocabulary／languages／aliases／symbols／rules-names；display 為 routes／defaults。
-sequence 為三位以上十進位序號，允許缺號；area 下直接放分片。records 非空，每片的 kind 須符合 area。
+sequence 為三位以上十進位序號，允許缺號；area 下直接放分片，含子目錄即拒絕，不當成空區。records 非空，每片的 kind 須符合 area。
 YAML、單檔小於 1 MiB、路徑安全與固定目錄掃描依 [authored-layout](authored-layout.md#2-分片與來源)。
 拒絕未知欄位、重複 YAML 鍵、symlink 及跨入口資料；載入後排序，不要求作者先排序。
 

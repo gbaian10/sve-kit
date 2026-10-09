@@ -28,7 +28,8 @@ filing_key 為 `[A-Za-z0-9_-]+`，sequence 為三位以上十進位字串；不�
 
 | 檔案 | 完整頂層欄位 |
 | --- | --- |
-| `translations/{glossary,templates,overrides}/<filing_key>/<sequence>.yaml` | `format: 2, kind: translation_shard, records` |
+| `translations/{glossary,overrides}/<filing_key>/<sequence>.yaml` | `format: 2, kind: translation_shard, records` |
+| `translations/templates/{definitions,values,candidates}/<sequence>.yaml` | `format: 2, kind: translation_shard, records` |
 
 翻譯入口只接受 format 2 分片；glossary 與模板 reader 共用已載入的資料。
 模板來源清冊在建置時產生，不進 Git，見[清冊契約](template-source-replay.md)。
