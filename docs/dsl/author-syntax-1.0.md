@@ -38,7 +38,7 @@ cards:
 
 這是容器示意；§13 的真實例子則省略工具自動填入的 meta，只列指定能力行或指定構造片段，並明示片段範圍。meta 的規範見 [ADR-0012](../adr/0012-version-meta.md)：`draft → reviewed → verified`，爭議為 `disputed`。逐卡本體與每個用途須經與作者不同模型的獨立語義審核；只有已取得 §10 資格的巨集，才可由每用途三項機械檢查取得 reviewed。共用框架存放或頻次達標不會自動 reviewed；該版本引擎實跑才可 verified。`rulings` 指裁定 ID，不直接堆 Q&A；巨集產物另記 `generated_by: {macro, version, params}`。舊 `review / ruling` 不沿用為驗收狀態。
 
-各頻次框架均可保存有版本的 DSL 本體；本體版本、精確 frame／semantic_variant、適用域及所有來源用途須可追蹤，不能只記巨集名稱。來源綁定與投影接口依[四層契約 §6／§7](../schema/domains/four-layer-translation.md#6-sourcebindingtrace-與逐-occurrence-位置)，仍組裝既有 A.card／A.ability，不另建每卡語法。body version 不入 frame 身分；呈現、來源語義與本體的版本／失效責任依[四層契約 §8](../schema/domains/four-layer-translation.md#8-建置-dbrender-projection-與依賴)。
+各頻次框架都可存放及重用有版本的 DSL 本體；版本、精確 frame／語義變體、適用域與所有來源用途須可追蹤，不能只記巨集名稱。來源綁定與投影接口依[四層契約 §6／§7](../schema/domains/four-layer-translation.md#6-sourcebindingtrace-與逐-occurrence-位置)，仍組裝既有 A.card／A.ability，不另建每卡語法。body version 不入 frame 身分；呈現、來源語義與本體的版本／失效責任依[四層契約 §8](../schema/domains/four-layer-translation.md#8-建置-dbrender-projection-與依賴)。
 
 每個使用 frame 的 DSL 依賴必納入[四層契約 §7](../schema/domains/four-layer-translation.md#7-規則投影接口)的 `interface_key`。建置重算不符即使相依 DSL 的接口連接、用途審查與實跑資格失效並重驗；來源語義及既有引用仍有效的接口描述調整，不重鍵翻譯。存放承載與 stale 比較位置由 [#498](https://github.com/gbaian10/sve-kit/issues/498) 的後續實作定，本節不指定表或新增 meta 欄位。
 
@@ -211,9 +211,9 @@ Until 保留 turn、next_opp_turn、this_and_next_opp_turn、game；明確長形
 
 ### 10.1 存放與資格
 
-句框架的 DSL 本體不分使用頻次，均可保存並重用。只有 1～2 張不同卡的本體及每個用途，仍依逐卡標準接受與作者不同模型的獨立語義審核；引用同一框架不能自動取得 reviewed。
+各頻次框架都可存放及重用有版本的 DSL 本體；版本、精確 frame／語義變體、適用域與所有來源用途須可追蹤。只有 1～2 張不同卡的本體及每個用途，仍依逐卡標準接受與作者不同模型的獨立語義審核；引用同一框架不能自動取得 reviewed。
 
-同一 resolved 語義變體由至少 3 張不同卡使用，且完成兩個不同模型各自的獨立審核、適用邊界測試及版本／適用域登錄，才取得合格巨集資格。作者不得自審。不同卡以「卡名概念、是否進化」計，進化前後分開；重印與異圖不重複計。不同變體不得合計，中文文字相同也不證明相同語義。
+同一 resolved 語義變體達至少 3 張不同卡（卡名概念＋是否進化；重印／異圖不累計），且完成兩個不同模型各自獨立審核、適用邊界測試及版本／適用域登錄，才取得合格巨集資格；作者不得自審。進化前後分開計；不同變體不得合計，中文文字相同也不證明相同語義。
 
 本體保存撰寫者、審核者、版本與適用域；邊界測試須含 0 張、無合法目標、大數值、時點／資訊邊界。頻次滿足只是 `threshold_eligible`，不是 `qualified`。2→3 張時升級同一版本本體的資格，不搬移本體；只採計對該版本、該適用域仍有效的審核與測試。
 
