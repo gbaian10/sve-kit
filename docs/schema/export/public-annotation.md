@@ -59,7 +59,7 @@ ID 是非空公開識別；Code 沿既有 ASCII 規則；Lang 須在本快照 la
 | --- | --- | --- |
 | AnnotationRange | start, end | 巢狀 tuple |
 | Annotation | ordinal, reference, ranges, bold | 巢狀 tuple；ordinal 於 set 內唯一 |
-| annotation_set | id, text_unit_id, occurrences | PK id；按列分 bootstrap／detail |
+| annotation_set | id, text_unit_id, occurrences | PK id；按列分 bootstrap／detail；只出被 field_annotation 或 translation 引用的列 |
 | PublicTextPointer | owner, field, ordinal | 巢狀 tuple；owner 是下述封閉 JSON |
 | field_annotation | owner, field, ordinal, annotation_set_id | 複合 PK 前三格；原文用途唯一 |
 | annotation_concept | id, category, explanations, card_ids | PK id；只有實際 annotation 引用的概念 |
@@ -87,7 +87,9 @@ descriptor 使用 `{"json":"型別名"}`；不是可執行 schema 或任意 obje
 | field_annotation.owner／field／ordinal | PublicTextPointer 三格；必填；只有 ordinal 可 null | §2.3 的 owner／欄位／段落必存在且唯一；不憑相同 text 借用用途；PA-05 |
 | field_annotation.annotation_set_id | ID；必填非 null | 指非空 annotation_set，text ID 等於該 owner 欄位；原文有 occurrence 時即使無譯文也必有這列；PA-05／PA-10 |
 
-公開投影只為非空集合產生 annotation_set／field_annotation 列。已知原文字段沒有 field_annotation 時，
+公開投影只為非空集合產生 annotation_set／field_annotation 列。
+完整載入後未被任何 field_annotation 或 translation 引用的 annotation_set 列由 P 移除；R 遇到即以 reference 拒絕（PA-06）。
+已知原文字段沒有 field_annotation 時，
 其公開 occurrence 為空；空字串亦如此。這不宣稱原文沒有術語，只表示沒有可公開的已解析 occurrence。
 未知 null 原文不造空字串／集合／用途列；缺列不免除 owner、field 與 exact text 的存在檢查。
 P 逐用途比對來源／render occurrence，驗證所有非空集合及其引用均已投影；漏列由 P 拒絕，
@@ -285,8 +287,8 @@ W-only 的語言／資格案例驗具體成功結果，P-only 的來源真實性
 | format／reader_version／capability | 未支援版本、minimum、能力未知／缺少／亂序／重複 | PA-01 |
 | shape／enum／tuple／descriptor | 必填／nullable／額外欄、未知 basis、長度、欄序 | PA-02 |
 | duplicate_key | 重複公開主鍵或複合鍵（含父 owner 內 FieldTranslation 的 field/ordinal/target_lang） | PA-03／PA-05／PA-06 |
-| reference／owner／text_identity | 缺公開目標、錯 card／face／模式、text 不相等 | PA-03／PA-05／PA-06／PA-07 |
-| range／ordering | 負值／空／超界／重疊、ordinal 或集合排序錯 | PA-04／PA-09 |
+| reference／owner／text_identity | 缺公開目標、未被引用的 annotation_set、錯 card／face／模式、text 不相等 | PA-03／PA-05／PA-06／PA-07 |
+| range／ordering | 負值／空／超界／重疊、ordinal 或集合排序錯、排序唯一陣列的重複元素 | PA-04／PA-06／PA-09 |
 | identity | exact text ID 或 annotation-v1 hash 錯配 | PA-03 |
 | basis | own_source／jp_source／counterpart 的語言、來源或品質組合矛盾 | PA-07／PA-08 |
 | source_invalid | P 才能驗的缺來源、過期或未確認來源身分 | PA-08 |
@@ -295,6 +297,7 @@ W-only 的語言／資格案例驗具體成功結果，P-only 的來源真實性
 Schema 可先定位結構型錯誤；各案例只引入一個目標違規，已壞的負數 range 統一歸 range 而不是任意 shape。
 Schema 的 enum／tuple／形狀錯誤按對應分類；owner／range／basis 的專屬條件即使由 Schema 捕獲，仍回該責任分類。
 公開主鍵／複合鍵重複一律歸 duplicate_key，無論同鍵內容相同或不同，在引用與 hash 檢查前拒絕；
+陣列內重複元素（card_ids、explanations 等排序唯一陣列）歸 ordering。
 JSON object 的重複鍵仍歸 wire，occurrence ordinal 與 range 次序仍依 ordering／range。
 多重語義違規先驗公開引用與 text，再驗座標／身分與 basis；同類按公開主鍵及欄序，不先重算 hash 掩蓋錯 owner 或 range。
 案例 mutation 可以故意不重算 ID，用來證明先抓目標錯誤；完整 reader harness 必重釘有效的外層檔案 bytes/hash

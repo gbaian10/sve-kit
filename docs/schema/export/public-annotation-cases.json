@@ -2078,6 +2078,26 @@
       },
       "expected": {
         "result": "reject",
+        "reason": "ordering"
+      }
+    },
+    {
+      "group": "PA-06",
+      "id": "unreferenced-annotation-set",
+      "operation": "read_projection",
+      "input": {
+        "fixture": "jp_en",
+        "changes": {
+          "/annotation_sets": [
+            ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
+            ["ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015", "t:en:4fc8efb088bdae58", [[0, {"kind": "glossary", "key": "term:hand"}, [[7, 11]], false]]],
+            ["ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e", "t:zh-Hant:fe648ccc6a92aa85", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
+            ["ann:d3de5fba61ac4a0eda3aa7ecf82a15f34cc297a90f8290d8e2d3f286cd184400", "t:ja:c74c4bf0a7a5dea4", [[0, {"kind": "glossary", "key": "term:hand"}, [[0, 2]], false]]]
+          ]
+        }
+      },
+      "expected": {
+        "result": "reject",
         "reason": "reference"
       }
     },

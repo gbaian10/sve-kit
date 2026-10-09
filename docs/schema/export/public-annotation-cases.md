@@ -59,7 +59,7 @@ translations 為 `[[translation_id,annotation_set]]`。harness 把這些明列 o
 harness 將使用到的情境嵌入隔離的完整 3.0 合成卡表，補齊既有格式必要的非本單欄位，按 PK 排序與裝檔。
 未被情境使用的 scaffolding 不得改變 oracle；可用預先固定的最小 baseline，不能由 production producer 生成預期結果。
 測試選擇撤掉 translation 等列時，harness 同步裁掉純粹失去用途的 scaffolding 閉包，
-但不得刪掉本例故意引入的懸空引用、補回缺失目標或修復錯誤資料。
+但不得刪掉本例故意引入的懸空引用或未被引用列、補回缺失目標或修復錯誤資料。
 
 read_projection 的 accept 結果是情境最後一個 FieldTranslation（一般為 EN receiver）的來源 owner kind、
 source／target exact text ID；display 則按 input.receiver／ui_lang／mode 取用，逐值比對 expected。
@@ -84,7 +84,7 @@ fixture 未按公開排序保存是為了固定 mutation 位置；裝檔時按 P
 | PA-03／annotation_identity、shared_annotation、read_projection | exact hash、同文字不同概念或 bold、同 set 多 owner、錯 source／target text；獨立固定完整 ann hash |
 | PA-04／unicode_ranges、read_projection | 負值／空／逆序／越界／不安全整數／Bool、UTF-16 錯座標、range／occurrence 重疊、跳 ordinal、多次／多段引用 |
 | PA-05／owner_field、read_projection、produce | 所有 owner 及 field、keyword action、P 漏掉非空原文／譯文 annotation、錯面、借同字串、printed/current 混用、null definition |
-| PA-06／concept_references、read_projection | glossary／vocabulary／card_name 到公開目標，category、雙鍵、卡片／說明正文閉包、缺 translation／text／set |
+| PA-06／concept_references、read_projection | glossary／vocabulary／card_name 到公開目標，category、雙鍵、卡片／說明正文閉包、缺 translation／text／set、未被引用的 set、排序唯一陣列 |
 | PA-07／read_projection | own_source／jp_source／官方 counterpart、exact 原文、語言／authority、錯 card／face、未確認 mapping、EN 套 JP offset、禁止 JP section 拼接 |
 | PA-08／display、produce、schema | 無 aligned／已知 divergence 仍顯示 JP 繁中，完整 JP effect、規則限制保留；來源 freshness／採納只由 produce 驗；不造 aligned 欄 |
 | PA-09／unicode_ranges、canonical_bytes | 非 BMP、組合字元、CRLF、NFKC 改長度與 wrong text identity、未配對 surrogate；CP→UTF-16 固定邊界表及切片 |

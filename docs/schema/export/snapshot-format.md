@@ -97,7 +97,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 
 新增巢狀型別 AnnotationRange／Annotation／PublicTextPointer 與有限 JSON reference 的逐欄型別、required/null、
 合法域、驗證者及反例 ID 依[公開 annotation §2](public-annotation.md#2-公開型別欄序與欄位責任)，是本白名單的一部分。
-只公開非空 annotation_set／field_annotation；相關分片完整載入驗畢後，缺原文用途列表示空集合。
+只公開非空且被引用的 annotation_set 與非空 field_annotation；相關分片完整載入驗畢後，缺原文用途列表示空集合。
 translation.annotation_set_id 必填，null 表示譯文空集合；非 null 引用仍須存在，不能降為空。
 producer 以來源／render occurrence 驗省略完整性；reader 不從缺列推論原文沒有術語。
 
