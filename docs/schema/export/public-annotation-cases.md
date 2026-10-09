@@ -11,9 +11,13 @@ cases 每筆恰有 `{group,id,operation,input,expected}`；完整案例 ID 是 `
 expected 的 result 為 accept／reject，reject.reason 是固定責任分類，不要求 Python／TS 例外文字相同。
 accept 中列出的欄位都要逐值比對；不能只驗「沒有拋錯」。
 
-`input.fixture` 指 fixtures 的鍵，深複製後依 `changes` 的 JSON Pointer→值替換；空 pointer 代表整個輸入。
+`input.fixture` 指 fixtures 的鍵。先展開 fixture，再深複製後依 `changes` 的 JSON Pointer→值替換；空 pointer 代表整個輸入。
 changes 依檔案中順序處理，不建立中間缺失的節點，只允許新增 object 的最末鍵。
 `remove` 其後逐項刪除指定欄／陣列元素，目標必須存在；無 changes／remove 就保留原值。
+`printed`、`mixed_mode`、`counterpart`、`different_sections`、`printed_borrows_current`、`undecided_bold`、`enabled_bold`
+七個 fixture 只存 `{fixture:"jp_en",changes,remove}` overlay，套用相同 mutation 規則；只准直接引用 jp_en，不串接 overlay。
+`input.variants` 若存在，須為非空陣列，每項只有 changes／remove；各自從完成 input mutation 的獨立複本執行，
+每項都須符合該案例的同一 expected，不累積前一項的修改。未提供時只執行一次。
 input 其他欄位是操作參數，不混入公開列。含 raw_json 的案例保留字面 bytes，不先 parse/stringify 修復。
 
 Schema 操作以 `#/$defs/<definition>` 驗個別元件；`Admission` 只驗 manifest 的三個准入欄，
@@ -22,9 +26,15 @@ Schema 操作以 `#/$defs/<definition>` 驗個別元件；`Admission` 只驗 man
 整數的 `1.0` 表示、surrogate、重複鍵與 canonical bytes 須在 JSON 值失去原表示前驗。
 Schema 不可代替跨列引用、座標上限／重疊、ordinal／集合排序及 hash 檢查。
 
+PA-02 的 tuple 長度檢查另有必跑規則：列舉 Schema `$defs` 中**所有**帶 `x-columns` 的定義（目前九種），
+各取相同 input.definition、expected=accept、無 changes／remove／variants 的唯一 schema 案例作基準。
+先驗基準，再各自刪末格／附加 null，兩者皆須以 tuple 拒絕；衍生 ID 為 `PA-02/tuple-lengths/<definition>/short|long`。
+缺基準、基準不唯一或新增型別漏跑均失敗。JSON 只留 short-translation／long-fieldtranslation 兩筆代表；
+它們不能取代此規則，也不把九種長度反例各存一份。
+
 ## 2. projection fixture 與真實 reader 接線
 
-`jp_en`、`printed`、`mixed_mode`、`counterpart`、`different_sections` 是同一種測試情境物件，
+`jp_en` 及七個 overlay 展開後是同一種測試情境物件，
 不是新增公開封套或第二份卡表。其明列資料如下。
 
 | fixture 欄位 | 內容／harness 責任 |
@@ -39,6 +49,11 @@ Schema 不可代替跨列引用、座標上限／重疊、ordinal／集合排序
 | explanation_targets | `{kind,id,text_unit_id?}`；還原 keyword.definition／CR.text／ruling.decision 的公開閉包；null 表示缺正文 |
 | support | region、shared_status、override_status、region_blocks；按既有 Support 順序驗有效狀態，不以 JP basis 改資格 |
 | producer | source_exists／source_fresh／identity_confirmed／source_adopted／aligned／divergent／counterpart_fresh；全部是 P-only 的建置背景，不序列化到公開快照 |
+
+`input.producer_annotations` 是 P-only 省略反例的固定投影前資料：fields 為 `[[PublicTextPointer,annotation_set]]`，
+translations 為 `[[translation_id,annotation_set]]`。harness 把這些明列 occurrence 當來源／render 的合成輸入，
+與 mutation 後的用途／譯文投影比對，不從已缺列的公開輸出反推預期，也不序列化成新證據層。
+其他 produce 案例只針對 producer 表內的來源先決條件；不能以這些布林背景取代實作中的真實檢查。
 
 只有 fixture 明列的 owner／field／text 才存在；未列的不補默認文字或用途。
 harness 將使用到的情境嵌入隔離的完整 3.0 合成卡表，補齊既有格式必要的非本單欄位，按 PK 排序與裝檔。
@@ -68,21 +83,26 @@ fixture 未按公開排序保存是為了固定 mutation 位置；裝檔時按 P
 | PA-02／schema、descriptor、canonical_bytes | 各新／改 tuple 的 valid／少格／多格、未知及退役 basis、品質型別、私有鍵、descriptor 換欄、JSON 原始表示 |
 | PA-03／annotation_identity、shared_annotation、read_projection | exact hash、同文字不同概念或 bold、同 set 多 owner、錯 source／target text；獨立固定完整 ann hash |
 | PA-04／unicode_ranges、read_projection | 負值／空／逆序／越界／不安全整數／Bool、UTF-16 錯座標、range／occurrence 重疊、跳 ordinal、多次／多段引用 |
-| PA-05／owner_field、read_projection | 所有 owner 及 field、keyword action、缺原文 annotation、錯面、借同字串、printed/current 混用、null definition |
+| PA-05／owner_field、read_projection、produce | 所有 owner 及 field、keyword action、P 漏掉非空原文／譯文 annotation、錯面、借同字串、printed/current 混用、null definition |
 | PA-06／concept_references、read_projection | glossary／vocabulary／card_name 到公開目標，category、雙鍵、卡片／說明正文閉包、缺 translation／text／set |
 | PA-07／read_projection | own_source／jp_source／官方 counterpart、exact 原文、語言／authority、錯 card／face、未確認 mapping、EN 套 JP offset、禁止 JP section 拼接 |
 | PA-08／display、produce、schema | 無 aligned／已知 divergence 仍顯示 JP 繁中，完整 JP effect、規則限制保留；來源 freshness／採納只由 produce 驗；不造 aligned 欄 |
 | PA-09／unicode_ranges、canonical_bytes | 非 BMP、組合字元、CRLF、NFKC 改長度與 wrong text identity、未配對 surrogate；CP→UTF-16 固定邊界表及切片 |
-| PA-10／display、unicode_ranges、annotation_emphasis | 日／英 UI 不回繁中、無譯文原文位置仍在、加粗開關、低信心、空字串與非法空字串 span |
+| PA-10／display、unicode_ranges、annotation_emphasis | 日／英 UI 不回繁中、無譯文非空原文位置仍在、空集合缺列／null、加粗開關、低信心、空字串與非法空字串 span |
 | PA-11／size_accounting | 以實際整檔按 key 去重；混區檔全額計各區、annotation／說明屬文字、media 計首屏、text_all 是替代、增量不重複加總 |
 
 unicode_ranges 先驗 text identity／set 的 text 引用與 scalar 字串，再驗各 range／ordinal，最後驗 annotation hash。
+此操作的 annotation_set=null 表示未公開集合，只驗 exact text，切片為空；非 null set 仍須非空。
 expected.slices 與 utf16_ranges 按 occurrence、再按 ranges 順序展平；不把多段引用中間的字也加粗。
 annotation_identity 驗每個固定 hash 與 distinct；shared_annotation 驗用途不能因 set 去重而消失。
 annotation_emphasis 驗 glossary category 及 vocabulary class/type 的固定加粗規則，不由文字猜類別。
 concept_references 驗所有明列概念／引用／說明／卡片的閉包與 category，不要求有翻譯才能打開說明。
 owner_field 只驗給定的來源 owner／field 定位；不自行生成另一個原文來源。
 produce 驗 P-only 的先決條件；不能拿公開 reader 接受結構正確的 bytes 算 P 的反例失敗。
+原 PA-05/missing-original-annotation 的 reader 拒絕預期隨稀疏契約退役，改由
+PA-05/producer-omits-nonempty-annotation 驗投影完整性。PA-10/sparse-annotations-display 則驗 R／W
+在完整載入後將缺 field_annotation 與 null translation.annotation_set_id 當空集合，文字與來源仍存在；
+no-translation-original-annotation-remains 保留非空原文位置，不能因沒有譯文便裁掉。
 display 的 grants_aligned／grants_official_counterpart 固定 false，表示本次 JP 顯示不授資格，
 不是覆寫既有獨立核對紀錄。size_accounting 的 bytes 是合成算例，`capacity_acceptance=not_measured`。
 

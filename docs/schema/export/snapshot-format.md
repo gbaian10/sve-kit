@@ -43,12 +43,12 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | `art` | `id, card_id, face_id, classification, review_level, regions:[region], artists:[{artist_id,role}]` | 每圖一格、只看異畫、繪師瀏覽 |
 | `artist` | `id, display_name` | 畫師名稱/篩選 |
 | `stamp` | `id, code, series_code?, text_raw, kind, displayed_year?, review_level` | 大賽標誌搜尋，不捏造場次 |
-| `annotation_set` | `id, text_unit_id, occurrences:[Annotation]` | 精確文字及概念位置；同文字不同概念分集合，ID 依 annotation-v1 |
-| `field_annotation` | `owner:PublicTextOwner, field, ordinal?, annotation_set_id` | 複合 PK(owner,field,ordinal)；原文不依賴譯文也有位置 |
+| `annotation_set` | `id, text_unit_id, occurrences:[Annotation]` | 非空概念位置集合；同文字不同概念分集合，ID 依 annotation-v1 |
+| `field_annotation` | `owner:PublicTextOwner, field, ordinal?, annotation_set_id` | 複合 PK(owner,field,ordinal)；原文有 occurrence 時不依賴譯文也有位置 |
 | `annotation_concept` | `id, category, explanations:[ExplanationReference], card_ids:[id]` | 必要公開概念、說明及已確認卡名目標；不是 DB glossary／採納紀錄 |
 | `text_unit` | `id, lang, text` | 全卡原文/譯文/問答/詞彙字串去重 |
 | `face_revision` | `id, face_id, region, revision, effective_from?, effective_until?, temporal_status, change_kind, name_unit_id, effect_unit_id, class_code?, type_code, cost?, attack?, defense?, traits:[code], titles:[code], special_kinds:[code], sections:[Section], translations:[FieldTranslation], corrections:[Correction]` | 現行與歷史卡文、數值、翻譯、更正徽章 |
-| `translation` | `id, source_unit_id, target_lang, text_unit_id, origin, authority, low_confidence, annotation_set_id` | 只收當前有效選用譯文；來源類別與 authority 分開，低信心仍顯示並標待校對 |
+| `translation` | `id, source_unit_id, target_lang, text_unit_id, origin, authority, low_confidence, annotation_set_id?` | 只收當前有效選用譯文；來源類別與 authority 分開，低信心仍顯示並標待校對 |
 | `qa` | `id, region, official_number?, source_url, current_version_id?` | 官方問答編號與連結 |
 | `qa_version` | `id, qa_id, revision, published_on?, updated_on?, date_raw?, question_unit_id, answer_unit_id, state, cards:[card_id], translations:[FieldTranslation]` | 問答全文/卡片關聯/同日歷史更新 |
 | `cr_version` | `id, region, version, published_on?, effective_on?, source_url` | 輔助提示的規則版本 |
@@ -97,6 +97,9 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 
 新增巢狀型別 AnnotationRange／Annotation／PublicTextPointer 與有限 JSON reference 的逐欄型別、required/null、
 合法域、驗證者及反例 ID 依[公開 annotation §2](public-annotation.md#2-公開型別欄序與欄位責任)，是本白名單的一部分。
+只公開非空 annotation_set／field_annotation；相關分片完整載入驗畢後，缺原文用途列表示空集合。
+translation.annotation_set_id 必填，null 表示譯文空集合；非 null 引用仍須存在，不能降為空。
+producer 以來源／render occurrence 驗省略完整性；reader 不從缺列推論原文沒有術語。
 
 卡表快照的 `card_engine_support.shared` 可以是 `missing_dsl`；EN-only 文件放 overrides；`region_blocks` 至少含未確認對應/語義差異/未有該區來源的理由。消費優先選 region override，否則 shared，最後套 `region_blocks`；block 強制手動且合併 reasons。若選中 `status=engine_passed` 但有 block，該區 `effective_status` 降為 reviewed（顯示「共用實作已審核，此區待核對」），不能在未實作清單顯示此區已通過。其餘四態保留並附區域原因；automatic 恰為 `effective_status=engine_passed`。不得從沒有 override 推斷「英版已確認」；block 完整性是發布閘門。
 
@@ -106,7 +109,7 @@ translation 僅輸出上述欄位，用 `text_unit_id` 取譯文；同一 chosen
 
 ### 2.1 獨立影像清單與 DSL 附件
 
-2.0.0 的三個影像集合如下。
+3.0.0 沿用 2.0.0 的三個影像集合如下。
 
 | 集合 | 公開欄位 | 鍵與用途（未註明 PK 者以首欄 `id` 為 PK） |
 | --- | --- | --- |
@@ -144,7 +147,7 @@ DSL 程式包（`dsl-programs`）不是集合；封套及 AST 驗證統一依 [�
 
 ### 2.3 表記未定的公開呈現
 
-**使用者 2026-10-01 核可本節暫顯規則**：觀測有差異、沒有舊 current 的卡仍可讀，不因未採納排除。以下公開欄位擴充對應 §2 白名單。公開形狀、Schema／types／golden 與 reader 依目前 2.0 的 [snapshot-contract](snapshot-contract.md) 同步維護。
+**使用者 2026-10-01 核可本節暫顯規則**：觀測有差異、沒有舊 current 的卡仍可讀，不因未採納排除。以下公開欄位擴充對應 §2 白名單。暫顯規則由 2.0 沿用至 3.0；各版的公開形狀、Schema／types／golden 與 reader 依 [snapshot-contract](snapshot-contract.md) 同步維護，3.0 新增欄位仍以公開 annotation 契約為準。
 
 - `PrintingFace.observations` 是 `{revision_id?,state,source_url}` 陣列；state=`available/missing_effect/correction_conflict`。available 必有同 face、同 printing.region 的公開 revision；missing_effect 的 revision_id=null，表示原觀測主文未知且無法建 revision；correction_conflict 可有原觀測 revision 或 null，只供帶警告查閱，不能作可信暫顯。source_url 是該 printing 的原始來源 URL，不出 source ID、hash 或決定。完整三欄 exact 相同才去重；按來源 URL／狀態／revision ID 的固定字串序儲存**不表示年代**。
 - `face.wording` 是稀疏陣列，只對表記未定的公開 face-region 各出一項，恰有 `{region,state,display,candidates,undated_printing_ids}`。state 固定 `pending`；display 恰有 `{revision_id?,basis}`，basis=`current/latest_known_release/candidates`。candidates 是 `{printing_id,revision_id?}` 陣列，恰列仍需核對的候選版次／revision，去重並按 printing_id／revision_id 固定排序，null 為尚無可表示 revision；undated_printing_ids 列無可信完整日精度收錄日的候選版次，去重排序。這些 ID 排序僅供穩定序列化，UI 的年代由日期證據顯示，不能用 ID 補順序。
@@ -361,6 +364,7 @@ Spelling 與 RulingHint 的參數宣告、值域及拼法驗證依 [傳輸契約
 
 [數位名字政策](../domains/digital-name-policy.md) 的 same_name 卡層瀏覽使用
 [傳輸契約 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片) 的 2.0 配置。
+3.0 沿用本節的同名規則；版本與必要能力改依公開 annotation §1，不能沿用 2.0 標頭或能力集合。
 公開欄序與引用閉包依 §2，relation 白名單、typed projector、Schema 與 reader 同步驗證。
 不另設中間格式或相容 reader。
 
@@ -394,12 +398,13 @@ digital_face／digital_text 留建置端，沒有資產採納就不出 digital a
 
 | 驗收反例 | 結果 |
 | --- | --- |
-| 未知格式，或 2.0 缺 capability／最低版本不足 | 拒絕整份快照，不能丟掉列後降版 |
-| 2.0 零配對便省 capability，或 config／fragment／programs／text_all 仍寫舊版本 | 拒絕，不因空列放寬准入 |
+| 未支援的格式，或缺該格式必要 capability／reader 契約版本不足 | 拒絕整份快照，不能丟掉列後降版；3.0 依完整八個能力檢查 |
+| 因零配對／空 annotation 省必要 capability，或 config／fragment／programs／text_all 版本與 manifest 不一致 | 拒絕，不因空列放寬准入，2.0／3.0 各自驗其固定配置 |
 | same_name 帶面／phase、effect_similarity、sampled／confirmed review | producer 與 reader 各自拒絕 |
 | same_name 因不同面或 phase 重複出列，或同組真人與規則並存 | 拒絕重複規則列；建置端保留全部匹配來源，真人精確面的合法多筆沿自己的 subject |
 | digital_card／link／endpoint 引用缺目標，或把凍結目錄全部當必要閉包 | 拒絕缺引用；只投影實際有效關係所需內容 |
 | 同名連結被拿來授官方譯名、概念、圖或語音，或空 coverage 被說成無對應 | 不授權；各入口仍驗自己的採納／來源條件，未知如實呈現 |
 
-正式容量與變動報告依 2.0 固定配置及既有預算量測；超出上限須交維護者決定，
+正式容量與變動報告依所宣告版本的固定配置及既有預算量測；3.0 沿用 2.0 分片參數，仍須重測新資料。
+完整文字或單片超限即停止發布效能驗收，不放寬門檻；啟動包超過 2 MiB 交維護者決定，
 不自動改 N／格式。保留窗口依 §4.1，不永久保存歷史快照。

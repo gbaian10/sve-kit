@@ -341,7 +341,8 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/Annotation"
-          }
+          },
+          "minItems": 1
         }
       ],
       "items": false,
@@ -993,7 +994,14 @@
           "$ref": "#/$defs/Bool"
         },
         {
-          "$ref": "#/$defs/AnnotationID"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnnotationID"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
@@ -1040,7 +1048,9 @@
           "scalar": "Bool"
         },
         {
-          "scalar": "ID"
+          "nullable": {
+            "scalar": "ID"
+          }
         }
       ],
       "x-primary-key": [

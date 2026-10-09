@@ -77,6 +77,10 @@ annotation_set 的 ID／exact text 引用／每次 occurrence／所有 ranges／
 annotation_concept 的 category／卡片／說明引用，translation 第八欄與 FieldTranslation 的 source／counterpart，
 CR translations，以及上述引用新增的 JP 原文、譯文、詞彙、卡片與說明正文閉包。
 同文字不同概念的多份 annotation 不能算成一份；只有完整 set 相同才去重。
+公開端只產非空 annotation_set／field_annotation；空集合的 ID、用途列與專用 fragment 不出貨，
+translation 仍保留第八格，以 null 表示空集合，不縮短 tuple。此投影不改 #495 建置端的空集合身分。
+容量報告須列出實際非空集合／用途列數與 annotation 的 raw 增量，另記空集合省略列數，避免每個已知字段強制空列的成本。
+P 仍須逐用途驗證所有非空 occurrence 都有投影，不能以省容量為由漏掉已解析位置。
 types、fragment metadata、row_counts、manifest、dependencies、changes 及分片造成的重複 descriptor 都須報告。
 
 完整文字合計沿既有定義，以 role=bootstrap/text/config 的實際 File 按 key 去重，raw／br／gzip 分別量；

@@ -441,7 +441,7 @@ format_version／min_reader_version=3.0.0，原六個 capability 加 jp-source-t
 完整集合依該契約 §1，所有封套及 index entry 一致；index_format=2 不變。
 原有 canonical、N=64、band widths、media、base／row_index 與同名規則沿用；整體容量仍須重新量測。
 
-欄序以公開 annotation §2.1 覆寫 2.0 的同名列：translation 加 annotation_set_id，FieldTranslation 加
+欄序以公開 annotation §2.1 覆寫 2.0 的同名列：translation 加必填可 null 的 annotation_set_id，FieldTranslation 加
 source／counterpart 並改 basis；cr_clause 加 translations；新增 annotation_set／field_annotation／annotation_concept。
 Translation 在 bootstrap／detail 都用完整八欄。所有原本內嵌 FieldTranslation 的位置都同步使用七格，
 不能只改 face_revision 而漏掉 printing／QA／keyword／vocabulary／商品。新增 PublicTextPointer／Annotation／AnnotationRange
@@ -451,6 +451,9 @@ Translation 在 bootstrap／detail 都用完整八欄。所有原本內嵌 Field
 只用於非 display revision 的原文用途，base=null，完整 tuple，不套 face_revision 的 row_index。
 其他集合仍沿前述欄位分割，printing.faces 的 face_ordinal 與 translation 子陣列 join 鍵不變。
 text_all 包含全部 43 文字集合的原始 File 聯集；changes 支援新表 PK／欄位白名單。
+annotation_set／field_annotation 只產非空集合及用途列；row_counts 計實際列數，不為空集合建立 fragment。
+translation.annotation_set_id=null 表示空集合；缺 field_annotation 只有在對應分片完整驗畢後才可當空，
+非 null 引用缺目標仍拒絕。完整性由 producer 比對投影前 occurrence 保證，不能靠 reader 重造空 set ID。
 改 annotation／bold 可能改 set ID 及用途列，不能因 text bytes 未變省掉相關 changes／依賴更新。
 
 機器 Schema 的整合、reader 支援表與共用完整 golden 由 #498 一次替換；不得先產新 wire 卻沿舊 2.0 標頭，

@@ -69,10 +69,12 @@
 | --- | --- |
 | [preview 建置與前端接線](export/preview-handoff.md) | 本機配方、匯出根、圖片快取與前端載入 |
 | [公開投影](export/public-projection.md) | 發布版次、區域閉包與公開文字集合的篩選 |
+| [公開 annotation 與 JP 依據](export/public-annotation.md) | 3.0 目標的稀疏位置集合、公開來源指標、逐 owner 語言與引用閉包 |
+| [公開 annotation 固定案例](export/public-annotation-cases.md) | 元件 Schema、共用合成正反例與 producer／reader／Web 接線責任 |
 | [容量與記憶體預算](export/size-budget.md) | 卡表快照的容量門檻、量測方法與目前結論 |
 | [機器契約](export/snapshot-contract.md) | Schema 資源、候選格式配置、Python reader 與 TS 驗收清單 |
 | [快照匯出流程](export/snapshot-export.md) | 凍結輸入、建置配方、公開投影、媒體與傳輸產出 |
-| [卡表快照格式](export/snapshot-format.md) | 發布給使用者的 40 個文字集合與 3 個影像集合的欄位白名單、快照清單、分片與更新規則 |
+| [卡表快照格式](export/snapshot-format.md) | 3.0 目標的 43 個文字集合與 3 個影像集合的欄位白名單、快照清單、分片與更新規則 |
 | [快照傳輸契約](export/snapshot-transport.md) | manifest、config、tuple descriptor、fragment 身分與欄序、版本及變動摘要 |
 
 ## 文件之間的關係
@@ -81,7 +83,7 @@
 flowchart LR
     A["authored/ 人寫資料<br/>＋爬取的原始來源"] --> B["建置資料庫<br/>來源、審核、雜湊與驗證"]
     B --> P["欄位白名單投影<br/>與引用閉包驗證"]
-    P --> S["卡表快照<br/>40 個文字集合"]
+    P --> S["卡表快照（3.0 目標）<br/>43 個文字集合"]
     P --> I["影像清單<br/>DSL 程式包"]
     S --> C["離線快取<br/>三語全文"]
     C --> U["逐片解析<br/>查卡、建牌、對戰"]
@@ -104,7 +106,7 @@ uv run tools/schema-er/build_er.py --serve    # 產生後在 localhost:8000 提�
 
 輸出在 `tools/schema-er/out/`（不進 git）：`schema-er.html` 是單檔頁面，`parse-report.txt` 是解析報告，`schema-model.json` 是從 Markdown 讀出的中間資料（除錯用）。`--out <路徑>/schema-er.html` 改輸出位置，`--artifact` 省略 doctype 外殼。有任何欄位無法解析、PK 無法標記、FK 目標不存在或分組錯誤時，不產生 HTML 並以非零狀態結束；修改 `docs/schema/` 時 pre-commit 會跑一次確認能產出。分組與快照欄名的引用對應寫在 `tools/schema-er/diagram.toml`，新增表或集合時要一起登記。
 
-建置資料庫的 117 表分成 12 組（來源與確認、身分與商品、插畫與加工、文字與勘誤、跨區與構築、問答與裁定、數位與語音、翻譯依賴、DSL 證據、機制、影像與更正、顯示與路由）；卡表快照的 43 個集合分成 6 組。
+建置資料庫的 117 表分成 12 組（來源與確認、身分與商品、插畫與加工、文字與勘誤、跨區與構築、問答與裁定、數位與語音、翻譯依賴、DSL 證據、機制、影像與更正、顯示與路由）；3.0 目標卡表快照的 46 個集合（43 文字＋3 影像）分成 6 組。
 圖中的箭頭表示「引用者 → 被引用者」，不是時序，也不表示基數；線條分三種：欄位宣告的 FK、約束 `FK(...)` 宣告的 FK（複合約束保留兩側完整欄組，以粗線標示）、依 `*_id` 欄名推斷的引用（卡表快照沒有 FK 記號，全部屬於這種，並包含內嵌陣列與物件裡的 ID）。正式的複合 FK、nullable 與部分唯一性以 build-db.md 為準；固定 `vocabulary` kind 的常數欄由 DDL 展開，不出現在邏輯表中。
 
 ## 待辦與待實作驗收

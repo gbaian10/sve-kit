@@ -78,17 +78,23 @@ descriptor 使用 `{"json":"型別名"}`；不是可執行 schema 或任意 obje
 | --- | --- | --- |
 | annotation_set.id | ID；必填非 null，`ann:`＋64 位小寫 hex | 重算 §3 配方；同鍵異內容、冒用另一 set 拒絕；PA-03 |
 | annotation_set.text_unit_id | ID；必填非 null，指公開 text_unit | 必須等用途／translation 的 exact text ID，不只比較文字長度；PA-03／PA-05 |
-| annotation_set.occurrences | `[Annotation]`；必填非 null，可空 | 空表示沒有可公開的已解析 occurrence，不宣稱原文沒有術語；禁止漏掉已解析引用；PA-04／PA-10 |
+| annotation_set.occurrences | 非空 `[Annotation]`；必填非 null | 只公開已解析 occurrence；空集合不產生公開列，禁止漏掉非空集合；PA-02／PA-04／PA-10 |
 | Annotation.ordinal | UInt；必填非 null | 依第一個 range.start、最後 range.end、reference 的 canonical bytes 排序後從 0 連續；PA-04 |
 | Annotation.reference | AnnotationReference；必填非 null | 依 §2.4 驗公開目標、category 及必要閉包；PA-06 |
 | Annotation.ranges | 非空 `[AnnotationRange]`；必填非 null | 依 start/end 升序，每項及所有 occurrence 彼此不重疊，允許相鄰；PA-04 |
 | Annotation.bold | Bool?；必填可 null | true 可加粗，false 不加粗，null 未定而不加粗；不得把 null 寫成 false；PA-02／PA-10 |
 | AnnotationRange.start／end | UInt；必填非 null | exact text 的 codepoint 半開區間，0≤start<end≤長度；PA-04／PA-09 |
 | field_annotation.owner／field／ordinal | PublicTextPointer 三格；必填；只有 ordinal 可 null | §2.3 的 owner／欄位／段落必存在且唯一；不憑相同 text 借用用途；PA-05 |
-| field_annotation.annotation_set_id | ID；必填非 null | 指 annotation_set，text ID 等於該 owner 欄位；無譯文也必有這列；PA-05／PA-10 |
+| field_annotation.annotation_set_id | ID；必填非 null | 指非空 annotation_set，text ID 等於該 owner 欄位；原文有 occurrence 時即使無譯文也必有這列；PA-05／PA-10 |
 
-已知且非 null 的 §2.3 原文字段，各有一列 field_annotation；空字串仍有空集合。
-未知 null 原文不造空字串／空 set／用途列。section ordinal 依原 owner 的 Section.ordinal，
+公開投影只為非空集合產生 annotation_set／field_annotation 列。已知原文字段沒有 field_annotation 時，
+其公開 occurrence 為空；空字串亦如此。這不宣稱原文沒有術語，只表示沒有可公開的已解析 occurrence。
+未知 null 原文不造空字串／集合／用途列；缺列不免除 owner、field 與 exact text 的存在檢查。
+P 逐用途比對來源／render occurrence，驗證所有非空集合及其引用均已投影；漏列由 P 拒絕，
+R 不能從公開資料判斷被省掉的非空集合。部分載入時仍為未備妥，只有依已驗 manifest 確認該定位無分片，
+或相關 field_annotation 分片全部載入並驗畢，才能把缺列當空集合；不能從尚未下載推論為空，
+也不按相同 text 借另一用途的 set。
+section ordinal 依原 owner 的 Section.ordinal，
 action_label ordinal 依 keyword.actions 的原次序；其他 field 的 ordinal 必為 null。
 原文用來源 raw occurrence，譯文用 render occurrence；省略來源的葉不造 raw range，
 若在譯文實際呈現則有譯文 range。重複概念各留一筆，多段同一次引用用多個 range，不事後搜尋同字。
@@ -151,19 +157,21 @@ P 從同一概念設定產生所有原文／譯文 occurrence，R 驗固定類�
 | translation.id | ID；必填非 null | 沿 render-v3／官方 counterpart 的既有識別，公開 PK 唯一；不出 context／dependency_key；PA-02／PA-06 |
 | translation.source_unit_id | ID；必填非 null | 必等 FieldTranslation.source 的原文 text ID；jp_source 為 JP，不改成 EN；PA-07 |
 | translation.target_lang | Lang；必填非 null | 等 FieldTranslation.target_lang 及輸出 text_unit.lang，必為已宣告語言；PA-07 |
-| translation.text_unit_id | ID；必填非 null | 公開譯文 text_unit；必等譯文 annotation_set.text_unit_id；PA-03／PA-06 |
+| translation.text_unit_id | ID；必填非 null | 公開譯文 text_unit；有非 null annotation_set_id 時必等該 set.text_unit_id；PA-03／PA-06 |
 | translation.origin | official/project/machine；必填非 null | 沿有效選用值，不能改寫機器來源；PA-02／PA-07 |
 | translation.authority | sve_official/digital_official/unofficial；必填非 null | 沿來源權威；jp_source 繁中不能冒充 SVE 官文；PA-07 |
 | translation.low_confidence | Bool；必填非 null | true 仍顯示、標待校對；false 不授人工核可；PA-02／PA-10 |
-| translation.annotation_set_id | ID；必填非 null | 唯一明示譯文集合，不按文字反查猜集合；PA-03／PA-06 |
+| translation.annotation_set_id | ID?；必填可 null | null 表示譯文無公開 occurrence；非 null 唯一明示非空集合，不按文字反查猜集合；PA-02／PA-03／PA-06／PA-10 |
 | FieldTranslation.field／ordinal | Field／UInt?；皆必填 | 父 owner 的合法欄位；section/action_label 才可且必非 null；PA-05 |
 | FieldTranslation.target_lang／translation_id | Lang／ID；必填非 null | 唯一鍵仍為 field/ordinal/target_lang，引用上述 translation；PA-06／PA-07 |
 | FieldTranslation.basis | own_source/jp_source/official_counterpart；必填非 null | 封閉三值，依 §4 驗來源／receiver；PA-02／PA-07 |
-| FieldTranslation.source | PublicTextPointer；必填非 null | 指精確來源用途並有 field_annotation；不能用相同 text 借另一 owner；PA-05／PA-07 |
-| FieldTranslation.counterpart | PublicTextPointer?；必填可 null | 只有 official_counterpart 非 null；其 exact 原文必等 translation.text_unit_id，且原文 set 必等 translation.annotation_set_id；PA-07 |
+| FieldTranslation.source | PublicTextPointer；必填非 null | 指存在且非 null 的精確來源原文，無 occurrence 時不要求 field_annotation；不能用相同 text 借另一 owner；PA-05／PA-07 |
+| FieldTranslation.counterpart | PublicTextPointer?；必填可 null | 只有 official_counterpart 非 null；其 exact 原文必等 translation.text_unit_id，原文 set ID（缺列為 null）必等 translation.annotation_set_id；PA-07 |
 | cr_clause.translations | `[FieldTranslation]`；必填非 null，可空 | effect/null 的 own_source；不跨區借 CR；PA-05 |
 
 translation 只出被有效 FieldTranslation 使用的列；source／target text、annotation 及說明均須有公開閉包。
+annotation_set_id=null 不免除 text／來源檢查；非 null 卻缺目標仍拒絕，不退回空集合。
+official_counterpart 雙端 annotation 都為空時可相等，但原文 exact text 與 owner 檢查不變。
 同一 source text 可以有多個 translation／annotation，所有 receiver 分別驗 owner；不全域挑第一筆。
 公開 ID 中即使包含內容 hash 也不另公開逐列 source_hash、binding、render dependency 或選用歷史。
 
@@ -173,9 +181,11 @@ text ID 沿 `t:{lang}:{sha256(exact UTF-8 text)[:16]}`；碰撞拒絕，不自�
 annotation ID 精確沿共用契約：`ann:`＋H(`{recipe:"annotation-v1",text_unit_id,occurrences}`)。
 H 是 canonical-json-v1 的完整 SHA-256 小寫 hex，無 `sha256:` 前綴。
 算 hash 時先將 Annotation tuple 還原成 `{ordinal,reference,ranges,bold}`，range 還原 `{start,end}`；
-reference object 原樣保留。不是對 tuple bytes 或 text 單獨取 hash。空 set 也依此取 ID。
+reference object 原樣保留。不是對 tuple bytes 或 text 單獨取 hash。
+建置端依 #495 仍以同一配方保存空 set；公開投影省略空 set 的 ID 與列，不改建置身分或 hash 配方，
+reader 也不需重造空 set ID。公開 annotation_set 列若含空 occurrences 即拒絕。
 同文字／相同 ranges 而 reference 或 bold 不同，ID 必不同；更換 owner 而 exact set 完全相同可共用，
-但兩個 field_annotation 仍各自存在。explanations 是概念外部呈現資料，不塞進 annotation hash。
+但非空集合的兩個 field_annotation 仍各自存在。explanations 是概念外部呈現資料，不塞進 annotation hash。
 
 所有位置針對 text_unit 的 **exact Unicode scalar sequence**（不接受未配對 surrogate），不用 NFKC／NFC、
 搜尋索引、HTML、圖示替換後文字或 UTF-16 code unit 座標。CRLF 是兩個 codepoint，組合字元亦各自計數。
@@ -247,6 +257,9 @@ bootstrap 的可見原文、譯文與 facet 字串，連同其 annotation／必�
 這些邏輯引用由 P／完整 R／U 驗閉包，W 在使用來源對照／說明前載入且驗到目的欄位。
 完整文字包包含三個新集合及所有必要文字／說明閉包；分片與 text_all 的 decoded logical view 相同。
 所有新集合納入 row_counts、types、changes 的 PK／changed_fields 白名單、檔案 hash 與完整文字離線 ready 判定。
+row_counts 只計實際非空集合及用途列；空集合不補列、不產生僅為保存空集合的 fragment。
+非空集合變空時，原文用途以 changes 記錄用途列的 retired；譯文則記錄 translation.annotation_set_id 改為 null，
+並依既有閉包規則移除不再被引用的集合／概念；不能省略仍有其他用途的共享集合。
 
 | 欄位／資料 | P | Python R | TS R／W | read_api／publish |
 | --- | --- | --- | --- | --- |
@@ -271,14 +284,18 @@ W-only 的語言／資格案例驗具體成功結果，P-only 的來源真實性
 | wire | 非 canonical、重複鍵、浮點表示、surrogate | PA-02／PA-09 |
 | format／reader_version／capability | 未支援版本、minimum、能力未知／缺少／亂序／重複 | PA-01 |
 | shape／enum／tuple／descriptor | 必填／nullable／額外欄、未知 basis、長度、欄序 | PA-02 |
+| duplicate_key | 重複公開主鍵或複合鍵（含父 owner 內 FieldTranslation 的 field/ordinal/target_lang） | PA-03／PA-05／PA-06 |
 | reference／owner／text_identity | 缺公開目標、錯 card／face／模式、text 不相等 | PA-03／PA-05／PA-06／PA-07 |
 | range／ordering | 負值／空／超界／重疊、ordinal 或集合排序錯 | PA-04／PA-09 |
 | identity | exact text ID 或 annotation-v1 hash 錯配 | PA-03 |
 | basis | own_source／jp_source／counterpart 的語言、來源或品質組合矛盾 | PA-07／PA-08 |
 | source_invalid | P 才能驗的缺來源、過期或未確認來源身分 | PA-08 |
+| annotation_incomplete | P 比對來源／render occurrence 後發現非空集合或用途被省略／改為 null | PA-05 |
 
 Schema 可先定位結構型錯誤；各案例只引入一個目標違規，已壞的負數 range 統一歸 range 而不是任意 shape。
 Schema 的 enum／tuple／形狀錯誤按對應分類；owner／range／basis 的專屬條件即使由 Schema 捕獲，仍回該責任分類。
+公開主鍵／複合鍵重複一律歸 duplicate_key，無論同鍵內容相同或不同，在引用與 hash 檢查前拒絕；
+JSON object 的重複鍵仍歸 wire，occurrence ordinal 與 range 次序仍依 ordering／range。
 多重語義違規先驗公開引用與 text，再驗座標／身分與 basis；同類按公開主鍵及欄序，不先重算 hash 掩蓋錯 owner 或 range。
 案例 mutation 可以故意不重算 ID，用來證明先抓目標錯誤；完整 reader harness 必重釘有效的外層檔案 bytes/hash
 以到達該語義邊界，不能因外層 hash 失敗就算通過。
