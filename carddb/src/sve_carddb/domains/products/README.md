@@ -95,7 +95,10 @@ pipeline, and does not enable broad capability readiness flags.
 
 Raw source rows have `parser_version=NULL` and are shared with identity staging
 only when every version metadata field matches. The authored source rows keep
-their original envelope parser recipes. `FrozenSources` provides one reusable
+their input profiles: `product-authored-v2` for product shards and
+`product-identity-v2` for identity shards. These profiles identify both the
+accepted envelope and the core canonical recipe; the document formats remain
+`product-authored-v1` and `product-identity-v1`. `FrozenSources` provides one reusable
 sealed-source metadata boundary; product evidence records `archive-closure-v1`
 under `product_evidence_closure`, since checking bytes does not parse or adopt
 a product relationship. Identity evidence keeps its actual parser pin.
@@ -212,7 +215,7 @@ def populate(db):
 Call this population inside the build transaction, then save that database.
 The single transaction includes families, the existing identity graph, authored
 identity shard sources and official products/inclusions. Official content
-references raw sources, never an identity mapping as a content approval. Authored identity sources use `product-identity-v1`; raw parsers remain
+references raw sources, never an identity mapping as a content approval. Authored identity sources use `product-identity-v2`; raw parsers remain
 NULL. Exact evidence closure uses `product_identity_evidence_closure` with
 `archive-closure-v1`; reproduced matches use `official_product_identity` and the
 actual product parser. Page scans, product and inclusion processing each retain

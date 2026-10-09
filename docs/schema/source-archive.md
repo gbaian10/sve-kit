@@ -16,7 +16,7 @@
 
 ## 2. 內容、來源版本與 inventory
 
-以下 JSON 記錄採 [build-db.md §14 的 canonical-json-v1](build-db.md#14-不可變雜湊僅建置)，Hash 為 `sha256:` 加完整 64 小寫 hex；接入既有 manifest 的裸 hex 時只加前綴，不重新定義 hash。raw hash 是 HTTP client 交給 Writer 的 body bytes、解開本機 zstd 後的 exact bytes；不做文字正規化，不把本機壓縮檔 hash、registry-observation-v1 或語義 bundle hash 混用。圖片 hash 是原始圖片檔 bytes，不能改算解碼後像素。
+以下 JSON 記錄採 [build-db.md §14 的 canonical-json-v1](build-db.md#14-不可變雜湊僅建置)，Hash 為 `sha256:` 加完整 64 小寫 hex；接入既有 manifest 的裸 hex 時只加前綴，不重新定義 hash。raw hash 是 HTTP client 交給 Writer 的 body bytes、解開本機 zstd 後的 exact bytes；不做文字正規化，不把本機壓縮檔 hash、registry-observation-v2 或語義 bundle hash 混用。圖片 hash 是原始圖片檔 bytes，不能改算解碼後像素。registry-observation-v2 是現行 parser 的明確領域投影加 core canonical，升版不更改 raw bytes、source_version_id 或官方 raw parser pins。
 
 | 記錄／鍵 | 定義 |
 | --- | --- |
@@ -58,7 +58,19 @@ metadata 依 hash 保存：`receipts/<64hex>.json`、`descriptors/<64hex>.json` 
 
 raw 來源的 `source_record.id` 使用 source_version_id，`sha256` 是 raw_sha256，`raw_locator` 是具名 store＋相對內容定址 path；來源 kind 依實際用途映射 official_page/official_api/official_pdf/image 等建置 enum。`url` 沿 descriptor；fetched_at／ETag 等採 first_receipt_id 的已知來源值，後續觀測留收據，不就地修改同一版本。不能把 observed_at 填成未知的原始 fetched_at。
 
-**使用者核可（2026-10-01，F1 方案 A）**：同一 raw 來源版本只投影一列 `source_record`，`parser_version` 一律 null；每個實際使用的 `(source_version_id, usage, parser pin)` 另存於與 DB／report 一起輸出的建置輸入紀錄。不能以不同 parser 或用途配假 raw ID。authored 來源記實際 Git／檔案內容版號；parser_version 按入口為 registry-envelope-v1、product-authored-v1、translation-current-v2 或 catalog-current-v2，不混成爬取 raw，也不假造人工核可。
+**使用者核可（2026-10-01，F1 方案 A）**：同一 raw 來源版本只投影一列 `source_record`，`parser_version` 一律 null；每個實際使用的 `(source_version_id, usage, parser pin)` 另存於與 DB／report 一起輸出的建置輸入紀錄。不能以不同 parser 或用途配假 raw ID。authored 來源記實際 Git／檔案內容版號；其 `parser_version` 是接受的文件封套與產生 source identity 所用 recipe 的 profile，不混成爬取 raw，也不假造人工核可。任一部分改變都升 profile，ASCII 內容碰巧同 hash 也不沿用舊版。
+
+| producer | #474 C2 profile | #476 封套遷移後 profile |
+| --- | --- | --- |
+| registry preview importer | registry-envelope-v2 | registry-envelope-v3 |
+| products importer | product-authored-v2 | product-authored-v3 |
+| official products importer | product-identity-v2 | product-identity-v3 |
+| catalog loader | catalog-current-v2 | catalog-current-v3 |
+| glossary populate | translation-authored-current-v2 | translation-authored-current-v3 |
+| templates build | template-authored-current-v2 | template-authored-current-v3 |
+| digital links importer | digital-link-authored-v2 | digital-link-authored-v3 |
+
+profile 版號與文件 format 版號獨立，例如 #476 後 catalog 文件可為 `format: 2`，profile 為 `catalog-current-v3`。C2 只升前三列，其餘封套不變；官方 raw parser pins、archive-closure-v1、policy_id、owner-name-current-v2 等不同意義的 recipe 保留原值。digital links 目前只有 reader／合成資料。
 
 共用列的 id／url／raw hash 取 descriptor，raw_locator 為具名 store＋相對內容定址 path；fetched_at／ETag／Last-Modified 採 descriptor.first_receipt_id，fetched_at 使用該收據的 last_changed_at 並轉 UTC Z，不以 URL 首次抓取、批次最新 receipt 或 observed_at 替代。官方 JP／EN 卡片 HTML 的 kind 為 official_page，須驗來源身分與 HTML media type；不得按身分／商品用途分成不同 kind。相同 ID 的全部版本 metadata（含 kind、locator、HTTP metadata 及空 parser／authored 欄）逐欄相同才可重用；任一衝突整筆匯入交易回滾，禁止 `INSERT OR IGNORE` 或任取先寫入者。
 
