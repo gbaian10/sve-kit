@@ -1,6 +1,6 @@
 # 插畫裁切覆寫契約
 
-本文件定義來源綁定的插畫裁切覆寫 `authored/image-crops.yaml`，沿用[卡圖衍生檔契約](image-variants.md)的整數框與五檔 WebP，不新增影像表或快照欄位；公開 2.0 投影另依 snapshot-format §2.1。`jp` 與 `en` 共用 loader、產圖與建置驗證。
+本文件定義來源綁定的插畫裁切覆寫 `authored/images/crops.yaml`，沿用[卡圖衍生檔契約](image-variants.md)的整數框與五檔 WebP，不新增影像表或快照欄位；公開 2.0 投影另依 snapshot-format §2.1。`jp` 與 `en` 共用 loader、產圖與建置驗證。
 
 ## 1. 鍵
 
@@ -10,9 +10,9 @@
 
 ## 2. 檔案與欄位
 
-覆寫只有 `authored/image-crops.yaml` 一個檔案，頂層是列的陣列，沒有 index 或格式封套。檔案遵守 [authored 共同格式](authored-layout.md#1-路徑與共同格式)的 YAML 邊界與小於 1,048,576 bytes 上限，重用既有嚴格 YAML reader。
+覆寫只有 `authored/images/crops.yaml` 一個檔案，頂層恰為 `format: 1, kind: image_crop_overrides, records`，原裁切列放在 records 陣列，沒有 index。檔案遵守 [authored 共同格式](authored-layout.md#1-路徑與共同格式)的 YAML 邊界與小於 1,048,576 bytes 上限，重用既有嚴格 YAML reader。
 
-loader 直接讀工作目錄裡的檔案，不查 Git：未 commit 的修改在下一次建置就生效。檔案不存在時報錯，不當成空集合；沒有任何覆寫時寫 `[]`。全檔一併驗證，不因本次只建 JP 而跳過 EN 列。
+loader 直接讀工作目錄裡的檔案，不查 Git：未 commit 的修改在下一次建置就生效。檔案不存在時報錯，不當成空集合；沒有任何覆寫時仍保留 format／kind，寫 `records: []`。全檔一併驗證，不因本次只建 JP 而跳過 EN 列。
 
 每列的欄位：
 

@@ -5,8 +5,8 @@
 
 ## 1. 當前規則格式
 
-`authored/template-parameter-rules/current.yaml` 完整欄位：
-`{parameter_rule_format:2,kind:template_parameter_rules,rules}`。
+`authored/translations/parameter-rules/current.yaml` 完整欄位：
+`{format:2,kind:template_parameter_rules,rules}`。
 rules 是按 rule_id 排序的 `{rule_id,enabled,origin,low_confidence,note}` 陣列，ID 唯一、enabled 為 Bool；note 可省略，讀取時視為空字串。
 origin/low_confidence/note 沿翻譯 record 的意義；不用 policy_id、matcher_commit、condition_hash 或 approval。
 

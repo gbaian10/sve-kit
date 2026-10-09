@@ -10,6 +10,8 @@ sve-kit 包含 Python 卡表工具、Rust 引擎、Web 前端、可執行效果�
 
 ## 決定
 
+2026-10-09 [#476](https://github.com/gbaian10/sve-kit/issues/476) 落地註記（以下原文為歷史決定）：Apache 路徑精確承接至 `authored/rules/effects/`、`authored/rules/keywords.yaml`、`authored/rules/engine/`；`authored/rules/rulings/` 仍屬原 CC0 範圍與引文例外，原授權決定不變。
+
 程式採 Apache-2.0。`carddb/`、`sim/`、`dsl/`、`.github/`、`tests/`，以及可執行的 `authored/effects/`、`authored/keywords.yaml` 的自有貢獻適用此授權；設計文件、README 與其餘根目錄設定檔也採 Apache-2.0。
 
 其餘 `authored/` 路徑的自有資料貢獻採 CC0-1.0，包括我們自己的翻譯與裁定說明，不強制對我們署名。官方原文、官方譯名及其他第三方內容的權利不受影響；這不是對整份衍生譯文或混合快照的自由利用許可。

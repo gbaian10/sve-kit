@@ -21,7 +21,7 @@
 
 | 路徑（相對 authored 根） | 完整頂層欄位 |
 | --- | --- |
-| `identity-transitions/<sequence>.yaml` | `identity_transition_format: 1, kind: identity_transition_shard, records` |
+| `identity-transitions/<sequence>.yaml` | `format: 1, kind: identity_transition_shard, records` |
 
 sequence 是從 1 開始、至少三位十進位數字的連續序號；每片恰一筆 transition。目錄不存在或為空表示沒有 transition。
 尚未接入此能力的舊工具不能忽略非空目錄後仍宣稱 registry 可發布。
@@ -346,7 +346,7 @@ record = {
                  "after": new, "allocation_anchor": None}],
     "repairs": [], "evidence": evidence, "reason": "合成例：新增版次後完整重審無對應",
 }
-shard = {"identity_transition_format": 1, "kind": "identity_transition_shard",
+shard = {"format": 1, "kind": "identity_transition_shard",
          "records": [record]}
 assert digest(canonical(old)) != digest(canonical(new))
 print(json.dumps(stored({"old_record": old, "shard": shard}), ensure_ascii=False, indent=2))
@@ -400,7 +400,7 @@ def ref(record):
 
 
 def pack(record):
-    return {"identity_transition_format": 1, "kind": "identity_transition_shard",
+    return {"format": 1, "kind": "identity_transition_shard",
             "records": [record]}
 
 

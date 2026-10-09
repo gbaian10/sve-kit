@@ -24,7 +24,7 @@
 | `CR`＋條號 | [官方規則入口](https://shadowverse-evolve.com/rules/)。DSL 1.0 指定 CR 1.27.0；其他文件依各自記錄的版本，不能把目前官網版本當成舊文引用版本。 |
 | `Q`＋編號 | [日文官方卡片 Q&A](https://shadowverse-evolve.com/question/card/)、[一般規則 Q&A](https://shadowverse-evolve.com/question/faq/)，以及對應地區的官方卡片頁。日英答覆可能不同；例如 M0 的 Q302 比較須保留兩種語言。 |
 | `卡號#面/text/行`、`卡號#面/section:段/行` | DSL 卡例在 2026-09-26 凍結卡表的來源位置，面、段與行從 0 起算；不是網站錨點。卡例旁的官方頁連結供定位，頁面可能已更新。 |
-| `R-…`、`C§…`、題號 | 專案的 [裁定登錄](../authored/rulings/)、[情境契約](../tests/rules-scenarios/CONTRACT.md) 與 [定案題庫](../tests/rules-scenarios/questions/)。其中的來源引文保留其原權利；其餘專案內容依各自路徑授權。 |
+| `R-…`、`C§…`、題號 | 專案的 [裁定登錄](../authored/rules/rulings/)、[情境契約](../tests/rules-scenarios/CONTRACT.md) 與 [定案題庫](../tests/rules-scenarios/questions/)。其中的來源引文保留其原權利；其餘專案內容依各自路徑授權。 |
 
 引用應保留所在文件的卡號、Q／CR 編號、版本與來源位置。本文不替舊文件更新引文、補猜缺失的來源，
 也不把變動中的官網頁面當成歷史文字的逐字證明。

@@ -48,7 +48,7 @@ cargo run --locked -p sve-engine --bin sve-prototype -- "$SVE_TEST_SNAPSHOT" . v
 
 | 卡 | 位置 | 原因 | 處理 |
 | --- | --- | --- | --- |
-| BP10-T09 | `authored/effects/BP10.yaml:378` | 「武装・タイプを持つ」寫成 `modify.traits`，引擎不能執行（原本執行時才回 Unsupported） | 維持拒絕；需要實作種族授予（持續效果層），見 known-errors KE-20 |
+| BP10-T09 | `authored/rules/effects/BP10.yaml:379` | 「武装・タイプを持つ」寫成 `modify.traits`，引擎不能執行（原本執行時才回 Unsupported） | 維持拒絕；需要實作種族授予（持續效果層），見 known-errors KE-20 |
 
 第一版檢查另外拒絕了 11 張，處理如下（細節見 [known-errors.md](known-errors.md) 的 KE-07～KE-14）：
 

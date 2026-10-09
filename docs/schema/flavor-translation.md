@@ -5,7 +5,7 @@
 
 ## 1. 檔案
 
-`authored/flavor-translations/<hash 首位 16 進位字>.yaml`，每檔單一 `kind: flavor_translation_shard`，
+`authored/translations/flavor/<hash 首位 16 進位字>.yaml`，每檔明示 `format: 1, kind: flavor_translation_shard`，
 `entries` 依 `(source_hash, lang)` 排序且唯一，同一組合不得出現在兩個檔案。單檔小於 1 MiB。
 
 | 欄位 | 含義 |

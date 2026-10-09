@@ -23,11 +23,11 @@
 
 | 入口／分片 | 完整頂層欄位 |
 | --- | --- |
-| `catalog-adoptions/<area>/<filing>/<sequence>.yaml` | `catalog_adoption_format: 2, kind: catalog_adoption_shard, records` |
-| `display-overrides/<area>/<filing>/<sequence>.yaml` | `display_override_format: 2, kind: display_override_shard, records` |
+| `catalog/adoptions/<area>/<sequence>.yaml` | `format: 2, kind: catalog_adoption_shard, records` |
+| `catalog/overrides/<area>/<sequence>.yaml` | `format: 2, kind: display_override_shard, records` |
 
 catalog 的 area 為 vocabulary／languages／aliases／symbols／rules-names；display 為 routes／defaults。
-filing 只作檔案整理，沒有地區或商品語意；sequence 允許缺號。records 非空，每片的 kind 須符合 area。
+sequence 為三位以上十進位序號，允許缺號；area 下直接放分片。records 非空，每片的 kind 須符合 area。
 YAML、單檔小於 1 MiB、路徑安全與固定目錄掃描依 [authored-layout](authored-layout.md#2-分片與來源)。
 拒絕未知欄位、重複 YAML 鍵、symlink 及跨入口資料；載入後排序，不要求作者先排序。
 

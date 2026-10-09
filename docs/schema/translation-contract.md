@@ -28,7 +28,7 @@ filing_key 為 `[A-Za-z0-9_-]+`，sequence 為三位以上十進位字串；不�
 
 | 檔案 | 完整頂層欄位 |
 | --- | --- |
-| `translations/{glossary,templates,overrides}/<filing_key>/<sequence>.yaml` | `translation_authored_format: 2, kind: translation_shard, records` |
+| `translations/{glossary,templates,overrides}/<filing_key>/<sequence>.yaml` | `format: 2, kind: translation_shard, records` |
 
 翻譯入口只接受 format 2 分片；glossary 與模板 reader 共用已載入的資料。
 模板來源清冊在建置時產生，不進 Git，見[清冊契約](template-source-replay.md)。
@@ -97,7 +97,7 @@ text_hash 對定位到的完整 UTF-8 字串計算；span 使用 Unicode code po
 沿用 format 2 的 kind/data record 與可省略品質欄位，origin 限 project/machine，low_confidence 保留原值；
 它始終未啟用，不因低信心旗標為 false 而成為可渲染譯文，也不能用 template_translation_variant 代替。
 
-路徑固定為 `authored/translations/templates/template_translation_candidate/<sequence>.yaml`，
+路徑固定為 `authored/translations/templates/candidates/<sequence>.yaml`，
 沿共用 includes 索引、可修改分片及單檔小於 1 MiB 的限制；索引 hash 仍由工具更新。
 record_key 為 `["template_translation_candidate",source_kind,candidate_id,lang]` 的 canonical JSON 字串。
 text、reasons、note 不參與身分；同鍵原稿有不同文字時拒絕，不按檔序選取。
@@ -276,7 +276,7 @@ qa_version 用 question/answer，cr_clause 用 effect，vocabulary／商品用 l
 ### 7.1 非翻譯區域核對保留原入口
 
 region_text_review／region_divergence 會控制 DSL／機制，保留 region-reviews 的 format 1，
-不使用 §2 新 record。分片為 `{translation_authored_format:1,kind:translation_shard,default_decision_id,records,decisions}`；
+不使用 §2 新 record。分片為 `{format:1,kind:translation_shard,default_decision_id,records,decisions}`；
 record 為 `{record_key,kind,filing_key,data,evidence}`，同片單 kind／單決定，decisions 恰含 default 所指 batch。
 evidence 為排序唯一 `{source_ref,role}`；decision 沿 authored-layout §2 的完整封套與精確成員 hash。
 record_key 是 `[kind,...選擇鍵,adoption_no]` 的 canonical JSON 字串，review 選擇鍵為

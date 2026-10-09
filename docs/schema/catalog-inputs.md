@@ -7,7 +7,7 @@
 
 ## 1. 唯一入口與建置
 
-權威是當前工作樹 catalog-adoptions 固定 area 中 format 2 分片的 vocabulary_adoption；不使用 checksum index。
+權威是當前工作樹 catalog/adoptions 固定 area 中 format 2 分片的 vocabulary_adoption；不使用 checksum index。
 subject 為 `{kind,code}`，value 為 `{label,raw_mappings,active}`；基本原值映射與語言檢查保留。
 一般讀取驗結構／引用，建置從本次來源自動驗 exact 原值；不掃歷史採納或重播私人核可。
 Catalog／Vocabulary 記憶體物件由此推導，不是另一份權威。

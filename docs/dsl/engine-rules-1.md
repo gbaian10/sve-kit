@@ -7,13 +7,14 @@
 
 ## 1. 封套與版本背景
 
-檔案位置是 `authored/engine-rules/index.yaml`，首版一個檔案，不另設分片或新的採納入口。
+檔案位置是 `authored/rules/engine/index.yaml`，首版一個檔案，不另設分片或新的採納入口。
 依 [LICENSING](../../LICENSING.md)，本專案在此路徑的貢獻採 Apache-2.0；官方及第三方內容仍排除。
 公開設定只記代碼、身分參照、卡號定位器、來源版本及核對紀錄，不複製官方名稱或引文。
 
 | 欄位 | 內容與限制 |
 | --- | --- |
-| `version` | 恰為 `engine-rules/1` |
+| `format` | 恰為整數 1 |
+| `kind` | 恰為 `engine_rules`；原 engine-rules/1 設定語意不變 |
 | `scope` | `region` 僅 jp／en，`rules_version` 保留當區官版字串，`rules_source_version_id` 指向該官版的正式凍結來源 |
 | `input` | `kind` 僅 legacy-jp／resolved；`snapshot_sha256` 是完整輸入 exact bytes 的 64 位小寫 hex |
 | `titles` | 作品代碼、定位 face、有限能力及 evidence ID；不收顯示名稱欄 |
@@ -156,7 +157,8 @@ checked_on 是 ISO 8601 的日期；不存 checked_by 這類流程紀錄，來�
 下列只有合成定位器及 hash，用來說明格式，不能當真實 CR、採納或可執行綁定：
 
 ```yaml
-version: engine-rules/1
+format: 1
+kind: engine_rules
 scope:
   region: jp
   rules_version: synthetic-v1
