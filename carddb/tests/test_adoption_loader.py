@@ -90,6 +90,16 @@ def test_current_file_boundary_guards(case: Case, mutation: str) -> None:
         load_adoptions(case.root, entry="catalog/adoptions")
 
 
+@pytest.mark.parametrize("group", ["current", "shared"])
+def test_nested_shard_directory_is_not_skipped(case: Case, group: str) -> None:
+    path = case.root / "catalog/adoptions/vocabulary/001.yaml"
+    nested = path.parent / group / path.name
+    nested.parent.mkdir()
+    path.rename(nested)
+    with pytest.raises(ValueError, match=r"^Catalog area must hold shards directly$"):
+        load_adoptions(case.root, entry="catalog/adoptions")
+
+
 def test_unknown_entry(case: Case) -> None:
     with pytest.raises(ValueError, match="Unknown adoption entry"):
         load_adoptions(case.root, entry=cast("Entry", "other"))

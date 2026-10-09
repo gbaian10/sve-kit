@@ -116,7 +116,10 @@ def _inputs(root: Path, paths: tuple[str, ...]) -> list[tuple[str, bytes, bytes]
         if not directory.exists():
             continue
         require_directory(root, directory)
-        for path in sorted(directory.glob("*.yaml")):
+        for path in sorted(directory.iterdir()):
+            # A nested directory is a stale deeper layout, so it must not read as empty.
+            if path.is_dir():
+                raise ValueError("Catalog area must hold shards directly")
             if re.fullmatch(r"[0-9]{3,}\.yaml", path.name) is not None:
                 exact, encoded = read(path, root=root)
                 inputs.append((path.relative_to(root).as_posix(), exact, encoded))

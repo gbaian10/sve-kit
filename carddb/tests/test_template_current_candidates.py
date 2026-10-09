@@ -134,7 +134,7 @@ def test_candidate_dedicated_path_is_checked_by_both_readers(
     validate_foreign("translations/templates/candidates/001.yaml", raw)
     with pytest.raises(
         ValueError,
-        match=r"^Current template candidates require their dedicated shard area$",
+        match=r"^Current template record is outside its kind's shard area$",
     ):
         validate_foreign("translations/templates/values/001.yaml", raw)
     mixed = wire(record)
@@ -144,12 +144,33 @@ def test_candidate_dedicated_path_is_checked_by_both_readers(
     ]
     with pytest.raises(
         ValueError,
-        match=r"^Current template candidates require their dedicated shard area$",
+        match=r"^Current template record is outside its kind's shard area$",
     ):
         validate_foreign(
             "translations/templates/candidates/001.yaml",
             canonical(mixed),
         )
+
+
+@pytest.mark.parametrize(
+    "area", ["values", "candidates", "sentence_template", "template_translation"]
+)
+def test_definition_is_read_only_from_its_area(current_case: Case, area: str) -> None:
+    definition = next(
+        r for r in current_case.inputs.records if isinstance(r, DefinitionRecord)
+    )
+    raw = canonical(
+        {
+            "format": 2,
+            "kind": "translation_shard",
+            "records": [definition.model_dump(mode="json", round_trip=True)],
+        }
+    )
+    validate_foreign("translations/templates/definitions/001.yaml", raw)
+    with pytest.raises(
+        ValueError, match=r"^Current template record is outside its kind's shard area$"
+    ):
+        validate_foreign(f"translations/templates/{area}/001.yaml", raw)
 
 
 def test_candidate_never_renders_projects_or_bypasses_source_checks(
