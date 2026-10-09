@@ -432,6 +432,9 @@ expected:
 `optional_costs.additional` 的鍵：`discard`、`banish`、`act`（アクト哪些）、`pp`、`stack_counter_from`、`return_to_deck`、`reveal`；
 其他寫 `other: "<原文片段>"`。拒付仍是 `decline`。
 
+チョイス有多個選項各帶費用（R-0006）時，不用 `additional`，改以 `mode_<選項編號>` 逐項回答，只寫被選的選項：
+`optional_costs: {mode_1: {pp: 1}, mode_2: decline}`。只有一組可選追加費用時仍寫 `additional`。
+
 ### 9.11 事件補充
 
 | `kind` | 欄位 | 規則 |

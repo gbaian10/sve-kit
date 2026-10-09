@@ -8,20 +8,16 @@ must_pass: false
 mechanisms:
   - 抉擇＋條件改變選擇數
   - 前一步的結果
-  - 打出時的可選追加費用
+  - 結算時的「してよい。そうしたなら」
 cards:
   - BP01-173
   - BP07-SL05
   - BP17-SL28
-why: 依 R-0006 官方確認（2026-10-09），選項 3 的翻面費用在打出時決定並支付；不需場上目標，不足兩張可拒付，不能部分支付；完整支付才於結算抽一及回 2 PP。
-discriminates: 要求全部選項有目標、容許翻一張也得效果或延到結算才問是否翻面，PP／手牌或輸入次數不同。
+why: 選項 3 是結算時的「してよい。そうしたなら」，不是「（処理）：（効果）」，不適用 R-0006；不需要場上目標；不足兩張不能部分翻面；成功翻兩張才抽一及回 2 PP。
+discriminates: 要求全部選項有目標或容許翻一張也得效果，PP／手牌不同；把翻面提前到打出時的引擎不會在結算中暫停詢問。
 refs:
   rules:
     - 5.18.4.1
-    - 10.4.2.2
-    - 10.6.2.2.2
-    - 10.6.2.5
-    - 10.6.2.5.4
   qa:
     - Q2294
     - Q2295
@@ -32,10 +28,6 @@ evidence:
     quote: いいえ。【3】をチョイスした場合、自分のエボルヴデッキの表向きの自然・エボルヴフォロワー1枚のみを裏向きにすることができません。
   - ref: cr 5.18.4.1
     quote: "存在しないものとして扱われた選択肢内で\nは、‘選ぶ’処理による目標を選択することは\nなく、そのカードや能力のプレイに際してその\n適正な目標が存在していなくてもプレイが可能\nです。"
-    derivation:
-      - 選項 3 不需要場上目標；不足兩張不能部分翻面；成功翻兩張才抽一及回 2 PP。
-  - ref: cr 10.4.2.2
-    quote: "コストのうち一部または全部を支払うことが\n不可能である場合、このコストはまったく支払\nうことはできません。"
     derivation:
       - 選項 3 不需要場上目標；不足兩張不能部分翻面；成功翻兩張才抽一及回 2 PP。
 status: verified
@@ -95,11 +87,29 @@ scenarios:
         card: a
         options:
           - 3
-        optional_costs:
-          additional: decline
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        choice: decline
     random: {}
     expected:
       - at: after-decision-1
+        view: omniscient
+        outcome: paused
+        assert:
+          P1.pp.current: 5
+          P1.resolution:
+            - a
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              choice: decline
+      - at: after-decision-2
         view: omniscient
         outcome: resolved
         assert:
@@ -162,11 +172,29 @@ scenarios:
         card: a
         options:
           - 3
-        optional_costs:
-          additional: decline
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        choice: decline
     random: {}
     expected:
       - at: after-decision-1
+        view: omniscient
+        outcome: paused
+        assert:
+          P1.pp.current: 5
+          P1.resolution:
+            - a
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              choice: decline
+      - at: after-decision-2
         view: omniscient
         outcome: resolved
         assert:
@@ -234,14 +262,20 @@ scenarios:
         card: a
         options:
           - 3
-        optional_costs:
-          additional:
-            flip:
-              - e0
-              - e1
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        choice: execute
+        select:
+          - e0
+          - e1
     random: {}
     expected:
-      - at: after-decision-1
+      - at: after-decision-2
         view: omniscient
         outcome: resolved
         assert:

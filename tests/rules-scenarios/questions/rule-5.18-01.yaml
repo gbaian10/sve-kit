@@ -20,8 +20,8 @@ cards:
   - BP17-SL28
   - SP01-046
   - BP01-176
-why: "[astra] 2 つまで下限一；同時選 3 與 1 時，打出時先支付翻面費用，效果仍依卡面先破壞再抽牌。\n[fable] ダークエンジェル・オリヴィエ「2つまでチョイス」：下限 1（5.18.2.1、Q293）、不可重複（Q294）、在打出時決定（5.18.3）， 合法的選項集合是 4 個單選＋6 個雙選共 10 種；選中的依卡面順序結算（10.6.2.8.2.2）。【4】讓對手捨牌，捨哪張由對手在結算中途決定。"
-discriminates: "[astra] 依 options 列表順序處理會先抽牌再破壞；結算時才支付翻面費用會額外暫停；允許空選項會錯扣費。\n[fable] awaiting 若包含 []（0 個）或 [1,1] 之類重複，或缺少任一合法組合，就是抉擇規則實作錯； B 中若引擎替 P2 隨機捨牌、或不停下來讓 P2 選，事件與手牌會不同；若 EP+1 因「EP 有上限」而沒有發生也可觀察（Q337）。"
+why: "[astra] 2 つまで下限一；同時選 3 與 1 時仍依卡面先破壞再翻面抽牌。\n[fable] ダークエンジェル・オリヴィエ「2つまでチョイス」：下限 1（5.18.2.1、Q293）、不可重複（Q294）、在打出時決定（5.18.3）， 合法的選項集合是 4 個單選＋6 個雙選共 10 種；選中的依卡面順序結算（10.6.2.8.2.2）。【4】讓對手捨牌，捨哪張由對手在結算中途決定。"
+discriminates: "[astra] 依 options 列表順序處理會在第一次暫停時留下 b；允許空選項會錯扣費。\n[fable] awaiting 若包含 []（0 個）或 [1,1] 之類重複，或缺少任一合法組合，就是抉擇規則實作錯； B 中若引擎替 P2 隨機捨牌、或不停下來讓 P2 選，事件與手牌會不同；若 EP+1 因「EP 有上限」而沒有發生也可觀察（Q337）。"
 refs:
   rules:
     - 5.18.2.1
@@ -45,11 +45,11 @@ evidence:
   - ref: cr 5.18.2.1
     quote: "‘（数値）までチョイスする’指示がある場\n合、1 以上（数値）までの値を選択し、その個\n数の選択肢を選択して実行します。"
     derivation:
-      - 2 つまで下限一；同時選 3 與 1 時，打出時先支付翻面費用，效果仍依卡面先破壞再抽牌。
+      - 2 つまで下限一；同時選 3 與 1 時仍依卡面先破壞再翻面抽牌。
   - ref: cr 10.6.2.8.2.2
     quote: "チョイスする（5.18）処理により\n複数の選択肢を選んだ場合、各選択\n肢はテキストに表記の順で実行しま\nす。"
     derivation:
-      - 2 つまで下限一；同時選 3 與 1 時，打出時先支付翻面費用，效果仍依卡面先破壞再抽牌。
+      - 2 つまで下限一；同時選 3 與 1 時仍依卡面先破壞再翻面抽牌。
   - ref: Q293
     quote: いいえ。必ず1つ以上チョイスする必要があります。
   - ref: Q294
@@ -205,29 +205,43 @@ scenarios:
         targets:
           1:
             - b
-        optional_costs:
-          additional:
-            flip:
-              - e0
-              - e1
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        choice: execute
+        select:
+          - e0
+          - e1
     random: {}
     expected:
       - at: after-decision-1
+        view: omniscient
+        outcome: paused
+        assert:
+          P2.field: []
+          P2.cemetery:
+            - b
+          P1.hand: []
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              choice: decline
+            - do: resolve-choice
+              choice: execute
+              select:
+                - e0
+                - e1
+      - at: after-decision-2
         view: omniscient
         outcome: resolved
         assert:
           P1.pp.current: 7
           P2.field: []
-        events:
-          - kind: 表向き／裏向き
-            object: e0
-          - kind: プレイ
-            object: a
-          - kind: 破壊
-            object: b
-          - kind: 引く
-            player: P1
-            object: d
   - name: '[astra] []'
     setup:
       turn:
