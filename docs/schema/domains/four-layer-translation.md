@@ -19,7 +19,7 @@
 | --- | --- |
 | A：authored reader | 讀當前輸入一次，驗版本、封閉欄位、型別、鍵唯一、target 語法、可在輸入閉包判定的引用；壞資料拒絕載入 |
 | B：建置 validator | 從固定來源驗 owner／face、hash、角色、trace、葉值、適用域、完整覆蓋及使用閉包；已知錯配拒絕建置交易，不任選或靜默忽略 |
-| D：DB 邊界 | 寫入及讀回時驗 SQL 的 PK／FK、nullable、enum、Json 的具名型別及跨列一致性；原始 Any 不得流出邊界 |
+| D：DB 邊界 | 寫入及讀回時驗 SQL 的 PK／FK、nullable、enum、Json 的具名型別及跨列一致性；原始 Any 不得流出邊界；FL-027 |
 
 每張表的「失敗／案例」列給出可判定原因；案例 ID 指向[固定案例](four-layer-cases.md)。
 尚未辨識的合法來源用 pending／未匹配清單保存；缺譯用整欄原文退回。
@@ -189,7 +189,7 @@ rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章�
 形式可產生「手牌」＋「中」、「到」＋「戰場」＋「上」，或「加入」＋「手牌」、「回到」＋「手牌」。
 動詞融合形式只可在相符 frame 動作／目的地角色使用，不能把 add、return、draw、discard、destroy 都變成 move。
 keyword.display 可供括號，基礎名稱不含括號；別名與全名綁同概念，來源拼寫留 trace。
-形式內的 Label 產生概念範圍，Literal 後綴／括號不擴大該範圍。缺基礎選詞則整欄退回，未知形式 ID 則結構拒絕。
+形式內的 Label 產生概念範圍，Literal 後綴／括號不擴大該範圍。缺基礎選詞則整欄退回（FL-011），未知形式 ID 則結構拒絕。
 
 ### 5.1 原文單位與中文量詞是兩張表
 
@@ -308,7 +308,7 @@ scope 指同 frame 宣告的 ability／branch／sequence 作用域。A 驗簽章
 | template_translation；PK template_id,lang,variant_key | target:Target 取代 text；其餘品質欄保留；template_id FK、variant_key=default 表一般值 | A/B/D；壞 target；FL-005 |
 | glossary_term、glossary_translation；鍵不變 | 基礎概念／選詞及 emphasis 保留；形式不把基礎名字複製成多份 translation | A/B/D；引用錯配；FL-013／FL-015 |
 | translation_form；PK id,lang | §5 FormDefinition＋人工來源／品質欄；rule 隨 renderer pin，signature／cases 有型別 | A/B/D；壞 form；FL-012 |
-| text_template_binding；PK id，UQ use_id,ordinal | §6 SourceBinding；use_id FK translation_use 取代 context_id，context 沿 use 取得；owner 不同即各驗來源 | B/D；錯 owner／錯面；FL-007 |
+| text_template_binding；PK id，UQ use_id,ordinal | §6 SourceBinding；use_id FK translation_use 取代 context_id，context 沿 use 取得；owner 不同即各驗來源 | B/D；錯 owner／錯面／同字串借用；FL-007／FL-028 |
 | binding_leaf_occurrence；PK binding_id,slot,ordinal | LeafOccurrence 拆列；binding_id FK text_template_binding；不能以 translation_term 去重掉次數 | B/D；位置漏失；FL-008／FL-014 |
 | render_leaf_occurrence；PK translation_id,binding_id,node_path | `{translation_id:ID,binding_id:ID,node_path:[UInt],slot:Code,source_ordinals:[UInt],ranges:[Span]}`；前兩欄 FK，slot／source_ordinals 指該 binding 的葉 occurrence，node_path 為 target／form 展開後的唯一節點路徑，ranges 指輸出；所有陣列非空 | B/D；來源／輸出位置失聯，重複引用被去重；FL-014 |
 | translation；PK id | 原 context/target_lang/text/origin/authority/low_confidence/source_hash/source_id 保留；render-v3 內容鍵，tokens 不作隱藏承載 | B/D；依賴不一致；FL-015 |
