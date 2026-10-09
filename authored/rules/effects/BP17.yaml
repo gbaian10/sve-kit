@@ -432,9 +432,22 @@ cards:
               min: 0
               max: 1
               to: field
-            - op: if
-              condition:
-                read: paid.mode_3
+            - op: pay
+              cost_selections:
+                - key: '1'
+                  select:
+                    side: self
+                    zone: evolve_deck
+                    type: follower
+                    trait: 自然
+                    where:
+                      read: item.face_up
+                  min: 2
+                  max: 2
+              costs:
+                - op: flip
+                  subjects: cost.1
+                  face: down
               then:
                 op: seq
                 steps:
@@ -452,25 +465,6 @@ cards:
             max: 1
             modes:
               - 1
-        additional_costs:
-          - key: mode_3
-            modes:
-              - 3
-            costs:
-              - op: flip
-                subjects: cost.1
-                face: down
-            cost_selections:
-              - key: '1'
-                select:
-                  side: self
-                  zone: evolve_deck
-                  type: follower
-                  trait: 自然
-                  where:
-                    read: item.face_up
-                min: 2
-                max: 2
   BP17-T02:
     status: complete
     abilities:
