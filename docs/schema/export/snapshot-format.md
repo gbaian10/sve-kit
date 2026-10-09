@@ -222,7 +222,7 @@ card images 依完整 URL（含 v）快取或供已選牌組離線使用；啟�
 
 身分修復的永久 printing／int_id、卡片入口舊 URL 與 split 玩家選擇，沿 build-db §13／§15；快照保留僅依下述 §4.1，
 建置端的追加封套與公開事件映射另見 [身分修復契約 §6](../domains/identity-repair.md#6-公開事件墓碑與路由)。
-§2 表格列現行 2.0 的公開形狀；實作撤回時在原欄序尾端
+§2 表格的 identity_change 列仍是現行 2.0 的公開形狀（3.0 不改此表）；實作撤回時在原欄序尾端
 追加 reverts_id，identity_change 新增 kind=revert 與 required nullable reverts_id，
 一般事件填 null，撤回列指原公開事件並保留原 old/new／printing 欄位，不代表反向邊。
 reader 先移除被指名的有效事件再解析修復圖；原事件與撤回事件皆保留，不改舊快照。

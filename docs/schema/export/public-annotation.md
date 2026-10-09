@@ -187,7 +187,7 @@ TS 先用 `for…of` 走 exact 字串，建前綴表 B，初值 B[0]=0；每個 
 表可按當頁文字建立並釋放，不全庫常駐。DOM 若將符號換圖，先在 exact 文字上分段，再產生純文字／圖示節點，
 不能以 innerHTML 重新計 offset；複製仍為原字串。range 不保證 grapheme cluster 對齊。
 
-固定向量（PA-09）使用自撰 `A😀Ｂé手牌`：codepoint 長度 7、UTF-16 長度 8，
+固定向量（PA-09）使用自撰 `A😀Ｂé手牌`（é 是 `e`＋U+0301 兩個 scalar，不可先合成）：codepoint 長度 7、UTF-16 長度 8，
 `B=[0,1,3,4,5,6,7,8]`。手牌 range `[5,7)` 轉 `[6,8)`。
 `㍑手牌` 的 raw 手牌為 `[1,3)`；NFKC 後長度不同，不得套 `[4,6)` 回 raw。
 建置的 trace／normalizer 驗證仍依 #495；公開只保 exact raw／render 的位置，不出 canonical_source 或 trace。
