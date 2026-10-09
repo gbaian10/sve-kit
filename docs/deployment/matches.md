@@ -29,7 +29,7 @@
 
 ## Durable Object 工作區與清理
 
-維護者在 2026-09-25 的部署討論中明示確認：Durable Object 的對局儲存須由應用程式
+維護者明示確認：Durable Object 的對局儲存須由應用程式
 依規則清理，不能假設對局結束後平台會自動丟棄資料。整理來源由
 [#473](https://github.com/gbaian10/sve-kit/issues/473) 指定。
 
