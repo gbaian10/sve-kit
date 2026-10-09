@@ -267,6 +267,12 @@ def test_cache_skips_encoding_and_clean_runs_match(
     assert cached.variants == first.variants
 
 
+def test_default_recipe_has_golden_version() -> None:
+    assert DEFAULT_RECIPE.version == (
+        "sha256:511d896fab7459dbcc98eb20046b0ed581e158da6c7435d236acb5c41534bbb5"
+    )
+
+
 def test_synthetic_portrait_has_golden_webp_hashes(tmp_path: Path) -> None:
     result = build(source(png(459, 641)), tmp_path)
     assert {item.size_key: item.sha256 for item in result.variants} == {

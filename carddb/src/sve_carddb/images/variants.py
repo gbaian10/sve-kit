@@ -1,7 +1,6 @@
 """Deterministic, content-addressed WebP variants for approved SVE card images."""
 
 import hashlib
-import json
 import os
 import re
 import tempfile
@@ -15,10 +14,13 @@ from PIL import Image, ImageCms, ImageOps, UnidentifiedImageError, features
 from PIL import __version__ as pillow_version
 from pydantic import BaseModel, ConfigDict, ValidationError
 
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.images.checks import ImageChecks
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
+    from pydantic import JsonValue
 
 PILLOW_VERSION = "12.3.0"
 LIBWEBP_VERSION = "1.6.0"
@@ -80,7 +82,7 @@ class Recipe:
     method: int = 6
     exact_alpha: bool = True
 
-    def definition(self) -> dict[str, object]:
+    def definition(self) -> dict[str, JsonValue]:
         """Return every setting that can affect the encoded bytes."""
         return {
             "algorithm": "sve-webp-v2",
@@ -118,7 +120,7 @@ class Recipe:
     @property
     def version(self) -> str:
         """Hash the complete encoding and geometry recipe."""
-        return "sha256:" + hashlib.sha256(_canonical(self.definition())).hexdigest()
+        return digest(canonical(self.definition()))
 
 
 DEFAULT_RECIPE = Recipe()
@@ -225,15 +227,15 @@ def _build_variants(
     image = _decode(source.source_bytes)
     checks.png["sha256:" + source.source_sha256] = "PNG", image.size
     crop = crop_box(image.width, image.height, override)
-    cache_key = hashlib.sha256(
-        _canonical(
+    cache_key = digest(
+        canonical(
             {
                 "source_sha256": source.source_sha256,
                 "crop": list(crop.bounds),
                 "recipe": recipe.definition(),
             }
         )
-    ).hexdigest()
+    ).removeprefix("sha256:")
     cache_path = cache_root / "image-variants" / f"{cache_key}.json"
     cached = _read_cache(
         cache_path, source, image, crop, recipe, blob_root, checks=checks
@@ -254,9 +256,9 @@ def _build_variants(
                 dimensions, Image.Resampling.LANCZOS, reducing_gap=None
             )
         encoded = _encode(pixels, recipe)
-        digest = hashlib.sha256(encoded).hexdigest()
-        path = _blob_path(digest)
-        _write_blob(blob_root / path, encoded, digest)
+        checksum = hashlib.sha256(encoded).hexdigest()
+        path = _blob_path(checksum)
+        _write_blob(blob_root / path, encoded, checksum)
         generated.append(
             ImageVariant(
                 image_id=source.image_id,
@@ -266,7 +268,7 @@ def _build_variants(
                 width=dimensions[0],
                 height=dimensions[1],
                 bytes=len(encoded),
-                sha256=digest,
+                sha256=checksum,
                 recipe_version=recipe.version,
             )
         )
@@ -284,10 +286,6 @@ def _build_variants(
     )
     _write_cache(cache_path, result, cache_key)
     return result
-
-
-def _canonical(value: object) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
 def _validate_source(source: ImageSource) -> None:
@@ -612,7 +610,7 @@ def _write_cache(path: Path, result: VariantSet, key: str) -> None:
     temporary = Path(temp_name)
     try:
         with os.fdopen(fd, "wb") as file:
-            file.write(_canonical(entry.model_dump(mode="json")))
+            file.write(canonical(entry.model_dump(mode="json")))
             file.flush()
             os.fsync(file.fileno())
         temporary.replace(path)
