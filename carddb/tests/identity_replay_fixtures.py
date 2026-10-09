@@ -74,7 +74,7 @@ def observation(number: str) -> dict[str, Any]:
     return {
         "region": "en",
         "card_no": number,
-        "recipe": "registry-observation-v1",
+        "recipe": "registry-observation-v2",
         "observation_hash": "sha256:" + "8" * 64,
         "rules_hash": "sha256:" + "9" * 64,
     }

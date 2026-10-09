@@ -94,7 +94,7 @@ def populate_families(
                 "sha256": shard.content_hash,
                 "authored_path": "authored/" + shard.path,
                 "authored_revision": authored_revision,
-                "parser_version": "product-authored-v1",
+                "parser_version": "product-authored-v2",
             },
         )
         for record in shard.envelope.records:

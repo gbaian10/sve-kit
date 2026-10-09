@@ -93,7 +93,7 @@ def test_family_and_identity_share_sealed_raw_and_keep_every_use(
             row.values["parser_version"]
             for row in db.rows("source_record")
             if row.values["kind"] == "authored"
-        } == {"registry-envelope-v1", "product-authored-v1"}
+        } == {"registry-envelope-v2", "product-authored-v2"}
         allocations = {
             r.data.printing_id: r.data.int_id
             for r in plan.included("card_int_id")

@@ -165,7 +165,7 @@ def test_complete_graph_keeps_ids_owners_dates_region_and_raw_provenance(
             row.values["parser_version"]
             for row in db.rows("source_record")
             if row.values["kind"] == "authored"
-        } == {"registry-envelope-v1", "product-authored-v1", "product-identity-v1"}
+        } == {"registry-envelope-v2", "product-authored-v2", "product-identity-v2"}
         assert not db.rows("decision")
         assert not db.rows("decision_source")
         db.verify()

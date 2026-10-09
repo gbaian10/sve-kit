@@ -133,7 +133,7 @@ def merge_record() -> dict[str, Any]:
     observation = {
         "region": "jp",
         "card_no": "EXAMPLE-001",
-        "recipe": "registry-observation-v1",
+        "recipe": "registry-observation-v2",
         "observation_hash": "sha256:" + "1" * 64,
         "rules_hash": "sha256:" + "2" * 64,
     }

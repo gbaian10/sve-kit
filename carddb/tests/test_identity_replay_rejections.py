@@ -439,7 +439,7 @@ def test_post_review_append_needs_new_route_evidence(
                 "observation": {
                     "region": "jp",
                     "card_no": "TEST-05",
-                    "recipe": "registry-observation-v1",
+                    "recipe": "registry-observation-v2",
                     "observation_hash": "sha256:" + "8" * 64,
                     "rules_hash": "sha256:" + "9" * 64,
                 },

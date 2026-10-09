@@ -39,7 +39,7 @@ def _authored_sources(db: Database, identities: ProductIdentities) -> None:
                 "sha256": shard.checksum,
                 "authored_path": "authored/" + shard.path,
                 "authored_revision": identities.revision,
-                "parser_version": "product-identity-v1",
+                "parser_version": "product-identity-v2",
             },
         )
 
