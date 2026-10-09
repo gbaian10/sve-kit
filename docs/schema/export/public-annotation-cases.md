@@ -16,7 +16,7 @@ changes 依檔案中順序處理，不建立中間缺失的節點，只允許新
 `remove` 其後逐項刪除指定欄／陣列元素，目標必須存在；無 changes／remove 就保留原值。
 `printed`、`mixed_mode`、`counterpart`、`different_sections`、`printed_borrows_current`、`undecided_bold`、`enabled_bold`
 七個 fixture 只存 `{fixture:"jp_en",changes,remove}` overlay，套用相同 mutation 規則；只准直接引用 jp_en，不串接 overlay。
-`input.variants` 若存在，須為非空陣列，每項只有 changes／remove；各自從完成 input mutation 的獨立複本執行，
+`input.variants` 若存在，須為非空陣列，每項只能有 changes／remove（`{}` 表示直接用 input 結果）；各自從完成 input mutation 的獨立複本執行，
 每項都須符合該案例的同一 expected，不累積前一項的修改。未提供時只執行一次。
 input 其他欄位是操作參數，不混入公開列。含 raw_json 的案例保留字面 bytes，不先 parse/stringify 修復。
 
