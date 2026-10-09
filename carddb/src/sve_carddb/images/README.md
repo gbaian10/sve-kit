@@ -1,7 +1,7 @@
 # Regional image assets
 
-API summary. Contracts live in `docs/schema/image-variants.md` (recipe, sizes, crop)
-and `docs/schema/image-crop-overrides.md` (adopted crop boxes).
+API summary. Contracts live in `docs/schema/images/image-variants.md` (recipe, sizes, crop)
+and `docs/schema/images/image-crop-overrides.md` (adopted crop boxes).
 
 - `build_regional_assets(FrozenSources, PreviewRoots, region=, crops=, workers=)`
   converts every **current** source of one exclusively `jp` or `en` image batch to

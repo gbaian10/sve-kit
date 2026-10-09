@@ -1,7 +1,7 @@
 # Digital-name policy inputs
 
 This module reads the editable name and link policies defined by
-`docs/schema/digital-name-policy.md`. Its loader and report command do not write
+`docs/schema/domains/digital-name-policy.md`. Its loader and report command do not write
 applications or receipts. The explicit offline name application is described
 below.
 
