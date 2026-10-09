@@ -3,9 +3,8 @@
 from typing import TYPE_CHECKING, Protocol
 
 from sve_carddb.build.source_rows import insert_raw_sources
-from sve_carddb.core.json import canonical
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import SourceUse, input_record
-from sve_carddb.domains.registry.inputs import digest
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database
@@ -28,17 +27,19 @@ def _authored_sources(db: Database, identities: ProductIdentities) -> None:
             {
                 "id": "authored:v1:"
                 + digest(
-                    {
-                        "path": shard.path,
-                        "hash": shard.checksum,
-                        "revision": identities.revision,
-                    }
+                    canonical(
+                        {
+                            "path": shard.path,
+                            "hash": shard.checksum,
+                            "revision": identities.revision,
+                        }
+                    )
                 ).removeprefix("sha256:"),
                 "kind": "authored",
                 "sha256": shard.checksum,
                 "authored_path": "authored/" + shard.path,
                 "authored_revision": identities.revision,
-                "parser_version": "product-identity-v1",
+                "parser_version": "product-identity-v2",
             },
         )
 

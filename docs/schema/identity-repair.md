@@ -287,17 +287,9 @@ context 仍遵守 source-archive §2.2.1：dependencies 非空，configuration �
 
 ```python
 import copy
-import hashlib
 import json
 
-
-def canonical(value):
-    return json.dumps(value, ensure_ascii=False, sort_keys=True,
-                      separators=(",", ":")).encode("utf-8")
-
-
-def digest(value):
-    return "sha256:" + hashlib.sha256(canonical(value)).hexdigest()
+from sve_carddb.core.json import canonical, digest
 
 
 def stored(value):
@@ -312,7 +304,7 @@ def stored(value):
 
 def observation(number, digit):
     return {"region": "en", "card_no": number,
-            "recipe": "registry-observation-v1",
+            "recipe": "registry-observation-v2",
             "observation_hash": "sha256:" + digit * 64,
             "rules_hash": "sha256:" + "3" * 64}
 
@@ -346,17 +338,17 @@ record = {
         "context": {"program_revision": "b" * 40,
                     "dependencies": [{"name": "carddb/uv.lock", "sha256": "sha256:" + "c" * 64}],
                     "configuration": canonical({"registry": basis,
-                        "observation_recipe": "registry-observation-v1"}).decode("utf-8")},
+                        "observation_recipe": "registry-observation-v2"}).decode("utf-8")},
         "source_batches": [{"batch_id": "sha256:" + "7" * 64}]},
     "updates": [{"target_key": key,
                  "before": {"transition_key": None, "record_key": key,
-                            "record_hash": digest(old)},
+                            "record_hash": digest(canonical(old))},
                  "after": new, "allocation_anchor": None}],
     "repairs": [], "evidence": evidence, "reason": "合成例：新增版次後完整重審無對應",
 }
 shard = {"identity_transition_format": 1, "kind": "identity_transition_shard",
          "records": [record]}
-assert digest(old) != digest(new)
+assert digest(canonical(old)) != digest(canonical(new))
 print(json.dumps(stored({"old_record": old, "shard": shard}), ensure_ascii=False, indent=2))
 ```
 
@@ -364,10 +356,10 @@ print(json.dumps(stored({"old_record": old, "shard": shard}), ensure_ascii=False
 
 | 輸入 | SHA-256（省略 `sha256:`） |
 | --- | --- |
-| old record | `eb2e777e37086e85161fdcf71f90ce6ae30a2705c283f9daa6b64fb63f33d10e` |
-| new record | `b5e9034517d9fd97a48fa3c44482c91dc8c761aa730a276dd70cddfb24d21995` |
-| 完整 transition record | `185fe35f93ad5f6772a3da4c91ea0d1effd053c91c8a543cd6510c6c37ff90e5` |
-| 完整 shard（含推導鍵的語義物件） | `ce2ad58b2596e2e8a9060af64c1adfdf37ceca2b3890073a8a684dfbdbfd36dc` |
+| old record | `1684078eca18a479508509874894230f3795ee04874af440f011fb23dac9a60a` |
+| new record | `41b84723721ef84eb18b2eba55a2e8b2436ca4f815dda13b6e7fc865ca365fed` |
+| 完整 transition record | `6f5418a5fcdfa270c85af5d9a7c5d745700fd2e4c4302542f30c0138422d6300` |
+| 完整 shard（含推導鍵的語義物件） | `94b8989448bfd6d14021c97a1381fed63d2821f53c6857595884d39d413454df` |
 
 此例的 old_record 是重建測試前件，不寫入新分片；原 registry 仍需存在於被釘住的輸入。
 下一次新增版次時 sequence=2，previous 釘第一筆 record hash，update.before 指第一筆
@@ -404,7 +396,7 @@ moved[1]["data"]["source_face_map"][0]["face_id"] = FB
 
 
 def ref(record):
-    return {"record_key": record["record_key"], "record_hash": digest(record)}
+    return {"record_key": record["record_key"], "record_hash": digest(canonical(record))}
 
 
 def pack(record):
@@ -438,7 +430,7 @@ revert = {**copy.deepcopy(apply), "record_key": '["identity_transition",2]',
 revert_shard = pack(revert)
 assert canonical(roots) == root_bytes
 assert [u["after"] for u in revert["updates"]] == roots
-assert digest(apply) != digest(revert)
+assert digest(canonical(apply)) != digest(canonical(revert))
 active_edges = {"repair:example-merge": (A, B)}
 active_edges.pop(apply["repairs"][0]["id"])
 assert active_edges == {}
@@ -451,10 +443,10 @@ print(json.dumps(stored({"apply": apply_shard, "revert": revert_shard}),
 
 | 輸入 | SHA-256（省略 `sha256:`） |
 | --- | --- |
-| apply record | `9a9c0693da527a808f738706c9098ea382eff18d9ee7007f3285443dc33070f3` |
-| apply shard | `2b43da13d73801b8182f8f2d72d023d5f69e034d6709b5081693da4cab0d430b` |
-| revert record | `292f29a5b767bdb6c5cc1843b0d5b93d6c8f730848a2da58da32324f3b48a45c` |
-| revert shard | `682163938fb68b29d4ae4a28c3d7951763ab7ba44aa3b4d7c4a2993621db7d52` |
+| apply record | `e76aa7b24422f3a4e66ff5368d17291ff4d469e7af6d603efe11d8483f74d2fc` |
+| apply shard | `a0c73b38447365ab3c24972890793e192ac27905cabf8373c0fae3c80571cef9` |
+| revert record | `f11594560891504bf5730a898ca124495df798d9931427549f5327f6f8460012` |
+| revert shard | `46163bf18a8853309b06a695dde9e5a2712b366af134d380381cc13d6376ba8d` |
 
 路由有變動時的合成預期另列如下；O／N 均代表同一 printing 的已驗證合法入口，實作測試須提供
 相應已採納路由證據，不能靠此示意修改 card_no。每列都以完整 routes.before／after 參與 record hash。

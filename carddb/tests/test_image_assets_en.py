@@ -12,10 +12,6 @@ from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.registry.build import build
 from sve_carddb.domains.registry.inputs import Mapping
-from sve_carddb.domains.registry.parser_adapters.official_en import (
-    legacy_projection as legacy_en,
-)
-from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
 from sve_carddb.domains.registry.preview import (
     FrozenEN,
     FrozenJP,
@@ -44,6 +40,7 @@ from sve_carddb.parse.pages.official_jp import image_url
 
 from .en_extract_fixtures import page
 from .image_crop_fixtures import install, record
+from .registry_observation_fixtures import parsed_card
 from .test_image_assets_db import Staged, make_staged
 from .test_image_variants import png
 from .test_source_archive import _put, _resource
@@ -128,10 +125,10 @@ def english_images(  # ruff: ignore[too-many-locals] -- seal the shared minimal 
     for number in ("TEST-001", "TEST-002"):
         evidence = jp.plan.evidence["jp", number]
         _, content, _ = jp.cards.read(evidence.source.id, parser_version="synthetic-v1")
-        jp_cards[number] = legacy_projection(extract_card(content, number=number))
+        jp_cards[number] = parsed_card(extract_card(content, number=number))
     registry = Inputs(
         jp=jp_cards,
-        en={NUMBER: legacy_en(extract_en(raw, number=NUMBER))},
+        en={NUMBER: parsed_card(extract_en(raw, number=NUMBER))},
         mapping=Mapping(targets={NUMBER: "TEST-002"}, original_art=set(), reskins={}),
         decisions=InitDecisions(),
         as_of=date(2026, 9, 29),

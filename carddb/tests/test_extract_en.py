@@ -1,4 +1,4 @@
-"""Each legacy constraint has an independent synthetic oracle or counterexample."""
+"""Each extraction constraint has an independent synthetic oracle or counterexample."""
 
 import json
 from pathlib import Path
@@ -10,9 +10,7 @@ from typer.testing import CliRunner
 from sve_carddb import cli
 from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.registry.inputs import Card
-from sve_carddb.domains.registry.parser_adapters.official_en import (
-    legacy_projection as legacy_en_projection,
-)
+from sve_carddb.domains.registry.projection import en_card
 from sve_carddb.domains.registry.review import observation
 from sve_carddb.ingest.http.validate import ValidationError
 from sve_carddb.ingest.http.writer import LocalState
@@ -99,7 +97,7 @@ def test_static_synthetic_page_has_an_independent_full_record(
     assert record.qa == []
     assert record.products == []
     assert record.related_cards == []
-    assert legacy_en_projection(record) == Card.model_validate(
+    assert en_card(record) == Card.model_validate(
         {
             "number": number,
             "faces": [
@@ -109,6 +107,7 @@ def test_static_synthetic_page_has_an_independent_full_record(
                     "stats": stats,
                     "image": image,
                     "text": expected["text"],
+                    "traits": ["SyntheticAlpha/SyntheticBeta"],
                     "speech": expected["speech"],
                 }
             ],
@@ -152,7 +151,7 @@ def test_every_face_raw_value_and_page_hint_is_preserved() -> None:
     assert record.related_cards[0].label == "Related"
 
 
-def test_legacy_projection_matches_independently_written_full_card() -> None:
+def test_v2_projection_matches_independently_written_full_card() -> None:
     record = official_en.extract_card(page(), number="SYNⓈ-01aEN")
     expected = Card.model_validate(
         {
@@ -169,14 +168,16 @@ def test_legacy_projection_matches_independently_written_full_card() -> None:
                         "Universe": "Synthetic universe",
                     },
                     "stats": {"cost": "-", "power": "02", "hp": "X"},
-                    "text": FULL_TEXT,
+                    "text": "First {synthetic.badge|[badge]}\nNext",
+                    "sections": ["Auxiliary", "Last"],
+                    "traits": ["Alpha", "Beta"],
                     "speech": "Voice {synthetic.voice|voice}",
                     "image": "../exact/SYNⓈ-01aEN.png?v=7",
                 }
             ],
         }
     )
-    actual = legacy_en_projection(record)
+    actual = en_card(record)
     assert actual == expected
     assert observation(actual, "en") == observation(expected, "en")
 
@@ -273,7 +274,7 @@ def test_missing_and_empty_text_are_distinct(
     assert record.faces[0].text == text
     assert record.faces[0].sections == []
     assert record.faces[0].speech == speech
-    assert legacy_en_projection(record).faces[0].text == text
+    assert en_card(record).faces[0].text == text
 
 
 def test_unknown_info_and_empty_auxiliary_section_are_retained() -> None:
@@ -285,7 +286,7 @@ def test_unknown_info_and_empty_auxiliary_section_are_retained() -> None:
     record = official_en.extract_card(raw, number="SYNⓈ-01aEN")
     assert record.faces[0].info["Future label"] == "Synthetic universe"
     assert record.faces[0].sections == ["", "Last"]
-    assert "Future label" in legacy_en_projection(record).faces[0].info
+    assert "Future label" in en_card(record).faces[0].info
 
 
 def test_markup_rendering_handles_nested_breaks_whitespace_and_exact_stem() -> None:
@@ -316,7 +317,8 @@ def test_section_separator_requires_at_least_five_symbols(
     text = "First {synthetic.badge|[badge]}\nNext"
     complete = text + "\n" + separator + "\nAuxiliary"
     assert record.faces[0].raw_text == complete
-    assert legacy_en_projection(record).faces[0].text == complete
+    assert en_card(record).faces[0].text == (text if length == 5 else complete)
+    assert en_card(record).faces[0].sections == (["Auxiliary"] if length == 5 else [])
     assert record.faces[0].text == (text if length == 5 else complete)
     assert record.faces[0].sections == (["Auxiliary"] if length == 5 else [])
 
@@ -401,13 +403,15 @@ def test_digital_regions_rejected_before_writing(
     assert "only JP and EN" in result.stdout
 
 
-def test_explicit_empty_trait_retains_empty_value_instead_of_failing_or_inventing_dash() -> (
-    None
-):
-    raw = page().replace(b"<dd>Alpha / Beta</dd>", b"<dd></dd>")
-    empty_value = ""
+@pytest.mark.parametrize("empty_value", ["", "-"])
+def test_absent_traits_are_empty_in_v2_observations(empty_value: str) -> None:
+    raw = page().replace(
+        b"<dd>Alpha / Beta</dd>", ("<dd>" + empty_value + "</dd>").encode()
+    )
     record = official_en.extract_card(raw, number="SYNⓈ-01aEN")
     assert record.faces[0].trait_raw == empty_value
     assert record.faces[0].traits == []
     assert record.faces[0].info["Trait"] == empty_value
-    assert legacy_en_projection(record).faces[0].info["Trait"] == empty_value
+    assert en_card(record).faces[0].info["Trait"] == empty_value
+    assert en_card(record).faces[0].traits == []
+    assert en_card(record).faces[0].structure("en")["traits"] == []

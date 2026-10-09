@@ -11,7 +11,7 @@ from sve_carddb.core.models import RecordData, Text
 from sve_carddb.core.provenance import SourceUse, uses_sorted
 from sve_carddb.domains.catalog.adoption_models import ReviewContext, SourceRef
 from sve_carddb.domains.digital.links.evidence import Evidence
-from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
+from sve_carddb.domains.registry.projection import jp_card
 from sve_carddb.domains.registry.records import CardId, FaceId, PrintingId
 from sve_carddb.domains.registry.review import observation
 from sve_carddb.parse.pages.extract_jp import extract_card
@@ -157,9 +157,7 @@ def owner_text(
     _, raw, _ = sources.batch(ref.batch_id).read(
         ref.source_version_id, parser_version=ref.parser
     )
-    actual = observation(
-        legacy_projection(extract_card(raw, number=printing.card_no)), "jp"
-    )
+    actual = observation(jp_card(extract_card(raw, number=printing.card_no)), "jp")
     if actual != printing.observation.model_dump(mode="json"):
         raise ValueError("Digital-name owner registry observation mismatch")
     use = SourceUse(

@@ -13,9 +13,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-001EN
-          observation_hash: sha256:796d9711788e967b3c951b41c59f654a2d03286423dcf302e7f204331051c0f7
-          rules_hash: sha256:cf3eebf0f78118f219f6108c68e013bdc9c47f4ed085b156d40be1ccbe23c40e
-          recipe: registry-observation-v1
+          observation_hash: sha256:2e51a3113f29690368a77e3083f7d74fca0ebab9aa39d395e13fbb5209db84e1
+          rules_hash: sha256:ddcb6c4fc77e56905a5ad116bebe82c747ed008dd6a4190b0978eb733ec2f0a1
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -28,9 +28,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-002EN
-          observation_hash: sha256:06f5ca7c35b5071a586eed609aebae9aecb04d18bbbd0321419f4db617ee5f8c
-          rules_hash: sha256:36a33e307d88d0cd9bdceb29f840edbc1757dc2f168ba5c5abcf805da5d30ded
-          recipe: registry-observation-v1
+          observation_hash: sha256:2518fbe10e975889356d5c94c3b0816ab535c66050117298df1f697aed204c7d
+          rules_hash: sha256:ce78cc8fdc1f01a7babeb8a0a5f8f07b19276d958c8e6470eece153b737319a4
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -43,9 +43,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-003EN
-          observation_hash: sha256:f058eeab97f9d9fbbd037db17b040966fed9c0bcf8cb6b8016700a5a5fde3c81
-          rules_hash: sha256:3bf72e80c17fe598765d2ceb11d94069a6583131e0cfc255592024bb2f5e6b56
-          recipe: registry-observation-v1
+          observation_hash: sha256:0954bf94ccba96c982e453da19f146290cd752a0e8da6a0cbfe1bd728620fe5f
+          rules_hash: sha256:a8e5ca907da64bbf8358a255e266c3423eb2701099474ca8c6a4447d88e33a25
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -58,9 +58,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-004EN
-          observation_hash: sha256:0da119e42c2e51aeee2a49ffe4a30b9f1beee4aeb7a4d9fa130460c93631aebf
-          rules_hash: sha256:ea12d3ce6cc9e4414e62151d2bdc8e7fdf0917d40eb8947c1fe6f7803fc7ab56
-          recipe: registry-observation-v1
+          observation_hash: sha256:fb24edc18816a2c4fa7a20ef8fc9ab3519caf9a22c6bd397ab8e95ad4fe16d18
+          rules_hash: sha256:77a0aa7892bef003c65b095ec5ca5b30a9a4ed97116df8ed1f31ebf25b130ef8
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -73,9 +73,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-005EN
-          observation_hash: sha256:1d0584bf46dc8e2d23d7a652f2cfaafd74777090b2a0573a795046377dd7a34c
-          rules_hash: sha256:67fafc5023329023a5835189376b1a47434fc59af1a9f8600e19b318e6776caf
-          recipe: registry-observation-v1
+          observation_hash: sha256:b89a0789528acb1d471e739fd5692567e721845f7a399fa4299ef0d4dc35fcec
+          rules_hash: sha256:d144fa708b30ffc2d3f97509cb79ff55ef0c92c067068845f21e6fa426e0805b
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -88,9 +88,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-006EN
-          observation_hash: sha256:4f9ac40364473e3ad260ab4bd7a81b5f63de52fbd76d1f01440b7ecd9e8a6373
-          rules_hash: sha256:7e418f9e5580f8b98673e04f6e37b7762726d0cc013f5b3acd7ef0d8e4b4af2b
-          recipe: registry-observation-v1
+          observation_hash: sha256:0cdc9930bee9ed517a11cff554608f509abc6910c7ecba74e78402dfa4ef2788
+          rules_hash: sha256:4389646832ca1690cc48ed3a97f60b7c7559714aa9c10ac0e7b606535882aedb
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -103,9 +103,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-007EN
-          observation_hash: sha256:beef18c7b919421c030d326973f8f0f9cce39784253e18fd4f4b6ff5b6602ff4
-          rules_hash: sha256:0a7a1aa4b515a832d91b68b6be27d465fe08eb2b3e16b770b527c1e507563a16
-          recipe: registry-observation-v1
+          observation_hash: sha256:bcc71297ad6b71b2c55302266eb75f58b022d3a4f966469a15c46e0625b7e044
+          rules_hash: sha256:386937be03000e0b1ecede31f67743015933691d5330742aef06d0857dde93a3
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -118,9 +118,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-008EN
-          observation_hash: sha256:fa0031931efa3df70d8b6caf7b2c59c2d6f9fcaa3e98553477d71d6a933985de
-          rules_hash: sha256:b76a46560f420db5cc1478ddb439124a2f255f5d731a0f91941e1843ef4ebe76
-          recipe: registry-observation-v1
+          observation_hash: sha256:f7d44e5ecfac1ae2dd64a82e7601c8b8763468fe5f36f15c73a07fc01d58ac51
+          rules_hash: sha256:aa31b64e64e4f0fff458681312af1e20198382c7e623181dca56528d4c078a55
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -133,9 +133,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-009EN
-          observation_hash: sha256:b43df155013dc55b021b100166eacd27b254ee411258b0b8556f806f6f1c35bc
-          rules_hash: sha256:162660827599d43b04df654623dd5da9d2dbf1aa4fd3dadf51a8a5456b1ad3e1
-          recipe: registry-observation-v1
+          observation_hash: sha256:1651fcf5008a9f9a66102da67a68bc2a2a82339b08781b7d90ad13b39a0392d5
+          rules_hash: sha256:0a45084333b57619496a6e65d24b1540a60814a05edced38456059e8f04e3999
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -148,9 +148,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-010EN
-          observation_hash: sha256:b049e76a3d18e96b28f2829e59af4aae9cfcad3814b7990966dd6f21aa37ef4f
+          observation_hash: sha256:c37f3a6f4b48bc5c5154c12535e1cfca33985ab8b443402e304066324c3629fe
           rules_hash: sha256:d73a2064bcac9eb3bb7cb6c5a3566fe72f5e79cca3d63a2f600ebab50dd1bb85
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -163,9 +163,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-011EN
-          observation_hash: sha256:290fda7bff6ecece9df0811d6179755855d35cc2ad8444080a11cfb4cbfec6b1
-          rules_hash: sha256:afb3d9ec8358e4d2dc350c1afc4276c8de6a8035f3272a29e02705bca023ac4b
-          recipe: registry-observation-v1
+          observation_hash: sha256:d5fc4b57216eb0f5d02f66a000f4aee38b01124e965cd3f552a5e8dab93f847b
+          rules_hash: sha256:b6466b822be8ed3dc0ce9115ad750668931d220684e3285823f73c7d3cd926de
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -178,9 +178,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-012EN
-          observation_hash: sha256:308ac5f635618139abf8baab3699ec2d6638b8813df2748bf0cfd2fbf6912b0f
-          rules_hash: sha256:6f7a9698b39df4e8f5b9b494f8f3fe7183f0edb7ea337ab422a44f2f5519f700
-          recipe: registry-observation-v1
+          observation_hash: sha256:b39411708d12583e7350d28dc6d1ef2b77bd189d73ffc60882481fdc31c37db0
+          rules_hash: sha256:9b7fc622699f4a2f2554f57f7d13430a0d3ce6b4eab0050cc52d1bb46412ac72
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -193,9 +193,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-013EN
-          observation_hash: sha256:7c513cb3e01d4c00543de74376db15f67658a66d6e24f25b2a02ecdec1380263
-          rules_hash: sha256:44c5dc1e688ede71f82cf127b47caa3295512d931c2be2796277e230484947a7
-          recipe: registry-observation-v1
+          observation_hash: sha256:6e211b93d50d6c6b54312559bf88e51b0e470f0cb6e0867f273fdcd647f4edb3
+          rules_hash: sha256:d921a5e36159bb8aae70e76569aa91deeab6af8f79a7024110a426b40675f7ff
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -208,9 +208,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-014EN
-          observation_hash: sha256:e35900fdb5e9ffc777bfc2bb6aa16649e4858322ede8b051d7d59f721d576800
+          observation_hash: sha256:2d09c2e44c7c3d20b987b9e5daa2204bdb2439c3687188ce68e6cb427492aca9
           rules_hash: sha256:567b11f5cab68616969e45f1727a5efe1cbef60ffb2972bd37ec250587f03057
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -223,9 +223,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-015EN
-          observation_hash: sha256:44c2f4f0f7ae96dfda669fe644318d7d58d7801a3f13c9f4c6a8f19248f0b308
-          rules_hash: sha256:c704e6ff91e4ee59dd9af73676131112187d948db1744670ea0d4446677569c0
-          recipe: registry-observation-v1
+          observation_hash: sha256:611e706901af7c5441f3ced5f37e565df58952567f23d7d70ce27b3cdfbab669
+          rules_hash: sha256:32bc53c5559bc292002f447d8e94d096add7c1ea507a239a23c2ad6f13499e18
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -238,9 +238,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-016EN
-          observation_hash: sha256:7b1a42d591c9f4a2b4cd1386024aaf1f79a0cd2ee9b7c784ccfeeb645baa2951
-          rules_hash: sha256:6bd2a7b3dced25fc3c9fe30b8dce38e0e4547b5b6daa44263a7f53613845c9df
-          recipe: registry-observation-v1
+          observation_hash: sha256:48168ae99ae6cdd1d5f59f27132f5f30085cd9c30806baee114cdd1c57983011
+          rules_hash: sha256:978631ad943295e7683370bf526104bc4c023bcf4a32715a759455cfa2ac7516
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -253,9 +253,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-017EN
-          observation_hash: sha256:0ed631fea91d40551e9aead3cd318c31602453d9d33a74866610ab64477b810a
-          rules_hash: sha256:f7bcc6e1517f5b67d919d57d36efa75faf0fa9e39f863d16fe8edbe415f1dbb7
-          recipe: registry-observation-v1
+          observation_hash: sha256:2a9cbb1d36db38bd10027013e14b68485f340d5db2c41c29646a4acdde53c5dc
+          rules_hash: sha256:fdb0eb602003442072248490bede817fc094af51b0735d8db93091cc9a6d667c
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -268,9 +268,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-018EN
-          observation_hash: sha256:bde2d895373808e9be3c0c402f7b0c48901204ee7e76af1dd2dc3b5547c69269
-          rules_hash: sha256:fd9ccbfc5f5dce442faacc55411cf96130ca7c0247c82d6f0441eb378b4f41b4
-          recipe: registry-observation-v1
+          observation_hash: sha256:b03e595bf13be9c27b3b6a41943cd34f861bc78ba30b78c68cd083541bb1c32a
+          rules_hash: sha256:d9eca7b2eb4720310296725bbf0af3a1e89108de975289dc09c9966f0ebd4b98
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -283,9 +283,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-019EN
-          observation_hash: sha256:4ac2c573d89283571a1382272292bd72ac3bbe8427f4cb753f6b19b86cb6b108
-          rules_hash: sha256:8d66c3e1b74b03be9b2920f0618c64d4b550e7f2820e074e141fc1224c8be24d
-          recipe: registry-observation-v1
+          observation_hash: sha256:aa06a696db4a16db1800aa8e4612975ee726265dd0d9dc211a6c87c09f3a148e
+          rules_hash: sha256:160c6042c97e7d5799c56b2096c43a71541c00ad7b5c8bcdde8f772edc57febf
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -298,9 +298,9 @@ records:
       observations:
         - region: en
           card_no: GFE01-020EN
-          observation_hash: sha256:9259ebcb6ea673c3007126a69428ffd7faf192192c030388e1883d366abeb189
-          rules_hash: sha256:391c370f28771f0e147cbfec422bae8ead88102119e553a173f1f84a9843fa90
-          recipe: registry-observation-v1
+          observation_hash: sha256:c00bb4f7e81afb512b96b460a3bafea7dae41cf2075ba3c8eb90c21ef7845ccc
+          rules_hash: sha256:f671dc9c02b8a2dcc1af245593f96a2e95947b884e2b15454400be86d3d7822c
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFE01
     data:
@@ -313,6 +313,6 @@ records:
       observations:
         - region: en
           card_no: GFE01-T01EN
-          observation_hash: sha256:21d246886b6e10e9bed6284e9c444325b50dee76d2ae4e5c18e22f874a6cc335
-          rules_hash: sha256:999367f49b1fd529c87c34aa323ea3a57596dc500084498a6cc8fd8979dde824
-          recipe: registry-observation-v1
+          observation_hash: sha256:be1133a64c97e639ec476dbe82e326595baffc1ac01f0016ec3ea3f0502f45af
+          rules_hash: sha256:44a97882ea28f4d385e31f4e2f63dbd80b9083263475c516dc6a15e35da12d92
+          recipe: registry-observation-v2

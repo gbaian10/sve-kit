@@ -45,7 +45,7 @@ RUNTIME = (
     "carddb/src/sve_carddb/parse/pages/official_en.py",
     "carddb/src/sve_carddb/parse/pages/extract_jp.py",
     "carddb/src/sve_carddb/parse/pages/extract_en.py",
-    "carddb/src/sve_carddb/domains/registry/parser_adapters/official_jp.py",
+    "carddb/src/sve_carddb/domains/registry/projection.py",
     "carddb/src/sve_carddb/domains/registry/inputs.py",
     "carddb/src/sve_carddb/domains/registry/review.py",
     "carddb/src/sve_carddb/core/json.py",

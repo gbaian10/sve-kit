@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue, ValidationError
 
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import RecordData
 from sve_carddb.domains.products.models import (
     CatalogRecord,
@@ -16,7 +17,6 @@ from sve_carddb.domains.products.models import (
     ProductRecord,
     Shard,
 )
-from sve_carddb.domains.registry.inputs import canonical, digest
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.storage import read_yaml
 
@@ -132,7 +132,7 @@ def _load_shard(root: Path, name: str) -> LoadedShard:
     raw = read_yaml(path)
     shard = _model(Shard, raw)
     _check_records(shard, name)
-    return LoadedShard(name, digest(raw), canonical(raw), shard)
+    return LoadedShard(name, digest(canonical(raw)), canonical(raw), shard)
 
 
 def _check_records(shard: Shard, path: str) -> None:

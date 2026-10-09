@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import ValidationError
 
-from sve_carddb.domains.registry.inputs import canonical
+from sve_carddb.core.json import canonical
 from sve_carddb.domains.registry.records import (
     DATA_MODELS,
     ArtData,

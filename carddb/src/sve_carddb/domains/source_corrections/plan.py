@@ -5,11 +5,10 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.core.json import canonical
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import SourceUse
 from sve_carddb.core.regions import Region
 from sve_carddb.domains.registry.corrections import Status, correction_status
-from sve_carddb.domains.registry.inputs import digest as registry_digest
 from sve_carddb.domains.registry.records import CorrectionData, PrintingData
 from sve_carddb.domains.source_corrections.images import evidence_url
 
@@ -36,7 +35,7 @@ class Application:
 
     def key(self) -> str:
         """Invalidate candidate/review identity on every authored correction change."""
-        return registry_digest(self.record.entry().model_dump(mode="json"))
+        return digest(canonical(self.record.entry().model_dump(mode="json")))
 
     def uses(self) -> tuple[SourceUse, ...]:
         """Pin both the observation comparison and every exact image locator."""

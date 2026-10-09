@@ -14,7 +14,7 @@ nodes are `None`; present empty nodes are empty strings. Traits retain both the
 original `Trait` value and the list split at the EN ` / ` delimiter. Numbers
 such as `-` or leading zeros are never coerced here.
 
-## EN legacy compatibility
+## EN text rendering and registry projection
 
 The measured historical EN renderer emits text icons as
 `{filename_stem|alt}`. The stem comes from the source URL's path basename with
@@ -24,13 +24,14 @@ block elements start a new line and horizontal whitespace is collapsed.
 An icon without a nonempty src, alt or filename stem fails extraction. There
 is no fallback renderer that silently drops unknown icons.
 
-`registry.parser_adapters.official_en.legacy_projection(record)` independently constructs the existing
-registry `Card`: name, full info, stats, **complete raw_text**, speech and image
-for each face. Historical EN records kept auxiliary sections inside full text,
-so the legacy `sections` list remains empty while the new record separately
-exposes them. No section content is removed to make a hash match. Page hints
-and credits are retained in the full record; they are outside the original
-`registry-observation-v1` recipe. Neither that recipe nor old decisions change.
+`domains.registry.projection` explicitly maps JP and EN records to the domain
+`Card` for `registry-observation-v2`. JP traits come from the parser, including
+compound traits as one item. EN retains parsed traits, text and sections
+separately; absent traits are `[]`. Every face field and its default is explicit,
+and source face order remains intact. Page hints, dates and credits stay in the
+full extraction record, outside the registry identity projection. Hashes use
+`core.json.canonical` and `core.json.digest`; there is one accepted observation
+recipe.
 
 ## Sealed extraction
 
@@ -48,6 +49,6 @@ Parse failures report exception types without echoing source text.
 
 These records are extraction inputs, not public snapshots or new authored
 truth. Use the [regional evidence providers](../domains/registry/preview/README.md) to
-verify legacy identity observations and preserve the shared raw-source/build
+verify registry identity observations and preserve the shared raw-source/build
 input contract. Matching both observation hashes does not establish cross-region
 text equivalence, correction adoption, review scope or release readiness.

@@ -1,6 +1,9 @@
-"""Strict YAML boundaries and append-only registry shards."""
+"""Strict YAML boundaries and append-only registry shards.
 
-import hashlib
+The #474 evidence and #476 envelope migrations are one-time exceptions defined
+in docs/schema/authored-layout.md; daily append tools retain their invariants.
+"""
+
 import io
 import os
 import tempfile
@@ -19,6 +22,7 @@ from pydantic import (
 )
 from ruamel.yaml import YAML
 
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, parse_yaml
 from sve_carddb.domains.registry.allocation import (
     ALLOCATION_POLICY,
@@ -26,7 +30,6 @@ from sve_carddb.domains.registry.allocation import (
     cursors,
     region_allocations,
 )
-from sve_carddb.domains.registry.inputs import canonical
 from sve_carddb.domains.registry.transitions.files import require_empty_transitions
 
 if TYPE_CHECKING:
@@ -227,7 +230,7 @@ def read_base_files(root: Path) -> RegistryFiles:
         shards.append(
             LoadedShard(
                 file.relative_to(root).as_posix(),
-                "sha256:" + hashlib.sha256(content).hexdigest(),
+                digest(content),
                 content,
                 shard.model_dump_json(round_trip=True).encode(),
                 file.read_bytes(),

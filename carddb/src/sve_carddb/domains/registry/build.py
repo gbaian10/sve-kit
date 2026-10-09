@@ -7,9 +7,10 @@ from uuid import UUID, uuid5
 
 from pydantic import JsonValue
 
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.registry.allocation import cursors, region_range
 from sve_carddb.domains.registry.evidence import require_evidence
-from sve_carddb.domains.registry.inputs import Card, digest, validate_mapping
+from sve_carddb.domains.registry.inputs import Card, validate_mapping
 from sve_carddb.domains.registry.review import Inputs, observation, validation_cards
 from sve_carddb.domains.registry.storage import Entry
 
@@ -374,8 +375,8 @@ class Builder:
                 "field": correction.field,
                 "expected_raw_value": correction.expected_raw_value,
                 "corrected_value": correction.corrected_value,
-                "expected_source_hash": digest(card.model_dump(mode="json")),
-                "source_hash_recipe": "registry-observation-v1",
+                "expected_source_hash": digest(canonical(card.model_dump(mode="json"))),
+                "source_hash_recipe": "registry-observation-v2",
                 "reason": correction.reason,
                 "state": correction.state,
                 "reported_to_official": False,

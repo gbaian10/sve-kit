@@ -17,7 +17,6 @@ from sve_carddb.domains.products.official import PARSER, parse_products
 from sve_carddb.domains.products.plan import plan_official_products
 from sve_carddb.domains.registry.build import build
 from sve_carddb.domains.registry.inputs import Mapping as CardMapping
-from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
 from sve_carddb.domains.registry.preview import plan_preview
 from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
 from sve_carddb.domains.registry.review import InitDecisions, Inputs
@@ -31,6 +30,7 @@ from sve_carddb.parse.pages.official_jp import card_url
 
 from .identity_evidence_fixtures import MemoryEvidence
 from .product_fixtures import envelope, family, install, obj, write_yaml
+from .registry_observation_fixtures import parsed_card
 from .test_registry_preview_archive import RAW
 from .test_source_archive import _put, _resource, _store
 
@@ -229,7 +229,7 @@ def identity_template(tmp_path_factory: pytest.TempPathFactory) -> IdentityTempl
         store.root, store.store_id, sealed.batch_id
     ).read(sealed.inventory.current[0].source_version_id, parser_version=PARSER)
     page = parse_products(verified, source, "jp")
-    card = legacy_projection(extract_card(verified, number="TEST-001"))
+    card = parsed_card(extract_card(verified, number="TEST-001"))
     inputs = Inputs(
         jp={card.number: card},
         en={},

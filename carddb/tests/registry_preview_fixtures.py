@@ -2,8 +2,8 @@
 
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import ArchivePin, BuildContext, Source
-from sve_carddb.domains.registry.inputs import digest
 from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
 from sve_carddb.domains.registry.records import CardData, PrintingData
 
@@ -23,10 +23,12 @@ BUILD = BuildContext.from_inputs(REVISION, {"synthetic": True})
 
 def observed(card: Card, region: Region) -> CardEvidence:
     """Use real observation hashing on synthetic card data."""
-    raw_hash = digest(card.model_dump(mode="json"))
+    raw_hash = digest(canonical(card.model_dump(mode="json")))
     source = Source(
         id="src:v1:"
-        + digest({"region": region, "number": card.number}).removeprefix("sha256:"),
+        + digest(canonical({"region": region, "number": card.number})).removeprefix(
+            "sha256:"
+        ),
         url=f"https://example.invalid/{region}/{card.number}",
         raw_locator="synthetic:raw/" + raw_hash.removeprefix("sha256:"),
         sha256=raw_hash,

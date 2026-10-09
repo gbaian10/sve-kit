@@ -11,9 +11,8 @@ from typer.testing import CliRunner
 
 from sve_carddb import cli
 from sve_carddb.build.source_rows import source_values
+from sve_carddb.core.json import canonical
 from sve_carddb.core.regions import SourceRegion
-from sve_carddb.domains.registry.inputs import canonical
-from sve_carddb.domains.registry.parser_adapters.official_en import legacy_projection
 from sve_carddb.domains.registry.preview import FrozenEN, FrozenJP, FrozenRegions
 from sve_carddb.domains.registry.records import Observation
 from sve_carddb.domains.registry.review import observation
@@ -26,6 +25,7 @@ from sve_carddb.parse.pages import official_jp as jp
 from sve_carddb.parse.pages.extract_en import extract_card
 
 from .en_extract_fixtures import page
+from .registry_observation_fixtures import parsed_card
 from .test_registry_preview_archive import RAW as JP_RAW
 from .test_source_archive import NOW, _put, _resource, _store
 
@@ -101,7 +101,7 @@ def test_exact_en_source_pins_first_receipt_and_recomputes_both_hashes(
     assert (
         found.source.archive.first_receipt_id != latest.inventory.entries[0].receipt_id
     )
-    expected = observation(legacy_projection(extract_card(raw, number=NUMBER)), "en")
+    expected = observation(parsed_card(extract_card(raw, number=NUMBER)), "en")
     assert found.observation == Observation.model_validate_json(canonical(expected))
     assert len(found.faces) == 2
     assert all(

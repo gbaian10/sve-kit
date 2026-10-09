@@ -381,7 +381,12 @@ def test_source_block_ordinal_is_strict_uint(
     row = identity_record(fixture.pages[0], match_index=-1)
     obj(obj(row["data"])["match"])["product_block_ordinal"] = ordinal
     install_identity(fixture.root, identity_envelope([row]))
-    with pytest.raises(ValueError, match="product_block_ordinal:"):
+    error = (
+        "Expected safe integer"
+        if ordinal == 9_007_199_254_740_992
+        else "product_block_ordinal:"
+    )
+    with pytest.raises(ValueError, match=error):
         fixture.load()
 
 

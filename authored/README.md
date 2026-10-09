@@ -20,6 +20,13 @@ Never regenerate identity IDs from sorting, rewrite an existing registry record 
 or treat a `needs_review` correction as accepted. Identities are written only after manual
 confirmation; the PR review records how they were checked.
 
+The #474 evidence representation migration and #476 document envelope migration
+are one-time exceptions to the prohibition on rewriting records. Each requires
+a fixed baseline, an isolated conversion using the existing encoder, a complete
+diff and review before an atomic switch of readers and data. Permanent IDs,
+allocations and manual membership remain fixed. The [migration boundary](../docs/schema/authored-layout.md#2-分片與來源)
+does not relax the daily append-only tools or add a general rewrite command.
+
 The glossary input follows the [translation contract](../docs/schema/translation-contract.md)
 and [glossary adoption rules](../docs/schema/glossary-adoption.md). Readers load the dedicated working-tree data directories once; keep documentation, candidates and audit reports outside `translations/`.
 Concept keys are permanent. Edit translation YAML directly and review it in a PR; Git keeps the

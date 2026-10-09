@@ -10,8 +10,8 @@ records:
       field: card_type
       expected_raw_value: '-'
       corrected_value: Evolution Point
-      expected_source_hash: sha256:5eb7197540d32918de7c23a45fa7a57a142dc5c738d8150717636007b71ccb91
-      source_hash_recipe: registry-observation-v1
+      expected_source_hash: sha256:f07346677a4271db9c36a60b1eadaa9bf9d187014a7af5591bd21a3198d9401e
+      source_hash_recipe: registry-observation-v2
       reason: Official page transcription differs from the printed card image.
       state: active
       reported_to_official: false
@@ -33,7 +33,7 @@ records:
       expected_raw_value: '-'
       corrected_value: Evolution Point
       expected_source_hash: sha256:902ee86efccf6c52df8f8282c3d116519c3d5a77555bcbc2bea4fba166fee7ca
-      source_hash_recipe: registry-observation-v1
+      source_hash_recipe: registry-observation-v2
       reason: Official page transcription differs from the printed card image.
       state: active
       reported_to_official: false
@@ -55,7 +55,7 @@ records:
       expected_raw_value: 【疾走】
       corrected_value: "【疾走】\n自分のエンドフェイズが来たとき、これは消滅する。"
       expected_source_hash: sha256:daae2afa3464a8882766c4da357ffdd91c143b96fba626a59490210ea354313c
-      source_hash_recipe: registry-observation-v1
+      source_hash_recipe: registry-observation-v2
       reason: Official page transcription differs from the printed card image.
       state: active
       reported_to_official: false

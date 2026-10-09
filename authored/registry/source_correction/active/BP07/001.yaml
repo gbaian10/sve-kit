@@ -10,8 +10,8 @@ records:
       field: effect
       expected_raw_value: "これをプレイする際、場の『ナテラの大樹』2つを{アクト}：コストを-2する。\nこれをプレイする際、自分の場に『王たる光・ベイリオン』がいるなら、コストを-1する。"
       corrected_value: "これをプレイする際、場の『ナテラの大樹』2つを{アクト}：コストを-2する。\nこれをプレイする際、自分の場に『王たる光・ベイリオン』がいるなら、コストを-1する。\n相手の場のフォロワー1体を選ぶ。それに4ダメージ。"
-      expected_source_hash: sha256:e676d30e4a32e2895ba5593fd52546781292723c201e6def6d721ffb3d4b3774
-      source_hash_recipe: registry-observation-v1
+      expected_source_hash: sha256:522994eea10017f56a87f7711060186de17bdf81e14a80c72c75b3a3f9d46a80
+      source_hash_recipe: registry-observation-v2
       reason: Official page transcription differs from the printed card image.
       state: active
       reported_to_official: false

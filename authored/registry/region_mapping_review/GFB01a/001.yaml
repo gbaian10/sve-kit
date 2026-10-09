@@ -13,9 +13,9 @@ records:
       observations:
         - region: en
           card_no: GFB01a-001EN
-          observation_hash: sha256:c158e7496e4552e1004dd15e4b6d3021268d61f7e28115d88756b279cf34dbbe
-          rules_hash: sha256:d22e2b6787260ea6800cd168c9994bce1c9e1a55d9151e6e4435fc7ebf98f6d2
-          recipe: registry-observation-v1
+          observation_hash: sha256:51bf4c6b08c93db9103aae744182ec1262cc140f6bf00a35073ccc8e3b97e0e9
+          rules_hash: sha256:bcd37663d5a0c1c8e585b350abe422981000bb1e0683ce8e98f1669e1b2a7ee7
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -28,9 +28,9 @@ records:
       observations:
         - region: en
           card_no: GFB01a-002EN
-          observation_hash: sha256:4e2b46015f485b08647e394745c989b3ef3b8cb23a84651dd4983285fdac9f15
+          observation_hash: sha256:beea6d710247d6798dabe91d7b85e4884996d65e64b5f7344dd9c7fb5eea069c
           rules_hash: sha256:71aa3adcd7ddfdc10c8eb0038a3a8b672ec5761b8f4db257b52f0eff9bcbaf3e
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -43,9 +43,9 @@ records:
       observations:
         - region: en
           card_no: GFB01a-003EN
-          observation_hash: sha256:d284351a2c4b1f34294c209eda6de8446551c2bbc7ea34107227d10fe86b8c51
-          rules_hash: sha256:9542155eeaa8d49d9ff5cce4cfcc06b07f09b4ee68283427fab6704af7619986
-          recipe: registry-observation-v1
+          observation_hash: sha256:95ac72a6577aa272fbf91610a04eb0ac56dcc201df649e48a47813ab48847c01
+          rules_hash: sha256:6a38520f025124c388f72fdcd10269ab68f74b7eb6c46852026f317e9ebb9f9a
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -58,9 +58,9 @@ records:
       observations:
         - region: en
           card_no: GFB01a-004EN
-          observation_hash: sha256:6088b7dc6febe10b197de2394425f30cc01aaddbbcd7498ba1e4d3e708c6f700
+          observation_hash: sha256:deeb43152fc5092c16bcd1bed00770a2399298c7a3c1b9a2f48d79f5287c7550
           rules_hash: sha256:188924e87af11bf5e5475972fde65d8cccee3b90dd83e4da43202ba6d3ed8272
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -73,9 +73,9 @@ records:
       observations:
         - region: en
           card_no: GFB01a-005EN
-          observation_hash: sha256:8cde3e618215d618fb93ee897ee9eb1d3195e51ab6f822f9d7c5f0825f47eefb
-          rules_hash: sha256:639275d56112999ca7c1d47eeaf4d79e44393b8aae039c5aaf3fe256643c9571
-          recipe: registry-observation-v1
+          observation_hash: sha256:af6e461cbb0a0cfc2f3580e639636419d4eb0d87962360340b19072f8260dfc9
+          rules_hash: sha256:9a42138fd440ff6525bfdd7986e49d2d87160e039b88f98119547c3bddf269e2
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -88,9 +88,9 @@ records:
       observations:
         - region: en
           card_no: GFB01a-006EN
-          observation_hash: sha256:374acb8cf93fc2c16daeff4249fee9872e6f10562f5d044754baf66998b8a1c9
-          rules_hash: sha256:066feaf6cebbef294e852c42e0781b30be2151e99b81717380c577e697ab69ea
-          recipe: registry-observation-v1
+          observation_hash: sha256:9f2a296168300ba14849c7caa769c4c8659fb3a6a76afe8d4b2d897f0acc1145
+          rules_hash: sha256:ca54413e1c2db6ac5ddf5862b085f1134fad067e90aee204b84143032dd61d3c
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -103,9 +103,9 @@ records:
       observations:
         - region: en
           card_no: GFB01a-007EN
-          observation_hash: sha256:65d9d6a4e6af21acbff82a64c2f3ae1a5bc67fc293c5fb20f037fe39124ed10a
-          rules_hash: sha256:3af8e81ca8559cbce6fa71f14526dfced2bd7359051b78e1ed7a42ae080c3c05
-          recipe: registry-observation-v1
+          observation_hash: sha256:5530afb7c09f0c0bccdadab99c099ef63588fc6815229292adefc622f719ed88
+          rules_hash: sha256:cba0a6d55659c9ff2b81f62a4d9703087364afabff0f857651584b65cd7ca6ca
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -118,14 +118,14 @@ records:
       observations:
         - region: en
           card_no: GFB01a-008EN
-          observation_hash: sha256:df326085efa379091bb7d72a6edb9966306a39a074abb099c8e89334e8e7e5d6
-          rules_hash: sha256:64425cca435ad1d4276e28fc64933f5a089accd88dbc158e4afe12c2012d146f
-          recipe: registry-observation-v1
+          observation_hash: sha256:37a832c46ee4576167f0ca101d59f94f1298eff4c7d16be3ef9dbe3e9633931d
+          rules_hash: sha256:93df6691d862e8e9842b12a63e0ac435bb18c1524c754faf455f5528cd91d8ce
+          recipe: registry-observation-v2
         - region: en
           card_no: GFB01d-008EN
-          observation_hash: sha256:904319e3aadf423a0f54a318e8154a60498ce1f3396dd836fa267a76a5c8c2c7
-          rules_hash: sha256:64425cca435ad1d4276e28fc64933f5a089accd88dbc158e4afe12c2012d146f
-          recipe: registry-observation-v1
+          observation_hash: sha256:238fffa0390591c85e691bd547c1e87ac9cb6a0efea73ca39ea6189a90248d81
+          rules_hash: sha256:93df6691d862e8e9842b12a63e0ac435bb18c1524c754faf455f5528cd91d8ce
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -138,9 +138,9 @@ records:
       observations:
         - region: en
           card_no: GFB01a-016EN
-          observation_hash: sha256:693a1ad3012936fd29eff2b3d80af16579cc65d1e5d43aef89bcb980bd485acc
-          rules_hash: sha256:4d6b79760357f5499601c352c55d351810517bfe90d8c90d698027170bc78c0e
-          recipe: registry-observation-v1
+          observation_hash: sha256:024c8fa9749802e867e410e002fccfa243263dc9117bee006276e47aea0d115a
+          rules_hash: sha256:dff9260729d5ff0e6b91caf58c53275d60e7a4a33f811485ee3669c777eede0f
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -153,9 +153,9 @@ records:
       observations:
         - region: en
           card_no: GFB01a-017EN
-          observation_hash: sha256:aefd7ee19d5b90a3971ce668101b0a3944305839d3be93756b875ba5dabe58b3
-          rules_hash: sha256:40625b03ffb8146e0dad11d85a4c65adb963b2aa8cbf3d0681efa86fce011015
-          recipe: registry-observation-v1
+          observation_hash: sha256:0d9c6a10e8f2585c4f1e6fa1b63e5cd89e24309101aa0a749d5b687fafb7da00
+          rules_hash: sha256:494a2be960ed810171c5d45bd1a5ec38cd92e44571480f0e35ceda9dfb85c918
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -168,9 +168,9 @@ records:
       observations:
         - region: en
           card_no: GFB01a-018EN
-          observation_hash: sha256:f4392e4ad1fb7c4c446c9744be99aec3942436c65262d179d0a1532d52066dfd
+          observation_hash: sha256:458a9ca6138648ba2c8f090587f189f76461e7a95734f69a86f64df8988f82ec
           rules_hash: sha256:74ad00d1481e487ce416e1e2d23dd8e89f4234046943703e48b8d7789a36f208
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -183,9 +183,9 @@ records:
       observations:
         - region: en
           card_no: GFB01a-019EN
-          observation_hash: sha256:fafc95cd7709d627b24311a069ab5533dbd923d259217f5b680c1acf6ca38660
+          observation_hash: sha256:5c840efffde3d6deab210fe93c2f4914e5efd26de6f5e4ba6cb44edbd6a20178
           rules_hash: sha256:ba94ddb1b6a0db637e53503ca5af9dd133ed229d3fab37f4b9bae93b6b355c03
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -198,9 +198,9 @@ records:
       observations:
         - region: en
           card_no: GFB01a-020EN
-          observation_hash: sha256:7f56651476dddc6f0d56f98bda3f31b9d868975335be6d195f837f3f745f8149
+          observation_hash: sha256:c0455fc13578f5a9168474480236ac49b5b1ce88993924f0567a2739a4b0009f
           rules_hash: sha256:63e69667743f5a7a1c5193b651e3d0772dc1d619695e77eb466af032753af3f4
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -213,9 +213,9 @@ records:
       observations:
         - region: en
           card_no: GFB01a-021EN
-          observation_hash: sha256:8b59a55da3fb5b50a517503c8f373755adb853c78cf394e2ba453c62e7377ada
-          rules_hash: sha256:9b17859adf289cd4358604d2c74b00b75d6a5835d367038d14db731f1d3ebb9b
-          recipe: registry-observation-v1
+          observation_hash: sha256:6679a39f47abc050977a0248b57b582accf3a525e39a8eadac728154ce82692b
+          rules_hash: sha256:68011588e278b6d593f565ef5476e662287849f10e51fcf393ca544e4742c834
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -228,14 +228,14 @@ records:
       observations:
         - region: en
           card_no: GFB01a-022EN
-          observation_hash: sha256:b4d8b17b434f3e050998b3b4bd9ff42151a31d8b5a5fb52d81054c79179e65a1
-          rules_hash: sha256:c751072aba8e7abb64ebbb5ed21a88c2509cde636c95c5c4ebf3c53e7847afee
-          recipe: registry-observation-v1
+          observation_hash: sha256:c3ece1f47eeedd82265ceda519f9ac068ca086976f596a464dfe41cdd88cba7e
+          rules_hash: sha256:66675b5f3c0d6559a8fe0d503c0f9decaf5c501438b2980e432e403f7960877b
+          recipe: registry-observation-v2
         - region: en
           card_no: GFB01d-026EN
-          observation_hash: sha256:576283a781b7058148dee22e189e21c48721df9618faff245678f3a9de25c69a
-          rules_hash: sha256:c751072aba8e7abb64ebbb5ed21a88c2509cde636c95c5c4ebf3c53e7847afee
-          recipe: registry-observation-v1
+          observation_hash: sha256:285b6677226e0bd86b59b8d6e9e84416c0669012412b1320f96d4a6a29b6433c
+          rules_hash: sha256:66675b5f3c0d6559a8fe0d503c0f9decaf5c501438b2980e432e403f7960877b
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -248,19 +248,19 @@ records:
       observations:
         - region: en
           card_no: GFB01a-023EN
-          observation_hash: sha256:18616dec98577354da9153052d3922b28ca20c99999eddd4e43a63d98fecf02a
-          rules_hash: sha256:fdd0572ddbf3d280b9fbc1b612fe66ee2258016a12997e9395a681caf5942b99
-          recipe: registry-observation-v1
+          observation_hash: sha256:0d417255da5ffaa13425bfb32bd358d4213ab0bddeee0ade776c5c3676706f27
+          rules_hash: sha256:ea208d73f3f21b5220e637e963158b9b04ca36600a445f527264d2a8bf67d203
+          recipe: registry-observation-v2
         - region: en
           card_no: GFB01b-025EN
-          observation_hash: sha256:3175a7f2a6a75ad0b44bd5bd1e885d187cb2083fdfe67a2e25d056b841e82045
-          rules_hash: sha256:fdd0572ddbf3d280b9fbc1b612fe66ee2258016a12997e9395a681caf5942b99
-          recipe: registry-observation-v1
+          observation_hash: sha256:3be4847626b28f35ac21a4a0fd786d2f79e86b6785a5253a0f4ba184efdf1b27
+          rules_hash: sha256:ea208d73f3f21b5220e637e963158b9b04ca36600a445f527264d2a8bf67d203
+          recipe: registry-observation-v2
         - region: en
           card_no: PR-137EN
-          observation_hash: sha256:541edd1e0fc9f98dc952c58b5f5f2e2ed987621a805cea8593f7da72c97f98af
-          rules_hash: sha256:fdd0572ddbf3d280b9fbc1b612fe66ee2258016a12997e9395a681caf5942b99
-          recipe: registry-observation-v1
+          observation_hash: sha256:9c89dc96d916abfe47f9d207bedfd1db674a130ac581dc37f5a3b3ed07aed1b5
+          rules_hash: sha256:ea208d73f3f21b5220e637e963158b9b04ca36600a445f527264d2a8bf67d203
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: GFB01a
     data:
@@ -275,4 +275,4 @@ records:
           card_no: GFB01a-LD01EN
           observation_hash: sha256:cf7ddd3e5250188ef37ff52b5b76974e98e481f05aa96a18eed64e83aec5d811
           rules_hash: sha256:dda836740783da8322ded140b9df37f7efec3cb914d0a7307d5b1547e5720834
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2

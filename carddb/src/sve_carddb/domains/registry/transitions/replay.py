@@ -3,7 +3,7 @@
 from dataclasses import replace
 from typing import TYPE_CHECKING, Protocol
 
-from sve_carddb.domains.registry.inputs import canonical, digest
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.registry.records import ArtData, CardData, PrintingData
 from sve_carddb.domains.registry.snapshot import _printing_evidence
 from sve_carddb.domains.registry.storage import Entry, RegistryFiles, read_base_files
@@ -83,7 +83,7 @@ def _base(files: RegistryFiles) -> dict[str, Entity]:
     for loaded in files.shards:
         shard = loaded.envelope()
         if (
-            digest(shard.model_dump(mode="json", round_trip=True))
+            digest(canonical(shard.model_dump(mode="json", round_trip=True)))
             != loaded.content_hash
         ):
             raise ValueError(
@@ -266,7 +266,7 @@ def _replay(root: Path, inputs: ReplayInputs) -> EffectiveRegistry:
             raise ValueError("Named revert effective replay requires stage C")
         basis = inputs.registry(record.registry_basis)
         if (
-            digest(basis.index().model_dump(mode="json"))
+            digest(canonical(basis.index().model_dump(mode="json")))
             != record.registry_basis.index_hash
         ):
             raise ValueError("Historical registry basis index hash mismatch")

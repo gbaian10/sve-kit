@@ -4,7 +4,7 @@
 printings through an independently verified `registry.preview` identity plan.
 `FrozenTexts` reads only an explicitly pinned immutable archive batch; use
 `RegionalTexts` to dispatch JP and EN without guessing cross-region IDs or face
-ordinals. Exact source metadata and the compatible legacy observation must match
+ordinals. Exact source metadata and the `registry-observation-v2` observation must match
 identity evidence. Full source face maps bind each original index to its authored
 face ID. The EN adapter retains the new extractor's main text, ordered auxiliary
 sections and Universe field.

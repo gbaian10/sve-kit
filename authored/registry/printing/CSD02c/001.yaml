@@ -16,18 +16,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-001EN
-        observation_hash: sha256:90b19bdfcf21be8bacd841d3dd74fcb1cd76c59f5de981c82d2274430ff62077
-        rules_hash: sha256:59b6c8a7f8c095ac1dff1202872e0fc088ca94bad2d062761c6a5a7d26e4af58
-        recipe: registry-observation-v1
+        observation_hash: sha256:1c422f14031092368dbd1ba3f8ca02ef503e090931171037bc637ab0fbee1463
+        rules_hash: sha256:18e30f8648f31e1ae2a67f45d4222245eddcd455e4fb6db252a453bbe6b07bc4
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-001
         target_observation:
           region: jp
           card_no: CSD02c-001
-          observation_hash: sha256:24937a7881291a9ee01ef96491bfc6d4b650b128df071fc7d5a50ccc0985f7c9
-          rules_hash: sha256:4188f927bc390c707687bb32e90522f3709672d1c3c462232c0631f3a02ba5b6
-          recipe: registry-observation-v1
+          observation_hash: sha256:308ffb8181514b659dacb1c8cf9f538f563dc4e6bd9d3eff3ca7d61364c7965d
+          rules_hash: sha256:0c859255d8e148f068410f84ac674a40e6afeb49c141b42baa8d218b2c0dc70a
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -43,9 +43,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-002EN
-        observation_hash: sha256:bb24dcc94da000f830da4df6bac57fdf38d819cea0c344a422be88f8e27c655c
+        observation_hash: sha256:3b430d1e2a12cb021d2003678b1ae6822cd9165e2d37f42b0844b2443d14e337
         rules_hash: sha256:a79a94d6ed58c3e406c9722de3dd4781ee7a3b26ea6fac29ea9709b9253ecb87
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-002
@@ -54,7 +54,7 @@ records:
           card_no: CSD02c-002
           observation_hash: sha256:dc7d396bd1d6f2fc57078120610f628b6f4a4f8a0b60cd8122d00a271fe3bd82
           rules_hash: sha256:8c481eea9f38ce32460e83830de7c18cfc754cb139ee07621835275c48f770c7
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -70,18 +70,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-003EN
-        observation_hash: sha256:8f6f19a92343eb6051196d7c5b87c0c8709c2158ccd45f680266964f1d8cb531
-        rules_hash: sha256:e7f071b5cf10c44494659269a9ee607e0177c4af12122eedbf7376d95ebd267a
-        recipe: registry-observation-v1
+        observation_hash: sha256:0af5a42a135a4b845cf504f2fbc7e1b6f09e405fb8acb1eb8e16a4b04f7e172f
+        rules_hash: sha256:1451229ff35a2602a57e70b423ddcf14d9fb5f571f76c90ea7ad7ffda411b3ee
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-003
         target_observation:
           region: jp
           card_no: CSD02c-003
-          observation_hash: sha256:ed97e85737f76e5d9bb274db593040a61289ab5c6a58dfd2b7cefd6fb4a27f8f
-          rules_hash: sha256:b3aeb255591ed7a562a41e51bf7f07b960251da87ea827287fadff30da550405
-          recipe: registry-observation-v1
+          observation_hash: sha256:d790b59fc4f80612f1032b65460799ec28b0c64f4d3f667ac034f4903d76cdfe
+          rules_hash: sha256:71c0635a1bf4bdf313293cfe7c6701aab5a0fe19e444e05b52ce020bd24a406b
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -97,9 +97,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-004EN
-        observation_hash: sha256:fca47239becf051165a5c5bf5e31682bb20538c21cc6e4e99e7fff9597364910
+        observation_hash: sha256:96972db1dfb2ac1fa5a8f2b5c9c2ed7385c62a7c5d93728e3325a5a35b2af312
         rules_hash: sha256:b2f5eaead204b74ac49c3dd87bbbeefcdc6bd8e7757a18c2b6e967e907f7b0b8
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-004
@@ -108,7 +108,7 @@ records:
           card_no: CSD02c-004
           observation_hash: sha256:83240f59216ac45eb032704e3c06d6fbc5c73f92757820b6da246db4b8bce6bc
           rules_hash: sha256:d1f36672681e98c2350094d84355a9c975dcf91c54f86ec0b5a9ad70b42a40f4
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -124,18 +124,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-005EN
-        observation_hash: sha256:9eed7b6112f297fc0f4725223f430cbe1bb5cb1ae7c0d2c0a2e904efb1680683
-        rules_hash: sha256:0eb4e87116115f2ec1af67788dff9a8ff68d0823ebca6c841530379d8d5d4454
-        recipe: registry-observation-v1
+        observation_hash: sha256:db7ebd12e1b322b4bc27f84767fd1e85d3d41cca7b9a8bc51df5332cb508d5ba
+        rules_hash: sha256:82658f309308ce5ee90d509f324982340454168950e9e38196dba32d010f818e
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-005
         target_observation:
           region: jp
           card_no: CSD02c-005
-          observation_hash: sha256:9da24fb8d591ae0975f5e5f8444dd2b8cabe5dc27cecb784cd64fc48bf57773d
-          rules_hash: sha256:2d082ff0420e82faef7aac225b2dfa99b51d1c1f74773ea40728477aee5a2ddf
-          recipe: registry-observation-v1
+          observation_hash: sha256:ab369dfac1ec370eaac19ab95bc46869ffb45d9ae603c55e15de04bf1d297777
+          rules_hash: sha256:e7645b10a34d4c50f2573975df4d4648d43595898962f18207e3d14252dcedaa
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -151,9 +151,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-006EN
-        observation_hash: sha256:ef306bef3d01b9c9dd83e62113e4a463a7a30bbde923b5a8a8742eac85a2fd01
+        observation_hash: sha256:91805a54cd45fb6cf9dffbda515eefe44d02f7aca087890a41c8098d9f7dbb21
         rules_hash: sha256:aa1b06e792a66e9bb5f99d06a97691583fa9f03b6dba2cabc6c2aed38919ac5a
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-006
@@ -162,7 +162,7 @@ records:
           card_no: CSD02c-006
           observation_hash: sha256:76b7e7d7c57a995c3db52e78cc77e6419817a5d5c31366620d7f3dabbfb0b55f
           rules_hash: sha256:28b1589625ebd9be32e866f8d15728da5f7563b967a7d78b5ddc50441348c9b3
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -178,18 +178,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-007EN
-        observation_hash: sha256:6181c523943dd8cd037229123fc1b5293ab90ea7d4e42434f3ca2b9b6a16cf44
-        rules_hash: sha256:c2c6c7dd47eb9248964501d4faf39a6220509353e6472af1692cc82340820d74
-        recipe: registry-observation-v1
+        observation_hash: sha256:2325b7318cc6a0c5f5907bcefa3657c5e761a0b5f11091e4aa5ae44d2fbb0ab2
+        rules_hash: sha256:ac91ece1f46facdc80a7dabbd7a6590dca41f10b5ff64eb85b55fd595dfdadc0
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-007
         target_observation:
           region: jp
           card_no: CSD02c-007
-          observation_hash: sha256:598f80d4b25d40705baf5a3ff77a8b2078a47b3711864053a665d5604bb10bdb
-          rules_hash: sha256:adfe19595f60fa0e6952cdb9822f18283b28c57c14fde6463e3fcf4c5e897354
-          recipe: registry-observation-v1
+          observation_hash: sha256:9d5bd34c27bd9408c40ca8a7c6d6a586d577421abd30a27dd6291255bd6ea7f7
+          rules_hash: sha256:db53e761fe4aeed6d52ab13173486d926f0f40b89297a2afc61a046c3f059fa1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -205,9 +205,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-008EN
-        observation_hash: sha256:f8f5d8a1034c52ecb664f03d4710925dba2b39aedd65988ec90cf47c4645e043
+        observation_hash: sha256:84633f62cea85159e3b5e2d93604c37e93914b2d3d9beacc3e93e7cc8abffef9
         rules_hash: sha256:c1117df6cc69d0350d50b4815e2ccd792f0d18a4b81ac06f69adbdd0cfef00b6
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-008
@@ -216,7 +216,7 @@ records:
           card_no: CSD02c-008
           observation_hash: sha256:05251733b1edd0018cc655f576b55879e62b95cd9e9a77329de5b73417d5abd2
           rules_hash: sha256:c77981b384b1be2128af52e9e549a3250f81e0e5df4188fcf4e8b7dd4dcda02c
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -232,18 +232,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-009EN
-        observation_hash: sha256:53dc9198b0b2f2d03462c7fc41a5e7f8bce96c8bbb946327df2cc0653b8012f5
-        rules_hash: sha256:ea66133de3676ccba3f2d5b5f9abd3972fac94f32c81bc48d071f7411e8bd6be
-        recipe: registry-observation-v1
+        observation_hash: sha256:3d91b038ce046438f50378c1c25a357851cbb8b7fc5ec23b6138259399cb09a9
+        rules_hash: sha256:2e4112b2614dc7410396b47a0401838f5393b70762167f2549200797ec64f0db
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-009
         target_observation:
           region: jp
           card_no: CSD02c-009
-          observation_hash: sha256:65f871548e554fcd14950bff9123525635f7ab00bd1246581dd6e333b0d8a37a
-          rules_hash: sha256:239c72906392c9f19de93bbb32dd001889edbaa4c9688a4059f9e9636a68acb7
-          recipe: registry-observation-v1
+          observation_hash: sha256:d3819355e75486b617ba5537ca012bf5b450aa94e405e1b025959c0c1c57727f
+          rules_hash: sha256:eb21408379d2ebc6985ae3d172aa3e3b403c961487b946ce392b70c2e1c4e93f
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -259,9 +259,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-010EN
-        observation_hash: sha256:c92598043a28f67bae65b3be2c2eeaa053ef93beac57cc5cfea16b314950fff6
+        observation_hash: sha256:8940ebb83c833535dd04d531b8f699f026c2b91a23360cb7a42ec251f08e09e4
         rules_hash: sha256:910605f60ad57306860addffdc179624cb1cfb92a447341e36b49ad9a764949b
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-010
@@ -270,7 +270,7 @@ records:
           card_no: CSD02c-010
           observation_hash: sha256:a8ad22037b0eb43af60e14a4ba51d867ffe10a01cb0a7f4291d1c06190d5772a
           rules_hash: sha256:81b86e06e5a9177ea0dc8abbaf7264ddb57ce2ff546a58e7836e9431a8737bb0
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -286,9 +286,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-011EN
-        observation_hash: sha256:7b7eb5307af4cd48355a0c75268f883f06d51755752681c191816401f68c9f81
+        observation_hash: sha256:9a9d15d772c4b478136bc515e0f080d6aaa3cf502341bdbe94e724885366d99e
         rules_hash: sha256:cae8a9c9df0349f28f8796dbf6fbb089ea256d046e22046fa5365a4034d2212c
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-011
@@ -297,7 +297,7 @@ records:
           card_no: CSD02c-011
           observation_hash: sha256:36f1b754a0074ecc9dbed17c2b90cf7da89761928f7725b81e7e3a7f5b2f2d6d
           rules_hash: sha256:059905174479d48797b05cdde9fd4ea78c28ccf6ba7f57509adf5003faf66afa
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -313,18 +313,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-012EN
-        observation_hash: sha256:b180a33c2936ac7da4e97aa358667b53a6aa39bbece30360b63c367d5baf113a
-        rules_hash: sha256:0433605c6343b676b6eff5a3c4768741be0a1608410ac76f685e1942b07d80de
-        recipe: registry-observation-v1
+        observation_hash: sha256:45a56b89f69eb8a01b30142ffd60edfdab8caae042701c15509ebeae80ba6329
+        rules_hash: sha256:a7fde87439457071888b0e10d1b6bd01220777a4f267e075a06317d8b3ca8bac
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-012
         target_observation:
           region: jp
           card_no: CSD02c-012
-          observation_hash: sha256:4caa30a51007478d84e1b853330512b53ba44eeb336c34c18f1e68c8c55f85df
-          rules_hash: sha256:e642a4f12bbf5de314e2f082bcbeee144ad2ce2173605307abeaf816b35a2e9f
-          recipe: registry-observation-v1
+          observation_hash: sha256:bc0193da31697e5480158825c79ee9cb243bdae5309a4e82d8db96547148795b
+          rules_hash: sha256:d46685fcf6fff49a6181f65771b9f202e264e423e55bfeb6934db8b7f874f467
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -340,9 +340,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-013EN
-        observation_hash: sha256:75732e36f10188f973f5e0f448d1a227176ee5e900886f65d43c02daf507b307
+        observation_hash: sha256:2a3486590a90aae7e387930b902cf54a29bd8c79030968d596a43241478d3ca9
         rules_hash: sha256:0dab29dd7088864a6aa9bae750d8419253d095eadc0f1e7e4eeedceba6211f7e
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-013
@@ -351,7 +351,7 @@ records:
           card_no: CSD02c-013
           observation_hash: sha256:5a80a5ed6c4c0433773bbfff92d3cd307e2bb92e5cf2df4713fc760c000160be
           rules_hash: sha256:d66b5d1f1845604864ae017b89ab536f788e68a4fe8089a26a1d1d8509bf6729
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -367,18 +367,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-014EN
-        observation_hash: sha256:00148d43233f56dfe3f2544e7601de885b92c07f0776db21909e369c994fe085
-        rules_hash: sha256:10cf927be3c6f6757dd3c32a14fb68be6cf220e90eb9fc1cb8f9062f31b94a04
-        recipe: registry-observation-v1
+        observation_hash: sha256:4016dfe5810e1f88e8219e61138b6b0c5cf308aa39b7cb36c7a5dfc8c281b859
+        rules_hash: sha256:f5d377e3e3dec15e712a98f13b949f0cb6e8d575999ff5df6355e129fdd88164
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-014
         target_observation:
           region: jp
           card_no: CSD02c-014
-          observation_hash: sha256:a5245b2ac06ecd6975389f028e97ac0f15798d03ecfa7a079c080c8b447f8d06
-          rules_hash: sha256:626a0353b4c09cb225d0eecbb3a20aab556578d3e18eaecbe9b10421e6b4483c
-          recipe: registry-observation-v1
+          observation_hash: sha256:d49d4a7e4451c5f51048932a73253ca643e0620d8972e3bde7410c9849352698
+          rules_hash: sha256:18eb1c741ff80129432e01e80c6ce17de0e1777efbe45307ed8631420a224b60
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -394,18 +394,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-015EN
-        observation_hash: sha256:c0138517ca91d8e2d35dd3c0b70e50b8f54c903b69276884f78f9686cb626414
-        rules_hash: sha256:6978ae09146bc9b230f743b2eac64dd44f2a607cf8e2cb21fdea90ae2414dc1d
-        recipe: registry-observation-v1
+        observation_hash: sha256:2174d75a1409fc938990d38a2778a987834d57438d7e3d9054c6f72344de6f70
+        rules_hash: sha256:b7ce4e11a654213895d690aaaac4ef21655e0c895c21cf205ec0307b8a570a4d
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-015
         target_observation:
           region: jp
           card_no: CSD02c-015
-          observation_hash: sha256:61a870c92ae1f5f9b5ea4023ecf78f29590530a6555ace6e714d988f1016858a
-          rules_hash: sha256:b747a8fdc7611f60bc1700d274fba910d1cc1e1d64cb1434da0a9d65f5abaa48
-          recipe: registry-observation-v1
+          observation_hash: sha256:d74cfc6ed63796be6f55894f00278ff1fb2dd83b03b6cb2908af2917d028c444
+          rules_hash: sha256:4a7380ad9597827981cd92417cb470b5952faa5a9e1906b1cfa252f801d72525
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -421,18 +421,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-016EN
-        observation_hash: sha256:b8c492f03c87ae9f415cc6f63488b36c20b5a7fa34740ceb4e94a774fba227ca
-        rules_hash: sha256:c084f4b351942683eb4371fc99263051bdd48e292eff315a9245b6a8c612b3f7
-        recipe: registry-observation-v1
+        observation_hash: sha256:15f60dc1fa584fb966602e38129449c67e1970f622aad91b592b28630b272c6d
+        rules_hash: sha256:7044a5cd9951f8852702fe2ce67ebbc2bab917c0b7eb24adbdfd318599e60f67
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-016
         target_observation:
           region: jp
           card_no: CSD02c-016
-          observation_hash: sha256:ab1d112416ccdd79acfa78e8662f1c05ddd89ce7059fd1220dc61c0025c0f1bf
-          rules_hash: sha256:8b1edbbcaf0bc48118476d7e98d03cd145e833ad5d324aa867a866d7d8862ad4
-          recipe: registry-observation-v1
+          observation_hash: sha256:fe4278a90e27fa53a9a762d40f944c9976483f09a23e099eec865026a0804e88
+          rules_hash: sha256:68d61a030ff5cef29687ad6c32b3d5719947296f02b64ea73951c671a449bf6a
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -448,9 +448,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-017EN
-        observation_hash: sha256:87aae26709884b1356ecc5ca1bea0fe0287f47d83381554fe55d2a0e8fe25b15
+        observation_hash: sha256:69cea87ecf97693a38641637488de0e1c86dce75251ff2861ad1bb164cf1b33a
         rules_hash: sha256:761f5fd736e32ad25a8b93f9049ead241ad9fc21efd81cd15cb57996f11985a6
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-017
@@ -459,7 +459,7 @@ records:
           card_no: CSD02c-017
           observation_hash: sha256:cbabef630df49be421505f307364d807819ad254d1f81a3e41f164f36edde0c8
           rules_hash: sha256:f442e5ba004a924acab42ffec989fcaa0a2e8a16e60cf07db06ab336172996bb
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -475,18 +475,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-018EN
-        observation_hash: sha256:36f4846966b3ef5fb10b18c2cb66696dbc282e4ea52066b6aef13c4d1449e307
-        rules_hash: sha256:2078d93af3878487395a0fda0d856e411e546c83baa8d3b57ea1f5c3499050a2
-        recipe: registry-observation-v1
+        observation_hash: sha256:4921ee699270119dc7d7f3db1c580d389c877e8f9d4048ced3e860d5c298d62d
+        rules_hash: sha256:dc09aaaebc6c0a87c68fe42cb89359251527323b791a908e5685341b749cb151
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-018
         target_observation:
           region: jp
           card_no: CSD02c-018
-          observation_hash: sha256:c45524924ccb62e000d18a87fc1d25588e8f6344cf8a9e1556b02ad0466b3423
-          rules_hash: sha256:24a6707acc7925326d783c6e49f7c48e5aaa2cdcfcbbee430bb631e954640577
-          recipe: registry-observation-v1
+          observation_hash: sha256:c3b4cd48f1f0e003b9add9a065a7c9d44e53f72ea1f0e3500b868106d7275b37
+          rules_hash: sha256:4c9a5a049b42c26016b6194db65b0f1d8d3d14db612d3d24fc8ecf347f6f6ce7
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -504,7 +504,7 @@ records:
         card_no: CSD02c-LD01EN
         observation_hash: sha256:15579efa1e9c823e4bdecda5ef51657c71959225dd42f7594d925b7cc36f9db2
         rules_hash: sha256:ce9137456018057e78fbd6d2ee7e04ca881188b0c2a82972891a09c196906e51
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-LD01
@@ -513,7 +513,7 @@ records:
           card_no: CSD02c-LD01
           observation_hash: sha256:462a9915bf9814423e1ec4ca6b9eeb6e4abd6ad007ff0887a10c020af68c3eb7
           rules_hash: sha256:fda603dd29cae4d53e9e60918dac1c067d3faa20836cc588b914376383febc8f
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -531,7 +531,7 @@ records:
         card_no: CSD02c-LDⓈ01EN
         observation_hash: sha256:f62488a33fb83953d70584755f6c6c32c6b026c54ad82af1f8688c6dabb9bcd5
         rules_hash: sha256:ce9137456018057e78fbd6d2ee7e04ca881188b0c2a82972891a09c196906e51
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-LDⓈ01
@@ -540,7 +540,7 @@ records:
           card_no: CSD02c-LDⓈ01
           observation_hash: sha256:072b57fe667bf1b9e867adde00279c9edf56e95ad8d11a31960049a250bbcea6
           rules_hash: sha256:fda603dd29cae4d53e9e60918dac1c067d3faa20836cc588b914376383febc8f
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -556,9 +556,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-P01EN
-        observation_hash: sha256:8b4fa3554fd6a7e2b21413b6790c4da7ee52a7a4e07982d03777b1ae3d3652ec
+        observation_hash: sha256:fbe763cb44220e7f93fff15851d61f32f3c2e510781d135298059895b65a857e
         rules_hash: sha256:b2f5eaead204b74ac49c3dd87bbbeefcdc6bd8e7757a18c2b6e967e907f7b0b8
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-P01
@@ -567,7 +567,7 @@ records:
           card_no: CSD02c-P01
           observation_hash: sha256:019e0cd7d2aa60d376a51c47668bc78645ade25d15cd9f6aa482716e02f2b34b
           rules_hash: sha256:d1f36672681e98c2350094d84355a9c975dcf91c54f86ec0b5a9ad70b42a40f4
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -583,18 +583,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-P02EN
-        observation_hash: sha256:62b7baa36f7b1b0c13a96165dbce4177ac0dde10a2247fe5668af286bd5c0b67
-        rules_hash: sha256:0eb4e87116115f2ec1af67788dff9a8ff68d0823ebca6c841530379d8d5d4454
-        recipe: registry-observation-v1
+        observation_hash: sha256:98ee50e6a5309ace50010db513cb604d6da2a81a2f4c6c8a3e77d0716ce8e50f
+        rules_hash: sha256:82658f309308ce5ee90d509f324982340454168950e9e38196dba32d010f818e
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-P02
         target_observation:
           region: jp
           card_no: CSD02c-P02
-          observation_hash: sha256:cf6eb326104501d671413932fa1208bef597072cf2e4e8440f766f25c1969ccd
-          rules_hash: sha256:2d082ff0420e82faef7aac225b2dfa99b51d1c1f74773ea40728477aee5a2ddf
-          recipe: registry-observation-v1
+          observation_hash: sha256:3bf36e724aa3ba6f2856cc3c000f7b42e2d195bd6a288c5604f925e992e72370
+          rules_hash: sha256:e7645b10a34d4c50f2573975df4d4648d43595898962f18207e3d14252dcedaa
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -610,9 +610,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-P03EN
-        observation_hash: sha256:b187730012e17f7d9bad377bd8478821eab996bb4620467ef724aa7d972b5daa
+        observation_hash: sha256:a33be6e9b428f71bf4fc41faa593fec02c8466d42c0f57a4559bc2309068fd29
         rules_hash: sha256:aa1b06e792a66e9bb5f99d06a97691583fa9f03b6dba2cabc6c2aed38919ac5a
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-P03
@@ -621,7 +621,7 @@ records:
           card_no: CSD02c-P03
           observation_hash: sha256:a6f88a5b90e8b508b105f57ca9b5576f29591324fc7b37b4d88832cc6029735a
           rules_hash: sha256:28b1589625ebd9be32e866f8d15728da5f7563b967a7d78b5ddc50441348c9b3
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -637,18 +637,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-P04EN
-        observation_hash: sha256:08bdf81d5e7b73c9710e4e2dc1cabfba23957531964259d18e7d1d2bdc404ba6
-        rules_hash: sha256:c2c6c7dd47eb9248964501d4faf39a6220509353e6472af1692cc82340820d74
-        recipe: registry-observation-v1
+        observation_hash: sha256:6444ffc4804af140d033d6e9402d83f95777b550bc810177174dc06fa94534d6
+        rules_hash: sha256:ac91ece1f46facdc80a7dabbd7a6590dca41f10b5ff64eb85b55fd595dfdadc0
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-P04
         target_observation:
           region: jp
           card_no: CSD02c-P04
-          observation_hash: sha256:5661dd1e03c00a735c65f2fc39fde77fae6582434e4e1e21d11cb4b47dfa1e20
-          rules_hash: sha256:adfe19595f60fa0e6952cdb9822f18283b28c57c14fde6463e3fcf4c5e897354
-          recipe: registry-observation-v1
+          observation_hash: sha256:8fedbec6e5cc3dbae1db4fa1ab4a2319dcfe6b8d80ad360b52fdccc240e290ba
+          rules_hash: sha256:db53e761fe4aeed6d52ab13173486d926f0f40b89297a2afc61a046c3f059fa1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -664,9 +664,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-P05EN
-        observation_hash: sha256:85e4ed9e5a22a75d153fedd794c741bec6a9ae679a5a7f7d9576f88e1c7c3688
+        observation_hash: sha256:d139e1b2d22c3a8fef6d9447c3e9384a1088efc53165fb4b820b9493881b6368
         rules_hash: sha256:c1117df6cc69d0350d50b4815e2ccd792f0d18a4b81ac06f69adbdd0cfef00b6
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-P05
@@ -675,7 +675,7 @@ records:
           card_no: CSD02c-P05
           observation_hash: sha256:32b666b8ea061369aac80c4a58a7dc836d2466a0c105858c039e5406283f340f
           rules_hash: sha256:c77981b384b1be2128af52e9e549a3250f81e0e5df4188fcf4e8b7dd4dcda02c
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -691,18 +691,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-P06EN
-        observation_hash: sha256:060acdc7097d1084bd4aceadca6fed8006223bacafbbb31a83ce541f66c019ca
-        rules_hash: sha256:ea66133de3676ccba3f2d5b5f9abd3972fac94f32c81bc48d071f7411e8bd6be
-        recipe: registry-observation-v1
+        observation_hash: sha256:b8dbd5ff76a85899b4ba0bb1fbc3c06e9b98a85e35f690c0e4ed72845e37d3af
+        rules_hash: sha256:2e4112b2614dc7410396b47a0401838f5393b70762167f2549200797ec64f0db
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-P06
         target_observation:
           region: jp
           card_no: CSD02c-P06
-          observation_hash: sha256:88bcc883753ea3b63ae27ba6fd9df20de19e9995acf725353d3ef6ff92535286
-          rules_hash: sha256:239c72906392c9f19de93bbb32dd001889edbaa4c9688a4059f9e9636a68acb7
-          recipe: registry-observation-v1
+          observation_hash: sha256:58ccd78ae5bcd19c653e91146b1999fefd6f11aba8df7e0f46b35675c305d010
+          rules_hash: sha256:eb21408379d2ebc6985ae3d172aa3e3b403c961487b946ce392b70c2e1c4e93f
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -718,9 +718,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-P07EN
-        observation_hash: sha256:b1415a99edc885d6513022d150aa4c8796132e462efe457fb61d7a8567808418
+        observation_hash: sha256:2d3b6e42276e70346a03487d6f2a64818c5c184b50c92b7aec9f8846edb28c43
         rules_hash: sha256:910605f60ad57306860addffdc179624cb1cfb92a447341e36b49ad9a764949b
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-P07
@@ -729,7 +729,7 @@ records:
           card_no: CSD02c-P07
           observation_hash: sha256:07fc5f7b3fd2baf3cba7dd2e9f47cbd9a7b881094c04de81eebc6823a64c0082
           rules_hash: sha256:81b86e06e5a9177ea0dc8abbaf7264ddb57ce2ff546a58e7836e9431a8737bb0
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -745,9 +745,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-P08EN
-        observation_hash: sha256:2d743d7d5a1b61ba5e11db71df67326ae4f80e9dae8d26f27357041f1f557803
+        observation_hash: sha256:893f70f9356166c528088c4eaaac22a57fb74559e7b5afda2c91e8a670316799
         rules_hash: sha256:cae8a9c9df0349f28f8796dbf6fbb089ea256d046e22046fa5365a4034d2212c
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-P08
@@ -756,7 +756,7 @@ records:
           card_no: CSD02c-P08
           observation_hash: sha256:3d8b72fabec4ea212ce06507b1c69736a396501d3a3bb3bc651aa072356e8f1e
           rules_hash: sha256:059905174479d48797b05cdde9fd4ea78c28ccf6ba7f57509adf5003faf66afa
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -772,18 +772,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-SL01EN
-        observation_hash: sha256:faf7cd971cde1b0a81f5405dc22c6288d41a811396762636d3a4d21715522220
-        rules_hash: sha256:59b6c8a7f8c095ac1dff1202872e0fc088ca94bad2d062761c6a5a7d26e4af58
-        recipe: registry-observation-v1
+        observation_hash: sha256:4e347f437f32c5047bd59c196fd7560d9f88879cb74aa7ac98efa7faf791f21c
+        rules_hash: sha256:18e30f8648f31e1ae2a67f45d4222245eddcd455e4fb6db252a453bbe6b07bc4
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-SL01
         target_observation:
           region: jp
           card_no: CSD02c-SL01
-          observation_hash: sha256:8601193b8267eb4ff9909e5cf6b1763f4ea98eae3531e186905fbaba3d348ff2
-          rules_hash: sha256:4188f927bc390c707687bb32e90522f3709672d1c3c462232c0631f3a02ba5b6
-          recipe: registry-observation-v1
+          observation_hash: sha256:c2784207bf29304b5a11ce9cdcb54bfeb28f8432558f02afd35c7ab2c055b496
+          rules_hash: sha256:0c859255d8e148f068410f84ac674a40e6afeb49c141b42baa8d218b2c0dc70a
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -799,9 +799,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-SL02EN
-        observation_hash: sha256:917307325af2a7d3e013a0d903cb52004173ee322d0f852013b8d5c64bc96896
+        observation_hash: sha256:1d3769f7db4febfcd02c1118ec8f2e5a6f689e0f97e53dbddbb5f846684e02d4
         rules_hash: sha256:a79a94d6ed58c3e406c9722de3dd4781ee7a3b26ea6fac29ea9709b9253ecb87
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-SL02
@@ -810,7 +810,7 @@ records:
           card_no: CSD02c-SL02
           observation_hash: sha256:7d3528839bc4de8c93de0f42cdf79f77ee7d5a714c876a60e6d100bd33c8ab60
           rules_hash: sha256:8c481eea9f38ce32460e83830de7c18cfc754cb139ee07621835275c48f770c7
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -826,18 +826,18 @@ records:
       observation:
         region: en
         card_no: CSD02c-SL03EN
-        observation_hash: sha256:94d43c715354324399796c842ff8a970e5afcf34c4f58ddf3aeb8dae265ecf86
-        rules_hash: sha256:e7f071b5cf10c44494659269a9ee607e0177c4af12122eedbf7376d95ebd267a
-        recipe: registry-observation-v1
+        observation_hash: sha256:a92fdc0071d01f952909a009c22fcc094af53ba7616988d0e3a9f0da4e5e3124
+        rules_hash: sha256:1451229ff35a2602a57e70b423ddcf14d9fb5f571f76c90ea7ad7ffda411b3ee
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-SL03
         target_observation:
           region: jp
           card_no: CSD02c-SL03
-          observation_hash: sha256:80d3afec31de34c544b0538142a5b0c9c1190d051bdab8d4ad096905023faa77
-          rules_hash: sha256:b3aeb255591ed7a562a41e51bf7f07b960251da87ea827287fadff30da550405
-          recipe: registry-observation-v1
+          observation_hash: sha256:ed910410c187482db7b281fd5c34c075af339fe449acd8145d6f16a26f9ae6e2
+          rules_hash: sha256:71c0635a1bf4bdf313293cfe7c6701aab5a0fe19e444e05b52ce020bd24a406b
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -853,9 +853,9 @@ records:
       observation:
         region: en
         card_no: CSD02c-T01EN
-        observation_hash: sha256:82a0ec0591748bde077c7be2e5decdba5619fb8347bb133a72ca1f6f783f50f8
-        rules_hash: sha256:76ba62f54f2135dc1c64dbce4939a55d5deaa997e7d693f7edba1a32248c1388
-        recipe: registry-observation-v1
+        observation_hash: sha256:257c5eef696ac9d0056dd337636cea51e3996b562b79e77cbdd054c24d954fdf
+        rules_hash: sha256:648afc7286869ddcc4e382c3a2c33f7c406ba9f9529e66007519837aedc81589
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: CSD02c-T01
@@ -864,7 +864,7 @@ records:
           card_no: CSD02c-T01
           observation_hash: sha256:5e98bfdaf176340a039224abb5d6b4ccdc4125a7f9410e87b44b2b07d02678ab
           rules_hash: sha256:fd7d7fb19ec4d1038d632b435e6a2d1d2d7d0ca2e991bb6a5c9cc54e6a5d3db3
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -880,9 +880,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-001
-        observation_hash: sha256:24937a7881291a9ee01ef96491bfc6d4b650b128df071fc7d5a50ccc0985f7c9
-        rules_hash: sha256:4188f927bc390c707687bb32e90522f3709672d1c3c462232c0631f3a02ba5b6
-        recipe: registry-observation-v1
+        observation_hash: sha256:308ffb8181514b659dacb1c8cf9f538f563dc4e6bd9d3eff3ca7d61364c7965d
+        rules_hash: sha256:0c859255d8e148f068410f84ac674a40e6afeb49c141b42baa8d218b2c0dc70a
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -900,7 +900,7 @@ records:
         card_no: CSD02c-002
         observation_hash: sha256:dc7d396bd1d6f2fc57078120610f628b6f4a4f8a0b60cd8122d00a271fe3bd82
         rules_hash: sha256:8c481eea9f38ce32460e83830de7c18cfc754cb139ee07621835275c48f770c7
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -916,9 +916,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-003
-        observation_hash: sha256:ed97e85737f76e5d9bb274db593040a61289ab5c6a58dfd2b7cefd6fb4a27f8f
-        rules_hash: sha256:b3aeb255591ed7a562a41e51bf7f07b960251da87ea827287fadff30da550405
-        recipe: registry-observation-v1
+        observation_hash: sha256:d790b59fc4f80612f1032b65460799ec28b0c64f4d3f667ac034f4903d76cdfe
+        rules_hash: sha256:71c0635a1bf4bdf313293cfe7c6701aab5a0fe19e444e05b52ce020bd24a406b
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -936,7 +936,7 @@ records:
         card_no: CSD02c-004
         observation_hash: sha256:83240f59216ac45eb032704e3c06d6fbc5c73f92757820b6da246db4b8bce6bc
         rules_hash: sha256:d1f36672681e98c2350094d84355a9c975dcf91c54f86ec0b5a9ad70b42a40f4
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -952,9 +952,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-005
-        observation_hash: sha256:9da24fb8d591ae0975f5e5f8444dd2b8cabe5dc27cecb784cd64fc48bf57773d
-        rules_hash: sha256:2d082ff0420e82faef7aac225b2dfa99b51d1c1f74773ea40728477aee5a2ddf
-        recipe: registry-observation-v1
+        observation_hash: sha256:ab369dfac1ec370eaac19ab95bc46869ffb45d9ae603c55e15de04bf1d297777
+        rules_hash: sha256:e7645b10a34d4c50f2573975df4d4648d43595898962f18207e3d14252dcedaa
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -972,7 +972,7 @@ records:
         card_no: CSD02c-006
         observation_hash: sha256:76b7e7d7c57a995c3db52e78cc77e6419817a5d5c31366620d7f3dabbfb0b55f
         rules_hash: sha256:28b1589625ebd9be32e866f8d15728da5f7563b967a7d78b5ddc50441348c9b3
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -988,9 +988,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-007
-        observation_hash: sha256:598f80d4b25d40705baf5a3ff77a8b2078a47b3711864053a665d5604bb10bdb
-        rules_hash: sha256:adfe19595f60fa0e6952cdb9822f18283b28c57c14fde6463e3fcf4c5e897354
-        recipe: registry-observation-v1
+        observation_hash: sha256:9d5bd34c27bd9408c40ca8a7c6d6a586d577421abd30a27dd6291255bd6ea7f7
+        rules_hash: sha256:db53e761fe4aeed6d52ab13173486d926f0f40b89297a2afc61a046c3f059fa1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1008,7 +1008,7 @@ records:
         card_no: CSD02c-008
         observation_hash: sha256:05251733b1edd0018cc655f576b55879e62b95cd9e9a77329de5b73417d5abd2
         rules_hash: sha256:c77981b384b1be2128af52e9e549a3250f81e0e5df4188fcf4e8b7dd4dcda02c
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1024,9 +1024,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-009
-        observation_hash: sha256:65f871548e554fcd14950bff9123525635f7ab00bd1246581dd6e333b0d8a37a
-        rules_hash: sha256:239c72906392c9f19de93bbb32dd001889edbaa4c9688a4059f9e9636a68acb7
-        recipe: registry-observation-v1
+        observation_hash: sha256:d3819355e75486b617ba5537ca012bf5b450aa94e405e1b025959c0c1c57727f
+        rules_hash: sha256:eb21408379d2ebc6985ae3d172aa3e3b403c961487b946ce392b70c2e1c4e93f
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1044,7 +1044,7 @@ records:
         card_no: CSD02c-010
         observation_hash: sha256:a8ad22037b0eb43af60e14a4ba51d867ffe10a01cb0a7f4291d1c06190d5772a
         rules_hash: sha256:81b86e06e5a9177ea0dc8abbaf7264ddb57ce2ff546a58e7836e9431a8737bb0
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1062,7 +1062,7 @@ records:
         card_no: CSD02c-011
         observation_hash: sha256:36f1b754a0074ecc9dbed17c2b90cf7da89761928f7725b81e7e3a7f5b2f2d6d
         rules_hash: sha256:059905174479d48797b05cdde9fd4ea78c28ccf6ba7f57509adf5003faf66afa
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1078,9 +1078,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-012
-        observation_hash: sha256:4caa30a51007478d84e1b853330512b53ba44eeb336c34c18f1e68c8c55f85df
-        rules_hash: sha256:e642a4f12bbf5de314e2f082bcbeee144ad2ce2173605307abeaf816b35a2e9f
-        recipe: registry-observation-v1
+        observation_hash: sha256:bc0193da31697e5480158825c79ee9cb243bdae5309a4e82d8db96547148795b
+        rules_hash: sha256:d46685fcf6fff49a6181f65771b9f202e264e423e55bfeb6934db8b7f874f467
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1098,7 +1098,7 @@ records:
         card_no: CSD02c-013
         observation_hash: sha256:5a80a5ed6c4c0433773bbfff92d3cd307e2bb92e5cf2df4713fc760c000160be
         rules_hash: sha256:d66b5d1f1845604864ae017b89ab536f788e68a4fe8089a26a1d1d8509bf6729
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1114,9 +1114,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-014
-        observation_hash: sha256:a5245b2ac06ecd6975389f028e97ac0f15798d03ecfa7a079c080c8b447f8d06
-        rules_hash: sha256:626a0353b4c09cb225d0eecbb3a20aab556578d3e18eaecbe9b10421e6b4483c
-        recipe: registry-observation-v1
+        observation_hash: sha256:d49d4a7e4451c5f51048932a73253ca643e0620d8972e3bde7410c9849352698
+        rules_hash: sha256:18eb1c741ff80129432e01e80c6ce17de0e1777efbe45307ed8631420a224b60
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1132,9 +1132,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-015
-        observation_hash: sha256:61a870c92ae1f5f9b5ea4023ecf78f29590530a6555ace6e714d988f1016858a
-        rules_hash: sha256:b747a8fdc7611f60bc1700d274fba910d1cc1e1d64cb1434da0a9d65f5abaa48
-        recipe: registry-observation-v1
+        observation_hash: sha256:d74cfc6ed63796be6f55894f00278ff1fb2dd83b03b6cb2908af2917d028c444
+        rules_hash: sha256:4a7380ad9597827981cd92417cb470b5952faa5a9e1906b1cfa252f801d72525
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1150,9 +1150,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-016
-        observation_hash: sha256:ab1d112416ccdd79acfa78e8662f1c05ddd89ce7059fd1220dc61c0025c0f1bf
-        rules_hash: sha256:8b1edbbcaf0bc48118476d7e98d03cd145e833ad5d324aa867a866d7d8862ad4
-        recipe: registry-observation-v1
+        observation_hash: sha256:fe4278a90e27fa53a9a762d40f944c9976483f09a23e099eec865026a0804e88
+        rules_hash: sha256:68d61a030ff5cef29687ad6c32b3d5719947296f02b64ea73951c671a449bf6a
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1170,7 +1170,7 @@ records:
         card_no: CSD02c-017
         observation_hash: sha256:cbabef630df49be421505f307364d807819ad254d1f81a3e41f164f36edde0c8
         rules_hash: sha256:f442e5ba004a924acab42ffec989fcaa0a2e8a16e60cf07db06ab336172996bb
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1186,9 +1186,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-018
-        observation_hash: sha256:c45524924ccb62e000d18a87fc1d25588e8f6344cf8a9e1556b02ad0466b3423
-        rules_hash: sha256:24a6707acc7925326d783c6e49f7c48e5aaa2cdcfcbbee430bb631e954640577
-        recipe: registry-observation-v1
+        observation_hash: sha256:c3b4cd48f1f0e003b9add9a065a7c9d44e53f72ea1f0e3500b868106d7275b37
+        rules_hash: sha256:4c9a5a049b42c26016b6194db65b0f1d8d3d14db612d3d24fc8ecf347f6f6ce7
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1206,7 +1206,7 @@ records:
         card_no: CSD02c-LD01
         observation_hash: sha256:462a9915bf9814423e1ec4ca6b9eeb6e4abd6ad007ff0887a10c020af68c3eb7
         rules_hash: sha256:fda603dd29cae4d53e9e60918dac1c067d3faa20836cc588b914376383febc8f
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1224,7 +1224,7 @@ records:
         card_no: CSD02c-LDⓈ01
         observation_hash: sha256:072b57fe667bf1b9e867adde00279c9edf56e95ad8d11a31960049a250bbcea6
         rules_hash: sha256:fda603dd29cae4d53e9e60918dac1c067d3faa20836cc588b914376383febc8f
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1242,7 +1242,7 @@ records:
         card_no: CSD02c-P01
         observation_hash: sha256:019e0cd7d2aa60d376a51c47668bc78645ade25d15cd9f6aa482716e02f2b34b
         rules_hash: sha256:d1f36672681e98c2350094d84355a9c975dcf91c54f86ec0b5a9ad70b42a40f4
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1258,9 +1258,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-P02
-        observation_hash: sha256:cf6eb326104501d671413932fa1208bef597072cf2e4e8440f766f25c1969ccd
-        rules_hash: sha256:2d082ff0420e82faef7aac225b2dfa99b51d1c1f74773ea40728477aee5a2ddf
-        recipe: registry-observation-v1
+        observation_hash: sha256:3bf36e724aa3ba6f2856cc3c000f7b42e2d195bd6a288c5604f925e992e72370
+        rules_hash: sha256:e7645b10a34d4c50f2573975df4d4648d43595898962f18207e3d14252dcedaa
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1278,7 +1278,7 @@ records:
         card_no: CSD02c-P03
         observation_hash: sha256:a6f88a5b90e8b508b105f57ca9b5576f29591324fc7b37b4d88832cc6029735a
         rules_hash: sha256:28b1589625ebd9be32e866f8d15728da5f7563b967a7d78b5ddc50441348c9b3
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1294,9 +1294,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-P04
-        observation_hash: sha256:5661dd1e03c00a735c65f2fc39fde77fae6582434e4e1e21d11cb4b47dfa1e20
-        rules_hash: sha256:adfe19595f60fa0e6952cdb9822f18283b28c57c14fde6463e3fcf4c5e897354
-        recipe: registry-observation-v1
+        observation_hash: sha256:8fedbec6e5cc3dbae1db4fa1ab4a2319dcfe6b8d80ad360b52fdccc240e290ba
+        rules_hash: sha256:db53e761fe4aeed6d52ab13173486d926f0f40b89297a2afc61a046c3f059fa1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1314,7 +1314,7 @@ records:
         card_no: CSD02c-P05
         observation_hash: sha256:32b666b8ea061369aac80c4a58a7dc836d2466a0c105858c039e5406283f340f
         rules_hash: sha256:c77981b384b1be2128af52e9e549a3250f81e0e5df4188fcf4e8b7dd4dcda02c
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1330,9 +1330,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-P06
-        observation_hash: sha256:88bcc883753ea3b63ae27ba6fd9df20de19e9995acf725353d3ef6ff92535286
-        rules_hash: sha256:239c72906392c9f19de93bbb32dd001889edbaa4c9688a4059f9e9636a68acb7
-        recipe: registry-observation-v1
+        observation_hash: sha256:58ccd78ae5bcd19c653e91146b1999fefd6f11aba8df7e0f46b35675c305d010
+        rules_hash: sha256:eb21408379d2ebc6985ae3d172aa3e3b403c961487b946ce392b70c2e1c4e93f
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1350,7 +1350,7 @@ records:
         card_no: CSD02c-P07
         observation_hash: sha256:07fc5f7b3fd2baf3cba7dd2e9f47cbd9a7b881094c04de81eebc6823a64c0082
         rules_hash: sha256:81b86e06e5a9177ea0dc8abbaf7264ddb57ce2ff546a58e7836e9431a8737bb0
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1368,7 +1368,7 @@ records:
         card_no: CSD02c-P08
         observation_hash: sha256:3d8b72fabec4ea212ce06507b1c69736a396501d3a3bb3bc651aa072356e8f1e
         rules_hash: sha256:059905174479d48797b05cdde9fd4ea78c28ccf6ba7f57509adf5003faf66afa
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1384,9 +1384,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-SL01
-        observation_hash: sha256:8601193b8267eb4ff9909e5cf6b1763f4ea98eae3531e186905fbaba3d348ff2
-        rules_hash: sha256:4188f927bc390c707687bb32e90522f3709672d1c3c462232c0631f3a02ba5b6
-        recipe: registry-observation-v1
+        observation_hash: sha256:c2784207bf29304b5a11ce9cdcb54bfeb28f8432558f02afd35c7ab2c055b496
+        rules_hash: sha256:0c859255d8e148f068410f84ac674a40e6afeb49c141b42baa8d218b2c0dc70a
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1404,7 +1404,7 @@ records:
         card_no: CSD02c-SL02
         observation_hash: sha256:7d3528839bc4de8c93de0f42cdf79f77ee7d5a714c876a60e6d100bd33c8ab60
         rules_hash: sha256:8c481eea9f38ce32460e83830de7c18cfc754cb139ee07621835275c48f770c7
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1420,9 +1420,9 @@ records:
       observation:
         region: jp
         card_no: CSD02c-SL03
-        observation_hash: sha256:80d3afec31de34c544b0538142a5b0c9c1190d051bdab8d4ad096905023faa77
-        rules_hash: sha256:b3aeb255591ed7a562a41e51bf7f07b960251da87ea827287fadff30da550405
-        recipe: registry-observation-v1
+        observation_hash: sha256:ed910410c187482db7b281fd5c34c075af339fe449acd8145d6f16a26f9ae6e2
+        rules_hash: sha256:71c0635a1bf4bdf313293cfe7c6701aab5a0fe19e444e05b52ce020bd24a406b
+        recipe: registry-observation-v2
   - kind: printing
     owner: CSD02c
     data:
@@ -1440,4 +1440,4 @@ records:
         card_no: CSD02c-T01
         observation_hash: sha256:5e98bfdaf176340a039224abb5d6b4ccdc4125a7f9410e87b44b2b07d02678ab
         rules_hash: sha256:fd7d7fb19ec4d1038d632b435e6a2d1d2d7d0ca2e991bb6a5c9cc54e6a5d3db3
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2

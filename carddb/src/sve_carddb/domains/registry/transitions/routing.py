@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Literal
 
-from sve_carddb.domains.registry.inputs import canonical
+from sve_carddb.core.json import canonical
 from sve_carddb.domains.registry.records import AllocationData, PrintingData
 from sve_carddb.domains.registry.transitions.models import (
     Alias,

@@ -285,7 +285,12 @@ def test_explicit_envelope_fields(
             "unknown_format": 2,
         }[damage]
     write_chain(tmp_path, [raw])
-    with pytest.raises(ValueError, match="authored fields"):
+    error = (
+        "Invalid identity transition YAML"
+        if damage == "float_format"
+        else "authored fields"
+    )
+    with pytest.raises(ValueError, match=error):
         load_transitions(tmp_path)
 
 

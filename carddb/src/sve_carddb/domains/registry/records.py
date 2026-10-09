@@ -10,7 +10,7 @@ from sve_carddb.core.regions import Region
 CardId = Annotated[str, Field(pattern=r"^c:[0-9a-f]{32}\Z")]
 FaceId = Annotated[str, Field(pattern=r"^f:[0-9a-f]{32}\Z")]
 PrintingId = Annotated[str, Field(pattern=r"^p:[0-9a-f]{32}\Z")]
-Recipe = Literal["registry-observation-v1"]
+Recipe = Literal["registry-observation-v2"]
 
 
 class Observation(RecordData):

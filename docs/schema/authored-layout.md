@@ -36,7 +36,7 @@
 
 分片內記錄依對應 printing 的 `(region, card_no, variant_key, printing id)` 排序（`card_no` 為原樣字串的 code-point 字典序）：printing、配號、來源更正用自身或所指 printing；art 用第一個 use 的 printing；card、face、英文獨有查核、換皮卡用該 card 所有 printing 中最小的鍵（face 再加 ordinal）；最後一律以 `record_key` 收尾。排序只作用於**同一次寫入的新記錄**：正常追加只排序本次新增、寫到該 `(area, owner)` 的下一個序號檔，舊分片不動，所以同一 owner 的多個分片合起來不保證是全域卡號序。2026-09-28 首次公開前曾一次性全量重新分片（見 §3.2）；此後不再重排。
 
-YAML 為單一文件、UTF-8；省略版本指示或明示 `%YAML 1.2` 可讀，其他版本指示拒絕。`carddb` 使用 `yamlrocks==0.6.1` 的純量與詞法語意，不宣稱完全等同 YAML 1.2 core resolver，也不保留舊數字拼法相容層：例如 plain `0777`、`0b101`、`1_000` 是字串；正常十進位、`0o17`、`0xFF` 與指數形式依套件解讀。日期仍是字串，不啟用 timestamp；作者的日期字串加引號慣例不變。所有鍵必須是字串，禁止重複鍵、非有限浮點；套件先拒絕重複鍵與複合鍵，載入後仍做 strict JSON、canonical 雜湊（`allow_nan=False`）、結構與引用檢查。大小限制與分片規則不變，另見 [DSL 1.0 §11](../dsl/author-syntax-1.0.md#11-載入與錯誤)。
+YAML 為單一文件、UTF-8；省略版本指示或明示 `%YAML 1.2` 可讀，其他版本指示拒絕。`carddb` 使用 `yamlrocks==0.6.1` 的純量與詞法語意，不宣稱完全等同 YAML 1.2 core resolver，也不保留舊數字拼法相容層：例如 plain `0777`、`0b101`、`1_000` 是字串；正常十進位、`0o17`、`0xFF` 與指數形式依套件解讀。日期仍是字串，不啟用 timestamp；作者的日期字串加引號慣例不變。所有鍵必須是字串，禁止重複鍵；套件先拒絕重複鍵與複合鍵，載入後仍做 strict JSON、core canonical 雜湊、結構與引用檢查。canonical 拒絕所有浮點（含 NaN／Infinity）與不安全整數。大小限制與分片規則不變，另見 [DSL 1.0 §11](../dsl/author-syntax-1.0.md#11-載入與錯誤)。
 
 Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通 alias 與 merge 由套件展開，循環 alias 報錯，quoted `"<<"` 保留為一般字串鍵。標準 tag 依套件解讀；自訂 tag 保留為物件，再由 strict JSON 拒絕，不註冊 tag callback，也不啟用 include／env／secret／Python 物件執行。合法位置的 tab、NEL／LS／PS、interior BOM 與未知指示由套件處理，不另設 libyaml 字元禁令或 lint；縮排等語法錯誤仍拒絕。Parser 錯誤只回報安全類別，不附原始文字。寫出維持 `ruamel.yaml` 與原有 `storage.encode`，不設 PyYAML fallback；套件升級須重驗 canonical 差分與邊界案例。
 
@@ -61,13 +61,19 @@ records:
       home_set_id: BP01
 ```
 
-canonical hash recipe 固定：JSON 物件鍵排序、UTF-8（不 ASCII escape）、分隔符 `,`／`:`、無額外空白／尾端換行，不正規化 Unicode。觀測 hash、authored source_record 的內容 hash 與後續各節沿用此 recipe。
+canonical hash recipe 固定為 [canonical-json-v1](build-db.md#14-不可變雜湊僅建置)，唯一 API 是 `core.json.canonical(value)` 與 `digest(bytes)`，物件 hash 明示組合為 `digest(canonical(value))`。JSON 物件鍵依 Python 字串順序排序、UTF-8、無額外空白／尾端換行、不正規化 Unicode；U+0000～U+001F 固定寫成小寫 `\u00xx`，引號與反斜線 escape。整數限 ±9,007,199,254,740,991；拒絕 float、非 JSON 型別與非法 UTF-8 字串。觀測與 authored source_record 的語義內容採此 recipe；raw bytes、exact UTF-8 文字及歷史 JSONL coverage hash 保留各自的 exact bytes 定義。
+
+[#474](https://github.com/gbaian10/sve-kit/issues/474) 證據表示遷移與 [#476](https://github.com/gbaian10/sve-kit/issues/476) 文件封套遷移是既有記錄不可改寫的一次性例外：固定基準、以既有 `storage.encode` 隔離轉換、完整差分與審查後，reader／資料原子切換。#474 只允許指定位置的 `observation_hash`、`rules_hash`、`recipe`、`expected_source_hash`、`source_hash_recipe` 值行；全部 record_key、owner、順序、永久 ID／int_id、游標、關係、原值／改值及 coverage hash 不變。日常 append-only 工具仍拒絕改寫，不新增任意重寫入口；#476 不再改觀測投影或語義 hash 邊界。
+
+authored source 的 `parser_version` 是接受封套與 source identity recipe 的 profile，任一部分改變就升版；[來源契約](source-archive.md#22-建置-source_record-的投影)列出實際 profile。profile 版號與文件 format 版號獨立，例如 #476 後 catalog 文件可為 `format: 2`，讀它的 profile 卻是 `catalog-current-v3`。
 
 **其他入口的批次決定**：region-reviews 等仍採批次決定封套的入口，沿以下 recipe（catalog、display、registry、商品與商品身分對照不採）：先對完整 record（不含封套的決定指針）計 semantic hash；將 `(record_key,semantic_hash)` 二元素陣列按 key 排序作為 members，再計 membership hash；decision ID 為 `d:` 加完整 membership hash 的 64 hex；confirmed 的 sample_ids 恰為全部 members 的 record_key。任何新成員或內容變更都不得沿用舊決定。
 
 `ids/index.yaml`（`authored_format: 2`）只保存 `allocation_policy`（目前 `region-ranges-2026-09-28-v1`）與各地區游標 `next_int_id: {en: …, jp: …}`，每個游標是該區下一個未使用值；鍵必須恰為政策內的地區，值落在 `[start, end+1]`，`end+1` 表示該區已用盡。不認識的政策或格式直接拒絕。讀取掃描 `registry/` 與 `ids/` 下全部 YAML 分片，不另存檔案清單或檔案 hash，內容由 Git 保存；任何不是合法分片的 YAML 都會讓讀取失敗。有分片卻沒有 index 時停止，避免重用配號；寫入時先裝分片、最後才更新 index，中斷時多出的配號會使游標檢查失敗。
 
-每張 printing 的 `observation` 保存 `region/card_no/recipe/observation_hash/rules_hash`。`registry-observation-v1` 是工具 `Card` typed projection 的 canonical JSON；包括全部 faces 的 card name、職業、種類、數值、特性、原文、sections／speech、來源 img src，不含抓取時間或本機路徑。它是**萃取觀測 hash，不是原 HTML hash**。原始萃取仍留 repo 外；建置匯入需以同 recipe 驗證原始觀測並連到 source_record，不能把它偽裝成官方 HTML 的 sha256。僅取得此 registry 不足以重建官方卡文。
+每張 printing 的 `observation` 保存 `region/card_no/recipe/observation_hash/rules_hash`，reader 只接受 `registry-observation-v2`。唯一明確投影為 `domains.registry.projection` 的 `Card`／`Face`：Card 含 number 與來源順序的 faces；JP 使用現行 parser 的 name、職業、種類、traits、數值、text、sections、image，info／stats 為空物件、speech 為 null；EN 使用 name、完整 info／stats、parsed traits、分開的 text／sections、speech、image，職業／種類為空字串、cost／power／hp 為 `-`。全部預設明示，JP compound traits 保持一項，EN 無 traits 為 `[]`；觀測陣列不排序，grouping 才排序 traits。產品、QA、日期、credits 與抓取 metadata 不進投影。它是**萃取觀測 hash，不是原 HTML hash**。原始萃取仍留 repo 外；建置匯入需以同 recipe 驗證原始觀測並連到 source_record，不能把它偽裝成官方 HTML 的 sha256。僅取得此 registry 不足以重建官方卡文。
+
+歷史 JSONL 與 `separate_groups` 不能直接拿來跑新的 `registry init --check`；下次 init 使用現行萃取器的 JSONL（JP 可用 `extract cards`；JP／EN 可用 `archive extract-cards --region jp|en` 從凍結批次萃取）。本次證據遷移不執行 init、不重配身份。
 
 規則 hash 包含逐面 `name/text/speech/sections` 的原值。JP／EN 再錄措辭、提醒文字與標點差異可依本批人工政策共用 card，但各觀測分別保留；**不產生規則等義證明**，不沿用 DSL 驗證。未來來源變動須重新審核，不是忽略括號後自動通過。
 
@@ -96,7 +102,7 @@ data:
   observation:
     region: en
     card_no: "BP02-070EN"
-    recipe: registry-observation-v1
+    recipe: registry-observation-v2
     observation_hash: "sha256:<64 hex>"
     rules_hash: "sha256:<64 hex>"
   cross_region_review:
@@ -105,7 +111,7 @@ data:
     target_observation:
       region: jp
       card_no: "BP02-071"
-      recipe: registry-observation-v1
+      recipe: registry-observation-v2
       observation_hash: "sha256:<64 hex>"
       rules_hash: "sha256:<64 hex>"
 ```
@@ -173,7 +179,7 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 | 檔名 | 取得方式與內容 |
 | ---- | -------------- |
 | jp.jsonl | 取得已核對的 JP 萃取快照；每行 Card 的 number 與完整 faces。一般 JP 萃取由 workflows/extract.py 產生；本工具不讀 manifest、不執行萃取 |
-| en.jsonl | 取得審閱批次的完整 EN 萃取快照；每行同樣符合 registry.inputs.Card。目前沒有正式 EN 萃取 CLI，不可假定重新解析 HTML 能還原舊批次 exact bytes |
+| en.jsonl | 取得審閱批次的完整 EN 萃取快照；每行同樣符合 registry.inputs.Card。EN 萃取由 `archive extract-cards --region en` 從凍結批次產生；不可假定重新解析 HTML 能還原舊批次 exact bytes |
 | candidates.jsonl | 取得本批已審候選；每行 en_no、category（A/B/C）、jp_candidates（含 jp_no）。新增批次須完整列出 EN 版次，人工確認 A/B 第一候選或 C 無對應 |
 | confirmations.tsv | 保存依序追加的人工裁決，欄位 en_no、jp_no、verdict、confirmed_on；後列覆蓋前列，不能重排 |
 | original_art.jsonl | 保存人工卡圖比對結果，每行含 en_no、verdict；en_original_art 是插畫確認證據 |

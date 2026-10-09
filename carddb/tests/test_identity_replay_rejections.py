@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.domains.registry.inputs import canonical
+from sve_carddb.core.json import canonical
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.transitions.models import (
     ArtTransfer,
@@ -439,7 +439,7 @@ def test_post_review_append_needs_new_route_evidence(
                 "observation": {
                     "region": "jp",
                     "card_no": "TEST-05",
-                    "recipe": "registry-observation-v1",
+                    "recipe": "registry-observation-v2",
                     "observation_hash": "sha256:" + "8" * 64,
                     "rules_hash": "sha256:" + "9" * 64,
                 },

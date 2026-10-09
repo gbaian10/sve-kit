@@ -1,6 +1,5 @@
 """Independent counterexamples for correction provenance, application and reference scope."""
 
-import json
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
@@ -105,18 +104,14 @@ def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: i
     assert revision_id(raw) != revision_id(candidate)
     assert candidate.correction_keys == (
         digest(
-            json.dumps(
+            canonical(
                 {
                     "record_key": "source_correction:" + application.data.id,
                     "kind": "source_correction",
                     "owner": application.record.owner,
                     "data": application.data.model_dump(mode="json"),
                 },
-                ensure_ascii=False,
-                sort_keys=True,
-                separators=(",", ":"),
-                allow_nan=False,
-            ).encode()
+            )
         ),
     )
     assert application.key() == candidate.correction_keys[0]

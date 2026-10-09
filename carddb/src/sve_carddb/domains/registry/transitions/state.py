@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Literal
 
-from sve_carddb.domains.registry.inputs import canonical, digest
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.registry.records import DATA_MODELS, EnglishPrintingData
 from sve_carddb.domains.registry.storage import Entry
 from sve_carddb.domains.registry.transitions.models import Before
@@ -49,7 +49,7 @@ def entity(entry: Entry | None, key: str, transition: str | None) -> Entity:
             transition_key=transition,
             record_key=key,
             record_hash=digest(
-                None if entry is None else entry.model_dump(mode="json")
+                canonical(None if entry is None else entry.model_dump(mode="json"))
             ),
         ),
         None if entry is None else canonical(raw),

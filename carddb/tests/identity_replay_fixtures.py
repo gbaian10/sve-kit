@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid5
 
-from sve_carddb.domains.registry.inputs import canonical
+from sve_carddb.core.json import canonical
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.storage import (
     Entry,
@@ -74,7 +74,7 @@ def observation(number: str) -> dict[str, Any]:
     return {
         "region": "en",
         "card_no": number,
-        "recipe": "registry-observation-v1",
+        "recipe": "registry-observation-v2",
         "observation_hash": "sha256:" + "8" * 64,
         "rules_hash": "sha256:" + "9" * 64,
     }

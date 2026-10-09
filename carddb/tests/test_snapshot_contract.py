@@ -1,6 +1,7 @@
 """Consume shared, handwritten contract fixtures without a producer or database."""
 
 from pathlib import Path
+from typing import cast
 
 import pytest
 from jsonschema import Draft202012Validator, ValidationError
@@ -238,6 +239,20 @@ def test_fixed_canonical_and_bucket_vectors() -> None:
 def test_invalid_json_boundary(data: bytes) -> None:
     with pytest.raises((ValueError, UnicodeError)):
         parse(data)
+
+
+@pytest.mark.parametrize("value", [1.0, float("nan"), float("inf")])
+def test_canonical_rejects_floating_point_numbers(value: float) -> None:
+    with pytest.raises(ValueError, match=r"^Floating point JSON is forbidden$"):
+        canonical(value)
+
+
+@pytest.mark.parametrize("value", [(1, 2), {1, 2}, Path("synthetic")])
+def test_canonical_identifies_unsupported_types(value: object) -> None:
+    with pytest.raises(
+        TypeError, match=r"^Unsupported JSON type: " + type(value).__name__
+    ):
+        canonical(cast("JsonValue", value))
 
 
 def test_resources_available_from_package() -> None:

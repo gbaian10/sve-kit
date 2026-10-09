@@ -10,10 +10,16 @@ unchanged, including corrections outside the selected output region.
 
 The importer reuses `registry.corrections.correction_status`. An active correction
 first checks for an upstream fix, then requires both exact old value and the
-complete `registry-observation-v1` hash. Proposed corrections are retained without
+complete `registry-observation-v2` hash. Proposed corrections are retained without
 an application. Conflict applications have no successful result and the build
 record becomes `needs_review`; upstream fixes become `upstream_fixed`, keep the
 existing result and report a retirement warning.
+
+The #474 migration updates only `expected_source_hash` and `source_hash_recipe`
+from the same verified raw input. Exact old/corrected values, evidence and state
+remain fixed; every correction must retain its baseline `applied` or
+`already_fixed` status. Application keys and dependent revision IDs are rebuilt
+from the new evidence representation without changing public content.
 
 `populate_text_observations` writes `source_correction`, `correction_evidence` and
 `correction_application` in the same transaction as the text graph. Successful

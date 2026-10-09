@@ -4,9 +4,9 @@ from typing import Annotated, Literal
 
 from pydantic import Field, JsonValue, computed_field, field_validator, model_validator
 
+from sve_carddb.core.json import canonical
 from sve_carddb.core.models import Hash, RecordData, Text, UInt
 from sve_carddb.core.provenance import BuildContext, Revision, Version
-from sve_carddb.domains.registry.inputs import canonical
 from sve_carddb.domains.registry.records import (
     DATA_MODELS,
     CardId,

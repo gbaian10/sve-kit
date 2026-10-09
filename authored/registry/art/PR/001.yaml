@@ -14,9 +14,9 @@ records:
       observation:
         region: en
         card_no: PR-211EN
-        observation_hash: sha256:e1c94d72d46de3e3916c3770a101a9bfde75bc04e28523efe47bdc5778c81fdb
-        rules_hash: sha256:36abd9e02b81811a0365058b7389d95afc6b4c182b9c8fac9a051985fd6b30e9
-        recipe: registry-observation-v1
+        observation_hash: sha256:82fdc83b4f532e7d47a2552453294fdf6e9aeb21cb59645bfd15971bc11fa5c5
+        rules_hash: sha256:446d1ef301eab265277354ecd571b842d143c00ccf5847fcbaa59f0b868d57d2
+        recipe: registry-observation-v2
   - kind: art
     owner: PR
     data:
@@ -30,9 +30,9 @@ records:
       observation:
         region: en
         card_no: PR-298EN
-        observation_hash: sha256:c67052087a615a77efed7856c613507a6afdcd52b84dbc3e1ddcddfb2ae229b8
-        rules_hash: sha256:01a8d2f3e79e5f03ce2165ddca04c08a39341782a60f86f01adb6ce594b64860
-        recipe: registry-observation-v1
+        observation_hash: sha256:454faf029784ef493b9a597d708389c1ece8a8094385c2f4c7353720ec2fe215
+        rules_hash: sha256:ce99ad2bee427fa0cef02550bb9c97b8f0b9acb7b54520a78a667d453d5acb1a
+        recipe: registry-observation-v2
   - kind: art
     owner: PR
     data:
@@ -46,9 +46,9 @@ records:
       observation:
         region: en
         card_no: PR-342EN
-        observation_hash: sha256:af1268e2e5186a0ae365c3bf1d501ece54c47ad0c138b88a185d003f14a0f3a0
-        rules_hash: sha256:d28b3af8d4e05ff4edbdbe69d01931ee589f47bb766eb4cde240e67026aba72f
-        recipe: registry-observation-v1
+        observation_hash: sha256:2c73dce93c651444f425ffc7178295733b5a33128f313b3fca68fd1226e839a1
+        rules_hash: sha256:eddaa37d3d52434cb8afab354054362213caabdcc939a347a5dec171afd4781b
+        recipe: registry-observation-v2
   - kind: art
     owner: PR
     data:
@@ -62,9 +62,9 @@ records:
       observation:
         region: en
         card_no: PR-395EN
-        observation_hash: sha256:5cb85e3c0ffda9afa8d148952eb4a0556dddeaaa4c6e14a156447c072ae9c8a6
-        rules_hash: sha256:9700da72cb9a09a9dafa2f76ed0be814162d1edc7b2afe3757cd8de5518351dd
-        recipe: registry-observation-v1
+        observation_hash: sha256:4cbbfa8c9002171aa082aa919040e81d09dc9316868eae939557dce7194edca9
+        rules_hash: sha256:c04509e76e366a1c85ac01244e925341a21a15655e745d4015fd82b554ed2d8f
+        recipe: registry-observation-v2
   - kind: art
     owner: PR
     data:
@@ -78,9 +78,9 @@ records:
       observation:
         region: en
         card_no: PR-448EN
-        observation_hash: sha256:fdfda08a1f6cff9ab4ef9255bfc364d604f6b12b73d8349bcfc06b98d9571308
+        observation_hash: sha256:f7e1d7adf2e294612aea6aa5a7a6e8fcf5640b9b7b1b42772475e7ae4e36f919
         rules_hash: sha256:542dd859babf35fa890d559b3e29ef093ab092b5a9177a0c117d5bd97cb8c934
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: art
     owner: PR
     data:
@@ -94,6 +94,6 @@ records:
       observation:
         region: en
         card_no: PR-543EN
-        observation_hash: sha256:67e0109bb6c682f125fed89793628a1b992237e59c2945f047aba2faf8e2a3e7
-        rules_hash: sha256:24e37e9b85a189d0828f9ff0dde7a254d5800b87a745c9abba8b4ac83679da3e
-        recipe: registry-observation-v1
+        observation_hash: sha256:e8d47cd31cfc426447af2361f9ec92b687225d28515c0184bc8bd5fc67b3cd98
+        rules_hash: sha256:0ca44cd792d0b841e13de48bb8465b92169a16a748f9ab004e286d27aefa2629
+        recipe: registry-observation-v2

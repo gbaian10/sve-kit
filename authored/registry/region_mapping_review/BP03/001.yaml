@@ -13,14 +13,14 @@ records:
       observations:
         - region: en
           card_no: BP03-036EN
-          observation_hash: sha256:0173dc4377fe1d353f31172e317b20db56eea7cbc9246d680b710114cc46f491
-          rules_hash: sha256:7c97f9ed686e9f5d0e40ad6cdc13408c4631988a6caa78af2d89e7c83215d23f
-          recipe: registry-observation-v1
+          observation_hash: sha256:896de1a9ae036b8cd354d09cc335ad6dbffc313fe6d30a3a65c87f8f275cbb57
+          rules_hash: sha256:eaa1d6bfc34d6ab99b220ea4d7cdbf2c40acca0f0d2b0bc3f4bb7a708b7316ae
+          recipe: registry-observation-v2
         - region: en
           card_no: BP03-SP01EN
-          observation_hash: sha256:052daf7190eac6e0a732233a7bc963b2ffc5ebfd50ebe1191784f53067b3af97
-          rules_hash: sha256:8653663137c1a3fb7c614021c8b208ba7717b623482f82750472a3ed936d83de
-          recipe: registry-observation-v1
+          observation_hash: sha256:7849cfca0f488f4ba5658efcacb2b59d6d9e4ae916137275b47fbd083a8ed6ba
+          rules_hash: sha256:90041a694304f40111a4845a545a66277a94854639885389f5675c9baacf02be
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: BP03
     data:
@@ -33,9 +33,9 @@ records:
       observations:
         - region: en
           card_no: BP03-047EN
-          observation_hash: sha256:3d585dfc36968a1d19530d2bc839d99fed0d18ccc189473cd133836cb61adef9
-          rules_hash: sha256:d04327efd2eece282df4e6b3dc3d46469ce32cdb36d8564068a5d01d35e3273c
-          recipe: registry-observation-v1
+          observation_hash: sha256:f23ee3c2145a8f8cf07268dffcc1f0b028a90e94d03e754e0e816de9b1ccb203
+          rules_hash: sha256:9dbee7769cc9b6f96639338c2e1768e5353d17b9b56c4a58aac74d0d4b3d0be4
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: BP03
     data:
@@ -48,9 +48,9 @@ records:
       observations:
         - region: en
           card_no: BP03-054EN
-          observation_hash: sha256:6968e737c7e715afe47936c2b7ae96566d01d6d7565b88c3c895f58c9b3074d1
-          rules_hash: sha256:61896e52803fadf8af3bbe94583a1da190d07a3c0c595199e2c2dc48974f6dea
-          recipe: registry-observation-v1
+          observation_hash: sha256:993663d451e90576dcd832be550f159f2e0b0aaa27d8f89b814cba4517b2a810
+          rules_hash: sha256:0237a47cf91ff7dac3d5907621d984072c58c848a0baf632c594cccf52395528
+          recipe: registry-observation-v2
   - kind: region_mapping_review
     owner: BP03
     data:
@@ -65,9 +65,9 @@ records:
           card_no: BP03-LDⓈ01EN
           observation_hash: sha256:3f4e75c735d290e386cae25c04d0c83f9a4112d83169c81d819990730585f9b0
           rules_hash: sha256:194210db546732485991c59acd1b13a3d49fa96b87b1f30b3482afe6f07ac1fd
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
         - region: en
           card_no: PR-041EN
           observation_hash: sha256:1b352d84c40a30815dad650169ab690693f42f01e06fea5bda2395fdc179e44b
           rules_hash: sha256:194210db546732485991c59acd1b13a3d49fa96b87b1f30b3482afe6f07ac1fd
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
