@@ -298,8 +298,8 @@ def _validate_source(source: ImageSource) -> None:
     if source.publication_state != "approved" or source.availability != "available":
         msg = "only approved, available SVE card images can have public variants"
         raise ImageVariantError(msg)
-    digest = hashlib.sha256(source.source_bytes).hexdigest()
-    if not _HASH.fullmatch(source.source_sha256) or digest != source.source_sha256:
+    checksum = hashlib.sha256(source.source_bytes).hexdigest()
+    if not _HASH.fullmatch(source.source_sha256) or checksum != source.source_sha256:
         msg = "source SHA-256 does not match the frozen image bytes"
         raise ImageVariantError(msg)
 
@@ -455,14 +455,14 @@ def _encode(image: Image.Image, recipe: Recipe) -> bytes:
     return target.getvalue()
 
 
-def _blob_path(digest: str) -> str:
-    if not _HASH.fullmatch(digest):
+def _blob_path(checksum: str) -> str:
+    if not _HASH.fullmatch(checksum):
         msg = "invalid WebP blob SHA-256"
         raise ImageVariantError(msg)
-    return f"images/sha256/{digest[:2]}/{digest}.webp"
+    return f"images/sha256/{checksum[:2]}/{checksum}.webp"
 
 
-def _write_blob(path: Path, data: bytes, digest: str) -> None:
+def _write_blob(path: Path, data: bytes, checksum: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temp_name = tempfile.mkstemp(prefix=".webp-", dir=path.parent)
     temporary = Path(temp_name)
@@ -474,14 +474,14 @@ def _write_blob(path: Path, data: bytes, digest: str) -> None:
         try:
             os.link(temporary, path)
         except FileExistsError:
-            _verify_blob(path, digest, len(data))
+            _verify_blob(path, checksum, len(data))
     finally:
         temporary.unlink(missing_ok=True)
 
 
-def _verify_blob(path: Path, digest: str, byte_count: int) -> None:
+def _verify_blob(path: Path, checksum: str, byte_count: int) -> None:
     data = path.read_bytes()
-    if len(data) != byte_count or hashlib.sha256(data).hexdigest() != digest:
+    if len(data) != byte_count or hashlib.sha256(data).hexdigest() != checksum:
         msg = f"content-addressed WebP blob is corrupt: {path}"
         raise ImageVariantError(msg)
 
