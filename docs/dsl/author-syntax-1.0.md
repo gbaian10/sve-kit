@@ -36,7 +36,11 @@ cards:
         keywords: [ward]
 ```
 
-這是容器示意；§13 的真實例子則省略工具自動填入的 meta，只列指定能力行或指定構造片段，並明示片段範圍。meta 的規範見 [ADR-0012](../adr/0012-version-meta.md)：`draft → reviewed → verified`，爭議為 `disputed`；模型不同的審核或合格巨集的三項機械檢查才可 reviewed，實跑才可 verified。`rulings` 指裁定 ID，不直接堆 Q&A；巨集產物另記 `generated_by: {macro, version, params}`。舊 `review / ruling` 不沿用為驗收狀態。
+這是容器示意；§13 的真實例子則省略工具自動填入的 meta，只列指定能力行或指定構造片段，並明示片段範圍。meta 的規範見 [ADR-0012](../adr/0012-version-meta.md)：`draft → reviewed → verified`，爭議為 `disputed`。逐卡本體與每個用途須經與作者不同模型的獨立語義審核；只有已取得 §10 資格的巨集，才可由每用途三項機械檢查取得 reviewed。共用框架存放或頻次達標不會自動 reviewed；該版本引擎實跑才可 verified。`rulings` 指裁定 ID，不直接堆 Q&A；巨集產物另記 `generated_by: {macro, version, params}`。舊 `review / ruling` 不沿用為驗收狀態。
+
+各頻次框架均可保存有版本的 DSL 本體；本體版本、精確 frame／semantic_variant、適用域及所有來源用途須可追蹤，不能只記巨集名稱。來源綁定與投影接口依[四層契約 §6／§7](../schema/domains/four-layer-translation.md#6-sourcebindingtrace-與逐-occurrence-位置)，仍組裝既有 A.card／A.ability，不另建每卡語法。body version 不入 frame 身分；呈現、來源語義與本體的版本／失效責任依[四層契約 §8](../schema/domains/four-layer-translation.md#8-建置-dbrender-projection-與依賴)。
+
+每個使用 frame 的 DSL 依賴必納入 §7 的 `interface_key`。建置重算不符即使相依 DSL 的接口連接、用途審查與實跑資格失效並重驗；來源語義及既有引用仍有效的接口描述調整，不重鍵翻譯。存放承載與 stale 比較位置由 [#498](https://github.com/gbaian10/sve-kit/issues/498) 的後續實作定，本節不指定表或新增 meta 欄位。
 
 ## 2. 能力頭與來源
 
@@ -203,9 +207,33 @@ Until 保留 turn、next_opp_turn、this_and_next_opp_turn、game；明確長形
 
 ## 10. 巨集規範
 
-保留 v0 dig（look→choose→move→餘牌排列）、discount（install cost_mod）、search_to（search）與誘發頭巨集。模式數／目標／費用參數由明示構造收集，不由巨集在文字中的位置猜測。巨集 ≥3 個不同卡名才建立，2 張換參數、1 張單寫；170 個候選仍需兩模型各審與測試，不能此稿一次宣布全部合格。
+保留 v0 dig（look→choose→move→餘牌排列）、discount（install cost_mod）、search_to（search）與誘發頭巨集。模式數／目標／費用參數由明示構造收集，不由巨集在文字中的位置猜測。以下區分框架本體存放、合格巨集資格及逐用途驗收，不批次授予既有候選資格。
 
-每個巨集記撰寫者、審核者、版本；測試含 0 張、無合法目標、大數值、時點／資訊邊界。每張套用卡必須句型完全相符、數字／卡名參數相符、反向翻譯相符，才能 reviewed；實跑前不 verified。修巨集後依版本反向索引重檢所有套用卡。
+### 10.1 存放與資格
+
+句框架的 DSL 本體不分使用頻次，均可保存並重用。只有 1～2 張不同卡的本體及每個用途，仍依逐卡標準接受與作者不同模型的獨立語義審核；引用同一框架不能自動取得 reviewed。
+
+同一 resolved 語義變體由至少 3 張不同卡使用，且完成兩個不同模型各自的獨立審核、適用邊界測試及版本／適用域登錄，才取得合格巨集資格。作者不得自審。不同卡以「卡名概念、是否進化」計，進化前後分開；重印與異圖不重複計。不同變體不得合計，中文文字相同也不證明相同語義。
+
+本體保存撰寫者、審核者、版本與適用域；邊界測試須含 0 張、無合法目標、大數值、時點／資訊邊界。頻次滿足只是 `threshold_eligible`，不是 `qualified`。2→3 張時升級同一版本本體的資格，不搬移本體；只採計對該版本、該適用域仍有效的審核與測試。
+
+已分類的 ability_flag、card_field、none 行不納入可執行本體／巨集資格計數；pending 另列，不能當確定的 none。語義變體仍 pending 的來源可用保守精確框架翻譯，但須保留自身來源 scope，不得跨來源累計資格或自動生成可執行本體；確認後再依實際變體重鍵並審用途。
+
+純術語、文法形式與顯示 NP 不是此處的巨集。若 NP 開始付款、選目標、移動物件或產生 receipt，就已是 DSL 構造，須遵守本節的審核責任，不能以命名繞過。
+
+### 10.2 逐用途驗收與失效
+
+合格巨集的每個用途須通過三項機械檢查，才可取得 reviewed：
+
+1. 精確 frame 與 semantic_variant 相符，且用途在已審適用域內。
+2. 完整 typed 參數及來源角色相符，包含數字、卡名、術語、區域、卡種等實際使用的葉值及其合法域；不能只核對數字／卡名。
+3. 從實際 DSL 構造產生的反向日文與來源一致；回放儲存的原文不能冒充反向翻譯。
+
+檢查不通過、用途超出已審範圍或仍有未解語義者，退回逐用途的獨立語義審核；引擎實跑前不標 verified。巨集資格不代替每個用途的責任，也不代替載入時的型別、scope 與 capability 檢查。
+
+巨集本體、來源語義或適用域改動後，按反向用途索引重驗；舊版本審核及實跑證據保留，不能直接作新版資格。中文形式、譯名字串或 NP 覆蓋改動不自動改 DSL 語義。依[四層契約 §7／§8](../schema/domains/four-layer-translation.md#7-規則投影接口)，每個 DSL 用途依賴必包含 `interface_key`；建置重算不符即使相依接口連接、用途審查與實跑資格失效。有效引用與來源語義未變時，不重鍵翻譯；承載與比較位置由 #498 後續實作定，這裡不新增欄位。
+
+固定輸入及預期 `count`、`threshold_eligible`、`qualified` 見[資格案例規格](macro-qualification-cases.md)與其 JSON。這些是後續 carddb consumer 的驗收資料，不是已執行的資格測試或授予紀錄。
 
 ## 11. 載入與錯誤
 

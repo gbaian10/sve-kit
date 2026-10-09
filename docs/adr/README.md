@@ -31,3 +31,4 @@ ADR 中引用的官方卡名、卡文及 CR／Q&A 原文片段不在本專案授
 
 ADR-0001～0012 是效果 DSL 1.0 的設計決定，規格本文見 [`docs/dsl/`](../dsl/README.md)；
 裁定登錄見 `authored/rules/rulings/`；2026-10-09 路徑／封套更新見 [ADR-0011 註記](0011-rulings-evidence.md#決定)，精確授權路徑承接見 [ADR-0014 註記](0014-license-policy.md#決定)。
+2026-10-10 框架 DSL 存放與巨集資格修訂見 [ADR-0012 註記](0012-version-meta.md#決定)及[作者語法 §10](../dsl/author-syntax-1.0.md#10-巨集規範)。
