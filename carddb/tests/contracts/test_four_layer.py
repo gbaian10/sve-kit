@@ -10,6 +10,7 @@ from pydantic import JsonValue, TypeAdapter, ValidationError
 from sve_carddb.contracts.annotations import AnnotationSet
 from sve_carddb.contracts.four_layer import Bound, Frame, LeafSlot, Target, hash_payload
 from sve_carddb.contracts.source_binding import (
+    LayoutDomain,
     SourceBinding,
     SourceDescriptor,
     SourceSpan,
@@ -220,6 +221,21 @@ def test_named_source_domains_accept_each_alternative_and_reject_unknown_names()
         verify_value(slot, ("deck",), domains)
     with pytest.raises(ValueError, match="Unknown or incorrectly typed"):
         verify_value(slot, ("hand",), {"hand": domains["hand"]})
+
+
+def test_layout_values_do_not_change_the_registered_domain_or_frame_schema() -> None:
+    slot = LeafSlot.model_validate_json(
+        b'{"name":"layout","type":"LiteralLayout","role":"layout",'
+        b'"domain":{"values":["source_whitespace"],"min":null,"max":null},'
+        b'"required":true,"occurrences":[{"start":0,"end":1}]}'
+    )
+    domains = {"source_whitespace": LayoutDomain(type="LiteralLayout")}
+    for value in (" ", "\n", "\r\n", "\t  \r\n"):
+        verify_value(slot, value, domains)
+    with pytest.raises(ValueError, match="outside every registered"):
+        verify_value(slot, " rules text ", domains)
+    with pytest.raises(ValueError, match="outside every registered"):
+        verify_value(slot, "", domains)
 
 
 @pytest.mark.parametrize(

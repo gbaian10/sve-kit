@@ -49,7 +49,6 @@ class QuantityDomain(RecordData):
 
 class LayoutDomain(RecordData):
     type: Literal["LiteralLayout"]
-    exact: str
 
 
 ClosedDomain = ZoneDomain | QuantityDomain | LayoutDomain
@@ -274,8 +273,8 @@ def _registered_value(domain: ClosedDomain, value: TypedValue) -> None:
         _zone_value(domain, value)
     elif isinstance(domain, QuantityDomain):
         _quantity_value(domain, value)
-    elif not isinstance(value, str) or not value.isspace() or value != domain.exact:
-        raise ValueError("LiteralLayout must equal registered exact whitespace")
+    elif not isinstance(value, str) or not value.isspace():
+        raise ValueError("LiteralLayout must contain only source whitespace")
 
 
 def _quantity_value(domain: QuantityDomain, value: TypedValue) -> None:

@@ -580,16 +580,7 @@ def _form_slots(
     form = forms.get((node.form_id, lang))
     if form is None:
         raise ValueError("Target requires a form in its own language")
-    signature = {arg.name: arg for arg in form.signature}
-    if set(node.args) != set(signature):
-        raise ValueError("Form argument names disagree with signature")
-    used = set()
-    for name, ref in node.args.items():
-        slot = _leaf(slots, ref.slot, signature[name].type)
-        if slot.role != signature[name].role:
-            raise ValueError("Form leaf role disagrees with signature")
-        used.add(slot.name)
-    return used
+    return form.verify_arguments(node.args, slots)
 
 
 def _node_slots(
@@ -653,3 +644,18 @@ class FormDefinition(RecordData):
         ):
             raise ValueError("Form Label requires a signature argument")
         return self
+
+    def verify_arguments(
+        self, args: Mapping[str, SlotRef], slots: Mapping[str, LeafSlot]
+    ) -> set[str]:
+        """Implicit NP forms obey the same typed role signature as explicit Form nodes."""
+        signature = {arg.name: arg for arg in self.signature}
+        if set(args) != set(signature):
+            raise ValueError("Form argument names disagree with signature")
+        used = set()
+        for name, ref in args.items():
+            slot = _leaf(slots, ref.slot, signature[name].type)
+            if slot.role != signature[name].role:
+                raise ValueError("Form leaf role disagrees with signature")
+            used.add(slot.name)
+        return used
