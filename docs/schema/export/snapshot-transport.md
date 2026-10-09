@@ -1,8 +1,9 @@
-# 卡表快照傳輸契約 v2
+# 卡表快照傳輸契約（2.0 實作與 3.0 目標）
 
 本文件補足 [snapshot-format.md](snapshot-format.md) 的 JSON 容器、欄序與版本契約；公開邏輯欄位仍以該文件 §2 為唯一白名單。這些記錄不是新增的玩家集合或建置表。所有物件拒絕未列出的欄位；所有列出的欄位必須存在，`T?` 表示 `T` 或 JSON null，不能省略。空陣列表示已知無成員，來源是否完整另看 coverage。
 
 目前 producer／reader 僅支援 2.0.0，圖片契約與配置見 §5.4；不提供 1.x 產出或相容讀取。機器資源依 [snapshot-contract](snapshot-contract.md) 維護。
+3.0.0 的變更以[公開 annotation 契約](public-annotation.md)及本文 §8 為準；下列 2.0 歷史欄序不代表新版可接受舊 tuple。
 
 ## 1. 基本型別與 canonical bytes
 
@@ -220,7 +221,7 @@ printing/bootstrap.faces 使用 PrintingFaceBootstrap，detail.faces 使用 Prin
 
 row_index 為從 0 起的 UInt，指 base fragment 已按 PK 排序的 rows。detail 按 row_index 排序，每個 base row 必須且只能有一列 detail，包含文字未知／空陣列的卡，不能藉缺列改變 unknown 語意。printing detail 每列須恰有與 bootstrap 相同的 faces 集合，從 base 的 face_id 連回 face.ordinal 來定位。join 以 base 還原 id／face_id，不輸出 row_index／face_ordinal；translations 按 `(field,ordinal,target_lang)` 合併並拒絕同鍵重複，合併後依該鍵排序（null ordinal 在數字前）。
 
-`current_ref` 只是從所有 face.current.revision_id 推導的去重集合；`display_ref` 依 snapshot-format §2.3 為 current_ref 加 pending wording.display 非 null revision ID 的聯集，不加入其餘 candidates。兩者都不是 manifest 欄位、檔案或第 41 個集合。display_ref 內只用 bootstrap/detail，每個 pending face-region 最多一筆暫顯的輕量欄位、名稱與可用名稱翻譯閉包進 bootstrap；集合外（含其餘候選）用 history 完整列，role=text、base=null，按需載入。history 不表示年代，其餘候選引用不形成 bootstrap 對 history 的強制下載依賴。候選與現行／暫顯共用 revision 時只沿用其唯一儲存；同一 revision 不可同時兩邊出現。current 或 display 改變時重算分割，永久 ID 不變；所有分割 join 後必須恰等於公開邏輯投影，無遺失、無重複欄、無額外列。須量測日版／英版各自的 manifest、config 與首屏實際必載 bootstrap（含暫顯輕量投影、名稱／可用名稱翻譯閉包及稀疏 wording 引用），共用／混區檔整檔計入；Brotli 約 1 MiB 為目標、2 MiB 可接受，更大停下交維護者決定，詳 [size-budget.md](size-budget.md)。另列其餘按需候選片容量；未載候選的索引與搜尋進度依 snapshot-format §2.3 標示。
+`current_ref` 只是從所有 face.current.revision_id 推導的去重集合；`display_ref` 依 snapshot-format §2.3 為 current_ref 加 pending wording.display 非 null revision ID 的聯集，不加入其餘 candidates。兩者都不是 manifest 欄位、檔案或額外公開集合。display_ref 內只用 bootstrap/detail，每個 pending face-region 最多一筆暫顯的輕量欄位、名稱與可用名稱翻譯閉包進 bootstrap；集合外（含其餘候選）用 history 完整列，role=text、base=null，按需載入。history 不表示年代，其餘候選引用不形成 bootstrap 對 history 的強制下載依賴。候選與現行／暫顯共用 revision 時只沿用其唯一儲存；同一 revision 不可同時兩邊出現。current 或 display 改變時重算分割，永久 ID 不變；所有分割 join 後必須恰等於公開邏輯投影，無遺失、無重複欄、無額外列。須量測日版／英版各自的 manifest、config 與首屏實際必載 bootstrap（含暫顯輕量投影、名稱／可用名稱翻譯閉包及稀疏 wording 引用），共用／混區檔整檔計入；Brotli 約 1 MiB 為目標、2 MiB 可接受，更大停下交維護者決定，詳 [size-budget.md](size-budget.md)。另列其餘按需候選片容量；未載候選的索引與搜尋進度依 snapshot-format §2.3 標示。
 
 例如 base 有依 ID 排序的兩列 revision，detail 的 `[1,...]` 只可指第二列。缺 base hash、hash 指舊片、index=2、重複 index=1、漏 index=0，或 printing 同一 face_ordinal 兩次，都必須拒收，不能 fallback 到最新 bootstrap。
 
@@ -346,7 +347,7 @@ config 與 programs 各一檔，key 分別為 `config`、`programs`。無列 buc
 
 ### 5.4 format 2.0.0 卡包 media 與 ID 圖片
 
-format_version、min_reader_version 均為 `2.0.0`。公開欄序依 snapshot-format，canonical、owner、分片鍵及文字裝檔依本文件前述配置。translation 固定七欄的最後一欄為必填 Bool `low_confidence`，origin 為 `official/project/machine`；bootstrap／detail 使用相同完整七欄，FieldTranslation.basis 同步接受 `shared_jp_unchecked`。reader 依固定 Schema 拒絕舊 status 字串、舊 origin、缺欄與非 Bool，不兼容兩種七欄形狀。
+本節記錄切換前 2.0 配置；3.0 以 §8 覆寫變更欄序與版本。format_version、min_reader_version 均為 `2.0.0`。2.0 公開欄序依既有套件 Schema，canonical、owner、分片鍵及文字裝檔依本文件前述配置。translation 固定七欄的最後一欄為必填 Bool `low_confidence`，origin 為 `official/project/machine`；bootstrap／detail 使用相同完整七欄，FieldTranslation.basis 同步接受 `shared_jp_unchecked`。reader 依固定 Schema 拒絕舊 status 字串、舊 origin、缺欄與非 Bool，不兼容兩種七欄形狀。
 
 2.0 尚未正式首發，本候選契約同步 producer、Python／TS reader、共用 golden 與 Web 合成快照，不增加能力旗標；正式發布後同類破壞性欄型更動須升 major。required_capabilities 恰為排序的：
 
@@ -414,7 +415,7 @@ changes 是一般物件 `{format_version,from_data_version,to_data_version,added
 
 | 欄位 | 元素完整形狀 |
 | --- | --- |
-| added, modified, retired | `{entity:Code,key:{欄名:主鍵值},changed_fields:[Text],reason:Text}`；entity 限該 format 的公開 40＋3 集合，key 恰含其 PK 欄且型別相同；changed_fields 是排序唯一的公開頂層欄名，modified 非空，added/retired 為 [] |
+| added, modified, retired | `{entity:Code,key:{欄名:主鍵值},changed_fields:[Text],reason:Text}`；entity 限該 format 的公開集合（2.0 為 40＋3，3.0 為 43＋3），key 恰含其 PK 欄且型別相同；changed_fields 是排序唯一的公開頂層欄名，modified 非空，added/retired 為 [] |
 | errata | `{errata_id:ID,version_id:ID,card_ids:[ID],reason:Text}`；新公布／改版的 ErrataVersion，不把所有舊公告重列 |
 | new_qa_versions | `{qa_id:ID,version_id:ID,card_ids:[ID]}`；包含新增題與同題新 revision |
 | identity_changes | `{identity_change_id:ID}`；引用本次新增公開 identity_change，包含撤回事件；原事件不重寫，reverts_id 沿 snapshot-format 的新格式白名單 |
@@ -432,3 +433,26 @@ support_changes 比較套用 override/block 後的有效狀態；同狀態但 re
 [數位名字政策](../domains/digital-name-policy.md) 的 same_name 枚舉能力使用 §5.4 的 2.0 配置。未支持 digital-same-name-links-v1 或 min_reader 不足的 reader
 拒絕該快照，不把規則 unreviewed 誤看成裸候選或真人確認。
 政策與收據不出貨，不追加公開 tuple 欄位；枚舉新增 minor、既有欄序／語意更換 major，沿既有快照准入與完整引用閉包。
+
+## 8. format 3.0.0 的 annotation 變更
+
+[公開 annotation 契約](public-annotation.md)及其[元件 Schema](public-annotation.schema.json)釘住新版：
+format_version／min_reader_version=3.0.0，原六個 capability 加 jp-source-translation-v1 與 public-annotation-v1，
+完整集合依該契約 §1，所有封套及 index entry 一致；index_format=2 不變。
+原有 canonical、N=64、band widths、media、base／row_index 與同名規則沿用；整體容量仍須重新量測。
+
+欄序以公開 annotation §2.1 覆寫 2.0 的同名列：translation 加 annotation_set_id，FieldTranslation 加
+source／counterpart 並改 basis；cr_clause 加 translations；新增 annotation_set／field_annotation／annotation_concept。
+Translation 在 bootstrap／detail 都用完整八欄。所有原本內嵌 FieldTranslation 的位置都同步使用七格，
+不能只改 face_revision 而漏掉 printing／QA／keyword／vocabulary／商品。新增 PublicTextPointer／Annotation／AnnotationRange
+的 descriptor 與三個有限 JSON reference 定義必隨使用處完整附入 types。
+
+新增集合的 PK／欄序、欄位分割及 bucket 依公開 annotation §2／§5；field_annotation 的 history
+只用於非 display revision 的原文用途，base=null，完整 tuple，不套 face_revision 的 row_index。
+其他集合仍沿前述欄位分割，printing.faces 的 face_ordinal 與 translation 子陣列 join 鍵不變。
+text_all 包含全部 43 文字集合的原始 File 聯集；changes 支援新表 PK／欄位白名單。
+改 annotation／bold 可能改 set ID 及用途列，不能因 text bytes 未變省掉相關 changes／依賴更新。
+
+機器 Schema 的整合、reader 支援表與共用完整 golden 由 #498 一次替換；不得先產新 wire 卻沿舊 2.0 標頭，
+也不得只升 data_version。固定案例依 [public-annotation-cases](public-annotation-cases.md)，
+正式容量依 [size-budget](size-budget.md#30-annotation-與-jp-來源的計帳)，本次規格不宣稱實作或量測已通過。

@@ -221,6 +221,9 @@ tables = [
 key = "s03"
 title = "文字與版本"
 tables = [
+    "annotation_set",
+    "field_annotation",
+    "annotation_concept",
     "text_unit",
     "face_revision",
     "translation",

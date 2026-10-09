@@ -1,0 +1,1309 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sve-kit:snapshot:public-annotation:3.0.0",
+  "$comment": "Component contract for the 3.0.0 design. Not a complete snapshot schema or an installed reader profile. Canonical bytes, identities, ranges and public reference semantics also require the checks in public-annotation.md.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/Admission"
+    },
+    {
+      "$ref": "#/$defs/AnnotationRange"
+    },
+    {
+      "$ref": "#/$defs/Annotation"
+    },
+    {
+      "$ref": "#/$defs/annotation_set"
+    },
+    {
+      "$ref": "#/$defs/PublicTextPointer"
+    },
+    {
+      "$ref": "#/$defs/field_annotation"
+    },
+    {
+      "$ref": "#/$defs/annotation_concept"
+    },
+    {
+      "$ref": "#/$defs/translation"
+    },
+    {
+      "$ref": "#/$defs/FieldTranslation"
+    },
+    {
+      "$ref": "#/$defs/cr_clause"
+    }
+  ],
+  "$defs": {
+    "ID": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Text": {
+      "type": "string"
+    },
+    "Code": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*$"
+    },
+    "Lang": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+    },
+    "UInt": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "Bool": {
+      "type": "boolean"
+    },
+    "AnnotationID": {
+      "type": "string",
+      "pattern": "^ann:[0-9a-f]{64}$"
+    },
+    "Field": {
+      "enum": [
+        "name",
+        "effect",
+        "flavor",
+        "question",
+        "answer",
+        "section",
+        "label",
+        "action_label"
+      ]
+    },
+    "Admission": {
+      "type": "object",
+      "properties": {
+        "format_version": {
+          "const": "3.0.0"
+        },
+        "min_reader_version": {
+          "const": "3.0.0"
+        },
+        "required_capabilities": {
+          "const": [
+            "column-partition-v1",
+            "digital-same-name-links-v1",
+            "fragment-container-v1",
+            "image-entity-buckets-v1",
+            "image-id-url-v1",
+            "jp-source-translation-v1",
+            "public-annotation-v1",
+            "rules-name-on-demand-v1"
+          ]
+        }
+      },
+      "required": [
+        "format_version",
+        "min_reader_version",
+        "required_capabilities"
+      ],
+      "additionalProperties": false
+    },
+    "PublicTextOwner": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "face_revision",
+                "qa_version",
+                "cr_clause",
+                "product_family",
+                "product",
+                "keyword"
+              ]
+            },
+            "id": {
+              "$ref": "#/$defs/ID"
+            }
+          },
+          "required": [
+            "kind",
+            "id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "printing_face"
+            },
+            "id": {
+              "$ref": "#/$defs/ID"
+            },
+            "face_id": {
+              "$ref": "#/$defs/ID"
+            }
+          },
+          "required": [
+            "kind",
+            "id",
+            "face_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "vocabulary"
+            },
+            "vocabulary_kind": {
+              "$ref": "#/$defs/Code"
+            },
+            "code": {
+              "$ref": "#/$defs/Code"
+            }
+          },
+          "required": [
+            "kind",
+            "vocabulary_kind",
+            "code"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "AnnotationReference": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "glossary"
+            },
+            "key": {
+              "$ref": "#/$defs/ID"
+            }
+          },
+          "required": [
+            "kind",
+            "key"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "vocabulary"
+            },
+            "key": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Code"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "kind",
+            "key"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "card_name"
+            },
+            "term_id": {
+              "$ref": "#/$defs/ID"
+            }
+          },
+          "required": [
+            "kind",
+            "term_id"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ExplanationReference": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "keyword",
+            "cr_clause",
+            "ruling_revision"
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/ID"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "AnnotationRange": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/UInt"
+        },
+        {
+          "$ref": "#/$defs/UInt"
+        }
+      ],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2,
+      "x-columns": [
+        "start",
+        "end"
+      ],
+      "x-types": [
+        {
+          "scalar": "UInt"
+        },
+        {
+          "scalar": "UInt"
+        }
+      ]
+    },
+    "Annotation": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/UInt"
+        },
+        {
+          "$ref": "#/$defs/AnnotationReference"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AnnotationRange"
+          },
+          "minItems": 1
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Bool"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      ],
+      "items": false,
+      "minItems": 4,
+      "maxItems": 4,
+      "x-columns": [
+        "ordinal",
+        "reference",
+        "ranges",
+        "bold"
+      ],
+      "x-types": [
+        {
+          "scalar": "UInt"
+        },
+        {
+          "json": "AnnotationReference"
+        },
+        {
+          "array": {
+            "ref": "AnnotationRange"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "Bool"
+          }
+        }
+      ]
+    },
+    "annotation_set": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/AnnotationID"
+        },
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Annotation"
+          }
+        }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3,
+      "x-columns": [
+        "id",
+        "text_unit_id",
+        "occurrences"
+      ],
+      "x-types": [
+        {
+          "scalar": "ID"
+        },
+        {
+          "scalar": "ID"
+        },
+        {
+          "array": {
+            "ref": "Annotation"
+          }
+        }
+      ],
+      "x-primary-key": [
+        "id"
+      ]
+    },
+    "PublicTextPointer": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/PublicTextOwner"
+        },
+        {
+          "$ref": "#/$defs/Field"
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UInt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3,
+      "x-columns": [
+        "owner",
+        "field",
+        "ordinal"
+      ],
+      "x-types": [
+        {
+          "json": "PublicTextOwner"
+        },
+        {
+          "enum": [
+            "name",
+            "effect",
+            "flavor",
+            "question",
+            "answer",
+            "section",
+            "label",
+            "action_label"
+          ]
+        },
+        {
+          "nullable": {
+            "scalar": "UInt"
+          }
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "prefixItems": [
+              {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "face_revision"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "section"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "printing_face"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "section"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "qa_version"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {
+                "enum": [
+                  "question",
+                  "answer"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "cr_clause"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {
+                "enum": [
+                  "effect"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "vocabulary",
+                      "product_family",
+                      "product"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {
+                "enum": [
+                  "label"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "keyword"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {
+                "enum": [
+                  "label",
+                  "effect",
+                  "action_label"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {},
+              {
+                "enum": [
+                  "section",
+                  "action_label"
+                ]
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {},
+              {
+                "$ref": "#/$defs/UInt"
+              }
+            ]
+          },
+          "else": {
+            "prefixItems": [
+              {},
+              {},
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "field_annotation": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/PublicTextOwner"
+        },
+        {
+          "$ref": "#/$defs/Field"
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UInt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "$ref": "#/$defs/AnnotationID"
+        }
+      ],
+      "items": false,
+      "minItems": 4,
+      "maxItems": 4,
+      "x-columns": [
+        "owner",
+        "field",
+        "ordinal",
+        "annotation_set_id"
+      ],
+      "x-types": [
+        {
+          "json": "PublicTextOwner"
+        },
+        {
+          "enum": [
+            "name",
+            "effect",
+            "flavor",
+            "question",
+            "answer",
+            "section",
+            "label",
+            "action_label"
+          ]
+        },
+        {
+          "nullable": {
+            "scalar": "UInt"
+          }
+        },
+        {
+          "scalar": "ID"
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "prefixItems": [
+              {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "face_revision"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "section"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "printing_face"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "section"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "qa_version"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {
+                "enum": [
+                  "question",
+                  "answer"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "cr_clause"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {
+                "enum": [
+                  "effect"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "vocabulary",
+                      "product_family",
+                      "product"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {
+                "enum": [
+                  "label"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "keyword"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {
+                "enum": [
+                  "label",
+                  "effect",
+                  "action_label"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {},
+              {
+                "enum": [
+                  "section",
+                  "action_label"
+                ]
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {},
+              {
+                "$ref": "#/$defs/UInt"
+              }
+            ]
+          },
+          "else": {
+            "prefixItems": [
+              {},
+              {},
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      ],
+      "x-primary-key": [
+        "owner",
+        "field",
+        "ordinal"
+      ]
+    },
+    "annotation_concept": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "enum": [
+            "keyword",
+            "ability",
+            "trait",
+            "rule_term",
+            "card_name"
+          ]
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExplanationReference"
+          },
+          "uniqueItems": true
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ID"
+          },
+          "uniqueItems": true
+        }
+      ],
+      "items": false,
+      "minItems": 4,
+      "maxItems": 4,
+      "x-columns": [
+        "id",
+        "category",
+        "explanations",
+        "card_ids"
+      ],
+      "x-types": [
+        {
+          "scalar": "ID"
+        },
+        {
+          "enum": [
+            "keyword",
+            "ability",
+            "trait",
+            "rule_term",
+            "card_name"
+          ]
+        },
+        {
+          "array": {
+            "json": "ExplanationReference"
+          }
+        },
+        {
+          "array": {
+            "scalar": "ID"
+          }
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "prefixItems": [
+              {},
+              {
+                "not": {
+                  "const": "card_name"
+                }
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {},
+              {},
+              {
+                "maxItems": 0
+              }
+            ]
+          }
+        }
+      ],
+      "x-primary-key": [
+        "id"
+      ]
+    },
+    "translation": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "$ref": "#/$defs/Lang"
+        },
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "enum": [
+            "official",
+            "project",
+            "machine"
+          ]
+        },
+        {
+          "enum": [
+            "sve_official",
+            "digital_official",
+            "unofficial"
+          ]
+        },
+        {
+          "$ref": "#/$defs/Bool"
+        },
+        {
+          "$ref": "#/$defs/AnnotationID"
+        }
+      ],
+      "items": false,
+      "minItems": 8,
+      "maxItems": 8,
+      "x-columns": [
+        "id",
+        "source_unit_id",
+        "target_lang",
+        "text_unit_id",
+        "origin",
+        "authority",
+        "low_confidence",
+        "annotation_set_id"
+      ],
+      "x-types": [
+        {
+          "scalar": "ID"
+        },
+        {
+          "scalar": "ID"
+        },
+        {
+          "scalar": "Lang"
+        },
+        {
+          "scalar": "ID"
+        },
+        {
+          "enum": [
+            "official",
+            "project",
+            "machine"
+          ]
+        },
+        {
+          "enum": [
+            "sve_official",
+            "digital_official",
+            "unofficial"
+          ]
+        },
+        {
+          "scalar": "Bool"
+        },
+        {
+          "scalar": "ID"
+        }
+      ],
+      "x-primary-key": [
+        "id"
+      ]
+    },
+    "Translation": {
+      "$ref": "#/$defs/translation"
+    },
+    "FieldTranslation": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/Field"
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UInt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "$ref": "#/$defs/Lang"
+        },
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "enum": [
+            "own_source",
+            "jp_source",
+            "official_counterpart"
+          ]
+        },
+        {
+          "$ref": "#/$defs/PublicTextPointer"
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PublicTextPointer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      ],
+      "items": false,
+      "minItems": 7,
+      "maxItems": 7,
+      "x-columns": [
+        "field",
+        "ordinal",
+        "target_lang",
+        "translation_id",
+        "basis",
+        "source",
+        "counterpart"
+      ],
+      "x-types": [
+        {
+          "enum": [
+            "name",
+            "effect",
+            "flavor",
+            "question",
+            "answer",
+            "section",
+            "label",
+            "action_label"
+          ]
+        },
+        {
+          "nullable": {
+            "scalar": "UInt"
+          }
+        },
+        {
+          "scalar": "Lang"
+        },
+        {
+          "scalar": "ID"
+        },
+        {
+          "enum": [
+            "own_source",
+            "jp_source",
+            "official_counterpart"
+          ]
+        },
+        {
+          "ref": "PublicTextPointer"
+        },
+        {
+          "nullable": {
+            "ref": "PublicTextPointer"
+          }
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "prefixItems": [
+              {
+                "enum": [
+                  "section",
+                  "action_label"
+                ]
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {
+                "$ref": "#/$defs/UInt"
+              }
+            ]
+          },
+          "else": {
+            "prefixItems": [
+              {},
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {},
+              {},
+              {},
+              {},
+              {
+                "const": "official_counterpart"
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {},
+              {
+                "enum": [
+                  "ja",
+                  "en"
+                ]
+              },
+              {},
+              {},
+              {},
+              {
+                "$ref": "#/$defs/PublicTextPointer"
+              }
+            ]
+          },
+          "else": {
+            "prefixItems": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {},
+              {},
+              {},
+              {},
+              {
+                "const": "jp_source"
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor"
+                ]
+              },
+              {
+                "type": "null"
+              },
+              {
+                "const": "zh-Hant"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "cr_clause": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "$ref": "#/$defs/Text"
+        },
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FieldTranslation"
+          }
+        }
+      ],
+      "items": false,
+      "minItems": 5,
+      "maxItems": 5,
+      "x-columns": [
+        "id",
+        "cr_version_id",
+        "number",
+        "text_unit_id",
+        "translations"
+      ],
+      "x-types": [
+        {
+          "scalar": "ID"
+        },
+        {
+          "scalar": "ID"
+        },
+        {
+          "scalar": "Text"
+        },
+        {
+          "scalar": "ID"
+        },
+        {
+          "array": {
+            "ref": "FieldTranslation"
+          }
+        }
+      ],
+      "x-primary-key": [
+        "id"
+      ]
+    }
+  }
+}

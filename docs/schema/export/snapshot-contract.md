@@ -1,5 +1,12 @@
 # 快照機器契約與共用樣本
 
+**狀態界線：** 本文既有套件資源與 reader 是 2.0.0。3.0.0 的新增／變更欄位定義於
+[public-annotation.schema.json](public-annotation.schema.json)，固定正反例為
+[public-annotation-cases.json](public-annotation-cases.json)，讀法及真實 reader 接線依[案例規格](public-annotation-cases.md)。
+這是可獨立驗證的元件 Schema，尚不是完整 3.0 snapshot Schema 或已啟用的 profile。
+[#498](https://github.com/gbaian10/sve-kit/issues/498) 須將其欄序、形狀及語義檢查整合到唯一套件 Schema／Python／TS reader，同步替換完整 golden；
+不可在執行期讀取 Markdown，亦不可把元件 Schema 驗過當作整份快照驗收。
+
 欄位語意依 [快照格式](snapshot-format.md)，傳輸與版本規則依 [傳輸契約](snapshot-transport.md)。機器資源位於 `carddb/src/sve_carddb/contracts/schema/v2/contract.schema.json`，隨 carddb wheel 打包；採 JSON Schema Draft 2020-12，識別為 `urn:sve-kit:snapshot:2.0.0`，所有 `$ref` 都在檔內。
 
 此資源釘候選 format `2.0.0`、bucket_count=64；它是可核算的契約配置，不宣稱正式容量凍結。正式配置仍依傳輸契約 §5 量測；更換配置須依其版本規則同步 Schema、樣本與 reader 支援表。
@@ -9,8 +16,8 @@
 **使用者決定 2026-10-10（JP 唯一一般來源，#495）**：既有 Schema 的 `shared_jp_unchecked` 是 2026-10-01 加入的切換前 basis。
 新來源政策依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)，
 不再以已知 divergence 或日英段落數不同禁止有效 JP 繁中；段落不同取完整 JP 效果，不按 EN ordinal 拼接。
-新版 basis、annotation、版本、golden 與 Python／TS reader 的同步責任交
-[#496](https://github.com/gbaian10/sve-kit/issues/496)／#498，本段不改現有 wire，也不宣稱 reader 已支援新政策。
+新版 basis、annotation、版本及必要檢查已由[公開 annotation 契約](public-annotation.md)固定；
+完整 golden 與 Python／TS reader 的同步實作交 #498。本單不改現有 2.0 wire，也不宣稱 reader 已支援新政策。
 繁中顯示不建立 aligned、官方 counterpart 或自動支援資格。
 
 **使用者核可 2026-10-01**：`product.product_type` 的既有 tuple 位置可為 null，與官方商品無 exact confirmed `family.public_code` 型別對應時的 DB 欄位一致；人工 product 輸入仍必填 Code。本候選 format 尚無正式發布快照，直接同步 nullable Schema、type descriptor 與獨立 golden，維持候選 `2.0.0`；正式凍結後的同類相容性變更須另依傳輸契約升版與同步 reader。
