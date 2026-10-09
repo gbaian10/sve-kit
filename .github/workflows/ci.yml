@@ -67,7 +67,7 @@ jobs:
               - 'dsl/**'
               - 'tests/**'
               - 'authored/**'
-              - 'docs/m0/*.yaml'
+              - 'tests/engine/*.yaml'
             web:
               - 'sim/web/**'
               - 'carddb/src/sve_carddb/contracts/schema/**' # the web reader validates against the published schema

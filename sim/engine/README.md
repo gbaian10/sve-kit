@@ -37,7 +37,7 @@ cargo run --locked --release -p sve-engine --bin sve-prototype -- /path/to/cards
 ```
 
 `gate` runs every public scenario and fails unless the result matches
-[docs/m0/known-failures.yaml](../../docs/m0/known-failures.yaml) exactly.
+[tests/engine/known-failures.yaml](../../tests/engine/known-failures.yaml) exactly.
 
 Successful CLI exit means reports were written; inspect their statuses for failures.
 
@@ -60,10 +60,10 @@ cargo llvm-cov --locked --workspace --fail-under-lines 90
 
 The G1 regression requires all 41 scenarios to pass every checkpoint. The gate
 test requires all 706 public scenarios to pass or be listed in
-`docs/m0/known-failures.yaml`, which is currently empty. Pending choices include
+`tests/engine/known-failures.yaml`, which is currently empty. Pending choices include
 each legal parameter combination, and resolution events follow effect completion
 and removal from the resolution zone. Remaining engine errors and open questions
-are tracked in [docs/m0/known-errors.md](../../docs/m0/known-errors.md).
+are tracked in [docs/sim/known-errors.md](../../docs/sim/known-errors.md).
 
 `Catalog::load` reads `authored/engine-rules/index.yaml` and verifies its exact
 snapshot SHA-256. Its default identity boundary is explicitly `legacy-jp`.

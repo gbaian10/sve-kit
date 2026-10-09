@@ -57,7 +57,8 @@ fn main() -> Result<()> {
         return rules(&catalog, &root, &output, selection_or_known.as_deref());
     }
     if mode == Mode::Gate {
-        let known = selection_or_known.unwrap_or_else(|| root.join("docs/m0/known-failures.yaml"));
+        let known =
+            selection_or_known.unwrap_or_else(|| root.join("tests/engine/known-failures.yaml"));
         return strict_gate(&catalog, &root, &output, &known);
     }
     if mode == Mode::Validate {

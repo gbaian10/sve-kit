@@ -1,5 +1,5 @@
 //! M1: load-time rejection, the engine behaviours it made explicit, and the R1–R3
-//! properties from the design cross-review (docs/m0/known-errors.md).
+//! properties from the design cross-review (docs/sim/known-errors.md).
 
 #![expect(
     clippy::unwrap_used,

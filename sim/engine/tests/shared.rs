@@ -49,7 +49,7 @@ fn every_shared_scenario_passes_or_is_a_listed_known_failure() {
         return;
     };
     let questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
-    let known = load_known_failures(&root().join("docs/m0/known-failures.yaml")).unwrap();
+    let known = load_known_failures(&root().join("tests/engine/known-failures.yaml")).unwrap();
     let reports = run(
         &mut Adapter::new(catalog),
         &questions,
@@ -69,9 +69,10 @@ fn authored_yaml_loads_or_is_a_listed_rejection() {
     let Some(catalog) = catalog() else {
         return;
     };
-    let listed: serde_json::Value =
-        serde_saphyr::from_str(&read_to_string(root().join("docs/m0/rejected-yaml.yaml")).unwrap())
-            .unwrap();
+    let listed: serde_json::Value = serde_saphyr::from_str(
+        &read_to_string(root().join("tests/engine/rejected-yaml.yaml")).unwrap(),
+    )
+    .unwrap();
     let mut expected = listed["rejected"]
         .as_array()
         .unwrap()

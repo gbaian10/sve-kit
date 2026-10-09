@@ -13,7 +13,7 @@
 | 題本與契約 | main `b96f6d8`（契約 v2.1 第 10 節 1～36 條），commit `c62fce6` 原樣搬入 `tests/` |
 | 卡表快照 | `cards.jsonl`，SHA-256 `4c7b98b7…0c632`（與封存相同） |
 | 起點 | 題本 `700511a` 時 697／8／0／1（第三次封存報告）；換成 `b96f6d8` 後 692 pass／12 fail／2 adapter-error，與中立重跑一致 |
-| 閘門 | `sve-prototype SNAPSHOT . gate`，或共用測試 `every_shared_scenario_passes_or_is_a_listed_known_failure`；已知失敗清單 `docs/m0/known-failures.yaml` |
+| 閘門 | `sve-prototype SNAPSHOT . gate`，或共用測試 `every_shared_scenario_passes_or_is_a_listed_known_failure`；已知失敗清單 `tests/engine/known-failures.yaml` |
 | 目前結果 | 706／706 pass，已知失敗清單為空；G1 41／41、回放 8、輔助 7、AI 25 |
 
 起點的 8 fail＋1 adapter-error 是舊題本 `700511a` 的結果。其中 BP10-050 A2、BP19-042、
