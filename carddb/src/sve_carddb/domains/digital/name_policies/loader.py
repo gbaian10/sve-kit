@@ -18,8 +18,7 @@ def model[T: RecordData](kind: type[T], raw: JsonValue) -> T:
     """Do not echo source-bearing validation values in CLI failures."""
     try:
         if isinstance(raw, dict) and any(
-            key.endswith("_format") and type(value) is not int
-            for key, value in raw.items()
+            key == "format" and type(value) is not int for key, value in raw.items()
         ):
             raise ValueError("Policy format must be an integer")
         return kind.model_validate_json(canonical(raw))
@@ -70,35 +69,33 @@ class Snapshot:
 
 def load(root: Path, revision: str) -> Snapshot:
     """Read only current policies in the dedicated data area."""
-    directory = root / "digital-name-policies"
+    directory = root / "digital/policies"
     require_directory(root, directory)
     files = []
     current_names = []
     links = []
-    for group in sorted(directory.glob("*")):
-        if group.is_symlink():
-            raise ValueError("Symlink digital-name policy input")
-        if not group.is_dir() or not _portable(group.name):
-            continue
-        path = group / "current.yaml"
-        if not path.exists():
+    for purpose, filename in (
+        ("names", "names.yaml"),
+        ("links", "links.yaml"),
+    ):
+        path = directory / filename
+        # Optional purposes stay absent; dangling links still fail at the file boundary.
+        if not path.exists() and not path.is_symlink():
             continue
         exact, content = read(path, root=root)
         value = object_value(JSON_VALUE.validate_json(content))
         policy = (
             model(LinkPolicy, value)
-            if value.get("purpose") == "links"
+            if purpose == "links"
             else model(CurrentPolicy, value)
         )
-        if policy.policy_id != group.name:
-            raise ValueError("Digital-name policy identity mismatch")
+        if policy.purpose != purpose:
+            raise ValueError("Digital-name policy purpose mismatch")
         files.append((path.relative_to(root).as_posix(), exact))
         if isinstance(policy, LinkPolicy):
             links.append(policy)
         else:
             current_names.append(policy)
-    if len(current_names) > 1 or len(links) > 1:
-        raise ValueError("Digital-name policy purpose must select at most one policy")
     return Snapshot(
         revision, tuple(files), tuple(current_names), links[0] if links else None
     )

@@ -81,19 +81,19 @@ def test_missing_file_is_not_an_empty_set(tmp_path: Path) -> None:
 @pytest.mark.parametrize("symlink_root", [False, True], ids=["file", "authored-root"])
 def test_symlinked_crop_input_is_rejected(tmp_path: Path, symlink_root: bool) -> None:
     external = tmp_path / "external"
-    external.mkdir()
-    (external / "image-crops.yaml").write_text("[]\n")
+    (external / "images").mkdir(parents=True)
+    (external / "images/crops.yaml").write_text("[]\n")
     authored = tmp_path / "authored"
     authored.mkdir()
+    (authored / "images").mkdir()
     if symlink_root:
+        (authored / "images").rmdir()
         authored.rmdir()
         authored.symlink_to(external, target_is_directory=True)
     else:
-        (authored / "image-crops.yaml").symlink_to(external / "image-crops.yaml")
+        (authored / "images/crops.yaml").symlink_to(external / "images/crops.yaml")
 
-    with pytest.raises(
-        ValueError, match=r"^Symlinks are forbidden in image crop inputs$"
-    ):
+    with pytest.raises(ValueError, match=r"^Symlink authored data area$"):
         load_image_crops(authored)
 
 
@@ -124,9 +124,13 @@ def test_record_strict_fields(
     row = record(descriptor) | {field: value}
     with pytest.raises(
         ValueError,
-        match="^" + re.escape("Invalid image crop fields: " + location) + "$",
+        match="^" + re.escape("Invalid image crop fields: records." + location) + "$",
     ):
-        parse_crops(json.dumps([row]).encode())
+        parse_crops(
+            json.dumps(
+                {"format": 1, "kind": "image_crop_overrides", "records": [row]}
+            ).encode()
+        )
 
 
 @pytest.mark.parametrize(

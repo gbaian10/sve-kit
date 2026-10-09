@@ -321,11 +321,11 @@ class Transition(RecordData):
 
 
 class Shard(RecordData):
-    identity_transition_format: Literal[1]
+    format: Literal[1]
     kind: Literal["identity_transition_shard"]
     records: Annotated[tuple[Transition, ...], Field(min_length=1, max_length=1)]
 
-    @field_validator("identity_transition_format", mode="before")
+    @field_validator("format", mode="before")
     @classmethod
     def _format(cls, value: object) -> object:
         if type(value) is not int:

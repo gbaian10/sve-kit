@@ -9,7 +9,7 @@ from pydantic import JsonValue
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.core.json import array, canonical, digest, object_value
+from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.core.provenance import BuildContext
 from sve_carddb.domains.catalog.adoption_loader import load_adoptions
 from sve_carddb.domains.registry.storage import read_yaml
@@ -33,7 +33,7 @@ def test_current_catalog_has_provenance_without_adoption_decisions(
     current_baseline: Case,
 ) -> None:
     case = current_baseline
-    snapshot = load_adoptions(case.root, entry="catalog-adoptions")
+    snapshot = load_adoptions(case.root, entry="catalog/adoptions")
     assert len(snapshot.current_records()) == 4
     with create_database(compile_build()) as db:
         with db.transaction():
@@ -61,7 +61,7 @@ def vocabulary_with_label(
     root = tmp_path / "repository"
     shutil.copytree(base.repository, root)
     case = replace(base, repository=root, root=root / "authored")
-    path = "catalog-adoptions/vocabulary/shared/001.yaml"
+    path = "catalog/adoptions/vocabulary/001.yaml"
     raw = object_value(read_yaml(case.root / path))
     row = next(
         object_value(r)
@@ -70,10 +70,6 @@ def vocabulary_with_label(
     )
     object_value(object_value(row["data"])["value"])["translations"] = [label]
     (case.root / path).write_bytes(canonical(raw))
-    index_path = case.root / "catalog-adoptions/index.yaml"
-    index = object_value(read_yaml(index_path))
-    object_value(index["includes"])[path] = digest(canonical(raw))
-    index_path.write_bytes(canonical(index))
     return replace(case, revision=commit(root))
 
 
@@ -128,7 +124,7 @@ def test_label_translation_cannot_replace_the_japanese_base(
         {"lang": lang, "text": "x", "origin": "machine", "low_confidence": False},
     )
     with pytest.raises(ValueError, match="Invalid"):
-        load_adoptions(case.root, entry="catalog-adoptions").current_records()
+        load_adoptions(case.root, entry="catalog/adoptions").current_records()
 
 
 def test_current_fallback_is_still_checked(
@@ -137,7 +133,7 @@ def test_current_fallback_is_still_checked(
     root = tmp_path / "repository"
     shutil.copytree(current_baseline.repository, root)
     case = replace(current_baseline, repository=root, root=root / "authored")
-    path = "catalog-adoptions/languages/shared/001.yaml"
+    path = "catalog/adoptions/languages/001.yaml"
     raw = object_value(read_yaml(case.root / path))
     row = next(
         object_value(r)
@@ -146,10 +142,6 @@ def test_current_fallback_is_still_checked(
     )
     object_value(object_value(row["data"])["value"])["fallback_order"] = ["zh-Hant"]
     (case.root / path).write_bytes(canonical(raw))
-    index_path = case.root / "catalog-adoptions/index.yaml"
-    index = object_value(read_yaml(index_path))
-    object_value(index["includes"])[path] = digest(canonical(raw))
-    index_path.write_bytes(canonical(index))
     case = replace(case, revision=commit(root))
     with (
         create_database(compile_build()) as db,
@@ -198,7 +190,7 @@ def test_native_current_entry_rejects_unpinned_catalog(
         build = BuildContext.from_inputs(build.program_revision, {})
         message = "^Build configuration does not pin adoption inputs$"
     else:
-        path = case.root / "catalog-adoptions/languages/shared/001.yaml"
+        path = case.root / "catalog/adoptions/languages/001.yaml"
         path.write_bytes(path.read_bytes() + b"\n")
         message = "^Adoption bytes differ from immutable authored revision$"
     with create_database(compile_build()) as db:
@@ -232,7 +224,7 @@ def test_current_ui_fallback_closure_and_policy(
     root = tmp_path / "repository"
     shutil.copytree(current_baseline.repository, root)
     case = replace(current_baseline, repository=root, root=root / "authored")
-    path = "catalog-adoptions/languages/shared/001.yaml"
+    path = "catalog/adoptions/languages/001.yaml"
     payload = object_value(read_yaml(case.root / path))
     rows = array(payload["records"])
     if mutation == "unregistered":
@@ -261,10 +253,6 @@ def test_current_ui_fallback_closure_and_policy(
             }[mutation]
         )
     (case.root / path).write_bytes(canonical(payload))
-    index_path = case.root / "catalog-adoptions/index.yaml"
-    index = object_value(read_yaml(index_path))
-    object_value(index["includes"])[path] = digest(canonical(payload))
-    index_path.write_bytes(canonical(index))
     case = replace(case, revision=commit(root))
     with create_database(compile_build()) as db:
         with pytest.raises(ValueError, match="^" + message + "$"), db.transaction():

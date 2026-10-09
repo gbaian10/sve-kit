@@ -116,7 +116,7 @@ def _authored(db: Database, plan: PreviewPlan, revision: str) -> dict[str, str]:
                 "sha256": shard.content_hash,
                 "authored_path": "authored/" + shard.path,
                 "authored_revision": revision,
-                "parser_version": "registry-envelope-v2",
+                "parser_version": "registry-envelope-v3",
             },
         )
     return sources

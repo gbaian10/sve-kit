@@ -224,7 +224,7 @@ def test_all_symlink_inputs_are_rejected(
 @pytest.mark.parametrize(
     "value",
     [
-        "identity_transition_format: 1\nidentity_transition_format: 1\n",
+        "format: 1\nidentity_transition_format: 1\n",
         "a: &a [*a]\n",
         "a: !custom text\n",
         "a: 1\n---\nb: 2\n",
@@ -275,11 +275,11 @@ def test_explicit_envelope_fields(
 ) -> None:
     raw = pack(copy.deepcopy(merge_record))
     if damage in {"missing_format", "missing_kind"}:
-        raw.pop("identity_transition_format" if damage == "missing_format" else "kind")
+        raw.pop("format" if damage == "missing_format" else "kind")
     elif damage == "extra":
         raw["extra"] = None
     else:
-        raw["identity_transition_format"] = {
+        raw["format"] = {
             "bool_format": True,
             "float_format": 1.0,
             "unknown_format": 2,

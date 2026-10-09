@@ -57,7 +57,7 @@ def pending(normalized_hash: str = ABSENT, role: Role = "body") -> CandidateReco
 
 def wire(record: CandidateRecord) -> dict[str, JsonValue]:
     return {
-        "translation_authored_format": 2,
+        "format": 2,
         "kind": "translation_shard",
         "records": [record.model_dump(mode="json", round_trip=True)],
     }
@@ -131,14 +131,12 @@ def test_candidate_dedicated_path_is_checked_by_both_readers(
 ) -> None:
     record = pending()
     raw = canonical(wire(record))
-    validate_foreign(
-        "translations/templates/template_translation_candidate/001.yaml", raw
-    )
+    validate_foreign("translations/templates/candidates/001.yaml", raw)
     with pytest.raises(
         ValueError,
         match=r"^Current template candidates require their dedicated shard area$",
     ):
-        validate_foreign("translations/templates/template_translation/001.yaml", raw)
+        validate_foreign("translations/templates/values/001.yaml", raw)
     mixed = wire(record)
     mixed["records"] = [
         record.model_dump(mode="json", round_trip=True),
@@ -149,7 +147,7 @@ def test_candidate_dedicated_path_is_checked_by_both_readers(
         match=r"^Current template candidates require their dedicated shard area$",
     ):
         validate_foreign(
-            "translations/templates/template_translation_candidate/001.yaml",
+            "translations/templates/candidates/001.yaml",
             canonical(mixed),
         )
 

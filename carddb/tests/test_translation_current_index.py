@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 def test_shared_working_tree_without_index_or_git(tmp_path: Path) -> None:
     authored = tmp_path / "authored"
     write(authored, {"translations/glossary/concepts/007.yaml": envelope([term()])})
-    (authored / "translations/index.yaml").unlink()
+    assert not (authored / "translations/index.yaml").exists()
     glossary = load_glossary(authored)
     templates = read(tmp_path, "a" * 40)
     assert templates.content == glossary.closure

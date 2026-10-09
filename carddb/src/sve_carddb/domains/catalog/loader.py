@@ -135,7 +135,7 @@ def populate(  # ruff: ignore[complex-structure,too-many-branches] -- indexed pr
                     "sha256": digest(shard.exact),
                     "authored_path": "authored/" + shard.path,
                     "authored_revision": revision,
-                    "parser_version": "catalog-current-v2",
+                    "parser_version": "catalog-current-v3",
                 },
                 ("id",),
             )

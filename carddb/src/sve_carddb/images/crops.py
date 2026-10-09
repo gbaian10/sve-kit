@@ -2,16 +2,11 @@
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Literal
 
-from pydantic import (
-    Field,
-    TypeAdapter,
-    ValidationError,
-    field_validator,
-    model_validator,
-)
+from pydantic import Field, ValidationError, field_validator, model_validator
 
+from sve_carddb.core.authored import check_path
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import Hash, RecordData
 from sve_carddb.core.regions import Region
@@ -24,7 +19,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.ingest.archive.source_archive import Descriptor
 
-FILE = "image-crops.yaml"
+FILE = "images/crops.yaml"
 HexHash = Annotated[str, Field(pattern=r"^[0-9a-f]{64}\Z")]
 Nonnegative = Annotated[int, Field(ge=0)]
 Positive = Annotated[int, Field(gt=0)]
@@ -70,7 +65,17 @@ class CropRecord(RecordData):
         return CropBox(self.left, self.top, self.width, self.height)
 
 
-_RECORDS = TypeAdapter(tuple[CropRecord, ...])
+class CropOverrides(RecordData):
+    format: Literal[1]
+    kind: Literal["image_crop_overrides"]
+    records: tuple[CropRecord, ...]
+
+    @field_validator("format", mode="before")
+    @classmethod
+    def _format(cls, value: object) -> object:
+        if type(value) is not int:
+            raise ValueError("Image crop format must be an integer")
+        return value
 
 
 @dataclass(frozen=True)
@@ -97,7 +102,7 @@ def parse_crops(data: bytes) -> tuple[CropRecord, ...]:
         if len(data) >= MAX_BYTES:
             raise ValueError("Oversized image crop YAML")
         raw = JSON_VALUE.validate_python(parse_yaml(data), strict=True)
-        return _RECORDS.validate_json(canonical(raw))
+        return CropOverrides.model_validate_json(canonical(raw)).records
     except ValidationError as error:
         details = "; ".join(
             ".".join(map(str, issue["loc"])) + ":" + issue["type"]
@@ -109,8 +114,7 @@ def parse_crops(data: bytes) -> tuple[CropRecord, ...]:
 def load_image_crops(authored: Path) -> ImageCrops:
     """Read the working-tree file, so an uncommitted box edit applies to the next build."""
     path = authored / FILE
-    if authored.is_symlink() or path.is_symlink():
-        raise ValueError("Symlinks are forbidden in image crop inputs")
+    check_path(authored, path)
     records: dict[tuple[str, str], CropRecord] = {}
     for record in parse_crops(path.read_bytes()):
         if record.key in records:

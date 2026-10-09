@@ -111,7 +111,7 @@ def test_omitted_defaults_and_withdrawal_survive_yaml_round_trip(
     target = choice(value=None)
     target.update(origin="machine", low_confidence=True)
     raw: dict[str, JsonValue] = {
-        "translation_authored_format": 2,
+        "format": 2,
         "kind": "translation_shard",
         "records": [concept, target],
     }

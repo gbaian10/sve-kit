@@ -73,7 +73,7 @@ Use `import_preview(db, plan, authored_revision=<full Git SHA>, build=build_cont
 new build database, or `populate_preview` inside the transaction owned by
 `rebuild_database`. The caller supplies a stable, verified authored checkout and
 its full revision. Shard source IDs pin revision, path and the canonical envelope
-hash (`registry-envelope-v2`); `sha256` is the shard's canonical JSON content
+hash (`registry-envelope-v3`); `sha256` is the shard's canonical JSON content
 hash, not YAML serialization bytes. Every original shard is recorded, including
 excluded regions and deferred corrections. Matched and mismatched raw evidence
 stays in the plan's projection results.
@@ -112,7 +112,7 @@ pipeline still needs product, text, public projection and capability validation.
 `Source` lives in `sve_carddb.core.provenance`. It retains each use's parser and
 sealed archive pin (store, batch, descriptor and first receipt); `build.source_rows.source_values(source)`
 projects shared raw metadata with `parser_version=NULL`. Authored envelope
-sources keep `registry-envelope-v2`. No source ID is derived from a parser.
+sources keep `registry-envelope-v3`. No source ID is derived from a parser.
 `FrozenJP` and product evidence use the same `FrozenSources` metadata reader.
 
 Both import and populate require an explicit `BuildContext` and return an

@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from sve_carddb.core.models import Hash, RecordData, Text
 from sve_carddb.domains.catalog.adoption_models import Batch
@@ -84,7 +84,15 @@ class Content(RecordData):
 
 
 class Policy(RecordData):
-    digital_name_policy_format: Literal[2]
+    format: Literal[2]
+
+    @field_validator("format", mode="before")
+    @classmethod
+    def _format(cls, value: object) -> object:
+        if type(value) is not int:
+            raise ValueError("Authored format must be an integer")
+        return value
+
     kind: Literal["digital_name_policy"]
     policy_id: PolicyId
     purpose: Literal["names"]
@@ -136,7 +144,15 @@ class LinkContent(RecordData):
 
 
 class LinkPolicy(RecordData):
-    digital_name_policy_format: Literal[2]
+    format: Literal[2]
+
+    @field_validator("format", mode="before")
+    @classmethod
+    def _format(cls, value: object) -> object:
+        if type(value) is not int:
+            raise ValueError("Authored format must be an integer")
+        return value
+
     kind: Literal["digital_name_policy"]
     policy_id: PolicyId
     purpose: Literal["links"]

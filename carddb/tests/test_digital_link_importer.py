@@ -91,7 +91,7 @@ def test_real_entry_proves_relation_name_and_no_coverage(
             for r in db.rows("decision_source")
             if r.values["decision_id"] == link["decision_id"]
         )
-        assert shard["locator"] == "digital-links/links/synthetic/001.yaml"
+        assert shard["locator"] == "digital/links/synthetic/001.yaml"
         face = next(
             row.values
             for row in db.rows("digital_face")

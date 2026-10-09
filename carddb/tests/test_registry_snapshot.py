@@ -163,9 +163,9 @@ def test_explicit_wire_envelopes(
     raw = read_yaml(path)
     assert isinstance(raw, dict)
     if damage == "bool_format":
-        raw["authored_format"] = True
+        raw["format"] = True
     else:
-        raw.pop("authored_format" if damage == "missing_format" else "kind")
+        raw.pop("format" if damage == "missing_format" else "kind")
     with path.open("w") as stream:
         yaml_emitter().dump(raw, stream)
     with pytest.raises(ValueError, match="envelope fields or format"):

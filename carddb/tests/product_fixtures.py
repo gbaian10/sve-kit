@@ -99,7 +99,7 @@ def inclusion(printing_id: str) -> Object:
 
 def envelope(records: list[Object]) -> Object:
     return {
-        "product_authored_format": 1,
+        "format": 1,
         "kind": "product_shard",
         "records": list[JsonValue](records),
     }

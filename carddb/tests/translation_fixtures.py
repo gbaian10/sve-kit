@@ -70,7 +70,7 @@ def choice(
 def envelope(records: list[dict[str, JsonValue]]) -> dict[str, JsonValue]:
     ordered = records
     return {
-        "translation_authored_format": 2,
+        "format": 2,
         "kind": "translation_shard",
         "records": list[JsonValue](ordered),
     }
@@ -78,12 +78,7 @@ def envelope(records: list[dict[str, JsonValue]]) -> dict[str, JsonValue]:
 
 def write(root: Path, shards: dict[str, dict[str, JsonValue]]) -> None:
     (root / "translations/glossary").mkdir(parents=True, exist_ok=True)
-    index: dict[str, JsonValue] = {
-        "translation_authored_format": 2,
-        "kind": "translation_index",
-        "includes": {p: digest(canonical(v)) for p, v in shards.items()},
-    }
-    for name, value in {"translations/index.yaml": index, **shards}.items():
+    for name, value in shards.items():
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(canonical(value))

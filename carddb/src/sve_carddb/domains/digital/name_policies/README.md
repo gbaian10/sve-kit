@@ -5,9 +5,9 @@ This module reads the editable name and link policies defined by
 applications or receipts. The explicit offline name application is described
 below.
 
-`load(authored, authored_revision)` reads only `digital-name-policies/*/current.yaml`
-from the working tree, once. Policy IDs match their directories and purposes are
-unique; strict YAML, safe paths, file size, types and references remain checked.
+`load(authored, authored_revision)` reads only `digital/policies/names.yaml` and `digital/policies/links.yaml`
+from the working tree, once. Fixed filenames select the names/links purpose; policy IDs retain their
+existing identity and need not match filenames. Purposes are unique; strict YAML, safe paths, file size, types and references remain checked.
 Names hold business conditions and quality fields. Links hold frozen catalogue
 batches and editable exclusions. The same-name rule uses the current code.
 There is no checksum index or runtime-byte gate.

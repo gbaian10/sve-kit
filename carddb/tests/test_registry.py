@@ -589,7 +589,7 @@ def test_confirmed_type_projection_has_field_local_badge(inputs: Inputs) -> None
 def test_official_promotions_are_active_corrections(
     official_snapshot: RegistrySnapshot,
 ) -> None:
-    root = Path(__file__).resolve().parents[2] / "authored/registry/source_correction"
+    root = Path(__file__).resolve().parents[2] / "authored/registry/source-correction"
     assert list((root / "needs_review").rglob("*.yaml")) == []
     promoted = []
     shards = {shard.path: shard for shard in official_snapshot.files.shards}
@@ -676,8 +676,8 @@ def test_index_rejects_cursors_outside_policy(cursor: dict[str, int]) -> None:
 def test_index_rejects_unknown_policy_and_format() -> None:
     with pytest.raises(ValueError, match="Unknown allocation policy"):
         Index(allocation_policy="region-ranges-v0")
-    with pytest.raises(ValueError, match="authored_format"):
-        Index.model_validate({"authored_format": 1, "next_int_id": 1})
+    with pytest.raises(ValueError, match="format"):
+        Index.model_validate({"format": 1, "next_int_id": 1})
 
 
 @pytest.mark.parametrize("damage", ["cross_region", "reserved", "gap", "missing"])

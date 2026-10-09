@@ -18,6 +18,7 @@ from pydantic import (
     Field,
     JsonValue,
     computed_field,
+    field_validator,
     model_validator,
 )
 from ruamel.yaml import YAML
@@ -69,14 +70,30 @@ class Entry(BaseModel):
 
 class Shard(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    authored_format: Literal[1] = 1
+    format: Literal[1] = 1
+
+    @field_validator("format", mode="before")
+    @classmethod
+    def _format(cls, value: object) -> object:
+        if type(value) is not int:
+            raise ValueError("Authored format must be an integer")
+        return value
+
     kind: Literal["registry_shard"] = "registry_shard"
     records: list[Entry]
 
 
 class Index(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
-    authored_format: Literal[2] = 2
+    format: Literal[2] = 2
+
+    @field_validator("format", mode="before")
+    @classmethod
+    def _format(cls, value: object) -> object:
+        if type(value) is not int:
+            raise ValueError("Authored format must be an integer")
+        return value
+
     kind: Literal["registry_index"] = "registry_index"
     allocation_policy: str = ALLOCATION_POLICY
     next_int_id: dict[str, int] = Field(
@@ -212,16 +229,14 @@ def read_base_files(root: Path) -> RegistryFiles:
         return RegistryFiles(canonical(Index().model_dump(mode="json")), ())
     _safe_file(root, path)
     raw_index, index_content = _read_yaml_content(path)
-    _wire_fields(
-        raw_index, 2, {"authored_format", "kind", "allocation_policy", "next_int_id"}
-    )
+    _wire_fields(raw_index, 2, {"format", "kind", "allocation_policy", "next_int_id"})
     Index.model_validate(raw_index)
     shards = []
     keys: set[str] = set()
     for file in files:
         _safe_file(root, file)
         raw, content = _read_yaml_content(file)
-        _wire_fields(raw, 1, {"authored_format", "kind", "records"})
+        _wire_fields(raw, 1, {"format", "kind", "records"})
         shard = Shard.model_validate(raw)
         for entry in shard.records:
             if entry.record_key in keys:
@@ -243,8 +258,8 @@ def _wire_fields(raw: JsonValue, version: int, fields: set[str]) -> None:
     if (
         not isinstance(raw, dict)
         or set(raw) != fields
-        or type(raw.get("authored_format")) is not int
-        or raw["authored_format"] != version
+        or type(raw.get("format")) is not int
+        or raw["format"] != version
     ):
         raise ValueError("Invalid registry envelope fields or format")
 
@@ -318,9 +333,13 @@ def _text(data: dict[str, JsonValue], key: str) -> str:
 
 
 def _area(entry: Entry) -> str:
-    area = "ids" if entry.kind == "card_int_id" else "registry/" + entry.kind
+    area = (
+        "ids"
+        if entry.kind == "card_int_id"
+        else "registry/" + entry.kind.replace("_", "-")
+    )
     if entry.kind == "source_correction":
-        area += "/" + str(entry.data["state"])
+        area += "/" + str(entry.data["state"]).replace("_", "-")
     return area
 
 

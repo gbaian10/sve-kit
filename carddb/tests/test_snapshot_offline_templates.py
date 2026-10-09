@@ -117,11 +117,19 @@ def sources(tmp_path_factory: pytest.TempPathFactory) -> Templates:
         key=lambda r: r.record_key,
     )
     files: dict[str, JsonValue] = {
-        "translations/templates/current/001.yaml": {
-            "translation_authored_format": 2,
+        f"translations/templates/{area}/001.yaml": {
+            "format": 2,
             "kind": "translation_shard",
-            "records": [r.model_dump(mode="json", round_trip=True) for r in records],
-        },
+            "records": [
+                r.model_dump(mode="json", round_trip=True)
+                for r in records
+                if r.kind == kind
+            ],
+        }
+        for area, kind in (
+            ("definitions", "sentence_template"),
+            ("values", "template_translation"),
+        )
     }
     _write(repo, files)
     commit(repo)
@@ -131,7 +139,7 @@ def sources(tmp_path_factory: pytest.TempPathFactory) -> Templates:
 RULES = parse_rules(
     canonical(
         {
-            "parameter_rule_format": 2,
+            "format": 2,
             "kind": "template_parameter_rules",
             "rules": [
                 {

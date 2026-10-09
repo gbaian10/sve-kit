@@ -220,23 +220,23 @@ def test_source_endpoint_rejection_is_specific(url: str, message: str) -> None:
         project(canonical({"data": {"errors": []}}), url, "sv1")
 
 
-@pytest.mark.parametrize("mode", ["absent", "file_link", "parent_link"])
-def test_index_must_be_regular_input(tmp_path: Path, mode: str) -> None:
+@pytest.mark.parametrize("mode", ["absent", "shard_link", "parent_link"])
+def test_glossary_area_checks_its_input_links(tmp_path: Path, mode: str) -> None:
     root = tmp_path / "authored"
     if mode != "absent":
         target = tmp_path / "target"
         write(target, {})
         root.mkdir()
-        if mode == "file_link":
-            (root / "translations/glossary").mkdir(parents=True)
-            (root / "translations/index.yaml").symlink_to(
-                target / "translations/index.yaml"
+        if mode == "shard_link":
+            (root / "translations/glossary/test").mkdir(parents=True)
+            (root / "translations/glossary/test/001.yaml").symlink_to(
+                target / "translations/glossary/test/001.yaml"
             )
         else:
             (root / "translations").symlink_to(
                 target / "translations", target_is_directory=True
             )
-    if mode == "parent_link":
+    if mode in {"parent_link", "shard_link"}:
         with pytest.raises(ValueError, match=r"^Symlink authored data area$"):
             load_glossary(root)
     elif mode == "absent":

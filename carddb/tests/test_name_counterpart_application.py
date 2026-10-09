@@ -34,7 +34,7 @@ def links_case(case: ApplicationCase, root: Path) -> ApplicationCase:
     for name in array(object_value(evolved["value"])["digital_names"]):
         object_value(name)["phase"] = "evolved"
     shard = envelope([normal, evolved])
-    write(root / "authored", {"digital-links/links/synthetic/001.yaml": shard})
+    write(root / "authored", {"digital/links/synthetic/001.yaml": shard})
     revision = commit(root)
     inputs = Inputs(root / "authored", root, revision)
     config = (

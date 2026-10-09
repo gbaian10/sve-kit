@@ -117,7 +117,7 @@ def composer(recipe: Inputs) -> Composer | None:
     """Human links are optional; the link loader validates an existing entry."""
     if recipe.name_policy is None:
         return None
-    entry = authored_root(recipe.repo) / "digital-links"
+    entry = authored_root(recipe.repo) / "digital/links"
     links = (
         LinkInputs(authored_root(recipe.repo), recipe.repo, recipe.revision)
         # A dangling symlink still reaches the loader, which rejects symlinks.

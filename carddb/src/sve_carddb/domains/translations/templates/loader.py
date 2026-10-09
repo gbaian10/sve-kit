@@ -106,10 +106,15 @@ def _references(records: dict[str, Record]) -> None:
 
 
 def _candidate_path(path: str, records: tuple[Record, ...]) -> None:
-    candidate_area = path.startswith(
-        "translations/templates/template_translation_candidate/"
-    )
-    if any(isinstance(record, CandidateRecord) != candidate_area for record in records):
+    area = path.removeprefix("translations/templates/").split("/", 1)[0]
+    allowed = {
+        "definitions": (DefinitionRecord,),
+        "values": (TranslationRecord, VariantRecord),
+        "candidates": (CandidateRecord,),
+    }
+    if area not in allowed or any(
+        not isinstance(record, allowed[area]) for record in records
+    ):
         raise ValueError(
             "Current template candidates require their dedicated shard area"
         )

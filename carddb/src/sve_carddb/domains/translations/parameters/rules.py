@@ -27,7 +27,7 @@ LEGACY_IDS = (
 )
 
 
-PATH = "authored/template-parameter-rules/current.yaml"
+PATH = "authored/translations/parameter-rules/current.yaml"
 
 
 class Rule(RecordData):
@@ -39,11 +39,11 @@ class Rule(RecordData):
 
 
 class Rules(RecordData):
-    parameter_rule_format: Literal[2]
+    format: Literal[2]
     kind: Literal["template_parameter_rules"]
     rules: tuple[Rule, ...]
 
-    @field_validator("parameter_rule_format", mode="before")
+    @field_validator("format", mode="before")
     @classmethod
     def _format(cls, value: object) -> object:
         if type(value) is not int:
@@ -75,7 +75,7 @@ def parse(raw: bytes) -> Rules:
 def load(repository: Path) -> Rules:
     """Read the current matcher switches in the working tree."""
     return load_file(
-        authored_root(repository) / "template-parameter-rules/current.yaml",
+        authored_root(repository) / "translations/parameter-rules/current.yaml",
         root=authored_root(repository),
     )
 

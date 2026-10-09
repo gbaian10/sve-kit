@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Annotated, Literal, Self
 
 from pydantic import Field, ValidationError, field_validator, model_validator
 
+from sve_carddb.core.authored import check_path
 from sve_carddb.core.json import canonical
 from sve_carddb.core.models import Hash, RecordData, Text
 from sve_carddb.domains.registry.storage import read_yaml
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import Database
 
-DIRECTORY = "flavor-translations"
+DIRECTORY = "translations/flavor"
 type Key = tuple[str, str]
 LANGS = ("zh-Hant",)
 
@@ -39,6 +40,15 @@ class Entry(RecordData):
 
 
 class Shard(RecordData):
+    format: Literal[1]
+
+    @field_validator("format", mode="before")
+    @classmethod
+    def _format(cls, value: object) -> object:
+        if type(value) is not int:
+            raise ValueError("Authored format must be an integer")
+        return value
+
     kind: Literal["flavor_translation_shard"]
     entries: Annotated[tuple[Entry, ...], Field(min_length=1)]
 
@@ -64,6 +74,7 @@ class Report:
 def load(authored: Path) -> dict[Key, Entry]:
     """Read every shard of the directory; an absent directory means no translations yet."""
     root = authored / DIRECTORY
+    check_path(authored, root)
     if not root.exists():
         return {}
     if root.is_symlink() or not root.is_dir():

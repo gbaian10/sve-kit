@@ -10,7 +10,7 @@ The recipe is JSON matching `sve_carddb.workflows.offline.Inputs`: `repo`, `arch
 `image_batch`, `parser_version`), `revision`, `as_of`,
 `data_version`, `published_at`, `feedback_url`, `grammar_version` and
 `normalizer_version`. Vocabulary and UI languages come from the current working
-files in `authored/catalog-adoptions`. The catalog is prepared once and the same
+files in `authored/catalog/adoptions`. The catalog is prepared once and the same
 checked plan supplies vocabulary, languages and DB rows. Offline catalogs use
 format 2 shards; adopted EN and JA languages are required. The current format 2
 translation entry is loaded once for glossary, templates and name overrides.
@@ -76,7 +76,7 @@ no image publication is claimed.
 ## Regional preview images
 
 Pass an existing private image library and recipe cache directory together.
-For each pinned image batch, `export-offline` loads `authored/image-crops.yaml`
+For each pinned image batch, `export-offline` loads `authored/images/crops.yaml`
 from the working tree, so uncommitted box edits apply, and calls
 `build_regional_assets`. A verified five-size cache hit is reused; a missing or
 stale entry (new source bytes, crop box or recipe) is encoded into the library

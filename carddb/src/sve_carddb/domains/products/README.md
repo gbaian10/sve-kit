@@ -95,10 +95,10 @@ pipeline, and does not enable broad capability readiness flags.
 
 Raw source rows have `parser_version=NULL` and are shared with identity staging
 only when every version metadata field matches. The authored source rows keep
-their input profiles: `product-authored-v2` for product shards and
-`product-identity-v2` for identity shards. These profiles identify both the
-accepted envelope and the core canonical recipe; the document formats remain
-`product-authored-v1` and `product-identity-v1`. `FrozenSources` provides one reusable
+their input profiles: `product-authored-v3` for product shards and
+`product-identity-v3` for identity shards. These profiles identify both the
+accepted envelope and the core canonical recipe; both documents use integer `format: 1` with
+`kind: product_shard` and `kind: product_identity_shard` respectively. `FrozenSources` provides one reusable
 sealed-source metadata boundary; product evidence records `archive-closure-v1`
 under `product_evidence_closure`, since checking bytes does not parse or adopt
 a product relationship. Identity evidence keeps its actual parser pin.
@@ -113,7 +113,7 @@ a second database. See the [build DB example](../../build/README.md#saved-build-
 
 `load_product_identities(authored_root, authored_revision=..., catalog=...,
 stores=...)` implements [authored-layout §11](../../../../../docs/schema/authored-layout.md#11-官方商品身分對照-product-identity-v1).
-It validates every shard under `product-identities/` and both regions before
+It validates every shard under `products/identities/` and both regions before
 projection: closed fields, strict YAML, expected file paths, path/filing/region
 agreement and unique complete match keys. Every record is a confirmed
 identity; the directory must exist, so a missing one never reads as empty. IDs
@@ -215,7 +215,7 @@ def populate(db):
 Call this population inside the build transaction, then save that database.
 The single transaction includes families, the existing identity graph, authored
 identity shard sources and official products/inclusions. Official content
-references raw sources, never an identity mapping as a content approval. Authored identity sources use `product-identity-v2`; raw parsers remain
+references raw sources, never an identity mapping as a content approval. Authored identity sources use `product-identity-v3`; raw parsers remain
 NULL. Exact evidence closure uses `product_identity_evidence_closure` with
 `archive-closure-v1`; reproduced matches use `official_product_identity` and the
 actual product parser. Page scans, product and inclusion processing each retain

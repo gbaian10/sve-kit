@@ -85,17 +85,15 @@ def load_links(  # ruff: ignore[complex-structure] -- whole-entry validation pre
     root: Path,
 ) -> Snapshot:
     """Validate the entire entry before projecting any public relations."""
-    directory = root.absolute() / "digital-links"
+    directory = root.absolute() / "digital/links"
     index_path = directory / "index.yaml"
     _safe(index_path)
     index = _model(Index, read_yaml(index_path))
     sequences: dict[str, list[int]] = defaultdict(list)
     for name in index.includes:
-        if name.startswith("digital-links/coverage/"):
+        if name.startswith("digital/links/coverage/"):
             raise ValueError("Digital coverage adoption is not supported")
-        match = re.fullmatch(
-            r"digital-links/links/([A-Za-z0-9_-]+)/([0-9]{3,})\.yaml", name
-        )
+        match = re.fullmatch(r"digital/links/([A-Za-z0-9_-]+)/([0-9]{3,})\.yaml", name)
         if match is None:
             raise ValueError("Unsafe digital-link include")
         sequences[match[1]].append(int(match[2]))

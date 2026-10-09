@@ -161,7 +161,7 @@ def test_closed_complete_field_sets(
 @pytest.mark.parametrize("value", [True, 2, "1"])
 def test_explicit_version_type(product_root: Path, value: JsonValue) -> None:
     raw = shard(product_root)
-    raw["product_authored_format"] = value
+    raw["format"] = value
     install(product_root, NAME, raw)
     with pytest.raises(ValueError, match="Invalid product authored"):
         load(product_root)

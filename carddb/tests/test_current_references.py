@@ -34,7 +34,7 @@ def test_current_reference_uses_full_current_glossary(tmp_path: Path) -> None:
         tmp_path,
         {
             "translations/glossary/concepts/001.yaml": {
-                "translation_authored_format": 2,
+                "format": 2,
                 "kind": "translation_shard",
                 "records": list[JsonValue](values),
             }

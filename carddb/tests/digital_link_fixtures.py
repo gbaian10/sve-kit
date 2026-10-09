@@ -43,7 +43,7 @@ def record() -> dict[str, JsonValue]:
 
 def envelope(records: list[dict[str, JsonValue]]) -> dict[str, JsonValue]:
     return {
-        "digital_link_authored_format": 2,
+        "format": 2,
         "kind": "digital_link_shard",
         "records": list[JsonValue](records),
     }
@@ -51,11 +51,11 @@ def envelope(records: list[dict[str, JsonValue]]) -> dict[str, JsonValue]:
 
 def write(root: Path, shards: dict[str, dict[str, JsonValue]]) -> None:
     index: dict[str, JsonValue] = {
-        "digital_link_authored_format": 2,
+        "format": 2,
         "kind": "digital_link_index",
         "includes": {p: digest(canonical(v)) for p, v in shards.items()},
     }
-    for name, value in {"digital-links/index.yaml": index, **shards}.items():
+    for name, value in {"digital/links/index.yaml": index, **shards}.items():
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(canonical(value))

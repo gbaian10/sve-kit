@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.core.json import canonical, digest, object_value
-from sve_carddb.domains.registry.storage import read_yaml
+from sve_carddb.core.json import canonical, object_value
 from sve_carddb.domains.translations.glossary.records import (
     ChoiceRecord,
     Shard,
@@ -28,22 +27,11 @@ def _write(root: Path, records: list[dict[str, JsonValue]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     ordered = records
     raw: dict[str, JsonValue] = {
-        "translation_authored_format": 2,
+        "format": 2,
         "kind": "translation_shard",
         "records": list[JsonValue](ordered),
     }
     path.write_bytes(canonical(raw))
-    (root / "translations/index.yaml").write_bytes(
-        canonical(
-            {
-                "translation_authored_format": 2,
-                "kind": "translation_index",
-                "includes": {
-                    "translations/glossary/shared/001.yaml": digest(canonical(raw))
-                },
-            }
-        )
-    )
 
 
 def _records() -> list[dict[str, JsonValue]]:
@@ -128,17 +116,12 @@ def test_current_refusals(tmp_path: Path, change: str, message: str) -> None:
         other.write_bytes(
             canonical(
                 {
-                    "translation_authored_format": 2,
+                    "format": 2,
                     "kind": "translation_shard",
                     "records": [records[1]],
                 }
             )
         )
-        index = object_value(read_yaml(tmp_path / "translations/index.yaml"))
-        object_value(index["includes"])["translations/glossary/shared/002.yaml"] = (
-            digest(canonical(read_yaml(other)))
-        )
-        (tmp_path / "translations/index.yaml").write_bytes(canonical(index))
     else:
         if change == "absent_term":
             records = [records[1]]
@@ -153,7 +136,7 @@ def test_current_refusals(tmp_path: Path, change: str, message: str) -> None:
 
 def test_private_approval_fields_are_not_current_data() -> None:
     raw: dict[str, JsonValue] = {
-        "translation_authored_format": 2,
+        "format": 2,
         "kind": "translation_shard",
         "records": list[JsonValue](_records()),
     }

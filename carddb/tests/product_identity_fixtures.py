@@ -43,7 +43,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.products.plan import OfficialProducts
     from sve_carddb.domains.registry.preview import PreviewPlan
 
-NAME = "product-identities/jp/001.yaml"
+NAME = "products/identities/jp/001.yaml"
 LANGUAGES = (
     Language(code="ja", fallback_order=(), display_name="Japanese"),
     Language(code="en", fallback_order=(), display_name="English"),
@@ -142,7 +142,7 @@ def identity_record(
 def identity_envelope(records: list[dict[str, JsonValue]]) -> dict[str, JsonValue]:
     ordered = records
     return {
-        "product_identity_format": 1,
+        "format": 1,
         "kind": "product_identity_shard",
         "records": list[JsonValue](ordered),
     }

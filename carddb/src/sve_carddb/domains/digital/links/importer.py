@@ -336,7 +336,7 @@ def _audit(
                 "sha256": digest(exact),
                 "authored_path": "authored/" + path,
                 "authored_revision": inputs.authored_revision,
-                "parser_version": "digital-link-authored-v2",
+                "parser_version": "digital-link-authored-v3",
             },
             ("id",),
         )

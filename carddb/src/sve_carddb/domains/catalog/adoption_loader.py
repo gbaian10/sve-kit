@@ -1,12 +1,13 @@
 """Read current catalog/display values from the enabled authored data areas."""
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import ValidationError
 
-from sve_carddb.core.authored import require_directory, shards
+from sve_carddb.core.authored import check_path, read, require_directory
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.domains.catalog.records import (
     AliasRecord,
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
     from sve_carddb.core.models import RecordData
 
 CURRENT_FORMAT = 2
-Entry = Literal["catalog-adoptions", "display-overrides"]
+Entry = Literal["catalog/adoptions", "catalog/overrides"]
 _AREAS = {
     "vocabulary": "vocabulary_adoption",
     "languages": "language_adoption",
@@ -49,7 +50,7 @@ class LoadedShard:
 
     def envelope(self) -> Shard | DisplayShard:
         """Detach typed values from the loaded bytes."""
-        model = Shard if self.path.startswith("catalog-adoptions/") else DisplayShard
+        model = Shard if self.path.startswith("catalog/adoptions/") else DisplayShard
         return model.model_validate_json(self.content)
 
 
@@ -70,21 +71,17 @@ class AdoptionSnapshot:
 
 def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:
     """Check current value keys and kinds across the complete enabled entry."""
-    if entry not in {"catalog-adoptions", "display-overrides"}:
+    if entry not in {"catalog/adoptions", "catalog/overrides"}:
         raise ValueError("Unknown adoption entry")
-    field = (
-        "catalog_adoption_format"
-        if entry == "catalog-adoptions"
-        else "display_override_format"
-    )
+    field = "format"
     areas = (
         ("vocabulary", "languages", "aliases", "symbols", "rules-names")
-        if entry == "catalog-adoptions"
+        if entry == "catalog/adoptions"
         else ("routes", "defaults")
     )
     require_directory(root, root / entry)
     paths = tuple(entry + "/" + area for area in areas)
-    inputs = shards(root, paths, optional=paths)
+    inputs = _inputs(root, paths)
     if not any((root / path).is_dir() for path in paths):
         raise ValueError("Adoption entry must contain at least one known data area")
     loaded = []
@@ -94,12 +91,12 @@ def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:
             raise ValueError("Catalog format must be integer two")
         try:
             shard = (
-                Shard if entry == "catalog-adoptions" else DisplayShard
+                Shard if entry == "catalog/adoptions" else DisplayShard
             ).model_validate_json(canonical(content))
         except ValidationError:
             raise ValueError("Invalid current catalog fields") from None
         for record in shard.records:
-            if record.kind != _AREAS[Path(name).parts[1]]:
+            if record.kind != _AREAS[Path(name).relative_to(entry).parts[0]]:
                 raise ValueError("Current catalog area mismatch")
         loaded.append(LoadedShard(name, exact, digest(encoded), encoded))
     snapshot = AdoptionSnapshot(entry, tuple(loaded))
@@ -109,6 +106,21 @@ def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:
         raise ValueError("Duplicate current catalog selection key")
     _values(records)
     return snapshot
+
+
+def _inputs(root: Path, paths: tuple[str, ...]) -> list[tuple[str, bytes, bytes]]:
+    inputs: list[tuple[str, bytes, bytes]] = []
+    for area in paths:
+        directory = root / area
+        check_path(root, directory)
+        if not directory.exists():
+            continue
+        require_directory(root, directory)
+        for path in sorted(directory.glob("*.yaml")):
+            if re.fullmatch(r"[0-9]{3,}\.yaml", path.name) is not None:
+                exact, encoded = read(path, root=root)
+                inputs.append((path.relative_to(root).as_posix(), exact, encoded))
+    return inputs
 
 
 def _values(records: tuple[Record, ...]) -> None:
