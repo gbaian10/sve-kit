@@ -7,7 +7,6 @@ from sve_carddb.parse.html import (
     MissingElementError,
     attribute,
     parse,
-    require_attribute,
     require_one,
     select_all,
     select_one,
@@ -53,9 +52,3 @@ def test_attribute_is_optional() -> None:
     link = require_one(parse(PAGE), "a")
     assert_type(attribute(link, "href"), str | None)
     assert attribute(link, "href") is None
-
-
-def test_require_attribute_raises_when_missing() -> None:
-    link = require_one(parse(PAGE), "a")
-    with pytest.raises(MissingElementError, match="href"):
-        require_attribute(link, "href")

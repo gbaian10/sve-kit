@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 import pytest
 from ruamel.yaml.error import YAMLError
 
+from sve_carddb.core.yaml import parse_yaml
 from sve_carddb.domains.registry import allocation, storage
 from sve_carddb.domains.registry.allocation import IdRange, region_allocations
 from sve_carddb.domains.registry.build import (
@@ -44,7 +45,6 @@ from sve_carddb.domains.registry.storage import (
     read_yaml,
     relayout,
     write_files,
-    yaml_parser,
 )
 from sve_carddb.domains.registry.validate import check_cursors, validate
 
@@ -740,7 +740,7 @@ def test_shards_fill_to_target_measured_on_final_yaml(
     monkeypatch.setattr(storage, "TARGET_BYTES", target)
     files = plan_files(tmp_path, entries)
     shards = [
-        Shard.model_validate(yaml_parser().load(data))
+        Shard.model_validate(parse_yaml(data))
         for path, data in sorted(files.items())
         if path.parent == tmp_path / "registry" / "printing" / "PR"
     ]

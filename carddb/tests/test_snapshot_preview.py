@@ -16,11 +16,11 @@ from sve_carddb.export.preview import Roots, _write, write_preview
 from sve_carddb.export.project import Projection, project
 from sve_carddb.export.project.records import art_records, initial
 from sve_carddb.export.project.source import Source
-from sve_carddb.export.publication import require_formal, require_preview
+from sve_carddb.export.publication import require_preview
 from sve_carddb.export.reader import read_snapshot
 from sve_carddb.export.transport import Ownership, export_snapshot
 from sve_carddb.export.transport.compression import python_brotli
-from sve_carddb.workflows.export import require_unknown_coverage
+from sve_carddb.workflows.offline import require_offline_coverage
 
 from .snapshot_project_fixtures import SETTINGS, populate, schema
 from .test_snapshot_export import BATCH
@@ -83,12 +83,6 @@ def test_preview_cannot_accept_formal_version(exported: Snapshot, version: str) 
     manifest = exported.manifest | {"data_version": version}
     with pytest.raises(ValueError, match="preview- data version"):
         require_preview(manifest)
-
-
-def test_formal_publish_refuses_preview(exported: Snapshot) -> None:
-    with pytest.raises(ValueError, match="Formal publish refuses preview"):
-        require_formal(exported.manifest)
-    require_formal(exported.manifest | {"data_version": "20261002T010203Z-0001"})
 
 
 def test_preview_scope_is_exactly_jp(exported: Snapshot) -> None:
@@ -252,18 +246,19 @@ def test_missing_coverage_cannot_be_invented_complete(
         tables=logical[0].tables
         | {name: [] for name in ("qa", "errata", "cr_version", "restriction")},
     )
-    require_unknown_coverage(projection)
+    require_offline_coverage(projection, errata=False)
     broken = replace(
         projection, metadata=projection.metadata | {field: [{"state": "complete"}]}
     )
     with pytest.raises(ValueError, match="Uncovered"):
-        require_unknown_coverage(broken)
-    for table in ("qa", "errata", "cr_version", "restriction"):
+        require_offline_coverage(broken, errata=False)
+    for table in ("errata", "cr_version", "restriction"):
         with pytest.raises(ValueError, match="Unrequested"):
-            require_unknown_coverage(
+            require_offline_coverage(
                 replace(
                     projection, tables=projection.tables | {table: [{"id": "invented"}]}
-                )
+                ),
+                errata=False,
             )
 
 

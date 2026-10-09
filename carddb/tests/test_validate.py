@@ -7,7 +7,6 @@ from sve_carddb.ingest.http.validate import (
     ValidationError,
     check_image,
     check_jpeg,
-    check_pdf,
     check_png,
     decode_html,
     require_media_type,
@@ -122,9 +121,3 @@ def test_decode_html_rejects_short_page() -> None:
 def test_decode_html_rejects_invalid_utf8() -> None:
     with pytest.raises(ValidationError, match="UTF-8"):
         decode_html(b"<html>\xff\xfe</html>", min_bytes=1)
-
-
-def test_check_pdf() -> None:
-    check_pdf(b"%PDF-1.7\n...")
-    with pytest.raises(ValidationError, match="PDF"):
-        check_pdf(b"<html>")

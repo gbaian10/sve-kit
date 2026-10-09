@@ -22,10 +22,10 @@ from sve_carddb.domains.translations.templates.records import (
     DefinitionRecord,
 )
 from sve_carddb.domains.translations.templates.render import render
-from sve_carddb.domains.translations.templates.writer import compose
 
 from .adoption_fixtures import commit
 from .build_db_fixtures import seed
+from .template_fixtures import template_files
 from .test_template_current import Case, current_case
 
 if TYPE_CHECKING:
@@ -162,7 +162,7 @@ def test_candidate_never_renders_projects_or_bypasses_source_checks(
     definitions = tuple(
         r for r in current_case.inputs.records if isinstance(r, DefinitionRecord)
     )
-    package = compose(current_case.inputs.files, (*definitions, record))
+    package = template_files(current_case.inputs.files, (*definitions, record))
     inputs = from_files(package)
     assert not inputs.translations()
     verified = validate_templates(inputs, current_case.sources, current_case.batches)
@@ -200,7 +200,9 @@ def test_candidate_never_renders_projects_or_bypasses_source_checks(
         destination.write_bytes(exact)
     commit(current_case.repository)
     assert load_glossary(directory).current_records() == ()
-    absent = from_files(compose(current_case.inputs.files, (*definitions, pending())))
+    absent = from_files(
+        template_files(current_case.inputs.files, (*definitions, pending()))
+    )
     with pytest.raises(
         ValueError,
         match=r"^Current template candidate pattern has no current source position$",

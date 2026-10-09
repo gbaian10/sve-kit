@@ -27,7 +27,6 @@ from sve_carddb.workflows.offline import Built, Inputs
 from sve_carddb.workflows.offline import build as build_offline
 
 if TYPE_CHECKING:
-    from sve_carddb.export.project import Projection
     from sve_carddb.export.transport import Brotli
 
 app = typer.Typer(no_args_is_help=True, help="Export isolated offline previews.")
@@ -178,17 +177,3 @@ def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] 
             checks=checks,
         )
     )
-
-
-def require_unknown_coverage(projection: Projection) -> None:
-    """This input recipe contains no QA/errata/CR/restriction source coverage."""
-    if (
-        projection.metadata["source_windows"]
-        or projection.metadata["restriction_coverage"]
-    ):
-        raise ValueError("Uncovered sources must remain empty windows / unknown")
-    if any(
-        projection.tables[table]
-        for table in ("qa", "errata", "cr_version", "restriction")
-    ):
-        raise ValueError("Unrequested ancillary sources cannot become public facts")

@@ -7,9 +7,9 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.domains.products import Language
-from sve_carddb.domains.registry.storage import yaml_parser
 
 from .fixture_files import FrozenFiles, freeze_files, restore_files
+from .yaml_fixtures import yaml_emitter
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -107,7 +107,7 @@ def envelope(records: list[Object]) -> Object:
 
 def write_yaml(path: Path, value: JsonValue) -> None:
     stream = io.StringIO()
-    yaml_parser().dump(value, stream)
+    yaml_emitter().dump(value, stream)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(stream.getvalue(), encoding="utf-8")
 
