@@ -1,5 +1,5 @@
 // Handwritten synthetic cards for the development snapshot. Nothing here is real card text; the
-// point is coverage of every shape the pages must render (docs/schema/snapshot-format.md).
+// point is coverage of every shape the pages must render (docs/schema/export/snapshot-format.md).
 
 type ClassCode = "elf" | "royal" | "witch" | "dragon" | "nightmare" | "bishop"
 type TypeCode = "follower" | "spell" | "amulet" | "evolved" | "leader" | "token"
