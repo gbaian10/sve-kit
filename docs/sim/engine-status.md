@@ -45,27 +45,27 @@
 - 解算燃料 20,000 步、部分列舉上限 10,000 是原型的防護界線，不是 CR 15.2 的循環判定（見 `sim/engine/src/game/effects.rs`、`payments.rs` 等的常數）
 - 場上（`field`）上限固定為 5，從者與護符放不下時依規則處理（見 `sim/engine/src/game/rules.rs`、`legal.rs`）
 - 引擎不驗牌組構築合法性（KE-21）；牌組合法性屬建牌器範圍
-- 尚未支援的動作原子、選擇、付款、持續效果、取代、區域與誘發構造，以 #478 的清單為準；
+- 動作原子、選擇、付款、持續效果、取代、區域與誘發構造的執行限制與待確認項目，以 #478 的清單為準；
   載入期拒絕的部分以 [rejected-yaml.md](rejected-yaml.md) 為準
 
 ## AI
 
 - 根節點確定化取樣（profile 的 `samples`）加固定啟發式延伸，展望到當回合、最多 128 個決定深度（`sim/engine/src/ai.rs`）。
   不是完整的 IS-MCTS，沒有對手策略學習或跨回合價值
-- Rust 只載入 `profiles.yaml` 列出的 profile（`sim/engine/profiles/`）；
+- 原型 CLI 固定載入 `sim/engine/profiles/` 的 `general`、`aggro`、`control` 三個 profile；
+  `profiles.yaml` 提供共用 AI 測試資料，公開的 `Profile::load` 接受呼叫者指定的檔案。
   [docs/ai/](../ai/profile.schema.json) 的 v2 profile 是未實作的設計，現行載入器不接受
 - `Game` 以深複製分支，只有 `Catalog` 以 `Arc` 共用；先驗、數值宣告與複製成本的限制見 #478
 
 ## 回放、輔助與資訊邊界
 
-本節是設計契約；各項實作是否已重新驗證見 #478。
+資訊可見性是設計契約；回放與輔助原型的封存記錄仍待確認，見 #478。
 
 - 玩家投影不送出未公開手牌或背面起始護符的固定 ID；裁判視角與存檔含秘密，不能當一般封包傳送
-- 回放原型保存完整 `Game` 快照；輔助模式目前只有手動攻擊、生命設定與兩層對齊。持久化、續體、`realign` 的語義與
-  網路／權限／不可信存檔驗證，現況與缺口見 #478
-- 現行 digest 尚未綁定 `Catalog` 內容指紋，不能當成版本相容的保證
+- 回放持久化、續體、輔助 `realign`、網路／權限／不可信存檔驗證與 `Catalog` digest 的限制及待確認項目見 #478；
+  封存記錄不能當成版本相容或線上恢復的保證
 
 ## 建置目標
 
 函式庫設計上可用 `--no-default-features` 編譯到 `wasm32-unknown-unknown`；
-JS 綁定、瀏覽器宿主與計時驗證尚未建立，見 #478。
+WASM 編譯、JS 綁定、瀏覽器宿主與計時驗證的待確認項目見 #478。
