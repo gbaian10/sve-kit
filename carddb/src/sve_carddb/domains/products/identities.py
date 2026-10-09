@@ -22,7 +22,7 @@ from sve_carddb.domains.products.identity_models import (
 from sve_carddb.domains.products.loader import _safe_file
 from sve_carddb.domains.products.models import Evidence, ProductRecord
 from sve_carddb.domains.products.official import PARSER, ProductPage, parse_products
-from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.frozen_sources import FrozenBatches
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -121,13 +121,14 @@ def load_product_identities(
     authored_revision: str,
     catalog: ProductSnapshot,
     stores: Mapping[str, Path],
+    batches: FrozenBatches | None = None,
 ) -> ProductIdentities:
     """Validate the entire input before any regional selection, without writes."""
     if re.fullmatch(r"[0-9a-f]{40}", authored_revision) is None:
         raise ValueError("Product identity revision must be a full Git SHA")
     shards = tuple(_shard(root, name) for name in _inventory(root))
     records = _records(shards, catalog)
-    pages = _evidence(records, stores)
+    pages = _evidence(records, stores, batches or FrozenBatches())
     return ProductIdentities(
         authored_revision,
         shards,
@@ -226,18 +227,18 @@ def _ordinal(locator: str) -> int:
 
 
 def _evidence(
-    records: Mapping[str, IdentityRecord], stores: Mapping[str, Path]
+    records: Mapping[str, IdentityRecord],
+    stores: Mapping[str, Path],
+    batches: FrozenBatches,
 ) -> dict[Evidence, IdentityEvidence]:
-    batches: dict[str, FrozenSources] = {}
     parsed: dict[tuple[str, str], ProductPage] = {}
     pages: dict[Evidence, IdentityEvidence] = {}
     for record in records.values():
         for ref in record.evidence:
             key = ref.batch_id
-            if key not in batches:
-                batches[key] = FrozenSources.configured(stores, key)
+            frozen = batches.configured(stores, key)
             parse_key = (key, ref.source_version_id)
-            source, raw, descriptor = batches[key].read(
+            source, raw, descriptor = frozen.read(
                 ref.source_version_id, parser_version="archive-closure-v1"
             )
             page: ProductPage | None = None

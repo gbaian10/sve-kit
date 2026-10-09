@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from sve_carddb.core.provenance import BuildContext
     from sve_carddb.domains.catalog.adoption_loader import AdoptionSnapshot
     from sve_carddb.domains.registry.snapshot import RegistrySnapshot
+    from sve_carddb.ingest.archive.frozen_sources import FrozenBatches
 
 
 @dataclass(frozen=True)
@@ -43,6 +44,8 @@ def prepare(
     build: BuildContext,
     stores: dict[str, Path],
     registry: RegistrySnapshot | None = None,
+    *,
+    batches: FrozenBatches | None = None,
 ) -> Prepared:
     """Validate mappings against this build's frozen sources."""
     loaded = tuple(r for snapshot in snapshots for r in snapshot.current_records())
@@ -55,8 +58,8 @@ def prepare(
         for record in loaded
         if isinstance(record, (LanguageRecord, VocabularyRecord))
     )
-    sources = AdoptionSources(stores, repository, registry)
-    batches = {
+    sources = AdoptionSources(stores, repository, registry, batches=batches)
+    source_batches = {
         e.source_ref.batch_id
         for r in records
         for e in r.evidence
@@ -64,7 +67,7 @@ def prepare(
     }
     review = ReviewContext(
         context=build,
-        source_batches=tuple(Batch(batch_id=b) for b in sorted(batches)),
+        source_batches=tuple(Batch(batch_id=b) for b in sorted(source_batches)),
     )
     registered = {
         r.data.subject.code

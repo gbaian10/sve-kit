@@ -6,7 +6,6 @@ from sve_carddb.domains.catalog.adoption_models import SourceRef
 from sve_carddb.domains.digital.name_policies.evaluate import NameOwner as PolicyOwner
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.text_observations.models import candidate_revision_id
-from sve_carddb.domains.text_observations.plan import verify_plan
 from sve_carddb.domains.translations.names.sources import NameOwner, name_source
 
 if TYPE_CHECKING:
@@ -19,7 +18,6 @@ def publication_owners(
     db: Database, texts: TextPlan
 ) -> tuple[tuple[NameOwner, PolicyOwner], ...]:
     """Raw registry identity alone cannot authorize a corrected or withheld owner."""
-    verify_plan(texts)
     published = {
         r.data.id
         for r in texts.publication_identity().included("printing")

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from PIL import Image
 
 from sve_carddb.core.json import digest
-from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.frozen_sources import FrozenBatches, FrozenSources
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -33,14 +33,11 @@ class ImageChecks:
         ] = {}
         self.png: dict[str, tuple[str | None, tuple[int, int]]] = {}
         self.lock = RLock()
-        self.batches: dict[tuple[Path, str, str], FrozenSources] = {}
+        self.batches = FrozenBatches()
 
     def batch(self, root: Path, store_id: str, batch_id: str) -> FrozenSources:
         """One command shares the same verified immutable batch across image stages."""
-        key = root.resolve(), store_id, batch_id
-        if key not in self.batches:
-            self.batches[key] = FrozenSources(root, store_id, batch_id)
-        return self.batches[key]
+        return self.batches.batch(root, store_id, batch_id)
 
     def inspect(self, path: Path) -> tuple[int, str, str | None, tuple[int, int]]:
         """Changed files are read again; no previous command can supply a cache hit."""

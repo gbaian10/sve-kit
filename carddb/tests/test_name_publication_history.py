@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.domains.digital.name_policies.owners import publication_owners
-from sve_carddb.domains.text_observations import import_text_observations
 from sve_carddb.domains.text_observations.models import candidate_revision_id
 
 from .source_correction_fixtures import make_correction_case
@@ -30,9 +29,8 @@ def test_raw_history_remains_eligible_after_effect_correction(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),

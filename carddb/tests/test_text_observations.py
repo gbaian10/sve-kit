@@ -14,12 +14,10 @@ from sve_carddb.domains.text_observations import (
     Binding,
     Vocabulary,
     diagnostic_exclusion_report,
-    import_text_observations,
     plan_text_observations,
 )
 from sve_carddb.domains.text_observations.importer import stat
 from sve_carddb.domains.text_observations.intern import TextInterner
-from sve_carddb.domains.text_observations.plan import verify_plan
 
 from .registry_snapshot_fixtures import edit_record
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared synthetic fixture
@@ -44,9 +42,8 @@ def test_exact_initial_keeps_every_physical_source_and_one_revision_per_face_reg
     with create_database(schema) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -91,9 +88,8 @@ def test_missing_effect_stays_distinct_from_present_empty(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        result = import_text_observations(
+        result = case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -125,9 +121,8 @@ def test_sections_are_ordered_unknown_and_not_removed_from_diffs(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -168,9 +163,8 @@ def test_partial_double_face_quarantines_entire_card_region_and_all_ids(
     with create_database(schema) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -234,7 +228,6 @@ def test_missing_source_blocks_a_good_sibling_instead_of_selecting_it(
     assert group.reasons == ("missing_source",)
     assert group.current() is None
     assert len(plan.unavailable) == 1
-    verify_plan(plan)
 
 
 def test_errata_link_keeps_even_identical_observations_pending(
@@ -278,9 +271,8 @@ def test_flavor_is_physical_and_does_not_choose_a_different_current(
     with create_database(compile_build(("en", "related"))) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -325,7 +317,6 @@ def test_reversed_source_indices_use_authored_faces_not_face_ordinals(
     face = identity.snapshot.records["face:" + target.face_id].data
     assert face.model_dump()["ordinal"] == 1
     assert target.content.name == inputs.en["BP02-070EN"].faces[0].name
-    verify_plan(plan)
 
 
 @pytest.mark.parametrize("state", ["active", "needs_review"])
@@ -400,9 +391,8 @@ def test_explicit_special_kinds_traits_and_titles_are_all_materialized(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -444,55 +434,6 @@ class TestDefaultTextInputs:
         assert "Rule." not in str(report)
         assert "Reminder" not in str(report)
         assert report["initial_current_count"] == 2
-
-    @pytest.mark.parametrize(
-        "problem", ["source", "index", "content", "missing", "extra", "closure"]
-    )
-    def test_altered_observation_or_selection_plan_fails_closed(
-        self, tmp_path: Path, default_text_case: TextCaseTemplate, problem: str
-    ) -> None:
-        case = default_text_case.copy(tmp_path)
-        item = case.plan.observations[0]
-        plan = case.plan
-        if problem == "source":
-            card = item.card.model_copy(
-                update={
-                    "source": item.card.source.model_copy(update={"etag": "changed"})
-                }
-            )
-            item = item.model_copy(update={"card": card})
-        elif problem == "index":
-            item = item.model_copy(update={"source_index": 1})
-        elif problem == "content":
-            item = item.model_copy(
-                update={
-                    "content": item.content.model_copy(update={"effect": "Invented"})
-                }
-            )
-        elif problem == "missing":
-            plan = replace(plan, observations=plan.observations[1:])
-        elif problem == "extra":
-            groups = tuple(
-                replace(
-                    group,
-                    observations=tuple(
-                        sorted(
-                            (*group.observations, item),
-                            key=lambda obs: (obs.card.source.id, obs.printing_id),
-                        )
-                    ),
-                )
-                if (group.face_id, group.region) == (item.face_id, item.region)
-                else group
-                for group in plan.groups
-            )
-            plan = replace(plan, observations=(*plan.observations, item), groups=groups)
-        else:
-            plan = replace(plan, diagnostic_exclusions=plan.identity)
-        if problem in {"source", "index", "content"}:
-            plan = replace(plan, observations=(item, *plan.observations[1:]))
-        with pytest.raises(ValueError, match="Text"):
-            verify_plan(plan)
 
     def test_exclusion_closes_routes_aliases_defaults_and_keeps_other_region(
         self, tmp_path: Path, default_text_case: TextCaseTemplate
@@ -579,9 +520,8 @@ class TestDefaultTextInputs:
                         "namespace": "official",
                     },
                 )
-            import_text_observations(
+            case.compose(case.plan.identity).import_into(
                 db,
-                case.plan,
                 build=case.context(),
                 vocabulary=case.vocabulary,
                 published=(),
@@ -620,9 +560,8 @@ class TestDefaultTextInputs:
                 db.update("printing", {"id": item.printing_id}, {field: replacement})
             before = {table.name: db.rows(table.name) for table in schema.tables}
             with pytest.raises(ValueError, match="identity parent"):
-                import_text_observations(
+                case.compose(case.plan.identity).import_into(
                     db,
-                    case.plan,
                     build=case.context(),
                     vocabulary=case.vocabulary,
                     published=(),
@@ -669,9 +608,8 @@ class TestDefaultTextInputs:
                     )
             before = {table.name: db.rows(table.name) for table in schema.tables}
             with pytest.raises(ValueError, match="vocabulary"):
-                import_text_observations(
+                case.compose(case.plan.identity).import_into(
                     db,
-                    case.plan,
                     build=case.context(),
                     vocabulary=case.vocabulary,
                     published=(),

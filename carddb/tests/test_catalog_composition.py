@@ -9,10 +9,8 @@ from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.provenance import BuildContext
 from sve_carddb.domains.catalog.importer import catalog_configuration
 from sve_carddb.domains.catalog.models import Alias, Catalog
-from sve_carddb.domains.text_observations import (
-    populate_text_preview,
-    text_configuration,
-)
+from sve_carddb.domains.text_observations import text_configuration
+from sve_carddb.domains.text_observations.composition import populate_text_preview
 
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared synthetic inputs
 from .text_observation_fixtures import LANGUAGES, make_case
@@ -57,7 +55,7 @@ def test_catalog_composes_with_both_regional_sources(
                 populate_text_preview(
                     db,
                     case.catalog,
-                    case.plan,
+                    case.compose(case.plan.identity),
                     authored_revision="a" * 40,
                     build=build,
                     vocabulary=case.vocabulary,

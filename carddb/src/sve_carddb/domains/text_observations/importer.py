@@ -15,7 +15,6 @@ from sve_carddb.domains.source_corrections.plan import selected_records
 from sve_carddb.domains.text_observations.configuration import text_configuration
 from sve_carddb.domains.text_observations.intern import TextInterner
 from sve_carddb.domains.text_observations.models import candidate_revision_id
-from sve_carddb.domains.text_observations.plan import verify_plan
 from sve_carddb.domains.text_observations.type_binding import type_binding
 from sve_carddb.domains.text_observations.wording import mark_wording_pending
 
@@ -23,6 +22,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from sve_carddb.build import Database, Value
+    from sve_carddb.domains.text_observations.composition import TextObservations
     from sve_carddb.domains.text_observations.models import FaceObservation
     from sve_carddb.domains.text_observations.plan import TextPlan
     from sve_carddb.domains.text_observations.vocabulary import Vocabulary
@@ -286,14 +286,14 @@ def _groups_to_database(
 
 def populate_text_observations(
     db: Database,
-    plan: TextPlan,
+    observations: TextObservations,
     *,
     build: BuildContext,
     vocabulary: Vocabulary,
     published: tuple[LocalizedText, ...],
 ) -> InputRecord:
     """Populate in a caller-owned transaction, preserving missing-effect source uses."""
-    verify_plan(plan)
+    plan = observations.plan
     if plan.corrections is None and selected_records(plan.identity):
         raise ValueError("Scoped source corrections require pinned image evidence")
     if any(
@@ -341,18 +341,3 @@ def populate_text_observations(
         verify_corrections(db, plan, vocabulary)
     mark_wording_pending(db, plan)
     return input_record(build, expected)
-
-
-def import_text_observations(
-    db: Database,
-    plan: TextPlan,
-    *,
-    build: BuildContext,
-    vocabulary: Vocabulary,
-    published: tuple[LocalizedText, ...],
-) -> InputRecord:
-    """Roll back the entire observation graph on metadata, collision or row failures."""
-    with db.transaction():
-        return populate_text_observations(
-            db, plan, build=build, vocabulary=vocabulary, published=published
-        )

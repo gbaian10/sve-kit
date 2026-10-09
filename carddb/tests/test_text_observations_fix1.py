@@ -15,11 +15,10 @@ from sve_carddb.domains.registry.records import (
 )
 from sve_carddb.domains.text_observations import (
     diagnostic_exclusion_report,
-    import_text_observations,
     importer,
     plan_text_observations,
-    populate_text_preview,
 )
+from sve_carddb.domains.text_observations.composition import populate_text_preview
 from sve_carddb.domains.text_observations.exclusions import _close
 
 from .registry_preview_fixtures import REVISION
@@ -43,9 +42,8 @@ def test_initial_current_basis_never_claims_authored_adoption(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -163,7 +161,7 @@ class TestDefaultTextInputs:
             populate_text_preview(
                 db,
                 case.catalog,
-                case.plan,
+                case.compose(case.plan.identity),
                 authored_revision=REVISION,
                 build=case.context(),
                 vocabulary=case.vocabulary,
@@ -261,9 +259,8 @@ class TestDefaultTextInputs:
         with create_database(schema) as db:
             with db.transaction():
                 case.stage(db)
-            import_text_observations(
+            case.compose(case.plan.identity).import_into(
                 db,
-                case.plan,
                 build=case.context(),
                 vocabulary=case.vocabulary,
                 published=(),
@@ -277,9 +274,8 @@ class TestDefaultTextInputs:
 
             monkeypatch.setattr(importer, "insert_raw_sources", forbidden)
             with pytest.raises(ValueError, match="fresh text staging graph"):
-                import_text_observations(
+                case.compose(case.plan.identity).import_into(
                     db,
-                    case.plan,
                     build=case.context(),
                     vocabulary=case.vocabulary,
                     published=(),

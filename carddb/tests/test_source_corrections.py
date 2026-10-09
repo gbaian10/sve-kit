@@ -14,14 +14,13 @@ from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.source_corrections.closure import correction_exclusions
 from sve_carddb.domains.source_corrections.importer import verify_corrections
-from sve_carddb.domains.source_corrections.plan import plan_applications
-from sve_carddb.domains.source_corrections.projection import correction_references
-from sve_carddb.domains.text_observations import (
-    import_text_observations,
-    plan_text_observations,
+from sve_carddb.domains.source_corrections.plan import (
+    plan_applications,
+    verify_applications,
 )
+from sve_carddb.domains.source_corrections.projection import correction_references
+from sve_carddb.domains.text_observations import plan_text_observations
 from sve_carddb.domains.text_observations.importer import revision_id
-from sve_carddb.domains.text_observations.plan import verify_plan
 
 from .identity_evidence_fixtures import MemoryEvidence
 from .registry_snapshot_fixtures import edit_record
@@ -68,9 +67,8 @@ def test_conflict_is_the_only_pending_reason_and_prevents_mechanical_current(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -129,9 +127,8 @@ def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: i
     with create_database(schema) as db:
         with db.transaction():
             case.stage(db)
-        record = import_text_observations(
+        record = case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -223,9 +220,8 @@ def test_proposed_correction_is_retained_but_never_applied_or_marked(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -262,9 +258,8 @@ def test_already_fixed_is_not_reapplied_even_when_old_hash_differs(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -402,9 +397,8 @@ def test_conflict_closure_removes_routes_aliases_and_defaults_but_keeps_pending_
                     "namespace": "official",
                 },
             )
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -439,9 +433,8 @@ class TestDefaultCorrectionInputs:
         with create_database(compile_build(("en", "related", "correction"))) as db:
             with db.transaction():
                 case.stage(db)
-            import_text_observations(
+            case.compose(case.plan.identity).import_into(
                 db,
-                case.plan,
                 build=case.context(),
                 vocabulary=case.vocabulary,
                 published=(),
@@ -537,9 +530,8 @@ class TestDefaultCorrectionInputs:
         with create_database(compile_build(("en", "related", "correction"))) as db:
             with db.transaction():
                 case.stage(db)
-            import_text_observations(
+            case.compose(case.plan.identity).import_into(
                 db,
-                case.plan,
                 build=case.context(),
                 vocabulary=case.vocabulary,
                 published=(),
@@ -612,9 +604,8 @@ class TestDefaultCorrectionInputs:
             applications = (
                 replace(application, record=replace(application.record, data=data)),
             )
-        changed_plan = replace(case.plan, corrections=applications)
         with pytest.raises(ValueError, match="Correction"):
-            verify_plan(changed_plan)
+            verify_applications(case.identity, case.plan.observations, applications)
 
     @pytest.mark.parametrize("field", ["reason", "corrected_value", "state"])
     def test_correction_change_invalidates_old_candidate_and_configuration(
@@ -640,15 +631,15 @@ class TestDefaultCorrectionInputs:
             case.identity, case.provider, images=fixture.images
         )
         assert case.plan.configuration() != old.configuration()
+        assert old.corrections is not None
         with pytest.raises(ValueError, match="Correction"):
-            verify_plan(replace(old, identity=case.identity))
+            verify_applications(case.identity, old.observations, old.corrections)
         with create_database(compile_build(("en", "related", "correction"))) as db:
             with db.transaction():
                 case.stage(db)
             with pytest.raises(ValueError, match="configuration"):
-                import_text_observations(
+                case.compose(case.plan.identity).import_into(
                     db,
-                    case.plan,
                     build=old_configuration,
                     vocabulary=case.vocabulary,
                     published=(),
@@ -677,9 +668,8 @@ class TestDefaultCorrectionInputs:
         with create_database(compile_build(("en", "related", "correction"))) as db:
             with db.transaction():
                 case.stage(db)
-            import_text_observations(
+            case.compose(case.plan.identity).import_into(
                 db,
-                case.plan,
                 build=case.context(),
                 vocabulary=case.vocabulary,
                 published=(),
@@ -738,6 +728,7 @@ class TestDefaultCorrectionInputs:
         self, tmp_path: Path, default_correction_case: CorrectionCaseTemplate
     ) -> None:
         case = default_correction_case.copy(tmp_path).texts
+        case.images = None
         plan = plan_text_observations(case.identity, case.provider)
         with pytest.raises(ValueError, match="pinned image"):
             plan.publication_identity()
@@ -745,9 +736,8 @@ class TestDefaultCorrectionInputs:
             with db.transaction():
                 case.stage(db)
             with pytest.raises(ValueError, match="pinned image"):
-                import_text_observations(
+                case.compose(plan.identity).import_into(
                     db,
-                    plan,
                     build=case.context(),
                     vocabulary=case.vocabulary,
                     published=(),

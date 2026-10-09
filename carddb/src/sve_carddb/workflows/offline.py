@@ -42,14 +42,9 @@ from sve_carddb.domains.source_corrections import FrozenImages
 from sve_carddb.domains.text_observations import (
     FrozenTexts,
     RegionalTexts,
-    plan_text_observations,
-    populate_text_preview,
-    text_configuration,
+    TextObservations,
 )
-from sve_carddb.domains.text_observations.wording import (
-    printing_observed_texts,
-    wording_views,
-)
+from sve_carddb.domains.text_observations.composition import populate_text_preview
 from sve_carddb.domains.translations.flavor import apply as apply_flavor
 from sve_carddb.domains.translations.flavor import load as load_flavor
 from sve_carddb.domains.translations.glossary.records import (
@@ -91,6 +86,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.names.resolve import Names
     from sve_carddb.domains.translations.templates.loader import Validated
     from sve_carddb.images.assets import ImageBuild
+    from sve_carddb.ingest.archive.frozen_sources import FrozenBatches
 
 
 # Templates and flavor translate Japanese source text into this display language.
@@ -226,6 +222,7 @@ def _templates(
     stores: dict[str, Path],
     vocabulary: Vocabulary,
     batch: SourceBatch,
+    batches: FrozenBatches,
 ) -> Validated | None:
     """Template source positions come from this build's sealed JP batch, not from Git."""
     if inputs.translation_inputs() is None:
@@ -236,7 +233,8 @@ def _templates(
     if not templates.records:
         return None
     found = adopted(
-        templates.glossary, TranslationSources(stores, inputs.repository, build)
+        templates.glossary,
+        TranslationSources(stores, inputs.repository, build, batches=batches),
     )
     references = TemplateReferences(
         card_names=found.card_names,
@@ -246,7 +244,7 @@ def _templates(
     )
     rules = load_rules(inputs.repository)
     return validate_templates(
-        templates, TemplateSources(stores, references, rules), (batch,)
+        templates, TemplateSources(stores, references, rules, batches=batches), (batch,)
     )
 
 
@@ -255,6 +253,8 @@ def _prepare_catalog(
     build: BuildContext,
     stores: dict[str, Path],
     registry: RegistrySnapshot | None = None,
+    *,
+    batches: FrozenBatches | None = None,
 ) -> Prepared:
     """Native offline builds consume current values, never receipt envelopes."""
     from sve_carddb.domains.catalog.loader import prepare  # ruff: ignore[import-outside-top-level] -- initialize the shared text interner before catalog modules
@@ -267,7 +267,9 @@ def _prepare_catalog(
         configuration.get(key) != value for key, value in inputs.configuration().items()
     ):
         raise ValueError("Build configuration does not pin adoption inputs")
-    return prepare(snapshots, inputs.repository, build, stores, registry)
+    return prepare(
+        snapshots, inputs.repository, build, stores, registry, batches=batches
+    )
 
 
 def _populate_adoptions(
@@ -340,6 +342,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 )
     names = composer(inputs)
     image_checks = image_checks or ImageChecks()
+    batches = image_checks.batches
     mounted = prepare_images(inputs, images, image_root, image_checks)
     if (
         mounted is not None
@@ -359,17 +362,19 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 inputs.store_id,
                 en.card_batch,
                 parser_version=en.parser_version,
+                sources=batches.batch(inputs.archive, inputs.store_id, en.card_batch),
             ),
             jp=FrozenJP(
                 inputs.archive,
                 inputs.store_id,
                 jp.card_batch,
                 parser_version=jp.parser_version,
+                sources=batches.batch(inputs.archive, inputs.store_id, jp.card_batch),
             ),
         ),
         regions=("en", "jp"),
     )
-    texts = plan_text_observations(
+    observations = TextObservations(
         identity,
         RegionalTexts(
             {
@@ -379,12 +384,16 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     pin.card_batch,
                     region=pin.region,
                     parser_version=pin.parser_version,
+                    sources=batches.batch(
+                        inputs.archive, inputs.store_id, pin.card_batch
+                    ),
                 )
                 for pin in inputs.sources
             }
         ),
         images=RegionalImages(inputs, image_checks),
     )
+    texts = observations.plan
     publication = texts.publication_identity()
     printings = frozenset(
         record.data.id
@@ -398,6 +407,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         authored_revision=inputs.revision,
         catalog=catalog,
         stores=stores,
+        batches=batches,
     )
     official = plan_official_products(
         identities,
@@ -405,7 +415,11 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             page
             for pin in inputs.sources
             for page in FrozenProducts(
-                inputs.archive, inputs.store_id, pin.card_batch, region=pin.region
+                inputs.archive,
+                inputs.store_id,
+                pin.card_batch,
+                region=pin.region,
+                sources=batches.batch(inputs.archive, inputs.store_id, pin.card_batch),
             ).pages()
         ),
         identity,
@@ -414,7 +428,11 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         page
         for pin in inputs.sources
         for page in FrozenCardExtras(
-            inputs.archive, inputs.store_id, pin.card_batch, region=pin.region
+            inputs.archive,
+            inputs.store_id,
+            pin.card_batch,
+            region=pin.region,
+            sources=batches.batch(inputs.archive, inputs.store_id, pin.card_batch),
         ).pages()
     )
     adoptions = AdoptionInputs(
@@ -444,19 +462,26 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             "translation_templates",
         )
     )
-    prepared = _prepare_catalog(adoptions, context, stores, identity.snapshot)
+    prepared = _prepare_catalog(
+        adoptions, context, stores, identity.snapshot, batches=batches
+    )
     derived = prepared.projection
     if not {"en", "ja"} <= {language.code for language in derived.catalog.languages}:
         raise ValueError("Offline launch requires adopted EN and JA languages")
     vocabulary = derived.vocabulary
-    configuration |= text_configuration(texts, vocabulary, ())
+    configuration |= observations.configuration(vocabulary, ())
     context = BuildContext.from_inputs(inputs.revision, configuration)
     flavor = load_flavor(authored_root(inputs.repo))
     templates = _templates(
-        adoptions, context, stores, vocabulary, SourceBatch(batch_id=jp.card_batch)
+        adoptions,
+        context,
+        stores,
+        vocabulary,
+        SourceBatch(batch_id=jp.card_batch),
+        batches,
     )
     translation_sources = TranslationSources(
-        stores, inputs.repo, context, identity.snapshot
+        stores, inputs.repo, context, identity.snapshot, batches=batches
     )
     image_report: dict[str, JsonValue] | None = None
     name_result = None
@@ -465,7 +490,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             parents = populate_text_preview(
                 db,
                 catalog,
-                texts,
+                observations,
                 authored_revision=inputs.revision,
                 build=context,
                 vocabulary=vocabulary,
@@ -473,6 +498,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 languages=derived.catalog.languages,
                 stores=stores,
                 official=official,
+                batches=batches,
             )
             link_result = (
                 None
@@ -541,13 +567,14 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 )
             ),
         )
+        views = observations.views(db)
         decisions = replace(
             Decisions(),
             related_regions=applicable_reskin_regions(db, texts, vocabulary=vocabulary),
             supplemental_restrictions=restrictions,
             display_bindings=() if name_result is None else name_result.bindings,
             private_digital=names is not None,
-        ).with_text_views(wording_views(db, texts), printing_observed_texts(db, texts))
+        ).with_text_views(views.wording, views.observed)
         projection = project(
             db,
             regions=("en", "jp"),

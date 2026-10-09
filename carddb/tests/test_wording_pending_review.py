@@ -6,7 +6,6 @@ import pytest
 
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.domains.text_observations import import_text_observations
 from sve_carddb.domains.text_observations.wording import (
     ObservedText,
     WordingCandidate,
@@ -38,9 +37,8 @@ def test_unresolved_correction_never_selects_latest_known_display(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -98,9 +96,8 @@ def test_candidate_revision_must_belong_to_its_face_and_region(
     with create_database(compile_build(("en",))) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -178,9 +175,8 @@ def test_importer_marks_only_the_region_without_a_current(
                         "reason_codes": Json(["existing_manual_reason"]),
                     },
                 )
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),

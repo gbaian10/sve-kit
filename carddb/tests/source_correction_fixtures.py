@@ -104,5 +104,6 @@ def make_correction_case(  # ruff: ignore[too-many-arguments] -- explicit before
                 Binding(region=region, kind="type", raw="Spell", code="spell"),
             )
         )
+    case.images = images
     case.plan = plan_text_observations(case.identity, case.provider, images=images)
     return CorrectionCase(case, images, store.root)

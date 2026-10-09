@@ -575,12 +575,3 @@ def test_absent_projection_is_preserved_when_source_correction_changes_type(
         "source_correction_comparison",
         "source_correction_evidence",
     }
-
-
-def test_raw_observation_cannot_inherit_corrected_candidate_keys(
-    tmp_path: Path, inputs: Inputs
-) -> None:
-    plan = make_correction_case(tmp_path, inputs).texts.plan
-    item = plan.observations[0].model_copy(update={"correction_keys": ("tampered",)})
-    with pytest.raises(ValueError, match="content/source face mismatch"):
-        planning.verify_plan(replace(plan, observations=(item, *plan.observations[1:])))

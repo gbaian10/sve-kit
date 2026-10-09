@@ -132,11 +132,18 @@ def _date(raw: str | None) -> str | None:
 
 class FrozenCardExtras:
     def __init__(
-        self, root: Path, store_id: str, batch_id: str, *, region: Region = "jp"
+        self,
+        root: Path,
+        store_id: str,
+        batch_id: str,
+        *,
+        sources: FrozenSources | None = None,
+        region: Region = "jp",
     ) -> None:
         if region not in {"jp", "en"}:
             raise ValueError("Card extras require an explicit JP or EN region")
-        self.sources = FrozenSources(root, store_id, batch_id)
+        self.sources = sources or FrozenSources(root, store_id, batch_id)
+        self.sources.require_scope(root, store_id, batch_id)
         self.region = region
 
     def pages(self) -> Iterator[CardPage]:

@@ -300,7 +300,7 @@ def build_regional_assets(
             f"Image conversion requires an exclusively {region.upper()} image batch"
         )
     checks = checks or ImageChecks()
-    checks.batches.setdefault(
+    checks.batches.batches.setdefault(
         (images.root.resolve(), images.store_id, images.batch_id), images
     )
     start = perf_counter()

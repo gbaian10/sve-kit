@@ -68,9 +68,9 @@ class CorrectionCaseTemplate:
     def copy(self, destination: Path) -> CorrectionCase:
         texts = self.texts.copy(destination)
         image_store = destination / self.image_store
-        return CorrectionCase(
-            texts, FrozenImages(image_store, self.store_id, self.batch_id), image_store
-        )
+        images = FrozenImages(image_store, self.store_id, self.batch_id)
+        texts.images = images
+        return CorrectionCase(texts, images, image_store)
 
 
 @pytest.fixture(scope="session")

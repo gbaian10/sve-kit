@@ -8,7 +8,7 @@ from pydantic import JsonValue
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, canonical, digest, object_value
-from sve_carddb.domains.text_observations import populate_text_preview
+from sve_carddb.domains.text_observations.composition import populate_text_preview
 from sve_carddb.domains.translations.flavor import Entry, apply, load
 from sve_carddb.workflows import offline
 from sve_carddb.workflows.offline import build

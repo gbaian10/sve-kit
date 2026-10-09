@@ -15,11 +15,18 @@ if TYPE_CHECKING:
 
 class FrozenErrataNotices:
     def __init__(
-        self, root: Path, store_id: str, batch_id: str, *, region: Region
+        self,
+        root: Path,
+        store_id: str,
+        batch_id: str,
+        *,
+        sources: FrozenSources | None = None,
+        region: Region,
     ) -> None:
         if region not in {"jp", "en"}:
             raise ValueError("Errata archive requires an explicit JP or EN region")
-        self.sources = FrozenSources(root, store_id, batch_id)
+        self.sources = sources or FrozenSources(root, store_id, batch_id)
+        self.sources.require_scope(root, store_id, batch_id)
         self.region = region
 
     def notices(self) -> Iterator[StagedNotice]:

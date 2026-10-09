@@ -149,7 +149,7 @@ def prepared(
         offline, "plan_preview", lambda *_args, **_kwargs: case.identity
     )
     monkeypatch.setattr(
-        offline, "plan_text_observations", lambda *_args, **_kwargs: case.plan
+        offline, "TextObservations", lambda *_args, **_kwargs: case.compose()
     )
     monkeypatch.setattr(
         offline, "load_products", lambda *_args, **_kwargs: case.catalog
@@ -202,7 +202,7 @@ def prepared(
     )
 
     class Pages:
-        def __init__(self, *_args: object, region: str) -> None:
+        def __init__(self, *_args: object, region: str, **_kwargs: object) -> None:
             self.region = region
 
         def pages(self) -> tuple[CardPage, ...]:

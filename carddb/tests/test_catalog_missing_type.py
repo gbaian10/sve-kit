@@ -9,11 +9,7 @@ from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, object_value
 from sve_carddb.domains.source_corrections.projection import correction_references
-from sve_carddb.domains.text_observations import (
-    Binding,
-    Vocabulary,
-    import_text_observations,
-)
+from sve_carddb.domains.text_observations import Binding, Vocabulary
 from sve_carddb.domains.text_observations.importer import revision_id
 from sve_carddb.domains.text_observations.type_binding import type_binding
 
@@ -69,9 +65,8 @@ def test_missing_type_uses_exact_confirmed_correction_and_preserves_both_revisio
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        record = import_text_observations(
+        record = case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
