@@ -76,6 +76,10 @@ The authoritative game server (`sim/server/`) is planned and does not exist yet.
 The engine, scenario runner, and web client already exist; their presence does
 not imply that the complete battle service or public deployment is ready.
 
+Confirmed deployment boundaries and replay storage constraints are documented
+in [docs/deployment](docs/deployment/README.md); the remaining online lifecycle
+proposal requires maintainer confirmation.
+
 ## How the parts fit
 
 ```text

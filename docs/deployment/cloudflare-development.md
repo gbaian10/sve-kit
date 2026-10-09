@@ -1,5 +1,7 @@
 # Cloudflare 開發環境設定與快照上傳
 
+部署分工與回放儲存邊界見 [部署文件索引](README.md)。
+
 前端使用 **Workers 靜態資源**，建置與部署為 Vite build → Wrangler deploy。
 本清單由維護者親手操作；agent、CI 不取得 Cloudflare 憑證，不執行真實部署或上傳。
 資料契約見 [preview 建置與接線](../schema/preview-handoff.md)。
