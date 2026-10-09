@@ -12,7 +12,7 @@
 cargo run --locked -p sve-engine --bin sve-prototype -- "$SVE_TEST_SNAPSHOT" . validate target/validate
 ```
 
-機器可讀清單在 [rejected-yaml.yaml](rejected-yaml.yaml)；共用測試
+機器可讀清單在 [rejected-yaml.yaml](../../tests/engine/rejected-yaml.yaml)；共用測試
 `authored_yaml_loads_or_is_a_listed_rejection` 要求實際結果與清單完全相同（多一張、少一張都失敗）。
 
 ## 檢查項目

@@ -3,8 +3,8 @@
 `sim/engine`（crate `sve-engine`）目前是 D 階段留下、經 M0 修正的**原型**，不是正式引擎。
 這份文件記錄它現在能做什麼、還不能做什麼，以及哪些限制尚未重新確認。
 
-- 逐項的錯誤、預期結果與處理狀態：[M0／M1 已知錯清單](../m0/known-errors.md)
-- 載入期會拒絕哪些 YAML、哪些構造還抓不到：[載入期拒絕的 YAML](../m0/rejected-yaml.md)
+- 逐項的錯誤、預期結果與處理狀態：[M0／M1 已知錯清單](known-errors.md)
+- 載入期會拒絕哪些 YAML、哪些構造還抓不到：[載入期拒絕的 YAML](rejected-yaml.md)
 - 效果 DSL 的正式規格：[docs/dsl/](../dsl/README.md)
 
 標記「待確認」的項目是 D 階段第三次封存時記錄的限制，M0 之後沒有逐項重新驗證；
@@ -22,23 +22,23 @@
 
 `Catalog` 載入 `authored/` 時，除了 JSON Schema，還用 `sim/engine/src/catalog/semantics.rs` 檢查每張卡。
 檢查的對象是**已列舉且實際比對**的種類與值：各位置可執行的 opcode 清單、引擎會發出的誘發事件、
-已知的讀值路徑與選擇器欄位、有到期處理的期間，以及 [rejected-yaml.md〈檢查項目〉](../m0/rejected-yaml.md) 列出的參數。
+已知的讀值路徑與選擇器欄位、有到期處理的期間，以及 [rejected-yaml.md〈檢查項目〉](rejected-yaml.md) 列出的參數。
 不在清單內的會帶卡號與行號拒絕，被拒絕的卡永不執行。D 階段「未知讀值可能回 null／0」
 「部分宣告可能被略過」的情況，在上述檢查涵蓋的範圍內已由這項檢查取代（KE-15）。
 
 通過載入只是必要條件，不代表能正確執行：仍須靠執行測試與逐卡語義審查。
 已知會通過載入卻靜默不做或讀錯的構造（選擇器的種族名或卡名拼錯、讀值與拼錯的字面值比較、
-`bind` 名稱的作用域、沒有程式讀取的一般欄位等），列在 [rejected-yaml.md〈尚未涵蓋〉](../m0/rejected-yaml.md)。
+`bind` 名稱的作用域、沒有程式讀取的一般欄位等），列在 [rejected-yaml.md〈尚未涵蓋〉](rejected-yaml.md)。
 
 ## 測試現況
 
-依據：M0 閘門結果（[known-errors.md〈基準〉](../m0/known-errors.md)），以及 2026-09-28 推送前清理時的
+依據：M0 閘門結果（[known-errors.md〈基準〉](known-errors.md)），以及 2026-09-28 推送前清理時的
 `cargo test --locked --workspace`（267 passed、0 failed；`SVE_TEST_SNAPSHOT` 指向 2026-09-26 的 D 階段封存輸入 `cards.jsonl`，
 SHA-256 見 known-errors.md〈基準〉）。換了卡表快照或程式之後要重跑，不能沿用這裡的結果。
 
-- 共同題本 `tests/rules-scenarios/` 706 個局面全部通過，已知失敗清單 `docs/m0/known-failures.yaml` 為空
+- 共同題本 `tests/rules-scenarios/` 706 個局面全部通過，已知失敗清單 `tests/engine/known-failures.yaml` 為空
 - G1 代表題組 41 個局面全部通過；回放、輔助與 AI 共同局面的檢查通過
-- `authored/` 的載入結果必須與 `docs/m0/rejected-yaml.yaml` 完全相同（目前只有 BP10-T09 被拒絕）
+- `authored/` 的載入結果必須與 `tests/engine/rejected-yaml.yaml` 完全相同（目前只有 BP10-T09 被拒絕）
 - 執行方式與 `SVE_TEST_SNAPSHOT` 的設定見 [sim/engine/README.md](../../sim/engine/README.md)
 
 題本通過只表示這些局面正確，不能推論任意卡片、初始狀態或組合都正確。
