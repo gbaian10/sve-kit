@@ -83,7 +83,9 @@ def _encode(value: JsonValue) -> str:
             )
             + "}"
         )
-    raise ValueError("Floating point JSON is forbidden")
+    if isinstance(value, float):
+        raise ValueError("Floating point JSON is forbidden")  # ruff: ignore[type-check-without-type-error] -- JSON numbers are rejected by value under this recipe
+    raise TypeError("Unsupported JSON type: " + type(value).__name__)
 
 
 def canonical(value: JsonValue) -> bytes:
