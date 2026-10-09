@@ -165,7 +165,7 @@ def test_complete_graph_keeps_ids_owners_dates_region_and_raw_provenance(
             row.values["parser_version"]
             for row in db.rows("source_record")
             if row.values["kind"] == "authored"
-        } == {"registry-envelope-v2", "product-authored-v2", "product-identity-v2"}
+        } == {"registry-envelope-v3", "product-authored-v3", "product-identity-v3"}
         assert not db.rows("decision")
         assert not db.rows("decision_source")
         db.verify()
@@ -465,7 +465,7 @@ def test_english_inclusions_obey_existing_identity_gate(
     install_identity(
         fixture.root,
         identity_envelope([identity_record(page, product_id="english-id")]),
-        name="product-identities/en/001.yaml",
+        name="products/identities/en/001.yaml",
     )
     fixture.revision = commit(fixture.root)
     fixture.pages = (*fixture.pages, page)
@@ -590,7 +590,7 @@ def test_product_code_conflict_is_independent_of_same_name_and_date(
     install_identity(
         fixture.root,
         identity_envelope([identity_record(changed)]),
-        name="product-identities/jp/002.yaml",
+        name="products/identities/jp/002.yaml",
     )
     fixture.revision = commit(fixture.root)
     original = fixture.pages[0]
@@ -715,7 +715,7 @@ def test_compound_expansion_is_not_split_to_find_a_family_kind(
     install_identity(
         fixture.root,
         identity_envelope([identity_record(page)]),
-        name="product-identities/jp/002.yaml",
+        name="products/identities/jp/002.yaml",
     )
     fixture.revision = commit(fixture.root)
     official = plan_official_products(fixture.load(), (page,), fixture.preview)

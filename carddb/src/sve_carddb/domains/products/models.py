@@ -158,11 +158,11 @@ CatalogRecord = Annotated[
 
 
 class Shard(RecordData):
-    product_authored_format: Literal[1]
+    format: Literal[1]
     kind: Literal["product_shard"]
     records: Annotated[tuple[CatalogRecord, ...], Field(min_length=1)]
 
-    @field_validator("product_authored_format", mode="before")
+    @field_validator("format", mode="before")
     @classmethod
     def _version(cls, value: object) -> object:
         if type(value) is not int:

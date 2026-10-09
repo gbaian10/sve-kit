@@ -88,13 +88,13 @@ def test_inventory_yaml_and_revision_constraints(  # ruff: ignore[complex-struct
     fixture = identity_fixture
     shard_path = fixture.root / NAME
     if constraint == "missing_directory":
-        shutil.rmtree(fixture.root / "product-identities")
+        shutil.rmtree(fixture.root / "products/identities")
     elif constraint in {"extra_shard", "yml"}:
         (
             shard_path.parent / ("002.yml" if constraint == "yml" else "002.yaml")
         ).write_bytes(shard_path.read_bytes())
     elif constraint == "unexpected_path":
-        other = fixture.root / "product-identities/cn/001.yaml"
+        other = fixture.root / "products/identities/cn/001.yaml"
         other.parent.mkdir()
         other.write_bytes(shard_path.read_bytes())
     elif constraint == "wrong_sequence":
@@ -115,13 +115,11 @@ def test_inventory_yaml_and_revision_constraints(  # ruff: ignore[complex-struct
         )
     elif constraint == "alias":
         shard_path.write_text(
-            "product_identity_format: &format 1\nkind: product_identity_shard\nrecords: *format\n"
+            "format: &format 1\nkind: product_identity_shard\nrecords: *format\n"
         )
     elif constraint == "unknown_yaml_tag":
         shard_path.write_text(
-            shard_path.read_text().replace(
-                "product_identity_format: 1", "product_identity_format: !custom 1"
-            )
+            shard_path.read_text().replace("format: 1", "format: !custom 1")
         )
     else:
         shard_path.write_bytes(shard_path.read_bytes() + b"# Dirty physical bytes\n")
@@ -216,7 +214,7 @@ def test_same_match_cannot_be_appended_even_to_same_id(
     install_identity(
         fixture.root,
         obj(read_yaml(fixture.root / NAME)),
-        name="product-identities/jp/002.yaml",
+        name="products/identities/jp/002.yaml",
     )
     fixture.revision = commit(fixture.root)
     with pytest.raises(ValueError, match="Duplicate global product identity match"):
@@ -279,7 +277,7 @@ def test_same_expansion_different_ids_warns_but_alias_same_id_does_not(
     )
     alias = identity_record(page, product_id="second-id")
     install_identity(
-        fixture.root, identity_envelope([alias]), name="product-identities/jp/002.yaml"
+        fixture.root, identity_envelope([alias]), name="products/identities/jp/002.yaml"
     )
     fixture.revision = commit(fixture.root)
     identities = fixture.load()
@@ -292,7 +290,7 @@ def test_same_expansion_different_ids_warns_but_alias_same_id_does_not(
     } == {"permanent-example", "second-id"}
     obj(alias["data"])["product_id"] = "permanent-example"
     install_identity(
-        fixture.root, identity_envelope([alias]), name="product-identities/jp/002.yaml"
+        fixture.root, identity_envelope([alias]), name="products/identities/jp/002.yaml"
     )
     fixture.revision = commit(fixture.root)
     assert not fixture.load().warnings
@@ -315,7 +313,7 @@ def test_same_id_cannot_cross_regions(identity_fixture: IdentityFixture) -> None
     install_identity(
         fixture.root,
         identity_envelope([identity_record(page)]),
-        name="product-identities/en/001.yaml",
+        name="products/identities/en/001.yaml",
     )
     with pytest.raises(ValueError, match="across regions"):
         fixture.load()
@@ -351,7 +349,7 @@ def test_duplicate_match_same_id_with_distinct_evidence_still_fails(
     refs = items(row["evidence"])
     refs.append(obj(refs[0]).copy() | {"role": "supplementary"})
     install_identity(
-        fixture.root, identity_envelope([row]), name="product-identities/jp/002.yaml"
+        fixture.root, identity_envelope([row]), name="products/identities/jp/002.yaml"
     )
     with pytest.raises(ValueError, match="Duplicate global product identity match"):
         fixture.load()
@@ -450,7 +448,9 @@ def test_evidence_region_is_not_assumed_from_match_region(
     data = obj(record["data"])
     data["region"] = "en"
     install_identity(
-        fixture.root, identity_envelope([record]), name="product-identities/en/001.yaml"
+        fixture.root,
+        identity_envelope([record]),
+        name="products/identities/en/001.yaml",
     )
     fixture.revision = commit(fixture.root)
     with pytest.raises(ValueError, match="source region/kind mismatch"):
@@ -469,7 +469,9 @@ def test_ambiguous_block_can_only_use_confirmed_exact_source_block(
     record = identity_record(page)
     assert obj(obj(record["data"])["match"])["kind"] == "source_block"
     install_identity(
-        fixture.root, identity_envelope([record]), name="product-identities/jp/002.yaml"
+        fixture.root,
+        identity_envelope([record]),
+        name="products/identities/jp/002.yaml",
     )
     fixture.revision = commit(fixture.root)
     assert fixture.load().match("jp", page.blocks[0].matches) == "permanent-example"
@@ -519,7 +521,7 @@ def test_filing_path_is_checked_independently_of_data_region(
     fixture = identity_fixture
     shard = obj(read_yaml(fixture.root / NAME))
     (fixture.root / NAME).unlink()
-    install_identity(fixture.root, shard, name="product-identities/en/001.yaml")
+    install_identity(fixture.root, shard, name="products/identities/en/001.yaml")
     fixture.revision = commit(fixture.root)
     with pytest.raises(
         ValueError, match="Product identity filing/path/region mismatch"
@@ -553,8 +555,8 @@ class TestIdentityWireConstraints:
     @pytest.mark.parametrize(
         ("area", "field", "value"),
         [
-            ("shard", "product_identity_format", True),
-            ("shard", "product_identity_format", 2),
+            ("shard", "format", True),
+            ("shard", "format", 2),
             ("shard", "kind", "product_shard"),
             ("shard", "extra", "unexpected"),
             ("shard", "records", []),

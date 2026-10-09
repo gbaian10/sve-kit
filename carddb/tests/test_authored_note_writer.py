@@ -27,9 +27,7 @@ def test_parameter_rules_round_trip_omits_only_empty_note(note: str) -> None:
         low_confidence=False,
         note=note,
     )
-    rules = Rules(
-        parameter_rule_format=2, kind="template_parameter_rules", rules=(rule,)
-    )
+    rules = Rules(format=2, kind="template_parameter_rules", rules=(rule,))
     raw = encode(rules)
     assert (b"note:" in raw) == bool(note)
     assert b"enabled: false" in raw

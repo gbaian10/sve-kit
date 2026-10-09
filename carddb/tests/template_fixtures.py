@@ -12,12 +12,15 @@ def template_files(files: Files, records: tuple[Record, ...]) -> Files:
         if not item[0].startswith("translations/templates/")
     )
     content = list(preserved)
-    for kind in sorted({record.kind for record in records}):
-        shard = Shard(
-            translation_authored_format=2,
-            kind="translation_shard",
-            records=tuple(record for record in records if record.kind == kind),
-        )
+    for area, kinds in (
+        ("definitions", {"sentence_template"}),
+        ("values", {"template_translation", "template_translation_variant"}),
+        ("candidates", {"template_translation_candidate"}),
+    ):
+        selected = tuple(record for record in records if record.kind in kinds)
+        if not selected:
+            continue
+        shard = Shard(format=2, kind="translation_shard", records=selected)
         raw = canonical(shard.model_dump(mode="json", round_trip=True))
-        content.append((f"translations/templates/{kind}/001.yaml", raw, raw))
+        content.append((f"translations/templates/{area}/001.yaml", raw, raw))
     return Files(files.revision, tuple(sorted(content)))

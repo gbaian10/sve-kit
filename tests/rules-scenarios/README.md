@@ -29,7 +29,7 @@
 所有題目都經過對方交叉審核，雙方同意後定案。
 
 `verified_by[].note` 裡出現的 `xverify-*/recheck.md`、`last.md`、`split.md` 等檔名是設計期本機審核稿，
-不隨 repo 發布。題目的公開依據以題目的 `refs`、`evidence` 與裁定登錄（`authored/rulings/`）為準。
+不隨 repo 發布。題目的公開依據以題目的 `refs`、`evidence` 與裁定登錄（`authored/rules/rulings/`）為準。
 
 定案題庫中的官方規則、Q&A 與卡文引文用來說明預期結果，保留出處，且不在本專案授權內。
 題庫自有部分與裁定登錄的授權依根目錄 [LICENSING.md](../../LICENSING.md) 的路徑表；

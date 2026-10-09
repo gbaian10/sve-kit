@@ -4,18 +4,25 @@ Human-maintained data and permanent identity allocations, read by `carddb` at bu
 
 - `registry/card/`, `registry/face/`, `registry/printing/` — permanent identities and manually confirmed JP/EN membership, filed by immutable owner
 - `ids/index.yaml`, `ids/<owner>/*.yaml` — allocation policy and cursors, and append-only printing `int_id` allocations in per-region ranges
-- `registry/region_mapping_review/` — confirmed absence of Japanese counterparts, with scope and date
+- `registry/region-mapping-review/` — confirmed absence of Japanese counterparts, with scope and date
 - `registry/art/` — reviewed English original-art uses
-- `registry/card_related/` — source-pinned reskin relationships
-- `registry/source_correction/` — confirmed corrections and separately marked review candidates; raw observations remain unchanged
-- `effects/` — effect data in the DSL defined by `../dsl/`
-- `rulings/` — evidence-backed interpretations; see `../docs/adr/0011-rulings-evidence.md`
+- `registry/card-related/` — source-pinned reskin relationships
+- `registry/source-correction/` — confirmed corrections and separately marked review candidates; raw observations remain unchanged
+- `rules/effects/` — effect data in the DSL defined by `../dsl/`
+- `rules/rulings/` — evidence-backed interpretations; see `../docs/adr/0011-rulings-evidence.md`
 - `translations/glossary/<filing_key>/*.yaml` — current glossary concepts and editable current translations
-- `flavor-translations/<hash digit>.yaml` — whole-paragraph flavor translations keyed by the source text's SHA-256; see [flavor translation](../docs/schema/flavor-translation.md)
+- `translations/flavor/<hash digit>.yaml` — whole-paragraph flavor translations keyed by the source text's SHA-256; see [flavor translation](../docs/schema/flavor-translation.md)
+
+Every YAML document explicitly declares integer `format` and enumerated `kind`.
+Templates use `translations/templates/{definitions,values,candidates}/`; products
+use `products/{family,product,inclusion,identities}/`; catalog data lives under
+`catalog/{adoptions,overrides}/`, and digital policies are
+`digital/policies/{names,links}.yaml`. Rules also include `rules/keywords.yaml`
+and `rules/engine/index.yaml`; source-bound crops are `images/crops.yaml`.
 
 The identity registry format is defined in [authored layout](../docs/schema/authored-layout.md).
 The former `card-ids.yaml` proposal is replaced by `registry/` and `ids/`.
-Run the offline generator with `python -m sve_carddb.registry --help` through the carddb uv environment.
+Run the offline generator with `python -m sve_carddb.domains.registry --help` through the carddb uv environment.
 Never regenerate identity IDs from sorting, rewrite an existing registry record in place,
 or treat a `needs_review` correction as accepted. Identities are written only after manual
 confirmation; the PR review records how they were checked.
@@ -28,7 +35,9 @@ allocations and manual membership remain fixed. The [migration boundary](../docs
 does not relax the daily append-only tools or add a general rewrite command.
 
 The glossary input follows the [translation contract](../docs/schema/translation-contract.md)
-and [glossary adoption rules](../docs/schema/glossary-adoption.md). Readers load the dedicated working-tree data directories once; keep documentation, candidates and audit reports outside `translations/`.
+and [glossary adoption rules](../docs/schema/glossary-adoption.md). Readers load the dedicated working-tree data directories once; keep documentation and audit reports outside `translations/`.
+The controlled `translations/templates/candidates/` area is the exception for
+validated template candidates; candidates never supply formal template translations.
 Concept keys are permanent. Edit translation YAML directly and review it in a PR; Git keeps the
 history (ADR-0018). Official wording stays out of git. Mark quality with `low_confidence`
 and `origin`; a `source_claim` is optional and only holds a work, URL or claimed source.

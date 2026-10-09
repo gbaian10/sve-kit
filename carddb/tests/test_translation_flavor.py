@@ -50,10 +50,12 @@ def entry(
 
 
 def shard(root: Path, name: str, *entries: dict[str, JsonValue]) -> None:
-    directory = root / "flavor-translations"
+    directory = root / "translations/flavor"
     directory.mkdir(parents=True, exist_ok=True)
     (directory / name).write_bytes(
-        canonical({"kind": "flavor_translation_shard", "entries": list(entries)})
+        canonical(
+            {"format": 1, "kind": "flavor_translation_shard", "entries": list(entries)}
+        )
     )
 
 
@@ -107,7 +109,7 @@ def test_one_source_text_cannot_appear_in_two_shards(tmp_path: Path) -> None:
 
 def test_directory_holds_only_yaml_files(tmp_path: Path) -> None:
     shard(tmp_path, "1.yaml", entry())
-    (tmp_path / "flavor-translations" / "notes.txt").write_text("x")
+    (tmp_path / "translations/flavor" / "notes.txt").write_text("x")
     with pytest.raises(ValueError, match="only YAML"):
         load(tmp_path)
 

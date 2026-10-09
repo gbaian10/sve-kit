@@ -97,7 +97,7 @@ def test_confirmed_family_and_identity_are_one_graph(
         sources = {
             row.values["authored_path"]: row.values
             for row in db.rows("source_record")
-            if row.values["parser_version"] == "product-authored-v2"
+            if row.values["parser_version"] == "product-authored-v3"
         }
         assert not db.rows("decision")
         assert not db.rows("decision_source")

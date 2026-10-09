@@ -1,0 +1,561 @@
+format: 1
+kind: effect_set
+cards:
+  ECP01-001:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount:
+            fn: sub
+            args:
+              - 0
+              - count:
+                  zone: field
+                  side: self
+                  trait: ウマ娘
+      - line: 2
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 3
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+  ECP01-002:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: evolve
+        subject: self
+  ECP01-010:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 3
+        kind: static
+        body:
+          op: restrict
+          subjects: opponent.leader
+          action: trigger
+          events:
+            - fanfare
+            - on_evolve
+  ECP01-011:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: restrict
+          subjects: opponent.leader
+          action: trigger
+          events:
+            - fanfare
+            - on_evolve
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects:
+            side: both
+            zone: field
+            type: follower
+            other: true
+          amount: 7
+        event: evolve
+        subject: self
+  ECP01-012:
+    status: complete
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 2
+        costs:
+          - op: eat
+            subjects: self
+            count: 2
+          - op: pp
+            amount: 2
+      - line: 3
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 3
+        costs:
+          - op: eat
+            subjects: self
+            count: 3
+          - op: pp
+            amount: 3
+      - line: 4
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self
+              power: 1
+              hp: 1
+            - op: seq
+              steps:
+                - op: look
+                  count: 3
+                  bind: seen
+                - op: optional
+                  selection:
+                    select:
+                      from: seen
+                      type: follower
+                      trait: ウマ娘
+                      where:
+                        fn: le
+                        args:
+                          - read: item.cost
+                          - 3
+                    min: 1
+                    max: 1
+                    bind: chosen
+                  then:
+                    op: move
+                    subjects: chosen
+                    to: field
+                    bind: placed
+                - op: seq
+                  steps:
+                    - op: select
+                      select:
+                        difference:
+                          - seen
+                          - placed
+                      min:
+                        count:
+                          difference:
+                            - seen
+                            - placed
+                      max:
+                        count:
+                          difference:
+                            - seen
+                            - placed
+                      bind: ordered
+                      order: true
+                    - op: move
+                      subjects: ordered
+                      to: deck
+                      position: bottom
+        event: race
+        subject: self
+  ECP01-014:
+    status: complete
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 4
+            - op: modify
+              subjects: self
+              power: 1
+              hp: 1
+            - op: damage
+              subjects: self
+              amount: 2
+        event: race
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 0
+            max: 1
+  ECP01-016:
+    status: complete
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: search
+          select:
+            zone: deck
+            side: self
+            trait: ウマ娘
+            type: follower
+            where:
+              fn: eq
+              args:
+                - read: item.cost
+                - 1
+          min: 0
+          max: 1
+          to: field
+        event: enter
+        subject: self
+  ECP01-019:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 3
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - count:
+                  zone: cemetery
+                  side: self
+                  trait: ウマ娘
+              - 10
+          then:
+            op: flip
+            subjects: target.1
+            face: down
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: evolve_deck
+              side: self
+              name: にんじん
+              where:
+                read: item.face_up
+            min: 1
+            max: 1
+  ECP01-023:
+    status: complete
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 3
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount: 2
+        event: enter
+        subject:
+          union:
+            - side: self
+              zone: field
+              name: シュヴァルグラン
+            - side: self
+              zone: field
+              name: ヴィブロス
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+      - line: 4
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: opponent.leader
+              amount: 2
+            - op: modify
+              subjects: self.leader
+              hp: 2
+            - op: draw
+              count: 2
+        event: enter
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+              trait: ウマ娘
+            min: 1
+            max: 1
+        costs:
+          - op: discard
+            subjects: cost.1
+  ECP01-025:
+    status: complete
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount:
+            if:
+              fn: gt
+              args:
+                - count:
+                    zone: field
+                    side: self
+                    trait: ウマ娘
+                    where:
+                      fn: ge
+                      args:
+                        - read: item.cost
+                        - 4
+                - 0
+            then: 3
+            else: 1
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+  ECP01-049:
+    status: complete
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: draw
+          count:
+            if:
+              fn: ge
+              args:
+                - read: cost.1.cost
+                - 7
+            then: 2
+            else: 1
+        event: enter
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              zone: hand
+              side: self
+              trait: ウマ娘
+            min: 1
+            max: 1
+        costs:
+          - op: discard
+            subjects: cost.1
+      - line: 3
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - count:
+                      zone: field
+                      side: self
+                      trait: ウマ娘
+                  - 3
+              then:
+                op: damage
+                subjects: target.1
+                amount: 2
+            - op: if
+              condition:
+                fn: eq
+                args:
+                  - count:
+                      zone: field
+                      side: self
+                      trait: ウマ娘
+                  - 5
+              then:
+                op: damage
+                subjects: target.1.leader
+                amount: 2
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+        costs:
+          - op: act
+            subjects: self
+  ECP01-053:
+    status: complete
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 3
+        kind: static
+        body:
+          op: restrict
+          subjects: self
+          action: normal_stand
+      - line: 4
+        kind: trigger
+        body:
+          op: pay
+          costs:
+            - op: pp
+              amount: 1
+          then:
+            op: stand
+            subjects: self
+        event: main_start

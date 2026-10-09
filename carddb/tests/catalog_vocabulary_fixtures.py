@@ -18,7 +18,6 @@ from .adoption_fixtures import (
     Case,
     commit,
     envelope,
-    index,
     make_case,
     record,
     source_configuration,
@@ -36,7 +35,7 @@ RUNTIME = (
     "carddb/src/sve_carddb/domains/catalog/adoption_sources.py",
     "carddb/src/sve_carddb/core/json.py",
 )
-VOCABULARY_PATH = "catalog-adoptions/vocabulary/shared/001.yaml"
+VOCABULARY_PATH = "catalog/adoptions/vocabulary/001.yaml"
 
 
 @dataclass(frozen=True)
@@ -100,7 +99,6 @@ def save(case: VocabularyCase, records: list[dict[str, JsonValue]]) -> Vocabular
         VOCABULARY_PATH,
         envelope(list[JsonValue](records)),
     )
-    index(case.case.root)
     return replace(case, case=replace(case.case, revision=commit(case.case.repository)))
 
 

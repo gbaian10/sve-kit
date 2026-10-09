@@ -260,8 +260,8 @@ def _prepare_catalog(
     from sve_carddb.domains.catalog.loader import prepare  # ruff: ignore[import-outside-top-level] -- initialize the shared text interner before catalog modules
 
     snapshots = inputs.load()
-    if any(snapshot.entry != "catalog-adoptions" for snapshot in snapshots):
-        raise ValueError("Offline catalog requires catalog-adoptions inputs")
+    if any(snapshot.entry != "catalog/adoptions" for snapshot in snapshots):
+        raise ValueError("Offline catalog requires catalog/adoptions inputs")
     configuration = object_value(parse(build.configuration.encode()))
     if any(
         configuration.get(key) != value for key, value in inputs.configuration().items()
@@ -421,7 +421,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         authored_root(inputs.repo),
         inputs.repo,
         inputs.revision,
-        ("catalog-adoptions",),
+        ("catalog/adoptions",),
         include_translations=True,
     )
     configuration = adoptions.configuration() | {

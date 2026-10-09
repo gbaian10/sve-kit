@@ -62,7 +62,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
         "ids/index.yaml",
         Index().model_dump(mode="json"),
     )
-    for area in ("products", "product-identities"):
+    for area in ("products", "products/identities"):
         (case.case.root / area).mkdir(parents=True, exist_ok=True)
     store = _store(case.case.repository.parent / "translation-sources")
     shutil.copytree(case.archive, store.root, dirs_exist_ok=True)

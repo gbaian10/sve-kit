@@ -1,0 +1,259 @@
+format: 2
+kind: template_parameter_rules
+rules:
+  - rule_id: attack_assignment
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: attack_bound
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: attack_damage_multiplier
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: attack_health_assignment
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: attack_sum_bound
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: braced_ability_reference
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: braced_action_engage_reference
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: braced_stat_reference
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: bracket_choice_index
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: cost_assignment
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: count_formula_multiplier
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: damage_attack_multiplier
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: damage_count_multiplier
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: dealt_ability_damage_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: dealt_all_damage_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: dealt_combat_damage_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: deck_top_ordinal
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: distinct_card_name_count
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: distinct_original_cost_count
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: ep_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: health_assignment
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: keyword_alias_nc
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: keyword_alias_sc
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: keyword_threshold_combo
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: keyword_threshold_lesson
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: keyword_threshold_necrocharge
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: keyword_threshold_spell_chain
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: leader_health_assignment
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: leader_health_bound
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: leader_person_quantity
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: named_counter_group_size
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: named_counter_place
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: named_counter_remove
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: named_counter_threshold
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: original_cost_bound
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: original_cost_sum_bound
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: player_person_quantity
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: pp_capacity_bound
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: pp_capacity_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: pp_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: pp_remaining_bound
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: prefix_attack_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: prefix_cost_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: prefix_field_attack
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: prefix_field_cost
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: prefix_field_health
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: prefix_health_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: received_ability_damage_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: received_all_damage_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: received_combat_damage_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: received_damage_assignment
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: received_damage_lower_bound
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: stack_delta
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: suffix_damage_amount
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: suffix_ordinal_cards
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: suffix_ordinal_times
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: suffix_ordinal_turns
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: suffix_recovery_amount
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: suffix_unit_cards
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: suffix_unit_entities
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: suffix_unit_items
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: suffix_unit_pp
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: suffix_unit_times
+    enabled: true
+    origin: project
+    low_confidence: false
+  - rule_id: suffix_unit_turns
+    enabled: true
+    origin: project
+    low_confidence: false

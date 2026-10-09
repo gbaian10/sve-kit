@@ -1,0 +1,18 @@
+format: 1
+kind: effect_set
+cards:
+  CSD01-032:
+    status: complete
+    abilities:
+      - line: 1
+        kind: construction
+        body:
+          op: deck_limit
+          name: にんじん
+          limit: 10
+          zone: evolve_deck
+        section: 0
+  CSD01-T01:
+    status: complete
+    review: EP 卡的本文重述 3.2.5／14.2 的共通開局與費用程序；不作額外卡片效果，不會加第二次 EP。
+    abilities: []

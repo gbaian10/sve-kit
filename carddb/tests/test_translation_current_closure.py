@@ -20,7 +20,7 @@ def test_current_input_refusals(tmp_path: Path, fault: str) -> None:
     write(tmp_path, {name: shard})
     path = tmp_path / name
     if fault == "shard_v1":
-        shard["translation_authored_format"] = 1
+        shard["format"] = 1
     elif fault == "duplicate":
         shard["records"] = [term(), term()]
     elif fault == "symlink":

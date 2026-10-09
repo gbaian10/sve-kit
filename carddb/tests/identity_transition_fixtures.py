@@ -73,7 +73,7 @@ def reference(shard: dict[str, Any]) -> dict[str, Any]:
 
 def pack(record: dict[str, Any]) -> dict[str, Any]:
     return {
-        "identity_transition_format": 1,
+        "format": 1,
         "kind": "identity_transition_shard",
         "records": [record],
     }

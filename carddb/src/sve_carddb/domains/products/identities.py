@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.products.identity_models import Match
     from sve_carddb.domains.products.loader import ProductSnapshot
 
-_PATH = re.compile(r"product-identities/(jp|en)/([0-9]{3,})\.yaml")
+_PATH = re.compile(r"products/identities/(jp|en)/([0-9]{3,})\.yaml")
 MAX_ORDINAL = 9_007_199_254_740_991
 
 
@@ -151,7 +151,7 @@ def _model[T: RecordData](model: type[T], raw: JsonValue) -> T:
 
 
 def _inventory(root: Path) -> list[str]:
-    directory = root / "product-identities"
+    directory = root / "products/identities"
     # A missing directory must not read as an empty identity mapping.
     if directory.is_symlink() or not directory.is_dir():
         raise ValueError("Missing product identity input directory")
@@ -180,7 +180,7 @@ def _shard(root: Path, name: str) -> IdentityFile:
         raise ValueError("Product identity records must be sorted and unique")
     for record in envelope.records:
         if (
-            record.filing_key != Path(name).parts[1]
+            record.filing_key != Path(name).relative_to("products/identities").parts[0]
             or record.filing_key != record.data.region
         ):
             raise ValueError("Product identity filing/path/region mismatch")

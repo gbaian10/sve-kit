@@ -1,0 +1,114 @@
+format: 1
+kind: effect_set
+cards:
+  SCS01-006:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - count:
+                  zone: cemetery
+                  side: self
+              - 20
+          then:
+            op: evolve
+            subjects: self
+        event: end
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: reveal_until
+              qualifies:
+                zone: deck
+                side: self
+                type: follower
+                where:
+                  fn: le
+                  args:
+                    - read: item.cost
+                    - 3
+              count: 2
+              bind: revealed
+            - op: move
+              subjects:
+                from: revealed
+                type: follower
+                where:
+                  fn: le
+                  args:
+                    - read: item.cost
+                    - 3
+              to: field
+              bind: entered
+            - op: shuffle
+              subjects:
+                difference:
+                  - revealed
+                  - entered
+            - op: move
+              subjects:
+                difference:
+                  - revealed
+                  - entered
+              to: deck
+              position: bottom
+        event: enter
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              zone: hand
+              side: self
+            min: 1
+            max: 1
+        costs:
+          - op: discard
+            subjects: cost.1
+  SCS01-007:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 5
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: self.turn.leader_hp_decreased
+              - 4
+          then:
+            op: evolve
+            subjects: self
+        event: leader_life_change
+        subject: self.leader
+        trigger_if:
+          fn: and
+          args:
+            - read: self.is_active
+            - fn: lt
+              args:
+                - read: event.after_life
+                - read: event.before_life
+      - line: 3
+        kind: trigger
+        body:
+          op: damage
+          subjects: self.leader
+          amount: 1
+        event: enter
+        subject: self

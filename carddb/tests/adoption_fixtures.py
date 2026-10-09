@@ -12,11 +12,10 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.json import canonical
 from sve_carddb.core.provenance import BuildContext
 from sve_carddb.domains.catalog.adoption_importer import AdoptionInputs
 from sve_carddb.domains.catalog.adoption_loader import load_adoptions
-from sve_carddb.domains.registry.storage import read_yaml
 
 if TYPE_CHECKING:
     from sve_carddb.domains.catalog.adoption_loader import Entry
@@ -80,11 +79,11 @@ def record(
 
 
 def envelope(
-    records: list[JsonValue], *, entry: Entry = "catalog-adoptions"
+    records: list[JsonValue], *, entry: Entry = "catalog/adoptions"
 ) -> dict[str, JsonValue]:
-    prefix = "catalog_adoption" if entry == "catalog-adoptions" else "display_override"
+    prefix = "catalog_adoption" if entry == "catalog/adoptions" else "display_override"
     return {
-        prefix + "_format": 2,
+        "format": 2,
         "kind": prefix + "_shard",
         "records": records,
     }
@@ -94,21 +93,6 @@ def write(root: Path, path: str, value: JsonValue) -> None:
     file = root / path
     file.parent.mkdir(parents=True, exist_ok=True)
     file.write_bytes(canonical(value))
-
-
-def index(root: Path, *, entry: Entry = "catalog-adoptions") -> None:
-    includes: dict[str, JsonValue] = {}
-    for file in sorted((root / entry).rglob("*.yaml")):
-        if file.name != "index.yaml":
-            includes[file.relative_to(root).as_posix()] = digest(
-                canonical(read_yaml(file))
-            )
-    prefix = "catalog_adoption" if entry == "catalog-adoptions" else "display_override"
-    write(
-        root,
-        entry + "/index.yaml",
-        {prefix + "_format": 2, "kind": prefix + "_index", "includes": includes},
-    )
 
 
 @dataclass(frozen=True)
@@ -121,7 +105,7 @@ class Case:
 
     def inputs(self) -> AdoptionInputs:
         return AdoptionInputs(
-            self.root, self.repository, self.revision, ("catalog-adoptions",)
+            self.root, self.repository, self.revision, ("catalog/adoptions",)
         )
 
     def build(self) -> BuildContext:
@@ -166,7 +150,7 @@ def make_case(root: Path) -> Case:
     ]
     write(
         authored,
-        "catalog-adoptions/languages/shared/001.yaml",
+        "catalog/adoptions/languages/001.yaml",
         envelope(languages),
     )
     term = record(
@@ -180,12 +164,11 @@ def make_case(root: Path) -> Case:
     )
     write(
         authored,
-        "catalog-adoptions/vocabulary/shared/001.yaml",
+        "catalog/adoptions/vocabulary/001.yaml",
         envelope([term]),
     )
     for area in ("aliases", "symbols"):
-        (authored / "catalog-adoptions" / area).mkdir()
-    index(authored)
+        (authored / "catalog/adoptions" / area).mkdir()
     final = commit(root)
-    load_adoptions(authored, entry="catalog-adoptions")
+    load_adoptions(authored, entry="catalog/adoptions")
     return Case(root, authored, review, normalizer, final)

@@ -36,8 +36,13 @@ def record(descriptor: Descriptor) -> dict[str, JsonValue]:
 
 
 def install(root: Path, records: list[dict[str, JsonValue]]) -> None:
-    root.mkdir(parents=True, exist_ok=True)
+    (root / FILE).parent.mkdir(parents=True, exist_ok=True)
     (root / FILE).write_text(
-        json.dumps(records, ensure_ascii=False, sort_keys=True) + "\n",
+        json.dumps(
+            {"format": 1, "kind": "image_crop_overrides", "records": records},
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+        + "\n",
         encoding="utf-8",
     )

@@ -1,10 +1,14 @@
 # Effect DSL
 
 [effects.schema.json](effects.schema.json) is the sole grammar authority for
-`astra/1`. Its 73 node variants contain 47 action atoms, 10 combinators,
+`astra/1`. Documents use `format: 1, kind: effect_set`; keyword registries
+use `format: 1, kind: keyword_registry`. These envelopes select the existing
+prototype grammar and keep Schema `$id: urn:sve-kit:effects:astra:1`.
+A future DSL 1.0 uses a separate kind or entry, rather than effect_set format 2.
+Its 73 node variants contain 47 action atoms, 10 combinators,
 14 declarations and two loading/unsupported markers.
 
-The Rust prototype validates `authored/keywords.yaml` and every pack file, expands
+The Rust prototype validates `authored/rules/keywords.yaml` and every pack file, expands
 macros, then validates the expanded programs again. `carddb` does not yet invoke
 this schema and Rust types are not generated from it.
 

@@ -1,0 +1,564 @@
+format: 1
+kind: effect_set
+cards:
+  BP18-001:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: rule_override
+          rule: evolve_per_turn
+          value: unlimited
+          side: self
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: move
+              subjects: target.1
+              to: ex
+            - op: adjust_cost
+              subjects: target.1
+              amount: -2
+              until: end-of-turn
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: cemetery
+              side: self
+              trait: 透京
+            min: 1
+            max: 1
+  BP18-007:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: play_permission
+          subjects: self
+          condition:
+            fn: ge
+            args:
+              - read: self.turn.cards_played
+              - 3
+          from:
+            - cemetery
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount: 1
+        event: leave
+        subject: self
+        trigger_if:
+          read: self.is_active
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 1
+            - op: if
+              condition:
+                fn: ne
+                args:
+                  - read: self.entered_from
+                  - hand
+              then:
+                op: move
+                subjects: self
+                to: deck
+                position: bottom
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+  BP18-026:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: assail
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: target.1.controller.field_count
+              - 3
+          then:
+            op: seq
+            steps:
+              - op: destroy
+                subjects: target.1
+              - op: modify
+                subjects: self
+                keywords:
+                  - aura
+              - op: replace_damage
+                subjects: self
+                prevent: true
+                kind: any
+                until: end-of-turn
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP18-058:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+  BP18-059:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: look
+              count: 3
+              bind: looked
+            - op: optional
+              selection:
+                select:
+                  from: looked
+                  trait: 武闘竜人
+                min: 1
+                max: 1
+                bind: chosen
+              then:
+                op: move
+                subjects: chosen
+                to: ex
+            - op: select
+              select:
+                difference:
+                  - looked
+                  - chosen
+              min:
+                count:
+                  difference:
+                    - looked
+                    - chosen
+              max:
+                count:
+                  difference:
+                    - looked
+                    - chosen
+              bind: ordered
+              order: true
+            - op: move
+              subjects: ordered
+              to: deck
+              position: bottom
+            - op: adjust_cost
+              subjects: chosen
+              amount: -3
+              until: end-of-turn
+        event: evolve
+        subject: self
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: 青春の一撃
+          count: 1
+          to: ex
+        event: super_evolve
+        subject: self
+  BP18-073:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: eq
+            args:
+              - read: self.zone
+              - field
+          then:
+            op: search
+            select:
+              side: self
+              zone: deck
+              name: ドラゴスネーク
+            min: 0
+            max: 1
+            to: field
+        event: damage
+        subject: self
+      - line: 3
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: self.pp.max
+              - 7
+          then:
+            op: modify
+            subjects: self
+            power: 2
+            hp: 2
+        event: enter
+        subject: self
+  BP18-075:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: replace_damage
+          subjects: self
+          kind: effect
+          prevent: true
+  BP18-P32:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 5
+      - line: 2
+        kind: activated
+        body:
+          op: damage
+          subjects: target.1
+          amount: 4
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+              where:
+                fn: eq
+                args:
+                  - read: item.cost
+                  - 2
+            min: 2
+            max: 2
+        costs:
+          - op: act
+            subjects: self
+          - op: reveal
+            subjects: cost.1
+            to: all
+  BP18-P35:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 2
+        event: enter
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+              where:
+                fn: eq
+                args:
+                  - read: item.cost
+                  - 2
+            min: 2
+            max: 2
+        costs:
+          - op: reveal
+            subjects: cost.1
+            to: all
+  BP18-P53:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: destroy
+              subjects: target.1
+            - op: modify
+              subjects: target.2
+              keywords:
+                - storm
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+          - key: '2'
+            select:
+              zone: field
+              side: self
+              type: follower
+              trait: 透京
+            min: 1
+            max: 1
+  BP18-P54:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: move
+          subjects: target.1
+          to: hand
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: cemetery
+              trait: 透京
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 2
+            min: 0
+            max: 3
+            distinct_by: name
+  BP18-SL13:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+  BP18-SL14:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: seq
+              steps:
+                - op: look
+                  count: 3
+                  bind: seen
+                - op: optional
+                  selection:
+                    select:
+                      from: seen
+                      trait: 武闘竜人
+                    min: 1
+                    max: 1
+                    bind: chosen
+                  then:
+                    op: move
+                    subjects: chosen
+                    to: ex
+                    bind: placed
+                - op: seq
+                  steps:
+                    - op: select
+                      select:
+                        difference:
+                          - seen
+                          - placed
+                      min:
+                        count:
+                          difference:
+                            - seen
+                            - placed
+                      max:
+                        count:
+                          difference:
+                            - seen
+                            - placed
+                      bind: ordered
+                      order: true
+                    - op: move
+                      subjects: ordered
+                      to: deck
+                      position: bottom
+            - op: adjust_cost
+              subjects: placed
+              amount: -3
+              until: end-of-turn
+        event: evolve
+        subject: self
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: 青春の一撃
+          count: 1
+          to: ex
+        event: super_evolve
+        subject: self
+  BP18-SL16:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: static
+        body:
+          op: replace_move
+          subjects:
+            zone: field
+            side: opponent
+            type: follower
+          from: field
+          to: cemetery
+          replacement: banish
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects:
+                zone: field
+                side: opponent
+                type: follower
+              amount: 8
+            - op: damage
+              subjects: opponent.leader
+              amount: 4
+        event: enter
+        subject: self
+  BP18-SP01:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: search
+          select:
+            side: self
+            zone: deck
+            where:
+              fn: and
+              args:
+                - fn: eq
+                  args:
+                    - read: item.class
+                    - ロイヤル
+                - fn: eq
+                  args:
+                    - read: item.cost
+                    - 1
+          min: 0
+          max: 1
+          to: ex
+        event: enter
+        subject: self
+      - line: 2
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: act
+              subjects: target.1
+            - op: box
+              subjects: target.1
+              until: next-controller-end
+        limit: 1
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+        costs:
+          - op: pp
+            amount: 0

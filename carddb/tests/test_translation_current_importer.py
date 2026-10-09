@@ -8,9 +8,8 @@ from pydantic import JsonValue
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
-from sve_carddb.core.json import array, canonical, digest, object_value, parse
+from sve_carddb.core.json import array, canonical, object_value, parse
 from sve_carddb.core.provenance import BuildContext, SourceUse
-from sve_carddb.domains.registry.storage import read_yaml
 from sve_carddb.domains.translations.glossary.importer import (
     import_glossary,
     populate_glossary,
@@ -51,8 +50,6 @@ def test_current_import_rechecks_source_without_creating_decision(
     shutil.copytree(frozen.root, tmp_path / "repository")
     root = tmp_path / "repository"
     old = load_glossary(root / "authored")
-    index = object_value(read_yaml(root / "authored/translations/index.yaml"))
-    includes = object_value(index["includes"])
     for path, _, _ in old.shards:
         rows = [
             r.model_dump(mode="json", round_trip=True)
@@ -69,14 +66,11 @@ def test_current_import_rechecks_source_without_creating_decision(
                 )
                 ref["text_hash"] = "sha256:" + "0" * 64
         payload: dict[str, JsonValue] = {
-            "translation_authored_format": 2,
+            "format": 2,
             "kind": "translation_shard",
             "records": list[JsonValue](rows),
         }
         (root / "authored" / path).write_bytes(canonical(payload))
-        includes[path] = digest(canonical(payload))
-    index["translation_authored_format"] = 2
-    (root / "authored/translations/index.yaml").write_bytes(canonical(index))
     revision = commit(root)
     inputs = Inputs(root / "authored", root, revision)
     config = object_value(parse(frozen.build.configuration.encode()))

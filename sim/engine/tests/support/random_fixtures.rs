@@ -24,11 +24,11 @@ pub(crate) fn catalog() -> Arc<Catalog> {
                 {"op":"damage","subjects":"opponent.leader","amount":{"read":"again"}}
             ]}}
         ]});
-        let document = json!({"version":"astra/1","cards":{
+        let document = json!({"format":1_u8,"kind":"effect_set","cards":{
             "unit":{"status":"complete","review":"synthetic","abilities":[]},
             "spell":{"status":"complete","review":"synthetic","abilities":[{"kind":"spell","line":1_i64,"targets":[],"body":body}]}
         }});
-        Arc::new(Catalog::from_documents(&snapshot, "{\"version\":\"astra/1\",\"keywords\":{}}", &[("random.yaml".into(),document.to_string())]).unwrap())
+        Arc::new(Catalog::from_documents(&snapshot, "{\"format\":1,\"kind\":\"keyword_registry\",\"keywords\":{}}", &[("random.yaml".into(),document.to_string())]).unwrap())
     }))
 }
 

@@ -26,16 +26,7 @@ from sve_carddb.ingest.archive.source_archive import (
 from sve_carddb.parse.pages.official_jp import card_url
 from sve_carddb.workflows.offline import _populate_adoptions, _prepare_catalog
 
-from .adoption_fixtures import (
-    CODE,
-    REPO,
-    Case,
-    commit,
-    envelope,
-    index,
-    make_case,
-    write,
-)
+from .adoption_fixtures import CODE, REPO, Case, commit, envelope, make_case, write
 from .catalog_adoption_fixtures import populate_case
 from .registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- expose synthetic pytest fixture
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- expose registry fixture dependency
@@ -93,7 +84,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> tuple[Case, Path, str]
             "text_hash": digest(text.encode()),
         }
 
-    for path in (case.root / "catalog-adoptions").rglob("*.yaml"):
+    for path in (case.root / "catalog/adoptions").rglob("*.yaml"):
         if path.name == "index.yaml":
             continue
         shard = object_value(read_yaml(path))
@@ -116,7 +107,6 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> tuple[Case, Path, str]
                     }
                 ]
         write(case.root, path.relative_to(case.root).as_posix(), envelope(members))
-    index(case.root)
     return (
         replace(case, revision=commit(case.repository), review=review),
         store.root,
@@ -219,7 +209,7 @@ def test_source_single_guard_rejection(
     case: tuple[Case, Path, str], schema: CompiledSchema, mutation: str, message: str
 ) -> None:
     inputs, archive, _ = case
-    name = "catalog-adoptions/vocabulary/shared/001.yaml"
+    name = "catalog/adoptions/vocabulary/001.yaml"
     shard = object_value(read_yaml(inputs.root / name))
     member = object_value(array(shard["records"])[0])
     data = object_value(member["data"])
@@ -249,7 +239,6 @@ def test_source_single_guard_rejection(
             "/missing" if mutation == "locator" else "sha256:" + "e" * 64
         )
     write(inputs.root, name, envelope([member]))
-    index(inputs.root)
     revised = replace(inputs, revision=commit(inputs.repository), review=review)
     build = revised.build()
     with create_database(schema) as db:

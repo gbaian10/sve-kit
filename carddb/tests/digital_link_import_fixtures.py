@@ -377,7 +377,7 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
                 ref["text_hash"] = digest("第二個測試譯名".encode())
         records.append(extra)
     shard = envelope(records)
-    write(root / "authored", {"digital-links/links/synthetic/001.yaml": shard})
+    write(root / "authored", {"digital/links/synthetic/001.yaml": shard})
     authored = commit(root)
     config.update(Inputs(root / "authored", root, authored).configuration())
     build = BuildContext.from_inputs(program, config)
@@ -407,7 +407,7 @@ def copied(fixture: Fixture, root: Path) -> Fixture:
 
 def with_records(fixture: Fixture, records: list[dict[str, JsonValue]]) -> Fixture:
     shard = envelope(records)
-    write(fixture.root / "authored", {"digital-links/links/synthetic/001.yaml": shard})
+    write(fixture.root / "authored", {"digital/links/synthetic/001.yaml": shard})
     authored = commit(fixture.root)
     inputs = Inputs(fixture.root / "authored", fixture.root, authored)
     config = object_value(parse(fixture.build.configuration.encode()))

@@ -95,7 +95,7 @@ def test_size_boundary() -> None:
 
 def test_bool_is_not_a_format(baseline: tuple[Path, str]) -> None:
     raw = current(baseline[0], LINKS)
-    raw["digital_name_policy_format"] = True
+    raw["format"] = True
     with pytest.raises(ValueError, match=r"^Policy format must be an integer$"):
         model(LinkPolicy, raw)
 
@@ -106,7 +106,7 @@ def test_bool_is_not_a_format(baseline: tuple[Path, str]) -> None:
         ("extra", 1),
         ("kind", "unknown"),
         ("purpose", "coverage"),
-        ("digital_name_policy_format", 1),
+        ("format", 1),
     ],
 )
 def test_unknown_policy_fields_are_not_ignored(

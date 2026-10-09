@@ -43,7 +43,7 @@ Schema 與規格不一致時要修到一致，不能讓任一邊默默降級。
 
 ## 裁定
 
-需要依綜合規則或 Q&A 才能決定的判讀登錄在 `authored/rulings/`（`R-0001`…）。
+需要依綜合規則或 Q&A 才能決定的判讀登錄在 `authored/rules/rulings/`（`R-0001`…）。
 IR §0 列出各裁定對應的 IR 元素與證據強度。`strength: inferred` 表示本專案解讀，
 輔助模式提示時必須說明；不存決定者；裁定日期以頂層 `decided_on` 保留。
 

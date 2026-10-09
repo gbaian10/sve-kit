@@ -166,7 +166,8 @@ def test_variant_is_never_automatically_selected_and_pin_must_exist(
 def test_shared_glossary_reader_accepts_current_templates(current_case: Case) -> None:
     snapshot = load_glossary(current_case.repository / "authored")
     assert [path for path, _, _ in snapshot.closure] == [
-        "translations/templates/current/001.yaml"
+        "translations/templates/definitions/001.yaml",
+        "translations/templates/values/001.yaml",
     ]
     assert not snapshot.current_records()
 
@@ -363,13 +364,19 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
     _write(
         current_case.repository,
         {
-            "translations/templates/current/001.yaml": {
-                "translation_authored_format": 2,
+            f"translations/templates/{area}/001.yaml": {
+                "format": 2,
                 "kind": "translation_shard",
                 "records": [
-                    r.model_dump(mode="json", round_trip=True) for r in records
+                    r.model_dump(mode="json", round_trip=True)
+                    for r in records
+                    if r.kind == kind
                 ],
-            },
+            }
+            for area, kind in (
+                ("definitions", "sentence_template"),
+                ("values", "template_translation"),
+            )
         },
     )
     revision = commit(current_case.repository)

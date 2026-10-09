@@ -4,8 +4,12 @@
   "title": "SVE effect programs, independent prototype A",
   "type": "object",
   "properties": {
-    "version": {
-      "const": "astra/1"
+    "format": {
+      "type": "integer",
+      "const": 1
+    },
+    "kind": {
+      "const": "effect_set"
     },
     "cards": {
       "type": "object",
@@ -51,7 +55,8 @@
     }
   },
   "required": [
-    "version",
+    "format",
+    "kind",
     "cards"
   ],
   "additionalProperties": false,
@@ -2530,13 +2535,18 @@
     "keywordRegistry": {
       "type": "object",
       "required": [
-        "version",
+        "format",
+        "kind",
         "keywords"
       ],
       "additionalProperties": false,
       "properties": {
-        "version": {
-          "const": "astra/1"
+        "format": {
+          "type": "integer",
+          "const": 1
+        },
+        "kind": {
+          "const": "keyword_registry"
         },
         "keywords": {
           "type": "object",
@@ -2589,7 +2599,8 @@
             ]
           }
         }
-      }
+      },
+      "description": "keyword_registry format 1 uses the astra/1 prototype grammar."
     },
     "resolutionSelection": {
       "type": "object",
@@ -2632,5 +2643,6 @@
         "stack_base"
       ]
     }
-  }
+  },
+  "description": "effect_set and keyword_registry format 1 use the astra/1 prototype grammar."
 }

@@ -1,0 +1,5571 @@
+format: 2
+kind: translation_shard
+records:
+  - kind: sentence_template
+    data:
+      id: T62c1e699c4929607
+      normalized_hash: sha256:f4b0ce5a689da4f0837d561aa999c8c02d4ecd4492036e760feab5037d53ac27
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 4
+                end: 5
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 14
+                end: 15
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 32
+                end: 33
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 46
+                end: 47
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 59
+                end: 60
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_5
+            type: reference
+            occurrences:
+              - start: 69
+                end: 72
+            reference_kind: term
+            min:
+            max:
+          - name: slot_6
+            type: uint
+            occurrences:
+              - start: 74
+                end: 75
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_7
+            type: reference
+            occurrences:
+              - start: 77
+                end: 79
+            reference_kind: term
+            min:
+            max:
+          - name: slot_8
+            type: uint
+            occurrences:
+              - start: 81
+                end: 82
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:62c1e699c4929607094d0ff31d67f51b7e9954b41f1d9e8e013fb2861c0beea0
+  - kind: sentence_template
+    data:
+      id: T62d3f53cdd40c20f
+      normalized_hash: sha256:6af26e6b5cfa6beab1afb4b20a43514fa57e2e48d399a36689cf5f1a44080840
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 25
+                end: 27
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 29
+                end: 30
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 33
+                end: 34
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:62d3f53cdd40c20f341eb7882d7ea9cd17262018b1d4b2b8be9a158e55f1bb66
+  - kind: sentence_template
+    data:
+      id: T62fe26d1a53a3732
+      normalized_hash: sha256:f969f97d648e37128059d9967356869f4e72ad64553e98915c1f7310d66580c2
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 24
+                end: 26
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 28
+                end: 29
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:62fe26d1a53a3732d756a6b61a2505c1eba8a4b22509dc971a43dc8b5360ec63
+  - kind: sentence_template
+    data:
+      id: T63195502b6df4921
+      normalized_hash: sha256:215a90819c32f6685babd039503427ce13bc59c79697980d7b60d0d5e72b2b43
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 17
+                end: 18
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 41
+                end: 42
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 54
+                end: 55
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:63195502b6df49215cd3a5ec34b537023eff75c7b1f3a971c03ec07af818b86a
+  - kind: sentence_template
+    data:
+      id: T631cd8a6644ea370
+      normalized_hash: sha256:aff5ef226651b0da6b208540026b2c0eacbd9ddfcf44286732dec06a16f28b55
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 8
+                end: 9
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 18
+                end: 21
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 23
+                end: 24
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: reference
+            occurrences:
+              - start: 26
+                end: 28
+            reference_kind: term
+            min:
+            max:
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 30
+                end: 31
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:631cd8a6644ea370cec97b40ac19f07901fff4d93dd4eddab0584f0f4292583d
+  - kind: sentence_template
+    data:
+      id: T633b0f8229e7d5ac
+      normalized_hash: sha256:0d77da50baf3f2ec5d42bf910015c1b7eb189cd62d858736315ccafa9eafc55e
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 24
+                end: 25
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:633b0f8229e7d5acb933ca892fc39ba599e95b997b9a3dabbe2f6e8ecd063961
+  - kind: sentence_template
+    data:
+      id: T636ee073c2d46c6b
+      normalized_hash: sha256:a657d4f4f493dcefaf44f51c3a01fe2ff793faccccb8777c0d1785c0aa6befd2
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 6
+                end: 7
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 31
+                end: 34
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 36
+                end: 37
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: reference
+            occurrences:
+              - start: 39
+                end: 41
+            reference_kind: term
+            min:
+            max:
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 43
+                end: 44
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:636ee073c2d46c6b6bf80f1a696c3be9d52b5db46600cb00c3a73100255e57aa
+  - kind: sentence_template
+    data:
+      id: T6378e0f3ddc6d8d3
+      normalized_hash: sha256:0545701c411c1a5238f54e4a0ac7e90bb41d44da1ecdbf5d35cc9fc11405b0b8
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+              - start: 5
+                end: 7
+              - start: 9
+                end: 11
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 16
+                end: 17
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 22
+                end: 23
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6378e0f3ddc6d8d3e5a4f3660811380de659f2e6c449b8f7c670e4682b609c7b
+  - kind: sentence_template
+    data:
+      id: T637ffba655417bf7
+      normalized_hash: sha256:b60ffda4dd565027ac7b1d70cf3e87765533345cfc3101f02e8a295a12fcb3d2
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 30
+                end: 31
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 46
+                end: 47
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 59
+                end: 60
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_3
+            type: reference
+            occurrences:
+              - start: 84
+                end: 87
+            reference_kind: term
+            min:
+            max:
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 89
+                end: 90
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_5
+            type: reference
+            occurrences:
+              - start: 92
+                end: 94
+            reference_kind: term
+            min:
+            max:
+          - name: slot_6
+            type: uint
+            occurrences:
+              - start: 96
+                end: 97
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:637ffba655417bf7fd17d26af1de2a70072f8a9d6841934ddd880619298cc749
+  - kind: sentence_template
+    data:
+      id: T638487585c74b27a
+      normalized_hash: sha256:ede54b341798d87a2bda1b3db25fc5d87a31e4b9f05b362475af269342eab884
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 36
+                end: 37
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:638487585c74b27ae40ad5e8f357bc964acd630c1e8a11ba786c64432f095d83
+  - kind: sentence_template
+    data:
+      id: T63b274e5009ac12e
+      normalized_hash: sha256:982467993e42f218de904fa922a59cd59dab83c16d821f973a16b13b17a856b9
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 15
+                end: 16
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 37
+                end: 38
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:63b274e5009ac12ed4241e466909b86eb95c67f3e0b366bfb851529a8e76945a
+  - kind: sentence_template
+    data:
+      id: T63b4f52f41e5d746
+      normalized_hash: sha256:6e2730cd60e174fcbb0628cfcf0564f5099ffb26b98225862667cf47b7abfac0
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 13
+                end: 14
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 23
+                end: 24
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 25
+                end: 26
+              - start: 42
+                end: 43
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 31
+                end: 32
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+      content_hash: sha256:63b4f52f41e5d7460d82aac164342cda77b431bf8ae5efea9c24eb60ec7a6b2a
+  - kind: sentence_template
+    data:
+      id: T63bcb8c8f9e0e77e
+      normalized_hash: sha256:032241bfd8d6171c5fea62c2b30d1ee86ec3a9453b3b5015e038c68c49724b7d
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 36
+                end: 37
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:63bcb8c8f9e0e77e88871775fb1fd59666120665428307c78d2f8330bb90ab29
+  - kind: sentence_template
+    data:
+      id: T63c5e3805b586ddc
+      normalized_hash: sha256:8419fd8e85e84d4260083503016f3196f3ad7cc2297f776db46a9b106445ad4a
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 5
+                end: 7
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 12
+                end: 15
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 27
+                end: 28
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 36
+                end: 37
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:63c5e3805b586ddc3c2db3447b4d18e724f20f9e214cd1753616e3701687ed54
+  - kind: sentence_template
+    data:
+      id: T63e8c600b59f375e
+      normalized_hash: sha256:2774c07e583cb3558ebb40961fbb1cf727c181a6b3f97ba25b525a18fcbc0381
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 39
+                end: 44
+            reference_kind: vocabulary
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 50
+                end: 51
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:63e8c600b59f375e7689945ea1afd61764e2caf9c4520b32d07584f430eb3f8d
+  - kind: sentence_template
+    data:
+      id: T63fae25e6a695fe3
+      normalized_hash: sha256:232a83686e2ac65d68ffbfd7f44128ec16499ba7eaffa62736406fcba6b8962f
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots: []
+      content_hash: sha256:63fae25e6a695fe32bb9812f701b0dac2ebc43a1a042f3c12936e19f72af198d
+  - kind: sentence_template
+    data:
+      id: T63fb8286c1d478c2
+      normalized_hash: sha256:9c7266f8c77204bee228c11fa55c59b470793e45d8a083854039291c188264dd
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 7
+                end: 14
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 15
+                end: 16
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 30
+                end: 31
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 54
+                end: 55
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:63fb8286c1d478c22d00a5978d079592b466875f5c6ad6094d9e56811d8a530d
+  - kind: sentence_template
+    data:
+      id: T6400b6d34a091a3f
+      normalized_hash: sha256:02b0c1dea14cd65f77c6499740c97323f753f45f0656eb7056078041d1ae1ef9
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 8
+                end: 11
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 23
+                end: 24
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 32
+                end: 33
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 56
+                end: 57
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6400b6d34a091a3f91896bcf0995663e31aa6b2e41d2cda73053c474b2c0dd6f
+  - kind: sentence_template
+    data:
+      id: T6408fd66b3b41e1d
+      normalized_hash: sha256:2e4f1c9c1157e01ae44d819f0f5fc1f43d117b08300f13d80c543f66e1187c7e
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 26
+                end: 27
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 39
+                end: 40
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6408fd66b3b41e1db4096f6e3f98dd96adc370cc610a17002584f3c5e6ed446f
+  - kind: sentence_template
+    data:
+      id: T640d896ee479f56d
+      normalized_hash: sha256:7ac1a48b4a09552a27c07a67507c818d3f6d58fc2dc6c14b352370c7fc44a600
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 20
+                end: 21
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:640d896ee479f56ddc6a5ba99a6e0353e5aaf445ce69d26c62c4e30a5e7ba566
+  - kind: sentence_template
+    data:
+      id: T641db26dcd28921e
+      normalized_hash: sha256:a5683cf7141d08842cf2ebb84dcbac55819643ac9dab74f2093ecfe4db776496
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 29
+                end: 32
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 34
+                end: 35
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:641db26dcd28921e55e8f17ff8936e7e6736dde2c445ee2ce5878a39f65ce5d2
+  - kind: sentence_template
+    data:
+      id: T643bc0bb6d955d2f
+      normalized_hash: sha256:e694c410b084d09791d9aef4c45a07b72b0b68391069144503f2ca83e4a522cc
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 24
+                end: 25
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 42
+                end: 43
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:643bc0bb6d955d2fd1af161fcfc535b72a37d15940dccf4910b7f6793f4a55bf
+  - kind: sentence_template
+    data:
+      id: T64670af54a06a688
+      normalized_hash: sha256:8dd69e642b2bb0cce23fa71937fc6c82c29ba2da2c3519a397701d17bdd654de
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 9
+                end: 12
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 14
+                end: 15
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 17
+                end: 19
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 21
+                end: 22
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 36
+                end: 37
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 44
+                end: 45
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:64670af54a06a6889f1bdb9efc741d7ee9613ab1a4948a7382bf4f0009f3f043
+  - kind: sentence_template
+    data:
+      id: T64847f3cc7aea5c9
+      normalized_hash: sha256:2c32997873a7f804601a90a93eda15a9644de41d2e0a35a64a3f43e9fbaf55de
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 13
+                end: 14
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 34
+                end: 35
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:64847f3cc7aea5c943c431ea1f796b8d6924b5f13ebf4b505e27d1acc1d20717
+  - kind: sentence_template
+    data:
+      id: T649f6d47214525fc
+      normalized_hash: sha256:9a20d000d9ea80397a0809ec2fdd507fb3eba4523d8ff9078e3dbc79929cf016
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 16
+                end: 20
+            reference_kind: term
+            min:
+            max:
+      content_hash: sha256:649f6d47214525fc0c09aa828e1f650387c6d3aabb8030abca2c1ce1500b9f54
+  - kind: sentence_template
+    data:
+      id: T64a506058ca51405
+      normalized_hash: sha256:5c9c988e195637eea9f9e45648e8ac1f97f6c1017bdca63c365acd48005a4d83
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 10
+                end: 11
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:64a506058ca514053bcbd708fc05880a030f7de8b499b016d99212464898c7bf
+  - kind: sentence_template
+    data:
+      id: T64b4885ffec934eb
+      normalized_hash: sha256:9fed6a378a741b308c3e9a40cb7e175db05dfd89ec575800e4cf3c14293cb00e
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 42
+                end: 43
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:64b4885ffec934eb325a87bf18801bfebbf07a915168f9b18e8cef00d99b0dd0
+  - kind: sentence_template
+    data:
+      id: T64c9a2fe913d4d67
+      normalized_hash: sha256:5330d6a7123811cf74971c1b6f2d4e5f95d6b379f78d879e0d05b4fff8eaf99f
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 15
+                end: 16
+              - start: 40
+                end: 41
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 28
+                end: 29
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 47
+                end: 48
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:64c9a2fe913d4d677e217bda898827569318548f0a86e9ebfb06724a23ee7ef6
+  - kind: sentence_template
+    data:
+      id: T64e39f7fd2e2a6a0
+      normalized_hash: sha256:5d7ed1d189d5df7eef974b682e122ff5143cee1445cb2fc616d3337c65db6946
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 19
+                end: 20
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:64e39f7fd2e2a6a02a32ea37d29a92939ef2d0a2aa63c831efcc06d75a65faad
+  - kind: sentence_template
+    data:
+      id: T64e3aae19d9ed1e3
+      normalized_hash: sha256:3824a8a9a5968108f32166354581d415b07a824e17c8b9cdcc993d32aef0ae13
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 29
+                end: 30
+              - start: 57
+                end: 58
+              - start: 79
+                end: 80
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 45
+                end: 46
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 67
+                end: 68
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:64e3aae19d9ed1e38ebf62f1e2baf3bfa22816109a697285e4a00255110b1bd2
+  - kind: sentence_template
+    data:
+      id: T64f2046301e24b26
+      normalized_hash: sha256:83326f230dafda604f89fddfccaab038f539d489556611a42bb85a33b45b46da
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 16
+                end: 17
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 21
+                end: 25
+            reference_kind: vocabulary
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 31
+                end: 32
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:64f2046301e24b262666d43d992ea22cd16d52221883a99eb96d782334124546
+  - kind: sentence_template
+    data:
+      id: T64fab2cf3f5cce35
+      normalized_hash: sha256:650972531bcc19fbd300c8e86bb2b8f2e3d8cd527df8c776535a946f3f05ba33
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 33
+                end: 36
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 38
+                end: 39
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 41
+                end: 43
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 45
+                end: 46
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:64fab2cf3f5cce3527b384ddc0c4d76f40d76a2f5a45ba835ebccaaa1d9c7239
+  - kind: sentence_template
+    data:
+      id: T654ee8f74866699d
+      normalized_hash: sha256:932e3adc6ec59941b0800dec463cb02cb0b6331ff641d8d756da8575334e6c31
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 23
+                end: 24
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:654ee8f74866699dfb33f895bbe0411751f9a68ad0ce718ea1620a87b0091fcc
+  - kind: sentence_template
+    data:
+      id: T655a08a92e83e094
+      normalized_hash: sha256:a572e8fcdd3b5fbe70941ded2d21b061d0efce0b0971c7788c645bdf16b175cc
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 10
+                end: 11
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 33
+                end: 37
+            reference_kind: vocabulary
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 43
+                end: 44
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:655a08a92e83e094e4e295ed8fb75a7111d67545a9aa884c77397265f0ce7f80
+  - kind: sentence_template
+    data:
+      id: T655ae376492faf2d
+      normalized_hash: sha256:c3decea5f35a147604eccaf72f7f371c0e60b5118227eab89461756402108901
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 21
+                end: 22
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:655ae376492faf2dc6c63054948c9cb99a5cffc444330a4e183a298b32a8bd64
+  - kind: sentence_template
+    data:
+      id: T655b387823476a36
+      normalized_hash: sha256:eb0b607900f888c5bac134f2df27b479347f17fa04b13e1a3fcdb9334a73add1
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots: []
+      content_hash: sha256:655b387823476a366bdc6370caa063e09dce0cb82ff4ddba160f0727e8427e35
+  - kind: sentence_template
+    data:
+      id: T6564423e88b6ea41
+      normalized_hash: sha256:f0b4a6a0c61805f76157ebf466e6fbcf8d7302545ea137286541507f11548718
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 18
+                end: 19
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 32
+                end: 33
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6564423e88b6ea41681910ef15458c560448e75cd2cc9ebf9e709c893dcf1dfc
+  - kind: sentence_template
+    data:
+      id: T656c4760db0b37f9
+      normalized_hash: sha256:a39d6d3622c2830f67d8bfd937bb86819c7a6208d044cf1d4486640ffb263d46
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 8
+                end: 9
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:656c4760db0b37f93dbc2080db2427d3884d4268abca9a77dd512464b95c99e0
+  - kind: sentence_template
+    data:
+      id: T657b3d8a555706cb
+      normalized_hash: sha256:bb44e25923c8a5bcbefb488cdc88985f535c3d69fc385c12f64bb078a03de573
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 19
+                end: 20
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:657b3d8a555706cb48e4682a613273398c1b2d82ee093d5a95fad19c84fc9f15
+  - kind: sentence_template
+    data:
+      id: T657b6a69f5b2e6a3
+      normalized_hash: sha256:12b69ffd037d9661eba83368299a5ccb42a89fbfeae101bf6ac31ecca2204a56
+      role: reminder
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots: []
+      content_hash: sha256:657b6a69f5b2e6a308a045db3f9a1c099e99beaa5fe4e014724d8f088c851aea
+  - kind: sentence_template
+    data:
+      id: T658e446bb1e8f8b6
+      normalized_hash: sha256:4b898782d5b38424bd85a97e25e914a4c185586c5c8642d5518cc8b292ddd3c3
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 7
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 29
+                end: 31
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 33
+                end: 34
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:658e446bb1e8f8b660746d8239aa93e2b061d235cc8debf81da71f3f49d5ad3e
+  - kind: sentence_template
+    data:
+      id: T659d373f4b7edce3
+      normalized_hash: sha256:b041da9a833d10583cdb13abafd23555a8e91b03071ee71e69b56b337e458f8b
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+      content_hash: sha256:659d373f4b7edce307e78067c11b50c627d23e9b80c995acd64b2dccf5ce4d4f
+  - kind: sentence_template
+    data:
+      id: T65af5bcc0a395fe3
+      normalized_hash: sha256:a0d4ce6d2dc4472d8eda89325298edc705ff38a7b1ef6ad36b4d26604d0f5516
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 19
+                end: 20
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 29
+                end: 30
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 39
+                end: 42
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 44
+                end: 45
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: reference
+            occurrences:
+              - start: 47
+                end: 49
+            reference_kind: term
+            min:
+            max:
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 51
+                end: 52
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_6
+            type: uint
+            occurrences:
+              - start: 63
+                end: 64
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:65af5bcc0a395fe358779eb2b91985a0a1c0301ab09fe783ac7cc06426053e15
+  - kind: sentence_template
+    data:
+      id: T65b2023c6859e36b
+      normalized_hash: sha256:7173a6db694cacdc80941c5846ee3e434d6b37effbddc8d04e56652946552726
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 8
+                end: 11
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 23
+                end: 24
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 39
+                end: 40
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 61
+                end: 62
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:65b2023c6859e36b000b819cbd86781d2750edc49824a67cba5f8191cb7ca8ca
+  - kind: sentence_template
+    data:
+      id: T65c70bf057ffd83b
+      normalized_hash: sha256:e16ea5309785327a6a58171c9bf564f34bbe898cdd6daa1edb0667e4451500bb
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 17
+                end: 18
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 38
+                end: 40
+            reference_kind: term
+            min:
+            max:
+      content_hash: sha256:65c70bf057ffd83b240fd572dac0f9676adfb7a9e1005caa6e6e3a3815ce6378
+  - kind: sentence_template
+    data:
+      id: T65fd4b03014cfb07
+      normalized_hash: sha256:055b65f8f5ec2321020499db34a4d40f5ae334dc351f672a1cad4e24eee5cb72
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 1
+                end: 2
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 3
+                end: 4
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 9
+                end: 10
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 22
+                end: 23
+              - start: 50
+                end: 51
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 29
+                end: 30
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 41
+                end: 42
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:65fd4b03014cfb07bd3ad0d2717c3f9dbbf9923999fd145c96545441d0717e2b
+  - kind: sentence_template
+    data:
+      id: T66121c36a519cf51
+      normalized_hash: sha256:6c2ca8facb81b3a1fa36a8a45caa10ec47efab779041c3ed1e72a2ea572ae391
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 18
+                end: 19
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 28
+                end: 29
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:66121c36a519cf5141e1ce11168c2316d20417f85f9a3c6bdaf3e5d262f041a8
+  - kind: sentence_template
+    data:
+      id: T66197d71667c7e6d
+      normalized_hash: sha256:f0072b2d87fa748e7baad8c812bb0685441634aada29a61a7edcd55cf4a09925
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 21
+                end: 22
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:66197d71667c7e6d6878243eac74b1dbb904e43164dd5166f5dd674f773831cd
+  - kind: sentence_template
+    data:
+      id: T661c81450fad0dbc
+      normalized_hash: sha256:f919d3e15e24a20155892f3a91b0e94ec85704066ac0779a507800b55f9f15b9
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 29
+                end: 30
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:661c81450fad0dbc8cc215511c28f7336d180bef3f212e3c46539578a31a7222
+  - kind: sentence_template
+    data:
+      id: T66516b67d57cd290
+      normalized_hash: sha256:4a4b72d98aa6cc409e3cd57cb942ed04e4ff5122ebcf9393c2d732ff25b400e5
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 24
+                end: 25
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:66516b67d57cd2901186f0bd4a09623fce08c79e9aef55616b4e007cb300edbb
+  - kind: sentence_template
+    data:
+      id: T66619c30fbbe957d
+      normalized_hash: sha256:f0318f7891711604ce2411f958b31a017245a06ed0abf38a14d458e603503335
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 14
+                end: 15
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 29
+                end: 31
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 33
+                end: 34
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 37
+                end: 38
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:66619c30fbbe957de740838dd9d01a94b907bdd4dafe1f2dabc41121bebfac5e
+  - kind: sentence_template
+    data:
+      id: T667878e94564d9c2
+      normalized_hash: sha256:d140b2e1a93f69f98933984941c5beb8e200e049e49a04a1f91df258f3e485a3
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 9
+                end: 10
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 19
+                end: 20
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: reference
+            occurrences:
+              - start: 48
+                end: 50
+            reference_kind: term
+            min:
+            max:
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 52
+                end: 53
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:667878e94564d9c240382d5e935f9a01b2e10ec95472ddee74171f8bc2f4daff
+  - kind: sentence_template
+    data:
+      id: T66828b864e3d0311
+      normalized_hash: sha256:608b7bd47034a460b3564f73ecf4f0548e25dba51561a20ed9f1e8135e6426de
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 15
+                end: 16
+              - start: 22
+                end: 23
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:66828b864e3d03113351914492bd5159cc1f6d49a693ff423d9cb3e16ed7d8eb
+  - kind: sentence_template
+    data:
+      id: T669516f3c6d7bf4b
+      normalized_hash: sha256:008328e61974ddb9463a05b03e449ed117f7281059bee0758904ff7c9b2725fd
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 13
+                end: 14
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 20
+                end: 23
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 25
+                end: 26
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: reference
+            occurrences:
+              - start: 28
+                end: 30
+            reference_kind: term
+            min:
+            max:
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 32
+                end: 33
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:669516f3c6d7bf4bd9c902382ca9835c2c337dc8932b4c169ec807181cce519f
+  - kind: sentence_template
+    data:
+      id: T669726512dfe6090
+      normalized_hash: sha256:379cd7886c70eec01efdfec423f6381e8b4555fb0ac2d1950d35ddf834b7ff9e
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 17
+                end: 18
+              - start: 43
+                end: 44
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 34
+                end: 35
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:669726512dfe60909860afbf208ce58c02cfe39cead4a3a09182a1ebf78b5add
+  - kind: sentence_template
+    data:
+      id: T669a6ee4a24a0950
+      normalized_hash: sha256:3ca83dad68af1df14418f492c1ac79c84aae7e230c611e87c59cf07d404c09e8
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 17
+                end: 18
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:669a6ee4a24a0950c6b1de46ff1b3b887d57623922282c8b66e3131275f5569e
+  - kind: sentence_template
+    data:
+      id: T66ee7c63d7ee9ef0
+      normalized_hash: sha256:d4234bcd750dbd1609e774d1713f86f5ca265e6a544dc72425c6fcf76f9cae5c
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 10
+                end: 11
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+      content_hash: sha256:66ee7c63d7ee9ef0f7a450db4649eb1920e1740986507c640c118e21395f2f0d
+  - kind: sentence_template
+    data:
+      id: T6701e2d249c99bf2
+      normalized_hash: sha256:e1ac1c79a0655fdc3a613ff7883bf438f828ca28060d9915cf12e33fd69b2b6b
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 7
+                end: 8
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 21
+                end: 22
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6701e2d249c99bf2185be4e32276e8d7019a7192e70870b4b995286fe742af32
+  - kind: sentence_template
+    data:
+      id: T6723db67bd31706c
+      normalized_hash: sha256:05cf7e8c6a39ad0ad79f352592aec5329e01316d66613272e03b330219a8c1a4
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 14
+                end: 16
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 59
+                end: 60
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6723db67bd31706c02b24251aadb2dde5bd91040c0db8eede38a3be396dc5425
+  - kind: sentence_template
+    data:
+      id: T673071c245634ba8
+      normalized_hash: sha256:094adcd2e9ff39bc8ac5244083d9e8a773a6f0bf9e1d6a9c62c7030d457023a7
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 5
+                end: 6
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 27
+                end: 28
+              - start: 52
+                end: 53
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:673071c245634ba86d7aac651097064ce6015a28953c4c749ff96eec144f2a68
+  - kind: sentence_template
+    data:
+      id: T673fe68c30ee37b3
+      normalized_hash: sha256:a35f32a68734a697493bd1f0827734dc669bb06ff55fea0a887e5ada63fbb132
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 17
+                end: 18
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 43
+                end: 44
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:673fe68c30ee37b386018ea07121af05be44e9136a29b69ef9ca36b2cb9ca4ec
+  - kind: sentence_template
+    data:
+      id: T67f5d9db01b71239
+      normalized_hash: sha256:e3f5c534a8a5f3457d6c2c36ca853edc5007daeb69f4719ed18f4651891acbd3
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 14
+                end: 15
+              - start: 58
+                end: 59
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 42
+                end: 43
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:67f5d9db01b71239d7bd6c55338c75761e0c1e0dc3fbeb54330eaa968ef3ce53
+  - kind: sentence_template
+    data:
+      id: T68304c0b693b2e71
+      normalized_hash: sha256:b12b534d8eb34fe8c28ddc476f56823121efa793d73ba6fc32169928c0dab038
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 19
+                end: 20
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 36
+                end: 40
+            reference_kind: vocabulary
+            min:
+            max:
+      content_hash: sha256:68304c0b693b2e7136f82018992080a5c3aae1b2066f337d28e896011e0d4068
+  - kind: sentence_template
+    data:
+      id: T684410cdfc32fe20
+      normalized_hash: sha256:86193a803c18d4c201f6253d684da95a89e6bc183888ec00ebb16bdc001e6f74
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 17
+                end: 18
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 26
+                end: 27
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 45
+                end: 46
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:684410cdfc32fe20b8a0f30e2a8325edb3b14cf44c1e81e329868b5b550855a5
+  - kind: sentence_template
+    data:
+      id: T68493418f09f5f1f
+      normalized_hash: sha256:66f20273b2bb559deee06f4da91c69e019f8b58f4274a6f9bddff9ef7af3f419
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 19
+                end: 20
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 28
+                end: 29
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 53
+                end: 54
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:68493418f09f5f1f8d3c82a28927d1408f0a8676bdd247fc8f2f876189c6bc78
+  - kind: sentence_template
+    data:
+      id: T6857ac71e38401cb
+      normalized_hash: sha256:cc3cda4ab38bb5c3fa887f1d98a923c8dd3843874894baab10f15e95302dd23d
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 15
+                end: 16
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 25
+                end: 28
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 30
+                end: 31
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: reference
+            occurrences:
+              - start: 33
+                end: 35
+            reference_kind: term
+            min:
+            max:
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 37
+                end: 38
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6857ac71e38401cbae84c36efd32b2400eb505ae51e8bc3652907f2df154d500
+  - kind: sentence_template
+    data:
+      id: T685c4c3a3f3ce743
+      normalized_hash: sha256:18d92ab4c2a678c7a90e3c4404faf4800fc9fab9365289dcc7d1b92ba18d50fb
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 27
+                end: 28
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 39
+                end: 40
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:685c4c3a3f3ce743c31db84787f0e2dc5152fa3014c2423f0ba746d62db62556
+  - kind: sentence_template
+    data:
+      id: T686b116d5fec1636
+      normalized_hash: sha256:823777a33b9c065c5417703726b691bd646e973c4a667b913b92d52913ecc0af
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 18
+                end: 20
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 22
+                end: 23
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 34
+                end: 35
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:686b116d5fec1636ee99df174b9d06d61f6ae56d0a71b96ed61a6c8849376408
+  - kind: sentence_template
+    data:
+      id: T68b141b0fcc555c4
+      normalized_hash: sha256:e58bde3b521e4edac4cb5dd132a74ab918c7f34499bc1d65bb3f048b3dbbb6f6
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 22
+                end: 23
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 31
+                end: 32
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 45
+                end: 46
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:68b141b0fcc555c4df71ad32952ebdc5442fb914f4f65ef0a7d4034742748ff1
+  - kind: sentence_template
+    data:
+      id: T68b1c28c3d289160
+      normalized_hash: sha256:4e0060e6d7f12ca63f25d24ee89a60ee0e4811ea50ef0b9f3cbb3127ed8f8bf7
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 32
+                end: 33
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 47
+                end: 48
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:68b1c28c3d2891602402860236b2dc998cea27c0c3faa44bfe9bb5055e119831
+  - kind: sentence_template
+    data:
+      id: T68cbd84ae910fb2d
+      normalized_hash: sha256:b08dca6d685f5b89c8925a6514e2e20d3024514e7e324f51680d92b1a4de6e3c
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 9
+                end: 10
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 16
+                end: 17
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 18
+                end: 19
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:68cbd84ae910fb2daa497129c370c22428ca56b59fcfea5ec0e8c08bd56ae9be
+  - kind: sentence_template
+    data:
+      id: T68d5b47b03d06ebb
+      normalized_hash: sha256:c39a18fef06d5b664822c650925748bd1a170d2ebb7a639a7888d1c6ade8abd6
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 15
+                end: 16
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:68d5b47b03d06ebbcfee9f2b70a80edce39156fcced29f8be458289841ed6b4e
+  - kind: sentence_template
+    data:
+      id: T68e163f12701fd2c
+      normalized_hash: sha256:2024a1d750b05729d96cb9032949e521c39a17ccabe8a21a4095848a8af9603d
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 18
+                end: 22
+            reference_kind: vocabulary
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 28
+                end: 29
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:68e163f12701fd2c42ef49ccfa0d77a881a5cd4fd59f27e91ab83ef986de43c7
+  - kind: sentence_template
+    data:
+      id: T69769aae9ce4e24b
+      normalized_hash: sha256:420846ad18bf01fa35079b1c4c47785d49961530811ad954ef7ac22db2217145
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 15
+                end: 16
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:69769aae9ce4e24b9d5f8418ec30d66a1f5c3285232dcf1794325685124fccac
+  - kind: sentence_template
+    data:
+      id: T69c63d1c44809cb9
+      normalized_hash: sha256:1c323bb38f84b53f2f3f689a1da44d42a9bff968fc871142510ff4c9df9c9239
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 8
+                end: 9
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 14
+                end: 17
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 27
+                end: 28
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 36
+                end: 37
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 50
+                end: 51
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:69c63d1c44809cb946455c226ed3c07bbd0224b50ed2da34bdab926aa57b36d0
+  - kind: sentence_template
+    data:
+      id: T69d5b2889b5c4f01
+      normalized_hash: sha256:43bba62e3194e1bf4c369c1df3fe428b6a25afeac9ad4f7e6c07709985ace327
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 8
+                end: 9
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 14
+                end: 17
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 35
+                end: 36
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 47
+                end: 48
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:69d5b2889b5c4f0144ee00654b065e848ca4f059c86baf575904bb298c4d56cd
+  - kind: sentence_template
+    data:
+      id: T69e76d8143cfdcca
+      normalized_hash: sha256:af698918eef6f0afac8e686d68d2466fa014baf87bf8405062382ab87d26b94a
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 16
+                end: 17
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 34
+                end: 36
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 38
+                end: 39
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:69e76d8143cfdccad5a31d69fb9afa13e884a62bb3dc5edb7ad5bdeead17c222
+  - kind: sentence_template
+    data:
+      id: T69f803a5382e249e
+      normalized_hash: sha256:d4d154836f5d689deaf00c3f3f85ddcad3145a97e4ef47787ddcbd7093b89271
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 18
+                end: 19
+              - start: 43
+                end: 44
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 28
+                end: 29
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:69f803a5382e249ee5aa6ee8a133265c3b3b228901e9f30ef53803df5fb30349
+  - kind: sentence_template
+    data:
+      id: T6a0fec5f0bd3d0a9
+      normalized_hash: sha256:a61f1fd1c65f13ec878a23eec76e876f65945d3a0d3e9b07e33e1d9f2854bc9f
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 25
+                end: 26
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 42
+                end: 43
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 48
+                end: 49
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 59
+                end: 60
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6a0fec5f0bd3d0a9959056a97086d86749cacb73212f1c133769a9a2934865b7
+  - kind: sentence_template
+    data:
+      id: T6a435812c0dfdd84
+      normalized_hash: sha256:548f622d157b01be04d625756ddc717e0b5097f93f51f363a86e5b709682eb88
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 30
+                end: 31
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 49
+                end: 51
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 53
+                end: 54
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 64
+                end: 65
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 74
+                end: 75
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6a435812c0dfdd84b5321fad936c9ad9cb3ab4f26c5087907f36cb20adcf6aae
+  - kind: sentence_template
+    data:
+      id: T6a63ed1a305b219e
+      normalized_hash: sha256:30e30dc7d1db66358de547fd3b0e8488f0e5d5d9689c9403053ce561b1bcc7ef
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 8
+                end: 9
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 35
+                end: 36
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 44
+                end: 45
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6a63ed1a305b219eb48ce8ff536b028aa1300794ffaa4f2c8df2f0804cf2fdbe
+  - kind: sentence_template
+    data:
+      id: T6a8e4747f94a3f95
+      normalized_hash: sha256:141bf7b18a5a18f9b5f7059ff8c9aa3d35755927abd7f2ca1d8216330609f2f2
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 18
+                end: 19
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 25
+                end: 26
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6a8e4747f94a3f958a89e247b106c61dc0d52030655b9191b4b14962d83127bd
+  - kind: sentence_template
+    data:
+      id: T6a93e6b8ab6e7ed0
+      normalized_hash: sha256:b8e8598433e2c7207643b8e889d6b2fa70f54127c2569008ce6c9dbd836a39f6
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 27
+                end: 28
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 37
+                end: 40
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 42
+                end: 43
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6a93e6b8ab6e7ed024e8d47a9b23c963cbaec34f1e6aa1ecea7bc9703d0fffc4
+  - kind: sentence_template
+    data:
+      id: T6ac5f7bc85ee37a8
+      normalized_hash: sha256:9235d140541a173b522c4012f7de7eaff527999e1e2ec151c971fa72d9bc33d1
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 8
+                end: 9
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 30
+                end: 31
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6ac5f7bc85ee37a8ab6d9e9c233eace1db0db1f0eebbd119462f1a153e7f333e
+  - kind: sentence_template
+    data:
+      id: T6b0070ab82112694
+      normalized_hash: sha256:6dd6900fb221647bdd9cdf51f8b1d4871b856a176d5462b12dbaf2c42ac9dce1
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 23
+                end: 24
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6b0070ab8211269472ded5dbc441dedf4bcd5d28afd6b2fd5840122dc13b00a4
+  - kind: sentence_template
+    data:
+      id: T6b1681346035fe22
+      normalized_hash: sha256:8f92392abe4b68d8419df76be654869c12e2b17026e6c4a74a1bdda64180abc4
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 11
+                end: 12
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6b1681346035fe228ea784795f9691d6df23f069ec5541b329aa5ec15d8838aa
+  - kind: sentence_template
+    data:
+      id: T6b367129d8c37ad6
+      normalized_hash: sha256:289ab790778c4458586e895d6f38a9fd6bbd097c7e2478e240856f52e98151e3
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 51
+                end: 52
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 72
+                end: 73
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 83
+                end: 84
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6b367129d8c37ad6c5ac454f99347e24bab8faada0b0816e6151a49ad9e9f898
+  - kind: sentence_template
+    data:
+      id: T6b542734764f1215
+      normalized_hash: sha256:b8708e4f2e71c47c8c7b807e34746a9c218d85e97e9f8ec64684e1e7df049f6d
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 28
+                end: 29
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6b542734764f121531d3d849ec112cc77ac68afaa41c320655ad3e4f27016013
+  - kind: sentence_template
+    data:
+      id: T6b6e23e70fc14401
+      normalized_hash: sha256:c71defa3b3fce1ba0f902d097a15362f2d37ead7100d6cbfd71757011f26ae51
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 8
+                end: 11
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 23
+                end: 24
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 32
+                end: 33
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6b6e23e70fc144019af4751a5f3c72eeecd0e4c0d75ab905b8fe65883a1e009c
+  - kind: sentence_template
+    data:
+      id: T6b941b10cddf2f41
+      normalized_hash: sha256:61681169b330a2d2ebfbc4bef19c6b514f9aedef55dbe625eafcce2236992973
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 29
+                end: 30
+              - start: 58
+                end: 59
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6b941b10cddf2f41cf4e739053d2459b15475e172e6e82ed96b238e6969cfcc7
+  - kind: sentence_template
+    data:
+      id: T6bd92c3c9a5fcd6c
+      normalized_hash: sha256:eda30221742eb9b2437bf3f1ba8587ebb6ce5566d4a301a6e50f929f3598e4f4
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 15
+                end: 16
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 32
+                end: 33
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 46
+                end: 47
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6bd92c3c9a5fcd6cb571466731959b0e02784d3478baa5112320f0830fea9ee9
+  - kind: sentence_template
+    data:
+      id: T6c3592b43761c3e5
+      normalized_hash: sha256:63cce02f4fada57bf3bf21551ff124b391d09a2e7f2743895c1cda33a40e258d
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 17
+                end: 18
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 48
+                end: 49
+              - start: 67
+                end: 68
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6c3592b43761c3e5a6c6d2f742e7becbe79b90d452177fff16761c42bd557991
+  - kind: sentence_template
+    data:
+      id: T6c374219bf81c412
+      normalized_hash: sha256:779a51788c838e91b9b1a1fc006e62b594e0244480b7907c84d2580b382a03f4
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 13
+                end: 14
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 23
+                end: 26
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 28
+                end: 29
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6c374219bf81c412e61bfce99dce4b79d301711b361f5dd65bca1dd449afb136
+  - kind: sentence_template
+    data:
+      id: T6c55285b076756e1
+      normalized_hash: sha256:f5b392129be3aa787fb4ed3e872bdcd3b3004d032414c7f6f6a20f039e6c5e20
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 9
+                end: 10
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 38
+                end: 39
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 47
+                end: 48
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6c55285b076756e13370e4ba8fc03394c956efa88d4839fbf0dda41c04d050c9
+  - kind: sentence_template
+    data:
+      id: T6c6668692b396de6
+      normalized_hash: sha256:3c4b6472fb53137ab3b6bed6f944ba496f403a03e31b64b6373a4cc7b1784a60
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 8
+                end: 9
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 14
+                end: 17
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 34
+                end: 35
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6c6668692b396de690bbbe02a64e59b7ac2ddcd8477574b3ec78204693a15f0b
+  - kind: sentence_template
+    data:
+      id: T6c7c9a0eb9ff2619
+      normalized_hash: sha256:14a5c9543c4f31d71f55d1dfe887f5a909386693678332fac2a9f7daf2c64919
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots: []
+      content_hash: sha256:6c7c9a0eb9ff26192a8b6ddce1465d838275fdc78f649399047da394e2c7b725
+  - kind: sentence_template
+    data:
+      id: T6c85d92b372927ba
+      normalized_hash: sha256:59064813174254b20a7df47993b5445e38cff07ef43606d5d1389be546127056
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 13
+                end: 16
+            reference_kind: term
+            min:
+            max:
+      content_hash: sha256:6c85d92b372927baf1beb6f81260017db6a08e9e502993ee25f71d288528092f
+  - kind: sentence_template
+    data:
+      id: T6ca90777dc2f02ff
+      normalized_hash: sha256:1477d5017a9e7cc68505c7f46f5c6c3e31f74e2c9f7e9f849dff54ac12f5f5dd
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 34
+                end: 35
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 43
+                end: 44
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6ca90777dc2f02ff3270edd3fdc1832c80b5afd43406381f69139646f80cada9
+  - kind: sentence_template
+    data:
+      id: T6cf3dcf42432509c
+      normalized_hash: sha256:0ddcddd1de28b1d74535c909629cd94a1d89321496b7a4adccef71943926e5eb
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 8
+                end: 9
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 21
+                end: 22
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: reference
+            occurrences:
+              - start: 26
+                end: 30
+            reference_kind: vocabulary
+            min:
+            max:
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 34
+                end: 35
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 41
+                end: 42
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6cf3dcf42432509c42d11fc9c3625b20e97f863873620ee528c67b2c0ee07019
+  - kind: sentence_template
+    data:
+      id: T6d115164b0606b84
+      normalized_hash: sha256:450443faa5729532a48c4282f9ad62ce1fb2315b4759603c642b289856802e44
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 11
+                end: 12
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 32
+                end: 34
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 36
+                end: 37
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6d115164b0606b84ef4478d35f13b7cc4b2f047f8ddb3967905caaa2db5f4b24
+  - kind: sentence_template
+    data:
+      id: T6d1cd7865cc92f24
+      normalized_hash: sha256:de5a71eee849208de6a8365a96e2eb5e780dbc2545bcbb1cc94815b899fe6538
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 0
+                end: 1
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6d1cd7865cc92f24d5ccee5df4e8e4ebc1ec66a4e8cfa2f0a88c602b4b0f17a8
+  - kind: sentence_template
+    data:
+      id: T6d24465b77212a95
+      normalized_hash: sha256:98fd8d61472464fa8a194aef5f47611fee8da988f01a6726b6e095d1c02ee49e
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 16
+                end: 17
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 35
+                end: 36
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 57
+                end: 58
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 68
+                end: 69
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 73
+                end: 74
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6d24465b77212a9571c47d4b23e497a211f0561fa14023dd6d3dff3133fb4e1c
+  - kind: sentence_template
+    data:
+      id: T6d3d2216c8cc167e
+      normalized_hash: sha256:afd11da040059cfea6d24ba8af66fd6e4feab094bdd44e8e53c3be9320799859
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 17
+                end: 18
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 27
+                end: 30
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 32
+                end: 33
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6d3d2216c8cc167ee557aeed9de95a802b343073a14a5fab00c4b3d776110d16
+  - kind: sentence_template
+    data:
+      id: T6d5d362ef5786383
+      normalized_hash: sha256:76488be5ee453aff692eaafe99a45b0749c70c490417d93b544df1754dcfd437
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 7
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 18
+                end: 19
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6d5d362ef578638342bc3d148a587d37fb5a5a17e011d6e24a1a3a6a4180d599
+  - kind: sentence_template
+    data:
+      id: T6dac0c68c6754c94
+      normalized_hash: sha256:b4e63617fdfe2839649d5a62f9325cc7cb93df61d1da37d5b87f139719e31cb4
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 13
+                end: 14
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 30
+                end: 31
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6dac0c68c6754c949ee5badca0609fa76c031e17f3fb85fb0a109223dddc657b
+  - kind: sentence_template
+    data:
+      id: T6dbeb6669e2499aa
+      normalized_hash: sha256:1dae26c8078eaa1e309d4ef07afe9040a5e0ee80cf32156fd60f9901d9a8a8ab
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 24
+                end: 25
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6dbeb6669e2499aad211167675ad34bb705ae595628c79811207af501ed4e1f2
+  - kind: sentence_template
+    data:
+      id: T6dc5271035404074
+      normalized_hash: sha256:f0bcb2979b6945762c9923105eadc9ecc23ac482f12be1344a8d52f975dc4c7c
+      role: reminder
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots: []
+      content_hash: sha256:6dc52710354040747d61cd382c5fadb6aa54259d7ea10414390b465dd9f6e68a
+  - kind: sentence_template
+    data:
+      id: T6e141c03a0d91799
+      normalized_hash: sha256:49429da47dcdde7b2eca2142f434b068328a6ae9b9b2b7802baf23071f7ef1e3
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 8
+                end: 11
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 23
+                end: 24
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: reference
+            occurrences:
+              - start: 28
+                end: 32
+            reference_kind: vocabulary
+            min:
+            max:
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 38
+                end: 39
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_5
+            type: reference
+            occurrences:
+              - start: 48
+                end: 51
+            reference_kind: term
+            min:
+            max:
+          - name: slot_6
+            type: uint
+            occurrences:
+              - start: 53
+                end: 54
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_7
+            type: reference
+            occurrences:
+              - start: 56
+                end: 58
+            reference_kind: term
+            min:
+            max:
+          - name: slot_8
+            type: uint
+            occurrences:
+              - start: 60
+                end: 61
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6e141c03a0d91799e36b01a523b2564591f7aa04b25a5c536e1fe1689655f212
+  - kind: sentence_template
+    data:
+      id: T6e28ddd65b386a9c
+      normalized_hash: sha256:139e3df56d7e335dcfde0cad845034bb9dd56538fa2188ed4ea59bfd45df463c
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 19
+                end: 20
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 45
+                end: 46
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6e28ddd65b386a9cf764d89d5ad410dab89069be6c9940a2cc850508c6973baf
+  - kind: sentence_template
+    data:
+      id: T6e45b40c548e1afc
+      normalized_hash: sha256:d3b2f4e8d770cc30f08c2353ae1c587921cedc96e5220e097a48384992bb6722
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 9
+                end: 11
+            reference_kind: term
+            min:
+            max:
+      content_hash: sha256:6e45b40c548e1afc1208488477398a67c52e950905fc9d78b1b3943316d10711
+  - kind: sentence_template
+    data:
+      id: T6e4e26cee9e6a304
+      normalized_hash: sha256:7a399627cabc81a82f17782b06c705d34b068d1a14f920ee5afe76f53bc3d854
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 11
+                end: 12
+              - start: 21
+                end: 22
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6e4e26cee9e6a304a5760504b6e379fb6ccd8b4a3ede4fd8ce6675d8e34815f5
+  - kind: sentence_template
+    data:
+      id: T6e63a469efb84c32
+      normalized_hash: sha256:e080d6da408a032af629652634a6905846f36643ab179dd93e406d6580afb3f9
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 13
+                end: 14
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 24
+                end: 25
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 33
+                end: 34
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6e63a469efb84c321e44250aa19103bc3251d5933943d4bc24a73fc7e141feca
+  - kind: sentence_template
+    data:
+      id: T6e7d8ed3310c91d0
+      normalized_hash: sha256:ebbe3e31885ee323ffa20d0669b3aa67c9c8355fd97f34313017a29b817df2a2
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 8
+                end: 11
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 25
+                end: 26
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6e7d8ed3310c91d0601e003fc7036b1ac92a9a39d7137c05f113b9fd01717e31
+  - kind: sentence_template
+    data:
+      id: T6e92845736afb913
+      normalized_hash: sha256:0e718e441f7bc8dafe3c96892c47d5c3e30da9e4df8176e06fae80da81dab014
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 9
+                end: 12
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 14
+                end: 15
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6e92845736afb9136b2d53dbe75cbaed15feaa79c34e31f5cdcbf214d6c75038
+  - kind: sentence_template
+    data:
+      id: T6ea5b7d560135664
+      normalized_hash: sha256:3d0a5be41dbe83a05da340c662ea7c6c51dea5dc15907f1a1673dc7fd1ab3235
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 5
+                end: 12
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 23
+                end: 24
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6ea5b7d560135664aa80a4a33b48d7c6557d6095712486fe4a3b0e6d36134904
+  - kind: sentence_template
+    data:
+      id: T6ebfc704478b75e7
+      normalized_hash: sha256:0e75ffb61d2918a320020e4de79d017ca6820270395fe19c72d69e4d4b7e8a67
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 22
+                end: 25
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 27
+                end: 28
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6ebfc704478b75e76276a521e96abc683e40a6956ff9e0df93cd27c91557973f
+  - kind: sentence_template
+    data:
+      id: T6edbf42b6bcf9eb8
+      normalized_hash: sha256:8c8c74d7c4aab155caf44d7707669e8e7aa8f5e105f7b924a2c613c306d66758
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 8
+                end: 9
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 19
+                end: 20
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 35
+                end: 36
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6edbf42b6bcf9eb8634b2c7973fbc6aef9ef5490f37ab5aaf14721385567d2ca
+  - kind: sentence_template
+    data:
+      id: T6ee79dfd8e64a735
+      normalized_hash: sha256:3b11fcbec859c0b17c7adb2c4811130c83483040bc68e4d5da2aecd908beb40c
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 20
+                end: 21
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 25
+                end: 29
+            reference_kind: vocabulary
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 35
+                end: 36
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: reference
+            occurrences:
+              - start: 53
+                end: 56
+            reference_kind: term
+            min:
+            max:
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 58
+                end: 59
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6ee79dfd8e64a735c40e5864ebaf853d26c77c30adf7f83f397ed6b0bfd44996
+  - kind: sentence_template
+    data:
+      id: T6efcc1c6ec412ab5
+      normalized_hash: sha256:432a36916d8840c86f6b3c93adcdb9658b5c24d91168c03e451eec31c9cb6e8f
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 31
+                end: 32
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6efcc1c6ec412ab5a335b23293f15833bbc0b5e6a226966f4f70a778ee98efbf
+  - kind: sentence_template
+    data:
+      id: T6f2d0612e389e21b
+      normalized_hash: sha256:49b9676f3688e90a5d3685d93979322beb578d6826f45f5074f17c5cb8e32921
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 8
+                end: 11
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 18
+                end: 19
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 35
+                end: 36
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6f2d0612e389e21bd046e981047f6b82fbe2a6b5b10eb1e4b941e3c1efad470b
+  - kind: sentence_template
+    data:
+      id: T6f6375728f45a784
+      normalized_hash: sha256:d73bbd72883c91cece6760fd29e039f48fbbb1f7c863abae6dc0245d9864a9d7
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 8
+                end: 11
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 32
+                end: 33
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: reference
+            occurrences:
+              - start: 42
+                end: 45
+            reference_kind: term
+            min:
+            max:
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 47
+                end: 48
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_5
+            type: reference
+            occurrences:
+              - start: 50
+                end: 52
+            reference_kind: term
+            min:
+            max:
+          - name: slot_6
+            type: uint
+            occurrences:
+              - start: 54
+                end: 55
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6f6375728f45a78468d359e1b15208ca430dc2f3d65b4c809002e93b53835b03
+  - kind: sentence_template
+    data:
+      id: T6f6601e92b963bcc
+      normalized_hash: sha256:e624f586fa8f425582a6b7d0f55c00772fdbc1f20003f78cf5c176df3cb5508c
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 34
+                end: 35
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 46
+                end: 47
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6f6601e92b963bcc5177b9301bac99f373041f7f9944e81943ea06b55e70d032
+  - kind: sentence_template
+    data:
+      id: T6f7503e7b00654cd
+      normalized_hash: sha256:981ce41bc5d2f43fb62dc0b38d1040d7995fcb93190a021e6936fadff20dacad
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 7
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 12
+                end: 13
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 22
+                end: 23
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_3
+            type: reference
+            occurrences:
+              - start: 33
+                end: 35
+            reference_kind: term
+            min:
+            max:
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 37
+                end: 38
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 42
+                end: 43
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_6
+            type: uint
+            occurrences:
+              - start: 48
+                end: 49
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_7
+            type: reference
+            occurrences:
+              - start: 60
+                end: 61
+            reference_kind: term
+            min:
+            max:
+          - name: slot_8
+            type: uint
+            occurrences:
+              - start: 62
+                end: 63
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6f7503e7b00654cdfe230a626c620a2134749ac65e4e2117936109c812a4655c
+  - kind: sentence_template
+    data:
+      id: T6fcbb4662e3f07ab
+      normalized_hash: sha256:ad251230e5395896d3d039f3a7641def08aad5d8f40a35ee913ab1d9398dca07
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 27
+                end: 28
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6fcbb4662e3f07abfb468b9cb86b129b0f28f2dd16f4e80e28ca5b81c1ea1b4f
+  - kind: sentence_template
+    data:
+      id: T6feb382d4f5005b9
+      normalized_hash: sha256:ec42687051257dd02e884c554c3ef9a319875838438d6b6b239efeaeae8d93f2
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 19
+                end: 20
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6feb382d4f5005b92ae7d582f2d5c2da84e2f4375ab85f7a84df569bd4caeb1b
+  - kind: sentence_template
+    data:
+      id: T6fedbca2eb7e78fc
+      normalized_hash: sha256:03a78938847465d82eda2cf8ec1a1e377154be76d6c89da5cb13d9d7c829e656
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 40
+                end: 41
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:6fedbca2eb7e78fc789fb53be1e1234df438848f4f899be8f1a3c9b4e9d7a685
+  - kind: sentence_template
+    data:
+      id: T7052368a73521d14
+      normalized_hash: sha256:71be66e5ad511eadc6eaeb46c7564dc982f1e4e9558835a2090ecef517a537fa
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 41
+                end: 42
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:7052368a73521d14923522081148663851c88356cdd846b4e2f4d7af8f581630
+  - kind: sentence_template
+    data:
+      id: T705877724ef0a060
+      normalized_hash: sha256:346c9feff2a7101214b9b768e4c3d91b8d83b309c2db899963290293512d80fe
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 26
+                end: 27
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 28
+                end: 29
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:705877724ef0a06019dbccef1b53bbe98fcab4a934ed4d244929b40c0d81aa3e
+  - kind: sentence_template
+    data:
+      id: T7063a934cbd632b5
+      normalized_hash: sha256:d6a384af5f9b4e4e08219f781bc089bf5f302e28f0c48fc958b283c86b7e3ce9
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 25
+                end: 26
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 36
+                end: 39
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 41
+                end: 42
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: reference
+            occurrences:
+              - start: 44
+                end: 46
+            reference_kind: term
+            min:
+            max:
+          - name: slot_5
+            type: uint
+            occurrences:
+              - start: 48
+                end: 49
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:7063a934cbd632b52d503ab0b690a9ac2727191f2c7e814262719ca2f7ec78b6
+  - kind: sentence_template
+    data:
+      id: T70667b23909c45d6
+      normalized_hash: sha256:29545bde2727f9e5734bb7a25b8699e5fbb2c5216b8d75baf7635dd43f6228ad
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots: []
+      content_hash: sha256:70667b23909c45d699be1936cbd060bb3b2abd0f96dedf3f3aecf3df2ccfa74d
+  - kind: sentence_template
+    data:
+      id: T70774ee9cf4826a9
+      normalized_hash: sha256:51acca8bbc71ae9166795d5c59a58273c275b8f40e30a13cddcf8f2111fb2b62
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 6
+                end: 7
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 35
+                end: 37
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 39
+                end: 40
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:70774ee9cf4826a93a979ac809732ecd8717c0f0817b67effc0648381a5970b0
+  - kind: sentence_template
+    data:
+      id: T707c733ed0061f41
+      normalized_hash: sha256:42c92d4160174d56580a0addc1ea5645cfe606203deca622dd603c0d643af51e
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 8
+                end: 11
+            reference_kind: term
+            min:
+            max:
+      content_hash: sha256:707c733ed0061f4166eca589edf2f92dd3f861846cebc8960b67b8b9642cb46c
+  - kind: sentence_template
+    data:
+      id: T709d1c0cb6dc78b3
+      normalized_hash: sha256:c94a6027acd7c7bd9771572f40c6d8516c04b566088a686e6670e02734e377ea
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 22
+                end: 23
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 35
+                end: 36
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:709d1c0cb6dc78b3bb7f678698e5696317189dd66bbdc441be85607518198401
+  - kind: sentence_template
+    data:
+      id: T70c45f5e9b9e46e7
+      normalized_hash: sha256:5fd22f337526f97f1ec24d73a5e26f8ceb38cec4aed4debb2fd8e5af0f26d481
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots: []
+      content_hash: sha256:70c45f5e9b9e46e7a95d729b85c11d367074409f49826c5bb28b5fccd3344876
+  - kind: sentence_template
+    data:
+      id: T70cf164d7ea05609
+      normalized_hash: sha256:9c79f8a38272aa9975d535a90e0240f27d180b5e4a43cf3e12e348330e013e2d
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 19
+                end: 20
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 28
+                end: 29
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 56
+                end: 57
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:70cf164d7ea0560909c31bce9986d33286e74d6e166fd11a51d0c45bc8a50878
+  - kind: sentence_template
+    data:
+      id: T70d6d1664093b477
+      normalized_hash: sha256:57eb43b12f7bcc395ef6b7613bcc5761eaaa6b2270e67b05452fa18be0a2b946
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 17
+                end: 18
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 47
+                end: 48
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 92
+                end: 93
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 104
+                end: 105
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_5
+            type: reference
+            occurrences:
+              - start: 119
+                end: 122
+            reference_kind: term
+            min:
+            max:
+          - name: slot_6
+            type: uint
+            occurrences:
+              - start: 124
+                end: 125
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_7
+            type: reference
+            occurrences:
+              - start: 127
+                end: 129
+            reference_kind: term
+            min:
+            max:
+          - name: slot_8
+            type: uint
+            occurrences:
+              - start: 131
+                end: 132
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:70d6d1664093b47748f8a6cae65e760431afc08e4785721ee42498f540d69baa
+  - kind: sentence_template
+    data:
+      id: T70ec2d0230868c2b
+      normalized_hash: sha256:08de225fb5154517dca1a74b93a00591313f1abb41029a5e0c20214c74eb9c4c
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 7
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 16
+                end: 17
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 29
+                end: 32
+            reference_kind: vocabulary
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 38
+                end: 39
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:70ec2d0230868c2b3bfd2a1dbef7e11773b256524e76c7ab34c1df277dd4fbb2
+  - kind: sentence_template
+    data:
+      id: T70ee00353185103d
+      normalized_hash: sha256:f4cf71342a9b242bc4ec3b3801805d688fa985d6e47d9e7e8b841b1a1364baf3
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 17
+                end: 18
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 38
+                end: 39
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:70ee00353185103dde3e4d0d52d2aa67d67bca713566d5c0ed916b7dda837c9a
+  - kind: sentence_template
+    data:
+      id: T71298f96651f592e
+      normalized_hash: sha256:670ddf4e17cecde332762b74bc9e247a37b814bc08aa737639ef8fae9b3596ce
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 17
+                end: 18
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 27
+                end: 30
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 32
+                end: 33
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:71298f96651f592e066f3a02c25888f5f680f1c1122b135f50cd1b1524eaef83
+  - kind: sentence_template
+    data:
+      id: T7141c49a3a35ad1b
+      normalized_hash: sha256:2386228589e39dfeca57c36265e8923d7f35ae83ef51c77baf3fe7f29209c77a
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 8
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 17
+                end: 18
+              - start: 37
+                end: 38
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:7141c49a3a35ad1b34d7aa60d98af2a7239e4ad701a622338f250fa053a1a5c8
+  - kind: sentence_template
+    data:
+      id: T7167a2029824cb5c
+      normalized_hash: sha256:8bc14e972758041be843816d99fd78d413690fb2c7b937bf57aa88ecf714841e
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 8
+                end: 11
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 39
+                end: 40
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:7167a2029824cb5ccb53ba0932516690e7512766d0ac475fc4a4594cde4bd72e
+  - kind: sentence_template
+    data:
+      id: T716842e488741afe
+      normalized_hash: sha256:fd99ec64a1a997d5669df24806f46a73b7c9684a0c2a2a788ff6e1f730794887
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 8
+                end: 11
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 13
+                end: 14
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:716842e488741afe2c89601e48f9a4c408344bf37d5a7029873399dd742386a3
+  - kind: sentence_template
+    data:
+      id: T7174894d24a2b489
+      normalized_hash: sha256:c50500d952952fa478c7050e9ad4dcf55d832749a2dc572ea9b5bead7b159cfa
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 14
+                end: 15
+              - start: 46
+                end: 47
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 31
+                end: 32
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 40
+                end: 41
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:7174894d24a2b489a0359dd2befc7670fe57ff098e589699ef86221a87f3226a
+  - kind: sentence_template
+    data:
+      id: T7179110eb20b8ca7
+      normalized_hash: sha256:c97736add8703ea4caedcbb6e882e19c9437444322cc6a47768cc531953ebaca
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 15
+                end: 16
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 25
+                end: 26
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:7179110eb20b8ca749e51b5c35a75ceee06469a1a4f53a85abc94bc507fe7f51
+  - kind: sentence_template
+    data:
+      id: T717a30ea7abf968e
+      normalized_hash: sha256:984838f53cb74775ddb5160d0c5d9b5487f4a9d5517aca5aa2b6a9a748843bca
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 28
+                end: 29
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 44
+                end: 46
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 48
+                end: 49
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:717a30ea7abf968ed4035757a92eb332ba0171f5760727cb59cb2a22294f4586
+  - kind: sentence_template
+    data:
+      id: T71d1f3f47f2939fb
+      normalized_hash: sha256:2f6f974f7ee84460c617141cd97c37eecd1ac2b2bfa00ac7136e8656fc1aada6
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 15
+                end: 16
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 37
+                end: 38
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_2
+            type: reference
+            occurrences:
+              - start: 52
+                end: 54
+            reference_kind: term
+            min:
+            max:
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 56
+                end: 57
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:71d1f3f47f2939fbfca3ac08be41fdff385f956621036b3eb8244e979129d3bd
+  - kind: sentence_template
+    data:
+      id: T71d86fab65978f92
+      normalized_hash: sha256:cc8893bb6e1888b8b822622f7c2b00c3d4eb6b68526c284205fe348778766c36
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 14
+                end: 15
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 39
+                end: 40
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:71d86fab65978f923b785870902b57bea46ea1a850df7668d19fa61032f92107
+  - kind: sentence_template
+    data:
+      id: T71da4fb810a052c5
+      normalized_hash: sha256:df5662e6d62460998e00f96b0d28f710b3c1a07c53b3db2b5e2e4de7d92e0dd2
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 8
+                end: 9
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:71da4fb810a052c504dd5e1e41c59a669279f84ad408269ce7bb67ea6257eca1
+  - kind: sentence_template
+    data:
+      id: T71f3c368ee370795
+      normalized_hash: sha256:09ce30f0e88c6f16a58e43be667f2c0b1aa3aa288b6f0cd07de800b63662e799
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 4
+                end: 5
+              - start: 53
+                end: 54
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_1
+            type: uint
+            occurrences:
+              - start: 14
+                end: 15
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 24
+                end: 25
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_3
+            type: reference
+            occurrences:
+              - start: 34
+                end: 37
+            reference_kind: term
+            min:
+            max:
+          - name: slot_4
+            type: uint
+            occurrences:
+              - start: 39
+                end: 40
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_6
+            type: uint
+            occurrences:
+              - start: 63
+                end: 64
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_7
+            type: reference
+            occurrences:
+              - start: 72
+                end: 76
+            reference_kind: vocabulary
+            min:
+            max:
+          - name: slot_8
+            type: uint
+            occurrences:
+              - start: 82
+                end: 83
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+          - name: slot_9
+            type: uint
+            occurrences:
+              - start: 107
+                end: 108
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:71f3c368ee3707953560f4835e30c72f38874210440ae2e9194fbeb4328df63c
+  - kind: sentence_template
+    data:
+      id: T72047af84505ebf4
+      normalized_hash: sha256:cdead60b3478b561d443f1f6c89cb003d772878edbd7c2d2b2f62126c9d14ec0
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 23
+                end: 24
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:72047af84505ebf47d2398ab8d5bc618bc37512124143a7e317905dcbfb604f4
+  - kind: sentence_template
+    data:
+      id: T721659cf02c2f640
+      normalized_hash: sha256:32999279d53d303ea9a6d4fbfca27dbfe5018d3532270e406b362fb9dd8c41c2
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: reference
+            occurrences:
+              - start: 1
+                end: 3
+            reference_kind: term
+            min:
+            max:
+          - name: slot_1
+            type: reference
+            occurrences:
+              - start: 8
+                end: 11
+            reference_kind: term
+            min:
+            max:
+          - name: slot_2
+            type: uint
+            occurrences:
+              - start: 25
+                end: 26
+            reference_kind:
+            min: 1
+            max: 9007199254740991
+          - name: slot_3
+            type: uint
+            occurrences:
+              - start: 38
+                end: 39
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:721659cf02c2f6404b72f82d8191970d37397ad351107c0cf34e39ce121afd1b
+  - kind: sentence_template
+    data:
+      id: T722aa1f9d95f22cd
+      normalized_hash: sha256:6668cd8fac388ca91a9178449518a9f37591204e3d957d2647b427e1f1289716
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots:
+          - name: slot_0
+            type: uint
+            occurrences:
+              - start: 39
+                end: 40
+            reference_kind:
+            min: 0
+            max: 9007199254740991
+      content_hash: sha256:722aa1f9d95f22cdc199e428b486ff68d891d55b8cc0fb744e9ecb5f0a8c5000
+  - kind: sentence_template
+    data:
+      id: T722bcfca26f85650
+      normalized_hash: sha256:b8bad03b5136fb911167f38d900b3661e8300f6acb821d1488fc5606ec31ec9a
+      role: body
+      source_lang: ja
+      normalizer_version: template-parameters-jp-candidate-v1
+      semantic_variant: default
+      parameter_schema:
+        format: 1
+        slots: []
+      content_hash: sha256:722bcfca26f85650519f798722c80a98cd9ccc6e26bce5b7f73bd8b691c14758

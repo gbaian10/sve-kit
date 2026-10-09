@@ -1,0 +1,1921 @@
+format: 2
+kind: translation_shard
+records:
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7611b02da5
+      lang: zh-Hant
+      text: 只要這張卡片在場，自己的回合中，自己的全部『X』不會受到傷害。自己的主要階段到來時，這張卡片消失。
+      normalized_hash: sha256:7611b02da57fc8385683da0db93fec6d8da6d42b175167f4d9bb6816712af810
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T762e3be26d
+      lang: zh-Hant
+      text: '{起動}將這張卡片{橫置}、使EX區的N張『X』消失：抽取N張卡片。'
+      normalized_hash: sha256:762e3be26d4b50d522502ccee86cb67c21505f35c69890dce45cd0e2d00dbeef
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7668838971
+      lang: zh-Hant
+      text: 使用這張卡片之際，自己墓場每有N組魔法使・從者與魔法使・法術各N張，消費-N。
+      normalized_hash: sha256:76688389711a53e66bf0e7cff3dc8f8a8b18e80da98636d7c18b0af215629a28
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - numeric_role_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7677a50740
+      lang: zh-Hant
+      text: 使用這張卡片之際，如果自己的戰場上有『X』，則消費-N。
+      normalized_hash: sha256:7677a507403230a2f7435d5c25f03844efd8c6acac2825a86a52d1635710e390
+      role: body
+      reasons:
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T768b18ffcb
+      lang: zh-Hant
+      text: 指定自己戰場上的N個『X』。本回合，使其獲得「該從者給予的傷害+N」。
+      normalized_hash: sha256:768b18ffcb12a4002f75d229952239f30ba063db9ee3817710899c6d112870f5
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+        - signed_numeric_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T76982ff76b
+      lang: zh-Hant
+      text: '{入場曲}從自己的牌堆中搜尋N張原始消費N以下的絕傑・獵人・法術，增加到手牌中。如果自己墓場的獵人・卡片為N張以上，則將N張『X』放置到EX區。'
+      normalized_hash: sha256:76982ff76b488ac3b6c6d7e8da25f757df5a7c6a4b7e9893b2fc78766a7174ab
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T76f84510ff
+      lang: zh-Hant
+      text: '{入場曲}將戰場上的N個其他護符放置到墓場：從自己的牌堆中搜尋N張『X』，召喚到戰場上。'
+      normalized_hash: sha256:76f84510ff0d4ebe6239ece86b66604421d629ee7b38bc94b4af5aac295dc2a9
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7737c64182
+      lang: zh-Hant
+      text: 給予全部從者與敵方的全部主戰者X點傷害。X為「自己墓場的『X』『X』的合計+N」。
+      normalized_hash: sha256:7737c64182b516b650f0d485cbc7f628f4f6e3b8ed3afe9b5df21a642e56a830
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+        - signed_numeric_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T773aca563e
+      lang: zh-Hant
+      text: '{入場曲}指定敵方戰場上的N個從者。給予其N點傷害。如果自己的戰場上有『X』，則轉變為N點傷害。'
+      normalized_hash: sha256:773aca563ef91f0dda2f858ee95c080211749b62e27aa0fc97bb38bca07dff55
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T777fa38ee6
+      lang: zh-Hant
+      text: 從自己的牌堆中搜尋N張『X』與N張『X』與N張『X』，召喚到戰場上。
+      normalized_hash: sha256:777fa38ee6db86c83225370d05c1c64c2ae5a528795ea162411a28942ca8cb79
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7946badafd
+      lang: zh-Hant
+      text: '{入場曲}如果自己的EX區有「卡片名稱含有『X』的從者」，則抽取N張卡片。'
+      normalized_hash: sha256:7946badafddf0d644ec3e22673c84e279d148e15d0730dbbb8fe1ece194992f1
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T79a83fa8d0
+      lang: zh-Hant
+      text: 召喚N個『X』到戰場上。如果為【覺醒】狀態，則轉變為N個。
+      normalized_hash: sha256:79a83fa8d0430b785403ea4ef7d11416c08de4b837f9c2b2a72422a44cc2a302
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7a09ddca01
+      lang: zh-Hant
+      text: 這張卡片被橫置時，自己的主戰者{生命值}+N。如果自己的戰場上有『X』，則轉變為{生命值}+N。
+      normalized_hash: sha256:7a09ddca0140ff7f1499e8ab317e64d554e0253ad6953a93be45d25ffee7ee4b
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7af0c4cad7
+      lang: zh-Hant
+      text: 【進化時】召喚N個『X』到戰場上。將N張『X』或N張『X』放置到EX區。
+      normalized_hash: sha256:7af0c4cad73b8422f4075eaaa9b000e84af2ad0732c1c44be94a078a97f39d59
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7afc2931c4
+      lang: zh-Hant
+      text: '{起動}{消費N}使戰場上的N個『X』消失：指定敵方戰場上的N個從者。給予其N點傷害。此能力N回合中可使用N次。'
+      normalized_hash: sha256:7afc2931c47b8778ab50fce58eaa25f1afffcf6512d99e51490ef41f8abee8cd
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7b946eb548
+      lang: zh-Hant
+      text: '{入場曲}指定EX區的N張卡片。其變身為『X』。'
+      normalized_hash: sha256:7b946eb54885534e96a3c067441e132970e2a2c4df693c314825414f3f6a362e
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7bd9346f91
+      lang: zh-Hant
+      text: 使用這張卡片之際，將進化牌堆中N張正面朝上的「卡片名稱含有『X』的進化從者」轉為背面朝上：消費-N。
+      normalized_hash: sha256:7bd9346f91524cd7ee98b9cf72e02b0b6bb10a01a19b9512cdfabdeb519b4a1a
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7cd5755bb9
+      lang: zh-Hant
+      text: 只要這張卡片在場，自己戰場上的『X』給予的傷害+N。
+      normalized_hash: sha256:7cd5755bb90315393246f8b6e18732f7bd052e22fdf637e368102f6aa17680e3
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+        - signed_numeric_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7d2c6c0a9b
+      lang: zh-Hant
+      text: 使用這張卡片之際，將戰場上的N個「卡片名稱含有『X』的從者」放置到墓場：消費-N。
+      normalized_hash: sha256:7d2c6c0a9bffba6c7b5eece9b0036d6eb62e3159e4b13e75013c068947e41298
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7dad7dcdb0
+      lang: zh-Hant
+      text: '{入場曲}從自己的牌堆中搜尋N張『X』或『X』，召喚到戰場上。'
+      normalized_hash: sha256:7dad7dcdb0f5de7f314f62f51aa87c2a13de72fd42f873d203aa5d39c9f25611
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7dca5c927e
+      lang: zh-Hant
+      text: 指定自己墓場的N張原始消費N以下的機械・從者。將其召喚到戰場上。如果其為『X』，則將N張『X』放置到EX區。
+      normalized_hash: sha256:7dca5c927e8a3166b9bff4009937a730c486d5ad20085906e91006c60c3ed162
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7df8dc1de1
+      lang: zh-Hant
+      text: '{謝幕曲}指定自己墓場中任意張數的『X』。將其返回牌堆，並洗牌。'
+      normalized_hash: sha256:7df8dc1de17906923e839fb0cda4c9cdc196084d95c6568562e502d25dfd23c5
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7e91c92ef7
+      lang: zh-Hant
+      text: 【進化時】指定自己戰場上的N個『X』。使其{攻擊力}+N，並獲得【必殺】。
+      normalized_hash: sha256:7e91c92ef7eebd9e03b9e67bef56b46580512c6222819310c962e5d70bdbfa56
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7ef0795334
+      lang: zh-Hant
+      text: '{謝幕曲}使戰場或EX區的N張『X』消失：將這張卡片以橫置狀態召喚到戰場上。這張卡片進化。如果未進化，則這張卡片消失。'
+      normalized_hash: sha256:7ef07953347433835fa56e6ae3bc88f864bb524e28b1eaeda704c3a2e81e4a39
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7f11e593dc
+      lang: zh-Hant
+      text: 自己擲骰子時，指定敵方戰場上的N個從者。給予其N點傷害。如果擲出的點數為N，則轉變為N點傷害。
+      normalized_hash: sha256:7f11e593dcaa0f64bcc184a515ae2b2d2907f4feb4614b9bfc2e8f93c62d083b
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - numeric_role_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7f7f74cdf8
+      lang: zh-Hant
+      text: 『X』進入自己的戰場時，使墓場的這張卡片消失：自己的EP+N。
+      normalized_hash: sha256:7f7f74cdf82e3d6258e7e063af74005cb26cc47684cdde23025810f905e417e3
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+        - signed_numeric_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7f970dc184
+      lang: zh-Hant
+      text: 指定自己戰場上的N個『X』。使其{攻擊力}+N/{生命值}+N。【連擊_N】給予敵方戰場上的全部從者與「其攻擊力」相同的傷害。
+      normalized_hash: sha256:7f970dc1844e0c238dc3c1cd622011a170dc3619a04d5611af27a55b86c4d545
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T7fa0f5ad6a
+      lang: zh-Hant
+      text: 【進化時】召喚N個『X』到戰場上。
+      normalized_hash: sha256:7fa0f5ad6a4ca3a0ff9d0e44c4b2c11376c0fcdbceb572fd53c4db86191ec528
+      role: body
+      reasons:
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8035ad03d2
+      lang: zh-Hant
+      text: '{入場曲}將N個護符{橫置}：召喚N個『X』到戰場上。'
+      normalized_hash: sha256:8035ad03d241e931f6a7f41aabe58bb77de960dd26593b502b867c95589250fd
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8046971c94
+      lang: zh-Hant
+      text: 【攻擊時】召喚N個『X』到戰場上。
+      normalized_hash: sha256:8046971c946c425d95f27d883701ae5e983ebd53a9c9f37cfe173d6904374146
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T80cc08beec
+      lang: zh-Hant
+      text: '{入場曲}使墓場的N張『X』消失：指定敵方戰場上的N個從者。使其生命值變為N。'
+      normalized_hash: sha256:80cc08beec5cf81bbdb576c599f33f39478e67065b3b62d0ea3619f483c06238
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+        - numeric_role_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T81d284c709
+      lang: zh-Hant
+      text: '{起動}{消費N}捨棄手牌中的這張卡片：從自己的牌堆中搜尋N張『X』，召喚到戰場上。'
+      normalized_hash: sha256:81d284c709456620143dfa01e515381ec50e46f11cb5557f353b512c9fdbcbed
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T826e58e245
+      lang: zh-Hant
+      text: 【攻擊時】從自己的牌堆中搜尋N張『X』，召喚到戰場上。
+      normalized_hash: sha256:826e58e245d818b0958f92fb1eb7dc462ec37d2cd144b596bca57e88c96c03b3
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T829d83491e
+      lang: zh-Hant
+      text: '{起動}將這張卡片{橫置}、捨棄N張手牌：將N張『X』放置到EX區。此能力在【覺醒】狀態時可使用。'
+      normalized_hash: sha256:829d83491e9e41366214c5fb99cab0dc3e7b09fd54b05c358f900e5c36c2252a
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T82a2a70646
+      lang: zh-Hant
+      text: '{起動}{消費N}將這張卡片{橫置}並放置到墓場：指定敵方戰場上的N個從者。將其破壞。其玩家召喚N個『X』到戰場上。此能力在自己EX區的妖精・卡片為N張時可使用。'
+      normalized_hash: sha256:82a2a70646256309a5522c21814ca60f592952dac14535580f1e0d645b4b56fc
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T82c540337a
+      lang: zh-Hant
+      text: 只要這張卡片在場，自己的全部『X』『X』獲得【光紋】。
+      normalized_hash: sha256:82c540337a68f6f4f89fe8e258ea6aaceb1e115ad82e090cc861b1493617c21f
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T82c9adb6a9
+      lang: zh-Hant
+      text: 從下列之中選擇至多N項。【N】指定敵方戰場上的N個從者。將其破壞。【N】從自己的牌堆中搜尋N張『X』，召喚到戰場上。【N】可以將自己進化牌堆中N張正面朝上的自然・進化從者轉為背面朝上。如果如此做，則抽取N張卡片。回復自己的PP N點。
+      normalized_hash: sha256:82c9adb6a98a875f5d4f1b117279339e82ed8e24c655a35643c5d24b43998dd6
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T82e3754f42
+      lang: zh-Hant
+      text: 使用這張卡片之際，如果自己的戰場上有「卡片名稱含有『X』的從者」，則消費-N。
+      normalized_hash: sha256:82e3754f42d18cf4315af9c4f0601f6a51da3fcbd972ba24f4de85cda89418bc
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T835fc180eb
+      lang: zh-Hant
+      text: 使用這張卡片之際，【魔力連鎖_N】消費-N。指定敵方戰場上至多N個從者。給予其N點傷害。將N張『X』放置到EX區。
+      normalized_hash: sha256:835fc180ebb214dbe93ad4ee9cc4d4a9348123b61ffe312486eecaf8498684df
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T838574cd75
+      lang: zh-Hant
+      text: 每回合N次，自己使用財寶・卡片時，將N張『X』放置到EX區。
+      normalized_hash: sha256:838574cd7526f7c46a57f5ee95c2ec346284c3596988d3e2e4f7ae331e92b52b
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T83c1817dcc
+      lang: zh-Hant
+      text: 自己擲骰子時，指定自己戰場上的N個從者。如果擲出的點數為N，則使其{攻擊力}+N/{生命值}+N。
+      normalized_hash: sha256:83c1817dccc9b6f323952a58c9144605823a9bc93cd15842cf748815fb43b4fd
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - numeric_role_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T849952879c
+      lang: zh-Hant
+      text: 給予戰場上的全部從者N點傷害。如果為【覺醒】狀態，則自己戰場上的全部『X』獲得【疾馳】。
+      normalized_hash: sha256:849952879c87ebaf6c1efd812770a75410c9231215a9a58a0d73561da9e8a6bf
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T849f30ac50
+      lang: zh-Hant
+      text: 自己的『X』離開戰場時，召喚N個『X』到戰場上。
+      normalized_hash: sha256:849f30ac502561bbd638fa3944ac10460b67d5dcebe99869f1a9f26558f68763
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T84b6ee9861
+      lang: zh-Hant
+      text: 指定敵方戰場上至多N個從者。對其任意分配N點傷害。如果自己的戰場上有『X』，則轉變為N點傷害。
+      normalized_hash: sha256:84b6ee9861b70a05c1d4b34b24e19fad6d0a845c4253ef6c18e32242993f8fc5
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T85669d6527
+      lang: zh-Hant
+      text: '{起動}使戰場上的N個『X』消失：自己的主戰者{生命值}+N。此能力N回合中可使用N次。'
+      normalized_hash: sha256:85669d6527cd524ef31abc9bd9828c6c0d5d57e28661fbba7b77518292c81d51
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T85becca884
+      lang: zh-Hant
+      text: '{入場曲}如果為【覺醒】狀態，則將N張『X』放置到EX區。'
+      normalized_hash: sha256:85becca88405c29aa51a05d9822bbdef2cdb28d09e3f1dfe0e5276c5ff3c3d0b
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T86c2094121
+      lang: zh-Hant
+      text: 自己的結束階段到來時，如果自己戰場上的學院・從者為N個以上，則召喚N個『X』到戰場上。
+      normalized_hash: sha256:86c209412145b9ad36310bdb4d10c3c3fe1f7ed62776c11e516fdf118eb5153b
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T87cc096ba2
+      lang: zh-Hant
+      text: '{起動}{消費N}【土之秘術】：召喚『X』與『X』合計N個到戰場上。'
+      normalized_hash: sha256:87cc096ba2b8b94a8fd4fa6fb8726760964586e3098e5d445fd5d71c7a5ea2ed
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8864bc99db
+      lang: zh-Hant
+      text: 從自己的牌堆中搜尋N張『X』或『X』或『X』，增加到手牌中。如果已使消費+N，則轉變為各搜尋N張，召喚到戰場上。
+      normalized_hash: sha256:8864bc99dbda827e67b9d59a752ad9f8558e5ff04125b9d1e0b9a344ed9fdb61
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8870fcbd8d
+      lang: zh-Hant
+      text: 【攻擊時】將N張『X』放置到EX區。之後，如果自己EX區的『X』為N張以上，則這張卡片{攻擊力}+N。
+      normalized_hash: sha256:8870fcbd8d0f31385a7ae225bafb1333505b204bc388a15227eb145e95573033
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T88923808f4
+      lang: zh-Hant
+      text: '{入場曲}敵方的全部玩家將自身牌堆頂的N張卡片放置到墓場。如果放置到墓場的卡片中有從者，則自己將N張『X』放置到EX區。如果放置到墓場的卡片中有法術或護符，則自己將N張『X』放置到EX區。'
+      normalized_hash: sha256:88923808f4c8d9da3071197c8068efc58a6f0f11ee718b5a88b37d881ebb18fb
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8b4f7592b5
+      lang: zh-Hant
+      text: 查看自己牌堆頂的N張卡片。可以從其中將N張原始消費N以下的賽馬娘・從者召喚到戰場上。將其餘卡片以任意順序放置到牌堆底。如果其為『X』，則查看自己牌堆頂的N張卡片。可以從其中將N張原始消費N以下的賽馬娘・從者召喚到戰場上。將其餘卡片以任意順序放置到牌堆底。
+      normalized_hash: sha256:8b4f7592b595c28523c6502ee76e62964b4aae8746a1f4ad9acf081d5713e878
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8c92904194
+      lang: zh-Hant
+      text: 自己的結束階段到來時，如果自己的戰場上有『X』，則指定敵方的N個從者。給予其N點傷害。
+      normalized_hash: sha256:8c92904194c6de5fc8e7febdf00e9c1237292371d4a55cf133655c1c3e16efe0
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8cafd37ddc
+      lang: zh-Hant
+      text: '{謝幕曲}召喚N個『X』到戰場上。給予敵方的全部主戰者N點傷害。{起動}將戰場上的N張偶像歌手・卡片{橫置}：將這張卡片放置到墓場。'
+      normalized_hash: sha256:8cafd37ddccf05675cb760aa39810f70ff6713b9a7c5a23c4afc1de403558a40
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8d4fbdd18f
+      lang: zh-Hant
+      text: '{起動}將這張卡片{橫置}：指定自己戰場上的N個『X』。使其{攻擊力}+N/{生命值}+N，並獲得【疾馳】【必殺】。此能力在自己墓場的人偶・卡片為N張以上時可使用。'
+      normalized_hash: sha256:8d4fbdd18f90f5fb7a6ae26c96ea65533c620f5b6355389ffd3d96f803ebfdc6
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8daf336930
+      lang: zh-Hant
+      text: 從下列之中選擇N項。【N】使EX區的N張『X』消失：從自己的牌堆中搜尋N張原始消費N以下的機械・從者，召喚到戰場上。【N】使EX區的N張『X』消失：從自己的牌堆中搜尋N張原始消費N以下的機械・從者，召喚到戰場上。
+      normalized_hash: sha256:8daf33693085e00d341bdd368472d16e657f1a9d676b3d4aa6401b34a752b9fb
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8de23df18d
+      lang: zh-Hant
+      text: '{入場曲}{消費N}：從自己的牌堆中搜尋N張『X』與N張『X』，放置到EX區。'
+      normalized_hash: sha256:8de23df18db97df65b9af222552870f4379072a70f1d3402506760c347638a0a
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8e1c042d57
+      lang: zh-Hant
+      text: 【進化時】從N到N之中宣告N個任意數字並擲骰子。如果為宣告的數字，則自己的主戰者{生命值}+N。從自己的牌堆中搜尋N張卡片，放置到EX區。將自己的PP回復至最大值。
+      normalized_hash: sha256:8e1c042d5757c664eb73bd78a7286228814147b348fe69621b539393c3d35bea
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - numeric_role_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8e669efa41
+      lang: zh-Hant
+      text: 查看自己牌堆頂的N張卡片。可以從其中將N張機械・卡片放置到EX區。將N張『X』放置到EX區。
+      normalized_hash: sha256:8e669efa41a3840a77334102251ea6ddffa8ec6daa3e7810faa48e0aa6df1618
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8e7aa53b19
+      lang: zh-Hant
+      text: 【N】指定敵方戰場上的N個從者。將其橫置。其在下一個其玩家的開始階段不會重置。【N】抽取N張卡片。將自己的N張手牌放置到牌堆頂或牌堆底。【N】將N張『X』放置到EX區。
+      normalized_hash: sha256:8e7aa53b19bd52ffc861427aedc9374d0c19cb703934592a53944c22a4e3ca5d
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8e91ed962a
+      lang: zh-Hant
+      text: '{謝幕曲}召喚N個『X』到戰場上。'
+      normalized_hash: sha256:8e91ed962a667e80793eb086ae708d0a92e6c52ed6b775ee08bf0af08e6dec03
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8ec6c11f56
+      lang: zh-Hant
+      text: 【進化時】從自己的牌堆中搜尋N張『X』，召喚到戰場上。
+      normalized_hash: sha256:8ec6c11f561a4f80399d9ec362bcf8c9fd9f3b0dad501fdba9b57be97be8d2f5
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8ed9bd940d
+      lang: zh-Hant
+      text: '{入場曲}自己墓場的『X』與『X』各N張每有N組，指定敵方戰場上至多N個從者。將其破壞。'
+      normalized_hash: sha256:8ed9bd940df66a1073f5979e8d315433564f9e15f88c0e8b2e8105e540c86729
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - numeric_role_requires_review
+    origin: machine
+    low_confidence: true
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8f55723a91
+      lang: zh-Hant
+      text: 自己使用『X』時，指定敵方的N名主戰者或敵方戰場上的N個從者。給予其N點傷害。
+      normalized_hash: sha256:8f55723a91c805c7c0f1e20e6835bae3429e81c2d2ec7ae989d2ae8dcb370459
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+        - numeric_role_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T8f9b8c5996
+      lang: zh-Hant
+      text: 自己使用『X』時，指定自己戰場上的N個從者。使其獲得【必殺】。
+      normalized_hash: sha256:8f9b8c599614a93511f7fa3b6cc1f7c0669fea33ee851828a64740dd6a347abd
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9059c4c9cd
+      lang: zh-Hant
+      text: 使用這張卡片之際，移除戰場上N個『X』的N個神湯指示物：消費-N。
+      normalized_hash: sha256:9059c4c9cd00250476f1016168d66a0fddf428ffe2cc61cb47c064e1746e692c
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+        - numeric_role_requires_review
+    origin: machine
+    low_confidence: true
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9123e9868c
+      lang: zh-Hant
+      text: '{入場曲}將N張『X』放置到EX區。如果為【覺醒】狀態，則自己的主戰者{生命值}+N。'
+      normalized_hash: sha256:9123e9868ce337cc6f82623ef0fc8100698f535afe393054ba4701dbea9ec918
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9161359785
+      lang: zh-Hant
+      text: 從自己的牌堆中搜尋N張「卡片名稱含有『X』的從者」與N張原始消費N以下的從者，召喚到戰場上。自己的主戰者{生命值}+N。
+      normalized_hash: sha256:91613597854fbc8053a9142f6435430a8cc0626059abd02208d317f83ca0f032
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T918fc0b36b
+      lang: zh-Hant
+      text: 從自己的牌堆中搜尋N張『X』或『X』，召喚到戰場上。
+      normalized_hash: sha256:918fc0b36b57639be8f3f0c0e2011179d093ce42247475210a24f54c63ff8333
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T91bd7a5749
+      lang: zh-Hant
+      text: '{入場曲}從下列之中選擇N項。【N】指定自己墓場的N張『X』。將其放置到EX區。【NC_N】本回合，使用該卡之際，消費-N。【N】將自己牌堆頂的N張卡片放置到墓場。'
+      normalized_hash: sha256:91bd7a5749dbd328405f641636d251431a14f6fd60e5f1f48f180daf2b89296f
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+        - numeric_identifier_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T91dda14bd0
+      lang: zh-Hant
+      text: 【N】指定自己墓場的N張消費N以下的從者。將其召喚到戰場上。【N】召喚N個『X』到戰場上。
+      normalized_hash: sha256:91dda14bd09c2d3aa81443f42414d22852b83e0aa1c90ac38ea27749cd6cfe2e
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T91f32d3d48
+      lang: zh-Hant
+      text: 召喚N個『X』與N個『X』到戰場上。如果敵方的戰場上有原始消費N以上的從者，則該『X』與『X』{攻擊力}+N/{生命值}+N。回復自己的PP N點。
+      normalized_hash: sha256:91f32d3d485223ee150c2cf303e76f8f41f549b25fcf0f6844ab3825ab668093
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9260230738
+      lang: zh-Hant
+      text: 【攻擊時】使EX區的N張卡片消失：指定敵方的N名主戰者或敵方的N個從者。給予其N點傷害。召喚N個『X』到戰場上。
+      normalized_hash: sha256:9260230738fd5da9638596fea20ed73d6b961467c3f7bcfb83ba2f8162429c9d
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+        - numeric_role_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T93300ab90f
+      lang: zh-Hant
+      text: '{入場曲}查看自己牌堆頂的N張卡片。可以從其中公開N張吸血鬼・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。如果公開了「卡片名稱含有『X』的從者」，則召喚N個『X』到戰場上。'
+      normalized_hash: sha256:93300ab90ffb9afc0a5d71d4cc76f4a7d1911443f3461506eec60f3a26cfe7a8
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T943eefd2b6
+      lang: zh-Hant
+      text: '{入場曲}【土之秘術】將N張『X』放置到EX區。'
+      normalized_hash: sha256:943eefd2b68389e762439f26fcee0a952bb9a14c9030f3bae8ebaeb6769f7257
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T94a5c510ad
+      lang: zh-Hant
+      text: 將N張『X』放置到EX區。本回合，使用該卡之際，消費-N。
+      normalized_hash: sha256:94a5c510adf584c39b89a1acf7ea2c65f75d63b35e6e40e665e8afde5764f745
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T94b115cf29
+      lang: zh-Hant
+      text: 【攻擊時】指定敵方戰場上的N個從者。如果自己的戰場或自己的墓場有「卡片名稱含有『X』的從者」，則給予其N點傷害。
+      normalized_hash: sha256:94b115cf2912bf9696cece0c8f2c1f1ee7b96f61383300de34be79f84c8e1c18
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T94c53053eb
+      lang: zh-Hant
+      text: '{入場曲}{消費N}：從自己的牌堆中搜尋N張『X』，放置到EX區。'
+      normalized_hash: sha256:94c53053eb7d2f58753b9fd977793d7ceab74b1d1bc32e16c0b30cbf6865f68c
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T954930a111
+      lang: zh-Hant
+      text: '{入場曲}從下列之中選擇N項。【N】從自己的牌堆中搜尋N張『X』，增加到手牌中。【N】指定自己墓場的N張『X』。將其增加到手牌中。'
+      normalized_hash: sha256:954930a111edf973727e2c4f33b139f9ddc9958008a9ff7f4bb7aa551fa62e07
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T96610af3b4
+      lang: zh-Hant
+      text: 【N】指定敵方戰場上的N個從者。給予其N點傷害。【N】從自己的牌堆中搜尋N張「卡片名稱含有『X』的從者」，召喚到戰場上。使其獲得【吸血】。【N】將N張『X』放置到EX區。
+      normalized_hash: sha256:96610af3b4d390c8d1687611bebdb6e11c43f0c06f2703b6eda4fd242dd4da04
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9674fa4a11
+      lang: zh-Hant
+      text: '{入場曲}{謝幕曲}召喚N個『X』到戰場上。'
+      normalized_hash: sha256:9674fa4a11c19286c76b082c7a4e8df49baf7122810f7564d492d2ce22946e76
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T96ae309f71
+      lang: zh-Hant
+      text: '{起動}將這張卡片{橫置}：指定自己戰場上的N個『X』或『X』。使其獲得【吸血】。'
+      normalized_hash: sha256:96ae309f7129f174ee853f3298b513ce828d7b1db03e5480906e15e5f3a7cd02
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T96cd47fb8f
+      lang: zh-Hant
+      text: '{入場曲}如果自己的SEP為N，則這張卡片{攻擊力}+N/{生命值}+N，並獲得【疾馳】。'
+      normalized_hash: sha256:96cd47fb8f0ba74ac91543e2a9a1bfee59c1a632ece2859fc7d2d62ccf88ecb5
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - numeric_role_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T970cfd970f
+      lang: zh-Hant
+      text: '{入場曲}捨棄手牌中的N張機械・卡片：抽取N張卡片。將N張『X』與N張『X』放置到EX區。如果自己EX區的機械・卡片為N張，則回復自己的PP N點。'
+      normalized_hash: sha256:970cfd970f6427804c2e0e9f1dbaeb2595e7101749f21027630bf824d320e7d1
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T977d9d53e0
+      lang: zh-Hant
+      text: '{起動}將這張卡片{橫置}【土之秘術】：召喚N個『X』或N個『X』到戰場上。'
+      normalized_hash: sha256:977d9d53e024e30daa7eab1344a9a37ae5201806ff00a7541ce4f779aaf5a1c4
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T988268b3f9
+      lang: zh-Hant
+      text: 查看自己牌堆頂的N張卡片。可以從其中公開N張吸血鬼・卡片並增加到手牌中。召喚N個『X』到戰場上。如果自己墓場的吸血鬼・卡片為N張以上，則使其{攻擊力}+N，並獲得【突進】【指定攻擊】。
+      normalized_hash: sha256:988268b3f9de5486f11a2d6a56265f8dd819fdc33df073ea921b76cb49ef0eb3
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T988431b59e
+      lang: zh-Hant
+      text: '{入場曲}抽取N張卡片。如果自己的SEP為N，則這張卡片{攻擊力}+N/{生命值}+N。自己的主戰者{生命值}+N。'
+      normalized_hash: sha256:988431b59eab25111b423518b846745032c9c833a186d552c1afb741b03b1aaf
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - numeric_role_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T98c703e5e9
+      lang: zh-Hant
+      text: 使用這張卡片之際，消費-X。X為「自己戰場上『X』的數量」。
+      normalized_hash: sha256:98c703e5e94262c41836f751b19b3a30ee32d0365124ab80e34746b7c187f84d
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T990549e3e7
+      lang: zh-Hant
+      text: '{入場曲}抽取N張卡片。如果自己的戰場上有『X』，則自己的主戰者{生命值}+N。'
+      normalized_hash: sha256:990549e3e7523285743420c59634a751bcc5fc96322e7b8a3a44cf67f2bc2081
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T990dc8713d
+      lang: zh-Hant
+      text: '{入場曲}將N張『X』放置到EX區。如果自己EX區的卡片為N張以上，則自己的主戰者{生命值}+N。'
+      normalized_hash: sha256:990dc8713d2f5643aa20adf9e94ae02751a34d448679d1c95250aa6c6deb3bd4
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9922f13706
+      lang: zh-Hant
+      text: 只要這張卡片在戰場上，自己戰場上的全部『X』獲得【疾馳】【吸血】。（擁有【吸血】的從者攻擊並給予多少傷害，自己的主戰者的生命值就+多少）
+      normalized_hash: sha256:9922f13706623050b14dfcfe6d50c09e13f48b41241e008fe84ba15ba57cbd13
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T993bb291ea
+      lang: zh-Hant
+      text: 使用這張卡片之際，如果自己的戰場上有『X』，則消費-N。
+      normalized_hash: sha256:993bb291ea2d7bc46f8dc9ad66afd01c81f4a68d6969b9e80a964d6268a48061
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T994075372a
+      lang: zh-Hant
+      text: '{入場曲}這張卡片{攻擊力}+X/{生命值}+X。X為「自己戰場上『X』的數量」。'
+      normalized_hash: sha256:994075372a4698cff67c295524afb962eaefbd5abd271057837c73768750d1d4
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9ab41d9465
+      lang: zh-Hant
+      text: '{謝幕曲}將N張『X』放置到EX區。將自己牌堆頂的N張卡片放置到墓場。'
+      normalized_hash: sha256:9ab41d9465e1555f9c75f2f3b50537753e278871c60840fdd6e89c316ff092d7
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9b762614c0
+      lang: zh-Hant
+      text: 【進化時】從下列之中選擇N項。【N】指定自己墓場的N張「卡片名稱含有『X』的從者」。將其召喚到戰場上。【N】指定敵方戰場上的N個從者。給予其N點傷害。
+      normalized_hash: sha256:9b762614c0aee6b0248b1fe37b7d92e49c161b0e70250559d4d0ada7021e7a2d
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9bb648d71a
+      lang: zh-Hant
+      text: '{起動}將這張卡片{橫置}並放置到墓場：將N張『X』放置到EX區。此能力在自己戰場上的機械・從者為N個以上時可使用。'
+      normalized_hash: sha256:9bb648d71a1c96bc08317e1fa02c522e8cc1c33a26c81fea86050fa42136f184
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9c23ab1418
+      lang: zh-Hant
+      text: '{入場曲}使戰場上的N個『X』消失：這張卡片{攻擊力}+N/{生命值}+N。'
+      normalized_hash: sha256:9c23ab1418a3d55634b8f73f4ecac39caef5237665f20168632bf6006f6a0b4b
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9c59cbdeb2
+      lang: zh-Hant
+      text: 指定敵方的N個從者。給予其N點傷害。將N張『X』放置到EX區。
+      normalized_hash: sha256:9c59cbdeb2b640750d4d3085471bdf85c22a8bfb68aa14ce8a9a132cbddedafe
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9dc82cdbb5
+      lang: zh-Hant
+      text: 指定敵方戰場上的N個從者。給予其N點傷害。召喚N個『X』到戰場上。將N張『X』放置到EX區。
+      normalized_hash: sha256:9dc82cdbb58f863d58f1adbcb8a21a21d094591fe739524f209df8d868f05cf8
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9dd9ed3178
+      lang: zh-Hant
+      text: '{入場曲}{謝幕曲}召喚N個『X』到戰場上。'
+      normalized_hash: sha256:9dd9ed3178fe89ec74d9a07c98b62679100eb1e73bc6682172f62a9c42684554
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9df79c2158
+      lang: zh-Hant
+      text: 只要這張卡片在場，自己的全部『X』獲得【突進】。
+      normalized_hash: sha256:9df79c2158c47d486fa2996910822ba2f8aaabe724e840d9f615e1725492cbe0
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9e48d26ed2
+      lang: zh-Hant
+      text: 指定敵方戰場上至多N個從者。給予其N點傷害。將N張『X』放置到EX區。
+      normalized_hash: sha256:9e48d26ed2eb66d85fc47824ccd06360b05d8abdee23fb5ca97b52511dc9ebe6
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9eaca7caf7
+      lang: zh-Hant
+      text: 自己的每個回合N次，『X』進入自己的戰場時，給予敵方的全部主戰者N點傷害。
+      normalized_hash: sha256:9eaca7caf7815d98eb3f419cec8165bbc5f4e02eb8595eca944deb83f03fc017
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9fca8a8ef4
+      lang: zh-Hant
+      text: '{起動}{消費N}使EX區的N張機械・衍生物消失：召喚N個『X』到戰場上。'
+      normalized_hash: sha256:9fca8a8ef45411da6e1c614a4868861b2bf8f9156fca84bde6b072e5efbd0423
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: T9fcce0369d
+      lang: zh-Hant
+      text: '{起動}【融合】X張原始消費N以上的財寶・卡片：在這張卡片上放置X個融合指示物。X為N以下。'
+      normalized_hash: sha256:9fcce0369d8d5fab41a40ea7bbdead64b4c111cbbe592a1d7428d35b013b2583
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - numeric_role_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta04aa8540e
+      lang: zh-Hant
+      text: '{入場曲}將N張『X』放置到EX區。如果自己EX區的自然・卡片為N張以上，則自己的主戰者{生命值}+N。'
+      normalized_hash: sha256:a04aa8540e4eb62c3c293c9609e3d0299df4fdf9d9f6293b57496a896bd83982
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta0757935f6
+      lang: zh-Hant
+      text: '{入場曲}如果自己的戰場上有「卡片名稱含有『X』的從者」，則這張卡片{攻擊力}+N，並獲得【疾馳】。'
+      normalized_hash: sha256:a0757935f602f4e44563999befcd8bd41a5fa353c51537ab195ffb13d4025c54
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta0aeece714
+      lang: zh-Hant
+      text: '{入場曲}這張卡片{攻擊力}+N。將自己牌堆頂的N張卡片放置到墓場。如果藉此將『X』放置到了墓場，則重複這張卡片的{入場曲}能力。'
+      normalized_hash: sha256:a0aeece714255490ae2cce516266c2f6990898812941412c3aae5e8ca53cfd61
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta16f513028
+      lang: zh-Hant
+      text: '{入場曲}將『X』『X』各N張放置到EX區。給予敵方的全部主戰者與敵方戰場上的全部從者與「自己EX區的載具・卡片張數」相同的傷害。'
+      normalized_hash: sha256:a16f513028478317c0a4d470fcab8b0908f826af970a42084621e0255391b340
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta19600decc
+      lang: zh-Hant
+      text: 自己的結束階段到來時，如果自己墓場的學院・卡片為N張以上，則召喚N個『X』到戰場上。
+      normalized_hash: sha256:a19600decc2a35b47f513fe6e40e7020c2c2a5b87b6ba9d95e1121fe7bc2b8bc
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta1b7403450
+      lang: zh-Hant
+      text: '{入場曲}使EX區的N張『X』消失：將N張『X』放置到EX區。'
+      normalized_hash: sha256:a1b7403450806782423a97593c3ac9850df97f767d53ce72fe24af7c915ca407
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta1bd9d2ec5
+      lang: zh-Hant
+      text: 指定自己EX區的N張『X』。其分別變身為『X』與『X』。
+      normalized_hash: sha256:a1bd9d2ec55dab73529ed8b6c891102df6245b77bbf9ebcd42f2b629a5f17890
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta24c6ba0f9
+      lang: zh-Hant
+      text: '{起動}{消費N}使墓場的這張卡片消失：自己戰場上的全部『X』{攻擊力}+N，並獲得【疾馳】。'
+      normalized_hash: sha256:a24c6ba0f9df7ce972aac3fd5d79201af3fd179779994edb8209648f6f7d656c
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta2d3fbdf05
+      lang: zh-Hant
+      text: 使用這張卡片之際，如果自己的EX區有「卡片名稱含有『X』的從者」，則消費-N。
+      normalized_hash: sha256:a2d3fbdf05b5102864dc5414f69849d362c82b1eb9c04e4aa381b5499fa28302
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta30d8fa1f7
+      lang: zh-Hant
+      text: '{起動}{消費N}：這張卡片{攻擊力}+N/{生命值}+N。召喚N個『X』到戰場上。'
+      normalized_hash: sha256:a30d8fa1f7fdc2742cf86f53ce02f289ef92d6376b2b5de0e9200f50f793241e
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta33b0c016f
+      lang: zh-Hant
+      text: 自己擲骰子時，如果擲出的點數為N，則給予敵方的全部主戰者N點傷害。
+      normalized_hash: sha256:a33b0c016f832caee92f873273465627ade206eb3c9383842eddb6a4300e510d
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - numeric_role_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta33d02b52f
+      lang: zh-Hant
+      text: 『X』進入自己的戰場時，使其{攻擊力}+N/{生命值}+N。
+      normalized_hash: sha256:a33d02b52f912a2ba3c247dc2ff8c26e53ad747e874002727ec708815ab26ca5
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta34f075700
+      lang: zh-Hant
+      text: '{入場曲}召喚N個『X』與N個『X』到戰場上。將N張『X』放置到EX區。'
+      normalized_hash: sha256:a34f075700322dab3e610c9f72ab182ad6c8d2ffcde9a2372f29c9fae2a397c3
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta3fabbcda5
+      lang: zh-Hant
+      text: '{入場曲}可以將N張『X』放置到戰場或EX區。之後，如果自己戰場與自己EX區的自然・卡片合計為N張以上，則查看自己牌堆頂的N張卡片。可以從其中公開N張自然・卡片並增加到手牌中。將其餘卡片以任意順序放置到牌堆底。'
+      normalized_hash: sha256:a3fabbcda5af98d56013618d87a3c658213d472c2c7719fcc461c6de710ee474
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta474449761
+      lang: zh-Hant
+      text: '{入場曲}{消費N}：召喚N個『X』到戰場上。抽取N張卡片。'
+      normalized_hash: sha256:a474449761ccac6da22036edd7c1acf175bfb3922714db18b01d9d5139dd6db6
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta4e8a26e04
+      lang: zh-Hant
+      text: 使用這張卡片之際，將戰場上的N個『X』{橫置}：消費-N。
+      normalized_hash: sha256:a4e8a26e04c39114758d7212eda8c2879f51a22c400d036e243dbd6b787315a3
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta55ec8afff
+      lang: zh-Hant
+      text: '{入場曲}抽取N張卡片。捨棄自己的N張手牌。將N張『X』放置到EX區。'
+      normalized_hash: sha256:a55ec8afff408a2e52eb977eed8224fe0e97bfa35f338b5228d1d22fedc0b015
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta673b1aaf7
+      lang: zh-Hant
+      text: '{入場曲}指定自己EX區的N張『X』。其變身為『X』。'
+      normalized_hash: sha256:a673b1aaf7e477abde738f06d6e7dc275959b117ec2af6d7733f6b335b33a1dc
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta747018852
+      lang: zh-Hant
+      text: 卡片名稱不含『X』的卡片，在主牌堆與進化牌堆中各自至多只能放入N張。
+      normalized_hash: sha256:a747018852df7215be8e1192758e2e4807f3d56b95b0800ee80a39c9b33adc1f
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta8354b1d56
+      lang: zh-Hant
+      text: '{謝幕曲}將N張『X』放置到EX區。'
+      normalized_hash: sha256:a8354b1d56af3b839eef265655cd2f5de498e806d9cd40602b522ee53bd33523
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta836a18262
+      lang: zh-Hant
+      text: 召喚N個『X』到戰場上。如果自己的戰場上有戈爾貢・從者，則該『X』獲得【突進】【指定攻擊】。
+      normalized_hash: sha256:a836a18262be4cc732f18489562a0ba5719499bce9c157bbff4ca389e7aa7465
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta837cc112b
+      lang: zh-Hant
+      text: '{入場曲}召喚N個『X』與N個『X』到戰場上。【死靈充能_N】使其獲得【疾馳】。'
+      normalized_hash: sha256:a837cc112b259006921365b0bc7dc48d0d98fec6d47bed49071ad95f5fe53e78
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta882bd0e60
+      lang: zh-Hant
+      text: '{起動}{消費N}捨棄手牌中的這張卡片：指定自己戰場上的N張卡片。將其返回手牌。將N張『X』放置到EX區。'
+      normalized_hash: sha256:a882bd0e60c1edf0c8a3905233e58e639623886f8fb6642bc4128a8c8b0d58bb
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta8c031cd30
+      lang: zh-Hant
+      text: '{入場曲}如果自己的戰場上有『X』，則抽取N張卡片。'
+      normalized_hash: sha256:a8c031cd3057541c3708918ec650b20bf727a592a48c41d5b157bc8be7c4fbb9
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta8da8b705f
+      lang: zh-Hant
+      text: '{入場曲}從下列之中選擇N項。【N】召喚N個『X』到戰場上。【N】【土之秘術】指定敵方戰場上的N個從者。給予其N點傷害。'
+      normalized_hash: sha256:a8da8b705fe2f834119e704221674671ad34f4d7819c85603b8e5ecb13d17c5c
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta9479b3445
+      lang: zh-Hant
+      text: '{入場曲}各玩家將N張『X』放置到EX區。'
+      normalized_hash: sha256:a9479b34452654ddcffad7cf45dd175ab5174d267113c789128a441ce245e8c4
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta96bcc90b7
+      lang: zh-Hant
+      text: '{起動}將這張卡片{橫置}：指定敵方戰場上的N個從者。給予其與「自己戰場上的『X』的數量」相同的傷害。'
+      normalized_hash: sha256:a96bcc90b74f86eecc496a681269c94fa16afad4ac43c1e0cd9b09f39bd69a8e
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Ta9b1dbb809
+      lang: zh-Hant
+      text: 指定敵方戰場上的N個從者。給予其N點傷害。如果自己的戰場上有「卡片名稱含有『X』的從者」，則將N張『X』放置到EX區。
+      normalized_hash: sha256:a9b1dbb80933ea49bca37350e70214776177217a37cf51632038b8000db47f42
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Taa62a5a3a0
+      lang: zh-Hant
+      text: '{入場曲}從自己的牌堆中搜尋原始消費合計為N以下的至多N張「與這張卡片同名者除外的荒野・卡片」，放置到EX區。本回合，使用該卡之際，消費變為N。召喚N個『X』到戰場上。'
+      normalized_hash: sha256:aa62a5a3a0af4a251ad6b5ae7eb39ef95d1ea7e1e7b82f97ef94c6b5dee4fcd4
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+        - numeric_role_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Taab9a96ff2
+      lang: zh-Hant
+      text: '{謝幕曲}可以將『X』『X』『X』各N張放置到戰場或EX區。'
+      normalized_hash: sha256:aab9a96ff23b3753ce05ad0e60175ca0ce7d7998409b4e6dd817c6d446551c5c
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Taabae6c676
+      lang: zh-Hant
+      text: '{起動}將戰場上的N個其他從者放置到墓場：從下列之中選擇N項。此能力N回合中可使用N次。【N】抽取N張卡片。【N】召喚N個『X』到戰場上。【N】將自己牌堆頂的N張卡片放置到墓場。'
+      normalized_hash: sha256:aabae6c676c3ab0673722531b0675855cc4c26f27a7c2922fc2a7f9b26f6d455
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tab1a743464
+      lang: zh-Hant
+      text: '{入場曲}從下列之中選擇N項。【N】從自己的牌堆中搜尋N張『X』，召喚到戰場上。【N】可以將自己手牌中的N張『X』召喚到戰場上。'
+      normalized_hash: sha256:ab1a7434647151338e756ca20f59e91bb7e8603470949d9fa9ec3fbdf503228f
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tab2364502f
+      lang: zh-Hant
+      text: 只要這張卡片在戰場上，同時也是『X』。
+      normalized_hash: sha256:ab2364502f685e2ce5a0d4f454416e6a2d2a6a3f4383ba12571f88d59cef69e8
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tab4bb3df39
+      lang: zh-Hant
+      text: 這張卡片上至多可放置N個電池指示物。
+      normalized_hash: sha256:ab4bb3df3960235356f5de4f8af0b1a87fea23ce3c89e4737ce400f7ff7a36d9
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - numeric_role_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tab78f5a04f
+      lang: zh-Hant
+      text: '{入場曲}召喚N個『X』到戰場上。如果自己的戰場上有『X』，則轉變為N個。'
+      normalized_hash: sha256:ab78f5a04fbfb8b6a3ad936553c2b95c7b3c97cbe457835a377a8ddb040aea44
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tabc62156bc
+      lang: zh-Hant
+      text: 召喚N個『X』到戰場上。如果自己的墓場有「卡片名稱含有『X』的從者」，則抽取N張卡片。
+      normalized_hash: sha256:abc62156bcb1c9d2652c1fe2be2f3d9ff5782e7476644864e9ba2dfeec3289f5
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tac284b5d3c
+      lang: zh-Hant
+      text: '{起動}{消費N}將這張卡片與N個『X』放置到墓場：從自己的牌堆中搜尋N張『X』，召喚到戰場上。'
+      normalized_hash: sha256:ac284b5d3c100349474ca508e7001e973a85f1c2e9d6d5ed255631b7b1c8a3f9
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tac36e89d55
+      lang: zh-Hant
+      text: '{入場曲}召喚N個『X』或N個『X』到戰場上。將N張『X』或N張『X』放置到EX區。'
+      normalized_hash: sha256:ac36e89d550ecad7df38f5e27c5518ea339373a063ce84e0f4cd54d3fe1f2e8b
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tac454327bc
+      lang: zh-Hant
+      text: 指定自己的N個武裝・從者與敵方的N個從者。將前者放置到EX區。給予後者N點傷害。召喚N個『X』到戰場上。
+      normalized_hash: sha256:ac454327bce5bdda8fd0d9ec55d35a2e8dd6c63aa401a72b72baa48e35f58f04
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tacbc87e742
+      lang: zh-Hant
+      text: 將N張『X』或N張『X』放置到EX區。
+      normalized_hash: sha256:acbc87e742a2df12023a15a111959796cc7d55628a3b33eb655da4a7970642cb
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tad6210dd35
+      lang: zh-Hant
+      text: '{起動}使墓場的N張『X』消失：給予敵方的全部主戰者N點傷害。抽取N張卡片。此能力N回合中可使用N次。'
+      normalized_hash: sha256:ad6210dd35b37100ceae25cebfd3a94bd6571434799c219cb1c57e824ed0a413
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tad6b70de3d
+      lang: zh-Hant
+      text: '{起動}使墓場的這張卡片與N張『X』消失：指定敵方戰場上的N個從者。將其橫置。'
+      normalized_hash: sha256:ad6b70de3df673ef1b9483629077f7afbc7b58e3a8ef768efb40c9d78f079f94
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tae055e53be
+      lang: zh-Hant
+      text: 『X』進入自己的戰場時，{消費N}：將自己墓場的這張卡片放置到EX區。
+      normalized_hash: sha256:ae055e53bed3052ea7588b9a0fa7c20333151095a3daa6db28af4783acf625cc
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Taf5d67e5ed
+      lang: zh-Hant
+      text: '{入場曲}使戰場上的N個『X』消失：指定敵方戰場上的N個從者。將其破壞。'
+      normalized_hash: sha256:af5d67e5edfe1e21084c5c51c4876397be32e28feafc00a73dff0a1a1b3da1ad
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tb090dce102
+      lang: zh-Hant
+      text: 【超進化時】指定敵方戰場上的N個從者。將N張『X』放置到EX區。給予其與其主戰者與「自己EX區的『X』張數」相同的傷害。
+      normalized_hash: sha256:b090dce102e0c71312e7201f965106e0b973d0ca6c07f13ef55a28a678ab4c2b
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tb1d575bcd3
+      lang: zh-Hant
+      text: 只要這張卡片在戰場上，自己戰場上的全部『X』獲得【疾馳】【吸血】。
+      normalized_hash: sha256:b1d575bcd3b64ab05eb7dcb9fd775484235ceddbaa58f877b67f6f2519dbe4de
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tb2494c9823
+      lang: zh-Hant
+      text: '{入場曲}將N張『X』放置到EX區。敵方的全部玩家將自身牌堆頂的N張卡片放置到墓場。'
+      normalized_hash: sha256:b2494c982341850d386f086e6925f1077a12721e12a2ecb451856f8d6a8dca14
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tb33503d498
+      lang: zh-Hant
+      text: '{起動}{消費N}：這張卡片獲得【疾馳】。將N張『X』放置到EX區。此能力在自己墓場的Cute・卡片為N張以上時，N回合中可使用N次。'
+      normalized_hash: sha256:b33503d49869d79c6e492328d65f4f07ca05d67aaffdc9f30c3b453c770c671d
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tb41568a357
+      lang: zh-Hant
+      text: '{入場曲}指定敵方戰場上的N個從者。如果本回合已使自己主戰者的{生命值}+N以上，則將其破壞。抽取N張卡片。'
+      normalized_hash: sha256:b41568a357831511ece012c8420f17b5e9474a95cc4a2bb1b68bbc64e089dd55
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - signed_numeric_requires_review
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tb48a24a038
+      lang: zh-Hant
+      text: 只要這張卡片在戰場上，同時也是『X』。【守護】{入場曲}自己的主戰者{生命值}+N。
+      normalized_hash: sha256:b48a24a038a877a5fe2972ff58d4dd3e69ef28a2b429d8ea7ac4a5d03b774406
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tb4d6cc280a
+      lang: zh-Hant
+      text: '{起動}使墓場的這張卡片消失：自己戰場上的全部『X』獲得【疾馳】。'
+      normalized_hash: sha256:b4d6cc280a8d235f1841647b9ed3d0f5d2b94d902598fb85ea4c63f2f914b3c6
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tb531727a9f
+      lang: zh-Hant
+      text: '{入場曲}{消費N}：從自己的牌堆中搜尋N張『X』，召喚到戰場上。自己戰場上的全部『X』{攻擊力}+N/{生命值}+N。'
+      normalized_hash: sha256:b531727a9ff9b25cb7696e5d174122d500c12c89a1ee12e0ce8a670efd1f192d
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tb609c84e1e
+      lang: zh-Hant
+      text: '{起動}{消費N}：將自己墓場的這張卡片召喚到戰場上。這張卡片{攻擊力}+N，並獲得「{謝幕曲}這張卡片消失」。此能力在自己的戰場上有『X』時可使用。'
+      normalized_hash: sha256:b609c84e1e6687e12e13fdf9cc38c9ea097a1363d5fa49f372ee92e144ba900e
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine
+  - kind: template_translation_candidate
+    data:
+      source_kind: effect
+      candidate_id: Tb63d74ba21
+      lang: zh-Hant
+      text: '{入場曲}如果自己的戰場上有「卡片名稱含有『X』的從者」，則這張卡片{攻擊力}+N/{生命值}+N。'
+      normalized_hash: sha256:b63d74ba2189d125e40b6feb33b0c7cc9835b6396688db4d7307e3170726f318
+      role: body
+      reasons:
+        - alignment_definition_unavailable
+        - missing_card_name_concept
+    origin: machine

@@ -54,7 +54,7 @@ def recipe(tmp_path_factory: pytest.TempPathFactory) -> offline.Inputs:
         "products/family/" + home + "/001.yaml",
         envelope([family(home, code="synthetic")]),
     )
-    (root / "authored/product-identities").mkdir(parents=True)
+    (root / "authored/products/identities").mkdir(parents=True)
     revision = commit(root)
     ref = fixture.owner().name_ref
     assert ref is not None
@@ -212,7 +212,7 @@ def test_name_composition_reads_link_entry_from_disk(
     present = composer(checkout)
     assert present is not None
     assert present.links is not None
-    shutil.rmtree(root / "authored/digital-links")
+    shutil.rmtree(root / "authored/digital/links")
     absent = composer(checkout)
     assert absent is not None
     assert absent.links is None
@@ -223,7 +223,7 @@ def test_name_composition_rejects_symlinked_authored_entry(
 ) -> None:
     root = tmp_path / "checkout"
     git(tmp_path, "clone", "--local", "--no-hardlinks", str(recipe.repo), str(root))
-    path = root / "authored/digital-links"
+    path = root / "authored/digital/links"
     target = root / "private-link-entry"
     path.rename(target)
     path.symlink_to(target, target_is_directory=True)

@@ -90,9 +90,9 @@ class ConceptSubject(RecordData):
 
 
 class Envelope(RecordData):
-    translation_authored_format: Literal[2]
+    format: Literal[2]
 
-    @field_validator("translation_authored_format", mode="before")
+    @field_validator("format", mode="before")
     @classmethod
     def _format(cls, value: object) -> object:
         if type(value) is not int:

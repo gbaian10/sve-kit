@@ -45,7 +45,7 @@ def shard(raw: bytes) -> Shard:
 
 def validate_foreign(path: str, raw: bytes) -> None:
     """Glossary readers may validate template shapes without reading frozen sources."""
-    _candidate_path(path, shard(raw).records)
+    _shard_area(path, shard(raw).records)
 
 
 @dataclass(frozen=True)
@@ -82,7 +82,7 @@ def _collect(files: Files) -> dict[str, Record]:
     for path, _, raw in files.content:
         if SHARD.fullmatch(path) and path.startswith("translations/templates/"):
             values = shard(raw).records
-            _candidate_path(path, values)
+            _shard_area(path, values)
             for record in values:
                 if record.record_key in records:
                     raise ValueError("Duplicate current template selection key")
@@ -105,14 +105,17 @@ def _references(records: dict[str, Record]) -> None:
     _texts(records, definitions)
 
 
-def _candidate_path(path: str, records: tuple[Record, ...]) -> None:
-    candidate_area = path.startswith(
-        "translations/templates/template_translation_candidate/"
-    )
-    if any(isinstance(record, CandidateRecord) != candidate_area for record in records):
-        raise ValueError(
-            "Current template candidates require their dedicated shard area"
-        )
+def _shard_area(path: str, records: tuple[Record, ...]) -> None:
+    area = path.removeprefix("translations/templates/").split("/", 1)[0]
+    allowed = {
+        "definitions": (DefinitionRecord,),
+        "values": (TranslationRecord, VariantRecord),
+        "candidates": (CandidateRecord,),
+    }
+    if area not in allowed or any(
+        not isinstance(record, allowed[area]) for record in records
+    ):
+        raise ValueError("Current template record is outside its kind's shard area")
 
 
 def _texts(

@@ -53,7 +53,7 @@ def populate(db: Database, validated: Validated) -> None:
                 "sha256": digest(exact),
                 "authored_path": "authored/" + path,
                 "authored_revision": validated.inputs.files.revision,
-                "parser_version": "template-authored-current-v2",
+                "parser_version": "template-authored-current-v3",
             },
             ("id",),
         )

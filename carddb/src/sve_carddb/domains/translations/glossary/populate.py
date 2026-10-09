@@ -39,7 +39,7 @@ def authored_sources(db: Database, snapshot: Snapshot, revision: str) -> dict[st
                 "sha256": digest(exact),
                 "authored_path": "authored/" + path,
                 "authored_revision": revision,
-                "parser_version": "translation-authored-current-v2",
+                "parser_version": "translation-authored-current-v3",
             },
             ("id",),
         )

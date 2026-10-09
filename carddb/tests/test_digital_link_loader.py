@@ -14,7 +14,7 @@ from .digital_link_fixtures import envelope, record, write
 if TYPE_CHECKING:
     from pathlib import Path
 
-SHARD = "digital-links/links/synthetic/001.yaml"
+SHARD = "digital/links/synthetic/001.yaml"
 
 
 def test_current_records_have_stable_subject_ids(tmp_path: Path) -> None:
@@ -25,7 +25,7 @@ def test_current_records_have_stable_subject_ids(tmp_path: Path) -> None:
         tmp_path,
         {
             SHARD: envelope([first]),
-            "digital-links/links/synthetic/002.yaml": envelope([second]),
+            "digital/links/synthetic/002.yaml": envelope([second]),
         },
     )
     snapshot = load_links(tmp_path)
@@ -94,9 +94,9 @@ def test_record_refusals(  # ruff: ignore[complex-structure,too-many-branches] -
     if fault == "decisions":
         shard["decisions"] = []
     elif fault == "bool-format":
-        shard["digital_link_authored_format"] = True
+        shard["format"] = True
     elif fault == "old-format":
-        shard["digital_link_authored_format"] = 1
+        shard["format"] = 1
     write(tmp_path, {SHARD: shard})
     with pytest.raises(ValueError, match=r"^" + message + "$"):
         load_links(tmp_path)
@@ -108,10 +108,10 @@ def test_record_refusals(  # ruff: ignore[complex-structure,too-many-branches] -
         ("../other/001.yaml", "Unsafe digital-link include"),
         ("translations/glossary/synthetic/001.yaml", "Unsafe digital-link include"),
         (
-            "digital-links/coverage/synthetic/001.yaml",
+            "digital/links/coverage/synthetic/001.yaml",
             "Digital coverage adoption is not supported",
         ),
-        ("digital-links/links/synthetic/002.yaml", "Digital-link shard sequence gap"),
+        ("digital/links/synthetic/002.yaml", "Digital-link shard sequence gap"),
     ],
 )
 def test_include_refusals(tmp_path: Path, name: str, message: str) -> None:
@@ -122,7 +122,7 @@ def test_include_refusals(tmp_path: Path, name: str, message: str) -> None:
 
 def test_unindexed_and_hash(tmp_path: Path) -> None:
     write(tmp_path, {SHARD: envelope([record()])})
-    extra = tmp_path / "digital-links/unindexed.json"
+    extra = tmp_path / "digital/links/unindexed.json"
     extra.write_text("{}")
     with pytest.raises(
         ValueError, match=r"^Digital-link indexed file closure differs from disk$"
@@ -136,7 +136,7 @@ def test_unindexed_and_hash(tmp_path: Path) -> None:
 
 def test_symlink_even_unindexed(tmp_path: Path) -> None:
     write(tmp_path, {})
-    (tmp_path / "digital-links/symlink").symlink_to(tmp_path, target_is_directory=True)
+    (tmp_path / "digital/links/symlink").symlink_to(tmp_path, target_is_directory=True)
     with pytest.raises(ValueError, match=r"^Symlink digital-link input$"):
         load_links(tmp_path)
 
@@ -179,7 +179,7 @@ def test_index_symlink_rejected_before_directory_scan(
     root = tmp_path / "authored"
     write(root, {SHARD: envelope([record()])})
     if fault == "index":
-        path = root / "digital-links/index.yaml"
+        path = root / "digital/links/index.yaml"
         target = tmp_path / "index-target.yaml"
         path.rename(target)
         path.symlink_to(target)
@@ -194,6 +194,6 @@ def test_index_symlink_rejected_before_directory_scan(
 
 def test_duplicate_record_across_separately_valid_shards(tmp_path: Path) -> None:
     shard = envelope([record()])
-    write(tmp_path, {SHARD: shard, "digital-links/links/synthetic/002.yaml": shard})
+    write(tmp_path, {SHARD: shard, "digital/links/synthetic/002.yaml": shard})
     with pytest.raises(ValueError, match=r"^Duplicate digital-link record$"):
         load_links(tmp_path)

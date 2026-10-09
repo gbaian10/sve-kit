@@ -50,7 +50,7 @@ impl Fixture {
             ("alias", "synthetic-alias", "スペル", ""),
         ];
         let facts = definitions.iter().map(|(number, name, kind, title)| json!({"number":number,"faces":[{"name":name,"card_type":kind,"title":title,"card_class":"ニュートラル","cost":"0","power":"2","hp":"3","traits":[],"sections":[]}]})).collect();
-        let mut programs = json!({"version":"astra/1","cards":{}});
+        let mut programs = json!({"format":1_u8,"kind":"effect_set","cards":{}});
         for (number, ..) in definitions {
             programs["cards"][number] = json!({"status":"complete","abilities":[]});
         }
@@ -59,7 +59,7 @@ impl Fixture {
         let mut fixture = Self {
             facts,
             programs,
-            keywords: json!({"version":"astra/1","keywords":{}}),
+            keywords: json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}),
             rules: Value::Null,
         };
         fixture.rules = rule_fixtures::rules(
@@ -280,6 +280,56 @@ fn loader_background_and_player_fields_are_required_for_same_version_saves() {
     }
 }
 
+#[test]
+fn document_envelopes_are_exclusive_and_background_names_the_grammar() {
+    let original = Fixture::new();
+    original.load().unwrap();
+    for area in ["effects", "keywords", "engine"] {
+        for (field, value) in [
+            ("format", json!(true)),
+            ("format", json!("1")),
+            ("format", json!(1.0_f64)),
+            ("format", json!(999_u16)),
+            ("kind", json!("unknown")),
+            ("version", json!("astra/1")),
+        ] {
+            let mut fixture = original.clone();
+            let document = match area {
+                "effects" => &mut fixture.programs,
+                "keywords" => &mut fixture.keywords,
+                _ => &mut fixture.rules,
+            };
+            document[field] = value;
+            assert!(fixture.load().is_err(), "{area}/{field} was accepted");
+        }
+        for field in ["format", "kind"] {
+            let mut fixture = original.clone();
+            let document = match area {
+                "effects" => &mut fixture.programs,
+                "keywords" => &mut fixture.keywords,
+                _ => &mut fixture.rules,
+            };
+            document.as_object_mut().unwrap().remove(field);
+            assert!(fixture.load().is_err(), "{area}/{field} could be omitted");
+        }
+    }
+    let game = original.game(&position()).unwrap();
+    let saved = serde_json::to_value(&game).unwrap();
+    let versions = &saved["catalog"]["rule_bindings"]["background"]["Bound"]["schema_versions"];
+    assert_eq!(
+        versions["effects"],
+        json!({"kind":"effect_set","format":1_u8,"schema_id":"urn:sve-kit:effects:astra:1"})
+    );
+    assert_eq!(
+        versions["keywords"],
+        json!({"kind":"keyword_registry","format":1_u8,"schema_id":"urn:sve-kit:effects:astra:1"})
+    );
+    assert_eq!(
+        versions["engine_rules"],
+        json!({"kind":"engine_rules","format":1_u8,"schema_id":"https://svekit.app/dsl/engine-rules.schema.json"})
+    );
+}
+
 fn project(fixture: &Fixture) -> (Value, EngineIdentityInput) {
     let mut rules = fixture.rules.clone();
     rules["input"]["kind"] = json!("resolved");
@@ -386,13 +436,21 @@ fn resolved_projection_is_explicit_and_rejects_unknown_or_inconsistent_identitie
 fn file_and_memory_loaders_have_identical_binding_backgrounds() {
     let fixture = Fixture::new();
     let root = temp_dir().join(format!("sve-engine-bindings-{}", id()));
-    create_dir_all(root.join("effects")).unwrap();
-    create_dir_all(root.join("engine-rules")).unwrap();
+    create_dir_all(root.join("rules/effects")).unwrap();
+    create_dir_all(root.join("rules/engine")).unwrap();
     write(root.join("cards.jsonl"), fixture.snapshot()).unwrap();
-    write(root.join("keywords.yaml"), fixture.keywords.to_string()).unwrap();
-    write(root.join("effects/unit.yaml"), fixture.programs.to_string()).unwrap();
     write(
-        root.join("engine-rules/index.yaml"),
+        root.join("rules/keywords.yaml"),
+        fixture.keywords.to_string(),
+    )
+    .unwrap();
+    write(
+        root.join("rules/effects/unit.yaml"),
+        fixture.programs.to_string(),
+    )
+    .unwrap();
+    write(
+        root.join("rules/engine/index.yaml"),
         fixture.rules.to_string(),
     )
     .unwrap();

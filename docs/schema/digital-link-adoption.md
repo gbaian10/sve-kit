@@ -18,10 +18,10 @@ registry 固定永久身分；`curation/` 尚無格式／loader。glossary 現�
 
 | 路徑 | 完整頂層欄位 |
 | --- | --- |
-| `digital-links/index.yaml` | `digital_link_authored_format: 2, kind: digital_link_index, includes` |
-| `digital-links/<area>/<filing_key>/<sequence>.yaml` | `digital_link_authored_format: 2, kind: digital_link_shard, records` |
+| `digital/links/index.yaml` | `format: 2, kind: digital_link_index, includes` |
+| `digital/links/<filing_key>/<sequence>.yaml` | `format: 2, kind: digital_link_shard, records` |
 
-area 目前只有 `links`，`coverage` 路徑明確拒絕。filing_key 為 `[A-Za-z0-9_-]+`，只歸檔，不決定身分、商品或地區；可沿 card 的歸檔代號。sequence 從 001 起按 area/filing_key 連續，至少三位十進位。每片非空。
+`digital/links/coverage/` 路徑明確拒絕，不建立新入口。filing_key 為 `[A-Za-z0-9_-]+`，只歸檔，不決定身分、商品或地區；可沿 card 的歸檔代號。sequence 從 001 起按 filing_key 連續，至少三位十進位。每片非空。
 
 沿 [authored-layout §1／§2](authored-layout.md#2-分片與來源) 的嚴格 YAML 1.2、canonical recipe、單檔 <1 MiB／512 KiB 目標。includes 映射完整分片路徑到**解析後 canonical 內容 hash**；當前分片直接從工作樹讀取。拒絕缺檔、hash 不符、重複 key、symlink、絕對路徑、`..`、跨入口引用及未索引檔案。先驗全入口，再按公開範圍投影；不能先濾 JP。啟用此能力時缺 index 必須失敗，空集合只能明示 includes={}；未支援的新格式不能當空集合。
 
@@ -216,7 +216,7 @@ docs 階段只審上述形狀與邊界；程式階段再測嚴格入口、交易
 
 在 caller-owned transaction 內先呼叫 `populate_links()`；`workflows/offline_names.Composer` 將結果以 `links=result` 交給 `domains.digital.name_policies.application.populate()`，委派 `domains.digital.name_policies.projection` 產生一次已檢查的 current 名稱計畫並填入 DB。獨立的 `import_links()` 包裝才開 transaction。link 結果含 fresh records、stale 的 link id 與原因及 input record，並按 card／face 索引 fresh records。application 的 `_counterparts()` 經 `result.eligible_owner(db, sources, owner, name_ref=...)` 每次重驗此 owner 的 JP hash、registry/source_face_map、實際 frozen printing 來源與採納的兩端名字，並比對 materialized link 的完整 subject／值／decision；`counterparts.first_counterpart()` 只在此證據範圍內選真人候選，不另建名稱算法。
 
-離線 composer 以本機 `authored/digital-links` 是否存在判定是否匯入 link；入口存在時由 loader 驗全入口，沒有入口不偽造空採納結果。沒有 link result 時，不提供真人同卡候選；政策名字仍按其獨立條件判斷。另一 owner 不因已有 context／translation 得到權限；同原文異譯而未有 context_assignment 時回報上述概念診斷，不任選概念。pending wording 的 JP revision 同樣可驗；printed owner、語義指派與 current translation/use／bindings 已有現行接點，#53 的其餘需求須沿此路徑接續，不能用 link API 宣稱全部完成。
+離線 composer 以本機 `authored/digital/links` 是否存在判定是否匯入 link；入口存在時由 loader 驗全入口，沒有入口不偽造空採納結果。沒有 link result 時，不提供真人同卡候選；政策名字仍按其獨立條件判斷。另一 owner 不因已有 context／translation 得到權限；同原文異譯而未有 context_assignment 時回報上述概念診斷，不任選概念。pending wording 的 JP revision 同樣可驗；printed owner、語義指派與 current translation/use／bindings 已有現行接點，#53 的其餘需求須沿此路徑接續，不能用 link API 宣稱全部完成。
 
 各階段維持自己的來源用途紀錄與固定 build context，共用的只有已驗證來源／解析快取。完整建置合併 link、名稱及其他階段的實際用途，交易完成後直接保存該 DB、inputs 與 report，先寫暫存目錄再 rename；不另計 expected 閉包、不執行 build seal 或第二次 DB 填入。原始來源 hash、owner 適用性、DB FK／STRICT 與 transaction 檢查仍保留。
 

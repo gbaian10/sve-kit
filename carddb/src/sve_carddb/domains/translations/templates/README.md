@@ -1,15 +1,16 @@
 # Current template definitions and translations
 
 `loader.read_templates(repository, revision)` reads the fixed working-tree directories once.
-It checks safe regular files, strict YAML, canonical include hashes, complete file
-closure, closed record shapes, unique selection keys and structural references.
+It scans fixed glossary, override and template areas and checks safe regular files,
+strict YAML, closed record shapes, unique selection keys and structural references.
+Template areas are `definitions/`, `values/` and `candidates/`; there is no include index.
 It does not read raw sources, traverse ancestors, or require adoption receipts,
 initial sampling, model-review agreement or historical producer environments.
 Text, notes and quality flags can be edited in a new commit. Low-confidence
 machine translations remain active values; consumers must mark them for review
 and let readers switch to the original source.
 
-Current template shards use `translation_authored_format: 2`. Each record has
+Current template shards use `format: 2, kind: translation_shard`. Each record has
 `kind,data` plus optional `origin,low_confidence,note`. Omitted quality values
 are `project` and `false`; YAML writers omit them. Selection keys are derived
 from identity fields, and stored `record_key` fields are rejected. Definitions hold
@@ -20,7 +21,7 @@ The shared glossary reader owns glossary/name values; template code uses that
 snapshot instead of maintaining a parallel glossary.
 
 Unresolved original drafts use `template_translation_candidate` in their dedicated
-indexed shard area. Their source kind, stable draft ID, language, exact target text,
+`translations/templates/candidates/` area. Their source kind, stable draft ID, language, exact target text,
 `normalized_hash`, `role` and sorted reason codes are closed data. Anonymous N/X and
 malformed placeholder syntax remain untouched; candidates need no definition ID.
 They never become active targets, variants, bindings, pins or translated coverage,
@@ -48,7 +49,7 @@ content hash; one payload has one allocated ID and collisions compare full paylo
 bytes. A source position can match at most one current definition.
 
 `parameters.rules` reads registered, explicit enabled/disabled
-switches from `authored/template-parameter-rules/current.yaml`. Missing files fail;
+switches from `authored/translations/parameter-rules/current.yaml`. Missing files fail;
 an empty rule list does not enable all matchers. Conditions and recognition roles
 belong to the current program, not an approval/hash chain. Disabled rules leave
 positions pending. This does not relax unrelated identity, correction or registry

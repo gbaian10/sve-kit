@@ -1,0 +1,28 @@
+format: 2
+kind: catalog_adoption_shard
+records:
+  - kind: language_adoption
+    data:
+      subject:
+        code: en
+      value:
+        display_name: English
+        fallback_order:
+          - ja
+  - kind: language_adoption
+    data:
+      subject:
+        code: ja
+      value:
+        display_name: 日本語
+        fallback_order:
+          - en
+  - kind: language_adoption
+    data:
+      subject:
+        code: zh-Hant
+      value:
+        display_name: 繁體中文
+        fallback_order:
+          - ja
+          - en

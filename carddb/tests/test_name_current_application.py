@@ -52,8 +52,8 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
     override: bool = False,
 ) -> ApplicationCase:
     shutil.copytree(case.fixture.root, root)
-    base = root / "authored/digital-name-policies" / NAMES
-    document = object_value(read_yaml(base / "current.yaml"))
+    base = root / "authored/digital/policies"
+    document = object_value(read_yaml(base / "names.yaml"))
     content = object_value(document["content"])
     content["excluded_names"] = (
         [
@@ -77,7 +77,7 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
             }
         ]
     policy: dict[str, JsonValue] = {
-        "digital_name_policy_format": 2,
+        "format": 2,
         "kind": "digital_name_policy",
         "policy_id": NAMES,
         "purpose": "names",
@@ -86,17 +86,7 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
         "low_confidence": False,
         "note": "",
     }
-    for path in base.iterdir():
-        path.unlink()
-    (base / "current.yaml").write_bytes(canonical(policy))
-    index_path = root / "authored/digital-name-policies/index.yaml"
-    index = object_value(read_yaml(index_path))
-    index["digital_name_policy_index_format"] = 2
-    object_value(index["policies"])[NAMES] = {
-        "path": "digital-name-policies/" + NAMES + "/current.yaml",
-        "hash": digest(canonical(policy)),
-    }
-    index_path.write_bytes(canonical(index))
+    (base / "names.yaml").write_bytes(canonical(policy))
     values: list[dict[str, JsonValue]] = []
     for identifier in ["name.test", "name.other"] if ambiguous else ["name.test"]:
         values.append(  # ruff: ignore[manual-list-comprehension] -- synthetic source construction keeps each concept identifier explicit
@@ -118,7 +108,7 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
         root / "authored",
         {
             "translations/glossary/concepts/001.yaml": {
-                "translation_authored_format": 2,
+                "format": 2,
                 "kind": "translation_shard",
                 "records": list[JsonValue](ordered),
             }
@@ -284,7 +274,7 @@ def test_current_variant_cannot_select_two_concepts(
         ordered_assignments = assignments
         content = canonical(
             {
-                "translation_authored_format": 2,
+                "format": 2,
                 "kind": "translation_shard",
                 "records": list[JsonValue](ordered_assignments),
             }

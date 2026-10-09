@@ -1,0 +1,940 @@
+format: 2
+kind: catalog_adoption_shard
+records:
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: rage_legion
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:0450198cae9ee2b4f32531bd2bc757815d4648271bdb35f18ec8d96164ee081a
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:78c5dc26db21d607b662acc9205a932d32a9f9399004813b3dd2b2e335c0f5d1
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Rage Legion
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:8e293b7ccd78778268684af1dcfc97db721d0371428caad3f65555991e1b9179
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:8bdccdae57b6a7b18a225eb23b762d7176be7198260efec21200f4c30b47d45c
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: 〈レイジ・レギオン〉
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:0450198cae9ee2b4f32531bd2bc757815d4648271bdb35f18ec8d96164ee081a
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:78c5dc26db21d607b662acc9205a932d32a9f9399004813b3dd2b2e335c0f5d1
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: richmond_corporation
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:015c801771d5e4c74f6855e821a5f07d8b9bebefc2dbeb3e0fe838bacfcc8f38
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:ce660c89ef0aa4bea45238cc8abd66e8742a4077c01c67cb1ab3a130bb1fc109
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Richmond Corporation
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:7955ad941c4b3a8fc816be3907ecaab99064a8289b99e5c97929c552b0dfcb39
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:37174603642a6ab7ec75b768ca010f659a6607a0017c6cf208eb905654863be0
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: リッチモンド商工会
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:015c801771d5e4c74f6855e821a5f07d8b9bebefc2dbeb3e0fe838bacfcc8f38
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:ce660c89ef0aa4bea45238cc8abd66e8742a4077c01c67cb1ab3a130bb1fc109
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: class
+        code: royal
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:a696d6170d5bbd840699dee9576489571610c70aeca089bfac41fb07466ad127
+            parser: official-jp-exact-v1
+            locator: /faces/0/card_class
+            text_hash: sha256:7f185ac6fad36fb1d7b4c0eb0049e64f7de38692f555a77a60734d66cbfe4d92
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Swordcraft
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:ccf024384a803db481a9583fdcfde33fcd942767fffa886ea2c89f6e07761359
+              parser: official-en-exact-v1
+              locator: /faces/0/info/Class
+              text_hash: sha256:8943843c9e78caab04f24956884f22729ffd7b6aac24e6a44c9b5445771c43b5
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: ロイヤル
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:a696d6170d5bbd840699dee9576489571610c70aeca089bfac41fb07466ad127
+              parser: official-jp-exact-v1
+              locator: /faces/0/card_class
+              text_hash: sha256:7f185ac6fad36fb1d7b4c0eb0049e64f7de38692f555a77a60734d66cbfe4d92
+            special_kinds: []
+        active: true
+        translations:
+          - lang: zh-Hant
+            text: 皇家護衛
+            origin: machine
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: royal_paladin
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:1f422fd24fb69f7062457c51a524607431a60294306b755e596540e685589c84
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:e36fbb5749bdefc03a8ee9e155ecf004ef0354eda2a088f34c835343dfff866d
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Royal Paladin
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:14c8d1223fd481d3f7bd174c9209f5e3f0a1a1e567aa1ad65e9d4464f8c7e086
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:34617f13adb5091208fce936bc7e051788c4f385fbe9b500a429da7393fb1f03
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: ロイヤルパラディン
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:1f422fd24fb69f7062457c51a524607431a60294306b755e596540e685589c84
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:e36fbb5749bdefc03a8ee9e155ecf004ef0354eda2a088f34c835343dfff866d
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: sarendia_orphanage
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:6abd399fa9d017216fa97102edbc5f940af2f85bd6e680dd8dfd97646b62568f
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:2b497046142cd2ea290a04ead252384378d124b27e764d24a81954fb3460eb2b
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Sarendia Orphanage
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:5fdc6e23f254de256e14332770f595244a535ed5bd1cb5ab629c81e5adbf71a1
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:bc480d8a7aa1501936436368c7999512859cbcaa5d56dc1b87227e6931ea3269
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: サレンディア救護院
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:6abd399fa9d017216fa97102edbc5f940af2f85bd6e680dd8dfd97646b62568f
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:2b497046142cd2ea290a04ead252384378d124b27e764d24a81954fb3460eb2b
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: type
+        code: sep
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:34f1176cb639aaa263b7cf96c43068d7353da4e3ea2255500a41688fa582e9a6
+            parser: official-jp-exact-v1
+            locator: /faces/0/card_type
+            text_hash: sha256:b6cb1069c3484df57bbf6ca296030eacc3d0d9121da1be9358cb3c92d3257975
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Super-Evolution Point
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:5a1bbb19a47c4167a824e1d9272334f124a1d1179cadc3516c9a44c87a952f9f
+              parser: official-en-exact-v1
+              locator: /faces/0/info/Card Type
+              text_hash: sha256:2e32585c107f8ce1682575f8cedbfbd68c37dc122bba55267bc6bf04dbd32449
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: SEP
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:34f1176cb639aaa263b7cf96c43068d7353da4e3ea2255500a41688fa582e9a6
+              parser: official-jp-exact-v1
+              locator: /faces/0/card_type
+              text_hash: sha256:b6cb1069c3484df57bbf6ca296030eacc3d0d9121da1be9358cb3c92d3257975
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: seven_crowns
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:8ce27828b2a39abc79d23087091733fbd84c6161013cd1f08072b151b0ed5026
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/2
+            text_hash: sha256:023fff9932451bf23c5f64500bdbfcadf865ce647281c8081ea04dbc7fa5f290
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Seven Crowns
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:5e4f43c93b1730c8c75e538cb2c5cae32bf31fbc29ced7761510f55eaa950a19
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/2
+              text_hash: sha256:d28d0cb3758186b87ac2a64fa145e7ea3b134dea75885c50e560e5c5545f4344
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: 七冠
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:8ce27828b2a39abc79d23087091733fbd84c6161013cd1f08072b151b0ed5026
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/2
+              text_hash: sha256:023fff9932451bf23c5f64500bdbfcadf865ce647281c8081ea04dbc7fa5f290
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: shadow_paladin
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:f40b8b025f76b166ae98fadfdaada44a74479a7e6c066ea7a36cb1b76472be9f
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:4eb8fcb4be70404a3953c6d64cd32b6d346cf2b91b8e6c9785e70a997a7671ec
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Shadow Paladin
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:59e45293388c6f3b7ab4acc6adaf18743aa57fc40318cd219380d520697fbcb9
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:f97bd5e6c4662d63ae87117b3f09e883c6ad426dedc716c7e010e3307c03a8fb
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: シャドウパラディン
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:f40b8b025f76b166ae98fadfdaada44a74479a7e6c066ea7a36cb1b76472be9f
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:4eb8fcb4be70404a3953c6d64cd32b6d346cf2b91b8e6c9785e70a997a7671ec
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: shikigami
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:17e3ff1dd4eb3e6797120cd8ddad81c362c9bf0b2429b2306807072494391d41
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:fc246298db41ee077b72f25519233790fc0d67c654605734e9178358d131da50
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Shikigami
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:98b9aadb18da09a3022a514125e45ba90f9a25e53ad472e3b07d2bab43877eed
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:ac1db362f29d987eab239bda66d75afdefd71ced11dff184a0c83d9f3f7d07f3
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: 式神
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:17e3ff1dd4eb3e6797120cd8ddad81c362c9bf0b2429b2306807072494391d41
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:fc246298db41ee077b72f25519233790fc0d67c654605734e9178358d131da50
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: type
+        code: spell
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:57b6e56c4fd174b333e4b704ca5547807e298fe979f02e99f39ed3cd60323c01
+            parser: official-jp-exact-v1
+            locator: /faces/0/card_type
+            text_hash: sha256:fd21092c490d59e072aa81f79e44c192530bfa645a198d53edc89fe69a4ce8c3
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Spell / Advanced
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:291cd912b8f304f584d63f237f0bf4195ce0f89fb6ed5cbd9070cf02ab89360b
+              parser: official-en-exact-v1
+              locator: /faces/0/info/Card Type
+              text_hash: sha256:bea1e0bf52e2044f4f26202d2aac6e604babc6339f801a61e8c7ea112fda141c
+            special_kinds:
+              - advance
+          - region: en
+            lang: en
+            raw: Spell / Evolved
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:4181c3e8e3de82ec83ba7a99ec367f1ebb387b179d893d2eef41887ba610e9fb
+              parser: official-en-exact-v1
+              locator: /faces/0/info/Card Type
+              text_hash: sha256:660f0e62240df2c400ad6c13724b6e2653ea8c5f015874b4cd6d7ec0b0cc839b
+            special_kinds:
+              - evolve
+          - region: en
+            lang: en
+            raw: Spell / Token
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:de22da12ad24faf0a5d34424f9697a43a4eb591d38dfc9fdc3c4d9f8ad64aa64
+              parser: official-en-exact-v1
+              locator: /faces/0/info/Card Type
+              text_hash: sha256:afa5e4c7df985c9648205112a2aca9c6b4d2c20fb05a2b01146f4a9732be8862
+            special_kinds:
+              - token
+          - region: en
+            lang: en
+            raw: Spell
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:8bac2993687e7d0d4d4eac953724a35a131fe2fb07fcb6dd51df1ac39a91cb1d
+              parser: official-en-exact-v1
+              locator: /faces/0/info/Card Type
+              text_hash: sha256:63c5b77101f2fd7c7fd3a4acd8522e07fd14b623f50216ecbaf02a8e06de0d29
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: スペル
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:57b6e56c4fd174b333e4b704ca5547807e298fe979f02e99f39ed3cd60323c01
+              parser: official-jp-exact-v1
+              locator: /faces/0/card_type
+              text_hash: sha256:fd21092c490d59e072aa81f79e44c192530bfa645a198d53edc89fe69a4ce8c3
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: スペル・アドバンス
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:45e3980ea939ac9d13a9295b6571a6c49e28ed8b8e75fc1fe72149db7a50acaf
+              parser: official-jp-exact-v1
+              locator: /faces/0/card_type
+              text_hash: sha256:2fb40a2a38d8c971e083c1e11f776cd31fd188b29279b3c8888f09384b86ccc1
+            special_kinds:
+              - advance
+          - region: jp
+            lang: ja
+            raw: スペル・エボルヴ
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:00b69b483cbb37941996d299a579b8f1c3157b93d06c6afdd22d5527df618c46
+              parser: official-jp-exact-v1
+              locator: /faces/0/card_type
+              text_hash: sha256:edb3c441f64b2eee22ebd817baa5ebfe7f34d5015264f48a14f60233e5cddc64
+            special_kinds:
+              - evolve
+          - region: jp
+            lang: ja
+            raw: スペル・トークン
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:87201d39fb2c19c8c57c0a2ea12c3a969fbc1ac602f7641cd7dacca209a6acfa
+              parser: official-jp-exact-v1
+              locator: /faces/0/card_type
+              text_hash: sha256:6831af0dcbc47858908a5a52dc9a8dc513029b1872190b58095ee710e25877b9
+            special_kinds:
+              - token
+        active: true
+        translations:
+          - lang: zh-Hant
+            text: 法術
+            origin: machine
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: supreme
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:56a74762222de4715b0c71cc8764399b69395520e6bf82f07c31db76566e52e9
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:e64a9c67172790cd8d399cd99ad4eef41c376e24b550bf6054b34b838d8548b0
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Supreme
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:61bfe6e03b95b4e037380fc72cf3b5046df2e374e6220d9ac5e49cd268e44330
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:de641b6c0c46224b8c6a3eb74097c1a4006ae80c7e8f229813f989c2a7802943
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: 超克
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:56a74762222de4715b0c71cc8764399b69395520e6bf82f07c31db76566e52e9
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:e64a9c67172790cd8d399cd99ad4eef41c376e24b550bf6054b34b838d8548b0
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: thief
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:26711c4851280eb1c0fa94a65296dbf563bf32ec74095299ead6b2ae57b47547
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:09492a2a62637314b2d7756816b03ff0be6e0086b370585285fe45ca7fe68acd
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Thief
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:26fe297b35c8426f8a944ee01cdb044cae21e4a8352e328f620e0f41299699e0
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:2fd478c88ca0e81b2d75642c55fc2ac47eef23f24ee2f6d89d1c1af8c5ca4c43
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: 盗賊
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:26711c4851280eb1c0fa94a65296dbf563bf32ec74095299ead6b2ae57b47547
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:09492a2a62637314b2d7756816b03ff0be6e0086b370585285fe45ca7fe68acd
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: togh_keyoh
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:2ccb13bcca5342998a4d7478695cee50cbf75301e8732bd954762ef2f1ee504d
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:c65951173ab820b9f2d1e3a0d72e44ece2b0a7c173e3f7d349939d2204a3bcd3
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Togh Keyoh
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:29a804523ce19676cfe0f23adabadb6325f6dbe0b0f1217c416aaf2055ecca0a
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:76fb818fe3f9cfc9e331676bbdf3f88350283a18965cabec3978248936fd7fc3
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: 透京
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:2ccb13bcca5342998a4d7478695cee50cbf75301e8732bd954762ef2f1ee504d
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:c65951173ab820b9f2d1e3a0d72e44ece2b0a7c173e3f7d349939d2204a3bcd3
+            special_kinds: []
+        active: true
+  - kind: vocabulary_adoption
+    data:
+      subject:
+        kind: special_kind
+        code: token
+      value:
+        label:
+          kind: authored
+          lang: ja
+          text: トークン
+        raw_mappings: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: tracen_academy
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:351f16e7c3ab71ae413cc4fbcdd71a82f2f1e6f9276fc90685dfb51b9295bf09
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:3518a1ff46c97e308a9da1ab05519d71bac075d4803118568f8c8c2b7a34925f
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Tracen Academy
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:7813aea6b4d92bbee9f3d3da165482fd10b1bd4ec69a6d70c3f518b5b43e8d60
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:f1993a75eb05a9ca651760466f84f600bf3257453eed8114b07f6dcc0974d282
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: トレセン学園
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:351f16e7c3ab71ae413cc4fbcdd71a82f2f1e6f9276fc90685dfb51b9295bf09
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:3518a1ff46c97e308a9da1ab05519d71bac075d4803118568f8c8c2b7a34925f
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: twilight_caravan
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:0498d4804e9b8d8b24b766a0054a604e610ddef3f0fb3537d42612431e9e1175
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:85f159232a860446ecbf13e8b5e2b248656b98f69dd14994bbd00d9d18a62015
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Twilight Caravan
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:1a2a5a4edcc55e3501d4fef332156e1de17f6cfe2f1e9c85183f4e03b026e259
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:01d2a46865cbb8fe0cd80ca7f631e72cf1458d88f27938d461365b116259ea78
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: トワイライトキャラバン
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:0498d4804e9b8d8b24b766a0054a604e610ddef3f0fb3537d42612431e9e1175
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:85f159232a860446ecbf13e8b5e2b248656b98f69dd14994bbd00d9d18a62015
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: twinkle_wish
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:3602b3fe01da7a96959819065eecb3dc5142f3baa48e08bd01a1ef003b4fd467
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:a9e233d15bf21a6f27785f87641fdf2515f99326e759fb9b9c252dc38583712b
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Twinkle Wish
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:b0454cef87afdbfc7a57a902446754a624ff216b5ad9e79209c608125c3fd83a
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:e1004cf1bc6afcab816ced37460aef338507a385b94205496be97c4c72c9f925
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: トゥインクルウィッシュ
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:3602b3fe01da7a96959819065eecb3dc5142f3baa48e08bd01a1ef003b4fd467
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:a9e233d15bf21a6f27785f87641fdf2515f99326e759fb9b9c252dc38583712b
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: umamusume
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:977577bad91d43e9175bb3d4b4039003ba54267eaed250ac98265be53f4335db
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:867b543a827af1083f926bca9e56b62134bb0b34ae61eb12a32fca776f29eed8
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Umamusume
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:13cbb9b450d58ed8b7b7f456b89d41fc264bfc343b5903e8304b0c636f514d63
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:2ff5b8866ad085c35b156d1a45bef1259c47a13f80f6e5476abffbe5441f04b3
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: ウマ娘
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:977577bad91d43e9175bb3d4b4039003ba54267eaed250ac98265be53f4335db
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:867b543a827af1083f926bca9e56b62134bb0b34ae61eb12a32fca776f29eed8
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: title
+        code: umamusume_pretty_derby
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:977577bad91d43e9175bb3d4b4039003ba54267eaed250ac98265be53f4335db
+            parser: official-jp-exact-v1
+            locator: /faces/0/title
+            text_hash: sha256:ad9475326eba8c466d139f41ea033d4d3658ea5a052228496adaaa677d379894
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: 'Umamusume: Pretty Derby'
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:13cbb9b450d58ed8b7b7f456b89d41fc264bfc343b5903e8304b0c636f514d63
+              parser: official-en-exact-v1
+              locator: /faces/0/info/Universe
+              text_hash: sha256:1b2813615cfaf9477eb2157466193d481fbf590f076b4b53ab577d39d8d7a7d4
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: ウマ娘 プリティーダービー
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:977577bad91d43e9175bb3d4b4039003ba54267eaed250ac98265be53f4335db
+              parser: official-jp-exact-v1
+              locator: /faces/0/title
+              text_hash: sha256:ad9475326eba8c466d139f41ea033d4d3658ea5a052228496adaaa677d379894
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: vampire
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:d078a5d4a86dd350796dfd4b3030e6964cd59d90ff7df548a68226e5da24c0e3
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:0c6918a0198ea2c5747541c636fc3b7ed1e948203bdea5dde31cc4700276f5f8
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Vampire
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:80369828d9c360fbd63a2611d5e5764a03f298c0bc8a13bad3299fbd9372797c
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:ef177717b2d61a6ac74a239f5c3eae9634b65091e35031cebf5d18f0c17b55b4
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: 吸血鬼
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:d078a5d4a86dd350796dfd4b3030e6964cd59d90ff7df548a68226e5da24c0e3
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:0c6918a0198ea2c5747541c636fc3b7ed1e948203bdea5dde31cc4700276f5f8
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: vanguard
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:256685cab320c155512807765bef5303f5d34bd62e939ec91b4ac19c62356201
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:d6e29a90d87e7392f5f78f1b72a02b7f21bdce18a80a3425b189d6c5d702c6f4
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Vanguard
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:76ab28e2c0db840fe6548703ae85d87d9cd669b0a539c4eebc1134a539594473
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:ce1edfea6d6b8c2217b9ee006991bddb2e70e11bb4609c4e0970cff7013f9b72
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: ヴァンガード
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:256685cab320c155512807765bef5303f5d34bd62e939ec91b4ac19c62356201
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:d6e29a90d87e7392f5f78f1b72a02b7f21bdce18a80a3425b189d6c5d702c6f4
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: verdant
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:3c9c3c40699dfdf432392f432967fc805cc97b04e3a0750456205eae9922bf8d
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:8203c955d844cad23a9e3b0871a81e4038f73065cbb6a95efca71c16347ce6cd
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Verdant
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:962c0f7408288fc1535d7b7229ea8066a9d573a50be6794e1f2ce6c49d7e059f
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:4671cee279d8ca0ba109deb1224d7e1749737c186043d86d19a8ca1ade8916a0
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: 植物族
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:3c9c3c40699dfdf432392f432967fc805cc97b04e3a0750456205eae9922bf8d
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:8203c955d844cad23a9e3b0871a81e4038f73065cbb6a95efca71c16347ce6cd
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: ward_office
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:2dcdb86fe316d728aacab81d64191787f4c5265ae2781816119dc7a3df30ad4c
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:70c67d71a4bca4df2aa4db4d30f4963469b9d1bb910401482aa274f936bee342
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Ward Office
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:232224f8af5ade71c31ced49e0129203b34d404fb61faeeb16aa54fcdc03ae2f
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:8a3e17a837527ecf504f623b6d0bc954982ae8995c65ba3fae440c6f1a80e2b0
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: 区役所
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:2dcdb86fe316d728aacab81d64191787f4c5265ae2781816119dc7a3df30ad4c
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:70c67d71a4bca4df2aa4db4d30f4963469b9d1bb910401482aa274f936bee342
+            special_kinds: []
+        active: true
+  - origin: official
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: wasteland
+      value:
+        label:
+          kind: source
+          source_ref:
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:5acf44b02bda852a84039311d927843fb9b2bf00237b7fb9d59fd3d886f8cd89
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:b549e3f43fcb4a559b0eab44958930e6c7fbc1fef35890041c1734bf0654504c
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Wasteland
+            source_ref:
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:ba628217080fe5877d7848ec43d5528e42e506dc7c56bf0566e5822c0bd60db0
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:4b415ab1819fb1f65ab0f28ede926796c3dbd37ba669b7b035e0530f92c700a2
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: 荒野
+            source_ref:
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:5acf44b02bda852a84039311d927843fb9b2bf00237b7fb9d59fd3d886f8cd89
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:b549e3f43fcb4a559b0eab44958930e6c7fbc1fef35890041c1734bf0654504c
+            special_kinds: []
+        active: true

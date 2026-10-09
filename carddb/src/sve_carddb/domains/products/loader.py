@@ -115,9 +115,16 @@ def _inventory(root: Path) -> list[str]:
     if directory.is_symlink() or not directory.is_dir():
         raise ValueError("Missing product input directory")
     names: list[str] = []
+    for area in directory.iterdir():
+        if area.is_symlink():
+            raise ValueError("Symlinks are forbidden in product inputs")
+        if area.is_dir() and area.name not in {*_KINDS, "identities"}:
+            raise ValueError("Unexpected product input path")
     for file in directory.rglob("*"):
         if file.is_symlink():
             raise ValueError("Symlinks are forbidden in product inputs")
+        if file.is_relative_to(directory / "identities"):
+            continue
         if file.suffix.lower() in {".yaml", ".yml"}:
             name = file.relative_to(root).as_posix()
             if _PATH.fullmatch(name) is None:

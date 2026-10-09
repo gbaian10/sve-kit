@@ -1,0 +1,358 @@
+format: 1
+kind: effect_set
+cards:
+  BP06-022:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: aura
+      - line: 3
+        kind: static
+        body:
+          op: seq
+          steps:
+            - op: restrict
+              subjects: self
+              action: ability_destroy
+            - op: restrict
+              subjects: self
+              action: banish
+  BP06-035:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount:
+            fn: sub
+            args:
+              - 0
+              - count:
+                  union:
+                    - side: self
+                      zone: cemetery
+                      trait: 陰陽師
+                    - side: self
+                      zone: cemetery
+                      type: spell
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: eq
+            args:
+              - count:
+                  side: self
+                  zone: field
+                  name: 天后
+              - 0
+          then:
+            op: create
+            name: 天后
+            count: 1
+            to: field
+        event: enter
+        subject: self
+      - line: 3
+        kind: activated
+        body:
+          op: modify
+          subjects: target.1
+          keywords:
+            - storm
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              trait: 式神
+            min: 0
+            max: 2
+        costs:
+          - op: act
+            subjects: self
+  BP06-042:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: create
+              name: 形代
+              count: 1
+              to: field
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - count:
+                      union:
+                        - side: self
+                          zone: cemetery
+                          trait: 陰陽師
+                        - side: self
+                          zone: cemetery
+                          type: spell
+                  - 7
+              then:
+                op: draw
+                count: 1
+  BP06-048:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: search
+          select:
+            side: self
+            zone: deck
+            name: 式神の使役
+          min: 0
+          max: 1
+          to: hand
+        event: field_to_cemetery
+        subject: self
+  BP06-072:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: modify
+          subjects: target.1
+          power: 2
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP06-073:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: 一ツ尾狐
+          count: 5
+          to: ex
+        event: enter
+        subject: self
+  BP06-074:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects:
+            side: self
+            zone: any
+            type: follower
+            trait: 妖怪
+          amount: -2
+      - line: 2
+        kind: static
+        body:
+          op: replace_damage
+          sources:
+            side: self
+            zone: field
+            type: follower
+            trait: 妖怪
+          amount: 1
+          kind: any
+      - line: 3
+        kind: trigger
+        body:
+          op: modify
+          subjects: self
+          power: 1
+        event: leave
+        subject:
+          side: self
+          zone: field
+          type: follower
+          trait: 妖怪
+  BP06-079:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: bane
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: select
+              select:
+                side: opponent
+                zone: field
+                type: follower
+              by: opponent
+              min:
+                if:
+                  fn: ge
+                  args:
+                    - at: resolution-start
+                      value:
+                        count:
+                          side: self
+                          zone: cemetery
+                    - 10
+                then: 2
+                else: 1
+              max:
+                if:
+                  fn: ge
+                  args:
+                    - at: resolution-start
+                      value:
+                        count:
+                          side: self
+                          zone: cemetery
+                    - 10
+                then: 2
+                else: 1
+              bind: offered
+            - op: move
+              subjects: offered
+              to: cemetery
+        event: enter
+        subject: self
+      - line: 3
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 5
+            - op: move
+              subjects:
+                side: self
+                zone: deck
+                top: 1
+              to: cemetery
+        active_zones:
+          - hand
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+        costs:
+          - op: pp
+            amount: 3
+          - op: discard
+            subjects: self
+  BP06-080:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: choice
+          min: 1
+          max: 1
+          modes:
+            - op: seq
+              steps:
+                - op: damage
+                  subjects: target.1
+                  amount: 1
+                - op: move
+                  subjects:
+                    side: self
+                    zone: deck
+                    top: 1
+                  to: cemetery
+            - op: move
+              subjects: target.1
+              to: hand
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+            modes:
+              - 1
+          - key: '1'
+            select:
+              side: self
+              zone: cemetery
+              type: follower
+              trait: 妖怪
+              not_name: self
+            min: 1
+            max: 1
+            modes:
+              - 2
+  BP06-117:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: flip
+              subjects: target.1
+              face: down
+            - op: draw
+              count: 1
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: evolve_deck
+              type: evolved_follower
+              where:
+                read: item.face_up
+            min: 1
+            max: 1

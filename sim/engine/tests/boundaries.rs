@@ -23,10 +23,10 @@ fn snapshot() -> String {
     [("unit-follower","フォロワー"),("unit-spell","スペル")].iter().map(|(number,kind)|json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"1","power":"2","hp":"3","traits":[],"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n")
 }
 fn registry() -> String {
-    json!({"version":"astra/1","keywords":{"guard":{"ja":"守護","rule":"12.8","expansion":{"op":"keyword","name":"guard"}},"drain":{"ja":"ドレイン","rule":"12.13","expansion":{"op":"keyword","name":"drain"}}}}).to_string()
+    json!({"format":1_u8,"kind":"keyword_registry","keywords":{"guard":{"ja":"守護","rule":"12.8","expansion":{"op":"keyword","name":"guard"}},"drain":{"ja":"ドレイン","rule":"12.13","expansion":{"op":"keyword","name":"drain"}}}}).to_string()
 }
 fn document(body: &Value) -> Value {
-    json!({"version":"astra/1","cards":{"unit-follower":{"status":"complete","review":"synthetic","abilities":[]},"unit-spell":{"status":"complete","review":"synthetic","abilities":[{"kind":"spell","line":1,"targets":[{"key":"1","select":{"zone":"field","side":"opponent","type":"follower"},"min":1,"max":1}],"body":body}]}}})
+    json!({"format":1_u8,"kind":"effect_set","cards":{"unit-follower":{"status":"complete","review":"synthetic","abilities":[]},"unit-spell":{"status":"complete","review":"synthetic","abilities":[{"kind":"spell","line":1,"targets":[{"key":"1","select":{"zone":"field","side":"opponent","type":"follower"},"min":1,"max":1}],"body":body}]}}})
 }
 #[expect(
     clippy::unwrap_used,
@@ -80,7 +80,7 @@ fn loader_rejects_invalid_grammar_duplicates_and_macro_cycles() {
     .unwrap_err();
     let mut cycle = valid.clone();
     cycle["cards"]["unit-spell"]["abilities"][0]["body"] = json!({"op":"macro","name":"guard"});
-    let registry_cycle = json!({"version":"astra/1","keywords":{"guard":{"ja":"守護","expansion":{"op":"macro","name":"guard"}}}});
+    let registry_cycle = json!({"format":1_u8,"kind":"keyword_registry","keywords":{"guard":{"ja":"守護","expansion":{"op":"macro","name":"guard"}}}});
     Catalog::from_documents(
         &snapshot(),
         &registry_cycle.to_string(),
@@ -762,7 +762,7 @@ fn targeting_protection_and_zero_damage_bane_follow_distinct_rules() {
         let mut doc = document(&json!({"op":"damage","subjects":"target.1","amount":2_i64}));
         doc["cards"]["unit-follower"]["abilities"] =
             json!([{"kind":"static","line":1_i64,"body":{"op":"keyword","name":keyword}}]);
-        let words = json!({"version":"astra/1","keywords":{keyword:{"ja":keyword,"expansion":{"op":"keyword","name":keyword}}}});
+        let words = json!({"format":1_u8,"kind":"keyword_registry","keywords":{keyword:{"ja":keyword,"expansion":{"op":"keyword","name":keyword}}}});
         let loaded = Catalog::from_documents(
             &snapshot(),
             &words.to_string(),
@@ -1303,7 +1303,7 @@ fn printed_line_discriminators_select_the_intended_pending_ability() {
             {"kind":"trigger","line":second_line,"keyword":"second","event":"attack","subject":"self",
              "body":{"op":"damage","subjects":"opponent.leader","amount":2_i64}}
         ]);
-        let words = json!({"version":"astra/1","keywords":{
+        let words = json!({"format":1_u8,"kind":"keyword_registry","keywords":{
             "first":{"ja":"First","role":"ability-label"},
             "second":{"ja":"Second","role":"ability-label"}
         }});
@@ -2420,7 +2420,7 @@ fn bane_rule_destruction_respects_immunity_and_shares_the_lethal_damage_batch() 
             json!([{"kind":"static","line":1_i64,"body":{"op":"keyword","name":"bane"}}]);
         docs["cards"]["unit-tank"] = json!({"status":"complete","review":"synthetic","abilities":if protected {json!([{"kind":"static","line":1_i64,"body":{"op":"restrict","subjects":"self","action":"ability_destroy"}}])}else{json!([])}});
         let tank = json!({"number":"unit-tank","faces":[{"name":"tank","card_type":"フォロワー","card_class":"ニュートラル","traits":[],"cost":"1","power":"4","hp":"3","text":null,"sections":[]}]});
-        let registry = json!({"version":"astra/1","keywords":{"bane":{"ja":"必殺","expansion":{"op":"keyword","name":"bane"}}}});
+        let registry = json!({"format":1_u8,"kind":"keyword_registry","keywords":{"bane":{"ja":"必殺","expansion":{"op":"keyword","name":"bane"}}}});
         let loaded = Catalog::from_documents(
             &format!("{}\n{tank}", snapshot()),
             &registry.to_string(),

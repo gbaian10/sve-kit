@@ -1,0 +1,36 @@
+format: 1
+kind: effect_set
+cards:
+  EBD01-015:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: move
+              subjects: target.1
+              to: hand
+            - op: draw
+              count: 1
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+            min: 1
+            max: 1
+  EBD01-021:
+    status: complete
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: create
+          name: フェアリー
+          count: 3
+          to: ex
+  EBD01-T01:
+    status: complete
+    abilities: []

@@ -22,7 +22,7 @@ and `docs/schema/image-crop-overrides.md` (adopted crop boxes).
   whose source has no crop. It never inherits a box or blocks a build.
 
 Crops come from `sve_carddb.images.crops.load_image_crops`, which reads
-`authored/image-crops.yaml` from the working tree, and are selected by
+`authored/images/crops.yaml` from the working tree, and are selected by
 `(source_key, source_sha256)`. Reports never include official card text.
 The `export-offline` command is the only caller: it encodes whatever the cache
 lacks and wires the result into a snapshot preview; see [offline export](../export/OFFLINE.md).

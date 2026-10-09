@@ -35,17 +35,17 @@ def case(tmp_path: Path, baseline: Case) -> Case:
 
 def test_complete_entry_and_explicit_empty(case: Case) -> None:
     assert (
-        len(load_adoptions(case.root, entry="catalog-adoptions").current_records()) == 4
+        len(load_adoptions(case.root, entry="catalog/adoptions").current_records()) == 4
     )
-    (case.root / "display-overrides/routes").mkdir(parents=True)
-    assert not load_adoptions(case.root, entry="display-overrides").current_records()
+    (case.root / "catalog/overrides/routes").mkdir(parents=True)
+    assert not load_adoptions(case.root, entry="catalog/overrides").current_records()
 
 
-@pytest.mark.parametrize("entry", ["catalog-adoptions", "display-overrides"])
+@pytest.mark.parametrize("entry", ["catalog/adoptions", "catalog/overrides"])
 @pytest.mark.parametrize("typo", [False, True])
 def test_entry_requires_known_area(tmp_path: Path, entry: Entry, *, typo: bool) -> None:
     directory = tmp_path / entry
-    directory.mkdir()
+    directory.mkdir(parents=True)
     if typo:
         (directory / "misspelled-area").mkdir()
     with pytest.raises(ValueError, match="at least one known data area"):
@@ -57,7 +57,7 @@ def test_entry_requires_known_area(tmp_path: Path, entry: Entry, *, typo: bool) 
     ["duplicate", "symlink", "unknown", "kind", "bool_format", "key", "area"],
 )
 def test_current_file_boundary_guards(case: Case, mutation: str) -> None:
-    path = case.root / "catalog-adoptions/vocabulary/shared/001.yaml"
+    path = case.root / "catalog/adoptions/vocabulary/001.yaml"
     raw = object_value(read_yaml(path))
     row = object_value(array(raw["records"])[0])
     message = "Invalid current catalog fields"
@@ -75,7 +75,7 @@ def test_current_file_boundary_guards(case: Case, mutation: str) -> None:
         row["kind"] = "unknown_adoption"
         write(case.root, path.relative_to(case.root).as_posix(), raw)
     elif mutation == "bool_format":
-        raw["catalog_adoption_format"] = True
+        raw["format"] = True
         message = "integer two"
         write(case.root, path.relative_to(case.root).as_posix(), raw)
     else:
@@ -85,9 +85,19 @@ def test_current_file_boundary_guards(case: Case, mutation: str) -> None:
             row["record_key"] = "wrong"
             write(case.root, path.relative_to(case.root).as_posix(), raw)
         else:
-            path.rename(case.root / "catalog-adoptions/languages/shared/002.yaml")
+            path.rename(case.root / "catalog/adoptions/languages/002.yaml")
     with pytest.raises(ValueError, match=message):
-        load_adoptions(case.root, entry="catalog-adoptions")
+        load_adoptions(case.root, entry="catalog/adoptions")
+
+
+@pytest.mark.parametrize("group", ["current", "shared"])
+def test_nested_shard_directory_is_not_skipped(case: Case, group: str) -> None:
+    path = case.root / "catalog/adoptions/vocabulary/001.yaml"
+    nested = path.parent / group / path.name
+    nested.parent.mkdir()
+    path.rename(nested)
+    with pytest.raises(ValueError, match=r"^Catalog area must hold shards directly$"):
+        load_adoptions(case.root, entry="catalog/adoptions")
 
 
 def test_unknown_entry(case: Case) -> None:
@@ -96,19 +106,19 @@ def test_unknown_entry(case: Case) -> None:
 
 
 def test_unordered_files_and_records_load_current_values(case: Case) -> None:
-    path = case.root / "catalog-adoptions/languages/shared/001.yaml"
+    path = case.root / "catalog/adoptions/languages/001.yaml"
     raw = object_value(read_yaml(path))
     raw["records"] = list(reversed(array(raw["records"])))
     path.unlink()
-    write(case.root, "catalog-adoptions/languages/shared/019.yaml", raw)
-    records = load_adoptions(case.root, entry="catalog-adoptions").current_records()
+    write(case.root, "catalog/adoptions/languages/019.yaml", raw)
+    records = load_adoptions(case.root, entry="catalog/adoptions").current_records()
     assert tuple(r.record_key for r in records) == tuple(
         sorted(r.record_key for r in records)
     )
 
 
 def test_current_withdrawal_and_edit(case: Case) -> None:
-    path = "catalog-adoptions/vocabulary/shared/001.yaml"
+    path = "catalog/adoptions/vocabulary/001.yaml"
     raw = object_value(read_yaml(case.root / path))
     row = object_value(array(raw["records"])[0])
     data = object_value(row["data"])
@@ -119,7 +129,7 @@ def test_current_withdrawal_and_edit(case: Case) -> None:
         next(
             r
             for r in load_adoptions(
-                case.root, entry="catalog-adoptions"
+                case.root, entry="catalog/adoptions"
             ).current_records()
             if r.kind == "vocabulary_adoption"
         ).data.value
@@ -131,7 +141,7 @@ def test_current_withdrawal_and_edit(case: Case) -> None:
         next(
             r
             for r in load_adoptions(
-                case.root, entry="catalog-adoptions"
+                case.root, entry="catalog/adoptions"
             ).current_records()
             if r.kind == "vocabulary_adoption"
         ).data.value
@@ -143,7 +153,7 @@ def test_current_withdrawal_and_edit(case: Case) -> None:
     ("entry", "area", "kind", "subject", "value"),
     [
         (
-            "catalog-adoptions",
+            "catalog/adoptions",
             "aliases",
             "search_alias_adoption",
             {"kind": "type", "code": "follower", "lang": "ja", "text": "Synthetic"},
@@ -153,28 +163,28 @@ def test_current_withdrawal_and_edit(case: Case) -> None:
             },
         ),
         (
-            "catalog-adoptions",
+            "catalog/adoptions",
             "rules-names",
             "rules_name_adoption",
             {"face_id": "face", "region": "jp", "role": "collab"},
             None,
         ),
         (
-            "catalog-adoptions",
+            "catalog/adoptions",
             "symbols",
             "text_symbol_adoption",
             {"id": "symbol:synthetic"},
             None,
         ),
         (
-            "display-overrides",
+            "catalog/overrides",
             "routes",
             "route_override_adoption",
             {"region": "jp", "route_key": "synthetic"},
             None,
         ),
         (
-            "display-overrides",
+            "catalog/overrides",
             "defaults",
             "default_printing_adoption",
             {"card_id": "card", "region": "jp"},
@@ -195,7 +205,7 @@ def test_editable_catalog_and_display_kinds(
     value: JsonValue,
 ) -> None:
     row = record(kind, subject, value)
-    write(case.root, f"{entry}/{area}/current/001.yaml", envelope([row], entry=entry))
+    write(case.root, f"{entry}/{area}/001.yaml", envelope([row], entry=entry))
     assert any(
         r.kind == kind for r in load_adoptions(case.root, entry=entry).current_records()
     )
@@ -212,7 +222,7 @@ def test_offline_cannot_silently_discard_an_editable_alias(case: Case) -> None:
             "normalizer": {"version": "nfkc-casefold-v1", "config": {}},
         },
     )
-    write(case.root, "catalog-adoptions/aliases/current/001.yaml", envelope([row]))
+    write(case.root, "catalog/adoptions/aliases/001.yaml", envelope([row]))
     with pytest.raises(
         ValueError, match="Offline catalog supports vocabulary and language values"
     ):

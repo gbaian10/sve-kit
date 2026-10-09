@@ -2,7 +2,7 @@
 
 from typing import Annotated, Literal, Self
 
-from pydantic import Field, computed_field, model_validator
+from pydantic import Field, computed_field, field_validator, model_validator
 
 from sve_carddb.core.json import canonical
 from sve_carddb.core.models import RecordData, Text
@@ -234,12 +234,28 @@ Record = Annotated[
 
 
 class Shard(RecordData):
-    catalog_adoption_format: Literal[2]
+    format: Literal[2]
+
+    @field_validator("format", mode="before")
+    @classmethod
+    def _format(cls, value: object) -> object:
+        if type(value) is not int:
+            raise ValueError("Authored format must be an integer")
+        return value
+
     kind: Literal["catalog_adoption_shard"]
     records: Annotated[tuple[Record, ...], Field(min_length=1)]
 
 
 class DisplayShard(RecordData):
-    display_override_format: Literal[2]
+    format: Literal[2]
+
+    @field_validator("format", mode="before")
+    @classmethod
+    def _format(cls, value: object) -> object:
+        if type(value) is not int:
+            raise ValueError("Authored format must be an integer")
+        return value
+
     kind: Literal["display_override_shard"]
     records: Annotated[tuple[Record, ...], Field(min_length=1)]

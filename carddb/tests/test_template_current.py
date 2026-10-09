@@ -7,7 +7,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.contracts.template_parameters import Schema, Slot
-from sve_carddb.core.json import canonical, digest, object_value, parse
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.catalog.adoption_models import Batch
 from sve_carddb.domains.translations.parameters.analysis import (
     SAFE_INTEGER,
@@ -75,7 +75,7 @@ def make_case(tmp_path: Path) -> Case:
     rules = parse_rules(
         canonical(
             {
-                "parameter_rule_format": 2,
+                "format": 2,
                 "kind": "template_parameter_rules",
                 "rules": [
                     {
@@ -92,9 +92,19 @@ def make_case(tmp_path: Path) -> Case:
     generated = sources.generate((batch,))
     records = _records(generated)
     values: dict[str, JsonValue] = {
-        "translations/templates/current/001.yaml": records.model_dump(
-            mode="json", round_trip=True
-        ),
+        f"translations/templates/{area}/001.yaml": {
+            "format": 2,
+            "kind": "translation_shard",
+            "records": [
+                r.model_dump(mode="json", round_trip=True)
+                for r in records.records
+                if r.kind == kind
+            ],
+        }
+        for area, kind in (
+            ("definitions", "sentence_template"),
+            ("values", "template_translation"),
+        )
     }
     _write(root, values)
     revision = commit(root)
@@ -157,7 +167,7 @@ def _records(generated: Generated) -> Shard:
         note="待校對。",
     )
     return Shard(
-        translation_authored_format=2,
+        format=2,
         kind="translation_shard",
         records=tuple(sorted((target, translation), key=lambda r: r.record_key)),
     )
@@ -165,12 +175,7 @@ def _records(generated: Generated) -> Shard:
 
 def _write(root: Path, values: dict[str, JsonValue]) -> None:
     (root / "authored/translations/glossary").mkdir(parents=True, exist_ok=True)
-    index: dict[str, JsonValue] = {
-        "translation_authored_format": 2,
-        "kind": "translation_index",
-        "includes": {name: digest(canonical(value)) for name, value in values.items()},
-    }
-    for name, value in {"translations/index.yaml": index, **values}.items():
+    for name, value in values.items():
         path = root / "authored" / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(canonical(value))
@@ -190,16 +195,16 @@ def test_read_is_source_free_and_low_confidence_stays_active(
 
 
 def test_new_commit_can_edit_text_and_note_without_receipt(current_case: Case) -> None:
-    path = current_case.repository / "authored/translations/templates/current/001.yaml"
+    path = current_case.repository / "authored/translations/templates/values/001.yaml"
     records = list(
         shard(
             canonical(
                 {
-                    "translation_authored_format": 2,
+                    "format": 2,
                     "kind": "translation_shard",
                     "records": [
                         r.model_dump(mode="json", round_trip=True)
-                        for r in current_case.inputs.records
+                        for r in current_case.inputs.translations()
                     ],
                 }
             )
@@ -216,16 +221,8 @@ def test_new_commit_can_edit_text_and_note_without_receipt(current_case: Case) -
             "data": old.data.model_copy(update={"text": "Changed " + old.data.text}),
         }
     )
-    value = Shard(
-        translation_authored_format=2, kind="translation_shard", records=tuple(records)
-    )
+    value = Shard(format=2, kind="translation_shard", records=tuple(records))
     path.write_bytes(canonical(value.model_dump(mode="json", round_trip=True)))
-    index_path = current_case.repository / "authored/translations/index.yaml"
-    index = object_value(parse(index_path.read_bytes()))
-    object_value(index["includes"])["translations/templates/current/001.yaml"] = digest(
-        path.read_bytes()
-    )
-    index_path.write_bytes(canonical(index))
     revision = commit(current_case.repository)
     inputs = read_templates(current_case.repository, revision)
     assert inputs.translations()[0].data.text.startswith("Changed ")
@@ -282,7 +279,7 @@ def test_closed_formats_refuse_receipts_and_unknown_switches() -> None:
         shard(
             canonical(
                 {
-                    "translation_authored_format": 2,
+                    "format": 2,
                     "kind": "translation_shard",
                     "records": [],
                     "decisions": [],
@@ -293,7 +290,7 @@ def test_closed_formats_refuse_receipts_and_unknown_switches() -> None:
         parse_rules(
             canonical(
                 {
-                    "parameter_rule_format": 2,
+                    "format": 2,
                     "kind": "template_parameter_rules",
                     "rules": [
                         {
@@ -310,7 +307,7 @@ def test_closed_formats_refuse_receipts_and_unknown_switches() -> None:
     rules = parse_rules(
         canonical(
             {
-                "parameter_rule_format": 2,
+                "format": 2,
                 "kind": "template_parameter_rules",
                 "rules": [],
             }
@@ -333,7 +330,7 @@ def current_rule_file(tmp_path: Path) -> Path:
     path.write_bytes(
         canonical(
             {
-                "parameter_rule_format": 2,
+                "format": 2,
                 "kind": "template_parameter_rules",
                 "rules": [],
             }
@@ -346,7 +343,7 @@ def current_rule_file(tmp_path: Path) -> Path:
 def test_current_rule_repository_below_symlink_is_readable(
     tmp_path: Path, current_rule_file: Path, ancestor: str
 ) -> None:
-    repository = current_rule_file.parents[2]
+    repository = current_rule_file.parents[3]
     linked = tmp_path / "linked"
     linked.symlink_to(
         repository.parent if ancestor == "parent" else repository,
@@ -357,12 +354,12 @@ def test_current_rule_repository_below_symlink_is_readable(
 
 
 @pytest.mark.parametrize(
-    "part", ["authored", "template-parameter-rules", "current.yaml"]
+    "part", ["authored", "translations", "parameter-rules", "current.yaml"]
 )
 def test_current_rule_internal_symlink_is_rejected(
     tmp_path: Path, current_rule_file: Path, part: str
 ) -> None:
-    repository = current_rule_file.parents[2]
+    repository = current_rule_file.parents[3]
     target = next(
         path
         for path in (current_rule_file, *current_rule_file.parents)

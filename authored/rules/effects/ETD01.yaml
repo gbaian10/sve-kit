@@ -1,0 +1,71 @@
+format: 1
+kind: effect_set
+cards:
+  ETD01-011:
+    status: complete
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self
+              power: 1
+            - op: damage
+              subjects: opponent.leader
+              amount: 1
+        event: targeted
+        subject: self
+        trigger_if:
+          read: self.is_active
+        limit: 1
+        limit_at: trigger
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: self.pp.max
+              - 7
+          then:
+            op: create
+            name: ドラゴウェポン
+            count: 1
+            to: field
+        event: enter
+        subject: self
+  ETD01-013:
+    status: complete
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: draw
+              count: 1
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    side: self
+                    zone: hand
+                  by: self
+                  min: 1
+                  max: 1
+                  bind: discarded
+                - op: discard
+                  subjects: discarded
+        event: enter
+        subject: self

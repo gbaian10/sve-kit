@@ -1,7 +1,7 @@
 # Independent rules prototype
 
 Card facts come from the versioned card database snapshot. Effects come from
-`authored/effects/`, validated against `dsl/effects.schema.json` before and after
+`authored/rules/effects/`, validated against `dsl/effects.schema.json` before and after
 macro expansion. Missing and partial programs are rejected. Some declared
 semantics are not executable yet; see
 [docs/sim/engine-status.md](../../docs/sim/engine-status.md).
@@ -65,7 +65,13 @@ each legal parameter combination, and resolution events follow effect completion
 and removal from the resolution zone. Remaining engine errors and open questions
 are tracked in [docs/sim/known-errors.md](../../docs/sim/known-errors.md).
 
-`Catalog::load` reads `authored/engine-rules/index.yaml` and verifies its exact
+Effect documents use `format: 1, kind: effect_set`; keywords use
+`format: 1, kind: keyword_registry`, selecting the astra/1 prototype grammar.
+The private background records each document kind/format and validation Schema
+`schema_id`. This migration rebuilds authored/settings/schema fingerprints and
+does not accept former backgrounds or replay fingerprints.
+
+`Catalog::load` reads `authored/rules/engine/index.yaml` and verifies its exact
 snapshot SHA-256. Its default identity boundary is explicitly `legacy-jp`.
 `Catalog::load_with_identity` and `Catalog::from_documents_with_rules` accept an
 explicit `EngineIdentityInput`; the latter uses only the supplied bytes. A

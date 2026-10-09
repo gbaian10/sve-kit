@@ -12,7 +12,7 @@ from sve_carddb.core.regions import SourceRegion
 from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import seal_batch
 
-from .adoption_fixtures import REPO, commit, index, make_case
+from .adoption_fixtures import REPO, commit, make_case
 from .catalog_vocabulary_fixtures import RUNTIME, VocabularyCase
 from .test_source_archive import _put, _resource, _store
 
@@ -129,9 +129,8 @@ def trait_baseline(tmp_path_factory: pytest.TempPathFactory) -> TraitCase:
         "context": context.model_dump(mode="json"),
         "source_batches": [{"batch_id": batch.batch_id}],
     }
-    shutil.rmtree(case.root / "catalog-adoptions/aliases")
-    shutil.rmtree(case.root / "catalog-adoptions/symbols")
-    index(case.root)
+    shutil.rmtree(case.root / "catalog/adoptions/aliases")
+    shutil.rmtree(case.root / "catalog/adoptions/symbols")
     return TraitCase(
         VocabularyCase(replace(case, review=review), store.root, {}),
         versions,

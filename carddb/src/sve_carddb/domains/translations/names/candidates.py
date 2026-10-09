@@ -106,7 +106,7 @@ def prepare(  # ruff: ignore[complex-structure] -- independent permanent key, ex
         )
         for start in range(0, len(selected), 24):
             shard = Shard(
-                translation_authored_format=2,
+                format=2,
                 kind="translation_shard",
                 records=tuple(selected[start : start + 24]),
             )

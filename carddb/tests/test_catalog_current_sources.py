@@ -50,7 +50,7 @@ RUNTIME = (
     "carddb/src/sve_carddb/domains/registry/review.py",
     "carddb/src/sve_carddb/core/json.py",
 )
-VOCABULARY = "catalog-adoptions/vocabulary/shared/001.yaml"
+VOCABULARY = "catalog/adoptions/vocabulary/001.yaml"
 IMAGE_RAW = b"Invented image evidence bytes"
 IMAGE_URL = "https://shadowverse-evolve.com/synthetic/image.png"
 
@@ -79,10 +79,6 @@ class PageCase:
 
 def save(case: PageCase, path: str, payload: JsonValue) -> PageCase:
     write(case.case.root, path, payload)
-    index_path = "catalog-adoptions/index.yaml"
-    index = object_value(read_yaml(case.case.root / index_path))
-    object_value(index["includes"])[path] = digest(canonical(payload))
-    write(case.case.root, index_path, index)
     return replace(case, case=replace(case.case, revision=commit(case.case.repository)))
 
 
@@ -176,7 +172,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> PageCase:
         current,
         VOCABULARY,
         {
-            "catalog_adoption_format": 2,
+            "format": 2,
             "kind": "catalog_adoption_shard",
             "records": rows,
         },

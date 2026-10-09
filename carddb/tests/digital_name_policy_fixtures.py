@@ -15,8 +15,6 @@ from sve_carddb.domains.registry.storage import read_yaml
 from .adoption_fixtures import REPO, commit, git
 from .digital_link_import_fixtures import Fixture, catalogue_fixture, make_fixture
 
-INDEX = "digital-name-policies/index.yaml"
-
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -28,30 +26,20 @@ LINKS = "digital-name-links-v1"
 
 def current(root: Path, identifier: str) -> dict[str, JsonValue]:
     return object_value(
-        read_yaml(root / "authored/digital-name-policies" / identifier / "current.yaml")
+        read_yaml(
+            root
+            / "authored/digital/policies"
+            / ("names.yaml" if identifier == NAMES else "links.yaml")
+        )
     )
 
 
 def rewrite(root: Path, identifier: str, document: dict[str, JsonValue]) -> None:
-    """Write one current policy and its index entry, as an editor would."""
-    base = root / "authored/digital-name-policies" / identifier
+    """Edit one purpose-bound policy without changing its permanent policy ID."""
+    base = root / "authored/digital/policies"
     base.mkdir(parents=True, exist_ok=True)
-    (base / "current.yaml").write_bytes(canonical(document))
-    index_path = root / "authored" / INDEX
-    index: dict[str, JsonValue] = (
-        object_value(read_yaml(index_path))
-        if index_path.exists()
-        else {
-            "digital_name_policy_index_format": 2,
-            "kind": "digital_name_policy_index",
-            "policies": {},
-        }
-    )
-    object_value(index["policies"])[identifier] = {
-        "path": f"digital-name-policies/{identifier}/current.yaml",
-        "hash": digest(canonical(document)),
-    }
-    index_path.write_bytes(canonical(index))
+    name = "names.yaml" if identifier == NAMES else "links.yaml"
+    (base / name).write_bytes(canonical(document))
 
 
 def copy_policies(root: Path, batches: list[JsonValue] | None = None) -> None:
@@ -59,7 +47,7 @@ def copy_policies(root: Path, batches: list[JsonValue] | None = None) -> None:
         root,
         LINKS,
         {
-            "digital_name_policy_format": 2,
+            "format": 2,
             "kind": "digital_name_policy",
             "policy_id": LINKS,
             "purpose": "links",

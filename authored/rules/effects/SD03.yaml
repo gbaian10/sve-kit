@@ -1,0 +1,16 @@
+format: 1
+kind: effect_set
+cards:
+  SD03-005:
+    status: complete
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: draw
+          count: 1
