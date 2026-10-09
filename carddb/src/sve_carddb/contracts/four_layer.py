@@ -334,10 +334,31 @@ Owner = Annotated[
 ]
 
 
-class OccurrenceKey(RecordData):
+class OwnerField(RecordData):
     owner: Owner
     field: Code
     ordinal: UInt | None
+
+    @model_validator(mode="after")
+    def _field(self) -> Self:
+        fields = {
+            "face_revision": {"name", "effect", "section"},
+            "printing_face": {"name", "effect", "flavor", "section"},
+            "qa_version": {"question", "answer"},
+            "cr_clause": {"effect"},
+            "vocabulary": {"label"},
+            "product": {"label"},
+            "product_family": {"label"},
+            "keyword": {"label", "effect", "action_label"},
+        }
+        if self.field not in fields[self.owner.kind]:
+            raise ValueError("Source field is not legal for this owner kind")
+        if (self.field in {"section", "action_label"}) != (self.ordinal is not None):
+            raise ValueError("Source field and ordinal disagree")
+        return self
+
+
+class OccurrenceKey(OwnerField):
     source_hash: Hash
     line_ordinal: UInt
     role: Role

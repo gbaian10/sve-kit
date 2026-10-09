@@ -13,7 +13,7 @@ from sve_carddb.contracts.four_layer import (
     Hash,
     Id,
     OccurrenceKey,
-    Owner,
+    OwnerField,
     QuantityExpr,
     QuantitySpec,
     Reference,
@@ -62,32 +62,15 @@ class SourceReference(RecordData):
     text_hash: Hash
 
 
-class SourceDescriptor(RecordData):
-    owner: Owner
-    field: Code
-    ordinal: UInt | None
+class SourceDescriptor(OwnerField):
     source_unit_id: Id
     source_hash: Hash
     source_ref: SourceReference
 
     @model_validator(mode="after")
     def _linked(self) -> Self:
-        if (self.field in {"section", "action_label"}) != (self.ordinal is not None):
-            raise ValueError("Source field and ordinal disagree")
         if self.source_ref.text_hash != self.source_hash:
             raise ValueError("Source reference hash differs from exact field")
-        fields = {
-            "face_revision": {"name", "effect", "section"},
-            "printing_face": {"name", "effect", "flavor", "section"},
-            "qa_version": {"question", "answer"},
-            "cr_clause": {"effect"},
-            "vocabulary": {"label"},
-            "product": {"label"},
-            "product_family": {"label"},
-            "keyword": {"label", "effect", "action_label"},
-        }
-        if self.field not in fields[self.owner.kind]:
-            raise ValueError("Source field is not legal for this owner kind")
         return self
 
     def verify(self, expected: SourceDescriptor, raw: str) -> None:
@@ -372,7 +355,9 @@ def _verify_occurrences(
     values: Mapping[str, TypedValue],
 ) -> None:
     order = tuple(
-        (o.raw_spans[0].start if o.raw_spans else -1, o.slot) for o in occurrences
+        (o.raw_spans[0].start, o.slot)
+        for o in occurrences
+        if o.source_presence == "explicit"
     )
     if order != tuple(sorted(order)):
         raise ValueError("Leaf occurrences must follow raw source order and slot")

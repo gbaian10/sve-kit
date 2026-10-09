@@ -552,6 +552,39 @@ def test_binding_archive_labels_preserve_identity_but_owner_is_not_interchangeab
         binding.source.verify(binding.source, raw.replace("２", "2"))
 
 
+def test_same_leaf_retains_explicit_and_resolved_omitted_occurrences() -> None:
+    definition, binding, _, _ = binding_sample()
+    data = binding.model_dump(mode="json")
+    explicit = object_value(array(data["occurrences"])[0])
+    data["occurrences"] = [
+        explicit,
+        {
+            "slot": "n",
+            "ordinal": 1,
+            "raw_spans": [],
+            "canonical_spans": [],
+            "source_unit": None,
+            "source_presence": "omitted",
+            "resolution_rule": "fixture.antecedent.v1",
+        },
+    ]
+    mixed = SourceBinding.model_validate_json(canonical(data))
+    mixed = mixed.model_copy(update={"id": "bind:" + hash_payload(mixed.payload())})
+    mixed.verify(definition)
+    assert mixed.values == {"n": 2}
+    assert [o.source_presence for o in mixed.occurrences] == ["explicit", "omitted"]
+    assert (
+        mixed.occurrences[0].canonical_spans
+        == definition.leaf_schema.slots[0].occurrences
+    )
+
+    data = mixed.model_dump(mode="json")
+    object_value(array(data["occurrences"])[1])["resolution_rule"] = None
+    unknown = SourceBinding.model_validate_json(canonical(data))
+    with pytest.raises(ValueError, match="named resolution rule"):
+        unknown.verify(definition)
+
+
 def test_binding_rejects_missing_leaf_value_and_lost_occurrence() -> None:
     definition, binding, _, _ = binding_sample()
     mutations: tuple[tuple[dict[str, JsonValue], str], ...] = (
