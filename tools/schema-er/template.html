@@ -764,7 +764,7 @@ function renderPanel() {
       <p>點一張表看完整欄位、約束與引用關係。欄位右側帶虛框的琥珀色標籤是跨分組的 FK，點了會跳到目標表所在的分組。</p>
       <p>拖曳平移、滾輪或雙指縮放。<kbd>/</kbd> 搜尋，<kbd>Esc</kbd> 取消選取，<kbd>Tab</kbd> 可在表之間移動、<kbd>Enter</kbd> 選取。</p>
       <p>連線樣式：灰色實線是欄位宣告的 FK（虛線為可空）、紫色是約束 <code>FK(...)</code> 宣告的 FK（粗線為複合約束，欄位旁的 FK1、FK2… 標出成員欄）、綠色點線是依 <code>*_id</code> 欄名推斷的引用（快照層沒有 FK 記號，內嵌物件裡的 ID 也畫成點線）。</p>
-      <p>快照層未註明 PK 的集合以首欄 <code>id</code> 為主鍵（依 snapshot-format.md）。</p></div>`;
+      <p>快照層未註明 PK 的集合以首欄 <code>id</code> 為主鍵（依 export/snapshot-format.md）。</p></div>`;
     return;
   }
   const L = S.layer, ix = IDX[L];

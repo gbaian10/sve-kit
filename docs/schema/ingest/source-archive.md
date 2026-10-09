@@ -1,6 +1,6 @@
 # 不可變來源歸檔與凍結輸入
 
-本文件定義建置與萃取的持久輸入；[build-db.md](build-db.md) 的 source_record 是其建置投影，不是歷史來源的唯一保存處。原始來源包含 HTML、PDF、API JSON、卡圖 PNG，以及本批實際使用的其他來源 bytes。公開快照與原始來源各自保留：前者依 [有限保留契約](snapshot-format.md#41-發布窗口圖片新鮮度與回收) 供當前查詢／更新過渡、不承諾歷史回放，後者仍永久保存以供重新解析、查核與重建，不能互相取代。
+本文件定義建置與萃取的持久輸入；[build-db.md](../build/build-db.md) 的 source_record 是其建置投影，不是歷史來源的唯一保存處。原始來源包含 HTML、PDF、API JSON、卡圖 PNG，以及本批實際使用的其他來源 bytes。公開快照與原始來源各自保留：前者依 [有限保留契約](../export/snapshot-format.md#41-發布窗口圖片新鮮度與回收) 供當前查詢／更新過渡、不承諾歷史回放，後者仍永久保存以供重新解析、查核與重建，不能互相取代。
 
 ## 1. 保存邊界
 
@@ -16,7 +16,7 @@
 
 ## 2. 內容、來源版本與 inventory
 
-以下 JSON 記錄採 [build-db.md §14 的 canonical-json-v1](build-db.md#14-不可變雜湊僅建置)，Hash 為 `sha256:` 加完整 64 小寫 hex；接入既有 manifest 的裸 hex 時只加前綴，不重新定義 hash。raw hash 是 HTTP client 交給 Writer 的 body bytes、解開本機 zstd 後的 exact bytes；不做文字正規化，不把本機壓縮檔 hash、registry-observation-v2 或語義 bundle hash 混用。圖片 hash 是原始圖片檔 bytes，不能改算解碼後像素。registry-observation-v2 是現行 parser 的明確領域投影加 core canonical，升版不更改 raw bytes、source_version_id 或官方 raw parser pins。
+以下 JSON 記錄採 [build-db.md §14 的 canonical-json-v1](../build/build-db.md#14-不可變雜湊僅建置)，Hash 為 `sha256:` 加完整 64 小寫 hex；接入既有 manifest 的裸 hex 時只加前綴，不重新定義 hash。raw hash 是 HTTP client 交給 Writer 的 body bytes、解開本機 zstd 後的 exact bytes；不做文字正規化，不把本機壓縮檔 hash、registry-observation-v2 或語義 bundle hash 混用。圖片 hash 是原始圖片檔 bytes，不能改算解碼後像素。registry-observation-v2 是現行 parser 的明確領域投影加 core canonical，升版不更改 raw bytes、source_version_id 或官方 raw parser pins。
 
 | 記錄／鍵 | 定義 |
 | --- | --- |
@@ -78,7 +78,7 @@ profile 版號與文件 format 版號獨立，例如 #476 後 catalog 文件可�
 
 #### 2.2.1 建置輸入紀錄
 
-模板來源清冊依[清冊契約](template-source-replay.md)每次建置用本次程式及指定來源產生。
+模板來源清冊依[清冊契約](../domains/template-source-replay.md)每次建置用本次程式及指定來源產生。
 建置輸入紀錄為 `input_format: 1`，包含 `context` 與排序唯一的實際 `uses`，採 canonical-json-v1。
 它是本次輸入摘要，不作逐欄 expected 使用閉包的驗收證明；不含卡片效果文或私人絕對路徑。
 
@@ -137,7 +137,7 @@ Writer 的檔案替換與 SQLite transaction 不是同一原子交易：既有�
 
 ## 5. 只讀重建與缺失歷史
 
-模板來源清冊依[清冊契約](template-source-replay.md)每次建置重新產生，不保存也不比對歷史輸出；
+模板來源清冊依[清冊契約](../domains/template-source-replay.md)每次建置重新產生，不保存也不比對歷史輸出；
 每次仍驗本節 sealed/raw 閉包，不借私人審核頁面的免重讀例外略過來源。
 只用一個 BuildContext／F1，實際 program_revision、完整程式／lock 如實記當次執行 H；
 逐群組保留歷史 producer R、凍結版本／manifest pins、context、預期／實際結果與實際環境差異。
@@ -185,11 +185,11 @@ raw 歷史 logical bytes 為 `Σ(size(hash))`，只加總所有保留版本引�
 
 ## 人工版次的 URL-only 參考邊界
 
-[manual-printings-v1](manual-printings.md#4-來源類別日期與取得方式) 的 third_party_url 只保存第三方店家 URL、人工定位與查核收據，沒有消費第三方 raw，不產 source_version／receipt 或 ArchiveSourceUse。其 printing_reference.source_id 指完整 authored 封套，source_record.sha256 是該分片 exact bytes，不能以 H(URL) 或 canonical 記錄 hash 假裝第三方頁面 raw hash。此例外不適用官方來源、圖像鏡像、人工商品 evidence 或構築證據；已使用官方 raw 仍必驗歸檔完整閉包，完整 authored index／分片仍釘不可變 revision／bytes hash。URL-only 不能宣稱第三方內容可重播或仍為現行。
+[manual-printings-v1](../domains/manual-printings.md#4-來源類別日期與取得方式) 的 third_party_url 只保存第三方店家 URL、人工定位與查核收據，沒有消費第三方 raw，不產 source_version／receipt 或 ArchiveSourceUse。其 printing_reference.source_id 指完整 authored 封套，source_record.sha256 是該分片 exact bytes，不能以 H(URL) 或 canonical 記錄 hash 假裝第三方頁面 raw hash。此例外不適用官方來源、圖像鏡像、人工商品 evidence 或構築證據；已使用官方 raw 仍必驗歸檔完整閉包，完整 authored index／分片仍釘不可變 revision／bytes hash。URL-only 不能宣稱第三方內容可重播或仍為現行。
 
 ## 7. 已取得規則原檔的離線登錄
 
-一次性取得、已有 URL／HTTP metadata／時間／內容 hash 的官方 HTML／PDF，依 [構築採納 §2](construction-adoption.md#2-一次性抓回原檔如何正式登錄與釘版) 及 [carddb 離線登錄入口](../../carddb/src/sve_carddb/ingest/archive/source_import/README.md) 登錄：原 index／raw 唯讀驗證，在全新隔離 manifest 保存專用匯入收據，不開 live manifest、不造 HTTP fetch_log，再用本契約既有來源版本／inventory／seal 格式封存、備份與 restore-check。已實作的隔離格式使用 PRAGMA user_version=2，inventory 記同版號；v2 完整 schema 獨立凍結，reader 分版本驗完整表／欄位／約束、Resource 與收據閉包，不能只新增表卻仍宣稱版本 1。僅支援版本 1 的舊 reader 必須拒絕版本 2；現行 reader 支援版本 1／2，live writer 仍只寫版本 1 並拒絕版本 2，不自動升 live 或已封存批次。未壓縮來源用實際 raw／stored bytes 與 `.html`／`.pdf` path，不假用 `.zst`；缺 metadata 不補造。
+一次性取得、已有 URL／HTTP metadata／時間／內容 hash 的官方 HTML／PDF，依 [構築採納 §2](../domains/construction-adoption.md#2-一次性抓回原檔如何正式登錄與釘版) 及 [carddb 離線登錄入口](../../../carddb/src/sve_carddb/ingest/archive/source_import/README.md) 登錄：原 index／raw 唯讀驗證，在全新隔離 manifest 保存專用匯入收據，不開 live manifest、不造 HTTP fetch_log，再用本契約既有來源版本／inventory／seal 格式封存、備份與 restore-check。已實作的隔離格式使用 PRAGMA user_version=2，inventory 記同版號；v2 完整 schema 獨立凍結，reader 分版本驗完整表／欄位／約束、Resource 與收據閉包，不能只新增表卻仍宣稱版本 1。僅支援版本 1 的舊 reader 必須拒絕版本 2；現行 reader 支援版本 1／2，live writer 仍只寫版本 1 並拒絕版本 2，不自動升 live 或已封存批次。未壓縮來源用實際 raw／stored bytes 與 `.html`／`.pdf` path，不假用 `.zst`；缺 metadata 不補造。
 
 登錄收據由隔離 manifest 的 backup hash 納入 metadata 閉包；不能手工補一個未被釘住的旁檔冒充完成。seal＋獨立備份＋restore-check 後，已引用的 DB 副本／收據／raw 永久保留，工作副本也不自動清理；未引用工作檔的回收須另行核對全部引用與授權。正式批次／政策核對採納完成前，研究樣本或成功抓取 log 均不能成為構築 SourceUse。入口落後公告或沒有個別公告連結，只影響知識覆蓋，不影響原檔的不可變留存；seal 成功不等於 restriction_coverage=complete。
 

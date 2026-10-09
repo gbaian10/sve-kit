@@ -4,7 +4,7 @@
 
 前端使用 **Workers 靜態資源**，建置與部署為 Vite build → Wrangler deploy。
 本清單由維護者親手操作；agent、CI 不取得 Cloudflare 憑證，不執行真實部署或上傳。
-資料契約見 [preview 建置與接線](../schema/preview-handoff.md)。
+資料契約見 [preview 建置與接線](../schema/export/preview-handoff.md)。
 
 第 5 節配置已查核官方文件並以 Wrangler 離線打包驗證，未部署；其餘維護者提供
 官方依據的內容標為「依官方文件，未實測」。控制台、Access／網域／預覽與 R2 平台行為仍為

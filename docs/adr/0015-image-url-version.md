@@ -24,8 +24,8 @@ media 同時提供狀態與實際尺寸，取得一層局部 metadata 即可組�
 舊快照帶舊 v 冷讀取得新圖可接受；同 key 不保存歷史 bytes。多尺寸覆寫不原子，必須全組完成才發布新快照。
 browser src／srcset、CDN 及 SW cache key 都須區分 v；接受新版後禁止舊圖 fallback，失敗明示。
 CDN purge 不會清掉 browser／SW，因此不能代替版本切換；JSON 的內容定址與 hash 驗證仍保留。
-精確欄位、版本、發布與失敗恢復見 [snapshot-format](../schema/snapshot-format.md#21-獨立影像清單與-dsl-附件)、
-[image-variants](../schema/image-variants.md#20-圖片-url版本與新鮮度) 及 [snapshot-transport §5.4](../schema/snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)。
+精確欄位、版本、發布與失敗恢復見 [snapshot-format](../schema/export/snapshot-format.md#21-獨立影像清單與-dsl-附件)、
+[image-variants](../schema/images/image-variants.md#20-圖片-url版本與新鮮度) 及 [snapshot-transport §5.4](../schema/export/snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)。
 
 2026-10-04 的 R2 自訂網域合成圖實測已通過 query 分離：普通 GET 暖 v1 後覆寫同 key，未 purge、未 bypass，
 v1 HIT 舊內容，v2 MISS 新內容後 HIT 新內容。這只證明所測 CDN 設定；browser／SW 與發布整合須另驗。

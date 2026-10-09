@@ -4,7 +4,7 @@
 介面、路由與渲染設計屬專案內容。見[文件引用說明](../quotations.md)。
 
 版本：**v1**，2026-09-28 定案。用語依 [`docs/terminology.md`](../terminology.md)；
-資料契約以 [`docs/schema/snapshot-format.md`](../schema/snapshot-format.md) 為準。
+資料契約以 [`docs/schema/export/snapshot-format.md`](../schema/export/snapshot-format.md) 為準。
 共用尺寸見 §7、§8；色彩值見進版控的 [`tokens.css`](../../sim/web/src/styles/tokens.css)。各畫面完整間距與尺寸規格：待補。
 
 `sim/web` 是查卡、建牌、對戰共用的前端（`AGENTS.md`）。本文涵蓋查卡需要的架構；建牌與對戰只預留接點。
@@ -297,7 +297,7 @@ idle → loading(version-index) → loading(manifest) → loading(bootstrap) →
 
 ## 快照 2.0 與圖片更新邊界
 
-既有 format-v1／版本 pages 接線是 1.x 實作描述；2.0 須依 [傳輸契約 §5.4](../schema/snapshot-transport.md#54-format-200-卡包-media-與-id-圖片) 同步新 accessor 與 Index v2，不能只放寬版本範圍。
+既有 format-v1／版本 pages 接線是 1.x 實作描述；2.0 須依 [傳輸契約 §5.4](../schema/export/snapshot-transport.md#54-format-200-卡包-media-與-id-圖片) 同步新 accessor 與 Index v2，不能只放寬版本範圍。
 卡包 media 提供 card／art 版本與實際尺寸，int_id＋永久 face.ordinal＋size 直接組背景圖片 URL；玩家頁面路由不變。
 切新快照時更新 src／srcset、取消舊工作、拒絕晚到舊 response；SW 以完整含 v URL 匹配，不忽略 query 或回退舊圖。
 新圖未完成／失敗用 placeholder；離線舊 active 明示時效，不宣稱圖片最新。

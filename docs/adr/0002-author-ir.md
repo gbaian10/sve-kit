@@ -21,7 +21,7 @@ create 列表表示每個名稱各 n，either 表示結算時擇一，choice 表
 
 ### YAML 解析邊界
 
-2026-10-05（#318）：`carddb` authored 讀取採 `yamlrocks==0.6.1`，評估的完整讀取中位數由 4.47 秒降至 1.52 秒，700 份原先可讀檔案的 canonical 全同；純量採套件語意，不保留 libyaml 字元禁令或舊 resolver 相容層。Anchor／alias／merge 與顯式 tag 讀取允許、寫入不產生，套件展開正常 alias 並拒絕循環，保留 UTF-8／大小／單文件／1.2 版本指示／重複鍵／非字串鍵／非有限數防線及讀後 strict JSON／canonical，寫出仍用 ruamel；詳 [authored 格式 §1](../schema/authored-layout.md#1-路徑與共同格式)。其他既有 Python DSL 工具的 ruamel safe 路線不在本次替換範圍，日期與 `on`／`yes` 等仍以必要邊界案例驗證，不以解析成功代替構造與型別檢查。
+2026-10-05（#318）：`carddb` authored 讀取採 `yamlrocks==0.6.1`，評估的完整讀取中位數由 4.47 秒降至 1.52 秒，700 份原先可讀檔案的 canonical 全同；純量採套件語意，不保留 libyaml 字元禁令或舊 resolver 相容層。Anchor／alias／merge 與顯式 tag 讀取允許、寫入不產生，套件展開正常 alias 並拒絕循環，保留 UTF-8／大小／單文件／1.2 版本指示／重複鍵／非字串鍵／非有限數防線及讀後 strict JSON／canonical，寫出仍用 ruamel；詳 [authored 格式 §1](../schema/domains/authored-layout.md#1-路徑與共同格式)。其他既有 Python DSL 工具的 ruamel safe 路線不在本次替換範圍，日期與 `on`／`yes` 等仍以必要邊界案例驗證，不以解析成功代替構造與型別檢查。
 
 Rust 選 **saphyr** 作 1.2 解析前端：官方文件明列 YAML 1.2 與 core schema scalar 支援；載入邊界仍須自行拒絕非字串鍵、未知 tag／BadValue、舊版本及重複鍵，不能把函式庫支援格式等同 DSL 合法。本 ADR 只定選型、不新增 Cargo 依賴；接入時釘實際版本並在建 map 前驗證事件／節點，跑與 Python 相同的金絲雀及負例。未完成前不得宣告 Rust 載入器通過。[saphyr 官方文件](https://docs.rs/saphyr/0.1.0/saphyr/)
 

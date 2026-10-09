@@ -14,7 +14,7 @@ report card data, mapping, translation or rule problems, or suggest features.
 You do not need to write code, and any language is welcome. Include the card
 number, region and official source URL where relevant.
 
-For data contribution formats, see [authored layout](docs/schema/authored-layout.md).
+For data contribution formats, see [authored layout](docs/schema/domains/authored-layout.md).
 
 ## Contribution licenses and sources
 

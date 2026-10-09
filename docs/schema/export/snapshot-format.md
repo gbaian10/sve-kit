@@ -1,11 +1,11 @@
 # 卡表快照格式 v2
 
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
-專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../quotations.md)。
+專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../../quotations.md)。
 
-卡表快照是由[建置資料庫](build-db.md)投影出的精簡契約。表名相同不代表欄位相同；本文件是出貨欄位白名單。精確 JSON 形狀、欄序、版本及分片規則見 [傳輸契約](snapshot-transport.md)。沒有指定的建置資料庫欄位不出貨，尤其 decision、`source_record`、逐列 hash、翻譯依賴、載入/考題報告與巨集。保留玩家可見的來源 URL、Q&A/CR 引文、印刷歷史、更正原值，不提供建置稽核包。
+卡表快照是由[建置資料庫](../build/build-db.md)投影出的精簡契約。表名相同不代表欄位相同；本文件是出貨欄位白名單。精確 JSON 形狀、欄序、版本及分片規則見 [傳輸契約](snapshot-transport.md)。沒有指定的建置資料庫欄位不出貨，尤其 decision、`source_record`、逐列 hash、翻譯依賴、載入/考題報告與巨集。保留玩家可見的來源 URL、Q&A/CR 引文、印刷歷史、更正原值，不提供建置稽核包。
 
-本文件的 2.0.0 圖片與有限保留契約依 [ADR-0015](../adr/0015-image-url-version.md)／[ADR-0016](../adr/0016-snapshot-retention.md)。1.x 已退役，不保留相容讀寫。
+本文件的 2.0.0 圖片與有限保留契約依 [ADR-0015](../../adr/0015-image-url-version.md)／[ADR-0016](../../adr/0016-snapshot-retention.md)。1.x 已退役，不保留相容讀寫。
 
 ## 1. 快照清單（manifest）、版本與容器
 
@@ -17,9 +17,9 @@
 
 巢狀的 RegionView/PrintingFace/Section/FieldTranslation/Correction/Support 等記錄同樣用 tuple，types 以具名型別→columns 順序及引用型別描述（固定於 format）供載入器驗列長度；producer 以本文件的具名型別作型別名。`parameter_schema/corrected_from` 等值保持受限 JSON，不轉成位置陣列，值域依 [傳輸契約 §3.2–3.3](snapshot-transport.md#32-公開參數宣告)。純 ID/code 陣列亦保持原樣。每個分片只附用到的 types，producer 驗其與 format 定義一致；consumer 不執行資料提供的轉換程式。
 
-reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；啟動包轉 typed 索引後釋放原 tuples，只在畫面當前項目建立 view，不能全量展開成物件再多存一份。這項編碼主要節省未壓縮傳輸/快取大小；原型量測顯示 heap 並未因此降低，記憶體要靠 §3 的逐片解析/淘汰。每表按穩定主鍵排序、集合陣列按 ID/code 排序、有序段落保留 ordinal。payload 不含 `data_version/published_at`，未變內容跨版 bytes/hash 完全相同。完整文字包是同一分片 payload 的容器聯集，不能另做另一套 carddb。公共永久 ID 保持不透明字串；text ID 固定為 `t:{lang}:{sha256(exact UTF-8 text)[:16]}`，同一份快照內同鍵不同內容即停止匯出，不能重配舊鍵或自動加長，快照不附完整 hash。不另保存跨版本的已發布文字鍵索引（[ADR-0020](../adr/0020-upload-from-export.md)）。
+reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；啟動包轉 typed 索引後釋放原 tuples，只在畫面當前項目建立 view，不能全量展開成物件再多存一份。這項編碼主要節省未壓縮傳輸/快取大小；原型量測顯示 heap 並未因此降低，記憶體要靠 §3 的逐片解析/淘汰。每表按穩定主鍵排序、集合陣列按 ID/code 排序、有序段落保留 ordinal。payload 不含 `data_version/published_at`，未變內容跨版 bytes/hash 完全相同。完整文字包是同一分片 payload 的容器聯集，不能另做另一套 carddb。公共永久 ID 保持不透明字串；text ID 固定為 `t:{lang}:{sha256(exact UTF-8 text)[:16]}`，同一份快照內同鍵不同內容即停止匯出，不能重配舊鍵或自動加長，快照不附完整 hash。不另保存跨版本的已發布文字鍵索引（[ADR-0020](../../adr/0020-upload-from-export.md)）。
 
-下面列出的欄位全部存在，`?` 表示可 null，不表示任意省略。內嵌同型陣列可以空；未知與空的規則在 [build-db.md](build-db.md) 定義。顯示 label 參照 `text_unit`，介面通用提示留 app i18n。枚舉值與型別沿建置資料庫同名定義，投影新增型別於下節明列；不可帶出建置資料庫未列欄位。
+下面列出的欄位全部存在，`?` 表示可 null，不表示任意省略。內嵌同型陣列可以空；未知與空的規則在 [build-db.md](../build/build-db.md) 定義。顯示 label 參照 `text_unit`，介面通用提示留 app i18n。枚舉值與型別沿建置資料庫同名定義，投影新增型別於下節明列；不可帶出建置資料庫未列欄位。
 
 職業／卡種正式採納不改欄位或格式版本，但公開資料內容會變：class_code／type_code 由暫碼變正式代碼、special_kinds 開始有值、公開 vocabulary 新增 special_kind 類別；資料版本須更新。producer／reader 的引用閉包驗證須涵蓋 vocabulary(kind=special_kind)，不能把新標記當成 type 或忽略未定義引用。
 
@@ -112,7 +112,7 @@ approved 且 available 時 card_version／art_version 均非 null、恰有五檔
 int_id 讀 printing 的永久配號，不能由卡號或號段推 region；image_id 只供來源／詳情 join。
 card_s／m／l 取 card_version，art_s／m 取 art_version；ID、ordinal、版本皆用無前導零的十進位整數。
 query 由 reader 附加，不寫入 File.path；背景資源 URL 與玩家卡片頁路由分開。
-版本配發、產製／覆寫及新鮮度規則見 [卡圖衍生檔契約](image-variants.md)。
+版本配發、產製／覆寫及新鮮度規則見 [卡圖衍生檔契約](../images/image-variants.md)。
 
 printing_image 唯一存於 printing.home_set 的 media 分片，取得文字啟動包及一層卡包 metadata 後即可組圖；
 image_asset／image_variant 是按需詳情，不再為顯圖預取全域影像表。裝檔與精確依賴見[傳輸契約 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)。
@@ -207,7 +207,7 @@ row delta 延後，以替換不可變 JSON 分片更新。未知 format／規則
 card images 依完整 URL（含 v）快取或供已選牌組離線使用；啟用新版時改用新版 v，不回退舊圖，下載失敗明示 placeholder。尚未連線取得新版者明示資料時效，不宣稱圖片最新；看過不等於所有圖片離線備妥；雙面兩張皆列，追加區只抓玩家實選。音檔與圖片各自狀態，不影響文字完成判定。不預抓隱藏對手的卡，也不把未實作提示洩漏其牌組。
 
 身分修復的永久 printing／int_id、卡片入口舊 URL 與 split 玩家選擇，沿 build-db §13／§15；快照保留僅依下述 §4.1，
-建置端的追加封套與公開事件映射另見 [身分修復契約 §6](identity-repair.md#6-公開事件墓碑與路由)。
+建置端的追加封套與公開事件映射另見 [身分修復契約 §6](../domains/identity-repair.md#6-公開事件墓碑與路由)。
 §2 表格列現行 2.0 的公開形狀；實作撤回時在原欄序尾端
 追加 reverts_id，identity_change 新增 kind=revert 與 required nullable reverts_id，
 一般事件填 null，撤回列指原公開事件並保留原 old/new／printing 欄位，不代表反向邊。
@@ -244,7 +244,7 @@ changes 是相鄰發布摘要，不是重建鏈。previous manifest 引用的 ch
 但其 from_data_version 只是批次識別，可指向已回收版本，不遞迴保留第三版。
 慢 client 遇到已回收分片須重讀索引並更新；不以無限延長保留期維持過時下載。
 本機引擎的確定性重播與來源重算仍可保留，均不構成公開歷史資料下載承諾。
-決策理由見 [ADR-0016](../adr/0016-snapshot-retention.md)。
+決策理由見 [ADR-0016](../../adr/0016-snapshot-retention.md)。
 
 ### 4.2 預覽快照
 
@@ -258,7 +258,7 @@ changes 是相鄰發布摘要，不是重建鏈。previous manifest 引用的 ch
 
 ## 5. 語言矩陣與取用
 
-**使用者已核可（2026-10-01）**：繁中以日文卡文為來源；日英身分已確認同卡一律用日文，只有兩區版本明顯不同或英文版獨有才用英文。同日追加核可：EN 同卡身分確認後先顯示 JP 繁中，文字未核對時標「日英文字尚未核對」，完成核對且適用後移除；公開以新增 basis 值 shared_jp_unchecked 區分。當前翻譯與選用依 [翻譯契約](translation-contract.md)。有效 selection／直接 owner 引用通過來源、context、語言與 owner 檢查即可出貨，machine 或低信心不排除；只有實際 FieldTranslation 引用的譯文及原文閉包出貨，未選候選與內部清冊不出貨。
+**使用者已核可（2026-10-01）**：繁中以日文卡文為來源；日英身分已確認同卡一律用日文，只有兩區版本明顯不同或英文版獨有才用英文。同日追加核可：EN 同卡身分確認後先顯示 JP 繁中，文字未核對時標「日英文字尚未核對」，完成核對且適用後移除；公開以新增 basis 值 shared_jp_unchecked 區分。當前翻譯與選用依 [翻譯契約](../domains/translation-contract.md)。有效 selection／直接 owner 引用通過來源、context、語言與 owner 檢查即可出貨，machine 或低信心不排除；只有實際 FieldTranslation 引用的譯文及原文閉包出貨，未選候選與內部清冊不出貨。
 
 機器與非官方來源仍須清楚標示；繁中可用「非官方翻譯」、機器另標「機器翻譯・非官方」，審過不改 origin。此呈現文字、low_confidence 的「待校對」及 basis=shared_jp_unchecked 的「日英文字尚未核對」各自獨立並存，不互相抵銷；不把未核對譯文改成 aligned，也不放行對戰自動能力。合法低信心選用仍計 translated，沒有選用才標缺譯並回原文；來源失效或錯誤引用不得用低信心替代拒絕。
 
@@ -292,9 +292,9 @@ changes 是內容定址的公開摘要 `{format_version,from_data_version,to_dat
 
 art.regions 由實際 `printing_face→printing.region` 唯一推導，`[en]` 顯示「目前收錄僅英版插畫」，不宣稱永不出日版。BP18-SP01 與 BP18-SP01EN 雖去尾碼相同仍是不同卡；Vania 必經人工連到 ヴァンピィ 的 card/face。精確 EN 原卡號保留，不能拿猜測後綴當已確認證據。
 
-`printing.int_id` 所有出貨列必填，發布後永久不改；依地區分段配發（[authored-layout.md](authored-layout.md) §3.2），但號段只是配號容量安排，地區一律讀 `printing.region`，不從號碼推算；解碼時一律查表取得版次，查無對應（含保留或未分配號段）即依下述未知 int 處理。`catalog_state/card_no_state/identity_state` 是獨立軸。`review_level=unreviewed/model_reviewed/sampled/confirmed`，由適用的 decision 推導，官方直抓未另審為 unreviewed，不把官方來源當人工確認。unlisted 才出已審可公開 `reference_urls`（至少一個）；official 為 []，一般來源圖網址另在影像清單。信心 `listing_confidence` 不等於 `review_level`。暫定號碼用 `/cards/_provisional/{int_id}`；官方 raw `card_no` 用 exact route；兩者改號 alias 分 namespace。非官方圖依 [build-db.md](build-db.md) §17 採 `mirror_reviewed`，目前只產生官方圖：卡表快照 printing_image 的 `publication_state` 為 pending/approved，待確認不能出 variant/path；來源 URL 保留在 image_asset。建牌准入採 `regional_decklog`：依 printing.region 與 `decklog_available` 判斷，provisional 卡號/身分不擋加入、分享或匯出。verified 必有 `decklog_source_url` 與 `decklog_checked_on`；unverified 的日期為 null，available 依 `catalog_state=official` 預設 true，unlisted 預設 false，來源 URL 可空且 UI 明示未查證。建置資料庫的來源 FK 投影成可公開來源網址，不出完整稽核紀錄。Decklog 證據覆蓋預設，日英不得互相套用。這四欄屬 printing 頂層啟動包主儲存，詳情分片不重複，邏輯欄位白名單必填 Bool 與 verification，nullable 來源/日期依上述約束。
+`printing.int_id` 所有出貨列必填，發布後永久不改；依地區分段配發（[authored-layout.md](../domains/authored-layout.md) §3.2），但號段只是配號容量安排，地區一律讀 `printing.region`，不從號碼推算；解碼時一律查表取得版次，查無對應（含保留或未分配號段）即依下述未知 int 處理。`catalog_state/card_no_state/identity_state` 是獨立軸。`review_level=unreviewed/model_reviewed/sampled/confirmed`，由適用的 decision 推導，官方直抓未另審為 unreviewed，不把官方來源當人工確認。unlisted 才出已審可公開 `reference_urls`（至少一個）；official 為 []，一般來源圖網址另在影像清單。信心 `listing_confidence` 不等於 `review_level`。暫定號碼用 `/cards/_provisional/{int_id}`；官方 raw `card_no` 用 exact route；兩者改號 alias 分 namespace。非官方圖依 [build-db.md](../build/build-db.md) §17 採 `mirror_reviewed`，目前只產生官方圖：卡表快照 printing_image 的 `publication_state` 為 pending/approved，待確認不能出 variant/path；來源 URL 保留在 image_asset。建牌准入採 `regional_decklog`：依 printing.region 與 `decklog_available` 判斷，provisional 卡號/身分不擋加入、分享或匯出。verified 必有 `decklog_source_url` 與 `decklog_checked_on`；unverified 的日期為 null，available 依 `catalog_state=official` 預設 true，unlisted 預設 false，來源 URL 可空且 UI 明示未查證。建置資料庫的來源 FK 投影成可公開來源網址，不出完整稽核紀錄。Decklog 證據覆蓋預設，日英不得互相套用。這四欄屬 printing 頂層啟動包主儲存，詳情分片不重複，邏輯欄位白名單必填 Bool 與 verification，nullable 來源/日期依上述約束。
 
-人工限量序號版次沿 [manual-printings-v1](manual-printings.md#5-重建freshness-與公開呈現)：未確認一般版對應者仍有 provisional card／face，印刷原文狀態 unknown，不以人工名稱造官方文字或 current。官方 PR（含 PR-442）照常顯示卡文。人工名稱／公開來源類別與查核日的欄位方案只在該契約列為待實作；本 PR 不改公開白名單或 printing 欄序，須後續機器契約審核與版本／能力協商再實作。
+人工限量序號版次沿 [manual-printings-v1](../domains/manual-printings.md#5-重建freshness-與公開呈現)：未確認一般版對應者仍有 provisional card／face，印刷原文狀態 unknown，不以人工名稱造官方文字或 current。官方 PR（含 PR-442）照常顯示卡文。人工名稱／公開來源類別與查核日的欄位方案只在該契約列為待實作；本 PR 不改公開白名單或 printing 欄序，須後續機器契約審核與版本／能力協商再實作。
 
 舊碼照常解碼，既有牌組照常開啟保留原 `int_id`/數量/區域/位置；目前 unavailable 顯示 `decklog_unavailable` 警告與可用同地區同名版次替換建議，不能自動換卡/丟行。所有區域禁止新加入 unavailable 版次；新的分享碼與任何牌組匯出拒絕整次操作，舊解碼及本機牌組開啟/編輯不受此拒絕。未知 int 顯示 `needs_update` 並保留，不能猜版次後輸出。反向恢復可用即可再加入/分享/匯出；其他牌組合法性另驗。永久 `int_id` 不因此移除。
 
@@ -332,11 +332,11 @@ Spelling 與 RulingHint 的參數宣告、值域及拼法驗證依 [傳輸契約
 
 ### Standard 構築資料與固定引用的實作邊界
 
-[construction-adoption-v1](construction-adoption.md) 定義首批 JP／EN Standard 的來源、兩模型核對採納與後續必要 CR 引用，不承諾整副牌合法性。首發先上禁限資料，CR 條文引用等 #48；其間 cr_version_id／construction_rules_ref 可為 null，固定 ref 尚未兌現，介面如實標示。已知限制可查，partial／未知日期或 evaluator 未支援 ref 時仍 unknown；不因入口沒公告連結而推無禁限。CR context_key、profile revision／restriction source_urls、coverage as_of、config.construction_refs 只在該契約列為待實作方案，本次不改公開表格／欄序。後續須與機器 Schema／types／reader、格式版本／capability 協商同步，才可宣稱出貨支援。
+[construction-adoption-v1](../domains/construction-adoption.md) 定義首批 JP／EN Standard 的來源、兩模型核對採納與後續必要 CR 引用，不承諾整副牌合法性。首發先上禁限資料，CR 條文引用等 #48；其間 cr_version_id／construction_rules_ref 可為 null，固定 ref 尚未兌現，介面如實標示。已知限制可查，partial／未知日期或 evaluator 未支援 ref 時仍 unknown；不因入口沒公告連結而推無禁限。CR context_key、profile revision／restriction source_urls、coverage as_of、config.construction_refs 只在該契約列為待實作方案，本次不改公開表格／欄序。後續須與機器 Schema／types／reader、格式版本／capability 協商同步，才可宣稱出貨支援。
 
 ## 9. format 2.0.0 同名規則瀏覽
 
-[數位名字政策](digital-name-policy.md) 的 same_name 卡層瀏覽使用
+[數位名字政策](../domains/digital-name-policy.md) 的 same_name 卡層瀏覽使用
 [傳輸契約 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片) 的 2.0 配置。
 公開欄序與引用閉包依 §2，relation 白名單、typed projector、Schema 與 reader 同步驗證。
 不另設中間格式或相容 reader。

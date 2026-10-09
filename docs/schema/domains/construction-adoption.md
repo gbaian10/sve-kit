@@ -1,6 +1,6 @@
 # 構築規則與禁限採納：construction-adoption-v1
 
-本文件為 [#40](https://github.com/gbaian10/sve-kit/issues/40) 的構築採納技術契約，細化 [build-db §6／§7](build-db.md#7-禁限與構築)。維護者 2026-10-03 決定首批只做 **JP Standard、EN Standard**；首發先交付可查、可追溯的 profile／禁限資料，CR 條文引用等 #48；這段期間固定 ref 尚未兌現，必須明示未確認，不能當作原承諾已完成。其他賽制保持 unknown；整副牌合法性檢查留後續建牌器。契約、來源封存、逐筆採納、資料能力與算法能力是分開的門檻。
+本文件為 [#40](https://github.com/gbaian10/sve-kit/issues/40) 的構築採納技術契約，細化 [build-db §6／§7](../build/build-db.md#7-禁限與構築)。維護者 2026-10-03 決定首批只做 **JP Standard、EN Standard**；首發先交付可查、可追溯的 profile／禁限資料，CR 條文引用等 #48；這段期間固定 ref 尚未兌現，必須明示未確認，不能當作原承諾已完成。其他賽制保持 unknown；整副牌合法性檢查留後續建牌器。契約、來源封存、逐筆採納、資料能力與算法能力是分開的門檻。
 
 本文不提供來源抓取指令、不採納規則數值／公告內容。官方 HTML／PDF、CR 全文與轉錄結果留 repo 外；研究樣本不是正式證據，不能複製進 authored 或用它們的 hash 代替正式原檔。已獲同意抓回的原檔仍須完成 §2 登錄／封存，才能供正式採納。
 
@@ -91,12 +91,12 @@ restriction.state 的 confirmed／announced／withdrawn 是限制的生命周期
 
 ## 2. 一次性抓回原檔如何正式登錄與釘版
 
-此節定義 carddb 已提供的**離線登錄能力**，入口為 [`source-import register`](../../carddb/src/sve_carddb/ingest/archive/source_import/README.md)，預設只檢查，明示 `--execute` 才登錄；程式合併與本契約均不授權真實執行。輸入是維護者認可的一次性來源集合：index 記 URL／final URL／status／sha256／bytes／fetched_at／content_type／ETag／Last-Modified／chain，raw 以內容 hash 保存。原始 index 與 raw 保留不動，登錄不會對任何外部服務發請求，不開 live manifest 或以它補 metadata。
+此節定義 carddb 已提供的**離線登錄能力**，入口為 [`source-import register`](../../../carddb/src/sve_carddb/ingest/archive/source_import/README.md)，預設只檢查，明示 `--execute` 才登錄；程式合併與本契約均不授權真實執行。輸入是維護者認可的一次性來源集合：index 記 URL／final URL／status／sha256／bytes／fetched_at／content_type／ETag／Last-Modified／chain，raw 以內容 hash 保存。原始 index 與 raw 保留不動，登錄不會對任何外部服務發請求，不開 live manifest 或以它補 metadata。
 
 1. 唯讀驗完整 index 與全部 raw：唯一 canonical requested URL、200 成功狀態、原始 URL／最終 URL／chain 一致、HTTPS／官方 host、有效 UTC 時間、media type、exact raw hash／bytes。禁止 symlink 越界、未知欄位、缺檔、重複衝突、未結束鏈及不符合用途的 HTML／PDF。URL 只沿既有 canonicalizer，不推測 PDF 版號或用來源路徑配 region。把來源清單、原 index exact hash、原 metadata 與本次用途分類釘在獨立登錄收據；它留來源歸檔 metadata 閉包，不進 git。
 2. 建立**全新的隔離 manifest／staging**，不複製或接管 live manifest。provider 依核對後來源用途明示 jp/en（EN PDF 即使由共享官方 host 供應仍是 en）；抓取 kind 使用現有 rules（規則入口／CR PDF）、limit（禁限入口）、news（新聞索引／公告），不把 PDF 虛構成 card。Resource.url 取 canonical requested URL；final_url／chain 保留登錄收據，不能把兩者互換或默默合併別的 URL 身分。
 3. Resource 的 hash／raw_bytes／content_type／標頭沿原紀錄；stored_bytes 等於這份未壓縮 raw 的實際 bytes，並與 raw_bytes 相同。path 為隔離目錄中的安全相對 path（HTML 用 `.html`，PDF 用 `.pdf`），不得用 `.zst` 假稱壓縮，避免既有封存器依副檔名誤解壓。first_fetched_at／last_checked_at／last_changed_at 使用唯一這次已知 fetched_at，不冒稱官方首次發布或更早抓取，archived_at 在封存前為 null。raw 不轉碼、不正規化；原 ETag／Last-Modified 缺值留 null，缺用途所需 metadata 則拒絕，不自行補造。只登錄既有來源觀測，不造未實際發生的 HTTP fetch_log、重試、歷史或爬取 generation。重複匯入同收據可重用，衝突停止，不覆寫。
-4. 使用 [source-archive §2／§3](source-archive.md#2-內容來源版本與-inventory) 的既有 raw blob／source_key／source_version_id／descriptor／receipt／inventory／seal 格式，來源版本身份仍是 `{provider,kind,url}`＋raw hash，不能新增另一套「研究來源」ID。inventory 必帶隔離 manifest 的 SQLite backup API 自足副本，其 metadata 閉包含上述登錄收據。準備／重驗／fsync／最後原子發布 seal；沒有 seal 或任一 missing 不能當正式批次。
+4. 使用 [source-archive §2／§3](../ingest/source-archive.md#2-內容來源版本與-inventory) 的既有 raw blob／source_key／source_version_id／descriptor／receipt／inventory／seal 格式，來源版本身份仍是 `{provider,kind,url}`＋raw hash，不能新增另一套「研究來源」ID。inventory 必帶隔離 manifest 的 SQLite backup API 自足副本，其 metadata 閉包含上述登錄收據。準備／重驗／fsync／最後原子發布 seal；沒有 seal 或任一 missing 不能當正式批次。
 5. **備份並 restore-check 通過**才交付正式 batch pin／原 index hash／登錄收據 hash／用途分類／數量與 bytes 對帳給協調者。異常停止，原輸入與失敗收據保留，不以重抓／crawl／refresh 修補、不清理其他任務狀態。真實執行由協調者在工具審核／合併且取得當次範圍的明示授權後操作；登錄不自動執行 seal／備份／restore-check，也不採納規則含義。
 
 隔離 manifest 保存 `source_import_receipt` 登錄紀錄，與 fetch_log 分開：保存原 index exact bytes（BLOB）、index_sha256、canonical `{source_mappings,program_revision,dependencies}`、該內容的 receipt_id 與 registered_at；此收據不是 archive observation receipt，不能代替 descriptor.first_receipt_id。source_mappings 恰列每個 canonical URL／provider／kind／raw hash／安全相對 path，原 final_url／chain／抓取 metadata 由 index bytes 保留。receipt_id 對 index_sha256 與 canonical 登錄內容計 H，不以私人路徑或時間配號；相同收據重跑保留原 registered_at、逐欄比對，不覆寫。此表由隔離 manifest 的 SQLite backup hash 一起釘住，故可驗原 index 與 raw 的登錄關係，不向 inventory／Resource 塞未知欄位。現行 carddb 已接入相應 schema／reader 驗證；只有舊 seal 工具或多放一個未被 hash 引用的旁檔不算完成此邊界。入口驗證明示的程式 revision 與列出的依賴 pins，這份固定清單不宣稱涵蓋完整執行閉包。

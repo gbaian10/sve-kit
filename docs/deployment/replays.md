@@ -34,7 +34,7 @@ ADR-0016 將對局重播的歷史資料還原留待實際開發時另設計，
 | 對局工作區 | 應用程式須依規則清理，不等於回放長期儲存 | [對局工作區](matches.md#durable-object-工作區與清理) |
 | 權威回放／存檔 | 保有權威輸入；送給觀看者前須遵守資訊投影 | [ADR-0001](../adr/0001-engine-skeleton.md) |
 | 公開卡表快照與卡圖 | 有限發布窗口，不提供永久歷史下載保證 | [ADR-0016](../adr/0016-snapshot-retention.md) |
-| 來源 raw、PNG、manifest 與 inventory | 依來源歸檔契約保存；公開 WebP 回收不授權刪除來源 | [來源歸檔](../schema/source-archive.md)、[ADR-0016](../adr/0016-snapshot-retention.md) |
+| 來源 raw、PNG、manifest 與 inventory | 依來源歸檔契約保存；公開 WebP 回收不授權刪除來源 | [來源歸檔](../schema/ingest/source-archive.md)、[ADR-0016](../adr/0016-snapshot-retention.md) |
 
 回放與診斷資料的觀看權限不是官方素材的再授權；官方文字、圖像與其他保留內容的權利
 仍依 [LICENSING.md](../../LICENSING.md)。本頁不指定回放落在 D1 或 R2，

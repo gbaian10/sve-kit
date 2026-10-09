@@ -2,7 +2,7 @@
 
 **使用者 2026-10-01 核可**（含指名撤回錯誤修復）。 本文件將既有永久身分與不可變決定原則具體化為
 `identity-transition-v1` authored 契約；格式核可不表示已有實作或真實資料採納。
-已定語意仍以 [build-db §3.1](build-db.md#31-永久身分)、[§13](build-db.md#13-官網更正與身分修復)
+已定語意仍以 [build-db §3.1](../build/build-db.md#31-永久身分)、[§13](../build/build-db.md#13-官網更正與身分修復)
 及 [authored-layout §2–§3](authored-layout.md#2-分片與來源) 為準。
 
 ## 1. 範圍與不變條件
@@ -261,7 +261,7 @@ transition 分片最後寫入，因此中斷時已有新版次卻缺對應 trans
   apply 事件的 reverts_id=null；revert 必須指先前非 revert 事件，全域唯一且 confirmed，整組事件原子撤回。
   公開不出私有 transition key，只出公開事件間的 reverts_id；consumer 先解析撤回再計有效圖。
 - data_version 是產出該事件列的建置所填的版號，不承諾是該事件首次發布的版號；
-  不另保存事件首次發布的收據（[ADR-0020](../adr/0020-upload-from-export.md)）。reader 不能用它推斷事件首次出現在哪一版。
+  不另保存事件首次發布的收據（[ADR-0020](../../adr/0020-upload-from-export.md)）。reader 不能用它推斷事件首次出現在哪一版。
   事件 ID 與其關係照上述規則永久保留。公開修復歷史與舊墓碑保留，changes 只列本次新增事件。
 - 卡片網址綁 printing；合併 card 不代表把該版次 URL 轉到另一個 printing。原卡號沒變就不新增 alias。
   確實改號時依 build-db §15 永久保留舊入口、展平 alias 到同 printing 的最新 canonical，
@@ -271,7 +271,7 @@ transition 分片最後寫入，因此中斷時已有新版次卻缺對應 trans
   保留窗口內 JSON 不回寫新父 card／面／文字，公開保留依 snapshot-format §4.1，不影響身分事件／採納鏈。
 
 公開形狀新增 kind=revert 與 required nullable reverts_id。format `1.0.0` 仍為候選時，依
-[機器契約的候選期規則](snapshot-contract.md) 在候選內同步修訂 Schema、欄序、golden 與 reader，
+[機器契約的候選期規則](../export/snapshot-contract.md) 在候選內同步修訂 Schema、欄序、golden 與 reader，
 不要求額外升版；正式凍結後才至少升 minor、加入 `identity-revert-v1` required capability，
 並提高 min_reader_version。尚未完成 reader／匯出器相容實作時不得發布含此格式的快照。
 

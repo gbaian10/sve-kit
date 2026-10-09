@@ -1,6 +1,6 @@
 # ADR-0018：翻譯資料驗證層簡化
 
-狀態：已採用（2026-10-04）。契約見 [PR #309](https://github.com/gbaian10/sve-kit/pull/309) 與 [翻譯契約](../schema/translation-contract.md)。
+狀態：已採用（2026-10-04）。契約見 [PR #309](https://github.com/gbaian10/sve-kit/pull/309) 與 [翻譯契約](../schema/domains/translation-contract.md)。
 
 ## 背景
 

@@ -10,7 +10,7 @@
 
 ## 2. 檔案與欄位
 
-覆寫只有 `authored/images/crops.yaml` 一個檔案，頂層恰為 `format: 1, kind: image_crop_overrides, records`，原裁切列放在 records 陣列，沒有 index。檔案遵守 [authored 共同格式](authored-layout.md#1-路徑與共同格式)的 YAML 邊界與小於 1,048,576 bytes 上限，重用既有嚴格 YAML reader。
+覆寫只有 `authored/images/crops.yaml` 一個檔案，頂層恰為 `format: 1, kind: image_crop_overrides, records`，原裁切列放在 records 陣列，沒有 index。檔案遵守 [authored 共同格式](../domains/authored-layout.md#1-路徑與共同格式)的 YAML 邊界與小於 1,048,576 bytes 上限，重用既有嚴格 YAML reader。
 
 loader 直接讀工作目錄裡的檔案，不查 Git：未 commit 的修改在下一次建置就生效。檔案不存在時報錯，不當成空集合；沒有任何覆寫時仍保留 format／kind，寫 `records: []`。全檔一併驗證，不因本次只建 JP 而跳過 EN 列。
 
@@ -45,7 +45,7 @@ region／card_no 不參與來源查找、跨區配對或採納判定；已驗證
 
 先完整驗證整個檔案，再大量轉檔；未被選中的列列為未使用，不是錯誤。`build_regional_assets(region=…)` 明示 `jp` 或 `en`，只接受相符地區的 image batch。頁面綁定使用該地區萃取器的原始 `<img src>` 與人工 source_face_map。
 
-日英 `snapshot export-offline` 的 Inputs.sources 分別釘兩區 card／image batch 與 parser version，成對提供 `--image-assets-dir`、`--image-cache-dir` 才納入影像。入口對每區呼叫上述 API：通過驗證的完整五檔快取直接沿用，缺檔或過時（來源、框或 recipe 改變）的來源當場產圖，寫入圖片庫與快取。建置須重驗各區目前批次的完整成員，影像綁定及來源使用閉包同時進入 staging／sealed DB 重播；詳細參數見[離線建置入口](../../carddb/src/sve_carddb/export/OFFLINE.md)。正式發布仍依既有來源涵蓋與 readiness 門檻。
+日英 `snapshot export-offline` 的 Inputs.sources 分別釘兩區 card／image batch 與 parser version，成對提供 `--image-assets-dir`、`--image-cache-dir` 才納入影像。入口對每區呼叫上述 API：通過驗證的完整五檔快取直接沿用，缺檔或過時（來源、框或 recipe 改變）的來源當場產圖，寫入圖片庫與快取。建置須重驗各區目前批次的完整成員，影像綁定及來源使用閉包同時進入 staging／sealed DB 重播；詳細參數見[離線建置入口](../../../carddb/src/sve_carddb/export/OFFLINE.md)。正式發布仍依既有來源涵蓋與 readiness 門檻。
 
 `export-offline` 消費外部傳入的 `ImageBuild` 時，`verify_asset_sources` 從同一個裁切檔重算每個來源應用的框（覆寫或預設），與 `VariantSet.crop_box` 比對後才可填 DB／輸出公開清單。僅在 `build_regional_assets` 產圖側驗證不夠；來源、recipe、五檔 hash 都有效但仍使用舊框的結果也必須拒絕。
 

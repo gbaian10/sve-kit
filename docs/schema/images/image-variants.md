@@ -38,13 +38,13 @@ recipe 必須固定解碼／編碼器與底層 libwebp 版本、品質、色彩�
 
 建置 path 仍為 `images/sha256/<前兩碼>/<64hex>.webp`，hex 為實際 WebP bytes 的 SHA-256；2.0 公開 key 如下節，不由來源 image_id／hash 決定。image_variant.bytes/width/height 記當次輸出；發布器驗完整 SHA／尺寸／bytes，不能只驗清單。2.0 reader 不用歷史 SHA 去拒絕同 key 的新 bytes；JSON hash 與建置來源 pin 不變。
 
-官方圖片經來源驗證成為 approved 的規則見 [build-db.md §17.1](build-db.md#171-mirror_reviewed)。只有 availability=available 且 publication_state=approved 才可出 variant；missing/unfetched/pending 不出 path。直向與橫向 approved available 的圖都需五個檔位，缺檔不得宣稱影像閉包備妥；文字預覽可明示尚無影像結果。先完成資產閉包才發布引用它的影像清單；目前沒有第三方圖片，其逐圖確認政策仍依 [build-db.md §17](build-db.md#17-已決政策非官方圖鏡像與地區-decklog-建牌資格)。
+官方圖片經來源驗證成為 approved 的規則見 [build-db.md §17.1](../build/build-db.md#171-mirror_reviewed)。只有 availability=available 且 publication_state=approved 才可出 variant；missing/unfetched/pending 不出 path。直向與橫向 approved available 的圖都需五個檔位，缺檔不得宣稱影像閉包備妥；文字預覽可明示尚無影像結果。先完成資產閉包才發布引用它的影像清單；目前沒有第三方圖片，其逐圖確認政策仍依 [build-db.md §17](../build/build-db.md#17-已決政策非官方圖鏡像與地區-decklog-建牌資格)。
 
 卡圖按需快取或只抓已選牌組與雙面，不預抓全庫；數位卡圖僅連官方頁，不混入 SVE 衍生檔。裁切圖的使用頁仍保留來源與版權標示；原始卡圖不是專案可再授權素材。
 
 ## 2.0 圖片 URL、版本與新鮮度
 
-依 [ADR-0015](../adr/0015-image-url-version.md)，公開 key 為
+依 [ADR-0015](../../adr/0015-image-url-version.md)，公開 key 為
 `images/<size>/<int_id>[-f<ordinal>].webp`，reader 加上 `?v=<version>`。
 f0 省略，其他面用永久 face.ordinal；printing.int_id 永不重配，不能用卡號、image_id 或列位置代替。
 例如 `images/card_m/20001.webp?v=3` 與 `images/art_s/20001-f1.webp?v=7`。
@@ -63,7 +63,7 @@ binding／指紋／版本。每次匯出先把 H 加一並寫回，失敗的匯�
 此檔不是 authored 人工輸入，也不放在公開根；請隨既有備份保存。遺失時會從 1 重新配號，
 可能撞到已被快取的舊 URL，應從備份還原而非刪除重來。
 
-上傳流程（[R2 上傳](../../publish/README.md)）：
+上傳流程（[R2 上傳](../../../publish/README.md)）：
 
 1. 只選 preview 指標所指清單的引用閉包與其卡圖；私有目錄、建置 bundle 與圖片庫不上傳。
 2. 卡圖缺少或不同時才寫：新 key create-only，既有 key 以 If-Match 條件覆寫；JSON／manifest 不可覆寫，不同即停止。
@@ -99,4 +99,4 @@ purge 只清 CDN；若 browser／SW 已取得受污染的 v，須放棄該號、
 若部署無法可靠維持 query 分離，改採不重用版本檔名，須同步 producer／reader 契約，不能悄悄改 URL。
 
 卡圖只保存 current bytes；永久保留來源 PNG、inventory 與 authored 證據的規則不變。
-回收與舊 client 過渡詳 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
+回收與舊 client 過渡詳 [snapshot-format §4.1](../export/snapshot-format.md#41-發布窗口圖片新鮮度與回收)。

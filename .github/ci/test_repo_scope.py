@@ -37,7 +37,7 @@ class RepoScopeTests(unittest.TestCase):
         self.command("config", "user.name", "Scope Test")
         self.command("config", "user.email", "scope@example.invalid")
         self.write("README.md", "# Baseline\n")
-        self.write("docs/schema/build-db.md", "# Schema\n")
+        self.write("docs/schema/build/build-db.md", "# Schema\n")
         self.write(".markdownlint-cli2.yaml", "config: {}\n")
         self.base = self.commit()
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
@@ -138,7 +138,7 @@ class RepoScopeTests(unittest.TestCase):
 
     def test_deleted_or_renamed_inputs(self) -> None:
         """Pre-commit drops removed inputs; retain aggregate checks for their consumers."""
-        for name in ("docs/schema/build-db.md", ".markdownlint-cli2.yaml"):
+        for name in ("docs/schema/build/build-db.md", ".markdownlint-cli2.yaml"):
             for rename in (False, True):
                 with self.subTest(name=name, rename=rename):
                     self.command("reset", "--hard", self.base)

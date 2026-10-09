@@ -181,15 +181,15 @@ delete a lock, remove raw files, or restore an older manifest over the live one.
 Preserve the interrupted state, create a new locked manifest backup, inspect
 the closed backup and affected files offline, then request a recovery tool
 limited to the reviewed request IDs, URLs, paths and hashes. The detailed
-[recovery procedure](docs/schema/refresh-operation.md#勘誤新增入口中斷後的處置)
+[recovery procedure](docs/schema/ingest/refresh-operation.md#勘誤新增入口中斷後的處置)
 requires evidence preservation, synthetic rehearsal and explicit maintainer
 approval before any recovery writes.
 
 The operator must back up the manifest before and after the run, then seal the
 reviewed `jp:errata` and/or `en:errata` scopes, back up its closure and verify this batch with
 `archive restore-check`; these operations are explicit and are not performed by
-`errata-new`. See [source archive](docs/schema/source-archive.md) and
-[protected fetching](docs/schema/refresh-operation.md). Official bodies stay
+`errata-new`. See [source archive](docs/schema/ingest/source-archive.md) and
+[protected fetching](docs/schema/ingest/refresh-operation.md). Official bodies stay
 outside git, tests, reports and public snapshots.
 
 ```bash

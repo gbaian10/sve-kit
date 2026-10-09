@@ -6,9 +6,9 @@
 
 ## 1. 基本型別與 canonical bytes
 
-`ID/Text/Code/UInt/Int/Bool/Date/Instant/Region/Lang/Hash` 沿用 [build-db.md §2](build-db.md#2-共通型別來源與採納政策)。JSON 的 Bool 只能是 true/false。`Hash` 統一為 `sha256:` 加 64 個小寫 hex；內容定址 path 的檔名只取 hex，不含前綴。`Path` 是相對資料根的非空路徑，不含 scheme、前導斜線、反斜線、空段、`.`、`..`、query 或 fragment；不可帶本機路徑。`URL` 是公開 HTTPS URL。
+`ID/Text/Code/UInt/Int/Bool/Date/Instant/Region/Lang/Hash` 沿用 [build-db.md §2](../build/build-db.md#2-共通型別來源與採納政策)。JSON 的 Bool 只能是 true/false。`Hash` 統一為 `sha256:` 加 64 個小寫 hex；內容定址 path 的檔名只取 hex，不含前綴。`Path` 是相對資料根的非空路徑，不含 scheme、前導斜線、反斜線、空段、`.`、`..`、query 或 fragment；不可帶本機路徑。`URL` 是公開 HTTPS URL。
 
-所有 JSON 的序列化規則以 [build-db.md §14 的 canonical-json-v1](build-db.md#14-不可變雜湊僅建置) 為唯一依據。hash 與 bytes 都針對這組未壓縮 bytes。示例為便於閱讀的排版，需 canonical 序列化後才計 hash。
+所有 JSON 的序列化規則以 [build-db.md §14 的 canonical-json-v1](../build/build-db.md#14-不可變雜湊僅建置) 為唯一依據。hash 與 bytes 都針對這組未壓縮 bytes。示例為便於閱讀的排版，需 canonical 序列化後才計 hash。
 
 集合以其鍵排序並去重；複合鍵按欄序逐項比較，整數按數值、字串按 Unicode code point；不以本地語言排序。陣列中有業務順序的保留順序：faces 按固定 ordinal、sections 按 ordinal、fallback_order 按優先順序、keyword.actions 按既定 action 順序。tuple 欄序不是 object key 排序。
 
@@ -65,7 +65,7 @@ config 是 `{format_version,languages,digital_endpoints,shop_links,image_sizes,s
 | languages | `[{code:Lang,fallback_order:[Lang],display_name:Text}]`，按 code；fallback 不含自己、不重複、目標存在 |
 | digital_endpoints | `[{game:sv1/svwb,card_url_template:Text,language_map:{Lang:Text},status:unknown/available/unavailable,refresh_policy:frozen/on_sve_release}]`，按 game |
 | shop_links | `[{id:ID,url_template:Text,parameters:[Code],feature_key:Code,enabled_dev:Bool,enabled_prod:Bool}]`，按 id；parameters 排序去重 |
-| image_sizes | `[{key:Code,purpose:card/art,max_width:UInt,max_height:UInt}]`，按 key；五檔數值見 [image-variants.md](image-variants.md) |
+| image_sizes | `[{key:Code,purpose:card/art,max_width:UInt,max_height:UInt}]`，按 key；五檔數值見 [image-variants.md](../images/image-variants.md) |
 | search | `{grammar_version:Code,normalizer_version:Code}`，兩者非空、按 reader 支援表判斷 |
 | catalog_feedback_url | URL |
 | third_party_image_policy | 固定 `mirror_reviewed` |
@@ -429,6 +429,6 @@ support_changes 比較套用 override/block 後的有效狀態；同狀態但 re
 
 ## 數位同名規則的版本准入
 
-[數位名字政策](digital-name-policy.md) 的 same_name 枚舉能力使用 §5.4 的 2.0 配置。未支持 digital-same-name-links-v1 或 min_reader 不足的 reader
+[數位名字政策](../domains/digital-name-policy.md) 的 same_name 枚舉能力使用 §5.4 的 2.0 配置。未支持 digital-same-name-links-v1 或 min_reader 不足的 reader
 拒絕該快照，不把規則 unreviewed 誤看成裸候選或真人確認。
 政策與收據不出貨，不追加公開 tuple 欄位；枚舉新增 minor、既有欄序／語意更換 major，沿既有快照准入與完整引用閉包。

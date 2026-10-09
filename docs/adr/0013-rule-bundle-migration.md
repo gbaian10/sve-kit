@@ -1,6 +1,6 @@
 # ADR-0013：觀測雜湊與規則語義 bundle 的明示遷移
 
-狀態：延後（2026-10-06 清理未上線能力）；原技術方向於 2026-10-01 採用，未實作。沿 [build-db §14](../schema/build-db.md#14-不可變雜湊僅建置)，不改 DSL Schema 或公開快照 format。
+狀態：延後（2026-10-06 清理未上線能力）；原技術方向於 2026-10-01 採用，未實作。沿 [build-db §14](../schema/build/build-db.md#14-不可變雜湊僅建置)，不改 DSL Schema 或公開快照 format。
 
 ## 背景
 
@@ -20,6 +20,6 @@ face-bundle-v1 釘完整觀測；rule-bundle-v2 釘不可變規則表示、數�
 
 未實作等義驗證前，不承諾表記更新可沿用規則 bundle；翻譯仍依 exact source/context 重算；規則本文、數值、特性、rules_names、normalizer 或 token 規則依賴改動須重驗。identity confirmed 與 region_text_review aligned 獨立，規則等義也不代表新版顯示字句已核。
 
-來源與人工採納依原歸檔／authored 契約保存，推導結果由對應 F1 輸入重現。翻譯不依賴被移除的語義投影，不回寫首發已有等義證明。翻譯的當前驗證與跨區邊界見[翻譯契約 §7–§8](../schema/translation-contract.md#7-跨區與官方對照)。保留原文變更重算、身分不等於等義、counterpart 逐 owner 失效、recipe 不可改名冒用、token／背面完整性及規則依賴變更的行為反例；資料 PR 不要求逐 guard 定向突變。
+來源與人工採納依原歸檔／authored 契約保存，推導結果由對應 F1 輸入重現。翻譯不依賴被移除的語義投影，不回寫首發已有等義證明。翻譯的當前驗證與跨區邊界見[翻譯契約 §7–§8](../schema/domains/translation-contract.md#7-跨區與官方對照)。保留原文變更重算、身分不等於等義、counterpart 逐 owner 失效、recipe 不可改名冒用、token／背面完整性及規則依賴變更的行為反例；資料 PR 不要求逐 guard 定向突變。
 
 公開 CDN 的快照／圖片保留依 [ADR-0016](0016-snapshot-retention.md)；本 ADR 的本機重播／建置證據要求不構成永久歷史下載承諾。

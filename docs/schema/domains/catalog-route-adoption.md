@@ -193,8 +193,8 @@ identity-repair 的完整路由交易中提供前後件與永久入口比較；�
 text_symbol_adoption.subject 為 `{id}`；value 恰為
 `{code,parameter_schema,keyword_id,spellings,source_localization}`。
 id 為人工首次指定的永久非空 ID，code 符合 Code；二者全域一對一且不可重配。
-parameter_schema／spellings 沿 [snapshot-transport §3.2](snapshot-transport.md#32-公開參數宣告)
-與 [snapshot-format 的 Spelling](snapshot-format.md#2-公開表完整欄位與玩家用途)，不另定 regex 或參數值域。
+parameter_schema／spellings 沿 [snapshot-transport §3.2](../export/snapshot-transport.md#32-公開參數宣告)
+與 [snapshot-format 的 Spelling](../export/snapshot-format.md#2-公開表完整欄位與玩家用途)，不另定 regex 或參數值域。
 spellings 非空、排序唯一，語言已登錄；literal 拼接 prefix/suffix 必非空且 parameter_name=null。
 uint/variable 必引用啟用的參數。必須消耗完整 token，保留 raw 及前導零；多義或未知回原記號，不任選 symbol。
 keyword_id 可 null；非 null 須引用已採納 keyword，不能因拼法相似自動建立機制關係。
@@ -254,7 +254,7 @@ premium 的來源／解析 recipe 亦必可驗；各面與版次完整受審才�
 加工審查沿 build-db §3.3 的 sampled/confirmed 門檻並保留抽查標示，不自行提高為全筆 confirmed。
 分類規則的核可與各面加工事實的採納分開；未完成事實採納時維持未知。
 
-日期依 [build-db §3.2](build-db.md#32-商品與發行)：每筆同區 printing_product 的有效日期，
+日期依 [build-db §3.2](../build/build-db.md#32-商品與發行)：每筆同區 printing_product 的有效日期，
 在 first_available_precision=null（沒有覆寫）時沿該 product 的 released_on/date_precision；
 有覆寫則以 first_available_on/first_available_precision 為準。只有有效精度為 day 才有完整日期。
 覆寫為 month/year/unknown 時不得回退商品 day，也不得補成某日；商品自身不是 day 時同樣未知。
