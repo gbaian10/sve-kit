@@ -10,23 +10,23 @@
 
 CR 1.27.0、2026-09-26 日文卡表（含所有面與 sections／Q&A）、已封存 v0、現有 88 族缺口與 3,669 句型目錄。文中「C」「契約」指 v0 所依據的情境資料契約 v2.1（repo 內 [`tests/rules-scenarios/CONTRACT.md`](../../tests/rules-scenarios/CONTRACT.md)）：`C§x.y` 為該文件的節號，`C33` 等為其第 10 節的條號。R-0009 取代舊裁定 #1 及 R-0002 的誘發時檢查部分；R-0003 文件中仍留舊裁定 #1 描述者也以 R-0009 校正。早期格式示例中的 R-0002 寫法不是有效判讀。
 
-| 裁定   | 效力與對應元素                                                                                                      | 證據強度    |
-| ------ | ------------------------------------------------------------------------------------------------------------------- | ----------- |
-| R-0001 | 五種關鍵字誘發頭的冒號成本是 K.pay PlayParameter，先目標後費用；保留 family provenance，不能展開成 auto 後改時點    | generalized |
-| R-0002 | K.if 在結算處理到條件時判，不成立則其段落不做；誘發部分由 R-0009 取代                                               | official    |
-| R-0003 | 攻擊時等關鍵字後條件也是本文 K.if，不控制 B.trigger；仍受合法目標／付款限制，非無條件能打出                         | official    |
-| R-0004 | D.play-param Targets 不被普通本文條件關閉；SC／NC 仍按 V.spell-chain／V.necro-charge 特定捕捉                       | generalized |
-| R-0005 | 土の秘術付款只控制本文，不控制選目標；刪 targets.if(paid)，結果讀 PaymentComplete                                   | official    |
-| R-0006 | spell／模式內冒號 K.pay ResolutionChoice；Modes、Targets、X 保留 PlayParameter；付款事件在 play 之後（CR 10.4.7.4） | inferred    |
-| R-0007 | K.if／自我取代的條件延伸至段落／模式邊界；取代後的後句也受保護                                                      | official    |
-| R-0008 | Stack 提醒不變成獨立能力；B.keyword Stack 展開及規則歸零移墓，不產生 E.destroy                                      | official    |
-| R-0009 | 長寫事件能力先誘發，條件只在本文判；V.event-field 凍結值不變成 Live；State 誘發另處理                               | official    |
-| R-0010 | BP14-046 的 cost_mod.next_only 用 UsageScope SharedPlayer，整組共用一次                                             | inferred    |
-| R-0011 | E.stat-change 只由明示數值處理產生；持續重算、到期、還原不生事件                                                    | inferred    |
-| R-0012 | E.stat-change 同指示同主體一個 OriginFactId，攻／體為 facets，or 條件只匹配一次                                     | inferred    |
-| R-0013 | I.transform TokenAllocation 部分成功：actor 選模板子集，每模板至多一張，零張不詢問                                  | inferred    |
-| R-0014 | L.continuous 同 timestamp 以 D.rule-choice ContinuousTieOrder 定序：回合玩家先、同玩家自選並保存                    | inferred    |
-| R-0015 | ChooseModeAny（好きな数チョイス）數域 0..可用模式數；選 0 不執行整段                                                | inferred    |
+| 裁定   | 效力與對應元素                                                                                                                                                   | 證據強度    |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| R-0001 | 五種關鍵字誘發頭的冒號成本是 K.pay PlayParameter，先目標後費用；保留 family provenance，不能展開成 auto 後改時點                                                 | generalized |
+| R-0002 | K.if 在結算處理到條件時判，不成立則其段落不做；誘發部分由 R-0009 取代                                                                                            | official    |
+| R-0003 | 攻擊時等關鍵字後條件也是本文 K.if，不控制 B.trigger；仍受合法目標／付款限制，非無條件能打出                                                                      | official    |
+| R-0004 | D.play-param Targets 不被普通本文條件關閉；SC／NC 仍按 V.spell-chain／V.necro-charge 特定捕捉                                                                    | generalized |
+| R-0005 | 土の秘術付款只控制本文，不控制選目標；刪 targets.if(paid)，結果讀 PaymentComplete                                                                                | official    |
+| R-0006 | spell／模式內冒號 D.play-param{OptionalCost}＋K.pay PlayParameter；先決定 Modes、Targets、X、各組是否付款，合計費用在 play 之前支付；付不起依 CR 10.6.2.5.4 取消 | official    |
+| R-0007 | K.if／自我取代的條件延伸至段落／模式邊界；取代後的後句也受保護                                                                                                   | official    |
+| R-0008 | Stack 提醒不變成獨立能力；B.keyword Stack 展開及規則歸零移墓，不產生 E.destroy                                                                                   | official    |
+| R-0009 | 長寫事件能力先誘發，條件只在本文判；V.event-field 凍結值不變成 Live；State 誘發另處理                                                                            | official    |
+| R-0010 | BP14-046 的 cost_mod.next_only 用 UsageScope SharedPlayer，整組共用一次                                                                                          | inferred    |
+| R-0011 | E.stat-change 只由明示數值處理產生；持續重算、到期、還原不生事件                                                                                                 | inferred    |
+| R-0012 | E.stat-change 同指示同主體一個 OriginFactId，攻／體為 facets，or 條件只匹配一次                                                                                  | inferred    |
+| R-0013 | I.transform TokenAllocation 部分成功：actor 選模板子集，每模板至多一張，零張不詢問                                                                               | inferred    |
+| R-0014 | L.continuous 同 timestamp 以 D.rule-choice ContinuousTieOrder 定序：回合玩家先、同玩家自選並保存                                                                 | inferred    |
+| R-0015 | ChooseModeAny（好きな数チョイス）數域 0..可用模式數；選 0 不執行整段                                                                                             | inferred    |
 
 T 型別、R 引用、D 決定、C 捕捉、B 能力、I 指示、K 組合、X 表達式、S 選擇器、V 讀值、E 事件、H 歷史、L 效果；G 只是未決分類，不能執行。`Expr<T>` 純函數；`Info<T>=Present`(T)/AbsentByRules；未知欄位不是 AbsentByRules。每個 registry 定義攜帶 rule/rulings、型別、合法上下文、可見性與 source span，載入 capability 不足即拒絕。
 
@@ -82,7 +82,7 @@ BP13-043 的 P.start scope 具體化如下：它保護「渡す」的 I.transfer
 
 ### 已定費用時點（R-0001、R-0005、R-0006）
 
-`K.pay.at` 只有 PlayParameter / ResolutionChoice。起動、進化相當、fanfare，以及五種關鍵字誘發頭直接接冒號的費用為 PlayParameter（R-0001，generalized）；lastword 與一般長寫 auto 的冒號為 ResolutionChoice（CR 10.4.7.3、契約 36）。本文／選項內冒號為 ResolutionChoice（R-0006，inferred），選項、目標、自由宣告 X 仍在打出時決定。明寫「プレイする際」與獨立土の秘術為 PlayParameter。
+`K.pay.at` 只有 PlayParameter / ResolutionChoice。起動、進化相當、fanfare，以及五種關鍵字誘發頭直接接冒號的費用為 PlayParameter（R-0001，generalized）；lastword 與一般長寫 auto 的冒號為 ResolutionChoice（CR 10.4.7.3、契約 36）。spell 本文／チョイス選項內冒號為 PlayParameter（R-0006，official，2026-10-09），選項、目標、自由宣告 X 與各選項是否支付追加費用一起決定；卡片費用與所選追加費用在「プレイされた」之前支付，付不起依 CR 10.6.2.5.4 取消打出，再依卡面順序結算效果。明寫「プレイする際」與獨立土の秘術為 PlayParameter。
 
 `D.play-param Targets` 的存在不被一般條件／未付費阻止（R-0004、R-0005）；只按被選模式與原目標要求檢查。費用完整與實際動作結果分開，付款前不可讀 payment.complete；取消非法 play 必須一併撤銷暫態事件、待機、額度與模式使用記錄。傳輸層使用 resolve-choice 承載內層打出參數，不改變其語義型別。
 

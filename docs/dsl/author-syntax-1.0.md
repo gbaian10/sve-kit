@@ -73,14 +73,14 @@ evolve:
 
 ## 3. 費用、目標與打出程序
 
-| 位置                                                                          | 表達                            | 時點與依據                                                                                        |
-| ----------------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------- |
-| 起動／進化／憑依／食事、fanfare                                               | 頭的 `cost`                     | PlayParameter，CR 10.6.2.5、契約 36                                                               |
-| evolve_time、super_evolve_time、attack_time、race_time、drive_time 後直接冒號 | 頭的 `cost`                     | PlayParameter，R-0001（generalized）；先選目標再付款，拒付或不能付不產生適正 play                 |
-| lastword、一般長寫 auto 的冒號                                                | 本文 `pay: {cost, do, result?}` | ResolutionChoice，CR 10.4.7.3、契約 36                                                            |
-| spell 本文／チョイス選項內冒號                                                | 本文 pay                        | ResolutionChoice，R-0006（inferred），選模式／目標／宣告 X 仍在打出時；不因付費誘發而在選項中插隊 |
-| 明寫「プレイする際」、独立前綴土の秘術                                        | optional_cost                   | PlayParameter，CR 10.4.7.2、13.3.3.2；R-0005、R-0006                                              |
-| 明寫必要追加費用                                                              | additional_cost                 | PlayParameter，optional=false（BP17-116）                                                         |
+| 位置                                                                          | 表達                            | 時點與依據                                                                                               |
+| ----------------------------------------------------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| 起動／進化／憑依／食事、fanfare                                               | 頭的 `cost`                     | PlayParameter，CR 10.6.2.5、契約 36                                                                      |
+| evolve_time、super_evolve_time、attack_time、race_time、drive_time 後直接冒號 | 頭的 `cost`                     | PlayParameter，R-0001（generalized）；先選目標再付款，拒付或不能付不產生適正 play                        |
+| lastword、一般長寫 auto 的冒號                                                | 本文 `pay: {cost, do, result?}` | ResolutionChoice，CR 10.4.7.3、契約 36                                                                   |
+| spell 本文／チョイス選項內冒號                                                | optional_cost（所選分支各一組） | PlayParameter，R-0006（official，2026-10-09）；先決定模式／目標／X／是否付款，再合計支付，依卡面順序結算 |
+| 明寫「プレイする際」、独立前綴土の秘術                                        | optional_cost                   | PlayParameter，CR 10.4.7.2、13.3.3.2；R-0005、R-0006                                                     |
+| 明寫必要追加費用                                                              | additional_cost                 | PlayParameter，optional=false（BP17-116）                                                                |
 
 刪除頭的 `timing: pending|play|resolution` 與任填 `ruling` 就改時點的入口。例外需先登錄新裁定、更新 typed lowering；R-0001 不覆蓋選項內本文費用。`A.cost-timing-override` 僅是遷移診斷，不是可執行構造。
 
