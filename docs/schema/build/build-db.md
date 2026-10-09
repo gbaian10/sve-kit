@@ -192,19 +192,19 @@ errata_change 的 field 與 before_value／after_value 型別依 [傳輸契約 �
 
 ## 5. 關聯與地區差異
 
-| 表                   | 建置期欄位、鍵與約束                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 表 | 建置期欄位、鍵與約束 |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `card_related`       | `id:ID PK, from_card_id→card, to_card_id→card, target_printing_id→printing?, relation:official_unspecified\|evolves_to\|advances_to\|produces_token\|mentions\|extra_aid\|same_rules_reskin, suggested_count:UInt?, source_kind:official\|authored\|dsl, source_id→source_record?, dsl_id→dsl_document?`；M；禁止自指 card（面切換不在此表），count>0 或 null；`FK(target_printing_id,to_card_id)→printing(id,card_id)` |
-| `region_divergence`  | `card_id→card,region:Region,field_scope:rules\|name\|all,reason:Text,effect:manual\|override_dsl,override_dsl_id→dsl_document?,source_id→source_record,decision_id→decision,resolved:Bool`；`PK(card_id,region,field_scope)`，未解決不共用該 scope 的翻譯/機制/DSL，`override_dsl` 必填文件                                                                                                                             |
-| `region_text_review` | `card_id→card,region:Region,source_jp_hash:Hash,source_region_hash:Hash,state:pending\|aligned\|divergent,decision_id→decision?,checked_at:Instant`；`PK(card_id,region,source_jp_hash,source_region_hash)`，目前選用須精確兩端 bundle；aligned 必須 sampled/confirmed 的語義對照決定；pending 不放行已核對共用，繁中提前顯示例外見 §9                                                                                  |
+| `card_related` | `id:ID PK, from_card_id→card, to_card_id→card, target_printing_id→printing?, relation:official_unspecified\|evolves_to\|advances_to\|produces_token\|mentions\|extra_aid\|same_rules_reskin, suggested_count:UInt?, source_kind:official\|authored\|dsl, source_id→source_record?, dsl_id→dsl_document?`；M；禁止自指 card（面切換不在此表），count>0 或 null；`FK(target_printing_id,to_card_id)→printing(id,card_id)` |
+| `region_divergence` | `card_id→card,region:Region,field_scope:rules\|name\|all,reason:Text,effect:manual\|override_dsl,override_dsl_id→dsl_document?,source_id→source_record,decision_id→decision,resolved:Bool`；`PK(card_id,region,field_scope)`，未解決不共用該 scope 的機制/DSL，也不授官方 counterpart 等義資格；不禁止有效 JP 依據繁中，`override_dsl` 必填文件 |
+| `region_text_review` | `card_id→card,region:Region,source_jp_hash:Hash,source_region_hash:Hash,state:pending\|aligned\|divergent,decision_id→decision?,checked_at:Instant`；`PK(card_id,region,source_jp_hash,source_region_hash)`，目前選用須精確兩端 bundle；aligned 必須 sampled/confirmed 的語義對照決定；pending 不放行規則等義或官方 counterpart；JP 繁中來源選用獨立依 §9 |
 
 官方相關連結先以目標地區＋原卡號解到 printing，建置資料庫的 `target_printing_id` 留原證據，`to_card_id` 必須等於該 `printing.card_id`；不能因 token 名稱相同就猜另一 card。未知目標留 staging；provisional 政策依 §17。ゴースト/大地の魔片 若只是已核對表記差異依同卡通則，缺消滅句等仍待更正，不能自動等義。追加區用相同 target card/printing 候選，使用者仍可換版次。
 
 相關列表沒說關係時用 `official_unspecified`，不自動變 `produces_token`。未爬到 target 留 staging，正式 FK 不得懸空。`same_rules_reskin` 由換皮卡（`from`）指向經人工核對、規則相同的原卡（`to`）。採納：只來自 registry（`source_kind=authored`），每筆以 evidence 記兩端官方觀測；`suggested_count`、`dsl_id` 為 null，`target_printing_id` 除非有明確版次證據否則為 null。唯一性：同一 `(from_card_id,to_card_id,relation)` 至多一筆；不建反向列（查原卡的換皮卡用反查）；每個 `from` 至多一個已採納的 `to`。地區與失效：只在**兩端都有該地區版次**的地區成立，且以兩端該地區目前有效的面與規則 bundle 為準；建置每次比對兩端該地區目前的面、規則內容與 registry 記錄所釘住的兩端觀測；任一端來源或已採納語義改變，該地區先不投影，須重新人工核對並更新 registry 記錄後才恢復，即使新舊兩端經機械比對仍相同也不自動沿用舊觀測。比對時卡名與自身名稱引用以對應變數替換（保留「此卡」「名稱含…」等語義），不可整段刪除；無法機械對應的引用逐案人工核對。此關係不推出日英同卡或跨區等義，跨區對應與 `region_divergence` 各自處理。用途：只供查卡顯示「規則與某卡相同」與 DSL **撰寫候選**；不得直接繼承原卡的 `dsl_document`、`card_engine_support`、mechanic、載入或考題結果，換皮卡須依自身面、地區、規則名稱與依賴另建 `dsl_document` 並依 §10 驗證。兩張仍是不同卡、不同 `rules_name`，構築張數不合併（除非另有官方裁定）。`produces_token/extra_aid` 才產追加區建議；數量由玩家調整，不算合法性，也不匯出 Decklog。`card_related/qa_card` 不做面級；`digital_link.face_id` 保留，因實際插畫/數位面對照需要。
 
-region_mapping_review 只來自 registry，confirmed_none 即已人工確認；pending 可保留待審。region_text_review 的 aligned 必須有 sampled／confirmed decision；pending 不放行已核對共用；§9 的 shared_jp_unchecked 僅是已核可的繁中顯示例外。region_divergence 依 §2 的語義分歧政策要求 confirmed decision。以上在提交前重驗，不能藉修改 decision 繞過；兩端 bundle freshness、精確查核範圍與有效 divergence 的投影仍由領域驗證器判定。
+region_mapping_review 只來自 registry，confirmed_none 即已人工確認；pending 可保留待審。region_text_review 的 aligned 必須有 sampled／confirmed decision；pending 不放行規則等義或官方 counterpart；§9 的 JP 繁中顯示不要求 aligned。region_divergence 依 §2 的語義分歧政策要求 confirmed decision。以上在提交前重驗，不能藉修改 decision 繞過；兩端 bundle freshness、精確查核範圍與有效 divergence 的投影仍由領域驗證器判定。
 
-DSL 與繁中翻譯預設跟 JP。EN 身分已人工確認、`region_text_review` 對目前兩端 bundle 為 aligned 且沒有未解決 divergence，才自動共用 JP DSL 與選官英翻譯；繁中提前顯示另依 §9 已核可的 shared_jp_unchecked 例外，不以顯示譯文放行 DSL／機制；文字對照可工具比對＋批次抽查，不逐段開 equivalence。EN 勘誤較晚、數值或規則不同則記 `region_divergence`，規則 scope 禁止共用，暫手動或顯式 `en_override`。name-only divergence 不必讓所有效果 DSL 失效；若牽涉規則同名/名稱依賴仍須重驗受影響規則。消費端拿到已選定投影，不自行推斷跨語義等價。
+繁中以有效且已確認同卡同面的 JP 為唯一一般來源，沒有 aligned 或已有 divergence 均可顯示 JP 依據繁中。EN 身分已人工確認、`region_text_review` 對目前兩端 bundle 為 aligned 且沒有相關未解決 divergence，才自動共用 JP DSL 與選官方 counterpart；不以繁中顯示放行 DSL／機制；文字對照可工具比對＋批次抽查，不逐段開 equivalence。EN 勘誤較晚、數值或規則不同則記 `region_divergence`，規則 scope 禁止共用，暫手動或顯式 `en_override`。name-only divergence 不必讓所有效果 DSL 失效；若牽涉規則同名/名稱依賴仍須重驗受影響規則。消費端拿到已選定投影，不自行推斷跨語義等價。
 
 Decklog 的 JP/EN adapter 是不同常數命名空間。未有實際樣本，不能宣稱外部 ID 就是 `card_no`；暫延後 `external_system/printing_external_id` 的具體形狀。匯入要先解 region＋外部值→候選 printing，再人工選多義項；驗證真樣本前 Decklog 匯入需求不可標完成。這不是取消匯入需求。
 
@@ -278,7 +278,8 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 
 ### 9.1 現行 DDL 表格
 
-下表為唯一的 current 建置 DDL；人工資料保存來源與品質，不包含翻譯核可封套。
+下表記錄四層切換前已存在的 current DDL；人工資料保存來源與品質，不包含翻譯核可封套。
+四層的目標邏輯列與欄位差異另見 §9.3，尚未實作；不能把本表的 text／params 宣稱為四層 target／typed values。
 
 | 表 | 建置期欄位、鍵與約束 |
 | --- | --- |
@@ -296,7 +297,8 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 
 ### 9.2 當前翻譯投影
 
-[翻譯 current 契約](../domains/translation-contract.md)與 §9.1 使用相同 DDL，透過 `build.t1.compile_build()` 編譯。
+§9.1 的既有 DDL 透過 `build.t1.compile_build()` 編譯。
+[翻譯契約](../domains/translation-contract.md)已描述四層目標行為，具體差異依 §9.3；以下既有欄位不代表新版已驗收。
 模板功能、術語／名字／風味、owner/use、來源 hash 與跨區適用檢查保留。
 人工輸入的 authored_source_id、record_key、origin 與 low_confidence 定位本次來源與品質，沒有另建核可表。
 language／vocabulary 的四欄可為 null，以容納程式提供的配置；從 authored 讀入的值都須填齊。
@@ -327,9 +329,33 @@ context/use/binding/selection 每次重建，DB 只放本次有效組；改詞�
 來源變動不得沿用錯配舊譯文，缺任何必要譯詞／匹配則回原文並列一張清單，不假稱整段已翻。
 歷史由 Git 保存，清冊在 CI／建置用當前程式與固定輸入重產，不執行歷史 producer 或核可事件。
 
-繁中共用 JP 來源規則、shared_jp／shared_jp_unchecked 及 divergence 的隔離仍適用。
-EN 的 FieldTranslation 引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；不據翻譯顯示放行 DSL 等義。
+繁中只取有效且已確認同卡同面的 JP 來源，不以 aligned／divergence 作顯示門檻。
+EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；日英段落不同取完整 JP 效果，不按 EN ordinal 拼接。
+錯 owner／face、過期／缺來源仍拒絕；不據翻譯顯示放行 DSL、機制或官方 counterpart。
+移除翻譯入口 source_exception 的責任在翻譯契約 §2；區域差異表及其規則資格仍保留。
 快照只出選中資料；新 origin／low_confidence 與加粗位置須同步公開契約及 reader 後啟用，不能在舊 tuple 偷增欄。
+
+### 9.3 四層資料的目標契約
+
+[四層共用契約](../domains/four-layer-translation.md)是本節授權的欄位細節：
+§3～§7 定義 Frame、葉 schema、target、SourceBinding 與投影接口，§8 定義目標邏輯列／PK／FK、annotation 與依賴，
+§9 定義模板重鍵及裁定引用。每欄附型別、nullable、合法域、驗證者、失敗條件及[固定案例 ID](../domains/four-layer-cases.md)。
+這些是設計規格，#498 才同步修改正式 DDL、DB 邊界與匯入器；下表不是另一份已能編譯的 DDL。
+
+| 現有資料 | 四層後的欄位差異與責任 |
+| --- | --- |
+| sentence_template | Frame 身分包含 canonical source、型別／角色／域、語義變體、normalizer 及投影接口；舊六欄 payload 改版，NP/form 不入身分 |
+| template_translation／glossary_translation | 前者 text 改有型別 Target；後者繼續保存單一基礎選詞，translation_form 以引用組合形式，不複製每種文法形的名字 |
+| text_template_binding | 改為逐 use 的 SourceBinding；新增 owner／來源定位、trace、typed values 與每葉 occurrence，不能只按 context 去重 |
+| translation_context／translation | context 的變體鍵聚合來源 frame／values；render-v3 包含實際 target、形式、選詞／加粗、位置與 renderer 版本的依賴 |
+| translation_term／位置 | 去重反查保留；binding_leaf_occurrence、render_leaf_occurrence 與 annotation_set 分別保留來源位置、輸出關聯、exact 文字的概念位置 |
+| owner／translation 的 annotation 引用 | 原文 use 與譯文各引用精確 set；沒有譯文也可有原文 set，同 text_unit 不代表同概念位置 |
+| 舊模板／裁定 | 多對多映射以 occurrence／variant／scope 判定；每個引用唯一 resolved 或帶原因／候選 pending，不擴域、不留 active 懸空 FK |
+
+四層資料不新增逐詞核可、成功收據或不可變翻譯帳本；DB 邊界只驗必要結構與建置閉包。
+§9.1 的既有表數／實作分期與 ER 圖描述目前 DDL；待實作新增邏輯列時一併更新表數、分期及 ER 登錄。
+公開 basis=jp_source、annotation 承載、tuple 與 reader 由 [#496](https://github.com/gbaian10/sve-kit/issues/496) 定義，不能直接 dump 本節邏輯列。
+巨集資格條文由 [#497](https://github.com/gbaian10/sve-kit/issues/497) 處理，本節不修改 §10 或授予可執行資格。
 
 ## 10. DSL、驗證與未實作卡片頁
 
@@ -449,7 +475,7 @@ card_route_alias 的有效轉址圖仍無環、展平到同 printing 的 canonic
 
 canonical-json-v1：null/bool/Unicode string/安全整數/array/object；拒浮點和未配對 surrogate。鍵以 Unicode code point 排序、無空白/BOM、UTF-8；控制字元一律小寫 `\u00xx`，其餘僅跳脫引號/反斜線，不正規化 Unicode。有序 array 不排序，集合依本契約排序。`source_record` 雜湊取 exact raw bytes，不重序列化。
 
-`text_unit` hash＝exact text UTF-8；相同 hash 仍比 bytes。`sentence_template` `content_hash`＝canonical `{level,source_lang,normalized_text,normalizer_version,semantic_variant,parameter_schema}`；模板 ID 為 T／C＋此 hash 的前綴，每個 ID 固定完整內容；normalizer 升版即產生新 ID。
+`text_unit` hash＝exact text UTF-8；相同 hash 仍比 bytes。切換前 `sentence_template` 的六欄 payload 與 T／C 前綴只用於舊資料辨識；四層的 frame-v1 完整 payload／ID 依[共用契約 §3](../domains/four-layer-translation.md#3-frame-與語義身分)，normalizer、角色／域或語義變體變更須重鍵，NP／中文形式不入身分。
 
 `program_hash`＝canonical `{dsl_version,ast}`；macro `body_hash`＝`{dsl_version,body}`。既有 face-bundle-v1 保留完整觀測 recipe（含 revision ID、原始 name/effect/sections/kind、數值與特性），只作觀測追溯，不充當 DSL 新鮮度鍵。
 

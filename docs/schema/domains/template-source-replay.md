@@ -1,7 +1,9 @@
 # 模板來源清冊（建置時產生）
 
 清冊列出全部句型及其來源位置。它不存進 Git：每次建置用當前程式，從建置 recipe 指定的 JP card 封存批次產生，建置結束即丟棄。
-authored 只保存定義與候選的綁定鍵（hash 與 role），不保存官方原文、正規化文字或來源位置。
+四層目標依[共用契約](four-layer-translation.md)；本文件不表示新 normalizer 已實作。
+authored 保存 frame 的來源描述 hash／版本、角色、葉 schema 與語義變體；pending 可釘精確 occurrence。
+官方原文與 canonical source 只在建置中重建，不複製到 authored；候選仍未啟用。
 
 ## 1. 清冊項目
 
@@ -14,12 +16,17 @@ normalizer_id 指本次支援的具名程式；normalized_hash 是分段後正�
 
 ## 2. 定義與候選的綁定
 
-定義與候選以 `normalized_hash`＋`role` 綁定。這裡的 normalized_hash 是參數正規化後 pattern 的 UTF-8 SHA-256，也就是模板 payload 的 normalized_text 的 hash；authored 只存 hash。
+Frame 以 `source.canonical_hash`、`source.normalizer_version`、role 與 leaf_schema 對本次來源匹配，
+再驗 semantic_variant、projection 及完整語義 payload；normalized_hash 單獨相同不足以合併。
+清冊的 normalizer_id／normalized_hash 在四層分別對應上述版本與 canonical source hash。
 
-- 定義匹配同一組（hash＋role）中參數 schema 驗得過的所有位置；驗不過的位置不匹配，不依原文字串合一。
-- 一組裡沒有任何位置驗得過，或驗得過的位置 slot 語義角色不一致，建置失敗。
-- 同一位置至多匹配一個定義；定義另驗六欄 payload 與 content_hash，見[翻譯契約 §3](translation-contract.md#3-清冊與定義)。
-- 候選的 hash＋role 在本次清冊找不到位置時，建置失敗；候選仍不成為可渲染譯文。
+- 每個來源 occurrence 逐一驗型別、角色、合法域、實值與單位；同一位置至多一個有效 frame，歧義保留清單。
+- resolved 變體可共用；pending 變體只對精確來源 scope 有效，不跨卡自動合併。
+- 定義沒有任何位置驗得過、已知來源錯配或同一槽的角色不一致時拒絕；不是按字串任選定義。
+- 候選沿 normalized_hash＋role 定位本次清冊，但沒有完整 leaf_schema 就不能成為有效 frame／target。
+  切換時須重算候選的 hash 對應當前 canonical；原稿文字保留，找不到來源即失敗，不維護舊 normalizer 雙軌。
+- ID 與 hash 的精確 payload 依[共用契約 §3](four-layer-translation.md#3-frame-與語義身分)，
+  SourceBinding 與多對多舊引用映射依該文件 §6／§9；來源換封存批次不重配相同語義 frame。
 
 ## 3. 建置
 

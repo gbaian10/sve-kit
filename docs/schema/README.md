@@ -51,7 +51,9 @@
 | [人工限量序號版次](domains/manual-printings.md) | 獨立入口、官方封存／第三方 URL、SNC／WB 歸屬、序號補充及人工名稱邊界 |
 | [模板參數辨識規則](domains/template-parameter-policy.md) | 具名辨識開關、參數驗證與退回原因 |
 | [模板來源清冊](domains/template-source-replay.md) | 建置清冊、來源定位、定義與候選綁定 |
-| [翻譯與模板採納契約](domains/translation-contract.md) | 已核可的來源／抽查／提前顯示；人工採納、推導重建與跨區契約 |
+| [翻譯與模板契約](domains/translation-contract.md) | JP 唯一一般來源、當前資料、逐 owner 顯示與跨區規則資格 |
+| [四層翻譯共用契約](domains/four-layer-translation.md) | Frame／SourceBinding、typed 葉、形式與 NP、建置目標欄位、位置與重鍵；設計待實作 |
+| [四層固定案例](domains/four-layer-cases.md) | 機器可讀的合成輸入／預期結果及真實來源邊界索引；不是已通過測試紀錄 |
 | [模板採納政策與收據](domains/translation-policy.md) | authored 政策索引、不可變核可收據、首輪抽查與長尾驗證閉包 |
 
 ### 影像（images）

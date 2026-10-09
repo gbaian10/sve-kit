@@ -1,0 +1,3223 @@
+{
+  "format": 1,
+  "kind": "four_layer_contract_cases",
+  "fixtures": {
+    "identity_base": {
+      "semantic": {
+        "recipe": "frame-v1",
+        "source_lang": "ja",
+        "canonical_source": "TEST_SELECT({zone},{kind},{quantity})",
+        "normalizer_version": "fixture-normalizer-v1",
+        "role": "body",
+        "leaf_schema": {
+          "format": 2,
+          "slots": [
+            {
+              "name": "zone",
+              "type": "ZoneSet",
+              "role": "counted_zone",
+              "domain": {
+                "values": [
+                  "fixture.zones"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 12,
+                  "end": 18
+                }
+              ]
+            },
+            {
+              "name": "kind",
+              "type": "CardKind",
+              "role": "counted_kind",
+              "domain": {
+                "values": [
+                  {
+                    "kind": "vocabulary",
+                    "key": [
+                      "type",
+                      "follower"
+                    ]
+                  }
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 19,
+                  "end": 25
+                }
+              ]
+            },
+            {
+              "name": "quantity",
+              "type": "QuantitySpec",
+              "role": "selection_count",
+              "domain": {
+                "values": [
+                  "fixture.cardinality"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 26,
+                  "end": 36
+                }
+              ]
+            }
+          ]
+        },
+        "semantic_variant": {
+          "state": "resolved",
+          "key": "resolution_choose_effect",
+          "scope": null
+        },
+        "projection": {
+          "projection_kind": "ability_body",
+          "discriminator": "fixture_choose",
+          "scopes": [
+            {
+              "id": "ability",
+              "parent": null,
+              "kind": "ability"
+            }
+          ],
+          "imports": [],
+          "exports": []
+        }
+      },
+      "values": {
+        "zone": [
+          "hand"
+        ],
+        "kind": {
+          "kind": "vocabulary",
+          "key": [
+            "type",
+            "follower"
+          ]
+        },
+        "quantity": {
+          "mode": "exact",
+          "expr": {
+            "kind": "constant",
+            "value": 2
+          }
+        }
+      },
+      "target": {
+        "format": 1,
+        "nodes": [
+          {
+            "kind": "Form",
+            "form_id": "zone.locative",
+            "args": {
+              "zone": {
+                "slot": "zone"
+              }
+            }
+          },
+          {
+            "kind": "Literal",
+            "text": "的"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "quantity"
+          },
+          {
+            "kind": "Form",
+            "form_id": "quantity.classifier",
+            "args": {
+              "zone": {
+                "slot": "zone"
+              },
+              "kind": {
+                "slot": "kind"
+              },
+              "quantity": {
+                "slot": "quantity"
+              }
+            }
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "kind"
+          }
+        ]
+      },
+      "forms_version": "fixture-forms-v1",
+      "note": "",
+      "lang": "zh-Hant"
+    },
+    "source_base": {
+      "registry": {
+        "revision:a": {
+          "card": "card:a",
+          "face": "face:a",
+          "region": "jp",
+          "field": "effect",
+          "source_unit_id": "text:a",
+          "source_hash": "f6caab73124b7e48c9b9c39ff01ec20f69ca15fec10800d43afd5cde391f417a",
+          "source_version_id": "version:a",
+          "fresh": true
+        }
+      },
+      "source": {
+        "owner": {
+          "kind": "face_revision",
+          "revision_id": "revision:a"
+        },
+        "field": "effect",
+        "ordinal": null,
+        "source_unit_id": "text:a",
+        "source_hash": "f6caab73124b7e48c9b9c39ff01ec20f69ca15fec10800d43afd5cde391f417a",
+        "source_ref": {
+          "batch_id": "batch:a",
+          "source_version_id": "version:a",
+          "parser": "fixture-parser-v1",
+          "locator": "/faces/0/effect",
+          "text_hash": "f6caab73124b7e48c9b9c39ff01ec20f69ca15fec10800d43afd5cde391f417a"
+        }
+      },
+      "expected_card": "card:a",
+      "expected_face": "face:a",
+      "available_versions": [
+        "version:a"
+      ],
+      "raw_sources": {
+        "version:a": {
+          "faces": [
+            {
+              "face_id": "face:a",
+              "effect": "自撰來源甲"
+            }
+          ]
+        }
+      }
+    },
+    "positions_base": {
+      "raw": "試😀２\r\n",
+      "canonical": "試😀2",
+      "segments": [
+        {
+          "role": "body",
+          "start": 0,
+          "end": 3
+        },
+        {
+          "role": "layout",
+          "start": 3,
+          "end": 5
+        }
+      ],
+      "trace": [
+        {
+          "raw_span": {
+            "start": 0,
+            "end": 2
+          },
+          "canonical_spans": [
+            {
+              "start": 0,
+              "end": 2
+            }
+          ],
+          "rule": "identity"
+        },
+        {
+          "raw_span": {
+            "start": 2,
+            "end": 3
+          },
+          "canonical_spans": [
+            {
+              "start": 2,
+              "end": 3
+            }
+          ],
+          "rule": "nfkc_digit"
+        },
+        {
+          "raw_span": {
+            "start": 3,
+            "end": 5
+          },
+          "canonical_spans": [],
+          "rule": "layout"
+        }
+      ]
+    },
+    "target_base": {
+      "required": [
+        "zone",
+        "kind",
+        "quantity"
+      ],
+      "bound": [
+        "zone",
+        "kind",
+        "quantity"
+      ],
+      "known_references": [
+        "term:zone.hand",
+        [
+          "type",
+          "follower"
+        ]
+      ],
+      "target": {
+        "format": 1,
+        "nodes": [
+          {
+            "kind": "Form",
+            "form_id": "zone.locative",
+            "args": {
+              "zone": {
+                "slot": "zone"
+              }
+            }
+          },
+          {
+            "kind": "Literal",
+            "text": "的"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "quantity"
+          },
+          {
+            "kind": "Form",
+            "form_id": "quantity.classifier",
+            "args": {
+              "zone": {
+                "slot": "zone"
+              },
+              "kind": {
+                "slot": "kind"
+              },
+              "quantity": {
+                "slot": "quantity"
+              }
+            }
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "kind"
+          }
+        ]
+      }
+    },
+    "jp_base": {
+      "mapping": "confirmed_same_card_face",
+      "jp_source": "valid_fresh",
+      "jp_translation": "valid_fresh",
+      "en_source": "valid_fresh",
+      "aligned": false,
+      "divergence": false,
+      "jp_sections": 2,
+      "en_sections": 2,
+      "display_owner": "en",
+      "translation_source_owner": "jp",
+      "annotation_source": "jp"
+    },
+    "annotation_base": {
+      "text": "星河墓場與墓場😀",
+      "occurrences": [
+        {
+          "ordinal": 0,
+          "reference": {
+            "kind": "card_name",
+            "term_id": "term:fixture.name"
+          },
+          "ranges": [
+            {
+              "start": 0,
+              "end": 4
+            }
+          ],
+          "bold": true
+        },
+        {
+          "ordinal": 1,
+          "reference": {
+            "kind": "glossary",
+            "key": "term:zone.cemetery"
+          },
+          "ranges": [
+            {
+              "start": 5,
+              "end": 7
+            }
+          ],
+          "bold": true
+        }
+      ],
+      "source_concepts": {
+        "name": {
+          "kind": "card_name",
+          "term_id": "term:fixture.name"
+        },
+        "zone": {
+          "kind": "glossary",
+          "key": "term:zone.cemetery"
+        }
+      },
+      "known_concepts": [
+        "term:fixture.name",
+        "term:zone.cemetery",
+        "term:fixture.other"
+      ]
+    },
+    "ruling_base": {
+      "legacy_namespace": "template-v1.normalizer-v1",
+      "legacy_template_id": "T-fixture",
+      "legacy_occurrences": [
+        "occ:a",
+        "occ:b"
+      ],
+      "legacy_scope": [
+        "occ:a",
+        "occ:b"
+      ],
+      "edges": [
+        {
+          "occurrence": "occ:a",
+          "frame_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+          "variant": "play_targets_effect"
+        },
+        {
+          "occurrence": "occ:b",
+          "frame_id": "frame:6ac4ed03747f6420302ae692ae4532f785de68415293d5e6ac222a82efaaa4b4",
+          "variant": "resolution_choose_effect"
+        }
+      ],
+      "existing_frames": [
+        "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "frame:6ac4ed03747f6420302ae692ae4532f785de68415293d5e6ac222a82efaaa4b4"
+      ],
+      "reference_occurrence": "occ:a",
+      "requested_status": "resolved",
+      "requested_scope": [
+        "occ:a"
+      ]
+    },
+    "authored_base": {
+      "document": {
+        "format": 3,
+        "kind": "translation_shard",
+        "records": [
+          {
+            "kind": "template_translation",
+            "data": {
+              "template_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+              "lang": "zh-Hant",
+              "target": {
+                "format": 1,
+                "nodes": [
+                  {
+                    "kind": "Form",
+                    "form_id": "zone.locative",
+                    "args": {
+                      "zone": {
+                        "slot": "zone"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "Literal",
+                    "text": "的"
+                  },
+                  {
+                    "kind": "LeafRef",
+                    "slot": "quantity"
+                  },
+                  {
+                    "kind": "Form",
+                    "form_id": "quantity.classifier",
+                    "args": {
+                      "zone": {
+                        "slot": "zone"
+                      },
+                      "kind": {
+                        "slot": "kind"
+                      },
+                      "quantity": {
+                        "slot": "quantity"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "LeafRef",
+                    "slot": "kind"
+                  }
+                ]
+              }
+            },
+            "origin": "machine",
+            "low_confidence": true
+          }
+        ]
+      },
+      "known_frames": [
+        "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611"
+      ]
+    },
+    "db_target_base": {
+      "table": "template_translation",
+      "row": {
+        "template_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "lang": "zh-Hant",
+        "variant_key": "default",
+        "target": {
+          "format": 1,
+          "nodes": [
+            {
+              "kind": "Form",
+              "form_id": "zone.locative",
+              "args": {
+                "zone": {
+                  "slot": "zone"
+                }
+              }
+            },
+            {
+              "kind": "Literal",
+              "text": "的"
+            },
+            {
+              "kind": "LeafRef",
+              "slot": "quantity"
+            },
+            {
+              "kind": "Form",
+              "form_id": "quantity.classifier",
+              "args": {
+                "zone": {
+                  "slot": "zone"
+                },
+                "kind": {
+                  "slot": "kind"
+                },
+                "quantity": {
+                  "slot": "quantity"
+                }
+              }
+            },
+            {
+              "kind": "LeafRef",
+              "slot": "kind"
+            }
+          ]
+        },
+        "authored_source_id": "source:fixture",
+        "record_key": "[\"template_translation\",\"fixture\",\"zh-Hant\"]",
+        "origin": "project",
+        "low_confidence": false
+      },
+      "existing_frames": [
+        "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611"
+      ],
+      "existing_authored_sources": [
+        "source:fixture"
+      ]
+    }
+  },
+  "cases": [
+    {
+      "group": "FL-001",
+      "id": "np_on_off",
+      "operation": "frame_identity",
+      "input": {
+        "fixture": "identity_base",
+        "changes": {
+          "/target": {
+            "format": 1,
+            "nodes": [
+              {
+                "kind": "NP",
+                "constructor": "CardNP",
+                "args": {
+                  "zone": {
+                    "slot": "zone"
+                  },
+                  "kind": {
+                    "slot": "kind"
+                  },
+                  "quantity": {
+                    "slot": "quantity"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_equal": true,
+        "before_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "after_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "leaf_values_equal": true
+      }
+    },
+    {
+      "group": "FL-001",
+      "id": "form_style",
+      "operation": "frame_identity",
+      "input": {
+        "fixture": "identity_base",
+        "changes": {
+          "/forms_version": "fixture-forms-v2"
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_equal": true,
+        "before_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "after_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "leaf_values_equal": true
+      }
+    },
+    {
+      "group": "FL-001",
+      "id": "note_only",
+      "operation": "frame_identity",
+      "input": {
+        "fixture": "identity_base",
+        "changes": {
+          "/note": "自撰案例備註"
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_equal": true,
+        "before_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "after_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "leaf_values_equal": true
+      }
+    },
+    {
+      "group": "FL-001",
+      "id": "literal_wording",
+      "operation": "frame_identity",
+      "input": {
+        "fixture": "identity_base",
+        "changes": {
+          "/target/nodes/1/text": "裡的"
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_equal": true,
+        "before_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "after_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "leaf_values_equal": true
+      }
+    },
+    {
+      "group": "FL-002",
+      "id": "play_targets",
+      "operation": "frame_identity",
+      "input": {
+        "fixture": "identity_base",
+        "changes": {
+          "/semantic/semantic_variant/key": "play_targets_effect"
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_equal": false,
+        "before_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "after_id": "frame:6ac4ed03747f6420302ae692ae4532f785de68415293d5e6ac222a82efaaa4b4"
+      }
+    },
+    {
+      "group": "FL-002",
+      "id": "cost_role",
+      "operation": "frame_identity",
+      "input": {
+        "fixture": "identity_base",
+        "changes": {
+          "/semantic/semantic_variant/key": "cost_material"
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_equal": false,
+        "before_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "after_id": "frame:9e25dfdc25e276d710315cb3845230b8f280965d1df239739cd086a005be7cc0"
+      }
+    },
+    {
+      "group": "FL-002",
+      "id": "normalizer_version",
+      "operation": "frame_identity",
+      "input": {
+        "fixture": "identity_base",
+        "changes": {
+          "/semantic/normalizer_version": "fixture-normalizer-v2"
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_equal": false,
+        "before_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "after_id": "frame:920318a7e3138c37b22e9b97dc4749def88ea2e95c2301dde081d46efbf1a540"
+      }
+    },
+    {
+      "group": "FL-002",
+      "id": "canonical_source",
+      "operation": "frame_identity",
+      "input": {
+        "fixture": "identity_base",
+        "changes": {
+          "/semantic/canonical_source": "TEST_SELECT({zone},{kind},{quantity})_OPTIONAL"
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_equal": false,
+        "before_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "after_id": "frame:e5f9a29010847c87e8642956f67bcc3502ad7097e660aa261c769d9921cb0697"
+      }
+    },
+    {
+      "group": "FL-002",
+      "id": "domain_changed",
+      "operation": "frame_identity",
+      "input": {
+        "fixture": "identity_base",
+        "changes": {
+          "/semantic/leaf_schema/slots/0/domain/values": [
+            "fixture.zones.narrow"
+          ]
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_equal": false
+      }
+    },
+    {
+      "group": "FL-003",
+      "id": "ex_token_follower",
+      "operation": "source_unit",
+      "input": {
+        "constructor": "fixture.select_card",
+        "counted_object": "follower",
+        "counted_zones": [
+          "ex"
+        ],
+        "token": true,
+        "quantity_role": "cardinality",
+        "raw_unit": "体",
+        "registered_allowed_units": [
+          "体"
+        ]
+      },
+      "expected": {
+        "result": "accept",
+        "merge_allowed": true,
+        "reason": null
+      }
+    },
+    {
+      "group": "FL-003",
+      "id": "ex_wrong_unit",
+      "operation": "source_unit",
+      "input": {
+        "constructor": "fixture.select_card",
+        "counted_object": "follower",
+        "counted_zones": [
+          "ex"
+        ],
+        "token": true,
+        "quantity_role": "cardinality",
+        "raw_unit": "枚",
+        "registered_allowed_units": [
+          "体"
+        ]
+      },
+      "expected": {
+        "result": "reject",
+        "merge_allowed": false,
+        "reason": "source_unit_mismatch"
+      }
+    },
+    {
+      "group": "FL-003",
+      "id": "union_cards",
+      "operation": "source_unit",
+      "input": {
+        "constructor": "fixture.select_union",
+        "counted_object": "follower",
+        "counted_zones": [
+          "battlefield",
+          "ex"
+        ],
+        "token": false,
+        "quantity_role": "union_cardinality",
+        "raw_unit": "枚",
+        "registered_allowed_units": [
+          "枚"
+        ]
+      },
+      "expected": {
+        "result": "accept",
+        "merge_allowed": true,
+        "reason": null
+      }
+    },
+    {
+      "group": "FL-003",
+      "id": "union_wrong_unit",
+      "operation": "source_unit",
+      "input": {
+        "constructor": "fixture.select_union",
+        "counted_object": "follower",
+        "counted_zones": [
+          "battlefield",
+          "ex"
+        ],
+        "token": false,
+        "quantity_role": "union_cardinality",
+        "raw_unit": "体",
+        "registered_allowed_units": [
+          "枚"
+        ]
+      },
+      "expected": {
+        "result": "reject",
+        "merge_allowed": false,
+        "reason": "source_unit_mismatch"
+      }
+    },
+    {
+      "group": "FL-003",
+      "id": "amulet_tsu",
+      "operation": "source_unit",
+      "input": {
+        "constructor": "fixture.select_card",
+        "counted_object": "amulet",
+        "counted_zones": [
+          "battlefield"
+        ],
+        "token": false,
+        "quantity_role": "cardinality",
+        "raw_unit": "つ",
+        "registered_allowed_units": [
+          "つ",
+          "枚"
+        ]
+      },
+      "expected": {
+        "result": "accept",
+        "merge_allowed": true,
+        "reason": null
+      }
+    },
+    {
+      "group": "FL-003",
+      "id": "amulet_mai",
+      "operation": "source_unit",
+      "input": {
+        "constructor": "fixture.select_card",
+        "counted_object": "amulet",
+        "counted_zones": [
+          "battlefield"
+        ],
+        "token": false,
+        "quantity_role": "cardinality",
+        "raw_unit": "枚",
+        "registered_allowed_units": [
+          "つ",
+          "枚"
+        ]
+      },
+      "expected": {
+        "result": "accept",
+        "merge_allowed": true,
+        "reason": null
+      }
+    },
+    {
+      "group": "FL-003",
+      "id": "leader_person",
+      "operation": "source_unit",
+      "input": {
+        "constructor": "fixture.select_leader",
+        "counted_object": "leader",
+        "counted_zones": [],
+        "token": false,
+        "quantity_role": "player_count",
+        "raw_unit": "人",
+        "registered_allowed_units": [
+          "人"
+        ]
+      },
+      "expected": {
+        "result": "accept",
+        "merge_allowed": true,
+        "reason": null
+      }
+    },
+    {
+      "group": "FL-003",
+      "id": "leader_card_unit",
+      "operation": "source_unit",
+      "input": {
+        "constructor": "fixture.select_leader",
+        "counted_object": "leader",
+        "counted_zones": [],
+        "token": false,
+        "quantity_role": "player_count",
+        "raw_unit": "枚",
+        "registered_allowed_units": [
+          "人"
+        ]
+      },
+      "expected": {
+        "result": "reject",
+        "merge_allowed": false,
+        "reason": "source_unit_mismatch"
+      }
+    },
+    {
+      "group": "FL-003",
+      "id": "hand_card",
+      "operation": "source_unit",
+      "input": {
+        "constructor": "fixture.select_card",
+        "counted_object": "follower",
+        "counted_zones": [
+          "hand"
+        ],
+        "token": false,
+        "quantity_role": "cardinality",
+        "raw_unit": "枚",
+        "registered_allowed_units": [
+          "枚"
+        ]
+      },
+      "expected": {
+        "result": "accept",
+        "merge_allowed": true,
+        "reason": null
+      }
+    },
+    {
+      "group": "FL-003",
+      "id": "repeat_not_card",
+      "operation": "source_unit",
+      "input": {
+        "constructor": "fixture.select_card",
+        "counted_object": "follower",
+        "counted_zones": [
+          "hand"
+        ],
+        "token": false,
+        "quantity_role": "cardinality",
+        "raw_unit": "回",
+        "registered_allowed_units": [
+          "枚"
+        ]
+      },
+      "expected": {
+        "result": "reject",
+        "merge_allowed": false,
+        "reason": "source_unit_mismatch"
+      }
+    },
+    {
+      "group": "FL-004",
+      "id": "nat_zero",
+      "operation": "leaf_domain",
+      "input": {
+        "type": "Nat",
+        "role": "count",
+        "value": 0,
+        "min": 0,
+        "max": 9007199254740991
+      },
+      "expected": {
+        "result": "accept",
+        "reason": null
+      }
+    },
+    {
+      "group": "FL-004",
+      "id": "ordinal_zero",
+      "operation": "leaf_domain",
+      "input": {
+        "type": "Ordinal",
+        "role": "choice_index",
+        "value": 0,
+        "min": 1,
+        "max": 9007199254740991
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "invalid_leaf_value"
+      }
+    },
+    {
+      "group": "FL-004",
+      "id": "unsafe_integer",
+      "operation": "leaf_domain",
+      "input": {
+        "type": "Nat",
+        "role": "count",
+        "value": 9007199254740992,
+        "min": 0,
+        "max": 9007199254740991
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "invalid_leaf_value"
+      }
+    },
+    {
+      "group": "FL-004",
+      "id": "bool_is_not_nat",
+      "operation": "leaf_domain",
+      "input": {
+        "type": "Nat",
+        "role": "count",
+        "value": true,
+        "min": 0,
+        "max": 9007199254740991
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "invalid_leaf_value"
+      }
+    },
+    {
+      "group": "FL-004",
+      "id": "same_number_different_role",
+      "operation": "leaf_domain",
+      "input": {
+        "schema_role": "selection_count",
+        "source_role": "repeat_count",
+        "value": 2
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "leaf_role_mismatch"
+      }
+    },
+    {
+      "group": "FL-005",
+      "id": "complete",
+      "operation": "target_references",
+      "input": {
+        "fixture": "target_base"
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-005",
+      "id": "missing_required_value",
+      "operation": "target_references",
+      "input": {
+        "fixture": "target_base",
+        "changes": {
+          "/bound": [
+            "zone",
+            "kind"
+          ]
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "missing_required_leaf"
+      }
+    },
+    {
+      "group": "FL-005",
+      "id": "missing_required_reference",
+      "operation": "target_references",
+      "input": {
+        "fixture": "target_base",
+        "changes": {
+          "/target": {
+            "format": 1,
+            "nodes": [
+              {
+                "kind": "Literal",
+                "text": "手牌中的2張從者"
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unused_required_leaf"
+      }
+    },
+    {
+      "group": "FL-005",
+      "id": "unknown_slot",
+      "operation": "target_references",
+      "input": {
+        "fixture": "target_base",
+        "changes": {
+          "/target/nodes/4/slot": "missing"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unknown_leaf_reference"
+      }
+    },
+    {
+      "group": "FL-005",
+      "id": "unknown_concept",
+      "operation": "target_references",
+      "input": {
+        "fixture": "target_base",
+        "reference": {
+          "kind": "glossary",
+          "key": "term:missing"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unknown_concept"
+      }
+    },
+    {
+      "group": "FL-006",
+      "id": "action_body",
+      "operation": "projection",
+      "input": {
+        "source_class": "action_body"
+      },
+      "expected": {
+        "result": "accept",
+        "projection_kind": "ability_body",
+        "completed_body": true,
+        "noop": false
+      }
+    },
+    {
+      "group": "FL-006",
+      "id": "quick_flag",
+      "operation": "projection",
+      "input": {
+        "source_class": "quick_flag"
+      },
+      "expected": {
+        "result": "accept",
+        "projection_kind": "ability_flag",
+        "completed_body": false,
+        "noop": false
+      }
+    },
+    {
+      "group": "FL-006",
+      "id": "deck_constraint",
+      "operation": "projection",
+      "input": {
+        "source_class": "deck_constraint"
+      },
+      "expected": {
+        "result": "accept",
+        "projection_kind": "card_field",
+        "completed_body": false,
+        "noop": false
+      }
+    },
+    {
+      "group": "FL-006",
+      "id": "classified_reminder",
+      "operation": "projection",
+      "input": {
+        "source_class": "classified_reminder"
+      },
+      "expected": {
+        "result": "accept",
+        "projection_kind": "none",
+        "completed_body": false,
+        "noop": true
+      }
+    },
+    {
+      "group": "FL-006",
+      "id": "classified_layout",
+      "operation": "projection",
+      "input": {
+        "source_class": "classified_layout"
+      },
+      "expected": {
+        "result": "accept",
+        "projection_kind": "none",
+        "completed_body": false,
+        "noop": true
+      }
+    },
+    {
+      "group": "FL-006",
+      "id": "unclassified",
+      "operation": "projection",
+      "input": {
+        "source_class": "unclassified"
+      },
+      "expected": {
+        "result": "pending",
+        "projection_kind": "pending",
+        "completed_body": false,
+        "noop": false,
+        "semantic_variant_state": "pending",
+        "scope_is_exact_occurrence": true
+      }
+    },
+    {
+      "group": "FL-006",
+      "id": "unknown_not_none",
+      "operation": "projection",
+      "input": {
+        "source_class": "unclassified",
+        "requested_kind": "none"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unclassified_projection"
+      }
+    },
+    {
+      "group": "FL-007",
+      "id": "exact_source",
+      "operation": "source_identity",
+      "input": {
+        "fixture": "source_base"
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-007",
+      "id": "wrong_owner",
+      "operation": "source_identity",
+      "input": {
+        "fixture": "source_base",
+        "changes": {
+          "/expected_card": "card:b"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "owner_mismatch"
+      }
+    },
+    {
+      "group": "FL-007",
+      "id": "wrong_face",
+      "operation": "source_identity",
+      "input": {
+        "fixture": "source_base",
+        "changes": {
+          "/expected_face": "face:b"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "face_mismatch"
+      }
+    },
+    {
+      "group": "FL-007",
+      "id": "wrong_field",
+      "operation": "source_identity",
+      "input": {
+        "fixture": "source_base",
+        "changes": {
+          "/source/field": "name"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "field_mismatch"
+      }
+    },
+    {
+      "group": "FL-007",
+      "id": "wrong_hash",
+      "operation": "source_identity",
+      "input": {
+        "fixture": "source_base",
+        "changes": {
+          "/source/source_hash": "2222222222222222222222222222222222222222222222222222222222222222"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "source_hash_mismatch"
+      }
+    },
+    {
+      "group": "FL-007",
+      "id": "stale_source",
+      "operation": "source_identity",
+      "input": {
+        "fixture": "source_base",
+        "changes": {
+          "/registry/revision:a/fresh": false
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "stale_source"
+      }
+    },
+    {
+      "group": "FL-007",
+      "id": "missing_source",
+      "operation": "source_identity",
+      "input": {
+        "fixture": "source_base",
+        "changes": {
+          "/available_versions": []
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "missing_source"
+      }
+    },
+    {
+      "group": "FL-008",
+      "id": "unicode_roundtrip",
+      "operation": "source_positions",
+      "input": {
+        "fixture": "positions_base"
+      },
+      "expected": {
+        "result": "accept",
+        "raw_codepoints": 5,
+        "canonical_codepoints": 3,
+        "raw_roundtrip_equal": true
+      }
+    },
+    {
+      "group": "FL-008",
+      "id": "utf16_offset",
+      "operation": "source_positions",
+      "input": {
+        "fixture": "positions_base",
+        "changes": {
+          "/trace/1/raw_span": {
+            "start": 3,
+            "end": 4
+          }
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "trace_mismatch"
+      }
+    },
+    {
+      "group": "FL-008",
+      "id": "lost_cr",
+      "operation": "source_positions",
+      "input": {
+        "fixture": "positions_base",
+        "changes": {
+          "/segments/1/start": 4
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "source_coverage_gap"
+      }
+    },
+    {
+      "group": "FL-008",
+      "id": "overlap",
+      "operation": "source_positions",
+      "input": {
+        "fixture": "positions_base",
+        "changes": {
+          "/segments/1/start": 2
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "source_coverage_overlap"
+      }
+    },
+    {
+      "group": "FL-008",
+      "id": "layout_contains_semantics",
+      "operation": "source_positions",
+      "input": {
+        "fixture": "positions_base",
+        "changes": {
+          "/segments/1/start": 2,
+          "/segments/0/end": 2
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "invalid_layout"
+      }
+    },
+    {
+      "group": "FL-009",
+      "id": "required_missing",
+      "operation": "record_shape",
+      "input": {
+        "fixture": "authored_base",
+        "remove": [
+          "/document/records/0/data/target"
+        ]
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "missing_required_field"
+      }
+    },
+    {
+      "group": "FL-009",
+      "id": "unknown_field",
+      "operation": "record_shape",
+      "input": {
+        "fixture": "authored_base",
+        "changes": {
+          "/document/records/0": {
+            "kind": "template_translation",
+            "data": {
+              "template_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+              "lang": "zh-Hant",
+              "target": {
+                "format": 1,
+                "nodes": [
+                  {
+                    "kind": "Form",
+                    "form_id": "zone.locative",
+                    "args": {
+                      "zone": {
+                        "slot": "zone"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "Literal",
+                    "text": "的"
+                  },
+                  {
+                    "kind": "LeafRef",
+                    "slot": "quantity"
+                  },
+                  {
+                    "kind": "Form",
+                    "form_id": "quantity.classifier",
+                    "args": {
+                      "zone": {
+                        "slot": "zone"
+                      },
+                      "kind": {
+                        "slot": "kind"
+                      },
+                      "quantity": {
+                        "slot": "quantity"
+                      }
+                    }
+                  },
+                  {
+                    "kind": "LeafRef",
+                    "slot": "kind"
+                  }
+                ]
+              },
+              "unexpected": "extra"
+            },
+            "origin": "machine",
+            "low_confidence": true
+          }
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unknown_field"
+      }
+    },
+    {
+      "group": "FL-009",
+      "id": "duplicate_key",
+      "operation": "record_shape",
+      "input": {
+        "fixture": "authored_base",
+        "changes": {
+          "/document/records": [
+            {
+              "kind": "template_translation",
+              "data": {
+                "template_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+                "lang": "zh-Hant",
+                "target": {
+                  "format": 1,
+                  "nodes": [
+                    {
+                      "kind": "Form",
+                      "form_id": "zone.locative",
+                      "args": {
+                        "zone": {
+                          "slot": "zone"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "Literal",
+                      "text": "的"
+                    },
+                    {
+                      "kind": "LeafRef",
+                      "slot": "quantity"
+                    },
+                    {
+                      "kind": "Form",
+                      "form_id": "quantity.classifier",
+                      "args": {
+                        "zone": {
+                          "slot": "zone"
+                        },
+                        "kind": {
+                          "slot": "kind"
+                        },
+                        "quantity": {
+                          "slot": "quantity"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "LeafRef",
+                      "slot": "kind"
+                    }
+                  ]
+                }
+              },
+              "origin": "machine",
+              "low_confidence": true
+            },
+            {
+              "kind": "template_translation",
+              "data": {
+                "template_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+                "lang": "zh-Hant",
+                "target": {
+                  "format": 1,
+                  "nodes": [
+                    {
+                      "kind": "Form",
+                      "form_id": "zone.locative",
+                      "args": {
+                        "zone": {
+                          "slot": "zone"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "Literal",
+                      "text": "的"
+                    },
+                    {
+                      "kind": "LeafRef",
+                      "slot": "quantity"
+                    },
+                    {
+                      "kind": "Form",
+                      "form_id": "quantity.classifier",
+                      "args": {
+                        "zone": {
+                          "slot": "zone"
+                        },
+                        "kind": {
+                          "slot": "kind"
+                        },
+                        "quantity": {
+                          "slot": "quantity"
+                        }
+                      }
+                    },
+                    {
+                      "kind": "LeafRef",
+                      "slot": "kind"
+                    }
+                  ]
+                }
+              },
+              "origin": "machine",
+              "low_confidence": true
+            }
+          ]
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "duplicate_record_key"
+      }
+    },
+    {
+      "group": "FL-010",
+      "id": "new_entry",
+      "operation": "authored_entry",
+      "input": {
+        "fixture": "authored_base"
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-010",
+      "id": "removed_divergence",
+      "operation": "authored_entry",
+      "input": {
+        "fixture": "authored_base",
+        "changes": {
+          "/document/records": [
+            {
+              "kind": "source_exception",
+              "data": {
+                "card_id": "card:a",
+                "region": "en",
+                "scope": "rules",
+                "basis": "divergence",
+                "reason": "自撰案例"
+              }
+            }
+          ]
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unknown_record_kind"
+      }
+    },
+    {
+      "group": "FL-010",
+      "id": "removed_default_jp",
+      "operation": "authored_entry",
+      "input": {
+        "fixture": "authored_base",
+        "changes": {
+          "/document/records": [
+            {
+              "kind": "source_exception",
+              "data": {
+                "card_id": "card:a",
+                "region": "en",
+                "scope": "rules",
+                "basis": "default_jp",
+                "reason": "自撰案例"
+              }
+            }
+          ]
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unknown_record_kind"
+      }
+    },
+    {
+      "group": "FL-010",
+      "id": "old_format",
+      "operation": "authored_entry",
+      "input": {
+        "fixture": "authored_base",
+        "changes": {
+          "/document/format": 2
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unsupported_format"
+      }
+    },
+    {
+      "group": "FL-010",
+      "id": "invalid_origin",
+      "operation": "authored_entry",
+      "input": {
+        "fixture": "authored_base",
+        "changes": {
+          "/document/records/0/origin": "reviewed"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "invalid_origin"
+      }
+    },
+    {
+      "group": "FL-010",
+      "id": "invalid_confidence",
+      "operation": "authored_entry",
+      "input": {
+        "fixture": "authored_base",
+        "changes": {
+          "/document/records/0/low_confidence": "false"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "invalid_bool"
+      }
+    },
+    {
+      "group": "FL-011",
+      "id": "missing_label",
+      "operation": "missing_translation",
+      "input": {
+        "leaf_bound": true,
+        "label_state": "missing",
+        "named_variant_exists": true,
+        "pin": null
+      },
+      "expected": {
+        "result": "fallback",
+        "whole_field": true,
+        "reason": "missing_term_translation",
+        "select_variant": false
+      }
+    },
+    {
+      "group": "FL-011",
+      "id": "withdrawn_label",
+      "operation": "missing_translation",
+      "input": {
+        "leaf_bound": true,
+        "label_state": "withdrawn",
+        "named_variant_exists": true,
+        "pin": null
+      },
+      "expected": {
+        "result": "fallback",
+        "whole_field": true,
+        "reason": "missing_term_translation",
+        "select_variant": false
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "zone_locative",
+      "operation": "form_signature",
+      "input": {
+        "form": "zone.locative",
+        "registered": true,
+        "argument_type": "ZoneSet",
+        "required_type": "ZoneSet",
+        "lang": "zh-Hant",
+        "target_lang": "zh-Hant"
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "zone_allative",
+      "operation": "form_signature",
+      "input": {
+        "form": "zone.allative",
+        "registered": true,
+        "argument_type": "ZoneSet",
+        "required_type": "ZoneSet",
+        "lang": "zh-Hant",
+        "target_lang": "zh-Hant"
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "zone_ablative",
+      "operation": "form_signature",
+      "input": {
+        "form": "zone.ablative",
+        "registered": true,
+        "argument_type": "ZoneSet",
+        "required_type": "ZoneSet",
+        "lang": "zh-Hant",
+        "target_lang": "zh-Hant"
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "unknown_form",
+      "operation": "form_signature",
+      "input": {
+        "form": "zone.unknown",
+        "registered": false
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unknown_form"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "wrong_arg",
+      "operation": "form_signature",
+      "input": {
+        "form": "zone.locative",
+        "argument_type": "Nat",
+        "required_type": "ZoneSet"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "form_type_mismatch"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "wrong_lang",
+      "operation": "form_signature",
+      "input": {
+        "form": "zone.locative",
+        "lang": "ja",
+        "target_lang": "zh-Hant"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "form_language_mismatch"
+      }
+    },
+    {
+      "group": "FL-013",
+      "id": "name_contains_term",
+      "operation": "annotation_identity",
+      "input": {
+        "fixture": "annotation_base"
+      },
+      "expected": {
+        "result": "accept",
+        "occurrence_count": 2,
+        "cemetery_ranges": [
+          {
+            "start": 5,
+            "end": 7
+          }
+        ],
+        "nested_term_in_name": false
+      }
+    },
+    {
+      "group": "FL-013",
+      "id": "same_text_other_concept",
+      "operation": "annotation_identity",
+      "input": {
+        "fixture": "annotation_base",
+        "changes": {
+          "/occurrences/1/reference": {
+            "kind": "glossary",
+            "key": "term:fixture.other"
+          },
+          "/source_concepts/zone": {
+            "kind": "glossary",
+            "key": "term:fixture.other"
+          }
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "same_text_unit": true,
+        "same_annotation_set": false,
+        "same_context": false
+      }
+    },
+    {
+      "group": "FL-014",
+      "id": "repeated_reference",
+      "operation": "occurrences",
+      "input": {
+        "text": "手牌與手牌",
+        "reference": "term:zone.hand",
+        "source_ordinals": [
+          0,
+          1
+        ],
+        "target_paths": [
+          [
+            0
+          ],
+          [
+            2
+          ]
+        ],
+        "ranges": [
+          {
+            "start": 0,
+            "end": 2
+          },
+          {
+            "start": 3,
+            "end": 5
+          }
+        ]
+      },
+      "expected": {
+        "result": "accept",
+        "occurrence_count": 2,
+        "dedup_term_count": 1,
+        "render_occurrence_count": 2
+      }
+    },
+    {
+      "group": "FL-014",
+      "id": "source_without_translation",
+      "operation": "occurrences",
+      "input": {
+        "text": "自撰位置",
+        "source_annotations": 1,
+        "translation": null
+      },
+      "expected": {
+        "result": "accept",
+        "source_annotation_retained": true
+      }
+    },
+    {
+      "group": "FL-014",
+      "id": "wrong_text",
+      "operation": "occurrences",
+      "input": {
+        "annotation_text": "手牌",
+        "selected_text": "墓場"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "annotation_text_mismatch"
+      }
+    },
+    {
+      "group": "FL-014",
+      "id": "out_of_bounds",
+      "operation": "occurrences",
+      "input": {
+        "text": "手牌",
+        "ranges": [
+          {
+            "start": 0,
+            "end": 3
+          }
+        ]
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "span_out_of_bounds"
+      }
+    },
+    {
+      "group": "FL-014",
+      "id": "lost_source_link",
+      "operation": "occurrences",
+      "input": {
+        "target_occurrences": 2,
+        "render_occurrence_rows": 1
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "missing_render_occurrence"
+      }
+    },
+    {
+      "group": "FL-015",
+      "id": "label",
+      "operation": "render_dependencies",
+      "input": {
+        "changed": "label"
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_changed": false,
+        "render_dependency_changed": true,
+        "dsl_review_stale": false
+      }
+    },
+    {
+      "group": "FL-015",
+      "id": "form",
+      "operation": "render_dependencies",
+      "input": {
+        "changed": "form"
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_changed": false,
+        "render_dependency_changed": true,
+        "dsl_review_stale": false
+      }
+    },
+    {
+      "group": "FL-015",
+      "id": "bold",
+      "operation": "render_dependencies",
+      "input": {
+        "changed": "bold"
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_changed": false,
+        "render_dependency_changed": true,
+        "dsl_review_stale": false
+      }
+    },
+    {
+      "group": "FL-015",
+      "id": "target_np",
+      "operation": "render_dependencies",
+      "input": {
+        "changed": "target_np"
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_changed": false,
+        "render_dependency_changed": true,
+        "dsl_review_stale": false
+      }
+    },
+    {
+      "group": "FL-015",
+      "id": "low_confidence",
+      "operation": "render_dependencies",
+      "input": {
+        "changed": "low_confidence"
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_changed": false,
+        "render_dependency_changed": true,
+        "dsl_review_stale": false
+      }
+    },
+    {
+      "group": "FL-015",
+      "id": "note_only",
+      "operation": "render_dependencies",
+      "input": {
+        "changed": "note"
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_changed": false,
+        "render_dependency_changed": false,
+        "dsl_review_stale": false
+      }
+    },
+    {
+      "group": "FL-015",
+      "id": "unresolved_emphasis",
+      "operation": "render_dependencies",
+      "input": {
+        "changed": "emphasis_to_null"
+      },
+      "expected": {
+        "result": "accept",
+        "bold": null,
+        "reason": "missing_emphasis",
+        "frame_id_changed": false
+      }
+    },
+    {
+      "group": "FL-016",
+      "id": "source_hash",
+      "operation": "semantic_dependencies",
+      "input": {
+        "changed": "source_hash"
+      },
+      "expected": {
+        "result": "accept",
+        "frame_rekey": false,
+        "bindings_stale": true,
+        "render_stale": true,
+        "dsl_stale": true,
+        "ruling_uses_recheck": true,
+        "permanent_card_id_changed": false
+      }
+    },
+    {
+      "group": "FL-016",
+      "id": "semantic_variant",
+      "operation": "semantic_dependencies",
+      "input": {
+        "changed": "semantic_variant"
+      },
+      "expected": {
+        "result": "accept",
+        "frame_rekey": true,
+        "bindings_stale": true,
+        "render_stale": true,
+        "dsl_stale": true,
+        "ruling_uses_recheck": true,
+        "permanent_card_id_changed": false
+      }
+    },
+    {
+      "group": "FL-016",
+      "id": "dsl_body",
+      "operation": "semantic_dependencies",
+      "input": {
+        "changed": "dsl_body"
+      },
+      "expected": {
+        "result": "accept",
+        "frame_rekey": false,
+        "bindings_stale": false,
+        "render_stale": false,
+        "dsl_stale": true,
+        "ruling_uses_recheck": false,
+        "permanent_card_id_changed": false
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "zone_locative",
+      "operation": "zone_forms",
+      "input": {
+        "form": "zone.locative",
+        "zone": "hand",
+        "labels": {
+          "hand": "手牌",
+          "battlefield": "戰場"
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "text": "手牌中",
+        "executable_action_in_form": false
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "zone_allative",
+      "operation": "zone_forms",
+      "input": {
+        "form": "zone.allative",
+        "zone": "battlefield",
+        "labels": {
+          "hand": "手牌",
+          "battlefield": "戰場"
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "text": "到戰場上",
+        "executable_action_in_form": false
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "zone_ablative",
+      "operation": "zone_forms",
+      "input": {
+        "form": "zone.ablative",
+        "zone": "hand",
+        "labels": {
+          "hand": "手牌",
+          "battlefield": "戰場"
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "text": "從手牌",
+        "executable_action_in_form": false
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "zone_add_to_hand",
+      "operation": "zone_forms",
+      "input": {
+        "form": "zone.add_to_hand",
+        "zone": "hand",
+        "labels": {
+          "hand": "手牌",
+          "battlefield": "戰場"
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "text": "加入手牌",
+        "executable_action_in_form": false
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "zone_return_to_hand",
+      "operation": "zone_forms",
+      "input": {
+        "form": "zone.return_to_hand",
+        "zone": "hand",
+        "labels": {
+          "hand": "手牌",
+          "battlefield": "戰場"
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "text": "回到手牌",
+        "executable_action_in_form": false
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "destination_does_not_count",
+      "operation": "zone_forms",
+      "input": {
+        "counted_zone": "deck",
+        "destination": "battlefield",
+        "raw_unit": "枚"
+      },
+      "expected": {
+        "result": "accept",
+        "count_unit_context": "deck"
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "top_is_not_zone",
+      "operation": "zone_forms",
+      "input": {
+        "type": "ZoneSet",
+        "value": [
+          "deck_top"
+        ]
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unknown_zone_kind"
+      }
+    },
+    {
+      "group": "FL-018",
+      "id": "partial_modifier",
+      "operation": "partial_np",
+      "input": {
+        "np_complete": false,
+        "required_leaves_bound": true,
+        "literal_modifier_translated": true
+      },
+      "expected": {
+        "result": "accept",
+        "render_allowed": true,
+        "frame_rekey": false
+      }
+    },
+    {
+      "group": "FL-018",
+      "id": "unknown_filter",
+      "operation": "partial_np",
+      "input": {
+        "np_complete": false,
+        "semantic_filter": "unknown"
+      },
+      "expected": {
+        "result": "pending",
+        "render_allowed": true,
+        "dsl_executable": false
+      }
+    },
+    {
+      "group": "FL-018",
+      "id": "sum_type",
+      "operation": "partial_np",
+      "input": {
+        "branches": [
+          "PlayerRef",
+          "CardObject"
+        ],
+        "requested_element_type": "CardObject"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "union_element_type_mismatch"
+      }
+    },
+    {
+      "group": "FL-018",
+      "id": "branch_filter_lifted",
+      "operation": "partial_np",
+      "input": {
+        "source_scope": "branch_a",
+        "requested_scope": "all_branches"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "scope_widening"
+      }
+    },
+    {
+      "group": "FL-018",
+      "id": "groups_flattened",
+      "operation": "partial_np",
+      "input": {
+        "source": "per_group_limit",
+        "requested": "union_limit"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "quantity_scope_mismatch"
+      }
+    },
+    {
+      "group": "FL-018",
+      "id": "token_as_trait",
+      "operation": "partial_np",
+      "input": {
+        "source_type": "TokenStatus",
+        "requested_type": "Concept.trait"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "leaf_type_mismatch"
+      }
+    },
+    {
+      "group": "FL-019",
+      "id": "exact",
+      "operation": "quantity",
+      "input": {
+        "mode": "exact",
+        "construct": "supported_fixture_construct",
+        "expr": {
+          "kind": "constant",
+          "value": 2
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "semantic_destination": "n"
+      }
+    },
+    {
+      "group": "FL-019",
+      "id": "up_to",
+      "operation": "quantity",
+      "input": {
+        "mode": "up_to",
+        "construct": "supported_fixture_construct",
+        "expr": {
+          "kind": "constant",
+          "value": 2
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "semantic_destination": "upto"
+      }
+    },
+    {
+      "group": "FL-019",
+      "id": "at_least",
+      "operation": "quantity",
+      "input": {
+        "mode": "at_least",
+        "construct": "existence_condition",
+        "expr": {
+          "kind": "constant",
+          "value": 2
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "semantic_destination": "count_compare"
+      }
+    },
+    {
+      "group": "FL-019",
+      "id": "all",
+      "operation": "quantity",
+      "input": {
+        "mode": "all",
+        "construct": "supported_fixture_construct",
+        "expr": null
+      },
+      "expected": {
+        "result": "accept",
+        "semantic_destination": "whole_set"
+      }
+    },
+    {
+      "group": "FL-019",
+      "id": "any",
+      "operation": "quantity",
+      "input": {
+        "mode": "any",
+        "construct": "supported_fixture_construct",
+        "expr": null
+      },
+      "expected": {
+        "result": "accept",
+        "semantic_destination": "player_quantity"
+      }
+    },
+    {
+      "group": "FL-019",
+      "id": "may_is_not_zero",
+      "operation": "quantity",
+      "input": {
+        "source": "may",
+        "requested": "up_to_zero"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "control_mismatch"
+      }
+    },
+    {
+      "group": "FL-019",
+      "id": "random_is_not_choose",
+      "operation": "quantity",
+      "input": {
+        "source": "random",
+        "requested": "player_choose"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "control_mismatch"
+      }
+    },
+    {
+      "group": "FL-019",
+      "id": "missing_bound_x",
+      "operation": "quantity",
+      "input": {
+        "expr": {
+          "kind": "bound",
+          "import": "x"
+        },
+        "imports": []
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unknown_import"
+      }
+    },
+    {
+      "group": "FL-019",
+      "id": "at_least_choose",
+      "operation": "quantity",
+      "input": {
+        "mode": "at_least",
+        "construct": "choose"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unsupported_quantity_mode"
+      }
+    },
+    {
+      "group": "FL-019",
+      "id": "freeze_live",
+      "operation": "quantity",
+      "input": {
+        "expression_evaluation": "Live",
+        "requested": "entry_constant"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "capture_timing_mismatch"
+      }
+    },
+    {
+      "group": "FL-020",
+      "id": "named_cost_rule",
+      "operation": "owner_omission",
+      "input": {
+        "source_presence": "omitted",
+        "resolution_rule": "fixture.cost_owner_self",
+        "context": "cost"
+      },
+      "expected": {
+        "result": "accept",
+        "owner": "self",
+        "raw_spans": []
+      }
+    },
+    {
+      "group": "FL-020",
+      "id": "unknown_owner",
+      "operation": "owner_omission",
+      "input": {
+        "source_presence": "omitted",
+        "resolution_rule": null,
+        "context": "unknown"
+      },
+      "expected": {
+        "result": "pending",
+        "owner": null,
+        "dsl_executable": false
+      }
+    },
+    {
+      "group": "FL-020",
+      "id": "global_default_self",
+      "operation": "owner_omission",
+      "input": {
+        "source_presence": "omitted",
+        "resolution_rule": null,
+        "proposed_owner": "self"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unjustified_owner_default"
+      }
+    },
+    {
+      "group": "FL-021",
+      "id": "keyword_head_grant",
+      "operation": "semantic_roles",
+      "input": {
+        "before_role": "ability_head",
+        "after_role": "grant_keyword",
+        "same_concept": true
+      },
+      "expected": {
+        "result": "accept",
+        "same_frame_id": false
+      }
+    },
+    {
+      "group": "FL-021",
+      "id": "keyword_predicate",
+      "operation": "semantic_roles",
+      "input": {
+        "before_role": "grant_keyword",
+        "after_role": "selector_keyword",
+        "same_concept": true
+      },
+      "expected": {
+        "result": "accept",
+        "same_frame_id": false
+      }
+    },
+    {
+      "group": "FL-021",
+      "id": "phase_duration",
+      "operation": "semantic_roles",
+      "input": {
+        "before_role": "phase_trigger",
+        "after_role": "phase_duration",
+        "same_concept": true
+      },
+      "expected": {
+        "result": "accept",
+        "same_frame_id": false
+      }
+    },
+    {
+      "group": "FL-021",
+      "id": "cost_threshold",
+      "operation": "semantic_roles",
+      "input": {
+        "before_role": "condition_threshold",
+        "after_role": "cost_threshold",
+        "same_concept": true
+      },
+      "expected": {
+        "result": "accept",
+        "same_frame_id": false
+      }
+    },
+    {
+      "group": "FL-021",
+      "id": "alias_full_name",
+      "operation": "semantic_roles",
+      "input": {
+        "before_spelling": "fixture_short",
+        "after_spelling": "fixture_full",
+        "same_concept": true,
+        "same_role": true,
+        "registered_alias": true
+      },
+      "expected": {
+        "result": "accept",
+        "same_frame_id": true,
+        "trace_spelling_equal": false
+      }
+    },
+    {
+      "group": "FL-021",
+      "id": "numeric_option",
+      "operation": "semantic_roles",
+      "input": {
+        "source_role": "choice_index",
+        "value": 1
+      },
+      "expected": {
+        "result": "accept",
+        "keyword_reference": false
+      }
+    },
+    {
+      "group": "FL-021",
+      "id": "name_brackets",
+      "operation": "semantic_roles",
+      "input": {
+        "source_role": "card_name",
+        "text": "自撰《測試》名稱"
+      },
+      "expected": {
+        "result": "accept",
+        "trait_reference": false
+      }
+    },
+    {
+      "group": "FL-022",
+      "id": "selected_set",
+      "operation": "ports",
+      "input": {
+        "export_type": "ObjectSet",
+        "import_type": "ObjectSet",
+        "producer_scope": "ability",
+        "consumer_scope": "ability"
+      },
+      "expected": {
+        "result": "accept",
+        "reason": null
+      }
+    },
+    {
+      "group": "FL-022",
+      "id": "receipt_not_selected",
+      "operation": "ports",
+      "input": {
+        "export_type": "ObjectSet",
+        "import_type": "ReceiptId",
+        "producer_scope": "ability",
+        "consumer_scope": "ability"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "port_type_mismatch"
+      }
+    },
+    {
+      "group": "FL-022",
+      "id": "capture_not_receipt",
+      "operation": "ports",
+      "input": {
+        "export_type": "CapturedValue",
+        "import_type": "ReceiptId",
+        "producer_scope": "ability",
+        "consumer_scope": "ability"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "port_type_mismatch"
+      }
+    },
+    {
+      "group": "FL-022",
+      "id": "branch_escape",
+      "operation": "ports",
+      "input": {
+        "export_type": "ObjectSet",
+        "import_type": "ObjectSet",
+        "producer_scope": "branch_a",
+        "consumer_scope": "branch_b"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "port_scope_mismatch"
+      }
+    },
+    {
+      "group": "FL-022",
+      "id": "unsupported_relation",
+      "operation": "ports",
+      "input": {
+        "source_relation": "unclassified",
+        "proposed_noop": false
+      },
+      "expected": {
+        "result": "pending",
+        "dsl_executable": false
+      }
+    },
+    {
+      "group": "FL-023",
+      "id": "no_aligned",
+      "operation": "jp_selection",
+      "input": {
+        "fixture": "jp_base"
+      },
+      "expected": {
+        "result": "accept",
+        "zh_source": "jp",
+        "dsl_shared": false,
+        "official_counterpart": false
+      }
+    },
+    {
+      "group": "FL-023",
+      "id": "known_divergence",
+      "operation": "jp_selection",
+      "input": {
+        "fixture": "jp_base",
+        "changes": {
+          "/divergence": true
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "zh_source": "jp",
+        "dsl_shared": false,
+        "official_counterpart": false
+      }
+    },
+    {
+      "group": "FL-023",
+      "id": "different_sections",
+      "operation": "jp_selection",
+      "input": {
+        "fixture": "jp_base",
+        "changes": {
+          "/en_sections": 3
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "zh_source": "jp",
+        "selection_scope": "whole_jp_effect",
+        "pair_by_en_ordinal": false,
+        "en_only_card": false
+      }
+    },
+    {
+      "group": "FL-023",
+      "id": "unmapped",
+      "operation": "jp_selection",
+      "input": {
+        "fixture": "jp_base",
+        "changes": {
+          "/mapping": "unmapped"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unconfirmed_identity"
+      }
+    },
+    {
+      "group": "FL-023",
+      "id": "wrong_face",
+      "operation": "jp_selection",
+      "input": {
+        "fixture": "jp_base",
+        "changes": {
+          "/mapping": "wrong_face"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "face_mismatch"
+      }
+    },
+    {
+      "group": "FL-023",
+      "id": "jp_stale",
+      "operation": "jp_selection",
+      "input": {
+        "fixture": "jp_base",
+        "changes": {
+          "/jp_source": "stale"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "stale_source"
+      }
+    },
+    {
+      "group": "FL-023",
+      "id": "jp_missing",
+      "operation": "jp_selection",
+      "input": {
+        "fixture": "jp_base",
+        "changes": {
+          "/jp_source": "missing"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "missing_source"
+      }
+    },
+    {
+      "group": "FL-023",
+      "id": "wrong_language",
+      "operation": "jp_selection",
+      "input": {
+        "fixture": "jp_base",
+        "changes": {
+          "/translation_source_owner": "en"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "wrong_translation_source"
+      }
+    },
+    {
+      "group": "FL-023",
+      "id": "offsets_on_en",
+      "operation": "jp_selection",
+      "input": {
+        "fixture": "jp_base",
+        "changes": {
+          "/annotation_source": "en"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "annotation_source_mismatch"
+      }
+    },
+    {
+      "group": "FL-023",
+      "id": "confirmed_en_only",
+      "operation": "jp_selection",
+      "input": {
+        "mapping": "confirmed_none",
+        "jp_source": "absent"
+      },
+      "expected": {
+        "result": "pending",
+        "general_en_pipeline": false,
+        "individual_exception_issue": 500
+      }
+    },
+    {
+      "group": "FL-024",
+      "id": "split_unique_occurrence",
+      "operation": "ruling_mapping",
+      "input": {
+        "fixture": "ruling_base"
+      },
+      "expected": {
+        "result": "accept",
+        "status": "resolved",
+        "frame_id": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "active_scope": [
+          "occ:a"
+        ]
+      }
+    },
+    {
+      "group": "FL-024",
+      "id": "second_split_occurrence",
+      "operation": "ruling_mapping",
+      "input": {
+        "fixture": "ruling_base",
+        "changes": {
+          "/reference_occurrence": "occ:b",
+          "/requested_scope": [
+            "occ:b"
+          ]
+        }
+      },
+      "expected": {
+        "result": "accept",
+        "status": "resolved",
+        "frame_id": "frame:6ac4ed03747f6420302ae692ae4532f785de68415293d5e6ac222a82efaaa4b4",
+        "active_scope": [
+          "occ:b"
+        ]
+      }
+    },
+    {
+      "group": "FL-024",
+      "id": "two_legacy_one_frame",
+      "operation": "ruling_mapping",
+      "input": {
+        "legacy_ids": [
+          "T-a",
+          "T-b"
+        ],
+        "occurrences": [
+          "occ:a",
+          "occ:b"
+        ],
+        "targets": [
+          "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+          "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611"
+        ]
+      },
+      "expected": {
+        "result": "accept",
+        "resolved_count": 2,
+        "active_scope": [
+          "occ:a",
+          "occ:b"
+        ],
+        "all_frame_uses_allowed": false
+      }
+    },
+    {
+      "group": "FL-024",
+      "id": "wrong_namespace",
+      "operation": "ruling_mapping",
+      "input": {
+        "fixture": "ruling_base",
+        "changes": {
+          "/legacy_namespace": "template-v0.unknown"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "legacy_namespace_mismatch"
+      }
+    },
+    {
+      "group": "FL-025",
+      "id": "scope_widening",
+      "operation": "ruling_mapping",
+      "input": {
+        "fixture": "ruling_base",
+        "changes": {
+          "/requested_scope": [
+            "occ:a",
+            "occ:b",
+            "occ:c"
+          ]
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "ruling_scope_widening"
+      }
+    },
+    {
+      "group": "FL-025",
+      "id": "unknown_legacy_scope",
+      "operation": "ruling_mapping",
+      "input": {
+        "fixture": "ruling_base",
+        "changes": {
+          "/legacy_scope": null,
+          "/requested_status": "pending"
+        }
+      },
+      "expected": {
+        "result": "pending",
+        "reason": "unknown_legacy_scope",
+        "active": false
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "none",
+      "operation": "ruling_resolution",
+      "input": {
+        "status": "pending",
+        "target": null,
+        "candidates": [],
+        "reason": "no_candidate"
+      },
+      "expected": {
+        "result": "pending",
+        "active": false,
+        "candidates_retained": []
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "ambiguous",
+      "operation": "ruling_resolution",
+      "input": {
+        "status": "pending",
+        "target": null,
+        "candidates": [
+          "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+          "frame:6ac4ed03747f6420302ae692ae4532f785de68415293d5e6ac222a82efaaa4b4"
+        ],
+        "reason": "ambiguous_variant"
+      },
+      "expected": {
+        "result": "pending",
+        "active": false,
+        "candidates_retained": [
+          "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+          "frame:6ac4ed03747f6420302ae692ae4532f785de68415293d5e6ac222a82efaaa4b4"
+        ]
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "dangling_resolved",
+      "operation": "ruling_resolution",
+      "input": {
+        "status": "resolved",
+        "target": "frame:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "existing_frames": [
+          "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611"
+        ]
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "dangling_ruling_target"
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "pending_missing_reason",
+      "operation": "ruling_resolution",
+      "input": {
+        "status": "pending",
+        "target": null,
+        "candidates": [],
+        "reason": null
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "missing_pending_reason"
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "pending_has_active_target",
+      "operation": "ruling_resolution",
+      "input": {
+        "status": "pending",
+        "target": "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611",
+        "candidates": [
+          "frame:317f56738afaa575af31eae47fb610c47fa1da8fd879a99b1bcf3f4a1085d611"
+        ],
+        "reason": "ambiguous_variant"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "invalid_resolution_state"
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "missing_old_reference",
+      "operation": "ruling_resolution",
+      "input": {
+        "legacy_reference_count": 2,
+        "resolution_count": 1
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "missing_ruling_resolution"
+      }
+    },
+    {
+      "group": "FL-027",
+      "id": "json_shape",
+      "operation": "db_boundary",
+      "input": {
+        "fixture": "db_target_base",
+        "changes": {
+          "/row/target": {
+            "format": 1,
+            "nodes": [
+              {
+                "kind": "Executable",
+                "code": "forbidden"
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "invalid_json_shape"
+      }
+    },
+    {
+      "group": "FL-027",
+      "id": "foreign_key",
+      "operation": "db_boundary",
+      "input": {
+        "fixture": "db_target_base",
+        "changes": {
+          "/row/template_id": "frame:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "missing_fk"
+      }
+    },
+    {
+      "group": "FL-027",
+      "id": "required_null",
+      "operation": "db_boundary",
+      "input": {
+        "fixture": "db_target_base",
+        "changes": {
+          "/row/lang": null
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "required_null"
+      }
+    },
+    {
+      "group": "FL-028",
+      "id": "same_text_wrong_owner",
+      "operation": "translation_use",
+      "input": {
+        "same_text": true,
+        "use_owner": "owner:a",
+        "verified_owner": "owner:b"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "owner_mismatch"
+      }
+    },
+    {
+      "group": "FL-028",
+      "id": "same_text_different_field",
+      "operation": "translation_use",
+      "input": {
+        "same_text": true,
+        "use_field": "name",
+        "verified_field": "effect"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "field_mismatch"
+      }
+    },
+    {
+      "group": "FL-028",
+      "id": "counterpart_no_borrow",
+      "operation": "translation_use",
+      "input": {
+        "same_context": true,
+        "counterpart_verified_owner": "owner:a",
+        "receiver": "owner:b"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "counterpart_owner_mismatch"
+      }
+    },
+    {
+      "group": "FL-029",
+      "id": "retained_draft",
+      "operation": "candidate",
+      "input": {
+        "source_in_inventory": true,
+        "complete_binding": false,
+        "action": "store"
+      },
+      "expected": {
+        "result": "accept",
+        "active": false,
+        "translated_coverage": false
+      }
+    },
+    {
+      "group": "FL-029",
+      "id": "pin_draft",
+      "operation": "candidate",
+      "input": {
+        "source_in_inventory": true,
+        "complete_binding": false,
+        "action": "pin"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "candidate_not_renderable"
+      }
+    },
+    {
+      "group": "FL-029",
+      "id": "missing_source",
+      "operation": "candidate",
+      "input": {
+        "source_in_inventory": false,
+        "complete_binding": false,
+        "action": "store"
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "missing_candidate_source"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "missing_form_case",
+      "operation": "form_signature",
+      "input": {
+        "form": "zone.locative",
+        "registered": true,
+        "valid_rule_cases": [
+          "hand",
+          "battlefield"
+        ],
+        "form_cases": {
+          "hand": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "missing_form_case"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "unknown_form_case",
+      "operation": "form_signature",
+      "input": {
+        "form": "zone.locative",
+        "registered": true,
+        "valid_rule_cases": [
+          "hand"
+        ],
+        "form_cases": {
+          "unknown": [
+            {
+              "kind": "Literal",
+              "text": "未知"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unknown_form_case"
+      }
+    }
+  ]
+}

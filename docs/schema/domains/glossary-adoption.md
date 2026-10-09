@@ -67,7 +67,10 @@ rule_term 用當前 Bool；null／缺值時列 missing_emphasis，仍可顯示�
 
 ## 6. 公開快照影響與最小擴充提案
 
-**目前格式保持原樣。** [snapshot-format §2](../export/snapshot-format.md#2-公開表完整欄位與玩家用途) 的 translation 只有七欄：id/source_unit_id/target_lang/text_unit_id/origin/authority/status；沒有術語集合、加粗旗標或位置。build-db.translation.tokens 首版固定 null，而且不在公開白名單；本文件不把它當已存在的公開承載欄，不把 HTML／Markdown 標記塞入 exact text。
+四層的內部逐 occurrence／annotation set 以[共用契約 §8](four-layer-translation.md#8-建置-dbrender-projection-與依賴)為準；
+以下只記舊公開格式與早期承載提案，正式 wire 選擇由 #496 定義，不能據此新增欄位或省略原文註記。
+
+**目前格式保持原樣。** [snapshot-format §2](../export/snapshot-format.md#2-公開表完整欄位與玩家用途) 的 translation 只有七欄：id/source_unit_id/target_lang/text_unit_id/origin/authority/low_confidence；沒有術語集合、加粗旗標或位置。build-db.translation.tokens 首版固定 null，而且不在公開白名單；本文件不把它當已存在的公開承載欄，不把 HTML／Markdown 標記塞入 exact text。
 
 僅把 rule_term 的 Bool 帶到前端仍不足以實現原文／譯文對照：前端不知道哪個片段引用哪個概念。加粗資訊的出貨流程應是：當前 emphasis＋型別推導值 → 與後續原文／譯文位置產生器的 TermReference 結合 → 隨**選中 translation** 的公開註記輸出。位置與 renderer 仍由後續契約／實作處理；本文件只固定上游引用及值，不讓前端自維第二份詞庫。
 
@@ -77,7 +80,7 @@ rule_term 用當前 Bool；null／缺值時列 missing_emphasis，仍可顯示�
 
 本提案不出全份 glossary 表，所以 glossary key 是註記內的自描述概念識別，不冒稱有公開全庫 FK；producer 仍須驗建置概念引用，reader 驗註記與同列原文／譯文 span 的完整性。vocabulary reference 可沿既有公開 vocabulary 驗 `(kind,code)`。若格式審核要求公開 glossary FK，則須另定僅出已使用概念的 descriptor 及其容量，不能讓 reader 向外查最新詞庫補洞。
 
-原文 span 必須綁該 translation.source_unit_id 的 exact 文字。EN 提前顯示共用 JP 繁中時，對照來源仍為 JP；沒有 EN 位置對齊不能宣稱在 EN 原文同位置加粗。同一顯示名字若是不同 glossary／vocabulary，註記 reference 仍不同。前端可關閉視覺加粗，但不得改存放的概念／位置；開關政策沿既有介面決定。
+原文 span 必須綁該 translation.source_unit_id 的 exact 文字。EN 顯示 JP 依據繁中時，對照來源仍為 JP；沒有 EN 位置對齊不能宣稱在 EN 原文同位置加粗。同一顯示名字若是不同 glossary／vocabulary，註記 reference 仍不同。前端可關閉視覺加粗，但不得改存放的概念／位置；開關政策沿既有介面決定。
 
 | 影響 | 最小改法與驗收 |
 | --- | --- |

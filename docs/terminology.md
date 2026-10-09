@@ -101,15 +101,32 @@
 
 | 中文 | 英文 | 指什麼 |
 | --- | --- | --- |
-| **翻譯上下文** | translation context | 原文字單元與已採納語義變體的組合；同字異義可分開選譯文 |
+| **翻譯上下文** | translation context | 原文字單元在特定語義解讀下的組合；同字異義可分開選譯文 |
 | **翻譯用途** | translation use | 精確指向原文所屬的引用者、欄位及段落位置，不是檔案的歸檔 owner |
 | **翻譯選用** | translation selection | 每個上下文與目標語言的唯一有效本站譯文；官方 counterpart 另按 owner 選用 |
-| **選詞** | glossary choice | 對指定概念與語言採納的一個譯名，變更追加決定，生成譯文自動重算 |
+| **選詞** | glossary choice | 指定概念與語言的當前譯名，可直接修訂；生成譯文隨相依選詞重算 |
 | **術語引用** | term reference | 以 kind/key 定位 glossary 永久概念或 vocabulary 詞彙，與顯示名分開 |
 | **加粗選擇** | glossary emphasis choice | rule_term 的可修訂加粗採納紀錄；其他術語由型別推導 |
-| **委託採納收據** | delegated adoption receipt | 保存具體委託範圍、實際協調者與決定事件，不算維護者親自核可 |
+| **委託採納收據** | delegated adoption receipt | 歷史上的委託範圍與決定紀錄，不算維護者親自核可；當前翻譯不使用此收據 |
 | **模板來源清冊** | template source inventory | 每次建置從封存來源產生的句型位置清單；不存 Git，項目 ID 不含 store 與封存批次 |
-| **參數辨識政策** | parameter recognition policy | 核可精確來源位置的數值／引用角色；以條件 hash、matcher 與真實事件釘住，獨立於模板定義及譯本採納 |
+| **參數辨識政策** | parameter recognition policy | 以具名辨識規則及開關界定來源值、角色與適用條件；版本由程式／資料保存，無逐詞核可事件 |
+
+### 四層翻譯
+
+| 中文 | 英文 | 指什麼 |
+| --- | --- | --- |
+| **句框架** | frame（Frame） | 整行來源的固定語義、葉槽及語義變體；可跨卡重用，承接既有 sentence template 的職責，不由中文譯法決定身分 |
+| **語義葉值** | typed leaf value | 有明確型別、角色與合法域的來源值，例如區域、概念引用或數量；翻譯與 DSL 共用同一值 |
+| **來源綁定** | source binding（SourceBinding） | 一個句框架在精確來源用途及位置上的實例，含葉值與來源追蹤；translation use 定位整個欄位，SourceBinding 定位欄位中的框架 |
+| **文法形式** | form | 引用基礎名稱與葉值的有限呈現規則，例如量詞、在／到／從或動詞融合；不執行遊戲動作 |
+| **名詞片語** | noun phrase（NP） | 在封閉文法內組合葉引用的顯示結構；允許只覆蓋一部分修飾，不另保存語義值或代替規則本體 |
+| **渲染投影** | render projection | 由框架、葉值、譯文 target 與形式產生的文字及概念位置；改變呈現不表示改變來源語義 |
+| **標註集合** | annotation set | 某一精確文字單元及其概念出現位置的組合；文字相同而概念位置不同時是不同集合 |
+| **引用出現位置** | occurrence | 某個葉引用在來源或渲染文字中實際出現的一次；重複詞各有位置，不由詞彙去重表代替 |
+| **語義變體** | semantic variant | 同表面句型中會影響規則解讀的分支，例如打出時目標與結算時選擇；不同於替代譯詞或 NP 覆蓋 |
+| **規則投影類別** | projection kind | 來源片段承擔的規則責任：能力本體、能力旗標、卡片欄位、已知無執行內容或未定；未定不視為無動作 |
+
+四層的欄位與身分契約見[四層翻譯共用契約](schema/domains/four-layer-translation.md)。
 
 ## 規則與效果
 

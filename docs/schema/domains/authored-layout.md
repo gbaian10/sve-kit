@@ -226,7 +226,9 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 ## 6. 模板、翻譯與語義例外
 
-翻譯分片使用 `format: 2, kind: translation_shard`，沒有 index；模板來源清冊在建置時產生，不進 authored。
+現有 reader 的翻譯分片為 `format: 2, kind: translation_shard`；四層目標改為 format 3，
+依[共用契約 §2](four-layer-translation.md#2-authored-入口與替換界線)同批替換 reader／資料，新增 forms 入口，移除 source_exception。
+§1.1 版本表記錄切換前封套，不能當成已支援 format 3；沒有 index，模板來源清冊仍在建置時產生。
 完整欄位依[翻譯契約](translation-contract.md)與[清冊契約](template-source-replay.md)。
 舊決定封套、membership、核可收據、採納鏈、歷史 producer／expected 只供轉換，不是新 reader 的必要輸入。
 資料可直接改，退回用 git revert；只記來源類別 official/project/machine、低信心及必要資料理由。
@@ -242,8 +244,8 @@ context_assignment／card_name_concept 只對自己的 owner 與 exact 原文有
 同名歧義與撤回仍有明示資料，不能因移除收據就按字串猜配對。
 術語與加粗的當前值見[術語契約](glossary-adoption.md)，class/type 仍引用 vocabulary。
 
-繁中以 JP 原文為主；EN 已確認同卡而文字未核對時沿 shared_jp_unchecked 顯示提示，
-已核對為 shared_jp，已知 divergence 不共用受影響欄位；不放行未核對的 DSL／機制或官方 counterpart。
+繁中以有效且已確認同卡同面的 JP 為唯一一般來源，未核對或已知 divergence 均不禁止 JP 依據顯示；
+逐 owner 選用及完整 JP 效果範圍依翻譯契約 §7.2。這不放行未核對的 DSL／機制或官方 counterpart。
 origin 與 authority 分開，本站效果翻譯仍 unofficial；機器譯文人看過仍 machine。
 低信心但自動檢查通過的譯文直接顯示待校對，可切原文；壞結構／錯來源不渲染。
 

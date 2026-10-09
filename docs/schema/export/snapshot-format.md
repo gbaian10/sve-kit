@@ -7,6 +7,11 @@
 
 本文件的 2.0.0 圖片與有限保留契約依 [ADR-0015](../../adr/0015-image-url-version.md)／[ADR-0016](../../adr/0016-snapshot-retention.md)。1.x 已退役，不保留相容讀寫。
 
+四層翻譯的來源政策已改依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)：
+有效且已確認同卡同面的 JP 可供繁中，divergence 不構成此顯示門檻。
+本文既有 basis 列及 tuple 仍描述切換前的 wire；新版 basis／annotation／版本由
+[#496](https://github.com/gbaian10/sve-kit/issues/496) 定義後同步 producer／reader，不能用舊值冒充新政策。
+
 ## 1. 快照清單（manifest）、版本與容器
 
 `format_version` 是傳輸格式 SemVer；`data_version` 是資料批次識別，正式版表示 UTC 發布批次，`preview-` 前綴保留給不發布的預覽批次、不得用於正式版；`dsl_version` 是 DSL 主版.次版，不能混用。快照清單一份釘住 `format_version,data_version,published_at,regions,languages,min_reader_version,required_capabilities,engine_support_target,files,config_ref,text_all,partitioning,coverage,mechanic_universe_id,restriction_coverage,source_windows,qa_card_ids,errata_card_ids,changes_ref`；完整型別及命名規則見 [傳輸契約 §1–2](snapshot-transport.md#2-快照清單與檔案描述)。
@@ -88,7 +93,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 
 卡表快照的 `card_engine_support.shared` 可以是 `missing_dsl`；EN-only 文件放 overrides；`region_blocks` 至少含未確認對應/語義差異/未有該區來源的理由。消費優先選 region override，否則 shared，最後套 `region_blocks`；block 強制手動且合併 reasons。若選中 `status=engine_passed` 但有 block，該區 `effective_status` 降為 reviewed（顯示「共用實作已審核，此區待核對」），不能在未實作清單顯示此區已通過。其餘四態保留並附區域原因；automatic 恰為 `effective_status=engine_passed`。不得從沒有 override 推斷「英版已確認」；block 完整性是發布閘門。
 
-translation 僅輸出上述欄位，用 `text_unit_id` 取譯文；同一 chosen translation 可供多個引用者。`origin` 固定為 `official/project/machine`，`authority` 維持 `sve_official/digital_official/unofficial`；數位官方名稱不因此取得實體官方 counterpart 資格。`low_confidence` 是必填 Bool，原樣保留 current producer 的結果；true 直接顯示譯文、標「待校對」並提供該 owner 的原文，false 不表示逐筆人工確認。不輸出或查詢舊 `status`，不把 false 轉成 reviewed，也不把所有 machine 改成 true。官英/官方日文 counterpart 由建置產生選用記錄（`origin=official, authority=sve_official`），無需人工 equivalence 表。繁中共用的 `source_unit_id` 仍是 JP 來源，`FieldTranslation.basis=shared_jp` 明示已核對，shared_jp_unchecked 明示未完成文字核對；有相關 divergence 不得輸出任一共用選用。官方 counterpart 逐 owner 直接引用，不占共用 translation_selection。詞彙與商品標籤亦在引用者存 FieldTranslation，不以共享 `source_unit` 字串去猜唯一翻法。keyword action 用 `field=action_label`、ordinal 對應 actions 順序；其他標籤 field=label。
+translation 僅輸出上述欄位，用 `text_unit_id` 取譯文；同一 chosen translation 可供多個引用者。`origin` 固定為 `official/project/machine`，`authority` 維持 `sve_official/digital_official/unofficial`；數位官方名稱不因此取得實體官方 counterpart 資格。`low_confidence` 是必填 Bool，原樣保留 current producer 的結果；true 直接顯示譯文、標「待校對」並提供該 owner 的原文，false 不表示逐筆人工確認。不輸出或查詢舊 `status`，不把 false 轉成 reviewed，也不把所有 machine 改成 true。官英/官方日文 counterpart 由建置產生選用記錄（`origin=official, authority=sve_official`），無需人工 equivalence 表。繁中依據的 `source_unit_id` 仍是 JP 來源；本文的 shared_jp／shared_jp_unchecked 是切換前 basis，四層的選用政策依翻譯契約、新版 basis 由 #496 定義。官方 counterpart 逐 owner 直接引用，不占共用 translation_selection。詞彙與商品標籤亦在引用者存 FieldTranslation，不以共享 `source_unit` 字串去猜唯一翻法。keyword action 用 `field=action_label`、ordinal 對應 actions 順序；其他標籤 field=label。
 
 `keyword.name_unit_id` 由建置資料庫的 `glossary_term.source_ja` 建文字單元，translations 選同概念多語名稱；`definition_unit_id` 另供說明。relation/action 篩選的三態必合併兩個稀疏集合：指定 relation/action 在 projection 集合內→present；無吻合但 `coverage.complete_all=true` 或 keyword 在依 `complete_mode` 解碼的 complete 集合→absent；否則 unknown。另一 relation 已 present 不能推本項 absent。未列 coverage 等於尚未檢查；`partial_keyword_ids` 不代表完整。只有 fresh 標籤進 projection，universe/source/producer 改版重算 coverage；EN region block 使不適用的 shared 結果 unknown。config.search 的版本必與 reader 能力匹配，normalized 別名與使用者輸入用同一規則。
 
@@ -258,11 +263,13 @@ changes 是相鄰發布摘要，不是重建鏈。previous manifest 引用的 ch
 
 ## 5. 語言矩陣與取用
 
-**使用者已核可（2026-10-01）**：繁中以日文卡文為來源；日英身分已確認同卡一律用日文，只有兩區版本明顯不同或英文版獨有才用英文。同日追加核可：EN 同卡身分確認後先顯示 JP 繁中，文字未核對時標「日英文字尚未核對」，完成核對且適用後移除；公開以新增 basis 值 shared_jp_unchecked 區分。當前翻譯與選用依 [翻譯契約](../domains/translation-contract.md)。有效 selection／直接 owner 引用通過來源、context、語言與 owner 檢查即可出貨，machine 或低信心不排除；只有實際 FieldTranslation 引用的譯文及原文閉包出貨，未選候選與內部清冊不出貨。
+來源方向依 **2026-10-10 的日文唯一來源決定**（[#495](https://github.com/gbaian10/sve-kit/issues/495)）：
+已確認同卡同面且來源有效即以 JP 翻譯，已知日英差異不改取 EN。
+具體選用責任依[翻譯契約](../domains/translation-contract.md)；新版公開 basis／呈現與版本交 #496。有效 selection／直接 owner 引用通過來源、context、語言與 owner 檢查即可出貨，machine 或低信心不排除；只有實際 FieldTranslation 引用的譯文及原文閉包出貨，未選候選與內部清冊不出貨。
 
-機器與非官方來源仍須清楚標示；繁中可用「非官方翻譯」、機器另標「機器翻譯・非官方」，審過不改 origin。此呈現文字、low_confidence 的「待校對」及 basis=shared_jp_unchecked 的「日英文字尚未核對」各自獨立並存，不互相抵銷；不把未核對譯文改成 aligned，也不放行對戰自動能力。合法低信心選用仍計 translated，沒有選用才標缺譯並回原文；來源失效或錯誤引用不得用低信心替代拒絕。
+機器與非官方來源仍須清楚標示；繁中可用「非官方翻譯」、機器另標「機器翻譯・非官方」，審過不改 origin。來源標示與 low_confidence 的「待校對」各自獨立；新版 JP 依據的標示另由 #496 定義，不能用顯示狀態抵銷規則核對；不把未核對譯文改成 aligned，也不放行對戰自動能力。合法低信心選用仍計 translated，沒有選用才標缺譯並回原文；來源失效或錯誤引用不得用低信心替代拒絕。
 
-卡面 region 決定卡圖/原文；UI 語言決定翻譯列。指定 printing 不被語言切換偷偷換圖。官方 counterpart 只用已人工確認 card/face 且完成語義核對、無相關 divergence 的版本；否則用該原文的 project/machine 譯文或原文回退。官英到齊且核對通過才自動優先，當前譯文依有效來源、參數及選用資料重建，不使用舊翻譯收據或審核狀態作發布過濾；繁中跟 JP；EN 身分已確認、來源完整且無相關 divergence 時可先輸出 shared_jp_unchecked；日英段落數不同的受影響 section／effect 欄不提前共用，不按 ordinal 猜配，缺譯回 EN 原文。核對且適用後改 shared_jp，完整閘門見翻譯契約 §7.1。
+卡面 region 決定卡圖/原文；UI 語言決定翻譯列。指定 printing 不被語言切換偷偷換圖。官方 counterpart 只用已人工確認 card/face 且完成語義核對、無相關 divergence 的版本；否則用該原文的 project/machine 譯文或原文回退。官英到齊且核對通過才自動優先，當前譯文依有效來源、參數及選用資料重建，不使用舊翻譯收據或審核狀態作發布過濾；繁中來源與段落選用依翻譯契約 §7.2，取完整 JP 效果且不按 EN ordinal 拼接。區域規則與官方 counterpart 的資格另依 §7.1。
 
 | UI      | JP 卡面                                           | EN 卡面                             |
 | ------- | ------------------------------------------------- | ----------------------------------- |
@@ -306,7 +313,9 @@ art.regions 由實際 `printing_face→printing.region` 唯一推導，`[en]` �
 
 卡表快照的 `translation.source_unit_id` 由建置資料庫的 `translation.context_id→translation_context.source_unit_id` 投影；context/owner bindings 不出貨。不同 context 選出的 translation.id 可以指相同 `source_unit`，但 FieldTranslation 明確指定所用 translation，不全域依 `source_unit` 找唯一譯文。`stamp.series_code` 指 `vocabulary(kind=stamp_series)`；`search_alias.kind=stamp` 指單一 stamp.code，`kind=stamp_series` 指系列 vocabulary.code。
 
-`shared_jp/official_counterpart` 的 FieldTranslation 從已核對的來源 owner/use 及跨區關係推導；`shared_jp_unchecked` 從已確認同卡同面的 JP use 推導，強制未核對標示且不接受已知相關 divergence，不偽造 EN 欄位擁有 JP 原文字串。只有 `own_source` 才以顯示引用者的原文直接核 `context.source_unit`。這項建置驗證不出貨 dependency 表。
+FieldTranslation 的逐 owner 來源檢查依[翻譯契約 §7.2](../domains/translation-contract.md#72-逐-owner-的顯示選用)。
+JP 依據不要求 aligned、不偽造 EN 欄位擁有 JP 原文字串；官方 counterpart 仍須自己的 fresh 核對與適用資格。
+新版 basis 與公開欄位由 #496 定義；這項建置驗證不出貨 dependency 表。
 
 Spelling 與 RulingHint 的參數宣告、值域及拼法驗證依 [傳輸契約 §3.2](snapshot-transport.md#32-公開參數宣告)。`{Q}` 先登錄 literal、原樣文字顯示與複製，語意未查明前不賦予機制/引擎含義。文字 roundtrip 不以語意猜測為前提。
 
