@@ -69,3 +69,31 @@ reader 建好 typed 索引後必須釋放啟動包的原始 tuple 陣列與解�
 既有文字容量／每區啟動目標及 512 KiB 單片上限不變；manifest 與首屏實際必載 media 要計入實際啟動傳輸，不能隱藏在背景分類。
 分別報告文字 ready、首圖 ready、24 面同包／混包及單面 metadata、圖片 bitmap、常駐／更新峰值與長任務。
 2.0 新 wire 尚待雙區及手機實測，不以 ID URL 自動推論 heap 下降或直接套用舊配置數字。
+
+## 3.0 annotation 與 JP 來源的計帳
+
+[公開 annotation 契約](public-annotation.md)的必要資料全部屬完整文字預算：
+annotation_set 的 ID／exact text 引用／每次 occurrence／所有 ranges／bold，field_annotation 的 owner／field／ordinal，
+annotation_concept 的 category／卡片／說明引用，translation 第八欄與 FieldTranslation 的 source／counterpart，
+CR translations，以及上述引用新增的 JP 原文、譯文、詞彙、卡片與說明正文閉包。
+同文字不同概念的多份 annotation 不能算成一份；只有完整 set 相同才去重。
+公開端只產非空 annotation_set／field_annotation；空集合的 ID、用途列與專用 fragment 不出貨，
+translation 仍保留第八格，以 null 表示空集合，不縮短 tuple。此投影不改 #495 建置端的空集合身分。
+容量報告須列出實際非空集合／用途列數與 annotation 的 raw 增量，另記空集合省略列數，避免每個已知字段強制空列的成本。
+P 仍須逐用途驗證所有非空 occurrence 都有投影，不能以省容量為由漏掉已解析位置。
+types、fragment metadata、row_counts、manifest、dependencies、changes 及分片造成的重複 descriptor 都須報告。
+
+完整文字合計沿既有定義，以 role=bootstrap/text/config 的實際 File 按 key 去重，raw／br／gzip 分別量；
+text_all 為替代下載方式，另報它的封套及整檔壓縮大小，不與同批分片重複加總。
+manifest／changes 另報實測，不藏在 annotation 增量估算中；annotation 的 before/after 增量已包含在 File 合計，不能再加一次。
+不把必要概念或位置改列 DSL／debug／可選附件以避開 8／10／40 MiB 門檻。
+
+JP／EN 啟動各自含 manifest＋config＋首屏真實必載 File 的依賴閉包（含可見名字／譯文的 annotation 與必要概念）；
+混區檔整檔計入每個需要它的版本，media 的首屏 metadata 也依既有規則計入。
+首次開 JP 來源對照、printed／history、說明正文的按需增量另外報告；依賴若令它們成首屏必載，則移回啟動帳。
+日／英 UI 不顯示繁中不能成為省掉原文 annotation 或完整離線文字閉包的理由。
+
+沿用單 File 512 KiB、每區啟動 Brotli 約 1 MiB 目標及超過 2 MiB 的維護者決定停點，
+不自動改 N、band width、壓縮等級或裁掉列。另量文字改動／只改 bold／改概念說明造成的重建檔案數與下載 bytes。
+heap 包含 ID 索引、annotation tuples、當頁 UTF-16 前綴表、ranges／說明 view、更新峰值；下載後全庫展開物件不合契約。
+3.0 的完整輸出與手機數字由 #498／#53 實測；本單的合成 PA-11 算例與 2.0 舊數字均不構成容量通過。

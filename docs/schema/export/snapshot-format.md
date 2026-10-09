@@ -1,16 +1,17 @@
-# 卡表快照格式 v2
+# 卡表快照格式 v3（目標契約）
 
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
 專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../../quotations.md)。
 
 卡表快照是由[建置資料庫](../build/build-db.md)投影出的精簡契約。表名相同不代表欄位相同；本文件是出貨欄位白名單。精確 JSON 形狀、欄序、版本及分片規則見 [傳輸契約](snapshot-transport.md)。沒有指定的建置資料庫欄位不出貨，尤其 decision、`source_record`、逐列 hash、翻譯依賴、載入/考題報告與巨集。保留玩家可見的來源 URL、Q&A/CR 引文、印刷歷史、更正原值，不提供建置稽核包。
 
-本文件的 2.0.0 圖片與有限保留契約依 [ADR-0015](../../adr/0015-image-url-version.md)／[ADR-0016](../../adr/0016-snapshot-retention.md)。1.x 已退役，不保留相容讀寫。
+本文件沿用 2.0.0 的圖片與有限保留契約，依 [ADR-0015](../../adr/0015-image-url-version.md)／[ADR-0016](../../adr/0016-snapshot-retention.md)。1.x 已退役，不保留相容讀寫。
 
 四層翻譯的來源政策已改依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)：
 有效且已確認同卡同面的 JP 可供繁中，divergence 不構成此顯示門檻。
-本文既有 basis 列及 tuple 仍描述切換前的 wire；新版 basis／annotation／版本由
-[#496](https://github.com/gbaian10/sve-kit/issues/496) 定義後同步 producer／reader，不能用舊值冒充新政策。
+本文的 basis、annotation 與改動欄序依 [3.0.0 公開 annotation 契約](public-annotation.md)。
+目前 producer／reader 仍為 2.0.0；新版機器元件 Schema 與固定案例已定義，接線及實際驗收由 #498 承接。
+下文未變動的 2.0 圖片／保留規則繼續適用，不表示既有程式已能讀新版。
 
 ## 1. 快照清單（manifest）、版本與容器
 
@@ -18,7 +19,7 @@
 
 `engine_support_target` 恰含 `engine_version,engine_build_hash,validation_policy_id`，三欄全 null 或全有值；逐卡狀態不重複它。files 的完整形狀、hash／壓縮大小及依賴規則見 [傳輸契約 §2](snapshot-transport.md#2-快照清單與檔案描述)。
 
-傳輸容器採 `{format_version,types,tables:{table_name:[Fragment]}}`；Fragment 完整包含 `owner,bucket,partition,base,columns,rows`，精確身分與欄序見 [傳輸契約 §4](snapshot-transport.md#4-fragment-容器與-join)。這是具名 schema 的 row tuple 編碼，不是欄式分析資料庫。邏輯欄位仍以下表為權威。§2 是 join 後邏輯白名單；實際 columns 必須符合 §3.1 固定的啟動包／詳情分片欄位分割，不可任意省略 required/null 欄。manifest 宣告 `required_capabilities` 至少含 `column-partition-v1` 與 `fragment-container-v1`；舊 reader 不支援時拒絕載入此傳輸格式。
+傳輸容器採 `{format_version,types,tables:{table_name:[Fragment]}}`；Fragment 完整包含 `owner,bucket,partition,base,columns,rows`，精確身分與欄序見 [傳輸契約 §4](snapshot-transport.md#4-fragment-容器與-join)。這是具名 schema 的 row tuple 編碼，不是欄式分析資料庫。邏輯欄位仍以下表為權威。§2 是 join 後邏輯白名單；實際 columns 必須符合 §3.1 固定的啟動包／詳情分片欄位分割，不可任意省略 required/null 欄。3.0 manifest 的 `format_version/min_reader_version` 及完整八個 `required_capabilities` 依[公開 annotation §1](public-annotation.md#1-版本與驗證邊界)；缺能力或未知版本即拒絕。
 
 巢狀的 RegionView/PrintingFace/Section/FieldTranslation/Correction/Support 等記錄同樣用 tuple，types 以具名型別→columns 順序及引用型別描述（固定於 format）供載入器驗列長度；producer 以本文件的具名型別作型別名。`parameter_schema/corrected_from` 等值保持受限 JSON，不轉成位置陣列，值域依 [傳輸契約 §3.2–3.3](snapshot-transport.md#32-公開參數宣告)。純 ID/code 陣列亦保持原樣。每個分片只附用到的 types，producer 驗其與 format 定義一致；consumer 不執行資料提供的轉換程式。
 
@@ -30,76 +31,85 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 
 ## 2. 公開表、完整欄位與玩家用途
 
-| 集合                     | 公開欄位                                                                                                                                                                                                                                                                                                                   | 鍵與玩家用途（未註明 PK 者以首欄 `id` 為 PK）                                                                                                                                                                                                                                                           |
+| 集合 | 公開欄位 | 鍵與玩家用途（未註明 PK 者以首欄 `id` 為 PK） |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `card`                   | `id, layout, identity_state, home_set_id, faces:[face_id], regions:[RegionView]`                                                                                                                                                                                                                                           | 每卡一格、各區預設入口、發行/對照狀態                                                                                                                                                                                                                                                                   |
-| `face`                   | `id, card_id, ordinal, side, current:[{region,revision_id,basis}], wording:[WordingView]`                                                                                                                                                                                                                                  | 雙面切換，兩面算同一實物                                                                                                                                                                                                                                                                                |
-| `printing`               | `id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence?, review_level, reference_urls:[url], variant_key, rarity_code?, rarity_raw, premium?, serial_total?, int_id, decklog_available, decklog_verification:unverified/verified, decklog_source_url?, decklog_checked_on?, faces:[PrintingFace]` | 每版次一格、版本區、分享碼解碼、圖像定位                                                                                                                                                                                                                                                                |
-| `product_family`         | `id, code, public_code, kind, name_unit_id, translations:[FieldTranslation]`                                                                                                                                                                                                                                               | /sets 與 set 搜尋                                                                                                                                                                                                                                                                                       |
-| `product`                | `id, family_id?, region, product_code?, name_unit_id, product_type?, released_on?, date_precision, date_raw?, translations:[FieldTranslation]`                                                                                                                                                                             | 單卡頁補充的商品名稱與日期                                                                                                                                                                                                                                                                              |
-| `printing_product`       | `printing_id, product_id, available_on?, date_precision?, date_raw?, inclusion_kind, note_unit_id?, first_inclusion_state`                                                                                                                                                                                                 | 複合 `PK(printing_id,product_id)`；單卡頁列出 PR／再錄收錄；初收錄（首次／再錄）篩選                                                                                                                                                                                                                    |
-| `identity_change`        | `id, kind, old_card_id, new_card_id, printing_id?, data_version, reason`                                                                                                                                                                                                                                                   | 舊牌組身分修復提示、split 不猜                                                                                                                                                                                                                                                                          |
-| `art`                    | `id, card_id, face_id, classification, review_level, regions:[region], artists:[{artist_id,role}]`                                                                                                                                                                                                                         | 每圖一格、只看異畫、繪師瀏覽                                                                                                                                                                                                                                                                            |
-| `artist`                 | `id, display_name`                                                                                                                                                                                                                                                                                                         | 畫師名稱/篩選                                                                                                                                                                                                                                                                                           |
-| `stamp`                  | `id, code, series_code?, text_raw, kind, displayed_year?, review_level`                                                                                                                                                                                                                                                    | 大賽標誌搜尋，不捏造場次                                                                                                                                                                                                                                                                                |
-| `text_unit`              | `id, lang, text`                                                                                                                                                                                                                                                                                                           | 全卡原文/譯文/問答/詞彙字串去重                                                                                                                                                                                                                                                                         |
-| `face_revision`          | `id, face_id, region, revision, effective_from?, effective_until?, temporal_status, change_kind, name_unit_id, effect_unit_id, class_code?, type_code, cost?, attack?, defense?, traits:[code], titles:[code], special_kinds:[code], sections:[Section], translations:[FieldTranslation], corrections:[Correction]`        | 現行與歷史卡文、數值、翻譯、更正徽章                                                                                                                                                                                                                                                                    |
-| `translation`            | `id, source_unit_id, target_lang, text_unit_id, origin, authority, low_confidence`                                                                                                                                                                                                                                         | 只收當前有效選用譯文；來源類別與 authority 分開，低信心仍顯示並標待校對                                                                                                                                                                                                                                 |
-| `qa`                     | `id, region, official_number?, source_url, current_version_id?`                                                                                                                                                                                                                                                            | 官方問答編號與連結                                                                                                                                                                                                                                                                                      |
-| `qa_version`             | `id, qa_id, revision, published_on?, updated_on?, date_raw?, question_unit_id, answer_unit_id, state, cards:[card_id], translations:[FieldTranslation]`                                                                                                                                                                    | 問答全文/卡片關聯/同日歷史更新                                                                                                                                                                                                                                                                          |
-| `cr_version`             | `id, region, version, published_on?, effective_on?, source_url`                                                                                                                                                                                                                                                            | 輔助提示的規則版本                                                                                                                                                                                                                                                                                      |
-| `cr_clause`              | `id, cr_version_id, number, text_unit_id`                                                                                                                                                                                                                                                                                  | 離線逐字證據與條號                                                                                                                                                                                                                                                                                      |
-| `errata`                 | `id, region, official_url, versions:[ErrataVersion]`                                                                                                                                                                                                                                                                       | 勘誤徽章、公告/生效分開、before/after/適用印刷                                                                                                                                                                                                                                                          |
-| `ruling_revision`        | `id, ruling_id, revision, question_unit_id, decision_unit_id, strength, decided_on, review_state, active_scopes:[text_unit_id], replaced_scopes:[{scope_unit_id,replacement_revision_id}], cards:[card_id], evidence:[Evidence], hints:[{lang,text_unit_id,parameter_schema}]`                                             | 輔助說明、證據、部分取代與待重審警示                                                                                                                                                                                                                                                                    |
-| `rules_name`             | `id, region, official_name`                                                                                                                                                                                                                                                                                                | 同名限張及禁限目標                                                                                                                                                                                                                                                                                      |
-| `face_rules_name`        | `face_id, region, rules_name_id, role`                                                                                                                                                                                                                                                                                     | 複合 `PK(全部欄)`；同名/合作名/`treated_as` 構築                                                                                                                                                                                                                                                        |
-| `rules_profile`          | `id, region, format_code, name_unit_id, revisions:[{id,effective_from,effective_until?,cr_version_id?,default_copy_limit?,construction_rules_ref?}]`                                                                                                                                                                       | 各區各賽制/日期規則                                                                                                                                                                                                                                                                                     |
-| `restriction`            | `id, profile_id, announced_on?, effective_from, effective_until?, kind, state, max_copies?, max_selected_groups?, members:[{rules_name_id,choice_option,deck_scope}]`                                                                                                                                                      | 禁止、限張、二擇一/多選項；不以 `card_id` 漏限                                                                                                                                                                                                                                                          |
-| `card_related`           | `id, from_card_id, to_card_id, relation, suggested_count?, applicable_regions?:[Region]`                                                                                                                                                                                                                                   | 進化/相關卡與牌組追加區建議；`same_rules_reskin` 為換皮卡指向原卡的「規則相同」提示：`applicable_regions` 必填（非空、去重、排序），由建置逐地區驗證結果填入，reader 只在目前卡面地區包含於其中時顯示，結果為空則不投影；其他 relation 為 null。不合併構築張數，reader 不得據此推導 DSL 共用或跨區等義  |
-| `digital_card`           | `id, game, official_id`                                                                                                                                                                                                                                                                                                    | 官方數位頁連結，僅 SVE 所需閉包                                                                                                                                                                                                                                                                         |
-| `digital_art`            | `id, digital_card_id, phase, style_key`                                                                                                                                                                                                                                                                                    | 數位進化面/styles/異畫對照                                                                                                                                                                                                                                                                              |
-| `digital_link`           | `id, card_id, face_id?, digital_card_id, digital_phase?, relation, effect_similarity?, review_level`                                                                                                                                                                                                                       | 區分 `same_card/character/name_only`                                                                                                                                                                                                                                                                    |
-| `digital_art_link`       | `art_id, digital_art_id, relation, review_level`                                                                                                                                                                                                                                                                           | 複合 `PK(art_id,digital_art_id)`；實體圖對數位圖                                                                                                                                                                                                                                                        |
-| `digital_link_coverage`  | `card_id, game, state, as_of`                                                                                                                                                                                                                                                                                              | 複合 `PK(card_id,game)`；尚未核對與核對無結果分開                                                                                                                                                                                                                                                       |
-| `voice`                  | `id, digital_card_id, digital_phase?, lang, kind_code, variant?, interaction_target_id?, label_raw?, source_url, asset_path?, mime?, bytes?, duration_ms?, availability`                                                                                                                                                   | 語音瀏覽與來源切換；不預載音檔                                                                                                                                                                                                                                                                          |
-| `card_voice`             | `card_id, voice_id, usage`                                                                                                                                                                                                                                                                                                 | 複合 `PK(card_id,voice_id,usage)`；可播放的已採納對照/場景                                                                                                                                                                                                                                              |
-| `keyword`                | `id, code, kind, name_unit_id, definition_unit_id?, actions:[{action,label_unit_id}], translations:[FieldTranslation]`                                                                                                                                                                                                     | 關鍵字/資源及產生消耗篩選                                                                                                                                                                                                                                                                               |
-| `mechanic_projection`    | `card_id, keyword_id, scope, relations:[code], actions:[code]`                                                                                                                                                                                                                                                             | 複合 `PK(前三欄)`；has/grants/refers/counts 與三態搜尋                                                                                                                                                                                                                                                  |
-| `card_mechanic_coverage` | `card_id, scope, complete_all, complete_mode:include/exclude, complete_keyword_ids:[id], partial_mode:include/exclude, partial_keyword_ids:[id]`                                                                                                                                                                           | 複合 `PK(前兩欄)`；稀疏三態搜尋的完整性，不展開 absent 列                                                                                                                                                                                                                                               |
-| `card_engine_support`    | `card_id, shared:Support, overrides:[{region,support:Support}], region_blocks:[{region,reasons:[code]}]`                                                                                                                                                                                                                   | PK(`card_id`)；未實作頁/單卡徽章/建牌數量/手動回退                                                                                                                                                                                                                                                      |
-| `vocabulary`             | `kind, code, label_unit_id, active, translations:[FieldTranslation]`                                                                                                                                                                                                                                                       | 複合 `PK(kind,code)`；穩定英文 filter code，多語 label 經 translation                                                                                                                                                                                                                                   |
-| `search_alias`           | `kind, code, lang, text, normalized`                                                                                                                                                                                                                                                                                       | 複合 `PK(kind,code,lang,text)`；三語輸入/Discord 暱稱                                                                                                                                                                                                                                                   |
-| `text_symbol`            | `id, code, parameter_schema, keyword_id?, spellings:[Spelling], localizations:[Localization]`                                                                                                                                                                                                                              | 自製圖示、aria、tooltip、複製文字                                                                                                                                                                                                                                                                       |
-| `card_route_alias`       | `namespace, old_key, target_namespace, target_key, reason`                                                                                                                                                                                                                                                                 | PK(`namespace`,`old_key`)；改卡號永久轉址；official 路由由已確認 `card_no` 推導；provisional 用 `int_id` 保留命名空間                                                                                                                                                                                   |
-| `route_override`         | `route_key, printing_id`                                                                                                                                                                                                                                                                                                   | PK(`route_key`)；僅多 variant 的穩定入口例外，正常卡不重複 route 列                                                                                                                                                                                                                                     |
+| `card` | `id, layout, identity_state, home_set_id, faces:[face_id], regions:[RegionView]` | 每卡一格、各區預設入口、發行/對照狀態 |
+| `face` | `id, card_id, ordinal, side, current:[{region,revision_id,basis}], wording:[WordingView]` | 雙面切換，兩面算同一實物 |
+| `printing` | `id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence?, review_level, reference_urls:[url], variant_key, rarity_code?, rarity_raw, premium?, serial_total?, int_id, decklog_available, decklog_verification:unverified/verified, decklog_source_url?, decklog_checked_on?, faces:[PrintingFace]` | 每版次一格、版本區、分享碼解碼、圖像定位 |
+| `product_family` | `id, code, public_code, kind, name_unit_id, translations:[FieldTranslation]` | /sets 與 set 搜尋 |
+| `product` | `id, family_id?, region, product_code?, name_unit_id, product_type?, released_on?, date_precision, date_raw?, translations:[FieldTranslation]` | 單卡頁補充的商品名稱與日期 |
+| `printing_product` | `printing_id, product_id, available_on?, date_precision?, date_raw?, inclusion_kind, note_unit_id?, first_inclusion_state` | 複合 `PK(printing_id,product_id)`；單卡頁列出 PR／再錄收錄；初收錄（首次／再錄）篩選 |
+| `identity_change` | `id, kind, old_card_id, new_card_id, printing_id?, data_version, reason` | 舊牌組身分修復提示、split 不猜 |
+| `art` | `id, card_id, face_id, classification, review_level, regions:[region], artists:[{artist_id,role}]` | 每圖一格、只看異畫、繪師瀏覽 |
+| `artist` | `id, display_name` | 畫師名稱/篩選 |
+| `stamp` | `id, code, series_code?, text_raw, kind, displayed_year?, review_level` | 大賽標誌搜尋，不捏造場次 |
+| `annotation_set` | `id, text_unit_id, occurrences:[Annotation]` | 非空概念位置集合；同文字不同概念分集合，ID 依 annotation-v1 |
+| `field_annotation` | `owner:PublicTextOwner, field, ordinal?, annotation_set_id` | 複合 PK(owner,field,ordinal)；原文有 occurrence 時不依賴譯文也有位置 |
+| `annotation_concept` | `id, category, explanations:[ExplanationReference], card_ids:[id]` | 必要公開概念、說明及已確認卡名目標；不是 DB glossary／採納紀錄 |
+| `text_unit` | `id, lang, text` | 全卡原文/譯文/問答/詞彙字串去重 |
+| `face_revision` | `id, face_id, region, revision, effective_from?, effective_until?, temporal_status, change_kind, name_unit_id, effect_unit_id, class_code?, type_code, cost?, attack?, defense?, traits:[code], titles:[code], special_kinds:[code], sections:[Section], translations:[FieldTranslation], corrections:[Correction]` | 現行與歷史卡文、數值、翻譯、更正徽章 |
+| `translation` | `id, source_unit_id, target_lang, text_unit_id, origin, authority, low_confidence, annotation_set_id?` | 只收當前有效選用譯文；來源類別與 authority 分開，低信心仍顯示並標待校對 |
+| `qa` | `id, region, official_number?, source_url, current_version_id?` | 官方問答編號與連結 |
+| `qa_version` | `id, qa_id, revision, published_on?, updated_on?, date_raw?, question_unit_id, answer_unit_id, state, cards:[card_id], translations:[FieldTranslation]` | 問答全文/卡片關聯/同日歷史更新 |
+| `cr_version` | `id, region, version, published_on?, effective_on?, source_url` | 輔助提示的規則版本 |
+| `cr_clause` | `id, cr_version_id, number, text_unit_id, translations:[FieldTranslation]` | 離線逐字證據與條號 |
+| `errata` | `id, region, official_url, versions:[ErrataVersion]` | 勘誤徽章、公告/生效分開、before/after/適用印刷 |
+| `ruling_revision` | `id, ruling_id, revision, question_unit_id, decision_unit_id, strength, decided_on, review_state, active_scopes:[text_unit_id], replaced_scopes:[{scope_unit_id,replacement_revision_id}], cards:[card_id], evidence:[Evidence], hints:[{lang,text_unit_id,parameter_schema}]` | 輔助說明、證據、部分取代與待重審警示 |
+| `rules_name` | `id, region, official_name` | 同名限張及禁限目標 |
+| `face_rules_name` | `face_id, region, rules_name_id, role` | 複合 `PK(全部欄)`；同名/合作名/`treated_as` 構築 |
+| `rules_profile` | `id, region, format_code, name_unit_id, revisions:[{id,effective_from,effective_until?,cr_version_id?,default_copy_limit?,construction_rules_ref?}]` | 各區各賽制/日期規則 |
+| `restriction` | `id, profile_id, announced_on?, effective_from, effective_until?, kind, state, max_copies?, max_selected_groups?, members:[{rules_name_id,choice_option,deck_scope}]` | 禁止、限張、二擇一/多選項；不以 `card_id` 漏限 |
+| `card_related` | `id, from_card_id, to_card_id, relation, suggested_count?, applicable_regions?:[Region]` | 進化/相關卡與牌組追加區建議；`same_rules_reskin` 為換皮卡指向原卡的「規則相同」提示：`applicable_regions` 必填（非空、去重、排序），由建置逐地區驗證結果填入，reader 只在目前卡面地區包含於其中時顯示，結果為空則不投影；其他 relation 為 null。不合併構築張數，reader 不得據此推導 DSL 共用或跨區等義 |
+| `digital_card` | `id, game, official_id` | 官方數位頁連結，僅 SVE 所需閉包 |
+| `digital_art` | `id, digital_card_id, phase, style_key` | 數位進化面/styles/異畫對照 |
+| `digital_link` | `id, card_id, face_id?, digital_card_id, digital_phase?, relation, effect_similarity?, review_level` | 區分 `same_card/character/name_only` |
+| `digital_art_link` | `art_id, digital_art_id, relation, review_level` | 複合 `PK(art_id,digital_art_id)`；實體圖對數位圖 |
+| `digital_link_coverage` | `card_id, game, state, as_of` | 複合 `PK(card_id,game)`；尚未核對與核對無結果分開 |
+| `voice` | `id, digital_card_id, digital_phase?, lang, kind_code, variant?, interaction_target_id?, label_raw?, source_url, asset_path?, mime?, bytes?, duration_ms?, availability` | 語音瀏覽與來源切換；不預載音檔 |
+| `card_voice` | `card_id, voice_id, usage` | 複合 `PK(card_id,voice_id,usage)`；可播放的已採納對照/場景 |
+| `keyword` | `id, code, kind, name_unit_id, definition_unit_id?, actions:[{action,label_unit_id}], translations:[FieldTranslation]` | 關鍵字/資源及產生消耗篩選 |
+| `mechanic_projection` | `card_id, keyword_id, scope, relations:[code], actions:[code]` | 複合 `PK(前三欄)`；has/grants/refers/counts 與三態搜尋 |
+| `card_mechanic_coverage` | `card_id, scope, complete_all, complete_mode:include/exclude, complete_keyword_ids:[id], partial_mode:include/exclude, partial_keyword_ids:[id]` | 複合 `PK(前兩欄)`；稀疏三態搜尋的完整性，不展開 absent 列 |
+| `card_engine_support` | `card_id, shared:Support, overrides:[{region,support:Support}], region_blocks:[{region,reasons:[code]}]` | PK(`card_id`)；未實作頁/單卡徽章/建牌數量/手動回退 |
+| `vocabulary` | `kind, code, label_unit_id, active, translations:[FieldTranslation]` | 複合 `PK(kind,code)`；穩定英文 filter code，多語 label 經 translation |
+| `search_alias` | `kind, code, lang, text, normalized` | 複合 `PK(kind,code,lang,text)`；三語輸入/Discord 暱稱 |
+| `text_symbol` | `id, code, parameter_schema, keyword_id?, spellings:[Spelling], localizations:[Localization]` | 自製圖示、aria、tooltip、複製文字 |
+| `card_route_alias` | `namespace, old_key, target_namespace, target_key, reason` | PK(`namespace`,`old_key`)；改卡號永久轉址；official 路由由已確認 `card_no` 推導；provisional 用 `int_id` 保留命名空間 |
+| `route_override` | `route_key, printing_id` | PK(`route_key`)；僅多 variant 的穩定入口例外，正常卡不重複 route 列 |
 
-上述共 40 個公開陣列；這是物件投影的集合數量，不是建置表數。config 是單一設定物件，精確型別見 [傳輸契約 §3](snapshot-transport.md#3-config-與巢狀-tuple-型別)：languages（`code/fallback_order/display_name`）、`digital_endpoints`（`game/card_url_template/language_map/status/refresh_policy`）、`shop_links`（`id/url_template/parameters/feature_key/enabled_dev/enabled_prod`）、`image_sizes`（key/purpose/max_width/max_height）、search（`grammar_version/normalizer_version`），另含 `catalog_feedback_url`、`third_party_image_policy`（固定 `mirror_reviewed`）、`deck_eligibility_policy`（固定 `regional_decklog`）；v1 producer/reader 必須實施這兩項已決政策。不含作者/hash/審核流程。僅 `image_sizes` 在影像清單中也會被引用；避免兩份獨立設定，快照清單指向同一 config 檔。
+上述共 43 個公開文字陣列；這是物件投影的集合數量，不是建置表數。config 是單一設定物件，精確型別見 [傳輸契約 §3](snapshot-transport.md#3-config-與巢狀-tuple-型別)：languages（`code/fallback_order/display_name`）、`digital_endpoints`（`game/card_url_template/language_map/status/refresh_policy`）、`shop_links`（`id/url_template/parameters/feature_key/enabled_dev/enabled_prod`）、`image_sizes`（key/purpose/max_width/max_height）、search（`grammar_version/normalizer_version`），另含 `catalog_feedback_url`、`third_party_image_policy`（固定 `mirror_reviewed`）、`deck_eligibility_policy`（固定 `regional_decklog`）；v1 producer/reader 必須實施這兩項已決政策。不含作者/hash/審核流程。僅 `image_sizes` 在影像清單中也會被引用；避免兩份獨立設定，快照清單指向同一 config 檔。
 
-| 巢狀型別         | 完整欄位與語意                                                                                                                                                                                                                                                                                                                         |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------              |
-| RegionView       | `region, release_state:released/unknown/announced/not_released_confirmed, mapping_state:unmapped/pending/confirmed/confirmed_none, as_of, mapping_as_of?, mapping_scope?, default_printing_id?, default_method?, deck_role?, debut_product_ids:[id], debut_state:known/unknown`；來自建置資料庫推導，無法判最早時 unknown              |
-| PrintingFace     | `face_id, art_id?, frame_code?, signed?, embellishment_state, printed_name_unit_id?, printed_effect_unit_id?, flavor_unit_id?, printed_text_state, observations:[ObservedText], sections:[Section], stamps:[{stamp_id,position?,color?}], translations:[FieldTranslation], corrections:[Correction]`；不帶 `card_id/credit_raw/source` |
-| WordingView      | `region, state:pending, display:{revision_id?,basis:current/latest_known_release/candidates}, candidates:[{printing_id,revision_id?}], undated_printing_ids:[id]`；暫顯不等於 current，見 §2.3                                                                                                                                         |
-| ObservedText     | `revision_id?, state:available/missing_effect/correction_conflict, source_url`；同版次觀測，不等於 printed，見 §2.3                                                                                                                                                                                                                    |
-| Section          | `ordinal, text_unit_id, kind`                                                                                                                                                                                                                                                                                                          |
-| FieldTranslation | `field:name/effect/flavor/question/answer/section/label/action_label, ordinal?, target_lang, translation_id, basis:own_source/shared_jp/shared_jp_unchecked/official_counterpart`；逐 card/face/region 選用，不能只以共享文字單元判同語義                                                                                              |
-| Correction       | `field, corrected_from:JSON, is_corrected:true, reason, source_url?`；綁引用者，不標污染去重文字單元                                                                                                                                                                                                                                   |
-| ErrataVersion    | `id, revision, announced_on?, effective_on?, date_raw?, reason_unit_id?, exchange_offered?, changes:[{face_id,field,before:JSON,after:JSON}], printings:[{printing_id,scope}]`；版本不可變，`scope=listed/confirmed_applies` 沿建置資料庫範圍，面由 `changes.face_id` 定位                                                             |
-| Evidence         | `qa_version_id?, cr_clause_id?, source_url?, role, quote, locator?`；前三欄恰一；非 QA/CR 的官方來源仍保留 URL/quote                                                                                                                                                                                                                   |
-| Support          | `status, dsl_status?, dsl_version?, dsl_id?, validation_state, reasons:[code], reason_detail?, program_ref?, ruling_revision_ids:[id]`；automatic 由套用區域 block 後 `effective_status=engine_passed` 推導，不另存重複布林                                                                                                            |
-| `program_ref`    | `file_key, entry_id`；由快照清單得檔 hash，entry 是已展開 AST，無 `author_macro`；draft/invalid 可 null；機械 verified/fresh 門檻只在建置資料庫計算                                                                                                                                                                                    |
-| Spelling         | `lang, literal_prefix, literal_suffix, parameter_name?, parse_kind:literal/uint/variable`                                                                                                                                                                                                                                              |
-| Localization     | `lang, name, tooltip, copy_pattern`；純字串，以 `parameter_schema` 驗參數                                                                                                                                                                                                                                                              |
+| 巢狀型別 | 完整欄位與語意 |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RegionView | `region, release_state:released/unknown/announced/not_released_confirmed, mapping_state:unmapped/pending/confirmed/confirmed_none, as_of, mapping_as_of?, mapping_scope?, default_printing_id?, default_method?, deck_role?, debut_product_ids:[id], debut_state:known/unknown`；來自建置資料庫推導，無法判最早時 unknown |
+| PrintingFace | `face_id, art_id?, frame_code?, signed?, embellishment_state, printed_name_unit_id?, printed_effect_unit_id?, flavor_unit_id?, printed_text_state, observations:[ObservedText], sections:[Section], stamps:[{stamp_id,position?,color?}], translations:[FieldTranslation], corrections:[Correction]`；不帶 `card_id/credit_raw/source` |
+| WordingView | `region, state:pending, display:{revision_id?,basis:current/latest_known_release/candidates}, candidates:[{printing_id,revision_id?}], undated_printing_ids:[id]`；暫顯不等於 current，見 §2.3 |
+| ObservedText | `revision_id?, state:available/missing_effect/correction_conflict, source_url`；同版次觀測，不等於 printed，見 §2.3 |
+| Section | `ordinal, text_unit_id, kind` |
+| FieldTranslation | `field:name/effect/flavor/question/answer/section/label/action_label, ordinal?, target_lang, translation_id, basis:own_source/jp_source/official_counterpart, source:PublicTextPointer, counterpart:PublicTextPointer?`；逐 card/face/region 選用，不能只以共享文字單元判同語義 |
+| Correction | `field, corrected_from:JSON, is_corrected:true, reason, source_url?`；綁引用者，不標污染去重文字單元 |
+| ErrataVersion | `id, revision, announced_on?, effective_on?, date_raw?, reason_unit_id?, exchange_offered?, changes:[{face_id,field,before:JSON,after:JSON}], printings:[{printing_id,scope}]`；版本不可變，`scope=listed/confirmed_applies` 沿建置資料庫範圍，面由 `changes.face_id` 定位 |
+| Evidence | `qa_version_id?, cr_clause_id?, source_url?, role, quote, locator?`；前三欄恰一；非 QA/CR 的官方來源仍保留 URL/quote |
+| Support | `status, dsl_status?, dsl_version?, dsl_id?, validation_state, reasons:[code], reason_detail?, program_ref?, ruling_revision_ids:[id]`；automatic 由套用區域 block 後 `effective_status=engine_passed` 推導，不另存重複布林 |
+| `program_ref` | `file_key, entry_id`；由快照清單得檔 hash，entry 是已展開 AST，無 `author_macro`；draft/invalid 可 null；機械 verified/fresh 門檻只在建置資料庫計算 |
+| Spelling | `lang, literal_prefix, literal_suffix, parameter_name?, parse_kind:literal/uint/variable` |
+| Localization | `lang, name, tooltip, copy_pattern`；純字串，以 `parameter_schema` 驗參數 |
+
+新增巢狀型別 AnnotationRange／Annotation／PublicTextPointer 與有限 JSON reference 的逐欄型別、required/null、
+合法域、驗證者及反例 ID 依[公開 annotation §2](public-annotation.md#2-公開型別欄序與欄位責任)，是本白名單的一部分。
+只公開非空且被引用的 annotation_set 與非空 field_annotation；相關分片完整載入驗畢後，缺原文用途列表示空集合。
+translation.annotation_set_id 必填，null 表示譯文空集合；非 null 引用仍須存在，不能降為空。
+producer 以來源／render occurrence 驗省略完整性；reader 不從缺列推論原文沒有術語。
 
 卡表快照的 `card_engine_support.shared` 可以是 `missing_dsl`；EN-only 文件放 overrides；`region_blocks` 至少含未確認對應/語義差異/未有該區來源的理由。消費優先選 region override，否則 shared，最後套 `region_blocks`；block 強制手動且合併 reasons。若選中 `status=engine_passed` 但有 block，該區 `effective_status` 降為 reviewed（顯示「共用實作已審核，此區待核對」），不能在未實作清單顯示此區已通過。其餘四態保留並附區域原因；automatic 恰為 `effective_status=engine_passed`。不得從沒有 override 推斷「英版已確認」；block 完整性是發布閘門。
 
-translation 僅輸出上述欄位，用 `text_unit_id` 取譯文；同一 chosen translation 可供多個引用者。`origin` 固定為 `official/project/machine`，`authority` 維持 `sve_official/digital_official/unofficial`；數位官方名稱不因此取得實體官方 counterpart 資格。`low_confidence` 是必填 Bool，原樣保留 current producer 的結果；true 直接顯示譯文、標「待校對」並提供該 owner 的原文，false 不表示逐筆人工確認。不輸出或查詢舊 `status`，不把 false 轉成 reviewed，也不把所有 machine 改成 true。官英/官方日文 counterpart 由建置產生選用記錄（`origin=official, authority=sve_official`），無需人工 equivalence 表。繁中依據的 `source_unit_id` 仍是 JP 來源；本文的 shared_jp／shared_jp_unchecked 是切換前 basis，四層的選用政策依翻譯契約、新版 basis 由 #496 定義。官方 counterpart 逐 owner 直接引用，不占共用 translation_selection。詞彙與商品標籤亦在引用者存 FieldTranslation，不以共享 `source_unit` 字串去猜唯一翻法。keyword action 用 `field=action_label`、ordinal 對應 actions 順序；其他標籤 field=label。
+translation 僅輸出上述欄位，用 `text_unit_id` 取譯文；同一 chosen translation 可供多個引用者。`origin` 固定為 `official/project/machine`，`authority` 維持 `sve_official/digital_official/unofficial`；數位官方名稱不因此取得實體官方 counterpart 資格。`low_confidence` 是必填 Bool，原樣保留 current producer 的結果；true 直接顯示譯文、標「待校對」並提供該 owner 的原文，false 不表示逐筆人工確認。不輸出或查詢舊 `status`，不把 false 轉成 reviewed，也不把所有 machine 改成 true。官英/官方日文 counterpart 由建置產生選用記錄（`origin=official, authority=sve_official`），無需人工 equivalence 表。繁中依據的 `source_unit_id` 仍是 JP 來源；JP 自身選用為 own_source、EN 接收為 jp_source。source 明指 JP 原文 owner，counterpart 在這兩種 basis 都為 null；舊 shared_jp／shared_jp_unchecked 拒絕。官方 counterpart 逐 owner 直接引用，不占共用 translation_selection。詞彙與商品標籤亦在引用者存 FieldTranslation，不以共享 `source_unit` 字串去猜唯一翻法。keyword action 用 `field=action_label`、ordinal 對應 actions 順序；其他標籤 field=label。
 
 `keyword.name_unit_id` 由建置資料庫的 `glossary_term.source_ja` 建文字單元，translations 選同概念多語名稱；`definition_unit_id` 另供說明。relation/action 篩選的三態必合併兩個稀疏集合：指定 relation/action 在 projection 集合內→present；無吻合但 `coverage.complete_all=true` 或 keyword 在依 `complete_mode` 解碼的 complete 集合→absent；否則 unknown。另一 relation 已 present 不能推本項 absent。未列 coverage 等於尚未檢查；`partial_keyword_ids` 不代表完整。只有 fresh 標籤進 projection，universe/source/producer 改版重算 coverage；EN region block 使不適用的 shared 結果 unknown。config.search 的版本必與 reader 能力匹配，normalized 別名與使用者輸入用同一規則。
 
 ### 2.1 獨立影像清單與 DSL 附件
 
-2.0.0 的三個影像集合如下。
+3.0.0 沿用 2.0.0 的三個影像集合如下。
 
 | 集合 | 公開欄位 | 鍵與用途（未註明 PK 者以首欄 `id` 為 PK） |
 | --- | --- | --- |
@@ -137,7 +147,7 @@ DSL 程式包（`dsl-programs`）不是集合；封套及 AST 驗證統一依 [�
 
 ### 2.3 表記未定的公開呈現
 
-**使用者 2026-10-01 核可本節暫顯規則**：觀測有差異、沒有舊 current 的卡仍可讀，不因未採納排除。以下公開欄位擴充對應 §2 白名單。公開形狀、Schema／types／golden 與 reader 依目前 2.0 的 [snapshot-contract](snapshot-contract.md) 同步維護。
+**使用者 2026-10-01 核可本節暫顯規則**：觀測有差異、沒有舊 current 的卡仍可讀，不因未採納排除。以下公開欄位擴充對應 §2 白名單。暫顯規則由 2.0 沿用至 3.0；各版的公開形狀、Schema／types／golden 與 reader 依 [snapshot-contract](snapshot-contract.md) 同步維護，3.0 新增欄位仍以公開 annotation 契約為準。
 
 - `PrintingFace.observations` 是 `{revision_id?,state,source_url}` 陣列；state=`available/missing_effect/correction_conflict`。available 必有同 face、同 printing.region 的公開 revision；missing_effect 的 revision_id=null，表示原觀測主文未知且無法建 revision；correction_conflict 可有原觀測 revision 或 null，只供帶警告查閱，不能作可信暫顯。source_url 是該 printing 的原始來源 URL，不出 source ID、hash 或決定。完整三欄 exact 相同才去重；按來源 URL／狀態／revision ID 的固定字串序儲存**不表示年代**。
 - `face.wording` 是稀疏陣列，只對表記未定的公開 face-region 各出一項，恰有 `{region,state,display,candidates,undated_printing_ids}`。state 固定 `pending`；display 恰有 `{revision_id?,basis}`，basis=`current/latest_known_release/candidates`。candidates 是 `{printing_id,revision_id?}` 陣列，恰列仍需核對的候選版次／revision，去重並按 printing_id／revision_id 固定排序，null 為尚無可表示 revision；undated_printing_ids 列無可信完整日精度收錄日的候選版次，去重排序。這些 ID 排序僅供穩定序列化，UI 的年代由日期證據顯示，不能用 ID 補順序。
@@ -176,10 +186,10 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 ### 3.1 啟動包是欄位主儲存
 
-§2 的 40 個文字集合是完整**邏輯讀取視圖**，不是額外下載的全欄主表。傳輸以同一 table 的固定欄位分割（fragment）分成啟動包（bootstrap）和詳情分片（detail），跨表 FK 保留永久 ID；同表詳情分片不重複永久 PK，而以片內 `row_index` 指向啟動包列（printing.faces 用 `face_ordinal`），每個實體欄位值只在一處。以下為完整分割規則；「其餘」精確指 §2 白名單扣去該列啟動包欄，非任意省欄。
+§2 的 43 個文字集合是完整**邏輯讀取視圖**，不是額外下載的全欄主表。傳輸以同一 table 的固定欄位分割（fragment）分成啟動包（bootstrap）和詳情分片（detail），跨表 FK 保留永久 ID；同表詳情分片不重複永久 PK，而以片內 `row_index` 指向啟動包列（printing.faces 用 `face_ordinal`），每個實體欄位值只在一處。以下為完整分割規則；「其餘」精確指 §2 白名單扣去該列啟動包欄，非任意省欄。
 
 | 邏輯集合/列範圍 | 啟動包唯一儲存欄位 | 詳情分片唯一儲存欄位 |
-| --- | --- | --- |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | card、face、`product_family`、product、`printing_product`、`identity_change` | 全部欄位 | 無資料列，不發僅 PK 的空殼 |
 | `printing` | id 及除 faces 外全部欄位；faces 的裝飾欄位分割為 `face_id/art_id/frame_code/signed/embellishment_state/stamps` | id；faces 的文字欄位分割為 `face_id/printed_name_unit_id/printed_effect_unit_id/flavor_unit_id/printed_text_state/observations/sections/translations/corrections` |
 | `face_revision`：§2.3 display_ref 的現行／暫顯列 | `id/face_id/region/name_unit_id/class_code/type_code/cost/attack/defense/traits/titles/special_kinds`；translations 中 field=name 的列 | id＋其餘白名單欄；translations 僅非 name 列 |
@@ -189,6 +199,8 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 | `rules_profile`、restriction、vocabulary、`search_alias`、keyword、stamp | 全部欄位 | 無 |
 | `text_unit` | 現行／暫顯名字、可用名字翻譯與 facet 字典引用的 ID 閉包；每個文字 ID 只在其固定 bucket 的啟動包或詳情分片一邊 | 非上述閉包的其餘文字列 |
 | `translation` | 現行／暫顯 name 與 facet labels 使用的翻譯列 | 其餘翻譯列；同 ID 兩用途時歸啟動包，只存一次 |
+| `annotation_set`、`annotation_concept` | 可見名字／名稱翻譯／facet 必要閉包；同 ID 只存一次 | 其餘集合列；正文按需，完整文字包含全部引用 |
+| `field_annotation` | 隨原文欄位；display name／字典／商品等 | 隨 effect／printing／QA／CR 等；非 display revision 的用途在 history，詳[位置分片](public-annotation.md#5-分片閉包與消費表) |
 | 其餘文字集合 | 無 | 完整白名單列 |
 
 `rules_name`／`face_rules_name` 的全部原欄位在 2.0 唯一存於 global detail，依 [傳輸契約 §5.1](snapshot-transport.md#51-format-200-固定配置) 定位。兩表的 PK、欄序、型別及邏輯參照不變，也沒有 row_index/base。名稱搜尋與一般 facet 仍用 current／display 的名稱閉包；同名規則／構築功能按需取兩表，未完成須標「規則資料載入中／未備妥」，不能當作沒有同名限制或完整合法性。其他表與 printing 診斷／art_id／printing_product／support 的存放均不變。
@@ -213,7 +225,7 @@ card images 依完整 URL（含 v）快取或供已選牌組離線使用；啟�
 
 身分修復的永久 printing／int_id、卡片入口舊 URL 與 split 玩家選擇，沿 build-db §13／§15；快照保留僅依下述 §4.1，
 建置端的追加封套與公開事件映射另見 [身分修復契約 §6](../domains/identity-repair.md#6-公開事件墓碑與路由)。
-§2 表格列現行 2.0 的公開形狀；實作撤回時在原欄序尾端
+§2 表格的 identity_change 列仍是現行 2.0 的公開形狀（3.0 不改此表）；實作撤回時在原欄序尾端
 追加 reverts_id，identity_change 新增 kind=revert 與 required nullable reverts_id，
 一般事件填 null，撤回列指原公開事件並保留原 old/new／printing 欄位，不代表反向邊。
 reader 先移除被指名的有效事件再解析修復圖；原事件與撤回事件皆保留，不改舊快照。
@@ -265,19 +277,19 @@ changes 是相鄰發布摘要，不是重建鏈。previous manifest 引用的 ch
 
 來源方向依 **2026-10-10 的日文唯一來源決定**（[#495](https://github.com/gbaian10/sve-kit/issues/495)）：
 已確認同卡同面且來源有效即以 JP 翻譯，已知日英差異不改取 EN。
-具體選用責任依[翻譯契約](../domains/translation-contract.md)；新版公開 basis／呈現與版本交 #496。有效 selection／直接 owner 引用通過來源、context、語言與 owner 檢查即可出貨，machine 或低信心不排除；只有實際 FieldTranslation 引用的譯文及原文閉包出貨，未選候選與內部清冊不出貨。
+具體選用責任依[翻譯契約](../domains/translation-contract.md)；新版公開 basis／呈現與版本依[公開 annotation](public-annotation.md)。有效 selection／直接 owner 引用通過來源、context、語言與 owner 檢查即可出貨，machine 或低信心不排除；只有實際 FieldTranslation 引用的譯文及原文閉包出貨，未選候選與內部清冊不出貨。
 
-機器與非官方來源仍須清楚標示；繁中可用「非官方翻譯」、機器另標「機器翻譯・非官方」，審過不改 origin。來源標示與 low_confidence 的「待校對」各自獨立；新版 JP 依據的標示另由 #496 定義，不能用顯示狀態抵銷規則核對；不把未核對譯文改成 aligned，也不放行對戰自動能力。合法低信心選用仍計 translated，沒有選用才標缺譯並回原文；來源失效或錯誤引用不得用低信心替代拒絕。
+機器與非官方來源仍須清楚標示；繁中可用「非官方翻譯」、機器另標「機器翻譯・非官方」，審過不改 origin。來源標示與 low_confidence 的「待校對」各自獨立；jp_source 明示「日文依據」，不能用顯示狀態抵銷規則核對；不把未核對譯文改成 aligned，也不放行對戰自動能力。合法低信心選用仍計 translated，沒有選用才標缺譯並回原文；來源失效或錯誤引用不得用低信心替代拒絕。
 
 卡面 region 決定卡圖/原文；UI 語言決定翻譯列。指定 printing 不被語言切換偷偷換圖。官方 counterpart 只用已人工確認 card/face 且完成語義核對、無相關 divergence 的版本；否則用該原文的 project/machine 譯文或原文回退。官英到齊且核對通過才自動優先，當前譯文依有效來源、參數及選用資料重建，不使用舊翻譯收據或審核狀態作發布過濾；繁中來源與段落選用依翻譯契約 §7.2，取完整 JP 效果且不按 EN ordinal 拼接。區域規則與官方 counterpart 的資格另依 §7.1。
 
-| UI      | JP 卡面                                           | EN 卡面                             |
-| ------- | ------------------------------------------------- | ----------------------------------- |
-| zh-Hant | 日文＋繁中，缺翻譯留日文並標示                    | 英文＋繁中，缺翻譯留英文並標示      |
-| `ja`    | 日文                                              | 英文＋適用官方日文/譯文，缺則留英文 |
-| `en`    | 日文＋適用官方英文，否則已審譯文/機翻，缺則留日文 | 英文                                |
+| UI | JP 卡面 | EN 卡面 |
+| --- | --- | --- |
+| zh-Hant | 日文＋繁中，缺翻譯留日文並標示 | 英文＋完整 JP 繁中（標日文依據），缺翻譯留英文並標示 |
+| `ja` | 日文 | 英文＋適用官方日文/譯文，缺則留英文 |
+| `en` | 日文＋適用官方英文，否則有效本站譯文/機翻，缺則留日文 | 英文 |
 
-日/英 UI 不回退繁中。`language.fallback_order` 只供 vocabulary/keyword 等介面詞彙。原文該區也缺時可顯示另一已確認區原文但明說，不自造英版 printing。printed 模式只用該印刷文字版本的 FieldTranslation，不拿 current 譯文冒充印刷翻譯；derived 狀態必標推定，unknown 仍可讀 current。逐欄 origin/authority 顯示，卡名官方數位譯名不把整段繁中效果變官方。
+日/英 UI 不回退繁中。原文無翻譯列時仍取 field_annotation；JP 繁中與原文對照依 JP source 取位置，EN 原文只用 EN 的集合；不按 EN ordinal 拼接，也不套 JP offsets。`language.fallback_order` 只供 vocabulary/keyword 等介面詞彙。原文該區也缺時可顯示另一已確認區原文但明說，不自造英版 printing。printed 模式只用該印刷文字版本的 FieldTranslation，不拿 current 譯文冒充印刷翻譯；derived 狀態必標推定，unknown 仍可讀 current。逐欄 origin/authority 顯示，卡名官方數位譯名不把整段繁中效果變官方。
 
 ## 6. 未實作頁消費契約
 
@@ -287,7 +299,7 @@ changes 是相鄰發布摘要，不是重建鏈。previous manifest 引用的 ch
 
 ## 7. 發布閘門與變動報告
 
-除了建置資料庫完整性，卡表快照需驗：所有表與內嵌 reference 有公開目標；40 個文字集合＋3 個影像集合逐欄白名單；current/translation 選用/region blocks 完整；每卡 support 恰一列；所有非 passed 有原因；passed 的建置資料庫證據吻合；完整文字包/分片/啟動包語義等價；bytes/hash/count/依賴 closure 正確；無來源本機路徑、作者候選 YAML、逐列稽核 hash。
+除了建置資料庫完整性，卡表快照需驗：所有表與內嵌 reference 有公開目標；43 個文字集合＋3 個影像集合逐欄白名單；current/translation 選用/region blocks 完整；每卡 support 恰一列；所有非 passed 有原因；passed 的建置資料庫證據吻合；完整文字包/分片/啟動包語義等價；bytes/hash/count/依賴 closure 正確；無來源本機路徑、作者候選 YAML、逐列稽核 hash。
 
 changes 是內容定址的公開摘要 `{format_version,from_data_version,to_data_version,added,modified,retired,errata,new_qa_versions,identity_changes,coverage_changes,support_changes}`，元素型別與複合主鍵表示見 [傳輸契約 §7](snapshot-transport.md#7-changes-元素)；建置待辦與原報告留建置資料庫。只是抓取時間/ETag 改變而內容相同不列修改。引擎版本/政策變化即使卡文不動仍發布新 `support/data_version`。
 
@@ -315,7 +327,12 @@ art.regions 由實際 `printing_face→printing.region` 唯一推導，`[en]` �
 
 FieldTranslation 的逐 owner 來源檢查依[翻譯契約 §7.2](../domains/translation-contract.md#72-逐-owner-的顯示選用)。
 JP 依據不要求 aligned、不偽造 EN 欄位擁有 JP 原文字串；官方 counterpart 仍須自己的 fresh 核對與適用資格。
-新版 basis 與公開欄位由 #496 定義；這項建置驗證不出貨 dependency 表。
+逐 owner 的公開鍵、欄位、模式與 text identity 依[公開 annotation §2.3／§4](public-annotation.md#23-owner-與原文定位)：
+face_revision 的 name/effect/section 綁精確 revision；printing_face 的 name/effect/flavor/section 綁自己的 printed 文字，
+不借 current；QA 的 question/answer、CR 的 effect、商品／vocabulary 的 label、keyword 的 label/effect/action_label
+都使用自身來源。只有卡片的 EN receiver 可用 jp_source，且 source 必為同種 owner、已確認同卡同面的有效 JP。
+EN effect 固定取完整 JP effect，jp_source 不產 section 列；官方 counterpart 另驗自己的雙端精確用途。
+P 驗 freshness／來源證據，Python／TS reader 驗公開引用與矛盾；不出貨 dependency、來源 FK 或採納過程資料。
 
 Spelling 與 RulingHint 的參數宣告、值域及拼法驗證依 [傳輸契約 §3.2](snapshot-transport.md#32-公開參數宣告)。`{Q}` 先登錄 literal、原樣文字顯示與複製，語意未查明前不賦予機制/引擎含義。文字 roundtrip 不以語意猜測為前提。
 
@@ -347,6 +364,7 @@ Spelling 與 RulingHint 的參數宣告、值域及拼法驗證依 [傳輸契約
 
 [數位名字政策](../domains/digital-name-policy.md) 的 same_name 卡層瀏覽使用
 [傳輸契約 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片) 的 2.0 配置。
+3.0 沿用本節的同名規則；版本與必要能力改依公開 annotation §1，不能沿用 2.0 標頭或能力集合。
 公開欄序與引用閉包依 §2，relation 白名單、typed projector、Schema 與 reader 同步驗證。
 不另設中間格式或相容 reader。
 
@@ -380,12 +398,13 @@ digital_face／digital_text 留建置端，沒有資產採納就不出 digital a
 
 | 驗收反例 | 結果 |
 | --- | --- |
-| 未知格式，或 2.0 缺 capability／最低版本不足 | 拒絕整份快照，不能丟掉列後降版 |
-| 2.0 零配對便省 capability，或 config／fragment／programs／text_all 仍寫舊版本 | 拒絕，不因空列放寬准入 |
+| 未支援的格式，或缺該格式必要 capability／reader 契約版本不足 | 拒絕整份快照，不能丟掉列後降版；3.0 依完整八個能力檢查 |
+| 因零配對／空 annotation 省必要 capability，或 config／fragment／programs／text_all 版本與 manifest 不一致 | 拒絕，不因空列放寬准入，2.0／3.0 各自驗其固定配置 |
 | same_name 帶面／phase、effect_similarity、sampled／confirmed review | producer 與 reader 各自拒絕 |
 | same_name 因不同面或 phase 重複出列，或同組真人與規則並存 | 拒絕重複規則列；建置端保留全部匹配來源，真人精確面的合法多筆沿自己的 subject |
 | digital_card／link／endpoint 引用缺目標，或把凍結目錄全部當必要閉包 | 拒絕缺引用；只投影實際有效關係所需內容 |
 | 同名連結被拿來授官方譯名、概念、圖或語音，或空 coverage 被說成無對應 | 不授權；各入口仍驗自己的採納／來源條件，未知如實呈現 |
 
-正式容量與變動報告依 2.0 固定配置及既有預算量測；超出上限須交維護者決定，
+正式容量與變動報告依所宣告版本的固定配置及既有預算量測；3.0 沿用 2.0 分片參數，仍須重測新資料。
+完整文字或單片超限即停止發布效能驗收，不放寬門檻；啟動包超過 2 MiB 交維護者決定，
 不自動改 N／格式。保留窗口依 §4.1，不永久保存歷史快照。
