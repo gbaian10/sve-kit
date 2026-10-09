@@ -63,7 +63,7 @@ HTML、PDF、API JSON 與卡圖 PNG 均屬凍結來源；WebP 已發布不代表
 
 原則：**能用程式重新產生的不進 git；專案共用的人寫資料與正式文件進 git。**
 個人設定、秘密、本機的研究筆記不屬於這個 repo。
-`authored/` 依卡包切檔（例如 `authored/effects/BP01.yaml`），單檔不要超過 1 MiB（1024 KiB）。
+`authored/` 依卡包切檔（例如 `authored/rules/effects/BP01.yaml`），單檔不要超過 1 MiB（1024 KiB）。
 
 測試用官方卡文存於永久私有的 GitHub testdata repo，保存完整日文卡表 JSONL、19 個官方頁面測試原檔與來源說明，不放卡圖或憑證，不用 R2。
 公開 repo 的 carddb 測試使用自編的合成頁面與文字，只保存私有案例索引及逐欄位 SHA-256；官方網址、欄位標籤與解析所需的固定詞彙仍用於結構測試。
