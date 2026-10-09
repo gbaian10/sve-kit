@@ -54,6 +54,7 @@ jobs:
               - 'carddb/**' # includes read_api, contracts and lock inputs used by publish
               - 'publish/**'
               - 'docs/schema/**'
+              - 'tools/schema-er/**'
               - 'authored/**' # the registry tests load and validate the real authored data
             rust:
               - 'sim/engine/**'
