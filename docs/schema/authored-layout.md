@@ -73,7 +73,7 @@ authored source 的 `parser_version` 是接受封套與 source identity recipe �
 
 每張 printing 的 `observation` 保存 `region/card_no/recipe/observation_hash/rules_hash`，reader 只接受 `registry-observation-v2`。唯一明確投影為 `domains.registry.projection` 的 `Card`／`Face`：Card 含 number 與來源順序的 faces；JP 使用現行 parser 的 name、職業、種類、traits、數值、text、sections、image，info／stats 為空物件、speech 為 null；EN 使用 name、完整 info／stats、parsed traits、分開的 text／sections、speech、image，職業／種類為空字串、cost／power／hp 為 `-`。全部預設明示，JP compound traits 保持一項，EN 無 traits 為 `[]`；觀測陣列不排序，grouping 才排序 traits。產品、QA、日期、credits 與抓取 metadata 不進投影。它是**萃取觀測 hash，不是原 HTML hash**。原始萃取仍留 repo 外；建置匯入需以同 recipe 驗證原始觀測並連到 source_record，不能把它偽裝成官方 HTML 的 sha256。僅取得此 registry 不足以重建官方卡文。
 
-歷史 JSONL 與 `separate_groups` 不能直接拿來跑新的 `registry init --check`；下次 init 使用現行 `extract cards` 的輸出。本次證據遷移不執行 init、不重配身份。
+歷史 JSONL 與 `separate_groups` 不能直接拿來跑新的 `registry init --check`；下次 init 使用現行萃取器的 JSONL（JP 可用 `extract cards`；JP／EN 可用 `archive extract-cards --region jp|en` 從凍結批次萃取）。本次證據遷移不執行 init、不重配身份。
 
 規則 hash 包含逐面 `name/text/speech/sections` 的原值。JP／EN 再錄措辭、提醒文字與標點差異可依本批人工政策共用 card，但各觀測分別保留；**不產生規則等義證明**，不沿用 DSL 驗證。未來來源變動須重新審核，不是忽略括號後自動通過。
 
@@ -179,7 +179,7 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 | 檔名 | 取得方式與內容 |
 | ---- | -------------- |
 | jp.jsonl | 取得已核對的 JP 萃取快照；每行 Card 的 number 與完整 faces。一般 JP 萃取由 workflows/extract.py 產生；本工具不讀 manifest、不執行萃取 |
-| en.jsonl | 取得審閱批次的完整 EN 萃取快照；每行同樣符合 registry.inputs.Card。目前沒有正式 EN 萃取 CLI，不可假定重新解析 HTML 能還原舊批次 exact bytes |
+| en.jsonl | 取得審閱批次的完整 EN 萃取快照；每行同樣符合 registry.inputs.Card。EN 萃取由 `archive extract-cards --region en` 從凍結批次產生；不可假定重新解析 HTML 能還原舊批次 exact bytes |
 | candidates.jsonl | 取得本批已審候選；每行 en_no、category（A/B/C）、jp_candidates（含 jp_no）。新增批次須完整列出 EN 版次，人工確認 A/B 第一候選或 C 無對應 |
 | confirmations.tsv | 保存依序追加的人工裁決，欄位 en_no、jp_no、verdict、confirmed_on；後列覆蓋前列，不能重排 |
 | original_art.jsonl | 保存人工卡圖比對結果，每行含 en_no、verdict；en_original_art 是插畫確認證據 |
