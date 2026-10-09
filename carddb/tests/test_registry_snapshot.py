@@ -10,17 +10,12 @@ from pydantic import ValidationError
 from sve_carddb.domains.registry.inputs import digest
 from sve_carddb.domains.registry.records import CorrectionData, EnglishPrintingData
 from sve_carddb.domains.registry.snapshot import load_registry
-from sve_carddb.domains.registry.storage import (
-    Index,
-    encode,
-    load,
-    read_yaml,
-    yaml_parser,
-)
+from sve_carddb.domains.registry.storage import Index, encode, load, read_yaml
 
 from .registry_snapshot_fixtures import edit_record, kind_shard
 from .registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- expose synthetic pytest fixture
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- expose dependency of the synthetic registry fixture
+from .yaml_fixtures import yaml_emitter
 
 if TYPE_CHECKING:
     from sve_carddb.domains.registry.snapshot import RegistrySnapshot
@@ -170,7 +165,7 @@ def test_explicit_wire_envelopes(
     else:
         raw.pop("authored_format" if damage == "missing_format" else "kind")
     with path.open("w") as stream:
-        yaml_parser().dump(raw, stream)
+        yaml_emitter().dump(raw, stream)
     with pytest.raises(ValueError, match="envelope fields or format"):
         load_registry(registry_root)
 
@@ -200,6 +195,6 @@ def test_removed_envelope_fields_are_rejected(
     assert isinstance(raw, dict)
     raw[field] = []
     with path.open("w") as stream:
-        yaml_parser().dump(raw, stream)
+        yaml_emitter().dump(raw, stream)
     with pytest.raises(ValueError, match="envelope fields or format"):
         load_registry(registry_root)

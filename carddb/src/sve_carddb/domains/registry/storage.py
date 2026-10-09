@@ -94,18 +94,6 @@ class Index(BaseModel):
         return self
 
 
-def yaml_parser() -> YAML:
-    """Limit the safe pure parser to YAML 1.2 core scalar types."""
-    yaml = YAML(typ="safe", pure=True)
-    yaml.version = (1, 2)
-    yaml.allow_duplicate_keys = False
-    resolver = yaml.resolver.versioned_resolver
-    allowed = {"tag:yaml.org,2002:" + name for name in ("bool", "int", "float", "null")}
-    for key, rules in list(resolver.items()):
-        resolver[key] = [(tag, pattern) for tag, pattern in rules if tag in allowed]
-    return yaml
-
-
 def read_yaml(path: Path) -> JsonValue:
     """Require bounded UTF-8 YAML, JSON values and finite canonical content."""
     return _read_yaml_content(path)[0]

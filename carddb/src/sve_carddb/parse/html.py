@@ -41,12 +41,3 @@ def require_one(root: Queryable, query: str) -> LexborNode:
 def attribute(node: LexborNode, name: str) -> str | None:
     """Return an attribute value, or `None` when it is absent."""
     return node.attributes.get(name)
-
-
-def require_attribute(node: LexborNode, name: str) -> str:
-    """Return an attribute value, or raise `MissingElementError`."""
-    value = attribute(node, name)
-    if value is None:
-        msg = f"<{node.tag}> has no {name!r} attribute"
-        raise MissingElementError(msg)
-    return value

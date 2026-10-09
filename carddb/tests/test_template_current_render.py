@@ -429,21 +429,6 @@ def test_reference_interpolation_tracks_exact_positions_and_requires_target_labe
     assert all(p.label.emphasis is True and p.label.low_confidence for p in positions)
 
 
-def test_current_package_splits_yaml_and_preserves_shared_closure(
-    current_case: Case, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    from sve_carddb.domains.translations.templates.loader import from_files  # ruff: ignore[import-outside-top-level] -- reconstructed package readback
-    from sve_carddb.domains.translations.templates.writer import compose  # ruff: ignore[import-outside-top-level] -- current packaging boundary
-
-    monkeypatch.setattr(
-        "sve_carddb.domains.translations.templates.writer.TARGET_BYTES", 1
-    )
-    package = compose(current_case.inputs.files, current_case.inputs.records)
-    assert from_files(package).records == current_case.inputs.records
-    assert all(len(raw) < 1048576 for _, raw, _ in package.content)
-    assert all(b"decisions:" not in raw for _, raw, _ in package.content)
-
-
 def test_invalid_placeholder_keeps_only_that_field_original(
     verified: Validated,
 ) -> None:

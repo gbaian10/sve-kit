@@ -142,25 +142,6 @@ def verify_application(registry: RegistrySnapshot, application: Application) -> 
             raise ValueError("Correction image evidence metadata mismatch")
 
 
-def historical_application(
-    registry: RegistrySnapshot,
-    record: RegistryRecord,
-    item: FaceObservation,
-    images: ImageProvider,
-) -> Application:
-    """Apply the existing absent-then-correction contract to an explicit raw version."""
-    if not isinstance(record.data, CorrectionData):
-        raise TypeError("Historical correction requires a correction record")
-    application = Application(
-        record,
-        item,
-        tuple(images.image(e) for e in record.data.evidence),
-        _status(record.data, item),
-    )
-    verify_application(registry, application)
-    return application
-
-
 def selected_records(preview: PreviewPlan) -> tuple[RegistryRecord, ...]:
     """Preserve exact complete envelopes while importing only included regional parents."""
     included = {

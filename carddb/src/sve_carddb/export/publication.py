@@ -6,13 +6,6 @@ from sve_carddb.contracts.snapshot import validate
 from sve_carddb.core.json import string
 
 
-def require_formal(manifest: dict[str, JsonValue]) -> None:
-    """Refuse preview artifacts before the future formal release gates (#34)."""
-    validate("Manifest", manifest, string(manifest["format_version"]))
-    if string(manifest["data_version"]).startswith("preview-"):
-        raise ValueError("Formal publish refuses preview artifacts")
-
-
 def require_preview(
     manifest: dict[str, JsonValue], *, regions: tuple[str, ...] = ("jp",)
 ) -> None:

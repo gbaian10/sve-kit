@@ -49,13 +49,6 @@ def decode_html(body: bytes, *, min_bytes: int) -> str:
         raise ValidationError(msg) from exc
 
 
-def check_pdf(body: bytes) -> None:
-    """Rough check only: the header is right. It does not prove the PDF is complete."""
-    if not body.startswith(b"%PDF-"):
-        msg = "not a PDF"
-        raise ValidationError(msg)
-
-
 def check_image(body: bytes, *, max_bytes: int) -> None:
     """Structural check of a PNG or JPEG."""
     if len(body) > max_bytes:

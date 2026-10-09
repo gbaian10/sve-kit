@@ -34,7 +34,6 @@ from sve_carddb.export.reader import read_snapshot
 from sve_carddb.export.transport import export_snapshot
 from sve_carddb.workflows import export as commands
 from sve_carddb.workflows import offline
-from sve_carddb.workflows.export import require_unknown_coverage
 from sve_carddb.workflows.offline import (
     Inputs,
     RegionalInput,
@@ -274,10 +273,7 @@ def test_regional_build_projects_qa_related_and_reskin_with_complete_sources(
     assert report["pointer"]
     with pytest.raises(ValueError, match=r"^Preview requires exactly the JP region$"):
         require_preview(snapshot.manifest)
-    with pytest.raises(
-        ValueError, match=r"^Unrequested ancillary sources cannot become public facts$"
-    ):
-        require_unknown_coverage(built.projection)
+    require_offline_coverage(built.projection, errata=False)
 
 
 def test_errata_pending_keeps_cards_routes_and_existing_current(
@@ -413,8 +409,9 @@ def test_errata_fragments_dates_and_multiple_notices_remain_independent(
     "field",
     ["source_windows", "restriction_coverage", "cr_version", "restriction", "errata"],
 )
+@pytest.mark.parametrize("errata", [False, True])
 def test_offline_coverage_remains_unknown(
-    prepared: tuple[Case, Inputs, tuple[CardPage, ...]], field: str
+    prepared: tuple[Case, Inputs, tuple[CardPage, ...]], field: str, *, errata: bool
 ) -> None:
     projection = build(prepared[1]).projection
     if field in {"source_windows", "restriction_coverage"}:
@@ -427,8 +424,11 @@ def test_offline_coverage_remains_unknown(
             projection, tables=projection.tables | {field: [{"id": "invented"}]}
         )
         message = "Unrequested ancillary sources cannot become public facts"
-    with pytest.raises(ValueError, match=r"^" + message + "$"):
-        require_offline_coverage(poisoned, errata=False)
+    if field == "errata" and errata:
+        require_offline_coverage(poisoned, errata=True)
+    else:
+        with pytest.raises(ValueError, match=r"^" + message + "$"):
+            require_offline_coverage(poisoned, errata=errata)
 
 
 @pytest.mark.parametrize("source", ["env", "cli", "cli-over-env"])

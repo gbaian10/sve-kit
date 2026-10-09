@@ -51,8 +51,3 @@ truth. Use the [regional evidence providers](../domains/registry/preview/README.
 verify legacy identity observations and preserve the shared raw-source/build
 input contract. Matching both observation hashes does not establish cross-region
 text equivalence, correction adoption, review scope or release readiness.
-
-`workflows.diagnostics.acceptance_report` composes the identity, product, text and
-correction plans into a redacted per-printing EN report and re-review queue.
-See [EN integration acceptance](../workflows/acceptance_en.md) for mismatch handling and the
-separate expected-input, F1 bundle and regional text review gates.
