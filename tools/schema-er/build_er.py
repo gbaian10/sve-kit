@@ -19,7 +19,7 @@ from er_model import LAYERS, Diagnostics, LayerName, Relation, SchemaModel, Tabl
 from er_parse import SnapshotRefs, build_layer
 
 HERE = Path(__file__).resolve().parent
-SCHEMA_DIR = HERE.parent
+SCHEMA_DIR = HERE.parents[1] / "docs" / "schema"
 TEMPLATE = HERE / "template.html"
 CONFIG = HERE / "diagram.toml"
 DEFAULT_OUT = HERE / "out" / "schema-er.html"
@@ -266,7 +266,7 @@ def is_headless_remote() -> bool:
 def remote_hint(out: Path, port: int | None) -> str:
     """Explain how to view the page from the local machine."""
     p = port or 8000
-    serve_line = "" if port else f"  uv run docs/schema/er/build_er.py --serve {p}\n"
+    serve_line = "" if port else f"  uv run tools/schema-er/build_er.py --serve {p}\n"
     return (
         "偵測到 SSH 且沒有圖形環境，不自動開啟瀏覽器。在本機瀏覽器查看：\n"
         f"{serve_line}"

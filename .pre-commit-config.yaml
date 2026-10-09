@@ -52,12 +52,12 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.9
     hooks:
-      # docs/schema/er/ and .github/ci/ have ruff.toml files that extend the carddb settings.
+      # tools/schema-er/ and .github/ci/ have ruff.toml files that extend the carddb settings.
       - id: ruff-format
         args: [--check]
-        files: ^(carddb|publish|docs/schema/er|\.github/ci)/
+        files: ^(carddb|publish|tools/schema-er|\.github/ci)/
       - id: ruff-check
-        files: ^(carddb|publish|docs/schema/er|\.github/ci)/
+        files: ^(carddb|publish|tools/schema-er|\.github/ci)/
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.23.3
@@ -225,9 +225,9 @@ repos:
       # Optional strict check on all Python, run by hand; not in CI (mypy is the gate):
       # `pre-commit run --hook-stage manual pyright`.
       - id: pyright
-        name: pyright (carddb, docs/schema/er)
+        name: pyright (carddb, tools/schema-er)
         language: system
-        entry: bash -c 'status=0; uv --directory carddb run --group pyright pyright || status=1; uv --directory carddb run --group pyright pyright -p ../docs/schema/er || status=1; exit $status'
+        entry: bash -c 'status=0; uv --directory carddb run --group pyright pyright || status=1; uv --directory carddb run --group pyright pyright -p ../tools/schema-er || status=1; exit $status'
         pass_filenames: false
         always_run: true
         stages: [manual]
@@ -242,12 +242,12 @@ repos:
         fail_fast: true
       # The ER generator is a standalone uv script checked with the carddb toolchain and settings.
       - id: mypy-schema-er
-        name: mypy (docs/schema/er)
+        name: mypy (tools/schema-er)
         stages: [pre-push]
         language: system
-        entry: uv run --directory carddb mypy ../docs/schema/er
+        entry: uv run --directory carddb mypy ../tools/schema-er
         pass_filenames: false
-        files: ^(docs/schema/er/.*\.py|carddb/pyproject\.toml)$
+        files: ^(tools/schema-er/.*\.py|carddb/pyproject\.toml)$
       - id: mypy-ci
         name: mypy (CI helpers)
         stages: [pre-push]
@@ -260,9 +260,9 @@ repos:
         name: schema ER builds from docs/schema
         stages: [pre-commit, manual]
         language: system
-        entry: bash -c 'out=$(mktemp -d) && trap "rm -rf \"$out\"" EXIT && uv run docs/schema/er/build_er.py --no-open --out "$out/schema-er.html"'
+        entry: bash -c 'out=$(mktemp -d) && trap "rm -rf \"$out\"" EXIT && uv run tools/schema-er/build_er.py --no-open --out "$out/schema-er.html"'
         pass_filenames: false
-        files: ^docs/schema/
+        files: ^(docs/schema/|tools/schema-er/)
 
       - id: mypy-publish
         name: mypy (publish)

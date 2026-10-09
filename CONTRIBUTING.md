@@ -160,7 +160,7 @@ Type hints are required. pyright strict is an optional local check (a manual hoo
 because it bundles a large Node.js runtime); run it when you like and fix what it reports as you go:
 
 ```bash
-pre-commit run --hook-stage manual pyright   # carddb and docs/schema/er
+pre-commit run --hook-stage manual pyright   # carddb and tools/schema-er
 ```
 
 Follow the rules; if a rule is wrong for the whole project, propose changing the config
@@ -203,7 +203,7 @@ Install these tools with their own installers (each is one command; see the link
 | Tool                             | Used for                                                       | Install                                                           |
 | -------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------- |
 | [rustup](https://rustup.rs)      | Rust; the toolchain version is pinned in `rust-toolchain.toml` | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
-| [uv](https://docs.astral.sh/uv/) | Python (`carddb`, `docs/schema/er`)                            | `curl -LsSf https://astral.sh/uv/install.sh \| sh`                |
+| [uv](https://docs.astral.sh/uv/) | Python (`carddb`, `tools/schema-er`)                           | `curl -LsSf https://astral.sh/uv/install.sh \| sh`                |
 | [mise](https://mise.jdx.dev)     | Bun and Node.js plus shared project environment variables      | `curl https://mise.run \| sh`, then `mise install` in the repo    |
 
 mise manages Bun and Node.js versions and shared project environment variables.
