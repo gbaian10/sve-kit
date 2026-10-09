@@ -189,4 +189,4 @@ evidence:
 
 ## 選項內追加費用（R-0006）
 
-2026-10-09 官方確認採路線 B。`additional_costs` 可列多組，以 `modes` 限定所屬選項，本文透過 `paid.<key>` 決定效果是否適用。一組費用以 `optional_costs.additional` 回答；多組以 `optional_costs.<key>` 分別回答（`decline` 或付款材料）。各組在打出時決定並合計檢查，付款事件先於 play，付不起取消打出；效果仍依卡面順序執行。
+2026-10-09 官方確認採路線 B。`additional_costs` 可列多組，以 `modes` 限定所屬選項，本文透過 `paid.<key>` 決定效果是否適用。一組費用以 `optional_costs.additional` 回答；多組以 `optional_costs.<key>` 分別回答（`decline` 或付款材料），`key` 寫成 `mode_<選項編號>`，對應情境契約 §9.10。各組在打出時決定並合計檢查，付款事件先於 play，付不起取消打出；效果仍依卡面順序執行。
