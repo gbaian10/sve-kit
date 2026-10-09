@@ -27,7 +27,7 @@ ADR 中引用的官方卡名、卡文及 CR／Q&A 原文片段不在本專案授
 | [ADR-0018](0018-translation-validation.md) | 翻譯資料驗證層簡化 | 已採用 | 2026-10-04 |
 | [ADR-0019](0019-platform-dependency-policy.md) | 支援平台與依賴選型 | 已採用 | 2026-10-04 |
 | [ADR-0020](0020-upload-from-export.md) | 上傳直接讀匯出目錄，取消發布帳本 | 已採用 | 2026-10-06 |
-| [ADR-0021](0021-four-layer-translation.md) | 翻譯採術語葉、文法形式、有限名詞片語與整行句框架 | 提議，待審核與維護者核可 | 2026-10-10 |
+| [ADR-0021](0021-four-layer-translation.md) | 翻譯採術語葉、文法形式、有限名詞片語與整行句框架 | 已採用 | 2026-10-10 |
 
 ADR-0001～0012 是效果 DSL 1.0 的設計決定，規格本文見 [`docs/dsl/`](../dsl/README.md)；
 裁定登錄見 `authored/rules/rulings/`；2026-10-09 路徑／封套更新見 [ADR-0011 註記](0011-rulings-evidence.md#決定)，精確授權路徑承接見 [ADR-0014 註記](0014-license-policy.md#決定)。
