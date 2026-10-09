@@ -120,5 +120,5 @@ hidden files) remain rejected.
 Synthetic acceptance and counterexamples:
 
 ```bash
-uv --directory carddb run pytest tests/test_identity_replay.py tests/test_identity_replay_history.py tests/test_identity_replay_rejections.py tests/test_identity_transition_loader.py --durations=20
+uv --directory carddb run pytest tests/domains/registry/test_identity_replay.py tests/domains/registry/test_identity_replay_history.py tests/domains/registry/test_identity_replay_rejections.py tests/domains/registry/test_identity_transition_loader.py --durations=20
 ```

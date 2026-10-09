@@ -75,7 +75,7 @@ consumer still uses the positive group-version cases above.
 Run the shared Python consumer from the repo root:
 
 ```bash
-uv --directory carddb run pytest tests/test_snapshot_media_vectors.py tests/test_snapshot_media.py -n 4 --no-cov
+uv --directory carddb run pytest tests/export/test_snapshot_media_vectors.py tests/export/test_snapshot_media.py -n 4 --no-cov
 ```
 
 TS consumers can use the same JSON mutation and resealing procedure; no Python

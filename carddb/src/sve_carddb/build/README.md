@@ -60,7 +60,7 @@ with create_database(schema) as db:
   `Table.without_rowid` defaults to true. T0 `text_unit` uses a rowid table because
   synthetic long-text measurements favored it; its public primary key is still
   the explicit text ID. Reproduce the comparison with
-  `uv --directory carddb run python -m tests.benchmark_build_db` (10,000 rows,
+  `uv --directory carddb run python -m tests.build.benchmark_build_db` (10,000 rows,
   three repetitions, four text lengths, including commit-time verification).
 - `create_database(schema, path)` requires a new file; omission selects an isolated
   in-memory DB. It never replaces an existing file. This API creates databases;
