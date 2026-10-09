@@ -567,10 +567,9 @@ cards:
           min: 1
           max: 2
           modes:
-            - op: pay
-              costs:
-                - op: pp
-                  amount: 1
+            - op: if
+              condition:
+                read: paid.mode_1
               then:
                 op: seq
                 steps:
@@ -580,10 +579,9 @@ cards:
                   - op: damage
                     subjects: self.leader
                     amount: 1
-            - op: pay
-              costs:
-                - op: pp
-                  amount: 1
+            - op: if
+              condition:
+                read: paid.mode_2
               then:
                 op: seq
                 steps:
@@ -602,6 +600,19 @@ cards:
             max: 1
             modes:
               - 1
+        additional_costs:
+          - key: mode_1
+            modes:
+              - 1
+            costs:
+              - op: pp
+                amount: 1
+          - key: mode_2
+            modes:
+              - 2
+            costs:
+              - op: pp
+                amount: 1
   BP19-095:
     status: complete
     abilities:
