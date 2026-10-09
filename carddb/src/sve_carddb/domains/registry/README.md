@@ -48,3 +48,36 @@ fresh publication eligibility. A later importer must compare pinned observations
 with verified source versions, report unavailable evidence and excluded records,
 and satisfy the database's actual dependency closure. This reader does not apply
 corrections or mark any build capability importer/validator ready.
+
+## EN candidate identity inventory
+
+`python -m sve_carddb.domains.registry.english_inventory` reads explicitly pinned
+JP and EN card batches and the complete validated registry. Supply `--archive`,
+`--store-id`, `--jp-batch`, `--en-batch`, `--authored`, `--program-revision` and
+`--output`; keep the report outside the repository. It never opens the live
+manifest, fetches pages, allocates IDs or adopts permanent mappings.
+
+Candidates are EN source faces without an explicitly registered JP face. New EN
+cards, added faces, unavailable registered sources and unparsed EN cards remain
+visible. Every candidate receives `has_jp`, `confirmed_no_jp` or `unresolved`.
+Card-number suffixes, source order, names and same-rules reskins never infer a
+cross-region pairing. The report records batch IDs, every current source version,
+raw and observation hashes, per-face field hashes, actual image URLs and release
+metadata. It omits original names and ability wording from projected source fields.
+
+Optional `--reviewed-jp` pins the exact historical JP JSONL. Existing manually
+adopted absence reviews can be replayed only when this file's byte hash matches
+the review, its complete observations match the current JP input, and every EN
+printing observation in that review still matches. Unavailable or changed input
+leaves candidates unresolved and reports the differing JP card numbers.
+
+Optional `--conclusions` supplies private JSONL `Conclusion` records after manual
+identity review. Each record pins an EN card number, source face index, complete
+EN observation hash and complete JP coverage hash, and records its classification,
+reason and compared fields. `has_jp` also pins the exact JP card number, source
+face index and observation hash. Stale conclusions remain unresolved; incomplete
+JP extraction cannot support confirmed absence. A new cross-region conclusion is
+flagged for permanent-identity review, but this report does not write it into the
+registry. Adopt it through the existing identity repair procedure, separately
+from classification. Inventory conclusions do not select translations or grant
+DSL eligibility.
