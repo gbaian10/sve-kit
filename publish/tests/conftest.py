@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
+from typer import rich_utils
 
 from .isolation_guard import IsolationGuard
 from .r2_sdk_fixtures import close_sdk_clients as close_sdk_clients  # ruff: ignore[useless-import-alias] -- register SDK cleanup fixture
@@ -36,3 +37,14 @@ def test_isolation_guard(
             yield guard
         finally:
             guard._active = False
+
+
+@pytest.fixture(autouse=True)  # ruff: ignore[pytest-fixture-autouse] -- every CLI assertion needs escape-free output
+def plain_cli_output(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make CLI output plain text; a test that checks color overrides this itself."""
+    monkeypatch.setenv("NO_COLOR", "1")
+    monkeypatch.setenv("TERM", "dumb")
+    monkeypatch.delenv("FORCE_COLOR", raising=False)
+    monkeypatch.delenv("PY_COLORS", raising=False)
+    # Typer fixes this at import from FORCE_COLOR and GITHUB_ACTIONS, so the env above is too late.
+    monkeypatch.setattr(rich_utils, "FORCE_TERMINAL", None)

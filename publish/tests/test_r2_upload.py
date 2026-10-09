@@ -429,7 +429,6 @@ def test_execute_without_cdn_url_or_skip_is_refused_before_reading(
     result = CliRunner().invoke(
         app,
         ["upload", "--export-dir", str(roots.preview), "--execute"],
-        env={"FORCE_COLOR": None, "NO_COLOR": "1", "TERM": "dumb"},
     )
     assert result.exit_code != 0
     assert "--skip-cdn-verify" in result.output

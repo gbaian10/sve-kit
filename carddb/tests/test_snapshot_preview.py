@@ -278,12 +278,7 @@ def test_roots_have_no_defaults(tmp_path: Path) -> None:
             "--bundle-dir",
             str(tmp_path / "bundle"),
         ],
-        env={
-            "SVE_EXPORT_DIR": "",
-            "FORCE_COLOR": None,
-            "NO_COLOR": "1",
-            "TERM": "dumb",
-        },
+        env={"SVE_EXPORT_DIR": ""},
     )
     assert result.exit_code != 0
     assert "--preview-dir" in result.output

@@ -748,7 +748,6 @@ def test_cli_diagnostic_is_specific_without_input_values(
             "--output",
             str(tmp_path / "isolated"),
         ],
-        env={"FORCE_COLOR": None, "NO_COLOR": "1", "TERM": "dumb"},
     )
     assert result.exit_code == 2
     assert expected in result.output

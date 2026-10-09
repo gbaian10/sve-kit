@@ -34,7 +34,7 @@ def test_upload_rejects_invalid_root(source: str, tmp_path: Path) -> None:
     result = CliRunner().invoke(
         app,
         arguments,
-        env=env | {"FORCE_COLOR": None, "NO_COLOR": "1", "TERM": "dumb"},
+        env=env,
     )
     assert result.exit_code == 2
     assert "SVE_EXPORT_DIR" in result.output
@@ -64,7 +64,7 @@ def test_upload_root_precedence(
     result = CliRunner().invoke(
         app,
         arguments,
-        env=env | {"FORCE_COLOR": None, "NO_COLOR": "1", "TERM": "dumb"},
+        env=env,
     )
     assert "synthetic stop before reading" in result.output
     assert selected == [root]

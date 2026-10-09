@@ -4,7 +4,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
+from rich.console import Console
+from typer import rich_utils
 
+from sve_carddb import cli
 from sve_carddb.ingest.archive.manifest import Manifest
 
 from .database_fixtures import (
@@ -56,6 +59,19 @@ def test_isolation_guard(
             yield guard
         finally:
             guard._active = False
+
+
+@pytest.fixture(autouse=True)  # ruff: ignore[pytest-fixture-autouse] -- every CLI assertion needs escape-free output
+def plain_cli_output(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make CLI output plain text; a test that checks color overrides this itself."""
+    monkeypatch.setenv("NO_COLOR", "1")
+    monkeypatch.setenv("TERM", "dumb")
+    monkeypatch.delenv("FORCE_COLOR", raising=False)
+    monkeypatch.delenv("PY_COLORS", raising=False)
+    # Typer fixes this at import from FORCE_COLOR and GITHUB_ACTIONS, so the env above is too late.
+    monkeypatch.setattr(rich_utils, "FORCE_TERMINAL", None)
+    # The imported console has already cached the caller's color mode.
+    monkeypatch.setattr(cli, "console", Console(soft_wrap=True, color_system=None))
 
 
 @pytest.fixture(scope="session")
