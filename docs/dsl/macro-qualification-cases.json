@@ -1,0 +1,1770 @@
+{
+  "format": 1,
+  "kind": "macro_qualification_cases",
+  "fixtures": {
+    "three_cards": {
+      "candidate": {
+        "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "semantic_variant": {
+          "state": "resolved",
+          "key": "fixture.v1",
+          "scope": null
+        },
+        "projection_kind": "ability_body",
+        "body_version": "1",
+        "applicability_scope": "fixture.scope",
+        "written_by": "fixture.author",
+        "version_registered": true,
+        "scope_registered": true
+      },
+      "uses": [
+        {
+          "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_a",
+          "evolved": false,
+          "printing_id": "fixture.print_a_false_1"
+        },
+        {
+          "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_a",
+          "evolved": true,
+          "printing_id": "fixture.print_a_true_1"
+        },
+        {
+          "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_b",
+          "evolved": false,
+          "printing_id": "fixture.print_b_false_1"
+        }
+      ],
+      "reviews": [
+        {
+          "model": "fixture.reviewer_a",
+          "body_version": "1",
+          "applicability_scope": "fixture.scope",
+          "verdict": "ok",
+          "current": true
+        },
+        {
+          "model": "fixture.reviewer_b",
+          "body_version": "1",
+          "applicability_scope": "fixture.scope",
+          "verdict": "ok",
+          "current": true
+        }
+      ],
+      "boundary_test": {
+        "body_version": "1",
+        "applicability_scope": "fixture.scope",
+        "result": "pass",
+        "current": true,
+        "covered_boundaries": [
+          "zero_cards",
+          "no_legal_targets",
+          "large_values",
+          "timing",
+          "information"
+        ]
+      },
+      "application": null
+    },
+    "split_variants": {
+      "candidate": {
+        "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "semantic_variant": {
+          "state": "resolved",
+          "key": "fixture.v1",
+          "scope": null
+        },
+        "projection_kind": "ability_body",
+        "body_version": "1",
+        "applicability_scope": "fixture.scope",
+        "written_by": "fixture.author",
+        "version_registered": true,
+        "scope_registered": true
+      },
+      "uses": [
+        {
+          "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_a",
+          "evolved": false,
+          "printing_id": "fixture.print_a_false_1"
+        },
+        {
+          "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_b",
+          "evolved": false,
+          "printing_id": "fixture.print_b_false_1"
+        },
+        {
+          "frame_id": "frame:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v2",
+            "scope": null
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_c",
+          "evolved": false,
+          "printing_id": "fixture.print_c_false_1"
+        }
+      ],
+      "reviews": [
+        {
+          "model": "fixture.reviewer_a",
+          "body_version": "1",
+          "applicability_scope": "fixture.scope",
+          "verdict": "ok",
+          "current": true
+        },
+        {
+          "model": "fixture.reviewer_b",
+          "body_version": "1",
+          "applicability_scope": "fixture.scope",
+          "verdict": "ok",
+          "current": true
+        }
+      ],
+      "boundary_test": {
+        "body_version": "1",
+        "applicability_scope": "fixture.scope",
+        "result": "pass",
+        "current": true,
+        "covered_boundaries": [
+          "zero_cards",
+          "no_legal_targets",
+          "large_values",
+          "timing",
+          "information"
+        ]
+      },
+      "application": null
+    },
+    "reprints": {
+      "candidate": {
+        "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "semantic_variant": {
+          "state": "resolved",
+          "key": "fixture.v1",
+          "scope": null
+        },
+        "projection_kind": "ability_body",
+        "body_version": "1",
+        "applicability_scope": "fixture.scope",
+        "written_by": "fixture.author",
+        "version_registered": true,
+        "scope_registered": true
+      },
+      "uses": [
+        {
+          "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_a",
+          "evolved": false,
+          "printing_id": "fixture.print_a_false_1"
+        },
+        {
+          "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_a",
+          "evolved": false,
+          "printing_id": "fixture.print_a_false_2"
+        },
+        {
+          "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_a",
+          "evolved": false,
+          "printing_id": "fixture.print_a_false_alternate_art"
+        },
+        {
+          "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_b",
+          "evolved": false,
+          "printing_id": "fixture.print_b_false_1"
+        }
+      ],
+      "reviews": [
+        {
+          "model": "fixture.reviewer_a",
+          "body_version": "1",
+          "applicability_scope": "fixture.scope",
+          "verdict": "ok",
+          "current": true
+        },
+        {
+          "model": "fixture.reviewer_b",
+          "body_version": "1",
+          "applicability_scope": "fixture.scope",
+          "verdict": "ok",
+          "current": true
+        }
+      ],
+      "boundary_test": {
+        "body_version": "1",
+        "applicability_scope": "fixture.scope",
+        "result": "pass",
+        "current": true,
+        "covered_boundaries": [
+          "zero_cards",
+          "no_legal_targets",
+          "large_values",
+          "timing",
+          "information"
+        ]
+      },
+      "application": null
+    },
+    "ability_flag": {
+      "candidate": {
+        "frame_id": "frame:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "semantic_variant": {
+          "state": "resolved",
+          "key": "fixture.v1",
+          "scope": null
+        },
+        "projection_kind": "ability_flag",
+        "body_version": null,
+        "applicability_scope": "fixture.scope",
+        "written_by": "fixture.author",
+        "version_registered": false,
+        "scope_registered": false
+      },
+      "uses": [
+        {
+          "frame_id": "frame:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_flag",
+          "card_name_concept": "fixture.card_a",
+          "evolved": false,
+          "printing_id": "fixture.print_a_false_1"
+        },
+        {
+          "frame_id": "frame:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_flag",
+          "card_name_concept": "fixture.card_a",
+          "evolved": true,
+          "printing_id": "fixture.print_a_true_1"
+        },
+        {
+          "frame_id": "frame:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_flag",
+          "card_name_concept": "fixture.card_b",
+          "evolved": false,
+          "printing_id": "fixture.print_b_false_1"
+        }
+      ],
+      "reviews": [],
+      "boundary_test": null,
+      "application": null
+    },
+    "card_field": {
+      "candidate": {
+        "frame_id": "frame:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "semantic_variant": {
+          "state": "resolved",
+          "key": "fixture.v1",
+          "scope": null
+        },
+        "projection_kind": "card_field",
+        "body_version": null,
+        "applicability_scope": "fixture.scope",
+        "written_by": "fixture.author",
+        "version_registered": false,
+        "scope_registered": false
+      },
+      "uses": [
+        {
+          "frame_id": "frame:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "card_field",
+          "card_name_concept": "fixture.card_a",
+          "evolved": false,
+          "printing_id": "fixture.print_a_false_1"
+        },
+        {
+          "frame_id": "frame:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "card_field",
+          "card_name_concept": "fixture.card_a",
+          "evolved": true,
+          "printing_id": "fixture.print_a_true_1"
+        },
+        {
+          "frame_id": "frame:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "card_field",
+          "card_name_concept": "fixture.card_b",
+          "evolved": false,
+          "printing_id": "fixture.print_b_false_1"
+        }
+      ],
+      "reviews": [],
+      "boundary_test": null,
+      "application": null
+    },
+    "none": {
+      "candidate": {
+        "frame_id": "frame:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "semantic_variant": {
+          "state": "resolved",
+          "key": "fixture.v1",
+          "scope": null
+        },
+        "projection_kind": "none",
+        "body_version": null,
+        "applicability_scope": "fixture.scope",
+        "written_by": "fixture.author",
+        "version_registered": false,
+        "scope_registered": false
+      },
+      "uses": [
+        {
+          "frame_id": "frame:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "none",
+          "card_name_concept": "fixture.card_a",
+          "evolved": false,
+          "printing_id": "fixture.print_a_false_1"
+        },
+        {
+          "frame_id": "frame:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "none",
+          "card_name_concept": "fixture.card_a",
+          "evolved": true,
+          "printing_id": "fixture.print_a_true_1"
+        },
+        {
+          "frame_id": "frame:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "none",
+          "card_name_concept": "fixture.card_b",
+          "evolved": false,
+          "printing_id": "fixture.print_b_false_1"
+        }
+      ],
+      "reviews": [],
+      "boundary_test": null,
+      "application": null
+    },
+    "pending": {
+      "candidate": {
+        "frame_id": "frame:1111111111111111111111111111111111111111111111111111111111111111",
+        "semantic_variant": {
+          "state": "pending",
+          "key": null,
+          "scope": {
+            "owner": {
+              "kind": "face_revision",
+              "revision_id": "fixture.card_a.revision"
+            },
+            "field": "effect",
+            "ordinal": null,
+            "source_hash": "9999999999999999999999999999999999999999999999999999999999999999",
+            "line_ordinal": 0,
+            "role": "body",
+            "segments": [
+              {
+                "start": 0,
+                "end": 1
+              }
+            ]
+          }
+        },
+        "projection_kind": "pending",
+        "body_version": null,
+        "applicability_scope": "fixture.scope",
+        "written_by": "fixture.author",
+        "version_registered": false,
+        "scope_registered": false
+      },
+      "uses": [
+        {
+          "frame_id": "frame:1111111111111111111111111111111111111111111111111111111111111111",
+          "semantic_variant": {
+            "state": "pending",
+            "key": null,
+            "scope": {
+              "owner": {
+                "kind": "face_revision",
+                "revision_id": "fixture.card_a.revision"
+              },
+              "field": "effect",
+              "ordinal": null,
+              "source_hash": "9999999999999999999999999999999999999999999999999999999999999999",
+              "line_ordinal": 0,
+              "role": "body",
+              "segments": [
+                {
+                  "start": 0,
+                  "end": 1
+                }
+              ]
+            }
+          },
+          "projection_kind": "pending",
+          "card_name_concept": "fixture.card_a",
+          "evolved": false,
+          "printing_id": "fixture.print_a_false_1"
+        },
+        {
+          "frame_id": "frame:2222222222222222222222222222222222222222222222222222222222222222",
+          "semantic_variant": {
+            "state": "pending",
+            "key": null,
+            "scope": {
+              "owner": {
+                "kind": "face_revision",
+                "revision_id": "fixture.card_b.revision"
+              },
+              "field": "effect",
+              "ordinal": null,
+              "source_hash": "9999999999999999999999999999999999999999999999999999999999999999",
+              "line_ordinal": 0,
+              "role": "body",
+              "segments": [
+                {
+                  "start": 0,
+                  "end": 1
+                }
+              ]
+            }
+          },
+          "projection_kind": "pending",
+          "card_name_concept": "fixture.card_b",
+          "evolved": false,
+          "printing_id": "fixture.print_b_false_1"
+        },
+        {
+          "frame_id": "frame:3333333333333333333333333333333333333333333333333333333333333333",
+          "semantic_variant": {
+            "state": "pending",
+            "key": null,
+            "scope": {
+              "owner": {
+                "kind": "face_revision",
+                "revision_id": "fixture.card_c.revision"
+              },
+              "field": "effect",
+              "ordinal": null,
+              "source_hash": "9999999999999999999999999999999999999999999999999999999999999999",
+              "line_ordinal": 0,
+              "role": "body",
+              "segments": [
+                {
+                  "start": 0,
+                  "end": 1
+                }
+              ]
+            }
+          },
+          "projection_kind": "pending",
+          "card_name_concept": "fixture.card_c",
+          "evolved": false,
+          "printing_id": "fixture.print_c_false_1"
+        }
+      ],
+      "reviews": [],
+      "boundary_test": null,
+      "application": null
+    },
+    "application": {
+      "candidate": {
+        "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "semantic_variant": {
+          "state": "resolved",
+          "key": "fixture.v1",
+          "scope": null
+        },
+        "projection_kind": "ability_body",
+        "body_version": "1",
+        "applicability_scope": "fixture.scope",
+        "written_by": "fixture.author",
+        "version_registered": true,
+        "scope_registered": true
+      },
+      "uses": [
+        {
+          "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_a",
+          "evolved": false,
+          "printing_id": "fixture.print_a_false_1"
+        },
+        {
+          "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_a",
+          "evolved": true,
+          "printing_id": "fixture.print_a_true_1"
+        },
+        {
+          "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v1",
+            "scope": null
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_b",
+          "evolved": false,
+          "printing_id": "fixture.print_b_false_1"
+        }
+      ],
+      "reviews": [
+        {
+          "model": "fixture.reviewer_a",
+          "body_version": "1",
+          "applicability_scope": "fixture.scope",
+          "verdict": "ok",
+          "current": true
+        },
+        {
+          "model": "fixture.reviewer_b",
+          "body_version": "1",
+          "applicability_scope": "fixture.scope",
+          "verdict": "ok",
+          "current": true
+        }
+      ],
+      "boundary_test": {
+        "body_version": "1",
+        "applicability_scope": "fixture.scope",
+        "result": "pass",
+        "current": true,
+        "covered_boundaries": [
+          "zero_cards",
+          "no_legal_targets",
+          "large_values",
+          "timing",
+          "information"
+        ]
+      },
+      "application": {
+        "frame_variant_match": true,
+        "in_scope": true,
+        "typed_params_match": true,
+        "source_roles_match": true,
+        "roundtrip_match": true,
+        "roundtrip_from_dsl": true,
+        "unresolved_semantics": false,
+        "engine_run_passed": false
+      }
+    },
+    "pending_ability_body": {
+      "candidate": {
+        "frame_id": "frame:4444444444444444444444444444444444444444444444444444444444444444",
+        "semantic_variant": {
+          "state": "pending",
+          "key": null,
+          "scope": {
+            "owner": {
+              "kind": "face_revision",
+              "revision_id": "fixture.card_a.revision"
+            },
+            "field": "effect",
+            "ordinal": null,
+            "source_hash": "9999999999999999999999999999999999999999999999999999999999999999",
+            "line_ordinal": 0,
+            "role": "body",
+            "segments": [
+              {
+                "start": 0,
+                "end": 1
+              }
+            ]
+          }
+        },
+        "projection_kind": "ability_body",
+        "body_version": null,
+        "applicability_scope": "fixture.scope",
+        "written_by": "fixture.author",
+        "version_registered": false,
+        "scope_registered": false
+      },
+      "uses": [
+        {
+          "frame_id": "frame:4444444444444444444444444444444444444444444444444444444444444444",
+          "semantic_variant": {
+            "state": "pending",
+            "key": null,
+            "scope": {
+              "owner": {
+                "kind": "face_revision",
+                "revision_id": "fixture.card_a.revision"
+              },
+              "field": "effect",
+              "ordinal": null,
+              "source_hash": "9999999999999999999999999999999999999999999999999999999999999999",
+              "line_ordinal": 0,
+              "role": "body",
+              "segments": [
+                {
+                  "start": 0,
+                  "end": 1
+                }
+              ]
+            }
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_a",
+          "evolved": false,
+          "printing_id": "fixture.print_a_false_1"
+        },
+        {
+          "frame_id": "frame:5555555555555555555555555555555555555555555555555555555555555555",
+          "semantic_variant": {
+            "state": "pending",
+            "key": null,
+            "scope": {
+              "owner": {
+                "kind": "face_revision",
+                "revision_id": "fixture.card_b.revision"
+              },
+              "field": "effect",
+              "ordinal": null,
+              "source_hash": "9999999999999999999999999999999999999999999999999999999999999999",
+              "line_ordinal": 0,
+              "role": "body",
+              "segments": [
+                {
+                  "start": 0,
+                  "end": 1
+                }
+              ]
+            }
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_b",
+          "evolved": false,
+          "printing_id": "fixture.print_b_false_1"
+        },
+        {
+          "frame_id": "frame:6666666666666666666666666666666666666666666666666666666666666666",
+          "semantic_variant": {
+            "state": "pending",
+            "key": null,
+            "scope": {
+              "owner": {
+                "kind": "face_revision",
+                "revision_id": "fixture.card_c.revision"
+              },
+              "field": "effect",
+              "ordinal": null,
+              "source_hash": "9999999999999999999999999999999999999999999999999999999999999999",
+              "line_ordinal": 0,
+              "role": "body",
+              "segments": [
+                {
+                  "start": 0,
+                  "end": 1
+                }
+              ]
+            }
+          },
+          "projection_kind": "ability_body",
+          "card_name_concept": "fixture.card_c",
+          "evolved": false,
+          "printing_id": "fixture.print_c_false_1"
+        }
+      ],
+      "reviews": [],
+      "boundary_test": null,
+      "application": null
+    }
+  },
+  "cases": [
+    {
+      "group": "MQ-001",
+      "id": "v1_two_cards",
+      "operation": "qualification",
+      "input": {
+        "fixture": "split_variants",
+        "changes": {}
+      },
+      "expected": {
+        "count": 2,
+        "threshold_eligible": false,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-001",
+      "id": "v2_one_card",
+      "operation": "qualification",
+      "input": {
+        "fixture": "split_variants",
+        "changes": {
+          "/candidate/frame_id": "frame:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "/candidate/semantic_variant": {
+            "state": "resolved",
+            "key": "fixture.v2",
+            "scope": null
+          }
+        }
+      },
+      "expected": {
+        "count": 1,
+        "threshold_eligible": false,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-002",
+      "id": "reprints_and_alternate_art",
+      "operation": "qualification",
+      "input": {
+        "fixture": "reprints",
+        "changes": {}
+      },
+      "expected": {
+        "count": 2,
+        "threshold_eligible": false,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-003",
+      "id": "evolved_card_is_distinct",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {}
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": true
+      }
+    },
+    {
+      "group": "MQ-004",
+      "id": "missing_second_model",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/reviews": [
+            {
+              "model": "fixture.reviewer_a",
+              "body_version": "1",
+              "applicability_scope": "fixture.scope",
+              "verdict": "ok",
+              "current": true
+            }
+          ]
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-004",
+      "id": "missing_boundary_test",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/boundary_test": null
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-004",
+      "id": "failed_boundary_test",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/boundary_test/result": "fail"
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-004",
+      "id": "missing_information_boundary",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/boundary_test/covered_boundaries": [
+            "zero_cards",
+            "no_legal_targets",
+            "large_values",
+            "timing"
+          ]
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-005",
+      "id": "same_model_twice",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/reviews/1/model": "fixture.reviewer_a"
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-005",
+      "id": "author_self_review",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/reviews/1/model": "fixture.author"
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-005",
+      "id": "review_requires_revision",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/reviews/1/verdict": "revise"
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-005",
+      "id": "old_review_version",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/reviews/1/body_version": "0"
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-005",
+      "id": "review_outside_scope",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/reviews/1/applicability_scope": "fixture.other_scope"
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-005",
+      "id": "stale_review",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/reviews/1/current": false
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-005",
+      "id": "old_test_version",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/boundary_test/body_version": "0"
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-005",
+      "id": "test_outside_scope",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/boundary_test/applicability_scope": "fixture.other_scope"
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-005",
+      "id": "stale_test",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/boundary_test/current": false
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-005",
+      "id": "version_not_registered",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/candidate/version_registered": false
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-005",
+      "id": "scope_not_registered",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/candidate/scope_registered": false
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-005",
+      "id": "body_changed_old_evidence",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/candidate/body_version": "2"
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-005",
+      "id": "scope_changed_old_evidence",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/candidate/applicability_scope": "fixture.other_scope"
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-006",
+      "id": "zero_cards",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/uses": []
+        }
+      },
+      "expected": {
+        "count": 0,
+        "threshold_eligible": false,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-006",
+      "id": "one_card",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/uses": [
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_a",
+              "evolved": false,
+              "printing_id": "fixture.print_a_false_1"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "count": 1,
+        "threshold_eligible": false,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-006",
+      "id": "before_third_card",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/uses": [
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_a",
+              "evolved": false,
+              "printing_id": "fixture.print_a_false_1"
+            },
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_b",
+              "evolved": false,
+              "printing_id": "fixture.print_b_false_1"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "count": 2,
+        "threshold_eligible": false,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-006",
+      "id": "third_card_same_body_and_reviews",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/uses": [
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_a",
+              "evolved": false,
+              "printing_id": "fixture.print_a_false_1"
+            },
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_b",
+              "evolved": false,
+              "printing_id": "fixture.print_b_false_1"
+            },
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_c",
+              "evolved": false,
+              "printing_id": "fixture.print_c_false_1"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": true
+      }
+    },
+    {
+      "group": "MQ-006",
+      "id": "duplicate_use",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/uses": [
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_a",
+              "evolved": false,
+              "printing_id": "fixture.print_a_false_1"
+            },
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_a",
+              "evolved": false,
+              "printing_id": "fixture.print_a_false_1"
+            },
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_b",
+              "evolved": false,
+              "printing_id": "fixture.print_b_false_1"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "count": 2,
+        "threshold_eligible": false,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-006",
+      "id": "different_frame_same_variant",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/uses": [
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_a",
+              "evolved": false,
+              "printing_id": "fixture.print_a_false_1"
+            },
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_b",
+              "evolved": false,
+              "printing_id": "fixture.print_b_false_1"
+            },
+            {
+              "frame_id": "frame:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_c",
+              "evolved": false,
+              "printing_id": "fixture.print_c_false_1"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "count": 2,
+        "threshold_eligible": false,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-007",
+      "id": "ability_flag",
+      "operation": "qualification",
+      "input": {
+        "fixture": "ability_flag",
+        "changes": {}
+      },
+      "expected": {
+        "count": 0,
+        "threshold_eligible": false,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-007",
+      "id": "card_field",
+      "operation": "qualification",
+      "input": {
+        "fixture": "card_field",
+        "changes": {}
+      },
+      "expected": {
+        "count": 0,
+        "threshold_eligible": false,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-007",
+      "id": "none",
+      "operation": "qualification",
+      "input": {
+        "fixture": "none",
+        "changes": {}
+      },
+      "expected": {
+        "count": 0,
+        "threshold_eligible": false,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-007",
+      "id": "pending",
+      "operation": "qualification",
+      "input": {
+        "fixture": "pending",
+        "changes": {}
+      },
+      "expected": {
+        "count": 0,
+        "threshold_eligible": false,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-007",
+      "id": "pending_occurrence_no_extra_card",
+      "operation": "qualification",
+      "input": {
+        "fixture": "three_cards",
+        "changes": {
+          "/uses": [
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_a",
+              "evolved": false,
+              "printing_id": "fixture.print_a_false_1"
+            },
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_b",
+              "evolved": false,
+              "printing_id": "fixture.print_b_false_1"
+            },
+            {
+              "frame_id": "frame:3333333333333333333333333333333333333333333333333333333333333333",
+              "semantic_variant": {
+                "state": "pending",
+                "key": null,
+                "scope": {
+                  "owner": {
+                    "kind": "face_revision",
+                    "revision_id": "fixture.card_c.revision"
+                  },
+                  "field": "effect",
+                  "ordinal": null,
+                  "source_hash": "9999999999999999999999999999999999999999999999999999999999999999",
+                  "line_ordinal": 0,
+                  "role": "body",
+                  "segments": [
+                    {
+                      "start": 0,
+                      "end": 1
+                    }
+                  ]
+                }
+              },
+              "projection_kind": "pending",
+              "card_name_concept": "fixture.card_c",
+              "evolved": false,
+              "printing_id": "fixture.print_c_false_1"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "count": 2,
+        "threshold_eligible": false,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-007",
+      "id": "pending_variant_with_body_projection",
+      "operation": "qualification",
+      "input": {
+        "fixture": "pending_ability_body",
+        "changes": {}
+      },
+      "expected": {
+        "count": 0,
+        "threshold_eligible": false,
+        "qualified": false
+      }
+    },
+    {
+      "group": "MQ-008",
+      "id": "checks_pass_without_engine_run",
+      "operation": "use_review",
+      "input": {
+        "fixture": "application",
+        "changes": {}
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": true,
+        "reviewed_by_macro_checks": true,
+        "requires_independent_review": false,
+        "verified": false
+      }
+    },
+    {
+      "group": "MQ-008",
+      "id": "checks_and_current_engine_run_pass",
+      "operation": "use_review",
+      "input": {
+        "fixture": "application",
+        "changes": {
+          "/application/engine_run_passed": true
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": true,
+        "reviewed_by_macro_checks": true,
+        "requires_independent_review": false,
+        "verified": true
+      }
+    },
+    {
+      "group": "MQ-008",
+      "id": "wrong_frame_or_variant",
+      "operation": "use_review",
+      "input": {
+        "fixture": "application",
+        "changes": {
+          "/application/frame_variant_match": false
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": true,
+        "reviewed_by_macro_checks": false,
+        "requires_independent_review": true,
+        "verified": false
+      }
+    },
+    {
+      "group": "MQ-008",
+      "id": "outside_reviewed_scope",
+      "operation": "use_review",
+      "input": {
+        "fixture": "application",
+        "changes": {
+          "/application/in_scope": false
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": true,
+        "reviewed_by_macro_checks": false,
+        "requires_independent_review": true,
+        "verified": false
+      }
+    },
+    {
+      "group": "MQ-008",
+      "id": "typed_parameter_mismatch",
+      "operation": "use_review",
+      "input": {
+        "fixture": "application",
+        "changes": {
+          "/application/typed_params_match": false
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": true,
+        "reviewed_by_macro_checks": false,
+        "requires_independent_review": true,
+        "verified": false
+      }
+    },
+    {
+      "group": "MQ-008",
+      "id": "source_role_mismatch",
+      "operation": "use_review",
+      "input": {
+        "fixture": "application",
+        "changes": {
+          "/application/source_roles_match": false
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": true,
+        "reviewed_by_macro_checks": false,
+        "requires_independent_review": true,
+        "verified": false
+      }
+    },
+    {
+      "group": "MQ-008",
+      "id": "dsl_roundtrip_mismatch",
+      "operation": "use_review",
+      "input": {
+        "fixture": "application",
+        "changes": {
+          "/application/roundtrip_match": false
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": true,
+        "reviewed_by_macro_checks": false,
+        "requires_independent_review": true,
+        "verified": false
+      }
+    },
+    {
+      "group": "MQ-008",
+      "id": "stored_source_replay",
+      "operation": "use_review",
+      "input": {
+        "fixture": "application",
+        "changes": {
+          "/application/roundtrip_from_dsl": false
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": true,
+        "reviewed_by_macro_checks": false,
+        "requires_independent_review": true,
+        "verified": false
+      }
+    },
+    {
+      "group": "MQ-008",
+      "id": "unresolved_semantics",
+      "operation": "use_review",
+      "input": {
+        "fixture": "application",
+        "changes": {
+          "/application/unresolved_semantics": true
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": true,
+        "reviewed_by_macro_checks": false,
+        "requires_independent_review": true,
+        "verified": false
+      }
+    },
+    {
+      "group": "MQ-008",
+      "id": "engine_pass_does_not_replace_use_review",
+      "operation": "use_review",
+      "input": {
+        "fixture": "application",
+        "changes": {
+          "/application/typed_params_match": false,
+          "/application/engine_run_passed": true
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": true,
+        "reviewed_by_macro_checks": false,
+        "requires_independent_review": true,
+        "verified": false
+      }
+    },
+    {
+      "group": "MQ-008",
+      "id": "unqualified_candidate_checks_insufficient",
+      "operation": "use_review",
+      "input": {
+        "fixture": "application",
+        "changes": {
+          "/reviews": [
+            {
+              "model": "fixture.reviewer_a",
+              "body_version": "1",
+              "applicability_scope": "fixture.scope",
+              "verdict": "ok",
+              "current": true
+            }
+          ]
+        }
+      },
+      "expected": {
+        "count": 3,
+        "threshold_eligible": true,
+        "qualified": false,
+        "reviewed_by_macro_checks": false,
+        "requires_independent_review": true,
+        "verified": false
+      }
+    },
+    {
+      "group": "MQ-008",
+      "id": "low_frequency_checks_do_not_auto_review",
+      "operation": "use_review",
+      "input": {
+        "fixture": "application",
+        "changes": {
+          "/uses": [
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_a",
+              "evolved": false,
+              "printing_id": "fixture.print_a_false_1"
+            },
+            {
+              "frame_id": "frame:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "fixture.v1",
+                "scope": null
+              },
+              "projection_kind": "ability_body",
+              "card_name_concept": "fixture.card_b",
+              "evolved": false,
+              "printing_id": "fixture.print_b_false_1"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "count": 2,
+        "threshold_eligible": false,
+        "qualified": false,
+        "reviewed_by_macro_checks": false,
+        "requires_independent_review": true,
+        "verified": false
+      }
+    }
+  ]
+}
