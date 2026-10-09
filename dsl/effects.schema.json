@@ -2404,6 +2404,7 @@
           ]
         },
         "additional_costs": {
+          "description": "Optional costs decided and paid at play time, before the play event; selected mode groups are combined for payment (R-0006).",
           "type": "array",
           "items": {
             "type": "object",
