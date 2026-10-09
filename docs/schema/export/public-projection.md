@@ -92,7 +92,7 @@ Schema descriptor 驗完整欄序、nullable、enum 與額外鍵，不以 SQL �
 ## 驗證
 
 ```bash
-uv --directory carddb run pytest tests/test_snapshot_project.py
+uv --directory carddb run pytest tests/export/test_snapshot_project.py
 ```
 
 合成 DB 正例讓 43 集合都有資料。`tests/fixtures/snapshot-project/expected-ancillary.json`

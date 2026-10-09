@@ -10,23 +10,27 @@ from typer import rich_utils
 from sve_carddb import cli
 from sve_carddb.ingest.archive.manifest import Manifest
 
-from .database_fixtures import (
+from .support.database_fixtures import (
     image_parent_database_template as image_parent_database_template,  # ruff: ignore[useless-import-alias] -- register shared immutable database template
 )
-from .database_fixtures import t0_database_template as t0_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
-from .database_fixtures import t1_database_template as t1_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
-from .database_fixtures import t1b_database_template as t1b_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
-from .image_archive_fixtures import image_archive_template as image_archive_template  # ruff: ignore[useless-import-alias] -- register shared synthetic archive template
-from .image_crop_fixtures import empty_crops as empty_crops  # ruff: ignore[useless-import-alias] -- register shared empty crop set
-from .isolation_guard import IsolationGuard
-from .official_registry_fixtures import load_shared_registry
-from .product_fixtures import product_files as product_files  # ruff: ignore[useless-import-alias] -- register session fixture dependency
-from .product_identity_fixtures import identity_template as identity_template  # ruff: ignore[useless-import-alias] -- register session fixture dependency
-from .registry_snapshot_fixtures import registry_template as registry_template  # ruff: ignore[useless-import-alias] -- register session fixture dependency
-from .shared_case_fixtures import default_correction_case as default_correction_case  # ruff: ignore[useless-import-alias] -- register session fixture dependency
-from .shared_case_fixtures import default_text_case as default_text_case  # ruff: ignore[useless-import-alias] -- register session fixture dependency
+from .support.database_fixtures import t0_database_template as t0_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
+from .support.database_fixtures import t1_database_template as t1_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
+from .support.database_fixtures import t1b_database_template as t1b_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
+from .support.image_archive_fixtures import (
+    image_archive_template as image_archive_template,  # ruff: ignore[useless-import-alias] -- register shared synthetic archive template
+)
+from .support.image_crop_fixtures import empty_crops as empty_crops  # ruff: ignore[useless-import-alias] -- register shared empty crop set
+from .support.isolation_guard import IsolationGuard
+from .support.official_registry_fixtures import load_shared_registry
+from .support.product_fixtures import product_files as product_files  # ruff: ignore[useless-import-alias] -- register session fixture dependency
+from .support.product_identity_fixtures import identity_template as identity_template  # ruff: ignore[useless-import-alias] -- register session fixture dependency
+from .support.registry_snapshot_fixtures import registry_template as registry_template  # ruff: ignore[useless-import-alias] -- register session fixture dependency
+from .support.shared_case_fixtures import (
+    default_correction_case as default_correction_case,  # ruff: ignore[useless-import-alias] -- register session fixture dependency
+)
+from .support.shared_case_fixtures import default_text_case as default_text_case  # ruff: ignore[useless-import-alias] -- register session fixture dependency
 
-pytest_plugins = ("tests.private_pages_plugin",)
+pytest_plugins = ("tests.support.private_pages_plugin",)
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

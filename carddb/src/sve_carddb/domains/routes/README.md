@@ -79,7 +79,7 @@ products or release capabilities; their readiness flags remain unchanged.
 Run the independent synthetic counterexamples with:
 
 ```bash
-uv --directory carddb run pytest tests/test_routes.py tests/test_route_defaults.py tests/test_routes_defensive.py
+uv --directory carddb run pytest tests/domains/routes/test_routes.py tests/domains/routes/test_route_defaults.py tests/domains/routes/test_routes_defensive.py
 ```
 
 Official card text is not stored in these tests. Frozen production validation

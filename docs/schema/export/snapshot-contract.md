@@ -43,7 +43,7 @@ Schema 驗欄序、tuple 長度、required-nullable、額外欄及 enum。跨值
 
 ```bash
 uv --directory carddb run python -m sve_carddb.contracts.generate_schema
-uv --directory carddb run pytest tests/test_snapshot_contract.py
+uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 ```
 
 `test_schema_regeneration_matches_committed_bytes` 從來源重新產生並逐位元組比對提交版；另以未啟用 format checker 的 Draft 2020-12 驗證器拒絕共用形狀反例。產生器只產生 Schema，不生成 golden 或預期 logical view。欄位變更仍須對照 snapshot-format／snapshot-transport 審核，並依傳輸契約判定版本變動。
@@ -73,7 +73,7 @@ error 釘住預期失敗原因；其他 reader 不要求相同訊息文字。所
 從 repo 根目錄執行：
 
 ```bash
-uv --directory carddb run pytest tests/test_snapshot_contract.py
+uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 ```
 
 `sve_carddb.export.reader.read_snapshot(manifest_value, payloads)` 接受已解析的 manifest 與邏輯鍵→未壓縮 canonical bytes；`read_text_all` 驗聯集後走相同 join。Schema 由套件資源讀取，不在執行期解析 Markdown、不抓網路、不寫版本索引。

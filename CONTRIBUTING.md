@@ -323,8 +323,18 @@ guard covers Python I/O in each pytest worker; it is not an operating-system
 sandbox for subprocesses. Existing Git fixture subprocesses operate offline on
 synthetic repositories. Do not add tests that invoke external network tools.
 
-Layer directions in carddb and publish are enforced by `carddb/tests/test_core_boundary.py`,
-`test_contracts_boundary.py`, `test_pipeline_boundaries.py`, `test_module_imports.py` and
+carddb tests follow the source layers under `carddb/tests/`: `core`, `contracts`,
+`ingest`, `parse`, `build`, `domains/<domain>`, `images`, `export` and `workflows`.
+Cross-layer boundary and isolation checks live in `architecture`; shared fixtures,
+fake sites and pytest plugins live in `support`. The root `conftest.py` registers
+session fixtures and plugins for all layers. Pinned and synthetic fixture files stay
+in `fixtures`.
+
+Layer directions in carddb and publish are enforced by
+`carddb/tests/architecture/test_core_boundary.py`,
+`carddb/tests/architecture/test_contracts_boundary.py`,
+`carddb/tests/architecture/test_pipeline_boundaries.py`,
+`carddb/tests/architecture/test_module_imports.py` and
 `publish/tests/test_import_boundary.py`; those tests are the authority.
 
 Run them yourself when you change the code they cover:
