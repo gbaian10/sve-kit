@@ -16,15 +16,15 @@ records:
       observation:
         region: en
         card_no: BSF2024-001EN
-        observation_hash: sha256:a298f22610cc31f614870eef3aab6ec2343f068b4b699060dffaf0ace1b77e0a
-        rules_hash: sha256:4b9ec713c177a443b978210427e1cb8c7a4c269ebc61f4625039f13c092d1c43
-        recipe: registry-observation-v1
+        observation_hash: sha256:f660f1d8388326e78975a2f38a97cfab40c3a27379c364c3a3cb79e703b34164
+        rules_hash: sha256:f9417ce048fa6fbad72fe88ba3e49ffe10235cb8821973b4b719354e562d3065
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: PR-049
         target_observation:
           region: jp
           card_no: PR-049
-          observation_hash: sha256:b55b2b0f72c4d479724b9a6f16e42ee95f7e97828f2acb97ce783c166230f67f
-          rules_hash: sha256:f9848ef1c9d107b65fd0fa28c5a89389c0c80a1c59f240d01f0ced438d168756
-          recipe: registry-observation-v1
+          observation_hash: sha256:dba0bdfbd1f09e38dc2b49e440dc1a99ed4ac31fbafccfed555daaf4828e6b72
+          rules_hash: sha256:ae3ce8221909f9b9ae78dfe621e6a09c6408beb609c98201480553e485ec955a
+          recipe: registry-observation-v2

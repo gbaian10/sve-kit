@@ -18,7 +18,7 @@ records:
         card_no: LCS01-001
         observation_hash: sha256:eaba62638593680f4604e63610e70a4edc1e4843b5db7c03bc5e70282b972245
         rules_hash: sha256:26e72e961f26a02151f5129674dd4bd8c43546562e044c5fccb15b10bcef779b
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: LCS01
     data:
@@ -36,7 +36,7 @@ records:
         card_no: LCS01-002
         observation_hash: sha256:ff68711b6b6b527b68c6c622eff6e86abdf4e27dd5560105351775175ccaacfd
         rules_hash: sha256:4c1e1436852c68d61fbcbf6f03b57b4a0c55fa10540e926acdcc924c6ba28fe1
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: LCS01
     data:
@@ -54,7 +54,7 @@ records:
         card_no: LCS01-003
         observation_hash: sha256:14512015e13b48ccbcc56efc83528ae7cfc03f4358bea7414784e578d82d2f85
         rules_hash: sha256:abdb3d72901acfc469bc8abcb30383881436c7f5f4615f146a55fb0f0b07ae92
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: LCS01
     data:
@@ -72,7 +72,7 @@ records:
         card_no: LCS01-004
         observation_hash: sha256:431e8a69239be40f3a0a8031e10dcaed5b9061b8e865dd5409f7421ea20c9cef
         rules_hash: sha256:11d7b738d953e690dcc88beef353ab3c1c987a19d34e2c9f5a4627f510996fc4
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: LCS01
     data:
@@ -90,7 +90,7 @@ records:
         card_no: LCS01-005
         observation_hash: sha256:6e1b288cf5cee9837ab5da87ab16e17830ce3750893fbd277ff3640533ed2fcc
         rules_hash: sha256:aa6a77bd320593e11cac91b169eed30d2b9d444703ebd8c0ed6216794d3b0dfa
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: LCS01
     data:
@@ -108,7 +108,7 @@ records:
         card_no: LCS01-006
         observation_hash: sha256:6b54e22bc39ce42f9515ceb3cfc6e0f0f5b28048542cf890a874ec25166f85c7
         rules_hash: sha256:4c2029a5644446ff38e1f5cabd15668b1117aefbd885e494545bbfa279c85ed5
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: LCS01
     data:
@@ -126,4 +126,4 @@ records:
         card_no: LCS01-007
         observation_hash: sha256:b296a36b5bbfe67d82643adc19d4c37e1193aa0521e1a89f81a7155b7a1ab461
         rules_hash: sha256:aabed2d9854a6c8dbeb7b576c2125eb0278424096127e685b26227c742d3a84d
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2

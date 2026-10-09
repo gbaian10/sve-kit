@@ -16,9 +16,9 @@ records:
       observation:
         region: en
         card_no: SD03-001EN
-        observation_hash: sha256:9ee5365e6df5bc8a5722a711b4f6b1d045f5372db4bc0070f7c197426239c48d
+        observation_hash: sha256:45d4484758baa56fff663eb367069fb91d9b01147889baca1c50e1d7d1012d24
         rules_hash: sha256:9211a7f7dab9965537ed7cc9fa22018f5b01e1df5e25ea0242394603a872a75e
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-001
@@ -27,7 +27,7 @@ records:
           card_no: SD03-001
           observation_hash: sha256:505e618c01d7dd3375308f900aa8c4bddf8465317ea4395d0a4b25771cc690eb
           rules_hash: sha256:8ea07eefc646189984a82222eec2c5d413109dd605c337567ad8404308ed6661
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -43,9 +43,9 @@ records:
       observation:
         region: en
         card_no: SD03-002EN
-        observation_hash: sha256:46da94ce98e7c562895e1f4e9ad37a10eda18f51a7f38e40b7ef306192fed309
+        observation_hash: sha256:cc3f3ceeee38a280eba90da3281a83f35415703d600a7893c48805a6f5fcd6d1
         rules_hash: sha256:7e29d629ac8bb3513507affb56498cac9c6145b96ae17b3371ca68d25bc2cf0a
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-002
@@ -54,7 +54,7 @@ records:
           card_no: SD03-002
           observation_hash: sha256:d0de290f98421852e95fa56043afa3e36827db9a7cd5fd6aebd9056fe5d21c00
           rules_hash: sha256:8b32818d77db4fceed3626eb0d46ea58532f0f59af454ad4bc38552987aa90ea
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -70,9 +70,9 @@ records:
       observation:
         region: en
         card_no: SD03-003EN
-        observation_hash: sha256:17652cf2f971293255c4ae919c873b7cbba28b2506968508a9521a4acd1f91e8
+        observation_hash: sha256:759b8071ec7fc6a4413f82c8588ce7ce8fb489f06fbb39a0868904a97605c44c
         rules_hash: sha256:0e1018b80c2c080237735163b284d665dc7639ff99515fcd1d32637495fe50e9
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-003
@@ -81,7 +81,7 @@ records:
           card_no: SD03-003
           observation_hash: sha256:a40ce431a9a234621d2509c7beb8652be4dfee12bc47505058ed00fe2315283a
           rules_hash: sha256:bf24628cd6a6b84fde0971c9f2a5cec677d86b34990b287387798f75c5c6d622
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -97,9 +97,9 @@ records:
       observation:
         region: en
         card_no: SD03-004EN
-        observation_hash: sha256:56640bebccc1b23a504455d2ff22419ee140dec7520bc72b82a31408c037cd3a
+        observation_hash: sha256:657d937867f82bab11f8f684d075cd97fe811978f51ac3701e1d9a8d7c7be073
         rules_hash: sha256:1992b7f0aba5c84ebd507e2328aa23e299ee4f5de5e4e67fbe1e859ed1a84d1d
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-004
@@ -108,7 +108,7 @@ records:
           card_no: SD03-004
           observation_hash: sha256:7f39e02dba1473bcbc269b70a876ca818f92e85a8adc7a121c565ee18c8bd178
           rules_hash: sha256:4fc102e50b8b7f9981aff6c41f49e9ab75b170e15e574b81483760199524afab
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -124,18 +124,18 @@ records:
       observation:
         region: en
         card_no: SD03-005EN
-        observation_hash: sha256:e3e2c85e848934b7a0fdd6d9a3c499f16c69f07cd9f981ee62654d95e21cd371
-        rules_hash: sha256:47d83ac42226fe402b211603fe829b0b295c18c8d3f2e3724d74118287066f10
-        recipe: registry-observation-v1
+        observation_hash: sha256:0a4fb2a2c969fb061dfa60d7fe75b958b0935c9d20c0a32b419a092a4cdd3a2d
+        rules_hash: sha256:ac8ea60a0bd6c4138954a2b8eb3032ded0f6023aeaefa31d147fb93003d25575
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-005
         target_observation:
           region: jp
           card_no: SD03-005
-          observation_hash: sha256:b05997dbd53e4e18173ba513ef471e7206d8df80bd4d40fef392874b7c8461c3
-          rules_hash: sha256:07891cf7ce9ca5fb835a790fa9ea2761f864dc5d629238db68fab0234df96c43
-          recipe: registry-observation-v1
+          observation_hash: sha256:404e6d39ae7f4e73ceced76f3ac63a35e3ae90cc419cc6e7a7c052c2fd2a01bd
+          rules_hash: sha256:ec72c2efb118fdbe34840ec5771e2d235a46cb9b41a47c44831179a99ab45998
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -151,18 +151,18 @@ records:
       observation:
         region: en
         card_no: SD03-006EN
-        observation_hash: sha256:699a8514ec799e64f9a44459ba372cba2ed9819124923f41371f38ed62dea0b7
-        rules_hash: sha256:4fc37951056617d5b4cc426f604f3d7d1fc6702e6555cac2aa739c718b35283f
-        recipe: registry-observation-v1
+        observation_hash: sha256:39a5981bae14d347f6476ad8d1141b206bf1d979413645c3f4b850d18a2a251f
+        rules_hash: sha256:c2ade7c99c73fb7dd13cb8222dac5ba956240ee659483c74458775fea04283e2
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-006
         target_observation:
           region: jp
           card_no: SD03-006
-          observation_hash: sha256:ebca0b7ca2dc4742b195e141ecd3c5166c3a15b5acabc26cb47e20951073f4f4
-          rules_hash: sha256:221d941ec0529243cd1c72f9b45bc11b3ea890bbba147f6e04320e3a9330dfa9
-          recipe: registry-observation-v1
+          observation_hash: sha256:12ca75ba63526c9be88bc7c944b179641f71b590f00c66d862387fe22f9131e0
+          rules_hash: sha256:694a06397abd1be404a859820c54acf6c4ec5c15ae760e4c9b781cecdf6a120d
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -178,9 +178,9 @@ records:
       observation:
         region: en
         card_no: SD03-007EN
-        observation_hash: sha256:f9c2514cfd12dad1201726617c18fc2fb2f6d69fb1c5efd2fee42eb462d87443
+        observation_hash: sha256:006dcd4718269ebf766a505036efbad18eb69bd9d51ac2bc36acbc27595994dd
         rules_hash: sha256:78f9beaad3b958e619419a55ddd012dedc3a48d6522c75ba1b3a083e3de22eae
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-007
@@ -189,7 +189,7 @@ records:
           card_no: SD03-007
           observation_hash: sha256:f4e6fcebe7ad47a25fb7380eeede035d74a910f76601c4a549bc7977d383d605
           rules_hash: sha256:5787164214f3ed542f84fc4a9b0a34157cc5d0eedde1f1daa08554981601c834
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -205,18 +205,18 @@ records:
       observation:
         region: en
         card_no: SD03-008EN
-        observation_hash: sha256:c2f5f2b80c2f08e9f631bf888b1497fd0ce9d00210ca7fa5387d9494a8a376f8
-        rules_hash: sha256:7b8df69617302f857c9ebdb15f9f00f2a555e8697b6b298d0a2709e084c4407d
-        recipe: registry-observation-v1
+        observation_hash: sha256:37f890af9b318b83eabe5e91b0430c40e2a98143a03e3f41567d21fcdff5bb6e
+        rules_hash: sha256:4465582b53f32edcd86087807685ea05ebaeb00da9a0ca53e71b2d3402dad429
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-008
         target_observation:
           region: jp
           card_no: SD03-008
-          observation_hash: sha256:69849f6a0fbe04f631bf76843c84f469f4cb55eebfed799a1846e2f8d6760fc8
-          rules_hash: sha256:531d436bd38ad9d2bde7c8bdfcdc365820e4372aa520c8150b9c522da7618af2
-          recipe: registry-observation-v1
+          observation_hash: sha256:288df5d5af09968069f5cbe58a37ed393f3192bb82274bcd8c6b4aa690a50c22
+          rules_hash: sha256:5f80c96c68290a2726446bda1b0206f73a6067bc29ff05acfaa012b24b325b1a
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -232,18 +232,18 @@ records:
       observation:
         region: en
         card_no: SD03-009EN
-        observation_hash: sha256:f2bf61f69dd4f9f54ea940baadae108634ae042859af9e2ae8476a8b6795d8fd
-        rules_hash: sha256:6311e4a099536827981467e85f0a5e883a64b5be518710e08a1a5db6ec4e97e5
-        recipe: registry-observation-v1
+        observation_hash: sha256:0a4ddb67ef92812e3fb7a8a85b815e7d1db95a1c31bc8db286f4a58fa895062f
+        rules_hash: sha256:e0e006bbd8fbeecedcf16873c41f063cfdc2ccc9787a6f1b786a1c77b4cf0a0a
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-009
         target_observation:
           region: jp
           card_no: SD03-009
-          observation_hash: sha256:8d4a7d879510ac4d562a805260fe56375f1be457232a9be10e0f2114fa11b9a1
-          rules_hash: sha256:4eba30d2f3b3e686bff96494de6b4612f4cbc8ba41220744bb7d35c6e4f92d66
-          recipe: registry-observation-v1
+          observation_hash: sha256:fb4328519347b476da3abb70c199c6c2081e66561fb197d35d77c413a5aa2964
+          rules_hash: sha256:49e267fb402b5b0bb8eb4b58c10afdf72c3cfe9ca0bbf4841651bcaa0618c5f4
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -259,18 +259,18 @@ records:
       observation:
         region: en
         card_no: SD03-010EN
-        observation_hash: sha256:99b8e3df6cb47e788a2fe4620ad32a07874af4a4e7dcb6a8ea2ced63d3e02a51
-        rules_hash: sha256:7b9fa286e406530dda4879a3095440a139652df8071d625ebe4a892edd7d3232
-        recipe: registry-observation-v1
+        observation_hash: sha256:a86fd1eed4f4ec0c3bde460316fbba1adc8e976888cf5f15e1a55408435c175b
+        rules_hash: sha256:f9f89231e951da2a1c8aa9d3a440c7421d11fab416d1d1c73c18c7709d4a43e0
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-010
         target_observation:
           region: jp
           card_no: SD03-010
-          observation_hash: sha256:1108c866469cf941f3e849420c796aee0c2c79cc2841b5ee61883ca1e6cee0c1
-          rules_hash: sha256:644a06f87a5d24f49f8027df88f7a6cac535554d7e881d5a237e2e1d0213687b
-          recipe: registry-observation-v1
+          observation_hash: sha256:9e25d2382606be1d52c56215f294deed73cf76337c5047b9459653cb4306cb3b
+          rules_hash: sha256:fb78f15af7b7252dba91ecdd1e42dde8a7a96a8aeb615af7ca3aa0653e91985b
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -286,9 +286,9 @@ records:
       observation:
         region: en
         card_no: SD03-011EN
-        observation_hash: sha256:fba33f664a97aef6d8011df96c9913da110f82e1b3df4951dedb0a6bacfcdb0a
+        observation_hash: sha256:ca92bf470e9fd6943e8268aceeca8606e4300033527d85ee79d701ed43770e41
         rules_hash: sha256:86efeadb2dabbb2e161b953c5d2c8e2aa3803716713dae2b3aa109696f07d112
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-011
@@ -297,7 +297,7 @@ records:
           card_no: SD03-011
           observation_hash: sha256:cf8b7308f61d667d2cdeb0c55029563d9f143baaa04f3d95c866d61dadac00b1
           rules_hash: sha256:74c3f214cb79692b93e6bc81611cc083a410e4e8984ae4c056a2bd126f3424fb
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -313,9 +313,9 @@ records:
       observation:
         region: en
         card_no: SD03-012EN
-        observation_hash: sha256:ac37b838899db1131d797608a27698aba4e3fb71ba636a941981434c3d50eba6
+        observation_hash: sha256:704e47f81114c7a99839d316f17dc847ef0a7045a3a9c3ad4ea11d2f07e55cb1
         rules_hash: sha256:3bff71f736a20edab9d17a1c0c99be6cf4cb812363de0aea070b10d8af3aa5c8
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-012
@@ -324,7 +324,7 @@ records:
           card_no: SD03-012
           observation_hash: sha256:12ad16930ff6f82c8bd0be410b6823fb360552a2de9ed65eab3816e5ce254a27
           rules_hash: sha256:1b0fe47b8ac9dbc2ddae1ea9740cdbf4a0a5a99870ec3ab16b38bda7ad5d7e4b
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -340,18 +340,18 @@ records:
       observation:
         region: en
         card_no: SD03-013EN
-        observation_hash: sha256:788438e95fed34afd07be476d4b4644e57aeec81acba99cd1742ac42834b1160
-        rules_hash: sha256:b01a166373f6c36d1d9ccb8f5e30d72826bea997fdf8e844a546eb79fe1a1b6b
-        recipe: registry-observation-v1
+        observation_hash: sha256:d8bb05e068fdcc93c64054a9c94d5106b1a95e8b827fe1dae169bf02e1ba2961
+        rules_hash: sha256:52f7e6a9468482b28cc3924634abcbb586baa6987da2d97bac0072413a95f240
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-013
         target_observation:
           region: jp
           card_no: SD03-013
-          observation_hash: sha256:e02e7c1868546dc18af467355c3a803c4bb56267e0b46dcf32f266916f5af400
-          rules_hash: sha256:7678e6f4e4d7981519c40d1123c042f8cb373320f2c3efa3730394663a98dd22
-          recipe: registry-observation-v1
+          observation_hash: sha256:9f8ffc93321d8dfba800682d79e7b766ab01d22d9e783b2b7774ca9926e0d4eb
+          rules_hash: sha256:95e8c3cee7cba7b5027d6ae871b52c5ca60a425d0a54748e411e0347168deecd
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -367,18 +367,18 @@ records:
       observation:
         region: en
         card_no: SD03-014EN
-        observation_hash: sha256:cadae328b3b5d1d70e6c540683ca4f67ec32d41f967c463713672b9efbe94420
-        rules_hash: sha256:92ac6bdaccb103c2b43786df24b43c856d665f4f4c98485b577ceeeb9ccfb0be
-        recipe: registry-observation-v1
+        observation_hash: sha256:2217da840caf0ec7c41481e6d7d1e757ec6eb1094de059befc3135a08c3ab6c1
+        rules_hash: sha256:02f3a574d7da21de06412b773dc00967ecd76b84826a66eb2423c91850d0f4f0
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-014
         target_observation:
           region: jp
           card_no: SD03-014
-          observation_hash: sha256:6750eea6ad5792cb36bd1668823c4be7c0723be9570d280e5beb5d819a5d2ad0
-          rules_hash: sha256:725ab4e5ab4a3adf8fe2280fff0887ce8daef169801305f1ca2811db4fd0261c
-          recipe: registry-observation-v1
+          observation_hash: sha256:319a4bc5673e40b6415a2d5cd9da9386b819ac14828a2099d04e865fda3245fe
+          rules_hash: sha256:ef3aa68a889209c62ff0f94d0b71f089997d93626be6a9da52e9952b34ab517a
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -394,18 +394,18 @@ records:
       observation:
         region: en
         card_no: SD03-015EN
-        observation_hash: sha256:1a3f7350fa3169b38353a57c88390fe5431a950b250f448454e1ad1d0c5a862f
-        rules_hash: sha256:67f63ac00600f3a352249c15244087b633a7d436916979b7751451a0c402ce03
-        recipe: registry-observation-v1
+        observation_hash: sha256:6ed6986f0fb503ecaa158b927633fc253b9a5dba3c44097e218adf680f3fbe85
+        rules_hash: sha256:9caace439835d49f2ea86e499bf79ee4bfcbfe15c32b8e34fd9f2b0df851ebe5
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-015
         target_observation:
           region: jp
           card_no: SD03-015
-          observation_hash: sha256:e24e3249925540f71a6ade96176ea2ac5999fda6d9dd199d424f04e051ef9113
-          rules_hash: sha256:dce4569b9a80f07dab5ca59955b3fafe070f11d00181ba8229baaf6f93f0a08e
-          recipe: registry-observation-v1
+          observation_hash: sha256:db6de1f2d5e3b67ac07b472f7098c157b3b7f9ab1ca1e3dbeb990c74b0c793e1
+          rules_hash: sha256:b70a12da5b366c03c9800e4dbbcccd8a6340ff54abd453ff3740c63b4d9a920e
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -421,18 +421,18 @@ records:
       observation:
         region: en
         card_no: SD03-016EN
-        observation_hash: sha256:0ab9be222b6baeabb6075c398cb58a0e6cf06d6b3a8437e1b6d90d00549cfe61
-        rules_hash: sha256:e854fbde9ae753aa6e217ffd04aba62b9d1fda6b2c62e03000192918bdcaaa85
-        recipe: registry-observation-v1
+        observation_hash: sha256:9377758e8155705bf9525b45a55e1cd108d6ee1916bb17e8ad9c0d5a062369af
+        rules_hash: sha256:c9856ddec97eda97c64ac8f052858f6401ab462869e61b6a3b9b1505e56c1e81
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-016
         target_observation:
           region: jp
           card_no: SD03-016
-          observation_hash: sha256:932174d5508ecde220a61319875ec55550e9b8993e991a81b31e091d48aaa0a1
-          rules_hash: sha256:ece3057ffafc2918b88ba752453f74d83dcc168f2027fd290462bd5385a3688c
-          recipe: registry-observation-v1
+          observation_hash: sha256:74a12a3e2cd06b8a1d8e18e2b9f16b2085f1f19c4a78f92d6bccc8c1e03201d6
+          rules_hash: sha256:76e06a74b3c8419144e13c00441c1b27057c29edda6d495960efc9f59ebb0b2f
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -448,18 +448,18 @@ records:
       observation:
         region: en
         card_no: SD03-017EN
-        observation_hash: sha256:b44dbae641b91a54eeb1f324663dbb0960cfd0c34bfefb3c3b1d4cde35dd8685
-        rules_hash: sha256:765ec2e04a1e4332f7290347936ec2a3e11237449ef264c9bc61ab604e0348fd
-        recipe: registry-observation-v1
+        observation_hash: sha256:1a6b63a337134cccd5daa29f3d4ed712f02e5b741ec3fca78d7f5e96061c3ebd
+        rules_hash: sha256:47f3634774c6c2df98ac23df1364fa58495c51f93abb94951559ad47797035db
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-017
         target_observation:
           region: jp
           card_no: SD03-017
-          observation_hash: sha256:671841119d4df18cb56f7cb09836344be4d036100c61b21014a802e2c3b67a9c
-          rules_hash: sha256:3f2df5d79415e2cbf102f97806c74115134e4b95889e543fdc10b731cfd966c5
-          recipe: registry-observation-v1
+          observation_hash: sha256:3e1e1de6b085c271614aad8db0cb61722862ae8b94f49e648e712f7e3d95f25a
+          rules_hash: sha256:1f2f368e0f32448f15cf814a069678017dcee3ea8a27f065ed59cc690db53ba0
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -475,9 +475,9 @@ records:
       observation:
         region: en
         card_no: SD03-018EN
-        observation_hash: sha256:268a54873dabe84b86e7e35039960f18c1ad691d6056c0b2e42f0b26d9c93724
+        observation_hash: sha256:1475d459d26a194768af3e1cc6cba27e468f13a464ace3d865d30df7f540d4f4
         rules_hash: sha256:fb1a77e43f027c8d4544ff58b10dd4f0b19cf3b5276f82daece15a49e6c5e3d1
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-018
@@ -486,7 +486,7 @@ records:
           card_no: SD03-018
           observation_hash: sha256:792ef36028dda5ba07d04c804cb2b3de350a4f1dbf85a3b5620ea3778fcdaad4
           rules_hash: sha256:26441012e8349af1e5190c27225f4560e844523c226d91cc64b7a608e0d11c1c
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -502,18 +502,18 @@ records:
       observation:
         region: en
         card_no: SD03-019EN
-        observation_hash: sha256:6c0ca19a9f5017c878acb4779fb91f0cf95829702365e24e0b6b75795dac61b1
-        rules_hash: sha256:fe2ff7084145a4e32f8a16422e5d6453d99c90e79c3b714e119e1b3b86fb154e
-        recipe: registry-observation-v1
+        observation_hash: sha256:dc691246b3648eb2dfcc1a125e63484ea414125d8dd427826c6c9cbdd1934ef7
+        rules_hash: sha256:3aa6c47490f09c6296c17a9dc0ed76d3439b68afe1f63977dafc461536c99a33
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-019
         target_observation:
           region: jp
           card_no: SD03-019
-          observation_hash: sha256:88980a58de38092a87316e54aea3ef5b20e490eb11b5b9b01ab6f4108d2d15c0
-          rules_hash: sha256:97a60b06657f76d63626cb51f94e6f0ec683a6810a834a76a49b71f7860970d2
-          recipe: registry-observation-v1
+          observation_hash: sha256:beae7b08db3b31e9ecc5656104cf18fdd4124c4548e68e12074fe5f61aa232db
+          rules_hash: sha256:e0d0ac784b07cd1b8a4b26b3ee2fe0efb26ee7b22b4343799b41cf9dc46349f8
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -529,18 +529,18 @@ records:
       observation:
         region: en
         card_no: SD03-020EN
-        observation_hash: sha256:207060b26069b67da26200a7a600205f580ce0ef67c96146c7979c7e4e056610
-        rules_hash: sha256:5b6e6fda0d4d92608d3861b7f044ca3d175de4f60fc9a10b23f3bc153d6079d8
-        recipe: registry-observation-v1
+        observation_hash: sha256:814510322407703028c1ad44254ccb847e21781d9e8eea7cdac3966a770bbbeb
+        rules_hash: sha256:c41231d7fdd3d7d8a2203be336d0905e20efadd4476711c61c128557c3c793c3
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-020
         target_observation:
           region: jp
           card_no: SD03-020
-          observation_hash: sha256:3f56abdda6239338a2d9052b37b00e9c8f9c5c32f7c6767a39044c2330045f33
-          rules_hash: sha256:f83fac26a4961382421403c123a203d72a0a5e05667db72bc8a1279ad8c2b137
-          recipe: registry-observation-v1
+          observation_hash: sha256:6f0a84edcd44675dd12c211f14cd6eb667d9ac33353f3816aee7eaf9f1c58bee
+          rules_hash: sha256:23100e1aa645c06ed24574d921df94313a1cf19ac7b6f8d0460aec7b0cca7724
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -558,7 +558,7 @@ records:
         card_no: SD03-LD01EN
         observation_hash: sha256:ea5247c6bfa9a34d35707ab65242090d6a499dd84c2dfe2d2b5915818155430b
         rules_hash: sha256:be8c4317ae98112b916fe55875e45a654ab9f8a4bc448e0a863af55e8e9dc0c9
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-LD01
@@ -567,7 +567,7 @@ records:
           card_no: SD03-LD01
           observation_hash: sha256:757658cbd26d352c67450ee819d0f268dd9dbce605758da692e678c42c2fd6f5
           rules_hash: sha256:884182de358a5ff2c62276c2ec595794d51a7be5d4cddec525e4d18d65d6e83c
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -583,9 +583,9 @@ records:
       observation:
         region: en
         card_no: SD03-T01EN
-        observation_hash: sha256:8b222c13bb21c675b0a2bd6a67b9d537705964aeaffb20afb5ac8e6a76a859df
+        observation_hash: sha256:d2a71524206ce52ef2a660fa9f1360fadd2691354d7b567ce20f33ce1ab92b9e
         rules_hash: sha256:6fa7b6cc12ea0b47177ad00252ebc32d2663f5906b3215278009c47fbb17b040
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-T01
@@ -594,7 +594,7 @@ records:
           card_no: SD03-T01
           observation_hash: sha256:dea0dc1aa14d5ddb54b814a932eca55aebee91782efb407ae07373f736fc5d66
           rules_hash: sha256:98ce3dee53a877edc9a31408531547bae1cbf076b43d7bfc5cd29295dfb61e20
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -610,9 +610,9 @@ records:
       observation:
         region: en
         card_no: SD03-T02EN
-        observation_hash: sha256:2bbff672e879600aed501d98ec9b654ccbde990a94e51cbad6230d17a68cece5
+        observation_hash: sha256:1eeb7d07c1aa8d89177e9dc63e434e29391c33bf1cbee3c575f28f12526c3d55
         rules_hash: sha256:10a6e482c975af1db71b6f7892e728557c223e994bd36c01bfd0ed905c2b8e39
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
       cross_region_review:
         checked: true
         target_jp_card_no: SD03-T02
@@ -621,7 +621,7 @@ records:
           card_no: SD03-T02
           observation_hash: sha256:f9937a6ff9a294d750f9589e778474e7c6e62e651a3d47fd9ad8e4c098bbe3cc
           rules_hash: sha256:716087bc483f3cabeeb066e2f8ce8cb0a9643ac14717e312730efcfe6c75aa9a
-          recipe: registry-observation-v1
+          recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -639,7 +639,7 @@ records:
         card_no: SD03-001
         observation_hash: sha256:505e618c01d7dd3375308f900aa8c4bddf8465317ea4395d0a4b25771cc690eb
         rules_hash: sha256:8ea07eefc646189984a82222eec2c5d413109dd605c337567ad8404308ed6661
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -657,7 +657,7 @@ records:
         card_no: SD03-002
         observation_hash: sha256:d0de290f98421852e95fa56043afa3e36827db9a7cd5fd6aebd9056fe5d21c00
         rules_hash: sha256:8b32818d77db4fceed3626eb0d46ea58532f0f59af454ad4bc38552987aa90ea
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -675,7 +675,7 @@ records:
         card_no: SD03-003
         observation_hash: sha256:a40ce431a9a234621d2509c7beb8652be4dfee12bc47505058ed00fe2315283a
         rules_hash: sha256:bf24628cd6a6b84fde0971c9f2a5cec677d86b34990b287387798f75c5c6d622
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -693,7 +693,7 @@ records:
         card_no: SD03-004
         observation_hash: sha256:7f39e02dba1473bcbc269b70a876ca818f92e85a8adc7a121c565ee18c8bd178
         rules_hash: sha256:4fc102e50b8b7f9981aff6c41f49e9ab75b170e15e574b81483760199524afab
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -709,9 +709,9 @@ records:
       observation:
         region: jp
         card_no: SD03-005
-        observation_hash: sha256:b05997dbd53e4e18173ba513ef471e7206d8df80bd4d40fef392874b7c8461c3
-        rules_hash: sha256:07891cf7ce9ca5fb835a790fa9ea2761f864dc5d629238db68fab0234df96c43
-        recipe: registry-observation-v1
+        observation_hash: sha256:404e6d39ae7f4e73ceced76f3ac63a35e3ae90cc419cc6e7a7c052c2fd2a01bd
+        rules_hash: sha256:ec72c2efb118fdbe34840ec5771e2d235a46cb9b41a47c44831179a99ab45998
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -727,9 +727,9 @@ records:
       observation:
         region: jp
         card_no: SD03-006
-        observation_hash: sha256:ebca0b7ca2dc4742b195e141ecd3c5166c3a15b5acabc26cb47e20951073f4f4
-        rules_hash: sha256:221d941ec0529243cd1c72f9b45bc11b3ea890bbba147f6e04320e3a9330dfa9
-        recipe: registry-observation-v1
+        observation_hash: sha256:12ca75ba63526c9be88bc7c944b179641f71b590f00c66d862387fe22f9131e0
+        rules_hash: sha256:694a06397abd1be404a859820c54acf6c4ec5c15ae760e4c9b781cecdf6a120d
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -747,7 +747,7 @@ records:
         card_no: SD03-007
         observation_hash: sha256:f4e6fcebe7ad47a25fb7380eeede035d74a910f76601c4a549bc7977d383d605
         rules_hash: sha256:5787164214f3ed542f84fc4a9b0a34157cc5d0eedde1f1daa08554981601c834
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -763,9 +763,9 @@ records:
       observation:
         region: jp
         card_no: SD03-008
-        observation_hash: sha256:69849f6a0fbe04f631bf76843c84f469f4cb55eebfed799a1846e2f8d6760fc8
-        rules_hash: sha256:531d436bd38ad9d2bde7c8bdfcdc365820e4372aa520c8150b9c522da7618af2
-        recipe: registry-observation-v1
+        observation_hash: sha256:288df5d5af09968069f5cbe58a37ed393f3192bb82274bcd8c6b4aa690a50c22
+        rules_hash: sha256:5f80c96c68290a2726446bda1b0206f73a6067bc29ff05acfaa012b24b325b1a
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -781,9 +781,9 @@ records:
       observation:
         region: jp
         card_no: SD03-009
-        observation_hash: sha256:8d4a7d879510ac4d562a805260fe56375f1be457232a9be10e0f2114fa11b9a1
-        rules_hash: sha256:4eba30d2f3b3e686bff96494de6b4612f4cbc8ba41220744bb7d35c6e4f92d66
-        recipe: registry-observation-v1
+        observation_hash: sha256:fb4328519347b476da3abb70c199c6c2081e66561fb197d35d77c413a5aa2964
+        rules_hash: sha256:49e267fb402b5b0bb8eb4b58c10afdf72c3cfe9ca0bbf4841651bcaa0618c5f4
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -799,9 +799,9 @@ records:
       observation:
         region: jp
         card_no: SD03-010
-        observation_hash: sha256:1108c866469cf941f3e849420c796aee0c2c79cc2841b5ee61883ca1e6cee0c1
-        rules_hash: sha256:644a06f87a5d24f49f8027df88f7a6cac535554d7e881d5a237e2e1d0213687b
-        recipe: registry-observation-v1
+        observation_hash: sha256:9e25d2382606be1d52c56215f294deed73cf76337c5047b9459653cb4306cb3b
+        rules_hash: sha256:fb78f15af7b7252dba91ecdd1e42dde8a7a96a8aeb615af7ca3aa0653e91985b
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -819,7 +819,7 @@ records:
         card_no: SD03-011
         observation_hash: sha256:cf8b7308f61d667d2cdeb0c55029563d9f143baaa04f3d95c866d61dadac00b1
         rules_hash: sha256:74c3f214cb79692b93e6bc81611cc083a410e4e8984ae4c056a2bd126f3424fb
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -837,7 +837,7 @@ records:
         card_no: SD03-012
         observation_hash: sha256:12ad16930ff6f82c8bd0be410b6823fb360552a2de9ed65eab3816e5ce254a27
         rules_hash: sha256:1b0fe47b8ac9dbc2ddae1ea9740cdbf4a0a5a99870ec3ab16b38bda7ad5d7e4b
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -853,9 +853,9 @@ records:
       observation:
         region: jp
         card_no: SD03-013
-        observation_hash: sha256:e02e7c1868546dc18af467355c3a803c4bb56267e0b46dcf32f266916f5af400
-        rules_hash: sha256:7678e6f4e4d7981519c40d1123c042f8cb373320f2c3efa3730394663a98dd22
-        recipe: registry-observation-v1
+        observation_hash: sha256:9f8ffc93321d8dfba800682d79e7b766ab01d22d9e783b2b7774ca9926e0d4eb
+        rules_hash: sha256:95e8c3cee7cba7b5027d6ae871b52c5ca60a425d0a54748e411e0347168deecd
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -871,9 +871,9 @@ records:
       observation:
         region: jp
         card_no: SD03-014
-        observation_hash: sha256:6750eea6ad5792cb36bd1668823c4be7c0723be9570d280e5beb5d819a5d2ad0
-        rules_hash: sha256:725ab4e5ab4a3adf8fe2280fff0887ce8daef169801305f1ca2811db4fd0261c
-        recipe: registry-observation-v1
+        observation_hash: sha256:319a4bc5673e40b6415a2d5cd9da9386b819ac14828a2099d04e865fda3245fe
+        rules_hash: sha256:ef3aa68a889209c62ff0f94d0b71f089997d93626be6a9da52e9952b34ab517a
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -889,9 +889,9 @@ records:
       observation:
         region: jp
         card_no: SD03-015
-        observation_hash: sha256:e24e3249925540f71a6ade96176ea2ac5999fda6d9dd199d424f04e051ef9113
-        rules_hash: sha256:dce4569b9a80f07dab5ca59955b3fafe070f11d00181ba8229baaf6f93f0a08e
-        recipe: registry-observation-v1
+        observation_hash: sha256:db6de1f2d5e3b67ac07b472f7098c157b3b7f9ab1ca1e3dbeb990c74b0c793e1
+        rules_hash: sha256:b70a12da5b366c03c9800e4dbbcccd8a6340ff54abd453ff3740c63b4d9a920e
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -907,9 +907,9 @@ records:
       observation:
         region: jp
         card_no: SD03-016
-        observation_hash: sha256:932174d5508ecde220a61319875ec55550e9b8993e991a81b31e091d48aaa0a1
-        rules_hash: sha256:ece3057ffafc2918b88ba752453f74d83dcc168f2027fd290462bd5385a3688c
-        recipe: registry-observation-v1
+        observation_hash: sha256:74a12a3e2cd06b8a1d8e18e2b9f16b2085f1f19c4a78f92d6bccc8c1e03201d6
+        rules_hash: sha256:76e06a74b3c8419144e13c00441c1b27057c29edda6d495960efc9f59ebb0b2f
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -925,9 +925,9 @@ records:
       observation:
         region: jp
         card_no: SD03-017
-        observation_hash: sha256:671841119d4df18cb56f7cb09836344be4d036100c61b21014a802e2c3b67a9c
-        rules_hash: sha256:3f2df5d79415e2cbf102f97806c74115134e4b95889e543fdc10b731cfd966c5
-        recipe: registry-observation-v1
+        observation_hash: sha256:3e1e1de6b085c271614aad8db0cb61722862ae8b94f49e648e712f7e3d95f25a
+        rules_hash: sha256:1f2f368e0f32448f15cf814a069678017dcee3ea8a27f065ed59cc690db53ba0
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -945,7 +945,7 @@ records:
         card_no: SD03-018
         observation_hash: sha256:792ef36028dda5ba07d04c804cb2b3de350a4f1dbf85a3b5620ea3778fcdaad4
         rules_hash: sha256:26441012e8349af1e5190c27225f4560e844523c226d91cc64b7a608e0d11c1c
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -961,9 +961,9 @@ records:
       observation:
         region: jp
         card_no: SD03-019
-        observation_hash: sha256:88980a58de38092a87316e54aea3ef5b20e490eb11b5b9b01ab6f4108d2d15c0
-        rules_hash: sha256:97a60b06657f76d63626cb51f94e6f0ec683a6810a834a76a49b71f7860970d2
-        recipe: registry-observation-v1
+        observation_hash: sha256:beae7b08db3b31e9ecc5656104cf18fdd4124c4548e68e12074fe5f61aa232db
+        rules_hash: sha256:e0d0ac784b07cd1b8a4b26b3ee2fe0efb26ee7b22b4343799b41cf9dc46349f8
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -979,9 +979,9 @@ records:
       observation:
         region: jp
         card_no: SD03-020
-        observation_hash: sha256:3f56abdda6239338a2d9052b37b00e9c8f9c5c32f7c6767a39044c2330045f33
-        rules_hash: sha256:f83fac26a4961382421403c123a203d72a0a5e05667db72bc8a1279ad8c2b137
-        recipe: registry-observation-v1
+        observation_hash: sha256:6f0a84edcd44675dd12c211f14cd6eb667d9ac33353f3816aee7eaf9f1c58bee
+        rules_hash: sha256:23100e1aa645c06ed24574d921df94313a1cf19ac7b6f8d0460aec7b0cca7724
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -999,7 +999,7 @@ records:
         card_no: SD03-LD01
         observation_hash: sha256:757658cbd26d352c67450ee819d0f268dd9dbce605758da692e678c42c2fd6f5
         rules_hash: sha256:884182de358a5ff2c62276c2ec595794d51a7be5d4cddec525e4d18d65d6e83c
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -1017,7 +1017,7 @@ records:
         card_no: SD03-T01
         observation_hash: sha256:dea0dc1aa14d5ddb54b814a932eca55aebee91782efb407ae07373f736fc5d66
         rules_hash: sha256:98ce3dee53a877edc9a31408531547bae1cbf076b43d7bfc5cd29295dfb61e20
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2
   - kind: printing
     owner: SD03
     data:
@@ -1035,4 +1035,4 @@ records:
         card_no: SD03-T02
         observation_hash: sha256:f9937a6ff9a294d750f9589e778474e7c6e62e651a3d47fd9ad8e4c098bbe3cc
         rules_hash: sha256:716087bc483f3cabeeb066e2f8ce8cb0a9643ac14717e312730efcfe6c75aa9a
-        recipe: registry-observation-v1
+        recipe: registry-observation-v2

@@ -16,51 +16,51 @@ records:
         - role: to
           region: en
           card_no: BP03-035EN
-          observation_hash: sha256:4bbbf0bebe7c9befe82123f00a0ef6d41741242907511a667ce28a3f6b3dfff5
-          rules_hash: sha256:4472c770d5bd52a619838ff585328dbea14786514019cb409cb9c726ce0fc3c9
-          recipe: registry-observation-v1
+          observation_hash: sha256:0c8f1eba09c1312a91385090838d3724b89d94f7fa2651f6c46812401c60f9c8
+          rules_hash: sha256:cbbf56692c0fd7d70dbfee98930eebe12694e9587c5e54584acb335d619c8cca
+          recipe: registry-observation-v2
         - role: from
           region: en
           card_no: BP03-036EN
-          observation_hash: sha256:0173dc4377fe1d353f31172e317b20db56eea7cbc9246d680b710114cc46f491
-          rules_hash: sha256:7c97f9ed686e9f5d0e40ad6cdc13408c4631988a6caa78af2d89e7c83215d23f
-          recipe: registry-observation-v1
+          observation_hash: sha256:896de1a9ae036b8cd354d09cc335ad6dbffc313fe6d30a3a65c87f8f275cbb57
+          rules_hash: sha256:eaa1d6bfc34d6ab99b220ea4d7cdbf2c40acca0f0d2b0bc3f4bb7a708b7316ae
+          recipe: registry-observation-v2
         - role: to
           region: en
           card_no: BP03-SL07EN
-          observation_hash: sha256:cc41560ef38e5be2633426945aa8d099df1ac1ea68f8b69a975fa2f38133b4d2
-          rules_hash: sha256:4472c770d5bd52a619838ff585328dbea14786514019cb409cb9c726ce0fc3c9
-          recipe: registry-observation-v1
+          observation_hash: sha256:d7d5de350bf4918f7c65cfdb8009d12ec4c59736913a79c96d8ed756e4195823
+          rules_hash: sha256:cbbf56692c0fd7d70dbfee98930eebe12694e9587c5e54584acb335d619c8cca
+          recipe: registry-observation-v2
         - role: from
           region: en
           card_no: BP03-SP01EN
-          observation_hash: sha256:052daf7190eac6e0a732233a7bc963b2ffc5ebfd50ebe1191784f53067b3af97
-          rules_hash: sha256:8653663137c1a3fb7c614021c8b208ba7717b623482f82750472a3ed936d83de
-          recipe: registry-observation-v1
+          observation_hash: sha256:7849cfca0f488f4ba5658efcacb2b59d6d9e4ae916137275b47fbd083a8ed6ba
+          rules_hash: sha256:90041a694304f40111a4845a545a66277a94854639885389f5675c9baacf02be
+          recipe: registry-observation-v2
         - role: to
           region: en
           card_no: BP03-U03EN
-          observation_hash: sha256:438a9f606c856de8326a2ded46cfeb76ff05e7d9116f8ede58636775237e66d4
-          rules_hash: sha256:96902f30cdba35bfb632ce896bd2e3c4f964a6d153e4e0a0562b355d7d84b4d3
-          recipe: registry-observation-v1
+          observation_hash: sha256:47a6330a110aca20df00f4e4aec828436603b03de5b1e84e2f566fd7b93fec04
+          rules_hash: sha256:b0221f40f0e575a420e945bfe3a7159e525ef941a03b1358c04e6da0a8df5332
+          recipe: registry-observation-v2
         - role: to
           region: jp
           card_no: BP03-038
-          observation_hash: sha256:f507aeafbac510feebfa4949a927079d91035ff4a625d996b3927e088dc530d6
-          rules_hash: sha256:1a5a218bc5a85dd885e8eb636e43e13d33cb935e45dd98d5a8fc82f890aea0fc
-          recipe: registry-observation-v1
+          observation_hash: sha256:dbce610d1585024962a9222dcb2410ec10b9d4413876612fb1d830b1726cd1de
+          rules_hash: sha256:af90a29feffaa55a6bf96045fb5d3048615439acc402795a05ac4ebb80ac151e
+          recipe: registry-observation-v2
         - role: to
           region: jp
           card_no: BP03-SL07
-          observation_hash: sha256:f89933dd6ebdb44d8d6a56bb237ef94ec0a1bf9f372792b26a86fc7c046ea7ce
-          rules_hash: sha256:1a5a218bc5a85dd885e8eb636e43e13d33cb935e45dd98d5a8fc82f890aea0fc
-          recipe: registry-observation-v1
+          observation_hash: sha256:639d67f200809fff569065ceee1c8770cc9b71caa00b373c671d1acc7b04b6a0
+          rules_hash: sha256:af90a29feffaa55a6bf96045fb5d3048615439acc402795a05ac4ebb80ac151e
+          recipe: registry-observation-v2
         - role: to
           region: jp
           card_no: BP03-U03
-          observation_hash: sha256:548fae75785ebe1e5917df59040c324233b37a49754830a60006b40743aef8dc
-          rules_hash: sha256:ae00a45fd6d3af59e22f4ba771137c7fd8c9b46efe2727a316e2bd1df2affa7f
-          recipe: registry-observation-v1
+          observation_hash: sha256:b2a353ce6bc026c0b3a6d4d1a119d3b34f5dccda7357279926868ad74773a5bf
+          rules_hash: sha256:4c1d3c49e295a0620bc0eed6221c41c19207c2025b4b5211e52eda904c870f1e
+          recipe: registry-observation-v2
   - kind: card_related
     owner: BP03
     data:
@@ -76,33 +76,33 @@ records:
         - role: to
           region: en
           card_no: BP03-046EN
-          observation_hash: sha256:b874a4571310003b7c6c4ce37cbdef04233fc4dde8d1f79365e946d492e04718
-          rules_hash: sha256:4446c44a827c6e3fdb5545e915dc9d7de29b56f2effb40cda3cea27538bd8ea6
-          recipe: registry-observation-v1
+          observation_hash: sha256:f712239761e5284e5a7a8e662de3f6626c4b9878955c8e0f615fe33ab9433879
+          rules_hash: sha256:59bcb8cfad4dc3d512efdee0ca46047f96da4d6a2f4a1c38ff37649a0d32cb4e
+          recipe: registry-observation-v2
         - role: from
           region: en
           card_no: BP03-047EN
-          observation_hash: sha256:3d585dfc36968a1d19530d2bc839d99fed0d18ccc189473cd133836cb61adef9
-          rules_hash: sha256:d04327efd2eece282df4e6b3dc3d46469ce32cdb36d8564068a5d01d35e3273c
-          recipe: registry-observation-v1
+          observation_hash: sha256:f23ee3c2145a8f8cf07268dffcc1f0b028a90e94d03e754e0e816de9b1ccb203
+          rules_hash: sha256:9dbee7769cc9b6f96639338c2e1768e5353d17b9b56c4a58aac74d0d4b3d0be4
+          recipe: registry-observation-v2
         - role: to
           region: en
           card_no: SDD03-014EN
-          observation_hash: sha256:c6d3929c0a51f6b5700fba363fe98bfa65257ea1f3d614f76f7d041c406edd87
-          rules_hash: sha256:4446c44a827c6e3fdb5545e915dc9d7de29b56f2effb40cda3cea27538bd8ea6
-          recipe: registry-observation-v1
+          observation_hash: sha256:66b7ebe15ecc05df75481f59644e20fc794f9c80d857480ba05d02a6d9e96940
+          rules_hash: sha256:59bcb8cfad4dc3d512efdee0ca46047f96da4d6a2f4a1c38ff37649a0d32cb4e
+          recipe: registry-observation-v2
         - role: to
           region: jp
           card_no: BP03-048
-          observation_hash: sha256:fbf0fb6183f79a96022c0d8fafe88628877623dd04b4d05e02605e64b39c2ddf
-          rules_hash: sha256:ecbaf33a410a4b973b23236aa374cb2527b1645e213e5788eb12bb248e58da98
-          recipe: registry-observation-v1
+          observation_hash: sha256:bbad2f7008a451aa04f408f5754b1134061a19428e2c1f2b5d97a6d23e7c0b10
+          rules_hash: sha256:158a74a30d510dbb3c03ae6f4d8c5b2fc507bb58d76e6886e4837a67ce2e691f
+          recipe: registry-observation-v2
         - role: to
           region: jp
           card_no: PR-121
-          observation_hash: sha256:f0f96d1c70bdb597dc7e149168b9c4d9959d53b4bc49e012b595ac2b44832b73
-          rules_hash: sha256:ecbaf33a410a4b973b23236aa374cb2527b1645e213e5788eb12bb248e58da98
-          recipe: registry-observation-v1
+          observation_hash: sha256:5ceb6e836ad9ea77802fb4748c570eab2f43dccf9f2e10ed1082d4af79745575
+          rules_hash: sha256:158a74a30d510dbb3c03ae6f4d8c5b2fc507bb58d76e6886e4837a67ce2e691f
+          recipe: registry-observation-v2
   - kind: card_related
     owner: BP03
     data:
@@ -118,54 +118,54 @@ records:
         - role: to
           region: en
           card_no: BP03-053EN
-          observation_hash: sha256:0823b31fdadd81b713922857b8f32f2ca54a6ee49ecda831e777cba293a7869e
-          rules_hash: sha256:f3a243281b276fef5b6428b2eb3384b9bbc14e72b1955edba3cd4c0ef1336a0d
-          recipe: registry-observation-v1
+          observation_hash: sha256:ea9f1e6f8a1229b8119cd21b413ef7a67e6785049bfe5fd21b2e918e7adcccb8
+          rules_hash: sha256:fb0ec9905164768ad826f2733294427c629af1debf34845d55158b40effabfc8
+          recipe: registry-observation-v2
         - role: from
           region: en
           card_no: BP03-054EN
-          observation_hash: sha256:6968e737c7e715afe47936c2b7ae96566d01d6d7565b88c3c895f58c9b3074d1
-          rules_hash: sha256:61896e52803fadf8af3bbe94583a1da190d07a3c0c595199e2c2dc48974f6dea
-          recipe: registry-observation-v1
+          observation_hash: sha256:993663d451e90576dcd832be550f159f2e0b0aaa27d8f89b814cba4517b2a810
+          rules_hash: sha256:0237a47cf91ff7dac3d5907621d984072c58c848a0baf632c594cccf52395528
+          recipe: registry-observation-v2
         - role: to
           region: en
           card_no: BP03-P15EN
-          observation_hash: sha256:95554b925c2f3f6daab3dbeae20214e560b46bd71a9a5fb5d7a88871e2f584a3
-          rules_hash: sha256:f3a243281b276fef5b6428b2eb3384b9bbc14e72b1955edba3cd4c0ef1336a0d
-          recipe: registry-observation-v1
+          observation_hash: sha256:9a231b8eef08ac3c24fcb15dfc6d40df5ac7d96b3052f141609a8bb397d439e1
+          rules_hash: sha256:fb0ec9905164768ad826f2733294427c629af1debf34845d55158b40effabfc8
+          recipe: registry-observation-v2
         - role: to
           region: en
           card_no: PR-526EN
-          observation_hash: sha256:6601b63efeebd4a35acc83d96742323dc81e64e93510642e4fa6b2ce3cee5360
-          rules_hash: sha256:c04c1e0be2930b63b7345c33cfc300a618a9ea534788125bfb6457408faaa35c
-          recipe: registry-observation-v1
+          observation_hash: sha256:9badce06af55859d01a9c303bcb29c0440e8668736caadb0f2d87c9e4a03f281
+          rules_hash: sha256:8214638ce39854190bb2187169ea5dcfa2b9113920b6d1ff021241d9cb4bd4e5
+          recipe: registry-observation-v2
         - role: to
           region: en
           card_no: PR-533EN
-          observation_hash: sha256:aeb62219119b48085f2a6c3bae1f989513326018ae6de92c043b1ad5f4c017aa
-          rules_hash: sha256:c04c1e0be2930b63b7345c33cfc300a618a9ea534788125bfb6457408faaa35c
-          recipe: registry-observation-v1
+          observation_hash: sha256:c599af1ad330c5b87d95a72f28b1a131f0e0c8836866a57a319f01f630ce9075
+          rules_hash: sha256:8214638ce39854190bb2187169ea5dcfa2b9113920b6d1ff021241d9cb4bd4e5
+          recipe: registry-observation-v2
         - role: to
           region: en
           card_no: SDD03-021EN
-          observation_hash: sha256:f76456ce60984ebcb0eed221e6b3409ce6d389d37bd10d15bd20e3bda684e9b8
-          rules_hash: sha256:c04c1e0be2930b63b7345c33cfc300a618a9ea534788125bfb6457408faaa35c
-          recipe: registry-observation-v1
+          observation_hash: sha256:eb202d7f098f2b1d617e8ae56d72036772cb8c4ef69446ef33103d3520e29a24
+          rules_hash: sha256:8214638ce39854190bb2187169ea5dcfa2b9113920b6d1ff021241d9cb4bd4e5
+          recipe: registry-observation-v2
         - role: to
           region: jp
           card_no: BP03-054
-          observation_hash: sha256:e53409dfcfe838b6ad184216515965234d5da397e67568be1fbd742abb8c5374
-          rules_hash: sha256:983fa50b8103c61d83ea3c9fed95f8ab8a481ebac07094e2124099a3ce5bb558
-          recipe: registry-observation-v1
+          observation_hash: sha256:8a33f99dc40df8c33c683accb8de2eef827178a9c87def27601f415e994fff33
+          rules_hash: sha256:745e1c14903db2785bf60ae981ac98df343d90112906545425651de198b6e3fe
+          recipe: registry-observation-v2
         - role: to
           region: jp
           card_no: BP03-P15
-          observation_hash: sha256:e733846865a19f7efe9b9f2ebf468d4b3ab5e00e078a57e02177b33ba014df16
-          rules_hash: sha256:983fa50b8103c61d83ea3c9fed95f8ab8a481ebac07094e2124099a3ce5bb558
-          recipe: registry-observation-v1
+          observation_hash: sha256:2f16cfb9a8ba9924a87cdd3033187717ef0e64dcfdef137c758857589e2ae41e
+          rules_hash: sha256:745e1c14903db2785bf60ae981ac98df343d90112906545425651de198b6e3fe
+          recipe: registry-observation-v2
         - role: to
           region: jp
           card_no: PR-341
-          observation_hash: sha256:7c19a28a9a278c98786705bbdd64456529512b79bd16d85664d39235b4816a4b
-          rules_hash: sha256:983fa50b8103c61d83ea3c9fed95f8ab8a481ebac07094e2124099a3ce5bb558
-          recipe: registry-observation-v1
+          observation_hash: sha256:e67c401a70a1217b7dc8aff892a7deb6518cac1d4a8aee18e76258320402c813
+          rules_hash: sha256:745e1c14903db2785bf60ae981ac98df343d90112906545425651de198b6e3fe
+          recipe: registry-observation-v2

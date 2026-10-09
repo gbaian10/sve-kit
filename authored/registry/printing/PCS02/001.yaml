@@ -16,9 +16,9 @@ records:
       observation:
         region: jp
         card_no: PCS02-001
-        observation_hash: sha256:37ed8eb11db2ee26e6019995424101c5d6a18e09da20e1df179ece8d5d53644e
-        rules_hash: sha256:327bd1f3680d05f406d6765a0b6632bb2b981701d2b25909553c93e20f3694bc
-        recipe: registry-observation-v1
+        observation_hash: sha256:c1ff454bc0f027d9e2be25460912db12b0a370d7f3b082db3bcf25bfbf1005a6
+        rules_hash: sha256:6c0c29cda0ff67509b6370d8c087b8ea4ad260d589e6a181614cc505bb6a8afd
+        recipe: registry-observation-v2
   - kind: printing
     owner: PCS02
     data:
@@ -34,9 +34,9 @@ records:
       observation:
         region: jp
         card_no: PCS02-002
-        observation_hash: sha256:87086cc587f219606e123221f4dfc5379cfe9f5e0b50dd1b0c314c830d088698
-        rules_hash: sha256:14e18055801998d777d0386218b63ec72e52bc9321d4bf4d4e554def8813c62e
-        recipe: registry-observation-v1
+        observation_hash: sha256:f2a4d48f2ee82de2e53ea39f5250c1ee524d4a69f3357564b79599855acf51b5
+        rules_hash: sha256:b1f2e97c8862e8c17b97066a04c3fa699726ecb7f8cc8186a7b04810f5c6d660
+        recipe: registry-observation-v2
   - kind: printing
     owner: PCS02
     data:
@@ -52,6 +52,6 @@ records:
       observation:
         region: jp
         card_no: PCS02-003
-        observation_hash: sha256:d2f2f0665cc2c4a24920ae766a0c839b8692f9f448854ab5c392a1f275fd5f4c
-        rules_hash: sha256:2ef30bc9b7a4b352526bac5495fe3ea60f39df94cdfa92cbb3f91d4296972bf3
-        recipe: registry-observation-v1
+        observation_hash: sha256:78cde7433a22a94ff81acc5820cab715aeae348edc62c7126972814282edfcd7
+        rules_hash: sha256:71240c3dd8caeb357390e319f1449c74dd59c3509d65474466db6f69205960f2
+        recipe: registry-observation-v2

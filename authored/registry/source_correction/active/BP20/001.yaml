@@ -11,7 +11,7 @@ records:
       expected_raw_value: '{ファンファーレ}下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに3ダメージ。【2】相手のリーダーすべてに2ダメージ。【3】1枚引く。自分の手札1枚を捨てる。【4】自分のPPを1回復する。'
       corrected_value: 下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに3ダメージ。【2】相手のリーダーすべてに2ダメージ。【3】1枚引く。自分の手札1枚を捨てる。【4】自分のPPを1回復する。
       expected_source_hash: sha256:0cd58a312a43e1e69b6599d7cc00ee292f5cf4b7329e3e80c151440adce361b6
-      source_hash_recipe: registry-observation-v1
+      source_hash_recipe: registry-observation-v2
       reason: Official page transcription differs from the printed card image.
       state: active
       reported_to_official: false
@@ -32,8 +32,8 @@ records:
       field: effect
       expected_raw_value: "{進化}{コスト1}：これは進化する。\n場の他のフォロワー1体を選ぶ。それは{攻撃力}+2/{体力}-2する。"
       corrected_value: "{進化}{コスト1}：これは進化する。\n{ファンファーレ}場の他のフォロワー1体を選ぶ。それは{攻撃力}+2/{体力}-2する。"
-      expected_source_hash: sha256:91cfaa87e272443b35af9234cec721822d18176d744717b5bae67e9b82afe649
-      source_hash_recipe: registry-observation-v1
+      expected_source_hash: sha256:9ae4f297814025076d98eb3894f1bd5a1d0226d14fcb30c09a19d2187fe679b8
+      source_hash_recipe: registry-observation-v2
       reason: Official page transcription differs from the printed card image.
       state: active
       reported_to_official: false
@@ -55,7 +55,7 @@ records:
       expected_raw_value: 自分のエンドフェイズが来たとき、相手の場のフォロワー1体を選ぶ。自分のEXエリアのクレストが3枚以上なら、それは{攻撃力}-2/{体力}-2する。5枚以上なら、代わりに{攻撃力}-4/{体力}-4する。
       corrected_value: 自分のエンドフェイズが来たとき、相手の場のフォロワー1体を選ぶ。自分のEXエリアのクレストが3枚以上なら、それは{攻撃力}-2/{体力}-2する。5枚なら、代わりに{攻撃力}-4/{体力}-4する。
       expected_source_hash: sha256:084d708a0874928abd2e02b62c519e28fccd308c46f9d5a72186850a0d42597a
-      source_hash_recipe: registry-observation-v1
+      source_hash_recipe: registry-observation-v2
       reason: Official page transcription differs from the printed card image.
       state: active
       reported_to_official: false
