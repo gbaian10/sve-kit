@@ -171,21 +171,36 @@ impl Game {
         frame: &Frame,
     ) -> Result<Vec<Value>> {
         let specifications = list(&code["additional_costs"]);
-        if specifications.len() > 1 {
-            return Err(EngineFailure::Unsupported(
-                "multiple independent additional-cost groups".into(),
-            ));
+        let mut options = vec![base];
+        for spec in &specifications {
+            let slot = if specifications.len() == 1 {
+                "additional"
+            } else {
+                string(&spec["key"])
+            };
+            let mut expanded = Vec::new();
+            for option in options {
+                expanded.extend(self.additional_group_choices(option, spec, slot, frame)?);
+            }
+            options = expanded;
         }
-        let Some(spec) = specifications.first() else {
-            return Ok(vec![base]);
-        };
+        Ok(options)
+    }
+
+    fn additional_group_choices(
+        &self,
+        base: Value,
+        spec: &Value,
+        slot: &str,
+        frame: &Frame,
+    ) -> Result<Vec<Value>> {
         let mut context = frame.clone();
         context.decision = base.clone();
         if !Self::mode_applies(spec, &context) {
             return Ok(vec![base]);
         }
         let mut decline = base.clone();
-        decline["optional_costs"]["additional"] = json!("decline");
+        decline["optional_costs"][slot] = json!("decline");
         let mut result = vec![decline];
         let costs = list(&spec["costs"]);
         if costs.iter().any(|cost| cost["op"] == "earth_rite") {
@@ -199,7 +214,7 @@ impl Game {
             )? {
                 if int(&self.object(&id)?.state["counters"]["stack_counter"]) >= count {
                     let mut option = base.clone();
-                    option["optional_costs"]["additional"] = json!({"stack_counter_from":id});
+                    option["optional_costs"][slot] = json!({"stack_counter_from":id});
                     result.push(option);
                 }
             }
@@ -223,7 +238,7 @@ impl Game {
             }
             let mut external = option;
             external.as_object_mut().map(|map| map.remove("costs"));
-            external["optional_costs"]["additional"] = payload;
+            external["optional_costs"][slot] = payload;
             result.push(external);
         }
         Ok(result)
@@ -231,26 +246,29 @@ impl Game {
 
     pub(super) fn prepare_additional(&self, code: &Value, frame: &mut Frame) -> Result<bool> {
         let specifications = list(&code["additional_costs"]);
-        if specifications.len() > 1 {
-            return Err(EngineFailure::Unsupported(
-                "multiple independent additional-cost groups".into(),
-            ));
+        if specifications.is_empty() {
+            return Ok(true);
         }
-        for spec in specifications {
+        let mut prepared = Vec::new();
+        let mut extra_pp = 0_i64;
+        for spec in &specifications {
+            let slot = if specifications.len() == 1 {
+                "additional"
+            } else {
+                string(&spec["key"])
+            };
             let key = format!("paid.{}", string(&spec["key"]));
             frame.values.insert(key.clone(), json!(false));
-            if !Self::mode_applies(&spec, frame) {
+            if !Self::mode_applies(spec, frame) {
                 continue;
             }
-            let payload = frame.decision["optional_costs"]["additional"].clone();
+            let payload = frame.decision["optional_costs"][slot].clone();
             if payload.is_null() || payload == "decline" {
                 continue;
             }
             if !payload.is_object() {
                 return Ok(false);
             }
-            let mut prepared = Vec::new();
-            let mut extra_pp = 0_i64;
             for cost in list(&spec["costs"]) {
                 let op = string(&cost["op"]);
                 if op == "pp" {
@@ -298,11 +316,11 @@ impl Game {
                 return Ok(false);
             }
             frame.values.insert(key, json!(true));
-            frame
-                .values
-                .insert("additional_nodes".into(), json!(prepared));
-            frame.values.insert("additional_pp".into(), json!(extra_pp));
         }
+        frame
+            .values
+            .insert("additional_nodes".into(), json!(prepared));
+        frame.values.insert("additional_pp".into(), json!(extra_pp));
         Ok(true)
     }
 

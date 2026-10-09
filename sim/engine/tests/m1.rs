@@ -1011,3 +1011,141 @@ fn next_opponent_turn_end_registered_in_the_opponent_turn() {
     // Ends of: this P2 turn (kept), P1's turn (kept), P2's next turn (gone).
     assert_eq!(alive, [1, 1, 0]);
 }
+
+#[test]
+fn choice_costs_are_combined_before_play_and_effects_follow_printed_order() {
+    let loaded = catalog(&json!({"spell":[{
+        "line":1,"kind":"spell",
+        "additional_costs":[
+            {"key":"first","modes":[1],"costs":[{"op":"pp","amount":2}]},
+            {"key":"second","modes":[2],"costs":[{"op":"discard","subjects":"cost.material"}],
+             "cost_selections":[{"key":"material","select":{"side":"self","zone":"hand","name":"f-a"},"min":1,"max":1}]}
+        ],
+        "body":{"op":"choice","min":1,"max":2,"modes":[
+            {"op":"if","condition":{"read":"paid.first"},"then":{"op":"damage","subjects":"opponent.leader","amount":1}},
+            {"op":"if","condition":{"read":"paid.second"},"then":{"op":"draw","count":1}}
+        ]}
+    }]}));
+    for (pp, paid, expected_pp) in [(3, true, 0), (2, true, 2), (1, false, 0)] {
+        let mut position = setup(
+            &json!({"hand":[{"id":"s","card":"spell"},{"id":"m","card":"f-a"}]}),
+            &json!({}),
+        );
+        position["players"]["P1"]["pp"]["current"] = json!(pp);
+        let mut game = start(loaded.clone(), &position);
+        let decision = json!({"do":"play","card":"s","options":[2,1],"optional_costs":{
+            "first":if paid {json!({"pp":2})}else{json!("decline")},
+            "second":if paid {json!({"discard":["m"]})}else{json!("decline")}
+        }});
+        let offered = game.legal().unwrap();
+        assert_eq!(
+            offered
+                .iter()
+                .any(|choice| choice["optional_costs"] == decision["optional_costs"]),
+            pp != 2
+        );
+        let step = game.decide(&decision, "choice-costs").unwrap();
+        assert_eq!(
+            game.query(View::Referee, "P1.pp.current").unwrap().unwrap(),
+            json!(expected_pp)
+        );
+        if pp == 2 {
+            assert_eq!(step.outcome, "cannot-play");
+            assert!(step.events.is_empty());
+            assert_eq!(
+                game.query(View::Referee, "P1.hand").unwrap().unwrap(),
+                json!(["s", "m"])
+            );
+            continue;
+        }
+        assert_eq!(step.outcome, "resolved");
+        if !paid {
+            assert_eq!(life(&game, "P2"), json!(15));
+            assert!(!step.events.iter().any(|event| matches!(
+                event["kind"].as_str(),
+                Some("捨てる" | "ダメージ" | "引く")
+            )));
+            continue;
+        }
+        let index = |kind: &str| {
+            step.events
+                .iter()
+                .position(|event| event["kind"] == kind)
+                .unwrap()
+        };
+        assert!(index("捨てる") < index("プレイ"));
+        assert!(index("プレイ") < index("ダメージ"));
+        assert!(index("ダメージ") < index("引く"));
+        assert_eq!(life(&game, "P2"), json!(14));
+    }
+}
+
+#[test]
+fn choice_pp_costs_cannot_use_pp_recovered_by_an_earlier_mode() {
+    let loaded = catalog(&json!({"spell":[{
+        "line":1,"kind":"spell",
+        "additional_costs":[
+            {"key":"first","modes":[1],"costs":[{"op":"pp","amount":2}]},
+            {"key":"second","modes":[2],"costs":[{"op":"pp","amount":3}]}
+        ],
+        "body":{"op":"choice","min":1,"max":2,"modes":[
+            {"op":"if","condition":{"read":"paid.first"},"then":{"op":"recover_pp","amount":3}},
+            {"op":"if","condition":{"read":"paid.second"},"then":{"op":"damage","subjects":"opponent.leader","amount":1}}
+        ]}
+    }]}));
+    for pp in [3, 6] {
+        let mut position = setup(&json!({"hand":[{"id":"s","card":"spell"}]}), &json!({}));
+        position["players"]["P1"]["pp"]["current"] = json!(pp);
+        let mut game = start(loaded.clone(), &position);
+        let step = game
+            .decide(
+                &json!({"do":"play","card":"s","options":[2,1],
+            "optional_costs":{"first":{"pp":2},"second":{"pp":3}}}),
+                "combined-pp",
+            )
+            .unwrap();
+        assert_eq!(
+            step.outcome,
+            if pp == 3 { "cannot-play" } else { "resolved" }
+        );
+        assert_eq!(
+            game.query(View::Referee, "P1.pp.current").unwrap().unwrap(),
+            json!(3)
+        );
+        assert_eq!(life(&game, "P2"), json!(if pp == 3 { 15 } else { 14 }));
+    }
+}
+
+#[test]
+fn free_nested_play_still_pays_the_selected_additional_cost() {
+    let loaded = catalog(&json!({
+        "heal":[{"line":1,"kind":"spell","body":{"op":"play_card","subjects":{
+            "side":"self","zone":"hand","name":"spell"},"set_cost":0}}],
+        "spell":[{"line":1,"kind":"spell","additional_costs":[
+            {"key":"extra","costs":[{"op":"pp","amount":2}]}
+        ],"body":{"op":"if","condition":{"read":"paid.extra"},
+            "then":{"op":"damage","subjects":"opponent.leader","amount":1}}}]
+    }));
+    let mut position = setup(
+        &json!({"hand":[{"id":"outer","card":"heal"},{"id":"inner","card":"spell"}]}),
+        &json!({}),
+    );
+    position["players"]["P1"]["pp"]["current"] = json!(3);
+    let mut game = start(loaded, &position);
+    let step = game
+        .decide(&json!({"do":"play","card":"outer"}), "outer")
+        .unwrap();
+    assert_eq!(step.outcome, "paused");
+    let choice = game
+        .legal()
+        .unwrap()
+        .into_iter()
+        .find(|option| option["optional_costs"]["additional"] == json!({"pp":2}))
+        .unwrap();
+    assert_eq!(game.decide(&choice, "inner").unwrap().outcome, "resolved");
+    assert_eq!(
+        game.query(View::Referee, "P1.pp.current").unwrap().unwrap(),
+        json!(0)
+    );
+    assert_eq!(life(&game, "P2"), json!(14));
+}
