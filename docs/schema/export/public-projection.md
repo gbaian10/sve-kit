@@ -79,6 +79,10 @@ Schema descriptor 驗完整欄序、nullable、enum 與額外鍵，不以 SQL �
   只取代該 owner 的同欄同語言共用選譯；shared_jp 使用 JP 共用選譯，顯示於同面 EN owner。
   未核對、divergence 或只有 pending display 的跨區選用不出。建置器仍須驗 exact source bundle／名稱來源。
   #29 的 shared_jp_unchecked 尚待 Schema／建置能力接入，本模組不自行產生未核對選用。
+  **四層切換前行為**：以上是現行投影器的限制；2026-10-10 的 JP 唯一一般來源政策依
+  [翻譯契約 §1](../domains/translation-contract.md#1-來源與顯示原則)與
+  [§7.2](../domains/translation-contract.md#72-逐-owner-的顯示選用)，不以 divergence 或缺 aligned 禁止有效 JP 繁中。
+  新 basis 與公開投影由 #496／#498 同步切換，不能用現行投影限制取代新政策。
 - `related_regions`：reskin 在各輸出地區的已驗證 eligibility。
 - `active_scopes`：ruling revision 的已驗證現行有效文字單元；projector 不猜部分取代的切段。
 - `general_evidence`：printing ID → 路由建置器的 `GeneralEvidence`，原樣傳給唯一的預設版次選取器；

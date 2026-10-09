@@ -3,19 +3,24 @@
 本契約保留清冊、句型比對、固定字與參數定義、譯文、術語、卡名、風味、加粗、新卡自動套用及未匹配清單。
 2026-10-04 起，翻譯資料採可直接修訂的當前值；Git 保存修改歷史，退回使用 git revert。
 不再用決定封套、收據、成員雜湊、只增不改、歷史重播、首輪抽查、雙模型或手動合併前檢查作載入門檻。
-本文件定義當前資料格式；建置投影與 reader 的公開欄位仍須依 §8 配套驗證。
+本文件的四層目標契約依 [ADR-0021](../../adr/0021-four-layer-translation.md)，仍待審核與實作；
+既有 format 2／固定字串模板不能宣稱已支援新模型。逐欄型別、驗證責任與固定案例以
+[四層共用契約](four-layer-translation.md)為準；建置與公開 reader 依 §8 同步切換。
 
 ## 1. 來源與顯示原則
 
-繁中以 JP 原文為主；日英已確認同卡且適用時共用 JP 譯文，已知差異及英文獨有欄位才用 EN 來源。
-跨區卡片 ID 對應仍須人工確認，不能靠同名或移除卡號後綴推算。
-EN 身分已確認而文字尚未核對時，沿 `shared_jp_unchecked` 顯示並標示；核對完成用 `shared_jp`，已知 divergence 不適用。
+繁中以日文為唯一一般翻譯來源。有有效且已確認同卡同面的 JP 來源，一律以 JP 翻譯；
+沒有 aligned 核對或已知日英效果不同，均不禁止 JP 繁中，也不切換成 EN 翻譯。
+跨區卡片 ID 對應仍須人工確認，不能靠同名或移除卡號後綴推算；錯 owner／face、過期或缺來源仍拒絕。
+純英文卡須確認日版沒有才個別處理（[#500](https://github.com/gbaian10/sve-kit/issues/500)），unmapped 不等於 confirmed_none。
+JP 卡缺少某個 EN 段落不構成純英文卡；段落不同時顯示完整 JP 效果，不依 EN ordinal 拼接。
 卡名來源順序及資格見[數位名字規則](digital-name-policy.md)，風味見[風味直接對照表](flavor-translation.md)。
+JP 依據的顯示不代表規則等義；區域差異、DSL／機制及官方 counterpart 資格仍依 §7。
 
 每筆資料只用 `origin: official|project|machine` 與 `low_confidence: Bool` 描述來源類別及信心，
 不保存誰點哪個按鈕、模型互審結果或私人證據 hash。machine 經審閱仍是 machine。
 結構及適用性通過的低信心譯文直接顯示「待校對」，可切回原文；旗標不是禁止入庫或發布的人工關卡。
-缺譯、無法匹配或缺必要參數者回原文並列清單，不把半段原文混入完整繁中譯文。
+缺譯或來源尚無可匹配的完整框架者回原文並列清單；已宣告可用卻缺必要葉引用則拒絕，不把半段原文混入完整繁中譯文。
 來源損壞、錯 owner、錯型別及衝突引用屬錯誤，不能用低信心旗標掩蓋。
 
 ## 2. 當前資料入口
@@ -23,15 +28,17 @@ EN 身分已確認而文字尚未核對時，沿 `shared_jp_unchecked` 顯示並
 沿用 `authored/translations/`，分片按卡包或共用類別歸檔，單檔小於 1 MiB；序號只是檔名，不是修訂鏈。
 沿 authored-layout §1 的嚴格 YAML、未知欄位拒絕、禁止 symlink／跳脫路徑。
 filing_key 為 `[A-Za-z0-9_-]+`，sequence 為三位以上十進位字串；不要求連號或預先排序。
-讀取當前工作樹的固定 glossary／templates／overrides 子目錄一次，載入後依 record_key 排序；重複鍵拒絕。
+讀取當前工作樹的固定 glossary／templates／forms／overrides 子目錄一次，載入後依 record_key 排序；重複鍵拒絕。
 沒有內部 checksum index；其他目錄的私人草稿不納入輸入。空目錄表示空集合。
 
 | 檔案 | 完整頂層欄位 |
 | --- | --- |
-| `translations/{glossary,overrides}/<filing_key>/<sequence>.yaml` | `format: 2, kind: translation_shard, records` |
-| `translations/templates/{definitions,values,candidates}/<sequence>.yaml` | `format: 2, kind: translation_shard, records` |
+| `translations/{glossary,overrides}/<filing_key>/<sequence>.yaml` | `format: 3, kind: translation_shard, records` |
+| `translations/templates/{definitions,values,candidates}/<sequence>.yaml` | `format: 3, kind: translation_shard, records` |
+| `translations/forms/<sequence>.yaml` | `format: 3, kind: translation_shard, records` |
 
-翻譯入口只接受 format 2 分片；glossary 與模板 reader 共用已載入的資料。
+四層入口只接受 format 3 分片；glossary 與模板 reader 共用已載入的資料。
+由 #498 切換前清查並轉換 format 2；本文件不代表現有 reader 已更新，不保留雙軌載入。
 模板來源清冊在建置時產生，不進 Git，見[清冊契約](template-source-replay.md)。
 舊格式留在 Git 歷史，不作現行載入分支。
 
@@ -52,19 +59,19 @@ concept_evidence 的 concept_note 可省略，只保留有實際內容的說明�
 | glossary_choice | term_id,lang | `term_id,lang,value,concept_evidence`（選填 `source_claim`） |
 | glossary_emphasis_choice | term_id | `term_id,value` |
 | symbol_localization_choice | symbol_id,lang | `symbol_id,lang,symbol_basis,value,concept_evidence`，完整值依[記號文案契約](catalog-route-adoption.md#6-卡文記號與三語文案) |
-| sentence_template | id | `id,normalized_hash,role,source_lang,normalizer_version,semantic_variant,parameter_schema,content_hash` |
-| template_translation | template_id,lang | `template_id,lang,text` |
+| sentence_template | id | 四層 Frame：`id,source,role,semantic_variant,leaf_schema,projection,content_hash`，見[共用契約 §3](four-layer-translation.md#3-frame-與語義身分) |
+| template_translation | template_id,lang | `template_id,lang,target`，target 為 Literal／LeafRef／Form／NP 節點 |
 | template_translation_candidate | source_kind,candidate_id,lang | `source_kind,candidate_id,lang,text,normalized_hash,role,reasons`，未啟用原稿依 §2.1 |
-| template_translation_variant | template_id,lang,variant_key | `template_id,lang,variant_key,text` |
+| template_translation_variant | template_id,lang,variant_key | `template_id,lang,variant_key,target` |
+| translation_form | id,lang | `id,lang,signature,rule,cases`，見[共用契約 §5](four-layer-translation.md#5-targetform-與部分-np) |
 | glossary_choice_variant | term_id,lang,variant_key | `term_id,lang,variant_key,value,concept_evidence`（選填 `source_claim`） |
 | context_assignment | owner,field,ordinal | `owner,field,ordinal,source_hash,variant,concept_key,reason` |
 | card_name_concept | subject | `subject,term_id,source_ref,reason`；subject 恰為 `{card_id,face_id,source_lang,source_hash}`，不帶歷史 identity_basis |
 | template_match | context_key | `context_key,source_hash,matches` |
 | translation_override | context_key,lang | `context_key,lang,action,templates,terms,reason`，action=suppress/pin/default |
-| source_exception | card_id,region,scope | `card_id,region,scope,basis,reason`；region=en、scope=rules/name/all、basis=divergence/default_jp |
 
 glossary 欄位依[術語契約](glossary-adoption.md)。context_key 恰為 `{source_unit_id,variant}`；
-matches 為 null（回自動比對）或 `{template_id,source_span,params}` 陣列，須完整且無歧義。
+matches 為 null（回自動比對）或 `{frame_id,source_span,values}` 陣列，須完整且無歧義。
 context_assignment 的 concept_key 可 null；非 default variant 須非空理由。card_name_concept 的 term_id 可 null，表示撤回指派。
 owner／field／ordinal 的組合及來源雜湊由本次有效身分與原文自動核對，不再要求歷史背景在 base main 的祖先。
 同名不代表同概念。region-reviews 中的 region_text_review／region_divergence 同時控制 DSL／機制，
@@ -83,9 +90,9 @@ variant_key 是穩定具名 Code（`[a-z][a-z0-9_-]*`），候選不能命名 de
 舊 pin 選用的文字即使不是最新值，轉換時也只保留仍被引用的具名候選及實際來源，維持相同渲染結果；
 不保留全部歷史譯本或採納鏈。無法無損對應者列清單，不把 pin 悄悄改成 default。
 
-source_exception 的 divergence 只在本次存在該卡／區／scope 的 fresh、未解 confirmed divergence 時有效；
-default_jp 撤回例外並按預設重算，不造不存在的 JP 來源。英文獨有仍由 fresh confirmed_none 與 as_of 推導，
-不另寫 en_only、不藉翻譯欄位授予跨區資格。
+`source_exception` 不再是合法 kind；原 divergence／default_jp 分支均移除。
+新 reader 遇此 kind 必須拒絕，切換前列清查與處置結果，不能無聲忽略。
+`region_divergence` 是 §7.1 的非翻譯資料，仍保留；不藉翻譯欄位授予或解除跨區規則資格。
 
 source_ref 保留既有 `{batch_id,source_version_id,parser,locator,text_hash}`，只定位來源資料；
 store 名稱與實體路徑由執行端設定，authored 不保存 store_id。parser 是本次支援的解析器，locator 為 JSON Pointer，
@@ -95,11 +102,11 @@ text_hash 對定位到的完整 UTF-8 字串計算；span 使用 Unicode code po
 ### 2.1 無法綁定 slot 的候選原稿
 
 `template_translation_candidate` 保存尚無完整參數定義或無法無損綁定的專案譯文草稿。
-沿用 format 2 的 kind/data record 與可省略品質欄位，origin 限 project/machine，low_confidence 保留原值；
+沿用 format 3 的 kind/data record 與可省略品質欄位，origin 限 project/machine，low_confidence 保留原值；
 它始終未啟用，不因低信心旗標為 false 而成為可渲染譯文，也不能用 template_translation_variant 代替。
 
 路徑固定為 `authored/translations/templates/candidates/<sequence>.yaml`，
-沿共用 includes 索引、可修改分片及單檔小於 1 MiB 的限制；索引 hash 仍由工具更新。
+沿固定子目錄讀取、可修改分片及單檔小於 1 MiB 的限制；不新增 includes 或 checksum index。
 record_key 為 `["template_translation_candidate",source_kind,candidate_id,lang]` 的 canonical JSON 字串。
 text、reasons、note 不參與身分；同鍵原稿有不同文字時拒絕，不按檔序選取。
 
@@ -125,21 +132,16 @@ data 恰含上表七欄；record 及分片沿既有封閉結構、鍵唯一、�
 
 ## 3. 清冊與定義
 
-清冊是所有來源欄位及句型位置的完整盤點，保留 body、reminder、token_header、layout、name 與 label 角色；風味不在清冊內。
-清冊每次建置從封存來源產生，不存 Git；定義與候選以 normalized_hash＋role 綁定，見[清冊契約](template-source-replay.md)。
-缺來源、unknown、空字串與空白不能混為不存在；每個來源片段要有去向。
-固定文字和參數 schema 共同描述模板；辨識不能只把所有數字叫 N、所有引號內容叫 X 後當成同一句。
+清冊列全部來源欄位及句型位置，保留 body、reminder、token_header、layout、name 與 label 角色；風味不在其中。
+每次建置從封存來源產生清冊，不存 Git，見[清冊契約](template-source-replay.md)。
+缺來源、unknown、空字串與空白不能混為不存在；每個來源片段都要有去向。
 
-模板 ID 由內容 hash 配發；semantic payload 為 level/source_lang/normalized_text/normalizer_version/semantic_variant/parameter_schema。
-content_hash 由工具對實際 payload 計算，用來抓錯配與碰撞，不含 note、來源收據或翻譯審查。
-純譯文、說明修正不換模板 ID；固定字、參數型別或語義分支真的改變時，形成另一個模板定義，並重算其使用位置。
-ID 為 T（sentence）／C（clause）＋六欄 payload hash 前 16 hex；碰撞時逐次加 2 碼至 64，
-保留已配結果。完整 hash 相同仍比完整 payload，撞異 bytes 就失敗；來源換頁而 payload 相同可重用。
-這是語義身分規則，不要求保存全部舊清冊／採納分片或遍歷 Git 祖先；未使用的舊定義可從當前檔移除。
-
-同一位置至多匹配一個有效定義；多個候選列歧義，不依檔名或 ID 大小任選。
-normalized_text 相同、但參數 schema 不同的位置不匹配該定義，不依原文字串合一；schema 相符但 slot 角色不一致時建置失敗。
-所有句型包括只出現一次者仍用模板；子句組合無環，不另造每張卡自由翻譯覆寫。
+四層 Frame 的 source descriptor、canonical source、語義 payload 與完整 hash ID 依
+[共用契約 §3](four-layer-translation.md#3-frame-與語義身分)。
+舊 T/C 六欄 payload 只用於遷移映射，不再作新 frame 的定義或匹配條件。
+同一來源位置至多匹配一個有效 frame；多個候選列歧義，不依檔名、頻次或 ID 任選。
+相同固定字仍須驗葉槽角色、合法域及 semantic_variant；未定變體限定精確來源，不跨用途合併。
+所有頻次都保留整行框架，NP/form 覆蓋變動不重配 frame；不造逐卡自由翻譯覆寫。
 
 ## 4. 參數、譯文與自動套用
 
@@ -154,50 +156,39 @@ binding 由每次建置產生。source_span 固定 `{role,segments,anchor}`，se
 | 句中提示 | body.segments 排除提示，提示另綁 reminder 並 anchor 到 body；譯文先輸出完整 body，再按原文順序附提示，原文欄保持原位置 | 用單一 body span 包住提示再重疊 reminder 失敗 |
 | 同模板有／無提示 | 同一 body payload，提示屬來源 binding，不灌進 body 模板；未知括號仍作 body 規則或報匹配失敗 | 把條件括號一律當提示，或因有提示覆寫 body payload 失敗 |
 | token 定義標頭 | 保留標頭完整 span，新 token_header 模板釘名稱、職業／特性／種類、可選費用／攻防的 slot；不同形狀用不同 schema | 只翻後續能力而略掉標頭、未知形狀硬套固定費用失敗 |
-| NFKC 改變字元 | trace 保存每一正規化片段對應的 raw 區間與前後 bytes；normalizer 僅做明定轉換，不做逐字可逆的假設 | 把全形標點正規化後位置當原文 offset 失敗 |
-| 裸 N／『X』與原文字面字母 | 舊 normalized 原樣留；schema 以 normalized 的位置指明「哪個 N/X 是哪個 slot」，其餘為 literal | 全域 replace N、把字面 N 當數字 slot 失敗 |
+| NFKC 改變字元 | trace 保存 raw／canonical 區間，以來源與 canonical 字串取回前後 bytes；normalizer 僅做明定轉換，不做逐字可逆的假設 | 把全形標點正規化後位置當原文 offset 失敗 |
+| 裸 N／『X』與原文字面字母 | 從 exact 來源與具名規則重建 canonical；葉槽明列位置，字面 N/X 保留 literal，舊 normalized 只供重鍵盤點 | 全域 replace N、把字面 N 當數字 slot 失敗 |
 
 layout 不含待翻語義，可機械生成固定模板；reminder/token_header 是獨立句型，須像 body 一樣提供其譯本。版次欄位與 section 的完整覆蓋各自核對，不跨欄偷接；提示分類有疑義則保留原文／失敗清單，不擅自取語義等義。
 
 風味文字不經此分段，也不進清冊，直接以原文 hash 對照，見[風味文字契約](flavor-translation.md)。
 
-### 4.2 參數 schema 與驗回來源
+### 4.2 葉 schema 與驗回來源
 
-當前解析結果逐位置保留角色、引用身分、raw 拼寫、span 與 pending；
-逐位置 schema／raw roundtrip 及定義六欄 payload 都要驗，同 hash 仍比完整 bytes。
+葉的型別、角色、合法域與 SourceBinding 依[共用契約 §4](four-layer-translation.md#4-有型別葉槽與值)及
+[§6](four-layer-translation.md#6-sourcebindingtrace-與逐-occurrence-位置)。
+不再將所有數字視為 N、所有概念視為任意 term；數量、次數、傷害、序數及門檻分角色。
+必要引用缺失、未知概念、錯型別或已知錯來源拒絕；尚未辨識的來源留 pending，不用自由文字參數假裝解析成功。
+卡名缺唯一概念時仍可保留未啟用候選／整欄原文，但不能造永久概念或可執行 token 身分。
 
-parameter_schema 固定 `{format:1,slots:[...]}`；每個 slot 恰為 `{name,type,occurrences,reference_kind,min,max}`。name 為 `[a-z][a-z0-9_]*`，唯一；type=uint/literal/reference，reference_kind 為 card/term/vocabulary 或 null，uint 的 min/max 為安全非負整數，其餘為 null。occurrences 是 normalized_text 的不重疊 `{start,end}` 陣列；同 slot 多次出現值須一致。slot 陣列按首次位置排序。舊 `『X』` 的 slot 只覆蓋中間 X，左右引號仍是 literal；params 的 uint/literal 是整數／字串，reference 為 `{kind:card,id}`、`{kind:term,id}` 或 `{kind:vocabulary,vocabulary_kind,vocabulary_code}`，須符合宣告種類與 FK。數字正規化前的 raw 字串與數值分開保存；reference 綁永久概念 ID，不能靠顯示名猜同卡。literal 僅給明定的格式片段（例如 layout），不得包住整句外文冒充翻譯。
+來源重建有兩個獨立檢查：先按原文 codepoint 位置從凍結來源重組 exact UTF-8，
+再以具名分類器／normalizer 驗固定字、葉值、角色、單位與 canonical source。
+依計數物、所在區域集合與數量角色查表並驗回原文單位；NFKC、別名及省略均留 trace。
+renderer 與 DSL 使用同一份通過檢查的值，NP 只組合引用，不建立重疊的第二份來源槽。
 
-術語引用 slot 可覆蓋 normalized_text 中原樣保留的名稱，不必換成佔位符；該模板的名稱固定、大括號仍 literal。只以唯一 exact 當前概念及 category 綁定；詞庫改動由每次建置的清冊檢查歧義。四條能力門檻規則（combo／lesson／necrocharge／spell_chain）只將數字作 uint slot，已採納名稱只供 context 檢查、仍為 literal；不借此核可中文譯名或新增名稱引用。
+### 4.3 target 與自動套用
 
-已辨識為卡名引用的 slot（本文的 `『X』` 與 token 標頭名稱）缺 glossary 卡名概念時，仍可匹配同句型的 term slot：
-建置內部參數為 `{kind:card_name,text}`，text 須等於該位置的原文拼寫；渲染時用該原文已選用的卡名譯名，
-沒有就照原文名稱輸出，整段標低信心。不自造 term ID、不推斷同卡；有歧義（多個 exact 概念）仍為 pending，整段回原文。
+template_translation.data 恰為 `{template_id,lang,target}`，品質欄在 record 外層。
+target 由 Literal／LeafRef／Form／有限 NP 節點構成，完整簽章依[共用契約 §5](four-layer-translation.md#5-targetform-與部分-np)。
+未知節點、壞引用或未使用必要葉是結構錯誤，拒絕載入／建置；缺必要目標語選詞則整欄回原文列 missing_term_translation。
+Literal 中不解析舊 `{{slot}}` 語法，不允許把必要引用改寫成同字 literal 躲過檢查。
 
-數量／增減幅度的 schema 界值為 0..9007199254740991，序數為 1..9007199254740991；此為安全整數技術界值。原樣十進位／safe unsigned／序數非零等匹配條件仍須驗證；正負號留 literal，只以非負幅度綁 slot。完整欄位依賴（例如選項引導與全部標號）按各當前來源核對，不從同一模板的其他成員借證據。
-
-例（全為自撰）：原文 `N測試２` 重建 normalized=`N測試N`。唯一 uint slot `count` 的 occurrences=[{start:3,end:4}]、min=0、max=9007199254740991；第一個 N 是 literal。若另一成員在位置 0 也是數字，兩者不能共用此 schema，分新模板；不能依候選分組的字串相同合併。
-
-「驗回來源」是兩個獨立檢查，不能只把譯文重跑同一個 normalizer：
-
-1. trace 由原文直接取每個 segment 的 raw bytes，連同 layout/reminder/header 按來源位置重組，須逐 byte 等於來源 UTF-8（不依翻譯結果猜回原文）。trace 的 NFKC 對照可多對多；prefix/字數變化不移動原文座標。
-2. 以當前分類／normalizer 重算選中 body 等角色，對 literal 段與 slot 的位置、型別、原值、規則分類逐項匹配，產生 normalized 須等於 模板 payload。額外／遺漏參數、未分類片段、無法解析的引用都失敗。第一項防漏原文，第二項防「任意片段都包成 literal」假通過。
-
-### 4.3 當前譯文與自動套用
-
-template_translation.data 恰為 `{template_id,lang,text}`，origin／low_confidence 在 record 外層。
-text 使用 `{{slot_name}}`，literal 的反斜線與左右大括號以反斜線跳脫；禁止未知 slot、
-未閉合括號與未使用的必要 slot，不支援運算式。slot 可重排，重複使用依 schema，
-不以裸 N 作替換語法。缺必要目標語詞庫時整個 context 回原文，列 missing_term_translation；
-譯文 placeholder 不合語法時不擋建置，使用它的欄位整段回原文，列 invalid_template_translation。
-
-首版在 sentence 層翻譯，包括只出現一次者；C ID 保留盤點，首版不啟用子句拼接。
-已有 component 仍驗無環及父子來源一致性；日後啟用拼接須先補參數映射契約，不能將未實作能力當成可用。
-
-新增卡包由工具產清冊、套用當前模板及詞庫、渲染譯文。只需一個資料 PR 和一張
-低信心／新句型／歧義／未匹配／缺譯清單，不需先完成固定數量人工樣本。
-低信心由輸入旗標及實際使用的定義、譯文、詞庫、標為低信心的參數辨識規則與卡名退回作 OR 傳播；機器來源不自動等於低信心。
-加粗由概念引用及位置產生，不能事後搜尋同中文字串猜位置。
+句框架維持整行，子句切分可作盤點，但不啟用任意句子拼接。
+未覆蓋的 NP 修飾可用固定譯句與已驗葉引用，無須等待 NP 全覆蓋；未解語義不能投成 DSL no-op。
+新增卡包由工具產清冊、套用 frame／形式／詞庫並渲染，合併列出低信心、新句型、歧義、未匹配及缺譯清單。
+低信心沿實際依賴 OR 傳播，machine 不自動等於低信心；不新增固定人工樣本門檻。
+加粗由逐 occurrence 的來源與渲染節點產生，不能事後搜尋中文；annotation set 契約見
+[共用契約 §8](four-layer-translation.md#8-建置-dbrender-projection-與依賴)。
 
 ## 5. 概念選詞與數位證據
 
@@ -215,39 +206,29 @@ claimed_source 是選填的出處主張；沒有具體主張就省略，不用�
 
 ### 6.1 當前資料的建置
 
-一般 reader 只驗版本、型別、唯一鍵、索引及引用。建置使用本次來源與有效資料，
-產生 context、use、binding、translation、selection；清冊在本次建置產生一次，
-不執行舊 producer、不重算舊採納歷史，也不保存新的核可證明。
-每次建置的同一組來源可共用解析結果；缺資料不得借最新官網或另一台機器的私人檔補洞。
-來源歸檔完整性及本次 build inputs 的追溯仍依[來源歸檔](../ingest/source-archive.md)，不能代入假 decision。
+一般 reader 依[共用契約 §1](four-layer-translation.md#1-型別驗證責任與失敗語義)驗結構與輸入引用，
+建置 validator 以本次來源驗 owner、全欄覆蓋、frame、葉值與實際依賴閉包。
+清冊在本次建置產生一次，不執行歷史 producer，也不保存新的核可證明。
+缺資料不得借最新官網或個人檔補洞；來源歸檔完整性仍依[來源歸檔](../ingest/source-archive.md)。
 
-export-offline 在交易前讀當前模板、參數規則與 glossary 並驗證一次，再於交易內對每個 face_revision 與 printing_face 的日文主文與 section，
-以原文 hash 找到涵蓋它的模板來源並整段渲染，寫入 context、use、binding、translation 與 selection。
-資格只看原文 hash 與卡片身分已確認，不等 printed_text_state；同一原文只有一個 context 與選用，已有不同譯文者回原文。
-建置報告的 `effect_translations` 列欄位數、已翻、回原文、低信心與各退回原因的計數，不含卡文。
-
-context_assignment／卡名指派只對自己的 owner 與 exact 原文有效；來源改變時不搬到新字串。
-模板／術語修改後重算所有相依位置，受影響清單由工具列出；有效原文沒有變而只改 note 不造成語義變更。
-同字串出現在 name、effect、flavor 時，use 仍驗自己的欄位資格，不能只憑共用 context 借用譯文。
+現有 export-offline 會對 face_revision 與 printing_face 的 JP 主文／section 建置固定模板翻譯；
+四層切換由 #498 實作，不能把現有成功輸出視為新 schema／annotation 已驗收。
+目標行為是逐來源 use 建 binding，source context 可共用，但 owner、field、面及所用原文均逐一驗證。
+效果／section 只要自己的原文有效即可套用，不等 printed_text_state；名稱仍只用該版已知 printed 字串。
+建置報告只列 ID、原因及欄位／退回計數，不輸出官方卡文。
 
 ### 6.2 穩定 ID
 
-H 是 build-db §14 canonical-json-v1 的完整 SHA-256（64 小寫 hex）。命中仍比完整輸入；
-完整 hash 撞異 payload 即停止，不換舊鍵。排除時間、私人路徑、核可者與收據。
+H 為 build-db §14 canonical-json-v1 的完整 SHA-256；相同 hash 仍比完整內容，碰撞即失敗。
+Frame、binding-v2、context 聚合語義鍵、render-v3 與 annotation-v1 的精確輸入依
+[四層共用契約](four-layer-translation.md#8-建置-dbrender-projection-與依賴)。
+context ID 仍為 `ctx:`＋H(`{recipe:"context-v1",source_unit_id,semantic_variant}`)，
+use 仍為 `use:`＋H(`{recipe:"use-v1",owner,field,ordinal,context_id}`)。
+四層的 context.semantic_variant 是由來源順序的 frame／values／span 算出的聚合鍵，不能拿單一 frame 的變體物件冒充。
 
-| 物件 | ID 與 hash 輸入 |
-| --- | --- |
-| context | `ctx:`＋H(`{recipe:context-v1,source_unit_id,semantic_variant}`) |
-| use | `use:`＋H(`{recipe:use-v1,owner,field,ordinal,context_id}`) |
-| binding | `bind:`＋H(`{recipe:binding-v1,context_id,ordinal,template_id,params,source_span}`) |
-
-owner 為具名單一物件，恰有 kind 與 §6.3 該種類列出的鍵；不以未命名陣列或另一組別名表示。
-模板語義 ID 依 §3，term ID 依 §5。
-翻譯推導改用 render-v2：對 `{recipe,context_id,target_lang,dependency_key,text,origin,authority,low_confidence}`
-的 canonical JSON 取完整 SHA-256，ID 為 `tr:`＋64 hex；recipe 恰為 `render-v2`。
-dependency_key 是按種類及鍵排序的本次模板定義、譯文、詞庫／加粗與 binding 的語義值，
-包含選中的 variant_key 及其實際文字／來源類別，不含 note、adoption_no 或核可 hash。revision 取完整 hash 前 13 hex 作 52-bit 非負整數；同鍵撞不同完整 hash 必拒絕。
-這是產物的更新／去重鍵，不是人工資料的不可變版本機制；人工一般譯文只有當前 `(template_id,lang)`，具名候選是 §2 的明示可修改替代值。
+人工譯文及選詞可直接改值；ID／依賴 hash 用於重建和去重，不是不可變採納序號。
+變更純文字／form／NP／加粗只重建 render；來源語義、角色、域或分類改變則重鍵並重驗相依 DSL／裁定。
+永久卡片 ID 不受模板重鍵影響；舊引用依[多對多映射](four-layer-translation.md#9-舊模板重鍵與裁定引用)逐用途處理。
 
 ### 6.3 來源 owner
 
@@ -284,7 +265,7 @@ evidence 為排序唯一 `{source_ref,role}`；decision 沿 authored-layout §2 
 record_key 是 `[kind,...選擇鍵,adoption_no]` 的 canonical JSON 字串，review 選擇鍵為
 `card_id,region,jp_hash,region_hash`，divergence 為 `card_id,region,field_scope`。
 adoption_no 從 1 連續只增，predecessor 首筆 null，其後為上一筆 `{record_key,record_hash,decision_id}`；
-拒絕分叉、缺號、錯前件，舊分片及索引 hash 不改。這些門檻不擴及翻譯 format 2。
+拒絕分叉、缺號、錯前件，舊分片及索引 hash 不改。這些門檻不擴及四層翻譯 format 3。
 
 region_text_review 的語義對照來源 hash 與逐面對應格式須在正式規則驗證實作時另定；目前沒有規則等義 bundle 產出端，不提供此採納能力。跨語 hash 不要求相等；aligned 仍需 sampled/confirmed 語義對照決定，兩端身分另須 confirmed，不能把文字配對當作規則等義證明。
 
@@ -294,36 +275,39 @@ region_divergence.data 為 `{card_id,region,field_scope,reason,effect,override_d
 
 ### 7.2 逐 owner 的顯示選用
 
-共用 JP 的 EN 顯示沿 §1，JP owner 的 use 不能硬綁成 EN 原文。
-官方 counterpart 依有效 display_checks 逐 owner 產生 translation，由 FieldTranslation 直接引用，
-不占共用 selection；origin=official、authority=sve_official、bindings/terms 空。
-其 context/source_hash 是顯示來源 owner 的原文，text 是已核對的 counterpart；
-render-v2 依賴包含兩端 owner/ref 及有效核對，不能讓同 context 的第三張卡借到官英資格。
+JP 繁中依 §1 選用；EN 接收端只需有效且已確認同卡同面的 JP 來源及 fresh 譯文，不要求 aligned，也不排除已知 divergence。
+原文 owner 與顯示接收端分開：JP use 綁自己的 source_unit，EN 原文仍綁 EN owner，不能將 EN 的原文欄改成 JP。
+日英段落不同時取完整 JP effect 及其來源對照，不按 EN ordinal 貼 JP section，也不另翻 JP 沒有的 EN 段落。
+錯 card／face、錯欄位、缺來源、來源過期或仍 unmapped 時拒絕此選用；不能以同字串或低信心放行。
 
-shared_jp_unchecked 只限 target_lang=zh-Hant、EN 接收端、已確認同卡／面、JP 譯文 fresh、
-兩端來源可驗且無相關已知 divergence。它不建立 aligned review，不放行 DSL／機制。
-日英段落數不同時，全部 section ordinal 及包含它們的 effect 全文均不得提前共用；
-回 EN 原文或有效 own_source，不依 ordinal 猜配。name 等獨立合法欄不受牽連。
-完成 display_checks 且適用後才轉 shared_jp；basis 改變不改共用譯文的內容／origin。
+公開的新 JP 依據 basis（jp_source）及停用 shared_jp／shared_jp_unchecked 的 wire 變更由 #496 定義，#498 同步 producer／reader。
+它只說明繁中依據，不能產生 aligned review、機制或 DSL 資格。JP 來源註記只可套到 JP 原文，不能套 EN offsets。
 
-已知 divergence 按 scope 隔離；不知道不等於英文獨有或已核對一致。
-來源／身分變動時重驗兩端及該 owner；counterpart 失效回有效本站詞或原文，不影響無關 owner。
-目前沒有跨表記規則等義或 DSL 重用能力；exact 字句對照不能當作規則等義證明。來源更正仍依 build-db 的獨立入口驗證。
+官方 counterpart 仍依有效 display_checks 逐 owner 產生 translation，直接供 FieldTranslation 引用，不占共用 selection；
+origin=official、authority=sve_official、bindings/terms 空。其 context/source_hash 是顯示來源 owner 原文，text 是已核對的 counterpart；
+依賴包含雙端 owner/ref 與 fresh 核對，不能讓共用 context 的第三張卡借到官文資格。
+相關 divergence 仍阻止不適用的官方 counterpart 與跨區 DSL／機制；JP 繁中顯示不解除此限制。
+來源／身分變動重驗兩端及用途，失效 counterpart 回有效本站詞或原文。來源更正另依 build-db 的獨立入口。
 
 ## 8. 公開投影與自動檢查
 
 公開仍只輸出選中的文字、來源類別／authority、適用基礎與必要呈現資料，不輸出內部清冊或核可紀錄。
 新格式的 low_confidence 必須從 producer 傳到 reader，UI 顯示「待校對」且提供原文；
 啟用時同步 snapshot-format、機器 Schema、tuple、Python／TS reader 及能力版本，不能只改資料版號或冒用 reviewed 表示人工看過。
-加粗／原文位置的公開承載依[術語契約 §6](glossary-adoption.md#6-公開快照影響與最小擴充提案)，內部支援不代表舊公開 tuple 已有該欄。
+內部 annotation set／逐 occurrence 依[共用契約 §8](four-layer-translation.md#8-建置-dbrender-projection-與依賴)；
+公開承載、無譯文的原文註記、basis 與 Unicode reader 由 #496 定義。內部支援不代表舊 tuple 已有這些欄。
 
-CI 自動驗格式、key／ID 唯一、參數對齊、引用與 owner、來源覆蓋，並用固定輸入產生清冊完成建置驗證。
+四層實作的 CI 須驗格式、key／ID 唯一、葉角色／域、引用與 owner、來源覆蓋及 render 位置，
+按[固定案例](four-layer-cases.md)逐項驗預期結果；這些案例目前是規格，不是程式通過紀錄。
 官方輸入存既有永久私有 testdata repo，公開 repo 只留 commit 與檔案 hash，依既有 deploy-key 流程取得；
 可信任 CI 缺資料失敗，fork 明示只跑合成檢查，不能宣稱完整資料驗收。
 CI 不讀個人檔案、不即時爬站；報告列 ID／原因，不在 log、cache 或 artifact 放官方全文。
 保留能抓錯的行為反例；資料 PR 不要求每個 guard 都做一次定向突變，不另加人工合併前命令。
 
 ## 9. 舊格式的保存
+
+模板重鍵及每個裁定引用的 resolved／pending 依[共用契約 §9](four-layer-translation.md#9-舊模板重鍵與裁定引用)。
+無法唯一且不擴域的引用保留原因與候選，不把 pending 掛成 active，也不刪除引用以假造完整率。
 
 當前資料保留有效模板、參數、選詞、加粗、來源類別、排除與撤回語義；無法無損綁定的譯文依 §2.1 保留候選原稿並列原因，不混入可渲染集合。
 舊決定、收據、修訂鏈、舊清冊檔及其環境留在 Git 歷史，現行入口不載入或重播，也不據此補造核可事件；原始來源歸檔的保存責任不變。
