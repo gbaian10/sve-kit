@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 from sve_carddb.domains.card_extras.reskin_rules import actual_rules, expected_rules
 from sve_carddb.domains.registry.records import RelatedData
 from sve_carddb.domains.text_observations.importer import revision_id
-from sve_carddb.domains.text_observations.plan import verify_plan
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -31,7 +30,6 @@ def applicable_reskin_regions(
     db: Database, texts: TextPlan, *, vocabulary: Vocabulary
 ) -> dict[str, tuple[Region, ...]]:
     """Return only valid display regions; never propagate DSL or deck identity."""
-    verify_plan(texts)
     rows = {row.values["id"]: row.values for row in db.rows("card_related")}
     graph = _Graph(
         {row.values["id"]: row.values for row in db.rows("printing")},

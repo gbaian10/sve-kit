@@ -41,9 +41,16 @@ class FrozenCoverage:
 
 class FrozenOfficialExtras:
     def __init__(
-        self, root: Path, store_id: str, batch_id: str, *, region: Region
+        self,
+        root: Path,
+        store_id: str,
+        batch_id: str,
+        *,
+        sources: FrozenSources | None = None,
+        region: Region,
     ) -> None:
-        self.sources = FrozenSources(root, store_id, batch_id)
+        self.sources = sources or FrozenSources(root, store_id, batch_id)
+        self.sources.require_scope(root, store_id, batch_id)
         self.region = region
 
     def qa_pages(self) -> Iterator[QAPage]:

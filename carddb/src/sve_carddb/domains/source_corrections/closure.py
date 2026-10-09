@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.domains.text_observations.exclusions import reference_exclusions
-from sve_carddb.domains.text_observations.plan import verify_plan
 
 if TYPE_CHECKING:
     from sve_carddb.build import CompiledSchema, Database
@@ -16,7 +15,6 @@ def correction_exclusions(
     db: Database, schema: CompiledSchema, plan: TextPlan
 ) -> dict[str, JsonValue]:
     """Provide exact blocked DB keys for routes, defaults and all downstream references."""
-    verify_plan(plan)
     if plan.corrections is None:
         raise ValueError("Correction output closure requires a pinned correction plan")
     return reference_exclusions(db, schema, plan.identity, plan.publication_identity())

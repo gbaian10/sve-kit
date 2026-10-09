@@ -17,6 +17,7 @@ from sve_carddb.domains.text_observations import (
     Binding,
     FaceContent,
     TextCard,
+    TextObservations,
     Vocabulary,
     plan_text_observations,
     text_configuration,
@@ -35,6 +36,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.registry.inputs import Card
     from sve_carddb.domains.registry.preview import PreviewPlan
     from sve_carddb.domains.registry.review import Inputs
+    from sve_carddb.domains.source_corrections.images import ImageProvider
     from sve_carddb.domains.text_observations import TextPlan
 
 LANGUAGES = (
@@ -60,6 +62,12 @@ class Case:
     plan: TextPlan
     catalog: ProductSnapshot
     vocabulary: Vocabulary
+    images: ImageProvider | None = None
+
+    def compose(self, identity: PreviewPlan | None = None) -> TextObservations:
+        return TextObservations(
+            identity or self.identity, self.provider, images=self.images
+        )
 
     def context(self) -> BuildContext:
         return BuildContext.from_inputs(

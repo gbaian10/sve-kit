@@ -10,7 +10,6 @@ from sve_carddb.build.t1 import compile_build
 from sve_carddb.domains.card_extras import applicable_reskin_regions
 from sve_carddb.domains.registry.inputs import Mapping
 from sve_carddb.domains.registry.review import InitDecisions, Inputs
-from sve_carddb.domains.text_observations import populate_text_observations
 
 from .test_registry import card
 from .text_observation_fixtures import make_case
@@ -75,9 +74,8 @@ def test_reskin_requires_both_current_endpoints(
     with create_database(schema) as db:
         with db.transaction():
             baseline.stage(db)
-            populate_text_observations(
+            baseline.compose(baseline.plan.identity).populate(
                 db,
-                baseline.plan,
                 build=baseline.context(),
                 vocabulary=baseline.vocabulary,
                 published=(),

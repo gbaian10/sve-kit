@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.products.loader import ProductSnapshot
     from sve_carddb.domains.products.plan import OfficialProducts
     from sve_carddb.domains.registry.preview import PreviewPlan
+    from sve_carddb.ingest.archive.frozen_sources import FrozenBatches
 
 
 def _require_family_catalog(catalog: ProductSnapshot) -> None:
@@ -49,7 +50,7 @@ def _require_family_catalog(catalog: ProductSnapshot) -> None:
         )
 
 
-def populate_families(
+def populate_families(  # ruff: ignore[too-many-arguments] -- explicit archive readers share the command lifetime
     db: Database,
     catalog: ProductSnapshot,
     *,
@@ -57,6 +58,7 @@ def populate_families(
     build: BuildContext,
     languages: tuple[Language, ...] = (),
     stores: Mapping[str, Path] | None = None,
+    batches: FrozenBatches | None = None,
 ) -> InputRecord:
     """Project inside the caller's transaction; unsupported record kinds fail explicitly."""
     if not re.fullmatch(r"[0-9a-f]{40}", authored_revision):
@@ -65,6 +67,7 @@ def populate_families(
     evidence = resolve_evidence(
         tuple(ref for record in catalog.records.values() for ref in record.evidence),
         {} if stores is None else stores,
+        batches=batches,
     )
     uses: list[SourceUse] = []
     insert_raw_sources(db, (checked.source for checked in evidence.values()))
@@ -140,12 +143,14 @@ def product_preview_uses(
     stores: Mapping[str, Path],
     *,
     official: OfficialProducts | None = None,
+    batches: FrozenBatches | None = None,
 ) -> tuple[SourceUse, ...]:
     """Declare the complete expected source closure independently of database writes."""
     _require_family_catalog(catalog)
     evidence = resolve_evidence(
         tuple(ref for record in catalog.records.values() for ref in record.evidence),
         stores,
+        batches=batches,
     )
     if official is not None and official.preview != plan:
         raise ValueError(
@@ -169,6 +174,7 @@ def populate_product_preview(  # ruff: ignore[too-many-arguments] -- compose exp
     build: BuildContext,
     languages: tuple[Language, ...] = (),
     stores: Mapping[str, Path] | None = None,
+    batches: FrozenBatches | None = None,
     official: OfficialProducts | None = None,
 ) -> InputRecord:
     """Compose family and identity writes inside one rebuild/caller transaction."""
@@ -183,6 +189,7 @@ def populate_product_preview(  # ruff: ignore[too-many-arguments] -- compose exp
         build=build,
         languages=languages,
         stores=stores,
+        batches=batches,
     )
     identity_inputs = populate_preview(
         db, plan, authored_revision=authored_revision, build=build
@@ -208,6 +215,7 @@ def import_product_preview(  # ruff: ignore[too-many-arguments] -- transaction o
     build: BuildContext,
     languages: tuple[Language, ...] = (),
     stores: Mapping[str, Path] | None = None,
+    batches: FrozenBatches | None = None,
     official: OfficialProducts | None = None,
 ) -> InputRecord:
     """Own one transaction for the complete family/audit/identity graph."""
@@ -220,6 +228,7 @@ def import_product_preview(  # ruff: ignore[too-many-arguments] -- transaction o
             build=build,
             languages=languages,
             stores=stores,
+            batches=batches,
             official=official,
         )
 

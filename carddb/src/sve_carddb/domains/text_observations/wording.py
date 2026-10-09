@@ -12,7 +12,6 @@ from sve_carddb.core.regions import Region
 from sve_carddb.domains.products.models import Date, Precision, check_date
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.text_observations.models import candidate_revision_id
-from sve_carddb.domains.text_observations.plan import verify_plan
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database, Value
@@ -202,7 +201,6 @@ def _candidate_revisions(
 
 def wording_views(db: Database, plan: TextPlan) -> dict[str, tuple[WordingView, ...]]:
     """Keep every identity-eligible face/region, including missing-source positions."""
-    verify_plan(plan)
     dates = printing_dates(db)
     parents: dict[tuple[str, Region], set[str]] = defaultdict(set)
     for record in plan.publication_identity().included("printing"):
@@ -277,7 +275,6 @@ def printing_observed_texts(
     db: Database, plan: TextPlan
 ) -> dict[tuple[str, str], tuple[ObservedText, ...]]:
     """Project each printing's own observations, retaining unknown main text."""
-    verify_plan(plan)
     revisions = {_string(row.values["id"]) for row in db.rows("face_revision")}
     included = {
         record.data.id

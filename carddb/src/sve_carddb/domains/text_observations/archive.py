@@ -90,8 +90,10 @@ class FrozenTexts:
         *,
         region: Region,
         parser_version: str,
+        sources: FrozenSources | None = None,
     ) -> None:
-        self.sources = FrozenSources(root, store_id, batch_id)
+        self.sources = sources or FrozenSources(root, store_id, batch_id)
+        self.sources.require_scope(root, store_id, batch_id)
         self.region = region
         self.parser_version = parser_version
         self.current = {

@@ -12,7 +12,7 @@ from sve_carddb.domains.translations.source_inventory.inventory import (
 )
 from sve_carddb.domains.translations.sources import pointer
 from sve_carddb.domains.translations.templates.members import Reconstructed, _members
-from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.frozen_sources import FrozenBatches
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -36,7 +36,10 @@ class Sources:
         stores: dict[str, Path],
         references: References,
         rules: Rules,
+        *,
+        batches: FrozenBatches | None = None,
     ) -> None:
+        self.batches = batches or FrozenBatches()
         self.stores = dict(stores)
         self.references = deepcopy(references)
         self.rules = deepcopy(rules)
@@ -62,7 +65,7 @@ class Sources:
         return Generated(tuple(deepcopy(entries)), canonical(reports))
 
     def _batch(self, batch: Batch) -> Generated:
-        frozen = FrozenSources.configured(self.stores, batch.batch_id)
+        frozen = self.batches.configured(self.stores, batch.batch_id)
         scan = scan_current(frozen)
         candidates = build(
             frozen,

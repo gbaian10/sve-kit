@@ -18,9 +18,16 @@ if TYPE_CHECKING:
 
 class FrozenEN:
     def __init__(
-        self, root: Path, store_id: str, batch_id: str, *, parser_version: str
+        self,
+        root: Path,
+        store_id: str,
+        batch_id: str,
+        *,
+        parser_version: str,
+        sources: FrozenSources | None = None,
     ) -> None:
-        self._sources = FrozenSources(root, store_id, batch_id)
+        self._sources = sources or FrozenSources(root, store_id, batch_id)
+        self._sources.require_scope(root, store_id, batch_id)
         self._current = {
             item.url: item.source_version_id for item in self._sources.inventory.current
         }

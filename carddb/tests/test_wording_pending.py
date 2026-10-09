@@ -11,10 +11,7 @@ from sve_carddb.build.t1 import compile_build
 from sve_carddb.contracts.snapshot import validate
 from sve_carddb.domains.products import load_products
 from sve_carddb.domains.registry.snapshot import load_registry
-from sve_carddb.domains.text_observations import (
-    import_text_observations,
-    plan_text_observations,
-)
+from sve_carddb.domains.text_observations import plan_text_observations
 from sve_carddb.domains.text_observations.wording import (
     printing_dates,
     printing_observed_texts,
@@ -93,9 +90,8 @@ def test_latest_complete_product_day_is_a_display_and_never_a_current(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -150,9 +146,8 @@ def test_unavailable_or_undated_latest_is_not_silently_skipped(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -202,9 +197,8 @@ def test_multicollection_uses_first_available_day_and_unknown_overrides_block_it
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -232,9 +226,8 @@ def test_valid_old_current_wins_and_pending_does_not_imply_settled(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -276,9 +269,8 @@ def test_unknown_printing_does_not_hide_known_latest_and_block_is_in_support(
         }
         with db.transaction():
             db.insert("card_engine_support", support)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -301,9 +293,8 @@ def test_identical_latest_is_deduplicated_and_settled_omits_wording(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -333,9 +324,8 @@ def test_double_face_keeps_settled_front_and_unknown_back_visible(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -374,9 +364,8 @@ def test_all_sources_unavailable_keep_pending_positions_and_source_urls(
     with create_database(compile_build()) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -405,9 +394,8 @@ def test_correction_revision_ids_with_exact_same_content_can_share_display(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),
@@ -449,9 +437,8 @@ def test_conflicting_correction_retains_its_publication_integrity_gate(
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),

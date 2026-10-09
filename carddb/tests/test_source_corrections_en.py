@@ -15,7 +15,6 @@ from sve_carddb.domains.source_corrections.projection import correction_referenc
 from sve_carddb.domains.text_observations import (
     Binding,
     Vocabulary,
-    import_text_observations,
     plan_text_observations,
 )
 from sve_carddb.ingest.archive.source_archive import seal_batch
@@ -88,6 +87,7 @@ def test_four_synthetic_english_corrections_have_distinct_evidence_and_rule_resu
             )
     batch = seal_batch(store)
     images = FrozenImages(store.root, store.store_id, batch.batch_id)
+    case.images = images
     case.plan = plan_text_observations(case.identity, case.provider, images=images)
     assert case.plan.corrections is not None
     assert len(case.plan.corrections) == 4
@@ -95,9 +95,8 @@ def test_four_synthetic_english_corrections_have_distinct_evidence_and_rule_resu
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():
             case.stage(db)
-        import_text_observations(
+        case.compose(case.plan.identity).import_into(
             db,
-            case.plan,
             build=case.context(),
             vocabulary=case.vocabulary,
             published=(),

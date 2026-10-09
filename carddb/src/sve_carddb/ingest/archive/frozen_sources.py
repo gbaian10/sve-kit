@@ -2,7 +2,7 @@
 
 import re
 from datetime import UTC, datetime
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 
 from pydantic import ValidationError
@@ -19,25 +19,13 @@ from sve_carddb.ingest.archive.store import resolve_within
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
-    from pathlib import Path
 
 
 class FrozenSources:
     @classmethod
     def configured(cls, stores: Mapping[str, Path], batch_id: str) -> FrozenSources:
         """Resolve an exact batch in explicitly configured stores, then verify ownership."""
-        if re.fullmatch(r"sha256:[0-9a-f]{64}", batch_id) is None:
-            raise ValueError("Invalid configured source batch ID")
-        matches = [
-            (name, root)
-            for name, root in stores.items()
-            if (root / "batches" / batch_id[7:]).exists()
-        ]
-        if len(matches) != 1:
-            raise ValueError(
-                "Source batch requires exactly one configured archive store"
-            )
-        name, root = matches[0]
+        root, name = configured_batch(stores, batch_id)
         return cls(root, name, batch_id)
 
     def __init__(self, root: Path, store_id: str, batch_id: str) -> None:
@@ -48,6 +36,15 @@ class FrozenSources:
         self.root = root
         self.store_id = store_id
         self.batch_id = batch_id
+
+    def require_scope(self, root: Path, store_id: str, batch_id: str) -> None:
+        """A shared reader must still belong to the caller's exact input pin."""
+        if (self.root.resolve(), self.store_id, self.batch_id) != (
+            root.resolve(),
+            store_id,
+            batch_id,
+        ):
+            raise ValueError("Frozen source batch differs from configured input")
 
     def read(
         self, version: str, *, parser_version: str
@@ -119,6 +116,39 @@ class FrozenSources:
         if digest(data) != checksum:
             raise ArchiveError("Frozen source content hash mismatch")
         return data
+
+
+class FrozenBatches:
+    """Own shared source readers for one command; raw reads always recheck hashes."""
+
+    def __init__(self) -> None:
+        self.batches: dict[tuple[Path, str, str], FrozenSources] = {}
+
+    def batch(self, root: Path, store_id: str, batch_id: str) -> FrozenSources:
+        """Resolve the full store/root/batch key without borrowing another pin."""
+        key = root.resolve(), store_id, batch_id
+        if key not in self.batches:
+            self.batches[key] = FrozenSources(root, store_id, batch_id)
+        return self.batches[key]
+
+    def configured(self, stores: Mapping[str, Path], batch_id: str) -> FrozenSources:
+        """Require unambiguous store ownership even for an already opened batch."""
+        root, store_id = configured_batch(stores, batch_id)
+        return self.batch(root, store_id, batch_id)
+
+
+def configured_batch(stores: Mapping[str, Path], batch_id: str) -> tuple[Path, str]:
+    """Resolve an exact batch through the caller's explicit archive stores."""
+    if re.fullmatch(r"sha256:[0-9a-f]{64}", batch_id) is None:
+        raise ValueError("Invalid configured source batch ID")
+    matches = [
+        (root, name)
+        for name, root in stores.items()
+        if (root / "batches" / batch_id[7:]).exists()
+    ]
+    if len(matches) != 1:
+        raise ValueError("Source batch requires exactly one configured archive store")
+    return matches[0]
 
 
 def _kind(content_type: str) -> RawKind:

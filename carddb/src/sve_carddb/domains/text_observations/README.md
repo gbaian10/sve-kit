@@ -1,6 +1,7 @@
 # Frozen regional text and pending wording
 
-`plan_text_observations(identity_plan, provider)` reads all selected-region
+`TextObservations(identity_plan, provider, images=...)` owns one source-to-view
+composition. It reads all selected-region
 printings through an independently verified `registry.preview` identity plan.
 `FrozenTexts` reads only an explicitly pinned immutable archive batch; use
 `RegionalTexts` to dispatch JP and EN without guessing cross-region IDs or face
@@ -44,8 +45,15 @@ sections, an ordinary follower type and three numeric stats. It never fills text
 
 ## Publication and diagnostic exclusions
 
-`populate_text_preview` composes identity/product and text staging in a
-caller-owned transaction. `plan.publication_identity()` preserves pending wording
+`populate_text_preview(db, catalog, observations, ...)` composes identity/product
+and the owned text staging in a caller-owned transaction.
+`observations.populate` uses an existing transaction; `observations.import_into`
+owns a transaction and rolls back dependency failures. External hand-built
+`TextPlan` values are no longer importer inputs. `observations.configuration`
+pins the explicit vocabulary and published text history; these external inputs
+and all DB parent/revision dependencies are still checked during import.
+The plan is constructed once and its selection closure is not revalidated by
+import, reskin/name composition or view generation. `plan.publication_identity()` preserves pending wording
 and enforces the independent correction/identity integrity gates. Snapshot
 projectors use this identity selection; pending wording does not delete cards,
 printings, routes, defaults or integer IDs.
@@ -61,8 +69,9 @@ correction quarantine. No authored records, IDs or allocation cursors are rewrit
 
 ## Pending public projections
 
-`wording_views(db, plan)` returns sparse `WordingView` values for each pending
-public face/region. `printing_observed_texts(db, plan)` returns each physical
+`observations.views(db)` returns both views from its owned plan. Its `wording`
+field contains sparse `WordingView` values for each pending public face/region;
+its `observed` field contains each physical
 printing's own observations, using successfully corrected candidates while the
 original observation and correction application stay separate in the build DB.
 An unknown main effect is a null revision with `missing_effect`; unavailable
@@ -107,7 +116,7 @@ the 1 MiB compressed budget. This module alone is not a complete snapshot export
 Raw vocabulary bindings are an explicit caller input, not inferred translations
 or a new authored format. `Vocabulary` requires exact unique regional bindings
 and declared special-kind references. Missing/conflicting bindings fail before
-publication. Pin the complete configuration with `text_configuration`, alongside
+publication. Pin the complete configuration with `observations.configuration`, alongside
 program revision and any existing product-identity configuration.
 
 ## Completed build output
@@ -116,7 +125,10 @@ program revision and any existing product-identity configuration.
 configuration and provenance. Populate text once inside the combined build
 transaction, then save that completed DB and its actual input record/report with
 `build.output.save`. Source reads verify archived raw hashes and metadata; domain
-planning verifies current source ownership and observation applicability. There
+planning verifies current source ownership and observation applicability. All adapters in an offline command share `FrozenSources` through one
+`FrozenBatches`; full batch closure is checked once, while each source read
+rechecks descriptor, first receipt and raw hashes. Reader sharing ends with the
+command. There
 is no separate expected-use comparison, build seal or second DB population.
 
 ## Frozen effect presence

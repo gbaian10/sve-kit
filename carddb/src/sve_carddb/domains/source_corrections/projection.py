@@ -6,7 +6,6 @@ from pydantic import JsonValue
 
 from sve_carddb.domains.source_corrections.importer import verify_corrections
 from sve_carddb.domains.text_observations.importer import revision_id
-from sve_carddb.domains.text_observations.plan import verify_plan
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database
@@ -18,7 +17,6 @@ def correction_references(
     db: Database, plan: TextPlan, vocabulary: Vocabulary
 ) -> tuple[dict[str, JsonValue], ...]:
     """Return exact printing-face/source/revision uses for the later snapshot projector."""
-    verify_plan(plan)
     verify_corrections(db, plan, vocabulary)
     sources = {row.values["id"]: row.values for row in db.rows("source_record")}
     candidates = {

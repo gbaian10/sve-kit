@@ -19,7 +19,7 @@ from sve_carddb.domains.catalog.adoption_models import (
 )
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.registry.snapshot import load_registry
-from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.frozen_sources import FrozenBatches, FrozenSources
 from sve_carddb.parse.pages import extract_en as official_en
 from sve_carddb.parse.pages import extract_jp as official_jp
 
@@ -40,10 +40,12 @@ class AdoptionSources:
         stores: Mapping[str, Path],
         repository: Path,
         registry: RegistrySnapshot | None = None,
+        *,
+        batches: FrozenBatches | None = None,
     ) -> None:
         self.stores = dict(stores)
         self.repository = repository
-        self.batches: dict[str, FrozenSources] = {}
+        self.batches = batches or FrozenBatches()
         self.uses: list[SourceUse] = []
         self.cache: dict[bytes, tuple[LocalizedText, Source, JsonValue]] = {}
         self.current_registry = registry
@@ -56,9 +58,7 @@ class AdoptionSources:
 
     def batch(self, batch: str) -> FrozenSources:
         """Validate the complete descriptor/receipt/raw closure once per frozen batch."""
-        if batch not in self.batches:
-            self.batches[batch] = FrozenSources.configured(self.stores, batch)
-        return self.batches[batch]
+        return self.batches.configured(self.stores, batch)
 
     def text(
         self, ref: SourceRef, review: ReviewContext

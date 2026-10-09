@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.frozen_sources import FrozenBatches
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -19,22 +19,24 @@ class CheckedSource:
 
 
 def resolve_evidence(
-    references: tuple[Evidence, ...], stores: Mapping[str, Path]
+    references: tuple[Evidence, ...],
+    stores: Mapping[str, Path],
+    *,
+    batches: FrozenBatches | None = None,
 ) -> Mapping[Evidence, CheckedSource]:
     """Verify each full batch before resolving its descriptor and first receipt."""
-    batches: dict[str, FrozenSources] = {}
+    batches = batches or FrozenBatches()
     result: dict[Evidence, CheckedSource] = {}
     for reference in references:
         if reference in result:
             continue
         key = reference.batch_id
-        if key not in batches:
-            batches[key] = FrozenSources.configured(stores, key)
-        if reference.source_version_id not in batches[key].entries:
+        frozen = batches.configured(stores, key)
+        if reference.source_version_id not in frozen.entries:
             raise ValueError(
                 "Product evidence source version is absent from pinned batch"
             )
-        source, _, _ = batches[key].read(
+        source, _, _ = frozen.read(
             reference.source_version_id, parser_version="archive-closure-v1"
         )
         result[reference] = CheckedSource(source)

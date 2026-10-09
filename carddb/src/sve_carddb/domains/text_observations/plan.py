@@ -14,7 +14,6 @@ from sve_carddb.domains.source_corrections.plan import (
     corrected_observations,
     plan_applications,
     selected_records,
-    verify_applications,
     withheld_regions,
 )
 from sve_carddb.domains.text_observations.archive import verify_card
@@ -59,8 +58,6 @@ class TextPlan:
         """Unresolved active corrections block output; pending wording is still visible."""
         if self.corrections is None and selected_records(self.identity):
             raise ValueError("Correction output requires pinned image evidence")
-        if self.corrections is not None:
-            verify_applications(self.identity, self.observations, self.corrections)
         return close_preview(
             self.identity,
             frozenset(
@@ -389,68 +386,3 @@ def plan_text_observations(
         _diagnostic_exclusions(preview, groups),
         applications,
     )
-
-
-def verify_plan(plan: TextPlan) -> None:
-    """Reject altered selection/closure before opening a save transaction."""
-    _verify_observations(plan)
-    if plan.corrections is not None:
-        verify_applications(plan.identity, plan.observations, plan.corrections)
-    if plan.groups != _groups(
-        plan.identity, plan.candidates(), plan.unavailable, plan.corrections
-    ) or plan.diagnostic_exclusions != _diagnostic_exclusions(
-        plan.identity, plan.groups
-    ):
-        raise ValueError("Text selection or exclusion closure mismatch")
-
-
-def _verify_observations(plan: TextPlan) -> None:
-    printings = {
-        record.data.id: record.data
-        for record in plan.identity.snapshot.records.values()
-        if isinstance(record.data, PrintingData)
-        and record.data.region in plan.identity.regions
-    }
-    if (
-        plan.unavailable != tuple(sorted(set(plan.unavailable)))
-        or not set(plan.unavailable) <= printings.keys()
-    ):
-        raise ValueError("Unavailable text printing inventory mismatch")
-    expected = {
-        (printing.id, mapping.source_index): mapping.face_id
-        for printing in printings.values()
-        if printing.id not in plan.unavailable
-        for mapping in printing.source_face_map
-    }
-    actual: dict[tuple[str, int], str] = {}
-    for item in plan.observations:
-        key = item.printing_id, item.source_index
-        printing = printings.get(item.printing_id)
-        if (
-            key in actual
-            or printing is None
-            or (item.card_id, item.region, item.card_no)
-            != (printing.card_id, printing.region, printing.card_no)
-        ):
-            raise ValueError("Text observation identity inventory mismatch")
-        _verify_source(plan, item)
-        actual[key] = item.face_id
-    if actual != expected:
-        raise ValueError("Text observation face inventory mismatch")
-
-
-def _verify_source(plan: TextPlan, item: FaceObservation) -> None:
-    verify_card(item.card)
-    evidence = plan.identity.evidence.get((item.region, item.card_no))
-    if (
-        evidence is None
-        or source_values(item.card.source) != source_values(evidence.source)
-        or item.card.observation != evidence.observation
-    ):
-        raise ValueError("Text observation source inventory mismatch")
-    if (
-        not 0 <= item.source_index < len(item.card.faces)
-        or item.content != item.card.projected(item.source_index)
-        or item.correction_keys
-    ):
-        raise ValueError("Text observation content/source face mismatch")

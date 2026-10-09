@@ -9,7 +9,7 @@ from pydantic import JsonValue
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.core.provenance import SourceUse
 from sve_carddb.domains.catalog.adoption_sources import AdoptionSources
-from sve_carddb.ingest.archive.frozen_sources import FrozenSources
+from sve_carddb.ingest.archive.frozen_sources import FrozenBatches, FrozenSources
 from sve_carddb.parse.pages import extract_en as official_en
 from sve_carddb.parse.pages import extract_jp as official_jp
 
@@ -118,14 +118,18 @@ class Sources:
         repository: Path,
         build: BuildContext,
         registry: RegistrySnapshot | None = None,
+        *,
+        batches: FrozenBatches | None = None,
     ) -> None:
         self.stores = stores
         self.repository = repository
         self._build = build
-        self.identities = AdoptionSources(stores, repository, registry)
+        self.batches = batches or FrozenBatches()
+        self.identities = AdoptionSources(
+            stores, repository, registry, batches=self.batches
+        )
         self.identity_indexes: dict[bytes, RegistryIndex] = {}
         self.context_keys: dict[BuildContext, bytes] = {}
-        self.batches: dict[str, FrozenSources] = {}
         self.cache: dict[tuple[str, str, str], tuple[str, JsonValue, Source]] = {}
         self.uses: list[SourceUse] = []
 
@@ -140,7 +144,11 @@ class Sources:
         Share identity indexes, decoded projections, context keys and verified batches.
         """
         stage = Sources(
-            self.stores, self.repository, build, self.identities.current_registry
+            self.stores,
+            self.repository,
+            build,
+            self.identities.current_registry,
+            batches=self.batches,
         )
         stage.identity_indexes = self.identity_indexes
         stage.context_keys = self.context_keys
@@ -150,9 +158,7 @@ class Sources:
 
     def batch(self, batch_id: str) -> FrozenSources:
         """Verify the configured archive ownership before exposing any source member."""
-        if batch_id not in self.batches:
-            self.batches[batch_id] = FrozenSources.configured(self.stores, batch_id)
-        return self.batches[batch_id]
+        return self.batches.configured(self.stores, batch_id)
 
     def context_key(self, context: BuildContext) -> bytes:
         """Full immutable contexts distinguish inputs without quoting them for every owner."""
