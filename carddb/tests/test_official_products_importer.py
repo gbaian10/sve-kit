@@ -21,10 +21,6 @@ from sve_carddb.domains.products.archive import FrozenProducts
 from sve_carddb.domains.products.plan import plan_official_products
 from sve_carddb.domains.registry.build import build
 from sve_carddb.domains.registry.inputs import Mapping as CardMapping
-from sve_carddb.domains.registry.parser_adapters.official_en import (
-    legacy_projection as legacy_en,
-)
-from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
 from sve_carddb.domains.registry.preview import (
     FrozenEN,
     FrozenJP,
@@ -50,6 +46,7 @@ from .product_identity_fixtures import (
     install_identity,
 )
 from .product_identity_fixtures import identity_fixture as identity_fixture  # ruff: ignore[useless-import-alias] -- shared fixture
+from .registry_observation_fixtures import parsed_card
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -64,7 +61,7 @@ if TYPE_CHECKING:
 def changed_page(fixture: IdentityFixture, raw: bytes) -> ProductPage:
 
     page = add_page(fixture, raw, number="TEST-001")
-    card = legacy_projection(extract_card(raw, number="TEST-001"))
+    card = parsed_card(extract_card(raw, number="TEST-001"))
     evidence = CardEvidence.from_card(
         page.source.model_copy(update={"parser_version": "synthetic-jp-identity-v1"}),
         "jp",
@@ -410,8 +407,8 @@ def test_english_inclusions_obey_existing_identity_gate(
         .replace("レアリティ".encode(), b"Rarity")
     )
     page = add_page(fixture, raw, region="en", number="TEST-001EN")
-    en_card = legacy_en(extract_en(raw, number="TEST-001EN"))
-    jp_card = legacy_projection(extract_card(html(), number="TEST-001"))
+    en_card = parsed_card(extract_en(raw, number="TEST-001EN"))
+    jp_card = parsed_card(extract_card(html(), number="TEST-001"))
     inputs = Inputs(
         jp={jp_card.number: jp_card},
         en={en_card.number: en_card},
@@ -436,7 +433,7 @@ def test_english_inclusions_obey_existing_identity_gate(
     if state != "missing_source":
         if state == "observation_mismatch":
             changed_raw = raw.replace(b"Synthetic rule.", b"Different synthetic rule.")
-            en_card = legacy_en(extract_en(changed_raw, number="TEST-001EN"))
+            en_card = parsed_card(extract_en(changed_raw, number="TEST-001EN"))
             page = add_page(fixture, changed_raw, region="en", number="TEST-001EN")
         cards["en", en_card.number] = CardEvidence.from_card(
             page.source, "en", en_card, (FaceEvidence("LG", None),)

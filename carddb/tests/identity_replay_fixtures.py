@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid5
 
-from sve_carddb.domains.registry.inputs import canonical
+from sve_carddb.core.json import canonical
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.storage import (
     Entry,

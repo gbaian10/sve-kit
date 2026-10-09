@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, cast
 import pytest
 
 from sve_carddb.domains.registry.inputs import Card, Face
-from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
+from sve_carddb.domains.registry.projection import jp_card
 from sve_carddb.domains.registry.review import observation
 from sve_carddb.domains.text_observations.archive import jp_face
 from sve_carddb.ingest.http.validate import ValidationError
@@ -18,34 +18,22 @@ if TYPE_CHECKING:
 class TraitCase:
     raw: str
     complete: tuple[str, ...]
-    legacy: tuple[str, ...]
 
 
 CASES = (
-    TraitCase("-", (), ()),
-    TraitCase("Alpha・Beta", ("Alpha", "Beta"), ("Alpha", "Beta")),
-    TraitCase("ジオ・テオゴニア", ("ジオ・テオゴニア",), ("ジオ・テオゴニア",)),
-    TraitCase(
-        "〈Synthetic・Compound〉",
-        ("〈Synthetic・Compound〉",),
-        ("〈Synthetic", "Compound〉"),
-    ),
+    TraitCase("-", ()),
+    TraitCase("Alpha・Beta", ("Alpha", "Beta")),
+    TraitCase("ジオ・テオゴニア", ("ジオ・テオゴニア",)),
+    TraitCase("〈Synthetic・Compound〉", ("〈Synthetic・Compound〉",)),
     TraitCase(
         "Alpha・〈Synthetic・Compound〉・Beta",
         ("Alpha", "〈Synthetic・Compound〉", "Beta"),
-        ("Alpha", "〈Synthetic", "Compound〉", "Beta"),
     ),
     TraitCase(
-        "〈First・Group〉・〈Second・Group〉",
-        ("〈First・Group〉", "〈Second・Group〉"),
-        ("〈First", "Group〉", "〈Second", "Group〉"),
+        "〈First・Group〉・〈Second・Group〉", ("〈First・Group〉", "〈Second・Group〉")
     ),
-    TraitCase(
-        "〈Three・Part・Group〉",
-        ("〈Three・Part・Group〉",),
-        ("〈Three", "Part", "Group〉"),
-    ),
-    TraitCase("〈Single〉・Alpha", ("〈Single〉", "Alpha"), ("〈Single〉", "Alpha")),
+    TraitCase("〈Three・Part・Group〉", ("〈Three・Part・Group〉",)),
+    TraitCase("〈Single〉・Alpha", ("〈Single〉", "Alpha")),
 )
 
 
@@ -76,7 +64,7 @@ def extracted(request: pytest.FixtureRequest) -> tuple[CardRecord, TraitCase]:
     return extract_card(page(case.raw), number="SYN-001"), case
 
 
-def expected_legacy(case: TraitCase) -> Card:
+def expected_card(case: TraitCase) -> Card:
     return Card(
         number="SYN-001",
         faces=[
@@ -84,7 +72,7 @@ def expected_legacy(case: TraitCase) -> Card:
                 name=name,
                 card_class="Synthetic class",
                 card_type="Synthetic type",
-                traits=list(case.legacy),
+                traits=list(case.complete),
                 cost="1",
                 power="2",
                 hp="3",
@@ -107,23 +95,19 @@ def test_all_faces_keep_complete_traits_and_exact_raw(
         assert jp_face(face).traits == case.complete
 
 
-def test_legacy_projection_keeps_registry_hashes_without_mutating_faces(
+def test_v2_projection_keeps_complete_traits_without_mutating_faces(
     extracted: tuple[CardRecord, TraitCase],
 ) -> None:
     record, case = extracted
     before = asdict(record)
-    expected = expected_legacy(case)
-    actual = legacy_projection(record)
+    expected = expected_card(case)
+    actual = jp_card(record)
     assert actual == expected
     assert observation(actual, "jp") == observation(expected, "jp")
     assert asdict(record) == before
-    current = Card.model_validate(asdict(record))
-    assert (observation(current, "jp") == observation(expected, "jp")) == (
-        case.complete == case.legacy
-    )
 
 
-def test_legacy_traits_come_from_raw_instead_of_corrected_values(
+def test_projection_uses_parsed_traits_instead_of_retokenizing_raw(
     extracted: tuple[CardRecord, TraitCase],
 ) -> None:
     record, case = extracted
@@ -131,7 +115,10 @@ def test_legacy_traits_come_from_raw_instead_of_corrected_values(
         record,
         faces=[replace(face, traits=["Separate value"]) for face in record.faces],
     )
-    assert legacy_projection(changed) == expected_legacy(case)
+    expected = expected_card(case)
+    for face in expected.faces:
+        face.traits = ["Separate value"]
+    assert jp_card(changed) == expected
     assert all(face.traits == ["Separate value"] for face in changed.faces)
 
 

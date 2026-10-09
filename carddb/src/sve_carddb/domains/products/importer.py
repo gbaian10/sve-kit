@@ -5,7 +5,7 @@ import re
 from typing import TYPE_CHECKING
 
 from sve_carddb.build.source_rows import insert_raw_sources
-from sve_carddb.core.json import canonical
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import (
     BuildContext,
     InputRecord,
@@ -21,7 +21,6 @@ from sve_carddb.domains.products.models import (
     LocalizedText,
 )
 from sve_carddb.domains.products.official_importer import populate_official_products
-from sve_carddb.domains.registry.inputs import digest
 from sve_carddb.domains.registry.preview import populate_preview
 
 if TYPE_CHECKING:
@@ -79,11 +78,13 @@ def populate_families(
             raise ValueError("Product text language is not registered")
     for shard in catalog.shards:
         source_id = "authored:v1:" + digest(
-            {
-                "path": shard.path,
-                "hash": shard.content_hash,
-                "revision": authored_revision,
-            }
+            canonical(
+                {
+                    "path": shard.path,
+                    "hash": shard.content_hash,
+                    "revision": authored_revision,
+                }
+            )
         ).removeprefix("sha256:")
         db.insert(
             "source_record",

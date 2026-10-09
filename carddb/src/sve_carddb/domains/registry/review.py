@@ -7,13 +7,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
 
-from sve_carddb.domains.registry.inputs import (
-    Card,
-    Mapping,
-    digest,
-    read_cards,
-    read_mapping,
-)
+from sve_carddb.core.json import canonical, digest
+from sve_carddb.domains.registry.inputs import Card, Mapping, read_cards, read_mapping
 
 
 class Correction(BaseModel):
@@ -135,9 +130,9 @@ def observation(card: Card, region: str) -> dict[str, JsonValue]:
     return {
         "region": region,
         "card_no": card.number,
-        "observation_hash": digest(card.model_dump(mode="json")),
+        "observation_hash": digest(canonical(card.model_dump(mode="json"))),
         "rules_hash": card.rules_hash(),
-        "recipe": "registry-observation-v1",
+        "recipe": "registry-observation-v2",
     }
 
 

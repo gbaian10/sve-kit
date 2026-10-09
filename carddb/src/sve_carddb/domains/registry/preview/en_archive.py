@@ -2,8 +2,8 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.domains.registry.parser_adapters.official_en import legacy_projection
 from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
+from sve_carddb.domains.registry.projection import en_card
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.source_archive import ArchiveError
 from sve_carddb.parse.pages.extract_en import extract_card
@@ -54,7 +54,7 @@ class FrozenEN:
         return CardEvidence.from_card(
             source,
             "en",
-            legacy_projection(record),
+            en_card(record),
             tuple(
                 FaceEvidence(face.info["Rarity"], face.illustrator)
                 for face in record.faces

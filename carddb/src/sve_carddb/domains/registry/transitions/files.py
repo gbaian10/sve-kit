@@ -6,9 +6,9 @@ from pathlib import Path
 
 from pydantic import JsonValue
 
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import RecordData
 from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
-from sve_carddb.domains.registry.inputs import canonical, digest
 from sve_carddb.domains.registry.transitions.models import Shard
 
 MAX_BYTES = 1_048_576
@@ -105,7 +105,7 @@ def read_transition_files(root: Path) -> TransitionFiles:
         shard = checked_model(Shard, raw)
         if shard.records[0].sequence != int(Path(name).stem):
             raise ValueError("Identity transition sequence disagrees with shard path")
-        shards.append(LoadedShard(name, digest(raw), canonical(raw), exact))
+        shards.append(LoadedShard(name, digest(canonical(raw)), canonical(raw), exact))
     return TransitionFiles(tuple(shards))
 
 

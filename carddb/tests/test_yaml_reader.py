@@ -8,9 +8,9 @@ import pytest
 import yamlrocks
 from pydantic import JsonValue, RootModel, ValidationError
 
-from sve_carddb.core.yaml import MAX_BYTES
+from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.yaml import MAX_BYTES, parse_yaml
 from sve_carddb.domains.registry import storage
-from sve_carddb.domains.registry.inputs import canonical, digest
 from sve_carddb.domains.registry.storage import encode, read_yaml
 
 if TYPE_CHECKING:
@@ -65,13 +65,15 @@ def test_each_syntax_rule_independently(
         read_yaml(path)
 
 
-@pytest.mark.parametrize("source", [".inf", "-.Inf", "+.INF", ".nan", ".NaN", "1e999"])
-def test_nonfinite_scalars_cannot_reach_canonical_hash(
+@pytest.mark.parametrize(
+    "source", [".inf", "-.Inf", "+.INF", ".nan", ".NaN", "1e999", "1.5"]
+)
+def test_floating_point_scalars_cannot_reach_canonical_hash(
     tmp_path: Path, source: str
 ) -> None:
     path = tmp_path / "input.yaml"
     path.write_text("a: " + source)
-    with pytest.raises(ValueError, match="Out of range float"):
+    with pytest.raises(ValueError, match="Floating point JSON is forbidden"):
         read_yaml(path)
 
 
@@ -144,11 +146,17 @@ def test_yaml12_scalar_values_and_types(
 ) -> None:
     path = tmp_path / "input.yaml"
     path.write_text("a: " + source)
-    value = read_yaml(path)
-    assert isinstance(value, dict)
-    assert value["a"] == expected
-    assert type(value["a"]) is type(expected)
-    assert canonical(value) == canonical({"a": expected})
+    decoded = parse_yaml(path.read_bytes())
+    assert isinstance(decoded, dict)
+    assert decoded["a"] == expected
+    assert type(decoded["a"]) is type(expected)
+    if isinstance(expected, float):
+        with pytest.raises(ValueError, match="Floating point JSON is forbidden"):
+            read_yaml(path)
+    else:
+        value = read_yaml(path)
+        assert value == {"a": expected}
+        assert canonical(value) == canonical({"a": expected})
 
 
 @pytest.mark.parametrize("prefix", ["", "%YAML 1.2\n---\n", "\ufeff---\n"])
@@ -171,7 +179,7 @@ ROUND_TRIP: list[JsonValue] = [
     "line one\nline two\n",
     "日本語と emoji 🦊",
     "very long " * 1500,
-    {"yes": "no", "true": "false", "0777": "1e3", "nested": [None, True, 0, 1.0]},
+    {"yes": "no", "true": "false", "0777": "1e3", "nested": [None, True, 0, 1]},
 ]
 
 
@@ -200,7 +208,7 @@ def test_ruamel_encoder_round_trip(tmp_path: Path, value: JsonValue) -> None:
     result = read_yaml(path)
     assert result == value
     assert canonical(result) == canonical(value)
-    assert digest(result) == digest(value)
+    assert digest(canonical(result)) == digest(canonical(value))
 
 
 def test_strict_json_validation_is_retained(

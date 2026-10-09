@@ -12,7 +12,6 @@ from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.provenance import BuildContext, InputRecord
 from sve_carddb.domains.registry.build import build
 from sve_carddb.domains.registry.inputs import Mapping
-from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
 from sve_carddb.domains.registry.preview import FrozenJP, plan_preview, populate_preview
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.review import InitDecisions, Inputs
@@ -30,6 +29,7 @@ from sve_carddb.parse.pages.extract_jp import extract_card
 from sve_carddb.parse.pages.official_jp import card_url
 
 from .build_db_fixtures import rows
+from .registry_observation_fixtures import parsed_card
 from .test_image_assets import frozen as frozen  # ruff: ignore[useless-import-alias] -- reuse only synthetic archive fixture
 from .test_image_assets import roots
 from .test_image_variants import png
@@ -108,7 +108,7 @@ def make_staged(
     frozen_cards = FrozenSources(store.root, store.store_id, batch.batch_id)
     inputs = Inputs(
         jp={
-            number: legacy_projection(extract_card(raw, number=number))
+            number: parsed_card(extract_card(raw, number=number))
             for number, raw in cards.items()
         },
         en={},

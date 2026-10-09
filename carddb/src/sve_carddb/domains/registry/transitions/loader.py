@@ -2,8 +2,8 @@
 
 from typing import TYPE_CHECKING
 
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.registry.build import permanent_id
-from sve_carddb.domains.registry.inputs import digest
 from sve_carddb.domains.registry.transitions.files import (
     TransitionFiles,
     read_transition_files,
@@ -23,7 +23,7 @@ def _reference(shard: Shard) -> Reference:
     record = shard.records[0]
     return Reference(
         record_key=record.record_key,
-        record_hash=digest(record.model_dump(mode="json")),
+        record_hash=digest(canonical(record.model_dump(mode="json"))),
     )
 
 
@@ -132,9 +132,11 @@ def load_transitions(root: Path) -> TransitionFiles:
                 transition_key=record.record_key,
                 record_key=update.target_key,
                 record_hash=digest(
-                    None
-                    if update.after is None
-                    else update.after.model_dump(mode="json")
+                    canonical(
+                        None
+                        if update.after is None
+                        else update.after.model_dump(mode="json")
+                    )
                 ),
             )
     return files

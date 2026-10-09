@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import JsonValue
 
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.registry.build import string
-from sve_carddb.domains.registry.inputs import digest
 
 if TYPE_CHECKING:
     from sve_carddb.domains.registry.review import Inputs
@@ -68,7 +68,7 @@ def project_corrections(
             if field == "effect"
             else (face.card_type if region == "jp" else face.info["Card Type"])
         )
-        source_hash = digest(card.model_dump(mode="json"))
+        source_hash = digest(canonical(card.model_dump(mode="json")))
         status = correction_status(
             raw,
             source_hash,

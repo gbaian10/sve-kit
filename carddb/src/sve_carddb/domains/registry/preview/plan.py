@@ -101,7 +101,7 @@ class PreviewPlan:
                         {
                             "region": check.region,
                             "card_no": check.card_no,
-                            "recipe": "registry-observation-v1",
+                            "recipe": "registry-observation-v2",
                             "observation_hash": check.observation_hash,
                             "rules_hash": check.rules_hash,
                             "status": check.status,

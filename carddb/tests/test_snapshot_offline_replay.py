@@ -17,10 +17,6 @@ from sve_carddb.core.provenance import InputRecord
 from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.registry.build import build as build_identity
 from sve_carddb.domains.registry.inputs import Card, Mapping
-from sve_carddb.domains.registry.parser_adapters.official_en import (
-    legacy_projection as legacy_en_projection,
-)
-from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
 from sve_carddb.domains.registry.review import InitDecisions
 from sve_carddb.domains.registry.review import Inputs as IdentityInputs
 from sve_carddb.domains.registry.storage import Index, plan_files, write_files
@@ -34,6 +30,7 @@ from .adoption_fixtures import REPO, commit, write
 from .catalog_vocabulary_fixtures import make_vocabulary_case
 from .product_fixtures import envelope as product_envelope
 from .product_fixtures import family, install
+from .registry_observation_fixtures import parsed_card
 from .test_effect_presence import page
 from .test_source_archive import _put, _resource, _store
 from .translation_fixtures import choice, envelope, term
@@ -202,9 +199,9 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
         )
         _put(store, resource, raw)
         card = (
-            legacy_projection(extract_jp.extract_card(raw, number=number))
+            parsed_card(extract_jp.extract_card(raw, number=number))
             if region == SourceRegion.JP
-            else legacy_en_projection(extract_en.extract_card(raw, number=number))
+            else parsed_card(extract_en.extract_card(raw, number=number))
         )
         cards[region.value] = card
         batches[region.value] = seal_batch(

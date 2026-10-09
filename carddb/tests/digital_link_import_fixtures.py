@@ -17,7 +17,6 @@ from sve_carddb.domains.digital.links.importer import Inputs
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.registry.build import build as build_registry
 from sve_carddb.domains.registry.inputs import Mapping
-from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
 from sve_carddb.domains.registry.records import CardData, FaceData, PrintingData
 from sve_carddb.domains.registry.review import InitDecisions
 from sve_carddb.domains.registry.review import Inputs as RegistryInputs
@@ -34,6 +33,7 @@ from sve_carddb.parse.pages.official_jp import card_url
 
 from .adoption_fixtures import commit, git
 from .digital_link_fixtures import envelope, record, write
+from .registry_observation_fixtures import parsed_card
 from .test_registry_preview_archive import RAW
 from .test_source_archive import _put, _resource, _store
 from .translation_fixtures import INSTANT
@@ -252,11 +252,11 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
                 )
             )
     jp = jp_refs[card_url("SYN-001")]
-    physical = legacy_projection(extract_card(RAW, number="SYN-001"))
+    physical = parsed_card(extract_card(RAW, number="SYN-001"))
     registry_inputs = RegistryInputs(
         jp={"SYN-001": physical}
         | (
-            {"SYN-002": legacy_projection(extract_card(RAW, number="SYN-002"))}
+            {"SYN-002": parsed_card(extract_card(RAW, number="SYN-002"))}
             if dual
             else {}
         ),

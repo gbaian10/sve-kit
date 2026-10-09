@@ -2,8 +2,8 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
 from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
+from sve_carddb.domains.registry.projection import jp_card
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.source_archive import ArchiveError
 from sve_carddb.parse.pages.extract_jp import extract_card
@@ -55,6 +55,6 @@ class FrozenJP:
         return CardEvidence.from_card(
             source,
             "jp",
-            legacy_projection(record),
+            jp_card(record),
             tuple(FaceEvidence(face.rarity, face.illustrator) for face in record.faces),
         )

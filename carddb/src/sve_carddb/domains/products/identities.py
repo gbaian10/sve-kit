@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue, ValidationError
 
-from sve_carddb.core.json import parse
+from sve_carddb.core.json import canonical, digest, parse
 from sve_carddb.core.models import RecordData
 from sve_carddb.core.provenance import BuildContext, Source, SourceUse
 from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, parse_yaml
@@ -22,7 +22,6 @@ from sve_carddb.domains.products.identity_models import (
 from sve_carddb.domains.products.loader import _safe_file
 from sve_carddb.domains.products.models import Evidence, ProductRecord
 from sve_carddb.domains.products.official import PARSER, ProductPage, parse_products
-from sve_carddb.domains.registry.inputs import canonical, digest
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
 if TYPE_CHECKING:
@@ -189,7 +188,7 @@ def _shard(root: Path, name: str) -> IdentityFile:
             raise ValueError("Duplicate product identity evidence")
         if not any(ref.role == "product_identity_match" for ref in record.evidence):
             raise ValueError("Product identity requires match evidence")
-    return IdentityFile(name, digest(raw), exact, envelope)
+    return IdentityFile(name, digest(canonical(raw)), exact, envelope)
 
 
 def _records(

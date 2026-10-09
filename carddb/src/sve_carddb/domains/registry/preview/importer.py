@@ -4,14 +4,13 @@ import re
 from typing import TYPE_CHECKING
 
 from sve_carddb.build.source_rows import insert_raw_sources
-from sve_carddb.core.json import canonical
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import (
     BuildContext,
     InputRecord,
     SourceUse,
     input_record,
 )
-from sve_carddb.domains.registry.inputs import digest
 from sve_carddb.domains.registry.records import (
     AllocationData,
     ArtData,
@@ -100,11 +99,13 @@ def _authored(db: Database, plan: PreviewPlan, revision: str) -> dict[str, str]:
     sources: dict[str, str] = {}
     for shard in plan.snapshot.files.shards:
         source_id = "authored:v1:" + digest(
-            {
-                "path": shard.path,
-                "hash": shard.content_hash,
-                "revision": revision,
-            }
+            canonical(
+                {
+                    "path": shard.path,
+                    "hash": shard.content_hash,
+                    "revision": revision,
+                }
+            )
         ).removeprefix("sha256:")
         sources[shard.path] = source_id
         db.insert(

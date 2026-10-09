@@ -19,6 +19,7 @@ from pydantic import (
 )
 from ruamel.yaml import YAML
 
+from sve_carddb.core.json import canonical
 from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, parse_yaml
 from sve_carddb.domains.registry.allocation import (
     ALLOCATION_POLICY,
@@ -26,7 +27,6 @@ from sve_carddb.domains.registry.allocation import (
     cursors,
     region_allocations,
 )
-from sve_carddb.domains.registry.inputs import canonical
 from sve_carddb.domains.registry.transitions.files import require_empty_transitions
 
 if TYPE_CHECKING:

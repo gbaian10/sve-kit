@@ -9,12 +9,6 @@ from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.registry.build import build
-from sve_carddb.domains.registry.parser_adapters.official_en import (
-    legacy_projection as legacy_en,
-)
-from sve_carddb.domains.registry.parser_adapters.official_jp import (
-    legacy_projection as legacy_jp,
-)
 from sve_carddb.domains.registry.preview import (
     FrozenEN,
     FrozenJP,
@@ -33,6 +27,7 @@ from sve_carddb.parse.pages.extract_en import extract_card as extract_en
 from sve_carddb.parse.pages.extract_jp import extract_card as extract_jp
 
 from .en_extract_fixtures import page
+from .registry_observation_fixtures import parsed_card
 from .registry_preview_fixtures import BUILD, REVISION, parents
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- expose synthetic fixture dependency
 from .test_registry_preview_archive import RAW as JP_RAW
@@ -51,7 +46,7 @@ def frozen_registry(tmp_path: Path, inputs: Inputs) -> tuple[Path, FrozenRegions
     store = _store(tmp_path)
     for number in inputs.jp:
         raw = JP_RAW.replace(b"TEST-001", number.encode())
-        inputs.jp[number] = legacy_jp(extract_jp(raw, number=number))
+        inputs.jp[number] = parsed_card(extract_jp(raw, number=number))
         _put(
             store,
             _resource(jp.card_url(number), f"raw/{number}.html", raw, Kind.CARD),
@@ -67,7 +62,7 @@ def frozen_registry(tmp_path: Path, inputs: Inputs) -> tuple[Path, FrozenRegions
             .replace(b">02</div>", b">1</div>")
             .replace(b">X</div>", b">1</div>")
         )
-        inputs.en[number] = legacy_en(extract_en(raw, number=number))
+        inputs.en[number] = parsed_card(extract_en(raw, number=number))
         _put(
             store,
             replace(

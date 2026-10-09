@@ -2,12 +2,8 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.core.json import digest
-from sve_carddb.domains.registry.inputs import canonical
-from sve_carddb.domains.registry.parser_adapters.official_en import (
-    legacy_projection as legacy_en_projection,
-)
-from sve_carddb.domains.registry.parser_adapters.official_jp import legacy_projection
+from sve_carddb.core.json import canonical, digest
+from sve_carddb.domains.registry.projection import en_card, jp_card
 from sve_carddb.domains.registry.records import Observation
 from sve_carddb.domains.registry.review import observation
 from sve_carddb.domains.text_observations.models import FaceContent, TextCard
@@ -147,17 +143,17 @@ class FrozenTexts:
         if region == "jp":
             record = official_jp.extract_card(raw, number=card_no)
             faces = tuple(jp_face(face) for face in record.faces)
-            old = legacy_projection(record)
+            identity_card = jp_card(record)
             date_raw, errata = record.release_date, record.errata_url
         else:
             english = official_en.extract_card(raw, number=card_no)
             faces = tuple(en_face(face) for face in english.faces)
-            old = legacy_en_projection(english)
+            identity_card = en_card(english)
             date_raw, errata = english.release_date, english.errata_url
         return TextCard(
             source=source,
             observation=Observation.model_validate_json(
-                canonical(observation(old, region))
+                canonical(observation(identity_card, region))
             ),
             faces=faces,
             date_raw=date_raw,

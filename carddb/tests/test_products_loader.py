@@ -8,9 +8,9 @@ import pytest
 from pydantic import JsonValue, ValidationError
 from ruamel.yaml.error import YAMLError
 
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.products import load_products
 from sve_carddb.domains.products.models import FamilyRecord
-from sve_carddb.domains.registry.inputs import digest
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.registry.storage import read_yaml
@@ -52,7 +52,7 @@ def test_complete_immutable_snapshot_retains_state_and_bytes(
     snapshot = load(product_root)
     assert len(snapshot.records) == 3
     loaded = next(s for s in snapshot.shards if s.path == NAME)
-    assert loaded.content_hash == digest(json.loads(loaded.content))
+    assert loaded.content_hash == digest(canonical(json.loads(loaded.content)))
     record = snapshot.records['["product_family","BP02"]']
     assert isinstance(record, FamilyRecord)
     assert record.state == "confirmed"

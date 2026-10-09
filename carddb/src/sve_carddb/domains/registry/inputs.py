@@ -1,12 +1,12 @@
 """Typed local input boundaries and cross-region consistency checks."""
 
 import csv
-import hashlib
-import json
 from collections import defaultdict
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
+
+from sve_carddb.core.json import canonical, digest
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -34,22 +34,6 @@ TYPES = {
     "アドバンス": "Advanced",
     "トークン": "Token",
 }
-
-
-def digest(value: JsonValue) -> str:
-    """Hash canonical UTF-8 JSON without Unicode or whitespace normalization."""
-    return "sha256:" + hashlib.sha256(canonical(value)).hexdigest()
-
-
-def canonical(value: JsonValue) -> bytes:
-    """Encode the registry's version-one canonical JSON recipe."""
-    return json.dumps(
-        value,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-        allow_nan=False,
-    ).encode()
 
 
 class Face(BaseModel):
@@ -81,7 +65,7 @@ class Face(BaseModel):
             "name": self.name,
             "class": self.info["Class"],
             "type": self.info["Card Type"],
-            "traits": list[JsonValue](sorted(self.info.get("Trait", "-").split(" / "))),
+            "traits": list[JsonValue](sorted(self.traits)),
             "stats": [self.stats[key] for key in ("cost", "power", "hp")],
         }
 
@@ -92,15 +76,17 @@ class Card(BaseModel):
 
     def structure_hash(self, region: str) -> str:
         """Identify reviewed grouping candidates, never public card IDs."""
-        return digest([face.structure(region) for face in self.faces])
+        return digest(canonical([face.structure(region) for face in self.faces]))
 
     def rules_hash(self) -> str:
         """Pin every face and auxiliary section without claiming equivalence."""
         return digest(
-            [
-                face.model_dump(include={"name", "text", "speech", "sections"})
-                for face in self.faces
-            ]
+            canonical(
+                [
+                    face.model_dump(include={"name", "text", "speech", "sections"})
+                    for face in self.faces
+                ]
+            )
         )
 
 

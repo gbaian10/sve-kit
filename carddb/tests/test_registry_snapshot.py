@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
-from sve_carddb.domains.registry.inputs import digest
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.registry.records import CorrectionData, EnglishPrintingData
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.registry.storage import Index, encode, load, read_yaml
@@ -29,7 +29,9 @@ def test_preserves_complete_global_envelopes(registry_root: Path) -> None:
     assert snapshot.files.index() == index
     assert set(snapshot.records) == set(legacy)
     for shard in snapshot.files.shards:
-        assert shard.content_hash == digest(read_yaml(registry_root / shard.path))
+        assert shard.content_hash == digest(
+            canonical(read_yaml(registry_root / shard.path))
+        )
         assert (
             shard.content_hash == "sha256:" + hashlib.sha256(shard.content).hexdigest()
         )

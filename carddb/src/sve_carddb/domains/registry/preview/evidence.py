@@ -3,13 +3,14 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
-from sve_carddb.domains.registry.inputs import Card, canonical
+from sve_carddb.core.json import canonical
 from sve_carddb.domains.registry.records import Observation
 from sve_carddb.domains.registry.review import observation
 
 if TYPE_CHECKING:
     from sve_carddb.core.provenance import Source
     from sve_carddb.core.regions import Region
+    from sve_carddb.domains.registry.inputs import Card
 
 
 @dataclass(frozen=True)
@@ -28,7 +29,7 @@ class CardEvidence:
     def from_card(
         cls, source: Source, region: Region, card: Card, faces: tuple[FaceEvidence, ...]
     ) -> CardEvidence:
-        """Compute the old observation recipe from extracted data, not registry hashes."""
+        """Compute the registry observation recipe from extracted data, not registry hashes."""
         if len(card.faces) != len(faces):
             raise ValueError("Source face metadata count mismatch")
         return cls(

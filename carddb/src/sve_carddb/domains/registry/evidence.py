@@ -2,7 +2,7 @@
 
 from pydantic import JsonValue
 
-from sve_carddb.domains.registry.inputs import canonical
+from sve_carddb.core.json import canonical
 
 
 def require_evidence(actual: JsonValue, expected: list[JsonValue]) -> None:

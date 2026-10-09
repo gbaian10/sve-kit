@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
+from sve_carddb.core.json import digest
 from sve_carddb.domains.registry import snapshot, storage
-from sve_carddb.domains.registry.inputs import digest
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.storage import Entry
 
@@ -120,7 +120,7 @@ def test_canonical_input_is_encoded_once_per_file(
     assert canonical.call_count == len(files.shards) + 1
     for shard in files.shards:
         assert shard.content_hash == digest(
-            storage.read_yaml(registry_root / shard.path)
+            canonical(storage.read_yaml(registry_root / shard.path))
         )
 
 

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.domains.registry.inputs import canonical
+from sve_carddb.core.json import canonical
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.transitions.models import (
     ArtTransfer,
