@@ -58,9 +58,9 @@ def compiled() -> CompiledSchema:
     registry = replace(
         REGISTRY,
         tables=tuple(t for t in REGISTRY.tables if t.name not in old)
-        + four_layer.TABLES,
+        + four_layer.FRAME_TABLES,
         capabilities=tuple(
-            replace(cap, tables=tuple(t.name for t in four_layer.TABLES))
+            replace(cap, tables=tuple(t.name for t in four_layer.FRAME_TABLES))
             if cap.name == "translation_templates"
             else cap
             for cap in REGISTRY.capabilities

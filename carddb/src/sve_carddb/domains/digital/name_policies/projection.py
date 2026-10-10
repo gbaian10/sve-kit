@@ -16,6 +16,7 @@ from sve_carddb.domains.digital.name_policies.owners import publication_owners
 from sve_carddb.domains.digital.name_policies.results import Result
 from sve_carddb.domains.translations.glossary.evidence import validate_choice
 from sve_carddb.domains.translations.glossary.records import ChoiceRecord, TermRecord
+from sve_carddb.domains.translations.names.annotations import annotate_name
 from sve_carddb.domains.translations.names.bindings import DisplayBinding
 from sve_carddb.domains.translations.names.counterparts import first_counterpart
 from sve_carddb.domains.translations.names.sources import name_source
@@ -52,6 +53,7 @@ class Selected:
     candidate: Candidate | None
     reason: str
     semantic_reason: str
+    term_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -254,8 +256,16 @@ def prepare(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals
         else:
             chosen = _choice(db, sources, replay, source, resolved.term_id, ())
             reason = "choice" if chosen is not None else "untranslated"
+        annotation_term = overrides[0].term_id if overrides else resolved.term_id
         owners.append(
-            Selected(source, resolved.variant, chosen, reason, resolved.reason)
+            Selected(
+                source,
+                resolved.variant,
+                chosen,
+                reason,
+                resolved.reason,
+                annotation_term,
+            )
         )
     return Plan(snapshot, tuple(owners), uses_sorted(sources.uses))
 
@@ -280,7 +290,7 @@ def apply(db: Database, plan: Plan, build: BuildContext) -> Result:
     bindings = []
     for owner in plan.owners:
         candidate = owner.candidate
-        if candidate is None:
+        if candidate is None and owner.term_id is None:
             continue
         if name_source(db, owner.source.owner) != owner.source:
             raise ValueError("Name application owner changed after current planning")
@@ -331,7 +341,25 @@ def apply(db: Database, plan: Plan, build: BuildContext) -> Result:
             values.update(printing_id=payload.identifier, face_id=payload.face_id)
             destination = (payload.kind, payload.identifier, str(payload.face_id))
         insert_exact(db, "translation_use", values, ("id",))
+        if owner.term_id is not None:
+            annotate_name(db, use, owner.source.unit_id, owner.term_id)
+        if candidate is None:
+            continue
         translation = materialize(db, owner.source, context, candidate)
+        if owner.term_id is not None:
+            target_unit = "t:zh-Hant:" + digest(candidate.text.encode())[7:23]
+            insert_exact(
+                db,
+                "text_unit",
+                {
+                    "id": target_unit,
+                    "lang": "zh-Hant",
+                    "text": candidate.text,
+                    "content_hash": digest(candidate.text.encode()),
+                },
+                ("id",),
+            )
+            annotate_name(db, translation, target_unit, owner.term_id, translated=True)
         bindings.append(
             DisplayBinding(use, destination, "zh-Hant", "own_source", translation)
         )

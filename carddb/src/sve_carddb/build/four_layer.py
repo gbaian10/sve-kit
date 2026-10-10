@@ -46,7 +46,7 @@ def _fk(column: str, table: str) -> ForeignKey:
     return ForeignKey((column,), table, ("id",))
 
 
-TABLES = (
+FRAME_TABLES = (
     Table(
         "sentence_template",
         (
@@ -193,6 +193,9 @@ TABLES = (
             _fk("term_id", "glossary_term"),
         ),
     ),
+)
+
+ANNOTATION_TABLES = (
     Table(
         "annotation_set",
         (
@@ -238,6 +241,8 @@ TABLES = (
         ),
     ),
 )
+
+TABLES = (*FRAME_TABLES, *ANNOTATION_TABLES)
 
 
 def schemas() -> dict[str, JsonValue]:

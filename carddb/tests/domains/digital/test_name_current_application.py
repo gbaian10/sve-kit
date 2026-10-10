@@ -9,11 +9,14 @@ from pydantic import JsonValue
 
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
+from sve_carddb.contracts.four_layer import CardNameReference, Span
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.core.provenance import BuildContext
 from sve_carddb.domains.digital.name_policies.application import Inputs, populate
 from sve_carddb.domains.digital.name_policies.projection import materialize, prepare
 from sve_carddb.domains.registry.storage import read_yaml
+from sve_carddb.domains.translations.four_layer_storage import read_annotation
+from sve_carddb.domains.translations.glossary.importer import populate_glossary
 from sve_carddb.domains.translations.glossary.records import (
     AssignmentData,
     AssignmentRecord,
@@ -142,7 +145,7 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
         for r in snapshot.current_records()
         if isinstance(r, TermRecord)
     )
-    return replace(
+    prepared = replace(
         case,
         inputs=inputs,
         context=context,
@@ -157,6 +160,17 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
             ),
         ),
     )
+    with prepared.database.copy() as db:
+        with db.transaction():
+            populate_glossary(
+                db,
+                translations,
+                build=context,
+                stores={"test-store": prepared.fixture.digital.store},
+                sources=prepared.sources(),
+            )
+        database = DatabaseTemplate(schema, db._connection.serialize())
+    return replace(prepared, database=database)
 
 
 @pytest.mark.parametrize("excluded", [False, True])
@@ -237,6 +251,38 @@ def test_current_explicit_override_and_low_machine_name(
             assert row["origin"] == "official"
             assert row["low_confidence"] is False
         assert len(result.bindings) == 1
+        original_use = db.rows("translation_use_annotation")[0].values
+        original = read_annotation(db, str(original_use["annotation_set_id"]))
+        translated_use = db.rows("translation_annotation")[0].values
+        translated = read_annotation(db, str(translated_use["annotation_set_id"]))
+        assert len(original.occurrences) == len(translated.occurrences) == 1
+        assert (
+            original.occurrences[0].reference
+            == translated.occurrences[0].reference
+            == CardNameReference(kind="card_name", term_id="term:name.test")
+        )
+        assert original.occurrences[0].ranges == (
+            Span(start=0, end=len("Synthetic card")),
+        )
+        assert translated.occurrences[0].ranges == (
+            Span(start=0, end=len(str(row["text"]))),
+        )
+
+
+def test_untranslated_resolved_name_keeps_its_original_annotation(
+    base_case: ApplicationCase,
+    tmp_path: Path,
+) -> None:
+    case = current_case(base_case, tmp_path / "repo", excluded=True)
+    with case.database.copy() as db, db.transaction():
+        result = populate(
+            db, case.inputs, case.texts, sources=case.sources(), replay=case.replay
+        )
+        assert result.report["covered_owners"] == 0
+        assert not db.rows("translation")
+        assert not db.rows("translation_annotation")
+        assert len(db.rows("translation_use_annotation")) == 1
+        assert len(db.rows("annotation_set")) == 1
 
 
 def test_current_variant_cannot_select_two_concepts(
