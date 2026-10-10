@@ -50,6 +50,13 @@ def test_disjunct_counts_require_a_shared_np_and_legal_units(raw: str) -> None:
 @pytest.mark.parametrize(
     ("raw", "role", "unit"),
     [
+        ("仮。場の自分のフォロワー２体を選ぶ。", "selection_count", "体"),
+        ("仮。それの場のカードが２枚以上なら、仮。", "existence_count", "枚"),
+        (
+            "仮。それのプレイヤーの場のカードが２枚以上なら、仮。",
+            "existence_count",
+            "枚",
+        ),
         ("仮。自分の墓場の仮N族・フォロワー２枚を選ぶ。", "selection_count", "枚"),
         (
             "仮。相手の場の【仮状態】状態のフォロワー２体まで選ぶ。",

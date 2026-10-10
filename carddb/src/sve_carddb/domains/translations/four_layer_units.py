@@ -140,6 +140,7 @@ _ONSET = r"(?:^|[、。:：}】（(]|か|と|は|として)"
 _KIND = r"スペルかアミュレット|フォロワー|アミュレット|スペル|カード|クレスト|『X』"
 _SET_KIND = r"(?:" + _KIND + r")(?:(?:や|か|と)" + _FILTER + r"(?:" + _KIND + r"))*"
 _SET_ATOM = re.compile(_FILTER + r"(?P<kind>" + _KIND + r")")
+_OWNER = r"自分|相手|それ(?:のプレイヤー)?|(?:自分|相手)プレイヤーN人"
 _UNION_COUNTED = re.compile(
     _ONSET
     + _FILTER
@@ -153,8 +154,13 @@ _UNION_COUNTED = re.compile(
 _COUNTED = re.compile(
     _ONSET
     + _FILTER
-    + r"(?:(?:自分|相手)の)?(?P<zone>場とEXエリア|場か自分のEXエリア|場か相手のEXエリア|場や自分のEXエリア|場や相手のEXエリア|エボルヴデッキ|EXエリア|消滅領域|デッキ|墓場|手札|場)"
+    + r"(?:(?P<owner>"
+    + _OWNER
+    + r")の)?(?P<zone>場とEXエリア|場か自分のEXエリア|場か相手のEXエリア|場や自分のEXエリア|場や相手のEXエリア|エボルヴデッキ|EXエリア|消滅領域|デッキ|墓場|手札|場)"
     r"(?:の|にある|にいる|に表向きで置かれている|に裏向きで置かれている|に表向きで置いた|に裏向きで置いた|に表向きである|に裏向きである|に|から)(?:、)?"
+    + r"(?(owner)|(?:(?:"
+    + _OWNER
+    + r")の)?)"
     + _FILTER
     + r"(?P<quote>「)?"
     + _FILTER
