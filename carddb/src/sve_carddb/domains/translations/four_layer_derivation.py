@@ -32,7 +32,8 @@ if TYPE_CHECKING:
 
 # This preparation version is deliberately absent from the authored reader.
 VERSION = "four-layer-jp-v2"
-_KEYWORDS = re.compile(r"(?:【(?P<keyword>[^【】]+)】|\{(?P<ability>[^{}]+)\})[ 、]*")
+# Separators follow only a keyword, so a braced flag line stays exactly the flag.
+_KEYWORDS = re.compile(r"(?:【(?P<keyword>[^【】]+)】[ 、]*|\{(?P<ability>[^{}]+)\})")
 _QUICK = "term:ability.quick"
 
 

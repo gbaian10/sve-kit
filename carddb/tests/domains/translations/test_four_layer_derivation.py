@@ -149,6 +149,7 @@ def test_quick_without_context_does_not_share_across_owners() -> None:
         "{クイック}を持つ。",
         "{クイック}仮。",
         "{クイック}【仮旗】",
+        "{クイック}、",
         "{クイック}、{クイック}",
     ],
 )
