@@ -10,7 +10,7 @@ from sve_carddb.contracts.four_layer import (
     Projection,
     Scope,
 )
-from sve_carddb.domains.translations.source_inventory.normalizer import TOKEN_HEADER
+from sve_carddb.domains.translations.four_layer_grammar import TOKEN_HEADER
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

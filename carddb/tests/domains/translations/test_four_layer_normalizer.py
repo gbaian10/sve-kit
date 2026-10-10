@@ -56,9 +56,7 @@ def test_name_parentheses_and_inner_numbers_are_not_reminders_or_numeric_leaves(
     None
 ):
     raw = "『仮（２）😀』を２枚選ぶ。（補足）\r\n"
-    result = normalize_source(
-        raw, source(raw), reminders=frozenset({"（補足）", "（２）"})
-    )
+    result = normalize_source(raw, source(raw))
     body, reminder, cr, lf = result.parts
     assert body.canonical_source == "『X』をN枚選ぶ。"
     assert body.source_span.segments == (Span(start=0, end=13),)
@@ -74,9 +72,7 @@ def test_name_parentheses_and_inner_numbers_are_not_reminders_or_numeric_leaves(
 
 def test_nfkc_composition_across_removed_reminder_retains_both_raw_origins() -> None:
     raw = "e（補足）\u0301😀"
-    body, reminder = normalize_source(
-        raw, source(raw), reminders=frozenset({"（補足）"})
-    ).parts
+    body, reminder = normalize_source(raw, source(raw)).parts
     assert body.canonical_source == "é😀"
     assert body.source_span.segments == (Span(start=0, end=1), Span(start=5, end=7))
     assert [p.canonical_spans for p in body.trace] == [
@@ -128,12 +124,13 @@ def test_blank_layout_and_empty_fields_do_not_fabricate_body_parts() -> None:
     assert normalize_source("", source("")).parts == ()
 
 
-def test_unknown_parentheses_remain_in_body_with_their_control_semantics() -> None:
+def test_unknown_parentheses_keep_exact_separate_source_and_body_anchor() -> None:
     raw = "仮を選ぶ（しなくてもよい）。"
-    (part,) = normalize_source(raw, source(raw)).parts
-    assert part.source_span.role == "body"
-    assert part.source_span.segments == (Span(start=0, end=len(raw)),)
-    assert part.canonical_source == normalize("NFKC", raw)
+    body, reminder = normalize_source(raw, source(raw)).parts
+    assert body.canonical_source == "仮を選ぶ。"
+    assert reminder.source_span.role == "reminder"
+    assert reminder.canonical_source == "（しなくてもよい）"
+    assert reminder.source_span.anchor == body.ordinal
 
 
 def test_stale_source_is_rejected_before_any_normalization() -> None:

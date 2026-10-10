@@ -72,12 +72,10 @@ def compile_card_field(
     descriptor: SourceDescriptor,
     classifier: Classifier,
     frames: Frames,
-    *,
-    reminders: frozenset[str] = frozenset(),
 ) -> CompiledField:
     """Frozen inventory and exact owner checks precede normalization or target selection."""
     source = card_source(db, sources, descriptor)
-    field = normalize_source(source.text, descriptor, reminders=reminders)
+    field = normalize_source(source.text, descriptor)
     context = semantic_context(db, source)
     matches: list[Matched | None] = []
     quality = []

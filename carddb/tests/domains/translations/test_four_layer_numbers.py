@@ -491,7 +491,7 @@ def test_positioning_group_reminder_requires_a_positive_complete_divisor(
     reminder = f"（{count}体ずつ上か下か決める）"
     raw = "仮。" + reminder
     engine = classifier()
-    field = normalize_source(raw, source(raw), reminders=frozenset({reminder}))
+    field = normalize_source(raw, source(raw))
     part = next(p for p in field.parts if p.source_span.role == "reminder")
     found = engine.recognize(raw, field.source, part, field=field)
     if count == "０":
@@ -649,7 +649,7 @@ def test_entry_reminder_numbers_require_the_entire_shared_limit_grammar(
         reminder = reminder.replace("できる", "でき仮")
     raw = "仮。" + reminder
     engine = classifier(extra=("suffix_unit_items",))
-    field = normalize_source(raw, source(raw), reminders=frozenset({reminder}))
+    field = normalize_source(raw, source(raw))
     part = next(p for p in field.parts if p.source_span.role == "reminder")
     found = engine.recognize(raw, field.source, part, field=field)
     if malformed:

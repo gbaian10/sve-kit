@@ -10,8 +10,8 @@ from sve_carddb.contracts.n0 import VERSION
 from sve_carddb.contracts.source_binding import SourceSpan, TracePiece, verify_partition
 from sve_carddb.contracts.template_parameters import Range
 from sve_carddb.core.json import digest
+from sve_carddb.domains.translations.four_layer_grammar import TOKEN_HEADER
 from sve_carddb.domains.translations.parameters.provenance import Unit, merged, nfkc
-from sve_carddb.domains.translations.source_inventory.normalizer import TOKEN_HEADER
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -119,7 +119,6 @@ class SourcePart:
 class SourceField:
     source: SourceDescriptor
     parts: tuple[SourcePart, ...]
-    reminders: frozenset[str]
 
     def verify(
         self,
@@ -131,7 +130,7 @@ class SourceField:
         """Every owner use replays its own field, even when its context is shared."""
         if len(frames) != len(self.parts) or len(bindings) != len(self.parts):
             raise ValueError("Bindings must cover the complete exact source field")
-        if normalize_source(raw, self.source, reminders=self.reminders) != self:
+        if normalize_source(raw, self.source) != self:
             raise ValueError("Source field differs from pinned normalization replay")
         for part, frame, binding in zip(self.parts, frames, bindings, strict=True):
             if binding.source != self.source:
@@ -173,9 +172,7 @@ def replay_part(
     part.verify(raw, frame, binding, domains)
 
 
-def normalize_source(
-    raw: str, source: SourceDescriptor, *, reminders: frozenset[str] = frozenset()
-) -> SourceField:
+def normalize_source(raw: str, source: SourceDescriptor) -> SourceField:
     """Preserve source bytes before applying a pinned, finite normalization recipe."""
     if digest(raw.encode())[7:] != source.source_hash:
         raise ValueError("Normalizer source has stale exact bytes")
@@ -193,7 +190,7 @@ def normalize_source(
             else ()
         )
     else:
-        spans = _partition(raw, source.field == "section", reminders)
+        spans = _partition(raw, source.field == "section")
     verify_partition(raw, spans)
     parts = []
     for ordinal, span in enumerate(spans):
@@ -208,7 +205,7 @@ def normalize_source(
                 units,
             )
         )
-    return SourceField(source, tuple(parts), reminders)
+    return SourceField(source, tuple(parts))
 
 
 def _segments(positions: tuple[int, ...]) -> tuple[Span, ...]:
@@ -221,9 +218,7 @@ def _segments(positions: tuple[int, ...]) -> tuple[Span, ...]:
     return tuple(result)
 
 
-def _line(
-    line: str, offset: int, section: bool, reminders: frozenset[str]
-) -> tuple[SourceSpan, ...]:
+def _line(line: str, offset: int, section: bool) -> tuple[SourceSpan, ...]:
     roles: list[Role] = ["layout"] * len(line)
     header = TOKEN_HEADER.match(line) if section else None
     header_end = header.end() if header is not None else 0
@@ -234,8 +229,7 @@ def _line(
     reminder_spans = tuple(
         (start + m.start(), start + m.end())
         for m in _REMINDER.finditer(line[start:stop])
-        if m.group() in reminders
-        and not any(n.start() <= start + m.start() < n.end() for n in names)
+        if not any(n.start() <= start + m.start() < n.end() for n in names)
     )
     for first, last in reminder_spans:
         roles[first:last] = ["reminder"] * (last - first)
@@ -272,13 +266,11 @@ def _line(
     return tuple(result)
 
 
-def _partition(
-    raw: str, section: bool, reminders: frozenset[str]
-) -> tuple[SourceSpan, ...]:
+def _partition(raw: str, section: bool) -> tuple[SourceSpan, ...]:
     spans: list[SourceSpan] = []
     offset = 0
     for line in raw.split("\n"):
-        spans.extend(_line(line, offset, section, reminders))
+        spans.extend(_line(line, offset, section))
         offset += len(line)
         if offset < len(raw):
             spans.append(

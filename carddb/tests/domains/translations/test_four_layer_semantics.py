@@ -216,7 +216,7 @@ def test_pure_reminder_requires_registered_complete_grammar_and_matching_anchor(
 ) -> None:
     reminder = "（プレイしたターンから攻撃できる。）"
     raw = anchor + reminder
-    field = normalize_source(raw, source(raw), reminders=frozenset({reminder}))
+    field = normalize_source(raw, source(raw))
     engine = classifier(
         (
             Term("term:keyword.storm", "keyword", "疾走"),
@@ -317,7 +317,7 @@ def test_reminder_needs_the_entire_registered_sentence(
     action = "攻撃できる" if keyword == "疾走" else "フォロワーに攻撃できる"
     reminder = f"（これはプレイしたターンから{action}。{extra}）"
     raw = f"【{keyword}】" + reminder
-    field = normalize_source(raw, source(raw), reminders=frozenset({reminder}))
+    field = normalize_source(raw, source(raw))
     engine = classifier((Term("term:keyword.synthetic", "keyword", keyword),))
     part = next(p for p in field.parts if p.source_span.role == "reminder")
     found = engine.recognize(raw, field.source, part, field=field)

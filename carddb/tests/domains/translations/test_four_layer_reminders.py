@@ -27,7 +27,7 @@ def test_mandatory_selection_note_replays_one_exact_body_count(
 ) -> None:
     note = "（２枚を選べなければプレイできない）"
     raw = body + note
-    field = normalize_source(raw, source(raw), reminders=frozenset({note}))
+    field = normalize_source(raw, source(raw))
     part = field.parts[-1]
     assert part.source_span.role == "reminder"
     engine = classifier()
@@ -47,7 +47,7 @@ def test_mandatory_selection_note_replays_one_exact_body_count(
 def test_mandatory_note_cannot_use_a_field_from_another_owner() -> None:
     note = "（２枚を選べなければプレイできない）"
     raw = "自分の墓場の仮族・カード２枚を選ぶ。" + note
-    field = normalize_source(raw, source(raw), reminders=frozenset({note}))
+    field = normalize_source(raw, source(raw))
     foreign = replace(field, source=field.source.model_copy(update={"ordinal": 1}))
     with pytest.raises(ValueError, match="another exact owner"):
         classifier().recognize(raw, field.source, field.parts[-1], field=foreign)
