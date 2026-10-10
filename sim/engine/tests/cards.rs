@@ -1,5 +1,5 @@
 //! Printed-card regression tests for fixes that no shared scenario covers
-//! (docs/sim/known-errors.md KE-13, KE-14). Needs `SVE_TEST_SNAPSHOT`.
+//! (docs/dsl/validation.md). Needs `SVE_TEST_SNAPSHOT`.
 
 #![cfg(feature = "runner")]
 extern crate alloc;

@@ -64,7 +64,7 @@ ID 是非空公開識別；Code 沿既有 ASCII 規則；Lang 須在本快照 la
 | PublicTextPointer | owner, field, ordinal | 巢狀 tuple；owner 是下述封閉 JSON |
 | field_annotation | owner, field, ordinal, annotation_set_id | 複合 PK 前三格；原文用途唯一 |
 | annotation_concept | id, category, explanations, card_ids | PK id；只有實際 annotation 引用的概念 |
-| Translation／translation | id, source_unit_id, target_lang, text_unit_id, origin, authority, low_confidence, annotation_set_id | 原七欄後加一格；兩個 partition 均完整八欄 |
+| Translation／translation | id, source_unit_id, target_lang, text_unit_id, origin, authority, low_confidence, annotation_set_id | 兩個 partition 均為完整八欄 |
 | FieldTranslation | field, ordinal, target_lang, translation_id, basis, source, counterpart | 原五欄後加兩格；receiver 由父 owner 決定 |
 | cr_clause | id, cr_version_id, number, text_unit_id, translations | 原四欄後加 `[FieldTranslation]`；global detail |
 

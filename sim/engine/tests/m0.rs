@@ -1,4 +1,4 @@
-//! M0/M1 regression tests: one test per fixed known error (docs/sim/known-errors.md)
+//! M0/M1 regression tests: one test per fixed known error (docs/dsl/validation.md)
 //! and the R1–R3 properties from the design cross-review.
 
 #![expect(

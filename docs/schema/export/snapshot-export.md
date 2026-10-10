@@ -1,7 +1,7 @@
 # 公開快照候選匯出器
 
 匯出器產出 3.0.0，N0 已接線；圖片 URL、版本與新鮮度依 [圖片發布契約](../images/image-variants.md#20-圖片-url版本與新鮮度)
-與 [傳輸 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)。預覽配號狀態與快取放在公開根之外，
+與 [傳輸 §5.4](snapshot-transport.md#54-卡包-media-與-id-圖片)。預覽配號狀態與快取放在公開根之外，
 匯出不寫 current／previous 索引；開發桶的索引由上傳寫入，正式發布仍須另行建置並通過發布閘門。
 
 本文件說明 N0 已接線的 Python producer 邊界；基本目錄容器與新容量帳是 [size-budget](size-budget.md) 的設計要求，現有量測 API 尚未據此重寫；公開欄位與分片語意以
@@ -48,7 +48,7 @@ bucket 數只讀取目前候選 Schema 的 `bucket_count.const`，不接受呼�
 現行加 pending 暫顯的 `display_ref` 決定 revision 的 bootstrap/detail；其餘完整列
 只進 history。text 與 translation 按名字、可用名字翻譯及啟動欄位的文字引用閉包分列。
 
-2.0 使用 [傳輸契約 §5.1](snapshot-transport.md#51-format-200-固定配置) 的 N=64、
+2.0 使用 [傳輸契約 §5.1](snapshot-transport.md#51-固定配置) 的 N=64、
 image 實體鍵與固定相鄰 bucket bands；BP01／CP04 是配置明列的 bootstrap 例外。
 同 role／partition／owner 的 band 合檔，不合併邏輯列，不按資料大小動態換 width 或跨 owner 填裝。
 同名兩表完整存於 detail，其他啟動欄位依既有閉包保留。

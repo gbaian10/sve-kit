@@ -63,7 +63,7 @@ test requires all 706 public scenarios to pass or be listed in
 `tests/engine/known-failures.yaml`, which is currently empty. Pending choices include
 each legal parameter combination, and resolution events follow effect completion
 and removal from the resolution zone. Remaining engine errors and open questions
-are tracked in [docs/sim/known-errors.md](../../docs/sim/known-errors.md).
+are tracked in [the engine tracking issue](https://github.com/gbaian10/sve-kit/issues/478).
 
 Effect documents use `format: 1, kind: effect_set`; keywords use
 `format: 1, kind: keyword_registry`, selecting the astra/1 prototype grammar.

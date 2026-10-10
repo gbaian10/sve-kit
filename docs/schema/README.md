@@ -32,6 +32,7 @@
 | 文件 | 內容 |
 | --- | --- |
 | [建置資料庫 schema](build/build-db.md) | 建置資料庫 126 表的完整邏輯契約：欄位、鍵、約束、採納政策、雜湊與發布閘門 |
+| [程式分層](build/code-layers.md) | carddb 內部層次與匯入邊界 |
 | [建置表實作分期](build/implementation-tiers.md) | 126 表各自的實作 tier（T0～T3）與首發必要集合 |
 
 ### 資料領域（domains）
@@ -46,15 +47,15 @@
 | [數位對應採納契約](domains/digital-link-adoption.md) | 真人 link 入口、凍結名稱與逐 owner 使用；政策連結見獨立契約 |
 | [數位名字與同名瀏覽政策](domains/digital-name-policy.md) | 可修改的名字／同名瀏覽規則、排除與待啟用能力 |
 | [風味文字直接對照表](domains/flavor-translation.md) | 以原文 hash 對照整段譯文；不走模板、不設採納政策 |
-| [術語採納與加粗](domains/glossary-adoption.md) | 概念引用、來源主張／委託收據、可修訂加粗與公開格式擴充影響 |
+| [術語採納與加粗](domains/glossary-adoption.md) | 永久概念、當前選詞、來源主張、可修訂加粗與公開標註 |
 | [身分修復與決定續版](domains/identity-repair.md) | 已核可的不可變續版、指名撤回、完整面／插畫移轉與有效投影 |
 | [人工限量序號版次](domains/manual-printings.md) | 獨立入口、官方封存／第三方 URL、SNC／WB 歸屬、序號補充及人工名稱邊界 |
 | [模板參數辨識規則](domains/template-parameter-policy.md) | 具名辨識開關、參數驗證與退回原因 |
 | [四層來源位置](domains/four-layer-source-positions.md) | 四層來源核心、binding／未匹配清單與來源定位 |
 | [翻譯與模板契約](domains/translation-contract.md) | JP 唯一一般來源、當前資料、逐 owner 顯示與跨區規則資格 |
-| [四層翻譯共用契約](domains/four-layer-translation.md) | Frame／SourceBinding、typed 葉、形式與 NP、建置目標欄位、位置與重鍵；N0 已實作 |
+| [四層翻譯共用契約](domains/four-layer-translation.md) | Frame／SourceBinding、typed 葉、形式與 NP、建置目標欄位、位置與重鍵 |
 | [四層固定案例](domains/four-layer-cases.md) | 機器可讀的合成輸入／預期結果及真實來源邊界索引；不是已通過測試紀錄 |
-| [模板採納政策與收據](domains/translation-policy.md) | authored 政策索引、不可變核可收據、首輪抽查與長尾驗證閉包 |
+| [翻譯維護流程](domains/translation-policy.md) | 一般資料 PR、低信心顯示與必要自動檢查 |
 
 ### 影像（images）
 
@@ -83,7 +84,7 @@
 flowchart LR
     A["authored/ 人寫資料<br/>＋爬取的原始來源"] --> B["建置資料庫<br/>來源、審核、雜湊與驗證"]
     B --> P["欄位白名單投影<br/>與引用閉包驗證"]
-    P --> S["卡表快照（3.0.0，N0 已交付）<br/>43 個文字集合"]
+    P --> S["卡表快照（3.0.0）<br/>43 個文字集合"]
     P --> I["影像清單<br/>DSL 程式包"]
     S --> C["離線快取<br/>三語全文"]
     C --> U["逐片解析<br/>查卡、建牌、對戰"]
@@ -109,30 +110,15 @@ uv run tools/schema-er/build_er.py --serve    # 產生後在 localhost:8000 提�
 建置資料庫的 126 表分成 12 組（來源與確認、身分與商品、插畫與加工、文字與勘誤、跨區與構築、問答與裁定、數位與語音、翻譯依賴、DSL 證據、機制、影像與更正、顯示與路由）；3.0.0 卡表快照的 46 個集合（43 文字＋3 影像）分成 6 組。
 圖中的箭頭表示「引用者 → 被引用者」，不是時序，也不表示基數；線條分三種：欄位宣告的 FK、約束 `FK(...)` 宣告的 FK（複合約束保留兩側完整欄組，以粗線標示）、依 `*_id` 欄名推斷的引用（卡表快照沒有 FK 記號，全部屬於這種，並包含內嵌陣列與物件裡的 ID）。正式的複合 FK、nullable 與部分唯一性以 build-db.md 為準；固定 `vocabulary` kind 的常數欄由 DDL 展開，不出現在邏輯表中。
 
-## 待辦與待實作驗收
+## 資料未知與未啟用能力
 
-已定案的設計不再列於此。以下是實作、資料或量測尚未完成的項目；完成前一律依「完成前的行為」處理，不能假裝已完成。
+以下是資料缺漏時的長期行為；實作進度與資料交付放 issue／milestone，不能以規格存在推定已驗收。
 
-| 項目 | 待做 | 完成前的行為 |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| 正式 DDL、匯出器 | 依本規格實作建置資料庫 DDL（含常數 kind 欄展開）、投影匯出器與發布閘門 | 沒有可發布的卡表快照；不能聲稱 FK、PWA 或容量已全數通過 |
-| 永久登錄匯入與身分修復 | authored 永久 ID／配號工具已實作；待正式建置匯入器與 identity_change 執行流程 | 已配號只增不改；本機 registry 不能當作可發布快照 |
-| 引擎驗證政策 | 第一版驗證政策須包含載入、基本局面與必要題本，並對應原錯誤碼 | 卡表可先上線，缺證據一律手動處理；不能把 reviewed 當 `engine_passed` |
-| Decklog 來源與外部 ID | 研究 JP/EN Decklog 卡片清單來源或 API、完整範圍與精確版次 ID 對照；兩區各至少一份含普通、特殊、再錄與同號 variant 的匯入樣本 | 不假設外部 ID 等於卡號；未查證依官方卡表收錄預設（收錄 true、未收錄 false）並標示；Decklog 匯入需求不標完成 |
-| 手機實測 | 中階 Android 與 iPad 量測解析、搜尋、切換語言、更新與離線峰值（見 [size-budget.md](export/size-budget.md)）；多尺寸卡圖、2.5D 與動態 atlas 的尺寸實測 | 數字只是估算與預算；不全包常駐解析，卡表不加 sprite |
-| 基本目錄容量 | 各日版／英版計整區基本目錄冷載；Brotli 2 MiB 為分界，略超報精確差額、明顯超出才交維護者；容器 raw ≤2 MiB、其他資料檔 ≤512 KiB | 全量 raw ≤40 MiB、單區完整文字閉包 br ≤8 MiB／gzip ≤10 MiB；共用／混區 File 整檔計，手機及完整三語獨立驗收 |
-| 勘誤歷史資料 | 勘誤歷史的來源覆蓋、生效日與印刷適用證據 | current 可讀；印刷原文 unknown 時說明原因；歷史時間未知不猜 |
-| 來源覆蓋區間 | `source_windows` 與 `restriction_coverage` 的實際資料 | 日期不在 complete 範圍內時，合法性為 unknown |
-| 同號 variant | 同地區同卡號的多個 variant 依證據拆分（預設 `standard`），入口例外固定 | 不覆蓋真實差異，不以同號任選圖 |
-| 數位對應 | `same_card` 個案重新分類（close/partial/redesigned）、svwb style 永久 key 對齊 | 真人沿 sampled/confirmed；政策 same_name 待完整能力啟用，不造面對應 |
-| 機制詞彙 | relation 四種與資源產生／消耗 action 的詞彙審核 | partial 不能推 absent；EN 差異另設 scope |
-| 構築規則資料 | `rules_name` 作為禁限單位；雙面、合作名、`treated_as` 依 `construction_rules_ref` 計數 | 未支援的規則回 unknown，不逐面重複計張 |
-| 語音資料 | 語音分類與互動目標、browse 與 battle 的適用審核 | 沒有語音資料不表示該卡沒有語音；來源 URL 必須保留 |
-| 框的詞彙 | 從資料整理穩定的 `frame_code`，原字保留 | `signed`／`premium` 未知為 null；預設版次不聲稱已確認普通框 |
-| 發行證據 | 各區版次的發行證據；`announced`／`not_released_confirmed` 只存例外 | 未對照不等於尚未發售 |
-| 卡店連結與畫師連結 | 真實卡店 HTTPS 模板（feature flag）；`artist_link`／`art_post` 待有畫面與資料時設計 | 不捏造連結，示例模板停用 |
-| 已確認更正的正式匯入 | 已有 9 筆 active 更正；待建置資料庫與快照匯入器接入既有投影（見 [§3.4](domains/authored-layout.md#34-來源更正)） | 已確認者無須重審；每次套用仍驗原值、觀測 hash 與圖片證據，衝突停用；未確認候選不套用 |
-| 延後的資料模型 | `event`／`printing_event`、`signature`／`printing_signature`、`query_alias` 複合條件、Decklog 外部 ID 格式 | 不建空表；標誌列表不能稱某場活動的全部獎卡 |
-| 登入與同步 | 玩家帳號、牌組、設定的 D1 同步是否在首版提供（屬 server） | 卡表快照不含玩家內容 |
-| 搜尋文法 | 定義 `config.search.grammar_version` 所指的搜尋語法（欄位篩選、運算子、正規化）文件與版本規則 | 只提供一般關鍵字與篩選介面，不宣稱支援進階語法 |
-| 跨區同卡號路徑 | 目前官英卡號帶 EN 後綴不會撞號；若日後出現 JP/EN 原卡號完全相同的情況再決定路徑 | 遇到時停止發布該路徑，不破壞既有 canonical |
+- 未啟用的資料能力仍須按[建置表分組](build/implementation-tiers.md)處理完整依賴，公開 required 欄位不可任意省略。
+- 缺正式 DSL 或引擎證據維持手動／unknown，reviewed 不等於 engine_passed。
+- 來源日期不在 complete 覆蓋範圍時，合法性維持 unknown；印刷原文、加工、發行與語音缺證據不推定不存在。
+- Decklog 查證須有地區與精確版次依據，不能假設外部 ID 等於卡號；未查證沿 printing 的明示預設並標記未核對。
+- 同號 variant 與跨區同卡號不能任選；若無法沿現有路由唯一定位，停止該路徑發布，保留既有 canonical。
+- 更正只套用仍符合原值及來源證據者；衝突停用該項，未確認候選不套用。
+- 無資料與畫面需要的延後模型不建空表，玩家帳號／同步資料不進卡表快照。
+- 容量與手機效能須按[量測契約](export/size-budget.md)驗收，舊配置估算不當現行配置通過。

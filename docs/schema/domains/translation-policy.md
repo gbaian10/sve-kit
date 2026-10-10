@@ -16,10 +16,3 @@ CI 自動驗格式、key、參數、引用及來源 binding／未匹配清單；
 低信心且機械檢查通過的譯文直接顯示「待校對」，可切原文；不自動改成 project 或官方。
 結構壞掉、參數無法對應與來源錯配不能渲染；缺譯及待補句型回原文，列同一張清單。
 清單只需資料 ID、原因、影響範圍與建議，不保存私人提示詞、對話、點擊或核可頁 hash。
-
-## 3. Legacy
-
-`translation-policies/*.policy.yaml`、`.approval.yaml`、`.review-queue.yaml`、五欄 pin、
-initial_sample_decisions、sample_ids 與 model_review 不再是新格式的輸入。
-舊檔只供轉換取有效文字與來源類別；完成轉換後從當前 tree 移除，Git 歷史保留。
-不把以前的審閱偽裝成針對新格式 bytes 的人員核可，也不另做替代收據。

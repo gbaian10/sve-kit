@@ -346,20 +346,20 @@ context/use/binding/selection 每次重建，DB 只放本次有效組；改詞�
 EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；日英段落不同取完整 JP 效果，不按 EN ordinal 拼接。
 錯 owner／face、過期／缺來源仍拒絕；不據翻譯顯示放行 DSL、機制或官方 counterpart。
 移除翻譯入口 source_exception 的責任在翻譯契約 §2；區域差異表及其規則資格仍保留。
-快照只出選中資料；新 origin／low_confidence 與加粗位置須同步公開契約及 reader 後啟用，不能在舊 tuple 偷增欄。
+快照只出選中資料；origin／low_confidence 與加粗位置依現行[公開 annotation 契約](../export/public-annotation.md)投影，不直接輸出建置列。
 
-### 9.3 四層資料的目標契約
+### 9.3 四層資料契約
 
 [四層共用契約](../domains/four-layer-translation.md)是本節授權的欄位細節：
 §3～§7 定義 Frame、葉 schema、target、SourceBinding 與投影接口，§8 定義目標邏輯列／PK／FK、annotation 與依賴，
 §9 定義模板重鍵及裁定引用。每欄附型別、nullable、合法域、驗證者、失敗條件及[固定案例 ID](../domains/four-layer-cases.md)。
-N0 的正式 DDL、DB 邊界與匯入器已依此切換；下表說明相對於舊模板的變更，實際欄位以 §9.1 為準。
+下表說明四層資料的責任，實際 DDL 欄位以 §9.1 為準。
 
-| 現有資料 | 四層後的欄位差異與責任 |
+| 資料 | 責任 |
 | --- | --- |
-| sentence_template | Frame 身分包含 canonical source、型別／角色／域、語義變體、normalizer 及投影分類；scopes/imports/exports 由 DSL 的 interface_key 追蹤；舊六欄 payload 改版，NP/form 不入身分 |
-| template_translation／glossary_translation | 前者 text 改有型別 Target；後者繼續保存單一基礎選詞，translation_form 以引用組合形式，不複製每種文法形的名字 |
-| text_template_binding | 改為逐 use 的 SourceBinding；新增 owner／來源定位、trace、typed values 與每葉 occurrence，不能只按 context 去重 |
+| sentence_template | Frame 身分包含 canonical source、型別／角色／域、語義變體、normalizer 及投影分類；scopes/imports/exports 由 DSL 的 interface_key 追蹤；NP/form 不入身分 |
+| template_translation／glossary_translation | 前者保存有型別 Target；後者繼續保存單一基礎選詞，translation_form 以引用組合形式，不複製每種文法形的名字 |
+| text_template_binding | 逐 use 的 SourceBinding；保存 owner／來源定位、trace、typed values 與每葉 occurrence，不能只按 context 去重 |
 | translation_context／translation | context 的變體鍵聚合來源 frame／values；render-v3 包含實際 target、形式、選詞／加粗、位置與 renderer 版本的依賴 |
 | translation_term／位置 | 去重反查保留；binding_leaf_occurrence、render_leaf_occurrence 與 annotation_set 分別保留來源位置、輸出關聯、exact 文字的概念位置 |
 | owner／translation 的 annotation 引用 | 原文 use 與譯文各引用精確 set；沒有譯文也可有原文 set，同 text_unit 不代表同概念位置 |
@@ -367,8 +367,8 @@ N0 的正式 DDL、DB 邊界與匯入器已依此切換；下表說明相對於�
 
 四層資料不新增逐詞核可、成功收據或不可變翻譯帳本；DB 邊界只驗必要結構與建置閉包。
 §9.1 與 ER 圖描述目前 DDL；已知舊域的用途級裁定解析及 N1 新葉由 #499／#380 接續。
-公開 basis=jp_source、annotation 承載、tuple 與 reader 由 [#496](https://github.com/gbaian10/sve-kit/issues/496) 定義，不能直接 dump 本節邏輯列。
-巨集資格條文由 [#497](https://github.com/gbaian10/sve-kit/issues/497) 處理，本節不修改 §10 或授予可執行資格。
+公開 basis=jp_source、annotation 承載、tuple 與 reader 依[公開契約](../export/public-annotation.md)，不能直接 dump 本節邏輯列。
+巨集資格依[撰寫語法 §10](../../dsl/author-syntax-1.0.md#10-巨集規範)，本節不修改 §10 或授予可執行資格。
 
 ## 10. DSL、驗證與未實作卡片頁
 
@@ -436,7 +436,7 @@ shared 預設、EN 真差異才 override；同樣的 region blocks 使共用機�
 - `availability=available` 必須有 `content_hash/mime/width/height/bytes`，mime 非空、寬高為正；這些 metadata 不代替實際 bytes 解碼與比對。
 - approved 必須 available。
 - `image_variant.size_key` 以 FK 引用 `image_size.key`。每筆 variant 只能引用 available 且 approved 的 image_asset；pending／missing／unfetched 不得保有公開 variant 列。
-- 建置 variant 的 format 固定 webp，size 設定不得為 `is_original=true`；path 必須等於該列 sha256 推得的 `images/sha256/<前兩碼>/<64hex>.webp`。檔案實際 hash／尺寸／bytes 與完整檔位集合另由影像產製與發布驗證器核對。此 path 是建置內容定址位置；2.0 公開 ID key／query 由發布投影生成，不能把這個本機 path 當 2.0 圖片 URL，見 [image-variants](../images/image-variants.md)。
+- 建置 variant 的 format 固定 webp，size 設定不得為 `is_original=true`；path 必須等於該列 sha256 推得的 `images/sha256/<前兩碼>/<64hex>.webp`。檔案實際 hash／尺寸／bytes 與完整檔位集合另由影像產製與發布驗證器核對。此 path 是建置內容定址位置；公開 ID key／query 由發布投影生成，不能把這個本機 path 當公開圖片 URL，見 [image-variants](../images/image-variants.md)。
 
 跨表條件在建置交易完成寫入後、提交前檢查最終資料圖；修改圖片或 image_size 同樣必須重驗，不能只在新增 variant 時檢查。任一條件失敗即回滾整筆交易；可以在同一交易中把圖片改回 pending 並刪除其 variants。已有 available／approved 來源但尚未產 variants 是合法的建置中間狀態，不代表影像發布閉包已完成。
 
@@ -450,7 +450,7 @@ shared 預設、EN 真差異才 override；同樣的 region blocks 使共用機�
 
 流程：增量抓取/manifest→完整面候選/永久 registry→模板與巨集→新 QA 影響審核→載入/基本局面/題本→翻譯→數位/插畫/標誌批次抽查→建置資料庫完整性→卡表快照白名單投影與驗證→版號/變動報告。EN 的主要人工作業是全筆日英身分確認，之後文字對照與例外處理；沒有跨區逐卡重寫 DSL/繁中。
 
-已知 traits 斷詞、BP07-P06 缺句、BP07-076/077 繪師疑似卡名、只讀 faces[0]、未套用同卡通則的 EP/SEP/交錯する力/ルゥ 候選列 `identity_policy_mismatch`；日英去尾碼同號但不同名列 `cross_region_same_number_different_name`，輸出完整名稱/全部面供人工確認，不能自動依尾碼合併。這些與前列資料缺陷均列 `build_issue`。可發布資料不完整狀態，不可宣稱確認；衝突會阻止受影響自動能力，結構/FK/內容完整性錯誤阻止整批。正式 DDL/JSON Schema/匯出器尚未實作（見 [README 的待辦](../README.md#待辦與待實作驗收)），現有容量量測只涵蓋指定投影，不代表完整發布器。
+已知 traits 斷詞、BP07-P06 缺句、BP07-076/077 繪師疑似卡名、只讀 faces[0]、未套用同卡通則的 EP/SEP/交錯する力/ルゥ 候選列 `identity_policy_mismatch`；日英去尾碼同號但不同名列 `cross_region_same_number_different_name`，輸出完整名稱/全部面供人工確認，不能自動依尾碼合併。這些與前列資料缺陷均列 `build_issue`。可發布資料不完整狀態，不可宣稱確認；衝突會阻止受影響自動能力，結構/FK/內容完整性錯誤阻止整批。建置與公開匯出只保證已啟用能力的驗證；完整正式發布閘門與容量須依[匯出契約](../export/snapshot-export.md)及[容量契約](../export/size-budget.md)另行驗收。
 
 ## 13. 官網更正與身分修復
 
@@ -488,7 +488,7 @@ card_route_alias 的有效轉址圖仍無環、展平到同 printing 的 canonic
 
 canonical-json-v1：null/bool/Unicode string/安全整數/array/object；拒浮點和未配對 surrogate。鍵以 Unicode code point 排序、無空白/BOM、UTF-8；控制字元一律小寫 `\u00xx`，其餘僅跳脫引號/反斜線，不正規化 Unicode。有序 array 不排序，集合依本契約排序。`source_record` 雜湊取 exact raw bytes，不重序列化。
 
-`text_unit` hash＝exact text UTF-8；相同 hash 仍比 bytes。`sentence_template` 切換前的六欄 payload 與 T／C 前綴 ID 是 §9.1 既有 DDL 的模板身分，四層切換後只用於[共用契約 §9](../domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)的舊模板映射辨識；四層的 frame-v1 完整 payload／ID 依[共用契約 §3](../domains/four-layer-translation.md#3-frame-與語義身分)，normalizer、角色／域或語義變體變更須重鍵，NP／中文形式不入身分。
+`text_unit` hash＝exact text UTF-8；相同 hash 仍比 bytes。舊 T／C 模板身分只用於[共用契約 §9](../domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)的舊模板映射辨識；四層的 frame-v1 完整 payload／ID 依[共用契約 §3](../domains/four-layer-translation.md#3-frame-與語義身分)，normalizer、角色／域或語義變體變更須重鍵，NP／中文形式不入身分。
 
 `program_hash`＝canonical `{dsl_version,ast}`；macro `body_hash`＝`{dsl_version,body}`。既有 face-bundle-v1 保留完整觀測 recipe（含 revision ID、原始 name/effect/sections/kind、數值與特性），只作觀測追溯，不充當 DSL 新鮮度鍵。
 
@@ -537,7 +537,7 @@ official route 由 `card_no_state=official` 的 printing 自動推導，舊號/�
 
 ## 16. 發布閘門與投影邊界
 
-`region_text_review` 的規則 hash 在 JP/EN 規則 bundle 變更時失效；純已採納等義表記不失效，卡名/官英顯示選用另檢 exact 名稱來源，沒有 fresh aligned 不能以「沒有 divergence」當核對完成。
+`region_text_review` 的規則來源變更須重驗；目前沒有規則等義投影可讓表記變更沿用舊資格。卡名／官英顯示選用另檢 exact 名稱來源，沒有 fresh aligned 不能以「沒有 divergence」當核對完成。
 
 建置資料庫開啟 `foreign_keys`，PK/UQ/CHECK、`foreign_key_check/integrity_check` 全過；對仍使用決定封套的入口驗批次成員 hash、跨區全筆確認、各面歸屬/數量、日期不重疊、永久配號/alias 無環、模板碰撞與依賴、逐字證據、DSL exact tuple、機制 freshness、圖片狀態。未採納資料依各自類別處理，不能假造 FK；§4 表記未定的觀測仍公開顯示，不能把診斷隔離集合當整卡排除閘門。
 
@@ -561,7 +561,7 @@ official route 由 `card_no_state=official` 的 printing 自動推導，舊號/�
 
 版次准入唯一標準為該地區 Decklog 能否使用這個版次。printing 已含 region，因此每個 printing 的 `decklog_available` 只代表其所屬 jp/en 地區；日英分開記錄，不能借用另一區版次結果、去 EN 配對或依 `card_id` 共用。`identity_state/card_no_state` 的 provisional 只影響顯示與對應，不阻擋加入任何牌組區域、分享碼或匯出。圖片確認與 DSL 狀態也不決定這項資格；賽制、禁限及張數等牌組合法性另驗，不把這些結果寫成 Decklog 不可用。
 
-建置資料庫的 printing 含 `decklog_available:Bool`、`decklog_verification:unverified`|verified、`decklog_source_id→source_record?`、`decklog_checked_on:Date?`，皆屬 T0。verified 時來源 FK 與實際查證日期必填，`source_record` 記來源網址、地區/版次依據及抓取追溯。可查得正式 Decklog 卡片清單/API 時，以相符地區與精確版次的可用性證據為準；來源/API 與外部 ID 對照尚待研究（見 [README 的待辦](../README.md#待辦與待實作驗收)），不捏造端點。判定 false 需明確不可用證據或完整範圍清單的缺席；請求失敗、清單未完整或對照不明不能當 negative 證據，也不能覆蓋既有 verified 結果。
+建置資料庫的 printing 含 `decklog_available:Bool`、`decklog_verification:unverified`|verified、`decklog_source_id→source_record?`、`decklog_checked_on:Date?`，皆屬 T0。verified 時來源 FK 與實際查證日期必填，`source_record` 記來源網址、地區/版次依據及抓取追溯。可查得正式 Decklog 卡片清單/API 時，以相符地區與精確版次的可用性證據為準；來源/API 與外部 ID 對照尚待研究（見 [資料未知時的邊界](../README.md#資料未知與未啟用能力)），不捏造端點。判定 false 需明確不可用證據或完整範圍清單的缺席；請求失敗、清單未完整或對照不明不能當 negative 證據，也不能覆蓋既有 verified 結果。
 
 未查證時 `decklog_verification=unverified`、`decklog_checked_on=null`；`decklog_available=(catalog_state=official)`：官方卡表收錄預設 true，未收錄（如 SNC）預設 false。`decklog_source_id` 指預設依據的官方卡表或收錄參考來源；沒有來源可為 null，不能把收錄/抓取日期冒充 Decklog 查證日期。UI 顯示「未查證，依官方卡表收錄狀態預設」與來源（若有）。verified 的 true/false 均覆蓋預設，未收錄版次若證實可用也立即放行；保留證據與快照版本以追溯變更。
 

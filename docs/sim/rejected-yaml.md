@@ -1,9 +1,5 @@
 # 載入期拒絕的 YAML
 
-引用與授權：拒絕原因中 BP10-T09 的日文卡文片段是官方引用，不在本專案授權內；卡號保留作來源定位。
-其餘載入檢查、程式欄位與拒絕訊息是專案說明，不能視為官方裁定。
-來源、版本與權利界線見[文件引用說明](../quotations.md)。
-
 `Catalog` 載入 `authored/` 時，除了 JSON Schema，還會用 `sim/engine/src/catalog/semantics.rs`
 檢查每張卡。不通過的卡記在 `Catalog::rejections()`（`檔案:行: 訊息`），**永不執行**：
 任何用到它的操作都回 `Unsupported("card program rejected at load: …")`。
@@ -29,43 +25,4 @@ cargo run --locked -p sve-engine --bin sve-prototype -- "$SVE_TEST_SNAPSHOT" . v
 | 指稱 | 同一行、同類（誘發／宣告）且內容不同的能力沒有各自的 keyword（契約 3.1） |
 | 行號 | 每個拒絕都要能定位到卡內的行（共用測試要求行號大於 0） |
 
-## 尚未涵蓋（會靜默不做或回 null／0，載入期還抓不到）
-
-進度與後續由 [#478](https://github.com/gbaian10/sve-kit/issues/478) 追蹤；「預定」欄是當時的規劃，不是承諾。
-
-| 構造 | 執行期結果 | 預定 |
-| --- | --- | --- |
-| 選擇器的 `trait`、`name`、`name_contains` 拼錯（不存在的種族或卡名） | 永遠沒有候選 | M2：對照卡表快照的種族、卡名、token 名 |
-| `turn.phase` 或其他讀值與字面值比較時字面值拼錯（例 `"strat"`） | 條件恆真或恆假 | M2：型別化 IR 的列舉值 |
-| `bind` 名稱全卡共用，不分能力、不分先後 | 在另一個能力或更後面才綁定的名稱讀到空集合 | M2：綁定的作用域與先後檢查 |
-| 行號用子字串定位：同卡同字串多次出現時指向第一處；值加引號或流式寫法時退回卡號那一行 | 行號可能不精確（不會是 0） | M2：由 YAML 解析器帶位置 |
-| 一般的「宣告了但沒有程式讀取」欄位 | 靜默忽略 | 目前靠手動盤點（見下）；M2 以型別化 IR 的 `deny_unknown_fields` 取代 |
-| CR 10.7.6 的狀態誘發 | 若寫成 `trigger_if` 會被 R-0009 規則以錯誤理由拒絕（見 known-errors KE-28） | 遇到時另設構造 |
-
-## 既有 422 張的結果（歷史紀錄）
-
-以下是當時的結果，卡表或 YAML 變動後以 `tests/engine/rejected-yaml.yaml` 為準：421 張通過，1 張拒絕（審核第 1 輪加嚴檢查後，另外抓到 BP03-078、SCS01-007，已修 YAML，見下）：
-
-| 卡 | 位置 | 原因 | 處理 |
-| --- | --- | --- | --- |
-| BP10-T09 | `authored/rules/effects/BP10.yaml:379` | 「武装・タイプを持つ」寫成 `modify.traits`，引擎不能執行（原本執行時才回 Unsupported） | 維持拒絕；需要實作種族授予（持續效果層），見 known-errors KE-20 |
-
-第一版檢查另外拒絕了 11 張，處理如下（細節見 [known-errors.md](known-errors.md) 的 KE-07～KE-14）：
-
-| 卡 | 第一版的拒絕原因 | 處理 |
-| --- | --- | --- |
-| BP14-074、BP14-081、BP20-P61 | 誘發事件 `banish`／`card_play`／`fusion` 不存在 | 引擎補上事件（KE-07） |
-| BP20-P65 | `replace_choice` 未實作 | 引擎補上（KE-10） |
-| BP16-036 | `self.turn.evolved` 不存在 | YAML 改讀 `evolutions`（KE-13） |
-| BP20-P28 | `item.type` 不存在 | YAML 改 `union` 選擇器（KE-14） |
-| CP03-009 | 同行兩個誘發能力沒有各自的 keyword | 補 `on_drive_gain`（KE-04） |
-| BP21-PR04 | BOX 的 `until` 寫法與 BP18-SP01 不一致（兩者引擎都忽略，BOX 期間固定） | 檢查只接受引擎實際的 `next-controller-end`，BP18-SP01 改成同一拼法 |
-| BP07-P06、BP15-SL13、EBD02-007 | `paid.*` 不在同一能力 | 檢查規則過嚴：靜態費用減免讀的是同卡打出能力的追加費用，改為同卡範圍 |
-
-另外用「YAML 用到的每個欄位是否有程式讀取」的盤點找到檢查規則還沒涵蓋的
-`restrict action: draw`（BP10-076）、`until: next-opponent-turn-end`（BP02-090、BP02-SL17）、
-`search.groups`（CP04-088）、`name_alias`（BP03-078、BP08-T01、BP08-T02），引擎補實作後
-把這些值加進檢查（KE-08、KE-09、KE-11、KE-12）。
-
-交叉審核第 1 輪後加嚴的檢查又抓到兩張，已改 YAML：
-SCS01-007（`trigger_if` 讀回合計數，R-0009，M-003）、BP03-078（別名 `while_zone: any`，M-004）。
+尚待確認的限制與修復進度由 [#478](https://github.com/gbaian10/sve-kit/issues/478) 追蹤；載入通過不等於執行正確。
