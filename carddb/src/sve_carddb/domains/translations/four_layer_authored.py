@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
 
-VariantKey = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_-]*\Z")]
+VariantKey = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.-]*\Z")]
 
 
 class _Record[T: RecordData](Quality):

@@ -271,6 +271,26 @@ def test_pin_selects_an_actual_reusable_value_and_checks_its_language() -> None:
         )
 
 
+def test_named_target_variant_uses_the_contract_code_grammar() -> None:
+    identifier = object_value(definition()["data"])["id"]
+    variant = target(identifier)
+    variant["kind"] = "template_translation_variant"
+    object_value(variant["data"])["variant_key"] = "display.formal-v1"
+    selected = override(identifier)
+    data = object_value(selected["data"])
+    templates = data["templates"]
+    assert isinstance(templates, list)
+    object_value(templates[0])["variant_key"] = "display.formal-v1"
+    records = from_files(
+        (
+            *valid_files(),
+            file("translations/templates/values/002.yaml", [variant]),
+            file("translations/overrides/fixture/001.yaml", [selected]),
+        )
+    ).records
+    assert len(records) == 4
+
+
 @pytest.mark.parametrize("action", ["suppress", "default"])
 def test_nonpin_override_cannot_hide_a_selection(action: str) -> None:
     selection = override(object_value(definition()["data"])["id"])
