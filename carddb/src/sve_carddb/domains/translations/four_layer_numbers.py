@@ -433,10 +433,8 @@ def _action_number(value: int, before: str, after: str) -> Number | None:
 
 
 def _event_count_number(value: int, before: str, after: str) -> Number | None:
-    if (unit := _event_predicate_unit(before)) and re.match(
-        r"^" + unit + r"以上なら" + _END, after
-    ):
-        return Number("Nat", "threshold", value, unit)
+    if predicate := _predicate_number(value, before, after):
+        return predicate
     counted = count_context(before)
     if (
         counted is not None
@@ -462,6 +460,29 @@ def _event_count_number(value: int, before: str, after: str) -> Number | None:
         r"^枚が墓場に(?:置かれた|送られた)とき" + _END, after
     ):
         return Number("Nat", "count", value, "枚")
+    return None
+
+
+def _predicate_number(value: int, before: str, after: str) -> Number | None:
+    if (unit := _event_predicate_unit(before)) and re.match(
+        r"^" + unit + r"以上なら" + _END, after
+    ):
+        return Number("Nat", "threshold", value, unit)
+    counted = count_context(before)
+    if (
+        counted is not None
+        and counted.counted_zones == ("hand",)
+        and re.match(
+            r"^枚になるように(?:自分|相手|それ|お互い)の手札を捨てる" + _END, after
+        )
+    ):
+        return _quantity("existence_count", value, "枚")
+    if (
+        value >= 1
+        and re.fullmatch(r"[（(]", before)
+        and re.fullmatch(r"体ずつ上か下か決める[）)]", after)
+    ):
+        return Number("Nat", "group_divisor", value, "体")
     return None
 
 

@@ -29,6 +29,8 @@ def test_disjunct_counts_share_one_explicit_counted_set(np: str, unit: str) -> N
 @pytest.mark.parametrize(
     "raw",
     [
+        "仮。自分の墓場が２枚になるように自分の手札を捨てる。",
+        "仮。自分の手札が２枚になるように自分の手札を不明する。",
         "自分の墓場のカードが２枚以上なら、仮。{起動}３枚以上なら、別。",
         "自分の墓場のカードが２枚以上なら、仮。【相手のターン終了時】３枚以上なら、別。",
         "自分の墓場のカードが２枚以上なら、仮。相手の手札が３枚以上なら、別。４枚以上なら、仮。",
@@ -61,6 +63,16 @@ def test_unknown_or_mismatched_counted_constructions_cannot_bind(raw: str) -> No
 @pytest.mark.parametrize(
     ("raw", "role", "unit"),
     [
+        (
+            "仮。お互いの手札が２枚になるようにお互いの手札を捨てる。",
+            "existence_count",
+            "枚",
+        ),
+        (
+            "仮。自分の手札が２枚になるように自分の手札を捨てる。",
+            "existence_count",
+            "枚",
+        ),
         ("仮。これはエボルヴデッキに２枚まで入れることができる。", "threshold", "枚"),
         ("仮。自分の他の仮族・カードが２枚なら、仮。", "existence_count", "枚"),
         (
@@ -200,6 +212,26 @@ def test_complete_event_counts_keep_the_written_set(raw: str, role: str) -> None
     frame, binding = found.bind(field.source, part)
     engine.verify(raw, field, part, frame, binding)
     assert frame.leaf_schema.slots[-1].role == role
+
+
+@pytest.mark.parametrize("count", ["０", "２"])
+def test_positioning_group_reminder_requires_a_positive_complete_divisor(
+    count: str,
+) -> None:
+    reminder = f"（{count}体ずつ上か下か決める）"
+    raw = "仮。" + reminder
+    engine = classifier()
+    field = normalize_source(raw, source(raw), reminders=frozenset({reminder}))
+    part = next(p for p in field.parts if p.source_span.role == "reminder")
+    found = engine.recognize(raw, field.source, part, field=field)
+    if count == "０":
+        assert found.issues
+        return
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[0].role == "group_divisor"
+    assert binding.occurrences[0].source_unit == "体"
 
 
 @pytest.mark.parametrize(
