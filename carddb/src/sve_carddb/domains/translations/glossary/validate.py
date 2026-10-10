@@ -9,7 +9,6 @@ from sve_carddb.domains.translations.glossary.records import (
     ConceptRecord,
     EmphasisRecord,
     Record,
-    Shard,
     TermRecord,
 )
 
@@ -23,8 +22,17 @@ def records(snapshot: Snapshot) -> tuple[Record, ...]:
         sorted(
             (
                 record
-                for _, _, content in snapshot.shards
-                for record in Shard.model_validate_json(content).records
+                for record in snapshot.four_layer.records
+                if isinstance(
+                    record,
+                    (
+                        TermRecord,
+                        ChoiceRecord,
+                        EmphasisRecord,
+                        AssignmentRecord,
+                        ConceptRecord,
+                    ),
+                )
             ),
             key=lambda record: record.record_key,
         )

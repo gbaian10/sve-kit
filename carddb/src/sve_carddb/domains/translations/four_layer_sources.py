@@ -163,6 +163,11 @@ def descriptor(
     return result
 
 
+def empty_field(db: Database, field: OwnerField) -> bool:
+    """An absent effect is interned as empty text and has no source span to authorize."""
+    return not _field(db, field).text
+
+
 def card_source(
     db: Database, sources: Sources, descriptor: SourceDescriptor
 ) -> CardSource:
@@ -193,7 +198,11 @@ def card_source(
     if source.id != source_id or lang != "ja":
         raise ValueError("Card source frozen version belongs to another owner source")
     if pointer(document, locator) != raw:
-        raise ValueError("Card source frozen field differs from the exact owner bytes")
+        raise ValueError(
+            "Card source frozen field differs from the exact owner bytes: "
+            f"{descriptor.owner.model_dump(mode='json')} {descriptor.field} "
+            f"{descriptor.ordinal} {source_id} {locator}"
+        )
     if ref.parser == CORRECTED_PARSER:
         if not isinstance(owner, FaceRevisionOwner) or descriptor.field != "effect":
             raise ValueError("Corrected source recipe requires a revision effect field")

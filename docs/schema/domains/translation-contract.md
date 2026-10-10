@@ -38,7 +38,7 @@ filing_key 為 `[A-Za-z0-9_-]+`，sequence 為三位以上十進位字串；不�
 | `translations/forms/<sequence>.yaml` | `format: 3, kind: translation_shard, records` |
 
 四層入口只接受 format 3 分片；glossary 與模板 reader 共用已載入的資料。
-由 #498 切換前清查並轉換 format 2；本文件不代表現有 reader 已更新，不保留雙軌載入。
+切換時已清查並轉換 format 2，正式 reader 不保留雙軌載入。
 模板來源清冊在建置時產生，不進 Git，見[清冊契約](template-source-replay.md)。
 舊格式留在 Git 歷史，不作現行載入分支。
 

@@ -15,10 +15,10 @@ from sve_carddb.contracts.four_layer import (
 )
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_identities import context_variant
-from sve_carddb.domains.translations.four_layer_render import BoundTarget
+from sve_carddb.domains.translations.four_layer_render import BoundTarget, Result
 from sve_carddb.domains.translations.four_layer_storage import (
     read_annotation,
-    read_render_occurrences,
+    read_owned_render_occurrences,
     write_annotation,
     write_binding,
 )
@@ -31,12 +31,11 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_pipeline import CompiledField
     from sve_carddb.domains.translations.four_layer_render import (
         Renderer,
-        Result,
         SelectedTarget,
     )
 
 
-def render_field(
+def render_field(  # ruff: ignore[too-many-arguments] -- explicit suppression preserves validated source bindings without selecting translated text
     db: Database,
     compiled: CompiledField,
     renderer: Renderer,
@@ -44,6 +43,7 @@ def render_field(
     lang: str,
     *,
     assignment: str = "default",
+    suppress: bool = False,
 ) -> Result:
     """Persist only complete bindings; absent selected values preserve a whole-field fallback."""
     if not compiled.complete:
@@ -75,7 +75,11 @@ def render_field(
         )
         for match, low in zip(matches, compiled.low_confidence, strict=True)
     )
-    result = renderer.render(context_id, lang, plan)
+    result = (
+        Result(None, ("suppressed_translation",))
+        if suppress
+        else renderer.render(context_id, lang, plan)
+    )
     insert_exact(
         db,
         "translation_context",
@@ -194,7 +198,7 @@ def render_field(
         {"context_id": context_id, "target_lang": lang, "translation_id": identifier},
         ("context_id", "target_lang"),
     )
-    read_render_occurrences(db, identifier, renderer.domains, expected=rendered)
+    read_owned_render_occurrences(db, identifier, renderer.domains, rendered)
     return result
 
 
@@ -230,7 +234,19 @@ def _use(db: Database, compiled: CompiledField, context_id: str) -> str:
 def _source_annotation(
     db: Database, bindings: tuple[SourceBinding, ...], unit_id: str
 ) -> AnnotationSet:
-    terms = {row.values["id"]: row.values for row in db.rows("glossary_term")}
+    referenced = {
+        value.key
+        for binding in bindings
+        for value in binding.values.values()
+        if isinstance(value, GlossaryReference)
+    }
+    terms = {
+        row.values["id"]: row.values
+        for term_id in sorted(referenced)
+        for row in db.select(
+            "glossary_term", db.columns("glossary_term"), where={"id": term_id}
+        )
+    }
     occurrences: list[Annotation] = []
     for binding in bindings:
         for leaf in binding.occurrences:

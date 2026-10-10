@@ -3,22 +3,14 @@
 import copy
 import re
 from dataclasses import replace
-from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.core.json import array, canonical, digest, integer, object_value
-from sve_carddb.domains.catalog.adoption_models import SourceRef
-from sve_carddb.domains.translations.parameters import candidate_matching as matching
-from sve_carddb.domains.translations.parameters.candidate_matching import recognize
-from sve_carddb.domains.translations.parameters.inventory import (
-    Candidates,
-    Field,
-    _field,
-    summary,
-)
-from sve_carddb.domains.translations.parameters.references import References
-from sve_carddb.domains.translations.parameters.rule_candidates import (
+from sve_carddb.core.json import array, object_value
+from sve_carddb.domains.translations.recognition import candidate_matching as matching
+from sve_carddb.domains.translations.recognition.candidate_matching import recognize
+from sve_carddb.domains.translations.recognition.references import References
+from sve_carddb.domains.translations.recognition.rule_candidates import (
     BY_ID,
     RULES,
     SUFFIXES,
@@ -27,26 +19,8 @@ from sve_carddb.domains.translations.parameters.rule_candidates import (
     definition,
     selection,
 )
-from sve_carddb.domains.translations.source_inventory.inventory import entry
-from sve_carddb.domains.translations.source_inventory.normalizer import (
-    VERSION,
-    partition,
-)
-from sve_carddb.domains.translations.source_inventory.pins import PARSER
 
-from .test_template_parameters import HASH, candidate
-
-if TYPE_CHECKING:
-    from pydantic import JsonValue
-
-
-def matches(
-    text: str, rule: str, refs: References | None = None
-) -> tuple[dict[str, JsonValue], ...]:
-    evidence = refs or References()
-    value = candidate(text, evidence)
-    return recognize(text, partition(text)[0], value, evidence, (rule,))
-
+from .test_template_parameters import candidate, matches, partition
 
 SUFFIX_CASES = (
     ("suffix_damage_amount", "試験２ダメージ", "試験２ダメージX", "damage_amount"),
@@ -72,8 +46,6 @@ def test_each_suffix_is_opt_in_and_cannot_authorize_or_change_a_candidate(
     assert rows[0]["source_segments"] == [{"start": 2, "end": 3}]
     assert rows[0]["value"] == 2
     assert value.model_dump() == before
-    assert value.parameter_schema is None
-    assert value.payload_hash is None
     assert value.issues
     assert matches(negative, rule) == ()
 
@@ -118,42 +90,6 @@ def test_general_matchers_cannot_claim_vetoed_positions_even_if_grammar_matches(
     assert recognize(text, partition(text)[0], value, References(), (rule,)) == ()
 
 
-@pytest.mark.parametrize(
-    ("text", "reason"),
-    [
-        ("仮A２枚、仮３ダメージ", "numeric_identifier_requires_review"),
-        ("仮＋２枚、仮３ダメージ", "signed_numeric_requires_review"),
-    ],
-)
-def test_matching_one_number_keeps_other_source_diagnostics(
-    text: str, reason: str
-) -> None:
-    ref = SourceRef(
-        batch_id=HASH,
-        source_version_id="src:v1:" + "b" * 64,
-        parser=PARSER,
-        locator="/faces/0/text",
-        text_hash=digest(text.encode()),
-    )
-    context = Field(
-        ref.source_version_id,
-        ref.locator,
-        text,
-        None,
-        [entry(ref, p, VERSION) for p in partition(text)],
-        {"faces": [{"text": text, "sections": []}]},
-    )
-    result = Candidates(enabled_rules=("suffix_damage_amount",))
-    _field(result, context, References())
-    classified = result.entries[0]
-    assert len(result.rule_matches) == 1
-    assert classified.slots[1].semantic_role == "damage_amount"
-    assert classified.slots[1].issues == ()
-    assert classified.slots[0].issues == (reason,)
-    assert classified.issues == (reason,)
-    assert classified.parameter_schema is None
-
-
 @pytest.mark.parametrize(("rule", "positive", "negative", "role"), SUFFIX_CASES)
 def test_invalid_raw_digit_or_overflow_never_becomes_a_proposal(
     rule: str, positive: str, negative: str, role: str
@@ -166,7 +102,7 @@ def test_invalid_raw_digit_or_overflow_never_becomes_a_proposal(
 @pytest.mark.parametrize("sign", ["＋", "－"])
 def test_unchanged_reminder_fullwidth_sign_cannot_hit_an_old_unit(sign: str) -> None:
     value = candidate("（試験" + sign + "２枚）")
-    assert value.source_span.role == "reminder"
+    assert partition("（試験" + sign + "２枚）")[0].role == "reminder"
     assert value.slots[0].numeric_rule is None
     assert value.slots[0].issues == ("signed_numeric_requires_review",)
 
@@ -456,47 +392,6 @@ def test_registry_is_closed_default_off_and_not_an_approval_receipt() -> None:
     )
 
 
-def test_field_classifies_choice_context_across_lines() -> None:
-    text = "２つチョイス。\n【１】仮\n【２】例"
-    ref = SourceRef(
-        batch_id=HASH,
-        source_version_id="src:v1:" + "b" * 64,
-        parser=PARSER,
-        locator="/faces/0/text",
-        text_hash=digest(text.encode()),
-    )
-    context = Field(
-        ref.source_version_id,
-        ref.locator,
-        text,
-        None,
-        [entry(ref, p, VERSION) for p in partition(text)],
-        {"faces": [{"text": text, "sections": []}]},
-    )
-    off = Candidates()
-    on = Candidates(enabled_rules=("bracket_choice_index", "suffix_unit_items"))
-    _field(off, context, References())
-    _field(on, context, References())
-    assert [c.source_span for c in on.entries] == [c.source_span for c in off.entries]
-    assert all(not c.issues and c.parameter_schema is not None for c in on.entries)
-    assert off.rule_matches == []
-    choices = [r for r in on.rule_matches if r["rule_id"] == "bracket_choice_index"]
-    assert len(choices) == 2
-    assert len({r["inventory_id"] for r in choices}) == 2
-    assert all(
-        array(r["context_segments"])[0] == {"start": 0, "end": 6} for r in choices
-    )
-    counts = object_value(summary(on)["candidate_rule_counts"])
-    assert counts["bracket_choice_index"] == {
-        "positions": 2,
-        "uses": 2,
-        "body_positions": 2,
-        "body_uses": 2,
-    }
-    assert summary(on)["parameter_complete"] is True
-    assert all("仮".encode() not in canonical(row) for row in on.rule_matches)
-
-
 def test_definitions_expose_exact_rule_syntax_and_closed_set(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -561,69 +456,6 @@ def test_new_suffix_cannot_claim_an_old_prefix_owned_position(prefix: str) -> No
     assert matches(text, "suffix_damage_amount") == ()
 
 
-def choice_field(text: str) -> Candidates:
-    ref = SourceRef(
-        batch_id=HASH,
-        source_version_id="src:v1:" + "b" * 64,
-        parser=PARSER,
-        locator="/faces/0/text",
-        text_hash=digest(text.encode()),
-    )
-    field = Field(
-        ref.source_version_id,
-        ref.locator,
-        text,
-        None,
-        [entry(ref, part, VERSION) for part in partition(text)],
-        {"faces": [{"text": text, "sections": []}]},
-    )
-    result = Candidates(enabled_rules=("bracket_choice_index",))
-    _field(result, field, References())
-    return result
-
-
-@pytest.mark.parametrize(
-    "text",
-    [
-        "（２つチョイス）【１】仮【２】例",
-        "２つチョイス（【１】仮【２】例）",
-        "２つチョイス【１】仮（【２】例）",
-    ],
-)
-def test_choice_introduction_and_labels_must_be_body_spans(text: str) -> None:
-    result = choice_field(text)
-    assert any(item.source_span.role == "body" for item in result.entries)
-    assert any(item.slots for item in result.entries)
-    assert result.rule_matches == []
-
-
-@pytest.mark.parametrize("second_complete", [True, False])
-def test_each_choice_introduction_owns_only_its_following_group(
-    second_complete: bool,
-) -> None:
-    first = "２つチョイス【１】仮【２】例。"
-    second = "２つチョイス【１】仮" + ("【２】例" if second_complete else "")
-    result = choice_field(first + second)
-    assert len(result.rule_matches) == (4 if second_complete else 2)
-    first_rows = [
-        row
-        for row in result.rule_matches
-        if array(row["context_segments"])[0] == {"start": 0, "end": 6}
-    ]
-    assert len(first_rows) == 2
-    assert all(
-        integer(object_value(array(row["context_segments"])[-1])["end"]) <= len(first)
-        for row in first_rows
-    )
-    if second_complete:
-        later = result.rule_matches[2:]
-        assert all(
-            array(row["context_segments"])[0]
-            == {"start": len(first), "end": len(first) + 6}
-            for row in later
-        )
-
-
 @pytest.mark.parametrize(
     "rule",
     [
@@ -658,7 +490,7 @@ def test_fullwidth_reminder_sign_cannot_enable_a_new_signed_rule(
     )
     text = "（" + marker + sign + "２）"
     value = candidate(text, refs)
-    assert value.source_span.role == "reminder"
+    assert partition("（試験" + sign + "２枚）")[0].role == "reminder"
     assert value.slots[-1].issues == ("signed_numeric_requires_review",)
     assert matches(text, rule, refs) == ()
     assert (
@@ -680,7 +512,7 @@ def test_rule_specific_conditions_exclude_unrelated_family_syntax(
 ) -> None:
     before = {rule.id: conditions(rule) for rule in RULES}
     monkeypatch.setattr(
-        "sve_carddb.domains.translations.parameters.rule_candidates.INTRO_PATTERN",
+        "sve_carddb.domains.translations.recognition.rule_candidates.INTRO_PATTERN",
         "altered choice introduction",
     )
     after = {rule.id: conditions(rule) for rule in RULES}

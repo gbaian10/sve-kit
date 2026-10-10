@@ -4,7 +4,7 @@ import pytest
 
 from sve_carddb.contracts.template_parameters import Range
 from sve_carddb.domains.translations.four_layer_choices import choice_alternative
-from sve_carddb.domains.translations.parameters.models import Hint
+from sve_carddb.domains.translations.recognition.models import Hint
 
 
 @pytest.mark.parametrize(

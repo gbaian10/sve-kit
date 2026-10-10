@@ -11,8 +11,8 @@ from sve_carddb.build import (
     t1_json,
     t1_qa,
     t1_related,
+    t1_rulings,
     t2_translation,
-    templates,
     translation_evidence,
 )
 from sve_carddb.build.compiler import CompiledSchema, compile_schema
@@ -33,7 +33,8 @@ TABLES = (
     *translation_evidence.TABLES,
     *t2_translation.TABLES,
     *four_layer.ANNOTATION_TABLES,
-    *templates.TABLES,
+    *four_layer.FRAME_TABLES,
+    *t1_rulings.TABLES,
 )
 REGISTRY = Registry(
     tables=(*t0.TABLES, *TABLES),
@@ -59,10 +60,15 @@ REGISTRY = Registry(
         ),
         Capability(
             "translation_templates",
-            tuple(table.name for table in templates.TABLES),
+            tuple(table.name for table in four_layer.FRAME_TABLES),
             requires=("translation_names",),
         ),
         Capability("art", ("art",)),
+        Capability(
+            "rulings",
+            tuple(table.name for table in t1_rulings.TABLES),
+            requires=("translation_templates",),
+        ),
         Capability(
             "en",
             tuple(table.name for table in t1_en.TABLES if table.name != "art"),
@@ -84,8 +90,8 @@ def compile_build(requested: tuple[str, ...] = ("t0",)) -> CompiledSchema:
         requested,
         schemas()
         | t1_json.schemas()
-        | templates.schemas()
         | four_layer.schemas()
+        | t1_rulings.schemas()
         | {"TranslationTokens": {"type": "null"}},
         version=SCHEMA_VERSION,
     )

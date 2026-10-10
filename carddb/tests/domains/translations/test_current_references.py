@@ -8,7 +8,7 @@ from pydantic import JsonValue
 from sve_carddb.core.json import canonical
 from sve_carddb.domains.translations.glossary.records import TermRecord
 from sve_carddb.domains.translations.inputs import load_glossary
-from sve_carddb.domains.translations.parameters.adopted_references import adopted
+from sve_carddb.domains.translations.recognition.adopted_references import adopted
 
 from ...support.translation_fixtures import name_term, write
 
@@ -34,7 +34,7 @@ def test_current_reference_uses_full_current_glossary(tmp_path: Path) -> None:
         tmp_path,
         {
             "translations/glossary/concepts/001.yaml": {
-                "format": 2,
+                "format": 3,
                 "kind": "translation_shard",
                 "records": list[JsonValue](values),
             }

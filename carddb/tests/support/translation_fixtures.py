@@ -70,7 +70,7 @@ def choice(
 def envelope(records: list[dict[str, JsonValue]]) -> dict[str, JsonValue]:
     ordered = records
     return {
-        "format": 2,
+        "format": 3,
         "kind": "translation_shard",
         "records": list[JsonValue](ordered),
     }

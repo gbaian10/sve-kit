@@ -11,7 +11,7 @@ from sve_carddb.contracts.source_binding import SourceSpan, TracePiece, verify_p
 from sve_carddb.contracts.template_parameters import Range
 from sve_carddb.core.json import digest
 from sve_carddb.domains.translations.four_layer_grammar import TOKEN_HEADER
-from sve_carddb.domains.translations.parameters.provenance import Unit, merged, nfkc
+from sve_carddb.domains.translations.recognition.provenance import Unit, merged, nfkc
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -190,7 +190,7 @@ def normalize_source(raw: str, source: SourceDescriptor) -> SourceField:
             else ()
         )
     else:
-        spans = _partition(raw, source.field == "section")
+        spans = partition_source(raw, source.field == "section")
     verify_partition(raw, spans)
     parts = []
     for ordinal, span in enumerate(spans):
@@ -266,7 +266,7 @@ def _line(line: str, offset: int, section: bool) -> tuple[SourceSpan, ...]:
     return tuple(result)
 
 
-def _partition(raw: str, section: bool) -> tuple[SourceSpan, ...]:
+def partition_source(raw: str, section: bool) -> tuple[SourceSpan, ...]:
     spans: list[SourceSpan] = []
     offset = 0
     for line in raw.split("\n"):

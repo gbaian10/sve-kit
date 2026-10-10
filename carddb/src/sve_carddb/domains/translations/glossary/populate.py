@@ -6,12 +6,9 @@ from sve_carddb.build.rows import insert_exact
 from sve_carddb.build.source_rows import insert_raw_sources
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.core.provenance import input_record
+from sve_carddb.domains.translations.four_layer_authored import shard
 from sve_carddb.domains.translations.glossary.evidence import validate_choice
-from sve_carddb.domains.translations.glossary.records import (
-    ChoiceRecord,
-    Shard,
-    TermRecord,
-)
+from sve_carddb.domains.translations.glossary.records import ChoiceRecord, TermRecord
 from sve_carddb.domains.translations.sources import Sources
 
 if TYPE_CHECKING:
@@ -43,7 +40,7 @@ def authored_sources(db: Database, snapshot: Snapshot, revision: str) -> dict[st
             },
             ("id",),
         )
-        for record in Shard.model_validate_json(content).records:
+        for record in shard(content).records:
             result[record.record_key] = identifier
     return result
 

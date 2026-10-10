@@ -14,7 +14,7 @@ from sve_carddb.domains.translations.four_layer_sources import (
     card_source,
     semantic_context,
 )
-from sve_carddb.domains.translations.parameters.adopted_references import adopted
+from sve_carddb.domains.translations.recognition.adopted_references import adopted
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_normalizer import SourceField
     from sve_carddb.domains.translations.four_layer_sources import CardSource
     from sve_carddb.domains.translations.inputs import Snapshot
-    from sve_carddb.domains.translations.parameters.rules import Rules
+    from sve_carddb.domains.translations.recognition.rules import Rules
     from sve_carddb.domains.translations.sources import Sources
 
 

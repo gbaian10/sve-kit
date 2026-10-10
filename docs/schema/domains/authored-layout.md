@@ -18,12 +18,12 @@
 | 定案（格式） | 歸檔類別、人工商品與收錄 | `products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
 | 定案（格式） | 官方商品身分對照 | `products/identities/<region>/001.yaml`，見 §11；獨立於商品內容採納 |
 | 待審技術契約 | 人工序號版次／官方序號補充 | `manual-printings/index.yaml`、`manual-printings/{printings,serials}/<filing_key>/<sequence>.yaml`，見 manual-printings-v1；不表示已有採納資料 |
-| 已定案（ADR-0011） | 裁定 | `rules/rulings/R-0001.yaml`，`format: 1, kind: ruling`，原本文不另包 data |
+| 已定案（ADR-0011） | 裁定 | `rules/rulings/R-0001.yaml`，`format: 2, kind: ruling`，revision 必填正整數，原本文不另包 data；依[四層契約 §9](four-layer-translation.md#9-舊模板重鍵與裁定引用) |
 | 定案（格式） | 身分修復與決定續版 | `identity-transitions/<sequence>.yaml`，見 §12 |
 | 待審技術契約 | Standard 構築／禁限／角色與必要 CR 引用 | `construction-adoptions/index.yaml`、`construction-adoptions/<area>/<region>/standard/<sequence>.yaml`，roles／cr 為 `<area>/<region>/<sequence>.yaml` 整區共用；見[構築採納契約](construction-adoption.md)，尚無正式採納資料 |
 | 提案 | 其他策展、標誌 | `curation/BP01/001.yaml` |
 | 待審（技術契約） | 數位對應與查核覆蓋採納 | `digital/links/index.yaml`、`digital/links/<filing_key>/<sequence>.yaml`；見[數位對應採納契約](digital-link-adoption.md)，真人link入口已實作、尚無逐卡正式遷入；coverage未實作 |
-| 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/templates/{definitions,values,candidates}/<sequence>.yaml`、`translations/{glossary,overrides}/<filing_key>/<sequence>.yaml`；四層目標另增 `translations/forms/<sequence>.yaml`（尚未實作）；推導結果不進 authored，見 §6 |
+| 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/templates/{definitions,values,candidates}/<sequence>.yaml`、`translations/{glossary,overrides}/<filing_key>/<sequence>.yaml`；形式位於 `translations/forms/<sequence>.yaml`；推導結果不進 authored，見 §6 |
 | 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog/adoptions/<area>/<sequence>.yaml`，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與當前值) |
 | 定案（技術契約） | 同號路由與預設版次覆寫 | `catalog/overrides/<area>/<sequence>.yaml`，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
 | 定案（新格式） | 數位名字／同名瀏覽政策 | `digital/policies/{names,links}.yaml`；名字與同名瀏覽各一份可修改的 current 規則，同名瀏覽是獨立非翻譯入口，見[名字契約](digital-name-policy.md) |
@@ -226,9 +226,8 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 ## 6. 模板、翻譯與語義例外
 
-現有 reader 的翻譯分片為 `format: 2, kind: translation_shard`；四層目標改為 format 3，
-依[共用契約 §2](four-layer-translation.md#2-authored-入口與替換界線)同批替換 reader／資料，新增 forms 入口，移除 source_exception。
-§1.1 版本表記錄切換前封套，不能當成已支援 format 3；沒有 index，模板來源清冊仍在建置時產生。
+正式翻譯分片為 `format: 3, kind: translation_shard`，reader、authored 與 builder 同步使用四層格式。
+依[共用契約 §2](four-layer-translation.md#2-authored-入口與替換界線)載入 forms，拒絕 source_exception 與舊格式，不設 index。
 完整欄位依[翻譯契約](translation-contract.md)與[清冊契約](template-source-replay.md)。
 舊決定封套、membership、核可收據、採納鏈、歷史 producer／expected 只供轉換，不是新 reader 的必要輸入。
 資料可直接改，退回用 git revert；只記來源類別 official/project/machine、低信心及必要資料理由。

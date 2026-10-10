@@ -383,19 +383,52 @@ def read_render_occurrences(
     expected: Rendered | None = None,
 ) -> tuple[RenderLeafOccurrence, ...]:
     """Every repeated output path retains its own link to the source ordinal set."""
-    translation = payload(_one(db, "translation", {"id": translation_id}))
-    text = string(translation["text"])
-    result = []
-    for row in db.select(
+    rows = db.select(
         "render_leaf_occurrence",
         db.columns("render_leaf_occurrence"),
         where={"translation_id": translation_id},
-    ):
+    )
+    return _render_rows(db, translation_id, domains, rows, expected)
+
+
+def read_owned_render_occurrences(
+    db: Database,
+    translation_id: str,
+    domains: Mapping[str, ClosedDomain],
+    expected: Rendered,
+) -> tuple[RenderLeafOccurrence, ...]:
+    """Read the source links belonging to this rendered owner."""
+    rows = tuple(
+        row
+        for binding_id in sorted({leaf.binding_id for leaf in expected.leaves})
+        for row in db.select(
+            "render_leaf_occurrence",
+            db.columns("render_leaf_occurrence"),
+            where={"translation_id": translation_id, "binding_id": binding_id},
+        )
+    )
+    return _render_rows(db, translation_id, domains, rows, expected)
+
+
+def _render_rows(
+    db: Database,
+    translation_id: str,
+    domains: Mapping[str, ClosedDomain],
+    rows: tuple[Row, ...],
+    expected: Rendered | None,
+) -> tuple[RenderLeafOccurrence, ...]:
+    translation = payload(_one(db, "translation", {"id": translation_id}))
+    text = string(translation["text"])
+    result = []
+    bindings: dict[str, SourceBinding] = {}
+    for row in rows:
         try:
             leaf = RenderLeafOccurrence.model_validate_json(canonical(payload(row)))
         except ValueError, TypeError:
             raise ValueError("Invalid stored render leaf occurrence") from None
-        binding = read_binding(db, leaf.binding_id, domains)
+        if leaf.binding_id not in bindings:
+            bindings[leaf.binding_id] = read_binding(db, leaf.binding_id, domains)
+        binding = bindings[leaf.binding_id]
         ordinals = {o.ordinal for o in binding.occurrences if o.slot == leaf.slot}
         if leaf.slot not in binding.values or not set(leaf.source_ordinals) <= ordinals:
             raise ValueError("Stored render leaf refers to missing source occurrences")
@@ -413,11 +446,11 @@ def read_render_occurrences(
         if use.values["context_id"] != translation["context_id"]:
             raise ValueError("Stored render leaf belongs to another source context")
         result.append(leaf)
-    rows = tuple(result)
+    parsed = tuple(result)
     if expected is not None:
         # A shared render retains separate source links for every exact owner.
         binding_ids = {leaf.binding_id for leaf in expected.leaves}
         expected.verify_occurrences(
-            tuple(row for row in rows if row.binding_id in binding_ids)
+            tuple(row for row in parsed if row.binding_id in binding_ids)
         )
-    return rows
+    return parsed

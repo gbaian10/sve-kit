@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from sve_carddb.domains.translations.parameters.models import Hint
+    from sve_carddb.domains.translations.recognition.models import Hint
 
 _INTRO = re.compile(
     r"(?<![A-Za-z0-9０-９])(?P<count>[0-9０-９]+)つ(?:まで)?チョイス(?:する|して)?[。:：]"

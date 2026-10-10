@@ -23,7 +23,6 @@ from sve_carddb.domains.card_extras import (
     populate_card_extras,
     require_card_extras_ready,
 )
-from sve_carddb.domains.catalog.adoption_models import Batch as SourceBatch
 from sve_carddb.domains.products import (
     FrozenProducts,
     load_product_identities,
@@ -38,6 +37,8 @@ from sve_carddb.domains.registry.preview import (
     plan_preview,
 )
 from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.rulings.reader import load as load_rulings
+from sve_carddb.domains.rulings.storage import write as write_rulings
 from sve_carddb.domains.source_corrections import FrozenImages
 from sve_carddb.domains.text_observations import (
     FrozenTexts,
@@ -45,8 +46,11 @@ from sve_carddb.domains.text_observations import (
     TextObservations,
 )
 from sve_carddb.domains.text_observations.composition import populate_text_preview
+from sve_carddb.domains.translations.corrected_sources import Corrections
 from sve_carddb.domains.translations.flavor import apply as apply_flavor
 from sve_carddb.domains.translations.flavor import load as load_flavor
+from sve_carddb.domains.translations.four_layer_build import Settings as FrameSettings
+from sve_carddb.domains.translations.four_layer_build import apply as apply_templates
 from sve_carddb.domains.translations.glossary.records import (
     ChoiceRecord,
     ConceptRecord,
@@ -55,19 +59,8 @@ from sve_carddb.domains.translations.glossary.records import (
 from sve_carddb.domains.translations.jp_sources import effect_bindings
 from sve_carddb.domains.translations.models import EffectTerm, SourceValue
 from sve_carddb.domains.translations.names.resolve import prepare as prepare_names
-from sve_carddb.domains.translations.parameters.adopted_references import adopted
-from sve_carddb.domains.translations.parameters.rules import load as load_rules
+from sve_carddb.domains.translations.recognition.rules import load as load_rules
 from sve_carddb.domains.translations.sources import Sources as TranslationSources
-from sve_carddb.domains.translations.templates.build import apply as apply_templates
-from sve_carddb.domains.translations.templates.files import Files
-from sve_carddb.domains.translations.templates.loader import (
-    from_files,
-    validate_templates,
-)
-from sve_carddb.domains.translations.templates.references import (
-    References as TemplateReferences,
-)
-from sve_carddb.domains.translations.templates.sources import Sources as TemplateSources
 from sve_carddb.export.project import Decisions, Projection, Settings, project
 from sve_carddb.export.transport import Batch, Ownership
 from sve_carddb.images.checks import ImageChecks
@@ -83,9 +76,10 @@ if TYPE_CHECKING:
     from sve_carddb.domains.catalog.loader import Prepared
     from sve_carddb.domains.registry.records import CorrectionEvidence
     from sve_carddb.domains.registry.snapshot import RegistrySnapshot
-    from sve_carddb.domains.text_observations.vocabulary import Vocabulary
+    from sve_carddb.domains.translations.four_layer_authored import (
+        Inputs as FrameInputs,
+    )
     from sve_carddb.domains.translations.names.resolve import Names
-    from sve_carddb.domains.translations.templates.loader import Validated
     from sve_carddb.images.assets import ImageBuild
     from sve_carddb.ingest.archive.frozen_sources import FrozenBatches
 
@@ -217,35 +211,14 @@ def _current_names(
     return prepare_names(translation.load(), originals, translation, sources, db)
 
 
-def _templates(
-    inputs: AdoptionInputs,
-    build: BuildContext,
-    stores: dict[str, Path],
-    vocabulary: Vocabulary,
-    batch: SourceBatch,
-    batches: FrozenBatches,
-) -> Validated | None:
-    """Template source positions come from this build's sealed JP batch, not from Git."""
-    if inputs.translation_inputs() is None:
-        return None
+def _templates(inputs: AdoptionInputs) -> FrameInputs | None:
+    """The shared closure performs A; exact owner compilation performs B inside this build."""
     translation = inputs.translation_inputs()
-    assert translation is not None
-    templates = from_files(Files(inputs.authored_revision, translation.load().closure))
-    if not templates.records:
+    if translation is None:
         return None
-    found = adopted(
-        templates.glossary,
-        TranslationSources(stores, inputs.repository, build, batches=batches),
-    )
-    references = TemplateReferences(
-        card_names=found.card_names,
-        terms=found.terms,
-        vocabulary=vocabulary,
-        pins=found.pins,
-    )
-    rules = load_rules(inputs.repository)
-    return validate_templates(
-        templates, TemplateSources(stores, references, rules, batches=batches), (batch,)
+    current = translation.load().four_layer
+    return (
+        current if any(r.kind == "sentence_template" for r in current.records) else None
     )
 
 
@@ -445,9 +418,17 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     )
     configuration = adoptions.configuration() | {
         "product_identity": identities.configuration(),
-        "offline_recipe": inputs.model_dump(mode="json", exclude={"repo", "archive"}),
+        "offline_recipe": inputs.model_dump(
+            mode="json",
+            exclude={"repo", "archive"},
+        ),
         "selected_regions": ["en", "jp"],
         "published_history": "explicit-empty-no-releases",
+    }
+    rulings = load_rulings(inputs.repo)
+    configuration["ruling_references"] = {
+        "profile": "ruling-authored-v2",
+        "documents": [item.source.model_dump(mode="json") for item in rulings],
     }
     if names is not None:
         configuration |= names.configuration(inputs)
@@ -461,6 +442,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             "translation_evidence",
             "translation_names",
             "translation_templates",
+            "rulings",
         )
     )
     prepared = _prepare_catalog(
@@ -473,16 +455,14 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     configuration |= observations.configuration(vocabulary, ())
     context = BuildContext.from_inputs(inputs.revision, configuration)
     flavor = load_flavor(authored_root(inputs.repo))
-    templates = _templates(
-        adoptions,
-        context,
-        stores,
-        vocabulary,
-        SourceBatch(batch_id=jp.card_batch),
-        batches,
-    )
+    templates = _templates(adoptions)
     translation_sources = TranslationSources(
-        stores, inputs.repo, context, identity.snapshot, batches=batches
+        stores,
+        inputs.repo,
+        context,
+        identity.snapshot,
+        batches=batches,
+        corrections=None if texts.corrections is None else Corrections(texts),
     )
     image_report: dict[str, JsonValue] | None = None
     name_result = None
@@ -543,14 +523,37 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     sources=name_sources,
                 )
             flavor_report = apply_flavor(db, flavor)
+            translation = adoptions.translation_inputs()
             template_report = (
-                None if templates is None else apply_templates(db, templates, LANG)
+                None
+                if templates is None or translation is None
+                else apply_templates(
+                    db,
+                    templates,
+                    translation.load(),
+                    FrameSettings(
+                        name_sources,
+                        vocabulary,
+                        load_rules(inputs.repo),
+                        jp.card_batch,
+                        inputs.revision,
+                        LANG,
+                    ),
+                )
             )
             link_uses = () if link_result is None else link_result.record.uses
+            ruling_report = write_rulings(db, rulings, inputs.revision)
             name_uses = () if name_result is None else name_result.record.uses
             record = input_record(
                 context,
-                (*parents.uses, *added.uses, *adopted.uses, *link_uses, *name_uses),
+                (
+                    *parents.uses,
+                    *added.uses,
+                    *adopted.uses,
+                    *link_uses,
+                    *name_uses,
+                    *name_sources.uses,
+                ),
             )
             if mounted is not None:
                 record, image_report = mounted.populate(
@@ -659,6 +662,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         report["effect_translations"] = (
             None if template_report is None else template_report.payload()
         )
+        report["ruling_references"] = ruling_report.payload()
         if name_result is not None:
             report["name_application"] = name_result.report
         if image_report is not None:

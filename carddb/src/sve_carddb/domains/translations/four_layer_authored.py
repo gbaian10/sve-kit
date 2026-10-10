@@ -20,6 +20,7 @@ from sve_carddb.contracts.source_binding import SourceSpan, TypedValue
 from sve_carddb.core.authored import check_path, read, require_directory, shards
 from sve_carddb.core.json import canonical, parse
 from sve_carddb.core.models import Hash, RecordData, Text
+from sve_carddb.domains.translations.four_layer_candidates import CandidateRecord
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 from sve_carddb.domains.translations.four_layer_render import validate_form
 from sve_carddb.domains.translations.glossary.records import (
@@ -33,7 +34,6 @@ from sve_carddb.domains.translations.glossary.records import (
     TermRecord,
 )
 from sve_carddb.domains.translations.models import AuthoredValue, Quality, SourceValue
-from sve_carddb.domains.translations.templates.records import CandidateRecord
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

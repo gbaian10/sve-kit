@@ -31,7 +31,7 @@ from sve_carddb.ingest.archive.source_archive import seal_batch
 from sve_carddb.parse.pages.extract_jp import extract_card
 from sve_carddb.parse.pages.official_jp import card_url
 
-from ..domains.registry.test_registry_preview_archive import RAW
+from ..domains.registry.test_registry_preview_archive import RAW as RAW  # ruff: ignore[useless-import-alias] -- tests deliberately replace the synthetic HTML before sealing
 from ..ingest.test_source_archive import _put, _resource, _store
 from .adoption_fixtures import commit, git
 from .digital_link_fixtures import envelope, record, write

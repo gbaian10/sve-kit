@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from sve_carddb.build import Database, Value
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
     from sve_carddb.domains.translations.inputs import Snapshot
-    from sve_carddb.domains.translations.parameters.references import References
+    from sve_carddb.domains.translations.recognition.references import References
     from sve_carddb.domains.translations.sources import Sources
 
 _NAMED = re.compile(r"(?:^|[。:：}】])(?:自分|相手)の場の『(?P<name>X)』(?:を|が)?$")

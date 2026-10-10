@@ -66,7 +66,7 @@ def test_current_import_rechecks_source_without_creating_decision(
                 )
                 ref["text_hash"] = "sha256:" + "0" * 64
         payload: dict[str, JsonValue] = {
-            "format": 2,
+            "format": 3,
             "kind": "translation_shard",
             "records": list[JsonValue](rows),
         }

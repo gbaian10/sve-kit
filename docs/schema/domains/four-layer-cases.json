@@ -533,6 +533,111 @@
       "existing_authored_sources": [
         "source:fixture"
       ]
+    },
+    "ruling_document": {
+      "format": 2,
+      "kind": "ruling",
+      "id": "R-0001",
+      "revision": 1,
+      "question": "A synthetic question",
+      "decision": "A synthetic answer",
+      "evidence": [],
+      "strength": "inferred",
+      "decided_on": "2026-10-10",
+      "applies_to": [
+        "T-old",
+        "T-old",
+        "E.synthetic"
+      ],
+      "hint": {
+        "ja": "合成"
+      }
+    },
+    "ruling_reference": {
+      "ruling_ref": {
+        "id": "R-0001",
+        "revision": 1,
+        "reference_ordinal": 0
+      },
+      "ruling_source": {
+        "path": "authored/rules/rulings/R-0001.yaml",
+        "sha256": "sha256:4254207537abb26f5158f3f3dde2b80ddc3418f8c57bcf94409955d5f379c282"
+      },
+      "level": "reference",
+      "legacy": {
+        "namespace": null,
+        "template_id": "T-old",
+        "occurrence": null
+      },
+      "status": "pending",
+      "target": null,
+      "candidates": [],
+      "reason": "unknown_legacy_scope"
+    },
+    "ruling_occurrences": [
+      {
+        "owner": {
+          "kind": "face_revision",
+          "revision_id": "revision:synthetic-a"
+        },
+        "field": "effect",
+        "ordinal": null,
+        "source_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "line_ordinal": 0,
+        "role": "body",
+        "segments": [
+          {
+            "start": 0,
+            "end": 4
+          }
+        ]
+      },
+      {
+        "owner": {
+          "kind": "face_revision",
+          "revision_id": "revision:synthetic-b"
+        },
+        "field": "effect",
+        "ordinal": null,
+        "source_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "line_ordinal": 0,
+        "role": "body",
+        "segments": [
+          {
+            "start": 0,
+            "end": 4
+          }
+        ]
+      }
+    ],
+    "ruling_typed_target": {
+      "frame_id": "frame:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "semantic_variant": {
+        "state": "resolved",
+        "key": "synthetic.variant.v1",
+        "scope": null
+      },
+      "scope": {
+        "role": "body",
+        "domain": "synthetic.domain.v1"
+      },
+      "occurrence": {
+        "owner": {
+          "kind": "face_revision",
+          "revision_id": "revision:synthetic-a"
+        },
+        "field": "effect",
+        "ordinal": null,
+        "source_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "line_ordinal": 0,
+        "role": "body",
+        "segments": [
+          {
+            "start": 0,
+            "end": 4
+          }
+        ]
+      }
     }
   },
   "cases": [
@@ -3156,18 +3261,15 @@
     {
       "group": "FL-025",
       "id": "unknown_legacy_scope",
-      "operation": "ruling_mapping",
+      "operation": "ruling_reference_shape",
       "input": {
-        "fixture": "ruling_base",
-        "changes": {
-          "/legacy_scope": null,
-          "/requested_status": "pending"
-        }
+        "fixture": "ruling_reference"
       },
       "expected": {
-        "result": "pending",
-        "reason": "unknown_legacy_scope",
-        "active": false
+        "result": "accept",
+        "active": false,
+        "level": "reference",
+        "reason": "unknown_legacy_scope"
       }
     },
     {
@@ -3458,6 +3560,425 @@
       "expected": {
         "result": "reject",
         "reason": "unknown_form_case"
+      }
+    },
+    {
+      "group": "FL-025",
+      "id": "known_namespace_unknown_scope",
+      "operation": "ruling_reference_shape",
+      "input": {
+        "fixture": "ruling_reference",
+        "changes": {
+          "/legacy/namespace": "synthetic.normalizer.v1"
+        }
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-025",
+      "id": "reference_candidates",
+      "operation": "ruling_reference_shape",
+      "input": {
+        "fixture": "ruling_reference",
+        "changes": {
+          "/candidates": [
+            {
+              "frame_id": "frame:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "semantic_variant": {
+                "state": "resolved",
+                "key": "synthetic.variant.v1",
+                "scope": null
+              },
+              "scope": {
+                "role": "body",
+                "domain": "synthetic.domain.v1"
+              },
+              "occurrence": {
+                "owner": {
+                  "kind": "face_revision",
+                  "revision_id": "revision:synthetic-a"
+                },
+                "field": "effect",
+                "ordinal": null,
+                "source_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "line_ordinal": 0,
+                "role": "body",
+                "segments": [
+                  {
+                    "start": 0,
+                    "end": 4
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-025",
+      "id": "reference_target",
+      "operation": "ruling_reference_shape",
+      "input": {
+        "fixture": "ruling_reference",
+        "changes": {
+          "/target": {
+            "frame_id": "frame:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "semantic_variant": {
+              "state": "resolved",
+              "key": "synthetic.variant.v1",
+              "scope": null
+            },
+            "scope": {
+              "role": "body",
+              "domain": "synthetic.domain.v1"
+            },
+            "occurrence": {
+              "owner": {
+                "kind": "face_revision",
+                "revision_id": "revision:synthetic-a"
+              },
+              "field": "effect",
+              "ordinal": null,
+              "source_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "line_ordinal": 0,
+              "role": "body",
+              "segments": [
+                {
+                  "start": 0,
+                  "end": 4
+                }
+              ]
+            }
+          }
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-025",
+      "id": "reference_resolved",
+      "operation": "ruling_reference_shape",
+      "input": {
+        "fixture": "ruling_reference",
+        "changes": {
+          "/status": "resolved"
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-025",
+      "id": "reference_fake_occurrence",
+      "operation": "ruling_reference_shape",
+      "input": {
+        "fixture": "ruling_reference",
+        "changes": {
+          "/legacy/occurrence": {
+            "owner": {
+              "kind": "face_revision",
+              "revision_id": "revision:synthetic-a"
+            },
+            "field": "effect",
+            "ordinal": null,
+            "source_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "line_ordinal": 0,
+            "role": "body",
+            "segments": [
+              {
+                "start": 0,
+                "end": 4
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-025",
+      "id": "unknown_fake_namespace",
+      "operation": "ruling_reference_shape",
+      "input": {
+        "fixture": "ruling_reference",
+        "changes": {
+          "/legacy/namespace": "unknown"
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-025",
+      "id": "null_occurrence_no_candidate",
+      "operation": "ruling_reference_shape",
+      "input": {
+        "fixture": "ruling_reference",
+        "changes": {
+          "/reason": "no_candidate"
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-025",
+      "id": "occurrence_null_namespace",
+      "operation": "ruling_reference_shape",
+      "input": {
+        "fixture": "ruling_reference",
+        "changes": {
+          "/level": "occurrence",
+          "/legacy/occurrence": {
+            "owner": {
+              "kind": "face_revision",
+              "revision_id": "revision:synthetic-a"
+            },
+            "field": "effect",
+            "ordinal": null,
+            "source_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "line_ordinal": 0,
+            "role": "body",
+            "segments": [
+              {
+                "start": 0,
+                "end": 4
+              }
+            ]
+          },
+          "/reason": "no_candidate"
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-025",
+      "id": "occurrence_unknown_reason",
+      "operation": "ruling_reference_shape",
+      "input": {
+        "fixture": "ruling_reference",
+        "changes": {
+          "/level": "occurrence",
+          "/legacy/namespace": "synthetic.normalizer.v1",
+          "/legacy/occurrence": {
+            "owner": {
+              "kind": "face_revision",
+              "revision_id": "revision:synthetic-a"
+            },
+            "field": "effect",
+            "ordinal": null,
+            "source_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "line_ordinal": 0,
+            "role": "body",
+            "segments": [
+              {
+                "start": 0,
+                "end": 4
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "version_two_revision_one",
+      "operation": "ruling_document_shape",
+      "input": {
+        "fixture": "ruling_document",
+        "changes": {}
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "revision_zero",
+      "operation": "ruling_document_shape",
+      "input": {
+        "fixture": "ruling_document",
+        "changes": {
+          "/revision": 0
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "revision_negative",
+      "operation": "ruling_document_shape",
+      "input": {
+        "fixture": "ruling_document",
+        "changes": {
+          "/revision": -1
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "revision_boolean",
+      "operation": "ruling_document_shape",
+      "input": {
+        "fixture": "ruling_document",
+        "changes": {
+          "/revision": true
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "revision_string",
+      "operation": "ruling_document_shape",
+      "input": {
+        "fixture": "ruling_document",
+        "changes": {
+          "/revision": "1"
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "revision_null",
+      "operation": "ruling_document_shape",
+      "input": {
+        "fixture": "ruling_document",
+        "changes": {
+          "/revision": null
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "revision_unsafe",
+      "operation": "ruling_document_shape",
+      "input": {
+        "fixture": "ruling_document",
+        "changes": {
+          "/revision": 9007199254740992
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "format_one",
+      "operation": "ruling_document_shape",
+      "input": {
+        "fixture": "ruling_document",
+        "changes": {
+          "/format": 1
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "version_alias",
+      "operation": "ruling_document_shape",
+      "input": {
+        "fixture": "ruling_document",
+        "changes": {
+          "/version": 1
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "unknown_field",
+      "operation": "ruling_document_shape",
+      "input": {
+        "fixture": "ruling_document",
+        "changes": {
+          "/extra": null
+        }
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-026",
+      "id": "missing_revision",
+      "operation": "ruling_document_shape",
+      "input": {
+        "fixture": "ruling_document",
+        "changes": {},
+        "remove": [
+          "/revision"
+        ]
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-027",
+      "id": "missing_nullable_occurrence",
+      "operation": "ruling_reference_shape",
+      "input": {
+        "fixture": "ruling_reference",
+        "changes": {},
+        "remove": [
+          "/legacy/occurrence"
+        ]
+      },
+      "expected": {
+        "result": "reject"
+      }
+    },
+    {
+      "group": "FL-027",
+      "id": "missing_nullable_target",
+      "operation": "ruling_reference_shape",
+      "input": {
+        "fixture": "ruling_reference",
+        "changes": {},
+        "remove": [
+          "/target"
+        ]
+      },
+      "expected": {
+        "result": "reject"
       }
     }
   ]

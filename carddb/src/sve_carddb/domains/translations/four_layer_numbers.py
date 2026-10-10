@@ -28,7 +28,7 @@ from sve_carddb.domains.translations.four_layer_units import (
     source_unit,
     written_card_np,
 )
-from sve_carddb.domains.translations.parameters.explicit_rules import COUNTER_NAMES
+from sve_carddb.domains.translations.recognition.explicit_rules import COUNTER_NAMES
 
 if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_classification import (
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
         SourceField,
         SourcePart,
     )
-    from sve_carddb.domains.translations.parameters.models import Hint
+    from sve_carddb.domains.translations.recognition.models import Hint
 
 _ROLES = {
     "damage_amount": "damage_amount",

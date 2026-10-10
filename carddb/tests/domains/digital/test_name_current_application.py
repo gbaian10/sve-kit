@@ -115,7 +115,7 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
         root / "authored",
         {
             "translations/glossary/concepts/001.yaml": {
-                "format": 2,
+                "format": 3,
                 "kind": "translation_shard",
                 "records": list[JsonValue](ordered),
             }
@@ -338,13 +338,17 @@ def test_current_variant_cannot_select_two_concepts(
         ordered_assignments = assignments
         content = canonical(
             {
-                "format": 2,
+                "format": 3,
                 "kind": "translation_shard",
                 "records": list[JsonValue](ordered_assignments),
             }
         )
         snapshot = replace(
             case.replay.snapshot,
+            closure=(
+                *case.replay.snapshot.closure,
+                ("translations/overrides/names/001.yaml", content, content),
+            ),
             shards=(
                 *case.replay.snapshot.shards,
                 ("translations/overrides/names/001.yaml", content, content),

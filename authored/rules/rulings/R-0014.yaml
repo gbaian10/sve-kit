@@ -1,6 +1,7 @@
-format: 1
+format: 2
 kind: ruling
 id: R-0014
+revision: 1
 question: 依存與 CR 10.9.1.6 都無法決定先後、發生時點（timestamp）又相同的多個持續效果，要照什麼順序套用？
 decision: 回合玩家控制的效果先，同一玩家的效果由該玩家自選順序；選定的順序保存下來，之後重算沿用、不再詢問。有效效果集合改變時，只對尚未定序的部分續補，保留既有相對順序。
 evidence:

@@ -29,9 +29,7 @@ from sve_carddb.contracts.source_binding import (
     SourceBinding,
 )
 from sve_carddb.contracts.template_parameters import Range
-from sve_carddb.contracts.template_parameters import SourceSpan as ParameterSpan
 from sve_carddb.core.json import canonical, digest
-from sve_carddb.domains.catalog.adoption_models import SourceRef
 from sve_carddb.domains.translations.four_layer_kinds import KindFacts
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION, SourcePart
 from sve_carddb.domains.translations.four_layer_numbers import (
@@ -44,11 +42,12 @@ from sve_carddb.domains.translations.four_layer_semantics import (
     classify_semantics,
 )
 from sve_carddb.domains.translations.four_layer_units import field_filter
-from sve_carddb.domains.translations.parameters.candidate_matching import classify
-from sve_carddb.domains.translations.parameters.references import References, Resolution
-from sve_carddb.domains.translations.parameters.spans import Located
-from sve_carddb.domains.translations.source_inventory.inventory import entry
-from sve_carddb.domains.translations.source_inventory.normalizer import Part, Segment
+from sve_carddb.domains.translations.recognition.candidate_matching import classify
+from sve_carddb.domains.translations.recognition.lexical import Part
+from sve_carddb.domains.translations.recognition.references import (
+    References,
+    Resolution,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -60,8 +59,8 @@ if TYPE_CHECKING:
         TypedValue,
     )
     from sve_carddb.domains.translations.four_layer_normalizer import SourceField
-    from sve_carddb.domains.translations.parameters.models import Candidate, Hint
-    from sve_carddb.domains.translations.parameters.rules import Rules
+    from sve_carddb.domains.translations.recognition.models import Candidate, Hint
+    from sve_carddb.domains.translations.recognition.rules import Rules
 
 type Leaf = tuple[LeafSlot, TypedValue, LeafOccurrence]
 
@@ -308,7 +307,7 @@ class Classifier:
                 if not named.issues
                 else None,
             )
-        candidate = self._candidate(raw, source, part)
+        candidate = self._candidate(raw, part)
         issues = set(candidate.issues) - {
             "legacy_parenthesis_classification_requires_review"
         }
@@ -363,36 +362,19 @@ class Classifier:
             semantics,
         )
 
-    def _candidate(
-        self, raw: str, source: SourceDescriptor, part: SourcePart
-    ) -> Candidate:
+    def _candidate(self, raw: str, part: SourcePart) -> Candidate:
         role = part.source_span.role
         if role not in {"body", "reminder", "token_header", "layout"}:
             raise ValueError("Unsupported parameter source role")
-        spans = tuple(
-            Segment(start=s.start, end=s.end) for s in part.source_span.segments
-        )
-        projected = Part(part.line_ordinal, role, spans, part.canonical_source)
-        ref = SourceRef.model_validate(
-            source.source_ref.model_dump()
-            | {"text_hash": "sha256:" + source.source_hash}
-        )
-        located = Located(
-            part.ordinal,
-            part.line_ordinal,
-            ParameterSpan(
-                role=role,
-                segments=tuple(
-                    Range(start=s.start, end=s.end) for s in part.source_span.segments
-                ),
-                anchor=part.source_span.anchor,
-            ),
+        projected = Part(
+            role,
+            tuple(Range(start=s.start, end=s.end) for s in part.source_span.segments),
+            part.canonical_source,
+            part.units,
         )
         return classify(
             raw,
             projected,
-            entry(ref, projected, VERSION),
-            located,
             self.references,
             self.rules.enabled(),
             units=part.units,

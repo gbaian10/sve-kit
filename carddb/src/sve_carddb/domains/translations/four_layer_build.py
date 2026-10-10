@@ -33,7 +33,8 @@ from sve_carddb.domains.translations.four_layer_render import (
     Renderer,
     SelectedTarget,
 )
-from sve_carddb.domains.translations.four_layer_sources import descriptor
+from sve_carddb.domains.translations.four_layer_selection import Controls
+from sve_carddb.domains.translations.four_layer_sources import descriptor, empty_field
 from sve_carddb.domains.translations.four_layer_storage import (
     write_form,
     write_frame,
@@ -49,7 +50,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_classification import Classifier
     from sve_carddb.domains.translations.four_layer_pipeline import CompiledField
     from sve_carddb.domains.translations.inputs import Snapshot
-    from sve_carddb.domains.translations.parameters.rules import Rules
+    from sve_carddb.domains.translations.recognition.rules import Rules
     from sve_carddb.domains.translations.sources import Sources
 
 
@@ -188,7 +189,11 @@ def _confirmed(db: Database, field: OwnerField) -> bool:
 
 
 def _compile(
-    db: Database, frames: Frames, classifier: Classifier, settings: Settings
+    db: Database,
+    frames: Frames,
+    classifier: Classifier,
+    settings: Settings,
+    controls: Controls,
 ) -> _Plan:
     compiled: list[CompiledField] = []
     canonical_sources: dict[str, str] = {}
@@ -200,10 +205,24 @@ def _compile(
         if not _confirmed(db, field):
             reasons["unconfirmed_identity"] += 1
             continue
+        if empty_field(db, field):
+            reasons["empty_source_field"] += 1
+            continue
         source = descriptor(db, settings.sources, field, settings.batch_id)
-        result = compile_card_field(db, settings.sources, source, classifier, frames)
+        result = compile_card_field(
+            db,
+            settings.sources,
+            source,
+            classifier,
+            controls.frames_for(source.source_unit_id, source.source_hash, frames),
+        )
+        controls.verify(result)
         if not result.complete:
-            reasons["unmatched_source_frame"] += 1
+            reasons[
+                "missing_name_concept"
+                if "missing_card_name_concept" in result.issues
+                else "unmatched_source_frame"
+            ] += 1
             pending.update(result.issues)
             continue
         compiled.append(result)
@@ -214,6 +233,7 @@ def _compile(
             )
             if previous != part.canonical_source:
                 raise ValueError("Frame hash collision across exact owner fields")
+    controls.verify_closure()
     return _Plan(tuple(compiled), canonical_sources, total, reasons, pending)
 
 
@@ -240,7 +260,8 @@ def _populate(
             forms[record.data.id, record.data.lang] = Form(
                 record.data, record.origin, record.low_confidence
             )
-        elif isinstance(record, (TargetRecord, TargetVariantRecord)):
+    for record in inputs.records:
+        if isinstance(record, (TargetRecord, TargetVariantRecord)):
             write_target(db, record, audit[record.record_key])
             if isinstance(record, TargetRecord):
                 selected[record.data.template_id, record.data.lang] = SelectedTarget(
@@ -257,14 +278,24 @@ def apply(
     classifier = prepare_classifier(
         db, snapshot, settings.sources, settings.vocabulary, settings.rules
     )
-    plan = _compile(db, frames, classifier, settings)
+    controls = Controls(inputs)
+    plan = _compile(db, frames, classifier, settings, controls)
     forms, selected = _populate(db, inputs, plan, settings)
     renderer = Renderer(
         labels(db, settings.lang), {}, forms, domains=classifier.domains
     )
+    controls.prepare_labels(db, classifier, settings.sources)
     translated = low = 0
     for field in plan.fields:
-        result = render_field(db, field, renderer, selected, settings.lang)
+        chosen = controls.select(field, renderer, selected, settings.lang)
+        result = render_field(
+            db,
+            field,
+            chosen.renderer,
+            chosen.targets,
+            settings.lang,
+            suppress=chosen.suppress,
+        )
         if result.rendered is None:
             plan.reasons.update(result.issues)
         else:

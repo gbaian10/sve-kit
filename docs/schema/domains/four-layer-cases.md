@@ -93,3 +93,14 @@ expected 的 reason 是本規格原因碼，實作可映射既有公開診斷，
 | B20 | SD08-006、BP10-P18、BP10-P24 | FL-013：完整卡名引用；中文同字位置另用合成值驗 |
 
 這些索引是來源邊界要求，不是重新發布官方文字，也不是任何卡已取得 DSL reviewed／verified 的證明。
+
+## 裁定版本與引用層級固定案例
+
+`ruling_document` 是完整自編裁定封套；`ruling_reference` 是帶檔案實際 hash、原引用 ordinal 與明示 null 的完整 RulingResolution。
+`ruling_occurrences` 保存兩個完整 OccurrenceKey，`ruling_typed_target` 保存完整 target；舊 `occ:a` 等簡寫僅說明既有 split／merge 意義，不送正式邊界。
+`ruling_document_shape` 走裁定 public reader，`ruling_reference_shape` 走封閉 Resolution 型別；accept 案例逐值比對。
+
+本次 #498 的 builder／DB 測試保存相同引用字串的兩個原 ordinal；IR 引用原樣保留，pending 不得進入 active 依賴。
+已知域的 split／merge、完整用途集合與候選來源檢查屬 #499 後續實作的規格案例，不能當成本次已通過的行為。
+只改裁定 format／revision 的切換必須另驗去除這兩欄後 parsed payload 完全相同；此逐欄比對是切換驗收報告，不作為正式建置的外部輸入。
+已知舊域、多用途、候選與完整用途集合的行為由 #499 補上，#498 只驗引用層級與非模板引用的保留。

@@ -16,7 +16,7 @@ from sve_carddb.domains.translations.four_layer_classification import (
     Term,
 )
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
-from sve_carddb.domains.translations.parameters.rules import LEGACY_IDS, Rule, Rules
+from sve_carddb.domains.translations.recognition.rules import LEGACY_IDS, Rule, Rules
 
 from .test_four_layer_normalizer import source as fixture_source
 
@@ -166,14 +166,20 @@ def test_unclassified_control_text_stays_in_exact_pending_frame() -> None:
     field = normalize_source(raw, source(raw))
     part = field.parts[0]
     engine = classifier()
-    definition, binding = engine.recognize(raw, field.source, part).bind(
+    definition, _binding = engine.recognize(raw, field.source, part).bind(
         field.source, part
     )
-    field.verify(raw, (definition,), (binding,), engine.domains)
+    pairs = tuple(
+        engine.recognize(raw, field.source, p).bind(field.source, p)
+        for p in field.parts
+    )
+    field.verify(
+        raw, tuple(f for f, _ in pairs), tuple(b for _, b in pairs), engine.domains
+    )
     assert definition.projection.projection_kind == "pending"
     assert definition.semantic_variant.scope is not None
     assert definition.semantic_variant.scope.source_hash == field.source.source_hash
-    assert "しなくてもよい" in part.canonical_source
+    assert "しなくてもよい" in field.parts[1].canonical_source
     assert "ランダム" in part.canonical_source
 
 

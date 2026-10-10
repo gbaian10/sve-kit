@@ -12,6 +12,8 @@ R-0009 依 Q940／Q852／Q2418 修正長寫條件的誘發時檢查；R-0002 結
 
 2026-10-09 [#476](https://github.com/gbaian10/sve-kit/issues/476) 落地註記（以下原文為歷史決定）：正式位置改為 `authored/rules/rulings/`，文件封套為 `format: 1, kind: ruling`；裁定證據與原決定不變。
 
+2026-10-10 [#498](https://github.com/gbaian10/sve-kit/issues/498) 落地註記：現行裁定封套改為 `format: 2, kind: ruling` 並明寫 `revision: 1`，初始化切換時內容的版次，不追認未編版歷史。正文、證據、日期、applies_to 順序與 supersedes 不變；未知舊域按[四層契約 §9](../schema/domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)保留引用層級 pending，不授予執行資格。
+
 集中登錄 RulingRecord，正式資料位置為 authored/rulings。欄位包括 question、decision、evidence、strength、decided_by、applies_to、hint、supersedes。`applies_to` 型別為 `List<TemplateId | IrElementId>`：句型 ID（`T…`）來自全卡句型分類，IR 元素 ID 用於不限於特定句型的引擎層語義。Evidence 保存 CR 版本／條號、Q&A 編號／日期／問題範圍、卡片來源快照與必要原文；專案決定記日期、責任與理由，不假造官方編號。`decided_by.who` 為封閉值：`user` 表示經使用者裁定，`agents` 表示起草與審核的 agent 意見一致而依專案原則直接採用；參與者可另列，不另加標記欄位。
 
 Official 表示來源直接支持；Generalized 表示由條文明文適用範圍或同類 Q&A 推得；Inferred 表示專案推定；Undecided 不能驅動自動結算或肯定提示。強度落在具体結論，不能因同份 ADR 有一條官方引用就整份升 official。使用者接受推定也不改變它的證據強度。

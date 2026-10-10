@@ -14,9 +14,9 @@ from sve_carddb.domains.products.identity_models import IdentityShard
 from sve_carddb.domains.products.models import Shard as ProductShard
 from sve_carddb.domains.registry.storage import read_base_files, read_yaml
 from sve_carddb.domains.translations.flavor import Shard as FlavorShard
-from sve_carddb.domains.translations.glossary.records import Shard as GlossaryShard
-from sve_carddb.domains.translations.parameters.rules import Rules
-from sve_carddb.domains.translations.templates.records import Shard as TemplateShard
+from sve_carddb.domains.translations.four_layer_authored import Shard as GlossaryShard
+from sve_carddb.domains.translations.four_layer_authored import Shard as TemplateShard
+from sve_carddb.domains.translations.recognition.rules import Rules
 from sve_carddb.images.crops import CropOverrides
 
 if TYPE_CHECKING:

@@ -145,3 +145,6 @@
 | **權威狀態**   | authoritative state  | 引擎保存的完整對局狀態，含私有資訊與續體；不能直接送給玩家                                       |
 | **玩家觀察**   | Observation          | 權威狀態依玩家可見範圍投影的資料；決定另以獲授權的 DecisionView 提供                             |
 | **權威回放**   | authoritative replay | 保存權威決定與隨機輸入版本的重播資料；觀看時仍須套資訊投影，見 [回放邊界](deployment/replays.md) |
+
+- **引用層級裁定 pending**：以裁定版本與原始 applies_to 序號保存未知舊域的歷史引用，不造來源 occurrence 或 active 目標。
+- **用途層級裁定 resolution**：已驗完整舊域後，逐精確來源 occurrence 判斷是否能承接到新 frame。兩者依[四層契約 §9](schema/domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)。

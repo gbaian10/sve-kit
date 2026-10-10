@@ -6,17 +6,12 @@ from typing import TYPE_CHECKING
 import pytest
 from jsonschema import ValidationError
 
-from sve_carddb.build import (
-    Json,
-    compile_schema,
-    create_database,
-    four_layer,
-    templates,
-)
+from sve_carddb.build import Json, compile_schema, create_database, four_layer
 from sve_carddb.build.model import Column, Kind, Table
 from sve_carddb.build.t0_json import schemas as t0_schemas
 from sve_carddb.build.t1 import REGISTRY
 from sve_carddb.build.t1_json import schemas as t1_schemas
+from sve_carddb.build.t1_rulings import schemas as ruling_schemas
 from sve_carddb.contracts.annotations import AnnotationSet
 from sve_carddb.contracts.four_layer import Target, hash_payload
 from sve_carddb.contracts.source_binding import LeafOccurrence, SourceDescriptor
@@ -65,7 +60,7 @@ if TYPE_CHECKING:
 @pytest.fixture(scope="session")
 def compiled() -> CompiledSchema:
     # Exercise the reserved owner without enabling a production keyword importer.
-    old = {t.name for t in templates.TABLES}
+    old = {t.name for t in four_layer.FRAME_TABLES}
     registry = replace(
         REGISTRY,
         tables=tuple(t for t in REGISTRY.tables if t.name not in old)
@@ -82,10 +77,11 @@ def compiled() -> CompiledSchema:
     )
     return compile_schema(
         registry,
-        ("translation_templates", "qa", "cr", "keyword", "correction"),
+        ("translation_templates", "qa", "cr", "keyword", "correction", "rulings"),
         t0_schemas()
         | t1_schemas()
         | four_layer.schemas()
+        | ruling_schemas()
         | {"TranslationTokens": {"type": "null"}},
         version=7,
     )

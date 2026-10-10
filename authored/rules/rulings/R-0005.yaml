@@ -1,6 +1,7 @@
-format: 1
+format: 2
 kind: ruling
 id: R-0005
+revision: 1
 question: 「【土の秘術】相手の場のフォロワー1体を選ぶ。それに3ダメージ。」沒付【土の秘術】時，還要不要選目標？
 decision: '目標照選（選項 B）：目標在打出時照常選（選不到就不能選這一項或不能打出）；付費只決定效果有沒有。撤銷先前補的 targets[].if: {paid} 自指 branch。'
 evidence:
