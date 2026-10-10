@@ -29,6 +29,8 @@ def test_disjunct_counts_share_one_explicit_counted_set(np: str, unit: str) -> N
 @pytest.mark.parametrize(
     "raw",
     [
+        "仮。これはエボルヴデッキに２体まで入れることができる。",
+        "仮。自分のデッキを不明し、上X枚を見る。その中から、フォロワー２枚まで場に出してよい。",
         "仮。相手の場のフォロワー２枚以上に能力ダメージを与えたとき、仮。",
         "仮。場に出た不明物２体にXダメージ。",
         "仮。自分が手札を２枚以上捨てた仮、仮。",
@@ -42,7 +44,7 @@ def test_disjunct_counts_share_one_explicit_counted_set(np: str, unit: str) -> N
         "仮。自分の場のフォロワーが２体。か３体なら、仮。",
     ],
 )
-def test_disjunct_counts_require_a_shared_np_and_legal_units(raw: str) -> None:
+def test_unknown_or_mismatched_counted_constructions_cannot_bind(raw: str) -> None:
     engine = classifier()
     field = normalize_source(raw, source(raw))
     found = engine.recognize(raw, field.source, field.parts[0])
@@ -54,6 +56,13 @@ def test_disjunct_counts_require_a_shared_np_and_legal_units(raw: str) -> None:
 @pytest.mark.parametrize(
     ("raw", "role", "unit"),
     [
+        ("仮。これはエボルヴデッキに２枚まで入れることができる。", "threshold", "枚"),
+        ("仮。自分の他の仮族・カードが２枚なら、仮。", "existence_count", "枚"),
+        (
+            "仮。自分のデッキをシャッフルし、上X枚を見る。その中から、フォロワー２枚まで場に出してよい。",
+            "selection_count",
+            "枚",
+        ),
         (
             "仮。自分の場や自分のEXエリアのアミュレットが２枚以上なら、仮。",
             "existence_count",
@@ -153,6 +162,10 @@ def test_explicit_set_constraints_designations_and_ordinals(
         ),
         ("仮。自分が手札を２枚以上捨てたとき、仮。", "threshold"),
         (
+            "仮。これが相手の場のフォロワー２体以上に能力ダメージを与えたとき、仮。",
+            "threshold",
+        ),
+        (
             "仮。「このターン中に自分がプレイしたカードの枚数」が２枚以上なら、仮。",
             "threshold",
         ),
@@ -163,6 +176,10 @@ def test_explicit_set_constraints_designations_and_ordinals(
         ("仮。相手のデッキ２枚が墓場に置かれたとき、仮。", "count"),
         ("仮。場に出たフォロワー２体にXダメージ。", "selection_count"),
         ("仮。「自分の墓場の仮族・カード」２枚につき、仮。", "group_divisor"),
+        (
+            "仮。これによって破壊した相手の場のフォロワー２体につき、仮。",
+            "group_divisor",
+        ),
         (
             "仮。このターン中に場に出た自分の他のフォロワー２体を選ぶ。",
             "selection_count",

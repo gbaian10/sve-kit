@@ -365,6 +365,10 @@ def _generic_number(
 
 
 def _set_number(value: int, before: str, after: str) -> Number | None:
+    if before.endswith("これはエボルヴデッキに") and re.match(
+        r"^枚まで入れることができる" + _END, after
+    ):
+        return Number("Nat", "threshold", value, "枚")
     if re.search(r"(?:カード名|好きな数)$", before) and re.match(
         r"^つを指定する" + _END, after
     ):

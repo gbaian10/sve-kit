@@ -144,10 +144,10 @@ _FILTER = (
     r"(?:(?:元の)?(?:コスト|攻撃力|体力)(?:N|X)(?:以下|以上)?の|"
     r"他の|表向きの|裏向きの|(?:進化前|進化後|エボルヴ|アドバンス)(?:の)?|(?:アクト|レスト|スタンド)状態の|これと同名を除く(?:・)?|"
     r"(?:【[^【】]+】(?:や|か)?)+を持つ|【[^【】]+】状態の|カード名に『X』を含む|カード名に「[^「」]+」を含む|"
-    r"それぞれカード名が異なる|それによって破壊した|"
+    r"それぞれカード名が異なる|(?:これ|それ)によって破壊した|"
     r"\{[^{}]+\}(?:を持つ|である|でない|の|・)?|" + _TRAIT + r")*"
 )
-_ONSET = r"(?:^|[、。:：}】（(]|か|と|は|として)"
+_ONSET = r"(?:^|[、。:：}】（(]|か|と|は|が|として)"
 _KIND = r"スペルかアミュレット|フォロワー|アミュレット|スペル|カード|クレスト|『X』"
 _SET_KIND = r"(?:" + _KIND + r")(?:(?:や|か|と)" + _FILTER + r"(?:" + _KIND + r"))*"
 _SET_ATOM = re.compile(_FILTER + r"(?P<kind>" + _KIND + r")")
@@ -193,6 +193,9 @@ _IMPLICIT_FIELD = re.compile(
     + r"(?P<kind>フォロワー|アミュレット)(?(quote)」)(?:を|が)?$"
 )
 _OTHER_FIELD = re.compile(_ONSET + r"他の(?P<kind>フォロワー|アミュレット)(?:を|が)?$")
+_OTHER_CARD_FIELD = re.compile(
+    _ONSET + r"(?:自分|相手)の他の" + _FILTER + r"(?P<kind>カード)(?:を|が)?$"
+)
 _EVENT_FIELD = re.compile(
     _ONSET
     + r"(?:このターン中に)?場に出た(?:(?:自分|相手)の)?"
@@ -207,7 +210,8 @@ _COLLECTION = re.compile(
     + r"(?:(?:自分|相手|それ(?:のプレイヤー)?)の)?(?:現在の)?(?P<zone>墓場|手札|消滅領域)(?:が|に)?$"
 )
 _LOOK_SELECTION = re.compile(
-    _ONSET + r"(?:自分|相手)のデッキの上(?:から)?N枚(?:を)?見(?:る|て)[。、]"
+    _ONSET
+    + r"(?:自分|相手)のデッキ(?:の上(?:から)?|をシャッフルし、上)(?:N|X)枚(?:を)?見(?:る|て)[。、]"
     r"(?:その中から|その中の)(?:、)?(?P<quote>「)?"
     + _FILTER
     + r"(?P<kind>"
@@ -315,6 +319,7 @@ def count_context(before: str) -> CountContext | None:
     if match := (
         _IMPLICIT_FIELD.search(before)
         or _OTHER_FIELD.search(before)
+        or _OTHER_CARD_FIELD.search(before)
         or _EVENT_FIELD.search(before)
     ):
         return CountContext(
