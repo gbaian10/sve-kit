@@ -128,6 +128,40 @@ class SourceField:
             part.verify(raw, frame, binding, domains)
 
 
+def replay_part(
+    raw: str,
+    frame: Frame,
+    binding: SourceBinding,
+    domains: Mapping[str, ClosedDomain],
+) -> None:
+    """Typed DB reads recheck a part's exact bytes; complete classification still belongs to B."""
+    binding.source.verify(binding.source, raw)
+    span = binding.source_span
+    if any(segment.end > len(raw) for segment in span.segments):
+        raise ValueError("Stored source part is outside exact field")
+    named_role = (
+        "name"
+        if binding.source.field == "name"
+        else "label"
+        if binding.source.field in {"label", "action_label"}
+        else None
+    )
+    if named_role is not None and span.role != named_role:
+        raise ValueError("Stored source part has the wrong named-field role")
+    if raw[: span.segments[0].start].count("\n") != binding.line_ordinal:
+        raise ValueError("Stored source part has the wrong raw line ordinal")
+    units = _units(raw, span)
+    part = SourcePart(
+        binding.ordinal,
+        binding.line_ordinal,
+        span,
+        "".join(unit.text for unit in units),
+        _trace(raw, span, units),
+        units,
+    )
+    part.verify(raw, frame, binding, domains)
+
+
 def normalize_source(
     raw: str, source: SourceDescriptor, *, reminders: frozenset[str] = frozenset()
 ) -> SourceField:
