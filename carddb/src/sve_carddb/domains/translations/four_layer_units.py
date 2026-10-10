@@ -164,6 +164,7 @@ _UNION_COUNTED = re.compile(
 )
 _COUNTED = re.compile(
     _ONSET
+    + r"(?:同時に)?"
     + _FILTER
     + r"(?:(?P<owner>"
     + _OWNER

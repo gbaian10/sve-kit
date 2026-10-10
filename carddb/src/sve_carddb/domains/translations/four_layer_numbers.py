@@ -445,7 +445,9 @@ def _event_count_number(value: int, before: str, after: str) -> Number | None:
         counted is not None
         and (
             match := re.match(
-                r"^(?P<unit>枚|体|つ)以上に(?:能力)?ダメージを与えたとき" + _END, after
+                r"^(?P<unit>枚|体|つ)以上(?:に(?:能力)?ダメージを与えた|出た)とき"
+                + _END,
+                after,
             )
         )
         and source_unit(counted, match["unit"]).merge_allowed
@@ -453,7 +455,13 @@ def _event_count_number(value: int, before: str, after: str) -> Number | None:
         return Number("Nat", "threshold", value, match["unit"])
     if (
         counted is not None
-        and (match := re.match(r"^(?P<unit>体|つ)に(?:N|X)ダメージ" + _END, after))
+        and (
+            match := re.match(
+                r"^(?P<unit>体|つ)に(?:(?:N|X)ダメージ|"
+                r"\{攻撃力\}[+-](?:N|X)(?:/\{体力\}[+-](?:N|X))?する)" + _END,
+                after,
+            )
+        )
         and source_unit(counted, match["unit"]).merge_allowed
     ):
         return _quantity("selection_count", value, match["unit"])

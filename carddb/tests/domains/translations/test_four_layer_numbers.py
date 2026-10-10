@@ -60,6 +60,7 @@ def test_disjunct_counts_share_one_explicit_counted_set(np: str, unit: str) -> N
 @pytest.mark.parametrize(
     "raw",
     [
+        "仮。自分の場にフォロワーが２体以上出たとき、仮。{起動}出たうちの１体に{攻撃力}+Xする。",
         "仮。相手の場のフォロワー２体を選ぶ。{起動}残りの１体にXダメージ。",
         "仮。相手の場のフォロワー２体を選ぶ。それを墓場に置く。残りの１体にXダメージ。",
         "仮。相手の場のフォロワー２体を選ぶ。それをEXエリアに置く。残りの１体にXダメージ。",
@@ -224,6 +225,8 @@ def test_explicit_set_constraints_designations_and_ordinals(
             "threshold",
         ),
         ("仮。自分が手札を２枚以上捨てたとき、仮。", "threshold"),
+        ("仮。同時に自分の場にフォロワーが２体以上出たとき、仮。", "threshold"),
+        ("仮。自分の場のフォロワー２体に{攻撃力}+Xする。", "selection_count"),
         (
             "仮。これが相手の場のフォロワー２体以上に能力ダメージを与えたとき、仮。",
             "threshold",
@@ -334,6 +337,11 @@ def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
             ["枚", "枚"],
         ),
         ("これを２回くり返す。", ["repeat_count"], ["回"]),
+        (
+            "仮。同時に自分の場にフォロワーが２体以上出たとき、出たうちの１体に{攻撃力}+X/{体力}+Xする。",
+            ["threshold", "selection_count"],
+            ["体", "体"],
+        ),
         (
             "仮。相手の場のフォロワー３体まで選ぶ。選んだうちの１体にXダメージ。残りの２体にXダメージ。",
             ["selection_count", "selection_count", "selection_count"],

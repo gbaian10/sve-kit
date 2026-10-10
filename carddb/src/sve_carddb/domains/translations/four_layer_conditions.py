@@ -20,6 +20,9 @@ _SELECTION = re.compile(
     r"(?:^|[。:：、\n])(?P<np>[^。:：、\n]+?)N(?P<unit>枚|体|つ|人)"
     r"(?:まで)?(?:を)?選ぶ[。]"
 )
+_ARRIVAL = re.compile(
+    r"(?:^|[。:：、\n])(?P<np>[^。:：、\n]+?)N(?P<unit>枚|体|つ)以上出たとき、"
+)
 _MOVEMENT = re.compile(r"戻す|戻し|加え|置く|置き|置いて|場に出|消滅|破壊|移す|移し")
 
 
@@ -47,13 +50,14 @@ def existence_context(before: str) -> CountContext | None:
 
 def selection_context(before: str) -> CountContext | None:
     """An explicit subset refers to one selection; a later zone-changing action blocks reuse."""
-    if not before.endswith(("選んだうちの", "残りの")):
+    if not before.endswith(("選んだうちの", "残りの", "出たうちの")):
         return None
     start = max((head.end() for head in _HEAD.finditer(before)), default=0)
     scope = before[start:]
     depth = scope.count("「") - scope.count("」")
     evidence: dict[str, CountContext] = {}
-    for selection in _SELECTION.finditer(scope):
+    grammar = _ARRIVAL if before.endswith("出たうちの") else _SELECTION
+    for selection in grammar.finditer(scope):
         prefix = scope[: selection.start("unit")]
         if prefix.count("「") - prefix.count("」") != depth:
             continue
