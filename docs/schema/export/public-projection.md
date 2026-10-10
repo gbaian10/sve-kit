@@ -1,7 +1,7 @@
 # 公開邏輯投影
 
 `project(db, regions=..., as_of=..., settings=..., decisions=...)` 讀已驗證的建置 DB，
-回傳 `Projection.tables/config/metadata`。`tables` 恰有 40 個文字集合與 3 個影像集合，
+回傳 `Projection.tables/config/metadata`。`tables` 恰有 43 個文字集合與 3 個影像集合，
 即使未啟用也保留空陣列。這是 join 後的公開邏輯物件，不是分片、tuple 快照或發布器；
 輸入批次／採納／freshness 的 domain 驗證仍由建置器負責。
 
@@ -43,6 +43,7 @@ Schema descriptor 驗完整欄序、nullable、enum 與額外鍵，不以 SQL �
 | `art.review_level/regions/artists`、`artist` | registry 插畫固定 `confirmed`；此次地區的現行 `printing_face` 使用關係、`art_artist` | 無現行用途的舊 art 與只被舊 art 引用的 artist 不出貨；被排除 art 的 nullable 引用留 null |
 | `traits/titles/special_kinds/sections` | `face_trait/title/special_kind/text_section`、`printing_text_section` | ID/code 集合穩定排序；段落保留 ordinal；未有資料為 [] |
 | `translation.source_unit_id/text_unit_id`、各 owner 的 translations | `translation_use/context/selection` 的精確 owner/field/ordinal，chosen translation 的原文與譯文 | 未選、未 reviewed 不出；同 source 的不同 context 不合併；缺譯留原文 |
+| `annotation_set/field_annotation/annotation_concept` | 建置端逐用途的 exact text、typed reference、Unicode scalar ranges 與當前 emphasis；用途沿精確 owner/field/ordinal | 空或未被引用的 set 不出貨；非空用途不得遺漏；缺必要公開引用拒絕 |
 | `qa.current_version_id`、`qa_version.cards` | 同 QA 最高 revision、`qa_card` | 無版本 null；原版本歷史保留；QA/errata 稀疏摘要空不代表 absent |
 | `errata.versions` | `errata_version/change/printing` | 可未知公告／生效日；before/after 保持受限 JSON |
 | `ruling_revision` 的 scopes/evidence/cards/hints | 建置器提供的有效 scope、supersession、精確 QA/CR 引文／source URL、ruling_card/hint | 不推測文字切段；沒有明確有效 scope 或 undecided 不提供提示；無 active scope 接點直接拒絕 |
@@ -76,22 +77,19 @@ Schema descriptor 驗完整欄序、nullable、enum 與額外鍵，不以 SQL �
 - `display_bindings` 與 `aligned_regions`：建置器已核對且 fresh 的來源 owner／跨區顯示選用；
   來源 use 一律驗原始 owner/context；跨區以 destination 的結構鍵選定顯示 owner。
   官方 counterpart 的 display owner 就是原始 source owner，必須提供 direct translation ID，
-  只取代該 owner 的同欄同語言共用選譯；shared_jp 使用 JP 共用選譯，顯示於同面 EN owner。
-  未核對、divergence 或只有 pending display 的跨區選用不出。建置器仍須驗 exact source bundle／名稱來源。
-  #29 的 shared_jp_unchecked 尚待 Schema／建置能力接入，本模組不自行產生未核對選用。
-  **四層切換前行為**：以上是現行投影器的限制；2026-10-10 的 JP 唯一一般來源政策依
+  只取代該 owner 的同欄同語言共用選譯。繁中 `jp_source` 使用同卡同面的有效 JP 現行來源，
+  不以 divergence 或缺 aligned 禁止選用；缺 JP current、錯身分／面或過期 binding 則拒絕。
+  effect 使用完整 JP effect，不拼接 EN section；公開 source／counterpart 指標各自指精確原文用途。
+  建置器仍須驗 exact source bundle／名稱來源。JP 唯一一般來源政策依
   [翻譯契約 §1](../domains/translation-contract.md#1-來源與顯示原則)與
-  [§7.2](../domains/translation-contract.md#72-逐-owner-的顯示選用)，不以 divergence 或缺 aligned 禁止有效 JP 繁中。
-  新 basis 與公開投影由 #496／#498 同步切換，不能用現行投影限制取代新政策。
+  [§7.2](../domains/translation-contract.md#72-逐-owner-的顯示選用)；翻譯選用不解除 DSL 區域限制。
 - `related_regions`：reskin 在各輸出地區的已驗證 eligibility。
 - `active_scopes`：ruling revision 的已驗證現行有效文字單元；projector 不猜部分取代的切段。
 - `general_evidence`：printing ID → 路由建置器的 `GeneralEvidence`，原樣傳給唯一的預設版次選取器；
   不由卡號、字串猜加工，不把未知分類補成已確認一般版。
 
-目前 baseline 機器契約尚未含 `face.wording`／PrintingFace.observations；依 #143 的既定分工，
-這兩項使用本模組的 exact shape／連結檢查，其他欄位仍完整通過 baseline Schema。
-待 #145 同步候選 Schema 後，既有 validator 自動驗其 descriptor；本模組不改 Schema／golden／reader。
-這份邏輯結果在那之前不能被宣稱為已通過 A 的完整 wire 快照。
+投影沿 3.0.0 機器契約驗 `face.wording`、PrintingFace.observations、annotation 與來源指標的完整欄序及閉包。
+logical projection 通過後，匯出器與 reader 仍須分別驗實際 File、partition、hash 與下載閉包。
 
 ## 驗證
 
@@ -99,8 +97,10 @@ Schema descriptor 驗完整欄序、nullable、enum 與額外鍵，不以 SQL �
 uv --directory carddb run pytest tests/export/test_snapshot_project.py
 ```
 
-合成 DB 正例讓 43 集合都有資料。`tests/fixtures/snapshot-project/expected-ancillary.json`
+合成 DB 正例保留全部 46 集合。`tests/fixtures/snapshot-project/expected-ancillary.json`
 是獨立手寫的完整附屬列 oracle；測試另驗核心、config、support、nullable 欄與缺能力反例。
+`tests/fixtures/snapshot-contract/v3/annotated-native.json` 固定非空 annotation 的 DB→投影→wire 結果，
+供 Python 與 Web 共同驗 exact text、ranges、說明引用及加粗呈現。
 區域反例分別覆蓋混合日期、未確認 mapping／release／role、角色衝突、未知代碼、divergence 範圍與 QA 現行版本。
 整體反例驗離線 DB 版號與 join 後的引用閉包；未核可圖帶 variant 則先由建置完整性約束拒絕。
 正式卡文不進 fixture 或回報；真實封存來源與合成資料的數量須分開記錄。
