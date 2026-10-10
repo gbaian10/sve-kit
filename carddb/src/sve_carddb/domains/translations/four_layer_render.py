@@ -22,6 +22,7 @@ from sve_carddb.contracts.four_layer import (
     LeafRef,
     LiteralNode,
     QuantitySpec,
+    QuantityValuePart,
     SlotRef,
     Span,
     UnionNP,
@@ -171,6 +172,7 @@ def validate_form(form: FormDefinition) -> None:
         "zone.case.v1": ZONE_CASES,
         "keyword.display.v1": frozenset({"default"}),
         "quantity.classifier.v1": frozenset({"card", "object"}),
+        "quantity.constant_value.v1": frozenset({"default"}),
     }.get(form.rule)
     if expected is None:
         raise ValueError("Unknown four-layer form rule")
@@ -193,6 +195,25 @@ def validate_form(form: FormDefinition) -> None:
         raise ValueError(
             "Classifier rule supplies a unit, not another copy of its arguments"
         )
+    if form.rule == "quantity.constant_value.v1":
+        roles = {
+            "selection_count",
+            "choice_mode_count",
+            "existence_count",
+            "counter_amount",
+            "repeat_count",
+        }
+        if (
+            len(form.signature) != 1
+            or form.signature[0].type != "QuantitySpec"
+            or form.signature[0].role not in roles
+            or form.id != f"quantity.{form.signature[0].role}.value"
+            or form.cases["default"]
+            != (QuantityValuePart(kind="QuantityValue", arg=form.signature[0].name),)
+        ):
+            raise ValueError(
+                "Constant quantity form requires its exact role and value part"
+            )
 
 
 class Renderer:
@@ -353,7 +374,7 @@ class _Output:
             raise MissingValueError("missing_leaf_value")
         return item.binding.values[name]
 
-    def leaf(self, item: BoundTarget, name: str, path: tuple[int, ...]) -> None:  # ruff: ignore[complex-structure] -- exhaustive dispatch over the closed leaf value types
+    def leaf(self, item: BoundTarget, name: str, path: tuple[int, ...]) -> None:
         slot = next(s for s in item.frame.leaf_schema.slots if s.name == name)
         value = self.value(item, name)
         start = len(self.text)
@@ -379,6 +400,11 @@ class _Output:
                 self.code(slot.type, value)
         else:
             raise ValueError("Typed leaf cannot be presented as a generic string")
+        self.record_leaf(item, name, path, start)
+
+    def record_leaf(
+        self, item: BoundTarget, name: str, path: tuple[int, ...], start: int
+    ) -> None:
         if len(self.text) > start:
             self.leaves.append(
                 LeafOutput(
@@ -443,6 +469,15 @@ class _Output:
         for index, part in enumerate(form.cases[case]):
             if isinstance(part, LabelPart):
                 self.leaf(item, node.args[part.arg].slot, (*path, index))
+            elif isinstance(part, QuantityValuePart):
+                name = node.args[part.arg].slot
+                value = self.value(item, name)
+                start = len(self.text)
+                if isinstance(value, QuantitySpec) and isinstance(value.expr, Constant):
+                    self.text += str(value.expr.value)
+                else:
+                    raise TypeError("QuantityValue requires a constant quantity")
+                self.record_leaf(item, name, (*path, index), start)
             else:
                 self.text += part.text
 

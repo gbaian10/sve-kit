@@ -8,9 +8,22 @@ import pytest
 from pydantic import JsonValue, TypeAdapter, ValidationError
 
 from sve_carddb.contracts.annotations import AnnotationSet
-from sve_carddb.contracts.four_layer import Bound, Frame, LeafSlot, Target, hash_payload
+from sve_carddb.contracts.four_layer import (
+    Bound,
+    CardNameReference,
+    Constant,
+    Frame,
+    GlossaryReference,
+    LeafSlot,
+    QuantitySpec,
+    Target,
+    VocabularyReference,
+    hash_payload,
+)
 from sve_carddb.contracts.source_binding import (
     LayoutDomain,
+    QuantityDomain,
+    ReferenceDomain,
     SourceBinding,
     SourceDescriptor,
     SourceSpan,
@@ -344,6 +357,93 @@ def test_fixed_numeric_domains(case: dict[str, JsonValue]) -> None:
             verify_value(slot, value)
     else:
         verify_value(slot, value)
+
+
+def test_reference_catalog_growth_preserves_frame_and_rejects_unadopted_values() -> (
+    None
+):
+    slot = LeafSlot.model_validate_json(
+        canonical(
+            {
+                "name": "name",
+                "type": "CardName",
+                "role": "declared_name",
+                "domain": {"values": ["card_name.any.v1"], "min": None, "max": None},
+                "required": True,
+                "occurrences": [{"start": 0, "end": 1}],
+            }
+        )
+    )
+    first = CardNameReference(kind="card_name", term_id="term:first")
+    other = CardNameReference(kind="card_name", term_id="term:other")
+    before = canonical(slot.model_dump(mode="json"))
+    for references in ((first,), (first, other)):
+        domain = ReferenceDomain(
+            type="CardName", category="card_name", references=references
+        )
+        verify_value(slot, first, {"card_name.any.v1": domain})
+        assert canonical(slot.model_dump(mode="json")) == before
+    for invalid in (other, GlossaryReference(kind="glossary", key="term:first")):
+        with pytest.raises(ValueError, match="outside every registered"):
+            verify_value(
+                slot,
+                invalid,
+                {
+                    "card_name.any.v1": ReferenceDomain(
+                        type="CardName", category="card_name", references=(first,)
+                    ),
+                },
+            )
+    with pytest.raises(ValueError, match="Unknown or incorrectly typed"):
+        verify_value(slot, first)
+    with pytest.raises(ValueError, match="wrong reference kind"):
+        ReferenceDomain(
+            type="CardKind",
+            category="type",
+            references=(
+                VocabularyReference(kind="vocabulary", key=("class", "neutral")),
+            ),
+        )
+
+
+def test_constant_quantity_domain_rejects_all_and_bound_even_with_registered_import() -> (
+    None
+):
+    slot = LeafSlot.model_validate_json(
+        canonical(
+            {
+                "name": "n",
+                "type": "QuantitySpec",
+                "role": "selection_count",
+                "domain": {
+                    "values": ["quantity.selection_count.constant.v1"],
+                    "min": None,
+                    "max": None,
+                },
+                "required": True,
+                "occurrences": [{"start": 0, "end": 1}],
+            }
+        )
+    )
+    domain = QuantityDomain(
+        type="QuantitySpec",
+        modes=("exact", "up_to", "all"),
+        imports=("received",),
+        expressions=(),
+        constant_only=True,
+    )
+    domains = {"quantity.selection_count.constant.v1": domain}
+    verify_value(
+        slot,
+        QuantitySpec(mode="up_to", expr=Constant(kind="constant", value=2)),
+        domains,
+    )
+    for invalid in (
+        QuantitySpec(mode="all", expr=None),
+        QuantitySpec(mode="exact", expr=Bound(kind="bound", **{"import": "received"})),
+    ):
+        with pytest.raises(ValueError, match="outside every registered"):
+            verify_value(slot, invalid, domains)
 
 
 def annotation_set(text: str, occurrences: JsonValue) -> AnnotationSet:

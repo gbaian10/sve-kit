@@ -233,6 +233,84 @@ def test_forms_keep_only_base_labels_in_semantic_ranges() -> None:
     assert [o.source_ordinals for o in rendered.occurrences()] == [(0,), (0,), (0,)]
 
 
+def test_quantity_value_preserves_literal_modifier_and_numeric_occurrence() -> None:
+    constant_form = FormDefinition.model_validate_json(
+        canonical(
+            {
+                "id": "quantity.selection_count.value",
+                "lang": "zh-Hant",
+                "rule": "quantity.constant_value.v1",
+                "signature": [
+                    {
+                        "name": "quantity",
+                        "type": "QuantitySpec",
+                        "role": "selection_count",
+                    }
+                ],
+                "cases": {"default": [{"kind": "QuantityValue", "arg": "quantity"}]},
+            }
+        )
+    )
+    target_value = target(
+        [
+            {"kind": "LeafRef", "slot": "zone"},
+            {"kind": "Literal", "text": "的至多"},
+            {
+                "kind": "Form",
+                "form_id": constant_form.id,
+                "args": {"quantity": {"slot": "quantity"}},
+            },
+            {"kind": "LeafRef", "slot": "kind"},
+        ]
+    )
+    item = sample(target_value)
+    data = item.binding.model_dump(mode="json", by_alias=True)
+    data["values"]["quantity"]["mode"] = "up_to"
+    candidate = SourceBinding.model_validate_json(canonical(data))
+    data["id"] = "bind:" + hash_payload(candidate.payload())
+    item = replace(item, binding=SourceBinding.model_validate_json(canonical(data)))
+    engine = renderer()
+    engine.forms[constant_form.id, "zh-Hant"] = Form(constant_form)
+    engine.domains["fixture.cardinality"] = QuantityDomain(
+        type="QuantitySpec",
+        modes=("exact", "up_to", "all"),
+        imports=("received",),
+        expressions=(),
+    )
+    result = engine.render("context:quantity", "zh-Hant", (item,)).rendered
+    assert result is not None
+    assert result.text == "手牌的至多2從者"
+    occurrence = result.occurrences()[1]
+    assert occurrence.node_path == (2, 0)
+    assert occurrence.source_ordinals == (0,)
+    assert [(span.start, span.end) for span in occurrence.ranges] == [(5, 6)]
+    assert len(result.annotation.occurrences) == 2
+    data["values"]["quantity"] = {"mode": "all", "expr": None}
+    candidate = SourceBinding.model_validate_json(canonical(data))
+    data["id"] = "bind:" + hash_payload(candidate.payload())
+    invalid = replace(item, binding=SourceBinding.model_validate_json(canonical(data)))
+    with pytest.raises(TypeError, match="QuantityValue requires a constant"):
+        engine.render("context:quantity", "zh-Hant", (invalid,))
+
+
+def test_quantity_value_rule_rejects_label_or_wrong_signature() -> None:
+    data: dict[str, JsonValue] = {
+        "id": "quantity.selection_count.value",
+        "lang": "zh-Hant",
+        "rule": "quantity.constant_value.v1",
+        "signature": [
+            {"name": "quantity", "type": "QuantitySpec", "role": "selection_count"}
+        ],
+        "cases": {"default": [{"kind": "Label", "arg": "quantity"}]},
+    }
+    with pytest.raises(ValueError, match="exact role and value part"):
+        validate_form(FormDefinition.model_validate_json(canonical(data)))
+    data["cases"] = {"default": [{"kind": "QuantityValue", "arg": "quantity"}]}
+    data["signature"] = [{"name": "quantity", "type": "Nat", "role": "selection_count"}]
+    with pytest.raises(ValueError, match="constant quantity rule"):
+        FormDefinition.model_validate_json(canonical(data))
+
+
 def test_np_grouping_preserves_frame_and_binding_but_changes_presentation_dependency() -> (
     None
 ):

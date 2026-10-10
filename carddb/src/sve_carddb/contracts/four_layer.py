@@ -136,6 +136,12 @@ class LeafSlot(RecordData):
 
 
 def _domain_shape(slot: LeafSlot) -> None:
+    if (
+        slot.type in {"Concept", "CardName", "CardKind"}
+        and len(slot.domain.values) == 1
+        and isinstance(slot.domain.values[0], str)
+    ):
+        return
     if slot.type == "CardKind":
         if any(
             not isinstance(v, VocabularyReference) or v.key[0] != "type"
@@ -639,7 +645,14 @@ class LabelPart(RecordData):
     arg: Code
 
 
-FormPart = Annotated[LiteralNode | LabelPart, Field(discriminator="kind")]
+class QuantityValuePart(RecordData):
+    kind: Literal["QuantityValue"]
+    arg: Code
+
+
+FormPart = Annotated[
+    LiteralNode | LabelPart | QuantityValuePart, Field(discriminator="kind")
+]
 
 
 class FormDefinition(RecordData):
@@ -661,9 +674,18 @@ class FormDefinition(RecordData):
             part.arg not in names
             for parts in self.cases.values()
             for part in parts
-            if isinstance(part, LabelPart)
+            if isinstance(part, (LabelPart, QuantityValuePart))
         ):
-            raise ValueError("Form Label requires a signature argument")
+            raise ValueError("Form part requires a signature argument")
+        signature = {arg.name: arg.type for arg in self.signature}
+        if any(
+            self.rule != "quantity.constant_value.v1"
+            or signature[part.arg] != "QuantitySpec"
+            for parts in self.cases.values()
+            for part in parts
+            if isinstance(part, QuantityValuePart)
+        ):
+            raise ValueError("QuantityValue requires its constant quantity rule")
         return self
 
     def verify_arguments(

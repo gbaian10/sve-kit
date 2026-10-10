@@ -7,9 +7,11 @@ from pydantic import Field, model_validator
 
 from sve_carddb.contracts.four_layer import (
     Bound,
+    CardNameReference,
     Code,
     Constant,
     Expression,
+    GlossaryReference,
     Hash,
     Id,
     OccurrenceKey,
@@ -19,10 +21,11 @@ from sve_carddb.contracts.four_layer import (
     Reference,
     Role,
     Span,
+    VocabularyReference,
     disjoint,
     hash_payload,
 )
-from sve_carddb.core.json import digest
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import RecordData, UInt
 
 if TYPE_CHECKING:
@@ -45,13 +48,46 @@ class QuantityDomain(RecordData):
     modes: tuple[Literal["exact", "up_to", "at_least", "all", "any"], ...]
     imports: tuple[Code, ...]
     expressions: tuple[Code, ...]
+    constant_only: bool = False
+
+
+class ReferenceDomain(RecordData):
+    type: Literal["Concept", "CardName", "CardKind"]
+    category: Literal[
+        "keyword", "ability", "rule_term", "trait", "class", "card_name", "type"
+    ]
+    references: tuple[Reference, ...]
+
+    @model_validator(mode="after")
+    def _catalog(self) -> Self:
+        expected = {"CardName": {"card_name"}, "CardKind": {"type"}}.get(
+            self.type, {"keyword", "ability", "rule_term", "trait", "class"}
+        )
+        if self.category not in expected:
+            raise ValueError("Reference domain has the wrong catalog category")
+        encoded = tuple(canonical(r.model_dump(mode="json")) for r in self.references)
+        if encoded != tuple(sorted(set(encoded))):
+            raise ValueError("Reference catalog must be sorted and unique")
+        for reference in self.references:
+            if self.category == "card_name":
+                valid = isinstance(reference, CardNameReference)
+            elif self.category in {"class", "type"}:
+                valid = (
+                    isinstance(reference, VocabularyReference)
+                    and reference.key[0] == self.category
+                )
+            else:
+                valid = isinstance(reference, GlossaryReference)
+            if not valid:
+                raise ValueError("Reference domain contains the wrong reference kind")
+        return self
 
 
 class LayoutDomain(RecordData):
     type: Literal["LiteralLayout"]
 
 
-ClosedDomain = ZoneDomain | QuantityDomain | LayoutDomain
+ClosedDomain = ZoneDomain | QuantityDomain | ReferenceDomain | LayoutDomain
 
 
 class SourceReference(RecordData):
@@ -210,7 +246,9 @@ def verify_value(
     """A source value is accepted according to its declared leaf type, never renderer guesses."""
     if slot.type in {"Nat", "Ordinal"}:
         _numeric_value(slot, value)
-    elif slot.type in {"ZoneSet", "QuantitySpec", "QuantityExpr", "LiteralLayout"}:
+    elif slot.type in {"ZoneSet", "QuantitySpec", "QuantityExpr", "LiteralLayout"} or (
+        len(slot.domain.values) == 1 and isinstance(slot.domain.values[0], str)
+    ):
         _complex_value(slot, value, domains or {})
     elif value not in slot.domain.values:
         raise ValueError("Leaf value is outside its source domain")
@@ -256,6 +294,9 @@ def _registered_value(domain: ClosedDomain, value: TypedValue) -> None:
         _zone_value(domain, value)
     elif isinstance(domain, QuantityDomain):
         _quantity_value(domain, value)
+    elif isinstance(domain, ReferenceDomain):
+        if value not in domain.references:
+            raise ValueError("Reference is outside the active adopted catalog")
     elif not isinstance(value, str) or not value.isspace():
         raise ValueError("LiteralLayout must contain only source whitespace")
 
@@ -269,6 +310,8 @@ def _quantity_value(domain: QuantityDomain, value: TypedValue) -> None:
         if not isinstance(value, (Bound, Constant, Expression)):
             raise ValueError("QuantityExpr leaf has the wrong value shape")
         expr = value
+    if domain.constant_only and not isinstance(expr, Constant):
+        raise ValueError("Quantity domain requires a constant expression")
     if isinstance(expr, Bound) and expr.import_ not in domain.imports:
         raise ValueError("Quantity expression refers to unknown import")
     if isinstance(expr, Expression) and expr.expression_id not in domain.expressions:
