@@ -33,7 +33,8 @@ _EDGE = re.compile(_OWNER + r"(?P<position>デッキの(?P<edge>上|下))")
 _PHASE = re.compile(
     _OWNER + r"(?P<phase>" + "|".join(PHASES) + r")(?P<case>が来たとき|に)"
 )
-_QUOTED = re.compile(r"『[^』]*』|「[^「」。:：]*」|\{[^{}]*\}|【[^【】]*】")
+# A quoted granted ability may span sentences; none of it belongs to the outer operand.
+_QUOTED = re.compile(r"『[^』]*』|「[^「」]*」|\{[^{}]*\}|【[^【】]*】")
 _NP_TOKEN = re.compile(
     r"(?P<name>『X』)|(?P<quote>「[^「」。:：]*」)(?:の)?|"
     r"(?P<kind>フォロワー|アミュレット|スペル)|(?P<card>カード)|"
@@ -470,6 +471,8 @@ class _Registry:
     def costs(self) -> None:
         text, found, attempts = self.text, self.found, self.attempts
         for match in _HAND_COST.finditer(text):
+            if not self.allowed(match.start(), _local_end(text, match.end())):
+                continue
             row = "N1-SRC02.hand_cost"
             head = _COST_HEAD.search(text[: match.start()])
             np = noun(match["np"], match.start("np")) if match["np"] else None

@@ -813,3 +813,18 @@ def test_n1_hand_cost_self_does_not_authorize_a_hand_destination(
     assert roles(found)["source_owner"] == ["self"]
     assert roles(found)["destination_zone"] == [("hand",)]
     assert "destination_owner" not in roles(found)
+
+
+@pytest.mark.parametrize(
+    "ability",
+    [
+        "【攻撃時】手札７枚を捨てる:仮効果。",
+        "{起動}手札７枚を捨てる:自分の墓場のフォロワー７枚を選ぶ。",
+    ],
+)
+def test_n1_quoted_granted_ability_supplies_no_outer_leaves(
+    engine: Classifier, ability: str
+) -> None:
+    found = derive("相手のフォロワーすべては「" + ability + "」を得る。", engine)
+    assert not {"source_owner", "source_zone"} & roles(found).keys()
+    assert all(o.source_presence == "explicit" for o in found.recognized[0].occurrences)
