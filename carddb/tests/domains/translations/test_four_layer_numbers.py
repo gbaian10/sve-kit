@@ -3,6 +3,7 @@
 import pytest
 
 from sve_carddb.contracts.four_layer import Constant, QuantitySpec
+from sve_carddb.domains.translations.four_layer_classification import Term
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 
 from .test_four_layer_classification import classifier, source
@@ -15,6 +16,9 @@ from .test_four_layer_classification import classifier, source
         ("自分の手札のカード２枚を場に出してよい。", ["count"], ["枚"]),
         ("自分のデッキからフォロワー２枚を探し、場に出す。", ["count"], ["枚"]),
         ("自分の手札のカード２枚を公開する。", ["count"], ["枚"]),
+        ("仮。自分が手札２枚を捨てたとき、仮。", ["count"], ["枚"]),
+        ("仮。墓場のカード２枚を消滅:仮。", ["count"], ["枚"]),
+        ("仮。自分の場のフォロワー２体を手札に戻す。", ["count"], ["体"]),
         ("これを２回くり返す。", ["repeat_count"], ["回"]),
         (
             "この能力は２ターンに３回働く。",
@@ -158,6 +162,34 @@ def test_unknown_counter_and_incomplete_resource_or_event_cannot_bind(raw: str) 
     assert "n0_numeric_construction_unresolved" in found.issues
     with pytest.raises(ValueError, match="Unresolved source leaves"):
         found.bind(field.source, field.parts[0])
+
+
+def test_created_name_count_preserves_its_unit_without_inferring_a_card_kind() -> None:
+    raw = "仮。『仮生成物』２体を出す。"
+    engine = classifier((Term("term:created.synthetic", "card_name", "仮生成物"),))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[1].role == "count"
+    assert binding.occurrences[1].source_unit == "体"
+    assert all(s.type != "CardKind" for s in frame.leaf_schema.slots)
+
+
+def test_full_existence_permission_does_not_lose_its_comparator_mode() -> None:
+    raw = "仮。自分の墓場のフォロワー２枚以上なら使える。"
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert binding.values["leaf_0"] == QuantitySpec(
+        mode="at_least", expr=Constant(kind="constant", value=2)
+    )
 
 
 @pytest.mark.parametrize(

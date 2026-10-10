@@ -41,6 +41,7 @@ from sve_carddb.domains.translations.four_layer_semantics import (
     Classified,
     classify_semantics,
 )
+from sve_carddb.domains.translations.four_layer_units import field_filter
 from sve_carddb.domains.translations.parameters.candidate_matching import classify
 from sve_carddb.domains.translations.parameters.references import References, Resolution
 from sve_carddb.domains.translations.parameters.spans import Located
@@ -602,6 +603,6 @@ def _vocabulary_role(part: SourcePart, hint: Hint) -> str | None:
             return "counted_kind"
         if re.search(r"(?:元の)?コストN(?:以上|以下)の$", before):
             return "filter_kind"
-    elif re.match(r"^(?:の|・)?(?:カード|フォロワー|アミュレット|スペル)", after):
+    elif field_filter(after.removeprefix("・").removeprefix("でない")):
         return "class_filter"
     return None

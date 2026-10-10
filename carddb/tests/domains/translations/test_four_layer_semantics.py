@@ -26,7 +26,7 @@ def context(raw: str) -> CardContext:
     )
 
 
-@pytest.mark.parametrize("separator", ["", "の", "・"])
+@pytest.mark.parametrize("separator", ["", "の", "・", "でない", "・仮族・"])
 def test_class_filter_accepts_complete_direct_kind_constructions(
     separator: str,
 ) -> None:

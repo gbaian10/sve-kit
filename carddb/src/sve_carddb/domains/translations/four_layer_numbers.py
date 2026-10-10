@@ -79,10 +79,11 @@ _SELECT = re.compile(
 )
 _EXIST = re.compile(
     r"^(?P<unit>枚|体|つ|人)(?P<compare>以上|以下)?(?:あるなら|いるなら|ある限り|いる限り|なら|である限り|であれば|ある|いる)"
-    + _END
+    r"(?:使える)?" + _END
 )
 _MOVE = re.compile(
-    r"^枚(?:を)?(?:引く|引き|引いて|捨てる|捨て|戻す|戻し|加える|加え|置く|置き|出す|出し|消滅させる)(?=[。:、）)\n]|$)"
+    r"^枚(?:を)?(?:引く|引き|引いて|引いたとき|捨てる|捨て|捨ててよい|捨てたとき|"
+    r"戻す|戻し|加える|加え|置く|置き|出す|出し|消滅|消滅させる|消滅させてよい)" + _END
 )
 _TRANSFER = re.compile(
     r"^(?:枚|体|つ)(?:まで)?(?:を)?(?:、)?(?:裏向きで)?(?:自分の|相手の)?"
@@ -96,7 +97,11 @@ _SEARCH = re.compile(
 )
 _EQUIP = re.compile(r"^枚(?:を)?装備する" + _END)
 _LOOK = re.compile(r"^枚(?:を)?見(?:る|て)" + _END)
-_PUBLIC = re.compile(r"^枚(?:を)?公開する" + _END)
+_PUBLIC = re.compile(r"^枚(?:を)?公開(?:する)?" + _END)
+_RETURN = re.compile(
+    r"^(?P<unit>枚|体|つ)(?:を)?(?:手札|デッキ)に(?:戻す|戻し|戻してよい)" + _END
+)
+_CREATE = re.compile(r"^(?P<unit>体|つ)(?:を)?出す" + _END)
 _REVEAL = re.compile(
     r"^枚(?P<limit>まで)?(?:を)?公開して(?:、)?"
     r"(?:それを|そのカードを)?(?:手札に加える|手札に加えてよい|墓場に置く|場に出す)"
@@ -135,7 +140,7 @@ _EVENT_THRESHOLD = re.compile(
 )
 _EVOLUTION_FREQUENCY = re.compile(r"^ターンに何回でも使える" + _END)
 _SACRIFICE = re.compile(
-    r"^(?P<unit>枚|体|つ)(?:を)?(?:墓場に置く|アクトする|レストする|破壊する|"
+    r"^(?P<unit>枚|体|つ)(?:を)?(?:墓場に置く|アクトする|レストする|スタンドする|破壊する|消滅|"
     r"\{(?:アクト|レスト)\})" + _END
 )
 _LEADER = re.compile(r"^人(?:に(?:N|[0-9０-９]+)ダメージ|の(?:手札|墓場|場|デッキ))")
@@ -335,6 +340,10 @@ def _generic_number(
 def _action_number(value: int, before: str, after: str) -> Number | None:
     if _ABILITY_COUNT.match(after) and re.search(r"(?:能力を|能力が|能力)$", before):
         return Number("Nat", "count", value, "つ")
+    if (match := _CREATE.match(after)) and re.search(
+        r"(?:『X』|フォロワー|アミュレット)(?:を)?$", before
+    ):
+        return Number("Nat", "count", value, match["unit"])
     return (
         _movement_number(value, after)
         or _payment_number(value, before, after)
@@ -346,9 +355,11 @@ def _action_number(value: int, before: str, after: str) -> Number | None:
 def _movement_number(value: int, after: str) -> Number | None:
     if _MOVE.match(after) or _TRANSFER.match(after) or _LOOK.match(after):
         unit = after[0]
-        if after.startswith(unit + "まで"):
-            return _quantity("selection_count", value, unit, "up_to")
-        return Number("Nat", "count", value, unit)
+        return (
+            _quantity("selection_count", value, unit, "up_to")
+            if after.startswith(unit + "まで")
+            else Number("Nat", "count", value, unit)
+        )
     if match := _SEARCH.match(after):
         return (
             _quantity("selection_count", value, "枚", "up_to")
@@ -357,6 +368,8 @@ def _movement_number(value: int, after: str) -> Number | None:
         )
     if _EQUIP.match(after) or _PUBLIC.match(after):
         return Number("Nat", "count", value, "枚")
+    if match := _RETURN.match(after):
+        return Number("Nat", "count", value, match["unit"])
     if match := _REVEAL.match(after):
         return _quantity(
             "selection_count", value, "枚", "up_to" if match["limit"] else "exact"
@@ -401,6 +414,8 @@ def _counter_number(value: int, before: str, after: str) -> Number | None:
 
 
 def _repetition_number(value: int, before: str, after: str) -> Number | None:
+    if (event := _repeated_event(value, before, after)) is not None:
+        return event
     if (match := _REPEAT.match(after)) and re.search(
         r"(?:これを|下記を|この動作を|同じ操作を)$", before
     ):
@@ -427,12 +442,22 @@ def _repetition_number(value: int, before: str, after: str) -> Number | None:
         and before.endswith("が")
     ):
         return Number("Nat", "threshold", value, "回")
-    if (
-        value >= 1
+    return (
+        Number("Nat", "group_divisor", value, "回")
+        if value >= 1
         and before.endswith("進化")
         and re.match(r"^回につき使えるEPは(?:N|[0-9０-９]+)つ[）)]", after)
+        else None
+    )
+
+
+def _repeated_event(value: int, before: str, after: str) -> Number | None:
+    if re.search(r"(?:\{食事\})+\{コストN\}:これは$", before) and re.match(
+        r"^回出走する" + _END, after
     ):
-        return Number("Nat", "group_divisor", value, "回")
+        return Number("Nat", "repeat_count", value, "回")
+    if re.search(r"(?:自分の)?ターンごとに$", before) and re.match(r"^回、", after):
+        return Number("Nat", "repeat_count", value, "回")
     return None
 
 
