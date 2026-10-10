@@ -10,7 +10,10 @@ from sve_carddb.domains.translations.four_layer_choices import (
     choice_index,
     choice_quantity,
 )
-from sve_carddb.domains.translations.four_layer_conditions import existence_context
+from sve_carddb.domains.translations.four_layer_conditions import (
+    existence_context,
+    selection_context,
+)
 from sve_carddb.domains.translations.four_layer_units import (
     compound_action,
     compound_selection,
@@ -211,7 +214,9 @@ def recognize_number(raw: str, part: SourcePart, hint: Hint) -> Number | None:
         "existence_count",
     }:
         counted = count_context(before) or (
-            existence_context(before) if number.role == "existence_count" else None
+            existence_context(before)
+            if number.role == "existence_count"
+            else selection_context(before)
         )
         if (
             counted is None
@@ -237,7 +242,7 @@ def number_issue(raw: str, part: SourcePart, hint: Hint) -> str:
                 or (
                     existence_context(before)
                     if number.role == "existence_count"
-                    else None
+                    else selection_context(before)
                 )
             )
             is not None
@@ -435,7 +440,7 @@ def _action_number(value: int, before: str, after: str) -> Number | None:
 def _event_count_number(value: int, before: str, after: str) -> Number | None:
     if predicate := _predicate_number(value, before, after):
         return predicate
-    counted = count_context(before)
+    counted = count_context(before) or selection_context(before)
     if (
         counted is not None
         and (

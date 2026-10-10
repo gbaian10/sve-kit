@@ -60,6 +60,10 @@ def test_disjunct_counts_share_one_explicit_counted_set(np: str, unit: str) -> N
 @pytest.mark.parametrize(
     "raw",
     [
+        "仮。相手の場のフォロワー２体を選ぶ。{起動}残りの１体にXダメージ。",
+        "仮。相手の場のフォロワー２体を選ぶ。それを墓場に置く。残りの１体にXダメージ。",
+        "仮。相手の場のフォロワー２体を選ぶ。それをEXエリアに置く。残りの１体にXダメージ。",
+        "仮。相手の場のフォロワー２体を選ぶ。選んだうちの１枚にXダメージ。",
         "仮。自分の能力は追加で２回不明する。",
         "仮。自分の墓場が２枚になるように自分の手札を捨てる。",
         "仮。自分の手札が２枚になるように自分の手札を不明する。",
@@ -330,6 +334,11 @@ def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
             ["枚", "枚"],
         ),
         ("これを２回くり返す。", ["repeat_count"], ["回"]),
+        (
+            "仮。相手の場のフォロワー３体まで選ぶ。選んだうちの１体にXダメージ。残りの２体にXダメージ。",
+            ["selection_count", "selection_count", "selection_count"],
+            ["体", "体", "体"],
+        ),
         ("仮。誘発する自分の能力は追加で２回誘発する。", ["repeat_count"], ["回"]),
         (
             "自分の墓場のカードが２枚以上なら、仮。３枚以上なら、別。",

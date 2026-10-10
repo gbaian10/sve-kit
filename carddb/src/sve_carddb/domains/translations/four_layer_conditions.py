@@ -16,6 +16,11 @@ _CONDITION = re.compile(
     r"(?:^|[。:：、\n])(?P<np>[^。:：、\n]+?)N(?P<unit>枚|体|つ|人)"
     r"(?:以上|以下)?なら(?=[、。])"
 )
+_SELECTION = re.compile(
+    r"(?:^|[。:：、\n])(?P<np>[^。:：、\n]+?)N(?P<unit>枚|体|つ|人)"
+    r"(?:まで)?(?:を)?選ぶ[。]"
+)
+_MOVEMENT = re.compile(r"戻す|戻し|加え|置く|置き|置いて|場に出|消滅|破壊|移す|移し")
 
 
 def existence_context(before: str) -> CountContext | None:
@@ -37,4 +42,27 @@ def existence_context(before: str) -> CountContext | None:
         if context is None or not source_unit(context, condition["unit"]).merge_allowed:
             return None
         evidence[np] = context
+    return next(iter(evidence.values())) if len(evidence) == 1 else None
+
+
+def selection_context(before: str) -> CountContext | None:
+    """An explicit subset refers to one selection; a later zone-changing action blocks reuse."""
+    if not before.endswith(("選んだうちの", "残りの")):
+        return None
+    start = max((head.end() for head in _HEAD.finditer(before)), default=0)
+    scope = before[start:]
+    depth = scope.count("「") - scope.count("」")
+    evidence: dict[str, CountContext] = {}
+    for selection in _SELECTION.finditer(scope):
+        prefix = scope[: selection.start("unit")]
+        if prefix.count("「") - prefix.count("」") != depth:
+            continue
+        context = count_context(selection["np"])
+        if (
+            context is None
+            or not source_unit(context, selection["unit"]).merge_allowed
+            or _MOVEMENT.search(scope[selection.end() :]) is not None
+        ):
+            return None
+        evidence[selection["np"]] = context
     return next(iter(evidence.values())) if len(evidence) == 1 else None
