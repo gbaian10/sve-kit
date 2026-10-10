@@ -140,7 +140,8 @@
       "special_kinds": [],
       "sections": [],
       "translations": [],
-      "corrections": []
+      "corrections": [],
+      "name_concept_id": null
     },
     {
       "id": "r:a2",
@@ -210,7 +211,8 @@
           "reason": "Synthetic correction",
           "source_url": null
         }
-      ]
+      ],
+      "name_concept_id": null
     },
     {
       "id": "r:b1",
@@ -233,7 +235,8 @@
       "special_kinds": [],
       "sections": [],
       "translations": [],
-      "corrections": []
+      "corrections": [],
+      "name_concept_id": null
     }
   ],
   "printing": [
@@ -278,7 +281,8 @@
               "state": "available",
               "source_url": "https://example.invalid/observations/a"
             }
-          ]
+          ],
+          "name_concept_id": null
         },
         {
           "face_id": "f:b",
@@ -294,7 +298,8 @@
           "stamps": [],
           "translations": [],
           "corrections": [],
-          "observations": []
+          "observations": [],
+          "name_concept_id": null
         }
       ]
     },
@@ -365,7 +370,8 @@
               "source_url": "https://example.invalid/correction"
             }
           ],
-          "observations": []
+          "observations": [],
+          "name_concept_id": null
         },
         {
           "face_id": "f:b",
@@ -381,7 +387,8 @@
           "stamps": [],
           "translations": [],
           "corrections": [],
-          "observations": []
+          "observations": [],
+          "name_concept_id": null
         }
       ]
     }
@@ -437,7 +444,8 @@
       "origin": "machine",
       "authority": "unofficial",
       "low_confidence": true,
-      "annotation_set_id": null
+      "annotation_set_id": null,
+      "annotation_kind": "none"
     },
     {
       "id": "tr:name",
@@ -447,7 +455,8 @@
       "origin": "project",
       "authority": "unofficial",
       "low_confidence": false,
-      "annotation_set_id": null
+      "annotation_set_id": null,
+      "annotation_kind": "none"
     }
   ],
   "image_asset": [

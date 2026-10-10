@@ -28,6 +28,7 @@ REFERENCES = {
     "product_id": "product",
     "translation_id": "translation",
     "annotation_set_id": "annotation_set",
+    "name_concept_id": "annotation_concept",
     "qa_id": "qa",
     "qa_version_id": "qa_version",
     "current_version_id": "qa_version",

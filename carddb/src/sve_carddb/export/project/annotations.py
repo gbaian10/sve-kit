@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import array, canonical, object_value, string
 from sve_carddb.domains.translations.four_layer_storage import read_annotation
+from sve_carddb.export.name_annotations import assign_name_concepts
 from sve_carddb.export.project.source import Record, Source, json_list
 from sve_carddb.export.project.translations import pointer
 from sve_carddb.export.text_owners import TextOwners
@@ -50,6 +51,7 @@ def annotations(
     view["field_annotation"] = list(fields.values())
     translated = _translated(source, view, sets, fields)
 
+    assign_name_concepts(view)
     _concepts(source, view, decisions)
     validate_completeness(view, tuple(fields.values()), translated)
 

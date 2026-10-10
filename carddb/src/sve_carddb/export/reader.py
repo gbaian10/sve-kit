@@ -13,6 +13,7 @@ from pydantic import JsonValue
 
 from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.contracts.snapshot import (
+    columns,
     decode,
     definition,
     descriptor,
@@ -137,11 +138,25 @@ def _container(file: Row, value: Row) -> list[Fragment]:
             ):
                 raise ValueError("Fragment role or bucket does not match profile")
             name = row_type(table, part, selected.version)
+            used.add(name)
             used |= required_types(name, selected.version)
             rows = [
                 decode(name, row, selected.version) for row in array(fragment["rows"])
             ]
-            result.append(Fragment(string(file["key"]), table, fragment, rows))
+            if table == "translation" and any(
+                row["annotation_kind"] == "whole_name"
+                and row["annotation_set_id"] is not None
+                for row in rows
+            ):
+                raise ValueError("public-annotation/shape")
+            result.append(
+                Fragment(
+                    string(file["key"]),
+                    table,
+                    fragment | {"columns": list(columns(name, selected.version))},
+                    rows,
+                )
+            )
             counts.append(
                 {
                     "table": table,
@@ -525,6 +540,7 @@ def read_snapshot(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
         parse(payloads[string(object_value(manifest["config_ref"])["key"])])
     )
     validate_digital(view, config)
+    _unique(view)
     return view
 
 

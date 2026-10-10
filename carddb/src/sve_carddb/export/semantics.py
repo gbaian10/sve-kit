@@ -9,6 +9,7 @@ from sve_carddb.contracts.profiles import profile
 from sve_carddb.contracts.snapshot import definition
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
 from sve_carddb.export.buckets import bucket
+from sve_carddb.export.name_annotations import whole_name
 from sve_carddb.export.reader_annotations import validate_annotations
 
 if TYPE_CHECKING:
@@ -286,6 +287,16 @@ def _annotation_partitions(view: View, fragments: list[Fragment]) -> None:
                 for row in fragment.rows
                 if row["annotation_set_id"] is not None
             }
+    texts = {string(row["id"]): row for row in view["text_unit"]}
+    annotations |= {
+        string(
+            whole_name(
+                texts[string(row["name_unit_id"])], string(row["name_concept_id"])
+            )["id"]
+        )
+        for row in view["face_revision"]
+        if row["id"] in display and row["name_concept_id"] is not None
+    }
     concepts = {
         string(reference["key" if reference["kind"] == "glossary" else "term_id"])
         for row in view["annotation_set"]
@@ -293,6 +304,11 @@ def _annotation_partitions(view: View, fragments: list[Fragment]) -> None:
         for occurrence in array(row["occurrences"])
         for reference in (object_value(object_value(occurrence)["reference"]),)
         if reference["kind"] != "vocabulary"
+    }
+    concepts |= {
+        string(row["name_concept_id"])
+        for row in view["face_revision"]
+        if row["id"] in display and row["name_concept_id"] is not None
     }
     for fragment in fragments:
         selected = annotations if fragment.table == "annotation_set" else concepts

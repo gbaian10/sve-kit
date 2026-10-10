@@ -3,45 +3,212 @@
   "kind": "public_annotation_contract_cases",
   "fixtures": {
     "jp_en": {
-      "languages": ["en", "ja", "zh-Hant"],
+      "languages": [
+        "en",
+        "ja",
+        "zh-Hant"
+      ],
       "admission": {
         "format_version": "3.0.0",
         "min_reader_version": "3.0.0",
-        "required_capabilities": ["column-partition-v1", "digital-same-name-links-v1", "fragment-container-v1", "image-entity-buckets-v1", "image-id-url-v1", "jp-source-translation-v1", "public-annotation-v1", "rules-name-on-demand-v1"]
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ]
       },
       "text_units": [
-        ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"],
-        ["t:en:4fc8efb088bdae58", "en", "Sample hand."],
-        ["t:zh-Hant:fe648ccc6a92aa85", "zh-Hant", "合成😀手牌"],
-        ["t:ja:c74c4bf0a7a5dea4", "ja", "合成区"]
+        [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ],
+        [
+          "t:en:4fc8efb088bdae58",
+          "en",
+          "Sample hand."
+        ],
+        [
+          "t:zh-Hant:fe648ccc6a92aa85",
+          "zh-Hant",
+          "合成😀手牌"
+        ],
+        [
+          "t:ja:c74c4bf0a7a5dea4",
+          "ja",
+          "合成区"
+        ]
       ],
       "annotation_sets": [
-        ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-        ["ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015", "t:en:4fc8efb088bdae58", [[0, {"kind": "glossary", "key": "term:hand"}, [[7, 11]], false]]],
-        ["ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e", "t:zh-Hant:fe648ccc6a92aa85", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]]
+        [
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+          "t:ja:50c0947436ae73f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        [
+          "ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015",
+          "t:en:4fc8efb088bdae58",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  7,
+                  11
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        [
+          "ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e",
+          "t:zh-Hant:fe648ccc6a92aa85",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ]
       ],
       "field_annotations": [
-        [{"kind": "face_revision", "id": "rev:jp"}, "effect", null, "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"],
-        [{"kind": "face_revision", "id": "rev:en"}, "effect", null, "ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015"]
+        [
+          {
+            "kind": "face_revision",
+            "id": "rev:jp"
+          },
+          "effect",
+          null,
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"
+        ],
+        [
+          {
+            "kind": "face_revision",
+            "id": "rev:en"
+          },
+          "effect",
+          null,
+          "ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015"
+        ]
       ],
       "translations": [
-        ["tr:synthetic-render", "t:ja:50c0947436ae73f4", "zh-Hant", "t:zh-Hant:fe648ccc6a92aa85", "project", "unofficial", false, "ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e"]
+        [
+          "tr:synthetic-render",
+          "t:ja:50c0947436ae73f4",
+          "zh-Hant",
+          "t:zh-Hant:fe648ccc6a92aa85",
+          "project",
+          "unofficial",
+          false,
+          "ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e",
+          "explicit"
+        ]
       ],
       "field_translations": [
         {
-          "receiver": [{"kind": "face_revision", "id": "rev:jp"}, "effect", null],
-          "value": ["effect", null, "zh-Hant", "tr:synthetic-render", "own_source", [{"kind": "face_revision", "id": "rev:jp"}, "effect", null], null]
+          "receiver": [
+            {
+              "kind": "face_revision",
+              "id": "rev:jp"
+            },
+            "effect",
+            null
+          ],
+          "value": [
+            "effect",
+            null,
+            "zh-Hant",
+            "tr:synthetic-render",
+            "own_source",
+            [
+              {
+                "kind": "face_revision",
+                "id": "rev:jp"
+              },
+              "effect",
+              null
+            ],
+            null
+          ]
         },
         {
-          "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
-          "value": ["effect", null, "zh-Hant", "tr:synthetic-render", "jp_source", [{"kind": "face_revision", "id": "rev:jp"}, "effect", null], null]
+          "receiver": [
+            {
+              "kind": "face_revision",
+              "id": "rev:en"
+            },
+            "effect",
+            null
+          ],
+          "value": [
+            "effect",
+            null,
+            "zh-Hant",
+            "tr:synthetic-render",
+            "jp_source",
+            [
+              {
+                "kind": "face_revision",
+                "id": "rev:jp"
+              },
+              "effect",
+              null
+            ],
+            null
+          ]
         }
       ],
       "concepts": [
-        ["term:hand", "rule_term", [], []]
+        [
+          "term:hand",
+          "rule_term",
+          [],
+          []
+        ]
       ],
       "vocabulary": [
-        ["zone", "hand", "t:ja:c74c4bf0a7a5dea4", true, []]
+        [
+          "zone",
+          "hand",
+          "t:ja:c74c4bf0a7a5dea4",
+          true,
+          []
+        ]
       ],
       "owners": [
         {
@@ -54,7 +221,11 @@
           "region": "jp",
           "mapping_state": "confirmed",
           "fields": [
-            ["effect", null, "t:ja:50c0947436ae73f4"]
+            [
+              "effect",
+              null,
+              "t:ja:50c0947436ae73f4"
+            ]
           ]
         },
         {
@@ -67,7 +238,11 @@
           "region": "en",
           "mapping_state": "confirmed",
           "fields": [
-            ["effect", null, "t:en:4fc8efb088bdae58"]
+            [
+              "effect",
+              null,
+              "t:en:4fc8efb088bdae58"
+            ]
           ]
         },
         {
@@ -81,17 +256,25 @@
           "region": null,
           "mapping_state": null,
           "fields": [
-            ["label", null, "t:ja:c74c4bf0a7a5dea4"]
+            [
+              "label",
+              null,
+              "t:ja:c74c4bf0a7a5dea4"
+            ]
           ]
         }
       ],
-      "cards": ["c:sample"],
+      "cards": [
+        "c:sample"
+      ],
       "explanation_targets": [],
       "support": {
         "region": "en",
         "shared_status": "engine_passed",
         "override_status": null,
-        "region_blocks": ["region_text_unchecked"]
+        "region_blocks": [
+          "region_text_unchecked"
+        ]
       },
       "producer": {
         "source_exists": true,
@@ -103,15 +286,101 @@
         "counterpart_fresh": false
       }
     },
-    "translation_tuple": ["tr:synthetic-render", "t:ja:50c0947436ae73f4", "zh-Hant", "t:zh-Hant:fe648ccc6a92aa85", "project", "unofficial", false, "ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e"],
-    "field_translation_tuple": ["effect", null, "zh-Hant", "tr:synthetic-render", "jp_source", [{"kind": "face_revision", "id": "rev:jp"}, "effect", null], null],
-    "annotation_tuple": [0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false],
-    "annotation_set_tuple": ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-    "field_annotation_tuple": [{"kind": "face_revision", "id": "rev:jp"}, "effect", null, "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"],
-    "range_tuple": [3, 5],
-    "pointer_tuple": [{"kind": "face_revision", "id": "rev:jp"}, "effect", null],
-    "concept_tuple": ["term:sample", "rule_term", [], []],
-    "cr_clause_tuple": ["cr:sample", "crv:sample", "1", "t:ja:50c0947436ae73f4", []],
+    "translation_tuple": [
+      "tr:synthetic-render",
+      "t:ja:50c0947436ae73f4",
+      "zh-Hant",
+      "t:zh-Hant:fe648ccc6a92aa85",
+      "project",
+      "unofficial",
+      false,
+      "ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e",
+      "explicit"
+    ],
+    "field_translation_tuple": [
+      "effect",
+      null,
+      "zh-Hant",
+      "tr:synthetic-render",
+      "jp_source",
+      [
+        {
+          "kind": "face_revision",
+          "id": "rev:jp"
+        },
+        "effect",
+        null
+      ],
+      null
+    ],
+    "annotation_tuple": [
+      0,
+      {
+        "kind": "glossary",
+        "key": "term:hand"
+      },
+      [
+        [
+          3,
+          5
+        ]
+      ],
+      false
+    ],
+    "annotation_set_tuple": [
+      "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+      "t:ja:50c0947436ae73f4",
+      [
+        [
+          0,
+          {
+            "kind": "glossary",
+            "key": "term:hand"
+          },
+          [
+            [
+              3,
+              5
+            ]
+          ],
+          false
+        ]
+      ]
+    ],
+    "field_annotation_tuple": [
+      {
+        "kind": "face_revision",
+        "id": "rev:jp"
+      },
+      "effect",
+      null,
+      "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"
+    ],
+    "range_tuple": [
+      3,
+      5
+    ],
+    "pointer_tuple": [
+      {
+        "kind": "face_revision",
+        "id": "rev:jp"
+      },
+      "effect",
+      null
+    ],
+    "concept_tuple": [
+      "term:sample",
+      "rule_term",
+      [],
+      []
+    ],
+    "cr_clause_tuple": [
+      "cr:sample",
+      "crv:sample",
+      "1",
+      "t:ja:50c0947436ae73f4",
+      []
+    ],
     "printed": {
       "fixture": "jp_en",
       "changes": {
@@ -146,9 +415,34 @@
       "fixture": "jp_en",
       "changes": {
         "/field_annotations": [
-          [{"kind": "face_revision", "id": "rev:jp"}, "effect", null, "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"],
-          [{"kind": "face_revision", "id": "rev:en"}, "effect", null, "ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015"],
-          [{"kind": "printing_face", "id": "p:jp", "face_id": "f:front"}, "effect", null, "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"]
+          [
+            {
+              "kind": "face_revision",
+              "id": "rev:jp"
+            },
+            "effect",
+            null,
+            "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"
+          ],
+          [
+            {
+              "kind": "face_revision",
+              "id": "rev:en"
+            },
+            "effect",
+            null,
+            "ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015"
+          ],
+          [
+            {
+              "kind": "printing_face",
+              "id": "p:jp",
+              "face_id": "f:front"
+            },
+            "effect",
+            null,
+            "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"
+          ]
         ],
         "/field_translations/1/value/5/0/kind": "printing_face",
         "/field_translations/1/value/5/0/id": "p:jp",
@@ -164,7 +458,11 @@
             "region": "jp",
             "mapping_state": "confirmed",
             "fields": [
-              ["effect", null, "t:ja:50c0947436ae73f4"]
+              [
+                "effect",
+                null,
+                "t:ja:50c0947436ae73f4"
+              ]
             ]
           },
           {
@@ -177,7 +475,11 @@
             "region": "en",
             "mapping_state": "confirmed",
             "fields": [
-              ["effect", null, "t:en:4fc8efb088bdae58"]
+              [
+                "effect",
+                null,
+                "t:en:4fc8efb088bdae58"
+              ]
             ]
           },
           {
@@ -191,7 +493,11 @@
             "region": null,
             "mapping_state": null,
             "fields": [
-              ["label", null, "t:ja:c74c4bf0a7a5dea4"]
+              [
+                "label",
+                null,
+                "t:ja:c74c4bf0a7a5dea4"
+              ]
             ]
           },
           {
@@ -205,7 +511,11 @@
             "region": "jp",
             "mapping_state": "confirmed",
             "fields": [
-              ["effect", null, "t:ja:50c0947436ae73f4"]
+              [
+                "effect",
+                null,
+                "t:ja:50c0947436ae73f4"
+              ]
             ]
           }
         ]
@@ -214,8 +524,33 @@
     },
     "concept_closure": {
       "concepts": [
-        ["term:hand", "rule_term", [{"kind": "cr_clause", "id": "cr:one"}, {"kind": "keyword", "id": "kw:one"}, {"kind": "ruling_revision", "id": "rul:v1"}], []],
-        ["term:name", "card_name", [], ["c:sample"]]
+        [
+          "term:hand",
+          "rule_term",
+          [
+            {
+              "kind": "cr_clause",
+              "id": "cr:one"
+            },
+            {
+              "kind": "keyword",
+              "id": "kw:one"
+            },
+            {
+              "kind": "ruling_revision",
+              "id": "rul:v1"
+            }
+          ],
+          []
+        ],
+        [
+          "term:name",
+          "card_name",
+          [],
+          [
+            "c:sample"
+          ]
+        ]
       ],
       "references": [
         {
@@ -227,7 +562,9 @@
           "term_id": "term:name"
         }
       ],
-      "cards": ["c:sample"],
+      "cards": [
+        "c:sample"
+      ],
       "explanation_targets": [
         {
           "kind": "keyword",
@@ -246,7 +583,11 @@
         }
       ],
       "text_units": [
-        ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+        [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ]
       ]
     },
     "counterpart": {
@@ -261,8 +602,37 @@
         "/translations/0/7": "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
         "/field_translations": [
           {
-            "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
-            "value": ["effect", null, "ja", "tr:counterpart", "official_counterpart", [{"kind": "face_revision", "id": "rev:en"}, "effect", null], [{"kind": "face_revision", "id": "rev:jp"}, "effect", null]]
+            "receiver": [
+              {
+                "kind": "face_revision",
+                "id": "rev:en"
+              },
+              "effect",
+              null
+            ],
+            "value": [
+              "effect",
+              null,
+              "ja",
+              "tr:counterpart",
+              "official_counterpart",
+              [
+                {
+                  "kind": "face_revision",
+                  "id": "rev:en"
+                },
+                "effect",
+                null
+              ],
+              [
+                {
+                  "kind": "face_revision",
+                  "id": "rev:jp"
+                },
+                "effect",
+                null
+              ]
+            ]
           }
         ],
         "/producer/aligned": true,
@@ -274,26 +644,94 @@
       "fixture": "jp_en",
       "changes": {
         "/text_units": [
-          ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"],
-          ["t:en:4fc8efb088bdae58", "en", "Sample hand."],
-          ["t:zh-Hant:fe648ccc6a92aa85", "zh-Hant", "合成😀手牌"],
-          ["t:ja:c74c4bf0a7a5dea4", "ja", "合成区"],
-          ["t:en:4666c725d5eff0f5", "en", "First synthetic part."],
-          ["t:en:a59640ce328b41cb", "en", "Second synthetic part."]
+          [
+            "t:ja:50c0947436ae73f4",
+            "ja",
+            "合成😀手札"
+          ],
+          [
+            "t:en:4fc8efb088bdae58",
+            "en",
+            "Sample hand."
+          ],
+          [
+            "t:zh-Hant:fe648ccc6a92aa85",
+            "zh-Hant",
+            "合成😀手牌"
+          ],
+          [
+            "t:ja:c74c4bf0a7a5dea4",
+            "ja",
+            "合成区"
+          ],
+          [
+            "t:en:4666c725d5eff0f5",
+            "en",
+            "First synthetic part."
+          ],
+          [
+            "t:en:a59640ce328b41cb",
+            "en",
+            "Second synthetic part."
+          ]
         ],
         "/field_annotations": [
-          [{"kind": "face_revision", "id": "rev:jp"}, "effect", null, "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"],
-          [{"kind": "face_revision", "id": "rev:en"}, "effect", null, "ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015"],
-          [{"kind": "face_revision", "id": "rev:jp"}, "section", 0, "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"]
+          [
+            {
+              "kind": "face_revision",
+              "id": "rev:jp"
+            },
+            "effect",
+            null,
+            "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"
+          ],
+          [
+            {
+              "kind": "face_revision",
+              "id": "rev:en"
+            },
+            "effect",
+            null,
+            "ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015"
+          ],
+          [
+            {
+              "kind": "face_revision",
+              "id": "rev:jp"
+            },
+            "section",
+            0,
+            "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"
+          ]
         ],
         "/owners/0/fields": [
-          ["effect", null, "t:ja:50c0947436ae73f4"],
-          ["section", 0, "t:ja:50c0947436ae73f4"]
+          [
+            "effect",
+            null,
+            "t:ja:50c0947436ae73f4"
+          ],
+          [
+            "section",
+            0,
+            "t:ja:50c0947436ae73f4"
+          ]
         ],
         "/owners/1/fields": [
-          ["effect", null, "t:en:4fc8efb088bdae58"],
-          ["section", 0, "t:en:4666c725d5eff0f5"],
-          ["section", 1, "t:en:a59640ce328b41cb"]
+          [
+            "effect",
+            null,
+            "t:en:4fc8efb088bdae58"
+          ],
+          [
+            "section",
+            0,
+            "t:en:4666c725d5eff0f5"
+          ],
+          [
+            "section",
+            1,
+            "t:en:a59640ce328b41cb"
+          ]
         ]
       },
       "remove": []
@@ -302,9 +740,35 @@
       "fixture": "jp_en",
       "changes": {
         "/field_annotations": [
-          [{"kind": "printing_face", "id": "p:jp", "face_id": "f:front"}, "effect", null, "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"],
-          [{"kind": "printing_face", "id": "p:en", "face_id": "f:front"}, "effect", null, "ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015"],
-          [{"kind": "face_revision", "id": "rev:jp"}, "effect", null, "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"]
+          [
+            {
+              "kind": "printing_face",
+              "id": "p:jp",
+              "face_id": "f:front"
+            },
+            "effect",
+            null,
+            "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"
+          ],
+          [
+            {
+              "kind": "printing_face",
+              "id": "p:en",
+              "face_id": "f:front"
+            },
+            "effect",
+            null,
+            "ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015"
+          ],
+          [
+            {
+              "kind": "face_revision",
+              "id": "rev:jp"
+            },
+            "effect",
+            null,
+            "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"
+          ]
         ],
         "/field_translations/0/receiver/0/kind": "printing_face",
         "/field_translations/0/receiver/0/id": "p:jp",
@@ -327,7 +791,11 @@
             "region": "jp",
             "mapping_state": "confirmed",
             "fields": [
-              ["effect", null, "t:ja:50c0947436ae73f4"]
+              [
+                "effect",
+                null,
+                "t:ja:50c0947436ae73f4"
+              ]
             ]
           },
           {
@@ -341,7 +809,11 @@
             "region": "en",
             "mapping_state": "confirmed",
             "fields": [
-              ["effect", null, "t:en:4fc8efb088bdae58"]
+              [
+                "effect",
+                null,
+                "t:en:4fc8efb088bdae58"
+              ]
             ]
           },
           {
@@ -355,7 +827,11 @@
             "region": null,
             "mapping_state": null,
             "fields": [
-              ["label", null, "t:ja:c74c4bf0a7a5dea4"]
+              [
+                "label",
+                null,
+                "t:ja:c74c4bf0a7a5dea4"
+              ]
             ]
           },
           {
@@ -368,7 +844,11 @@
             "region": "jp",
             "mapping_state": "confirmed",
             "fields": [
-              ["effect", null, "t:ja:50c0947436ae73f4"]
+              [
+                "effect",
+                null,
+                "t:ja:50c0947436ae73f4"
+              ]
             ]
           }
         ]
@@ -415,11 +895,31 @@
         "value": {
           "format_version": "3.0.0",
           "min_reader_version": "3.0.0",
-          "required_capabilities": ["column-partition-v1", "digital-same-name-links-v1", "fragment-container-v1", "image-entity-buckets-v1", "image-id-url-v1", "jp-source-translation-v1", "public-annotation-v1", "rules-name-on-demand-v1"]
+          "required_capabilities": [
+            "column-partition-v1",
+            "digital-same-name-links-v1",
+            "fragment-container-v1",
+            "image-entity-buckets-v1",
+            "image-id-url-v1",
+            "jp-source-translation-v1",
+            "public-annotation-v1",
+            "rules-name-on-demand-v1"
+          ]
         },
         "reader_version": "3.0.0",
-        "supported_formats": ["3.0.0"],
-        "supported_capabilities": ["column-partition-v1", "digital-same-name-links-v1", "fragment-container-v1", "image-entity-buckets-v1", "image-id-url-v1", "jp-source-translation-v1", "public-annotation-v1", "rules-name-on-demand-v1"]
+        "supported_formats": [
+          "3.0.0"
+        ],
+        "supported_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ]
       },
       "expected": {
         "result": "accept"
@@ -492,7 +992,15 @@
       "input": {
         "fixture": "jp_en",
         "changes": {
-          "/admission/required_capabilities": ["column-partition-v1", "digital-same-name-links-v1", "fragment-container-v1", "image-entity-buckets-v1", "image-id-url-v1", "jp-source-translation-v1", "rules-name-on-demand-v1"]
+          "/admission/required_capabilities": [
+            "column-partition-v1",
+            "digital-same-name-links-v1",
+            "fragment-container-v1",
+            "image-entity-buckets-v1",
+            "image-id-url-v1",
+            "jp-source-translation-v1",
+            "rules-name-on-demand-v1"
+          ]
         }
       },
       "expected": {
@@ -507,7 +1015,17 @@
       "input": {
         "fixture": "jp_en",
         "changes": {
-          "/admission/required_capabilities": ["column-partition-v1", "digital-same-name-links-v1", "fragment-container-v1", "future-v1", "image-entity-buckets-v1", "image-id-url-v1", "jp-source-translation-v1", "public-annotation-v1", "rules-name-on-demand-v1"]
+          "/admission/required_capabilities": [
+            "column-partition-v1",
+            "digital-same-name-links-v1",
+            "fragment-container-v1",
+            "future-v1",
+            "image-entity-buckets-v1",
+            "image-id-url-v1",
+            "jp-source-translation-v1",
+            "public-annotation-v1",
+            "rules-name-on-demand-v1"
+          ]
         }
       },
       "expected": {
@@ -522,7 +1040,17 @@
       "input": {
         "fixture": "jp_en",
         "changes": {
-          "/admission/required_capabilities": ["column-partition-v1", "digital-same-name-links-v1", "fragment-container-v1", "image-entity-buckets-v1", "image-id-url-v1", "jp-source-translation-v1", "public-annotation-v1", "rules-name-on-demand-v1", "rules-name-on-demand-v1"]
+          "/admission/required_capabilities": [
+            "column-partition-v1",
+            "digital-same-name-links-v1",
+            "fragment-container-v1",
+            "image-entity-buckets-v1",
+            "image-id-url-v1",
+            "jp-source-translation-v1",
+            "public-annotation-v1",
+            "rules-name-on-demand-v1",
+            "rules-name-on-demand-v1"
+          ]
         }
       },
       "expected": {
@@ -537,7 +1065,16 @@
       "input": {
         "fixture": "jp_en",
         "changes": {
-          "/admission/required_capabilities": ["rules-name-on-demand-v1", "public-annotation-v1", "jp-source-translation-v1", "image-id-url-v1", "image-entity-buckets-v1", "fragment-container-v1", "digital-same-name-links-v1", "column-partition-v1"]
+          "/admission/required_capabilities": [
+            "rules-name-on-demand-v1",
+            "public-annotation-v1",
+            "jp-source-translation-v1",
+            "image-id-url-v1",
+            "image-entity-buckets-v1",
+            "fragment-container-v1",
+            "digital-same-name-links-v1",
+            "column-partition-v1"
+          ]
         }
       },
       "expected": {
@@ -553,11 +1090,29 @@
         "value": {
           "format_version": "3.0.0",
           "min_reader_version": "3.0.0",
-          "required_capabilities": ["column-partition-v1", "digital-same-name-links-v1", "fragment-container-v1", "image-entity-buckets-v1", "image-id-url-v1", "jp-source-translation-v1", "public-annotation-v1", "rules-name-on-demand-v1"]
+          "required_capabilities": [
+            "column-partition-v1",
+            "digital-same-name-links-v1",
+            "fragment-container-v1",
+            "image-entity-buckets-v1",
+            "image-id-url-v1",
+            "jp-source-translation-v1",
+            "public-annotation-v1",
+            "rules-name-on-demand-v1"
+          ]
         },
         "reader_version": "2.0.0",
-        "supported_formats": ["2.0.0"],
-        "supported_capabilities": ["column-partition-v1", "digital-same-name-links-v1", "fragment-container-v1", "image-entity-buckets-v1", "image-id-url-v1", "rules-name-on-demand-v1"]
+        "supported_formats": [
+          "2.0.0"
+        ],
+        "supported_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "rules-name-on-demand-v1"
+        ]
       },
       "expected": {
         "result": "reject",
@@ -572,11 +1127,30 @@
         "value": {
           "format_version": "3.0.0",
           "min_reader_version": "3.0.0",
-          "required_capabilities": ["column-partition-v1", "digital-same-name-links-v1", "fragment-container-v1", "image-entity-buckets-v1", "image-id-url-v1", "jp-source-translation-v1", "public-annotation-v1", "rules-name-on-demand-v1"]
+          "required_capabilities": [
+            "column-partition-v1",
+            "digital-same-name-links-v1",
+            "fragment-container-v1",
+            "image-entity-buckets-v1",
+            "image-id-url-v1",
+            "jp-source-translation-v1",
+            "public-annotation-v1",
+            "rules-name-on-demand-v1"
+          ]
         },
         "reader_version": "3.0.0",
-        "supported_formats": ["3.0.0"],
-        "supported_capabilities": ["column-partition-v1", "digital-same-name-links-v1", "fragment-container-v1", "image-entity-buckets-v1", "image-id-url-v1", "jp-source-translation-v1", "rules-name-on-demand-v1"]
+        "supported_formats": [
+          "3.0.0"
+        ],
+        "supported_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "rules-name-on-demand-v1"
+        ]
       },
       "expected": {
         "result": "reject",
@@ -591,7 +1165,16 @@
         "admission": {
           "format_version": "3.0.0",
           "min_reader_version": "3.0.0",
-          "required_capabilities": ["column-partition-v1", "digital-same-name-links-v1", "fragment-container-v1", "image-entity-buckets-v1", "image-id-url-v1", "jp-source-translation-v1", "public-annotation-v1", "rules-name-on-demand-v1"]
+          "required_capabilities": [
+            "column-partition-v1",
+            "digital-same-name-links-v1",
+            "fragment-container-v1",
+            "image-entity-buckets-v1",
+            "image-id-url-v1",
+            "jp-source-translation-v1",
+            "public-annotation-v1",
+            "rules-name-on-demand-v1"
+          ]
         },
         "members": {
           "container": "3.0.0",
@@ -627,7 +1210,9 @@
         "fixture": "translation_tuple",
         "changes": {},
         "definition": "translation",
-        "remove": ["/7"]
+        "remove": [
+          "/7"
+        ]
       },
       "expected": {
         "result": "reject",
@@ -653,7 +1238,23 @@
       "input": {
         "fixture": "field_translation_tuple",
         "changes": {
-          "": ["effect", null, "zh-Hant", "tr:synthetic-render", "jp_source", [{"kind": "face_revision", "id": "rev:jp"}, "effect", null], null, null]
+          "": [
+            "effect",
+            null,
+            "zh-Hant",
+            "tr:synthetic-render",
+            "jp_source",
+            [
+              {
+                "kind": "face_revision",
+                "id": "rev:jp"
+              },
+              "effect",
+              null
+            ],
+            null,
+            null
+          ]
         },
         "definition": "FieldTranslation"
       },
@@ -961,10 +1562,27 @@
       "operation": "descriptor",
       "input": {
         "definition": "FieldTranslation",
-        "columns": ["field", "ordinal", "target_lang", "translation_id", "basis", "counterpart", "source"],
+        "columns": [
+          "field",
+          "ordinal",
+          "target_lang",
+          "translation_id",
+          "basis",
+          "counterpart",
+          "source"
+        ],
         "items": [
           {
-            "enum": ["name", "effect", "flavor", "question", "answer", "section", "label", "action_label"]
+            "enum": [
+              "name",
+              "effect",
+              "flavor",
+              "question",
+              "answer",
+              "section",
+              "label",
+              "action_label"
+            ]
           },
           {
             "nullable": {
@@ -978,7 +1596,11 @@
             "scalar": "ID"
           },
           {
-            "enum": ["own_source", "jp_source", "official_counterpart"]
+            "enum": [
+              "own_source",
+              "jp_source",
+              "official_counterpart"
+            ]
           },
           {
             "ref": "PublicTextPointer"
@@ -1055,21 +1677,80 @@
       "id": "same-text-distinct-concepts",
       "operation": "annotation_identity",
       "input": {
-        "text_unit": ["t:zh-Hant:4f7186f788739f93", "zh-Hant", "手牌"],
+        "text_unit": [
+          "t:zh-Hant:4f7186f788739f93",
+          "zh-Hant",
+          "手牌"
+        ],
         "sets": [
-          ["ann:6cc8746913fdf3ccff888b5ef5060ac259e3358a06863142000c97a0f4df4b10", "t:zh-Hant:4f7186f788739f93", [[0, {"kind": "glossary", "key": "term:hand"}, [[0, 2]], true]]],
-          ["ann:8ab181eff6c67604ece7c29b1ef1ce5c9b5e0b7131884c9128d4649b5a874885", "t:zh-Hant:4f7186f788739f93", [[0, {"kind": "card_name", "term_id": "term:name"}, [[0, 2]], true]]]
+          [
+            "ann:6cc8746913fdf3ccff888b5ef5060ac259e3358a06863142000c97a0f4df4b10",
+            "t:zh-Hant:4f7186f788739f93",
+            [
+              [
+                0,
+                {
+                  "kind": "glossary",
+                  "key": "term:hand"
+                },
+                [
+                  [
+                    0,
+                    2
+                  ]
+                ],
+                true
+              ]
+            ]
+          ],
+          [
+            "ann:8ab181eff6c67604ece7c29b1ef1ce5c9b5e0b7131884c9128d4649b5a874885",
+            "t:zh-Hant:4f7186f788739f93",
+            [
+              [
+                0,
+                {
+                  "kind": "card_name",
+                  "term_id": "term:name"
+                },
+                [
+                  [
+                    0,
+                    2
+                  ]
+                ],
+                true
+              ]
+            ]
+          ]
         ],
         "concepts": [
-          ["term:hand", "rule_term", [], []],
-          ["term:name", "card_name", [], ["c:sample"]]
+          [
+            "term:hand",
+            "rule_term",
+            [],
+            []
+          ],
+          [
+            "term:name",
+            "card_name",
+            [],
+            [
+              "c:sample"
+            ]
+          ]
         ],
-        "cards": ["c:sample"]
+        "cards": [
+          "c:sample"
+        ]
       },
       "expected": {
         "result": "accept",
         "text_unit_count": 1,
-        "annotation_set_ids": ["ann:6cc8746913fdf3ccff888b5ef5060ac259e3358a06863142000c97a0f4df4b10", "ann:8ab181eff6c67604ece7c29b1ef1ce5c9b5e0b7131884c9128d4649b5a874885"],
+        "annotation_set_ids": [
+          "ann:6cc8746913fdf3ccff888b5ef5060ac259e3358a06863142000c97a0f4df4b10",
+          "ann:8ab181eff6c67604ece7c29b1ef1ce5c9b5e0b7131884c9128d4649b5a874885"
+        ],
         "distinct": true
       }
     },
@@ -1078,20 +1759,70 @@
       "id": "bold-changes-set-id",
       "operation": "annotation_identity",
       "input": {
-        "text_unit": ["t:zh-Hant:4f7186f788739f93", "zh-Hant", "手牌"],
+        "text_unit": [
+          "t:zh-Hant:4f7186f788739f93",
+          "zh-Hant",
+          "手牌"
+        ],
         "sets": [
-          ["ann:6cc8746913fdf3ccff888b5ef5060ac259e3358a06863142000c97a0f4df4b10", "t:zh-Hant:4f7186f788739f93", [[0, {"kind": "glossary", "key": "term:hand"}, [[0, 2]], true]]],
-          ["ann:67042b9bd4dd601d97bc113f55b68887810c1ff4c46de34bcbc398ca2b92db65", "t:zh-Hant:4f7186f788739f93", [[0, {"kind": "glossary", "key": "term:hand"}, [[0, 2]], false]]]
+          [
+            "ann:6cc8746913fdf3ccff888b5ef5060ac259e3358a06863142000c97a0f4df4b10",
+            "t:zh-Hant:4f7186f788739f93",
+            [
+              [
+                0,
+                {
+                  "kind": "glossary",
+                  "key": "term:hand"
+                },
+                [
+                  [
+                    0,
+                    2
+                  ]
+                ],
+                true
+              ]
+            ]
+          ],
+          [
+            "ann:67042b9bd4dd601d97bc113f55b68887810c1ff4c46de34bcbc398ca2b92db65",
+            "t:zh-Hant:4f7186f788739f93",
+            [
+              [
+                0,
+                {
+                  "kind": "glossary",
+                  "key": "term:hand"
+                },
+                [
+                  [
+                    0,
+                    2
+                  ]
+                ],
+                false
+              ]
+            ]
+          ]
         ],
         "concepts": [
-          ["term:hand", "rule_term", [], []]
+          [
+            "term:hand",
+            "rule_term",
+            [],
+            []
+          ]
         ],
         "cards": []
       },
       "expected": {
         "result": "accept",
         "text_unit_count": 1,
-        "annotation_set_ids": ["ann:6cc8746913fdf3ccff888b5ef5060ac259e3358a06863142000c97a0f4df4b10", "ann:67042b9bd4dd601d97bc113f55b68887810c1ff4c46de34bcbc398ca2b92db65"],
+        "annotation_set_ids": [
+          "ann:6cc8746913fdf3ccff888b5ef5060ac259e3358a06863142000c97a0f4df4b10",
+          "ann:67042b9bd4dd601d97bc113f55b68887810c1ff4c46de34bcbc398ca2b92db65"
+        ],
         "distinct": true
       }
     },
@@ -1176,11 +1907,50 @@
       "id": "same-set-two-owners",
       "operation": "shared_annotation",
       "input": {
-        "text_unit": ["t:zh-Hant:4f7186f788739f93", "zh-Hant", "手牌"],
-        "annotation_set": ["ann:6cc8746913fdf3ccff888b5ef5060ac259e3358a06863142000c97a0f4df4b10", "t:zh-Hant:4f7186f788739f93", [[0, {"kind": "glossary", "key": "term:hand"}, [[0, 2]], true]]],
+        "text_unit": [
+          "t:zh-Hant:4f7186f788739f93",
+          "zh-Hant",
+          "手牌"
+        ],
+        "annotation_set": [
+          "ann:6cc8746913fdf3ccff888b5ef5060ac259e3358a06863142000c97a0f4df4b10",
+          "t:zh-Hant:4f7186f788739f93",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  0,
+                  2
+                ]
+              ],
+              true
+            ]
+          ]
+        ],
         "uses": [
-          [{"kind": "face_revision", "id": "rev:one"}, "effect", null, "ann:6cc8746913fdf3ccff888b5ef5060ac259e3358a06863142000c97a0f4df4b10"],
-          [{"kind": "face_revision", "id": "rev:two"}, "effect", null, "ann:6cc8746913fdf3ccff888b5ef5060ac259e3358a06863142000c97a0f4df4b10"]
+          [
+            {
+              "kind": "face_revision",
+              "id": "rev:one"
+            },
+            "effect",
+            null,
+            "ann:6cc8746913fdf3ccff888b5ef5060ac259e3358a06863142000c97a0f4df4b10"
+          ],
+          [
+            {
+              "kind": "face_revision",
+              "id": "rev:two"
+            },
+            "effect",
+            null,
+            "ann:6cc8746913fdf3ccff888b5ef5060ac259e3358a06863142000c97a0f4df4b10"
+          ]
         ]
       },
       "expected": {
@@ -1197,7 +1967,10 @@
         "fixture": "jp_en",
         "changes": {
           "/annotation_sets/0/2/0/2": [
-            [-1, 5]
+            [
+              -1,
+              5
+            ]
           ]
         }
       },
@@ -1214,7 +1987,10 @@
         "fixture": "jp_en",
         "changes": {
           "/annotation_sets/0/2/0/2": [
-            [3, 3]
+            [
+              3,
+              3
+            ]
           ]
         }
       },
@@ -1231,7 +2007,10 @@
         "fixture": "jp_en",
         "changes": {
           "/annotation_sets/0/2/0/2": [
-            [4, 3]
+            [
+              4,
+              3
+            ]
           ]
         }
       },
@@ -1248,7 +2027,10 @@
         "fixture": "jp_en",
         "changes": {
           "/annotation_sets/0/2/0/2": [
-            [3, 6]
+            [
+              3,
+              6
+            ]
           ]
         }
       },
@@ -1265,7 +2047,10 @@
         "fixture": "jp_en",
         "changes": {
           "/annotation_sets/0/2/0/2": [
-            [4, 6]
+            [
+              4,
+              6
+            ]
           ]
         }
       },
@@ -1297,8 +2082,14 @@
         "fixture": "jp_en",
         "changes": {
           "/annotation_sets/0/2/0/2": [
-            [1, 4],
-            [3, 5]
+            [
+              1,
+              4
+            ],
+            [
+              3,
+              5
+            ]
           ]
         }
       },
@@ -1315,8 +2106,14 @@
         "fixture": "jp_en",
         "changes": {
           "/annotation_sets/0/2/0/2": [
-            [3, 5],
-            [0, 1]
+            [
+              3,
+              5
+            ],
+            [
+              0,
+              1
+            ]
           ]
         }
       },
@@ -1333,7 +2130,10 @@
         "fixture": "jp_en",
         "changes": {
           "/annotation_sets/0/2/0/2": [
-            [true, 5]
+            [
+              true,
+              5
+            ]
           ]
         }
       },
@@ -1350,7 +2150,10 @@
         "fixture": "jp_en",
         "changes": {
           "/annotation_sets/0/2/0/2": [
-            [3, 9007199254740992]
+            [
+              3,
+              9007199254740992
+            ]
           ]
         }
       },
@@ -1382,8 +2185,34 @@
         "fixture": "jp_en",
         "changes": {
           "/annotation_sets/0/2": [
-            [0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false],
-            [1, {"kind": "glossary", "key": "term:hand"}, [[4, 5]], false]
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ],
+            [
+              1,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  4,
+                  5
+                ]
+              ],
+              false
+            ]
           ]
         }
       },
@@ -1397,15 +2226,61 @@
       "id": "repeat-retains-occurrences",
       "operation": "unicode_ranges",
       "input": {
-        "text_unit": ["t:zh-Hant:fc2bef98fd0213f4", "zh-Hant", "手牌與手牌"],
-        "annotation_set": ["ann:ffeac9a00a2bb80a3ef858c1848d4b7dda5f7bf6e1ccdced38ea837de2c4a263", "t:zh-Hant:fc2bef98fd0213f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[0, 2]], false], [1, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]]
+        "text_unit": [
+          "t:zh-Hant:fc2bef98fd0213f4",
+          "zh-Hant",
+          "手牌與手牌"
+        ],
+        "annotation_set": [
+          "ann:ffeac9a00a2bb80a3ef858c1848d4b7dda5f7bf6e1ccdced38ea837de2c4a263",
+          "t:zh-Hant:fc2bef98fd0213f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  0,
+                  2
+                ]
+              ],
+              false
+            ],
+            [
+              1,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ]
       },
       "expected": {
         "result": "accept",
-        "slices": ["手牌", "手牌"],
+        "slices": [
+          "手牌",
+          "手牌"
+        ],
         "utf16_ranges": [
-          [0, 2],
-          [3, 5]
+          [
+            0,
+            2
+          ],
+          [
+            3,
+            5
+          ]
         ]
       }
     },
@@ -1414,15 +2289,51 @@
       "id": "one-reference-disjoint-ranges",
       "operation": "unicode_ranges",
       "input": {
-        "text_unit": ["t:zh-Hant:0f6c23cdf5cc5dbe", "zh-Hant", "甲和乙"],
-        "annotation_set": ["ann:880367120a64ef7040c5d9074e48297c1cb0e7df93b7b65135a8b94acc4c2730", "t:zh-Hant:0f6c23cdf5cc5dbe", [[0, {"kind": "glossary", "key": "term:hand"}, [[0, 1], [2, 3]], false]]]
+        "text_unit": [
+          "t:zh-Hant:0f6c23cdf5cc5dbe",
+          "zh-Hant",
+          "甲和乙"
+        ],
+        "annotation_set": [
+          "ann:880367120a64ef7040c5d9074e48297c1cb0e7df93b7b65135a8b94acc4c2730",
+          "t:zh-Hant:0f6c23cdf5cc5dbe",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  0,
+                  1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ],
+              false
+            ]
+          ]
+        ]
       },
       "expected": {
         "result": "accept",
-        "slices": ["甲", "乙"],
+        "slices": [
+          "甲",
+          "乙"
+        ],
         "utf16_ranges": [
-          [0, 1],
-          [2, 3]
+          [
+            0,
+            1
+          ],
+          [
+            2,
+            3
+          ]
         ]
       }
     },
@@ -1480,21 +2391,72 @@
         "producer_annotations": {
           "fields": [
             [
-              [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
-              ["ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015", "t:en:4fc8efb088bdae58", [[0, {"kind": "glossary", "key": "term:hand"}, [[7, 11]], false]]]
+              [
+                {
+                  "kind": "face_revision",
+                  "id": "rev:en"
+                },
+                "effect",
+                null
+              ],
+              [
+                "ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015",
+                "t:en:4fc8efb088bdae58",
+                [
+                  [
+                    0,
+                    {
+                      "kind": "glossary",
+                      "key": "term:hand"
+                    },
+                    [
+                      [
+                        7,
+                        11
+                      ]
+                    ],
+                    false
+                  ]
+                ]
+              ]
             ]
           ],
           "translations": [
-            ["tr:synthetic-render", ["ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e", "t:zh-Hant:fe648ccc6a92aa85", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]]]
+            [
+              "tr:synthetic-render",
+              [
+                "ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e",
+                "t:zh-Hant:fe648ccc6a92aa85",
+                [
+                  [
+                    0,
+                    {
+                      "kind": "glossary",
+                      "key": "term:hand"
+                    },
+                    [
+                      [
+                        3,
+                        5
+                      ]
+                    ],
+                    false
+                  ]
+                ]
+              ]
+            ]
           ]
         },
         "variants": [
           {
-            "remove": ["/field_annotations/1"]
+            "remove": [
+              "/field_annotations/1"
+            ]
           },
           {
             "changes": {
-              "/translations/0/7": null
+              "/translations/0/7": null,
+              "/translations/0/8": "none"
             }
           }
         ]
@@ -1511,7 +2473,15 @@
       "input": {
         "fixture": "jp_en",
         "changes": {
-          "/field_annotations/1": [{"kind": "face_revision", "id": "rev:jp"}, "effect", null, "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"]
+          "/field_annotations/1": [
+            {
+              "kind": "face_revision",
+              "id": "rev:jp"
+            },
+            "effect",
+            null,
+            "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"
+          ]
         }
       },
       "expected": {
@@ -1562,11 +2532,45 @@
           "id": "qa:v1"
         },
         "fields": [
-          ["question", null, "t:ja:50c0947436ae73f4"]
+          [
+            "question",
+            null,
+            "t:ja:50c0947436ae73f4"
+          ]
         ],
-        "pointer": [{"kind": "qa_version", "id": "qa:v1"}, "question", null],
-        "annotation_set": ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-        "text_unit": ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+        "pointer": [
+          {
+            "kind": "qa_version",
+            "id": "qa:v1"
+          },
+          "question",
+          null
+        ],
+        "annotation_set": [
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+          "t:ja:50c0947436ae73f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        "text_unit": [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ]
       },
       "expected": {
         "result": "accept",
@@ -1583,11 +2587,45 @@
           "id": "qa:v1"
         },
         "fields": [
-          ["answer", null, "t:ja:50c0947436ae73f4"]
+          [
+            "answer",
+            null,
+            "t:ja:50c0947436ae73f4"
+          ]
         ],
-        "pointer": [{"kind": "qa_version", "id": "qa:v1"}, "answer", null],
-        "annotation_set": ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-        "text_unit": ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+        "pointer": [
+          {
+            "kind": "qa_version",
+            "id": "qa:v1"
+          },
+          "answer",
+          null
+        ],
+        "annotation_set": [
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+          "t:ja:50c0947436ae73f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        "text_unit": [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ]
       },
       "expected": {
         "result": "accept",
@@ -1604,11 +2642,45 @@
           "id": "cr:one"
         },
         "fields": [
-          ["effect", null, "t:ja:50c0947436ae73f4"]
+          [
+            "effect",
+            null,
+            "t:ja:50c0947436ae73f4"
+          ]
         ],
-        "pointer": [{"kind": "cr_clause", "id": "cr:one"}, "effect", null],
-        "annotation_set": ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-        "text_unit": ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+        "pointer": [
+          {
+            "kind": "cr_clause",
+            "id": "cr:one"
+          },
+          "effect",
+          null
+        ],
+        "annotation_set": [
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+          "t:ja:50c0947436ae73f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        "text_unit": [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ]
       },
       "expected": {
         "result": "accept",
@@ -1625,11 +2697,45 @@
           "id": "product:one"
         },
         "fields": [
-          ["label", null, "t:ja:50c0947436ae73f4"]
+          [
+            "label",
+            null,
+            "t:ja:50c0947436ae73f4"
+          ]
         ],
-        "pointer": [{"kind": "product", "id": "product:one"}, "label", null],
-        "annotation_set": ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-        "text_unit": ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+        "pointer": [
+          {
+            "kind": "product",
+            "id": "product:one"
+          },
+          "label",
+          null
+        ],
+        "annotation_set": [
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+          "t:ja:50c0947436ae73f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        "text_unit": [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ]
       },
       "expected": {
         "result": "accept",
@@ -1646,11 +2752,45 @@
           "id": "family:one"
         },
         "fields": [
-          ["label", null, "t:ja:50c0947436ae73f4"]
+          [
+            "label",
+            null,
+            "t:ja:50c0947436ae73f4"
+          ]
         ],
-        "pointer": [{"kind": "product_family", "id": "family:one"}, "label", null],
-        "annotation_set": ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-        "text_unit": ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+        "pointer": [
+          {
+            "kind": "product_family",
+            "id": "family:one"
+          },
+          "label",
+          null
+        ],
+        "annotation_set": [
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+          "t:ja:50c0947436ae73f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        "text_unit": [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ]
       },
       "expected": {
         "result": "accept",
@@ -1667,11 +2807,45 @@
           "id": "kw:one"
         },
         "fields": [
-          ["label", null, "t:ja:50c0947436ae73f4"]
+          [
+            "label",
+            null,
+            "t:ja:50c0947436ae73f4"
+          ]
         ],
-        "pointer": [{"kind": "keyword", "id": "kw:one"}, "label", null],
-        "annotation_set": ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-        "text_unit": ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+        "pointer": [
+          {
+            "kind": "keyword",
+            "id": "kw:one"
+          },
+          "label",
+          null
+        ],
+        "annotation_set": [
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+          "t:ja:50c0947436ae73f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        "text_unit": [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ]
       },
       "expected": {
         "result": "accept",
@@ -1688,11 +2862,45 @@
           "id": "kw:one"
         },
         "fields": [
-          ["effect", null, "t:ja:50c0947436ae73f4"]
+          [
+            "effect",
+            null,
+            "t:ja:50c0947436ae73f4"
+          ]
         ],
-        "pointer": [{"kind": "keyword", "id": "kw:one"}, "effect", null],
-        "annotation_set": ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-        "text_unit": ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+        "pointer": [
+          {
+            "kind": "keyword",
+            "id": "kw:one"
+          },
+          "effect",
+          null
+        ],
+        "annotation_set": [
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+          "t:ja:50c0947436ae73f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        "text_unit": [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ]
       },
       "expected": {
         "result": "accept",
@@ -1709,11 +2917,45 @@
           "id": "kw:one"
         },
         "fields": [
-          ["action_label", 0, "t:ja:50c0947436ae73f4"]
+          [
+            "action_label",
+            0,
+            "t:ja:50c0947436ae73f4"
+          ]
         ],
-        "pointer": [{"kind": "keyword", "id": "kw:one"}, "action_label", 0],
-        "annotation_set": ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-        "text_unit": ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+        "pointer": [
+          {
+            "kind": "keyword",
+            "id": "kw:one"
+          },
+          "action_label",
+          0
+        ],
+        "annotation_set": [
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+          "t:ja:50c0947436ae73f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        "text_unit": [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ]
       },
       "expected": {
         "result": "accept",
@@ -1731,11 +2973,46 @@
           "code": "hand"
         },
         "fields": [
-          ["label", null, "t:ja:50c0947436ae73f4"]
+          [
+            "label",
+            null,
+            "t:ja:50c0947436ae73f4"
+          ]
         ],
-        "pointer": [{"kind": "vocabulary", "vocabulary_kind": "zone", "code": "hand"}, "label", null],
-        "annotation_set": ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-        "text_unit": ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+        "pointer": [
+          {
+            "kind": "vocabulary",
+            "vocabulary_kind": "zone",
+            "code": "hand"
+          },
+          "label",
+          null
+        ],
+        "annotation_set": [
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+          "t:ja:50c0947436ae73f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        "text_unit": [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ]
       },
       "expected": {
         "result": "accept",
@@ -1752,11 +3029,45 @@
           "id": "rev:jp"
         },
         "fields": [
-          ["section", 0, "t:ja:50c0947436ae73f4"]
+          [
+            "section",
+            0,
+            "t:ja:50c0947436ae73f4"
+          ]
         ],
-        "pointer": [{"kind": "face_revision", "id": "rev:jp"}, "section", 0],
-        "annotation_set": ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-        "text_unit": ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+        "pointer": [
+          {
+            "kind": "face_revision",
+            "id": "rev:jp"
+          },
+          "section",
+          0
+        ],
+        "annotation_set": [
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+          "t:ja:50c0947436ae73f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        "text_unit": [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ]
       },
       "expected": {
         "result": "accept",
@@ -1773,11 +3084,45 @@
           "id": "kw:one"
         },
         "fields": [
-          ["action_label", 0, "t:ja:50c0947436ae73f4"]
+          [
+            "action_label",
+            0,
+            "t:ja:50c0947436ae73f4"
+          ]
         ],
-        "pointer": [{"kind": "keyword", "id": "kw:one"}, "action_label", 1],
-        "annotation_set": ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-        "text_unit": ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+        "pointer": [
+          {
+            "kind": "keyword",
+            "id": "kw:one"
+          },
+          "action_label",
+          1
+        ],
+        "annotation_set": [
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+          "t:ja:50c0947436ae73f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        "text_unit": [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ]
       },
       "expected": {
         "result": "reject",
@@ -1794,11 +3139,45 @@
           "id": "kw:one"
         },
         "fields": [
-          ["effect", null, null]
+          [
+            "effect",
+            null,
+            null
+          ]
         ],
-        "pointer": [{"kind": "keyword", "id": "kw:one"}, "effect", null],
-        "annotation_set": ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-        "text_unit": ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+        "pointer": [
+          {
+            "kind": "keyword",
+            "id": "kw:one"
+          },
+          "effect",
+          null
+        ],
+        "annotation_set": [
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+          "t:ja:50c0947436ae73f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        "text_unit": [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ]
       },
       "expected": {
         "result": "reject",
@@ -1901,7 +3280,10 @@
         "changes": {
           "/annotation_sets/0/2/0/1": {
             "kind": "vocabulary",
-            "key": ["type", "hand"]
+            "key": [
+              "type",
+              "hand"
+            ]
           }
         }
       },
@@ -1934,8 +3316,33 @@
       "operation": "concept_references",
       "input": {
         "concepts": [
-          ["term:hand", "rule_term", [{"kind": "cr_clause", "id": "cr:one"}, {"kind": "keyword", "id": "kw:one"}, {"kind": "ruling_revision", "id": "rul:v1"}], []],
-          ["term:name", "card_name", [], ["c:sample"]]
+          [
+            "term:hand",
+            "rule_term",
+            [
+              {
+                "kind": "cr_clause",
+                "id": "cr:one"
+              },
+              {
+                "kind": "keyword",
+                "id": "kw:one"
+              },
+              {
+                "kind": "ruling_revision",
+                "id": "rul:v1"
+              }
+            ],
+            []
+          ],
+          [
+            "term:name",
+            "card_name",
+            [],
+            [
+              "c:sample"
+            ]
+          ]
         ],
         "references": [
           {
@@ -1947,7 +3354,9 @@
             "term_id": "term:name"
           }
         ],
-        "cards": ["c:sample"],
+        "cards": [
+          "c:sample"
+        ],
         "explanation_targets": [
           {
             "kind": "keyword",
@@ -1966,7 +3375,11 @@
           }
         ],
         "text_units": [
-          ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+          [
+            "t:ja:50c0947436ae73f4",
+            "ja",
+            "合成😀手札"
+          ]
         ]
       },
       "expected": {
@@ -2073,7 +3486,10 @@
       "input": {
         "fixture": "concept_closure",
         "changes": {
-          "/concepts/1/3": ["c:sample", "c:sample"]
+          "/concepts/1/3": [
+            "c:sample",
+            "c:sample"
+          ]
         }
       },
       "expected": {
@@ -2089,10 +3505,86 @@
         "fixture": "jp_en",
         "changes": {
           "/annotation_sets": [
-            ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-            ["ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015", "t:en:4fc8efb088bdae58", [[0, {"kind": "glossary", "key": "term:hand"}, [[7, 11]], false]]],
-            ["ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e", "t:zh-Hant:fe648ccc6a92aa85", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-            ["ann:d3de5fba61ac4a0eda3aa7ecf82a15f34cc297a90f8290d8e2d3f286cd184400", "t:ja:c74c4bf0a7a5dea4", [[0, {"kind": "glossary", "key": "term:hand"}, [[0, 2]], false]]]
+            [
+              "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+              "t:ja:50c0947436ae73f4",
+              [
+                [
+                  0,
+                  {
+                    "kind": "glossary",
+                    "key": "term:hand"
+                  },
+                  [
+                    [
+                      3,
+                      5
+                    ]
+                  ],
+                  false
+                ]
+              ]
+            ],
+            [
+              "ann:625bd844ee6d22e05d0f9d10d5ea6cd76301373382eb1b0e745fd02ea486a015",
+              "t:en:4fc8efb088bdae58",
+              [
+                [
+                  0,
+                  {
+                    "kind": "glossary",
+                    "key": "term:hand"
+                  },
+                  [
+                    [
+                      7,
+                      11
+                    ]
+                  ],
+                  false
+                ]
+              ]
+            ],
+            [
+              "ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e",
+              "t:zh-Hant:fe648ccc6a92aa85",
+              [
+                [
+                  0,
+                  {
+                    "kind": "glossary",
+                    "key": "term:hand"
+                  },
+                  [
+                    [
+                      3,
+                      5
+                    ]
+                  ],
+                  false
+                ]
+              ]
+            ],
+            [
+              "ann:d3de5fba61ac4a0eda3aa7ecf82a15f34cc297a90f8290d8e2d3f286cd184400",
+              "t:ja:c74c4bf0a7a5dea4",
+              [
+                [
+                  0,
+                  {
+                    "kind": "glossary",
+                    "key": "term:hand"
+                  },
+                  [
+                    [
+                      0,
+                      2
+                    ]
+                  ],
+                  false
+                ]
+              ]
+            ]
           ]
         }
       },
@@ -2123,7 +3615,10 @@
         "fixture": "jp_en",
         "changes": {
           "/owners/0/card_id": "c:other",
-          "/cards": ["c:other", "c:sample"]
+          "/cards": [
+            "c:other",
+            "c:sample"
+          ]
         }
       },
       "expected": {
@@ -2186,8 +3681,30 @@
           "/translations/0/1": "t:en:4fc8efb088bdae58",
           "/field_translations": [
             {
-              "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
-              "value": ["effect", null, "zh-Hant", "tr:synthetic-render", "jp_source", [{"kind": "face_revision", "id": "rev:en"}, "effect", null], null]
+              "receiver": [
+                {
+                  "kind": "face_revision",
+                  "id": "rev:en"
+                },
+                "effect",
+                null
+              ],
+              "value": [
+                "effect",
+                null,
+                "zh-Hant",
+                "tr:synthetic-render",
+                "jp_source",
+                [
+                  {
+                    "kind": "face_revision",
+                    "id": "rev:en"
+                  },
+                  "effect",
+                  null
+                ],
+                null
+              ]
             }
           ]
         }
@@ -2265,7 +3782,14 @@
       "input": {
         "fixture": "jp_en",
         "changes": {
-          "/field_translations/1/value/6": [{"kind": "face_revision", "id": "rev:jp"}, "effect", null]
+          "/field_translations/1/value/6": [
+            {
+              "kind": "face_revision",
+              "id": "rev:jp"
+            },
+            "effect",
+            null
+          ]
         }
       },
       "expected": {
@@ -2314,9 +3838,12 @@
           {},
           {
             "changes": {
-              "/translations/0/7": null
+              "/translations/0/7": null,
+              "/translations/0/8": "none"
             },
-            "remove": ["/field_annotations/0"]
+            "remove": [
+              "/field_annotations/0"
+            ]
           }
         ]
       },
@@ -2355,7 +3882,8 @@
           {},
           {
             "changes": {
-              "/translations/0/7": null
+              "/translations/0/7": null,
+              "/translations/0/8": "none"
             }
           },
           {
@@ -2380,7 +3908,14 @@
       "input": {
         "fixture": "jp_en",
         "ui_lang": "zh-Hant",
-        "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
+        "receiver": [
+          {
+            "kind": "face_revision",
+            "id": "rev:en"
+          },
+          "effect",
+          null
+        ],
         "mode": "revision",
         "bold_enabled": true
       },
@@ -2407,10 +3942,19 @@
         "fixture": "jp_en",
         "changes": {
           "/producer/divergent": true,
-          "/support/region_blocks": ["region_divergence"]
+          "/support/region_blocks": [
+            "region_divergence"
+          ]
         },
         "ui_lang": "zh-Hant",
-        "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
+        "receiver": [
+          {
+            "kind": "face_revision",
+            "id": "rev:en"
+          },
+          "effect",
+          null
+        ],
         "mode": "revision",
         "bold_enabled": true
       },
@@ -2436,7 +3980,14 @@
       "input": {
         "fixture": "different_sections",
         "ui_lang": "zh-Hant",
-        "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
+        "receiver": [
+          {
+            "kind": "face_revision",
+            "id": "rev:en"
+          },
+          "effect",
+          null
+        ],
         "mode": "revision",
         "bold_enabled": true
       },
@@ -2569,17 +4120,54 @@
       "id": "non-bmp-combining",
       "operation": "unicode_ranges",
       "input": {
-        "text_unit": ["t:zh-Hant:fa94ef9a35b33b39", "zh-Hant", "A😀Ｂe\u0301手牌"],
-        "annotation_set": ["ann:2a9e0c6df876501f52aa2dc28a0f908a7b9063a37128256d1c175bbd092d7032", "t:zh-Hant:fa94ef9a35b33b39", [[0, {"kind": "glossary", "key": "term:hand"}, [[5, 7]], false]]]
+        "text_unit": [
+          "t:zh-Hant:fa94ef9a35b33b39",
+          "zh-Hant",
+          "A😀Ｂé手牌"
+        ],
+        "annotation_set": [
+          "ann:2a9e0c6df876501f52aa2dc28a0f908a7b9063a37128256d1c175bbd092d7032",
+          "t:zh-Hant:fa94ef9a35b33b39",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  5,
+                  7
+                ]
+              ],
+              false
+            ]
+          ]
+        ]
       },
       "expected": {
         "result": "accept",
         "codepoint_length": 7,
         "utf16_length": 8,
-        "utf16_boundaries": [0, 1, 3, 4, 5, 6, 7, 8],
-        "slices": ["手牌"],
+        "utf16_boundaries": [
+          0,
+          1,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "slices": [
+          "手牌"
+        ],
         "utf16_ranges": [
-          [6, 8]
+          [
+            6,
+            8
+          ]
         ]
       }
     },
@@ -2588,17 +4176,50 @@
       "id": "nfkc-raw-positions",
       "operation": "unicode_ranges",
       "input": {
-        "text_unit": ["t:ja:34d8ab1278124dfa", "ja", "㍑手牌"],
-        "annotation_set": ["ann:85165fb70b83930902c21c64314736d1eb6ea6415210629f941b3de989851c4c", "t:ja:34d8ab1278124dfa", [[0, {"kind": "glossary", "key": "term:hand"}, [[1, 3]], false]]]
+        "text_unit": [
+          "t:ja:34d8ab1278124dfa",
+          "ja",
+          "㍑手牌"
+        ],
+        "annotation_set": [
+          "ann:85165fb70b83930902c21c64314736d1eb6ea6415210629f941b3de989851c4c",
+          "t:ja:34d8ab1278124dfa",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  1,
+                  3
+                ]
+              ],
+              false
+            ]
+          ]
+        ]
       },
       "expected": {
         "result": "accept",
         "codepoint_length": 3,
         "utf16_length": 3,
-        "utf16_boundaries": [0, 1, 2, 3],
-        "slices": ["手牌"],
+        "utf16_boundaries": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "slices": [
+          "手牌"
+        ],
         "utf16_ranges": [
-          [1, 3]
+          [
+            1,
+            3
+          ]
         ]
       }
     },
@@ -2607,8 +4228,31 @@
       "id": "nfkc-normalized-offsets-rejected",
       "operation": "unicode_ranges",
       "input": {
-        "text_unit": ["t:ja:34d8ab1278124dfa", "ja", "㍑手牌"],
-        "annotation_set": ["ann:cde0aaf90de466642c3841cd731f80b65d8c3c55896480edd036f79829987365", "t:ja:34d8ab1278124dfa", [[0, {"kind": "glossary", "key": "term:hand"}, [[4, 6]], false]]]
+        "text_unit": [
+          "t:ja:34d8ab1278124dfa",
+          "ja",
+          "㍑手牌"
+        ],
+        "annotation_set": [
+          "ann:cde0aaf90de466642c3841cd731f80b65d8c3c55896480edd036f79829987365",
+          "t:ja:34d8ab1278124dfa",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  4,
+                  6
+                ]
+              ],
+              false
+            ]
+          ]
+        ]
       },
       "expected": {
         "result": "reject",
@@ -2620,8 +4264,31 @@
       "id": "normalizing-text-before-identity-rejected",
       "operation": "unicode_ranges",
       "input": {
-        "text_unit": ["t:ja:34d8ab1278124dfa", "ja", "リットル手牌"],
-        "annotation_set": ["ann:85165fb70b83930902c21c64314736d1eb6ea6415210629f941b3de989851c4c", "t:ja:34d8ab1278124dfa", [[0, {"kind": "glossary", "key": "term:hand"}, [[1, 3]], false]]]
+        "text_unit": [
+          "t:ja:34d8ab1278124dfa",
+          "ja",
+          "リットル手牌"
+        ],
+        "annotation_set": [
+          "ann:85165fb70b83930902c21c64314736d1eb6ea6415210629f941b3de989851c4c",
+          "t:ja:34d8ab1278124dfa",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  1,
+                  3
+                ]
+              ],
+              false
+            ]
+          ]
+        ]
       },
       "expected": {
         "result": "reject",
@@ -2645,14 +4312,42 @@
       "id": "crlf-counts-two-scalars",
       "operation": "unicode_ranges",
       "input": {
-        "text_unit": ["t:ja:106b3e992d0895cb", "ja", "A\r\n手牌"],
-        "annotation_set": ["ann:8c12f5c97d88f6d1eef2ec06195f5e834807dfa8e41ff9f9a5dd87c42cb68054", "t:ja:106b3e992d0895cb", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]]
+        "text_unit": [
+          "t:ja:106b3e992d0895cb",
+          "ja",
+          "A\r\n手牌"
+        ],
+        "annotation_set": [
+          "ann:8c12f5c97d88f6d1eef2ec06195f5e834807dfa8e41ff9f9a5dd87c42cb68054",
+          "t:ja:106b3e992d0895cb",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ]
       },
       "expected": {
         "result": "accept",
-        "slices": ["手牌"],
+        "slices": [
+          "手牌"
+        ],
         "utf16_ranges": [
-          [3, 5]
+          [
+            3,
+            5
+          ]
         ]
       }
     },
@@ -2661,14 +4356,42 @@
       "id": "non-bmp-scalar-slice",
       "operation": "unicode_ranges",
       "input": {
-        "text_unit": ["t:ja:782b1c99f354e5b1", "ja", "😀手牌"],
-        "annotation_set": ["ann:74319009d4444b3ae56d68dfe88e64ea3655f5445ad118ab7fdc8db58216cd0b", "t:ja:782b1c99f354e5b1", [[0, {"kind": "glossary", "key": "term:hand"}, [[0, 1]], false]]]
+        "text_unit": [
+          "t:ja:782b1c99f354e5b1",
+          "ja",
+          "😀手牌"
+        ],
+        "annotation_set": [
+          "ann:74319009d4444b3ae56d68dfe88e64ea3655f5445ad118ab7fdc8db58216cd0b",
+          "t:ja:782b1c99f354e5b1",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  0,
+                  1
+                ]
+              ],
+              false
+            ]
+          ]
+        ]
       },
       "expected": {
         "result": "accept",
-        "slices": ["😀"],
+        "slices": [
+          "😀"
+        ],
         "utf16_ranges": [
-          [0, 2]
+          [
+            0,
+            2
+          ]
         ]
       }
     },
@@ -2679,7 +4402,14 @@
       "input": {
         "fixture": "jp_en",
         "ui_lang": "en",
-        "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
+        "receiver": [
+          {
+            "kind": "face_revision",
+            "id": "rev:en"
+          },
+          "effect",
+          null
+        ],
         "mode": "revision",
         "bold_enabled": true
       },
@@ -2699,7 +4429,14 @@
       "input": {
         "fixture": "jp_en",
         "ui_lang": "ja",
-        "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
+        "receiver": [
+          {
+            "kind": "face_revision",
+            "id": "rev:en"
+          },
+          "effect",
+          null
+        ],
         "mode": "revision",
         "bold_enabled": true
       },
@@ -2723,7 +4460,14 @@
           "/field_translations": []
         },
         "ui_lang": "zh-Hant",
-        "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
+        "receiver": [
+          {
+            "kind": "face_revision",
+            "id": "rev:en"
+          },
+          "effect",
+          null
+        ],
         "mode": "revision",
         "bold_enabled": true
       },
@@ -2743,7 +4487,14 @@
       "input": {
         "fixture": "enabled_bold",
         "ui_lang": "zh-Hant",
-        "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
+        "receiver": [
+          {
+            "kind": "face_revision",
+            "id": "rev:en"
+          },
+          "effect",
+          null
+        ],
         "mode": "revision",
         "bold_enabled": false
       },
@@ -2775,7 +4526,14 @@
           "/translations/0/6": true
         },
         "ui_lang": "zh-Hant",
-        "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
+        "receiver": [
+          {
+            "kind": "face_revision",
+            "id": "rev:en"
+          },
+          "effect",
+          null
+        ],
         "mode": "revision",
         "bold_enabled": true
       },
@@ -2804,14 +4562,22 @@
       "input": {
         "fixture": "jp_en",
         "ui_lang": "zh-Hant",
-        "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
+        "receiver": [
+          {
+            "kind": "face_revision",
+            "id": "rev:en"
+          },
+          "effect",
+          null
+        ],
         "mode": "revision",
         "bold_enabled": true,
         "changes": {
           "/annotation_sets": [],
           "/field_annotations": [],
           "/concepts": [],
-          "/translations/0/7": null
+          "/translations/0/7": null,
+          "/translations/0/8": "none"
         }
       },
       "expected": {
@@ -2835,7 +4601,11 @@
       "id": "empty-exact-text",
       "operation": "unicode_ranges",
       "input": {
-        "text_unit": ["t:ja:e3b0c44298fc1c14", "ja", ""],
+        "text_unit": [
+          "t:ja:e3b0c44298fc1c14",
+          "ja",
+          ""
+        ],
         "annotation_set": null
       },
       "expected": {
@@ -2849,8 +4619,31 @@
       "id": "empty-text-cannot-have-span",
       "operation": "unicode_ranges",
       "input": {
-        "text_unit": ["t:ja:e3b0c44298fc1c14", "ja", ""],
-        "annotation_set": ["ann:080a955a397ebe5eacd8a06ec246124324d0a625492841422192bf62bef6c847", "t:ja:e3b0c44298fc1c14", [[0, {"kind": "glossary", "key": "term:hand"}, [[0, 1]], false]]]
+        "text_unit": [
+          "t:ja:e3b0c44298fc1c14",
+          "ja",
+          ""
+        ],
+        "annotation_set": [
+          "ann:080a955a397ebe5eacd8a06ec246124324d0a625492841422192bf62bef6c847",
+          "t:ja:e3b0c44298fc1c14",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  0,
+                  1
+                ]
+              ],
+              false
+            ]
+          ]
+        ]
       },
       "expected": {
         "result": "reject",
@@ -2912,8 +4705,17 @@
           "gzip": 170
         },
         "startup": {
-          "jp": ["config", "names", "media", "names"],
-          "en": ["config", "names", "media"]
+          "jp": [
+            "config",
+            "names",
+            "media",
+            "names"
+          ],
+          "en": [
+            "config",
+            "names",
+            "media"
+          ]
         },
         "text_all": {
           "raw": 3600,
@@ -3007,7 +4809,9 @@
         "definition": "AnnotationReference",
         "value": {
           "kind": "vocabulary",
-          "key": ["zone"]
+          "key": [
+            "zone"
+          ]
         }
       },
       "expected": {
@@ -3021,7 +4825,14 @@
       "operation": "schema",
       "input": {
         "definition": "annotation_concept",
-        "value": ["term:one", "rule_term", [], ["c:sample"]]
+        "value": [
+          "term:one",
+          "rule_term",
+          [],
+          [
+            "c:sample"
+          ]
+        ]
       },
       "expected": {
         "result": "reject",
@@ -3035,7 +4846,10 @@
       "input": {
         "fixture": "jp_en",
         "changes": {
-          "/languages": ["en", "ja"]
+          "/languages": [
+            "en",
+            "ja"
+          ]
         }
       },
       "expected": {
@@ -3051,8 +4865,28 @@
         "fixture": "jp_en",
         "changes": {
           "/translations": [
-            ["tr:synthetic-render", "t:ja:50c0947436ae73f4", "zh-Hant", "t:zh-Hant:fe648ccc6a92aa85", "project", "unofficial", false, "ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e"],
-            ["tr:synthetic-render", "t:ja:50c0947436ae73f4", "zh-Hant", "t:zh-Hant:fe648ccc6a92aa85", "project", "unofficial", false, "ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e"]
+            [
+              "tr:synthetic-render",
+              "t:ja:50c0947436ae73f4",
+              "zh-Hant",
+              "t:zh-Hant:fe648ccc6a92aa85",
+              "project",
+              "unofficial",
+              false,
+              "ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e",
+              "explicit"
+            ],
+            [
+              "tr:synthetic-render",
+              "t:ja:50c0947436ae73f4",
+              "zh-Hant",
+              "t:zh-Hant:fe648ccc6a92aa85",
+              "project",
+              "unofficial",
+              false,
+              "ann:14e6f6c77c8ee7599bc2a172eb61a849c02af4ac4751cc91a3a4aa7d96ad323e",
+              "explicit"
+            ]
           ]
         }
       },
@@ -3070,16 +4904,82 @@
         "changes": {
           "/field_translations": [
             {
-              "receiver": [{"kind": "face_revision", "id": "rev:jp"}, "effect", null],
-              "value": ["effect", null, "zh-Hant", "tr:synthetic-render", "own_source", [{"kind": "face_revision", "id": "rev:jp"}, "effect", null], null]
+              "receiver": [
+                {
+                  "kind": "face_revision",
+                  "id": "rev:jp"
+                },
+                "effect",
+                null
+              ],
+              "value": [
+                "effect",
+                null,
+                "zh-Hant",
+                "tr:synthetic-render",
+                "own_source",
+                [
+                  {
+                    "kind": "face_revision",
+                    "id": "rev:jp"
+                  },
+                  "effect",
+                  null
+                ],
+                null
+              ]
             },
             {
-              "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
-              "value": ["effect", null, "zh-Hant", "tr:synthetic-render", "jp_source", [{"kind": "face_revision", "id": "rev:jp"}, "effect", null], null]
+              "receiver": [
+                {
+                  "kind": "face_revision",
+                  "id": "rev:en"
+                },
+                "effect",
+                null
+              ],
+              "value": [
+                "effect",
+                null,
+                "zh-Hant",
+                "tr:synthetic-render",
+                "jp_source",
+                [
+                  {
+                    "kind": "face_revision",
+                    "id": "rev:jp"
+                  },
+                  "effect",
+                  null
+                ],
+                null
+              ]
             },
             {
-              "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
-              "value": ["effect", null, "zh-Hant", "tr:synthetic-render", "jp_source", [{"kind": "face_revision", "id": "rev:jp"}, "effect", null], null]
+              "receiver": [
+                {
+                  "kind": "face_revision",
+                  "id": "rev:en"
+                },
+                "effect",
+                null
+              ],
+              "value": [
+                "effect",
+                null,
+                "zh-Hant",
+                "tr:synthetic-render",
+                "jp_source",
+                [
+                  {
+                    "kind": "face_revision",
+                    "id": "rev:jp"
+                  },
+                  "effect",
+                  null
+                ],
+                null
+              ]
             }
           ]
         }
@@ -3156,11 +5056,46 @@
           "face_id": "f:front"
         },
         "fields": [
-          ["name", null, null]
+          [
+            "name",
+            null,
+            null
+          ]
         ],
-        "pointer": [{"kind": "printing_face", "id": "p:en", "face_id": "f:front"}, "name", null],
-        "annotation_set": ["ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777", "t:ja:50c0947436ae73f4", [[0, {"kind": "glossary", "key": "term:hand"}, [[3, 5]], false]]],
-        "text_unit": ["t:ja:50c0947436ae73f4", "ja", "合成😀手札"]
+        "pointer": [
+          {
+            "kind": "printing_face",
+            "id": "p:en",
+            "face_id": "f:front"
+          },
+          "name",
+          null
+        ],
+        "annotation_set": [
+          "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+          "t:ja:50c0947436ae73f4",
+          [
+            [
+              0,
+              {
+                "kind": "glossary",
+                "key": "term:hand"
+              },
+              [
+                [
+                  3,
+                  5
+                ]
+              ],
+              false
+            ]
+          ]
+        ],
+        "text_unit": [
+          "t:ja:50c0947436ae73f4",
+          "ja",
+          "合成😀手札"
+        ]
       },
       "expected": {
         "result": "reject",
@@ -3174,7 +5109,14 @@
       "input": {
         "fixture": "jp_en",
         "ui_lang": "ja",
-        "receiver": [{"kind": "face_revision", "id": "rev:jp"}, "effect", null],
+        "receiver": [
+          {
+            "kind": "face_revision",
+            "id": "rev:jp"
+          },
+          "effect",
+          null
+        ],
         "mode": "revision",
         "bold_enabled": true
       },
@@ -3193,7 +5135,14 @@
       "input": {
         "fixture": "undecided_bold",
         "ui_lang": "zh-Hant",
-        "receiver": [{"kind": "face_revision", "id": "rev:en"}, "effect", null],
+        "receiver": [
+          {
+            "kind": "face_revision",
+            "id": "rev:en"
+          },
+          "effect",
+          null
+        ],
         "mode": "revision",
         "bold_enabled": true
       },
@@ -3238,7 +5187,10 @@
       "input": {
         "reference": {
           "kind": "vocabulary",
-          "key": ["class", "sample"]
+          "key": [
+            "class",
+            "sample"
+          ]
         },
         "category": null,
         "bold": true
@@ -3254,7 +5206,10 @@
       "input": {
         "reference": {
           "kind": "vocabulary",
-          "key": ["type", "sample"]
+          "key": [
+            "type",
+            "sample"
+          ]
         },
         "category": null,
         "bold": null

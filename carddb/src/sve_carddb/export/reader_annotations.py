@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Never
 
 from sve_carddb.contracts.four_layer import hash_payload
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
+from sve_carddb.export.name_annotations import expand_names
 from sve_carddb.export.text_owners import TextOwner, TextOwners
 
 if TYPE_CHECKING:
@@ -330,6 +331,8 @@ def _selection(closure: _Closure, receiver: TextOwner, value: Row) -> None:
 
 def validate_annotations(view: View, languages: tuple[str, ...]) -> None:
     """Full closure verification runs before any consumer can obtain a ready text view."""
+    _Closure(view, languages)
+    expand_names(view)
     closure = _Closure(view, languages)
     _concepts(closure)
     _sets(closure)

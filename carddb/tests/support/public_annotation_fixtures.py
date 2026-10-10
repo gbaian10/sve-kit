@@ -189,6 +189,8 @@ def owner_row(owner: dict[str, JsonValue], fields: JsonValue) -> dict[str, JsonV
     }
     result: dict[str, JsonValue] = dict.fromkeys(columns[kind].values())
     result |= {"translations": [], "sections": [], "actions": []}
+    if kind in {"face_revision", "printing_face"}:
+        result["name_concept_id"] = None
     for raw in array(fields):
         name, ordinal, unit = array(raw)
         if name == "section":

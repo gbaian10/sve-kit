@@ -1002,11 +1002,18 @@
               "type": "null"
             }
           ]
+        },
+        {
+          "enum": [
+            "none",
+            "explicit",
+            "whole_name"
+          ]
         }
       ],
       "items": false,
-      "minItems": 8,
-      "maxItems": 8,
+      "minItems": 9,
+      "maxItems": 9,
       "x-columns": [
         "id",
         "source_unit_id",
@@ -1015,7 +1022,8 @@
         "origin",
         "authority",
         "low_confidence",
-        "annotation_set_id"
+        "annotation_set_id",
+        "annotation_kind"
       ],
       "x-types": [
         {
@@ -1051,6 +1059,13 @@
           "nullable": {
             "scalar": "ID"
           }
+        },
+        {
+          "enum": [
+            "none",
+            "explicit",
+            "whole_name"
+          ]
         }
       ],
       "x-primary-key": [

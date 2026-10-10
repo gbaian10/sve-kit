@@ -54,6 +54,11 @@ def container(
     used: set[str] = set()
     for table, fragments in tables.items():
         for fragment in array(fragments):
+            used.add(
+                row_type(
+                    table, string(object_value(fragment)["partition"]), format_version
+                )
+            )
             used |= required_types(
                 row_type(
                     table, string(object_value(fragment)["partition"]), format_version
@@ -63,5 +68,15 @@ def container(
     return {
         "format_version": format_version,
         "types": {name: descriptor(name, format_version) for name in sorted(used)},
-        "tables": tables,
+        "tables": {
+            table: [
+                {
+                    key: value
+                    for key, value in object_value(fragment).items()
+                    if key != "columns"
+                }
+                for fragment in array(fragments)
+            ]
+            for table, fragments in tables.items()
+        },
     }
