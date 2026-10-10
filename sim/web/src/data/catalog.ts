@@ -15,7 +15,7 @@ import {
 } from "../domain/search"
 import type { LoadedSnapshot } from "./client"
 import type { Row } from "./format-v3/decode"
-import { integerValue, type JsonValue, stringValue } from "./format-v3/json"
+import { integerValue, type JsonObject, type JsonValue, stringValue } from "./format-v3/json"
 import { type CardIndex, createCardIndex } from "./store"
 
 /** What a list cell or suggestion row shows for one card without loading any detail file. */
@@ -101,11 +101,20 @@ function nullableInteger(value: JsonValue | undefined): number | null {
 
 export function createCatalog(snapshot: LoadedSnapshot): Catalog {
   const index = createCardIndex(snapshot)
-  const sets = new Set(index.families.map((family) => stringValue(family["code"])))
   const rows = (table: string): Row[] =>
     snapshot.bootstrap
       .filter((fragment) => fragment.table === table)
       .flatMap((fragment) => fragment.rows)
+  return catalogFromIndex(index, rows, snapshot.config)
+}
+
+/** Worker stores can materialize one table at a time without retaining decoded fragments. */
+export function catalogFromIndex(
+  index: CardIndex,
+  rows: (table: string) => Row[],
+  config: JsonObject,
+): Catalog {
+  const sets = new Set(index.families.map((family) => stringValue(family["code"])))
   const classCodes = rows("vocabulary")
     .filter((row) => row["kind"] === "class" && row["active"] === true)
     .map((row) => stringValue(row["code"]))
@@ -218,7 +227,7 @@ export function createCatalog(snapshot: LoadedSnapshot): Catalog {
     const unit = index.textUnit(stringValue(row["label_unit_id"]))
     return unit ? stringValue(unit["text"]) : code
   }
-  const search = snapshot.config["search"]
+  const search = config["search"]
   const normalizerMatches =
     typeof search === "object" &&
     search !== null &&

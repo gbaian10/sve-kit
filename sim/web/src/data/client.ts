@@ -13,8 +13,8 @@ import {
 import { validateMedia, validateMediaIdentities } from "./format-v3/media"
 import { validatePlacement } from "./format-v3/placement"
 import { type Files, findBase, type Fragment, isCompatible, joinDetail } from "./format-v3/reader"
-import { validate } from "./format-v3/schema"
 import { validateDigitalLinks, validateImageRows } from "./format-v3/semantics"
+import { validateIndex2 } from "./index-entry"
 import { transferDigest } from "./integrity"
 import { MetadataBytes, type MetadataProgress } from "./metadata"
 import { requestQueue } from "./request-queue"
@@ -93,27 +93,6 @@ function failureOf(error: unknown): LoadFailure {
       : { kind: "corrupt", detail: error.message }
   }
   return { kind: "corrupt", detail: error instanceof Error ? error.message : String(error) }
-}
-
-function validateIndex2(index: JsonObject): void {
-  validate("Index", index, [], "3.0.0")
-  const entries = [
-    objectValue(index["current"]),
-    ...(index["previous"] === null ? [] : [objectValue(index["previous"])]),
-  ]
-  for (const entry of entries) {
-    const capabilities = arrayValue(entry["required_capabilities"]).map((value) =>
-      stringValue(value),
-    )
-    if (
-      new Set(capabilities).size !== capabilities.length ||
-      canonicalText([...capabilities].sort()) !== canonicalText(capabilities)
-    )
-      throw new SnapshotError("schema", "Index capabilities must be sorted and unique")
-    const hash = stringValue(entry["manifest_sha256"]).slice(7)
-    if (entry["manifest_path"] !== `snapshots/manifests/${hash}.json`)
-      throw new SnapshotError("blob-integrity", "Index manifest path differs from hash")
-  }
 }
 
 const mediaAnchors = new WeakMap<LoadedSnapshot, Map<string, Fragment>>()

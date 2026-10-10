@@ -33,4 +33,6 @@ export {
   useSnapshotRoot,
   useSnapshotStatus,
 } from "./roots"
+export type { SearchPage, SearchQuery } from "./search/index"
+export { SearchSession, type SearchStatus } from "./search/session"
 export { textRuns } from "./text-runs"
