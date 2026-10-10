@@ -196,7 +196,6 @@ def test_keyword_occurrences_are_not_deduplicated_and_names_are_not_keywords() -
     ("terms", "reason"),
     [
         ((), "missing_keyword_concept"),
-        ((Term("term:name.flag", "card_name", "仮旗"),), "missing_keyword_concept"),
         (
             (KEYWORD, Term("term:keyword.other", "keyword", "仮旗")),
             "ambiguous_keyword_concept",

@@ -462,10 +462,10 @@ def _keyword(
         if t.category == "keyword" and t.source_ja == match["keyword"]
     )
     if not terms:
-        if any(
-            t.source_ja == match["keyword"] and t.category == "ability"
-            for t in classifier.terms.values()
-        ):
+        other_terms = tuple(
+            t for t in classifier.terms.values() if t.source_ja == match["keyword"]
+        )
+        if len(other_terms) == 1:
             return None, None
         return None, "missing_keyword_concept"
     if len(terms) != 1:

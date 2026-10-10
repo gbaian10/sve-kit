@@ -303,6 +303,7 @@ NC／ネクロチャージ、SC／スペルチェイン只在完整數字門檻�
 每個新葉可沿準備結果的 registry_rows 對回上列；沿用葉對回 N0。
 
 名稱／提示文保護與事件、歷史、receipt、回合、主戰者持有者、靜態期間等父語境排除先行。
+任何成對的「…」（含句點、冒號）都整段受保護，裡面不產外層葉；手牌費用與其他來源共用引號、父語境、並列阻擋及名詞起點檢查。
 完整 G10 優先於單區；失敗的並列（含頓號、中黑直接並列的區域）不截右半邊；DP 優先於 deck；門檻能力優先於一般 keyword。
 NP 內 trait 形狀或泛稱カード片段須恰好解析為一個 glossary 概念，否則整個 operand 不產新葉、保留 N0。
 未解引號條件、其他、表裏狀態、數值限定及非 class 的大括號 token 保留在共同 canonical／trace 中，不穿入新增結構葉。
@@ -314,7 +315,8 @@ NP 內 trait 形狀或泛稱カード片段須恰好解析為一個 glossary 概
 停用或空選擇不旁路產葉／resolved，品質沿實際相依傳播。Quick 的完整 body 恰為 `{クイック}`，只在 effect 第一個非空 raw 行、
 normal face、type_code=spell（含法術代幣）及精確 owner/context 成立時產 `quick_card_field.v1`；
 整行只有已解析 keyword 時產 `card_keywords.v2`。非整行的未知或非 keyword 類別括號不產 keyword 葉、不新增 issue；
-整行維持準備入口原有的缺概念／category 檢查，不因非整行例外放寬。局部詞彙成功不授予其他整行語義。
+整行括號若只有唯一的非 keyword 類別概念，也不套用、不報 issue，保持 pending；真正缺概念或非 keyword 概念不唯一時仍保留 issue。
+局部詞彙成功不授予其他整行語義。
 
 ## 5. target、form 與部分 NP
 

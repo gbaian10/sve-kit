@@ -748,14 +748,58 @@ def test_n1_nonkeyword_brackets_in_prose_preserve_bindability(
     assert token in found.field.parts[0].canonical_source
 
 
-@pytest.mark.parametrize("token", ["【仮触発】", "【カード】"])
-def test_n1_unresolved_whole_keyword_line_still_has_an_issue(
-    engine: Classifier, token: str
-) -> None:
-    found = derive_source(token, source(token), engine)
+def test_n1_unknown_whole_keyword_line_still_has_an_issue(engine: Classifier) -> None:
+    raw = "【仮触発】"
+    found = derive_source(raw, source(raw), engine)
     assert "missing_keyword_concept" in found.recognized[0].issues
     with pytest.raises(ValueError, match="Unresolved"):
         found.bind(0)
+
+
+@pytest.mark.parametrize("spelling", ["カード", "起動", "仮族", "仮場手札自分"])
+def test_n1_unique_nonkeyword_whole_line_stays_bindable_and_pending(
+    engine: Classifier, spelling: str
+) -> None:
+    raw = "【" + spelling + "】"
+    found = derive(raw, engine)
+    assert found.recognized[0].issues == ()
+    assert found.recognized[0].semantics is None
+    assert "keyword" not in roles(found)
+    assert found.field.parts[0].canonical_source == raw
+    frame, _ = found.bind(0)
+    assert frame.semantic_variant.state == "pending"
+
+
+@pytest.mark.parametrize(
+    "categories", [("rule_term", "rule_term"), ("ability", "trait")]
+)
+def test_n1_ambiguous_nonkeyword_whole_line_cannot_borrow_a_concept(
+    categories: tuple[str, str],
+) -> None:
+    engine = classifier(
+        tuple(
+            Term("term:synthetic." + str(i), category, "仮同字")
+            for i, category in enumerate(categories)
+        ),
+        ("bracket_keyword_reference",),
+    )
+    raw = "【仮同字】"
+    found = derive_source(raw, source(raw), engine)
+    assert "missing_keyword_concept" in found.recognized[0].issues
+    assert "keyword" not in roles(found)
+    with pytest.raises(ValueError, match="Unresolved"):
+        found.bind(0)
+
+
+def test_n1_mixed_keyword_and_nonkeyword_line_does_not_resolve(
+    engine: Classifier,
+) -> None:
+    found = derive("【仮旗】、【カード】", engine)
+    assert found.recognized[0].issues == ()
+    assert len(roles(found)["keyword"]) == 1
+    assert found.recognized[0].semantics is None
+    frame, _ = found.bind(0)
+    assert frame.semantic_variant.state == "pending"
 
 
 @pytest.mark.parametrize("modifier", ["{起動}の", "{仮修飾}の"])
