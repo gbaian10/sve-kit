@@ -19,6 +19,7 @@ from sve_carddb.domains.translations.four_layer_units import (
     compound_selection,
     count_context,
     field_filter,
+    fusion_material,
     source_unit,
 )
 from sve_carddb.domains.translations.parameters.explicit_rules import COUNTER_NAMES
@@ -551,6 +552,10 @@ def _payment_number(value: int, before: str, after: str) -> Number | None:
 
 
 def _counter_number(value: int, before: str, after: str) -> Number | None:
+    if fusion_material(before) and re.match(
+        r"^枚:これに融合カウンターN個を置く" + _END, after
+    ):
+        return Number("Nat", "count", value, "枚")
     if re.search(r"(?:^|[。、:：}】])(?:自分の)?場の『X』$", before) and (
         match := re.match(
             r"^(?P<unit>枚|体|つ)の" + _COUNTER + r"N(?:個|つ)を取る" + _END, after

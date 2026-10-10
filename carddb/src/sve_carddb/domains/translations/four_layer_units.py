@@ -144,7 +144,7 @@ _FILTER = (
     r"(?:(?:元の)?(?:コスト|攻撃力|体力)(?:N|X)(?:以下|以上)?の|"
     r"他の|表向きの|裏向きの|(?:進化前|進化後|エボルヴ|アドバンス)(?:の)?|(?:アクト|レスト|スタンド)状態の|これと同名を除く(?:・)?|"
     r"(?:【[^【】]+】(?:や|か)?)+を持つ|【[^【】]+】状態の|カード名に『X』を含む|カード名に「[^「」]+」を含む|"
-    r"それぞれカード名が異なる|(?:これ|それ)によって破壊した|"
+    r"それぞれカード名が異なる|トークンでない|(?:これ|それ)によって破壊した|"
     r"\{[^{}]+\}(?:を持つ|である|でない|の|・)?|" + _TRAIT + r")*"
 )
 _ONSET = r"(?:^|[、。:：}】（(]|か|と|は|が|として)"
@@ -266,6 +266,18 @@ _SET_CONSTRAINT = re.compile(
 def field_filter(after: str) -> bool:
     """Known filters must terminate in an explicit kind before classifying a field value."""
     return _FIELD_FILTER.match(after) is not None
+
+
+def fusion_material(before: str) -> bool:
+    """A material cost requires a complete written card NP, without supplying an omitted zone."""
+    match = re.search(r"【融合】(?P<np>[^。:：]+)$", before)
+    if match is None:
+        return False
+    material = _SHARED_SET.fullmatch(match["np"])
+    return material is not None and _counted_kind(material["kind"]) in {
+        "card",
+        "follower",
+    }
 
 
 def compound_selection(after: str, before: str = "") -> tuple[str, bool] | None:

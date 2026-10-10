@@ -60,6 +60,8 @@ def test_disjunct_counts_share_one_explicit_counted_set(np: str, unit: str) -> N
 @pytest.mark.parametrize(
     "raw",
     [
+        "仮。【融合】不明物２枚:これに融合カウンターX個を置く。",
+        "仮。【融合】トークンでないフォロワー２枚:これに融合カウンターX個を不明する。",
         "仮。自分の場にフォロワーが２体以上出たとき、仮。{起動}出たうちの１体に{攻撃力}+Xする。",
         "仮。相手の場のフォロワー２体を選ぶ。{起動}残りの１体にXダメージ。",
         "仮。相手の場のフォロワー２体を選ぶ。それを墓場に置く。残りの１体にXダメージ。",
@@ -100,6 +102,11 @@ def test_unknown_or_mismatched_counted_constructions_cannot_bind(raw: str) -> No
 @pytest.mark.parametrize(
     ("raw", "role", "unit"),
     [
+        (
+            "仮。【融合】トークンでないフォロワー２枚:これに融合カウンター３個を置く。",
+            "counter_amount",
+            "個",
+        ),
         ("仮。お互いの場のカードが２枚以上ある限り、仮。", "existence_count", "枚"),
         (
             "仮。各プレイヤーは、自身の手札が２枚になるように自身の手札を捨てる。",
@@ -206,6 +213,7 @@ def test_explicit_set_constraints_designations_and_ordinals(
             "player_person_quantity",
             "suffix_ordinal_times",
             "suffix_ordinal_turns",
+            "named_counter_place",
         )
     )
     field = normalize_source(raw, source(raw))
