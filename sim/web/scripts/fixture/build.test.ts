@@ -77,6 +77,32 @@ describe("fixture snapshot", async () => {
       expect(hex(again.files.get(path) ?? new Uint8Array())).toBe(hex(bytes))
   })
 
+  it("selects the exact current JP owner for EN names and effects across errata", () => {
+    const view = readSnapshot(snapshot.manifest, payloadsOf(snapshot))
+    for (const [faceId, currentRevision] of [
+      ["f:bp01-020", 2],
+      ["f:bp01-021", 1],
+    ] as const) {
+      const sourceId = `r:${faceId}:jp:${String(currentRevision)}`
+      const source = view["face_revision"]?.find((row) => row["id"] === sourceId)
+      const receiver = view["face_revision"]?.find((row) => row["id"] === `r:${faceId}:en:1`)
+      for (const field of ["name", "effect"]) {
+        const selection = (receiver?.["translations"] as JsonObject[]).find(
+          (row) => row["field"] === field && row["target_lang"] === "zh-Hant",
+        )
+        expect(selection?.["source"]).toEqual({
+          owner: { kind: "face_revision", id: sourceId },
+          field,
+          ordinal: null,
+        })
+        const own = (source?.["translations"] as JsonObject[]).find(
+          (row) => row["field"] === field && row["target_lang"] === "zh-Hant",
+        )
+        expect(selection?.["translation_id"]).toBe(own?.["translation_id"])
+      }
+    }
+  })
+
   it("publishes the current snapshot through index format 2", () => {
     const index = parseStrict(
       snapshot.files.get("snapshots/versions/index.json") ?? "",

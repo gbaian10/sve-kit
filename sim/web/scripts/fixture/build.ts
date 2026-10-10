@@ -549,6 +549,7 @@ function addFaces(ctx: CardContext): FaceRevisions {
   const currentIds = new Set<string>()
   card.faces.forEach((face, ordinal) => {
     const plans = revisionPlans(card, face)
+    const jpSource = plans.find((candidate) => candidate.region === "jp" && candidate.current)
     const current: JsonObject[] = []
     for (const plan of plans) {
       const nameUnit = builder.unit(plan.lang, plan.name, true)
@@ -644,9 +645,9 @@ function addFaces(ctx: CardContext): FaceRevisions {
             )
           }
         }
-      } else if (face.name.zhHant !== undefined && face.name.ja !== "") {
+      } else if (face.name.zhHant !== undefined && jpSource) {
         // The EN face shows the same Traditional Chinese rows the JP face chose.
-        const jaName = builder.unit(LANGS.ja, face.name.ja, true)
+        const jaName = builder.unit(jpSource.lang, jpSource.name, true)
         translations.push(
           builder.translation(
             `${face.id}:jp`,
@@ -661,7 +662,7 @@ function addFaces(ctx: CardContext): FaceRevisions {
             true,
             {
               kind: "face_revision",
-              id: plans.find((p) => p.region === "jp" && p.name === face.name.ja)?.id ?? null,
+              id: jpSource.id,
             },
           ),
         )
@@ -670,7 +671,7 @@ function addFaces(ctx: CardContext): FaceRevisions {
             builder.translation(
               `${face.id}:jp`,
               "effect",
-              builder.unit(LANGS.ja, face.effect.ja),
+              builder.unit(jpSource.lang, jpSource.effect),
               LANGS.zhHant,
               face.effect.zhHant,
               "project",
@@ -680,7 +681,7 @@ function addFaces(ctx: CardContext): FaceRevisions {
               false,
               {
                 kind: "face_revision",
-                id: plans.find((p) => p.region === "jp" && p.effect === face.effect.ja)?.id ?? null,
+                id: jpSource.id,
               },
             ),
           )
