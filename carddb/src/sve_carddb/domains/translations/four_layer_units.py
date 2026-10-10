@@ -286,6 +286,19 @@ def fusion_material(before: str) -> bool:
     }
 
 
+def written_card_np(text: str) -> bool:
+    """A complete explicit NP can prove a discarded object without inventing its zone."""
+    match = _SHARED_SET.fullmatch(text)
+    return match is not None and _counted_kind(match["kind"]) in {
+        "card",
+        "follower",
+        "spell",
+        "amulet",
+        "spell_or_amulet",
+        "crest",
+    }
+
+
 def compound_selection(after: str, before: str = "") -> tuple[str, bool] | None:
     """Both counted NPs must be explicit; the final selection verb belongs to both."""
     match = _COMPOUND_SELECTION.match(after)

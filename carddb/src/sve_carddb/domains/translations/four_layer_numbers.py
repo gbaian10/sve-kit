@@ -14,6 +14,7 @@ from sve_carddb.domains.translations.four_layer_conditions import (
     existence_context,
     selection_context,
 )
+from sve_carddb.domains.translations.four_layer_replacements import replacement_action
 from sve_carddb.domains.translations.four_layer_units import (
     compound_action,
     compound_selection,
@@ -215,10 +216,15 @@ def recognize_number(raw: str, part: SourcePart, hint: Hint) -> Number | None:
         "selection_count",
         "existence_count",
     }:
-        counted = number_context(before, after) or (
-            existence_context(before)
-            if number.role == "existence_count"
-            else selection_context(before)
+        replacement = replacement_action(before, after)
+        counted = (
+            number_context(before, after)
+            or (replacement.context if replacement is not None else None)
+            or (
+                existence_context(before)
+                if number.role == "existence_count"
+                else selection_context(before)
+            )
         )
         if (
             counted is None
@@ -353,6 +359,7 @@ def _generic_number(
         _counter_number(value, before, after)
         or _event_count_number(value, before, after)
         or _complete_action_number(value, before, after)
+        or _replacement_number(value, before, after)
     ):
         return counter
     if compound := compound_selection(after, before):
@@ -383,6 +390,17 @@ def _generic_number(
             "up_to" if match["limit"] else "exact",
         )
     return _action_number(value, before, after)
+
+
+def _replacement_number(value: int, before: str, after: str) -> Number | None:
+    replacement = replacement_action(before, after)
+    if replacement is None:
+        return None
+    return (
+        _quantity(replacement.role, value, replacement.unit, replacement.mode)
+        if replacement.role == "selection_count"
+        else Number("Nat", replacement.role, value, replacement.unit)
+    )
 
 
 def _complete_action_number(value: int, before: str, after: str) -> Number | None:
