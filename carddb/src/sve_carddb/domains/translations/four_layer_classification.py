@@ -74,7 +74,14 @@ _PHASES = {
     "term:phase.main": "main",
     "term:phase.end": "end",
 }
-_ZONES = {"term:zone." + code: code for code in ZONE_CODES}
+_ZONES = {
+    "term:zone.battlefield": "battlefield",
+    "term:zone.deck": "deck",
+    "term:zone.evolve_deck": "evolve_deck",
+    "term:zone.ex": "ex",
+    "term:zone.cemetery": "graveyard",
+    "term:zone.hand": "hand",
+}
 
 
 @dataclass(frozen=True)

@@ -88,7 +88,7 @@ def test_phase_and_zone_values_come_from_source_roles_with_exact_positions() -> 
     terms = (
         Term("term:phase.end", "rule_term", "エンドフェイズ"),
         Term("term:zone.hand", "rule_term", "手札"),
-        Term("term:zone.graveyard", "rule_term", "墓場"),
+        Term("term:zone.cemetery", "rule_term", "墓場"),
     )
     raw = "エンドフェイズ開始時、手札から墓場に置く。"
     field = normalize_source(raw, source(raw))
