@@ -9,6 +9,43 @@ from sve_carddb.domains.translations.four_layer_normalizer import normalize_sour
 from .test_four_layer_classification import classifier, source
 
 
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "仮。相手プレイヤー１人は手札を公開する。自分はその中から２枚を選ぶ。",
+        "仮。自分のデッキの上X枚を見る。その中から、仮族・フォロワー１枚を公開して手札に加える。残りを好きな順にデッキの下に置く。【覚醒】状態なら、代わりに仮族・フォロワー２枚まで公開して手札に加える。",
+        "仮。自分の墓場が２枚以上で自分の他の元のコストX以下の仮族・フォロワーが場か墓場に置かれたとき、仮。",
+    ],
+)
+def test_explicit_reveal_and_conjunction_contexts_prove_the_counted_set(
+    raw: str,
+) -> None:
+    engine = classifier(extra=("player_person_quantity",))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert any(s.type == "QuantitySpec" for s in frame.leaf_schema.slots)
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "仮。相手プレイヤー１人は墓場を公開する。自分はその中から２枚を選ぶ。",
+        "仮。相手プレイヤー１人は手札を公開する。{起動}自分はその中から２枚を選ぶ。",
+        "仮。相手プレイヤー１人は手札を公開する。自分はその中から２体を選ぶ。",
+        "仮。自分のデッキの上X枚を見る。その中から、仮族・フォロワー１枚を公開して手札に加える。残りを好きな順に墓場に置く。【覚醒】状態なら、代わりに仮族・フォロワー２枚まで公開して手札に加える。",
+        "仮。自分の墓場が２枚以上で自分の他の元のコストX以下の不明物が場か墓場に置かれたとき、仮。",
+    ],
+)
+def test_reveal_or_conjunction_cannot_inherit_an_unknown_set(raw: str) -> None:
+    engine = classifier(extra=("player_person_quantity",))
+    field = normalize_source(raw, source(raw))
+    assert engine.recognize(raw, field.source, field.parts[0]).issues
+
+
 def test_explicit_counter_carrier_union_keeps_count_and_threshold_separate() -> None:
     raw = "仮。これか自分のEXエリアのカード２枚の情熱カウンターが３個以上なら、仮。"
     engine = classifier(extra=("named_counter_threshold",))

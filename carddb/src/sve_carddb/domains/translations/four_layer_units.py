@@ -229,6 +229,15 @@ _LOOK_NAMED_UNION = re.compile(
     _ONSET + r"(?:自分|相手)のデッキの上(?:から)?(?:N|X)枚(?:を)?見る。"
     r"その中から、?「" + _FILTER + r"カード」と『X』$"
 )
+_REVEALED_HAND = re.compile(
+    _ONSET + r"(?:自分|相手)プレイヤーN人は手札を公開する。自分はその中から$"
+)
+_LOOK_REPLACEMENT = re.compile(
+    _ONSET + r"(?:自分|相手)のデッキの上(?:から)?(?:N|X)枚(?:を)?見る。"
+    r"その中から、?(?P<original>[^。]+?)N枚(?:を)?公開して手札に加え(?:る|てよい)。"
+    r"残りを好きな順にデッキの下に置く。【覚醒】状態なら、代わりに"
+    r"(?P<replacement>[^。]+)$"
+)
 _FIELD_FILTER = re.compile(
     r"^(?:の)?(?:(?:自分|相手)の(?:(?:場|墓場|手札|デッキ)の)?|(?:場|墓場|手札|デッキ)の(?:(?:自分|相手)の)?)?"
     + _FILTER
@@ -352,7 +361,7 @@ def count_context(before: str) -> CountContext | None:
         return context
     if context := _explicit_object_context(before):
         return context
-    if context := _zone_context(before):
+    if context := _zone_context(before) or _derived_context(before):
         return context
     if match := (
         _IMPLICIT_FIELD.search(before)
@@ -367,6 +376,25 @@ def count_context(before: str) -> CountContext | None:
             _ALL_TOKENS,
             "cardinality",
         )
+    return None
+
+
+def _derived_context(before: str) -> CountContext | None:
+    if _REVEALED_HAND.search(before):
+        return CountContext(
+            "select.unrestricted.v1", "card", ("hand",), _ALL_TOKENS, "cardinality"
+        )
+    if match := _LOOK_REPLACEMENT.search(before):
+        original = _SHARED_SET.fullmatch(match["original"])
+        replacement = _SHARED_SET.fullmatch(match["replacement"])
+        if original is not None and replacement is not None:
+            return CountContext(
+                "select.unrestricted.v1",
+                _counted_kind(replacement["kind"]),
+                ("deck",),
+                _ALL_TOKENS,
+                "cardinality",
+            )
     return None
 
 

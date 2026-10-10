@@ -26,6 +26,7 @@ from sve_carddb.domains.translations.four_layer_units import (
     fusion_material,
     number_context,
     source_unit,
+    written_card_np,
 )
 from sve_carddb.domains.translations.parameters.explicit_rules import COUNTER_NAMES
 
@@ -372,6 +373,7 @@ def _generic_number(
         or _event_count_number(value, before, after)
         or _complete_action_number(value, before, after)
         or _replacement_number(value, before, after)
+        or _compound_existence_number(value, before, after)
     ):
         return counter
     if compound := compound_selection(after, before):
@@ -413,6 +415,21 @@ def _replacement_number(value: int, before: str, after: str) -> Number | None:
         if replacement.role == "selection_count"
         else Number("Nat", replacement.role, value, replacement.unit)
     )
+
+
+def _compound_existence_number(value: int, before: str, after: str) -> Number | None:
+    match = re.match(
+        r"^枚以上で(?:自分|相手)の(?P<np>[^。:：]+?フォロワー)が"
+        r"場か墓場に置かれたとき" + _END,
+        after,
+    )
+    if (
+        match is not None
+        and count_context(before) is not None
+        and written_card_np(match["np"])
+    ):
+        return _quantity("existence_count", value, "枚", "at_least")
+    return None
 
 
 def _complete_action_number(value: int, before: str, after: str) -> Number | None:
