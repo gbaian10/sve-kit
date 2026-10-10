@@ -50,14 +50,21 @@ def existence_context(before: str) -> CountContext | None:
 
 def selection_context(before: str) -> CountContext | None:
     """An explicit subset refers to one selection; a later zone-changing action blocks reuse."""
-    if not before.endswith(("選んだうちの", "残りの", "出たうちの")):
+    if not before.endswith(("選んだうちの", "残りの", "出たうちの", "その中の")):
         return None
     start = max((head.end() for head in _HEAD.finditer(before)), default=0)
     scope = before[start:]
     depth = scope.count("「") - scope.count("」")
     evidence: dict[str, CountContext] = {}
-    grammar = _ARRIVAL if before.endswith("出たうちの") else _SELECTION
-    for selection in grammar.finditer(scope):
+    grammars = (
+        (_ARRIVAL, _SELECTION)
+        if before.endswith("その中の")
+        else (_ARRIVAL,)
+        if before.endswith("出たうちの")
+        else (_SELECTION,)
+    )
+    selections = (match for grammar in grammars for match in grammar.finditer(scope))
+    for selection in selections:
         prefix = scope[: selection.start("unit")]
         if prefix.count("「") - prefix.count("」") != depth:
             continue

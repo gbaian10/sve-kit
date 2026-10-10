@@ -100,6 +100,7 @@ def test_unknown_or_mismatched_counted_constructions_cannot_bind(raw: str) -> No
 @pytest.mark.parametrize(
     ("raw", "role", "unit"),
     [
+        ("仮。お互いの場のカードが２枚以上ある限り、仮。", "existence_count", "枚"),
         (
             "仮。各プレイヤーは、自身の手札が２枚になるように自身の手札を捨てる。",
             "existence_count",
@@ -337,6 +338,21 @@ def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
             ["枚", "枚"],
         ),
         ("これを２回くり返す。", ["repeat_count"], ["回"]),
+        (
+            "仮。自分の墓場の元のコストX以下の「{仮クラス}でないフォロワー」２枚と元のコストX以下の「{仮クラス}でないフォロワー」３枚を選ぶ。",
+            ["selection_count", "selection_count"],
+            ["枚", "枚"],
+        ),
+        (
+            "仮。相手の場のフォロワー３体まで選ぶ。その中の１体にXダメージ。",
+            ["selection_count", "selection_count"],
+            ["体", "体"],
+        ),
+        (
+            "仮。次に自分の場にフォロワーが２体以上出たとき、その中の１体は{攻撃力}+X/{体力}+Xする。",
+            ["threshold", "selection_count"],
+            ["体", "体"],
+        ),
         (
             "仮。同時に自分の場にフォロワーが２体以上出たとき、出たうちの１体に{攻撃力}+X/{体力}+Xする。",
             ["threshold", "selection_count"],

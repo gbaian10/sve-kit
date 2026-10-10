@@ -151,7 +151,7 @@ _ONSET = r"(?:^|[、。:：}】（(]|か|と|は|が|として)"
 _KIND = r"スペルかアミュレット|フォロワー|アミュレット|スペル|カード|クレスト|『X』"
 _SET_KIND = r"(?:" + _KIND + r")(?:(?:や|か|と)" + _FILTER + r"(?:" + _KIND + r"))*"
 _SET_ATOM = re.compile(_FILTER + r"(?P<kind>" + _KIND + r")")
-_OWNER = r"自分|相手|それ(?:のプレイヤー)?|(?:自分|相手)プレイヤーN人"
+_OWNER = r"自分|相手|お互い|それ(?:のプレイヤー)?|(?:自分|相手)プレイヤーN人"
 _UNION_COUNTED = re.compile(
     _ONSET
     + _FILTER
@@ -164,7 +164,7 @@ _UNION_COUNTED = re.compile(
 )
 _COUNTED = re.compile(
     _ONSET
-    + r"(?:同時に)?"
+    + r"(?:同時に|次に)?"
     + _FILTER
     + r"(?:(?P<owner>"
     + _OWNER
@@ -232,7 +232,9 @@ _COMPOUND_SELECTION = re.compile(
     r"選(?:ぶ|び|んで)(?=[。:、）)\n]|$)"
 )
 _SHARED_SET = re.compile(
-    r"^(?P<quote>「)?"
+    r"^"
+    + _FILTER
+    + r"(?P<quote>「)?"
     + _FILTER
     + r"(?P<kind>"
     + _SET_KIND

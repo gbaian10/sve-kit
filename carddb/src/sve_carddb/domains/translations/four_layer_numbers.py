@@ -457,8 +457,9 @@ def _event_count_number(value: int, before: str, after: str) -> Number | None:
         counted is not None
         and (
             match := re.match(
-                r"^(?P<unit>体|つ)に(?:(?:N|X)ダメージ|"
-                r"\{攻撃力\}[+-](?:N|X)(?:/\{体力\}[+-](?:N|X))?する)" + _END,
+                r"^(?P<unit>体|つ)(?:に|は)(?:(?:N|X)ダメージ|"
+                r"\{攻撃力\}[+-](?:N|X|[0-9０-９]+)(?:/\{体力\}[+-](?:N|X|[0-9０-９]+))?する)"
+                + _END,
                 after,
             )
         )
