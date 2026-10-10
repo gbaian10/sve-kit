@@ -2,11 +2,16 @@ import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import {
+  type AnnotatedTextResolver,
+  arrayValue,
   canonicalText,
   createAnnotatedTextResolver,
   type JsonObject,
+  objectValue,
+  parseStrict,
   type SelectedText,
   type SnapshotClient,
+  SnapshotError,
   stringValue,
 } from "../../data"
 import { usePrefs } from "../../settings"
@@ -16,7 +21,9 @@ export function CardText({
   client,
   owner,
   field,
+  sharedResolver,
 }: {
+  readonly sharedResolver?: AnnotatedTextResolver | null
   readonly client: SnapshotClient
   readonly owner: JsonObject
   readonly field: "name" | "effect" | "flavor"
@@ -27,34 +34,49 @@ export function CardText({
   const language = i18n.resolvedLanguage === "zh-TW" ? "zh-Hant" : (i18n.resolvedLanguage ?? "ja")
   const identity = canonicalText([owner, field, language])
   const resolver = useMemo(
-    () => (snapshot ? createAnnotatedTextResolver(client) : null),
-    [client, snapshot],
+    () => sharedResolver ?? (snapshot ? createAnnotatedTextResolver(client) : null),
+    [client, snapshot, sharedResolver],
   )
   const [loaded, setLoaded] = useState<{
     readonly snapshot: typeof snapshot
     readonly identity: string
     readonly value?: SelectedText | null
-    readonly failed?: boolean
+    readonly failed?: "validation" | "network"
   }>()
   useEffect(() => {
     if (!resolver) return
     let active = true
-    const pointer = { owner, field, ordinal: null }
-    void resolver.resolve(pointer, language).then(
+    const [currentOwner, currentField, currentLanguage] = arrayValue(parseStrict(identity))
+    const pointer = {
+      owner: objectValue(currentOwner),
+      field: stringValue(currentField),
+      ordinal: null,
+    }
+    void resolver.resolve(pointer, stringValue(currentLanguage)).then(
       (value) => {
         if (active) setLoaded({ snapshot, identity, value })
       },
-      () => {
-        if (active) setLoaded({ snapshot, identity, failed: true })
+      (error: unknown) => {
+        if (active)
+          setLoaded({
+            snapshot,
+            identity,
+            failed: error instanceof SnapshotError ? "validation" : "network",
+          })
       },
     )
     return () => {
       active = false
     }
-  }, [resolver, snapshot, identity, owner, field, language])
+  }, [resolver, snapshot, identity])
   if (loaded?.snapshot !== snapshot || loaded.identity !== identity)
     return <p role="status">{t("card.annotationPending")}</p>
-  if (loaded.failed) return <p role="alert">{t("card.textFailed")}</p>
+  if (loaded.failed)
+    return (
+      <p role="alert">
+        {loaded.failed === "validation" ? t("card.textFailed") : t("card.textLoadFailed")}
+      </p>
+    )
   const value = loaded.value
   if (!value) return <p>{t("card.textUnavailable")}</p>
   const mode = field === "name" ? prefs.nameDisplay : prefs.effectLanguage

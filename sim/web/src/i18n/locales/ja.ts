@@ -94,6 +94,7 @@ export default {
     translationProofreading: "翻訳要校正",
     annotationPending: "本文と注釈を読み込み中",
     textFailed: "本文データの検証に失敗しました",
+    textLoadFailed: "本文を読み込めませんでした。もう一度お試しください。",
     textUnavailable: "原文の項目は不明です",
     textMode: "カードテキストの版",
     currentText: "現在のテキスト",

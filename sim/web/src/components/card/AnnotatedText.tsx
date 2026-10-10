@@ -6,6 +6,7 @@ import {
   arrayValue,
   canonicalText,
   type JsonObject,
+  objectValue,
   type SelectedText,
   stringValue,
   textRuns,
@@ -28,6 +29,14 @@ export function AnnotatedText({
     context.concepts.find(
       (row) => row["id"] === reference[reference["kind"] === "card_name" ? "term_id" : "key"],
     )
+  const vocabulary =
+    reference?.["kind"] === "vocabulary"
+      ? context.vocabulary?.find(
+          (row) =>
+            row.kind === arrayValue(reference["key"])[0] &&
+            row.code === arrayValue(reference["key"])[1],
+        )
+      : undefined
   const explanations = concept
     ? arrayValue(concept["explanations"])
         .map((ref) =>
@@ -64,6 +73,11 @@ export function AnnotatedText({
           aria-label={t("card.annotationReference")}
           className="mt-2 rounded-block bg-surface-2 p-3"
         >
+          {vocabulary && (
+            <p lang={stringValue(objectValue(vocabulary.unit)["lang"])}>
+              {stringValue(vocabulary.unit["text"])}
+            </p>
+          )}
           {explanations.map((value) => (
             <div key={canonicalText(value.reference)}>
               {value.reference["kind"] === "ruling_revision" && (

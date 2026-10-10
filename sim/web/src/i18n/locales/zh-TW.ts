@@ -92,6 +92,7 @@ const zhTW = {
     translationProofreading: "待校對",
     annotationPending: "文字與標註載入中",
     textFailed: "文字資料無法通過驗證",
+    textLoadFailed: "文字載入失敗，請稍後再試。",
     textUnavailable: "原文字段未知",
     textMode: "卡文版本",
     currentText: "目前卡文",

@@ -1,11 +1,11 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router"
 
 import { useCatalog } from "../../app/snapshot"
 import { CardText } from "../../components/card/CardText"
 import { Segmented } from "../../components/ui/Segmented"
-import type { Row } from "../../data"
+import { createAnnotatedTextResolver, type Row } from "../../data"
 import { usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
 
@@ -26,6 +26,12 @@ export function CardPage() {
   const { catalog, client } = useCatalog()
   const [textMode, setTextMode] = useState<"current" | "printed">("current")
   const { cardEdition } = usePrefs()
+  const snapshot = client.snapshot()
+  const pageKey = cardNo ?? intId ?? ""
+  const resolver = useMemo(
+    () => (snapshot && pageKey ? createAnnotatedTextResolver(client) : null),
+    [client, snapshot, pageKey],
+  )
   const printing = cardNo
     ? (catalog?.index.printingByCardNo(cardEdition, cardNo) ??
       catalog?.index.printingByCardNo(cardEdition === "jp" ? "en" : "jp", cardNo))
@@ -69,6 +75,7 @@ export function CardPage() {
                 <CardText
                   key={field}
                   client={client}
+                  sharedResolver={resolver}
                   owner={
                     textMode === "printed"
                       ? { kind: "printing_face", id: printing["id"] as string, face_id: faceId }

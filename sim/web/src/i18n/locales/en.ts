@@ -95,6 +95,7 @@ export default {
     translationProofreading: "Translation awaiting proofreading",
     annotationPending: "Loading text and annotations",
     textFailed: "Text data failed validation",
+    textLoadFailed: "Text could not be loaded. Please try again.",
     textUnavailable: "Original field is unknown",
     textMode: "Card text version",
     currentText: "Current text",

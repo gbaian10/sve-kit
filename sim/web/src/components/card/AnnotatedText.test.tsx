@@ -1,8 +1,9 @@
 import { act, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import { useState } from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { createAnnotatedTextResolver, type SelectedText, textRuns } from "../../data"
+import { createAnnotatedTextResolver, type SelectedText, SnapshotError, textRuns } from "../../data"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { annotatedOrigin } from "../../test-utils/annotated-snapshot"
@@ -14,6 +15,87 @@ afterEach(() => {
 })
 
 describe("annotation presentation", () => {
+  it("resolves a vocabulary reference by its kind and code", async () => {
+    const value = {
+      unit: { text: "手札", lang: "ja" },
+      annotation: {
+        occurrences: [
+          {
+            ordinal: 0,
+            reference: { kind: "vocabulary", key: ["zone", "hand"] },
+            ranges: [{ start: 0, end: 2 }],
+            bold: false,
+          },
+        ],
+      },
+    }
+    await renderInRouter(
+      <AnnotatedText
+        value={value}
+        context={{
+          original: value,
+          concepts: [],
+          explanations: [],
+          cards: [],
+          vocabulary: [{ kind: "zone", code: "hand", unit: { text: "原始區域標籤", lang: "ja" } }],
+        }}
+        emphasis={false}
+      />,
+    )
+    await userEvent.click(screen.getByRole("button", { name: "手札" }))
+    expect(screen.getByRole("complementary")).toHaveTextContent("原始區域標籤")
+  })
+
+  it.each([
+    [new SnapshotError("public-annotation/reference", "invalid reference"), "文字資料無法通過驗證"],
+    [new Error("network unavailable"), "文字載入失敗，請稍後再試。"],
+  ])("distinguishes validation and temporary loading failures", async (error, message) => {
+    const { client } = await annotatedOrigin()
+    await client.load()
+    const resolve = vi.fn().mockRejectedValue(error)
+    await renderInRouter(
+      <CardText
+        client={client}
+        sharedResolver={{ resolve }}
+        owner={{ kind: "face_revision", id: "revision" }}
+        field="name"
+      />,
+    )
+    expect(await screen.findByRole("alert")).toHaveTextContent(message)
+  })
+
+  it("does not repeat a request when rendering an equal owner object", async () => {
+    const { client } = await annotatedOrigin()
+    await client.load()
+    const resolve = vi.fn().mockResolvedValue(null)
+    const sharedResolver = { resolve }
+    function Harness() {
+      const [revision, setRevision] = useState(0)
+      return (
+        <>
+          <button
+            onClick={() => {
+              setRevision((value) => value + 1)
+            }}
+          >
+            rerender {revision}
+          </button>
+          <CardText
+            client={client}
+            sharedResolver={sharedResolver}
+            owner={{ kind: "face_revision", id: "revision" }}
+            field="name"
+          />
+        </>
+      )
+    }
+    await renderInRouter(<Harness />)
+    await screen.findByText("原文字段未知")
+    const calls = resolve.mock.calls.length
+    await userEvent.click(screen.getByRole("button", { name: "rerender 0" }))
+    expect(calls).toBeGreaterThan(0)
+    expect(resolve).toHaveBeenCalledTimes(calls)
+  })
   it("slices exact codepoints without NFC, NFKC or UTF-16 offsets", () => {
     const value = {
       unit: { text: "A😀Ｂé手牌", lang: "ja" },

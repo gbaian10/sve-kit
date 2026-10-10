@@ -2,6 +2,7 @@
 // their first consumer, so the barrel never carries unused surface.
 export {
   type AnnotatedText,
+  type AnnotatedTextResolver,
   createAnnotatedTextResolver,
   type SelectedText,
 } from "./annotated-text"
@@ -13,11 +14,13 @@ export {
   type SnapshotStatus,
 } from "./client"
 export type { Row } from "./format-v3/decode"
+export { SnapshotError } from "./format-v3/errors"
 export {
   arrayValue,
   canonicalText,
   type JsonObject,
   objectValue,
+  parseStrict,
   stringValue,
 } from "./format-v3/json"
 export { registerImageCache } from "./image-sw-registration"
