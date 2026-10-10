@@ -5,11 +5,15 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
+from sve_carddb.contracts.four_layer import OwnerField
 from sve_carddb.contracts.source_binding import SourceDescriptor
 from sve_carddb.core.json import canonical
 from sve_carddb.domains.translations.four_layer_sources import (
     card_source,
     semantic_context,
+)
+from sve_carddb.domains.translations.four_layer_sources import (
+    descriptor as register_descriptor,
 )
 
 from ...support.build_db_fixtures import rows
@@ -43,6 +47,17 @@ def test_equal_name_on_another_frozen_card_cannot_authorize_owner(
             | {"text_hash": fixture.jp.text_hash[7:]},
         }
         descriptor = SourceDescriptor.model_validate_json(canonical(data))
+        assert (
+            register_descriptor(
+                db,
+                fixture.sources(),
+                OwnerField.model_validate_json(
+                    canonical({key: data[key] for key in ("owner", "field", "ordinal")})
+                ),
+                fixture.jp.batch_id,
+            )
+            == descriptor
+        )
         verified = card_source(db, fixture.sources(), descriptor)
         assert verified.text == "Synthetic card"
         assert verified.card_id == fixture.card.id

@@ -3,8 +3,13 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.contracts.four_layer import FaceRevisionOwner, PrintingFaceOwner
-from sve_carddb.core.json import digest
+from sve_carddb.contracts.four_layer import (
+    FaceRevisionOwner,
+    OwnerField,
+    PrintingFaceOwner,
+)
+from sve_carddb.contracts.source_binding import SourceDescriptor
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.catalog.adoption_models import SourceRef
 from sve_carddb.domains.translations.corrected_sources import PARSER as CORRECTED_PARSER
 from sve_carddb.domains.translations.four_layer_semantics import CardContext
@@ -14,7 +19,6 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from sve_carddb.build import Database, Value
-    from sve_carddb.contracts.source_binding import SourceDescriptor
     from sve_carddb.domains.translations.sources import Sources
 
 
@@ -40,11 +44,21 @@ def _row(db: Database, table: str, key: Mapping[str, Value]) -> Mapping[str, Val
     return rows[0].values
 
 
-def card_source(  # ruff: ignore[complex-structure, too-many-branches, too-many-statements, too-many-locals] -- prove the joined owner, field, face, raw version and bytes together
-    db: Database, sources: Sources, descriptor: SourceDescriptor
-) -> CardSource:
-    """Equal bytes on another card or face cannot authorize a source descriptor."""
-    owner = descriptor.owner
+@dataclass(frozen=True)
+class _Field:
+    unit_id: str
+    text: str
+    source_id: str
+    locator: str
+    card_id: str
+    face_id: str
+    face_ordinal: int
+
+
+def _field(  # ruff: ignore[too-many-locals] -- resolve the joined exact owner and field once for both descriptor registration and verification
+    db: Database, field: OwnerField
+) -> _Field:
+    owner = field.owner
     if isinstance(owner, FaceRevisionOwner):
         row = _row(db, "face_revision", {"id": owner.revision_id})
         face_id = _string(row["face_id"])
@@ -89,13 +103,13 @@ def card_source(  # ruff: ignore[complex-structure, too-many-branches, too-many-
     face_ordinal = face["ordinal"]
     if type(face_ordinal) is not int or face_ordinal < 0:
         raise TypeError("Card source face has an invalid permanent ordinal")
-    if descriptor.field == "section":
-        section = _row(db, section_table, section_key | {"ordinal": descriptor.ordinal})
+    if field.field == "section":
+        section = _row(db, section_table, section_key | {"ordinal": field.ordinal})
         unit_id = _string(section["text_unit_id"])
-        locator = f"/faces/{face_ordinal}/sections/{descriptor.ordinal}"
+        locator = f"/faces/{face_ordinal}/sections/{field.ordinal}"
     else:
-        unit_id = _string(row[fields[descriptor.field]])
-        source_field = "text" if descriptor.field == "effect" else descriptor.field
+        unit_id = _string(row[fields[field.field]])
+        source_field = "text" if field.field == "effect" else field.field
         locator = f"/faces/{face_ordinal}/{source_field}"
     source_id = _string(row["source_id"])
     unit = _row(db, "text_unit", {"id": unit_id})
@@ -106,6 +120,61 @@ def card_source(  # ruff: ignore[complex-structure, too-many-branches, too-many-
         or unit["content_hash"] != digest(raw.encode())
     ):
         raise ValueError("Card source original text identity is invalid")
+    return _Field(unit_id, raw, source_id, locator, card_id, face_id, face_ordinal)
+
+
+def descriptor(
+    db: Database, sources: Sources, field: OwnerField, batch_id: str
+) -> SourceDescriptor:
+    """Register the actual owner field rather than searching other cards by equal text."""
+    selected = _field(db, field)
+    parser = "translation-jp-v1"
+    if isinstance(field.owner, FaceRevisionOwner) and field.field == "effect":
+        applications = db.select(
+            "correction_application",
+            db.columns("correction_application"),
+            where={
+                "face_revision_id": field.owner.revision_id,
+                "source_id": selected.source_id,
+                "status": "applied",
+                "result_unit_id": selected.unit_id,
+            },
+        )
+        if applications:
+            parser = CORRECTED_PARSER
+    checksum = digest(selected.text.encode())[7:]
+    result = SourceDescriptor.model_validate_json(
+        canonical(
+            field.model_dump(mode="json")
+            | {
+                "source_unit_id": selected.unit_id,
+                "source_hash": checksum,
+                "source_ref": {
+                    "batch_id": batch_id,
+                    "source_version_id": selected.source_id,
+                    "parser": parser,
+                    "locator": selected.locator,
+                    "text_hash": checksum,
+                },
+            }
+        )
+    )
+    card_source(db, sources, result)
+    return result
+
+
+def card_source(
+    db: Database, sources: Sources, descriptor: SourceDescriptor
+) -> CardSource:
+    """Equal bytes on another card or face cannot authorize a source descriptor."""
+    selected = _field(db, descriptor)
+    unit_id, raw, source_id, locator = (
+        selected.unit_id,
+        selected.text,
+        selected.source_id,
+        selected.locator,
+    )
+    owner = descriptor.owner
     if (
         descriptor.source_unit_id != unit_id
         or descriptor.source_hash != digest(raw.encode())[7:]
@@ -143,9 +212,13 @@ def card_source(  # ruff: ignore[complex-structure, too-many-branches, too-many-
         if len(applications) != 1:
             raise ValueError("Corrected source requires its exact applied revision")
         sources.corrections.verify_scope(
-            ref.batch_id, ref.source_version_id, face_ordinal, card_id, face_id
+            ref.batch_id,
+            ref.source_version_id,
+            selected.face_ordinal,
+            selected.card_id,
+            selected.face_id,
         )
-    return CardSource(descriptor, raw, card_id, face_id, source_id)
+    return CardSource(descriptor, raw, selected.card_id, selected.face_id, source_id)
 
 
 def semantic_context(db: Database, source: CardSource) -> CardContext | None:
