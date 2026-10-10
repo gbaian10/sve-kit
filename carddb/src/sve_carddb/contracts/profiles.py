@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-MEDIA = "2.0.0"
+MEDIA = "3.0.0"
 
 
 @dataclass(frozen=True)
@@ -25,7 +25,7 @@ class Profile:
 PROFILES = (
     Profile(
         MEDIA,
-        "v2",
+        "v3",
         64,
         (
             "column-partition-v1",
@@ -33,6 +33,8 @@ PROFILES = (
             "fragment-container-v1",
             "image-entity-buckets-v1",
             "image-id-url-v1",
+            "jp-source-translation-v1",
+            "public-annotation-v1",
             "rules-name-on-demand-v1",
         ),
     ),

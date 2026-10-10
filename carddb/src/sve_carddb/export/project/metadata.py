@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from sve_carddb.contracts.profiles import MEDIA
 from sve_carddb.contracts.snapshot import definition, validate
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.export.project.source import Record, Source, json_list, pick
@@ -28,7 +29,7 @@ def configuration(source: Source, settings: Settings) -> Record:
         if size not in array(sizes):
             raise ValueError("Build image size differs from fixed public config")
     config: Record = {
-        "format_version": "2.0.0",
+        "format_version": MEDIA,
         "languages": json_list(
             source.rows("language", "code,fallback_order,display_name")
         ),

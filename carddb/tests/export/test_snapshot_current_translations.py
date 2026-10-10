@@ -61,7 +61,7 @@ def shared(*, checked: bool = False) -> Decisions:
     )
 
 
-@pytest.mark.parametrize("regions", [("en",), ("en", "jp")])
+@pytest.mark.parametrize("regions", [("en", "jp")])
 def test_unchecked_machine_translation_keeps_quality_and_source_closure(
     db: Database, regions: tuple[str, ...]
 ) -> None:
@@ -89,7 +89,7 @@ def test_unchecked_machine_translation_keeps_quality_and_source_closure(
     binding = object_value(
         array(one(result, "face_revision", "revision-en")["translations"])[0]
     )
-    assert binding["basis"] == "shared_jp_unchecked"
+    assert binding["basis"] == "jp_source"
     assert any(row["id"] == TEXT for row in result.tables["text_unit"])
     assert "Synthetic translation" in {
         row["text"] for row in result.tables["text_unit"]
@@ -125,7 +125,7 @@ def test_unchecked_machine_translation_keeps_quality_and_source_closure(
 
 
 @pytest.mark.parametrize("field", ["name", "effect", "section"])
-def test_unequal_section_counts_only_block_unchecked_effect_and_sections(
+def test_unequal_sections_keep_complete_jp_effect_and_no_jp_sections(
     db: Database, field: str
 ) -> None:
     dual_region(db)
@@ -152,11 +152,11 @@ def test_unequal_section_counts_only_block_unchecked_effect_and_sections(
     bindings = one(dual_project(db, shared()), "face_revision", "revision-en")[
         "translations"
     ]
-    assert bool(bindings) is (field == "name")
+    assert bool(bindings) is (field in {"name", "effect"})
 
 
 @pytest.mark.parametrize("basis", ["shared_jp", "shared_jp_unchecked"])
-def test_known_name_divergence_blocks_both_sharing_modes(
+def test_known_name_divergence_keeps_jp_translation_in_both_modes(
     db: Database, basis: str
 ) -> None:
     dual_region(db)
@@ -167,23 +167,24 @@ def test_known_name_divergence_blocks_both_sharing_modes(
             {"resolved": False},
         )
     result = dual_project(db, shared(checked=basis == "shared_jp"))
-    assert one(result, "face_revision", "revision-en")["translations"] == []
-
-
-def test_completed_display_check_requires_checked_basis(db: Database) -> None:
-    dual_region(db)
-    chosen = replace(shared(), display_checks=shared(checked=True).display_checks)
-    with pytest.raises(
-        ValueError, match=r"^Checked JP translation must use shared_jp$"
-    ):
-        dual_project(db, chosen)
-    checked = dual_project(db, shared(checked=True))
     assert (
         object_value(
-            array(one(checked, "face_revision", "revision-en")["translations"])[0]
+            array(one(result, "face_revision", "revision-en")["translations"])[0]
         )["basis"]
-        == "shared_jp"
+        == "jp_source"
     )
+
+
+def test_completed_display_check_keeps_the_same_jp_source_basis(db: Database) -> None:
+    dual_region(db)
+    chosen = replace(shared(), display_checks=shared(checked=True).display_checks)
+    for result in (dual_project(db, chosen), dual_project(db, shared(checked=True))):
+        assert (
+            object_value(
+                array(one(result, "face_revision", "revision-en")["translations"])[0]
+            )["basis"]
+            == "jp_source"
+        )
 
 
 @pytest.mark.parametrize("side", ["source_unit_id", "counterpart_unit_id"])
@@ -305,3 +306,20 @@ def test_counterpart_does_not_borrow_an_unchecked_text(db: Database) -> None:
         ValueError, match=r"^Official counterpart text differs from its checked source$"
     ):
         projected(db, chosen)
+
+
+def test_jp_translation_rejects_a_snapshot_missing_the_exact_donor_owner(
+    db: Database,
+) -> None:
+    dual_region(db)
+    with db.transaction():
+        db.delete("ruling_evidence", {"id": "evidence"})
+        db.delete("route_override", {"route_key": "TEST-001%E2%93%88a"})
+    with pytest.raises(ValueError, match="public-annotation/owner"):
+        project(
+            db,
+            regions=("en",),
+            as_of="2026-10-01",
+            settings=SETTINGS,
+            decisions=shared(),
+        )

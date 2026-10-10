@@ -61,10 +61,13 @@ SECTION = "ordinal,text_unit_id,kind"
 
 def initial(source: Source) -> dict[str, list[Record]]:
     """Select only fixed scalar columns, leaving each derived field to its owner."""
-    return {
+    view = {
         name: [dict(row) for row in source.rows(name, fields)]
         for name, fields in SCALARS.items()
     }
+    for name in ("annotation_set", "annotation_concept", "field_annotation"):
+        view[name] = []
+    return view
 
 
 def text_records(source: Source, view: dict[str, list[Record]]) -> None:
@@ -104,7 +107,14 @@ def text_records(source: Source, view: dict[str, list[Record]]) -> None:
         ]
         revision["translations"] = []
         revision["corrections"] = []
-    for table in ("product", "product_family", "qa_version", "keyword", "vocabulary"):
+    for table in (
+        "product",
+        "product_family",
+        "qa_version",
+        "cr_clause",
+        "keyword",
+        "vocabulary",
+    ):
         for row in view[table]:
             row["translations"] = []
 

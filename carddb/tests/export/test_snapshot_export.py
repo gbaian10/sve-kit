@@ -568,7 +568,7 @@ def test_extra_nested_audit_field_is_not_silently_removed() -> None:
         )
 
 
-@pytest.mark.parametrize("format_version", ["2.0.0"])
+@pytest.mark.parametrize("format_version", ["3.0.0"])
 def test_single_oversized_fragment_is_reported_instead_of_silently_dropped(
     format_version: str,
     logical: tuple[Projection, Ownership],

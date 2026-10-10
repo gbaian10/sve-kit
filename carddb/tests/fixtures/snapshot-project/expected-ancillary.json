@@ -8,7 +8,7 @@
   "qa": [{"id":"qa","region":"jp","official_number":"Q1","source_url":"https://example.invalid/qa","current_version_id":"qa_v"}],
   "qa_version": [{"id":"qa_v","qa_id":"qa","revision":0,"published_on":"2026-09-29","updated_on":null,"date_raw":null,"question_unit_id":"t:ja:6a34655cc94a4524","answer_unit_id":"t:ja:6a34655cc94a4524","state":"active","cards":["card"],"translations":[]}],
   "cr_version": [{"id":"cr","region":"jp","version":"synthetic-1","published_on":"2026-09-29","effective_on":null,"source_url":"https://example.invalid/rules.pdf"}],
-  "cr_clause": [{"id":"clause","cr_version_id":"cr","number":"1.10.2","text_unit_id":"t:ja:6a34655cc94a4524"}],
+  "cr_clause": [{"id":"clause","cr_version_id":"cr","number":"1.10.2","text_unit_id":"t:ja:6a34655cc94a4524","translations":[]}],
   "errata": [{"id":"errata","region":"jp","official_url":"https://example.invalid/errata","versions":[{"id":"errata_v","revision":0,"announced_on":null,"effective_on":null,"date_raw":null,"reason_unit_id":null,"exchange_offered":null,"changes":[{"face_id":"face","field":"effect","before":"Before","after":"Synthetic text"}],"printings":[{"printing_id":"printing","scope":"confirmed_applies"}]}]}],
   "rules_name": [{"id":"rules_name","region":"jp","official_name":"Synthetic name"}],
   "face_rules_name": [{"face_id":"face","region":"jp","rules_name_id":"rules_name","role":"primary"}],

@@ -27,6 +27,7 @@ REFERENCES = {
     "family_id": "product_family",
     "product_id": "product",
     "translation_id": "translation",
+    "annotation_set_id": "annotation_set",
     "qa_id": "qa",
     "qa_version_id": "qa_version",
     "current_version_id": "qa_version",
@@ -45,6 +46,7 @@ REFERENCES = {
 }
 ARRAY_REFERENCES = {
     "cards": "card",
+    "card_ids": "card",
     "debut_product_ids": "product",
     "active_scopes": "text_unit",
     "ruling_revision_ids": "ruling_revision",

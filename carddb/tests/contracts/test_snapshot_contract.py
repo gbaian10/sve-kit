@@ -25,7 +25,7 @@ from ..support.snapshot_contract_fixtures import (
 def test_schema_is_valid_and_covers_every_collection() -> None:
     Draft202012Validator.check_schema(schema())
     valid = [object_value(case) for case in array(fixture("schema-valid.json"))]
-    assert len(tables()) == 43
+    assert len(tables()) == 46
     assert set(tables()) <= {string(case["schema"]) for case in valid}
     for case in valid:
         validate(string(case["schema"]), case["value"])
@@ -34,7 +34,7 @@ def test_schema_is_valid_and_covers_every_collection() -> None:
 def test_schema_regeneration_matches_committed_bytes() -> None:
     resource = (
         Path(__file__).resolve().parents[2]
-        / "src/sve_carddb/contracts/schema/v2/contract.schema.json"
+        / "src/sve_carddb/contracts/schema/v3/contract.schema.json"
     )
     assert generate() == resource.read_bytes()
 
@@ -256,7 +256,7 @@ def test_canonical_identifies_unsupported_types(value: object) -> None:
 
 
 def test_resources_available_from_package() -> None:
-    assert schema()["$id"] == "urn:sve-kit:snapshot:2.0.0"
+    assert schema()["$id"] == "urn:sve-kit:snapshot:3.0.0"
     assert len(canonical(schema())) < 1024 * 1024
 
 

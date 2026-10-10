@@ -159,7 +159,7 @@ formal release gates and the separate Web consumer acceptance.
 ## Validation boundary
 
 The native synthetic CLI test seals JP and EN card pages, registers two separate
-card identities and product families, and exports a 2.0 preview and private
+card identities and product families, and exports a 3.0 preview and private
 SQLite bundle using format 2 catalog and current glossary inputs. It uses the
 actual frozen providers, compiler and catalog composition without adapters or
 monkeypatching. Assertions cover both regions, physical card rows, current
@@ -170,9 +170,9 @@ keys, exact source evidence and owner mismatches. Supplemental tests exercise ca
 observations with mocked catalog composition. Synthetic tests do not claim complete
 real-card, catalog and translation acceptance.
 
-## 2.0 media previews
+## 3.0 media previews
 
-Select `--format-version 2.0.0` to export printing-owned media with permanent
+Select `--format-version 3.0.0` to export printing-owned media with permanent
 image keys. The source library still uses verified content-addressed WebPs;
 the isolated preview writes only the five display sizes to
 `images/<size>/<int_id>[-f<ordinal>].webp`. `display_url` selects the card or art
@@ -189,9 +189,9 @@ already cache, so restore it from backup instead. Before overwriting an image
 with different bytes, the writer removes the preview pointer; an interrupted
 export leaves no pointer and must be rerun before uploading.
 
-2.0 supports the same-name wire capability and rejects malformed nonempty links.
+3.0 supports the same-name wire capability and rejects malformed nonempty links.
 The existing offline recipe still keeps policy browsing private: its public
 same-name links are empty. This preview does not certify policy browsing or
 formal release readiness; policy links and the digital endpoint DB integration
-remain separate. The 2.0 offline config itself always contains the two game URL
+remain separate. The 3.0 offline config itself always contains the two game URL
 templates, with unknown service status; this does not perform a health check.

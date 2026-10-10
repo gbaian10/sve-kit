@@ -1,0 +1,4853 @@
+[
+  {
+    "schema": "card",
+    "value": [
+      "c:a",
+      "single",
+      "confirmed",
+      "set:a",
+      [
+        "f:a"
+      ],
+      []
+    ]
+  },
+  {
+    "schema": "face",
+    "value": [
+      "f:a",
+      "c:a",
+      0,
+      "front",
+      [],
+      []
+    ]
+  },
+  {
+    "schema": "printing",
+    "value": [
+      "p:a",
+      "c:a",
+      "jp",
+      "SYN",
+      "official",
+      "official",
+      null,
+      "unreviewed",
+      [],
+      "standard",
+      null,
+      "",
+      null,
+      null,
+      1,
+      true,
+      "unverified",
+      null,
+      null,
+      []
+    ]
+  },
+  {
+    "schema": "product_family",
+    "value": [
+      "set:a",
+      "synthetic",
+      "SYN",
+      "other",
+      "t:ja:90d435ce36c2c997",
+      []
+    ]
+  },
+  {
+    "schema": "product",
+    "value": [
+      "prod:a",
+      null,
+      "jp",
+      null,
+      "t:ja:90d435ce36c2c997",
+      "other",
+      null,
+      "unknown",
+      null,
+      []
+    ]
+  },
+  {
+    "schema": "printing_product",
+    "value": [
+      "p:a",
+      "prod:a",
+      null,
+      null,
+      null,
+      "other",
+      null,
+      "unknown"
+    ]
+  },
+  {
+    "schema": "identity_change",
+    "value": [
+      "identity:a",
+      "merge",
+      "c:old",
+      "c:a",
+      null,
+      "20260929T010203Z-0001",
+      "Synthetic reason"
+    ]
+  },
+  {
+    "schema": "art",
+    "value": [
+      "art:a",
+      "c:a",
+      "f:a",
+      "unclassified",
+      "unreviewed",
+      [
+        "jp"
+      ],
+      []
+    ]
+  },
+  {
+    "schema": "artist",
+    "value": [
+      "artist:a",
+      "Synthetic artist"
+    ]
+  },
+  {
+    "schema": "stamp",
+    "value": [
+      "stamp:a",
+      "synthetic",
+      null,
+      "Synthetic stamp",
+      "other",
+      null,
+      "unreviewed"
+    ]
+  },
+  {
+    "schema": "text_unit",
+    "value": [
+      "t:ja:90d435ce36c2c997",
+      "ja",
+      "Synthetic set"
+    ]
+  },
+  {
+    "schema": "face_revision",
+    "value": [
+      "r:a",
+      "f:a",
+      "jp",
+      1,
+      null,
+      null,
+      "unknown",
+      "initial",
+      "t:ja:c011ad4340c14396",
+      "t:ja:b17a760c59cb19db",
+      null,
+      "follower",
+      null,
+      null,
+      null,
+      [],
+      [],
+      [],
+      [],
+      [],
+      []
+    ]
+  },
+  {
+    "schema": "translation",
+    "value": [
+      "tr:a",
+      "t:ja:c011ad4340c14396",
+      "zh-Hant",
+      "t:zh-Hant:8967c9d899bcfc91",
+      "project",
+      "unofficial",
+      false,
+      null
+    ]
+  },
+  {
+    "schema": "qa",
+    "value": [
+      "qa:a",
+      "jp",
+      null,
+      "https://example.invalid/qa",
+      null
+    ]
+  },
+  {
+    "schema": "qa_version",
+    "value": [
+      "qav:a",
+      "qa:a",
+      1,
+      null,
+      null,
+      null,
+      "t:ja:c011ad4340c14396",
+      "t:ja:b17a760c59cb19db",
+      "active",
+      [],
+      []
+    ]
+  },
+  {
+    "schema": "cr_version",
+    "value": [
+      "cr:a",
+      "jp",
+      "synthetic",
+      null,
+      null,
+      "https://example.invalid/cr"
+    ]
+  },
+  {
+    "schema": "cr_clause",
+    "value": [
+      "clause:a",
+      "cr:a",
+      "1",
+      "t:ja:b17a760c59cb19db",
+      []
+    ]
+  },
+  {
+    "schema": "errata",
+    "value": [
+      "errata:a",
+      "jp",
+      "https://example.invalid/errata",
+      []
+    ]
+  },
+  {
+    "schema": "ruling_revision",
+    "value": [
+      "rr:a",
+      "ruling:a",
+      1,
+      "t:ja:c011ad4340c14396",
+      "t:ja:b17a760c59cb19db",
+      "undecided",
+      "2026-09-29",
+      "current",
+      [],
+      [],
+      [],
+      [],
+      []
+    ]
+  },
+  {
+    "schema": "rules_name",
+    "value": [
+      "name:a",
+      "jp",
+      "Synthetic name"
+    ]
+  },
+  {
+    "schema": "face_rules_name",
+    "value": [
+      "f:a",
+      "jp",
+      "name:a",
+      "primary"
+    ]
+  },
+  {
+    "schema": "rules_profile",
+    "value": [
+      "profile:a",
+      "jp",
+      "synthetic",
+      "t:ja:90d435ce36c2c997",
+      []
+    ]
+  },
+  {
+    "schema": "restriction",
+    "value": [
+      "rest:a",
+      "profile:a",
+      null,
+      "2026-09-29",
+      null,
+      "copy_limit",
+      "confirmed",
+      0,
+      null,
+      []
+    ]
+  },
+  {
+    "schema": "card_related",
+    "value": [
+      "related:a",
+      "c:a",
+      "c:b",
+      "mentions",
+      null,
+      null
+    ]
+  },
+  {
+    "schema": "digital_card",
+    "value": [
+      "dc:a",
+      "sv1",
+      "123456789"
+    ]
+  },
+  {
+    "schema": "digital_art",
+    "value": [
+      "da:a",
+      "dc:a",
+      "normal",
+      "standard"
+    ]
+  },
+  {
+    "schema": "digital_link",
+    "value": [
+      "dl:a",
+      "c:a",
+      null,
+      "dc:a",
+      null,
+      "same_card",
+      null,
+      "unreviewed"
+    ]
+  },
+  {
+    "schema": "digital_art_link",
+    "value": [
+      "art:a",
+      "da:a",
+      "same_art",
+      "unreviewed"
+    ]
+  },
+  {
+    "schema": "digital_link_coverage",
+    "value": [
+      "c:a",
+      "sv1",
+      "unreviewed",
+      "2026-09-29"
+    ]
+  },
+  {
+    "schema": "voice",
+    "value": [
+      "voice:a",
+      "dc:a",
+      null,
+      "ja",
+      "synthetic",
+      null,
+      null,
+      null,
+      "https://example.invalid/audio",
+      null,
+      null,
+      null,
+      null,
+      "remote_only"
+    ]
+  },
+  {
+    "schema": "card_voice",
+    "value": [
+      "c:a",
+      "voice:a",
+      "browse"
+    ]
+  },
+  {
+    "schema": "keyword",
+    "value": [
+      "kw:a",
+      "synthetic",
+      "mechanic",
+      "t:ja:c011ad4340c14396",
+      null,
+      [],
+      []
+    ]
+  },
+  {
+    "schema": "mechanic_projection",
+    "value": [
+      "c:a",
+      "kw:a",
+      "shared",
+      [
+        "has"
+      ],
+      []
+    ]
+  },
+  {
+    "schema": "card_mechanic_coverage",
+    "value": [
+      "c:a",
+      "shared",
+      false,
+      "include",
+      [],
+      "include",
+      []
+    ]
+  },
+  {
+    "schema": "card_engine_support",
+    "value": [
+      "c:a",
+      [
+        "missing_dsl",
+        null,
+        null,
+        null,
+        "not_applicable",
+        [
+          "no_formal_candidate"
+        ],
+        null,
+        null,
+        []
+      ],
+      [],
+      []
+    ]
+  },
+  {
+    "schema": "vocabulary",
+    "value": [
+      "type",
+      "follower",
+      "t:ja:0f977fdcb5d4fe74",
+      true,
+      []
+    ]
+  },
+  {
+    "schema": "search_alias",
+    "value": [
+      "type",
+      "follower",
+      "ja",
+      "Synthetic",
+      "synthetic"
+    ]
+  },
+  {
+    "schema": "text_symbol",
+    "value": [
+      "symbol:a",
+      "synthetic",
+      {
+        "parameters": []
+      },
+      null,
+      [],
+      []
+    ]
+  },
+  {
+    "schema": "card_route_alias",
+    "value": [
+      "official",
+      "SYN-OLD",
+      "official",
+      "SYN-001",
+      "renumbered"
+    ]
+  },
+  {
+    "schema": "route_override",
+    "value": [
+      "SYN-001",
+      "p:a"
+    ]
+  },
+  {
+    "schema": "image_asset",
+    "value": [
+      "img:a",
+      "/synthetic.png",
+      "https://example.invalid/synthetic.png",
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "schema": "printing_image",
+    "value": [
+      "p:a",
+      "f:a",
+      "img:a",
+      "approved",
+      "available",
+      1,
+      1,
+      [
+        [
+          "art_m",
+          384,
+          288
+        ],
+        [
+          "art_s",
+          160,
+          120
+        ],
+        [
+          "card_l",
+          459,
+          641
+        ],
+        [
+          "card_m",
+          320,
+          447
+        ],
+        [
+          "card_s",
+          128,
+          179
+        ]
+      ]
+    ]
+  },
+  {
+    "schema": "image_variant",
+    "value": [
+      "img:a",
+      "card_s",
+      "webp",
+      128,
+      179,
+      100
+    ]
+  },
+  {
+    "schema": "RegionView",
+    "value": [
+      "jp",
+      "released",
+      "unmapped",
+      "2026-09-29",
+      null,
+      null,
+      "p:a",
+      "fallback",
+      "main",
+      [],
+      "unknown"
+    ]
+  },
+  {
+    "schema": "Current",
+    "value": [
+      "jp",
+      "r:a",
+      "dated_effective"
+    ]
+  },
+  {
+    "schema": "PrintingFace",
+    "value": [
+      "f:a",
+      null,
+      null,
+      null,
+      "unreviewed",
+      null,
+      null,
+      null,
+      "unknown",
+      [],
+      [],
+      [],
+      [],
+      []
+    ]
+  },
+  {
+    "schema": "Section",
+    "value": [
+      0,
+      "t:ja:b17a760c59cb19db",
+      "rule"
+    ]
+  },
+  {
+    "schema": "FieldTranslation",
+    "value": [
+      "effect",
+      null,
+      "zh-Hant",
+      "tr:synthetic-render",
+      "jp_source",
+      [
+        {
+          "kind": "face_revision",
+          "id": "rev:jp"
+        },
+        "effect",
+        null
+      ],
+      null
+    ]
+  },
+  {
+    "schema": "Correction",
+    "value": [
+      "effect",
+      "Synthetic previous",
+      true,
+      "Synthetic reason",
+      null
+    ]
+  },
+  {
+    "schema": "ErrataVersion",
+    "value": [
+      "ev:a",
+      1,
+      null,
+      null,
+      null,
+      null,
+      null,
+      [],
+      []
+    ]
+  },
+  {
+    "schema": "Evidence",
+    "value": [
+      null,
+      null,
+      "https://example.invalid/evidence",
+      "supporting",
+      "Synthetic quote",
+      null
+    ]
+  },
+  {
+    "schema": "Support",
+    "value": [
+      "missing_dsl",
+      null,
+      null,
+      null,
+      "not_applicable",
+      [
+        "no_formal_candidate"
+      ],
+      null,
+      null,
+      []
+    ]
+  },
+  {
+    "schema": "ProgramRef",
+    "value": [
+      "programs",
+      "program:a"
+    ]
+  },
+  {
+    "schema": "Spelling",
+    "value": [
+      "ja",
+      "<",
+      ">",
+      null,
+      "literal"
+    ]
+  },
+  {
+    "schema": "Localization",
+    "value": [
+      "ja",
+      "Synthetic",
+      "Synthetic tooltip",
+      "Synthetic copy"
+    ]
+  },
+  {
+    "schema": "ArtArtist",
+    "value": [
+      "artist:a",
+      "illustrator"
+    ]
+  },
+  {
+    "schema": "PrintingStamp",
+    "value": [
+      "stamp:a",
+      null,
+      null
+    ]
+  },
+  {
+    "schema": "ErrataChange",
+    "value": [
+      "f:a",
+      "cost",
+      null,
+      1
+    ]
+  },
+  {
+    "schema": "ErrataPrinting",
+    "value": [
+      "p:a",
+      "listed"
+    ]
+  },
+  {
+    "schema": "ReplacedScope",
+    "value": [
+      "t:ja:b17a760c59cb19db",
+      "rr:b"
+    ]
+  },
+  {
+    "schema": "RulingHint",
+    "value": [
+      "ja",
+      "t:ja:b17a760c59cb19db",
+      {
+        "parameters": []
+      }
+    ]
+  },
+  {
+    "schema": "ProfileRevision",
+    "value": [
+      "pr:a",
+      "2026-09-29",
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "schema": "RestrictionMember",
+    "value": [
+      "name:a",
+      0,
+      "main"
+    ]
+  },
+  {
+    "schema": "KeywordAction",
+    "value": [
+      "synthetic",
+      "t:ja:b17a760c59cb19db"
+    ]
+  },
+  {
+    "schema": "SupportOverride",
+    "value": [
+      "jp",
+      [
+        "missing_dsl",
+        null,
+        null,
+        null,
+        "not_applicable",
+        [
+          "no_formal_candidate"
+        ],
+        null,
+        null,
+        []
+      ]
+    ]
+  },
+  {
+    "schema": "RegionBlock",
+    "value": [
+      "en",
+      [
+        "unmapped"
+      ]
+    ]
+  },
+  {
+    "schema": "PrintingFaceBootstrap",
+    "value": [
+      "f:a",
+      null,
+      null,
+      null,
+      "unreviewed",
+      []
+    ]
+  },
+  {
+    "schema": "PrintingFaceDetail",
+    "value": [
+      0,
+      null,
+      null,
+      null,
+      "unknown",
+      [],
+      [],
+      [],
+      []
+    ]
+  },
+  {
+    "schema": "Manifest",
+    "value": {
+      "changes_ref": null,
+      "config_ref": {
+        "key": "config",
+        "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+      },
+      "coverage": {
+        "mechanics": [],
+        "reviews": [],
+        "translations": []
+      },
+      "data_version": "preview-20260929T010203Z-0001",
+      "engine_support_target": {
+        "engine_build_hash": null,
+        "engine_version": null,
+        "validation_policy_id": null
+      },
+      "errata_card_ids": [],
+      "files": [
+        {
+          "bytes": 236,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 199
+          },
+          "dependencies": [],
+          "key": "bootstrap/bootstrap/global/global/band/0",
+          "path": "snapshots/blobs/5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0.json",
+          "role": "bootstrap",
+          "row_counts": [
+            {
+              "table": "text_unit",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 1,
+              "partition": "bootstrap",
+              "count": 1
+            }
+          ],
+          "sha256": "sha256:5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0"
+        },
+        {
+          "bytes": 239,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 200
+          },
+          "dependencies": [],
+          "key": "bootstrap/bootstrap/global/global/band/1",
+          "path": "snapshots/blobs/024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f.json",
+          "role": "bootstrap",
+          "row_counts": [
+            {
+              "table": "text_unit",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 9,
+              "partition": "bootstrap",
+              "count": 1
+            }
+          ],
+          "sha256": "sha256:024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f"
+        },
+        {
+          "bytes": 389,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 269
+          },
+          "dependencies": [],
+          "key": "bootstrap/bootstrap/global/global/band/2",
+          "path": "snapshots/blobs/fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279.json",
+          "role": "bootstrap",
+          "row_counts": [
+            {
+              "table": "translation",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 23,
+              "partition": "bootstrap",
+              "count": 1
+            }
+          ],
+          "sha256": "sha256:fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279"
+        },
+        {
+          "bytes": 1108,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 430
+          },
+          "dependencies": [],
+          "key": "bootstrap/bootstrap/global/global/band/3",
+          "path": "snapshots/blobs/bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd.json",
+          "role": "bootstrap",
+          "row_counts": [
+            {
+              "table": "product_family",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 24,
+              "partition": "bootstrap",
+              "count": 1
+            },
+            {
+              "table": "text_unit",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 28,
+              "partition": "bootstrap",
+              "count": 1
+            }
+          ],
+          "sha256": "sha256:bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd"
+        },
+        {
+          "bytes": 418,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 257
+          },
+          "dependencies": [],
+          "key": "bootstrap/bootstrap/global/global/band/4",
+          "path": "snapshots/blobs/215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc.json",
+          "role": "bootstrap",
+          "row_counts": [
+            {
+              "table": "text_unit",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 33,
+              "partition": "bootstrap",
+              "count": 1
+            },
+            {
+              "table": "text_unit",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 35,
+              "partition": "bootstrap",
+              "count": 1
+            }
+          ],
+          "sha256": "sha256:215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc"
+        },
+        {
+          "bytes": 1225,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 473
+          },
+          "dependencies": [],
+          "key": "bootstrap/bootstrap/global/global/band/7",
+          "path": "snapshots/blobs/fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b.json",
+          "role": "bootstrap",
+          "row_counts": [
+            {
+              "table": "product",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 59,
+              "partition": "bootstrap",
+              "count": 1
+            },
+            {
+              "table": "vocabulary",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 56,
+              "partition": "bootstrap",
+              "count": 1
+            }
+          ],
+          "sha256": "sha256:fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b"
+        },
+        {
+          "bytes": 6059,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 1636
+          },
+          "dependencies": [],
+          "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+          "path": "snapshots/blobs/a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd.json",
+          "role": "bootstrap",
+          "row_counts": [
+            {
+              "table": "card",
+              "owner": {
+                "id": "set:a",
+                "kind": "home_set"
+              },
+              "bucket": 26,
+              "partition": "bootstrap",
+              "count": 1
+            },
+            {
+              "table": "card_engine_support",
+              "owner": {
+                "id": "set:a",
+                "kind": "home_set"
+              },
+              "bucket": 26,
+              "partition": "bootstrap",
+              "count": 1
+            },
+            {
+              "table": "face",
+              "owner": {
+                "id": "set:a",
+                "kind": "home_set"
+              },
+              "bucket": 26,
+              "partition": "bootstrap",
+              "count": 2
+            },
+            {
+              "table": "face_revision",
+              "owner": {
+                "id": "set:a",
+                "kind": "home_set"
+              },
+              "bucket": 26,
+              "partition": "bootstrap",
+              "count": 2
+            },
+            {
+              "table": "printing",
+              "owner": {
+                "id": "set:a",
+                "kind": "home_set"
+              },
+              "bucket": 29,
+              "partition": "bootstrap",
+              "count": 1
+            },
+            {
+              "table": "printing",
+              "owner": {
+                "id": "set:a",
+                "kind": "home_set"
+              },
+              "bucket": 43,
+              "partition": "bootstrap",
+              "count": 1
+            }
+          ],
+          "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+        },
+        {
+          "bytes": 1218,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 548
+          },
+          "dependencies": [],
+          "key": "config",
+          "path": "snapshots/blobs/f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b.json",
+          "role": "config",
+          "row_counts": [],
+          "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+        },
+        {
+          "key": "images/detail/global/global/band/12",
+          "role": "images",
+          "row_counts": [
+            {
+              "table": "image_asset",
+              "owner": {
+                "kind": "global",
+                "id": null
+              },
+              "bucket": 12,
+              "partition": "detail",
+              "count": 2
+            }
+          ],
+          "dependencies": [
+            {
+              "key": "config",
+              "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+            }
+          ],
+          "path": "snapshots/blobs/017a078c28259b662f07ad65c00954ce2a3bb38e75694b2f62441ef65da871d2.json",
+          "sha256": "sha256:017a078c28259b662f07ad65c00954ce2a3bb38e75694b2f62441ef65da871d2",
+          "bytes": 392,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 241
+          }
+        },
+        {
+          "bytes": 674,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 328
+          },
+          "dependencies": [
+            {
+              "key": "config",
+              "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+            }
+          ],
+          "key": "images/detail/global/global/band/55",
+          "path": "snapshots/blobs/6503ac09c1273ddff08d8ca558ad6ff79893b05ecc3b6399ea1990a1d929bb5f.json",
+          "role": "images",
+          "row_counts": [
+            {
+              "table": "image_asset",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 55,
+              "partition": "detail",
+              "count": 1
+            },
+            {
+              "table": "image_variant",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 55,
+              "partition": "detail",
+              "count": 5
+            }
+          ],
+          "sha256": "sha256:6503ac09c1273ddff08d8ca558ad6ff79893b05ecc3b6399ea1990a1d929bb5f"
+        },
+        {
+          "key": "images/detail/home_set/set%3Aa/band/0",
+          "role": "images",
+          "row_counts": [
+            {
+              "table": "printing_image",
+              "owner": {
+                "kind": "home_set",
+                "id": "set:a"
+              },
+              "bucket": 29,
+              "partition": "detail",
+              "count": 2
+            }
+          ],
+          "dependencies": [
+            {
+              "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+              "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+            },
+            {
+              "key": "config",
+              "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+            }
+          ],
+          "path": "snapshots/blobs/96e240365a21f3759c50a300ce7f858c8f83b3493d2cbec1e4bbc5b2896632f0.json",
+          "sha256": "sha256:96e240365a21f3759c50a300ce7f858c8f83b3493d2cbec1e4bbc5b2896632f0",
+          "bytes": 649,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 381
+          }
+        },
+        {
+          "key": "images/detail/home_set/set%3Aa/band/1",
+          "role": "images",
+          "row_counts": [
+            {
+              "table": "printing_image",
+              "owner": {
+                "kind": "home_set",
+                "id": "set:a"
+              },
+              "bucket": 43,
+              "partition": "detail",
+              "count": 2
+            }
+          ],
+          "dependencies": [
+            {
+              "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+              "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+            },
+            {
+              "key": "config",
+              "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+            }
+          ],
+          "path": "snapshots/blobs/e72ecf14db02a66f3d69607e6d79a1a9fe56b612c84ee2f6b0094019b8b76674.json",
+          "sha256": "sha256:e72ecf14db02a66f3d69607e6d79a1a9fe56b612c84ee2f6b0094019b8b76674",
+          "bytes": 651,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 385
+          }
+        },
+        {
+          "bytes": 39,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 59
+          },
+          "dependencies": [],
+          "key": "programs",
+          "path": "snapshots/blobs/88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626.json",
+          "role": "programs",
+          "row_counts": [],
+          "sha256": "sha256:88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626"
+        },
+        {
+          "bytes": 241,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 211
+          },
+          "dependencies": [],
+          "key": "text/detail/global/global/band/15",
+          "path": "snapshots/blobs/42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803.json",
+          "role": "text",
+          "row_counts": [
+            {
+              "table": "text_unit",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 31,
+              "partition": "detail",
+              "count": 1
+            }
+          ],
+          "sha256": "sha256:42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803"
+        },
+        {
+          "bytes": 1259,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 567
+          },
+          "dependencies": [],
+          "key": "text/detail/global/global/band/18",
+          "path": "snapshots/blobs/5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5.json",
+          "role": "text",
+          "row_counts": [
+            {
+              "table": "text_symbol",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 37,
+              "partition": "detail",
+              "count": 1
+            },
+            {
+              "table": "translation",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 36,
+              "partition": "detail",
+              "count": 1
+            }
+          ],
+          "sha256": "sha256:5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5"
+        },
+        {
+          "bytes": 409,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 237
+          },
+          "dependencies": [],
+          "key": "text/detail/global/global/band/19",
+          "path": "snapshots/blobs/23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d.json",
+          "role": "text",
+          "row_counts": [
+            {
+              "table": "text_unit",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 39,
+              "partition": "detail",
+              "count": 1
+            },
+            {
+              "table": "digital_card",
+              "owner": {
+                "kind": "global",
+                "id": null
+              },
+              "bucket": 39,
+              "partition": "detail",
+              "count": 1
+            }
+          ],
+          "sha256": "sha256:23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d"
+        },
+        {
+          "bytes": 237,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 198
+          },
+          "dependencies": [],
+          "key": "text/detail/global/global/band/23",
+          "path": "snapshots/blobs/aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4.json",
+          "role": "text",
+          "row_counts": [
+            {
+              "table": "text_unit",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 46,
+              "partition": "detail",
+              "count": 1
+            }
+          ],
+          "sha256": "sha256:aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4"
+        },
+        {
+          "key": "text/detail/global/global/band/26",
+          "role": "text",
+          "row_counts": [
+            {
+              "table": "digital_card",
+              "owner": {
+                "kind": "global",
+                "id": null
+              },
+              "bucket": 52,
+              "partition": "detail",
+              "count": 1
+            }
+          ],
+          "dependencies": [
+            {
+              "key": "config",
+              "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+            }
+          ],
+          "path": "snapshots/blobs/38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106.json",
+          "sha256": "sha256:38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106",
+          "bytes": 223,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 182
+          }
+        },
+        {
+          "bytes": 1257,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 585
+          },
+          "dependencies": [],
+          "key": "text/detail/global/global/band/6",
+          "path": "snapshots/blobs/2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377.json",
+          "role": "text",
+          "row_counts": [
+            {
+              "table": "ruling_revision",
+              "owner": {
+                "id": null,
+                "kind": "global"
+              },
+              "bucket": 13,
+              "partition": "detail",
+              "count": 1
+            }
+          ],
+          "sha256": "sha256:2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377"
+        },
+        {
+          "bytes": 3535,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 1099
+          },
+          "dependencies": [
+            {
+              "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+              "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+            }
+          ],
+          "key": "text/detail/home_set/set%3Aa/band/0",
+          "path": "snapshots/blobs/09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d.json",
+          "role": "text",
+          "row_counts": [
+            {
+              "table": "face_revision",
+              "owner": {
+                "id": "set:a",
+                "kind": "home_set"
+              },
+              "bucket": 26,
+              "partition": "detail",
+              "count": 2
+            },
+            {
+              "table": "printing",
+              "owner": {
+                "id": "set:a",
+                "kind": "home_set"
+              },
+              "bucket": 29,
+              "partition": "detail",
+              "count": 1
+            },
+            {
+              "table": "digital_link",
+              "owner": {
+                "kind": "home_set",
+                "id": "set:a"
+              },
+              "bucket": 26,
+              "partition": "detail",
+              "count": 2
+            }
+          ],
+          "sha256": "sha256:09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d"
+        },
+        {
+          "bytes": 2562,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 909
+          },
+          "dependencies": [
+            {
+              "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+              "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+            }
+          ],
+          "key": "text/detail/home_set/set%3Aa/band/1",
+          "path": "snapshots/blobs/b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4.json",
+          "role": "text",
+          "row_counts": [
+            {
+              "table": "printing",
+              "owner": {
+                "id": "set:a",
+                "kind": "home_set"
+              },
+              "bucket": 43,
+              "partition": "detail",
+              "count": 1
+            }
+          ],
+          "sha256": "sha256:b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4"
+        },
+        {
+          "bytes": 1622,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 615
+          },
+          "dependencies": [],
+          "key": "text/history/home_set/set%3Aa/band/0",
+          "path": "snapshots/blobs/0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70.json",
+          "role": "text",
+          "row_counts": [
+            {
+              "table": "face_revision",
+              "owner": {
+                "id": "set:a",
+                "kind": "home_set"
+              },
+              "bucket": 26,
+              "partition": "history",
+              "count": 1
+            }
+          ],
+          "sha256": "sha256:0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70"
+        }
+      ],
+      "format_version": "3.0.0",
+      "languages": [
+        "ja",
+        "zh-Hant"
+      ],
+      "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "min_reader_version": "3.0.0",
+      "partitioning": {
+        "algorithm": "sha256-mod-v1",
+        "bucket_count": 64
+      },
+      "published_at": "2026-09-29T01:02:03Z",
+      "qa_card_ids": [],
+      "regions": [
+        "jp"
+      ],
+      "required_capabilities": [
+        "column-partition-v1",
+        "digital-same-name-links-v1",
+        "fragment-container-v1",
+        "image-entity-buckets-v1",
+        "image-id-url-v1",
+        "jp-source-translation-v1",
+        "public-annotation-v1",
+        "rules-name-on-demand-v1"
+      ],
+      "restriction_coverage": [],
+      "source_windows": [],
+      "text_all": {
+        "path": "snapshots/blobs/d5c9e1c630dbf90632a6fd1f85f25808469ffa7a7e168f6b6ce997fbb12bb26f.json",
+        "sha256": "sha256:d5c9e1c630dbf90632a6fd1f85f25808469ffa7a7e168f6b6ce997fbb12bb26f",
+        "bytes": 24652,
+        "compressed_bytes": {
+          "br": null,
+          "gzip": 4870
+        },
+        "contains": [
+          {
+            "key": "bootstrap/bootstrap/global/global/band/0",
+            "sha256": "sha256:5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0"
+          },
+          {
+            "key": "bootstrap/bootstrap/global/global/band/1",
+            "sha256": "sha256:024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f"
+          },
+          {
+            "key": "bootstrap/bootstrap/global/global/band/2",
+            "sha256": "sha256:fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279"
+          },
+          {
+            "key": "bootstrap/bootstrap/global/global/band/3",
+            "sha256": "sha256:bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd"
+          },
+          {
+            "key": "bootstrap/bootstrap/global/global/band/4",
+            "sha256": "sha256:215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc"
+          },
+          {
+            "key": "bootstrap/bootstrap/global/global/band/7",
+            "sha256": "sha256:fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b"
+          },
+          {
+            "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+            "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+          },
+          {
+            "key": "config",
+            "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+          },
+          {
+            "key": "text/detail/global/global/band/15",
+            "sha256": "sha256:42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803"
+          },
+          {
+            "key": "text/detail/global/global/band/18",
+            "sha256": "sha256:5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5"
+          },
+          {
+            "key": "text/detail/global/global/band/19",
+            "sha256": "sha256:23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d"
+          },
+          {
+            "key": "text/detail/global/global/band/23",
+            "sha256": "sha256:aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4"
+          },
+          {
+            "key": "text/detail/global/global/band/26",
+            "sha256": "sha256:38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106"
+          },
+          {
+            "key": "text/detail/global/global/band/6",
+            "sha256": "sha256:2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377"
+          },
+          {
+            "key": "text/detail/home_set/set%3Aa/band/0",
+            "sha256": "sha256:09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d"
+          },
+          {
+            "key": "text/detail/home_set/set%3Aa/band/1",
+            "sha256": "sha256:b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4"
+          },
+          {
+            "key": "text/history/home_set/set%3Aa/band/0",
+            "sha256": "sha256:0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "schema": "Config",
+    "value": {
+      "format_version": "3.0.0",
+      "languages": [
+        {
+          "code": "ja",
+          "fallback_order": [],
+          "display_name": "Japanese"
+        },
+        {
+          "code": "zh-Hant",
+          "fallback_order": [
+            "ja"
+          ],
+          "display_name": "繁中"
+        }
+      ],
+      "digital_endpoints": [],
+      "shop_links": [],
+      "image_sizes": [
+        {
+          "key": "art_m",
+          "purpose": "art",
+          "max_width": 384,
+          "max_height": 288
+        },
+        {
+          "key": "art_s",
+          "purpose": "art",
+          "max_width": 160,
+          "max_height": 120
+        },
+        {
+          "key": "card_l",
+          "purpose": "card",
+          "max_width": 459,
+          "max_height": 641
+        },
+        {
+          "key": "card_m",
+          "purpose": "card",
+          "max_width": 320,
+          "max_height": 447
+        },
+        {
+          "key": "card_s",
+          "purpose": "card",
+          "max_width": 128,
+          "max_height": 179
+        }
+      ],
+      "search": {
+        "grammar_version": "synthetic-v1",
+        "normalizer_version": "synthetic-v1"
+      },
+      "catalog_feedback_url": "https://example.invalid/feedback",
+      "third_party_image_policy": "mirror_reviewed",
+      "deck_eligibility_policy": "regional_decklog"
+    }
+  },
+  {
+    "schema": "Programs",
+    "value": {
+      "format_version": "3.0.0",
+      "entries": []
+    }
+  },
+  {
+    "schema": "TextAll",
+    "value": {
+      "format_version": "3.0.0",
+      "members": [
+        {
+          "key": "bootstrap/bootstrap/global/global/band/0",
+          "sha256": "sha256:5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {},
+            "tables": {
+              "text_unit": [
+                {
+                  "base": null,
+                  "bucket": 1,
+                  "columns": [
+                    "id",
+                    "lang",
+                    "text"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "t:ja:c011ad4340c14396",
+                      "ja",
+                      "Synthetic front"
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "bootstrap/bootstrap/global/global/band/1",
+          "sha256": "sha256:024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {},
+            "tables": {
+              "text_unit": [
+                {
+                  "base": null,
+                  "bucket": 9,
+                  "columns": [
+                    "id",
+                    "lang",
+                    "text"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "t:ja:0f977fdcb5d4fe74",
+                      "ja",
+                      "Synthetic follower"
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "bootstrap/bootstrap/global/global/band/2",
+          "sha256": "sha256:fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {},
+            "tables": {
+              "translation": [
+                {
+                  "base": null,
+                  "bucket": 23,
+                  "columns": [
+                    "id",
+                    "source_unit_id",
+                    "target_lang",
+                    "text_unit_id",
+                    "origin",
+                    "authority",
+                    "low_confidence",
+                    "annotation_set_id"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "tr:name",
+                      "t:ja:c011ad4340c14396",
+                      "zh-Hant",
+                      "t:zh-Hant:8967c9d899bcfc91",
+                      "project",
+                      "unofficial",
+                      false,
+                      null
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "bootstrap/bootstrap/global/global/band/3",
+          "sha256": "sha256:bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {
+              "FieldTranslation": {
+                "columns": [
+                  "field",
+                  "ordinal",
+                  "target_lang",
+                  "translation_id",
+                  "basis",
+                  "source",
+                  "counterpart"
+                ],
+                "items": [
+                  {
+                    "enum": [
+                      "name",
+                      "effect",
+                      "flavor",
+                      "question",
+                      "answer",
+                      "section",
+                      "label",
+                      "action_label"
+                    ]
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "UInt"
+                    }
+                  },
+                  {
+                    "scalar": "Lang"
+                  },
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "enum": [
+                      "own_source",
+                      "jp_source",
+                      "official_counterpart"
+                    ]
+                  },
+                  {
+                    "ref": "PublicTextPointer"
+                  },
+                  {
+                    "nullable": {
+                      "ref": "PublicTextPointer"
+                    }
+                  }
+                ]
+              },
+              "PublicTextPointer": {
+                "columns": [
+                  "owner",
+                  "field",
+                  "ordinal"
+                ],
+                "items": [
+                  {
+                    "json": "PublicTextOwner"
+                  },
+                  {
+                    "enum": [
+                      "name",
+                      "effect",
+                      "flavor",
+                      "question",
+                      "answer",
+                      "section",
+                      "label",
+                      "action_label"
+                    ]
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "UInt"
+                    }
+                  }
+                ]
+              }
+            },
+            "tables": {
+              "product_family": [
+                {
+                  "base": null,
+                  "bucket": 24,
+                  "columns": [
+                    "id",
+                    "code",
+                    "public_code",
+                    "kind",
+                    "name_unit_id",
+                    "translations"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "set:a",
+                      "synthetic",
+                      "SYN",
+                      "other",
+                      "t:ja:90d435ce36c2c997",
+                      []
+                    ]
+                  ]
+                }
+              ],
+              "text_unit": [
+                {
+                  "base": null,
+                  "bucket": 28,
+                  "columns": [
+                    "id",
+                    "lang",
+                    "text"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "t:ja:90d435ce36c2c997",
+                      "ja",
+                      "Synthetic set"
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "bootstrap/bootstrap/global/global/band/4",
+          "sha256": "sha256:215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {},
+            "tables": {
+              "text_unit": [
+                {
+                  "base": null,
+                  "bucket": 33,
+                  "columns": [
+                    "id",
+                    "lang",
+                    "text"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "t:zh-Hant:8967c9d899bcfc91",
+                      "zh-Hant",
+                      "合成名稱"
+                    ]
+                  ]
+                },
+                {
+                  "base": null,
+                  "bucket": 35,
+                  "columns": [
+                    "id",
+                    "lang",
+                    "text"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "t:ja:d772c516f7ee6f94",
+                      "ja",
+                      "Synthetic back"
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "bootstrap/bootstrap/global/global/band/7",
+          "sha256": "sha256:fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {
+              "FieldTranslation": {
+                "columns": [
+                  "field",
+                  "ordinal",
+                  "target_lang",
+                  "translation_id",
+                  "basis",
+                  "source",
+                  "counterpart"
+                ],
+                "items": [
+                  {
+                    "enum": [
+                      "name",
+                      "effect",
+                      "flavor",
+                      "question",
+                      "answer",
+                      "section",
+                      "label",
+                      "action_label"
+                    ]
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "UInt"
+                    }
+                  },
+                  {
+                    "scalar": "Lang"
+                  },
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "enum": [
+                      "own_source",
+                      "jp_source",
+                      "official_counterpart"
+                    ]
+                  },
+                  {
+                    "ref": "PublicTextPointer"
+                  },
+                  {
+                    "nullable": {
+                      "ref": "PublicTextPointer"
+                    }
+                  }
+                ]
+              },
+              "PublicTextPointer": {
+                "columns": [
+                  "owner",
+                  "field",
+                  "ordinal"
+                ],
+                "items": [
+                  {
+                    "json": "PublicTextOwner"
+                  },
+                  {
+                    "enum": [
+                      "name",
+                      "effect",
+                      "flavor",
+                      "question",
+                      "answer",
+                      "section",
+                      "label",
+                      "action_label"
+                    ]
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "UInt"
+                    }
+                  }
+                ]
+              }
+            },
+            "tables": {
+              "product": [
+                {
+                  "base": null,
+                  "bucket": 59,
+                  "columns": [
+                    "id",
+                    "family_id",
+                    "region",
+                    "product_code",
+                    "name_unit_id",
+                    "product_type",
+                    "released_on",
+                    "date_precision",
+                    "date_raw",
+                    "translations"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "prod:null",
+                      null,
+                      "jp",
+                      null,
+                      "t:ja:90d435ce36c2c997",
+                      null,
+                      null,
+                      "unknown",
+                      null,
+                      []
+                    ]
+                  ]
+                }
+              ],
+              "vocabulary": [
+                {
+                  "base": null,
+                  "bucket": 56,
+                  "columns": [
+                    "kind",
+                    "code",
+                    "label_unit_id",
+                    "active",
+                    "translations"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "type",
+                      "follower",
+                      "t:ja:0f977fdcb5d4fe74",
+                      true,
+                      []
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+          "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {
+              "Current": {
+                "columns": [
+                  "region",
+                  "revision_id",
+                  "basis"
+                ],
+                "items": [
+                  {
+                    "scalar": "Region"
+                  },
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "enum": [
+                      "dated_effective",
+                      "latest_observed_no_errata",
+                      "latest_adopted_wording",
+                      "reviewed_override"
+                    ]
+                  }
+                ]
+              },
+              "FieldTranslation": {
+                "columns": [
+                  "field",
+                  "ordinal",
+                  "target_lang",
+                  "translation_id",
+                  "basis",
+                  "source",
+                  "counterpart"
+                ],
+                "items": [
+                  {
+                    "enum": [
+                      "name",
+                      "effect",
+                      "flavor",
+                      "question",
+                      "answer",
+                      "section",
+                      "label",
+                      "action_label"
+                    ]
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "UInt"
+                    }
+                  },
+                  {
+                    "scalar": "Lang"
+                  },
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "enum": [
+                      "own_source",
+                      "jp_source",
+                      "official_counterpart"
+                    ]
+                  },
+                  {
+                    "ref": "PublicTextPointer"
+                  },
+                  {
+                    "nullable": {
+                      "ref": "PublicTextPointer"
+                    }
+                  }
+                ]
+              },
+              "PrintingFaceBootstrap": {
+                "columns": [
+                  "face_id",
+                  "art_id",
+                  "frame_code",
+                  "signed",
+                  "embellishment_state",
+                  "stamps"
+                ],
+                "items": [
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "Code"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "Bool"
+                    }
+                  },
+                  {
+                    "enum": [
+                      "unreviewed",
+                      "sampled",
+                      "confirmed"
+                    ]
+                  },
+                  {
+                    "array": {
+                      "ref": "PrintingStamp"
+                    }
+                  }
+                ]
+              },
+              "PrintingStamp": {
+                "columns": [
+                  "stamp_id",
+                  "position",
+                  "color"
+                ],
+                "items": [
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "Text"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "Text"
+                    }
+                  }
+                ]
+              },
+              "ProgramRef": {
+                "columns": [
+                  "file_key",
+                  "entry_id"
+                ],
+                "items": [
+                  {
+                    "scalar": "Text"
+                  },
+                  {
+                    "scalar": "ID"
+                  }
+                ]
+              },
+              "PublicTextPointer": {
+                "columns": [
+                  "owner",
+                  "field",
+                  "ordinal"
+                ],
+                "items": [
+                  {
+                    "json": "PublicTextOwner"
+                  },
+                  {
+                    "enum": [
+                      "name",
+                      "effect",
+                      "flavor",
+                      "question",
+                      "answer",
+                      "section",
+                      "label",
+                      "action_label"
+                    ]
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "UInt"
+                    }
+                  }
+                ]
+              },
+              "RegionBlock": {
+                "columns": [
+                  "region",
+                  "reasons"
+                ],
+                "items": [
+                  {
+                    "scalar": "Region"
+                  },
+                  {
+                    "array": {
+                      "scalar": "Code"
+                    }
+                  }
+                ]
+              },
+              "RegionView": {
+                "columns": [
+                  "region",
+                  "release_state",
+                  "mapping_state",
+                  "as_of",
+                  "mapping_as_of",
+                  "mapping_scope",
+                  "default_printing_id",
+                  "default_method",
+                  "deck_role",
+                  "debut_product_ids",
+                  "debut_state"
+                ],
+                "items": [
+                  {
+                    "scalar": "Region"
+                  },
+                  {
+                    "enum": [
+                      "released",
+                      "unknown",
+                      "announced",
+                      "not_released_confirmed"
+                    ]
+                  },
+                  {
+                    "enum": [
+                      "unmapped",
+                      "pending",
+                      "confirmed",
+                      "confirmed_none"
+                    ]
+                  },
+                  {
+                    "scalar": "Date"
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "Date"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "Text"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "enum": [
+                        "override",
+                        "fallback",
+                        "earliest_general",
+                        "candidate_general"
+                      ]
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "enum": [
+                        "main",
+                        "evolve",
+                        "leader",
+                        "extra"
+                      ]
+                    }
+                  },
+                  {
+                    "array": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "enum": [
+                      "known",
+                      "unknown"
+                    ]
+                  }
+                ]
+              },
+              "Support": {
+                "columns": [
+                  "status",
+                  "dsl_status",
+                  "dsl_version",
+                  "dsl_id",
+                  "validation_state",
+                  "reasons",
+                  "reason_detail",
+                  "program_ref",
+                  "ruling_revision_ids"
+                ],
+                "items": [
+                  {
+                    "enum": [
+                      "missing_dsl",
+                      "draft",
+                      "reviewed",
+                      "engine_passed",
+                      "load_rejected"
+                    ]
+                  },
+                  {
+                    "nullable": {
+                      "enum": [
+                        "draft",
+                        "reviewed",
+                        "verified",
+                        "disputed"
+                      ]
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "Text"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "enum": [
+                      "fresh",
+                      "stale",
+                      "not_applicable"
+                    ]
+                  },
+                  {
+                    "array": {
+                      "scalar": "Code"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "Text"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "ref": "ProgramRef"
+                    }
+                  },
+                  {
+                    "array": {
+                      "scalar": "ID"
+                    }
+                  }
+                ]
+              },
+              "SupportOverride": {
+                "columns": [
+                  "region",
+                  "support"
+                ],
+                "items": [
+                  {
+                    "scalar": "Region"
+                  },
+                  {
+                    "ref": "Support"
+                  }
+                ]
+              },
+              "WordingCandidate": {
+                "columns": [
+                  "printing_id",
+                  "revision_id"
+                ],
+                "items": [
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  }
+                ]
+              },
+              "WordingDisplay": {
+                "columns": [
+                  "revision_id",
+                  "basis"
+                ],
+                "items": [
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "enum": [
+                      "current",
+                      "latest_known_release",
+                      "candidates"
+                    ]
+                  }
+                ]
+              },
+              "WordingView": {
+                "columns": [
+                  "region",
+                  "state",
+                  "display",
+                  "candidates",
+                  "undated_printing_ids"
+                ],
+                "items": [
+                  {
+                    "scalar": "Region"
+                  },
+                  {
+                    "enum": [
+                      "pending"
+                    ]
+                  },
+                  {
+                    "ref": "WordingDisplay"
+                  },
+                  {
+                    "array": {
+                      "ref": "WordingCandidate"
+                    }
+                  },
+                  {
+                    "array": {
+                      "scalar": "ID"
+                    }
+                  }
+                ]
+              }
+            },
+            "tables": {
+              "card": [
+                {
+                  "base": null,
+                  "bucket": 26,
+                  "columns": [
+                    "id",
+                    "layout",
+                    "identity_state",
+                    "home_set_id",
+                    "faces",
+                    "regions"
+                  ],
+                  "owner": {
+                    "id": "set:a",
+                    "kind": "home_set"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "c:a",
+                      "double_faced",
+                      "confirmed",
+                      "set:a",
+                      [
+                        "f:a",
+                        "f:b"
+                      ],
+                      [
+                        [
+                          "jp",
+                          "released",
+                          "unmapped",
+                          "2026-09-29",
+                          null,
+                          null,
+                          "p:a",
+                          "fallback",
+                          "main",
+                          [],
+                          "unknown"
+                        ]
+                      ]
+                    ]
+                  ]
+                }
+              ],
+              "card_engine_support": [
+                {
+                  "base": null,
+                  "bucket": 26,
+                  "columns": [
+                    "card_id",
+                    "shared",
+                    "overrides",
+                    "region_blocks"
+                  ],
+                  "owner": {
+                    "id": "set:a",
+                    "kind": "home_set"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "c:a",
+                      [
+                        "missing_dsl",
+                        null,
+                        null,
+                        null,
+                        "not_applicable",
+                        [
+                          "no_formal_candidate"
+                        ],
+                        null,
+                        null,
+                        []
+                      ],
+                      [],
+                      []
+                    ]
+                  ]
+                }
+              ],
+              "face": [
+                {
+                  "base": null,
+                  "bucket": 26,
+                  "columns": [
+                    "id",
+                    "card_id",
+                    "ordinal",
+                    "side",
+                    "current",
+                    "wording"
+                  ],
+                  "owner": {
+                    "id": "set:a",
+                    "kind": "home_set"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "f:a",
+                      "c:a",
+                      0,
+                      "front",
+                      [
+                        [
+                          "jp",
+                          "r:a2",
+                          "latest_adopted_wording"
+                        ]
+                      ],
+                      [
+                        [
+                          "jp",
+                          "pending",
+                          [
+                            "r:a2",
+                            "current"
+                          ],
+                          [
+                            [
+                              "p:a",
+                              "r:a2"
+                            ],
+                            [
+                              "p:b",
+                              null
+                            ]
+                          ],
+                          [
+                            "p:a",
+                            "p:b"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "f:b",
+                      "c:a",
+                      1,
+                      "back",
+                      [
+                        [
+                          "jp",
+                          "r:b1",
+                          "dated_effective"
+                        ]
+                      ],
+                      []
+                    ]
+                  ]
+                }
+              ],
+              "face_revision": [
+                {
+                  "base": null,
+                  "bucket": 26,
+                  "columns": [
+                    "id",
+                    "face_id",
+                    "region",
+                    "name_unit_id",
+                    "class_code",
+                    "type_code",
+                    "cost",
+                    "attack",
+                    "defense",
+                    "traits",
+                    "titles",
+                    "special_kinds",
+                    "translations"
+                  ],
+                  "owner": {
+                    "id": "set:a",
+                    "kind": "home_set"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "r:a2",
+                      "f:a",
+                      "jp",
+                      "t:ja:c011ad4340c14396",
+                      null,
+                      "follower",
+                      1,
+                      2,
+                      3,
+                      [],
+                      [],
+                      [],
+                      [
+                        [
+                          "name",
+                          null,
+                          "zh-Hant",
+                          "tr:name",
+                          "own_source",
+                          [
+                            {
+                              "kind": "face_revision",
+                              "id": "r:a2"
+                            },
+                            "name",
+                            null
+                          ],
+                          null
+                        ]
+                      ]
+                    ],
+                    [
+                      "r:b1",
+                      "f:b",
+                      "jp",
+                      "t:ja:d772c516f7ee6f94",
+                      null,
+                      "follower",
+                      null,
+                      3,
+                      4,
+                      [],
+                      [],
+                      [],
+                      []
+                    ]
+                  ]
+                }
+              ],
+              "printing": [
+                {
+                  "base": null,
+                  "bucket": 29,
+                  "columns": [
+                    "id",
+                    "card_id",
+                    "region",
+                    "card_no",
+                    "card_no_state",
+                    "catalog_state",
+                    "listing_confidence",
+                    "review_level",
+                    "reference_urls",
+                    "variant_key",
+                    "rarity_code",
+                    "rarity_raw",
+                    "premium",
+                    "serial_total",
+                    "int_id",
+                    "decklog_available",
+                    "decklog_verification",
+                    "decklog_source_url",
+                    "decklog_checked_on",
+                    "faces"
+                  ],
+                  "owner": {
+                    "id": "set:a",
+                    "kind": "home_set"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "p:a",
+                      "c:a",
+                      "jp",
+                      "SYN-001",
+                      "official",
+                      "official",
+                      null,
+                      "unreviewed",
+                      [],
+                      "standard",
+                      null,
+                      "",
+                      null,
+                      null,
+                      1,
+                      true,
+                      "unverified",
+                      null,
+                      null,
+                      [
+                        [
+                          "f:a",
+                          null,
+                          null,
+                          null,
+                          "unreviewed",
+                          []
+                        ],
+                        [
+                          "f:b",
+                          null,
+                          null,
+                          null,
+                          "unreviewed",
+                          []
+                        ]
+                      ]
+                    ]
+                  ]
+                },
+                {
+                  "base": null,
+                  "bucket": 43,
+                  "columns": [
+                    "id",
+                    "card_id",
+                    "region",
+                    "card_no",
+                    "card_no_state",
+                    "catalog_state",
+                    "listing_confidence",
+                    "review_level",
+                    "reference_urls",
+                    "variant_key",
+                    "rarity_code",
+                    "rarity_raw",
+                    "premium",
+                    "serial_total",
+                    "int_id",
+                    "decklog_available",
+                    "decklog_verification",
+                    "decklog_source_url",
+                    "decklog_checked_on",
+                    "faces"
+                  ],
+                  "owner": {
+                    "id": "set:a",
+                    "kind": "home_set"
+                  },
+                  "partition": "bootstrap",
+                  "rows": [
+                    [
+                      "p:b",
+                      "c:a",
+                      "jp",
+                      "SYN-002",
+                      "official",
+                      "official",
+                      null,
+                      "unreviewed",
+                      [],
+                      "standard",
+                      null,
+                      "",
+                      null,
+                      null,
+                      2,
+                      true,
+                      "unverified",
+                      null,
+                      null,
+                      [
+                        [
+                          "f:a",
+                          null,
+                          null,
+                          null,
+                          "unreviewed",
+                          []
+                        ],
+                        [
+                          "f:b",
+                          null,
+                          null,
+                          null,
+                          "unreviewed",
+                          []
+                        ]
+                      ]
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "config",
+          "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b",
+          "payload": {
+            "catalog_feedback_url": "https://example.invalid/feedback",
+            "deck_eligibility_policy": "regional_decklog",
+            "digital_endpoints": [
+              {
+                "game": "sv1",
+                "card_url_template": "https://shadowverse-portal.com/card/{official_id}?lang={provider_lang}",
+                "language_map": {
+                  "ja": "ja",
+                  "en": "en",
+                  "zh-Hant": "zh-tw"
+                },
+                "status": "unknown",
+                "refresh_policy": "frozen"
+              },
+              {
+                "game": "svwb",
+                "card_url_template": "https://shadowverse-wb.com/{provider_lang}/deck/cardslist/card/?card_id={official_id}",
+                "language_map": {
+                  "ja": "ja",
+                  "en": "en",
+                  "zh-Hant": "cht"
+                },
+                "status": "unknown",
+                "refresh_policy": "on_sve_release"
+              }
+            ],
+            "format_version": "3.0.0",
+            "image_sizes": [
+              {
+                "key": "art_m",
+                "max_height": 288,
+                "max_width": 384,
+                "purpose": "art"
+              },
+              {
+                "key": "art_s",
+                "max_height": 120,
+                "max_width": 160,
+                "purpose": "art"
+              },
+              {
+                "key": "card_l",
+                "max_height": 641,
+                "max_width": 459,
+                "purpose": "card"
+              },
+              {
+                "key": "card_m",
+                "max_height": 447,
+                "max_width": 320,
+                "purpose": "card"
+              },
+              {
+                "key": "card_s",
+                "max_height": 179,
+                "max_width": 128,
+                "purpose": "card"
+              }
+            ],
+            "languages": [
+              {
+                "code": "ja",
+                "display_name": "Japanese",
+                "fallback_order": []
+              },
+              {
+                "code": "zh-Hant",
+                "display_name": "繁中",
+                "fallback_order": [
+                  "ja"
+                ]
+              }
+            ],
+            "search": {
+              "grammar_version": "synthetic-v1",
+              "normalizer_version": "synthetic-v1"
+            },
+            "shop_links": [],
+            "third_party_image_policy": "mirror_reviewed"
+          }
+        },
+        {
+          "key": "text/detail/global/global/band/15",
+          "sha256": "sha256:42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {},
+            "tables": {
+              "text_unit": [
+                {
+                  "base": null,
+                  "bucket": 31,
+                  "columns": [
+                    "id",
+                    "lang",
+                    "text"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "detail",
+                  "rows": [
+                    [
+                      "t:zh-Hant:396cbc2e2e8d61a1",
+                      "zh-Hant",
+                      "合成規則"
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "text/detail/global/global/band/18",
+          "sha256": "sha256:5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {
+              "Localization": {
+                "columns": [
+                  "lang",
+                  "name",
+                  "tooltip",
+                  "copy_pattern"
+                ],
+                "items": [
+                  {
+                    "scalar": "Lang"
+                  },
+                  {
+                    "scalar": "Text"
+                  },
+                  {
+                    "scalar": "Text"
+                  },
+                  {
+                    "scalar": "Text"
+                  }
+                ]
+              },
+              "Spelling": {
+                "columns": [
+                  "lang",
+                  "literal_prefix",
+                  "literal_suffix",
+                  "parameter_name",
+                  "parse_kind"
+                ],
+                "items": [
+                  {
+                    "scalar": "Lang"
+                  },
+                  {
+                    "scalar": "Text"
+                  },
+                  {
+                    "scalar": "Text"
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "Code"
+                    }
+                  },
+                  {
+                    "enum": [
+                      "literal",
+                      "uint",
+                      "variable"
+                    ]
+                  }
+                ]
+              }
+            },
+            "tables": {
+              "text_symbol": [
+                {
+                  "base": null,
+                  "bucket": 37,
+                  "columns": [
+                    "id",
+                    "code",
+                    "parameter_schema",
+                    "keyword_id",
+                    "spellings",
+                    "localizations"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "detail",
+                  "rows": [
+                    [
+                      "sym:a",
+                      "synthetic",
+                      {
+                        "parameters": [
+                          {
+                            "name": "amount",
+                            "uint": {
+                              "maximum": 9,
+                              "minimum": 0
+                            },
+                            "variables": [
+                              "X"
+                            ]
+                          }
+                        ]
+                      },
+                      null,
+                      [
+                        [
+                          "ja",
+                          "Synthetic ",
+                          "",
+                          "amount",
+                          "uint"
+                        ],
+                        [
+                          "en",
+                          "Synthetic ",
+                          "",
+                          "amount",
+                          "variable"
+                        ],
+                        [
+                          "zh-Hant",
+                          "合成",
+                          "",
+                          null,
+                          "literal"
+                        ]
+                      ],
+                      [
+                        [
+                          "ja",
+                          "Synthetic symbol",
+                          "Synthetic tooltip",
+                          "Synthetic copy"
+                        ]
+                      ]
+                    ]
+                  ]
+                }
+              ],
+              "translation": [
+                {
+                  "base": null,
+                  "bucket": 36,
+                  "columns": [
+                    "id",
+                    "source_unit_id",
+                    "target_lang",
+                    "text_unit_id",
+                    "origin",
+                    "authority",
+                    "low_confidence",
+                    "annotation_set_id"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "detail",
+                  "rows": [
+                    [
+                      "tr:effect",
+                      "t:ja:b17a760c59cb19db",
+                      "zh-Hant",
+                      "t:zh-Hant:396cbc2e2e8d61a1",
+                      "machine",
+                      "unofficial",
+                      true,
+                      null
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "text/detail/global/global/band/19",
+          "sha256": "sha256:23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {},
+            "tables": {
+              "text_unit": [
+                {
+                  "base": null,
+                  "bucket": 39,
+                  "columns": [
+                    "id",
+                    "lang",
+                    "text"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "detail",
+                  "rows": [
+                    [
+                      "t:ja:b17a760c59cb19db",
+                      "ja",
+                      "Synthetic rule"
+                    ]
+                  ]
+                }
+              ],
+              "digital_card": [
+                {
+                  "owner": {
+                    "kind": "global",
+                    "id": null
+                  },
+                  "bucket": 39,
+                  "partition": "detail",
+                  "base": null,
+                  "columns": [
+                    "id",
+                    "game",
+                    "official_id"
+                  ],
+                  "rows": [
+                    [
+                      "d:svwb",
+                      "svwb",
+                      "12345678"
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "text/detail/global/global/band/23",
+          "sha256": "sha256:aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {},
+            "tables": {
+              "text_unit": [
+                {
+                  "base": null,
+                  "bucket": 46,
+                  "columns": [
+                    "id",
+                    "lang",
+                    "text"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "detail",
+                  "rows": [
+                    [
+                      "t:ja:4cae4ae84ce083d7",
+                      "ja",
+                      "Synthetic old rule"
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "text/detail/global/global/band/26",
+          "sha256": "sha256:38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {},
+            "tables": {
+              "digital_card": [
+                {
+                  "owner": {
+                    "kind": "global",
+                    "id": null
+                  },
+                  "bucket": 52,
+                  "partition": "detail",
+                  "base": null,
+                  "columns": [
+                    "id",
+                    "game",
+                    "official_id"
+                  ],
+                  "rows": [
+                    [
+                      "d:sv1",
+                      "sv1",
+                      "123456789"
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "text/detail/global/global/band/6",
+          "sha256": "sha256:2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {
+              "Evidence": {
+                "columns": [
+                  "qa_version_id",
+                  "cr_clause_id",
+                  "source_url",
+                  "role",
+                  "quote",
+                  "locator"
+                ],
+                "items": [
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "URL"
+                    }
+                  },
+                  {
+                    "enum": [
+                      "direct",
+                      "supporting",
+                      "terminology",
+                      "community"
+                    ]
+                  },
+                  {
+                    "scalar": "Text"
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "Text"
+                    }
+                  }
+                ]
+              },
+              "ReplacedScope": {
+                "columns": [
+                  "scope_unit_id",
+                  "replacement_revision_id"
+                ],
+                "items": [
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "scalar": "ID"
+                  }
+                ]
+              },
+              "RulingHint": {
+                "columns": [
+                  "lang",
+                  "text_unit_id",
+                  "parameter_schema"
+                ],
+                "items": [
+                  {
+                    "scalar": "Lang"
+                  },
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "json": "ParameterSchema"
+                  }
+                ]
+              }
+            },
+            "tables": {
+              "ruling_revision": [
+                {
+                  "base": null,
+                  "bucket": 13,
+                  "columns": [
+                    "id",
+                    "ruling_id",
+                    "revision",
+                    "question_unit_id",
+                    "decision_unit_id",
+                    "strength",
+                    "decided_on",
+                    "review_state",
+                    "active_scopes",
+                    "replaced_scopes",
+                    "cards",
+                    "evidence",
+                    "hints"
+                  ],
+                  "owner": {
+                    "id": null,
+                    "kind": "global"
+                  },
+                  "partition": "detail",
+                  "rows": [
+                    [
+                      "rr:a",
+                      "ruling:a",
+                      1,
+                      "t:ja:c011ad4340c14396",
+                      "t:ja:b17a760c59cb19db",
+                      "inferred",
+                      "2026-09-29",
+                      "current",
+                      [],
+                      [],
+                      [
+                        "c:a"
+                      ],
+                      [],
+                      [
+                        [
+                          "ja",
+                          "t:ja:b17a760c59cb19db",
+                          {
+                            "parameters": [
+                              {
+                                "name": "amount",
+                                "uint": {
+                                  "maximum": 9,
+                                  "minimum": 0
+                                },
+                                "variables": [
+                                  "X"
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        [
+                          "zh-Hant",
+                          "t:zh-Hant:396cbc2e2e8d61a1",
+                          {
+                            "parameters": [
+                              {
+                                "name": "amount",
+                                "uint": {
+                                  "maximum": 9,
+                                  "minimum": 0
+                                },
+                                "variables": [
+                                  "X"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      ]
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "text/detail/home_set/set%3Aa/band/0",
+          "sha256": "sha256:09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {
+              "Correction": {
+                "columns": [
+                  "field",
+                  "corrected_from",
+                  "is_corrected",
+                  "reason",
+                  "source_url"
+                ],
+                "items": [
+                  {
+                    "enum": [
+                      "effect",
+                      "name",
+                      "card_type",
+                      "flavor",
+                      "cost",
+                      "attack",
+                      "defense",
+                      "traits",
+                      "titles",
+                      "special_kinds",
+                      "other"
+                    ]
+                  },
+                  {
+                    "json": "CorrectionValue"
+                  },
+                  {
+                    "scalar": "Bool"
+                  },
+                  {
+                    "scalar": "Text"
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "URL"
+                    }
+                  }
+                ]
+              },
+              "FieldTranslation": {
+                "columns": [
+                  "field",
+                  "ordinal",
+                  "target_lang",
+                  "translation_id",
+                  "basis",
+                  "source",
+                  "counterpart"
+                ],
+                "items": [
+                  {
+                    "enum": [
+                      "name",
+                      "effect",
+                      "flavor",
+                      "question",
+                      "answer",
+                      "section",
+                      "label",
+                      "action_label"
+                    ]
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "UInt"
+                    }
+                  },
+                  {
+                    "scalar": "Lang"
+                  },
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "enum": [
+                      "own_source",
+                      "jp_source",
+                      "official_counterpart"
+                    ]
+                  },
+                  {
+                    "ref": "PublicTextPointer"
+                  },
+                  {
+                    "nullable": {
+                      "ref": "PublicTextPointer"
+                    }
+                  }
+                ]
+              },
+              "ObservedText": {
+                "columns": [
+                  "revision_id",
+                  "state",
+                  "source_url"
+                ],
+                "items": [
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "enum": [
+                      "available",
+                      "missing_effect",
+                      "correction_conflict"
+                    ]
+                  },
+                  {
+                    "scalar": "URL"
+                  }
+                ]
+              },
+              "PrintingFaceDetail": {
+                "columns": [
+                  "face_ordinal",
+                  "printed_name_unit_id",
+                  "printed_effect_unit_id",
+                  "flavor_unit_id",
+                  "printed_text_state",
+                  "observations",
+                  "sections",
+                  "translations",
+                  "corrections"
+                ],
+                "items": [
+                  {
+                    "scalar": "UInt"
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "enum": [
+                      "verified",
+                      "derived_no_errata",
+                      "derived_from_errata",
+                      "unknown",
+                      "omitted"
+                    ]
+                  },
+                  {
+                    "array": {
+                      "ref": "ObservedText"
+                    }
+                  },
+                  {
+                    "array": {
+                      "ref": "Section"
+                    }
+                  },
+                  {
+                    "array": {
+                      "ref": "FieldTranslation"
+                    }
+                  },
+                  {
+                    "array": {
+                      "ref": "Correction"
+                    }
+                  }
+                ]
+              },
+              "PublicTextPointer": {
+                "columns": [
+                  "owner",
+                  "field",
+                  "ordinal"
+                ],
+                "items": [
+                  {
+                    "json": "PublicTextOwner"
+                  },
+                  {
+                    "enum": [
+                      "name",
+                      "effect",
+                      "flavor",
+                      "question",
+                      "answer",
+                      "section",
+                      "label",
+                      "action_label"
+                    ]
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "UInt"
+                    }
+                  }
+                ]
+              },
+              "Section": {
+                "columns": [
+                  "ordinal",
+                  "text_unit_id",
+                  "kind"
+                ],
+                "items": [
+                  {
+                    "scalar": "UInt"
+                  },
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "scalar": "Code"
+                  }
+                ]
+              }
+            },
+            "tables": {
+              "face_revision": [
+                {
+                  "base": {
+                    "bucket": 26,
+                    "file": {
+                      "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                      "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+                    },
+                    "owner": {
+                      "id": "set:a",
+                      "kind": "home_set"
+                    },
+                    "partition": "bootstrap",
+                    "table": "face_revision"
+                  },
+                  "bucket": 26,
+                  "columns": [
+                    "row_index",
+                    "revision",
+                    "effective_from",
+                    "effective_until",
+                    "temporal_status",
+                    "change_kind",
+                    "effect_unit_id",
+                    "sections",
+                    "translations",
+                    "corrections"
+                  ],
+                  "owner": {
+                    "id": "set:a",
+                    "kind": "home_set"
+                  },
+                  "partition": "detail",
+                  "rows": [
+                    [
+                      0,
+                      2,
+                      null,
+                      null,
+                      "unknown",
+                      "wording",
+                      "t:ja:b17a760c59cb19db",
+                      [
+                        [
+                          0,
+                          "t:ja:b17a760c59cb19db",
+                          "rule"
+                        ]
+                      ],
+                      [
+                        [
+                          "effect",
+                          null,
+                          "zh-Hant",
+                          "tr:effect",
+                          "own_source",
+                          [
+                            {
+                              "kind": "face_revision",
+                              "id": "r:a2"
+                            },
+                            "effect",
+                            null
+                          ],
+                          null
+                        ]
+                      ],
+                      [
+                        [
+                          "cost",
+                          null,
+                          true,
+                          "Synthetic correction",
+                          null
+                        ]
+                      ]
+                    ],
+                    [
+                      1,
+                      1,
+                      "2026-09-29",
+                      null,
+                      "known",
+                      "initial",
+                      "t:ja:b17a760c59cb19db",
+                      [],
+                      [],
+                      []
+                    ]
+                  ]
+                }
+              ],
+              "printing": [
+                {
+                  "base": {
+                    "bucket": 29,
+                    "file": {
+                      "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                      "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+                    },
+                    "owner": {
+                      "id": "set:a",
+                      "kind": "home_set"
+                    },
+                    "partition": "bootstrap",
+                    "table": "printing"
+                  },
+                  "bucket": 29,
+                  "columns": [
+                    "row_index",
+                    "faces"
+                  ],
+                  "owner": {
+                    "id": "set:a",
+                    "kind": "home_set"
+                  },
+                  "partition": "detail",
+                  "rows": [
+                    [
+                      0,
+                      [
+                        [
+                          0,
+                          null,
+                          null,
+                          null,
+                          "unknown",
+                          [
+                            [
+                              "r:a2",
+                              "available",
+                              "https://example.invalid/observations/a"
+                            ]
+                          ],
+                          [],
+                          [],
+                          []
+                        ],
+                        [
+                          1,
+                          null,
+                          null,
+                          null,
+                          "unknown",
+                          [],
+                          [],
+                          [],
+                          []
+                        ]
+                      ]
+                    ]
+                  ]
+                }
+              ],
+              "digital_link": [
+                {
+                  "owner": {
+                    "kind": "home_set",
+                    "id": "set:a"
+                  },
+                  "bucket": 26,
+                  "partition": "detail",
+                  "base": null,
+                  "columns": [
+                    "id",
+                    "card_id",
+                    "face_id",
+                    "digital_card_id",
+                    "digital_phase",
+                    "relation",
+                    "effect_similarity",
+                    "review_level"
+                  ],
+                  "rows": [
+                    [
+                      "dl:sv1",
+                      "c:a",
+                      null,
+                      "d:sv1",
+                      null,
+                      "same_name",
+                      null,
+                      "unreviewed"
+                    ],
+                    [
+                      "dl:svwb",
+                      "c:a",
+                      null,
+                      "d:svwb",
+                      null,
+                      "same_name",
+                      null,
+                      "unreviewed"
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "text/detail/home_set/set%3Aa/band/1",
+          "sha256": "sha256:b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {
+              "Correction": {
+                "columns": [
+                  "field",
+                  "corrected_from",
+                  "is_corrected",
+                  "reason",
+                  "source_url"
+                ],
+                "items": [
+                  {
+                    "enum": [
+                      "effect",
+                      "name",
+                      "card_type",
+                      "flavor",
+                      "cost",
+                      "attack",
+                      "defense",
+                      "traits",
+                      "titles",
+                      "special_kinds",
+                      "other"
+                    ]
+                  },
+                  {
+                    "json": "CorrectionValue"
+                  },
+                  {
+                    "scalar": "Bool"
+                  },
+                  {
+                    "scalar": "Text"
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "URL"
+                    }
+                  }
+                ]
+              },
+              "FieldTranslation": {
+                "columns": [
+                  "field",
+                  "ordinal",
+                  "target_lang",
+                  "translation_id",
+                  "basis",
+                  "source",
+                  "counterpart"
+                ],
+                "items": [
+                  {
+                    "enum": [
+                      "name",
+                      "effect",
+                      "flavor",
+                      "question",
+                      "answer",
+                      "section",
+                      "label",
+                      "action_label"
+                    ]
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "UInt"
+                    }
+                  },
+                  {
+                    "scalar": "Lang"
+                  },
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "enum": [
+                      "own_source",
+                      "jp_source",
+                      "official_counterpart"
+                    ]
+                  },
+                  {
+                    "ref": "PublicTextPointer"
+                  },
+                  {
+                    "nullable": {
+                      "ref": "PublicTextPointer"
+                    }
+                  }
+                ]
+              },
+              "ObservedText": {
+                "columns": [
+                  "revision_id",
+                  "state",
+                  "source_url"
+                ],
+                "items": [
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "enum": [
+                      "available",
+                      "missing_effect",
+                      "correction_conflict"
+                    ]
+                  },
+                  {
+                    "scalar": "URL"
+                  }
+                ]
+              },
+              "PrintingFaceDetail": {
+                "columns": [
+                  "face_ordinal",
+                  "printed_name_unit_id",
+                  "printed_effect_unit_id",
+                  "flavor_unit_id",
+                  "printed_text_state",
+                  "observations",
+                  "sections",
+                  "translations",
+                  "corrections"
+                ],
+                "items": [
+                  {
+                    "scalar": "UInt"
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "enum": [
+                      "verified",
+                      "derived_no_errata",
+                      "derived_from_errata",
+                      "unknown",
+                      "omitted"
+                    ]
+                  },
+                  {
+                    "array": {
+                      "ref": "ObservedText"
+                    }
+                  },
+                  {
+                    "array": {
+                      "ref": "Section"
+                    }
+                  },
+                  {
+                    "array": {
+                      "ref": "FieldTranslation"
+                    }
+                  },
+                  {
+                    "array": {
+                      "ref": "Correction"
+                    }
+                  }
+                ]
+              },
+              "PublicTextPointer": {
+                "columns": [
+                  "owner",
+                  "field",
+                  "ordinal"
+                ],
+                "items": [
+                  {
+                    "json": "PublicTextOwner"
+                  },
+                  {
+                    "enum": [
+                      "name",
+                      "effect",
+                      "flavor",
+                      "question",
+                      "answer",
+                      "section",
+                      "label",
+                      "action_label"
+                    ]
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "UInt"
+                    }
+                  }
+                ]
+              },
+              "Section": {
+                "columns": [
+                  "ordinal",
+                  "text_unit_id",
+                  "kind"
+                ],
+                "items": [
+                  {
+                    "scalar": "UInt"
+                  },
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "scalar": "Code"
+                  }
+                ]
+              }
+            },
+            "tables": {
+              "printing": [
+                {
+                  "base": {
+                    "bucket": 43,
+                    "file": {
+                      "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                      "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+                    },
+                    "owner": {
+                      "id": "set:a",
+                      "kind": "home_set"
+                    },
+                    "partition": "bootstrap",
+                    "table": "printing"
+                  },
+                  "bucket": 43,
+                  "columns": [
+                    "row_index",
+                    "faces"
+                  ],
+                  "owner": {
+                    "id": "set:a",
+                    "kind": "home_set"
+                  },
+                  "partition": "detail",
+                  "rows": [
+                    [
+                      0,
+                      [
+                        [
+                          0,
+                          "t:ja:c011ad4340c14396",
+                          "t:ja:b17a760c59cb19db",
+                          null,
+                          "verified",
+                          [],
+                          [
+                            [
+                              0,
+                              "t:ja:b17a760c59cb19db",
+                              "rule"
+                            ]
+                          ],
+                          [
+                            [
+                              "effect",
+                              null,
+                              "zh-Hant",
+                              "tr:effect",
+                              "own_source",
+                              [
+                                {
+                                  "kind": "printing_face",
+                                  "id": "p:b",
+                                  "face_id": "f:a"
+                                },
+                                "effect",
+                                null
+                              ],
+                              null
+                            ]
+                          ],
+                          [
+                            [
+                              "name",
+                              "Synthetic old front",
+                              true,
+                              "Synthetic printed correction",
+                              "https://example.invalid/correction"
+                            ]
+                          ]
+                        ],
+                        [
+                          1,
+                          null,
+                          null,
+                          null,
+                          "unknown",
+                          [],
+                          [],
+                          [],
+                          []
+                        ]
+                      ]
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "text/history/home_set/set%3Aa/band/0",
+          "sha256": "sha256:0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70",
+          "payload": {
+            "format_version": "3.0.0",
+            "types": {
+              "Correction": {
+                "columns": [
+                  "field",
+                  "corrected_from",
+                  "is_corrected",
+                  "reason",
+                  "source_url"
+                ],
+                "items": [
+                  {
+                    "enum": [
+                      "effect",
+                      "name",
+                      "card_type",
+                      "flavor",
+                      "cost",
+                      "attack",
+                      "defense",
+                      "traits",
+                      "titles",
+                      "special_kinds",
+                      "other"
+                    ]
+                  },
+                  {
+                    "json": "CorrectionValue"
+                  },
+                  {
+                    "scalar": "Bool"
+                  },
+                  {
+                    "scalar": "Text"
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "URL"
+                    }
+                  }
+                ]
+              },
+              "FieldTranslation": {
+                "columns": [
+                  "field",
+                  "ordinal",
+                  "target_lang",
+                  "translation_id",
+                  "basis",
+                  "source",
+                  "counterpart"
+                ],
+                "items": [
+                  {
+                    "enum": [
+                      "name",
+                      "effect",
+                      "flavor",
+                      "question",
+                      "answer",
+                      "section",
+                      "label",
+                      "action_label"
+                    ]
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "UInt"
+                    }
+                  },
+                  {
+                    "scalar": "Lang"
+                  },
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "enum": [
+                      "own_source",
+                      "jp_source",
+                      "official_counterpart"
+                    ]
+                  },
+                  {
+                    "ref": "PublicTextPointer"
+                  },
+                  {
+                    "nullable": {
+                      "ref": "PublicTextPointer"
+                    }
+                  }
+                ]
+              },
+              "PublicTextPointer": {
+                "columns": [
+                  "owner",
+                  "field",
+                  "ordinal"
+                ],
+                "items": [
+                  {
+                    "json": "PublicTextOwner"
+                  },
+                  {
+                    "enum": [
+                      "name",
+                      "effect",
+                      "flavor",
+                      "question",
+                      "answer",
+                      "section",
+                      "label",
+                      "action_label"
+                    ]
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "UInt"
+                    }
+                  }
+                ]
+              },
+              "Section": {
+                "columns": [
+                  "ordinal",
+                  "text_unit_id",
+                  "kind"
+                ],
+                "items": [
+                  {
+                    "scalar": "UInt"
+                  },
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "scalar": "Code"
+                  }
+                ]
+              }
+            },
+            "tables": {
+              "face_revision": [
+                {
+                  "base": null,
+                  "bucket": 26,
+                  "columns": [
+                    "id",
+                    "face_id",
+                    "region",
+                    "revision",
+                    "effective_from",
+                    "effective_until",
+                    "temporal_status",
+                    "change_kind",
+                    "name_unit_id",
+                    "effect_unit_id",
+                    "class_code",
+                    "type_code",
+                    "cost",
+                    "attack",
+                    "defense",
+                    "traits",
+                    "titles",
+                    "special_kinds",
+                    "sections",
+                    "translations",
+                    "corrections"
+                  ],
+                  "owner": {
+                    "id": "set:a",
+                    "kind": "home_set"
+                  },
+                  "partition": "history",
+                  "rows": [
+                    [
+                      "r:a1",
+                      "f:a",
+                      "jp",
+                      1,
+                      null,
+                      null,
+                      "unknown",
+                      "initial",
+                      "t:ja:c011ad4340c14396",
+                      "t:ja:4cae4ae84ce083d7",
+                      null,
+                      "follower",
+                      1,
+                      1,
+                      1,
+                      [],
+                      [],
+                      [],
+                      [],
+                      [],
+                      []
+                    ]
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "schema": "ParameterSchema",
+    "value": {
+      "parameters": [
+        {
+          "name": "value",
+          "uint": {
+            "minimum": 0,
+            "maximum": 9
+          },
+          "variables": [
+            "X"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "schema": "Changes",
+    "value": {
+      "format_version": "3.0.0",
+      "from_data_version": null,
+      "to_data_version": "20260929T010203Z-0001",
+      "added": [
+        {
+          "entity": "card_voice",
+          "key": {
+            "card_id": "c:a",
+            "voice_id": "voice:a",
+            "usage": "browse"
+          },
+          "changed_fields": [],
+          "reason": "Synthetic"
+        }
+      ],
+      "modified": [],
+      "retired": [],
+      "errata": [],
+      "new_qa_versions": [],
+      "identity_changes": [],
+      "coverage_changes": [],
+      "support_changes": []
+    }
+  },
+  {
+    "schema": "Index",
+    "value": {
+      "index_format": 2,
+      "revision": 3,
+      "current": {
+        "data_version": "20260929T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "3.0.0",
+        "min_reader_version": "3.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/569f13bd1ab15f5e0057dea7c2b2539e9f9978cd5a557c57a5c3af6c50af4010.json",
+        "manifest_sha256": "sha256:569f13bd1ab15f5e0057dea7c2b2539e9f9978cd5a557c57a5c3af6c50af4010"
+      },
+      "previous": null
+    }
+  },
+  {
+    "name": "Date-valid-76",
+    "schema": "Date",
+    "value": "2000-02-29"
+  },
+  {
+    "name": "Date-valid-77",
+    "schema": "Date",
+    "value": "2024-02-29"
+  },
+  {
+    "name": "Date-valid-78",
+    "schema": "Date",
+    "value": "1900-02-28"
+  },
+  {
+    "name": "Instant-valid-79",
+    "schema": "Instant",
+    "value": "2026-09-29T23:59:59.123Z"
+  },
+  {
+    "name": "DataVersion-valid-80",
+    "schema": "DataVersion",
+    "value": "20000229T235959Z-9999"
+  },
+  {
+    "name": "URL-valid-81",
+    "schema": "URL",
+    "value": "https://example.invalid/%E5%90%88?q=a%20b#fragment"
+  },
+  {
+    "name": "URL-valid-82",
+    "schema": "URL",
+    "value": "https://[2001:db8::1]:443/a"
+  },
+  {
+    "name": "URL-valid-83",
+    "schema": "URL",
+    "value": "https://[::ffff:192.0.2.1]/"
+  },
+  {
+    "name": "product_family-special-pack",
+    "schema": "product_family",
+    "value": [
+      "set:a",
+      "synthetic",
+      "SYN",
+      "special_pack",
+      "t:ja:90d435ce36c2c997",
+      []
+    ]
+  },
+  {
+    "name": "product_family_bootstrap-special-pack",
+    "schema": "product_family_bootstrap",
+    "value": [
+      "set:a",
+      "synthetic",
+      "SYN",
+      "special_pack",
+      "t:ja:90d435ce36c2c997",
+      []
+    ]
+  },
+  {
+    "schema": "product",
+    "value": [
+      "prod:a",
+      null,
+      "jp",
+      null,
+      "t:ja:90d435ce36c2c997",
+      null,
+      null,
+      "unknown",
+      null,
+      []
+    ]
+  },
+  {
+    "name": "pending-wording-WordingDisplay",
+    "schema": "WordingDisplay",
+    "value": [
+      null,
+      "candidates"
+    ]
+  },
+  {
+    "name": "pending-wording-WordingCandidate",
+    "schema": "WordingCandidate",
+    "value": [
+      "p:a",
+      null
+    ]
+  },
+  {
+    "name": "pending-wording-WordingView",
+    "schema": "WordingView",
+    "value": [
+      "jp",
+      "pending",
+      [
+        null,
+        "candidates"
+      ],
+      [
+        [
+          "p:a",
+          null
+        ]
+      ],
+      [
+        "p:a"
+      ]
+    ]
+  },
+  {
+    "name": "pending-wording-ObservedText",
+    "schema": "ObservedText",
+    "value": [
+      null,
+      "missing_effect",
+      "https://example.invalid/missing"
+    ]
+  },
+  {
+    "schema": "ObservedText",
+    "value": [
+      "r:a2",
+      "correction_conflict",
+      "https://example.invalid/conflict"
+    ]
+  },
+  {
+    "schema": "Index",
+    "value": {
+      "index_format": 2,
+      "revision": 3,
+      "current": {
+        "data_version": "preview-20260929T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "3.0.0",
+        "min_reader_version": "3.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/569f13bd1ab15f5e0057dea7c2b2539e9f9978cd5a557c57a5c3af6c50af4010.json",
+        "manifest_sha256": "sha256:569f13bd1ab15f5e0057dea7c2b2539e9f9978cd5a557c57a5c3af6c50af4010"
+      },
+      "previous": null
+    }
+  },
+  {
+    "schema": "annotation_set",
+    "value": [
+      "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777",
+      "t:ja:50c0947436ae73f4",
+      [
+        [
+          0,
+          {
+            "kind": "glossary",
+            "key": "term:hand"
+          },
+          [
+            [
+              3,
+              5
+            ]
+          ],
+          false
+        ]
+      ]
+    ]
+  },
+  {
+    "schema": "field_annotation",
+    "value": [
+      {
+        "kind": "face_revision",
+        "id": "rev:jp"
+      },
+      "effect",
+      null,
+      "ann:4316e35126088047af2341ccfb26fb4b461e15f555c762bbb9f1f711b5365777"
+    ]
+  },
+  {
+    "schema": "annotation_concept",
+    "value": [
+      "term:sample",
+      "rule_term",
+      [],
+      []
+    ]
+  },
+  {
+    "schema": "AnnotationRange",
+    "value": [
+      3,
+      5
+    ]
+  },
+  {
+    "schema": "Annotation",
+    "value": [
+      0,
+      {
+        "kind": "glossary",
+        "key": "term:hand"
+      },
+      [
+        [
+          3,
+          5
+        ]
+      ],
+      false
+    ]
+  },
+  {
+    "schema": "PublicTextPointer",
+    "value": [
+      {
+        "kind": "face_revision",
+        "id": "rev:jp"
+      },
+      "effect",
+      null
+    ]
+  }
+]

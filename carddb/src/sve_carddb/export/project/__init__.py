@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from sve_carddb.contracts.snapshot import definition, tables, validate
 from sve_carddb.core.json import array, canonical, object_value, parse, string
 from sve_carddb.domains.routes.defaults import select_defaults
+from sve_carddb.export.project.annotations import annotations
 from sve_carddb.export.project.closure import (
     prune,
     select_regions,
@@ -35,7 +36,7 @@ from sve_carddb.export.project.regions import (
 from sve_carddb.export.project.shape import source_tuple
 from sve_carddb.export.project.source import Record, Source, json_list
 from sve_carddb.export.project.translations import Texts, keywords, translations
-from sve_carddb.export.semantics import ordered_rows, validate_view
+from sve_carddb.export.semantics import ordered_rows, row_key, validate_view
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database
@@ -62,11 +63,7 @@ class Projection:
 def _sort(view: dict[str, list[Record]]) -> None:
     for table, rows in view.items():
         keys = [string(field) for field in array(definition(table)["x-primary-key"])]
-        rows.sort(
-            key=lambda row: tuple(
-                (0, "") if row[field] is None else (1, row[field]) for field in keys
-            )
-        )
+        rows.sort(key=lambda row: tuple(row_key(row[field]) for field in keys))
         ordered_rows(rows, keys)
         for row in rows:
             _nested_sort(row)
@@ -220,6 +217,7 @@ def project(
     region_views(source, view, as_of, dates, defaults)
     support(source, view, decisions)
     _images(source, view)
+    annotations(source, view, decisions)
     prune(view)
     _sort(view)
     _validate(view)
@@ -227,5 +225,8 @@ def project(
     metadata = summaries(source, view, regions, decisions)
     if decisions.private_digital:
         config["digital_endpoints"] = []
-    validate_view(view, metadata, [])
+    languages = tuple(
+        string(object_value(lang)["code"]) for lang in array(config["languages"])
+    )
+    validate_view(view, metadata | {"languages": list(languages)}, [])
     return Projection(view, config, metadata)

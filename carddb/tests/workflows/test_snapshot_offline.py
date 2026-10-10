@@ -24,7 +24,7 @@ from sve_carddb.domains.card_extras.importer import CardExtrasRestriction
 from sve_carddb.domains.catalog import adoption_importer
 from sve_carddb.domains.catalog.models import Catalog
 from sve_carddb.domains.catalog.projection import CatalogProjection
-from sve_carddb.domains.products import OfficialProducts, ProductIdentities
+from sve_carddb.domains.products import Language, OfficialProducts, ProductIdentities
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.preview import Roots, write_preview
@@ -122,7 +122,14 @@ def prepared(
         lambda *_args, **_kwargs: SimpleNamespace(
             projection=CatalogProjection(
                 Catalog(
-                    languages=LANGUAGES,
+                    languages=(
+                        *LANGUAGES,
+                        Language(
+                            code="zh-Hant",
+                            fallback_order=("ja", "en"),
+                            display_name="繁體中文",
+                        ),
+                    ),
                     terms=(),
                     aliases=(),
                     symbols=(),
@@ -432,7 +439,7 @@ def test_offline_coverage_remains_unknown(
 
 
 @pytest.mark.parametrize("source", ["env", "cli", "cli-over-env"])
-@pytest.mark.parametrize("format_version", ["2.0.0"])
+@pytest.mark.parametrize("format_version", ["3.0.0"])
 @pytest.mark.parametrize("with_brotli", [False, True])
 def test_offline_cli_writes_private_bundle_and_dual_preview(
     source: str,

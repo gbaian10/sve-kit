@@ -1,4 +1,4 @@
-"""Verified 2.0 media projection and printing-face image revision comparison.
+"""Verified 3.0 media projection and printing-face image revision comparison.
 
 The caller supplies a new high-water revision and the last export's state.
 This module does not allocate revisions or publish remote assets.
