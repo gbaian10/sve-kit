@@ -1223,7 +1223,6 @@ function buildContainer(
   const tableFragments = new Map<string, JsonObject[]>()
   for (const fragment of spec.fragments) {
     const name = rowType(fragment.table, fragment.partition)
-    types.add(name)
     for (const nested of requiredTypes(name)) types.add(nested)
     const withBase =
       fragment.partition === "detail" &&

@@ -161,7 +161,6 @@ export function readContainer(file: JsonObject, value: JsonObject, version = "3.
         )
       }
       const name = rowType(table, partition, version)
-      used.add(name)
       for (const nested of requiredTypes(name, version)) used.add(nested)
       const rows = arrayValue(fragment["rows"] ?? null).map((row, index) =>
         decodeRow(name, row, [key, table, index], version),

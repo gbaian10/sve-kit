@@ -13,8 +13,8 @@ import {
 import { translationNameConcept, wholeName } from "./format-v3/name-annotations"
 import type { Fragment, View } from "./format-v3/reader"
 import { definition } from "./format-v3/schema"
-import { annotationFailure, TextOwners } from "./format-v3/text-owners"
-import { bucketOf, createLocator, GLOBAL_OWNER } from "./locator"
+import { annotationFailure, type TextOwner, TextOwners } from "./format-v3/text-owners"
+import { bucketOf, createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
 
 export interface AnnotatedText {
   readonly unit: JsonObject
@@ -133,8 +133,9 @@ class PageClosure {
   }
 
   async row(table: string, id: JsonValue): Promise<JsonObject> {
-    await this.load(table, [id], "detail")
-    const row = this.rows.get(table)?.get(canonicalText([id]))
+    const identity = canonicalText([id])
+    if (!this.rows.get(table)?.has(identity)) await this.load(table, [id], "detail")
+    const row = this.rows.get(table)?.get(identity)
     if (!row) annotationFailure("reference")
     return row
   }
@@ -164,7 +165,10 @@ class PageClosure {
     this.rows.set("annotation_set", sets)
   }
 
-  async original(pointer: JsonObject): Promise<{ unitId: string; annotationId: JsonValue } | null> {
+  async original(
+    pointer: JsonObject,
+    receiver?: TextOwner,
+  ): Promise<{ unitId: string; annotationId: JsonValue } | null> {
     const value = objectValue(pointer["owner"])
     const field = stringValue(pointer["field"])
     const kind = stringValue(value["kind"])
@@ -176,22 +180,18 @@ class PageClosure {
           : [value["id"] ?? null]
       await this.load(kind, pk, "detail")
     }
-    const table = kind === "printing_face" ? "printing" : kind
     if (
-      !this.rows.get(table)?.has(canonicalText([value["id"] ?? null])) &&
-      ["face_revision", "printing_face"].includes(kind)
+      kind === "face_revision" &&
+      !this.rows.get(kind)?.has(canonicalText([value["id"] ?? null]))
     ) {
-      for (const [key, file] of this.snapshot.files) {
-        if (
-          this.loaded.has(key) ||
-          file["role"] !== "text" ||
-          !arrayValue(file["row_counts"]).some((raw) => objectValue(raw)["table"] === table)
-        )
-          continue
-        this.add(await this.client.fragments(key))
-        if (this.client.snapshot() !== this.snapshot) throw new Error("snapshot replaced")
-        this.loaded.add(key)
-        if (this.rows.get(table)?.has(canonicalText([value["id"] ?? null]))) break
+      const card = this.rows.get("card")?.get(canonicalText([receiver?.cardId ?? null]))
+      if (!card) annotationFailure("owner")
+      const physical = homeSetOwner(stringValue(card["home_set_id"]))
+      const entity = [card["id"] ?? null]
+      // Same-face source owners can only live in this card's fixed bootstrap or history fragment.
+      for (const partition of ["bootstrap", "history"] as const) {
+        await this.load(kind, [value["id"] ?? null], partition, physical, entity)
+        if (this.rows.get(kind)?.has(canonicalText([value["id"] ?? null]))) break
       }
     }
     const location = this.location(value, field, pointer["ordinal"] ?? null)
@@ -279,7 +279,7 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
         ? { ...(await page.row("translation", selection["translation_id"] ?? null)) }
         : undefined
       const sourcePointer = selection ? objectValue(selection["source"]) : pointer
-      const source = await page.original(sourcePointer)
+      const source = await page.original(sourcePointer, receiver)
       if (source === null) annotationFailure("owner")
       if (translation?.["annotation_kind"] === "whole_name" && selection) {
         const unit = await page.row("text_unit", translation["text_unit_id"] ?? null)
@@ -293,7 +293,7 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
       const pointers = [pointer, sourcePointer]
       if (selection?.["counterpart"] !== null && selection?.["counterpart"] !== undefined) {
         const counterpart = objectValue(selection["counterpart"])
-        await page.original(counterpart)
+        await page.original(counterpart, receiver)
         pointers.push(counterpart)
       }
       const fieldRows = pointers.flatMap((value) => {

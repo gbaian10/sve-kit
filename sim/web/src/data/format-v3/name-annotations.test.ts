@@ -2,7 +2,8 @@
 import { describe, expect, it } from "vitest"
 
 import { createAnnotatedTextResolver } from "../annotated-text"
-import { createSnapshotClient } from "../client"
+import { createSnapshotClient, type SnapshotClient } from "../client"
+import { bucketOf, homeSetOwner } from "../locator"
 import { v3Fixture } from "../v3-fixture"
 import { validateAnnotations } from "./annotations"
 import {
@@ -14,7 +15,7 @@ import {
   stringValue,
 } from "./json"
 import { expandNames, wholeName } from "./name-annotations"
-import { readSnapshot, type View } from "./reader"
+import { type Fragment, readSnapshot, type View } from "./reader"
 import { digest } from "./sha256"
 
 const fixture = () => objectValue(v3Fixture("whole-name-native.json"))
@@ -55,6 +56,59 @@ function origin() {
     },
   })
   return { data, client }
+}
+
+async function sourceHistory() {
+  const { client } = origin()
+  await client.load()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing loaded snapshot")
+  const revision = snapshot.bootstrap.find((fragment) => fragment.table === "face_revision")
+    ?.rows[0]
+  const card = snapshot.bootstrap
+    .find((fragment) => fragment.table === "card")
+    ?.rows.find((row) => row["id"] === "card")
+  if (!revision || !card) throw new Error("missing test receiver")
+  const donor = {
+    ...(objectValue(fixture()["expected"])["face_revision"] as JsonObject[])[0],
+    id: "historical-jp-source",
+    translations: [],
+  }
+  revision["region"] = "en"
+  revision["name_concept_id"] = null
+  for (const raw of arrayValue(card["regions"])) objectValue(raw)["mapping_state"] = "confirmed"
+  const selection = objectValue(arrayValue(revision["translations"])[0])
+  selection["basis"] = "jp_source"
+  objectValue(objectValue(selection["source"])["owner"])["id"] = donor.id
+  const owner = homeSetOwner(stringValue(card["home_set_id"]))
+  const bucket = bucketOf([card["id"] ?? null], 64)
+  const historyKey = `text/history/home_set/family/band/${String(Math.floor(bucket / 32))}`
+  snapshot.files.set(historyKey, {
+    role: "text",
+    row_counts: [{ table: "face_revision", partition: "history", owner, bucket, count: 1 }],
+  })
+  // These manifest candidates must never be fetched for this card's source closure.
+  for (let index = 0; index < 20; index++)
+    snapshot.files.set(`unrelated-${String(index)}`, {
+      role: "text",
+      row_counts: [
+        {
+          table: "face_revision",
+          partition: "history",
+          owner: homeSetOwner(`other-${String(index)}`),
+          bucket,
+          count: 1,
+        },
+      ],
+    })
+  const fragment: Fragment = {
+    file: historyKey,
+    table: "face_revision",
+    identity: canonicalText(["face_revision", owner, bucket, "history"]),
+    value: { owner, bucket, partition: "history", base: null },
+    rows: [donor],
+  }
+  return { client, snapshot, revision, historyKey, fragment }
 }
 
 describe("whole names on exact source owners", () => {
@@ -133,23 +187,18 @@ describe("whole names on exact source owners", () => {
     expect(view?.translation?.["annotation_kind"]).toBe("whole_name")
   })
   it("stays pending while the exact source is fetching, then rejects a complete missing source", async () => {
-    const { client } = origin()
-    await client.load()
-    const snapshot = client.snapshot()
-    if (!snapshot) throw new Error("missing loaded snapshot")
-    const revision = snapshot.bootstrap.find((fragment) => fragment.table === "face_revision")
-      ?.rows[0]
-    if (!revision) throw new Error("missing test revision")
-    const selection = objectValue(arrayValue(revision["translations"])[0])
-    objectValue(objectValue(selection["source"])["owner"])["id"] = "missing-exact-source"
+    const { client, revision, historyKey } = await sourceHistory()
+    const requests: string[] = []
     const gate = Promise.withResolvers<undefined>()
     const entered = Promise.withResolvers<undefined>()
     const resolver = createAnnotatedTextResolver({
       ...client,
       fragments: async (file) => {
+        requests.push(file)
+        if (file !== historyKey) throw new Error("unrelated source candidate fetched")
         entered.resolve(undefined)
         await gate.promise
-        return client.fragments(file)
+        return []
       },
     })
     let settled = false
@@ -157,7 +206,7 @@ describe("whole names on exact source owners", () => {
       { owner: { kind: "face_revision", id: "revision" }, field: "name", ordinal: null },
       "zh-Hant",
     )
-    const rejection = expect(pending).rejects.toThrow()
+    const rejection = expect(pending).rejects.toThrow("public-annotation/owner")
     void pending.then(
       () => {
         settled = true
@@ -172,5 +221,75 @@ describe("whole names on exact source owners", () => {
     gate.resolve(undefined)
     await rejection
     expect(settled).toBe(true)
+    expect(requests).toEqual([historyKey])
+  })
+  it("loads only the receiver card's history partition for an exact JP donor", async () => {
+    const { client, historyKey, fragment } = await sourceHistory()
+    const requests: string[] = []
+    const scopedClient: SnapshotClient = {
+      ...client,
+      fragments: (file) => {
+        requests.push(file)
+        if (file !== historyKey) throw new Error("unrelated source candidate fetched")
+        return Promise.resolve([fragment])
+      },
+    }
+    const result = await createAnnotatedTextResolver(scopedClient).resolve(
+      { owner: { kind: "face_revision", id: "revision" }, field: "name", ordinal: null },
+      "zh-Hant",
+    )
+    expect(result?.selection?.["basis"]).toBe("jp_source")
+    expect(result?.source?.annotation?.["occurrences"]).toHaveLength(1)
+    expect(result?.translated?.annotation?.["occurrences"]).toHaveLength(1)
+    expect(requests).toEqual([historyKey])
+  })
+  it("reports a missing source directly when its card has no candidate partition", async () => {
+    const { client, snapshot, historyKey } = await sourceHistory()
+    snapshot.files.delete(historyKey)
+    const resolver = createAnnotatedTextResolver({
+      ...client,
+      fragments: () => {
+        throw new Error("unrelated source candidate fetched")
+      },
+    })
+    await expect(
+      resolver.resolve(
+        { owner: { kind: "face_revision", id: "revision" }, field: "name", ordinal: null },
+        "zh-Hant",
+      ),
+    ).rejects.toThrow("public-annotation/owner")
+  })
+  it("uses restored name sets without fetching their unrelated detail bucket", async () => {
+    const { data, client } = origin()
+    await client.load()
+    const snapshot = client.snapshot()
+    if (!snapshot) throw new Error("missing loaded snapshot")
+    const ids = (objectValue(data["expected"])["annotation_set"] as JsonObject[]).map(
+      (row) => row["id"] ?? null,
+    )
+    snapshot.files.set("virtual-set-trap", {
+      role: "text",
+      row_counts: ids.map((id) => ({
+        table: "annotation_set",
+        owner: { kind: "global", id: null },
+        bucket: bucketOf([id], 64),
+        partition: "detail",
+        count: 1,
+      })),
+    })
+    const resolver = createAnnotatedTextResolver({
+      ...client,
+      fragments: () => {
+        throw new Error("virtual set detail bucket fetched")
+      },
+    })
+    const result = await resolver.resolve(
+      { owner: { kind: "face_revision", id: "revision" }, field: "name", ordinal: null },
+      "zh-Hant",
+    )
+    expect(result?.original.annotation?.["id"]).toBe(
+      (objectValue(data["expected"])["field_annotation"] as JsonObject[])[0]?.["annotation_set_id"],
+    )
+    expect(result?.translated?.annotation).toBeTruthy()
   })
 })

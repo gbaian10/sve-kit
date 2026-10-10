@@ -10,8 +10,8 @@ import {
 import { wholeName } from "./name-annotations"
 import type { Fragment, View } from "./reader"
 
-export function annotationLocations(view: View, fragments: readonly Fragment[]) {
-  const display = new Set<JsonValue>(
+function displayRevisions(view: View): Set<JsonValue> {
+  return new Set<JsonValue>(
     (view["face"] ?? [])
       .flatMap((face) => [
         ...arrayValue(face["current"]).map((value) => objectValue(value)["revision_id"]),
@@ -21,6 +21,10 @@ export function annotationLocations(view: View, fragments: readonly Fragment[]) 
       ])
       .filter((value) => value !== null && value !== undefined),
   )
+}
+
+export function annotationLocations(view: View, fragments: readonly Fragment[]) {
+  const display = displayRevisions(view)
   const revisions = new Map(
     (view["face_revision"] ?? []).map((row) => [stringValue(row["id"]), row]),
   )
@@ -101,16 +105,9 @@ export function validateAnnotationPlacement(view: View, fragments: readonly Frag
         if (ref["kind"] !== "vocabulary")
           concepts.add(ref[ref["kind"] === "card_name" ? "term_id" : "key"] ?? null)
       }
-  const display = new Set(
-    (view["face"] ?? []).flatMap((face) => [
-      ...arrayValue(face["current"]).map((raw) => objectValue(raw)["revision_id"]),
-      ...arrayValue(face["wording"]).map(
-        (raw) => objectValue(objectValue(raw)["display"])["revision_id"],
-      ),
-    ]),
-  )
+  const display = displayRevisions(view)
   for (const row of view["face_revision"] ?? [])
-    if (display.has(row["id"]) && row["name_concept_id"] != null)
+    if (display.has(row["id"] ?? null) && row["name_concept_id"] != null)
       concepts.add(row["name_concept_id"])
   for (const fragment of fragments)
     if (["annotation_set", "annotation_concept"].includes(fragment.table)) {
