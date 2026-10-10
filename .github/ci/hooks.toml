@@ -38,6 +38,9 @@ job = "repo"
 [hooks.markdownlint-cli2]
 job = "repo"
 
+[hooks.lychee]
+job = "repo"
+
 [hooks.gitleaks-staged]
 job = "none"
 reason = "Scans staged changes only, so it would scan nothing in a clean CI checkout; gitleaks-range covers CI."
