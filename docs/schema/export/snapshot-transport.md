@@ -76,7 +76,7 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 
 ### 3.1 types descriptor
 
-`types` 是具名 row 與巢狀 tuple 型別到 descriptor 的共用 object，每個型別在同一容器只存一份。fragment 的 row 型別由固定 `(table,partition)` 對應決定；wire 不重複 columns，解碼時由此 descriptor 還原 columns。descriptor 為 `{columns:[Code],items:[Type]}`，兩陣列等長；Type 恰為下列其中一種：
+`types` 只保存用到的巢狀 tuple descriptor，每個型別在同一容器只存一份。fragment 的 root row 欄序與型別由 `format_version` 的固定 `(table,partition)` schema 決定；wire 不帶 columns，也不附 root row descriptor，reader 由固定 schema 解碼。descriptor 為 `{columns:[Code],items:[Type]}`，兩陣列等長；Type 恰為下列其中一種：
 
 - `{"scalar":"Text"}`：沿 §1／邏輯欄位的純量型別；允許 ID、Text、Code、UInt、Int、Bool、Date、Instant、Region、Lang、Hash、URL、Path。
 - `{"enum":["a","b"]}`：固定字串集合，不由資料新增值。
@@ -240,26 +240,7 @@ text_all 是替代表示，不列入 files，不在容量合計重算。文字�
 ```json
 {
   "format_version": "3.0.0",
-  "types": {
-    "text_unit_bootstrap": {
-      "columns": [
-        "id",
-        "lang",
-        "text"
-      ],
-      "items": [
-        {
-          "scalar": "ID"
-        },
-        {
-          "scalar": "Lang"
-        },
-        {
-          "scalar": "Text"
-        }
-      ]
-    }
-  },
+  "types": {},
   "tables": {
     "text_unit": [
       {
@@ -288,9 +269,9 @@ text_all 是替代表示，不列入 files，不在容量合計重算。文字�
 ```json
 {
   "key": "bootstrap/bootstrap/global/global/band/2",
-  "path": "snapshots/blobs/d56930154a8cd95b6655c1660fe99ccb0297deff6d6fda8a3dfb56ef3a1566f9.json",
-  "sha256": "sha256:d56930154a8cd95b6655c1660fe99ccb0297deff6d6fda8a3dfb56ef3a1566f9",
-  "bytes": 319,
+  "path": "snapshots/blobs/9573600ca4ad2525092454de3c277d89c469c220ac4b82e348eefea102ca847b.json",
+  "sha256": "sha256:9573600ca4ad2525092454de3c277d89c469c220ac4b82e348eefea102ca847b",
+  "bytes": 203,
   "compressed_bytes": {
     "br": null,
     "gzip": null
@@ -468,9 +449,9 @@ format_version／min_reader_version=3.0.0，必要能力包含 jp-source-transla
 完整集合依該契約 §1，所有封套及 index entry 一致；index_format=2 不變。
 canonical、N=64、band widths、media、base／row_index 與同名規則依前述配置；整體容量仍須重新量測。
 
-欄序以公開 annotation §2.1 覆寫 2.0 的同名列：translation 依序加必填可 null 的 annotation_set_id 與必填 annotation_kind，face_revision 與 PrintingFaceDetail 加 name_concept_id；FieldTranslation 加
-source／counterpart 並改 basis；cr_clause 加 translations；新增 annotation_set／field_annotation／annotation_concept。
-Translation 在 bootstrap／detail 都用完整九欄。所有原本內嵌 FieldTranslation 的位置都同步使用七格，
+欄序依公開 annotation §2.1：translation 依序含必填可 null 的 annotation_set_id 與必填 annotation_kind，face_revision 與 PrintingFaceDetail 含 name_concept_id；FieldTranslation 含
+source／counterpart 與 basis；cr_clause 含 translations，標註集合為 annotation_set／field_annotation／annotation_concept。
+Translation 在 bootstrap／detail 都用完整九欄。所有內嵌 FieldTranslation 的位置都同步使用七格，
 不能只改 face_revision 而漏掉 printing／QA／keyword／vocabulary／商品。新增 PublicTextPointer／Annotation／AnnotationRange
 的 descriptor 與三個有限 JSON reference 定義必隨使用處完整附入 types。
 
@@ -483,6 +464,7 @@ translation.annotation_kind=none 且 annotation_set_id=null 才表示空集合�
 非 null 引用缺目標仍拒絕。完整性由 producer 比對投影前 occurrence 保證，不能靠 reader 重造空 set ID。
 改 annotation／bold 可能改 set ID 及用途列，不能因 text bytes 未變省掉相關 changes／依賴更新。
 
-欄序依公開 annotation §2.1：translation 依序含必填可 null 的 annotation_set_id 與必填 annotation_kind，face_revision 與 PrintingFaceDetail 含 name_concept_id；FieldTranslation 含
-source／counterpart 與 basis；cr_clause 含 translations，標註集合為 annotation_set／field_annotation／annotation_concept。
-Translation 在 bootstrap／detail 都用完整九欄。所有內嵌 FieldTranslation 的位置都同步使用七格，
+機器 Schema、reader 支援表與共用完整 golden 使用相同 3.0.0 profile。固定案例依 [public-annotation-cases](public-annotation-cases.md)，
+正式容量依 [size-budget](size-budget.md#30-annotation-與-jp-來源的計帳)。基本目錄裝檔與量法須同步 exporter／reader 後驗收，不能以其他配置或桌面數字證明手機通過。
+
+3.0.0 候選的共用描述與整名省略已由 producer／Python reader 同步替換；每個容器 types 精確包含所用巢狀型別的固定描述閉包；root row 描述只存在於固定 schema，拒絕缺少、多餘或改寫的 descriptor。base FileRef、fragment 身分與 row_counts 不因 descriptor 合併而改變；row_counts 計 wire 實際列，完整 logical view 含虛擬集合。最終基本目錄分區配置另依固定配置修訂，不由本次瘦身自動搬 owner。
