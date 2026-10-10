@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, PrintingFaceOwner
 from sve_carddb.core.json import digest
 from sve_carddb.domains.catalog.adoption_models import SourceRef
+from sve_carddb.domains.translations.corrected_sources import PARSER as CORRECTED_PARSER
 from sve_carddb.domains.translations.four_layer_semantics import CardContext
 from sve_carddb.domains.translations.sources import pointer
 
@@ -124,6 +125,26 @@ def card_source(  # ruff: ignore[complex-structure, too-many-branches, too-many-
         raise ValueError("Card source frozen version belongs to another owner source")
     if pointer(document, locator) != raw:
         raise ValueError("Card source frozen field differs from the exact owner bytes")
+    if ref.parser == CORRECTED_PARSER:
+        if not isinstance(owner, FaceRevisionOwner) or descriptor.field != "effect":
+            raise ValueError("Corrected source recipe requires a revision effect field")
+        if sources.corrections is None:
+            raise ValueError("Corrected source recipe lacks its pinned correction plan")
+        applications = db.select(
+            "correction_application",
+            db.columns("correction_application"),
+            where={
+                "face_revision_id": owner.revision_id,
+                "source_id": source_id,
+                "status": "applied",
+                "result_unit_id": unit_id,
+            },
+        )
+        if len(applications) != 1:
+            raise ValueError("Corrected source requires its exact applied revision")
+        sources.corrections.verify_scope(
+            ref.batch_id, ref.source_version_id, face_ordinal, card_id, face_id
+        )
     return CardSource(descriptor, raw, card_id, face_id, source_id)
 
 

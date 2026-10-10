@@ -9,6 +9,7 @@ from pydantic import JsonValue
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.core.provenance import SourceUse
 from sve_carddb.domains.catalog.adoption_sources import AdoptionSources
+from sve_carddb.domains.translations.corrected_sources import PARSER as CORRECTED_PARSER
 from sve_carddb.ingest.archive.frozen_sources import FrozenBatches, FrozenSources
 from sve_carddb.parse.pages import extract_en as official_en
 from sve_carddb.parse.pages import extract_jp as official_jp
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.catalog.adoption_models import SourceRef
     from sve_carddb.domains.digital.links.evidence import RegistryIndex
     from sve_carddb.domains.registry.snapshot import RegistrySnapshot
+    from sve_carddb.domains.translations.corrected_sources import Corrections
     from sve_carddb.domains.translations.models import Span
 
 
@@ -120,10 +122,14 @@ class Sources:
         registry: RegistrySnapshot | None = None,
         *,
         batches: FrozenBatches | None = None,
+        corrections: Corrections | None = None,
     ) -> None:
         self.stores = stores
         self.repository = repository
         self._build = build
+        self.corrections = corrections
+        if corrections is not None:
+            corrections.verify_context(build)
         self.batches = batches or FrozenBatches()
         self.identities = AdoptionSources(
             stores, repository, registry, batches=self.batches
@@ -149,6 +155,7 @@ class Sources:
             build,
             self.identities.current_registry,
             batches=self.batches,
+            corrections=self.corrections,
         )
         stage.identity_indexes = self.identity_indexes
         stage.context_keys = self.context_keys
@@ -178,10 +185,20 @@ class Sources:
             "translation-" + provider + "-v1": provider
             for provider in ("jp", "en", "sv1", "svwb")
         }
+        if parser == CORRECTED_PARSER:
+            if self.corrections is None:
+                raise ValueError(
+                    "Corrected translation sources require a pinned correction plan"
+                )
+            providers[CORRECTED_PARSER] = "jp"
         provider = providers.get(parser)
         if provider is None:
             raise ValueError("Unsupported translation source recipe")
-        cache_key = (batch_id, version, parser)
+        cache_recipe = parser
+        if parser == CORRECTED_PARSER:
+            assert self.corrections is not None
+            cache_recipe += ":" + self.corrections.pin
+        cache_key = (batch_id, version, cache_recipe)
         if cache_key not in self.cache:
             source, raw, descriptor = self.batch(batch_id).read(
                 version, parser_version=parser
@@ -191,6 +208,9 @@ class Sources:
             ):
                 raise ValueError("Frozen evidence provider/kind mismatch")
             lang, document = project(raw, source.url, provider)
+            if parser == CORRECTED_PARSER:
+                assert self.corrections is not None
+                document = self.corrections.project(batch_id, version, document)
             self.cache[cache_key] = lang, document, source
         return self.cache[cache_key]
 
