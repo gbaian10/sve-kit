@@ -496,6 +496,10 @@ canonical-json-v1：null/bool/Unicode string/安全整數/array/object；拒浮�
 
 卡表快照不出逐列稽核 hash；`program_ref` 由快照清單的檔案雜湊驗證。發布 metadata 不能改寫歷史審核事實。
 
+身分確認與跨區文字 aligned 各自判定；改 hash 或 recipe 名稱不能把 missing_dsl 升為 verified。
+來源規則本文、數值、特性、rules_names、normalizer 或 token 規則依賴變動須重驗，翻譯與 counterpart 仍按 exact source/context 及各 owner 失效。
+若需承接真正存在的舊驗證物件，保留舊觀測、決定與歷史快照，先依該實例定義新舊 hash、來源及重驗證據的保存契約，再啟用遷移；不預建空收據庫。
+
 ### 14.1 DSL 撰寫/題本的文字來源
 
 DSL 撰寫與題本須保留實際使用的原文觀測及完整規則依賴。`dsl_source` 保留當時採用的觀測 revision，不因 current 改字而改寫歷史證據。沒有正式規則等義驗證時，暫顯或身分分組均不能作為沿用 DSL／題本驗證結果的依據。

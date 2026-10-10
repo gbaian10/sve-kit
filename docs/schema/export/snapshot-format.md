@@ -5,7 +5,7 @@
 
 卡表快照是由[建置資料庫](../build/build-db.md)投影出的精簡契約。表名相同不代表欄位相同；本文件是出貨欄位白名單。精確 JSON 形狀、欄序、版本及分片規則見 [傳輸契約](snapshot-transport.md)。沒有指定的建置資料庫欄位不出貨，尤其 decision、`source_record`、逐列 hash、翻譯依賴、載入/考題報告與巨集。保留玩家可見的來源 URL、Q&A/CR 引文、印刷歷史、更正原值，不提供建置稽核包。
 
-本文件沿用 2.0.0 的圖片與有限保留契約，依 [ADR-0015](../../adr/0015-image-url-version.md)／[ADR-0016](../../adr/0016-snapshot-retention.md)。1.x 已退役，不保留相容讀寫。
+本文件沿用 2.0.0 的圖片與有限保留契約，依 [ADR-0012](../../adr/0012-image-url-version.md)／[ADR-0013](../../adr/0013-snapshot-retention.md)。1.x 已退役，不保留相容讀寫。
 
 四層翻譯的來源政策已改依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)：
 有效且已確認同卡同面的 JP 可供繁中，divergence 不構成此顯示門檻。
@@ -22,7 +22,7 @@
 
 巢狀的 RegionView/PrintingFace/Section/FieldTranslation/Correction/Support 等記錄同樣用 tuple，types 以具名型別→columns 順序及引用型別描述（固定於 format）供載入器驗列長度；producer 以本文件的具名型別作型別名。`parameter_schema/corrected_from` 等值保持受限 JSON，不轉成位置陣列，值域依 [傳輸契約 §3.2–3.3](snapshot-transport.md#32-公開參數宣告)。純 ID/code 陣列亦保持原樣。每個分片只附用到的 types，producer 驗其與 format 定義一致；consumer 不執行資料提供的轉換程式。
 
-reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；啟動包轉 typed 索引後釋放原 tuples，只在畫面當前項目建立 view，不能全量展開成物件再多存一份。這項編碼主要節省未壓縮傳輸/快取大小；原型量測顯示 heap 並未因此降低，記憶體要靠 §3 的逐片解析/淘汰。每表按穩定主鍵排序、集合陣列按 ID/code 排序、有序段落保留 ordinal。payload 不含 `data_version/published_at`，未變內容跨版 bytes/hash 完全相同。完整文字包是同一分片 payload 的容器聯集，不能另做另一套 carddb。公共永久 ID 保持不透明字串；text ID 固定為 `t:{lang}:{sha256(exact UTF-8 text)[:16]}`，同一份快照內同鍵不同內容即停止匯出，不能重配舊鍵或自動加長，快照不附完整 hash。不另保存跨版本的已發布文字鍵索引（[ADR-0020](../../adr/0020-upload-from-export.md)）。
+reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；啟動包轉 typed 索引後釋放原 tuples，只在畫面當前項目建立 view，不能全量展開成物件再多存一份。這項編碼主要節省未壓縮傳輸/快取大小；原型量測顯示 heap 並未因此降低，記憶體要靠 §3 的逐片解析/淘汰。每表按穩定主鍵排序、集合陣列按 ID/code 排序、有序段落保留 ordinal。payload 不含 `data_version/published_at`，未變內容跨版 bytes/hash 完全相同。完整文字包是同一分片 payload 的容器聯集，不能另做另一套 carddb。公共永久 ID 保持不透明字串；text ID 固定為 `t:{lang}:{sha256(exact UTF-8 text)[:16]}`，同一份快照內同鍵不同內容即停止匯出，不能重配舊鍵或自動加長，快照不附完整 hash。不另保存跨版本的已發布文字鍵索引（[ADR-0015](../../adr/0015-upload-from-export.md)）。
 
 下面列出的欄位全部存在，`?` 表示可 null，不表示任意省略。內嵌同型陣列可以空；未知與空的規則在 [build-db.md](../build/build-db.md) 定義。顯示 label 參照 `text_unit`，介面通用提示留 app i18n。枚舉值與型別沿建置資料庫同名定義，投影新增型別於下節明列；不可帶出建置資料庫未列欄位。
 
@@ -260,7 +260,7 @@ changes 是相鄰發布摘要，不是重建鏈。previous manifest 引用的 ch
 但其 from_data_version 只是批次識別，可指向已回收版本，不遞迴保留第三版。
 慢 client 遇到已回收分片須重讀索引並更新；不以無限延長保留期維持過時下載。
 本機引擎的確定性重播與來源重算仍可保留，均不構成公開歷史資料下載承諾。
-決策理由見 [ADR-0016](../../adr/0016-snapshot-retention.md)。
+決策理由見 [ADR-0013](../../adr/0013-snapshot-retention.md)。
 
 ### 4.2 預覽快照
 

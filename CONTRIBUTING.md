@@ -134,6 +134,15 @@ AI-generated code tends to over-comment. Keep comments few and short:
 
 ### Documentation
 
+- Use [the project glossary](docs/terminology.md) for project-specific names. Resolve
+  new or renamed terms there first: one or two sentences, rejected aliases, no
+  implementation details; group related terms naturally.
+- Write an ADR only for a hard-to-reverse decision with a surprising rationale and
+  a real trade-off. Use one decision and a short context/decision/reason paragraph;
+  optional sections must add useful information. See [the ADR index](docs/adr/README.md)
+  for numbering and supersession. Put contracts in `docs/schema/` or `docs/dsl/`,
+  and progress, scheduling and open questions in issues or milestones.
+
 - Verify references to implemented modules, classes, files and commands; label
   planned ones explicitly.
 - Keep claims about current behaviour within what the tests guarantee. Distinguish

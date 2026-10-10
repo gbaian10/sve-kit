@@ -141,7 +141,7 @@
 | **框架本體** | frame body | 各頻次框架都可存放及重用有版本的 DSL 本體；版本、精確 frame／語義變體、適用域與所有來源用途須可追蹤 |
 | **合格巨集** | qualified macro | 同一 resolved 語義變體達至少 3 張不同卡（卡名概念＋是否進化；重印／異圖不累計），且完成兩個不同模型各自獨立審核、適用邊界測試及版本／適用域登錄，才取得合格巨集資格；作者不得自審 |
 
-四層的欄位與身分契約見[四層翻譯共用契約](schema/domains/four-layer-translation.md)；框架本體與合格巨集的審核責任見[作者語法 §10](dsl/author-syntax-1.0.md#10-巨集規範)與 [ADR-0012](adr/0012-version-meta.md#2026-10-10-框架存放與巨集資格)。
+四層的欄位與身分契約見[四層翻譯共用契約](schema/domains/four-layer-translation.md)；框架本體與合格巨集的審核責任見[作者語法 §10](dsl/author-syntax-1.0.md#10-巨集規範)與 [ADR-0010](adr/0010-version-meta.md)。
 
 ## 規則與效果
 

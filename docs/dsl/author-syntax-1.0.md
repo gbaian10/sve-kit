@@ -36,11 +36,18 @@ cards:
         keywords: [ward]
 ```
 
-這是容器示意；§13 的真實例子則省略工具自動填入的 meta，只列指定能力行或指定構造片段，並明示片段範圍。meta 的規範見 [ADR-0012](../adr/0012-version-meta.md)：`draft → reviewed → verified`，爭議為 `disputed`。逐卡本體與每個用途須經與作者不同模型的獨立語義審核；只有已取得 §10 資格的巨集，才可由每用途三項機械檢查取得 reviewed。共用框架存放或頻次達標不會自動 reviewed；該版本引擎實跑才可 verified。`rulings` 指裁定 ID，不直接堆 Q&A；巨集產物另記 `generated_by: {macro, version, params}`。舊 `review / ruling` 不沿用為驗收狀態。
+這是容器示意；§13 的真實例子則省略工具自動填入的 meta，只列指定能力行或指定構造片段，並明示片段範圍。meta 的狀態為 `draft → reviewed → verified`，爭議為 `disputed`。逐卡本體與每個用途須經與作者不同模型的獨立語義審核；只有已取得 §10 資格的巨集，才可由每用途三項機械檢查取得 reviewed。共用框架存放或頻次達標不會自動 reviewed；該版本引擎實跑才可 verified。`rulings` 指裁定 ID，不直接堆 Q&A；巨集產物另記 `generated_by: {macro, version, params}`。舊 `review / ruling` 不沿用為驗收狀態。
 
 各頻次框架都可存放及重用有版本的 DSL 本體；版本、精確 frame／語義變體、適用域與所有來源用途須可追蹤，不能只記巨集名稱。來源綁定與投影接口依[四層契約 §6／§7](../schema/domains/four-layer-translation.md#6-sourcebindingtrace-與逐-occurrence-位置)，仍組裝既有 A.card／A.ability，不另建每卡語法。body version 不入 frame 身分；呈現、來源語義與本體的版本／失效責任依[四層契約 §8](../schema/domains/four-layer-translation.md#8-建置-dbrender-projection-與依賴)。
 
 每個使用 frame 的 DSL 依賴必納入[四層契約 §7](../schema/domains/four-layer-translation.md#7-規則投影接口)的 `interface_key`。建置重算不符即使相依 DSL 的接口連接、用途審查與實跑資格失效並重驗；來源語義及既有引用仍有效的接口描述調整，不重鍵翻譯。存放承載與 stale 比較位置由 [#498](https://github.com/gbaian10/sve-kit/issues/498) 的後續實作定，本節不指定表或新增 meta 欄位。
+
+DSL 用主版.次版：次版只容許舊資料不必修改且降低語義不變的相容新增；不相容 IR 或既有語義變更升主版，不以 bugfix 名義繞過。
+卡表快照、CR／裁定與引擎版本獨立保存。meta 必有 `dsl/source/written_by/reviewed_by/status`，另保存 `verified_by_exam/rulings`；巨集產物須有 `generated_by`。
+`source` 是依明示正規化版本對卡文、面及 token 歸屬計算的 hash；資料集 provenance 另存完整快照 hash 與 CR 版本。
+日期與身分只由真實作業填入。主版遷移使原 verified 至少降 reviewed 並標 review_required；語義映射有歧義時降 draft／disputed，原 draft 不提升、原 disputed 不消失。
+來源、裁定及本體／版本的反向用途索引用於重驗；舊版本實跑證據不作新版 verified。沒有正式舊卡片 YAML 時，分類標註轉換只建立 draft／needs_review，不假造 meta 遷移成果。
+自動執行只使用 capability 與驗收狀態符合要求的能力，未驗收者明示範圍，不以人工旗標代替規則支援。
 
 ## 2. 能力頭與來源
 
@@ -241,11 +248,11 @@ Until 保留 turn、next_opp_turn、this_and_next_opp_turn、game；明確長形
 
 每個鍵必須在**目前構造上下文**的登錄表：例如 cannot 沒有 n，buff 有 on；不能以另一構造曾使用 n 就放行。cards、define、roles 的動態名稱須符合其專屬卡號／識別字規則，不是任意額外欄位。未知鍵附卡號、行與完整路徑報錯。event 與 history.where 共用該事件的欄位表。
 
-`carddb` 的 authored 讀取採 `yamlrocks==0.6.1`，以套件選項拒絕重複鍵與複合鍵，再由 strict JSON 與 canonical 拒絕其他非字串鍵、自訂 tag 物件與非有限數；anchor／alias／merge 與顯式 tag 讀取允許、寫入不產生，字元與數字拼法完整邊界見 [authored 格式 §1](../schema/domains/authored-layout.md#1-路徑與共同格式)。寫出維持 ruamel，不自製 parser／resolver 或 PyYAML fallback；其他既有 Python DSL 工具維持 `ruamel.yaml` 的 `YAML(typ="safe", pure=True)`、版本 `(1, 2)`、`allow_duplicate_keys=False`，本次未替換。Rust 選 saphyr 的 YAML 1.2 路線，經節點／事件邊界先檢查鍵型別、重複鍵、版本與 core tag，再轉有型別資料；不能先轉成會覆蓋重複鍵的 map。解析器選型與文件見 ADR-0002。
+`carddb` 的 authored 讀取採 `yamlrocks==0.6.1`，以套件選項拒絕重複鍵與複合鍵，再由 strict JSON 與 canonical 拒絕其他非字串鍵、自訂 tag 物件與非有限數；anchor／alias／merge 與顯式 tag 讀取允許、寫入不產生，字元與數字拼法完整邊界見 [authored 格式 §1](../schema/domains/authored-layout.md#1-路徑與共同格式)。寫出維持 ruamel，不自製 parser／resolver 或 PyYAML fallback；其他既有 Python DSL 工具維持 `ruamel.yaml` 的 `YAML(typ="safe", pure=True)`、版本 `(1, 2)`、`allow_duplicate_keys=False`，本次未替換。Rust 選 saphyr 的 YAML 1.2 路線，經節點／事件邊界先檢查鍵型別、重複鍵、版本與 core tag，再轉有型別資料；不能先轉成會覆蓋重複鍵的 map。Rust 前端選用 [saphyr](https://docs.rs/saphyr/0.1.0/saphyr/)，接入時釘版本並完成同組反例；此選型不代表 Rust 1.0 載入器已驗收。YAML 原始文字作來源證據保存，不以 load→dump 作反向翻譯來源。
 
 兩端載入器必過同組金絲雀：含 on、n、yes／no 值的最小卡片保留字串與數字；true 值仍為布林；布林鍵、字串 true 鍵、重複 on、未知鍵、cannot.draw.n、stat_changed 歷史中的 subject／property 舊別名均拒絕。設計階段只以 Python 端跑過這組檢查；Rust 接入時必須重跑，不能沿用 Python 結果宣告 Rust 已驗收。
 
-依序做上述 YAML 版本／純量與 JSON 型別／鍵型別／重複鍵／構造鍵名檢查、schema 版號、卡表／source hash、欄位／registry 型別、binding scope、捕捉時點、receipt 可用性、目標／費用時點、效果安裝型別、引擎 capability；任一失敗都不能進入自動結算。正向 YAML 語法檢查不能替代此流程。禁止一般字串 selector、缺值回 0、未支援欄位默默忽略。詳 [ADR-0002](../adr/0002-author-ir.md)、[ADR-0010](../adr/0010-tests.md)。
+依序做上述 YAML 版本／純量與 JSON 型別／鍵型別／重複鍵／構造鍵名檢查、schema 版號、卡表／source hash、欄位／registry 型別、binding scope、捕捉時點、receipt 可用性、目標／費用時點、效果安裝型別、引擎 capability；任一失敗都不能進入自動結算。正向 YAML 語法檢查不能替代此流程。禁止一般字串 selector、缺值回 0、未支援欄位默默忽略。詳 [ADR-0002](../adr/0002-author-ir.md)、[DSL 驗收規格](validation.md)。
 
 ## 12. 狀態與證據
 

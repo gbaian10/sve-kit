@@ -1,7 +1,7 @@
 # 公開 annotation 與 JP 依據契約
 
 本文件定義 [#496](https://github.com/gbaian10/sve-kit/issues/496) 的 **3.0.0 目標契約**。
-它承接 [ADR-0021](../../adr/0021-four-layer-translation.md)、[四層共用契約 §8](../domains/four-layer-translation.md#8-建置-dbrender-projection-與依賴)
+它承接 [ADR-0016](../../adr/0016-four-layer-translation.md)、[四層共用契約 §8](../domains/four-layer-translation.md#8-建置-dbrender-projection-與依賴)
 及 [#198](https://github.com/gbaian10/sve-kit/issues/198)，不修改 frame、render 或 annotation 的身分配方。
 機器定義見 [Schema](public-annotation.schema.json)，固定正反例見[案例規格](public-annotation-cases.md)。
 producer、Python／TS reader 與 read_api 已切換為 3.0.0，Web 依精確 owner 讀取標註與來源對照。

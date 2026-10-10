@@ -26,7 +26,8 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 | `sim/`      | 模擬器：`engine/`、`scenario-runner/`、`web/`；`server/` 尚未建立                 | Rust、TS    |
 | `docs/`     | 進版控的正式文件：ADR（`docs/adr/`）、DSL 規格（`docs/dsl/`）、schema、mermaid 圖 | Markdown    |
 
-專案用語（卡表快照、啟動包、分片、版次等）以 `docs/terminology.md` 為準，新名詞先加進那份。
+專案用語（卡表快照、啟動包、分片、版次等）以 `docs/terminology.md` 為準，新增或改名先在那份寫一兩句定義與「避免用」別名，不放實作細節。
+記錄架構決定時依 [ADR 規則](docs/adr/README.md) 判斷是否同時符合難以回頭、需背景解釋及真實取捨；規格細節留在對應契約。
 `docs/` 只放完成後仍成立的規格與決定；進度、排程、交付點與待決事項放 GitHub issue／milestone。
 
 依賴方向：`dsl/` ← `authored/` ← `carddb/` → 匯出的快照 ← `sim/`。

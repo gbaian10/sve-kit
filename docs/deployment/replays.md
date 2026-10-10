@@ -11,19 +11,19 @@
 均受同一權威／投影邊界約束。下載或重跑不能繞過觀看者獲授權的資訊範圍。
 
 卡片資料仍只引用 `carddb` 匯出的有版號快照；
-[ADR-0012](../adr/0012-version-meta.md) 將卡表快照、CR／裁定與引擎版本分開記錄。
+[ADR-0010](../adr/0010-version-meta.md) 將卡表快照、CR／裁定與引擎版本分開記錄。
 這些是回放溯源的要求，不是已完成的線上封存 Schema 或版本遷移支援。
 
 ## 公開 CDN 的保留契約
 
-依 [ADR-0016](../adr/0016-snapshot-retention.md)，公開卡圖只保留 current 圖片集合，
+依 [ADR-0013](../adr/0013-snapshot-retention.md)，公開卡圖只保留 current 圖片集合，
 公開卡表快照只保留 current 與直接前一發布版 previous，首次 previous 為 null。
 快照的內容定址 JSON 不覆寫，但輪替後可以回收；不可變不等於永久保存。
-圖片版本與快取更新依 [ADR-0015](../adr/0015-image-url-version.md)，
+圖片版本與快取更新依 [ADR-0012](../adr/0012-image-url-version.md)，
 不能把 previous 的舊圖片引用當成保留舊圖片 bytes 的理由。
 
 因此，回放記錄了舊資料版號，不代表 CDN 一定還有該版的完整資料或舊卡圖。
-ADR-0016 將對局重播的歷史資料還原留待實際開發時另設計，
+ADR-0013 將對局重播的歷史資料還原留待實際開發時另設計，
 不能沿用較早提案的「永久保存快照／下載所有舊版引擎」作為公開服務承諾。
 既有本機確定性重播與來源重算要求仍成立。
 
@@ -33,8 +33,8 @@ ADR-0016 將對局重播的歷史資料還原留待實際開發時另設計，
 | --- | --- | --- |
 | 對局工作區 | 應用程式須依規則清理，不等於回放長期儲存 | [對局工作區](matches.md#durable-object-工作區與清理) |
 | 權威回放／存檔 | 保有權威輸入；送給觀看者前須遵守資訊投影 | [ADR-0001](../adr/0001-engine-skeleton.md) |
-| 公開卡表快照與卡圖 | 有限發布窗口，不提供永久歷史下載保證 | [ADR-0016](../adr/0016-snapshot-retention.md) |
-| 來源 raw、PNG、manifest 與 inventory | 依來源歸檔契約保存；公開 WebP 回收不授權刪除來源 | [來源歸檔](../schema/ingest/source-archive.md)、[ADR-0016](../adr/0016-snapshot-retention.md) |
+| 公開卡表快照與卡圖 | 有限發布窗口，不提供永久歷史下載保證 | [ADR-0013](../adr/0013-snapshot-retention.md) |
+| 來源 raw、PNG、manifest 與 inventory | 依來源歸檔契約保存；公開 WebP 回收不授權刪除來源 | [來源歸檔](../schema/ingest/source-archive.md)、[ADR-0013](../adr/0013-snapshot-retention.md) |
 
 回放與診斷資料的觀看權限不是官方素材的再授權；官方文字、圖像與其他保留內容的權利
 仍依 [LICENSING.md](../../LICENSING.md)。本頁不指定回放落在 D1 或 R2，
