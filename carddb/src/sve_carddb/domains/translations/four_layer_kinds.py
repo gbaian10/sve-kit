@@ -118,14 +118,19 @@ def _named_kinds(
         location = re.fullmatch(r"/faces/(?P<ordinal>0|[1-9][0-9]*)/name", ref.locator)
         if location is None:
             continue
+        candidates = tuple(
+            revision
+            for revision in catalog.revisions
+            if revision["source_id"] == ref.source_version_id
+            and catalog.faces[revision["face_id"]]["ordinal"]
+            == int(location["ordinal"])
+        )
+        if not candidates:
+            continue
         lang, spelling, source = sources.text(ref)
-        if lang != "ja":
+        if lang != "ja" or source.id != ref.source_version_id:
             raise ValueError("Named counted-kind source must be Japanese")
-        for revision in catalog.revisions:
-            if revision["source_id"] != source.id or catalog.faces[revision["face_id"]][
-                "ordinal"
-            ] != int(location["ordinal"]):
-                continue
+        for revision in candidates:
             unit = catalog.units[revision["name_unit_id"]]
             if unit["text"] == spelling:
                 named.add((data.id, catalog.kind(revision["type_code"])))

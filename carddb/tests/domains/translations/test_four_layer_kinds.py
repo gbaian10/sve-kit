@@ -115,3 +115,9 @@ def test_adopted_named_kind_uses_its_own_frozen_definition(tmp_path: Path) -> No
             )
         token_facts = adopted_kinds(db, snapshot, fixture.sources())
         assert token_facts.token_traits == (("synthetic", ("follower",)),)
+        data["source_ref"] = fixture.jp.model_dump(mode="json") | {
+            "source_version_id": "src:v1:" + "c" * 64,
+        }
+        write(root, {"translations/glossary/defs/000.yaml": envelope([record])})
+        other_snapshot = load_glossary(root)
+        assert adopted_kinds(db, other_snapshot, fixture.sources()).named == ()
