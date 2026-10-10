@@ -733,3 +733,83 @@ def test_n1_remaining_inspected_cards_can_return_to_whole_deck(
     if remaining == "残り":
         assert roles(found)["destination_owner"] == ["self"]
         assert "N1-SRC07.return_inspected_deck.zone" in found.registry_rows[0]
+
+
+@pytest.mark.parametrize("token", ["【仮触発】", "【カード】", "【コンボ】"])
+def test_n1_nonkeyword_brackets_in_prose_preserve_bindability(
+    engine: Classifier, token: str
+) -> None:
+    raw = token + "自分の手札のフォロワー７枚を選ぶ。"
+    found = derive(raw, engine)
+    assert found.recognized[0].issues == ()
+    assert found.recognized[0].semantics is None
+    assert "keyword" not in roles(found)
+    assert roles(found)["source_zone"] == [("hand",)]
+    assert token in found.field.parts[0].canonical_source
+
+
+@pytest.mark.parametrize("token", ["【仮触発】", "【カード】"])
+def test_n1_unresolved_whole_keyword_line_still_has_an_issue(
+    engine: Classifier, token: str
+) -> None:
+    found = derive_source(token, source(token), engine)
+    assert "missing_keyword_concept" in found.recognized[0].issues
+    with pytest.raises(ValueError, match="Unresolved"):
+        found.bind(0)
+
+
+@pytest.mark.parametrize("modifier", ["{起動}の", "{仮修飾}の"])
+def test_n1_nonclass_braces_keep_the_operand_flat(
+    engine: Classifier, modifier: str
+) -> None:
+    raw = "自分の手札の" + modifier + "フォロワー７枚を選ぶ。"
+    found = derive(raw, engine)
+    assert found.recognized[0].issues == ()
+    assert "class_filter" not in roles(found)
+    assert modifier in found.field.parts[0].canonical_source
+    frame, binding = found.bind(0)
+    slots = {s.role: s.name for s in frame.leaf_schema.slots}
+    card = CardNP(
+        kind="NP",
+        constructor="CardNP",
+        args=CardArgs(
+            kind=SlotRef(slot=slots["counted_kind"]),
+            quantity=SlotRef(slot=slots["selection_count"]),
+            owner=SlotRef(slot=slots["source_owner"]),
+            zone=SlotRef(slot=slots["source_zone"]),
+        ),
+    )
+    with pytest.raises(ValueError, match="supported source operand"):
+        found.verify(
+            raw, engine, frame, binding, target=Target(format=1, nodes=(card,))
+        )
+
+
+@pytest.mark.parametrize("head", ["【進化時】", "【攻撃時】"])
+@pytest.mark.parametrize("cost", ["", "{コスト２}、"])
+def test_n1_trigger_hand_discard_requires_the_cost_separator(
+    engine: Classifier, head: str, cost: str
+) -> None:
+    raw = head + cost + "手札７枚を捨てる:仮効果。"
+    found = derive(raw, engine)
+    assert roles(found)["source_zone"] == [("hand",)]
+    assert roles(found)["source_owner"] == ["self"]
+    assert "N1-SRC02.hand_cost" in found.registry_rows[0]
+    for effect in (
+        "手札７枚を捨てる。",
+        ":手札７枚を捨てる。",
+        ":手札７枚を捨てる:仮効果。",
+    ):
+        discarded = derive(head + cost + effect, engine)
+        assert "source_owner" not in roles(discarded)
+        assert "source_zone" not in roles(discarded)
+
+
+def test_n1_hand_cost_self_does_not_authorize_a_hand_destination(
+    engine: Classifier,
+) -> None:
+    raw = "{起動}手札７枚を捨てる:それを手札に加える。"
+    found = derive(raw, engine)
+    assert roles(found)["source_owner"] == ["self"]
+    assert roles(found)["destination_zone"] == [("hand",)]
+    assert "destination_owner" not in roles(found)

@@ -156,6 +156,27 @@ def structural(operand: Operand, text: str) -> list[Leaf]:
     return result
 
 
+def preserve_modifiers(operand: Operand, classifier: Classifier) -> Operand:
+    """An unadopted braced class remains a restriction, even if N0 recognizes its ability."""
+    noun = operand.noun
+    if noun is not None and any(
+        item.kind == "braced" and _class_filter(item, classifier) is None
+        for item in noun.filters
+    ):
+        return replace(operand, noun=replace(noun, opaque=True))
+    return operand
+
+
+def _class_filter(item: Filter, classifier: Classifier) -> VocabularyReference | None:
+    resolution = classifier.references.proposed_vocabulary("class", item.spelling[1:-1])
+    code = resolution.target.get("vocabulary_code") if resolution.target else None
+    return (
+        VocabularyReference(kind="vocabulary", key=("class", code))
+        if not resolution.issues and isinstance(code, str)
+        else None
+    )
+
+
 def filters(
     operand: Operand, classifier: Classifier
 ) -> tuple[list[Leaf], tuple[str, ...]] | None:
@@ -203,17 +224,11 @@ def filters(
                 )
             value = VocabularyReference(kind="vocabulary", key=("type", code))
         elif item.kind == "braced":
-            spelling = item.spelling[1:-1]
-            resolution = classifier.references.proposed_vocabulary("class", spelling)
-            code = (
-                resolution.target.get("vocabulary_code") if resolution.target else None
-            )
-            if not resolution.issues and isinstance(code, str):
-                role, domain = "class_filter", "vocabulary.class.v1"
-                value = VocabularyReference(kind="vocabulary", key=("class", code))
-            else:
-                # Braced abilities retain N0's own lexical rule and fixed spelling.
+            class_value = _class_filter(item, classifier)
+            if class_value is None:
+                # N0's braced ability is preserved inside an opaque restriction.
                 continue
+            role, domain, value = "class_filter", "vocabulary.class.v1", class_value
         elif item.kind == "token":
             type_name, role, domain, value = (
                 "TokenStatus",
@@ -370,6 +385,15 @@ _THRESHOLD = re.compile(
     r"【(?P<ability>コンボ|レッスン|ネクロチャージ|スペルチェイン|NC|SC)_(?P<number>N)】"
 )
 _KEYWORD = re.compile(r"【(?P<keyword>[^【】]+)】")
+_KEYWORD_LINE = re.compile(
+    r"(?:【(?P<keyword>[^【】]+)】[ 、]*|\{(?P<ability>[^{}]+)\})"
+)
+
+
+def keyword_line(text: str) -> tuple[re.Match[str], ...]:
+    """Whole-line failures retain PR 1's treatment; prose tokens do not authorize the line."""
+    matches = tuple(_KEYWORD_LINE.finditer(text))
+    return matches if matches and "".join(m[0] for m in matches) == text else ()
 
 
 def _quick(part: SourcePart, classifier: Classifier) -> list[Leaf]:
@@ -478,7 +502,13 @@ def lexical(
             ):
                 continue
             item, reason = _keyword(part, match, classifier)
-            if reason:
+            if reason and (
+                keyword_line(text)
+                or any(
+                    t.category == "keyword" and t.source_ja == match["keyword"]
+                    for t in classifier.terms.values()
+                )
+            ):
                 issues.add(reason)
             if item:
                 result.append(item)

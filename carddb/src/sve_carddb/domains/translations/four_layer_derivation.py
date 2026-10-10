@@ -1,6 +1,5 @@
 """Prepare N1 whole-line semantics without installing them in the N0 build."""
 
-import re
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
@@ -21,8 +20,10 @@ from sve_carddb.domains.translations.four_layer_n1 import (
 from sve_carddb.domains.translations.four_layer_n1_leaves import (
     Leaf,
     filters,
+    keyword_line,
     leaf,
     lexical,
+    preserve_modifiers,
     quantity,
     structural,
     valid_unit,
@@ -52,8 +53,6 @@ if TYPE_CHECKING:
 
 # This preparation version is deliberately absent from the authored reader.
 VERSION = "four-layer-jp-v2"
-# Separators follow only a keyword, so a braced flag line stays exactly the flag.
-_KEYWORDS = re.compile(r"(?:【(?P<keyword>[^【】]+)】[ 、]*|\{(?P<ability>[^{}]+)\})")
 _QUICK = "term:ability.quick"
 
 
@@ -104,7 +103,7 @@ class DerivedField:
 
         if target is not None:
             original = normalize_source(raw, self.field.source).parts[ordinal]
-            _verify_card_operands(original, binding, target)
+            _verify_card_operands(original, binding, target, classifier)
 
     def bind(self, ordinal: int) -> tuple[Frame, SourceBinding]:
         """An unresolved line can translate precisely, but cannot share its semantic scope."""
@@ -238,7 +237,7 @@ def _source_additions(
     additions = []
     issues: set[str] = set()
     dependencies: set[str] = set()
-    for operand in accepted:
+    for operand in (preserve_modifiers(o, classifier) for o in accepted):
         evidence = filters(operand, classifier)
         if evidence is None:
             continue
@@ -362,8 +361,8 @@ def _keyword_semantics(
     classifier: Classifier,
     context: CardContext | None,
 ) -> tuple[Classified | None, tuple[str, ...]]:
-    matches = tuple(_KEYWORDS.finditer(text))
-    if not matches or "".join(match[0] for match in matches) != text:
+    matches = keyword_line(text)
+    if not matches:
         return None, ()
     quick = any(match["ability"] == "クイック" for match in matches)
     if any(
@@ -417,9 +416,10 @@ def _quick_issue(classifier: Classifier, leaves: list[Leaf]) -> str | None:
 
 
 def _verify_card_operands(
-    part: SourcePart, binding: SourceBinding, target: Target
+    part: SourcePart, binding: SourceBinding, target: Target, classifier: Classifier
 ) -> None:
     found, _ = operands(part.canonical_source)
+    found = tuple(preserve_modifiers(o, classifier) for o in found)
     for node in target.nodes:
         cards = (
             (node,)

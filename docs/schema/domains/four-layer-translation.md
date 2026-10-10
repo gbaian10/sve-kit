@@ -272,7 +272,7 @@ NP 以卡種、泛稱カード或完整 `『』` 名稱為核心；Q 沿既有�
 | N1-SRC01.select | `[Pの] Z(の/から) NP[を] Q[を]` 接選ぶ／選び／選んで；source_owner、source_zone、selection_count 及 NP filter。 |
 | N1-SRC01.search／inspect／reveal | 同一來源構造接探す／探し／探して、見る／見て、公開する／公開して；不套 selection 助詞 alias。 |
 | N1-SRC02.locative／ablative | `[Pの] Z(の/から) NP Qを [Pの] Zに` 接有限移動動詞；同子句、同 NP、明示目的地，來源與目的分槽。 |
-| N1-SRC02.hand_cost | 完整能力頭與成本分隔內的手札成本、Q、捨てる與冒號；裸棄牌不是成本。 |
+| N1-SRC02.hand_cost | 完整能力頭（含【進化時】／【攻撃時】觸發頭）與成本分隔內的手札成本、Q、捨てる與冒號；必須在該能力冒號前，觸發後的效果棄牌或裸棄牌不是成本。 |
 | N1-SRC03.place／return／add_hand／deploy | `[Pの] Zに` 接置く／置き／置いて／置いてよい；戻す／戻し／戻して／戻してよい；固定手札接加える／加え／加えてよい；固定場接出す／出し／出して／出してよい。只產目的角色。 |
 | N1-SRC04.read／quantity／exist | `Zの NPの数/枚数`、`Zの NPが(ちょうど)?Q(以上/以下)?なら(使える)?`、`Zに NPがいる/いない/ある/ない(なら/場合)?`；counted_owner／counted_zone。比較、否定及既有數值角色不合併。 |
 | N1-SRC05.arrival／delayed | `[Pの] PHが来たとき`，或 `[Pの] PHに` 接完整具體效果述語；phase_owner／phase_trigger，兩骨架不 alias。 |
@@ -305,14 +305,16 @@ NC／ネクロチャージ、SC／スペルチェイン只在完整數字門檻�
 名稱／提示文保護與事件、歷史、receipt、回合、主戰者持有者、靜態期間等父語境排除先行。
 完整 G10 優先於單區；失敗的並列（含頓號、中黑直接並列的區域）不截右半邊；DP 優先於 deck；門檻能力優先於一般 keyword。
 NP 內 trait 形狀或泛稱カード片段須恰好解析為一個 glossary 概念，否則整個 operand 不產新葉、保留 N0。
-未解引號條件、其他、表裏狀態或數值限定保留在共同 canonical／trace 中，不穿入新增結構葉。
+未解引號條件、其他、表裏狀態、數值限定及非 class 的大括號 token 保留在共同 canonical／trace 中，不穿入新增結構葉。
+非 class 大括號即使有 N0 ability 葉仍是未解修飾，該 operand 只用 flat target。
 外層合法 owner／zone／quantity／filter 仍可產葉；含未解修飾、多 trait 或泛稱卡片的 operand 使用 flat target，不能用 CardNP 吞掉限定。
 
 結構規則沒有 YAML 開關。可選相依沿 `enabled`／`low_confidence`：數值量與四種門檻沿原規則，NC／SC 分別沿原 alias 規則，
 一般 braced ability 與 Quick 沿 `braced_ability_reference`；新 `bracket_keyword_reference` 控制正文 bracket keyword。
 停用或空選擇不旁路產葉／resolved，品質沿實際相依傳播。Quick 的完整 body 恰為 `{クイック}`，只在 effect 第一個非空 raw 行、
 normal face、type_code=spell（含法術代幣）及精確 owner/context 成立時產 `quick_card_field.v1`；
-整行只有已解析 keyword 時產 `card_keywords.v2`。局部詞彙成功不授予其他整行語義。
+整行只有已解析 keyword 時產 `card_keywords.v2`。非整行的未知或非 keyword 類別括號不產 keyword 葉、不新增 issue；
+整行維持準備入口原有的缺概念／category 檢查，不因非整行例外放寬。局部詞彙成功不授予其他整行語義。
 
 ## 5. target、form 與部分 NP
 
