@@ -68,7 +68,7 @@ class SourcePart:
                     for origin in unit.origins
                 )
             )
-            expected = tuple(Span(start=s.start, end=s.end) for s in origins)
+            expected = origins
             if occurrence.raw_spans != expected:
                 raise ValueError("Leaf raw positions differ from replayed provenance")
             if occurrence.source_presence == "explicit":
@@ -300,9 +300,7 @@ def _units(raw: str, span: SourceSpan) -> tuple[Unit, ...]:
     positions = tuple(i for s in span.segments for i in range(s.start, s.end))
     text = "".join(raw[i] for i in positions)
     if span.role == "layout":
-        return (
-            Unit("W", tuple(Span(start=s.start, end=s.end) for s in span.segments)),
-        )
+        return (Unit("W", span.segments),)
     if span.role != "body":
         return tuple(Unit(raw[i], (Span(start=i, end=i + 1),)) for i in positions)
     units = nfkc(text, positions)

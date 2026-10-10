@@ -1,8 +1,8 @@
-# 卡表快照傳輸契約（2.0 實作與 3.0 目標）
+# 卡表快照傳輸契約（3.0.0，N0 已接線）
 
 本文件補足 [snapshot-format.md](snapshot-format.md) 的 JSON 容器、欄序與版本契約；公開邏輯欄位仍以該文件 §2 為唯一白名單。這些記錄不是新增的玩家集合或建置表。所有物件拒絕未列出的欄位；所有列出的欄位必須存在，`T?` 表示 `T` 或 JSON null，不能省略。空陣列表示已知無成員，來源是否完整另看 coverage。
 
-目前 producer／reader 僅支援 2.0.0，圖片契約與配置見 §5.4；不提供 1.x 產出或相容讀取。機器資源依 [snapshot-contract](snapshot-contract.md) 維護。
+目前 producer／reader 支援 3.0.0，N0 已交付，圖片契約與配置見 §5.4；不提供 1.x 產出或相容讀取。機器資源依 [snapshot-contract](snapshot-contract.md) 維護。
 3.0.0 的變更以[公開 annotation 契約](public-annotation.md)及本文 §8 為準；下列 2.0 歷史欄序不代表新版可接受舊 tuple。
 
 ## 1. 基本型別與 canonical bytes
@@ -458,4 +458,4 @@ translation.annotation_set_id=null 表示空集合；缺 field_annotation 只有
 
 機器 Schema、reader 支援表與共用完整 golden 已在 #498 的 N0 同步替換；正式 producer／reader 為 3.0.0，不沿用舊 2.0 標頭，
 也不得只升 data_version。固定案例依 [public-annotation-cases](public-annotation-cases.md)，
-正式容量依 [size-budget](size-budget.md#30-annotation-與-jp-來源的計帳)，本次規格不宣稱實作或量測已通過。
+正式容量依 [size-budget](size-budget.md#30-annotation-與-jp-來源的計帳)，N0 已接線並完成量測；未達預算的項目沿用維護者豁免，由 #506 最佳化，手機實測由 #53 承接。

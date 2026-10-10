@@ -3,7 +3,7 @@
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
 專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../../quotations.md)。
 
-建置資料庫的完整邏輯契約，共 120 表；這是設計規格，不是 migration。卡表快照的公開欄位見 [snapshot-format.md](../export/snapshot-format.md)。DSL 語法只以 `dsl/` 的 JSON Schema 為權威。
+建置資料庫的完整邏輯契約，共 126 表；這是設計規格，不是 migration。卡表快照的公開欄位見 [snapshot-format.md](../export/snapshot-format.md)。DSL 語法只以 `dsl/` 的 JSON Schema 為權威。
 
 ## 1. 兩層與範圍
 
@@ -51,7 +51,7 @@ record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由�
 | DSL | §10 的不同作者審核或巨集機械門檻；實跑另判定 | 卡文可發布，自動能力不放行 |
 
 **翻譯及詞彙當前資料**：依[翻譯契約](../domains/translation-contract.md)及 catalog format 2，
-只驗格式、來源、唯一鍵、參數、引用與當前清冊一致；低信心顯示待校對，不使用 sampled／confirmed 或批准收據。
+只驗格式、來源、唯一鍵、參數、引用與本次來源 binding／未匹配清單一致；低信心顯示待校對，不使用 sampled／confirmed 或批准收據。
 新格式指回 authored source_record，不能產生假的 decision 或全面放寬其他入口的 FK。
 
 **構築採納的明示例外**：依維護者 2026-10-03「比照翻譯」的決定及 [構築採納 §1](../domains/construction-adoption.md#1-專用入口與採納封套)，首輪須有維護者實際抽查與政策核可收據；之後由 Claude 系、Codex 系各一個模型對最終值及官方來源互審，無分歧且全體政策檢查通過者，可以 `adoption_review.mode=approved_policy`、confirmed batch 採納。sample_ids 恰列全體 checked，表示政策機械全查；note 明示「政策核可」，不能把模型檢查宣稱為逐筆人工核可。真人抽查／處理分歧另記實際事件，分歧走 human 批次，不混入政策批次；首輪或政策收據／loader 未到位一律拒絕。其餘類別的人工門檻不變，此例外不擴及身分／跨區核對、勘誤、更正、翻譯或其他採納入口。
@@ -226,7 +226,7 @@ Decklog 的 JP/EN adapter 是不同常數命名空間。未有實際樣本，不
 | `ruling_supersession` | `old_revision_id→ruling_revision,new_revision_id→ruling_revision,scope_unit_id→text_unit` `PK(前兩欄)`；A；支援 R-0009 只取代 R-0002 的部分判斷，不刪其其餘效力                                                                                                                                                    |
 | `ruling_review`       | `ruling_revision_id→ruling_revision,cr_version_id→cr_version,reviewed_by:Text?,reviewed_on:Date?,verdict:pending\|valid\|revise` `PK(前兩欄)`；A                                                                                                                                                                   |
 
-`ruling_revision.revision` 取 authored 明示的正整數，format 不參與取值。四層裁定建置以 RulingResolution 的精確 occurrence／scope 為適用權威；舊 `ruling_template` 關聯不能表示用途範圍，pending 不投影為有效關聯。DB 型別邊界保留現行裁定檔案 hash、原始引用 ordinal，檢查必填 nullable、邏輯唯一及兩層級互斥，不能只依 SQL 的 nullable UNIQUE。裁定仍有效的文字 active_scope 與特定卡用途資格分開；pending 正文可查讀，但不出肯定適用提示。完整形狀與集合對帳依[四層契約 §9](../domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)。
+`ruling_revision.revision` 取 authored 明示的正整數，format 不參與取值。四層裁定建置以 RulingResolution 的精確 occurrence／scope 為適用權威；舊 `ruling_template` 關聯不能表示用途範圍，pending 不投影為有效關聯。N0 的 resolution.build 依原始 ordinal 產生引用列；DB 保存現行裁定檔案 hash，檢查 SQL PK／FK 與逐列封閉型別。邏輯鍵唯一／互斥、完整用途集合及用途候選來源檢查由 #499 接上；本次不宣稱 DB 已驗證這些集合條件。裁定仍有效的文字 active_scope 與特定卡用途資格分開；pending 正文可查讀，但不出肯定適用提示。完整形狀與集合對帳依[四層契約 §9](../domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)。
 
 ruling_hint.parameter_schema 與 text_symbol 共用 [傳輸契約 §3.2 的公開參數宣告](../export/snapshot-transport.md#32-公開參數宣告)，建置與出貨使用同一形狀。
 

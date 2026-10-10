@@ -84,19 +84,24 @@ def _descriptor(
     return {}
 
 
+# These two cases describe other reader versions and check the case specification,
+# not the installed reader.
+def _peer_admits(entry: dict[str, JsonValue], reader: dict[str, JsonValue]) -> bool:
+    return (
+        entry["format_version"] in array(reader["supported_formats"])
+        and tuple(map(int, string(entry["min_reader_version"]).split(".")))
+        <= tuple(map(int, string(reader["reader_version"]).split(".")))
+        and set(map(string, array(entry["required_capabilities"])))
+        <= set(map(string, array(reader["supported_capabilities"])))
+    )
+
+
 def _admission(
     _case: dict[str, JsonValue], scenario: JsonValue
 ) -> dict[str, JsonValue]:
     value = object_value(scenario)
     entry = object_value(value["value"])
-    if (
-        not compatible(entry)
-        or entry["format_version"] not in array(value["supported_formats"])
-        or tuple(map(int, string(entry["min_reader_version"]).split(".")))
-        > tuple(map(int, string(value["reader_version"]).split(".")))
-        or not set(map(string, array(entry["required_capabilities"])))
-        <= set(map(string, array(value["supported_capabilities"])))
-    ):
+    if not compatible(entry) or not _peer_admits(entry, value):
         raise ValueError("public-annotation/admission")
     return {}
 

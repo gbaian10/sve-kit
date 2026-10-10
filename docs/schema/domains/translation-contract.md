@@ -3,8 +3,8 @@
 本契約保留四層來源 binding／未匹配清單、句型比對、固定字與參數定義、譯文、術語、卡名、風味、加粗、新卡自動套用及未匹配清單。
 2026-10-04 起，翻譯資料採可直接修訂的當前值；Git 保存修改歷史，退回使用 git revert。
 不再用決定封套、收據、成員雜湊、只增不改、歷史重播、首輪抽查、雙模型或手動合併前檢查作載入門檻。
-本文件的四層目標契約依 [ADR-0021](../../adr/0021-four-layer-translation.md)，仍待審核與實作；
-既有 format 2／固定字串模板不能宣稱已支援新模型。逐欄型別、驗證責任與固定案例以
+本文件的四層契約依 [ADR-0021](../../adr/0021-four-layer-translation.md)，N0 已實作；
+N1 由 #380／#499 接續。逐欄型別、驗證責任與固定案例以
 [四層共用契約](four-layer-translation.md)為準；建置與公開 reader 依 §8 同步切換。
 
 ## 1. 來源與顯示原則
@@ -211,9 +211,9 @@ claimed_source 是選填的出處主張；沒有具體主張就省略，不用�
 四層來源核心在本次建置定位及驗證來源一次，不執行歷史 producer，也不保存新的核可證明。
 缺資料不得借最新官網或個人檔補洞；來源歸檔完整性仍依[來源歸檔](../ingest/source-archive.md)。
 
-現有 export-offline 會對 face_revision 與 printing_face 的 JP 主文／section 建置固定模板翻譯；
-四層切換由 #498 實作，不能把現有成功輸出視為新 schema／annotation 已驗收。
-目標行為是逐來源 use 建 binding，source context 可共用，但 owner、field、面及所用原文均逐一驗證。
+現有 export-offline 對 face_revision 與 printing_face 的 JP 主文／section 建置四層翻譯，
+並產生 3.0.0 公開 annotation；#498 的 N0 已完成 producer／reader／Web 接線。
+每個來源 use 分別建 binding，source context 可共用，但 owner、field、面及所用原文均逐一驗證。
 效果／section 只要自己的原文有效即可套用，不等 printed_text_state；名稱仍只用該版已知 printed 字串。
 建置報告只列 ID、原因及欄位／退回計數，不輸出官方卡文。
 

@@ -367,7 +367,7 @@ class Classifier:
             raise ValueError("Unsupported parameter source role")
         projected = Part(
             role,
-            tuple(Span(start=s.start, end=s.end) for s in part.source_span.segments),
+            part.source_span.segments,
             part.canonical_source,
             part.units,
         )
@@ -480,9 +480,7 @@ class Classifier:
         presence = LeafOccurrence(
             slot=hint.name,
             ordinal=0,
-            raw_spans=tuple(
-                Span(start=s.start, end=s.end) for s in hint.source_segments
-            ),
+            raw_spans=hint.source_segments,
             canonical_spans=spans,
             source_unit=source_unit,
             source_presence="explicit",

@@ -43,6 +43,21 @@ const handled = new Set([
   "admission",
 ])
 
+// These two cases describe other reader versions and check the case specification,
+// not the installed reader.
+function peerAdmits(entry: JsonObject, reader: JsonObject): boolean {
+  const minimum = stringValue(entry["min_reader_version"]).split(".").map(Number)
+  const available = stringValue(reader["reader_version"]).split(".").map(Number)
+  const difference = minimum.findIndex((part, index) => part !== available[index])
+  return (
+    arrayValue(reader["supported_formats"]).includes(entry["format_version"] ?? null) &&
+    (difference === -1 || Number(minimum[difference]) <= Number(available[difference])) &&
+    arrayValue(entry["required_capabilities"]).every((capability) =>
+      arrayValue(reader["supported_capabilities"]).includes(capability),
+    )
+  )
+}
+
 function run(
   caseValue: JsonObject,
   input: ReturnType<typeof annotationInputs>[number],
@@ -68,25 +83,7 @@ function run(
   }
   if (operation === "admission") {
     const value = objectValue(objectValue(input)["value"])
-    if (
-      !isCompatible(value) ||
-      !arrayValue(parameters["supported_formats"]).includes(value["format_version"] ?? null) ||
-      stringValue(value["min_reader_version"])
-        .split(".")
-        .map(Number)
-        .some(
-          (part, i, parts) =>
-            parts
-              .slice(0, i)
-              .every(
-                (previous, j) =>
-                  previous === Number(stringValue(parameters["reader_version"]).split(".")[j]),
-              ) && part > Number(stringValue(parameters["reader_version"]).split(".")[i]),
-        ) ||
-      arrayValue(value["required_capabilities"]).some(
-        (capability) => !arrayValue(parameters["supported_capabilities"]).includes(capability),
-      )
-    )
+    if (!isCompatible(value) || !peerAdmits(value, parameters))
       throw new Error("admission rejected")
     return {}
   }

@@ -190,6 +190,14 @@ def test_missing_required_leaf_and_old_placeholder_text_are_rejected() -> None:
     assert isinstance(target_data, dict)
     target_data["target"] = {
         "format": 1,
+        "nodes": [{"kind": "Literal", "text": ""}, {"kind": "LeafRef", "slot": "n"}],
+    }
+    with pytest.raises(ValueError, match="Invalid four-layer authored shard"):
+        from_files(
+            (records[0], file("translations/templates/values/001.yaml", [invalid]))
+        )
+    target_data["target"] = {
+        "format": 1,
         "nodes": [{"kind": "Literal", "text": "{{n}}"}],
     }
     with pytest.raises(ValueError, match="every required leaf"):
@@ -340,6 +348,29 @@ def term_choice(value: JsonValue) -> list[JsonValue]:
             },
         },
     ]
+
+
+def test_duplicate_concept_key_identifies_only_the_two_conflicting_paths() -> None:
+    first = object_value(term_choice(None)[0])
+    second = deepcopy(first)
+    object_value(second["data"])["id"] = "term:fixture.alias"
+    unrelated = deepcopy(first)
+    data = object_value(unrelated["data"])
+    data["id"] = "term:fixture.unrelated"
+    data["concept_key"] = "fixture.unrelated"
+    paths = tuple(f"translations/glossary/fixture/{i:03}.yaml" for i in (1, 2, 3))
+    with pytest.raises(ValueError, match="Duplicate glossary concept key") as error:
+        from_files(
+            tuple(
+                file(path, [term])
+                for path, term in zip(paths, (first, second, unrelated), strict=True)
+            )
+        )
+    message = str(error.value)
+    assert "fixture.keyword" in message
+    assert paths[0] in message
+    assert paths[1] in message
+    assert paths[2] not in message
 
 
 @pytest.mark.parametrize("value", [None, {"kind": "authored", "text": "自編詞"}])

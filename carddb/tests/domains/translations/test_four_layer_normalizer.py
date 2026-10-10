@@ -272,6 +272,7 @@ def test_normalized_numeric_placeholder_cannot_be_hidden_in_a_literal_target() -
 
 
 def test_public_replay_rejects_utf16_coordinates_in_a_codepoint_trace() -> None:
+    """FL-008/utf16_offset reaches the production replay boundary here."""
     raw = "仮😀２枚"
     _, frame, binding = bound_number(raw)
     replay_part(raw, frame, binding, {})

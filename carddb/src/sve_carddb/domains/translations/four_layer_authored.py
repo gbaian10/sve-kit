@@ -428,11 +428,18 @@ def _match_references(data: TemplateMatch, frames: Mapping[str, Frame]) -> None:
 def _glossary_references(  # ruff: ignore[complex-structure,too-many-branches] -- each record kind retains its existing evidence constraints
     records: tuple[Record, ...], locations: Mapping[str, str]
 ) -> None:
-    terms = {r.data.id: r.data for r in records if isinstance(r, TermRecord)}
-    if len({t.concept_key for t in terms.values()}) != len(terms):
-        raise ValueError(
-            f"Duplicate glossary concept key: paths={sorted(set(locations.values()))}"
-        )
+    term_records = {r.data.id: r for r in records if isinstance(r, TermRecord)}
+    terms = {identifier: record.data for identifier, record in term_records.items()}
+    seen: dict[str, TermRecord] = {}
+    for term_record in term_records.values():
+        key = term_record.data.concept_key
+        previous = seen.get(key)
+        if previous is not None:
+            paths = [locations[previous.record_key], locations[term_record.record_key]]
+            raise ValueError(
+                f"Duplicate glossary concept key: key={key}, paths={paths}"
+            )
+        seen[key] = term_record
     for record in records:
         with _located(record, locations):
             if isinstance(record, FrameRecord):

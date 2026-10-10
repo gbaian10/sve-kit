@@ -49,12 +49,7 @@ def load(repo: Path) -> tuple[Document, ...]:
     """Current IDs are unique even when two files claim different revisions."""
     root = repo / "authored"
     directory = root / "rules/rulings"
-    try:
-        require_directory(root, directory)
-    except ValueError:
-        raise ValueError(
-            "Missing or unsafe authored data area: authored/rules/rulings"
-        ) from None
+    require_directory(root, directory)
     result = tuple(
         document(path.relative_to(repo).as_posix(), read(path, root=root)[0])
         for path in sorted(directory.glob("*.yaml"))
