@@ -252,7 +252,7 @@ Node 的 kind 是上述四種唯一 discriminator；required 槽須由 LeafRef �
 | UnionNP(branches,quantity?) | branches 為至少兩個 CardNP；只組合同元素型別且分支 scope 已明確者，quantity 是整體數量；異種或複雜分支可保留 Literal＋葉引用 |
 | CountExpr(expr) | expr=QuantityExpr 葉引用；只呈現既有表達式結構，不建立新的 runtime count 指令 |
 
-CardNP 的 owner=Player、zone=ZoneSet、token=TokenStatus；class 為 Concept 的 vocabulary(class) 引用，
+CardNP 的 owner=Player、zone=ZoneSet（role 限 source_zone 或 counted_zone）、token=TokenStatus；class 為 Concept 的 vocabulary(class) 引用，
 traits 每項為 role=trait 的 Concept glossary 引用；class 的 role=class_filter。
 引用域也可使用已登錄的 `concept.trait.v1`／`vocabulary.class.v1`。
 目前 traits 限 0 或 1 項，不把 token／class 當 trait；多項篩選須先確認具名構造的 AND／OR 語義。

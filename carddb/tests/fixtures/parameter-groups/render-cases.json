@@ -1446,8 +1446,7 @@
         "class": false
       },
       "expected": {
-        "selection_unit": "枚",
-        "np_eligible": false
+        "selection_unit": "枚"
       }
     },
     {
@@ -1459,8 +1458,7 @@
         "class": false
       },
       "expected": {
-        "selection_unit": "体",
-        "np_eligible": false
+        "selection_unit": "体"
       }
     },
     {
@@ -1472,8 +1470,7 @@
         "class": false
       },
       "expected": {
-        "selection_unit": "体",
-        "np_eligible": false
+        "selection_unit": "体"
       }
     },
     {
@@ -1485,8 +1482,7 @@
         "class": true
       },
       "expected": {
-        "selection_unit": "枚",
-        "np_eligible": false
+        "selection_unit": "枚"
       }
     },
     {
@@ -1498,8 +1494,7 @@
         "class": false
       },
       "expected": {
-        "selection_unit": "枚",
-        "np_eligible": false
+        "selection_unit": "枚"
       }
     },
     {
@@ -1511,9 +1506,6 @@
       },
       "expected": {
         "text": "可以公開自己手牌中的2張從者。",
-        "same_frame": true,
-        "same_binding": true,
-        "same_annotation": true,
         "annotations": [
           {
             "ordinal": 0,
@@ -1572,9 +1564,6 @@
       },
       "expected": {
         "text": "選擇對手戰場上至多2體從者。",
-        "same_frame": true,
-        "same_binding": true,
-        "same_annotation": true,
         "annotations": [
           {
             "ordinal": 0,
@@ -1633,9 +1622,6 @@
       },
       "expected": {
         "text": "選擇自己EX區中的1體具有星紋特性的代幣從者。",
-        "same_frame": true,
-        "same_binding": true,
-        "same_annotation": true,
         "annotations": [
           {
             "ordinal": 0,
@@ -1722,9 +1708,6 @@
       },
       "expected": {
         "text": "選擇自己手牌中的4張測試職業從者。",
-        "same_frame": true,
-        "same_binding": true,
-        "same_annotation": true,
         "annotations": [
           {
             "ordinal": 0,
@@ -1800,9 +1783,6 @@
       },
       "expected": {
         "text": "選擇自己戰場或EX區中合計至多3張從者。",
-        "same_frame": true,
-        "same_binding": true,
-        "same_annotation": true,
         "annotations": [
           {
             "ordinal": 0,

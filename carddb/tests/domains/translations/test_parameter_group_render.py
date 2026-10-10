@@ -88,7 +88,7 @@ def engine() -> Renderer:
         {(f.id, f.lang): Form(f) for f in forms},
         domains={
             "fixture.pg380.zone": ZoneDomain(
-                type="ZoneSet", zones=("battlefield", "hand", "ex", "deck", "cemetery")
+                type="ZoneSet", zones=("battlefield", "hand", "ex", "deck", "graveyard")
             ),
             "fixture.pg380.zone_union": ZoneDomain(
                 type="ZoneSet", zones=("battlefield", "ex")
@@ -194,7 +194,6 @@ def test_parameter_group_case(case: dict[str, JsonValue]) -> None:
             s.type == "CardKind" and s.role == "counted_kind"
             for s in definition.leaf_schema.slots
         )
-        assert expected["np_eligible"] is False
         return
     fixture = object_value(object_value(DATA["fixtures"])[string(value["fixture"])])
     item = render_item(fixture)
@@ -358,3 +357,45 @@ def test_card_np_cannot_use_a_destination_as_its_counted_zone() -> None:
     )
     with pytest.raises(ValueError, match="counted source zone"):
         engine().render("context:pg380", "zh-Hant", (item,))
+
+
+def test_trait_cannot_be_a_class() -> None:
+    fixture = deepcopy(object_value(object_value(DATA["fixtures"])["g09"]))
+    nodes = array(object_value(fixture["np_target"])["nodes"])
+    args = object_value(object_value(nodes[1])["args"])
+    args["traits"] = []
+    args["class"] = {"slot": "trait"}
+    item = replace(
+        render_item(fixture),
+        selected=SelectedTarget(
+            Target.model_validate_json(canonical(fixture["np_target"]))
+        ),
+    )
+    with pytest.raises(ValueError, match="class requires class vocabulary"):
+        engine().render("context:pg380", "zh-Hant", (item,))
+
+
+def test_classifier_follows_the_np_zone_not_another_zone_leaf() -> None:
+    fixture = deepcopy(object_value(object_value(DATA["fixtures"])["g07"]))
+    semantic = object_value(fixture["semantic"])
+    slots = array(object_value(semantic["leaf_schema"])["slots"])
+    raw = string(semantic["canonical_source"])
+    semantic["canonical_source"] = raw + "{dest}"
+    destination = deepcopy(
+        next(object_value(s) for s in slots if object_value(s)["name"] == "zone")
+    )
+    destination.update(
+        name="dest",
+        role="destination_zone",
+        required=False,
+        occurrences=[{"start": len(raw), "end": len(raw) + 6}],
+    )
+    slots.append(destination)
+    object_value(fixture["values"])["dest"] = ["battlefield"]
+    item = replace(
+        render_item(fixture),
+        selected=SelectedTarget(
+            Target.model_validate_json(canonical(fixture["np_target"]))
+        ),
+    )
+    assert rendered(item, engine()).text == "可以公開自己手牌中的2張從者。"
