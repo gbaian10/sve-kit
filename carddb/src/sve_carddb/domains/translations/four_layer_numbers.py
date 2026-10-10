@@ -10,6 +10,7 @@ from sve_carddb.domains.translations.four_layer_choices import (
     choice_index,
     choice_quantity,
 )
+from sve_carddb.domains.translations.four_layer_conditions import existence_context
 from sve_carddb.domains.translations.four_layer_units import (
     compound_action,
     compound_selection,
@@ -208,7 +209,9 @@ def recognize_number(raw: str, part: SourcePart, hint: Hint) -> Number | None:
         "selection_count",
         "existence_count",
     }:
-        counted = count_context(before)
+        counted = count_context(before) or (
+            existence_context(before) if number.role == "existence_count" else None
+        )
         if (
             counted is None
             or not source_unit(counted, number.source_unit or "").merge_allowed
@@ -228,7 +231,15 @@ def number_issue(raw: str, part: SourcePart, hint: Hint) -> str:
             and number.type == "QuantitySpec"
             and number.role in {"selection_count", "existence_count"}
             and number.source_unit is not None
-            and (counted := count_context(before)) is not None
+            and (
+                counted := count_context(before)
+                or (
+                    existence_context(before)
+                    if number.role == "existence_count"
+                    else None
+                )
+            )
+            is not None
         ):
             decision = source_unit(counted, number.source_unit)
             if decision.reason == "source_unit_mismatch":
