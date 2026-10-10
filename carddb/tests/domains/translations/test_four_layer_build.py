@@ -123,6 +123,15 @@ def test_producer_uses_exact_owner_and_preserves_whole_field_fallback(  # ruff: 
         with db.transaction():
             report = apply(db, inputs, snapshot, settings)
         assert report.fields == 1
+        detail = report.details[0].payload()
+        assert detail["owner"] == {
+            "kind": "face_revision",
+            "revision_id": "link-revision",
+        }
+        assert detail["field"] == "effect"
+        assert detail["translated"] == (translated and not unused)
+        assert report.payload()["np_target_bindings"] == 0
+        assert "Synthetic rule." not in canonical(report.payload()).decode()
         assert report.translated == int(translated and not unused)
         assert report.unused_frames == ((frame.id,) if unused else ())
         if unused:

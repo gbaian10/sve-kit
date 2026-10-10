@@ -5,18 +5,45 @@ from typing import TYPE_CHECKING
 from sve_carddb.build import Json
 from sve_carddb.build.rows import insert_exact
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.domains.rulings.mapping import key
 from sve_carddb.domains.rulings.resolution import Report, build
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database
+    from sve_carddb.domains.rulings.mapping import Rebuild
     from sve_carddb.domains.rulings.reader import Document
 
 PROFILE = "ruling-authored-v2"
 
 
-def write(db: Database, documents: tuple[Document, ...], revision: str) -> Report:
+def write(
+    db: Database,
+    documents: tuple[Document, ...],
+    revision: str,
+    *,
+    rebuild: Rebuild | None = None,
+) -> Report:
     """Store the current documents and their original applicability positions."""
-    report = build(documents)
+    report = build(documents, rebuild)
+    frames = {row.values["id"] for row in db.rows("sentence_template")}
+    bindings = {row.values["id"] for row in db.rows("text_template_binding")}
+    for resolution in report.resolutions:
+        targets = resolution.candidates + (
+            () if resolution.target is None else (resolution.target,)
+        )
+        if any(target.frame_id not in frames for target in targets):
+            raise ValueError(
+                "Ruling target or candidate frame is missing from this build"
+            )
+        if targets and (
+            rebuild is None
+            or any(
+                rebuild.binding_ids[key(target)] not in bindings for target in targets
+            )
+        ):
+            raise ValueError(
+                "Ruling target or candidate source use is missing from this build"
+            )
     for item in documents:
         source_id = (
             "authored:ruling:"

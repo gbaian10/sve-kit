@@ -2,6 +2,7 @@
 
 from collections import Counter
 from dataclasses import dataclass
+from dataclasses import field as dataclass_field
 from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
@@ -54,6 +55,35 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.sources import Sources
 
 
+@dataclass
+class FieldReport:
+    field: OwnerField
+    translated: bool = False
+    low_confidence: bool | None = None
+    source_hash: str | None = None
+    reasons: tuple[str, ...] = ()
+    pending: tuple[str, ...] = ()
+    pending_semantics: tuple[str, ...] = ()
+    projections: Counter[str] = dataclass_field(default_factory=Counter)
+    target_bindings: int = 0
+    np_target_bindings: int = 0
+
+    def payload(self) -> dict[str, JsonValue]:
+        """Missing sources and pending semantics remain visible even on untranslated fields."""
+        return {
+            **self.field.model_dump(mode="json"),
+            "translated": self.translated,
+            "low_confidence": self.low_confidence,
+            "source_hash": self.source_hash,
+            "reasons": list(self.reasons),
+            "pending": list(self.pending),
+            "pending_semantics": list(self.pending_semantics),
+            "projections": dict[str, JsonValue](sorted(self.projections.items())),
+            "target_bindings": self.target_bindings,
+            "np_target_bindings": self.np_target_bindings,
+        }
+
+
 @dataclass(frozen=True)
 class Report:
     fields: int
@@ -62,6 +92,7 @@ class Report:
     reasons: Counter[str]
     pending: Counter[str]
     unused_frames: tuple[str, ...]
+    details: tuple[FieldReport, ...]
 
     def payload(self) -> dict[str, JsonValue]:
         """Only counts, IDs and diagnostic codes enter reports, never source text."""
@@ -73,6 +104,9 @@ class Report:
                 }
                 for identifier in self.unused_frames
             ],
+            "owner_fields": [d.payload() for d in self.details],
+            "np_target_bindings": sum(d.np_target_bindings for d in self.details),
+            "target_bindings": sum(d.target_bindings for d in self.details),
             "fields": self.fields,
             "translated": self.translated,
             "original": self.fields - self.translated,
@@ -171,6 +205,7 @@ class _Plan:
     fields: tuple[CompiledField, ...]
     canonical_sources: dict[str, str]
     total: int
+    details: dict[bytes, FieldReport]
     reasons: Counter[str]
     pending: Counter[str]
 
@@ -208,13 +243,18 @@ def _compile(
     reasons: Counter[str] = Counter()
     pending: Counter[str] = Counter()
     total = 0
+    details: dict[bytes, FieldReport] = {}
     for field in owner_fields(db):
         total += 1
+        detail = FieldReport(field)
+        details[canonical(field.model_dump(mode="json"))] = detail
         if not _confirmed(db, field):
             reasons["unconfirmed_identity"] += 1
+            detail.reasons = ("unconfirmed_identity",)
             continue
         if empty_field(db, field):
             reasons["empty_source_field"] += 1
+            detail.reasons = ("empty_source_field",)
             continue
         source = descriptor(db, settings.sources, field, settings.batch_id)
         result = compile_card_field(
@@ -225,6 +265,16 @@ def _compile(
             controls.frames_for(source.source_unit_id, source.source_hash, frames),
         )
         controls.verify(result)
+        detail.source_hash = source.source_hash
+        detail.pending = result.issues
+        detail.projections = Counter(
+            m.frame.projection.projection_kind for m in result.matches if m is not None
+        )
+        detail.pending_semantics = tuple(
+            m.frame.id
+            for m in result.matches
+            if m is not None and m.frame.semantic_variant.state == "pending"
+        )
         if not result.complete:
             reasons[
                 "missing_name_concept"
@@ -232,6 +282,11 @@ def _compile(
                 else "unmatched_source_frame"
             ] += 1
             pending.update(result.issues)
+            detail.reasons = (
+                "missing_name_concept"
+                if "missing_card_name_concept" in result.issues
+                else "unmatched_source_frame",
+            )
             continue
         compiled.append(result)
         for part, match in zip(result.field.parts, result.matches, strict=True):
@@ -244,7 +299,7 @@ def _compile(
                     f"Frame hash collision across exact owner fields: frame_id={match.frame.id}, source_unit_id={source.source_unit_id}"
                 )
     controls.verify_closure()
-    return _Plan(tuple(compiled), canonical_sources, total, reasons, pending)
+    return _Plan(tuple(compiled), canonical_sources, total, details, reasons, pending)
 
 
 def _populate(
@@ -300,6 +355,22 @@ def apply(
     translated = low = 0
     for field in plan.fields:
         chosen = controls.select(field, renderer, selected, settings.lang)
+        field_key = canonical(
+            field.source.descriptor.model_dump(
+                mode="json", include={"owner", "field", "ordinal"}
+            )
+        )
+        detail = plan.details[field_key]
+        selected_targets = [
+            chosen.targets.get((match.frame.id, settings.lang))
+            for match in field.matches
+            if match is not None
+        ]
+        detail.target_bindings = sum(t is not None for t in selected_targets)
+        detail.np_target_bindings = sum(
+            t is not None and any(n.kind == "NP" for n in t.target.nodes)
+            for t in selected_targets
+        )
         result = render_field(
             db,
             field,
@@ -308,9 +379,12 @@ def apply(
             settings.lang,
             suppress=chosen.suppress,
         )
+        detail.reasons = result.issues
         if result.rendered is None:
             plan.reasons.update(result.issues)
         else:
+            detail.translated = True
+            detail.low_confidence = result.rendered.low_confidence
             translated += 1
             low += result.rendered.low_confidence
     unused = tuple(
@@ -319,4 +393,12 @@ def apply(
             - plan.canonical_sources.keys()
         )
     )
-    return Report(plan.total, translated, low, plan.reasons, plan.pending, unused)
+    return Report(
+        plan.total,
+        translated,
+        low,
+        plan.reasons,
+        plan.pending,
+        unused,
+        tuple(value for _, value in sorted(plan.details.items())),
+    )

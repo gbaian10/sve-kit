@@ -86,6 +86,15 @@ class Target(RecordData):
     occurrence: OccurrenceKey
 
 
+class Mapping(RecordData):
+    legacy_namespace: Code
+    legacy_template_id: Text
+    occurrence: OccurrenceKey
+    frame_id: FrameId
+    semantic_variant: SemanticVariant
+    scope: Scope
+
+
 class Legacy(RecordData):
     namespace: Code | None
     template_id: Text
@@ -98,6 +107,15 @@ class Legacy(RecordData):
         return self
 
 
+PendingReason = Literal[
+    "unknown_legacy_scope",
+    "no_candidate",
+    "ambiguous_variant",
+    "source_changed",
+    "unsupported_relation",
+]
+
+
 class Resolution(RecordData):
     ruling_ref: RulingRef
     ruling_source: RulingSource
@@ -106,16 +124,7 @@ class Resolution(RecordData):
     status: Literal["resolved", "pending"]
     target: Target | None
     candidates: tuple[Target, ...]
-    reason: (
-        Literal[
-            "unknown_legacy_scope",
-            "no_candidate",
-            "ambiguous_variant",
-            "source_changed",
-            "unsupported_relation",
-        ]
-        | None
-    )
+    reason: PendingReason | None
 
     @model_validator(mode="after")
     def _disposition(self) -> Self:
