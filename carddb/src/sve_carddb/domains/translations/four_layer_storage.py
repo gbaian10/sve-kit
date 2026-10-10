@@ -192,7 +192,7 @@ def use_field(row: Row) -> OwnerField:
         ("cr_clause_id", "cr_clause", "cr_clause_id"),
         ("keyword_id", "keyword", "keyword_id"),
         ("product_id", "product", "product_id"),
-        ("product_family_id", "product_family", "family_id"),
+        ("product_family_id", "product_family", "product_family_id"),
     ):
         if use[column] is not None:
             owners.append({"kind": kind, key: use[column]})
@@ -209,7 +209,7 @@ def use_field(row: Row) -> OwnerField:
             {
                 "kind": "vocabulary",
                 "vocabulary_kind": use["vocabulary_kind"],
-                "code": use["vocabulary_code"],
+                "vocabulary_code": use["vocabulary_code"],
             }
         )
     if len(owners) != 1:

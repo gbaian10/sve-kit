@@ -13,18 +13,21 @@ from sve_carddb.build import (
     four_layer,
     templates,
 )
+from sve_carddb.build.model import Column, Kind, Table
 from sve_carddb.build.t0_json import schemas as t0_schemas
 from sve_carddb.build.t1 import REGISTRY
 from sve_carddb.build.t1_json import schemas as t1_schemas
 from sve_carddb.contracts.annotations import AnnotationSet
 from sve_carddb.contracts.four_layer import hash_payload
-from sve_carddb.contracts.source_binding import LeafOccurrence
+from sve_carddb.contracts.source_binding import LeafOccurrence, SourceDescriptor
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_authored import (
     FormRecord,
     FrameRecord,
     TargetRecord,
 )
+from sve_carddb.domains.translations.four_layer_classification import Term
+from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 from sve_carddb.domains.translations.four_layer_storage import (
     read_annotation,
     read_binding,
@@ -40,6 +43,8 @@ from sve_carddb.domains.translations.four_layer_storage import (
 )
 
 from ...support.build_db_fixtures import seed
+from .test_four_layer_classification import classifier
+from .test_four_layer_classification import source as classified_source
 from .test_four_layer_normalizer import bound_number, rekey
 
 if TYPE_CHECKING:
@@ -54,21 +59,25 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope="session")
 def compiled() -> CompiledSchema:
+    # Exercise the reserved owner without enabling a production keyword importer.
     old = {t.name for t in templates.TABLES}
     registry = replace(
         REGISTRY,
         tables=tuple(t for t in REGISTRY.tables if t.name not in old)
-        + four_layer.FRAME_TABLES,
+        + four_layer.FRAME_TABLES
+        + (Table("keyword", (Column("id", Kind.ID),), ("id",)),),
         capabilities=tuple(
             replace(cap, tables=tuple(t.name for t in four_layer.FRAME_TABLES))
             if cap.name == "translation_templates"
+            else replace(cap, implemented=True)
+            if cap.name == "keyword"
             else cap
             for cap in REGISTRY.capabilities
         ),
     )
     return compile_schema(
         registry,
-        ("translation_templates",),
+        ("translation_templates", "qa", "cr", "keyword"),
         t0_schemas()
         | t1_schemas()
         | four_layer.schemas()
@@ -99,6 +108,55 @@ def stored(compiled: CompiledSchema) -> Iterator[tuple[Database, Frame, SourceBi
                     "lang": "ja",
                     "text": raw,
                     "content_hash": "sha256:" + binding.source.source_hash,
+                },
+            )
+            db.insert("keyword", {"id": "keyword:synthetic"})
+            db.insert(
+                "qa",
+                {
+                    "id": "qa",
+                    "region": "jp",
+                    "official_number": None,
+                    "stable_source_key": "synthetic",
+                    "source_url": "https://example.invalid/qa",
+                },
+            )
+            db.insert(
+                "qa_version",
+                {
+                    "id": "qa:synthetic",
+                    "qa_id": "qa",
+                    "revision": 1,
+                    "published_on": None,
+                    "updated_on": None,
+                    "date_raw": None,
+                    "observed_at": "2026-10-01T00:00:00Z",
+                    "question_unit_id": "text",
+                    "answer_unit_id": "text",
+                    "state": "active",
+                    "source_id": "source",
+                    "supersedes_id": None,
+                },
+            )
+            db.insert(
+                "cr_version",
+                {
+                    "id": "cr",
+                    "region": "jp",
+                    "version": "synthetic",
+                    "published_on": None,
+                    "effective_on": None,
+                    "source_id": "source",
+                    "source_url": "https://example.invalid/cr",
+                },
+            )
+            db.insert(
+                "cr_clause",
+                {
+                    "id": "cr:synthetic",
+                    "cr_version_id": "cr",
+                    "number": "1",
+                    "text_unit_id": "text",
                 },
             )
             revision = dict(db.rows("face_revision")[0].values)
@@ -161,6 +219,109 @@ def test_frame_target_and_owner_binding_round_trip_through_actual_sqlite(
     assert read_target(db, frame.id, "zh-Hant", "default").nodes[1].kind == "LeafRef"
     with db.transaction():
         write_binding(db, "use:synthetic", binding, {})
+    assert read_binding(db, binding.id, {}) == binding
+
+
+@pytest.mark.parametrize(
+    ("owner", "field", "columns"),
+    [
+        (
+            {"kind": "face_revision", "revision_id": "revision:synthetic"},
+            "effect",
+            {"face_revision_id": "revision:synthetic"},
+        ),
+        (
+            {"kind": "printing_face", "printing_id": "printing", "face_id": "face"},
+            "effect",
+            {"printing_id": "printing", "face_id": "face"},
+        ),
+        (
+            {"kind": "qa_version", "qa_version_id": "qa:synthetic"},
+            "question",
+            {"qa_version_id": "qa:synthetic"},
+        ),
+        (
+            {"kind": "cr_clause", "cr_clause_id": "cr:synthetic"},
+            "effect",
+            {"cr_clause_id": "cr:synthetic"},
+        ),
+        (
+            {
+                "kind": "vocabulary",
+                "vocabulary_kind": "type",
+                "vocabulary_code": "follower",
+            },
+            "label",
+            {"vocabulary_kind": "type", "vocabulary_code": "follower"},
+        ),
+        (
+            {"kind": "product", "product_id": "product"},
+            "label",
+            {"product_id": "product"},
+        ),
+        (
+            {"kind": "product_family", "product_family_id": "family"},
+            "label",
+            {"product_family_id": "family"},
+        ),
+        (
+            {"kind": "keyword", "keyword_id": "keyword:synthetic"},
+            "effect",
+            {"keyword_id": "keyword:synthetic"},
+        ),
+    ],
+    ids=lambda value: value.get("kind") if isinstance(value, dict) else None,
+)
+def test_all_owner_kinds_round_trip_bindings(
+    stored: tuple[Database, Frame, SourceBinding],
+    owner: dict[str, str],
+    field: str,
+    columns: dict[str, str],
+) -> None:
+    db, _, _ = stored
+    raw = "仮"
+    descriptor = SourceDescriptor.model_validate_json(
+        canonical(
+            classified_source(raw).model_dump(mode="json")
+            | {"owner": owner, "field": field}
+        )
+    )
+    normalized = normalize_source(raw, descriptor)
+    part = normalized.parts[0]
+    frame, binding = (
+        classifier((Term("term:synthetic", "rule_term", raw),))
+        .recognize(raw, descriptor, part)
+        .bind(descriptor, part)
+    )
+    with db.transaction():
+        db.delete("translation_use", {"id": "use:synthetic"})
+        db.insert(
+            "text_unit",
+            {
+                "id": descriptor.source_unit_id,
+                "lang": "ja",
+                "text": raw,
+                "content_hash": "sha256:" + descriptor.source_hash,
+            },
+        )
+        write_frame(
+            db,
+            FrameRecord(kind="sentence_template", data=frame),
+            part.canonical_source,
+            "source",
+        )
+        db.insert(
+            "translation_context",
+            {
+                "id": "context:owner",
+                "source_unit_id": descriptor.source_unit_id,
+                "semantic_variant": "variant:owner",
+            },
+        )
+        use: dict[str, Value] = dict.fromkeys(db.columns("translation_use"))
+        use.update(id="use:owner", context_id="context:owner", field=field, **columns)
+        db.insert("translation_use", use)
+        write_binding(db, "use:owner", binding, {})
     assert read_binding(db, binding.id, {}) == binding
 
 
