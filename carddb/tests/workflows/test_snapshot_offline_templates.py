@@ -62,7 +62,7 @@ SCHEMA = (
     "translation_templates",
 )
 TEXTS = {
-    "BP02-071": ("名前", "カードを2枚引く。"),
+    "BP02-071": ("数値仮名", "カードを2枚引く。"),
     "PR-001": ("名前", "『名前』を1枚手札に加える。"),
     "BP02-072": ("別名", "『別名』を1枚手札に加える。"),
     "BP02-073": ("第三", "Rule."),
@@ -233,6 +233,7 @@ def test_offline_renders_whole_effects_and_keeps_uncovered_original(
                     "text_template_binding",
                     "translation_binding",
                     "translation_term",
+                    "face_current",
                 )
             }
         )
@@ -258,6 +259,37 @@ def test_offline_renders_whole_effects_and_keeps_uncovered_original(
         "PR-001": (None, None),
         "BP02-072": (None, None),
         UNCOVERED: (None, None),
+    }
+    current_revisions = {
+        str(row.values["revision_id"]) for row in populations[0]["face_current"]
+    }
+    jp_source = next(
+        row
+        for row in built.projection.tables["face_revision"]
+        if row["region"] == "jp"
+        and row["id"] in current_revisions
+        and any(
+            object_value(raw)["field"] == "effect" for raw in array(row["translations"])
+        )
+    )
+    en_receiver = next(
+        row
+        for row in built.projection.tables["face_revision"]
+        if row["region"] == "en"
+        and row["face_id"] == jp_source["face_id"]
+        and row["id"] in current_revisions
+    )
+    received = [
+        object_value(raw)
+        for raw in array(en_receiver["translations"])
+        if object_value(raw)["field"] == "effect"
+    ]
+    assert len(received) == 1
+    assert received[0]["basis"] == "jp_source"
+    assert received[0]["source"] == {
+        "owner": {"kind": "face_revision", "id": jp_source["id"]},
+        "field": "effect",
+        "ordinal": None,
     }
     assert "カード" not in canonical(built.report["effect_translations"]).decode()
     with open_database(compile_build(SCHEMA), tmp_path / "bundle/build.sqlite") as db:

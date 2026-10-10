@@ -454,6 +454,7 @@ def translations(  # ruff: ignore[complex-structure] -- own-source and cross-reg
     for binding in decisions.display_bindings:
         if binding.basis not in {
             "own_source",
+            "jp_source",
             "shared_jp",
             "shared_jp_unchecked",
             "official_counterpart",

@@ -7,6 +7,7 @@ import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.core.json import array, object_value
+from sve_carddb.domains.translations.jp_sources import effect_bindings
 from sve_carddb.domains.translations.names.bindings import DisplayBinding
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.project import DisplayCheck, project
@@ -59,6 +60,45 @@ def shared(*, checked: bool = False) -> Decisions:
         if checked
         else (),
     )
+
+
+@pytest.mark.parametrize("resolved", [False, True])
+def test_current_jp_effect_bindings_do_not_require_alignment(
+    db: Database, resolved: bool
+) -> None:
+    dual_region(db)
+    with db.transaction():
+        db.update("translation_use", {"id": "use"}, {"field": "effect"})
+        db.update(
+            "region_divergence",
+            {"card_id": "card", "region": "en", "field_scope": "name"},
+            {"resolved": resolved},
+        )
+    bindings = effect_bindings(db)
+    assert bindings == (
+        DisplayBinding("use", ("face_revision", "revision-en"), "zh-Hant", "jp_source"),
+    )
+    result = dual_project(db, replace(decisions(), display_bindings=bindings))
+    field = object_value(
+        array(one(result, "face_revision", "revision-en")["translations"])[0]
+    )
+    assert field["field"] == "effect"
+    assert field["basis"] == "jp_source"
+    assert field["source"] == {
+        "owner": {"kind": "face_revision", "id": "revision"},
+        "field": "effect",
+        "ordinal": None,
+    }
+
+
+def test_jp_effect_bindings_require_current_donor_and_existing_receiver(
+    db: Database,
+) -> None:
+    dual_region(db)
+    with db.transaction():
+        db.update("translation_use", {"id": "use"}, {"field": "effect"})
+        db.delete("face_current", {"face_id": "face", "region": "jp"})
+    assert effect_bindings(db) == ()
 
 
 @pytest.mark.parametrize("regions", [("en", "jp")])

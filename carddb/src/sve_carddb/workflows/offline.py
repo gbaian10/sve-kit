@@ -52,6 +52,7 @@ from sve_carddb.domains.translations.glossary.records import (
     ConceptRecord,
     TermRecord,
 )
+from sve_carddb.domains.translations.jp_sources import effect_bindings
 from sve_carddb.domains.translations.models import EffectTerm, SourceValue
 from sve_carddb.domains.translations.names.resolve import prepare as prepare_names
 from sve_carddb.domains.translations.parameters.adopted_references import adopted
@@ -572,7 +573,10 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             Decisions(),
             related_regions=applicable_reskin_regions(db, texts, vocabulary=vocabulary),
             supplemental_restrictions=restrictions,
-            display_bindings=() if name_result is None else name_result.bindings,
+            display_bindings=(
+                *(() if name_result is None else name_result.bindings),
+                *effect_bindings(db),
+            ),
             private_digital=names is not None,
         ).with_text_views(views.wording, views.observed)
         projection = project(
