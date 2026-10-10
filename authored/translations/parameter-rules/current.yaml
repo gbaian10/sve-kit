@@ -37,6 +37,10 @@ rules:
     enabled: true
     origin: project
     low_confidence: false
+  - rule_id: bracket_keyword_reference
+    enabled: true
+    origin: project
+    low_confidence: false
   - rule_id: cost_assignment
     enabled: true
     origin: project
