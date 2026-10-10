@@ -5,7 +5,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 from unicodedata import normalize
 
-from sve_carddb.contracts.four_layer import Span
+from sve_carddb.contracts.four_layer import Constant, QuantitySpec, Span
+from sve_carddb.contracts.n0 import VERSION
 from sve_carddb.contracts.source_binding import SourceSpan, TracePiece, verify_partition
 from sve_carddb.contracts.template_parameters import Range
 from sve_carddb.core.json import digest
@@ -22,7 +23,7 @@ if TYPE_CHECKING:
         SourceDescriptor,
     )
 
-VERSION = "four-layer-jp-v1"
+__all__ = ("VERSION", "SourceField", "SourcePart", "normalize_source", "replay_part")
 _NAME = re.compile(r"『[^』]*』")
 _REMINDER = re.compile(r"（[^（）]*）")
 _NUMBER = re.compile(r"[0-9０-９]+")
@@ -74,9 +75,19 @@ class SourcePart:
             if occurrence.source_presence == "explicit":
                 value = binding.values.get(occurrence.slot)
                 spelling = "".join(raw[s.start : s.end] for s in expected)
-                if slots[occurrence.slot].type in {"Nat", "Ordinal"} and (
+                numeric = (
+                    value.expr.value
+                    if isinstance(value, QuantitySpec)
+                    and isinstance(value.expr, Constant)
+                    else value
+                )
+                if slots[occurrence.slot].type in {
+                    "Nat",
+                    "Ordinal",
+                    "QuantitySpec",
+                } and (
                     _NUMBER.fullmatch(spelling) is None
-                    or value != int(normalize("NFKC", spelling))
+                    or numeric != int(normalize("NFKC", spelling))
                 ):
                     raise ValueError("Numeric leaf value differs from exact source")
                 if slots[occurrence.slot].type == "LiteralLayout" and value != spelling:

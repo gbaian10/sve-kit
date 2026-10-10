@@ -293,11 +293,8 @@ def test_all_owner_kinds_round_trip_bindings(
     )
     normalized = normalize_source(raw, descriptor)
     part = normalized.parts[0]
-    frame, binding = (
-        classifier((Term("term:synthetic", "rule_term", raw),))
-        .recognize(raw, descriptor, part)
-        .bind(descriptor, part)
-    )
+    engine = classifier((Term("term:synthetic", "rule_term", raw),))
+    frame, binding = engine.recognize(raw, descriptor, part).bind(descriptor, part)
     with db.transaction():
         db.delete("translation_use", {"id": "use:synthetic"})
         db.insert(
@@ -326,11 +323,11 @@ def test_all_owner_kinds_round_trip_bindings(
         use: dict[str, Value] = dict.fromkeys(db.columns("translation_use"))
         use.update(id="use:owner", context_id="context:owner", field=field, **columns)
         db.insert("translation_use", use)
-        write_binding(db, "use:owner", binding, {})
-    assert read_binding(db, binding.id, {}) == binding
+        write_binding(db, "use:owner", binding, engine.domains)
+    assert read_binding(db, binding.id, engine.domains) == binding
 
 
-def test_explicit_then_omitted_occurrences_keep_their_array_order(
+def test_n0_storage_rejects_omitted_occurrences(
     stored: tuple[Database, Frame, SourceBinding],
 ) -> None:
     db, _, binding = stored
@@ -346,9 +343,12 @@ def test_explicit_then_omitted_occurrences_keep_their_array_order(
     mixed = rekey(
         binding.model_copy(update={"occurrences": (*binding.occurrences, omitted)})
     )
-    with db.transaction():
+    with (
+        pytest.raises(ValueError, match="N0 requires explicit leaves"),
+        db.transaction(),
+    ):
         write_binding(db, "use:synthetic", mixed, {})
-    assert read_binding(db, mixed.id, {}) == mixed
+    assert db.rows("binding_leaf_occurrence") == ()
 
 
 def test_binding_cannot_move_to_a_use_with_another_owner(

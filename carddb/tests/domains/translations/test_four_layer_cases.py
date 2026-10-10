@@ -7,10 +7,8 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.contracts.four_layer import GlossaryReference, Target, hash_payload
-from sve_carddb.contracts.source_binding import SourceBinding
+from sve_carddb.contracts.source_binding import ReferenceDomain, SourceBinding
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
-from sve_carddb.domains.translations.four_layer_authored import from_files
-from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
     Form,
@@ -77,29 +75,26 @@ def _target(value: dict[str, JsonValue]) -> dict[str, JsonValue]:
         },
     )
     if "reference" in value:
-        # The authored boundary checks registration; rendering cannot authorize a missing concept.
-        definition = object_value(object_value(CASES["fixtures"])["identity_base"])
-        definition = deepcopy(definition)
-        object_value(definition["semantic"])["normalizer_version"] = VERSION
+        definition = deepcopy(
+            object_value(object_value(CASES["fixtures"])["identity_base"])
+        )
         slots = array(
             object_value(object_value(definition["semantic"])["leaf_schema"])["slots"]
         )
         object_value(slots[0])["type"] = "Concept"
         object_value(slots[0])["domain"] = {
-            "values": [value["reference"]],
+            "values": ["concept.rule_term.v1"],
             "min": None,
             "max": None,
         }
-        record: dict[str, JsonValue] = {
-            "kind": "sentence_template",
-            "origin": "project",
-            "low_confidence": False,
-            "data": frame(definition).model_dump(mode="json"),
-        }
-        body = canonical(
-            {"format": 3, "kind": "translation_shard", "records": [record]}
+        values = object_value(item.binding.model_dump(mode="json")["values"])
+        values[string(object_value(slots[0])["name"])] = value["reference"]
+        item = rebind(item, frame(definition), values=values)
+        domains = dict(renderer().domains)
+        domains["concept.rule_term.v1"] = ReferenceDomain(
+            type="Concept", category="rule_term", references=()
         )
-        from_files((("translations/templates/definitions/000.yaml", body, body),))
+        item.binding.verify(item.frame, domains)
     rendered(item)
     return {}
 
@@ -368,7 +363,7 @@ REASONS = {
     "missing_required_leaf": "missing required",
     "unused_required_leaf": "every required leaf",
     "unknown_leaf_reference": "Target references an unknown leaf",
-    "unknown_concept": "absent glossary term",
+    "unknown_concept": "outside every registered source domain",
     "annotation_text_mismatch": "text identity mismatch",
     "span_out_of_bounds": "outside exact text",
     "missing_render_occurrence": "render occurrence",

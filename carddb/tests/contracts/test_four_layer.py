@@ -446,6 +446,49 @@ def test_constant_quantity_domain_rejects_all_and_bound_even_with_registered_imp
             verify_value(slot, invalid, domains)
 
 
+@pytest.mark.parametrize(
+    "change", ["numeric_role", "future_type", "finite_reference", "port"]
+)
+def test_n0_authored_frame_rejects_unregistered_leaf_or_interface(change: str) -> None:
+    definition, _, _, _ = binding_sample()
+    data = definition.model_dump(mode="json")
+    data["source"]["normalizer_version"] = "four-layer-jp-v1"
+    if change == "numeric_role":
+        data["leaf_schema"]["slots"][0]["role"] = "numeric"
+    elif change == "future_type":
+        data["leaf_schema"]["slots"][0].update(
+            type="Phase",
+            role="phase_trigger",
+            domain={"values": ["main"], "min": None, "max": None},
+        )
+    elif change == "finite_reference":
+        data["leaf_schema"]["slots"][0].update(
+            type="Concept",
+            role="ability",
+            domain={
+                "values": [{"kind": "glossary", "key": "term:ability.fixture"}],
+                "min": None,
+                "max": None,
+            },
+        )
+    else:
+        data["projection"].update(
+            projection_kind="ability_body",
+            discriminator="fixture.body",
+            scopes=[{"id": "ability", "parent": None, "kind": "ability"}],
+            imports=[
+                {
+                    "name": "received",
+                    "type": "CapturedValue",
+                    "source_role": "received_damage",
+                    "scope": "ability",
+                }
+            ],
+        )
+    with pytest.raises(ValueError, match="N0"):
+        Frame.model_validate_json(canonical(data))
+
+
 def annotation_set(text: str, occurrences: JsonValue) -> AnnotationSet:
     """Build the logical recipe used by the external public golden vectors."""
     unit = "t:zh-Hant:" + digest(text.encode())[7:23]

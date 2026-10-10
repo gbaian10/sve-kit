@@ -310,13 +310,15 @@ def recognize(
     candidate: Candidate,
     refs: References,
     enabled: tuple[str, ...] = (),
+    *,
+    units: tuple[Unit, ...] | None = None,
 ) -> tuple[dict[str, JsonValue], ...]:
     """Return enabled lexical matches with roles, types and exact positions."""
     selected = selection(enabled)
     if part.role not in {"body", "reminder"}:
         return ()
     results: list[dict[str, JsonValue]] = []
-    traced = None
+    traced = None if units is None else (part, units)
     for hint in candidate.slots:
         if (
             hint.numeric_rule is not None
@@ -359,18 +361,25 @@ def recognize(
     return tuple(results)
 
 
-def classify(
+def classify(  # ruff: ignore[too-many-arguments] -- the optional authoritative trace prevents a second normalization pass
     text: str,
     part: Part,
     item: Entry,
     located: Located,
     refs: References,
     enabled: tuple[str, ...] = (),
+    *,
+    units: tuple[Unit, ...] | None = None,
 ) -> tuple[Candidate, tuple[dict[str, JsonValue], ...]]:
     """Classify once; disabled or unmatched positions retain their failure reasons."""
-    candidate = analyze(text, part, item, located, refs)
+    candidate = analyze(text, part, item, located, refs, units=units)
     rows = recognize(
-        text, part, candidate, refs, tuple(k for k in enabled if k not in LEGACY_IDS)
+        text,
+        part,
+        candidate,
+        refs,
+        tuple(k for k in enabled if k not in LEGACY_IDS),
+        units=units,
     )
     matched = {str(row["slot"]): row for row in rows}
     hints = []
@@ -403,7 +412,7 @@ def classify(
         sorted(field_issues | {reason for hint in hints for reason in hint.issues})
     )
     parameter_schema, signature_hash, payload_hash = contract(
-        prepared(text, part)[0].normalized, tuple(hints)
+        (prepared(text, part)[0] if units is None else part).normalized, tuple(hints)
     )
     return candidate.model_copy(
         update={

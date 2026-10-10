@@ -346,10 +346,16 @@ def contract(
 
 
 def analyze(
-    text: str, part: Part, item: Entry, located: Located, refs: References
+    text: str,
+    part: Part,
+    item: Entry,
+    located: Located,
+    refs: References,
+    *,
+    units: tuple[Unit, ...] | None = None,
 ) -> Candidate:
     """Extract source slots before applying the enabled contextual rules."""
-    template_part, units = prepared(text, part)
+    template_part, units = prepared(text, part) if units is None else (part, units)
     hints = tuple(
         hint(text, template_part, units, position, index, refs)
         for index, position in enumerate(positions(text, template_part, units, refs))

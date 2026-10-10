@@ -19,19 +19,21 @@ from sve_carddb.contracts.four_layer import (
     VocabularyReference,
     hash_payload,
 )
+from sve_carddb.contracts.n0 import QUANTITY_ROLES, SAFE_INTEGER
 from sve_carddb.contracts.source_binding import (
     LayoutDomain,
     LeafOccurrence,
+    QuantityDomain,
+    ReferenceDomain,
     SourceBinding,
-    ZoneDomain,
 )
 from sve_carddb.contracts.template_parameters import Range
 from sve_carddb.contracts.template_parameters import SourceSpan as ParameterSpan
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.catalog.adoption_models import SourceRef
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION, SourcePart
+from sve_carddb.domains.translations.four_layer_numbers import recognize_number
 from sve_carddb.domains.translations.parameters.candidate_matching import classify
-from sve_carddb.domains.translations.parameters.keyword_aliases import KEYWORD_ALIASES
 from sve_carddb.domains.translations.parameters.references import References, Resolution
 from sve_carddb.domains.translations.parameters.spans import Located
 from sve_carddb.domains.translations.source_inventory.inventory import entry
@@ -51,36 +53,20 @@ if TYPE_CHECKING:
 
 type Leaf = tuple[LeafSlot, TypedValue, LeafOccurrence]
 
-SAFE_INTEGER = 9007199254740991
-ZONE_CODES = ("battlefield", "deck", "evolve_deck", "ex", "graveyard", "hand")
 DOMAINS: Mapping[str, ClosedDomain] = {
     "layout.whitespace.v1": LayoutDomain(type="LiteralLayout"),
-    "zones.v1": ZoneDomain(
-        type="ZoneSet",
-        zones=ZONE_CODES,
-    ),
-}
-POSITIVE_ROLES = frozenset(
-    {
-        "choice_ordinal",
-        "card_ordinal",
-        "repetition_ordinal",
-        "turn_ordinal",
-        "deck_top_ordinal",
-    }
-)
-_PHASES = {
-    "term:phase.start": "start",
-    "term:phase.main": "main",
-    "term:phase.end": "end",
-}
-_ZONES = {
-    "term:zone.battlefield": "battlefield",
-    "term:zone.deck": "deck",
-    "term:zone.evolve_deck": "evolve_deck",
-    "term:zone.ex": "ex",
-    "term:zone.cemetery": "graveyard",
-    "term:zone.hand": "hand",
+    **{
+        f"quantity.{role}.constant.v1": QuantityDomain(
+            type="QuantitySpec",
+            modes=("exact", "up_to", "at_least")
+            if role == "existence_count"
+            else ("exact", "up_to"),
+            imports=(),
+            expressions=(),
+            constant_only=True,
+        )
+        for role in QUANTITY_ROLES
+    },
 }
 
 
@@ -225,8 +211,17 @@ class Classifier:
         for hint in candidate.slots:
             if hint.issues:
                 continue
-            leaves.append(self._hint(raw, hint))
-        leaves.extend(self._lexical(part, leaves))
+            if hint.type == "uint" and recognize_number(raw, part, hint) is None:
+                issues.add("n0_numeric_construction_unresolved")
+                continue
+            if (
+                hint.target is not None
+                and hint.target.get("kind") == "vocabulary"
+                and _vocabulary_role(part, hint) is None
+            ):
+                issues.add("n0_vocabulary_construction_unresolved")
+                continue
+            leaves.append(self._hint(raw, part, hint))
         leaves.sort(key=lambda item: item[0].occurrences[0].start)
         values: dict[str, TypedValue] = {}
         slots = []
@@ -282,23 +277,37 @@ class Classifier:
             located,
             self.references,
             self.rules.enabled(),
+            units=part.units,
         )[0]
 
     def _hint(
-        self, raw: str, hint: Hint
+        self, raw: str, part: SourcePart, hint: Hint
     ) -> tuple[LeafSlot, TypedValue, LeafOccurrence]:
         bounds: Domain
+        role = "layout"
+        source_unit = None
         spelling = "".join(raw[s.start : s.end] for s in hint.source_segments)
         if hint.type == "uint":
             if hint.value is None:
                 raise ValueError("Recognized source number lacks a value")
-            type_name: LeafType = (
-                "Ordinal" if hint.semantic_role in POSITIVE_ROLES else "Nat"
+            number = recognize_number(raw, part, hint)
+            assert number is not None
+            type_name: LeafType = number.type
+            role = number.role
+            source_unit = number.source_unit
+            bounds = (
+                Domain(values=(f"quantity.{role}.constant.v1",), min=None, max=None)
+                if type_name == "QuantitySpec"
+                else Domain(
+                    values=(),
+                    min=1
+                    if type_name == "Ordinal"
+                    or role in {"arithmetic_multiplier", "group_divisor"}
+                    else 0,
+                    max=SAFE_INTEGER,
+                )
             )
-            bounds = Domain(
-                values=(), min=1 if type_name == "Ordinal" else 0, max=SAFE_INTEGER
-            )
-            value: TypedValue = hint.value
+            value: TypedValue = number.value
         elif hint.type == "literal":
             type_name, bounds, value = (
                 "LiteralLayout",
@@ -317,6 +326,19 @@ class Classifier:
                 else GlossaryReference(kind="glossary", key=identifier)
             )
             bounds = self._term_domain(category)
+            role = (
+                (
+                    "declared_name"
+                    if part.source_span.role == "token_header"
+                    else "name_reference"
+                )
+                if category == "card_name"
+                else (
+                    "declared_trait"
+                    if part.source_span.role == "token_header" and category == "trait"
+                    else category
+                )
+            )
         elif hint.target is not None and hint.target.get("kind") == "vocabulary":
             kind, code = (
                 hint.target.get("vocabulary_kind"),
@@ -326,28 +348,25 @@ class Classifier:
                 raise ValueError("Source vocabulary reference is incomplete")
             type_name = "CardKind" if kind == "type" else "Concept"
             value = VocabularyReference(kind="vocabulary", key=(kind, code))
-            vocabulary = self.references.vocabulary
-            assert vocabulary is not None
-            refs = [
-                VocabularyReference(kind="vocabulary", key=(t.kind, t.code))
-                for t in vocabulary.terms
-                if t.kind == kind and t.active
-            ]
-            ordered = tuple(
-                sorted(refs, key=lambda v: canonical(v.model_dump(mode="json")))
-            )
+            found_role = _vocabulary_role(part, hint)
+            assert found_role is not None
+            role = found_role
             bounds = Domain(
-                values=ordered,
+                values=(
+                    "card_kind.any.v1" if kind == "type" else "vocabulary.class.v1",
+                ),
                 min=None,
                 max=None,
             )
         else:
             raise ValueError("Source leaf has an unsupported resolved type")
+        if hint.type == "literal":
+            role = "layout"
         spans = (Span(start=hint.occurrence.start, end=hint.occurrence.end),)
         slot = LeafSlot(
             name=hint.name,
             type=type_name,
-            role=hint.semantic_role,
+            role=role,
             domain=bounds,
             required=True,
             occurrences=spans,
@@ -359,28 +378,70 @@ class Classifier:
                 Span(start=s.start, end=s.end) for s in hint.source_segments
             ),
             canonical_spans=spans,
-            source_unit=_source_unit(raw, hint),
+            source_unit=source_unit,
             source_presence="explicit",
             resolution_rule=None,
         )
         return slot, value, presence
 
-    def _term_domain(self, category: str) -> Domain:
-        values: list[CardNameReference | GlossaryReference] = [
-            CardNameReference(kind="card_name", term_id=t.id)
-            if category == "card_name"
-            else GlossaryReference(kind="glossary", key=t.id)
-            for t in self.terms.values()
-            if t.category == category
-        ]
-        ordered = tuple(
-            sorted(values, key=lambda v: canonical(v.model_dump(mode="json")))
-        )
+    @staticmethod
+    def _term_domain(category: str) -> Domain:
         return Domain(
-            values=ordered,
+            values=(
+                "card_name.any.v1"
+                if category == "card_name"
+                else "concept." + category + ".v1",
+            ),
             min=None,
             max=None,
         )
+
+    @property
+    def domains(self) -> Mapping[str, ClosedDomain]:
+        """Catalog membership is checked at binding time and never enters a frame hash."""
+        result = dict(DOMAINS)
+        for category in ("card_name", "keyword", "ability", "rule_term", "trait"):
+            type_name = "CardName" if category == "card_name" else "Concept"
+            references = tuple(
+                sorted(
+                    (
+                        CardNameReference(kind="card_name", term_id=term.id)
+                        if category == "card_name"
+                        else GlossaryReference(kind="glossary", key=term.id)
+                        for term in self.terms.values()
+                        if term.category == category
+                    ),
+                    key=lambda reference: canonical(reference.model_dump(mode="json")),
+                )
+            )
+            result[
+                "card_name.any.v1"
+                if category == "card_name"
+                else "concept." + category + ".v1"
+            ] = ReferenceDomain.model_validate(
+                {"type": type_name, "category": category, "references": references}
+            )
+        vocabulary = self.references.vocabulary
+        for kind, type_name, code in (
+            ("class", "Concept", "vocabulary.class.v1"),
+            ("type", "CardKind", "card_kind.any.v1"),
+        ):
+            refs = tuple(
+                sorted(
+                    (
+                        VocabularyReference(
+                            kind="vocabulary", key=(term.kind, term.code)
+                        )
+                        for term in (() if vocabulary is None else vocabulary.terms)
+                        if term.kind == kind and term.active
+                    ),
+                    key=lambda reference: canonical(reference.model_dump(mode="json")),
+                )
+            )
+            result[code] = ReferenceDomain.model_validate(
+                {"type": type_name, "category": kind, "references": refs}
+            )
+        return result
 
     def _named(self, raw: str, part: SourcePart) -> Recognized:
         exact = "".join(raw[s.start : s.end] for s in part.source_span.segments)
@@ -405,7 +466,7 @@ class Classifier:
         slot = LeafSlot(
             name="leaf_0",
             type="CardName" if category == "card_name" else "Concept",
-            role="card_name" if category == "card_name" else "label",
+            role="declared_name" if category == "card_name" else category,
             domain=self._term_domain(category),
             required=True,
             occurrences=(span,),
@@ -427,128 +488,23 @@ class Classifier:
             False,
         )
 
-    def _lexical(self, part: SourcePart, occupied: list[Leaf]) -> list[Leaf]:
-        """Source grammar skips protected names before any phase, zone or alias recognition."""
-        text = part.canonical_source
-        covered = {
-            i
-            for slot, _, _ in occupied
-            for span in slot.occurrences
-            for i in range(span.start, span.end)
-        }
-        protected = tuple(re.finditer(r"『[^』]*』", text))
-        candidates: list[tuple[int, int, LeafType, str, str]] = []
-        for identifier, code in {**_PHASES, **_ZONES}.items():
-            term = self.terms.get(identifier)
-            if term is None or not term.source_ja or term.category != "rule_term":
-                continue
-            for match in re.finditer(re.escape(term.source_ja), text):
-                role = _context_role(text[match.end() :], identifier in _PHASES)
-                if role is not None:
-                    candidates.append(
-                        (
-                            match.start(),
-                            match.end(),
-                            "Phase" if identifier in _PHASES else "ZoneSet",
-                            role,
-                            code,
-                        )
-                    )
-        for alias in KEYWORD_ALIASES.values():
-            term = self.terms.get(alias.target)
-            if (
-                term is not None
-                and term.source_ja == alias.full_name
-                and term.category == "ability"
-            ):
-                candidates.extend(
-                    (m.start(1), m.end(1), "Concept", "ability", alias.target)
-                    for m in re.finditer(
-                        r"【(" + alias.spelling + r")_[N0-9０-９]+】", text
-                    )
-                )
-        result: list[Leaf] = []
-        for start, end, kind, role, code in sorted(
-            candidates, key=lambda item: (-(item[1] - item[0]), item[0])
+
+def _vocabulary_role(part: SourcePart, hint: Hint) -> str | None:
+    assert hint.target is not None
+    kind = hint.target.get("vocabulary_kind")
+    if kind not in {"type", "class"}:
+        return None
+    if part.source_span.role == "token_header":
+        return "declared_kind" if kind == "type" else "declared_class"
+    before = part.canonical_source[: hint.occurrence.start].removesuffix("{")
+    after = part.canonical_source[hint.occurrence.end :].removeprefix("}")
+    if kind == "type":
+        if re.match(
+            r"^N(?:枚|体|つ)(?:まで)?(?:を)?選(?:ぶ|び|んで)(?=[。:、）)\n]|$)", after
         ):
-            if any(i in covered for i in range(start, end)) or any(
-                m.start() < end and start < m.end() for m in protected
-            ):
-                continue
-            covered.update(range(start, end))
-            result.append(self._lexical_leaf(part, start, end, kind, role, code))
-        return result
-
-    def _lexical_leaf(
-        self,
-        part: SourcePart,
-        start: int,
-        end: int,
-        kind: LeafType,
-        role: str,
-        code: str,
-    ) -> Leaf:
-        origins = sorted(
-            {(s.start, s.end) for unit in part.units[start:end] for s in unit.origins}
-        )
-        merged: list[Span] = []
-        for first, last in origins:
-            if merged and merged[-1].end >= first:
-                merged[-1] = Span(start=merged[-1].start, end=max(merged[-1].end, last))
-            else:
-                merged.append(Span(start=first, end=last))
-        span = Span(start=start, end=end)
-        if kind == "ZoneSet":
-            domain = Domain(values=("zones.v1",), min=None, max=None)
-            value: TypedValue = (code,)
-        elif kind == "Phase":
-            domain = Domain(values=("end", "main", "start"), min=None, max=None)
-            value = code
-        else:
-            domain = self._term_domain("ability")
-            value = GlossaryReference(kind="glossary", key=code)
-        slot = LeafSlot(
-            name="lexical",
-            type=kind,
-            role=role,
-            domain=domain,
-            required=True,
-            occurrences=(span,),
-        )
-        presence = LeafOccurrence(
-            slot="lexical",
-            ordinal=0,
-            raw_spans=tuple(merged),
-            canonical_spans=(span,),
-            source_unit=None,
-            source_presence="explicit",
-            resolution_rule=None,
-        )
-        return slot, value, presence
-
-
-def _context_role(after: str, phase: bool) -> str | None:
-    if phase:
-        if after.startswith(("開始時", "終了時")):
-            return "phase_trigger"
-        if after.startswith("まで"):
-            return "phase_duration"
-        return None
-    for suffix, role in (
-        ("から", "source_zone"),
-        ("に", "destination_zone"),
-        ("の", "counted_zone"),
-    ):
-        if after.startswith(suffix):
-            return role
-    return None
-
-
-def _source_unit(raw: str, hint: Hint) -> str | None:
-    if hint.type != "uint":
-        return None
-    after = raw[hint.source_segments[-1].end :]
-    for spelling in ("ターン", "PP", "ＰＰ", "枚", "体", "人", "つ", "点", "回"):
-        if after.startswith(spelling):
-            return spelling
+            return "counted_kind"
+        if re.search(r"(?:元の)?コストN(?:以上|以下)の$", before):
+            return "filter_kind"
+    elif re.match(r"^(?:の|・)(?:カード|フォロワー|アミュレット|スペル)", after):
+        return "class_filter"
     return None

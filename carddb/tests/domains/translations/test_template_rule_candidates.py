@@ -119,21 +119,15 @@ def test_general_matchers_cannot_claim_vetoed_positions_even_if_grammar_matches(
 
 
 @pytest.mark.parametrize(
-    "reason", ["numeric_identifier_requires_review", "signed_numeric_requires_review"]
+    ("text", "reason"),
+    [
+        ("仮A２枚、仮３ダメージ", "numeric_identifier_requires_review"),
+        ("仮＋２枚、仮３ダメージ", "signed_numeric_requires_review"),
+    ],
 )
-def test_classification_removes_only_the_matched_rules_reason(
-    monkeypatch: pytest.MonkeyPatch, reason: str
+def test_matching_one_number_keeps_other_source_diagnostics(
+    text: str, reason: str
 ) -> None:
-    text = "試験２ダメージ"
-    value = candidate(text)
-    issues = (*value.slots[0].issues, reason)
-    guarded = value.model_copy(
-        update={
-            "slots": (value.slots[0].model_copy(update={"issues": issues}),),
-            "issues": issues,
-        }
-    )
-    monkeypatch.setattr(matching, "analyze", lambda *_: guarded)
     ref = SourceRef(
         batch_id=HASH,
         source_version_id="src:v1:" + "b" * 64,
@@ -153,7 +147,8 @@ def test_classification_removes_only_the_matched_rules_reason(
     _field(result, context, References())
     classified = result.entries[0]
     assert len(result.rule_matches) == 1
-    assert classified.slots[0].semantic_role == "damage_amount"
+    assert classified.slots[1].semantic_role == "damage_amount"
+    assert classified.slots[1].issues == ()
     assert classified.slots[0].issues == (reason,)
     assert classified.issues == (reason,)
     assert classified.parameter_schema is None
