@@ -364,9 +364,13 @@ def test_switches_cannot_implicitly_expand_to_unknown_or_duplicate_rules(
 
 
 def test_registry_is_closed_default_off_and_not_an_approval_receipt() -> None:
-    assert len(BY_ID) == 56
+    assert len(BY_ID) == 57
     config = configuration()
     assert config["enabled"] == []
+    keyword = conditions(BY_ID["bracket_keyword_reference"])
+    assert keyword["scope"] == {"region": "jp", "roles": ["body"]}
+    assert "choice_evidence" not in keyword
+    assert matches("【２】", "bracket_keyword_reference") == ()
     assert all("earth_rite" not in rule for rule in BY_ID)
     assert BY_ID["braced_stat_reference"].targets == (
         "term:stat.attack",

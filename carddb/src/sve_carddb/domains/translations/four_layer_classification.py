@@ -30,6 +30,7 @@ from sve_carddb.contracts.source_binding import (
 )
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_kinds import KindFacts
+from sve_carddb.domains.translations.four_layer_n1_leaves import DOMAINS as N1_DOMAINS
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION, SourcePart
 from sve_carddb.domains.translations.four_layer_numbers import (
     number_issue,
@@ -231,11 +232,21 @@ class Classifier:
         context: CardContext | None = None,
     ) -> None:
         """B proves roles, modes and units from source rather than trusting authored descriptors."""
-        source = field.source
-        if part not in field.parts:
-            raise ValueError("Source part does not belong to the exact field")
-        if binding.source != source:
+        if part not in field.parts or binding.ordinal != part.ordinal:
+            raise ValueError("Source part does not belong to the exact binding ordinal")
+        if binding.source != field.source:
             raise ValueError("Binding borrows another exact owner field")
+        if frame.source.normalizer_version == "four-layer-jp-v2":
+            from sve_carddb.domains.translations.four_layer_derivation import (  # ruff: ignore[import-outside-top-level] -- defer the preparation dependency to its existing B boundary
+                derive_source,
+            )
+
+            derived = derive_source(raw, field.source, self, context=context)
+            if field != derived.field:
+                raise ValueError("Source field differs from current N1 normalization")
+            derived.verify(raw, self, frame, binding, context=context)
+            return
+        source = field.source
         part.verify(raw, frame, binding, self.domains)
         found = self.recognize(raw, source, part, context=context, field=field)
         if found.issues:
@@ -507,7 +518,7 @@ class Classifier:
     @property
     def domains(self) -> Mapping[str, ClosedDomain]:
         """Catalog membership is checked at binding time and never enters a frame hash."""
-        result = dict(DOMAINS)
+        result = {**DOMAINS, **N1_DOMAINS}
         for category in ("card_name", "keyword", "ability", "rule_term", "trait"):
             type_name = "CardName" if category == "card_name" else "Concept"
             references = tuple(
@@ -549,6 +560,28 @@ class Classifier:
             result[code] = ReferenceDomain.model_validate(
                 {"type": type_name, "category": kind, "references": refs}
             )
+        adopted = result.get("card_kind.any.v1")
+        if isinstance(adopted, ReferenceDomain):
+            result["card_kind.selection.v1"] = ReferenceDomain(
+                type="CardKind",
+                category="type",
+                references=tuple(
+                    r
+                    for r in adopted.references
+                    if isinstance(r, VocabularyReference)
+                    and r.key[1] in {"follower", "amulet", "spell"}
+                ),
+            )
+            for kind in ("follower", "amulet", "spell"):
+                result["card_kind." + kind + ".v1"] = ReferenceDomain(
+                    type="CardKind",
+                    category="type",
+                    references=tuple(
+                        r
+                        for r in adopted.references
+                        if isinstance(r, VocabularyReference) and r.key[1] == kind
+                    ),
+                )
         return result
 
     def _named(self, raw: str, part: SourcePart) -> Recognized:

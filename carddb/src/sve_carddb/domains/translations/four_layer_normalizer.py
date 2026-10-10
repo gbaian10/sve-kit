@@ -43,9 +43,11 @@ class SourcePart:
         frame: Frame,
         binding: SourceBinding,
         domains: Mapping[str, ClosedDomain],
+        *,
+        normalizer_version: str = VERSION,
     ) -> None:
         """Only replayed source coordinates authorize an authored frame or stored binding."""
-        if frame.source.normalizer_version != VERSION:
+        if frame.source.normalizer_version != normalizer_version:
             raise ValueError("Unsupported four-layer normalizer version")
         if (
             binding.ordinal != self.ordinal
@@ -69,7 +71,14 @@ class SourcePart:
                 )
             )
             expected = origins
-            if occurrence.raw_spans != expected:
+            shared = tuple(
+                other
+                for other in binding.occurrences
+                if other.slot == occurrence.slot
+                and other.canonical_spans == occurrence.canonical_spans
+            )
+            actual = merged(tuple(s for other in shared for s in other.raw_spans))
+            if actual != expected:
                 raise ValueError("Leaf raw positions differ from replayed provenance")
             if occurrence.source_presence == "explicit":
                 value = binding.values.get(occurrence.slot)
@@ -101,6 +110,16 @@ class SourcePart:
                 if unit.transformation == "quoted"
                 else {"Nat", "Ordinal", "QuantitySpec", "QuantityExpr"}
                 if unit.transformation == "digits"
+                else {
+                    "Player",
+                    "ZoneSet",
+                    "DeckPosition",
+                    "Phase",
+                    "TokenStatus",
+                    "CardKind",
+                    "Concept",
+                }
+                if unit.transformation == "leaf"
                 else None
             )
             if expected is not None and not any(
@@ -165,7 +184,7 @@ def replay_part(
         binding.line_ordinal,
         span,
         "".join(unit.text for unit in units),
-        _trace(raw, span, units),
+        source_trace(raw, span, units),
         units,
     )
     part.verify(raw, frame, binding, domains)
@@ -200,7 +219,7 @@ def normalize_source(raw: str, source: SourceDescriptor) -> SourceField:
                 raw[: span.segments[0].start].count("\n"),
                 span,
                 "".join(unit.text for unit in units),
-                _trace(raw, span, units),
+                source_trace(raw, span, units),
                 units,
             )
         )
@@ -329,7 +348,7 @@ def _units(raw: str, span: SourceSpan) -> tuple[Unit, ...]:
     return tuple(result)
 
 
-def _trace(
+def source_trace(
     raw: str, span: SourceSpan, units: tuple[Unit, ...]
 ) -> tuple[TracePiece, ...]:
     positions: dict[int, list[int]] = {}
