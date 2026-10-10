@@ -5,7 +5,17 @@ from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Literal
 
 from sve_carddb.contracts.four_layer import Constant, QuantitySpec
-from sve_carddb.domains.translations.four_layer_units import count_context, source_unit
+from sve_carddb.domains.translations.four_layer_choices import (
+    choice_alternative,
+    choice_index,
+    choice_quantity,
+)
+from sve_carddb.domains.translations.four_layer_units import (
+    compound_selection,
+    count_context,
+    field_filter,
+    source_unit,
+)
 from sve_carddb.domains.translations.parameters.explicit_rules import COUNTER_NAMES
 
 if TYPE_CHECKING:
@@ -80,7 +90,13 @@ _TRANSFER = re.compile(
     r"デッキの(?:上|下)に(?:置く|置き|置いて)|EXエリアに(?:置く|置き|置いて)|"
     r"場に(?:出す|出し|出して))(?:よい)?" + _END
 )
+_SEARCH = re.compile(
+    r"^枚(?P<limit>まで)?(?:を)?探(?:し|して)、(?:それを)?"
+    r"(?:手札に加える|場に出す|EXエリアに置く)" + _END
+)
+_EQUIP = re.compile(r"^枚(?:を)?装備する" + _END)
 _LOOK = re.compile(r"^枚(?:を)?見(?:る|て)" + _END)
+_PUBLIC = re.compile(r"^枚(?:を)?公開する" + _END)
 _REVEAL = re.compile(
     r"^枚(?P<limit>まで)?(?:を)?公開して(?:、)?"
     r"(?:それを|そのカードを)?(?:手札に加える|手札に加えてよい|墓場に置く|場に出す)"
@@ -119,7 +135,8 @@ _EVENT_THRESHOLD = re.compile(
 )
 _EVOLUTION_FREQUENCY = re.compile(r"^ターンに何回でも使える" + _END)
 _SACRIFICE = re.compile(
-    r"^(?P<unit>枚|体|つ)(?:を)?(?:墓場に置く|アクトする|レストする|破壊する)" + _END
+    r"^(?P<unit>枚|体|つ)(?:を)?(?:墓場に置く|アクトする|レストする|破壊する|"
+    r"\{(?:アクト|レスト)\})" + _END
 )
 _LEADER = re.compile(r"^人(?:に(?:N|[0-9０-９]+)ダメージ|の(?:手札|墓場|場|デッキ))")
 _ORDINAL = {
@@ -128,7 +145,6 @@ _ORDINAL = {
     "turn_ordinal": ("turn_index", "ターン"),
     "deck_top_ordinal": ("deck_index", "番"),
 }
-_MIN_OPTIONS = 2
 
 
 @dataclass(frozen=True)
@@ -220,9 +236,13 @@ def _recognize(raw: str, hint: Hint, before: str, after: str) -> Number | None:
     if role == "choice_ordinal":
         return (
             Number("Ordinal", "choice_index", hint.value, None)
-            if _choice_index(raw, hint)
+            if choice_index(raw, hint)
             else None
         )
+    if _CHOICE.match(after) and not choice_quantity(raw, hint):
+        return None
+    if before.endswith("代わりに") and choice_alternative(raw, hint):
+        return _quantity("choice_mode_count", hint.value, "つ", "up_to")
     return _constructed_number(hint, before, after, None)
 
 
@@ -282,6 +302,10 @@ def _generic_number(
 ) -> Number | None:
     if counter := _counter_number(value, before, after):
         return counter
+    if compound := compound_selection(after):
+        return _quantity(
+            "selection_count", value, compound[0], "up_to" if compound[1] else "exact"
+        )
     if match := _SELECT.match(after):
         return _quantity(
             "selection_count",
@@ -309,22 +333,35 @@ def _generic_number(
 
 
 def _action_number(value: int, before: str, after: str) -> Number | None:
+    if _ABILITY_COUNT.match(after) and re.search(r"(?:能力を|能力が|能力)$", before):
+        return Number("Nat", "count", value, "つ")
+    return (
+        _movement_number(value, after)
+        or _payment_number(value, before, after)
+        or _repetition_number(value, before, after)
+        or _field_number(value, before, after)
+    )
+
+
+def _movement_number(value: int, after: str) -> Number | None:
     if _MOVE.match(after) or _TRANSFER.match(after) or _LOOK.match(after):
         unit = after[0]
         if after.startswith(unit + "まで"):
             return _quantity("selection_count", value, unit, "up_to")
         return Number("Nat", "count", value, unit)
+    if match := _SEARCH.match(after):
+        return (
+            _quantity("selection_count", value, "枚", "up_to")
+            if match["limit"]
+            else Number("Nat", "count", value, "枚")
+        )
+    if _EQUIP.match(after) or _PUBLIC.match(after):
+        return Number("Nat", "count", value, "枚")
     if match := _REVEAL.match(after):
         return _quantity(
             "selection_count", value, "枚", "up_to" if match["limit"] else "exact"
         )
-    if _ABILITY_COUNT.match(after) and re.search(r"(?:能力を|能力が|能力)$", before):
-        return Number("Nat", "count", value, "つ")
-    return (
-        _payment_number(value, before, after)
-        or _repetition_number(value, before, after)
-        or _field_number(value, before, after)
-    )
+    return None
 
 
 def _payment_number(value: int, before: str, after: str) -> Number | None:
@@ -399,49 +436,11 @@ def _repetition_number(value: int, before: str, after: str) -> Number | None:
     return None
 
 
-def _choice_index(raw: str, hint: Hint) -> bool:
-    """One complete field proves ordered explicit indices without a cross-frame port."""
-    protected = re.sub(r"『[^』]*』", lambda m: " " * len(m[0]), raw)
-    protected = re.sub(r"[（(][^（）()]*[）)]", lambda m: " " * len(m[0]), protected)
-    introduction = tuple(
-        re.finditer(
-            r"(?<![A-Za-z0-9０-９])(?P<count>[0-9０-９]+)つ(?:まで)?チョイス(?:する|して)?[。:：]",
-            protected,
-        )
-    )
-    if len(introduction) != 1:
-        return False
-    intro = introduction[0]
-    tail = protected[intro.end() :]
-    # A fresh ability head or blank paragraph cannot inherit another ability's intro.
-    boundary = re.search(
-        r"\n\s*\n|(?:^|[。\n])\s*(?:\{(?:ファンファーレ|起動|ラストワード|進化|食事|憑依)\}|"
-        r"【(?:進化時|攻撃時|超進化時)】)",
-        tail,
-    )
-    stop = intro.end() + boundary.start() if boundary is not None else len(raw)
-    labels = tuple(re.finditer(r"【([0-9０-９]+)】", protected[intro.end() : stop]))
-    if (
-        len(labels) < _MIN_OPTIONS
-        or not 1 <= int(intro["count"]) <= len(labels)
-        or [int(m[1]) for m in labels] != list(range(1, len(labels) + 1))
-    ):
-        return False
-    if re.search(r"【[0-9０-９]+】", protected[: intro.start()]):
-        return False
-    return any(
-        len(hint.source_segments) == 1
-        and hint.source_segments[0].start == intro.end() + label.start(1)
-        and hint.source_segments[0].end == intro.end() + label.end(1)
-        for label in labels
-    )
-
-
 def _field_number(value: int, before: str, after: str) -> Number | None:
     if field := re.search(r"(コスト|攻撃力|体力)(?:[=:：])?$", before):
         if re.match(r"^(?:以上|以下)(?:の|なら|になるように|である限り)", after):
             return Number("Nat", "threshold", value, None)
-        if re.match(r"^(?:の)?(?:カード|フォロワー|アミュレット|スペル)", after) or (
+        if field_filter(after) or (
             before.endswith("{コスト") and after.startswith("}")
         ):
             return Number(

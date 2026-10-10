@@ -13,6 +13,8 @@ from .test_four_layer_classification import classifier, source
     [
         ("自分の手札のカード２枚を墓場に置く。", ["count"], ["枚"]),
         ("自分の手札のカード２枚を場に出してよい。", ["count"], ["枚"]),
+        ("自分のデッキからフォロワー２枚を探し、場に出す。", ["count"], ["枚"]),
+        ("自分の手札のカード２枚を公開する。", ["count"], ["枚"]),
         ("これを２回くり返す。", ["repeat_count"], ["回"]),
         (
             "この能力は２ターンに３回働く。",
@@ -38,12 +40,48 @@ def test_complete_movement_frequency_and_resource_recovery(
 
 
 @pytest.mark.parametrize(
+    ("raw", "units"),
+    [
+        ("仮。相手のリーダー２人か相手の場のフォロワー３体を選ぶ。", ["人", "体"]),
+        (
+            "仮。相手の場のフォロワー２体と自分の墓場の元のコスト３の仮族・フォロワー４枚を選ぶ。",
+            ["体", None, "枚"],
+        ),
+        (
+            "仮。自分のデッキの上２枚を見る。その中から、スペルかアミュレット３枚を公開して手札に加えてよい。",
+            ["枚", "枚"],
+        ),
+    ],
+)
+def test_compound_selections_prove_each_source_counted_set(
+    raw: str, units: list[str | None]
+) -> None:
+    engine = classifier(extra=("leader_person_quantity",))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert [o.source_unit for o in binding.occurrences] == units
+
+
+def test_compound_selection_cannot_hide_an_unknown_second_np() -> None:
+    raw = "仮。相手のリーダー２人か不明なフォロワー３体を選ぶ。"
+    engine = classifier(extra=("leader_person_quantity",))
+    field = normalize_source(raw, source(raw))
+    assert engine.recognize(raw, field.source, field.parts[0]).issues
+
+
+@pytest.mark.parametrize(
     "raw",
     [
         "自分の手札のカード２枚を墓場に置る。",
         "自分の手札のカード２枚を場に出く。",
         "自分の手札のカード２枚を手札に加えす。",
         "自分の手札のカード２枚を公開して手札に加え仮。",
+        "自分のデッキからフォロワー２枚を探し、場に出る。",
+        "自分の手札のカード２枚を公開する仮。",
         "仮２回行う。",
         "仮、２ターンに３回。",
         "この能力は２ターンに３回復する。",
@@ -160,3 +198,38 @@ def test_choice_indices_need_one_complete_ordered_ability_scope(
         assert all(not f.issues for f in found)
     else:
         assert any(f.issues for f in found)
+
+
+@pytest.mark.parametrize("count", ["１", "２", "３"])
+def test_choice_replacement_uses_the_original_options_and_preserves_up_to(
+    count: str,
+) -> None:
+    raw = (
+        f"下記から１つチョイスする。仮なら、代わりに{count}つまで。【１】仮。【２】別。"
+    )
+    engine = classifier(extra=("bracket_choice_index", "suffix_unit_items"))
+    field = normalize_source(raw, source(raw))
+    found = engine.recognize(raw, field.source, field.parts[0])
+    if count == "３":
+        assert found.issues
+        return
+    assert not found.issues
+    frame, binding = found.bind(field.source, field.parts[0])
+    engine.verify(raw, field, field.parts[0], frame, binding)
+    assert binding.values["leaf_1"] == QuantitySpec(
+        mode="up_to", expr=Constant(kind="constant", value=int(count))
+    )
+
+
+def test_distinct_explicit_abilities_have_independent_choice_scopes() -> None:
+    raw = (
+        "{ファンファーレ}下記から１つチョイスする。【１】仮。【２】別。"
+        "{起動}下記から１つチョイスする。【１】他。【２】替。"
+    )
+    engine = classifier(extra=("bracket_choice_index", "suffix_unit_items"))
+    field = normalize_source(raw, source(raw))
+    found = engine.recognize(raw, field.source, field.parts[0])
+    assert not found.issues
+    assert [
+        found.values[s.name] for s in found.schema.slots if s.role == "choice_index"
+    ] == [1, 2, 1, 2]

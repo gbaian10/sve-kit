@@ -120,3 +120,21 @@ def test_explicit_token_filter_is_preserved_instead_of_becoming_unrestricted() -
     assert found.token is True
     assert source_unit(found, "体").merge_allowed
     assert not source_unit(found, "枚").merge_allowed
+
+
+def test_a_trait_prefix_cannot_swallow_another_counted_np_and_its_zone() -> None:
+    found = count_context(
+        "相手の場のフォロワーN体と自分の墓場の元のコストNの仮族・フォロワー"
+    )
+    assert found is not None
+    assert found.counted_zones == ("graveyard",)
+    assert source_unit(found, "枚").merge_allowed
+
+
+def test_an_explicit_two_np_union_preserves_both_zones() -> None:
+    found = count_context("進化前の自分の場のフォロワーや自分のEXエリアのフォロワー")
+    assert found is not None
+    assert found.counted_zones == ("battlefield", "ex")
+    assert found.quantity_role == "union_cardinality"
+    assert source_unit(found, "枚").merge_allowed
+    assert not source_unit(found, "体").merge_allowed
