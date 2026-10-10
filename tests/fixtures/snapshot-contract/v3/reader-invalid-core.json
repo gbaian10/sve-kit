@@ -308,6 +308,31 @@
     "rehash": true
   },
   {
+    "name": "root-row-descriptor",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "types",
+      "printing_detail"
+    ],
+    "value": {
+      "columns": [
+        "row_index",
+        "faces"
+      ],
+      "items": [
+        {
+          "scalar": "UInt"
+        },
+        {
+          "array": {
+            "ref": "PrintingFaceDetail"
+          }
+        }
+      ]
+    },
+    "rehash": true
+  },
+  {
     "name": "wrong-columns",
     "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
