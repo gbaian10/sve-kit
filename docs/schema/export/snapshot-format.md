@@ -167,7 +167,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 不在 display_ref 的候選及其他 revision 沿用 `history` 分片保存完整列，所需文字／翻譯沿既有 bucket 分片閉包按需載入。history 是傳輸分區名稱，不宣稱候選年代較舊；候選恰與 display_ref 共用 revision 時沿用 bootstrap/detail 的唯一儲存，不另存複本。啟動包的 dependencies 不得因其餘候選引用而強制預載 history；producer 仍驗同快照的完整引用閉包。
 
-開啟卡文詳情、候選比較或搜尋需要其餘候選內容時，reader 依 face 所屬 card 的穩定 owner 載入相應 detail/history 與文字依賴；按使用用途載入，不作首頁或整區基本目錄的阻擋條件，也不要求 PWA 整庫預取。有 display 的卡首屏使用其名稱與數值，標表記未定；沒有唯一 display 時保留卡號與「表記未定／候選載入中」，不能視為空文字、無候選或排除該卡。沒有唯一 display 的 card facet，候選載入後只對全候選一致的欄位給單值，其餘保持未定；尚未載入時標該進階用途未備妥與進度，不把缺少值當篩選不符。名稱搜尋先用 current／display 名稱，需搜尋其餘候選名稱與全文時逐片載入並取可讀候選聯集，未完成顯示載入中、完成後回完整結果並標表記未定，不使用某候選數值作已採納規則。
+開啟卡文詳情、候選比較或搜尋需要其餘候選內容時，reader 依 face 所屬 card 的穩定 owner 載入相應 detail/history 與文字依賴；按使用用途載入，不作首頁或整區基本目錄的阻擋條件，也不要求 PWA 整庫預取。有 display 的卡在基本目錄使用其名稱與數值，標表記未定；沒有唯一 display 時保留卡號與「表記未定／候選載入中」，不能視為空文字、無候選或排除該卡。沒有唯一 display 的 card facet，候選載入後只對全候選一致的欄位給單值，其餘保持未定；尚未載入時標該進階用途未備妥與進度，不把缺少值當篩選不符。名稱搜尋先用 current／display 名稱，需搜尋其餘候選名稱與全文時逐片載入並取可讀候選聯集，未完成顯示載入中、完成後回完整結果並標表記未定，不使用某候選數值作已採納規則。
 
 須以當次日英、所有卡片及實際可用名稱翻譯閉包量基本目錄冷載，包含完整 manifest／config、暫顯 revision、稀疏 wording 引用及必要實體檔；候選按需增量另報。依 [size-budget](size-budget.md)，Brotli 2 MiB 是分界，略超報精確差額，明顯超出才交維護者；共用／混區檔整檔計入，不能以尚未下載候選宣稱進階索引完整。
 
@@ -210,7 +210,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 依使用者 2026-09-30 的規格變更（build-db §15），卡包（`set=`）facet 由已登錄的 `printing.home_set_id` 建立，以 `product_family.code` 為篩選值，並限定 `printing.region` 為全站目前選定的版本（`jp`／`en`），兩區結果不混。合併卡片顯示也只使用命中的版次；`card.home_set_id` 不代替這項篩選。商品與收錄（`product`／`printing_product`）供單卡頁補充資訊與連結，不作卡包（`set=`）facet，也不由卡號前綴推斷商品收錄。初收錄（首次／再錄）是獨立 facet，可依收錄資料建立；資料缺少或狀態未知時標示 coverage，不因此隱藏卡片（build-db §15 的協調者決定）。
 
-基本目錄完成表示所選區的名稱／卡號／基本 facet 可完整搜尋，並不表示稀有度／異圖、機制、Q&A／勘誤、效果全文與規則資料全部就緒。非 display 候選的進階用途按需且明示未備妥；不得回部分卡片結果。reader 建完索引後丟棄原始 tuple／解碼字串，保留 TypedArray、唯一字串池與緊湊欄式 store；view 只持 ID／ordinal。基本文字 ready、來源／annotation pending、完整檢視缺來源依[公開 annotation §4.1](public-annotation.md#41-三種就緒狀態與部分-reader)。
+基本目錄完成表示所選區的名稱／卡號／基本 facet 可完整搜尋，並不表示稀有度／異圖、機制、Q&A／勘誤、效果全文與規則資料全部就緒。非 display 候選的進階用途按需且明示未備妥；不得回部分卡片結果。reader 建完索引後丟棄原始 tuple／解碼字串，保留 TypedArray、唯一字串池與緊湊欄式 store；view 只持 ID／ordinal。基本文字就緒、日文依據／標註未備妥、完整檢視缺來源依[公開 annotation §4.1](public-annotation.md#41-三種就緒狀態與部分-reader)。
 
 `complete_mode=include/exclude` 先在快照清單 keyword universe U 解碼 complete；`partial_mode` 再於 `U\complete` 解碼 partial。各集合選較短的正集/補集，同長選 include，列表長度不得超過其基底一半；兩集合解碼後互斥。`complete_all=true` 時 mode 皆 include、列表皆空。未知=`U\(complete∪partial)`，不因壓縮改成 absent。這個編碼也需 column-partition-v1 reader 能力，不能讓舊 reader 把補集當正集。
 

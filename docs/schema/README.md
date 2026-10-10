@@ -120,7 +120,7 @@ uv run tools/schema-er/build_er.py --serve    # 產生後在 localhost:8000 提�
 | 引擎驗證政策 | 第一版驗證政策須包含載入、基本局面與必要題本，並對應原錯誤碼 | 卡表可先上線，缺證據一律手動處理；不能把 reviewed 當 `engine_passed` |
 | Decklog 來源與外部 ID | 研究 JP/EN Decklog 卡片清單來源或 API、完整範圍與精確版次 ID 對照；兩區各至少一份含普通、特殊、再錄與同號 variant 的匯入樣本 | 不假設外部 ID 等於卡號；未查證依官方卡表收錄預設（收錄 true、未收錄 false）並標示；Decklog 匯入需求不標完成 |
 | 手機實測 | 中階 Android 與 iPad 量測解析、搜尋、切換語言、更新與離線峰值（見 [size-budget.md](export/size-budget.md)）；多尺寸卡圖、2.5D 與動態 atlas 的尺寸實測 | 數字只是估算與預算；不全包常駐解析，卡表不加 sprite |
-| 基本目錄容量 | 各日版／英版計整區基本目錄冷載；Brotli 2 MiB 為分界，略超報精確差額、明顯超出才交維護者；容器 raw ≤2 MiB、其他資料檔 ≤512 KiB | 全量 raw ≤40 MiB、單區完整來源閉包 br ≤8 MiB／gzip ≤10 MiB；共用／混區 File 整檔計，手機及完整三語獨立驗收 |
+| 基本目錄容量 | 各日版／英版計整區基本目錄冷載；Brotli 2 MiB 為分界，略超報精確差額、明顯超出才交維護者；容器 raw ≤2 MiB、其他資料檔 ≤512 KiB | 全量 raw ≤40 MiB、單區完整文字閉包 br ≤8 MiB／gzip ≤10 MiB；共用／混區 File 整檔計，手機及完整三語獨立驗收 |
 | 勘誤歷史資料 | 勘誤歷史的來源覆蓋、生效日與印刷適用證據 | current 可讀；印刷原文 unknown 時說明原因；歷史時間未知不猜 |
 | 來源覆蓋區間 | `source_windows` 與 `restriction_coverage` 的實際資料 | 日期不在 complete 範圍內時，合法性為 unknown |
 | 同號 variant | 同地區同卡號的多個 variant 依證據拆分（預設 `standard`），入口例外固定 | 不覆蓋真實差異，不以同號任選圖 |

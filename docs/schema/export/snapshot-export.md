@@ -4,7 +4,7 @@
 與 [傳輸 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)。預覽配號狀態與快取放在公開根之外，
 匯出不寫 current／previous 索引；開發桶的索引由上傳寫入，正式發布仍須另行建置並通過發布閘門。
 
-本文件說明 N0 已接線的 Python producer 邊界；基本目錄容器與新容量帳是 [size-budget](size-budget.md) 的設計要求，現有量測 API 尚未據此重寫，本次不宣稱已支援；公開欄位與分片語意以
+本文件說明 N0 已接線的 Python producer 邊界；基本目錄容器與新容量帳是 [size-budget](size-budget.md) 的設計要求，現有量測 API 尚未據此重寫；公開欄位與分片語意以
 [snapshot-format.md](snapshot-format.md)、[snapshot-transport.md](snapshot-transport.md)
 為準，機器契約以套件內 Schema 為準。
 
@@ -70,21 +70,21 @@ printing 與 display revision 的詳情片一對一提供每個 base row，保�
 `Snapshot.assert_identical` 比較兩次輸出的 raw/br/gzip、文字聯集與 recipe；批次時間
 及版號只影響快照清單，未變 payload bytes 可跨版重用。
 
-`export.measure.measure` 目前回報 N0 的全文／啟動包 raw／br／gzip、逐片 metadata 與超限檔；它把 manifest／config 計入，排除 images／空 DSL 與替代 text_all 重複量。
-既有 `startup_by_region.jp`／`.en` 若仍載全部 bootstrap，兩區數字相同；這不是新基本目錄裝檔或單區完整來源帳的通過證據。
+`export.transport.measure.measure` 目前回報 N0 的全文／啟動包 raw／br／gzip、逐片 metadata 與超限檔；它把 manifest／config 計入，排除 images／空 DSL 與替代 text_all 重複量。
+既有 `startup_by_region.jp`／`.en` 若仍載全部 bootstrap，兩區數字相同；其中 `target_br_1_mib`／`stop_for_maintainer` 沿用舊啟動目標與停點，不是現行分界。這些數字不是新基本目錄裝檔或單區完整文字帳的通過證據。
 
-修訂後的報告依 [size-budget](size-budget.md)：全量 raw（全部文字分片＋manifest）≤40 MiB，單一版本完整來源閉包 Brotli ≤8 MiB、gzip ≤10 MiB，基本目錄容器 raw ≤2 MiB，其他資料檔 ≤512 KiB。
+修訂後的報告依 [size-budget](size-budget.md)：全量 raw（全部文字分片＋manifest）≤40 MiB，單一版本完整文字閉包 Brotli ≤8 MiB、gzip ≤10 MiB，基本目錄容器 raw ≤2 MiB，其他資料檔 ≤512 KiB。
 基本目錄冷載逐區計完整 manifest＋config＋實際 File 與依賴；混區／共用 File 整檔計，不分攤語言比例。
 Brotli 2 MiB 是分界，略超報精確 bytes 差額與比例，明顯超出才交維護者，不當作 CI 硬閘門。
-source／counterpart、必要跨區檔、卡號索引與字典須完整計入單區全文；基本文字 ready 而來源 pending 不免計。
+source／counterpart、必要跨區檔、卡號索引與字典須完整計入單區全文；基本文字就緒而日文依據／標註未備妥時亦不免計。
 text_all 整檔與封套另報，不與分片重加；新量法不以舊豁免或現有 API 數字宣稱已驗收。
 
 逐檔 owner／bucket／partition 報所有 fragments 的集合，不只取第一個。
 另報全部 images metadata 的檔數／raw／br／gzip（不加進完整文字）；metadata 與
-圖片 blob 分列，當頁小型 row 集合不能冒充實際下載量。首屏後背景全量 metadata 的
-成本仍算首次 session／離線下載；實際阻擋首屏者加回啟動量。
+圖片 blob 分列，當頁小型 row 集合不能冒充實際下載量。背景全量 metadata 的
+成本仍算首次 session／離線下載；實際成為首屏或基本目錄必載依賴者加回該冷載帳。
 
-`export.measure.update` 比較不可變 payload bytes，列出變更檔鍵與替換下載量（含新
+`export.transport.measure.update` 比較不可變 payload bytes，列出變更檔鍵與替換下載量（含新
 快照清單）；base hash 變動即使 row_index 不變也會重建詳情片。選用 `text_all` 更新
 時應另計整個聯集，不能與個別分片同時計算。
 

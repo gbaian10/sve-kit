@@ -250,11 +250,11 @@ W 仍按 card_engine_support 的 region override／shared／block 順序求資�
 
 | 狀態 | 合成例與 reader／Web 行為 |
 | --- | --- |
-| 基本文字 ready | EN receiver 的名稱／基本欄位、FieldTranslation 七格、translation 八格、source_unit_id 指向的字典文字及目標文字已驗；`jp_source` 的 JP source owner 尚未載入。可搜尋／呈現普通字串與 origin／authority／low_confidence，標「日文依據」，不聲稱已核完 JP owner 或完整標註 |
-| 日文依據／annotation pending | 上例仍有完整 source pointer 或非 null annotation_set_id，但所需 JP owner／兩區 mapping slice、用途 set／concept 尚未下載驗畢。顯示「日文依據載入中／標註載入中」，不畫未驗 ranges、不造加粗／說明入口；不能當作缺譯、空 set、無術語或已確認 counterpart |
+| 基本文字就緒（ready） | EN receiver 的名稱／基本欄位、FieldTranslation 七格、translation 八格、source_unit_id 指向的字典文字及目標文字已驗；`jp_source` 的 JP source owner 尚未載入。可搜尋／呈現普通字串與 origin／authority／low_confidence，標「日文依據」，不聲稱已核完 JP owner 或完整標註 |
+| 日文依據／標註未備妥（pending） | 上例仍有完整 source pointer 或非 null annotation_set_id，但所需 JP owner／兩區 mapping slice、用途 set／concept 尚未下載驗畢。顯示「日文依據載入中／標註載入中」，不畫未驗 ranges、不造加粗／說明入口；不能當作缺譯、空 set、無術語或已確認 counterpart |
 | 完整檢視缺來源（錯誤） | 所需 owner、字典與標註候選檔及其依賴已全部載入驗畢，仍找不到 pointer 指定的 JP revision、原文或非 null set；完整 view 回 reference／owner／text_identity 錯誤，不降級 pending／缺譯或借 current／同字串用途補洞 |
 
-前兩種可同時成立：名稱搜尋 ready，而日文依據／annotation pending。已載入資料顯示錯 card／face／語言、座標或 hash 時立即拒絕，不等全量才報錯。
+前兩種可同時成立：名稱搜尋已就緒，而日文依據／標註未備妥。已載入資料顯示錯 card／face／語言、座標或 hash 時立即拒絕，不等全量才報錯。
 基本目錄的整區名稱／卡號／基本 facet 索引完整後才開放搜尋，不以來源對照待載阻塞普通文字，也不將部分卡片當完整結果。
 效果全文與進階 facet 的搜尋須等各自整區閉包驗畢；未完成顯示該用途載入中，不傳部分結果。
 
@@ -267,7 +267,7 @@ W 仍按 card_engine_support 的 region override／shared／block 順序求資�
 未完成 counterpart 雙端與標註驗證時不能顯示為已確認的官方對照；可顯示接收端自身原文，對照用途保持 pending。
 `jp_source` 的普通字串可讀不授予 counterpart、aligned、機制或 DSL 資格；完整來源／標註 view 不放寬任何檢查。
 
-目前容量 fixture（3.0.0，`preview-20261010T032000Z-0001`）的 FieldTranslation 用途列為 own_source **9,950**、jp_source **5,423**、official_counterpart **0**。
+[#498](https://github.com/gbaian10/sve-kit/issues/498) 交付時量測容量用的 3.0.0 fixture，FieldTranslation 用途列為 own_source **9,950**、jp_source **5,423**、official_counterpart **0**。
 這是實際各文字 File 的用途列計數，不是唯一 translation 數，也不是三種 UI 語言完整驗收。
 零 counterpart 未驗真實雙端官方對照；本 fixture 的語言／owner／效果標註覆蓋不能當全三語或手機驗收，合成正反例另依[案例規格](public-annotation-cases.md)。
 
@@ -284,7 +284,7 @@ printing 字段為 detail；keyword／vocabulary／商品為 bootstrap；QA／CR
 這是 field_annotation 可用 history 的唯一情形，不將 history 誤解為 current。
 
 基本目錄的原文、譯文與 facet 字串及必要字典計入基本目錄冷載；來源／annotation 可按 §4.1 延後，實際成必載依賴者仍整檔計入。
-說明正文、JP source 比較或 printed／history 的非首屏欄位可以按需載入，不藉 reference 強迫 bootstrap 依賴 detail。
+說明正文、JP source 比較或 printed／history 等基本目錄以外的欄位可以按需載入，不藉 reference 讓基本目錄強制依賴按需檔。
 這些邏輯引用由 P／完整 R／U 驗閉包，W 在使用來源對照／說明前載入且驗到目的欄位。
 完整文字包包含三個新集合及所有必要文字／說明閉包；分片與 text_all 的 decoded logical view 相同。
 所有新集合納入 row_counts、types、changes 的 PK／changed_fields 白名單、檔案 hash 與完整文字離線 ready 判定。
@@ -333,5 +333,5 @@ JSON object 的重複鍵仍歸 wire，occurrence ordinal 與 range 次序仍依 
 以到達該語義邊界，不能因外層 hash 失敗就算通過。
 
 容量依 [size-budget](size-budget.md#30-annotation-與-jp-來源的計帳)逐項計入；
-N0 已量測既有完整文字、單片與 JP／EN 啟動，超標依維護者豁免交付；修訂後按單區完整來源閉包、基本目錄容器及其他資料檔量測，不沿用舊帳當新配置通過。
+N0 已量測既有完整文字、單片與 JP／EN 啟動，超標依維護者豁免交付；修訂後按單區完整文字閉包、基本目錄容器及其他資料檔量測，不沿用舊帳當新配置通過。
 本單只驗 Schema 與案例可讀／一致；不得把合成小樣本或既有 2.0 數字當成新格式容量通過。

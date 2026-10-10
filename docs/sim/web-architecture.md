@@ -163,7 +163,7 @@ interface QueryState {
 - 網路／Service Worker 處理取得、驗 bytes 與持久快取；Worker 逐容器解壓、驗證、解析、建立索引；main 接收必要 view、進度與完整結果。原始 tuple／解碼字串建立緊湊 store 後釋放，詳情用有界 LRU，不把 text_all 一次 JSON.parse 到 main。
 - 現有 PWA 前只靠 HTTP 快取；Service Worker／CacheStorage 的上述分工是設計要求，不宣稱已實作。快取不可用時保持明確用途狀態並重新下載，不要求整庫離線預取。
 - 持久 bytes 以根目錄及內容定址 URL 重用，衍生索引以 manifest／reader／normalizer 隔離。切快照／版本／查詢取消舊工作，拒絕晚到回應；部分用途 ready 不等於完整離線 active。
-- `data/` 公開呼叫採 async，提供用途所需 keys、載入／解析進度與分開的文字／來源／標註狀態；未知分母不造百分比。基本文字 ready、來源／annotation pending、完整檢視缺來源（error）依[公開 annotation §4.1](../schema/export/public-annotation.md#41-三種就緒狀態與部分-reader)。
+- `data/` 公開呼叫採 async，提供用途所需 keys、載入／解析進度與分開的文字／來源／標註狀態；未知分母不造百分比。基本文字就緒、日文依據／標註未備妥、完整檢視缺來源（錯誤）依[公開 annotation §4.1](../schema/export/public-annotation.md#41-三種就緒狀態與部分-reader)。
 - main＋Worker 穩態合計 ≤48 MiB、更新峰值 ≤80 MiB，主線程單段 ≤50 ms、所選整區基本目錄完整解析累計 ≤1 秒；量法依[size-budget](../schema/export/size-budget.md#手機記憶體與解析)。各 Worker 不分別享有 48／80 MiB，下載 bytes 不等於 heap；本文件不宣稱效能驗收通過。
 
 ### 4.3 容器解碼、型別與拒絕條件
@@ -185,7 +185,7 @@ interface QueryState {
 ### 4.5 詳情分片、文字與定位
 
 - `details.ts`：`loadShard(key)` → 解碼 → 驗拒絕條件 → `row_index` 對回精確 base fragment 的列（`printing.faces` 用 `face_ordinal`）；LRU。
-- `text.ts`：`textOf(unitId)` 先查啟動包閉包，再查已載入的詳情片；沒載入時回 `undefined`，呼叫端顯示載入中。
+- `text.ts`：`textOf(unitId)` 先查基本目錄，再查已載入的詳情片；沒載入時回「未載入」，與完整查找後不存在分開（[公開 annotation §4.1](../schema/export/public-annotation.md#41-三種就緒狀態與部分-reader)），呼叫端顯示載入中。
 - **定位**：快照格式允許同 family 依 ID bucket 拆成多片，所以「一個 owner → 一個檔」不成立。`Locator.shardsFor(kind, ref) → fileKey[]`
   回傳候選檔集合（`kind` 是分片種類，`ref` 是 owner 或 `text_unit` bucket）；要找某一列時依序載入候選片、用片內索引確認；
   「不存在」只在所有候選片都載入且都沒有時才成立。候選集合如何從快照清單算出由快照格式定義；`Locator` 是唯一知道這個規則的模組。

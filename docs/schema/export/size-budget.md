@@ -1,7 +1,7 @@
 # 卡表快照容量與記憶體預算
 
 本文件定義容量帳的對象、量法與設計門檻；分片與欄位白名單依 [snapshot-format](snapshot-format.md)，容器與 join 依 [snapshot-transport](snapshot-transport.md)。
-依[維護者決定](https://github.com/gbaian10/sve-kit/issues/506)，3.0.0 尚未發布，基本目錄契約原地修訂。
+基本目錄的載入分類與容量分界依 [#506 的維護者決定](https://github.com/gbaian10/sve-kit/issues/506)。
 N0 的 producer／reader 已接線；下列基本目錄裝檔與部分 reader 語意是設計要求，不宣稱現有 exporter／Worker 已完成或手機效能已通過。
 
 ## 基本目錄與載入分類
@@ -23,12 +23,13 @@ N0 的 producer／reader 已接線；下列基本目錄裝檔與部分 reader �
 ## 預算
 
 MiB = 1,048,576 bytes，KiB = 1,024 bytes。raw 是 canonical-json-v1 未壓縮 bytes；Brotli quality 11，gzip level 9（mtime=0、無檔名），recipe 釘住壓縮器及版本。
+多檔帳的壓縮量是各 File（含 manifest）各自壓縮後 bytes 的和，不以合併成單一串流的壓縮量代替。
 
 | 項目 | 門檻／分界 | 對象與量法 |
 | --- | --- | --- |
 | 基本目錄冷載，依所選版本 | Brotli 2 MiB（2,097,152 bytes）分界 | 完整 manifest＋config＋整區基本目錄實際 File 及必要依賴；按 key 去重 |
 | 基本目錄容器 | 解壓後 ≤ 2 MiB | 穩定封存檔、最近包各自的檔與共用檔；整個 File 的 types、字典、fragment metadata、rows 都計入 |
-| 詳情與其他資料檔 | 解壓後 ≤ 512 KiB（524,288 bytes） | 基本目錄容器以外的實際資料 File，含印刷、history、media、config、programs；不只量單一 fragment |
+| 詳情與其他資料檔 | 解壓後 ≤ 512 KiB（524,288 bytes） | 基本目錄容器以外裝 fragment 的實際 File，含詳情、印刷擴充、history 與 images；整檔計，不只量單一 fragment；config／programs 另報 |
 | 全部文字 raw | ≤ 40 MiB（41,943,040 bytes） | 全部分片的 bootstrap／text／config 聯集＋manifest，兩區合計；changes 另報 |
 | 完整文字閉包，依單一版本 | Brotli ≤ 8 MiB（8,388,608 bytes） | 該區全部文字及其完整引用閉包＋manifest，含共享、JP 來源與必要跨區資料 |
 | 完整文字閉包，依單一版本 | gzip ≤ 10 MiB（10,485,760 bytes） | 與 Brotli 相同的實際 File 集合，不能改用只含顯示譯文的集合 |
@@ -56,6 +57,8 @@ text_all 是同批原 File 聯集的替代下載：另報封套與整檔 raw／g
 annotation before／after 的 raw 增量、manifest／changes 摘要與分片重複 descriptor 另列；已含在 File 帳中的增量不重加。
 圖片 bitmap、語音與 DSL AST 不屬完整文字；images metadata 另報，實際進入某冷載用途者仍加進該用途帳。
 
+表記未定的公開呈現須量測日版／英版基本目錄，包含當次實際可用的名稱翻譯；manifest、config、實際必載容器與 pending wording 引用依上述各版本 Brotli 分界計算。基本目錄須計入每個 pending face-region 最多一筆 display revision 的輕量投影、名稱及可用名稱翻譯文字閉包，讓整區完成後可讀暫顯卡名、搜尋名稱與建立 facet。display_ref 以外的候選 revision 與文字閉包按需載入，另報容量，不算成已完成候選索引；不能讓其餘候選引用形成必載依賴後仍漏算基本目錄成本。
+
 ## 早期原型與推估
 
 以下保留舊全包量法的歷史實測／估算，不能當新單區完整閉包或基本目錄驗收。
@@ -70,15 +73,13 @@ annotation before／after 的 raw 增量、manifest／changes 摘要與分片重
 
 敏感度情境（共用來源、10% 或全部已查證、192-byte 長網址、機制標籤密度加倍或 partial coverage）的估算落在 raw 24.3～27.7 MiB、Brotli 4.70～5.12 MiB、gzip 4.84～5.28 MiB，全部在預算內。
 
-表記未定的公開呈現須量測日版／英版基本目錄，包含當次實際可用的名稱翻譯；manifest、config、實際必載容器與 pending wording 引用依上述各版本 Brotli 分界計算。bootstrap 須計入每個 pending face-region 最多一筆 display revision 的輕量投影、名稱及可用名稱翻譯文字閉包，讓基本目錄可讀暫顯卡名、搜尋名稱與建立 facet。display_ref 以外的候選 revision 與文字閉包按需載入，另報容量，不算成已完成候選索引；不能讓其餘候選引用形成必載依賴後仍漏算基本目錄成本。
-
 早期啟動包原型只量了日文部分：Brotli 約 0.30 MiB（raw 3.75 MiB）。這不能代表日英全庫、當次名稱翻譯或新分片配置；每次定版須以完整新 manifest、types、依賴與實際裝檔重測基本目錄冷載量，不沿用舊 manifest 大小估算。
 
 以上是早期原型實測加推估，不是正式匯出器或手機驗收。之後資料量增加（新卡包、EN 完整資料、繁中翻譯）要以實際輸出重新對帳；沒有名稱翻譯的批次不能代表完整三語規模。
 
 ## 手機記憶體與解析
 
-以下是設計門檻，須於中階 Android 與 iPad 實測；dev 網頁的維護者體驗不能由桌面小樣本代替。
+以下是設計門檻，以中階 Android 與 iPad 的實測為準；桌面量測不能代替。
 
 | 項目 | 門檻 | 對象與量法 |
 | --- | --- | --- |
@@ -103,9 +104,9 @@ annotation_concept 的 category／card_ids／explanations、translation 第八�
 同文字不同概念的集合不能算成同一份；只有完整 set 相同才去重。
 空集合不出 annotation_set／field_annotation，translation 保留第八格 null；不改建置端空集合身分。
 容量報告列實際非空集合／用途列數、空集合省略量；producer 逐用途確保非空 occurrence 不被省略。
-整名推導的契約若另行啟用，須依其機器契約同步 producer／reader，本次不以假定省略量當實測。
+容量以實際輸出計，不以推定可省略的集合量代替實測。
 
-基本目錄的普通文字可先 ready，日文依據／annotation 仍 pending；完整文字帳不因此縮減。
+基本目錄可先達基本文字就緒而日文依據／標註未備妥；完整文字帳不因此縮減。
 首次來源對照、printed／history、概念說明另報按需增量；若實際成基本目錄必載依賴，就回基本目錄帳。
 文字、只改 bold、概念說明等更新，各自報重建檔數及下載 bytes，base／字典變更的重抓亦計入。
 N0 已完成完整輸出量測，既有超標依維護者豁免交付；該豁免不代表新裝檔或手機驗收通過。
