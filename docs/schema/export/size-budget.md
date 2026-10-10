@@ -23,6 +23,8 @@
 | 背景解析時單段主執行緒工作   | ≤ 50 ms   |
 | 完整可搜尋資料的解析時間累計 | ≤ 1 秒    |
 
+容量停點屬於發布效能驗收，不是快照格式或 reader 相容性條件。reader 核對實際 bytes、hash 與分片結構，不以容量預算數字拒絕合法快照。
+
 完整文字或單個資料 File 超過限制就停止發布效能驗收，調整投影或固定分片配置；不能只因 gzip 小就宣稱手機順暢。單片 512 KiB 計整個實際下載容器（含 types 與 fragment metadata），不只計其中一個 fragment；manifest 與替代下載的 text_all 另計，不能漏算其總量或記憶體。
 
 啟動包約 1 MiB 是盡量達成的目標，不是 br／gzip 的 CI 閘門。JP／EN 依所選版本各自計 manifest＋config＋首屏實際必載 File 與依賴，按 key 去重。共用／混區檔整檔計入每個需要它的版本，不能按列數或語言比例分攤；仍載全部 bootstrap 時兩區數字會相同。raw／gzip 另報實測，gzip 不另套 1 MiB。

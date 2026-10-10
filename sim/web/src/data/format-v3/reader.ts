@@ -589,8 +589,6 @@ export function verifyManifest(manifestValue: JsonValue): { manifest: JsonObject
   if (!isCompatible(manifest))
     fail("unsupported-version", "unsupported format, reader version or capability")
   const all = files(manifest)
-  if ([...all.values()].some((file) => integerValue(file["bytes"]) > 512 * 1024))
-    fail("fragment-profile", "data file exceeds fixed 512 KiB limit")
   const identities = new Set<string>()
   for (const file of all.values()) {
     for (const count of arrayValue(file["row_counts"])) {

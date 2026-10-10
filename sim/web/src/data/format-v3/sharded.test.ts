@@ -9,7 +9,7 @@ import {
   objectValue,
   stringValue,
 } from "./json"
-import { readContainer, readSnapshot, readTextAll, verifyManifest } from "./reader"
+import { readContainer, readPayload, readSnapshot, readTextAll, verifyManifest } from "./reader"
 import { digest } from "./sha256"
 
 const files = import.meta.glob<string>(
@@ -29,7 +29,7 @@ const payloads = new Map(
   ]),
 )
 
-describe("2.0 shared wire contract", () => {
+describe("3.0 shared wire contract", () => {
   it("joins the independently written multibucket golden to the unchanged logical view", () => {
     expect(canonicalText(readSnapshot(manifest, payloads))).toBe(
       canonicalText(fixture("expected-logical.json")),
@@ -51,12 +51,15 @@ describe("2.0 shared wire contract", () => {
     container["format_version"] = "1.0.0"
     expect(() => readContainer(file, container, "3.0.0")).toThrow(/schema/)
   })
-  it("rejects data files over the frozen raw budget before requesting payloads", () => {
+  it("keeps the publication size budget separate from payload integrity", () => {
     const value = structuredClone(manifest)
     const file = (value["files"] as JsonObject[])[0]
     if (!file) throw new Error("missing fixture file")
     file["bytes"] = 512 * 1024 + 1
-    expect(() => verifyManifest(value)).toThrow(/fragment-profile/)
+    expect(() => verifyManifest(value)).not.toThrow()
+    expect(() =>
+      readPayload(file, payloads.get(stringValue(file["key"])) ?? new Uint8Array()),
+    ).toThrow("blob-integrity")
   })
   it("rejects duplicate manifest fragment identities before payload fetching", () => {
     const value = structuredClone(manifest)
