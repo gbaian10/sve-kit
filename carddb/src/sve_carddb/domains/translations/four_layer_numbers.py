@@ -420,7 +420,7 @@ def _replacement_number(value: int, before: str, after: str) -> Number | None:
 def _compound_existence_number(value: int, before: str, after: str) -> Number | None:
     match = re.match(
         r"^枚以上で(?:自分|相手)の(?P<np>[^。:：]+?フォロワー)が"
-        r"場か墓場に置かれたとき" + _END,
+        r"場(?:か|から)墓場に置かれたとき" + _END,
         after,
     )
     if (
