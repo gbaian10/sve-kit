@@ -3,7 +3,7 @@
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
 專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../../quotations.md)。
 
-建置資料庫的完整邏輯契約，共 118 表；這是設計規格，不是 migration。卡表快照的公開欄位見 [snapshot-format.md](../export/snapshot-format.md)。DSL 語法只以 `dsl/` 的 JSON Schema 為權威。
+建置資料庫的完整邏輯契約，共 120 表；這是設計規格，不是 migration。卡表快照的公開欄位見 [snapshot-format.md](../export/snapshot-format.md)。DSL 語法只以 `dsl/` 的 JSON Schema 為權威。
 
 ## 1. 兩層與範圍
 
@@ -279,7 +279,8 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 ### 9.1 現行 DDL 表格
 
 下表記錄四層切換前已存在的 current DDL；人工資料保存來源與品質，不包含翻譯核可封套。
-四層的目標邏輯列與欄位差異另見 §9.3，尚未實作；不能把本表的 text／params 宣稱為四層 target／typed values。
+四層的目標邏輯列與欄位差異另見 §9.3；正式名稱流程已寫入下表的 annotation 三表，
+模板 text／params 仍待切換，不能宣稱為四層 target／typed values。
 
 | 表 | 建置期欄位、鍵與約束 |
 | --- | --- |
@@ -294,10 +295,15 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 | `translation_selection` | `context_id→translation_context,target_lang:Lang,translation_id→translation` `PK(context_id,target_lang)`；context 與語言須與選中的譯文一致 |
 | `translation_context` | `id:ID PK,source_unit_id→text_unit,semantic_variant:ID`；`UQ(source_unit_id,semantic_variant)` |
 | `translation_use` | `id:ID PK,context_id→translation_context,field:Code,ordinal:UInt?,face_revision_id→face_revision?,printing_id:ID?,face_id:ID?,qa_version_id→qa_version?,cr_clause_id→cr_clause?,vocabulary_kind:Code?,vocabulary_code:Code?,keyword_id→keyword?,product_family_id→product_family?,product_id→product?`；恰一 owner 組非空；`FK(printing_id,face_id)→printing_face(printing_id,face_id)`，`FK(vocabulary_kind,vocabulary_code)→vocabulary(kind,code)`；owner/field/ordinal 條件唯一，來源 text 必須同 context |
+| `annotation_set` | `id:ID PK,text_unit_id→text_unit,occurrences:Json`；annotation-v1 完整 hash；Unicode scalar ranges、引用類別、exact text 與當前 emphasis 由 typed 邊界驗證 |
+| `translation_annotation` | `translation_id→translation,annotation_set_id→annotation_set` `PK(translation_id)`；set 對應該譯文的 exact target text |
+| `translation_use_annotation` | `use_id→translation_use,annotation_set_id→annotation_set` `PK(use_id)`；set.text_unit_id 必等於 use 所屬 context 原文 |
 
 ### 9.2 當前翻譯投影
 
 §9.1 的既有 DDL 透過 `build.t1.compile_build()` 編譯。
+建置 DB 版本為 7；annotation 三表隨 translation_names 能力編譯，名稱的已解析概念覆蓋完整原文與譯名，
+無譯名時仍保留原文用途。名稱內不再抽術語，不能把缺概念的名字造為 CardName 引用。
 [翻譯契約](../domains/translation-contract.md)已描述四層目標行為，具體差異依 §9.3；以下既有欄位不代表新版已驗收。
 模板功能、術語／名字／風味、owner/use、來源 hash 與跨區適用檢查保留。
 人工輸入的 authored_source_id、record_key、origin 與 low_confidence 定位本次來源與品質，沒有另建核可表。
