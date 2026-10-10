@@ -54,6 +54,16 @@ def test_disjunct_counts_require_a_shared_np_and_legal_units(raw: str) -> None:
 @pytest.mark.parametrize(
     ("raw", "role", "unit"),
     [
+        (
+            "仮。自分の場や自分のEXエリアのアミュレットが２枚以上なら、仮。",
+            "existence_count",
+            "枚",
+        ),
+        (
+            "仮。それによって破壊した相手の場のフォロワー２体につき、仮。",
+            "group_divisor",
+            "体",
+        ),
         ("仮。場の自分のフォロワー２体を選ぶ。", "selection_count", "体"),
         ("仮。それの場のカードが２枚以上なら、仮。", "existence_count", "枚"),
         (
@@ -220,6 +230,16 @@ def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
         ("仮。自分の場のフォロワー２体を手札に戻す。", ["count"], ["体"]),
         ("これを２回くり返す。", ["repeat_count"], ["回"]),
         (
+            "仮。この能力は自分の場の「それぞれカード名が異なる仮族・フォロワー」が４体以上なら、２ターンに３回使える。",
+            ["existence_count", "duration_count", "repeat_count"],
+            ["体", "ターン", "回"],
+        ),
+        (
+            "仮。相手プレイヤー２人の場のカードが３枚以上なら、仮。",
+            ["selection_count", "existence_count"],
+            ["人", "枚"],
+        ),
+        (
             "仮。この能力は「このターン中に自分がプレイしたカードの枚数」が４枚以上なら、２ターンに３回使える。",
             ["threshold", "duration_count", "repeat_count"],
             ["枚", "ターン", "回"],
@@ -246,7 +266,7 @@ def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
 def test_complete_movement_frequency_and_resource_recovery(
     raw: str, roles: list[str], units: list[str]
 ) -> None:
-    engine = classifier(extra=("suffix_recovery_amount",))
+    engine = classifier(extra=("suffix_recovery_amount", "player_person_quantity"))
     field = normalize_source(raw, source(raw))
     part = field.parts[0]
     found = engine.recognize(raw, field.source, part)

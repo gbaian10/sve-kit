@@ -73,6 +73,16 @@ for _kind in ("follower", "spell", "amulet", "card", "spell_or_amulet", "crest")
 _RULES[
     CountContext("select.card.v1", "card", ("battlefield",), False, "cardinality")
 ] = frozenset({"枚"})
+
+_RULES[
+    CountContext(
+        "select.union_unrestricted.v1",
+        "amulet",
+        ("battlefield", "ex"),
+        _ALL_TOKENS,
+        "union_cardinality",
+    )
+] = frozenset({"枚"})
 for _kind in ("follower", "amulet", "card"):
     _RULES[
         CountContext("select.card.v1", _kind, ("battlefield",), True, "cardinality")
@@ -134,7 +144,8 @@ _FILTER = (
     r"(?:(?:元の)?(?:コスト|攻撃力|体力)(?:N|X)(?:以下|以上)?の|"
     r"他の|表向きの|裏向きの|(?:進化前|進化後|エボルヴ|アドバンス)(?:の)?|(?:アクト|レスト|スタンド)状態の|これと同名を除く(?:・)?|"
     r"(?:【[^【】]+】(?:や|か)?)+を持つ|【[^【】]+】状態の|カード名に『X』を含む|カード名に「[^「」]+」を含む|"
-    r"\{[^{}]+\}(?:を持つ|でない|の|・)?|" + _TRAIT + r")*"
+    r"それぞれカード名が異なる|それによって破壊した|"
+    r"\{[^{}]+\}(?:を持つ|である|でない|の|・)?|" + _TRAIT + r")*"
 )
 _ONSET = r"(?:^|[、。:：}】（(]|か|と|は|として)"
 _KIND = r"スペルかアミュレット|フォロワー|アミュレット|スペル|カード|クレスト|『X』"
