@@ -325,7 +325,7 @@ def _generic_number(
 ) -> Number | None:
     if counter := _counter_number(value, before, after):
         return counter
-    if compound := compound_selection(after):
+    if compound := compound_selection(after, before):
         return _quantity(
             "selection_count", value, compound[0], "up_to" if compound[1] else "exact"
         )

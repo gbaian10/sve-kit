@@ -136,6 +136,10 @@ def test_complete_movement_frequency_and_resource_recovery(
             ["体", None, "枚"],
         ),
         (
+            "仮。自分の墓場の仮族・フォロワー２枚か別族・フォロワー３枚を選ぶ。",
+            ["枚", "枚"],
+        ),
+        (
             "仮。自分のデッキの上２枚を見る。その中から、スペルかアミュレット３枚を公開して手札に加えてよい。",
             ["枚", "枚"],
         ),
@@ -159,6 +163,12 @@ def test_compound_selection_cannot_hide_an_unknown_second_np() -> None:
     engine = classifier(extra=("leader_person_quantity",))
     field = normalize_source(raw, source(raw))
     assert engine.recognize(raw, field.source, field.parts[0]).issues
+
+
+def test_a_separate_clause_cannot_inherit_a_counted_collection() -> None:
+    raw = "仮。自分の墓場のフォロワー２枚を選ぶ。仮族・フォロワー３枚を選ぶ。"
+    field = normalize_source(raw, source(raw))
+    assert classifier().recognize(raw, field.source, field.parts[0]).issues
 
 
 @pytest.mark.parametrize(

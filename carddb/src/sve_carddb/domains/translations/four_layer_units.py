@@ -154,7 +154,7 @@ _COUNTED = re.compile(
     _ONSET
     + _FILTER
     + r"(?:(?:自分|相手)の)?(?P<zone>場とEXエリア|場か自分のEXエリア|場か相手のEXエリア|場や自分のEXエリア|場や相手のEXエリア|エボルヴデッキ|EXエリア|消滅領域|デッキ|墓場|手札|場)"
-    r"(?:の|にある|にいる|に表向きで置かれている|に裏向きで置かれている|に|から)(?:、)?(?P<quote>「)?"
+    r"(?:の|にある|にいる|に表向きで置かれている|に裏向きで置かれている|に表向きである|に裏向きである|に|から)(?:、)?(?P<quote>「)?"
     + _FILTER
     + r"(?P<kind>"
     + _SET_KIND
@@ -198,6 +198,16 @@ _COMPOUND_SELECTION = re.compile(
     r"(?P<next>[^。:：]+)N(?:枚|体|つ|人)(?:まで)?(?:を)?"
     r"選(?:ぶ|び|んで)(?=[。:、）)\n]|$)"
 )
+_SHARED_SET = re.compile(
+    r"^(?P<quote>「)?"
+    + _FILTER
+    + r"(?P<kind>"
+    + _SET_KIND
+    + r")(?(quote)」)(?:を|が)?$"
+)
+_COMPOUND_PREFIX = re.compile(
+    r"^(?P<first>.*)N(?P<unit>枚|体|つ)(?:まで)?(?:か|と)(?P<next>[^。:：]+)$"
+)
 
 
 _SET_CONSTRAINT = re.compile(
@@ -211,10 +221,15 @@ def field_filter(after: str) -> bool:
     return _FIELD_FILTER.match(after) is not None
 
 
-def compound_selection(after: str) -> tuple[str, bool] | None:
+def compound_selection(after: str, before: str = "") -> tuple[str, bool] | None:
     """Both counted NPs must be explicit; the final selection verb belongs to both."""
     match = _COMPOUND_SELECTION.match(after)
-    if match is None or count_context(match["next"]) is None:
+    if match is None:
+        return None
+    second = count_context(match["next"])
+    if second is None and (first := count_context(before)) is not None:
+        second = _shared_set(first, match["next"])
+    if second is None:
         return None
     return match["unit"], bool(match["limit"])
 
@@ -223,6 +238,14 @@ def count_context(before: str) -> CountContext | None:
     """A complete counted NP supplies its zone; the later destination is never inspected."""
     if constraint := _SET_CONSTRAINT.search(before):
         return count_context(before[: constraint.start()])
+    if match := _COMPOUND_PREFIX.match(before):
+        first = count_context(match["first"])
+        if (
+            first is not None
+            and source_unit(first, match["unit"]).merge_allowed
+            and (shared := _shared_set(first, match["next"])) is not None
+        ):
+            return shared
     if context := _explicit_object_context(before):
         return context
     if context := _zone_context(before):
@@ -236,6 +259,23 @@ def count_context(before: str) -> CountContext | None:
             "cardinality",
         )
     return None
+
+
+def _shared_set(first: CountContext, tail: str) -> CountContext | None:
+    """Only an adjacent complete coordinate NP shares its written collection introducer."""
+    match = _SHARED_SET.fullmatch(tail)
+    if match is None or len(first.counted_zones) != 1:
+        return None
+    zone = first.counted_zones[0]
+    if zone in {"battlefield", "ex"} and "『X』" in match["kind"]:
+        return None
+    return CountContext(
+        "select.ex_unrestricted.v1" if zone == "ex" else "select.unrestricted.v1",
+        _counted_kind(match["kind"]),
+        (zone,),
+        _ALL_TOKENS,
+        "cardinality",
+    )
 
 
 def _explicit_object_context(before: str) -> CountContext | None:
