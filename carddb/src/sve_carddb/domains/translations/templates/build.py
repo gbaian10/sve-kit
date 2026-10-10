@@ -19,8 +19,6 @@ from sve_carddb.domains.translations.templates.records import (
 from sve_carddb.domains.translations.templates.render import Label, render
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from sve_carddb.build import Database, Value
     from sve_carddb.domains.catalog.adoption_models import SourceRef
     from sve_carddb.domains.translations.templates.loader import Validated
@@ -128,7 +126,7 @@ def labels(db: Database, lang: str) -> dict[tuple[str, str, str], Label]:
             )
         )
     units = {row.values["id"]: row.values for row in db.rows("text_unit")}
-    vocabulary, names = _selected_labels(db, lang, units)
+    vocabulary = _selected_labels(db, lang)
     for row in db.rows("vocabulary"):
         value = row.values
         if not value["active"]:
@@ -147,22 +145,12 @@ def labels(db: Database, lang: str) -> dict[tuple[str, str, str], Label]:
         else:
             continue
         found.append(Label("vocabulary", key, lang, text, origin, low, None))
-    found.extend(
-        Label("card_name", source, lang, text, origin, low, None)
-        for source, (text, origin, low) in sorted(names.items())
-    )
-    # Glossary, vocabulary and name keys are primary keys of their own tables.
+    # Glossary and vocabulary keys are primary keys of their own tables.
     return {(label.kind, label.identifier, label.lang): label for label in found}
 
 
-def _selected_labels(
-    db: Database, lang: str, units: Mapping[Value, Mapping[str, Value]]
-) -> tuple[dict[str, tuple[str, str, bool]], dict[str, tuple[str, str, bool]]]:
-    """Selected vocabulary-label and name translations become reference labels."""
-    contexts = {
-        row.values["id"]: row.values["source_unit_id"]
-        for row in db.rows("translation_context")
-    }
+def _selected_labels(db: Database, lang: str) -> dict[str, tuple[str, str, bool]]:
+    """Only selected vocabulary translations supply labels outside the glossary."""
     translations = {row.values["id"]: row.values for row in db.rows("translation")}
     selected = {
         row.values["context_id"]: translations[row.values["translation_id"]]
@@ -170,7 +158,6 @@ def _selected_labels(
         if row.values["target_lang"] == lang
     }
     vocabulary: dict[str, tuple[str, str, bool]] = {}
-    names: dict[str, tuple[str, str, bool]] = {}
     for row in db.rows("translation_use"):
         use = row.values
         chosen = selected.get(use["context_id"])
@@ -185,11 +172,7 @@ def _selected_labels(
             vocabulary[
                 str(use["vocabulary_kind"]) + ":" + str(use["vocabulary_code"])
             ] = value
-        elif use["field"] == "name":
-            source = units[contexts[use["context_id"]]]
-            if source["lang"] == "ja":
-                names[str(source["text"])] = value
-    return vocabulary, names
+    return vocabulary
 
 
 @dataclass(frozen=True)

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+import sve_carddb.domains.translations.templates.render as rendering
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import canonical, digest
@@ -17,7 +18,7 @@ from sve_carddb.domains.translations.templates.records import (
     Variant,
     VariantRecord,
 )
-from sve_carddb.domains.translations.templates.render import render
+from sve_carddb.domains.translations.templates.render import Binding, Label, render
 
 from ...support.build_db_fixtures import seed
 from .test_template_current import Case, current_case
@@ -259,7 +260,7 @@ def test_apply_keeps_changed_source_revision_original(verified: Validated) -> No
         assert db.rows("translation_selection") == ()
 
 
-def test_labels_read_selected_vocabulary_and_name_translations(
+def test_labels_read_vocabulary_and_exclude_name_spellings(
     verified: Validated,
 ) -> None:
     schema = compile_build(("translation_templates",))
@@ -301,8 +302,7 @@ def test_labels_read_selected_vocabulary_and_name_translations(
                 low_confidence=False,
             )
         found = labels(db, "zh-Hant")
-    name = found["card_name", "合成カード", "zh-Hant"]
-    assert (name.text, name.origin, name.low_confidence) == ("合成卡", "machine", True)
+    assert not any(key[0] == "card_name" for key in found)
     key = str(vocabulary["kind"]) + ":" + str(vocabulary["code"])
     assert found["vocabulary", key, "zh-Hant"].text == "詞彙"
 
@@ -456,37 +456,6 @@ def test_invalid_placeholder_keeps_only_that_field_original(
     assert result.issues == ("invalid_template_translation",)
 
 
-def test_unregistered_card_name_blocks_whole_field_even_with_a_matching_label(
-    verified: Validated,
-) -> None:
-    from sve_carddb.domains.translations.templates.render import Binding, Label, _chunk  # ruff: ignore[import-outside-top-level] -- source parameters isolate the missing-concept boundary
-
-    definition = next(
-        r for r in verified.inputs.records if isinstance(r, DefinitionRecord)
-    )
-    binding = Binding(
-        "bind:test",
-        0,
-        definition,
-        verified.members[0],
-        canonical({"slot_0": {"kind": "card_name", "text": "Synthetic name"}}),
-    )
-    label = Label(
-        "card_name", "Synthetic name", "zh-Hant", "合成名稱", "machine", True, True
-    )
-    assert _chunk(verified, binding, {}, "zh-Hant", {}) == "missing_name_concept"
-    assert (
-        _chunk(
-            verified,
-            binding,
-            {},
-            "zh-Hant",
-            {("card_name", "Synthetic name", "zh-Hant"): label},
-        )
-        == "missing_name_concept"
-    )
-
-
 @pytest.mark.parametrize("doubtful", [False, True])
 def test_low_confidence_recognition_rule_marks_the_rendered_field(
     current_case: Case, *, doubtful: bool
@@ -519,3 +488,35 @@ def test_low_confidence_recognition_rule_marks_the_rendered_field(
     )
     assert result.rendered is not None
     assert result.rendered.low_confidence is doubtful
+
+
+def test_unregistered_card_name_blocks_whole_field_even_with_a_matching_label(
+    verified: Validated,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    definition = next(
+        r for r in verified.inputs.records if isinstance(r, DefinitionRecord)
+    )
+    binding = Binding(
+        "bind:test",
+        0,
+        definition,
+        verified.members[0],
+        canonical({"slot_0": {"kind": "card_name", "text": "Synthetic name"}}),
+    )
+    label = Label(
+        "card_name", "Synthetic name", "zh-Hant", "合成名稱", "machine", True, True
+    )
+    monkeypatch.setattr(rendering, "bindings", lambda *_args: (binding,))
+    member = verified.members[0]
+    for selected in ({}, {("card_name", "Synthetic name", "zh-Hant"): label}):
+        result = render(
+            verified,
+            member.entry.source_ref,
+            "ctx:test",
+            member.field_text,
+            "zh-Hant",
+            selected,
+        )
+        assert result.rendered is None
+        assert result.issues == ("missing_name_concept",)

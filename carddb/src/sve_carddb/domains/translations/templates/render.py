@@ -335,8 +335,6 @@ def _fragment(
             value = params[part.name]
             if isinstance(value, dict):
                 kind = str(value["kind"])
-                if kind == "card_name":
-                    return None
                 identifier = (
                     str(value["id"])
                     if "id" in value
