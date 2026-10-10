@@ -31,6 +31,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import Database, Row, Value
     from sve_carddb.contracts.source_binding import ClosedDomain
+    from sve_carddb.domains.translations.four_layer_render import Rendered
 
 
 @dataclass(frozen=True)
@@ -375,7 +376,11 @@ def read_annotation(db: Database, identifier: str) -> AnnotationSet:
 
 
 def read_render_occurrences(
-    db: Database, translation_id: str, domains: Mapping[str, ClosedDomain]
+    db: Database,
+    translation_id: str,
+    domains: Mapping[str, ClosedDomain],
+    *,
+    expected: Rendered | None = None,
 ) -> tuple[RenderLeafOccurrence, ...]:
     """Every repeated output path retains its own link to the source ordinal set."""
     translation = payload(_one(db, "translation", {"id": translation_id}))
@@ -408,4 +413,7 @@ def read_render_occurrences(
         if use.values["context_id"] != translation["context_id"]:
             raise ValueError("Stored render leaf belongs to another source context")
         result.append(leaf)
-    return tuple(result)
+    rows = tuple(result)
+    if expected is not None:
+        expected.verify_occurrences(rows)
+    return rows

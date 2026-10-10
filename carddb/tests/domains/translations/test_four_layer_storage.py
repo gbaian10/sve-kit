@@ -18,7 +18,7 @@ from sve_carddb.build.t0_json import schemas as t0_schemas
 from sve_carddb.build.t1 import REGISTRY
 from sve_carddb.build.t1_json import schemas as t1_schemas
 from sve_carddb.contracts.annotations import AnnotationSet
-from sve_carddb.contracts.four_layer import hash_payload
+from sve_carddb.contracts.four_layer import Target, hash_payload
 from sve_carddb.contracts.source_binding import LeafOccurrence, SourceDescriptor
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_authored import (
@@ -28,6 +28,11 @@ from sve_carddb.domains.translations.four_layer_authored import (
 )
 from sve_carddb.domains.translations.four_layer_classification import Term
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
+from sve_carddb.domains.translations.four_layer_render import (
+    BoundTarget,
+    Renderer,
+    SelectedTarget,
+)
 from sve_carddb.domains.translations.four_layer_storage import (
     read_annotation,
     read_binding,
@@ -639,3 +644,73 @@ def test_valid_binding_hash_does_not_authorize_a_forged_numeric_value(
     ):
         write_binding(db, "use:synthetic", forged, {})
     assert db.rows("text_template_binding") == ()
+
+
+def test_stored_render_rejects_a_missing_repeated_path(
+    stored: tuple[Database, Frame, SourceBinding],
+) -> None:
+    db, definition, binding = stored
+    slot = next(iter(binding.values))
+    target = Target.model_validate_json(
+        canonical(
+            {
+                "format": 1,
+                "nodes": [
+                    {"kind": "LeafRef", "slot": slot},
+                    {"kind": "Literal", "text": "😀"},
+                    {"kind": "LeafRef", "slot": slot},
+                ],
+            }
+        )
+    )
+    result = Renderer({}, {}, {}).render(
+        "context:synthetic",
+        "zh-Hant",
+        (BoundTarget(definition, binding, SelectedTarget(target)),),
+    )
+    assert result.rendered is not None
+    expected = result.rendered
+    identifier, _ = expected.identity()
+    with db.transaction():
+        write_binding(db, "use:synthetic", binding, {})
+        db.insert(
+            "translation",
+            {
+                "id": identifier,
+                "context_id": expected.context_id,
+                "target_lang": expected.target_lang,
+                "revision": 0,
+                "text": expected.text,
+                "tokens": None,
+                "origin": expected.origin,
+                "authority": "unofficial",
+                "low_confidence": expected.low_confidence,
+                "source_hash": "sha256:" + binding.source.source_hash,
+                "source_id": None,
+            },
+        )
+        for occurrence in expected.occurrences():
+            data = occurrence.model_dump(mode="json")
+            db.insert(
+                "render_leaf_occurrence",
+                {
+                    "translation_id": identifier,
+                    "binding_id": binding.id,
+                    "slot": occurrence.slot,
+                    "node_path": Json(data["node_path"]),
+                    "source_ordinals": Json(data["source_ordinals"]),
+                    "ranges": Json(data["ranges"]),
+                },
+            )
+    assert len(read_render_occurrences(db, identifier, {}, expected=expected)) == 2
+    with db.transaction():
+        db.delete(
+            "render_leaf_occurrence",
+            {
+                "translation_id": identifier,
+                "binding_id": binding.id,
+                "node_path": Json([2]),
+            },
+        )
+    with pytest.raises(ValueError, match="render occurrence"):
+        read_render_occurrences(db, identifier, {}, expected=expected)

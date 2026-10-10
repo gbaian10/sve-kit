@@ -145,6 +145,15 @@ class Rendered:
             for leaf in self.leaves
         )
 
+    def verify_occurrences(self, rows: tuple[RenderLeafOccurrence, ...]) -> None:
+        """A persisted subset cannot erase a repeated target path or its source link."""
+
+        def key(row: RenderLeafOccurrence) -> tuple[str, tuple[int, ...], str]:
+            return row.binding_id, row.node_path, row.slot
+
+        if sorted(rows, key=key) != sorted(self.occurrences(), key=key):
+            raise ValueError("Missing or mismatched render occurrence")
+
 
 @dataclass(frozen=True)
 class Result:
@@ -255,7 +264,7 @@ class Renderer:
                     output.node(item, node, (index,))
         except MissingValueError as error:
             return Result(None, (str(error),))
-        return Result(output.finish(context_id), ())
+        return Result(output.finish(context_id), tuple(sorted(output.issues)))
 
 
 def _assembly(plan: tuple[BoundTarget, ...]) -> tuple[BoundTarget, ...]:
@@ -284,6 +293,7 @@ class _Output:
         self.leaves: list[LeafOutput] = []
         self.dependencies: list[object] = []
         self.quality: list[tuple[str, bool]] = []
+        self.issues: set[str] = set()
 
     def node(self, item: BoundTarget, node: Node, path: tuple[int, ...]) -> None:
         if isinstance(node, LiteralNode):
@@ -334,6 +344,8 @@ class _Output:
             }
         )
         self.quality.append((value.origin, value.low_confidence))
+        if value.bold is None:
+            self.issues.add("missing_emphasis")
 
     @staticmethod
     def value(item: BoundTarget, name: str) -> TypedValue:
