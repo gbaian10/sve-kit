@@ -109,6 +109,16 @@ def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
             ["duration_count", "repeat_count"],
             ["ターン", "回"],
         ),
+        (
+            "仮。この能力は自分の墓場のカードが４枚以上なら、２ターンに３回使える。",
+            ["existence_count", "duration_count", "repeat_count"],
+            ["枚", "ターン", "回"],
+        ),
+        (
+            "仮。「この能力は２ターンに３回働く」を持つ。",
+            ["duration_count", "repeat_count"],
+            ["ターン", "回"],
+        ),
         ("自分のＰＰを２回復する。", ["resource_amount"], ["ＰＰ"]),
         ("自分のPPを２回復する。", ["resource_amount"], ["PP"]),
     ],
@@ -184,6 +194,7 @@ def test_a_separate_clause_cannot_inherit_a_counted_collection() -> None:
         "仮、２ターンに３回。",
         "この能力は２ターンに３回復する。",
         "この能力は２ターンに３回仮。",
+        "この能力は不明なカードが４枚以上なら、２ターンに３回使える。",
     ],
 )
 def test_malformed_movement_and_incomplete_frequency_cannot_bind(raw: str) -> None:

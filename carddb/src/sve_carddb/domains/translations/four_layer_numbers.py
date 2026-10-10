@@ -113,9 +113,11 @@ _REPEAT = re.compile(
     r"^回(?P<limit>まで)?(?:を)?(?:行う|行い|行って|繰り返す|くり返す|使える|使用できる)"
     + _END
 )
-_FREQUENCY = re.compile(r"^回(?P<limit>まで)?(?:使える|使用できる|働く)" + _END)
+_FREQUENCY = re.compile(
+    r"^回(?P<limit>まで)?(?:使える|使用できる|働く)(?=[。:、）」)\n]|$)"
+)
 _DURATION = re.compile(
-    r"^ターン(?:に|につき)(?:N|[0-9０-９]+)回(?:まで)?(?:使える|使用できる|働く)" + _END
+    r"^ターン(?:に|につき)(?:N|[0-9０-９]+)回(?:まで)?(?:使える|使用できる|働く)(?=[。:、）」)\n]|$)"
 )
 _RESOURCE = re.compile(
     r"^(?P<unit>SEP|PP|EP)(?:を)?(?:支払う|払う|払える|回復する|回復)" + _END
@@ -473,15 +475,17 @@ def _repetition_number(value: int, before: str, after: str) -> Number | None:
             if match["limit"]
             else Number("Nat", "repeat_count", value, "回")
         )
-    if (match := _FREQUENCY.match(after)) and re.search(
-        r"この能力は(?:N|[0-9０-９]+)ターン(?:に|につき)$", before
+    if (
+        (match := _FREQUENCY.match(after))
+        and (duration := re.search(r"(?:N|[0-9０-９]+)ターン(?:に|につき)$", before))
+        and _frequency_introduction(before[: duration.start()])
     ):
         return (
             _quantity("repeat_count", value, "回", "up_to")
             if match["limit"]
             else Number("Nat", "repeat_count", value, "回")
         )
-    if (_DURATION.match(after) and before.endswith("この能力は")) or (
+    if (_DURATION.match(after) and _frequency_introduction(before)) or (
         _EVOLUTION_FREQUENCY.match(after) and before.endswith("自分は{進化}能力を")
     ):
         return Number("Nat", "duration_count", value, "ターン")
@@ -498,6 +502,18 @@ def _repetition_number(value: int, before: str, after: str) -> Number | None:
         and re.match(r"^回につき使えるEPは(?:N|[0-9０-９]+)つ[）)]", after)
         else None
     )
+
+
+def _frequency_introduction(before: str) -> bool:
+    if before.endswith("この能力は"):
+        return True
+    condition = re.search(
+        r"この能力は(?P<np>[^。:：]+)N(?P<unit>枚|体|つ)(?:以上|以下)なら、$", before
+    )
+    if condition is None:
+        return False
+    counted = count_context(condition["np"])
+    return counted is not None and source_unit(counted, condition["unit"]).merge_allowed
 
 
 def _repeated_event(value: int, before: str, after: str) -> Number | None:
