@@ -330,7 +330,9 @@ def _ordinal_number(value: int, role: str, before: str, after: str) -> Number | 
 def _generic_number(
     value: int, before: str, after: str, unit: str | None
 ) -> Number | None:
-    if counter := _counter_number(value, before, after):
+    if counter := _counter_number(value, before, after) or _event_count_number(
+        value, before, after
+    ):
         return counter
     if compound := compound_selection(after, before):
         return _quantity(
@@ -407,8 +409,7 @@ def _action_number(value: int, before: str, after: str) -> Number | None:
     ):
         return Number("Nat", "count", value, "枚")
     return (
-        _event_count_number(value, before, after)
-        or _movement_number(value, after)
+        _movement_number(value, after)
         or _payment_number(value, before, after)
         or _repetition_number(value, before, after)
         or _field_number(value, before, after)
@@ -416,6 +417,10 @@ def _action_number(value: int, before: str, after: str) -> Number | None:
 
 
 def _event_count_number(value: int, before: str, after: str) -> Number | None:
+    if (unit := _event_predicate_unit(before)) and re.match(
+        r"^" + unit + r"以上なら" + _END, after
+    ):
+        return Number("Nat", "threshold", value, unit)
     counted = count_context(before)
     if (
         counted is not None
@@ -441,6 +446,17 @@ def _event_count_number(value: int, before: str, after: str) -> Number | None:
         r"^枚が墓場に(?:置かれた|送られた)とき" + _END, after
     ):
         return Number("Nat", "count", value, "枚")
+    return None
+
+
+def _event_predicate_unit(before: str) -> str | None:
+    if re.search(r"「このターン中に(?:自分|相手)がプレイしたカードの枚数」が$", before):
+        return "枚"
+    if re.search(
+        r"「このターン中に(?:自分|相手)のリーダーの体力が(?:増加|減少|回復)した回数」が$",
+        before,
+    ):
+        return "回"
     return None
 
 
@@ -549,12 +565,14 @@ def _frequency_introduction(before: str) -> bool:
     if before.endswith("この能力は"):
         return True
     condition = re.search(
-        r"この能力は(?P<np>[^。:：]+)N(?P<unit>枚|体|つ)(?:以上|以下)なら、$", before
+        r"この能力は(?P<np>[^。:：]+)N(?P<unit>枚|体|つ|回)(?:以上|以下)なら、$", before
     )
     if condition is None:
         return False
     counted = count_context(condition["np"])
-    return counted is not None and source_unit(counted, condition["unit"]).merge_allowed
+    return (
+        counted is not None and source_unit(counted, condition["unit"]).merge_allowed
+    ) or _event_predicate_unit(condition["np"]) == condition["unit"]
 
 
 def _repeated_event(value: int, before: str, after: str) -> Number | None:
