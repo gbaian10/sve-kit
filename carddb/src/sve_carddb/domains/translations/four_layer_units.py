@@ -210,6 +210,7 @@ _SHARED_SET = re.compile(
 _COMPOUND_PREFIX = re.compile(
     r"^(?P<first>.*)N(?P<unit>枚|体|つ)(?:まで)?(?:か|と)(?P<next>[^。:：]+)$"
 )
+_ALTERNATIVE_COUNT = re.compile(r"^(?P<first>.*)N(?P<unit>枚|体|つ|人)か$")
 _ACTION_SERIES = re.compile(
     r"^(?P<unit>枚|体|つ)(?P<limit>まで)?(?:か|と)(?P<tail>.+)$"
 )
@@ -277,14 +278,8 @@ def count_context(before: str) -> CountContext | None:
         before = before.removesuffix("それぞれ").removesuffix("が")
     if constraint := _SET_CONSTRAINT.search(before):
         return count_context(before[: constraint.start()])
-    if match := _COMPOUND_PREFIX.match(before):
-        first = count_context(match["first"])
-        if (
-            first is not None
-            and source_unit(first, match["unit"]).merge_allowed
-            and (shared := _shared_set(first, match["next"])) is not None
-        ):
-            return shared
+    if context := _coordinate_context(before):
+        return context
     if context := _explicit_object_context(before):
         return context
     if context := _zone_context(before):
@@ -297,6 +292,26 @@ def count_context(before: str) -> CountContext | None:
             _ALL_TOKENS,
             "cardinality",
         )
+    return None
+
+
+def _coordinate_context(before: str) -> CountContext | None:
+    if alternative := _ALTERNATIVE_COUNT.fullmatch(before):
+        context = count_context(alternative["first"])
+        return (
+            context
+            if context is not None
+            and source_unit(context, alternative["unit"]).merge_allowed
+            else None
+        )
+    if match := _COMPOUND_PREFIX.match(before):
+        first = count_context(match["first"])
+        if (
+            first is not None
+            and source_unit(first, match["unit"]).merge_allowed
+            and (shared := _shared_set(first, match["next"])) is not None
+        ):
+            return shared
     return None
 
 

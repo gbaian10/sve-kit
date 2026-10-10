@@ -10,6 +10,40 @@ from .test_four_layer_classification import classifier, source
 
 
 @pytest.mark.parametrize(
+    ("np", "unit"),
+    [("自分の場の仮族・カードが", "枚"), ("相手の場のフォロワーが", "体")],
+)
+def test_disjunct_counts_share_one_explicit_counted_set(np: str, unit: str) -> None:
+    raw = f"仮。{np}２{unit}か３{unit}なら、仮。"
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert [s.role for s in frame.leaf_schema.slots] == ["existence_count"] * 2
+    assert [o.source_unit for o in binding.occurrences] == [unit] * 2
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "仮。自分の場のフォロワーが２体か３枚なら、仮。",
+        "仮。自分の場の不明物が２体か３体なら、仮。",
+        "仮。自分の場のフォロワーが２体。か３体なら、仮。",
+    ],
+)
+def test_disjunct_counts_require_a_shared_np_and_legal_units(raw: str) -> None:
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    found = engine.recognize(raw, field.source, field.parts[0])
+    assert found.issues
+    with pytest.raises(ValueError, match="Unresolved source leaves"):
+        found.bind(field.source, field.parts[0])
+
+
+@pytest.mark.parametrize(
     ("raw", "role", "unit"),
     [
         (
