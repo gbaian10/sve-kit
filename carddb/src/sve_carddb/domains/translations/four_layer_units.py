@@ -58,7 +58,7 @@ _RULES: dict[CountContext, frozenset[str]] = {
     ),
 }
 for _kind in ("follower", "spell", "amulet", "card", "spell_or_amulet"):
-    for _zone in ("deck", "evolve_deck", "graveyard", "hand"):
+    for _zone in ("deck", "evolve_deck", "graveyard", "hand", "banished"):
         _RULES[
             CountContext("select.card.v1", _kind, (_zone,), False, "cardinality")
         ] = frozenset({"枚"})
@@ -111,6 +111,7 @@ _ZONES = {
     "デッキ": "deck",
     "墓場": "graveyard",
     "手札": "hand",
+    "消滅領域": "banished",
 }
 _TRAIT = (
     r"(?:(?!自分|相手|フォロワー|アミュレット|スペル|カード|EXエリア|墓場|手札|デッキ|N|の)"
@@ -118,7 +119,7 @@ _TRAIT = (
 )
 _FILTER = (
     r"(?:(?:元の)?(?:コスト|攻撃力|体力)N(?:以下|以上)?の|"
-    r"他の|表向きの|裏向きの|(?:進化前|進化後)の|(?:アクト|レスト|スタンド)状態の|これと同名を除く・|"
+    r"他の|表向きの|裏向きの|(?:進化前|進化後)(?:の)?|(?:アクト|レスト|スタンド)状態の|これと同名を除く・|"
     r"【[^【】]+】を持つ|カード名に『X』を含む|カード名に「[^「」]+」を含む|"
     r"\{[^{}]+\}(?:でない|の|・)?|" + _TRAIT + r")*"
 )
@@ -137,8 +138,8 @@ _UNION_COUNTED = re.compile(
 _COUNTED = re.compile(
     _ONSET
     + _FILTER
-    + r"(?:(?:自分|相手)の)?(?P<zone>場とEXエリア|場か自分のEXエリア|場か相手のEXエリア|エボルヴデッキ|EXエリア|デッキ|墓場|手札|場)"
-    r"(?:の|にある|にいる|に|から)(?:、)?(?P<quote>「)?"
+    + r"(?:(?:自分|相手)の)?(?P<zone>場とEXエリア|場か自分のEXエリア|場か相手のEXエリア|エボルヴデッキ|EXエリア|消滅領域|デッキ|墓場|手札|場)"
+    r"(?:の|にある|にいる|に表向きで置かれている|に裏向きで置かれている|に|から)(?:、)?(?P<quote>「)?"
     + _FILTER
     + r"(?P<kind>"
     + _KIND
@@ -157,7 +158,7 @@ _IMPLICIT_FIELD = re.compile(
 _LEADER = re.compile(r"(?:自分|相手)のリーダー(?:を|が)?$")
 _PLAYER = re.compile(r"(?:自分|相手)プレイヤー(?:を|が)?$")
 _COLLECTION = re.compile(
-    r"(?:自分|相手|それ)の(?:現在の)?(?P<zone>墓場|手札)(?:が|に)$"
+    _ONSET + r"(?:(?:自分|相手|それ)の)?(?:現在の)?(?P<zone>墓場|手札)(?:が|に)?$"
 )
 _LOOK_SELECTION = re.compile(
     _ONSET + r"(?:自分|相手)のデッキの上(?:から)?N枚(?:を)?見(?:る|て)[。、]"

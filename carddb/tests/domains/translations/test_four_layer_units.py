@@ -100,6 +100,10 @@ def test_counted_zone_context_does_not_silently_repair_input() -> None:
         "自分のEXエリアのフォロワー",
         "自分の場か自分のEXエリアの仮族・フォロワー",
         "自分の手札の元のコストN以下の仮族・フォロワー",
+        "自分の消滅領域のカード",
+        "自分のエボルヴデッキの表向きの進化後フォロワー",
+        "自分のエボルヴデッキに表向きで置かれている『X』",
+        "手札",
     ],
 )
 def test_unrestricted_source_nps_include_both_token_states(before: str) -> None:
