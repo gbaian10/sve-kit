@@ -11,6 +11,8 @@ from sve_carddb.domains.translations.parameters.models import Hint
     ("suffix", "expected"),
     [
         ("【ネクロチャージ７】代わりに２つまで。", True),
+        ("【ネクロチャージ_７】代わりに２つまで。", True),
+        ("【ネクロチャージ__７】代わりに２つまで。", False),
         ("【ネクロチャージ７】代わりに３つまで。", False),
         ("【NC７】代わりに２つまで。", False),
         ("【ネクロチャージ７】代わりに２つ。", False),

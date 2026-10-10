@@ -87,7 +87,8 @@ def choice_alternative(raw: str, hint: Hint) -> bool:
         or (
             last_label <= span.start < scope.end
             and re.search(
-                r"(?:^|[。\n])【ネクロチャージ[ 　]*[0-9０-９]+】代わりに$", prefix
+                r"(?:^|[。\n])【ネクロチャージ(?:[ 　]*|_)[0-9０-９]+】代わりに$",
+                prefix,
             )
             is not None
         )
