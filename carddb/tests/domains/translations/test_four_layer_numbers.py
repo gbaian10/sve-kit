@@ -9,6 +9,57 @@ from sve_carddb.domains.translations.four_layer_normalizer import normalize_sour
 from .test_four_layer_classification import classifier, source
 
 
+@pytest.mark.parametrize("unit", ["枚", "体"])
+def test_complete_ex_token_deployment_has_its_own_unit_rule(unit: str) -> None:
+    raw = f"仮。自分のEXエリアの仮族・トークン・フォロワー２{unit}まで場に出す。"
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[0].role == "selection_count"
+    assert binding.values["leaf_0"] == QuantitySpec(
+        mode="up_to", expr=Constant(kind="constant", value=2)
+    )
+    assert binding.occurrences[0].source_unit == unit
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "仮。自分のEXエリアの仮族・トークン・フォロワー２枚を選ぶ。",
+        "仮。自分の場の仮族・トークン・フォロワー２枚まで場に出す。",
+        "仮。自分のEXエリアの仮族・トークン・フォロワー２枚まで場に不明する。",
+    ],
+)
+def test_other_actions_cannot_borrow_the_ex_deployment_unit(raw: str) -> None:
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    found = engine.recognize(raw, field.source, field.parts[0])
+    assert found.issues
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "仮。自分の墓場のトリガーを持つフォロワー２枚選ぶ。",
+        "仮。自分のデッキからの仮族・アミュレット２枚を選ぶ。",
+        "仮。自身の場のフォロワー２体を選ぶ。",
+    ],
+)
+def test_explicit_counted_np_connectors_preserve_source_evidence(raw: str) -> None:
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[0].role == "selection_count"
+
+
 @pytest.mark.parametrize("malformed", [False, True])
 def test_counter_carrier_count_is_distinct_from_the_removed_counter_amount(
     malformed: bool,

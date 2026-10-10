@@ -20,6 +20,7 @@ from sve_carddb.domains.translations.four_layer_units import (
     count_context,
     field_filter,
     fusion_material,
+    number_context,
     source_unit,
 )
 from sve_carddb.domains.translations.parameters.explicit_rules import COUNTER_NAMES
@@ -214,7 +215,7 @@ def recognize_number(raw: str, part: SourcePart, hint: Hint) -> Number | None:
         "selection_count",
         "existence_count",
     }:
-        counted = count_context(before) or (
+        counted = number_context(before, after) or (
             existence_context(before)
             if number.role == "existence_count"
             else selection_context(before)
@@ -239,7 +240,7 @@ def number_issue(raw: str, part: SourcePart, hint: Hint) -> str:
             and number.role in {"selection_count", "existence_count"}
             and number.source_unit is not None
             and (
-                counted := count_context(before)
+                counted := number_context(before, after)
                 or (
                     existence_context(before)
                     if number.role == "existence_count"

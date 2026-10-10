@@ -39,6 +39,9 @@ class UnitDecision:
 # Each key is a source construction, not a global Japanese classifier equivalence.
 _RULES: dict[CountContext, frozenset[str]] = {
     CountContext(
+        "deploy.ex_token_follower.v1", "follower", ("ex",), True, "cardinality"
+    ): frozenset({"枚", "体"}),
+    CountContext(
         "select.card.v1", "follower", ("battlefield",), False, "cardinality"
     ): frozenset({"体"}),
     CountContext("select.card.v1", "follower", ("ex",), True, "cardinality"): frozenset(
@@ -143,7 +146,7 @@ _TRAIT = (
 _FILTER = (
     r"(?:(?:元の)?(?:コスト|攻撃力|体力)(?:N|X)(?:以下|以上)?の|"
     r"他の|表向きの|裏向きの|(?:進化前|進化後|エボルヴ|アドバンス)(?:の)?|(?:アクト|レスト|スタンド)状態の|これと同名を除く(?:・)?|"
-    r"(?:【[^【】]+】(?:や|か)?)+を持つ|【[^【】]+】状態の|カード名に『X』を含む|カード名に「[^「」]+」を含む|"
+    r"(?:【[^【】]+】(?:や|か)?)+を持つ|トリガーを持つ|【[^【】]+】状態の|カード名に『X』を含む|カード名に「[^「」]+」を含む|"
     r"それぞれカード名が異なる|トークンでない|(?:これ|それ)によって破壊した|"
     r"\{[^{}]+\}(?:を持つ|である|でない|の|・)?|" + _TRAIT + r")*"
 )
@@ -151,7 +154,7 @@ _ONSET = r"(?:^|[、。:：}】（(]|か|と|は|が|として)"
 _KIND = r"スペルかアミュレット|フォロワー|アミュレット|スペル|カード|クレスト|『X』"
 _SET_KIND = r"(?:" + _KIND + r")(?:(?:や|か|と)" + _FILTER + r"(?:" + _KIND + r"))*"
 _SET_ATOM = re.compile(_FILTER + r"(?P<kind>" + _KIND + r")")
-_OWNER = r"自分|相手|お互い|それ(?:のプレイヤー)?|(?:自分|相手)プレイヤーN人"
+_OWNER = r"自分|相手|自身|お互い|それ(?:のプレイヤー)?|(?:自分|相手)プレイヤーN人"
 _UNION_COUNTED = re.compile(
     _ONSET
     + _FILTER
@@ -169,7 +172,7 @@ _COUNTED = re.compile(
     + r"(?:(?P<owner>"
     + _OWNER
     + r")の)?(?P<zone>場とEXエリア|場か自分のEXエリア|場か相手のEXエリア|場や自分のEXエリア|場や相手のEXエリア|エボルヴデッキ|EXエリア|消滅領域|デッキ|墓場|手札|場)"
-    r"(?:の|にある|にいる|に表向きで置かれている|に裏向きで置かれている|に表向きで置いた|に裏向きで置いた|に表向きである|に裏向きである|に|から)(?:、)?"
+    r"(?:の|にある|にいる|に表向きで置かれている|に裏向きで置かれている|に表向きで置いた|に裏向きで置いた|に表向きである|に裏向きである|に|からの|から)(?:、)?"
     + r"(?(owner)|(?:(?:"
     + _OWNER
     + r")の)?)"
@@ -347,6 +350,25 @@ def count_context(before: str) -> CountContext | None:
     return None
 
 
+def number_context(before: str, after: str) -> CountContext | None:
+    """An EX deployment has its own unit rule, without changing general selection."""
+    context = count_context(before)
+    if (
+        context is not None
+        and context.counted_object == "follower"
+        and context.counted_zones == ("ex",)
+        and context.token is True
+        and re.match(
+            r"^(?:枚|体)(?:まで)?(?:を)?場に出(?:す|してよい)(?=[。、）)\n]|$)",
+            after,
+        )
+    ):
+        return CountContext(
+            "deploy.ex_token_follower.v1", "follower", ("ex",), True, "cardinality"
+        )
+    return context
+
+
 def _coordinate_context(before: str) -> CountContext | None:
     if alternative := _ALTERNATIVE_COUNT.fullmatch(before):
         context = count_context(alternative["first"])
@@ -446,9 +468,7 @@ def _counted_context(match: re.Match[str]) -> CountContext | None:
             "union_cardinality",
         )
     zone = _ZONES[match["zone"]]
-    if (zone in {"battlefield", "ex"} and "『X』" in match["kind"]) or (
-        zone == "ex" and "トークン・" in match[0]
-    ):
+    if zone in {"battlefield", "ex"} and "『X』" in match["kind"]:
         return None
     if "トークン・" in match[0] and match["kind"] in {
         "フォロワー",
