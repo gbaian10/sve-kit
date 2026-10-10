@@ -205,6 +205,69 @@ class Classifier:
                 "Source classifier references differ from exact glossary closure"
             )
 
+    def verify(
+        self,
+        raw: str,
+        field: SourceField,
+        part: SourcePart,
+        frame: Frame,
+        binding: SourceBinding,
+        *,
+        context: CardContext | None = None,
+    ) -> None:
+        """B proves roles, modes and units from source rather than trusting authored descriptors."""
+        source = field.source
+        if part not in field.parts:
+            raise ValueError("Source part does not belong to the exact field")
+        if binding.source != source:
+            raise ValueError("Binding borrows another exact owner field")
+        part.verify(raw, frame, binding, self.domains)
+        found = self.recognize(raw, source, part, context=context, field=field)
+        if found.issues:
+            raise ValueError("Unresolved source leaves cannot verify a binding")
+        expected = {
+            (span.start, span.end): (slot, found.values[slot.name])
+            for slot in found.schema.slots
+            for span in slot.occurrences
+        }
+        actual = {
+            (span.start, span.end): (slot, binding.values[slot.name])
+            for slot in frame.leaf_schema.slots
+            for span in slot.occurrences
+        }
+        if actual.keys() != expected.keys() or any(
+            (slot.type, slot.role, slot.domain, slot.required, value)
+            != (
+                expected[position][0].type,
+                expected[position][0].role,
+                expected[position][0].domain,
+                expected[position][0].required,
+                expected[position][1],
+            )
+            for position, (slot, value) in actual.items()
+        ):
+            raise ValueError(
+                "Leaf type, role or value differs from source classification"
+            )
+        expected_units = {
+            occurrence.canonical_spans: occurrence.source_unit
+            for occurrence in found.occurrences
+        }
+        if any(
+            occurrence.canonical_spans not in expected_units
+            or occurrence.source_unit != expected_units[occurrence.canonical_spans]
+            for occurrence in binding.occurrences
+        ):
+            raise ValueError("Leaf unit differs from the exact source construction")
+        expected_frame, _ = found.bind(source, part)
+        if (
+            frame.semantic_variant != expected_frame.semantic_variant
+            or frame.projection != expected_frame.projection
+        ):
+            raise ValueError(
+                "Frame semantics differs from the complete source construction"
+            )
+
     def recognize(
         self,
         raw: str,
