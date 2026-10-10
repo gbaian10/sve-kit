@@ -389,6 +389,10 @@ def _action_number(value: int, before: str, after: str) -> Number | None:
         r"(?:『X』|フォロワー|アミュレット)(?:を)?$", before
     ):
         return Number("Nat", "count", value, match["unit"])
+    if count_context(before) is not None and re.match(
+        r"^枚を(?:表向き|裏向き)にする" + _END, after
+    ):
+        return Number("Nat", "count", value, "枚")
     return (
         _movement_number(value, after)
         or _payment_number(value, before, after)
@@ -497,6 +501,10 @@ def _repetition_number(value: int, before: str, after: str) -> Number | None:
 
 
 def _repeated_event(value: int, before: str, after: str) -> Number | None:
+    if before.endswith("ドライブチェックを") and re.match(r"^回する" + _END, after):
+        return Number("Nat", "repeat_count", value, "回")
+    if before.endswith("サイコロを") and re.match(r"^回ふりなおしてよい" + _END, after):
+        return Number("Nat", "repeat_count", value, "回")
     if re.search(r"(?:\{食事\})+\{コストN\}:これは$", before) and re.match(
         r"^回出走する" + _END, after
     ):

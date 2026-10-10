@@ -27,10 +27,21 @@ def context(raw: str) -> CardContext:
 
 
 @pytest.mark.parametrize("separator", ["", "の", "・", "でない", "・仮族・"])
+@pytest.mark.parametrize(
+    "continuation",
+    [
+        "２枚を選ぶ。",
+        "すべては仮。",
+        "なら、仮。",
+        "でないなら、仮。",
+        "か元のコストX以下のカード２枚を選ぶ。",
+    ],
+)
 def test_class_filter_accepts_complete_direct_kind_constructions(
     separator: str,
+    continuation: str,
 ) -> None:
-    raw = f"仮。自分の墓場の{{仮クラス}}{separator}フォロワー２枚を選ぶ。"
+    raw = f"仮。自分の墓場の{{仮クラス}}{separator}フォロワー{continuation}"
     field = normalize_source(raw, source(raw))
     engine = classifier()
     engine.references.vocabulary = Vocabulary(
