@@ -11,6 +11,7 @@ from sve_carddb.domains.translations.four_layer_choices import (
     choice_quantity,
 )
 from sve_carddb.domains.translations.four_layer_units import (
+    compound_action,
     compound_selection,
     count_context,
     field_filter,
@@ -386,6 +387,12 @@ def _set_number(value: int, before: str, after: str) -> Number | None:
 
 
 def _action_number(value: int, before: str, after: str) -> Number | None:
+    if compound := compound_action(after, before):
+        return (
+            _quantity("selection_count", value, compound[0], "up_to")
+            if compound[1]
+            else Number("Nat", "count", value, compound[0])
+        )
     if counted := _set_number(value, before, after):
         return counted
     if _ABILITY_COUNT.match(after) and re.search(r"(?:能力を|能力が|能力)$", before):

@@ -208,6 +208,17 @@ _SHARED_SET = re.compile(
 _COMPOUND_PREFIX = re.compile(
     r"^(?P<first>.*)N(?P<unit>枚|体|つ)(?:まで)?(?:か|と)(?P<next>[^。:：]+)$"
 )
+_ACTION_SERIES = re.compile(
+    r"^(?P<unit>枚|体|つ)(?P<limit>まで)?(?:か|と)(?P<tail>.+)$"
+)
+_SERIES_MEMBER = re.compile(
+    r"^(?P<np>[^。:：]+?)N(?P<unit>枚|体|つ)(?:まで)?(?P<tail>.*)$"
+)
+_SERIES_ACTION = re.compile(
+    r"^(?:を)?(?:捨てる|消滅|墓場に置く|手札に戻す|"
+    r"探し、(?:手札に加える|場に出す|墓場に置く|EXエリアに置く)|"
+    r"公開して手札に加えてよい)(?=[。:：、）)\n]|$)"
+)
 
 
 _SET_CONSTRAINT = re.compile(
@@ -232,6 +243,30 @@ def compound_selection(after: str, before: str = "") -> tuple[str, bool] | None:
     if second is None:
         return None
     return match["unit"], bool(match["limit"])
+
+
+def compound_action(after: str, before: str) -> tuple[str, bool] | None:
+    """Every coordinate count shares the final action only after all NPs and units validate."""
+    start = _ACTION_SERIES.match(after)
+    first = count_context(before)
+    if (
+        start is None
+        or first is None
+        or not source_unit(first, start["unit"]).merge_allowed
+    ):
+        return None
+    tail = start["tail"]
+    while member := _SERIES_MEMBER.match(tail):
+        context = count_context(member["np"]) or _shared_set(first, member["np"])
+        if context is None or not source_unit(context, member["unit"]).merge_allowed:
+            return None
+        tail = member["tail"]
+        if _SERIES_ACTION.match(tail):
+            return start["unit"], bool(start["limit"])
+        if not tail.startswith(("か", "と")):
+            return None
+        first, tail = context, tail[1:]
+    return None
 
 
 def count_context(before: str) -> CountContext | None:
