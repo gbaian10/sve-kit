@@ -82,3 +82,13 @@ TS consumers can use the same JSON mutation and resealing procedure; no Python
 runtime, build DB or official input is required. Review changes to the wire and
 independent expected objects together; never regenerate expected objects from
 producer output to make a test pass.
+
+## Native producer regression snapshot
+
+`annotated-native.json` is a producer regression snapshot, not an independent
+Python oracle. Its manifest and logical output detect changes to the native
+annotation projection. The handwritten assertions in
+`test_annotation_projection.py` check the intended relationships independently.
+TypeScript also consumes these bytes as reader input. Regenerate this snapshot
+only after reviewing a deliberate producer or wire contract change, and keep
+the independent assertions and shared public annotation cases passing.
