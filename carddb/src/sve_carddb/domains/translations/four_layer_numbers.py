@@ -141,6 +141,9 @@ _EVENT_THRESHOLD = re.compile(
     r"^回以上(?:攻撃した|攻撃していた|発動していた)なら" + _END
 )
 _EVOLUTION_FREQUENCY = re.compile(r"^ターンに何回でも使える" + _END)
+_ENTRY_DIGIT = r"(?:N|[0-9０-９]+)"
+_ENTRY_FREQUENCY = r"ターンに進化か(?:食事|憑依)はどちらか"
+_ENTRY_DIVISOR = r"回につき使えるEPは" + _ENTRY_DIGIT + r"つ[）)]$"
 _SACRIFICE = re.compile(
     r"^(?P<unit>枚|体|つ)(?:を)?(?:墓場に置く|アクトする|レストする|スタンドする|破壊する|消滅|"
     r"\{(?:アクト|レスト)\})" + _END
@@ -517,6 +520,8 @@ def _frequency_introduction(before: str) -> bool:
 
 
 def _repeated_event(value: int, before: str, after: str) -> Number | None:
+    if entry := _entry_reminder_number(value, before, after):
+        return entry
     if before.endswith("ドライブチェックを") and re.match(r"^回する" + _END, after):
         return Number("Nat", "repeat_count", value, "回")
     if before.endswith("サイコロを") and re.match(r"^回ふりなおしてよい" + _END, after):
@@ -527,6 +532,28 @@ def _repeated_event(value: int, before: str, after: str) -> Number | None:
         return Number("Nat", "repeat_count", value, "回")
     if re.search(r"(?:自分の)?ターンごとに$", before) and re.match(r"^回、", after):
         return Number("Nat", "repeat_count", value, "回")
+    return None
+
+
+def _entry_reminder_number(value: int, before: str, after: str) -> Number | None:
+    if re.fullmatch(r"[（(]", before) and re.fullmatch(
+        _ENTRY_FREQUENCY + _ENTRY_DIGIT + r"回できる。" + _ENTRY_DIGIT + _ENTRY_DIVISOR,
+        after,
+    ):
+        return Number("Nat", "duration_count", value, "ターン")
+    if re.fullmatch(
+        r"[（(]" + _ENTRY_DIGIT + _ENTRY_FREQUENCY, before
+    ) and re.fullmatch(r"回できる。" + _ENTRY_DIGIT + _ENTRY_DIVISOR, after):
+        return Number("Nat", "repeat_count", value, "回")
+    if (
+        value >= 1
+        and re.fullmatch(
+            r"[（(]" + _ENTRY_DIGIT + _ENTRY_FREQUENCY + _ENTRY_DIGIT + r"回できる。",
+            before,
+        )
+        and re.fullmatch(_ENTRY_DIVISOR, after)
+    ):
+        return Number("Nat", "group_divisor", value, "回")
     return None
 
 

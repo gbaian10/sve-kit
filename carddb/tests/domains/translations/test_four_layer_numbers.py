@@ -137,6 +137,37 @@ def test_complete_movement_frequency_and_resource_recovery(
     assert [o.source_unit for o in binding.occurrences] == units
 
 
+@pytest.mark.parametrize("family", ["食事", "憑依"])
+@pytest.mark.parametrize("malformed", [False, True])
+def test_entry_reminder_numbers_require_the_entire_shared_limit_grammar(
+    family: str, malformed: bool
+) -> None:
+    reminder = (
+        f"（２ターンに進化か{family}はどちらか３回できる。４回につき使えるEPは５つ）"
+    )
+    if malformed:
+        reminder = reminder.replace("できる", "でき仮")
+    raw = "仮。" + reminder
+    engine = classifier(extra=("suffix_unit_items",))
+    field = normalize_source(raw, source(raw), reminders=frozenset({reminder}))
+    part = next(p for p in field.parts if p.source_span.role == "reminder")
+    found = engine.recognize(raw, field.source, part, field=field)
+    if malformed:
+        assert "n0_numeric_construction_unresolved" in found.issues
+        return
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert [s.role for s in frame.leaf_schema.slots] == [
+        "duration_count",
+        "repeat_count",
+        "group_divisor",
+        "resource_amount",
+    ]
+    assert [o.source_unit for o in binding.occurrences] == ["ターン", "回", "回", "つ"]
+    assert frame.semantic_variant.state == "pending"
+
+
 @pytest.mark.parametrize(
     ("raw", "units"),
     [
