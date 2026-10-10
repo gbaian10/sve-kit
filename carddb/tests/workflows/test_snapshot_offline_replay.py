@@ -180,6 +180,7 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
     root = tmp_path / "repository"
     archive = tmp_path / "archive"
     shutil.copytree(baseline.case.repository, root)
+    (root / "authored/rules/rulings").mkdir(parents=True)
     shutil.copytree(baseline.archive, archive)
     store = _store(tmp_path / "card-sources")
     batches: dict[str, str] = {}
@@ -258,7 +259,7 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
             "snapshot",
             "export-offline",
             "--format-version",
-            "2.0.0",
+            "3.0.0",
             "--inputs",
             str(path),
             "--preview-dir",
@@ -282,7 +283,7 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
     manifest = object_value(
         parse((tmp_path / "preview" / str(pointer["manifest_path"])).read_bytes())
     )
-    assert manifest["format_version"] == "2.0.0"
+    assert manifest["format_version"] == "3.0.0"
     assert manifest["regions"] == ["en", "jp"]
     record = InputRecord.model_validate_json(
         (tmp_path / "bundle/inputs.json").read_bytes()

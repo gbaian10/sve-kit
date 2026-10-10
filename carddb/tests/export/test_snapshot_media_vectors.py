@@ -1,4 +1,4 @@
-"""Shared independent 2.0 vectors for Python and TypeScript consumers."""
+"""Shared independent 3.0 vectors for Python and TypeScript consumers."""
 
 import json
 from copy import deepcopy
@@ -20,7 +20,7 @@ from ..support.snapshot_contract_fixtures import wire as wire  # ruff: ignore[us
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
-GOLDEN = Path(__file__).resolve().parents[3] / "tests/fixtures/snapshot-contract/v2"
+GOLDEN = Path(__file__).resolve().parents[3] / "tests/fixtures/snapshot-contract/v3"
 
 
 def fixture(name: str) -> JsonValue:
@@ -30,7 +30,7 @@ def fixture(name: str) -> JsonValue:
 @pytest.mark.parametrize(
     "case", array(fixture("reader-invalid.json")), ids=lambda c: object_value(c)["name"]
 )
-def test_shared_v2_reader_counterexamples(
+def test_shared_v3_reader_counterexamples(
     wire: tuple[dict[str, JsonValue], dict[str, JsonValue]], case: JsonValue
 ) -> None:
     manifest, payloads = deepcopy(wire)
@@ -51,7 +51,7 @@ def test_shared_v2_reader_counterexamples(
 @pytest.mark.parametrize(
     "case", array(fixture("schema-invalid.json")), ids=lambda c: object_value(c)["name"]
 )
-def test_shared_v2_schema_counterexamples(case: JsonValue) -> None:
+def test_shared_v3_schema_counterexamples(case: JsonValue) -> None:
     item = object_value(case)
     if "raw_json" in item:
         value = cast("JsonValue", json.loads(string(item["raw_json"])))
@@ -67,7 +67,7 @@ def test_shared_v2_schema_counterexamples(case: JsonValue) -> None:
     array(fixture("image-url-cases.json")),
     ids=lambda c: object_value(c)["case"],
 )
-def test_shared_v2_url_cases(case: JsonValue) -> None:
+def test_shared_v3_url_cases(case: JsonValue) -> None:
     item = object_value(case)
     args_value = (
         object_value(cast("JsonValue", json.loads(string(item["raw_json"]))))
@@ -91,7 +91,7 @@ def test_shared_v2_url_cases(case: JsonValue) -> None:
 @pytest.mark.parametrize(
     "case", array(fixture("index-cases.json")), ids=lambda c: object_value(c)["name"]
 )
-def test_shared_v2_index_cases(case: JsonValue) -> None:
+def test_shared_v3_index_cases(case: JsonValue) -> None:
     item = object_value(case)
     index = object_value(item["index"])
     manifests = {k: canonical(v) for k, v in object_value(item["manifests"]).items()}

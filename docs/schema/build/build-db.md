@@ -3,7 +3,7 @@
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
 專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../../quotations.md)。
 
-建置資料庫的完整邏輯契約，共 118 表；這是設計規格，不是 migration。卡表快照的公開欄位見 [snapshot-format.md](../export/snapshot-format.md)。DSL 語法只以 `dsl/` 的 JSON Schema 為權威。
+建置資料庫的完整邏輯契約，共 126 表；這是設計規格，不是 migration。卡表快照的公開欄位見 [snapshot-format.md](../export/snapshot-format.md)。DSL 語法只以 `dsl/` 的 JSON Schema 為權威。
 
 ## 1. 兩層與範圍
 
@@ -51,7 +51,7 @@ record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由�
 | DSL | §10 的不同作者審核或巨集機械門檻；實跑另判定 | 卡文可發布，自動能力不放行 |
 
 **翻譯及詞彙當前資料**：依[翻譯契約](../domains/translation-contract.md)及 catalog format 2，
-只驗格式、來源、唯一鍵、參數、引用與當前清冊一致；低信心顯示待校對，不使用 sampled／confirmed 或批准收據。
+只驗格式、來源、唯一鍵、參數、引用與本次來源 binding／未匹配清單一致；低信心顯示待校對，不使用 sampled／confirmed 或批准收據。
 新格式指回 authored source_record，不能產生假的 decision 或全面放寬其他入口的 FK。
 
 **構築採納的明示例外**：依維護者 2026-10-03「比照翻譯」的決定及 [構築採納 §1](../domains/construction-adoption.md#1-專用入口與採納封套)，首輪須有維護者實際抽查與政策核可收據；之後由 Claude 系、Codex 系各一個模型對最終值及官方來源互審，無分歧且全體政策檢查通過者，可以 `adoption_review.mode=approved_policy`、confirmed batch 採納。sample_ids 恰列全體 checked，表示政策機械全查；note 明示「政策核可」，不能把模型檢查宣稱為逐筆人工核可。真人抽查／處理分歧另記實際事件，分歧走 human 批次，不混入政策批次；首輪或政策收據／loader 未到位一律拒絕。其餘類別的人工門檻不變，此例外不擴及身分／跨區核對、勘誤、更正、翻譯或其他採納入口。
@@ -226,6 +226,8 @@ Decklog 的 JP/EN adapter 是不同常數命名空間。未有實際樣本，不
 | `ruling_supersession` | `old_revision_id→ruling_revision,new_revision_id→ruling_revision,scope_unit_id→text_unit` `PK(前兩欄)`；A；支援 R-0009 只取代 R-0002 的部分判斷，不刪其其餘效力                                                                                                                                                    |
 | `ruling_review`       | `ruling_revision_id→ruling_revision,cr_version_id→cr_version,reviewed_by:Text?,reviewed_on:Date?,verdict:pending\|valid\|revise` `PK(前兩欄)`；A                                                                                                                                                                   |
 
+`ruling_revision.revision` 取 authored 明示的正整數，format 不參與取值。四層裁定建置以 RulingResolution 的精確 occurrence／scope 為適用權威；舊 `ruling_template` 關聯不能表示用途範圍，pending 不投影為有效關聯。N0 的 resolution.build 依原始 ordinal 產生引用列；DB 保存現行裁定檔案 hash，檢查 SQL PK／FK 與逐列封閉型別。邏輯鍵唯一／互斥、完整用途集合及用途候選來源檢查由 #499 接上；本次不宣稱 DB 已驗證這些集合條件。裁定仍有效的文字 active_scope 與特定卡用途資格分開；pending 正文可查讀，但不出肯定適用提示。完整形狀與集合對帳依[四層契約 §9](../domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)。
+
 ruling_hint.parameter_schema 與 text_symbol 共用 [傳輸契約 §3.2 的公開參數宣告](../export/snapshot-transport.md#32-公開參數宣告)，建置與出貨使用同一形狀。
 
 QA 無編號不可造 Q 號，日期不是 revision key，同日修改保留兩版；qa_version 的 supersedes 只能引用同一 qa 的版本。CR 同版換檔另存來源版本。evidence.quote 必須逐字屬於指定 QA/CR 版本；terminology/community 不能單獨升 official。strength 與 `review_state` 分開，inferred 明示專案解讀，undecided 不出行為提示。
@@ -278,33 +280,44 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 
 ### 9.1 現行 DDL 表格
 
-下表記錄四層切換前已存在的 current DDL；人工資料保存來源與品質，不包含翻譯核可封套。
-四層的目標邏輯列與欄位差異另見 §9.3，尚未實作；不能把本表的 text／params 宣稱為四層 target／typed values。
+下表記錄正式四層 DDL：frame 的型別語義、target 節點、來源 binding、形式與語義位置分開保存。
+人工資料保留來源與品質，不包含翻譯核可封套；欄位語義另見 §9.3。
 
 | 表 | 建置期欄位、鍵與約束 |
 | --- | --- |
 | `glossary_term` | `id:ID PK,category:keyword\|ability\|trait\|rule_term\|card_name,source_ja:Text,concept_key:Text UNIQUE,emphasis:Bool?,authored_source_id→source_record,record_key:Text,origin:official\|project\|machine,low_confidence:Bool` |
 | `glossary_translation` | `term_id→glossary_term,lang:Lang,text:Text,source_id→source_record?,authored_source_id→source_record,record_key:Text,origin:official\|project\|machine,low_confidence:Bool` `PK(term_id,lang)`；每概念語系一個當前選定譯法 |
-| `sentence_template` | `id:ID PK,level:sentence\|clause,source_lang:Lang,normalized_text:Text,normalizer_version:Text,semantic_variant:ID,parameter_schema:Json,content_hash:Hash UNIQUE,authored_source_id→source_record,record_key:Text,origin:official\|project\|machine,low_confidence:Bool`；語義內容 hash 決定 ID |
-| `template_translation` | `template_id→sentence_template,lang:Lang,variant_key:ID,text:Text,authored_source_id→source_record,record_key:Text,origin:official\|project\|machine,low_confidence:Bool` `PK(template_id,lang,variant_key)`；當前值與明示候選 |
-| `text_template_binding` | `id:ID PK,context_id→translation_context,ordinal:UInt,template_id→sentence_template,params:Json,source_span:Json`；`UQ(context_id,ordinal)`，來源覆蓋與參數檢查保持 |
+| `sentence_template` | `id:ID PK,source:Json,role:body\|reminder\|token_header\|layout\|name\|label,semantic_variant:Json,leaf_schema:Json,projection:Json,canonical_source:Text,content_hash:Text,interface_key:Text,authored_source_id:ID,record_key:Text,origin:official\|project\|machine,low_confidence:Bool`；`UQ(content_hash)`；`FK(authored_source_id)→source_record(id)`；依四層 typed 邊界驗完整形狀、來源與跨列一致性 |
+| `template_translation` | `template_id:ID,lang:Lang,variant_key:ID,target:Json,authored_source_id:ID,record_key:Text,origin:official\|project\|machine,low_confidence:Bool` `PK(template_id,lang,variant_key)`；`FK(template_id)→sentence_template(id)`；`FK(authored_source_id)→source_record(id)`；依四層 typed 邊界驗完整形狀、來源與跨列一致性 |
+| `text_template_binding` | `id:ID PK,use_id:ID,ordinal:UInt,line_ordinal:UInt,frame_id:ID,source:Json,source_span:Json,values:Json,trace:Json`；`UQ(use_id,ordinal)`；`FK(use_id)→translation_use(id)`；`FK(frame_id)→sentence_template(id)`；依四層 typed 邊界驗完整形狀、來源與跨列一致性 |
 | `translation` | `id:ID PK,context_id→translation_context,target_lang:Lang,revision:UInt,text:Text,tokens:Json?,origin:official\|project\|machine,authority:sve_official\|digital_official\|unofficial,low_confidence:Bool,source_hash:Hash,source_id→source_record?`；`UQ(context_id,target_lang,revision)` |
-| `translation_binding` | `translation_id→translation,binding_id→text_template_binding,template_id:ID,lang:Lang,variant_key:ID` `PK(translation_id,binding_id)`；`FK(template_id,lang,variant_key)→template_translation(template_id,lang,variant_key)`；模板、context 與語言須一致 |
-| `translation_term` | `translation_id→translation,term_id→glossary_term` `PK(translation_id,term_id)`；支援術語反查 |
+| `translation_binding` | `translation_id:ID,binding_id:ID,template_id:ID,lang:Lang,variant_key:ID` `PK(translation_id,binding_id)`；`FK(translation_id)→translation(id)`；`FK(binding_id)→text_template_binding(id)`；`FK(template_id,lang,variant_key)→template_translation(template_id,lang,variant_key)`；依四層 typed 邊界驗完整形狀、來源與跨列一致性 |
+| `translation_term` | `translation_id:ID,term_id:ID` `PK(translation_id,term_id)`；`FK(translation_id)→translation(id)`；`FK(term_id)→glossary_term(id)`；依四層 typed 邊界驗完整形狀、來源與跨列一致性 |
 | `translation_selection` | `context_id→translation_context,target_lang:Lang,translation_id→translation` `PK(context_id,target_lang)`；context 與語言須與選中的譯文一致 |
 | `translation_context` | `id:ID PK,source_unit_id→text_unit,semantic_variant:ID`；`UQ(source_unit_id,semantic_variant)` |
 | `translation_use` | `id:ID PK,context_id→translation_context,field:Code,ordinal:UInt?,face_revision_id→face_revision?,printing_id:ID?,face_id:ID?,qa_version_id→qa_version?,cr_clause_id→cr_clause?,vocabulary_kind:Code?,vocabulary_code:Code?,keyword_id→keyword?,product_family_id→product_family?,product_id→product?`；恰一 owner 組非空；`FK(printing_id,face_id)→printing_face(printing_id,face_id)`，`FK(vocabulary_kind,vocabulary_code)→vocabulary(kind,code)`；owner/field/ordinal 條件唯一，來源 text 必須同 context |
+| `annotation_set` | `id:ID PK,text_unit_id→text_unit,occurrences:Json`；annotation-v1 完整 hash；Unicode scalar ranges、引用類別、exact text 與當前 emphasis 由 typed 邊界驗證 |
+| `translation_annotation` | `translation_id→translation,annotation_set_id→annotation_set` `PK(translation_id)`；set 對應該譯文的 exact target text |
+| `translation_use_annotation` | `use_id→translation_use,annotation_set_id→annotation_set` `PK(use_id)`；set.text_unit_id 必等於 use 所屬 context 原文 |
+| `translation_form` | `id:ID,lang:Lang,rule:Text,signature:Json,cases:Json,authored_source_id:ID,record_key:Text,origin:official\|project\|machine,low_confidence:Bool` `PK(id,lang)`；`FK(authored_source_id)→source_record(id)`；依四層 typed 邊界驗完整形狀、來源與跨列一致性 |
+| `binding_leaf_occurrence` | `binding_id:ID,position:UInt,slot:Text,ordinal:UInt,raw_spans:Json,canonical_spans:Json,source_unit:Text?,source_presence:explicit\|omitted,resolution_rule:Text?` `PK(binding_id,slot,ordinal)`；`UQ(binding_id,position)`；`FK(binding_id)→text_template_binding(id)`；依四層 typed 邊界驗完整形狀、來源與跨列一致性 |
+| `render_leaf_occurrence` | `translation_id:ID,binding_id:ID,node_path:Json,slot:Text,source_ordinals:Json,ranges:Json` `PK(translation_id,binding_id,node_path)`；`FK(translation_id)→translation(id)`；`FK(binding_id)→text_template_binding(id)`；依四層 typed 邊界驗完整形狀、來源與跨列一致性 |
+| `ruling_document` | `ruling_id:ID,revision:UInt,source_id:ID,source_path:Text,source_hash:Text,raw_text:Text` `PK(ruling_id,revision)`；`FK(source_id)→source_record(id)`；SQL PK／FK 與逐列封閉型別；裁定邏輯唯一與完整用途集合由 #499 接上 |
+| `ruling_resolution` | `id:ID PK,ruling_id:ID,revision:UInt,frame_id:ID?,payload:Json`；`FK(ruling_id,revision)→ruling_document(ruling_id,revision)`；`FK(frame_id)→sentence_template(id)`；SQL PK／FK 與逐列封閉型別；裁定邏輯唯一與完整用途集合由 #499 接上 |
+| `ruling_retained_reference` | `ruling_id:ID,revision:UInt,reference_ordinal:UInt,payload:Json` `PK(ruling_id,revision,reference_ordinal)`；`FK(ruling_id,revision)→ruling_document(ruling_id,revision)`；SQL PK／FK 與逐列封閉型別；裁定邏輯唯一與完整用途集合由 #499 接上 |
 
 ### 9.2 當前翻譯投影
 
 §9.1 的既有 DDL 透過 `build.t1.compile_build()` 編譯。
-[翻譯契約](../domains/translation-contract.md)已描述四層目標行為，具體差異依 §9.3；以下既有欄位不代表新版已驗收。
+建置 DB 版本為 7；annotation 三表隨 translation_names 能力編譯，名稱的已解析概念覆蓋完整原文與譯名，
+無譯名時仍保留原文用途。名稱內不再抽術語，不能把缺概念的名字造為 CardName 引用。
+[翻譯契約](../domains/translation-contract.md)已描述四層目標行為，具體差異依 §9.3；typed frame、target 與 binding 已接入正式建置。
 模板功能、術語／名字／風味、owner/use、來源 hash 與跨區適用檢查保留。
 人工輸入的 authored_source_id、record_key、origin 與 low_confidence 定位本次來源與品質，沒有另建核可表。
 language／vocabulary 的四欄可為 null，以容納程式提供的配置；從 authored 讀入的值都須填齊。
 模板與 glossary 的人工來源欄位必填，真實官方來源另保留 source_id。
 模板譯文以 `(template_id,lang,variant_key)` 唯一；glossary 選詞以 `(term_id,lang)` 唯一。
-translation 的 revision 是 render-v2 的 52-bit 內容鍵，首版 tokens=null，不代表人工採納序列。
+translation 的 revision 是 render-v3 的 52-bit 內容鍵，首版 tokens=null，不代表人工採納序列。
 其他元件仍有用途的 decision FK 不由翻譯的 current schema 移除。
 
 完整 translation_use owner 欄位為 face_revision_id、printing_id/face_id、qa_version_id、cr_clause_id、
@@ -327,7 +340,7 @@ low_confidence 沿實際依賴 OR 傳播，通過自動檢查後直接顯示待�
 
 context/use/binding/selection 每次重建，DB 只放本次有效組；改詞／加粗重算相依結果，未變的 note 不影響語義 ID。
 來源變動不得沿用錯配舊譯文，缺任何必要譯詞／匹配則回原文並列一張清單，不假稱整段已翻。
-歷史由 Git 保存，清冊在 CI／建置用當前程式與固定輸入重產，不執行歷史 producer 或核可事件。
+歷史由 Git 保存，四層來源核心在 CI／建置用當前程式與固定輸入產生 binding／未匹配清單，不執行歷史 producer 或核可事件。
 
 繁中只取有效且已確認同卡同面的 JP 來源，不以 aligned／divergence 作顯示門檻。
 EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；日英段落不同取完整 JP 效果，不按 EN ordinal 拼接。
@@ -340,7 +353,7 @@ EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；�
 [四層共用契約](../domains/four-layer-translation.md)是本節授權的欄位細節：
 §3～§7 定義 Frame、葉 schema、target、SourceBinding 與投影接口，§8 定義目標邏輯列／PK／FK、annotation 與依賴，
 §9 定義模板重鍵及裁定引用。每欄附型別、nullable、合法域、驗證者、失敗條件及[固定案例 ID](../domains/four-layer-cases.md)。
-這些是設計規格，#498 才同步修改正式 DDL、DB 邊界與匯入器；下表不是另一份已能編譯的 DDL。
+N0 的正式 DDL、DB 邊界與匯入器已依此切換；下表說明相對於舊模板的變更，實際欄位以 §9.1 為準。
 
 | 現有資料 | 四層後的欄位差異與責任 |
 | --- | --- |
@@ -350,10 +363,10 @@ EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；�
 | translation_context／translation | context 的變體鍵聚合來源 frame／values；render-v3 包含實際 target、形式、選詞／加粗、位置與 renderer 版本的依賴 |
 | translation_term／位置 | 去重反查保留；binding_leaf_occurrence、render_leaf_occurrence 與 annotation_set 分別保留來源位置、輸出關聯、exact 文字的概念位置 |
 | owner／translation 的 annotation 引用 | 原文 use 與譯文各引用精確 set；沒有譯文也可有原文 set，同 text_unit 不代表同概念位置 |
-| 舊模板／裁定 | 多對多映射以 occurrence／variant／scope 判定；每個引用唯一 resolved 或帶原因／候選 pending，不擴域、不留 active 懸空 FK |
+| 舊模板／裁定 | 多對多映射以 occurrence／variant／scope 判定；每個模板引用有一個引用級 pending，或完整用途級 resolution 集合；非模板引用另行對帳，不擴域、不留 active 懸空 FK |
 
 四層資料不新增逐詞核可、成功收據或不可變翻譯帳本；DB 邊界只驗必要結構與建置閉包。
-§9.1 的既有表數／實作分期與 ER 圖描述目前 DDL；待實作新增邏輯列時一併更新表數、分期及 ER 登錄。
+§9.1 與 ER 圖描述目前 DDL；已知舊域的用途級裁定解析及 N1 新葉由 #499／#380 接續。
 公開 basis=jp_source、annotation 承載、tuple 與 reader 由 [#496](https://github.com/gbaian10/sve-kit/issues/496) 定義，不能直接 dump 本節邏輯列。
 巨集資格條文由 [#497](https://github.com/gbaian10/sve-kit/issues/497) 處理，本節不修改 §10 或授予可執行資格。
 

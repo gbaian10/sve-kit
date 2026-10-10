@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 
 import { memoryCache } from "../test-utils/cache"
 import type { Fetcher } from "./cdn"
-import type { JsonObject } from "./format-v1/json"
+import type { JsonObject } from "./format-v3/json"
 import { transferDigest } from "./integrity"
 import { MetadataBytes } from "./metadata"
 

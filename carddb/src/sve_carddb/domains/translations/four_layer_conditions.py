@@ -1,0 +1,79 @@
+"""Prove a repeated numeric predicate's one explicit counted set in its source ability."""
+
+import re
+from typing import TYPE_CHECKING
+
+from sve_carddb.domains.translations.four_layer_units import count_context, source_unit
+
+if TYPE_CHECKING:
+    from sve_carddb.domains.translations.four_layer_units import CountContext
+
+_HEAD = re.compile(
+    r"(?:^|[。\n])\s*(?:\{(?:ファンファーレ|起動|ラストワード|進化|食事|憑依)\}|"
+    r"【(?:進化時|攻撃時|超進化時|(?:自分|相手)のターン(?:開始時|終了時)|N)】)"
+)
+_CONDITION = re.compile(
+    r"(?:^|(?<=[。:：、\n]))(?P<np>[^。:：、\n]+?)N(?P<unit>枚|体|つ|人)"
+    r"(?:以上|以下)?なら(?=[、。])"
+)
+_SELECTION = re.compile(
+    r"(?:^|(?<=[。:：、\n]))(?P<np>[^。:：、\n]+?)N(?P<unit>枚|体|つ|人)"
+    r"(?:まで)?(?:を)?選ぶ[。]"
+)
+_ARRIVAL = re.compile(
+    r"(?:^|(?<=[。:：、\n]))(?P<np>[^。:：、\n]+?)N(?P<unit>枚|体|つ)以上出たとき、"
+)
+_MOVEMENT = re.compile(r"戻す|戻し|加え|置く|置き|置いて|場に出|消滅|破壊|移す|移し")
+
+
+def existence_context(before: str) -> CountContext | None:
+    """A bare repeated predicate cannot borrow another ability or an ambiguous antecedent."""
+    if not before.endswith(("。", "、")):
+        return None
+    start = max((head.end() for head in _HEAD.finditer(before)), default=0)
+    scope = before[start:]
+    depth = scope.count("「") - scope.count("」")
+    if depth < 0:
+        return None
+    evidence: dict[str, CountContext] = {}
+    for condition in _CONDITION.finditer(scope):
+        prefix = scope[: condition.start("unit")]
+        if prefix.count("「") - prefix.count("」") != depth:
+            continue
+        np = condition["np"]
+        context = count_context(np)
+        if context is None or not source_unit(context, condition["unit"]).merge_allowed:
+            return None
+        evidence[np] = context
+    return next(iter(evidence.values())) if len(evidence) == 1 else None
+
+
+def selection_context(before: str) -> CountContext | None:
+    """An explicit subset refers to one selection; a later zone-changing action blocks reuse."""
+    if not before.endswith(("選んだうちの", "残りの", "出たうちの", "その中の")):
+        return None
+    start = max((head.end() for head in _HEAD.finditer(before)), default=0)
+    scope = before[start:]
+    depth = scope.count("「") - scope.count("」")
+    evidence: dict[str, CountContext] = {}
+    grammars = (
+        (_ARRIVAL, _SELECTION)
+        if before.endswith("その中の")
+        else (_ARRIVAL,)
+        if before.endswith("出たうちの")
+        else (_SELECTION,)
+    )
+    selections = (match for grammar in grammars for match in grammar.finditer(scope))
+    for selection in selections:
+        prefix = scope[: selection.start("unit")]
+        if prefix.count("「") - prefix.count("」") != depth:
+            continue
+        context = count_context(selection["np"])
+        if (
+            context is None
+            or not source_unit(context, selection["unit"]).merge_allowed
+            or _MOVEMENT.search(scope[selection.end() :]) is not None
+        ):
+            return None
+        evidence[selection["np"]] = context
+    return next(iter(evidence.values())) if len(evidence) == 1 else None

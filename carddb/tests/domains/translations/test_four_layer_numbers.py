@@ -1,0 +1,904 @@
+"""Complete numeric constructions prove roles without borrowing neighboring syntax."""
+
+import pytest
+
+from sve_carddb.contracts.four_layer import Constant, QuantitySpec
+from sve_carddb.domains.translations.four_layer_classification import Term
+from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
+
+from .test_four_layer_classification import classifier, source
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "仮。相手プレイヤー１人は手札を公開する。自分はその中から２枚を選ぶ。",
+        "仮。自分のデッキの上X枚を見る。その中から、仮族・フォロワー１枚を公開して手札に加える。残りを好きな順にデッキの下に置く。【覚醒】状態なら、代わりに仮族・フォロワー２枚まで公開して手札に加える。",
+        "仮。自分の墓場が２枚以上で自分の他の元のコストX以下の仮族・フォロワーが場か墓場に置かれたとき、仮。",
+        "仮。自分の墓場が２枚以上で自分の他の元のコストX以下の仮族・フォロワーが場から墓場に置かれたとき、仮。",
+    ],
+)
+def test_explicit_reveal_and_conjunction_contexts_prove_the_counted_set(
+    raw: str,
+) -> None:
+    engine = classifier(extra=("player_person_quantity",))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert any(s.type == "QuantitySpec" for s in frame.leaf_schema.slots)
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "仮。相手プレイヤー１人は墓場を公開する。自分はその中から２枚を選ぶ。",
+        "仮。相手プレイヤー１人は手札を公開する。{起動}自分はその中から２枚を選ぶ。",
+        "仮。相手プレイヤー１人は手札を公開する。自分はその中から２体を選ぶ。",
+        "仮。自分のデッキの上X枚を見る。その中から、仮族・フォロワー１枚を公開して手札に加える。残りを好きな順に墓場に置く。【覚醒】状態なら、代わりに仮族・フォロワー２枚まで公開して手札に加える。",
+        "仮。自分の墓場が２枚以上で自分の他の元のコストX以下の不明物が場か墓場に置かれたとき、仮。",
+    ],
+)
+def test_reveal_or_conjunction_cannot_inherit_an_unknown_set(raw: str) -> None:
+    engine = classifier(extra=("player_person_quantity",))
+    field = normalize_source(raw, source(raw))
+    assert engine.recognize(raw, field.source, field.parts[0]).issues
+
+
+def test_explicit_counter_carrier_union_keeps_count_and_threshold_separate() -> None:
+    raw = "仮。これか自分のEXエリアのカード２枚の情熱カウンターが３個以上なら、仮。"
+    engine = classifier(extra=("named_counter_threshold",))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert [s.role for s in frame.leaf_schema.slots] == ["count", "threshold"]
+    assert [o.source_unit for o in binding.occurrences] == ["枚", "個"]
+
+
+def test_named_union_inherits_only_the_complete_deck_look_source() -> None:
+    raw = (
+        "仮。自分のデッキの上X枚を見る。その中から、"
+        "「これと同名を除く仮族・カード」と『仮名』それぞれ２枚まで公開して手札に加えてよい。"
+    )
+    engine = classifier((Term("term:name.synthetic_union", "card_name", "仮名"),))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[-1].role == "selection_count"
+    assert binding.occurrences[-1].source_unit == "枚"
+    bad = raw.replace("見る。", "不明する。")
+    bad_field = normalize_source(bad, source(bad))
+    assert engine.recognize(bad, bad_field.source, bad_field.parts[0]).issues
+
+
+def test_sum_constraint_keeps_the_explicit_amulet_trait_and_source_zone() -> None:
+    raw = "仮。自分のデッキから土の印・アミュレットを元のコストの合計がX以下になるように２枚まで探し、EXエリアに置く。"
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[0].role == "selection_count"
+    assert binding.occurrences[0].source_unit == "枚"
+
+
+@pytest.mark.parametrize(
+    ("raw", "role"),
+    [
+        ("仮。このターン中にこれを含めて２枚以上プレイしていたなら、仮。", "threshold"),
+        (
+            "仮。自分のデッキの上を元のコストX以下のフォロワーが２枚公開されるまで公開する。",
+            "threshold",
+        ),
+        (
+            "仮。これによってカード名がそれぞれ異なる２枚のカードを公開したなら、仮。",
+            "threshold",
+        ),
+        ("仮。これによって消滅させたカードが２枚以上なら、仮。", "threshold"),
+        ("仮。それの{UB}能力２つを元のコストを支払わずに発動する。", "count"),
+        (
+            "仮。自身の場のフォロワー２体を指定し、ターンプレイヤーから順にそれを手札に戻す。",
+            "selection_count",
+        ),
+        (
+            "仮。自分のデッキから【スタートアミュレット】を持つカード２枚を場に出した状態でバトルを開始する。",
+            "count",
+        ),
+        ("仮。自分のEXエリアのトークン・カード２枚を選ぶ。", "selection_count"),
+        (
+            "仮。自分のデッキから「消滅させたフォロワーと同名のフォロワー」２枚まで探し、EXエリアに置く。",
+            "selection_count",
+        ),
+    ],
+)
+def test_complete_actions_and_event_predicates_prove_the_numeric_role(
+    raw: str, role: str
+) -> None:
+    engine = classifier(extra=("suffix_unit_items",))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[0].role == role
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "仮。このターン中にこれを含めて２枚以上不明していたなら、仮。",
+        "仮。これによってカード名がそれぞれ異なる２枚のカードを不明したなら、仮。",
+        "仮。それの{UB}能力２つを元のコストを支払わずに不明する。",
+        "仮。自分のEXエリアのトークン・カード２体を選ぶ。",
+    ],
+)
+def test_incomplete_event_or_execution_cannot_supply_a_numeric_role(raw: str) -> None:
+    engine = classifier(extra=("suffix_unit_items",))
+    field = normalize_source(raw, source(raw))
+    assert engine.recognize(raw, field.source, field.parts[0]).issues
+
+
+@pytest.mark.parametrize("action", ["２枚か『仮別名』３枚", "２枚ずつ"])
+def test_named_creation_count_does_not_infer_card_kind(action: str) -> None:
+    terms = (
+        Term("term:name.synthetic_first", "card_name", "仮名"),
+        Term("term:name.synthetic_second", "card_name", "仮別名"),
+    )
+    raw = f"仮。『仮名』{action}をEXエリアに置く。"
+    if action.endswith("ずつ"):
+        raw = raw.replace("ずつを", "ずつ")
+    engine = classifier(terms)
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert all(s.type != "CardKind" for s in frame.leaf_schema.slots)
+    assert all(s.role == "count" for s in frame.leaf_schema.slots if s.type == "Nat")
+
+
+@pytest.mark.parametrize("unit", ["枚", "体"])
+def test_complete_ex_token_deployment_has_its_own_unit_rule(unit: str) -> None:
+    raw = f"仮。自分のEXエリアの仮族・トークン・フォロワー２{unit}まで場に出す。"
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[0].role == "selection_count"
+    assert binding.values["leaf_0"] == QuantitySpec(
+        mode="up_to", expr=Constant(kind="constant", value=2)
+    )
+    assert binding.occurrences[0].source_unit == unit
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "仮。自分のEXエリアの仮族・トークン・フォロワー２枚を選ぶ。",
+        "仮。自分の場の仮族・トークン・フォロワー２枚まで場に出す。",
+        "仮。自分のEXエリアの仮族・トークン・フォロワー２枚まで場に不明する。",
+    ],
+)
+def test_other_actions_cannot_borrow_the_ex_deployment_unit(raw: str) -> None:
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    found = engine.recognize(raw, field.source, field.parts[0])
+    assert found.issues
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "仮。自分の墓場のトリガーを持つフォロワー２枚選ぶ。",
+        "仮。自分のデッキからの仮族・アミュレット２枚を選ぶ。",
+        "仮。自身の場のフォロワー２体を選ぶ。",
+    ],
+)
+def test_explicit_counted_np_connectors_preserve_source_evidence(raw: str) -> None:
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[0].role == "selection_count"
+
+
+@pytest.mark.parametrize("malformed", [False, True])
+def test_counter_carrier_count_is_distinct_from_the_removed_counter_amount(
+    malformed: bool,
+) -> None:
+    term = Term("term:name.synthetic_carrier", "card_name", "仮器")
+    raw = "仮。場の『仮器』２つのギガカウンター３個を取る:仮。"
+    if malformed:
+        raw = raw.replace("ギガ", "未知")
+    engine = classifier((term,), extra=("suffix_unit_items", "named_counter_remove"))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    if malformed:
+        assert found.issues
+        with pytest.raises(ValueError, match="Unresolved source leaves"):
+            found.bind(field.source, part)
+        return
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert [s.role for s in frame.leaf_schema.slots if s.type == "Nat"] == [
+        "count",
+        "counter_amount",
+    ]
+    numeric = {s.name for s in frame.leaf_schema.slots if s.type == "Nat"}
+    assert [o.source_unit for o in binding.occurrences if o.slot in numeric] == [
+        "つ",
+        "個",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("np", "unit"),
+    [("自分の場の仮族・カードが", "枚"), ("相手の場のフォロワーが", "体")],
+)
+def test_disjunct_counts_share_one_explicit_counted_set(np: str, unit: str) -> None:
+    raw = f"仮。{np}２{unit}か３{unit}なら、仮。"
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert [s.role for s in frame.leaf_schema.slots] == ["existence_count"] * 2
+    assert [o.source_unit for o in binding.occurrences] == [unit] * 2
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "仮。【融合】不明物２枚:これに融合カウンターX個を置く。",
+        "仮。【融合】トークンでないフォロワー２枚:これに融合カウンターX個を不明する。",
+        "仮。自分の場にフォロワーが２体以上出たとき、仮。{起動}出たうちの１体に{攻撃力}+Xする。",
+        "仮。相手の場のフォロワー２体を選ぶ。{起動}残りの１体にXダメージ。",
+        "仮。相手の場のフォロワー２体を選ぶ。それを墓場に置く。残りの１体にXダメージ。",
+        "仮。相手の場のフォロワー２体を選ぶ。それをEXエリアに置く。残りの１体にXダメージ。",
+        "仮。相手の場のフォロワー２体を選ぶ。自分の場のフォロワー２体を選ぶ。残りの１体にXダメージ。",
+        "仮。相手の場のフォロワー２体を選ぶ。選んだうちの１枚にXダメージ。",
+        "仮。自分の能力は追加で２回不明する。",
+        "仮。自分の墓場が２枚になるように自分の手札を捨てる。",
+        "仮。自分の手札が２枚になるように自分の手札を不明する。",
+        "自分の墓場のカードが２枚以上なら、仮。{起動}３枚以上なら、別。",
+        "自分の墓場のカードが２枚以上なら、仮。【相手のターン終了時】３枚以上なら、別。",
+        "自分の墓場のカードが２枚以上なら、仮。相手の手札が３枚以上なら、別。４枚以上なら、仮。",
+        "自分の墓場のカードが２枚以上なら、仮。３体以上なら、別。",
+        "仮。「自分の墓場のカードが２枚以上なら、仮」を持つ。３枚以上なら、別。",
+        "仮。これはエボルヴデッキに２体まで入れることができる。",
+        "仮。自分のデッキを不明し、上X枚を見る。その中から、フォロワー２枚まで場に出してよい。",
+        "仮。相手の場のフォロワー２枚以上に能力ダメージを与えたとき、仮。",
+        "仮。場に出た不明物２体にXダメージ。",
+        "仮。自分が手札を２枚以上捨てた仮、仮。",
+        "仮。「不明。自分の墓場のカード」２枚につき、仮。",
+        "仮。自分の墓場の「相手の場のフォロワー」２体を選ぶ。",
+        "仮。自分の場の相手のフォロワー２体を選ぶ。",
+        "仮。「このターン中に自分がプレイしたカードの枚数」が２体以上なら、仮。",
+        "仮。「このターン中に自分が不明したカードの枚数」が２枚以上なら、仮。",
+        "仮。自分の場のフォロワーが２体か３枚なら、仮。",
+        "仮。自分の場の不明物が２体か３体なら、仮。",
+        "仮。自分の場のフォロワーが２体。か３体なら、仮。",
+    ],
+)
+def test_unknown_or_mismatched_counted_constructions_cannot_bind(raw: str) -> None:
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    found = engine.recognize(raw, field.source, field.parts[0])
+    assert found.issues
+    with pytest.raises(ValueError, match="Unresolved source leaves"):
+        found.bind(field.source, field.parts[0])
+
+
+@pytest.mark.parametrize(
+    ("raw", "role", "unit"),
+    [
+        (
+            "仮。【融合】トークンでないフォロワー２枚:これに融合カウンター３個を置く。",
+            "counter_amount",
+            "個",
+        ),
+        ("仮。お互いの場のカードが２枚以上ある限り、仮。", "existence_count", "枚"),
+        (
+            "仮。各プレイヤーは、自身の手札が２枚になるように自身の手札を捨てる。",
+            "existence_count",
+            "枚",
+        ),
+        (
+            "仮。相手のリーダーすべてに「自分の墓場の仮族・カード」２枚につきXダメージ。",
+            "group_divisor",
+            "枚",
+        ),
+        (
+            "仮。お互いの手札が２枚になるようにお互いの手札を捨てる。",
+            "existence_count",
+            "枚",
+        ),
+        (
+            "仮。自分の手札が２枚になるように自分の手札を捨てる。",
+            "existence_count",
+            "枚",
+        ),
+        ("仮。これはエボルヴデッキに２枚まで入れることができる。", "threshold", "枚"),
+        ("仮。自分の他の仮族・カードが２枚なら、仮。", "existence_count", "枚"),
+        (
+            "仮。自分のデッキをシャッフルし、上X枚を見る。その中から、フォロワー２枚まで場に出してよい。",
+            "selection_count",
+            "枚",
+        ),
+        (
+            "仮。自分の場や自分のEXエリアのアミュレットが２枚以上なら、仮。",
+            "existence_count",
+            "枚",
+        ),
+        (
+            "仮。それによって破壊した相手の場のフォロワー２体につき、仮。",
+            "group_divisor",
+            "体",
+        ),
+        ("仮。場の自分のフォロワー２体を選ぶ。", "selection_count", "体"),
+        ("仮。それの場のカードが２枚以上なら、仮。", "existence_count", "枚"),
+        (
+            "仮。それのプレイヤーの場のカードが２枚以上なら、仮。",
+            "existence_count",
+            "枚",
+        ),
+        ("仮。自分の墓場の仮N族・フォロワー２枚を選ぶ。", "selection_count", "枚"),
+        (
+            "仮。相手の場の【仮状態】状態のフォロワー２体まで選ぶ。",
+            "selection_count",
+            "体",
+        ),
+        (
+            "仮。自分の墓場の元のコストX以下の「仮族・フォロワーか別族・アミュレット」２枚を選ぶ。",
+            "selection_count",
+            "枚",
+        ),
+        (
+            "仮。自分の墓場の{ラストワード}を持つ{仮クラス}フォロワー２枚を選ぶ。",
+            "selection_count",
+            "枚",
+        ),
+        ("仮。{進化}を持つ自分の仮族・フォロワー２体を選ぶ。", "selection_count", "体"),
+        (
+            "仮。自分の墓場のスペルをカード名が異なるように２枚まで選ぶ。",
+            "selection_count",
+            "枚",
+        ),
+        (
+            "仮。自分の墓場のカードを元のコストの合計がX以下になるように２枚まで選ぶ。",
+            "selection_count",
+            "枚",
+        ),
+        ("仮。自分の消滅領域が２枚以上なら使える。", "existence_count", "枚"),
+        (
+            "仮。自分の墓場のエボルヴフォロワーが２枚以上なら、仮。",
+            "existence_count",
+            "枚",
+        ),
+        ("仮。自分の場のアミュレット２つにつき、仮。", "group_divisor", "つ"),
+        ("仮。カード名２つを指定する。", "selection_count", "つ"),
+        ("仮。好きな数２つを指定する。", "selection_count", "つ"),
+        ("仮。相手プレイヤー２人は手札を公開する。", "selection_count", "人"),
+        ("仮。自分は２つ以上の選択肢をチョイスする際、仮。", "threshold", "つ"),
+        (
+            "仮。このターン、２回目の自分の場のフォロワーの攻撃なら、仮。",
+            "repeat_index",
+            "回",
+        ),
+        (
+            "仮。このターン、２回目の自分の場のフォロワーの進化なら、仮。",
+            "repeat_index",
+            "回",
+        ),
+        ("仮。先攻のプレイヤーなら２ターン目以降、仮。", "turn_index", "ターン"),
+        ("仮。自分のターンが２ターン目かそれ以降なら、仮。", "turn_index", "ターン"),
+    ],
+)
+def test_explicit_set_constraints_designations_and_ordinals(
+    raw: str, role: str, unit: str
+) -> None:
+    engine = classifier(
+        extra=(
+            "suffix_unit_items",
+            "player_person_quantity",
+            "suffix_ordinal_times",
+            "suffix_ordinal_turns",
+            "named_counter_place",
+        )
+    )
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[-1].role == role
+    assert binding.occurrences[-1].source_unit == unit
+
+
+@pytest.mark.parametrize(
+    ("raw", "role"),
+    [
+        (
+            "仮。相手の場のフォロワー２体以上に能力ダメージを与えたとき、仮。",
+            "threshold",
+        ),
+        ("仮。自分が手札を２枚以上捨てたとき、仮。", "threshold"),
+        ("仮。同時に自分の場にフォロワーが２体以上出たとき、仮。", "threshold"),
+        ("仮。自分の場のフォロワー２体に{攻撃力}+Xする。", "selection_count"),
+        (
+            "仮。これが相手の場のフォロワー２体以上に能力ダメージを与えたとき、仮。",
+            "threshold",
+        ),
+        (
+            "仮。「このターン中に自分がプレイしたカードの枚数」が２枚以上なら、仮。",
+            "threshold",
+        ),
+        (
+            "仮。「このターン中に自分のリーダーの体力が増加した回数」が２回以上なら、仮。",
+            "threshold",
+        ),
+        ("仮。相手のデッキ２枚が墓場に置かれたとき、仮。", "count"),
+        ("仮。場に出たフォロワー２体にXダメージ。", "selection_count"),
+        ("仮。「自分の墓場の仮族・カード」２枚につき、仮。", "group_divisor"),
+        (
+            "仮。これによって破壊した相手の場のフォロワー２体につき、仮。",
+            "group_divisor",
+        ),
+        (
+            "仮。このターン中に場に出た自分の他のフォロワー２体を選ぶ。",
+            "selection_count",
+        ),
+    ],
+)
+def test_complete_event_counts_keep_the_written_set(raw: str, role: str) -> None:
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[-1].role == role
+
+
+@pytest.mark.parametrize("count", ["０", "２"])
+def test_positioning_group_reminder_requires_a_positive_complete_divisor(
+    count: str,
+) -> None:
+    reminder = f"（{count}体ずつ上か下か決める）"
+    raw = "仮。" + reminder
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    part = next(p for p in field.parts if p.source_span.role == "reminder")
+    found = engine.recognize(raw, field.source, part, field=field)
+    if count == "０":
+        assert found.issues
+        return
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[0].role == "group_divisor"
+    assert binding.occurrences[0].source_unit == "体"
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "仮。自分の墓場のスペルを不明な規則により２枚まで選ぶ。",
+        "仮。自分の墓場のカードを元のコストの合計がX以下になった２枚まで選ぶ。",
+        "仮。自分の場のフォロワー２枚につき、仮。",
+        "仮。このターン、２回目の不明なフォロワーの攻撃なら、仮。",
+        "仮。２ターン目かそれ以降なら、仮。",
+        "仮。カード名２つを指定する仮。",
+    ],
+)
+def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
+    engine = classifier(
+        extra=("suffix_unit_items", "suffix_ordinal_times", "suffix_ordinal_turns")
+    )
+    field = normalize_source(raw, source(raw))
+    found = engine.recognize(raw, field.source, field.parts[0])
+    assert "n0_numeric_construction_unresolved" in found.issues
+    with pytest.raises(ValueError, match="Unresolved source leaves"):
+        found.bind(field.source, field.parts[0])
+
+
+@pytest.mark.parametrize(
+    ("raw", "roles", "units"),
+    [
+        ("自分の手札のカード２枚を墓場に置く。", ["count"], ["枚"]),
+        ("自分の手札のカード２枚を場に出してよい。", ["count"], ["枚"]),
+        ("自分のデッキからフォロワー２枚を探し、場に出す。", ["count"], ["枚"]),
+        ("自分の手札のカード２枚を公開する。", ["count"], ["枚"]),
+        ("仮。自分が手札２枚を捨てたとき、仮。", ["count"], ["枚"]),
+        ("仮。手札２枚まで捨てる:仮。", ["selection_count"], ["枚"]),
+        ("仮。次のターンに２枚引けない。", ["count"], ["枚"]),
+        ("仮。「自分の手札２枚を捨てる」を持つ。", ["count"], ["枚"]),
+        (
+            "仮。手札の仮族・カード２枚と別族・カード３枚と第三族・カード４枚を捨てる:仮。",
+            ["count", "count", "count"],
+            ["枚", "枚", "枚"],
+        ),
+        (
+            "仮。自分のデッキから仮族・フォロワー２枚と別族・フォロワー３枚を探し、場に出す。",
+            ["count", "count"],
+            ["枚", "枚"],
+        ),
+        ("仮。自分のエボルヴデッキのカード２枚を裏向きにする。", ["count"], ["枚"]),
+        ("仮。ドライブチェックを２回する。", ["repeat_count"], ["回"]),
+        ("仮。自分はサイコロを２回ふりなおしてよい。", ["repeat_count"], ["回"]),
+        ("仮。墓場のカード２枚を消滅:仮。", ["count"], ["枚"]),
+        ("仮。自分の場のフォロワー２体を手札に戻す。", ["count"], ["体"]),
+        (
+            "仮。自分のデッキから仮族・フォロワー２枚と{仮クラス}スペル３枚を探し、前者を場に出す。後者をEXエリアに置く。",
+            ["count", "count"],
+            ["枚", "枚"],
+        ),
+        ("これを２回くり返す。", ["repeat_count"], ["回"]),
+        (
+            "仮。自分の墓場の元のコストX以下の「{仮クラス}でないフォロワー」２枚と元のコストX以下の「{仮クラス}でないフォロワー」３枚を選ぶ。",
+            ["selection_count", "selection_count"],
+            ["枚", "枚"],
+        ),
+        (
+            "仮。相手の場のフォロワー３体まで選ぶ。その中の１体にXダメージ。",
+            ["selection_count", "selection_count"],
+            ["体", "体"],
+        ),
+        (
+            "仮。次に自分の場にフォロワーが２体以上出たとき、その中の１体は{攻撃力}+X/{体力}+Xする。",
+            ["threshold", "selection_count"],
+            ["体", "体"],
+        ),
+        (
+            "仮。同時に自分の場にフォロワーが２体以上出たとき、出たうちの１体に{攻撃力}+X/{体力}+Xする。",
+            ["threshold", "selection_count"],
+            ["体", "体"],
+        ),
+        (
+            "仮。相手の場のフォロワー３体まで選ぶ。選んだうちの１体にXダメージ。残りの２体にXダメージ。",
+            ["selection_count", "selection_count", "selection_count"],
+            ["体", "体", "体"],
+        ),
+        ("仮。誘発する自分の能力は追加で２回誘発する。", ["repeat_count"], ["回"]),
+        (
+            "自分の墓場のカードが２枚以上なら、仮。３枚以上なら、別。",
+            ["existence_count", "existence_count"],
+            ["枚", "枚"],
+        ),
+        (
+            "仮。この能力は自分の場の「それぞれカード名が異なる仮族・フォロワー」が４体以上なら、２ターンに３回使える。",
+            ["existence_count", "duration_count", "repeat_count"],
+            ["体", "ターン", "回"],
+        ),
+        (
+            "仮。相手プレイヤー２人の場のカードが３枚以上なら、仮。",
+            ["selection_count", "existence_count"],
+            ["人", "枚"],
+        ),
+        (
+            "仮。この能力は「このターン中に自分がプレイしたカードの枚数」が４枚以上なら、２ターンに３回使える。",
+            ["threshold", "duration_count", "repeat_count"],
+            ["枚", "ターン", "回"],
+        ),
+        (
+            "この能力は２ターンに３回働く。",
+            ["duration_count", "repeat_count"],
+            ["ターン", "回"],
+        ),
+        (
+            "仮。この能力は自分の墓場のカードが４枚以上なら、２ターンに３回使える。",
+            ["existence_count", "duration_count", "repeat_count"],
+            ["枚", "ターン", "回"],
+        ),
+        (
+            "仮。「この能力は２ターンに３回働く」を持つ。",
+            ["duration_count", "repeat_count"],
+            ["ターン", "回"],
+        ),
+        ("自分のＰＰを２回復する。", ["resource_amount"], ["ＰＰ"]),
+        ("自分のPPを２回復する。", ["resource_amount"], ["PP"]),
+    ],
+)
+def test_complete_movement_frequency_and_resource_recovery(
+    raw: str, roles: list[str], units: list[str]
+) -> None:
+    engine = classifier(extra=("suffix_recovery_amount", "player_person_quantity"))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    field.verify(raw, (frame,), (binding,), engine.domains)
+    assert [s.role for s in frame.leaf_schema.slots] == roles
+    assert [o.source_unit for o in binding.occurrences] == units
+
+
+@pytest.mark.parametrize("family", ["食事", "憑依"])
+@pytest.mark.parametrize("malformed", [False, True])
+def test_entry_reminder_numbers_require_the_entire_shared_limit_grammar(
+    family: str, malformed: bool
+) -> None:
+    reminder = (
+        f"（２ターンに進化か{family}はどちらか３回できる。４回につき使えるEPは５つ）"
+    )
+    if malformed:
+        reminder = reminder.replace("できる", "でき仮")
+    raw = "仮。" + reminder
+    engine = classifier(extra=("suffix_unit_items",))
+    field = normalize_source(raw, source(raw))
+    part = next(p for p in field.parts if p.source_span.role == "reminder")
+    found = engine.recognize(raw, field.source, part, field=field)
+    if malformed:
+        assert "n0_numeric_construction_unresolved" in found.issues
+        return
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert [s.role for s in frame.leaf_schema.slots] == [
+        "duration_count",
+        "repeat_count",
+        "group_divisor",
+        "resource_amount",
+    ]
+    assert [o.source_unit for o in binding.occurrences] == ["ターン", "回", "回", "つ"]
+    assert frame.semantic_variant.state == "pending"
+
+
+@pytest.mark.parametrize(
+    ("raw", "units"),
+    [
+        ("仮。相手のリーダー２人か相手の場のフォロワー３体を選ぶ。", ["人", "体"]),
+        (
+            "仮。相手の場のフォロワー２体と自分の墓場の元のコスト３の仮族・フォロワー４枚を選ぶ。",
+            ["体", None, "枚"],
+        ),
+        (
+            "仮。自分の墓場の仮族・フォロワー２枚か別族・フォロワー３枚を選ぶ。",
+            ["枚", "枚"],
+        ),
+        (
+            "仮。自分のデッキの上２枚を見る。その中から、スペルかアミュレット３枚を公開して手札に加えてよい。",
+            ["枚", "枚"],
+        ),
+    ],
+)
+def test_compound_selections_prove_each_source_counted_set(
+    raw: str, units: list[str | None]
+) -> None:
+    engine = classifier(extra=("leader_person_quantity",))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert [o.source_unit for o in binding.occurrences] == units
+
+
+def test_compound_selection_cannot_hide_an_unknown_second_np() -> None:
+    raw = "仮。相手のリーダー２人か不明なフォロワー３体を選ぶ。"
+    engine = classifier(extra=("leader_person_quantity",))
+    field = normalize_source(raw, source(raw))
+    assert engine.recognize(raw, field.source, field.parts[0]).issues
+
+
+def test_a_separate_clause_cannot_inherit_a_counted_collection() -> None:
+    raw = "仮。自分の墓場のフォロワー２枚を選ぶ。仮族・フォロワー３枚を選ぶ。"
+    field = normalize_source(raw, source(raw))
+    assert classifier().recognize(raw, field.source, field.parts[0]).issues
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "自分の手札のカード２枚を墓場に置る。",
+        "自分の手札のカード２枚を場に出く。",
+        "自分の手札のカード２枚を手札に加えす。",
+        "自分の手札のカード２枚を公開して手札に加え仮。",
+        "自分のデッキからフォロワー２枚を探し、場に出る。",
+        "自分の手札のカード２枚を公開する仮。",
+        "仮。手札の仮族・カード２枚と不明なカード３枚を捨てる:仮。",
+        "仮２回行う。",
+        "仮、２ターンに３回。",
+        "この能力は２ターンに３回復する。",
+        "この能力は２ターンに３回仮。",
+        "この能力は不明なカードが４枚以上なら、２ターンに３回使える。",
+    ],
+)
+def test_malformed_movement_and_incomplete_frequency_cannot_bind(raw: str) -> None:
+    field = normalize_source(raw, source(raw))
+    found = classifier().recognize(raw, field.source, field.parts[0])
+    assert "n0_numeric_construction_unresolved" in found.issues
+    with pytest.raises(ValueError, match="Unresolved source leaves"):
+        found.bind(field.source, field.parts[0])
+
+
+def test_repeat_up_to_retains_mode_without_turning_recovery_into_repetition() -> None:
+    raw = "これを２回まで行う。"
+    field = normalize_source(raw, source(raw))
+    engine = classifier()
+    frame, binding = engine.recognize(raw, field.source, field.parts[0]).bind(
+        field.source, field.parts[0]
+    )
+    field.verify(raw, (frame,), (binding,), engine.domains)
+    assert binding.values == {
+        "leaf_0": QuantitySpec(mode="up_to", expr=Constant(kind="constant", value=2))
+    }
+    assert frame.leaf_schema.slots[0].role == "repeat_count"
+
+
+@pytest.mark.parametrize(
+    ("raw", "roles", "units"),
+    [
+        ("仮。SEPを２つ持つ。", ["resource_amount"], ["つ"]),
+        (
+            "仮。EPを２つ裏向きにすることで、３PPを払える。",
+            ["resource_amount", "resource_amount"],
+            ["つ", "PP"],
+        ),
+        ("これは魂カウンター２つを置く。", ["counter_amount"], ["つ"]),
+        ("これは魂カウンター２つまでを置いてよい。", ["counter_amount"], ["つ"]),
+        ("これは魂カウンターが２つ以上なら、仮。", ["threshold"], ["つ"]),
+        ("これは魂カウンター２つにつき、仮。", ["group_divisor"], ["つ"]),
+        ("このターン、仮の動作が２回以上発動していたなら、仮。", ["threshold"], ["回"]),
+    ],
+)
+def test_resource_items_and_closed_counter_constructions(
+    raw: str, roles: list[str], units: list[str]
+) -> None:
+    engine = classifier(extra=("suffix_unit_items",))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert [s.role for s in frame.leaf_schema.slots] == roles
+    assert [o.source_unit for o in binding.occurrences] == units
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "これは未知カウンター２つを置く。",
+        "これは魂カウンター２つを置る。",
+        "これは魂カウンター２つ以上仮。",
+        "これは魂カウンター０つにつき、仮。",
+        "仮。EPを２つ裏向きにすることで、３PPを払える仮。",
+        "このターン、仮の動作が２回以上発動していた仮。",
+    ],
+)
+def test_unknown_counter_and_incomplete_resource_or_event_cannot_bind(raw: str) -> None:
+    engine = classifier(extra=("suffix_unit_items",))
+    field = normalize_source(raw, source(raw))
+    found = engine.recognize(raw, field.source, field.parts[0])
+    assert "n0_numeric_construction_unresolved" in found.issues
+    with pytest.raises(ValueError, match="Unresolved source leaves"):
+        found.bind(field.source, field.parts[0])
+
+
+def test_created_name_count_preserves_its_unit_without_inferring_a_card_kind() -> None:
+    raw = "仮。『仮生成物』２体を出す。"
+    engine = classifier((Term("term:created.synthetic", "card_name", "仮生成物"),))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[1].role == "count"
+    assert binding.occurrences[1].source_unit == "体"
+    assert all(s.type != "CardKind" for s in frame.leaf_schema.slots)
+
+
+def test_full_existence_permission_does_not_lose_its_comparator_mode() -> None:
+    raw = "仮。自分の墓場のフォロワー２枚以上なら使える。"
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert binding.values["leaf_0"] == QuantitySpec(
+        mode="at_least", expr=Constant(kind="constant", value=2)
+    )
+
+
+@pytest.mark.parametrize(
+    ("raw", "valid"),
+    [
+        ("下記から１つチョイスする。【１】仮。【２】別。", True),
+        ("下記から１つチョイスする。\n【１】仮。\n【２】別。", True),
+        ("下記から１つチョイスする。【２】仮。【１】別。", False),
+        ("下記から３つチョイスする。【１】仮。【２】別。", False),
+        ("下記から１つチョイスする。【１】仮。\n\n【２】別。", False),
+        (
+            "下記から１つチョイスする。【１】仮。{ファンファーレ}【２】別。",
+            False,
+        ),
+        ("下記から１つチョイスする。（【１】仮。）【２】別。", False),
+        ("下記から１つチョイスする。『仮【１】』【２】別。", False),
+        (
+            "下記から１つチョイスする。【１】仮。【２】別。下記から１つチョイスする。",
+            False,
+        ),
+    ],
+)
+def test_choice_indices_need_one_complete_ordered_ability_scope(
+    raw: str, *, valid: bool
+) -> None:
+    field = normalize_source(raw, source(raw))
+    engine = classifier(extra=("bracket_choice_index", "suffix_unit_items"))
+    found = tuple(engine.recognize(raw, field.source, p) for p in field.parts)
+    ordinals = tuple(
+        (s, f.values[s.name])
+        for f in found
+        for s in f.schema.slots
+        if s.role == "choice_index"
+    )
+    assert bool(ordinals) is valid
+    if valid:
+        assert [value for _, value in ordinals] == [1, 2]
+        assert all(not f.issues for f in found)
+    else:
+        assert any(f.issues for f in found)
+
+
+@pytest.mark.parametrize("count", ["１", "２", "３"])
+def test_choice_replacement_uses_the_original_options_and_preserves_up_to(
+    count: str,
+) -> None:
+    raw = (
+        f"下記から１つチョイスする。仮なら、代わりに{count}つまで。【１】仮。【２】別。"
+    )
+    engine = classifier(extra=("bracket_choice_index", "suffix_unit_items"))
+    field = normalize_source(raw, source(raw))
+    found = engine.recognize(raw, field.source, field.parts[0])
+    if count == "３":
+        assert found.issues
+        return
+    assert not found.issues
+    frame, binding = found.bind(field.source, field.parts[0])
+    engine.verify(raw, field, field.parts[0], frame, binding)
+    assert binding.values["leaf_1"] == QuantitySpec(
+        mode="up_to", expr=Constant(kind="constant", value=int(count))
+    )
+
+
+def test_distinct_explicit_abilities_have_independent_choice_scopes() -> None:
+    raw = (
+        "{ファンファーレ}下記から１つチョイスする。【１】仮。【２】別。"
+        "{起動}下記から１つチョイスする。【１】他。【２】替。"
+    )
+    engine = classifier(extra=("bracket_choice_index", "suffix_unit_items"))
+    field = normalize_source(raw, source(raw))
+    found = engine.recognize(raw, field.source, field.parts[0])
+    assert not found.issues
+    assert [
+        found.values[s.name] for s in found.schema.slots if s.role == "choice_index"
+    ] == [1, 2, 1, 2]

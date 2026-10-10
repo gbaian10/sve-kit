@@ -190,17 +190,3 @@ Record = Annotated[
     TermRecord | ChoiceRecord | EmphasisRecord | AssignmentRecord | ConceptRecord,
     Field(discriminator="kind"),
 ]
-
-
-class Shard(RecordData):
-    format: Literal[2]
-
-    @field_validator("format", mode="before")
-    @classmethod
-    def _format(cls, value: object) -> object:
-        if type(value) is not int:
-            raise ValueError("Authored format must be an integer")
-        return value
-
-    kind: Literal["translation_shard"]
-    records: Annotated[tuple[Record, ...], Field(min_length=1)]

@@ -1,28 +1,13 @@
 """A signed magnitude cannot borrow a resource, damage direction or unverified ability."""
 
-from dataclasses import replace
-
 import pytest
 
-from sve_carddb.contracts.template_parameters import Schema, Slot
 from sve_carddb.core.json import integer, object_value
-from sve_carddb.domains.translations.parameters.candidate_matching import (
-    classify,
-    recognize,
-)
-from sve_carddb.domains.translations.parameters.references import References
-from sve_carddb.domains.translations.parameters.signed_contexts import SIGNED_CONTEXTS
-from sve_carddb.domains.translations.parameters.spans import locate
-from sve_carddb.domains.translations.source_inventory.inventory import entry
-from sve_carddb.domains.translations.source_inventory.normalizer import (
-    VERSION,
-    partition,
-)
-from sve_carddb.domains.translations.templates.members import _members
+from sve_carddb.domains.translations.recognition.candidate_matching import recognize
+from sve_carddb.domains.translations.recognition.references import References
+from sve_carddb.domains.translations.recognition.signed_contexts import SIGNED_CONTEXTS
 
-from .test_template_explicit_rules import entry_ref
-from .test_template_parameters import candidate
-from .test_template_rule_candidates import matches
+from .test_template_parameters import candidate, matches, partition
 
 CASES = (
     ("pp_capacity_delta", "自分のPP最大値を+２する。"),
@@ -70,7 +55,6 @@ def test_signed_roles_require_opt_in_and_raw_magnitude_keep_literal_sign(
         else:
             assert row["target_id"] is None
     assert c.model_dump() == original
-    assert c.parameter_schema is None
     assert matches(text.replace("２", "０"), identifier, evidence)
     assert matches(text.replace("２", "9007199254740991"), identifier, evidence)
     for raw in ("②", "9007199254740992", "2X", "２猫"):
@@ -90,67 +74,6 @@ def test_signed_roles_require_opt_in_and_raw_magnitude_keep_literal_sign(
         }
     )
     assert recognize(text, partition(text)[0], damaged, evidence, (identifier,)) == ()
-
-
-@pytest.mark.parametrize(("identifier", "text"), CASES)
-def test_signed_current_resolution_keeps_role_bounds_and_ownership(
-    identifier: str, text: str
-) -> None:
-    evidence = refs()
-    c = candidate(text, evidence)
-    ref = entry_ref()
-    e = entry(ref, partition(text)[0], VERSION)
-    c = c.model_copy(update={"inventory_id": e.id})
-    part = partition(text)[0]
-    classified, matches = classify(
-        text, part, e, locate(text, (part,))[0], evidence, (identifier,)
-    )
-    assert len(matches) == 1
-    numeric = next(h for h in c.slots if h.type == "uint")
-    m = _members((e,), (classified,), {(ref.source_version_id, ref.locator): text})[0]
-    assert m.pending == ()
-    assert (
-        next(r for h, r in zip(m.hints, m.roles, strict=True) if h.name == numeric.name)
-        == identifier + "_magnitude"
-    )
-    slots = []
-    for h in m.hints:
-        assert h.type is not None
-        slots.append(
-            Slot(
-                name=h.name,
-                type=h.type,
-                occurrences=(h.occurrence,),
-                reference_kind=h.reference_kind,
-                min=0 if h.type == "uint" else None,
-                max=9007199254740991 if h.type == "uint" else None,
-            )
-        )
-    schema = Schema(slots=tuple(slots))
-    m.verify_schema(schema)
-    wrong = replace(
-        m,
-        roles=tuple(
-            "card_ordinal" if h.type == "uint" else r
-            for h, r in zip(m.hints, m.roles, strict=True)
-        ),
-    )
-    with pytest.raises(
-        ValueError, match=r"^Template numeric bounds differ from the recognized role$"
-    ):
-        wrong.verify_schema(schema)
-    assert candidate(text, evidence).issues
-    owned = c.model_copy(
-        update={
-            "slots": tuple(
-                h.model_copy(update={"numeric_rule": "prefix_field_cost"})
-                if h.type == "uint"
-                else h
-                for h in c.slots
-            )
-        }
-    )
-    assert recognize(text, partition(text)[0], owned, evidence, (identifier,)) == ()
 
 
 @pytest.mark.parametrize(("identifier", "text"), CASES)

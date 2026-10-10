@@ -1,4 +1,4 @@
-import { digest } from "./format-v1/sha256"
+import { digest } from "./format-v3/sha256"
 
 /** Large transfer hashes run outside the UI thread when WebCrypto is available. */
 export async function transferDigest(bytes: Uint8Array): Promise<string> {

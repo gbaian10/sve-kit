@@ -1,4 +1,4 @@
-"""Apply editable name rules with owner-local eligibility and render-v2 outputs."""
+"""Apply editable name rules with owner-local eligibility and render-v3 outputs."""
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -14,8 +14,10 @@ from sve_carddb.domains.digital.name_policies.catalogue import catalogue
 from sve_carddb.domains.digital.name_policies.evaluate import name_result, owner_text
 from sve_carddb.domains.digital.name_policies.owners import publication_owners
 from sve_carddb.domains.digital.name_policies.results import Result
+from sve_carddb.domains.translations.four_layer_render import RENDERER_VERSION
 from sve_carddb.domains.translations.glossary.evidence import validate_choice
 from sve_carddb.domains.translations.glossary.records import ChoiceRecord, TermRecord
+from sve_carddb.domains.translations.names.annotations import annotate_name
 from sve_carddb.domains.translations.names.bindings import DisplayBinding
 from sve_carddb.domains.translations.names.counterparts import first_counterpart
 from sve_carddb.domains.translations.names.sources import name_source
@@ -52,6 +54,7 @@ class Selected:
     candidate: Candidate | None
     reason: str
     semantic_reason: str
+    term_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -254,8 +257,16 @@ def prepare(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals
         else:
             chosen = _choice(db, sources, replay, source, resolved.term_id, ())
             reason = "choice" if chosen is not None else "untranslated"
+        annotation_term = overrides[0].term_id if overrides else resolved.term_id
         owners.append(
-            Selected(source, resolved.variant, chosen, reason, resolved.reason)
+            Selected(
+                source,
+                resolved.variant,
+                chosen,
+                reason,
+                resolved.reason,
+                annotation_term,
+            )
         )
     return Plan(snapshot, tuple(owners), uses_sorted(sources.uses))
 
@@ -280,7 +291,7 @@ def apply(db: Database, plan: Plan, build: BuildContext) -> Result:
     bindings = []
     for owner in plan.owners:
         candidate = owner.candidate
-        if candidate is None:
+        if candidate is None and owner.term_id is None:
             continue
         if name_source(db, owner.source.owner) != owner.source:
             raise ValueError("Name application owner changed after current planning")
@@ -331,7 +342,27 @@ def apply(db: Database, plan: Plan, build: BuildContext) -> Result:
             values.update(printing_id=payload.identifier, face_id=payload.face_id)
             destination = (payload.kind, payload.identifier, str(payload.face_id))
         insert_exact(db, "translation_use", values, ("id",))
-        translation = materialize(db, owner.source, context, candidate)
+        if owner.term_id is not None:
+            annotate_name(db, use, owner.source.unit_id, owner.term_id)
+        if candidate is None:
+            continue
+        translation = materialize(
+            db, owner.source, context, candidate, term_id=owner.term_id
+        )
+        if owner.term_id is not None:
+            target_unit = "t:zh-Hant:" + digest(candidate.text.encode())[7:23]
+            insert_exact(
+                db,
+                "text_unit",
+                {
+                    "id": target_unit,
+                    "lang": "zh-Hant",
+                    "text": candidate.text,
+                    "content_hash": digest(candidate.text.encode()),
+                },
+                ("id",),
+            )
+            annotate_name(db, translation, target_unit, owner.term_id, translated=True)
         bindings.append(
             DisplayBinding(use, destination, "zh-Hant", "own_source", translation)
         )
@@ -339,16 +370,42 @@ def apply(db: Database, plan: Plan, build: BuildContext) -> Result:
 
 
 def materialize(
-    db: Database, source: NameSource, context: str, candidate: Candidate
+    db: Database,
+    source: NameSource,
+    context: str,
+    candidate: Candidate,
+    *,
+    term_id: str | None = None,
 ) -> str:
     """Render IDs include semantic dependencies and quality, excluding notes and proofs."""
+    if term_id is not None:
+        concepts = db.select("glossary_term", ("category",), where={"id": term_id})
+        if len(concepts) != 1 or concepts[0].values["category"] != "card_name":
+            raise ValueError("Name render requires its exact card-name concept")
     checksum = digest(
         canonical(
             {
-                "recipe": "render-v2",
+                "recipe": "render-v3",
                 "context_id": context,
                 "target_lang": "zh-Hant",
-                "dependency_key": candidate.dependency,
+                "dependency_key": digest(
+                    canonical(
+                        {
+                            "renderer_version": RENDERER_VERSION,
+                            "source_hash": source.source_hash,
+                            "selection": candidate.dependency,
+                            "target_source_id": None
+                            if candidate.source is None
+                            else candidate.source.id,
+                            "annotation": None
+                            if term_id is None
+                            else {
+                                "reference": {"kind": "card_name", "term_id": term_id},
+                                "bold": True,
+                            },
+                        }
+                    )
+                )[7:],
                 "text": candidate.text,
                 "origin": candidate.origin,
                 "authority": candidate.authority,

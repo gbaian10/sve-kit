@@ -1,11 +1,11 @@
 # Glossary and digital names
 
-The translation entry accepts format 2 only. Shards contain
+The translation entry accepts format 3 only. Shards contain
 `kind/data` with optional `origin/low_confidence/note`. Omitted quality values
 are `project` and `false`. Selection keys are derived on load; stored `record_key`
 fields are rejected. YAML writers omit these defaults and a null
 `missing_source_reason`, while retaining meaningful `value: null`.
-Readers load the current working tree once from the dedicated glossary/templates/
+Readers load the current working tree once from the dedicated glossary/templates/forms/
 overrides directories. They validate size, types, unique keys and references,
 then sort; shard gaps and unordered records are accepted. There is no checksum
 index or Git-byte gate. Selection keys and concept IDs stay stable when wording
@@ -55,7 +55,8 @@ invent review state or adapt current quality into an obsolete public shape.
 
 Shared authored inputs and closure checks live in `inputs`; exact evidence checks
 live in `glossary.evidence`, and glossary DB projection lives in `glossary.populate`.
-Template loading, building, rendering and writing live in `templates`. Parameter
-recognition and matcher switches live in `parameters`; the generated source
-inventory lives in `source_inventory`. Shared source, owner and quality types live
+Four-layer authored parsing, source compilation, rendering and storage live in
+`four_layer_authored`, `four_layer_pipeline`, `four_layer_render` and
+`four_layer_storage`. Finite lexical recognition and matcher switches live in
+`recognition`; they receive the source core’s partition and Unicode trace. Shared source, owner and quality types live
 in `models`. These Python groups do not change authored paths or formats.

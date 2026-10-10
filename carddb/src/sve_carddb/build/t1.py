@@ -1,6 +1,7 @@
 """Implemented T1 DDL groups; none yet claim a complete import/validation pipeline."""
 
 from sve_carddb.build import (
+    four_layer,
     t0,
     t1_correction,
     t1_cr,
@@ -10,8 +11,8 @@ from sve_carddb.build import (
     t1_json,
     t1_qa,
     t1_related,
+    t1_rulings,
     t2_translation,
-    templates,
     translation_evidence,
 )
 from sve_carddb.build.compiler import CompiledSchema, compile_schema
@@ -19,7 +20,7 @@ from sve_carddb.build.model import Capability
 from sve_carddb.build.registry import Registry
 from sve_carddb.build.t0_json import schemas
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 MINIMUM_CAPABILITIES = ("t0", "images", "cr", "errata", "correction", "qa", "related")
 TABLES = (
     *t1_images.TABLES,
@@ -31,7 +32,9 @@ TABLES = (
     *t1_en.TABLES,
     *translation_evidence.TABLES,
     *t2_translation.TABLES,
-    *templates.TABLES,
+    *four_layer.ANNOTATION_TABLES,
+    *four_layer.FRAME_TABLES,
+    *t1_rulings.TABLES,
 )
 REGISTRY = Registry(
     tables=(*t0.TABLES, *TABLES),
@@ -49,15 +52,23 @@ REGISTRY = Registry(
         ),
         Capability(
             "translation_names",
-            tuple(table.name for table in t2_translation.TABLES),
+            tuple(
+                table.name
+                for table in (*t2_translation.TABLES, *four_layer.ANNOTATION_TABLES)
+            ),
             requires=("t0", "translation_evidence"),
         ),
         Capability(
             "translation_templates",
-            tuple(table.name for table in templates.TABLES),
+            tuple(table.name for table in four_layer.FRAME_TABLES),
             requires=("translation_names",),
         ),
         Capability("art", ("art",)),
+        Capability(
+            "rulings",
+            tuple(table.name for table in t1_rulings.TABLES),
+            requires=("translation_templates",),
+        ),
         Capability(
             "en",
             tuple(table.name for table in t1_en.TABLES if table.name != "art"),
@@ -79,7 +90,8 @@ def compile_build(requested: tuple[str, ...] = ("t0",)) -> CompiledSchema:
         requested,
         schemas()
         | t1_json.schemas()
-        | templates.schemas()
+        | four_layer.schemas()
+        | t1_rulings.schemas()
         | {"TranslationTokens": {"type": "null"}},
         version=SCHEMA_VERSION,
     )

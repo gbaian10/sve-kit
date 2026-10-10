@@ -141,7 +141,7 @@ def regional_images(
     return recipe, assets, roots
 
 
-@pytest.mark.parametrize("format_version", ["2.0.0"])
+@pytest.mark.parametrize("format_version", ["3.0.0"])
 def test_bilingual_images_bundle_snapshot_and_preview(
     format_version: str,
     regional_images: tuple[Inputs, ImageBuild, PreviewRoots],

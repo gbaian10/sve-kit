@@ -1,37 +1,46 @@
 # 四層翻譯共用資料契約
 
-本文件是 [ADR-0021](../../adr/0021-four-layer-translation.md) 的設計契約，**尚非已實作的 reader、DDL 或 DSL 語法**。
+本文件是 [ADR-0021](../../adr/0021-four-layer-translation.md) 的共用契約；#498 已實作 N0 的 reader、DDL、來源 binding 與渲染。
+區域／階段葉、可選範圍、省略持有者與 NC 全名等價等 N1 行為由 #380／#499 承接；本文不是 DSL 語法。
 用語依[術語表](../../terminology.md#四層翻譯)；來源選用依[翻譯契約](translation-contract.md)。
 本契約取代固定整行模板的參數／target 模型，保留整行粒度與必要的來源完整性檢查。
 公開欄序、版本與 reader 拒絕規則由 [#496](https://github.com/gbaian10/sve-kit/issues/496) 定義；
-實作及測試由 [#498](https://github.com/gbaian10/sve-kit/issues/498) 承接，整庫重建由 [#499](https://github.com/gbaian10/sve-kit/issues/499) 承接。
+N0 實作及測試已由 [#498](https://github.com/gbaian10/sve-kit/issues/498) 完成，整庫語義與中文重建由 [#499](https://github.com/gbaian10/sve-kit/issues/499) 承接。
 
 ## 1. 型別、驗證責任與失敗語義
 
 下文物件均為封閉結構：未列欄位、重複鍵、錯型別拒絕；未標 `?` 的欄位必填且不可 null。
 `T?` 表示**必填、可 null**，不是可省略；僅明寫「可省略」才有預設值。空集合使用 `[]`／`{}`。
 `Code` 是非空 ASCII `[a-z][a-z0-9_.-]*`，`ID` 是對應登錄的非空識別，`Hash` 是 64 位小寫 SHA-256。
+`TypeName` 是封閉型別名稱，ASCII `[A-Z][A-Za-z0-9]*`，只接受該 normalizer 版本登錄的名稱。
+它不是 `Code`；兩者不互相轉換，也不自動映射大小寫。
 `UInt` 是 0..9007199254740991 的整數且不接受 Bool，`Ordinal` 是 UInt，`Lang` 沿建置 DB 的語言登錄。
 `Span={start:UInt,end:UInt}` 以 **Unicode code point** 計數，半開區間，要求 start < end；空字串不造零長 span。
 陣列的排序、唯一與非空條件在各欄明定，不能用 JSON 的物件順序代替來源順序。
 
 | 驗證者 | 責任與拒絕時點 |
 | --- | --- |
-| A：authored reader | 讀當前輸入一次，驗版本、封閉欄位、型別、鍵唯一、target 語法、可在輸入閉包判定的引用；壞資料拒絕載入 |
-| B：建置 validator | 從固定來源驗 owner／face、hash、角色、trace、葉值、適用域、完整覆蓋及使用閉包；已知錯配拒絕建置交易，不任選或靜默忽略 |
-| C：DB 邊界 | 寫入及讀回時驗 SQL 的 PK／FK、nullable、enum、Json 的具名型別及跨列一致性；原始 Any 不得流出邊界；FL-027 |
+| A：authored reader | 讀當前輸入一次，驗版本、封閉欄位、型別、鍵唯一、target 語法、可在輸入閉包判定的引用；裁定明示 revision／兩種 level 的封閉形狀；壞資料拒絕載入 |
+| B：建置 validator | 從固定來源驗 owner／face、hash、角色、trace、葉值、適用域、完整覆蓋及使用閉包；裁定原引用、ordinal、已知舊域完整性及未知舊域資格；已知錯配拒絕建置交易，不任選或靜默忽略 |
+| C：DB 邊界 | 寫入及讀回時驗 SQL 的 PK／FK、nullable、enum、Json 的具名型別及跨列一致性；原始 Any 不得流出邊界；裁定沿 SQL PK／FK 與逐列封閉型別；邏輯唯一／互斥及完整用途集合由 #499 接上；不重跑舊 normalizer；FL-027 |
 
 每張表的「失敗／案例」列給出可判定原因；案例 ID 指向[固定案例](four-layer-cases.md)。
 尚未辨識的合法來源用 pending／未匹配清單保存；缺譯用整欄原文退回。
 這兩者可完成建置，但**壞引用、錯來源或無效 target 是錯誤**，不能以 pending 或 low_confidence 放行。
+§9 的引用層級 unknown_legacy_scope 是保存固定歷史裁定原始引用的明示分支。它沒有有效模板／frame FK 的宣告，不構成壞引用可以啟用的例外。其裁定版本、檔案來源、hash、ordinal 與原始引用必須可驗；已宣告的來源／命名空間錯配仍拒絕。只有舊適用域證據不足時可保留，且不得產生 active 目標或進入可執行閉包。這個 nullable 分支只屬於 RulingResolution，不放寬 SourceBinding、Mapping 或 Frame.semantic_variant 的 OccurrenceKey。
+
 NP 沒覆蓋的修飾可以用已寫好的 Literal＋LeafRef 翻譯；必要葉值未解時仍整欄退回，不能把它改成 Literal 躲檢查。
 
 ## 2. authored 入口與替換界線
 
+authored frame 未在本次建置的完整來源欄位被使用時，不使整批建置失敗。
+建置報告列出 frame ID 與 no_fully_verified_source_owner_field；不啟用該 frame／target，受影響欄位照常整欄退回原文。
+壞結構、引用、明示 manual match 的過期來源與無效 target 仍拒絕。
+
 四層翻譯分片採 `format:3,kind:translation_shard,records:[Record]`。
 三欄皆必填且不可 null：format 是固定整數 3、kind 是固定字串 translation_shard、records 是可空陣列；
 A 驗封閉形狀與全入口唯一鍵，缺欄／錯版／重複鍵拒絕（FL-009／FL-010）。
-這是待切換的新格式；#498 必須同批更換 reader、資料與建置端，不建立 format 2／3 永久雙軌。
+正式翻譯入口只讀此 format 3；reader、authored 資料與建置端同步切換，不建立 format 2／3 永久雙軌。
 parameter-rules 的 format 2 與風味的獨立封套不隨之升版。
 沿[翻譯契約 §2](translation-contract.md#2-當前資料入口)的安全路徑、分片大小與排序規則；不新增 includes/checksum index。
 
@@ -105,6 +114,9 @@ projection 只有 `projection_kind` 與 `discriminator` 入 frame hash；`scopes
 未知來源語義轉為已確認也須按 semantic_variant 重鍵；只新增已知語義的 adapter 支援則不必。
 DSL 本體／body version 不入 frame hash。
 變體 key 的含義改變須改分類器版本，不能原 key 偷換語義。
+normalizer_version 是全庫單一版本，同時釘住分段、Unicode／canonical、葉角色、域、單位、alias、省略及 resolved 規則。
+不按規則族另釘版本；封版後改任一項語義均須新版本及全庫重鍵。N0 的 reminder／token_header 保留 raw Unicode，
+不套 body 的 NFKC；所有角色共用同一來源 units／trace，分類器不能重新用另一套正規化索取位置。
 葉的實值、來源卡片／頁面（resolved 時）、譯文、form、NP 分組、加粗與 note 不入 frame hash。
 新增語義槽、改合法域／canonical pattern／正規化規則須新 ID；只開關 NP、修中文形式或改選詞不換 ID。
 同 hash 必比完整 payload，碰撞即錯誤，不截短或覆蓋已有 frame。
@@ -114,15 +126,17 @@ DSL 本體／body version 不入 frame hash。
 | LeafSlot 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
 | name | Code；同 frame 唯一 | A/C；重名或未知引用；FL-005 |
-| type | 下表封閉型別名稱 | A/B/C；不可泛用 term 吞所有角色；FL-004 |
+| type | TypeName；下表封閉型別名稱 | A/B/C；不可泛用 term 吞所有角色；FL-004 |
 | role | Code；type 對應的具名語義角色 | A/B；同字不同角色不合併；FL-004／FL-021 |
 | domain | `{values:[Scalar],min:UInt?,max:UInt?}` | A/B/C；引用值域或數值界限不符；FL-004 |
 | required | Bool；true 必須綁值且被 target 使用 | A/B；遺失、Literal 偽裝引用；FL-005 |
 | occurrences | 排序且不重疊的 canonical_source Span 陣列；一般非空，只有具名來源規則推導的省略槽可空 | A/B；越界、空槽沒有推導規則或角色不符；FL-008／FL-020 |
 
-Scalar 只可為 UInt、Bool、Code 或下列具名引用。domain.values 是排序唯一的合法值集合；
+Scalar 只可為 UInt、Bool、Code 或下列具名引用。domain.values 是排序唯一的來源合法值描述；
 數值型別用空 values 與非 null min/max，其他型別 min/max=null、values 非空；排序依元素的 canonical JSON bytes。
-複合型別的 values 列出具名域代碼，引用該 normalizer 版本的封閉型別規則，不能執行任意 predicate。
+Concept、CardName、CardKind 及複合型別可用具名域代碼，引用該 normalizer 版本的封閉 descriptor，不能執行任意 predicate。
+N0 引用型別每槽恰用一個代碼，不將本次 catalog 的整個類別展開到 Frame；代碼固定引用種類、category／vocabulary kind、
+有效性及來源構造限制。catalog 新增合格成員不改域含義；實際值仍須通過本次 FK、category、採用狀態及來源限制檢查。
 合法域是來源限制，不能從 target 推導。可省略的槽 required=false；省略時 values 不含該 key，不用 null 造值。
 
 | type／值 | role／合法域與語義界線 | 案例 |
@@ -152,6 +166,69 @@ B 驗對照存在、型別吻合並沿同一選詞產生位置，不能用 Code 
 數值本身及純文法片段無概念名稱時不造 TermReference。
 ZoneKind 本身不是完整目的 ZoneRef；後者還要持有者。union 的分支限定不能上提成全域 filter；
 異種聯集須具名 sum type，group 的各組數量不能壓成單一 union。
+
+### 4.1 N0 產生登錄
+
+N0 使用全庫版本 `four-layer-jp-v1`。一般契約保留未來型別，N0 authored／來源分類只接受下列封閉組合，
+不產 Player、ZoneSet、Phase、Stat、TokenStatus、獨立 QuantityExpr、跨 frame port 或 omitted occurrence。
+所有 N0 槽 required=true、有 explicit 位置。未知整行可保留合法葉及 occurrence-scoped pending；必要葉未解則不能建立 active binding。
+
+| type | role | 域與必要來源構造 |
+| --- | --- | --- |
+| Nat | count | 已辨識抽牌、棄牌、移動等動作的明示張數；0..安全整數上限。 |
+| Nat | damage_amount、recovery_amount | 明示傷害／回復量；0..上限；回復的「回」不是次數。 |
+| Nat | counter_amount | 具名指示物放置／移除的 exact 幅度；0..上限。 |
+| Nat | repeat_count、duration_count | 已辨識執行次數／回合長度；0..上限。 |
+| Nat | resource_amount | 明示資源量或付款量；0..上限；種類與付款／恢復時點留 canonical。 |
+| Nat | cost_value、stat_value | 明示費用／攻擊／體力值及已辨識 header 欄位；0..上限。 |
+| Nat | threshold | 主體、比較子、原始／目前值明確的費用、資源、指示物、種類數或生命門檻；0..上限。 |
+| Nat | arithmetic_multiplier、group_divisor | 已辨識倍數／每組基數；1..上限，不執行整個算式。 |
+| Nat | stat_delta_magnitude、cost_delta_magnitude、resource_delta_magnitude、damage_delta_magnitude、counter_delta_magnitude | 明示正負號構造的非負幅度；0..上限；sign、種類及讀值時點留 canonical。 |
+| Ordinal | choice_index、card_index、repeat_index、turn_index、deck_index | 唯一完整引介的選項／卡片／次數／回合／牌堆序號；1..上限；跨行選項只保留經完整 owner／欄位／能力作用域守衛的序號，不產 ChoiceContext port。 |
+| QuantitySpec | selection_count、choice_mode_count、counter_amount、repeat_count | `quantity.<role>.constant.v1`；mode=exact/up_to，expr=constant；0..上限，由完整構造另收窄。 |
+| QuantitySpec | existence_count | `quantity.existence_count.constant.v1`；mode=exact/up_to/at_least，expr=constant；0..上限，僅已辨識物件存在構造。 |
+| Concept | keyword、ability、rule_term、trait | 原本已抽出的具名引用；分別用 `concept.<category>.v1`，category 必一致。 |
+| Concept | class_filter、declared_class | 已明確的 class filter／header 欄位；`vocabulary.class.v1`。 |
+| Concept | declared_trait | header 明示 trait；`concept.trait.v1`。 |
+| CardName | declared_name、name_filter、created_name、name_reference | 完整 name／header、已確定 filter／生成，或受保護整名引用；`card_name.any.v1`。 |
+| CardKind | counted_kind、filter_kind、declared_kind | 原參數已辨識的計數物、filter 或 header；`card_kind.any.v1`。 |
+| LiteralLayout | layout | `layout.whitespace.v1`，只接受 exact、非空的來源空白。 |
+
+| 引用域 | 本次 catalog 限制 |
+| --- | --- |
+| card_name.any.v1 | card_name 引用，term_id 有效且 category=card_name。 |
+| concept.keyword.v1、concept.ability.v1、concept.rule_term.v1、concept.trait.v1 | glossary 引用，分別限制相同 category。 |
+| vocabulary.class.v1 | vocabulary 引用，複合鍵 kind=class，code 已採用且有效。 |
+| card_kind.any.v1 | vocabulary 引用，複合鍵 kind=type，code 已採用且有效。 |
+
+`any` 僅用於上表列出的完整名稱／header 宣告、受保護整名 operand、已確定名稱 filter／生成，
+以及無有限種類限制的計數物／filter／header 欄位構造；不授予整行來源等價。
+若來源只容兩種卡種或其他有限集合，須另登錄該構造的有限域，不能用 any 放寬，亦不能把目前觀測成員當成來源上限。
+引用實值保留在 binding；新增無關合格概念不改 frame、binding 或 cv。
+區域、階段、未參數化能力全名／alias、玩家及 token 身分仍是 canonical 固定詞；不能新增 lexical 葉讓 target 反找位置。
+原 braced 術語／圖示、header 欄位與整名參數仍須保留，不以「不新增 lexical 葉」刪除既有必要引用。
+
+### 4.2 N0 整段語義構造登錄
+
+N0 的 resolved key、來源 role、投影及能力作用域由 `contracts/n0.py` 封閉登錄。
+未知 key、role／投影錯配或額外作用域均拒絕；未知完整語法維持 occurrence-scoped pending。
+
+| key | role | projection_kind | 獨立 ability scope 數 |
+| --- | --- | --- | ---: |
+| metadata.name.v1、metadata.label.v1、metadata.layout.v1 | 各自的 name／label／layout | none | 0 |
+| card_keywords.v1 | body | card_field | 0 |
+| evolve_entry.v1、feed_entry.v1、ride_entry.v1 | body | ability_body | 1 |
+| evolve_feed_entries.v1、evolve_ride_entries.v1 | body | ability_body | 2 |
+| token_header.v1 | token_header | card_field | 0 |
+| pure_reminder.v1 | reminder | none | 0 |
+
+入口只分類自身完整動作、費用及能力頭；本版不引用轉換後的面，也不產 target-face port，
+因此不要求 paired face 關係。來源自身仍須對上精確日文版次、從者種類與 normal phase；
+不以 `official_unspecified`、卡號或名字推斷面關係。
+組合入口的 scope 依來源順序命名 ability_0、ability_1，parent=null、kind=ability。
+pure_reminder 必須有完整具名提示文法及同欄的精確 body anchor；token_header 必須位於 section 起點，
+全部明示名稱、class、trait、kind 與數值均須唯一解析。
+此登錄描述可產生的有限構造，不表示已完成全庫或正式 workflow 的來源驗收。
 
 ## 5. target、form 與部分 NP
 
@@ -186,9 +263,15 @@ NP 不另占來源 span；它的葉各自有來源位置。NP 移除或新增只
 | --- | --- | --- |
 | id | Code；具名形式，如 zone.locative、zone.allative、zone.ablative、zone.add_to_hand、zone.return_to_hand、keyword.display、quantity.classifier | A/B/C；未知形式拒絕；FL-012 |
 | lang | Lang；和 target 相同 | A/B/C；錯語言；FL-012 |
-| signature | 非空 `{name:Code,type:Code,role:Code}` 陣列，name 唯一，引用 §4 型別／角色 | A/B；參數不合；FL-004／FL-012 |
+| signature | 非空 `{name:Code,type:TypeName,role:Code}` 陣列，name 唯一，type 引用 §4 葉型別，role 引用其角色 | A/B；參數不合；FL-004／FL-012 |
 | rule | Code；引用釘版 renderer 的有限規則，不接受程式 | A/B/C；未知或超域；FL-012 |
-| cases | 非空 `{case_code:[FormPart]}` mapping；case_code 限 rule 登錄的分支，FormPart 是 `{kind:Literal,text:Text}`／`{kind:Label,arg:Code}`，每分支有序 | A/B；分支缺失／未知、Label 不引用 signature 拒絕；基礎名稱來自當前選詞；FL-012／FL-015 |
+| cases | 非空 `{case_code:[FormPart]}` mapping；case_code 限 rule 登錄的分支，FormPart 是 `{kind:Literal,text:Text}`／`{kind:Label,arg:Code}`／`{kind:QuantityValue,arg:Code}`，每分支有序 | A/B；分支缺失／未知、arg 不引用 signature 拒絕；基礎名稱來自當前選詞；FL-012／FL-015 |
+
+QuantityValue 的 arg 必指本形式簽章中的 QuantitySpec，僅在 `quantity.constant_value.v1` 使用，輸入 expr 必為 constant。
+它只輸出 UInt 的十進位字串，不輸出 mode、單位或概念位置；all／any、bound／expression 均不適用。
+N0 的 `quantity.<role>.value` form 只有對應 role 的單一 QuantitySpec 參數、default 分支及一個 QuantityValue。
+arg 沿同一來源葉驗證，計入 required 引用閉包、render 依賴及來源／target occurrence；mode 仍由來源構造驗證。
+機械轉換保留原 target 的固定數量修飾，只替換原數字 placeholder，不從中文反推 mode、單位、值或來源位置。
 
 rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章合法域，不能把選詞或語義值複製到規則內。
 例如 zone.locative 的 hand／battlefield 分支各組合 Label 與「中」／「上」；quantity.classifier 依計數語境選中文量詞分支。
@@ -283,7 +366,7 @@ NFKC 的前後字元由 raw_span 與 canonical_spans 取出，允許多對多，
 | imports | Port 陣列，依 name 排序唯一 | A/B；錯型別、未知先行詞；FL-022 |
 | exports | Port 陣列，依 name 排序唯一 | A/B；結果越 scope；FL-022 |
 
-Port 恰有 `{name:Code,type:Code,source_role:Code,scope:Code}`，皆必填；type 是具名語義型別，
+Port 恰有 `{name:Code,type:TypeName,source_role:Code,scope:Code}`，皆必填；type 引用該分類規則版本的封閉接口型別登錄，
 例如 ObjectSet、PlayerRef、ReceiptId、CapturedValue、QuantityExpr，不允許 Any／任意 it 字串。
 source_role 限該分類規則明列的 selected_objects/action_result/paid_result/selection_snapshot/count_value 等；
 scope 指同 frame 宣告的 ability／branch／sequence 作用域。A 驗簽章，B 驗實際來源上下文與支配／可見範圍（FL-022）。
@@ -311,7 +394,7 @@ scope 指同 frame 宣告的 ability／branch／sequence 作用域。A 驗簽章
 
 ## 8. 建置 DB、render projection 與依賴
 
-以下是[build-db §9.3](../build/build-db.md#93-四層資料的目標契約)的**目標邏輯列**，不是宣稱既有 DDL 已有這些欄／表。
+以下是[build-db §9.3](../build/build-db.md#93-四層資料的目標契約)的邏輯列契約；N0 已接入正式 DDL 與建置邊界，實際儲存欄位見該文件 §9.1。
 所有新 Json 欄均使用本文件具名型別，C 逐層驗證後才能交給其他層。
 現有 authored_source_id／record_key／origin／low_confidence 與真實 source_id 的型別及 nullable 保留。
 
@@ -378,12 +461,45 @@ interface_key 及 scopes/imports/exports 不入 render 依賴，相關引用仍�
 
 ## 9. 舊模板重鍵與裁定引用
 
-舊 T/C ID 與新 frame 的關係是多對多；不能依 hash 前綴、相同中文字或最大覆蓋率選一個新 ID。
+舊 T/C ID 與新 frame 的關係是多對多；不能依 hash 前綴、相同中文字、
+`supersedes_id` 線索或最大覆蓋率選一個新 ID。
 映射只在一次重建及當前裁定檢查使用，舊格式仍留 Git；不建長期相容 reader。
+已知舊域的資料接口由 #499 補上；正式 reader 不因保留舊引用而恢復舊翻譯格式。
+
+### 9.1 裁定版本與引用來源
+
+裁定文件採 `format:2,kind:ruling`，原本文不另包 data；`id` 與 `revision` 必填。
+revision 是 1..9007199254740991 的整數，不接受 Bool；format 不是裁定版本。
+既有未編版裁定在切換時明寫 `revision:1`，命名當時現行內容，
+不把先前 Git 歷史追認為同一版，也不提升裁定強度或審查資格。
+正式 reader 不接受舊封套，不為缺失 revision 補值，不接受 version 別名。
+後續裁定的已解析內容（含 applies_to 順序）改變須明示遞增 revision；
+只有排版或註解改變時，可保持 revision，但建置仍須重新驗實際來源 hash。
+同一 `(id,revision)` 的不同已解析內容不得混入同一輸入閉包。
+
+`ruling_ref={id:ID,revision:UInt,reference_ordinal:UInt}` 指該版裁定的
+applies_to 陣列中一項；reference_ordinal 從零起算，不能排序後重編或先按 ID 去重。
+相同字串出現在不同 ordinal 仍是不同引用。
+`ruling_source={path:Text,sha256:Hash}` 指本次固定 authored 輸入中的完整裁定檔：
+path 為 repo 相對 POSIX 路徑，限 authored/rules/rulings 下的裁定 YAML，
+不得有絕對路徑、空路徑節、`.` 或 `..`；sha256 為 exact 檔案 bytes 的 hash。
+建置既有輸入紀錄另釘 authored 修訂；同一 `(id,revision)` 的所有引用使用同一來源檔。
+這是本次來源追溯資料，不是新增 authored index、逐引用核可收據或永久帳本。
+
+A 讀取裁定一次並驗封套、型別及 ID 唯一；B 從現行裁定檔保留 id／revision、
+引用 ordinal、原始字串與完整檔案 hash；C 沿既有型別邊界檢查 DB 列。
+檔案缺失、hash 錯、ordinal 越界、引用字串被替換、版號不存在均為錯誤，不能改成 pending。
+
+本節 Mapping／RulingResolution 處理舊模板引用；IR 元素引用不轉成 template_id 或 frame。
+所有 applies_to 項均須進本次引用對帳；IR 引用另保存 ruling_ref、ruling_source 與原始 ID，
+標明非模板保留，沿原裁定／IR 契約驗證。未通過其既有可執行檢查者不得進執行閉包，
+本節的保留紀錄不授予其有效性，也不算模板重鍵 resolved。
+
+### 9.2 已知舊域的 Mapping
 
 | Mapping 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
-| legacy_namespace | Code；明示舊 ID recipe 與 normalizer 版本 | A/B；不同版本 T ID 混用；FL-024 |
+| legacy_namespace | Code；明示且已驗的舊 ID recipe 與 normalizer 版本 | A/B；不同版本 T ID 混用；FL-024 |
 | legacy_template_id | ID；該命名空間的實際舊定義 | B；不存在；FL-024 |
 | occurrence | OccurrenceKey；精確舊適用來源 | B；不屬舊模板範圍；FL-025 |
 | frame_id | FrameID FK | B/C；目標不存在；FL-026 |
@@ -391,23 +507,87 @@ interface_key 及 scopes/imports/exports 不入 render 依賴，相關引用仍�
 | scope | `{role:Code,domain:Code}`；具名來源角色及舊適用域的交集 | B；擴大適用域；FL-025 |
 
 映射邏輯鍵是 `(legacy_namespace,legacy_template_id,occurrence,frame_id,scope)`；重複邊拒絕。
-每個裁定舊引用 occurrence 必有一筆 `RulingResolution`，包括未能得到候選者；不能靠刪引用清空失敗清單。
-若舊 applies_to 指模板所有成員，先在固定舊輸入展開其**明示**適用域；不知道舊域時保留 pending，不能猜成新框架所有用途。
+Mapping 各欄皆不可 null。未知舊域不建立 Mapping，不以 placeholder 冒充舊定義。
+
+### 9.3 引用層級及用途層級的 RulingResolution
 
 | RulingResolution 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
-| ruling_ref | `{id:ID,revision:UInt,reference_ordinal:UInt}`；指實際裁定版本及其中一個舊引用，revision > 0 | A/B；漏引用、重複或不存在；FL-026 |
-| legacy | `{namespace:Code,template_id:ID,occurrence:OccurrenceKey}` | A/B；舊引用錯誤／範圍未知；FL-024 |
+| ruling_ref | §9.1 的物件；指實際裁定版本及其中一個模板引用 | A/B/C；漏引用、重複或不存在；FL-026 |
+| ruling_source | §9.1 的物件；精確固定檔案 | A/B/C；錯檔、hash 或同版來源矛盾；FL-026／FL-027 |
+| level | reference/occurrence | A/B/C；未知值或層級混用；FL-025／FL-026 |
+| legacy | `{namespace:Code?,template_id:Text,occurrence:OccurrenceKey?}`；全部必填 | A/B/C；條件見下文；FL-024／FL-025 |
 | status | resolved/pending | A/B/C；第三種狀態拒絕；FL-026 |
-| target | `{frame_id:FrameID,semantic_variant,scope,occurrence}` 或 null | B/C；resolved 必非 null，且唯一精確映射、不擴域；FL-024／FL-025 |
-| candidates | 排序唯一的 target 形狀陣列；每一候選 FK／來源亦須可驗 | B/C；pending 可空但不得假造有效目標；FL-026 |
-| reason | Code? | A/B；resolved=null 且 candidates=[]；pending 必有原因且 target=null；FL-026 |
+| target | `{frame_id:FrameID,semantic_variant,scope,occurrence:OccurrenceKey}` 或 null | B/C；resolved 須有唯一精確映射、不擴域；FL-024／FL-025 |
+| candidates | 排序唯一的 target 形狀陣列；排序按 canonical JSON bytes；每一候選 FK／來源／域亦須可驗 | B/C；候選不得是假目標；FL-026 |
+| reason | Code?；封閉原因集合見下文 | A/B/C；狀態矛盾；FL-026 |
 
-pending 原因至少包含 no_candidate、ambiguous_variant、unknown_legacy_scope、source_changed、unsupported_relation。
-resolved 是唯一且不擴域的**用途級**引用，不意味裁定適用新 frame 的所有卡；多個舊用途可各自 resolved 到同一新 frame。
-同一舊模板拆成數個 frame 時也按 occurrence 各自判定，未唯一者留 pending，不作 active applies_to。
-裁定正文、版本歷史及語義決定不因映射成功重寫；既有 reviewed／verified 不自動繼承。
-active 懸空引用必為零；pending 不進可執行閉包，仍留可讀裁定與原因。正式 authored 裁定換鍵由 #499 承接，本文不修改其檔案。
+legacy.template_id 是該裁定原始引用的非空文字，必須逐字相同；
+此處特意使用 Text 保存可能失去定義的歷史引用，不宣稱它已通過 ID 登錄 FK。
+進入 occurrence 分支與 Mapping 時，仍須驗它是該舊命名空間的實際定義。
+
+本次對每個模板引用恰取下列一種表示，兩者不能混用：
+
+1. **用途層級**：已從固定舊輸入證明命名空間、實際定義及完整明示適用域。
+   level=occurrence；namespace 與 occurrence 均非 null。
+   每個舊 occurrence 恰有一筆 RulingResolution，包含沒有新候選的用途。
+   唯一鍵為 `(ruling_ref.id,ruling_ref.revision,ruling_ref.reference_ordinal,level,legacy.occurrence)`。
+   全部列的 occurrence 集合必須等於原引用的完整明示域，不漏列、不加列、不靠總列數充當集合相等。
+   明示域空集合是無有效適用對象的錯引用，拒絕建置；不能輸出零列當完成。
+2. **引用層級**：固定裁定確有此歷史模板引用，但舊命名空間、實際定義或完整適用域無法確立。
+   level=reference，occurrence=null，status=pending，reason=unknown_legacy_scope，
+   target=null，candidates=[]；上述欄位都必須明寫。
+   唯一鍵為 `(ruling_ref.id,ruling_ref.revision,ruling_ref.reference_ordinal,level)`。
+   namespace 已有可驗 recipe／normalizer 證據時填其 Code，否則必為 null；
+   不用 `unknown` 字串、T10 長度、現行 normalizer 或任意版本名替代未知。
+   此列只聲明歷史引用存在，不宣稱其模板、適用域或目標已驗證有效。
+
+namespace=null 僅准於引用層級；occurrence=null 當且僅當引用層級。
+同一 ruling_ref 不得同時有引用層級列與用途層級列，即使只找到部分舊成員，
+也先保留整個引用的 unknown_legacy_scope，不用已知子集合冒充完整域。
+引用層級不得保存 target 形狀候選；supersedes 等未驗線索可列在本次診斷報告，
+不放進 candidates，也不由消費端自動升為 active。
+
+用途層級的 resolved 要求 target 非 null、candidates=[]、reason=null；
+target 的 frame、semantic_variant、scope 與 occurrence 必與一筆已驗 Mapping 一致。
+用途層級的 pending 要求 target=null、reason 非 null；原因限
+no_candidate、ambiguous_variant、source_changed、unsupported_relation。
+no_candidate 的 candidates 必空；ambiguous_variant 至少有兩個不同且已驗的候選；
+其他原因的候選可空，但若列出仍必須逐筆通過全部來源、FK 及適用域檢查。
+unknown_legacy_scope 只用在引用層級。source_changed 表示舊 occurrence 已驗、
+新來源無法安全承接，不表示可忽略本次提供來源的 hash／owner 錯配。
+
+本次 #498 的正式建置直接讀現行 format 2 裁定檔，不要求 repo 外的一次性遷移輸入、
+永久 authored allowlist 或 runtime Git 查詢。舊 `T` 加十位小寫十六進位 hash 引用
+目前沒有已知舊域，直接按原 applies_to ordinal 產生引用層級 pending。
+非模板 IR 引用原樣保留並獨立列帳；不符合支援形狀的引用拒絕建置。
+裁定來源記錄保留本次檔案 path 與實際 bytes hash。
+
+已知舊域的用途層級解析、完整用途集合與候選來源檢查由 #499 實作；
+以上用途層級形狀是後續契約，#498 不產生用途層級 resolved 或 pending。
+
+### 9.4 完整性與執行邊界
+
+B 逐筆保留裁定原始 applies_to 清單與 ordinal，重複文字的引用仍各有一筆記錄。
+已知域的完整用途集合對帳由 #499 承接。
+對帳同時列出模板引用、非模板引用、引用層級 pending、用途層級 resolved／pending；
+不把引用數和用途列數相加，不以「輸出 0 個裁定」宣稱驗收完成。
+N0 的 resolution.build 依現行裁定的原始 ordinal 產生引用列；DB 檢查 SQL PK／FK 與逐列封閉型別。
+裁定邏輯鍵唯一／互斥、完整用途集合及用途候選來源檢查由 #499 接上；本次不宣稱 DB 已驗證這些集合條件（FL-027）。
+
+active 裁定邊只能由已驗的用途層級 resolved 產生，且其 scope 僅限該用途。
+多個舊用途可 resolved 到同一新 frame；任何一筆都不代表適用新 frame 的所有卡。
+active 懸空引用必為零；所有 pending 與其候選不得進可執行閉包。
+這不自動授予 resolved 邊所依賴 DSL 的 reviewed／verified、freshness 或實跑資格。
+裁定正文仍可查讀，pending 原因仍可見；無用途級資格時不出適用該卡的肯定提示。
+有下游可執行資料要求 pending 引用時，拒絕該執行閉包，不把 pending 當 no-op。
+
+本次 #498 同批完成裁定封套／revision 的機械初始化、reader／validator／DB 邊界及引用層級完整對帳，
+用途層級對帳由 #499 承接。
+不改裁定正文、證據、日期、applies_to 內容與順序或 supersedes。
+已知舊域的用途解析、正式 authored 適用引用換鍵、補齊歷史語義證據、裁定內容與用途審查由 #499 承接；
+換鍵或內容變更須明示續版，舊引用與版本歷史仍可追溯。
+映射成功不自動繼承既有 reviewed／verified，也不重寫過去裁定決定。
 
 ## 10. 舊責任對照與交付接口
 
@@ -418,8 +598,8 @@ active 懸空引用必為零；pending 不進可執行閉包，仍留可讀裁�
 | build-db §5／translation-contract §7.1 區域差異 | 保留 aligned／freshness／divergence 的 DSL、機制與官方 counterpart 資格 | FL-023；不因 JP 譯文顯示授予 aligned |
 | 舊六欄 payload、uint/literal/reference、字串 text | §3 語義身分、§4 葉型別、§5 target；NP/form 不入語義 hash | FL-001～FL-005；#498 |
 | translation_term 反查集合 | §6 逐 occurrence ＋§8 annotation；文字去重與語義位置分離 | FL-008／FL-013～FL-015；#496 承載 |
-| 舊 T ID applies_to | §9 多對多映射與用途級 resolved/pending，禁止假有效引用 | FL-024～FL-026；#498／#499 |
+| 舊 T ID applies_to | §9 已知域用途級 resolved／pending，未知域引用級 pending，非模板引用獨立保留對帳，禁止假有效引用 | FL-024～FL-026；#498／#499 |
 
-在 #496 完成前，舊公開 wire 文件只描述既有 reader 能讀的格式，不得再作「divergence 禁止 JP 繁中」的政策依據。
+公開 3.0 的 producer／Python 與 TS reader 已同步接線；舊公開 wire 文件不得再作「divergence 禁止 JP 繁中」的政策依據。
 新版 producer／reader 必須同步切換 basis 與 annotation，不能用舊 shared_jp_unchecked 冒充新政策。
 固定案例是規格，並不代表 normalizer、renderer、全庫譯文、DSL adapter 或 runtime 已通過驗收。

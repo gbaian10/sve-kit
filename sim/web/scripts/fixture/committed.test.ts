@@ -9,9 +9,9 @@ import {
   objectValue,
   parseStrict,
   stringValue,
-} from "../../src/data/format-v1/json"
-import { readSnapshot, readTextAll } from "../../src/data/format-v1/reader"
-import { digest } from "../../src/data/format-v1/sha256"
+} from "../../src/data/format-v3/json"
+import { readSnapshot, readTextAll } from "../../src/data/format-v3/reader"
+import { digest } from "../../src/data/format-v3/sha256"
 import { CARDS } from "./cards"
 
 const readCommitted = (relative: string) =>
@@ -22,7 +22,7 @@ it("reads the committed version index, manifest and payloads with the current re
   const index = objectValue(parseStrict(await readCommitted("snapshots/versions/index.json")))
   expect(index["index_format"]).toBe(2)
   const entry = objectValue(index["current"])
-  expect(entry["format_version"]).toBe("2.0.0")
+  expect(entry["format_version"]).toBe("3.0.0")
   const manifestBytes = await readCommitted(stringValue(entry["manifest_path"]))
   expect(digest(manifestBytes)).toBe(entry["manifest_sha256"])
   const manifest = objectValue(parseStrict(manifestBytes))

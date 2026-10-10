@@ -1,6 +1,6 @@
 # preview 建置與前端接線
 
-preview 僅供本機，匯出器預設產出 2.0。圖片投影依 [圖片發布契約](../images/image-variants.md#20-圖片-url版本與新鮮度)
+preview 僅供本機，匯出器預設產出 3.0.0，N0 已接線。圖片投影依 [圖片發布契約](../images/image-variants.md#20-圖片-url版本與新鮮度)
 與 [傳輸 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)：從建置 hash path
 產生固定 ID key，卡包 media 提供版本／尺寸；圖片可受控覆寫，JSON 不可變。
 preview 的圖片版本狀態與快取放在公開根之外。`sve-publish upload` 直接上傳這個公開根，

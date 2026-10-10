@@ -7,11 +7,8 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.core.json import canonical, object_value
-from sve_carddb.domains.translations.glossary.records import (
-    ChoiceRecord,
-    Shard,
-    TermRecord,
-)
+from sve_carddb.domains.translations.four_layer_authored import Shard
+from sve_carddb.domains.translations.glossary.records import ChoiceRecord, TermRecord
 from sve_carddb.domains.translations.glossary.validate import semantic_hash
 from sve_carddb.domains.translations.inputs import load_glossary
 from sve_carddb.domains.translations.models import AuthoredValue
@@ -27,7 +24,7 @@ def _write(root: Path, records: list[dict[str, JsonValue]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     ordered = records
     raw: dict[str, JsonValue] = {
-        "format": 2,
+        "format": 3,
         "kind": "translation_shard",
         "records": list[JsonValue](ordered),
     }
@@ -98,13 +95,13 @@ def test_withdrawal_is_not_replaced_by_an_old_choice(tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     ("change", "message"),
     [
-        ("duplicate", "Duplicate current translation selection key"),
+        ("duplicate", "Duplicate four-layer authored selection key"),
         ("absent_term", "Glossary choice references an absent concept"),
         (
             "wrong_key",
-            "Invalid translation authored fields at records.1.glossary_choice.record_key",
+            "Invalid four-layer authored shard",
         ),
-        ("official", "Official choice lacks same-concept evidence"),
+        ("official", "Official glossary choice requires same-concept evidence"),
     ],
 )
 def test_current_refusals(tmp_path: Path, change: str, message: str) -> None:
@@ -116,7 +113,7 @@ def test_current_refusals(tmp_path: Path, change: str, message: str) -> None:
         other.write_bytes(
             canonical(
                 {
-                    "format": 2,
+                    "format": 3,
                     "kind": "translation_shard",
                     "records": [records[1]],
                 }
@@ -130,13 +127,19 @@ def test_current_refusals(tmp_path: Path, change: str, message: str) -> None:
         else:
             records[1]["origin"] = "official"
         _write(tmp_path, records)
-    with pytest.raises(ValueError, match="^" + message + "$"):
+    with pytest.raises(ValueError, match=message) as raised:
         load_glossary(tmp_path)
+    shard_number = "002" if change == "duplicate" else "001"
+    assert f"authored/translations/glossary/shared/{shard_number}.yaml" in str(
+        raised.value
+    )
+    if change == "wrong_key":
+        assert "records.1.glossary_choice.record_key" in str(raised.value)
 
 
 def test_private_approval_fields_are_not_current_data() -> None:
     raw: dict[str, JsonValue] = {
-        "format": 2,
+        "format": 3,
         "kind": "translation_shard",
         "records": list[JsonValue](_records()),
     }

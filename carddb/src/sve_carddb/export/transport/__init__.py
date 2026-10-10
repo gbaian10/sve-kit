@@ -18,6 +18,7 @@ from sve_carddb.contracts.snapshot import (
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
 from sve_carddb.export.project.source import json_list
 from sve_carddb.export.reader import read_snapshot
+from sve_carddb.export.semantics import row_key
 from sve_carddb.export.transport.compression import Blob, Brotli, compress, recipe
 from sve_carddb.export.transport.layout import Group, Layout, Ownership, references
 from sve_carddb.export.transport.wire import container, encode
@@ -66,15 +67,8 @@ class Snapshot:
             raise ValueError("Clean exports differ in payload or compression bytes")
 
 
-def _key(row: Record, fields: list[str]) -> tuple[tuple[int, int | str], ...]:
-    return tuple(
-        (0, 0)
-        if row[field] is None
-        else (1, string(row[field]))
-        if isinstance(row[field], str)
-        else (2, integer(row[field]))
-        for field in fields
-    )
+def _key(row: Record, fields: list[str]) -> tuple[tuple[int, int | str | bytes], ...]:
+    return tuple(row_key(row[field]) for field in fields)
 
 
 def _ordered(table: str, rows: list[Record]) -> list[Record]:
@@ -93,7 +87,13 @@ def _partition(layout: Layout) -> dict[Group, dict[str, list[Record]]]:
         definition("Container", layout.profile.version)["x-fragments"]
     )
     for table, rows in layout.view.items():
-        if table in {"text_unit", "translation"}:
+        if table in {
+            "text_unit",
+            "translation",
+            "field_annotation",
+            "annotation_set",
+            "annotation_concept",
+        }:
             continue
         for row in _ordered(table, rows):
             part = (
@@ -109,10 +109,7 @@ def _partition(layout: Layout) -> dict[Group, dict[str, list[Record]]]:
                 texts, translations = references(layout.record(table, row, part, 0))
                 text_ids |= texts
                 translation_ids |= translations
-    for row in layout.view["translation"]:
-        if row["id"] in translation_ids:
-            texts, _ = references(row)
-            text_ids |= texts
+    _annotation_partition(layout, result, text_ids, translation_ids)
     for table, selected in (("text_unit", text_ids), ("translation", translation_ids)):
         for row in _ordered(table, layout.view[table]):
             part = "bootstrap" if row["id"] in selected else "detail"
@@ -120,6 +117,39 @@ def _partition(layout: Layout) -> dict[Group, dict[str, list[Record]]]:
                 table, []
             ).append(row)
     return result
+
+
+def _annotation_partition(
+    layout: Layout,
+    result: dict[Group, dict[str, list[Record]]],
+    text_ids: set[str],
+    translation_ids: set[str],
+) -> None:
+    annotation_ids: set[str] = set()
+    for row in _ordered("field_annotation", layout.view["field_annotation"]):
+        part = layout.field_partition(row)
+        group = layout.group("field_annotation", row, part)
+        result.setdefault(group, {}).setdefault("field_annotation", []).append(row)
+        if part == "bootstrap":
+            annotation_ids.add(string(row["annotation_set_id"]))
+    for row in layout.view["translation"]:
+        if row["id"] in translation_ids:
+            texts, _ = references(row)
+            text_ids |= texts
+            if row["annotation_set_id"] is not None:
+                annotation_ids.add(string(row["annotation_set_id"]))
+    concept_ids: set[str] = set()
+    for row in _ordered("annotation_set", layout.view["annotation_set"]):
+        part = "bootstrap" if row["id"] in annotation_ids else "detail"
+        group = layout.group("annotation_set", row, part)
+        result.setdefault(group, {}).setdefault("annotation_set", []).append(row)
+        if part == "bootstrap":
+            text_ids.add(string(row["text_unit_id"]))
+            concept_ids |= _concept_references(row)
+    for row in _ordered("annotation_concept", layout.view["annotation_concept"]):
+        part = "bootstrap" if row["id"] in concept_ids else "detail"
+        group = layout.group("annotation_concept", row, part)
+        result.setdefault(group, {}).setdefault("annotation_concept", []).append(row)
 
 
 def _reference(file: Record) -> Record:
@@ -399,4 +429,19 @@ def export_snapshot(
     validate("Manifest", manifest, format_version)
     result = Snapshot(manifest, files.payloads, union, recipe(brotli))
     result.verify(projection)
+    return result
+
+
+def _concept_references(row: Record) -> set[str]:
+    result: set[str] = set()
+    for raw in array(row["occurrences"]):
+        reference = object_value(object_value(raw)["reference"])
+        if reference["kind"] != "vocabulary":
+            result.add(
+                string(
+                    reference["term_id"]
+                    if reference["kind"] == "card_name"
+                    else reference["key"]
+                )
+            )
     return result

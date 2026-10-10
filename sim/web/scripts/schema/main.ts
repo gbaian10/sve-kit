@@ -9,7 +9,7 @@ const webRoot = path.resolve(import.meta.dirname, "../..")
 const schemaDir = path.resolve(webRoot, "../../carddb/src/sve_carddb/contracts/schema")
 const output = path.join(webRoot, "node_modules/.cache/sve-schema")
 const roots: Record<string, object> = {}
-for (const version of ["v2"]) {
+for (const version of ["v3"]) {
   roots[version] = JSON.parse(
     await readFile(path.join(schemaDir, version, "contract.schema.json"), "utf8"),
   ) as object

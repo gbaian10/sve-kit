@@ -9,6 +9,7 @@ from sve_carddb.contracts.profiles import profile
 from sve_carddb.contracts.snapshot import definition
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
 from sve_carddb.export.buckets import bucket
+from sve_carddb.export.reader_annotations import validate_annotations
 
 if TYPE_CHECKING:
     from sve_carddb.export.reader import Fragment, Row, View
@@ -29,17 +30,20 @@ _PRINT_TABLES = {"printing", "printing_product", "printing_image"}
 _ART_TABLES = {"art", "digital_art_link"}
 
 
-def _key(value: JsonValue) -> tuple[int, int | str]:
+def row_key(value: JsonValue) -> tuple[int, int | str | bytes]:
+    """Sort structured owner keys by canonical bytes without comparing mappings."""
     if value is None:
         return (0, 0)
     if isinstance(value, str):
         return (1, value)
+    if isinstance(value, (dict, list)):
+        return (3, canonical(value))
     return (2, integer(value))
 
 
 def ordered_rows(rows: list[Row], fields: list[str]) -> None:
     """Enforce stable key order before positional joins."""
-    keys = [tuple(_key(row[field]) for field in fields) for row in rows]
+    keys = [tuple(row_key(row[field]) for field in fields) for row in rows]
     if keys != sorted(set(keys)):
         raise ValueError("Rows must be sorted with unique keys")
 
@@ -66,7 +70,7 @@ def validate_fragments(fragments: list[Fragment]) -> None:
             keys = [
                 (
                     string(object_value(f.value["owner"])["kind"]),
-                    _key(object_value(f.value["owner"])["id"]),
+                    row_key(object_value(f.value["owner"])["id"]),
                     integer(f.value["bucket"]),
                     string(f.value["partition"]),
                 )
@@ -192,6 +196,8 @@ def _owners(view: View, fragments: list[Fragment]) -> None:
     print_owners: dict[str, JsonValue] = {}
     for fragment in fragments:
         owner = object_value(fragment.value["owner"])
+        if fragment.table == "field_annotation":
+            continue
         home = fragment.table in _CARD_TABLES | _PRINT_TABLES | _ART_TABLES
         if owner["kind"] != ("home_set" if home else "global") or (
             home and owner["id"] not in families
@@ -211,6 +217,91 @@ def _owners(view: View, fragments: list[Fragment]) -> None:
                 card_id = _owner_card(fragment.table, row, faces, arts)
                 if cards[string(card_id)]["home_set_id"] != owner["id"]:
                     raise ValueError("Owner does not match card home_set")
+    _annotation_owners(view, fragments, print_owners)
+    _annotation_partitions(view, fragments)
+
+
+def _annotation_owners(
+    view: View, fragments: list[Fragment], print_owners: dict[str, JsonValue]
+) -> None:
+    cards = {string(row["id"]): row for row in view["card"]}
+    faces = {string(row["id"]): row for row in view["face"]}
+    revisions = {string(row["id"]): row for row in view["face_revision"]}
+    for fragment in fragments:
+        if fragment.table != "field_annotation":
+            continue
+        location = object_value(fragment.value["owner"])
+        for row in fragment.rows:
+            owner = object_value(row["owner"])
+            expected: JsonValue = None
+            if owner["kind"] == "face_revision":
+                revision = revisions[string(owner["id"])]
+                card_id = faces[string(revision["face_id"])]["card_id"]
+                expected = cards[string(card_id)]["home_set_id"]
+            elif owner["kind"] == "printing_face":
+                expected = print_owners[string(owner["id"])]
+            if location != {
+                "kind": "global" if expected is None else "home_set",
+                "id": expected,
+            }:
+                raise ValueError(
+                    "Original annotation fragment owner differs from source owner"
+                )
+
+
+def _annotation_partitions(view: View, fragments: list[Fragment]) -> None:
+    display = {
+        string(object_value(item)["revision_id"])
+        for face in view["face"]
+        for item in array(face["current"])
+    } | {
+        string(value["revision_id"])
+        for face in view["face"]
+        for raw in array(face["wording"])
+        for value in (object_value(object_value(raw)["display"]),)
+        if value["revision_id"] is not None
+    }
+    annotations: set[str] = set()
+    for fragment in fragments:
+        part = fragment.value["partition"]
+        if fragment.table == "field_annotation":
+            for row in fragment.rows:
+                owner = object_value(row["owner"])
+                expected = (
+                    "history"
+                    if owner["kind"] == "face_revision" and owner["id"] not in display
+                    else "bootstrap"
+                    if (owner["kind"] == "face_revision" and row["field"] == "name")
+                    or owner["kind"]
+                    in {"keyword", "vocabulary", "product", "product_family"}
+                    else "detail"
+                )
+                if part != expected:
+                    raise ValueError("Original annotation column partition mismatch")
+                if part == "bootstrap":
+                    annotations.add(string(row["annotation_set_id"]))
+        if fragment.table == "translation" and part == "bootstrap":
+            annotations |= {
+                string(row["annotation_set_id"])
+                for row in fragment.rows
+                if row["annotation_set_id"] is not None
+            }
+    concepts = {
+        string(reference["key" if reference["kind"] == "glossary" else "term_id"])
+        for row in view["annotation_set"]
+        if row["id"] in annotations
+        for occurrence in array(row["occurrences"])
+        for reference in (object_value(object_value(occurrence)["reference"]),)
+        if reference["kind"] != "vocabulary"
+    }
+    for fragment in fragments:
+        selected = annotations if fragment.table == "annotation_set" else concepts
+        if fragment.table in {"annotation_set", "annotation_concept"} and any(
+            fragment.value["partition"]
+            != ("bootstrap" if row["id"] in selected else "detail")
+            for row in fragment.rows
+        ):
+            raise ValueError("Annotation bootstrap closure partition mismatch")
 
 
 def _summaries(view: View, manifest: Row) -> None:
@@ -260,6 +351,9 @@ def validate_view(view: View, manifest: Row, fragments: list[Fragment]) -> None:
     for ruling in view["ruling_revision"]:
         _hints(ruling)
     _wording(view)
+    validate_annotations(
+        view, tuple(string(lang) for lang in array(manifest.get("languages", [])))
+    )
     if {row["card_id"] for row in view["card_engine_support"]} != {
         row["id"] for row in view["card"]
     }:
@@ -507,6 +601,7 @@ def validate_placement(view: View, manifest: Row, fragments: list[Fragment]) -> 
     """Recompute entity buckets from joined identities, independently of the exporter."""
     selected = profile(string(manifest["format_version"]))
     faces = {string(row["id"]): row for row in view["face"]}
+    revisions = {string(row["id"]): row for row in view["face_revision"]}
     bases = {
         (
             f.file,
@@ -553,12 +648,16 @@ def validate_placement(view: View, manifest: Row, fragments: list[Fragment]) -> 
                 integer(base["bucket"]),
             ]
         for row in rows:
-            key_values = _entity_key(fragment.table, row, faces)
+            key_values = _entity_key(fragment.table, row, faces, revisions)
             if bucket(key_values, selected.buckets) != fragment.value["bucket"]:
                 raise ValueError("Fragment entity bucket does not match fixed profile")
 
 
-def _entity_key(table: str, row: Row, faces: dict[str, Row]) -> list[JsonValue]:
+def _entity_key(
+    table: str, row: Row, faces: dict[str, Row], revisions: dict[str, Row]
+) -> list[JsonValue]:
+    if table == "field_annotation":
+        return _annotation_entity(row, faces, revisions)
     if table in _CARD_TABLES:
         entity = (
             row["id"]
@@ -577,3 +676,14 @@ def _entity_key(table: str, row: Row, faces: dict[str, Row]) -> list[JsonValue]:
     if table in {"image_asset", "image_variant"}:
         return [row["id" if table == "image_asset" else "image_id"]]
     return [row[string(field)] for field in array(definition(table)["x-primary-key"])]
+
+
+def _annotation_entity(
+    row: Row, faces: dict[str, Row], revisions: dict[str, Row]
+) -> list[JsonValue]:
+    owner = object_value(row["owner"])
+    if owner["kind"] == "face_revision":
+        return [faces[string(revisions[string(owner["id"])]["face_id"])]["card_id"]]
+    if owner["kind"] == "printing_face":
+        return [owner["id"]]
+    return [row["owner"], row["field"], row["ordinal"]]

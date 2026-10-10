@@ -82,8 +82,12 @@ def test_all_collections_and_every_public_field_have_synthetic_rows(
 ) -> None:
     result = projected(db)
     assert set(result.tables) == set(tables())
-    assert len(result.tables) == 43
-    assert all(result.tables.values())
+    assert len(result.tables) == 46
+    assert all(
+        rows
+        for table, rows in result.tables.items()
+        if table not in {"annotation_set", "annotation_concept", "field_annotation"}
+    )
     assert one(result, "digital_art") == {
         "id": "digital-art",
         "digital_card_id": "digital",
@@ -274,6 +278,12 @@ def test_selected_translation_is_owner_bound_and_missing_language_keeps_source(
             "target_lang": "zh-Hant",
             "translation_id": "translation",
             "basis": "own_source",
+            "source": {
+                "owner": {"kind": "face_revision", "id": "revision"},
+                "field": "name",
+                "ordinal": None,
+            },
+            "counterpart": None,
         }
     ]
     assert revision["name_unit_id"] == TEXT
@@ -744,8 +754,8 @@ def test_two_contexts_for_same_source_can_select_different_field_translations(
             "label",
             None,
         ),
-        ({"face_revision_id": None, "product_family_id": "family"}, "name", None),
-        ({"face_revision_id": None, "product_id": "product"}, "name", None),
+        ({"face_revision_id": None, "product_family_id": "family"}, "label", None),
+        ({"face_revision_id": None, "product_id": "product"}, "label", None),
         ({"face_revision_id": None, "qa_version_id": "qa_v"}, "answer", None),
     ],
 )
@@ -1104,7 +1114,7 @@ def dual_project(db: Database, chosen: Decisions) -> Projection:
 
 
 @pytest.mark.parametrize("aligned", [False, True])
-def test_shared_jp_preserves_source_owner_context(
+def test_jp_source_preserves_source_owner_context(
     db: Database, *, aligned: bool
 ) -> None:
     dual_region(db)
@@ -1118,7 +1128,7 @@ def test_shared_jp_preserves_source_owner_context(
         else (),
         display_bindings=(
             DisplayBinding(
-                "use", ("face_revision", "revision-en"), "zh-Hant", "shared_jp"
+                "use", ("face_revision", "revision-en"), "zh-Hant", "jp_source"
             ),
         ),
     )
@@ -1130,29 +1140,28 @@ def test_shared_jp_preserves_source_owner_context(
         )["basis"]
         == "own_source"
     )
-    assert one(result, "face_revision", "revision-en")["translations"] == (
-        [
-            {
+    assert one(result, "face_revision", "revision-en")["translations"] == [
+        {
+            "field": "name",
+            "ordinal": None,
+            "target_lang": "zh-Hant",
+            "translation_id": "translation",
+            "basis": "jp_source",
+            "source": {
+                "owner": {"kind": "face_revision", "id": "revision"},
                 "field": "name",
                 "ordinal": None,
-                "target_lang": "zh-Hant",
-                "translation_id": "translation",
-                "basis": "shared_jp",
-            }
-        ]
-        if aligned
-        else []
-    )
+            },
+            "counterpart": None,
+        }
+    ]
     with db.transaction():
         db.update(
             "region_divergence",
             {"card_id": "card", "region": "en", "field_scope": "name"},
             {"resolved": False},
         )
-    assert (
-        one(dual_project(db, chosen), "face_revision", "revision-en")["translations"]
-        == []
-    )
+    assert one(dual_project(db, chosen), "face_revision", "revision-en")["translations"]
 
 
 def test_official_counterpart_uses_direct_id_without_common_selection(
@@ -1314,7 +1323,12 @@ def test_counterpart_replaces_only_its_owner_common_selection(db: Database) -> N
         db.insert(
             "translation_use",
             dict(db.rows("translation_use")[0].values)
-            | {"id": "other-use", "face_revision_id": None, "product_id": "product"},
+            | {
+                "id": "other-use",
+                "face_revision_id": None,
+                "product_id": "product",
+                "field": "label",
+            },
         )
     chosen = replace(
         decisions(),
@@ -1332,11 +1346,11 @@ def test_counterpart_replaces_only_its_owner_common_selection(db: Database) -> N
             ),
         ),
     )
-    result = projected(db, chosen)
+    result = dual_project(db, chosen)
     assert (
-        object_value(array(one(result, "face_revision")["translations"])[0])[
-            "translation_id"
-        ]
+        object_value(
+            array(one(result, "face_revision", "revision")["translations"])[0]
+        )["translation_id"]
         == "official"
     )
     assert (
@@ -1345,7 +1359,7 @@ def test_counterpart_replaces_only_its_owner_common_selection(db: Database) -> N
     )
     with db.transaction():
         db.delete("translation_use", {"id": "other-use"})
-    result = projected(db, chosen)
+    result = dual_project(db, chosen)
     assert [row["id"] for row in result.tables["translation"]] == ["official"]
     assert "Synthetic translation" not in [
         row["text"] for row in result.tables["text_unit"]

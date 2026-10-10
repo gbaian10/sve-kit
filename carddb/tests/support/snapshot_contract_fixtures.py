@@ -1,4 +1,4 @@
-"""Shared independent 2.0 golden inputs and deliberate resealing for counterexamples."""
+"""Shared independent 3.0 golden inputs and deliberate resealing for counterexamples."""
 
 import json
 from pathlib import Path
@@ -8,7 +8,7 @@ from pydantic import JsonValue, TypeAdapter
 
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 
-GOLDEN = Path(__file__).resolve().parents[3] / "tests/fixtures/snapshot-contract/v2"
+GOLDEN = Path(__file__).resolve().parents[3] / "tests/fixtures/snapshot-contract/v3"
 ADAPTER: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
 
 

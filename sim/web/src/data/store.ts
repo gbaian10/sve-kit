@@ -1,6 +1,6 @@
 import type { LoadedSnapshot } from "./client"
-import type { Row } from "./format-v1/decode"
-import { integerValue, stringValue } from "./format-v1/json"
+import type { Row } from "./format-v3/decode"
+import { integerValue, stringValue } from "./format-v3/json"
 
 /** Bootstrap-only lookups every page needs; detail rows are fetched through the client. */
 export interface CardIndex {

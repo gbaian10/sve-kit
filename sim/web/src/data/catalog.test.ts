@@ -176,7 +176,7 @@ describe("pending display in the list", () => {
 })
 
 describe("current name translations", () => {
-  it("retains a low-confidence selected name in display and search, independent of unchecked source", () => {
+  it("retains a low-confidence selected name in display and search, independent of Japanese source basis", () => {
     const revised = {
       ...snapshot,
       bootstrap: snapshot.bootstrap.map((fragment) => ({
@@ -189,7 +189,7 @@ describe("current name translations", () => {
               ...row,
               translations: (row["translations"] as { basis: string }[]).map((value) => ({
                 ...value,
-                basis: "shared_jp_unchecked",
+                basis: "jp_source",
               })),
             }
           return row
@@ -203,7 +203,7 @@ describe("current name translations", () => {
     )
     expect(name?.translationQuality?.["zh-Hant"]).toEqual({
       lowConfidence: true,
-      sourceUnchecked: true,
+      jpSource: true,
     })
     expect(current.entries.find((entry) => entry.cardId === "c:bp01-001")?.names).toEqual(
       catalog.entries.find((entry) => entry.cardId === "c:bp01-001")?.names,

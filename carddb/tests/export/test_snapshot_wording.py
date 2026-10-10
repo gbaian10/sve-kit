@@ -1,5 +1,6 @@
 """Independent logical counterexamples for the public pending display contract."""
 
+from copy import deepcopy
 from typing import TYPE_CHECKING
 
 import pytest
@@ -145,6 +146,12 @@ def test_same_day_exact_public_content_can_use_distinct_correction_revision_ids(
         "revision": 1,
         "change_kind": "initial",
     }
+    exact["translations"] = deepcopy(latest["translations"])
+    for item in array(exact["translations"]):
+        translation = object_value(item)
+        pointer = object_value(translation["source"])
+        if pointer["owner"] == {"kind": "face_revision", "id": latest["id"]}:
+            pointer["owner"] = {"kind": "face_revision", "id": "r:a1"}
     original.update(exact)
     validate_view(view, manifest, fragments)
 

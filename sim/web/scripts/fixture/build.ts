@@ -6,7 +6,7 @@ import {
   objectValue,
   stringValue,
   utf8,
-} from "../../src/data/format-v1/json"
+} from "../../src/data/format-v3/json"
 import {
   columns,
   definition,
@@ -14,8 +14,8 @@ import {
   requiredTypes,
   rowType,
   tables,
-} from "../../src/data/format-v1/schema"
-import { bucket, digest, hex, sha256 } from "../../src/data/format-v1/sha256"
+} from "../../src/data/format-v3/schema"
+import { bucket, digest, hex, sha256 } from "../../src/data/format-v3/sha256"
 import {
   type Card,
   CARDS,
@@ -52,7 +52,7 @@ export interface BuiltSnapshot {
   readonly counts: Readonly<Record<string, number>>
 }
 
-const FORMAT = "2.0.0"
+const FORMAT = "3.0.0"
 const AS_OF = "2026-09-29"
 const IMAGE_SIZES = [
   { key: "art_m", purpose: "art", max_width: 384, max_height: 288 },
@@ -143,8 +143,10 @@ class Builder {
     lowConfidence: boolean,
     basis: string,
     bootstrap: boolean,
+    sourceOwner: JsonObject,
+    counterpart: JsonObject | null = null,
   ): JsonObject {
-    const id = `tr:${idBase}:${field}:${targetLang}`
+    const id = `tr:${idBase}:${field}:${targetLang}:${sourceUnit}`
     const unit = this.unit(targetLang, text, bootstrap)
     this.translationRows.set(id, {
       id,
@@ -154,13 +156,28 @@ class Builder {
       origin,
       authority,
       low_confidence: lowConfidence,
+      annotation_set_id: null,
       bootstrap,
     })
-    return { field, ordinal: null, target_lang: targetLang, translation_id: id, basis }
+    return {
+      field,
+      ordinal: null,
+      target_lang: targetLang,
+      translation_id: id,
+      basis,
+      source: { owner: sourceOwner, field, ordinal: null },
+      counterpart,
+    }
   }
 
   /** zh-Hant and English translations of a label-like text (names of vocabulary, sets, keywords). */
-  labelTranslations(idBase: string, field: string, text: Text, bootstrap: boolean): JsonObject[] {
+  labelTranslations(
+    idBase: string,
+    field: string,
+    text: Text,
+    bootstrap: boolean,
+    sourceOwner: JsonObject,
+  ): JsonObject[] {
     const source = this.unit(LANGS.ja, text.ja, bootstrap)
     const out: JsonObject[] = []
     if (text.zhHant !== undefined) {
@@ -176,6 +193,7 @@ class Builder {
           false,
           "own_source",
           bootstrap,
+          sourceOwner,
         ),
       )
     }
@@ -192,6 +210,7 @@ class Builder {
           false,
           "own_source",
           bootstrap,
+          sourceOwner,
         ),
       )
     }
@@ -327,7 +346,11 @@ function addVocabulary(builder: Builder, kind: string, code: string, text: Text)
     code,
     label_unit_id: builder.unit(LANGS.ja, text.ja, true),
     active: true,
-    translations: builder.labelTranslations(`vocab:${kind}:${code}`, "label", text, true),
+    translations: builder.labelTranslations(`vocab:${kind}:${code}`, "label", text, true, {
+      kind: "vocabulary",
+      vocabulary_kind: kind,
+      code,
+    }),
   })
   for (const [lang, value] of [
     [LANGS.ja, text.ja],
@@ -353,7 +376,10 @@ function addSets(builder: Builder, families: Record<string, Family>): void {
       public_code: set.publicCode,
       kind: set.kind,
       name_unit_id: builder.unit(LANGS.ja, set.name.ja, true),
-      translations: builder.labelTranslations(`family:${set.code}`, "name", set.name, true),
+      translations: builder.labelTranslations(`family:${set.code}`, "label", set.name, true, {
+        kind: "product_family",
+        id,
+      }),
     })
     for (const region of set.regions) {
       const released = set.code === "pr" ? null : region === "jp" ? "2026-02-01" : "2026-04-01"
@@ -374,7 +400,10 @@ function addSets(builder: Builder, families: Record<string, Family>): void {
         date_raw: null,
         translations:
           region === "jp"
-            ? builder.labelTranslations(`product:${set.code}-${region}`, "name", set.name, true)
+            ? builder.labelTranslations(`product:${set.code}-${region}`, "label", set.name, true, {
+                kind: "product",
+                id: `prod:${set.code}-${region}`,
+              })
             : [],
       })
     }
@@ -409,7 +438,10 @@ function addKeywords(builder: Builder): void {
       name_unit_id: builder.unit(LANGS.ja, keyword.name.ja, true),
       definition_unit_id: builder.unit(LANGS.ja, keyword.definition.ja),
       actions: [],
-      translations: builder.labelTranslations(`keyword:${code}`, "name", keyword.name, true),
+      translations: builder.labelTranslations(`keyword:${code}`, "label", keyword.name, true, {
+        kind: "keyword",
+        id: `kw:${code}`,
+      }),
     })
     for (const [lang, value] of [
       [LANGS.ja, keyword.name.ja],
@@ -517,6 +549,7 @@ function addFaces(ctx: CardContext): FaceRevisions {
   const currentIds = new Set<string>()
   card.faces.forEach((face, ordinal) => {
     const plans = revisionPlans(card, face)
+    const jpSource = plans.find((candidate) => candidate.region === "jp" && candidate.current)
     const current: JsonObject[] = []
     for (const plan of plans) {
       const nameUnit = builder.unit(plan.lang, plan.name, true)
@@ -536,6 +569,7 @@ function addFaces(ctx: CardContext): FaceRevisions {
               false,
               "own_source",
               true,
+              { kind: "face_revision", id: plan.id },
             ),
           )
         }
@@ -552,6 +586,7 @@ function addFaces(ctx: CardContext): FaceRevisions {
               false,
               "own_source",
               false,
+              { kind: "face_revision", id: plan.id },
             ),
           )
         }
@@ -569,6 +604,17 @@ function addFaces(ctx: CardContext): FaceRevisions {
               !official,
               official ? "official_counterpart" : "own_source",
               true,
+              { kind: "face_revision", id: plan.id },
+              official
+                ? {
+                    owner: {
+                      kind: "face_revision",
+                      id: plans.find((p) => p.region === "en")?.id ?? null,
+                    },
+                    field: "name",
+                    ordinal: null,
+                  }
+                : null,
             ),
           )
           if (face.effect.en !== undefined) {
@@ -584,13 +630,24 @@ function addFaces(ctx: CardContext): FaceRevisions {
                 !official,
                 official ? "official_counterpart" : "own_source",
                 false,
+                { kind: "face_revision", id: plan.id },
+                official
+                  ? {
+                      owner: {
+                        kind: "face_revision",
+                        id: plans.find((p) => p.region === "en")?.id ?? null,
+                      },
+                      field: "effect",
+                      ordinal: null,
+                    }
+                  : null,
               ),
             )
           }
         }
-      } else if (face.name.zhHant !== undefined && face.name.ja !== "") {
+      } else if (face.name.zhHant !== undefined && jpSource) {
         // The EN face shows the same Traditional Chinese rows the JP face chose.
-        const jaName = builder.unit(LANGS.ja, face.name.ja, true)
+        const jaName = builder.unit(jpSource.lang, jpSource.name, true)
         translations.push(
           builder.translation(
             `${face.id}:jp`,
@@ -601,8 +658,12 @@ function addFaces(ctx: CardContext): FaceRevisions {
             "project",
             "unofficial",
             false,
-            "shared_jp",
+            "jp_source",
             true,
+            {
+              kind: "face_revision",
+              id: jpSource.id,
+            },
           ),
         )
         if (face.effect.zhHant !== undefined) {
@@ -610,14 +671,18 @@ function addFaces(ctx: CardContext): FaceRevisions {
             builder.translation(
               `${face.id}:jp`,
               "effect",
-              builder.unit(LANGS.ja, face.effect.ja),
+              builder.unit(jpSource.lang, jpSource.effect),
               LANGS.zhHant,
               face.effect.zhHant,
               "project",
               "unofficial",
               false,
-              "shared_jp",
+              "jp_source",
               false,
+              {
+                kind: "face_revision",
+                id: jpSource.id,
+              },
             ),
           )
         }
@@ -998,6 +1063,7 @@ async function addCard(ctx: CardContext): Promise<void> {
               false,
               "own_source",
               false,
+              { kind: "qa_version", id: versionId },
             ),
           )
         if (qa.answer.zhHant !== undefined)
@@ -1013,6 +1079,7 @@ async function addCard(ctx: CardContext): Promise<void> {
               false,
               "own_source",
               false,
+              { kind: "qa_version", id: versionId },
             ),
           )
       }
@@ -1562,13 +1629,15 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     published_at: publishedAt,
     regions,
     languages,
-    min_reader_version: "2.0.0",
+    min_reader_version: "3.0.0",
     required_capabilities: [
       "column-partition-v1",
       "digital-same-name-links-v1",
       "fragment-container-v1",
       "image-entity-buckets-v1",
       "image-id-url-v1",
+      "jp-source-translation-v1",
+      "public-annotation-v1",
       "rules-name-on-demand-v1",
     ],
     engine_support_target: {
@@ -1635,13 +1704,15 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     data_version: dataVersion,
     published_at: publishedAt,
     format_version: FORMAT,
-    min_reader_version: "2.0.0",
+    min_reader_version: "3.0.0",
     required_capabilities: [
       "column-partition-v1",
       "digital-same-name-links-v1",
       "fragment-container-v1",
       "image-entity-buckets-v1",
       "image-id-url-v1",
+      "jp-source-translation-v1",
+      "public-annotation-v1",
       "rules-name-on-demand-v1",
     ],
     manifest_path: manifestPath,

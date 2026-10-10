@@ -12,10 +12,10 @@ from sve_carddb.core.json import canonical
 from sve_carddb.core.models import RecordData, Text
 from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.domains.catalog.adoption_models import SourceRef
+from sve_carddb.domains.translations.four_layer_authored import Shard
 from sve_carddb.domains.translations.glossary.records import (
     ChoiceData,
     ChoiceRecord,
-    Shard,
     TermData,
     TermRecord,
 )
@@ -106,7 +106,7 @@ def prepare(  # ruff: ignore[complex-structure] -- independent permanent key, ex
         )
         for start in range(0, len(selected), 24):
             shard = Shard(
-                format=2,
+                format=3,
                 kind="translation_shard",
                 records=tuple(selected[start : start + 24]),
             )

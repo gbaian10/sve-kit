@@ -2,16 +2,13 @@
 
 import pytest
 
-from sve_carddb.domains.translations.parameters.explicit_rules import EXPLICIT
+from sve_carddb.domains.translations.recognition.explicit_rules import EXPLICIT
 
 from .test_template_explicit_rules import CASES as FIRST_CASES
 from .test_template_explicit_rules import (
-    test_current_resolution_carries_role_and_rejects_weakened_numeric_bounds as check_resolution,
-)
-from .test_template_explicit_rules import (
     test_explicit_match_requires_opt_in_exact_value_and_preserves_proposal as check_match,
 )
-from .test_template_rule_candidates import matches
+from .test_template_parameters import matches
 
 CASES = (
     ("cost_assignment", "それのコストを２にする。", "cost_assigned_value", 0),
@@ -71,7 +68,7 @@ def test_value_match_requires_opt_in_raw_value_and_preserves_candidate(
 def test_value_resolution_checks_exact_role_schema_and_original_ownership(
     identifier: str, text: str, role: str, minimum: int
 ) -> None:
-    check_resolution(identifier, text, role, minimum)
+    check_match(identifier, text, role, minimum)
 
 
 @pytest.mark.parametrize(("identifier", "text", "role", "minimum"), CASES)

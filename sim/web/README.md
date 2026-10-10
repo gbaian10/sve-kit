@@ -120,7 +120,7 @@ declares them (list a rule twice when it fires twice). Update the fixtures toget
 
 ## Snapshot reader
 
-`src/data/format-v1/` is the pure core of the card-data reader: no `fetch`, no DOM. It follows
+`src/data/format-v3/` is the pure core of the card-data reader: no `fetch`, no DOM. It follows
 [docs/schema/export/snapshot-format.md](../../docs/schema/export/snapshot-format.md),
 [snapshot-transport.md](../../docs/schema/export/snapshot-transport.md) and
 [snapshot-contract.md](../../docs/schema/export/snapshot-contract.md), and mirrors the Python reference
@@ -144,14 +144,14 @@ reader in `carddb/src/sve_carddb/export/`.
   cross-row rules JSON Schema cannot express. Every rejection is a `SnapshotError` with a fixed
   `code`; tests match codes, never message text.
 
-`v2-contract.test.ts` runs the shared schema, reader, index and image-URL vectors from
-`tests/fixtures/snapshot-contract/v2/`. The current golden manifest and payloads join into
+`v3-contract.test.ts` runs the shared schema, reader, index and image-URL vectors from
+`tests/fixtures/snapshot-contract/v3/`. The current golden manifest and payloads join into
 exactly `expected-logical.json`; text-all gives the same view. `contract.test.ts` covers
 additional transport errors (missing files, cycles and integrity failures), and
 `schema.test.ts` checks synthetic positive samples against standalone and live Ajv.
 
-The client supports only snapshot 2.0.0, including its capabilities and fixed band membership.
-The `format-v1/` directory name is historical; its strict JSON, Ajv, decoding and semantic
+The client supports only snapshot 3.0.0, including its capabilities and fixed band membership.
+Its strict JSON, Ajv, decoding and semantic
 checks are shared current-format logic, with no 1.0 or 1.1 reader or schema branches.
 Index v2 considers only current, previous and the local active snapshot; an incompatible
 current does not trigger a search through historical versions. An older usable snapshot has

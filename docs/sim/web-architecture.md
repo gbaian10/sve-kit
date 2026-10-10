@@ -163,13 +163,14 @@ idle → loading(version-index) → loading(manifest) → loading(bootstrap) →
 
 ### 4.3 容器解碼、型別與拒絕條件
 
-- `data/format-v1/schema.ts`：把快照格式 §2 的公開欄位與 §3.1 的啟動包／詳情欄位分割寫成**常數表**（表名 → columns 順序、巢狀型別 → columns）。
-  解碼時比對 `tables[name].columns`、驗每列長度、依 `types` 驗巢狀 tuple 長度；不符就拒絕該檔。假資料產生器共用這份常數。
-  常數表只防 web 內部漂移；與匯出器「一起錯」要靠卡表管線提供的 golden 契約樣本（`tests/fixtures/snapshot-contract/v2/`）與真快照。
-- 拒絕條件（快照格式 §3.1）：詳情分片 `dependencies` 釘的啟動包 key／hash 與現用啟動包不符；`row_index` 越界；同一 `row_index`／`face_ordinal` 重複；
-  `printing.faces` 裝飾片與文字片不是一對一；translation 子陣列依 `field/ordinal/target_lang` 合併後有重複；歷史 `face_revision` 出現在現行詳情片。
-- `data/format-v1/types.ts`：TS 型別對應 §2 的邏輯集合（可 null 的欄位是 `| null`，與 `exactOptionalPropertyTypes` 一致）；有 JSON Schema 時以生成型別為準，並與常數表比對。
-- 執行期只驗版本、欄位分割、列長度、必要欄位與上述拒絕條件；不做全量 FK 驗證（格式規定 producer 端驗）。
+- `data/format-v3/schema.ts` 直接引用 carddb 隨套件發布的唯一 JSON Schema；建置時編譯 Ajv standalone validators，執行期與 Worker 不重新編譯。
+  欄序、tuple 長度、nullable 及固定 descriptor 由 Schema 驗；解碼 accessor 使用同一份 `x-columns`／`x-types`。
+  卡表管線提供的共用 golden（`tests/fixtures/snapshot-contract/v3/`）與獨立 logical oracle 防止 consumer 與 producer 同時偏離契約。
+- `reader.ts`／`semantics.ts` 驗精確 dependencies、hash、`row_index`／`face_ordinal` 合併、完整引用閉包及其他跨列規則。
+  `annotations.ts`／`annotation-placement.ts` 驗公開 annotation 的概念、位置、來源 owner 與實際分片歸屬。
+  詳情片按需載入時仍須拒絕錯 base、重複用途及不一致來源；不能借另一個 owner 的 ranges 補洞。
+- TS 邏輯值與索引存於 `data/store.ts`；文字呈現由 `data/annotated-text.ts` 依精確 owner 取得，
+  Unicode scalar ranges 在呈現邊界轉成 UTF-16，不正規化原始文字。必要 FK 與 annotation 閉包驗證遵守公開契約。
 
 ### 4.4 索引（`data/store/`）
 
@@ -286,18 +287,19 @@ idle → loading(version-index) → loading(manifest) → loading(bootstrap) →
 ## 10. 依賴
 
 `react-router`、`clsx`、`lucide-react`、`@fontsource/ibm-plex-sans`；測試 `@testing-library/user-event`；工具 `knip`。
-不加狀態管理套件、UI 元件庫、schema 驗證庫（手寫驗證＋常數表）。
+不加狀態管理套件或 UI 元件庫；Schema 驗證使用已釘版的 Ajv standalone validators。
 
 ## 11. 與其他部分的接點
 
-- **卡表管線**：快照格式是契約，前端不對格式未規定的地方另作假設；格式改變時只改 `data/format-v1/`、`data/versions.ts` 與 `Locator`。
+- **卡表管線**：快照格式是契約，前端不對格式未規定的地方另作假設；格式改變時同步改 `data/format-v3/`、版本入口與 `Locator`。
 - **建牌**：同一個搜尋工作區加牌組面板；列表元件預留每張卡的動作列插槽，`useBlocker` 處理離開編輯頁。
 - **上線**：登入、PWA（Service Worker、CacheStorage、IndexedDB 索引持久化，namespace 帶根目錄與 `data_version`）、正式部署
   （`VITE_CDN_BASE` 指向 CDN 網域）。
 
-## 快照 2.0 與圖片更新邊界
+## 快照 3.0 與圖片更新邊界
 
-既有 format-v1／版本 pages 接線是 1.x 實作描述；2.0 須依 [傳輸契約 §5.4](../schema/export/snapshot-transport.md#54-format-200-卡包-media-與-id-圖片) 同步新 accessor 與 Index v2，不能只放寬版本範圍。
+現行 reader 僅支援 3.0；圖片沿用 [傳輸契約 §5.4](../schema/export/snapshot-transport.md#54-format-200-卡包-media-與-id-圖片) 的卡包 media 與 Index v2。
+公開 annotation 與 JP 來源閉包依 [公開 annotation 契約](../schema/export/public-annotation.md)，不能只放寬版本範圍。
 卡包 media 提供 card／art 版本與實際尺寸，int_id＋永久 face.ordinal＋size 直接組背景圖片 URL；玩家頁面路由不變。
 切新快照時更新 src／srcset、取消舊工作、拒絕晚到舊 response；SW 以完整含 v URL 匹配，不忽略 query 或回退舊圖。
 新圖未完成／失敗用 placeholder；離線舊 active 明示時效，不宣稱圖片最新。

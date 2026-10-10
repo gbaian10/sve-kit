@@ -5,6 +5,8 @@ from itertools import starmap
 from typing import TYPE_CHECKING
 
 from sve_carddb.build import Capability, Column, Json, Kind, Table, compile_schema
+from sve_carddb.build.four_layer import TABLES as FOUR_LAYER_TABLES
+from sve_carddb.build.four_layer import schemas as four_layer_schemas
 from sve_carddb.build.registry import Registry
 from sve_carddb.build.t1 import REGISTRY, compile_minimum
 from sve_carddb.build.t2_translation import TABLES as NAME_TABLES
@@ -272,7 +274,9 @@ def _column(name: str, value: Value) -> Column:
     return Column(name, Kind.TEXT, nullable=value is None or name == "face_revision_id")
 
 
-def schema(*, nullable_observation: bool = False) -> CompiledSchema:
+def schema(
+    *, nullable_observation: bool = False, with_annotations: bool = False
+) -> CompiledSchema:
     base = compile_minimum(include_en=True)
     extra = tuple(
         Table(name, tuple(starmap(_column, row.items())), (next(iter(row)),))
@@ -294,7 +298,21 @@ def schema(*, nullable_observation: bool = False) -> CompiledSchema:
         )
         for table in base.tables
     )
-    all_tables = (*base_tables, *extra)
+    annotation_tables = (
+        tuple(
+            table
+            for table in FOUR_LAYER_TABLES
+            if table.name
+            in {
+                "annotation_set",
+                "translation_annotation",
+                "translation_use_annotation",
+            }
+        )
+        if with_annotations
+        else ()
+    )
+    all_tables = (*base_tables, *extra, *annotation_tables)
     defined = {table.name for table in all_tables}
     reserved = tuple(
         Capability(
@@ -313,7 +331,8 @@ def schema(*, nullable_observation: bool = False) -> CompiledSchema:
         registry,
         ("synthetic",),
         {name: parse(value.encode()) for name, value in base.json_schemas}
-        | {"synthetic-any": {}},
+        | {"synthetic-any": {}}
+        | (four_layer_schemas() if with_annotations else {}),
         version=base.version,
     )
 

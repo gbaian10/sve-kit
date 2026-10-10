@@ -1,8 +1,8 @@
-# 卡表快照傳輸契約（2.0 實作與 3.0 目標）
+# 卡表快照傳輸契約（3.0.0，N0 已接線）
 
 本文件補足 [snapshot-format.md](snapshot-format.md) 的 JSON 容器、欄序與版本契約；公開邏輯欄位仍以該文件 §2 為唯一白名單。這些記錄不是新增的玩家集合或建置表。所有物件拒絕未列出的欄位；所有列出的欄位必須存在，`T?` 表示 `T` 或 JSON null，不能省略。空陣列表示已知無成員，來源是否完整另看 coverage。
 
-目前 producer／reader 僅支援 2.0.0，圖片契約與配置見 §5.4；不提供 1.x 產出或相容讀取。機器資源依 [snapshot-contract](snapshot-contract.md) 維護。
+目前 producer／reader 支援 3.0.0，N0 已交付，圖片契約與配置見 §5.4；不提供 1.x 產出或相容讀取。機器資源依 [snapshot-contract](snapshot-contract.md) 維護。
 3.0.0 的變更以[公開 annotation 契約](public-annotation.md)及本文 §8 為準；下列 2.0 歷史欄序不代表新版可接受舊 tuple。
 
 ## 1. 基本型別與 canonical bytes
@@ -190,7 +190,7 @@ DSL 程式包是物件 `{format_version,entries}`；兩鍵皆 required 且不得
 
 format_version=`2.0.0` 的支援 DSL 版本集合固定為空：唯一可接受的 entries 為 `[]`。任何非空 entries 都拒絕整包，即使封套完整也不放行；不忽略項目、不轉用 astra/1、不使用任意 JSON 的 ast 驗證替代正式 Schema。此規則是版本契約，不因執行環境裝有某個引擎或 Schema 而改變。沒有程式項目可供引用時，非 null ProgramRef 亦無法通過引用閉包驗證。
 
-此格式每份 manifest 必須恰有一個 role=programs 的 File，固定提供 format_version 與 manifest 相同且 entries=[] 的程式包（`{"format_version":"2.0.0","entries":[]}`）；row_counts 與 dependencies 都是 []，仍驗 canonical bytes、長度及 hash。不得以省略檔案表示沒有程式；reader 缺檔即拒收。此附件依 §4.2 不列入 text_all，下載文字分片不依賴它；驗完整快照時另外取得。
+此格式每份 manifest 必須恰有一個 role=programs 的 File，固定提供 format_version 與 manifest 相同且 entries=[] 的程式包（`{"format_version":"3.0.0","entries":[]}`）；row_counts 與 dependencies 都是 []，仍驗 canonical bytes、長度及 hash。不得以省略檔案表示沒有程式；reader 缺檔即拒收。此附件依 §4.2 不列入 text_all，下載文字分片不依賴它；驗完整快照時另外取得。
 
 啟用正式 DSL 1.0 時須由新的 format 配置至少升 minor，明列支援 DSL 版本到 `dsl/` Schema 資源的映射、所需 capability 與最低 reader 版本，並依 §1.1 協商；reader 使用釘住的權威資源驗 ast，且拒絕未展開的作者巨集。未知 DSL 版本仍拒絕整包，不改寫既有 `2.0.0` 的空集合。
 
@@ -456,6 +456,6 @@ translation.annotation_set_id=null 表示空集合；缺 field_annotation 只有
 非 null 引用缺目標仍拒絕。完整性由 producer 比對投影前 occurrence 保證，不能靠 reader 重造空 set ID。
 改 annotation／bold 可能改 set ID 及用途列，不能因 text bytes 未變省掉相關 changes／依賴更新。
 
-機器 Schema 的整合、reader 支援表與共用完整 golden 由 #498 一次替換；不得先產新 wire 卻沿舊 2.0 標頭，
+機器 Schema、reader 支援表與共用完整 golden 已在 #498 的 N0 同步替換；正式 producer／reader 為 3.0.0，不沿用舊 2.0 標頭，
 也不得只升 data_version。固定案例依 [public-annotation-cases](public-annotation-cases.md)，
-正式容量依 [size-budget](size-budget.md#30-annotation-與-jp-來源的計帳)，本次規格不宣稱實作或量測已通過。
+正式容量依 [size-budget](size-budget.md#30-annotation-與-jp-來源的計帳)，N0 已接線並完成量測；未達預算的項目沿用維護者豁免，由 #506 最佳化，手機實測由 #53 承接。

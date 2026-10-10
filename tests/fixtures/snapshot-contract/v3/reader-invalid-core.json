@@ -1,0 +1,1980 @@
+[
+  {
+    "name": "dependency-hash",
+    "target": "manifest",
+    "path": [
+      "files",
+      19,
+      "dependencies",
+      0,
+      "sha256"
+    ],
+    "value": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "rehash": false
+  },
+  {
+    "name": "base-hash",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "base",
+      "file",
+      "sha256"
+    ],
+    "value": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "rehash": true
+  },
+  {
+    "name": "row-index-out-of-range",
+    "target": "text/detail/home_set/set%3Aa/band/1",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows",
+      0,
+      0
+    ],
+    "value": 2,
+    "rehash": true
+  },
+  {
+    "name": "row-index-duplicate",
+    "target": "text/detail/home_set/set%3Aa/band/1",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows"
+    ],
+    "value": [
+      [
+        0,
+        [
+          [
+            0,
+            "t:ja:c011ad4340c14396",
+            "t:ja:b17a760c59cb19db",
+            null,
+            "verified",
+            [],
+            [
+              [
+                0,
+                "t:ja:b17a760c59cb19db",
+                "rule"
+              ]
+            ],
+            [
+              [
+                "effect",
+                null,
+                "zh-Hant",
+                "tr:effect",
+                "own_source"
+              ]
+            ],
+            [
+              [
+                "name",
+                "Synthetic old front",
+                true,
+                "Synthetic printed correction",
+                "https://example.invalid/correction"
+              ]
+            ]
+          ],
+          [
+            1,
+            null,
+            null,
+            null,
+            "unknown",
+            [],
+            [],
+            [],
+            []
+          ]
+        ]
+      ],
+      [
+        0,
+        [
+          [
+            0,
+            "t:ja:c011ad4340c14396",
+            "t:ja:b17a760c59cb19db",
+            null,
+            "verified",
+            [],
+            [
+              [
+                0,
+                "t:ja:b17a760c59cb19db",
+                "rule"
+              ]
+            ],
+            [
+              [
+                "effect",
+                null,
+                "zh-Hant",
+                "tr:effect",
+                "own_source"
+              ]
+            ],
+            [
+              [
+                "name",
+                "Synthetic old front",
+                true,
+                "Synthetic printed correction",
+                "https://example.invalid/correction"
+              ]
+            ]
+          ],
+          [
+            1,
+            null,
+            null,
+            null,
+            "unknown",
+            [],
+            [],
+            [],
+            []
+          ]
+        ]
+      ]
+    ],
+    "rehash": true
+  },
+  {
+    "name": "row-index-missing",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows"
+    ],
+    "value": [],
+    "rehash": true,
+    "error": "Missing, duplicate, unordered or out-of-range row_index"
+  },
+  {
+    "name": "face-ordinal-out-of-range",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows",
+      0,
+      1,
+      1,
+      0
+    ],
+    "value": 2,
+    "rehash": true
+  },
+  {
+    "name": "face-ordinal-duplicate",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows",
+      0,
+      1,
+      1,
+      0
+    ],
+    "value": 0,
+    "rehash": true
+  },
+  {
+    "name": "face-ordinal-missing",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows",
+      0,
+      1
+    ],
+    "value": [
+      [
+        0,
+        null,
+        null,
+        null,
+        "unknown",
+        [],
+        [],
+        [],
+        []
+      ]
+    ],
+    "rehash": true,
+    "error": "Printing faces do not match"
+  },
+  {
+    "name": "dangling-text",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      0,
+      6
+    ],
+    "value": "t:ja:0000000000000000",
+    "rehash": true
+  },
+  {
+    "name": "duplicate-translation",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      0,
+      8
+    ],
+    "value": [
+      [
+        "effect",
+        null,
+        "zh-Hant",
+        "tr:effect",
+        "own_source"
+      ],
+      [
+        "effect",
+        null,
+        "zh-Hant",
+        "tr:effect",
+        "own_source"
+      ]
+    ],
+    "rehash": true
+  },
+  {
+    "name": "wrong-translation-partition",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      0,
+      8
+    ],
+    "value": [
+      [
+        "name",
+        null,
+        "zh-Hant",
+        "tr:name",
+        "own_source"
+      ]
+    ],
+    "rehash": true
+  },
+  {
+    "name": "wrong-descriptor",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "types",
+      "Section",
+      "items",
+      2
+    ],
+    "value": {
+      "scalar": "Text"
+    },
+    "rehash": true
+  },
+  {
+    "name": "wrong-columns",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "columns"
+    ],
+    "value": [
+      "faces",
+      "row_index"
+    ],
+    "rehash": true
+  },
+  {
+    "name": "row-count",
+    "target": "manifest",
+    "path": [
+      "files",
+      19,
+      "row_counts",
+      0,
+      "count"
+    ],
+    "value": 99,
+    "rehash": false
+  },
+  {
+    "name": "wrong-capability",
+    "target": "manifest",
+    "path": [
+      "required_capabilities"
+    ],
+    "value": [
+      "column-partition-v1",
+      "fragment-container-v1",
+      "unknown-v1"
+    ],
+    "rehash": false
+  },
+  {
+    "name": "wrong-bucket-profile",
+    "target": "manifest",
+    "path": [
+      "partitioning",
+      "bucket_count"
+    ],
+    "value": 1,
+    "rehash": false
+  },
+  {
+    "name": "future-reader",
+    "target": "manifest",
+    "path": [
+      "min_reader_version"
+    ],
+    "value": "4.0.0",
+    "rehash": false
+  },
+  {
+    "name": "missing-base-dependency",
+    "target": "manifest",
+    "path": [
+      "files",
+      19,
+      "dependencies"
+    ],
+    "value": [],
+    "rehash": false
+  },
+  {
+    "name": "nonempty-programs",
+    "target": "programs",
+    "path": [
+      "entries"
+    ],
+    "value": [
+      {
+        "id": "prog:a",
+        "dsl_version": "1.0",
+        "ast": {}
+      }
+    ],
+    "rehash": true
+  },
+  {
+    "name": "malformed-text-id",
+    "target": "text/detail/global/global/band/23",
+    "path": [
+      "tables",
+      "text_unit",
+      0,
+      "rows",
+      0,
+      2
+    ],
+    "value": "Changed synthetic text",
+    "rehash": true
+  },
+  {
+    "name": "current-in-history",
+    "target": "text/history/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      0,
+      0
+    ],
+    "value": "r:a2",
+    "rehash": true
+  },
+  {
+    "name": "dangling-vocabulary",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      0,
+      7
+    ],
+    "value": [
+      [
+        0,
+        "t:ja:0000000000000000",
+        "rule"
+      ]
+    ],
+    "rehash": true
+  },
+  {
+    "name": "spelling-undeclared",
+    "target": "text/detail/global/global/band/18",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      4,
+      0,
+      3
+    ],
+    "value": "absent",
+    "rehash": true,
+    "error": "undeclared parameter"
+  },
+  {
+    "name": "spelling-disabled-uint",
+    "target": "text/detail/global/global/band/18",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters",
+      0,
+      "uint"
+    ],
+    "value": null,
+    "rehash": true,
+    "error": "enabled parameter domain"
+  },
+  {
+    "name": "spelling-disabled-variable",
+    "target": "text/detail/global/global/band/18",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters",
+      0,
+      "variables"
+    ],
+    "value": [],
+    "rehash": true,
+    "error": "enabled parameter domain"
+  },
+  {
+    "name": "parameter-inverted",
+    "target": "text/detail/global/global/band/18",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters",
+      0,
+      "uint",
+      "minimum"
+    ],
+    "value": 10,
+    "rehash": true,
+    "error": "Inverted parameter range"
+  },
+  {
+    "name": "parameter-duplicate",
+    "target": "text/detail/global/global/band/18",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters"
+    ],
+    "value": [
+      {
+        "name": "amount",
+        "uint": {
+          "minimum": 0,
+          "maximum": 9
+        },
+        "variables": [
+          "X"
+        ]
+      },
+      {
+        "name": "amount",
+        "uint": {
+          "minimum": 0,
+          "maximum": 9
+        },
+        "variables": [
+          "X"
+        ]
+      }
+    ],
+    "rehash": true,
+    "error": "unique keys"
+  },
+  {
+    "name": "parameter-unsorted",
+    "target": "text/detail/global/global/band/18",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters"
+    ],
+    "value": [
+      {
+        "name": "z",
+        "uint": null,
+        "variables": [
+          "X"
+        ]
+      },
+      {
+        "name": "amount",
+        "uint": {
+          "minimum": 0,
+          "maximum": 9
+        },
+        "variables": [
+          "X"
+        ]
+      }
+    ],
+    "rehash": true,
+    "error": "unique keys"
+  },
+  {
+    "name": "hint-parameters-disagree",
+    "target": "text/detail/global/global/band/6",
+    "path": [
+      "tables",
+      "ruling_revision",
+      0,
+      "rows",
+      0,
+      12,
+      1,
+      2,
+      "parameters",
+      0,
+      "uint",
+      "maximum"
+    ],
+    "value": 10,
+    "rehash": true,
+    "error": "identical parameters"
+  },
+  {
+    "name": "variant-unapproved",
+    "target": "images/detail/home_set/set%3Aa/band/1",
+    "path": [
+      "tables",
+      "printing_image",
+      0,
+      "rows",
+      0,
+      3
+    ],
+    "value": "pending",
+    "rehash": true,
+    "error": "approved available image",
+    "setup": [
+      {
+        "target": "images/detail/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "printing_image",
+          0,
+          "rows",
+          0,
+          3
+        ],
+        "value": "pending",
+        "rehash": true
+      }
+    ]
+  },
+  {
+    "name": "variant-unavailable",
+    "target": "images/detail/home_set/set%3Aa/band/1",
+    "path": [
+      "tables",
+      "printing_image",
+      0,
+      "rows",
+      0,
+      4
+    ],
+    "value": "unfetched",
+    "rehash": true,
+    "error": "approved available image",
+    "setup": [
+      {
+        "target": "images/detail/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "printing_image",
+          0,
+          "rows",
+          0,
+          4
+        ],
+        "value": "unfetched",
+        "rehash": true
+      }
+    ]
+  },
+  {
+    "name": "published-hour-25",
+    "target": "manifest",
+    "path": [
+      "published_at"
+    ],
+    "value": "2026-09-29T25:00:00Z",
+    "rehash": false
+  },
+  {
+    "name": "published-february-30",
+    "target": "manifest",
+    "path": [
+      "published_at"
+    ],
+    "value": "2026-02-30T01:00:00Z",
+    "rehash": false
+  },
+  {
+    "name": "revision-date-unicode",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      1,
+      2
+    ],
+    "value": "２０２６-09-29",
+    "rehash": true
+  },
+  {
+    "name": "pending-cross-face-observation",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows",
+      0,
+      1,
+      0,
+      5,
+      0,
+      0
+    ],
+    "value": "r:b1",
+    "rehash": true,
+    "error": "Observation revision belongs"
+  },
+  {
+    "name": "pending-candidate-without-own-observation",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      3,
+      0,
+      1
+    ],
+    "value": "r:a1",
+    "rehash": true,
+    "error": "no printing observation"
+  },
+  {
+    "name": "pending-null-cannot-replace-available-observation",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      3,
+      0,
+      1
+    ],
+    "value": null,
+    "rehash": true,
+    "error": "no printing observation"
+  },
+  {
+    "name": "pending-undated-inventory-incomplete",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      4
+    ],
+    "value": [],
+    "rehash": true,
+    "error": "undated wording"
+  },
+  {
+    "name": "pending-preserves-valid-current",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      2
+    ],
+    "value": [
+      null,
+      "candidates"
+    ],
+    "rehash": true,
+    "error": "preserve a valid current"
+  },
+  {
+    "name": "pending-current-display-must-match",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      2
+    ],
+    "value": [
+      "r:b1",
+      "current"
+    ],
+    "rehash": true,
+    "error": "disagrees with adopted current"
+  },
+  {
+    "name": "pending-display-not-candidate",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      2
+    ],
+    "value": [
+      "r:a1",
+      "latest_known_release"
+    ],
+    "rehash": true,
+    "error": "Display is not a pending candidate",
+    "setup": [
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          4
+        ],
+        "value": []
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          5,
+          0,
+          2
+        ],
+        "value": [
+          "r:a2",
+          "latest_known_release"
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "card_engine_support",
+          0,
+          "rows",
+          0,
+          3
+        ],
+        "value": [
+          [
+            "jp",
+            [
+              "wording_pending"
+            ]
+          ]
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          5,
+          0,
+          4
+        ],
+        "value": [
+          "p:b"
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/global/global/band/7",
+        "path": [
+          "tables",
+          "product",
+          0,
+          "rows",
+          0,
+          6
+        ],
+        "value": "2026-01-01"
+      },
+      {
+        "target": "bootstrap/bootstrap/global/global/band/7",
+        "path": [
+          "tables",
+          "product",
+          0,
+          "rows",
+          0,
+          7
+        ],
+        "value": "day"
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "printing_product"
+        ],
+        "value": [
+          {
+            "owner": {
+              "id": "set:a",
+              "kind": "home_set"
+            },
+            "bucket": 29,
+            "partition": "bootstrap",
+            "base": null,
+            "columns": [
+              "printing_id",
+              "product_id",
+              "available_on",
+              "date_precision",
+              "date_raw",
+              "inclusion_kind",
+              "note_unit_id",
+              "first_inclusion_state"
+            ],
+            "rows": [
+              [
+                "p:a",
+                "prod:null",
+                null,
+                null,
+                null,
+                "other",
+                null,
+                "unknown"
+              ]
+            ]
+          },
+          {
+            "owner": {
+              "id": "set:a",
+              "kind": "home_set"
+            },
+            "bucket": 43,
+            "partition": "bootstrap",
+            "base": null,
+            "columns": [
+              "printing_id",
+              "product_id",
+              "available_on",
+              "date_precision",
+              "date_raw",
+              "inclusion_kind",
+              "note_unit_id",
+              "first_inclusion_state"
+            ],
+            "rows": []
+          }
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face_revision",
+          0,
+          "rows",
+          0,
+          0
+        ],
+        "value": "r:a1"
+      },
+      {
+        "target": "text/history/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face_revision",
+          0,
+          "rows",
+          0,
+          0
+        ],
+        "value": "r:a2"
+      }
+    ]
+  },
+  {
+    "name": "pending-display-cross-face",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      0,
+      1
+    ],
+    "value": "f:b",
+    "rehash": true,
+    "error": "Current revision belongs"
+  },
+  {
+    "name": "pending-display-cross-region",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      0,
+      2
+    ],
+    "value": "en",
+    "rehash": true,
+    "error": "Current revision belongs"
+  },
+  {
+    "name": "pending-latest-without-day",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      2
+    ],
+    "value": [
+      "r:a2",
+      "latest_known_release"
+    ],
+    "rehash": true,
+    "error": "complete release day",
+    "setup": [
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          4
+        ],
+        "value": []
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          5,
+          0,
+          2
+        ],
+        "value": [
+          "r:a2",
+          "latest_known_release"
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "card_engine_support",
+          0,
+          "rows",
+          0,
+          3
+        ],
+        "value": [
+          [
+            "jp",
+            [
+              "wording_pending"
+            ]
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "pending-latest-null-candidate",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "printing_product"
+    ],
+    "value": [
+      {
+        "owner": {
+          "id": "set:a",
+          "kind": "home_set"
+        },
+        "bucket": 29,
+        "partition": "bootstrap",
+        "base": null,
+        "columns": [
+          "printing_id",
+          "product_id",
+          "available_on",
+          "date_precision",
+          "date_raw",
+          "inclusion_kind",
+          "note_unit_id",
+          "first_inclusion_state"
+        ],
+        "rows": [
+          [
+            "p:a",
+            "prod:null",
+            null,
+            null,
+            null,
+            "other",
+            null,
+            "unknown"
+          ]
+        ]
+      },
+      {
+        "owner": {
+          "id": "set:a",
+          "kind": "home_set"
+        },
+        "bucket": 43,
+        "partition": "bootstrap",
+        "base": null,
+        "columns": [
+          "printing_id",
+          "product_id",
+          "available_on",
+          "date_precision",
+          "date_raw",
+          "inclusion_kind",
+          "note_unit_id",
+          "first_inclusion_state"
+        ],
+        "rows": [
+          [
+            "p:b",
+            "prod:null",
+            null,
+            null,
+            null,
+            "other",
+            null,
+            "unknown"
+          ]
+        ]
+      }
+    ],
+    "rehash": true,
+    "error": "unavailable/latest",
+    "setup": [
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          4
+        ],
+        "value": []
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          5,
+          0,
+          2
+        ],
+        "value": [
+          "r:a2",
+          "latest_known_release"
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "card_engine_support",
+          0,
+          "rows",
+          0,
+          3
+        ],
+        "value": [
+          [
+            "jp",
+            [
+              "wording_pending"
+            ]
+          ]
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          5,
+          0,
+          4
+        ],
+        "value": [
+          "p:b"
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/global/global/band/7",
+        "path": [
+          "tables",
+          "product",
+          0,
+          "rows",
+          0,
+          6
+        ],
+        "value": "2026-01-01"
+      },
+      {
+        "target": "bootstrap/bootstrap/global/global/band/7",
+        "path": [
+          "tables",
+          "product",
+          0,
+          "rows",
+          0,
+          7
+        ],
+        "value": "day"
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "printing_product"
+        ],
+        "value": [
+          {
+            "owner": {
+              "id": "set:a",
+              "kind": "home_set"
+            },
+            "bucket": 29,
+            "partition": "bootstrap",
+            "base": null,
+            "columns": [
+              "printing_id",
+              "product_id",
+              "available_on",
+              "date_precision",
+              "date_raw",
+              "inclusion_kind",
+              "note_unit_id",
+              "first_inclusion_state"
+            ],
+            "rows": [
+              [
+                "p:a",
+                "prod:null",
+                null,
+                null,
+                null,
+                "other",
+                null,
+                "unknown"
+              ]
+            ]
+          },
+          {
+            "owner": {
+              "id": "set:a",
+              "kind": "home_set"
+            },
+            "bucket": 43,
+            "partition": "bootstrap",
+            "base": null,
+            "columns": [
+              "printing_id",
+              "product_id",
+              "available_on",
+              "date_precision",
+              "date_raw",
+              "inclusion_kind",
+              "note_unit_id",
+              "first_inclusion_state"
+            ],
+            "rows": []
+          }
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          5,
+          0,
+          4
+        ],
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "pending-display-not-latest",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      2
+    ],
+    "value": [
+      "r:a2",
+      "latest_known_release"
+    ],
+    "rehash": true,
+    "error": "unavailable/latest",
+    "setup": [
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          4
+        ],
+        "value": []
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          5,
+          0,
+          2
+        ],
+        "value": [
+          "r:a2",
+          "latest_known_release"
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "card_engine_support",
+          0,
+          "rows",
+          0,
+          3
+        ],
+        "value": [
+          [
+            "jp",
+            [
+              "wording_pending"
+            ]
+          ]
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          5,
+          0,
+          4
+        ],
+        "value": [
+          "p:b"
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/global/global/band/7",
+        "path": [
+          "tables",
+          "product",
+          0,
+          "rows",
+          0,
+          6
+        ],
+        "value": "2026-01-01"
+      },
+      {
+        "target": "bootstrap/bootstrap/global/global/band/7",
+        "path": [
+          "tables",
+          "product",
+          0,
+          "rows",
+          0,
+          7
+        ],
+        "value": "day"
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "printing_product"
+        ],
+        "value": [
+          {
+            "owner": {
+              "id": "set:a",
+              "kind": "home_set"
+            },
+            "bucket": 29,
+            "partition": "bootstrap",
+            "base": null,
+            "columns": [
+              "printing_id",
+              "product_id",
+              "available_on",
+              "date_precision",
+              "date_raw",
+              "inclusion_kind",
+              "note_unit_id",
+              "first_inclusion_state"
+            ],
+            "rows": [
+              [
+                "p:a",
+                "prod:null",
+                null,
+                null,
+                null,
+                "other",
+                null,
+                "unknown"
+              ]
+            ]
+          },
+          {
+            "owner": {
+              "id": "set:a",
+              "kind": "home_set"
+            },
+            "bucket": 43,
+            "partition": "bootstrap",
+            "base": null,
+            "columns": [
+              "printing_id",
+              "product_id",
+              "available_on",
+              "date_precision",
+              "date_raw",
+              "inclusion_kind",
+              "note_unit_id",
+              "first_inclusion_state"
+            ],
+            "rows": []
+          }
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          5,
+          0,
+          4
+        ],
+        "value": []
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          5,
+          0,
+          3,
+          1,
+          1
+        ],
+        "value": "r:a1"
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "printing_product"
+        ],
+        "value": [
+          {
+            "owner": {
+              "id": "set:a",
+              "kind": "home_set"
+            },
+            "bucket": 29,
+            "partition": "bootstrap",
+            "base": null,
+            "columns": [
+              "printing_id",
+              "product_id",
+              "available_on",
+              "date_precision",
+              "date_raw",
+              "inclusion_kind",
+              "note_unit_id",
+              "first_inclusion_state"
+            ],
+            "rows": [
+              [
+                "p:a",
+                "prod:null",
+                null,
+                null,
+                null,
+                "other",
+                null,
+                "unknown"
+              ]
+            ]
+          },
+          {
+            "owner": {
+              "id": "set:a",
+              "kind": "home_set"
+            },
+            "bucket": 43,
+            "partition": "bootstrap",
+            "base": null,
+            "columns": [
+              "printing_id",
+              "product_id",
+              "available_on",
+              "date_precision",
+              "date_raw",
+              "inclusion_kind",
+              "note_unit_id",
+              "first_inclusion_state"
+            ],
+            "rows": [
+              [
+                "p:b",
+                "prod:null",
+                "2027-01-01",
+                "day",
+                null,
+                "other",
+                null,
+                "unknown"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "target": "text/detail/home_set/set%3Aa/band/1",
+        "path": [
+          "tables",
+          "printing",
+          0,
+          "rows",
+          0,
+          1,
+          0,
+          5
+        ],
+        "value": [
+          [
+            "r:a1",
+            "available",
+            "https://example.invalid/observations/b"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "pending-region-without-printing",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      1,
+      5
+    ],
+    "value": [
+      [
+        "en",
+        "pending",
+        [
+          null,
+          "candidates"
+        ],
+        [
+          [
+            "p:a",
+            "r:a2"
+          ]
+        ],
+        [
+          "p:a"
+        ]
+      ]
+    ],
+    "rehash": true,
+    "error": "requires pending wording"
+  },
+  {
+    "name": "pending-candidate-cross-region",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      3,
+      0,
+      1
+    ],
+    "value": null,
+    "rehash": true,
+    "error": "another printing face/region",
+    "setup": [
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "printing",
+          0,
+          "rows",
+          0,
+          2
+        ],
+        "value": "en"
+      },
+      {
+        "target": "text/detail/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "printing",
+          0,
+          "rows",
+          0,
+          1,
+          0,
+          5
+        ],
+        "value": []
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          5
+        ],
+        "value": [
+          [
+            "en",
+            "pending",
+            [
+              null,
+              "candidates"
+            ],
+            [
+              [
+                "p:a",
+                null
+              ]
+            ],
+            [
+              "p:a"
+            ]
+          ],
+          [
+            "jp",
+            "pending",
+            [
+              "r:a2",
+              "current"
+            ],
+            [
+              [
+                "p:a",
+                "r:a2"
+              ],
+              [
+                "p:b",
+                null
+              ]
+            ],
+            [
+              "p:a",
+              "p:b"
+            ]
+          ]
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          1,
+          5
+        ],
+        "value": [
+          [
+            "en",
+            "pending",
+            [
+              null,
+              "candidates"
+            ],
+            [
+              [
+                "p:a",
+                null
+              ]
+            ],
+            [
+              "p:a"
+            ]
+          ]
+        ]
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "card_engine_support",
+          0,
+          "rows",
+          0,
+          3
+        ],
+        "value": [
+          [
+            "en",
+            [
+              "wording_pending"
+            ]
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "name": "pending-observation-cross-region",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows",
+      0,
+      1,
+      0,
+      5
+    ],
+    "value": [
+      [
+        "r:a1",
+        "available",
+        "https://example.invalid/observations/a"
+      ]
+    ],
+    "rehash": true,
+    "error": "Observation revision belongs",
+    "setup": [
+      {
+        "target": "text/history/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face_revision",
+          0,
+          "rows",
+          0,
+          2
+        ],
+        "value": "en"
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "tables",
+          "face",
+          0,
+          "rows",
+          0,
+          5,
+          0,
+          3,
+          0,
+          1
+        ],
+        "value": "r:a1"
+      }
+    ]
+  },
+  {
+    "name": "pending-wording-unsorted",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5
+    ],
+    "value": [
+      [
+        "jp",
+        "pending",
+        [
+          "r:a2",
+          "current"
+        ],
+        [
+          [
+            "p:a",
+            "r:a2"
+          ],
+          [
+            "p:b",
+            null
+          ]
+        ],
+        [
+          "p:a",
+          "p:b"
+        ]
+      ],
+      [
+        "jp",
+        "pending",
+        [
+          "r:a2",
+          "current"
+        ],
+        [
+          [
+            "p:a",
+            "r:a2"
+          ],
+          [
+            "p:b",
+            null
+          ]
+        ],
+        [
+          "p:a",
+          "p:b"
+        ]
+      ]
+    ],
+    "rehash": true,
+    "error": "Rows must be sorted with unique keys"
+  },
+  {
+    "name": "pending-candidates-unsorted",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      3
+    ],
+    "value": [
+      [
+        "p:b",
+        null
+      ],
+      [
+        "p:a",
+        "r:a2"
+      ]
+    ],
+    "rehash": true,
+    "error": "Rows must be sorted with unique keys"
+  },
+  {
+    "name": "pending-observations-unsorted",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows",
+      0,
+      1,
+      0,
+      5
+    ],
+    "value": [
+      [
+        "r:a2",
+        "available",
+        "https://example.invalid/z"
+      ],
+      [
+        "r:a2",
+        "available",
+        "https://example.invalid/a"
+      ]
+    ],
+    "rehash": true,
+    "error": "Rows must be sorted with unique keys"
+  }
+]

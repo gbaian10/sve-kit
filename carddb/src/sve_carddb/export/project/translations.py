@@ -51,6 +51,7 @@ def _owners(view: dict[str, list[Record]]) -> dict[tuple[str, ...], Record]:
     for table in (
         "face_revision",
         "qa_version",
+        "cr_clause",
         "keyword",
         "product_family",
         "product",
@@ -121,6 +122,10 @@ def source_unit(owner: Record, field: str, ordinal: JsonValue) -> JsonValue:
         if len(values) != 1:
             raise ValueError("Translation section ordinal missing")
         return values[0]["text_unit_id" if field == "section" else "label_unit_id"]
+    if field == "effect" and "cr_version_id" in owner:
+        return owner["text_unit_id"]
+    if field == "label" and "name_unit_id" in owner:
+        return owner["name_unit_id"]
     key = {
         "name": "name_unit_id",
         "effect": "effect_unit_id",
@@ -220,7 +225,7 @@ def _binding_identity(
         if destination[:2] != (card_id, face_id) or destination[2] == region:
             raise ValueError("Cross-region translation owner mismatch")
         if region != "jp" or destination[2] != "en" or binding.target_lang != "zh-Hant":
-            raise ValueError("Shared JP translation region/language mismatch")
+            raise ValueError("JP source translation region/language mismatch")
     return original
 
 
@@ -248,24 +253,6 @@ def _display_checks(
         ):
             raise ValueError("Translation display check source mismatch")
     return checks
-
-
-def _unchecked_source_available(
-    source: Source, view: dict[str, list[Record]], use: Record, binding: DisplayBinding
-) -> bool:
-    original_owner = _source_owner(source, _owner(use))
-    owner = _owners(view)[binding.destination]
-    if original_owner is None:
-        return False
-    field = string(use["field"])
-    if (
-        source_unit(owner, field, use["ordinal"]) is None
-        or source_unit(original_owner, field, use["ordinal"]) is None
-    ):
-        return False
-    return field not in {"effect", "section"} or len(
-        array(original_owner["sections"])
-    ) == len(array(owner["sections"]))
 
 
 def _counterpart_text(
@@ -299,19 +286,15 @@ def _cross_region_allowed(
     identity = _binding_identity(source, use, binding)
     if identity is None or not _confirmed_mapping(source, view, identity[0]):
         return False
-    if _divergent(source, identity[0], string(use["field"])):
-        return False
     checks = _display_checks(source, use, decisions, identity)
     if binding.basis == "official_counterpart":
+        if _divergent(source, identity[0], string(use["field"])):
+            return False
         return _counterpart_text(source, checks, binding)
-    matching = [
-        check for check in checks if check.counterpart_owner == binding.destination
-    ]
-    if binding.basis == "shared_jp":
-        return bool(matching)
-    if matching:
-        raise ValueError("Checked JP translation must use shared_jp")
-    return _unchecked_source_available(source, view, use, binding)
+    if use["field"] not in {"name", "effect", "flavor"} or use["ordinal"] is not None:
+        return False
+    receiver = _owners(view)[binding.destination]
+    return source_unit(receiver, string(use["field"]), None) is not None
 
 
 def _confirmed_mapping(
@@ -353,6 +336,7 @@ class _SelectedTranslations:
         use: Record,
         selected: Record,
         basis: str,
+        counterpart: Record | None = None,
     ) -> None:
         """Keep selected current values and their exact source/text closure."""
         identifier = string(selected["translation_id"])
@@ -372,6 +356,7 @@ class _SelectedTranslations:
         if details["source_hash"] != digest(string(original["text"]).encode()):
             raise ValueError("Translation source hash differs from its current context")
         translation["source_unit_id"] = unit_id
+        translation["annotation_set_id"] = None
         translation["text_unit_id"] = self.texts.intern(
             string(translation["target_lang"]), string(details["text"])
         )
@@ -395,10 +380,18 @@ class _SelectedTranslations:
                 "target_lang": translation["target_lang"],
                 "translation_id": identifier,
                 "basis": basis,
+                "source": pointer(use),
+                "counterpart": counterpart,
             }
         )
 
-    def bind(self, owner: Record, use: Record, binding: DisplayBinding) -> None:
+    def bind(
+        self,
+        owner: Record,
+        use: Record,
+        binding: DisplayBinding,
+        counterpart: Record | None = None,
+    ) -> None:
         """Official counterpart IDs do not occupy the common selection slot."""
         selected = [
             row
@@ -420,9 +413,9 @@ class _SelectedTranslations:
                 }
             ]
         elif binding.translation_id is not None:
-            raise ValueError("Shared JP binding must use the common selection")
+            raise ValueError("JP source binding must use the common selection")
         for row in selected:
-            self.append(owner, use, row, binding.basis)
+            self.append(owner, use, row, binding.basis, counterpart)
 
 
 def _direct_binding(
@@ -459,8 +452,7 @@ def translations(  # ruff: ignore[complex-structure] -- own-source and cross-reg
     for binding in decisions.display_bindings:
         if binding.basis not in {
             "own_source",
-            "shared_jp",
-            "shared_jp_unchecked",
+            "jp_source",
             "official_counterpart",
         }:
             raise ValueError("Unknown translation display basis")
@@ -477,10 +469,50 @@ def translations(  # ruff: ignore[complex-structure] -- own-source and cross-reg
         if binding.basis == "own_source":
             _direct_binding(chosen, owner, use, binding)
         elif _cross_region_allowed(source, view, use, binding, decisions):
-            chosen.bind(owner, use, binding)
+            chosen.bind(
+                owner, use, binding, _counterpart_pointer(use, binding, decisions)
+            )
     used = {
         string(object_value(raw)["translation_id"])
         for owner in owners.values()
         for raw in array(owner["translations"])
     }
     view["translation"] = [row for row in view["translation"] if row["id"] in used]
+
+
+def public_owner(key: tuple[str, ...]) -> Record:
+    """Public pointers preserve exact owners while removing private build column names."""
+    if key[0] == "vocabulary":
+        return {"kind": key[0], "vocabulary_kind": key[1], "code": key[2]}
+    result: Record = {"kind": key[0], "id": key[1]}
+    if key[0] == "printing_face":
+        result["face_id"] = key[2]
+    return result
+
+
+def pointer(use: Record) -> Record:
+    """The display owner never supplies coordinates for a donor's text."""
+    return {
+        "owner": public_owner(_owner(use)),
+        "field": use["field"],
+        "ordinal": use["ordinal"],
+    }
+
+
+def _counterpart_pointer(
+    use: Record, binding: DisplayBinding, decisions: Decisions
+) -> Record | None:
+    if binding.basis != "official_counterpart":
+        return None
+    checks = [
+        check
+        for check in decisions.display_checks
+        if check.source_use_id == use["id"] and check.counterpart
+    ]
+    if len(checks) != 1:
+        raise ValueError("Official counterpart requires one exact peer owner")
+    return {
+        "owner": public_owner(checks[0].counterpart_owner),
+        "field": use["field"],
+        "ordinal": use["ordinal"],
+    }

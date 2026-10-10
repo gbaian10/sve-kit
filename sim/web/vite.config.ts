@@ -132,7 +132,13 @@ export default defineConfig({
     serveSnapshotRoot("/cdn-preview", previewDir),
   ],
   server: {
-    fs: { allow: [searchForWorkspaceRoot(process.cwd()), contractSchemaDir] },
+    fs: {
+      allow: [
+        searchForWorkspaceRoot(process.cwd()),
+        contractSchemaDir,
+        path.resolve(import.meta.dirname, "../../tests/fixtures"),
+      ],
+    },
   },
   worker: {
     rollupOptions: {

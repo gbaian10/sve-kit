@@ -1,8 +1,8 @@
 import type { LoadedSnapshot, SnapshotClient } from "./client"
-import type { Row } from "./format-v1/decode"
-import { SnapshotError } from "./format-v1/errors"
-import { arrayValue, integerValue, objectValue, stringValue } from "./format-v1/json"
-import { validateMedia } from "./format-v1/media"
+import type { Row } from "./format-v3/decode"
+import { SnapshotError } from "./format-v3/errors"
+import { arrayValue, integerValue, objectValue, stringValue } from "./format-v3/json"
+import { validateMedia } from "./format-v3/media"
 import { mediaImageSource } from "./image-url"
 import { bucketOf, createLocator } from "./locator"
 

@@ -1,16 +1,16 @@
 """Validate the complete current glossary closure before projection."""
 
-import re
 from dataclasses import dataclass
 from functools import cached_property
 from typing import TYPE_CHECKING
 
-from pydantic import JsonValue, ValidationError
+from pydantic import JsonValue
 
-from sve_carddb.core.authored import shards
-from sve_carddb.core.json import canonical, parse
-from sve_carddb.core.models import RecordData
-from sve_carddb.domains.translations.glossary.records import Shard as CurrentShard
+from sve_carddb.core.authored import require_directory
+from sve_carddb.domains.translations.four_layer_authored import (
+    Inputs as FourLayerInputs,
+)
+from sve_carddb.domains.translations.four_layer_authored import from_files, read_inputs
 from sve_carddb.domains.translations.glossary.validate import records as current_records
 from sve_carddb.domains.translations.glossary.validate import (
     validate as validate_current,
@@ -22,22 +22,23 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.glossary.records import Record as CurrentRecord
 
 
-def _model[T: RecordData](model: type[T], value: JsonValue) -> T:
-    try:
-        return model.model_validate_json(canonical(value))
-    except ValidationError as error:
-        location = ".".join(
-            str(part) for part in error.errors(include_input=False)[0]["loc"]
-        )
-        raise ValueError(
-            "Invalid translation authored fields at " + (location or "root")
-        ) from None
-
-
 @dataclass(frozen=True)
 class Snapshot:
     shards: tuple[tuple[str, bytes, bytes], ...]
     closure: tuple[tuple[str, bytes, bytes], ...] = ()
+
+    @cached_property
+    def four_layer(self) -> FourLayerInputs:
+        """All consumers share one strict format-three closure and its source-free checks."""
+        if self.closure and self.shards != tuple(
+            file
+            for file in self.closure
+            if file[0].startswith(("translations/glossary/", "translations/overrides/"))
+        ):
+            raise ValueError(
+                "Translation snapshot projections differ from their shared closure"
+            )
+        return from_files(self.closure or self.shards)
 
     @cached_property
     def _current_values(self) -> tuple[CurrentRecord, ...]:
@@ -51,46 +52,22 @@ class Snapshot:
 
 def validate_snapshot(snapshot: Snapshot) -> None:
     """Validate glossary and name overrides in a separately verified full closure."""
-    for path, _, content in snapshot.shards:
-        match = re.fullmatch(
-            r"translations/(glossary|overrides)/([A-Za-z0-9_-]+)/[0-9]{3,}\.yaml", path
-        )
-        if match is None:
-            raise ValueError("Glossary snapshot contains an unsupported shard path")
-        current = _model(CurrentShard, parse(content))
-        keys = [r.record_key for r in current.records]
-        if len(keys) != len(set(keys)):
-            raise ValueError("Current translation records must be unique")
-        for record in current.records:
-            is_override = record.kind in {"context_assignment", "card_name_concept"}
-            if is_override != (match[1] == "overrides"):
-                raise ValueError("Translation record is in the wrong authored area")
+    _ = snapshot.four_layer
     validate_current(snapshot)
 
 
 def load_glossary(root: Path) -> Snapshot:
     """Read current glossary, overrides and templates once from fixed data areas."""
-    closure = shards(
-        root,
-        ("translations/glossary", "translations/overrides", "translations/templates"),
-        optional=("translations/overrides", "translations/templates"),
+    require_directory(root, root / "translations/glossary")
+    loaded = read_inputs(root)
+    selected = tuple(
+        file
+        for file in loaded.files
+        if file[0].startswith(("translations/glossary/", "translations/overrides/"))
     )
-    selected = []
-    for name, exact, content in closure:
-        if name.startswith("translations/templates/"):
-            _template_input(name, content)
-        else:
-            selected.append((name, exact, content))
-    snapshot = Snapshot(tuple(selected), closure)
+    snapshot = Snapshot(selected, loaded.files)
     validate_snapshot(snapshot)
     return snapshot
-
-
-def _template_input(path: str, content: bytes) -> None:
-    """Foreign current envelopes are checked without reconstructing source pages."""
-    from sve_carddb.domains.translations.templates.loader import validate_foreign  # ruff: ignore[import-outside-top-level] -- shared foreign validation remains source free
-
-    validate_foreign(path, content)
 
 
 @dataclass(frozen=True)

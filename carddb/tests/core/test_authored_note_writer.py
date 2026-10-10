@@ -9,8 +9,8 @@ from pydantic import BaseModel
 from sve_carddb.core.yaml import parse_yaml
 from sve_carddb.domains.products.models import Shard
 from sve_carddb.domains.registry.storage import encode, read_yaml
-from sve_carddb.domains.translations.parameters.rule_candidates import BY_ID
-from sve_carddb.domains.translations.parameters.rules import Rule, Rules, parse
+from sve_carddb.domains.translations.recognition.rule_candidates import BY_ID
+from sve_carddb.domains.translations.recognition.rules import Rule, Rules, parse
 
 from ..support.product_fixtures import envelope, family, first_record
 

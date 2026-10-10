@@ -1,0 +1,577 @@
+[
+  {
+    "name": "media-shape-0",
+    "target": "printing_image",
+    "value": [
+      "p:a",
+      "f:a",
+      "img:a",
+      "approved",
+      "available",
+      0,
+      11,
+      [
+        [
+          "art_m",
+          384,
+          288
+        ],
+        [
+          "art_s",
+          160,
+          120
+        ],
+        [
+          "card_l",
+          459,
+          641
+        ],
+        [
+          "card_m",
+          320,
+          447
+        ],
+        [
+          "card_s",
+          128,
+          179
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "media-shape-1",
+    "target": "printing_image",
+    "value": [
+      "p:a",
+      "f:a",
+      "img:a",
+      "approved",
+      "available",
+      true,
+      11,
+      [
+        [
+          "art_m",
+          384,
+          288
+        ],
+        [
+          "art_s",
+          160,
+          120
+        ],
+        [
+          "card_l",
+          459,
+          641
+        ],
+        [
+          "card_m",
+          320,
+          447
+        ],
+        [
+          "card_s",
+          128,
+          179
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "media-shape-2",
+    "target": "printing_image",
+    "raw_json": "[\"p:a\",\"f:a\",\"img:a\",\"approved\",\"available\",9007199254740992,11,[[\"art_m\",384,288],[\"art_s\",160,120],[\"card_l\",459,641],[\"card_m\",320,447],[\"card_s\",128,179]]]",
+    "error": "Expected safe integer"
+  },
+  {
+    "name": "media-shape-3",
+    "target": "printing_image",
+    "value": [
+      "p:a",
+      "f:a",
+      "img:a",
+      "approved",
+      "available",
+      7,
+      -1,
+      [
+        [
+          "art_m",
+          384,
+          288
+        ],
+        [
+          "art_s",
+          160,
+          120
+        ],
+        [
+          "card_l",
+          459,
+          641
+        ],
+        [
+          "card_m",
+          320,
+          447
+        ],
+        [
+          "card_s",
+          128,
+          179
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "media-shape-4",
+    "target": "printing_image",
+    "value": [
+      "p:a",
+      "f:a",
+      "img:a",
+      "approved",
+      "available",
+      7,
+      11,
+      [
+        [
+          "art_m",
+          0,
+          288
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "media-shape-5",
+    "target": "printing_image",
+    "value": [
+      "p:a",
+      "f:a",
+      "img:a",
+      "approved",
+      "available",
+      7,
+      11,
+      [
+        [
+          "png",
+          160,
+          120
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "Translation-low_confidence-null",
+    "target": "Container",
+    "value": {
+      "format_version": "3.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "machine",
+                "unofficial",
+                null
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-low_confidence-zero",
+    "target": "Container",
+    "value": {
+      "format_version": "3.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "machine",
+                "unofficial",
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-low_confidence-one",
+    "target": "Container",
+    "value": {
+      "format_version": "3.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "machine",
+                "unofficial",
+                1
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-low_confidence-old-status",
+    "target": "Container",
+    "value": {
+      "format_version": "3.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "machine",
+                "unofficial",
+                "reviewed"
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-low_confidence-string",
+    "target": "Container",
+    "value": {
+      "format_version": "3.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "machine",
+                "unofficial",
+                "true"
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-low_confidence-missing",
+    "target": "Container",
+    "value": {
+      "format_version": "3.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "machine",
+                "unofficial"
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-origin-official_sve",
+    "target": "Container",
+    "value": {
+      "format_version": "3.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "official_sve",
+                "unofficial",
+                true
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-origin-official_sv1",
+    "target": "Container",
+    "value": {
+      "format_version": "3.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "official_sv1",
+                "unofficial",
+                true
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-origin-official_svwb",
+    "target": "Container",
+    "value": {
+      "format_version": "3.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "official_svwb",
+                "unofficial",
+                true
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-origin-community",
+    "target": "Container",
+    "value": {
+      "format_version": "3.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "community",
+                "unofficial",
+                true
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  }
+]

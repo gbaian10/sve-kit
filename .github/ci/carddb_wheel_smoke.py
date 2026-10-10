@@ -14,9 +14,9 @@ from sve_carddb.export.reader import read_snapshot
 def main() -> None:
     """Run under the isolated wheel interpreter, without the checkout on sys.path."""
     fixture = Path(sys.argv[1]).resolve()
-    resource = files("sve_carddb.contracts").joinpath("schema/v2/contract.schema.json")
+    resource = files("sve_carddb.contracts").joinpath("schema/v3/contract.schema.json")
     assert "site-packages" in str(resource)
-    assert schema()["$id"] == "urn:sve-kit:snapshot:2.0.0"
+    assert schema()["$id"] == "urn:sve-kit:snapshot:3.0.0"
     assert generate() == resource.read_bytes()
     assert not any(
         name == prefix or name.startswith(prefix + ".")

@@ -36,6 +36,7 @@ class Decisions:
     observed_texts: Mapping[tuple[str, str], tuple[Record, ...]] = field(
         default_factory=dict
     )
+    card_name_targets: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     display_bindings: tuple[DisplayBinding, ...] = ()
     display_checks: tuple[DisplayCheck, ...] = ()
     private_digital: bool = False

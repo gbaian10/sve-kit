@@ -4,18 +4,18 @@ import { describe, expect, it, vi } from "vitest"
 import { memoryCache as storage } from "../test-utils/cache"
 import type { Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
-import { canonical, type JsonObject, type JsonValue, stringValue } from "./format-v1/json"
-import { digest } from "./format-v1/sha256"
+import { canonical, type JsonObject, type JsonValue, stringValue } from "./format-v3/json"
+import { digest } from "./format-v3/sha256"
 import { loadImagePage } from "./images"
 import { MetadataBytes } from "./metadata"
 import { requestQueue } from "./request-queue"
 
 const golden = import.meta.glob<string>(
-  "../../../../tests/fixtures/snapshot-contract/v2/**/*.json",
+  "../../../../tests/fixtures/snapshot-contract/v3/**/*.json",
   { query: "?raw", import: "default", eager: true },
 )
 const value = (name: string): JsonValue => {
-  const key = Object.keys(golden).find((path) => path.endsWith(`/v2/${name}`))
+  const key = Object.keys(golden).find((path) => path.endsWith(`/v3/${name}`))
   if (!key) throw new Error("missing golden")
   return JSON.parse(golden[key] ?? "") as JsonValue
 }

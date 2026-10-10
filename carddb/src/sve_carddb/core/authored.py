@@ -31,7 +31,9 @@ def require_directory(root: Path, path: Path) -> None:
     """Missing declared areas are errors unless the caller explicitly opts out."""
     check_path(root, path)
     if not path.is_dir():
-        raise ValueError("Missing authored data area")
+        raise ValueError(
+            f"Missing authored data area: authored/{path.relative_to(root).as_posix()}"
+        )
 
 
 def read(path: Path, *, root: Path) -> tuple[bytes, bytes]:
@@ -41,11 +43,15 @@ def read(path: Path, *, root: Path) -> tuple[bytes, bytes]:
         raise ValueError("Missing or symlink authored input")
     raw = path.read_bytes()
     if len(raw) >= MAX_BYTES:
-        raise ValueError("Authored input must be smaller than one MiB")
+        raise ValueError(
+            f"Authored input must be smaller than one MiB: authored/{path.relative_to(root).as_posix()}"
+        )
     try:
         content = canonical(JSON_VALUE.validate_python(parse_yaml(raw), strict=True))
     except ValueError, TypeError:
-        raise ValueError("Invalid authored YAML input") from None
+        raise ValueError(
+            f"Invalid authored YAML input: authored/{path.relative_to(root).as_posix()}"
+        ) from None
     return raw, content
 
 

@@ -1,5 +1,5 @@
 import type { SnapshotClient } from "./client"
-import { integerValue, objectValue, stringValue } from "./format-v1/json"
+import { integerValue, objectValue, stringValue } from "./format-v3/json"
 import { bucketOf, createLocator, GLOBAL_OWNER } from "./locator"
 import type { CardIndex } from "./store"
 

@@ -37,7 +37,7 @@ from .test_snapshot_wording import pending_view
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-GOLDEN = Path(__file__).resolve().parents[3] / "tests/fixtures/snapshot-contract/v2"
+GOLDEN = Path(__file__).resolve().parents[3] / "tests/fixtures/snapshot-contract/v3"
 CODEC = Brotli("synthetic-zlib-not-real-br-v1", synthetic_compress)
 
 
@@ -170,6 +170,8 @@ def test_same_profile_produces_equal_bytes(
         "fragment-container-v1",
         "image-entity-buckets-v1",
         "image-id-url-v1",
+        "jp-source-translation-v1",
+        "public-annotation-v1",
         "rules-name-on-demand-v1",
     ]
 
@@ -328,7 +330,7 @@ def test_image_increment_changes_only_one_entity_file(
 
 def test_default_schema_does_not_silently_negotiate_new_minor() -> None:
     with pytest.raises(ValidationError):
-        validate("Programs", {"format_version": "3.0.0", "entries": []})
+        validate("Programs", {"format_version": "3.1.0", "entries": []})
     with pytest.raises(ValueError, match=r"^Unsupported snapshot format profile$"):
         profile("1.1.1")
 

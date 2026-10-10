@@ -4,9 +4,9 @@ import {
   type JsonValue,
   objectValue,
   stringValue,
-} from "./format-v1/json"
-import type { Files } from "./format-v1/reader"
-import { bucket } from "./format-v1/sha256"
+} from "./format-v3/json"
+import type { Files } from "./format-v3/reader"
+import { bucket } from "./format-v3/sha256"
 
 interface FragmentRef {
   readonly table: string

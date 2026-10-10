@@ -96,6 +96,9 @@ tables = [
     "ruling_hint",
     "ruling_supersession",
     "ruling_review",
+    "ruling_document",
+    "ruling_resolution",
+    "ruling_retained_reference",
 ]
 
 [[build.groups]]
@@ -130,6 +133,12 @@ tables = [
     "translation_selection",
     "translation_context",
     "translation_use",
+    "annotation_set",
+    "translation_annotation",
+    "translation_use_annotation",
+    "translation_form",
+    "binding_leaf_occurrence",
+    "render_leaf_occurrence",
 ]
 
 [[build.groups]]

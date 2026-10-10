@@ -18,12 +18,12 @@
 | 定案（格式） | 歸檔類別、人工商品與收錄 | `products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
 | 定案（格式） | 官方商品身分對照 | `products/identities/<region>/001.yaml`，見 §11；獨立於商品內容採納 |
 | 待審技術契約 | 人工序號版次／官方序號補充 | `manual-printings/index.yaml`、`manual-printings/{printings,serials}/<filing_key>/<sequence>.yaml`，見 manual-printings-v1；不表示已有採納資料 |
-| 已定案（ADR-0011） | 裁定 | `rules/rulings/R-0001.yaml`，`format: 1, kind: ruling`，原本文不另包 data |
+| 已定案（ADR-0011） | 裁定 | `rules/rulings/R-0001.yaml`，`format: 2, kind: ruling`，revision 必填正整數，原本文不另包 data；依[四層契約 §9](four-layer-translation.md#9-舊模板重鍵與裁定引用) |
 | 定案（格式） | 身分修復與決定續版 | `identity-transitions/<sequence>.yaml`，見 §12 |
 | 待審技術契約 | Standard 構築／禁限／角色與必要 CR 引用 | `construction-adoptions/index.yaml`、`construction-adoptions/<area>/<region>/standard/<sequence>.yaml`，roles／cr 為 `<area>/<region>/<sequence>.yaml` 整區共用；見[構築採納契約](construction-adoption.md)，尚無正式採納資料 |
 | 提案 | 其他策展、標誌 | `curation/BP01/001.yaml` |
 | 待審（技術契約） | 數位對應與查核覆蓋採納 | `digital/links/index.yaml`、`digital/links/<filing_key>/<sequence>.yaml`；見[數位對應採納契約](digital-link-adoption.md)，真人link入口已實作、尚無逐卡正式遷入；coverage未實作 |
-| 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/templates/{definitions,values,candidates}/<sequence>.yaml`、`translations/{glossary,overrides}/<filing_key>/<sequence>.yaml`；四層目標另增 `translations/forms/<sequence>.yaml`（尚未實作）；推導結果不進 authored，見 §6 |
+| 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/templates/{definitions,values,candidates}/<sequence>.yaml`、`translations/{glossary,overrides}/<filing_key>/<sequence>.yaml`；形式位於 `translations/forms/<sequence>.yaml`；推導結果不進 authored，見 §6 |
 | 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog/adoptions/<area>/<sequence>.yaml`，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與當前值) |
 | 定案（技術契約） | 同號路由與預設版次覆寫 | `catalog/overrides/<area>/<sequence>.yaml`，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
 | 定案（新格式） | 數位名字／同名瀏覽政策 | `digital/policies/{names,links}.yaml`；名字與同名瀏覽各一份可修改的 current 規則，同名瀏覽是獨立非翻譯入口，見[名字契約](digital-name-policy.md) |
@@ -51,11 +51,13 @@ Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通
 | kind | format |
 | --- | --- |
 | registry_shard、product_shard、product_identity_shard、identity_transition_shard | 1 |
-| registry_index、translation_shard、catalog_adoption_shard、display_override_shard | 2 |
+| translation_shard | 3 |
+| ruling | 2 |
+| registry_index、catalog_adoption_shard、display_override_shard | 2 |
 | digital_name_policy、digital_link_index、digital_link_shard、template_parameter_rules | 2 |
-| effect_set、keyword_registry、engine_rules、flavor_translation_shard、ruling、image_crop_overrides | 1 |
+| effect_set、keyword_registry、engine_rules、flavor_translation_shard、image_crop_overrides | 1 |
 
-`effect_set`／`keyword_registry` format 1 精確選定 astra/1 原型文法，保留 Schema `$id: urn:sve-kit:effects:astra:1`；不是 DSL 1.0，未來正式 DSL 使用另一 kind 或入口。ruling 尚無 production reader，只增加封套、保留原頂層本文。
+`effect_set`／`keyword_registry` format 1 精確選定 astra/1 原型文法，保留 Schema `$id: urn:sve-kit:effects:astra:1`；不是 DSL 1.0，未來正式 DSL 使用另一 kind 或入口。ruling 的 format 2 production reader 已實作，revision 必填並保留原頂層本文。
 
 [#476](https://github.com/gbaian10/sve-kit/issues/476) 使用新封套及路徑重建私人 source-record ID／provenance，Rust authored／settings／schemas fingerprints 亦如實重算。舊私人 provenance、序列化背景與回放指紋不相容，不保留舊 reader。各種 exact／canonical authored source hash 包含封套；raw 來源 hash、record-level 語義 hash 與公開匯出契約不因此改變。公開 323 JSON、媒體及 token 必須逐 byte 同值。
 
@@ -226,17 +228,16 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 ## 6. 模板、翻譯與語義例外
 
-現有 reader 的翻譯分片為 `format: 2, kind: translation_shard`；四層目標改為 format 3，
-依[共用契約 §2](four-layer-translation.md#2-authored-入口與替換界線)同批替換 reader／資料，新增 forms 入口，移除 source_exception。
-§1.1 版本表記錄切換前封套，不能當成已支援 format 3；沒有 index，模板來源清冊仍在建置時產生。
-完整欄位依[翻譯契約](translation-contract.md)與[清冊契約](template-source-replay.md)。
+正式翻譯分片為 `format: 3, kind: translation_shard`，reader、authored 與 builder 同步使用四層格式。
+依[共用契約 §2](four-layer-translation.md#2-authored-入口與替換界線)載入 forms，拒絕 source_exception 與舊格式，不設 index。
+完整欄位依[翻譯契約](translation-contract.md)與[來源位置契約](four-layer-source-positions.md)。
 舊決定封套、membership、核可收據、採納鏈、歷史 producer／expected 只供轉換，不是新 reader 的必要輸入。
-資料可直接改，退回用 git revert；只記來源類別 official/project/machine、低信心及必要資料理由。
+authored YAML 用 block style（縮排 2、序列 offset 2）。資料可直接改，退回用 git revert；只記來源類別 official/project/machine、低信心及必要資料理由。
 
 效果模板保留固定字、參數、句型比對、術語、卡名引用、加粗、新卡自動套用及未匹配清單。
 [辨識規則](template-parameter-policy.md)由現行程式與當前設定提供；風味不走模板，依[直接對照表](flavor-translation.md)。
 純譯文／note 改字不換模板或術語 ID；真正固定字／參數語義改變才是另一模板。
-一般讀取驗結構與引用，CI／建置用本次固定來源產生清冊，不逐次回放 Git 祖先或舊環境。
+一般讀取驗結構與引用，CI／建置由四層來源核心用本次固定來源產生 binding／未匹配清單，不逐次回放 Git 祖先或舊環境。
 context/use/binding、渲染全文與 selection 由工具推導，不存另一份逐卡翻譯真值。
 
 context_assignment／card_name_concept 只對自己的 owner 與 exact 原文有效，建置驗目前身分與原文；

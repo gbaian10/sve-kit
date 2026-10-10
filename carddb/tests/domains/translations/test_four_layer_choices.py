@@ -1,0 +1,65 @@
+"""Replacement choice counts require a unique reachable introduction and explicit grammar."""
+
+import pytest
+
+from sve_carddb.contracts.four_layer import Span
+from sve_carddb.domains.translations.four_layer_choices import choice_alternative
+from sve_carddb.domains.translations.recognition.models import Hint
+
+
+@pytest.mark.parametrize(
+    ("suffix", "expected"),
+    [
+        ("【ネクロチャージ７】代わりに２つまで。", True),
+        ("【ネクロチャージ_７】代わりに２つまで。", True),
+        ("【ネクロチャージ__７】代わりに２つまで。", False),
+        ("【ネクロチャージ７】代わりに３つまで。", False),
+        ("【NC７】代わりに２つまで。", False),
+        ("【ネクロチャージ７】代わりに２つ。", False),
+        ("{起動}【ネクロチャージ７】代わりに２つまで。", False),
+        ("下記から１つチョイスする。【ネクロチャージ７】代わりに２つまで。", False),
+    ],
+)
+def test_post_option_replacement_count_is_bound_to_the_original_choice(
+    suffix: str, expected: bool
+) -> None:
+    raw = "下記から１つチョイスする。【１】仮。【２】別。" + suffix
+    start = raw.rindex("代わりに") + len("代わりに")
+    span = Span(start=start, end=start + 1)
+    hint = Hint(
+        name="count",
+        occurrence=span,
+        source_segments=(span,),
+        transformation="fullwidth_to_ascii",
+        semantic_role="numeric",
+        numeric_rule=None,
+        type="uint",
+        reference_kind=None,
+        value=int(raw[start]),
+        target=None,
+        issues=(),
+    )
+    assert choice_alternative(raw, hint) is expected
+
+
+@pytest.mark.parametrize("keyword", ["ネクロチャージ_７", "NC_７"])
+def test_pre_option_keyword_replacement_preserves_the_intro_scope(keyword: str) -> None:
+    raw = (
+        f"下記から１つチョイスする。【{keyword}】代わりに２つまで。【１】仮。【２】別。"
+    )
+    start = raw.index("代わりに") + len("代わりに")
+    span = Span(start=start, end=start + 1)
+    hint = Hint(
+        name="count",
+        occurrence=span,
+        source_segments=(span,),
+        transformation="fullwidth_to_ascii",
+        semantic_role="numeric",
+        numeric_rule=None,
+        type="uint",
+        reference_kind=None,
+        value=2,
+        target=None,
+        issues=(),
+    )
+    assert choice_alternative(raw, hint) is (keyword == "ネクロチャージ_７")

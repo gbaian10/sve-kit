@@ -14,9 +14,8 @@ from sve_carddb.domains.products.identity_models import IdentityShard
 from sve_carddb.domains.products.models import Shard as ProductShard
 from sve_carddb.domains.registry.storage import read_base_files, read_yaml
 from sve_carddb.domains.translations.flavor import Shard as FlavorShard
-from sve_carddb.domains.translations.glossary.records import Shard as GlossaryShard
-from sve_carddb.domains.translations.parameters.rules import Rules
-from sve_carddb.domains.translations.templates.records import Shard as TemplateShard
+from sve_carddb.domains.translations.four_layer_authored import Shard
+from sve_carddb.domains.translations.recognition.rules import Rules
 from sve_carddb.images.crops import CropOverrides
 
 if TYPE_CHECKING:
@@ -31,12 +30,12 @@ CASES = (
     (ProductShard, "products/family/BP01/001.yaml", "product_authored_format"),
     (FlavorShard, "translations/flavor/0.yaml", None),
     (
-        GlossaryShard,
+        Shard,
         "translations/glossary/concepts/001.yaml",
         "translation_authored_format",
     ),
     (
-        TemplateShard,
+        Shard,
         "translations/templates/definitions/001.yaml",
         "translation_authored_format",
     ),

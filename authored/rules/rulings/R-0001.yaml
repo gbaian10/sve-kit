@@ -1,6 +1,7 @@
-format: 1
+format: 2
 kind: ruling
 id: R-0001
+revision: 1
 question: 【進化時】【超進化時】【攻撃時】【出走時】【ドライブ獲得時】後面直接接「（コスト）：」時，費用是打出能力時付，還是結算時才決定付不付？
 decision: 整族打出時付（選項 A）：跟 {ファンファーレ} 一樣，先選目標再付費；付不起或拒付，這個能力就沒有打出。標註 cost_timing=PlayParameter，作者 A.cost，IR K.pay(at=PlayParameter)，費用材料選擇 D.play-param{CostMaterials}。
 evidence:

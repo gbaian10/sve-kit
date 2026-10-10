@@ -108,7 +108,7 @@
 | **術語引用** | term reference | 以 kind/key 定位 glossary 永久概念或 vocabulary 詞彙，與顯示名分開 |
 | **加粗選擇** | glossary emphasis choice | rule_term 的可修訂加粗採納紀錄；其他術語由型別推導 |
 | **委託採納收據** | delegated adoption receipt | 歷史上的委託範圍與決定紀錄，不算維護者親自核可；當前翻譯不使用此收據 |
-| **模板來源清冊** | template source inventory | 每次建置從封存來源產生的句型位置清單；不存 Git，項目 ID 不含 store 與封存批次 |
+| **模板來源清冊** | template source inventory | 舊建置的句型位置清單；現行四層來源核心產生 binding／未匹配清單，不讀取舊清冊 |
 | **參數辨識政策** | parameter recognition policy | 以具名辨識規則及開關界定來源值、角色與適用條件；版本由程式／資料保存，無逐詞核可事件 |
 
 ### 四層翻譯
@@ -135,13 +135,15 @@
 
 ## 規則與效果
 
-| 中文           | 英文                 | 指什麼                                                                                           |
-| -------------- | -------------------- | ------------------------------------------------------------------------------------------------ |
-| **效果 DSL**   | DSL                  | 描述卡片效果的撰寫語法，規格在 `docs/dsl/`，Schema 在 `dsl/`                                     |
-| **IR**         | IR                   | DSL 編譯後引擎實際執行的中間表示                                                                 |
-| **ADR**        | ADR                  | 架構決策紀錄，在 `docs/adr/`，編號全 repo 共用一個序列                                           |
-| **裁定**       | ruling               | 官方沒有明說時本專案採用的判讀，編號 `R-0001` 起，在 `authored/rules/rulings/`                   |
-| **對局工作區** | match workspace      | 進行中對局的可恢復工作資料；與結束後的回放歸檔分開，見 [對局儲存邊界](deployment/matches.md)     |
-| **權威狀態**   | authoritative state  | 引擎保存的完整對局狀態，含私有資訊與續體；不能直接送給玩家                                       |
-| **玩家觀察**   | Observation          | 權威狀態依玩家可見範圍投影的資料；決定另以獲授權的 DecisionView 提供                             |
-| **權威回放**   | authoritative replay | 保存權威決定與隨機輸入版本的重播資料；觀看時仍須套資訊投影，見 [回放邊界](deployment/replays.md) |
+| 中文 | 英文 | 指什麼 |
+| --- | --- | --- |
+| **效果 DSL** | DSL | 描述卡片效果的撰寫語法，規格在 `docs/dsl/`，Schema 在 `dsl/` |
+| **IR** | IR | DSL 編譯後引擎實際執行的中間表示 |
+| **ADR** | ADR | 架構決策紀錄，在 `docs/adr/`，編號全 repo 共用一個序列 |
+| **裁定** | ruling | 官方沒有明說時本專案採用的判讀，編號 `R-0001` 起，在 `authored/rules/rulings/` |
+| **對局工作區** | match workspace | 進行中對局的可恢復工作資料；與結束後的回放歸檔分開，見 [對局儲存邊界](deployment/matches.md) |
+| **權威狀態** | authoritative state | 引擎保存的完整對局狀態，含私有資訊與續體；不能直接送給玩家 |
+| **玩家觀察** | Observation | 權威狀態依玩家可見範圍投影的資料；決定另以獲授權的 DecisionView 提供 |
+| **權威回放** | authoritative replay | 保存權威決定與隨機輸入版本的重播資料；觀看時仍須套資訊投影，見 [回放邊界](deployment/replays.md) |
+| **引用層級裁定 pending** | reference-level ruling pending | 以裁定版本與原始 applies_to 序號保存未知舊域的歷史引用，不造來源 occurrence 或 active 目標 |
+| **用途層級裁定 resolution** | occurrence-level ruling resolution | 已驗完整舊域後，逐精確來源 occurrence 判斷是否能承接到新 frame；依[四層契約 §9](schema/domains/four-layer-translation.md#9-舊模板重鍵與裁定引用) |

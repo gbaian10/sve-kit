@@ -86,6 +86,8 @@ class Layout:
         self.ownership = ownership
         self.cards = {string(row["id"]): row for row in view["card"]}
         self.faces = {string(row["id"]): row for row in view["face"]}
+        self.revisions = {string(row["id"]): row for row in view["face_revision"]}
+        self.printings = {string(row["id"]): row for row in view["printing"]}
         self.arts = {string(row["id"]): row for row in view["art"]}
         self.display = {
             string(object_value(item)["revision_id"])
@@ -106,6 +108,16 @@ class Layout:
 
     def group(self, table: str, row: Record, partition: str) -> Group:
         """Hash the complete primary entity key and use its registered home."""
+        if table == "field_annotation":
+            owner = object_value(row["owner"])
+            if owner["kind"] == "face_revision":
+                return self.group(
+                    "face_revision", self.revisions[string(owner["id"])], partition
+                )
+            if owner["kind"] == "printing_face":
+                return self.group(
+                    "printing", self.printings[string(owner["id"])], partition
+                )
         identifier = ""
         if table in PRINT_TABLES:
             entity = string(row["id" if table == "printing" else "printing_id"])
@@ -152,6 +164,20 @@ class Layout:
             "home_set" if identifier else "global",
             identifier,
             bucket(key, self.count),
+        )
+
+    def field_partition(self, row: Record) -> str:
+        """An annotation use stays beside its exact original field, including history."""
+        owner = object_value(row["owner"])
+        kind = owner["kind"]
+        if kind == "face_revision":
+            if owner["id"] not in self.display:
+                return "history"
+            return "bootstrap" if row["field"] == "name" else "detail"
+        return (
+            "bootstrap"
+            if kind in {"keyword", "vocabulary", "product", "product_family"}
+            else "detail"
         )
 
     def record(self, table: str, row: Record, partition: str, index: int) -> Record:

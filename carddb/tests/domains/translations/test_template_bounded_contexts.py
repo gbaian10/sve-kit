@@ -2,32 +2,12 @@
 
 import pytest
 
-from sve_carddb.contracts.template_parameters import Schema, Slot
-from sve_carddb.domains.translations.parameters.candidate_matching import (
-    classify,
-    recognize,
-)
-from sve_carddb.domains.translations.parameters.explicit_rules import EXPLICIT
-from sve_carddb.domains.translations.parameters.keyword_aliases import KEYWORD_ALIASES
-from sve_carddb.domains.translations.parameters.references import References
-from sve_carddb.domains.translations.parameters.spans import locate
-from sve_carddb.domains.translations.source_inventory.inventory import entry
-from sve_carddb.domains.translations.source_inventory.normalizer import (
-    VERSION,
-    partition,
-)
-from sve_carddb.domains.translations.templates.members import _members
+from sve_carddb.domains.translations.recognition.explicit_rules import EXPLICIT
+from sve_carddb.domains.translations.recognition.keyword_aliases import KEYWORD_ALIASES
+from sve_carddb.domains.translations.recognition.references import References
 
 from .test_template_explicit_rules import CASES as FIRST_CASES
-from .test_template_explicit_rules import entry_ref
-from .test_template_explicit_rules import (
-    test_current_resolution_carries_role_and_rejects_weakened_numeric_bounds as check_resolution,
-)
-from .test_template_explicit_rules import (
-    test_explicit_match_requires_opt_in_exact_value_and_preserves_proposal as check_match,
-)
-from .test_template_parameters import candidate
-from .test_template_rule_candidates import matches
+from .test_template_parameters import matches
 from .test_template_value_rules import CASES as VALUE_CASES
 
 CASES = (
@@ -63,24 +43,11 @@ CASES = (
     ),
     (
         "attack_damage_multiplier",
-        "これが与える「リーダーへの攻撃ダメージ」と「交戦ダメージ」を２倍にする。",
+        "合成例：これが与える「リーダーへの攻撃ダメージ」と「交戦ダメージ」を１７倍にする。",
         "attack_damage_multiplier",
         1,
     ),
 )
-
-
-@pytest.mark.parametrize(("identifier", "text", "role", "minimum"), CASES)
-def test_bounded_contexts_preserve_opt_in_raw_value_role_and_schema(
-    identifier: str, text: str, role: str, minimum: int
-) -> None:
-    check_match(identifier, text, role, minimum)
-    check_resolution(identifier, text, role, minimum)
-    if minimum == 1:
-        assert matches(text.replace("２", "０"), identifier) == ()
-    else:
-        assert matches(text.replace("２", "０"), identifier)
-    assert matches(text.replace("２", "２猫"), identifier) == ()
 
 
 @pytest.mark.parametrize(
@@ -220,119 +187,3 @@ def test_alias_threshold_requires_closed_raw_prefix_and_registered_full_ability(
         References(terms={full: [(target, "ability")] * 2}),
     ):
         assert matches(text, identifier, raw) == ()
-
-
-@pytest.mark.parametrize(
-    ("text", "identifiers", "roles", "refs"),
-    [
-        (
-            "これが受ける２以上のダメージを５にする。",
-            ("received_damage_lower_bound", "received_damage_assignment"),
-            ("received_damage_lower_bound", "received_damage_assigned_value"),
-            References(),
-        ),
-        (
-            "【NC_２】試す。",
-            ("keyword_alias_nc",),
-            ("necrocharge_threshold",),
-            evidence(),
-        ),
-        (
-            "【SC_２】試す。",
-            ("keyword_alias_sc",),
-            ("spell_chain_threshold",),
-            evidence(),
-        ),
-    ],
-)
-def test_paired_caps_and_aliases_resolve_to_independent_roles_and_schema(
-    text: str, identifiers: tuple[str, ...], roles: tuple[str, ...], refs: References
-) -> None:
-    item = entry(entry_ref(), partition(text)[0], VERSION)
-    value = candidate(text, refs).model_copy(update={"inventory_id": item.id})
-    assert recognize(text, partition(text)[0], value, refs) == ()
-    part = partition(text)[0]
-    classified, matches = classify(
-        text, part, item, locate(text, (part,))[0], refs, identifiers
-    )
-    assert len(matches) == len(roles)
-    member = _members(
-        (item,),
-        (classified,),
-        {(item.source_ref.source_version_id, item.source_ref.locator): text},
-    )[0]
-    assert member.pending == ()
-    assert member.roles == roles
-    assert tuple(h.value for h in member.hints) == ((2, 5) if len(roles) == 2 else (2,))
-    member.verify_schema(
-        Schema(
-            slots=tuple(
-                Slot(
-                    name=f"slot_{n}",
-                    type="uint",
-                    occurrences=(h.occurrence,),
-                    min=0,
-                    max=9007199254740991,
-                    reference_kind=None,
-                )
-                for n, h in enumerate(member.hints)
-            )
-        )
-    )
-    assert candidate(text, refs).issues
-    assert value.parameter_schema is None
-    owned = value.model_copy(
-        update={
-            "slots": tuple(
-                h.model_copy(update={"numeric_rule": "prefix_field_cost"})
-                for h in value.slots
-            )
-        }
-    )
-    assert recognize(text, partition(text)[0], owned, refs, identifiers) == ()
-    changed = value.model_copy(
-        update={"slots": tuple(h.model_copy(update={"value": 7}) for h in value.slots)}
-    )
-    assert recognize(text, partition(text)[0], changed, refs, identifiers) == ()
-
-
-@pytest.mark.parametrize(("identifier", "text", "role", "minimum"), CASES[2:])
-def test_zero_multiplier_stays_unresolved_at_definition_projection(
-    identifier: str, text: str, role: str, minimum: int
-) -> None:
-    del role
-    assert minimum == 1
-    text = text.replace("２", "０")
-    item = entry(entry_ref(), partition(text)[0], VERSION)
-    value = candidate(text).model_copy(update={"inventory_id": item.id})
-    rows = recognize(text, partition(text)[0], value, References(), (identifier,))
-    assert rows == ()
-    part = partition(text)[0]
-    classified, matches = classify(
-        text, part, item, locate(text, (part,))[0], References(), (identifier,)
-    )
-    assert matches == ()
-    member = _members(
-        (item,),
-        (classified,),
-        {(item.source_ref.source_version_id, item.source_ref.locator): text},
-    )[0]
-    assert member.pending == ("numeric_role_requires_review",)
-    assert member.hints[0].value == 0
-    with pytest.raises(
-        ValueError, match=r"^Template definition source has unresolved parameter roles$"
-    ):
-        member.verify_schema(
-            Schema(
-                slots=(
-                    Slot(
-                        name="slot_0",
-                        type="uint",
-                        occurrences=(value.slots[0].occurrence,),
-                        reference_kind=None,
-                        min=1,
-                        max=9007199254740991,
-                    ),
-                )
-            )
-        )

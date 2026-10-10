@@ -1,4 +1,4 @@
-"""Synthetic 2.0 media, revision and independent wire counterexamples."""
+"""Synthetic 3.0 media, revision and independent wire counterexamples."""
 
 from copy import deepcopy
 from dataclasses import replace
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 
     from .test_snapshot_preview_images import PublicImages
 
-GOLDEN = Path(__file__).resolve().parents[3] / "tests/fixtures/snapshot-contract/v2"
+GOLDEN = Path(__file__).resolve().parents[3] / "tests/fixtures/snapshot-contract/v3"
 
 
 def test_independent_v2_golden_and_union() -> None:
@@ -70,7 +70,7 @@ def test_schema_regeneration_and_frozen_column_boundaries() -> None:
         generate(MEDIA)
         == (
             Path(__file__).resolve().parents[2]
-            / "src/sve_carddb/contracts/schema/v2/contract.schema.json"
+            / "src/sve_carddb/contracts/schema/v3/contract.schema.json"
         ).read_bytes()
     )
     assert columns("printing_image", MEDIA) == [
@@ -765,9 +765,9 @@ def test_index_future_current_is_not_corruption_and_compatible_previous_is_reada
         manifest_sha256="sha256:" + "a" * 64,
     )
     if incompatible == "future_format":
-        current.update(format_version="3.0.0", min_reader_version="3.0.0")
+        current.update(format_version="4.0.0", min_reader_version="4.0.0")
     elif incompatible == "future_minimum":
-        current["min_reader_version"] = "3.0.0"
+        current["min_reader_version"] = "4.0.0"
     else:
         capabilities: list[JsonValue] = [
             *array(current["required_capabilities"]),

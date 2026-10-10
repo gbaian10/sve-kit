@@ -14,8 +14,8 @@ import {
   type TextLang,
 } from "../domain/search"
 import type { LoadedSnapshot } from "./client"
-import type { Row } from "./format-v1/decode"
-import { integerValue, type JsonValue, stringValue } from "./format-v1/json"
+import type { Row } from "./format-v3/decode"
+import { integerValue, type JsonValue, stringValue } from "./format-v3/json"
 import { type CardIndex, createCardIndex } from "./store"
 
 /** What a list cell or suggestion row shows for one card without loading any detail file. */
@@ -84,7 +84,7 @@ function nameOf(index: CardIndex, revision: Row): NameSource | undefined {
       const translation = index.translation(stringValue(entry["translation_id"]))
       translationQuality[target] = {
         lowConfidence: translation?.["low_confidence"] === true,
-        sourceUnchecked: entry["basis"] === "shared_jp_unchecked",
+        jpSource: entry["basis"] === "jp_source",
       }
     }
   }

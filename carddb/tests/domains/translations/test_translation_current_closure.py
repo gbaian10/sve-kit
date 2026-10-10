@@ -34,7 +34,9 @@ def test_current_input_refusals(tmp_path: Path, fault: str) -> None:
         path.write_bytes(b" " * 1048576)
     if fault in {"shard_v1", "duplicate"}:
         path.write_bytes(canonical(shard))
-    with pytest.raises(ValueError, match=r"Invalid|unique|Symlink|symlink|wrong|MiB"):
+    with pytest.raises(
+        ValueError, match=r"Invalid|Duplicate|unique|Symlink|symlink|wrong|MiB|outside"
+    ):
         load_glossary(tmp_path)
 
 

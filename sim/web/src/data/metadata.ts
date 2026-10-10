@@ -2,8 +2,8 @@ import { LRUCache } from "lru-cache"
 import PQueue from "p-queue"
 
 import { fetchBytes, type Fetcher } from "./cdn"
-import { SnapshotError } from "./format-v1/errors"
-import { integerValue, type JsonObject, stringValue } from "./format-v1/json"
+import { SnapshotError } from "./format-v3/errors"
+import { integerValue, type JsonObject, stringValue } from "./format-v3/json"
 import { transferDigest } from "./integrity"
 
 export interface MetadataProgress {

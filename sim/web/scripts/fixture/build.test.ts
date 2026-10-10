@@ -6,9 +6,9 @@ import {
   type JsonObject,
   parseStrict,
   stringValue,
-} from "../../src/data/format-v1/json"
-import { readSnapshot } from "../../src/data/format-v1/reader"
-import { hex } from "../../src/data/format-v1/sha256"
+} from "../../src/data/format-v3/json"
+import { readSnapshot } from "../../src/data/format-v3/reader"
+import { hex } from "../../src/data/format-v3/sha256"
 import { buildSnapshot, canonicalSize } from "./build"
 import { CARDS } from "./cards"
 
@@ -75,6 +75,32 @@ describe("fixture snapshot", async () => {
     expect([...again.files.keys()].sort()).toEqual([...snapshot.files.keys()].sort())
     for (const [path, bytes] of snapshot.files)
       expect(hex(again.files.get(path) ?? new Uint8Array())).toBe(hex(bytes))
+  })
+
+  it("selects the exact current JP owner for EN names and effects across errata", () => {
+    const view = readSnapshot(snapshot.manifest, payloadsOf(snapshot))
+    for (const [faceId, currentRevision] of [
+      ["f:bp01-020", 2],
+      ["f:bp01-021", 1],
+    ] as const) {
+      const sourceId = `r:${faceId}:jp:${String(currentRevision)}`
+      const source = view["face_revision"]?.find((row) => row["id"] === sourceId)
+      const receiver = view["face_revision"]?.find((row) => row["id"] === `r:${faceId}:en:1`)
+      for (const field of ["name", "effect"]) {
+        const selection = (receiver?.["translations"] as JsonObject[]).find(
+          (row) => row["field"] === field && row["target_lang"] === "zh-Hant",
+        )
+        expect(selection?.["source"]).toEqual({
+          owner: { kind: "face_revision", id: sourceId },
+          field,
+          ordinal: null,
+        })
+        const own = (source?.["translations"] as JsonObject[]).find(
+          (row) => row["field"] === field && row["target_lang"] === "zh-Hant",
+        )
+        expect(selection?.["translation_id"]).toBe(own?.["translation_id"])
+      }
+    }
   })
 
   it("publishes the current snapshot through index format 2", () => {

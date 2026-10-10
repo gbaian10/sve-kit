@@ -71,6 +71,7 @@ jobs:
               - 'tests/engine/*.yaml'
             web:
               - 'sim/web/**'
+              - 'docs/schema/export/public-annotation-cases.json'
               - 'carddb/src/sve_carddb/contracts/schema/**' # the web reader validates against the published schema
 
   repo:
@@ -218,7 +219,7 @@ jobs:
           uv build --wheel carddb --out-dir "${RUNNER_TEMP}/carddb-wheel"
           UV_PROJECT_ENVIRONMENT="${RUNNER_TEMP}/carddb-wheel-env" uv sync --project carddb --locked --no-default-groups --no-install-project
           uv pip install --no-deps --python "${RUNNER_TEMP}/carddb-wheel-env/bin/python" "${RUNNER_TEMP}"/carddb-wheel/*.whl
-          "${RUNNER_TEMP}/carddb-wheel-env/bin/python" -I -B .github/ci/carddb_wheel_smoke.py "$GITHUB_WORKSPACE/tests/fixtures/snapshot-contract/v2"
+          "${RUNNER_TEMP}/carddb-wheel-env/bin/python" -I -B .github/ci/carddb_wheel_smoke.py "$GITHUB_WORKSPACE/tests/fixtures/snapshot-contract/v3"
           "${RUNNER_TEMP}/carddb-wheel-env/bin/sve-carddb" --help > /dev/null
       - name: Installed publish wheel smoke
         run: |

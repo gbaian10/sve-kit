@@ -1,0 +1,4370 @@
+[
+  {
+    "name": "compatible-current",
+    "index": {
+      "index_format": 2,
+      "revision": 3,
+      "current": {
+        "data_version": "20260929T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "3.0.0",
+        "min_reader_version": "3.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/2e72ba423a7c2587c02a6ddaeb1640b7f0ff712271a04616422882c4b34b2b5a.json",
+        "manifest_sha256": "sha256:2e72ba423a7c2587c02a6ddaeb1640b7f0ff712271a04616422882c4b34b2b5a"
+      },
+      "previous": null
+    },
+    "manifests": {
+      "sha256:2e72ba423a7c2587c02a6ddaeb1640b7f0ff712271a04616422882c4b34b2b5a": {
+        "changes_ref": null,
+        "config_ref": {
+          "key": "config",
+          "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+        },
+        "coverage": {
+          "mechanics": [],
+          "reviews": [],
+          "translations": []
+        },
+        "data_version": "20260929T010203Z-0001",
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "errata_card_ids": [],
+        "files": [
+          {
+            "bytes": 236,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 199
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/0",
+            "path": "snapshots/blobs/5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 1,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0"
+          },
+          {
+            "bytes": 239,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 200
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/1",
+            "path": "snapshots/blobs/024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 9,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f"
+          },
+          {
+            "bytes": 389,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 269
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/2",
+            "path": "snapshots/blobs/fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "translation",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 23,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279"
+          },
+          {
+            "bytes": 1108,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 430
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/3",
+            "path": "snapshots/blobs/bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "product_family",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 24,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 28,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd"
+          },
+          {
+            "bytes": 418,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 257
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/4",
+            "path": "snapshots/blobs/215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 33,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 35,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc"
+          },
+          {
+            "bytes": 1225,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 473
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/7",
+            "path": "snapshots/blobs/fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "product",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 59,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "vocabulary",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 56,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b"
+          },
+          {
+            "bytes": 6059,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 1636
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "card",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "card_engine_support",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "face",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 2
+              },
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 2
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 29,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 43,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+          },
+          {
+            "bytes": 1218,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 548
+            },
+            "dependencies": [],
+            "key": "config",
+            "path": "snapshots/blobs/f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b.json",
+            "role": "config",
+            "row_counts": [],
+            "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+          },
+          {
+            "key": "images/detail/global/global/band/12",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "image_asset",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 12,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/017a078c28259b662f07ad65c00954ce2a3bb38e75694b2f62441ef65da871d2.json",
+            "sha256": "sha256:017a078c28259b662f07ad65c00954ce2a3bb38e75694b2f62441ef65da871d2",
+            "bytes": 392,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 241
+            }
+          },
+          {
+            "bytes": 674,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 328
+            },
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "key": "images/detail/global/global/band/55",
+            "path": "snapshots/blobs/6503ac09c1273ddff08d8ca558ad6ff79893b05ecc3b6399ea1990a1d929bb5f.json",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "image_asset",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 55,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "image_variant",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 55,
+                "partition": "detail",
+                "count": 5
+              }
+            ],
+            "sha256": "sha256:6503ac09c1273ddff08d8ca558ad6ff79893b05ecc3b6399ea1990a1d929bb5f"
+          },
+          {
+            "key": "images/detail/home_set/set%3Aa/band/0",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "printing_image",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 29,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              },
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/96e240365a21f3759c50a300ce7f858c8f83b3493d2cbec1e4bbc5b2896632f0.json",
+            "sha256": "sha256:96e240365a21f3759c50a300ce7f858c8f83b3493d2cbec1e4bbc5b2896632f0",
+            "bytes": 649,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 381
+            }
+          },
+          {
+            "key": "images/detail/home_set/set%3Aa/band/1",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "printing_image",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 43,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              },
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/e72ecf14db02a66f3d69607e6d79a1a9fe56b612c84ee2f6b0094019b8b76674.json",
+            "sha256": "sha256:e72ecf14db02a66f3d69607e6d79a1a9fe56b612c84ee2f6b0094019b8b76674",
+            "bytes": 651,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 385
+            }
+          },
+          {
+            "bytes": 39,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 59
+            },
+            "dependencies": [],
+            "key": "programs",
+            "path": "snapshots/blobs/88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626.json",
+            "role": "programs",
+            "row_counts": [],
+            "sha256": "sha256:88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626"
+          },
+          {
+            "bytes": 241,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 211
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/15",
+            "path": "snapshots/blobs/42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 31,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803"
+          },
+          {
+            "bytes": 1259,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 567
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/18",
+            "path": "snapshots/blobs/5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_symbol",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 37,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "translation",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 36,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5"
+          },
+          {
+            "bytes": 409,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 237
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/19",
+            "path": "snapshots/blobs/23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 39,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "digital_card",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 39,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d"
+          },
+          {
+            "bytes": 237,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 198
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/23",
+            "path": "snapshots/blobs/aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 46,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4"
+          },
+          {
+            "key": "text/detail/global/global/band/26",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "digital_card",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 52,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106.json",
+            "sha256": "sha256:38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106",
+            "bytes": 223,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 182
+            }
+          },
+          {
+            "bytes": 1257,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 585
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/6",
+            "path": "snapshots/blobs/2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "ruling_revision",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 13,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377"
+          },
+          {
+            "bytes": 3535,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 1099
+            },
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              }
+            ],
+            "key": "text/detail/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "detail",
+                "count": 2
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 29,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "digital_link",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 26,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "sha256": "sha256:09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d"
+          },
+          {
+            "bytes": 2562,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 909
+            },
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              }
+            ],
+            "key": "text/detail/home_set/set%3Aa/band/1",
+            "path": "snapshots/blobs/b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 43,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4"
+          },
+          {
+            "bytes": 1622,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 615
+            },
+            "dependencies": [],
+            "key": "text/history/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "history",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70"
+          }
+        ],
+        "format_version": "3.0.0",
+        "languages": [
+          "ja",
+          "zh-Hant"
+        ],
+        "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "min_reader_version": "3.0.0",
+        "partitioning": {
+          "algorithm": "sha256-mod-v1",
+          "bucket_count": 64
+        },
+        "published_at": "2026-09-29T01:02:03Z",
+        "qa_card_ids": [],
+        "regions": [
+          "jp"
+        ],
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "restriction_coverage": [],
+        "source_windows": [],
+        "text_all": {
+          "path": "snapshots/blobs/d5c9e1c630dbf90632a6fd1f85f25808469ffa7a7e168f6b6ce997fbb12bb26f.json",
+          "sha256": "sha256:d5c9e1c630dbf90632a6fd1f85f25808469ffa7a7e168f6b6ce997fbb12bb26f",
+          "bytes": 24652,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 4870
+          },
+          "contains": [
+            {
+              "key": "bootstrap/bootstrap/global/global/band/0",
+              "sha256": "sha256:5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/1",
+              "sha256": "sha256:024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/2",
+              "sha256": "sha256:fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/3",
+              "sha256": "sha256:bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/4",
+              "sha256": "sha256:215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/7",
+              "sha256": "sha256:fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b"
+            },
+            {
+              "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+              "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+            },
+            {
+              "key": "config",
+              "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+            },
+            {
+              "key": "text/detail/global/global/band/15",
+              "sha256": "sha256:42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803"
+            },
+            {
+              "key": "text/detail/global/global/band/18",
+              "sha256": "sha256:5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5"
+            },
+            {
+              "key": "text/detail/global/global/band/19",
+              "sha256": "sha256:23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d"
+            },
+            {
+              "key": "text/detail/global/global/band/23",
+              "sha256": "sha256:aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4"
+            },
+            {
+              "key": "text/detail/global/global/band/26",
+              "sha256": "sha256:38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106"
+            },
+            {
+              "key": "text/detail/global/global/band/6",
+              "sha256": "sha256:2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377"
+            },
+            {
+              "key": "text/detail/home_set/set%3Aa/band/0",
+              "sha256": "sha256:09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d"
+            },
+            {
+              "key": "text/detail/home_set/set%3Aa/band/1",
+              "sha256": "sha256:b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4"
+            },
+            {
+              "key": "text/history/home_set/set%3Aa/band/0",
+              "sha256": "sha256:0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70"
+            }
+          ]
+        }
+      }
+    },
+    "selected_data_version": "20260929T010203Z-0001"
+  },
+  {
+    "name": "future-format-fallback",
+    "index": {
+      "index_format": 2,
+      "revision": 3,
+      "current": {
+        "data_version": "20261005T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "4.0.0",
+        "min_reader_version": "4.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json",
+        "manifest_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "previous": {
+        "data_version": "20260929T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "3.0.0",
+        "min_reader_version": "3.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/2e72ba423a7c2587c02a6ddaeb1640b7f0ff712271a04616422882c4b34b2b5a.json",
+        "manifest_sha256": "sha256:2e72ba423a7c2587c02a6ddaeb1640b7f0ff712271a04616422882c4b34b2b5a"
+      }
+    },
+    "manifests": {
+      "sha256:2e72ba423a7c2587c02a6ddaeb1640b7f0ff712271a04616422882c4b34b2b5a": {
+        "changes_ref": null,
+        "config_ref": {
+          "key": "config",
+          "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+        },
+        "coverage": {
+          "mechanics": [],
+          "reviews": [],
+          "translations": []
+        },
+        "data_version": "20260929T010203Z-0001",
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "errata_card_ids": [],
+        "files": [
+          {
+            "bytes": 236,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 199
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/0",
+            "path": "snapshots/blobs/5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 1,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0"
+          },
+          {
+            "bytes": 239,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 200
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/1",
+            "path": "snapshots/blobs/024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 9,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f"
+          },
+          {
+            "bytes": 389,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 269
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/2",
+            "path": "snapshots/blobs/fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "translation",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 23,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279"
+          },
+          {
+            "bytes": 1108,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 430
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/3",
+            "path": "snapshots/blobs/bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "product_family",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 24,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 28,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd"
+          },
+          {
+            "bytes": 418,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 257
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/4",
+            "path": "snapshots/blobs/215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 33,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 35,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc"
+          },
+          {
+            "bytes": 1225,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 473
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/7",
+            "path": "snapshots/blobs/fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "product",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 59,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "vocabulary",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 56,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b"
+          },
+          {
+            "bytes": 6059,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 1636
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "card",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "card_engine_support",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "face",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 2
+              },
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 2
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 29,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 43,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+          },
+          {
+            "bytes": 1218,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 548
+            },
+            "dependencies": [],
+            "key": "config",
+            "path": "snapshots/blobs/f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b.json",
+            "role": "config",
+            "row_counts": [],
+            "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+          },
+          {
+            "key": "images/detail/global/global/band/12",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "image_asset",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 12,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/017a078c28259b662f07ad65c00954ce2a3bb38e75694b2f62441ef65da871d2.json",
+            "sha256": "sha256:017a078c28259b662f07ad65c00954ce2a3bb38e75694b2f62441ef65da871d2",
+            "bytes": 392,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 241
+            }
+          },
+          {
+            "bytes": 674,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 328
+            },
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "key": "images/detail/global/global/band/55",
+            "path": "snapshots/blobs/6503ac09c1273ddff08d8ca558ad6ff79893b05ecc3b6399ea1990a1d929bb5f.json",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "image_asset",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 55,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "image_variant",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 55,
+                "partition": "detail",
+                "count": 5
+              }
+            ],
+            "sha256": "sha256:6503ac09c1273ddff08d8ca558ad6ff79893b05ecc3b6399ea1990a1d929bb5f"
+          },
+          {
+            "key": "images/detail/home_set/set%3Aa/band/0",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "printing_image",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 29,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              },
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/96e240365a21f3759c50a300ce7f858c8f83b3493d2cbec1e4bbc5b2896632f0.json",
+            "sha256": "sha256:96e240365a21f3759c50a300ce7f858c8f83b3493d2cbec1e4bbc5b2896632f0",
+            "bytes": 649,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 381
+            }
+          },
+          {
+            "key": "images/detail/home_set/set%3Aa/band/1",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "printing_image",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 43,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              },
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/e72ecf14db02a66f3d69607e6d79a1a9fe56b612c84ee2f6b0094019b8b76674.json",
+            "sha256": "sha256:e72ecf14db02a66f3d69607e6d79a1a9fe56b612c84ee2f6b0094019b8b76674",
+            "bytes": 651,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 385
+            }
+          },
+          {
+            "bytes": 39,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 59
+            },
+            "dependencies": [],
+            "key": "programs",
+            "path": "snapshots/blobs/88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626.json",
+            "role": "programs",
+            "row_counts": [],
+            "sha256": "sha256:88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626"
+          },
+          {
+            "bytes": 241,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 211
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/15",
+            "path": "snapshots/blobs/42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 31,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803"
+          },
+          {
+            "bytes": 1259,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 567
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/18",
+            "path": "snapshots/blobs/5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_symbol",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 37,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "translation",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 36,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5"
+          },
+          {
+            "bytes": 409,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 237
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/19",
+            "path": "snapshots/blobs/23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 39,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "digital_card",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 39,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d"
+          },
+          {
+            "bytes": 237,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 198
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/23",
+            "path": "snapshots/blobs/aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 46,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4"
+          },
+          {
+            "key": "text/detail/global/global/band/26",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "digital_card",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 52,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106.json",
+            "sha256": "sha256:38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106",
+            "bytes": 223,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 182
+            }
+          },
+          {
+            "bytes": 1257,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 585
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/6",
+            "path": "snapshots/blobs/2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "ruling_revision",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 13,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377"
+          },
+          {
+            "bytes": 3535,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 1099
+            },
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              }
+            ],
+            "key": "text/detail/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "detail",
+                "count": 2
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 29,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "digital_link",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 26,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "sha256": "sha256:09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d"
+          },
+          {
+            "bytes": 2562,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 909
+            },
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              }
+            ],
+            "key": "text/detail/home_set/set%3Aa/band/1",
+            "path": "snapshots/blobs/b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 43,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4"
+          },
+          {
+            "bytes": 1622,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 615
+            },
+            "dependencies": [],
+            "key": "text/history/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "history",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70"
+          }
+        ],
+        "format_version": "3.0.0",
+        "languages": [
+          "ja",
+          "zh-Hant"
+        ],
+        "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "min_reader_version": "3.0.0",
+        "partitioning": {
+          "algorithm": "sha256-mod-v1",
+          "bucket_count": 64
+        },
+        "published_at": "2026-09-29T01:02:03Z",
+        "qa_card_ids": [],
+        "regions": [
+          "jp"
+        ],
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "restriction_coverage": [],
+        "source_windows": [],
+        "text_all": {
+          "path": "snapshots/blobs/d5c9e1c630dbf90632a6fd1f85f25808469ffa7a7e168f6b6ce997fbb12bb26f.json",
+          "sha256": "sha256:d5c9e1c630dbf90632a6fd1f85f25808469ffa7a7e168f6b6ce997fbb12bb26f",
+          "bytes": 24652,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 4870
+          },
+          "contains": [
+            {
+              "key": "bootstrap/bootstrap/global/global/band/0",
+              "sha256": "sha256:5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/1",
+              "sha256": "sha256:024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/2",
+              "sha256": "sha256:fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/3",
+              "sha256": "sha256:bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/4",
+              "sha256": "sha256:215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/7",
+              "sha256": "sha256:fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b"
+            },
+            {
+              "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+              "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+            },
+            {
+              "key": "config",
+              "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+            },
+            {
+              "key": "text/detail/global/global/band/15",
+              "sha256": "sha256:42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803"
+            },
+            {
+              "key": "text/detail/global/global/band/18",
+              "sha256": "sha256:5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5"
+            },
+            {
+              "key": "text/detail/global/global/band/19",
+              "sha256": "sha256:23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d"
+            },
+            {
+              "key": "text/detail/global/global/band/23",
+              "sha256": "sha256:aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4"
+            },
+            {
+              "key": "text/detail/global/global/band/26",
+              "sha256": "sha256:38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106"
+            },
+            {
+              "key": "text/detail/global/global/band/6",
+              "sha256": "sha256:2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377"
+            },
+            {
+              "key": "text/detail/home_set/set%3Aa/band/0",
+              "sha256": "sha256:09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d"
+            },
+            {
+              "key": "text/detail/home_set/set%3Aa/band/1",
+              "sha256": "sha256:b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4"
+            },
+            {
+              "key": "text/history/home_set/set%3Aa/band/0",
+              "sha256": "sha256:0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70"
+            }
+          ]
+        }
+      }
+    },
+    "selected_data_version": "20260929T010203Z-0001"
+  },
+  {
+    "name": "future-format-no-compatible",
+    "index": {
+      "index_format": 2,
+      "revision": 3,
+      "current": {
+        "data_version": "20261005T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "4.0.0",
+        "min_reader_version": "4.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json",
+        "manifest_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "previous": null
+    },
+    "manifests": {},
+    "selected_data_version": null
+  },
+  {
+    "name": "unknown-capability-fallback",
+    "index": {
+      "index_format": 2,
+      "revision": 3,
+      "current": {
+        "data_version": "20261005T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "3.0.0",
+        "min_reader_version": "3.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "future-feature-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json",
+        "manifest_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "previous": {
+        "data_version": "20260929T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "3.0.0",
+        "min_reader_version": "3.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/2e72ba423a7c2587c02a6ddaeb1640b7f0ff712271a04616422882c4b34b2b5a.json",
+        "manifest_sha256": "sha256:2e72ba423a7c2587c02a6ddaeb1640b7f0ff712271a04616422882c4b34b2b5a"
+      }
+    },
+    "manifests": {
+      "sha256:2e72ba423a7c2587c02a6ddaeb1640b7f0ff712271a04616422882c4b34b2b5a": {
+        "changes_ref": null,
+        "config_ref": {
+          "key": "config",
+          "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+        },
+        "coverage": {
+          "mechanics": [],
+          "reviews": [],
+          "translations": []
+        },
+        "data_version": "20260929T010203Z-0001",
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "errata_card_ids": [],
+        "files": [
+          {
+            "bytes": 236,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 199
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/0",
+            "path": "snapshots/blobs/5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 1,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0"
+          },
+          {
+            "bytes": 239,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 200
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/1",
+            "path": "snapshots/blobs/024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 9,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f"
+          },
+          {
+            "bytes": 389,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 269
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/2",
+            "path": "snapshots/blobs/fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "translation",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 23,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279"
+          },
+          {
+            "bytes": 1108,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 430
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/3",
+            "path": "snapshots/blobs/bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "product_family",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 24,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 28,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd"
+          },
+          {
+            "bytes": 418,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 257
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/4",
+            "path": "snapshots/blobs/215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 33,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 35,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc"
+          },
+          {
+            "bytes": 1225,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 473
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/7",
+            "path": "snapshots/blobs/fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "product",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 59,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "vocabulary",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 56,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b"
+          },
+          {
+            "bytes": 6059,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 1636
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "card",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "card_engine_support",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "face",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 2
+              },
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 2
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 29,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 43,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+          },
+          {
+            "bytes": 1218,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 548
+            },
+            "dependencies": [],
+            "key": "config",
+            "path": "snapshots/blobs/f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b.json",
+            "role": "config",
+            "row_counts": [],
+            "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+          },
+          {
+            "key": "images/detail/global/global/band/12",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "image_asset",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 12,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/017a078c28259b662f07ad65c00954ce2a3bb38e75694b2f62441ef65da871d2.json",
+            "sha256": "sha256:017a078c28259b662f07ad65c00954ce2a3bb38e75694b2f62441ef65da871d2",
+            "bytes": 392,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 241
+            }
+          },
+          {
+            "bytes": 674,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 328
+            },
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "key": "images/detail/global/global/band/55",
+            "path": "snapshots/blobs/6503ac09c1273ddff08d8ca558ad6ff79893b05ecc3b6399ea1990a1d929bb5f.json",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "image_asset",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 55,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "image_variant",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 55,
+                "partition": "detail",
+                "count": 5
+              }
+            ],
+            "sha256": "sha256:6503ac09c1273ddff08d8ca558ad6ff79893b05ecc3b6399ea1990a1d929bb5f"
+          },
+          {
+            "key": "images/detail/home_set/set%3Aa/band/0",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "printing_image",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 29,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              },
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/96e240365a21f3759c50a300ce7f858c8f83b3493d2cbec1e4bbc5b2896632f0.json",
+            "sha256": "sha256:96e240365a21f3759c50a300ce7f858c8f83b3493d2cbec1e4bbc5b2896632f0",
+            "bytes": 649,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 381
+            }
+          },
+          {
+            "key": "images/detail/home_set/set%3Aa/band/1",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "printing_image",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 43,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              },
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/e72ecf14db02a66f3d69607e6d79a1a9fe56b612c84ee2f6b0094019b8b76674.json",
+            "sha256": "sha256:e72ecf14db02a66f3d69607e6d79a1a9fe56b612c84ee2f6b0094019b8b76674",
+            "bytes": 651,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 385
+            }
+          },
+          {
+            "bytes": 39,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 59
+            },
+            "dependencies": [],
+            "key": "programs",
+            "path": "snapshots/blobs/88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626.json",
+            "role": "programs",
+            "row_counts": [],
+            "sha256": "sha256:88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626"
+          },
+          {
+            "bytes": 241,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 211
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/15",
+            "path": "snapshots/blobs/42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 31,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803"
+          },
+          {
+            "bytes": 1259,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 567
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/18",
+            "path": "snapshots/blobs/5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_symbol",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 37,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "translation",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 36,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5"
+          },
+          {
+            "bytes": 409,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 237
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/19",
+            "path": "snapshots/blobs/23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 39,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "digital_card",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 39,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d"
+          },
+          {
+            "bytes": 237,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 198
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/23",
+            "path": "snapshots/blobs/aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 46,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4"
+          },
+          {
+            "key": "text/detail/global/global/band/26",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "digital_card",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 52,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106.json",
+            "sha256": "sha256:38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106",
+            "bytes": 223,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 182
+            }
+          },
+          {
+            "bytes": 1257,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 585
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/6",
+            "path": "snapshots/blobs/2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "ruling_revision",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 13,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377"
+          },
+          {
+            "bytes": 3535,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 1099
+            },
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              }
+            ],
+            "key": "text/detail/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "detail",
+                "count": 2
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 29,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "digital_link",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 26,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "sha256": "sha256:09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d"
+          },
+          {
+            "bytes": 2562,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 909
+            },
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              }
+            ],
+            "key": "text/detail/home_set/set%3Aa/band/1",
+            "path": "snapshots/blobs/b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 43,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4"
+          },
+          {
+            "bytes": 1622,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 615
+            },
+            "dependencies": [],
+            "key": "text/history/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "history",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70"
+          }
+        ],
+        "format_version": "3.0.0",
+        "languages": [
+          "ja",
+          "zh-Hant"
+        ],
+        "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "min_reader_version": "3.0.0",
+        "partitioning": {
+          "algorithm": "sha256-mod-v1",
+          "bucket_count": 64
+        },
+        "published_at": "2026-09-29T01:02:03Z",
+        "qa_card_ids": [],
+        "regions": [
+          "jp"
+        ],
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "restriction_coverage": [],
+        "source_windows": [],
+        "text_all": {
+          "path": "snapshots/blobs/d5c9e1c630dbf90632a6fd1f85f25808469ffa7a7e168f6b6ce997fbb12bb26f.json",
+          "sha256": "sha256:d5c9e1c630dbf90632a6fd1f85f25808469ffa7a7e168f6b6ce997fbb12bb26f",
+          "bytes": 24652,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 4870
+          },
+          "contains": [
+            {
+              "key": "bootstrap/bootstrap/global/global/band/0",
+              "sha256": "sha256:5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/1",
+              "sha256": "sha256:024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/2",
+              "sha256": "sha256:fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/3",
+              "sha256": "sha256:bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/4",
+              "sha256": "sha256:215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/7",
+              "sha256": "sha256:fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b"
+            },
+            {
+              "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+              "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+            },
+            {
+              "key": "config",
+              "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+            },
+            {
+              "key": "text/detail/global/global/band/15",
+              "sha256": "sha256:42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803"
+            },
+            {
+              "key": "text/detail/global/global/band/18",
+              "sha256": "sha256:5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5"
+            },
+            {
+              "key": "text/detail/global/global/band/19",
+              "sha256": "sha256:23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d"
+            },
+            {
+              "key": "text/detail/global/global/band/23",
+              "sha256": "sha256:aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4"
+            },
+            {
+              "key": "text/detail/global/global/band/26",
+              "sha256": "sha256:38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106"
+            },
+            {
+              "key": "text/detail/global/global/band/6",
+              "sha256": "sha256:2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377"
+            },
+            {
+              "key": "text/detail/home_set/set%3Aa/band/0",
+              "sha256": "sha256:09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d"
+            },
+            {
+              "key": "text/detail/home_set/set%3Aa/band/1",
+              "sha256": "sha256:b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4"
+            },
+            {
+              "key": "text/history/home_set/set%3Aa/band/0",
+              "sha256": "sha256:0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70"
+            }
+          ]
+        }
+      }
+    },
+    "selected_data_version": "20260929T010203Z-0001"
+  },
+  {
+    "name": "unknown-capability-no-compatible",
+    "index": {
+      "index_format": 2,
+      "revision": 3,
+      "current": {
+        "data_version": "20261005T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "3.0.0",
+        "min_reader_version": "3.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "future-feature-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json",
+        "manifest_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "previous": null
+    },
+    "manifests": {},
+    "selected_data_version": null
+  },
+  {
+    "name": "future-minimum-fallback",
+    "index": {
+      "index_format": 2,
+      "revision": 3,
+      "current": {
+        "data_version": "20261005T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "3.0.0",
+        "min_reader_version": "4.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json",
+        "manifest_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "previous": {
+        "data_version": "20260929T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "3.0.0",
+        "min_reader_version": "3.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/2e72ba423a7c2587c02a6ddaeb1640b7f0ff712271a04616422882c4b34b2b5a.json",
+        "manifest_sha256": "sha256:2e72ba423a7c2587c02a6ddaeb1640b7f0ff712271a04616422882c4b34b2b5a"
+      }
+    },
+    "manifests": {
+      "sha256:2e72ba423a7c2587c02a6ddaeb1640b7f0ff712271a04616422882c4b34b2b5a": {
+        "changes_ref": null,
+        "config_ref": {
+          "key": "config",
+          "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+        },
+        "coverage": {
+          "mechanics": [],
+          "reviews": [],
+          "translations": []
+        },
+        "data_version": "20260929T010203Z-0001",
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "errata_card_ids": [],
+        "files": [
+          {
+            "bytes": 236,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 199
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/0",
+            "path": "snapshots/blobs/5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 1,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0"
+          },
+          {
+            "bytes": 239,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 200
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/1",
+            "path": "snapshots/blobs/024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 9,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f"
+          },
+          {
+            "bytes": 389,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 269
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/2",
+            "path": "snapshots/blobs/fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "translation",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 23,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279"
+          },
+          {
+            "bytes": 1108,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 430
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/3",
+            "path": "snapshots/blobs/bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "product_family",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 24,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 28,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd"
+          },
+          {
+            "bytes": 418,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 257
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/4",
+            "path": "snapshots/blobs/215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 33,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 35,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc"
+          },
+          {
+            "bytes": 1225,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 473
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/7",
+            "path": "snapshots/blobs/fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "product",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 59,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "vocabulary",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 56,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b"
+          },
+          {
+            "bytes": 6059,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 1636
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "card",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "card_engine_support",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "face",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 2
+              },
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 2
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 29,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 43,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+          },
+          {
+            "bytes": 1218,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 548
+            },
+            "dependencies": [],
+            "key": "config",
+            "path": "snapshots/blobs/f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b.json",
+            "role": "config",
+            "row_counts": [],
+            "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+          },
+          {
+            "key": "images/detail/global/global/band/12",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "image_asset",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 12,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/017a078c28259b662f07ad65c00954ce2a3bb38e75694b2f62441ef65da871d2.json",
+            "sha256": "sha256:017a078c28259b662f07ad65c00954ce2a3bb38e75694b2f62441ef65da871d2",
+            "bytes": 392,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 241
+            }
+          },
+          {
+            "bytes": 674,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 328
+            },
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "key": "images/detail/global/global/band/55",
+            "path": "snapshots/blobs/6503ac09c1273ddff08d8ca558ad6ff79893b05ecc3b6399ea1990a1d929bb5f.json",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "image_asset",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 55,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "image_variant",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 55,
+                "partition": "detail",
+                "count": 5
+              }
+            ],
+            "sha256": "sha256:6503ac09c1273ddff08d8ca558ad6ff79893b05ecc3b6399ea1990a1d929bb5f"
+          },
+          {
+            "key": "images/detail/home_set/set%3Aa/band/0",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "printing_image",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 29,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              },
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/96e240365a21f3759c50a300ce7f858c8f83b3493d2cbec1e4bbc5b2896632f0.json",
+            "sha256": "sha256:96e240365a21f3759c50a300ce7f858c8f83b3493d2cbec1e4bbc5b2896632f0",
+            "bytes": 649,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 381
+            }
+          },
+          {
+            "key": "images/detail/home_set/set%3Aa/band/1",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "printing_image",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 43,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              },
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/e72ecf14db02a66f3d69607e6d79a1a9fe56b612c84ee2f6b0094019b8b76674.json",
+            "sha256": "sha256:e72ecf14db02a66f3d69607e6d79a1a9fe56b612c84ee2f6b0094019b8b76674",
+            "bytes": 651,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 385
+            }
+          },
+          {
+            "bytes": 39,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 59
+            },
+            "dependencies": [],
+            "key": "programs",
+            "path": "snapshots/blobs/88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626.json",
+            "role": "programs",
+            "row_counts": [],
+            "sha256": "sha256:88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626"
+          },
+          {
+            "bytes": 241,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 211
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/15",
+            "path": "snapshots/blobs/42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 31,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803"
+          },
+          {
+            "bytes": 1259,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 567
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/18",
+            "path": "snapshots/blobs/5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_symbol",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 37,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "translation",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 36,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5"
+          },
+          {
+            "bytes": 409,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 237
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/19",
+            "path": "snapshots/blobs/23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 39,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "digital_card",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 39,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d"
+          },
+          {
+            "bytes": 237,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 198
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/23",
+            "path": "snapshots/blobs/aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 46,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4"
+          },
+          {
+            "key": "text/detail/global/global/band/26",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "digital_card",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 52,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106.json",
+            "sha256": "sha256:38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106",
+            "bytes": 223,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 182
+            }
+          },
+          {
+            "bytes": 1257,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 585
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/6",
+            "path": "snapshots/blobs/2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "ruling_revision",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 13,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377"
+          },
+          {
+            "bytes": 3535,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 1099
+            },
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              }
+            ],
+            "key": "text/detail/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "detail",
+                "count": 2
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 29,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "digital_link",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 26,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "sha256": "sha256:09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d"
+          },
+          {
+            "bytes": 2562,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 909
+            },
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              }
+            ],
+            "key": "text/detail/home_set/set%3Aa/band/1",
+            "path": "snapshots/blobs/b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 43,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4"
+          },
+          {
+            "bytes": 1622,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 615
+            },
+            "dependencies": [],
+            "key": "text/history/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "history",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70"
+          }
+        ],
+        "format_version": "3.0.0",
+        "languages": [
+          "ja",
+          "zh-Hant"
+        ],
+        "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "min_reader_version": "3.0.0",
+        "partitioning": {
+          "algorithm": "sha256-mod-v1",
+          "bucket_count": 64
+        },
+        "published_at": "2026-09-29T01:02:03Z",
+        "qa_card_ids": [],
+        "regions": [
+          "jp"
+        ],
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "restriction_coverage": [],
+        "source_windows": [],
+        "text_all": {
+          "path": "snapshots/blobs/d5c9e1c630dbf90632a6fd1f85f25808469ffa7a7e168f6b6ce997fbb12bb26f.json",
+          "sha256": "sha256:d5c9e1c630dbf90632a6fd1f85f25808469ffa7a7e168f6b6ce997fbb12bb26f",
+          "bytes": 24652,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 4870
+          },
+          "contains": [
+            {
+              "key": "bootstrap/bootstrap/global/global/band/0",
+              "sha256": "sha256:5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/1",
+              "sha256": "sha256:024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/2",
+              "sha256": "sha256:fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/3",
+              "sha256": "sha256:bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/4",
+              "sha256": "sha256:215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/7",
+              "sha256": "sha256:fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b"
+            },
+            {
+              "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+              "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+            },
+            {
+              "key": "config",
+              "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+            },
+            {
+              "key": "text/detail/global/global/band/15",
+              "sha256": "sha256:42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803"
+            },
+            {
+              "key": "text/detail/global/global/band/18",
+              "sha256": "sha256:5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5"
+            },
+            {
+              "key": "text/detail/global/global/band/19",
+              "sha256": "sha256:23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d"
+            },
+            {
+              "key": "text/detail/global/global/band/23",
+              "sha256": "sha256:aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4"
+            },
+            {
+              "key": "text/detail/global/global/band/26",
+              "sha256": "sha256:38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106"
+            },
+            {
+              "key": "text/detail/global/global/band/6",
+              "sha256": "sha256:2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377"
+            },
+            {
+              "key": "text/detail/home_set/set%3Aa/band/0",
+              "sha256": "sha256:09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d"
+            },
+            {
+              "key": "text/detail/home_set/set%3Aa/band/1",
+              "sha256": "sha256:b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4"
+            },
+            {
+              "key": "text/history/home_set/set%3Aa/band/0",
+              "sha256": "sha256:0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70"
+            }
+          ]
+        }
+      }
+    },
+    "selected_data_version": "20260929T010203Z-0001"
+  },
+  {
+    "name": "future-minimum-no-compatible",
+    "index": {
+      "index_format": 2,
+      "revision": 3,
+      "current": {
+        "data_version": "20261005T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "3.0.0",
+        "min_reader_version": "4.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json",
+        "manifest_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "previous": null
+    },
+    "manifests": {},
+    "selected_data_version": null
+  },
+  {
+    "name": "manifest-path-hash-mismatch",
+    "index": {
+      "index_format": 2,
+      "revision": 1,
+      "current": {
+        "data_version": "20260929T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "3.0.0",
+        "min_reader_version": "3.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/0000000000000000000000000000000000000000000000000000000000000000.json",
+        "manifest_sha256": "sha256:2e72ba423a7c2587c02a6ddaeb1640b7f0ff712271a04616422882c4b34b2b5a"
+      },
+      "previous": null
+    },
+    "manifests": {
+      "sha256:2e72ba423a7c2587c02a6ddaeb1640b7f0ff712271a04616422882c4b34b2b5a": {
+        "changes_ref": null,
+        "config_ref": {
+          "key": "config",
+          "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+        },
+        "coverage": {
+          "mechanics": [],
+          "reviews": [],
+          "translations": []
+        },
+        "data_version": "20260929T010203Z-0001",
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "errata_card_ids": [],
+        "files": [
+          {
+            "bytes": 236,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 199
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/0",
+            "path": "snapshots/blobs/5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 1,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0"
+          },
+          {
+            "bytes": 239,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 200
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/1",
+            "path": "snapshots/blobs/024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 9,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f"
+          },
+          {
+            "bytes": 389,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 269
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/2",
+            "path": "snapshots/blobs/fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "translation",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 23,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279"
+          },
+          {
+            "bytes": 1108,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 430
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/3",
+            "path": "snapshots/blobs/bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "product_family",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 24,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 28,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd"
+          },
+          {
+            "bytes": 418,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 257
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/4",
+            "path": "snapshots/blobs/215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 33,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 35,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc"
+          },
+          {
+            "bytes": 1225,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 473
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/global/global/band/7",
+            "path": "snapshots/blobs/fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "product",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 59,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "vocabulary",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 56,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b"
+          },
+          {
+            "bytes": 6059,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 1636
+            },
+            "dependencies": [],
+            "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd.json",
+            "role": "bootstrap",
+            "row_counts": [
+              {
+                "table": "card",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "card_engine_support",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "face",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 2
+              },
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "bootstrap",
+                "count": 2
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 29,
+                "partition": "bootstrap",
+                "count": 1
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 43,
+                "partition": "bootstrap",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+          },
+          {
+            "bytes": 1218,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 548
+            },
+            "dependencies": [],
+            "key": "config",
+            "path": "snapshots/blobs/f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b.json",
+            "role": "config",
+            "row_counts": [],
+            "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+          },
+          {
+            "key": "images/detail/global/global/band/12",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "image_asset",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 12,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/017a078c28259b662f07ad65c00954ce2a3bb38e75694b2f62441ef65da871d2.json",
+            "sha256": "sha256:017a078c28259b662f07ad65c00954ce2a3bb38e75694b2f62441ef65da871d2",
+            "bytes": 392,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 241
+            }
+          },
+          {
+            "bytes": 674,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 328
+            },
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "key": "images/detail/global/global/band/55",
+            "path": "snapshots/blobs/6503ac09c1273ddff08d8ca558ad6ff79893b05ecc3b6399ea1990a1d929bb5f.json",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "image_asset",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 55,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "image_variant",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 55,
+                "partition": "detail",
+                "count": 5
+              }
+            ],
+            "sha256": "sha256:6503ac09c1273ddff08d8ca558ad6ff79893b05ecc3b6399ea1990a1d929bb5f"
+          },
+          {
+            "key": "images/detail/home_set/set%3Aa/band/0",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "printing_image",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 29,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              },
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/96e240365a21f3759c50a300ce7f858c8f83b3493d2cbec1e4bbc5b2896632f0.json",
+            "sha256": "sha256:96e240365a21f3759c50a300ce7f858c8f83b3493d2cbec1e4bbc5b2896632f0",
+            "bytes": 649,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 381
+            }
+          },
+          {
+            "key": "images/detail/home_set/set%3Aa/band/1",
+            "role": "images",
+            "row_counts": [
+              {
+                "table": "printing_image",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 43,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              },
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/e72ecf14db02a66f3d69607e6d79a1a9fe56b612c84ee2f6b0094019b8b76674.json",
+            "sha256": "sha256:e72ecf14db02a66f3d69607e6d79a1a9fe56b612c84ee2f6b0094019b8b76674",
+            "bytes": 651,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 385
+            }
+          },
+          {
+            "bytes": 39,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 59
+            },
+            "dependencies": [],
+            "key": "programs",
+            "path": "snapshots/blobs/88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626.json",
+            "role": "programs",
+            "row_counts": [],
+            "sha256": "sha256:88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626"
+          },
+          {
+            "bytes": 241,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 211
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/15",
+            "path": "snapshots/blobs/42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 31,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803"
+          },
+          {
+            "bytes": 1259,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 567
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/18",
+            "path": "snapshots/blobs/5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_symbol",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 37,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "translation",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 36,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5"
+          },
+          {
+            "bytes": 409,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 237
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/19",
+            "path": "snapshots/blobs/23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 39,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "digital_card",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 39,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d"
+          },
+          {
+            "bytes": 237,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 198
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/23",
+            "path": "snapshots/blobs/aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "text_unit",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 46,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4"
+          },
+          {
+            "key": "text/detail/global/global/band/26",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "digital_card",
+                "owner": {
+                  "kind": "global",
+                  "id": null
+                },
+                "bucket": 52,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "dependencies": [
+              {
+                "key": "config",
+                "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+              }
+            ],
+            "path": "snapshots/blobs/38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106.json",
+            "sha256": "sha256:38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106",
+            "bytes": 223,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 182
+            }
+          },
+          {
+            "bytes": 1257,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 585
+            },
+            "dependencies": [],
+            "key": "text/detail/global/global/band/6",
+            "path": "snapshots/blobs/2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "ruling_revision",
+                "owner": {
+                  "id": null,
+                  "kind": "global"
+                },
+                "bucket": 13,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377"
+          },
+          {
+            "bytes": 3535,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 1099
+            },
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              }
+            ],
+            "key": "text/detail/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "detail",
+                "count": 2
+              },
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 29,
+                "partition": "detail",
+                "count": 1
+              },
+              {
+                "table": "digital_link",
+                "owner": {
+                  "kind": "home_set",
+                  "id": "set:a"
+                },
+                "bucket": 26,
+                "partition": "detail",
+                "count": 2
+              }
+            ],
+            "sha256": "sha256:09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d"
+          },
+          {
+            "bytes": 2562,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 909
+            },
+            "dependencies": [
+              {
+                "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+                "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+              }
+            ],
+            "key": "text/detail/home_set/set%3Aa/band/1",
+            "path": "snapshots/blobs/b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "printing",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 43,
+                "partition": "detail",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4"
+          },
+          {
+            "bytes": 1622,
+            "compressed_bytes": {
+              "br": null,
+              "gzip": 615
+            },
+            "dependencies": [],
+            "key": "text/history/home_set/set%3Aa/band/0",
+            "path": "snapshots/blobs/0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70.json",
+            "role": "text",
+            "row_counts": [
+              {
+                "table": "face_revision",
+                "owner": {
+                  "id": "set:a",
+                  "kind": "home_set"
+                },
+                "bucket": 26,
+                "partition": "history",
+                "count": 1
+              }
+            ],
+            "sha256": "sha256:0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70"
+          }
+        ],
+        "format_version": "3.0.0",
+        "languages": [
+          "ja",
+          "zh-Hant"
+        ],
+        "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "min_reader_version": "3.0.0",
+        "partitioning": {
+          "algorithm": "sha256-mod-v1",
+          "bucket_count": 64
+        },
+        "published_at": "2026-09-29T01:02:03Z",
+        "qa_card_ids": [],
+        "regions": [
+          "jp"
+        ],
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "jp-source-translation-v1",
+          "public-annotation-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "restriction_coverage": [],
+        "source_windows": [],
+        "text_all": {
+          "path": "snapshots/blobs/d5c9e1c630dbf90632a6fd1f85f25808469ffa7a7e168f6b6ce997fbb12bb26f.json",
+          "sha256": "sha256:d5c9e1c630dbf90632a6fd1f85f25808469ffa7a7e168f6b6ce997fbb12bb26f",
+          "bytes": 24652,
+          "compressed_bytes": {
+            "br": null,
+            "gzip": 4870
+          },
+          "contains": [
+            {
+              "key": "bootstrap/bootstrap/global/global/band/0",
+              "sha256": "sha256:5e4805bdef47c11441cc33dfbcacb16d836816af5cb4623f734097b4734230d0"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/1",
+              "sha256": "sha256:024da8995641f9b5618e3f05ea88841b183049dbe96128998f0fd8addd87853f"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/2",
+              "sha256": "sha256:fc3ad4b97cd1c52801bd17df5ebc0606a0304991f2fe8e6c8dfc717248f70279"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/3",
+              "sha256": "sha256:bde2863c391e06acbe8ff11c936ed5905acd78b985e20156517f34129a62bafd"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/4",
+              "sha256": "sha256:215fea5b7475fbea0185047bc61d83a77ebfbbf3fcaee00bc6b0df888d1b77cc"
+            },
+            {
+              "key": "bootstrap/bootstrap/global/global/band/7",
+              "sha256": "sha256:fa1f63db77523c60f5c6e0dae38712a85788aa60c0429e3fe8082267c073b29b"
+            },
+            {
+              "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+              "sha256": "sha256:a1979d08f5b1d056be4720479b719b259930ae644eb8ccaa09974d58a970c3fd"
+            },
+            {
+              "key": "config",
+              "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
+            },
+            {
+              "key": "text/detail/global/global/band/15",
+              "sha256": "sha256:42a312a620cd527a70a81d612fd9ff57cfd3e0a3136190d10580e92c6f8ed803"
+            },
+            {
+              "key": "text/detail/global/global/band/18",
+              "sha256": "sha256:5fa5698379b6d1c15393f30676f5e0084b322869dd8a1fa56a35c862b58749f5"
+            },
+            {
+              "key": "text/detail/global/global/band/19",
+              "sha256": "sha256:23bdf40c1845d35be0f5aa866feb47176b1e9844c614863f035e7accf067483d"
+            },
+            {
+              "key": "text/detail/global/global/band/23",
+              "sha256": "sha256:aa377fbfad0c635a001df53307a89975ff6b6651ac857e0faf5c3697f36f5fd4"
+            },
+            {
+              "key": "text/detail/global/global/band/26",
+              "sha256": "sha256:38676bd0c5ebff0a99479d941d84ad623b9ae3dd6c022bd3b61284bcc0347106"
+            },
+            {
+              "key": "text/detail/global/global/band/6",
+              "sha256": "sha256:2472a67aa05e077f65bb66bdadc3a400786485b2e7999764880164b888827377"
+            },
+            {
+              "key": "text/detail/home_set/set%3Aa/band/0",
+              "sha256": "sha256:09c68ea461ae717f61b0697ca221124bf03a1f68e41bd4804f2d5c703adecf0d"
+            },
+            {
+              "key": "text/detail/home_set/set%3Aa/band/1",
+              "sha256": "sha256:b7c92bbe8c41bb95ce1772b709ff909ed00dc5dd9957eb45ecdcb8d5ea500dd4"
+            },
+            {
+              "key": "text/history/home_set/set%3Aa/band/0",
+              "sha256": "sha256:0d072753ce9194c55901716a507a026d42b6d47b4a51b8e9a6f3c1874a60eb70"
+            }
+          ]
+        }
+      }
+    },
+    "error": "Index manifest path must match its hash"
+  }
+]
