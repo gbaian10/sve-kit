@@ -1,13 +1,14 @@
 """Stored semantic positions cross the actual producer and complete wire reader."""
 
 from dataclasses import replace
+from pathlib import Path
 
 import pytest
 
 from sve_carddb.build import create_database
 from sve_carddb.contracts.annotations import Annotation, AnnotationSet
 from sve_carddb.contracts.four_layer import GlossaryReference, Span, hash_payload
-from sve_carddb.core.json import digest
+from sve_carddb.core.json import digest, object_value, parse
 from sve_carddb.domains.translations.four_layer_storage import write_annotation
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.reader import Fragment, read_snapshot
@@ -111,6 +112,19 @@ def test_nonempty_original_and_target_annotations_use_complete_new_wire() -> Non
             )
             == view.tables
         )
+        fixture = object_value(
+            parse(
+                (
+                    Path(__file__).resolve().parents[3]
+                    / "tests/fixtures/snapshot-contract/v3/annotated-native.json"
+                ).read_bytes()
+            )
+        )
+        assert snapshot.manifest == fixture["manifest"]
+        assert {
+            key: parse(blob.raw) for key, blob in snapshot.payloads.items()
+        } == fixture["payloads"]
+        assert view.tables == fixture["expected"]
 
 
 def test_empty_private_sets_emit_no_public_id_use_or_fragment() -> None:
