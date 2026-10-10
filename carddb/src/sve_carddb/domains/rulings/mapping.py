@@ -176,7 +176,7 @@ class Rebuild:
         return tuple(sorted(result, key=key))
 
     def candidates(self, use: LegacyUse) -> tuple[Target, ...]:
-        """Exact source identity and equivalent scope are required even for pending candidates."""
+        """Exact source identity and an equal scope are required even for pending candidates."""
         return tuple(
             sorted(
                 (

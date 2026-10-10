@@ -43,7 +43,8 @@ frame/binding pairs as `FrameUse`s. Scope roles and domains come from the existi
 source grammar, not from observed card frequency. Pure NP/form rendering changes
 do not require this rebuild.
 
-The resolver maps only an identical source occurrence with equivalent scope.
+The resolver maps only an identical source occurrence with an equal scope; the
+old and new boundaries must therefore use the same role and domain codes.
 It never chooses a target using a prefix, translated text, maximum coverage or
 `supersedes`. Changed source fields, changed partitions, different scope,
 unresolved semantics and multiple targets have explicit pending dispositions.

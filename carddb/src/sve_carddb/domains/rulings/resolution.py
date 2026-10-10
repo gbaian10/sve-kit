@@ -186,8 +186,6 @@ def _occurrence(
 
 def build(documents: tuple[Document, ...], rebuild: Rebuild | None = None) -> Report:
     """Each original ordinal expands over its complete old domain or stays reference-pending."""
-    if len({d.ruling.id for d in documents}) != len(documents):
-        raise ValueError("Duplicate current ruling document")
     resolutions: list[Resolution] = []
     retained = []
     for document in documents:
