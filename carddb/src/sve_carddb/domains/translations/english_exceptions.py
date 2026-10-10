@@ -251,7 +251,7 @@ def _source(
 ) -> tuple[CardSource | None, str | None]:
     try:
         source = card_source(db, sources, use.data.source, lang="en")
-    except ValueError, TypeError, ArchiveError, FileNotFoundError, ValidationError:
+    except ValueError, ArchiveError, FileNotFoundError, ValidationError:
         return None, "english_source_mismatch"
     if (source.card_id, source.face_id) != (use.data.card_id, use.data.face_id):
         return None, "english_owner_face_mismatch"
@@ -295,8 +295,6 @@ def apply(
             continue
         assert source is not None
         target = targets[use.data.target_id]
-        if target.data.source_hash != source.descriptor.source_hash:
-            raise ValueError("English target does not describe this exact source")
         context = "ctx:" + hash_payload(
             [source.descriptor.model_dump(mode="json"), target.data.id]
         )

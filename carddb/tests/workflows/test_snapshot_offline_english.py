@@ -113,7 +113,7 @@ def install_inputs(root: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         "wrong_version",
     ],
 )
-def test_normal_build_selects_only_exact_confirmed_english_fields(  # ruff: ignore[too-many-locals,too-many-statements,complex-structure] -- independent builds verify selection and public round-trip together
+def test_normal_build_selects_only_exact_confirmed_english_fields(  # ruff: ignore[too-many-locals,too-many-statements] -- independent builds verify selection and public round-trip together
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -260,21 +260,6 @@ def test_normal_build_selects_only_exact_confirmed_english_fields(  # ruff: igno
         )
         == after.projection.tables
     )
-    if mode in {"translated", "unresolved"}:
-        fixture_name = (
-            "english-native.json" if translated else "english-fallback-native.json"
-        )
-        (tmp_path / fixture_name).write_bytes(
-            canonical(
-                {
-                    "manifest": snapshot.manifest,
-                    "owner": {"kind": "face_revision", "id": revision["id"]},
-                    "payloads": {
-                        key: parse(blob.raw) for key, blob in snapshot.payloads.items()
-                    },
-                }
-            )
-        )
 
 
 def test_english_reader_rejects_missing_targets_and_omitted_required_references() -> (

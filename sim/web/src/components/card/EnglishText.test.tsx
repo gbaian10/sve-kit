@@ -2,9 +2,8 @@ import { act, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import fallbackFixture from "../../../../../tests/fixtures/snapshot-contract/v3/english-fallback-native.json"
 import fixture from "../../../../../tests/fixtures/snapshot-contract/v3/english-native.json"
-import { createAnnotatedTextResolver, type JsonObject, objectValue } from "../../data"
+import { createAnnotatedTextResolver, objectValue } from "../../data"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { annotatedOrigin } from "../../test-utils/annotated-snapshot"
@@ -12,13 +11,15 @@ import { CardText } from "./CardText"
 
 afterEach(() => prefsStore.set(DEFAULT_PREFS))
 
-async function englishOrigin(input: JsonObject = fixture) {
-  const origin = await annotatedOrigin(input)
-  return { ...origin, owner: objectValue(input["owner"]) }
+// The face's effect is translated; its name has no selected translation, which is
+// the complete-EN fallback case of the same exact owner.
+async function englishOrigin() {
+  const origin = await annotatedOrigin(fixture)
+  return { ...origin, owner: objectValue(fixture["owner"]) }
 }
 
 describe("English whole-field display exceptions", () => {
-  it("reads complete translated and missing fields from the Python-produced snapshot", async () => {
+  it("reads a translated and an untranslated field of one English owner from the Python-produced snapshot", async () => {
     const { client, owner } = await englishOrigin()
     await client.load()
     const resolver = createAnnotatedTextResolver(client)
@@ -34,13 +35,12 @@ describe("English whole-field display exceptions", () => {
     expect(translated?.selection?.["basis"]).toBe("own_source")
     expect(translated?.translation?.["low_confidence"]).toBe(true)
     expect(translated?.translation?.["authority"]).toBe("unofficial")
-    const fallback = await englishOrigin(fallbackFixture)
-    await fallback.client.load()
-    const missing = await createAnnotatedTextResolver(fallback.client).resolve(
-      { owner: fallback.owner, field: "effect", ordinal: null },
+    const missing = await resolver.resolve(
+      { owner: owner, field: "name", ordinal: null },
       "zh-Hant",
     )
-    expect(missing?.original.unit["text"]).toBe("Rule.")
+    expect(missing?.original.unit["text"]).toBe("Reskin")
+    expect(missing?.original.unit["lang"]).toBe("en")
     expect(missing?.original.annotation).toBeNull()
     expect(missing?.translated).toBeUndefined()
     expect(missing?.selection).toBeUndefined()
@@ -72,8 +72,8 @@ describe("English whole-field display exceptions", () => {
     expect(screen.getByText("合成規則😀。")).toBeVisible()
   })
 
-  it("shows the complete EN fallback and missing label for an unresolved English field", async () => {
-    const { client, owner } = await englishOrigin(fallbackFixture)
+  it("shows the complete EN fallback and missing label for an untranslated English field", async () => {
+    const { client, owner } = await englishOrigin()
     await client.load()
     const copy = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, "clipboard", {
@@ -81,12 +81,12 @@ describe("English whole-field display exceptions", () => {
       value: { writeText: copy },
     })
     const { container } = await renderInRouter(
-      <CardText client={client} owner={owner} field="effect" />,
+      <CardText client={client} owner={owner} field="name" />,
     )
-    expect(await screen.findByText("Rule.")).toBeVisible()
+    expect(await screen.findByText("Reskin")).toBeVisible()
     expect(screen.getByText("缺少此語言譯文")).toBeVisible()
     expect(container.querySelector("strong")).toBeNull()
     await userEvent.click(screen.getByRole("button", { name: "複製文字" }))
-    expect(copy).toHaveBeenLastCalledWith("Rule.")
+    expect(copy).toHaveBeenLastCalledWith("Reskin")
   })
 })
