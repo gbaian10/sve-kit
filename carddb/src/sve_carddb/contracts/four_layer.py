@@ -574,13 +574,19 @@ def _card_slots(node: CardNP, slots: Mapping[str, LeafSlot]) -> set[str]:
         for ref, expected in references
         if ref is not None
     )
+    if args.zone is not None and slots[args.zone.slot].role not in {
+        "source_zone",
+        "counted_zone",
+    }:
+        raise ValueError("CardNP requires a counted source zone")
     traits = tuple(ref.slot for ref in args.traits)
-    if len(traits) != len(set(traits)):
-        raise ValueError("CardNP trait leaves must be unique")
+    if len(traits) > 1:
+        raise ValueError("CardNP supports at most one proven trait filter")
     for name in traits:
-        if any(
-            not isinstance(value, GlossaryReference)
-            for value in _leaf(slots, name, "Concept").domain.values
+        trait = _leaf(slots, name, "Concept")
+        if trait.role != "trait" or any(
+            not isinstance(value, GlossaryReference) and value != "concept.trait.v1"
+            for value in trait.domain.values
         ):
             raise ValueError("CardNP traits require glossary concepts")
         used.add(name)
@@ -590,8 +596,9 @@ def _card_slots(node: CardNP, slots: Mapping[str, LeafSlot]) -> set[str]:
 
 
 def _class_domain(slot: LeafSlot) -> None:
-    if any(
-        not isinstance(value, VocabularyReference) or value.key[0] != "class"
+    if slot.role != "class_filter" or any(
+        value != "vocabulary.class.v1"
+        and (not isinstance(value, VocabularyReference) or value.key[0] != "class")
         for value in slot.domain.values
     ):
         raise ValueError("CardNP class requires class vocabulary")

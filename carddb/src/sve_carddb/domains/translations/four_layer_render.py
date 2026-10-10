@@ -41,7 +41,7 @@ if TYPE_CHECKING:
         TypedValue,
     )
 
-RENDERER_VERSION = "four-layer-renderer-v1"
+RENDERER_VERSION = "four-layer-renderer-v2"
 ZONE_CASES = frozenset(
     {"battlefield", "deck", "evolve_deck", "ex", "graveyard", "hand", "mixed"}
 )
@@ -173,12 +173,15 @@ def validate_form(form: FormDefinition) -> None:
         "keyword.display.v1": frozenset({"default"}),
         "quantity.classifier.v1": frozenset({"card", "object"}),
         "quantity.constant_value.v1": frozenset({"default"}),
+        "trait.filter.v1": frozenset({"default"}),
+        "zone.union_separator.v1": frozenset({"default"}),
     }.get(form.rule)
     if expected is None:
         raise ValueError("Unknown four-layer form rule")
     if set(form.cases) != expected:
         raise ValueError("Form must contain exactly its registered rule cases")
     types = {arg.name: arg.type for arg in form.signature}
+    _validate_filter_form(form)
     if form.rule == "zone.case.v1" and types != {"zone": "ZoneSet"}:
         raise ValueError("Zone form requires its exact typed signature")
     if form.rule == "keyword.display.v1" and types != {"term": "Concept"}:
@@ -214,6 +217,21 @@ def validate_form(form: FormDefinition) -> None:
             raise ValueError(
                 "Constant quantity form requires its exact role and value part"
             )
+
+
+def _validate_filter_form(form: FormDefinition) -> None:
+    types = {arg.name: arg.type for arg in form.signature}
+    if form.rule == "zone.union_separator.v1" and (
+        types != {"zone": "ZoneSet"}
+        or any(not isinstance(p, LiteralNode) for p in form.cases["default"])
+    ):
+        raise ValueError("Zone union separator requires only language literals")
+    if form.rule == "trait.filter.v1" and (
+        {arg.name: (arg.type, arg.role) for arg in form.signature}
+        != {"trait": ("Concept", "trait")}
+        or not any(isinstance(p, LabelPart) for p in form.cases["default"])
+    ):
+        raise ValueError("Trait filter form requires its exact typed signature")
 
 
 class Renderer:
@@ -385,10 +403,7 @@ class _Output:
         ):
             self.label(value)
         elif isinstance(value, tuple):
-            for index, zone in enumerate(value):
-                if index:
-                    self.text += "與"
-                self.code(slot.type, zone)
+            self.zones(item, name, value, path)
         elif isinstance(value, QuantitySpec):
             self.quantity(value)
         elif isinstance(value, (Bound, Constant, Expression)):
@@ -401,6 +416,34 @@ class _Output:
         else:
             raise ValueError("Typed leaf cannot be presented as a generic string")
         self.record_leaf(item, name, path, start)
+
+    def zones(
+        self,
+        item: BoundTarget,
+        name: str,
+        value: tuple[str, ...],
+        path: tuple[int, ...],
+    ) -> None:
+        for index, zone in enumerate(value):
+            if index:
+                self.implicit_form(
+                    item,
+                    FormNode(
+                        kind="Form",
+                        form_id="zone.union_separator",
+                        args={"zone": SlotRef(slot=name)},
+                    ),
+                    (*path, index),
+                    "missing_zone_union_separator",
+                )
+            self.code("ZoneSet", zone)
+
+    def implicit_form(
+        self, item: BoundTarget, node: FormNode, path: tuple[int, ...], issue: str
+    ) -> None:
+        if (node.form_id, self.lang) not in self.renderer.forms:
+            raise MissingValueError(issue)
+        self.form(item, node, path)
 
     def record_leaf(
         self, item: BoundTarget, name: str, path: tuple[int, ...], start: int
@@ -483,23 +526,30 @@ class _Output:
 
     def card(self, item: BoundTarget, node: CardNP, path: tuple[int, ...]) -> None:
         args = node.args
-        for index, ref in enumerate((args.owner, args.zone)):
-            if ref is not None:
-                self.leaf(item, ref.slot, (*path, index))
-                self.text += "的"
+        if args.owner is not None:
+            self.leaf(item, args.owner.slot, (*path, 0))
+        if args.zone is not None:
+            self.implicit_form(
+                item,
+                FormNode(kind="Form", form_id="zone.card_np", args={"zone": args.zone}),
+                (*path, 1),
+                "missing_card_zone_form",
+            )
         quantity = self.value(item, args.quantity.slot)
         self.leaf(item, args.quantity.slot, (*path, 2, 0))
         if isinstance(quantity, QuantitySpec) and quantity.mode not in {"all", "any"}:
-            zones = [
-                slot.name
-                for slot in item.frame.leaf_schema.slots
-                if slot.type == "ZoneSet" and slot.role == "counted_zone"
-            ]
+            zones = (
+                [args.zone.slot]
+                if args.zone is not None
+                else [
+                    slot.name
+                    for slot in item.frame.leaf_schema.slots
+                    if slot.type == "ZoneSet" and slot.role == "counted_zone"
+                ]
+            )
             if len(zones) != 1:
                 raise MissingValueError("unresolved_classifier_context")
-            if ("quantity.classifier", self.lang) not in self.renderer.forms:
-                raise MissingValueError("missing_classifier_form")
-            self.form(
+            self.implicit_form(
                 item,
                 FormNode(
                     kind="Form",
@@ -511,13 +561,21 @@ class _Output:
                     },
                 ),
                 (*path, 2, 1),
+                "missing_classifier_form",
             )
-        modifiers = [*args.traits]
+        for index, ref in enumerate(args.traits):
+            self.implicit_form(
+                item,
+                FormNode(kind="Form", form_id="trait.filter", args={"trait": ref}),
+                (*path, 3, index),
+                "missing_trait_filter_form",
+            )
+        modifiers = []
         if args.class_ is not None:
             modifiers.append(args.class_)
         if args.token is not None:
             modifiers.append(args.token)
-        for index, ref in enumerate(modifiers):
+        for index, ref in enumerate(modifiers, start=len(args.traits)):
             self.leaf(item, ref.slot, (*path, 3, index))
         self.leaf(item, args.kind.slot, (*path, 4))
 

@@ -158,7 +158,15 @@ def forms() -> dict[tuple[str, str], Form]:
             }
         )
     )
-    return {(f.id, f.lang): Form(f) for f in (locative, classifier)}
+    card_zone = locative.model_dump(mode="json")
+    card_zone["id"] = "zone.card_np"
+    card_zone["cases"] = {
+        name: [*parts, {"kind": "Literal", "text": "的"}]
+        for name, parts in object_value(card_zone["cases"]).items()
+        if isinstance(parts, list)
+    }
+    grouped = FormDefinition.model_validate_json(canonical(card_zone))
+    return {(f.id, f.lang): Form(f) for f in (locative, classifier, grouped)}
 
 
 def renderer(*, bold: bool = True, low: bool = False) -> Renderer:
@@ -337,7 +345,7 @@ def test_np_grouping_preserves_frame_and_binding_but_changes_presentation_depend
     second = renderer().render("context:sample", "zh-Hant", (grouped,)).rendered
     assert first is not None
     assert second is not None
-    assert second.text == "手牌的2張從者"
+    assert first.text == second.text == "手牌中的2張從者"
     assert grouped.frame.id == expanded.frame.id
     assert grouped.binding.id == expanded.binding.id
     assert first.dependency_key != second.dependency_key
