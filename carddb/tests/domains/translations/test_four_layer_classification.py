@@ -74,6 +74,20 @@ def test_card_name_is_protected_before_numeric_and_phase_recognition() -> None:
     assert all(f.projection.projection_kind == "none" for f in frames[1:])
 
 
+def test_leader_person_unit_survives_classification_and_binding_replay() -> None:
+    raw = "相手のリーダー１人を選ぶ。"
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    frame, binding = (
+        classifier(extra=("leader_person_quantity",))
+        .recognize(raw, field.source, part)
+        .bind(field.source, part)
+    )
+    field.verify(raw, (frame,), (binding,), DOMAINS)
+    assert binding.values == {"leaf_0": 1}
+    assert binding.occurrences[0].source_unit == "人"
+
+
 def test_missing_name_concept_cannot_create_an_active_binding() -> None:
     raw = "『仮』を２枚選ぶ。"
     field = normalize_source(raw, source(raw))

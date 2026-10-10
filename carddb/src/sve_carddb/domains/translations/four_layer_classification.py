@@ -548,7 +548,7 @@ def _source_unit(raw: str, hint: Hint) -> str | None:
     if hint.type != "uint":
         return None
     after = raw[hint.source_segments[-1].end :]
-    for spelling in ("ターン", "PP", "ＰＰ", "枚", "体", "つ", "点", "回"):
+    for spelling in ("ターン", "PP", "ＰＰ", "枚", "体", "人", "つ", "点", "回"):
         if after.startswith(spelling):
             return spelling
     return None
