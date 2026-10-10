@@ -76,7 +76,7 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 
 ### 3.1 types descriptor
 
-`types` 是具名 tuple 型別到 descriptor 的 object。descriptor 為 `{columns:[Code],items:[Type]}`，兩陣列等長；Type 恰為下列其中一種：
+`types` 是具名 row 與巢狀 tuple 型別到 descriptor 的共用 object，每個型別在同一容器只存一份。fragment 的 row 型別由固定 `(table,partition)` 對應決定；wire 不重複 columns，解碼時由此 descriptor 還原 columns。descriptor 為 `{columns:[Code],items:[Type]}`，兩陣列等長；Type 恰為下列其中一種：
 
 - `{"scalar":"Text"}`：沿 §1／邏輯欄位的純量型別；允許 ID、Text、Code、UInt、Int、Bool、Date、Instant、Region、Lang、Hash、URL、Path。
 - `{"enum":["a","b"]}`：固定字串集合，不由資料新增值。
@@ -198,7 +198,7 @@ format_version=`3.0.0` 的支援 DSL 版本集合固定為空：唯一可接受�
 
 容器完整形狀為 `{format_version,types,tables:{table_name:[Fragment]}}`，同表以陣列容納不同欄位分割／owner／bucket，解決 current/history 的 columns 不同但表名相同的情形。檔中沒有列的集合可省該 table entry；邏輯聯集中不存在的集合視為空陣列，不改為 null。
 
-`Fragment = {owner,bucket,partition,base,columns,rows}`。`Owner = {kind:home_set/global,id:ID?}`；home_set 的 id 是永久 product_family ID，global 的 id 固定 null。`Partition = bootstrap/detail/history`。唯一 fragment 身分是 `(table_name,owner.kind,owner.id,bucket,partition)`，同一 manifest 的所有 files 合計不得重複；檔案如何將 fragments 裝在一起不影響這個身分。每表 fragments 依上述身分排序。
+`Fragment = {owner,bucket,partition,base,rows}`。`Owner = {kind:home_set/global,id:ID?}`；home_set 的 id 是永久 product_family ID，global 的 id 固定 null。`Partition = bootstrap/detail/history`。唯一 fragment 身分是 `(table_name,owner.kind,owner.id,bucket,partition)`，同一 manifest 的所有 files 合計不得重複；檔案如何將 fragments 裝在一起不影響這個身分。每表 fragments 依上述身分排序。
 
 role 與 partition 解耦：role 是下載類別，partition 是欄位切分身分。文字 role=bootstrap/text 可依固定裝檔配置裝入 bootstrap/detail/history fragments；不是允許每批任意混裝。原 partition=bootstrap 的商品／引擎／印刷擴充可在 role=text 的按需檔，role=bootstrap 也不代表屬於基本目錄或必載。images 仍只容三影像集合的 detail，config／programs 的形狀不變。display_ref 外的 face_revision 及其 field_annotation 用 history，其他集合內嵌的歷史沿完整列出貨；text_all 保留原 File 分組。
 
@@ -213,8 +213,8 @@ role 與 partition 解耦：role 是下載類別，partition 是欄位切分身�
 | printing/bootstrap | id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence, review_level, reference_urls, variant_key, rarity_code, rarity_raw, premium, serial_total, int_id, decklog_available, decklog_verification, decklog_source_url, decklog_checked_on, faces |
 | PrintingFaceBootstrap | face_id, art_id, frame_code, signed, embellishment_state, stamps |
 | printing/detail | row_index, faces |
-| PrintingFaceDetail | face_ordinal, printed_name_unit_id, printed_effect_unit_id, flavor_unit_id, printed_text_state, observations, sections, translations, corrections |
-| face_revision/bootstrap | id, face_id, region, name_unit_id, class_code, type_code, cost, attack, defense, traits, titles, special_kinds, translations |
+| PrintingFaceDetail | face_ordinal, printed_name_unit_id, printed_effect_unit_id, flavor_unit_id, printed_text_state, observations, sections, translations, corrections, name_concept_id |
+| face_revision/bootstrap | id, face_id, region, name_unit_id, class_code, type_code, cost, attack, defense, traits, titles, special_kinds, translations, name_concept_id |
 | face_revision/detail | row_index, revision, effective_from, effective_until, temporal_status, change_kind, effect_unit_id, sections, translations, corrections |
 
 printing/bootstrap.faces 使用 PrintingFaceBootstrap，detail.faces 使用 PrintingFaceDetail；依 face.ordinal 排序，face_ordinal 取永久 face.ordinal，不是 arbitrary array index。只有所屬 card 的實際面可出現。face_revision 兩邊 translations 分別只收 field=name 與非 name；其他所有值的型別與邏輯欄位相同。
@@ -235,12 +235,31 @@ text_all 是替代表示，不列入 files，不在容量合計重算。文字�
 
 ### 4.3 檔案描述與容器對照例
 
-以下是手寫合成片段，使用 3.0 固定 N=64；不是完整可發布卡表。未顯示的 manifest/config／引用者需另行補齊。此 text_unit 屬名稱閉包，容器如下（排版不計入 canonical bytes）：
+以下是手寫合成片段，使用 3.0.0 固定 N=64；不是完整可發布卡表。未顯示的 manifest/config／引用者需另行補齊。此 text_unit 屬名稱閉包，容器如下（排版不計入 canonical bytes）：
 
 ```json
 {
   "format_version": "3.0.0",
-  "types": {},
+  "types": {
+    "text_unit_bootstrap": {
+      "columns": [
+        "id",
+        "lang",
+        "text"
+      ],
+      "items": [
+        {
+          "scalar": "ID"
+        },
+        {
+          "scalar": "Lang"
+        },
+        {
+          "scalar": "Text"
+        }
+      ]
+    }
+  },
   "tables": {
     "text_unit": [
       {
@@ -251,11 +270,6 @@ text_all 是替代表示，不列入 files，不在容量合計重算。文字�
         "bucket": 23,
         "partition": "bootstrap",
         "base": null,
-        "columns": [
-          "id",
-          "lang",
-          "text"
-        ],
         "rows": [
           [
             "t:ja:be3847dc77c33905",
@@ -274,9 +288,9 @@ text_all 是替代表示，不列入 files，不在容量合計重算。文字�
 ```json
 {
   "key": "bootstrap/bootstrap/global/global/band/2",
-  "path": "snapshots/blobs/099e7804e341d8ad5cff67c3addc5f90ee5843fb7174b02c7718156193d288e4.json",
-  "sha256": "sha256:099e7804e341d8ad5cff67c3addc5f90ee5843fb7174b02c7718156193d288e4",
-  "bytes": 234,
+  "path": "snapshots/blobs/d56930154a8cd95b6655c1660fe99ccb0297deff6d6fda8a3dfb56ef3a1566f9.json",
+  "sha256": "sha256:d56930154a8cd95b6655c1660fe99ccb0297deff6d6fda8a3dfb56ef3a1566f9",
+  "bytes": 319,
   "compressed_bytes": {
     "br": null,
     "gzip": null
@@ -454,9 +468,9 @@ format_version／min_reader_version=3.0.0，必要能力包含 jp-source-transla
 完整集合依該契約 §1，所有封套及 index entry 一致；index_format=2 不變。
 canonical、N=64、band widths、media、base／row_index 與同名規則依前述配置；整體容量仍須重新量測。
 
-欄序依公開 annotation §2.1：translation 的 annotation_set_id 必填且可 null，FieldTranslation 含
-source／counterpart 與 basis；cr_clause 含 translations，標註集合為 annotation_set／field_annotation／annotation_concept。
-Translation 在 bootstrap／detail 都用完整八欄。所有內嵌 FieldTranslation 的位置都同步使用七格，
+欄序以公開 annotation §2.1 覆寫 2.0 的同名列：translation 依序加必填可 null 的 annotation_set_id 與必填 annotation_kind，face_revision 與 PrintingFaceDetail 加 name_concept_id；FieldTranslation 加
+source／counterpart 並改 basis；cr_clause 加 translations；新增 annotation_set／field_annotation／annotation_concept。
+Translation 在 bootstrap／detail 都用完整九欄。所有原本內嵌 FieldTranslation 的位置都同步使用七格，
 不能只改 face_revision 而漏掉 printing／QA／keyword／vocabulary／商品。新增 PublicTextPointer／Annotation／AnnotationRange
 的 descriptor 與三個有限 JSON reference 定義必隨使用處完整附入 types。
 
@@ -465,9 +479,10 @@ Translation 在 bootstrap／detail 都用完整八欄。所有內嵌 FieldTransl
 其他集合仍沿前述欄位分割，printing.faces 的 face_ordinal 與 translation 子陣列 join 鍵不變。
 text_all 包含全部 43 文字集合的原始 File 聯集；changes 依現行集合的 PK／欄位白名單。
 annotation_set／field_annotation 只產非空集合及用途列；row_counts 計實際列數，不為空集合建立 fragment。
-translation.annotation_set_id=null 表示空集合；缺 field_annotation 只有在對應分片完整驗畢後才可當空，
+translation.annotation_kind=none 且 annotation_set_id=null 才表示空集合；whole_name 的 null 依公開 annotation §2.6 還原整名集合；缺 field_annotation 只有在對應分片完整驗畢後才可當空，
 非 null 引用缺目標仍拒絕。完整性由 producer 比對投影前 occurrence 保證，不能靠 reader 重造空 set ID。
 改 annotation／bold 可能改 set ID 及用途列，不能因 text bytes 未變省掉相關 changes／依賴更新。
 
-機器 Schema、reader 支援表與共用完整 golden 使用相同 3.0.0 profile。固定案例依 [public-annotation-cases](public-annotation-cases.md)，
-正式容量依 [size-budget](size-budget.md#30-annotation-與-jp-來源的計帳)。基本目錄裝檔與量法須同步 exporter／reader 後驗收，不能以其他配置或桌面數字證明手機通過。
+欄序依公開 annotation §2.1：translation 依序含必填可 null 的 annotation_set_id 與必填 annotation_kind，face_revision 與 PrintingFaceDetail 含 name_concept_id；FieldTranslation 含
+source／counterpart 與 basis；cr_clause 含 translations，標註集合為 annotation_set／field_annotation／annotation_concept。
+Translation 在 bootstrap／detail 都用完整九欄。所有內嵌 FieldTranslation 的位置都同步使用七格，

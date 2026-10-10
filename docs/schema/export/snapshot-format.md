@@ -18,9 +18,9 @@
 
 `engine_support_target` 恰含 `engine_version,engine_build_hash,validation_policy_id`，三欄全 null 或全有值；逐卡狀態不重複它。files 的完整形狀、hash／壓縮大小及依賴規則見 [傳輸契約 §2](snapshot-transport.md#2-快照清單與檔案描述)。
 
-傳輸容器採 `{format_version,types,tables:{table_name:[Fragment]}}`；Fragment 完整包含 `owner,bucket,partition,base,columns,rows`，精確身分與欄序見 [傳輸契約 §4](snapshot-transport.md#4-fragment-容器與-join)。這是具名 schema 的 row tuple 編碼，不是欄式分析資料庫。邏輯欄位仍以下表為權威。§2 是 join 後邏輯白名單；實際 columns 必須符合 §3.1 固定的啟動包／詳情分片欄位分割，不可任意省略 required/null 欄。3.0 manifest 的 `format_version/min_reader_version` 及完整八個 `required_capabilities` 依[公開 annotation §1](public-annotation.md#1-版本與驗證邊界)；缺能力或未知版本即拒絕。
+傳輸容器採 `{format_version,types,tables:{table_name:[Fragment]}}`；wire Fragment 完整包含 `owner,bucket,partition,base,rows`；columns 與 items 合併在容器 types 的固定 row descriptor，一次保存，精確身分與欄序見 [傳輸契約 §4](snapshot-transport.md#4-fragment-容器與-join)。這是具名 schema 的 row tuple 編碼，不是欄式分析資料庫。邏輯欄位仍以下表為權威。§2 是 join 後邏輯白名單；實際 columns 必須符合 §3.1 固定的啟動包／詳情分片欄位分割，不可任意省略 required/null 欄。3.0 manifest 的 `format_version/min_reader_version` 及完整八個 `required_capabilities` 依[公開 annotation §1](public-annotation.md#1-版本與驗證邊界)；缺能力或未知版本即拒絕。
 
-巢狀的 RegionView/PrintingFace/Section/FieldTranslation/Correction/Support 等記錄同樣用 tuple，types 以具名型別→columns 順序及引用型別描述（固定於 format）供載入器驗列長度；producer 以本文件的具名型別作型別名。`parameter_schema/corrected_from` 等值保持受限 JSON，不轉成位置陣列，值域依 [傳輸契約 §3.2–3.3](snapshot-transport.md#32-公開參數宣告)。純 ID/code 陣列亦保持原樣。每個分片只附用到的 types，producer 驗其與 format 定義一致；consumer 不執行資料提供的轉換程式。
+巢狀的 RegionView/PrintingFace/Section/FieldTranslation/Correction/Support 等記錄同樣用 tuple，types 以具名型別→columns 順序及引用型別描述（固定於 format）供載入器驗列長度；producer 以本文件的具名型別作型別名。`parameter_schema/corrected_from` 等值保持受限 JSON，不轉成位置陣列，值域依 [傳輸契約 §3.2–3.3](snapshot-transport.md#32-公開參數宣告)。純 ID/code 陣列亦保持原樣。每個容器只附用到的 row 與巢狀 types，各型別一份，producer 驗其與 format 定義一致；consumer 不執行資料提供的轉換程式。
 
 reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；啟動包轉 typed 索引後釋放原 tuples，只在畫面當前項目建立 view，不能全量展開成物件再多存一份。這項編碼主要節省未壓縮傳輸/快取大小；原型量測顯示 heap 並未因此降低，記憶體要靠 §3 的逐片解析/淘汰。每表按穩定主鍵排序、集合陣列按 ID/code 排序、有序段落保留 ordinal。payload 不含 `data_version/published_at`，未變內容跨版 bytes/hash 完全相同。完整文字包是同一分片 payload 的容器聯集，不能另做另一套 carddb。公共永久 ID 保持不透明字串；text ID 固定為 `t:{lang}:{sha256(exact UTF-8 text)[:16]}`，同一份快照內同鍵不同內容即停止匯出，不能重配舊鍵或自動加長，快照不附完整 hash。不另保存跨版本的已發布文字鍵索引（[ADR-0015](../../adr/0015-upload-from-export.md)）。
 
@@ -46,8 +46,8 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | `field_annotation` | `owner:PublicTextOwner, field, ordinal?, annotation_set_id` | 複合 PK(owner,field,ordinal)；原文有 occurrence 時不依賴譯文也有位置 |
 | `annotation_concept` | `id, category, explanations:[ExplanationReference], card_ids:[id]` | 必要公開概念、說明及已確認卡名目標；不是 DB glossary／採納紀錄 |
 | `text_unit` | `id, lang, text` | 全卡原文/譯文/問答/詞彙字串去重 |
-| `face_revision` | `id, face_id, region, revision, effective_from?, effective_until?, temporal_status, change_kind, name_unit_id, effect_unit_id, class_code?, type_code, cost?, attack?, defense?, traits:[code], titles:[code], special_kinds:[code], sections:[Section], translations:[FieldTranslation], corrections:[Correction]` | 現行與歷史卡文、數值、翻譯、更正徽章 |
-| `translation` | `id, source_unit_id, target_lang, text_unit_id, origin, authority, low_confidence, annotation_set_id?` | 只收當前有效選用譯文；來源類別與 authority 分開，低信心仍顯示並標待校對 |
+| `face_revision` | `id, face_id, region, revision, effective_from?, effective_until?, temporal_status, change_kind, name_unit_id, effect_unit_id, class_code?, type_code, cost?, attack?, defense?, traits:[code], titles:[code], special_kinds:[code], sections:[Section], translations:[FieldTranslation], corrections:[Correction], name_concept_id?` | 現行與歷史卡文、數值、翻譯、更正徽章 |
+| `translation` | `id, source_unit_id, target_lang, text_unit_id, origin, authority, low_confidence, annotation_set_id?, annotation_kind:none/explicit/whole_name` | 只收當前有效選用譯文；來源類別與 authority 分開，低信心仍顯示並標待校對 |
 | `qa` | `id, region, official_number?, source_url, current_version_id?` | 官方問答編號與連結 |
 | `qa_version` | `id, qa_id, revision, published_on?, updated_on?, date_raw?, question_unit_id, answer_unit_id, state, cards:[card_id], translations:[FieldTranslation]` | 問答全文/卡片關聯/同日歷史更新 |
 | `cr_version` | `id, region, version, published_on?, effective_on?, source_url` | 輔助提示的規則版本 |
@@ -81,7 +81,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | 巢狀型別 | 完整欄位與語意 |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | RegionView | `region, release_state:released/unknown/announced/not_released_confirmed, mapping_state:unmapped/pending/confirmed/confirmed_none, as_of, mapping_as_of?, mapping_scope?, default_printing_id?, default_method?, deck_role?, debut_product_ids:[id], debut_state:known/unknown`；來自建置資料庫推導，無法判最早時 unknown |
-| PrintingFace | `face_id, art_id?, frame_code?, signed?, embellishment_state, printed_name_unit_id?, printed_effect_unit_id?, flavor_unit_id?, printed_text_state, observations:[ObservedText], sections:[Section], stamps:[{stamp_id,position?,color?}], translations:[FieldTranslation], corrections:[Correction]`；不帶 `card_id/credit_raw/source` |
+| PrintingFace | `face_id, art_id?, frame_code?, signed?, embellishment_state, printed_name_unit_id?, printed_effect_unit_id?, flavor_unit_id?, printed_text_state, observations:[ObservedText], sections:[Section], stamps:[{stamp_id,position?,color?}], translations:[FieldTranslation], corrections:[Correction], name_concept_id?`；不帶 `card_id/credit_raw/source` |
 | WordingView | `region, state:pending, display:{revision_id?,basis:current/latest_known_release/candidates}, candidates:[{printing_id,revision_id?}], undated_printing_ids:[id]`；暫顯不等於 current，見 §2.3 |
 | ObservedText | `revision_id?, state:available/missing_effect/correction_conflict, source_url`；同版次觀測，不等於 printed，見 §2.3 |
 | Section | `ordinal, text_unit_id, kind` |
@@ -97,7 +97,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 新增巢狀型別 AnnotationRange／Annotation／PublicTextPointer 與有限 JSON reference 的逐欄型別、required/null、
 合法域、驗證者及反例 ID 依[公開 annotation §2](public-annotation.md#2-公開型別欄序與欄位責任)，是本白名單的一部分。
 只公開非空且被引用的 annotation_set 與非空 field_annotation；相關分片完整載入驗畢後，缺原文用途列表示空集合。
-translation.annotation_set_id 必填，null 表示譯文空集合；非 null 引用仍須存在，不能降為空。
+translation.annotation_set_id 與 annotation_kind 必填；wire null 依 none／whole_name 分別表示空集合／可推導整名，explicit 的非 null 引用仍須存在，不能降為空。
 producer 以來源／render occurrence 驗省略完整性；reader 不從缺列推論原文沒有術語。
 
 卡表快照的 `card_engine_support.shared` 可以是 `missing_dsl`；EN-only 文件放 overrides；`region_blocks` 至少含未確認對應/語義差異/未有該區來源的理由。消費優先選 region override，否則 shared，最後套 `region_blocks`；block 強制手動且合併 reasons。若選中 `status=engine_passed` 但有 block，該區 `effective_status` 降為 reviewed（顯示「共用實作已審核，此區待核對」），不能在未實作清單顯示此區已通過。其餘四態保留並附區域原因；automatic 恰為 `effective_status=engine_passed`。不得從沒有 override 推斷「英版已確認」；block 完整性是發布閘門。
@@ -404,3 +404,5 @@ digital_face／digital_text 留建置端，沒有資產採納就不出 digital a
 | 同名連結被拿來授官方譯名、概念、圖或語音，或空 coverage 被說成無對應 | 不授權；各入口仍驗自己的採納／來源條件，未知如實呈現 |
 
 正式容量與變動報告依所宣告版本及 [size-budget](size-budget.md) 量測。完整文字或資料檔超上限不能宣稱發布效能驗收通過；基本目錄略超 Brotli 2 MiB 報精確差額，明顯超出才交維護者。不自動改 N 或發布後格式；保留窗口依 §4.1，不永久保存歷史快照。
+
+整名 wire 省略與 logical 還原依[公開 annotation §2.6](public-annotation.md#26-整名集合的省略與還原)。`face_revision`（含 bootstrap／history）及 `PrintingFace`／`PrintingFaceDetail` 的末欄為 `name_concept_id?`，translation 第九欄為 `annotation_kind`；八項 capability 不變。

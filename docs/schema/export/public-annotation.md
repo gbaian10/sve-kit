@@ -64,11 +64,11 @@ ID 是非空公開識別；Code 沿既有 ASCII 規則；Lang 須在本快照 la
 | PublicTextPointer | owner, field, ordinal | 巢狀 tuple；owner 是下述封閉 JSON |
 | field_annotation | owner, field, ordinal, annotation_set_id | 複合 PK 前三格；原文用途唯一 |
 | annotation_concept | id, category, explanations, card_ids | PK id；只有實際 annotation 引用的概念 |
-| Translation／translation | id, source_unit_id, target_lang, text_unit_id, origin, authority, low_confidence, annotation_set_id | 兩個 partition 均為完整八欄 |
+| Translation／translation | id, source_unit_id, target_lang, text_unit_id, origin, authority, low_confidence, annotation_set_id, annotation_kind | 第八欄保留；兩個 partition 均完整九欄 |
 | FieldTranslation | field, ordinal, target_lang, translation_id, basis, source, counterpart | 原五欄後加兩格；receiver 由父 owner 決定 |
 | cr_clause | id, cr_version_id, number, text_unit_id, translations | 原四欄後加 `[FieldTranslation]`；global detail |
 
-其餘表／巢狀型別欄序不變。新增三個文字集合，文字集合總數為 43；加三個影像集合後為 46。
+`face_revision`（含 bootstrap／history）及 `PrintingFace`／`PrintingFaceDetail` 最後追加必填可 null 的 `name_concept_id`。其他表／巢狀型別欄序不變。新增三個文字集合，文字集合總數為 43；加三個影像集合後為 46。
 `AnnotationReference`、`PublicTextOwner`、`ExplanationReference` 是本版新增的三個具名有限 JSON 型別，
 descriptor 使用 `{"json":"型別名"}`；不是可執行 schema 或任意 object。
 `x-columns`／`x-types` 釘在本文件 Schema，資料的 types 必與之完全相等；不能由下載資料更改欄序或型別。
@@ -164,7 +164,8 @@ P 從同一概念設定產生所有原文／譯文 occurrence，R 驗固定類�
 | translation.origin | official/project/machine；必填非 null | 沿有效選用值，不能改寫機器來源；PA-02／PA-07 |
 | translation.authority | sve_official/digital_official/unofficial；必填非 null | 沿來源權威；jp_source 繁中不能冒充 SVE 官文；PA-07 |
 | translation.low_confidence | Bool；必填非 null | true 仍顯示、標待校對；false 不授人工核可；PA-02／PA-10 |
-| translation.annotation_set_id | ID?；必填可 null | null 表示譯文無公開 occurrence；非 null 唯一明示非空集合，不按文字反查猜集合；PA-02／PA-03／PA-06／PA-10 |
+| translation.annotation_set_id | ID?；必填可 null | `none` 時 null 表示無 occurrence；`explicit` 時非 null 明示集合；`whole_name` 時 wire 為 null，由 §2.6 推導，不按文字反查猜集合；PA-02／PA-03／PA-06／PA-10 |
+| translation.annotation_kind | none/explicit/whole_name；必填非 null | 只在完整可推導整名時省略集合，依 §2.6 還原；不把 wire null 當無標註 |
 | FieldTranslation.field／ordinal | Field／UInt?；皆必填 | 父 owner 的合法欄位；section/action_label 才可且必非 null；PA-05 |
 | FieldTranslation.target_lang／translation_id | Lang／ID；必填非 null | 唯一鍵仍為 field/ordinal/target_lang，引用上述 translation；PA-06／PA-07 |
 | FieldTranslation.basis | own_source/jp_source/official_counterpart；必填非 null | 封閉三值，依 §4 驗來源／receiver；PA-02／PA-07 |
@@ -177,6 +178,20 @@ annotation_set_id=null 不免除 text／來源檢查；非 null 卻缺目標仍�
 official_counterpart 雙端 annotation 都為空時可相等，但原文 exact text 與 owner 檢查不變。
 同一 source text 可以有多個 translation／annotation，所有 receiver 分別驗 owner；不全域挑第一筆。
 公開 ID 中即使包含內容 hash 也不另公開逐列 source_hash、binding、render dependency 或選用歷史。
+
+### 2.6 整名集合的省略與還原
+
+`name_concept_id` 是該精確 revision／printing-face 的整名概念；P 只從該原文用途已保存的整名 occurrence 投影，沒有可完全推導的原文集合時為 null。不用 current、rules_name、同字串或接收端英文名稱猜另一來源的概念。
+非 null 必須指 `category=card_name` 的公開 annotation_concept，該 owner 自己的 name 原文必須存在且非空。
+
+`translation.annotation_kind` 必填，封閉為 `none`／`explicit`／`whole_name`。`none` 的第八欄必為 null，`explicit` 必為非 null；`whole_name` 的 wire 第八欄必為 null，保留翻譯永久 ID、來源與品質欄。
+`whole_name` 的每個 FieldTranslation 用途都必須是 name/null；沿其精確 source owner 的 `name_concept_id` 推導，不從 EN receiver 推 JP 概念。同 translation 的所有用途必須導出相同概念；receiver 有概念時也須一致。source 的 kind、face、revision、region、mapping、text 與 basis 仍逐用途依 §4 驗證。
+
+虛擬原文／譯文 set 恰為一筆 occurrence：ordinal=0、reference=`{kind:"card_name",term_id:name_concept_id}`、ranges=`[{start:0,end:exact scalar length}]`、bold=true。ID 仍依 annotation-v1 原配方計算；wire null 不表示重配或空集合。完整 reader 的 decoded logical view 還原 set、field_annotation 及 translation 第八欄，changes 比較還原後的邏輯列；新欄 name_concept_id／annotation_kind 亦在 changed_fields 白名單內。
+
+P 只有在原集合與上述推導結果完全相同時省略 name 用途。被 effect、section、多次出現、非整名或 explicit translation 引用的集合仍保留；同 set 同時有可推導用途與 explicit 用途時，實體列只存一份。
+虛擬集合的 bootstrap／detail 資格仍依原用途判定；row_counts 計實際 wire 列數，decoded logical 列數另計，不造空 fragment。
+部分 reader 的普通字串仍可先讀；來源／概念閉包未取得時 annotated Promise 保持未完成，不把 null 判成無標註。完整 source／concept 查找後仍缺目標即錯誤；historical 與 printed 各用自己的精確 owner。
 
 ## 3. exact 身分與 Unicode 座標
 
@@ -250,7 +265,7 @@ W 仍按 card_engine_support 的 region override／shared／block 順序求資�
 
 | 狀態 | 合成例與 reader／Web 行為 |
 | --- | --- |
-| 基本文字就緒（ready） | EN receiver 的名稱／基本欄位、FieldTranslation 七格、translation 八格、source_unit_id 指向的字典文字及目標文字已驗；`jp_source` 的 JP source owner 尚未載入。可搜尋／呈現普通字串與 origin／authority／low_confidence，標「日文依據」，不聲稱已核完 JP owner 或完整標註 |
+| 基本文字就緒（ready） | EN receiver 的名稱／基本欄位、FieldTranslation 七格、translation 九格、source_unit_id 指向的字典文字及目標文字已驗；`jp_source` 的 JP source owner 尚未載入。可搜尋／呈現普通字串與 origin／authority／low_confidence，標「日文依據」，不聲稱已核完 JP owner 或完整標註 |
 | 日文依據／標註未備妥（pending） | 上例仍有完整 source pointer 或非 null annotation_set_id，但所需 JP owner／兩區 mapping slice、用途 set／concept 尚未下載驗畢。顯示「日文依據載入中／標註載入中」，不畫未驗 ranges、不造加粗／說明入口；不能當作缺譯、空 set、無術語或已確認 counterpart |
 | 完整檢視缺來源（錯誤） | 所需 owner、字典與標註候選檔及其依賴已全部載入驗畢，仍找不到 pointer 指定的 JP revision、原文或非 null set；完整 view 回 reference／owner／text_identity 錯誤，不降級 pending／缺譯或借 current／同字串用途補洞 |
 
@@ -288,7 +303,7 @@ printing 字段為 detail；keyword／vocabulary／商品為 bootstrap；QA／CR
 這些邏輯引用由 P／完整 R／U 驗閉包，W 在使用來源對照／說明前載入且驗到目的欄位。
 完整文字包包含三個新集合及所有必要文字／說明閉包；分片與 text_all 的 decoded logical view 相同。
 所有新集合納入 row_counts、types、changes 的 PK／changed_fields 白名單、檔案 hash 與完整文字離線 ready 判定。
-row_counts 只計實際非空集合及用途列；空集合不補列、不產生僅為保存空集合的 fragment。
+row_counts 只計 wire 實際儲存的非空集合及用途列；空集合不補列、不產生僅為保存空集合的 fragment。
 非空集合變空時，原文用途以 changes 記錄用途列的 retired；譯文則記錄 translation.annotation_set_id 改為 null，
 並依既有閉包規則移除不再被引用的集合／概念；不能省略仍有其他用途的共享集合。
 
