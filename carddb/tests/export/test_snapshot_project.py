@@ -1114,7 +1114,7 @@ def dual_project(db: Database, chosen: Decisions) -> Projection:
 
 
 @pytest.mark.parametrize("aligned", [False, True])
-def test_shared_jp_preserves_source_owner_context(
+def test_jp_source_preserves_source_owner_context(
     db: Database, *, aligned: bool
 ) -> None:
     dual_region(db)
@@ -1128,7 +1128,7 @@ def test_shared_jp_preserves_source_owner_context(
         else (),
         display_bindings=(
             DisplayBinding(
-                "use", ("face_revision", "revision-en"), "zh-Hant", "shared_jp"
+                "use", ("face_revision", "revision-en"), "zh-Hant", "jp_source"
             ),
         ),
     )

@@ -225,7 +225,7 @@ def _binding_identity(
         if destination[:2] != (card_id, face_id) or destination[2] == region:
             raise ValueError("Cross-region translation owner mismatch")
         if region != "jp" or destination[2] != "en" or binding.target_lang != "zh-Hant":
-            raise ValueError("Shared JP translation region/language mismatch")
+            raise ValueError("JP source translation region/language mismatch")
     return original
 
 
@@ -379,9 +379,7 @@ class _SelectedTranslations:
                 "ordinal": use["ordinal"],
                 "target_lang": translation["target_lang"],
                 "translation_id": identifier,
-                "basis": "jp_source"
-                if basis in {"shared_jp", "shared_jp_unchecked"}
-                else basis,
+                "basis": basis,
                 "source": pointer(use),
                 "counterpart": counterpart,
             }
@@ -415,7 +413,7 @@ class _SelectedTranslations:
                 }
             ]
         elif binding.translation_id is not None:
-            raise ValueError("Shared JP binding must use the common selection")
+            raise ValueError("JP source binding must use the common selection")
         for row in selected:
             self.append(owner, use, row, binding.basis, counterpart)
 
@@ -455,8 +453,6 @@ def translations(  # ruff: ignore[complex-structure] -- own-source and cross-reg
         if binding.basis not in {
             "own_source",
             "jp_source",
-            "shared_jp",
-            "shared_jp_unchecked",
             "official_counterpart",
         }:
             raise ValueError("Unknown translation display basis")

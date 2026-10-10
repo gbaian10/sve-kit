@@ -43,7 +43,7 @@ def db(current_schema: CompiledSchema) -> Iterator[Database]:
         yield database
 
 
-def shared(*, checked: bool = False) -> Decisions:
+def jp_source(*, checked: bool = False) -> Decisions:
     return replace(
         decisions(),
         display_bindings=(
@@ -51,7 +51,7 @@ def shared(*, checked: bool = False) -> Decisions:
                 "use",
                 ("face_revision", "revision-en"),
                 "zh-Hant",
-                "shared_jp" if checked else "shared_jp_unchecked",
+                "jp_source",
             ),
         ),
         display_checks=(
@@ -120,7 +120,11 @@ def test_unchecked_machine_translation_keeps_quality_and_source_closure(
             },
         )
     result = project(
-        db, regions=regions, as_of="2026-10-01", settings=SETTINGS, decisions=shared()
+        db,
+        regions=regions,
+        as_of="2026-10-01",
+        settings=SETTINGS,
+        decisions=jp_source(),
     )
     translation = one(result, "translation")
     assert translation["origin"] == "machine"
@@ -189,15 +193,15 @@ def test_unequal_sections_keep_complete_jp_effect_and_no_jp_sections(
                 dict(db.rows("face_text_section")[0].values)
                 | {"revision_id": "revision-en", "ordinal": 1},
             )
-    bindings = one(dual_project(db, shared()), "face_revision", "revision-en")[
+    bindings = one(dual_project(db, jp_source()), "face_revision", "revision-en")[
         "translations"
     ]
     assert bool(bindings) is (field in {"name", "effect"})
 
 
-@pytest.mark.parametrize("basis", ["shared_jp", "shared_jp_unchecked"])
+@pytest.mark.parametrize("checked", [False, True])
 def test_known_name_divergence_keeps_jp_translation_in_both_modes(
-    db: Database, basis: str
+    db: Database, checked: bool
 ) -> None:
     dual_region(db)
     with db.transaction():
@@ -206,7 +210,7 @@ def test_known_name_divergence_keeps_jp_translation_in_both_modes(
             {"card_id": "card", "region": "en", "field_scope": "name"},
             {"resolved": False},
         )
-    result = dual_project(db, shared(checked=basis == "shared_jp"))
+    result = dual_project(db, jp_source(checked=checked))
     assert (
         object_value(
             array(one(result, "face_revision", "revision-en")["translations"])[0]
@@ -217,8 +221,8 @@ def test_known_name_divergence_keeps_jp_translation_in_both_modes(
 
 def test_completed_display_check_keeps_the_same_jp_source_basis(db: Database) -> None:
     dual_region(db)
-    chosen = replace(shared(), display_checks=shared(checked=True).display_checks)
-    for result in (dual_project(db, chosen), dual_project(db, shared(checked=True))):
+    chosen = replace(jp_source(), display_checks=jp_source(checked=True).display_checks)
+    for result in (dual_project(db, chosen), dual_project(db, jp_source(checked=True))):
         assert (
             object_value(
                 array(one(result, "face_revision", "revision-en")["translations"])[0]
@@ -232,7 +236,7 @@ def test_display_checks_are_bound_to_each_current_source(
     db: Database, side: str
 ) -> None:
     dual_region(db)
-    original = shared(checked=True).display_checks[0]
+    original = jp_source(checked=True).display_checks[0]
     check = (
         replace(original, source_unit_id="t:stale")
         if side == "source_unit_id"
@@ -241,7 +245,7 @@ def test_display_checks_are_bound_to_each_current_source(
     with pytest.raises(
         ValueError, match=r"^Translation display check source mismatch$"
     ):
-        dual_project(db, replace(shared(checked=True), display_checks=(check,)))
+        dual_project(db, replace(jp_source(checked=True), display_checks=(check,)))
 
 
 def test_stale_source_hash_cannot_be_recast_as_low_confidence(db: Database) -> None:
@@ -305,11 +309,11 @@ def test_unchecked_shared_translation_does_not_borrow_other_languages(
     db: Database, lang: str
 ) -> None:
     dual_region(db)
-    binding = replace(shared().display_bindings[0], target_lang=lang)
+    binding = replace(jp_source().display_bindings[0], target_lang=lang)
     with pytest.raises(
-        ValueError, match=r"^Shared JP translation region/language mismatch$"
+        ValueError, match=r"^JP source translation region/language mismatch$"
     ):
-        dual_project(db, replace(shared(), display_bindings=(binding,)))
+        dual_project(db, replace(jp_source(), display_bindings=(binding,)))
 
 
 def test_counterpart_does_not_borrow_an_unchecked_text(db: Database) -> None:
@@ -361,5 +365,18 @@ def test_jp_translation_rejects_a_snapshot_missing_the_exact_donor_owner(
             regions=("en",),
             as_of="2026-10-01",
             settings=SETTINGS,
-            decisions=shared(),
+            decisions=jp_source(),
         )
+
+
+@pytest.mark.parametrize("basis", ["shared_jp", "shared_jp_unchecked"])
+def test_retired_jp_display_basis_is_rejected(db: Database, basis: str) -> None:
+    dual_region(db)
+    chosen = replace(
+        decisions(),
+        display_bindings=(
+            DisplayBinding("use", ("face_revision", "revision-en"), "zh-Hant", basis),
+        ),
+    )
+    with pytest.raises(ValueError, match="Unknown translation display basis"):
+        dual_project(db, chosen)
