@@ -126,10 +126,11 @@ jobs:
             carddb/pyproject.toml carddb/uv.lock publish/pyproject.toml publish/uv.lock
           )
           scope=(--all-files)
-          # Deleted inputs never reach pre-commit's filename filters, but can break the ER build.
+          # Deleted inputs never reach pre-commit's filename filters, but can break the ER build or leave
+          # Markdown links to a deleted or renamed file in files the PR did not touch.
           if [ "$GITHUB_EVENT_NAME" = pull_request ] &&
             git diff --quiet "${BASE}...${HEAD}" -- "${full_scan_inputs[@]}" &&
-            git diff --quiet --no-renames --diff-filter=D "${BASE}...${HEAD}" -- docs/schema/; then
+            git diff --quiet --no-renames --diff-filter=D "${BASE}...${HEAD}" -- docs/schema/ ':(glob)**/*.md'; then
             scope=(--from-ref "$BASE" --to-ref "$HEAD")
           fi
           echo "pre-commit scope: ${scope[*]}"
