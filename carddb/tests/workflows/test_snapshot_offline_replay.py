@@ -180,6 +180,7 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
     root = tmp_path / "repository"
     archive = tmp_path / "archive"
     shutil.copytree(baseline.case.repository, root)
+    (root / "authored/rules/rulings").mkdir(parents=True)
     shutil.copytree(baseline.archive, archive)
     store = _store(tmp_path / "card-sources")
     batches: dict[str, str] = {}

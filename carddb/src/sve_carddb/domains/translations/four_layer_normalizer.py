@@ -8,7 +8,6 @@ from unicodedata import normalize
 from sve_carddb.contracts.four_layer import Constant, QuantitySpec, Span
 from sve_carddb.contracts.n0 import VERSION
 from sve_carddb.contracts.source_binding import SourceSpan, TracePiece, verify_partition
-from sve_carddb.contracts.template_parameters import Range
 from sve_carddb.core.json import digest
 from sve_carddb.domains.translations.four_layer_grammar import TOKEN_HEADER
 from sve_carddb.domains.translations.recognition.provenance import Unit, merged, nfkc
@@ -302,10 +301,10 @@ def _units(raw: str, span: SourceSpan) -> tuple[Unit, ...]:
     text = "".join(raw[i] for i in positions)
     if span.role == "layout":
         return (
-            Unit("W", tuple(Range(start=s.start, end=s.end) for s in span.segments)),
+            Unit("W", tuple(Span(start=s.start, end=s.end) for s in span.segments)),
         )
     if span.role != "body":
-        return tuple(Unit(raw[i], (Range(start=i, end=i + 1),)) for i in positions)
+        return tuple(Unit(raw[i], (Span(start=i, end=i + 1),)) for i in positions)
     units = nfkc(text, positions)
     value = "".join(u.text for u in units)
     names = tuple(_NAME.finditer(value))

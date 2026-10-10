@@ -20,7 +20,6 @@ from sve_carddb.domains.registry.storage import (
 from sve_carddb.domains.registry.storage import Shard as RegistryShard
 from sve_carddb.domains.registry.transitions.models import After, Transition
 from sve_carddb.domains.translations.four_layer_authored import Shard
-from sve_carddb.domains.translations.four_layer_authored import Shard as TemplateShard
 from sve_carddb.domains.translations.glossary.records import TermRecord
 
 from ..support.translation_fixtures import choice, name_term, term
@@ -171,7 +170,6 @@ def test_stored_key_is_rejected_even_when_it_matches_derived_identity() -> None:
         IdentityShard,
         ProductShard,
         Shard,
-        TemplateShard,
     ],
 )
 def test_validation_schema_does_not_advertise_derived_keys(

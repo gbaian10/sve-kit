@@ -71,6 +71,7 @@ jobs:
               - 'tests/engine/*.yaml'
             web:
               - 'sim/web/**'
+              - 'docs/schema/export/public-annotation-cases.json'
               - 'carddb/src/sve_carddb/contracts/schema/**' # the web reader validates against the published schema
 
   repo:

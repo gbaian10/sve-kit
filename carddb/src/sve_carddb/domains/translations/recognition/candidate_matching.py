@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.contracts.template_parameters import Range
+from sve_carddb.contracts.four_layer import Span
 from sve_carddb.domains.translations.four_layer_normalizer import partition_source
 from sve_carddb.domains.translations.recognition.analysis import (
     analyze,
@@ -51,11 +51,11 @@ ASCII = re.compile(ASCII_AFTER)
 
 @dataclass(frozen=True)
 class Match:
-    context: tuple[Range, ...] = ()
+    context: tuple[Span, ...] = ()
     target_id: str | None = None
 
 
-def _raw(text: str, spans: tuple[Range, ...]) -> str:
+def _raw(text: str, spans: tuple[Span, ...]) -> str:
     return "".join(text[s.start : s.end] for s in spans)
 
 
@@ -68,7 +68,7 @@ def _exact_target(raw: str, refs: References, targets: tuple[str, ...]) -> str |
     return identifier if category == expected else None
 
 
-def _origins(units: tuple[Unit, ...], start: int, end: int) -> tuple[Range, ...]:
+def _origins(units: tuple[Unit, ...], start: int, end: int) -> tuple[Span, ...]:
     return merged(tuple(s for u in units[start:end] for s in u.origins))
 
 
@@ -92,13 +92,13 @@ def _choice(text: str, hint: Hint) -> Match | None:
         ):
             continue
         if any(
-            hint.source_segments == (Range(start=m.start(1), end=m.end(1)),)
+            hint.source_segments == (Span(start=m.start(1), end=m.end(1)),)
             for m in group
         ):
             return Match(
                 context=(
-                    Range(start=introduction.start(), end=introduction.end()),
-                    *(Range(start=m.start(), end=m.end()) for m in group),
+                    Span(start=introduction.start(), end=introduction.end()),
+                    *(Span(start=m.start(), end=m.end()) for m in group),
                 )
             )
     return None

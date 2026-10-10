@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.template_parameters import Range
+from sve_carddb.contracts.four_layer import Span
 from sve_carddb.core.models import RecordData, Text, UInt
 
 NumericRule = Literal[
@@ -24,8 +24,8 @@ NumericRule = Literal[
 
 class Hint(RecordData):
     name: Text
-    occurrence: Range
-    source_segments: tuple[Range, ...]
+    occurrence: Span
+    source_segments: tuple[Span, ...]
     transformation: Text
     semantic_role: Text
     numeric_rule: NumericRule | None
@@ -38,8 +38,8 @@ class Hint(RecordData):
 
 
 class LiteralTrace(RecordData):
-    occurrence: Range
-    source_segments: tuple[Range, ...]
+    occurrence: Span
+    source_segments: tuple[Span, ...]
 
 
 class Candidate(RecordData):

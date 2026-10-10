@@ -21,7 +21,7 @@ canonical hash 相同不足以合併不同語義。resolved 變體可以共用�
 同一位置至多選用一個有效 frame；人工 match pin 也必須通過同一個來源邊界。
 
 建置先完成來源分類與匹配，再將 authored frame、target 與 form 寫入 DB。
-沒有任何完整 owner 欄位支持的 authored frame 會使建置失敗。候選只保存未啟用草稿，不產生 active binding 或 target。
+沒有任何完整 owner 欄位支持的 authored frame 列入建置報告（frame ID 與 no_fully_verified_source_owner_field），不啟用該 frame／target；受影響欄位整欄退回原文，建置可完成。候選只保存未啟用草稿，不產生 active binding 或 target。
 來源 bindings、輸出葉關聯與原文／譯文 annotation 分別保存，不能按中文字串搜尋位置。
 
 ## 3. 輸入與測試

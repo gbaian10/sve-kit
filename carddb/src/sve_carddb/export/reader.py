@@ -565,31 +565,16 @@ def read_text_all(
     return read_snapshot(manifest, payloads | dict(attachments))
 
 
-def compatible(
-    entry: Row,
-    *,
-    reader_version: str | None = None,
-    supported_formats: tuple[str, ...] | None = None,
-    supported_capabilities: tuple[str, ...] | None = None,
-) -> bool:
-    """Negotiate advertised requirements independently of the installed wire parser."""
+def compatible(entry: Row) -> bool:
+    """Negotiate requirements supported by the installed wire parser."""
     try:
         selected = profile(string(entry["format_version"]))
     except ValueError:
         return False
-    if (
-        supported_formats is not None
-        and entry["format_version"] not in supported_formats
-    ):
-        return False
     minimum = tuple(map(int, string(entry["min_reader_version"]).split(".")))
-    return minimum <= tuple(
-        map(int, (reader_version or selected.version).split("."))
-    ) and set(map(string, array(entry["required_capabilities"]))) <= set(
-        selected.capabilities
-        if supported_capabilities is None
-        else supported_capabilities
-    )
+    return minimum <= tuple(map(int, selected.version.split("."))) and set(
+        map(string, array(entry["required_capabilities"]))
+    ) <= set(selected.capabilities)
 
 
 def select_index_entry(value: JsonValue) -> Row | None:

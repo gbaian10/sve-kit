@@ -4,25 +4,22 @@ import unicodedata
 from dataclasses import dataclass
 from typing import Literal
 
-from sve_carddb.contracts.template_parameters import Range
-from sve_carddb.core.json import digest
+from sve_carddb.contracts.four_layer import Span
 
 
 @dataclass(frozen=True)
 class Unit:
     text: str
-    origins: tuple[Range, ...]
+    origins: tuple[Span, ...]
     transformation: Literal["literal", "digits", "quoted"] = "literal"
 
 
-def merged(origins: tuple[Range, ...]) -> tuple[Range, ...]:
+def merged(origins: tuple[Span, ...]) -> tuple[Span, ...]:
     """One compatibility character can contribute to several normalized positions."""
-    result: list[Range] = []
+    result: list[Span] = []
     for span in sorted(origins, key=lambda item: (item.start, item.end)):
         if result and span.start <= result[-1].end:
-            result[-1] = Range(
-                start=result[-1].start, end=max(result[-1].end, span.end)
-            )
+            result[-1] = Span(start=result[-1].start, end=max(result[-1].end, span.end))
         else:
             result.append(span)
     return tuple(result)
@@ -44,7 +41,7 @@ def nfkc(text: str, positions: tuple[int, ...]) -> tuple[Unit, ...]:
         origins = merged(
             (
                 *(span for unit in units[common:] for span in unit.origins),
-                Range(start=position, end=position + 1),
+                Span(start=position, end=position + 1),
             )
         )
         units[common:] = [Unit(char, origins) for char in current[common:]]
@@ -57,8 +54,3 @@ def nfkc(text: str, positions: tuple[int, ...]) -> tuple[Unit, ...]:
 def raw_value(text: str, unit: Unit) -> str:
     """Reconstruct exact source spellings in memory; candidate outputs use their hashes."""
     return "".join(text[s.start : s.end] for s in unit.origins)
-
-
-def value_hash(text: str, unit: Unit) -> str:
-    """Bind the raw spelling rather than inventing a reversible normalized value."""
-    return digest(raw_value(text, unit).encode())

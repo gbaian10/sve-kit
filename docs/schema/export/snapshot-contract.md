@@ -4,7 +4,7 @@
 [公開 annotation 契約](public-annotation.md)的欄序、形狀、來源指標與語義檢查。
 [public-annotation.schema.json](public-annotation.schema.json)及
 [固定案例](public-annotation-cases.json)仍供指定邊界的元件驗證，完整快照以套件 Schema 與共用 golden 驗收。
-正常 authored 四層建置的完整切換及真實容量驗收仍由 [#498](https://github.com/gbaian10/sve-kit/issues/498) 負責。
+[#498](https://github.com/gbaian10/sve-kit/issues/498) 已完成正常 authored 四層建置與 3.0.0 producer／reader 的 N0 切換。容量依維護者豁免交付，最佳化由 #506、手機實測由 #53、N1 由 #380／#499 承接。
 
 欄位語意依 [快照格式](snapshot-format.md)，傳輸與版本規則依 [傳輸契約](snapshot-transport.md)。
 機器資源位於 `carddb/src/sve_carddb/contracts/schema/v3/contract.schema.json`，隨 carddb wheel 打包；

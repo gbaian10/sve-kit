@@ -48,6 +48,7 @@ def recipe(tmp_path_factory: pytest.TempPathFactory) -> offline.Inputs:
     for name in ("carddb/uv.lock", "carddb/pyproject.toml"):
         (root / name).write_bytes((REPO / name).read_bytes())
     write(root / "authored", {})
+    (root / "authored/rules/rulings").mkdir(parents=True)
     home = fixture.digital.printing.home_set_id
     install(
         root / "authored",

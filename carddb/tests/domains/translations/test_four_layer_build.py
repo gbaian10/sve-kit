@@ -7,7 +7,7 @@ import pytest
 from sve_carddb.build import create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField, Target
-from sve_carddb.core.json import canonical
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
 from sve_carddb.domains.text_observations.vocabulary import Vocabulary
@@ -37,8 +37,9 @@ if TYPE_CHECKING:
 
 
 @pytest.mark.parametrize("translated", [True, False])
-def test_producer_uses_exact_owner_and_preserves_whole_field_fallback(  # ruff: ignore[too-many-locals] -- independent frozen source, authored inputs and actual DB results form the end-to-end assertion
-    tmp_path: Path, compiled: CompiledSchema, translated: bool
+@pytest.mark.parametrize("unused", [True, False])
+def test_producer_uses_exact_owner_and_preserves_whole_field_fallback(  # ruff: ignore[too-many-locals,too-many-statements] -- independent frozen source, authored inputs and actual DB results form the end-to-end assertion
+    tmp_path: Path, compiled: CompiledSchema, translated: bool, unused: bool
 ) -> None:
     fixture = make_fixture(tmp_path)
     root = tmp_path / "authored"
@@ -67,11 +68,20 @@ def test_producer_uses_exact_owner_and_preserves_whole_field_fallback(  # ruff: 
         )
         source = descriptor(db, sources, field, fixture.jp.batch_id)
         engine = prepare_classifier(db, snapshot, sources, vocabulary, rules)
-        normalized = normalize_source("Synthetic rule.", source)
+        authored_text = "Unused synthetic rule." if unused else "Synthetic rule."
+        authored_source = source.model_copy(
+            update={
+                "source_hash": digest(authored_text.encode())[7:],
+                "source_ref": source.source_ref.model_copy(
+                    update={"text_hash": digest(authored_text.encode())[7:]}
+                ),
+            }
+        )
+        normalized = normalize_source(authored_text, authored_source)
         part = normalized.parts[0]
         frame, _ = engine.recognize(
-            "Synthetic rule.", source, part, field=normalized
-        ).bind(source, part)
+            authored_text, authored_source, part, field=normalized
+        ).bind(authored_source, part)
         definition = FrameRecord(kind="sentence_template", data=frame)
         records = [definition.model_dump(mode="json", exclude={"record_key"})]
         if translated:
@@ -113,7 +123,17 @@ def test_producer_uses_exact_owner_and_preserves_whole_field_fallback(  # ruff: 
         with db.transaction():
             report = apply(db, inputs, snapshot, settings)
         assert report.fields == 1
-        assert report.translated == int(translated)
+        assert report.translated == int(translated and not unused)
+        assert report.unused_frames == ((frame.id,) if unused else ())
+        if unused:
+            assert report.payload()["unused_authored_frames"] == [
+                {"frame_id": frame.id, "reason": "no_fully_verified_source_owner_field"}
+            ]
+            assert db.rows("sentence_template") == ()
+            assert db.rows("template_translation") == ()
+            assert db.rows("translation_selection") == ()
+            assert report.reasons == {"unmatched_source_frame": 1}
+            return
         bindings = db.rows("text_template_binding")
         assert len(bindings) == 1
         assert (

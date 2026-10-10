@@ -1,28 +1,26 @@
 """Real builder and SQLite boundaries preserve pending references without active edges."""
 
-from sqlite3 import IntegrityError
 from typing import TYPE_CHECKING
 
 import pytest
 from pydantic import ValidationError
 
-from sve_carddb.build import Json
 from sve_carddb.contracts.rulings import Resolution
 from sve_carddb.core.json import canonical, digest
-from sve_carddb.domains.rulings.reader import document
+from sve_carddb.domains.rulings.reader import document, load
 from sve_carddb.domains.rulings.resolution import build
-from sve_carddb.domains.rulings.storage import read, require_active, write
+from sve_carddb.domains.rulings.storage import write
 from sve_carddb.domains.translations.four_layer_storage import write_binding
 
 from ..translations.test_four_layer_storage import compiled as compiled  # ruff: ignore[useless-import-alias] -- shared SQLite schema fixture
 from ..translations.test_four_layer_storage import stored as unbound  # ruff: ignore[unused-import] -- register the parent fixture under a distinct name
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping as RowMapping
+    from pathlib import Path
 
     from pydantic import JsonValue
 
-    from sve_carddb.build import Database, Value
+    from sve_carddb.build import Database
     from sve_carddb.contracts.four_layer import Frame
     from sve_carddb.contracts.source_binding import SourceBinding
     from sve_carddb.domains.rulings.reader import Document
@@ -35,17 +33,6 @@ def stored(request: pytest.FixtureRequest) -> tuple[Database, Frame, SourceBindi
     with db.transaction():
         write_binding(db, "use:synthetic", binding, {})
     return parent
-
-
-def _rewrite_and_read(
-    db: Database,
-    table: str,
-    where: RowMapping[str, Value],
-    values: RowMapping[str, Value],
-) -> None:
-    with db.transaction():
-        db.update(table, where, values)
-        read(db)
 
 
 def ruling(**changes: JsonValue) -> Document:
@@ -105,7 +92,9 @@ def test_unknown_references_preserve_ordinals_and_ir_without_executable_edges(
     found = ruling()
     with db.transaction():
         report = write(db, (found,), "a" * 40)
-    assert report == read(db)
+    assert len(db.rows("ruling_resolution")) == 2
+    assert all(row.values["frame_id"] is None for row in db.rows("ruling_resolution"))
+    assert len(db.rows("ruling_retained_reference")) == 1
     assert [r.ruling_ref.reference_ordinal for r in report.resolutions] == [0, 1]
     assert all(
         r.level == "reference"
@@ -115,9 +104,6 @@ def test_unknown_references_preserve_ordinals_and_ir_without_executable_edges(
     )
     assert report.retained[0].reference_id == "E.synthetic"
     assert report.payload()["active_template_edges"] == 0
-    identifier = str(db.rows("ruling_resolution")[0].values["id"])
-    with pytest.raises(ValueError, match="missing or pending"):
-        require_active(db, (identifier,))
 
 
 @pytest.mark.parametrize(
@@ -141,46 +127,6 @@ def test_pending_shape_is_closed(change: dict[str, JsonValue]) -> None:
     with pytest.raises(ValidationError):
         Resolution.model_validate_json(
             canonical(report.resolutions[0].model_dump(mode="json") | change)
-        )
-
-
-@pytest.mark.parametrize(
-    ("column", "value"),
-    [("source_hash", "sha256:" + "0" * 64), ("revision", 2), ("raw_text", "{}")],
-)
-def test_db_readback_rechecks_document_source_and_version(
-    stored: tuple[Database, Frame, SourceBinding], column: str, value: str | int
-) -> None:
-    db, _, _ = stored
-    found = ruling()
-    with db.transaction():
-        write(db, (found,), "a" * 40)
-    with pytest.raises((ValueError, IntegrityError), match=r"[Rr]uling|FOREIGN KEY"):
-        _rewrite_and_read(
-            db,
-            "ruling_document",
-            {"ruling_id": "R-0001", "revision": 1},
-            {column: value},
-        )
-
-
-def test_db_readback_rejects_legal_json_with_illegal_nullable_resolution(
-    stored: tuple[Database, Frame, SourceBinding],
-) -> None:
-    db, _, _ = stored
-    found = ruling()
-    with db.transaction():
-        report = write(db, (found,), "a" * 40)
-    row = db.rows("ruling_resolution")[0]
-    corrupted = report.resolutions[0].model_dump(mode="json") | {
-        "reason": "no_candidate"
-    }
-    with pytest.raises(ValueError, match="Invalid stored ruling"):
-        _rewrite_and_read(
-            db,
-            "ruling_resolution",
-            {"id": row.values["id"]},
-            {"payload": Json(corrupted)},
         )
 
 
@@ -267,7 +213,19 @@ def test_unsupported_reference_is_rejected(reference: str) -> None:
         build((ruling(applies_to=[reference]),))
 
 
-def test_duplicate_current_ruling_is_rejected() -> None:
-    found = ruling()
+def test_load_requires_directory_and_preserves_multiple_current_documents(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(ValueError, match="authored/rules/rulings"):
+        load(tmp_path)
+    root = tmp_path / "authored/rules/rulings"
+    root.mkdir(parents=True)
+    assert load(tmp_path) == ()
+    (root / "a.yaml").write_bytes(ruling().raw)
+    (root / "b.yaml").write_bytes(ruling(id="R-0002").raw)
+    documents = load(tmp_path)
+    assert [d.ruling.id for d in documents] == ["R-0001", "R-0002"]
+    assert len(build(documents).resolutions) == 4
+    (root / "b.yaml").write_bytes(ruling(revision=2).raw)
     with pytest.raises(ValueError, match="Duplicate current ruling"):
-        build((found, found))
+        load(tmp_path)

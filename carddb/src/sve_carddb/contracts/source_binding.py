@@ -30,7 +30,7 @@ from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import RecordData, UInt
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
+    from collections.abc import Mapping
 
     from sve_carddb.contracts.four_layer import Frame, LeafSlot
 
@@ -202,41 +202,6 @@ def _verify_anchors(raw: str, spans: tuple[SourceSpan, ...]) -> None:
             raise ValueError(
                 "Inline reminder must anchor to its source-line body ordinal"
             )
-
-
-def verify_trace(
-    raw: str,
-    canonical_source: str,
-    span: SourceSpan,
-    trace: tuple[TracePiece, ...],
-    rules: Mapping[str, Callable[[str], str]],
-) -> None:
-    """Reapply pinned rules to raw evidence before accepting normalized coordinates."""
-    disjoint(tuple(piece.raw_span for piece in trace))
-    actual = tuple(
-        i for piece in trace for i in range(piece.raw_span.start, piece.raw_span.end)
-    )
-    expected = tuple(
-        i for segment in span.segments for i in range(segment.start, segment.end)
-    )
-    if actual != expected:
-        raise ValueError("Trace does not cover exact source segments")
-    covered: set[int] = set()
-    for piece in trace:
-        if piece.rule not in rules or piece.raw_span.end > len(raw):
-            raise ValueError("Unknown trace rule or source bound")
-        if any(s.end > len(canonical_source) for s in piece.canonical_spans):
-            raise ValueError("Trace canonical span is out of bounds")
-        source = raw[piece.raw_span.start : piece.raw_span.end]
-        rebuilt = rules[piece.rule](source)
-        projected = "".join(
-            canonical_source[s.start : s.end] for s in piece.canonical_spans
-        )
-        if rebuilt != projected:
-            raise ValueError("Trace rule does not reconstruct canonical bytes")
-        covered.update(i for s in piece.canonical_spans for i in range(s.start, s.end))
-    if covered != set(range(len(canonical_source))):
-        raise ValueError("Trace does not reconstruct complete canonical source")
 
 
 def verify_value(

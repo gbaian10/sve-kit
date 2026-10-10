@@ -299,18 +299,12 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 | `annotation_set` | `id:ID PK,text_unit_id→text_unit,occurrences:Json`；annotation-v1 完整 hash；Unicode scalar ranges、引用類別、exact text 與當前 emphasis 由 typed 邊界驗證 |
 | `translation_annotation` | `translation_id→translation,annotation_set_id→annotation_set` `PK(translation_id)`；set 對應該譯文的 exact target text |
 | `translation_use_annotation` | `use_id→translation_use,annotation_set_id→annotation_set` `PK(use_id)`；set.text_unit_id 必等於 use 所屬 context 原文 |
-
 | `translation_form` | `id:ID,lang:Lang,rule:Text,signature:Json,cases:Json,authored_source_id:ID,record_key:Text,origin:official\|project\|machine,low_confidence:Bool` `PK(id,lang)`；`FK(authored_source_id)→source_record(id)`；依四層 typed 邊界驗完整形狀、來源與跨列一致性 |
-
 | `binding_leaf_occurrence` | `binding_id:ID,position:UInt,slot:Text,ordinal:UInt,raw_spans:Json,canonical_spans:Json,source_unit:Text?,source_presence:explicit\|omitted,resolution_rule:Text?` `PK(binding_id,slot,ordinal)`；`UQ(binding_id,position)`；`FK(binding_id)→text_template_binding(id)`；依四層 typed 邊界驗完整形狀、來源與跨列一致性 |
-
 | `render_leaf_occurrence` | `translation_id:ID,binding_id:ID,node_path:Json,slot:Text,source_ordinals:Json,ranges:Json` `PK(translation_id,binding_id,node_path)`；`FK(translation_id)→translation(id)`；`FK(binding_id)→text_template_binding(id)`；依四層 typed 邊界驗完整形狀、來源與跨列一致性 |
-
-| `ruling_document` | `ruling_id:ID,revision:UInt,source_id:ID,source_path:Text,source_hash:Text,raw_text:Text` `PK(ruling_id,revision)`；`FK(source_id)→source_record(id)`；依四層 typed 邊界驗完整形狀、來源與跨列一致性 |
-
-| `ruling_resolution` | `id:ID PK,ruling_id:ID,revision:UInt,frame_id:ID?,payload:Json`；`FK(ruling_id,revision)→ruling_document(ruling_id,revision)`；`FK(frame_id)→sentence_template(id)`；依四層 typed 邊界驗完整形狀、來源與跨列一致性 |
-
-| `ruling_retained_reference` | `ruling_id:ID,revision:UInt,reference_ordinal:UInt,payload:Json` `PK(ruling_id,revision,reference_ordinal)`；`FK(ruling_id,revision)→ruling_document(ruling_id,revision)`；依四層 typed 邊界驗完整形狀、來源與跨列一致性 |
+| `ruling_document` | `ruling_id:ID,revision:UInt,source_id:ID,source_path:Text,source_hash:Text,raw_text:Text` `PK(ruling_id,revision)`；`FK(source_id)→source_record(id)`；SQL PK／FK 與逐列封閉型別；裁定邏輯唯一與完整用途集合由 #499 接上 |
+| `ruling_resolution` | `id:ID PK,ruling_id:ID,revision:UInt,frame_id:ID?,payload:Json`；`FK(ruling_id,revision)→ruling_document(ruling_id,revision)`；`FK(frame_id)→sentence_template(id)`；SQL PK／FK 與逐列封閉型別；裁定邏輯唯一與完整用途集合由 #499 接上 |
+| `ruling_retained_reference` | `ruling_id:ID,revision:UInt,reference_ordinal:UInt,payload:Json` `PK(ruling_id,revision,reference_ordinal)`；`FK(ruling_id,revision)→ruling_document(ruling_id,revision)`；SQL PK／FK 與逐列封閉型別；裁定邏輯唯一與完整用途集合由 #499 接上 |
 
 ### 9.2 當前翻譯投影
 
@@ -346,7 +340,7 @@ low_confidence 沿實際依賴 OR 傳播，通過自動檢查後直接顯示待�
 
 context/use/binding/selection 每次重建，DB 只放本次有效組；改詞／加粗重算相依結果，未變的 note 不影響語義 ID。
 來源變動不得沿用錯配舊譯文，缺任何必要譯詞／匹配則回原文並列一張清單，不假稱整段已翻。
-歷史由 Git 保存，清冊在 CI／建置用當前程式與固定輸入重產，不執行歷史 producer 或核可事件。
+歷史由 Git 保存，四層來源核心在 CI／建置用當前程式與固定輸入產生 binding／未匹配清單，不執行歷史 producer 或核可事件。
 
 繁中只取有效且已確認同卡同面的 JP 來源，不以 aligned／divergence 作顯示門檻。
 EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；日英段落不同取完整 JP 效果，不按 EN ordinal 拼接。

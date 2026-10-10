@@ -13,19 +13,22 @@ from .test_four_layer_classification import classifier, source
 @pytest.mark.parametrize(
     ("body", "valid"),
     [
-        ("自分の墓場の仮族・カード２枚を選ぶ。それを消滅させる。", True),
-        ("自分の墓場の仮族・カード３枚を選ぶ。それを消滅させる。", False),
-        ("自分の墓場の仮族・カード２枚まで選ぶ。", False),
-        ("自分の場のフォロワー２体を選ぶ。", False),
-        ("自分の墓場の仮族・カード２枚を不明する。", False),
-        ("自分の墓場の仮族・カード２枚を選ぶ。相手の手札のカード２枚を選ぶ。", False),
-        ("自分の墓場の仮族・カード２枚を選ぶ。\n別。", False),
+        ("自分の墓場の仮族・カード１７枚を選ぶ。それを消滅させる。", True),
+        ("自分の墓場の仮族・カード１８枚を選ぶ。それを消滅させる。", False),
+        ("自分の墓場の仮族・カード１７枚まで選ぶ。", False),
+        ("自分の場のフォロワー１７体を選ぶ。", False),
+        ("自分の墓場の仮族・カード１７枚を不明する。", False),
+        (
+            "自分の墓場の仮族・カード１７枚を選ぶ。相手の手札のカード１７枚を選ぶ。",
+            False,
+        ),
+        ("自分の墓場の仮族・カード１７枚を選ぶ。\n別。", False),
     ],
 )
 def test_mandatory_selection_note_replays_one_exact_body_count(
     body: str, valid: bool
 ) -> None:
-    note = "（２枚を選べなければプレイできない）"
+    note = "（１７枚を選べなければプレイできない）"
     raw = body + note
     field = normalize_source(raw, source(raw))
     part = field.parts[-1]
@@ -38,15 +41,15 @@ def test_mandatory_selection_note_replays_one_exact_body_count(
         engine.verify(raw, field, part, frame, binding)
         assert frame.leaf_schema.slots[0].role == "selection_count"
         assert binding.values["leaf_0"] == QuantitySpec(
-            mode="exact", expr=Constant(kind="constant", value=2)
+            mode="exact", expr=Constant(kind="constant", value=17)
         )
         assert binding.occurrences[0].source_unit == "枚"
         assert engine.recognize(raw, field.source, part).issues
 
 
 def test_mandatory_note_cannot_use_a_field_from_another_owner() -> None:
-    note = "（２枚を選べなければプレイできない）"
-    raw = "自分の墓場の仮族・カード２枚を選ぶ。" + note
+    note = "（１７枚を選べなければプレイできない）"
+    raw = "自分の墓場の仮族・カード１７枚を選ぶ。" + note
     field = normalize_source(raw, source(raw))
     foreign = replace(field, source=field.source.model_copy(update={"ordinal": 1}))
     with pytest.raises(ValueError, match="another exact owner"):

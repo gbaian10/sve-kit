@@ -1,6 +1,6 @@
 import casesJson from "../../../../docs/schema/export/public-annotation-cases.json"
-import { createSnapshotClient, type LoadedSnapshot, type SnapshotClient } from "./client"
-import { decodeRow } from "./format-v3/decode"
+import { createSnapshotClient, type LoadedSnapshot, type SnapshotClient } from "../data/client"
+import { decodeRow } from "../data/format-v3/decode"
 import {
   arrayValue,
   canonicalText,
@@ -9,10 +9,10 @@ import {
   objectValue,
   stringValue,
   utf8,
-} from "./format-v3/json"
-import type { Fragment } from "./format-v3/reader"
-import type { View } from "./format-v3/reader"
-import { digest } from "./format-v3/sha256"
+} from "../data/format-v3/json"
+import type { Fragment } from "../data/format-v3/reader"
+import type { View } from "../data/format-v3/reader"
+import { digest } from "../data/format-v3/sha256"
 
 export const publicCases = objectValue(casesJson)
 

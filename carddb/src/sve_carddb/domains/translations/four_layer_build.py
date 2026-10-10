@@ -61,10 +61,18 @@ class Report:
     low_confidence: int
     reasons: Counter[str]
     pending: Counter[str]
+    unused_frames: tuple[str, ...]
 
     def payload(self) -> dict[str, JsonValue]:
-        """Only counts and diagnostic codes enter reports, never source text."""
+        """Only counts, IDs and diagnostic codes enter reports, never source text."""
         return {
+            "unused_authored_frames": [
+                {
+                    "frame_id": identifier,
+                    "reason": "no_fully_verified_source_owner_field",
+                }
+                for identifier in self.unused_frames
+            ],
             "fields": self.fields,
             "translated": self.translated,
             "original": self.fields - self.translated,
@@ -232,7 +240,9 @@ def _compile(
                 match.frame.id, part.canonical_source
             )
             if previous != part.canonical_source:
-                raise ValueError("Frame hash collision across exact owner fields")
+                raise ValueError(
+                    f"Frame hash collision across exact owner fields: frame_id={match.frame.id}, source_unit_id={source.source_unit_id}"
+                )
     controls.verify_closure()
     return _Plan(tuple(compiled), canonical_sources, total, reasons, pending)
 
@@ -241,11 +251,11 @@ def _populate(
     db: Database, inputs: Inputs, plan: _Plan, settings: Settings
 ) -> tuple[dict[tuple[str, str], Form], dict[tuple[str, str], SelectedTarget]]:
     definitions = {r.data.id: r for r in inputs.records if isinstance(r, FrameRecord)}
-    if definitions.keys() - plan.canonical_sources.keys():
-        raise ValueError("Authored frame has no fully verified source owner field")
     insert_raw_sources(db, (use.source for use in settings.sources.uses))
     audit = _authored(db, inputs, settings.authored_revision)
     for identifier, definition in definitions.items():
+        if identifier not in plan.canonical_sources:
+            continue
         write_frame(
             db,
             definition,
@@ -262,6 +272,8 @@ def _populate(
             )
     for record in inputs.records:
         if isinstance(record, (TargetRecord, TargetVariantRecord)):
+            if record.data.template_id not in plan.canonical_sources:
+                continue
             write_target(db, record, audit[record.record_key])
             if isinstance(record, TargetRecord):
                 selected[record.data.template_id, record.data.lang] = SelectedTarget(
@@ -301,4 +313,10 @@ def apply(
         else:
             translated += 1
             low += result.rendered.low_confidence
-    return Report(plan.total, translated, low, plan.reasons, plan.pending)
+    unused = tuple(
+        sorted(
+            {r.data.id for r in inputs.records if isinstance(r, FrameRecord)}
+            - plan.canonical_sources.keys()
+        )
+    )
+    return Report(plan.total, translated, low, plan.reasons, plan.pending, unused)

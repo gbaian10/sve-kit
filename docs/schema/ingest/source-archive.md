@@ -78,7 +78,7 @@ profile 版號與文件 format 版號獨立，例如 #476 後 catalog 文件可�
 
 #### 2.2.1 建置輸入紀錄
 
-模板來源清冊依[清冊契約](../domains/template-source-replay.md)每次建置用本次程式及指定來源產生。
+四層來源核心依[來源位置契約](../domains/four-layer-source-positions.md)每次建置用本次程式及指定來源產生 binding／未匹配清單。
 建置輸入紀錄為 `input_format: 1`，包含 `context` 與排序唯一的實際 `uses`，採 canonical-json-v1。
 它是本次輸入摘要，不作逐欄 expected 使用閉包的驗收證明；不含卡片效果文或私人絕對路徑。
 
@@ -137,7 +137,7 @@ Writer 的檔案替換與 SQLite transaction 不是同一原子交易：既有�
 
 ## 5. 只讀重建與缺失歷史
 
-模板來源清冊依[清冊契約](../domains/template-source-replay.md)每次建置重新產生，不保存也不比對歷史輸出；
+四層來源核心依[來源位置契約](../domains/four-layer-source-positions.md)每次建置重新產生 binding／未匹配清單，不保存也不比對舊清冊；
 每次仍驗本節 sealed/raw 閉包，不借私人審核頁面的免重讀例外略過來源。
 只用一個 BuildContext／F1，實際 program_revision、完整程式／lock 如實記當次執行 H；
 逐群組保留歷史 producer R、凍結版本／manifest pins、context、預期／實際結果與實際環境差異。

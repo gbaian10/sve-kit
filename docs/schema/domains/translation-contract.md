@@ -1,6 +1,6 @@
 # 翻譯、模板與當前資料契約
 
-本契約保留清冊、句型比對、固定字與參數定義、譯文、術語、卡名、風味、加粗、新卡自動套用及未匹配清單。
+本契約保留四層來源 binding／未匹配清單、句型比對、固定字與參數定義、譯文、術語、卡名、風味、加粗、新卡自動套用及未匹配清單。
 2026-10-04 起，翻譯資料採可直接修訂的當前值；Git 保存修改歷史，退回使用 git revert。
 不再用決定封套、收據、成員雜湊、只增不改、歷史重播、首輪抽查、雙模型或手動合併前檢查作載入門檻。
 本文件的四層目標契約依 [ADR-0021](../../adr/0021-four-layer-translation.md)，仍待審核與實作；
@@ -39,7 +39,7 @@ filing_key 為 `[A-Za-z0-9_-]+`，sequence 為三位以上十進位字串；不�
 
 四層入口只接受 format 3 分片；glossary 與模板 reader 共用已載入的資料。
 切換時已清查並轉換 format 2，正式 reader 不保留雙軌載入。
-模板來源清冊在建置時產生，不進 Git，見[清冊契約](template-source-replay.md)。
+建置時由四層來源核心產生 binding／未匹配清單，不進 Git，見[來源位置契約](four-layer-source-positions.md)。
 舊格式留在 Git 歷史，不作現行載入分支。
 
 record 必填欄位為 `{kind,data}`，另可選填 origin、low_confidence、note。
@@ -116,24 +116,24 @@ text、reasons、note 不參與身分；同鍵原稿有不同文字時拒絕，�
 | candidate_id | 非空的原稿穩定識別，例如效果舊 T ID；不是已驗證的模板 ID，不要求存在正式 definition |
 | lang | 沿既有 Lang 型別的目標語言 |
 | text | 非空 UTF-8 譯文草稿字串，保留最終原稿字元；不解析匿名 N/X 或套用可渲染譯文的 slot 語法 |
-| normalized_hash | 參數正規化後 pattern 的 SHA-256；只存 hash，不存原文 |
+| normalized_hash | 舊 normalizer 的歷史 pattern hash；只供人工與 #499 對照，不在建置中驗證 |
 | role | body／reminder／token_header／layout |
 | reasons | 排序、唯一且非空的原因代號陣列，每項符合 ASCII `[a-z][a-z0-9_]*` |
 
 data 恰含上表七欄；record 及分片沿既有封閉結構、鍵唯一、安全路徑與引用檢查。
-完整建置時 normalized_hash＋role 必須在本次清冊找得到位置；不能因資料是候選就跳過壞來源。
+normalized_hash 是舊 normalizer 的歷史 pattern hash，只供人工與 #499 對照，不在建置中驗證。
 原稿只存我們撰寫／生成的譯文，不保存官方原文、JP normalized、完整來源欄位、私人路徑、核可 hash 或事件。
-來源文字由建置時清冊的 source_ref／locator 取得，不另抄進 text 或 note。
+來源文字依固定來源的 source_ref／locator 取得，不另抄進 text 或 note；候選的歷史 hash 不構成當前來源 binding。
 
 候選不加入 active targets、bindings、renderer、pin 選用或公開翻譯投影，也不計為機械有效／已翻譯覆蓋。
 統一處理清單保留 candidate ID、各原因及受影響卡片數；來源未知時影響數記未知，不當成零。
 日後能綁定時，以普通資料 PR 改為有效定義與 template_translation，通過原有參數／來源驗證後才可渲染。
 不新增核可、收據、修訂鏈或不可變機制。
 
-## 3. 清冊與定義
+## 3. 四層來源核心與定義
 
-清冊列全部來源欄位及句型位置，保留 body、reminder、token_header、layout、name 與 label 角色；風味不在其中。
-每次建置從封存來源產生清冊，不存 Git，見[清冊契約](template-source-replay.md)。
+四層來源核心定位來源欄位及句型位置，保留 body、reminder、token_header、layout、name 與 label 角色；風味不在其中。
+每次建置從封存來源產生 binding／未匹配清單，不存 Git，見[來源位置契約](four-layer-source-positions.md)。
 缺來源、unknown、空字串與空白不能混為不存在；每個來源片段都要有去向。
 
 四層 Frame 的 source descriptor、canonical source、語義 payload 與完整 hash ID 依
@@ -161,7 +161,7 @@ binding 由每次建置產生。source_span 固定 `{role,segments,anchor}`，se
 
 layout 不含待翻語義，可機械生成固定模板；reminder/token_header 是獨立句型，須像 body 一樣提供其譯本。版次欄位與 section 的完整覆蓋各自核對，不跨欄偷接；提示分類有疑義則保留原文／失敗清單，不擅自取語義等義。
 
-風味文字不經此分段，也不進清冊，直接以原文 hash 對照，見[風味文字契約](flavor-translation.md)。
+風味文字不經此分段，也不進效果來源核心，直接以原文 hash 對照，見[風味文字契約](flavor-translation.md)。
 
 ### 4.2 葉 schema 與驗回來源
 
@@ -185,7 +185,7 @@ Literal 中不解析舊 `{{slot}}` 語法，不允許把必要引用改寫成同
 
 句框架維持整行，子句切分可作盤點，但不啟用任意句子拼接。
 未覆蓋的 NP 修飾可用固定譯句與已驗葉引用，無須等待 NP 全覆蓋；未解語義不能投成 DSL no-op。
-新增卡包由工具產清冊、套用 frame／形式／詞庫並渲染，合併列出低信心、新句型、歧義、未匹配及缺譯清單。
+新增卡包由四層來源核心產生 binding／未匹配清單、套用 frame／形式／詞庫並渲染，合併列出低信心、新句型、歧義、未匹配及缺譯清單。
 低信心沿實際依賴 OR 傳播，machine 不自動等於低信心；不新增固定人工樣本門檻。
 加粗由逐 occurrence 的來源與渲染節點產生，不能事後搜尋中文；annotation set 契約見
 [共用契約 §8](four-layer-translation.md#8-建置-dbrender-projection-與依賴)。
@@ -208,7 +208,7 @@ claimed_source 是選填的出處主張；沒有具體主張就省略，不用�
 
 一般 reader 依[共用契約 §1](four-layer-translation.md#1-型別驗證責任與失敗語義)驗結構與輸入引用，
 建置 validator 以本次來源驗 owner、全欄覆蓋、frame、葉值與實際依賴閉包。
-清冊在本次建置產生一次，不執行歷史 producer，也不保存新的核可證明。
+四層來源核心在本次建置定位及驗證來源一次，不執行歷史 producer，也不保存新的核可證明。
 缺資料不得借最新官網或個人檔補洞；來源歸檔完整性仍依[來源歸檔](../ingest/source-archive.md)。
 
 現有 export-offline 會對 face_revision 與 printing_face 的 JP 主文／section 建置固定模板翻譯；
@@ -249,7 +249,7 @@ qa_version 用 question/answer，cr_clause 用 effect，vocabulary／商品用 l
 
 ### 6.4 更新與失效
 
-本次清冊、來源原文、參數及引用檢查通過才可輸出；壞結構／引用使建置失敗，未匹配／缺譯則回原文列清單。
+本次來源 binding、來源原文、參數及引用檢查通過才可輸出；壞結構／引用使建置失敗，未匹配／缺譯則回原文列清單。
 舊的輸出不能冒充新來源翻譯。每次建立新 DB，不原地修改已輸出快照；公開保留窗口仍為 latest＋previous。
 舊資料及舊程式留 Git 歷史，不承諾新 reader 能重播所有舊環境。
 

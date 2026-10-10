@@ -38,6 +38,7 @@ from sve_carddb.domains.registry.preview import (
 )
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.rulings.reader import load as load_rulings
+from sve_carddb.domains.rulings.storage import PROFILE as RULING_PROFILE
 from sve_carddb.domains.rulings.storage import write as write_rulings
 from sve_carddb.domains.source_corrections import FrozenImages
 from sve_carddb.domains.text_observations import (
@@ -427,7 +428,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     }
     rulings = load_rulings(inputs.repo)
     configuration["ruling_references"] = {
-        "profile": "ruling-authored-v2",
+        "profile": RULING_PROFILE,
         "documents": [item.source.model_dump(mode="json") for item in rulings],
     }
     if names is not None:

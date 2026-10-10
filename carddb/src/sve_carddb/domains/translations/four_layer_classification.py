@@ -28,7 +28,6 @@ from sve_carddb.contracts.source_binding import (
     ReferenceDomain,
     SourceBinding,
 )
-from sve_carddb.contracts.template_parameters import Range
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_kinds import KindFacts
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION, SourcePart
@@ -368,7 +367,7 @@ class Classifier:
             raise ValueError("Unsupported parameter source role")
         projected = Part(
             role,
-            tuple(Range(start=s.start, end=s.end) for s in part.source_span.segments),
+            tuple(Span(start=s.start, end=s.end) for s in part.source_span.segments),
             part.canonical_source,
             part.units,
         )

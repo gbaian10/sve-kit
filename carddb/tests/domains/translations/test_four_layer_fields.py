@@ -24,14 +24,14 @@ from sve_carddb.domains.translations.four_layer_sources import CardSource
 from sve_carddb.domains.translations.four_layer_storage import (
     read_annotation,
     read_binding,
-    read_render_occurrences,
-    read_target,
+    read_owned_render_occurrences,
     write_frame,
     write_target,
 )
 
 from .test_four_layer_classification import classifier
 from .test_four_layer_storage import compiled as compiled  # ruff: ignore[useless-import-alias] -- shared actual SQLite fixture
+from .test_four_layer_storage import default_target
 from .test_four_layer_storage import stored as stored  # ruff: ignore[useless-import-alias] -- shared exact source fixture
 
 if TYPE_CHECKING:
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from sve_carddb.contracts.source_binding import SourceBinding
 
 
-def _compiled(db: Database, frame: Frame, binding: SourceBinding) -> CompiledField:
+def compiled_field(db: Database, frame: Frame, binding: SourceBinding) -> CompiledField:
     text = db.select(
         "text_unit", ("text",), where={"id": binding.source.source_unit_id}
     )[0].values["text"]
@@ -62,7 +62,7 @@ def test_whole_field_writes_selection_or_keeps_an_exact_source_fallback(
     targets = (
         {
             (frame.id, "zh-Hant"): SelectedTarget(
-                read_target(db, frame.id, "zh-Hant", "default"),
+                default_target(),
                 origin="machine",
                 low_confidence=True,
             )
@@ -73,7 +73,11 @@ def test_whole_field_writes_selection_or_keeps_an_exact_source_fallback(
     with db.transaction():
         db.delete("translation_use", {"id": "use:synthetic"})
         result = render_field(
-            db, _compiled(db, frame, binding), Renderer({}, {}, {}), targets, "zh-Hant"
+            db,
+            compiled_field(db, frame, binding),
+            Renderer({}, {}, {}),
+            targets,
+            "zh-Hant",
         )
     assert len(db.rows("text_template_binding")) == 1
     assert read_binding(db, binding.id, {}) == binding
@@ -90,7 +94,11 @@ def test_whole_field_writes_selection_or_keeps_an_exact_source_fallback(
             db.rows("translation_selection")[0].values["translation_id"] == identifier
         )
         assert (
-            len(read_render_occurrences(db, identifier, {}, expected=result.rendered))
+            len(
+                read_owned_render_occurrences(
+                    db, identifier, {}, expected=result.rendered
+                )
+            )
             == 1
         )
     else:
@@ -103,7 +111,7 @@ def test_incomplete_field_does_not_activate_its_partial_bindings(
     stored: tuple[Database, Frame, SourceBinding],
 ) -> None:
     db, frame, binding = stored
-    partial = _compiled(db, frame, binding)
+    partial = compiled_field(db, frame, binding)
     partial = CompiledField(
         partial.source, partial.field, (None,), (False,), ("unmatched_source_frame",)
     )
@@ -211,7 +219,7 @@ def test_name_with_digits_has_one_whole_reference_in_source_and_translation(  # 
         )
         result = render_field(
             db,
-            _compiled(db, frame, binding),
+            compiled_field(db, frame, binding),
             renderer,
             {(frame.id, "zh-Hant"): SelectedTarget(target)},
             "zh-Hant",
@@ -302,7 +310,7 @@ def test_shared_render_keeps_each_owner_binding_and_verifies_each_output_path(  
         )
         targets = {(frame.id, "zh-Hant"): SelectedTarget(target)}
         first_result = render_field(
-            db, _compiled(db, frame, first), renderer, targets, "zh-Hant"
+            db, compiled_field(db, frame, first), renderer, targets, "zh-Hant"
         )
         row = dict(
             db.select(
@@ -325,7 +333,7 @@ def test_shared_render_keeps_each_owner_binding_and_verifies_each_output_path(  
         )
         assert second_frame == frame
         second_result = render_field(
-            db, _compiled(db, frame, second), renderer, targets, "zh-Hant"
+            db, compiled_field(db, frame, second), renderer, targets, "zh-Hant"
         )
     assert first_result.rendered is not None
     assert second_result.rendered is not None
@@ -336,17 +344,17 @@ def test_shared_render_keeps_each_owner_binding_and_verifies_each_output_path(  
     assert len(db.rows("translation_binding")) == 2
     assert (
         len(
-            read_render_occurrences(
+            read_owned_render_occurrences(
                 db, identifier, engine.domains, expected=first_result.rendered
             )
         )
-        == 2
+        == 1
     )
     assert (
         len(
-            read_render_occurrences(
+            read_owned_render_occurrences(
                 db, identifier, engine.domains, expected=second_result.rendered
             )
         )
-        == 2
+        == 1
     )

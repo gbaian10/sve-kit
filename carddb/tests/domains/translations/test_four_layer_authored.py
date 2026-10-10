@@ -429,3 +429,25 @@ def test_form_references_resolve_the_same_language_and_registered_signature() ->
     }
     with pytest.raises(ValueError, match="Unknown four-layer form rule"):
         from_files((*files, file("translations/forms/001.yaml", [form])))
+
+
+def test_invalid_authored_diagnostic_has_path_and_location_without_input_text() -> None:
+    invalid = target(object_value(definition()["data"])["id"])
+    data = object_value(invalid["data"])
+    data["target"] = {
+        "format": 1,
+        "nodes": [
+            {
+                "kind": "Literal",
+                "text": "synthetic input must stay private",
+                "extra": "private payload",
+            }
+        ],
+    }
+    with pytest.raises(ValueError, match="Invalid four-layer authored shard") as raised:
+        from_files((file("translations/templates/values/007.yaml", [invalid]),))
+    message = str(raised.value)
+    assert "authored/translations/templates/values/007.yaml" in message
+    assert "records.0.template_translation.data.target.nodes.0.Literal.extra" in message
+    assert "synthetic input must stay private" not in message
+    assert "private payload" not in message

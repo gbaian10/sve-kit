@@ -5,7 +5,7 @@
 及 [#198](https://github.com/gbaian10/sve-kit/issues/198)，不修改 frame、render 或 annotation 的身分配方。
 機器定義見 [Schema](public-annotation.schema.json)，固定正反例見[案例規格](public-annotation-cases.md)。
 producer、Python／TS reader 與 read_api 已切換為 3.0.0，Web 依精確 owner 讀取標註與來源對照。
-機器契約與案例通過不代表 #498 的原生四層 authored workflow、全庫機械重鍵或最終容量已通過驗收。
+本次 #498 已完成 N0 的原生四層 authored workflow、全庫機械重鍵與 3.0.0 producer／reader／Web 接線；固定案例本身仍不是實作驗收證據。容量依維護者豁免交付，最佳化由 #506、手機實測由 #53、N1 由 #380／#499 承接。
 
 ## 1. 版本與驗證邊界
 
@@ -305,5 +305,5 @@ JSON object 的重複鍵仍歸 wire，occurrence ordinal 與 range 次序仍依 
 以到達該語義邊界，不能因外層 hash 失敗就算通過。
 
 容量依 [size-budget](size-budget.md#30-annotation-與-jp-來源的計帳)逐項計入；
-完整文字、單片、JP／EN 各自啟動、首次來源對照／說明、增量更新與 heap 都須在 #498／#53 實測。
+N0 已量測完整文字、單片與 JP／EN 啟動，超標容量依維護者豁免交付；#506 承接最佳化，#53 承接手機、首次來源對照／說明、增量更新與 heap 實測。
 本單只驗 Schema 與案例可讀／一致；不得把合成小樣本或既有 2.0 數字當成新格式容量通過。

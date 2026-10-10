@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from sve_carddb.contracts.template_parameters import Range, Role
+    from sve_carddb.contracts.four_layer import Role, Span
     from sve_carddb.domains.translations.recognition.provenance import Unit
 
 DIGITS = re.compile(r"[0-9０-９]+")
@@ -15,6 +15,6 @@ QUOTED = re.compile(r"『[^』]*』")
 @dataclass(frozen=True)
 class Part:
     role: Role
-    segments: tuple[Range, ...]
+    segments: tuple[Span, ...]
     normalized: str
     units: tuple[Unit, ...]

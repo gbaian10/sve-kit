@@ -127,8 +127,14 @@ def test_current_refusals(tmp_path: Path, change: str, message: str) -> None:
         else:
             records[1]["origin"] = "official"
         _write(tmp_path, records)
-    with pytest.raises(ValueError, match="^" + message + "$"):
+    with pytest.raises(ValueError, match=message) as raised:
         load_glossary(tmp_path)
+    shard_number = "002" if change == "duplicate" else "001"
+    assert f"authored/translations/glossary/shared/{shard_number}.yaml" in str(
+        raised.value
+    )
+    if change == "wrong_key":
+        assert "records.1.glossary_choice.record_key" in str(raised.value)
 
 
 def test_private_approval_fields_are_not_current_data() -> None:

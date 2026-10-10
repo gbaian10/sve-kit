@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.contracts.template_parameters import Range
+from sve_carddb.contracts.four_layer import Span
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 from sve_carddb.domains.translations.recognition.analysis import analyze
 from sve_carddb.domains.translations.recognition.candidate_matching import recognize
@@ -29,7 +29,7 @@ def partition(text: str, *, section: int | None = None) -> tuple[Part, ...]:
             Part(
                 role,
                 tuple(
-                    Range(start=s.start, end=s.end) for s in part.source_span.segments
+                    Span(start=s.start, end=s.end) for s in part.source_span.segments
                 ),
                 part.canonical_source,
                 part.units,

@@ -93,8 +93,6 @@ class Report:
 
 def build(documents: tuple[Document, ...]) -> Report:
     """Original list positions distinguish repeated historical references."""
-    if len({d.ruling.id for d in documents}) != len(documents):
-        raise ValueError("Duplicate current ruling identity or version")
     resolutions = []
     retained = []
     for document in documents:

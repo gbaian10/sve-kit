@@ -10,7 +10,7 @@
 四層翻譯的來源政策已改依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)：
 有效且已確認同卡同面的 JP 可供繁中，divergence 不構成此顯示門檻。
 本文的 basis、annotation 與改動欄序依 [3.0.0 公開 annotation 契約](public-annotation.md)。
-目前 producer／reader 仍為 2.0.0；新版機器元件 Schema 與固定案例已定義，接線及實際驗收由 #498 承接。
+目前 producer／reader 為 3.0.0；#498 已完成 N0 原生四層建置、公開標註與跨語言 reader／Web 接線。容量依維護者豁免交付，最佳化由 #506、手機實測由 #53、N1 由 #380／#499 承接。
 下文未變動的 2.0 圖片／保留規則繼續適用，不表示既有程式已能讀新版。
 
 ## 1. 快照清單（manifest）、版本與容器

@@ -10,7 +10,6 @@ from sve_carddb.contracts.four_layer import (
     FormDefinition,
     Frame,
     OwnerField,
-    Target,
     VocabularyReference,
 )
 from sve_carddb.contracts.source_binding import SourceBinding
@@ -162,24 +161,6 @@ def read_forms(db: Database) -> dict[tuple[str, str], FormDefinition]:
         except ValueError, TypeError:
             raise ValueError("Invalid stored four-layer form") from None
         result[form.id, form.lang] = form
-    return result
-
-
-def read_target(db: Database, frame_id: str, lang: str, variant_key: str) -> Target:
-    """DB foreign keys cannot replace closed target syntax, roles and required-leaf checks."""
-    row = _one(
-        db,
-        "template_translation",
-        {"template_id": frame_id, "lang": lang, "variant_key": variant_key},
-    )
-    target = row.values["target"]
-    if not isinstance(target, Json):
-        raise TypeError("Stored target is not typed JSON")
-    try:
-        result = Target.model_validate_json(canonical(target.value))
-        result.verify(read_frame(db, frame_id).frame.leaf_schema, lang, read_forms(db))
-    except ValueError, TypeError:
-        raise ValueError("Invalid stored four-layer target") from None
     return result
 
 
@@ -375,22 +356,6 @@ def read_annotation(db: Database, identifier: str) -> AnnotationSet:
     return result
 
 
-def read_render_occurrences(
-    db: Database,
-    translation_id: str,
-    domains: Mapping[str, ClosedDomain],
-    *,
-    expected: Rendered | None = None,
-) -> tuple[RenderLeafOccurrence, ...]:
-    """Every repeated output path retains its own link to the source ordinal set."""
-    rows = db.select(
-        "render_leaf_occurrence",
-        db.columns("render_leaf_occurrence"),
-        where={"translation_id": translation_id},
-    )
-    return _render_rows(db, translation_id, domains, rows, expected)
-
-
 def read_owned_render_occurrences(
     db: Database,
     translation_id: str,
@@ -415,7 +380,7 @@ def _render_rows(
     translation_id: str,
     domains: Mapping[str, ClosedDomain],
     rows: tuple[Row, ...],
-    expected: Rendered | None,
+    expected: Rendered,
 ) -> tuple[RenderLeafOccurrence, ...]:
     translation = payload(_one(db, "translation", {"id": translation_id}))
     text = string(translation["text"])
@@ -447,10 +412,5 @@ def _render_rows(
             raise ValueError("Stored render leaf belongs to another source context")
         result.append(leaf)
     parsed = tuple(result)
-    if expected is not None:
-        # A shared render retains separate source links for every exact owner.
-        binding_ids = {leaf.binding_id for leaf in expected.leaves}
-        expected.verify_occurrences(
-            tuple(row for row in parsed if row.binding_id in binding_ids)
-        )
+    expected.verify_occurrences(parsed)
     return parsed

@@ -1,10 +1,17 @@
 """Closed format-three translation inputs shared by glossary, forms and frame consumers."""
 
 import re
+from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Annotated, Literal, Self, override
 
-from pydantic import Field, computed_field, field_validator, model_validator
+from pydantic import (
+    Field,
+    ValidationError,
+    computed_field,
+    field_validator,
+    model_validator,
+)
 
 from sve_carddb.contracts.four_layer import (
     CardNameReference,
@@ -36,7 +43,7 @@ from sve_carddb.domains.translations.glossary.records import (
 from sve_carddb.domains.translations.models import AuthoredValue, Quality, SourceValue
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Iterator, Mapping
     from pathlib import Path
 
     from pydantic import JsonValue
@@ -270,6 +277,16 @@ def shard(raw: bytes) -> Shard:
     """Strict JSON parsing rejects duplicate keys before Pydantic can replace a value."""
     try:
         result = Shard.model_validate_json(canonical(parse(raw)))
+    except ValidationError as error:
+        locations = [
+            ".".join(map(str, item["loc"]))
+            for item in error.errors(
+                include_input=False, include_context=False, include_url=False
+            )
+        ]
+        raise ValueError(
+            f"Invalid four-layer authored shard: loc={locations}"
+        ) from None
     except ValueError, TypeError:
         raise ValueError("Invalid four-layer authored shard") from None
     keys = tuple(r.record_key for r in result.records)
@@ -315,21 +332,31 @@ _KINDS = {
 def from_files(files: tuple[tuple[str, bytes, bytes], ...]) -> Inputs:
     """A single loaded closure supplies every consumer; filenames do not resolve duplicate keys."""
     selected: dict[str, Record] = {}
+    locations: dict[str, str] = {}
     for path, _, content in files:
         match = _PATH.fullmatch(path)
         if match is None:
-            raise ValueError("Unsupported four-layer authored shard path")
+            raise ValueError(
+                f"Unsupported four-layer authored shard path: authored/{path}"
+            )
         area = next(g for g in match.groups() if g is not None)
-        for record in shard(content).records:
+        try:
+            records_in_file = shard(content).records
+        except ValueError as error:
+            raise ValueError(f"authored/{path}: {error}") from None
+        for record in records_in_file:
             if record.kind not in _KINDS[area]:
                 raise ValueError(
-                    "Four-layer authored record is outside its kind's area"
+                    f"Four-layer authored record is outside its kind's area: authored/{path}: {record.record_key}"
                 )
             if record.record_key in selected:
-                raise ValueError("Duplicate four-layer authored selection key")
+                raise ValueError(
+                    f"Duplicate four-layer authored selection key: authored/{path}: {record.record_key}"
+                )
             selected[record.record_key] = record
+            locations[record.record_key] = path
     records = tuple(selected[key] for key in sorted(selected))
-    _references(records)
+    _references(records, locations)
     return Inputs(files, records)
 
 
@@ -352,87 +379,100 @@ def read_inputs(root: Path) -> Inputs:
     return from_files(tuple(sorted(files)))
 
 
-def _references(records: tuple[Record, ...]) -> None:
+def _references(records: tuple[Record, ...], locations: Mapping[str, str]) -> None:
     frames = {r.data.id: r.data for r in records if isinstance(r, FrameRecord)}
     forms = {
         (r.data.id, r.data.lang): r.data for r in records if isinstance(r, FormRecord)
     }
-    for definition in frames.values():
-        if definition.source.normalizer_version != VERSION:
-            raise ValueError("Unsupported four-layer authored normalizer version")
-    for form in forms.values():
-        validate_form(form)
     for record in records:
-        if isinstance(record, (TargetRecord, TargetVariantRecord)):
-            frame = frames.get(record.data.template_id)
-            if frame is None:
-                raise ValueError("Four-layer target requires its frame definition")
-            if record.data.lang == frame.source.source_lang:
-                raise ValueError(
-                    "Target language must differ from frame source language"
-                )
-            record.data.target.verify(frame.leaf_schema, record.data.lang, forms)
-        elif isinstance(record, MatchRecord):
-            _match_references(record.data, frames)
-    _glossary_references(records)
-    _pins(records)
+        with _located(record, locations):
+            if isinstance(record, FrameRecord):
+                if record.data.source.normalizer_version != VERSION:
+                    raise ValueError(
+                        "Unsupported four-layer authored normalizer version"
+                    )
+            elif isinstance(record, FormRecord):
+                validate_form(record.data)
+            elif isinstance(record, (TargetRecord, TargetVariantRecord)):
+                frame = frames.get(record.data.template_id)
+                if frame is None:
+                    raise ValueError("Four-layer target requires its frame definition")
+                if record.data.lang == frame.source.source_lang:
+                    raise ValueError(
+                        "Target language must differ from frame source language"
+                    )
+                record.data.target.verify(frame.leaf_schema, record.data.lang, forms)
+            elif isinstance(record, MatchRecord):
+                _match_references(record.data, frames)
+
+    _glossary_references(records, locations)
+    _pins(records, locations)
 
 
 def _match_references(data: TemplateMatch, frames: Mapping[str, Frame]) -> None:
     for selection in data.matches or ():
         frame = frames.get(selection.frame_id)
         if frame is None or selection.source_span.role != frame.role:
-            raise ValueError("Manual template match requires its exact frame role")
+            raise ValueError(
+                f"Manual template match requires its exact frame role: frame_id={selection.frame_id}, source_unit_id={data.context_key.source_unit_id}"
+            )
         slots = {s.name: s for s in frame.leaf_schema.slots}
         if set(selection.values) - slots.keys() or any(
             s.required and s.name not in selection.values for s in slots.values()
         ):
-            raise ValueError("Manual template match has missing or unknown leaf values")
+            raise ValueError(
+                f"Manual template match has missing or unknown leaf values: frame_id={selection.frame_id}, source_unit_id={data.context_key.source_unit_id}"
+            )
 
 
-def _glossary_references(records: tuple[Record, ...]) -> None:  # ruff: ignore[complex-structure, too-many-branches] -- each closed record kind preserves its distinct existing concept and evidence constraints
+def _glossary_references(  # ruff: ignore[complex-structure,too-many-branches] -- each record kind retains its existing evidence constraints
+    records: tuple[Record, ...], locations: Mapping[str, str]
+) -> None:
     terms = {r.data.id: r.data for r in records if isinstance(r, TermRecord)}
     if len({t.concept_key for t in terms.values()}) != len(terms):
-        raise ValueError("Duplicate glossary concept key")
+        raise ValueError(
+            f"Duplicate glossary concept key: paths={sorted(set(locations.values()))}"
+        )
     for record in records:
-        if isinstance(record, FrameRecord):
-            _leaf_references(record.data, terms)
-        elif isinstance(record, TermRecord):
-            if record.data.id != "term:" + record.data.concept_key:
-                raise ValueError("Glossary ID differs from its concept key")
-        elif isinstance(record, (ChoiceRecord, ChoiceVariantRecord)):
-            if record.data.term_id not in terms:
-                raise ValueError("Glossary choice references an absent concept")
-            if (
-                record.origin == "official"
-                and record.data.value is not None
-                and not record.data.concept_evidence
-            ):
-                raise ValueError(
-                    "Official glossary choice requires same-concept evidence"
-                )
-        elif isinstance(record, EmphasisRecord):
-            term = terms.get(record.data.term_id)
-            if term is None or term.category != "rule_term":
-                raise ValueError("Emphasis requires a rule-term concept")
-        elif isinstance(record, ConceptRecord):
-            term = terms.get(record.data.term_id or "")
-            if record.data.term_id is not None and (
-                term is None or term.category != "card_name"
-            ):
-                raise ValueError("Name concept requires a card-name glossary term")
-        elif isinstance(record, AssignmentRecord):
-            term = terms.get("term:" + (record.data.concept_key or ""))
-            if record.data.concept_key is not None and (
-                term is None or term.category != "card_name"
-            ):
-                raise ValueError("Name assignment requires a card-name concept")
-            if record.data.variant != "default" and (
-                not record.data.reason.strip() or term is None
-            ):
-                raise ValueError(
-                    "Nondefault name assignment requires a reason and concept"
-                )
+        with _located(record, locations):
+            if isinstance(record, FrameRecord):
+                _leaf_references(record.data, terms)
+            elif isinstance(record, TermRecord):
+                if record.data.id != "term:" + record.data.concept_key:
+                    raise ValueError("Glossary ID differs from its concept key")
+            elif isinstance(record, (ChoiceRecord, ChoiceVariantRecord)):
+                if record.data.term_id not in terms:
+                    raise ValueError("Glossary choice references an absent concept")
+                if (
+                    record.origin == "official"
+                    and record.data.value is not None
+                    and not record.data.concept_evidence
+                ):
+                    raise ValueError(
+                        "Official glossary choice requires same-concept evidence"
+                    )
+            elif isinstance(record, EmphasisRecord):
+                term = terms.get(record.data.term_id)
+                if term is None or term.category != "rule_term":
+                    raise ValueError("Emphasis requires a rule-term concept")
+            elif isinstance(record, ConceptRecord):
+                term = terms.get(record.data.term_id or "")
+                if record.data.term_id is not None and (
+                    term is None or term.category != "card_name"
+                ):
+                    raise ValueError("Name concept requires a card-name glossary term")
+            elif isinstance(record, AssignmentRecord):
+                term = terms.get("term:" + (record.data.concept_key or ""))
+                if record.data.concept_key is not None and (
+                    term is None or term.category != "card_name"
+                ):
+                    raise ValueError("Name assignment requires a card-name concept")
+                if record.data.variant != "default" and (
+                    not record.data.reason.strip() or term is None
+                ):
+                    raise ValueError(
+                        "Nondefault name assignment requires a reason and concept"
+                    )
 
 
 def _leaf_references(frame: Frame, terms: Mapping[str, TermData]) -> None:
@@ -448,7 +488,7 @@ def _leaf_references(frame: Frame, terms: Mapping[str, TermData]) -> None:
                     )
 
 
-def _pins(records: tuple[Record, ...]) -> None:
+def _pins(records: tuple[Record, ...], locations: Mapping[str, str]) -> None:
     templates = {
         (
             r.data.template_id,
@@ -469,16 +509,28 @@ def _pins(records: tuple[Record, ...]) -> None:
         and r.data.value is not None
     }
     for record in records:
-        if isinstance(record, OverrideRecord) and record.data.action == "pin":
-            if any(
-                (v.template_id, v.lang, v.variant_key) not in templates
-                for v in record.data.templates
-            ):
-                raise ValueError(
-                    "Pin requires an existing reusable template translation"
-                )
-            if any(
-                (v.term_id, v.lang, v.variant_key) not in terms
-                for v in record.data.terms
-            ):
-                raise ValueError("Pin requires an existing usable glossary choice")
+        with _located(record, locations):
+            if isinstance(record, OverrideRecord) and record.data.action == "pin":
+                if any(
+                    (v.template_id, v.lang, v.variant_key) not in templates
+                    for v in record.data.templates
+                ):
+                    raise ValueError(
+                        "Pin requires an existing reusable template translation"
+                    )
+                if any(
+                    (v.term_id, v.lang, v.variant_key) not in terms
+                    for v in record.data.terms
+                ):
+                    raise ValueError("Pin requires an existing usable glossary choice")
+
+
+@contextmanager
+def _located(record: Record, locations: Mapping[str, str]) -> Iterator[None]:
+    """Keep the original check's diagnostic tied to its editable authored record."""
+    try:
+        yield
+    except ValueError as error:
+        raise ValueError(
+            f"authored/{locations[record.record_key]}: record={record.record_key}: {error}"
+        ) from None

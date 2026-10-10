@@ -5,7 +5,7 @@ import unicodedata
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.contracts.template_parameters import Range
+from sve_carddb.contracts.four_layer import Span
 from sve_carddb.domains.translations.four_layer_grammar import TOKEN_HEADER, TYPE_WORDS
 from sve_carddb.domains.translations.recognition.lexical import DIGITS
 from sve_carddb.domains.translations.recognition.models import (
@@ -192,7 +192,7 @@ def hint(
     raw = "".join(text[s.start : s.end] for s in origins)
     common = {
         "name": f"slot_{index}",
-        "occurrence": Range(start=position.start, end=position.end),
+        "occurrence": Span(start=position.start, end=position.end),
         "source_segments": origins,
         "transformation": position.transformation,
         "semantic_role": position.semantic_role,
@@ -269,7 +269,7 @@ def literals(
         origins = merged(tuple(s for u in selected for s in u.origins))
         result.append(
             LiteralTrace(
-                occurrence=Range(start=start, end=end),
+                occurrence=Span(start=start, end=end),
                 source_segments=origins,
             )
         )

@@ -87,7 +87,9 @@ class Controls:
         if manual is None:
             return automatic
         if manual.source_hash != "sha256:" + source_hash:
-            raise ValueError("Manual template match has stale source bytes")
+            raise ValueError(
+                f"Manual template match has stale source bytes: source_unit_id={source_unit_id}"
+            )
         return (
             automatic
             if manual.matches is None
@@ -106,7 +108,7 @@ class Controls:
             return
         if not field.complete or len(manual.matches) != len(field.matches):
             raise ValueError(
-                "Manual template match does not cover the complete exact field"
+                f"Manual template match does not cover the complete exact field: source_unit_id={field.source.descriptor.source_unit_id}, matches={len(manual.matches)}"
             )
         for authored, matched in zip(manual.matches, field.matches, strict=True):
             if matched is None or (
@@ -119,7 +121,7 @@ class Controls:
                 matched.binding.values,
             ):
                 raise ValueError(
-                    "Manual template match differs from verified source leaves"
+                    f"Manual template match differs from verified source leaves: source_unit_id={field.source.descriptor.source_unit_id}, frame_id={authored.frame_id}"
                 )
 
     def verify_closure(self) -> None:
@@ -132,7 +134,7 @@ class Controls:
             for unit, variant, _lang in self.overrides
         ):
             raise ValueError(
-                "Translation selection has no exact current source context"
+                f"Translation selection has no exact current source context: source_unit_ids={sorted({u for u, v in self.matches if u not in self.seen or v != 'default'} | {u for u, v, _ in self.overrides if u not in self.seen or v != 'default'})}"
             )
 
     def prepare_labels(
@@ -207,7 +209,9 @@ class Controls:
         }
         for pin in override.templates:
             if pin.template_id not in frames:
-                raise ValueError("Pinned template is outside the exact source context")
+                raise ValueError(
+                    f"Pinned template is outside the exact source context: frame_id={pin.template_id}, source_unit_id={field.source.descriptor.source_unit_id}"
+                )
             targets[pin.template_id, lang] = self.targets[
                 pin.template_id, lang, pin.variant_key
             ]
@@ -226,7 +230,9 @@ class Controls:
                     == term_pin.term_id
                 ]
                 if len(candidates) != 1:
-                    raise ValueError("Pinned glossary default has no usable label")
+                    raise ValueError(
+                        f"Pinned glossary default has no usable label: term_id={term_pin.term_id}, source_unit_id={field.source.descriptor.source_unit_id}"
+                    )
                 value = candidates[0]
             else:
                 value = self.variant_labels[
@@ -235,7 +241,7 @@ class Controls:
             key = canonical(value.reference.model_dump(mode="json"))
             if key not in references:
                 raise ValueError(
-                    "Pinned glossary term is outside the exact source context"
+                    f"Pinned glossary term is outside the exact source context: term_id={term_pin.term_id}, source_unit_id={field.source.descriptor.source_unit_id}"
                 )
             selected_labels[key, lang] = value
         return Selection(

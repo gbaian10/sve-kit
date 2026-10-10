@@ -2,7 +2,7 @@
 
 import pytest
 
-from sve_carddb.contracts.template_parameters import Range
+from sve_carddb.contracts.four_layer import Span
 from sve_carddb.domains.translations.four_layer_choices import choice_alternative
 from sve_carddb.domains.translations.recognition.models import Hint
 
@@ -25,7 +25,7 @@ def test_post_option_replacement_count_is_bound_to_the_original_choice(
 ) -> None:
     raw = "下記から１つチョイスする。【１】仮。【２】別。" + suffix
     start = raw.rindex("代わりに") + len("代わりに")
-    span = Range(start=start, end=start + 1)
+    span = Span(start=start, end=start + 1)
     hint = Hint(
         name="count",
         occurrence=span,
@@ -48,7 +48,7 @@ def test_pre_option_keyword_replacement_preserves_the_intro_scope(keyword: str) 
         f"下記から１つチョイスする。【{keyword}】代わりに２つまで。【１】仮。【２】別。"
     )
     start = raw.index("代わりに") + len("代わりに")
-    span = Range(start=start, end=start + 1)
+    span = Span(start=start, end=start + 1)
     hint = Hint(
         name="count",
         occurrence=span,

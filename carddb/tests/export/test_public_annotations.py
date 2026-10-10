@@ -88,13 +88,14 @@ def _admission(
     _case: dict[str, JsonValue], scenario: JsonValue
 ) -> dict[str, JsonValue]:
     value = object_value(scenario)
-    if not compatible(
-        object_value(value["value"]),
-        reader_version=string(value["reader_version"]),
-        supported_formats=tuple(map(string, array(value["supported_formats"]))),
-        supported_capabilities=tuple(
-            map(string, array(value["supported_capabilities"]))
-        ),
+    entry = object_value(value["value"])
+    if (
+        not compatible(entry)
+        or entry["format_version"] not in array(value["supported_formats"])
+        or tuple(map(int, string(entry["min_reader_version"]).split(".")))
+        > tuple(map(int, string(value["reader_version"]).split(".")))
+        or not set(map(string, array(entry["required_capabilities"])))
+        <= set(map(string, array(value["supported_capabilities"])))
     ):
         raise ValueError("public-annotation/admission")
     return {}

@@ -1,10 +1,11 @@
 # 四層翻譯共用資料契約
 
-本文件是 [ADR-0021](../../adr/0021-four-layer-translation.md) 的設計契約，**尚非已實作的 reader、DDL 或 DSL 語法**。
+本文件是 [ADR-0021](../../adr/0021-four-layer-translation.md) 的共用契約；#498 已實作 N0 的 reader、DDL、來源 binding 與渲染。
+區域／階段葉、可選範圍、省略持有者與 NC 全名等價等 N1 行為由 #380／#499 承接；本文不是 DSL 語法。
 用語依[術語表](../../terminology.md#四層翻譯)；來源選用依[翻譯契約](translation-contract.md)。
 本契約取代固定整行模板的參數／target 模型，保留整行粒度與必要的來源完整性檢查。
 公開欄序、版本與 reader 拒絕規則由 [#496](https://github.com/gbaian10/sve-kit/issues/496) 定義；
-實作及測試由 [#498](https://github.com/gbaian10/sve-kit/issues/498) 承接，整庫重建由 [#499](https://github.com/gbaian10/sve-kit/issues/499) 承接。
+N0 實作及測試已由 [#498](https://github.com/gbaian10/sve-kit/issues/498) 完成，整庫語義與中文重建由 [#499](https://github.com/gbaian10/sve-kit/issues/499) 承接。
 
 ## 1. 型別、驗證責任與失敗語義
 
@@ -21,7 +22,7 @@
 | --- | --- |
 | A：authored reader | 讀當前輸入一次，驗版本、封閉欄位、型別、鍵唯一、target 語法、可在輸入閉包判定的引用；裁定明示 revision／兩種 level 的封閉形狀；壞資料拒絕載入 |
 | B：建置 validator | 從固定來源驗 owner／face、hash、角色、trace、葉值、適用域、完整覆蓋及使用閉包；裁定原引用、ordinal、已知舊域完整性及未知舊域資格；已知錯配拒絕建置交易，不任選或靜默忽略 |
-| C：DB 邊界 | 寫入及讀回時驗 SQL 的 PK／FK、nullable、enum、Json 的具名型別及跨列一致性；原始 Any 不得流出邊界；裁定 logical key 唯一／互斥、來源關聯及完整引用與用途集合；不重跑舊 normalizer；FL-027 |
+| C：DB 邊界 | 寫入及讀回時驗 SQL 的 PK／FK、nullable、enum、Json 的具名型別及跨列一致性；原始 Any 不得流出邊界；裁定沿 SQL PK／FK 與逐列封閉型別；邏輯唯一／互斥及完整用途集合由 #499 接上；不重跑舊 normalizer；FL-027 |
 
 每張表的「失敗／案例」列給出可判定原因；案例 ID 指向[固定案例](four-layer-cases.md)。
 尚未辨識的合法來源用 pending／未匹配清單保存；缺譯用整欄原文退回。
@@ -31,6 +32,10 @@
 NP 沒覆蓋的修飾可以用已寫好的 Literal＋LeafRef 翻譯；必要葉值未解時仍整欄退回，不能把它改成 Literal 躲檢查。
 
 ## 2. authored 入口與替換界線
+
+authored frame 未在本次建置的完整來源欄位被使用時，不使整批建置失敗。
+建置報告列出 frame ID 與 no_fully_verified_source_owner_field；不啟用該 frame／target，受影響欄位照常整欄退回原文。
+壞結構、引用、明示 manual match 的過期來源與無效 target 仍拒絕。
 
 四層翻譯分片採 `format:3,kind:translation_shard,records:[Record]`。
 三欄皆必填且不可 null：format 是固定整數 3、kind 是固定字串 translation_shard、records 是可空陣列；
@@ -567,8 +572,8 @@ B 逐筆保留裁定原始 applies_to 清單與 ordinal，重複文字的引用�
 已知域的完整用途集合對帳由 #499 承接。
 對帳同時列出模板引用、非模板引用、引用層級 pending、用途層級 resolved／pending；
 不把引用數和用途列數相加，不以「輸出 0 個裁定」宣稱驗收完成。
-C 依既有 DB 型別邊界檢查必填 nullable、封閉欄位、enum、邏輯唯一性、FK 與跨列一致性，
-不能只依賴 SQL 對含 null 的 UNIQUE 約束，也不能因 A 已讀過而跳過（FL-027）。
+N0 的 resolution.build 依現行裁定的原始 ordinal 產生引用列；DB 檢查 SQL PK／FK 與逐列封閉型別。
+裁定邏輯鍵唯一／互斥、完整用途集合及用途候選來源檢查由 #499 接上；本次不宣稱 DB 已驗證這些集合條件（FL-027）。
 
 active 裁定邊只能由已驗的用途層級 resolved 產生，且其 scope 僅限該用途。
 多個舊用途可 resolved 到同一新 frame；任何一筆都不代表適用新 frame 的所有卡。
@@ -594,6 +599,6 @@ active 懸空引用必為零；所有 pending 與其候選不得進可執行閉�
 | translation_term 反查集合 | §6 逐 occurrence ＋§8 annotation；文字去重與語義位置分離 | FL-008／FL-013～FL-015；#496 承載 |
 | 舊 T ID applies_to | §9 已知域用途級 resolved／pending，未知域引用級 pending，非模板引用獨立保留對帳，禁止假有效引用 | FL-024～FL-026；#498／#499 |
 
-在 #496 完成前，舊公開 wire 文件只描述既有 reader 能讀的格式，不得再作「divergence 禁止 JP 繁中」的政策依據。
+公開 3.0 的 producer／Python 與 TS reader 已同步接線；舊公開 wire 文件不得再作「divergence 禁止 JP 繁中」的政策依據。
 新版 producer／reader 必須同步切換 basis 與 annotation，不能用舊 shared_jp_unchecked 冒充新政策。
 固定案例是規格，並不代表 normalizer、renderer、全庫譯文、DSL adapter 或 runtime 已通過驗收。

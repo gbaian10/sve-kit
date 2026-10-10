@@ -110,5 +110,5 @@ display 的 grants_aligned／grants_official_counterpart 固定 false，表示�
 
 本單可檢查 Draft 2020-12 Schema 合法、每個 fixture pointer 可定位、ID 唯一、正反例的形狀、
 合成 text／annotation hash、Unicode 固定向量與計帳算術一致。
-這些只證明案例規格可讀且自洽；#498 還須交 producer／Python／TS／Web／read_api／publish 的實際測試結果，
+這些只證明案例規格可讀且自洽；#498 已另以 N0 的 producer／Python／TS／Web／read_api／publish 實際測試驗證接線，
 [#53](https://github.com/gbaian10/sve-kit/issues/53) 交全批與手機容量。規格合併與程式驗收必須分開記錄，不能以本文件取代後者。

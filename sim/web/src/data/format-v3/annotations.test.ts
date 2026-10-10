@@ -2,14 +2,14 @@ import { describe, expect, it } from "vitest"
 
 import compiled from "#snapshot-conformance"
 
-import { createAnnotatedTextResolver } from "../annotated-text"
 import {
   annotationInputs,
   annotationView,
   componentInput,
   displayClient,
   publicCases,
-} from "../public-annotation-cases"
+} from "../../test-utils/public-annotation-cases"
+import { createAnnotatedTextResolver } from "../annotated-text"
 import { v3Fixture } from "../v3-fixture"
 import { validateAnnotations } from "./annotations"
 import { decodeRow } from "./decode"
@@ -69,11 +69,23 @@ function run(
   if (operation === "admission") {
     const value = objectValue(objectValue(input)["value"])
     if (
-      !isCompatible(value, {
-        version: stringValue(parameters["reader_version"]),
-        formats: arrayValue(parameters["supported_formats"]).map((v) => stringValue(v)),
-        capabilities: arrayValue(parameters["supported_capabilities"]).map((v) => stringValue(v)),
-      })
+      !isCompatible(value) ||
+      !arrayValue(parameters["supported_formats"]).includes(value["format_version"] ?? null) ||
+      stringValue(value["min_reader_version"])
+        .split(".")
+        .map(Number)
+        .some(
+          (part, i, parts) =>
+            parts
+              .slice(0, i)
+              .every(
+                (previous, j) =>
+                  previous === Number(stringValue(parameters["reader_version"]).split(".")[j]),
+              ) && part > Number(stringValue(parameters["reader_version"]).split(".")[i]),
+        ) ||
+      arrayValue(value["required_capabilities"]).some(
+        (capability) => !arrayValue(parameters["supported_capabilities"]).includes(capability),
+      )
     )
       throw new Error("admission rejected")
     return {}

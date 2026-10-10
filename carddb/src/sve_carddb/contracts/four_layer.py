@@ -7,13 +7,12 @@ from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from sve_carddb.contracts.n0 import verify_frame
 from sve_carddb.core.json import canonical, digest
-from sve_carddb.core.models import RecordData, UInt
+from sve_carddb.core.models import RecordData, Text, UInt
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
 Code = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.-]*\Z")]
-TypeName = Annotated[str, Field(pattern=r"^[A-Z][A-Za-z0-9]*\Z")]
 Hash = Annotated[str, Field(pattern=r"^[0-9a-f]{64}\Z")]
 FrameId = Annotated[str, Field(pattern=r"^frame:[0-9a-f]{64}\Z")]
 Id = Annotated[str, Field(min_length=1)]
@@ -80,9 +79,6 @@ class CardNameReference(RecordData):
     term_id: Id
 
 
-TermReference = Annotated[
-    GlossaryReference | VocabularyReference, Field(discriminator="kind")
-]
 Reference = Annotated[
     GlossaryReference | VocabularyReference | CardNameReference,
     Field(discriminator="kind"),
@@ -450,7 +446,7 @@ class SlotRef(RecordData):
 
 class LiteralNode(RecordData):
     kind: Literal["Literal"]
-    text: str
+    text: Text
 
 
 class LeafRef(RecordData):

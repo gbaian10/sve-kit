@@ -67,6 +67,7 @@ def prepared(
 ) -> tuple[Case, Inputs, tuple[CardPage, ...]]:
     case = default_text_case.copy(tmp_path / "synthetic")
     repo = tmp_path / "repo"
+    (repo / "authored/rules/rulings").mkdir(parents=True)
     (repo / "carddb/src/sve_carddb").mkdir(parents=True)
     (repo / "carddb/uv.lock").write_bytes(b"synthetic lock")
     for name in (
