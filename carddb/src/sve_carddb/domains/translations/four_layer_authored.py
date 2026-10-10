@@ -27,6 +27,10 @@ from sve_carddb.contracts.source_binding import SourceSpan, TypedValue
 from sve_carddb.core.authored import check_path, read, require_directory, shards
 from sve_carddb.core.json import canonical, parse
 from sve_carddb.core.models import Hash, RecordData, Text
+from sve_carddb.domains.translations.english_records import (
+    EnglishTargetRecord,
+    EnglishUseRecord,
+)
 from sve_carddb.domains.translations.four_layer_candidates import CandidateRecord
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 from sve_carddb.domains.translations.four_layer_render import validate_form
@@ -255,7 +259,9 @@ Record = Annotated[
     | ChoiceVariantRecord
     | MatchRecord
     | OverrideRecord
-    | SymbolChoiceRecord,
+    | SymbolChoiceRecord
+    | EnglishTargetRecord
+    | EnglishUseRecord,
     Field(discriminator="kind"),
 ]
 
@@ -320,6 +326,8 @@ _KINDS = {
             "card_name_concept",
             "template_match",
             "translation_override",
+            "english_exception_target",
+            "english_exception_use",
         }
     ),
     "definitions": frozenset({"sentence_template"}),
@@ -407,6 +415,38 @@ def _references(records: tuple[Record, ...], locations: Mapping[str, str]) -> No
 
     _glossary_references(records, locations)
     _pins(records, locations)
+    _english_references(records, locations)
+
+
+def _english_references(
+    records: tuple[Record, ...], locations: Mapping[str, str]
+) -> None:
+    targets = {r.data.id: r.data for r in records if isinstance(r, EnglishTargetRecord)}
+    terms = {r.data.id: r.data for r in records if isinstance(r, TermRecord)}
+    for record in records:
+        with _located(record, locations):
+            if isinstance(record, EnglishUseRecord):
+                target = targets.get(record.data.target_id)
+                if target is None:
+                    raise ValueError("English use requires its shared target")
+                if target.source_hash != record.data.source.source_hash:
+                    raise ValueError("English target requires the same exact source")
+            elif isinstance(record, EnglishTargetRecord):
+                _english_leaf_references(record, terms)
+
+
+def _english_leaf_references(
+    record: EnglishTargetRecord, terms: Mapping[str, TermData]
+) -> None:
+    for reference in record.data.references.values():
+        if isinstance(reference, GlossaryReference):
+            term = terms.get(reference.key)
+            if term is None or term.category == "card_name":
+                raise ValueError("English leaf requires a glossary concept")
+        elif isinstance(reference, CardNameReference):
+            term = terms.get(reference.term_id)
+            if term is None or term.category != "card_name":
+                raise ValueError("English leaf requires a card-name concept")
 
 
 def _match_references(data: TemplateMatch, frames: Mapping[str, Frame]) -> None:

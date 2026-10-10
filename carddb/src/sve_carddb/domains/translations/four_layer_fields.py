@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from sve_carddb.build import Database, Value
-    from sve_carddb.contracts.source_binding import SourceBinding
+    from sve_carddb.contracts.source_binding import SourceBinding, SourceDescriptor
     from sve_carddb.domains.translations.four_layer_pipeline import CompiledField
     from sve_carddb.domains.translations.four_layer_render import (
         Renderer,
@@ -90,7 +90,7 @@ def render_field(  # ruff: ignore[too-many-arguments] -- explicit suppression pr
         },
         ("id",),
     )
-    use_id = _use(db, compiled, context_id)
+    use_id = write_use(db, compiled.source.descriptor, context_id)
     for binding in bindings:
         write_binding(db, use_id, binding, renderer.domains)
     original = _source_annotation(
@@ -202,8 +202,8 @@ def render_field(  # ruff: ignore[too-many-arguments] -- explicit suppression pr
     return result
 
 
-def _use(db: Database, compiled: CompiledField, context_id: str) -> str:
-    descriptor = compiled.source.descriptor
+def write_use(db: Database, descriptor: SourceDescriptor, context_id: str) -> str:
+    """Keep exact owner fields distinct even when their source text is interned together."""
     owner = descriptor.owner
     if not isinstance(owner, (FaceRevisionOwner, PrintingFaceOwner)):
         raise TypeError("Compiled card field requires a card owner")

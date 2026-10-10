@@ -219,7 +219,17 @@ def _templates(inputs: AdoptionInputs) -> FrameInputs | None:
         return None
     current = translation.load().four_layer
     return (
-        current if any(r.kind == "sentence_template" for r in current.records) else None
+        current
+        if any(
+            r.kind
+            in {
+                "sentence_template",
+                "english_exception_use",
+                "english_exception_target",
+            }
+            for r in current.records
+        )
+        else None
     )
 
 

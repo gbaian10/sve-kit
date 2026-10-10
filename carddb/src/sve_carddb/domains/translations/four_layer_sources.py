@@ -1,7 +1,7 @@
 """Prove card source ownership before normalizing or sharing a typed binding."""
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from sve_carddb.contracts.four_layer import (
     FaceRevisionOwner,
@@ -56,7 +56,7 @@ class _Field:
 
 
 def _field(  # ruff: ignore[too-many-locals] -- resolve the joined exact owner and field once for both descriptor registration and verification
-    db: Database, field: OwnerField
+    db: Database, field: OwnerField, lang: Literal["ja", "en"] = "ja"
 ) -> _Field:
     owner = field.owner
     if isinstance(owner, FaceRevisionOwner):
@@ -94,10 +94,8 @@ def _field(  # ruff: ignore[too-many-locals] -- resolve the joined exact owner a
         )
     else:
         raise TypeError("Card source requires a card owner")
-    if region != "jp":
-        raise ValueError(
-            "Four-layer normalization requires the owner's Japanese source"
-        )
+    if region != ("jp" if lang == "ja" else "en"):
+        raise ValueError("Card source requires the owner's selected regional source")
     if _row(db, "card", {"id": card_id})["identity_state"] != "confirmed":
         raise ValueError("Card source identity is not confirmed")
     face_ordinal = face["ordinal"]
@@ -116,7 +114,7 @@ def _field(  # ruff: ignore[too-many-locals] -- resolve the joined exact owner a
     raw = unit["text"]
     if (
         not isinstance(raw, str)
-        or unit["lang"] != "ja"
+        or unit["lang"] != lang
         or unit["content_hash"] != digest(raw.encode())
     ):
         raise ValueError("Card source original text identity is invalid")
@@ -124,12 +122,21 @@ def _field(  # ruff: ignore[too-many-locals] -- resolve the joined exact owner a
 
 
 def descriptor(
-    db: Database, sources: Sources, field: OwnerField, batch_id: str
+    db: Database,
+    sources: Sources,
+    field: OwnerField,
+    batch_id: str,
+    *,
+    lang: Literal["ja", "en"] = "ja",
 ) -> SourceDescriptor:
     """Register the actual owner field rather than searching other cards by equal text."""
-    selected = _field(db, field)
-    parser = "translation-jp-v1"
-    if isinstance(field.owner, FaceRevisionOwner) and field.field == "effect":
+    selected = _field(db, field, lang)
+    parser = "translation-jp-v1" if lang == "ja" else "translation-en-v1"
+    if (
+        lang == "ja"
+        and isinstance(field.owner, FaceRevisionOwner)
+        and field.field == "effect"
+    ):
         applications = db.select(
             "correction_application",
             db.columns("correction_application"),
@@ -159,7 +166,7 @@ def descriptor(
             }
         )
     )
-    card_source(db, sources, result)
+    card_source(db, sources, result, lang=lang)
     return result
 
 
@@ -169,10 +176,14 @@ def empty_field(db: Database, field: OwnerField) -> bool:
 
 
 def card_source(
-    db: Database, sources: Sources, descriptor: SourceDescriptor
+    db: Database,
+    sources: Sources,
+    descriptor: SourceDescriptor,
+    *,
+    lang: Literal["ja", "en"] = "ja",
 ) -> CardSource:
     """Equal bytes on another card or face cannot authorize a source descriptor."""
-    selected = _field(db, descriptor)
+    selected = _field(db, descriptor, lang)
     unit_id, raw, source_id, locator = (
         selected.unit_id,
         selected.text,
@@ -194,8 +205,8 @@ def card_source(
         locator=descriptor.source_ref.locator,
         text_hash="sha256:" + descriptor.source_ref.text_hash,
     )
-    lang, document, source = sources.document(ref)
-    if source.id != source_id or lang != "ja":
+    source_lang, document, source = sources.document(ref)
+    if source.id != source_id or source_lang != lang:
         raise ValueError("Card source frozen version belongs to another owner source")
     if pointer(document, locator) != raw:
         raise ValueError(

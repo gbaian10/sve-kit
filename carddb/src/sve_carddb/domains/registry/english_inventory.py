@@ -65,17 +65,17 @@ class Batch:
 
 
 @dataclass(frozen=True)
-class ReviewedJP:
+class JPBaseline:
     exact_sha256: str
     cards: dict[str, Card]
 
 
-def read_reviewed_jp(path: Path) -> ReviewedJP:
+def read_jp_baseline(path: Path) -> JPBaseline:
     """Read the exact historic JSONL boundary, without treating it as current raw."""
-    return ReviewedJP(digest(path.read_bytes()), read_cards(path))
+    return JPBaseline(digest(path.read_bytes()), read_cards(path))
 
 
-def _coverage(jp: Batch, reviewed: ReviewedJP | None) -> dict[str, JsonValue]:
+def _coverage(jp: Batch, reviewed: JPBaseline | None) -> dict[str, JsonValue]:
     if reviewed is None:
         return {"available": False, "matches_current": False}
     historic = {
@@ -95,29 +95,6 @@ def _coverage(jp: Batch, reviewed: ReviewedJP | None) -> dict[str, JsonValue]:
         and len(jp.cards) == jp.pin["expected_sources"],
         "changed_card_numbers": list[JsonValue](changed),
     }
-
-
-def _historical_reason(
-    review: MappingReviewData,
-    english: dict[str, PrintingData],
-    en: Batch,
-    coverage: dict[str, JsonValue],
-) -> str | None:
-    if not coverage["available"]:
-        return "historical_jp_baseline_unavailable"
-    if review.coverage_hash != coverage["exact_sha256"]:
-        return "historical_jp_baseline_hash_mismatch"
-    if not coverage["matches_current"]:
-        return "historical_jp_input_changed"
-    actual = [
-        observation(en.cards[item.card_no], "en")
-        for item in english.values()
-        if item.card_id == review.card_id and item.card_no in en.cards
-    ]
-    expected = [item.model_dump(mode="json") for item in review.observations]
-    if sorted(map(canonical, actual)) != sorted(map(canonical, expected)):
-        return "historical_en_observations_changed_or_missing"
-    return None
 
 
 def scan(sources: FrozenSources, region: Region) -> Batch:
@@ -308,19 +285,11 @@ def _row(
 def _history(
     row: dict[str, JsonValue],
     review: MappingReviewData | None,
-    reasons: dict[str, str | None],
 ) -> None:
     if review:
         row["historical_review"] = review.model_dump(mode="json")
         if row["reason"] == "no_manual_identity_conclusion":
-            reason = reasons[review.card_id]
-            row["reason"] = reason or "adopted_absence_replayed_with_complete_inputs"
-            if reason is None:
-                row["classification"] = "confirmed_no_jp"
-                row["compared_fields"] = [
-                    "complete_registry_observation",
-                    "complete_reviewed_jp_input",
-                ]
+            row["reason"] = "historical_absence_requires_current_conclusion"
     if row["classification"] == "confirmed_no_jp":
         row["permanent_identity_change"] = review is None or row["face_id"] is None
 
@@ -330,7 +299,7 @@ def inventory(
     jp: Batch,
     en: Batch,
     conclusions: tuple[Conclusion, ...] = (),
-    reviewed_jp: ReviewedJP | None = None,
+    jp_baseline: JPBaseline | None = None,
 ) -> dict[str, JsonValue]:
     """Classify every EN card/face lacking an explicit JP face in the registry.
 
@@ -357,11 +326,7 @@ def inventory(
         if isinstance(item := record.data, MappingReviewData)
         and item.target_region == "jp"
     }
-    coverage = _coverage(jp, reviewed_jp)
-    historical_reasons = {
-        key: _historical_reason(review, english, en, coverage)
-        for key, review in reviews.items()
-    }
+    coverage = _coverage(jp, jp_baseline)
     decisions = {(item.en_card_no, item.source_index): item for item in conclusions}
     if len(decisions) != len(conclusions):
         raise ValueError("Duplicate manual identity conclusion")
@@ -383,7 +348,7 @@ def inventory(
             keys.add((number, index))
             row = _row(number, index, printing, jp, en, decisions.get((number, index)))
             review = reviews.get(printing.card_id) if printing else None
-            _history(row, review, historical_reasons)
+            _history(row, review)
             rows.append(row)
     rows.extend(
         {
@@ -448,11 +413,11 @@ def main() -> None:
     parser.add_argument("--en-batch", required=True)
     parser.add_argument("--authored", type=Path, required=True)
     parser.add_argument("--conclusions", type=Path)
-    parser.add_argument("--reviewed-jp", type=Path)
+    parser.add_argument("--jp-baseline", type=Path)
     parser.add_argument("--program-revision", required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    for supplied in (args.reviewed_jp, args.conclusions):
+    for supplied in (args.jp_baseline, args.conclusions):
         if supplied is not None and args.output.resolve() == supplied.resolve():
             raise ValueError("Report output must not overwrite review inputs")
     for protected in (args.archive, args.authored):
@@ -474,7 +439,7 @@ def main() -> None:
         jp,
         en,
         conclusions,
-        read_reviewed_jp(args.reviewed_jp) if args.reviewed_jp else None,
+        read_jp_baseline(args.jp_baseline) if args.jp_baseline else None,
     )
     report["program_revision"] = args.program_revision
     report["program_sha256"] = digest(Path(__file__).read_bytes())
