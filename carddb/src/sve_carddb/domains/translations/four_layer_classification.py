@@ -33,6 +33,11 @@ from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.catalog.adoption_models import SourceRef
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION, SourcePart
 from sve_carddb.domains.translations.four_layer_numbers import recognize_number
+from sve_carddb.domains.translations.four_layer_semantics import (
+    CardContext,
+    Classified,
+    classify_semantics,
+)
 from sve_carddb.domains.translations.parameters.candidate_matching import classify
 from sve_carddb.domains.translations.parameters.references import References, Resolution
 from sve_carddb.domains.translations.parameters.spans import Located
@@ -48,6 +53,7 @@ if TYPE_CHECKING:
         SourceDescriptor,
         TypedValue,
     )
+    from sve_carddb.domains.translations.four_layer_normalizer import SourceField
     from sve_carddb.domains.translations.parameters.models import Candidate, Hint
     from sve_carddb.domains.translations.parameters.rules import Rules
 
@@ -110,6 +116,7 @@ class Recognized:
     occurrences: tuple[LeafOccurrence, ...]
     issues: tuple[str, ...]
     low_confidence: bool
+    semantics: Classified | None = None
 
     def bind(
         self, source: SourceDescriptor, part: SourcePart
@@ -126,14 +133,11 @@ class Recognized:
             role=part.source_span.role,
             segments=part.source_span.segments,
         )
-        role = part.source_span.role
-        metadata = role in {"name", "label", "layout"}
+        resolved = self.semantics
         # Lexical leaves alone cannot settle timing, actor or cross-sentence scope.
         semantic = (
-            SemanticVariant(
-                state="resolved", key="metadata." + role + ".v1", scope=None
-            )
-            if metadata
+            SemanticVariant(state="resolved", key=resolved.key, scope=None)
+            if resolved is not None
             else SemanticVariant(state="pending", key=None, scope=occurrence)
         )
         frame = Frame(
@@ -146,9 +150,11 @@ class Recognized:
             role=part.source_span.role,
             semantic_variant=semantic,
             leaf_schema=self.schema,
-            projection=Projection(
-                projection_kind="none" if metadata else "pending",
-                discriminator="metadata." + role + ".v1" if metadata else None,
+            projection=resolved.projection
+            if resolved is not None
+            else Projection(
+                projection_kind="pending",
+                discriminator=None,
                 scopes=(),
                 imports=(),
                 exports=(),
@@ -197,12 +203,30 @@ class Classifier:
             )
 
     def recognize(
-        self, raw: str, source: SourceDescriptor, part: SourcePart
+        self,
+        raw: str,
+        source: SourceDescriptor,
+        part: SourcePart,
+        *,
+        context: CardContext | None = None,
+        field: SourceField | None = None,
     ) -> Recognized:
         """Source positions and enabled grammar determine leaf values; target text is never inspected."""
         source.verify(source, raw)
         if part.source_span.role in {"name", "label"}:
-            return self._named(raw, part)
+            named = self._named(raw, part)
+            return Recognized(
+                named.schema,
+                named.values,
+                named.occurrences,
+                named.issues,
+                named.low_confidence,
+                classify_semantics(
+                    source, part, named.schema, self.terms, context, field
+                )
+                if not named.issues
+                else None,
+            )
         candidate = self._candidate(raw, source, part)
         issues = set(candidate.issues) - {
             "legacy_parenthesis_classification_requires_review"
@@ -237,12 +261,19 @@ class Classifier:
             for h in candidate.slots
             if h.rule_id in enabled
         )
+        schema = LeafSchema(format=2, slots=tuple(slots))
+        semantics = (
+            classify_semantics(source, part, schema, self.terms, context, field)
+            if not issues
+            else None
+        )
         return Recognized(
-            LeafSchema(format=2, slots=tuple(slots)),
+            schema,
             values,
             tuple(occurrences),
             tuple(sorted(issues)),
             doubtful,
+            semantics,
         )
 
     def _candidate(
