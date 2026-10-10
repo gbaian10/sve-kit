@@ -4,11 +4,11 @@
 不在本專案 Apache-2.0 授權內；中文解讀與 IR 型別設計屬專案內容。
 引用依同列／同段的卡號及 CR／Q 編號定位，來源與版本見[文件引用說明](../quotations.md)。
 
-版本 1.0，2026-09-28 採用；以 v0 的身分、決定、捕捉、receipt、事件、歷史與效果型別為底。配對 [撰寫語法](author-syntax-1.0.md)；總覽見 [README](README.md)。本文件是規格，非 Schema／引擎實作。保留穩定 ID，新增變體一律封閉。本文 §1–9 延續 v0 通用模型，§13 完整列出 GAP-S 的型別擴充與語義邊界。
+版本 1.0，2026-09-28 採用。配對 [撰寫語法](author-syntax-1.0.md)；總覽見 [README](README.md)。本文件是規格，非 Schema／引擎實作。保留穩定 ID，新增變體一律封閉。本文 §1–9 定義通用模型，§13 完整列出 GAP-S 的型別擴充與語義邊界。
 
 ## 0. 依據與裁定優先序
 
-CR 1.27.0、2026-09-26 日文卡表（含所有面與 sections／Q&A）、已封存 v0、現有 88 族缺口與 3,669 句型目錄。文中「C」「契約」指 v0 所依據的情境資料契約 v2.1（repo 內 [`tests/rules-scenarios/CONTRACT.md`](../../tests/rules-scenarios/CONTRACT.md)）：`C§x.y` 為該文件的節號，`C33` 等為其第 10 節的條號。R-0009 取代舊裁定 #1 及 R-0002 的誘發時檢查部分；R-0003 文件中仍留舊裁定 #1 描述者也以 R-0009 校正。早期格式示例中的 R-0002 寫法不是有效判讀。
+CR 1.27.0、2026-09-26 日文卡表（含所有面與 sections／Q&A）及設計期全卡句型目錄。文中「C」「契約」指情境資料契約 v2.1（repo 內 [`tests/rules-scenarios/CONTRACT.md`](../../tests/rules-scenarios/CONTRACT.md)）：`C§x.y` 為該文件的節號，`C33` 等為其第 10 節的條號。誘發與本文條件分離依 R-0009，R-0002 的結算條件及段落範圍仍有效。
 
 | 裁定   | 效力與對應元素                                                                                                                                                   | 證據強度    |
 | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
@@ -78,7 +78,7 @@ T 型別、R 引用、D 決定、C 捕捉、B 能力、I 指示、K 組合、X �
 - **P.start 與 K.if**：P.start 表示這一指示（含內部選擇）尚未開始；K.if 選擇應執行哪段普通本文。BP13-043 的個別目的地限制不能套到 SD01-006／BP01-027 的一般 token 容量程序。
 - **規則許可與前提**：BP17-044「…なら、プレイできない」是 `L.permission`／打出合法性；不是等到結算才判的 P.start。前提也不能用公開候選為空的預測，避開一個原本依法應問的私有選擇。
 
-BP13-043 的 P.start scope 具體化如下：它保護「渡す」的 I.transfer（含若規則另有的接收者選擇），不保護此前獨立的「指定」。兩方都滿場時仍各問一次指定，之後兩次交付各因自己的前提不成立而不開始；1/5 時先指定兩張，第一個交付不開始，第二個可以成功。依據為 Q1766 的四步及 [`rule-1.3.4-01`](../../tests/rules-scenarios/questions/rule-1.3.4-01.yaml) 的場數 5/5、1/5 局面，與 C33(c)② 限制「該指示」的語義相容。v0 互審已排除將前提擴大到整句的判讀；一般 P.start 仍會保護其 InstructionId 的內部選擇，不能向前跨越其他指示。
+BP13-043 的 P.start scope 具體化如下：它保護「渡す」的 I.transfer（含若規則另有的接收者選擇），不保護此前獨立的「指定」。兩方都滿場時仍各問一次指定，之後兩次交付各因自己的前提不成立而不開始；1/5 時先指定兩張，第一個交付不開始，第二個可以成功。依據為 Q1766 的四步及 [`rule-1.3.4-01`](../../tests/rules-scenarios/questions/rule-1.3.4-01.yaml) 的場數 5/5、1/5 局面，與 C33(c)② 限制「該指示」的語義相容。不得將前提擴大到整句；一般 P.start 仍會保護其 InstructionId 的內部選擇，不能向前跨越其他指示。
 
 ### 已定費用時點（R-0001、R-0005、R-0006）
 
@@ -144,7 +144,7 @@ Receipt 不用一個布林「做了」包辦全部。`PaymentResult {complete:Bo
 
 共用 `Instruction {id,actor:PlayerRef,source:AbilitySource,precondition?:P.start,context:Effect / Cost,receipt:ReceiptId,source_span}`。下表所有列都產生 T.receipt，欄位「結果」只列特有 payload／計量；預定量與實際量不能混用。效果按1.3.2盡可能做，Cost 由 K.pay 要求完整可支付。一般前提為身分有效、種類／區域適用、未被禁止；**這些執行適用性不自動取消依法已存在的選擇**。表中提到 precondition 時才另加 P.start，不憑「成功機率為0」自動生成它。
 
-下列橋接延續 v0 已登錄的原子，新增欄位見 §10、§13；不是另一份撰寫 YAML 文法，實際欄名／短寫以唯一撰寫稿為準。撰寫的選取／指定值用 bind，動作結果用 result。
+下列橋接定義已登錄的原子，新增欄位見 §10、§13；不是另一份撰寫 YAML 文法，實際欄名／短寫以唯一撰寫稿為準。撰寫的選取／指定值用 bind，動作結果用 result。
 
 | ID／撰寫構造                            | 定義、特有欄位／型別及結果                                                                                                                                                                                                                                                        | 日文句型／真實卡例（引用／解讀）                                                                                                                                     | 規則／契約；前提與不涵蓋                                                                                                                                                                                                                                                                     |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
@@ -324,7 +324,7 @@ BP20-P59 按 Q2702 已可確定：捨棄事件先產生待機，結算輪到條�
 
 ## 9. 特徵、持續效果、取代及規則許可
 
-本節定義分類要保留的資料；CR10.9 層次／依存的求值規則見 [ADR-0008](../adr/0008-continuous.md)；循環規則與被動重算事件仍未定案。同一權威 Chars 視圖應供合法性、read、事件判定與觀察共用，不能各自做少幾項的近似重算；也不能遇到遞迴深度上限就回印刷基本值。
+本節定義分類要保留的資料；CR10.9 層次／依存、循環定序及同時間戳的求值規則見 §14，數值事件與推定邊界見 §13 GAP-S-008。同一權威 Chars 視圖應供合法性、read、事件判定與觀察共用，不能各自做少幾項的近似重算；也不能遇到遞迴深度上限就回印刷基本值。
 
 | ID                | 定義與欄位／型別                                                                                                                                                                                                                                                                                                                                                                              | 句型與真實卡例（引用／解讀）／撰寫橋接                                                                                                                                               | 規則／契約；不涵蓋                                                                                                                                                                            |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -333,21 +333,19 @@ BP20-P59 按 Q2702 已可確定：捨棄事件先產生待機，結算輪到條�
 | `L.duration`      | `Duration {end:CurrentTurnEnd / NextTurnEnd(PlayerRef) / EndResolution / While(Predicate) / SourceZoneExit / NoTemporalExpiry,anchor:TimeAnchor,usage:Option<UseLimit>}`；SourceZoneExit 明確錨定 source ObjectRef 及原有效區；複合區間用 `List<Interval>`。                                                                                                                                  | BP05-061「このターンと次の相手のターン中」；BP11-018「次のそのプレイヤーのターン終了時まで」；CP02-007 未寫期限的 +1/+1。                                                            | CR10.2.1.2、10.3.4–.5、10.9.2、10.7.5、5.26–.28；C—。非 static 數值／能力修正省略期限＝NoTemporalExpiry（無額外時間截止），仍受目標世代與合法攜帶限制；來源有效區與目標生命週期分開，見下文。 |
 | `L.replacement`   | `ReplacementEffect {id,source,pattern:ProposedEventPattern,condition,rewrite:TypedEventRewrite,scope:Self/General,affected_player:PlayerResolver,once_per_event:Bool,usage?,duration,prospective_chars?:CharacteristicView}`；記候選、選序及取代鏈。                                                                                                                                          | BP02-041「代わりにデッキの上に」；BP05-020「代わりに8ダメージ」；CP03-083「元のコストを支払う代わりに」。撰寫 `replace`／條件替代短寫。                                              | CR10.10、5.14.2；C§9.5。原事件未發生；不是先做原效果再補做一個分支。只改模式數可降低為數值條件，不應生成全域事件攔截器。                                                                      |
 | `L.permission`    | `Permission {subject:PlayerSet/Selector,action:ActionPattern,polarity:Allow/Forbid/Require,condition,duration,rule:RuleId,reason:SourceSpan}`；ActionPattern 涵蓋 PlayCard、PlayAbility(AbilityPredicate)、Attack、ChooseTarget、Draw、Destroy、Banish、Stand、IncreasePPMaximum、IgnoreWard、Reroll、ChooseMode、Win、Lose、TriggerAdmission(AbilityPredicate)；限定來源／區域／接受者型別。 | BP17-044「プレイできない」；BP02-089「能力によって破壊されない」；ECP01-010「…ファンファーレ…進化時…誘発しない」。撰寫 `cannot`／keyword；`no_trigger` 用 TriggerAdmission＋Forbid。 | CR1.3.3、12.12、12.15、10.7；Q1882；C28。TriggerAdmission 依 ability controller／keyword 來源篩選，抑制進待機，不刪事件、不禁止效果直接 play 該能力；「不能被選」不等於免全體效果。           |
-| `L.rule-modifier` | `RuleModifier {key:SpellChainPopulation / CounterCap / EvolutionPlayLimit / BattleDamageBasis / TriggerMultiplicity,subject,operation:ReplacePopulation / SetCap / RemoveLimit / ReadLifeInsteadOfAttack,value:TypedValueOf<key>,condition,duration,source}`；key 與 value 配對封閉。                                                                                                         | BP02-035／BP02-036 改 SC 母體；CP04-115 上限7；BP18-001 進化次數；BP01-129 用生命算攻擊傷害。                                                                                        | CR1.3.1、8.3.2、13.3.1、15.1、5.14；C22。這些單一卡句可標註，不再作硬編卡號特判；同 key 多來源如何合成／依存交互見 ADR-0008 未決，不能用最後寫入勝出。                                        |
+| `L.rule-modifier` | `RuleModifier {key:SpellChainPopulation / CounterCap / EvolutionPlayLimit / BattleDamageBasis / TriggerMultiplicity,subject,operation:ReplacePopulation / SetCap / RemoveLimit / ReadLifeInsteadOfAttack,value:TypedValueOf<key>,condition,duration,source}`；key 與 value 配對封閉。                                                                                                         | BP02-035／BP02-036 改 SC 母體；CP04-115 上限7；BP18-001 進化次數；BP01-129 用生命算攻擊傷害。                                                                                        | CR1.3.1、8.3.2、13.3.1、15.1、5.14；C22。這些單一卡句可標註，不再作硬編卡號特判；同 key 多來源不可交換且無規則證據即於載入／預檢拒絕，不用最後寫入勝出；合成與依存見 §14。                    |
 | `L.deck-rule`     | `DeckRule {scope:Deck/Setup,basis:Class/Title,constraint:TypedDeckConstraint,setup_steps:List<RuleProcedure>,visibility,rule}`；初版包括同名張數、StartAmulet 不同卡名上限1、title 限制及其準備步驟。                                                                                                                                                                                         | CP03-021、CP03-041「スタートアミュレット…1種」；CP02-007 魔法のアイテム 的 title setup 情境（非該卡印有準備全文）。                                                                  | CR6.1–.2、14.3.1、14.4.2–.3；C§9.7。不是最多1張；開局私下取出與其後公開有不同時點，不在分類稿另定牌組合法性演算法。                                                                           |
 | `B.keyword`       | `KeywordUse {keyword:KeywordId,args:TypedArgs,origin:AbilitySource,rule:RuleId,expansion:TypedProgram/Declarations,dedup_policy:RuleDefined}`；保留原文 keyword 及展開後 IR 標籤。                                                                                                                                                                                                            | CP04-013／CP04-030「守護」；SD05-005／SD08-002「ドレイン」。撰寫 `keywords`／能力頭 macro。                                                                                          | CR12–14；C§3.1、§9.7。不是不透明 raw handler；多個 Drain 依12.13.3視為單一 Drain，不能把所有同文授予一律合併或一律多次發動。                                                                  |
 
-歷史名稱對照：`NoTemporalExpiry` 是較早 A0 的 `Permanent` 同義更名，舊名僅保留對照，不是另一種語義；L.duration 的穩定 ID 不變。
-
 期限與有效區的 lowering：撰寫 `buff`／`set_stat`／`grant`／`lose_abilities` 沒有 `until` 時，若是解算產生的持續修正，明寫 `NoTemporalExpiry`，意義僅為沒有額外時間截止（10.2.1.2）。目標普通換區後依10.9.2不延續，場到另一玩家的場例外；EX→解決區→場的效果攜帶僅按4.8.3.3、10.6.2.1.3、10.6.2.8.1.1及 R.follow-move 保留。這不是允許任意跨世代跟蹤。來源先付費離場不使之失效：CP02-007 仍給目標 +1/+1。
 
-靜態宣告使用 `While(source ability active in B.ability.active_zones AND explicit condition)`；一般場上 follower／amulet 預設 field（10.3.5），卡文明示其他有效區則照10.3.4，crest 的 EX 有效區依10.3.6，不能一概強制 field。撰寫 `static.effects` 隱含此來源有效區約束；本文產生的修正不自動帶此約束，卡文明示的期限仍照 L.duration。SourceZoneExit 同樣指來源的錨，與「目標移區後是否仍受效果影響」分開。精確清理／依存求值見 ADR-0008 的決定與未決事項，不延後這些已知規則邊界。
+靜態宣告使用 `While(source ability active in B.ability.active_zones AND explicit condition)`；一般場上 follower／amulet 預設 field（10.3.5），卡文明示其他有效區則照10.3.4，crest 的 EX 有效區依10.3.6，不能一概強制 field。撰寫 `static.effects` 隱含此來源有效區約束；本文產生的修正不自動帶此約束，卡文明示的期限仍照 L.duration。SourceZoneExit 同樣指來源的錨，與「目標移區後是否仍受效果影響」分開。精確清理／依存求值見 §14 與 [ADR-0008](../adr/0008-continuous.md)，不延後這些已知規則邊界。
 
 CharacteristicPatch 初版參數為 `GrantAbility / SuppressAbility / SetKind / AddName / AddTrait / RemoveTrait / SetAttack / AddAttack / SetLife / AddLife`，均攜帶目標型別及 Duration。分類碰到其他 patch，須新增具名參數並附證據；不能使用任意 JSON merge。打出費用增減／固定值屬10.10的成本取代，不混成修改印刷 cost。
 
 持續效果（ADR-0008）至少需處理：印刷／進化基礎資訊（cost 例外）→能力增失／有效性→非數值→數值四階段；同階依存與相依循環；仍不能定序時的規則 timestamp（static 用目前區域進入時點，非 static 用打出時點）；read／write 依存變更的重算；非 static 效果移區失效與合法攜帶例外；入場即有的特徵及進場取代；期限、一次消耗、BOX 只失去當時能力的交互。**本規格沒有批准任何既有原型的排序／遞迴方法。**
 
-取代的已知規則仍可先固定：受影響玩家決定多個取代的順序；同一事件每個取代至多一次；自己取代先行；費用固定值先於增減；進場取代用將進入區域所受持續效果的特徵判斷。ADR-0008 留待驗證的是如何與同一 Chars／依存求值及終止性合併實作，不是讓這些規則暫時消失。
+取代的已知規則仍可先固定：受影響玩家決定多個取代的順序；同一事件每個取代至多一次；自己取代先行；費用固定值先於增減；進場取代用將進入區域所受持續效果的特徵判斷。仍待引擎驗收的是如何與同一 Chars／依存求值及終止性合併實作，不是讓這些規則暫時消失。
 
 ### KeywordId 初始登錄範圍
 
@@ -392,7 +390,11 @@ CharacteristicPatch 初版參數為 `GrantAbility / SuppressAbility / SetKind / 
 
 `RulingRecord {id,question,decision,evidence:List<Evidence>,strength:Official|Generalized|Inferred|Undecided,decided_on:Date,applies_to:List<TemplateId | IrElementId>,hint:{zh-TW,ja},supersedes?,note?}`。`Evidence {ref,kind,quote?,question?,date?,version?,url?,reason?,note?}`，`kind` 封閉為 direct／supporting／counter／terminology／community／project：CR 條文用 `ref: "CR x.y.z"`＋`quote`＋`version`；Q&A 用 `ref: "Q####"`＋`quote`（回答）＋`question`＋`date`；卡文用 `ref: <卡號>`＋`quote`＋`date`（發售日）；英文官網等外部來源另附 `url`；專案決定用 `ref: project, kind: project`＋`reason`＋`date`，不假造官方編號。`applies_to` 的值是句型 ID（`T…`，來自全卡句型分類）或 IR 元素 ID（如 `E.stat-change`）；後者用於影響不限於封閉句型集合的引擎層語義。同一 Q&A 去重並保留適用情境。Undecided 不能驅動規則提示或自動結算；Inferred 提示必說本專案解讀。
 
-正式位置是 `authored/rules/rulings/`：R-0001～R-0009 經使用者裁定；六項專案解讀登錄為 R-0010～R-0015，標 strength: inferred。不存 `decided_by` 的決定者，裁定日期以頂層 `decided_on` 保留；證據、結論與強度仍完整保留。條文更新按依賴圖反查 IR、巨集與卡片 meta 重審。參見 [ADR-0011](../adr/0011-rulings-evidence.md)。
+正式封套為 `format: 2, kind: ruling`，`revision` 為 authored 明示的正整數；未編版內容按[四層契約 §9](../schema/domains/four-layer-translation.md#9-舊模板重鍵與裁定引用)初始化，不追認舊歷史。
+
+正式位置是 `authored/rules/rulings/`：R-0001～R-0009 經使用者裁定；六項專案解讀登錄為 R-0010～R-0015，標 strength: inferred。不存 `decided_by` 的決定者，裁定日期以頂層 `decided_on` 保留；證據、結論與強度仍完整保留。條文更新按依賴圖反查 IR、巨集與卡片 meta 重審。`supersedes` 保存被取代範圍，effective view 僅採目前有效部分；R-0002 的結算條件及段落範圍仍有效。
+來源互相衝突時保留 disputed 與相反證據，不以模型投票決定官方答案。提示按具體結論標強度並提供介面語言回退；新裁定不自動提升能力為 verified。
+卡片 meta 引用裁定 ID，提示再引用對應 Q&A，不逐卡複製整份來源。參見 [ADR-0009](../adr/0009-rulings-evidence.md)。
 
 ## 12. 未決範圍
 

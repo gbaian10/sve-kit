@@ -92,7 +92,7 @@ The steps are:
 An unchanged rerun makes no PUT. After a failure, current is unchanged; run the
 same command again to upload what is missing. A failed image overwrite can leave
 new origin bytes under a key that the old current still references; fixed image
-keys keep only current bytes (ADR-0015). Do not run an upload while an export
+keys keep only current bytes (ADR-0012). Do not run an upload while an export
 writes the same root: `export-offline` removes the pointer before it overwrites
 a changed image, so an interrupted export has to be rerun before uploading.
 
@@ -113,7 +113,7 @@ uv --directory publish run sve-publish gc \
 
 `gc` reads the remote index and keeps the index, the JSON closures of
 `current` and `previous` (plus their manifest `.br` if present) and the images of
-`current` only (ADR-0016). `changes.from` never retains a third version.
+`current` only (ADR-0013). `changes.from` never retains a third version.
 The dry-run lists every other object under `snapshots/blobs/`,
 `snapshots/manifests/` and the five image sizes; `--namespace` limits the list to
 some of those prefixes. `--execute` deletes them with plain DELETE (R2 does not

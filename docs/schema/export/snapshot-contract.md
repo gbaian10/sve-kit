@@ -4,7 +4,7 @@
 [公開 annotation 契約](public-annotation.md)的欄序、形狀、來源指標與語義檢查。
 [public-annotation.schema.json](public-annotation.schema.json)及
 [固定案例](public-annotation-cases.json)仍供指定邊界的元件驗證，完整快照以套件 Schema 與共用 golden 驗收。
-[#498](https://github.com/gbaian10/sve-kit/issues/498) 已完成正常 authored 四層建置與 3.0.0 producer／reader 的 N0 切換。容量依維護者豁免交付，最佳化由 #506、手機實測由 #53、N1 由 #380／#499 承接。
+基本目錄裝檔與容量量法依[容量契約](size-budget.md)，不以既有輸出或桌面測試代替手機驗收。
 
 欄位語意依 [快照格式](snapshot-format.md)，傳輸與版本規則依 [傳輸契約](snapshot-transport.md)。
 機器資源位於 `carddb/src/sve_carddb/contracts/schema/v3/contract.schema.json`，隨 carddb wheel 打包；
@@ -92,7 +92,7 @@ uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 
 ## TS 端應驗項目
 
-M3 的 TS reader／harness 使用相同資源和樣本，不建立第二份 golden，也不依賴 Python producer。驗收至少包含：
+TS reader／harness 使用相同資源和樣本，不建立第二份 golden，也不依賴 Python producer。驗收至少包含：
 
 - 載入同一 JSON Schema，逐項接受 schema-valid、拒絕 schema-invalid；固定欄序、每個 tuple 少格／多格、nullable 格不能省略、未知 enum 與額外物件鍵均拒絕。日期／URI 不依賴 format 外掛；拒絕非 ASCII 數字、不存在的日期、越界時間與未編碼 URI 字元。
 - 逐項比對固定 types，解碼巢狀 tuple；資料提供的 descriptor 不可重定義型別，缺漏、未知或循環引用不得接受。
@@ -113,9 +113,8 @@ CI 路徑分流須讓 `carddb/src/sve_carddb/contracts/schema/**` 觸發 web 契
 ## 圖片與有限保留的機器契約
 
 3.0 資源從 source descriptor 生成；共用 golden 位於 v3。
-1.x／2.0 的 Schema 與專用樣本退役，歷史只留 Git，不設相容 reader 分支。
 required_capabilities 已固定包含 digital-same-name-links-v1；即使 same_name 列為空，也不得省略能力、相關 Schema 或 reader 驗證。
-尚未完成時不得發布 3.0，不能以「可整合」為由裁掉必要能力。
+必要能力必須完整，不能裁掉已宣告能力以通過驗證。
 
 同步項目包括 printing_image 的 media 欄序／ImageDisplayVariant、移除公開 image_variant.path、
 固定 N／band width／dependencies、image-id-url-v1 與同名規則能力，以及獨立 index_format=2 的 current／previous。
@@ -125,7 +124,7 @@ unknown index_format 必拒收，不能把它當成空 pages。
 
 Python／TS 共用合成向量須覆蓋 int_id、f0／f1、JP／EN、手動版次、card／art 分組版本、
 pending／missing、尺寸不足與 srcset、同 image_id 多 printing、回復 bytes 不重用 v。
-新增 changes 的 PK／changed_fields 白名單；V1→V2→V3 只保 V3／V2，V2.changes.from 不保留 V1。
+新增 changes 的 PK／changed_fields 白名單；資料版次 A→B→C 只保 C／B，B.changes.from 不保留 A。
 另驗無相容 current／previous、本機 active、落後多版全量更新、下載中輪替導致缺檔後重抓 current。
 JSON hash／canonical／FK／base 驗證維持；圖片 SHA 由產製／發布端驗，不用歷史圖 hash 拒絕新 bytes。
 CDN query 分離已實測，但 browser／SW、新 v 負快取與發布中斷須在相應元件整合驗，不以 Schema 通過代替。

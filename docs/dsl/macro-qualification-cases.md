@@ -1,6 +1,6 @@
 # 框架 DSL 巨集資格固定案例規格
 
-本文件與 [macro-qualification-cases.json](macro-qualification-cases.json) 是 [#497](https://github.com/gbaian10/sve-kit/issues/497) 交付的固定輸入／預期，供後續 carddb 資格 consumer 驗收使用，**不是測試程式或已通過紀錄**。規範依[作者語法 §1／§10](author-syntax-1.0.md#10-巨集規範)、[ADR-0012](../adr/0012-version-meta.md)與[四層契約 §7／§8](../schema/domains/four-layer-translation.md#7-規則投影接口)。
+本文件與 [macro-qualification-cases.json](macro-qualification-cases.json) 是 [#497](https://github.com/gbaian10/sve-kit/issues/497) 交付的固定輸入／預期，供後續 carddb 資格 consumer 驗收使用，**不是測試程式或已通過紀錄**。規範依[作者語法 §1／§10](author-syntax-1.0.md#10-巨集規範)、[ADR-0010](../adr/0010-version-meta.md)與[四層契約 §7／§8](../schema/domains/four-layer-translation.md#7-規則投影接口)。
 
 資料僅含自撰合成識別與資格事實，不含官方卡文、不裁定個別卡片、不授予既有候選資格。frame／卡名概念／scope／模型 ID 均為合成登錄，後續測試須在隔離資料根建立。資料中的欄位是測試輸入的邏輯事實，不新增 production 表、meta 或作者引用語法。
 

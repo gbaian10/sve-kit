@@ -65,39 +65,21 @@ rule_term 用當前 Bool；null／缺值時列 missing_emphasis，仍可顯示�
 加粗改值重產相依位置，不改譯文字串、不重配概念，也不要求重簽。原文及譯文位置
 由同一概念引用產生，不用字串搜尋取代語義定位；語義相同的引用共享設定。
 
-## 6. 公開快照影響與最小擴充提案
+## 6. 公開標註
 
-四層的內部逐 occurrence／annotation set 以[共用契約 §8](four-layer-translation.md#8-建置-dbrender-projection-與依賴)為準；
-以下只記舊公開格式與早期承載提案，正式 wire 選擇由 #496 定義，不能據此新增欄位或省略原文註記。
+內部逐 occurrence 與 annotation set 依[四層契約 §8](four-layer-translation.md#8-建置-dbrender-projection-與依賴)，
+公開承載依[公開 annotation 契約](../export/public-annotation.md)：translation 的第八欄為 annotation_set_id，原文另由 field_annotation 定位。
+只輸出實際引用的概念及非空位置集合，不公開完整建置詞庫、選詞採納或來源收據；不把 HTML／Markdown 塞入 exact text。
 
-**目前格式保持原樣。** [snapshot-format §2](../export/snapshot-format.md#2-公開表完整欄位與玩家用途) 的 translation 只有七欄：id/source_unit_id/target_lang/text_unit_id/origin/authority/low_confidence；沒有術語集合、加粗旗標或位置。build-db.translation.tokens 首版固定 null，而且不在公開白名單；本文件不把它當已存在的公開承載欄，不把 HTML／Markdown 標記塞入 exact text。
+加粗由當前 emphasis 與型別推導，綁定精確文字及概念引用的位置；不同概念即使同字也不合併。
+EN 卡面顯示 JP 依據繁中時，來源仍為 JP；沒有 EN 對齊資料就不能把相同位置套到 EN 原文。
+前端可以關閉視覺加粗，但不能改存放的概念及位置，也不自行維護第二份詞庫。
+欄序、Unicode 範圍、引用閉包與 Python／TS 共用反例依公開契約；實際容量與載入用途依[容量契約](../export/size-budget.md)。
 
-僅把 rule_term 的 Bool 帶到前端仍不足以實現原文／譯文對照：前端不知道哪個片段引用哪個概念。加粗資訊的出貨流程應是：當前 emphasis＋型別推導值 → 與後續原文／譯文位置產生器的 TermReference 結合 → 隨**選中 translation** 的公開註記輸出。位置與 renderer 仍由後續契約／實作處理；本文件只固定上游引用及值，不讓前端自維第二份詞庫。
-
-建議的最小法（**待獨立格式審核，不是現在的白名單**）：在公開 translation 末尾新增一個 `term_spans` 欄，為帶 TermReference、原文／譯文 Unicode span 陣列與 bold 的具名註記陣列。用已存在的 source_unit_id／text_unit_id 取原文與譯文，不另出全份 glossary 清冊、內部選詞資料或新的詞庫附件。沒有術語引用的譯文用空陣列；詳細 tuple 名稱、欄序、跨行／多次引用與 span 覆蓋須和位置契約一起定案，不能先使用任意 JSON。
-
-**公開格式審核必答題**：日文／英文介面只顯示原文、沒有繁中 translation 列時，原文術語位置放在哪裡？原文位置必須跟著原文本身，或至少不依賴任何譯文列存在；格式審核須定出原文位置與 TermReference／bold 的承載、引用閉包及無譯文時的下載／取用，並以日文／英文只看原文的情境驗收。僅在繁中 translation 上附 term_spans 尚不能滿足這項要求，因此下述單欄方向不是完整定案。
-
-本提案不出全份 glossary 表，所以 glossary key 是註記內的自描述概念識別，不冒稱有公開全庫 FK；producer 仍須驗建置概念引用，reader 驗註記與同列原文／譯文 span 的完整性。vocabulary reference 可沿既有公開 vocabulary 驗 `(kind,code)`。若格式審核要求公開 glossary FK，則須另定僅出已使用概念的 descriptor 及其容量，不能讓 reader 向外查最新詞庫補洞。
-
-原文 span 必須綁該 translation.source_unit_id 的 exact 文字。EN 顯示 JP 依據繁中時，對照來源仍為 JP；沒有 EN 位置對齊不能宣稱在 EN 原文同位置加粗。同一顯示名字若是不同 glossary／vocabulary，註記 reference 仍不同。前端可關閉視覺加粗，但不得改存放的概念／位置；開關政策沿既有介面決定。
-
-| 影響 | 最小改法與驗收 |
-| --- | --- |
-| 邏輯白名單與固定 tuple | 經核可後同步 snapshot-format／snapshot-transport 與版本化型別；translation 新欄必有固定位置，不拿可省略欄欺騙舊 reader |
-| 版本／能力與嚴格 reader | 決定 format_version／min_reader_version／required_capabilities，舊 reader 明確拒收；不是只改 data_version 就發布 |
-| 機器契約與共用樣本 | 修改 source.json，再重產 contract.schema.json／descriptor；Python/TS accessor、reader、independent oracle、golden／invalid fixtures 一起驗新增欄及壞 span／reference／bold |
-| producer／projection／引用閉包 | 只出已選譯文註記；span 的原文／譯文存在、Codepoint 範圍、不重疊／多次引用與 reference 目標按新規格驗；不夾帶來源收據／建置 hash |
-| 分片／容量／離線更新 | 名稱及 label 仍在 bootstrap、效果在原分片；註記跟選中 translation 同片。不把全術語註記都塞啟動包；重新量測名稱類增加量、依所選版本的基本目錄 Brotli 2 MiB 分界（略超報精確差額、明顯超出才交維護者，量法依[容量契約](../export/size-budget.md)）、全文／text_all 聯集與 cache 更新 |
-
-替代方案若另做旁表／附件，會新增集合、join／索引／下載與容器完整性規則，須比較容量；不是零格式變更。本輪推薦單一註記欄以減少新增容器，但**不自行修改**已合併的快照白名單、Schema、tuple、reader 或公開格式版本。原文單獨顯示的承載未定前，不得把此單欄方向直接視為可實作的完整格式。核可與實作前只能出現有純字串，不能宣稱位置加粗／一對一原文對照已上線。
-
-## 7. 自動檢查與轉換
+## 7. 自動檢查
 
 保留 key／概念唯一、語言與 source span、官方來源分類、必要譯詞、加粗型別及依賴更新的行為反例。
-舊收據與採納鏈只在轉換時取最後有效值，不再進新分片或一般讀取。
-舊 origin=official_sv1/official_svwb 在新 authored 統一為 official，provider 仍由來源資料保存，
-公開的數位來源辨識不能丟失；machine 不因人審變 project。
+官方／數位來源辨識隨來源資料保存；machine 不因人審變 project。
 
 ## 8. 名字顯示與同名瀏覽分離
 

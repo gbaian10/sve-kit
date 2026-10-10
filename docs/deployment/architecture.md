@@ -34,7 +34,7 @@ flowchart TD
 建置 SQLite 不交給玩家；公開欄位與傳輸契約分別見
 [快照格式](../schema/export/snapshot-format.md) 與 [快照傳輸](../schema/export/snapshot-transport.md)。
 
-公開快照與卡圖的保留窗口依 [ADR-0016](../adr/0016-snapshot-retention.md)，
+公開快照與卡圖的保留窗口依 [ADR-0013](../adr/0013-snapshot-retention.md)，
 不由對戰部署設計擴大為永久歷史服務。回放與歷史資料的關係見 [回放契約](replays.md)。
 
 ## 建局與用量控制

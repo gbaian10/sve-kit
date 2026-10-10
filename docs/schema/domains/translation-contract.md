@@ -3,7 +3,7 @@
 本契約保留四層來源 binding／未匹配清單、句型比對、固定字與參數定義、譯文、術語、卡名、風味、加粗、新卡自動套用及未匹配清單。
 2026-10-04 起，翻譯資料採可直接修訂的當前值；Git 保存修改歷史，退回使用 git revert。
 不再用決定封套、收據、成員雜湊、只增不改、歷史重播、首輪抽查、雙模型或手動合併前檢查作載入門檻。
-本文件的四層契約依 [ADR-0021](../../adr/0021-four-layer-translation.md)，N0 已實作；
+本文件的四層契約依 [ADR-0016](../../adr/0016-four-layer-translation.md)；
 N1 由 #380／#499 接續。逐欄型別、驗證責任與固定案例以
 [四層共用契約](four-layer-translation.md)為準；建置與公開 reader 依 §8 同步切換。
 
@@ -212,7 +212,7 @@ claimed_source 是選填的出處主張；沒有具體主張就省略，不用�
 缺資料不得借最新官網或個人檔補洞；來源歸檔完整性仍依[來源歸檔](../ingest/source-archive.md)。
 
 現有 export-offline 對 face_revision 與 printing_face 的 JP 主文／section 建置四層翻譯，
-並產生 3.0.0 公開 annotation；#498 的 N0 已完成 producer／reader／Web 接線。
+並產生 3.0.0 公開 annotation。
 每個來源 use 分別建 binding，source context 可共用，但 owner、field、面及所用原文均逐一驗證。
 效果／section 只要自己的原文有效即可套用，不等 printed_text_state；名稱仍只用該版已知 printed 字串。
 建置報告只列 ID、原因及欄位／退回計數，不輸出官方卡文。
@@ -250,7 +250,7 @@ qa_version 用 question/answer，cr_clause 用 effect，vocabulary／商品用 l
 ### 6.4 更新與失效
 
 本次來源 binding、來源原文、參數及引用檢查通過才可輸出；壞結構／引用使建置失敗，未匹配／缺譯則回原文列清單。
-舊的輸出不能冒充新來源翻譯。每次建立新 DB，不原地修改已輸出快照；公開保留窗口仍為 latest＋previous。
+舊的輸出不能冒充新來源翻譯。每次建立新 DB，不原地修改已輸出快照；公開保留窗口仍為 current＋previous。
 舊資料及舊程式留 Git 歷史，不承諾新 reader 能重播所有舊環境。
 
 ## 7. 跨區與官方對照
@@ -280,7 +280,7 @@ JP 繁中依 §1 選用；EN 接收端只需有效且已確認同卡同面的 JP
 日英段落不同時取完整 JP effect 及其來源對照，不按 EN ordinal 貼 JP section，也不另翻 JP 沒有的 EN 段落。
 錯 card／face、錯欄位、缺來源、來源過期或仍 unmapped 時拒絕此選用；不能以同字串或低信心放行。
 
-公開的新 JP 依據 basis（jp_source）及停用 shared_jp／shared_jp_unchecked 的 wire 變更由 #496 定義，#498 同步 producer／reader。
+公開 JP 依據 basis（jp_source）與來源閉包依[公開 annotation 契約](../export/public-annotation.md)，producer／reader 使用相同 3.0.0 profile。
 它只說明繁中依據，不能產生 aligned review、機制或 DSL 資格。JP 來源註記只可套到 JP 原文，不能套 EN offsets。
 
 官方 counterpart 仍依有效 display_checks 逐 owner 產生 translation，直接供 FieldTranslation 引用，不占共用 selection；
@@ -295,7 +295,7 @@ origin=official、authority=sve_official、bindings/terms 空。其 context/sour
 新格式的 low_confidence 必須從 producer 傳到 reader，UI 顯示「待校對」且提供原文；
 啟用時同步 snapshot-format、機器 Schema、tuple、Python／TS reader 及能力版本，不能只改資料版號或冒用 reviewed 表示人工看過。
 內部 annotation set／逐 occurrence 依[共用契約 §8](four-layer-translation.md#8-建置-dbrender-projection-與依賴)；
-公開承載、無譯文的原文註記、basis 與 Unicode reader 由 #496 定義。內部支援不代表舊 tuple 已有這些欄。
+公開承載、無譯文的原文註記、basis 與 Unicode reader 依[公開 annotation 契約](../export/public-annotation.md)。
 
 四層實作的 CI 須驗格式、key／ID 唯一、葉角色／域、引用與 owner、來源覆蓋及 render 位置，
 按[固定案例](four-layer-cases.md)逐項驗預期結果；這些案例目前是規格，不是程式通過紀錄。

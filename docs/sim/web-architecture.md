@@ -302,7 +302,7 @@ interface QueryState {
 
 ## 快照 3.0 與圖片更新邊界
 
-現行 reader 僅支援 3.0；圖片沿用 [傳輸契約 §5.4](../schema/export/snapshot-transport.md#54-format-200-卡包-media-與-id-圖片) 的卡包 media 與 Index v2。
+現行 reader 僅支援 3.0；圖片沿用 [傳輸契約 §5.4](../schema/export/snapshot-transport.md#54-卡包-media-與-id-圖片) 的卡包 media 與 Index v2。
 公開 annotation 與 JP 來源閉包依 [公開 annotation 契約](../schema/export/public-annotation.md)，不能只放寬版本範圍。
 卡包 media 提供 card／art 版本與實際尺寸，int_id＋永久 face.ordinal＋size 直接組背景圖片 URL；玩家頁面路由不變。
 切新快照時更新 src／srcset、取消舊工作、拒絕晚到舊 response；SW 以完整含 v URL 匹配，不忽略 query 或回退舊圖。

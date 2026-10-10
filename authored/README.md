@@ -9,7 +9,7 @@ Human-maintained data and permanent identity allocations, read by `carddb` at bu
 - `registry/card-related/` — source-pinned reskin relationships
 - `registry/source-correction/` — confirmed corrections and separately marked review candidates; raw observations remain unchanged
 - `rules/effects/` — effect data in the DSL defined by `../dsl/`
-- `rules/rulings/` — evidence-backed interpretations; see `../docs/adr/0011-rulings-evidence.md`
+- `rules/rulings/` — evidence-backed interpretations; see `../docs/adr/0009-rulings-evidence.md`
 - `translations/glossary/<filing_key>/*.yaml` — current glossary concepts and editable current translations
 - `translations/flavor/<hash digit>.yaml` — whole-paragraph flavor translations keyed by the source text's SHA-256; see [flavor translation](../docs/schema/domains/flavor-translation.md)
 
@@ -39,7 +39,7 @@ and [glossary adoption rules](../docs/schema/domains/glossary-adoption.md). Read
 The controlled `translations/templates/candidates/` area is the exception for
 validated template candidates; candidates never supply formal template translations.
 Concept keys are permanent. Edit translation YAML directly and review it in a PR; Git keeps the
-history (ADR-0018). Official wording stays out of git. Mark quality with `low_confidence`
+history (ADR-0014). Official wording stays out of git. Mark quality with `low_confidence`
 and `origin`; a `source_claim` is optional and only holds a work, URL or claimed source.
 
 Class and card-type labels use catalog vocabulary references `(kind, code)`, rather than

@@ -18,7 +18,7 @@
 
 [ADR-0001](../adr/0001-engine-skeleton.md) 要求重播保存權威決定與隨機輸入的版本，
 觀察者重播仍套相同可見性；不能只靠玩家已收到的公開投影還原權威狀態。
-[ADR-0012](../adr/0012-version-meta.md) 要求卡表快照版本、CR／裁定版本與引擎版本獨立記錄。
+[ADR-0010](../adr/0010-version-meta.md) 要求卡表快照版本、CR／裁定版本與引擎版本獨立記錄。
 這些既有約束適用於對局恢復，不在此另訂資料表或封存格式。
 
 現有 [`Replay`](../../sim/engine/src/replay.rs) 原型有 `save`／`restore`，

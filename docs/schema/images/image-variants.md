@@ -44,7 +44,7 @@ recipe 必須固定解碼／編碼器與底層 libwebp 版本、品質、色彩�
 
 ## 2.0 圖片 URL、版本與新鮮度
 
-依 [ADR-0015](../../adr/0015-image-url-version.md)，公開 key 為
+依 [ADR-0012](../../adr/0012-image-url-version.md)，公開 key 為
 `images/<size>/<int_id>[-f<ordinal>].webp`，reader 加上 `?v=<version>`。
 f0 省略，其他面用永久 face.ordinal；printing.int_id 永不重配，不能用卡號、image_id 或列位置代替。
 例如 `images/card_m/20001.webp?v=3` 與 `images/art_s/20001-f1.webp?v=7`。

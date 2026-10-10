@@ -1,6 +1,6 @@
 # 四層翻譯共用資料契約
 
-本文件是 [ADR-0021](../../adr/0021-four-layer-translation.md) 的共用契約；#498 已實作 N0 的 reader、DDL、來源 binding 與渲染。
+本文件是 [ADR-0016](../../adr/0016-four-layer-translation.md) 的共用契約；#498 已實作 N0 的 reader、DDL、來源 binding 與渲染。
 區域／階段葉、可選範圍、省略持有者與 NC 全名等價等 N1 行為由 #380／#499 承接；本文不是 DSL 語法。
 用語依[術語表](../../terminology.md#四層翻譯)；來源選用依[翻譯契約](translation-contract.md)。
 本契約取代固定整行模板的參數／target 模型，保留整行粒度與必要的來源完整性檢查。
@@ -394,7 +394,7 @@ scope 指同 frame 宣告的 ability／branch／sequence 作用域。A 驗簽章
 
 ## 8. 建置 DB、render projection 與依賴
 
-以下是[build-db §9.3](../build/build-db.md#93-四層資料的目標契約)的邏輯列契約；N0 已接入正式 DDL 與建置邊界，實際儲存欄位見該文件 §9.1。
+以下是[build-db §9.3](../build/build-db.md#93-四層資料契約)的邏輯列契約；N0 已接入正式 DDL 與建置邊界，實際儲存欄位見該文件 §9.1。
 所有新 Json 欄均使用本文件具名型別，C 逐層驗證後才能交給其他層。
 現有 authored_source_id／record_key／origin／low_confidence 與真實 source_id 的型別及 nullable 保留。
 

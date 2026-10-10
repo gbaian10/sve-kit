@@ -1,10 +1,10 @@
 # 規則引擎現況與已知限制
 
-`sim/engine`（crate `sve-engine`）目前是 D 階段留下、經 M0 修正的**原型**，不是正式引擎。
+`sim/engine`（crate `sve-engine`）目前是**原型**，不是正式引擎。
 這份文件只記錄長期成立的邊界與契約；**進度、待辦與尚未重新確認的限制**由
 [#478「模擬器引擎：範圍與進度」](https://github.com/gbaian10/sve-kit/issues/478) 追蹤。
 
-- 逐項的錯誤、預期結果與處理狀態：[M0／M1 已知錯清單](known-errors.md)
+- 規則斷言與證據責任：[DSL 驗收規格](../dsl/validation.md)
 - 載入期會拒絕哪些 YAML：[載入期拒絕的 YAML](rejected-yaml.md)
 - 效果 DSL 的正式規格：[docs/dsl/](../dsl/README.md)
 
@@ -27,7 +27,7 @@
 不在清單內的會帶卡號與行號拒絕，被拒絕的卡永不執行。
 
 通過載入只是必要條件，不代表能正確執行：仍須靠執行測試與逐卡語義審查。
-已知會通過載入卻靜默不做或讀錯的構造，列在 [rejected-yaml.md〈尚未涵蓋〉](rejected-yaml.md)，進度在 #478。
+尚待確認的靜默忽略、捕捉及作用域限制由 #478 追蹤。
 
 ## 驗證方式
 
@@ -38,13 +38,13 @@
 - 執行方式與 `SVE_TEST_SNAPSHOT` 的設定見 [sim/engine/README.md](../../sim/engine/README.md)
 
 題本通過只表示這些局面正確，不能推論任意卡片、初始狀態或組合都正確。
-過去某個日期的基準與結果是歷史紀錄，見 [known-errors.md〈基準〉](known-errors.md)。
+規則族的正反例與推定強度依 [DSL 驗收規格](../dsl/validation.md)。
 
 ## 執行邊界
 
 - 解算燃料 20,000 步、部分列舉上限 10,000 是原型的防護界線，不是 CR 15.2 的循環判定（見 `sim/engine/src/game/effects.rs`、`payments.rs` 等的常數）
 - 場上（`field`）上限固定為 5，從者與護符放不下時依規則處理（見 `sim/engine/src/game/rules.rs`、`legal.rs`）
-- 引擎不驗牌組構築合法性（KE-21）；牌組合法性屬建牌器範圍
+- 引擎不驗牌組構築合法性；牌組合法性屬建牌器範圍
 - 動作原子、選擇、付款、持續效果、取代、區域與誘發構造的執行限制與待確認項目，以 #478 的清單為準；
   載入期拒絕的部分以 [rejected-yaml.md](rejected-yaml.md) 為準
 

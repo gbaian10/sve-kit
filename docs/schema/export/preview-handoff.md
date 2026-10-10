@@ -1,7 +1,7 @@
 # preview 建置與前端接線
 
-preview 僅供本機，匯出器預設產出 3.0.0，N0 已接線。圖片投影依 [圖片發布契約](../images/image-variants.md#20-圖片-url版本與新鮮度)
-與 [傳輸 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)：從建置 hash path
+preview 供隔離開發使用，匯出器產出 3.0.0。圖片投影依 [圖片發布契約](../images/image-variants.md#20-圖片-url版本與新鮮度)
+與 [傳輸 §5.4](snapshot-transport.md#54-卡包-media-與-id-圖片)：從建置 hash path
 產生固定 ID key，卡包 media 提供版本／尺寸；圖片可受控覆寫，JSON 不可變。
 preview 的圖片版本狀態與快取放在公開根之外。`sve-publish upload` 直接上傳這個公開根，
 在開發桶的 current／previous 索引寫入 `preview-` entry；這不是正式發布，不能把 preview 改名升格。
@@ -72,7 +72,7 @@ lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行�
 `sve-publish upload` 原樣上傳清單所列的 raw／gzip／br，不重壓；選檔、標頭與 CDN 驗證見
 [R2 上傳](../../../publish/README.md)，保留窗口見 [發布契約](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
 
-建置輸入的 WebP 使用內容定址 hash path；preview 輸出為 2.0 的固定 ID key。先驗證／寫入圖片，再寫 images
+建置輸入的 WebP 使用內容定址 hash path；preview 輸出為固定 ID key。先驗證／寫入圖片，再寫 images
 分片與其餘快照成員；只複製公開 `printing_image` 引用且可用、核可的變體，不以來源 hash 當公開 URL。
 不複製原始 PNG、數位卡圖或圖片庫的其他檔案。切換前再驗公開資產的 hash、bytes 與
 實際解碼格式／尺寸；中斷可以留下未引用的完整資產。要以不同 bytes 覆寫既有卡圖前，
@@ -97,7 +97,7 @@ text_all 的封套與整檔另報，不與分片重複加總；卡圖另計。
 基本目錄冷載依所選日版／英版各計完整 manifest＋config＋實際必載片及依賴，共用／混區 File 整檔計、不按語言比例分攤。
 Brotli 2 MiB 為分界，略超報精確差額、明顯超出才交維護者；raw／gzip 另報，不另設硬門檻。
 基本目錄容器整檔 raw ≤2 MiB，詳情與其他資料檔 ≤512 KiB，含 types／字典／base metadata。
-N0 現有量測 API 與[傳輸 §5.1](snapshot-transport.md#51-format-200-固定配置) 的 bands 不代表已完成新裝檔或單區完整文字帳；不因容量減少 pending／名稱／facet／公開欄位。
+N0 現有量測 API 與[傳輸 §5.1](snapshot-transport.md#51-固定配置) 的 bands 不代表已完成新裝檔或單區完整文字帳；不因容量減少 pending／名稱／facet／公開欄位。
 
 只載可見面的卡包 media 與圖片；全域來源詳情按需，不全量預取圖片或建立全庫影像索引。
 未完成的下載須標進度，CacheStorage 已驗 bytes 保存成功且未清除時，暖頁 metadata 不向外重抓。

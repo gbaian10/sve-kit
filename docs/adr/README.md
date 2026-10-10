@@ -1,34 +1,30 @@
 # 架構決策紀錄（ADR）
 
-ADR 中引用的官方卡名、卡文及 CR／Q&A 原文片段不在本專案授權內；
-背景中的中文轉述與架構決定屬專案解讀。來源記法見[文件引用說明](../quotations.md)。
+只在三個條件同時成立時寫 ADR：難以回頭、缺少背景會令人不解，而且確實比較過有取捨的替代方案。
+一份只記一個決定，以一段一至三句交代背景、選擇與理由；標題直接寫決定。
+只有能補充實質資訊時才加 `Status` frontmatter、Considered Options 或 Consequences。
+欄位、流程及驗收規格放 `docs/schema/` 或 `docs/dsl/`，ADR 連到它們；排程、進度及待決問題放 issue／milestone。
 
-全 repo 共用一條序號：`ADR-0001`、`ADR-0002`…，不依元件分開。檔名為 `NNNN-<主題>.md`，
-內文用繁體中文。新增 ADR 取下一個未用的號碼；已採用的 ADR 不改寫決定，要改就新增一份並在兩邊註明取代關係。
+全 repo 共用序號，檔名為 `NNNN-<主題>.md`，新增時取現有最大編號加一，內文用繁體中文。
+決定改變時新增一份，舊文以 frontmatter `Status: superseded by ADR-NNNN` 指向新決定；不在舊文底下疊落地註記。
+文件整理可修正文字與連結，不應讓舊決定和現行規格相互覆蓋。
+專案用語依[名詞表](../terminology.md)；來源與引用界線依[文件引用說明](../quotations.md)。
 
-| 編號 | 標題 | 狀態 | 日期 |
-| --- | --- | --- | --- |
-| [ADR-0001](0001-engine-skeleton.md) | 採用執行與資訊邊界骨架 | 已採用 | 2026-09-28 |
-| [ADR-0002](0002-author-ir.md) | 單一撰寫層降低為有型別 IR | 已採用 | 2026-09-28 |
-| [ADR-0003](0003-decisions.md) | 四種決定與單一輸入點判定 | 已採用 | 2026-09-28 |
-| [ADR-0004](0004-capture.md) | 讀值捕捉與條件求值分離 | 已採用 | 2026-09-28 |
-| [ADR-0005](0005-object-ref.md) | 物件世代、LKI 與合法跨區追蹤 | 已採用 | 2026-09-28 |
-| [ADR-0006](0006-receipts.md) | 動作結果與付款結果 | 已採用 | 2026-09-28 |
-| [ADR-0007](0007-history.md) | 有型別歷史事實與 UB 可見性 | 已採用 | 2026-09-28 |
-| [ADR-0008](0008-continuous.md) | 持續效果、依存、取代與數值事件 | 已採用 | 2026-09-28 |
-| [ADR-0009](0009-players.md) | PlayerRef 與 PlayerSet 分型 | 已採用 | 2026-09-28 |
-| [ADR-0010](0010-tests.md) | 分層證據與測試閘門 | 已採用 | 2026-09-28 |
-| [ADR-0011](0011-rulings-evidence.md) | 裁定登錄、證據強度與輔助提示 | 已採用 | 2026-09-28 |
-| [ADR-0012](0012-version-meta.md) | DSL 主次版與每卡 meta | 已採用 | 2026-09-28 |
-| [ADR-0013](0013-rule-bundle-migration.md) | 觀測雜湊與規則語義 bundle 的明示遷移 | 已採用 | 2026-10-01 |
-| [ADR-0014](0014-license-policy.md) | 程式與資料的路徑授權及第三方內容排除 | 已採用 | 2026-10-03 |
-| [ADR-0015](0015-image-url-version.md) | 卡圖採永久 ID 路徑與查詢版本 | 已採用，部分由 ADR-0020 取代 | 2026-10-04 |
-| [ADR-0016](0016-snapshot-retention.md) | 公開卡圖只留最新、快照保留兩版 | 已採用，部分由 ADR-0020 取代 | 2026-10-04 |
-| [ADR-0018](0018-translation-validation.md) | 翻譯資料驗證層簡化 | 已採用 | 2026-10-04 |
-| [ADR-0019](0019-platform-dependency-policy.md) | 支援平台與依賴選型 | 已採用 | 2026-10-04 |
-| [ADR-0020](0020-upload-from-export.md) | 上傳直接讀匯出目錄，取消發布帳本 | 已採用 | 2026-10-06 |
-| [ADR-0021](0021-four-layer-translation.md) | 翻譯採術語葉、文法形式、有限名詞片語與整行句框架 | 已採用 | 2026-10-10 |
-
-ADR-0001～0012 是效果 DSL 1.0 的設計決定，規格本文見 [`docs/dsl/`](../dsl/README.md)；
-裁定登錄見 `authored/rules/rulings/`；2026-10-09 路徑／封套更新見 [ADR-0011 註記](0011-rulings-evidence.md#決定)，精確授權路徑承接見 [ADR-0014 註記](0014-license-policy.md#決定)。
-2026-10-10 框架 DSL 存放與巨集資格修訂見 [ADR-0012 註記](0012-version-meta.md#決定)及[作者語法 §10](../dsl/author-syntax-1.0.md#10-巨集規範)，巨集測試門檻承接見 [ADR-0010 註記](0010-tests.md#決定)。
+| 編號 | 決定 |
+| --- | --- |
+| [ADR-0001](0001-engine-skeleton.md) | 引擎只維護一份權威狀態 |
+| [ADR-0002](0002-author-ir.md) | 效果只從單一撰寫語法降低成有型別 IR |
+| [ADR-0003](0003-decisions.md) | 輸入點依規則階段保留 |
+| [ADR-0004](0004-capture.md) | 讀值捕捉與條件求值分離 |
+| [ADR-0005](0005-object-ref.md) | 以世代限制物件引用與跨區追蹤 |
+| [ADR-0006](0006-receipts.md) | 動作使用有型別結果而非成功布林 |
+| [ADR-0007](0007-history.md) | 以適正打出的單一事實記錄 UB |
+| [ADR-0008](0008-continuous.md) | 持續特徵求值與事件提交分離 |
+| [ADR-0009](0009-rulings-evidence.md) | 集中裁定並逐結論保留證據強度 |
+| [ADR-0010](0010-version-meta.md) | DSL 語義版本與驗收證據分開記錄 |
+| [ADR-0011](0011-license-policy.md) | 按路徑授權自有貢獻並排除第三方內容 |
+| [ADR-0012](0012-image-url-version.md) | 卡圖採永久版次路徑與按需版本 |
+| [ADR-0013](0013-snapshot-retention.md) | 公開快照留兩版而卡圖只留當前 |
+| [ADR-0014](0014-translation-validation.md) | 翻譯以當前值檢查取代核可帳本 |
+| [ADR-0015](0015-upload-from-export.md) | 上傳直接讀取匯出閉包 |
+| [ADR-0016](0016-four-layer-translation.md) | 翻譯與 DSL 共用四層來源綁定 |

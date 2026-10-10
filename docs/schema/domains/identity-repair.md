@@ -261,7 +261,7 @@ transition 分片最後寫入，因此中斷時已有新版次卻缺對應 trans
   apply 事件的 reverts_id=null；revert 必須指先前非 revert 事件，全域唯一且 confirmed，整組事件原子撤回。
   公開不出私有 transition key，只出公開事件間的 reverts_id；consumer 先解析撤回再計有效圖。
 - data_version 是產出該事件列的建置所填的版號，不承諾是該事件首次發布的版號；
-  不另保存事件首次發布的收據（[ADR-0020](../../adr/0020-upload-from-export.md)）。reader 不能用它推斷事件首次出現在哪一版。
+  不另保存事件首次發布的收據（[ADR-0015](../../adr/0015-upload-from-export.md)）。reader 不能用它推斷事件首次出現在哪一版。
   事件 ID 與其關係照上述規則永久保留。公開修復歷史與舊墓碑保留，changes 只列本次新增事件。
 - 卡片網址綁 printing；合併 card 不代表把該版次 URL 轉到另一個 printing。原卡號沒變就不新增 alias。
   確實改號時依 build-db §15 永久保留舊入口、展平 alias 到同 printing 的最新 canonical，

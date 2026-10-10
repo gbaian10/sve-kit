@@ -18,7 +18,7 @@
 | 定案（格式） | 歸檔類別、人工商品與收錄 | `products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
 | 定案（格式） | 官方商品身分對照 | `products/identities/<region>/001.yaml`，見 §11；獨立於商品內容採納 |
 | 待審技術契約 | 人工序號版次／官方序號補充 | `manual-printings/index.yaml`、`manual-printings/{printings,serials}/<filing_key>/<sequence>.yaml`，見 manual-printings-v1；不表示已有採納資料 |
-| 已定案（ADR-0011） | 裁定 | `rules/rulings/R-0001.yaml`，`format: 2, kind: ruling`，revision 必填正整數，原本文不另包 data；依[四層契約 §9](four-layer-translation.md#9-舊模板重鍵與裁定引用) |
+| 已定案（ADR-0009） | 裁定 | `rules/rulings/R-0001.yaml`，`format: 2, kind: ruling`，revision 必填正整數，原本文不另包 data；依[四層契約 §9](four-layer-translation.md#9-舊模板重鍵與裁定引用) |
 | 定案（格式） | 身分修復與決定續版 | `identity-transitions/<sequence>.yaml`，見 §12 |
 | 待審技術契約 | Standard 構築／禁限／角色與必要 CR 引用 | `construction-adoptions/index.yaml`、`construction-adoptions/<area>/<region>/standard/<sequence>.yaml`，roles／cr 為 `<area>/<region>/<sequence>.yaml` 整區共用；見[構築採納契約](construction-adoption.md)，尚無正式採納資料 |
 | 提案 | 其他策展、標誌 | `curation/BP01/001.yaml` |
@@ -288,7 +288,7 @@ route/default 純推導；authored 只寫 alias、variant `route_override`、`de
 
 暫定 `card_no` 不占官方網址；`int_id` 所有出貨 printing 都依其地區號段追加分配（§3.2）。補正 `card_no` 後留下 provisional→official 永久 alias；`int_id` 不變。卡號推算與 card 身分是不同軸，同卡通則不會讓所有 SNC 或 EN 候選自動 confirmed。authored/config 已固定 `third_party_image_policy=mirror_reviewed`、`deck_eligibility_policy=regional_decklog`。第三方圖須逐張人工確認，換圖/換來源須重新確認，抽樣不代替逐圖確認；目前只產生官方圖，建置資料庫尚無第三方確認欄位。建牌資格依該地區/版次的 `decklog_available`；人工查證記來源與日期，未查證依官方卡表收錄狀態預設（詳 [build-db.md](../build/build-db.md) §17.2）。暫定號/身分不阻擋建牌；不可用版次禁止新加入、新分享碼與匯出。舊碼/既有牌組仍開啟保留條目，警告並提示可用同名版次，不靜默刪除。
 
-文字鍵固定 16 hex＋lang，碰撞檢查只涵蓋同一份快照，碰撞即停止匯出、不重配舊鍵；不另保存跨版本的發布鍵索引或發布收據（[ADR-0020](../../adr/0020-upload-from-export.md)）。公開快照只保 current＋previous，詳 [snapshot-format §4.1](../export/snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
+文字鍵固定 16 hex＋lang，碰撞檢查只涵蓋同一份快照，碰撞即停止匯出、不重配舊鍵；不另保存跨版本的發布鍵索引或發布收據（[ADR-0015](../../adr/0015-upload-from-export.md)）。公開快照只保 current＋previous，詳 [snapshot-format §4.1](../export/snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
 
 ### 9.1 未採納表記的顯示與來源更正
 
