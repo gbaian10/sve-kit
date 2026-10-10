@@ -93,7 +93,7 @@ _TRANSFER = re.compile(
 )
 _SEARCH = re.compile(
     r"^枚(?P<limit>まで)?(?:を)?探(?:し|して)、(?:それを)?"
-    r"(?:手札に加える|場に出す|EXエリアに置く)" + _END
+    r"(?:手札に加える|場に出す|EXエリアに置く|墓場に置く)" + _END
 )
 _EQUIP = re.compile(r"^枚(?:を)?装備する" + _END)
 _LOOK = re.compile(r"^枚(?:を)?見(?:る|て)" + _END)
@@ -104,7 +104,7 @@ _RETURN = re.compile(
 _CREATE = re.compile(r"^(?P<unit>体|つ)(?:を)?出す" + _END)
 _REVEAL = re.compile(
     r"^枚(?P<limit>まで)?(?:を)?公開して(?:、)?"
-    r"(?:それを|そのカードを)?(?:手札に加える|手札に加えてよい|墓場に置く|場に出す)"
+    r"(?:それを|そのカードを)?(?:手札に加えるかEXエリアに置いてよい|手札に加える|手札に加えてよい|墓場に置く|場に出す|デッキの下に置く)"
     + _END
 )
 _CHOICE = re.compile(r"^つ(?P<limit>まで)?チョイス(?:する|して)?" + _END)
@@ -133,7 +133,7 @@ _COUNTER_AMOUNT = re.compile(
     r"^(?P<unit>個|つ)(?P<limit>まで)?を(?:置く|置いてよい|取る)" + _END
 )
 _COUNTER_THRESHOLD = re.compile(
-    r"^(?P<unit>個|つ)(?:以上|以下)(?:なら|である限り)" + _END
+    r"^(?P<unit>個|つ)(?:以上|以下)(?:なら|である限り)(?:使える)?" + _END
 )
 _EVENT_THRESHOLD = re.compile(
     r"^回以上(?:攻撃した|攻撃していた|発動していた)なら" + _END
@@ -278,17 +278,7 @@ def _constructed_number(
             else Number("Nat", "counter_amount", hint.value, "個")
         )
     if role in _ORDINAL:
-        new_role, expected_unit = _ORDINAL[role]
-        introduction = re.search(
-            r"(?:第|このターン中に|ターン中に|デッキの上から)$", before
-        )
-        if (
-            hint.value >= 1
-            and introduction is not None
-            and after.startswith(expected_unit + "目")
-        ):
-            return Number("Ordinal", new_role, hint.value, expected_unit)
-        return None
+        return _ordinal_number(hint.value, role, before, after)
     return (
         _generic_number(hint.value, before, after, unit)
         if role
@@ -300,6 +290,34 @@ def _constructed_number(
         }
         else None
     )
+
+
+def _ordinal_number(value: int, role: str, before: str, after: str) -> Number | None:
+    new_role, unit = _ORDINAL[role]
+    if value < 1 or not after.startswith(unit + "目"):
+        return None
+    if role == "turn_ordinal":
+        valid = (
+            re.search(r"(?:先攻|後攻)のプレイヤーなら$", before) is not None
+            and re.match(r"^ターン目以降(?:、|に)", after) is not None
+        ) or (
+            re.search(r"(?:自分|相手)のターンが$", before) is not None
+            and re.match(r"^ターン目かそれ以降(?:でない)?なら" + _END, after)
+            is not None
+        )
+    elif role == "repetition_ordinal":
+        event = re.match(r"^回目の(?P<np>[^。:：]+)の(?:攻撃|進化)なら" + _END, after)
+        valid = (
+            re.search(r"このターン(?:、|中に)$", before) is not None
+            and event is not None
+            and count_context(event["np"]) is not None
+        )
+    else:
+        valid = (
+            re.search(r"(?:第|このターン中に|ターン中に|デッキの上から)$", before)
+            is not None
+        )
+    return Number("Ordinal", new_role, value, unit) if valid else None
 
 
 def _generic_number(
@@ -337,7 +355,34 @@ def _generic_number(
     return _action_number(value, before, after)
 
 
+def _set_number(value: int, before: str, after: str) -> Number | None:
+    if re.search(r"(?:カード名|好きな数)$", before) and re.match(
+        r"^つを指定する" + _END, after
+    ):
+        return _quantity("selection_count", value, "つ")
+    if before.endswith("自分は") and re.match(
+        r"^つ以上の選択肢をチョイスする際、", after
+    ):
+        return Number("Nat", "threshold", value, "つ")
+    if (
+        value >= 1
+        and (counted := count_context(before)) is not None
+        and re.match(r"^(?:枚|体|つ)につき、", after)
+        and source_unit(counted, after[0]).merge_allowed
+    ):
+        return Number("Nat", "group_divisor", value, after[0])
+    if re.search(r"(?:自分|相手)プレイヤー$", before) and re.match(
+        r"^人(?:は(?:手札を公開する|下記からNつチョイスする)|の場のカードがN枚以上なら)"
+        + _END,
+        after,
+    ):
+        return _quantity("selection_count", value, "人")
+    return None
+
+
 def _action_number(value: int, before: str, after: str) -> Number | None:
+    if counted := _set_number(value, before, after):
+        return counted
     if _ABILITY_COUNT.match(after) and re.search(r"(?:能力を|能力が|能力)$", before):
         return Number("Nat", "count", value, "つ")
     if (match := _CREATE.match(after)) and re.search(

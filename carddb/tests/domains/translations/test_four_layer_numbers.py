@@ -10,6 +10,87 @@ from .test_four_layer_classification import classifier, source
 
 
 @pytest.mark.parametrize(
+    ("raw", "role", "unit"),
+    [
+        (
+            "仮。自分の墓場のスペルをカード名が異なるように２枚まで選ぶ。",
+            "selection_count",
+            "枚",
+        ),
+        (
+            "仮。自分の墓場のカードを元のコストの合計がX以下になるように２枚まで選ぶ。",
+            "selection_count",
+            "枚",
+        ),
+        ("仮。自分の消滅領域が２枚以上なら使える。", "existence_count", "枚"),
+        (
+            "仮。自分の墓場のエボルヴフォロワーが２枚以上なら、仮。",
+            "existence_count",
+            "枚",
+        ),
+        ("仮。自分の場のアミュレット２つにつき、仮。", "group_divisor", "つ"),
+        ("仮。カード名２つを指定する。", "selection_count", "つ"),
+        ("仮。好きな数２つを指定する。", "selection_count", "つ"),
+        ("仮。相手プレイヤー２人は手札を公開する。", "selection_count", "人"),
+        ("仮。自分は２つ以上の選択肢をチョイスする際、仮。", "threshold", "つ"),
+        (
+            "仮。このターン、２回目の自分の場のフォロワーの攻撃なら、仮。",
+            "repeat_index",
+            "回",
+        ),
+        (
+            "仮。このターン、２回目の自分の場のフォロワーの進化なら、仮。",
+            "repeat_index",
+            "回",
+        ),
+        ("仮。先攻のプレイヤーなら２ターン目以降、仮。", "turn_index", "ターン"),
+        ("仮。自分のターンが２ターン目かそれ以降なら、仮。", "turn_index", "ターン"),
+    ],
+)
+def test_explicit_set_constraints_designations_and_ordinals(
+    raw: str, role: str, unit: str
+) -> None:
+    engine = classifier(
+        extra=(
+            "suffix_unit_items",
+            "player_person_quantity",
+            "suffix_ordinal_times",
+            "suffix_ordinal_turns",
+        )
+    )
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[-1].role == role
+    assert binding.occurrences[-1].source_unit == unit
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "仮。自分の墓場のスペルを不明な規則により２枚まで選ぶ。",
+        "仮。自分の墓場のカードを元のコストの合計がX以下になった２枚まで選ぶ。",
+        "仮。自分の場のフォロワー２枚につき、仮。",
+        "仮。このターン、２回目の不明なフォロワーの攻撃なら、仮。",
+        "仮。２ターン目かそれ以降なら、仮。",
+        "仮。カード名２つを指定する仮。",
+    ],
+)
+def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
+    engine = classifier(
+        extra=("suffix_unit_items", "suffix_ordinal_times", "suffix_ordinal_turns")
+    )
+    field = normalize_source(raw, source(raw))
+    found = engine.recognize(raw, field.source, field.parts[0])
+    assert "n0_numeric_construction_unresolved" in found.issues
+    with pytest.raises(ValueError, match="Unresolved source leaves"):
+        found.bind(field.source, field.parts[0])
+
+
+@pytest.mark.parametrize(
     ("raw", "roles", "units"),
     [
         ("自分の手札のカード２枚を墓場に置く。", ["count"], ["枚"]),

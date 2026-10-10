@@ -56,6 +56,9 @@ _RULES: dict[CountContext, frozenset[str]] = {
     CountContext("select.player.v1", "player", (), False, "player_count"): frozenset(
         {"人"}
     ),
+    CountContext(
+        "select.designation.v1", "designation", (), False, "cardinality"
+    ): frozenset({"つ"}),
 }
 for _kind in ("follower", "spell", "amulet", "card", "spell_or_amulet"):
     for _zone in ("deck", "evolve_deck", "graveyard", "hand", "banished"):
@@ -118,12 +121,12 @@ _TRAIT = (
     r"[^、。:『』{}「」\s・0-9０-９])+・"
 )
 _FILTER = (
-    r"(?:(?:元の)?(?:コスト|攻撃力|体力)N(?:以下|以上)?の|"
-    r"他の|表向きの|裏向きの|(?:進化前|進化後)(?:の)?|(?:アクト|レスト|スタンド)状態の|これと同名を除く・|"
-    r"【[^【】]+】を持つ|カード名に『X』を含む|カード名に「[^「」]+」を含む|"
+    r"(?:(?:元の)?(?:コスト|攻撃力|体力)(?:N|X)(?:以下|以上)?の|"
+    r"他の|表向きの|裏向きの|(?:進化前|進化後|エボルヴ|アドバンス)(?:の)?|(?:アクト|レスト|スタンド)状態の|これと同名を除く(?:・)?|"
+    r"(?:【[^【】]+】(?:や|か)?)+を持つ|カード名に『X』を含む|カード名に「[^「」]+」を含む|"
     r"\{[^{}]+\}(?:でない|の|・)?|" + _TRAIT + r")*"
 )
-_ONSET = r"(?:^|[、。:：}】（(]|か|と)"
+_ONSET = r"(?:^|[、。:：}】（(]|か|と|は|として)"
 _KIND = r"スペルかアミュレット|フォロワー|アミュレット|スペル|カード|『X』"
 _UNION_COUNTED = re.compile(
     _ONSET
@@ -158,7 +161,8 @@ _IMPLICIT_FIELD = re.compile(
 _LEADER = re.compile(r"(?:自分|相手)のリーダー(?:を|が)?$")
 _PLAYER = re.compile(r"(?:自分|相手)プレイヤー(?:を|が)?$")
 _COLLECTION = re.compile(
-    _ONSET + r"(?:(?:自分|相手|それ)の)?(?:現在の)?(?P<zone>墓場|手札)(?:が|に)?$"
+    _ONSET
+    + r"(?:(?:自分|相手|それ(?:のプレイヤー)?)の)?(?:現在の)?(?P<zone>墓場|手札|消滅領域)(?:が|に)?$"
 )
 _LOOK_SELECTION = re.compile(
     _ONSET + r"(?:自分|相手)のデッキの上(?:から)?N枚(?:を)?見(?:る|て)[。、]"
@@ -182,6 +186,12 @@ _COMPOUND_SELECTION = re.compile(
 )
 
 
+_SET_CONSTRAINT = re.compile(
+    r"を(?:(?:カード名|クラス|元のコスト)が異なるように|"
+    r"元のコストの合計が(?:N|X)以下になるように)$"
+)
+
+
 def field_filter(after: str) -> bool:
     """Known filters must terminate in an explicit kind before classifying a field value."""
     return _FIELD_FILTER.match(after) is not None
@@ -197,12 +207,10 @@ def compound_selection(after: str) -> tuple[str, bool] | None:
 
 def count_context(before: str) -> CountContext | None:
     """A complete counted NP supplies its zone; the later destination is never inspected."""
-    if _LEADER.search(before):
-        return CountContext("select.leader.v1", "leader", (), False, "player_count")
-    if _PLAYER.search(before):
-        return CountContext("select.player.v1", "player", (), False, "player_count")
-    if _EX_TOKEN.search(before):
-        return CountContext("select.card.v1", "follower", ("ex",), True, "cardinality")
+    if constraint := _SET_CONSTRAINT.search(before):
+        return count_context(before[: constraint.start()])
+    if context := _explicit_object_context(before):
+        return context
     if context := _zone_context(before):
         return context
     if match := _IMPLICIT_FIELD.search(before):
@@ -213,6 +221,20 @@ def count_context(before: str) -> CountContext | None:
             _ALL_TOKENS,
             "cardinality",
         )
+    return None
+
+
+def _explicit_object_context(before: str) -> CountContext | None:
+    if re.search(_ONSET + r"(?:カード名|好きな数)$", before):
+        return CountContext(
+            "select.designation.v1", "designation", (), False, "cardinality"
+        )
+    if _LEADER.search(before):
+        return CountContext("select.leader.v1", "leader", (), False, "player_count")
+    if _PLAYER.search(before):
+        return CountContext("select.player.v1", "player", (), False, "player_count")
+    if _EX_TOKEN.search(before):
+        return CountContext("select.card.v1", "follower", ("ex",), True, "cardinality")
     return None
 
 
