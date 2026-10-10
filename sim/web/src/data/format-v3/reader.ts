@@ -17,7 +17,7 @@ import {
 } from "./json"
 import { validateMediaDependencies, validateMediaIdentities } from "./media"
 import { validatePlacement } from "./placement"
-import { descriptor, primaryKey, requiredTypes, rowType, tables, validate } from "./schema"
+import { columns, descriptor, primaryKey, requiredTypes, rowType, tables, validate } from "./schema"
 import { validateConfig, validateFragments, validateView } from "./semantics"
 import { digest } from "./sha256"
 
@@ -161,15 +161,26 @@ export function readContainer(file: JsonObject, value: JsonObject, version = "3.
         )
       }
       const name = rowType(table, partition, version)
+      used.add(name)
       for (const nested of requiredTypes(name, version)) used.add(nested)
       const rows = arrayValue(fragment["rows"] ?? null).map((row, index) =>
         decodeRow(name, row, [key, table, index], version),
       )
+      if (
+        table === "translation" &&
+        rows.some(
+          (row) => row["annotation_kind"] === "whole_name" && row["annotation_set_id"] !== null,
+        )
+      )
+        fail("shape", "whole name wire slot must be null")
       const owner = fragment["owner"] ?? null
       result.push({
         file: key,
         table,
-        value: Object.fromEntries(Object.entries(fragment).filter(([name]) => name !== "rows")),
+        value: {
+          ...Object.fromEntries(Object.entries(fragment).filter(([name]) => name !== "rows")),
+          columns: columns(name, version),
+        },
         rows,
         identity: canonicalText([table, owner, fragment["bucket"] ?? null, partition]),
       })
@@ -651,6 +662,7 @@ export function readSnapshot(
   validateMediaDependencies(fragments, all, stringValue(objectValue(manifest["config_ref"])["key"]))
   validateView(view, manifest, fragments)
   validatePlacement(fragments, stringValue(manifest["format_version"]))
+  unique(view)
   return view
 }
 

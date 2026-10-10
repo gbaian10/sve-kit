@@ -8,6 +8,7 @@ import {
   stringValue,
   utf8,
 } from "./json"
+import { expandNames } from "./name-annotations"
 import type { View } from "./reader"
 import { digest } from "./sha256"
 import { annotationFailure, type TextOwner, TextOwners } from "./text-owners"
@@ -338,6 +339,8 @@ function selection(closure: Closure, receiver: TextOwner, value: Row): void {
 }
 
 export function validateAnnotations(view: View, languages: readonly string[]): void {
+  new Closure(view, languages)
+  expandNames(view)
   const closure = new Closure(view, languages)
   concepts(closure)
   sets(closure)
