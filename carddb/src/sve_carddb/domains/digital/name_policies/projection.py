@@ -1,4 +1,4 @@
-"""Apply editable name rules with owner-local eligibility and render-v2 outputs."""
+"""Apply editable name rules with owner-local eligibility and render-v3 outputs."""
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -14,6 +14,7 @@ from sve_carddb.domains.digital.name_policies.catalogue import catalogue
 from sve_carddb.domains.digital.name_policies.evaluate import name_result, owner_text
 from sve_carddb.domains.digital.name_policies.owners import publication_owners
 from sve_carddb.domains.digital.name_policies.results import Result
+from sve_carddb.domains.translations.four_layer_render import RENDERER_VERSION
 from sve_carddb.domains.translations.glossary.evidence import validate_choice
 from sve_carddb.domains.translations.glossary.records import ChoiceRecord, TermRecord
 from sve_carddb.domains.translations.names.annotations import annotate_name
@@ -345,7 +346,9 @@ def apply(db: Database, plan: Plan, build: BuildContext) -> Result:
             annotate_name(db, use, owner.source.unit_id, owner.term_id)
         if candidate is None:
             continue
-        translation = materialize(db, owner.source, context, candidate)
+        translation = materialize(
+            db, owner.source, context, candidate, term_id=owner.term_id
+        )
         if owner.term_id is not None:
             target_unit = "t:zh-Hant:" + digest(candidate.text.encode())[7:23]
             insert_exact(
@@ -367,16 +370,42 @@ def apply(db: Database, plan: Plan, build: BuildContext) -> Result:
 
 
 def materialize(
-    db: Database, source: NameSource, context: str, candidate: Candidate
+    db: Database,
+    source: NameSource,
+    context: str,
+    candidate: Candidate,
+    *,
+    term_id: str | None = None,
 ) -> str:
     """Render IDs include semantic dependencies and quality, excluding notes and proofs."""
+    if term_id is not None:
+        concepts = db.select("glossary_term", ("category",), where={"id": term_id})
+        if len(concepts) != 1 or concepts[0].values["category"] != "card_name":
+            raise ValueError("Name render requires its exact card-name concept")
     checksum = digest(
         canonical(
             {
-                "recipe": "render-v2",
+                "recipe": "render-v3",
                 "context_id": context,
                 "target_lang": "zh-Hant",
-                "dependency_key": candidate.dependency,
+                "dependency_key": digest(
+                    canonical(
+                        {
+                            "renderer_version": RENDERER_VERSION,
+                            "source_hash": source.source_hash,
+                            "selection": candidate.dependency,
+                            "target_source_id": None
+                            if candidate.source is None
+                            else candidate.source.id,
+                            "annotation": None
+                            if term_id is None
+                            else {
+                                "reference": {"kind": "card_name", "term_id": term_id},
+                                "bold": True,
+                            },
+                        }
+                    )
+                )[7:],
                 "text": candidate.text,
                 "origin": candidate.origin,
                 "authority": candidate.authority,

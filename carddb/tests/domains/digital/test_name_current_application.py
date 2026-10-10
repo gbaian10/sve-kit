@@ -226,6 +226,20 @@ def test_current_render_quality_changes_id_but_note_does_not(
             db, owner.source, context, replace(owner.candidate, low_confidence=True)
         )
         assert low != first
+        annotated = materialize(
+            db, owner.source, context, owner.candidate, term_id="term:name.test"
+        )
+        assert annotated != first
+        assert (
+            db.select("translation", ("text",), where={"id": annotated})[0].values[
+                "text"
+            ]
+            == owner.candidate.text
+        )
+        with pytest.raises(ValueError, match="exact card-name concept"):
+            materialize(
+                db, owner.source, context, owner.candidate, term_id="term:missing"
+            )
 
 
 @pytest.mark.parametrize("override", [False, True])
