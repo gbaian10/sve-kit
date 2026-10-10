@@ -829,6 +829,27 @@ it("a cancelled edition switch reports unavailability without blocking other cha
   expect(h.channel.getStatus().result.phase).toBe("complete")
 })
 
+it("an edition query is pending exactly while a load for that edition is in flight", async () => {
+  const h = harness()
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  const release = h.served.hold("snapshots/preview/current.json")
+  const notReady = { phase: "error", error: { kind: "edition-not-ready" } }
+  // A page can ask for the new edition before it starts that edition's download.
+  h.channel.search({ ...query, edition: "en" })
+  expect(h.channel.getStatus().result).toMatchObject(notReady)
+  h.session.load(base, "en", "preview")
+  expect(h.channel.getStatus().result.phase).toBe("pending")
+  h.session.load(base, "jp", "preview")
+  expect(h.channel.getStatus().result).toMatchObject(notReady)
+  h.session.load(base, "en", "preview")
+  release()
+  await h.settled()
+  const result = h.channel.getStatus().result
+  if (result.phase !== "complete") throw new Error("missing result")
+  expect(result.page.items.every((item) => item.summary?.region === "en")).toBe(true)
+})
+
 it("cost columns preserve the signed safe integers accepted by the snapshot reader", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()

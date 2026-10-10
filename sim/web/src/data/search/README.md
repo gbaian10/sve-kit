@@ -10,6 +10,7 @@ Worker 在 task 邊界合併每個通道尚未執行的查詢，只掃描最新 
 更新期間這些欄位仍指向目前可查詢的世代，`loading` 表示正在下載的根與地區。
 結果也帶 root 與 generation，晚到的 queryId／generation 不會覆寫新結果。
 載入失敗保留舊索引；切換地區的查詢必須等該地區完整就緒。
+查詢的地區正在下載時結果為 pending，沒有任何載入會提供該地區時為 `edition-not-ready`，先查詢後載入也一樣。
 量測由建構子的 `onMetrics` callback 另取，不屬於公開 status。
 
 查詢錯誤與載入錯誤分開：通道結果的 `error.kind` 為 `unsupported-query`、

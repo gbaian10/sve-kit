@@ -35,7 +35,7 @@ export {
 } from "./roots"
 export type { QueryFailure, SearchPage, SearchQuery } from "./search/index"
 export {
-  SearchChannel,
+  type SearchChannel,
   type SearchChannelStatus,
   SearchSession,
   type SearchStatus,

@@ -23,7 +23,10 @@ interface LoadFailure {
 export interface SearchStatus {
   readonly phase: "downloading" | "ready" | "error"
   readonly generation: number | null
-  /** The active root and edition stay attached to old results during a replacement load. */
+  /**
+   * The active root and edition stay attached to old results during a replacement load; without a
+   * generation, root names the root of the latest attempt.
+   */
   readonly root?: string
   readonly edition?: Region
   readonly loading?: { readonly root: string; readonly edition: Region }
@@ -63,17 +66,30 @@ const browserTransport: SearchTransportFactory = (receive, failed) => {
   }
 }
 
-/** A channel has its own last input and result; the owner holds the shared Worker generation. */
-export class SearchChannel {
+/** A query store with its own last input and result; the session holds the shared generation. */
+export interface SearchChannel {
+  readonly id: number
+  readonly getStatus: () => SearchChannelStatus
+  readonly subscribe: (listener: () => void) => () => void
+  search(query: SearchQuery): void
+  dispose(): void
+}
+interface ChannelOwner {
+  readonly status: () => SearchStatus
+  readonly send: (request: SearchRequest) => void
+  readonly close: (id: number) => void
+}
+
+class Channel implements SearchChannel {
   private readonly listeners = new Set<() => void>()
   private status: SearchChannelStatus = { lastInput: null, result: { phase: "pending" } }
   private queryId = 0
   private disposed = false
 
-  private readonly owner: SearchSession
+  private readonly owner: ChannelOwner
   readonly id: number
 
-  constructor(owner: SearchSession, id: number) {
+  constructor(owner: ChannelOwner, id: number) {
     this.owner = owner
     this.id = id
   }
@@ -99,7 +115,7 @@ export class SearchChannel {
   refresh(invalidate = true): void {
     if (this.disposed) return
     if (invalidate) this.queryId += 1
-    const status = this.owner.getStatus()
+    const status = this.owner.status()
     this.publish({
       ...this.status,
       result:
@@ -125,14 +141,14 @@ export class SearchChannel {
       })
   }
   checkAvailability(): void {
-    const status = this.owner.getStatus()
+    const status = this.owner.status()
     const query = this.status.lastInput
-    if (
-      query &&
-      status.generation !== null &&
-      query.edition !== status.edition &&
-      status.loading?.edition !== query.edition
-    )
+    if (!query || status.generation === null || query.edition === status.edition) return
+    // A query may arrive before its edition's load starts, or outlive a load replaced by another.
+    if (status.loading?.edition === query.edition) {
+      if (this.status.result.phase === "error")
+        this.publish({ ...this.status, result: { phase: "pending" } })
+    } else
       this.publish({
         ...this.status,
         result: {
@@ -142,7 +158,7 @@ export class SearchChannel {
       })
   }
   receive(event: Extract<SearchEvent, { kind: "result" | "query-error" }>): void {
-    const status = this.owner.getStatus()
+    const status = this.owner.status()
     if (this.disposed || event.generation !== status.generation || event.queryId !== this.queryId)
       return
     this.publish({
@@ -163,14 +179,14 @@ export class SearchChannel {
     if (this.disposed) return
     this.disposed = true
     this.listeners.clear()
-    this.owner.closeChannel(this.id)
+    this.owner.close(this.id)
   }
 }
 
 /** One owner serves any number of independent hook-ready query stores. */
 export class SearchSession {
   private readonly listeners = new Set<() => void>()
-  private readonly channels = new Map<number, SearchChannel>()
+  private readonly channels = new Map<number, Channel>()
   private transport: SearchTransport | undefined
   private status: SearchStatus = { phase: "downloading", generation: null, updating: false }
   private nextGeneration = 0
@@ -210,16 +226,24 @@ export class SearchSession {
   }
   createChannel(): SearchChannel {
     if (this.disposed) throw new Error("search session is disposed")
-    const channel = new SearchChannel(this, ++this.nextChannel)
+    const channel = new Channel(
+      {
+        status: this.getStatus,
+        send: (request) => {
+          this.send(request)
+        },
+        close: (id) => {
+          this.channels.delete(id)
+          this.send({ kind: "close-channel", channelId: id })
+        },
+      },
+      ++this.nextChannel,
+    )
     this.channels.set(channel.id, channel)
     return channel
   }
-  send(request: SearchRequest): void {
+  private send(request: SearchRequest): void {
     if (!this.disposed) this.transport?.send(request)
-  }
-  closeChannel(id: number): void {
-    this.channels.delete(id)
-    this.send({ kind: "close-channel", channelId: id })
   }
   private publish(status: SearchStatus): void {
     if (this.disposed) return
@@ -244,6 +268,7 @@ export class SearchSession {
       loading: { root: base, edition },
     })
     if (!active) this.refreshChannels()
+    else for (const channel of this.channels.values()) channel.checkAvailability()
     // Waiting for an explicit load avoids an endless respawn when a Worker fails during startup.
     this.transport ??= this.connect()
     this.transport.send(this.loadRequest)
