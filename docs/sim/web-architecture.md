@@ -5,9 +5,9 @@
 
 版本：**v1**，2026-09-28 定案。用語依 [`docs/terminology.md`](../terminology.md)；
 資料契約以 [`docs/schema/export/snapshot-format.md`](../schema/export/snapshot-format.md) 為準。
-共用尺寸見 §7、§8；色彩值見進版控的 [`tokens.css`](../../sim/web/src/styles/tokens.css)。各畫面完整間距與尺寸規格：待補。
+共用尺寸見 §7、§8；色彩值見進版控的 [`tokens.css`](../../sim/web/src/styles/tokens.css)。
 
-`sim/web` 是查卡、建牌、對戰共用的前端（`AGENTS.md`）。本文涵蓋查卡需要的架構；建牌與對戰只預留接點。
+`sim/web` 是查卡、建牌、對戰共用的前端（`AGENTS.md`）。本文涵蓋查卡需要的架構；建牌與對戰只預留接點。基本目錄載入、Worker 與手機門檻為設計要求；現有 N0 已接線的 3.0 reader 不代表下列分段載入已完成。
 
 ## 1. 目錄與邊界
 
@@ -129,7 +129,7 @@ interface QueryState {
 
 `Prefs` 欄位：`uiLanguage`、`cardEdition`（`jp`／`en`，預設 `jp`）、`nameDisplay`（`translated`／`original`／`both`）、`effectLanguage`（同）、
 `symbolLabels`、`theme`（`system`／`light`／`dark`）、`accent`（`amber`／`teal`／`red`／`null`＝依主題預設）、`banRegion`（`jp`／`en`）、
-`dataSaver`、`gridDensity`（2／3）、`viewMode`。
+`gridDensity`（2／3）、`viewMode`。
 
 ## 4. 資料層（`src/data/`）
 
@@ -145,21 +145,26 @@ interface QueryState {
 
 ### 4.2 載入順序與驗證鏈
 
-以下流程適用**正式卡表快照**（有版本索引）；2.0 採 current／previous，既有 1.x pages 只供舊格式解讀。預覽快照的清單入口由快照格式定義。
+以下流程適用正式快照；預覽入口依快照格式。首頁與外框不等待版本索引或 manifest。
 
 ```text
-idle → loading(version-index) → loading(manifest) → loading(bootstrap) → ready
-                                                                      ↘ 詳情分片按需（背景）
-       任一步失敗 → error{ kind: "network" | "incompatible" | "corrupt", retry() }
+首頁／外框可用 → 背景載入入口、manifest、config
+             → 所選區基本目錄下載／驗證／索引 → 整區可搜尋
+                                            → 背景補齊印刷資料
+                                            → 來源／標註、詳情、另一區按需
+每個用途各自 loading／ready／error；失敗可重試
 ```
 
-- reader 宣告 `READER = { version, capabilities: ["column-partition-v1"] }`。
-- 挑版本：2.0 讀 index_format=2 的 current，再檢查 previous；須符合明示支援的 format、最低 reader 與所有能力。沒有相容項時只能保留本機已驗 active 或提示更新，不查全歷史 pages。
-- 驗證鏈：索引先驗形狀與 index_format，再以 entry.manifest_sha256 驗清單、File.sha256 驗解壓後的 canonical bytes。2.0 不下載 pages；不符重試一次，再不符 → corrupt，不用未驗清單決定下載或相容性。
-- 啟動包解析後丟掉原始 tuple 陣列與解碼字串，只留索引；詳情分片逐片解析，保留 tuple＋`row_index` 索引，LRU 淘汰；不把整包 JSON.parse 進 heap。
-- **快取邊界（PWA 之前）**：JSON 只靠 HTTP 快取（內容定址路徑配 `immutable`）；2.0 卡圖使用含 v 完整 URL，header 依 image-variants；每次載入在記憶體重建索引；Service Worker、CacheStorage、
-  IndexedDB 索引持久化、離線預取都跟 PWA 一起做，介面（`Locator`、`ShardCache`）留位。
-- `data/` 的公開 API 從第一天就是 async；解析與全文掃描搬進 Worker 時不改呼叫端。
+- 目前 3.0 reader 的完整版本／minimum／八個 capabilities 依[公開 annotation §1](../schema/export/public-annotation.md#1-版本與驗證邊界)，不只宣告 column-partition-v1；index_format=2 只取 current／previous 或本機已驗相容 active。
+- 索引先驗形狀，以 entry.manifest_sha256 驗完整清單，再以 File.sha256 驗解壓後 canonical bytes；不以未驗 manifest 決定可用閉包，不取舊 pages。
+- 首頁顯示後背景下載所選 jp／en 整區基本目錄；所有連線同一政策，不設省流量模式。下載中可打字並顯示「資料下載中」，整區驗畢及索引完成後自動搜尋一次，不顯示部分結果。
+- 卡名／卡號、基本數值與基本 facet 先可用；稀有度、異圖與完整印刷版本之後背景補齊。相應條件未備妥時提示載入中，不能用部分版次輸出完整搜尋結果。全文與其他進階用途須等其整區閉包驗畢。
+- 另一區只在切換或對照時下載；不因 UI 語言切換改 card edition，亦不以字串可讀宣稱雙區來源已驗。單卡深連結可先載當頁完整用途，不宣稱整區搜尋 ready。
+- 網路／Service Worker 處理取得、驗 bytes 與持久快取；Worker 逐容器解壓、驗證、解析、建立索引；main 接收必要 view、進度與完整結果。原始 tuple／解碼字串建立緊湊 store 後釋放，詳情用有界 LRU，不把 text_all 一次 JSON.parse 到 main。
+- 現有 PWA 前只靠 HTTP 快取；Service Worker／CacheStorage 的上述分工是設計要求，不宣稱已實作。快取不可用時保持明確用途狀態並重新下載，不要求整庫離線預取。
+- 持久 bytes 以根目錄及內容定址 URL 重用，衍生索引以 manifest／reader／normalizer 隔離。切快照／版本／查詢取消舊工作，拒絕晚到回應；部分用途 ready 不等於完整離線 active。
+- `data/` 公開呼叫採 async，提供用途所需 keys、載入／解析進度與分開的文字／來源／標註狀態；未知分母不造百分比。基本文字就緒、日文依據／標註未備妥、完整檢視缺來源（錯誤）依[公開 annotation §4.1](../schema/export/public-annotation.md#41-三種就緒狀態與部分-reader)。
+- main＋Worker 穩態合計 ≤48 MiB、更新峰值 ≤80 MiB，主線程單段 ≤50 ms、所選整區基本目錄完整解析累計 ≤1 秒；量法依[size-budget](../schema/export/size-budget.md#手機記憶體與解析)。各 Worker 不分別享有 48／80 MiB，下載 bytes 不等於 heap；本文件不宣稱效能驗收通過。
 
 ### 4.3 容器解碼、型別與拒絕條件
 
@@ -174,13 +179,13 @@ idle → loading(version-index) → loading(manifest) → loading(bootstrap) →
 
 ### 4.4 索引（`data/store/`）
 
-從啟動包建：卡、版次、正規化卡號 → 版次、現行面、三語名字、facet posting lists（職業、種類、費用、攻擊、體力、特性、稀有度、商品、特殊種類）、
-機制三態（§4.6）、快照清單的 `qa_card_ids`／`errata_card_ids`。介面 `CardIndex` 固定；實作可由 `Map`／陣列換成 TypedArray posting lists＋唯一字串池（快照格式 §3.1）而不改呼叫端。`size-budget.md` 的記憶體門檻以目標手機實測為準。
+基本目錄先建所選區全部卡／面、版次輕量定位、正規化卡號 → 版次、current／暫顯名稱與可用翻譯、基本 facet（職業、種類、費用、攻擊、體力、特性、卡包、特殊種類）。
+稀有度／異圖、商品收錄、機制三態（§4.6）、Q&A／勘誤各依用途完整載入後補索引，分別保留未備妥狀態。介面 `CardIndex` 固定；實作可由 `Map`／陣列換成 TypedArray posting lists＋唯一字串池（快照格式 §3.1）而不改呼叫端。`size-budget.md` 的記憶體門檻以目標手機實測為準。
 
 ### 4.5 詳情分片、文字與定位
 
-- `details.ts`：`loadShard(key)` → 解碼 → 驗拒絕條件 → `row_index` 對回啟動包列（`printing.faces` 用 `face_ordinal`）；LRU。
-- `text.ts`：`textOf(unitId)` 先查啟動包閉包，再查已載入的詳情片；沒載入時回 `undefined`，呼叫端顯示載入中。
+- `details.ts`：`loadShard(key)` → 解碼 → 驗拒絕條件 → `row_index` 對回精確 base fragment 的列（`printing.faces` 用 `face_ordinal`）；LRU。
+- `text.ts`：`textOf(unitId)` 先查基本目錄，再查已載入的詳情片；沒載入時回「未載入」，與完整查找後不存在分開（[公開 annotation §4.1](../schema/export/public-annotation.md#41-三種就緒狀態與部分-reader)），呼叫端顯示載入中。
 - **定位**：快照格式允許同 family 依 ID bucket 拆成多片，所以「一個 owner → 一個檔」不成立。`Locator.shardsFor(kind, ref) → fileKey[]`
   回傳候選檔集合（`kind` 是分片種類，`ref` 是 owner 或 `text_unit` bucket）；要找某一列時依序載入候選片、用片內索引確認；
   「不存在」只在所有候選片都載入且都沒有時才成立。候選集合如何從快照清單算出由快照格式定義；`Locator` 是唯一知道這個規則的模組。
@@ -200,9 +205,8 @@ idle → loading(version-index) → loading(manifest) → loading(bootstrap) →
 
 ### 4.7 搜尋
 
-- `suggest(text, limit)`：同步、只用啟動包索引：正規化卡號完全／寬鬆命中 ＞ 卡號前綴 ＞ 卡名（三語＋`search_alias`）前綴／包含 ＞ 效果文字。
-  效果文字由 Worker 逐片掃全庫（去抖、取消舊查詢、傳部分結果、顯示進度）；不做「只掃已載入片」的半套行為——同一查詢在冷啟動與看過幾張卡後
-  結果必須一致。
+- 名稱／卡號搜尋只在所選整區基本目錄驗畢並建索引後回完整結果，優先序為正規化卡號完全／寬鬆命中 ＞ 卡號前綴 ＞ 可用卡名／翻譯／`search_alias` 前綴／包含。
+  效果全文按需交 Worker 載入並掃描整區該用途閉包（去抖、取消舊查詢、顯示進度），完成後回完整結果，不把已掃片的部分命中當完成。冷啟動與看過幾張卡後的結果須一致。
 - 正規化（`domain/normalize.ts`）：NFKC、大小寫折疊、去空白與連字號差異；卡號寬鬆比對（`bp01-51`、`BP01 051`、`BP01-051EN` 都命中）。
   `search_alias.normalized` 的規則要與匯出器（`config.search.normalizer_version`）一致。
 - 篩選 `domain/query/apply.ts`：`QueryState` × `CardIndex` → `ResultItem[]`；合併印刷時代表版次優先選符合目前卡片版本與條件者，其次依卡號。
@@ -233,7 +237,7 @@ idle → loading(version-index) → loading(manifest) → loading(bootstrap) →
 
 `components/card/CardImage.tsx`：由 `data/images.ts` 從 2.0 的卡包 `printing_image` media 取得版本／尺寸，配合 int_id／face.ordinal 組 `srcset`、`width`、`height`；不為首圖載 global `image_variant`；`alt` 三種語境
 （`identify`＝卡名＋版次；`redundant`＝旁邊已有同樣文字；`decorative`）；`sizes` 由呼叫端依版面給；`fit: cover | contain`（橫向卡用 contain）；
-固定比例、`loading="lazy"`、`decoding="async"`。載入中／缺圖／省流量共用同一張文字卡佔位，缺圖與待確認另加標示。
+固定比例、`loading="lazy"`、`decoding="async"`。`/cards` 預設圖卡格；隨 app 打包自行設計的共用佔位圖，尺寸比例與卡片相同，不使用官方卡背。載入中／缺圖共用它，缺圖與待確認另加標示。
 列表與建議清單用整張卡圖檔位，放大層用最大檔位；查卡不用插畫裁切檔位。
 
 ## 7. RWD 與無障礙

@@ -88,7 +88,7 @@ rule_term 用當前 Bool；null／缺值時列 missing_emphasis，仍可顯示�
 | 版本／能力與嚴格 reader | 決定 format_version／min_reader_version／required_capabilities，舊 reader 明確拒收；不是只改 data_version 就發布 |
 | 機器契約與共用樣本 | 修改 source.json，再重產 contract.schema.json／descriptor；Python/TS accessor、reader、independent oracle、golden／invalid fixtures 一起驗新增欄及壞 span／reference／bold |
 | producer／projection／引用閉包 | 只出已選譯文註記；span 的原文／譯文存在、Codepoint 範圍、不重疊／多次引用與 reference 目標按新規格驗；不夾帶來源收據／建置 hash |
-| 分片／容量／離線更新 | 名稱及 label 仍在 bootstrap、效果在原分片；註記跟選中 translation 同片。不把全術語註記都塞啟動包；重新量測名稱類增加量、依所選版本的 Brotli 約 1 MiB 啟動目標（更大依 [容量契約](../export/size-budget.md) 的容量門檻）、全文／text_all 聯集與 cache 更新 |
+| 分片／容量／離線更新 | 名稱及 label 仍在 bootstrap、效果在原分片；註記跟選中 translation 同片。不把全術語註記都塞啟動包；重新量測名稱類增加量、依所選版本的基本目錄 Brotli 2 MiB 分界（略超報精確差額、明顯超出才交維護者，量法依[容量契約](../export/size-budget.md)）、全文／text_all 聯集與 cache 更新 |
 
 替代方案若另做旁表／附件，會新增集合、join／索引／下載與容器完整性規則，須比較容量；不是零格式變更。本輪推薦單一註記欄以減少新增容器，但**不自行修改**已合併的快照白名單、Schema、tuple、reader 或公開格式版本。原文單獨顯示的承載未定前，不得把此單欄方向直接視為可實作的完整格式。核可與實作前只能出現有純字串，不能宣稱位置加粗／一對一原文對照已上線。
 

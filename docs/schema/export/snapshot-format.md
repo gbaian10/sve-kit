@@ -10,8 +10,7 @@
 四層翻譯的來源政策已改依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)：
 有效且已確認同卡同面的 JP 可供繁中，divergence 不構成此顯示門檻。
 本文的 basis、annotation 與改動欄序依 [3.0.0 公開 annotation 契約](public-annotation.md)。
-目前 producer／reader 為 3.0.0；#498 已完成 N0 原生四層建置、公開標註與跨語言 reader／Web 接線。容量依維護者豁免交付，最佳化由 #506、手機實測由 #53、N1 由 #380／#499 承接。
-下文未變動的 2.0 圖片／保留規則繼續適用；3.0.0 的欄位及 reader 規則依上述公開 annotation 契約。
+目前 producer／reader 為 3.0.0；N0 已完成四層建置與 annotation 接線，既有容量超標依維護者豁免交付。本文件的基本目錄載入與容器要求是尚未發布的 3.0.0 設計修訂；不宣稱 exporter／Worker 已完成或效能通過。
 
 ## 1. 快照清單（manifest）、版本與容器
 
@@ -164,29 +163,29 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 所有非 null revision／printing／文字引用均須在同份快照可達，候選不指向 report 或不存在的 revision。未解表記不刪 route、預設版次或 Decklog 可用性，也不能拿 #144 診斷排除閉包決定發布範圍。沒有 current 的 pending region 在 card_engine_support.region_blocks 加 `wording_pending`，強制手動並禁止由暫顯值自動繼承 DSL／跨區翻譯；有舊 current 時照既有 freshness／衝突檢查，不一律宣告新候選已通過。真正來源損壞、錯身分與勘誤／更正衝突仍按各自閘門處理。
 
-分片時，稀疏的 `face.wording` 隨 face 進啟動包，帶未定狀態、暫顯／候選 revision 引用及未知日期版次 ID；PrintingFace.observations 進 printing 詳情。`current_ref` 為所有 face.current.revision_id 的去重集合；`display_ref` 為 current_ref 加上 pending wording.display 非 null revision ID 的聯集，**不加入其餘 candidates**。每個 pending face-region 最多一筆 display revision，其 §3.1 輕量投影、名稱及可用名稱翻譯的文字閉包均進 bootstrap，讓卡表、名稱搜尋與 facet 首屏即可使用暫顯卡名／數值；其餘欄位仍走 detail。這只是顯示分割，不建立 current 或採納。
+分片時，稀疏的 `face.wording` 隨 face 進啟動包，帶未定狀態、暫顯／候選 revision 引用及未知日期版次 ID；PrintingFace.observations 進 printing 詳情。`current_ref` 為所有 face.current.revision_id 的去重集合；`display_ref` 為 current_ref 加上 pending wording.display 非 null revision ID 的聯集，**不加入其餘 candidates**。每個 pending face-region 最多一筆 display revision，其 §3.1 輕量投影、名稱及可用名稱翻譯的文字閉包均進 bootstrap，讓整區基本目錄完成後可使用暫顯卡名／數值；其餘欄位仍走 detail。這只是顯示分割，不建立 current 或採納。
 
 不在 display_ref 的候選及其他 revision 沿用 `history` 分片保存完整列，所需文字／翻譯沿既有 bucket 分片閉包按需載入。history 是傳輸分區名稱，不宣稱候選年代較舊；候選恰與 display_ref 共用 revision 時沿用 bootstrap/detail 的唯一儲存，不另存複本。啟動包的 dependencies 不得因其餘候選引用而強制預載 history；producer 仍驗同快照的完整引用閉包。
 
-開啟卡文詳情、候選比較或搜尋需要其餘候選內容時，reader 依 face 所屬 card 的穩定 owner 載入相應 detail/history 與文字依賴；既有背景下載與 PWA 全預取照常，但不作首次顯示的阻擋條件。有 display 的卡首屏使用其名稱與數值，標表記未定；沒有唯一 display 時保留卡號與「表記未定／候選載入中」，不能視為空文字、無候選或排除該卡。沒有唯一 display 的 card facet，候選載入後只對全候選一致的欄位給單值，其餘保持未定；尚未載入時標部分索引與進度，不把缺少值當篩選不符。名稱搜尋先用 current／display 名稱，需搜尋其餘候選名稱與全文時逐片載入並取可讀候選聯集，未完成明示部分結果，結果標表記未定，不使用某候選數值作已採納規則。
+開啟卡文詳情、候選比較或搜尋需要其餘候選內容時，reader 依 face 所屬 card 的穩定 owner 載入相應 detail/history 與文字依賴；按使用用途載入，不作首頁或整區基本目錄的阻擋條件，也不要求 PWA 整庫預取。有 display 的卡在基本目錄使用其名稱與數值，標表記未定；沒有唯一 display 時保留卡號與「表記未定／候選載入中」，不能視為空文字、無候選或排除該卡。沒有唯一 display 的 card facet，候選載入後只對全候選一致的欄位給單值，其餘保持未定；尚未載入時標該進階用途未備妥與進度，不把缺少值當篩選不符。名稱搜尋先用 current／display 名稱，需搜尋其餘候選名稱與全文時逐片載入並取可讀候選聯集，未完成顯示載入中、完成後回完整結果並標表記未定，不使用某候選數值作已採納規則。
 
-須以當次日英與實際可用名稱翻譯閉包，分別量測所選版本的啟動 Brotli：manifest、config、首屏必載 bootstrap（含暫顯 revision 的輕量投影、名稱／可用名稱翻譯文字閉包）與稀疏 wording 引用開銷，並分列候選按需分片容量。約 1 MiB 是盡量達成的目標，2 MiB 可接受；超過 2 MiB 停下交維護者決定，依 [size-budget.md](size-budget.md)。混區檔依實際整檔計費，不能只量單片、按語言比例拆帳或以候選未下載宣稱全庫索引完成；本文件不宣稱手機或完整三語驗收已通過。
+須以當次日英、所有卡片及實際可用名稱翻譯閉包量基本目錄冷載，包含完整 manifest／config、暫顯 revision、稀疏 wording 引用及必要實體檔；候選按需增量另報。依 [size-budget](size-budget.md)，Brotli 2 MiB 是分界，略超報精確差額，明顯超出才交維護者；共用／混區檔整檔計入，不能以尚未下載候選宣稱進階索引完整。
 
 ## 3. 分檔、下載順序與記憶體
 
 穩定 owner 是資料分片規則，與商品收錄分開：card/revision/support 跟 `card.home_set_id`；printing 跟第一次配發的 `printing.home_set_id`；再錄新 printing 到新 owner，舊列不搬。`printing_product` 新關係跟 printing owner，可引用舊 card，不能複製舊 card。shared 字典/QA/CR/`text_unit` 依固定 ID bucket；`text_unit` 不按「最新使用者」移動 owner。各 family 過大時依已固定 ID bucket 拆子片，快照清單決定檔案；翻譯/勘誤只更動涉及的片。
 
-三語**全部文字**首次即排入下載，PWA 安裝全預取；優先順序：快照清單/config → 全域輕量名稱/卡號/數值索引與目前卡面語言 current 片 → 背景補其他語言/歷史/QA/裁定/metadata。啟動包是同一公開列的欄位主儲存，主表詳情只存其餘欄位；其完整契約見 §3.1，producer 比對與主投影一致。直接連結單卡先拉所需 owner。facet 索引閉包完成後，全庫篩選不需解析卡文片；尚未完成顯示部分結果及進度。效果全文才逐片掃描。
+基本目錄是所選區全部卡片／面、current／暫顯名稱與可用名稱翻譯、基本數值、卡號定位及基本 facet／字典的完整集合。首頁先顯示，之後背景下載所選 jp／en 基本目錄；整區驗畢且索引完成才開放搜尋。下載中可打字並顯示「資料下載中」，完成後自動搜尋一次，不顯示部分結果。稀有度、異圖與完整印刷資料在基本目錄之後背景補齊；未備妥的進階條件明示載入中，使用時須等完整用途閉包。另一區只在切換或對照時下載；效果全文、Q&A／裁定、商品收錄、引擎支援與歷史按需，不要求首訪三語全量或 PWA 整庫預取。所有連線使用同一政策，不做省流量模式。直接連結單卡可先讀其精確閉包，但不代表整區搜尋 ready。
 
-**下載完成不等於全部常駐 JS heap。** Service Worker 將已驗 bytes 存 CacheStorage；用 Worker 逐片 JSON.parse、只將當前 UI/查詢所需的面、語言、索引保留。跨全庫全文搜尋由 Worker 逐片掃描（去抖動、取消舊查詢、傳部分結果）或使用持久化全文索引；結果頁只傳 id/摘要，LRU 釋放詳情，不把整份複製給主執行緒。預取不呼叫全包 JSON.parse。離線切語言從本機 cache 讀，不再等網路。facet 索引必須建置並持久化至 IndexedDB，按快照清單 hash 隔離；拒絕持久儲存時可重建記憶體索引並標示離線限制，不維護獨立資料真值。
+**下載完成不等於全部常駐 JS heap。** Worker 逐檔解壓、驗證、解析及建立緊湊索引，主執行緒只取必要 view／結果 ID；詳情以 LRU 釋放，不把全庫物件傳回主端。全文搜尋先取得所選區該用途全部效果閉包，再回完整結果，不只掃已載入卡。持久 bytes 與衍生索引均可快取；IndexedDB 依根目錄、manifest hash、reader／normalizer 隔離，不能形成第二真值。儲存被拒時可重建記憶體索引並如實標示可用範圍。
 
 完整文字包 `text_all` 僅供完整下載/工具匯入，可串流讀；瀏覽器預設用分片。完整文字包與分片是替代下載方式，不雙倍下載。快照清單的 `text_all.contains` 列出全部 required text keys，closure hash 皆驗過才標「文字離線備妥」。首訪部分可讀狀態不等於 active 完整離線版。
 
-容量與記憶體預算、量測方法見 [size-budget.md](size-budget.md)。容量門檻：卡表快照（完整文字分片合計，不含卡圖、語音與 DSL 程式包）Brotli 壓縮後 ≤ 8 MiB（gzip 傳輸時 ≤ 10 MiB）、解壓後 ≤ 40 MiB，啟動包依所選日版／英版的 Brotli 約 1 MiB 為目標、非硬門檻，2 MiB 可接受，更大需先由維護者決定。記憶體目標：卡表常駐 heap ≤48 MiB、更新峰值 ≤80 MiB（不含 WebGL/圖片/app）；單片解壓 ≤512 KiB、背景解析單段主線程工作≤50 ms、完整可搜尋資料解析累計≤1秒，這些是待手機實測驗收值。容量停點屬於發布效能驗收，不是快照格式或 reader 相容性條件；reader 核對實際 bytes、hash 與分片結構。完整文字／資料單片超標停止發布效能驗收，調整投影/固定配置；啟動停點依上述規則，不能只有 gzip 小就宣稱手機順暢。
+容量與量法依 [size-budget](size-budget.md)：全部文字分片＋manifest 的 raw ≤40 MiB；單一版本完整文字閉包（含共享、完整 JP source、counterpart、必要跨區檔、卡號索引、字典及實體重複裝檔）Brotli ≤8 MiB、gzip ≤10 MiB。基本目錄冷載 Brotli 2 MiB 為分界；基本目錄容器整檔 raw ≤2 MiB，詳情與其他資料檔 ≤512 KiB。手機目標是 main＋Worker 穩態合計 ≤48 MiB、更新峰值 ≤80 MiB、主線程單段 ≤50 ms、所選整區基本目錄完整解析累計 ≤1 秒；對象與量法以容量文件為準。這些是設計／發布效能驗收要求，reader 仍依實際 bytes、hash、欄序及閉包判相容性，不用預算數字拒收合法快照。
 
-### 3.1 啟動包是欄位主儲存
+### 3.1 欄位主儲存與載入用途
 
-§2 的 43 個文字集合是完整**邏輯讀取視圖**，不是額外下載的全欄主表。傳輸以同一 table 的固定欄位分割（fragment）分成啟動包（bootstrap）和詳情分片（detail），跨表 FK 保留永久 ID；同表詳情分片不重複永久 PK，而以片內 `row_index` 指向啟動包列（printing.faces 用 `face_ordinal`），每個實體欄位值只在一處。以下為完整分割規則；「其餘」精確指 §2 白名單扣去該列啟動包欄，非任意省欄。
+§2 的 43 個文字集合是完整**邏輯讀取視圖**，不是額外下載的全欄主表。傳輸以同一 table 的固定欄位分割（fragment）分成啟動包（bootstrap）和詳情分片（detail），跨表 FK 保留永久 ID；同表詳情分片不重複永久 PK，而以片內 `row_index` 指向啟動包列（printing.faces 用 `face_ordinal`），每個實體欄位值只在一處。下表記錄 N0 已接線的完整欄位分割；基本目錄重新裝檔不把此表所有 bootstrap 欄位當成必載。「其餘」精確指 §2 白名單扣去該列啟動包欄，非任意省欄。
 
 | 邏輯集合/列範圍 | 啟動包唯一儲存欄位 | 詳情分片唯一儲存欄位 |
 | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -203,15 +202,15 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 | `field_annotation` | 隨原文欄位；display name／字典／商品等 | 隨 effect／printing／QA／CR 等；非 display revision 的用途在 history，詳[位置分片](public-annotation.md#5-分片閉包與消費表) |
 | 其餘文字集合 | 無 | 完整白名單列 |
 
-`rules_name`／`face_rules_name` 的全部原欄位在 2.0 唯一存於 global detail，依 [傳輸契約 §5.1](snapshot-transport.md#51-format-200-固定配置) 定位。兩表的 PK、欄序、型別及邏輯參照不變，也沒有 row_index/base。名稱搜尋與一般 facet 仍用 current／display 的名稱閉包；同名規則／構築功能按需取兩表，未完成須標「規則資料載入中／未備妥」，不能當作沒有同名限制或完整合法性。其他表與 printing 診斷／art_id／printing_product／support 的存放均不變。
+`rules_name`／`face_rules_name` 的全部原欄位在 2.0 唯一存於 global detail，依 [傳輸契約 §5.1](snapshot-transport.md#51-format-200-固定配置) 定位。兩表的 PK、欄序、型別及邏輯參照不變，也沒有 row_index/base。名稱搜尋與一般 facet 仍用 current／display 的名稱閉包；同名規則／構築功能按需取兩表，未完成須標「規則資料載入中／未備妥」，不能當作沒有同名限制或完整合法性。商品收錄、完整 printing 裝飾與 support 可背景／按需；保留其完整欄位與邏輯參照。
 
-表中 `id/face_id` 是 join 後欄名；詳情分片傳輸以 `row_index/face_ordinal` 取代這些重複鍵。`row_index` 是該啟動包欄位分割已排序 rows 的位置，不是永久 ID；快照清單 dependencies 必釘精確啟動包 key/hash，錯版本/越界/同 ordinal 重複皆拒絕。當啟動包排序改變，相關詳情分片必重建，不能沿用舊 `row_index`；這會增加更新片數，是省去複本鍵的明示取捨。display_ref 外的 `face_revision`（含其餘候選）使用獨立的 history 分片與完整列，不混在現行／暫顯詳情分片的 columns。欄位分割的 columns/type 白名單由 format 固定，files.role 指儲存層，`row_counts` 按欄位分割實際列數計；producer 另外驗 join 後邏輯主鍵唯一、必填欄齊與無欄位重複。printing.faces 兩片以 `(printing.id,face_id)` 一對一合併；translation 子陣列按 `field/ordinal/target_lang` 合併且不重複。完整文字包只是這些欄位分割的容器聯集，仍維持分割，不額外打包全欄複本。owner/bucket 穩定，不因分片切換改永久 ID；字典選用狀態變更可讓該 bucket 的欄位分割內容更新。
+表中 `id/face_id` 是 join 後欄名；詳情分片傳輸以 `row_index/face_ordinal` 取代這些重複鍵。`row_index` 是該啟動包欄位分割已排序 rows 的位置，不是永久 ID；快照清單 dependencies 必釘精確啟動包 key/hash，錯版本/越界/同 ordinal 重複皆拒絕。當啟動包排序改變，相關詳情分片必重建，不能沿用舊 `row_index`；這會增加更新片數，是省去複本鍵的明示取捨。display_ref 外的 `face_revision`（含其餘候選）使用獨立的 history 分片與完整列，不混在現行／暫顯詳情分片的 columns。欄位分割的 columns/type 白名單由 format 固定，files.role 指下載類別，與欄位 partition 解耦，`row_counts` 按欄位分割實際列數計；producer 另外驗 join 後邏輯主鍵唯一、必填欄齊與無欄位重複。printing.faces 兩片以 `(printing.id,face_id)` 一對一合併；translation 子陣列按 `field/ordinal/target_lang` 合併且不重複。完整文字包只是這些欄位分割的容器聯集，仍維持分割，不額外打包全欄複本。owner/bucket 穩定，不因分片切換改永久 ID；字典選用狀態變更可讓該 bucket 的欄位分割內容更新。
 
 `card_facet/printing_facet/rules_facet` 只是 reader 建出的索引視圖，**不出貨三份 facet 列**。職業/作品/類型/數值/特性從現行 `face_revision`；無 current 的表記未定依 §2.3 的暫顯／候選及未定 facet 規則，不因此隱藏卡片；稀有度/標誌/圖從 printing 與裝飾片；三語名字從 name 的 `FieldTranslation→translation→text_unit`，缺譯 state=missing 並回原文；引擎五態按 `Support/region_blocks` 推導。Q&A/errata 的存在與否用快照清單的兩個稀疏 card ID 集合 `qa_card_ids/errata_card_ids`，加 `source_windows` 覆蓋判 present/absent/unknown，無閉包不能假 absent。兩集合是唯一額外 facet 摘要，容量另量。`rules_facet` 從已下載 rules/profile/restriction 與指定日期計算，不存第二份每卡/賽制摘要；也不能把單卡摘要當整副牌合法性。
 
 依使用者 2026-09-30 的規格變更（build-db §15），卡包（`set=`）facet 由已登錄的 `printing.home_set_id` 建立，以 `product_family.code` 為篩選值，並限定 `printing.region` 為全站目前選定的版本（`jp`／`en`），兩區結果不混。合併卡片顯示也只使用命中的版次；`card.home_set_id` 不代替這項篩選。商品與收錄（`product`／`printing_product`）供單卡頁補充資訊與連結，不作卡包（`set=`）facet，也不由卡號前綴推斷商品收錄。初收錄（首次／再錄）是獨立 facet，可依收錄資料建立；資料缺少或狀態未知時標示 coverage，不因此隱藏卡片（build-db §15 的協調者決定）。
 
-啟動包支援 current／display 的名稱與全部 facet；無唯一 display 或其餘候選的 facet 依 §2.3 按需補載，未完成須標部分索引；效果全文仍 Worker 掃詳情分片，查圖分組另載 art。reader 建完 typed posting indexes 後**丟棄啟動包 tuple 陣列與 JSON 解碼字串**，數值進 TypedArray、code 進小整數字典，文字/不可丟欄位進唯一字串池或緊湊欄式 store；view 僅持 ordinal/ID，不能閉包引用原 row。IndexedDB 索引依快照清單 hash 隔離，不能形成第二真值。手機驗收量「建索引後常駐」JS heap＋ArrayBuffer/字串池、詳情 LRU/當頁 view 與更新期間峰值；48/80 MiB 門檻待手機實測驗收。
+基本目錄完成表示所選區的名稱／卡號／基本 facet 可完整搜尋，並不表示稀有度／異圖、機制、Q&A／勘誤、效果全文與規則資料全部就緒。非 display 候選的進階用途按需且明示未備妥；不得回部分卡片結果。reader 建完索引後丟棄原始 tuple／解碼字串，保留 TypedArray、唯一字串池與緊湊欄式 store；view 只持 ID／ordinal。基本文字就緒、日文依據／標註未備妥、完整檢視缺來源依[公開 annotation §4.1](public-annotation.md#41-三種就緒狀態與部分-reader)。
 
 `complete_mode=include/exclude` 先在快照清單 keyword universe U 解碼 complete；`partial_mode` 再於 `U\complete` 解碼 partial。各集合選較短的正集/補集，同長選 include，列表長度不得超過其基底一半；兩集合解碼後互斥。`complete_all=true` 時 mode 皆 include、列表皆空。未知=`U\(complete∪partial)`，不因壓縮改成 absent。這個編碼也需 column-partition-v1 reader 能力，不能讓舊 reader 把補集當正集。
 
@@ -405,6 +404,4 @@ digital_face／digital_text 留建置端，沒有資產採納就不出 digital a
 | digital_card／link／endpoint 引用缺目標，或把凍結目錄全部當必要閉包 | 拒絕缺引用；只投影實際有效關係所需內容 |
 | 同名連結被拿來授官方譯名、概念、圖或語音，或空 coverage 被說成無對應 | 不授權；各入口仍驗自己的採納／來源條件，未知如實呈現 |
 
-正式容量與變動報告依所宣告版本的固定配置及既有預算量測；3.0 沿用 2.0 分片參數，仍須重測新資料。
-完整文字或單片超限即停止發布效能驗收，不放寬門檻；啟動包超過 2 MiB 交維護者決定，
-不自動改 N／格式。保留窗口依 §4.1，不永久保存歷史快照。
+正式容量與變動報告依所宣告版本及 [size-budget](size-budget.md) 量測。完整文字或資料檔超上限不能宣稱發布效能驗收通過；基本目錄略超 Brotli 2 MiB 報精確差額，明顯超出才交維護者。不自動改 N 或發布後格式；保留窗口依 §4.1，不永久保存歷史快照。
