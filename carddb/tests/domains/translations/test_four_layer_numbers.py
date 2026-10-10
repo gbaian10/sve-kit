@@ -46,6 +46,23 @@ def test_disjunct_counts_require_a_shared_np_and_legal_units(raw: str) -> None:
 @pytest.mark.parametrize(
     ("raw", "role", "unit"),
     [
+        ("仮。自分の墓場の仮N族・フォロワー２枚を選ぶ。", "selection_count", "枚"),
+        (
+            "仮。相手の場の【仮状態】状態のフォロワー２体まで選ぶ。",
+            "selection_count",
+            "体",
+        ),
+        (
+            "仮。自分の墓場の元のコストX以下の「仮族・フォロワーか別族・アミュレット」２枚を選ぶ。",
+            "selection_count",
+            "枚",
+        ),
+        (
+            "仮。自分の墓場の{ラストワード}を持つ{仮クラス}フォロワー２枚を選ぶ。",
+            "selection_count",
+            "枚",
+        ),
+        ("仮。{進化}を持つ自分の仮族・フォロワー２体を選ぶ。", "selection_count", "体"),
         (
             "仮。自分の墓場のスペルをカード名が異なるように２枚まで選ぶ。",
             "selection_count",
