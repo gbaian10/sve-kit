@@ -1,26 +1,34 @@
 import type { Region } from "../../domain/search"
-import type { SearchPage, SearchQuery } from "./index"
+import type { QueryFailure, SearchPage, SearchQuery } from "./index"
 import type { LoadRequest, SearchEvent, SearchMetrics, SearchRequest } from "./messages"
 
 type SearchResult =
   | { readonly phase: "pending" }
-  | { readonly phase: "error"; readonly message: string }
+  | { readonly phase: "error"; readonly error: QueryFailure }
   | {
       readonly phase: "complete"
       readonly queryId: number
       readonly generation: number
+      readonly root: string
       readonly page: SearchPage
     }
-
+export interface SearchChannelStatus {
+  readonly lastInput: SearchQuery | null
+  readonly result: SearchResult
+}
+interface LoadFailure {
+  readonly kind: "load-failed" | "worker-failed" | "cancelled"
+  readonly message: string
+}
 export interface SearchStatus {
   readonly phase: "downloading" | "ready" | "error"
   readonly generation: number | null
-  /** Region of the active generation; only queries for it are answered. */
+  /** The active root and edition stay attached to old results during a replacement load. */
+  readonly root?: string
   readonly edition?: Region
-  readonly lastInput: SearchQuery | null
-  readonly result: SearchResult
+  readonly loading?: { readonly root: string; readonly edition: Region }
   readonly updating: boolean
-  readonly error?: string
+  readonly error?: LoadFailure
   readonly progress?: {
     readonly done: number
     readonly total: number
@@ -28,7 +36,6 @@ export interface SearchStatus {
   }
   readonly dataVersion?: string
   readonly manifestHash?: string
-  readonly metrics?: SearchMetrics
 }
 export interface SearchTransport {
   readonly send: (request: SearchRequest) => void
@@ -56,31 +63,133 @@ const browserTransport: SearchTransportFactory = (receive, failed) => {
   }
 }
 
-/** Hook-ready external store: only the last input survives a download, and results are page-sized. */
-export class SearchSession {
-  private readonly factory: SearchTransportFactory
-  /** Undefined after the Worker failed; the next load starts a new one. */
-  private transport: SearchTransport | undefined
+/** A channel has its own last input and result; the owner holds the shared Worker generation. */
+export class SearchChannel {
   private readonly listeners = new Set<() => void>()
-  private status: SearchStatus = {
-    phase: "downloading",
-    generation: null,
-    lastInput: null,
-    result: { phase: "pending" },
-    updating: false,
-  }
-  private nextGeneration = 0
-  private staging: number | null = null
+  private status: SearchChannelStatus = { lastInput: null, result: { phase: "pending" } }
   private queryId = 0
+  private disposed = false
+
+  private readonly owner: SearchSession
+  readonly id: number
+
+  constructor(owner: SearchSession, id: number) {
+    this.owner = owner
+    this.id = id
+  }
+
+  getStatus = (): SearchChannelStatus => this.status
+  subscribe = (listener: () => void): (() => void) => {
+    this.listeners.add(listener)
+    return () => {
+      this.listeners.delete(listener)
+    }
+  }
+  private publish(status: SearchChannelStatus): void {
+    if (this.disposed) return
+    this.status = status
+    for (const listener of this.listeners) listener()
+  }
+  search(query: SearchQuery): void {
+    if (this.disposed) return
+    this.queryId += 1
+    this.publish({ lastInput: structuredClone(query), result: { phase: "pending" } })
+    this.refresh(false)
+  }
+  refresh(invalidate = true): void {
+    if (this.disposed) return
+    if (invalidate) this.queryId += 1
+    const status = this.owner.getStatus()
+    this.publish({
+      ...this.status,
+      result:
+        status.phase === "error"
+          ? {
+              phase: "error",
+              error: {
+                kind: "load-unavailable",
+                message: status.error?.message ?? "search unavailable",
+              },
+            }
+          : { phase: "pending" },
+    })
+    const query = this.status.lastInput
+    this.checkAvailability()
+    if (status.generation !== null && query && query.edition === status.edition)
+      this.owner.send({
+        kind: "search",
+        generation: status.generation,
+        channelId: this.id,
+        queryId: this.queryId,
+        query,
+      })
+  }
+  checkAvailability(): void {
+    const status = this.owner.getStatus()
+    const query = this.status.lastInput
+    if (
+      query &&
+      status.generation !== null &&
+      query.edition !== status.edition &&
+      status.loading?.edition !== query.edition
+    )
+      this.publish({
+        ...this.status,
+        result: {
+          phase: "error",
+          error: { kind: "edition-not-ready", message: "edition is not ready" },
+        },
+      })
+  }
+  receive(event: Extract<SearchEvent, { kind: "result" | "query-error" }>): void {
+    const status = this.owner.getStatus()
+    if (this.disposed || event.generation !== status.generation || event.queryId !== this.queryId)
+      return
+    this.publish({
+      ...this.status,
+      result:
+        event.kind === "result"
+          ? {
+              phase: "complete",
+              queryId: this.queryId,
+              generation: event.generation,
+              root: status.root ?? "",
+              page: event.page,
+            }
+          : { phase: "error", error: event.error },
+    })
+  }
+  dispose(): void {
+    if (this.disposed) return
+    this.disposed = true
+    this.listeners.clear()
+    this.owner.closeChannel(this.id)
+  }
+}
+
+/** One owner serves any number of independent hook-ready query stores. */
+export class SearchSession {
+  private readonly listeners = new Set<() => void>()
+  private readonly channels = new Map<number, SearchChannel>()
+  private transport: SearchTransport | undefined
+  private status: SearchStatus = { phase: "downloading", generation: null, updating: false }
+  private nextGeneration = 0
+  private nextChannel = 0
+  private staging: number | null = null
   private loadRequest: LoadRequest | undefined
   private disposed = false
 
-  constructor(factory: SearchTransportFactory = browserTransport) {
+  private readonly factory: SearchTransportFactory
+  private readonly onMetrics: ((metrics: SearchMetrics) => void) | undefined
+
+  constructor(
+    factory: SearchTransportFactory = browserTransport,
+    onMetrics?: (metrics: SearchMetrics) => void,
+  ) {
     this.factory = factory
+    this.onMetrics = onMetrics
     this.transport = this.connect()
   }
-
-  /** Events of a Worker that was already replaced or failed must not touch the current status. */
   private connect(): SearchTransport {
     const transport = this.factory(
       (event) => {
@@ -92,22 +201,34 @@ export class SearchSession {
     )
     return transport
   }
-
   getStatus = (): SearchStatus => this.status
-
   subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener)
     return () => {
       this.listeners.delete(listener)
     }
   }
-
+  createChannel(): SearchChannel {
+    if (this.disposed) throw new Error("search session is disposed")
+    const channel = new SearchChannel(this, ++this.nextChannel)
+    this.channels.set(channel.id, channel)
+    return channel
+  }
+  send(request: SearchRequest): void {
+    if (!this.disposed) this.transport?.send(request)
+  }
+  closeChannel(id: number): void {
+    this.channels.delete(id)
+    this.send({ kind: "close-channel", channelId: id })
+  }
   private publish(status: SearchStatus): void {
     if (this.disposed) return
     this.status = status
     for (const listener of this.listeners) listener()
   }
-
+  private refreshChannels(): void {
+    for (const channel of this.channels.values()) channel.refresh()
+  }
   load(base: string, edition: Region, entry: "index" | "preview" = "index"): void {
     if (this.disposed) return
     const generation = ++this.nextGeneration
@@ -119,133 +240,93 @@ export class SearchSession {
       ...previous,
       phase: active ? "ready" : "downloading",
       updating: active,
-      // An earlier failure without an index is not the answer to the input kept for this load.
-      ...(active ? {} : { result: { phase: "pending" as const } }),
+      ...(active ? {} : { root: base }),
+      loading: { root: base, edition },
     })
-    // Replacing a failed Worker here rather than in its error handler means a Worker that fails
-    // while starting cannot respawn in a loop.
+    if (!active) this.refreshChannels()
+    // Waiting for an explicit load avoids an endless respawn when a Worker fails during startup.
     this.transport ??= this.connect()
     this.transport.send(this.loadRequest)
   }
-
-  search(query: SearchQuery): void {
-    if (this.disposed) return
-    this.queryId += 1
-    this.publish({
-      ...this.status,
-      lastInput: structuredClone(query),
-      result:
-        this.status.phase === "error"
-          ? { phase: "error", message: this.status.error ?? "search unavailable" }
-          : { phase: "pending" },
-    })
-    this.dispatch()
-  }
-
-  private dispatch(): void {
-    const { generation, edition, lastInput } = this.status
-    if (generation !== null && lastInput && lastInput.edition === edition)
-      this.transport?.send({ kind: "search", generation, queryId: this.queryId, query: lastInput })
-  }
-
   private receive(event: SearchEvent): void {
     if (this.disposed) return
-    if (event.kind === "result" || (event.kind === "error" && event.queryId !== undefined)) {
-      if (event.generation !== this.status.generation || event.queryId !== this.queryId) return
-      this.publish({
-        ...this.status,
-        result:
-          event.kind === "result"
-            ? {
-                phase: "complete",
-                queryId: this.queryId,
-                generation: event.generation,
-                page: event.page,
-              }
-            : { phase: "error", message: event.message },
-      })
+    if (event.kind === "result" || event.kind === "query-error") {
+      this.channels.get(event.channelId)?.receive(event)
       return
     }
     if (event.kind === "ready") {
-      // The Worker activates every generation it finishes, even one whose ready crossed a cancel or
-      // newer load, and drops queries for any other generation, so the session follows it.
+      // A ready can cross a cancel or a newer load; follow the generation the Worker actually uses.
       if (this.status.generation !== null && event.generation <= this.status.generation) return
       if (event.generation === this.staging) this.staging = null
-      const { progress } = this.status
-      this.queryId += 1
+      const { progress, loading } = this.status
       this.publish({
         phase: "ready",
         generation: event.generation,
         edition: event.edition,
-        lastInput: this.status.lastInput,
-        result: { phase: "pending" },
+        root: event.root,
         updating: this.staging !== null,
-        ...(this.staging !== null && progress ? { progress } : {}),
+        ...(this.staging !== null ? { progress, loading } : {}),
         dataVersion: event.dataVersion,
         manifestHash: event.manifestHash,
-        metrics: event.metrics,
       })
-      this.dispatch()
+      this.refreshChannels()
+      this.onMetrics?.(event.metrics)
       return
     }
     if (event.generation !== this.staging) return
-    if (event.kind === "progress")
+    if (event.kind === "progress") {
       this.publish({
         ...this.status,
         progress: { done: event.done, total: event.total, persistent: event.persistent },
       })
-    else {
+    } else {
       this.staging = null
+      const { loading: _loading, ...previous } = this.status
       this.publish({
-        ...this.status,
-        phase: this.status.generation === null ? "error" : "ready",
+        ...previous,
+        phase: previous.generation === null ? "error" : "ready",
         updating: false,
-        error: event.message,
-        ...(this.status.generation === null
-          ? { result: { phase: "error" as const, message: event.message } }
-          : {}),
+        error: { kind: "load-failed", message: event.message },
       })
+      if (previous.generation === null) this.refreshChannels()
+      else for (const channel of this.channels.values()) channel.checkAvailability()
     }
   }
-
   private failed(): void {
     this.transport?.dispose()
     this.transport = undefined
     this.staging = null
-    this.queryId += 1
     this.publish({
       phase: "error",
       generation: null,
-      lastInput: this.status.lastInput,
-      result: { phase: "error", message: "search worker failed" },
+      ...(this.status.root ? { root: this.status.root } : {}),
       updating: false,
-      error: "search worker failed",
+      error: { kind: "worker-failed", message: "search worker failed" },
     })
+    this.refreshChannels()
   }
-
   cancel(): void {
     if (this.staging === null || this.disposed) return
-    this.transport?.send({ kind: "cancel", generation: this.staging })
+    this.send({ kind: "cancel", generation: this.staging })
     this.staging = null
+    const { loading: _loading, ...previous } = this.status
     this.publish({
-      ...this.status,
-      phase: this.status.generation === null ? "error" : "ready",
+      ...previous,
+      phase: previous.generation === null ? "error" : "ready",
       updating: false,
-      error: "download cancelled",
-      ...(this.status.generation === null
-        ? { result: { phase: "error" as const, message: "download cancelled" } }
-        : {}),
+      error: { kind: "cancelled", message: "download cancelled" },
     })
+    if (previous.generation === null) this.refreshChannels()
+    else for (const channel of this.channels.values()) channel.checkAvailability()
   }
-
   retry(): void {
-    if (!this.loadRequest || this.disposed) return
-    this.load(this.loadRequest.base, this.loadRequest.edition, this.loadRequest.entry)
+    if (this.loadRequest && !this.disposed)
+      this.load(this.loadRequest.base, this.loadRequest.edition, this.loadRequest.entry)
   }
-
   dispose(): void {
     this.disposed = true
     this.transport?.dispose()
+    for (const channel of this.channels.values()) channel.dispose()
     this.listeners.clear()
   }
 }

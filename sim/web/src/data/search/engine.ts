@@ -1,4 +1,3 @@
-import { catalogFromIndex } from "../catalog"
 import { fetchBytes, type Fetcher } from "../cdn"
 import { decodeMessage } from "../format-v3/decode-message"
 import { SnapshotError } from "../format-v3/errors"
@@ -17,7 +16,7 @@ import { validateIndex2 } from "../index-entry"
 import { transferDigest } from "../integrity"
 import { SearchBlobs } from "./blobs"
 import { BootstrapColumns } from "./bootstrap"
-import { SearchIndex } from "./index"
+import { SearchIndex, SearchQueryError } from "./index"
 import type { BootstrapPlan, LoadRequest, SearchEvent, SearchRequest } from "./messages"
 
 const defaultPlan: BootstrapPlan = (_manifest, files) =>
@@ -31,6 +30,11 @@ export class SearchEngine {
   private readonly plan: BootstrapPlan
   private staging: { generation: number; abort: AbortController } | undefined
   private active: { generation: number; index: SearchIndex } | undefined
+  private readonly queries = new Map<
+    number,
+    { request: Extract<SearchRequest, { kind: "search" }>; settled: () => void }
+  >()
+  private queryTimer: ReturnType<typeof setTimeout> | undefined
   private pending: Promise<void> = Promise.resolve()
 
   constructor(
@@ -48,30 +52,64 @@ export class SearchEngine {
       if (this.staging?.generation === request.generation) this.staging.abort.abort()
       return Promise.resolve()
     }
+    if (request.kind === "close-channel") {
+      this.queries.get(request.channelId)?.settled()
+      this.queries.delete(request.channelId)
+      return Promise.resolve()
+    }
     if (request.kind === "search") {
       if (this.active?.generation !== request.generation) return Promise.resolve()
-      try {
-        this.emit({
-          kind: "result",
-          generation: request.generation,
-          queryId: request.queryId,
-          page: this.active.index.search(request.query),
-        })
-      } catch (error) {
-        this.emit({
-          kind: "error",
-          generation: request.generation,
-          queryId: request.queryId,
-          message: error instanceof Error ? error.message : "search failed",
-        })
-      }
-      return Promise.resolve()
+      const previous = this.queries.get(request.channelId)
+      if (previous && previous.request.queryId >= request.queryId) return Promise.resolve()
+      previous?.settled()
+      const result = new Promise<void>((settled) =>
+        this.queries.set(request.channelId, { request, settled }),
+      )
+      // A task boundary admits queued messages before scanning; each channel keeps its latest input.
+      this.queryTimer ??= setTimeout(() => {
+        this.flushQueries()
+      }, 0)
+      return result
     }
     this.staging?.abort.abort()
     const staging = { generation: request.generation, abort: new AbortController() }
     this.staging = staging
     this.pending = this.pending.then(() => this.load(request, staging.abort.signal))
     return this.pending
+  }
+
+  private flushQueries(): void {
+    this.queryTimer = undefined
+    const queries = [...this.queries.values()]
+    this.queries.clear()
+    for (const { request, settled } of queries) {
+      try {
+        if (this.active?.generation !== request.generation) continue
+        this.emit({
+          kind: "result",
+          generation: request.generation,
+          channelId: request.channelId,
+          queryId: request.queryId,
+          page: this.active.index.search(request.query),
+        })
+      } catch (error) {
+        this.emit({
+          kind: "query-error",
+          generation: request.generation,
+          channelId: request.channelId,
+          queryId: request.queryId,
+          error:
+            error instanceof SearchQueryError
+              ? error.failure
+              : {
+                  kind: "query-failed",
+                  message: error instanceof Error ? error.message : "search failed",
+                },
+        })
+      } finally {
+        settled()
+      }
+    }
   }
 
   private async prepare(request: LoadRequest, signal: AbortSignal) {
@@ -156,7 +194,7 @@ export class SearchEngine {
       let parseMs = manifestParseMs
       let mark = performance.now()
       const blobs = new SearchBlobs(request.base, this.fetcher, this.storage)
-      const bootstrap = new BootstrapColumns()
+      let bootstrap: BootstrapColumns | undefined = new BootstrapColumns()
       const faces = new Map<string, string>()
       let config: JsonObject | undefined
       let maxRawBytes = manifestRawBytes
@@ -225,17 +263,19 @@ export class SearchEngine {
         printing: bootstrap.rows("printing"),
         face: bootstrap.rows("face"),
       })
-      const index = new SearchIndex(
-        catalogFromIndex(bootstrap.index(), bootstrap.rows, config),
-        request.edition,
-      )
+      bootstrap.seal()
+      const stagingAllocation = bootstrap.allocation()
+      const index = new SearchIndex(bootstrap, request.edition)
       buildMs += performance.now() - mark
       signal.throwIfAborted()
+      bootstrap = undefined
+      faces.clear()
       this.active = { generation: request.generation, index }
       this.emit({
         kind: "ready",
         generation: request.generation,
         edition: request.edition,
+        root: request.base,
         dataVersion,
         manifestHash,
         metrics: {
@@ -246,9 +286,15 @@ export class SearchEngine {
           wallMs: performance.now() - start,
           firstFileMs,
           firstSetMs,
+          stagingArrayBuffers: stagingAllocation.arrayBuffers,
+          stagingStringBytes: stagingAllocation.stringBytes,
           ...index.allocation(),
         },
       })
+      await blobs.retainPlan(
+        request.edition,
+        [...files.values()].filter((file): file is JsonObject => file !== undefined),
+      )
     } catch (error) {
       if (!signal.aborted)
         this.emit({

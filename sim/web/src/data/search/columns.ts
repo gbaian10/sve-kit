@@ -4,19 +4,31 @@ import type { JsonObject, JsonValue } from "../format-v3/json"
 export class StringPool {
   private readonly values: string[] = []
   private readonly ordinals = new Map<string, number>()
-  private nodes = new Float64Array(1024)
+  private nodes = new Uint32Array(1024)
   private used = 5
+  private numbers = new Float64Array(32)
+  private numberCount = 0
   private readonly stringNodes = new Map<number, number>()
 
-  constructor() {
+  private readonly internIds: boolean
+
+  constructor(internIds = true) {
+    this.internIds = internIds
     this.nodes.set([0, 2, 0, 2, 1])
   }
 
-  intern(value: string): number {
-    const found = this.ordinals.get(value)
-    if (found !== undefined) return found
+  retain(value: string): number {
     const ordinal = this.values.length
     this.values.push(value)
+    return ordinal
+  }
+
+  intern(value: string, identity = false): number {
+    // Staging IDs are mostly unique; retaining their strings avoids a second large identity map.
+    if (!this.internIds && identity) return this.retain(value)
+    const found = this.ordinals.get(value)
+    if (found !== undefined) return found
+    const ordinal = this.retain(value)
     this.ordinals.set(value, ordinal)
     return ordinal
   }
@@ -25,28 +37,38 @@ export class StringPool {
     return this.values[ordinal] ?? ""
   }
 
-  encode(value: JsonValue): number {
+  encode(value: JsonValue, identity = false): number {
     let cells: number[]
     if (value === null) return 0
     if (typeof value === "boolean") return value ? 3 : 1
-    if (typeof value === "number") cells = [1, value]
-    else if (typeof value === "string") {
-      const ordinal = this.intern(value)
+    if (typeof value === "number") {
+      if (this.numberCount === this.numbers.length) {
+        const grown = new Float64Array(this.numbers.length * 2)
+        grown.set(this.numbers)
+        this.numbers = grown
+      }
+      cells = [1, this.numberCount]
+      this.numbers[this.numberCount++] = value
+    } else if (typeof value === "string") {
+      const ordinal = this.intern(value, identity)
       const existing = this.stringNodes.get(ordinal)
       if (existing !== undefined) return existing
       cells = [3, ordinal]
-      this.stringNodes.set(ordinal, this.used)
+      if (this.internIds || !identity) this.stringNodes.set(ordinal, this.used)
     } else if (Array.isArray(value))
-      cells = [4, value.length, ...value.map((item) => this.encode(item))]
+      cells = [4, value.length, ...value.map((item) => this.encode(item, identity))]
     else
       cells = [
         5,
         Object.keys(value).length,
-        ...Object.entries(value).flatMap(([key, item]) => [this.intern(key), this.encode(item)]),
+        ...Object.entries(value).flatMap(([key, item]) => [
+          this.intern(key),
+          this.encode(item, key === "id" || key.endsWith("_id")),
+        ]),
       ]
     const offset = this.used
     if (offset + cells.length > this.nodes.length) {
-      const grown = new Float64Array(Math.max(this.nodes.length * 2, offset + cells.length))
+      const grown = new Uint32Array(Math.max(this.nodes.length * 2, offset + cells.length))
       grown.set(this.nodes)
       this.nodes = grown
     }
@@ -59,7 +81,7 @@ export class StringPool {
     const value = this.nodes[offset + 1] ?? 0
     switch (this.nodes[offset]) {
       case 1:
-        return value
+        return this.numbers[value] ?? 0
       case 2:
         return value === 1
       case 3:
@@ -86,12 +108,13 @@ export class StringPool {
 
   seal(): void {
     this.nodes = this.nodes.slice(0, this.used)
+    this.numbers = this.numbers.slice(0, this.numberCount)
     this.ordinals.clear()
     this.stringNodes.clear()
   }
 
   bufferBytes(): number {
-    return this.nodes.byteLength
+    return this.nodes.byteLength + this.numbers.byteLength
   }
 
   bytes(): number {
@@ -101,7 +124,7 @@ export class StringPool {
 
 interface Column {
   readonly kinds: Uint8Array
-  readonly values: Float64Array
+  readonly values: Uint32Array
 }
 interface Block {
   readonly start: number
@@ -125,20 +148,27 @@ export class Columns {
     const columns = new Map<string, Column>()
     for (const name of names) {
       const kinds = new Uint8Array(rows.length)
-      const values = new Float64Array(rows.length)
+      const values = new Uint32Array(rows.length)
       rows.forEach((row, ordinal) => {
         const value = row[name]
         if (value === null || value === undefined) return
         if (typeof value === "number") {
-          kinds[ordinal] = 1
-          values[ordinal] = value
+          if (Number.isInteger(value) && value >= 0 && value <= 0xffff_ffff) {
+            kinds[ordinal] = 1
+            values[ordinal] = value
+          } else {
+            kinds[ordinal] = 4
+            values[ordinal] = this.pool.encode(value)
+          }
         } else if (typeof value === "boolean") {
           kinds[ordinal] = 2
           values[ordinal] = Number(value)
         } else {
           kinds[ordinal] = typeof value === "string" ? 3 : 4
           values[ordinal] =
-            typeof value === "string" ? this.pool.intern(value) : this.pool.encode(value)
+            typeof value === "string"
+              ? this.pool.intern(value, name === "id" || name.endsWith("_id"))
+              : this.pool.encode(value)
         }
       })
       columns.set(name, { kinds, values })
@@ -194,11 +224,13 @@ export class Columns {
     return block ? this.rowAt(block, ordinal - block.start) : {}
   }
 
-  rows(): JsonObject[] {
-    const rows: JsonObject[] = []
+  *iterate(): Generator<JsonObject> {
     for (const block of this.blocks)
-      for (let offset = 0; offset < block.length; offset += 1) rows.push(this.rowAt(block, offset))
-    return rows
+      for (let offset = 0; offset < block.length; offset += 1) yield this.rowAt(block, offset)
+  }
+
+  rows(): JsonObject[] {
+    return [...this.iterate()]
   }
 
   bytes(): number {

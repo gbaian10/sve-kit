@@ -99,28 +99,17 @@ function nullableInteger(value: JsonValue | undefined): number | null {
   return value === null || value === undefined ? null : integerValue(value)
 }
 
-export function createCatalog(snapshot: LoadedSnapshot): Catalog {
-  const index = createCardIndex(snapshot)
-  const rows = (table: string): Row[] =>
-    snapshot.bootstrap
-      .filter((fragment) => fragment.table === table)
-      .flatMap((fragment) => fragment.rows)
-  return catalogFromIndex(index, rows, snapshot.config)
-}
-
-/** Worker stores can materialize one table at a time without retaining decoded fragments. */
-export function catalogFromIndex(
+/** The Worker consumes one card at a time, without constructing another region's summaries. */
+export function* catalogCards(
   index: CardIndex,
-  rows: (table: string) => Row[],
-  config: JsonObject,
-): Catalog {
-  const sets = new Set(index.families.map((family) => stringValue(family["code"])))
-  const classCodes = rows("vocabulary")
-    .filter((row) => row["kind"] === "class" && row["active"] === true)
-    .map((row) => stringValue(row["code"]))
+  cards: Iterable<Row>,
+  aliasRows: readonly Row[],
+  sets: ReadonlySet<string>,
+  edition?: Region,
+): Generator<{ readonly entry: SearchEntry; readonly summaries: readonly CardSummary[] }> {
   // Aliases of kind `card` name the card by its id without the `c:` prefix (Code has no colon).
   const aliases = new Map<string, SearchName[]>()
-  for (const row of rows("search_alias")) {
+  for (const row of aliasRows) {
     if (row["kind"] !== "card") continue
     const lang = stringValue(row["lang"])
     if (!isTextLang(lang)) continue
@@ -130,12 +119,13 @@ export function catalogFromIndex(
       searchName(lang, stringValue(row["text"])),
     ])
   }
-  const entries: SearchEntry[] = []
-  const summaries = new Map<string, CardSummary>()
-  index.cards.forEach((card, order) => {
+  let order = -1
+  for (const card of cards) {
+    order += 1
+    const summaries: CardSummary[] = []
     const cardId = stringValue(card["id"])
     const front = index.facesOf(cardId)[0]
-    if (!front) return
+    if (!front) continue
     const faceId = stringValue(front["id"])
     const names: SearchName[] = []
     const seen = new Set<string>()
@@ -173,9 +163,10 @@ export function catalogFromIndex(
         seen.add(key)
         names.push(searchName(lang, text))
       }
+      if (edition !== undefined && region !== edition) continue
       for (const printing of index.printingsOf(cardId)) {
         if (printing["region"] !== region) continue
-        summaries.set(stringValue(printing["id"]), {
+        summaries.push({
           cardId,
           printingId: stringValue(printing["id"]),
           faceId,
@@ -192,7 +183,7 @@ export function catalogFromIndex(
     }
     const printings: SearchPrinting[] = index.printingsOf(cardId).flatMap((printing) => {
       const region = stringValue(printing["region"])
-      if (!isRegion(region)) return []
+      if (!isRegion(region) || (edition !== undefined && region !== edition)) return []
       const cardNo = stringValue(printing["card_no"])
       return [
         {
@@ -205,7 +196,7 @@ export function catalogFromIndex(
         },
       ]
     })
-    entries.push({
+    const entry: SearchEntry = {
       cardId,
       classCode,
       setId: stringValue(card["home_set_id"]),
@@ -214,8 +205,44 @@ export function catalogFromIndex(
       aliases: aliases.get(cardId) ?? [],
       printings,
       defaultPrinting,
-    })
-  })
+    }
+    if (edition !== undefined) {
+      if (printings.length === 0) continue
+      const preferred = defaultPrinting[edition] ?? printings[0]?.id
+      if (preferred !== undefined) defaultPrinting[edition] = preferred
+      const representative = summaries.find((summary) => summary.printingId === preferred)
+      yield {
+        entry: { ...entry, classCode: representative ? representative.classCode : entry.classCode },
+        summaries,
+      }
+    } else yield { entry, summaries }
+  }
+}
+
+export function createCatalog(snapshot: LoadedSnapshot): Catalog {
+  const index = createCardIndex(snapshot)
+  const rows = (table: string): Row[] =>
+    snapshot.bootstrap
+      .filter((fragment) => fragment.table === table)
+      .flatMap((fragment) => fragment.rows)
+  return catalogFromIndex(index, rows, snapshot.config)
+}
+
+function catalogFromIndex(
+  index: CardIndex,
+  rows: (table: string) => Row[],
+  config: JsonObject,
+): Catalog {
+  const sets = new Set(index.families.map((family) => stringValue(family["code"])))
+  const classCodes = rows("vocabulary")
+    .filter((row) => row["kind"] === "class" && row["active"] === true)
+    .map((row) => stringValue(row["code"]))
+  const entries: SearchEntry[] = []
+  const summaries = new Map<string, CardSummary>()
+  for (const card of catalogCards(index, index.cards, rows("search_alias"), sets)) {
+    entries.push(card.entry)
+    for (const summary of card.summaries) summaries.set(summary.printingId, summary)
+  }
   const classLabel = (code: string, lang: TextLang): string => {
     const row = index.vocabulary("class", code)
     if (!row) return code

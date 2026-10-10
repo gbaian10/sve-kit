@@ -64,7 +64,7 @@ function project(table: string, row: Row): Row {
 
 /** Only search columns survive ingestion; lookup maps contain ordinals instead of decoded rows. */
 export class BootstrapColumns {
-  readonly pool = new StringPool()
+  readonly pool = new StringPool(false)
   private readonly tables = new Map<string, Columns>()
 
   ingest(fragments: readonly Fragment[]): void {
@@ -92,6 +92,22 @@ export class BootstrapColumns {
         this.tables.set(name, table)
       }
       table.append(rows)
+    }
+  }
+
+  seal(): void {
+    this.pool.seal()
+  }
+
+  *cards(): Generator<Row> {
+    yield* this.tables.get("card")?.iterate() ?? []
+  }
+
+  allocation(): { readonly arrayBuffers: number; readonly stringBytes: number } {
+    return {
+      arrayBuffers:
+        this.pool.bufferBytes() + [...this.tables.values()].reduce((n, t) => n + t.bytes(), 0),
+      stringBytes: this.pool.bytes(),
     }
   }
 
@@ -149,8 +165,9 @@ export class BootstrapColumns {
         group("face", id).sort((a, b) => integerValue(a["ordinal"]) - integerValue(b["ordinal"])),
       printing: (id) => get("printing", id),
       printingsOf: (id) => group("printing", id),
-      printingByCardNo: (region, cardNo) =>
-        this.rows("printing").find((row) => row["region"] === region && row["card_no"] === cardNo),
+      printingByCardNo: () => {
+        throw new Error("printingByCardNo is unavailable in search staging")
+      },
       currentRevision,
       wording,
       displayRevision: (faceId, region) => {
@@ -162,10 +179,16 @@ export class BootstrapColumns {
           : undefined
       },
       family: (id) => get("product_family", id),
-      product: () => undefined,
+      product: () => {
+        throw new Error("product is unavailable in search staging")
+      },
       vocabulary: (kind, code) => get("vocabulary", `${kind}\u0000${code}`),
-      keyword: () => undefined,
-      support: () => undefined,
+      keyword: () => {
+        throw new Error("keyword is unavailable in search staging")
+      },
+      support: () => {
+        throw new Error("support is unavailable in search staging")
+      },
       textUnit: (id) => get("text_unit", id),
       translation: (id) => get("translation", id),
     }

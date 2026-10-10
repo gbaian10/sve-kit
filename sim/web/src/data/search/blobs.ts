@@ -1,3 +1,4 @@
+import type { Region } from "../../domain/search"
 import { fetchBytes, type Fetcher } from "../cdn"
 import { SnapshotError } from "../format-v3/errors"
 import { integerValue, type JsonObject, stringValue } from "../format-v3/json"
@@ -22,6 +23,35 @@ export class SearchBlobs {
           () => undefined,
         )
       : Promise.resolve(undefined)
+  }
+
+  async retainPlan(edition: Region, files: readonly JsonObject[]): Promise<void> {
+    const cache = await this.cache
+    if (!cache) return
+    const planPath = (region: Region) => new Request(`${this.base}/__sve-search-plan/${region}`).url
+    try {
+      const current = [
+        ...new Set(
+          files.map((file) => new Request(`${this.base}/${stringValue(file["path"])}`).url),
+        ),
+      ].sort()
+      const readPlan = async (region: Region): Promise<string[][]> => {
+        const response = await cache.match(planPath(region))
+        return response ? ((await response.json()) as string[][]) : []
+      }
+      const previous = await readPlan(edition)
+      const plans =
+        JSON.stringify(previous[0]) === JSON.stringify(current)
+          ? previous
+          : [current, ...previous].slice(0, 2)
+      const other = await readPlan(edition === "jp" ? "en" : "jp")
+      const retained = new Set([...plans.flat(), ...other.flat(), planPath("jp"), planPath("en")])
+      // Evict before writing metadata so a full cache can recover space for the next load.
+      for (const key of await cache.keys()) if (!retained.has(key.url)) await cache.delete(key)
+      await cache.put(planPath(edition), new Response(JSON.stringify(plans)))
+    } catch {
+      this.persistent = false
+    }
   }
 
   async read(file: JsonObject, signal: AbortSignal): Promise<Uint8Array> {

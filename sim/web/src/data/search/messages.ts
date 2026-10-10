@@ -1,7 +1,7 @@
 import type { Region } from "../../domain/search"
 import type { JsonObject } from "../format-v3/json"
 import type { Files } from "../format-v3/reader"
-import type { SearchPage, SearchQuery } from "./index"
+import type { QueryFailure, SearchPage, SearchQuery } from "./index"
 
 export interface LoadRequest {
   readonly kind: "load"
@@ -12,10 +12,12 @@ export interface LoadRequest {
 }
 export type SearchRequest =
   | LoadRequest
+  | { readonly kind: "close-channel"; readonly channelId: number }
   | { readonly kind: "cancel"; readonly generation: number }
   | {
       readonly kind: "search"
       readonly generation: number
+      readonly channelId: number
       readonly queryId: number
       readonly query: SearchQuery
     }
@@ -31,6 +33,8 @@ export interface SearchMetrics {
   readonly arrayBuffers: number
   readonly stringBytes: number
   readonly cards: number
+  readonly stagingArrayBuffers: number
+  readonly stagingStringBytes: number
 }
 export type SearchEvent =
   | {
@@ -44,6 +48,7 @@ export type SearchEvent =
       readonly kind: "ready"
       readonly generation: number
       readonly edition: Region
+      readonly root: string
       readonly dataVersion: string
       readonly manifestHash: string
       readonly metrics: SearchMetrics
@@ -51,14 +56,22 @@ export type SearchEvent =
   | {
       readonly kind: "result"
       readonly generation: number
+      readonly channelId: number
       readonly queryId: number
       readonly page: SearchPage
     }
   | {
       readonly kind: "error"
       readonly generation: number
-      readonly queryId?: number
+      readonly queryId?: never
       readonly message: string
+    }
+  | {
+      readonly kind: "query-error"
+      readonly generation: number
+      readonly channelId: number
+      readonly queryId: number
+      readonly error: QueryFailure
     }
 
 /** Packaging can change without changing how the worker stages and publishes a generation. */
