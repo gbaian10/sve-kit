@@ -41,6 +41,9 @@ _RULES: dict[CountContext, frozenset[str]] = {
     CountContext(
         "deploy.ex_token_follower.v1", "follower", ("ex",), True, "cardinality"
     ): frozenset({"枚", "体"}),
+    CountContext("select.card.v1", "card", ("ex",), True, "cardinality"): frozenset(
+        {"枚"}
+    ),
     CountContext(
         "select.card.v1", "follower", ("battlefield",), False, "cardinality"
     ): frozenset({"体"}),
@@ -147,7 +150,7 @@ _FILTER = (
     r"(?:(?:元の)?(?:コスト|攻撃力|体力)(?:N|X)(?:以下|以上)?の|"
     r"他の|表向きの|裏向きの|(?:進化前|進化後|エボルヴ|アドバンス)(?:の)?|(?:アクト|レスト|スタンド)状態の|これと同名を除く(?:・)?|"
     r"(?:【[^【】]+】(?:や|か)?)+を持つ|トリガーを持つ|【[^【】]+】状態の|カード名に『X』を含む|カード名に「[^「」]+」を含む|"
-    r"それぞれカード名が異なる|トークンでない|(?:これ|それ)によって破壊した|"
+    r"それぞれカード名が異なる|トークンでない|消滅させたフォロワーと同名の|(?:これ|それ)によって破壊した|"
     r"\{[^{}]+\}(?:を持つ|である|でない|の|・)?|" + _TRAIT + r")*"
 )
 _ONSET = r"(?:^|[、。:：}】（(]|か|と|は|が|として)"

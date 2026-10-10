@@ -349,8 +349,10 @@ def _ordinal_number(value: int, role: str, before: str, after: str) -> Number | 
 def _generic_number(
     value: int, before: str, after: str, unit: str | None
 ) -> Number | None:
-    if counter := _counter_number(value, before, after) or _event_count_number(
-        value, before, after
+    if counter := (
+        _counter_number(value, before, after)
+        or _event_count_number(value, before, after)
+        or _complete_action_number(value, before, after)
     ):
         return counter
     if compound := compound_selection(after, before):
@@ -381,6 +383,31 @@ def _generic_number(
             "up_to" if match["limit"] else "exact",
         )
     return _action_number(value, before, after)
+
+
+def _complete_action_number(value: int, before: str, after: str) -> Number | None:
+    """These actions name the complete counted object and operation in the source."""
+    if re.search(r"\{UB\}能力$", before) and re.match(
+        r"^つを元のコストを支払わずに発動する" + _END, after
+    ):
+        return Number("Nat", "count", value, "つ")
+    if count_context(before) is not None and re.match(
+        r"^体を指定し、ターンプレイヤーから順にそれを", after
+    ):
+        return _quantity("selection_count", value, "体")
+    if count_context(before) is not None and re.match(
+        r"^枚を場に出した状態でバトルを開始する" + _END, after
+    ):
+        return Number("Nat", "count", value, "枚")
+    if re.search(r"(?:^|[。:：}】])(?:『X』)+$", before) and re.match(
+        r"^枚ずつEXエリアに置く" + _END, after
+    ):
+        return Number("Nat", "count", value, "枚")
+    if re.search(r"(?:^|[。:：}】])『X』$", before) and re.match(
+        r"^枚か『X』N枚をEXエリアに置く" + _END, after
+    ):
+        return Number("Nat", "count", value, "枚")
+    return None
 
 
 def _set_number(value: int, before: str, after: str) -> Number | None:
@@ -480,6 +507,20 @@ def _event_count_number(value: int, before: str, after: str) -> Number | None:
 
 
 def _predicate_number(value: int, before: str, after: str) -> Number | None:
+    predicates = (
+        (r"このターン中にこれを含めて$", r"^枚以上プレイしていたなら"),
+        (
+            r"(?:自分|相手)のデッキの上を元のコスト(?:N|X)以下のフォロワーが$",
+            r"^枚公開されるまで公開する",
+        ),
+        (r"これによってカード名がそれぞれ異なる$", r"^枚のカードを公開したなら"),
+        (r"これによって消滅させたカードが$", r"^枚以上なら"),
+    )
+    if any(
+        re.search(prefix, before) and re.match(suffix + _END, after)
+        for prefix, suffix in predicates
+    ):
+        return Number("Nat", "threshold", value, "枚")
     if (unit := _event_predicate_unit(before)) and re.match(
         r"^" + unit + r"以上なら" + _END, after
     ):
@@ -557,12 +598,17 @@ def _counter_number(value: int, before: str, after: str) -> Number | None:
         r"^枚:これに融合カウンターN個を置く" + _END, after
     ):
         return Number("Nat", "count", value, "枚")
-    if re.search(r"(?:^|[。、:：}】])(?:自分の)?場の『X』$", before) and (
-        match := re.match(
-            r"^(?P<unit>枚|体|つ)の" + _COUNTER + r"N(?:個|つ)を取る" + _END, after
+    if (
+        re.search(r"(?:^|[。、:：}】])(?:自分の)?場の『X』$", before)
+        and re.match(r"^(?:枚|体|つ)の" + _COUNTER + r"N(?:個|つ)を取る" + _END, after)
+    ) or (
+        re.search(r"これか(?:自分|相手)のEXエリアのカード$", before)
+        and re.match(
+            r"^枚の" + _COUNTER + r"N個以上なら" + _END,
+            after,
         )
     ):
-        return Number("Nat", "count", value, match["unit"])
+        return Number("Nat", "count", value, after[0])
     if _COUNTER_OBJECT.search(before) and (match := _COUNTER_AMOUNT.match(after)):
         return (
             _quantity("counter_amount", value, match["unit"], "up_to")

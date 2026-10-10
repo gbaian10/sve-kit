@@ -9,6 +9,83 @@ from sve_carddb.domains.translations.four_layer_normalizer import normalize_sour
 from .test_four_layer_classification import classifier, source
 
 
+@pytest.mark.parametrize(
+    ("raw", "role"),
+    [
+        ("仮。このターン中にこれを含めて２枚以上プレイしていたなら、仮。", "threshold"),
+        (
+            "仮。自分のデッキの上を元のコストX以下のフォロワーが２枚公開されるまで公開する。",
+            "threshold",
+        ),
+        (
+            "仮。これによってカード名がそれぞれ異なる２枚のカードを公開したなら、仮。",
+            "threshold",
+        ),
+        ("仮。これによって消滅させたカードが２枚以上なら、仮。", "threshold"),
+        ("仮。それの{UB}能力２つを元のコストを支払わずに発動する。", "count"),
+        (
+            "仮。自身の場のフォロワー２体を指定し、ターンプレイヤーから順にそれを手札に戻す。",
+            "selection_count",
+        ),
+        (
+            "仮。自分のデッキから【スタートアミュレット】を持つカード２枚を場に出した状態でバトルを開始する。",
+            "count",
+        ),
+        ("仮。自分のEXエリアのトークン・カード２枚を選ぶ。", "selection_count"),
+        (
+            "仮。自分のデッキから「消滅させたフォロワーと同名のフォロワー」２枚まで探し、EXエリアに置く。",
+            "selection_count",
+        ),
+    ],
+)
+def test_complete_actions_and_event_predicates_prove_the_numeric_role(
+    raw: str, role: str
+) -> None:
+    engine = classifier(extra=("suffix_unit_items",))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[0].role == role
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "仮。このターン中にこれを含めて２枚以上不明していたなら、仮。",
+        "仮。これによってカード名がそれぞれ異なる２枚のカードを不明したなら、仮。",
+        "仮。それの{UB}能力２つを元のコストを支払わずに不明する。",
+        "仮。自分のEXエリアのトークン・カード２体を選ぶ。",
+    ],
+)
+def test_incomplete_event_or_execution_cannot_supply_a_numeric_role(raw: str) -> None:
+    engine = classifier(extra=("suffix_unit_items",))
+    field = normalize_source(raw, source(raw))
+    assert engine.recognize(raw, field.source, field.parts[0]).issues
+
+
+@pytest.mark.parametrize("action", ["２枚か『仮別名』３枚", "２枚ずつ"])
+def test_named_creation_count_does_not_infer_card_kind(action: str) -> None:
+    terms = (
+        Term("term:name.synthetic_first", "card_name", "仮名"),
+        Term("term:name.synthetic_second", "card_name", "仮別名"),
+    )
+    raw = f"仮。『仮名』{action}をEXエリアに置く。"
+    if action.endswith("ずつ"):
+        raw = raw.replace("ずつを", "ずつ")
+    engine = classifier(terms)
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert all(s.type != "CardKind" for s in frame.leaf_schema.slots)
+    assert all(s.role == "count" for s in frame.leaf_schema.slots if s.type == "Nat")
+
+
 @pytest.mark.parametrize("unit", ["枚", "体"])
 def test_complete_ex_token_deployment_has_its_own_unit_rule(unit: str) -> None:
     raw = f"仮。自分のEXエリアの仮族・トークン・フォロワー２{unit}まで場に出す。"
