@@ -77,8 +77,18 @@ def choice_alternative(raw: str, hint: Hint) -> bool:
         return False
     span = hint.source_segments[0]
     first_label = scope.intro.end() + scope.labels[0].start()
+    last_label = scope.intro.end() + scope.labels[-1].end()
+    prefix = raw[scope.intro.end() : span.start]
     return (
-        scope.intro.end() <= span.start < first_label
-        and raw[scope.intro.end() : span.start].endswith("なら、代わりに")
-        and re.match(r"^つまで[。:：]", raw[span.end : scope.end]) is not None
-    )
+        (
+            scope.intro.end() <= span.start < first_label
+            and prefix.endswith("なら、代わりに")
+        )
+        or (
+            last_label <= span.start < scope.end
+            and re.search(
+                r"(?:^|[。\n])【ネクロチャージ[ 　]*[0-9０-９]+】代わりに$", prefix
+            )
+            is not None
+        )
+    ) and (re.match(r"^つまで[。:：]", raw[span.end : scope.end]) is not None)
