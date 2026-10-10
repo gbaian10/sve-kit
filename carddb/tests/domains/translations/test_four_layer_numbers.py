@@ -9,6 +9,37 @@ from sve_carddb.domains.translations.four_layer_normalizer import normalize_sour
 from .test_four_layer_classification import classifier, source
 
 
+@pytest.mark.parametrize("malformed", [False, True])
+def test_counter_carrier_count_is_distinct_from_the_removed_counter_amount(
+    malformed: bool,
+) -> None:
+    term = Term("term:name.synthetic_carrier", "card_name", "仮器")
+    raw = "仮。場の『仮器』２つのギガカウンター３個を取る:仮。"
+    if malformed:
+        raw = raw.replace("ギガ", "未知")
+    engine = classifier((term,), extra=("suffix_unit_items", "named_counter_remove"))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    if malformed:
+        assert found.issues
+        with pytest.raises(ValueError, match="Unresolved source leaves"):
+            found.bind(field.source, part)
+        return
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert [s.role for s in frame.leaf_schema.slots if s.type == "Nat"] == [
+        "count",
+        "counter_amount",
+    ]
+    numeric = {s.name for s in frame.leaf_schema.slots if s.type == "Nat"}
+    assert [o.source_unit for o in binding.occurrences if o.slot in numeric] == [
+        "つ",
+        "個",
+    ]
+
+
 @pytest.mark.parametrize(
     ("np", "unit"),
     [("自分の場の仮族・カードが", "枚"), ("相手の場のフォロワーが", "体")],
@@ -29,6 +60,7 @@ def test_disjunct_counts_share_one_explicit_counted_set(np: str, unit: str) -> N
 @pytest.mark.parametrize(
     "raw",
     [
+        "仮。自分の能力は追加で２回不明する。",
         "仮。自分の墓場が２枚になるように自分の手札を捨てる。",
         "仮。自分の手札が２枚になるように自分の手札を不明する。",
         "自分の墓場のカードが２枚以上なら、仮。{起動}３枚以上なら、別。",
@@ -63,6 +95,16 @@ def test_unknown_or_mismatched_counted_constructions_cannot_bind(raw: str) -> No
 @pytest.mark.parametrize(
     ("raw", "role", "unit"),
     [
+        (
+            "仮。各プレイヤーは、自身の手札が２枚になるように自身の手札を捨てる。",
+            "existence_count",
+            "枚",
+        ),
+        (
+            "仮。相手のリーダーすべてに「自分の墓場の仮族・カード」２枚につきXダメージ。",
+            "group_divisor",
+            "枚",
+        ),
         (
             "仮。お互いの手札が２枚になるようにお互いの手札を捨てる。",
             "existence_count",
@@ -288,6 +330,7 @@ def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
             ["枚", "枚"],
         ),
         ("これを２回くり返す。", ["repeat_count"], ["回"]),
+        ("仮。誘発する自分の能力は追加で２回誘発する。", ["repeat_count"], ["回"]),
         (
             "自分の墓場のカードが２枚以上なら、仮。３枚以上なら、別。",
             ["existence_count", "existence_count"],

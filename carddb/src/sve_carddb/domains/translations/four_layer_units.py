@@ -202,12 +202,12 @@ _EVENT_FIELD = re.compile(
     + _FILTER
     + r"(?P<kind>フォロワー|アミュレット)(?:を|が)?$"
 )
-_QUOTED_SET = re.compile(_ONSET + r"「(?P<np>[^「」。:：]+)」(?:を|が)?$")
+_QUOTED_SET = re.compile(r"(?:" + _ONSET + r"|に)「(?P<np>[^「」。:：]+)」(?:を|が)?$")
 _LEADER = re.compile(r"(?:自分|相手)のリーダー(?:を|が)?$")
 _PLAYER = re.compile(r"(?:自分|相手)プレイヤー(?:を|が)?$")
 _COLLECTION = re.compile(
     _ONSET
-    + r"(?:(?:自分|相手|お互い|それ(?:のプレイヤー)?)の)?(?:現在の)?(?P<zone>墓場|手札|消滅領域)(?:が|に)?$"
+    + r"(?:(?:自分|相手|自身|お互い|それ(?:のプレイヤー)?)の)?(?:現在の)?(?P<zone>墓場|手札|消滅領域)(?:が|に)?$"
 )
 _LOOK_SELECTION = re.compile(
     _ONSET

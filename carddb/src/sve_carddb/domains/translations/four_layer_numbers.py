@@ -392,7 +392,7 @@ def _set_number(value: int, before: str, after: str) -> Number | None:
     if (
         value >= 1
         and (counted := count_context(before)) is not None
-        and re.match(r"^(?:枚|体|つ)につき、", after)
+        and re.match(r"^(?:枚|体|つ)につき(?:、|(?:N|X)ダメージ" + _END + r")", after)
         and source_unit(counted, after[0]).merge_allowed
     ):
         return Number("Nat", "group_divisor", value, after[0])
@@ -473,7 +473,7 @@ def _predicate_number(value: int, before: str, after: str) -> Number | None:
         counted is not None
         and counted.counted_zones == ("hand",)
         and re.match(
-            r"^枚になるように(?:自分|相手|それ|お互い)の手札を捨てる" + _END, after
+            r"^枚になるように(?:自分|相手|自身|それ|お互い)の手札を捨てる" + _END, after
         )
     ):
         return _quantity("existence_count", value, "枚")
@@ -537,6 +537,12 @@ def _payment_number(value: int, before: str, after: str) -> Number | None:
 
 
 def _counter_number(value: int, before: str, after: str) -> Number | None:
+    if re.search(r"(?:^|[。、:：}】])(?:自分の)?場の『X』$", before) and (
+        match := re.match(
+            r"^(?P<unit>枚|体|つ)の" + _COUNTER + r"N(?:個|つ)を取る" + _END, after
+        )
+    ):
+        return Number("Nat", "count", value, match["unit"])
     if _COUNTER_OBJECT.search(before) and (match := _COUNTER_AMOUNT.match(after)):
         return (
             _quantity("counter_amount", value, match["unit"], "up_to")
@@ -613,7 +619,9 @@ def _frequency_introduction(before: str) -> bool:
 
 
 def _repeated_event(value: int, before: str, after: str) -> Number | None:
-    if entry := _entry_reminder_number(value, before, after):
+    if entry := _entry_reminder_number(
+        value, before, after
+    ) or _additional_trigger_number(value, before, after):
         return entry
     if before.endswith("ドライブチェックを") and re.match(r"^回する" + _END, after):
         return Number("Nat", "repeat_count", value, "回")
@@ -624,6 +632,12 @@ def _repeated_event(value: int, before: str, after: str) -> Number | None:
     ):
         return Number("Nat", "repeat_count", value, "回")
     if re.search(r"(?:自分の)?ターンごとに$", before) and re.match(r"^回、", after):
+        return Number("Nat", "repeat_count", value, "回")
+    return None
+
+
+def _additional_trigger_number(value: int, before: str, after: str) -> Number | None:
+    if before.endswith("自分の能力は追加で") and re.match(r"^回誘発する" + _END, after):
         return Number("Nat", "repeat_count", value, "回")
     return None
 
