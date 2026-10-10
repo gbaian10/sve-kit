@@ -191,9 +191,12 @@ def _body(
         units=part.units,
     )
     found, tried = operands(part.canonical_source)
-    found = tuple(o for o in found if valid_unit(o))
-    additions, issues, dependencies = _source_additions(
-        raw, part, classifier, candidate.slots, found
+    found, additions, issues, dependencies = _source_additions(
+        raw,
+        part,
+        classifier,
+        candidate.slots,
+        tuple(o for o in found if valid_unit(o)),
     )
     additions, inherited = _inherit(raw, field, part, n0, classifier, additions)
     issues.update(inherited)
@@ -230,13 +233,18 @@ def _source_additions(
     classifier: Classifier,
     hints: tuple[Hint, ...],
     accepted: tuple[Operand, ...],
-) -> tuple[list[Leaf], set[str], set[str]]:
+) -> tuple[tuple[Operand, ...], list[Leaf], set[str], set[str]]:
+    kept = []
     additions = []
     issues: set[str] = set()
     dependencies: set[str] = set()
     for operand in accepted:
+        evidence = filters(operand, classifier)
+        if evidence is None:
+            continue
+        kept.append(operand)
         additions.extend(structural(operand, part.canonical_source))
-        selected, failed = filters(operand, classifier)
+        selected, failed = evidence
         additions.extend(selected)
         issues.update(failed)
         for hint in hints:
@@ -244,7 +252,7 @@ def _source_additions(
                 additions.append(item)
                 if hint.rule_id:
                     dependencies.add(hint.rule_id)
-    for operand, rule, row in omitted_owners(part.canonical_source, accepted):
+    for operand, rule, row in omitted_owners(part.canonical_source, tuple(kept)):
         position = operand.position or (
             operand.zone_spans[0] if operand.zone_spans else None
         )
@@ -260,14 +268,15 @@ def _source_additions(
                     "N1-SRC07." + row,
                 ),
                 resolution_rule=rule,
-                use=position.start,
+                # Explicit occurrences sort by raw position, so the use point must too.
+                use=part.units[position.start].origins[0].start,
             )
         )
     selected, failed, used = lexical(part, classifier, hints)
     additions.extend(selected)
     issues.update(failed)
     dependencies.update(used)
-    return additions, issues, dependencies
+    return tuple(kept), additions, issues, dependencies
 
 
 def _inherit(

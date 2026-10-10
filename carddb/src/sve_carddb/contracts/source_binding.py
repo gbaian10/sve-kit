@@ -372,6 +372,10 @@ class SourceBinding(RecordData):
             )
         ):
             raise ValueError("N0 requires explicit leaves and constant quantities")
+        if frame.source.normalizer_version == N0_VERSION and len(
+            {(o.slot, o.canonical_spans) for o in self.occurrences}
+        ) != len(self.occurrences):
+            raise ValueError("N0 has no registered union sharing a canonical position")
         if (
             frame.semantic_variant.scope is not None
             and frame.semantic_variant.scope != self.occurrence_key()

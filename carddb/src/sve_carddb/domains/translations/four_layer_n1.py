@@ -53,19 +53,22 @@ _READ = re.compile(
     + _Q
     + r"(?:を)?(?P<verb>探す|探し|探して|見る|見て|公開する|公開して)(?=$|[。、]|手札に)"
 )
-_MOVE = re.compile(
-    r"(?P<np>.+?)"
-    + _Q
-    + r"を(?P<destination>(?:自分の|相手の)?"
-    + _ZONE
-    + r"に)(?P<verb>置く|置き|置いて|戻す|戻し|戻して|加える|加え|加えて|出す|出し|出して)(?:よい)?(?=$|[。、])"
-)
 _DEST_VERBS = {
     "place": r"置く|置き|置いて|置いてよい",
     "return": r"戻す|戻し|戻して|戻してよい",
     "add_hand": r"加える|加え|加えてよい",
     "deploy": r"出す|出し|出して|出してよい",
 }
+# A direct move is only a source when its destination is an SRC03 phrase.
+_MOVE = re.compile(
+    r"(?P<np>.+?)"
+    + _Q
+    + r"を(?P<destination>(?:自分の|相手の)?"
+    + _ZONE
+    + r"に)(?P<verb>"
+    + "|".join(_DEST_VERBS.values())
+    + r")(?=$|[。、])"
+)
 _DEST = re.compile(
     _OWNER
     + r"(?P<zone>"
@@ -84,7 +87,7 @@ _EDGE_DEST = re.compile(
     r"に(?:置く|置き|置いて|置いてよい|戻す|戻し|戻して|戻してよい)(?=$|[。、])"
 )
 _COUNT = re.compile(
-    r"(?P<np>.+?)(?P<tail>の(?:枚数|数)|が(?:ちょうど)?N(?:枚|体|つ)(?:以上|以下)?なら(?:使える)?|が(?:いる|いない|ある|ない)(?:なら|場合)?)(?=$|[。、]|だけ|が|と|に|を|の|分|＋|×)"
+    r"(?P<np>.+?)(?P<tail>の(?:枚数|数)|が(?:ちょうど)?N(?:枚|体|つ)(?:以上|以下)?なら(?:使える)?|が(?:いる|いない|ある|ない)(?:なら|場合)?)(?=$|[。、]|だけ|が|と|に|を|の|分|\+|×)"
 )
 _UNION = re.compile(
     r"(?P<owner>自分|相手)の(?P<first>場|EXエリア)(?P<connector>か|や)"
@@ -285,7 +288,8 @@ class _Registry:
         # Reject the right half of every unregistered coordinate scope as well.
         for match in re.finditer(
             _ZONE
-            + r"(?:の[^。:：、]*?)?(?:と|または|および|及び|か|や)(?:自分の|相手の)?"
+            + r"(?:(?:の[^。:：、]*?)?(?:と|または|および|及び|か|や)|[、・])"
+            + r"(?:自分の|相手の)?"
             + _ZONE,
             text,
         ):

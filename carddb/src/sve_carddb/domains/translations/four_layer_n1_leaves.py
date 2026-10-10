@@ -15,7 +15,7 @@ from sve_carddb.contracts.four_layer import (
 )
 from sve_carddb.contracts.n0 import SAFE_INTEGER
 from sve_carddb.contracts.source_binding import CodeDomain, ZoneDomain
-from sve_carddb.domains.translations.four_layer_n1 import PLAYERS, Operand
+from sve_carddb.domains.translations.four_layer_n1 import PLAYERS, Filter, Operand
 from sve_carddb.domains.translations.four_layer_units import CountContext, source_unit
 from sve_carddb.domains.translations.recognition.provenance import merged
 
@@ -158,8 +158,12 @@ def structural(operand: Operand, text: str) -> list[Leaf]:
 
 def filters(
     operand: Operand, classifier: Classifier
-) -> tuple[list[Leaf], tuple[str, ...]]:
-    """Noun evidence distinguishes adopted classes, traits, kinds and explicit token filters."""
+) -> tuple[list[Leaf], tuple[str, ...]] | None:
+    """Noun evidence distinguishes adopted classes, traits, kinds and explicit token filters.
+
+    A trait or generic-card token without exactly one glossary concept leaves the whole
+    operand to N0 instead of blocking the line.
+    """
     if operand.noun is None:
         return [], ()
     result = []
@@ -220,18 +224,10 @@ def filters(
         else:
             role = "rule_term" if item.kind == "card" else "trait"
             domain = "concept." + role + ".v1"
-            identifier = "term:object.card" if item.kind == "card" else None
-            terms = tuple(
-                t
-                for t in classifier.terms.values()
-                if t.category == role
-                and t.source_ja == item.spelling
-                and (identifier is None or t.id == identifier)
-            )
-            if len(terms) != 1:
-                issues.add("missing_or_ambiguous_n1_filter")
-                continue
-            value = GlossaryReference(kind="glossary", key=terms[0].id)
+            reference = _glossary_filter(item, role, classifier)
+            if reference is None:
+                return None
+            value = reference
         result.append(
             leaf(
                 type_name,
@@ -249,6 +245,22 @@ def filters(
             )
         )
     return result, tuple(sorted(issues))
+
+
+def _glossary_filter(
+    item: Filter, role: str, classifier: Classifier
+) -> GlossaryReference | None:
+    identifier = "term:object.card" if item.kind == "card" else None
+    terms = tuple(
+        t
+        for t in classifier.terms.values()
+        if t.category == role
+        and t.source_ja == item.spelling
+        and (identifier is None or t.id == identifier)
+    )
+    return (
+        GlossaryReference(kind="glossary", key=terms[0].id) if len(terms) == 1 else None
+    )
 
 
 def valid_unit(operand: Operand) -> bool:

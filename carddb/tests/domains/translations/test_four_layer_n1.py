@@ -164,6 +164,7 @@ def test_n1_s14_retains_modifier_and_outer_count(
         ("がいないなら", "に"),
         ("があるなら", "に"),
         ("がないなら", "に"),
+        ("の数+１", "の"),
     ],
 )
 def test_n1_current_count_registry(engine: Classifier, tail: str, case: str) -> None:
@@ -278,6 +279,43 @@ def test_n1_pronoun_does_not_cross_frames_or_other_antecedents(
     )
 
 
+def test_n1_omitted_use_point_keeps_raw_order_on_a_later_line(
+    engine: Classifier,
+) -> None:
+    found = derive("仮効果。\n{起動}手札７枚を捨てる:仮効果。", engine)
+    recognized = next(
+        r
+        for r in found.recognized
+        if any(o.source_presence == "omitted" for o in r.occurrences)
+    )
+    slots = {s.name: s for s in recognized.schema.slots}
+    assert [
+        (o.source_presence, slots[o.slot].type) for o in recognized.occurrences
+    ] == [
+        ("explicit", "Concept"),
+        ("omitted", "Player"),
+        ("explicit", "ZoneSet"),
+        ("explicit", "Nat"),
+    ]
+
+
+def test_n1_unresolved_trait_shape_leaves_the_operand_to_n0(
+    engine: Classifier,
+) -> None:
+    found = derive("自分の場の未登録・フォロワー７体を選ぶ。", engine)
+    assert found.recognized[0].issues == ()
+    assert "source_zone" not in roles(found)
+    assert "N1-SRC01.select" not in found.registry_rows[0]
+
+
+def test_n1_direct_move_requires_a_registered_destination_verb(
+    engine: Classifier,
+) -> None:
+    found = derive("自分の墓場のフォロワー７枚を手札に加えて、仮効果。", engine)
+    assert "source_zone" not in roles(found)
+    assert "destination_zone" not in roles(found)
+
+
 def test_n1_actor_hand_cost_omitted_value_is_still_required_in_binding(
     engine: Classifier,
 ) -> None:
@@ -362,6 +400,8 @@ def test_n1_g10_union_trace(
         "場や相手のEXエリア",
         "場のフォロワーかEXエリアのスペル",
         "場かEXエリアの各自のフォロワー",
+        "手札、墓場",
+        "場・EXエリア",
     ],
 )
 def test_n1_invalid_union_never_matches_its_right_half(
