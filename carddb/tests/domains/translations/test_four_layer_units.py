@@ -169,6 +169,12 @@ def test_an_explicit_two_np_union_preserves_both_zones() -> None:
             "体",
         ),
         ("自分のEXエリアのクレストが", "ex", "crest", "枚"),
+        (
+            "自分のデッキの上N枚を見る。その中から、フォロワーとアミュレットそれぞれ",
+            "deck",
+            "card",
+            "枚",
+        ),
     ],
 )
 def test_explicit_filtered_sets_preserve_their_counted_objects(

@@ -138,7 +138,7 @@ _FILTER = (
 )
 _ONSET = r"(?:^|[、。:：}】（(]|か|と|は|として)"
 _KIND = r"スペルかアミュレット|フォロワー|アミュレット|スペル|カード|クレスト|『X』"
-_SET_KIND = r"(?:" + _KIND + r")(?:(?:や|か)" + _FILTER + r"(?:" + _KIND + r"))*"
+_SET_KIND = r"(?:" + _KIND + r")(?:(?:や|か|と)" + _FILTER + r"(?:" + _KIND + r"))*"
 _SET_ATOM = re.compile(_FILTER + r"(?P<kind>" + _KIND + r")")
 _UNION_COUNTED = re.compile(
     _ONSET
@@ -236,6 +236,8 @@ def compound_selection(after: str, before: str = "") -> tuple[str, bool] | None:
 
 def count_context(before: str) -> CountContext | None:
     """A complete counted NP supplies its zone; the later destination is never inspected."""
+    if before.endswith("それぞれ"):
+        before = before.removesuffix("それぞれ").removesuffix("が")
     if constraint := _SET_CONSTRAINT.search(before):
         return count_context(before[: constraint.start()])
     if match := _COMPOUND_PREFIX.match(before):
@@ -370,7 +372,7 @@ def _counted_kind(text: str | None) -> str:
         kinds.add(_KINDS.get(atom["kind"], "card"))
         text = text[atom.end() :]
         if text:
-            if text[0] not in {"や", "か"}:
+            if text[0] not in {"や", "か", "と"}:
                 raise ValueError("Counted set must use a registered union connector")
             text = text[1:]
     return kinds.pop() if len(kinds) == 1 else "card"
