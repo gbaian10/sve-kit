@@ -1,5 +1,5 @@
 //! Printed-card regression tests for fixes that no shared scenario covers
-//! (docs/dsl/validation.md). Needs `SVE_TEST_SNAPSHOT`.
+//! (KE-13, KE-14 in the engine tracking issue #478). Needs `SVE_TEST_SNAPSHOT`.
 
 #![cfg(feature = "runner")]
 extern crate alloc;

@@ -1,4 +1,5 @@
-//! M0/M1 regression tests: one test per fixed known error (docs/dsl/validation.md)
+//! M0/M1 regression tests: one test per fixed known error (KE numbers follow the
+//! engine tracking issue #478)
 //! and the R1–R3 properties from the design cross-review.
 
 #![expect(
