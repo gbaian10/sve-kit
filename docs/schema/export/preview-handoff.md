@@ -92,14 +92,13 @@ lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行�
 報告，確保相同輸入重建的逐檔 bytes 一致。各圖的重用／轉檔時間是逐圖加總，多 worker 時會重疊，
 整體耗時看 `wall_milliseconds`。
 這些檔案與輸出都不進 git、Actions cache／artifact 或測試 fixture。
-完整文字容量以批次的同一 File 聯集計算，完整文字包不與分片重複加總；卡圖另計。
-啟動則依使用者所選日版／英版各自以 Brotli 計完整新清單＋config＋首屏實際必載片／依賴，
-每個版本的共用／混區 File 整檔計入，不按語言比例分攤。約 1 MiB 是盡量的約略目標，
-2 MiB 可接受；更大須停下交維護者決定該配置。raw／gzip 另報，不設 gzip 啟動 1 MiB gate。
+容量設計依 [size-budget](size-budget.md)：全部文字分片＋manifest 的 raw ≤40 MiB；單一版本完整文字閉包 Brotli ≤8 MiB、gzip ≤10 MiB，含完整來源、counterpart、共享字典、卡號索引與必要跨區檔。
+text_all 的封套與整檔另報，不與分片重複加總；卡圖另計。
+基本目錄冷載依所選日版／英版各計完整 manifest＋config＋實際必載片及依賴，共用／混區 File 整檔計、不按語言比例分攤。
+Brotli 2 MiB 為分界，略超報精確差額、明顯超出才交維護者；raw／gzip 另報，不設其啟動硬門檻。
+基本目錄容器整檔 raw ≤2 MiB，詳情與其他資料檔 ≤512 KiB，含 types／字典／base metadata。
+N0 現有量測 API 與 §5.1 bands 不代表已完成新裝檔或單區完整來源帳；不因容量減少 pending／名稱／facet／公開欄位。
 
-[傳輸契約 §5.1](snapshot-transport.md#51-format-200-固定配置) 與 §5.4 定義 2.0 的 N=64、固定 bands
-及卡包 media；pending／名稱／facet／公開欄位不因容量縮減。
-每個資料 File（含 types）raw≤512 KiB，完整文字仍守 40／8／10 MiB。
 只載可見面的卡包 media 與圖片；全域來源詳情按需，不全量預取圖片或建立全庫影像索引。
 未完成的下載須標進度，CacheStorage 已驗 bytes 保存成功且未清除時，暖頁 metadata 不向外重抓。
 
