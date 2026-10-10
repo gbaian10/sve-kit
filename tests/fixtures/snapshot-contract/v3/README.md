@@ -99,3 +99,5 @@ It is TS reader input only: the translation ID embeds the sealed synthetic archi
 batch, so a rebuild is not byte-identical and no Python test compares against it.
 The Python build, reader and projection cases live in
 `test_snapshot_offline_english.py`.
+
+`whole-name-native.json` uses synthetic whole names from stored source and target occurrences. Its compact wire has no name sets or field uses; the readers restore their unchanged annotation-v1 IDs and exact scalar ranges. Root row columns come from the fixed format schema; containers carry only the nested tuple descriptors they use.

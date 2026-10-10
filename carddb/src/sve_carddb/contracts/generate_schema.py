@@ -64,9 +64,7 @@ def _tuple(name: str, tuples: dict[str, JsonValue]) -> dict[str, JsonValue]:
     return result | object_value(object_value(tuples[name])["constraints"])
 
 
-def _fragment(
-    table: str, partition: str, name: str, row: dict[str, JsonValue]
-) -> dict[str, JsonValue]:
+def _fragment(table: str, partition: str, name: str) -> dict[str, JsonValue]:
     return _object(
         {
             "owner": _ref("Owner"),
@@ -77,7 +75,6 @@ def _fragment(
                 if table in {"printing", "face_revision"} and partition == "detail"
                 else {"type": "null"}
             ),
-            "columns": {"const": row["x-columns"]},
             "rows": {"type": "array", "items": _ref(name)},
         }
     )
@@ -146,9 +143,7 @@ def generate(format_version: str = MEDIA) -> bytes:
     for table, parts in fragments.items():
         for partition, raw in object_value(parts).items():
             name = string(raw)
-            definitions[name + "_fragment"] = _fragment(
-                table, partition, name, object_value(definitions[name])
-            )
+            definitions[name + "_fragment"] = _fragment(table, partition, name)
     change = object_value(definitions["Changes"])
     properties = object_value(change["properties"])
     change["properties"] = {

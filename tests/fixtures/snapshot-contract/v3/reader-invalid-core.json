@@ -84,7 +84,8 @@
                 "Synthetic printed correction",
                 "https://example.invalid/correction"
               ]
-            ]
+            ],
+            null
           ],
           [
             1,
@@ -95,7 +96,8 @@
             [],
             [],
             [],
-            []
+            [],
+            null
           ]
         ]
       ],
@@ -133,7 +135,8 @@
                 "Synthetic printed correction",
                 "https://example.invalid/correction"
               ]
-            ]
+            ],
+            null
           ],
           [
             1,
@@ -144,7 +147,8 @@
             [],
             [],
             [],
-            []
+            [],
+            null
           ]
         ]
       ]
@@ -217,7 +221,8 @@
         [],
         [],
         [],
-        []
+        [],
+        null
       ]
     ],
     "rehash": true,
@@ -299,6 +304,31 @@
     ],
     "value": {
       "scalar": "Text"
+    },
+    "rehash": true
+  },
+  {
+    "name": "root-row-descriptor",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "types",
+      "printing_detail"
+    ],
+    "value": {
+      "columns": [
+        "row_index",
+        "faces"
+      ],
+      "items": [
+        {
+          "scalar": "UInt"
+        },
+        {
+          "array": {
+            "ref": "PrintingFaceDetail"
+          }
+        }
+      ]
     },
     "rehash": true
   },
@@ -929,16 +959,6 @@
             "bucket": 29,
             "partition": "bootstrap",
             "base": null,
-            "columns": [
-              "printing_id",
-              "product_id",
-              "available_on",
-              "date_precision",
-              "date_raw",
-              "inclusion_kind",
-              "note_unit_id",
-              "first_inclusion_state"
-            ],
             "rows": [
               [
                 "p:a",
@@ -960,16 +980,6 @@
             "bucket": 43,
             "partition": "bootstrap",
             "base": null,
-            "columns": [
-              "printing_id",
-              "product_id",
-              "available_on",
-              "date_precision",
-              "date_raw",
-              "inclusion_kind",
-              "note_unit_id",
-              "first_inclusion_state"
-            ],
             "rows": []
           }
         ]
@@ -997,6 +1007,449 @@
           0
         ],
         "value": "r:a2"
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "types"
+        ],
+        "value": {
+          "Current": {
+            "columns": [
+              "region",
+              "revision_id",
+              "basis"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "dated_effective",
+                  "latest_observed_no_errata",
+                  "latest_adopted_wording",
+                  "reviewed_override"
+                ]
+              }
+            ]
+          },
+          "FieldTranslation": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis",
+              "source",
+              "counterpart"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              },
+              {
+                "ref": "PublicTextPointer"
+              },
+              {
+                "nullable": {
+                  "ref": "PublicTextPointer"
+                }
+              }
+            ]
+          },
+          "PrintingFaceBootstrap": {
+            "columns": [
+              "face_id",
+              "art_id",
+              "frame_code",
+              "signed",
+              "embellishment_state",
+              "stamps"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Code"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Bool"
+                }
+              },
+              {
+                "enum": [
+                  "unreviewed",
+                  "sampled",
+                  "confirmed"
+                ]
+              },
+              {
+                "array": {
+                  "ref": "PrintingStamp"
+                }
+              }
+            ]
+          },
+          "PrintingStamp": {
+            "columns": [
+              "stamp_id",
+              "position",
+              "color"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              }
+            ]
+          },
+          "ProgramRef": {
+            "columns": [
+              "file_key",
+              "entry_id"
+            ],
+            "items": [
+              {
+                "scalar": "Text"
+              },
+              {
+                "scalar": "ID"
+              }
+            ]
+          },
+          "PublicTextPointer": {
+            "columns": [
+              "owner",
+              "field",
+              "ordinal"
+            ],
+            "items": [
+              {
+                "json": "PublicTextOwner"
+              },
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              }
+            ]
+          },
+          "RegionBlock": {
+            "columns": [
+              "region",
+              "reasons"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "array": {
+                  "scalar": "Code"
+                }
+              }
+            ]
+          },
+          "RegionView": {
+            "columns": [
+              "region",
+              "release_state",
+              "mapping_state",
+              "as_of",
+              "mapping_as_of",
+              "mapping_scope",
+              "default_printing_id",
+              "default_method",
+              "deck_role",
+              "debut_product_ids",
+              "debut_state"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "enum": [
+                  "released",
+                  "unknown",
+                  "announced",
+                  "not_released_confirmed"
+                ]
+              },
+              {
+                "enum": [
+                  "unmapped",
+                  "pending",
+                  "confirmed",
+                  "confirmed_none"
+                ]
+              },
+              {
+                "scalar": "Date"
+              },
+              {
+                "nullable": {
+                  "scalar": "Date"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "enum": [
+                    "override",
+                    "fallback",
+                    "earliest_general",
+                    "candidate_general"
+                  ]
+                }
+              },
+              {
+                "nullable": {
+                  "enum": [
+                    "main",
+                    "evolve",
+                    "leader",
+                    "extra"
+                  ]
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "known",
+                  "unknown"
+                ]
+              }
+            ]
+          },
+          "Support": {
+            "columns": [
+              "status",
+              "dsl_status",
+              "dsl_version",
+              "dsl_id",
+              "validation_state",
+              "reasons",
+              "reason_detail",
+              "program_ref",
+              "ruling_revision_ids"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "missing_dsl",
+                  "draft",
+                  "reviewed",
+                  "engine_passed",
+                  "load_rejected"
+                ]
+              },
+              {
+                "nullable": {
+                  "enum": [
+                    "draft",
+                    "reviewed",
+                    "verified",
+                    "disputed"
+                  ]
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "fresh",
+                  "stale",
+                  "not_applicable"
+                ]
+              },
+              {
+                "array": {
+                  "scalar": "Code"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "ref": "ProgramRef"
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          },
+          "SupportOverride": {
+            "columns": [
+              "region",
+              "support"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "ref": "Support"
+              }
+            ]
+          },
+          "WordingCandidate": {
+            "columns": [
+              "printing_id",
+              "revision_id"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          },
+          "WordingDisplay": {
+            "columns": [
+              "revision_id",
+              "basis"
+            ],
+            "items": [
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "current",
+                  "latest_known_release",
+                  "candidates"
+                ]
+              }
+            ]
+          },
+          "WordingView": {
+            "columns": [
+              "region",
+              "state",
+              "display",
+              "candidates",
+              "undated_printing_ids"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "enum": [
+                  "pending"
+                ]
+              },
+              {
+                "ref": "WordingDisplay"
+              },
+              {
+                "array": {
+                  "ref": "WordingCandidate"
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          }
+        }
       }
     ]
   },
@@ -1116,16 +1569,6 @@
         "bucket": 29,
         "partition": "bootstrap",
         "base": null,
-        "columns": [
-          "printing_id",
-          "product_id",
-          "available_on",
-          "date_precision",
-          "date_raw",
-          "inclusion_kind",
-          "note_unit_id",
-          "first_inclusion_state"
-        ],
         "rows": [
           [
             "p:a",
@@ -1147,16 +1590,6 @@
         "bucket": 43,
         "partition": "bootstrap",
         "base": null,
-        "columns": [
-          "printing_id",
-          "product_id",
-          "available_on",
-          "date_precision",
-          "date_raw",
-          "inclusion_kind",
-          "note_unit_id",
-          "first_inclusion_state"
-        ],
         "rows": [
           [
             "p:b",
@@ -1277,16 +1710,6 @@
             "bucket": 29,
             "partition": "bootstrap",
             "base": null,
-            "columns": [
-              "printing_id",
-              "product_id",
-              "available_on",
-              "date_precision",
-              "date_raw",
-              "inclusion_kind",
-              "note_unit_id",
-              "first_inclusion_state"
-            ],
             "rows": [
               [
                 "p:a",
@@ -1308,16 +1731,6 @@
             "bucket": 43,
             "partition": "bootstrap",
             "base": null,
-            "columns": [
-              "printing_id",
-              "product_id",
-              "available_on",
-              "date_precision",
-              "date_raw",
-              "inclusion_kind",
-              "note_unit_id",
-              "first_inclusion_state"
-            ],
             "rows": []
           }
         ]
@@ -1335,6 +1748,449 @@
           4
         ],
         "value": []
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "types"
+        ],
+        "value": {
+          "Current": {
+            "columns": [
+              "region",
+              "revision_id",
+              "basis"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "dated_effective",
+                  "latest_observed_no_errata",
+                  "latest_adopted_wording",
+                  "reviewed_override"
+                ]
+              }
+            ]
+          },
+          "FieldTranslation": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis",
+              "source",
+              "counterpart"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              },
+              {
+                "ref": "PublicTextPointer"
+              },
+              {
+                "nullable": {
+                  "ref": "PublicTextPointer"
+                }
+              }
+            ]
+          },
+          "PrintingFaceBootstrap": {
+            "columns": [
+              "face_id",
+              "art_id",
+              "frame_code",
+              "signed",
+              "embellishment_state",
+              "stamps"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Code"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Bool"
+                }
+              },
+              {
+                "enum": [
+                  "unreviewed",
+                  "sampled",
+                  "confirmed"
+                ]
+              },
+              {
+                "array": {
+                  "ref": "PrintingStamp"
+                }
+              }
+            ]
+          },
+          "PrintingStamp": {
+            "columns": [
+              "stamp_id",
+              "position",
+              "color"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              }
+            ]
+          },
+          "ProgramRef": {
+            "columns": [
+              "file_key",
+              "entry_id"
+            ],
+            "items": [
+              {
+                "scalar": "Text"
+              },
+              {
+                "scalar": "ID"
+              }
+            ]
+          },
+          "PublicTextPointer": {
+            "columns": [
+              "owner",
+              "field",
+              "ordinal"
+            ],
+            "items": [
+              {
+                "json": "PublicTextOwner"
+              },
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              }
+            ]
+          },
+          "RegionBlock": {
+            "columns": [
+              "region",
+              "reasons"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "array": {
+                  "scalar": "Code"
+                }
+              }
+            ]
+          },
+          "RegionView": {
+            "columns": [
+              "region",
+              "release_state",
+              "mapping_state",
+              "as_of",
+              "mapping_as_of",
+              "mapping_scope",
+              "default_printing_id",
+              "default_method",
+              "deck_role",
+              "debut_product_ids",
+              "debut_state"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "enum": [
+                  "released",
+                  "unknown",
+                  "announced",
+                  "not_released_confirmed"
+                ]
+              },
+              {
+                "enum": [
+                  "unmapped",
+                  "pending",
+                  "confirmed",
+                  "confirmed_none"
+                ]
+              },
+              {
+                "scalar": "Date"
+              },
+              {
+                "nullable": {
+                  "scalar": "Date"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "enum": [
+                    "override",
+                    "fallback",
+                    "earliest_general",
+                    "candidate_general"
+                  ]
+                }
+              },
+              {
+                "nullable": {
+                  "enum": [
+                    "main",
+                    "evolve",
+                    "leader",
+                    "extra"
+                  ]
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "known",
+                  "unknown"
+                ]
+              }
+            ]
+          },
+          "Support": {
+            "columns": [
+              "status",
+              "dsl_status",
+              "dsl_version",
+              "dsl_id",
+              "validation_state",
+              "reasons",
+              "reason_detail",
+              "program_ref",
+              "ruling_revision_ids"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "missing_dsl",
+                  "draft",
+                  "reviewed",
+                  "engine_passed",
+                  "load_rejected"
+                ]
+              },
+              {
+                "nullable": {
+                  "enum": [
+                    "draft",
+                    "reviewed",
+                    "verified",
+                    "disputed"
+                  ]
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "fresh",
+                  "stale",
+                  "not_applicable"
+                ]
+              },
+              {
+                "array": {
+                  "scalar": "Code"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "ref": "ProgramRef"
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          },
+          "SupportOverride": {
+            "columns": [
+              "region",
+              "support"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "ref": "Support"
+              }
+            ]
+          },
+          "WordingCandidate": {
+            "columns": [
+              "printing_id",
+              "revision_id"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          },
+          "WordingDisplay": {
+            "columns": [
+              "revision_id",
+              "basis"
+            ],
+            "items": [
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "current",
+                  "latest_known_release",
+                  "candidates"
+                ]
+              }
+            ]
+          },
+          "WordingView": {
+            "columns": [
+              "region",
+              "state",
+              "display",
+              "candidates",
+              "undated_printing_ids"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "enum": [
+                  "pending"
+                ]
+              },
+              {
+                "ref": "WordingDisplay"
+              },
+              {
+                "array": {
+                  "ref": "WordingCandidate"
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          }
+        }
       }
     ]
   },
@@ -1461,16 +2317,6 @@
             "bucket": 29,
             "partition": "bootstrap",
             "base": null,
-            "columns": [
-              "printing_id",
-              "product_id",
-              "available_on",
-              "date_precision",
-              "date_raw",
-              "inclusion_kind",
-              "note_unit_id",
-              "first_inclusion_state"
-            ],
             "rows": [
               [
                 "p:a",
@@ -1492,16 +2338,6 @@
             "bucket": 43,
             "partition": "bootstrap",
             "base": null,
-            "columns": [
-              "printing_id",
-              "product_id",
-              "available_on",
-              "date_precision",
-              "date_raw",
-              "inclusion_kind",
-              "note_unit_id",
-              "first_inclusion_state"
-            ],
             "rows": []
           }
         ]
@@ -1551,16 +2387,6 @@
             "bucket": 29,
             "partition": "bootstrap",
             "base": null,
-            "columns": [
-              "printing_id",
-              "product_id",
-              "available_on",
-              "date_precision",
-              "date_raw",
-              "inclusion_kind",
-              "note_unit_id",
-              "first_inclusion_state"
-            ],
             "rows": [
               [
                 "p:a",
@@ -1582,16 +2408,6 @@
             "bucket": 43,
             "partition": "bootstrap",
             "base": null,
-            "columns": [
-              "printing_id",
-              "product_id",
-              "available_on",
-              "date_precision",
-              "date_raw",
-              "inclusion_kind",
-              "note_unit_id",
-              "first_inclusion_state"
-            ],
             "rows": [
               [
                 "p:b",
@@ -1626,6 +2442,449 @@
             "https://example.invalid/observations/b"
           ]
         ]
+      },
+      {
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "path": [
+          "types"
+        ],
+        "value": {
+          "Current": {
+            "columns": [
+              "region",
+              "revision_id",
+              "basis"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "dated_effective",
+                  "latest_observed_no_errata",
+                  "latest_adopted_wording",
+                  "reviewed_override"
+                ]
+              }
+            ]
+          },
+          "FieldTranslation": {
+            "columns": [
+              "field",
+              "ordinal",
+              "target_lang",
+              "translation_id",
+              "basis",
+              "source",
+              "counterpart"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              },
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "enum": [
+                  "own_source",
+                  "jp_source",
+                  "official_counterpart"
+                ]
+              },
+              {
+                "ref": "PublicTextPointer"
+              },
+              {
+                "nullable": {
+                  "ref": "PublicTextPointer"
+                }
+              }
+            ]
+          },
+          "PrintingFaceBootstrap": {
+            "columns": [
+              "face_id",
+              "art_id",
+              "frame_code",
+              "signed",
+              "embellishment_state",
+              "stamps"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Code"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Bool"
+                }
+              },
+              {
+                "enum": [
+                  "unreviewed",
+                  "sampled",
+                  "confirmed"
+                ]
+              },
+              {
+                "array": {
+                  "ref": "PrintingStamp"
+                }
+              }
+            ]
+          },
+          "PrintingStamp": {
+            "columns": [
+              "stamp_id",
+              "position",
+              "color"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              }
+            ]
+          },
+          "ProgramRef": {
+            "columns": [
+              "file_key",
+              "entry_id"
+            ],
+            "items": [
+              {
+                "scalar": "Text"
+              },
+              {
+                "scalar": "ID"
+              }
+            ]
+          },
+          "PublicTextPointer": {
+            "columns": [
+              "owner",
+              "field",
+              "ordinal"
+            ],
+            "items": [
+              {
+                "json": "PublicTextOwner"
+              },
+              {
+                "enum": [
+                  "name",
+                  "effect",
+                  "flavor",
+                  "question",
+                  "answer",
+                  "section",
+                  "label",
+                  "action_label"
+                ]
+              },
+              {
+                "nullable": {
+                  "scalar": "UInt"
+                }
+              }
+            ]
+          },
+          "RegionBlock": {
+            "columns": [
+              "region",
+              "reasons"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "array": {
+                  "scalar": "Code"
+                }
+              }
+            ]
+          },
+          "RegionView": {
+            "columns": [
+              "region",
+              "release_state",
+              "mapping_state",
+              "as_of",
+              "mapping_as_of",
+              "mapping_scope",
+              "default_printing_id",
+              "default_method",
+              "deck_role",
+              "debut_product_ids",
+              "debut_state"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "enum": [
+                  "released",
+                  "unknown",
+                  "announced",
+                  "not_released_confirmed"
+                ]
+              },
+              {
+                "enum": [
+                  "unmapped",
+                  "pending",
+                  "confirmed",
+                  "confirmed_none"
+                ]
+              },
+              {
+                "scalar": "Date"
+              },
+              {
+                "nullable": {
+                  "scalar": "Date"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "enum": [
+                    "override",
+                    "fallback",
+                    "earliest_general",
+                    "candidate_general"
+                  ]
+                }
+              },
+              {
+                "nullable": {
+                  "enum": [
+                    "main",
+                    "evolve",
+                    "leader",
+                    "extra"
+                  ]
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "known",
+                  "unknown"
+                ]
+              }
+            ]
+          },
+          "Support": {
+            "columns": [
+              "status",
+              "dsl_status",
+              "dsl_version",
+              "dsl_id",
+              "validation_state",
+              "reasons",
+              "reason_detail",
+              "program_ref",
+              "ruling_revision_ids"
+            ],
+            "items": [
+              {
+                "enum": [
+                  "missing_dsl",
+                  "draft",
+                  "reviewed",
+                  "engine_passed",
+                  "load_rejected"
+                ]
+              },
+              {
+                "nullable": {
+                  "enum": [
+                    "draft",
+                    "reviewed",
+                    "verified",
+                    "disputed"
+                  ]
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "fresh",
+                  "stale",
+                  "not_applicable"
+                ]
+              },
+              {
+                "array": {
+                  "scalar": "Code"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              },
+              {
+                "nullable": {
+                  "ref": "ProgramRef"
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          },
+          "SupportOverride": {
+            "columns": [
+              "region",
+              "support"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "ref": "Support"
+              }
+            ]
+          },
+          "WordingCandidate": {
+            "columns": [
+              "printing_id",
+              "revision_id"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          },
+          "WordingDisplay": {
+            "columns": [
+              "revision_id",
+              "basis"
+            ],
+            "items": [
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "current",
+                  "latest_known_release",
+                  "candidates"
+                ]
+              }
+            ]
+          },
+          "WordingView": {
+            "columns": [
+              "region",
+              "state",
+              "display",
+              "candidates",
+              "undated_printing_ids"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "enum": [
+                  "pending"
+                ]
+              },
+              {
+                "ref": "WordingDisplay"
+              },
+              {
+                "array": {
+                  "ref": "WordingCandidate"
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          }
+        }
       }
     ]
   },

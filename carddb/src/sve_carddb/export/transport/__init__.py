@@ -16,6 +16,7 @@ from sve_carddb.contracts.snapshot import (
     validate,
 )
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
+from sve_carddb.export.name_annotations import compact_names, whole_name
 from sve_carddb.export.project.source import json_list
 from sve_carddb.export.reader import read_snapshot
 from sve_carddb.export.semantics import row_key
@@ -138,7 +139,21 @@ def _annotation_partition(
             text_ids |= texts
             if row["annotation_set_id"] is not None:
                 annotation_ids.add(string(row["annotation_set_id"]))
-    concept_ids: set[str] = set()
+    text_rows = {string(row["id"]): row for row in layout.view["text_unit"]}
+    annotation_ids |= {
+        string(
+            whole_name(
+                text_rows[string(row["name_unit_id"])], string(row["name_concept_id"])
+            )["id"]
+        )
+        for row in layout.view["face_revision"]
+        if row["id"] in layout.display and row["name_concept_id"] is not None
+    }
+    concept_ids: set[str] = {
+        string(row["name_concept_id"])
+        for row in layout.view["face_revision"]
+        if row["id"] in layout.display and row["name_concept_id"] is not None
+    }
     for row in _ordered("annotation_set", layout.view["annotation_set"]):
         part = "bootstrap" if row["id"] in annotation_ids else "detail"
         group = layout.group("annotation_set", row, part)
@@ -375,7 +390,7 @@ def export_snapshot(
         for row in projection.tables[table]
     ):
         raise ValueError("Public region is outside the explicit manifest scope")
-    layout = Layout(projection.tables, ownership, count, format_version)
+    layout = Layout(compact_names(projection.tables), ownership, count, format_version)
     files = _Files(brotli)
     config = files.add(
         "config", "config", projection.config | {"format_version": format_version}, []

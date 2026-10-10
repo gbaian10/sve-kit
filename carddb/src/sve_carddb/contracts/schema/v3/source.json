@@ -3717,6 +3717,23 @@
               "ref": "Correction"
             }
           }
+        },
+        "name_concept_id": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "scalar": "ID"
+            }
+          }
         }
       },
       "constraints": {}
@@ -4977,6 +4994,23 @@
           "descriptor": {
             "array": {
               "ref": "Correction"
+            }
+          }
+        },
+        "name_concept_id": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "scalar": "ID"
             }
           }
         }
@@ -6549,6 +6583,23 @@
               "ref": "Correction"
             }
           }
+        },
+        "name_concept_id": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "scalar": "ID"
+            }
+          }
         }
       },
       "constraints": {
@@ -6646,6 +6697,22 @@
             "nullable": {
               "scalar": "ID"
             }
+          }
+        },
+        "annotation_kind": {
+          "schema": {
+            "enum": [
+              "none",
+              "explicit",
+              "whole_name"
+            ]
+          },
+          "descriptor": {
+            "enum": [
+              "none",
+              "explicit",
+              "whole_name"
+            ]
           }
         }
       },
@@ -9762,6 +9829,9 @@
         },
         "translations": {
           "from": "face_revision"
+        },
+        "name_concept_id": {
+          "from": "face_revision"
         }
       },
       "constraints": {}
@@ -9870,6 +9940,9 @@
         },
         "corrections": {
           "from": "face_revision"
+        },
+        "name_concept_id": {
+          "from": "face_revision"
         }
       },
       "constraints": {}
@@ -9899,6 +9972,9 @@
         },
         "annotation_set_id": {
           "from": "translation"
+        },
+        "annotation_kind": {
+          "from": "translation"
         }
       },
       "constraints": {}
@@ -9927,6 +10003,9 @@
           "from": "translation"
         },
         "annotation_set_id": {
+          "from": "translation"
+        },
+        "annotation_kind": {
           "from": "translation"
         }
       },

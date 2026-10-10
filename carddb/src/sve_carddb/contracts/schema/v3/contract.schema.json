@@ -1111,11 +1111,21 @@
           "items": {
             "$ref": "#/$defs/Correction"
           }
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ID"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 14,
-      "maxItems": 14,
+      "minItems": 15,
+      "maxItems": 15,
       "x-columns": [
         "face_id",
         "art_id",
@@ -1130,7 +1140,8 @@
         "sections",
         "stamps",
         "translations",
-        "corrections"
+        "corrections",
+        "name_concept_id"
       ],
       "x-types": [
         {
@@ -1205,6 +1216,11 @@
         {
           "array": {
             "ref": "Correction"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
           }
         }
       ]
@@ -2450,11 +2466,21 @@
           "items": {
             "$ref": "#/$defs/Correction"
           }
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ID"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 9,
-      "maxItems": 9,
+      "minItems": 10,
+      "maxItems": 10,
       "x-columns": [
         "face_ordinal",
         "printed_name_unit_id",
@@ -2464,7 +2490,8 @@
         "observations",
         "sections",
         "translations",
-        "corrections"
+        "corrections",
+        "name_concept_id"
       ],
       "x-types": [
         {
@@ -2512,6 +2539,11 @@
         {
           "array": {
             "ref": "Correction"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
           }
         }
       ]
@@ -4183,11 +4215,21 @@
           "items": {
             "$ref": "#/$defs/Correction"
           }
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ID"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 21,
-      "maxItems": 21,
+      "minItems": 22,
+      "maxItems": 22,
       "x-columns": [
         "id",
         "face_id",
@@ -4209,7 +4251,8 @@
         "special_kinds",
         "sections",
         "translations",
-        "corrections"
+        "corrections",
+        "name_concept_id"
       ],
       "x-types": [
         {
@@ -4306,6 +4349,11 @@
           "array": {
             "ref": "Correction"
           }
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
         }
       ],
       "x-primary-key": [
@@ -4353,11 +4401,18 @@
               "type": "null"
             }
           ]
+        },
+        {
+          "enum": [
+            "none",
+            "explicit",
+            "whole_name"
+          ]
         }
       ],
       "items": false,
-      "minItems": 8,
-      "maxItems": 8,
+      "minItems": 9,
+      "maxItems": 9,
       "x-columns": [
         "id",
         "source_unit_id",
@@ -4366,7 +4421,8 @@
         "origin",
         "authority",
         "low_confidence",
-        "annotation_set_id"
+        "annotation_set_id",
+        "annotation_kind"
       ],
       "x-types": [
         {
@@ -4402,6 +4458,13 @@
           "nullable": {
             "scalar": "ID"
           }
+        },
+        {
+          "enum": [
+            "none",
+            "explicit",
+            "whole_name"
+          ]
         }
       ],
       "x-primary-key": [
@@ -7848,16 +7911,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "layout",
-            "identity_state",
-            "home_set_id",
-            "faces",
-            "regions"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -7870,7 +7923,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -7960,16 +8012,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "card_id",
-            "ordinal",
-            "side",
-            "current",
-            "wording"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -7982,7 +8024,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -8420,30 +8461,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "card_id",
-            "region",
-            "card_no",
-            "card_no_state",
-            "catalog_state",
-            "listing_confidence",
-            "review_level",
-            "reference_urls",
-            "variant_key",
-            "rarity_code",
-            "rarity_raw",
-            "premium",
-            "serial_total",
-            "int_id",
-            "decklog_available",
-            "decklog_verification",
-            "decklog_source_url",
-            "decklog_checked_on",
-            "faces"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -8456,7 +8473,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -8507,12 +8523,6 @@
         "base": {
           "$ref": "#/$defs/Base"
         },
-        "columns": {
-          "const": [
-            "row_index",
-            "faces"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -8525,7 +8535,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -8620,16 +8629,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "code",
-            "public_code",
-            "kind",
-            "name_unit_id",
-            "translations"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -8642,7 +8641,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -8804,20 +8802,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "family_id",
-            "region",
-            "product_code",
-            "name_unit_id",
-            "product_type",
-            "released_on",
-            "date_precision",
-            "date_raw",
-            "translations"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -8830,7 +8814,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -8986,18 +8969,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "printing_id",
-            "product_id",
-            "available_on",
-            "date_precision",
-            "date_raw",
-            "inclusion_kind",
-            "note_unit_id",
-            "first_inclusion_state"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -9010,7 +8981,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -9108,17 +9078,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "kind",
-            "old_card_id",
-            "new_card_id",
-            "printing_id",
-            "data_version",
-            "reason"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -9131,7 +9090,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -9240,17 +9198,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "card_id",
-            "face_id",
-            "classification",
-            "review_level",
-            "regions",
-            "artists"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -9263,7 +9210,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -9309,12 +9255,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "display_name"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -9327,7 +9267,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -9448,17 +9387,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "code",
-            "series_code",
-            "text_raw",
-            "kind",
-            "displayed_year",
-            "review_level"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -9471,7 +9399,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -9525,13 +9452,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "lang",
-            "text"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -9544,7 +9464,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -9598,13 +9517,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "lang",
-            "text"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -9617,7 +9529,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -9703,11 +9614,21 @@
           "items": {
             "$ref": "#/$defs/FieldTranslation"
           }
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ID"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 13,
-      "maxItems": 13,
+      "minItems": 14,
+      "maxItems": 14,
       "x-columns": [
         "id",
         "face_id",
@@ -9721,7 +9642,8 @@
         "traits",
         "titles",
         "special_kinds",
-        "translations"
+        "translations",
+        "name_concept_id"
       ],
       "x-types": [
         {
@@ -9778,6 +9700,11 @@
           "array": {
             "ref": "FieldTranslation"
           }
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
         }
       ]
     },
@@ -9796,23 +9723,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "face_id",
-            "region",
-            "name_unit_id",
-            "class_code",
-            "type_code",
-            "cost",
-            "attack",
-            "defense",
-            "traits",
-            "titles",
-            "special_kinds",
-            "translations"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -9825,7 +9735,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -9976,20 +9885,6 @@
         "base": {
           "$ref": "#/$defs/Base"
         },
-        "columns": {
-          "const": [
-            "row_index",
-            "revision",
-            "effective_from",
-            "effective_until",
-            "temporal_status",
-            "change_kind",
-            "effect_unit_id",
-            "sections",
-            "translations",
-            "corrections"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -10002,7 +9897,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -10140,11 +10034,21 @@
           "items": {
             "$ref": "#/$defs/Correction"
           }
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ID"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 21,
-      "maxItems": 21,
+      "minItems": 22,
+      "maxItems": 22,
       "x-columns": [
         "id",
         "face_id",
@@ -10166,7 +10070,8 @@
         "special_kinds",
         "sections",
         "translations",
-        "corrections"
+        "corrections",
+        "name_concept_id"
       ],
       "x-types": [
         {
@@ -10263,6 +10168,11 @@
           "array": {
             "ref": "Correction"
           }
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
         }
       ]
     },
@@ -10281,31 +10191,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "face_id",
-            "region",
-            "revision",
-            "effective_from",
-            "effective_until",
-            "temporal_status",
-            "change_kind",
-            "name_unit_id",
-            "effect_unit_id",
-            "class_code",
-            "type_code",
-            "cost",
-            "attack",
-            "defense",
-            "traits",
-            "titles",
-            "special_kinds",
-            "sections",
-            "translations",
-            "corrections"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -10318,7 +10203,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -10364,11 +10248,18 @@
               "type": "null"
             }
           ]
+        },
+        {
+          "enum": [
+            "none",
+            "explicit",
+            "whole_name"
+          ]
         }
       ],
       "items": false,
-      "minItems": 8,
-      "maxItems": 8,
+      "minItems": 9,
+      "maxItems": 9,
       "x-columns": [
         "id",
         "source_unit_id",
@@ -10377,7 +10268,8 @@
         "origin",
         "authority",
         "low_confidence",
-        "annotation_set_id"
+        "annotation_set_id",
+        "annotation_kind"
       ],
       "x-types": [
         {
@@ -10413,6 +10305,13 @@
           "nullable": {
             "scalar": "ID"
           }
+        },
+        {
+          "enum": [
+            "none",
+            "explicit",
+            "whole_name"
+          ]
         }
       ]
     },
@@ -10431,18 +10330,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "source_unit_id",
-            "target_lang",
-            "text_unit_id",
-            "origin",
-            "authority",
-            "low_confidence",
-            "annotation_set_id"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -10455,7 +10342,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -10501,11 +10387,18 @@
               "type": "null"
             }
           ]
+        },
+        {
+          "enum": [
+            "none",
+            "explicit",
+            "whole_name"
+          ]
         }
       ],
       "items": false,
-      "minItems": 8,
-      "maxItems": 8,
+      "minItems": 9,
+      "maxItems": 9,
       "x-columns": [
         "id",
         "source_unit_id",
@@ -10514,7 +10407,8 @@
         "origin",
         "authority",
         "low_confidence",
-        "annotation_set_id"
+        "annotation_set_id",
+        "annotation_kind"
       ],
       "x-types": [
         {
@@ -10550,6 +10444,13 @@
           "nullable": {
             "scalar": "ID"
           }
+        },
+        {
+          "enum": [
+            "none",
+            "explicit",
+            "whole_name"
+          ]
         }
       ]
     },
@@ -10568,18 +10469,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "source_unit_id",
-            "target_lang",
-            "text_unit_id",
-            "origin",
-            "authority",
-            "low_confidence",
-            "annotation_set_id"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -10592,7 +10481,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -10677,15 +10565,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "region",
-            "official_number",
-            "source_url",
-            "current_version_id"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -10698,7 +10577,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -10850,21 +10728,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "qa_id",
-            "revision",
-            "published_on",
-            "updated_on",
-            "date_raw",
-            "question_unit_id",
-            "answer_unit_id",
-            "state",
-            "cards",
-            "translations"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -10877,7 +10740,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -10969,16 +10831,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "region",
-            "version",
-            "published_on",
-            "effective_on",
-            "source_url"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -10991,7 +10843,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -11063,15 +10914,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "cr_version_id",
-            "number",
-            "text_unit_id",
-            "translations"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -11084,7 +10926,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -11149,14 +10990,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "region",
-            "official_url",
-            "versions"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -11169,7 +11002,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -11335,23 +11167,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "ruling_id",
-            "revision",
-            "question_unit_id",
-            "decision_unit_id",
-            "strength",
-            "decided_on",
-            "review_state",
-            "active_scopes",
-            "replaced_scopes",
-            "cards",
-            "evidence",
-            "hints"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -11364,7 +11179,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -11417,13 +11231,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "region",
-            "official_name"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -11436,7 +11243,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -11504,14 +11310,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "face_id",
-            "region",
-            "rules_name_id",
-            "role"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -11524,7 +11322,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -11596,15 +11393,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "region",
-            "format_code",
-            "name_unit_id",
-            "revisions"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -11617,7 +11405,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -11830,20 +11617,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "profile_id",
-            "announced_on",
-            "effective_from",
-            "effective_until",
-            "kind",
-            "state",
-            "max_copies",
-            "max_selected_groups",
-            "members"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -11856,7 +11629,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -12016,16 +11788,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "from_card_id",
-            "to_card_id",
-            "relation",
-            "suggested_count",
-            "applicable_regions"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -12038,7 +11800,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -12130,13 +11891,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "game",
-            "official_id"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -12149,7 +11903,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -12217,14 +11970,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "digital_card_id",
-            "phase",
-            "style_key"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -12237,7 +11982,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -12388,18 +12132,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "card_id",
-            "face_id",
-            "digital_card_id",
-            "digital_phase",
-            "relation",
-            "effect_similarity",
-            "review_level"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -12412,7 +12144,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -12488,14 +12219,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "art_id",
-            "digital_art_id",
-            "relation",
-            "review_level"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -12508,7 +12231,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -12584,14 +12306,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "card_id",
-            "game",
-            "state",
-            "as_of"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -12604,7 +12318,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -12870,24 +12583,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "digital_card_id",
-            "digital_phase",
-            "lang",
-            "kind_code",
-            "variant",
-            "interaction_target_id",
-            "label_raw",
-            "source_url",
-            "asset_path",
-            "mime",
-            "bytes",
-            "duration_ms",
-            "availability"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -12900,7 +12595,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -12959,13 +12653,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "card_id",
-            "voice_id",
-            "usage"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -12978,7 +12665,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -13086,17 +12772,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "code",
-            "kind",
-            "name_unit_id",
-            "definition_unit_id",
-            "actions",
-            "translations"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -13109,7 +12784,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -13202,15 +12876,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "card_id",
-            "keyword_id",
-            "scope",
-            "relations",
-            "actions"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -13223,7 +12888,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -13332,17 +12996,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "card_id",
-            "scope",
-            "complete_all",
-            "complete_mode",
-            "complete_keyword_ids",
-            "partial_mode",
-            "partial_keyword_ids"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -13355,7 +13008,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -13425,14 +13077,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "card_id",
-            "shared",
-            "overrides",
-            "region_blocks"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -13445,7 +13089,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -13517,15 +13160,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "kind",
-            "code",
-            "label_unit_id",
-            "active",
-            "translations"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -13538,7 +13172,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -13605,15 +13238,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "kind",
-            "code",
-            "lang",
-            "text",
-            "normalized"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -13626,7 +13250,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -13719,16 +13342,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "code",
-            "parameter_schema",
-            "keyword_id",
-            "spellings",
-            "localizations"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -13741,7 +13354,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -13828,15 +13440,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "namespace",
-            "old_key",
-            "target_namespace",
-            "target_key",
-            "reason"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -13849,7 +13452,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -13895,12 +13497,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "route_key",
-            "printing_id"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -13913,7 +13509,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -14014,16 +13609,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "source_src_raw",
-            "source_url",
-            "width",
-            "height",
-            "format"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -14036,7 +13621,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -14161,18 +13745,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "printing_id",
-            "face_id",
-            "image_id",
-            "publication_state",
-            "availability",
-            "card_version",
-            "art_version",
-            "variants"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -14185,7 +13757,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -14273,16 +13844,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "image_id",
-            "size_key",
-            "format",
-            "width",
-            "height",
-            "bytes"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -14295,7 +13856,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -14354,13 +13914,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "text_unit_id",
-            "occurrences"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -14373,7 +13926,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -14432,13 +13984,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "text_unit_id",
-            "occurrences"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -14451,7 +13996,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -14535,14 +14079,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "category",
-            "explanations",
-            "card_ids"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -14555,7 +14091,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -14639,14 +14174,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "id",
-            "category",
-            "explanations",
-            "card_ids"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -14659,7 +14186,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -14737,14 +14263,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "owner",
-            "field",
-            "ordinal",
-            "annotation_set_id"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -14757,7 +14275,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -14835,14 +14352,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "owner",
-            "field",
-            "ordinal",
-            "annotation_set_id"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -14855,7 +14364,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -14933,14 +14441,6 @@
         "base": {
           "type": "null"
         },
-        "columns": {
-          "const": [
-            "owner",
-            "field",
-            "ordinal",
-            "annotation_set_id"
-          ]
-        },
         "rows": {
           "type": "array",
           "items": {
@@ -14953,7 +14453,6 @@
         "bucket",
         "partition",
         "base",
-        "columns",
         "rows"
       ],
       "additionalProperties": false
@@ -15228,7 +14727,8 @@
               "sections",
               "stamps",
               "translations",
-              "corrections"
+              "corrections",
+              "name_concept_id"
             ],
             "items": [
               {
@@ -15303,6 +14803,11 @@
               {
                 "array": {
                   "ref": "Correction"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
                 }
               }
             ]
@@ -15834,7 +15339,8 @@
               "observations",
               "sections",
               "translations",
-              "corrections"
+              "corrections",
+              "name_concept_id"
             ],
             "items": [
               {
@@ -15882,6 +15388,11 @@
               {
                 "array": {
                   "ref": "Correction"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
                 }
               }
             ]
@@ -18322,7 +17833,8 @@
                         "special_kinds",
                         "sections",
                         "translations",
-                        "corrections"
+                        "corrections",
+                        "name_concept_id"
                       ]
                     },
                     "maxItems": 0
@@ -18368,7 +17880,8 @@
                         "origin",
                         "authority",
                         "low_confidence",
-                        "annotation_set_id"
+                        "annotation_set_id",
+                        "annotation_kind"
                       ]
                     },
                     "maxItems": 0
@@ -20505,7 +20018,8 @@
                         "special_kinds",
                         "sections",
                         "translations",
-                        "corrections"
+                        "corrections",
+                        "name_concept_id"
                       ]
                     },
                     "minItems": 1,
@@ -20552,7 +20066,8 @@
                         "origin",
                         "authority",
                         "low_confidence",
-                        "annotation_set_id"
+                        "annotation_set_id",
+                        "annotation_kind"
                       ]
                     },
                     "minItems": 1,
@@ -22712,7 +22227,8 @@
                         "special_kinds",
                         "sections",
                         "translations",
-                        "corrections"
+                        "corrections",
+                        "name_concept_id"
                       ]
                     },
                     "maxItems": 0
@@ -22758,7 +22274,8 @@
                         "origin",
                         "authority",
                         "low_confidence",
-                        "annotation_set_id"
+                        "annotation_set_id",
+                        "annotation_kind"
                       ]
                     },
                     "maxItems": 0

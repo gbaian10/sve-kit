@@ -141,6 +141,12 @@ def _container(file: Row, value: Row) -> list[Fragment]:
             rows = [
                 decode(name, row, selected.version) for row in array(fragment["rows"])
             ]
+            if table == "translation" and any(
+                row["annotation_kind"] == "whole_name"
+                and row["annotation_set_id"] is not None
+                for row in rows
+            ):
+                raise ValueError("public-annotation/shape")
             result.append(Fragment(string(file["key"]), table, fragment, rows))
             counts.append(
                 {
@@ -525,6 +531,7 @@ def read_snapshot(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
         parse(payloads[string(object_value(manifest["config_ref"])["key"])])
     )
     validate_digital(view, config)
+    _unique(view)
     return view
 
 

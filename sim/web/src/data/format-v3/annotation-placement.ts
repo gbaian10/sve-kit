@@ -7,10 +7,11 @@ import {
   objectValue,
   stringValue,
 } from "./json"
+import { wholeName } from "./name-annotations"
 import type { Fragment, View } from "./reader"
 
-export function annotationLocations(view: View, fragments: readonly Fragment[]) {
-  const display = new Set<JsonValue>(
+function displayRevisions(view: View): Set<JsonValue> {
+  return new Set<JsonValue>(
     (view["face"] ?? [])
       .flatMap((face) => [
         ...arrayValue(face["current"]).map((value) => objectValue(value)["revision_id"]),
@@ -20,6 +21,10 @@ export function annotationLocations(view: View, fragments: readonly Fragment[]) 
       ])
       .filter((value) => value !== null && value !== undefined),
   )
+}
+
+export function annotationLocations(view: View, fragments: readonly Fragment[]) {
+  const display = displayRevisions(view)
   const revisions = new Map(
     (view["face_revision"] ?? []).map((row) => [stringValue(row["id"]), row]),
   )
@@ -84,6 +89,14 @@ export function validateAnnotationPlacement(view: View, fragments: readonly Frag
       for (const row of fragment.rows)
         if (row["annotation_set_id"] !== null) annotations.add(row["annotation_set_id"] ?? null)
   }
+  const texts = new Map((view["text_unit"] ?? []).map((row) => [row["id"], row]))
+  for (const row of view["face_revision"] ?? []) {
+    if (row["name_concept_id"] == null) continue
+    const location = locate({ kind: "face_revision", id: row["id"] ?? null }, "name")
+    const unit = texts.get(row["name_unit_id"])
+    if (location.partition === "bootstrap" && unit)
+      annotations.add(wholeName(unit, stringValue(row["name_concept_id"]))["id"] ?? null)
+  }
   const concepts = new Set<JsonValue>()
   for (const row of view["annotation_set"] ?? [])
     if (annotations.has(row["id"] ?? null))
@@ -92,6 +105,10 @@ export function validateAnnotationPlacement(view: View, fragments: readonly Frag
         if (ref["kind"] !== "vocabulary")
           concepts.add(ref[ref["kind"] === "card_name" ? "term_id" : "key"] ?? null)
       }
+  const display = displayRevisions(view)
+  for (const row of view["face_revision"] ?? [])
+    if (display.has(row["id"] ?? null) && row["name_concept_id"] != null)
+      concepts.add(row["name_concept_id"])
   for (const fragment of fragments)
     if (["annotation_set", "annotation_concept"].includes(fragment.table)) {
       const selected = fragment.table === "annotation_set" ? annotations : concepts

@@ -125,6 +125,9 @@ class Builder {
   }
 
   push(table: string, owner: Owner, partition: Partition, row: JsonObject): void {
+    if (table === "face_revision" && partition !== "detail") row["name_concept_id"] = null
+    if (table === "printing")
+      for (const face of row["faces_detail"] as JsonObject[]) face["name_concept_id"] = null
     const key = `${table}|${owner.kind}|${owner.id ?? ""}|${partition}`
     const fragment = this.fragments.get(key) ?? { table, owner, partition, rows: [] }
     fragment.rows.push(row)
@@ -157,6 +160,7 @@ class Builder {
       authority,
       low_confidence: lowConfidence,
       annotation_set_id: null,
+      annotation_kind: "none",
       bootstrap,
     })
     return {
@@ -1240,7 +1244,6 @@ function buildContainer(
       bucket: fragment.bucket ?? 0,
       partition: fragment.partition,
       base,
-      columns: columns(name),
       rows,
     }
     tableFragments.set(fragment.table, [...(tableFragments.get(fragment.table) ?? []), entry])

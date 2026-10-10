@@ -165,6 +165,13 @@ export function readContainer(file: JsonObject, value: JsonObject, version = "3.
       const rows = arrayValue(fragment["rows"] ?? null).map((row, index) =>
         decodeRow(name, row, [key, table, index], version),
       )
+      if (
+        table === "translation" &&
+        rows.some(
+          (row) => row["annotation_kind"] === "whole_name" && row["annotation_set_id"] !== null,
+        )
+      )
+        fail("shape", "whole name wire slot must be null")
       const owner = fragment["owner"] ?? null
       result.push({
         file: key,
@@ -651,6 +658,7 @@ export function readSnapshot(
   validateMediaDependencies(fragments, all, stringValue(objectValue(manifest["config_ref"])["key"]))
   validateView(view, manifest, fragments)
   validatePlacement(fragments, stringValue(manifest["format_version"]))
+  unique(view)
   return view
 }
 
