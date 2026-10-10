@@ -168,10 +168,12 @@ _IMPLICIT_FIELD = re.compile(
     _ONSET
     + _FILTER
     + r"(?:自分|相手)の"
+    + _FILTER
     + r"(?P<quote>「)?"
     + _FILTER
     + r"(?P<kind>フォロワー|アミュレット)(?(quote)」)(?:を|が)?$"
 )
+_OTHER_FIELD = re.compile(_ONSET + r"他の(?P<kind>フォロワー|アミュレット)(?:を|が)?$")
 _LEADER = re.compile(r"(?:自分|相手)のリーダー(?:を|が)?$")
 _PLAYER = re.compile(r"(?:自分|相手)プレイヤー(?:を|が)?$")
 _COLLECTION = re.compile(
@@ -187,7 +189,7 @@ _LOOK_SELECTION = re.compile(
     + r")?(?(quote)」)(?:を|が)?$"
 )
 _FIELD_FILTER = re.compile(
-    r"^(?:の)?(?:(?:自分|相手)の(?:(?:場|墓場|手札|デッキ)の)?)?"
+    r"^(?:の)?(?:(?:自分|相手)の(?:(?:場|墓場|手札|デッキ)の)?|(?:場|墓場|手札|デッキ)の(?:(?:自分|相手)の)?)?"
     + _FILTER
     + r"(?:"
     + _KIND
@@ -287,7 +289,7 @@ def count_context(before: str) -> CountContext | None:
         return context
     if context := _zone_context(before):
         return context
-    if match := _IMPLICIT_FIELD.search(before):
+    if match := _IMPLICIT_FIELD.search(before) or _OTHER_FIELD.search(before):
         return CountContext(
             "select.unrestricted.v1",
             _KINDS[match["kind"]],

@@ -169,6 +169,8 @@ def test_an_explicit_two_np_union_preserves_both_zones() -> None:
             "体",
         ),
         ("自分のEXエリアのクレストが", "ex", "crest", "枚"),
+        ("他のフォロワー", "battlefield", "follower", "体"),
+        ("自分の他の「【仮能力】を持つフォロワー」", "battlefield", "follower", "体"),
         (
             "自分のデッキの上N枚を見る。その中から、フォロワーとアミュレットそれぞれ",
             "deck",
