@@ -137,7 +137,6 @@ def _container(file: Row, value: Row) -> list[Fragment]:
             ):
                 raise ValueError("Fragment role or bucket does not match profile")
             name = row_type(table, part, selected.version)
-            used.add(name)
             used |= required_types(name, selected.version)
             rows = [
                 decode(name, row, selected.version) for row in array(fragment["rows"])

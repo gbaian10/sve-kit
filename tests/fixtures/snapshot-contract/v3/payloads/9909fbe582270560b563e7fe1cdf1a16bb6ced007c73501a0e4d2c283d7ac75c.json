@@ -1,0 +1,126 @@
+{
+  "format_version": "3.0.0",
+  "tables": {
+    "product_family": [
+      {
+        "base": null,
+        "bucket": 24,
+        "owner": {
+          "id": null,
+          "kind": "global"
+        },
+        "partition": "bootstrap",
+        "rows": [
+          [
+            "set:a",
+            "synthetic",
+            "SYN",
+            "other",
+            "t:ja:90d435ce36c2c997",
+            []
+          ]
+        ]
+      }
+    ],
+    "text_unit": [
+      {
+        "base": null,
+        "bucket": 28,
+        "owner": {
+          "id": null,
+          "kind": "global"
+        },
+        "partition": "bootstrap",
+        "rows": [
+          [
+            "t:ja:90d435ce36c2c997",
+            "ja",
+            "Synthetic set"
+          ]
+        ]
+      }
+    ]
+  },
+  "types": {
+    "FieldTranslation": {
+      "columns": [
+        "field",
+        "ordinal",
+        "target_lang",
+        "translation_id",
+        "basis",
+        "source",
+        "counterpart"
+      ],
+      "items": [
+        {
+          "enum": [
+            "name",
+            "effect",
+            "flavor",
+            "question",
+            "answer",
+            "section",
+            "label",
+            "action_label"
+          ]
+        },
+        {
+          "nullable": {
+            "scalar": "UInt"
+          }
+        },
+        {
+          "scalar": "Lang"
+        },
+        {
+          "scalar": "ID"
+        },
+        {
+          "enum": [
+            "own_source",
+            "jp_source",
+            "official_counterpart"
+          ]
+        },
+        {
+          "ref": "PublicTextPointer"
+        },
+        {
+          "nullable": {
+            "ref": "PublicTextPointer"
+          }
+        }
+      ]
+    },
+    "PublicTextPointer": {
+      "columns": [
+        "owner",
+        "field",
+        "ordinal"
+      ],
+      "items": [
+        {
+          "json": "PublicTextOwner"
+        },
+        {
+          "enum": [
+            "name",
+            "effect",
+            "flavor",
+            "question",
+            "answer",
+            "section",
+            "label",
+            "action_label"
+          ]
+        },
+        {
+          "nullable": {
+            "scalar": "UInt"
+          }
+        }
+      ]
+    }
+  }
+}

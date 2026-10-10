@@ -194,64 +194,7 @@
           }
         ]
       },
-      "types": {
-        "translation_bootstrap": {
-          "columns": [
-            "id",
-            "source_unit_id",
-            "target_lang",
-            "text_unit_id",
-            "origin",
-            "authority",
-            "low_confidence",
-            "annotation_set_id",
-            "annotation_kind"
-          ],
-          "items": [
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "Lang"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "enum": [
-                "official",
-                "project",
-                "machine"
-              ]
-            },
-            {
-              "enum": [
-                "sve_official",
-                "digital_official",
-                "unofficial"
-              ]
-            },
-            {
-              "scalar": "Bool"
-            },
-            {
-              "nullable": {
-                "scalar": "ID"
-              }
-            },
-            {
-              "enum": [
-                "none",
-                "explicit",
-                "whole_name"
-              ]
-            }
-          ]
-        }
-      }
+      "types": {}
     }
   },
   {
@@ -283,64 +226,7 @@
           }
         ]
       },
-      "types": {
-        "translation_bootstrap": {
-          "columns": [
-            "id",
-            "source_unit_id",
-            "target_lang",
-            "text_unit_id",
-            "origin",
-            "authority",
-            "low_confidence",
-            "annotation_set_id",
-            "annotation_kind"
-          ],
-          "items": [
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "Lang"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "enum": [
-                "official",
-                "project",
-                "machine"
-              ]
-            },
-            {
-              "enum": [
-                "sve_official",
-                "digital_official",
-                "unofficial"
-              ]
-            },
-            {
-              "scalar": "Bool"
-            },
-            {
-              "nullable": {
-                "scalar": "ID"
-              }
-            },
-            {
-              "enum": [
-                "none",
-                "explicit",
-                "whole_name"
-              ]
-            }
-          ]
-        }
-      }
+      "types": {}
     }
   },
   {
@@ -372,64 +258,7 @@
           }
         ]
       },
-      "types": {
-        "translation_bootstrap": {
-          "columns": [
-            "id",
-            "source_unit_id",
-            "target_lang",
-            "text_unit_id",
-            "origin",
-            "authority",
-            "low_confidence",
-            "annotation_set_id",
-            "annotation_kind"
-          ],
-          "items": [
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "Lang"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "enum": [
-                "official",
-                "project",
-                "machine"
-              ]
-            },
-            {
-              "enum": [
-                "sve_official",
-                "digital_official",
-                "unofficial"
-              ]
-            },
-            {
-              "scalar": "Bool"
-            },
-            {
-              "nullable": {
-                "scalar": "ID"
-              }
-            },
-            {
-              "enum": [
-                "none",
-                "explicit",
-                "whole_name"
-              ]
-            }
-          ]
-        }
-      }
+      "types": {}
     }
   },
   {
@@ -461,64 +290,7 @@
           }
         ]
       },
-      "types": {
-        "translation_bootstrap": {
-          "columns": [
-            "id",
-            "source_unit_id",
-            "target_lang",
-            "text_unit_id",
-            "origin",
-            "authority",
-            "low_confidence",
-            "annotation_set_id",
-            "annotation_kind"
-          ],
-          "items": [
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "Lang"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "enum": [
-                "official",
-                "project",
-                "machine"
-              ]
-            },
-            {
-              "enum": [
-                "sve_official",
-                "digital_official",
-                "unofficial"
-              ]
-            },
-            {
-              "scalar": "Bool"
-            },
-            {
-              "nullable": {
-                "scalar": "ID"
-              }
-            },
-            {
-              "enum": [
-                "none",
-                "explicit",
-                "whole_name"
-              ]
-            }
-          ]
-        }
-      }
+      "types": {}
     }
   },
   {
@@ -550,64 +322,7 @@
           }
         ]
       },
-      "types": {
-        "translation_bootstrap": {
-          "columns": [
-            "id",
-            "source_unit_id",
-            "target_lang",
-            "text_unit_id",
-            "origin",
-            "authority",
-            "low_confidence",
-            "annotation_set_id",
-            "annotation_kind"
-          ],
-          "items": [
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "Lang"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "enum": [
-                "official",
-                "project",
-                "machine"
-              ]
-            },
-            {
-              "enum": [
-                "sve_official",
-                "digital_official",
-                "unofficial"
-              ]
-            },
-            {
-              "scalar": "Bool"
-            },
-            {
-              "nullable": {
-                "scalar": "ID"
-              }
-            },
-            {
-              "enum": [
-                "none",
-                "explicit",
-                "whole_name"
-              ]
-            }
-          ]
-        }
-      }
+      "types": {}
     }
   },
   {
@@ -638,64 +353,7 @@
           }
         ]
       },
-      "types": {
-        "translation_bootstrap": {
-          "columns": [
-            "id",
-            "source_unit_id",
-            "target_lang",
-            "text_unit_id",
-            "origin",
-            "authority",
-            "low_confidence",
-            "annotation_set_id",
-            "annotation_kind"
-          ],
-          "items": [
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "Lang"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "enum": [
-                "official",
-                "project",
-                "machine"
-              ]
-            },
-            {
-              "enum": [
-                "sve_official",
-                "digital_official",
-                "unofficial"
-              ]
-            },
-            {
-              "scalar": "Bool"
-            },
-            {
-              "nullable": {
-                "scalar": "ID"
-              }
-            },
-            {
-              "enum": [
-                "none",
-                "explicit",
-                "whole_name"
-              ]
-            }
-          ]
-        }
-      }
+      "types": {}
     }
   },
   {
@@ -727,64 +385,7 @@
           }
         ]
       },
-      "types": {
-        "translation_bootstrap": {
-          "columns": [
-            "id",
-            "source_unit_id",
-            "target_lang",
-            "text_unit_id",
-            "origin",
-            "authority",
-            "low_confidence",
-            "annotation_set_id",
-            "annotation_kind"
-          ],
-          "items": [
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "Lang"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "enum": [
-                "official",
-                "project",
-                "machine"
-              ]
-            },
-            {
-              "enum": [
-                "sve_official",
-                "digital_official",
-                "unofficial"
-              ]
-            },
-            {
-              "scalar": "Bool"
-            },
-            {
-              "nullable": {
-                "scalar": "ID"
-              }
-            },
-            {
-              "enum": [
-                "none",
-                "explicit",
-                "whole_name"
-              ]
-            }
-          ]
-        }
-      }
+      "types": {}
     }
   },
   {
@@ -816,64 +417,7 @@
           }
         ]
       },
-      "types": {
-        "translation_bootstrap": {
-          "columns": [
-            "id",
-            "source_unit_id",
-            "target_lang",
-            "text_unit_id",
-            "origin",
-            "authority",
-            "low_confidence",
-            "annotation_set_id",
-            "annotation_kind"
-          ],
-          "items": [
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "Lang"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "enum": [
-                "official",
-                "project",
-                "machine"
-              ]
-            },
-            {
-              "enum": [
-                "sve_official",
-                "digital_official",
-                "unofficial"
-              ]
-            },
-            {
-              "scalar": "Bool"
-            },
-            {
-              "nullable": {
-                "scalar": "ID"
-              }
-            },
-            {
-              "enum": [
-                "none",
-                "explicit",
-                "whole_name"
-              ]
-            }
-          ]
-        }
-      }
+      "types": {}
     }
   },
   {
@@ -905,64 +449,7 @@
           }
         ]
       },
-      "types": {
-        "translation_bootstrap": {
-          "columns": [
-            "id",
-            "source_unit_id",
-            "target_lang",
-            "text_unit_id",
-            "origin",
-            "authority",
-            "low_confidence",
-            "annotation_set_id",
-            "annotation_kind"
-          ],
-          "items": [
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "Lang"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "enum": [
-                "official",
-                "project",
-                "machine"
-              ]
-            },
-            {
-              "enum": [
-                "sve_official",
-                "digital_official",
-                "unofficial"
-              ]
-            },
-            {
-              "scalar": "Bool"
-            },
-            {
-              "nullable": {
-                "scalar": "ID"
-              }
-            },
-            {
-              "enum": [
-                "none",
-                "explicit",
-                "whole_name"
-              ]
-            }
-          ]
-        }
-      }
+      "types": {}
     }
   },
   {
@@ -994,64 +481,7 @@
           }
         ]
       },
-      "types": {
-        "translation_bootstrap": {
-          "columns": [
-            "id",
-            "source_unit_id",
-            "target_lang",
-            "text_unit_id",
-            "origin",
-            "authority",
-            "low_confidence",
-            "annotation_set_id",
-            "annotation_kind"
-          ],
-          "items": [
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "scalar": "Lang"
-            },
-            {
-              "scalar": "ID"
-            },
-            {
-              "enum": [
-                "official",
-                "project",
-                "machine"
-              ]
-            },
-            {
-              "enum": [
-                "sve_official",
-                "digital_official",
-                "unofficial"
-              ]
-            },
-            {
-              "scalar": "Bool"
-            },
-            {
-              "nullable": {
-                "scalar": "ID"
-              }
-            },
-            {
-              "enum": [
-                "none",
-                "explicit",
-                "whole_name"
-              ]
-            }
-          ]
-        }
-      }
+      "types": {}
     }
   }
 ]

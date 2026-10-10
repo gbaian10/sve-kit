@@ -1,0 +1,42 @@
+{
+  "format_version": "3.0.0",
+  "tables": {
+    "digital_card": [
+      {
+        "base": null,
+        "bucket": 39,
+        "owner": {
+          "id": null,
+          "kind": "global"
+        },
+        "partition": "detail",
+        "rows": [
+          [
+            "d:svwb",
+            "svwb",
+            "12345678"
+          ]
+        ]
+      }
+    ],
+    "text_unit": [
+      {
+        "base": null,
+        "bucket": 39,
+        "owner": {
+          "id": null,
+          "kind": "global"
+        },
+        "partition": "detail",
+        "rows": [
+          [
+            "t:ja:b17a760c59cb19db",
+            "ja",
+            "Synthetic rule"
+          ]
+        ]
+      }
+    ]
+  },
+  "types": {}
+}

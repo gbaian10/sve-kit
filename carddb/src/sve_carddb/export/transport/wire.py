@@ -54,11 +54,6 @@ def container(
     used: set[str] = set()
     for table, fragments in tables.items():
         for fragment in array(fragments):
-            used.add(
-                row_type(
-                    table, string(object_value(fragment)["partition"]), format_version
-                )
-            )
             used |= required_types(
                 row_type(
                     table, string(object_value(fragment)["partition"]), format_version

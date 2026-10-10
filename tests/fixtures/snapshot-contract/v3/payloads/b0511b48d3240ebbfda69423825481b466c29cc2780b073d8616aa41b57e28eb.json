@@ -1,0 +1,410 @@
+{
+  "format_version": "3.0.0",
+  "tables": {
+    "digital_link": [
+      {
+        "base": null,
+        "bucket": 26,
+        "owner": {
+          "id": "set:a",
+          "kind": "home_set"
+        },
+        "partition": "detail",
+        "rows": [
+          [
+            "dl:sv1",
+            "c:a",
+            null,
+            "d:sv1",
+            null,
+            "same_name",
+            null,
+            "unreviewed"
+          ],
+          [
+            "dl:svwb",
+            "c:a",
+            null,
+            "d:svwb",
+            null,
+            "same_name",
+            null,
+            "unreviewed"
+          ]
+        ]
+      }
+    ],
+    "face_revision": [
+      {
+        "base": {
+          "bucket": 26,
+          "file": {
+            "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+            "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
+          },
+          "owner": {
+            "id": "set:a",
+            "kind": "home_set"
+          },
+          "partition": "bootstrap",
+          "table": "face_revision"
+        },
+        "bucket": 26,
+        "owner": {
+          "id": "set:a",
+          "kind": "home_set"
+        },
+        "partition": "detail",
+        "rows": [
+          [
+            0,
+            2,
+            null,
+            null,
+            "unknown",
+            "wording",
+            "t:ja:b17a760c59cb19db",
+            [
+              [
+                0,
+                "t:ja:b17a760c59cb19db",
+                "rule"
+              ]
+            ],
+            [
+              [
+                "effect",
+                null,
+                "zh-Hant",
+                "tr:effect",
+                "own_source",
+                [
+                  {
+                    "id": "r:a2",
+                    "kind": "face_revision"
+                  },
+                  "effect",
+                  null
+                ],
+                null
+              ]
+            ],
+            [
+              [
+                "cost",
+                null,
+                true,
+                "Synthetic correction",
+                null
+              ]
+            ]
+          ],
+          [
+            1,
+            1,
+            "2026-09-29",
+            null,
+            "known",
+            "initial",
+            "t:ja:b17a760c59cb19db",
+            [],
+            [],
+            []
+          ]
+        ]
+      }
+    ],
+    "printing": [
+      {
+        "base": {
+          "bucket": 29,
+          "file": {
+            "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+            "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
+          },
+          "owner": {
+            "id": "set:a",
+            "kind": "home_set"
+          },
+          "partition": "bootstrap",
+          "table": "printing"
+        },
+        "bucket": 29,
+        "owner": {
+          "id": "set:a",
+          "kind": "home_set"
+        },
+        "partition": "detail",
+        "rows": [
+          [
+            0,
+            [
+              [
+                0,
+                null,
+                null,
+                null,
+                "unknown",
+                [
+                  [
+                    "r:a2",
+                    "available",
+                    "https://example.invalid/observations/a"
+                  ]
+                ],
+                [],
+                [],
+                [],
+                null
+              ],
+              [
+                1,
+                null,
+                null,
+                null,
+                "unknown",
+                [],
+                [],
+                [],
+                [],
+                null
+              ]
+            ]
+          ]
+        ]
+      }
+    ]
+  },
+  "types": {
+    "Correction": {
+      "columns": [
+        "field",
+        "corrected_from",
+        "is_corrected",
+        "reason",
+        "source_url"
+      ],
+      "items": [
+        {
+          "enum": [
+            "effect",
+            "name",
+            "card_type",
+            "flavor",
+            "cost",
+            "attack",
+            "defense",
+            "traits",
+            "titles",
+            "special_kinds",
+            "other"
+          ]
+        },
+        {
+          "json": "CorrectionValue"
+        },
+        {
+          "scalar": "Bool"
+        },
+        {
+          "scalar": "Text"
+        },
+        {
+          "nullable": {
+            "scalar": "URL"
+          }
+        }
+      ]
+    },
+    "FieldTranslation": {
+      "columns": [
+        "field",
+        "ordinal",
+        "target_lang",
+        "translation_id",
+        "basis",
+        "source",
+        "counterpart"
+      ],
+      "items": [
+        {
+          "enum": [
+            "name",
+            "effect",
+            "flavor",
+            "question",
+            "answer",
+            "section",
+            "label",
+            "action_label"
+          ]
+        },
+        {
+          "nullable": {
+            "scalar": "UInt"
+          }
+        },
+        {
+          "scalar": "Lang"
+        },
+        {
+          "scalar": "ID"
+        },
+        {
+          "enum": [
+            "own_source",
+            "jp_source",
+            "official_counterpart"
+          ]
+        },
+        {
+          "ref": "PublicTextPointer"
+        },
+        {
+          "nullable": {
+            "ref": "PublicTextPointer"
+          }
+        }
+      ]
+    },
+    "ObservedText": {
+      "columns": [
+        "revision_id",
+        "state",
+        "source_url"
+      ],
+      "items": [
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
+        },
+        {
+          "enum": [
+            "available",
+            "missing_effect",
+            "correction_conflict"
+          ]
+        },
+        {
+          "scalar": "URL"
+        }
+      ]
+    },
+    "PrintingFaceDetail": {
+      "columns": [
+        "face_ordinal",
+        "printed_name_unit_id",
+        "printed_effect_unit_id",
+        "flavor_unit_id",
+        "printed_text_state",
+        "observations",
+        "sections",
+        "translations",
+        "corrections",
+        "name_concept_id"
+      ],
+      "items": [
+        {
+          "scalar": "UInt"
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
+        },
+        {
+          "enum": [
+            "verified",
+            "derived_no_errata",
+            "derived_from_errata",
+            "unknown",
+            "omitted"
+          ]
+        },
+        {
+          "array": {
+            "ref": "ObservedText"
+          }
+        },
+        {
+          "array": {
+            "ref": "Section"
+          }
+        },
+        {
+          "array": {
+            "ref": "FieldTranslation"
+          }
+        },
+        {
+          "array": {
+            "ref": "Correction"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
+        }
+      ]
+    },
+    "PublicTextPointer": {
+      "columns": [
+        "owner",
+        "field",
+        "ordinal"
+      ],
+      "items": [
+        {
+          "json": "PublicTextOwner"
+        },
+        {
+          "enum": [
+            "name",
+            "effect",
+            "flavor",
+            "question",
+            "answer",
+            "section",
+            "label",
+            "action_label"
+          ]
+        },
+        {
+          "nullable": {
+            "scalar": "UInt"
+          }
+        }
+      ]
+    },
+    "Section": {
+      "columns": [
+        "ordinal",
+        "text_unit_id",
+        "kind"
+      ],
+      "items": [
+        {
+          "scalar": "UInt"
+        },
+        {
+          "scalar": "ID"
+        },
+        {
+          "scalar": "Code"
+        }
+      ]
+    }
+  }
+}

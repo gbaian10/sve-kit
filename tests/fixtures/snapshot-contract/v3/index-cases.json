@@ -24,13 +24,13 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/9d7c2c3592b5b54afb141732cb2abcab43646df26b2ea03d190824edc8a7ba52.json",
-        "manifest_sha256": "sha256:9d7c2c3592b5b54afb141732cb2abcab43646df26b2ea03d190824edc8a7ba52"
+        "manifest_path": "snapshots/manifests/3dcafb2403eb4399a0f6f0f3c3d51d6d6ccf9cdc1d36be51dc6c9fafc2f67c15.json",
+        "manifest_sha256": "sha256:3dcafb2403eb4399a0f6f0f3c3d51d6d6ccf9cdc1d36be51dc6c9fafc2f67c15"
       },
       "previous": null
     },
     "manifests": {
-      "sha256:9d7c2c3592b5b54afb141732cb2abcab43646df26b2ea03d190824edc8a7ba52": {
+      "sha256:3dcafb2403eb4399a0f6f0f3c3d51d6d6ccf9cdc1d36be51dc6c9fafc2f67c15": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -50,14 +50,14 @@
         "errata_card_ids": [],
         "files": [
           {
-            "bytes": 321,
+            "bytes": 205,
             "compressed_bytes": {
-              "gzip": 232,
-              "br": null
+              "br": null,
+              "gzip": 178
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/0",
-            "path": "snapshots/blobs/bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada.json",
+            "path": "snapshots/blobs/6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -71,17 +71,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada"
+            "sha256": "sha256:6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2"
           },
           {
-            "bytes": 324,
+            "bytes": 208,
             "compressed_bytes": {
-              "gzip": 235,
-              "br": null
+              "br": null,
+              "gzip": 180
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/1",
-            "path": "snapshots/blobs/857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8.json",
+            "path": "snapshots/blobs/2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -95,17 +95,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8"
+            "sha256": "sha256:2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11"
           },
           {
-            "bytes": 704,
+            "bytes": 275,
             "compressed_bytes": {
-              "gzip": 387,
-              "br": null
+              "br": null,
+              "gzip": 218
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/2",
-            "path": "snapshots/blobs/ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62.json",
+            "path": "snapshots/blobs/e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -119,17 +119,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62"
+            "sha256": "sha256:e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f"
           },
           {
-            "bytes": 1423,
+            "bytes": 1002,
             "compressed_bytes": {
-              "gzip": 553,
-              "br": null
+              "br": null,
+              "gzip": 439
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/3",
-            "path": "snapshots/blobs/48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7.json",
+            "path": "snapshots/blobs/9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -153,17 +153,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7"
+            "sha256": "sha256:9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c"
           },
           {
-            "bytes": 472,
+            "bytes": 356,
             "compressed_bytes": {
-              "gzip": 293,
-              "br": null
+              "br": null,
+              "gzip": 240
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/4",
-            "path": "snapshots/blobs/00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12.json",
+            "path": "snapshots/blobs/73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -187,17 +187,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12"
+            "sha256": "sha256:73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee"
           },
           {
-            "bytes": 1683,
+            "bytes": 1019,
             "compressed_bytes": {
-              "gzip": 611,
-              "br": null
+              "br": null,
+              "gzip": 447
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/7",
-            "path": "snapshots/blobs/7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a.json",
+            "path": "snapshots/blobs/8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -221,17 +221,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a"
+            "sha256": "sha256:8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d"
           },
           {
-            "bytes": 7305,
+            "bytes": 5122,
             "compressed_bytes": {
-              "gzip": 1927,
-              "br": null
+              "br": null,
+              "gzip": 1461
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9.json",
+            "path": "snapshots/blobs/ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -295,13 +295,13 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+            "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
           },
           {
             "bytes": 1218,
             "compressed_bytes": {
-              "gzip": 549,
-              "br": null
+              "br": null,
+              "gzip": 549
             },
             "dependencies": [],
             "key": "config",
@@ -331,19 +331,19 @@
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/ed23b45cd7600a8c51c4e83829c4bbfb4e108c0a8c54716343ec9d043be91c11.json",
-            "sha256": "sha256:ed23b45cd7600a8c51c4e83829c4bbfb4e108c0a8c54716343ec9d043be91c11",
-            "bytes": 568,
+            "path": "snapshots/blobs/542407b89e9d5043e85d765319a757c42d7a2cfe0ca58ae619e146d5d4c665c3.json",
+            "sha256": "sha256:542407b89e9d5043e85d765319a757c42d7a2cfe0ca58ae619e146d5d4c665c3",
+            "bytes": 319,
             "compressed_bytes": {
-              "gzip": 298,
-              "br": null
+              "br": null,
+              "gzip": 202
             }
           },
           {
-            "bytes": 1027,
+            "bytes": 533,
             "compressed_bytes": {
-              "gzip": 421,
-              "br": null
+              "br": null,
+              "gzip": 266
             },
             "dependencies": [
               {
@@ -352,7 +352,7 @@
               }
             ],
             "key": "images/detail/global/global/band/55",
-            "path": "snapshots/blobs/c409bf2a774a77ee04822cf438f2528d7778067588c2996cc00f39185d7e24ae.json",
+            "path": "snapshots/blobs/bfbda7e70d54d6797c8f223bd034d96012d776122a01a74478f924ea9ba30d55.json",
             "role": "images",
             "row_counts": [
               {
@@ -376,7 +376,7 @@
                 "count": 5
               }
             ],
-            "sha256": "sha256:c409bf2a774a77ee04822cf438f2528d7778067588c2996cc00f39185d7e24ae"
+            "sha256": "sha256:bfbda7e70d54d6797c8f223bd034d96012d776122a01a74478f924ea9ba30d55"
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/0",
@@ -396,19 +396,19 @@
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               },
               {
                 "key": "config",
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/2a5539793d029f0274ab943aa86469fa3f9110083d38283efc3f9138bc088aba.json",
-            "sha256": "sha256:2a5539793d029f0274ab943aa86469fa3f9110083d38283efc3f9138bc088aba",
-            "bytes": 912,
+            "path": "snapshots/blobs/14863c3d5821a79c6cc698c76c931adfc74bd1c5034f1541464ea968441fa750.json",
+            "sha256": "sha256:14863c3d5821a79c6cc698c76c931adfc74bd1c5034f1541464ea968441fa750",
+            "bytes": 527,
             "compressed_bytes": {
-              "gzip": 443,
-              "br": null
+              "br": null,
+              "gzip": 335
             }
           },
           {
@@ -429,26 +429,26 @@
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               },
               {
                 "key": "config",
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/944b1815e3c5741fd339abea193ae622c110d779670b9bf88c8180e7bafcd0eb.json",
-            "sha256": "sha256:944b1815e3c5741fd339abea193ae622c110d779670b9bf88c8180e7bafcd0eb",
-            "bytes": 914,
+            "path": "snapshots/blobs/0550c278bb5615c6fb2e5f24a862974fba7f6a205db6de578d0f8356d59c1ef1.json",
+            "sha256": "sha256:0550c278bb5615c6fb2e5f24a862974fba7f6a205db6de578d0f8356d59c1ef1",
+            "bytes": 529,
             "compressed_bytes": {
-              "gzip": 445,
-              "br": null
+              "br": null,
+              "gzip": 339
             }
           },
           {
             "bytes": 39,
             "compressed_bytes": {
-              "gzip": 59,
-              "br": null
+              "br": null,
+              "gzip": 59
             },
             "dependencies": [],
             "key": "programs",
@@ -458,14 +458,14 @@
             "sha256": "sha256:88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626"
           },
           {
-            "bytes": 323,
+            "bytes": 210,
             "compressed_bytes": {
-              "gzip": 244,
-              "br": null
+              "br": null,
+              "gzip": 189
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/15",
-            "path": "snapshots/blobs/e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374.json",
+            "path": "snapshots/blobs/36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e.json",
             "role": "text",
             "row_counts": [
               {
@@ -479,17 +479,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374"
+            "sha256": "sha256:36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e"
           },
           {
-            "bytes": 1757,
+            "bytes": 1061,
             "compressed_bytes": {
-              "gzip": 702,
-              "br": null
+              "br": null,
+              "gzip": 492
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/18",
-            "path": "snapshots/blobs/f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911.json",
+            "path": "snapshots/blobs/c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74.json",
             "role": "text",
             "row_counts": [
               {
@@ -513,17 +513,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911"
+            "sha256": "sha256:c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74"
           },
           {
-            "bytes": 583,
+            "bytes": 340,
             "compressed_bytes": {
-              "gzip": 294,
-              "br": null
+              "br": null,
+              "gzip": 210
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/19",
-            "path": "snapshots/blobs/f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac.json",
+            "path": "snapshots/blobs/7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967.json",
             "role": "text",
             "row_counts": [
               {
@@ -547,17 +547,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac"
+            "sha256": "sha256:7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967"
           },
           {
-            "bytes": 319,
+            "bytes": 206,
             "compressed_bytes": {
-              "gzip": 232,
-              "br": null
+              "br": null,
+              "gzip": 178
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/23",
-            "path": "snapshots/blobs/0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3.json",
+            "path": "snapshots/blobs/0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217.json",
             "role": "text",
             "row_counts": [
               {
@@ -571,7 +571,7 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3"
+            "sha256": "sha256:0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217"
           },
           {
             "key": "text/detail/global/global/band/26",
@@ -594,23 +594,23 @@
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f.json",
-            "sha256": "sha256:e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f",
-            "bytes": 314,
+            "path": "snapshots/blobs/8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa.json",
+            "sha256": "sha256:8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa",
+            "bytes": 185,
             "compressed_bytes": {
-              "gzip": 229,
-              "br": null
+              "br": null,
+              "gzip": 161
             }
           },
           {
-            "bytes": 1648,
+            "bytes": 1079,
             "compressed_bytes": {
-              "gzip": 675,
-              "br": null
+              "br": null,
+              "gzip": 514
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/6",
-            "path": "snapshots/blobs/71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02.json",
+            "path": "snapshots/blobs/b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1.json",
             "role": "text",
             "row_counts": [
               {
@@ -624,22 +624,22 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02"
+            "sha256": "sha256:b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1"
           },
           {
-            "bytes": 4374,
+            "bytes": 3284,
             "compressed_bytes": {
-              "gzip": 1338,
-              "br": null
+              "br": null,
+              "gzip": 1072
             },
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               }
             ],
             "key": "text/detail/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba.json",
+            "path": "snapshots/blobs/b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb.json",
             "role": "text",
             "row_counts": [
               {
@@ -673,22 +673,22 @@
                 "count": 2
               }
             ],
-            "sha256": "sha256:b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba"
+            "sha256": "sha256:b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb"
           },
           {
-            "bytes": 2706,
+            "bytes": 2587,
             "compressed_bytes": {
-              "gzip": 1008,
-              "br": null
+              "br": null,
+              "gzip": 977
             },
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               }
             ],
             "key": "text/detail/home_set/set%3Aa/band/1",
-            "path": "snapshots/blobs/7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1.json",
+            "path": "snapshots/blobs/3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d.json",
             "role": "text",
             "row_counts": [
               {
@@ -702,17 +702,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1"
+            "sha256": "sha256:3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d"
           },
           {
-            "bytes": 2282,
+            "bytes": 1356,
             "compressed_bytes": {
-              "gzip": 772,
-              "br": null
+              "br": null,
+              "gzip": 584
             },
             "dependencies": [],
             "key": "text/history/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98.json",
+            "path": "snapshots/blobs/a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076.json",
             "role": "text",
             "row_counts": [
               {
@@ -726,7 +726,7 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98"
+            "sha256": "sha256:a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076"
           }
         ],
         "format_version": "3.0.0",
@@ -758,41 +758,41 @@
         "restriction_coverage": [],
         "source_windows": [],
         "text_all": {
-          "path": "snapshots/blobs/948f4263e11f41233552d0befde165c4425ef0805812706276be2622dd2c61f9.json",
-          "sha256": "sha256:948f4263e11f41233552d0befde165c4425ef0805812706276be2622dd2c61f9",
-          "bytes": 30171,
+          "path": "snapshots/blobs/ccdbe6d392cf72ee42ec0f9aed3fbf2e8f760ff6debbf109c01c78e177b49460.json",
+          "sha256": "sha256:ccdbe6d392cf72ee42ec0f9aed3fbf2e8f760ff6debbf109c01c78e177b49460",
+          "bytes": 22128,
           "compressed_bytes": {
-            "gzip": 5580,
-            "br": null
+            "br": null,
+            "gzip": 4397
           },
           "contains": [
             {
               "key": "bootstrap/bootstrap/global/global/band/0",
-              "sha256": "sha256:bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada"
+              "sha256": "sha256:6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/1",
-              "sha256": "sha256:857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8"
+              "sha256": "sha256:2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/2",
-              "sha256": "sha256:ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62"
+              "sha256": "sha256:e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/3",
-              "sha256": "sha256:48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7"
+              "sha256": "sha256:9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/4",
-              "sha256": "sha256:00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12"
+              "sha256": "sha256:73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/7",
-              "sha256": "sha256:7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a"
+              "sha256": "sha256:8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d"
             },
             {
               "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-              "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+              "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
             },
             {
               "key": "config",
@@ -800,39 +800,39 @@
             },
             {
               "key": "text/detail/global/global/band/15",
-              "sha256": "sha256:e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374"
+              "sha256": "sha256:36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e"
             },
             {
               "key": "text/detail/global/global/band/18",
-              "sha256": "sha256:f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911"
+              "sha256": "sha256:c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74"
             },
             {
               "key": "text/detail/global/global/band/19",
-              "sha256": "sha256:f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac"
+              "sha256": "sha256:7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967"
             },
             {
               "key": "text/detail/global/global/band/23",
-              "sha256": "sha256:0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3"
+              "sha256": "sha256:0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217"
             },
             {
               "key": "text/detail/global/global/band/26",
-              "sha256": "sha256:e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f"
+              "sha256": "sha256:8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa"
             },
             {
               "key": "text/detail/global/global/band/6",
-              "sha256": "sha256:71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02"
+              "sha256": "sha256:b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1"
             },
             {
               "key": "text/detail/home_set/set%3Aa/band/0",
-              "sha256": "sha256:b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba"
+              "sha256": "sha256:b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb"
             },
             {
               "key": "text/detail/home_set/set%3Aa/band/1",
-              "sha256": "sha256:7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1"
+              "sha256": "sha256:3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d"
             },
             {
               "key": "text/history/home_set/set%3Aa/band/0",
-              "sha256": "sha256:7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98"
+              "sha256": "sha256:a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076"
             }
           ]
         }
@@ -888,12 +888,12 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/9d7c2c3592b5b54afb141732cb2abcab43646df26b2ea03d190824edc8a7ba52.json",
-        "manifest_sha256": "sha256:9d7c2c3592b5b54afb141732cb2abcab43646df26b2ea03d190824edc8a7ba52"
+        "manifest_path": "snapshots/manifests/3dcafb2403eb4399a0f6f0f3c3d51d6d6ccf9cdc1d36be51dc6c9fafc2f67c15.json",
+        "manifest_sha256": "sha256:3dcafb2403eb4399a0f6f0f3c3d51d6d6ccf9cdc1d36be51dc6c9fafc2f67c15"
       }
     },
     "manifests": {
-      "sha256:9d7c2c3592b5b54afb141732cb2abcab43646df26b2ea03d190824edc8a7ba52": {
+      "sha256:3dcafb2403eb4399a0f6f0f3c3d51d6d6ccf9cdc1d36be51dc6c9fafc2f67c15": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -913,14 +913,14 @@
         "errata_card_ids": [],
         "files": [
           {
-            "bytes": 321,
+            "bytes": 205,
             "compressed_bytes": {
-              "gzip": 232,
-              "br": null
+              "br": null,
+              "gzip": 178
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/0",
-            "path": "snapshots/blobs/bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada.json",
+            "path": "snapshots/blobs/6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -934,17 +934,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada"
+            "sha256": "sha256:6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2"
           },
           {
-            "bytes": 324,
+            "bytes": 208,
             "compressed_bytes": {
-              "gzip": 235,
-              "br": null
+              "br": null,
+              "gzip": 180
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/1",
-            "path": "snapshots/blobs/857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8.json",
+            "path": "snapshots/blobs/2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -958,17 +958,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8"
+            "sha256": "sha256:2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11"
           },
           {
-            "bytes": 704,
+            "bytes": 275,
             "compressed_bytes": {
-              "gzip": 387,
-              "br": null
+              "br": null,
+              "gzip": 218
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/2",
-            "path": "snapshots/blobs/ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62.json",
+            "path": "snapshots/blobs/e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -982,17 +982,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62"
+            "sha256": "sha256:e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f"
           },
           {
-            "bytes": 1423,
+            "bytes": 1002,
             "compressed_bytes": {
-              "gzip": 553,
-              "br": null
+              "br": null,
+              "gzip": 439
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/3",
-            "path": "snapshots/blobs/48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7.json",
+            "path": "snapshots/blobs/9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -1016,17 +1016,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7"
+            "sha256": "sha256:9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c"
           },
           {
-            "bytes": 472,
+            "bytes": 356,
             "compressed_bytes": {
-              "gzip": 293,
-              "br": null
+              "br": null,
+              "gzip": 240
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/4",
-            "path": "snapshots/blobs/00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12.json",
+            "path": "snapshots/blobs/73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -1050,17 +1050,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12"
+            "sha256": "sha256:73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee"
           },
           {
-            "bytes": 1683,
+            "bytes": 1019,
             "compressed_bytes": {
-              "gzip": 611,
-              "br": null
+              "br": null,
+              "gzip": 447
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/7",
-            "path": "snapshots/blobs/7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a.json",
+            "path": "snapshots/blobs/8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -1084,17 +1084,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a"
+            "sha256": "sha256:8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d"
           },
           {
-            "bytes": 7305,
+            "bytes": 5122,
             "compressed_bytes": {
-              "gzip": 1927,
-              "br": null
+              "br": null,
+              "gzip": 1461
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9.json",
+            "path": "snapshots/blobs/ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -1158,13 +1158,13 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+            "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
           },
           {
             "bytes": 1218,
             "compressed_bytes": {
-              "gzip": 549,
-              "br": null
+              "br": null,
+              "gzip": 549
             },
             "dependencies": [],
             "key": "config",
@@ -1194,19 +1194,19 @@
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/ed23b45cd7600a8c51c4e83829c4bbfb4e108c0a8c54716343ec9d043be91c11.json",
-            "sha256": "sha256:ed23b45cd7600a8c51c4e83829c4bbfb4e108c0a8c54716343ec9d043be91c11",
-            "bytes": 568,
+            "path": "snapshots/blobs/542407b89e9d5043e85d765319a757c42d7a2cfe0ca58ae619e146d5d4c665c3.json",
+            "sha256": "sha256:542407b89e9d5043e85d765319a757c42d7a2cfe0ca58ae619e146d5d4c665c3",
+            "bytes": 319,
             "compressed_bytes": {
-              "gzip": 298,
-              "br": null
+              "br": null,
+              "gzip": 202
             }
           },
           {
-            "bytes": 1027,
+            "bytes": 533,
             "compressed_bytes": {
-              "gzip": 421,
-              "br": null
+              "br": null,
+              "gzip": 266
             },
             "dependencies": [
               {
@@ -1215,7 +1215,7 @@
               }
             ],
             "key": "images/detail/global/global/band/55",
-            "path": "snapshots/blobs/c409bf2a774a77ee04822cf438f2528d7778067588c2996cc00f39185d7e24ae.json",
+            "path": "snapshots/blobs/bfbda7e70d54d6797c8f223bd034d96012d776122a01a74478f924ea9ba30d55.json",
             "role": "images",
             "row_counts": [
               {
@@ -1239,7 +1239,7 @@
                 "count": 5
               }
             ],
-            "sha256": "sha256:c409bf2a774a77ee04822cf438f2528d7778067588c2996cc00f39185d7e24ae"
+            "sha256": "sha256:bfbda7e70d54d6797c8f223bd034d96012d776122a01a74478f924ea9ba30d55"
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/0",
@@ -1259,19 +1259,19 @@
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               },
               {
                 "key": "config",
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/2a5539793d029f0274ab943aa86469fa3f9110083d38283efc3f9138bc088aba.json",
-            "sha256": "sha256:2a5539793d029f0274ab943aa86469fa3f9110083d38283efc3f9138bc088aba",
-            "bytes": 912,
+            "path": "snapshots/blobs/14863c3d5821a79c6cc698c76c931adfc74bd1c5034f1541464ea968441fa750.json",
+            "sha256": "sha256:14863c3d5821a79c6cc698c76c931adfc74bd1c5034f1541464ea968441fa750",
+            "bytes": 527,
             "compressed_bytes": {
-              "gzip": 443,
-              "br": null
+              "br": null,
+              "gzip": 335
             }
           },
           {
@@ -1292,26 +1292,26 @@
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               },
               {
                 "key": "config",
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/944b1815e3c5741fd339abea193ae622c110d779670b9bf88c8180e7bafcd0eb.json",
-            "sha256": "sha256:944b1815e3c5741fd339abea193ae622c110d779670b9bf88c8180e7bafcd0eb",
-            "bytes": 914,
+            "path": "snapshots/blobs/0550c278bb5615c6fb2e5f24a862974fba7f6a205db6de578d0f8356d59c1ef1.json",
+            "sha256": "sha256:0550c278bb5615c6fb2e5f24a862974fba7f6a205db6de578d0f8356d59c1ef1",
+            "bytes": 529,
             "compressed_bytes": {
-              "gzip": 445,
-              "br": null
+              "br": null,
+              "gzip": 339
             }
           },
           {
             "bytes": 39,
             "compressed_bytes": {
-              "gzip": 59,
-              "br": null
+              "br": null,
+              "gzip": 59
             },
             "dependencies": [],
             "key": "programs",
@@ -1321,14 +1321,14 @@
             "sha256": "sha256:88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626"
           },
           {
-            "bytes": 323,
+            "bytes": 210,
             "compressed_bytes": {
-              "gzip": 244,
-              "br": null
+              "br": null,
+              "gzip": 189
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/15",
-            "path": "snapshots/blobs/e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374.json",
+            "path": "snapshots/blobs/36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e.json",
             "role": "text",
             "row_counts": [
               {
@@ -1342,17 +1342,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374"
+            "sha256": "sha256:36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e"
           },
           {
-            "bytes": 1757,
+            "bytes": 1061,
             "compressed_bytes": {
-              "gzip": 702,
-              "br": null
+              "br": null,
+              "gzip": 492
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/18",
-            "path": "snapshots/blobs/f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911.json",
+            "path": "snapshots/blobs/c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74.json",
             "role": "text",
             "row_counts": [
               {
@@ -1376,17 +1376,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911"
+            "sha256": "sha256:c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74"
           },
           {
-            "bytes": 583,
+            "bytes": 340,
             "compressed_bytes": {
-              "gzip": 294,
-              "br": null
+              "br": null,
+              "gzip": 210
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/19",
-            "path": "snapshots/blobs/f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac.json",
+            "path": "snapshots/blobs/7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967.json",
             "role": "text",
             "row_counts": [
               {
@@ -1410,17 +1410,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac"
+            "sha256": "sha256:7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967"
           },
           {
-            "bytes": 319,
+            "bytes": 206,
             "compressed_bytes": {
-              "gzip": 232,
-              "br": null
+              "br": null,
+              "gzip": 178
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/23",
-            "path": "snapshots/blobs/0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3.json",
+            "path": "snapshots/blobs/0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217.json",
             "role": "text",
             "row_counts": [
               {
@@ -1434,7 +1434,7 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3"
+            "sha256": "sha256:0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217"
           },
           {
             "key": "text/detail/global/global/band/26",
@@ -1457,23 +1457,23 @@
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f.json",
-            "sha256": "sha256:e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f",
-            "bytes": 314,
+            "path": "snapshots/blobs/8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa.json",
+            "sha256": "sha256:8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa",
+            "bytes": 185,
             "compressed_bytes": {
-              "gzip": 229,
-              "br": null
+              "br": null,
+              "gzip": 161
             }
           },
           {
-            "bytes": 1648,
+            "bytes": 1079,
             "compressed_bytes": {
-              "gzip": 675,
-              "br": null
+              "br": null,
+              "gzip": 514
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/6",
-            "path": "snapshots/blobs/71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02.json",
+            "path": "snapshots/blobs/b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1.json",
             "role": "text",
             "row_counts": [
               {
@@ -1487,22 +1487,22 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02"
+            "sha256": "sha256:b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1"
           },
           {
-            "bytes": 4374,
+            "bytes": 3284,
             "compressed_bytes": {
-              "gzip": 1338,
-              "br": null
+              "br": null,
+              "gzip": 1072
             },
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               }
             ],
             "key": "text/detail/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba.json",
+            "path": "snapshots/blobs/b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb.json",
             "role": "text",
             "row_counts": [
               {
@@ -1536,22 +1536,22 @@
                 "count": 2
               }
             ],
-            "sha256": "sha256:b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba"
+            "sha256": "sha256:b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb"
           },
           {
-            "bytes": 2706,
+            "bytes": 2587,
             "compressed_bytes": {
-              "gzip": 1008,
-              "br": null
+              "br": null,
+              "gzip": 977
             },
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               }
             ],
             "key": "text/detail/home_set/set%3Aa/band/1",
-            "path": "snapshots/blobs/7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1.json",
+            "path": "snapshots/blobs/3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d.json",
             "role": "text",
             "row_counts": [
               {
@@ -1565,17 +1565,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1"
+            "sha256": "sha256:3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d"
           },
           {
-            "bytes": 2282,
+            "bytes": 1356,
             "compressed_bytes": {
-              "gzip": 772,
-              "br": null
+              "br": null,
+              "gzip": 584
             },
             "dependencies": [],
             "key": "text/history/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98.json",
+            "path": "snapshots/blobs/a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076.json",
             "role": "text",
             "row_counts": [
               {
@@ -1589,7 +1589,7 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98"
+            "sha256": "sha256:a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076"
           }
         ],
         "format_version": "3.0.0",
@@ -1621,41 +1621,41 @@
         "restriction_coverage": [],
         "source_windows": [],
         "text_all": {
-          "path": "snapshots/blobs/948f4263e11f41233552d0befde165c4425ef0805812706276be2622dd2c61f9.json",
-          "sha256": "sha256:948f4263e11f41233552d0befde165c4425ef0805812706276be2622dd2c61f9",
-          "bytes": 30171,
+          "path": "snapshots/blobs/ccdbe6d392cf72ee42ec0f9aed3fbf2e8f760ff6debbf109c01c78e177b49460.json",
+          "sha256": "sha256:ccdbe6d392cf72ee42ec0f9aed3fbf2e8f760ff6debbf109c01c78e177b49460",
+          "bytes": 22128,
           "compressed_bytes": {
-            "gzip": 5580,
-            "br": null
+            "br": null,
+            "gzip": 4397
           },
           "contains": [
             {
               "key": "bootstrap/bootstrap/global/global/band/0",
-              "sha256": "sha256:bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada"
+              "sha256": "sha256:6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/1",
-              "sha256": "sha256:857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8"
+              "sha256": "sha256:2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/2",
-              "sha256": "sha256:ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62"
+              "sha256": "sha256:e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/3",
-              "sha256": "sha256:48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7"
+              "sha256": "sha256:9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/4",
-              "sha256": "sha256:00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12"
+              "sha256": "sha256:73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/7",
-              "sha256": "sha256:7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a"
+              "sha256": "sha256:8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d"
             },
             {
               "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-              "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+              "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
             },
             {
               "key": "config",
@@ -1663,39 +1663,39 @@
             },
             {
               "key": "text/detail/global/global/band/15",
-              "sha256": "sha256:e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374"
+              "sha256": "sha256:36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e"
             },
             {
               "key": "text/detail/global/global/band/18",
-              "sha256": "sha256:f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911"
+              "sha256": "sha256:c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74"
             },
             {
               "key": "text/detail/global/global/band/19",
-              "sha256": "sha256:f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac"
+              "sha256": "sha256:7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967"
             },
             {
               "key": "text/detail/global/global/band/23",
-              "sha256": "sha256:0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3"
+              "sha256": "sha256:0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217"
             },
             {
               "key": "text/detail/global/global/band/26",
-              "sha256": "sha256:e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f"
+              "sha256": "sha256:8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa"
             },
             {
               "key": "text/detail/global/global/band/6",
-              "sha256": "sha256:71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02"
+              "sha256": "sha256:b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1"
             },
             {
               "key": "text/detail/home_set/set%3Aa/band/0",
-              "sha256": "sha256:b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba"
+              "sha256": "sha256:b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb"
             },
             {
               "key": "text/detail/home_set/set%3Aa/band/1",
-              "sha256": "sha256:7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1"
+              "sha256": "sha256:3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d"
             },
             {
               "key": "text/history/home_set/set%3Aa/band/0",
-              "sha256": "sha256:7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98"
+              "sha256": "sha256:a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076"
             }
           ]
         }
@@ -1783,12 +1783,12 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/9d7c2c3592b5b54afb141732cb2abcab43646df26b2ea03d190824edc8a7ba52.json",
-        "manifest_sha256": "sha256:9d7c2c3592b5b54afb141732cb2abcab43646df26b2ea03d190824edc8a7ba52"
+        "manifest_path": "snapshots/manifests/3dcafb2403eb4399a0f6f0f3c3d51d6d6ccf9cdc1d36be51dc6c9fafc2f67c15.json",
+        "manifest_sha256": "sha256:3dcafb2403eb4399a0f6f0f3c3d51d6d6ccf9cdc1d36be51dc6c9fafc2f67c15"
       }
     },
     "manifests": {
-      "sha256:9d7c2c3592b5b54afb141732cb2abcab43646df26b2ea03d190824edc8a7ba52": {
+      "sha256:3dcafb2403eb4399a0f6f0f3c3d51d6d6ccf9cdc1d36be51dc6c9fafc2f67c15": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -1808,14 +1808,14 @@
         "errata_card_ids": [],
         "files": [
           {
-            "bytes": 321,
+            "bytes": 205,
             "compressed_bytes": {
-              "gzip": 232,
-              "br": null
+              "br": null,
+              "gzip": 178
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/0",
-            "path": "snapshots/blobs/bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada.json",
+            "path": "snapshots/blobs/6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -1829,17 +1829,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada"
+            "sha256": "sha256:6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2"
           },
           {
-            "bytes": 324,
+            "bytes": 208,
             "compressed_bytes": {
-              "gzip": 235,
-              "br": null
+              "br": null,
+              "gzip": 180
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/1",
-            "path": "snapshots/blobs/857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8.json",
+            "path": "snapshots/blobs/2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -1853,17 +1853,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8"
+            "sha256": "sha256:2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11"
           },
           {
-            "bytes": 704,
+            "bytes": 275,
             "compressed_bytes": {
-              "gzip": 387,
-              "br": null
+              "br": null,
+              "gzip": 218
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/2",
-            "path": "snapshots/blobs/ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62.json",
+            "path": "snapshots/blobs/e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -1877,17 +1877,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62"
+            "sha256": "sha256:e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f"
           },
           {
-            "bytes": 1423,
+            "bytes": 1002,
             "compressed_bytes": {
-              "gzip": 553,
-              "br": null
+              "br": null,
+              "gzip": 439
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/3",
-            "path": "snapshots/blobs/48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7.json",
+            "path": "snapshots/blobs/9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -1911,17 +1911,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7"
+            "sha256": "sha256:9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c"
           },
           {
-            "bytes": 472,
+            "bytes": 356,
             "compressed_bytes": {
-              "gzip": 293,
-              "br": null
+              "br": null,
+              "gzip": 240
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/4",
-            "path": "snapshots/blobs/00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12.json",
+            "path": "snapshots/blobs/73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -1945,17 +1945,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12"
+            "sha256": "sha256:73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee"
           },
           {
-            "bytes": 1683,
+            "bytes": 1019,
             "compressed_bytes": {
-              "gzip": 611,
-              "br": null
+              "br": null,
+              "gzip": 447
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/7",
-            "path": "snapshots/blobs/7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a.json",
+            "path": "snapshots/blobs/8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -1979,17 +1979,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a"
+            "sha256": "sha256:8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d"
           },
           {
-            "bytes": 7305,
+            "bytes": 5122,
             "compressed_bytes": {
-              "gzip": 1927,
-              "br": null
+              "br": null,
+              "gzip": 1461
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9.json",
+            "path": "snapshots/blobs/ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -2053,13 +2053,13 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+            "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
           },
           {
             "bytes": 1218,
             "compressed_bytes": {
-              "gzip": 549,
-              "br": null
+              "br": null,
+              "gzip": 549
             },
             "dependencies": [],
             "key": "config",
@@ -2089,19 +2089,19 @@
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/ed23b45cd7600a8c51c4e83829c4bbfb4e108c0a8c54716343ec9d043be91c11.json",
-            "sha256": "sha256:ed23b45cd7600a8c51c4e83829c4bbfb4e108c0a8c54716343ec9d043be91c11",
-            "bytes": 568,
+            "path": "snapshots/blobs/542407b89e9d5043e85d765319a757c42d7a2cfe0ca58ae619e146d5d4c665c3.json",
+            "sha256": "sha256:542407b89e9d5043e85d765319a757c42d7a2cfe0ca58ae619e146d5d4c665c3",
+            "bytes": 319,
             "compressed_bytes": {
-              "gzip": 298,
-              "br": null
+              "br": null,
+              "gzip": 202
             }
           },
           {
-            "bytes": 1027,
+            "bytes": 533,
             "compressed_bytes": {
-              "gzip": 421,
-              "br": null
+              "br": null,
+              "gzip": 266
             },
             "dependencies": [
               {
@@ -2110,7 +2110,7 @@
               }
             ],
             "key": "images/detail/global/global/band/55",
-            "path": "snapshots/blobs/c409bf2a774a77ee04822cf438f2528d7778067588c2996cc00f39185d7e24ae.json",
+            "path": "snapshots/blobs/bfbda7e70d54d6797c8f223bd034d96012d776122a01a74478f924ea9ba30d55.json",
             "role": "images",
             "row_counts": [
               {
@@ -2134,7 +2134,7 @@
                 "count": 5
               }
             ],
-            "sha256": "sha256:c409bf2a774a77ee04822cf438f2528d7778067588c2996cc00f39185d7e24ae"
+            "sha256": "sha256:bfbda7e70d54d6797c8f223bd034d96012d776122a01a74478f924ea9ba30d55"
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/0",
@@ -2154,19 +2154,19 @@
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               },
               {
                 "key": "config",
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/2a5539793d029f0274ab943aa86469fa3f9110083d38283efc3f9138bc088aba.json",
-            "sha256": "sha256:2a5539793d029f0274ab943aa86469fa3f9110083d38283efc3f9138bc088aba",
-            "bytes": 912,
+            "path": "snapshots/blobs/14863c3d5821a79c6cc698c76c931adfc74bd1c5034f1541464ea968441fa750.json",
+            "sha256": "sha256:14863c3d5821a79c6cc698c76c931adfc74bd1c5034f1541464ea968441fa750",
+            "bytes": 527,
             "compressed_bytes": {
-              "gzip": 443,
-              "br": null
+              "br": null,
+              "gzip": 335
             }
           },
           {
@@ -2187,26 +2187,26 @@
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               },
               {
                 "key": "config",
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/944b1815e3c5741fd339abea193ae622c110d779670b9bf88c8180e7bafcd0eb.json",
-            "sha256": "sha256:944b1815e3c5741fd339abea193ae622c110d779670b9bf88c8180e7bafcd0eb",
-            "bytes": 914,
+            "path": "snapshots/blobs/0550c278bb5615c6fb2e5f24a862974fba7f6a205db6de578d0f8356d59c1ef1.json",
+            "sha256": "sha256:0550c278bb5615c6fb2e5f24a862974fba7f6a205db6de578d0f8356d59c1ef1",
+            "bytes": 529,
             "compressed_bytes": {
-              "gzip": 445,
-              "br": null
+              "br": null,
+              "gzip": 339
             }
           },
           {
             "bytes": 39,
             "compressed_bytes": {
-              "gzip": 59,
-              "br": null
+              "br": null,
+              "gzip": 59
             },
             "dependencies": [],
             "key": "programs",
@@ -2216,14 +2216,14 @@
             "sha256": "sha256:88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626"
           },
           {
-            "bytes": 323,
+            "bytes": 210,
             "compressed_bytes": {
-              "gzip": 244,
-              "br": null
+              "br": null,
+              "gzip": 189
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/15",
-            "path": "snapshots/blobs/e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374.json",
+            "path": "snapshots/blobs/36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e.json",
             "role": "text",
             "row_counts": [
               {
@@ -2237,17 +2237,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374"
+            "sha256": "sha256:36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e"
           },
           {
-            "bytes": 1757,
+            "bytes": 1061,
             "compressed_bytes": {
-              "gzip": 702,
-              "br": null
+              "br": null,
+              "gzip": 492
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/18",
-            "path": "snapshots/blobs/f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911.json",
+            "path": "snapshots/blobs/c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74.json",
             "role": "text",
             "row_counts": [
               {
@@ -2271,17 +2271,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911"
+            "sha256": "sha256:c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74"
           },
           {
-            "bytes": 583,
+            "bytes": 340,
             "compressed_bytes": {
-              "gzip": 294,
-              "br": null
+              "br": null,
+              "gzip": 210
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/19",
-            "path": "snapshots/blobs/f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac.json",
+            "path": "snapshots/blobs/7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967.json",
             "role": "text",
             "row_counts": [
               {
@@ -2305,17 +2305,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac"
+            "sha256": "sha256:7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967"
           },
           {
-            "bytes": 319,
+            "bytes": 206,
             "compressed_bytes": {
-              "gzip": 232,
-              "br": null
+              "br": null,
+              "gzip": 178
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/23",
-            "path": "snapshots/blobs/0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3.json",
+            "path": "snapshots/blobs/0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217.json",
             "role": "text",
             "row_counts": [
               {
@@ -2329,7 +2329,7 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3"
+            "sha256": "sha256:0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217"
           },
           {
             "key": "text/detail/global/global/band/26",
@@ -2352,23 +2352,23 @@
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f.json",
-            "sha256": "sha256:e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f",
-            "bytes": 314,
+            "path": "snapshots/blobs/8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa.json",
+            "sha256": "sha256:8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa",
+            "bytes": 185,
             "compressed_bytes": {
-              "gzip": 229,
-              "br": null
+              "br": null,
+              "gzip": 161
             }
           },
           {
-            "bytes": 1648,
+            "bytes": 1079,
             "compressed_bytes": {
-              "gzip": 675,
-              "br": null
+              "br": null,
+              "gzip": 514
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/6",
-            "path": "snapshots/blobs/71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02.json",
+            "path": "snapshots/blobs/b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1.json",
             "role": "text",
             "row_counts": [
               {
@@ -2382,22 +2382,22 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02"
+            "sha256": "sha256:b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1"
           },
           {
-            "bytes": 4374,
+            "bytes": 3284,
             "compressed_bytes": {
-              "gzip": 1338,
-              "br": null
+              "br": null,
+              "gzip": 1072
             },
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               }
             ],
             "key": "text/detail/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba.json",
+            "path": "snapshots/blobs/b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb.json",
             "role": "text",
             "row_counts": [
               {
@@ -2431,22 +2431,22 @@
                 "count": 2
               }
             ],
-            "sha256": "sha256:b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba"
+            "sha256": "sha256:b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb"
           },
           {
-            "bytes": 2706,
+            "bytes": 2587,
             "compressed_bytes": {
-              "gzip": 1008,
-              "br": null
+              "br": null,
+              "gzip": 977
             },
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               }
             ],
             "key": "text/detail/home_set/set%3Aa/band/1",
-            "path": "snapshots/blobs/7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1.json",
+            "path": "snapshots/blobs/3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d.json",
             "role": "text",
             "row_counts": [
               {
@@ -2460,17 +2460,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1"
+            "sha256": "sha256:3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d"
           },
           {
-            "bytes": 2282,
+            "bytes": 1356,
             "compressed_bytes": {
-              "gzip": 772,
-              "br": null
+              "br": null,
+              "gzip": 584
             },
             "dependencies": [],
             "key": "text/history/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98.json",
+            "path": "snapshots/blobs/a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076.json",
             "role": "text",
             "row_counts": [
               {
@@ -2484,7 +2484,7 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98"
+            "sha256": "sha256:a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076"
           }
         ],
         "format_version": "3.0.0",
@@ -2516,41 +2516,41 @@
         "restriction_coverage": [],
         "source_windows": [],
         "text_all": {
-          "path": "snapshots/blobs/948f4263e11f41233552d0befde165c4425ef0805812706276be2622dd2c61f9.json",
-          "sha256": "sha256:948f4263e11f41233552d0befde165c4425ef0805812706276be2622dd2c61f9",
-          "bytes": 30171,
+          "path": "snapshots/blobs/ccdbe6d392cf72ee42ec0f9aed3fbf2e8f760ff6debbf109c01c78e177b49460.json",
+          "sha256": "sha256:ccdbe6d392cf72ee42ec0f9aed3fbf2e8f760ff6debbf109c01c78e177b49460",
+          "bytes": 22128,
           "compressed_bytes": {
-            "gzip": 5580,
-            "br": null
+            "br": null,
+            "gzip": 4397
           },
           "contains": [
             {
               "key": "bootstrap/bootstrap/global/global/band/0",
-              "sha256": "sha256:bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada"
+              "sha256": "sha256:6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/1",
-              "sha256": "sha256:857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8"
+              "sha256": "sha256:2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/2",
-              "sha256": "sha256:ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62"
+              "sha256": "sha256:e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/3",
-              "sha256": "sha256:48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7"
+              "sha256": "sha256:9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/4",
-              "sha256": "sha256:00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12"
+              "sha256": "sha256:73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/7",
-              "sha256": "sha256:7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a"
+              "sha256": "sha256:8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d"
             },
             {
               "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-              "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+              "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
             },
             {
               "key": "config",
@@ -2558,39 +2558,39 @@
             },
             {
               "key": "text/detail/global/global/band/15",
-              "sha256": "sha256:e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374"
+              "sha256": "sha256:36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e"
             },
             {
               "key": "text/detail/global/global/band/18",
-              "sha256": "sha256:f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911"
+              "sha256": "sha256:c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74"
             },
             {
               "key": "text/detail/global/global/band/19",
-              "sha256": "sha256:f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac"
+              "sha256": "sha256:7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967"
             },
             {
               "key": "text/detail/global/global/band/23",
-              "sha256": "sha256:0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3"
+              "sha256": "sha256:0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217"
             },
             {
               "key": "text/detail/global/global/band/26",
-              "sha256": "sha256:e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f"
+              "sha256": "sha256:8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa"
             },
             {
               "key": "text/detail/global/global/band/6",
-              "sha256": "sha256:71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02"
+              "sha256": "sha256:b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1"
             },
             {
               "key": "text/detail/home_set/set%3Aa/band/0",
-              "sha256": "sha256:b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba"
+              "sha256": "sha256:b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb"
             },
             {
               "key": "text/detail/home_set/set%3Aa/band/1",
-              "sha256": "sha256:7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1"
+              "sha256": "sha256:3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d"
             },
             {
               "key": "text/history/home_set/set%3Aa/band/0",
-              "sha256": "sha256:7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98"
+              "sha256": "sha256:a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076"
             }
           ]
         }
@@ -2678,12 +2678,12 @@
           "engine_version": null,
           "validation_policy_id": null
         },
-        "manifest_path": "snapshots/manifests/9d7c2c3592b5b54afb141732cb2abcab43646df26b2ea03d190824edc8a7ba52.json",
-        "manifest_sha256": "sha256:9d7c2c3592b5b54afb141732cb2abcab43646df26b2ea03d190824edc8a7ba52"
+        "manifest_path": "snapshots/manifests/3dcafb2403eb4399a0f6f0f3c3d51d6d6ccf9cdc1d36be51dc6c9fafc2f67c15.json",
+        "manifest_sha256": "sha256:3dcafb2403eb4399a0f6f0f3c3d51d6d6ccf9cdc1d36be51dc6c9fafc2f67c15"
       }
     },
     "manifests": {
-      "sha256:9d7c2c3592b5b54afb141732cb2abcab43646df26b2ea03d190824edc8a7ba52": {
+      "sha256:3dcafb2403eb4399a0f6f0f3c3d51d6d6ccf9cdc1d36be51dc6c9fafc2f67c15": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -2703,14 +2703,14 @@
         "errata_card_ids": [],
         "files": [
           {
-            "bytes": 321,
+            "bytes": 205,
             "compressed_bytes": {
-              "gzip": 232,
-              "br": null
+              "br": null,
+              "gzip": 178
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/0",
-            "path": "snapshots/blobs/bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada.json",
+            "path": "snapshots/blobs/6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -2724,17 +2724,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada"
+            "sha256": "sha256:6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2"
           },
           {
-            "bytes": 324,
+            "bytes": 208,
             "compressed_bytes": {
-              "gzip": 235,
-              "br": null
+              "br": null,
+              "gzip": 180
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/1",
-            "path": "snapshots/blobs/857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8.json",
+            "path": "snapshots/blobs/2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -2748,17 +2748,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8"
+            "sha256": "sha256:2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11"
           },
           {
-            "bytes": 704,
+            "bytes": 275,
             "compressed_bytes": {
-              "gzip": 387,
-              "br": null
+              "br": null,
+              "gzip": 218
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/2",
-            "path": "snapshots/blobs/ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62.json",
+            "path": "snapshots/blobs/e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -2772,17 +2772,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62"
+            "sha256": "sha256:e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f"
           },
           {
-            "bytes": 1423,
+            "bytes": 1002,
             "compressed_bytes": {
-              "gzip": 553,
-              "br": null
+              "br": null,
+              "gzip": 439
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/3",
-            "path": "snapshots/blobs/48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7.json",
+            "path": "snapshots/blobs/9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -2806,17 +2806,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7"
+            "sha256": "sha256:9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c"
           },
           {
-            "bytes": 472,
+            "bytes": 356,
             "compressed_bytes": {
-              "gzip": 293,
-              "br": null
+              "br": null,
+              "gzip": 240
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/4",
-            "path": "snapshots/blobs/00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12.json",
+            "path": "snapshots/blobs/73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -2840,17 +2840,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12"
+            "sha256": "sha256:73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee"
           },
           {
-            "bytes": 1683,
+            "bytes": 1019,
             "compressed_bytes": {
-              "gzip": 611,
-              "br": null
+              "br": null,
+              "gzip": 447
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/7",
-            "path": "snapshots/blobs/7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a.json",
+            "path": "snapshots/blobs/8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -2874,17 +2874,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a"
+            "sha256": "sha256:8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d"
           },
           {
-            "bytes": 7305,
+            "bytes": 5122,
             "compressed_bytes": {
-              "gzip": 1927,
-              "br": null
+              "br": null,
+              "gzip": 1461
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9.json",
+            "path": "snapshots/blobs/ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -2948,13 +2948,13 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+            "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
           },
           {
             "bytes": 1218,
             "compressed_bytes": {
-              "gzip": 549,
-              "br": null
+              "br": null,
+              "gzip": 549
             },
             "dependencies": [],
             "key": "config",
@@ -2984,19 +2984,19 @@
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/ed23b45cd7600a8c51c4e83829c4bbfb4e108c0a8c54716343ec9d043be91c11.json",
-            "sha256": "sha256:ed23b45cd7600a8c51c4e83829c4bbfb4e108c0a8c54716343ec9d043be91c11",
-            "bytes": 568,
+            "path": "snapshots/blobs/542407b89e9d5043e85d765319a757c42d7a2cfe0ca58ae619e146d5d4c665c3.json",
+            "sha256": "sha256:542407b89e9d5043e85d765319a757c42d7a2cfe0ca58ae619e146d5d4c665c3",
+            "bytes": 319,
             "compressed_bytes": {
-              "gzip": 298,
-              "br": null
+              "br": null,
+              "gzip": 202
             }
           },
           {
-            "bytes": 1027,
+            "bytes": 533,
             "compressed_bytes": {
-              "gzip": 421,
-              "br": null
+              "br": null,
+              "gzip": 266
             },
             "dependencies": [
               {
@@ -3005,7 +3005,7 @@
               }
             ],
             "key": "images/detail/global/global/band/55",
-            "path": "snapshots/blobs/c409bf2a774a77ee04822cf438f2528d7778067588c2996cc00f39185d7e24ae.json",
+            "path": "snapshots/blobs/bfbda7e70d54d6797c8f223bd034d96012d776122a01a74478f924ea9ba30d55.json",
             "role": "images",
             "row_counts": [
               {
@@ -3029,7 +3029,7 @@
                 "count": 5
               }
             ],
-            "sha256": "sha256:c409bf2a774a77ee04822cf438f2528d7778067588c2996cc00f39185d7e24ae"
+            "sha256": "sha256:bfbda7e70d54d6797c8f223bd034d96012d776122a01a74478f924ea9ba30d55"
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/0",
@@ -3049,19 +3049,19 @@
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               },
               {
                 "key": "config",
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/2a5539793d029f0274ab943aa86469fa3f9110083d38283efc3f9138bc088aba.json",
-            "sha256": "sha256:2a5539793d029f0274ab943aa86469fa3f9110083d38283efc3f9138bc088aba",
-            "bytes": 912,
+            "path": "snapshots/blobs/14863c3d5821a79c6cc698c76c931adfc74bd1c5034f1541464ea968441fa750.json",
+            "sha256": "sha256:14863c3d5821a79c6cc698c76c931adfc74bd1c5034f1541464ea968441fa750",
+            "bytes": 527,
             "compressed_bytes": {
-              "gzip": 443,
-              "br": null
+              "br": null,
+              "gzip": 335
             }
           },
           {
@@ -3082,26 +3082,26 @@
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               },
               {
                 "key": "config",
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/944b1815e3c5741fd339abea193ae622c110d779670b9bf88c8180e7bafcd0eb.json",
-            "sha256": "sha256:944b1815e3c5741fd339abea193ae622c110d779670b9bf88c8180e7bafcd0eb",
-            "bytes": 914,
+            "path": "snapshots/blobs/0550c278bb5615c6fb2e5f24a862974fba7f6a205db6de578d0f8356d59c1ef1.json",
+            "sha256": "sha256:0550c278bb5615c6fb2e5f24a862974fba7f6a205db6de578d0f8356d59c1ef1",
+            "bytes": 529,
             "compressed_bytes": {
-              "gzip": 445,
-              "br": null
+              "br": null,
+              "gzip": 339
             }
           },
           {
             "bytes": 39,
             "compressed_bytes": {
-              "gzip": 59,
-              "br": null
+              "br": null,
+              "gzip": 59
             },
             "dependencies": [],
             "key": "programs",
@@ -3111,14 +3111,14 @@
             "sha256": "sha256:88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626"
           },
           {
-            "bytes": 323,
+            "bytes": 210,
             "compressed_bytes": {
-              "gzip": 244,
-              "br": null
+              "br": null,
+              "gzip": 189
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/15",
-            "path": "snapshots/blobs/e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374.json",
+            "path": "snapshots/blobs/36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e.json",
             "role": "text",
             "row_counts": [
               {
@@ -3132,17 +3132,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374"
+            "sha256": "sha256:36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e"
           },
           {
-            "bytes": 1757,
+            "bytes": 1061,
             "compressed_bytes": {
-              "gzip": 702,
-              "br": null
+              "br": null,
+              "gzip": 492
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/18",
-            "path": "snapshots/blobs/f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911.json",
+            "path": "snapshots/blobs/c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74.json",
             "role": "text",
             "row_counts": [
               {
@@ -3166,17 +3166,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911"
+            "sha256": "sha256:c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74"
           },
           {
-            "bytes": 583,
+            "bytes": 340,
             "compressed_bytes": {
-              "gzip": 294,
-              "br": null
+              "br": null,
+              "gzip": 210
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/19",
-            "path": "snapshots/blobs/f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac.json",
+            "path": "snapshots/blobs/7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967.json",
             "role": "text",
             "row_counts": [
               {
@@ -3200,17 +3200,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac"
+            "sha256": "sha256:7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967"
           },
           {
-            "bytes": 319,
+            "bytes": 206,
             "compressed_bytes": {
-              "gzip": 232,
-              "br": null
+              "br": null,
+              "gzip": 178
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/23",
-            "path": "snapshots/blobs/0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3.json",
+            "path": "snapshots/blobs/0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217.json",
             "role": "text",
             "row_counts": [
               {
@@ -3224,7 +3224,7 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3"
+            "sha256": "sha256:0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217"
           },
           {
             "key": "text/detail/global/global/band/26",
@@ -3247,23 +3247,23 @@
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f.json",
-            "sha256": "sha256:e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f",
-            "bytes": 314,
+            "path": "snapshots/blobs/8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa.json",
+            "sha256": "sha256:8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa",
+            "bytes": 185,
             "compressed_bytes": {
-              "gzip": 229,
-              "br": null
+              "br": null,
+              "gzip": 161
             }
           },
           {
-            "bytes": 1648,
+            "bytes": 1079,
             "compressed_bytes": {
-              "gzip": 675,
-              "br": null
+              "br": null,
+              "gzip": 514
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/6",
-            "path": "snapshots/blobs/71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02.json",
+            "path": "snapshots/blobs/b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1.json",
             "role": "text",
             "row_counts": [
               {
@@ -3277,22 +3277,22 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02"
+            "sha256": "sha256:b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1"
           },
           {
-            "bytes": 4374,
+            "bytes": 3284,
             "compressed_bytes": {
-              "gzip": 1338,
-              "br": null
+              "br": null,
+              "gzip": 1072
             },
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               }
             ],
             "key": "text/detail/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba.json",
+            "path": "snapshots/blobs/b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb.json",
             "role": "text",
             "row_counts": [
               {
@@ -3326,22 +3326,22 @@
                 "count": 2
               }
             ],
-            "sha256": "sha256:b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba"
+            "sha256": "sha256:b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb"
           },
           {
-            "bytes": 2706,
+            "bytes": 2587,
             "compressed_bytes": {
-              "gzip": 1008,
-              "br": null
+              "br": null,
+              "gzip": 977
             },
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               }
             ],
             "key": "text/detail/home_set/set%3Aa/band/1",
-            "path": "snapshots/blobs/7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1.json",
+            "path": "snapshots/blobs/3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d.json",
             "role": "text",
             "row_counts": [
               {
@@ -3355,17 +3355,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1"
+            "sha256": "sha256:3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d"
           },
           {
-            "bytes": 2282,
+            "bytes": 1356,
             "compressed_bytes": {
-              "gzip": 772,
-              "br": null
+              "br": null,
+              "gzip": 584
             },
             "dependencies": [],
             "key": "text/history/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98.json",
+            "path": "snapshots/blobs/a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076.json",
             "role": "text",
             "row_counts": [
               {
@@ -3379,7 +3379,7 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98"
+            "sha256": "sha256:a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076"
           }
         ],
         "format_version": "3.0.0",
@@ -3411,41 +3411,41 @@
         "restriction_coverage": [],
         "source_windows": [],
         "text_all": {
-          "path": "snapshots/blobs/948f4263e11f41233552d0befde165c4425ef0805812706276be2622dd2c61f9.json",
-          "sha256": "sha256:948f4263e11f41233552d0befde165c4425ef0805812706276be2622dd2c61f9",
-          "bytes": 30171,
+          "path": "snapshots/blobs/ccdbe6d392cf72ee42ec0f9aed3fbf2e8f760ff6debbf109c01c78e177b49460.json",
+          "sha256": "sha256:ccdbe6d392cf72ee42ec0f9aed3fbf2e8f760ff6debbf109c01c78e177b49460",
+          "bytes": 22128,
           "compressed_bytes": {
-            "gzip": 5580,
-            "br": null
+            "br": null,
+            "gzip": 4397
           },
           "contains": [
             {
               "key": "bootstrap/bootstrap/global/global/band/0",
-              "sha256": "sha256:bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada"
+              "sha256": "sha256:6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/1",
-              "sha256": "sha256:857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8"
+              "sha256": "sha256:2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/2",
-              "sha256": "sha256:ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62"
+              "sha256": "sha256:e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/3",
-              "sha256": "sha256:48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7"
+              "sha256": "sha256:9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/4",
-              "sha256": "sha256:00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12"
+              "sha256": "sha256:73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/7",
-              "sha256": "sha256:7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a"
+              "sha256": "sha256:8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d"
             },
             {
               "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-              "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+              "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
             },
             {
               "key": "config",
@@ -3453,39 +3453,39 @@
             },
             {
               "key": "text/detail/global/global/band/15",
-              "sha256": "sha256:e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374"
+              "sha256": "sha256:36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e"
             },
             {
               "key": "text/detail/global/global/band/18",
-              "sha256": "sha256:f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911"
+              "sha256": "sha256:c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74"
             },
             {
               "key": "text/detail/global/global/band/19",
-              "sha256": "sha256:f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac"
+              "sha256": "sha256:7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967"
             },
             {
               "key": "text/detail/global/global/band/23",
-              "sha256": "sha256:0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3"
+              "sha256": "sha256:0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217"
             },
             {
               "key": "text/detail/global/global/band/26",
-              "sha256": "sha256:e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f"
+              "sha256": "sha256:8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa"
             },
             {
               "key": "text/detail/global/global/band/6",
-              "sha256": "sha256:71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02"
+              "sha256": "sha256:b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1"
             },
             {
               "key": "text/detail/home_set/set%3Aa/band/0",
-              "sha256": "sha256:b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba"
+              "sha256": "sha256:b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb"
             },
             {
               "key": "text/detail/home_set/set%3Aa/band/1",
-              "sha256": "sha256:7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1"
+              "sha256": "sha256:3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d"
             },
             {
               "key": "text/history/home_set/set%3Aa/band/0",
-              "sha256": "sha256:7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98"
+              "sha256": "sha256:a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076"
             }
           ]
         }
@@ -3552,12 +3552,12 @@
           "validation_policy_id": null
         },
         "manifest_path": "snapshots/manifests/0000000000000000000000000000000000000000000000000000000000000000.json",
-        "manifest_sha256": "sha256:9d7c2c3592b5b54afb141732cb2abcab43646df26b2ea03d190824edc8a7ba52"
+        "manifest_sha256": "sha256:3dcafb2403eb4399a0f6f0f3c3d51d6d6ccf9cdc1d36be51dc6c9fafc2f67c15"
       },
       "previous": null
     },
     "manifests": {
-      "sha256:9d7c2c3592b5b54afb141732cb2abcab43646df26b2ea03d190824edc8a7ba52": {
+      "sha256:3dcafb2403eb4399a0f6f0f3c3d51d6d6ccf9cdc1d36be51dc6c9fafc2f67c15": {
         "changes_ref": null,
         "config_ref": {
           "key": "config",
@@ -3577,14 +3577,14 @@
         "errata_card_ids": [],
         "files": [
           {
-            "bytes": 321,
+            "bytes": 205,
             "compressed_bytes": {
-              "gzip": 232,
-              "br": null
+              "br": null,
+              "gzip": 178
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/0",
-            "path": "snapshots/blobs/bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada.json",
+            "path": "snapshots/blobs/6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -3598,17 +3598,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada"
+            "sha256": "sha256:6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2"
           },
           {
-            "bytes": 324,
+            "bytes": 208,
             "compressed_bytes": {
-              "gzip": 235,
-              "br": null
+              "br": null,
+              "gzip": 180
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/1",
-            "path": "snapshots/blobs/857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8.json",
+            "path": "snapshots/blobs/2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -3622,17 +3622,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8"
+            "sha256": "sha256:2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11"
           },
           {
-            "bytes": 704,
+            "bytes": 275,
             "compressed_bytes": {
-              "gzip": 387,
-              "br": null
+              "br": null,
+              "gzip": 218
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/2",
-            "path": "snapshots/blobs/ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62.json",
+            "path": "snapshots/blobs/e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -3646,17 +3646,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62"
+            "sha256": "sha256:e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f"
           },
           {
-            "bytes": 1423,
+            "bytes": 1002,
             "compressed_bytes": {
-              "gzip": 553,
-              "br": null
+              "br": null,
+              "gzip": 439
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/3",
-            "path": "snapshots/blobs/48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7.json",
+            "path": "snapshots/blobs/9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -3680,17 +3680,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7"
+            "sha256": "sha256:9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c"
           },
           {
-            "bytes": 472,
+            "bytes": 356,
             "compressed_bytes": {
-              "gzip": 293,
-              "br": null
+              "br": null,
+              "gzip": 240
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/4",
-            "path": "snapshots/blobs/00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12.json",
+            "path": "snapshots/blobs/73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -3714,17 +3714,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12"
+            "sha256": "sha256:73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee"
           },
           {
-            "bytes": 1683,
+            "bytes": 1019,
             "compressed_bytes": {
-              "gzip": 611,
-              "br": null
+              "br": null,
+              "gzip": 447
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/global/global/band/7",
-            "path": "snapshots/blobs/7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a.json",
+            "path": "snapshots/blobs/8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -3748,17 +3748,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a"
+            "sha256": "sha256:8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d"
           },
           {
-            "bytes": 7305,
+            "bytes": 5122,
             "compressed_bytes": {
-              "gzip": 1927,
-              "br": null
+              "br": null,
+              "gzip": 1461
             },
             "dependencies": [],
             "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9.json",
+            "path": "snapshots/blobs/ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe.json",
             "role": "bootstrap",
             "row_counts": [
               {
@@ -3822,13 +3822,13 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+            "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
           },
           {
             "bytes": 1218,
             "compressed_bytes": {
-              "gzip": 549,
-              "br": null
+              "br": null,
+              "gzip": 549
             },
             "dependencies": [],
             "key": "config",
@@ -3858,19 +3858,19 @@
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/ed23b45cd7600a8c51c4e83829c4bbfb4e108c0a8c54716343ec9d043be91c11.json",
-            "sha256": "sha256:ed23b45cd7600a8c51c4e83829c4bbfb4e108c0a8c54716343ec9d043be91c11",
-            "bytes": 568,
+            "path": "snapshots/blobs/542407b89e9d5043e85d765319a757c42d7a2cfe0ca58ae619e146d5d4c665c3.json",
+            "sha256": "sha256:542407b89e9d5043e85d765319a757c42d7a2cfe0ca58ae619e146d5d4c665c3",
+            "bytes": 319,
             "compressed_bytes": {
-              "gzip": 298,
-              "br": null
+              "br": null,
+              "gzip": 202
             }
           },
           {
-            "bytes": 1027,
+            "bytes": 533,
             "compressed_bytes": {
-              "gzip": 421,
-              "br": null
+              "br": null,
+              "gzip": 266
             },
             "dependencies": [
               {
@@ -3879,7 +3879,7 @@
               }
             ],
             "key": "images/detail/global/global/band/55",
-            "path": "snapshots/blobs/c409bf2a774a77ee04822cf438f2528d7778067588c2996cc00f39185d7e24ae.json",
+            "path": "snapshots/blobs/bfbda7e70d54d6797c8f223bd034d96012d776122a01a74478f924ea9ba30d55.json",
             "role": "images",
             "row_counts": [
               {
@@ -3903,7 +3903,7 @@
                 "count": 5
               }
             ],
-            "sha256": "sha256:c409bf2a774a77ee04822cf438f2528d7778067588c2996cc00f39185d7e24ae"
+            "sha256": "sha256:bfbda7e70d54d6797c8f223bd034d96012d776122a01a74478f924ea9ba30d55"
           },
           {
             "key": "images/detail/home_set/set%3Aa/band/0",
@@ -3923,19 +3923,19 @@
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               },
               {
                 "key": "config",
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/2a5539793d029f0274ab943aa86469fa3f9110083d38283efc3f9138bc088aba.json",
-            "sha256": "sha256:2a5539793d029f0274ab943aa86469fa3f9110083d38283efc3f9138bc088aba",
-            "bytes": 912,
+            "path": "snapshots/blobs/14863c3d5821a79c6cc698c76c931adfc74bd1c5034f1541464ea968441fa750.json",
+            "sha256": "sha256:14863c3d5821a79c6cc698c76c931adfc74bd1c5034f1541464ea968441fa750",
+            "bytes": 527,
             "compressed_bytes": {
-              "gzip": 443,
-              "br": null
+              "br": null,
+              "gzip": 335
             }
           },
           {
@@ -3956,26 +3956,26 @@
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               },
               {
                 "key": "config",
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/944b1815e3c5741fd339abea193ae622c110d779670b9bf88c8180e7bafcd0eb.json",
-            "sha256": "sha256:944b1815e3c5741fd339abea193ae622c110d779670b9bf88c8180e7bafcd0eb",
-            "bytes": 914,
+            "path": "snapshots/blobs/0550c278bb5615c6fb2e5f24a862974fba7f6a205db6de578d0f8356d59c1ef1.json",
+            "sha256": "sha256:0550c278bb5615c6fb2e5f24a862974fba7f6a205db6de578d0f8356d59c1ef1",
+            "bytes": 529,
             "compressed_bytes": {
-              "gzip": 445,
-              "br": null
+              "br": null,
+              "gzip": 339
             }
           },
           {
             "bytes": 39,
             "compressed_bytes": {
-              "gzip": 59,
-              "br": null
+              "br": null,
+              "gzip": 59
             },
             "dependencies": [],
             "key": "programs",
@@ -3985,14 +3985,14 @@
             "sha256": "sha256:88e20805b4a8aa12e729bacbf662055ee52570a699eb4535d2b30eacbb4ba626"
           },
           {
-            "bytes": 323,
+            "bytes": 210,
             "compressed_bytes": {
-              "gzip": 244,
-              "br": null
+              "br": null,
+              "gzip": 189
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/15",
-            "path": "snapshots/blobs/e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374.json",
+            "path": "snapshots/blobs/36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e.json",
             "role": "text",
             "row_counts": [
               {
@@ -4006,17 +4006,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374"
+            "sha256": "sha256:36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e"
           },
           {
-            "bytes": 1757,
+            "bytes": 1061,
             "compressed_bytes": {
-              "gzip": 702,
-              "br": null
+              "br": null,
+              "gzip": 492
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/18",
-            "path": "snapshots/blobs/f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911.json",
+            "path": "snapshots/blobs/c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74.json",
             "role": "text",
             "row_counts": [
               {
@@ -4040,17 +4040,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911"
+            "sha256": "sha256:c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74"
           },
           {
-            "bytes": 583,
+            "bytes": 340,
             "compressed_bytes": {
-              "gzip": 294,
-              "br": null
+              "br": null,
+              "gzip": 210
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/19",
-            "path": "snapshots/blobs/f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac.json",
+            "path": "snapshots/blobs/7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967.json",
             "role": "text",
             "row_counts": [
               {
@@ -4074,17 +4074,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac"
+            "sha256": "sha256:7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967"
           },
           {
-            "bytes": 319,
+            "bytes": 206,
             "compressed_bytes": {
-              "gzip": 232,
-              "br": null
+              "br": null,
+              "gzip": 178
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/23",
-            "path": "snapshots/blobs/0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3.json",
+            "path": "snapshots/blobs/0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217.json",
             "role": "text",
             "row_counts": [
               {
@@ -4098,7 +4098,7 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3"
+            "sha256": "sha256:0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217"
           },
           {
             "key": "text/detail/global/global/band/26",
@@ -4121,23 +4121,23 @@
                 "sha256": "sha256:f266a45598a8815874c9bd7a10a313404d86cdaacff06de59984076fa16c742b"
               }
             ],
-            "path": "snapshots/blobs/e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f.json",
-            "sha256": "sha256:e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f",
-            "bytes": 314,
+            "path": "snapshots/blobs/8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa.json",
+            "sha256": "sha256:8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa",
+            "bytes": 185,
             "compressed_bytes": {
-              "gzip": 229,
-              "br": null
+              "br": null,
+              "gzip": 161
             }
           },
           {
-            "bytes": 1648,
+            "bytes": 1079,
             "compressed_bytes": {
-              "gzip": 675,
-              "br": null
+              "br": null,
+              "gzip": 514
             },
             "dependencies": [],
             "key": "text/detail/global/global/band/6",
-            "path": "snapshots/blobs/71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02.json",
+            "path": "snapshots/blobs/b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1.json",
             "role": "text",
             "row_counts": [
               {
@@ -4151,22 +4151,22 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02"
+            "sha256": "sha256:b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1"
           },
           {
-            "bytes": 4374,
+            "bytes": 3284,
             "compressed_bytes": {
-              "gzip": 1338,
-              "br": null
+              "br": null,
+              "gzip": 1072
             },
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               }
             ],
             "key": "text/detail/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba.json",
+            "path": "snapshots/blobs/b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb.json",
             "role": "text",
             "row_counts": [
               {
@@ -4200,22 +4200,22 @@
                 "count": 2
               }
             ],
-            "sha256": "sha256:b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba"
+            "sha256": "sha256:b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb"
           },
           {
-            "bytes": 2706,
+            "bytes": 2587,
             "compressed_bytes": {
-              "gzip": 1008,
-              "br": null
+              "br": null,
+              "gzip": 977
             },
             "dependencies": [
               {
                 "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+                "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
               }
             ],
             "key": "text/detail/home_set/set%3Aa/band/1",
-            "path": "snapshots/blobs/7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1.json",
+            "path": "snapshots/blobs/3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d.json",
             "role": "text",
             "row_counts": [
               {
@@ -4229,17 +4229,17 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1"
+            "sha256": "sha256:3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d"
           },
           {
-            "bytes": 2282,
+            "bytes": 1356,
             "compressed_bytes": {
-              "gzip": 772,
-              "br": null
+              "br": null,
+              "gzip": 584
             },
             "dependencies": [],
             "key": "text/history/home_set/set%3Aa/band/0",
-            "path": "snapshots/blobs/7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98.json",
+            "path": "snapshots/blobs/a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076.json",
             "role": "text",
             "row_counts": [
               {
@@ -4253,7 +4253,7 @@
                 "count": 1
               }
             ],
-            "sha256": "sha256:7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98"
+            "sha256": "sha256:a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076"
           }
         ],
         "format_version": "3.0.0",
@@ -4285,41 +4285,41 @@
         "restriction_coverage": [],
         "source_windows": [],
         "text_all": {
-          "path": "snapshots/blobs/948f4263e11f41233552d0befde165c4425ef0805812706276be2622dd2c61f9.json",
-          "sha256": "sha256:948f4263e11f41233552d0befde165c4425ef0805812706276be2622dd2c61f9",
-          "bytes": 30171,
+          "path": "snapshots/blobs/ccdbe6d392cf72ee42ec0f9aed3fbf2e8f760ff6debbf109c01c78e177b49460.json",
+          "sha256": "sha256:ccdbe6d392cf72ee42ec0f9aed3fbf2e8f760ff6debbf109c01c78e177b49460",
+          "bytes": 22128,
           "compressed_bytes": {
-            "gzip": 5580,
-            "br": null
+            "br": null,
+            "gzip": 4397
           },
           "contains": [
             {
               "key": "bootstrap/bootstrap/global/global/band/0",
-              "sha256": "sha256:bd28805ff2b8b24a9e9ebed3fd8a68164a7adf95ebcac2654ab7336057370ada"
+              "sha256": "sha256:6f237d9ada52d07acef371d7d97b3d5b088f2582cf79afce4f2934268ad379f2"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/1",
-              "sha256": "sha256:857709edc090f64a9c40d61168f4a89bc198dbef526673a484912cf43149a9f8"
+              "sha256": "sha256:2f03c35537ce40d2f7c8bc51d2f271d5a0e84667c9537020624fc8bb4df73c11"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/2",
-              "sha256": "sha256:ecd5f4ca1010519e058a0d6c2cb1f0ab5ba6b8f9015c2186f0d8f035ed4e9c62"
+              "sha256": "sha256:e078509971c91316a4cc18627cda6ad09003f4450b371cfe1d81ba8a3322b50f"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/3",
-              "sha256": "sha256:48945b972315186f9ea252bbb0e0144a096d7ffba18eb0688327e6051cbc23e7"
+              "sha256": "sha256:9909fbe582270560b563e7fe1cdf1a16bb6ced007c73501a0e4d2c283d7ac75c"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/4",
-              "sha256": "sha256:00dca02e8d63ea92997b7aaeac6fb1fbe2bb688fcc987db382ae87d05a510e12"
+              "sha256": "sha256:73e36994cc8b072b639b9998a224b640efad6439904bb473345d58696e4d07ee"
             },
             {
               "key": "bootstrap/bootstrap/global/global/band/7",
-              "sha256": "sha256:7f16e3e3e1cec97277aa4d5bb986dd172c5e33c10ad8b91ef2c0293ab4298c1a"
+              "sha256": "sha256:8761db102d0cdca48f67c7f606f6ce8db4f3a3622573c7766bb4a27b9bd1d18d"
             },
             {
               "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-              "sha256": "sha256:c366d742b673232f62277619e764d053f31d52b4bed2d5d8db8617cd4bb43da9"
+              "sha256": "sha256:ccc22676db1b3cb16666b05f4ef3ea7c5cd3b53a78ebb7334e631007a1fd4bbe"
             },
             {
               "key": "config",
@@ -4327,39 +4327,39 @@
             },
             {
               "key": "text/detail/global/global/band/15",
-              "sha256": "sha256:e015474178f8b06ee95a36645e6212e8560604202b6ac809b858f4217f86b374"
+              "sha256": "sha256:36fee3a8e82a13cf83b66fd4aa255a4ecf5fd432b6dabf1efa417c049c0ff76e"
             },
             {
               "key": "text/detail/global/global/band/18",
-              "sha256": "sha256:f0232abe3698a1789d350c555507f682d20d3d5813a0fb8a86ece140a184d911"
+              "sha256": "sha256:c54b1e5e20042f18e837d13a2390d23336742417332481d02bf07553015e6b74"
             },
             {
               "key": "text/detail/global/global/band/19",
-              "sha256": "sha256:f35cdcfad21cb1c341f8457a5c0028c36788825af9f345da8f837a788874e8ac"
+              "sha256": "sha256:7a09829691ee7b895d2d42c96ca50a886647c2d57fd8817ffd939cfdbf083967"
             },
             {
               "key": "text/detail/global/global/band/23",
-              "sha256": "sha256:0557393d61fb72978aa3c300b744cc5414764621318c7d30feddb135b40591f3"
+              "sha256": "sha256:0c5bd08074e9719c0b24673f046fd8f16e43777d61be449895a39e9d0771e217"
             },
             {
               "key": "text/detail/global/global/band/26",
-              "sha256": "sha256:e96d803550207938de9b4e40ffc87c66e86387736e300e041200c046f57bda8f"
+              "sha256": "sha256:8ba061d4d01aeef9f0a6da2830609fb3bc3653d6054aa225459ce2aa2bb911fa"
             },
             {
               "key": "text/detail/global/global/band/6",
-              "sha256": "sha256:71da449c1391d4381dfb0b23798dfb2d506423977ceb76f1b65d7c3925df5e02"
+              "sha256": "sha256:b1782453952d7feb1a61e4c3d8ef9d71c69fda103dfd6d95b4f3889f5079e5b1"
             },
             {
               "key": "text/detail/home_set/set%3Aa/band/0",
-              "sha256": "sha256:b52a6449f7fe7cca00e30f158034a047ade31d7ce85841787f1f1d25a09b04ba"
+              "sha256": "sha256:b0511b48d3240ebbfda69423825481b466c29cc2780b073d8616aa41b57e28eb"
             },
             {
               "key": "text/detail/home_set/set%3Aa/band/1",
-              "sha256": "sha256:7ed51419b83092b4347a25a7c5ef96457f7a29a1091cd7eee0463ff9b9991ce1"
+              "sha256": "sha256:3246cc24711800f13915ed7e71cf2296ec481438f972ff3ed93f55ab124c421d"
             },
             {
               "key": "text/history/home_set/set%3Aa/band/0",
-              "sha256": "sha256:7d8e35343a25c2ceb95ea18f0305b2b5df5a6cb6af8bc5d4fe86113c64248b98"
+              "sha256": "sha256:a0d2603b1d0bd1602c363b114acb606c06c78b538bd93ab864c21cb33ef23076"
             }
           ]
         }
