@@ -6,7 +6,11 @@ import pytest
 from pydantic import JsonValue, TypeAdapter
 
 from sve_carddb.core.json import array, object_value, string
-from sve_carddb.domains.translations.four_layer_units import CountContext, source_unit
+from sve_carddb.domains.translations.four_layer_units import (
+    CountContext,
+    count_context,
+    source_unit,
+)
 
 _DOCUMENT = object_value(
     TypeAdapter(JsonValue).validate_json(
@@ -88,3 +92,31 @@ def test_counted_zone_context_does_not_silently_repair_input() -> None:
         CountContext(
             "select.union.v1", "follower", ("ex", "ex"), False, "union_cardinality"
         )
+
+
+@pytest.mark.parametrize(
+    "before",
+    [
+        "自分のEXエリアのフォロワー",
+        "自分の場か自分のEXエリアの仮族・フォロワー",
+        "自分の手札の元のコストN以下の仮族・フォロワー",
+    ],
+)
+def test_unrestricted_source_nps_include_both_token_states(before: str) -> None:
+    found = count_context(before)
+    assert found is not None
+    assert found.token == frozenset({True, False})
+    assert source_unit(found, "枚").merge_allowed
+
+
+def test_incomplete_prefix_cannot_borrow_a_counted_set_suffix() -> None:
+    assert count_context("不明な自分の場のフォロワー") is None
+    assert count_context("自分場のフォロワー") is None
+
+
+def test_explicit_token_filter_is_preserved_instead_of_becoming_unrestricted() -> None:
+    found = count_context("自分の場のトークン・フォロワー")
+    assert found is not None
+    assert found.token is True
+    assert source_unit(found, "体").merge_allowed
+    assert not source_unit(found, "枚").merge_allowed

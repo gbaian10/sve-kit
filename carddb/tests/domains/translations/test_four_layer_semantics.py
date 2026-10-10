@@ -26,6 +26,53 @@ def context(raw: str) -> CardContext:
     )
 
 
+@pytest.mark.parametrize("separator", ["", "の", "・"])
+def test_class_filter_accepts_complete_direct_kind_constructions(
+    separator: str,
+) -> None:
+    raw = f"仮。自分の墓場の{{仮クラス}}{separator}フォロワー２枚を選ぶ。"
+    field = normalize_source(raw, source(raw))
+    engine = classifier()
+    engine.references.vocabulary = Vocabulary(
+        bindings=(
+            Binding(region="jp", kind="class", raw="仮クラス", code="synthetic"),
+        ),
+        terms=(
+            VocabularyTerm(
+                kind="class",
+                code="synthetic",
+                label=LocalizedText(lang="ja", text="仮クラス"),
+            ),
+        ),
+    )
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[0].role == "class_filter"
+
+
+def test_class_marker_without_a_complete_kind_filter_stays_unresolved() -> None:
+    raw = "仮。{仮クラス}未知。"
+    field = normalize_source(raw, source(raw))
+    engine = classifier()
+    engine.references.vocabulary = Vocabulary(
+        bindings=(
+            Binding(region="jp", kind="class", raw="仮クラス", code="synthetic"),
+        ),
+        terms=(
+            VocabularyTerm(
+                kind="class",
+                code="synthetic",
+                label=LocalizedText(lang="ja", text="仮クラス"),
+            ),
+        ),
+    )
+    found = engine.recognize(raw, field.source, field.parts[0])
+    assert "n0_vocabulary_construction_unresolved" in found.issues
+
+
 @pytest.mark.parametrize(
     ("raw", "key", "scope_count"),
     [
@@ -249,3 +296,18 @@ def test_token_header_requires_every_declared_field_in_its_exact_catalog(
         "stat_value",
     ]
     assert all(o.source_unit is None for o in binding.occurrences)
+
+
+@pytest.mark.parametrize("keyword", ["疾走", "突進"])
+@pytest.mark.parametrize("extra", ["", "仮の追加条件。"])
+def test_reminder_needs_the_entire_registered_sentence(
+    keyword: str, extra: str
+) -> None:
+    action = "攻撃できる" if keyword == "疾走" else "フォロワーに攻撃できる"
+    reminder = f"（これはプレイしたターンから{action}。{extra}）"
+    raw = f"【{keyword}】" + reminder
+    field = normalize_source(raw, source(raw), reminders=frozenset({reminder}))
+    engine = classifier((Term("term:keyword.synthetic", "keyword", keyword),))
+    part = next(p for p in field.parts if p.source_span.role == "reminder")
+    found = engine.recognize(raw, field.source, part, field=field)
+    assert (found.semantics is not None) is (not extra)

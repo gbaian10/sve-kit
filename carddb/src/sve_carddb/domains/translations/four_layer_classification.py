@@ -602,6 +602,6 @@ def _vocabulary_role(part: SourcePart, hint: Hint) -> str | None:
             return "counted_kind"
         if re.search(r"(?:元の)?コストN(?:以上|以下)の$", before):
             return "filter_kind"
-    elif re.match(r"^(?:の|・)(?:カード|フォロワー|アミュレット|スペル)", after):
+    elif re.match(r"^(?:の|・)?(?:カード|フォロワー|アミュレット|スペル)", after):
         return "class_filter"
     return None

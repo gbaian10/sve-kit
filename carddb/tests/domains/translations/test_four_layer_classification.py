@@ -317,7 +317,6 @@ def test_counted_zone_precedes_destination_and_union_keeps_its_own_unit(
 @pytest.mark.parametrize(
     "raw",
     [
-        "自分のEXエリアのフォロワー２枚を選ぶ。",
         "自分のEXエリアのフォロワー２体を選ぶ。",
         "自分のEXエリアのトークン・フォロワー２枚を選ぶ。",
     ],
@@ -339,6 +338,17 @@ def test_explicit_ex_token_follower_keeps_entity_unit() -> None:
     frame, binding = found.bind(field.source, field.parts[0])
     field.verify(raw, (frame,), (binding,), engine.domains)
     assert binding.occurrences[0].source_unit == "体"
+
+
+def test_generic_ex_source_includes_tokens_without_claiming_their_absence() -> None:
+    raw = "自分のEXエリアのフォロワー２枚を選ぶ。"
+    field = normalize_source(raw, source(raw))
+    engine = classifier()
+    frame, binding = engine.recognize(raw, field.source, field.parts[0]).bind(
+        field.source, field.parts[0]
+    )
+    engine.verify(raw, field, field.parts[0], frame, binding)
+    assert binding.occurrences[0].source_unit == "枚"
 
 
 def test_battlefield_named_card_does_not_infer_kind_from_its_unit() -> None:

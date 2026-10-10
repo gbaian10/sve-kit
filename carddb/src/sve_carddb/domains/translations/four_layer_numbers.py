@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Literal
 
 from sve_carddb.contracts.four_layer import Constant, QuantitySpec
 from sve_carddb.domains.translations.four_layer_units import count_context, source_unit
+from sve_carddb.domains.translations.parameters.explicit_rules import COUNTER_NAMES
 
 if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
@@ -67,7 +68,8 @@ _SELECT = re.compile(
     r"^(?P<unit>枚|体|つ|人)(?P<limit>まで)?(?:を)?選(?:ぶ|び|んで)(?=[。:、）)\n]|$)"
 )
 _EXIST = re.compile(
-    r"^(?P<unit>枚|体|つ|人)(?P<compare>以上|以下)?(?:あるなら|いるなら|ある|いる|なら|である限り|であれば)"
+    r"^(?P<unit>枚|体|つ|人)(?P<compare>以上|以下)?(?:あるなら|いるなら|ある限り|いる限り|なら|である限り|であれば|ある|いる)"
+    + _END
 )
 _MOVE = re.compile(
     r"^枚(?:を)?(?:引く|引き|引いて|捨てる|捨て|戻す|戻し|加える|加え|置く|置き|出す|出し|消滅させる)(?=[。:、）)\n]|$)"
@@ -99,6 +101,23 @@ _RESOURCE = re.compile(
 )
 _RESOURCE_PREFIX = re.compile(r"(?:自分|相手)の(?P<unit>SEP|PP|EP)(?:を)?$")
 _RESOURCE_RECOVERY = re.compile(r"^回復(?:する|して)?" + _END)
+_RESOURCE_ITEM = re.compile(r"(?<![A-Za-z0-9_])(?P<unit>SEP|EP)(?:を|は)$")
+_RESOURCE_POSSESSION = re.compile(r"^つ(?:持つ|裏向きにしてよい)" + _END + r"|^つ[）)]")
+_RESOURCE_PAYMENT = re.compile(
+    r"^つ裏向きにすることで、(?:N|[0-9０-９]+)PPを払える" + _END
+)
+_COUNTER = "(?:" + "|".join((*COUNTER_NAMES, "魂", "スペル")) + ")カウンター"
+_COUNTER_OBJECT = re.compile(_COUNTER + r"$")
+_COUNTER_AMOUNT = re.compile(
+    r"^(?P<unit>個|つ)(?P<limit>まで)?を(?:置く|置いてよい|取る)" + _END
+)
+_COUNTER_THRESHOLD = re.compile(
+    r"^(?P<unit>個|つ)(?:以上|以下)(?:なら|である限り)" + _END
+)
+_EVENT_THRESHOLD = re.compile(
+    r"^回以上(?:攻撃した|攻撃していた|発動していた)なら" + _END
+)
+_EVOLUTION_FREQUENCY = re.compile(r"^ターンに何回でも使える" + _END)
 _SACRIFICE = re.compile(
     r"^(?P<unit>枚|体|つ)(?:を)?(?:墓場に置く|アクトする|レストする|破壊する)" + _END
 )
@@ -261,6 +280,8 @@ def _constructed_number(
 def _generic_number(
     value: int, before: str, after: str, unit: str | None
 ) -> Number | None:
+    if counter := _counter_number(value, before, after):
+        return counter
     if match := _SELECT.match(after):
         return _quantity(
             "selection_count",
@@ -313,6 +334,32 @@ def _payment_number(value: int, before: str, after: str) -> Number | None:
         return Number("Nat", "count", value, match["unit"])
     if _LEADER.match(after) and re.search(r"(?:自分|相手)のリーダー$", before):
         return _quantity("selection_count", value, "人")
+    if _RESOURCE_ITEM.search(before) and (
+        _RESOURCE_POSSESSION.match(after) or _RESOURCE_PAYMENT.match(after)
+    ):
+        return Number("Nat", "resource_amount", value, "つ")
+    return _counter_number(value, before, after)
+
+
+def _counter_number(value: int, before: str, after: str) -> Number | None:
+    if _COUNTER_OBJECT.search(before) and (match := _COUNTER_AMOUNT.match(after)):
+        return (
+            _quantity("counter_amount", value, match["unit"], "up_to")
+            if match["limit"]
+            else Number("Nat", "counter_amount", value, match["unit"])
+        )
+    if (
+        before.endswith("が")
+        and _COUNTER_OBJECT.search(before[:-1])
+        and (match := _COUNTER_THRESHOLD.match(after))
+    ):
+        return Number("Nat", "threshold", value, match["unit"])
+    if (
+        _COUNTER_OBJECT.search(before)
+        and re.match(r"^(?:個|つ)につき、", after)
+        and value >= 1
+    ):
+        return Number("Nat", "group_divisor", value, after[0])
     return None
 
 
@@ -333,8 +380,22 @@ def _repetition_number(value: int, before: str, after: str) -> Number | None:
             if match["limit"]
             else Number("Nat", "repeat_count", value, "回")
         )
-    if _DURATION.match(after) and before.endswith("この能力は"):
+    if (_DURATION.match(after) and before.endswith("この能力は")) or (
+        _EVOLUTION_FREQUENCY.match(after) and before.endswith("自分は{進化}能力を")
+    ):
         return Number("Nat", "duration_count", value, "ターン")
+    if (
+        _EVENT_THRESHOLD.match(after)
+        and "このターン" in before
+        and before.endswith("が")
+    ):
+        return Number("Nat", "threshold", value, "回")
+    if (
+        value >= 1
+        and before.endswith("進化")
+        and re.match(r"^回につき使えるEPは(?:N|[0-9０-９]+)つ[）)]", after)
+    ):
+        return Number("Nat", "group_divisor", value, "回")
     return None
 
 

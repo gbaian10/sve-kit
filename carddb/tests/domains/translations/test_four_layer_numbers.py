@@ -73,6 +73,56 @@ def test_repeat_up_to_retains_mode_without_turning_recovery_into_repetition() ->
 
 
 @pytest.mark.parametrize(
+    ("raw", "roles", "units"),
+    [
+        ("仮。SEPを２つ持つ。", ["resource_amount"], ["つ"]),
+        (
+            "仮。EPを２つ裏向きにすることで、３PPを払える。",
+            ["resource_amount", "resource_amount"],
+            ["つ", "PP"],
+        ),
+        ("これは魂カウンター２つを置く。", ["counter_amount"], ["つ"]),
+        ("これは魂カウンター２つまでを置いてよい。", ["counter_amount"], ["つ"]),
+        ("これは魂カウンターが２つ以上なら、仮。", ["threshold"], ["つ"]),
+        ("これは魂カウンター２つにつき、仮。", ["group_divisor"], ["つ"]),
+        ("このターン、仮の動作が２回以上発動していたなら、仮。", ["threshold"], ["回"]),
+    ],
+)
+def test_resource_items_and_closed_counter_constructions(
+    raw: str, roles: list[str], units: list[str]
+) -> None:
+    engine = classifier(extra=("suffix_unit_items",))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert [s.role for s in frame.leaf_schema.slots] == roles
+    assert [o.source_unit for o in binding.occurrences] == units
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "これは未知カウンター２つを置く。",
+        "これは魂カウンター２つを置る。",
+        "これは魂カウンター２つ以上仮。",
+        "これは魂カウンター０つにつき、仮。",
+        "仮。EPを２つ裏向きにすることで、３PPを払える仮。",
+        "このターン、仮の動作が２回以上発動していた仮。",
+    ],
+)
+def test_unknown_counter_and_incomplete_resource_or_event_cannot_bind(raw: str) -> None:
+    engine = classifier(extra=("suffix_unit_items",))
+    field = normalize_source(raw, source(raw))
+    found = engine.recognize(raw, field.source, field.parts[0])
+    assert "n0_numeric_construction_unresolved" in found.issues
+    with pytest.raises(ValueError, match="Unresolved source leaves"):
+        found.bind(field.source, field.parts[0])
+
+
+@pytest.mark.parametrize(
     ("raw", "valid"),
     [
         ("下記から１つチョイスする。【１】仮。【２】別。", True),
