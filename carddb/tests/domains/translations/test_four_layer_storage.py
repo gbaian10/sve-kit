@@ -82,7 +82,7 @@ def compiled() -> CompiledSchema:
     )
     return compile_schema(
         registry,
-        ("translation_templates", "qa", "cr", "keyword"),
+        ("translation_templates", "qa", "cr", "keyword", "correction"),
         t0_schemas()
         | t1_schemas()
         | four_layer.schemas()
