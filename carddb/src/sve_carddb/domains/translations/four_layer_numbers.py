@@ -96,7 +96,8 @@ _TRANSFER = re.compile(
 )
 _SEARCH = re.compile(
     r"^枚(?P<limit>まで)?(?:を)?探(?:し|して)、(?:それを)?"
-    r"(?:手札に加える|場に出す|EXエリアに置く|墓場に置く|消滅させる)" + _END
+    r"(?:手札に加える|場に出す|EXエリアに置く|墓場に置く|消滅させる|前者を場に出す。後者をEXエリアに置く)"
+    + _END
 )
 _EQUIP = re.compile(r"^枚(?:を)?装備する" + _END)
 _LOOK = re.compile(r"^枚(?:を)?見(?:る|て)" + _END)
