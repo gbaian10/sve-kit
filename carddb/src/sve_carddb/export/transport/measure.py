@@ -9,6 +9,8 @@ from sve_carddb.export.project.source import json_list
 from sve_carddb.export.transport.compression import Blob, Brotli, compress
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Mapping
+
     from sve_carddb.export.transport import Snapshot
 
 MIB = 1048576
@@ -25,6 +27,14 @@ def _sizes(blobs: list[Blob]) -> dict[str, JsonValue]:
     }
 
 
+def accounted_sizes(
+    payloads: Mapping[str, Blob], keys: Iterable[str], *, manifest: Blob | None = None
+) -> dict[str, JsonValue]:
+    """Shared and mixed files contribute their whole bytes once per closure."""
+    blobs = [payloads[key] for key in sorted(set(keys))]
+    return _sizes(blobs if manifest is None else [manifest, *blobs])
+
+
 def measure(
     snapshot: Snapshot, *, brotli: Brotli | None = None
 ) -> dict[str, JsonValue]:
@@ -39,13 +49,13 @@ def measure(
         for item in array(snapshot.manifest["files"])
     }
     text = [
-        blob
-        for key, blob in snapshot.payloads.items()
+        key
+        for key in snapshot.payloads
         if files[key]["role"] in {"bootstrap", "text", "config"}
     ]
     initial = [
-        blob
-        for key, blob in snapshot.payloads.items()
+        key
+        for key in snapshot.payloads
         if files[key]["role"] in {"bootstrap", "config"}
     ]
     shards: list[JsonValue] = []
@@ -81,8 +91,8 @@ def measure(
         )
         if len(blob.raw) > SHARD_LIMIT:
             oversized.append(key)
-    full = _sizes([manifest, *text])
-    bootstrap = _sizes([manifest, *initial])
+    full = accounted_sizes(snapshot.payloads, text, manifest=manifest)
+    bootstrap = accounted_sizes(snapshot.payloads, initial, manifest=manifest)
     images = [
         blob
         for key, blob in snapshot.payloads.items()

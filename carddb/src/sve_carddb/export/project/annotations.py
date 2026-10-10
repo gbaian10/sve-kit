@@ -9,6 +9,8 @@ from sve_carddb.export.project.translations import pointer
 from sve_carddb.export.text_owners import TextOwners
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+
     from sve_carddb.export.project.evidence import Decisions
 
 USE_FIELDS = "id,context_id,field,ordinal,face_revision_id,printing_id,face_id,qa_version_id,cr_clause_id,vocabulary_kind,vocabulary_code,keyword_id,product_family_id,product_id"
@@ -46,9 +48,10 @@ def annotations(
             raise ValueError("Original annotation uses disagree for one owner field")
         fields[key] = projected
     view["field_annotation"] = list(fields.values())
-    _translated(source, view, sets, fields)
+    translated = _translated(source, view, sets, fields)
 
     _concepts(source, view, decisions)
+    validate_completeness(view, tuple(fields.values()), translated)
 
 
 def _concepts(
@@ -100,7 +103,7 @@ def _translated(
     view: dict[str, list[Record]],
     sets: dict[str, Record],
     fields: dict[bytes, Record],
-) -> None:
+) -> dict[str, str]:
     translated = {
         string(row["translation_id"]): string(row["annotation_set_id"])
         for row in source.rows(
@@ -116,3 +119,39 @@ def _translated(
                 raise ValueError("Target annotation differs from exact translated text")
             used.add(identifier)
     view["annotation_set"] = [sets[key] for key in sorted(used)]
+
+    return {
+        string(row["id"]): translated[string(row["id"])]
+        for row in view["translation"]
+        if translated.get(string(row["id"])) in sets
+    }
+
+
+def validate_completeness(
+    view: dict[str, list[Record]],
+    originals: Sequence[Record],
+    translations: Mapping[str, str],
+) -> None:
+    """R cannot reconstruct omitted C declarations; P must check them before handoff."""
+    fields = {
+        canonical({name: row[name] for name in ("owner", "field", "ordinal")}): row[
+            "annotation_set_id"
+        ]
+        for row in view["field_annotation"]
+    }
+    targets = {
+        string(row["id"]): row["annotation_set_id"] for row in view["translation"]
+    }
+    sets = {row["id"] for row in view["annotation_set"]}
+    if any(
+        fields.get(
+            canonical({name: row[name] for name in ("owner", "field", "ordinal")})
+        )
+        != row["annotation_set_id"]
+        or row["annotation_set_id"] not in sets
+        for row in originals
+    ) or any(
+        targets.get(identifier) != annotation or annotation not in sets
+        for identifier, annotation in translations.items()
+    ):
+        raise ValueError("public-annotation/annotation_incomplete")

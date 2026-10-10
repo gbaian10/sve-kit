@@ -287,7 +287,28 @@ def view(value: dict[str, JsonValue]) -> dict[str, list[dict[str, JsonValue]]]:
                     canonical(pointer["owner"]), pointer["owner"]
                 )
         array(row["translations"]).append(selection)
+    _explanation_targets(value, result)
     return result
+
+
+def _explanation_targets(
+    value: dict[str, JsonValue], result: dict[str, list[dict[str, JsonValue]]]
+) -> None:
+    columns = {
+        "keyword": "definition_unit_id",
+        "cr_clause": "text_unit_id",
+        "ruling_revision": "decision_unit_id",
+    }
+    for raw in array(value.get("explanation_targets", [])):
+        target = object_value(raw)
+        kind = string(target["kind"])
+        result[kind].append(
+            {
+                "id": target["id"],
+                columns[kind]: target["text_unit_id"],
+                "translations": [],
+            }
+        )
 
 
 def _card_owner(
@@ -316,3 +337,127 @@ def _card_owner(
             {"id": owner["id"], "card_id": card_id, "region": region, "faces": [row]}
         )
     return public_owner
+
+
+def component_input(value: dict[str, JsonValue]) -> dict[str, JsonValue]:
+    """Supply only missing owner scaffolding; declared text, ranges and IDs stay exact."""
+    unit = value.get(
+        "text_unit",
+        array(value.get("text_units", []))[0] if value.get("text_units") else None,
+    )
+    if unit is None:
+        unit = ["t:ja:559aead08264d579", "ja", "A"]
+    sets = _component_sets(value, unit)
+    uses = array(value.get("uses", []))
+    if "pointer" in value:
+        pointer = array(value["pointer"])
+        uses = [[*pointer, array(sets[0])[0]]]
+    elif not uses:
+        uses = [
+            [
+                {"kind": "qa_version", "id": "qa:component:" + str(i)},
+                "question",
+                None,
+                array(row)[0],
+            ]
+            for i, row in enumerate(sets)
+        ]
+    concepts, vocabulary = _component_references(value, sets, unit)
+    owners: list[JsonValue] = []
+    for use in uses:
+        pointer_owner, field, ordinal, annotation_id = array(use)
+        matched = next(row for row in sets if array(row)[0] == annotation_id)
+        owners.append(
+            {
+                "owner": pointer_owner,
+                "fields": value.get("fields", [[field, ordinal, array(matched)[1]]]),
+                "card_id": "c:component",
+                "face_id": "f:component",
+                "region": "jp",
+                "mapping_state": "confirmed",
+            }
+        )
+    return {
+        "languages": ["en", "ja", "zh-Hant"],
+        "text_units": value.get("text_units", [unit]),
+        "annotation_sets": sets,
+        "field_annotations": uses,
+        "translations": [],
+        "field_translations": [],
+        "concepts": concepts,
+        "vocabulary": vocabulary,
+        "owners": owners,
+        "cards": value.get("cards", ["c:component"]),
+        "explanation_targets": value.get("explanation_targets", []),
+    }
+
+
+def _component_sets(value: dict[str, JsonValue], unit: JsonValue) -> list[JsonValue]:
+    sets = array(value.get("sets", []))
+    if "annotation_set" in value and value["annotation_set"] is not None:
+        sets = [value["annotation_set"]]
+    references = array(value.get("references", []))
+    if "reference" in value:
+        references = [value["reference"]]
+    if references:
+        sets = []
+        for reference in references:
+            occurrences: list[JsonValue] = [
+                [0, reference, [[0, 1]], value.get("bold", True)]
+            ]
+            logical: list[JsonValue] = [decode("Annotation", r) for r in occurrences]
+            identifier = (
+                "ann:"
+                + digest(
+                    canonical(
+                        {
+                            "recipe": "annotation-v1",
+                            "text_unit_id": array(unit)[0],
+                            "occurrences": logical,
+                        }
+                    )
+                )[7:]
+            )
+            sets.append([identifier, array(unit)[0], occurrences])
+    return sets
+
+
+def _component_references(
+    value: dict[str, JsonValue], sets: list[JsonValue], unit: JsonValue
+) -> tuple[list[JsonValue], list[JsonValue]]:
+    concepts = array(value.get("concepts", []))
+    if "concepts" not in value:
+        by_id: dict[str, JsonValue] = {}
+        for row in sets:
+            for occurrence in array(array(row)[2]):
+                reference = object_value(array(occurrence)[1])
+                if reference["kind"] != "vocabulary":
+                    identifier = string(
+                        reference[
+                            "term_id" if reference["kind"] == "card_name" else "key"
+                        ]
+                    )
+                    by_id[identifier] = [
+                        identifier,
+                        value.get(
+                            "category",
+                            "card_name"
+                            if reference["kind"] == "card_name"
+                            else "rule_term",
+                        ),
+                        [],
+                        [],
+                    ]
+        concepts = list(by_id.values())
+    vocabulary: list[JsonValue] = []
+    for row in sets:
+        for occurrence in array(array(row)[2]):
+            ref = object_value(array(occurrence)[1])
+            if ref["kind"] == "vocabulary":
+                vocabulary.append([*array(ref["key"]), array(unit)[0], True, []])
+    owner = object_value(value["owner"]) if "owner" in value else None
+    if owner is not None and owner["kind"] == "vocabulary":
+        vocabulary.append(
+            [owner["vocabulary_kind"], owner["code"], array(unit)[0], True, []]
+        )
+    return concepts, vocabulary

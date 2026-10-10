@@ -126,6 +126,14 @@ def _concepts(closure: _Closure) -> None:
         for row in closure.view[table]
     }
     for row in closure.concepts.values():
+        if row["category"] not in {
+            "card_name",
+            "rule_term",
+            "trait",
+            "keyword",
+            "ability",
+        }:
+            _fail("enum")
         _ordered(array(row["card_ids"]))
         _ordered(array(row["explanations"]))
         if any(identifier not in cards for identifier in array(row["card_ids"])) or (
@@ -165,10 +173,10 @@ def _reference(closure: _Closure, occurrence: Row) -> None:
         closure.used_concepts.add(canonical([identifier]))
         fixed_bold = concept["category"] != "rule_term"
     if fixed_bold and occurrence["bold"] is not True:
-        _fail("emphasis")
+        _fail("reference")
     bold_key = canonical(reference)
     if bold_key in closure.bold and closure.bold[bold_key] != occurrence["bold"]:
-        _fail("emphasis")
+        _fail("reference")
     closure.bold[bold_key] = occurrence["bold"]
 
 
