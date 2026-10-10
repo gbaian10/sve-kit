@@ -310,6 +310,11 @@ def _chunk(
         parts = parse_text(target.data.text, definition.data.parameter_schema)
     except ValueError:
         return "invalid_template_translation"
+    if any(
+        isinstance(value, dict) and value.get("kind") == "card_name"
+        for value in object_value(parse(binding.params)).values()
+    ):
+        return "missing_name_concept"
     rendered = _fragment(binding, parts, lang, labels)
     return "missing_term_translation" if rendered is None else (target, rendered)
 
@@ -331,23 +336,18 @@ def _fragment(
             if isinstance(value, dict):
                 kind = str(value["kind"])
                 if kind == "card_name":
-                    name = str(value["text"])
-                    # Without an existing translation the reader still gets the exact source name.
-                    label = labels.get((kind, name, lang)) or Label(
-                        kind, name, lang, name, "official", True, None
-                    )
-                else:
-                    identifier = (
-                        str(value["id"])
-                        if "id" in value
-                        else str(value["vocabulary_kind"])
-                        + ":"
-                        + str(value["vocabulary_code"])
-                    )
-                    found = labels.get((kind, identifier, lang))
-                    if found is None:
-                        return None
-                    label = found
+                    return None
+                identifier = (
+                    str(value["id"])
+                    if "id" in value
+                    else str(value["vocabulary_kind"])
+                    + ":"
+                    + str(value["vocabulary_code"])
+                )
+                found = labels.get((kind, identifier, lang))
+                if found is None:
+                    return None
+                label = found
                 uses.append(
                     ReferenceUse(label, len(output), len(output) + len(label.text))
                 )

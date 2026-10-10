@@ -456,6 +456,37 @@ def test_invalid_placeholder_keeps_only_that_field_original(
     assert result.issues == ("invalid_template_translation",)
 
 
+def test_unregistered_card_name_blocks_whole_field_even_with_a_matching_label(
+    verified: Validated,
+) -> None:
+    from sve_carddb.domains.translations.templates.render import Binding, Label, _chunk  # ruff: ignore[import-outside-top-level] -- source parameters isolate the missing-concept boundary
+
+    definition = next(
+        r for r in verified.inputs.records if isinstance(r, DefinitionRecord)
+    )
+    binding = Binding(
+        "bind:test",
+        0,
+        definition,
+        verified.members[0],
+        canonical({"slot_0": {"kind": "card_name", "text": "Synthetic name"}}),
+    )
+    label = Label(
+        "card_name", "Synthetic name", "zh-Hant", "合成名稱", "machine", True, True
+    )
+    assert _chunk(verified, binding, {}, "zh-Hant", {}) == "missing_name_concept"
+    assert (
+        _chunk(
+            verified,
+            binding,
+            {},
+            "zh-Hant",
+            {("card_name", "Synthetic name", "zh-Hant"): label},
+        )
+        == "missing_name_concept"
+    )
+
+
 @pytest.mark.parametrize("doubtful", [False, True])
 def test_low_confidence_recognition_rule_marks_the_rendered_field(
     current_case: Case, *, doubtful: bool

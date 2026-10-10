@@ -243,17 +243,20 @@ def test_offline_renders_whole_effects_and_keeps_uncovered_original(
     assert len(populations) == 1
     assert built.report["effect_translations"] == {
         "fields": 4,
-        "translated": 3,
-        "original": 1,
-        "low_confidence": 2,
-        "fallback_reasons": {"unmatched_template_source": 1},
+        "translated": 1,
+        "original": 3,
+        "low_confidence": 0,
+        "fallback_reasons": {
+            "missing_name_concept": 2,
+            "unmatched_template_source": 1,
+        },
         "pending_parameter_causes": {},
     }
-    # Names without a glossary concept keep their source spelling and mark the field.
+    # A source spelling cannot supply the missing name-concept FK.
     assert effects(built) == {
         "BP02-071": ("抽2張卡。", False),
-        "PR-001": ("將1張『名前』加入手牌。", True),
-        "BP02-072": ("將1張『別名』加入手牌。", True),
+        "PR-001": (None, None),
+        "BP02-072": (None, None),
         UNCOVERED: (None, None),
     }
     assert "カード" not in canonical(built.report["effect_translations"]).decode()
@@ -263,7 +266,7 @@ def test_offline_renders_whole_effects_and_keeps_uncovered_original(
             for row in db.rows("translation_use")
             if row.values["face_revision_id"] is not None
         )
-    assert fields == ["effect"] * 3
+    assert fields == ["effect"]
 
 
 @pytest.mark.parametrize(("name", "number"), [("名前", "PR-001"), ("別名", "BP02-072")])
@@ -280,7 +283,7 @@ def test_ambiguous_card_name_concept_is_reported_not_resolved(
     monkeypatch.setattr(offline, "_templates", lambda *_args, **_kwargs: found)
     built = build(recipe)
     report = object_value(built.report["effect_translations"])
-    assert (report["translated"], report["original"]) == (2, 2)
+    assert (report["translated"], report["original"]) == (1, 3)
     assert report["pending_parameter_causes"] == {"ambiguous_card_name_concept": 1}
     assert effects(built)[number] == (None, None)
 
