@@ -188,7 +188,7 @@ _EVENT_FIELD = re.compile(
     + _FILTER
     + r"(?P<kind>フォロワー|アミュレット)(?:を|が)?$"
 )
-_QUOTED_SET = re.compile(r"「(?P<np>[^「」。:：]+)」(?:を|が)?$")
+_QUOTED_SET = re.compile(_ONSET + r"「(?P<np>[^「」。:：]+)」(?:を|が)?$")
 _LEADER = re.compile(r"(?:自分|相手)のリーダー(?:を|が)?$")
 _PLAYER = re.compile(r"(?:自分|相手)プレイヤー(?:を|が)?$")
 _COLLECTION = re.compile(
