@@ -31,6 +31,9 @@ from sve_carddb.domains.translations.four_layer_units import (
 from sve_carddb.domains.translations.parameters.explicit_rules import COUNTER_NAMES
 
 if TYPE_CHECKING:
+    from sve_carddb.domains.translations.four_layer_classification import (
+        SourceReferences,
+    )
     from sve_carddb.domains.translations.four_layer_normalizer import (
         SourceField,
         SourcePart,
@@ -198,7 +201,12 @@ def _quantity(
 
 
 def recognize_number(
-    raw: str, part: SourcePart, hint: Hint, *, field: SourceField | None = None
+    raw: str,
+    part: SourcePart,
+    hint: Hint,
+    *,
+    field: SourceField | None = None,
+    references: SourceReferences | None = None,
 ) -> Number | None:
     """The caller supplies the same canonical units used for the final source trace."""
     if hint.value is None or hint.issues:
@@ -238,6 +246,13 @@ def recognize_number(
                 if number.role == "existence_count"
                 else selection_context(before)
             )
+            or (
+                references.kind_facts.context(
+                    raw, part, hint.occurrence.start, references
+                )
+                if references is not None
+                else None
+            )
         )
         if (
             counted is None
@@ -247,7 +262,13 @@ def recognize_number(
     return number
 
 
-def number_issue(raw: str, part: SourcePart, hint: Hint) -> str:
+def number_issue(
+    raw: str,
+    part: SourcePart,
+    hint: Hint,
+    *,
+    references: SourceReferences | None = None,
+) -> str:
     """A known counted set with the wrong unit differs from an unknown construction."""
     if hint.value is not None and not hint.issues:
         before = part.canonical_source[: hint.occurrence.start]
@@ -264,6 +285,13 @@ def number_issue(raw: str, part: SourcePart, hint: Hint) -> str:
                     existence_context(before)
                     if number.role == "existence_count"
                     else selection_context(before)
+                )
+                or (
+                    references.kind_facts.context(
+                        raw, part, hint.occurrence.start, references
+                    )
+                    if references is not None
+                    else None
                 )
             )
             is not None

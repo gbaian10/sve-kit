@@ -2,6 +2,7 @@
 
 import re
 from dataclasses import dataclass
+from dataclasses import field as dataclass_field
 from typing import TYPE_CHECKING, override
 
 from sve_carddb.contracts.four_layer import (
@@ -31,6 +32,7 @@ from sve_carddb.contracts.template_parameters import Range
 from sve_carddb.contracts.template_parameters import SourceSpan as ParameterSpan
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.catalog.adoption_models import SourceRef
+from sve_carddb.domains.translations.four_layer_kinds import KindFacts
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION, SourcePart
 from sve_carddb.domains.translations.four_layer_numbers import (
     number_issue,
@@ -89,6 +91,8 @@ class Term:
 
 @dataclass
 class SourceReferences(References):
+    kind_facts: KindFacts = dataclass_field(default_factory=KindFacts)
+
     @override
     def proposed_vocabulary(self, kind: str, raw: str) -> Resolution:
         """Only this build's validated catalog supplies permanent vocabulary references."""
@@ -205,6 +209,14 @@ class Classifier:
             raise ValueError(
                 "Source classifier references differ from exact glossary closure"
             )
+        if any(
+            identifier not in self.terms
+            or self.terms[identifier].category != "card_name"
+            for identifier, _ in references.kind_facts.named
+        ):
+            raise ValueError(
+                "Counted-kind evidence requires a current card-name reference"
+            )
 
     def verify(
         self,
@@ -306,9 +318,12 @@ class Classifier:
                 continue
             if (
                 hint.type == "uint"
-                and recognize_number(raw, part, hint, field=field) is None
+                and recognize_number(
+                    raw, part, hint, field=field, references=self.references
+                )
+                is None
             ):
-                issues.add(number_issue(raw, part, hint))
+                issues.add(number_issue(raw, part, hint, references=self.references))
                 continue
             if (
                 hint.target is not None
@@ -398,7 +413,9 @@ class Classifier:
         if hint.type == "uint":
             if hint.value is None:
                 raise ValueError("Recognized source number lacks a value")
-            number = recognize_number(raw, part, hint, field=field)
+            number = recognize_number(
+                raw, part, hint, field=field, references=self.references
+            )
             assert number is not None
             type_name: LeafType = number.type
             role = number.role
