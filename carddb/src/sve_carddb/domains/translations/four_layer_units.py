@@ -60,7 +60,7 @@ _RULES: dict[CountContext, frozenset[str]] = {
         "select.designation.v1", "designation", (), False, "cardinality"
     ): frozenset({"つ"}),
 }
-for _kind in ("follower", "spell", "amulet", "card", "spell_or_amulet"):
+for _kind in ("follower", "spell", "amulet", "card", "spell_or_amulet", "crest"):
     for _zone in ("deck", "evolve_deck", "graveyard", "hand", "banished"):
         _RULES[
             CountContext("select.card.v1", _kind, (_zone,), False, "cardinality")
@@ -73,7 +73,7 @@ for _kind in ("follower", "spell", "amulet", "card", "spell_or_amulet"):
 _RULES[
     CountContext("select.card.v1", "card", ("battlefield",), False, "cardinality")
 ] = frozenset({"枚"})
-for _kind in ("follower", "amulet"):
+for _kind in ("follower", "amulet", "card"):
     _RULES[
         CountContext("select.card.v1", _kind, ("battlefield",), True, "cardinality")
     ] = _RULES[
@@ -99,6 +99,15 @@ _RULES[
         "union_cardinality",
     )
 ] = frozenset({"枚"})
+_RULES[
+    CountContext(
+        "select.union_unrestricted.v1",
+        "card",
+        ("battlefield", "ex"),
+        _ALL_TOKENS,
+        "union_cardinality",
+    )
+] = frozenset({"枚"})
 
 _KINDS = {
     "スペルかアミュレット": "spell_or_amulet",
@@ -106,6 +115,7 @@ _KINDS = {
     "アミュレット": "amulet",
     "スペル": "spell",
     "カード": "card",
+    "クレスト": "crest",
 }
 _ZONES = {
     "場": "battlefield",
@@ -127,7 +137,9 @@ _FILTER = (
     r"\{[^{}]+\}(?:でない|の|・)?|" + _TRAIT + r")*"
 )
 _ONSET = r"(?:^|[、。:：}】（(]|か|と|は|として)"
-_KIND = r"スペルかアミュレット|フォロワー|アミュレット|スペル|カード|『X』"
+_KIND = r"スペルかアミュレット|フォロワー|アミュレット|スペル|カード|クレスト|『X』"
+_SET_KIND = r"(?:" + _KIND + r")(?:(?:や|か)" + _FILTER + r"(?:" + _KIND + r"))*"
+_SET_ATOM = re.compile(_FILTER + r"(?P<kind>" + _KIND + r")")
 _UNION_COUNTED = re.compile(
     _ONSET
     + _FILTER
@@ -141,11 +153,11 @@ _UNION_COUNTED = re.compile(
 _COUNTED = re.compile(
     _ONSET
     + _FILTER
-    + r"(?:(?:自分|相手)の)?(?P<zone>場とEXエリア|場か自分のEXエリア|場か相手のEXエリア|エボルヴデッキ|EXエリア|消滅領域|デッキ|墓場|手札|場)"
+    + r"(?:(?:自分|相手)の)?(?P<zone>場とEXエリア|場か自分のEXエリア|場か相手のEXエリア|場や自分のEXエリア|場や相手のEXエリア|エボルヴデッキ|EXエリア|消滅領域|デッキ|墓場|手札|場)"
     r"(?:の|にある|にいる|に表向きで置かれている|に裏向きで置かれている|に|から)(?:、)?(?P<quote>「)?"
     + _FILTER
     + r"(?P<kind>"
-    + _KIND
+    + _SET_KIND
     + r")(?(quote)」)(?:を|が)?$"
 )
 _EX_TOKEN = re.compile(
@@ -154,9 +166,11 @@ _EX_TOKEN = re.compile(
 )
 _IMPLICIT_FIELD = re.compile(
     _ONSET
-    + r"(?:自分|相手)の"
     + _FILTER
-    + r"(?P<kind>フォロワー|アミュレット)(?:を|が)?$"
+    + r"(?:自分|相手)の"
+    + r"(?P<quote>「)?"
+    + _FILTER
+    + r"(?P<kind>フォロワー|アミュレット)(?(quote)」)(?:を|が)?$"
 )
 _LEADER = re.compile(r"(?:自分|相手)のリーダー(?:を|が)?$")
 _PLAYER = re.compile(r"(?:自分|相手)プレイヤー(?:を|が)?$")
@@ -169,8 +183,8 @@ _LOOK_SELECTION = re.compile(
     r"(?:その中から|その中の)(?:、)?(?P<quote>「)?"
     + _FILTER
     + r"(?P<kind>"
-    + _KIND
-    + r")(?(quote)」)(?:を|が)?$"
+    + _SET_KIND
+    + r")?(?(quote)」)(?:を|が)?$"
 )
 _FIELD_FILTER = re.compile(
     r"^(?:の)?(?:(?:自分|相手)の(?:場|墓場|手札|デッキ)の)?"
@@ -260,7 +274,7 @@ def _zone_context(before: str) -> CountContext | None:
     if match := _LOOK_SELECTION.search(before):
         return CountContext(
             "select.unrestricted.v1",
-            _KINDS.get(match["kind"], "card"),
+            _counted_kind(match["kind"]),
             ("deck",),
             _ALL_TOKENS,
             "cardinality",
@@ -270,11 +284,13 @@ def _zone_context(before: str) -> CountContext | None:
 
 
 def _counted_context(match: re.Match[str]) -> CountContext | None:
-    kind = _KINDS.get(match["kind"], "card")
+    kind = _counted_kind(match["kind"])
     if match["zone"] in {
         "場とEXエリア",
         "場か自分のEXエリア",
         "場か相手のEXエリア",
+        "場や自分のEXエリア",
+        "場や相手のEXエリア",
     }:
         return CountContext(
             "select.union_unrestricted.v1",
@@ -284,11 +300,15 @@ def _counted_context(match: re.Match[str]) -> CountContext | None:
             "union_cardinality",
         )
     zone = _ZONES[match["zone"]]
-    if (zone in {"battlefield", "ex"} and match["kind"] == "『X』") or (
+    if (zone in {"battlefield", "ex"} and "『X』" in match["kind"]) or (
         zone == "ex" and "トークン・" in match[0]
     ):
         return None
-    if "トークン・" in match[0]:
+    if "トークン・" in match[0] and match["kind"] in {
+        "フォロワー",
+        "アミュレット",
+        "カード",
+    }:
         return CountContext("select.card.v1", kind, (zone,), True, "cardinality")
     return CountContext(
         "select.ex_unrestricted.v1" if zone == "ex" else "select.unrestricted.v1",
@@ -297,6 +317,23 @@ def _counted_context(match: re.Match[str]) -> CountContext | None:
         _ALL_TOKENS,
         "cardinality",
     )
+
+
+def _counted_kind(text: str | None) -> str:
+    if text is None:
+        return "card"
+    kinds = set()
+    while text:
+        atom = _SET_ATOM.match(text)
+        if atom is None:
+            raise ValueError("Counted set must consist of complete known NPs")
+        kinds.add(_KINDS.get(atom["kind"], "card"))
+        text = text[atom.end() :]
+        if text:
+            if text[0] not in {"や", "か"}:
+                raise ValueError("Counted set must use a registered union connector")
+            text = text[1:]
+    return kinds.pop() if len(kinds) == 1 else "card"
 
 
 def source_unit(context: CountContext, raw_unit: str) -> UnitDecision:

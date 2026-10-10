@@ -142,3 +142,61 @@ def test_an_explicit_two_np_union_preserves_both_zones() -> None:
     assert found.quantity_role == "union_cardinality"
     assert source_unit(found, "枚").merge_allowed
     assert not source_unit(found, "体").merge_allowed
+
+
+@pytest.mark.parametrize(
+    ("before", "zone", "kind", "unit"),
+    [
+        ("自分の墓場の仮族・カードやスペルが", "graveyard", "card", "枚"),
+        (
+            "自分の場の仮族・フォロワーや仮族・フォロワーが",
+            "battlefield",
+            "follower",
+            "体",
+        ),
+        (
+            "自分のデッキの上N枚を見る。その中から、仮族・カードか仮族・スペル",
+            "deck",
+            "card",
+            "枚",
+        ),
+        ("自分のデッキの上N枚を見る。その中から、", "deck", "card", "枚"),
+        ("【仮能力】を持つ自分のフォロワー", "battlefield", "follower", "体"),
+        (
+            "自分の「【仮能力】や【別能力】を持つフォロワー」",
+            "battlefield",
+            "follower",
+            "体",
+        ),
+        ("自分のEXエリアのクレストが", "ex", "crest", "枚"),
+    ],
+)
+def test_explicit_filtered_sets_preserve_their_counted_objects(
+    before: str, zone: str, kind: str, unit: str
+) -> None:
+    found = count_context(before)
+    assert found is not None
+    assert found.counted_zones == (zone,)
+    assert found.counted_object == kind
+    assert source_unit(found, unit).merge_allowed
+
+
+def test_a_token_filtered_union_does_not_claim_every_member_is_a_token() -> None:
+    found = count_context("自分の場のトークン・フォロワーやフォロワーが")
+    assert found is not None
+    assert found.token == frozenset({True, False})
+
+
+@pytest.mark.parametrize(
+    "before",
+    [
+        "自分のデッキの上N枚を見る。その中から、仮語カードかフォロワー",
+        "自分の墓場のフォロワーや不明なカードが",
+        "自分のフォロワー」",
+        "自分の「フォロワー",
+    ],
+)
+def test_unknown_union_members_and_unbalanced_quotes_cannot_supply_a_set(
+    before: str,
+) -> None:
+    assert count_context(before) is None
