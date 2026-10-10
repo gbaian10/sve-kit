@@ -57,7 +57,7 @@ def classifier(terms: tuple[Term, ...] = (), extra: tuple[str, ...] = ()) -> Cla
 
 def test_card_name_is_protected_before_numeric_and_phase_recognition() -> None:
     term = Term("term:name.synthetic", "card_name", "仮（２）😀")
-    raw = "『仮（２）😀』を２枚選ぶ。\r\n"
+    raw = "自分の手札の『仮（２）😀』を２枚選ぶ。\r\n"
     field = normalize_source(raw, source(raw))
     engine = classifier((term,))
     frames = []
@@ -190,14 +190,14 @@ def test_name_field_cannot_borrow_an_ability_concept_with_the_same_spelling() ->
     ("raw", "type_name", "role", "value", "unit"),
     [
         (
-            "仮を２枚まで選ぶ。",
+            "自分の手札のカードを２枚まで選ぶ。",
             "QuantitySpec",
             "selection_count",
             QuantitySpec(mode="up_to", expr=Constant(kind="constant", value=2)),
             "枚",
         ),
         (
-            "仮が２体以上いるなら、仮。",
+            "相手の場のフォロワーが２体以上いるなら、仮。",
             "QuantitySpec",
             "existence_count",
             QuantitySpec(mode="at_least", expr=Constant(kind="constant", value=2)),
@@ -273,3 +273,77 @@ def test_unrelated_catalog_member_preserves_frame_and_binding_identity() -> None
     after = second.recognize(raw, field.source, part).bind(field.source, part)
     assert before == after
     field.verify(raw, (after[0],), (after[1],), second.domains)
+
+
+@pytest.mark.parametrize(
+    ("raw", "reason"),
+    [
+        ("相手の場のフォロワー２枚を選ぶ。", "source_unit_mismatch"),
+        ("相手の墓場のフォロワー２体を選ぶ。", "source_unit_mismatch"),
+        ("相手の場とEXエリアのフォロワー２体を選ぶ。", "source_unit_mismatch"),
+        ("不明な集合２枚を選ぶ。", "n0_numeric_construction_unresolved"),
+    ],
+)
+def test_counted_unit_requires_registered_object_and_counted_zone(
+    raw: str, reason: str
+) -> None:
+    field = normalize_source(raw, source(raw))
+    found = classifier().recognize(raw, field.source, field.parts[0])
+    assert reason in found.issues
+    with pytest.raises(ValueError, match="Unresolved source leaves"):
+        found.bind(field.source, field.parts[0])
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "相手の場のフォロワー２体を選ぶ。自分の手札に戻す。",
+        "相手の墓場のフォロワー２枚を選ぶ。場に出す。",
+        "相手の場とEXエリアのフォロワー２枚を選ぶ。自分の手札に加える。",
+    ],
+)
+def test_counted_zone_precedes_destination_and_union_keeps_its_own_unit(
+    raw: str,
+) -> None:
+    field = normalize_source(raw, source(raw))
+    engine = classifier()
+    found = engine.recognize(raw, field.source, field.parts[0])
+    assert not found.issues
+    frame, binding = found.bind(field.source, field.parts[0])
+    field.verify(raw, (frame,), (binding,), engine.domains)
+    assert binding.occurrences[0].source_unit in {"体", "枚"}
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "自分のEXエリアのフォロワー２枚を選ぶ。",
+        "自分のEXエリアのフォロワー２体を選ぶ。",
+        "自分のEXエリアのトークン・フォロワー２枚を選ぶ。",
+    ],
+)
+def test_ex_kind_or_unit_cannot_supply_missing_token_evidence(raw: str) -> None:
+    field = normalize_source(raw, source(raw))
+    found = classifier().recognize(raw, field.source, field.parts[0])
+    assert found.issues
+    with pytest.raises(ValueError, match="Unresolved source leaves"):
+        found.bind(field.source, field.parts[0])
+
+
+def test_explicit_ex_token_follower_keeps_entity_unit() -> None:
+    raw = "自分のEXエリアのトークン・フォロワー２体を選ぶ。"
+    field = normalize_source(raw, source(raw))
+    engine = classifier()
+    found = engine.recognize(raw, field.source, field.parts[0])
+    assert not found.issues
+    frame, binding = found.bind(field.source, field.parts[0])
+    field.verify(raw, (frame,), (binding,), engine.domains)
+    assert binding.occurrences[0].source_unit == "体"
+
+
+def test_battlefield_named_card_does_not_infer_kind_from_its_unit() -> None:
+    name = Term("term:name.synthetic", "card_name", "仮名")
+    raw = "自分の場の『仮名』２枚を選ぶ。"
+    field = normalize_source(raw, source(raw))
+    found = classifier((name,)).recognize(raw, field.source, field.parts[0])
+    assert found.issues == ("n0_numeric_construction_unresolved",)

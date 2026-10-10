@@ -32,7 +32,10 @@ from sve_carddb.contracts.template_parameters import SourceSpan as ParameterSpan
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.catalog.adoption_models import SourceRef
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION, SourcePart
-from sve_carddb.domains.translations.four_layer_numbers import recognize_number
+from sve_carddb.domains.translations.four_layer_numbers import (
+    number_issue,
+    recognize_number,
+)
 from sve_carddb.domains.translations.four_layer_semantics import (
     CardContext,
     Classified,
@@ -236,7 +239,7 @@ class Classifier:
             if hint.issues:
                 continue
             if hint.type == "uint" and recognize_number(raw, part, hint) is None:
-                issues.add("n0_numeric_construction_unresolved")
+                issues.add(number_issue(raw, part, hint))
                 continue
             if (
                 hint.target is not None
