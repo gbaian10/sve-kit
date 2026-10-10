@@ -38,3 +38,23 @@ producer pin, approval receipt or second resolution parser.
 
 These limitations are documented without expanding the frozen numeric or sentence
 recognition rules. N1 source semantics belongs to #380/#499.
+
+## N1 preparation
+
+`four_layer_derivation.derive_source` is an internal preparation entry point. It
+uses the current source partitions, Unicode units and adopted classifier catalog.
+Its frames use `four-layer-jp-v2`, which the production authored reader still
+rejects; the normal build continues to use N0. This is not a second reader.
+
+Complete `【keyword】` lines obtain required Concept leaves, including every
+repeated source occurrence. The standalone `{クイック}` construction requires the
+exact `term:ability.quick` concept in category `ability` and a normal spell's
+effect-field context to resolve as a shared card-field projection. Conditional,
+granted, compound or section uses do not acquire this projection. Catalog entries
+alone do not register new Quick aliases. Missing or ambiguous concepts prevent a
+binding; unknown whole-line semantics retain occurrence-scoped pending frames.
+
+The preparation preserves existing N0 constructions for other parts. It does not
+yet derive zone/phase roles, omitted owners, NC/SC aliases or their required
+reference closure. Those rules must be completed before the single N1 switch and
+corpus rebuild in #499; rendering a prepared frame grants no DSL qualification.

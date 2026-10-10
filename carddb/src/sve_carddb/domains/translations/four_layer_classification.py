@@ -125,7 +125,11 @@ class Recognized:
     semantics: Classified | None = None
 
     def bind(
-        self, source: SourceDescriptor, part: SourcePart
+        self,
+        source: SourceDescriptor,
+        part: SourcePart,
+        *,
+        normalizer_version: str = VERSION,
     ) -> tuple[Frame, SourceBinding]:
         """Unknown body semantics stay scoped to the exact occurrence, without macro eligibility."""
         if self.issues:
@@ -151,7 +155,7 @@ class Recognized:
             source=Source(
                 source_lang="ja",
                 canonical_hash=digest(part.canonical_source.encode())[7:],
-                normalizer_version=VERSION,
+                normalizer_version=normalizer_version,
             ),
             role=part.source_span.role,
             semantic_variant=semantic,
