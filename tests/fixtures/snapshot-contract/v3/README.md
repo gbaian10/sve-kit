@@ -92,3 +92,10 @@ annotation projection. The handwritten assertions in
 TypeScript also consumes these bytes as reader input. Regenerate this snapshot
 only after reviewing a deliberate producer or wire contract change, and keep
 the independent assertions and shared public annotation cases passing.
+
+`english-native.json` is one Python-built snapshot of a synthetic EN-only face
+whose effect has a selected whole-field zh-Hant translation and whose name has none.
+It is TS reader input only: the translation ID embeds the sealed synthetic archive
+batch, so a rebuild is not byte-identical and no Python test compares against it.
+The Python build, reader and projection cases live in
+`test_snapshot_offline_english.py`.

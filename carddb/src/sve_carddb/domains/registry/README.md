@@ -65,11 +65,10 @@ cross-region pairing. The report records batch IDs, every current source version
 raw and observation hashes, per-face field hashes, actual image URLs and release
 metadata. It omits original names and ability wording from projected source fields.
 
-Optional `--reviewed-jp` pins the exact historical JP JSONL. Existing manually
-adopted absence reviews can be replayed only when this file's byte hash matches
-the review, its complete observations match the current JP input, and every EN
-printing observation in that review still matches. Unavailable or changed input
-leaves candidates unresolved and reports the differing JP card numbers.
+Optional `--jp-baseline` reads the exact historical JP JSONL for diagnostics only.
+The report lists its byte hash and the card numbers whose complete observations
+differ from current input. Historical absence reviews remain context; only an
+explicit current `--conclusions` record can confirm absence in this inventory.
 
 Optional `--conclusions` supplies private JSONL `Conclusion` records after manual
 identity review. Each record pins an EN card number, source face index, complete

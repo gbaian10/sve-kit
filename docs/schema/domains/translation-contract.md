@@ -13,6 +13,7 @@ N1 由 #380／#499 接續。逐欄型別、驗證責任與固定案例以
 沒有 aligned 核對或已知日英效果不同，均不禁止 JP 繁中，也不切換成 EN 翻譯。
 跨區卡片 ID 對應仍須人工確認，不能靠同名或移除卡號後綴推算；錯 owner／face、過期或缺來源仍拒絕。
 純英文卡須確認日版沒有才個別處理（[#500](https://github.com/gbaian10/sve-kit/issues/500)），unmapped 不等於 confirmed_none。
+實作入口及來源、引用、品質與整欄 fallback 規則見 [EN 顯示特例](english-exceptions.md)。
 JP 卡缺少某個 EN 段落不構成純英文卡；段落不同時顯示完整 JP 效果，不依 EN ordinal 拼接。
 卡名來源順序及資格見[數位名字規則](digital-name-policy.md)，風味見[風味直接對照表](flavor-translation.md)。
 JP 依據的顯示不代表規則等義；區域差異、DSL／機制及官方 counterpart 資格仍依 §7。

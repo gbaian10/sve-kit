@@ -9,9 +9,9 @@ from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.domains.registry.english_inventory import (
     Batch,
     Conclusion,
-    ReviewedJP,
+    JPBaseline,
     inventory,
-    read_reviewed_jp,
+    read_jp_baseline,
 )
 from sve_carddb.domains.registry.records import EnglishPrintingData
 from sve_carddb.domains.registry.review import observation
@@ -77,7 +77,7 @@ def test_recomputes_candidates_without_name_or_suffix_pairing(
     assert all(row["classification"] == "unresolved" for row in found)
     assert report["counts"] == {"has_jp": 0, "confirmed_no_jp": 0, "unresolved": 2}
     assert {row["reason"] for row in found} == {
-        "historical_jp_baseline_unavailable",
+        "historical_absence_requires_current_conclusion",
         "no_manual_identity_conclusion",
     }
     encoded = canonical(report)
@@ -227,57 +227,36 @@ def test_shared_back_face_is_not_inferred_from_source_order(
     )
 
 
-def test_historic_human_absence_requires_full_replayed_inputs(
+def test_historical_baseline_is_diagnostic_and_never_grants_absence(
     registry_root: Path, inputs: Inputs
 ) -> None:
     jp, en = batch("jp", inputs.jp), batch("en", inputs.en)
-    reviewed = ReviewedJP(
+    baseline = JPBaseline(
         inputs.jp_hash,
         {number: value.model_copy(deep=True) for number, value in inputs.jp.items()},
     )
-    row = rows(inventory(load_registry(registry_root), jp, en, reviewed_jp=reviewed))[0]
-    assert row["classification"] == "confirmed_no_jp"
-    jp.cards["BP02-071"].faces[0].text = "Different synthetic rule."
-    report = inventory(load_registry(registry_root), jp, en, reviewed_jp=reviewed)
-    row = rows(report)[0]
-    assert row["classification"] == "unresolved"
-    assert row["reason"] == "historical_jp_input_changed"
+    registry = load_registry(registry_root)
+    report = inventory(registry, jp, en, jp_baseline=baseline)
+    assert rows(report)[0]["classification"] == "unresolved"
+    assert rows(report)[0]["reason"] == "historical_absence_requires_current_conclusion"
     coverage = object_value(object_value(report["inputs"])["historical_jp_coverage"])
+    assert coverage["matches_current"] is True
+    jp.cards["BP02-071"].faces[0].text = "Different synthetic rule."
+    report = inventory(registry, jp, en, (conclusion(jp, en),), jp_baseline=baseline)
+    assert rows(report)[0]["classification"] == "confirmed_no_jp"
+    coverage = object_value(object_value(report["inputs"])["historical_jp_coverage"])
+    assert coverage["matches_current"] is False
     assert coverage["changed_card_numbers"] == ["BP02-071"]
 
 
-@pytest.mark.parametrize(
-    ("change", "reason"),
-    [
-        ("hash", "historical_jp_baseline_hash_mismatch"),
-        ("missing_en", "en_source_or_face_unavailable"),
-        ("changed_en", "historical_en_observations_changed_or_missing"),
-    ],
-)
-def test_historic_absence_rejects_wrong_baseline_or_en_observations(
-    registry_root: Path, inputs: Inputs, change: str, reason: str
-) -> None:
-    jp, en = batch("jp", inputs.jp), batch("en", inputs.en)
-    reviewed = ReviewedJP(inputs.jp_hash, inputs.jp)
-    if change == "hash":
-        reviewed = replace(reviewed, exact_sha256="sha256:" + "f" * 64)
-    elif change == "missing_en":
-        en.cards.pop("GF01-001EN")
-    else:
-        en.cards["GF01-001EN"].faces[0].text = "Changed synthetic rule."
-    row = rows(inventory(load_registry(registry_root), jp, en, reviewed_jp=reviewed))[0]
-    assert row["classification"] == "unresolved"
-    assert row["reason"] == reason
-
-
-def test_private_reviewed_jp_file_is_pinned_by_exact_bytes(
+def test_private_jp_baseline_file_is_pinned_by_exact_bytes(
     tmp_path: Path, inputs: Inputs
 ) -> None:
     path = tmp_path / "jp.jsonl"
     path.write_text(
         "\n".join(card.model_dump_json() for card in inputs.jp.values()) + "\n"
     )
-    result = read_reviewed_jp(path)
+    result = read_jp_baseline(path)
     assert result.exact_sha256 == digest(path.read_bytes())
     assert result.cards == inputs.jp
 

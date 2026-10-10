@@ -15,6 +15,7 @@ from sve_carddb.contracts.four_layer import (
     PrintingFaceOwner,
 )
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.domains.translations.english_exceptions import apply as apply_english
 from sve_carddb.domains.translations.four_layer_authored import (
     FormRecord,
     FrameRecord,
@@ -93,10 +94,11 @@ class Report:
     pending: Counter[str]
     unused_frames: tuple[str, ...]
     details: tuple[FieldReport, ...]
+    english_exceptions: dict[str, JsonValue] | None = None
 
     def payload(self) -> dict[str, JsonValue]:
         """Only counts, IDs and diagnostic codes enter reports, never source text."""
-        return {
+        result: dict[str, JsonValue] = {
             "unused_authored_frames": [
                 {
                     "frame_id": identifier,
@@ -116,6 +118,9 @@ class Report:
                 sorted(self.pending.items())
             ),
         }
+        if self.english_exceptions is not None:
+            result["english_exceptions"] = self.english_exceptions
+        return result
 
 
 def owner_fields(db: Database) -> Iterator[OwnerField]:
@@ -304,7 +309,9 @@ def _compile(
 
 def _populate(
     db: Database, inputs: Inputs, plan: _Plan, settings: Settings
-) -> tuple[dict[tuple[str, str], Form], dict[tuple[str, str], SelectedTarget]]:
+) -> tuple[
+    dict[tuple[str, str], Form], dict[tuple[str, str], SelectedTarget], dict[str, str]
+]:
     definitions = {r.data.id: r for r in inputs.records if isinstance(r, FrameRecord)}
     insert_raw_sources(db, (use.source for use in settings.sources.uses))
     audit = _authored(db, inputs, settings.authored_revision)
@@ -334,7 +341,7 @@ def _populate(
                 selected[record.data.template_id, record.data.lang] = SelectedTarget(
                     record.data.target, record.origin, record.low_confidence
                 )
-    return forms, selected
+    return forms, selected, audit
 
 
 def apply(
@@ -347,7 +354,7 @@ def apply(
     )
     controls = Controls(inputs)
     plan = _compile(db, frames, classifier, settings, controls)
-    forms, selected = _populate(db, inputs, plan, settings)
+    forms, selected, audit = _populate(db, inputs, plan, settings)
     renderer = Renderer(
         labels(db, settings.lang), {}, forms, domains=classifier.domains
     )
@@ -387,18 +394,18 @@ def apply(
             detail.low_confidence = result.rendered.low_confidence
             translated += 1
             low += result.rendered.low_confidence
-    unused = tuple(
-        sorted(
-            {r.data.id for r in inputs.records if isinstance(r, FrameRecord)}
-            - plan.canonical_sources.keys()
-        )
-    )
     return Report(
         plan.total,
         translated,
         low,
         plan.reasons,
         plan.pending,
-        unused,
+        tuple(
+            sorted(
+                {r.data.id for r in inputs.records if isinstance(r, FrameRecord)}
+                - plan.canonical_sources.keys()
+            )
+        ),
         tuple(value for _, value in sorted(plan.details.items())),
+        apply_english(db, inputs, settings.sources, audit),
     )

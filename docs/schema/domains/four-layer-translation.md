@@ -70,6 +70,8 @@ glossary_choice_variant 與 translation_override 沿原欄位與來源規則；�
 template_match 不容手填未驗來源值；null 僅撤回人工指定，回本次自動匹配。
 context_key.variant 指 context_assignment 的具名 variant（缺省 default），不是 §8 建置後的 context 聚合鍵。
 source_exception 整個 kind 移除，divergence/default_jp 都沒有新入口；切換必須列出舊記錄及處置，遇遺留記錄拒絕，不靜默跳過。
+純英文卡另用 [EN 整欄顯示特例](english-exceptions.md) 的 english_exception_target／english_exception_use，
+不屬於 Frame 或一般每卡覆寫，不復活 source_exception。
 舊模板與裁定重鍵依 §9；無法綁定的原稿仍是 candidate。永久 card／face／printing／int_id、配號游標、人工日英對應與歸檔 bytes 均不改。
 
 ## 3. Frame 與語義身分
