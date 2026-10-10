@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, PrintingFaceOwner
 from sve_carddb.core.json import digest
 from sve_carddb.domains.catalog.adoption_models import SourceRef
+from sve_carddb.domains.translations.four_layer_semantics import CardContext
 from sve_carddb.domains.translations.sources import pointer
 
 if TYPE_CHECKING:
@@ -124,3 +125,42 @@ def card_source(  # ruff: ignore[complex-structure, too-many-branches, too-many-
     if pointer(document, locator) != raw:
         raise ValueError("Card source frozen field differs from the exact owner bytes")
     return CardSource(descriptor, raw, card_id, face_id, source_id)
+
+
+def semantic_context(db: Database, source: CardSource) -> CardContext | None:
+    """Use the exact source revision, including historical printed observations."""
+    owner = source.descriptor.owner
+    key: dict[str, Value] = {
+        "face_id": source.face_id,
+        "region": "jp",
+        "source_id": source.source_id,
+    }
+    if isinstance(owner, FaceRevisionOwner):
+        key["id"] = owner.revision_id
+    revisions = db.select(
+        "face_revision",
+        db.columns("face_revision"),
+        where=key,
+    )
+    if len(revisions) != 1:
+        return None
+    revision = revisions[0].values
+    special = {
+        _string(row.values["special_kind_code"])
+        for row in db.select(
+            "face_special_kind",
+            db.columns("face_special_kind"),
+            where={"revision_id": _string(revision["id"])},
+        )
+    }
+    return CardContext(
+        source.descriptor,
+        source.card_id,
+        source.face_id,
+        "evolved"
+        if "evolve" in special
+        else "advance"
+        if "advance" in special
+        else "normal",
+        _string(revision["type_code"]),
+    )

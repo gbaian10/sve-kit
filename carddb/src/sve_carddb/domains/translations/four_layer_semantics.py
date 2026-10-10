@@ -31,7 +31,6 @@ class CardContext:
     face_id: str
     phase: str
     card_kind: str
-    evolved_face_id: str | None
 
 
 @dataclass(frozen=True)
@@ -181,8 +180,7 @@ def _entry(text: str, schema: LeafSchema, context: CardContext) -> Classified | 
     costs = tuple(s for s in schema.slots if s.type == "Nat" and s.role == "cost_value")
     if not costs or any(s.role not in {"cost_value", "ability"} for s in schema.slots):
         return None
-    if context.evolved_face_id is None:
-        return None
+    # Entry classification has no target-face port; its own source proves the action.
     for family, pattern in _ENTRIES.items():
         if pattern.fullmatch(text) and len(costs) == 1:
             return _projection(f"{family}_entry.v1", "ability_body", 1)

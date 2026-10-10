@@ -7,7 +7,10 @@ from pydantic import JsonValue
 
 from sve_carddb.contracts.source_binding import SourceDescriptor
 from sve_carddb.core.json import canonical
-from sve_carddb.domains.translations.four_layer_sources import card_source
+from sve_carddb.domains.translations.four_layer_sources import (
+    card_source,
+    semantic_context,
+)
 
 from ...support.build_db_fixtures import rows
 from ...support.digital_link_import_fixtures import make_fixture
@@ -44,6 +47,32 @@ def test_equal_name_on_another_frozen_card_cannot_authorize_owner(
         assert verified.text == "Synthetic card"
         assert verified.card_id == fixture.card.id
         assert verified.face_id == fixture.face.id
+        facts = semantic_context(db, verified)
+        assert facts is not None
+        assert (facts.source, facts.phase, facts.card_kind) == (
+            descriptor,
+            "normal",
+            "follower",
+        )
+        with db.transaction():
+            db.insert(
+                "face_revision",
+                dict(revision) | {"id": "later-revision", "revision": 2},
+            )
+            db.insert(
+                "vocabulary",
+                {
+                    "kind": "special_kind",
+                    "code": "evolve",
+                    "label_unit_id": unit_id,
+                    "active": True,
+                },
+            )
+            db.insert(
+                "face_special_kind",
+                {"revision_id": "later-revision", "special_kind_code": "evolve"},
+            )
+        assert semantic_context(db, verified) == facts
         other = fixture.others[0][3]
         assert other.text_hash == fixture.jp.text_hash
         assert other.source_version_id != fixture.jp.source_version_id
@@ -128,7 +157,17 @@ def test_printed_unknown_effect_does_not_borrow_its_current_revision(
             | {"text_hash": fixture.jp.text_hash[7:]},
         }
         descriptor = SourceDescriptor.model_validate_json(canonical(data))
-        assert card_source(db, fixture.sources(), descriptor).text == "Synthetic card"
+        verified = card_source(db, fixture.sources(), descriptor)
+        assert verified.text == "Synthetic card"
+        facts = semantic_context(db, verified)
+        assert facts is not None
+        assert (facts.phase, facts.card_kind) == ("normal", "follower")
+        with db.transaction():
+            db.insert(
+                "face_revision",
+                dict(revision) | {"id": "ambiguous-revision", "revision": 2},
+            )
+        assert semantic_context(db, verified) is None
         effect = data | {
             "field": "effect",
             "source_ref": descriptor.source_ref.model_dump(mode="json")

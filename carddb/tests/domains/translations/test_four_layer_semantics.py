@@ -18,7 +18,6 @@ def context(raw: str) -> CardContext:
         "face:normal",
         "normal",
         "follower",
-        "face:evolved",
     )
 
 
@@ -63,21 +62,20 @@ def test_entry_families_have_distinct_semantics_and_independent_scopes(
 
 
 @pytest.mark.parametrize(
-    ("phase", "kind", "paired"),
+    ("phase", "kind"),
     [
-        ("evolved", "follower", "face:evolved"),
-        ("normal", "spell", "face:evolved"),
-        ("normal", "follower", None),
+        ("evolved", "follower"),
+        ("advance", "follower"),
+        ("normal", "spell"),
     ],
 )
 def test_entry_with_missing_or_wrong_face_context_stays_pending(
     phase: str,
     kind: str,
-    paired: str | None,
 ) -> None:
     raw = "{進化}{コスト９９}:これは進化する。"
     field = normalize_source(raw, source(raw))
-    facts = replace(context(raw), phase=phase, card_kind=kind, evolved_face_id=paired)
+    facts = replace(context(raw), phase=phase, card_kind=kind)
     found = classifier().recognize(raw, field.source, field.parts[0], context=facts)
     assert found.semantics is None
 
