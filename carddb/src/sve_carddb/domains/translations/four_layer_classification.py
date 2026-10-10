@@ -280,6 +280,8 @@ class Classifier:
     ) -> Recognized:
         """Source positions and enabled grammar determine leaf values; target text is never inspected."""
         source.verify(source, raw)
+        if field is not None and (field.source != source or part not in field.parts):
+            raise ValueError("Source field belongs to another exact owner or part")
         if part.source_span.role in {"name", "label"}:
             named = self._named(raw, part)
             return Recognized(
@@ -302,7 +304,10 @@ class Classifier:
         for hint in candidate.slots:
             if hint.issues:
                 continue
-            if hint.type == "uint" and recognize_number(raw, part, hint) is None:
+            if (
+                hint.type == "uint"
+                and recognize_number(raw, part, hint, field=field) is None
+            ):
                 issues.add(number_issue(raw, part, hint))
                 continue
             if (
@@ -312,7 +317,7 @@ class Classifier:
             ):
                 issues.add("n0_vocabulary_construction_unresolved")
                 continue
-            leaves.append(self._hint(raw, part, hint))
+            leaves.append(self._hint(raw, part, hint, field=field))
         leaves.sort(key=lambda item: item[0].occurrences[0].start)
         values: dict[str, TypedValue] = {}
         slots = []
@@ -379,7 +384,12 @@ class Classifier:
         )[0]
 
     def _hint(
-        self, raw: str, part: SourcePart, hint: Hint
+        self,
+        raw: str,
+        part: SourcePart,
+        hint: Hint,
+        *,
+        field: SourceField | None = None,
     ) -> tuple[LeafSlot, TypedValue, LeafOccurrence]:
         bounds: Domain
         role = "layout"
@@ -388,7 +398,7 @@ class Classifier:
         if hint.type == "uint":
             if hint.value is None:
                 raise ValueError("Recognized source number lacks a value")
-            number = recognize_number(raw, part, hint)
+            number = recognize_number(raw, part, hint, field=field)
             assert number is not None
             type_name: LeafType = number.type
             role = number.role

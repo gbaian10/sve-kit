@@ -14,6 +14,9 @@ from sve_carddb.domains.translations.four_layer_conditions import (
     existence_context,
     selection_context,
 )
+from sve_carddb.domains.translations.four_layer_reminders import (
+    mandatory_selection_context,
+)
 from sve_carddb.domains.translations.four_layer_replacements import replacement_action
 from sve_carddb.domains.translations.four_layer_units import (
     compound_action,
@@ -27,7 +30,10 @@ from sve_carddb.domains.translations.four_layer_units import (
 from sve_carddb.domains.translations.parameters.explicit_rules import COUNTER_NAMES
 
 if TYPE_CHECKING:
-    from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
+    from sve_carddb.domains.translations.four_layer_normalizer import (
+        SourceField,
+        SourcePart,
+    )
     from sve_carddb.domains.translations.parameters.models import Hint
 
 _ROLES = {
@@ -190,13 +196,18 @@ def _quantity(
     )
 
 
-def recognize_number(raw: str, part: SourcePart, hint: Hint) -> Number | None:
+def recognize_number(
+    raw: str, part: SourcePart, hint: Hint, *, field: SourceField | None = None
+) -> Number | None:
     """The caller supplies the same canonical units used for the final source trace."""
     if hint.value is None or hint.issues:
         return None
     before = part.canonical_source[: hint.occurrence.start]
     after = part.canonical_source[hint.occurrence.end :]
     number = _recognize(raw, hint, before, after)
+    reminder_context = mandatory_selection_context(raw, part, hint.value, field)
+    if number is None and reminder_context is not None:
+        number = _quantity("selection_count", hint.value, "枚")
     if number is None or number.source_unit is None:
         return number
     unit_start = hint.occurrence.end if number.unit_start is None else number.unit_start
@@ -218,7 +229,8 @@ def recognize_number(raw: str, part: SourcePart, hint: Hint) -> Number | None:
     }:
         replacement = replacement_action(before, after)
         counted = (
-            number_context(before, after)
+            reminder_context
+            or number_context(before, after)
             or (replacement.context if replacement is not None else None)
             or (
                 existence_context(before)
