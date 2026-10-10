@@ -560,15 +560,23 @@ function metadata(manifest: JsonObject, all: Files): void {
 }
 
 /** Whether a manifest or version-index entry can be read by this reader (transport §1.1). */
-export function isCompatible(entry: JsonObject): boolean {
+export function isCompatible(
+  entry: JsonObject,
+  reader: {
+    readonly version: string
+    readonly formats: readonly string[]
+    readonly capabilities: readonly string[]
+  } = { version: READER_CONTRACT_VERSION, formats: [FORMAT], capabilities: CAPABILITIES },
+): boolean {
   const capabilities = arrayValue(entry["required_capabilities"] ?? null).map((item) =>
     stringValue(item),
   )
   return (
-    entry["format_version"] === FORMAT &&
-    !newerThan(stringValue(entry["min_reader_version"]), versionTuple(READER_CONTRACT_VERSION)) &&
+    reader.formats.includes(stringValue(entry["format_version"])) &&
+    !newerThan(stringValue(entry["min_reader_version"]), versionTuple(reader.version)) &&
     capabilities.length === CAPABILITIES.length &&
-    CAPABILITIES.every((capability) => capabilities.includes(capability))
+    CAPABILITIES.every((capability) => capabilities.includes(capability)) &&
+    capabilities.every((capability) => reader.capabilities.includes(capability))
   )
 }
 

@@ -12,13 +12,13 @@ import type { View } from "./reader"
 
 export function annotationFailure(
   reason:
+    | "enum"
     | "duplicate_key"
     | "reference"
     | "ordering"
     | "range"
     | "owner"
     | "text_identity"
-    | "emphasis"
     | "identity"
     | "basis",
 ): never {

@@ -166,6 +166,12 @@ function concepts(closure: Closure): void {
     ruling_revision: "decision_unit_id",
   }
   for (const row of closure.concepts.values()) {
+    if (
+      !["card_name", "rule_term", "trait", "keyword", "ability"].includes(
+        stringValue(row["category"]),
+      )
+    )
+      annotationFailure("enum")
     ordered(arrayValue(row["card_ids"]))
     ordered(arrayValue(row["explanations"]))
     if (
@@ -198,10 +204,10 @@ function reference(closure: Closure, occurrence: Row): void {
     closure.usedConcepts.add(canonicalText([id ?? null]))
     fixed = concept["category"] !== "rule_term"
   }
-  if (fixed && occurrence["bold"] !== true) annotationFailure("emphasis")
+  if (fixed && occurrence["bold"] !== true) annotationFailure("reference")
   const key = canonicalText(ref)
   if (closure.bold.has(key) && closure.bold.get(key) !== occurrence["bold"])
-    annotationFailure("emphasis")
+    annotationFailure("reference")
   closure.bold.set(key, occurrence["bold"] ?? null)
 }
 
