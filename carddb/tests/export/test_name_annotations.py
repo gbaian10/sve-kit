@@ -11,7 +11,11 @@ from sve_carddb.build import create_database
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.domains.translations.names.annotations import annotate_name
 from sve_carddb.export.media import prepare_media
-from sve_carddb.export.name_annotations import compact_names, whole_name
+from sve_carddb.export.name_annotations import (
+    assign_name_concepts,
+    compact_names,
+    whole_name,
+)
 from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.read_api import load_export
 from sve_carddb.export.reader import read_snapshot, read_text_all
@@ -303,3 +307,40 @@ def test_counterpart_null_wire_slots_do_not_hide_different_concepts() -> None:
     assert view["field_annotation"] == []
     with pytest.raises(ValueError, match="public-annotation/text_identity"):
         validate_annotations(view, ("ja", "en", "zh-Hant"))
+
+
+def test_receiver_with_another_concept_keeps_the_translation_explicit() -> None:
+    projection, _, _ = name_snapshot()
+    view = deepcopy(projection.tables)
+    for region in array(view["card"][0]["regions"]):
+        object_value(region)["mapping_state"] = "confirmed"
+    source = view["face_revision"][0]
+    receiver = deepcopy(source)
+    receiver.update(id="english-revision", region="en")
+    object_value(array(receiver["translations"])[0])["basis"] = "jp_source"
+    view["face_revision"].append(receiver)
+    unit = next(
+        row for row in view["text_unit"] if row["id"] == receiver["name_unit_id"]
+    )
+    annotation = whole_name(unit, "other-term")
+    view["annotation_set"].append(annotation)
+    view["field_annotation"].append(
+        {
+            "owner": {"kind": "face_revision", "id": "english-revision"},
+            "field": "name",
+            "ordinal": None,
+            "annotation_set_id": annotation["id"],
+        }
+    )
+    view["annotation_concept"].append(
+        {
+            "id": "other-term",
+            "category": "card_name",
+            "card_ids": [],
+            "explanations": [],
+        }
+    )
+    assign_name_concepts(view)
+    assert receiver["name_concept_id"] == "other-term"
+    assert view["translation"][0]["annotation_kind"] == "explicit"
+    validate_annotations(compact_names(view), ("ja", "zh-Hant"))

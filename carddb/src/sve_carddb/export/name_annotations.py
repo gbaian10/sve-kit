@@ -72,22 +72,25 @@ def assign_name_concepts(view: View) -> None:
 def _translation_kinds(
     view: View, owners: TextOwners, texts: dict[str, Row], sets: dict[str, Row]
 ) -> None:
-    uses: dict[str, list[Row]] = {}
+    uses: dict[str, list[tuple[TextOwner, Row]]] = {}
     for owner in owners.by_owner.values():
         for raw in array(owner.row["translations"]):
             value = object_value(raw)
-            uses.setdefault(string(value["translation_id"]), []).append(value)
+            uses.setdefault(string(value["translation_id"]), []).append((owner, value))
     for translation in view["translation"]:
         identifier = translation["annotation_set_id"]
         translation["annotation_kind"] = "none" if identifier is None else "explicit"
         if identifier is None:
             continue
         selected = uses.get(string(translation["id"]), [])
-        concepts = [_source_concept(owners, value) for value in selected]
+        concepts = [_source_concept(owners, value) for _, value in selected]
+        # The full reader rejects a receiver whose own concept differs, so keep that use explicit.
+        receivers = {owner.row.get("name_concept_id") for owner, _ in selected}
         if (
             concepts
             and concepts[0] is not None
             and all(c == concepts[0] for c in concepts)
+            and receivers <= {None, concepts[0]}
             and sets[string(identifier)]
             == whole_name(
                 texts[string(translation["text_unit_id"])], string(concepts[0])

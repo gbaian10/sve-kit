@@ -101,7 +101,7 @@ owner_field 只驗給定的來源 owner／field 定位；不自行生成另一�
 produce 驗 P-only 的先決條件；不能拿公開 reader 接受結構正確的 bytes 算 P 的反例失敗。
 原 PA-05/missing-original-annotation 的 reader 拒絕預期隨稀疏契約退役，改由
 PA-05/producer-omits-nonempty-annotation 驗投影完整性。PA-10/sparse-annotations-display 則驗 R／W
-在完整載入後將缺 field_annotation 與 null translation.annotation_set_id 當空集合，文字與來源仍存在；
+在完整載入後將缺 field_annotation 與 `annotation_kind=none` 的 null translation.annotation_set_id 當空集合，文字與來源仍存在；
 no-translation-original-annotation-remains 保留非空原文位置，不能因沒有譯文便裁掉。
 display 的 grants_aligned／grants_official_counterpart 固定 false，表示本次 JP 顯示不授資格，
 不是覆寫既有獨立核對紀錄。size_accounting 的 bytes 是合成算例，`capacity_acceptance=not_measured`。

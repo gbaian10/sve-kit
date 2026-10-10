@@ -17,7 +17,7 @@ import {
 } from "./json"
 import { validateMediaDependencies, validateMediaIdentities } from "./media"
 import { validatePlacement } from "./placement"
-import { columns, descriptor, primaryKey, requiredTypes, rowType, tables, validate } from "./schema"
+import { descriptor, primaryKey, requiredTypes, rowType, tables, validate } from "./schema"
 import { validateConfig, validateFragments, validateView } from "./semantics"
 import { digest } from "./sha256"
 
@@ -177,10 +177,7 @@ export function readContainer(file: JsonObject, value: JsonObject, version = "3.
       result.push({
         file: key,
         table,
-        value: {
-          ...Object.fromEntries(Object.entries(fragment).filter(([name]) => name !== "rows")),
-          columns: columns(name, version),
-        },
+        value: Object.fromEntries(Object.entries(fragment).filter(([name]) => name !== "rows")),
         rows,
         identity: canonicalText([table, owner, fragment["bucket"] ?? null, partition]),
       })

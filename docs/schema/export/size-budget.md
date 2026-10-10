@@ -82,10 +82,10 @@ reader 保留 TypedArray、緊湊欄式 store 與唯一字串池；view 只持 I
 
 [公開 annotation 契約](public-annotation.md)的必要資料全部屬完整文字預算：
 annotation_set 的 ID／exact text／occurrences／ranges／bold、field_annotation 的 owner／field／ordinal、
-annotation_concept 的 category／card_ids／explanations、translation 第八欄、FieldTranslation 的 source／counterpart、CR translations，及其完整原文／譯文／詞彙／卡片／說明閉包。
+annotation_concept 的 category／card_ids／explanations、translation 第八、九欄、face_revision／PrintingFaceDetail 的 name_concept_id、FieldTranslation 的 source／counterpart、CR translations，及其完整原文／譯文／詞彙／卡片／說明閉包。
 同文字不同概念的集合不能算成同一份；只有完整 set 相同才去重。
-空集合不出 annotation_set／field_annotation，translation 保留第八格 null；不改建置端空集合身分。
-容量報告列實際非空集合／用途列數、空集合省略量；producer 逐用途確保非空 occurrence 不被省略。
+空集合不出 annotation_set／field_annotation，translation 保留第八格 null 與 `annotation_kind=none`；不改建置端空集合身分。
+容量報告列實際非空集合／用途列數、空集合省略量與整名推導省略量；producer 只省略可由 name_concept_id 完全推導的整名集合，其餘非空 occurrence 逐用途保留。
 容量以實際輸出計，不以推定可省略的集合量代替實測。
 
 基本目錄可先達基本文字就緒而日文依據／標註未備妥；完整文字帳不因此縮減。

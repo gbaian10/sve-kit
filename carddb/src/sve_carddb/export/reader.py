@@ -13,7 +13,6 @@ from pydantic import JsonValue
 
 from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.contracts.snapshot import (
-    columns,
     decode,
     definition,
     descriptor,
@@ -149,14 +148,7 @@ def _container(file: Row, value: Row) -> list[Fragment]:
                 for row in rows
             ):
                 raise ValueError("public-annotation/shape")
-            result.append(
-                Fragment(
-                    string(file["key"]),
-                    table,
-                    fragment | {"columns": list(columns(name, selected.version))},
-                    rows,
-                )
-            )
+            result.append(Fragment(string(file["key"]), table, fragment, rows))
             counts.append(
                 {
                     "table": table,

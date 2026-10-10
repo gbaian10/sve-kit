@@ -20,8 +20,8 @@
 來源選用依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)，
 讀取閉包依[公開 annotation 契約](public-annotation.md)。
 
-當前 `Translation` 為 `id/source_unit_id/target_lang/text_unit_id/origin/authority/low_confidence/annotation_set_id` 八欄；
-最後一格可為 null，不能省略。origin、authority 與 low_confidence 各自保留，不允許 scalar coercion。
+當前 `Translation` 為 `id/source_unit_id/target_lang/text_unit_id/origin/authority/low_confidence/annotation_set_id/annotation_kind` 九欄；
+第八格可為 null，第九格 `annotation_kind` 必填，兩者都不能省略。origin、authority 與 low_confidence 各自保留，不允許 scalar coercion。
 bootstrap／detail descriptor 與完整 tuple 一致，不輸出 translation.status 或內部決定／清冊。
 共用 v3 golden 保留 project/false 名稱與 machine/true 效果；非空 annotation 的原生合成成品另走 C→P→reader 管線，
 驗文字、ranges、概念及來源閉包。共用反例涵蓋 tuple 形狀、品質及 annotation 的指定拒絕邊界。
