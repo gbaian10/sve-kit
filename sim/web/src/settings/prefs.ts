@@ -25,6 +25,7 @@ export interface Prefs {
   readonly nameDisplay: TextDisplay
   readonly effectLanguage: TextDisplay
   readonly symbolLabels: boolean
+  readonly termEmphasis: boolean
   readonly theme: ThemePref
   /** null = the theme's default accent. */
   readonly accent: Accent | null
@@ -40,6 +41,7 @@ export const DEFAULT_PREFS: Prefs = {
   nameDisplay: "translated",
   effectLanguage: "translated",
   symbolLabels: false,
+  termEmphasis: true,
   theme: "system",
   accent: null,
   banRegion: "jp",
@@ -70,6 +72,7 @@ const guards: Guards = {
   nameDisplay: isTextDisplay,
   effectLanguage: isTextDisplay,
   symbolLabels: isBoolean,
+  termEmphasis: isBoolean,
   theme: isThemePref,
   accent: isNullableAccent,
   banRegion: isCardEdition,

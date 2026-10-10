@@ -19,6 +19,7 @@ vi.mock("../../app/snapshot", () => {
   })
   return {
     useCatalog: () => ({
+      client: { snapshot: () => null },
       catalog: {
         index: {
           cards: [{ id: "c:synthetic" }],

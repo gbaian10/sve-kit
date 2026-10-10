@@ -1,5 +1,10 @@
 // Public API of the data layer: pages import from here only (lint enforces it). Exports grow with
 // their first consumer, so the barrel never carries unused surface.
+export {
+  type AnnotatedText,
+  createAnnotatedTextResolver,
+  type SelectedText,
+} from "./annotated-text"
 export { type CardSummary, type Catalog, catalogOf } from "./catalog"
 export {
   createSnapshotClient,
@@ -8,6 +13,13 @@ export {
   type SnapshotStatus,
 } from "./client"
 export type { Row } from "./format-v3/decode"
+export {
+  arrayValue,
+  canonicalText,
+  type JsonObject,
+  objectValue,
+  stringValue,
+} from "./format-v3/json"
 export { registerImageCache } from "./image-sw-registration"
 export { type ImageFace, type ImageIndex, loadImagePage } from "./images"
 export {
@@ -18,3 +30,4 @@ export {
   useSnapshotRoot,
   useSnapshotStatus,
 } from "./roots"
+export { textRuns } from "./text-runs"

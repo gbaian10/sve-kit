@@ -57,7 +57,11 @@ export function validatePlacement(
             stringValue(objectValue(row["owner"])["kind"]),
           ),
         ))
-    if (kind !== (home ? "home_set" : "global"))
+    if (
+      fragment.table === "field_annotation" && fragment.rows.length === 0
+        ? !["home_set", "global"].includes(kind)
+        : kind !== (home ? "home_set" : "global")
+    )
       fail("owner-mismatch", "incorrect fragment owner kind")
     const id = owner["id"] === null ? "" : stringValue(owner["id"])
     const part = stringValue(fragment.value["partition"])

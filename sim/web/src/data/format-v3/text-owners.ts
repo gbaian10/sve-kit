@@ -143,6 +143,12 @@ export class TextOwners {
   }
 
   pointer(pointer: JsonObject): string {
+    const value = this.optionalPointer(pointer)
+    if (value === null) annotationFailure("owner")
+    return value
+  }
+
+  optionalPointer(pointer: JsonObject): string | null {
     if (canonicalText(Object.keys(pointer).sort()) !== canonicalText(["field", "ordinal", "owner"]))
       annotationFailure("owner")
     const owner = this.get(objectValue(pointer["owner"]))
@@ -163,7 +169,8 @@ export class TextOwners {
       if (index < 0 || index >= arrayValue(value).length) annotationFailure("owner")
       value = objectValue(arrayValue(value)[index])["label_unit_id"]
     }
-    if (value === null || value === undefined) annotationFailure("owner")
+    if (value === undefined) annotationFailure("owner")
+    if (value === null) return null
     return stringValue(value)
   }
 }

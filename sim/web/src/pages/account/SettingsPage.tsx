@@ -72,6 +72,17 @@ export function SettingsPage() {
         </SettingRow>
         <SettingRow
           className={ROW}
+          label={t("settings.termEmphasis")}
+          hint={t("settings.termEmphasisHint")}
+        >
+          <Switch
+            label={t("settings.termEmphasis")}
+            checked={prefs.termEmphasis}
+            onChange={(termEmphasis) => prefsStore.set({ termEmphasis })}
+          />
+        </SettingRow>
+        <SettingRow
+          className={ROW}
           label={t("settings.symbolLabels")}
           hint={t("settings.symbolLabelsHint")}
         >

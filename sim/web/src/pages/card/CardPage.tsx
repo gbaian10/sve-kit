@@ -1,7 +1,10 @@
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router"
 
 import { useCatalog } from "../../app/snapshot"
+import { CardText } from "../../components/card/CardText"
+import { Segmented } from "../../components/ui/Segmented"
 import type { Row } from "../../data"
 import { usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
@@ -14,10 +17,14 @@ function cardNoColumns(cardNo: string): number {
   )
 }
 
+const CURRENT_FIELDS = ["name", "effect"] as const
+const PRINTED_FIELDS = ["name", "effect", "flavor"] as const
+
 export function CardPage() {
   const { t } = useTranslation()
   const { cardNo, intId } = useParams()
-  const { catalog } = useCatalog()
+  const { catalog, client } = useCatalog()
+  const [textMode, setTextMode] = useState<"current" | "printed">("current")
   const { cardEdition } = usePrefs()
   const printing = cardNo
     ? (catalog?.index.printingByCardNo(cardEdition, cardNo) ??
@@ -35,43 +42,69 @@ export function CardPage() {
           {cardNo ?? intId}
         </span>
       </PageTitle>
+      <Segmented
+        label={t("card.textMode")}
+        options={[
+          { value: "current", label: t("card.currentText") },
+          { value: "printed", label: t("card.printedText") },
+        ]}
+        value={textMode}
+        onChange={setTextMode}
+      />
       {faces.map((face) => {
         const faceId = face["id"] as string
         const wording = catalog?.index.wording(faceId, region)
-        if (!wording) return null
         const revision = catalog?.index.displayRevision(faceId, region)
         const name = revision
           ? catalog?.index.textUnit(revision["name_unit_id"] as string)?.["text"]
           : undefined
-        const undated = (wording["undated_printing_ids"] as string[]).map(
+        const undated = ((wording?.["undated_printing_ids"] ?? []) as string[]).map(
           (id) => (catalog?.index.printing(id)?.["card_no"] as string | undefined) ?? id,
         )
         return (
-          <section key={faceId} className="mt-4 space-y-2" aria-label={t("card.wordingPending")}>
-            <h2 className="text-14 font-semibold">{t("card.wordingPending")}</h2>
-            {typeof name === "string" && <p>{name}</p>}
-            {(wording["display"] as Row)["basis"] === "latest_known_release" && revision && (
-              <p>{t("card.provisionalWording")}</p>
+          <div key={faceId}>
+            {printing &&
+              (textMode === "printed" || revision) &&
+              (textMode === "printed" ? PRINTED_FIELDS : CURRENT_FIELDS).map((field) => (
+                <CardText
+                  key={field}
+                  client={client}
+                  owner={
+                    textMode === "printed"
+                      ? { kind: "printing_face", id: printing["id"] as string, face_id: faceId }
+                      : { kind: "face_revision", id: revision?.["id"] as string }
+                  }
+                  field={field}
+                />
+              ))}
+            {wording && (
+              <section className="mt-4 space-y-2" aria-label={t("card.wordingPending")}>
+                <h2 className="text-14 font-semibold">{t("card.wordingPending")}</h2>
+                {typeof name === "string" && <p>{name}</p>}
+                {(wording["display"] as Row)["basis"] === "latest_known_release" && revision && (
+                  <p>{t("card.provisionalWording")}</p>
+                )}
+                {!revision && <p>{t("card.candidatesUnselected")}</p>}
+                {undated.length > 0 && (
+                  <div className="space-y-1">
+                    <span>{t("card.undatedPrintings")}</span>
+                    <ul
+                      className="grid gap-x-3 gap-y-1 font-mono text-14"
+                      style={{
+                        gridTemplateColumns: `repeat(auto-fill, ${String(Math.max(...undated.map(cardNoColumns)))}ch)`,
+                      }}
+                    >
+                      {undated.map((cardNo) => (
+                        <li key={cardNo} className="text-left whitespace-nowrap">
+                          {cardNo}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </section>
             )}
-            {!revision && <p>{t("card.candidatesUnselected")}</p>}
-            {undated.length > 0 && (
-              <div className="space-y-1">
-                <span>{t("card.undatedPrintings")}</span>
-                <ul
-                  className="grid gap-x-3 gap-y-1 font-mono text-14"
-                  style={{
-                    gridTemplateColumns: `repeat(auto-fill, ${String(Math.max(...undated.map(cardNoColumns)))}ch)`,
-                  }}
-                >
-                  {undated.map((cardNo) => (
-                    <li key={cardNo} className="text-left whitespace-nowrap">
-                      {cardNo}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </section>
+          </div>
         )
       })}
     </>
