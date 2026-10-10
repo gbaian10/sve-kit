@@ -201,6 +201,28 @@ N0 使用全庫版本 `four-layer-jp-v1`。一般契約保留未來型別，N0 a
 區域、階段、未參數化能力全名／alias、玩家及 token 身分仍是 canonical 固定詞；不能新增 lexical 葉讓 target 反找位置。
 原 braced 術語／圖示、header 欄位與整名參數仍須保留，不以「不新增 lexical 葉」刪除既有必要引用。
 
+### 4.2 N0 整段語義構造登錄
+
+N0 的 resolved key、來源 role、投影及能力作用域由 `contracts/n0.py` 封閉登錄。
+未知 key、role／投影錯配或額外作用域均拒絕；未知完整語法維持 occurrence-scoped pending。
+
+| key | role | projection_kind | 獨立 ability scope 數 |
+| --- | --- | --- | ---: |
+| metadata.name.v1、metadata.label.v1、metadata.layout.v1 | 各自的 name／label／layout | none | 0 |
+| card_keywords.v1 | body | card_field | 0 |
+| evolve_entry.v1、feed_entry.v1、ride_entry.v1 | body | ability_body | 1 |
+| evolve_feed_entries.v1、evolve_ride_entries.v1 | body | ability_body | 2 |
+| token_header.v1 | token_header | card_field | 0 |
+| pure_reminder.v1 | reminder | none | 0 |
+
+入口只分類自身完整動作、費用及能力頭；本版不引用轉換後的面，也不產 target-face port，
+因此不要求 paired face 關係。來源自身仍須對上精確日文版次、從者種類與 normal phase；
+不以 `official_unspecified`、卡號或名字推斷面關係。
+組合入口的 scope 依來源順序命名 ability_0、ability_1，parent=null、kind=ability。
+pure_reminder 必須有完整具名提示文法及同欄的精確 body anchor；token_header 必須位於 section 起點，
+全部明示名稱、class、trait、kind 與數值均須唯一解析。
+此登錄描述可產生的有限構造，不表示已完成全庫或正式 workflow 的來源驗收。
+
 ## 5. target、form 與部分 NP
 
 `Target={format:1,nodes:[Node]}`，nodes 為非空有序陣列，輸出依序串接；不支援任意運算式、正規式、HTML 或執行程式。
