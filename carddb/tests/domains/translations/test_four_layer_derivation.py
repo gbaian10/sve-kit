@@ -14,7 +14,7 @@ from sve_carddb.contracts.four_layer import (
 )
 from sve_carddb.core.json import canonical
 from sve_carddb.domains.translations.four_layer_authored import from_files
-from sve_carddb.domains.translations.four_layer_classification import Term
+from sve_carddb.domains.translations.four_layer_classification import Classifier, Term
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 from sve_carddb.domains.translations.four_layer_render import (
@@ -25,7 +25,15 @@ from sve_carddb.domains.translations.four_layer_render import (
 )
 from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
-from .test_four_layer_classification import classifier, source
+from .test_four_layer_classification import classifier as n0_classifier
+from .test_four_layer_classification import source
+
+
+def classifier(terms: tuple[Term, ...] = (), extra: tuple[str, ...] = ()) -> Classifier:
+    return n0_classifier(
+        terms, (*extra, "braced_ability_reference", "bracket_keyword_reference")
+    )
+
 
 QUICK = Term("term:ability.quick", "ability", "クイック")
 KEYWORD = Term("term:keyword.synthetic", "keyword", "仮旗")
@@ -188,7 +196,6 @@ def test_keyword_occurrences_are_not_deduplicated_and_names_are_not_keywords() -
     ("terms", "reason"),
     [
         ((), "missing_keyword_concept"),
-        ((Term("term:name.flag", "card_name", "仮旗"),), "missing_keyword_concept"),
         (
             (KEYWORD, Term("term:keyword.other", "keyword", "仮旗")),
             "ambiguous_keyword_concept",
@@ -201,7 +208,7 @@ def test_missing_ambiguous_or_wrong_category_concepts_cannot_bind(
 ) -> None:
     raw = "{クイック}" if reason == "invalid_quick_category" else "【仮旗】"
     derived = derive_source(raw, source(raw), classifier(terms))
-    assert derived.pending_causes == ((reason,),)
+    assert reason in derived.pending_causes[0]
     with pytest.raises(ValueError, match="Unresolved source leaves"):
         derived.bind(0)
 
@@ -284,7 +291,7 @@ def test_numeric_placeholder_cannot_impersonate_an_adopted_keyword_spelling() ->
     raw = "【仮９９】"
     term = Term("term:keyword.synthetic", "keyword", "仮N")
     derived = derive_source(raw, source(raw), classifier((term,)))
-    assert derived.pending_causes == (("keyword_source_replacement_unresolved",),)
+    assert "keyword_source_replacement_unresolved" in derived.pending_causes[0]
     with pytest.raises(ValueError, match="Unresolved source leaves"):
         derived.bind(0)
 

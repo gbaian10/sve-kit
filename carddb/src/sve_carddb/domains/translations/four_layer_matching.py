@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.four_layer import hash_payload
+from sve_carddb.contracts.n0 import VERSION
 from sve_carddb.contracts.source_binding import SourceBinding
 from sve_carddb.core.json import canonical
 
@@ -42,7 +43,10 @@ def _key(frame: Frame) -> bytes:
 
 
 class Frames:
-    def __init__(self, frames: Iterable[Frame]) -> None:
+    def __init__(
+        self, frames: Iterable[Frame], *, normalizer_version: str = VERSION
+    ) -> None:
+        self.normalizer_version = normalizer_version
         self.index: dict[bytes, list[Frame]] = {}
         identifiers = set()
         for frame in frames:
@@ -62,11 +66,13 @@ class Frames:
         context: CardContext | None = None,
     ) -> Matched | None:
         """Authored slot names and repeated occurrences cannot supply source roles or values."""
-        derived, _ = recognized.bind(field.source, part)
+        derived, _ = recognized.bind(
+            field.source, part, normalizer_version=self.normalizer_version
+        )
         candidates = self.index.get(_key(derived), ())
         matches = []
         for frame in candidates:
-            binding = _bind(frame, field, part, recognized)
+            binding = bind_recognized(frame, field, part, recognized)
             if binding is not None:
                 classifier.verify(raw, field, part, frame, binding, context=context)
                 matches.append(Matched(frame, binding))
@@ -81,9 +87,20 @@ def _signature(slot: LeafSlot) -> tuple[object, ...]:
     return slot.type, slot.role, slot.domain, slot.required
 
 
-def _bind(
+def bind_recognized(
     frame: Frame, field: SourceField, part: SourcePart, recognized: Recognized
 ) -> SourceBinding | None:
+    """Map complete signatures and construction order, including independent omitted operands."""
+    expected_omitted = tuple(s for s in recognized.schema.slots if not s.occurrences)
+    actual_omitted = tuple(s for s in frame.leaf_schema.slots if not s.occurrences)
+    if len(actual_omitted) != len(expected_omitted) or any(
+        _signature(a) != _signature(e)
+        for a, e in zip(actual_omitted, expected_omitted, strict=True)
+    ):
+        return None
+    omitted_names = {
+        e.name: a.name for a, e in zip(actual_omitted, expected_omitted, strict=True)
+    }
     expected = {
         (span.start, span.end): slot
         for slot in recognized.schema.slots
@@ -105,6 +122,12 @@ def _bind(
         mapped = {
             actual[span.start, span.end].name for span in occurrence.canonical_spans
         }
+        if not occurrence.canonical_spans:
+            mapped = (
+                {omitted_names[occurrence.slot]}
+                if occurrence.slot in omitted_names
+                else set()
+            )
         if len(mapped) != 1:
             return None
         name = mapped.pop()

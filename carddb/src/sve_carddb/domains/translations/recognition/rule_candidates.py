@@ -47,6 +47,12 @@ class Rule:
 
 RULES: tuple[Rule, ...] = (
     Rule(
+        "bracket_keyword_reference",
+        "keyword_reference",
+        "keyword_role_requires_review",
+        "N1 body-only exact adopted keyword in brackets; not a numeric option or threshold",
+    ),
+    Rule(
         "suffix_damage_amount",
         "damage_amount",
         "numeric_role_requires_review",
@@ -225,20 +231,18 @@ def _explicit_conditions(identifier: str) -> dict[str, JsonValue]:
     return result
 
 
-def conditions(rule: Rule) -> dict[str, JsonValue]:
-    """Expose the lexical inputs and role used by the registered matcher."""
-    result: dict[str, JsonValue] = {
-        "recognized_role": rule.role,
-        "scope": {
-            "region": "jp",
-            "roles": ["body"]
-            if rule.id == "bracket_choice_index"
-            else ["body", "reminder"],
-        },
-        "context": {"body_nfkc": True, "reminder_nfkc": False},
-        "existing_numeric_rule": False,
-        "invalid_safe_unsigned_decimal": False,
-    }
+def _special_conditions(rule: Rule) -> dict[str, JsonValue]:
+    result: dict[str, JsonValue] = {}
+    if rule.id == "bracket_keyword_reference":
+        result["keyword_evidence"] = {
+            "producer": "four-layer-jp-v2",
+            "category": "keyword",
+            "adopted_count": 1,
+            "spelling_remains_literal": True,
+            "protected_names_and_modifiers_excluded": True,
+            "numeric_choices_and_thresholds_excluded": True,
+        }
+        return result
     if rule.id in EXPLICIT:
         result.update(_explicit_conditions(rule.id))
         return result
@@ -267,6 +271,26 @@ def conditions(rule: Rule) -> dict[str, JsonValue]:
             "context_includes_magnitude_and_suffix": True,
             "exact_unique_ability": signed_spec.target,
         }
+        return result
+    return result
+
+
+def conditions(rule: Rule) -> dict[str, JsonValue]:
+    """Expose the lexical inputs and role used by the registered matcher."""
+    result: dict[str, JsonValue] = {
+        "recognized_role": rule.role,
+        "scope": {
+            "region": "jp",
+            "roles": ["body"]
+            if rule.id in {"bracket_choice_index", "bracket_keyword_reference"}
+            else ["body", "reminder"],
+        },
+        "context": {"body_nfkc": True, "reminder_nfkc": False},
+        "existing_numeric_rule": False,
+        "invalid_safe_unsigned_decimal": False,
+    }
+    if special := _special_conditions(rule):
+        result.update(special)
         return result
     if rule.targets:
         result["reference_evidence"] = {

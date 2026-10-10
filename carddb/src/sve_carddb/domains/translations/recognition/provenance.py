@@ -11,7 +11,7 @@ from sve_carddb.contracts.four_layer import Span
 class Unit:
     text: str
     origins: tuple[Span, ...]
-    transformation: Literal["literal", "digits", "quoted"] = "literal"
+    transformation: Literal["literal", "digits", "quoted", "leaf", "alias"] = "literal"
 
 
 def merged(origins: tuple[Span, ...]) -> tuple[Span, ...]:

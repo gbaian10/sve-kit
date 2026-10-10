@@ -23,6 +23,7 @@ LeafType = Literal[
     "Ordinal",
     "Player",
     "ZoneSet",
+    "DeckPosition",
     "CardKind",
     "Concept",
     "CardName",
@@ -579,6 +580,14 @@ def _card_slots(node: CardNP, slots: Mapping[str, LeafSlot]) -> set[str]:
         "counted_zone",
     }:
         raise ValueError("CardNP requires a counted source zone")
+    if args.owner is not None:
+        owner_role = slots[args.owner.slot].role
+        if owner_role not in {"source_owner", "counted_owner"}:
+            raise ValueError("CardNP requires a source or counted owner")
+        if args.zone is not None and slots[args.zone.slot].role != owner_role.replace(
+            "_owner", "_zone"
+        ):
+            raise ValueError("CardNP owner and zone roles must belong to one operand")
     traits = tuple(ref.slot for ref in args.traits)
     if len(traits) > 1:
         raise ValueError("CardNP supports at most one proven trait filter")

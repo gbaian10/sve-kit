@@ -42,6 +42,37 @@ TypedValue = (
 class ZoneDomain(RecordData):
     type: Literal["ZoneSet"]
     zones: Annotated[tuple[Code, ...], Field(min_length=1)]
+    combinations: tuple[tuple[Code, ...], ...] | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
+
+    @model_validator(mode="after")
+    def _combinations(self) -> Self:
+        if self.combinations is not None and (
+            not self.combinations
+            or self.combinations != tuple(sorted(set(self.combinations)))
+            or any(
+                not group
+                or group != tuple(sorted(set(group)))
+                or any(code not in self.zones for code in group)
+                for group in self.combinations
+            )
+        ):
+            raise ValueError(
+                "Zone domain combinations must be closed, sorted and unique"
+            )
+        return self
+
+
+class CodeDomain(RecordData):
+    type: Literal["Player", "Phase", "TokenStatus", "DeckPosition"]
+    codes: Annotated[tuple[Code, ...], Field(min_length=1)]
+
+    @model_validator(mode="after")
+    def _codes(self) -> Self:
+        if self.codes != tuple(sorted(set(self.codes))):
+            raise ValueError("Code domain must be sorted and unique")
+        return self
 
 
 class QuantityDomain(RecordData):
@@ -88,7 +119,7 @@ class LayoutDomain(RecordData):
     type: Literal["LiteralLayout"]
 
 
-ClosedDomain = ZoneDomain | QuantityDomain | ReferenceDomain | LayoutDomain
+ClosedDomain = CodeDomain | ZoneDomain | QuantityDomain | ReferenceDomain | LayoutDomain
 
 
 class SourceReference(RecordData):
@@ -230,6 +261,8 @@ def _numeric_value(slot: LeafSlot, value: TypedValue) -> None:
 def _zone_value(domain: ZoneDomain, value: TypedValue) -> None:
     if not isinstance(value, tuple) or not value or value != tuple(sorted(set(value))):
         raise ValueError("ZoneSet requires sorted unique zone codes")
+    if domain.combinations is not None and value not in domain.combinations:
+        raise ValueError("ZoneSet combination is outside its source domain")
     if any(v not in domain.zones for v in value):
         raise ValueError("ZoneSet value is outside its source domain")
 
@@ -258,6 +291,9 @@ def _complex_value(
 def _registered_value(domain: ClosedDomain, value: TypedValue) -> None:
     if isinstance(domain, ZoneDomain):
         _zone_value(domain, value)
+    elif isinstance(domain, CodeDomain):
+        if not isinstance(value, str) or value not in domain.codes:
+            raise ValueError("Code is outside its named source domain")
     elif isinstance(domain, QuantityDomain):
         _quantity_value(domain, value)
     elif isinstance(domain, ReferenceDomain):
@@ -336,6 +372,10 @@ class SourceBinding(RecordData):
             )
         ):
             raise ValueError("N0 requires explicit leaves and constant quantities")
+        if frame.source.normalizer_version == N0_VERSION and len(
+            {(o.slot, o.canonical_spans) for o in self.occurrences}
+        ) != len(self.occurrences):
+            raise ValueError("N0 has no registered union sharing a canonical position")
         if (
             frame.semantic_variant.scope is not None
             and frame.semantic_variant.scope != self.occurrence_key()
@@ -391,7 +431,15 @@ def _verify_occurrences(
             raise ValueError("Omitted value requires its own source occurrence")
         if tuple(o.ordinal for o in found) != tuple(range(len(found))):
             raise ValueError("Leaf occurrence ordinals must be continuous")
-        if tuple(s for o in found for s in o.canonical_spans) != slot.occurrences:
+        if (
+            tuple(
+                sorted(
+                    {s for o in found for s in o.canonical_spans},
+                    key=lambda s: (s.start, s.end),
+                )
+            )
+            != slot.occurrences
+        ):
             raise ValueError(
                 "Leaf occurrences do not cover declared canonical positions"
             )

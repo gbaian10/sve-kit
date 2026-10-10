@@ -139,7 +139,8 @@ Scalar 只可為 UInt、Bool、Code 或下列具名引用。domain.values 是排
 Concept、CardName、CardKind 及複合型別可用具名域代碼，引用該 normalizer 版本的封閉 descriptor，不能執行任意 predicate。
 N0 引用型別每槽恰用一個代碼，不將本次 catalog 的整個類別展開到 Frame；代碼固定引用種類、category／vocabulary kind、
 有效性及來源構造限制。catalog 新增合格成員不改域含義；實際值仍須通過本次 FK、category、採用狀態及來源限制檢查。
-合法域是來源限制，不能從 target 推導。可省略的槽 required=false；省略時 values 不含該 key，不用 null 造值。
+合法域是來源限制，不能從 target 推導。target 可不顯示的槽 required=false；沒有來源用途的 optional 槽可以不綁值。
+由具名來源規則實際產生的純省略槽仍須有值及 omitted occurrence，不用 null 造值。
 
 | type／值 | role／合法域與語義界線 | 案例 |
 | --- | --- | --- |
@@ -149,6 +150,7 @@ N0 引用型別每槽恰用一個代碼，不將本次 catalog 的整個類別�
 | CardKind／vocabulary 引用 | counted_kind/filter_kind；vocabulary 的 kind=type，code 必存在 | FL-003／FL-004 |
 | Concept／TermReference | keyword/trait/ability/rule_term 各自有 category 與角色限制；`{kind:glossary,key:ID}` 或 `{kind:vocabulary,key:[kind,code]}` | FL-005／FL-018 |
 | CardName／`{kind:card_name,term_id:ID}` | 名稱概念 FK；整個名字是葉，不抽名字內的術語，不因同名猜 card／token 身分 | FL-013 |
+| DeckPosition／具名 Code | source_position／destination_position；容器固定為 deck，完整牌堆＋端點片語由一葉持有，不與 deck ZoneSet 重疊 | N1 準備登錄 |
 | Phase、Stat、TokenStatus／具名 Code | phase_trigger/phase_duration、stat_filter、token_filter 各自引用封閉登錄；token 不是 trait | FL-018／FL-021 |
 | QuantitySpec／下述物件 | selection_count、existence_count、set_extent、repeat_count 等依構造限制 | FL-004／FL-019 |
 | QuantityExpr／下述有限描述 | count_expression；符號 X、計數與算式不是一律 Nat，也不提早凍結 Live 值 | FL-019 |
@@ -163,7 +165,7 @@ may 是 frame 控制語義，不等於 up_to 或選零個。random 屬 frame，�
 所有上述巢狀欄位由 A 驗結構、B 驗型別／使用處及來源、C 驗讀回，失敗按 FL-004／FL-019／FL-022。
 
 來源語義角色與遊戲型別用一份 binding，renderer 不另抽一次值，DSL adapter 也不能從中文猜值。
-Player／ZoneKind／Phase／Stat／TokenStatus 等 Code 的顯示名稱，須在該型別登錄中明示 value→TermReference 的對照；
+Player／ZoneKind／Phase／DeckPosition／Stat／TokenStatus 等 Code 的顯示名稱，須在該型別登錄中明示 value→TermReference 的對照；
 B 驗對照存在、型別吻合並沿同一選詞產生位置，不能用 Code 字串或中文猜概念（FL-005／FL-013）。
 數值本身及純文法片段無概念名稱時不造 TermReference。
 ZoneKind 本身不是完整目的 ZoneRef；後者還要持有者。union 的分支限定不能上提成全域 filter；
@@ -232,6 +234,90 @@ pure_reminder 必須有完整具名提示文法及同欄的精確 body anchor；
 全部明示名稱、class、trait、kind 與數值均須唯一解析。
 此登錄描述可產生的有限構造，不表示已完成全庫或正式 workflow 的來源驗收。
 
+### 4.3 N1 準備入口的來源登錄
+
+`four_layer_derivation.derive_source` 使用準備版本 `four-layer-jp-v2`；正式 compile 與 authored reader 仍只使用／接受 v1。
+此入口沿相同 source units、分段、catalog、數值規則及來源驗證邊界產葉，不另建來源驗證器。
+只擴充精確 face_revision／printing_face 的 effect／section 中 role=body 的部分；name、label、layout、reminder、token_header
+及已 resolved 的完整進化／食事／憑依等入口保留 N0。未知整行可以新增合法葉，仍維持整行 pending。
+
+明示 Player 一律用 `player.relative.v1={opponent,self}`，角色分 source_owner、destination_owner、counted_owner、phase_owner。
+只由下列省略規則保證 self 時使用 `player.self.v1={self}`；不產 each、both、affected_owner、物件控制者或回合玩家。
+小型 Code 域採 `CodeDomain(type,codes)`，codes 為排序唯一的非空列舉，不把裸 self 字串誤當 descriptor ID。
+ZoneDomain 可附精確 combinations；N0 未附此欄位時沿用既有成員集合限制，不改既有 descriptor 的順序。
+
+| 具名域 | 準備入口的精確限制 |
+| --- | --- |
+| zone.single.v1 | 恰七種單元素集合：battlefield、hand、deck、evolve_deck、graveyard、ex、banish。 |
+| zone.hand.v1 | 恰 `[hand]`；固定加入／放回手牌的目的區域。 |
+| zone.selection.battlefield_ex.v1 | 恰 `[battlefield,ex]`；只用於下列同質選取。 |
+| phase.named.v1 | start、main、end；只產 phase_trigger，不產 duration。 |
+| deck_position.edge.v1 | top、bottom；固定容器 deck，不產任意位置或 counted_position。 |
+| token_status.token.v1 | token；只認明示 token filter，不由名稱猜。 |
+| card_kind.selection.v1 | 本次已採用的 follower、amulet、spell 引用；禁止 leader／ep 等其他 type。 |
+| card_kind.follower.v1／card_kind.amulet.v1／card_kind.spell.v1 | 固定單種類 descriptor；現有構造／unit 守衛要求單種類時使用，不能按觀測值縮域。 |
+
+Code 的概念對照為 Player.self/opponent → `term:player.self/opponent`、Phase.start/main/end → `term:phase.start/main/end`。
+ZoneKind 的 battlefield／hand／deck／evolve_deck／graveyard／ex／banish 依序對應
+`term:zone.battlefield`／`term:zone.hand`／`term:zone.deck`／`term:zone.evolve_deck`／`term:zone.cemetery`／`term:zone.ex`／`term:zone.banishment`。
+DeckPosition.top/bottom 對應完整 `term:zone.deck_top/deck_bottom`；TokenStatus.token 對應 `term:object.token`。
+這裡記錄來源型別含義；準備入口尚未接正式 renderer 的 Code→Reference、必要引用集合與新形式。
+
+P 為明示自分／相手，Z 為上列區域，DP 為完整デッキの上／下，PH 為具名階段。
+NP 以卡種、泛稱カード或完整 `『』` 名稱為核心；Q 沿既有合法數量與單位。
+動詞採有限拼寫，不使用通用形態還原。下表來源片段只描述文法，沒有官方整句。
+
+| 登錄子族 | 接受的局部構造與葉角色 |
+| --- | --- |
+| N1-SRC01.select | `[Pの] Z(の/から) NP[を] Q[を]` 接選ぶ／選び／選んで；source_owner、source_zone、selection_count 及 NP filter。 |
+| N1-SRC01.search／inspect／reveal | 同一來源構造接探す／探し／探して、見る／見て、公開する／公開して；不套 selection 助詞 alias。 |
+| N1-SRC02.locative／ablative | `[Pの] Z(の/から) NP Qを [Pの] Zに` 接有限移動動詞；同子句、同 NP、明示目的地，來源與目的分槽。 |
+| N1-SRC02.hand_cost | 完整能力頭（含【進化時】／【攻撃時】觸發頭）與成本分隔內的手札成本、Q、捨てる與冒號；必須在該能力冒號前，觸發後的效果棄牌或裸棄牌不是成本。 |
+| N1-SRC03.place／return／add_hand／deploy | `[Pの] Zに` 接置く／置き／置いて／置いてよい；戻す／戻し／戻して／戻してよい；固定手札接加える／加え／加えてよい；固定場接出す／出し／出して／出してよい。只產目的角色。 |
+| N1-SRC04.read／quantity／exist | `Zの NPの数/枚数`、`Zの NPが(ちょうど)?Q(以上/以下)?なら(使える)?`、`Zに NPがいる/いない/ある/ない(なら/場合)?`；counted_owner／counted_zone。比較、否定及既有數值角色不合併。 |
+| N1-SRC05.arrival／delayed | `[Pの] PHが来たとき`，或 `[Pの] PHに` 接完整具體效果述語；phase_owner／phase_trigger，兩骨架不 alias。 |
+| N1-SRC06.source.inspect／source.move／destination | `[Pの] DP Qを` 接見る／見て／公開する／公開して，或直接置入／放回明示區域；`[Pの] DPに` 接有限置く／戻す活用。完整 DP 葉先於普通 deck 區域；不接受 DPから。 |
+| N1-SRC07 | 下表三條純省略規則；每個目的地／來源用途各一槽。 |
+| N1-SRC08.kind／trait／braced／token／card | 只補 SRC01／02／04／10 已成立 NP 內的明示 filter；class 沿 vocabulary(class)，trait 沿 glossary，泛稱カード使用 `term:object.card`，不造 type=card。 |
+| N1-SRC09.threshold／keyword／quick | 四種門檻能力名與數值分槽；合法正文 bracket keyword 與 braced Quick 使用既有可選規則。 |
+| N1-SRC10 | 明示同一 P 的場與 EXエリア，以か／や、兩種順序、一個共同 NP/Q、一次選ぶ連接；重複相同 owner 或共同 owner。異質、不同 owner、分支數量或控制分支均拒絕。 |
+
+新明示槽 required=true。純省略槽 occurrences=[]、required=false，binding 必有 self 值及恰一個 omitted occurrence。
+來源缺 P 且未通過省略規則時不建 owner 槽，也不新增 fallback。所有 omitted 的 raw_spans／canonical_spans 均空，
+沒有假 raw anchor 或零長 trace；邏輯次序由同版來源規則重建。
+
+| resolution_rule | 守衛與固定邏輯使用點 |
+| --- | --- |
+| owner.actor_hand_cost.v1 | 完整本能力成本邊界；在明示手牌 source_zone 前，能力頭／先行成本之後。 |
+| owner.self_hand_destination.v1 | 已知 self 的唯一局部來源集合：同子句選取／搜尋／公開→加入、同 raw 行選ぶ後緊接それを加入，或固定檢視→所見集合公開→加入骨架；在目的 hand 前。不得跨能力、分支、玩家切換或借未知／對手來源。 |
+| owner.return_inspected_deck.v1 | 唯一自家檢視牌堆與剩餘集合；直接收尾或固定公開／可加入後收尾。在目的 DP 或整牌堆前；兩種目的地分列，不借開頭來源位置。 |
+
+明示葉按首次 canonical 位置編序，省略槽接在明示槽後按 operand 使用點／角色編序。
+matching 以完整槽簽章及穩定省略次序對應，不以共同空 span 任配。來源驗證沿同一 producer 重建，拒絕缺值、偽規則及跨 operand 借葉。
+G10 的 zone occurrence 保留兩段 raw_spans；重複 owner 保留兩個明示 occurrence，可共同指向一個 canonical span。
+同槽明示位置的排序唯一聯集必須等於 LeafSlot.occurrences；跨槽或 raw 重疊仍拒絕。
+
+selection 的の／から與 `NPをQ選ぶ`／`NP Q[を]選ぶ` 歸一只限 SRC01.select；真正直接移動的來源助詞不 alias。
+NC／ネクロチャージ、SC／スペルチェイン只在完整數字門檻頭歸一；コンボ／レッスン不新增別名。
+四種能力名使用 typed placeholder，原數值 N 保留；一般 keyword 與 braced ability（含 Quick）保留 canonical 拼寫。
+每個新葉可沿準備結果的 registry_rows 對回上列；沿用葉對回 N0。
+
+名稱／提示文保護與事件、歷史、receipt、回合、主戰者持有者、靜態期間等父語境排除先行。
+任何成對的「…」（含句點、冒號）都整段受保護，裡面不產外層葉；手牌費用與其他來源共用引號、父語境、並列阻擋及名詞起點檢查。
+完整 G10 優先於單區；失敗的並列（含頓號、中黑直接並列的區域）不截右半邊；DP 優先於 deck；門檻能力優先於一般 keyword。
+NP 內 trait 形狀或泛稱カード片段須恰好解析為一個 glossary 概念，否則整個 operand 不產新葉、保留 N0。
+未解引號條件、其他、表裏狀態、數值限定及非 class 的大括號 token 保留在共同 canonical／trace 中，不穿入新增結構葉。
+非 class 大括號即使有 N0 ability 葉仍是未解修飾，該 operand 只用 flat target。
+外層合法 owner／zone／quantity／filter 仍可產葉；含未解修飾、多 trait 或泛稱卡片的 operand 使用 flat target，不能用 CardNP 吞掉限定。
+
+結構規則沒有 YAML 開關。可選相依沿 `enabled`／`low_confidence`：數值量與四種門檻沿原規則，NC／SC 分別沿原 alias 規則，
+一般 braced ability 與 Quick 沿 `braced_ability_reference`；新 `bracket_keyword_reference` 控制正文 bracket keyword。
+停用或空選擇不旁路產葉／resolved，品質沿實際相依傳播。Quick 的完整 body 恰為 `{クイック}`，只在 effect 第一個非空 raw 行、
+normal face、type_code=spell（含法術代幣）及精確 owner/context 成立時產 `quick_card_field.v1`；
+整行只有已解析 keyword 時產 `card_keywords.v2`。非整行的未知或非 keyword 類別括號不產 keyword 葉、不新增 issue；
+整行括號若只有唯一的非 keyword 類別概念，也不套用、不報 issue，保持 pending；真正缺概念或非 keyword 概念不唯一時仍保留 issue。
+局部詞彙成功不授予其他整行語義。
+
 ## 5. target、form 與部分 NP
 
 `Target={format:1,nodes:[Node]}`，nodes 為非空有序陣列，輸出依序串接；不支援任意運算式、正規式、HTML 或執行程式。
@@ -254,8 +340,10 @@ Node 的 kind 是上述四種唯一 discriminator；required 槽須由 LeafRef �
 | UnionNP(branches,quantity?) | branches 為至少兩個 CardNP；只組合同元素型別且分支 scope 已明確者，quantity 是整體數量；異種或複雜分支可保留 Literal＋葉引用 |
 | CountExpr(expr) | expr=QuantityExpr 葉引用；只呈現既有表達式結構，不建立新的 runtime count 指令 |
 
-CardNP 的 owner=Player、zone=ZoneSet（role 限 source_zone 或 counted_zone）、token=TokenStatus；class 為 Concept 的 vocabulary(class) 引用，
+CardNP 的 owner=Player（role 限 source_owner 或 counted_owner）、zone=ZoneSet（role 限 source_zone 或 counted_zone）、token=TokenStatus；class 為 Concept 的 vocabulary(class) 引用，
 traits 每項為 role=trait 的 Concept glossary 引用；class 的 role=class_filter。
+owner 與 zone 同時存在時，source_owner 只配 source_zone，counted_owner 只配 counted_zone；
+N1 準備來源驗證還須確認全部葉屬於同一合法 operand，不能跨用途借相同值。DeckPosition 用 flat target／Form，不冒充 zone。
 引用域也可使用已登錄的 `concept.trait.v1`／`vocabulary.class.v1`。
 目前 traits 限 0 或 1 項，不把 token／class 當 trait；多項篩選須先確認具名構造的 AND／OR 語義。
 

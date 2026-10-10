@@ -9,6 +9,8 @@ from sve_carddb.contracts.four_layer import (
     Constant,
     GlossaryReference,
     QuantitySpec,
+    Span,
+    hash_payload,
 )
 from sve_carddb.domains.translations.four_layer_classification import (
     Classifier,
@@ -77,6 +79,35 @@ def test_card_name_is_protected_before_numeric_and_phase_recognition() -> None:
     assert frames[0].semantic_variant.scope is not None
     assert bindings[0].occurrences[1].source_unit == "枚"
     assert all(f.projection.projection_kind == "none" for f in frames[1:])
+
+
+def test_n0_cannot_split_one_leaf_into_occurrences_sharing_its_position() -> None:
+    term = Term("term:name.synthetic", "card_name", "仮名前")
+    raw = "自分の手札の『仮名前』を２枚選ぶ。"
+    field = normalize_source(raw, source(raw))
+    engine = classifier((term,))
+    frame, binding = engine.recognize(raw, field.source, field.parts[0]).bind(
+        field.source, field.parts[0]
+    )
+    name = binding.occurrences[0]
+    span = name.raw_spans[0]
+    halves = (
+        name.model_copy(
+            update={"raw_spans": (Span(start=span.start, end=span.start + 1),)}
+        ),
+        name.model_copy(
+            update={
+                "ordinal": 1,
+                "raw_spans": (Span(start=span.start + 1, end=span.end),),
+            }
+        ),
+    )
+    split = binding.model_copy(
+        update={"occurrences": (*halves, *binding.occurrences[1:])}
+    )
+    split = split.model_copy(update={"id": "bind:" + hash_payload(split.payload())})
+    with pytest.raises(ValueError, match="sharing a canonical position"):
+        split.verify(frame, engine.domains)
 
 
 def test_leader_person_unit_survives_classification_and_binding_replay() -> None:
