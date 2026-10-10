@@ -68,23 +68,30 @@ export class BootstrapColumns {
   private readonly tables = new Map<string, Columns>()
 
   ingest(fragments: readonly Fragment[]): void {
+    // One block per table and file: a fragment often holds only a couple of rows, and a block
+    // per fragment costs more in typed-array headers than the rows themselves.
+    const tables = new Map<string, Row[]>()
     for (const fragment of fragments) {
       if (!TABLES.has(fragment.table)) continue
-      let table = this.tables.get(fragment.table)
-      if (!table) {
-        table = new Columns(this.pool)
-        this.tables.set(fragment.table, table)
-      }
-      table.append(
-        fragment.rows.map((row) =>
+      const rows = tables.get(fragment.table) ?? []
+      tables.set(fragment.table, rows)
+      for (const row of fragment.rows)
+        rows.push(
           project(
             fragment.table,
             fragment.table === "printing"
               ? { ...row, home_set_id: objectValue(fragment.value["owner"])["id"] ?? null }
               : row,
           ),
-        ),
-      )
+        )
+    }
+    for (const [name, rows] of tables) {
+      let table = this.tables.get(name)
+      if (!table) {
+        table = new Columns(this.pool)
+        this.tables.set(name, table)
+      }
+      table.append(rows)
     }
   }
 

@@ -64,17 +64,21 @@ export class StringPool {
         return value === 1
       case 3:
         return this.get(value)
-      case 4:
-        return Array.from({ length: value }, (_, ordinal) =>
-          this.decode(this.nodes[offset + 2 + ordinal] ?? 0),
-        )
-      case 5:
-        return Object.fromEntries(
-          Array.from({ length: value }, (_, ordinal) => [
-            this.get(this.nodes[offset + 2 + ordinal * 2] ?? 0),
-            this.decode(this.nodes[offset + 3 + ordinal * 2] ?? 0),
-          ]),
-        )
+      case 4: {
+        const items: JsonValue[] = []
+        for (let ordinal = 0; ordinal < value; ordinal += 1)
+          items.push(this.decode(this.nodes[offset + 2 + ordinal] ?? 0))
+        return items
+      }
+      case 5: {
+        // Plain assignment is safe: keys are schema columns, region/language codes and entity ids.
+        const object: JsonObject = {}
+        for (let ordinal = 0; ordinal < value; ordinal += 1)
+          object[this.get(this.nodes[offset + 2 + ordinal * 2] ?? 0)] = this.decode(
+            this.nodes[offset + 3 + ordinal * 2] ?? 0,
+          )
+        return object
+      }
       default:
         return null
     }
@@ -105,7 +109,7 @@ interface Block {
   readonly columns: ReadonlyMap<string, Column>
 }
 
-/** Fixed-size blocks avoid reallocating every previously parsed file during ingestion. */
+/** Each append keeps its own block, so ingesting a file never reallocates earlier files. */
 export class Columns {
   private readonly pool: StringPool
   private readonly blocks: Block[] = []
@@ -143,7 +147,7 @@ export class Columns {
     this.length += rows.length
   }
 
-  value(ordinal: number, name: string): JsonValue {
+  private block(ordinal: number): Block | undefined {
     let low = 0
     let high = this.blocks.length - 1
     while (low <= high) {
@@ -152,38 +156,49 @@ export class Columns {
       if (!block) break
       if (ordinal < block.start) high = middle - 1
       else if (ordinal >= block.start + block.length) low = middle + 1
-      else {
-        const column = block.columns.get(name)
-        const offset = ordinal - block.start
-        const value = column?.values[offset] ?? 0
-        switch (column?.kinds[offset]) {
-          case 1:
-            return value
-          case 2:
-            return value === 1
-          case 3:
-            return this.pool.get(value)
-          case 4:
-            return this.pool.decode(value)
-          default:
-            return null
-        }
-      }
+      else return block
     }
-    return null
+    return undefined
+  }
+
+  private cell(column: Column | undefined, offset: number): JsonValue {
+    const value = column?.values[offset] ?? 0
+    switch (column?.kinds[offset]) {
+      case 1:
+        return value
+      case 2:
+        return value === 1
+      case 3:
+        return this.pool.get(value)
+      case 4:
+        return this.pool.decode(value)
+      default:
+        return null
+    }
+  }
+
+  value(ordinal: number, name: string): JsonValue {
+    const block = this.block(ordinal)
+    return block ? this.cell(block.columns.get(name), ordinal - block.start) : null
+  }
+
+  // Rows are rebuilt on every lookup and query, so one block search serves all of a row's cells.
+  private rowAt(block: Block, offset: number): JsonObject {
+    const row: JsonObject = {}
+    for (const [name, column] of block.columns) row[name] = this.cell(column, offset)
+    return row
   }
 
   row(ordinal: number): JsonObject {
-    const block = this.blocks.find(
-      (candidate) => ordinal >= candidate.start && ordinal < candidate.start + candidate.length,
-    )
-    return Object.fromEntries(
-      [...(block?.columns.keys() ?? [])].map((name) => [name, this.value(ordinal, name)]),
-    )
+    const block = this.block(ordinal)
+    return block ? this.rowAt(block, ordinal - block.start) : {}
   }
 
   rows(): JsonObject[] {
-    return Array.from({ length: this.length }, (_, ordinal) => this.row(ordinal))
+    const rows: JsonObject[] = []
+    for (const block of this.blocks)
+      for (let offset = 0; offset < block.length; offset += 1) rows.push(this.rowAt(block, offset))
+    return rows
   }
 
   bytes(): number {

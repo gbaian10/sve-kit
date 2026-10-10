@@ -43,6 +43,7 @@ export type SearchEvent =
   | {
       readonly kind: "ready"
       readonly generation: number
+      readonly edition: Region
       readonly dataVersion: string
       readonly manifestHash: string
       readonly metrics: SearchMetrics

@@ -122,18 +122,14 @@ export class SearchIndex {
       if (state.text !== "" && !match) continue
       const printingId = match?.printingId ?? entry.defaultPrinting[query.edition]
       if (!printingId) continue
-      const summary = this.summary(printingId)
-      if (
-        state.cost.min !== undefined &&
-        (summary?.cost === null || summary?.cost === undefined || summary.cost < state.cost.min)
-      )
-        continue
-      if (
-        state.cost.max !== undefined &&
-        state.cost.max < 7 &&
-        (summary?.cost === null || summary?.cost === undefined || summary.cost > state.cost.max)
-      )
-        continue
+      const { min, max } = state.cost
+      // A max of 7 means 7 or more; summaries are decoded only when a bound applies.
+      const upper = max !== undefined && max < 7 ? max : undefined
+      if (min !== undefined || upper !== undefined) {
+        const cost = this.summary(printingId)?.cost
+        if (cost === null || cost === undefined) continue
+        if ((min !== undefined && cost < min) || (upper !== undefined && cost > upper)) continue
+      }
       matches.push({ ordinal, printingId, rank: match?.rank ?? 0, order: entry.order })
     }
     matches.sort((a, b) => a.rank - b.rank || a.order - b.order)

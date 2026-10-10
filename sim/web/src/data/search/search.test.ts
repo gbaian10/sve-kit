@@ -97,11 +97,39 @@ function harness(served = origin(), cacheStorage = memoryCache()) {
     settled: () => pending,
   }
 }
+/** Real message passing is asynchronous: a ready can cross a cancel or a newer load in flight. */
+function crossing(served = origin()) {
+  const toWorker: SearchRequest[] = []
+  const toMain: SearchEvent[] = []
+  let receive: (event: SearchEvent) => void = () => undefined
+  const engine = new SearchEngine((event) => toMain.push(event), {
+    fetch: served.fetcher,
+    cacheStorage: memoryCache(),
+  })
+  const session = new SearchSession((callback) => {
+    receive = callback
+    return {
+      send: (request) => toWorker.push(request),
+      dispose: () => undefined,
+    }
+  })
+  return {
+    session,
+    served,
+    worker: () => Promise.all(toWorker.splice(0).map((request) => engine.handle(request))),
+    main: () => {
+      for (const event of toMain.splice(0)) receive(event)
+    },
+  }
+}
 const bootstrapFile = (built.manifest["files"] as JsonObject[]).find(
   (file) => file["role"] === "bootstrap",
 )
 if (!bootstrapFile) throw new Error("fixture has no bootstrap")
 const heldPath = stringValue(bootstrapFile["path"])
+// The held file is reached only after the manifest is hashed and decoded, which a busy machine
+// can stretch past the default one-second poll.
+const POLL = { timeout: 10_000 }
 
 describe("complete Worker catalog generations", () => {
   it("keeps only the last input and searches once after the whole download", async () => {
@@ -120,7 +148,7 @@ describe("complete Worker catalog generations", () => {
       result: { phase: "pending" },
     })
     expect(h.requests.filter((request) => request.kind === "search")).toHaveLength(0)
-    await expect.poll(() => h.served.requests.includes(heldPath)).toBe(true)
+    await expect.poll(() => h.served.requests.includes(heldPath), POLL).toBe(true)
     expect(h.session.getStatus().result.phase).toBe("pending")
     expect(h.events.some((event) => event.kind === "ready")).toBe(false)
     release()
@@ -239,6 +267,43 @@ describe("complete Worker catalog generations", () => {
     }
   })
 
+  it("cost bounds read the opened printing's summary, and a max of 7 means 7 or more", async () => {
+    const served = origin()
+    const baseline = createSnapshotClient(base, { fetch: served.fetcher })
+    await baseline.load()
+    const snapshot = baseline.snapshot()
+    if (!snapshot) throw new Error("missing baseline")
+    const catalog = createCatalog(snapshot)
+    const all = catalog
+      .results(DEFAULT_QUERY, "jp")
+      .map((item) => catalog.summary(item.printingId))
+      .filter((summary) => summary?.region === "jp")
+    const h = harness(served)
+    h.session.load(base, "jp", "preview")
+    await h.settled()
+    const totals: number[] = []
+    for (const cost of [{ min: 2, max: 3 }, { min: 7 }, { max: 7 }, { max: 1 }]) {
+      h.session.search({ ...query, state: { ...DEFAULT_QUERY, cost } })
+      const result = h.session.getStatus().result
+      if (result.phase !== "complete") throw new Error("missing result")
+      const upper = cost.max !== undefined && cost.max < 7 ? cost.max : undefined
+      const expected =
+        cost.min === undefined && upper === undefined
+          ? all
+          : all.filter(
+              (summary) =>
+                typeof summary?.cost === "number" &&
+                (cost.min === undefined || summary.cost >= cost.min) &&
+                (upper === undefined || summary.cost <= upper),
+            )
+      expect(result.page.total).toBe(expected.length)
+      totals.push(result.page.total)
+    }
+    expect(totals[0]).toBeGreaterThan(0)
+    expect(totals[0]).toBeLessThan(all.length)
+    expect(totals[2]).toBe(all.length)
+  })
+
   it("cache quota failure still completes and reports nonpersistent progress", async () => {
     const h = harness(origin(), memoryCache(true))
     h.session.load(base, "en", "preview")
@@ -267,6 +332,7 @@ it("rejects late responses by both queryId and generation", () => {
   const ready = (generation: number): SearchEvent => ({
     kind: "ready",
     generation,
+    edition: "jp",
     dataVersion: "test",
     manifestHash: "hash",
     metrics: {
@@ -315,6 +381,75 @@ it("rejects late responses by both queryId and generation", () => {
   expect(session.getStatus().result).toMatchObject({ phase: "complete", page: { total: 0 } })
 })
 
+it("a ready that crossed a cancel stays the generation queries go to", async () => {
+  const h = crossing()
+  h.session.load(base, "jp", "preview")
+  await h.worker()
+  h.main()
+  h.session.load(base, "jp", "preview")
+  await h.worker()
+  h.session.cancel()
+  await h.worker()
+  h.main()
+  h.session.search(query)
+  await h.worker()
+  h.main()
+  expect(h.session.getStatus()).toMatchObject({
+    phase: "ready",
+    generation: 2,
+    updating: false,
+    result: { phase: "complete", generation: 2 },
+  })
+})
+
+it("a replaced load that finished first serves queries after its replacement fails", async () => {
+  const h = crossing()
+  h.session.load(base, "jp", "preview")
+  await h.worker()
+  h.main()
+  h.session.load(base, "jp", "preview")
+  await h.worker()
+  h.served.update(3)
+  h.served.files.clear()
+  h.session.load(base, "jp", "preview")
+  await h.worker()
+  h.main()
+  h.session.search(query)
+  await h.worker()
+  h.main()
+  expect(h.session.getStatus()).toMatchObject({
+    phase: "ready",
+    generation: 2,
+    updating: false,
+    result: { phase: "complete", generation: 2 },
+  })
+  expect(h.session.getStatus().error).toContain("HTTP 404")
+})
+
+it("a load after the Worker failed starts a new Worker and drops the old error", () => {
+  const workers: SearchRequest[][] = []
+  const failures: (() => void)[] = []
+  const session = new SearchSession((_receive, failed) => {
+    const sent: SearchRequest[] = []
+    workers.push(sent)
+    failures.push(failed)
+    return {
+      send: (request) => sent.push(request),
+      dispose: () => undefined,
+    }
+  })
+  session.load(base, "jp")
+  session.search(query)
+  failures[0]?.()
+  expect(session.getStatus().result.phase).toBe("error")
+  session.load(base, "en")
+  expect(workers).toHaveLength(2)
+  expect(workers[1]).toMatchObject([{ kind: "load", edition: "en" }])
+  expect(session.getStatus()).toMatchObject({ phase: "downloading", result: { phase: "pending" } })
+  failures[0]?.()
+  expect(session.getStatus().phase).toBe("downloading")
+})
+
 it("switching editions waits for the new region instead of returning old-region hits", async () => {
   const h = harness()
   h.session.load(base, "jp", "preview")
@@ -334,7 +469,7 @@ it("a replaced staging load drains without publishing its generation", async () 
   const h = harness()
   const release = h.served.hold(heldPath)
   h.session.load(base, "jp", "preview")
-  await expect.poll(() => h.served.requests.includes(heldPath)).toBe(true)
+  await expect.poll(() => h.served.requests.includes(heldPath), POLL).toBe(true)
   h.session.load(base, "jp", "preview")
   h.session.search(query)
   release()

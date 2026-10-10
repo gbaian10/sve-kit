@@ -235,6 +235,7 @@ export class SearchEngine {
       this.emit({
         kind: "ready",
         generation: request.generation,
+        edition: request.edition,
         dataVersion,
         manifestHash,
         metrics: {

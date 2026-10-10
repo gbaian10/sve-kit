@@ -15,6 +15,8 @@ type SearchResult =
 export interface SearchStatus {
   readonly phase: "downloading" | "ready" | "error"
   readonly generation: number | null
+  /** Region of the active generation; only queries for it are answered. */
+  readonly edition?: Region
   readonly lastInput: SearchQuery | null
   readonly result: SearchResult
   readonly updating: boolean
@@ -25,6 +27,7 @@ export interface SearchStatus {
     readonly persistent: boolean
   }
   readonly dataVersion?: string
+  readonly manifestHash?: string
   readonly metrics?: SearchMetrics
 }
 export interface SearchTransport {
@@ -56,7 +59,8 @@ const browserTransport: SearchTransportFactory = (receive, failed) => {
 /** Hook-ready external store: only the last input survives a download, and results are page-sized. */
 export class SearchSession {
   private readonly factory: SearchTransportFactory
-  private transport: SearchTransport
+  /** Undefined after the Worker failed; the next load starts a new one. */
+  private transport: SearchTransport | undefined
   private readonly listeners = new Set<() => void>()
   private status: SearchStatus = {
     phase: "downloading",
@@ -67,14 +71,26 @@ export class SearchSession {
   }
   private nextGeneration = 0
   private staging: number | null = null
-  private activeEdition: Region | undefined
   private queryId = 0
   private loadRequest: LoadRequest | undefined
   private disposed = false
 
   constructor(factory: SearchTransportFactory = browserTransport) {
     this.factory = factory
-    this.transport = factory(this.receive, this.failed)
+    this.transport = this.connect()
+  }
+
+  /** Events of a Worker that was already replaced or failed must not touch the current status. */
+  private connect(): SearchTransport {
+    const transport = this.factory(
+      (event) => {
+        if (this.transport === transport) this.receive(event)
+      },
+      () => {
+        if (this.transport === transport) this.failed()
+      },
+    )
+    return transport
   }
 
   getStatus = (): SearchStatus => this.status
@@ -98,11 +114,17 @@ export class SearchSession {
     this.staging = generation
     this.loadRequest = { kind: "load", generation, base, edition, entry }
     const { error: _error, progress: _progress, ...previous } = this.status
+    const active = previous.generation !== null
     this.publish({
       ...previous,
-      phase: this.status.generation === null ? "downloading" : "ready",
-      updating: this.status.generation !== null,
+      phase: active ? "ready" : "downloading",
+      updating: active,
+      // An earlier failure without an index is not the answer to the input kept for this load.
+      ...(active ? {} : { result: { phase: "pending" as const } }),
     })
+    // Replacing a failed Worker here rather than in its error handler means a Worker that fails
+    // while starting cannot respawn in a loop.
+    this.transport ??= this.connect()
     this.transport.send(this.loadRequest)
   }
 
@@ -121,12 +143,12 @@ export class SearchSession {
   }
 
   private dispatch(): void {
-    const { generation, lastInput } = this.status
-    if (generation !== null && lastInput && lastInput.edition === this.activeEdition)
-      this.transport.send({ kind: "search", generation, queryId: this.queryId, query: lastInput })
+    const { generation, edition, lastInput } = this.status
+    if (generation !== null && lastInput && lastInput.edition === edition)
+      this.transport?.send({ kind: "search", generation, queryId: this.queryId, query: lastInput })
   }
 
-  private receive = (event: SearchEvent): void => {
+  private receive(event: SearchEvent): void {
     if (this.disposed) return
     if (event.kind === "result" || (event.kind === "error" && event.queryId !== undefined)) {
       if (event.generation !== this.status.generation || event.queryId !== this.queryId) return
@@ -144,27 +166,35 @@ export class SearchSession {
       })
       return
     }
+    if (event.kind === "ready") {
+      // The Worker activates every generation it finishes, even one whose ready crossed a cancel or
+      // newer load, and drops queries for any other generation, so the session follows it.
+      if (this.status.generation !== null && event.generation <= this.status.generation) return
+      if (event.generation === this.staging) this.staging = null
+      const { progress } = this.status
+      this.queryId += 1
+      this.publish({
+        phase: "ready",
+        generation: event.generation,
+        edition: event.edition,
+        lastInput: this.status.lastInput,
+        result: { phase: "pending" },
+        updating: this.staging !== null,
+        ...(this.staging !== null && progress ? { progress } : {}),
+        dataVersion: event.dataVersion,
+        manifestHash: event.manifestHash,
+        metrics: event.metrics,
+      })
+      this.dispatch()
+      return
+    }
     if (event.generation !== this.staging) return
     if (event.kind === "progress")
       this.publish({
         ...this.status,
         progress: { done: event.done, total: event.total, persistent: event.persistent },
       })
-    else if (event.kind === "ready") {
-      this.staging = null
-      this.activeEdition = this.loadRequest?.edition
-      this.queryId += 1
-      this.publish({
-        phase: "ready",
-        generation: event.generation,
-        lastInput: this.status.lastInput,
-        result: { phase: "pending" },
-        updating: false,
-        dataVersion: event.dataVersion,
-        metrics: event.metrics,
-      })
-      this.dispatch()
-    } else {
+    else {
       this.staging = null
       this.publish({
         ...this.status,
@@ -178,8 +208,9 @@ export class SearchSession {
     }
   }
 
-  private failed = (): void => {
-    this.transport.dispose()
+  private failed(): void {
+    this.transport?.dispose()
+    this.transport = undefined
     this.staging = null
     this.queryId += 1
     this.publish({
@@ -194,7 +225,7 @@ export class SearchSession {
 
   cancel(): void {
     if (this.staging === null || this.disposed) return
-    this.transport.send({ kind: "cancel", generation: this.staging })
+    this.transport?.send({ kind: "cancel", generation: this.staging })
     this.staging = null
     this.publish({
       ...this.status,
@@ -209,16 +240,12 @@ export class SearchSession {
 
   retry(): void {
     if (!this.loadRequest || this.disposed) return
-    if (this.status.generation === null) {
-      this.transport.dispose()
-      this.transport = this.factory(this.receive, this.failed)
-    }
     this.load(this.loadRequest.base, this.loadRequest.edition, this.loadRequest.entry)
   }
 
   dispose(): void {
     this.disposed = true
-    this.transport.dispose()
+    this.transport?.dispose()
     this.listeners.clear()
   }
 }
