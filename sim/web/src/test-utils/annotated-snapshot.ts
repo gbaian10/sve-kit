@@ -10,8 +10,8 @@ import {
 const canonical = (value: Parameters<typeof canonicalText>[0]) =>
   new TextEncoder().encode(canonicalText(value))
 
-export async function annotatedOrigin() {
-  const fixture = objectValue(fixtureJson)
+export async function annotatedOrigin(input: JsonObject = fixtureJson) {
+  const fixture = objectValue(input)
   const manifest = objectValue(fixture["manifest"])
   const payloads = new Map(
     Object.entries(objectValue(fixture["payloads"])).map(([key, value]) => [key, canonical(value)]),
