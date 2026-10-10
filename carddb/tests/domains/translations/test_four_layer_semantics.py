@@ -4,6 +4,11 @@ from dataclasses import replace
 
 import pytest
 
+from sve_carddb.contracts.four_layer import Frame
+from sve_carddb.core.json import canonical
+from sve_carddb.domains.catalog.models import Term as VocabularyTerm
+from sve_carddb.domains.products.models import LocalizedText
+from sve_carddb.domains.text_observations.vocabulary import Binding, Vocabulary
 from sve_carddb.domains.translations.four_layer_classification import Term
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 from sve_carddb.domains.translations.four_layer_semantics import CardContext
@@ -167,3 +172,80 @@ def test_pure_reminder_requires_registered_complete_grammar_and_matching_anchor(
         assert found.semantics is not None
         assert found.semantics.key == "pure_reminder.v1"
         assert found.semantics.projection.projection_kind == "none"
+
+
+@pytest.mark.parametrize("mutation", ["key", "role", "projection", "scope"])
+def test_n0_cannot_publish_an_unregistered_or_mismatched_semantic_descriptor(
+    mutation: str,
+) -> None:
+    raw = "{進化}{コスト９９}:これは進化する。"
+    field = normalize_source(raw, source(raw))
+    frame, _ = (
+        classifier()
+        .recognize(raw, field.source, field.parts[0], context=context(raw))
+        .bind(field.source, field.parts[0])
+    )
+    data = frame.model_dump(mode="json")
+    if mutation == "key":
+        data["semantic_variant"]["key"] = "unregistered.v1"
+        data["projection"]["discriminator"] = "unregistered.v1"
+    elif mutation == "role":
+        data["role"] = "reminder"
+    elif mutation == "projection":
+        data["projection"]["projection_kind"] = "card_field"
+    else:
+        data["projection"]["scopes"][0]["id"] = "other_scope"
+    with pytest.raises(ValueError, match="N0"):
+        Frame.model_validate_json(canonical(data))
+
+
+@pytest.mark.parametrize("missing", [None, "name", "trait", "class", "kind"])
+def test_token_header_requires_every_declared_field_in_its_exact_catalog(
+    missing: str | None,
+) -> None:
+    raw = (
+        "『仮トークン😀』{仮クラス}仮種族・フォロワー{コスト２}{攻撃力}３/{体力}４仮。"
+    )
+    field = normalize_source(raw, source(raw, "section"))
+    terms = {
+        "name": Term("term:name.synthetic", "card_name", "仮トークン😀"),
+        "trait": Term("term:trait.synthetic", "trait", "仮種族"),
+    }
+    engine = classifier(tuple(t for k, t in terms.items() if k != missing))
+    vocabulary = {
+        "class": Binding(region="jp", kind="class", raw="仮クラス", code="synthetic"),
+        "kind": Binding(region="jp", kind="type", raw="フォロワー", code="follower"),
+    }
+    bindings = tuple(b for k, b in vocabulary.items() if k != missing)
+    engine.references.vocabulary = Vocabulary(
+        bindings=bindings,
+        terms=tuple(
+            VocabularyTerm(
+                kind=b.kind, code=b.code, label=LocalizedText(lang="ja", text=b.raw)
+            )
+            for b in bindings
+        ),
+    )
+    part = next(p for p in field.parts if p.source_span.role == "token_header")
+    found = engine.recognize(raw, field.source, part, field=field)
+    if missing is not None:
+        assert found.issues
+        assert found.semantics is None
+        with pytest.raises(ValueError, match="Unresolved source leaves"):
+            found.bind(field.source, part)
+        return
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.semantic_variant.key == "token_header.v1"
+    assert frame.projection.projection_kind == "card_field"
+    assert [s.role for s in frame.leaf_schema.slots] == [
+        "declared_name",
+        "declared_class",
+        "declared_trait",
+        "declared_kind",
+        "cost_value",
+        "stat_value",
+        "stat_value",
+    ]
+    assert all(o.source_unit is None for o in binding.occurrences)

@@ -67,6 +67,19 @@ REFERENCE_CODES = {
     },
     ("LiteralLayout", "layout"): "layout.whitespace.v1",
 }
+SEMANTIC_CONSTRUCTIONS = {
+    "metadata.name.v1": ("name", "none", 0),
+    "metadata.label.v1": ("label", "none", 0),
+    "metadata.layout.v1": ("layout", "none", 0),
+    "card_keywords.v1": ("body", "card_field", 0),
+    "evolve_entry.v1": ("body", "ability_body", 1),
+    "feed_entry.v1": ("body", "ability_body", 1),
+    "ride_entry.v1": ("body", "ability_body", 1),
+    "evolve_feed_entries.v1": ("body", "ability_body", 2),
+    "evolve_ride_entries.v1": ("body", "ability_body", 2),
+    "token_header.v1": ("token_header", "card_field", 0),
+    "pure_reminder.v1": ("reminder", "none", 0),
+}
 
 
 def verify_slot(slot: LeafSlot) -> None:
@@ -105,3 +118,18 @@ def verify_frame(frame: Frame) -> None:
         verify_slot(slot)
     if frame.projection.imports or frame.projection.exports:
         raise ValueError("N0 cannot produce cross-frame ports")
+    if frame.semantic_variant.state == "resolved":
+        key = frame.semantic_variant.key
+        descriptor = SEMANTIC_CONSTRUCTIONS.get(key) if key is not None else None
+        if descriptor is None:
+            raise ValueError("Unregistered N0 semantic construction")
+        role, kind, abilities = descriptor
+        projection = frame.projection
+        if (
+            frame.role != role
+            or projection.projection_kind != kind
+            or projection.discriminator != key
+            or tuple((s.id, s.parent, s.kind) for s in projection.scopes)
+            != tuple((f"ability_{i}", None, "ability") for i in range(abilities))
+        ):
+            raise ValueError("N0 projection differs from its registered construction")
