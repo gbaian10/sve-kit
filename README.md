@@ -32,6 +32,7 @@ sve-kit/
 ├── AGENTS.md              Project architecture and data rules (for AI coding agents)
 ├── CONTRIBUTING.md        Language and commit conventions, setup, coding standards
 ├── CLAUDE.md              Imports AGENTS.md for Claude Code
+├── GLOSSARY.md            Project terms and names to avoid
 ├── .cz.toml               Commit message rules (commitizen, gitmoji)
 ├── .pre-commit-config.yaml
 │
@@ -61,7 +62,7 @@ sve-kit/
 │   ├── scenario-runner/   Engine-neutral scenario runner
 │   └── web/               Web client (React / TypeScript)
 │
-└── docs/                  ADRs (docs/adr), DSL specs (docs/dsl), terminology and schema
+└── docs/                  ADRs (docs/adr), DSL specs (docs/dsl) and schema
 ```
 
 The carddb package groups data domains under `sve_carddb.domains`; translation

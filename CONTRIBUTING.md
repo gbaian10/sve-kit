@@ -134,7 +134,7 @@ AI-generated code tends to over-comment. Keep comments few and short:
 
 ### Documentation
 
-- Use [the project glossary](docs/terminology.md) for project-specific names. Resolve
+- Use [the project glossary](GLOSSARY.md) for project-specific names. Resolve
   new or renamed terms there first: one or two sentences, rejected aliases, no
   implementation details; group related terms naturally.
 - Write an ADR only for a hard-to-reverse decision with a surprising rationale and
