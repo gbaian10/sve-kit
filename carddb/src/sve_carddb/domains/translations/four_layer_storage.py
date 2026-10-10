@@ -415,5 +415,9 @@ def read_render_occurrences(
         result.append(leaf)
     rows = tuple(result)
     if expected is not None:
-        expected.verify_occurrences(rows)
+        # A shared render retains separate source links for every exact owner.
+        binding_ids = {leaf.binding_id for leaf in expected.leaves}
+        expected.verify_occurrences(
+            tuple(row for row in rows if row.binding_id in binding_ids)
+        )
     return rows
