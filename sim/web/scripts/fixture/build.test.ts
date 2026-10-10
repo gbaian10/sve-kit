@@ -6,9 +6,9 @@ import {
   type JsonObject,
   parseStrict,
   stringValue,
-} from "../../src/data/format-v1/json"
-import { readSnapshot } from "../../src/data/format-v1/reader"
-import { hex } from "../../src/data/format-v1/sha256"
+} from "../../src/data/format-v3/json"
+import { readSnapshot } from "../../src/data/format-v3/reader"
+import { hex } from "../../src/data/format-v3/sha256"
 import { buildSnapshot, canonicalSize } from "./build"
 import { CARDS } from "./cards"
 

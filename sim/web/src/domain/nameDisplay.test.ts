@@ -54,8 +54,8 @@ describe("current translation quality", () => {
   const low: NameSource = {
     ...jp,
     translationQuality: {
-      "zh-Hant": { lowConfidence: true, sourceUnchecked: false },
-      en: { lowConfidence: false, sourceUnchecked: true },
+      "zh-Hant": { lowConfidence: true, jpSource: false },
+      en: { lowConfidence: false, jpSource: true },
     },
   }
   it("shows a low-confidence translation with its exact original instead of falling back", () => {
@@ -70,7 +70,7 @@ describe("current translation quality", () => {
     expect(displayName(low, "en", "translated")).toEqual({
       primary: { text: "Prototype Fairy", lang: "en" },
       missingTranslation: false,
-      sourceUnchecked: true,
+      jpSource: true,
     })
     expect(displayName(low, "zh-TW", "both")).toMatchObject({ lowConfidence: true })
   })

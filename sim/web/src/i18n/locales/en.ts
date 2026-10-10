@@ -91,7 +91,7 @@ export default {
   },
   card: {
     translationProofreading: "Translation awaiting proofreading",
-    sourceUnchecked: "Japanese and English wording unchecked",
+    jpSource: "Translated from Japanese source",
     wordingPending: "Wording pending",
     candidatesUnselected: "Multiple candidates; none selected yet",
     provisionalWording: "Provisional display by known release date, not yet adopted",

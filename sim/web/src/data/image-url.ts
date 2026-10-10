@@ -1,7 +1,7 @@
-import type { Row } from "./format-v1/decode"
-import { SnapshotError } from "./format-v1/errors"
-import { arrayValue, integerValue, objectValue, stringValue } from "./format-v1/json"
-import { validateMedia } from "./format-v1/media"
+import type { Row } from "./format-v3/decode"
+import { SnapshotError } from "./format-v3/errors"
+import { arrayValue, integerValue, objectValue, stringValue } from "./format-v3/json"
+import { validateMedia } from "./format-v3/media"
 import type { ImageSource } from "./images"
 
 const SIZES = new Set(["card_s", "card_m", "card_l", "art_s", "art_m"])

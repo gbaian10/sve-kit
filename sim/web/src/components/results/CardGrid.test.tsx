@@ -48,9 +48,9 @@ describe("visible wording label in card results", () => {
 
 describe("visible current translation quality", () => {
   it.each([
-    ["zh-TW", "待校對", "日英文字尚未核對"],
-    ["ja", "翻訳要校正", "日英の原文は未照合"],
-    ["en", "Translation awaiting proofreading", "Japanese and English wording unchecked"],
+    ["zh-TW", "待校對", "依日文原文翻譯"],
+    ["ja", "翻訳要校正", "日本語原文からの訳"],
+    ["en", "Translation awaiting proofreading", "Translated from Japanese source"],
   ] as const)(
     "shows independent notices and the original in %s",
     async (language, quality, source) => {
@@ -62,7 +62,7 @@ describe("visible current translation quality", () => {
           secondary: { lang: "ja" as const, text: "Synthetic original" },
           missingTranslation: false,
           lowConfidence: true,
-          sourceUnchecked: true,
+          jpSource: true,
         },
       }
       await renderInRouter(<CardGrid cells={[translated]} images={undefined} onOpen={vi.fn()} />, {
@@ -80,14 +80,12 @@ describe("visible current translation quality", () => {
     const value = cell(false)
     await renderInRouter(
       <CardGrid
-        cells={[
-          { ...value, name: { ...value.name, lowConfidence: false, sourceUnchecked: false } },
-        ]}
+        cells={[{ ...value, name: { ...value.name, lowConfidence: false, jpSource: false } }]}
         images={undefined}
         onOpen={vi.fn()}
       />,
     )
     expect(screen.queryByText("待校對")).not.toBeInTheDocument()
-    expect(screen.queryByText("日英文字尚未核對")).not.toBeInTheDocument()
+    expect(screen.queryByText("依日文原文翻譯")).not.toBeInTheDocument()
   })
 })

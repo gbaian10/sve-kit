@@ -130,10 +130,10 @@ export function SuggestList({
                     {row.name.primary.text}
                   </span>
                   <span className="truncate text-12 text-text-3">{details.join(" · ")}</span>
-                  {(row.name.lowConfidence || row.name.sourceUnchecked) && (
+                  {(row.name.lowConfidence || row.name.jpSource) && (
                     <span className="flex flex-wrap gap-x-2 text-11 text-text-3">
                       {row.name.lowConfidence && <span>{t("card.translationProofreading")}</span>}
-                      {row.name.sourceUnchecked && <span>{t("card.sourceUnchecked")}</span>}
+                      {row.name.jpSource && <span>{t("card.jpSource")}</span>}
                     </span>
                   )}
                 </span>

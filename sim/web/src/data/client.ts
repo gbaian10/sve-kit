@@ -1,6 +1,6 @@
 import { fetchBytes, type Fetcher, NetworkError } from "./cdn"
-import { createDecoder } from "./format-v1/decoder"
-import { SnapshotError } from "./format-v1/errors"
+import { createDecoder } from "./format-v3/decoder"
+import { SnapshotError } from "./format-v3/errors"
 import {
   arrayValue,
   canonicalText,
@@ -9,12 +9,12 @@ import {
   objectValue,
   parseStrict,
   stringValue,
-} from "./format-v1/json"
-import { validateMedia, validateMediaIdentities } from "./format-v1/media"
-import { validatePlacement } from "./format-v1/placement"
-import { type Files, findBase, type Fragment, isCompatible, joinDetail } from "./format-v1/reader"
-import { validate } from "./format-v1/schema"
-import { validateDigitalLinks, validateImageRows } from "./format-v1/semantics"
+} from "./format-v3/json"
+import { validateMedia, validateMediaIdentities } from "./format-v3/media"
+import { validatePlacement } from "./format-v3/placement"
+import { type Files, findBase, type Fragment, isCompatible, joinDetail } from "./format-v3/reader"
+import { validate } from "./format-v3/schema"
+import { validateDigitalLinks, validateImageRows } from "./format-v3/semantics"
 import { transferDigest } from "./integrity"
 import { MetadataBytes, type MetadataProgress } from "./metadata"
 import { requestQueue } from "./request-queue"
@@ -96,7 +96,7 @@ function failureOf(error: unknown): LoadFailure {
 }
 
 function validateIndex2(index: JsonObject): void {
-  validate("Index", index, [], "2.0.0")
+  validate("Index", index, [], "3.0.0")
   const entries = [
     objectValue(index["current"]),
     ...(index["previous"] === null ? [] : [objectValue(index["previous"])]),

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { type Fetcher } from "./cdn"
 import { createSnapshotClient, type SnapshotStatus } from "./client"
-import { type JsonObject, parseStrict, stringValue } from "./format-v1/json"
+import { type JsonObject, parseStrict, stringValue } from "./format-v3/json"
 
 const stubImage = ({ width, height, seed }: { width: number; height: number; seed: number }) =>
   Promise.resolve(
@@ -97,7 +97,7 @@ describe("createSnapshotClient", () => {
       new TextEncoder().encode(
         JSON.stringify({
           ...index,
-          current: { ...(index["current"] as JsonObject), format_version: "3.0.0" },
+          current: { ...(index["current"] as JsonObject), format_version: "4.0.0" },
           previous: null,
         }),
       ),

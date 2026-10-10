@@ -88,7 +88,7 @@ const zhTW = {
   },
   card: {
     translationProofreading: "待校對",
-    sourceUnchecked: "日英文字尚未核對",
+    jpSource: "依日文原文翻譯",
     wordingPending: "卡文未定",
     candidatesUnselected: "有多個候選，尚未選定",
     provisionalWording: "依已知發售日暫顯，尚未採納",

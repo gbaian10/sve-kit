@@ -22,15 +22,15 @@ const row: SuggestRow = {
     secondary: { lang: "ja", text: "Synthetic original" },
     missingTranslation: false,
     lowConfidence: true,
-    sourceUnchecked: true,
+    jpSource: true,
   },
 }
 
 describe("current translation notices in suggestions", () => {
   it.each([
-    ["zh-TW", "待校對", "日英文字尚未核對"],
-    ["ja", "翻訳要校正", "日英の原文は未照合"],
-    ["en", "Translation awaiting proofreading", "Japanese and English wording unchecked"],
+    ["zh-TW", "待校對", "依日文原文翻譯"],
+    ["ja", "翻訳要校正", "日本語原文からの訳"],
+    ["en", "Translation awaiting proofreading", "Translated from Japanese source"],
   ] as const)(
     "keeps the quality and source notices visible in %s",
     async (language, quality, source) => {

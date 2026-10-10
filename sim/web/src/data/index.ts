@@ -7,7 +7,7 @@ export {
   type SnapshotClient,
   type SnapshotStatus,
 } from "./client"
-export type { Row } from "./format-v1/decode"
+export type { Row } from "./format-v3/decode"
 export { registerImageCache } from "./image-sw-registration"
 export { type ImageFace, type ImageIndex, loadImagePage } from "./images"
 export {

@@ -90,7 +90,7 @@ export default {
   },
   card: {
     translationProofreading: "翻訳要校正",
-    sourceUnchecked: "日英の原文は未照合",
+    jpSource: "日本語原文からの訳",
     wordingPending: "表記未定",
     candidatesUnselected: "複数の候補があり、まだ選定されていません",
     provisionalWording: "既知の発売日に基づく仮表示（未採用）",

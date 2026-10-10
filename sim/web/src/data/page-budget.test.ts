@@ -2,9 +2,9 @@
 import { describe, expect, it, vi } from "vitest"
 
 import type { LoadedSnapshot, SnapshotClient } from "./client"
-import type { JsonObject } from "./format-v1/json"
-import type { Fragment } from "./format-v1/reader"
-import { bucket } from "./format-v1/sha256"
+import type { JsonObject } from "./format-v3/json"
+import type { Fragment } from "./format-v3/reader"
+import { bucket } from "./format-v3/sha256"
 import { loadImagePage } from "./images"
 
 function page(extra: number) {
@@ -73,7 +73,7 @@ function page(extra: number) {
   }
   // The page API consumes an already-validated client, independently of byte decoding.
   const snapshot = {
-    manifest: { format_version: "2.0.0", partitioning: { bucket_count: 64 } },
+    manifest: { format_version: "3.0.0", partitioning: { bucket_count: 64 } },
     bootstrap,
     files,
   } as unknown as LoadedSnapshot

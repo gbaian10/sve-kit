@@ -14,7 +14,7 @@ export interface NameSource {
       TextLang,
       {
         readonly lowConfidence: boolean
-        readonly sourceUnchecked: boolean
+        readonly jpSource: boolean
       }
     >
   >
@@ -31,7 +31,7 @@ export interface DisplayedName {
   /** True when the preference asked for a translation the snapshot does not have. */
   readonly missingTranslation: boolean
   readonly lowConfidence?: boolean
-  readonly sourceUnchecked?: boolean
+  readonly jpSource?: boolean
 }
 
 export const UI_TEXT_LANG: Record<UiLanguage, TextLang> = { "zh-TW": "zh-Hant", ja: "ja", en: "en" }
@@ -54,7 +54,7 @@ export function displayName(
   const quality = source.translationQuality?.[lang]
   const notices = {
     ...(quality?.lowConfidence ? { lowConfidence: true } : {}),
-    ...(quality?.sourceUnchecked ? { sourceUnchecked: true } : {}),
+    ...(quality?.jpSource ? { jpSource: true } : {}),
   }
   if (display === "translated")
     return {
