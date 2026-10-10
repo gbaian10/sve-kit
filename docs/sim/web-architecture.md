@@ -3,7 +3,7 @@
 引用與授權：商品例與卡文渲染記號中沿用的官方名稱、原文片段不在本專案授權內；
 介面、路由與渲染設計屬專案內容。見[文件引用說明](../quotations.md)。
 
-版本：**v1**，2026-09-28 定案。用語依 [`docs/terminology.md`](../terminology.md)；
+版本：**v1**，2026-09-28 定案。用語依 [`GLOSSARY.md`](../../GLOSSARY.md)；
 資料契約以 [`docs/schema/export/snapshot-format.md`](../schema/export/snapshot-format.md) 為準。
 共用尺寸見 §7、§8；色彩值見進版控的 [`tokens.css`](../../sim/web/src/styles/tokens.css)。
 

@@ -13,4 +13,4 @@ pages use. Do not reuse them outside sve-kit.
 
 The official site has no icons for keyword abilities such as 守護 or 疾走; card text renders those
 as text chips, never as drawn icons. Class icon file names use the project's class codes
-(`forest sword rune dragon abyss haven neutral`, see `docs/terminology.md`).
+(`forest sword rune dragon abyss haven neutral`, see `GLOSSARY.md`).

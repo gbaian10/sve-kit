@@ -3,7 +3,7 @@
 範例中的官方卡名、商品名、日英原始詞彙與卡文片段為來源引用，不在本專案授權內；
 資料結構、合成範例與驗證規則屬專案設計。見[文件引用說明](../quotations.md)。
 
-版本：**v1**，2026-09-28 定案。用語依 [`docs/terminology.md`](../terminology.md)。
+版本：**v1**，2026-09-28 定案。用語依 [`GLOSSARY.md`](../../GLOSSARY.md)。
 
 這些文件描述資料契約；公開 JSON Schema、獨立 reader 與共用合成樣本的入口見[機器契約](export/snapshot-contract.md)。建置與發布閘門的規格驗收和傳輸形狀驗證分開。
 

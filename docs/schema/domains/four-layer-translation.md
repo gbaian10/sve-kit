@@ -2,7 +2,7 @@
 
 本文件是 [ADR-0016](../../adr/0016-four-layer-translation.md) 的共用契約；#498 已實作 N0 的 reader、DDL、來源 binding 與渲染。
 區域／階段葉、可選範圍、省略持有者與 NC 全名等價等 N1 行為由 #380／#499 承接；本文不是 DSL 語法。
-用語依[術語表](../../terminology.md#四層翻譯)；來源選用依[翻譯契約](translation-contract.md)。
+用語依[術語表](../../../GLOSSARY.md#四層翻譯)；來源選用依[翻譯契約](translation-contract.md)。
 本契約取代固定整行模板的參數／target 模型，保留整行粒度與必要的來源完整性檢查。
 公開欄序、版本與 reader 拒絕規則由 [#496](https://github.com/gbaian10/sve-kit/issues/496) 定義；
 N0 實作及測試已由 [#498](https://github.com/gbaian10/sve-kit/issues/498) 完成，整庫語義與中文重建由 [#499](https://github.com/gbaian10/sve-kit/issues/499) 承接。
