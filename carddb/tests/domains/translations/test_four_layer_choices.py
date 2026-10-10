@@ -40,3 +40,26 @@ def test_post_option_replacement_count_is_bound_to_the_original_choice(
         issues=(),
     )
     assert choice_alternative(raw, hint) is expected
+
+
+@pytest.mark.parametrize("keyword", ["ネクロチャージ_７", "NC_７"])
+def test_pre_option_keyword_replacement_preserves_the_intro_scope(keyword: str) -> None:
+    raw = (
+        f"下記から１つチョイスする。【{keyword}】代わりに２つまで。【１】仮。【２】別。"
+    )
+    start = raw.index("代わりに") + len("代わりに")
+    span = Range(start=start, end=start + 1)
+    hint = Hint(
+        name="count",
+        occurrence=span,
+        source_segments=(span,),
+        transformation="fullwidth_to_ascii",
+        semantic_role="numeric",
+        numeric_rule=None,
+        type="uint",
+        reference_kind=None,
+        value=2,
+        target=None,
+        issues=(),
+    )
+    assert choice_alternative(raw, hint) is (keyword == "ネクロチャージ_７")

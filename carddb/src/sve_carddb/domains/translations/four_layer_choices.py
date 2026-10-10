@@ -79,17 +79,17 @@ def choice_alternative(raw: str, hint: Hint) -> bool:
     first_label = scope.intro.end() + scope.labels[0].start()
     last_label = scope.intro.end() + scope.labels[-1].end()
     prefix = raw[scope.intro.end() : span.start]
+    keyword_replacement = (
+        re.search(
+            r"(?:^|[。\n])【ネクロチャージ(?:[ 　]*|_)[0-9０-９]+】代わりに$",
+            prefix,
+        )
+        is not None
+    )
     return (
         (
             scope.intro.end() <= span.start < first_label
-            and prefix.endswith("なら、代わりに")
+            and (prefix.endswith("なら、代わりに") or keyword_replacement)
         )
-        or (
-            last_label <= span.start < scope.end
-            and re.search(
-                r"(?:^|[。\n])【ネクロチャージ(?:[ 　]*|_)[0-9０-９]+】代わりに$",
-                prefix,
-            )
-            is not None
-        )
+        or (last_label <= span.start < scope.end and keyword_replacement)
     ) and (re.match(r"^つまで[。:：]", raw[span.end : scope.end]) is not None)

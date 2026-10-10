@@ -9,6 +9,51 @@ from sve_carddb.domains.translations.four_layer_normalizer import normalize_sour
 from .test_four_layer_classification import classifier, source
 
 
+def test_explicit_counter_carrier_union_keeps_count_and_threshold_separate() -> None:
+    raw = "仮。これか自分のEXエリアのカード２枚の情熱カウンターが３個以上なら、仮。"
+    engine = classifier(extra=("named_counter_threshold",))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert [s.role for s in frame.leaf_schema.slots] == ["count", "threshold"]
+    assert [o.source_unit for o in binding.occurrences] == ["枚", "個"]
+
+
+def test_named_union_inherits_only_the_complete_deck_look_source() -> None:
+    raw = (
+        "仮。自分のデッキの上X枚を見る。その中から、"
+        "「これと同名を除く仮族・カード」と『仮名』それぞれ２枚まで公開して手札に加えてよい。"
+    )
+    engine = classifier((Term("term:name.synthetic_union", "card_name", "仮名"),))
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[-1].role == "selection_count"
+    assert binding.occurrences[-1].source_unit == "枚"
+    bad = raw.replace("見る。", "不明する。")
+    bad_field = normalize_source(bad, source(bad))
+    assert engine.recognize(bad, bad_field.source, bad_field.parts[0]).issues
+
+
+def test_sum_constraint_keeps_the_explicit_amulet_trait_and_source_zone() -> None:
+    raw = "仮。自分のデッキから土の印・アミュレットを元のコストの合計がX以下になるように２枚まで探し、EXエリアに置く。"
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[0].role == "selection_count"
+    assert binding.occurrences[0].source_unit == "枚"
+
+
 @pytest.mark.parametrize(
     ("raw", "role"),
     [

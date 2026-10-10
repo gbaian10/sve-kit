@@ -150,7 +150,7 @@ _FILTER = (
     r"(?:(?:元の)?(?:コスト|攻撃力|体力)(?:N|X)(?:以下|以上)?の|"
     r"他の|表向きの|裏向きの|(?:進化前|進化後|エボルヴ|アドバンス)(?:の)?|(?:アクト|レスト|スタンド)状態の|これと同名を除く(?:・)?|"
     r"(?:【[^【】]+】(?:や|か)?)+を持つ|トリガーを持つ|【[^【】]+】状態の|カード名に『X』を含む|カード名に「[^「」]+」を含む|"
-    r"それぞれカード名が異なる|トークンでない|消滅させたフォロワーと同名の|(?:これ|それ)によって破壊した|"
+    r"それぞれカード名が異なる|トークンでない|土の印・|消滅させたフォロワーと同名の|(?:これ|それ)によって破壊した|"
     r"\{[^{}]+\}(?:を持つ|である|でない|の|・)?|" + _TRAIT + r")*"
 )
 _ONSET = r"(?:^|[、。:：}】（(]|か|と|は|が|として)"
@@ -224,6 +224,10 @@ _LOOK_SELECTION = re.compile(
     + r"(?P<kind>"
     + _SET_KIND
     + r")?(?(quote)」)(?:を|が)?$"
+)
+_LOOK_NAMED_UNION = re.compile(
+    _ONSET + r"(?:自分|相手)のデッキの上(?:から)?(?:N|X)枚(?:を)?見る。"
+    r"その中から、?「" + _FILTER + r"カード」と『X』$"
 )
 _FIELD_FILTER = re.compile(
     r"^(?:の)?(?:(?:自分|相手)の(?:(?:場|墓場|手札|デッキ)の)?|(?:場|墓場|手札|デッキ)の(?:(?:自分|相手)の)?)?"
@@ -462,6 +466,10 @@ def _zone_context(before: str) -> CountContext | None:
             ("deck",),
             _ALL_TOKENS,
             "cardinality",
+        )
+    if _LOOK_NAMED_UNION.search(before):
+        return CountContext(
+            "select.unrestricted.v1", "card", ("deck",), _ALL_TOKENS, "cardinality"
         )
     match = _COUNTED.search(before)
     return _counted_context(match) if match is not None else None

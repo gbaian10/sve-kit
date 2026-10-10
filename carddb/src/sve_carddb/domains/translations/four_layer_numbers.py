@@ -622,7 +622,7 @@ def _counter_number(value: int, before: str, after: str) -> Number | None:
     ) or (
         re.search(r"これか(?:自分|相手)のEXエリアのカード$", before)
         and re.match(
-            r"^枚の" + _COUNTER + r"N個以上なら" + _END,
+            r"^枚の" + _COUNTER + r"がN個以上なら" + _END,
             after,
         )
     ):
