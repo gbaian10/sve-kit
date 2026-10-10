@@ -407,11 +407,41 @@ def _action_number(value: int, before: str, after: str) -> Number | None:
     ):
         return Number("Nat", "count", value, "枚")
     return (
-        _movement_number(value, after)
+        _event_count_number(value, before, after)
+        or _movement_number(value, after)
         or _payment_number(value, before, after)
         or _repetition_number(value, before, after)
         or _field_number(value, before, after)
     )
+
+
+def _event_count_number(value: int, before: str, after: str) -> Number | None:
+    counted = count_context(before)
+    if (
+        counted is not None
+        and (
+            match := re.match(
+                r"^(?P<unit>枚|体|つ)以上に(?:能力)?ダメージを与えたとき" + _END, after
+            )
+        )
+        and source_unit(counted, match["unit"]).merge_allowed
+    ):
+        return Number("Nat", "threshold", value, match["unit"])
+    if (
+        counted is not None
+        and (match := re.match(r"^(?P<unit>体|つ)に(?:N|X)ダメージ" + _END, after))
+        and source_unit(counted, match["unit"]).merge_allowed
+    ):
+        return _quantity("selection_count", value, match["unit"])
+    if re.search(r"(?:自分|相手)が手札を$", before) and re.match(
+        r"^枚以上捨てたとき" + _END, after
+    ):
+        return Number("Nat", "threshold", value, "枚")
+    if re.search(r"(?:自分|相手)のデッキ$", before) and re.match(
+        r"^枚が墓場に(?:置かれた|送られた)とき" + _END, after
+    ):
+        return Number("Nat", "count", value, "枚")
+    return None
 
 
 def _movement_number(value: int, after: str) -> Number | None:

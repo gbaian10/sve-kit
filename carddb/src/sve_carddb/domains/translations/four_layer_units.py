@@ -176,6 +176,13 @@ _IMPLICIT_FIELD = re.compile(
     + r"(?P<kind>フォロワー|アミュレット)(?(quote)」)(?:を|が)?$"
 )
 _OTHER_FIELD = re.compile(_ONSET + r"他の(?P<kind>フォロワー|アミュレット)(?:を|が)?$")
+_EVENT_FIELD = re.compile(
+    _ONSET
+    + r"(?:このターン中に)?場に出た(?:(?:自分|相手)の)?"
+    + _FILTER
+    + r"(?P<kind>フォロワー|アミュレット)(?:を|が)?$"
+)
+_QUOTED_SET = re.compile(r"「(?P<np>[^「」。:：]+)」(?:を|が)?$")
 _LEADER = re.compile(r"(?:自分|相手)のリーダー(?:を|が)?$")
 _PLAYER = re.compile(r"(?:自分|相手)プレイヤー(?:を|が)?$")
 _COLLECTION = re.compile(
@@ -276,6 +283,8 @@ def compound_action(after: str, before: str) -> tuple[str, bool] | None:
 
 def count_context(before: str) -> CountContext | None:
     """A complete counted NP supplies its zone; the later destination is never inspected."""
+    if (quote := _QUOTED_SET.search(before)) and count_context(quote["np"]) is not None:
+        before = quote["np"]
     if before.endswith("それぞれ"):
         before = before.removesuffix("それぞれ").removesuffix("が")
     if constraint := _SET_CONSTRAINT.search(before):
@@ -286,7 +295,11 @@ def count_context(before: str) -> CountContext | None:
         return context
     if context := _zone_context(before):
         return context
-    if match := _IMPLICIT_FIELD.search(before) or _OTHER_FIELD.search(before):
+    if match := (
+        _IMPLICIT_FIELD.search(before)
+        or _OTHER_FIELD.search(before)
+        or _EVENT_FIELD.search(before)
+    ):
         return CountContext(
             "select.unrestricted.v1",
             _KINDS[match["kind"]],

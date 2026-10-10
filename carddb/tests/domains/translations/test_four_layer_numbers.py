@@ -29,6 +29,10 @@ def test_disjunct_counts_share_one_explicit_counted_set(np: str, unit: str) -> N
 @pytest.mark.parametrize(
     "raw",
     [
+        "仮。相手の場のフォロワー２枚以上に能力ダメージを与えたとき、仮。",
+        "仮。場に出た不明物２体にXダメージ。",
+        "仮。自分が手札を２枚以上捨てた仮、仮。",
+        "仮。「不明。自分の墓場のカード」２枚につき、仮。",
         "仮。自分の場のフォロワーが２体か３枚なら、仮。",
         "仮。自分の場の不明物が２体か３体なら、仮。",
         "仮。自分の場のフォロワーが２体。か３体なら、仮。",
@@ -117,6 +121,34 @@ def test_explicit_set_constraints_designations_and_ordinals(
     engine.verify(raw, field, part, frame, binding)
     assert frame.leaf_schema.slots[-1].role == role
     assert binding.occurrences[-1].source_unit == unit
+
+
+@pytest.mark.parametrize(
+    ("raw", "role"),
+    [
+        (
+            "仮。相手の場のフォロワー２体以上に能力ダメージを与えたとき、仮。",
+            "threshold",
+        ),
+        ("仮。自分が手札を２枚以上捨てたとき、仮。", "threshold"),
+        ("仮。相手のデッキ２枚が墓場に置かれたとき、仮。", "count"),
+        ("仮。場に出たフォロワー２体にXダメージ。", "selection_count"),
+        ("仮。「自分の墓場の仮族・カード」２枚につき、仮。", "group_divisor"),
+        (
+            "仮。このターン中に場に出た自分の他のフォロワー２体を選ぶ。",
+            "selection_count",
+        ),
+    ],
+)
+def test_complete_event_counts_keep_the_written_set(raw: str, role: str) -> None:
+    engine = classifier()
+    field = normalize_source(raw, source(raw))
+    part = field.parts[0]
+    found = engine.recognize(raw, field.source, part)
+    assert not found.issues
+    frame, binding = found.bind(field.source, part)
+    engine.verify(raw, field, part, frame, binding)
+    assert frame.leaf_schema.slots[-1].role == role
 
 
 @pytest.mark.parametrize(
