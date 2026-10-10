@@ -144,8 +144,8 @@ reader in `carddb/src/sve_carddb/export/`.
   cross-row rules JSON Schema cannot express. Every rejection is a `SnapshotError` with a fixed
   `code`; tests match codes, never message text.
 
-`v2-contract.test.ts` runs the shared schema, reader, index and image-URL vectors from
-`tests/fixtures/snapshot-contract/v2/`. The current golden manifest and payloads join into
+`v3-contract.test.ts` runs the shared schema, reader, index and image-URL vectors from
+`tests/fixtures/snapshot-contract/v3/`. The current golden manifest and payloads join into
 exactly `expected-logical.json`; text-all gives the same view. `contract.test.ts` covers
 additional transport errors (missing files, cycles and integrity failures), and
 `schema.test.ts` checks synthetic positive samples against standalone and live Ajv.

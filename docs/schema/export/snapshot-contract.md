@@ -1,32 +1,30 @@
 # 快照機器契約與共用樣本
 
-**狀態界線：** 本文既有套件資源與 reader 是 2.0.0。3.0.0 的新增／變更欄位定義於
-[public-annotation.schema.json](public-annotation.schema.json)，固定正反例為
-[public-annotation-cases.json](public-annotation-cases.json)，讀法及真實 reader 接線依[案例規格](public-annotation-cases.md)。
-這是可獨立驗證的元件 Schema，尚不是完整 3.0 snapshot Schema 或已啟用的 profile。
-[#498](https://github.com/gbaian10/sve-kit/issues/498) 須將其欄序、形狀及語義檢查整合到唯一套件 Schema／Python／TS reader，同步替換完整 golden；
-不可在執行期讀取 Markdown，亦不可把元件 Schema 驗過當作整份快照驗收。
+套件 Schema、Python reader 與 TS reader 使用唯一的 `3.0.0` profile，整合
+[公開 annotation 契約](public-annotation.md)的欄序、形狀、來源指標與語義檢查。
+[public-annotation.schema.json](public-annotation.schema.json)及
+[固定案例](public-annotation-cases.json)仍供指定邊界的元件驗證，完整快照以套件 Schema 與共用 golden 驗收。
+正常 authored 四層建置的完整切換及真實容量驗收仍由 [#498](https://github.com/gbaian10/sve-kit/issues/498) 負責。
 
-欄位語意依 [快照格式](snapshot-format.md)，傳輸與版本規則依 [傳輸契約](snapshot-transport.md)。機器資源位於 `carddb/src/sve_carddb/contracts/schema/v2/contract.schema.json`，隨 carddb wheel 打包；採 JSON Schema Draft 2020-12，識別為 `urn:sve-kit:snapshot:2.0.0`，所有 `$ref` 都在檔內。
+欄位語意依 [快照格式](snapshot-format.md)，傳輸與版本規則依 [傳輸契約](snapshot-transport.md)。
+機器資源位於 `carddb/src/sve_carddb/contracts/schema/v3/contract.schema.json`，隨 carddb wheel 打包；
+採 JSON Schema Draft 2020-12，識別為 `urn:sve-kit:snapshot:3.0.0`，所有 `$ref` 都在檔內。
 
-此資源釘候選 format `2.0.0`、bucket_count=64；它是可核算的契約配置，不宣稱正式容量凍結。正式配置仍依傳輸契約 §5 量測；更換配置須依其版本規則同步 Schema、樣本與 reader 支援表。
+此資源釘候選 format `3.0.0`、bucket_count=64；它是可核算的契約配置，不宣稱正式容量凍結。
+正式配置仍依傳輸契約 §5 量測；更換配置須同步 Schema、樣本與 reader 支援表。
+公開 enum 是固定集合；正式凍結後，新增值須依傳輸契約 §1.1 升 minor 並提高 `min_reader_version`。
+候選期間直接同步 Schema 與 golden，不改變既有 enum 值的語義。
 
-公開 enum 是固定集合，新增值會讓持有舊 Schema 的 reader 拒收含新值的快照。format `2.0.0` 仍為候選、尚無正式發布快照，候選期間直接修訂 Schema 與 golden；正式凍結後，同類新增值須依傳輸契約 §1.1 升 minor 並提高 `min_reader_version`，同步 reader 支援，不改變既有 enum 值的語義。
+有效 JP 繁中依同卡同面及精確來源檢查取完整效果，不以已知 divergence 或日英段落數不同禁止，
+亦不按 EN ordinal 拼接。繁中顯示不建立 aligned、官方 counterpart 或自動支援資格。
+來源選用依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)，
+讀取閉包依[公開 annotation 契約](public-annotation.md)。
 
-**使用者決定 2026-10-10（JP 唯一一般來源，#495）**：既有 Schema 的 `shared_jp_unchecked` 是 2026-10-01 加入的切換前 basis。
-新來源政策依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)，
-不再以已知 divergence 或日英段落數不同禁止有效 JP 繁中；段落不同取完整 JP 效果，不按 EN ordinal 拼接。
-新版 basis、annotation、版本及必要檢查已由[公開 annotation 契約](public-annotation.md)固定；
-完整 golden 與 Python／TS reader 的同步實作交 #498。本單不改現有 2.0 wire，也不宣稱 reader 已支援新政策。
-繁中顯示不建立 aligned、官方 counterpart 或自動支援資格。
-
-**使用者核可 2026-10-01**：`product.product_type` 的既有 tuple 位置可為 null，與官方商品無 exact confirmed `family.public_code` 型別對應時的 DB 欄位一致；人工 product 輸入仍必填 Code。本候選 format 尚無正式發布快照，直接同步 nullable Schema、type descriptor 與獨立 golden，維持候選 `2.0.0`；正式凍結後的同類相容性變更須另依傳輸契約升版與同步 reader。
-
-當前 `Translation` 為 `id/source_unit_id/target_lang/text_unit_id/origin/authority/low_confidence` 七欄；
-origin=`official/project/machine`，authority 與來源類別分開，low_confidence 必填且不允許 scalar coercion。
+當前 `Translation` 為 `id/source_unit_id/target_lang/text_unit_id/origin/authority/low_confidence/annotation_set_id` 八欄；
+最後一格可為 null，不能省略。origin、authority 與 low_confidence 各自保留，不允許 scalar coercion。
 bootstrap／detail descriptor 與完整 tuple 一致，不輸出 translation.status 或內部決定／清冊。
-共用 v2 golden 同時包含 project/false 名稱與 machine/true 效果，獨立邏輯 oracle、分片聯集及 text_all 皆驗完整來源／譯文閉包；
-共用反例拒絕舊 status、缺 Bool、null／0／1／字串 Bool 與舊 origin，兩個 reader 也驗重新釘 hash 後的完整快照，不能只驗單列。
+共用 v3 golden 保留 project/false 名稱與 machine/true 效果；非空 annotation 的原生合成成品另走 C→P→reader 管線，
+驗文字、ranges、概念及來源閉包。共用反例涵蓋 tuple 形狀、品質及 annotation 的指定拒絕邊界。
 
 ## 資源入口
 
@@ -34,7 +32,7 @@ bootstrap／detail descriptor 與完整 tuple 一致，不輸出 translation.sta
 | --- | --- |
 | Manifest、File、Blob、FileRef | 清單、精確檔案依賴與內容定址描述 |
 | Config、Types | 設定與固定巢狀 descriptor |
-| Container | 40 文字及 3 影像集合的 fragment 容器 |
+| Container | 43 文字及 3 影像集合的 fragment 容器 |
 | 集合名、`集合名_partition` | 完整邏輯 row tuple、各欄位分割 row tuple |
 | RegionView、PrintingFace、Section 等 | 固定巢狀 tuple，含 PrintingFaceBootstrap／Detail |
 | ParameterSchema、CorrectionValue | 保留為 JSON 的有限值域；field 與更正值另於所屬 tuple 綁定 |
@@ -49,7 +47,7 @@ Schema 驗欄序、tuple 長度、required-nullable、額外欄及 enum。跨值
 
 ## Schema 產生與維護
 
-`contract.schema.json` 是提交並隨套件發布的產生結果，不直接手改。`schema/v2/source.json` 保存物件定義、tuple 欄位與約束；欄位的 `from` 指向完整邏輯 tuple，讓分割列共用型別與 descriptor。產生器 `sve_carddb.contracts.generate_schema` 展開固定長度、欄序、Types、fragment 與 changes 的主鍵／欄位白名單；`schema_patterns.py` 組合日期與 URI pattern，來源中的 `pattern: {use: ...}` 只供產生器使用，不會出現在公開 Schema。
+`contract.schema.json` 是提交並隨套件發布的產生結果，不直接手改。`schema/v3/source.json` 保存物件定義、tuple 欄位與約束；欄位的 `from` 指向完整邏輯 tuple，讓分割列共用型別與 descriptor。產生器 `sve_carddb.contracts.generate_schema` 展開固定長度、欄序、Types、fragment 與 changes 的主鍵／欄位白名單；`schema_patterns.py` 組合日期與 URI pattern，來源中的 `pattern: {use: ...}` 只供產生器使用，不會出現在公開 Schema。
 
 修改對應的來源定義或 pattern 後，從 repo 根目錄重產：
 
@@ -62,12 +60,12 @@ uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 
 ## 共用合成樣本
 
-索引為 `tests/fixtures/snapshot-contract/v2/index.json`。所有內容都是手寫合成資料，不含官方卡文；沒有爬取、建置 DB 或 producer 依賴。`expected-logical.json` 的物件列與 wire tuples 分別撰寫，不從 reader 解碼或 producer 匯出產生預期值。
+索引為 `tests/fixtures/snapshot-contract/v3/index.json`。所有內容都是手寫合成資料，不含官方卡文；沒有爬取、建置 DB 或 producer 依賴。`expected-logical.json` 的物件列與 wire tuples 分別撰寫，不從 reader 解碼或 producer 匯出產生預期值。
 
 | 檔案 | 驗收用途 |
 | --- | --- |
 | manifest.json、payloads/*.json | bootstrap、detail、history、config、images、空 programs；雙面、兩版次、跨片翻譯、印刷面 sections／更正、五種 image_variant、text_symbol／多語 hints |
-| expected-logical.json | join 後全部 43 集合；未使用集合為 []，無 row_index／face_ordinal |
+| expected-logical.json | join 後全部 46 集合；未使用集合為 []，無 row_index／face_ordinal |
 | text-all.json | 與個別文字下載得到相同 logical view |
 | schema-valid.json | 各集合／巢狀型別與附屬容器的正例；形狀例不要求獨立形成引用閉包 |
 | schema-invalid-core.json、schema-invalid.json | 共用核心與圖片形狀反例，含非法日期／時間、非 ASCII 數字與 URI；有 raw_json 時先驗原始 JSON bytes 邊界 |
@@ -76,7 +74,7 @@ uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 
 樣本為便於審核的排版 JSON，manifest 的 hash／bytes 指向其 canonical 表示。Harness 先解析排版樣本並 canonical 序列化，交 reader 驗 bytes；不可更新 manifest 來掩蓋未預期差異。實際下載的 payload 直接驗收到的未壓縮 bytes，不先重序列化修復。`raw_json` 反例必須保留原字串，不先 parse/stringify 消除錯誤。
 
-reader-invalid 每例以 target（manifest 或 payload 邏輯鍵）、path（物件鍵／陣列位置序列）、value 指定替換；setup 是依序套用的前置變更。核心與圖片反例都定位到 2.0 的實際 fragments，不依賴舊版單檔位置。
+reader-invalid 每例以 target（manifest 或 payload 邏輯鍵）、path（物件鍵／陣列位置序列）、value 指定替換；setup 是依序套用的前置變更。核心與圖片反例都定位到 3.0 的實際 fragments，不依賴舊版單檔位置。
 測試 harness 重算受影響 File 的 hash／bytes／path／row_counts，並重釘原本有效的 FileRef；故意錯誤的 pin 不修復。manifest 本身的錯誤在重釘後套用，確保觸及該守門。rehash=false 保留目標原封套；不重建 text_all，這些反例使用個別下載入口。
 error 釘住預期失敗原因；其他 reader 不要求相同訊息文字。所有反例均須拒收，不得補值或 fallback。
 
@@ -102,7 +100,7 @@ M3 的 TS reader／harness 使用相同資源和樣本，不建立第二份 gold
 - 驗 files 的精確 key/hash、檔案大小、內容定址路徑、依賴 DAG、row_counts、format／最低 reader 版本／capabilities；缺 programs 失敗，非空 programs 失敗。
 - 套用 reader-invalid 全部反例；row_index 按已排序 base 定位且完全覆蓋，face_ordinal 取永久 face.ordinal，一對一合併並拒絕缺漏、越界、重複及錯 base。
 - 對照 current/history 集合、translation 的欄位分割與合併鍵、公開 ID／詞彙引用閉包；不得跨快照查最新目標補洞。另驗參數上下界、名稱唯一及排序，Spelling 必須引用已宣告且啟用對應域的參數，同一裁定的多語 hints 必須有完全相同的參數宣告。
-- 個別下載與 text_all 都恰等於 expected-logical；完整遍歷 43 集合，不忽略空集合、null 或巢狀陣列次序。對替代容器另驗 contains／members／依賴閉包，不能拿聯集逃避單檔 hash 驗證。
+- 個別下載與 text_all 都恰等於 expected-logical；完整遍歷 46 集合，不忽略空集合、null 或巢狀陣列次序。對替代容器另驗 contains／members／依賴閉包，不能拿聯集逃避單檔 hash 驗證。
 
 CI 路徑分流須讓 `carddb/src/sve_carddb/contracts/schema/**` 觸發 web 契約測試，讓 `tests/fixtures/snapshot-contract/**` 觸發 Python 與 web 共用契約測試；這些路徑亦供引擎測試接線使用。TS 實作與 CI job 的接線由各元件維護，這份文件只固定共用入口及驗收責任。
 
@@ -112,12 +110,12 @@ CI 路徑分流須讓 `carddb/src/sve_carddb/contracts/schema/**` 觸發 web 契
 兩份規則與排除清單依[digital-name-policy](../domains/digital-name-policy.md)，不因名字可用就推導真人same_card、coverage或圖／語音。
 新relation與機械／真人review的投影須同步producer／reader，未實作不發布、不略去不認識的能力。
 
-## 2.0 圖片與有限保留的機器契約
+## 圖片與有限保留的機器契約
 
-2.0 資源位於 `schema/v2/`，識別 `urn:sve-kit:snapshot:2.0.0`，從 source descriptor 生成；共用 golden 位於 v2。
-1.x 的 producer、reader、Schema 與專用樣本退役，歷史只留 Git，不設相容分支。
+3.0 資源從 source descriptor 生成；共用 golden 位於 v3。
+1.x／2.0 的 Schema 與專用樣本退役，歷史只留 Git，不設相容 reader 分支。
 required_capabilities 已固定包含 digital-same-name-links-v1；即使 same_name 列為空，也不得省略能力、相關 Schema 或 reader 驗證。
-尚未完成時不得發布 2.0，不能以「可整合」為由裁掉必要能力。
+尚未完成時不得發布 3.0，不能以「可整合」為由裁掉必要能力。
 
 同步項目包括 printing_image 的 media 欄序／ImageDisplayVariant、移除公開 image_variant.path、
 固定 N／band width／dependencies、image-id-url-v1 與同名規則能力，以及獨立 index_format=2 的 current／previous。
