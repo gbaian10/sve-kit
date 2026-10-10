@@ -1,0 +1,1850 @@
+{
+  "format": 1,
+  "kind": "parameter_group_render_cases",
+  "fixtures": {
+    "g07": {
+      "semantic": {
+        "recipe": "frame-v1",
+        "source_lang": "ja",
+        "canonical_source": "PG380_G07({owner},{zone},{kind},{quantity})",
+        "normalizer_version": "fixture-pg380-global-v2",
+        "role": "body",
+        "leaf_schema": {
+          "format": 2,
+          "slots": [
+            {
+              "name": "owner",
+              "type": "Player",
+              "role": "source_owner",
+              "domain": {
+                "values": [
+                  "opponent",
+                  "self"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 10,
+                  "end": 17
+                }
+              ]
+            },
+            {
+              "name": "zone",
+              "type": "ZoneSet",
+              "role": "source_zone",
+              "domain": {
+                "values": [
+                  "fixture.pg380.zone"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 18,
+                  "end": 24
+                }
+              ]
+            },
+            {
+              "name": "kind",
+              "type": "CardKind",
+              "role": "counted_kind",
+              "domain": {
+                "values": [
+                  {
+                    "kind": "vocabulary",
+                    "key": [
+                      "type",
+                      "follower"
+                    ]
+                  }
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 25,
+                  "end": 31
+                }
+              ]
+            },
+            {
+              "name": "quantity",
+              "type": "QuantitySpec",
+              "role": "selection_count",
+              "domain": {
+                "values": [
+                  "fixture.pg380.quantity"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 32,
+                  "end": 42
+                }
+              ]
+            }
+          ]
+        },
+        "semantic_variant": {
+          "state": "resolved",
+          "key": "fixture.optional_reveal_exact",
+          "scope": null
+        },
+        "projection": {
+          "projection_kind": "ability_body",
+          "discriminator": "fixture.pg380.g07"
+        }
+      },
+      "values": {
+        "owner": "self",
+        "zone": [
+          "hand"
+        ],
+        "kind": {
+          "kind": "vocabulary",
+          "key": [
+            "type",
+            "follower"
+          ]
+        },
+        "quantity": {
+          "mode": "exact",
+          "expr": {
+            "kind": "constant",
+            "value": 2
+          }
+        }
+      },
+      "target": {
+        "format": 1,
+        "nodes": [
+          {
+            "kind": "Literal",
+            "text": "可以公開"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "owner"
+          },
+          {
+            "kind": "Form",
+            "form_id": "zone.card_np",
+            "args": {
+              "zone": {
+                "slot": "zone"
+              }
+            }
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "quantity"
+          },
+          {
+            "kind": "Literal",
+            "text": "張"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "kind"
+          },
+          {
+            "kind": "Literal",
+            "text": "。"
+          }
+        ]
+      },
+      "projection_interface": {
+        "scopes": [
+          {
+            "id": "ability",
+            "parent": null,
+            "kind": "ability"
+          }
+        ],
+        "imports": [],
+        "exports": []
+      },
+      "np_target": {
+        "format": 1,
+        "nodes": [
+          {
+            "kind": "Literal",
+            "text": "可以公開"
+          },
+          {
+            "kind": "NP",
+            "constructor": "CardNP",
+            "args": {
+              "owner": {
+                "slot": "owner"
+              },
+              "zone": {
+                "slot": "zone"
+              },
+              "kind": {
+                "slot": "kind"
+              },
+              "quantity": {
+                "slot": "quantity"
+              }
+            }
+          },
+          {
+            "kind": "Literal",
+            "text": "。"
+          }
+        ]
+      },
+      "source_unit": "枚"
+    },
+    "g08": {
+      "semantic": {
+        "recipe": "frame-v1",
+        "source_lang": "ja",
+        "canonical_source": "PG380_G08({owner},{zone},{kind},{quantity})",
+        "normalizer_version": "fixture-pg380-global-v2",
+        "role": "body",
+        "leaf_schema": {
+          "format": 2,
+          "slots": [
+            {
+              "name": "owner",
+              "type": "Player",
+              "role": "source_owner",
+              "domain": {
+                "values": [
+                  "opponent",
+                  "self"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 10,
+                  "end": 17
+                }
+              ]
+            },
+            {
+              "name": "zone",
+              "type": "ZoneSet",
+              "role": "source_zone",
+              "domain": {
+                "values": [
+                  "fixture.pg380.zone"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 18,
+                  "end": 24
+                }
+              ]
+            },
+            {
+              "name": "kind",
+              "type": "CardKind",
+              "role": "counted_kind",
+              "domain": {
+                "values": [
+                  {
+                    "kind": "vocabulary",
+                    "key": [
+                      "type",
+                      "follower"
+                    ]
+                  }
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 25,
+                  "end": 31
+                }
+              ]
+            },
+            {
+              "name": "quantity",
+              "type": "QuantitySpec",
+              "role": "selection_count",
+              "domain": {
+                "values": [
+                  "fixture.pg380.quantity"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 32,
+                  "end": 42
+                }
+              ]
+            }
+          ]
+        },
+        "semantic_variant": {
+          "state": "resolved",
+          "key": "fixture.g08",
+          "scope": null
+        },
+        "projection": {
+          "projection_kind": "ability_body",
+          "discriminator": "fixture.pg380.g08"
+        }
+      },
+      "values": {
+        "owner": "opponent",
+        "zone": [
+          "battlefield"
+        ],
+        "kind": {
+          "kind": "vocabulary",
+          "key": [
+            "type",
+            "follower"
+          ]
+        },
+        "quantity": {
+          "mode": "up_to",
+          "expr": {
+            "kind": "constant",
+            "value": 2
+          }
+        }
+      },
+      "target": {
+        "format": 1,
+        "nodes": [
+          {
+            "kind": "Literal",
+            "text": "選擇"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "owner"
+          },
+          {
+            "kind": "Form",
+            "form_id": "zone.card_np",
+            "args": {
+              "zone": {
+                "slot": "zone"
+              }
+            }
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "quantity"
+          },
+          {
+            "kind": "Literal",
+            "text": "體"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "kind"
+          },
+          {
+            "kind": "Literal",
+            "text": "。"
+          }
+        ]
+      },
+      "projection_interface": {
+        "scopes": [
+          {
+            "id": "ability",
+            "parent": null,
+            "kind": "ability"
+          }
+        ],
+        "imports": [],
+        "exports": []
+      },
+      "np_target": {
+        "format": 1,
+        "nodes": [
+          {
+            "kind": "Literal",
+            "text": "選擇"
+          },
+          {
+            "kind": "NP",
+            "constructor": "CardNP",
+            "args": {
+              "owner": {
+                "slot": "owner"
+              },
+              "zone": {
+                "slot": "zone"
+              },
+              "kind": {
+                "slot": "kind"
+              },
+              "quantity": {
+                "slot": "quantity"
+              }
+            }
+          },
+          {
+            "kind": "Literal",
+            "text": "。"
+          }
+        ]
+      },
+      "source_unit": "体"
+    },
+    "g09": {
+      "semantic": {
+        "recipe": "frame-v1",
+        "source_lang": "ja",
+        "canonical_source": "PG380_G09({owner},{zone},{trait},{token},{kind},{quantity})",
+        "normalizer_version": "fixture-pg380-global-v2",
+        "role": "body",
+        "leaf_schema": {
+          "format": 2,
+          "slots": [
+            {
+              "name": "owner",
+              "type": "Player",
+              "role": "source_owner",
+              "domain": {
+                "values": [
+                  "opponent",
+                  "self"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 10,
+                  "end": 17
+                }
+              ]
+            },
+            {
+              "name": "zone",
+              "type": "ZoneSet",
+              "role": "source_zone",
+              "domain": {
+                "values": [
+                  "fixture.pg380.zone"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 18,
+                  "end": 24
+                }
+              ]
+            },
+            {
+              "name": "trait",
+              "type": "Concept",
+              "role": "trait",
+              "domain": {
+                "values": [
+                  {
+                    "kind": "glossary",
+                    "key": "fixture.trait.probe"
+                  }
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 25,
+                  "end": 32
+                }
+              ]
+            },
+            {
+              "name": "token",
+              "type": "TokenStatus",
+              "role": "token_filter",
+              "domain": {
+                "values": [
+                  "non_token",
+                  "token"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 33,
+                  "end": 40
+                }
+              ]
+            },
+            {
+              "name": "kind",
+              "type": "CardKind",
+              "role": "counted_kind",
+              "domain": {
+                "values": [
+                  {
+                    "kind": "vocabulary",
+                    "key": [
+                      "type",
+                      "follower"
+                    ]
+                  }
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 41,
+                  "end": 47
+                }
+              ]
+            },
+            {
+              "name": "quantity",
+              "type": "QuantitySpec",
+              "role": "selection_count",
+              "domain": {
+                "values": [
+                  "fixture.pg380.quantity"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 48,
+                  "end": 58
+                }
+              ]
+            }
+          ]
+        },
+        "semantic_variant": {
+          "state": "resolved",
+          "key": "fixture.g09",
+          "scope": null
+        },
+        "projection": {
+          "projection_kind": "ability_body",
+          "discriminator": "fixture.pg380.g09"
+        }
+      },
+      "values": {
+        "owner": "self",
+        "zone": [
+          "ex"
+        ],
+        "trait": {
+          "kind": "glossary",
+          "key": "fixture.trait.probe"
+        },
+        "token": "token",
+        "kind": {
+          "kind": "vocabulary",
+          "key": [
+            "type",
+            "follower"
+          ]
+        },
+        "quantity": {
+          "mode": "exact",
+          "expr": {
+            "kind": "constant",
+            "value": 1
+          }
+        }
+      },
+      "target": {
+        "format": 1,
+        "nodes": [
+          {
+            "kind": "Literal",
+            "text": "選擇"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "owner"
+          },
+          {
+            "kind": "Form",
+            "form_id": "zone.card_np",
+            "args": {
+              "zone": {
+                "slot": "zone"
+              }
+            }
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "quantity"
+          },
+          {
+            "kind": "Literal",
+            "text": "體具有"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "trait"
+          },
+          {
+            "kind": "Literal",
+            "text": "特性的"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "token"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "kind"
+          },
+          {
+            "kind": "Literal",
+            "text": "。"
+          }
+        ]
+      },
+      "projection_interface": {
+        "scopes": [
+          {
+            "id": "ability",
+            "parent": null,
+            "kind": "ability"
+          }
+        ],
+        "imports": [],
+        "exports": []
+      },
+      "np_target": {
+        "format": 1,
+        "nodes": [
+          {
+            "kind": "Literal",
+            "text": "選擇"
+          },
+          {
+            "kind": "NP",
+            "constructor": "CardNP",
+            "args": {
+              "owner": {
+                "slot": "owner"
+              },
+              "zone": {
+                "slot": "zone"
+              },
+              "kind": {
+                "slot": "kind"
+              },
+              "quantity": {
+                "slot": "quantity"
+              },
+              "traits": [
+                {
+                  "slot": "trait"
+                }
+              ],
+              "token": {
+                "slot": "token"
+              }
+            }
+          },
+          {
+            "kind": "Literal",
+            "text": "。"
+          }
+        ]
+      },
+      "source_unit": "体"
+    },
+    "g09_class": {
+      "semantic": {
+        "recipe": "frame-v1",
+        "source_lang": "ja",
+        "canonical_source": "PG380_G09({owner},{zone},{class},{kind},{quantity})",
+        "normalizer_version": "fixture-pg380-global-v2",
+        "role": "body",
+        "leaf_schema": {
+          "format": 2,
+          "slots": [
+            {
+              "name": "owner",
+              "type": "Player",
+              "role": "source_owner",
+              "domain": {
+                "values": [
+                  "opponent",
+                  "self"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 10,
+                  "end": 17
+                }
+              ]
+            },
+            {
+              "name": "zone",
+              "type": "ZoneSet",
+              "role": "source_zone",
+              "domain": {
+                "values": [
+                  "fixture.pg380.zone"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 18,
+                  "end": 24
+                }
+              ]
+            },
+            {
+              "name": "class",
+              "type": "Concept",
+              "role": "class_filter",
+              "domain": {
+                "values": [
+                  {
+                    "kind": "vocabulary",
+                    "key": [
+                      "class",
+                      "fixture_class"
+                    ]
+                  }
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 25,
+                  "end": 32
+                }
+              ]
+            },
+            {
+              "name": "kind",
+              "type": "CardKind",
+              "role": "counted_kind",
+              "domain": {
+                "values": [
+                  {
+                    "kind": "vocabulary",
+                    "key": [
+                      "type",
+                      "follower"
+                    ]
+                  }
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 33,
+                  "end": 39
+                }
+              ]
+            },
+            {
+              "name": "quantity",
+              "type": "QuantitySpec",
+              "role": "selection_count",
+              "domain": {
+                "values": [
+                  "fixture.pg380.quantity"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 40,
+                  "end": 50
+                }
+              ]
+            }
+          ]
+        },
+        "semantic_variant": {
+          "state": "resolved",
+          "key": "fixture.g09_class",
+          "scope": null
+        },
+        "projection": {
+          "projection_kind": "ability_body",
+          "discriminator": "fixture.pg380.g09_class"
+        }
+      },
+      "values": {
+        "owner": "self",
+        "zone": [
+          "hand"
+        ],
+        "class": {
+          "kind": "vocabulary",
+          "key": [
+            "class",
+            "fixture_class"
+          ]
+        },
+        "kind": {
+          "kind": "vocabulary",
+          "key": [
+            "type",
+            "follower"
+          ]
+        },
+        "quantity": {
+          "mode": "exact",
+          "expr": {
+            "kind": "constant",
+            "value": 4
+          }
+        }
+      },
+      "target": {
+        "format": 1,
+        "nodes": [
+          {
+            "kind": "Literal",
+            "text": "選擇"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "owner"
+          },
+          {
+            "kind": "Form",
+            "form_id": "zone.card_np",
+            "args": {
+              "zone": {
+                "slot": "zone"
+              }
+            }
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "quantity"
+          },
+          {
+            "kind": "Literal",
+            "text": "張"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "class"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "kind"
+          },
+          {
+            "kind": "Literal",
+            "text": "。"
+          }
+        ]
+      },
+      "projection_interface": {
+        "scopes": [
+          {
+            "id": "ability",
+            "parent": null,
+            "kind": "ability"
+          }
+        ],
+        "imports": [],
+        "exports": []
+      },
+      "np_target": {
+        "format": 1,
+        "nodes": [
+          {
+            "kind": "Literal",
+            "text": "選擇"
+          },
+          {
+            "kind": "NP",
+            "constructor": "CardNP",
+            "args": {
+              "owner": {
+                "slot": "owner"
+              },
+              "zone": {
+                "slot": "zone"
+              },
+              "kind": {
+                "slot": "kind"
+              },
+              "quantity": {
+                "slot": "quantity"
+              },
+              "class": {
+                "slot": "class"
+              }
+            }
+          },
+          {
+            "kind": "Literal",
+            "text": "。"
+          }
+        ]
+      },
+      "source_unit": "枚"
+    },
+    "g10": {
+      "semantic": {
+        "recipe": "frame-v1",
+        "source_lang": "ja",
+        "canonical_source": "PG380_G10({owner},{zone},{kind},{quantity})",
+        "normalizer_version": "fixture-pg380-global-v2",
+        "role": "body",
+        "leaf_schema": {
+          "format": 2,
+          "slots": [
+            {
+              "name": "owner",
+              "type": "Player",
+              "role": "source_owner",
+              "domain": {
+                "values": [
+                  "opponent",
+                  "self"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 10,
+                  "end": 17
+                }
+              ]
+            },
+            {
+              "name": "zone",
+              "type": "ZoneSet",
+              "role": "source_zone",
+              "domain": {
+                "values": [
+                  "fixture.pg380.zone_union"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 18,
+                  "end": 24
+                }
+              ]
+            },
+            {
+              "name": "kind",
+              "type": "CardKind",
+              "role": "counted_kind",
+              "domain": {
+                "values": [
+                  {
+                    "kind": "vocabulary",
+                    "key": [
+                      "type",
+                      "follower"
+                    ]
+                  }
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 25,
+                  "end": 31
+                }
+              ]
+            },
+            {
+              "name": "quantity",
+              "type": "QuantitySpec",
+              "role": "selection_count",
+              "domain": {
+                "values": [
+                  "fixture.pg380.quantity"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 32,
+                  "end": 42
+                }
+              ]
+            }
+          ]
+        },
+        "semantic_variant": {
+          "state": "resolved",
+          "key": "fixture.g10",
+          "scope": null
+        },
+        "projection": {
+          "projection_kind": "ability_body",
+          "discriminator": "fixture.pg380.g10"
+        }
+      },
+      "values": {
+        "owner": "self",
+        "kind": {
+          "kind": "vocabulary",
+          "key": [
+            "type",
+            "follower"
+          ]
+        },
+        "quantity": {
+          "mode": "up_to",
+          "expr": {
+            "kind": "constant",
+            "value": 3
+          }
+        },
+        "zone": [
+          "battlefield",
+          "ex"
+        ]
+      },
+      "target": {
+        "format": 1,
+        "nodes": [
+          {
+            "kind": "Literal",
+            "text": "選擇"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "owner"
+          },
+          {
+            "kind": "Form",
+            "form_id": "zone.card_np",
+            "args": {
+              "zone": {
+                "slot": "zone"
+              }
+            }
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "quantity"
+          },
+          {
+            "kind": "Literal",
+            "text": "張"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "kind"
+          },
+          {
+            "kind": "Literal",
+            "text": "。"
+          }
+        ]
+      },
+      "projection_interface": {
+        "scopes": [
+          {
+            "id": "ability",
+            "parent": null,
+            "kind": "ability"
+          }
+        ],
+        "imports": [],
+        "exports": []
+      },
+      "np_target": {
+        "format": 1,
+        "nodes": [
+          {
+            "kind": "Literal",
+            "text": "選擇"
+          },
+          {
+            "kind": "NP",
+            "constructor": "CardNP",
+            "args": {
+              "owner": {
+                "slot": "owner"
+              },
+              "zone": {
+                "slot": "zone"
+              },
+              "quantity": {
+                "slot": "quantity"
+              },
+              "kind": {
+                "slot": "kind"
+              }
+            }
+          },
+          {
+            "kind": "Literal",
+            "text": "。"
+          }
+        ]
+      },
+      "source_unit": "枚"
+    }
+  },
+  "forms": [
+    {
+      "id": "zone.card_np",
+      "lang": "zh-Hant",
+      "signature": [
+        {
+          "name": "zone",
+          "type": "ZoneSet",
+          "role": "source_zone"
+        }
+      ],
+      "rule": "zone.case.v1",
+      "cases": {
+        "battlefield": [
+          {
+            "kind": "Label",
+            "arg": "zone"
+          },
+          {
+            "kind": "Literal",
+            "text": "上"
+          }
+        ],
+        "deck": [
+          {
+            "kind": "Label",
+            "arg": "zone"
+          },
+          {
+            "kind": "Literal",
+            "text": "中的"
+          }
+        ],
+        "evolve_deck": [
+          {
+            "kind": "Label",
+            "arg": "zone"
+          },
+          {
+            "kind": "Literal",
+            "text": "中的"
+          }
+        ],
+        "ex": [
+          {
+            "kind": "Label",
+            "arg": "zone"
+          },
+          {
+            "kind": "Literal",
+            "text": "中的"
+          }
+        ],
+        "graveyard": [
+          {
+            "kind": "Label",
+            "arg": "zone"
+          },
+          {
+            "kind": "Literal",
+            "text": "中的"
+          }
+        ],
+        "hand": [
+          {
+            "kind": "Label",
+            "arg": "zone"
+          },
+          {
+            "kind": "Literal",
+            "text": "中的"
+          }
+        ],
+        "mixed": [
+          {
+            "kind": "Label",
+            "arg": "zone"
+          },
+          {
+            "kind": "Literal",
+            "text": "中合計"
+          }
+        ]
+      }
+    },
+    {
+      "id": "quantity.classifier",
+      "lang": "zh-Hant",
+      "signature": [
+        {
+          "name": "kind",
+          "type": "CardKind",
+          "role": "counted_kind"
+        },
+        {
+          "name": "quantity",
+          "type": "QuantitySpec",
+          "role": "selection_count"
+        },
+        {
+          "name": "zone",
+          "type": "ZoneSet",
+          "role": "source_zone"
+        }
+      ],
+      "rule": "quantity.classifier.v1",
+      "cases": {
+        "card": [
+          {
+            "kind": "Literal",
+            "text": "張"
+          }
+        ],
+        "object": [
+          {
+            "kind": "Literal",
+            "text": "體"
+          }
+        ]
+      }
+    },
+    {
+      "id": "trait.filter",
+      "lang": "zh-Hant",
+      "signature": [
+        {
+          "name": "trait",
+          "type": "Concept",
+          "role": "trait"
+        }
+      ],
+      "rule": "trait.filter.v1",
+      "cases": {
+        "default": [
+          {
+            "kind": "Literal",
+            "text": "具有"
+          },
+          {
+            "kind": "Label",
+            "arg": "trait"
+          },
+          {
+            "kind": "Literal",
+            "text": "特性的"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zone.union_separator",
+      "lang": "zh-Hant",
+      "signature": [
+        {
+          "name": "zone",
+          "type": "ZoneSet",
+          "role": "source_zone"
+        }
+      ],
+      "rule": "zone.union_separator.v1",
+      "cases": {
+        "default": [
+          {
+            "kind": "Literal",
+            "text": "或"
+          }
+        ]
+      }
+    }
+  ],
+  "labels": [
+    {
+      "reference": {
+        "kind": "glossary",
+        "key": "fixture.player.self"
+      },
+      "label": "自己",
+      "category": "rule_term",
+      "bold": true
+    },
+    {
+      "reference": {
+        "kind": "glossary",
+        "key": "fixture.player.opponent"
+      },
+      "label": "對手",
+      "category": "rule_term",
+      "bold": true
+    },
+    {
+      "reference": {
+        "kind": "glossary",
+        "key": "fixture.zone.battlefield"
+      },
+      "label": "戰場",
+      "category": "rule_term",
+      "bold": true
+    },
+    {
+      "reference": {
+        "kind": "glossary",
+        "key": "fixture.zone.hand"
+      },
+      "label": "手牌",
+      "category": "rule_term",
+      "bold": true
+    },
+    {
+      "reference": {
+        "kind": "glossary",
+        "key": "fixture.zone.ex"
+      },
+      "label": "EX區",
+      "category": "rule_term",
+      "bold": true
+    },
+    {
+      "reference": {
+        "kind": "vocabulary",
+        "key": [
+          "type",
+          "follower"
+        ]
+      },
+      "label": "從者",
+      "category": "type",
+      "bold": true
+    },
+    {
+      "reference": {
+        "kind": "glossary",
+        "key": "fixture.trait.probe"
+      },
+      "label": "星紋",
+      "category": "trait",
+      "bold": true
+    },
+    {
+      "reference": {
+        "kind": "glossary",
+        "key": "fixture.token"
+      },
+      "label": "代幣",
+      "category": "rule_term",
+      "bold": true
+    },
+    {
+      "reference": {
+        "kind": "vocabulary",
+        "key": [
+          "class",
+          "fixture_class"
+        ]
+      },
+      "label": "測試職業",
+      "category": "class",
+      "bold": true
+    }
+  ],
+  "code_labels": {
+    "Player": {
+      "self": {
+        "kind": "glossary",
+        "key": "fixture.player.self"
+      },
+      "opponent": {
+        "kind": "glossary",
+        "key": "fixture.player.opponent"
+      }
+    },
+    "ZoneSet": {
+      "battlefield": {
+        "kind": "glossary",
+        "key": "fixture.zone.battlefield"
+      },
+      "hand": {
+        "kind": "glossary",
+        "key": "fixture.zone.hand"
+      },
+      "ex": {
+        "kind": "glossary",
+        "key": "fixture.zone.ex"
+      }
+    },
+    "TokenStatus": {
+      "token": {
+        "kind": "glossary",
+        "key": "fixture.token"
+      }
+    }
+  },
+  "cases": [
+    {
+      "group": "FL-036",
+      "id": "pg380_g07_n0",
+      "operation": "parameter_group_n0",
+      "input": {
+        "source": "検証。自分の手札の星紋・フォロワー31枚を選ぶ。その後、仮を公開してよい。",
+        "class": false
+      },
+      "expected": {
+        "selection_unit": "枚"
+      }
+    },
+    {
+      "group": "FL-037",
+      "id": "pg380_g08_n0",
+      "operation": "parameter_group_n0",
+      "input": {
+        "source": "相手の場の星紋・フォロワー31体までを選ぶ。",
+        "class": false
+      },
+      "expected": {
+        "selection_unit": "体"
+      }
+    },
+    {
+      "group": "FL-038",
+      "id": "pg380_g09_n0",
+      "operation": "parameter_group_n0",
+      "input": {
+        "source": "自分のEXエリアの星紋・トークン・フォロワー31体を選ぶ。",
+        "class": false
+      },
+      "expected": {
+        "selection_unit": "体"
+      }
+    },
+    {
+      "group": "FL-038",
+      "id": "pg380_g09_class_n0",
+      "operation": "parameter_group_n0",
+      "input": {
+        "source": "自分の手札の{検査クラス}・フォロワー31枚を選ぶ。",
+        "class": true
+      },
+      "expected": {
+        "selection_unit": "枚"
+      }
+    },
+    {
+      "group": "FL-039",
+      "id": "pg380_g10_n0",
+      "operation": "parameter_group_n0",
+      "input": {
+        "source": "自分の場かEXエリアの星紋・フォロワー31枚を選ぶ。",
+        "class": false
+      },
+      "expected": {
+        "selection_unit": "枚"
+      }
+    },
+    {
+      "group": "FL-036",
+      "id": "pg380_g07_render",
+      "operation": "parameter_group_render",
+      "input": {
+        "fixture": "g07"
+      },
+      "expected": {
+        "text": "可以公開自己手牌中的2張從者。",
+        "annotations": [
+          {
+            "ordinal": 0,
+            "reference": {
+              "kind": "glossary",
+              "key": "fixture.player.self"
+            },
+            "ranges": [
+              {
+                "start": 4,
+                "end": 6
+              }
+            ],
+            "bold": true
+          },
+          {
+            "ordinal": 1,
+            "reference": {
+              "kind": "glossary",
+              "key": "fixture.zone.hand"
+            },
+            "ranges": [
+              {
+                "start": 6,
+                "end": 8
+              }
+            ],
+            "bold": true
+          },
+          {
+            "ordinal": 2,
+            "reference": {
+              "kind": "vocabulary",
+              "key": [
+                "type",
+                "follower"
+              ]
+            },
+            "ranges": [
+              {
+                "start": 12,
+                "end": 14
+              }
+            ],
+            "bold": true
+          }
+        ]
+      }
+    },
+    {
+      "group": "FL-037",
+      "id": "pg380_g08_render",
+      "operation": "parameter_group_render",
+      "input": {
+        "fixture": "g08"
+      },
+      "expected": {
+        "text": "選擇對手戰場上至多2體從者。",
+        "annotations": [
+          {
+            "ordinal": 0,
+            "reference": {
+              "kind": "glossary",
+              "key": "fixture.player.opponent"
+            },
+            "ranges": [
+              {
+                "start": 2,
+                "end": 4
+              }
+            ],
+            "bold": true
+          },
+          {
+            "ordinal": 1,
+            "reference": {
+              "kind": "glossary",
+              "key": "fixture.zone.battlefield"
+            },
+            "ranges": [
+              {
+                "start": 4,
+                "end": 6
+              }
+            ],
+            "bold": true
+          },
+          {
+            "ordinal": 2,
+            "reference": {
+              "kind": "vocabulary",
+              "key": [
+                "type",
+                "follower"
+              ]
+            },
+            "ranges": [
+              {
+                "start": 11,
+                "end": 13
+              }
+            ],
+            "bold": true
+          }
+        ]
+      }
+    },
+    {
+      "group": "FL-038",
+      "id": "pg380_g09_render",
+      "operation": "parameter_group_render",
+      "input": {
+        "fixture": "g09"
+      },
+      "expected": {
+        "text": "選擇自己EX區中的1體具有星紋特性的代幣從者。",
+        "annotations": [
+          {
+            "ordinal": 0,
+            "reference": {
+              "kind": "glossary",
+              "key": "fixture.player.self"
+            },
+            "ranges": [
+              {
+                "start": 2,
+                "end": 4
+              }
+            ],
+            "bold": true
+          },
+          {
+            "ordinal": 1,
+            "reference": {
+              "kind": "glossary",
+              "key": "fixture.zone.ex"
+            },
+            "ranges": [
+              {
+                "start": 4,
+                "end": 7
+              }
+            ],
+            "bold": true
+          },
+          {
+            "ordinal": 2,
+            "reference": {
+              "kind": "glossary",
+              "key": "fixture.trait.probe"
+            },
+            "ranges": [
+              {
+                "start": 13,
+                "end": 15
+              }
+            ],
+            "bold": true
+          },
+          {
+            "ordinal": 3,
+            "reference": {
+              "kind": "glossary",
+              "key": "fixture.token"
+            },
+            "ranges": [
+              {
+                "start": 18,
+                "end": 20
+              }
+            ],
+            "bold": true
+          },
+          {
+            "ordinal": 4,
+            "reference": {
+              "kind": "vocabulary",
+              "key": [
+                "type",
+                "follower"
+              ]
+            },
+            "ranges": [
+              {
+                "start": 20,
+                "end": 22
+              }
+            ],
+            "bold": true
+          }
+        ]
+      }
+    },
+    {
+      "group": "FL-038",
+      "id": "pg380_g09_class_render",
+      "operation": "parameter_group_render",
+      "input": {
+        "fixture": "g09_class"
+      },
+      "expected": {
+        "text": "選擇自己手牌中的4張測試職業從者。",
+        "annotations": [
+          {
+            "ordinal": 0,
+            "reference": {
+              "kind": "glossary",
+              "key": "fixture.player.self"
+            },
+            "ranges": [
+              {
+                "start": 2,
+                "end": 4
+              }
+            ],
+            "bold": true
+          },
+          {
+            "ordinal": 1,
+            "reference": {
+              "kind": "glossary",
+              "key": "fixture.zone.hand"
+            },
+            "ranges": [
+              {
+                "start": 4,
+                "end": 6
+              }
+            ],
+            "bold": true
+          },
+          {
+            "ordinal": 2,
+            "reference": {
+              "kind": "vocabulary",
+              "key": [
+                "class",
+                "fixture_class"
+              ]
+            },
+            "ranges": [
+              {
+                "start": 10,
+                "end": 14
+              }
+            ],
+            "bold": true
+          },
+          {
+            "ordinal": 3,
+            "reference": {
+              "kind": "vocabulary",
+              "key": [
+                "type",
+                "follower"
+              ]
+            },
+            "ranges": [
+              {
+                "start": 14,
+                "end": 16
+              }
+            ],
+            "bold": true
+          }
+        ]
+      }
+    },
+    {
+      "group": "FL-039",
+      "id": "pg380_g10_render",
+      "operation": "parameter_group_render",
+      "input": {
+        "fixture": "g10"
+      },
+      "expected": {
+        "text": "選擇自己戰場或EX區中合計至多3張從者。",
+        "annotations": [
+          {
+            "ordinal": 0,
+            "reference": {
+              "kind": "glossary",
+              "key": "fixture.player.self"
+            },
+            "ranges": [
+              {
+                "start": 2,
+                "end": 4
+              }
+            ],
+            "bold": true
+          },
+          {
+            "ordinal": 1,
+            "reference": {
+              "kind": "glossary",
+              "key": "fixture.zone.battlefield"
+            },
+            "ranges": [
+              {
+                "start": 4,
+                "end": 6
+              }
+            ],
+            "bold": true
+          },
+          {
+            "ordinal": 2,
+            "reference": {
+              "kind": "glossary",
+              "key": "fixture.zone.ex"
+            },
+            "ranges": [
+              {
+                "start": 7,
+                "end": 10
+              }
+            ],
+            "bold": true
+          },
+          {
+            "ordinal": 3,
+            "reference": {
+              "kind": "vocabulary",
+              "key": [
+                "type",
+                "follower"
+              ]
+            },
+            "ranges": [
+              {
+                "start": 17,
+                "end": 19
+              }
+            ],
+            "bold": true
+          }
+        ]
+      }
+    }
+  ]
+}

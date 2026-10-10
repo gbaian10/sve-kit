@@ -252,8 +252,10 @@ Node 的 kind 是上述四種唯一 discriminator；required 槽須由 LeafRef �
 | UnionNP(branches,quantity?) | branches 為至少兩個 CardNP；只組合同元素型別且分支 scope 已明確者，quantity 是整體數量；異種或複雜分支可保留 Literal＋葉引用 |
 | CountExpr(expr) | expr=QuantityExpr 葉引用；只呈現既有表達式結構，不建立新的 runtime count 指令 |
 
-CardNP 的 owner=Player、zone=ZoneSet、token=TokenStatus；class 為 Concept 的 vocabulary(class) 引用，
-traits 每項為 Concept 的 glossary trait 引用。traits 可空、不可重複，不把 token／class 當 trait。
+CardNP 的 owner=Player、zone=ZoneSet（role 限 source_zone 或 counted_zone）、token=TokenStatus；class 為 Concept 的 vocabulary(class) 引用，
+traits 每項為 role=trait 的 Concept glossary 引用；class 的 role=class_filter。
+引用域也可使用已登錄的 `concept.trait.v1`／`vocabulary.class.v1`。
+目前 traits 限 0 或 1 項，不把 token／class 當 trait；多項篩選須先確認具名構造的 AND／OR 語義。
 
 未覆蓋的長修飾保留在 target 的 Literal＋LeafRef／Form 中，**不建立 opaque NP 字串槽**。
 NP 不另占來源 span；它的葉各自有來源位置。NP 移除或新增只改 render projection，不改 frame 或 DSL 值。
@@ -279,6 +281,21 @@ rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章�
 動詞融合形式只可在相符 frame 動作／目的地角色使用，不能把 add、return、draw、discard、destroy 都變成 move。
 keyword.display 可供括號，基礎名稱不含括號；別名與全名綁同概念，來源拼寫留 trace。
 形式內的 Label 產生概念範圍，Literal 後綴／括號不擴大該範圍。缺基礎選詞則整欄退回（FL-011），未知形式 ID 則結構拒絕。
+
+CardNP 的區域詞尾使用同語言 `zone.card_np`（`zone.case.v1`），不由 renderer 在持有者與區域後一律補所有格。
+其 cases 包含單一區域與 `mixed`；詞尾與多區域的合計修飾由該語言的 Literal 表達。
+量詞使用既有 `quantity.classifier`，計數區域優先取 NP 自己的 zone，不能借用目的地區域。
+沒有 NP zone 時，只有唯一的 counted_zone 能提供語境，否則整欄退回。
+單一 trait 使用 `trait.filter`（`trait.filter.v1`），簽章恰為 trait:Concept/trait，default 必含 Label(trait)。
+class 與 token 仍各自顯示已綁葉，不在 trait 形式內藏入名稱。
+
+ZoneSet 的多成員按 canonical 排序顯示，每個基礎名稱有自己的概念範圍。
+成員間使用同語言 `zone.union_separator`（`zone.union_separator.v1`）：簽章為 zone:ZoneSet、default 只含 Literal。
+連接詞與詞尾都不屬於任何成員的概念範圍；缺少必要 NP 形式或連接詞時整欄退回。
+這些是既有葉的呈現規則，沒有新增 N0 來源葉或放寬來源單位守衛。
+固定案例見 [參數群組渲染案例](../../../carddb/tests/fixtures/parameter-groups/render-cases.json)。
+案例的 `parameter_group_render` 只驗 renderer 的隔離 typed fixture；`parameter_group_n0` 另從合成日文驗正常來源分類。
+N0 正文仍無可供 CardNP 使用的 counted_kind／ZoneSet／Player／TokenStatus 葉，因此不以 renderer 案例宣稱已完成真實來源的 NP 接入。
 
 ### 5.1 原文單位與中文量詞是兩張表
 
