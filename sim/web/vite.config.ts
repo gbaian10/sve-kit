@@ -28,7 +28,14 @@ export function snapshotCacheControl(relative: string, search: string): string {
 }
 
 export function snapshotEncoding(accept: string | undefined): "br" | "gzip" | undefined {
-  const offered = new Set((accept ?? "").split(",").map((token) => token.split(";")[0]?.trim()))
+  // q=0 means the client refuses that encoding.
+  const offered = new Set(
+    (accept ?? "")
+      .split(",")
+      .map((token) => token.trim().split(/\s*;\s*/))
+      .filter(([, ...params]) => !params.some((param) => /^q=0(\.0{0,3})?$/.test(param)))
+      .map(([name]) => name),
+  )
   if (offered.has("br")) return "br"
   if (offered.has("gzip")) return "gzip"
   return undefined
@@ -89,8 +96,10 @@ function serveSnapshotRoot(prefix: string, dir: string | undefined): Plugin {
     const search = url.includes("?") ? url.slice(url.indexOf("?")) : ""
     res.setHeader("Content-Type", MIME[path.extname(file)] ?? "application/octet-stream")
     res.setHeader("Cache-Control", snapshotCacheControl(relative, search))
-    const encoding =
-      path.extname(file) === ".json" ? snapshotEncoding(req.headers["accept-encoding"]) : undefined
+    const json = path.extname(file) === ".json"
+    // Every JSON representation depends on Accept-Encoding, including the uncompressed one.
+    if (json) res.setHeader("Vary", "Accept-Encoding")
+    const encoding = json ? snapshotEncoding(req.headers["accept-encoding"]) : undefined
     if (encoding === undefined) {
       createReadStream(file).pipe(res)
       return
@@ -104,7 +113,6 @@ function serveSnapshotRoot(prefix: string, dir: string | undefined): Plugin {
     body.then(
       (data) => {
         res.setHeader("Content-Encoding", encoding)
-        res.setHeader("Vary", "Accept-Encoding")
         res.setHeader("Content-Length", String(data.length))
         res.end(data)
       },

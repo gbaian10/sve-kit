@@ -71,4 +71,10 @@ describe("dev snapshot responses", () => {
     expect(snapshotEncoding("identity")).toBeUndefined()
     expect(snapshotEncoding(undefined)).toBeUndefined()
   })
+
+  it("skips an encoding the client refuses with q=0", () => {
+    expect(snapshotEncoding("br;q=0, gzip")).toBe("gzip")
+    expect(snapshotEncoding("br; q=0.0, gzip;q=0")).toBeUndefined()
+    expect(snapshotEncoding("br;q=0.5")).toBe("br")
+  })
 })
