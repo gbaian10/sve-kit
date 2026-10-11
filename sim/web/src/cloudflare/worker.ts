@@ -20,10 +20,21 @@ interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> }
 }
 
+interface Context {
+  waitUntil(promise: Promise<unknown>): void
+}
+
+interface EdgeCache {
+  match(request: Request): Promise<Response | undefined>
+  put(request: Request, response: Response): Promise<void>
+}
+
 const PREFIX = "/cdn-preview/"
 const INDEX = "snapshots/versions/index.json"
 const JSON_KEY = /^snapshots\/(?:blobs|manifests)\/[0-9a-f]{64}\.json(?:\.(?:br|gz))?$/
 const IMAGE_KEY = /^images\/(?:card_[sml]|art_[sm])\/([1-9][0-9]*)(?:-f([1-9][0-9]*))?\.webp$/
+const BROWSER_CACHE_CONTROL = "X-Sve-Browser-Cache-Control"
+const EDGE_CACHE_CONTROL = "public, max-age=31536000, immutable"
 
 function positiveInteger(value: string | null): boolean {
   if (value === null) return false
@@ -61,8 +72,35 @@ function failure(status: number): Response {
   return new Response(null, { status, headers })
 }
 
+async function clientResponse(
+  request: Request,
+  body: ReadObject["body"] | null,
+  headers: Headers,
+): Promise<Response> {
+  if (matchesEtag(request.headers.get("If-None-Match"), headers.get("ETag") ?? "")) {
+    await body?.cancel()
+    return new Response(null, { status: 304, headers })
+  }
+  if (request.method === "HEAD") {
+    await body?.cancel()
+    body = null
+  }
+  // R2 compressed siblings already contain wire bytes; Workers must not compress them again.
+  const init: ResponseInit & { encodeBody: "manual" } = { headers, encodeBody: "manual" }
+  return new Response(body, init)
+}
+
+async function store(cache: EdgeCache, key: Request, response: Response): Promise<void> {
+  try {
+    await cache.put(key, response)
+  } catch {
+    // A failed write only loses a future hit; release the tee branch so it stops buffering.
+    await response.body?.cancel().catch(() => undefined)
+  }
+}
+
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: Context): Promise<Response> {
     const url = new URL(request.url)
     // Disabled aliases are also denied here if a deployment still exposes one.
     if (url.origin !== "https://dev.svekit.app") return failure(404)
@@ -80,6 +118,27 @@ export default {
     if (!allowedKey(key)) return failure(404)
 
     try {
+      let edgeCache: EdgeCache | undefined
+      let cached: Response | undefined
+      // Only immutable paths can share a GET entry across queries, cookies and HEAD requests.
+      const cacheKey = JSON_KEY.test(key) ? new Request(`${url.origin}${PREFIX}${key}`) : null
+      if (cacheKey !== null) {
+        try {
+          edgeCache = (globalThis as typeof globalThis & { caches: { default: EdgeCache } }).caches
+            .default
+          cached = await edgeCache.match(cacheKey)
+        } catch {
+          // Cache availability must not prevent authorized R2 reads (including behind Access).
+          edgeCache = undefined
+        }
+      }
+      if (cached !== undefined) {
+        const headers = new Headers(cached.headers)
+        headers.set("Cache-Control", headers.get(BROWSER_CACHE_CONTROL) ?? "private, no-cache")
+        headers.delete(BROWSER_CACHE_CONTROL)
+        return await clientResponse(request, cached.body, headers)
+      }
+
       let object: ObjectMetadata | null
       let body: ReadObject["body"] | null = null
       if (request.method === "HEAD") {
@@ -100,14 +159,25 @@ export default {
       if (metadata?.contentEncoding !== undefined) {
         headers.set("Content-Encoding", metadata.contentEncoding)
       }
-      if (matchesEtag(request.headers.get("If-None-Match"), object.httpEtag)) {
-        await body?.cancel()
-        return new Response(null, { status: 304, headers })
+      const response = await clientResponse(request, body, headers)
+      if (
+        cacheKey !== null &&
+        edgeCache !== undefined &&
+        request.method === "GET" &&
+        response.status === 200
+      ) {
+        const copy = response.clone()
+        const cacheHeaders = new Headers(copy.headers)
+        // Public policy exists only on the internal entry; every browser response stays private.
+        cacheHeaders.set(BROWSER_CACHE_CONTROL, headers.get("Cache-Control") ?? "private, no-cache")
+        cacheHeaders.set("Cache-Control", EDGE_CACHE_CONTROL)
+        const init: ResponseInit & { encodeBody: "manual" } = {
+          headers: cacheHeaders,
+          encodeBody: "manual",
+        }
+        ctx.waitUntil(store(edgeCache, cacheKey, new Response(copy.body, init)))
       }
-
-      // R2 compressed siblings already contain wire bytes; Workers must not compress them again.
-      const init: ResponseInit & { encodeBody: "manual" } = { headers, encodeBody: "manual" }
-      return new Response(body, init)
+      return response
     } catch {
       return failure(502)
     }

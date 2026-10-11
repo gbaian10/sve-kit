@@ -137,6 +137,27 @@ R2 壓縮旁檔依 [Response 官方文件](https://developers.cloudflare.com/wor
 沿用發布器設定的 Cache-Control，dev 改為 private（僅將 public 換成 private），其餘指令保持原樣。
 物件缺少 Cache-Control 時退回 `private, no-cache`。
 
+Worker 對 `snapshots/blobs/<64 位小寫 hex>.json` 與
+`snapshots/manifests/<64 位小寫 hex>.json`（含 `.br`／`.gz` 旁檔）查詢
+`caches.default`，未命中時讀 R2，成功的 GET 以 `ctx.waitUntil` 寫入完整回應。
+這些 key 內容定址且不可變，內部快取使用 `public, max-age=31536000, immutable`；
+瀏覽器的 Cache-Control 另存於內部標頭，命中時還原並移除該標頭，維持上述 private 轉換與缺值退回。
+快取鍵使用已驗證的同源完整路徑與 GET，不帶 query、Cookie、Range 或條件標頭；
+不同壓縮旁檔分別存放。命中後由 handler 處理 ETag／If-None-Match 與 HEAD，保留壓縮位元組；
+HEAD 未命中僅讀 R2 metadata，不寫入空 body；304、404 與錯誤不寫入快取。
+`snapshots/versions/index.json` 必須取得最新版本，卡圖 key 可能覆寫，即使帶 `?v=` 也不使用邊緣快取，
+兩者仍直接讀 R2 並沿用發布器的 Cache-Control。
+
+快取只由 Worker 內部存取，Access 必須在 Worker 前驗證每次請求；命中不新增匿名入口，
+也不改變 §4 的全路徑 Access、別名關閉與 host gate 要求。內部的 public 快取回應不直接送給瀏覽器。
+依 [Cache API 官方文件](https://developers.cloudflare.com/workers/runtime-apis/cache/)，
+此快取只存在當次資料中心、不跨區複寫，各資料中心第一次讀取仍會回源 R2。
+官方文件對 Access 前方保護的 Worker 可能無法使用 Cache API 的限制敘述與實測不符，以實測為準：
+2026-10-11 在 Access 保護的開發網域上，第二次讀取同一 blob 的回應帶
+`server-timing: cfCacheStatus;desc="HIT"`，Worker 讀 R2 的 300～700 ms 消失。
+查詢失敗會退回 R2，背景寫入失敗不影響回應；本機測試只驗證程式行為，平台命中以線上實測為準。
+邊緣條目一年內不回源驗證，不要覆寫既有 blob／manifest key，內容改變須改用新的內容雜湊路徑。
+
 維護者以本機 Wrangler 登入或最小部署權限操作，登入方式／權限需依當下官方介面核對，
 未驗證，需維護者實測。部署登入只留本人本機，不把 R2 key pair 當部署 token，不交 CI／agent。
 在 `sim/web` 執行 `bun run deploy:dev`，呼叫本機鎖定的 Wrangler 與開發設定檔，不依賴全域 PATH。
