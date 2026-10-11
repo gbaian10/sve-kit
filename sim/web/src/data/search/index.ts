@@ -11,6 +11,7 @@ import {
   stringValue,
 } from "../format-v3/json"
 import type { BootstrapColumns } from "./bootstrap"
+import { cardNumberOrder } from "./card-number-order"
 import { Columns, StringPool } from "./columns"
 import { pack, unpack } from "./image"
 
@@ -89,7 +90,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump whenever `encode` changes, so stored images in an older layout are never read. */
-export const INDEX_IMAGE_FORMAT = 2
+export const INDEX_IMAGE_FORMAT = 3
 
 interface Parts {
   readonly pool: StringPool
@@ -98,6 +99,7 @@ interface Parts {
   readonly printings: Record<(typeof PRINTING_COLUMNS)[number], Uint32Array>
   readonly names: Uint32Array
   readonly aliases: Uint32Array
+  readonly order: Uint32Array
   readonly costs: Float64Array
   readonly sets: ReadonlySet<string>
   readonly options: SearchOptions
@@ -232,6 +234,14 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     printings: seal(printings),
     names: Uint32Array.from(names),
     aliases: Uint32Array.from(aliases),
+    order: cardNumberOrder(
+      printings.id.map((id, ordinal) => ({
+        lookup: pool.get(printings.lookup[ordinal] ?? 0),
+        flat: pool.get(printings.flat[ordinal] ?? 0),
+        printingId: pool.get(id),
+        cardId: pool.get(cards.id[printings.card[ordinal] ?? 0] ?? 0),
+      })),
+    ),
     costs: Float64Array.from(costs),
     sets,
     options,
@@ -264,6 +274,7 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
   const names = take(Uint32Array)
   const aliases = take(Uint32Array)
   const costs = take(Float64Array)
+  const order = take(Uint32Array)
   const readColumns = (value: unknown) =>
     Columns.restore(
       pool,
@@ -306,6 +317,7 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
     names,
     aliases,
     costs,
+    order,
     sets: new Set(arrayValue(image["sets"]).map((value) => stringValue(value))),
     options,
     targets,
@@ -320,6 +332,7 @@ export class SearchIndex {
   private readonly printings: Record<(typeof PRINTING_COLUMNS)[number], Uint32Array>
   private readonly names: Uint32Array
   private readonly aliases: Uint32Array
+  private readonly order: Uint32Array
   private readonly costs: Float64Array
   private readonly sets: ReadonlySet<string>
   readonly options: SearchOptions
@@ -338,6 +351,7 @@ export class SearchIndex {
     this.names = parts.names
     this.aliases = parts.aliases
     this.costs = parts.costs
+    this.order = parts.order
     this.sets = parts.sets
     this.options = parts.options
     this.targets = parts.targets
@@ -378,6 +392,7 @@ export class SearchIndex {
         this.names,
         this.aliases,
         this.costs,
+        this.order,
         ...blocks.flatMap(({ columns }) => columns.flatMap(([, kinds, values]) => [kinds, values])),
         ...this.targets
           .parts()
@@ -395,7 +410,7 @@ export class SearchIndex {
     if (state.rarities.length) facets.push("rarities")
     if (state.altArtOnly) facets.push("altArtOnly")
     if (Object.keys(state.mechanics).length) facets.push("mechanics")
-    if (state.unit !== "card") facets.push("unit")
+    if (state.unit === "art") facets.push("unit")
     if (state.sort !== "no") facets.push("sort")
     if (facets.length)
       throw new SearchQueryError({
@@ -410,6 +425,16 @@ export class SearchIndex {
     const buckets: number[][] = [[], [], [], []]
     const allowed = (printing: number) =>
       !state.sets.length || state.sets.includes(this.pool.get(this.printings.owner[printing] ?? 0))
+    const upper = state.cost.max !== undefined && state.cost.max < 7 ? state.cost.max : undefined
+    const costAllowed = (printing: number) => {
+      const cost = this.costs[printing] ?? Number.NaN
+      return (
+        (state.cost.min === undefined && upper === undefined) ||
+        (!Number.isNaN(cost) &&
+          (state.cost.min === undefined || cost >= state.cost.min) &&
+          (upper === undefined || cost <= upper))
+      )
+    }
     for (let card = 0; card < this.cards.id.length; card += 1) {
       if (
         state.classes.length &&
@@ -418,6 +443,40 @@ export class SearchIndex {
         continue
       const start = this.cards.printingStart[card] ?? 0
       const end = this.cards.printingStart[card + 1] ?? start
+      if (state.unit === "printing") {
+        const nameRank =
+          state.text === ""
+            ? 0
+            : Math.min(
+                this.textRank(this.names, this.cards.nameStart, card, flat),
+                this.textRank(this.aliases, this.cards.aliasStart, card, flat),
+              )
+        for (let p = start; p < end; p += 1) {
+          if (!allowed(p) || !costAllowed(p)) continue
+          let rank = nameRank
+          if (state.text !== "") {
+            if (!flat) continue
+            const number = this.pool.get(this.printings.number[p] ?? 0)
+            if (
+              (lookup !== null && this.pool.get(this.printings.lookup[p] ?? 0) === lookup) ||
+              (digits !== null && number === digits)
+            )
+              rank = 0
+            else if (
+              this.pool.get(this.printings.flat[p] ?? 0).startsWith(flat) ||
+              (number !== "" &&
+                typed !== null &&
+                typed.suffix === "" &&
+                this.pool.get(this.printings.set[p] ?? 0) === typed.set &&
+                number.startsWith(typed.number)) ||
+              (number !== "" && digits !== null && number.startsWith(digits))
+            )
+              rank = 1
+          }
+          if (rank <= 3) buckets[rank]?.push(p)
+        }
+        continue
+      }
       let representative = this.cards.default[card] ?? start
       if (!allowed(representative)) {
         representative = -1
@@ -472,18 +531,11 @@ export class SearchIndex {
           printing = representative
         }
       }
-      const cost = this.costs[printing] ?? Number.NaN
-      const upper = state.cost.max !== undefined && state.cost.max < 7 ? state.cost.max : undefined
-      if (
-        (state.cost.min !== undefined || upper !== undefined) &&
-        (Number.isNaN(cost) ||
-          (state.cost.min !== undefined && cost < state.cost.min) ||
-          (upper !== undefined && cost > upper))
-      )
-        continue
+      if (!costAllowed(printing)) continue
       buckets[rank]?.push(printing)
     }
     const matches = buckets.flat()
+    if (state.text === "") matches.sort((a, b) => (this.order[a] ?? 0) - (this.order[b] ?? 0))
     const offset = Math.max(0, Math.trunc(query.offset ?? 0))
     const limit = Math.max(1, Math.min(100, Math.trunc(query.limit ?? 24)))
     return {
@@ -493,7 +545,11 @@ export class SearchIndex {
         const card = this.printings.card[printing] ?? 0
         const summary = this.printings.summary[printing] ?? 0
         return {
-          key: this.pool.get(this.cards.id[card] ?? 0),
+          key: this.pool.get(
+            state.unit === "printing"
+              ? (this.printings.id[printing] ?? 0)
+              : (this.cards.id[card] ?? 0),
+          ),
           printingId: this.pool.get(this.printings.id[printing] ?? 0),
           summary: summary
             ? (this.summaries.row(summary - 1) as unknown as CardSummary)
@@ -594,6 +650,7 @@ export class SearchIndex {
           this.names,
           this.aliases,
           this.costs,
+          this.order,
         ].reduce((total, value) => total + value.byteLength, 0),
       stringBytes: this.pool.bytes(),
       cards: this.cards.id.length,

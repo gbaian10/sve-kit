@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
+import { cardNoKey } from "../../domain/cardNo"
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import { apply } from "../../domain/search"
 import { memoryCache } from "../../test-utils/cache"
@@ -19,6 +20,24 @@ import {
   SearchSession,
   type SearchStatus,
 } from "../index"
+const numeric = new Intl.Collator("en", { numeric: true, sensitivity: "base" })
+function orderExpected(
+  catalog: ReturnType<typeof createCatalog>,
+  items: { key: string; printingId: string }[],
+) {
+  return items.sort((a, b) => {
+    const first = cardNoKey(catalog.summary(a.printingId)?.cardNo ?? "", catalog.sets)
+    const second = cardNoKey(catalog.summary(b.printingId)?.cardNo ?? "", catalog.sets)
+    if (!first || !second) return Number(second !== null) - Number(first !== null)
+    return (
+      numeric.compare(first.set, second.set) ||
+      numeric.compare(first.number, second.number) ||
+      numeric.compare(first.suffix.replace(/en$/u, ""), second.suffix.replace(/en$/u, "")) ||
+      a.key.localeCompare(b.key) ||
+      a.printingId.localeCompare(b.printingId)
+    )
+  })
+}
 type CombinedStatus = SearchStatus & SearchChannelStatus
 import { SearchBlobs } from "./blobs"
 import { BootstrapColumns } from "./bootstrap"
@@ -287,6 +306,7 @@ describe("complete Worker catalog generations", () => {
         const expected = catalog
           .results(state, "jp")
           .filter((item) => catalog.summary(item.printingId)?.region === "jp")
+        if (!text) orderExpected(catalog, expected)
         expect(result.page.total).toBe(expected.length)
         expect(result.page.items.map(({ key, printingId }) => ({ key, printingId }))).toEqual(
           expected.slice(0, 2),
@@ -687,7 +707,7 @@ it("query failures are typed and isolated from other channels and load state", a
     [["rarities"], { rarities: ["legend"] }],
     [["altArtOnly"], { altArtOnly: true }],
     [["mechanics"], { mechanics: { quick: "has" } }],
-    [["unit"], { unit: "printing" }],
+    [["unit"], { unit: "art" }],
     [["sort"], { sort: "cost" }],
   ] as const) {
     h.channel.search({ ...query, state: { ...DEFAULT_QUERY, ...changes } })
@@ -848,6 +868,7 @@ it("typed matching preserves catalog ranking, canonical pagination and summaries
       const result = h.channel.getStatus().result
       if (result.phase !== "complete") throw new Error("missing result")
       const expected = apply(state, entries, { edition, sets: catalog.sets })
+      if (!text) orderExpected(catalog, expected)
       expect(result.page.total).toBe(expected.length)
       expect(result.page.items).toEqual(
         expected
@@ -1273,4 +1294,140 @@ it("separates config, bootstrap, index building and visible-image preparation", 
   expect(
     h.events.findLastIndex((event) => event.kind === "stage" && event.step === "images"),
   ).toBeLessThan(h.events.findIndex((event) => event.kind === "ready"))
+})
+
+it("printing pages preserve every edition printing, independent numbering, filters and image-complete cache identity", async () => {
+  const served = origin()
+  const client = createSnapshotClient(base, {
+    fetch: served.fetcher,
+    cacheStorage: memoryCache(),
+  })
+  await client.load()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const catalog = createCatalog(snapshot)
+  for (const edition of ["jp", "en"] as const) {
+    const storage = memoryCache()
+    const h = harness(served, storage)
+    h.session.load(base, edition, "preview")
+    await h.settled()
+    const entries = catalog.entries.flatMap((entry) =>
+      entry.printings
+        .filter((p) => p.region === edition)
+        .map((p) => ({ ...entry, printings: [p], defaultPrinting: { [edition]: p.id } })),
+    )
+    expect(entries.length).toBeGreaterThanOrEqual(
+      new Set(entries.map((entry) => entry.cardId)).size,
+    )
+    for (const text of ["", "BP01", "BP01-001", "51", "試作", "missing"]) {
+      const state = { ...DEFAULT_QUERY, unit: "printing" as const, text }
+      h.channel.search({ ...query, edition, state, offset: 1, limit: 3 })
+      await h.queried()
+      const result = h.status().result
+      if (result.phase !== "complete") throw new Error("missing printing page")
+      const expected = apply(state, entries, { edition, sets: catalog.sets })
+      if (!text) orderExpected(catalog, expected)
+      expect(result.page.total).toBe(expected.length)
+      expect(result.page.items).toEqual(
+        expected.slice(1, 4).map((item) => ({
+          key: item.printingId,
+          printingId: item.printingId,
+          summary: catalog.summary(item.printingId),
+        })),
+      )
+    }
+    const state = {
+      ...DEFAULT_QUERY,
+      unit: "printing" as const,
+      classes: ["forestcraft"],
+      cost: { max: 1 },
+    }
+    h.channel.search({ ...query, edition, state })
+    await h.queried()
+    const filtered = h.status().result
+    if (filtered.phase !== "complete") throw new Error("missing filtered printings")
+    const expected = orderExpected(
+      catalog,
+      apply(state, entries, { edition, sets: catalog.sets }).filter((item) => {
+        const cost = catalog.summary(item.printingId)?.cost
+        return cost !== null && cost !== undefined && cost <= 1
+      }),
+    )
+    expect(filtered.page.total).toBe(expected.length)
+    expect(filtered.page.items.map((item) => item.printingId)).toEqual(
+      expected.map((item) => item.printingId),
+    )
+    const viewQuery = {
+      ...query,
+      edition,
+      state: { ...DEFAULT_QUERY, unit: "printing" as const },
+      limit: 60,
+    }
+    h.channel.view(viewQuery, true)
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const complete = h.status().result
+    if (complete.phase !== "complete" || !complete.view) throw new Error("missing printing view")
+    expect(complete.page.items.every((item) => item.key === item.printingId)).toBe(true)
+    expect(complete.view.faces.length).toBeGreaterThan(0)
+    const fresh = origin()
+    const release = fresh.hold("snapshots/preview/current.json")
+    const warm = harness(fresh, storage)
+    warm.channel.view(viewQuery)
+    warm.session.load(base, edition, "preview")
+    await expect.poll(() => warm.status().result.phase, POLL).toBe("complete")
+    expect(warm.status().result).toMatchObject({ page: complete.page, view: complete.view })
+    expect(fresh.requests).toEqual(["snapshots/preview/current.json"])
+    release()
+    await warm.settled()
+    h.session.dispose()
+    warm.session.dispose()
+  }
+})
+
+it("keeps two printings of one card as separate numbered items after index restore", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const owner = snapshot.bootstrap.find(
+    (fragment) =>
+      fragment.table === "printing" && fragment.rows.some((row) => row["region"] === "jp"),
+  )
+  const original = owner?.rows.find((row) => row["region"] === "jp")
+  if (!owner || !original) throw new Error("missing test printing")
+  const extra = { ...original, id: "p:synthetic-special", int_id: 9999999, card_no: "BP01-P01" }
+  const bootstrap = snapshot.bootstrap.map((fragment) =>
+    fragment === owner ? { ...fragment, rows: [...fragment.rows, extra] } : fragment,
+  )
+  const columns = new BootstrapColumns()
+  columns.ingest(bootstrap)
+  columns.seal()
+  const created = new SearchIndex(columns, "jp")
+  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
+    const cards = index.search(query)
+    const printings = index.search({ ...query, state: { ...DEFAULT_QUERY, unit: "printing" } })
+    expect(printings.total).toBe(
+      snapshot.bootstrap.flatMap((fragment) =>
+        fragment.table === "printing" ? fragment.rows.filter((row) => row["region"] === "jp") : [],
+      ).length + 1,
+    )
+    expect(
+      printings.items.filter((item) => item.summary?.cardId === original["card_id"]),
+    ).toHaveLength(
+      snapshot.bootstrap.flatMap((fragment) =>
+        fragment.table === "printing"
+          ? fragment.rows.filter(
+              (row) => row["region"] === "jp" && row["card_id"] === original["card_id"],
+            )
+          : [],
+      ).length + 1,
+    )
+    const extraItem = printings.items.find((item) => item.printingId === extra.id)
+    expect(extraItem).toMatchObject({ key: extra.id, summary: { cardNo: "BP01-P01" } })
+    expect(cards.items.some((item) => item.printingId === extra.id)).toBe(false)
+    expect(
+      index.search({ ...query, state: { ...DEFAULT_QUERY, unit: "printing", text: "BP01-P01" } })
+        .items,
+    ).toEqual([extraItem])
+  }
 })

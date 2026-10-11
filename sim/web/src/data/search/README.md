@@ -6,11 +6,27 @@ recent printing summaries. Replies carry generation, channel ID and query ID; ol
 cannot replace current results. Suggestions preserve exact printing identity and name/alias
 ranking. Missing recent IDs explicitly return `not-in-edition`.
 
-Search supports text, classes, printing home-set family codes and cost. Types, rarities,
-mechanics, alternate-art filtering, other units and other sorting return `unsupported-query`.
+Search supports card/printing units, text, classes, printing home-set family codes and cost. Types, rarities,
+mechanics, alternate-art filtering, the art unit and other sorting return `unsupported-query`.
 The list shows only cards released in the selected edition. Names remain multilingual, and
 UI language is independent of card edition. Card detail retains its on-demand compatibility
 path; only the card page starts the full snapshot client.
+
+With no search text, card pages order the existing representative printing's card number;
+printing pages order each printing's own card number, without choosing a representative.
+Its width/case-folded key compares set-code digit runs numerically, then the letter prefix
+(empty first), integer number, and suffix (empty first, edition marker ignored). Leading
+zeros do not affect comparison. Ties use permanent card ID, then printing ID. Unknown
+number forms follow recognized keys and compare folded literal text. Text queries retain
+the existing relevance ranking. This does not change representative-printing selection.
+A persisted scalar rank avoids decoding summaries or re-sorting all printings per query.
+Prefixes sort empty, LD, P, PR, SL in ASCII order within the same set. For V3, pass
+`state: { ...DEFAULT_QUERY, unit: "printing", sort: "no", sets: [familyCode] }` to
+`channel.view` or `useListView`. Each item key is its printing ID; `summary.cardId`
+remains the card identity, and every face/image source belongs to that printing.
+Totals and paging count printings, and query/cache identity distinguishes units.
+The existing P2a screen retains its card-unit default; V3 can set printing as its default
+without a new index layout or a full catalog on the main thread.
 
 The Worker retains scalar index columns, a shared string pool, multilingual class/set
 options and image targets (printing ID, face ID, permanent integer ID, ordinal and owner).
@@ -33,7 +49,7 @@ active selection; missing or damaged bodies fall back to verified raw reconstruc
 
 Cache identity includes root, manifest hash, reader build and local format. View slots also
 include the normalizer version, selected-region policy and complete query. Multilingual
-names avoid a separate language-specific record. Index format is 2; view format is 1;
+names avoid a separate language-specific record. Index format is 3; view format is 1;
 the public snapshot wire format is unchanged. Automatic raw/index/view/metadata caches
 share 64 MiB per root and 128 MiB per origin. Views have a 2 MiB raw-body subquota; an
 oversized view stays usable in memory. Successful raw plans and verified records retain
