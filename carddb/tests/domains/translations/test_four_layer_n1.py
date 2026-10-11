@@ -33,8 +33,8 @@ from .test_four_layer_classification import classifier, source
 from .test_four_layer_derivation import context
 
 
-@pytest.fixture
-def engine() -> Classifier:
+def n1_classifier() -> Classifier:
+    """Expose the synthetic catalog for source and render integration cases."""
     terms = (
         Term("term:ability.quick", "ability", "クイック"),
         Term("term:keyword.synthetic", "keyword", "仮旗"),
@@ -88,6 +88,11 @@ def engine() -> Classifier:
         ),
     )
     return result
+
+
+@pytest.fixture
+def engine() -> Classifier:
+    return n1_classifier()
 
 
 def derive(raw: str, engine: Classifier) -> DerivedField:

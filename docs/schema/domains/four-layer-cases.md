@@ -42,12 +42,12 @@ expected 的 reason 是本規格原因碼，實作可映射既有公開診斷，
 | FL-009／record_shape | 缺必填、未知欄、重複鍵 | A／C 各自拒絕，不靠最後讀入覆蓋 |
 | FL-010／authored_entry | 新封套、舊 kind、品質欄 | format 3 通過；source_exception、舊格式、非法型別拒絕 |
 | FL-011／missing_translation | 結構正確而選詞缺譯／撤回 | 整欄 fallback；不輸出半中半日，也不擅取 variant |
-| FL-012／form_signature | locative／allative／ablative、未知 form、錯語言 | 合法形式通過，缺形式或錯參數拒絕 |
+| FL-012／form_signature、form_definition | locative／allative／ablative、完整具角色形式定義、空簽章、未知 form、錯語言 | 合法形式通過；錯 type／role、非法空簽章或非 Literal separator 拒絕 |
 | FL-013／annotation_identity | 卡名內同字、相同 text 不同概念 | 卡名與術語不互套 span；不同概念產生不同 set／context |
 | FL-014／occurrences | 重複詞、多個輸出與原文單獨顯示 | 保留每次位置；不同 exact text、越界或缺關聯拒絕 |
-| FL-015／render_dependencies | 改 label、form、bold、target、品質或 note | 真正依賴重算 render／annotation，note 不失效，frame 不變 |
+| FL-015／render_dependencies | 改 label、form、bold、target、品質、renderer 版本或 note | 真正依賴重算 render／annotation，note 不失效，frame 不變；v2→v3 改 dependency／tr，binding／annotation 不變 |
 | FL-016／semantic_dependencies | 改來源、frame 語義、接口描述、本體版本 | 精確失效用途／DSL；接口描述只失效相依 DSL，不重鍵翻譯；中文風格不重審規則 |
-| FL-017／zone_forms | 在／到／從、加入／回到手牌、計數來源與目的地 | 格與融合形式分清；目的地不改來源量詞，頂底不當普通 zone |
+| FL-017／zone_forms、np_role_render | 在／到／從、加入／回到手牌、計數來源與目的地、具角色 CardNP 與 owner-only | 格與融合形式分清；三個 classifier 分開派送，source/count owner 與 zone 配對；owner-only 用具角色所有格 |
 | FL-018／partial_np | 部分修飾、分支限定、異種聯集、特性／token／職業 | 未覆蓋可翻譯但不造已支援 DSL；不拉平 scope／型別 |
 | FL-019／quantity | exact/up_to/at_least/all/any/X/may/random | 構造分工不互換；缺 import／不合法 expression 拒絕 |
 | FL-020／owner_omission | 具名成本規則可解析、省略而未知 | 不全域補 self；未知保留 pending、相依 DSL 不可執行 |
@@ -62,6 +62,32 @@ expected 的 reason 是本規格原因碼，實作可映射既有公開診斷，
 | FL-029／candidate | 未完整綁定的譯文草稿、嘗試 pin／render | 可保留候選，不得進 active 或算完整覆蓋 |
 
 未列實作名稱、SQL 排序或私有 helper 呼叫次數，避免把契約測試寫成實作鏡像。
+
+### PR 3 的形式案例
+
+以下案例補入原有 FL 組，沿用同一份 JSON 與案例讀取器。`form_definition` 深複製
+`n1_role_forms` 中由 `form` 指定的完整定義、套用 `changes`，再驗有限形式規則；
+`np_role_render` 深複製 `n1_np_roles`、套用角色 `changes`，選取同名 forms，
+按 `omit_np_zone` 將區域改為 NP 外獨立 LeafRef，按 `remove_forms` 移除形式後實際 render。
+這是標示 `fixture-pg380-global-v2` 的合成 generic 來源，不宣稱 N1 producer 可接受該語法；
+正常來源的同 operand／全部 filter 邊界仍由既有行為測試驗證。
+
+| 案例組／ID | 必須驗到的結果 |
+| --- | --- |
+| FL-012／zone_locative_signature、zone_counted_locative_signature 及各自 wrong_role | source/count 區域使用不同 ID 與完整簽章，不能只驗型別 |
+| FL-012／quantity_classifier_source_selection_signature、counted_selection／counted_existence 對應 signature 及 wrong_role | 三個 classifier 的 kind／quantity／zone 角色 tuple 各自合法；不能互借區域角色 |
+| FL-012／owner_source_possessive_signature、owner_counted_possessive_signature 及各自 wrong_role | source/count 所有格有不同 ID，不能互換 owner role |
+| FL-012／zone_union_separator_signature、separator_with_arg、separator_old_rule、separator_with_label、possessive_empty_signature | 只允許 separator v2 的空簽章與 default Literal；其他空簽章拒絕 |
+| FL-017／np_source_selection_dispatch、np_counted_selection_dispatch、np_counted_existence_dispatch | source/count locative 與三個 classifier 依完整角色派送；保持來源 frame／binding |
+| FL-017／np_source_existence_rejected、np_owner_zone_role_mismatch、np_destination_owner_rejected | 未列 tuple、owner／zone 錯配及 destination_owner 拒絕 |
+| FL-017／np_source_owner_only_possessive、np_counted_owner_only_selection、np_counted_owner_only_existence | 區域在 NP 外引用，NP 使用具角色所有格與唯一 counted_zone 量詞語境；owner range 不含「的」 |
+| FL-017／np_counted_owner_only_missing_form | 缺所有格整欄 fallback，不輸出半句 |
+| FL-015／renderer_v3_dependencies | 相同 N0 來源／target 的 renderer v2→v3 更新 dependency／tr，frame／binding／annotation 不變 |
+
+上述新增 30 筆矩陣案例由 `test_four_layer_cases.py` 的原有共用 adapter 執行；
+`test_four_layer_n1_forms.py` 的正常來源、完整 filter、品質、範圍與派送行為測試保留。
+數位卡名共用版本相依由既有數位名稱 materialize 測試另驗。這些都是測試責任，
+不是對任一正式卡片授予 reviewed／verified。
 
 ## 3. 真實來源的回歸邊界索引
 

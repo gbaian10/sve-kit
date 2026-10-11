@@ -6,18 +6,27 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.contracts.four_layer import GlossaryReference, Target, hash_payload
+from sve_carddb.contracts.four_layer import (
+    FormDefinition,
+    GlossaryReference,
+    Target,
+    hash_payload,
+)
 from sve_carddb.contracts.source_binding import ReferenceDomain, SourceBinding
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
+from sve_carddb.domains.translations import four_layer_render
 from sve_carddb.domains.translations.four_layer_render import (
     BoundTarget,
     Form,
     Renderer,
     SelectedTarget,
+    validate_form,
 )
 
 from ...contracts.test_four_layer import CASES, annotation_set, changed, frame
 from .test_four_layer_render import expanded_target, renderer, sample, target
+from .test_parameter_group_render import engine as role_renderer
+from .test_parameter_group_render import render_item
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -30,6 +39,8 @@ OPERATIONS = {
     "occurrences",
     "render_dependencies",
     "semantic_dependencies",
+    "form_definition",
+    "np_role_render",
 }
 FIXED = tuple(
     object_value(row)
@@ -111,7 +122,15 @@ def _present(value: dict[str, JsonValue]) -> dict[str, JsonValue]:
         "zh-Hant",
     )
     action = string(value["changed"])
-    if action in {"label", "bold", "low_confidence", "emphasis_to_null"}:
+    if action == "renderer_version":
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(
+                "sve_carddb.domains.translations.four_layer_render.RENDERER_VERSION",
+                string(value["before_version"]),
+            )
+            before = rendered(item)
+        assert value["after_version"] == four_layer_render.RENDERER_VERSION
+    elif action in {"label", "bold", "low_confidence", "emphasis_to_null"}:
         label = selected.labels[key]
         if action == "label":
             label = replace(label, text="掌中牌")
@@ -126,7 +145,7 @@ def _present(value: dict[str, JsonValue]) -> dict[str, JsonValue]:
             domains=selected.domains,
         )
     elif action == "form":
-        form_key = ("zone.locative", "zh-Hant")
+        form_key = ("zone.counted_locative", "zh-Hant")
         original = selected.forms[form_key]
         data = original.definition.model_dump(mode="json")
         object_value(data["cases"])["hand"] = [
@@ -167,11 +186,70 @@ def _present(value: dict[str, JsonValue]) -> dict[str, JsonValue]:
     assert result.rendered is not None
     return {
         "frame_id_changed": after_item.frame.id != item.frame.id,
+        "binding_id_changed": after_item.binding.id != item.binding.id,
+        "translation_id_changed": before.identity() != result.rendered.identity(),
+        "annotation_changed": before.annotation != result.rendered.annotation,
         "render_dependency_changed": before.dependency_key
         != result.rendered.dependency_key,
         "dsl_review_stale": before_semantics(item) != before_semantics(after_item),
         "bold": result.rendered.annotation.occurrences[0].bold,
         "reason": None if not result.issues else result.issues[0],
+    }
+
+
+def _form_definition(value: dict[str, JsonValue]) -> dict[str, JsonValue]:
+    fixtures = object_value(CASES["fixtures"])
+    forms = object_value(fixtures[string(value["fixture"])])
+    definition = changed(
+        object_value(forms[string(value["form"])]), object_value(value["changes"])
+    )
+    validate_form(FormDefinition.model_validate_json(canonical(definition)))
+    return {}
+
+
+def _np_role_render(value: dict[str, JsonValue]) -> dict[str, JsonValue]:
+    fixtures = object_value(CASES["fixtures"])
+    fixture = changed(
+        object_value(fixtures[string(value["fixture"])]),
+        object_value(value["changes"]),
+    )
+    nodes = array(object_value(fixture["np_target"])["nodes"])
+    if value["omit_np_zone"]:
+        card = next(
+            object_value(n)
+            for n in nodes
+            if object_value(n).get("constructor") == "CardNP"
+        )
+        object_value(card["args"]).pop("zone")
+        nodes.insert(0, {"kind": "LeafRef", "slot": "zone"})
+    item = render_item(fixture)
+    selected = role_renderer()
+    for form in object_value(fixtures[string(value["forms"])]).values():
+        definition = FormDefinition.model_validate_json(canonical(form))
+        selected.forms[definition.id, definition.lang] = Form(definition)
+    for identifier in array(value["remove_forms"]):
+        selected.forms.pop((string(identifier), "zh-Hant"))
+    after_item = replace(
+        item,
+        selected=SelectedTarget(
+            Target.model_validate_json(canonical(fixture["np_target"]))
+        ),
+    )
+    result = selected.render("context:fixed-role", "zh-Hant", (after_item,))
+    output = result.rendered
+    if output is None:
+        return {"reason": result.issues[0]}
+    owner_leaves = tuple(leaf for leaf in output.leaves if leaf.slot == "owner")
+    assert owner_leaves
+    return {
+        "text": output.text,
+        "frame_id_changed": item.frame.id != after_item.frame.id,
+        "binding_id_changed": item.binding.id != after_item.binding.id,
+        "suffix_outside_owner_ranges": all(
+            output.text[r.start : r.end] == "自己"
+            for leaf in owner_leaves
+            for r in leaf.ranges
+        ),
     }
 
 
@@ -358,6 +436,8 @@ DISPATCH = {
     "render_dependencies": _present,
     "semantic_dependencies": _semantic,
     "occurrences": _occurrences,
+    "form_definition": _form_definition,
+    "np_role_render": _np_role_render,
 }
 REASONS = {
     "missing_required_leaf": "missing required",
@@ -367,6 +447,13 @@ REASONS = {
     "annotation_text_mismatch": "text identity mismatch",
     "span_out_of_bounds": "outside exact text",
     "missing_render_occurrence": "render occurrence",
+    "form_role_mismatch": "typed role signature",
+    "separator_signature_mismatch": "empty signature",
+    "separator_literal_required": "Literal|literal",
+    "empty_form_signature": "empty signature",
+    "unsupported_np_quantity_role": "unsupported classifier role tuple",
+    "np_owner_zone_role_mismatch": "owner and zone roles",
+    "unsupported_np_owner_role": "source or counted owner",
 }
 
 

@@ -176,6 +176,8 @@ layout 不含待翻語義，可機械生成固定模板；reminder/token_header 
 再以具名分類器／normalizer 驗固定字、葉值、角色、單位與 canonical source。
 依計數物、所在區域集合與數量角色查表並驗回原文單位；NFKC、別名及省略均留 trace。
 renderer 與 DSL 使用同一份通過檢查的值，NP 只組合引用，不建立重疊的第二份來源槽。
+N1 準備入口使用同版 derive_source／來源驗證，固定結構由版本決定；既有可選辨識仍尊重 enabled／low_confidence。
+正式 workflow／authored reader 仍 v1；renderer v3 的形式與必要引用規則獨立生效。
 
 ### 4.3 target 與自動套用
 
@@ -183,10 +185,14 @@ template_translation.data 恰為 `{template_id,lang,target}`，品質欄在 reco
 target 由 Literal／LeafRef／Form／有限 NP 節點構成，完整簽章依[共用契約 §5](four-layer-translation.md#5-targetform-與部分-np)。
 未知節點、壞引用或未使用必要葉是結構錯誤，拒絕載入／建置；缺必要目標語選詞則整欄回原文列 missing_term_translation。
 Literal 中不解析舊 `{{slot}}` 語法，不允許把必要引用改寫成同字 literal 躲過檢查。
+必要引用 E 按槽／角色／概念逐筆驗；量詞讀區域及空簽章 separator 不算呈現該區域。
+A 案純省略 owner 不入 E，未顯示時缺選詞不新增 fallback／品質依賴，顯示時仍引用自己的葉。
 
 句框架維持整行，子句切分可作盤點，但不啟用任意句子拼接。
 未覆蓋的 NP 修飾可用固定譯句與已驗葉引用，無須等待 NP 全覆蓋；未解語義不能投成 DSL no-op。
 新增卡包由四層來源核心產生 binding／未匹配清單、套用 frame／形式／詞庫並渲染，合併列出低信心、新句型、歧義、未匹配及缺譯清單。
+自動套用依目前的完整語義分類及 exact 來源 binding；occurrence-scoped pending 的新來源即使逐字同句，也不自動取得舊 target。
+派寫形狀可供整理，不能把尚未實作的跨 pending 複製算為可自動翻譯。
 低信心沿實際依賴 OR 傳播，machine 不自動等於低信心；不新增固定人工樣本門檻。
 加粗由逐 occurrence 的來源與渲染節點產生，不能事後搜尋中文；annotation set 契約見
 [共用契約 §8](four-layer-translation.md#8-建置-dbrender-projection-與依賴)。

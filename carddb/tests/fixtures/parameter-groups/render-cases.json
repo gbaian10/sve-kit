@@ -140,7 +140,7 @@
           },
           {
             "kind": "Form",
-            "form_id": "zone.card_np",
+            "form_id": "zone.locative",
             "args": {
               "zone": {
                 "slot": "zone"
@@ -347,7 +347,7 @@
           },
           {
             "kind": "Form",
-            "form_id": "zone.card_np",
+            "form_id": "zone.locative",
             "args": {
               "zone": {
                 "slot": "zone"
@@ -601,7 +601,7 @@
           },
           {
             "kind": "Form",
-            "form_id": "zone.card_np",
+            "form_id": "zone.locative",
             "args": {
               "zone": {
                 "slot": "zone"
@@ -860,7 +860,7 @@
           },
           {
             "kind": "Form",
-            "form_id": "zone.card_np",
+            "form_id": "zone.locative",
             "args": {
               "zone": {
                 "slot": "zone"
@@ -1075,7 +1075,7 @@
           },
           {
             "kind": "Form",
-            "form_id": "zone.card_np",
+            "form_id": "zone.locative",
             "args": {
               "zone": {
                 "slot": "zone"
@@ -1147,7 +1147,7 @@
   },
   "forms": [
     {
-      "id": "zone.card_np",
+      "id": "zone.locative",
       "lang": "zh-Hant",
       "signature": [
         {
@@ -1156,7 +1156,7 @@
           "role": "source_zone"
         }
       ],
-      "rule": "zone.case.v1",
+      "rule": "zone.case.v2",
       "cases": {
         "battlefield": [
           {
@@ -1227,11 +1227,21 @@
             "kind": "Literal",
             "text": "中合計"
           }
+        ],
+        "banish": [
+          {
+            "kind": "Label",
+            "arg": "zone"
+          },
+          {
+            "kind": "Literal",
+            "text": "中的"
+          }
         ]
       }
     },
     {
-      "id": "quantity.classifier",
+      "id": "quantity.classifier.source_selection",
       "lang": "zh-Hant",
       "signature": [
         {
@@ -1297,14 +1307,8 @@
     {
       "id": "zone.union_separator",
       "lang": "zh-Hant",
-      "signature": [
-        {
-          "name": "zone",
-          "type": "ZoneSet",
-          "role": "source_zone"
-        }
-      ],
-      "rule": "zone.union_separator.v1",
+      "signature": [],
+      "rule": "zone.union_separator.v2",
       "cases": {
         "default": [
           {

@@ -10,6 +10,7 @@ from pydantic import ConfigDict, JsonValue, TypeAdapter
 
 from sve_carddb.contracts.four_layer import (
     FormDefinition,
+    LeafRef,
     LeafType,
     Reference,
     Span,
@@ -223,8 +224,8 @@ def test_parameter_group_case(case: dict[str, JsonValue]) -> None:
 @pytest.mark.parametrize(
     ("key", "form_id", "issue"),
     [
-        ("g07", "zone.card_np", "missing_card_zone_form"),
-        ("g07", "quantity.classifier", "missing_classifier_form"),
+        ("g07", "zone.locative", "missing_card_zone_form"),
+        ("g07", "quantity.classifier.source_selection", "missing_classifier_form"),
         ("g09", "trait.filter", "missing_trait_filter_form"),
         ("g10", "zone.union_separator", "missing_zone_union_separator"),
     ],
@@ -266,7 +267,9 @@ def test_form_cannot_hide_a_required_modifier_or_change_its_type() -> None:
             ]
         else:
             object_value(array(changed["signature"])[0])["type"] = "TokenStatus"
-        with pytest.raises(ValueError, match="exact typed signature"):
+        with pytest.raises(
+            ValueError, match=r"exact typed role signature|must present its reference"
+        ):
             validate_form(FormDefinition.model_validate_json(canonical(changed)))
 
 
@@ -398,4 +401,21 @@ def test_classifier_follows_the_np_zone_not_another_zone_leaf() -> None:
             Target.model_validate_json(canonical(fixture["np_target"]))
         ),
     )
-    assert rendered(item, engine()).text == "可以公開自己手牌中的2張從者。"
+    # The optional destination is explicit and its selected label is project-origin,
+    # so the classifier reading only the NP zone cannot satisfy its reference.
+    with pytest.raises(ValueError, match="necessary concept references"):
+        engine().render("context:pg380", "zh-Hant", (item,))
+    assert item.selected is not None
+    item = replace(
+        item,
+        selected=SelectedTarget(
+            Target(
+                format=1,
+                nodes=(
+                    *item.selected.target.nodes,
+                    LeafRef(kind="LeafRef", slot="dest"),
+                ),
+            )
+        ),
+    )
+    assert rendered(item, engine()).text == "可以公開自己手牌中的2張從者。戰場"
