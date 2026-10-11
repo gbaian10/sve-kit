@@ -353,7 +353,7 @@ describe("page image metadata", () => {
 })
 
 describe("network scheduling", () => {
-  it("reserves a fourth slot for the page while background bodies are stalled", async () => {
+  it("keeps slots free for the page while background bodies are stalled", async () => {
     const starts: string[] = []
     const release: (() => void)[] = []
     const queue = requestQueue(async (url) => {
@@ -363,14 +363,17 @@ describe("network scheduling", () => {
       })
       return new Response("{}")
     })
-    const background = Array.from({ length: 6 }, (_, i) =>
+    const background = Array.from({ length: 9 }, (_, i) =>
       queue.background(`background${String(i)}`),
     )
     await Promise.resolve()
-    expect(starts).toHaveLength(3)
+    expect(starts).toHaveLength(6)
     const visible = queue.foreground("visible")
-    expect(starts).toEqual(["background0", "background1", "background2", "visible"])
-    while (starts.length < 7 || release.length > 0) {
+    expect(starts).toEqual([
+      ...Array.from({ length: 6 }, (_, i) => `background${String(i)}`),
+      "visible",
+    ])
+    while (starts.length < 10 || release.length > 0) {
       release.splice(0).forEach((resolve) => {
         resolve()
       })
