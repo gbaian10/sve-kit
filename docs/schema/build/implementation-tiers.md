@@ -64,6 +64,7 @@ T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction�
 | `face_title`                   | T0   |
 | `face_special_kind`            | T0   |
 | `face_current`                 | T0   |
+| `face_wording`                 | T0   |
 | `printing_face_observation`    | T0   |
 | `source_coverage`              | T0   |
 | `errata`                       | T1   |

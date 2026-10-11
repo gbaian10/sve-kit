@@ -3,7 +3,7 @@
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
 專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../../quotations.md)。
 
-身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；未採納表記的顯示與無主文證據（§9.1、§9.2）為 2026-10-01 已核可的處理政策，沒有 wording 採納輸入；身分修復與決定續版 **identity-transition-v1，使用者 2026-10-01 核可**（§12）；翻譯／模板格式與推導邊界見 §6（2026-10-01，技術契約）；詞彙與顯示覆寫封套見 §8（技術契約，稀有度白名單與繁中缺譯順序於 2026-10-01 核可）；來源綁定的插畫裁切覆寫見[覆寫契約](../images/image-crop-overrides.md)（技術契約）；人工限量序號版次另定待審技術契約 [manual-printings-v1](manual-printings.md)，收錄政策依維護者 2026-10-03 最新更正；構築專用入口見 [construction-adoption-v1](construction-adoption.md)，首批政策為維護者 2026-10-03 決定的 JP／EN Standard，首發先上可查禁限資料、CR 引用與固定 ref 等 #48 並明示尚未完成，不承諾整副牌合法性；其餘類別仍是提案。建置資料庫語意以 [build-db.md](../build/build-db.md) 為準；已核可的表記未定顯示擴充另見 [snapshot-format §2.3](../export/snapshot-format.md#23-表記未定的公開呈現)。
+身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；未採納表記的顯示與無主文證據（§9.1、§9.2）為 2026-10-01 已核可的處理政策，沒有 wording 採納輸入；身分修復與決定續版 **identity-transition-v1，使用者 2026-10-01 核可**（§12）；翻譯／模板格式與推導邊界見 §6（2026-10-01，技術契約）；詞彙與顯示覆寫封套見 §8（技術契約，稀有度白名單與繁中缺譯順序於 2026-10-01 核可）；來源綁定的插畫裁切覆寫見[覆寫契約](../images/image-crop-overrides.md)（技術契約）；人工限量序號版次另定待審技術契約 [manual-printings-v1](manual-printings.md)，收錄政策依維護者 2026-10-03 最新更正；構築專用入口見 [construction-adoption-v1](construction-adoption.md)，首批政策為維護者 2026-10-03 決定的 JP／EN Standard，首發先上可查禁限資料、CR 引用與固定 ref 等 #48 並明示尚未完成，不承諾整副牌合法性；其餘類別仍是提案。建置資料庫語意以 [build-db.md](../build/build-db.md) 為準；已核可的表記未定顯示擴充另見 [snapshot-format §2.3](../export/snapshot-format.md#23-卡文版本與依據版本)。
 
 ## 1. 路徑與共同格式
 
@@ -316,7 +316,7 @@ route/default 純推導；authored 只寫 alias、variant `route_override`、`de
 
 ### 9.1 未採納表記的顯示與來源更正
 
-**使用者 2026-10-01 核可本節暫顯規則**：沒有舊 current、但表記有差異的卡照樣顯示，不因待採納排除。正式／preview 採相同邊界：`face_current` 只表示已採納 current；暫時顯示的觀測另由公開 `face.wording` 投影，不能寫成 latest_adopted_wording 或虛構 decision。完整公開形狀、候選引用與分片規則見 [snapshot-format §2.3](../export/snapshot-format.md#23-表記未定的公開呈現)。
+**使用者 2026-10-01 核可本節暫顯規則**：沒有舊 current、但表記有差異的卡照樣顯示，不因待採納排除。正式／preview 採相同邊界：`face_current` 只表示已採納 current；暫時顯示的觀測另由公開 `face.wording` 投影，不能寫成 latest_adopted_wording 或虛構 decision。完整公開形狀、候選引用與分片規則見 [snapshot-format §2.3](../export/snapshot-format.md#23-卡文版本與依據版本)。
 
 | 情況 | 行為 |
 | --- | --- |
@@ -525,3 +525,9 @@ A／B 兩種名稱語意見 [引擎規則能力與資料身分](../../dsl/engine
 缺必要模板、歧義或 pin 不符都拒絕，沒有官方名稱預設。
 本專案在新路徑的可執行原創資料採 Apache-2.0，來源內容的排除仍依 LICENSING。
 格式合法不等於執行器支援或資料已採納，實際載入能力由 engine 契約與測試驗證。
+
+## 卡文判定
+
+`wording/<filing_key>/<sequence>.yaml` 是可選的 AI／人工卡文等價判定入口，
+format 1、kind wording_decisions；完整欄位、內容雜湊與人工覆寫規則依
+[卡文依據契約](wording-basis.md)。不存官方卡文，單檔沿用小於 1 MiB 限制。
