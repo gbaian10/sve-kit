@@ -260,6 +260,16 @@ describe("plain wording on the card page", () => {
     expect(screen.getByRole("heading", { name: "此卡各版次的卡文不同" })).toBeVisible()
     expect(screen.queryByText("此版次的原文")).not.toBeInTheDocument()
   })
+  it("opens this printing's own wording when no wording is displayed yet", async () => {
+    const { container } = await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    expect(container.querySelectorAll("details")).toHaveLength(2)
+    expect(container.querySelectorAll("details[open]")).toHaveLength(1)
+    expect(screen.getByText("Synthetic older effect")).toBeVisible()
+    expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
+    expect(screen.queryByText("目前顯示的卡文")).not.toBeInTheDocument()
+  })
   it("does not claim an unknown candidate has no effect", async () => {
     state.candidates = [{ printing_id: "p:synthetic", revision_id: null }]
     await renderRoutes([{ path: "/cards/:cardNo", ...card }], {

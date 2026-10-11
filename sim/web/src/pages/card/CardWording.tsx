@@ -23,11 +23,16 @@ interface TextProps {
 function CandidateText({
   candidate,
   selected,
+  initiallyOpen,
   client,
   edition,
-}: TextProps & { readonly candidate: Candidate; readonly selected: boolean }) {
+}: TextProps & {
+  readonly candidate: Candidate
+  readonly selected: boolean
+  readonly initiallyOpen: boolean
+}) {
   const { t } = useTranslation()
-  const [open, setOpen] = useState(selected)
+  const [open, setOpen] = useState(initiallyOpen)
   return (
     <details
       open={open}
@@ -202,18 +207,24 @@ export function CardWording({
     <section className="mt-4 space-y-2" aria-label={t("card.wording.different")}>
       <h3 className="text-14 font-semibold">{t("card.wording.different")}</h3>
       {candidates.length === 0 && <p>{t("card.wording.unavailable")}</p>}
-      {candidates.map((candidate) => (
-        <CandidateText
-          key={`${printingId}/${candidate.revisionId ?? "unknown"}`}
-          client={client}
-          edition={edition}
-          candidate={candidate}
-          selected={
-            candidate.revisionId === displayId ||
-            (displayId === undefined && candidates.length === 1)
-          }
-        />
-      ))}
+      {candidates.map((candidate) => {
+        const selected =
+          candidate.revisionId === displayId || (displayId === undefined && candidates.length === 1)
+        return (
+          <CandidateText
+            key={`${printingId}/${candidate.revisionId ?? "unknown"}`}
+            client={client}
+            edition={edition}
+            candidate={candidate}
+            selected={selected}
+            // With no wording displayed yet, open the one printed on this printing.
+            initiallyOpen={
+              selected ||
+              (displayId === undefined && candidate.printings.some((p) => p.id === printingId))
+            }
+          />
+        )
+      })}
     </section>
   )
 }
