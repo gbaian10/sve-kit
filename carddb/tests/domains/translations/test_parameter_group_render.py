@@ -401,6 +401,10 @@ def test_classifier_follows_the_np_zone_not_another_zone_leaf() -> None:
             Target.model_validate_json(canonical(fixture["np_target"]))
         ),
     )
+    # The optional destination is explicit and its selected label is project-origin,
+    # so the classifier reading only the NP zone cannot satisfy its reference.
+    with pytest.raises(ValueError, match="necessary concept references"):
+        engine().render("context:pg380", "zh-Hant", (item,))
     assert item.selected is not None
     item = replace(
         item,

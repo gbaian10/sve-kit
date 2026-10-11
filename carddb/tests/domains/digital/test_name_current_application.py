@@ -203,6 +203,7 @@ def test_current_policy_no_audit_and_ambiguous_name_is_independent(
 def test_current_render_quality_changes_id_but_note_does_not(
     base_case: ApplicationCase,
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     case = current_case(base_case, tmp_path / "repo")
     with case.database.copy() as db, db.transaction():
@@ -226,6 +227,13 @@ def test_current_render_quality_changes_id_but_note_does_not(
             db, owner.source, context, replace(owner.candidate, low_confidence=True)
         )
         assert low != first
+        # Digital names share the four-layer renderer version in their dependency key.
+        with monkeypatch.context() as patch:
+            patch.setattr(
+                "sve_carddb.domains.digital.name_policies.projection.RENDERER_VERSION",
+                "four-layer-renderer-test",
+            )
+            assert materialize(db, owner.source, context, owner.candidate) != first
         annotated = materialize(
             db, owner.source, context, owner.candidate, term_id="term:name.test"
         )
