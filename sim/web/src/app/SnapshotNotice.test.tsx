@@ -114,12 +114,15 @@ it.each(
         [{ path: "*", element: <SnapshotNotice client={client} status={status} /> }],
         { language },
       )
-      expect(screen.getByRole("status")).toHaveTextContent(i18n.t("snapshot.unavailable"))
       expect(screen.getByRole("status")).not.toHaveTextContent(i18n.t("snapshot.stale"))
       if (online) {
+        expect(screen.getByRole("status")).toHaveTextContent(i18n.t("snapshot.unavailable"))
         fireEvent.click(screen.getByRole("button", { name: i18n.t("snapshot.retry") }))
         expect(reload).toHaveBeenCalledTimes(1)
-      } else expect(screen.queryByRole("button")).not.toBeInTheDocument()
+      } else {
+        expect(screen.getByRole("status")).toHaveTextContent(i18n.t("snapshot.offline"))
+        expect(screen.queryByRole("button")).not.toBeInTheDocument()
+      }
     } finally {
       connection.mockRestore()
     }

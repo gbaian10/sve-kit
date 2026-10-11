@@ -149,8 +149,9 @@ The selection records distinguish permanent indexes from preview pointers. Missi
 or unavailable storage uses the usual index-first load. `reload()` waits for an active
 background check, so callers can explicitly await confirmation. A reload requested while local
 records are being restored starts a fresh check after restoration and waits for its result.
-Unconfirmed local data whose check fails with a network error gets a notice that updates could
-not be checked. Incompatible and corrupt errors keep their existing notices.
+Unconfirmed local data whose check fails with a network error while the browser is online gets a
+notice that updates could not be checked; offline keeps the offline notice. Incompatible and
+corrupt errors keep their existing notices.
 
 The search Worker's persistent index still resolves its own pointer before restoring. It is
 not currently connected to the cards-page list, which uses the main-thread catalog; giving

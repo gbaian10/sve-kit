@@ -38,13 +38,14 @@ export function SnapshotNotice({
       className="flex flex-wrap items-center gap-2 border-b border-border bg-surface-2 px-4 py-2 text-13 text-text-2"
     >
       <span>
-        {status.unconfirmed && status.updateError?.kind === "network"
-          ? t("snapshot.unavailable")
-          : online
-            ? status.unconfirmed && !status.updateError && !status.outdated
+        {/* Offline names the cause and the picture risk, which "could not check" would hide. */}
+        {online
+          ? status.unconfirmed && status.updateError?.kind === "network"
+            ? t("snapshot.unavailable")
+            : status.unconfirmed && !status.updateError && !status.outdated
               ? t("snapshot.checking")
               : t("snapshot.stale")
-            : t("snapshot.offline")}
+          : t("snapshot.offline")}
       </span>
       {status.updateError?.kind === "incompatible" && <span>{t("snapshot.updateApp")}</span>}
       {online && (!status.unconfirmed || status.updateError) && (
