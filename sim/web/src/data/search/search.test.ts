@@ -1278,6 +1278,94 @@ it("remembers the current completed query for a view-first reload without metada
   await warm.settled()
 })
 
+it("a cached generation replaced by a newer network version re-queries its completed view", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const first = harness(served, storage)
+  first.session.load(base, "jp", "preview")
+  await first.settled()
+  served.update(2)
+  const warm = harness(served, storage)
+  warm.channel.view({ ...query, limit: 60 })
+  warm.session.load(base, "jp", "preview")
+  await warm.settled()
+  // The cached view came from the old manifest; the list must follow the version now active.
+  expect(warm.status().dataVersion).toBe("20261004T010002Z-0001")
+  await expect
+    .poll(() => {
+      const result = warm.status().result
+      return result.phase === "complete" && result.manifestHash === warm.status().manifestHash
+    }, POLL)
+    .toBe(true)
+  const kinds = warm.events.map((event) => event.kind)
+  expect(kinds.lastIndexOf("view-result")).toBeGreaterThan(kinds.lastIndexOf("ready"))
+})
+
+it("a later check of an unchanged version keeps completed answers and rebuilds nothing", async () => {
+  const h = harness()
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  h.channel.view({ ...query, limit: 60 })
+  await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+  const answered = h.status().result
+  const phases: string[] = []
+  h.channel.subscribe(() => phases.push(h.channel.getStatus().result.phase))
+  const generation = h.status().generation ?? 0
+  h.served.requests.length = 0
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  expect(h.served.requests).toEqual(["snapshots/preview/current.json"])
+  expect(h.events.findLast((event) => event.kind === "ready")).toMatchObject({
+    generation: generation + 1,
+    metrics: { restored: true },
+  })
+  expect(h.status()).toMatchObject({ phase: "ready", generation: generation + 1, updating: false })
+  expect(phases).not.toContain("pending")
+  expect(h.status().result).toBe(answered)
+})
+
+it("switching back to an edition restores its stored index and view instead of rebuilding", async () => {
+  const h = harness()
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  h.session.load(base, "en", "preview")
+  await h.settled()
+  h.served.requests.length = 0
+  const mark = h.events.length
+  h.session.load(base, "jp", "preview")
+  h.channel.view({ ...query, limit: 60 })
+  await h.settled()
+  await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+  expect(h.served.requests).toEqual(["snapshots/preview/current.json"])
+  const readies = h.events.slice(mark).filter((event) => event.kind === "ready")
+  expect(readies.length).toBeGreaterThan(0)
+  expect(readies.every((event) => event.metrics.restored)).toBe(true)
+  expect(h.status()).toMatchObject({ edition: "jp", searchReady: true, unconfirmed: false })
+})
+
+it("an older selection of the other edition cannot make an unchanged entry look rewritten", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const en = harness(served, storage)
+  en.session.load(base, "en", "index")
+  await en.settled()
+  const path = "snapshots/versions/index.json"
+  const index = objectValue(
+    JSON.parse(new TextDecoder().decode(served.files.get(path))) as JsonObject,
+  )
+  served.files.set(path, canonical({ ...index, revision: Number(index["revision"]) + 1 }))
+  const jp = harness(served, storage)
+  jp.session.load(base, "jp", "index")
+  await jp.settled()
+  const h = harness(served, storage)
+  h.session.load(base, "jp", "index")
+  await h.settled()
+  h.session.load(base, "en", "index")
+  await h.settled()
+  expect(h.status()).toMatchObject({ phase: "ready", edition: "en", unconfirmed: false })
+  expect(h.status().error).toBeUndefined()
+})
+
 it("separates config, bootstrap, index building and visible-image preparation", async () => {
   const h = harness()
   h.session.load(base, "jp", "preview")

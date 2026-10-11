@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import type { SearchEvent, SearchQuery, SearchRequest } from "../data"
 import { DEFAULT_QUERY } from "../domain/query/model"
-import { useSearch, useSearchReadiness } from "./snapshot"
+import { useListView, useSearch, useSearchReadiness } from "./snapshot"
 
 // Control the browser boundary; the real session still owns generations and query identities.
 const fake = vi.hoisted(() => ({
@@ -75,6 +75,31 @@ function answer() {
     queryId: request.queryId,
     page: { total: 2, offset: request.query.offset ?? 0, items: [] },
   })
+}
+/** Answers each channel's latest view request with one item named after its page offset. */
+function answerViews() {
+  const latest = new Map<number, Extract<SearchRequest, { kind: "view" }>>()
+  for (const request of fake.requests)
+    if (request.kind === "view") latest.set(request.channelId, request)
+  for (const request of latest.values()) {
+    const offset = request.query.offset ?? 0
+    emit({
+      kind: "view-result",
+      generation: request.generation,
+      channelId: request.channelId,
+      queryId: request.queryId,
+      view: {
+        query: request.query,
+        page: {
+          total: 120,
+          offset,
+          items: [{ key: `c:${String(offset)}`, printingId: "p", summary: undefined }],
+        },
+        options: { classes: [], sets: [] },
+        faces: [],
+      },
+    })
+  }
 }
 const query: SearchQuery = { state: DEFAULT_QUERY, edition: "jp" }
 beforeEach(() => {
@@ -198,6 +223,43 @@ describe("Worker hooks", () => {
       phase: "error",
       error: { kind: "load-unavailable", message: "offline" },
     })
+  })
+  it("loading more keeps the shown page on screen and asks only for the new page", () => {
+    const { result, rerender } = renderHook(
+      ({ pages }: { pages: number }) => useListView(query, pages),
+      { initialProps: { pages: 1 } },
+    )
+    ready()
+    answerViews()
+    const shown = result.current.view
+    expect(shown?.page.items.map((item) => item.key)).toEqual(["c:0"])
+    const before = fake.requests.filter((request) => request.kind === "view").length
+    rerender({ pages: 2 })
+    expect(result.current.view).toBe(shown)
+    expect(fake.requests.filter((request) => request.kind === "view").slice(before)).toMatchObject([
+      { query: { offset: 60, limit: 60 } },
+    ])
+    answerViews()
+    expect(result.current.view?.page.items.map((item) => item.key)).toEqual(["c:0", "c:60"])
+    // Returning to fewer pages shows only those, without asking the Worker again.
+    const asked = fake.requests.length
+    rerender({ pages: 1 })
+    expect(result.current.view?.page.items.map((item) => item.key)).toEqual(["c:0"])
+    expect(fake.requests).toHaveLength(asked)
+  })
+  it("a newer data version keeps the shown pages until its own pages arrive", () => {
+    const { result } = renderHook(() => useListView(query, 1))
+    ready()
+    answerViews()
+    const shown = result.current.view
+    act(() => {
+      window.dispatchEvent(new Event("online"))
+    })
+    ready("v2")
+    expect(result.current.view).toBe(shown)
+    answerViews()
+    expect(result.current.view).toBeDefined()
+    expect(result.current.view).not.toBe(shown)
   })
   it("has no result without input", () => {
     const { result } = renderHook(() => useSearch(null))

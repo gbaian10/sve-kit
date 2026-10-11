@@ -235,21 +235,28 @@ export function useListView(query: SearchQuery, pages: number) {
   const { root } = useActiveSnapshot()
   const { session } = workerOf(root)
   const key = JSON.stringify(query)
+  // One store per query: more pages only add channels, and the pages on screen stay until a
+  // complete set (more pages, or a newer generation) replaces them.
   const store = useMemo(() => {
-    const channels = Array.from({ length: pages }, () => session.createChannel())
-    let value: { view?: CompleteView; error?: QueryFailure } = {}
+    const channels: SearchChannel[] = []
+    const unsubs: (() => void)[] = []
+    const state: { wanted: number; value: { view?: CompleteView; error?: QueryFailure } } = {
+      wanted: 0,
+      value: {},
+    }
     const listeners = new Set<() => void>()
     const update = () => {
-      const results = channels.map((channel) => channel.getStatus().result)
+      const { wanted, value } = state
+      const results = channels.slice(0, wanted).map((channel) => channel.getStatus().result)
       const error = results.find((result) => result.phase === "error")
       const complete = results.flatMap((result) =>
         result.phase === "complete" && result.view ? [result.view] : [],
       )
       const first = complete[0]
-      value =
+      state.value =
         error?.phase === "error"
           ? { error: error.error }
-          : complete.length === pages && first
+          : complete.length === wanted && first
             ? {
                 view: {
                   ...first,
@@ -257,10 +264,17 @@ export function useListView(query: SearchQuery, pages: number) {
                   faces: complete.flatMap((view) => view.faces),
                 },
               }
-            : {}
+            : value.error
+              ? {}
+              : value
       for (const listener of listeners) listener()
     }
-    const unsubs = channels.map((channel) => channel.subscribe(update))
+    const request = (channel: SearchChannel, page: number) => {
+      channel.view(
+        { ...(JSON.parse(key) as SearchQuery), offset: page * 60, limit: 60 },
+        page === 0,
+      )
+    }
     const lifecycle = deferredDisposal(() => {
       unsubs.forEach((unsub) => {
         unsub()
@@ -270,33 +284,40 @@ export function useListView(query: SearchQuery, pages: number) {
       })
     })
     return {
-      get: () => value,
+      get: () => state.value,
       subscribe: (listener: () => void) => {
         listeners.add(listener)
         return () => listeners.delete(listener)
       },
-      start: () => {
+      start: (count: number) => {
         lifecycle.retain()
-        channels.forEach((channel, page) => {
-          channel.view(
-            { ...(JSON.parse(key) as SearchQuery), offset: page * 60, limit: 60 },
-            page === 0,
-          )
-        })
+        const shrinking = count < state.wanted
+        state.wanted = count
+        while (channels.length < count) {
+          const channel = session.createChannel()
+          unsubs.push(channel.subscribe(update))
+          channels.push(channel)
+          request(channel, channels.length - 1)
+        }
+        // New pages report through their own channels; fewer pages only need a recount.
+        if (shrinking) update()
+      },
+      retry: () => {
+        channels.slice(0, state.wanted).forEach(request)
       },
       release: lifecycle.release,
     }
-  }, [session, key, pages])
+  }, [session, key])
   useEffect(() => {
-    store.start()
+    store.start(pages)
     return store.release
-  }, [store])
+  }, [store, pages])
   const result = useSyncExternalStore(store.subscribe, store.get, store.get)
   const images = useMemo(() => (result.view ? viewImages(result.view) : undefined), [result.view])
   useEffect(() => {
     if (result.view) performance.mark("sve-view-ready")
   }, [result.view])
-  return { ...result, images, retry: store.start }
+  return { ...result, images, retry: store.retry }
 }
 
 export function useWorkerSuggestions(text: string, edition: Region) {

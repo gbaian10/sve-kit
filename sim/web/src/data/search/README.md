@@ -46,10 +46,13 @@ is separate from view availability. Failed checks preserve usable local data and
 its unconfirmed/stale status. Index entries still require capability admission, manifest
 field agreement and monotonic revision/content identity. Bodies are written before the
 active selection; missing or damaged bodies fall back to verified raw reconstruction.
+Switching to another edition takes the same stored path. A later check that finds the
+active version unchanged carries the index over to the new generation without rebuilding;
+completed channel answers stay until the manifest, root or edition they came from changes.
 
 Cache identity includes root, manifest hash, reader build and local format. View slots also
 include the normalizer version, selected-region policy and complete query. Multilingual
-names avoid a separate language-specific record. Index format is 3; view format is 1;
+names avoid a separate language-specific record. Index format is 3; view format is 2;
 the public snapshot wire format is unchanged. Automatic raw/index/view/metadata caches
 share 64 MiB per root and 128 MiB per origin. Views have a 2 MiB raw-body subquota; an
 oversized view stays usable in memory. Successful raw plans and verified records retain
@@ -65,9 +68,10 @@ Config is independent of bootstrap progress; each verified bootstrap key contrib
 
 React adapters in `app/snapshot.ts` expose `useSearchReadiness`, `useSearch`, `useSearchView`,
 `useListView`, `useWorkerSuggestions`, `useRecentSummaries` and `useSetOptions`.
-`useListView` requests bounded 60-card pages and returns a complete image adapter after all
-requested pages belong to the same generation. Pending and unsupported results remain
-explicit. `useCardSnapshot` is the temporary full-detail path for the card page.
+`useListView` requests bounded 60-card pages and returns a complete image adapter once every
+requested page has arrived. Loading more only requests the new page, and the pages on screen
+stay until a complete set replaces them. Pending and unsupported results remain explicit.
+`useCardSnapshot` is the temporary full-detail path for the card page.
 
 V1 list views share the completed bounded page and image adapter. Art thumbnails retain the
 verified `art_version` in view format 2. View selection never changes search identity. Card-page

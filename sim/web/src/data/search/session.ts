@@ -22,6 +22,8 @@ type SearchResult =
       readonly queryId: number
       readonly generation: number
       readonly root: string
+      /** The data it was answered from; a generation number alone can be reused for newer data. */
+      readonly manifestHash: string
       readonly page: SearchPage
       readonly preview?: AbilityPreview | null
       readonly view?: CompleteView
@@ -181,11 +183,14 @@ class Channel implements SearchChannel {
   refresh(invalidate = true): void {
     if (this.disposed) return
     const current = this.owner.status()
+    const { result } = this.status
+    // A completed answer stays while its data stays; a new generation of other data re-queries.
     if (
       invalidate &&
-      this.purpose?.kind === "view" &&
-      this.status.result.phase === "complete" &&
-      this.status.result.generation === current.generation
+      result.phase === "complete" &&
+      result.manifestHash === current.manifestHash &&
+      result.root === current.root &&
+      this.status.lastInput?.edition === current.edition
     )
       return
     if (invalidate) this.queryId += 1
@@ -257,6 +262,7 @@ class Channel implements SearchChannel {
               queryId: this.queryId,
               generation: event.generation,
               root: status.root ?? "",
+              manifestHash: status.manifestHash ?? "",
               page:
                 event.kind === "result"
                   ? event.page

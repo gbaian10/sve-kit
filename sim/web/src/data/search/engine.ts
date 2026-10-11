@@ -492,11 +492,20 @@ export class SearchEngine {
         )
         return true
       }
-      if (adopted && !this.active) {
+      // Another edition or root is served from its own stored generation, like a cold start.
+      const sameSource = () =>
+        this.active?.request.base === request.base &&
+        this.active.request.edition === request.edition &&
+        this.active.request.entry === request.entry
+      if (adopted && !sameSource()) {
         try {
           cachedEntry = objectValue(parseJson(adopted))
-          this.revision = Math.max(this.revision, integerValue(cachedEntry["revision"]))
-          this.signature = stringValue(cachedEntry["signature"])
+          // Each edition keeps its own selection; an older one must not lower the revision floor.
+          const revision = integerValue(cachedEntry["revision"])
+          if (revision > this.revision) {
+            this.revision = revision
+            this.signature = stringValue(cachedEntry["signature"])
+          }
           await publishStored(objectValue(cachedEntry["entry"]), true)
         } catch {
           cachedEntry = undefined
@@ -515,15 +524,22 @@ export class SearchEngine {
         this.signature = signature
       }
       if (
-        this.active?.generation === request.generation &&
-        this.active.index &&
+        this.active?.index &&
+        sameSource() &&
         this.active.hash === stringValue(entry["manifest_sha256"])
       ) {
         if (request.entry === "index") checkEntry(entry, this.active.manifestFields)
-        this.emit({ kind: "checking", generation: request.generation })
+        signal.throwIfAborted()
+        if (this.active.generation === request.generation)
+          this.emit({ kind: "checking", generation: request.generation })
+        else {
+          // A later check of an unchanged version carries the index over instead of rebuilding.
+          this.active = { ...this.active, generation: request.generation, request }
+          this.ready(request, { ...emptyMetrics, wallMs: performance.now() - start }, true)
+        }
         return
       }
-      if (!this.active && (await publishStored(entry, false))) return
+      if (!sameSource() && (await publishStored(entry, false))) return
       const {
         manifestHash,
         version,
