@@ -130,7 +130,7 @@ describe("annotation presentation", () => {
       )
     }
     await renderInRouter(<Harness />)
-    await screen.findByText("原文字段未知")
+    await screen.findByText("此段文字尚未提供")
     const calls = resolve.mock.calls.length
     await userEvent.click(screen.getByRole("button", { name: "rerender 0" }))
     expect(calls).toBeGreaterThan(0)
