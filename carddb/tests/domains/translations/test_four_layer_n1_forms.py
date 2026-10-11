@@ -12,10 +12,13 @@ from sve_carddb.contracts.four_layer import (
     CardNP,
     FormDefinition,
     FormNode,
+    LabelPart,
     LeafRef,
     LiteralNode,
+    Signature,
     SlotRef,
     Target,
+    ZoneMemberPart,
 )
 from sve_carddb.core.json import array, canonical, object_value, string
 from sve_carddb.domains.translations.four_layer_derivation import derive_source
@@ -560,3 +563,143 @@ def test_np_rejects_unregistered_source_classifier_tuple(role: str) -> None:
     )
     with pytest.raises(ValueError, match=r"unsupported classifier|supported quantity"):
         render_engine().render("context:unsupported", "zh-Hant", (item,))
+
+
+def source_union_form(suffix: str) -> FormDefinition:
+    return FormDefinition(
+        id="zone.source_union." + suffix,
+        lang="zh-Hant",
+        rule="zone.source_union.v1",
+        signature=(
+            Signature(name="owner", type="Player", role="source_owner"),
+            Signature(name="zone", type="ZoneSet", role="source_zone"),
+        ),
+        cases={
+            "battlefield": (
+                LabelPart(kind="Label", arg="owner"),
+                ZoneMemberPart(kind="ZoneMember", arg="zone"),
+                *(
+                    (LiteralNode(kind="Literal", text="上"),)
+                    if suffix == "locative_or"
+                    else ()
+                ),
+            ),
+            "ex": (
+                LabelPart(kind="Label", arg="owner"),
+                ZoneMemberPart(kind="ZoneMember", arg="zone"),
+            ),
+            "separator": (
+                LiteralNode(kind="Literal", text="與" if suffix == "and" else "或"),
+            ),
+        },
+    )
+
+
+@pytest.mark.parametrize("suffix", ["locative_or", "or", "and"])
+@pytest.mark.parametrize("connector", ["か", "や"])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_source_union_preserves_member_ranges_and_shared_owner(
+    engine: Classifier, suffix: str, connector: str, *, reverse: bool
+) -> None:
+    zones = ("EXエリア", "場") if reverse else ("場", "EXエリア")
+    raw = f"自分の{zones[0]}{connector}自分の{zones[1]}のフォロワー７枚を選ぶ。"
+    found = derive_source(raw, source(raw), engine)
+    frame, binding = found.bind(0)
+    slots = {s.role: s.name for s in frame.leaf_schema.slots}
+    form = source_union_form(suffix)
+    target = Target(
+        format=1,
+        nodes=(
+            FormNode(
+                kind="Form",
+                form_id=form.id,
+                args={
+                    "owner": SlotRef(slot=slots["source_owner"]),
+                    "zone": SlotRef(slot=slots["source_zone"]),
+                },
+            ),
+            LeafRef(kind="LeafRef", slot=slots["counted_kind"]),
+            LeafRef(kind="LeafRef", slot=slots["selection_count"]),
+        ),
+    )
+    found.verify(raw, engine, frame, binding, target=target)
+    item = BoundTarget(frame, binding, SelectedTarget(target))
+    selected = synthetic_renderer(item, (form,))
+    names = {
+        "term:player.self": "自己",
+        "term:zone.battlefield": "戰場",
+        "term:zone.ex": "EX區",
+    }
+    selected.labels = {
+        key: replace(
+            label, text=names.get(getattr(label.reference, "key", ""), "仮從者")
+        )
+        for key, label in selected.labels.items()
+    }
+    output = selected.render("context:source-union", "zh-Hant", (item,)).rendered
+    assert output is not None
+    connector_text = "與" if suffix == "and" else "或"
+    suffix_text = "上" if suffix == "locative_or" else ""
+    assert output.text == f"自己戰場{suffix_text}{connector_text}自己EX區仮從者7"
+    assert [
+        output.text[r.start : r.end]
+        for a in output.annotation.occurrences
+        for r in a.ranges
+    ] == ["自己", "戰場", "自己", "EX區", "仮從者"]
+    zone_outputs = [leaf for leaf in output.leaves if leaf.slot == slots["source_zone"]]
+    assert [
+        output.text[r.start : r.end] for leaf in zone_outputs for r in leaf.ranges
+    ] == ["戰場", "EX區"]
+    assert len({leaf.node_path for leaf in zone_outputs}) == len(zone_outputs)
+    assert {o.slot for o in binding.occurrences} == set(slots.values())
+
+
+@pytest.mark.parametrize("connector", ["と", "または", "および"])
+def test_source_union_does_not_admit_unregistered_conjunction(
+    engine: Classifier, connector: str
+) -> None:
+    raw = f"自分の場{connector}自分のEXエリアのフォロワー７枚を選ぶ。"
+    found = derive_source(raw, source(raw), engine)
+    assert all(
+        slot.domain.values != ("zone.selection.battlefield_ex.v1",)
+        for slot in found.recognized[0].schema.slots
+    )
+
+
+def test_source_union_rejects_owner_from_another_operand(engine: Classifier) -> None:
+    raw = "自分の場か自分のEXエリアのフォロワー７枚を選ぶ。相手の場や相手のEXエリアのフォロワー７枚を選ぶ。"
+    found = derive_source(raw, source(raw), engine)
+    frame, binding = found.bind(0)
+    owners = [s.name for s in frame.leaf_schema.slots if s.role == "source_owner"]
+    zones = [s.name for s in frame.leaf_schema.slots if s.role == "source_zone"]
+    target = Target(
+        format=1,
+        nodes=(
+            FormNode(
+                kind="Form",
+                form_id="zone.source_union.and",
+                args={
+                    "owner": SlotRef(slot=owners[0]),
+                    "zone": SlotRef(slot=zones[-1]),
+                },
+            ),
+        ),
+    )
+    with pytest.raises(ValueError, match="one registered G10 operand"):
+        found.verify(raw, engine, frame, binding, target=target)
+
+
+@pytest.mark.parametrize("case", ["battlefield", "ex"])
+def test_source_union_rejects_missing_member_or_owner(case: str) -> None:
+    form = source_union_form("or")
+    for missing in ("Label", "ZoneMember"):
+        broken = form.model_copy(
+            update={
+                "cases": form.cases
+                | {
+                    case: tuple(p for p in form.cases[case] if p.kind != missing),
+                }
+            }
+        )
+        with pytest.raises(ValueError, match="present owner and member"):
+            validate_form(broken)

@@ -357,7 +357,7 @@ NP 不另占來源 span；它的葉各自有來源位置。NP 移除或新增只
 | lang | Lang；和 target 相同 | A/B/C；錯語言；FL-012 |
 | signature | 除 zone.union_separator 外非空 `{name:Code,type:TypeName,role:Code}` 陣列，name 唯一，type 引用 §4 葉型別，role 引用其角色 | A/B；參數不合；FL-004／FL-012 |
 | rule | Code；引用釘版 renderer 的有限規則，不接受程式 | A/B/C；未知或超域；FL-012 |
-| cases | 非空 `{case_code:[FormPart]}` mapping；case_code 限 rule 登錄的分支，FormPart 是 `{kind:Literal,text:Text}`／`{kind:Label,arg:Code}`／`{kind:QuantityValue,arg:Code}`，每分支有序 | A/B；分支缺失／未知、arg 不引用 signature 拒絕；基礎名稱來自當前選詞；FL-012／FL-015 |
+| cases | 非空 `{case_code:[FormPart]}` mapping；case_code 限 rule 登錄的分支，FormPart 是 `{kind:Literal,text:Text}`／`{kind:Label,arg:Code}`／`{kind:QuantityValue,arg:Code}`／`{kind:ZoneMember,arg:Code}`，每分支有序 | A/B；分支缺失／未知、arg 不引用 signature 拒絕；基礎名稱來自當前選詞；FL-012／FL-015 |
 
 QuantityValue 的 arg 必指本形式簽章中的 QuantitySpec，僅在 `quantity.constant_value.v1` 使用，輸入 expr 必為 constant。
 它只輸出 UInt 的十進位字串，不輸出 mode、單位或概念位置；all／any、bound／expression 均不適用。
@@ -391,6 +391,19 @@ renderer 使用 `four-layer-renderer-v3`；正式來源 workflow 仍採 N0 v1，
 | quantity.classifier.counted_selection | kind:CardKind/counted_kind, quantity:QuantitySpec/selection_count, zone:ZoneSet/counted_zone | quantity.classifier.v1；card／object，僅 Literal |
 | quantity.classifier.counted_existence | kind:CardKind/counted_kind, quantity:QuantitySpec/existence_count, zone:ZoneSet/counted_zone | quantity.classifier.v1；card／object，僅 Literal |
 | zone.union_separator | 空 signature=[]，呼叫 args={} | zone.union_separator.v2；唯一 default，僅 Literal |
+| zone.source_union.locative_or；zone.source_union.or；zone.source_union.and | owner:Player/source_owner, zone:ZoneSet/source_zone | zone.source_union.v1；battlefield／ex／separator，只供同一 G10 operand |
+
+`zone.source_union.v1` 限來源 G10 的 `[battlefield,ex]` 聯集，依 canonical 順序逐成員輸出；
+每個成員 case 的非 Literal 部分必須依序恰為 `Label(owner)`、`ZoneMember(zone)`。
+ZoneMember 的 arg 只可指該簽章的 ZoneSet；它輸出目前成員的 typed 概念選詞，成員由 renderer 決定，target 不提供索引或常數。
+separator case 僅有 Literal；locative_or 在 battlefield 後接「上」、成員間「或」；or 只接「或」；and 只接「與」。
+三者皆保留同一聯集及共同 owner，不能藉中文「與」推導兩區各選一次或日文 `と` 的獨立並列。
+G10 仍只接受既有封閉 `か`／`や` 構造，`と`／`または`／`および` 不因新 Form 而被納入。
+B 依原來源 operand 比對 owner 與 zone 的完整 raw spans，拒絕跨 operand、不同 owner 或非 G10 引用；
+A 驗 type＋role、封閉 cases、必呈現的兩參數；C 每次 owner Label 與每個 ZoneMember 各產實際概念 range、葉輸出路徑及必要引用。
+格後綴與連接詞不包進概念 range；重複 owner 的輸出仍指原同槽 occurrence，不新增來源槽、值或位置。
+未知 Form、錯角色、缺 owner／member／選詞、非二區值均拒絕或依既有缺詞規則整欄退回。
+既有空簽章 union separator 與 G10 語義維持原契約，新 Form 的完整 definition 參與 render 相依鍵。
 
 七個區域 Code 為 battlefield／hand／deck／evolve_deck／graveyard／ex／banish；mixed 逐成員引用。
 所有 label 形式在每個 case 必須有對應 Label，不能以空輸出或固定字替代引用。
@@ -569,7 +582,7 @@ NP 範圍不是 annotation，卡名內的同字不另套術語 annotation。form
 必要引用集合 E 逐 `(slot,role,reference)` 計算；ZoneSet 逐成員，CardName 是整名引用。
 先排除由來源規則產生、required=false 且 occurrences=[] 的純省略槽，其值仍必須存在。
 其餘明示結構／required 葉、四種門檻能力名，以及該用途實際選中的 label／variant 的 emphasis=true 或 origin=project／machine 都須引用。
-A 只計 LeafRef、Form 的實際 Label／QuantityValue 與 NP 展開的輸出；形式的讀值參數不等於呈現引用。
+A 只計 LeafRef、Form 的實際 Label／QuantityValue／ZoneMember 與 NP 展開的輸出；形式的讀值參數不等於呈現引用。
 E−A 必須為空；同字不同角色、卡名內同字與另一槽的引用不能補洞。重複呈現各保留 node_path／occurrence。
 缺必要或實際使用選詞沿 missing_term_translation 整欄 fallback；有 target 但漏 E 是結構錯誤，不能改叫缺譯。
 未用的純省略 label 不加品質或 fallback 依賴；emphasis／origin 是 render 條件，不入 frame hash。
