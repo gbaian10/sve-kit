@@ -5,29 +5,26 @@ import logo from "../../assets/official/logo/head-left.png"
 import { cn } from "../ui/cn"
 import { NAV_ITEMS } from "./nav-items"
 
-// Desktop / tablet-landscape navigation (design 03c, §5): a fixed 72px rail with 60×56 cells.
-// Every item already carries its label, so the design's optional expanded form added nothing but
-// a wordmark while narrowing the content, and the account avatar lives in the top bar like on
-// every other layout; both changed on the user's call (2026-09-29). The logo is the design's
-// large form (rounded square, whole artwork) at 48px.
+// Keep the account avatar in the top bar across layouts (user decision 2026-09-29).
 export function SideRail() {
   const { t } = useTranslation()
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-18 flex-col items-center border-r border-border bg-side py-3 lg:flex">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-18 flex-col border-r border-border bg-side py-3 lg:flex xl:w-50">
       <NavLink
         to="/"
         end
         aria-label={t("nav.logoAlt")}
-        className="flex h-16 items-center justify-center rounded-control"
+        className="mx-auto flex h-16 items-center gap-3 rounded-control px-1.5 xl:mx-3 xl:px-2"
       >
         <img
           src={logo}
           alt=""
-          className="size-12 rounded-control border border-border object-cover"
+          className="size-12 shrink-0 rounded-control border border-border object-cover xl:size-9"
         />
+        <span className="hidden text-16 font-bold xl:inline">{t("app.title")}</span>
       </NavLink>
       <nav aria-label={t("nav.primary")} className="mt-2 w-full">
-        <ul className="flex flex-col items-stretch gap-1 px-1.5">
+        <ul className="flex flex-col items-stretch gap-1 px-1.5 xl:px-3">
           {NAV_ITEMS.map(({ key, to, Icon, end }) => (
             <li key={key}>
               <NavLink
@@ -36,6 +33,7 @@ export function SideRail() {
                 className={({ isActive }) =>
                   cn(
                     "flex h-14 flex-col items-center justify-center gap-0.5 rounded-button text-11 text-text-2 hover:bg-surface-2",
+                    "xl:h-11 xl:flex-row xl:justify-start xl:gap-3 xl:px-3 xl:text-15",
                     isActive && "bg-accent-soft font-semibold text-accent-text",
                   )
                 }

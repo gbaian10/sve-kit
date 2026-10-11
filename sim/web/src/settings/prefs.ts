@@ -30,7 +30,6 @@ export interface Prefs {
   /** null = the theme's default accent. */
   readonly accent: Accent | null
   readonly banRegion: CardEdition
-  readonly dataSaver: boolean
   readonly gridDensity: GridDensity
   readonly viewMode: ViewMode
 }
@@ -39,13 +38,12 @@ export const DEFAULT_PREFS: Prefs = {
   uiLanguage: null,
   cardEdition: "jp",
   nameDisplay: "translated",
-  effectLanguage: "translated",
+  effectLanguage: "both",
   symbolLabels: false,
   termEmphasis: true,
   theme: "system",
   accent: null,
   banRegion: "jp",
-  dataSaver: false,
   gridDensity: 2,
   viewMode: "grid",
 }
@@ -76,7 +74,6 @@ const guards: Guards = {
   theme: isThemePref,
   accent: isNullableAccent,
   banRegion: isCardEdition,
-  dataSaver: isBoolean,
   gridDensity: isGridDensity,
   viewMode: isViewMode,
 }
@@ -89,8 +86,7 @@ function resolveStorage(source: StorageSource): Storage {
   return typeof source === "function" ? source() : source
 }
 
-// Only the exact version this build writes is trusted; a missing or different `v` means another
-// build's layout, and guessing field by field could keep half of it. Same rule in theme-boot.js.
+// Trust only this build's version, as theme-boot.js does; DEFAULT_PREFS excludes removed fields.
 function sanitize(raw: unknown): Prefs {
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return DEFAULT_PREFS
   const record = raw as Record<string, unknown>

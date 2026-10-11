@@ -12,8 +12,16 @@ import { useActiveSnapshot } from "./snapshot"
 import { SnapshotNotice } from "./SnapshotNotice"
 import { useThemeAttributes } from "./theme-attributes"
 
-// Layout switches on content width (design §11): < lg bottom bar, ≥ lg left rail; content is
-// capped at 1280 and centred.
+// Layout switches on content width (design §11): < lg bottom bar, ≥ lg left rail (72px, 200px
+// expanded from xl); content is capped at 1280 and centred.
+// Switching the result view (grid / table / list) is the same list, so it keeps its scroll position.
+function scrollKeySearch(search: string): string {
+  const params = new URLSearchParams(search)
+  params.delete("view")
+  const rest = params.toString()
+  return rest === "" ? "" : `?${rest}`
+}
+
 export function AppShell() {
   const { t } = useTranslation()
   useThemeAttributes()
@@ -21,7 +29,7 @@ export function AppShell() {
   const { client, status } = useActiveSnapshot()
   return (
     <ToastProvider>
-      <div className="flex min-h-dvh flex-col pb-21 lg:pb-0 lg:pl-18 phone-landscape:pb-0 phone-landscape:pl-16">
+      <div className="flex min-h-dvh flex-col pb-21 lg:pb-0 lg:pl-18 xl:pl-50 phone-landscape:pb-0 phone-landscape:pl-16">
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-button focus:bg-surface-1 focus:px-4 focus:py-2"
@@ -40,7 +48,9 @@ export function AppShell() {
           <DevBadge client={client} />
         )}
       </div>
-      <ScrollRestoration getKey={(location) => location.pathname + location.search} />
+      <ScrollRestoration
+        getKey={(location) => location.pathname + scrollKeySearch(location.search)}
+      />
     </ToastProvider>
   )
 }

@@ -19,8 +19,7 @@ export interface SegmentedProps<T extends string> {
   readonly className?: string
 }
 
-// A radiogroup: arrow keys move the selection, so a single Tab stop reaches the control. The
-// visible control is 34/36px (design §7); an invisible ::before extends each radio's hit area to 44px.
+// Roving focus keeps the group to one Tab stop; invisible hit areas preserve compact pills.
 export function Segmented<T extends string>({
   label,
   options,
@@ -40,8 +39,8 @@ export function Segmented<T extends string>({
       role="radiogroup"
       aria-label={label}
       className={cn(
-        "inline-flex shrink-0 rounded-control border border-border bg-surface-1 p-0.5",
-        size === "sm" ? "h-8.5" : "h-9",
+        "inline-flex shrink-0 rounded-control border border-border bg-surface-1",
+        size === "sm" ? "h-8.5 p-0.5" : "h-9 p-0.75",
         className,
       )}
     >

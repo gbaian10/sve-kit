@@ -113,17 +113,6 @@ export function SettingsPage() {
             onChange={(banRegion) => prefsStore.set({ banRegion })}
           />
         </SettingRow>
-        <SettingRow
-          className={ROW}
-          label={t("settings.dataSaver")}
-          hint={t("settings.dataSaverHint")}
-        >
-          <Switch
-            label={t("settings.dataSaver")}
-            checked={prefs.dataSaver}
-            onChange={(dataSaver) => prefsStore.set({ dataSaver })}
-          />
-        </SettingRow>
       </section>
     </>
   )

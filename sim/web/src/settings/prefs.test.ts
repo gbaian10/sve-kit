@@ -23,12 +23,11 @@ describe("readPrefs", () => {
       uiLanguage: null,
       cardEdition: "jp",
       nameDisplay: "translated",
-      effectLanguage: "translated",
+      effectLanguage: "both",
       symbolLabels: false,
       theme: "system",
       accent: null,
       banRegion: "jp",
-      dataSaver: false,
       gridDensity: 2,
       viewMode: "grid",
     })
@@ -57,6 +56,16 @@ describe("readPrefs", () => {
       }),
     )
     expect(readPrefs()).toEqual({ ...DEFAULT_PREFS, theme: "dark", viewMode: "table" })
+  })
+
+  it("ignores the removed data-saver field without touching the rest", () => {
+    localStorage.setItem(
+      PREFS_KEY,
+      JSON.stringify({ v: 1, dataSaver: true, termEmphasis: false, theme: "dark" }),
+    )
+    const prefs = readPrefs()
+    expect(prefs).toEqual({ ...DEFAULT_PREFS, termEmphasis: false, theme: "dark" })
+    expect(prefs).not.toHaveProperty("dataSaver")
   })
 
   it.each([
@@ -109,7 +118,7 @@ describe("createPrefsStore", () => {
     expect(stored()).toMatchObject({ theme: "light", accent: "amber" })
 
     unsubscribe()
-    store.set({ dataSaver: true })
+    store.set({ symbolLabels: true })
     expect(listener).toHaveBeenCalledTimes(1)
   })
 

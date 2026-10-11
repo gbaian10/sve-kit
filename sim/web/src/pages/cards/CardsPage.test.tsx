@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react"
+import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest"
 
@@ -41,6 +41,16 @@ async function open(path = "/cards") {
 }
 
 describe("CardsPage", () => {
+  it("preserves loaded pages and the anchor when switching views", async () => {
+    const { router } = await open("/cards?class=bishop")
+    const entry = { pages: 3, anchor: "c:bp01-051" }
+    await act(() => router.navigate("/cards?class=bishop", { replace: true, state: entry }))
+    await userEvent.click(screen.getByRole("radio", { name: "表格" }))
+    expect(router.state.location.search).toBe("?class=bishop&view=table")
+    expect(router.state.location.state).toMatchObject(entry)
+    await userEvent.click(screen.getByRole("radio", { name: "清單" }))
+    expect(router.state.location.state).toMatchObject(entry)
+  })
   it("lists the snapshot and keeps the class filter in the URL", async () => {
     const { router } = await open()
     const user = userEvent.setup()

@@ -5,9 +5,10 @@ import { createRoot } from "react-dom/client"
 import { I18nextProvider } from "react-i18next"
 
 import { App } from "./App"
+import { initialSnapshotRoot } from "./app/dev-root"
 import { currentUiLanguage } from "./app/language"
 import { installOverflowAudit } from "./app/overflow-audit"
-import { registerImageCache } from "./data"
+import { registerImageCache, setActiveSnapshotRoot } from "./data"
 import { createI18n } from "./i18n"
 import { prefsStore, runRequestedColdStart } from "./settings"
 
@@ -18,6 +19,8 @@ async function start(container: HTMLElement): Promise<void> {
   // A cold start asked for from the dev badge clears local data before anything caches again.
   await runRequestedColdStart()
   registerImageCache()
+  // Decided before the shell mounts, so the first load never starts on the wrong root.
+  setActiveSnapshotRoot(initialSnapshotRoot(import.meta.env))
 
   const language = currentUiLanguage(prefsStore.get().uiLanguage)
   document.documentElement.lang = language

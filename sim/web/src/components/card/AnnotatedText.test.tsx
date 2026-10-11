@@ -46,6 +46,44 @@ describe("annotation presentation", () => {
     expect(screen.getByRole("complementary")).toHaveTextContent("原始區域標籤")
   })
 
+  it("draws an annotated keyword marker as one official icon that still opens its explanation", async () => {
+    // The keyword range covers only the word inside the braces, as the real annotations do.
+    const value = {
+      unit: { text: "{ファンファーレ}{コスト1}：1枚引く。", lang: "ja" },
+      annotation: {
+        occurrences: [
+          {
+            ordinal: 0,
+            reference: { kind: "vocabulary", key: ["ability", "fanfare"] },
+            ranges: [{ start: 1, end: 8 }],
+            bold: true,
+          },
+        ],
+      },
+    }
+    await renderInRouter(
+      <AnnotatedText
+        value={value}
+        context={{
+          original: value,
+          concepts: [],
+          explanations: [],
+          cards: [],
+          vocabulary: [
+            { kind: "ability", code: "fanfare", unit: { text: "入場曲說明", lang: "ja" } },
+          ],
+        }}
+        emphasis
+      />,
+    )
+    const icons = screen.getAllByRole("img")
+    expect(icons.map((icon) => icon.getAttribute("alt"))).toEqual(["ファンファーレ", "コスト1"])
+    expect(screen.getByText("：1枚引く。")).toBeInTheDocument()
+    expect(screen.queryByText(/[{}]/)).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: "ファンファーレ" }))
+    expect(screen.getByRole("complementary")).toHaveTextContent("入場曲說明")
+  })
+
   it.each([
     [new SnapshotError("public-annotation/reference", "invalid reference"), "文字資料無法通過驗證"],
     [new Error("network unavailable"), "文字載入失敗，請稍後再試。"],
@@ -55,8 +93,9 @@ describe("annotation presentation", () => {
     const resolve = vi.fn().mockRejectedValue(error)
     await renderInRouter(
       <CardText
+        edition="jp"
         client={client}
-        sharedResolver={{ resolve }}
+        sharedResolver={{ resolve, peek: () => undefined }}
         owner={{ kind: "face_revision", id: "revision" }}
         field="name"
       />,
@@ -68,7 +107,7 @@ describe("annotation presentation", () => {
     const { client } = await annotatedOrigin()
     await client.load()
     const resolve = vi.fn().mockResolvedValue(null)
-    const sharedResolver = { resolve }
+    const sharedResolver = { resolve, peek: () => undefined }
     function Harness() {
       const [revision, setRevision] = useState(0)
       return (
@@ -81,6 +120,7 @@ describe("annotation presentation", () => {
             rerender {revision}
           </button>
           <CardText
+            edition="jp"
             client={client}
             sharedResolver={sharedResolver}
             owner={{ kind: "face_revision", id: "revision" }}
@@ -162,7 +202,12 @@ describe("annotation presentation", () => {
       value: { writeText: copy },
     })
     const { container } = await renderInRouter(
-      <CardText client={client} owner={{ kind: "face_revision", id: "revision" }} field="name" />,
+      <CardText
+        edition="jp"
+        client={client}
+        owner={{ kind: "face_revision", id: "revision" }}
+        field="name"
+      />,
     )
     expect(screen.getByRole("status")).toHaveTextContent("文字與標註載入中")
     await screen.findByText("translation")

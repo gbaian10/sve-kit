@@ -1,5 +1,4 @@
 import { screen, waitFor } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
@@ -24,23 +23,20 @@ describe("metadata progress", () => {
       language: "zh-TW" as const,
       button: "下載卡圖資訊",
       degraded: /無法使用持久快取/u,
-      complete: "卡圖資訊已下載",
     },
     {
       language: "ja" as const,
       button: "画像情報を取得",
       degraded: /永続キャッシュが使えません/u,
-      complete: "画像情報を取得済み",
     },
     {
       language: "en" as const,
       button: "Download metadata",
       degraded: /Persistent cache unavailable/u,
-      complete: "Image metadata downloaded",
     },
   ])(
-    "data saver delays background fetch with retry and cache degradation ($language)",
-    async ({ language, button, degraded, complete }) => {
+    "starts background fetch on its own with a persistent cache and goes quiet when complete ($language)",
+    async ({ language, button, degraded }) => {
       const client = createSnapshotClient("/cdn", {
         cacheStorage: memoryCache(),
         fetch: (url) => {
@@ -52,15 +48,17 @@ describe("metadata progress", () => {
       })
       await client.load()
       const start = vi.spyOn(client, "prefetchImages")
-      prefsStore.set({ ...DEFAULT_PREFS, dataSaver: true })
       await renderInRouter(<MetadataStatus client={client} />, { language })
-      expect(start).not.toHaveBeenCalled()
-      expect(screen.queryByText(degraded)).not.toBeInTheDocument()
-      await userEvent.setup().click(screen.getByRole("button", { name: button }))
       expect(start).toHaveBeenCalledOnce()
+      expect(screen.queryByText(degraded)).not.toBeInTheDocument()
+      // A finished download is not news: the row disappears instead of reporting completion.
       await waitFor(() => {
-        expect(screen.getByRole("status")).toHaveTextContent(complete)
+        expect(client.metadataStatus().state).toBe("complete")
       })
+      await waitFor(() => {
+        expect(screen.queryByRole("status")).not.toBeInTheDocument()
+      })
+      expect(screen.queryByRole("button", { name: button })).not.toBeInTheDocument()
     },
   )
   it.each(["zh-TW", "ja", "en"] as const)(

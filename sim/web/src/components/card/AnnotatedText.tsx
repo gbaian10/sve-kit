@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import {
@@ -11,16 +11,75 @@ import {
   stringValue,
   textRuns,
 } from "../../data"
+import { cn } from "../ui/cn"
 import { Link } from "../ui/Link"
+import { SymbolIcon } from "./InlineText"
+import { inlinePieces, type SymbolPiece } from "./textSymbols"
+
+interface Segment {
+  readonly text: string
+  readonly reference: JsonObject | null
+  readonly bold: boolean
+  readonly symbol?: SymbolPiece
+}
+
+// A marker may contain an annotation range; draw its icon once and preserve that explanation.
+function layOut(
+  text: string,
+  runs: readonly {
+    readonly text: string
+    readonly reference?: JsonObject | null
+    readonly bold?: boolean | null
+  }[],
+): readonly Segment[] {
+  let offset = 0
+  const spans = runs.map((run) => {
+    const start = offset
+    offset += run.text.length
+    return { start, end: offset, reference: run.reference ?? null, bold: run.bold === true }
+  })
+  const segments: Segment[] = []
+  for (const piece of inlinePieces(text)) {
+    if (piece.kind === "symbol") {
+      const span = spans.find(
+        (candidate) =>
+          candidate.reference !== null &&
+          candidate.start < piece.end &&
+          candidate.end > piece.start,
+      )
+      segments.push({
+        text: piece.alt,
+        reference: span?.reference ?? null,
+        bold: false,
+        symbol: piece,
+      })
+      continue
+    }
+    for (const span of spans) {
+      const start = Math.max(span.start, piece.start)
+      const end = Math.min(span.end, piece.end)
+      if (start < end)
+        segments.push({ text: text.slice(start, end), reference: span.reference, bold: span.bold })
+    }
+  }
+  return segments
+}
 
 export function AnnotatedText({
   value,
   context,
   emphasis,
+  heading = false,
+  annotationReady = true,
+  className,
 }: {
   readonly value: TextValue
   readonly context: SelectedText
   readonly emphasis: boolean
+  /** Render the text as the page's card-name heading instead of a paragraph. */
+  readonly heading?: boolean
+  readonly annotationReady?: boolean
+  readonly className?: string
 }) {
   const { t } = useTranslation()
   const [reference, setReference] = useState<JsonObject | null>(null)
@@ -46,19 +105,32 @@ export function AnnotatedText({
         )
         .filter((value) => value !== undefined)
     : []
+  const Text = heading ? "h2" : "p"
+  const text = stringValue(value.unit["text"])
+  const segments = useMemo(
+    () => layOut(text, annotationReady ? textRuns(value) : [{ text }]),
+    [text, value, annotationReady],
+  )
   return (
     <div>
-      <p lang={stringValue(value.unit["lang"])} className="whitespace-pre-wrap">
-        {textRuns(value).map((run, index) => {
-          const content = emphasis && run.bold === true ? <strong>{run.text}</strong> : run.text
-          return run.reference ? (
+      <Text lang={stringValue(value.unit["lang"])} className={cn("whitespace-pre-wrap", className)}>
+        {segments.map((segment, index) => {
+          const content =
+            segment.symbol !== undefined ? (
+              <SymbolIcon piece={segment.symbol} />
+            ) : emphasis && segment.bold ? (
+              <strong>{segment.text}</strong>
+            ) : (
+              segment.text
+            )
+          return segment.reference ? (
             <button
               key={index}
               type="button"
               className="inline cursor-pointer text-inherit underline decoration-dotted underline-offset-4"
               title={t("card.annotationReference")}
               onClick={() => {
-                setReference(run.reference ?? null)
+                setReference(segment.reference)
               }}
             >
               {content}
@@ -67,8 +139,8 @@ export function AnnotatedText({
             <span key={index}>{content}</span>
           )
         })}
-      </p>
-      {reference && (
+      </Text>
+      {annotationReady && reference && (
         <aside
           aria-label={t("card.annotationReference")}
           className="mt-2 rounded-block bg-surface-2 p-3"

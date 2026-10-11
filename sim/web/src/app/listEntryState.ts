@@ -1,6 +1,8 @@
 import { useCallback } from "react"
 import { useLocation, useNavigate } from "react-router"
 
+export const LIST_PAGE_SIZE = 60
+
 /** What the list keeps on its own history entry so "back" can rebuild it (architecture §2.2). */
 export interface ListEntryState {
   readonly pages?: number

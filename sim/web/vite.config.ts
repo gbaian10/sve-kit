@@ -143,6 +143,8 @@ export function serveSnapshotRoot(prefix: string, dir: string | undefined): Plug
   }
 }
 
+export const FIXTURE_ROOT = path.join(import.meta.dirname, "fixtures/snapshot")
+
 // Local snapshot roots: SVE_EXPORT_DIR (else the committed fixture) at /cdn, SVE_PREVIEW_DIR at /cdn-preview.
 export function snapshotRoots(environment: NodeJS.ProcessEnv): { cdn: string; preview?: string } {
   const root = (name: string): string | undefined => {
@@ -155,7 +157,7 @@ export function snapshotRoots(environment: NodeJS.ProcessEnv): { cdn: string; pr
   }
   const preview = root("SVE_PREVIEW_DIR")
   return {
-    cdn: root("SVE_EXPORT_DIR") ?? path.join(import.meta.dirname, "fixtures/snapshot"),
+    cdn: root("SVE_EXPORT_DIR") ?? FIXTURE_ROOT,
     ...(preview === undefined ? {} : { preview }),
   }
 }
@@ -247,9 +249,11 @@ const { cdn: cdnDir, preview: previewDir } = snapshotRoots(process.env)
 
 export default defineConfig({
   build: { license: { fileName: "third-party-licenses.md" } },
-  // Lets the dev badge hide its root switch when no preview root is configured.
+  // Only these two flags reach browser code: the badge hides its root switch without a preview,
+  // and dev starts on the preview root when /cdn is still the fixture (src/app/dev-root.ts).
   define: {
     "import.meta.env.SVE_PREVIEW_CONFIGURED": JSON.stringify(previewDir === undefined ? "" : "1"),
+    "import.meta.env.SVE_CDN_IS_FIXTURE": JSON.stringify(cdnDir === FIXTURE_ROOT ? "1" : ""),
   },
   plugins: [
     buildIdPlugin(BUILD_INPUTS),

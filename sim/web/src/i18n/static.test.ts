@@ -79,7 +79,8 @@ describe("i18n static checks", () => {
   it("keeps option labels short enough for segmented controls in every language", () => {
     for (const [lng, messages] of locales) {
       for (const [key, text] of messages) {
-        if (!key.startsWith("options.")) continue
+        if (!key.startsWith("options.") && key !== "card.currentText" && key !== "card.printedText")
+          continue
         expect(estimateEm(text), `${lng}:${key} ${JSON.stringify(text)}`).toBeLessThanOrEqual(
           OPTION_BUDGET_EM,
         )
