@@ -133,7 +133,9 @@ export class SearchEngine {
       request.kind === "suggest" ||
       request.kind === "recent" ||
       request.kind === "preview" ||
-      request.kind === "neighbours"
+      request.kind === "neighbours" ||
+      request.kind === "releases" ||
+      request.kind === "count"
     ) {
       if (this.active?.generation !== request.generation) return Promise.resolve()
       const previous = this.queries.get(request.channelId)
@@ -268,6 +270,14 @@ export class SearchEngine {
               preview: await (
                 await active.previews
               ).resolve(index, request.printingId, request.faceId, request.language, active.signal),
+            }
+          } else if (request.kind === "releases" && index) {
+            event = { kind: "releases-result", ...identity, releases: index.releases }
+          } else if (request.kind === "count" && index) {
+            event = {
+              kind: "count-result",
+              ...identity,
+              counts: index.count(request.query, request.language),
             }
           } else if (request.kind === "neighbours" && index) {
             event = {

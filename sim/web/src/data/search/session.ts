@@ -1,6 +1,7 @@
 import { DEFAULT_QUERY } from "../../domain/query/model"
-import type { Region } from "../../domain/search"
-import type { QueryFailure, SearchPage, SearchQuery } from "./index"
+import type { Region, TextLang } from "../../domain/search"
+import type { PackCounts } from "../../domain/sets"
+import type { QueryFailure, SearchPage, SearchQuery, SetRelease } from "./index"
 import type { RecentSummary, SuggestedSummary } from "./index"
 import type {
   AbilityPreview,
@@ -30,6 +31,8 @@ type SearchResult =
       readonly suggestions?: readonly SuggestedSummary[]
       readonly recent?: readonly RecentSummary[]
       readonly faces?: readonly ViewFace[]
+      readonly releases?: readonly SetRelease[]
+      readonly counts?: PackCounts
     }
 export interface SearchChannelStatus {
   readonly lastInput: SearchQuery | null
@@ -108,6 +111,8 @@ export interface SearchChannel {
   view(query: SearchQuery, remember?: boolean): void
   suggest(text: string, edition: Region, limit?: number): void
   recent(printingIds: readonly string[], edition: Region): void
+  releases(edition: Region): void
+  count(query: SearchQuery, language: TextLang): void
   dispose(): void
 }
 interface ChannelOwner {
@@ -157,6 +162,12 @@ class Channel implements SearchChannel {
       { kind: "recent", printingIds: printingIds.slice(0, 20) },
       { state: DEFAULT_QUERY, edition },
     )
+  }
+  releases(edition: Region): void {
+    this.submit({ kind: "releases" }, { state: DEFAULT_QUERY, edition })
+  }
+  count(query: SearchQuery, language: TextLang): void {
+    this.submit({ kind: "count", query, language }, query)
   }
   neighbours(query: SearchQuery, target: string, maxItems?: number): void {
     this.submit(
@@ -245,6 +256,8 @@ class Channel implements SearchChannel {
           | "suggest-result"
           | "recent-result"
           | "preview-result"
+          | "releases-result"
+          | "count-result"
           | "query-error"
       }
     >,
@@ -274,7 +287,9 @@ class Channel implements SearchChannel {
                             ? event.total
                             : event.kind === "recent-result"
                               ? event.items.length
-                              : 0,
+                              : event.kind === "count-result"
+                                ? event.counts.cards
+                                : 0,
                         offset: 0,
                         items: [],
                       },
@@ -286,7 +301,11 @@ class Channel implements SearchChannel {
                     ? { recent: event.items, ...(event.faces ? { faces: event.faces } : {}) }
                     : event.kind === "preview-result"
                       ? { preview: event.preview }
-                      : {}),
+                      : event.kind === "releases-result"
+                        ? { releases: event.releases }
+                        : event.kind === "count-result"
+                          ? { counts: event.counts }
+                          : {}),
             },
     })
   }
@@ -397,7 +416,9 @@ export class SearchSession {
       event.kind === "view-result" ||
       event.kind === "suggest-result" ||
       event.kind === "recent-result" ||
-      event.kind === "preview-result"
+      event.kind === "preview-result" ||
+      event.kind === "releases-result" ||
+      event.kind === "count-result"
     ) {
       this.channels.get(event.channelId)?.receive(event)
       return

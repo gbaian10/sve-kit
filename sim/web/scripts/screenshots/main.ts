@@ -16,7 +16,7 @@ type Width = (typeof WIDTHS)[number]
 
 interface Shot {
   readonly file: string
-  readonly page: "cards" | "card"
+  readonly page: "home" | "cards" | "card"
   readonly subject: string
   readonly theme: Theme
   readonly language: UiLanguage
@@ -45,6 +45,12 @@ const { values } = parseArgs({
     themes: { type: "string", default: THEMES.join(",") },
     langs: { type: "string", default: UI_LANGUAGES.join(",") },
     widths: { type: "string", default: WIDTHS.join(",") },
+    edition: { type: "string", default: "jp" },
+    // Home page shots: the page as opened, then with `--home-query` typed into its search.
+    home: { type: "boolean", default: false },
+    "home-query": { type: "string" },
+    // Printing ids stored as recently viewed before the page loads.
+    recent: { type: "string", multiple: true, default: [] },
   },
 })
 if (values.out === undefined) throw new Error("--out <dir> is required")
@@ -123,12 +129,21 @@ async function capture(
   width: Width,
 ): Promise<{ shots: Shot[]; dataVersion: string | null; manifestHash: string | null }> {
   const height = heightOf(width)
-  const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1 })
+  // `dev:lan` serves a self-signed certificate.
+  const context = await browser.newContext({
+    viewport: { width, height },
+    deviceScaleFactor: 1,
+    ignoreHTTPSErrors: true,
+  })
   await context.addInitScript(
-    (prefs) => {
+    ({ prefs, recent }) => {
       localStorage.setItem("sve-kit:prefs", JSON.stringify(prefs))
+      if (recent.length > 0) localStorage.setItem("sve-kit:recent", JSON.stringify(recent))
     },
-    { v: 1, theme, uiLanguage: language },
+    {
+      prefs: { v: 1, theme, uiLanguage: language, cardEdition: values.edition },
+      recent: values.recent,
+    },
   )
   const page = await context.newPage()
   let consoleErrors = 0
@@ -206,6 +221,18 @@ async function capture(
       `history.pushState({}, "", ${JSON.stringify(pathname)}); dispatchEvent(new PopStateEvent("popstate"))`,
     )
     await waitReady(page)
+  }
+  if (values.home) {
+    await visit("/")
+    await shoot(`home-${values.edition}-${tag}.png`, "home", `home ${values.edition}`)
+    const query = values["home-query"]
+    if (query !== undefined) {
+      await page.getByRole("combobox").fill(query)
+      await page.waitForSelector("[role=listbox] [role=option]")
+      await shoot(`home-search-${values.edition}-${tag}.png`, "home", `home search ${query}`)
+      await page.getByRole("combobox").fill("")
+      await page.keyboard.press("Escape")
+    }
   }
   for (const view of views) {
     await visit(`/cards?q=${encodeURIComponent(values.query)}&view=${view}`)

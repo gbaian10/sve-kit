@@ -14,8 +14,8 @@ export interface SearchBarProps {
   readonly listId: string
   readonly expanded: boolean
   readonly activeOptionId?: string
-  /** Facets set beyond the text; 0 hides the badge. */
-  readonly filterCount: number
+  /** Facets set beyond the text; 0 hides the badge, undefined hides the filter button. */
+  readonly filterCount?: number
   readonly onOpenFilters?: () => void
 }
 
@@ -103,34 +103,36 @@ export function SearchBar({
           </button>
         )}
       </div>
-      <button
-        type="button"
-        aria-label={t("search.filters")}
-        title={onOpenFilters ? t("search.filters") : t("search.filtersSoon")}
-        aria-disabled={onOpenFilters === undefined}
-        onClick={onOpenFilters}
-        className={cn(
-          "relative flex size-11 shrink-0 items-center justify-center rounded-button border border-border bg-surface-1 text-text-1",
-          onOpenFilters ? "hover:bg-surface-2" : "text-text-3",
-        )}
-      >
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          className="size-5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
+      {filterCount !== undefined && (
+        <button
+          type="button"
+          aria-label={t("search.filters")}
+          title={onOpenFilters ? t("search.filters") : t("search.filtersSoon")}
+          aria-disabled={onOpenFilters === undefined}
+          onClick={onOpenFilters}
+          className={cn(
+            "relative flex size-11 shrink-0 items-center justify-center rounded-button border border-border bg-surface-1 text-text-1",
+            onOpenFilters ? "hover:bg-surface-2" : "text-text-3",
+          )}
         >
-          <path d="M4 6h16M7 12h10M10 18h4" />
-        </svg>
-        {filterCount > 0 && (
-          <span className="absolute top-1 right-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-accent px-1 text-11 font-bold text-accent-ink tabular-nums">
-            {filterCount}
-          </span>
-        )}
-      </button>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="size-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
+            <path d="M4 6h16M7 12h10M10 18h4" />
+          </svg>
+          {filterCount > 0 && (
+            <span className="absolute top-1 right-1 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-accent px-1 text-11 font-bold text-accent-ink tabular-nums">
+              {filterCount}
+            </span>
+          )}
+        </button>
+      )}
     </div>
   )
 }

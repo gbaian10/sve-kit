@@ -2,6 +2,7 @@ import { cardNoKey, cardNoLookupKey } from "../../domain/cardNo"
 import { normalizeText } from "../../domain/normalize"
 import { DEFAULT_QUERY, NEUTRAL_CLASS, type QueryState } from "../../domain/query/model"
 import type { MatchedField, Region, TextLang } from "../../domain/search"
+import { datedSets, type PackCounts, packCounts } from "../../domain/sets"
 import { type CardSummary, catalogCards } from "../catalog"
 import {
   arrayValue,
@@ -29,6 +30,12 @@ interface SearchOption {
 export interface SearchOptions {
   readonly classes: readonly SearchOption[]
   readonly sets: readonly SearchOption[]
+}
+/** A set with its first day-precision release in the index's edition. */
+export interface SetRelease extends SearchOption {
+  readonly publicCode: string
+  readonly kind: string
+  readonly releasedOn: string
 }
 export interface ImageTarget {
   readonly printingId: string
@@ -90,7 +97,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump whenever `encode` changes, so stored images in an older layout are never read. */
-export const INDEX_IMAGE_FORMAT = 3
+export const INDEX_IMAGE_FORMAT = 4
 
 interface Parts {
   readonly pool: StringPool
@@ -103,6 +110,7 @@ interface Parts {
   readonly costs: Float64Array
   readonly sets: ReadonlySet<string>
   readonly options: SearchOptions
+  readonly releases: readonly SetRelease[]
   readonly targets: Columns
 }
 
@@ -157,6 +165,22 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
         (a, b) => a.code.localeCompare(b.code, "en", { numeric: true }) || a.id.localeCompare(b.id),
       ),
   }
+  const releases: SetRelease[] = datedSets(
+    index.families.map((row) => ({
+      ...option(row, "name_unit_id"),
+      publicCode: stringValue(row["public_code"]),
+      kind: stringValue(row["kind"]),
+    })),
+    bootstrap.rows("product").map((row) => ({
+      familyId: typeof row["family_id"] === "string" ? row["family_id"] : null,
+      region: stringValue(row["region"]),
+      releasedOn:
+        row["date_precision"] === "day" && typeof row["released_on"] === "string"
+          ? row["released_on"]
+          : null,
+    })),
+    edition,
+  )
   const targets = new Columns(pool)
   let targetBatch: JsonObject[] = []
   const cards = uintColumns(CARD_COLUMNS)
@@ -245,6 +269,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     costs: Float64Array.from(costs),
     sets,
     options,
+    releases,
     targets,
   }
 }
@@ -308,6 +333,7 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
   )
   const targets = readColumns(image["targets"])
   const options = image["options"] as unknown as SearchOptions
+  const releases = image["releases"] as unknown as SetRelease[]
   if (next !== arrays.length) throw new Error("index image has unread arrays")
   return {
     pool,
@@ -320,6 +346,7 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
     order,
     sets: new Set(arrayValue(image["sets"]).map((value) => stringValue(value))),
     options,
+    releases,
     targets,
   }
 }
@@ -336,6 +363,7 @@ export class SearchIndex {
   private readonly costs: Float64Array
   private readonly sets: ReadonlySet<string>
   readonly options: SearchOptions
+  readonly releases: readonly SetRelease[]
   private readonly targetGroups = new Map<string, number[]>()
   private readonly targets: Columns
   private readonly edition: Region
@@ -354,6 +382,7 @@ export class SearchIndex {
     this.order = parts.order
     this.sets = parts.sets
     this.options = parts.options
+    this.releases = parts.releases
     this.targets = parts.targets
     for (let ordinal = 0; ordinal < this.targets.length; ordinal += 1) {
       const id = stringValue(this.targets.value(ordinal, "printingId"))
@@ -372,6 +401,7 @@ export class SearchIndex {
         edition: this.edition,
         sets: [...this.sets],
         options: this.options as unknown as JsonObject,
+        releases: this.releases as unknown as JsonObject[],
         targets: this.targets.parts().map(({ start, length, columns }) => ({
           start,
           length,
@@ -560,6 +590,23 @@ export class SearchIndex {
       offset,
       items: matches.slice(offset, offset + limit).map((p) => this.item(p, query.state)),
     }
+  }
+
+  /** Each matching card once, and how many of them have a name translation in `language`. */
+  count(query: SearchQuery, language: TextLang): PackCounts {
+    return packCounts(
+      this.matches(query).map((printing) => {
+        const summary = this.printings.summary[printing] ?? 0
+        const name = summary
+          ? (this.summaries.row(summary - 1) as unknown as CardSummary).name
+          : undefined
+        return {
+          key: this.pool.get(this.cards.id[this.printings.card[printing] ?? 0] ?? 0),
+          translated: Boolean(name?.translations[language]),
+          lowConfidence: name?.translationQuality?.[language]?.lowConfidence ?? false,
+        }
+      }),
+    )
   }
 
   neighbours(query: SearchQuery, target: string, maxItems?: number): SearchPage {
