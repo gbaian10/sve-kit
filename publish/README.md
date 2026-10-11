@@ -93,10 +93,11 @@ The steps are:
 
 `--jobs N` caps the object worker pool (default 16, minimum 1); `--jobs 1`
 processes one object at a time. Every image is read back before any JSON object
-starts, and the index is still written last. After any object fails, no further
-PUT starts: objects still comparing with GET stop there, PUTs already started
-finish and are read back, and then the failed key is reported. Nothing is rolled
-back or resent; rerun to fill in what is missing or different.
+starts, and the index is still written last. After an object fails, no new PUT
+is admitted: workers that see the stop skip their PUT, operations that already
+passed the stop check may still write and finish their read-back, and then the
+failed key is reported. Nothing is rolled back or resent; rerun to fill in what
+is missing or different.
 
 Progress goes to stderr every 100 objects or about 5 seconds and at the start
 and end of each phase; stdout keeps the final JSON summary, and dry-run output
