@@ -31,15 +31,25 @@ export class VerifiedCache {
       : Promise.resolve(undefined)
   }
 
+  private slotPrefix(slot: string): string {
+    return new Request(`${this.prefix}/${encodeURIComponent(slot)}/`).url
+  }
+
   // Root, kind, format, build, slot and manifest are all in the URL: any change misses.
   private key(slot: string, manifestHash: string): string {
     return new Request(
-      `${this.prefix}/${this.version}/${encodeURIComponent(slot)}/${encodeURIComponent(manifestHash)}`,
+      `${this.slotPrefix(slot)}${this.version}/${encodeURIComponent(manifestHash)}`,
     ).url
   }
 
-  private plan(slot: string): string {
-    return new Request(`${this.prefix}/plans/${encodeURIComponent(slot)}`).url
+  async remove(slot: string, manifestHash: string): Promise<void> {
+    const cache = await this.cache
+    if (!cache) return
+    try {
+      await cache.delete(this.key(slot, manifestHash))
+    } catch {
+      // Removing an unusable record is best effort when storage fails.
+    }
   }
 
   async read(slot: string, manifestHash: string): Promise<Uint8Array | undefined> {
@@ -51,9 +61,10 @@ export class VerifiedCache {
       if (!response) return undefined
       const payload = new Uint8Array(await response.arrayBuffer())
       if (response.headers.get(DIGEST) === (await transferDigest(payload))) return payload
-      await cache.delete(key)
+      await this.remove(slot, manifestHash)
     } catch {
       // An unreadable record is a miss; the caller rebuilds from verified input.
+      await this.remove(slot, manifestHash)
     }
     return undefined
   }
@@ -63,27 +74,21 @@ export class VerifiedCache {
     if (!cache) return
     try {
       const key = this.key(slot, manifestHash)
-      const own = this.plan(slot)
-      const plans = this.plan("")
-      const readPlan = async (url: string): Promise<string[]> => {
-        const value: unknown = await (await cache.match(url))?.json()
-        return Array.isArray(value)
-          ? value.filter((item): item is string => typeof item === "string")
-          : []
+      const prefix = this.slotPrefix(slot)
+      const ownKeys = async () =>
+        (await cache.keys()).map((request) => request.url).filter((url) => url.startsWith(prefix))
+      const prune = async (urls: string[], keep: number) => {
+        for (const url of urls.slice(0, Math.max(0, urls.length - keep))) await cache.delete(url)
       }
-      // Writing the current record again keeps the previous distinct one.
-      const current = [key, ...(await readPlan(own)).filter((item) => item !== key)].slice(0, 2)
-      const urls = (await cache.keys()).map((request) => request.url)
-      const retained = new Set([...current, own])
-      for (const url of urls.filter((url) => url.startsWith(plans) && url !== own)) {
-        retained.add(url)
-        for (const item of await readPlan(url)) retained.add(item)
-      }
-      // Evict first so a full cache has room for the new record.
-      for (const url of urls) if (!retained.has(url)) await cache.delete(url)
+      const before = await ownKeys()
+      // Cache keys are in insertion order. Rewrites retain the previous distinct record.
+      await prune(before, before.includes(key) ? 2 : 1)
       const digest = await transferDigest(payload)
+      // Reinsert a reused record so it remains the current one in insertion order.
+      await cache.delete(key)
       await cache.put(key, new Response(payload, { headers: { [DIGEST]: digest } }))
-      await cache.put(own, new Response(JSON.stringify(current)))
+      // Sweep after insertion too: concurrent writers cannot leave orphaned records or grow a slot.
+      await prune(await ownKeys(), 2)
     } catch {
       // Quota or storage failures only cost a rebuild on the next load.
     }

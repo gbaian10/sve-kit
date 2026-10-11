@@ -1,9 +1,13 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs"
+// @vitest-environment node
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
+import { runInNewContext } from "node:vm"
 
+import { build } from "vite"
 import { expect, it } from "vitest"
 
+import { BUILD_ID } from "../src/data/build-id"
 import { buildIdentity } from "../vite.config"
 
 it("changes with shipped sources and locked inputs, not with tests or missing files", () => {
@@ -25,4 +29,42 @@ it("changes with shipped sources and locked inputs, not with tests or missing fi
   expect(edited).not.toBe(initial)
   writeFileSync(lock, "lock 2\n")
   expect(buildIdentity(inputs, root)).not.toBe(edited)
+  rmSync(root, { recursive: true, force: true })
 })
+
+it("injects the same identity into an executable production search Worker", async () => {
+  const root = mkdtempSync(path.join(tmpdir(), "worker-build-id-"))
+  const entry = path.join(root, "main.ts")
+  writeFileSync(entry, 'new Worker(new URL("./identity-worker.ts", import.meta.url))\n')
+  writeFileSync(
+    path.join(root, "identity-worker.ts"),
+    `import ${JSON.stringify(path.resolve(import.meta.dirname, "../src/data/search/worker.ts"))}\n` +
+      `import { BUILD_ID } from ${JSON.stringify(path.resolve(import.meta.dirname, "../src/data/build-id.ts"))}\n` +
+      "self.postMessage(BUILD_ID)\n",
+  )
+  try {
+    const result = await build({
+      configFile: path.resolve(import.meta.dirname, "../vite.config.ts"),
+      logLevel: "silent",
+      build: { write: false, minify: false, rollupOptions: { input: entry } },
+    })
+    if ("on" in result) throw new Error("unexpected watch build")
+    const outputs = Array.isArray(result) ? result : [result]
+    const worker = outputs
+      .flatMap((output) => output.output)
+      .find((file) => file.type === "asset" && /identity-worker.*\.js$/.test(file.fileName))
+    if (!worker || worker.type !== "asset") throw new Error("missing worker bundle")
+    const messages: unknown[] = []
+    runInNewContext(String(worker.source), {
+      TextDecoder,
+      TextEncoder,
+      self: {
+        addEventListener: () => undefined,
+        postMessage: (value: unknown) => messages.push(value),
+      },
+    })
+    expect(messages).toEqual([BUILD_ID])
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+}, 30_000)

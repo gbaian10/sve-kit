@@ -182,6 +182,20 @@ export function buildIdentity(inputs: readonly string[], base: string): string {
 }
 
 const BUILD_ID_MODULE = path.join(import.meta.dirname, "src/data/build-id.ts")
+const BUILD_INPUTS = [
+  path.join(import.meta.dirname, "src"),
+  contractSchemaDir,
+  path.join(import.meta.dirname, "node_modules/.cache/sve-schema/validators.js"),
+  ...[
+    "bun.lock",
+    "package.json",
+    "vite.config.ts",
+    "tsconfig.json",
+    "tsconfig.base.json",
+    "tsconfig.app.json",
+    "tsconfig.node.json",
+  ].map((file) => path.join(import.meta.dirname, file)),
+]
 
 // Cached decoded snapshots are valid only for the code that verified them. A define would be fixed
 // for the whole dev session, so dev recomputes the hash on each edit and reloads this one module.
@@ -195,7 +209,7 @@ function buildIdPlugin(inputs: readonly string[]): Plugin {
     enforce: "pre",
     transform(code, moduleId) {
       if (moduleId.split("?")[0] !== BUILD_ID_MODULE) return undefined
-      return { code: code.replace("__SVE_BUILD_ID__", JSON.stringify(id)), map: null }
+      return { code: code.replace("= __SVE_BUILD_ID__", `= ${JSON.stringify(id)}`), map: null }
     },
     configureServer(server) {
       server.watcher.add([...inputs])
@@ -246,12 +260,7 @@ export default defineConfig({
         })
       },
     },
-    buildIdPlugin([
-      path.join(import.meta.dirname, "src"),
-      contractSchemaDir,
-      path.join(import.meta.dirname, "node_modules/.cache/sve-schema/validators.js"),
-      path.join(import.meta.dirname, "bun.lock"),
-    ]),
+    buildIdPlugin(BUILD_INPUTS),
     react(),
     tailwindcss(),
     serveSnapshotRoot("/cdn", cdnDir),
@@ -267,6 +276,7 @@ export default defineConfig({
     },
   },
   worker: {
+    plugins: () => [buildIdPlugin(BUILD_INPUTS)],
     rollupOptions: {
       output: {
         entryFileNames: (chunk) =>

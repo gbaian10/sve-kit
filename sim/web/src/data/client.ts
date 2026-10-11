@@ -297,6 +297,7 @@ export function createSnapshotClient(
         bootstrap: arrayValue(record["bootstrap"]) as unknown as Fragment[],
       }
     } catch {
+      await stored.remove("snapshot", manifestHash)
       return undefined
     }
   }
@@ -353,8 +354,10 @@ export function createSnapshotClient(
       previous &&
       previous.manifestHash === stringValue(chosen["manifest_sha256"]) &&
       (previous.entrySource ?? "current") === source
-    )
+    ) {
+      checkEntry(chosen, previous.manifest)
       return previous
+    }
     const restored = await restore(stringValue(chosen["manifest_sha256"]))
     if (restored) {
       checkEntry(chosen, restored.manifest)

@@ -47,9 +47,11 @@ snapshot client 的啟動包（manifest、config、bootstrap 片段）用同一�
 - 鍵：root（各自的 cache namespace）、種類、格式版本常數（`INDEX_IMAGE_FORMAT`、
   `SNAPSHOT_RECORD_FORMAT`，改編碼必須遞增）、建置識別、slot（搜尋為地區）與 manifest hash，任一不同即不沿用。
 - 建置識別：`vite.config.ts` 的 `sve-build-id` plugin 把 `src/`（測試除外）、carddb 契約 schema、
-  編譯後的驗證器與 `bun.lock` 的內容雜湊注入 `src/data/build-id.ts`。開發模式在這些檔案變動時重算並
+  編譯後的驗證器、`bun.lock`、套件與編譯設定的內容雜湊注入頁面和 Worker 的 `src/data/build-id.ts`。開發模式在這些檔案變動時重算並
   讓該模組失效，重新整理後舊紀錄就不再命中；production 在建置時固定，來源沒變的部署會沿用使用者已存的紀錄。
-- 淘汰：每個 slot 保留目前與上一份，同一份重複寫入不擠掉上一份；其他 slot 與其他 root 不受影響。
+- 淘汰：每個 slot 保留最後寫入的兩份不同紀錄，同一份重複寫入不擠掉另一份；以 CacheStorage 的插入順序
+  淘汰該 slot 的最舊紀錄，寫入後再清理一次，並行寫入完成後最多兩份；其他 slot 與其他 root 不受影響。
+  同 slot 並行重寫時可能淘汰剛重寫的紀錄，下一次載入會退回完整驗證，不影響內容正確性。
 - 完整性：紀錄附 SHA-256，讀回不符即刪除並當作未命中。讀回失敗、格式不符、quota 不足或儲存不可用
   都安靜退回完整下載與驗證；驗證失敗的載入不寫入任何紀錄。
 - Chromium 的 `crypto.subtle.digest` 在呼叫端同步計算，大紀錄的雜湊會佔用該執行緒。

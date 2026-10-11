@@ -225,6 +225,7 @@ export class SearchEngine {
     try {
       record = readRecord(bytes, request.edition)
     } catch {
+      await stored.remove(request.edition, stringValue(entry["manifest_sha256"]))
       return false
     }
     const parseMs = performance.now() - mark

@@ -429,4 +429,23 @@ describe("createSnapshotClient: verified snapshot records", () => {
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(await records(storage)).toEqual([])
   })
+
+  it("rejects changed entry fields even when reusing the snapshot already in memory", async () => {
+    const served = serve(base)
+    const client = createSnapshotClient(base, {
+      fetch: served.fetcher,
+      cacheStorage: memoryCache(),
+    })
+    await client.load()
+    const snapshot = client.snapshot()
+    const index = parseStrict(served.files.get(INDEX) ?? new Uint8Array()) as JsonObject
+    const current = { ...(index["current"] as JsonObject), published_at: "2026-09-30T00:00:00Z" }
+    served.files.set(
+      INDEX,
+      new TextEncoder().encode(JSON.stringify({ ...index, revision: 2, current })),
+    )
+    await client.reload()
+    expect(client.status()).toMatchObject({ state: "ready", updateError: { kind: "corrupt" } })
+    expect(client.snapshot()).toBe(snapshot)
+  })
 })

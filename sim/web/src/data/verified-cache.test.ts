@@ -81,4 +81,70 @@ describe("VerifiedCache", () => {
     await relative.write("jp", hash(1), bytes("data"))
     expect(await relative.read("jp", hash(1))).toBeUndefined()
   })
+
+  it("bounds concurrent writes from separate instances to two records per slot", async () => {
+    const storage = memoryCache()
+    const cache = new VerifiedCache(root, "kind", 1, storage, "build")
+    await cache.write("jp", hash(1), bytes("old"))
+    await cache.write("jp", hash(2), bytes("previous"))
+    await Promise.all(
+      [3, 4, 5, 6].map((n) =>
+        new VerifiedCache(root, "kind", 1, storage, "build").write("jp", hash(n), bytes(String(n))),
+      ),
+    )
+    expect(await records(storage)).toHaveLength(2)
+    const retained = await Promise.all(
+      [3, 4, 5, 6].map(async (n) => text(await cache.read("jp", hash(n)))),
+    )
+    expect(retained.filter((value) => value !== undefined)).toHaveLength(2)
+    for (const [index, value] of retained.entries())
+      if (value !== undefined) expect(value).toBe(String(index + 3))
+  })
+
+  it("retains a rewritten previous record when a new manifest arrives", async () => {
+    const storage = memoryCache()
+    const cache = new VerifiedCache(root, "kind", 1, storage, "build")
+    for (const n of [1, 2, 1, 3]) await cache.write("jp", hash(n), bytes(String(n)))
+    expect(text(await cache.read("jp", hash(1)))).toBe("1")
+    expect(await cache.read("jp", hash(2))).toBeUndefined()
+    expect(text(await cache.read("jp", hash(3)))).toBe("3")
+  })
+
+  it("does not evict another slot while its write is still completing", async () => {
+    const storage = memoryCache()
+    let release: () => void = () => undefined
+    let notify: () => void = () => undefined
+    const paused = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    const inserted = new Promise<void>((resolve) => {
+      notify = resolve
+    })
+    const delayed = {
+      open: async (name: string) => {
+        const cache = await storage.open(name)
+        return {
+          match: cache.match.bind(cache),
+          keys: cache.keys.bind(cache),
+          delete: cache.delete.bind(cache),
+          put: async (key: string, response: Response) => {
+            await cache.put(key, response)
+            if (key.includes("/en/")) {
+              notify()
+              await paused
+            }
+          },
+        } as unknown as Cache
+      },
+    } as unknown as CacheStorage
+    const en = new VerifiedCache(root, "kind", 1, delayed, "build")
+    const pending = en.write("en", hash(1), bytes("en"))
+    await inserted
+    const jp = new VerifiedCache(root, "kind", 1, storage, "build")
+    await jp.write("jp", hash(1), bytes("jp"))
+    release()
+    await pending
+    expect(text(await en.read("en", hash(1)))).toBe("en")
+    expect(text(await jp.read("jp", hash(1)))).toBe("jp")
+  })
 })
