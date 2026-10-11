@@ -13,6 +13,7 @@
 
 非機械差異由 AI 逐項記錄理由，分類為 same_effect、pending_review、errata 或 unresolved。
 AI same_effect 可建立供審閱的依據版本，合併前仍交維護者確認；method=ai 不表示真人核可。
+AI 紀錄若只因日期不明觀測產生差異，不能覆寫有日期版次的機械等價結果；原判定仍保留供審閱。
 可能不同的效果分類 errata，交由勘誤版本／印刷版本功能呈現。人工紀錄優先於機械與 AI 判定。
 最新日期若有多份 exact 不同卡文，維持 unresolved；不能用 hash 或 ID 排定發售順序。
 
