@@ -25,9 +25,11 @@ export {
   stringValue,
 } from "./format-v3/json"
 export { registerImageCache } from "./image-sw-registration"
+export { mediaImageSource } from "./image-url"
 export {
   type ImageFace,
   type ImageIndex,
+  type ImageSource,
   isSnapshotImageFace,
   loadImagePage,
   retainedImageIndex,

@@ -23,23 +23,20 @@ describe("metadata progress", () => {
       language: "zh-TW" as const,
       button: "下載卡圖資訊",
       degraded: /無法使用持久快取/u,
-      complete: "卡圖資訊已下載",
     },
     {
       language: "ja" as const,
       button: "画像情報を取得",
       degraded: /永続キャッシュが使えません/u,
-      complete: "画像情報を取得済み",
     },
     {
       language: "en" as const,
       button: "Download metadata",
       degraded: /Persistent cache unavailable/u,
-      complete: "Image metadata downloaded",
     },
   ])(
-    "starts background fetch on its own with a persistent cache and reports completion ($language)",
-    async ({ language, button, degraded, complete }) => {
+    "starts background fetch on its own with a persistent cache and goes quiet when complete ($language)",
+    async ({ language, button, degraded }) => {
       const client = createSnapshotClient("/cdn", {
         cacheStorage: memoryCache(),
         fetch: (url) => {
@@ -54,8 +51,12 @@ describe("metadata progress", () => {
       await renderInRouter(<MetadataStatus client={client} />, { language })
       expect(start).toHaveBeenCalledOnce()
       expect(screen.queryByText(degraded)).not.toBeInTheDocument()
+      // A finished download is not news: the row disappears instead of reporting completion.
       await waitFor(() => {
-        expect(screen.getByRole("status")).toHaveTextContent(complete)
+        expect(client.metadataStatus().state).toBe("complete")
+      })
+      await waitFor(() => {
+        expect(screen.queryByRole("status")).not.toBeInTheDocument()
       })
       expect(screen.queryByRole("button", { name: button })).not.toBeInTheDocument()
     },

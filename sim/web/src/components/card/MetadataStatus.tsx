@@ -26,6 +26,8 @@ export function MetadataStatus({ client }: { readonly client: SnapshotClient }) 
     },
     [client],
   )
+  // Progress is only news while it is happening; a finished download leaves the list alone.
+  if (progress.state === "complete" && progress.persistent) return null
   return (
     <div className="flex flex-wrap items-center gap-2 text-13 text-text-2">
       <span role="status">

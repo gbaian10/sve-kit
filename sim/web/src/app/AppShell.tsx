@@ -14,6 +14,14 @@ import { useThemeAttributes } from "./theme-attributes"
 
 // Layout switches on content width (design §11): < lg bottom bar, ≥ lg left rail (72px, 200px
 // expanded from xl); content is capped at 1280 and centred.
+// Switching the result view (grid / table / list) is the same list, so it keeps its scroll position.
+function scrollKeySearch(search: string): string {
+  const params = new URLSearchParams(search)
+  params.delete("view")
+  const rest = params.toString()
+  return rest === "" ? "" : `?${rest}`
+}
+
 export function AppShell() {
   const { t } = useTranslation()
   useThemeAttributes()
@@ -40,7 +48,9 @@ export function AppShell() {
           <DevBadge client={client} />
         )}
       </div>
-      <ScrollRestoration getKey={(location) => location.pathname + location.search} />
+      <ScrollRestoration
+        getKey={(location) => location.pathname + scrollKeySearch(location.search)}
+      />
     </ToastProvider>
   )
 }

@@ -165,11 +165,21 @@ describe("CardImage", () => {
   })
 
   it("keeps the placeholder until the image has loaded, then hides it", async () => {
+    // A source never shown in this session: shown ones skip the placeholder on remount.
+    const fresh: ImageIndex = {
+      asset: () => ({ id: "img", availability: "available", publication_state: "approved" }),
+      cardImage: () => ({
+        src: "/cdn/fresh.webp",
+        srcSet: "/cdn/fresh.webp 320w",
+        width: 320,
+        height: 447,
+      }),
+    }
     await renderInRouter(
       <CardImage
         summary={summary}
         name={name}
-        images={images("available")}
+        images={fresh}
         alt="redundant"
         sizes="50vw"
         className="w-full"

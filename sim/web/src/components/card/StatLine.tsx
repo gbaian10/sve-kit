@@ -11,13 +11,17 @@ export function StatLine({
   cost,
   attack,
   defense,
+  size = "md",
   className,
 }: {
   readonly cost: number | null
   readonly attack: number | null
   readonly defense: number | null
+  /** `sm` for list rows: 13px numbers, 16px icons. */
+  readonly size?: "md" | "sm"
   readonly className?: string
 }) {
+  const small = size === "sm"
   const { t } = useTranslation()
   const stats = [
     { key: "cost", icon: null, label: t("cardPage.stats.cost"), value: cost, tone: "text-success" },
@@ -46,12 +50,17 @@ export function StatLine({
           {stat.icon === null ? (
             <span
               aria-hidden="true"
-              className="size-3.5 rounded-full bg-success ring-1 ring-text-1/30 ring-inset"
+              className={cn(
+                "rounded-full bg-success ring-1 ring-text-1/30 ring-inset",
+                small ? "size-3" : "size-3.5",
+              )}
             />
           ) : (
-            <img src={stat.icon} alt="" className="size-4.5" />
+            <img src={stat.icon} alt="" className={small ? "size-4" : "size-4.5"} />
           )}
-          <span className={cn("text-14 font-bold", stat.tone)}>{stat.label}</span>
+          <span className={cn(small ? "text-12 font-bold" : "text-14 font-bold", stat.tone)}>
+            {stat.label}
+          </span>
           <b className="font-bold">{stat.value}</b>
         </span>
       ))}

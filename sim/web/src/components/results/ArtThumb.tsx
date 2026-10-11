@@ -1,0 +1,55 @@
+import { useState } from "react"
+
+import type { CardSummary, ImageIndex, ImageSource } from "../../data"
+import type { DisplayedText } from "../../domain/nameDisplay"
+import { CardImage } from "../card/CardImage"
+
+/**
+ * The table's 4:3 illustration crop (`art_s`/`art_m`). A missing crop, or one that fails to
+ * download, falls back to the full-card thumbnail; nothing ever shows a broken image.
+ */
+export function ArtThumb({
+  summary,
+  name,
+  images,
+  art,
+}: {
+  readonly summary: CardSummary
+  readonly name: DisplayedText
+  readonly images: ImageIndex | undefined
+  readonly art: ImageSource | undefined
+}) {
+  const [failed, setFailed] = useState("")
+  if (art === undefined || failed === art.src)
+    return (
+      <CardImage
+        summary={summary}
+        name={name}
+        images={images}
+        alt="redundant"
+        sizes="48px"
+        className="w-12 shrink-0 self-start"
+      />
+    )
+  return (
+    <span
+      data-art-thumb
+      className="relative block aspect-[4/3] w-20 shrink-0 self-start overflow-hidden rounded-sm border border-border bg-surface-2"
+    >
+      <img
+        src={art.src}
+        srcSet={art.srcSet}
+        sizes="80px"
+        width={art.width}
+        height={art.height}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        onError={() => {
+          setFailed(art.src)
+        }}
+        className="absolute inset-0 size-full object-cover"
+      />
+    </span>
+  )
+}

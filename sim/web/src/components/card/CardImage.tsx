@@ -25,6 +25,8 @@ export interface CardImageProps {
 }
 
 // A fixed slot prevents layout shifts while the image downloads or remains unavailable.
+const shownSources = new Set<string>()
+
 export function CardImage({ summary, name, images, alt, sizes, className }: CardImageProps) {
   const { t } = useTranslation()
   const [loaded, setLoaded] = useState("")
@@ -51,7 +53,9 @@ export function CardImage({ summary, name, images, alt, sizes, className }: Card
                 ? t("card.imageError")
                 : undefined
   const showImage = source !== undefined && tag === undefined
-  const isLoaded = source !== undefined && loaded === source.src
+  // A source this session already showed is in the browser cache: a remounted slot (switching
+  // views, returning to a list) paints it at once instead of the placeholder until onLoad.
+  const isLoaded = source !== undefined && (loaded === source.src || shownSources.has(source.src))
   const stateLabel = tag ?? (showImage && !isLoaded ? t("card.imageDownloading") : undefined)
   // A landscape card keeps its real proportions inside the portrait slot instead of being cropped.
   const landscape = source !== undefined && source.width > source.height
@@ -96,6 +100,7 @@ export function CardImage({ summary, name, images, alt, sizes, className }: Card
               setFailed(source.src)
             }}
             onLoad={() => {
+              shownSources.add(source.src)
               setLoaded(source.src)
             }}
             className={cn(

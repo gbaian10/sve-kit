@@ -24,7 +24,13 @@ import { Button } from "../../components/ui/Button"
 import { Chip } from "../../components/ui/Chip"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
-import { type CardSummary, type SearchQuery, stringValue } from "../../data"
+import {
+  type CardSummary,
+  type ImageSource,
+  mediaImageSource,
+  type SearchQuery,
+  stringValue,
+} from "../../data"
 import { quickBarClasses } from "../../domain/classes"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
 import { formatQuery, parseQuery } from "../../domain/query/codec"
@@ -134,9 +140,14 @@ export function CardsPage() {
   const listOpen = focused && catalog !== null
 
   const pages = Math.max(1, entry.pages ?? 1)
+  // The view is presentation only: switching it must not run the search again, so the query
+  // handed to the search keeps its identity while everything but the view is unchanged.
+  const { view: chosenView, ...conditions } = query
+  const conditionsKey = formatQuery(conditions).toString()
+  const searchState = useMemo(() => parseQuery(new URLSearchParams(conditionsKey)), [conditionsKey])
   const searchQuery = useMemo<SearchQuery>(
-    () => ({ state: query, edition, offset: 0, limit: pages * PAGE_SIZE }),
-    [query, edition, pages],
+    () => ({ state: searchState, edition, offset: 0, limit: pages * PAGE_SIZE }),
+    [searchState, edition, pages],
   )
   const { result } = useSearch(searchQuery)
   // Search opens once the full index is ready, but plain browsing must not wait for it: with no
@@ -149,7 +160,7 @@ export function CardsPage() {
   const page = useMemo(() => {
     if (result.phase === "complete") return result.page
     if (result.phase === "error" || !browsing || !catalog) return null
-    const items = catalog.results(query, edition)
+    const items = catalog.results(searchState, edition)
     return {
       total: items.length,
       offset: 0,
@@ -159,7 +170,7 @@ export function CardsPage() {
         summary: catalog.summary(item.printingId),
       })),
     }
-  }, [result, browsing, catalog, query, edition, pages])
+  }, [result, browsing, catalog, searchState, edition, pages])
   // Opening a card must not wait for the snapshot's text indexes: build them while idle.
   useEffect(() => {
     const first = page?.items[0]
@@ -272,9 +283,28 @@ export function CardsPage() {
   const classLabel = (code: string) => quickBar.find((item) => item.code === code)?.label ?? code
   const filterCount = activeFilterCount(query)
   const hasConditions = query.text !== "" || filterCount > 0
-  const view = query.view ?? prefs.viewMode
+  const view = chosenView ?? prefs.viewMode
   const unsupported = result.phase === "error" && result.error.kind === "unsupported-query"
   const pending = result.phase === "pending" && page === null
+  // The table's illustration crop comes from the same image metadata the card thumbnails use.
+  const artOf = useCallback(
+    (cell: GridCell): ImageSource | undefined => {
+      const asset = images?.asset(cell.summary.printingId, cell.summary.faceId)
+      const printing = catalog?.index.printing(cell.summary.printingId)
+      const face = catalog?.index
+        .facesOf(cell.summary.cardId)
+        .find((row) => row["id"] === cell.summary.faceId)
+      if (!asset || !printing || !face || typeof printing["int_id"] !== "number") return undefined
+      return mediaImageSource(
+        client.base,
+        printing["int_id"],
+        typeof face["ordinal"] === "number" ? face["ordinal"] : 0,
+        asset,
+        "art",
+      )
+    },
+    [images, catalog, client],
+  )
   const effectOwner = useCallback(
     (cell: GridCell) => {
       const revision = catalog?.index.displayRevision(cell.summary.faceId, cell.summary.region)
@@ -464,6 +494,7 @@ export function CardsPage() {
               onOpen={openCell}
               client={client}
               effectOwner={effectOwner}
+              artOf={artOf}
               {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
             />
           )}

@@ -1,25 +1,29 @@
-import type { MouseEvent } from "react"
+import { type MouseEvent, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { useHref, useNavigate } from "react-router"
 
 import { useAnnotatedText } from "../../app/snapshot"
-import { type SnapshotClient, stringValue } from "../../data"
+import { type ImageSource, type SnapshotClient, stringValue } from "../../data"
 import { classStyle } from "../../domain/classes"
 import type { Region } from "../../domain/search"
-import { CardImage } from "../card/CardImage"
 import { CLASS_ICON } from "../card/classIcons"
 import { InlineText } from "../card/InlineText"
+import { StatLine } from "../card/StatLine"
 import { costIcon, costIconNeedsNumber } from "../card/symbolIcons"
 import { useTextLanguage } from "../card/text-language"
 import { Badge } from "../ui/Badge"
 import { cn } from "../ui/cn"
+import { ArtThumb } from "./ArtThumb"
 import { type CardGridProps, type GridCell, NameNotices } from "./CardGrid"
 import { isPlainClick } from "./plain-click"
+import { useSeen } from "./useSeen"
 
 export interface CardRowsProps extends CardGridProps {
   readonly client: SnapshotClient
   /** Revision owner per cell key, for the table's effect preview; absent = no preview row. */
   readonly effectOwner: (cell: GridCell) => { readonly kind: string; readonly id: string } | null
+  /** The 4:3 illustration crop of a cell's face, once its image metadata is known. */
+  readonly artOf: (cell: GridCell) => ImageSource | undefined
 }
 
 function Stat({ value, def = false }: { readonly value: number | null; readonly def?: boolean }) {
@@ -94,7 +98,10 @@ function EffectPreview({
   const { readiness, value } = useAnnotatedText(client, owner, "effect", language, edition)
   const unit = value ? (value.translated ?? value.original).unit : null
   return (
-    <span className="flex min-w-0 flex-col gap-0.5">
+    <span
+      className="flex min-w-0 flex-col gap-0.5"
+      data-preview={unit ? "ready" : readiness.basic === "error" ? "error" : "pending"}
+    >
       {unit ? (
         <span
           lang={stringValue(unit["lang"])}
@@ -117,64 +124,96 @@ function EffectPreview({
   )
 }
 
-// Table row (design 05, 02a): 48×67 thumbnail, name over translation, cost/attack/defense, then
-// the two-line preview on its own line below so the row never grows past what the text needs.
-export function CardTable({ cells, images, onOpen, anchor, client, effectOwner }: CardRowsProps) {
+// Table row (design 05, 02a; thumbnail per the maintainer's later decision): a 4:3 illustration
+// crop, name over translation and number, the official stat line, then the two-line ability
+// preview on its own line. The preview resolves text only once the row has come near the viewport.
+function TableRow({
+  cell,
+  images,
+  onOpen,
+  highlighted,
+  client,
+  owner,
+  art,
+}: {
+  readonly cell: GridCell
+  readonly images: CardRowsProps["images"]
+  readonly onOpen: CardRowsProps["onOpen"]
+  readonly highlighted: boolean
+  readonly client: SnapshotClient
+  readonly owner: ReturnType<CardRowsProps["effectOwner"]>
+  readonly art: ImageSource | undefined
+}) {
   const { t } = useTranslation()
+  const ref = useRef<HTMLLIElement>(null)
+  const seen = useSeen(ref)
+  return (
+    <li ref={ref} className="min-w-0">
+      <RowLink cell={cell} onOpen={onOpen} highlighted={highlighted} className="flex-wrap py-2">
+        <ArtThumb summary={cell.summary} name={cell.name.primary} images={images} art={art} />
+        <span className="flex min-w-0 flex-1 flex-col gap-0.5 leading-tight">
+          <span className="flex items-baseline gap-2">
+            <span lang={cell.name.primary.lang} className="min-w-0 truncate text-15 font-semibold">
+              {cell.name.primary.text}
+            </span>
+            <span className="shrink-0 text-11 text-text-3 tabular-nums">{cell.summary.cardNo}</span>
+          </span>
+          {cell.name.secondary && (
+            <span lang={cell.name.secondary.lang} className="truncate text-13 text-text-2">
+              {cell.name.secondary.text}
+            </span>
+          )}
+          <NameNotices name={cell.name} />
+          <StatLine
+            size="sm"
+            cost={cell.summary.cost}
+            attack={cell.summary.attack}
+            defense={cell.summary.defense}
+          />
+          {cell.summary.wordingPending && (
+            <Badge className="mt-0.5 self-start">{t("card.wordingPending")}</Badge>
+          )}
+        </span>
+        {owner && (
+          <span className="basis-full pl-23">
+            {seen ? (
+              <EffectPreview client={client} owner={owner} edition={cell.summary.region} />
+            ) : (
+              <span className="flex min-w-0 flex-col gap-0.5" data-preview="waiting">
+                <span className="text-13 text-text-3">{t("results.effectPending")}</span>
+                <span className="text-11 text-text-3">{t("results.abilityPreview")}</span>
+              </span>
+            )}
+          </span>
+        )}
+      </RowLink>
+    </li>
+  )
+}
+
+export function CardTable({
+  cells,
+  images,
+  onOpen,
+  anchor,
+  client,
+  effectOwner,
+  artOf,
+}: CardRowsProps) {
   return (
     <ul data-view="table" className="flex flex-col">
-      {cells.map((cell) => {
-        const owner = effectOwner(cell)
-        return (
-          <li key={cell.key} className="min-w-0">
-            <RowLink
-              cell={cell}
-              onOpen={onOpen}
-              highlighted={anchor === cell.key}
-              className="flex-wrap py-2"
-            >
-              <CardImage
-                summary={cell.summary}
-                name={cell.name.primary}
-                images={images}
-                alt="redundant"
-                sizes="48px"
-                className="w-12 shrink-0"
-              />
-              <span className="flex min-w-0 flex-1 flex-col leading-tight">
-                <span lang={cell.name.primary.lang} className="truncate text-15 font-semibold">
-                  {cell.name.primary.text}
-                </span>
-                {cell.name.secondary && (
-                  <span lang={cell.name.secondary.lang} className="truncate text-13 text-text-2">
-                    {cell.name.secondary.text}
-                  </span>
-                )}
-                <span className="text-11 text-text-3 tabular-nums">{cell.summary.cardNo}</span>
-                <NameNotices name={cell.name} />
-                {cell.summary.wordingPending && (
-                  <Badge className="mt-1 self-start">{t("card.wordingPending")}</Badge>
-                )}
-              </span>
-              <span className="flex shrink-0 items-center gap-2">
-                {cell.summary.cost !== null && <Cost value={cell.summary.cost} />}
-                {cell.summary.attack !== null && cell.summary.defense !== null && (
-                  <span className="flex items-baseline gap-0.5">
-                    <Stat value={cell.summary.attack} />
-                    <span className="text-13 text-text-3">/</span>
-                    <Stat value={cell.summary.defense} def />
-                  </span>
-                )}
-              </span>
-              {owner && (
-                <span className="basis-full pl-15">
-                  <EffectPreview client={client} owner={owner} edition={cell.summary.region} />
-                </span>
-              )}
-            </RowLink>
-          </li>
-        )
-      })}
+      {cells.map((cell) => (
+        <TableRow
+          key={cell.key}
+          cell={cell}
+          images={images}
+          onOpen={onOpen}
+          highlighted={anchor === cell.key}
+          client={client}
+          owner={effectOwner(cell)}
+          art={artOf(cell)}
+        />
+      ))}
     </ul>
   )
 }
@@ -185,7 +224,7 @@ export function CardList({
   cells,
   onOpen,
   anchor,
-}: Omit<CardRowsProps, "images" | "client" | "effectOwner">) {
+}: Omit<CardRowsProps, "images" | "client" | "effectOwner" | "artOf">) {
   const { t } = useTranslation()
   return (
     <ul data-view="list" className="flex flex-col">
