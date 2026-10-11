@@ -9091,11 +9091,11 @@ records:
           - {kind: LeafRef, slot: leaf_1}
           - {kind: Literal, text: 】給予敵方的全部主戰者與敵方的全部從者}
           - {kind: LeafRef, slot: leaf_2}
-          - {kind: Literal, text: 點傷害。【SC_}
+          - {kind: Literal, text: 點傷害。【魔力連鎖_}
           - {kind: LeafRef, slot: leaf_3}
           - {kind: Literal, text: 】轉變為}
           - {kind: LeafRef, slot: leaf_4}
-          - {kind: Literal, text: 點傷害。【SC_}
+          - {kind: Literal, text: 點傷害。【魔力連鎖_}
           - {kind: LeafRef, slot: leaf_5}
           - {kind: Literal, text: 】轉變為}
           - {kind: LeafRef, slot: leaf_6}
@@ -11432,7 +11432,7 @@ records:
         nodes:
           - {kind: Literal, text: 【死靈充能_}
           - {kind: LeafRef, slot: leaf_0}
-          - {kind: Literal, text: 】這張卡片獲得【指定攻擊】。【NC_}
+          - {kind: Literal, text: 】這張卡片獲得【指定攻擊】。【死靈充能_}
           - {kind: LeafRef, slot: leaf_1}
           - {kind: Literal, text: 】這張卡片獲得【疾馳】【必殺】。}
     origin: machine
