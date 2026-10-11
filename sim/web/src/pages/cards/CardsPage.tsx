@@ -2,7 +2,7 @@ import { type KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef, use
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 
-import { type CardEntryState, useListEntryState } from "../../app/listEntryState"
+import { type CardEntryState, LIST_PAGE_SIZE, useListEntryState } from "../../app/listEntryState"
 import {
   useCatalog,
   useImageIndex,
@@ -46,7 +46,6 @@ import type { Suggestion } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
 import { prefsStore, recentStore, usePrefs, useRecent } from "../../settings"
 
-const PAGE_SIZE = 60
 const SUGGEST_LIMIT = 8
 const DEBOUNCE_MS = 150
 
@@ -146,7 +145,7 @@ export function CardsPage() {
   const conditionsKey = formatQuery(conditions).toString()
   const searchState = useMemo(() => parseQuery(new URLSearchParams(conditionsKey)), [conditionsKey])
   const searchQuery = useMemo<SearchQuery>(
-    () => ({ state: searchState, edition, offset: 0, limit: pages * PAGE_SIZE }),
+    () => ({ state: searchState, edition, offset: 0, limit: pages * LIST_PAGE_SIZE }),
     [searchState, edition, pages],
   )
   const { result } = useSearch(searchQuery)
@@ -164,7 +163,7 @@ export function CardsPage() {
     return {
       total: items.length,
       offset: 0,
-      items: items.slice(0, pages * PAGE_SIZE).map((item) => ({
+      items: items.slice(0, pages * LIST_PAGE_SIZE).map((item) => ({
         key: item.key,
         printingId: item.printingId,
         summary: catalog.summary(item.printingId),
@@ -474,7 +473,11 @@ export function CardsPage() {
                 value={view}
                 onChange={(next) => {
                   prefsStore.set({ viewMode: next })
-                  commit({ ...query, view: next })
+                  setEdit(null)
+                  setParams(formatQuery({ ...query, view: next }), {
+                    state: entry,
+                    preventScrollReset: true,
+                  })
                 }}
               />
             </div>

@@ -69,7 +69,6 @@ async function waitReady(page: Page): Promise<void> {
   await page.waitForFunction(
     `Boolean(document.querySelector("[data-manifest-hash]")?.getAttribute("title"))`,
     undefined,
-    { timeout: 180_000 },
   )
 }
 
@@ -95,7 +94,7 @@ async function settleImages(page: Page): Promise<void> {
       previous = pending
       stableSince = Date.now()
     } else if (Date.now() - stableSince > 10_000) break
-    if (Date.now() - started > 120_000) break
+    if (Date.now() - started > 30_000) break
     await page.waitForTimeout(500)
   }
   await page.waitForTimeout(300)
@@ -211,15 +210,13 @@ async function capture(
   for (const view of views) {
     await visit(`/cards?q=${encodeURIComponent(values.query)}&view=${view}`)
     // An in-app view switch renders after the busy main thread frees up; wait for that view's list.
-    await page.waitForSelector(`[data-view="${view}"] [data-result-key], [role=alert]`, {
-      timeout: 60_000,
-    })
+    await page.waitForSelector(`[data-view="${view}"] [data-result-key], [role=alert]`)
     await shoot(`cards-${view}-${values.query}-${tag}.png`, "cards", `${view} ${values.query}`)
   }
   for (const cardNo of values.card) {
     await visit(`/cards/${encodeURIComponent(cardNo)}`)
     // A card with pending wording has no effect section; the header (name) is the ready signal.
-    await page.waitForSelector("article h2, [role=alert]", { timeout: 60_000 })
+    await page.waitForSelector("article h2, [role=alert]")
     await page
       .waitForSelector('[data-field="effect"] p:not([role])', { timeout: 20_000 })
       .catch(() => undefined)

@@ -18,13 +18,8 @@ import iconWitch from "../../assets/official/texticon/icon_witch.png"
 import iconRide from "../../assets/official/texticon/ride.png"
 import { ATTACK_ICON, costIcon, costIconNeedsNumber, DEFENSE_ICON } from "./symbolIcons"
 
-/**
- * Card text keeps the official site's inline icons as `{marker}` tokens: the JP crawler stores
- * the image's alt (`{ファンファーレ}`), the EN crawler its file stem and alt (`{icon_fanfare|[fanfare]}`),
- * and the zh-Hant templates the glossary's translated label (`{入場曲}`). The 3.0.0 preview
- * snapshot ships no `text_symbol` rows, so the official file name is the only key shared by all
- * three spellings; this table is that key until the snapshot carries the spellings itself.
- */
+// The snapshot has no text_symbol rows yet; official stems connect JP alts, EN tokens and
+// translated glossary labels. Keep unrecognized markers intact.
 type SymbolKind = "keyword" | "stat" | "class" | "cost"
 
 interface TextSymbol {

@@ -596,10 +596,8 @@ function afterPaint(task: () => void): () => void {
   }
 }
 
-// Creating the shared resolver indexes the whole bootstrap (about 100 ms on real data) and the
-// first text it resolves builds the owner index on top. Neither may run inside a render or in the
-// effects React flushes before the paint that follows a tap, so renders only read a resolver that
-// already exists, and creation happens after paint or during idle time.
+// Bootstrap indexing can delay a tap's next paint; render only existing resolvers and initialize
+// new ones after paint or during idle time.
 const createdResolvers = new WeakSet<LoadedSnapshot>()
 
 function existingResolver(

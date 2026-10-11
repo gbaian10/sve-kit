@@ -60,6 +60,36 @@ describe("the native C → P → R annotation slice", () => {
     expect(await resolver.resolve(effect, "en")).toBe(first)
     expect(requests).toHaveLength(settled)
   })
+  it("does not expose settled text after the client's snapshot is replaced", async () => {
+    const { client } = await annotatedOrigin()
+    await client.load()
+    let current = client.snapshot()
+    const resolver = createAnnotatedTextResolver({ ...client, snapshot: () => current })
+    const pointer = {
+      owner: { kind: "face_revision", id: "revision" },
+      field: "name",
+      ordinal: null,
+    }
+    expect(await resolver.resolve(pointer, "en")).not.toBeNull()
+    current = null
+    expect(resolver.peek(pointer, "en")).toBeUndefined()
+    await expect(resolver.resolve(pointer, "en")).rejects.toThrow("snapshot replaced")
+  })
+  it("rejects text finishing after the client's snapshot is replaced", async () => {
+    const { client } = await annotatedOrigin()
+    await client.load()
+    let current = client.snapshot()
+    const resolver = createAnnotatedTextResolver({ ...client, snapshot: () => current })
+    const pointer = {
+      owner: { kind: "face_revision", id: "revision" },
+      field: "name",
+      ordinal: null,
+    }
+    const pending = resolver.resolve(pointer, "en")
+    current = null
+    await expect(pending).rejects.toThrow("snapshot replaced")
+    expect(resolver.peek(pointer, "en")).toBeUndefined()
+  })
   it("rejects an absent owner rather than borrowing annotations of the same text", async () => {
     const { client } = await annotatedOrigin()
     await client.load()

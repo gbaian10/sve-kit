@@ -3,6 +3,8 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router"
 
+import { useDialogHistory } from "../../app/dialog-history"
+import { LIST_PAGE_SIZE } from "../../app/listEntryState"
 import { useCatalog, useImageIndex, useSearchReadiness } from "../../app/snapshot"
 import { StatusStrip } from "../../app/StatusStrip"
 import { CardImage } from "../../components/card/CardImage"
@@ -93,6 +95,9 @@ export function CardPage() {
   const toast = useToast()
   const [textMode, setTextMode] = useState<"current" | "printed">("current")
   const [zoomed, setZoomed] = useState<string | null>(null)
+  const closeZoom = useDialogHistory("card-zoom", zoomed !== null, () => {
+    setZoomed(null)
+  })
   const { cardEdition } = prefs
   const uiLanguage = currentUiLanguage(prefs.uiLanguage)
   const textLang = UI_TEXT_LANG[uiLanguage]
@@ -121,13 +126,15 @@ export function CardPage() {
   // The list order is computed in a deferred render after the card has painted, so opening a
   // card never waits for it; the buttons keep their place and enable once it is known.
   const deferredCatalog = useDeferredValue(catalog, null)
-  const order = useMemo<readonly ResultItem[] | null>(
-    () =>
-      deferredCatalog
-        ? deferredCatalog.results(parseQuery(new URLSearchParams(background ?? "")), cardEdition)
-        : null,
-    [deferredCatalog, background, cardEdition],
-  )
+  const pages = typeof entry?.["pages"] === "number" ? Math.max(1, entry["pages"]) : 1
+  const order = useMemo<readonly ResultItem[] | null>(() => {
+    if (!deferredCatalog) return null
+    const results = deferredCatalog.results(
+      parseQuery(new URLSearchParams(background ?? "")),
+      cardEdition,
+    )
+    return fromList ? results.slice(0, pages * LIST_PAGE_SIZE) : results
+  }, [deferredCatalog, background, cardEdition, fromList, pages])
   const position =
     order === null || printingId === null
       ? -1
@@ -454,9 +461,7 @@ export function CardPage() {
       </div>
       <Dialog
         open={zoomedView !== undefined}
-        onClose={() => {
-          setZoomed(null)
-        }}
+        onClose={closeZoom}
         title={zoomedView?.name?.primary.text ?? ""}
         variant="center"
       >

@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { act, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -21,6 +21,7 @@ const state = vi.hoisted(() => ({
   current: false,
   crossRegion: false,
   doubleFace: false,
+  order: null as { key: string; printingId: string }[] | null,
   undated: [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }],
   wording: vi.fn(),
 }))
@@ -49,12 +50,13 @@ vi.mock("../../app/snapshot", () => {
       catalog: {
         // Previous/next walk this order; the synthetic card is first, so only "next" is enabled.
         results: () =>
-          state.doubleFace
+          state.order ??
+          (state.doubleFace
             ? [
                 { key: "c:synthetic", printingId: "p:synthetic" },
                 { key: "c:other", printingId: "p:synthetic" },
               ]
-            : [],
+            : []),
         summary: () =>
           state.doubleFace
             ? {
@@ -138,6 +140,7 @@ beforeEach(() => {
   state.current = false
   state.crossRegion = false
   state.doubleFace = false
+  state.order = null
   state.undated = [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }]
   state.wording.mockClear()
 })
@@ -270,6 +273,46 @@ describe("double-face headers", () => {
     expect(screen.getAllByText("費用")).toHaveLength(2)
     expect(screen.getAllByText("2")).toHaveLength(2)
     expect(screen.queryByText("攻擊力")).not.toBeInTheDocument()
+  })
+  it("keeps previous/next inside the pages loaded by the originating list", async () => {
+    state.doubleFace = true
+    state.order = Array.from({ length: 61 }, (_, index) => ({
+      key: `c:${String(index)}`,
+      printingId: index === 59 ? "p:synthetic" : `p:${String(index)}`,
+    }))
+    prefsStore.set({ uiLanguage: "zh-TW" })
+    const { router } = await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    expect(screen.getByRole("button", { name: "下一張" })).toBeEnabled()
+    await act(() =>
+      router.navigate("/cards/BP-SYNTHETIC", {
+        replace: true,
+        state: { background: "", source: "results", pages: 1, resultKey: "c:59" },
+      }),
+    )
+    await waitFor(() => expect(screen.getByRole("button", { name: "下一張" })).toBeDisabled())
+    expect(screen.getByRole("button", { name: "上一張" })).toBeEnabled()
+  })
+  it("closes the enlarged image on browser back before leaving the card", async () => {
+    state.doubleFace = true
+    prefsStore.set({ uiLanguage: "zh-TW" })
+    const { router } = await renderRoutes(
+      [
+        { path: "/cards", element: <p>Synthetic list</p> },
+        { path: "/cards/:cardNo", ...card },
+      ],
+      { initialEntries: ["/cards", "/cards/BP-SYNTHETIC"] },
+    )
+    await userEvent.click(screen.getByRole("button", { name: "放大卡圖：Synthetic front" }))
+    await waitFor(() => {
+      expect(router.state.location.state).toMatchObject({ dialog: "card-zoom" })
+    })
+    await act(() => router.navigate(-1))
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
+    expect(router.state.location.pathname).toBe("/cards/BP-SYNTHETIC")
+    await act(() => router.navigate(-1))
+    expect(screen.getByText("Synthetic list")).toBeVisible()
   })
   it("offers previous/next from the list order and enlarges the image in a dialog", async () => {
     state.doubleFace = true

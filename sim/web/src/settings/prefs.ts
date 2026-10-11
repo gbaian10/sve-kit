@@ -86,10 +86,7 @@ function resolveStorage(source: StorageSource): Storage {
   return typeof source === "function" ? source() : source
 }
 
-// Only the exact version this build writes is trusted; a missing or different `v` means another
-// build's layout, and guessing field by field could keep half of it. Same rule in theme-boot.js.
-// Fields this build no longer has (`dataSaver`, removed with the data-saver mode) are ignored
-// without a version bump: the whitelist below only reads the keys of DEFAULT_PREFS.
+// Trust only this build's version, as theme-boot.js does; DEFAULT_PREFS excludes removed fields.
 function sanitize(raw: unknown): Prefs {
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return DEFAULT_PREFS
   const record = raw as Record<string, unknown>

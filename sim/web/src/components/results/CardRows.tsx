@@ -124,9 +124,7 @@ function EffectPreview({
   )
 }
 
-// Table row (design 05, 02a; thumbnail per the maintainer's later decision): a 4:3 illustration
-// crop, name over translation and number, the official stat line, then the two-line ability
-// preview on its own line. The preview resolves text only once the row has come near the viewport.
+// Near-viewport previews limit text work while preserving the table layout (design 05, 02a).
 function TableRow({
   cell,
   images,

@@ -4,10 +4,7 @@ import type { CardSummary, ImageIndex, ImageSource } from "../../data"
 import type { DisplayedText } from "../../domain/nameDisplay"
 import { CardImage } from "../card/CardImage"
 
-/**
- * The table's 4:3 illustration crop (`art_s`/`art_m`). A missing crop, or one that fails to
- * download, falls back to the full-card thumbnail; nothing ever shows a broken image.
- */
+// Missing or failed illustration crops fall back to the full-card thumbnail.
 export function ArtThumb({
   summary,
   name,

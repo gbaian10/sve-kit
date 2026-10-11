@@ -3,11 +3,7 @@ import { Fragment, useMemo } from "react"
 import { usePrefs } from "../../settings"
 import { inlinePieces, type SymbolPiece } from "./textSymbols"
 
-/**
- * One official icon in running text. It carries the marker's text as alt, so a copy of the text
- * reads as the official page does; the optional label beside keyword icons follows the
- * symbol-labels setting. Sized to the text so it sits on the line like a glyph at any line height.
- */
+// Alt preserves the marker's meaning; glyph-sized icons keep card text in normal flow.
 export function SymbolIcon({ piece }: { readonly piece: SymbolPiece }) {
   const { symbolLabels } = usePrefs()
   return (

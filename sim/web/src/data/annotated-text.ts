@@ -100,9 +100,7 @@ class PageClosure {
         rows.set(identity, row)
       }
       this.rows.set(fragment.table, rows)
-      // Each index changes only when a table it reads arrives. Rows new to the closure extend the
-      // owner index in place; a replaced row, or rows it rejects, leave it to the full rebuild,
-      // which applies the same checks and reports the failure where it always has.
+      // Extend valid new rows in place; replacements or rejected rows require full validation.
       const placed = ["card", "face", "printing", "face_revision"].includes(fragment.table)
       if (placed || OWNER_TABLES.includes(fragment.table)) {
         if (replaced) this.owners = undefined
@@ -253,10 +251,7 @@ class PageClosure {
 
 const shared = new WeakMap<LoadedSnapshot, AnnotatedTextResolver>()
 
-/**
- * The resolver every text on screen uses for the client's loaded snapshot. Indexing the bootstrap
- * is the expensive step, so a table of previews or a reopened card page must not repeat it.
- */
+// Share bootstrap indexing across previews and reopened card pages for the same snapshot.
 export function sharedAnnotatedTextResolver(client: SnapshotClient): AnnotatedTextResolver {
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("snapshot not loaded")
@@ -407,8 +402,12 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
   const settled = new Map<string, SelectedText | null>()
   const running = new Map<string, Promise<SelectedText | null>>()
   return {
-    peek: (pointer, targetLang) => settled.get(canonicalText([pointer, targetLang])),
+    peek: (pointer, targetLang) =>
+      client.snapshot() === snapshot
+        ? settled.get(canonicalText([pointer, targetLang]))
+        : undefined,
     resolve: (pointer, targetLang) => {
+      if (client.snapshot() !== snapshot) return Promise.reject(new Error("snapshot replaced"))
       const id = canonicalText([pointer, targetLang])
       const value = settled.get(id)
       if (value !== undefined) return Promise.resolve(value)
@@ -416,6 +415,7 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
       if (!promise) {
         promise = resolveText(pointer, targetLang)
           .then((result) => {
+            if (client.snapshot() !== snapshot) throw new Error("snapshot replaced")
             settled.set(id, result)
             return result
           })

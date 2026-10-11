@@ -23,9 +23,7 @@ interface Segment {
   readonly symbol?: SymbolPiece
 }
 
-// Annotation ranges and icon markers partition the text independently: a keyword range usually
-// covers only the word inside the braces. The icon stands for the whole marker, so it is drawn
-// once and takes over any explanation entry a range inside the marker carries.
+// A marker may contain an annotation range; draw its icon once and preserve that explanation.
 function layOut(
   text: string,
   runs: readonly {

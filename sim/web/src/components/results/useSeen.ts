@@ -1,32 +1,53 @@
 import { type RefObject, useEffect, useState } from "react"
 
-// One observer for every row: a row is "seen" once it comes within a screen of the viewport and
-// stays seen, so work it triggers (the ability preview) runs once per row and only for rows the
-// reader can reach soon. Without IntersectionObserver (tests) every row counts as seen.
-const callbacks = new WeakMap<Element, () => void>()
+// Sharing the observer avoids per-row work; pixel margins follow viewport height, not width.
+const callbacks = new Map<Element, () => void>()
 let observer: IntersectionObserver | undefined
+
+function release(): void {
+  if (callbacks.size !== 0) return
+  observer?.disconnect()
+  observer = undefined
+  window.removeEventListener("resize", resize)
+}
+
+function createObserver(): IntersectionObserver {
+  return new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries)
+        if (entry.isIntersecting) {
+          const onSeen = callbacks.get(entry.target)
+          callbacks.delete(entry.target)
+          observer?.unobserve(entry.target)
+          onSeen?.()
+        }
+      release()
+    },
+    { rootMargin: `${String(window.innerHeight)}px 0px ${String(window.innerHeight)}px 0px` },
+  )
+}
+
+function resize(): void {
+  observer?.disconnect()
+  observer = createObserver()
+  for (const node of callbacks.keys()) observer.observe(node)
+}
 
 function observe(node: Element, onSeen: () => void): () => void {
   if (typeof IntersectionObserver === "undefined") {
     onSeen()
     return () => undefined
   }
-  observer ??= new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries)
-        if (entry.isIntersecting) {
-          callbacks.get(entry.target)?.()
-          callbacks.delete(entry.target)
-          observer?.unobserve(entry.target)
-        }
-    },
-    { rootMargin: "100% 0px 100% 0px" },
-  )
+  if (!observer) {
+    observer = createObserver()
+    window.addEventListener("resize", resize)
+  }
   callbacks.set(node, onSeen)
   observer.observe(node)
   return () => {
     callbacks.delete(node)
     observer?.unobserve(node)
+    release()
   }
 }
 
