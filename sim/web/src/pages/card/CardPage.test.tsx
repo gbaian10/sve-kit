@@ -218,6 +218,8 @@ vi.mock("../../app/snapshot", () => {
           wording: (face: string, region: string) => {
             state.wording(face, region)
             return {
+              classification: "same_effect",
+              basis_printing_id: "p:undated",
               display: {
                 revision_id: state.available ? "rev:synthetic" : null,
                 basis: state.current
@@ -251,7 +253,7 @@ vi.mock("../../app/snapshot", () => {
                         : [],
                   }
                 : state.available
-                  ? { id: "rev:synthetic", name_unit_id: "t:synthetic" }
+                  ? { id: "rev:synthetic", face_id: "f:synthetic", name_unit_id: "t:synthetic" }
                   : undefined,
           revision: (id: string) => ({
             id,
@@ -356,13 +358,9 @@ it("shows the shared type line and stats without a display revision", async () =
 })
 
 describe("plain wording on the card page", () => {
-  it.each([
-    ["zh-TW", "此卡各版次的卡文不同"],
-    ["ja", "このカードは版によってテキストが異なります"],
-    ["en", "This card has different text across printings"],
-  ] as const)(
-    "groups candidates by text and initially opens the displayed wording in %s",
-    async (language, heading) => {
+  it.each(["zh-TW", "ja", "en"] as const)(
+    "shows this printing's own original in %s",
+    async (language) => {
       state.available = true
       state.current = true
       state.candidates.push({ printing_id: "p:additional", revision_id: "rev:other" })
@@ -370,18 +368,9 @@ describe("plain wording on the card page", () => {
         initialEntries: ["/cards/BP-SYNTHETIC"],
         language,
       })
-      expect(screen.getByRole("heading", { name: heading })).toBeVisible()
-      expect(container.querySelectorAll("details")).toHaveLength(2)
-      expect(container.querySelectorAll("details[open]")).toHaveLength(1)
-      expect(screen.getByText("Synthetic selected effect")).toBeVisible()
-      expect(screen.queryByText("Synthetic older effect")).not.toBeInTheDocument()
-      expect(screen.getByText("BP-SYNTHETIC / BP-OTHER")).toBeVisible()
-      await userEvent.click(screen.getByText("BP-SYNTHETIC / BP-OTHER"))
       expect(screen.getByText("Synthetic older effect")).toBeVisible()
-      expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument()
-      expect(container).not.toHaveTextContent(
-        /原文字段未知|印刷文字尚未確認|依已知發售日暫顯|日期未定版次/,
-      )
+      expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
+      expect(container.querySelectorAll("details")).toHaveLength(0)
     },
   )
   it("shows a printing's own original beside the latest translation and preserves the list on its source link", async () => {
@@ -421,8 +410,7 @@ describe("plain wording on the card page", () => {
     const { container } = await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
-    expect(container.querySelectorAll("details")).toHaveLength(2)
-    expect(container.querySelectorAll("details[open]")).toHaveLength(1)
+    expect(container.querySelectorAll("details")).toHaveLength(0)
     expect(screen.getByText("Synthetic older effect")).toBeVisible()
     expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
     expect(screen.queryByText("目前顯示的卡文")).not.toBeInTheDocument()
@@ -448,7 +436,7 @@ describe("plain wording on the card page", () => {
         { initialEntries: [path] },
       )
       expect(state.wording).toHaveBeenCalledWith("f:synthetic", "en")
-      expect(screen.getByText("Synthetic selected effect")).toBeVisible()
+      expect(screen.getByText("Synthetic older effect")).toBeVisible()
     },
   )
 })

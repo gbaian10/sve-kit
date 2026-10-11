@@ -548,10 +548,13 @@ export function CardView({
   const views = faces.map((face, ordinal) => {
     const faceId = face["id"] as string
     const wording = faceCatalog?.index.wording(faceId, region)
-    const revision = faceCatalog?.index.displayRevision(faceId, region)
+    const basis = faceCatalog?.index.displayRevision(faceId, region)
+    const revision = faceCatalog?.index.displayRevision(faceId, region, printingId ?? undefined)
     const nameRow = revision ?? (wording?.["common_name"] as Row | null | undefined)
     const backName =
-      ordinal > 0 && nameRow && faceCatalog ? nameOf(faceCatalog.index, nameRow) : undefined
+      ordinal > 0 && nameRow && faceCatalog
+        ? nameOf(faceCatalog.index, nameRow, "name", basis ?? nameRow)
+        : undefined
     const faceSummary: CardSummary | undefined =
       summary &&
       (ordinal === 0
@@ -563,7 +566,7 @@ export function CardView({
               original: { lang: region === "jp" ? "ja" : "en", text: summary.cardNo },
               translations: {},
             },
-            wordingPending: wording !== undefined,
+            wordingPending: wording !== undefined && wording["classification"] !== "same_effect",
           })
     const name = faceSummary
       ? displayName(faceSummary.name, uiLanguage, prefs.nameDisplay)

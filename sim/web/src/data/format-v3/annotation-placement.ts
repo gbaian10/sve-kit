@@ -10,6 +10,11 @@ function displayRevisions(view: View): Set<JsonValue> {
         ...arrayValue(face["wording"]).map(
           (value) => objectValue(objectValue(value)["display"])["revision_id"],
         ),
+        ...arrayValue(face["wording"]).flatMap((value) =>
+          arrayValue(objectValue(value)["candidates"]).map(
+            (candidate) => objectValue(candidate)["revision_id"],
+          ),
+        ),
       ])
       .filter((value) => value !== null && value !== undefined),
   )

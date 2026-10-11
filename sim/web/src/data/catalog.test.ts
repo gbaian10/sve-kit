@@ -172,6 +172,38 @@ describe("pending display in the list", () => {
       pending.results(DEFAULT_QUERY, "jp").some((item) => item.printingId === "p:bp01-001"),
     ).toBe(true)
   })
+  it("uses the printing observation's name and stats without an adopted or displayed revision", () => {
+    const original = catalog.index.currentRevision("f:bp01-001", "jp")
+    const revised = {
+      ...snapshot,
+      bootstrap: snapshot.bootstrap.map((fragment) => ({
+        ...fragment,
+        rows: fragment.rows.map((row) =>
+          row["id"] === "f:bp01-001"
+            ? {
+                ...row,
+                current: (row["current"] as { region: string }[]).filter(
+                  (entry) => entry.region !== "jp",
+                ),
+                wording: [
+                  {
+                    region: "jp",
+                    display: { revision_id: null, basis: "candidates" },
+                    candidates: [
+                      { printing_id: "p:bp01-001", revision_id: original?.["id"] ?? null },
+                    ],
+                    undated_printing_ids: [],
+                  },
+                ],
+              }
+            : row,
+        ),
+      })),
+    }
+    const own = createCatalog(revised).summary("p:bp01-001")
+    expect(own?.name.original.text).toBe("試作の見習い兵")
+    expect(own?.cost).toBe(1)
+  })
   it("prefers current over a pending display", () => {
     const revision = catalog.index.currentRevision("f:bp01-001", "jp")
     expect(catalog.index.displayRevision("f:bp01-001", "jp")).toEqual(revision)

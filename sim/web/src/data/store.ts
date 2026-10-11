@@ -17,7 +17,7 @@ export interface CardIndex {
   readonly currentRevision: (faceId: string, region: string) => Row | undefined
   readonly revision: (id: string) => Row | undefined
   /** Current takes precedence; a pending display is only a presentation value. */
-  readonly displayRevision: (faceId: string, region: string) => Row | undefined
+  readonly displayRevision: (faceId: string, region: string, printingId?: string) => Row | undefined
   readonly wording: (faceId: string, region: string) => Row | undefined
   readonly family: (id: string) => Row | undefined
   readonly product: (id: string) => Row | undefined
@@ -116,7 +116,15 @@ export function createCardIndex(snapshot: LoadedSnapshot): CardIndex {
     currentRevision,
     revision: (id) => revisionMap.get(id),
     wording,
-    displayRevision: (faceId, region) => {
+    displayRevision: (faceId, region, printingId) => {
+      if (printingId !== undefined) {
+        const own = ((wording(faceId, region)?.["candidates"] ?? []) as Row[]).filter(
+          (candidate) => candidate["printing_id"] === printingId,
+        )
+        if (own.length === 1 && typeof own[0]?.["revision_id"] === "string")
+          return revisionMap.get(own[0]["revision_id"])
+        if (own.length > 0) return undefined
+      }
       const current = currentRevision(faceId, region)
       if (current) return current
       const display = wording(faceId, region)?.["display"] as Row | undefined

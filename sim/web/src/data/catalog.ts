@@ -77,6 +77,7 @@ export function nameOf(
   index: CardIndex,
   revision: Row,
   field: "name" | "label" = "name",
+  basis: Row = revision,
 ): NameSource | undefined {
   const unit = index.textUnit(stringValue(revision[`${field}_unit_id`]))
   if (!unit) return undefined
@@ -84,7 +85,7 @@ export function nameOf(
   if (!isTextLang(lang)) return undefined
   const translations: Partial<Record<TextLang, string>> = {}
   const translationQuality: NonNullable<NameSource["translationQuality"]> = {}
-  for (const entry of revision["translations"] as Row[]) {
+  for (const entry of basis["translations"] as Row[]) {
     if (entry["field"] !== field) continue
     const target = stringValue(entry["target_lang"])
     const text = translationText(index, stringValue(entry["translation_id"]))
@@ -180,6 +181,8 @@ export function* catalogCards(
         const rarity =
           typeof rarityCode === "string" ? index.vocabulary("rarity", rarityCode) : undefined
         const rarityName = rarity ? nameOf(index, rarity, "label") : undefined
+        const own = index.displayRevision(faceId, region, stringValue(printing["id"]))
+        const ownName = own ? nameOf(index, own, "name", revision ?? own) : undefined
         summaries.push({
           cardId,
           ...(rarityName ? { rarity: rarityName } : {}),
@@ -195,12 +198,13 @@ export function* catalogCards(
           ...(typeof printing["card_no_state"] === "string"
             ? { cardNoState: printing["card_no_state"] }
             : {}),
-          classCode: typeof code === "string" ? code : null,
-          name,
-          cost: nullableInteger(revision?.["cost"]),
-          attack: nullableInteger(revision?.["attack"]),
-          defense: nullableInteger(revision?.["defense"]),
-          wordingPending: pending !== undefined,
+          classCode: typeof own?.["class_code"] === "string" ? own["class_code"] : null,
+          name: ownName ?? name,
+          cost: nullableInteger(own?.["cost"]),
+          attack: nullableInteger(own?.["attack"]),
+          defense: nullableInteger(own?.["defense"]),
+          wordingPending:
+            pending !== undefined && (pending["display"] as Row)["basis"] !== "current",
         })
       }
     }
