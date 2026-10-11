@@ -3,12 +3,20 @@ import { useId } from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink } from "react-router"
 
+import { Button } from "../../components/ui/Button"
 import { Link } from "../../components/ui/Link"
 import { RECENT_SET_LIMIT, type SetEntry, setPath } from "./home-model"
 
-// "By set" (design 00 desktop): entries to the newest booster sets and to all sets. The set pages
-// themselves arrive with V3; only known release dates decide which sets are newest.
-export function SetEntries({ sets }: { readonly sets: readonly SetEntry[] | null }) {
+// Only known release dates decide which booster and collaboration sets are newest.
+export function SetEntries({
+  sets,
+  failed = false,
+  onRetry,
+}: {
+  readonly sets: readonly SetEntry[] | null
+  readonly failed?: boolean
+  readonly onRetry?: () => void
+}) {
   const { t } = useTranslation()
   const headingId = useId()
   return (
@@ -22,7 +30,16 @@ export function SetEntries({ sets }: { readonly sets: readonly SetEntry[] | null
           <ChevronRight className="size-4" aria-hidden="true" />
         </Link>
       </div>
-      {sets === null ? (
+      {failed ? (
+        <div role="alert" className="text-13 leading-relaxed text-text-2">
+          <p>{t("home.sets.failed")}</p>
+          {onRetry && (
+            <Button className="mt-2 h-9" onClick={onRetry}>
+              {t("status.retry")}
+            </Button>
+          )}
+        </div>
+      ) : sets === null ? (
         <p role="status" className="text-13 text-text-3">
           {t("home.sets.loading")}
         </p>

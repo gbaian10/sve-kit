@@ -55,13 +55,15 @@ const zhTW = {
     searchPending: "卡片資料下載中。可以先輸入，下載完成後會自動搜尋。",
     searchFailed: "卡片資料載入失敗，暫時無法搜尋。",
     recentUnavailable: "目前資料沒有可顯示的最近查看卡片。",
+    recentFailed: "最近查看載入失敗，請重試。",
     recentLoading: "最近查看載入中",
     sets: {
       title: "依卡包・最近三彈",
       all: "全部卡包",
+      failed: "卡包資料載入失敗，請重試。",
       loading: "卡包資料載入中",
-      none: "還沒有補充包對應到已知的發售日，暫時無法列出最近三彈。",
-      undated: "只列出有已知發售日的補充包；發售日未知的不列入。",
+      none: "還沒有補充包或合作包對應到已知的發售日，暫時無法列出最近三彈。",
+      undated: "只列出有已知發售日的補充包與合作包；發售日未知的不列入。",
       released: "{{date}} 發售",
     },
     pack: {

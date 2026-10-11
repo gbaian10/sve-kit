@@ -18,6 +18,7 @@ import logo from "../../assets/official/logo/head-left.png"
 import { SearchBar } from "../../components/search/SearchBar"
 import { optionId } from "../../components/search/suggest-ids"
 import { SuggestList, type SuggestRow } from "../../components/search/SuggestList"
+import { Button } from "../../components/ui/Button"
 import type { ImageIndex, SearchQuery } from "../../data"
 import type { DisplayedName } from "../../domain/nameDisplay"
 import { querySearch } from "../../domain/query/codec"
@@ -34,6 +35,7 @@ export interface HomeSearchProps {
   /** The selected edition's search index is loaded. */
   readonly ready: boolean
   readonly failed: boolean
+  readonly onRetry: () => void
   readonly edition: Region
   /** Recently viewed rows; null while the search index that resolves them is not loaded. */
   readonly recent: readonly SuggestRow[] | null
@@ -44,6 +46,7 @@ export interface HomeSearchProps {
 export function HomeSearch({
   ready,
   failed,
+  onRetry,
   edition,
   recent,
   recentImages,
@@ -73,6 +76,12 @@ export function HomeSearch({
     suggestion.result.phase === "complete" &&
     suggestion.lastInput?.state.text === settled &&
     suggestion.lastInput.edition === edition
+  const queryFailed =
+    ready &&
+    settled !== "" &&
+    suggestion.result.phase === "error" &&
+    suggestion.lastInput?.state.text === settled &&
+    suggestion.lastInput.edition === edition
   // Until the next answer arrives the last one stays on screen, dimmed.
   const shown = suggestion.result.phase === "complete" ? suggestion.result : suggestion.previous
   const rows: readonly SuggestRow[] = useMemo(
@@ -95,7 +104,8 @@ export function HomeSearch({
   const active =
     focused && highlight !== null && highlight.text === debounced ? highlight.index : -1
   // An answer without rows stays closed while the next one is on its way, so no false "no match".
-  const listOpen = focused && ready && !failed && (settled === "" || complete || rows.length > 0)
+  const listOpen =
+    focused && ready && !failed && !queryFailed && (settled === "" || complete || rows.length > 0)
 
   const everyCard = useMemo<SearchQuery>(
     () => ({ state: DEFAULT_QUERY, edition, limit: 1 }),
@@ -155,13 +165,17 @@ export function HomeSearch({
     else seeAll()
   }
   const openArmed = useEffectEvent(() => {
+    if (queryFailed) {
+      armed.current = null
+      return
+    }
     if (armed.current === null || armed.current !== debounced || !complete) return
     armed.current = null
     activate(-1)
   })
   useEffect(() => {
     openArmed()
-  }, [debounced, complete])
+  }, [debounced, complete, queryFailed])
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.nativeEvent.isComposing) return
@@ -188,7 +202,7 @@ export function HomeSearch({
       return
     }
     // Downloading or failed: keep the text; the panel below the input says why nothing opens.
-    if (!ready || failed) {
+    if (!ready || failed || queryFailed) {
       setFocused(true)
       return
     }
@@ -241,14 +255,28 @@ export function HomeSearch({
           expanded={listOpen}
           {...(listOpen && active >= 0 ? { activeOptionId: optionId(listId, active) } : {})}
         />
-        {focused && (!ready || failed) && (
+        {(queryFailed || (focused && (!ready || failed))) && (
           <div className="absolute inset-x-0 top-full mt-1">
-            <p
-              role="status"
+            <div
+              role={queryFailed ? "alert" : "status"}
               className="rounded-block border border-border bg-surface-1 px-4 py-3 text-13 leading-relaxed text-text-2 shadow-lg"
             >
-              {failed ? t("home.searchFailed") : t("home.searchPending")}
-            </p>
+              <p>{failed || queryFailed ? t("home.searchFailed") : t("home.searchPending")}</p>
+              {queryFailed && (
+                <Button
+                  className="mt-2 h-9"
+                  onMouseDown={(event) => {
+                    event.preventDefault()
+                  }}
+                  onClick={() => {
+                    inputRef.current?.focus()
+                    onRetry()
+                  }}
+                >
+                  {t("status.retry")}
+                </Button>
+              )}
+            </div>
           </div>
         )}
         {listOpen && (

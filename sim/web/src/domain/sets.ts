@@ -40,13 +40,13 @@ export function datedSets<T extends SetFacts>(
   })
 }
 
-/** The newest booster sets, newest first. */
+/** The newest booster and collaboration sets, newest first. */
 export function recentSets<T extends SetFacts & { readonly releasedOn: string }>(
   sets: readonly T[],
   limit: number,
 ): T[] {
   return sets
-    .filter((set) => set.kind === "booster")
+    .filter((set) => set.kind === "booster" || set.kind === "collaboration")
     .sort(
       (a, b) =>
         compareCodePoints(b.releasedOn, a.releasedOn) ||

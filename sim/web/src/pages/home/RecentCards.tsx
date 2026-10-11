@@ -6,6 +6,7 @@ import type { CardEntryState } from "../../app/listEntryState"
 import { CardImage } from "../../components/card/CardImage"
 import { isPlainClick } from "../../components/results/plain-click"
 import type { SuggestRow } from "../../components/search/SuggestList"
+import { Button } from "../../components/ui/Button"
 import type { ImageIndex } from "../../data"
 import { recentStore } from "../../settings"
 import { cardPath } from "./home-model"
@@ -16,10 +17,12 @@ export interface RecentCardsProps {
   /** How many ids are stored, so a loading list keeps its height. */
   readonly stored: number
   readonly images: ImageIndex | undefined
+  readonly failed?: boolean
+  readonly onRetry?: () => void
 }
 
 // Unknown ids may belong to another snapshot, so resolving the list never deletes them.
-export function RecentCards({ rows, stored, images }: RecentCardsProps) {
+export function RecentCards({ rows, stored, images, failed = false, onRetry }: RecentCardsProps) {
   const { t } = useTranslation()
   const headingId = useId()
   const count = rows === null ? stored : rows.length
@@ -29,7 +32,7 @@ export function RecentCards({ rows, stored, images }: RecentCardsProps) {
         <h2 id={headingId} className="text-15 font-semibold">
           {t("search.recent")}
         </h2>
-        {rows !== null && stored > 0 && (
+        {(rows !== null || failed) && stored > 0 && (
           <button
             type="button"
             onClick={() => {
@@ -41,7 +44,16 @@ export function RecentCards({ rows, stored, images }: RecentCardsProps) {
           </button>
         )}
       </div>
-      {count === 0 ? (
+      {failed ? (
+        <div role="alert" className="text-13 leading-relaxed text-text-2">
+          <p>{t("home.recentFailed")}</p>
+          {onRetry && (
+            <Button className="mt-2 h-9" onClick={onRetry}>
+              {t("status.retry")}
+            </Button>
+          )}
+        </div>
+      ) : count === 0 ? (
         <p className="text-13 leading-relaxed text-text-3">
           {stored > 0 ? t("home.recentUnavailable") : t("search.noRecent")}
         </p>

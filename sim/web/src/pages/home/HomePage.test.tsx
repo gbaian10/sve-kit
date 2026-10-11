@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor, within } from "@testing-library/react"
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -187,6 +187,25 @@ describe("home search", () => {
     // A random card of the Japanese edition, opened on its Japanese printing.
     expect(recentStore.get()).toHaveLength(1)
     expect(recentStore.get()[0]).not.toMatch(/-en$/u)
+  })
+
+  it("disables the old random pick while changing edition and opens the new edition", async () => {
+    const { router } = await open()
+    const user = userEvent.setup()
+    const random = screen.getByRole("button", { name: "隨機一張" })
+    act(() => {
+      prefsStore.set({ cardEdition: "en" })
+    })
+    expect(random).toBeDisabled()
+    await waitFor(
+      () => {
+        expect(random).toBeEnabled()
+      },
+      { timeout: 4000 },
+    )
+    await user.click(random)
+    expect(router.state.location.pathname).toMatch(/^\/cards\/(?:BP01|SD01)EN-/u)
+    expect(recentStore.get()[0]).toMatch(/-en$/u)
   })
 })
 

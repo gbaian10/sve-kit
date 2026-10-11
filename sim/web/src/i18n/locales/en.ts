@@ -57,13 +57,15 @@ export default {
     searchPending: "Downloading card data. You can type now; the search runs when it finishes.",
     searchFailed: "Card data failed to load, so search is unavailable.",
     recentUnavailable: "No recently viewed cards are available in the current data.",
+    recentFailed: "Recently viewed cards could not be loaded. Please retry.",
     recentLoading: "Loading recently viewed cards",
     sets: {
       title: "By set · latest three",
       all: "All sets",
+      failed: "Set data could not be loaded. Please retry.",
       loading: "Loading sets",
-      none: "No booster set has a known release date yet, so the latest three cannot be listed.",
-      undated: "Only booster sets with a known release date are listed.",
+      none: "No booster or collaboration set has a known release date yet, so the latest three cannot be listed.",
+      undated: "Only booster and collaboration sets with a known release date are listed.",
       released: "Released {{date}}",
     },
     pack: {

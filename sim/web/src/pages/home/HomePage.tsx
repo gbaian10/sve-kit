@@ -89,6 +89,7 @@ export function HomePage() {
       <HomeSearch
         ready={ready}
         failed={failed}
+        onRetry={readiness.retry}
         edition={edition}
         recent={recentRows}
         recentImages={recentImages}
@@ -99,7 +100,13 @@ export function HomePage() {
       </div>
       <div className="mt-2 flex flex-col gap-6 lg:mx-auto lg:grid lg:w-full lg:max-w-290 lg:grid-cols-3 lg:items-start lg:gap-x-6">
         <div className="flex min-w-0 flex-col gap-6 lg:col-start-2 lg:row-start-1">
-          <RecentCards rows={recentRows} stored={recent.length} images={recentImages} />
+          <RecentCards
+            rows={recentRows}
+            stored={recent.length}
+            images={recentImages}
+            failed={ready && recentResult.phase === "error"}
+            onRetry={readiness.retry}
+          />
           {pack !== undefined && (
             <NewPackBanner
               pack={pack}
@@ -110,7 +117,13 @@ export function HomePage() {
           )}
         </div>
         <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-          <SetEntries sets={sets} />
+          <SetEntries
+            sets={sets}
+            failed={
+              ready && releases.result.phase === "error" && releases.lastInput?.edition === edition
+            }
+            onRetry={readiness.retry}
+          />
         </div>
         <div className="min-w-0 lg:col-start-3 lg:row-start-1">
           <OfficialNews edition={edition} />

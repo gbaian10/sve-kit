@@ -33,6 +33,35 @@ describe("datedSets and recentSets", () => {
     ])
   })
 
+  it("orders boosters and collaborations together while excluding other kinds", () => {
+    const sets = [
+      set("booster-old"),
+      set("booster-new"),
+      set("collaboration-old", "collaboration"),
+      set("collaboration-new", "collaboration"),
+      set("collaboration-undated", "collaboration"),
+      set("collaboration-en", "collaboration"),
+      ...["deck", "promo", "special", "special_pack", "other"].map((kind) => set(kind, kind)),
+    ]
+    const products = [
+      product("booster-old", "jp", "2026-03-01"),
+      product("booster-new", "jp", "2026-06-01"),
+      product("collaboration-old", "jp", "2026-04-01"),
+      product("collaboration-old", "jp", "2026-10-01"),
+      product("collaboration-new", "jp", "2026-07-01"),
+      product("collaboration-undated", "jp", null),
+      product("collaboration-en", "en", "2026-12-01"),
+      ...["deck", "promo", "special", "special_pack", "other"].map((kind) =>
+        product(kind, "jp", "2026-12-01"),
+      ),
+    ]
+    expect(recentSets(datedSets(sets, products, "jp"), 3).map((item) => item.id)).toEqual([
+      "collaboration-new",
+      "booster-new",
+      "collaboration-old",
+    ])
+  })
+
   it("leaves out sets without a dated, linked product in that region", () => {
     const sets = [set("s1"), set("s2"), set("s3")]
     const products = [
