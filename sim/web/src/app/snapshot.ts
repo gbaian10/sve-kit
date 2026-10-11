@@ -15,6 +15,8 @@ import {
   useSnapshotStatus,
 } from "../data"
 
+const FOCUS_CHECK_INTERVAL_MS = 60_000
+
 /** The snapshot every page reads: loading starts with the shell and follows the active root. */
 export function useActiveSnapshot(): {
   readonly client: SnapshotClient
@@ -26,14 +28,20 @@ export function useActiveSnapshot(): {
   const status = useSnapshotStatus(client)
   useEffect(() => {
     void client.load()
-    const refresh = () => {
+    // Switching back to the window only checks for a new version now and then, not on every focus.
+    let lastCheck = Date.now()
+    const check = () => {
+      lastCheck = Date.now()
       void client.reload()
     }
-    window.addEventListener("online", refresh)
-    window.addEventListener("focus", refresh)
+    const onFocus = () => {
+      if (Date.now() - lastCheck >= FOCUS_CHECK_INTERVAL_MS) check()
+    }
+    window.addEventListener("online", check)
+    window.addEventListener("focus", onFocus)
     return () => {
-      window.removeEventListener("online", refresh)
-      window.removeEventListener("focus", refresh)
+      window.removeEventListener("online", check)
+      window.removeEventListener("focus", onFocus)
     }
   }, [client])
   return { client, status, root }

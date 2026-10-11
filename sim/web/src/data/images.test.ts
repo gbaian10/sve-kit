@@ -199,7 +199,8 @@ describe("page image metadata", () => {
     expect(requests).toBe(1)
   })
   it("successful snapshot adoption aborts old metadata requests, not merely their returned indexes", async () => {
-    const served = serve()
+    const bytes = new Map(source)
+    const served = serve(bytes)
     const imagePaths = new Set(
       (manifest["files"] as JsonObject[])
         .filter((f) => f["role"] === "images")
@@ -228,6 +229,14 @@ describe("page image metadata", () => {
     block = true
     const prefetch = client.prefetchImages()
     await new Promise((resolve) => setTimeout(resolve, 0))
+    // Publish a new manifest; a reload that finds the same one keeps the snapshot instead.
+    const next = canonical({ ...manifest, data_version: "preview-20991231T000000Z-0001" })
+    const nextPath = `snapshots/manifests/${digest(next).slice(7)}.json`
+    bytes.set(nextPath, next)
+    bytes.set(
+      "snapshots/preview/current.json",
+      canonical({ manifest_path: nextPath, manifest_sha256: digest(next) }),
+    )
     await client.reload()
     await prefetch
     expect(aborted).toBeGreaterThan(0)

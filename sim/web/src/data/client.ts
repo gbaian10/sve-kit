@@ -262,6 +262,13 @@ export function createSnapshotClient(
     }
     progress("index")
     const { chosen, source } = await chooseEntry()
+    // A check that finds the same manifest keeps the loaded snapshot and its caches as they are.
+    if (
+      previous &&
+      previous.manifestHash === stringValue(chosen["manifest_sha256"]) &&
+      (previous.entrySource ?? "current") === source
+    )
+      return previous
     progress("manifest")
     const manifestBytes = await fetchVerified(
       stringValue(chosen["manifest_path"]),
@@ -338,6 +345,14 @@ export function createSnapshotClient(
     const previous = loaded
     try {
       const candidate = await download(previous)
+      if (candidate === previous) {
+        set({
+          state: "ready",
+          dataVersion: previous.dataVersion,
+          ...(previous.entrySource === "previous" ? { outdated: true } : {}),
+        })
+        return
+      }
       metadata?.dispose()
       detailAbort.abort()
       decode.cancel()

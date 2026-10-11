@@ -235,20 +235,47 @@ describe("createSnapshotClient: reload and transport edge cases", () => {
     expect(client.status()).toEqual({ state: "ready", dataVersion: before?.dataVersion })
   })
 
-  it("stays ready with an updating phase while a reload runs", async () => {
+  it("only checks the index when a reload finds the same manifest", async () => {
     const served = serve("/cdn")
     const client = createSnapshotClient("/cdn", { fetch: served.fetcher })
     await client.load()
+    const before = client.snapshot()
+    const loaded = served.requests.length
     const seen: SnapshotStatus[] = []
     client.subscribe(() => seen.push(client.status()))
     await client.reload()
-    expect(seen.every((status) => status.state === "ready")).toBe(true)
+    expect(served.requests.slice(loaded)).toEqual(["snapshots/versions/index.json"])
+    expect(client.snapshot()).toBe(before)
     expect(seen.map((status) => (status.state === "ready" ? status.updating : undefined))).toEqual([
       "index",
-      "manifest",
-      "bootstrap",
       undefined,
     ])
+    expect(client.status()).toEqual({ state: "ready", dataVersion: before?.dataVersion })
+  })
+
+  it("downloads again when the pointer names a different manifest", async () => {
+    const files = new Map(built.files)
+    const manifestHash = `sha256:${built.manifestPath.slice("snapshots/manifests/".length, -".json".length)}`
+    const pointer = (hash: string) =>
+      new TextEncoder().encode(
+        JSON.stringify({
+          manifest_path: built.manifestPath,
+          manifest_sha256: hash,
+          data_version: "preview-20260929T000000Z-0001",
+        }),
+      )
+    files.set("snapshots/preview/current.json", pointer(manifestHash))
+    const served = serve("/cdn-preview", files)
+    const client = createSnapshotClient("/cdn-preview", { fetch: served.fetcher, entry: "preview" })
+    await client.load()
+    const before = client.snapshot()
+    files.set("snapshots/preview/current.json", pointer(`sha256:${"0".repeat(64)}`))
+    const loaded = served.requests.length
+    await client.reload()
+    // A different hash is fetched and checked instead of being skipped as unchanged.
+    expect(served.requests.slice(loaded)).toContain(built.manifestPath)
+    expect(client.snapshot()).toBe(before)
+    expect(client.status()).toHaveProperty("updateError")
   })
 
   it("treats a broken index_format as corrupt, not as an update prompt", async () => {
