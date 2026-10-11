@@ -89,6 +89,19 @@ describe("createSnapshotClient", () => {
     expect(cancelled.every((path) => held.includes(path))).toBe(true)
   })
 
+  it("leaves an earlier error as soon as a new load starts", async () => {
+    const served = serve("/cdn")
+    served.fail(() => true)
+    const client = createSnapshotClient("/cdn", { fetch: served.fetcher })
+    await client.load()
+    expect(client.status().state).toBe("error")
+    served.fail(() => false)
+    const loading = client.load()
+    expect(client.status().state).toBe("loading")
+    await loading
+    expect(client.status().state).toBe("ready")
+  })
+
   it("fetches startup files together instead of one round trip at a time", async () => {
     const served = serve("/cdn")
     let inFlight = 0

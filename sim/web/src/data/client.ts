@@ -461,6 +461,9 @@ export function createSnapshotClient(
   }
 
   const start = async (): Promise<void> => {
+    // Leave an earlier error at once, as the plain download path does, so a new load never shows
+    // the previous failure while the local record is still being read.
+    if (status.state === "error") set({ state: "loading", phase: "index" })
     try {
       const entryBytes = requestEntry()
       // Network can fail before local storage finishes; run still classifies the original rejection.
