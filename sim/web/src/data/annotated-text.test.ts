@@ -3,8 +3,95 @@ import { describe, expect, it } from "vitest"
 
 import { annotatedOrigin } from "../test-utils/annotated-snapshot"
 import { createAnnotatedTextResolver, sharedAnnotatedTextResolver } from "./annotated-text"
+import { canonicalText, type JsonObject, objectValue } from "./format-v3/json"
+
+async function historicalCandidateOrigin() {
+  const { client } = await annotatedOrigin()
+  await client.load()
+  const loaded = client.snapshot()
+  if (!loaded) throw new Error("synthetic snapshot missing")
+  const detail = await client.fragments("text/detail/home_set/family/band/0")
+  const revision = detail.find((fragment) => fragment.table === "face_revision")
+  if (!revision) throw new Error("synthetic revision missing")
+  const historyKey = "history/history/home_set/family/band/0"
+  const historyValue: JsonObject = { ...revision.value, base: null, partition: "history" }
+  const history = {
+    ...revision,
+    file: historyKey,
+    value: historyValue,
+    rows: revision.rows.map((row) => ({ ...row, id: "historical" })),
+    identity: canonicalText([
+      "face_revision",
+      historyValue["owner"] ?? null,
+      historyValue["bucket"] ?? null,
+      "history",
+    ]),
+  }
+  const files = new Map(loaded.files)
+  files.set(historyKey, {
+    row_counts: [{ ...historyValue, table: "face_revision", count: revision.rows.length }],
+  })
+  const snapshot = {
+    ...loaded,
+    files,
+    bootstrap: loaded.bootstrap.map((fragment) =>
+      fragment.table === "face"
+        ? {
+            ...fragment,
+            rows: fragment.rows.map((row) => ({
+              ...row,
+              wording: [
+                {
+                  region: "jp",
+                  state: "pending",
+                  display: { revision_id: "revision", basis: "candidates" },
+                  candidates: [{ printing_id: "printing", revision_id: "historical" }],
+                  undated_printing_ids: [],
+                },
+              ],
+            })),
+          }
+        : fragment,
+    ),
+  }
+  const requested: string[] = []
+  return {
+    requested,
+    client: {
+      ...client,
+      snapshot: () => snapshot,
+      fragments: async (key: string) => {
+        requested.push(key)
+        return key === historyKey ? [history] : client.fragments(key)
+      },
+    },
+    revision: objectValue(revision.rows[0]),
+    historyKey,
+  }
+}
 
 describe("the native C → P → R annotation slice", () => {
+  it("locates a direct historical candidate through its face without a translation receiver", async () => {
+    const { client, requested, revision, historyKey } = await historicalCandidateOrigin()
+    const resolver = createAnnotatedTextResolver(client)
+    const pointer = {
+      owner: { kind: "face_revision", id: "historical" },
+      field: "effect",
+      ordinal: null,
+    }
+    const value = await resolver.resolve(pointer, "ja")
+    expect(value?.original.unit["id"]).toBe(revision["effect_unit_id"])
+    expect(value?.original.unit["text"]).toBe("Synthetic text")
+    expect(requested).toContain(historyKey)
+    expect(requested.filter((key) => key === historyKey)).toHaveLength(1)
+    const before = requested.length
+    expect(await resolver.resolve(pointer, "ja")).toBe(value)
+    expect(requested).toHaveLength(before)
+    await expect(
+      resolver.resolve({ ...pointer, owner: { kind: "face_revision", id: "unlisted" } }, "ja"),
+    ).rejects.toThrow("owner")
+    expect(requested).toHaveLength(before)
+  })
   it("validates bootstrap name annotations and their explanation without loading unrelated files", async () => {
     const { client, requests } = await annotatedOrigin()
     await client.load()
