@@ -570,9 +570,13 @@ export class SearchEngine {
           ),
         ),
       )
+      const currentQuery =
+        this.active?.request.edition === request.edition && this.rememberedRequest?.kind === "view"
+          ? this.rememberedRequest.query
+          : { state: DEFAULT_QUERY, edition: request.edition, limit: 60 }
       const firstView = await completeView(
         request.base,
-        { state: DEFAULT_QUERY, edition: request.edition, limit: 60 },
+        currentQuery,
         index,
         mediaFiles,
         version,
