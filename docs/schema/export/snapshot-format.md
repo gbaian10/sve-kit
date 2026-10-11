@@ -123,7 +123,7 @@ producer／reader／合成 fixture 同步更新，既有 preview 必須重新匯
 不拿 `card.home_set_id` 判斷再錄商品，也不推算新的商品收錄關係。
 首頁可沿 `family_ids` 與 `product_family.kind`，取得每區商品發售日；商品型別的原採納規則不變。
 
-官方版次的 `rarity_raw` 保持原值，`rarity_code` 使用以下共用代碼，字典以代碼作缺譯的展示標籤：
+官方版次的 `rarity_raw` 保持原值，`rarity_code` 使用以下共用代碼；字典標籤是 JP 卡面標籤（即代碼的大寫）：
 
 | JP 原值 | EN 原值 | 代碼 |
 | --- | --- | --- |
@@ -136,14 +136,15 @@ producer／reader／合成 fixture 同步更新，既有 preview 必須重新匯
 | SP | Special | `sp` |
 | SSP | Super Special | `ssp` |
 | PR | Promo | `pr` |
-| - | - | `unknown` |
-| プレミアム | Premium | `premium` |
+| - | - | null（`premium=null`） |
+| プレミアム | Premium | null（`premium=true`） |
 
-`X・プレミアム`／`X / Premium` 保留 X 的代碼並設 `premium=true`；單獨 Premium
-沒有可驗基礎階級，代碼為 `premium`。已辨識的一般標籤設 `premium=false`。
-未辨識拼法保持 `rarity_code/premium=null`，私人建置報告逐版次列出原值與原因，不歸入 `unknown`。
-版次列固定分 JP、EN 行，各行依 BR→SR→GR→LG→SL→UR→SP→SSP→PREMIUM→UNKNOWN→PR；
-未辨識代碼使用 UNKNOWN 的排序位置。相同階級先一般版再 premium，接著依卡號自然排序、永久版次 ID 定序。
+`X・プレミアム`／`X / Premium` 保留 X 的代碼並設 `premium=true`；已辨識的一般標籤設 `premium=false`。
+依[詞彙契約 §1、§4.1、§7](../domains/catalog-route-adoption.md)，單獨 Premium 不捏造基礎階級，「-」也不採為稀有度代碼，
+兩者 `rarity_code=null`，但不列為未辨識。
+未辨識拼法（例如「-・プレミアム」）保持 `rarity_code/premium=null`，私人建置報告逐版次列出原值與原因。
+版次列固定分 JP、EN 行，各行依 BR→SR→GR→LG→SL→UR→SP→SSP→單獨 premium→其他無代碼→PR；
+無代碼的排序位置由 `premium` 區分，不另造稀有度代碼。相同階級先一般版再 premium，接著依卡號自然排序、永久版次 ID 定序。
 此排序不推導 PR 的對應階級。
 
 ### 2.1 獨立影像清單與 DSL 附件

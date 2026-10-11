@@ -45,7 +45,8 @@ describe("printing rows", () => {
       printing("A-1", "UR"),
       printing("A-1", "SP"),
       printing("A-1", "SSP"),
-      printing("A-1", "PREMIUM", "jp", true),
+      printing("P-1", null, "jp", true),
+      printing("F-1", "FUTURE"),
     ]
     expect(
       printingGroups(rows)[0]?.printings.map((row) => [row["card_no"], row["rarity_code"]]),
@@ -60,7 +61,8 @@ describe("printing rows", () => {
       ["A-1", "ur"],
       ["A-1", "sp"],
       ["A-1", "ssp"],
-      ["A-1", "premium"],
+      ["P-1", null],
+      ["F-1", "future"],
       ["Z-1", null],
       ["PR-1", "pr"],
     ])

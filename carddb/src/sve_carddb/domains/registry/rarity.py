@@ -18,8 +18,6 @@ _LABELS = {
         "SP": "sp",
         "SSP": "ssp",
         "PR": "pr",
-        "-": "unknown",
-        "プレミアム": "premium",
     },
     "en": {
         "Bronze": "br",
@@ -31,23 +29,26 @@ _LABELS = {
         "Special": "sp",
         "Super Special": "ssp",
         "Promo": "pr",
-        "-": "unknown",
-        "Premium": "premium",
     },
 }
+# The approved catalog policy adopts no code for these: a bare premium has no base
+# tier, and "-" is not a rarity, so only the premium flag can be known.
+_UNCODED: dict[str, dict[str, bool | None]] = {
+    "jp": {"-": None, "プレミアム": True},
+    "en": {"-": None, "Premium": True},
+}
+_JP_LABELS = {code: label for label, code in _LABELS["jp"].items()}
 
 
-def normalize(region: str, raw: str) -> tuple[str | None, bool | None]:
-    """An unrecognized spelling stays unknown rather than acquiring a guessed tier."""
+def normalize(region: str, raw: str) -> tuple[str | None, bool | None] | None:
+    """None marks an unrecognized spelling, which never acquires a guessed tier."""
     if region not in _LABELS:
         raise ValueError("Unsupported rarity region")
+    if raw in _UNCODED[region]:
+        return None, _UNCODED[region][raw]
     suffix = "・プレミアム" if region == "jp" else " / Premium"
-    premium = raw.endswith(suffix)
-    label = raw.removesuffix(suffix)
-    code = _LABELS[region].get(label)
-    if code is None or (premium and code in {"unknown", "premium"}):
-        return None, None
-    return code, premium or code == "premium"
+    code = _LABELS[region].get(raw.removesuffix(suffix))
+    return None if code is None else (code, raw.endswith(suffix))
 
 
 def populate(db: Database) -> list[dict[str, JsonValue]]:
@@ -66,8 +67,8 @@ def populate(db: Database) -> list[dict[str, JsonValue]]:
         values = row.values
         region = str(values["region"])
         raw = str(values["rarity_raw"])
-        code, premium = normalize(region, raw)
-        if code is None:
+        normalized = normalize(region, raw)
+        if normalized is None:
             diagnostics.append(
                 {
                     "printing_id": str(values["id"]),
@@ -76,7 +77,9 @@ def populate(db: Database) -> list[dict[str, JsonValue]]:
                     "reason": "unrecognized_rarity",
                 }
             )
-        elif code not in registered:
+        code, premium = normalized or (None, None)
+        if code is not None and code not in registered:
+            # The label stays the JP card-face label whichever region is staged first.
             db.insert(
                 "vocabulary",
                 {
@@ -84,9 +87,7 @@ def populate(db: Database) -> list[dict[str, JsonValue]]:
                     "code": code,
                     "active": True,
                     "label_unit_id": texts.intern(
-                        LocalizedText(
-                            lang="ja" if region == "jp" else "en", text=code.upper()
-                        )
+                        LocalizedText(lang="ja", text=_JP_LABELS[code])
                     ),
                 },
             )
