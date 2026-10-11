@@ -172,5 +172,7 @@ export default {
     retry: "Retry",
     usePreview: "Use preview data",
     useCdn: "Back to live data",
+    clearLocal: "Clear local data",
+    insecure: "Not https: caching off",
   },
 } satisfies Messages
