@@ -77,7 +77,29 @@ vi.mock("../../app/snapshot", () => {
       updating: false,
       retry: () => undefined,
     }),
-    useCatalog: () => ({
+    useNeighbours: (_query: unknown, _target: string, maxItems?: number) => {
+      const order =
+        state.order ??
+        (state.doubleFace
+          ? [
+              { key: "c:synthetic", printingId: "p:synthetic" },
+              { key: "c:other", printingId: "p:synthetic" },
+            ]
+          : [])
+      return {
+        result: {
+          phase: "complete",
+          page: {
+            items: order.slice(0, maxItems).map((item) => ({
+              ...item,
+              summary: { cardNo: "BP-SYNTHETIC", printingId: item.printingId },
+            })),
+          },
+        },
+      }
+    },
+    useCardSnapshot: () => ({
+      status: { state: "ready" },
       client: { snapshot: () => null },
       catalog: {
         // Previous/next walk this order; the synthetic card is first, so only "next" is enabled.

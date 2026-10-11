@@ -44,7 +44,6 @@ export {
 } from "./roots"
 export { SearchEngine } from "./search/engine"
 export type { QueryFailure, SearchPage, SearchQuery } from "./search/index"
-export type { SearchOption, SearchOptions } from "./search/index"
 export type { SearchEvent, SearchRequest } from "./search/messages"
 export {
   type SearchChannel,

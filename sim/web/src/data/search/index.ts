@@ -21,7 +21,7 @@ export interface SearchQuery {
   readonly offset?: number
   readonly limit?: number
 }
-export interface SearchOption {
+interface SearchOption {
   readonly id: string
   readonly code: string
   readonly name: CardSummary["name"]
@@ -401,7 +401,7 @@ export class SearchIndex {
     )
   }
 
-  search(query: SearchQuery): SearchPage {
+  private matches(query: SearchQuery): number[] {
     if (query.edition !== this.edition)
       throw new SearchQueryError({ kind: "edition-not-ready", message: "edition is not ready" })
     const { state } = query
@@ -536,26 +536,51 @@ export class SearchIndex {
     }
     const matches = buckets.flat()
     if (state.text === "") matches.sort((a, b) => (this.order[a] ?? 0) - (this.order[b] ?? 0))
+    return matches
+  }
+
+  private item(printing: number, state: SearchQuery["state"]): SearchPage["items"][number] {
+    const card = this.printings.card[printing] ?? 0
+    const summary = this.printings.summary[printing] ?? 0
+    return {
+      key: this.pool.get(
+        state.unit === "printing" ? (this.printings.id[printing] ?? 0) : (this.cards.id[card] ?? 0),
+      ),
+      printingId: this.pool.get(this.printings.id[printing] ?? 0),
+      summary: summary ? (this.summaries.row(summary - 1) as unknown as CardSummary) : undefined,
+    }
+  }
+
+  search(query: SearchQuery): SearchPage {
+    const matches = this.matches(query)
     const offset = Math.max(0, Math.trunc(query.offset ?? 0))
     const limit = Math.max(1, Math.min(100, Math.trunc(query.limit ?? 24)))
     return {
       total: matches.length,
       offset,
-      items: matches.slice(offset, offset + limit).map((printing) => {
-        const card = this.printings.card[printing] ?? 0
-        const summary = this.printings.summary[printing] ?? 0
-        return {
-          key: this.pool.get(
-            state.unit === "printing"
-              ? (this.printings.id[printing] ?? 0)
-              : (this.cards.id[card] ?? 0),
-          ),
-          printingId: this.pool.get(this.printings.id[printing] ?? 0),
-          summary: summary
-            ? (this.summaries.row(summary - 1) as unknown as CardSummary)
-            : undefined,
-        }
-      }),
+      items: matches.slice(offset, offset + limit).map((p) => this.item(p, query.state)),
+    }
+  }
+
+  neighbours(query: SearchQuery, target: string, maxItems?: number): SearchPage {
+    const matches = this.matches(query).slice(
+      0,
+      maxItems === undefined ? undefined : Math.max(1, Math.trunc(maxItems)),
+    )
+    const position = matches.findIndex(
+      (p) =>
+        this.pool.get(this.printings.id[p] ?? 0) === target ||
+        (query.state.unit === "card" &&
+          this.pool.get(this.cards.id[this.printings.card[p] ?? 0] ?? 0) === target),
+    )
+    const offset = Math.max(0, position - 1)
+    return {
+      total: matches.length,
+      offset,
+      items:
+        position < 0
+          ? []
+          : matches.slice(offset, position + 2).map((p) => this.item(p, query.state)),
     }
   }
 

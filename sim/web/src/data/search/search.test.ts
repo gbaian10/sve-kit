@@ -6,6 +6,7 @@ import { cardNoKey } from "../../domain/cardNo"
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import { apply } from "../../domain/search"
 import { memoryCache } from "../../test-utils/cache"
+import { sharedAnnotatedTextResolver } from "../annotated-text"
 import { createCatalog } from "../catalog"
 import type { Fetcher } from "../cdn"
 import { createSnapshotClient } from "../client"
@@ -20,6 +21,7 @@ import {
   SearchSession,
   type SearchStatus,
 } from "../index"
+import { bucketOf } from "../locator"
 const numeric = new Intl.Collator("en", { numeric: true, sensitivity: "base" })
 function orderExpected(
   catalog: ReturnType<typeof createCatalog>,
@@ -1430,4 +1432,109 @@ it("keeps two printings of one card as separate numbered items after index resto
         .items,
     ).toEqual([extraItem])
   }
+})
+
+it.each(["jp", "en"] as const)(
+  "returns only the current card and its neighbours in %s, capped at the originating pages",
+  async (edition) => {
+    const h = harness()
+    h.session.load(base, edition, "preview")
+    await h.settled()
+    h.channel.search({ ...query, edition })
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const result = h.status().result
+    if (result.phase !== "complete") throw new Error("search pending")
+    const items = result.page.items
+    const target = items[4]
+    if (!target) throw new Error("missing neighbour target")
+    h.channel.neighbours({ ...query, edition }, target.key)
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    expect(h.status().result).toMatchObject({ page: { offset: 3, items: items.slice(3, 6) } })
+    h.channel.neighbours({ ...query, edition }, target.key, 5)
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    expect(h.status().result).toMatchObject({ page: { total: 5, items: items.slice(3, 5) } })
+    h.session.dispose()
+  },
+)
+
+it.each(["jp", "en"] as const)(
+  "resolves bounded visible effects against the full annotated-text oracle in %s",
+  async (edition) => {
+    const served = origin()
+    const client = createSnapshotClient(base, { fetch: served.fetcher })
+    await client.load()
+    const snapshot = client.snapshot()
+    if (!snapshot) throw new Error("oracle missing")
+    const catalog = createCatalog(snapshot)
+    const resolver = sharedAnnotatedTextResolver(client)
+    const h = harness(served)
+    h.session.load(base, edition, "preview")
+    await h.settled()
+    h.channel.search({ ...query, edition })
+    await expect.poll(() => h.status().result.phase, POLL).not.toBe("pending")
+    const page = h.status().result
+    if (page.phase !== "complete") throw new Error("list pending")
+    const targets = page.page.items
+      .slice(0, 8)
+      .flatMap((item) => (item.summary ? [item.summary] : []))
+    for (const summary of targets)
+      for (const language of ["ja", "en", "zh-Hant"]) {
+        const revision = catalog.index.displayRevision(summary.faceId, edition)
+        const selected = revision
+          ? await resolver.resolve(
+              {
+                owner: { kind: "face_revision", id: stringValue(revision["id"]) },
+                field: "effect",
+                ordinal: null,
+              },
+              language,
+            )
+          : null
+        const unit = selected ? (selected.translated ?? selected.original).unit : null
+        h.channel.preview(summary.printingId, summary.faceId, language, edition)
+        await expect.poll(() => h.status().result.phase, POLL).not.toBe("pending")
+        const result = h.status().result
+        if (result.phase !== "complete")
+          throw new Error(result.phase === "error" ? result.error.message : "preview pending")
+        expect(result.preview).toEqual(unit ? { text: unit["text"], language: unit["lang"] } : null)
+        expect(result.page.items).toHaveLength(0)
+      }
+    h.session.dispose()
+  },
+  30_000,
+)
+
+it("a pending visible preview neither blocks list queries nor publishes after its channel closes", async () => {
+  const h = harness()
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  h.channel.search(query)
+  await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+  const first = h.status().result
+  if (first.phase !== "complete") throw new Error("list pending")
+  const summary = first.page.items[0]?.summary
+  if (!summary) throw new Error("target missing")
+  const detail = (built.manifest["files"] as JsonObject[]).find((file) =>
+    (file["row_counts"] as JsonObject[]).some(
+      (count) =>
+        count["table"] === "face_revision" &&
+        count["partition"] === "detail" &&
+        count["bucket"] === bucketOf([summary.cardId], 64),
+    ),
+  )
+  if (!detail) throw new Error("preview detail missing")
+  const release = h.served.hold(stringValue(detail["path"]))
+  const preview = h.session.createChannel()
+  preview.preview(summary.printingId, summary.faceId, "zh-Hant", "jp")
+  await expect.poll(() => h.served.requests.includes(stringValue(detail["path"])), POLL).toBe(true)
+  h.channel.search({ ...query, state: { ...DEFAULT_QUERY, text: "BP01-051" } })
+  await expect.poll(() => h.channel.getStatus().result.phase, POLL).toBe("complete")
+  expect(preview.getStatus().result.phase).toBe("pending")
+  preview.dispose()
+  release()
+  await h.queried()
+  expect(
+    h.events.filter((event) => event.kind === "preview-result" && event.channelId === preview.id),
+  ).toHaveLength(0)
+  h.session.dispose()
 })

@@ -3,6 +3,7 @@ import type { Region } from "../../domain/search"
 import type { QueryFailure, SearchPage, SearchQuery } from "./index"
 import type { RecentSummary, SuggestedSummary } from "./index"
 import type {
+  AbilityPreview,
   LoadRequest,
   PurposeRequest,
   SearchEvent,
@@ -22,6 +23,7 @@ type SearchResult =
       readonly generation: number
       readonly root: string
       readonly page: SearchPage
+      readonly preview?: AbilityPreview | null
       readonly view?: CompleteView
       readonly suggestions?: readonly SuggestedSummary[]
       readonly recent?: readonly RecentSummary[]
@@ -98,6 +100,8 @@ export interface SearchChannel {
   readonly id: number
   readonly getStatus: () => SearchChannelStatus
   readonly subscribe: (listener: () => void) => () => void
+  neighbours(query: SearchQuery, target: string, maxItems?: number): void
+  preview(printingId: string, faceId: string, language: string, edition: Region): void
   search(query: SearchQuery): void
   view(query: SearchQuery, remember?: boolean): void
   suggest(text: string, edition: Region, limit?: number): void
@@ -149,6 +153,18 @@ class Channel implements SearchChannel {
   recent(printingIds: readonly string[], edition: Region): void {
     this.submit(
       { kind: "recent", printingIds: printingIds.slice(0, 20) },
+      { state: DEFAULT_QUERY, edition },
+    )
+  }
+  neighbours(query: SearchQuery, target: string, maxItems?: number): void {
+    this.submit(
+      { kind: "neighbours", query, target, ...(maxItems === undefined ? {} : { maxItems }) },
+      query,
+    )
+  }
+  preview(printingId: string, faceId: string, language: string, edition: Region): void {
+    this.submit(
+      { kind: "preview", printingId, faceId, language },
       { state: DEFAULT_QUERY, edition },
     )
   }
@@ -217,7 +233,15 @@ class Channel implements SearchChannel {
   receive(
     event: Extract<
       SearchEvent,
-      { kind: "result" | "view-result" | "suggest-result" | "recent-result" | "query-error" }
+      {
+        kind:
+          | "result"
+          | "view-result"
+          | "suggest-result"
+          | "recent-result"
+          | "preview-result"
+          | "query-error"
+      }
     >,
   ): void {
     const status = this.owner.status()
@@ -239,7 +263,12 @@ class Channel implements SearchChannel {
                   : event.kind === "view-result"
                     ? event.view.page
                     : {
-                        total: event.kind === "suggest-result" ? event.total : event.items.length,
+                        total:
+                          event.kind === "suggest-result"
+                            ? event.total
+                            : event.kind === "recent-result"
+                              ? event.items.length
+                              : 0,
                         offset: 0,
                         items: [],
                       },
@@ -249,7 +278,9 @@ class Channel implements SearchChannel {
                   ? { suggestions: event.items, ...(event.faces ? { faces: event.faces } : {}) }
                   : event.kind === "recent-result"
                     ? { recent: event.items, ...(event.faces ? { faces: event.faces } : {}) }
-                    : {}),
+                    : event.kind === "preview-result"
+                      ? { preview: event.preview }
+                      : {}),
             },
     })
   }
@@ -359,7 +390,8 @@ export class SearchSession {
       event.kind === "query-error" ||
       event.kind === "view-result" ||
       event.kind === "suggest-result" ||
-      event.kind === "recent-result"
+      event.kind === "recent-result" ||
+      event.kind === "preview-result"
     ) {
       this.channels.get(event.channelId)?.receive(event)
       return

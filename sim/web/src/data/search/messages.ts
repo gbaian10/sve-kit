@@ -18,6 +18,18 @@ export interface LoadRequest {
   readonly entry: "index" | "preview"
 }
 export type PurposeRequest =
+  | {
+      readonly kind: "neighbours"
+      readonly query: SearchQuery
+      readonly target: string
+      readonly maxItems?: number
+    }
+  | {
+      readonly kind: "preview"
+      readonly printingId: string
+      readonly faceId: string
+      readonly language: string
+    }
   | { readonly kind: "search"; readonly query: SearchQuery }
   | { readonly kind: "view"; readonly query: SearchQuery; readonly remember?: boolean }
   | { readonly kind: "suggest"; readonly text: string; readonly limit: number }
@@ -51,7 +63,12 @@ export interface SearchMetrics {
   readonly stagingArrayBuffers: number
   readonly stagingStringBytes: number
 }
-export type PurposeResult =
+export interface AbilityPreview {
+  readonly text: string
+  readonly language: string
+}
+type PurposeResult =
+  | { readonly kind: "preview-result"; readonly preview: AbilityPreview | null }
   | { readonly kind: "view-result"; readonly view: CompleteView }
   | {
       readonly kind: "suggest-result"

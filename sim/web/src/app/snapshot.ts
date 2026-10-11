@@ -2,22 +2,34 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "reac
 
 import {
   activeSnapshotRoot,
+  type AnnotatedTextResolver,
+  arrayValue,
+  canonicalText,
   type Catalog,
   catalogOf,
+  type CompleteView,
   type ImageFace,
   type ImageIndex,
   isSnapshotImageFace,
+  type JsonObject,
   type LoadedSnapshot,
   loadImagePage,
+  objectValue,
+  parseJson,
+  type QueryFailure,
   retainedImageIndex,
   type SearchChannel,
   type SearchQuery,
   SearchSession,
   type SearchStatus,
+  type SelectedText,
+  sharedAnnotatedTextResolver,
   type SnapshotClient,
   snapshotClient,
+  SnapshotError,
   type SnapshotRoot,
   type SnapshotStatus,
+  stringValue,
   useSnapshotRoot,
   useSnapshotStatus,
   viewImages,
@@ -137,18 +149,19 @@ function deferredDisposal(dispose: () => void) {
     },
   }
 }
-function useWorkerChannel(): { channel: SearchChannel; status: SearchStatus } {
+function useWorkerChannel(identity = ""): { channel: SearchChannel; status: SearchStatus } {
   const { root } = useActiveSnapshot()
   const { session } = workerOf(root)
   const holder = useMemo(() => {
     const channel = session.createChannel()
     return {
       channel,
+      identity,
       ...deferredDisposal(() => {
         channel.dispose()
       }),
     }
-  }, [session])
+  }, [session, identity])
   const { channel } = holder
   useEffect(() => {
     holder.retain()
@@ -157,14 +170,27 @@ function useWorkerChannel(): { channel: SearchChannel; status: SearchStatus } {
   const status = useSyncExternalStore(session.subscribe, session.getStatus, session.getStatus)
   return { channel, status }
 }
-export function useSearchReadiness(edition: Region) {
+export interface SearchReadiness extends Omit<SearchStatus, "root" | "loading"> {
+  readonly root: SnapshotRoot
+  readonly requestedEdition: Region
+  readonly loading?: {
+    readonly root: SnapshotRoot
+    readonly edition: Region
+    readonly step: NonNullable<SearchStatus["step"]>
+    readonly done?: number
+    readonly total?: number
+    readonly persistent?: boolean
+  }
+  readonly retry: () => void
+}
+export function useSearchReadiness(edition: Region): SearchReadiness {
   const { root, client } = useActiveSnapshot()
   const { session } = workerOf(root)
   const status = useSyncExternalStore(session.subscribe, session.getStatus, session.getStatus)
+  const { loading: _loading, root: _root, ...state } = status
   return {
-    ...status,
+    ...state,
     root,
-    edition: status.edition,
     requestedEdition: edition,
     retry: () => {
       void client.retry()
@@ -181,6 +207,7 @@ export function useSearchReadiness(edition: Region) {
       : {}),
   }
 }
+
 export function useSearch(query: SearchQuery | null) {
   const { channel } = useWorkerChannel()
   const key = query ? JSON.stringify(query) : null
@@ -189,7 +216,7 @@ export function useSearch(query: SearchQuery | null) {
   }, [channel, key])
   return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
 }
-export function useSearchView(query: SearchQuery) {
+function useSearchView(query: SearchQuery) {
   const { channel, status } = useWorkerChannel()
   const key = JSON.stringify(query)
   useEffect(() => {
@@ -210,8 +237,7 @@ export function useListView(query: SearchQuery, pages: number) {
   const key = JSON.stringify(query)
   const store = useMemo(() => {
     const channels = Array.from({ length: pages }, () => session.createChannel())
-    let value: { view?: import("../data").CompleteView; error?: import("../data").QueryFailure } =
-      {}
+    let value: { view?: CompleteView; error?: QueryFailure } = {}
     const listeners = new Set<() => void>()
     const update = () => {
       const results = channels.map((channel) => channel.getStatus().result)
@@ -274,14 +300,14 @@ export function useListView(query: SearchQuery, pages: number) {
 }
 
 export function useWorkerSuggestions(text: string, edition: Region) {
-  const { channel } = useWorkerChannel()
+  const { channel } = useWorkerChannel(edition)
   useEffect(() => {
     channel.suggest(text, edition)
   }, [channel, text, edition])
   return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
 }
 export function useRecentSummaries(ids: readonly string[], edition: Region) {
-  const { channel } = useWorkerChannel()
+  const { channel } = useWorkerChannel(JSON.stringify([ids, edition]))
   const key = JSON.stringify(ids)
   useEffect(() => {
     channel.recent(JSON.parse(key) as string[], edition)
@@ -560,4 +586,223 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
     eager: (printingId, faceId) => visible.has(faceKeyOf(printingId, faceId)),
     ...(store.failed.size > 0 ? { failed: true } : {}),
   }
+}
+
+const generations = new WeakMap<LoadedSnapshot, number>()
+let nextGeneration = 0
+
+function generationOf(snapshot: LoadedSnapshot | null): number | null {
+  if (!snapshot) return null
+  let generation = generations.get(snapshot)
+  if (generation === undefined) {
+    nextGeneration += 1
+    generation = nextGeneration
+    generations.set(snapshot, generation)
+  }
+  return generation
+}
+
+// Keep all purposes pending until the full V1 resolver settles (public-annotation §4.1).
+
+export type TextField = "name" | "effect" | "flavor"
+
+/** `none` = this purpose does not apply to the text (no JP source, no annotation set). */
+type TextPurposePhase = "pending" | "ready" | "none" | "error"
+
+interface TextFailure {
+  /** `validation`: the snapshot rejected the closure (a `public-annotation/*` code); `load`: transport. */
+  readonly kind: "validation" | "load"
+  readonly code?: string
+  readonly message: string
+}
+
+interface TextReadiness {
+  readonly root: SnapshotRoot
+  readonly generation: number | null
+  readonly dataVersion?: string
+  readonly manifestHash?: string
+  readonly edition: Region
+  readonly owner: JsonObject
+  /** V1 only consumes whole name/effect/flavor fields, not section paragraphs. */
+  readonly ordinal: null
+  readonly field: TextField
+  /** Target text language of the translation row (`zh-Hant`, `ja`, `en`). */
+  readonly language: string
+  /** Original and translated strings with origin/authority/low_confidence. */
+  readonly basic: TextPurposePhase
+  /** The JP owner a `jp_source` translation was made from. */
+  readonly source: TextPurposePhase
+  /** Ranges, concepts, vocabulary and explanations. */
+  readonly annotations: TextPurposePhase
+  readonly error?: TextFailure
+}
+
+export interface AnnotatedTextState {
+  readonly readiness: TextReadiness
+  /** Only set once `basic` is ready; null means the owner has no such field. */
+  readonly value: SelectedText | null
+}
+
+function purposesOf(
+  value: SelectedText | null,
+): Pick<TextReadiness, "basic" | "source" | "annotations"> {
+  if (value === null) return { basic: "none", source: "none", annotations: "none" }
+  const annotated = [value.original, value.translated, value.source].some(
+    (text) => text !== undefined && text.annotation !== null,
+  )
+  return {
+    basic: "ready",
+    source:
+      value.selection?.["basis"] === "jp_source" ? (value.source ? "ready" : "error") : "none",
+    annotations: annotated || value.concepts.length > 0 ? "ready" : "none",
+  }
+}
+
+/** Runs `task` after the next frame has painted; the returned function cancels it. */
+function afterPaint(task: () => void): () => void {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const frame = requestAnimationFrame(() => {
+    timer = setTimeout(task, 0)
+  })
+  return () => {
+    cancelAnimationFrame(frame)
+    if (timer !== undefined) clearTimeout(timer)
+  }
+}
+
+// Bootstrap indexing can delay a tap's next paint; render only existing resolvers and initialize
+// new ones after paint or during idle time.
+const createdResolvers = new WeakSet<LoadedSnapshot>()
+
+function existingResolver(
+  client: SnapshotClient,
+  snapshot: LoadedSnapshot | null,
+): AnnotatedTextResolver | null {
+  return snapshot && createdResolvers.has(snapshot) ? sharedAnnotatedTextResolver(client) : null
+}
+
+function createResolver(client: SnapshotClient, snapshot: LoadedSnapshot): AnnotatedTextResolver {
+  const resolver = sharedAnnotatedTextResolver(client)
+  createdResolvers.add(snapshot)
+  return resolver
+}
+
+// A changed exact owner or edition must never display the previous identity's text.
+export function useAnnotatedText(
+  client: SnapshotClient,
+  owner: JsonObject,
+  field: TextField,
+  language: string,
+  edition: Region,
+  sharedResolver?: AnnotatedTextResolver | null,
+): AnnotatedTextState {
+  const root = useSnapshotRoot()
+  const snapshot = client.snapshot()
+  const identity = canonicalText([owner, field, language, edition])
+  const [loaded, setLoaded] = useState<{
+    readonly snapshot: typeof snapshot
+    readonly identity: string
+    readonly value?: SelectedText | null
+    readonly error?: TextFailure
+  }>()
+  // A text resolved earlier for this snapshot renders final on the first pass.
+  const peeked = (sharedResolver ?? existingResolver(client, snapshot))?.peek(
+    { owner, field, ordinal: null },
+    language,
+  )
+  useEffect(() => {
+    if (!snapshot) return
+    let active = true
+    const [currentOwner, currentField, currentLanguage] = arrayValue(parseJson(identity))
+    const pointer = {
+      owner: objectValue(currentOwner),
+      field: stringValue(currentField),
+      ordinal: null,
+    }
+    const existing = sharedResolver ?? existingResolver(client, snapshot)
+    if (existing?.peek(pointer, stringValue(currentLanguage)) !== undefined) return
+    const cancel = afterPaint(() => {
+      const resolver = sharedResolver ?? createResolver(client, snapshot)
+      void resolver.resolve(pointer, stringValue(currentLanguage)).then(
+        (value) => {
+          if (active) setLoaded({ snapshot, identity, value })
+        },
+        (error: unknown) => {
+          if (active)
+            setLoaded({
+              snapshot,
+              identity,
+              error:
+                error instanceof SnapshotError
+                  ? { kind: "validation", code: error.code, message: error.message }
+                  : {
+                      kind: "load",
+                      message: error instanceof Error ? error.message : String(error),
+                    },
+            })
+        },
+      )
+    })
+    return () => {
+      active = false
+      cancel()
+    }
+  }, [client, sharedResolver, snapshot, identity])
+  const settled =
+    loaded?.snapshot === snapshot && loaded.identity === identity
+      ? loaded
+      : peeked === undefined
+        ? undefined
+        : { snapshot, identity, value: peeked }
+  const base = {
+    root,
+    generation: generationOf(snapshot),
+    ...(snapshot ? { dataVersion: snapshot.dataVersion, manifestHash: snapshot.manifestHash } : {}),
+    owner,
+    ordinal: null,
+    field,
+    language,
+    edition,
+  }
+  if (settled === undefined)
+    return {
+      readiness: { ...base, basic: "pending", source: "pending", annotations: "pending" },
+      value: null,
+    }
+  if (settled.error)
+    return {
+      readiness: {
+        ...base,
+        basic: "error",
+        source: "error",
+        annotations: "error",
+        error: settled.error,
+      },
+      value: null,
+    }
+  const value = settled.value ?? null
+  return { readiness: { ...base, ...purposesOf(value) }, value }
+}
+
+export function useNeighbours(query: SearchQuery | null, target: string | null, maxItems?: number) {
+  const identity = JSON.stringify([query, target, maxItems])
+  const { channel } = useWorkerChannel(identity)
+  useEffect(() => {
+    if (query && target) channel.neighbours(query, target, maxItems)
+  }, [channel, query, target, maxItems])
+  return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
+}
+
+export function useAbilityPreview(
+  printingId: string,
+  faceId: string,
+  language: string,
+  edition: Region,
+) {
+  const identity = JSON.stringify([printingId, faceId, language, edition])
+  const { channel } = useWorkerChannel(identity)
+  useEffect(() => {
+    channel.preview(printingId, faceId, language, edition)
+  }, [channel, printingId, faceId, language, edition])
+  return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus).result
 }

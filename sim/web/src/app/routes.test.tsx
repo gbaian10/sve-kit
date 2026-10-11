@@ -1,18 +1,21 @@
 import { act, screen } from "@testing-library/react"
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { DEFAULT_PREFS, prefsStore } from "../settings"
 import { renderRoutes } from "../test-utils"
+import { TestSearchWorker } from "../test-utils/search-worker"
 import { routes } from "./routes"
 
 // jsdom reports en-US as the browser language; the shell would switch to English otherwise.
 beforeEach(() => {
+  vi.stubGlobal("Worker", TestSearchWorker)
   prefsStore.set({ uiLanguage: "zh-TW" })
 })
 
 afterEach(() => {
   prefsStore.set(DEFAULT_PREFS)
   document.documentElement.removeAttribute("lang")
+  vi.unstubAllGlobals()
 })
 
 describe("route table", () => {

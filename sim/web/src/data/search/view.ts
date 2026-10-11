@@ -18,8 +18,8 @@ import { VerifiedCache } from "../verified-cache"
 import type { SearchBlobs } from "./blobs"
 import type { SearchIndex, SearchOptions, SearchPage, SearchQuery } from "./index"
 
-export const VIEW_FORMAT = 1
-export const REGION_POLICY = "selected-region"
+const VIEW_FORMAT = 2
+const REGION_POLICY = "selected-region"
 export interface ViewFace {
   readonly printingId: string
   readonly faceId: string
@@ -170,6 +170,7 @@ export async function completeImages(
       publication_state: row["publication_state"] ?? null,
       availability: row["availability"] ?? null,
       card_version: row["card_version"] ?? null,
+      art_version: row["art_version"] ?? null,
       variants: row["variants"] ?? [],
     }
     const source = mediaImageSource(root, target.intId, target.ordinal, asset, "card")

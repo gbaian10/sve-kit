@@ -47,7 +47,7 @@ describe("CardsPage", () => {
     const { router } = await open("/cards?class=bishop")
     const entry = { pages: 3, anchor: "c:bp01-051" }
     await act(() => router.navigate("/cards?class=bishop", { replace: true, state: entry }))
-    await userEvent.click(screen.getByRole("radio", { name: "表格" }))
+    await userEvent.click(await screen.findByRole("radio", { name: "表格" }))
     expect(router.state.location.search).toBe("?class=bishop&view=table")
     expect(router.state.location.state).toMatchObject(entry)
     await userEvent.click(screen.getByRole("radio", { name: "清單" }))
@@ -139,7 +139,7 @@ describe("CardsPage", () => {
     await user.type(input, "bp01-0")
     await screen.findByRole("listbox")
     await user.type(input, "5")
-    await user.click(screen.getByRole("button", { name: /看全部/u }))
+    await user.click(await screen.findByRole("button", { name: /看全部/u }))
     expect(router.state.location.search).toBe("?q=bp01-05")
   })
 

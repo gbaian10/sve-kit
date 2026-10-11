@@ -30,7 +30,7 @@ export function StatusStrip({ readiness }: { readonly readiness: SearchReadiness
   if (readiness.phase === "downloading") {
     const loading = readiness.loading
     const files =
-      loading?.total !== undefined && loading.total > 0
+      loading?.step === "bootstrap" && loading.total !== undefined && loading.total > 0
         ? { done: loading.done ?? 0, total: loading.total }
         : null
     // The entry and manifest steps are a version check; only the startup files take seconds.
@@ -38,7 +38,11 @@ export function StatusStrip({ readiness }: { readonly readiness: SearchReadiness
     return (
       <Notice tone="info" role="status">
         <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span>{downloading ? t("status.downloadingFiles") : t("status.preparing")}</span>
+          <span>
+            {downloading
+              ? t("status.downloadingFiles")
+              : t(`status.step.${loading?.step ?? "index"}`)}
+          </span>
           {files && (
             <span aria-hidden="true" className="tabular-nums">
               {files.done}/{files.total}

@@ -68,3 +68,16 @@ React adapters in `app/snapshot.ts` expose `useSearchReadiness`, `useSearch`, `u
 `useListView` requests bounded 60-card pages and returns a complete image adapter after all
 requested pages belong to the same generation. Pending and unsupported results remain
 explicit. `useCardSnapshot` is the temporary full-detail path for the card page.
+
+V1 list views share the completed bounded page and image adapter. Art thumbnails retain the
+verified `art_version` in view format 2. View selection never changes search identity. Card-page
+neighbours return at most three summaries; an originating list caps the order at its loaded
+pages. The full snapshot and annotated resolver remain card-page compatibility APIs, including
+historical wording candidates.
+
+Near-viewport table rows use independent `preview` channels. The Worker lazily verifies the
+active manifest and joins only the selected face revision's detail with its bootstrap base, then
+returns one selected effect string (translation or original). It retains at most 48 completed
+strings; decoded file promises are shared only while running. Each file is capped at 12 MiB.
+These are basic previews, not annotation closures. Pending previews cannot delay independent
+list/suggestion channels, and closed or replaced channels never publish their late results.

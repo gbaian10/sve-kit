@@ -28,6 +28,7 @@ import type {
   SearchMetrics,
   SearchRequest,
 } from "./messages"
+import { PreviewReader } from "./preview"
 import { completeImages, type CompleteView, completeView, ViewCache, viewSlot } from "./view"
 
 const defaultPlan: BootstrapPlan = (_manifest, files) =>
@@ -66,6 +67,7 @@ export class SearchEngine {
   private active:
     | {
         generation: number
+        previews?: Promise<PreviewReader>
         index?: SearchIndex
         request: LoadRequest
         hash: string
@@ -81,7 +83,10 @@ export class SearchEngine {
     | undefined
   private revision = -1
   private signature = ""
-  private readonly queries = new Map<number, { request: QueryRequest; settled: () => void }>()
+  private readonly queries = new Map<
+    number,
+    { request: QueryRequest; settled: () => void; running?: boolean }
+  >()
   private rememberedRequest: QueryRequest | undefined
   private queryTimer: ReturnType<typeof setTimeout> | undefined
   private pending: Promise<void> = Promise.resolve()
@@ -120,7 +125,9 @@ export class SearchEngine {
       request.kind === "search" ||
       request.kind === "view" ||
       request.kind === "suggest" ||
-      request.kind === "recent"
+      request.kind === "recent" ||
+      request.kind === "preview" ||
+      request.kind === "neighbours"
     ) {
       if (this.active?.generation !== request.generation) return Promise.resolve()
       const previous = this.queries.get(request.channelId)
@@ -147,107 +154,151 @@ export class SearchEngine {
     this.queryTimer = undefined
     const active = this.active
     if (!active) return
-    for (const [channel, job] of [...this.queries]) {
-      const { request, settled } = job
-      if (request.generation !== active.generation) {
-        this.queries.delete(channel)
-        settled()
-        continue
-      }
-      if (!active.index && request.kind !== "view") continue
-      try {
-        const index = active.index
-        const identity = {
-          generation: request.generation,
-          channelId: channel,
-          queryId: request.queryId,
+    await Promise.all(
+      [...this.queries].map(async ([channel, job]) => {
+        if (job.running) return
+        job.running = true
+        const { request, settled } = job
+        if (request.generation !== active.generation) {
+          this.queries.delete(channel)
+          settled()
+          return
         }
-        let event: SearchEvent
-        if (request.kind === "view") {
-          const key = viewSlot(request.query)
-          let view = active.memory.get(key) ?? (await active.views.read(request.query, active.hash))
-          if (!view && !active.index) continue
-          if (!view && index)
-            view = await completeView(
+        if (!active.index && request.kind !== "view") {
+          job.running = false
+          return
+        }
+        try {
+          const index = active.index
+          const identity = {
+            generation: request.generation,
+            channelId: channel,
+            queryId: request.queryId,
+          }
+          let event: SearchEvent
+          if (request.kind === "view") {
+            const key = viewSlot(request.query)
+            let view =
+              active.memory.get(key) ?? (await active.views.read(request.query, active.hash))
+            if (!view && !active.index) return
+            if (!view && index)
+              view = await completeView(
+                active.request.base,
+                request.query,
+                index,
+                active.files,
+                active.version,
+                active.blobs,
+                active.signal,
+              )
+            if (!view) return
+            active.memory.set(key, view)
+            while (active.memory.size > 8)
+              active.memory.delete(active.memory.keys().next().value ?? "")
+            event = { kind: "view-result", ...identity, view }
+            const completed = view
+            void active.views.write(completed, active.hash).then(async () => {
+              if (request.remember && this.active === active && this.rememberedRequest === request)
+                await active.views.remember(completed.query, active.hash)
+            })
+          } else if (request.kind === "suggest" || request.kind === "recent") {
+            if (!index) return
+            const result =
+              request.kind === "suggest"
+                ? index.suggest(request.text, request.limit)
+                : { items: index.recent(request.printingIds) }
+            const faces = await completeImages(
               active.request.base,
-              request.query,
+              result.items.flatMap((item) => (item.summary ? [item.summary.printingId] : [])),
               index,
               active.files,
               active.version,
               active.blobs,
               active.signal,
             )
-          if (!view) continue
-          active.memory.set(key, view)
-          while (active.memory.size > 8)
-            active.memory.delete(active.memory.keys().next().value ?? "")
-          event = { kind: "view-result", ...identity, view }
-          const completed = view
-          void active.views.write(completed, active.hash).then(async () => {
-            if (request.remember && this.active === active && this.rememberedRequest === request)
-              await active.views.remember(completed.query, active.hash)
-          })
-        } else if (request.kind === "suggest" || request.kind === "recent") {
-          if (!index) continue
-          const result =
-            request.kind === "suggest"
-              ? index.suggest(request.text, request.limit)
-              : { items: index.recent(request.printingIds) }
-          const faces = await completeImages(
-            active.request.base,
-            result.items.flatMap((item) => (item.summary ? [item.summary.printingId] : [])),
-            index,
-            active.files,
-            active.version,
-            active.blobs,
-            active.signal,
-          )
-          event =
-            request.kind === "suggest"
-              ? {
-                  kind: "suggest-result",
-                  ...identity,
-                  ...index.suggest(request.text, request.limit),
-                  faces,
-                }
-              : {
-                  kind: "recent-result",
-                  ...identity,
-                  items: index.recent(request.printingIds),
-                  faces,
-                }
-        } else
-          event = {
-            kind: "result",
-            ...identity,
-            page: index ? index.search(request.query) : { total: 0, offset: 0, items: [] },
-          }
-        if (this.active === active && this.queries.get(channel) === job) this.emit(event)
-      } catch (error) {
-        if (this.active === active && this.queries.get(channel) === job)
-          this.emit({
-            kind: "query-error",
-            generation: request.generation,
-            channelId: channel,
-            queryId: request.queryId,
-            error:
-              error instanceof SearchQueryError
-                ? error.failure
+            event =
+              request.kind === "suggest"
+                ? {
+                    kind: "suggest-result",
+                    ...identity,
+                    ...index.suggest(request.text, request.limit),
+                    faces,
+                  }
                 : {
-                    kind: "query-failed",
-                    message: error instanceof Error ? error.message : "query failed",
-                  },
-          })
-      } finally {
-        if (
-          active.index ||
-          (request.kind === "view" && active.memory.has(viewSlot(request.query)))
-        ) {
-          if (this.queries.get(channel) === job) this.queries.delete(channel)
-          settled()
+                    kind: "recent-result",
+                    ...identity,
+                    items: index.recent(request.printingIds),
+                    faces,
+                  }
+          } else if (request.kind === "preview" && index) {
+            active.previews ??= (async () => {
+              const bytes = await fetchBytes(
+                this.fetcher,
+                `${active.request.base}/snapshots/manifests/${active.hash.slice(7)}.json`,
+                { signal: active.signal },
+              )
+              if ((await transferDigest(bytes)) !== active.hash)
+                throw new Error("preview manifest hash mismatch")
+              const decoded = decodeMessage({ kind: "manifest", bytes })
+              if (decoded.kind !== "manifest") throw new Error("preview manifest shape")
+              return new PreviewReader(
+                decoded.files,
+                integerValue(objectValue(decoded.manifest["partitioning"])["bucket_count"]),
+                active.version,
+                active.blobs,
+              )
+            })().catch((error: unknown) => {
+              delete active.previews
+              throw error
+            })
+            event = {
+              kind: "preview-result",
+              ...identity,
+              preview: await (
+                await active.previews
+              ).resolve(index, request.printingId, request.faceId, request.language, active.signal),
+            }
+          } else if (request.kind === "neighbours" && index) {
+            event = {
+              kind: "result",
+              ...identity,
+              page: index.neighbours(request.query, request.target, request.maxItems),
+            }
+          } else if (request.kind === "search")
+            event = {
+              kind: "result",
+              ...identity,
+              page: index ? index.search(request.query) : { total: 0, offset: 0, items: [] },
+            }
+          else return
+          if (this.active === active && this.queries.get(channel) === job) this.emit(event)
+        } catch (error) {
+          if (this.active === active && this.queries.get(channel) === job)
+            this.emit({
+              kind: "query-error",
+              generation: request.generation,
+              channelId: channel,
+              queryId: request.queryId,
+              error:
+                error instanceof SearchQueryError
+                  ? error.failure
+                  : {
+                      kind: "query-failed",
+                      message: error instanceof Error ? error.message : "query failed",
+                    },
+            })
+        } finally {
+          job.running = false
+          if (
+            active.index ||
+            (request.kind === "view" && active.memory.has(viewSlot(request.query)))
+          ) {
+            if (this.queries.get(channel) === job) this.queries.delete(channel)
+            settled()
+          }
         }
-      }
-    }
+      }),
+    )
   }
 
   private async resolve(request: LoadRequest, signal: AbortSignal): Promise<JsonObject> {

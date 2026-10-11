@@ -2,8 +2,8 @@ import { type MouseEvent, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { useHref, useNavigate } from "react-router"
 
-import { useAnnotatedText } from "../../app/snapshot"
-import { type ImageSource, type SnapshotClient, stringValue } from "../../data"
+import { useAbilityPreview } from "../../app/snapshot"
+import { type ImageSource } from "../../data"
 import { classStyle } from "../../domain/classes"
 import type { Region } from "../../domain/search"
 import { CLASS_ICON } from "../card/classIcons"
@@ -19,9 +19,6 @@ import { isPlainClick } from "./plain-click"
 import { useSeen } from "./useSeen"
 
 export interface CardRowsProps extends CardGridProps {
-  readonly client: SnapshotClient
-  /** Revision owner per cell key, for the table's effect preview; absent = no preview row. */
-  readonly effectOwner: (cell: GridCell) => { readonly kind: string; readonly id: string } | null
   /** The 4:3 illustration crop of a cell's face, once its image metadata is known. */
   readonly artOf: (cell: GridCell) => ImageSource | undefined
 }
@@ -85,38 +82,35 @@ function RowLink({
 // Two-line ability preview (design 05): the effect in the UI language, clamped, with a label
 // that says it is a preview; the full text lives on the card page.
 function EffectPreview({
-  client,
-  owner,
+  printingId,
+  faceId,
   edition,
 }: {
-  readonly client: SnapshotClient
-  readonly owner: { readonly kind: string; readonly id: string }
+  readonly printingId: string
+  readonly faceId: string
   readonly edition: Region
 }) {
   const { t } = useTranslation()
   const language = useTextLanguage()
-  const { readiness, value } = useAnnotatedText(client, owner, "effect", language, edition)
-  const unit = value ? (value.translated ?? value.original).unit : null
+  const result = useAbilityPreview(printingId, faceId, language, edition)
+  const unit = result.phase === "complete" ? result.preview : undefined
   return (
     <span
       className="flex min-w-0 flex-col gap-0.5"
-      data-preview={unit ? "ready" : readiness.basic === "error" ? "error" : "pending"}
+      data-preview={
+        result.phase === "complete" ? "ready" : result.phase === "error" ? "error" : "pending"
+      }
     >
-      {unit ? (
-        <span
-          lang={stringValue(unit["lang"])}
-          className="line-clamp-2 text-13 leading-snug text-text-2"
-        >
-          <InlineText text={stringValue(unit["text"])} />
+      {result.phase === "complete" ? (
+        <span lang={unit?.language} className="line-clamp-2 text-13 leading-snug text-text-2">
+          <InlineText text={unit?.text ?? ""} />
         </span>
       ) : (
         <span
-          role={readiness.basic === "pending" ? "status" : undefined}
+          role={result.phase === "pending" ? "status" : undefined}
           className="text-13 text-text-3"
         >
-          {readiness.basic === "error"
-            ? t("results.effectUnavailable")
-            : t("results.effectPending")}
+          {result.phase === "error" ? t("results.effectUnavailable") : t("results.effectPending")}
         </span>
       )}
       <span className="text-11 text-text-3">{t("results.abilityPreview")}</span>
@@ -130,16 +124,12 @@ function TableRow({
   images,
   onOpen,
   highlighted,
-  client,
-  owner,
   art,
 }: {
   readonly cell: GridCell
   readonly images: CardRowsProps["images"]
   readonly onOpen: CardRowsProps["onOpen"]
   readonly highlighted: boolean
-  readonly client: SnapshotClient
-  readonly owner: ReturnType<CardRowsProps["effectOwner"]>
   readonly art: ImageSource | undefined
 }) {
   const { t } = useTranslation()
@@ -172,32 +162,26 @@ function TableRow({
             <Badge className="mt-0.5 self-start">{t("card.wordingPending")}</Badge>
           )}
         </span>
-        {owner && (
-          <span className="basis-full pl-23">
-            {seen ? (
-              <EffectPreview client={client} owner={owner} edition={cell.summary.region} />
-            ) : (
-              <span className="flex min-w-0 flex-col gap-0.5" data-preview="waiting">
-                <span className="text-13 text-text-3">{t("results.effectPending")}</span>
-                <span className="text-11 text-text-3">{t("results.abilityPreview")}</span>
-              </span>
-            )}
-          </span>
-        )}
+        <span className="basis-full pl-23">
+          {seen ? (
+            <EffectPreview
+              printingId={cell.summary.printingId}
+              faceId={cell.summary.faceId}
+              edition={cell.summary.region}
+            />
+          ) : (
+            <span className="flex min-w-0 flex-col gap-0.5" data-preview="waiting">
+              <span className="text-13 text-text-3">{t("results.effectPending")}</span>
+              <span className="text-11 text-text-3">{t("results.abilityPreview")}</span>
+            </span>
+          )}
+        </span>
       </RowLink>
     </li>
   )
 }
 
-export function CardTable({
-  cells,
-  images,
-  onOpen,
-  anchor,
-  client,
-  effectOwner,
-  artOf,
-}: CardRowsProps) {
+export function CardTable({ cells, images, onOpen, anchor, artOf }: CardRowsProps) {
   return (
     <ul data-view="table" className="flex flex-col">
       {cells.map((cell) => (
@@ -207,8 +191,6 @@ export function CardTable({
           images={images}
           onOpen={onOpen}
           highlighted={anchor === cell.key}
-          client={client}
-          owner={effectOwner(cell)}
           art={artOf(cell)}
         />
       ))}
@@ -218,11 +200,7 @@ export function CardTable({
 
 // List row (design 05, 02a): 52px base, a 3px class-coloured edge, 22px cost icon, name over
 // translation, attack/defense, chevron.
-export function CardList({
-  cells,
-  onOpen,
-  anchor,
-}: Omit<CardRowsProps, "images" | "client" | "effectOwner" | "artOf">) {
+export function CardList({ cells, onOpen, anchor }: Omit<CardRowsProps, "images" | "artOf">) {
   const { t } = useTranslation()
   return (
     <ul data-view="list" className="flex flex-col">
