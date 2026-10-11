@@ -622,6 +622,573 @@
           }
         ]
       }
+    },
+    "n1_role_forms": {
+      "zone.locative": {
+        "id": "zone.locative",
+        "lang": "zh-Hant",
+        "signature": [
+          {
+            "name": "zone",
+            "type": "ZoneSet",
+            "role": "source_zone"
+          }
+        ],
+        "rule": "zone.case.v2",
+        "cases": {
+          "battlefield": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "上"
+            }
+          ],
+          "deck": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中的"
+            }
+          ],
+          "evolve_deck": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中的"
+            }
+          ],
+          "ex": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中的"
+            }
+          ],
+          "graveyard": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中的"
+            }
+          ],
+          "hand": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中的"
+            }
+          ],
+          "mixed": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中合計"
+            }
+          ],
+          "banish": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中的"
+            }
+          ]
+        }
+      },
+      "quantity.classifier.source_selection": {
+        "id": "quantity.classifier.source_selection",
+        "lang": "zh-Hant",
+        "signature": [
+          {
+            "name": "kind",
+            "type": "CardKind",
+            "role": "counted_kind"
+          },
+          {
+            "name": "quantity",
+            "type": "QuantitySpec",
+            "role": "selection_count"
+          },
+          {
+            "name": "zone",
+            "type": "ZoneSet",
+            "role": "source_zone"
+          }
+        ],
+        "rule": "quantity.classifier.v1",
+        "cases": {
+          "card": [
+            {
+              "kind": "Literal",
+              "text": "張"
+            }
+          ],
+          "object": [
+            {
+              "kind": "Literal",
+              "text": "體"
+            }
+          ]
+        }
+      },
+      "zone.union_separator": {
+        "id": "zone.union_separator",
+        "lang": "zh-Hant",
+        "signature": [],
+        "rule": "zone.union_separator.v2",
+        "cases": {
+          "default": [
+            {
+              "kind": "Literal",
+              "text": "或"
+            }
+          ]
+        }
+      },
+      "zone.counted_locative": {
+        "id": "zone.counted_locative",
+        "lang": "zh-Hant",
+        "signature": [
+          {
+            "name": "zone",
+            "type": "ZoneSet",
+            "role": "counted_zone"
+          }
+        ],
+        "rule": "zone.case.v2",
+        "cases": {
+          "battlefield": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "上"
+            }
+          ],
+          "deck": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中的"
+            }
+          ],
+          "evolve_deck": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中的"
+            }
+          ],
+          "ex": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中的"
+            }
+          ],
+          "graveyard": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中的"
+            }
+          ],
+          "hand": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中的"
+            }
+          ],
+          "mixed": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中合計"
+            }
+          ],
+          "banish": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            },
+            {
+              "kind": "Literal",
+              "text": "中的"
+            }
+          ]
+        }
+      },
+      "quantity.classifier.counted_selection": {
+        "id": "quantity.classifier.counted_selection",
+        "lang": "zh-Hant",
+        "signature": [
+          {
+            "name": "kind",
+            "type": "CardKind",
+            "role": "counted_kind"
+          },
+          {
+            "name": "quantity",
+            "type": "QuantitySpec",
+            "role": "selection_count"
+          },
+          {
+            "name": "zone",
+            "type": "ZoneSet",
+            "role": "counted_zone"
+          }
+        ],
+        "rule": "quantity.classifier.v1",
+        "cases": {
+          "card": [
+            {
+              "kind": "Literal",
+              "text": "張"
+            }
+          ],
+          "object": [
+            {
+              "kind": "Literal",
+              "text": "體"
+            }
+          ]
+        }
+      },
+      "quantity.classifier.counted_existence": {
+        "id": "quantity.classifier.counted_existence",
+        "lang": "zh-Hant",
+        "signature": [
+          {
+            "name": "kind",
+            "type": "CardKind",
+            "role": "counted_kind"
+          },
+          {
+            "name": "quantity",
+            "type": "QuantitySpec",
+            "role": "existence_count"
+          },
+          {
+            "name": "zone",
+            "type": "ZoneSet",
+            "role": "counted_zone"
+          }
+        ],
+        "rule": "quantity.classifier.v1",
+        "cases": {
+          "card": [
+            {
+              "kind": "Literal",
+              "text": "張"
+            }
+          ],
+          "object": [
+            {
+              "kind": "Literal",
+              "text": "體"
+            }
+          ]
+        }
+      },
+      "owner.source_possessive": {
+        "id": "owner.source_possessive",
+        "lang": "zh-Hant",
+        "rule": "owner.possessive.v1",
+        "signature": [
+          {
+            "name": "owner",
+            "type": "Player",
+            "role": "source_owner"
+          }
+        ],
+        "cases": {
+          "default": [
+            {
+              "kind": "Label",
+              "arg": "owner"
+            },
+            {
+              "kind": "Literal",
+              "text": "的"
+            }
+          ]
+        }
+      },
+      "owner.counted_possessive": {
+        "id": "owner.counted_possessive",
+        "lang": "zh-Hant",
+        "rule": "owner.possessive.v1",
+        "signature": [
+          {
+            "name": "owner",
+            "type": "Player",
+            "role": "counted_owner"
+          }
+        ],
+        "cases": {
+          "default": [
+            {
+              "kind": "Label",
+              "arg": "owner"
+            },
+            {
+              "kind": "Literal",
+              "text": "的"
+            }
+          ]
+        }
+      }
+    },
+    "n1_np_roles": {
+      "semantic": {
+        "recipe": "frame-v1",
+        "source_lang": "ja",
+        "canonical_source": "PG380_G07({owner},{zone},{kind},{quantity})",
+        "normalizer_version": "fixture-pg380-global-v2",
+        "role": "body",
+        "leaf_schema": {
+          "format": 2,
+          "slots": [
+            {
+              "name": "owner",
+              "type": "Player",
+              "role": "source_owner",
+              "domain": {
+                "values": [
+                  "opponent",
+                  "self"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 10,
+                  "end": 17
+                }
+              ]
+            },
+            {
+              "name": "zone",
+              "type": "ZoneSet",
+              "role": "source_zone",
+              "domain": {
+                "values": [
+                  "fixture.pg380.zone"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 18,
+                  "end": 24
+                }
+              ]
+            },
+            {
+              "name": "kind",
+              "type": "CardKind",
+              "role": "counted_kind",
+              "domain": {
+                "values": [
+                  {
+                    "kind": "vocabulary",
+                    "key": [
+                      "type",
+                      "follower"
+                    ]
+                  }
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 25,
+                  "end": 31
+                }
+              ]
+            },
+            {
+              "name": "quantity",
+              "type": "QuantitySpec",
+              "role": "selection_count",
+              "domain": {
+                "values": [
+                  "fixture.pg380.quantity"
+                ],
+                "min": null,
+                "max": null
+              },
+              "required": true,
+              "occurrences": [
+                {
+                  "start": 32,
+                  "end": 42
+                }
+              ]
+            }
+          ]
+        },
+        "semantic_variant": {
+          "state": "resolved",
+          "key": "fixture.optional_reveal_exact",
+          "scope": null
+        },
+        "projection": {
+          "projection_kind": "ability_body",
+          "discriminator": "fixture.pg380.g07"
+        }
+      },
+      "values": {
+        "owner": "self",
+        "zone": [
+          "hand"
+        ],
+        "kind": {
+          "kind": "vocabulary",
+          "key": [
+            "type",
+            "follower"
+          ]
+        },
+        "quantity": {
+          "mode": "exact",
+          "expr": {
+            "kind": "constant",
+            "value": 2
+          }
+        }
+      },
+      "target": {
+        "format": 1,
+        "nodes": [
+          {
+            "kind": "Literal",
+            "text": "可以公開"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "owner"
+          },
+          {
+            "kind": "Form",
+            "form_id": "zone.locative",
+            "args": {
+              "zone": {
+                "slot": "zone"
+              }
+            }
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "quantity"
+          },
+          {
+            "kind": "Literal",
+            "text": "張"
+          },
+          {
+            "kind": "LeafRef",
+            "slot": "kind"
+          },
+          {
+            "kind": "Literal",
+            "text": "。"
+          }
+        ]
+      },
+      "projection_interface": {
+        "scopes": [
+          {
+            "id": "ability",
+            "parent": null,
+            "kind": "ability"
+          }
+        ],
+        "imports": [],
+        "exports": []
+      },
+      "np_target": {
+        "format": 1,
+        "nodes": [
+          {
+            "kind": "Literal",
+            "text": "可以公開"
+          },
+          {
+            "kind": "NP",
+            "constructor": "CardNP",
+            "args": {
+              "owner": {
+                "slot": "owner"
+              },
+              "zone": {
+                "slot": "zone"
+              },
+              "kind": {
+                "slot": "kind"
+              },
+              "quantity": {
+                "slot": "quantity"
+              }
+            }
+          },
+          {
+            "kind": "Literal",
+            "text": "。"
+          }
+        ]
+      },
+      "source_unit": "枚"
     }
   },
   "cases": [
@@ -3951,6 +4518,536 @@
       },
       "expected": {
         "result": "reject"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "zone_locative_signature",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "zone.locative",
+        "changes": {}
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "zone_locative_wrong_role",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "zone.locative",
+        "changes": {
+          "/signature/0/role": "counted_zone"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "form_role_mismatch"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "quantity_classifier_source_selection_signature",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "quantity.classifier.source_selection",
+        "changes": {}
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "quantity_classifier_source_selection_wrong_role",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "quantity.classifier.source_selection",
+        "changes": {
+          "/signature/2/role": "counted_zone"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "form_role_mismatch"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "zone_union_separator_signature",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "zone.union_separator",
+        "changes": {}
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "zone_counted_locative_signature",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "zone.counted_locative",
+        "changes": {}
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "zone_counted_locative_wrong_role",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "zone.counted_locative",
+        "changes": {
+          "/signature/0/role": "source_zone"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "form_role_mismatch"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "quantity_classifier_counted_selection_signature",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "quantity.classifier.counted_selection",
+        "changes": {}
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "quantity_classifier_counted_selection_wrong_role",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "quantity.classifier.counted_selection",
+        "changes": {
+          "/signature/2/role": "source_zone"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "form_role_mismatch"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "quantity_classifier_counted_existence_signature",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "quantity.classifier.counted_existence",
+        "changes": {}
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "quantity_classifier_counted_existence_wrong_role",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "quantity.classifier.counted_existence",
+        "changes": {
+          "/signature/2/role": "source_zone"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "form_role_mismatch"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "owner_source_possessive_signature",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "owner.source_possessive",
+        "changes": {}
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "owner_source_possessive_wrong_role",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "owner.source_possessive",
+        "changes": {
+          "/signature/0/role": "counted_owner"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "form_role_mismatch"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "owner_counted_possessive_signature",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "owner.counted_possessive",
+        "changes": {}
+      },
+      "expected": {
+        "result": "accept"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "owner_counted_possessive_wrong_role",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "owner.counted_possessive",
+        "changes": {
+          "/signature/0/role": "source_owner"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "form_role_mismatch"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "separator_with_arg",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "zone.union_separator",
+        "changes": {
+          "/signature": [
+            {
+              "name": "zone",
+              "type": "ZoneSet",
+              "role": "source_zone"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "separator_signature_mismatch"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "separator_old_rule",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "zone.union_separator",
+        "changes": {
+          "/rule": "zone.union_separator.v1"
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "separator_signature_mismatch"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "separator_with_label",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "zone.union_separator",
+        "changes": {
+          "/cases/default": [
+            {
+              "kind": "Label",
+              "arg": "zone"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "separator_literal_required"
+      }
+    },
+    {
+      "group": "FL-012",
+      "id": "possessive_empty_signature",
+      "operation": "form_definition",
+      "input": {
+        "fixture": "n1_role_forms",
+        "form": "owner.source_possessive",
+        "changes": {
+          "/signature": []
+        }
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "empty_form_signature"
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "np_source_selection_dispatch",
+      "operation": "np_role_render",
+      "input": {
+        "fixture": "n1_np_roles",
+        "forms": "n1_role_forms",
+        "changes": {
+          "/semantic/leaf_schema/slots/0/role": "source_owner",
+          "/semantic/leaf_schema/slots/1/role": "source_zone",
+          "/semantic/leaf_schema/slots/3/role": "selection_count"
+        },
+        "omit_np_zone": false,
+        "remove_forms": []
+      },
+      "expected": {
+        "result": "accept",
+        "text": "可以公開自己手牌中的2張從者。",
+        "suffix_outside_owner_ranges": true,
+        "frame_id_changed": false,
+        "binding_id_changed": false
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "np_counted_selection_dispatch",
+      "operation": "np_role_render",
+      "input": {
+        "fixture": "n1_np_roles",
+        "forms": "n1_role_forms",
+        "changes": {
+          "/semantic/leaf_schema/slots/0/role": "counted_owner",
+          "/semantic/leaf_schema/slots/1/role": "counted_zone",
+          "/semantic/leaf_schema/slots/3/role": "selection_count"
+        },
+        "omit_np_zone": false,
+        "remove_forms": []
+      },
+      "expected": {
+        "result": "accept",
+        "text": "可以公開自己手牌中的2張從者。",
+        "suffix_outside_owner_ranges": true,
+        "frame_id_changed": false,
+        "binding_id_changed": false
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "np_counted_existence_dispatch",
+      "operation": "np_role_render",
+      "input": {
+        "fixture": "n1_np_roles",
+        "forms": "n1_role_forms",
+        "changes": {
+          "/semantic/leaf_schema/slots/0/role": "counted_owner",
+          "/semantic/leaf_schema/slots/1/role": "counted_zone",
+          "/semantic/leaf_schema/slots/3/role": "existence_count"
+        },
+        "omit_np_zone": false,
+        "remove_forms": []
+      },
+      "expected": {
+        "result": "accept",
+        "text": "可以公開自己手牌中的2張從者。",
+        "suffix_outside_owner_ranges": true,
+        "frame_id_changed": false,
+        "binding_id_changed": false
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "np_source_existence_rejected",
+      "operation": "np_role_render",
+      "input": {
+        "fixture": "n1_np_roles",
+        "forms": "n1_role_forms",
+        "changes": {
+          "/semantic/leaf_schema/slots/0/role": "source_owner",
+          "/semantic/leaf_schema/slots/1/role": "source_zone",
+          "/semantic/leaf_schema/slots/3/role": "existence_count"
+        },
+        "omit_np_zone": false,
+        "remove_forms": []
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unsupported_np_quantity_role"
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "np_owner_zone_role_mismatch",
+      "operation": "np_role_render",
+      "input": {
+        "fixture": "n1_np_roles",
+        "forms": "n1_role_forms",
+        "changes": {
+          "/semantic/leaf_schema/slots/0/role": "counted_owner",
+          "/semantic/leaf_schema/slots/1/role": "source_zone",
+          "/semantic/leaf_schema/slots/3/role": "selection_count"
+        },
+        "omit_np_zone": false,
+        "remove_forms": []
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "np_owner_zone_role_mismatch"
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "np_destination_owner_rejected",
+      "operation": "np_role_render",
+      "input": {
+        "fixture": "n1_np_roles",
+        "forms": "n1_role_forms",
+        "changes": {
+          "/semantic/leaf_schema/slots/0/role": "destination_owner",
+          "/semantic/leaf_schema/slots/1/role": "source_zone",
+          "/semantic/leaf_schema/slots/3/role": "selection_count"
+        },
+        "omit_np_zone": false,
+        "remove_forms": []
+      },
+      "expected": {
+        "result": "reject",
+        "reason": "unsupported_np_owner_role"
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "np_source_owner_only_possessive",
+      "operation": "np_role_render",
+      "input": {
+        "fixture": "n1_np_roles",
+        "forms": "n1_role_forms",
+        "changes": {
+          "/semantic/leaf_schema/slots/0/role": "source_owner",
+          "/semantic/leaf_schema/slots/1/role": "counted_zone",
+          "/semantic/leaf_schema/slots/3/role": "selection_count"
+        },
+        "omit_np_zone": true,
+        "remove_forms": []
+      },
+      "expected": {
+        "result": "accept",
+        "text": "手牌可以公開自己的2張從者。",
+        "suffix_outside_owner_ranges": true,
+        "frame_id_changed": false,
+        "binding_id_changed": false
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "np_counted_owner_only_selection",
+      "operation": "np_role_render",
+      "input": {
+        "fixture": "n1_np_roles",
+        "forms": "n1_role_forms",
+        "changes": {
+          "/semantic/leaf_schema/slots/0/role": "counted_owner",
+          "/semantic/leaf_schema/slots/1/role": "counted_zone",
+          "/semantic/leaf_schema/slots/3/role": "selection_count"
+        },
+        "omit_np_zone": true,
+        "remove_forms": []
+      },
+      "expected": {
+        "result": "accept",
+        "text": "手牌可以公開自己的2張從者。",
+        "suffix_outside_owner_ranges": true,
+        "frame_id_changed": false,
+        "binding_id_changed": false
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "np_counted_owner_only_existence",
+      "operation": "np_role_render",
+      "input": {
+        "fixture": "n1_np_roles",
+        "forms": "n1_role_forms",
+        "changes": {
+          "/semantic/leaf_schema/slots/0/role": "counted_owner",
+          "/semantic/leaf_schema/slots/1/role": "counted_zone",
+          "/semantic/leaf_schema/slots/3/role": "existence_count"
+        },
+        "omit_np_zone": true,
+        "remove_forms": []
+      },
+      "expected": {
+        "result": "accept",
+        "text": "手牌可以公開自己的2張從者。",
+        "suffix_outside_owner_ranges": true,
+        "frame_id_changed": false,
+        "binding_id_changed": false
+      }
+    },
+    {
+      "group": "FL-017",
+      "id": "np_counted_owner_only_missing_form",
+      "operation": "np_role_render",
+      "input": {
+        "fixture": "n1_np_roles",
+        "forms": "n1_role_forms",
+        "changes": {
+          "/semantic/leaf_schema/slots/0/role": "counted_owner",
+          "/semantic/leaf_schema/slots/1/role": "counted_zone",
+          "/semantic/leaf_schema/slots/3/role": "selection_count"
+        },
+        "omit_np_zone": true,
+        "remove_forms": [
+          "owner.counted_possessive"
+        ]
+      },
+      "expected": {
+        "result": "fallback",
+        "reason": "missing_owner_possessive_form"
+      }
+    },
+    {
+      "group": "FL-015",
+      "id": "renderer_v3_dependencies",
+      "operation": "render_dependencies",
+      "input": {
+        "changed": "renderer_version",
+        "before_version": "four-layer-renderer-v2",
+        "after_version": "four-layer-renderer-v3"
+      },
+      "expected": {
+        "result": "accept",
+        "frame_id_changed": false,
+        "binding_id_changed": false,
+        "render_dependency_changed": true,
+        "translation_id_changed": true,
+        "annotation_changed": false,
+        "dsl_review_stale": false
       }
     }
   ]
