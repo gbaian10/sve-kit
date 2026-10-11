@@ -226,6 +226,22 @@ function buildIdPlugin(inputs: readonly string[]): Plugin {
   }
 }
 
+const THEME_BOOT_TAG = '<script src="/theme-boot.js"></script>'
+
+// The theme script blocks the first paint, and a fixed file name is revalidated on every load; inline
+// it so a reload does not wait one round trip for it. public/theme-boot.js stays the tested source.
+export function inlineThemeBoot(): Plugin {
+  return {
+    name: "sve-inline-theme-boot",
+    transformIndexHtml(html) {
+      if (!html.includes(THEME_BOOT_TAG))
+        throw new Error("index.html no longer loads theme-boot.js")
+      const source = readFileSync(path.join(import.meta.dirname, "public/theme-boot.js"), "utf8")
+      return html.replace(THEME_BOOT_TAG, () => `<script>${source}</script>`)
+    },
+  }
+}
+
 const { cdn: cdnDir, preview: previewDir } = snapshotRoots(process.env)
 
 export default defineConfig({
@@ -236,6 +252,7 @@ export default defineConfig({
   },
   plugins: [
     buildIdPlugin(BUILD_INPUTS),
+    inlineThemeBoot(),
     react(),
     tailwindcss(),
     serveSnapshotRoot("/cdn", cdnDir),
