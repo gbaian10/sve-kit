@@ -4,8 +4,7 @@ import { describe, expect, it } from "vitest"
 import { renderInRouter } from "../../test-utils"
 import { NewPackBanner } from "./NewPackBanner"
 
-// Positive state awaiting data: the real snapshot does not link products to sets yet, so the banner
-// with counts is only shown here, with synthetic values.
+// Synthetic counts cover what the fixture's set lacks: thousands separators and proofreading.
 const pack = {
   code: "syn01",
   publicCode: "SYN01",

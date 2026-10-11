@@ -12,37 +12,43 @@ import { useTranslation } from "react-i18next"
 import { Link as RouterLink, useLocation, useNavigate } from "react-router"
 
 import type { CardEntryState } from "../../app/listEntryState"
-import { useSearch } from "../../app/snapshot"
+import { useSearch, useWorkerSuggestions } from "../../app/snapshot"
 import { useDebouncedValue } from "../../app/useDebouncedValue"
 import logo from "../../assets/official/logo/head-left.png"
 import { SearchBar } from "../../components/search/SearchBar"
 import { optionId } from "../../components/search/suggest-ids"
 import { SuggestList, type SuggestRow } from "../../components/search/SuggestList"
-import type { Catalog, ImageIndex, SearchQuery } from "../../data"
+import type { ImageIndex, SearchQuery } from "../../data"
 import type { DisplayedName } from "../../domain/nameDisplay"
 import { querySearch } from "../../domain/query/codec"
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 import { recentStore } from "../../settings"
-import { cardPath, homeEntryState, readHomeEntry } from "./home-model"
+import { cardPath, faceImages, homeEntryState, readHomeEntry } from "./home-model"
 
-const SUGGEST_LIMIT = 8
 const DEBOUNCE_MS = 150
 const SHORTCUT =
   "flex h-10 min-w-0 items-center justify-center gap-1.5 rounded-button border border-border bg-surface-1 px-3 text-14 font-medium text-text-1 hover:bg-surface-2 lg:px-4"
 
 export interface HomeSearchProps {
-  /** Null until the selected region's basic catalog is complete. */
-  readonly catalog: Catalog | null
+  /** The selected edition's search index is loaded. */
+  readonly ready: boolean
   readonly failed: boolean
   readonly edition: Region
-  readonly images: ImageIndex | undefined
-  /** Recently viewed rows; null while the catalog that resolves them is not loaded. */
+  /** Recently viewed rows; null while the search index that resolves them is not loaded. */
   readonly recent: readonly SuggestRow[] | null
+  readonly recentImages: ImageIndex | undefined
   readonly nameOf: (summary: SuggestRow["summary"]) => DisplayedName
 }
 
-export function HomeSearch({ catalog, failed, edition, images, recent, nameOf }: HomeSearchProps) {
+export function HomeSearch({
+  ready,
+  failed,
+  edition,
+  recent,
+  recentImages,
+  nameOf,
+}: HomeSearchProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
@@ -60,34 +66,64 @@ export function HomeSearch({ catalog, failed, edition, images, recent, nameOf }:
   const debounced = useDebouncedValue(input, DEBOUNCE_MS)
   const typed = input.trim()
   const settled = debounced.trim()
-  const query = useMemo<SearchQuery | null>(
+  const suggestion = useWorkerSuggestions(settled, edition)
+  const complete =
+    ready &&
+    settled !== "" &&
+    suggestion.result.phase === "complete" &&
+    suggestion.lastInput?.state.text === settled &&
+    suggestion.lastInput.edition === edition
+  // Until the next answer arrives the last one stays on screen, dimmed.
+  const shown = suggestion.result.phase === "complete" ? suggestion.result : suggestion.previous
+  const rows: readonly SuggestRow[] = useMemo(
     () =>
       settled === ""
-        ? null
-        : { state: { ...DEFAULT_QUERY, text: settled }, edition, offset: 0, limit: 0 },
-    [settled, edition],
+        ? (recent ?? [])
+        : (shown?.suggestions ?? []).map((item) => ({
+            summary: item.summary,
+            name: nameOf(item.summary),
+            field: item.field,
+          })),
+    [settled, recent, shown, nameOf],
   )
-  const { lastInput, result } = useSearch(query)
-  const complete =
-    catalog !== null &&
-    settled !== "" &&
-    result.phase === "complete" &&
-    lastInput?.state.text === settled &&
-    lastInput.edition === edition
-  const rows: readonly SuggestRow[] = useMemo(() => {
-    if (settled === "") return recent ?? []
-    if (!complete) return []
-    return catalog.suggest(settled, edition, SUGGEST_LIMIT).flatMap((item) => {
-      const summary = catalog.summary(item.printingId)
-      return summary ? [{ summary, name: nameOf(summary), field: item.field }] : []
-    })
-  }, [settled, recent, complete, catalog, edition, nameOf])
-  const total = complete ? result.page.total : 0
-  const stale = input !== debounced
+  const suggestionImages = useMemo(
+    () => (shown?.faces ? faceImages(shown.faces, edition) : undefined),
+    [shown, edition],
+  )
+  const total = complete ? suggestion.result.page.total : 0
+  const stale = input !== debounced || (settled !== "" && !complete)
   const active =
     focused && highlight !== null && highlight.text === debounced ? highlight.index : -1
-  const ready = catalog !== null
-  const listOpen = focused && ready && !failed
+  // An answer without rows stays closed while the next one is on its way, so no false "no match".
+  const listOpen = focused && ready && !failed && (settled === "" || complete || rows.length > 0)
+
+  const everyCard = useMemo<SearchQuery>(
+    () => ({ state: DEFAULT_QUERY, edition, limit: 1 }),
+    [edition],
+  )
+  const all = useSearch(everyCard)
+  const cardCount =
+    ready && all.result.phase === "complete" && all.lastInput?.edition === edition
+      ? all.result.page.total
+      : 0
+  // The random card is picked ahead of the click, so the click opens it at once.
+  const [seed] = useState(Math.random)
+  const pickQuery = useMemo<SearchQuery | null>(
+    () =>
+      cardCount === 0
+        ? null
+        : { state: DEFAULT_QUERY, edition, offset: Math.floor(seed * cardCount), limit: 1 },
+    [cardCount, edition, seed],
+  )
+  const picked = useSearch(pickQuery)
+  const randomItem =
+    pickQuery !== null &&
+    picked.result.phase === "complete" &&
+    picked.lastInput !== null &&
+    picked.lastInput.offset === pickQuery.offset &&
+    picked.lastInput.edition === edition
+      ? picked.result.page.items[0]
+      : undefined
 
   const remember = () => {
     void navigate(location.pathname, { replace: true, state: homeEntryState(input) })
@@ -163,25 +199,16 @@ export function HomeSearch({ catalog, failed, edition, images, recent, nameOf }:
     activate(active)
   }
 
-  const pickRandom = () => {
-    if (!catalog) return
-    const pool = catalog.entries.filter((entry) =>
-      entry.printings.some((printing) => printing.region === edition),
-    )
-    const entry = pool[Math.floor(Math.random() * pool.length)]
-    if (!entry) return
-    const printingId =
-      entry.defaultPrinting[edition] ??
-      entry.printings.find((printing) => printing.region === edition)?.id
-    const summary = printingId === undefined ? undefined : catalog.summary(printingId)
-    if (!summary) return
+  const openRandom = () => {
+    const summary = randomItem?.summary
+    if (!randomItem || !summary) return
     recentStore.push(summary.printingId)
     remember()
     const state: CardEntryState = {
       background: "",
       source: "results",
       pages: 1,
-      resultKey: entry.cardId,
+      resultKey: randomItem.key,
     }
     void navigate(cardPath(summary), { state })
   }
@@ -214,7 +241,7 @@ export function HomeSearch({ catalog, failed, edition, images, recent, nameOf }:
           expanded={listOpen}
           {...(listOpen && active >= 0 ? { activeOptionId: optionId(listId, active) } : {})}
         />
-        {focused && !listOpen && (
+        {focused && (!ready || failed) && (
           <div className="absolute inset-x-0 top-full mt-1">
             <p
               role="status"
@@ -230,7 +257,7 @@ export function HomeSearch({ catalog, failed, edition, images, recent, nameOf }:
               id={listId}
               rows={rows}
               activeIndex={active}
-              images={images}
+              images={settled === "" ? recentImages : suggestionImages}
               onPick={openRow}
               onHover={(index) => {
                 setHighlight({ text: debounced, index })
@@ -261,9 +288,9 @@ export function HomeSearch({ catalog, failed, edition, images, recent, nameOf }:
         </RouterLink>
         <button
           type="button"
-          disabled={!ready || failed}
-          title={ready ? undefined : t("home.randomPending")}
-          onClick={pickRandom}
+          disabled={randomItem?.summary === undefined || failed}
+          title={randomItem?.summary === undefined ? t("home.randomPending") : undefined}
+          onClick={openRandom}
           className={`${SHORTCUT} disabled:cursor-not-allowed disabled:text-text-3 disabled:hover:bg-surface-1`}
         >
           <Shuffle className="size-4 shrink-0" aria-hidden="true" />

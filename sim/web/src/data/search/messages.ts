@@ -1,4 +1,5 @@
-import type { Region } from "../../domain/search"
+import type { Region, TextLang } from "../../domain/search"
+import type { PackCounts } from "../../domain/sets"
 import type { JsonObject } from "../format-v3/json"
 import type { Files } from "../format-v3/reader"
 import type {
@@ -6,6 +7,7 @@ import type {
   RecentSummary,
   SearchPage,
   SearchQuery,
+  SetRelease,
   SuggestedSummary,
 } from "./index"
 import type { CompleteView, ViewFace } from "./view"
@@ -34,6 +36,8 @@ export type PurposeRequest =
   | { readonly kind: "view"; readonly query: SearchQuery; readonly remember?: boolean }
   | { readonly kind: "suggest"; readonly text: string; readonly limit: number }
   | { readonly kind: "recent"; readonly printingIds: readonly string[] }
+  | { readonly kind: "releases" }
+  | { readonly kind: "count"; readonly query: SearchQuery; readonly language: TextLang }
 export type QueryRequest = PurposeRequest & {
   readonly generation: number
   readonly channelId: number
@@ -81,6 +85,8 @@ type PurposeResult =
       readonly items: readonly RecentSummary[]
       readonly faces?: readonly ViewFace[]
     }
+  | { readonly kind: "releases-result"; readonly releases: readonly SetRelease[] }
+  | { readonly kind: "count-result"; readonly counts: PackCounts }
 export type SearchStage = "index" | "manifest" | "config" | "bootstrap" | "search" | "images"
 
 type WorkerEvent =

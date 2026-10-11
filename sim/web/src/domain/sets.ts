@@ -17,23 +17,15 @@ export interface ProductFacts {
   readonly releasedOn: string | null
 }
 
-export interface DatedSet {
-  readonly id: string
-  readonly publicCode: string
-  /** The first release of the set in the region. */
-  readonly releasedOn: string
-}
-
 /**
- * The newest booster sets of a region, newest first. A set counts only through a product that
- * links to it and has a known day; a set without one is left out rather than dated by its code.
+ * Each set with its first release in the region. A set counts only through a product that links
+ * to it and has a known day; a set without one is left out rather than dated by its code.
  */
-export function recentSets(
-  sets: readonly SetFacts[],
+export function datedSets<T extends SetFacts>(
+  sets: readonly T[],
   products: readonly ProductFacts[],
   region: Region,
-  limit: number,
-): DatedSet[] {
+): (T & { readonly releasedOn: string })[] {
   const firstRelease = new Map<string, string>()
   for (const product of products) {
     if (product.region !== region || product.familyId === null || product.releasedOn === null)
@@ -42,14 +34,19 @@ export function recentSets(
     if (known === undefined || product.releasedOn < known)
       firstRelease.set(product.familyId, product.releasedOn)
   }
+  return sets.flatMap((set) => {
+    const releasedOn = firstRelease.get(set.id)
+    return releasedOn === undefined ? [] : [{ ...set, releasedOn }]
+  })
+}
+
+/** The newest booster sets, newest first. */
+export function recentSets<T extends SetFacts & { readonly releasedOn: string }>(
+  sets: readonly T[],
+  limit: number,
+): T[] {
   return sets
     .filter((set) => set.kind === "booster")
-    .flatMap((set) => {
-      const releasedOn = firstRelease.get(set.id)
-      return releasedOn === undefined
-        ? []
-        : [{ id: set.id, publicCode: set.publicCode, releasedOn }]
-    })
     .sort(
       (a, b) =>
         compareCodePoints(b.releasedOn, a.releasedOn) ||

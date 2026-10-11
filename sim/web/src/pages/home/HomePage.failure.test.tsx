@@ -1,14 +1,17 @@
 import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { afterAll, expect, it, vi } from "vitest"
+import { afterAll, beforeEach, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
 import { type JsonObject, objectValue } from "../../data"
 import { prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
+import { TestSearchWorker } from "../../test-utils/search-worker"
 
 const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array([1])) })
+
+beforeEach(() => vi.stubGlobal("Worker", TestSearchWorker))
 
 afterAll(() => {
   vi.unstubAllGlobals()

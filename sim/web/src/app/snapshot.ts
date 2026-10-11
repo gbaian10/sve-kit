@@ -35,7 +35,7 @@ import {
   viewImages,
 } from "../data"
 import { DEFAULT_QUERY } from "../domain/query/model"
-import type { Region } from "../domain/search"
+import type { Region, TextLang } from "../domain/search"
 import { usePrefs } from "../settings"
 
 performance.mark("sve-app-start")
@@ -346,6 +346,23 @@ export function useSetOptions() {
     limit: 60,
   })
   return { sets: view?.options.sets, classes: view?.options.classes, result, status }
+}
+/** Sets with their first known release in the edition, without building a list view. */
+export function useSetReleases(edition: Region) {
+  const { channel } = useWorkerChannel(edition)
+  useEffect(() => {
+    channel.releases(edition)
+  }, [channel, edition])
+  return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
+}
+/** One set's cards counted once each in the Worker; only the counts return. */
+export function useSetCounts(code: string | undefined, edition: Region, language: TextLang) {
+  const { channel } = useWorkerChannel()
+  useEffect(() => {
+    if (code !== undefined)
+      channel.count({ state: { ...DEFAULT_QUERY, sets: [code] }, edition }, language)
+  }, [channel, code, edition, language])
+  return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
 }
 
 /** The catalog of the loaded snapshot, or null while nothing is loaded yet. */

@@ -41,8 +41,8 @@ export function SetEntries({ sets }: { readonly sets: readonly SetEntry[] | null
                     {set.publicCode}
                   </span>
                   <span className="block min-w-0 flex-1 leading-tight">
-                    <span lang={set.name?.lang} className="block truncate text-14">
-                      {set.name?.text}
+                    <span lang={set.name.lang} className="block truncate text-14">
+                      {set.name.text}
                     </span>
                     <span className="block text-12 text-text-3 tabular-nums">
                       {t("home.sets.released", { date: set.releasedOn })}

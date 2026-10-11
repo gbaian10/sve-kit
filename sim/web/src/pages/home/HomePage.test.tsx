@@ -1,13 +1,16 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest"
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
 import { DEFAULT_PREFS, prefsStore, recentStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
+import { TestSearchWorker } from "../../test-utils/search-worker"
 
 const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array([1])) })
+
+beforeEach(() => vi.stubGlobal("Worker", TestSearchWorker))
 
 beforeAll(() => {
   vi.stubGlobal("fetch", (input: RequestInfo | URL) => {
@@ -173,8 +176,14 @@ describe("home search", () => {
     await user.click(main().getByRole("link", { name: "依卡包" }))
     expect(router.state.location.pathname).toBe("/sets")
     await goHome(router)
-    await user.click(screen.getByRole("button", { name: "隨機一張" }))
-    expect(router.state.location.pathname).toMatch(/^\/cards\/[^/]+$/u)
+    const random = screen.getByRole("button", { name: "隨機一張" })
+    await waitFor(() => {
+      expect(random).toBeEnabled()
+    })
+    await user.click(random)
+    await waitFor(() => {
+      expect(router.state.location.pathname).toMatch(/^\/cards\/[^/]+$/u)
+    })
     // A random card of the Japanese edition, opened on its Japanese printing.
     expect(recentStore.get()).toHaveLength(1)
     expect(recentStore.get()[0]).not.toMatch(/-en$/u)
@@ -188,7 +197,7 @@ describe("recently viewed", () => {
     recentStore.push("p:bp01-051")
     await open()
     const section = within(screen.getByRole("region", { name: "最近查看" }))
-    const links = section.getAllByRole("link")
+    const links = await section.findAllByRole("link")
     expect(links).toHaveLength(1)
     expect(links[0]).toHaveTextContent("BP01-051")
     expect(links[0]).toHaveAttribute("href", "/cards/BP01-051")
@@ -220,7 +229,7 @@ describe("recently viewed", () => {
     expect(router.state.location.pathname).toBe("/cards/BP01-051")
     await router.navigate(-1)
     const section = within(await screen.findByRole("region", { name: "最近查看" }))
-    expect(section.getByRole("link")).toHaveTextContent("BP01-051")
+    expect(await section.findByRole("link")).toHaveTextContent("BP01-051")
   })
 })
 
@@ -237,8 +246,10 @@ describe("sets, new pack and official news", () => {
     const banner = within(screen.getByRole("region", { name: "試作補充包第1彈" }))
     expect(banner.getByText(/新卡包/u)).toHaveTextContent("新卡包・2026-02-01 發售")
     expect(banner.getByRole("link", { name: "看卡表" })).toHaveAttribute("href", "/sets/BP01")
-    // The current search channel cannot filter by set yet, so no count is shown rather than a guess.
-    expect(banner.getByText("收錄數暫時無法計算")).toBeVisible()
+    // The fixture's booster holds 21 Japanese cards; 20 of them have a confident zh-Hant name.
+    expect(await banner.findByText(/已收錄/u)).toHaveTextContent("已收錄 21 種")
+    expect(banner.getByText(/繁中譯名/u)).toHaveTextContent("有繁中譯名 20")
+    expect(banner.queryByText(/待校對/u)).toBeNull()
     expect(main().queryByText(/%|／/u)).toBeNull()
     prefsStore.set({ cardEdition: "en" })
     expect(await sets.findByText("2026-04-01 發售")).toBeVisible()

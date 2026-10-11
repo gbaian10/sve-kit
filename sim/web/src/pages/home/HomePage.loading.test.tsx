@@ -1,14 +1,17 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { afterAll, expect, it, vi } from "vitest"
+import { afterAll, beforeEach, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
 import { type JsonObject, stringValue } from "../../data"
 import { prefsStore, recentStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
+import { TestSearchWorker } from "../../test-utils/search-worker"
 
 const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array([1])) })
+
+beforeEach(() => vi.stubGlobal("Worker", TestSearchWorker))
 
 afterAll(() => {
   vi.unstubAllGlobals()
@@ -58,8 +61,8 @@ it("keeps the typed text and stored recent ids during a download, then searches 
   const list = await screen.findByRole("listbox", { name: "建議" }, { timeout: 4000 })
   expect(within(list).getAllByRole("option")[0]).toHaveTextContent("BP01-051")
   expect(screen.getByRole("button", { name: /看全部/u })).toBeVisible()
-  expect(random).toBeEnabled()
   await waitFor(() => {
+    expect(random).toBeEnabled()
     expect(recent.getAllByRole("link")).toHaveLength(1)
   })
   expect(recentStore.get()).toEqual(["p:bp01-001", "p:unknown"])

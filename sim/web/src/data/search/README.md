@@ -1,10 +1,10 @@
 # Worker search and complete list views
 
 `SearchSession` owns one Worker generation. Each `createChannel()` has its own last input,
-query ID and result. Channels support `search`, `view`, `suggest`, and a batch of at most 20
-recent printing summaries. Replies carry generation, channel ID and query ID; old replies
-cannot replace current results. Suggestions preserve exact printing identity and name/alias
-ranking. Missing recent IDs explicitly return `not-in-edition`.
+query ID and result. Channels support `search`, `view`, `suggest`, a batch of at most 20
+recent printing summaries, set `releases` and `count`. Replies carry generation, channel ID
+and query ID; old replies cannot replace current results. Suggestions preserve exact printing
+identity and name/alias ranking. Missing recent IDs explicitly return `not-in-edition`.
 
 Search supports card/printing units, text, classes, printing home-set family codes and cost. Types, rarities,
 mechanics, alternate-art filtering, the art unit and other sorting return `unsupported-query`.
@@ -32,6 +32,10 @@ The Worker retains scalar index columns, a shared string pool, multilingual clas
 options and image targets (printing ID, face ID, permanent integer ID, ordinal and owner).
 Only bounded pages and purpose-specific summaries return to the main thread. Set options
 come from product families and use natural family-code ordering, then permanent ID.
+Set releases list each family with its first day-precision product date in the edition; a family
+without a linked, dated product is absent, never dated by its code. `count` returns only how many
+cards match (each card once, whatever unit) and how many have a name translation in one
+language, low confidence counted and reported separately.
 
 A complete view contains its full query, offset, limit, total, ordered summaries, options,
 and every printing face's verified publication/availability state, card version, variants
@@ -52,7 +56,7 @@ completed channel answers stay until the manifest, root or edition they came fro
 
 Cache identity includes root, manifest hash, reader build and local format. View slots also
 include the normalizer version, selected-region policy and complete query. Multilingual
-names avoid a separate language-specific record. Index format is 3; view format is 2;
+names avoid a separate language-specific record. Index format is 4; view format is 2;
 the public snapshot wire format is unchanged. Automatic raw/index/view/metadata caches
 share 64 MiB per root and 128 MiB per origin. Views have a 2 MiB raw-body subquota; an
 oversized view stays usable in memory. Successful raw plans and verified records retain
@@ -67,7 +71,8 @@ Config is independent of bootstrap progress; each verified bootstrap key contrib
 (the fixed real-data batch is 84). Bootstrap completion does not imply a complete view.
 
 React adapters in `app/snapshot.ts` expose `useSearchReadiness`, `useSearch`, `useSearchView`,
-`useListView`, `useWorkerSuggestions`, `useRecentSummaries` and `useSetOptions`.
+`useListView`, `useWorkerSuggestions`, `useRecentSummaries`, `useSetOptions`, `useSetReleases`
+and `useSetCounts`.
 `useListView` requests bounded 60-card pages and returns a complete image adapter once every
 requested page has arrived. Loading more only requests the new page, and the pages on screen
 stay until a complete set replaces them. Pending and unsupported results remain explicit.

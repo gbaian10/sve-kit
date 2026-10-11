@@ -1688,3 +1688,90 @@ it("memory and persistent view hits do not rewrite the completed view", async ()
     write.mockRestore()
   }
 })
+
+describe("set releases and counts", () => {
+  it("dates sets by their first linked release in the edition, also from a restored index", async () => {
+    const storage = memoryCache()
+    for (const edition of ["jp", "en", "jp"] as const) {
+      const h = harness(origin(), storage)
+      h.session.load(base, edition, "preview")
+      await h.settled()
+      h.channel.releases(edition)
+      await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+      const result = h.status().result
+      if (result.phase !== "complete") throw new Error("missing releases")
+      // The fixture dates every set but the promo one, and only the booster is a booster.
+      const releasedOn = edition === "jp" ? "2026-02-01" : "2026-04-01"
+      expect(result.releases?.find((set) => set.code === "bp01")).toMatchObject({
+        publicCode: "BP01",
+        kind: "booster",
+        releasedOn,
+      })
+      expect(result.releases?.some((set) => set.code === "pr")).toBe(false)
+      expect(result.releases?.every((set) => set.releasedOn === releasedOn)).toBe(true)
+    }
+  })
+
+  it("counts each card of a set once with its name translations, and returns no cards", async () => {
+    const served = origin()
+    const baseline = createSnapshotClient(base, { fetch: served.fetcher })
+    await baseline.load()
+    const snapshot = baseline.snapshot()
+    if (!snapshot) throw new Error("missing baseline")
+    const catalog = createCatalog(snapshot)
+    const family = catalog.index.families.find((row) => row["code"] === "bp01")?.["id"]
+    // A printing's set is the owner of the fragment that ships it.
+    const owners = new Map(
+      snapshot.bootstrap
+        .filter((fragment) => fragment.table === "printing")
+        .flatMap((fragment) =>
+          fragment.rows.map((row) => [row["id"], objectValue(fragment.value["owner"])["id"]]),
+        ),
+    )
+    const cards = catalog.entries.flatMap((entry) => {
+      const printing = entry.printings.find(
+        (item) => item.region === "jp" && owners.get(item.id) === family,
+      )
+      const summary = printing && catalog.summary(printing.id)
+      return summary ? [summary.name] : []
+    })
+    const expected = (language: "zh-Hant" | "en") => {
+      const translated = cards.filter((name) => name.translations[language])
+      return {
+        cards: cards.length,
+        translated: translated.length,
+        proofreading: translated.filter(
+          (name) => name.translationQuality?.[language]?.lowConfidence,
+        ).length,
+      }
+    }
+    // Synthetic names: every zh-Hant one is confident, English drafts without a counterpart are not.
+    expect(expected("zh-Hant")).toMatchObject({ proofreading: 0 })
+    expect(expected("zh-Hant").translated).toBeGreaterThan(0)
+    expect(expected("en").proofreading).toBeGreaterThan(0)
+
+    const h = harness(served)
+    h.session.load(base, "jp", "preview")
+    await h.settled()
+    const state = { ...DEFAULT_QUERY, sets: ["bp01"] }
+    for (const language of ["zh-Hant", "en"] as const) {
+      h.channel.count({ state, edition: "jp" }, language)
+      await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+      const result = h.status().result
+      if (result.phase !== "complete") throw new Error("missing counts")
+      expect(result.counts).toEqual(expected(language))
+      expect(result.page).toEqual({ total: cards.length, offset: 0, items: [] })
+    }
+    // Printings of one card in the set still count it once.
+    h.channel.search({ state: { ...state, unit: "printing" }, edition: "jp", limit: 1 })
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const listed = h.status().result
+    if (listed.phase !== "complete") throw new Error("missing printings")
+    expect(listed.page.total).toBeGreaterThan(cards.length)
+    h.channel.count({ state: { ...state, unit: "printing" }, edition: "jp" }, "zh-Hant")
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const printings = h.status().result
+    if (printings.phase !== "complete") throw new Error("missing counts")
+    expect(printings.counts?.cards).toBe(cards.length)
+  })
+})

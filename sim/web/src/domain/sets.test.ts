@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { packCounts, type ProductFacts, recentSets, type SetFacts } from "./sets"
+import { datedSets, packCounts, type ProductFacts, recentSets, type SetFacts } from "./sets"
 
 const set = (id: string, kind = "booster"): SetFacts => ({ id, publicCode: id.toUpperCase(), kind })
 const product = (
@@ -9,7 +9,7 @@ const product = (
   releasedOn: string | null,
 ): ProductFacts => ({ familyId, region, releasedOn })
 
-describe("recentSets", () => {
+describe("datedSets and recentSets", () => {
   it("orders booster sets by their first known release in the region, newest first", () => {
     const sets = [set("s1"), set("s2"), set("s3"), set("s4"), set("deck", "deck")]
     const products = [
@@ -20,10 +20,16 @@ describe("recentSets", () => {
       product("s4", "jp", "2026-02-01"),
       product("deck", "jp", "2026-12-01"),
     ]
-    expect(recentSets(sets, products, "jp", 3)).toEqual([
-      { id: "s3", publicCode: "S3", releasedOn: "2026-05-01" },
-      { id: "s2", publicCode: "S2", releasedOn: "2026-03-01" },
-      { id: "s4", publicCode: "S4", releasedOn: "2026-02-01" },
+    expect(datedSets(sets, products, "jp")).toContainEqual({
+      id: "s1",
+      publicCode: "S1",
+      kind: "booster",
+      releasedOn: "2026-01-10",
+    })
+    expect(recentSets(datedSets(sets, products, "jp"), 3).map((item) => item.id)).toEqual([
+      "s3",
+      "s2",
+      "s4",
     ])
   })
 
@@ -35,10 +41,10 @@ describe("recentSets", () => {
       product("s2", "jp", null),
       product("s3", "jp", "2026-02-01"),
     ]
-    expect(recentSets(sets, products, "jp", 3)).toEqual([
-      { id: "s3", publicCode: "S3", releasedOn: "2026-02-01" },
+    expect(datedSets(sets, products, "jp")).toEqual([
+      { id: "s3", publicCode: "S3", kind: "booster", releasedOn: "2026-02-01" },
     ])
-    expect(recentSets(sets, [product(null, "jp", "2026-08-01")], "jp", 3)).toEqual([])
+    expect(datedSets(sets, [product(null, "jp", "2026-08-01")], "jp")).toEqual([])
   })
 })
 

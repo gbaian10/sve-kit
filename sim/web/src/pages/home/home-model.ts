@@ -1,5 +1,7 @@
-import type { CardSummary } from "../../data"
-import type { DisplayedText } from "../../domain/nameDisplay"
+import { type CardSummary, type CompleteView, type ImageIndex, viewImages } from "../../data"
+import type { DisplayedText, NameSource } from "../../domain/nameDisplay"
+import { DEFAULT_QUERY } from "../../domain/query/model"
+import type { Region, TextLang } from "../../domain/search"
 
 export const RECENT_SET_LIMIT = 3
 
@@ -7,7 +9,7 @@ export interface SetEntry {
   /** `product_family.code`, the `set=` value. */
   readonly code: string
   readonly publicCode: string
-  readonly name: DisplayedText | undefined
+  readonly name: DisplayedText
   readonly releasedOn: string
 }
 
@@ -17,6 +19,22 @@ export function cardPath(summary: CardSummary): string {
 
 export function setPath(publicCode: string): string {
   return `/sets/${encodeURIComponent(publicCode)}`
+}
+
+/** A set name in the interface's text language, else the original. */
+export function setLabel(name: NameSource, lang: TextLang): DisplayedText {
+  const translated = name.translations[lang]
+  return translated ? { text: translated, lang } : name.original
+}
+
+/** Thumbnails of the faces a suggestion or recent answer brought along. */
+export function faceImages(faces: CompleteView["faces"], edition: Region): ImageIndex {
+  return viewImages({
+    query: { state: DEFAULT_QUERY, edition },
+    page: { items: [], total: 0, offset: 0 },
+    options: { classes: [], sets: [] },
+    faces,
+  })
 }
 
 /** What the home page keeps on its own history entry, so back restores the typed text. */

@@ -36,8 +36,8 @@ export function NewPackBanner({ pack, counts, countTranslations, locale }: NewPa
               {t("home.sets.released", { date: pack.releasedOn })}
             </span>
           </p>
-          <h2 id={headingId} lang={pack.name?.lang} className="text-16 font-bold">
-            {pack.name?.text ?? pack.publicCode}
+          <h2 id={headingId} lang={pack.name.lang} className="text-16 font-bold">
+            {pack.name.text}
           </h2>
         </div>
         <RouterLink
