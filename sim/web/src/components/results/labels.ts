@@ -1,9 +1,11 @@
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
+import { textLanguage } from "../card/text-language"
+
 export function useResultLabels() {
   const { t, i18n } = useTranslation()
-  const language = i18n.resolvedLanguage === "zh-TW" ? "zh-Hant" : (i18n.resolvedLanguage ?? "ja")
+  const language = textLanguage(i18n.resolvedLanguage)
   return useMemo(
     () => ({
       t,
