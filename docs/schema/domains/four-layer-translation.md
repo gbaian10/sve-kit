@@ -397,7 +397,7 @@ renderer 使用 `four-layer-renderer-v3`；正式來源 workflow、authored 與 
 `zone.source_union.v1` 限來源 G10 的 `[battlefield,ex]` 聯集，依 canonical 順序逐成員輸出；
 每個成員 case 的非 Literal 部分必須依序恰為 `Label(owner)`、`ZoneMember(zone)`。
 ZoneMember 的 arg 只可指該簽章的 ZoneSet；它輸出目前成員的 typed 概念選詞，成員由 renderer 決定，target 不提供索引或常數。
-separator case 僅有 Literal；locative_or 在 battlefield 後接「上」、成員間「或」；or 只接「或」；and 只接「與」。
+separator case 僅有 Literal；renderer 只驗結構，zh-Hant 定義中 locative_or 在 battlefield 後接「上」、成員間「或」，or 只接「或」，and 只接「與」。
 三者皆保留同一聯集及共同 owner，不能藉中文「與」推導兩區各選一次或日文 `と` 的獨立並列。
 G10 仍只接受既有封閉 `か`／`や` 構造，`と`／`または`／`および` 不因新 Form 而被納入。
 B 依原來源 operand 比對 owner 與 zone 的完整 raw spans，拒絕跨 operand、不同 owner 或非 G10 引用；

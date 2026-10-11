@@ -68,5 +68,6 @@ low_confidence. Disabled dependencies can leave an unmatched source or fallback.
 Renderer v3 uses finite forms with exact roles and checks necessary references by
 slot and concept member. A classifier argument used only to choose grammar is not
 a displayed concept. Unused pure omitted owners do not require a label; displaying
-them uses their own slot and ordinary quality/range dependencies. Its presentation version is independent of the production normalizer; rendering a
-frame grants no DSL qualification.
+them uses their own slot and ordinary quality/range dependencies. Its presentation
+version is independent of the production normalizer; rendering a frame grants no
+DSL qualification.
