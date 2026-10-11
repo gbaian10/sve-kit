@@ -129,12 +129,21 @@ describe("createSnapshotClient", () => {
     expect(client.status()).toEqual({ state: "idle" })
     await client.load()
     expect(client.status()).toEqual({ state: "ready", dataVersion: "20260929T000000Z-0001" })
-    expect(seen.map((s) => (s.state === "loading" ? s.phase : s.state))).toEqual([
+    const phases = seen.map((s) => (s.state === "loading" ? s.phase : s.state))
+    expect(phases.filter((phase, i) => phase !== phases[i - 1])).toEqual([
       "index",
       "manifest",
       "bootstrap",
       "ready",
     ])
+    // The bootstrap phase counts arrived startup files from 0 up to all of them, one at a time.
+    const counts = seen.flatMap((s) =>
+      s.state === "loading" && s.phase === "bootstrap" ? [[s.done, s.total]] : [],
+    )
+    const total = counts[0]?.[1] ?? 0
+    expect(total).toBeGreaterThan(1)
+    expect(counts.map(([done]) => done)).toEqual(Array.from({ length: total + 1 }, (_, i) => i))
+    expect(counts.every(([, all]) => all === total)).toBe(true)
     const snapshot = client.snapshot()
     expect(snapshot?.bootstrap.some((fragment) => fragment.table === "card")).toBe(true)
     expect(snapshot?.config["search"]).toEqual({

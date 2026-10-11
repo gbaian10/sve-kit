@@ -76,7 +76,9 @@ const zhTW = {
     loadFailed: "載入失敗",
     loadFailedHint: "請檢查連線後重試。",
     retry: "重試",
-    loading: "載入中",
+    preparing: "確認最新版本中",
+    downloading: "下載卡片資料中",
+    downloadProgress: "卡片資料下載進度",
   },
   metadata: {
     idle: "尚未下載卡圖資訊（{{done}}/{{total}}）",
