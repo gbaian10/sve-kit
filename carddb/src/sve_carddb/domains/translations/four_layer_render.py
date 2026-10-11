@@ -435,11 +435,11 @@ class Renderer:
                         item.selected.low_confidence or item.source_low_confidence,
                     )
                 )
-                required = self.required_references(item, lang)
                 output.actual.clear()
                 for index, node in enumerate(item.selected.target.nodes):
                     output.node(item, node, (index,))
-                if required - output.actual:
+                # Closing after the nodes keeps the first fallback reason in target order.
+                if self.required_references(item, lang) - output.actual:
                     raise ValueError("Target is missing necessary concept references")
         except MissingValueError as error:
             return Result(None, (str(error),))
