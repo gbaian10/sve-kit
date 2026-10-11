@@ -14,7 +14,7 @@ run on the Bun runtime (see Known issues).
 cd sim/web
 bun install
 bun run dev                     # http://localhost:5173, synthetic fixture under /cdn
-bun run dev -- --host 0.0.0.0   # also reachable from phones on the LAN
+bun run dev:lan                 # HTTPS on the LAN (self-signed); plain HTTP by IP has no WebCrypto or cache
 ```
 
 ### Real data (3.0.0 preview export)
@@ -26,7 +26,7 @@ formal version index. The dev server serves it under `/cdn-preview` and the dev 
 「預覽資料」 with the data version.
 
 ```bash
-SVE_EXPORT_DIR= SVE_PREVIEW_DIR=/path/to/preview-root bun run dev -- --host 0.0.0.0
+SVE_EXPORT_DIR= SVE_PREVIEW_DIR=/path/to/preview-root bun run dev:lan
 ```
 
 In dev the app starts on the preview root on its own when a preview is configured **and** `/cdn`

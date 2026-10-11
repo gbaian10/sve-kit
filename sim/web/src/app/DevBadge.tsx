@@ -8,7 +8,7 @@ import {
   useSnapshotStatus,
 } from "../data"
 import { formatDataVersion } from "../domain/dataVersion"
-import { clearLocalData } from "../settings"
+import { requestColdStart } from "../settings"
 
 // The badge is 28px tall, so it has its own compact button instead of the 44px design buttons.
 const BUTTON =
@@ -65,9 +65,8 @@ export function DevBadge({ client }: { readonly client: SnapshotClient }) {
         type="button"
         className={BUTTON}
         onClick={() => {
-          void clearLocalData().then(() => {
-            location.reload()
-          })
+          requestColdStart()
+          location.reload()
         }}
       >
         {t("dev.clearLocal")}
