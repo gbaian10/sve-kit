@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest"
 
 import { buildSnapshot } from "../../scripts/fixture/build"
+import { memoryCache } from "../test-utils/cache"
 import { type Fetcher } from "./cdn"
 import { createSnapshotClient, type SnapshotStatus } from "./client"
 import { type JsonObject, parseStrict, stringValue } from "./format-v3/json"
@@ -330,5 +331,102 @@ describe("createSnapshotClient: reload and transport edge cases", () => {
     await Promise.all([first, other, again])
     const bp01Path = stringValue(client.snapshot()?.files.get(printingKey)?.["path"])
     expect(served.requests.filter((path) => path === bp01Path)).toHaveLength(1)
+  })
+})
+
+describe("createSnapshotClient: verified snapshot records", () => {
+  const base = "https://cdn.test"
+  const INDEX = "snapshots/versions/index.json"
+  const namespace = (storage: CacheStorage) =>
+    storage.open(`sve-snapshot:${encodeURIComponent(base)}`)
+  const records = async (storage: CacheStorage) =>
+    (await (await namespace(storage)).keys()).filter((request) => !request.url.includes("/plans/"))
+  // The record is written after the page had a chance to render, in short slices.
+  const persisted = (storage: CacheStorage) =>
+    expect.poll(async () => (await records(storage)).length, { timeout: 10_000 }).toBe(1)
+  const phases = (client: ReturnType<typeof createSnapshotClient>) => {
+    const seen: string[] = []
+    client.subscribe(() => {
+      const status = client.status()
+      seen.push(status.state === "loading" ? status.phase : status.state)
+    })
+    return seen
+  }
+
+  it("restores the same manifest without fetching or decoding the manifest and startup files", async () => {
+    const storage = memoryCache()
+    const original = createSnapshotClient(base, {
+      fetch: serve(base).fetcher,
+      cacheStorage: storage,
+    })
+    await original.load()
+    await persisted(storage)
+    const served = serve(base)
+    const client = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
+    const seen = phases(client)
+    await client.load()
+    expect(served.requests).toEqual([INDEX])
+    expect(seen).toEqual(["index", "ready"])
+    expect(client.status()).toEqual(original.status())
+    expect(client.snapshot()).toStrictEqual(original.snapshot())
+    expect(await client.fragments(textKey)).toStrictEqual(await original.fragments(textKey))
+  })
+
+  it("a damaged record falls back to the full verified download", async () => {
+    const storage = memoryCache()
+    const original = createSnapshotClient(base, {
+      fetch: serve(base).fetcher,
+      cacheStorage: storage,
+    })
+    await original.load()
+    await persisted(storage)
+    const cache = await namespace(storage)
+    const [record] = await records(storage)
+    const response = record && (await cache.match(record))
+    if (!record || !response) throw new Error("missing record")
+    const bytes = new Uint8Array(await response.arrayBuffer())
+    const middle = bytes.length >> 1
+    bytes[middle] = (bytes[middle] ?? 0) ^ 0x01
+    await cache.put(record, new Response(bytes, { headers: response.headers }))
+    const served = serve(base)
+    const client = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
+    await client.load()
+    expect(served.requests.length).toBeGreaterThan(2)
+    expect(client.snapshot()).toStrictEqual(original.snapshot())
+  })
+
+  it("still rejects an index entry that differs from the stored manifest", async () => {
+    const storage = memoryCache()
+    const original = createSnapshotClient(base, {
+      fetch: serve(base).fetcher,
+      cacheStorage: storage,
+    })
+    await original.load()
+    await persisted(storage)
+    const served = serve(base)
+    const index = parseStrict(served.files.get(INDEX) ?? new Uint8Array()) as JsonObject
+    const current = { ...(index["current"] as JsonObject), published_at: "2026-09-30T00:00:00Z" }
+    served.files.set(INDEX, new TextEncoder().encode(JSON.stringify({ ...index, current })))
+    const client = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
+    await client.load()
+    expect(client.status()).toMatchObject({ state: "error", kind: "corrupt" })
+    expect(served.requests).toEqual([INDEX])
+  })
+
+  it("stores nothing for a download that fails verification", async () => {
+    const storage = memoryCache()
+    const files = new Map(built.files)
+    const bootstrap = (built.manifest["files"] as JsonObject[]).find(
+      (file) => file["role"] === "bootstrap",
+    )
+    files.set(stringValue(bootstrap?.["path"]), new Uint8Array([1, 2, 3]))
+    const client = createSnapshotClient(base, {
+      fetch: serve(base, files).fetcher,
+      cacheStorage: storage,
+    })
+    await client.load()
+    expect(client.status()).toMatchObject({ state: "error" })
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(await records(storage)).toEqual([])
   })
 })

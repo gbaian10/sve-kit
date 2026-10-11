@@ -6,6 +6,7 @@ import {
   canonicalText,
   integerValue,
   type JsonObject,
+  type JsonValue,
   objectValue,
   parseStrict,
   stringValue,
@@ -18,6 +19,7 @@ import { validateIndex2 } from "./index-entry"
 import { transferDigest } from "./integrity"
 import { MetadataBytes, type MetadataProgress } from "./metadata"
 import { requestQueue } from "./request-queue"
+import { VerifiedCache } from "./verified-cache"
 
 type LoadPhase = "index" | "manifest" | "bootstrap"
 type ErrorKind = "network" | "incompatible" | "corrupt"
@@ -81,6 +83,17 @@ const INDEX_PATH = "snapshots/versions/index.json"
 const INDEX_FORMAT = 2
 // Preview roots have no permanent index (format §4.2); until #4 Q12 settles, dev reads this pointer.
 const PREVIEW_POINTER = "snapshots/preview/current.json"
+// Bump whenever the stored snapshot record changes shape.
+const SNAPSHOT_RECORD_FORMAT = 1
+// An index entry must agree with its verified manifest on these fields (format §4.1).
+const ENTRY_FIELDS = [
+  "data_version",
+  "published_at",
+  "format_version",
+  "min_reader_version",
+  "required_capabilities",
+  "engine_support_target",
+] as const
 
 class NoCompatibleVersion extends Error {}
 
@@ -155,6 +168,12 @@ export function createSnapshotClient(
   const fetcher = requests.foreground
   const entry = options.entry ?? "index"
   const decode = createDecoder()
+  const stored = new VerifiedCache(
+    base,
+    "snapshot",
+    SNAPSHOT_RECORD_FORMAT,
+    options.cacheStorage ?? globalThis.caches,
+  )
   const cacheSize = options.detailCacheSize ?? 64
   let metadata: MetadataBytes | undefined
   let detailBytes = 0
@@ -247,6 +266,73 @@ export function createSnapshotClient(
     throw new NoCompatibleVersion("no current or previous snapshot is compatible; update the site")
   }
 
+  const checkEntry = (chosen: JsonObject, manifest: JsonObject): void => {
+    if (entry === "preview") return
+    for (const field of ENTRY_FIELDS)
+      if (canonicalText(chosen[field] ?? null) !== canonicalText(manifest[field] ?? null))
+        throw new SnapshotError("blob-integrity", "index entry differs from verified manifest")
+  }
+
+  // A record holds what one full download verified, so it replaces the manifest, every startup
+  // file and all of their checks; anything unreadable falls back to that download.
+  const restore = async (manifestHash: string): Promise<LoadedSnapshot | undefined> => {
+    const bytes = await stored.read("snapshot", manifestHash)
+    if (!bytes) return undefined
+    try {
+      const record = objectValue(JSON.parse(new TextDecoder().decode(bytes)) as JsonValue)
+      const manifest = objectValue(record["manifest"])
+      return {
+        dataVersion: stringValue(manifest["data_version"]),
+        manifestHash,
+        manifest,
+        // Same map verifyManifest builds: sorted unique keys over the manifest's own file objects.
+        files: new Map(
+          arrayValue(manifest["files"]).map((item) => {
+            const file = objectValue(item)
+            return [stringValue(file["key"]), file] as const
+          }),
+        ),
+        config: objectValue(record["config"]),
+        // Written from decoded fragments by `persist` below and digest-checked on read.
+        bootstrap: arrayValue(record["bootstrap"]) as unknown as Fragment[],
+      }
+    } catch {
+      return undefined
+    }
+  }
+
+  // Tens of megabytes of JSON would block input for a few hundred milliseconds in one task, so the
+  // record is serialized in short slices once the page has rendered the new snapshot.
+  const persist = async (snapshot: LoadedSnapshot): Promise<void> => {
+    await new Promise((resolve) => {
+      if (typeof requestIdleCallback === "function") requestIdleCallback(resolve, { timeout: 5000 })
+      else setTimeout(resolve, 0)
+    })
+    const encoder = new TextEncoder()
+    const { manifest, config, bootstrap } = snapshot
+    const parts = [
+      encoder.encode(
+        `{"manifest":${JSON.stringify(manifest)},"config":${JSON.stringify(config)},"bootstrap":[`,
+      ),
+    ]
+    let slice = performance.now()
+    for (const [index, fragment] of bootstrap.entries()) {
+      parts.push(encoder.encode(`${index ? "," : ""}${JSON.stringify(fragment)}`))
+      if (performance.now() - slice > 8) {
+        await new Promise((resolve) => setTimeout(resolve, 0))
+        slice = performance.now()
+      }
+    }
+    parts.push(encoder.encode("]}"))
+    const payload = new Uint8Array(parts.reduce((size, part) => size + part.length, 0))
+    let offset = 0
+    for (const part of parts) {
+      payload.set(part, offset)
+      offset += part.length
+    }
+    await stored.write("snapshot", snapshot.manifestHash, payload)
+  }
+
   const download = async (previous: LoadedSnapshot | null): Promise<LoadedSnapshot> => {
     const progress = (phase: LoadPhase) => {
       set(
@@ -269,6 +355,11 @@ export function createSnapshotClient(
       (previous.entrySource ?? "current") === source
     )
       return previous
+    const restored = await restore(stringValue(chosen["manifest_sha256"]))
+    if (restored) {
+      checkEntry(chosen, restored.manifest)
+      return { ...restored, entrySource: source }
+    }
     progress("manifest")
     const manifestBytes = await fetchVerified(
       stringValue(chosen["manifest_path"]),
@@ -277,18 +368,7 @@ export function createSnapshotClient(
     const decodedManifest = await decode({ kind: "manifest", bytes: manifestBytes })
     if (decodedManifest.kind !== "manifest") throw new SnapshotError("shape", "expected manifest")
     const { manifest, files } = decodedManifest
-    if (entry !== "preview") {
-      for (const field of [
-        "data_version",
-        "published_at",
-        "format_version",
-        "min_reader_version",
-        "required_capabilities",
-        "engine_support_target",
-      ])
-        if (canonicalText(chosen[field] ?? null) !== canonicalText(manifest[field] ?? null))
-          throw new SnapshotError("blob-integrity", "index entry differs from verified manifest")
-    }
+    checkEntry(chosen, manifest)
     const version = stringValue(manifest["format_version"])
     progress("bootstrap")
     const configKey = stringValue(objectValue(manifest["config_ref"])["key"])
@@ -329,7 +409,7 @@ export function createSnapshotClient(
         segment = performance.now()
       }
     }
-    return {
+    const snapshot: LoadedSnapshot = {
       entrySource: source,
       dataVersion: stringValue(manifest["data_version"]),
       manifestHash: stringValue(chosen["manifest_sha256"]),
@@ -338,6 +418,9 @@ export function createSnapshotClient(
       config,
       bootstrap,
     }
+    // Every startup file and check above passed, so the result can stand in for them next time.
+    void persist(snapshot).catch(() => undefined)
+    return snapshot
   }
 
   // The active snapshot only changes once a candidate is fully downloaded and verified; a failed

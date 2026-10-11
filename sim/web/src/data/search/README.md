@@ -34,3 +34,22 @@ plan 記錄存在相同 cache，因此 Worker 重啟後仍可淘汰。快取無�
 Worker 發出 error／messageerror 時會清掉不可用世代，下次 load 或 retry 建立新 Worker，從 cache 重建。
 瀏覽器因 OOM 殺掉 Worker 時**不保證觸發 onerror**，可能持續停在 downloading／pending；
 目前沒有 watchdog，手機驗收需觀察此限制。整個 Worker 終止後不能立即保留舊索引的可查詢性。
+
+## 沿用已驗證的結果
+
+完整世代驗證通過、發布 ready 之後，Worker 把索引（Uint32 欄位、字串池與當頁摘要欄）編碼成一份
+image，以 `src/data/verified-cache.ts` 存進 CacheStorage。下次載入時仍重新抓取並驗證 pointer 或版本
+索引；只要 manifest hash 對得上存好的 image，就直接讀回索引，不再抓 manifest、不讀任何 blob，也不重做
+解碼、雜湊、canonical 與 schema 檢查。版本索引的入口欄位仍與存下的 manifest 欄位比對，不一致照樣報錯。
+snapshot client 的啟動包（manifest、config、bootstrap 片段）用同一個模組存成 JSON 紀錄，行為相同；
+紀錄在畫面顯示後才分段序列化寫入。
+
+- 鍵：root（各自的 cache namespace）、種類、格式版本常數（`INDEX_IMAGE_FORMAT`、
+  `SNAPSHOT_RECORD_FORMAT`，改編碼必須遞增）、建置識別、slot（搜尋為地區）與 manifest hash，任一不同即不沿用。
+- 建置識別：`vite.config.ts` 的 `sve-build-id` plugin 把 `src/`（測試除外）、carddb 契約 schema、
+  編譯後的驗證器與 `bun.lock` 的內容雜湊注入 `src/data/build-id.ts`。開發模式在這些檔案變動時重算並
+  讓該模組失效，重新整理後舊紀錄就不再命中；production 在建置時固定，來源沒變的部署會沿用使用者已存的紀錄。
+- 淘汰：每個 slot 保留目前與上一份，同一份重複寫入不擠掉上一份；其他 slot 與其他 root 不受影響。
+- 完整性：紀錄附 SHA-256，讀回不符即刪除並當作未命中。讀回失敗、格式不符、quota 不足或儲存不可用
+  都安靜退回完整下載與驗證；驗證失敗的載入不寫入任何紀錄。
+- Chromium 的 `crypto.subtle.digest` 在呼叫端同步計算，大紀錄的雜湊會佔用該執行緒。

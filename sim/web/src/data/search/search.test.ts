@@ -25,7 +25,7 @@ import { BootstrapColumns } from "./bootstrap"
 import { Columns, StringPool } from "./columns"
 import { SearchEngine } from "./engine"
 import { SearchIndex } from "./index"
-import type { SearchEvent, SearchRequest } from "./messages"
+import type { BootstrapPlan, SearchEvent, SearchRequest } from "./messages"
 import type { SearchTransportFactory } from "./session"
 
 const built = await buildSnapshot({
@@ -69,7 +69,7 @@ function origin() {
     },
   }
 }
-function harness(served = origin(), cacheStorage = memoryCache()) {
+function harness(served = origin(), cacheStorage = memoryCache(), buildId = "build") {
   const events: SearchEvent[] = []
   const requests: SearchRequest[] = []
   let pending = Promise.resolve()
@@ -81,7 +81,7 @@ function harness(served = origin(), cacheStorage = memoryCache()) {
         events.push(event)
         receive(event)
       },
-      { fetch: served.fetcher, cacheStorage },
+      { fetch: served.fetcher, cacheStorage, buildId },
     )
     return {
       send(request) {
@@ -368,6 +368,7 @@ it("rejects late responses by both queryId and generation", () => {
     dataVersion: "test",
     manifestHash: "hash",
     metrics: {
+      restored: false,
       files: 1,
       maxRawBytes: 1,
       parseMs: 0,
@@ -914,4 +915,150 @@ it("cache cleanup still reclaims stale plans when a blob write hits quota", asyn
   const cache = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
   expect(await cache.match(`${base}/${descriptors[0]?.file.path ?? ""}`)).toBeUndefined()
   expect(await cache.match(`${base}/${descriptors[1]?.file.path ?? ""}`)).toBeDefined()
+})
+
+it("a stored index image answers every query like the index it was encoded from", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const catalog = createCatalog(snapshot)
+  const states = [
+    DEFAULT_QUERY,
+    ...["bp", "bp01-001", "51", "試作", "does not exist"].map((text) => ({
+      ...DEFAULT_QUERY,
+      text,
+    })),
+    ...catalog.entries
+      .flatMap((entry) => entry.names)
+      .map((name) => ({ ...DEFAULT_QUERY, text: name.text.slice(0, 2) })),
+    { ...DEFAULT_QUERY, classes: ["forestcraft"] },
+    { ...DEFAULT_QUERY, sets: ["bp01"] },
+    { ...DEFAULT_QUERY, cost: { min: 2, max: 3 } },
+  ]
+  for (const edition of ["jp", "en"] as const) {
+    const columns = new BootstrapColumns()
+    columns.ingest(snapshot.bootstrap)
+    columns.seal()
+    const built = new SearchIndex(columns, edition)
+    const encoded = built.encode()
+    const restored = new SearchIndex(encoded, edition)
+    expect(restored.allocation()).toEqual(built.allocation())
+    // An image read back at an unaligned offset is copied rather than misread.
+    const shifted = new Uint8Array(encoded.length + 1)
+    shifted.set(encoded, 1)
+    const unaligned = new SearchIndex(shifted.subarray(1), edition)
+    for (const state of states)
+      for (const page of [{}, { offset: 1, limit: 2 }]) {
+        const request = { ...query, ...page, edition, state }
+        expect(restored.search(request)).toEqual(built.search(request))
+        expect(unaligned.search(request)).toEqual(built.search(request))
+      }
+    expect(() => new SearchIndex(encoded, edition === "jp" ? "en" : "jp")).toThrow("edition")
+  }
+})
+
+describe("persistent index images", () => {
+  const readyMetrics = (events: SearchEvent[]) =>
+    events.flatMap((event) => (event.kind === "ready" ? [event.metrics] : []))
+
+  it("a reload of the same manifest restores the index without the manifest or any blob", async () => {
+    const storage = memoryCache()
+    const first = harness(origin(), storage)
+    first.session.load(base, "jp", "preview")
+    await first.settled()
+    first.channel.search(query)
+    await first.queried()
+    const second = harness(origin(), storage)
+    second.session.load(base, "jp", "preview")
+    second.channel.search(query)
+    await second.settled()
+    expect(second.served.requests).toEqual(["snapshots/preview/current.json"])
+    const files = readyMetrics(first.events)[0]?.files
+    expect(readyMetrics(second.events)).toMatchObject([{ restored: true, files }])
+    expect(second.status()).toMatchObject({
+      phase: "ready",
+      dataVersion: first.status().dataVersion,
+      manifestHash: first.status().manifestHash,
+      result: { phase: "complete" },
+    })
+    const before = first.status().result
+    const after = second.status().result
+    if (before.phase !== "complete" || after.phase !== "complete") throw new Error("missing result")
+    expect(after.page).toEqual(before.page)
+  })
+
+  it("rebuilds when the manifest, edition or build differs from the stored image", async () => {
+    const storage = memoryCache()
+    const served = origin()
+    const stored = harness(served, storage)
+    stored.session.load(base, "jp", "preview")
+    await stored.settled()
+    const rebuilt = async (h: ReturnType<typeof harness>, edition: "jp" | "en") => {
+      h.session.load(base, edition, "preview")
+      await h.settled()
+      return readyMetrics(h.events).map((metrics) => metrics.restored)
+    }
+    expect(await rebuilt(harness(served, storage, "other build"), "jp")).toEqual([false])
+    expect(await rebuilt(harness(served, storage), "en")).toEqual([false])
+    served.update(2)
+    expect(await rebuilt(harness(served, storage), "jp")).toEqual([false])
+    // The rebuilt image for the new manifest is reused, and the original one is still kept.
+    expect(await rebuilt(harness(served, storage), "jp")).toEqual([true])
+  })
+
+  it("a damaged image falls back to a full verified build with the same results", async () => {
+    const storage = memoryCache()
+    const first = harness(origin(), storage)
+    first.session.load(base, "jp", "preview")
+    await first.settled()
+    first.channel.search(query)
+    await first.queried()
+    const namespace = await storage.open(`sve-search-index:${encodeURIComponent(base)}`)
+    for (const request of await namespace.keys()) {
+      if (request.url.includes("/plans/")) continue
+      const response = await namespace.match(request)
+      if (!response) throw new Error("missing image")
+      const bytes = new Uint8Array(await response.arrayBuffer())
+      const middle = bytes.length >> 1
+      bytes[middle] = (bytes[middle] ?? 0) ^ 0xff
+      await namespace.put(request, new Response(bytes, { headers: response.headers }))
+    }
+    const second = harness(origin(), storage)
+    second.session.load(base, "jp", "preview")
+    second.channel.search(query)
+    await second.settled()
+    expect(readyMetrics(second.events)).toMatchObject([{ restored: false }])
+    const before = first.status().result
+    const after = second.status().result
+    if (before.phase !== "complete" || after.phase !== "complete") throw new Error("missing result")
+    expect(after.page).toEqual(before.page)
+  })
+
+  it("a custom bootstrap plan never reads or shares stored images", async () => {
+    const storage = memoryCache()
+    const served = origin()
+    const events: SearchEvent[] = []
+    const plan: BootstrapPlan = (_manifest, files) =>
+      [...files].filter(([, file]) => file["role"] === "bootstrap").map(([key]) => key)
+    for (const generation of [1, 2])
+      await new SearchEngine((event) => events.push(event), {
+        fetch: served.fetcher,
+        cacheStorage: storage,
+        plan,
+        buildId: "build",
+      }).handle({ kind: "load", generation, base, edition: "jp", entry: "preview" })
+    expect(readyMetrics(events).map((metrics) => metrics.restored)).toEqual([false, false])
+  })
+
+  it("a load that fails verification stores nothing", async () => {
+    const storage = memoryCache()
+    const h = harness(origin(), storage)
+    h.served.files.set(heldPath, new Uint8Array([1, 2, 3]))
+    h.session.load(base, "jp", "preview")
+    await h.settled()
+    expect(h.status().phase).toBe("error")
+    const namespace = await storage.open(`sve-search-index:${encodeURIComponent(base)}`)
+    expect(await namespace.keys()).toEqual([])
+  })
 })

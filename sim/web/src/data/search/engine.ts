@@ -1,9 +1,11 @@
+import type { Region } from "../../domain/search"
 import { fetchBytes, type Fetcher } from "../cdn"
 import { decodeMessage } from "../format-v3/decode-message"
 import { SnapshotError } from "../format-v3/errors"
 import {
   arrayValue,
   canonicalText,
+  integerValue,
   type JsonObject,
   objectValue,
   parseStrict,
@@ -14,13 +16,39 @@ import { validatePlacement } from "../format-v3/placement"
 import { isCompatible } from "../format-v3/reader"
 import { validateIndex2 } from "../index-entry"
 import { transferDigest } from "../integrity"
+import { VerifiedCache } from "../verified-cache"
 import { SearchBlobs } from "./blobs"
 import { BootstrapColumns } from "./bootstrap"
-import { SearchIndex, SearchQueryError } from "./index"
+import { pack, unpack } from "./image"
+import { INDEX_IMAGE_FORMAT, SearchIndex, SearchQueryError } from "./index"
 import type { BootstrapPlan, LoadRequest, SearchEvent, SearchRequest } from "./messages"
 
 const defaultPlan: BootstrapPlan = (_manifest, files) =>
   [...files].filter(([, file]) => file["role"] === "bootstrap").map(([key]) => key)
+// An index entry must agree with its manifest on these fields (format §4.1).
+const ENTRY_FIELDS = [
+  "data_version",
+  "published_at",
+  "format_version",
+  "min_reader_version",
+  "required_capabilities",
+  "engine_support_target",
+] as const
+
+/** A stored index with what the ready event and the index entry check need from its manifest. */
+function readRecord(bytes: Uint8Array, edition: Region) {
+  const { header, arrays } = unpack(bytes)
+  const record = objectValue(header)
+  const [image] = arrays
+  if (arrays.length !== 1 || !(image instanceof Uint8Array))
+    throw new Error("stored search record has the wrong layout")
+  return {
+    index: new SearchIndex(image, edition),
+    dataVersion: stringValue(record["dataVersion"]),
+    manifestFields: objectValue(record["manifestFields"]),
+    files: integerValue(record["files"]),
+  }
+}
 
 /** Fetch and parse are sequential; a replacement load aborts and drains the previous staging job. */
 export class SearchEngine {
@@ -28,6 +56,7 @@ export class SearchEngine {
   private readonly fetcher: Fetcher
   private readonly storage: CacheStorage | undefined
   private readonly plan: BootstrapPlan
+  private readonly buildId: string | undefined
   private staging: { generation: number; abort: AbortController } | undefined
   private active: { generation: number; index: SearchIndex } | undefined
   private readonly queries = new Map<
@@ -39,12 +68,18 @@ export class SearchEngine {
 
   constructor(
     emit: (event: SearchEvent) => void,
-    options: { fetch?: Fetcher; cacheStorage?: CacheStorage; plan?: BootstrapPlan } = {},
+    options: {
+      fetch?: Fetcher
+      cacheStorage?: CacheStorage
+      plan?: BootstrapPlan
+      buildId?: string
+    } = {},
   ) {
     this.emit = emit
     this.fetcher = options.fetch ?? ((url, init) => fetch(url, init))
     this.storage = options.cacheStorage ?? globalThis.caches
     this.plan = options.plan ?? defaultPlan
+    this.buildId = options.buildId
   }
 
   handle(request: SearchRequest): Promise<void> {
@@ -112,7 +147,7 @@ export class SearchEngine {
     }
   }
 
-  private async prepare(request: LoadRequest, signal: AbortSignal) {
+  private async resolve(request: LoadRequest, signal: AbortSignal): Promise<JsonObject> {
     const pointer = objectValue(
       parseStrict(
         await fetchBytes(
@@ -122,18 +157,23 @@ export class SearchEngine {
         ),
       ),
     )
-    let entry: JsonObject
-    if (request.entry === "preview") entry = pointer
-    else {
-      validateIndex2(pointer)
-      const current = objectValue(pointer["current"])
-      const previous = pointer["previous"] === null ? null : objectValue(pointer["previous"])
-      const compatible = [current, previous].find(
-        (candidate) => candidate && isCompatible(candidate),
-      )
-      if (!compatible) throw new SnapshotError("unsupported-version", "no compatible snapshot")
-      entry = compatible
-    }
+    if (request.entry === "preview") return pointer
+    validateIndex2(pointer)
+    const current = objectValue(pointer["current"])
+    const previous = pointer["previous"] === null ? null : objectValue(pointer["previous"])
+    const compatible = [current, previous].find((candidate) => candidate && isCompatible(candidate))
+    if (!compatible) throw new SnapshotError("unsupported-version", "no compatible snapshot")
+    return compatible
+  }
+
+  private checkEntry(request: LoadRequest, entry: JsonObject, manifest: JsonObject): void {
+    if (request.entry === "index")
+      for (const field of ENTRY_FIELDS)
+        if (canonicalText(entry[field] ?? null) !== canonicalText(manifest[field] ?? null))
+          throw new SnapshotError("blob-integrity", "index entry differs from manifest")
+  }
+
+  private async prepare(request: LoadRequest, entry: JsonObject, signal: AbortSignal) {
     const manifestHash = stringValue(entry["manifest_sha256"])
     const manifestBytes = await fetchBytes(
       this.fetcher,
@@ -148,17 +188,7 @@ export class SearchEngine {
     const parseMs = performance.now() - mark
     if (decoded.kind !== "manifest") throw new SnapshotError("shape", "expected manifest")
     const { manifest, files } = decoded
-    if (request.entry === "index")
-      for (const field of [
-        "data_version",
-        "published_at",
-        "format_version",
-        "min_reader_version",
-        "required_capabilities",
-        "engine_support_target",
-      ])
-        if (canonicalText(entry[field] ?? null) !== canonicalText(manifest[field] ?? null))
-          throw new SnapshotError("blob-integrity", "index entry differs from manifest")
+    this.checkEntry(request, entry, manifest)
     const version = stringValue(manifest["format_version"])
     const configKey = stringValue(objectValue(manifest["config_ref"])["key"])
     const keys = [
@@ -172,15 +202,74 @@ export class SearchEngine {
       keys,
       files: new Map(keys.map((key) => [key, files.get(key)] as const)),
       dataVersion: stringValue(manifest["data_version"]),
+      manifestFields: Object.fromEntries(
+        ENTRY_FIELDS.map((field) => [field, manifest[field] ?? null]),
+      ),
       parseMs,
       manifestRawBytes: manifestBytes.length,
     }
+  }
+
+  // Reading the stored image replaces the manifest, every blob and the index build.
+  private async restore(
+    request: LoadRequest,
+    entry: JsonObject,
+    stored: VerifiedCache,
+    start: number,
+    signal: AbortSignal,
+  ): Promise<boolean> {
+    const bytes = await stored.read(request.edition, stringValue(entry["manifest_sha256"]))
+    if (!bytes) return false
+    const mark = performance.now()
+    let record: ReturnType<typeof readRecord>
+    try {
+      record = readRecord(bytes, request.edition)
+    } catch {
+      return false
+    }
+    const parseMs = performance.now() - mark
+    this.checkEntry(request, entry, record.manifestFields)
+    signal.throwIfAborted()
+    this.active = { generation: request.generation, index: record.index }
+    this.emit({
+      kind: "ready",
+      generation: request.generation,
+      edition: request.edition,
+      root: request.base,
+      dataVersion: record.dataVersion,
+      manifestHash: stringValue(entry["manifest_sha256"]),
+      metrics: {
+        restored: true,
+        files: record.files,
+        maxRawBytes: bytes.length,
+        parseMs,
+        buildMs: 0,
+        wallMs: performance.now() - start,
+        firstFileMs: 0,
+        firstSetMs: 0,
+        stagingArrayBuffers: 0,
+        stagingStringBytes: 0,
+        ...record.index.allocation(),
+      },
+    })
+    return true
   }
 
   private async load(request: LoadRequest, signal: AbortSignal): Promise<void> {
     const start = performance.now()
     try {
       signal.throwIfAborted()
+      const entry = await this.resolve(request, signal)
+      // A custom plan picks other files from the same manifest, so only the default plan, which the
+      // build identity already covers, may share stored images.
+      const stored = new VerifiedCache(
+        request.base,
+        "search-index",
+        INDEX_IMAGE_FORMAT,
+        this.plan === defaultPlan ? this.storage : undefined,
+        this.buildId,
+      )
+      if (await this.restore(request, entry, stored, start, signal)) return
       const {
         manifestHash,
         version,
@@ -188,9 +277,10 @@ export class SearchEngine {
         keys,
         files,
         dataVersion,
+        manifestFields,
         manifestRawBytes,
         parseMs: manifestParseMs,
-      } = await this.prepare(request, signal)
+      } = await this.prepare(request, entry, signal)
       let parseMs = manifestParseMs
       let mark = performance.now()
       const blobs = new SearchBlobs(request.base, this.fetcher, this.storage)
@@ -279,6 +369,7 @@ export class SearchEngine {
         dataVersion,
         manifestHash,
         metrics: {
+          restored: false,
           files: keys.length,
           maxRawBytes,
           parseMs,
@@ -294,6 +385,12 @@ export class SearchEngine {
       await blobs.retainPlan(
         request.edition,
         [...files.values()].filter((file): file is JsonObject => file !== undefined),
+      )
+      // Written only now: every file passed its checks and this generation is already published.
+      await stored.write(
+        request.edition,
+        manifestHash,
+        pack({ dataVersion, manifestFields, files: keys.length }, [index.encode()]),
       )
     } catch (error) {
       if (!signal.aborted)
