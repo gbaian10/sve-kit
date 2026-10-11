@@ -84,6 +84,15 @@ describe("home search", () => {
     expect(second).toContain(cardNo)
   })
 
+  // Positive state awaiting data: real snapshots have no search_alias rows yet.
+  it("marks alias hits in the home suggestions", async () => {
+    await open()
+    const user = userEvent.setup()
+    await user.type(screen.getByRole("combobox"), "テンプラー")
+    const list = await screen.findByRole("listbox", { name: "建議" })
+    expect(within(list).getAllByRole("option")[0]).toHaveTextContent("符合：別名")
+  })
+
   it("waits for the suggestions when Enter comes inside the debounce window", async () => {
     const { router } = await open()
     const user = userEvent.setup()
