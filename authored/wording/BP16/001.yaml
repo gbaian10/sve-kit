@@ -1,0 +1,27 @@
+format: 1
+kind: wording_decisions
+records:
+  - face_id: f:42268c6af8f85de5b096a3f605f65b47
+    region: jp
+    comparison_hash: sha256:f0b83f1ac6536e066957b26e97ff16ddccad01f72db97439857450da7a9bec4f
+    classification: same_effect
+    method: ai
+    reason: 主文引用的同名生成物與操作未變，差異是補充段落列出或省略其定義；未增加主文的解決步驟。
+  - face_id: f:802d851080b555a3a1eb7740c2002f65
+    region: en
+    comparison_hash: sha256:5c4656713101328649f9ea2d0bd6c938183d8376e83ff69a74e723b6fd2c7ea3
+    classification: same_effect
+    method: ai
+    reason: 持續能力的場上適用範圍與對象不變；差異是省略已由能力種類決定的區域敘述，或調整獨立能力段落位置。
+  - face_id: f:ac52aa09a25d5c90b6f43f2511465252
+    region: jp
+    comparison_hash: sha256:00bf8af8c4e0ef389b2505602b8f5bc1ae1c51993667ee23e0c78e8a719989ab
+    classification: same_effect
+    method: ai
+    reason: 新增、刪除或改寫的是既有關鍵字或生成物處理的規則提醒；逐項比對主文的條件、數量與解決步驟均未改變。
+  - face_id: f:edd22b78e9d85d9ebd35eefd1be9cd5c
+    region: jp
+    comparison_hash: sha256:8c790f5854b81f6c0e3d6e7d1051a6676e1c3b60e7852e002c62ac2600d7ae89
+    classification: same_effect
+    method: ai
+    reason: 主文引用的同名生成物與操作未變，差異是補充段落列出或省略其定義；未增加主文的解決步驟。

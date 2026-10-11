@@ -1,0 +1,33 @@
+format: 1
+kind: wording_decisions
+records:
+  - face_id: f:1245a7b4b1d65161b0ba22c66549fc7b
+    region: jp
+    comparison_hash: sha256:376673198d957614cbe856df789be70b9236c2ddef103c0b6120dab3221c0312
+    classification: same_effect
+    method: ai
+    reason: 主文引用的同名生成物與操作未變，差異是補充段落列出或省略其定義；未增加主文的解決步驟。
+  - face_id: f:3e2172d38a13556cbf65b6e2b10bb89e
+    region: en
+    comparison_hash: sha256:27cfbbf0cd1d2b7babe9851dc129215236ac979758214dfa5a2b539bde222e4b
+    classification: same_effect
+    method: ai
+    reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。
+  - face_id: f:4b229b14eb9e563ebaa503b9fb0d307a
+    region: jp
+    comparison_hash: sha256:db67fd5995e7f1b2f0ee6e225c438c67ffbee180998a3513ad6730810810e4a9
+    classification: same_effect
+    method: ai
+    reason: 主文引用的同名生成物與操作未變，差異是補充段落列出或省略其定義；未增加主文的解決步驟。
+  - face_id: f:4c991bdff59e5535a8683727028710d5
+    region: jp
+    comparison_hash: sha256:6ae6e54d3a7630117b18c301b026cddbf513b398ad69359973ea90c12ba2e1a9
+    classification: same_effect
+    method: ai
+    reason: 主文引用的同名生成物與操作未變，差異是補充段落列出或省略其定義；未增加主文的解決步驟。
+  - face_id: f:e150f959a49450669959bf105d4fb844
+    region: jp
+    comparison_hash: sha256:91b00817b6fd6c3728a579f56b337f79a5128934f14e8a96e8ec3ece747a2acf
+    classification: same_effect
+    method: ai
+    reason: 新增、刪除或改寫的是既有關鍵字或生成物處理的規則提醒；逐項比對主文的條件、數量與解決步驟均未改變。

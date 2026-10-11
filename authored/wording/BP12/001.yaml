@@ -1,0 +1,27 @@
+format: 1
+kind: wording_decisions
+records:
+  - face_id: f:156a5532470b5100b6324d4a594b10bd
+    region: en
+    comparison_hash: sha256:ef02892b334d466234f1c5d9dbbf32f51f59e3a0a5fe494b37d781bfe4044ff5
+    classification: same_effect
+    method: ai
+    reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。
+  - face_id: f:159d0ca9782f5e7aa98dc014114115d6
+    region: jp
+    comparison_hash: sha256:f2f3cd1e62c9cac1f448d47c39deacc1d4e289744ef5344d9982cc5f1376f17a
+    classification: same_effect
+    method: ai
+    reason: 新增、刪除或改寫的是既有關鍵字或生成物處理的規則提醒；逐項比對主文的條件、數量與解決步驟均未改變。
+  - face_id: f:c3777102c1fa580c9ba049cfa95dd472
+    region: en
+    comparison_hash: sha256:be7b5f235b395108da3b8c0837be73f3ca6671885196f9bdc1c3f862130e9548
+    classification: same_effect
+    method: ai
+    reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。
+  - face_id: f:c897ea4ff63b50f6af58653476b47141
+    region: en
+    comparison_hash: sha256:b0a48c3eaacec7d121f4e6e02bf66d9b14c1c83aacecbbac7afbf3cf5825197e
+    classification: same_effect
+    method: ai
+    reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。
