@@ -234,7 +234,10 @@ def read_binding(
     except ValueError, TypeError:
         raise ValueError("Invalid stored four-layer binding") from None
     raw = _verify_use(db, use_id, binding)
-    replay_part(raw, read_frame(db, binding.frame_id).frame, binding, domains)
+    stored = read_frame(db, binding.frame_id)
+    replay_part(
+        raw, stored.frame, binding, domains, canonical_source=stored.canonical_source
+    )
     return binding
 
 
@@ -268,9 +271,16 @@ def write_binding(
     domains: Mapping[str, ClosedDomain],
 ) -> None:
     """Check the full object before splitting its ordered occurrences into rows."""
-    frame = read_frame(db, binding.frame_id).frame
+    stored_frame = read_frame(db, binding.frame_id)
+    frame = stored_frame.frame
     binding.verify(frame, domains)
-    replay_part(_verify_use(db, use_id, binding), frame, binding, domains)
+    replay_part(
+        _verify_use(db, use_id, binding),
+        frame,
+        binding,
+        domains,
+        canonical_source=stored_frame.canonical_source,
+    )
     data = binding.model_dump(mode="json")
     occurrences = data.pop("occurrences")
     if not isinstance(occurrences, list):

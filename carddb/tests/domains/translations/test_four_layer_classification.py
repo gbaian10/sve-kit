@@ -87,7 +87,7 @@ def test_n0_cannot_split_one_leaf_into_occurrences_sharing_its_position() -> Non
     field = normalize_source(raw, source(raw))
     engine = classifier((term,))
     frame, binding = engine.recognize(raw, field.source, field.parts[0]).bind(
-        field.source, field.parts[0]
+        field.source, field.parts[0], normalizer_version="four-layer-jp-v1"
     )
     name = binding.occurrences[0]
     span = name.raw_spans[0]
@@ -382,7 +382,7 @@ def test_generic_ex_source_includes_tokens_without_claiming_their_absence() -> N
     field = normalize_source(raw, source(raw))
     engine = classifier()
     frame, binding = engine.recognize(raw, field.source, field.parts[0]).bind(
-        field.source, field.parts[0]
+        field.source, field.parts[0], normalizer_version="four-layer-jp-v1"
     )
     engine.verify(raw, field, field.parts[0], frame, binding)
     assert binding.occurrences[0].source_unit == "枚"

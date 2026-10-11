@@ -247,7 +247,13 @@ class Classifier:
             derived.verify(raw, self, frame, binding, context=context)
             return
         source = field.source
-        part.verify(raw, frame, binding, self.domains)
+        part.verify(
+            raw,
+            frame,
+            binding,
+            self.domains,
+            normalizer_version=frame.source.normalizer_version,
+        )
         found = self.recognize(raw, source, part, context=context, field=field)
         if found.issues:
             raise ValueError("Unresolved source leaves cannot verify a binding")
@@ -285,7 +291,9 @@ class Classifier:
             for occurrence in binding.occurrences
         ):
             raise ValueError("Leaf unit differs from the exact source construction")
-        expected_frame, _ = found.bind(source, part)
+        expected_frame, _ = found.bind(
+            source, part, normalizer_version=frame.source.normalizer_version
+        )
         if (
             frame.semantic_variant != expected_frame.semantic_variant
             or frame.projection != expected_frame.projection

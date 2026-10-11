@@ -39,12 +39,14 @@ producer pin, approval receipt or second resolution parser.
 These limitations are documented without expanding the frozen numeric or sentence
 recognition rules. N1 source semantics belongs to #380/#499.
 
-## N1 preparation
+## N1 source derivation
 
-`four_layer_derivation.derive_source` is an internal preparation entry point. It
+`four_layer_derivation.derive_source` is the production source entry point. It
 uses the current source partitions, Unicode units and adopted classifier catalog.
-Its frames use `four-layer-jp-v2`, which the production authored reader still
-rejects; the normal build continues to use N0. This is not a second reader.
+Its frames use `four-layer-jp-v2`, the single version accepted by the production
+authored and DB readers. The normal build derives N1 source fields before matching
+frames. Frozen N0 lexical and numeric rules remain the registered foundation,
+without a second production reader.
 
 Complete `【keyword】` lines obtain required Concept leaves, including every
 repeated source occurrence. The standalone `{クイック}` construction requires the
@@ -54,7 +56,7 @@ granted, compound or section uses do not acquire this projection. Catalog entrie
 alone do not register new Quick aliases. Missing or ambiguous concepts prevent a
 binding; unknown whole-line semantics retain occurrence-scoped pending frames.
 
-The preparation derives closed body operands for owners, zones, deck positions,
+The source entry derives closed body operands for owners, zones, deck positions,
 phase triggers and card filters, the three registered omitted-owner rules, NC/SC
 aliases and four threshold ability names. Reminder/header boundaries and opaque
 modifiers remain intact; local leaves never resolve unknown whole-line semantics.
@@ -66,6 +68,5 @@ low_confidence. Disabled dependencies can leave an unmatched source or fallback.
 Renderer v3 uses finite forms with exact roles and checks necessary references by
 slot and concept member. A classifier argument used only to choose grammar is not
 a displayed concept. Unused pure omitted owners do not require a label; displaying
-them uses their own slot and ordinary quality/range dependencies. This presentation
-version is independent of the later single production N1 switch; rendering a
-prepared frame grants no DSL qualification.
+them uses their own slot and ordinary quality/range dependencies. Its presentation version is independent of the production normalizer; rendering a
+frame grants no DSL qualification.

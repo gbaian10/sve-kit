@@ -59,7 +59,9 @@ def test_class_filter_accepts_complete_direct_kind_constructions(
     part = field.parts[0]
     found = engine.recognize(raw, field.source, part)
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = found.bind(
+        field.source, part, normalizer_version="four-layer-jp-v1"
+    )
     engine.verify(raw, field, part, frame, binding)
     assert frame.leaf_schema.slots[0].role == "class_filter"
 
@@ -116,8 +118,16 @@ def test_entry_families_have_distinct_semantics_and_independent_scopes(
     found = engine.recognize(
         raw, field.source, field.parts[0], context=context(raw), field=field
     )
-    frame, binding = found.bind(field.source, field.parts[0])
-    field.verify(raw, (frame,), (binding,), engine.domains)
+    frame, binding = found.bind(
+        field.source, field.parts[0], normalizer_version="four-layer-jp-v1"
+    )
+    field.verify(
+        raw,
+        (frame,),
+        (binding,),
+        engine.domains,
+        normalizer_version="four-layer-jp-v1",
+    )
     assert frame.semantic_variant.key == key
     assert frame.projection.projection_kind == "ability_body"
     assert len(frame.projection.scopes) == scope_count
@@ -241,7 +251,7 @@ def test_n0_cannot_publish_an_unregistered_or_mismatched_semantic_descriptor(
     frame, _ = (
         classifier()
         .recognize(raw, field.source, field.parts[0], context=context(raw))
-        .bind(field.source, field.parts[0])
+        .bind(field.source, field.parts[0], normalizer_version="four-layer-jp-v1")
     )
     data = frame.model_dump(mode="json")
     if mutation == "key":
@@ -290,10 +300,12 @@ def test_token_header_requires_every_declared_field_in_its_exact_catalog(
         assert found.issues
         assert found.semantics is None
         with pytest.raises(ValueError, match="Unresolved source leaves"):
-            found.bind(field.source, part)
+            found.bind(field.source, part, normalizer_version="four-layer-jp-v1")
         return
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = found.bind(
+        field.source, part, normalizer_version="four-layer-jp-v1"
+    )
     engine.verify(raw, field, part, frame, binding)
     assert frame.semantic_variant.key == "token_header.v1"
     assert frame.projection.projection_kind == "card_field"

@@ -1,4 +1,4 @@
-"""Prepare N1 whole-line semantics without installing them in the N0 build."""
+"""Derive the current N1 source operands and closed whole-line semantics."""
 
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
@@ -32,6 +32,7 @@ from sve_carddb.domains.translations.four_layer_n1_leaves import (
 )
 from sve_carddb.domains.translations.four_layer_n1_transform import transform
 from sve_carddb.domains.translations.four_layer_normalizer import (
+    VERSION,
     SourceField,
     normalize_source,
 )
@@ -53,8 +54,6 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_semantics import CardContext
     from sve_carddb.domains.translations.recognition.models import Hint
 
-# This preparation version is deliberately absent from the authored reader.
-VERSION = "four-layer-jp-v2"
 _QUICK = "term:ability.quick"
 
 

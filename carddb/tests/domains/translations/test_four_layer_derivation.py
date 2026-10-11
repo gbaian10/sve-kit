@@ -333,7 +333,9 @@ def test_existing_entry_semantics_and_leaf_values_survive_preparation() -> None:
     n0 = engine.recognize(raw, facts.source, field.parts[0], context=facts, field=field)
     derived = derive_source(raw, facts.source, engine, context=facts)
     assert derived.recognized[0] == n0
-    old_frame, old_binding = n0.bind(facts.source, field.parts[0])
+    old_frame, old_binding = n0.bind(
+        facts.source, field.parts[0], normalizer_version="four-layer-jp-v1"
+    )
     frame, binding = derived.bind(0)
     assert frame.id != old_frame.id
     assert frame.semantic_variant == old_frame.semantic_variant
@@ -343,15 +345,15 @@ def test_existing_entry_semantics_and_leaf_values_survive_preparation() -> None:
     assert binding.trace == old_binding.trace
 
 
-def test_preparation_does_not_enable_n1_in_the_production_reader_or_classifier() -> (
-    None
-):
+def test_production_reader_accepts_only_the_current_n1_frames() -> None:
     raw = "{クイック}"
     facts = context(raw)
     engine = classifier((QUICK,), ("braced_ability_reference",))
     field = normalize_source(raw, facts.source)
     n0 = engine.recognize(raw, facts.source, field.parts[0], context=facts, field=field)
-    old_frame, _ = n0.bind(facts.source, field.parts[0])
+    old_frame, _ = n0.bind(
+        facts.source, field.parts[0], normalizer_version="four-layer-jp-v1"
+    )
     assert old_frame.source.normalizer_version == "four-layer-jp-v1"
     assert old_frame.semantic_variant.state == "pending"
     assert old_frame.leaf_schema.slots[0].role == "ability"
@@ -365,5 +367,20 @@ def test_preparation_does_not_enable_n1_in_the_production_reader_or_classifier()
             ],
         }
     )
+    loaded = from_files(
+        (("translations/templates/definitions/000.yaml", payload, payload),)
+    )
+    assert any(r.data == frame for r in loaded.records)
+    old_payload = canonical(
+        {
+            "format": 3,
+            "kind": "translation_shard",
+            "records": [
+                {"kind": "sentence_template", "data": old_frame.model_dump(mode="json")}
+            ],
+        }
+    )
     with pytest.raises(ValueError, match="Unsupported four-layer authored normalizer"):
-        from_files((("translations/templates/definitions/000.yaml", payload, payload),))
+        from_files(
+            (("translations/templates/definitions/000.yaml", old_payload, old_payload),)
+        )

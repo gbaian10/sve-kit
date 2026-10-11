@@ -339,7 +339,7 @@ def test_all_owner_kinds_round_trip_bindings(
     assert read_binding(db, binding.id, engine.domains) == binding
 
 
-def test_n0_storage_rejects_omitted_occurrences(
+def test_storage_rejects_a_forged_omission_on_an_explicit_number(
     stored: tuple[Database, Frame, SourceBinding],
 ) -> None:
     db, _, binding = stored
@@ -356,7 +356,9 @@ def test_n0_storage_rejects_omitted_occurrences(
         binding.model_copy(update={"occurrences": (*binding.occurrences, omitted)})
     )
     with (
-        pytest.raises(ValueError, match="N0 requires explicit leaves"),
+        pytest.raises(
+            ValueError, match="Stored occurrences differ from transformed source"
+        ),
         db.transaction(),
     ):
         write_binding(db, "use:synthetic", mixed, {})
