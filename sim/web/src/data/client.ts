@@ -119,6 +119,8 @@ export function createSnapshotClient(
   let status: SnapshotStatus = { state: "idle" }
   let loaded: LoadedSnapshot | null = null
   let pending: Promise<void> | null = null
+  let startup: Promise<void> | null = null
+  let reloadRequested = false
   let lastRevision = -1
   let lastIndex = ""
   let detailAbort = new AbortController()
@@ -418,8 +420,10 @@ export function createSnapshotClient(
       if (!snapshot) return undefined
       const restored: LoadedSnapshot = { ...snapshot, entrySource: source }
       catalogOf(restored)
-      lastRevision = revision
-      lastIndex = signature
+      if (revision > lastRevision) {
+        lastRevision = revision
+        lastIndex = signature
+      }
       return restored
     } catch {
       await stored.remove(`adopted-${entry}`, "active")
@@ -457,27 +461,40 @@ export function createSnapshotClient(
   }
 
   const start = async (): Promise<void> => {
-    const entryBytes = requestEntry()
-    // Network can fail before local storage finishes; run still classifies the original rejection.
-    void entryBytes.catch(() => undefined)
-    const cached = await restoreAdopted()
-    if (cached) {
-      adopt(cached)
-      set({
-        state: "ready",
-        dataVersion: cached.dataVersion,
-        unconfirmed: true,
-        ...(cached.entrySource === "previous" ? { outdated: true } : {}),
-      })
-      pending = run(entryBytes)
-    } else await run(entryBytes)
+    try {
+      const entryBytes = requestEntry()
+      // Network can fail before local storage finishes; run still classifies the original rejection.
+      void entryBytes.catch(() => undefined)
+      const cached = await restoreAdopted()
+      if (cached) {
+        adopt(cached)
+        set({
+          state: "ready",
+          dataVersion: cached.dataVersion,
+          unconfirmed: true,
+          ...(cached.entrySource === "previous" ? { outdated: true } : {}),
+        })
+      }
+      // Reconnection during restore must replace a request that may already have failed offline.
+      pending = run(reloadRequested ? undefined : entryBytes)
+      if (!cached) await pending
+    } catch (error) {
+      metadata?.dispose()
+      metadata = undefined
+      loaded = null
+      set({ state: "error", ...failureOf(error) })
+    } finally {
+      startup = null
+      reloadRequested = false
+    }
   }
 
   const load = (): Promise<void> => {
     if (status.state === "ready") return Promise.resolve()
+    if (startup) return startup
     if (pending) return pending
-    pending = start()
-    return pending
+    startup = start()
+    return startup
   }
 
   const facesOf = (snapshot: LoadedSnapshot): Map<string, JsonObject> => {
@@ -571,6 +588,10 @@ export function createSnapshotClient(
 
   const reload = (): Promise<void> => {
     if (pending) return pending
+    if (startup) {
+      reloadRequested = true
+      return startup.then(() => pending ?? Promise.resolve())
+    }
     pending = run()
     return pending
   }

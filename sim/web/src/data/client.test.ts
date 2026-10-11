@@ -7,6 +7,7 @@ import { type Fetcher } from "./cdn"
 import { createSnapshotClient, type SnapshotStatus } from "./client"
 import { canonical, type JsonObject, objectValue, parseJson, stringValue } from "./format-v3/json"
 import { transferDigest } from "./integrity"
+import { VerifiedCache } from "./verified-cache"
 
 const stubImage = ({ width, height, seed }: { width: number; height: number; seed: number }) =>
   Promise.resolve(
@@ -512,6 +513,180 @@ describe("createSnapshotClient: verified snapshot records", () => {
     expect(client.snapshot()).toBe(local)
     expect(client.status()).toEqual({ state: "ready", dataVersion: local?.dataVersion })
   })
+
+  it("rechecks after reconnection during restore and makes reload await confirmation", async () => {
+    const storage = memoryCache()
+    const original = createSnapshotClient(base, {
+      fetch: serve(base).fetcher,
+      cacheStorage: storage,
+    })
+    await original.load()
+    await persisted(storage)
+    let resumeRestore: () => void = () => undefined
+    let notifyRestore: () => void = () => undefined
+    let resumeIndex: () => void = () => undefined
+    const restoring = new Promise<void>((resolve) => {
+      notifyRestore = resolve
+    })
+    const heldRestore = new Promise<void>((resolve) => {
+      resumeRestore = resolve
+    })
+    const heldIndex = new Promise<void>((resolve) => {
+      resumeIndex = resolve
+    })
+    const open = storage.open.bind(storage)
+    storage.open = async (name) => {
+      const cache = await open(name)
+      const match = cache.match.bind(cache)
+      cache.match = async (key, options) => {
+        if ((key instanceof Request ? key.url : String(key)).includes("/adopted-index/")) {
+          notifyRestore()
+          await heldRestore
+        }
+        return match(key, options)
+      }
+      return cache
+    }
+    const served = serve(base)
+    let online = false
+    const client = createSnapshotClient(base, {
+      cacheStorage: storage,
+      fetch: async (url, init) => {
+        if (url.endsWith(INDEX)) {
+          if (!online) throw new TypeError("offline during startup")
+          await heldIndex
+        }
+        return served.fetcher(url, init)
+      },
+    })
+    const loading = client.load()
+    await restoring
+    // The application's online handler calls reload while the local record is still being read.
+    online = true
+    let reloaded = false
+    const reloading = client.reload().then(() => {
+      reloaded = true
+    })
+    const coalesced = client.reload()
+    resumeRestore()
+    await loading
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(reloaded).toBe(false)
+    expect(client.status()).toMatchObject({ state: "ready", unconfirmed: true, updating: "index" })
+    expect(client.snapshot()).toStrictEqual(original.snapshot())
+    resumeIndex()
+    await Promise.all([reloading, coalesced])
+    expect(client.status()).toEqual(original.status())
+    expect(served.requests).toEqual([INDEX])
+  })
+
+  it.each(["adoption", "notification", "repeated notification"])(
+    "recovers from a cached startup %s exception",
+    async (failure) => {
+      const storage = memoryCache()
+      const original = createSnapshotClient(base, {
+        fetch: serve(base).fetcher,
+        cacheStorage: storage,
+      })
+      await original.load()
+      await persisted(storage)
+      const cache = await namespace(storage)
+      const [key] = await records(storage)
+      const response = key && (await cache.match(key))
+      const snapshot = original.snapshot()
+      if (!response || !snapshot) throw new Error("missing stored snapshot")
+      const originalBytes = new Uint8Array(await response.arrayBuffer())
+      const stored = new VerifiedCache(base, "snapshot", 1, storage)
+      if (failure === "adoption") {
+        const record = objectValue(parseJson(originalBytes))
+        const manifest = objectValue(record["manifest"])
+        const files = manifest["files"] as JsonObject[]
+        // This is readable by catalog restore but fails when constructing image metadata at adoption.
+        await stored.write(
+          "snapshot",
+          snapshot.manifestHash,
+          canonical({
+            ...record,
+            manifest: {
+              ...manifest,
+              files: files.map((file) =>
+                file["role"] === "images" ? { ...file, row_counts: null } : file,
+              ),
+            },
+          }).slice(),
+        )
+      }
+      const client = createSnapshotClient(base, {
+        fetch: serve(base).fetcher,
+        cacheStorage: storage,
+      })
+      let notified = false
+      const unsubscribe = client.subscribe(() => {
+        if ((failure === "notification" && !notified) || failure === "repeated notification") {
+          notified = true
+          throw new Error("startup notification failed")
+        }
+      })
+      if (failure === "repeated notification")
+        await expect(client.load()).rejects.toThrow("startup notification failed")
+      else await expect(client.load()).resolves.toBeUndefined()
+      expect(client.status()).toMatchObject({ state: "error", kind: "corrupt" })
+      expect(client.snapshot()).toBeNull()
+      unsubscribe()
+      await stored.write("snapshot", snapshot.manifestHash, originalBytes)
+      await client.retry()
+      await client.reload()
+      expect(client.status()).toEqual(original.status())
+      expect(client.snapshot()).toStrictEqual(snapshot)
+    },
+  )
+
+  it.each([
+    { revision: 3, detail: "backwards" },
+    { revision: 2, detail: "changed without a new revision" },
+  ])(
+    "retry preserves the session's revision $revision despite another tab's older selection",
+    async ({ revision, detail }) => {
+      const storage = memoryCache()
+      const original = createSnapshotClient(base, {
+        fetch: serve(base).fetcher,
+        cacheStorage: storage,
+      })
+      await original.load()
+      await persisted(storage)
+      const cache = await namespace(storage)
+      const selection = (await cache.keys()).find((request) =>
+        request.url.includes("/adopted-index/"),
+      )
+      const older = selection && (await cache.match(selection))
+      if (!selection || !older) throw new Error("missing adopted selection")
+      await cache.delete(selection)
+      const served = serve(base)
+      const index = objectValue(parseJson(served.files.get(INDEX) ?? ""))
+      served.files.set(
+        INDEX,
+        canonical({
+          ...index,
+          revision,
+          current: { ...objectValue(index["current"]), published_at: "2026-09-30T00:00:00Z" },
+        }),
+      )
+      const client = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
+      await client.load()
+      expect(client.status()).toMatchObject({ state: "error", kind: "corrupt" })
+      // Another page writes the earlier verified selection before this client retries.
+      await cache.put(selection, older)
+      served.files.set(INDEX, canonical(index))
+      await client.retry()
+      await client.reload()
+      expect(client.status()).toMatchObject({
+        state: "ready",
+        unconfirmed: true,
+        updateError: { kind: "corrupt", detail: expect.stringContaining(detail) as string },
+      })
+      expect(client.snapshot()).toStrictEqual(original.snapshot())
+    },
+  )
 
   it("keeps local data usable offline and clears its warning after reconnection", async () => {
     const storage = memoryCache()

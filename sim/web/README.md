@@ -147,7 +147,10 @@ replaces them only after verification. Offline or failed checks keep local data 
 `outdated` notice and a classified `updateError`; successful checks clear `unconfirmed`.
 The selection records distinguish permanent indexes from preview pointers. Missing, damaged
 or unavailable storage uses the usual index-first load. `reload()` waits for an active
-background check, so callers can explicitly await confirmation.
+background check, so callers can explicitly await confirmation. A reload requested while local
+records are being restored starts a fresh check after restoration and waits for its result.
+Unconfirmed local data whose check fails with a network error gets a notice that updates could
+not be checked. Incompatible and corrupt errors keep their existing notices.
 
 The search Worker's persistent index still resolves its own pointer before restoring. It is
 not currently connected to the cards-page list, which uses the main-thread catalog; giving
