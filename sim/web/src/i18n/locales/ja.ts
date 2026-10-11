@@ -204,7 +204,7 @@ export default {
     retry: "更新を確認",
   },
   dev: {
-    root: { cdn: "本番", preview: "プレビュー" },
+    root: { cdn: "本番", preview: "プレビュー", fixture: "テストデータ（ダミー）" },
     status: {
       idle: "未読み込み",
       loading: "読み込み中：{{phase}}",
@@ -217,6 +217,8 @@ export default {
     retry: "再試行",
     usePreview: "プレビューデータへ",
     useCdn: "本番データへ戻す",
+    useRealData: "実データに切り替え",
+    useFixture: "テストデータに切り替え",
     clearLocal: "ローカルデータを消去",
     insecure: "https 以外：キャッシュ無効",
   },

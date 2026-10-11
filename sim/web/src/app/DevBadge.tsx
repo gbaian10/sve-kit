@@ -19,6 +19,10 @@ const BUTTON =
 export function DevBadge({ client }: { readonly client: SnapshotClient }) {
   const { t } = useTranslation()
   const root = useSnapshotRoot()
+  // Locally `/cdn` falls back to the committed fixture; calling that "live" made it look like the
+  // real data, so the labels say what is actually served.
+  const fixture = import.meta.env.SVE_CDN_IS_FIXTURE === "1"
+  const rootLabel = root === "cdn" && fixture ? t("dev.root.fixture") : t(`dev.root.${root}`)
   const status = useSnapshotStatus(client)
   const text =
     status.state === "ready"
@@ -47,7 +51,7 @@ export function DevBadge({ client }: { readonly client: SnapshotClient }) {
       data-manifest-hash={client.snapshot()?.manifestHash ?? ""}
       className="fixed right-2 bottom-24 z-40 flex max-w-[calc(100vw-1rem)] items-center gap-2 rounded-pill border border-border bg-surface-1 py-1 pr-1 pl-3 text-12 text-text-2 shadow-lg lg:bottom-3 phone-landscape:bottom-3"
     >
-      <span className="shrink-0 font-semibold">{t(`dev.root.${root}`)}</span>
+      <span className="shrink-0 font-semibold">{rootLabel}</span>
       <span className="min-w-0 truncate">{text}</span>
       {canRetry && (
         <button
@@ -79,7 +83,13 @@ export function DevBadge({ client }: { readonly client: SnapshotClient }) {
             setActiveSnapshotRoot(activeSnapshotRoot() === "cdn" ? "preview" : "cdn")
           }}
         >
-          {root === "cdn" ? t("dev.usePreview") : t("dev.useCdn")}
+          {root === "cdn"
+            ? fixture
+              ? t("dev.useRealData")
+              : t("dev.usePreview")
+            : fixture
+              ? t("dev.useFixture")
+              : t("dev.useCdn")}
         </button>
       )}
     </div>

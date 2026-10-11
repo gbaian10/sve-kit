@@ -202,7 +202,7 @@ const zhTW = {
     retry: "檢查更新",
   },
   dev: {
-    root: { cdn: "正式", preview: "預覽" },
+    root: { cdn: "正式", preview: "預覽", fixture: "測試樣本（假資料）" },
     status: {
       idle: "未載入",
       loading: "載入中：{{phase}}",
@@ -215,6 +215,8 @@ const zhTW = {
     retry: "重試",
     usePreview: "改用預覽資料",
     useCdn: "改回正式資料",
+    useRealData: "改用真實資料",
+    useFixture: "改用測試樣本",
     clearLocal: "清除本機資料",
     insecure: "非 https，快取停用",
   },

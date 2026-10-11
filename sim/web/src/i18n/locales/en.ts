@@ -209,7 +209,7 @@ export default {
     retry: "Check for updates",
   },
   dev: {
-    root: { cdn: "Live", preview: "Preview" },
+    root: { cdn: "Live", preview: "Preview", fixture: "Test fixture (fake)" },
     status: {
       idle: "Not loaded",
       loading: "Loading: {{phase}}",
@@ -222,6 +222,8 @@ export default {
     retry: "Retry",
     usePreview: "Use preview data",
     useCdn: "Back to live data",
+    useRealData: "Use real data",
+    useFixture: "Use test fixture",
     clearLocal: "Clear local data",
     insecure: "Not https: caching off",
   },
