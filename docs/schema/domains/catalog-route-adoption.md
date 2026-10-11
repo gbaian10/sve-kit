@@ -237,7 +237,9 @@ build-db §15 已有順序：同卡同區 → 當前有效 override → card.hom
 
 所有含 プレミアム／Premium 的版次均排除一般候選，不能只保留拆出的 BR／SR／GR 來繞過 premium。
 只有 PR／Promo／「-」等非白名單版次的卡仍有預設版次，method=fallback；不因此隱藏卡片，
-也不宣稱 PR／Promo 在實物上全部有特殊加工。raw 原樣保留，穩定 code 仍按詞彙採納契約登錄，
+也不宣稱 PR／Promo 在實物上全部有特殊加工。raw 原樣保留；稀有度原值→穩定 code 的對照由程式提供的配置
+（[rarity.py](../../../carddb/src/sve_carddb/domains/registry/rarity.py)）登錄，不經 authored 詞彙採納。
+日後若改走 authored 採納，須先移除程式對照，以免 `vocabulary(kind,code)` 主鍵衝突。
 新標籤／未核對的映射保持未知，不從卡號推分類。
 
 **卡框與標誌不在本次核可範圍**，依既有技術設計處理：要證實一般版，仍須 premium=false、
