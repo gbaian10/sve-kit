@@ -13,6 +13,7 @@ import pytest
 from sve_carddb.export.read_api import INDEX, ExportError, load_export
 from typer.testing import CliRunner
 
+from sve_publish import parallel
 from sve_publish.adapter import R2Store, Stored
 from sve_publish.cli import app
 from sve_publish.publish import report, upload
@@ -278,8 +279,9 @@ def test_invalid_jobs_are_rejected_before_export_or_credentials(
 
 
 def test_progress_keeps_reporting_while_an_object_waits_for_readback(
-    images: PublicImages, roots: Roots
+    images: PublicImages, roots: Roots, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    monkeypatch.setattr(parallel, "PROGRESS_SECONDS", 0)
     export(images, roots, step=0)
     loaded = load_export(roots.preview)
     fake = DelayedS3(delay=0, block_readback=loaded.images[0].key)
@@ -293,7 +295,7 @@ def test_progress_keeps_reporting_while_an_object_waits_for_readback(
         future = runner.submit(upload, store, loaded, None, jobs=1, progress=progress)
         try:
             assert fake.blocked.wait(5)
-            assert heartbeat.wait(7)
+            assert heartbeat.wait(5)
             assert not future.done()
         finally:
             fake.release.set()

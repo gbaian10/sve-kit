@@ -89,20 +89,22 @@ The steps are:
 4. Check that the index is unchanged, write it with a conditional PUT, and read
    it back.
 
-### 並行度與執行時間
+### Concurrency and run time
 
-`--jobs N` 設定物件工作池的上限，預設為 16，最小為 1；`--jobs 1` 依序處理。
-卡圖全部完成來源端讀回後才開始 JSON，index 仍最後以條件寫入更新並讀回。
-任一物件失敗就停止接納新的寫入，等待已接納的操作完成後回報失敗物件；
-尚在 GET 比對的其他物件不會再進入 PUT。修正原因後重跑，只補缺少或不同的物件。
-已開始的 PUT 仍可能成功，失敗不會回滾這些物件，也不會重送寫入。
+`--jobs N` caps the object worker pool (default 16, minimum 1); `--jobs 1`
+processes one object at a time. Every image is read back before any JSON object
+starts, and the index is still written last. After any object fails, no further
+PUT starts: objects still comparing with GET stop there, PUTs already started
+finish and are read back, and then the failed key is reported. Nothing is rolled
+back or resent; rerun to fill in what is missing or different.
 
-執行時進度寫到 stderr：每完成 100 個物件或約 5 秒回報完成數／總數與已寫入數，
-階段開始與結束也會回報；stdout 保留原本的最終 JSON 摘要。dry-run 的輸出與行為不變。
-每個變動物件仍需 GET → 條件 PUT → GET；首次數萬張卡圖的循序執行可能耗時數小時。
-並行度主要減少等待網路回應的時間，實際速度取決於頻寬、延遲、R2 限流及本機驗證；
-不能保證 16 倍加速。CDN 驗證仍循序執行，每個 URL 另有兩次 GET，
-提高 `--jobs` 不會加速此步驟。
+Progress goes to stderr every 100 objects or about 5 seconds and at the start
+and end of each phase; stdout keeps the final JSON summary, and dry-run output
+is unchanged. Each changed object still needs GET, conditional PUT and read-back
+GET, so a first upload of tens of thousands of images can take hours one at a
+time. Workers overlap network waits; actual speed depends on bandwidth, latency,
+R2 rate limits and local checks. The CDN check stays sequential, so `--jobs`
+does not speed it up.
 
 An unchanged rerun makes no PUT. After a failure, current is unchanged; run the
 same command again to upload what is missing. A failed image overwrite can leave

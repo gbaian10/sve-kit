@@ -1,9 +1,9 @@
-"""Bounded object uploads with shared failure admission and verified progress."""
+"""Bounded object uploads that admit no new PUT after the first failure."""
 
 from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass, field
 from itertools import islice
-from threading import Event, Lock
+from threading import Event
 from time import monotonic
 from typing import TYPE_CHECKING
 
@@ -39,7 +39,6 @@ class UploadPool:
     written: int = 0
     completed: int = 0
     stopped: Event = field(default_factory=Event)
-    admission: Lock = field(default_factory=Lock)
 
     def sync(self, objects: Iterable[UploadObject]) -> dict[str, str]:
         """Returning is the phase barrier: every object has finished read-back."""
@@ -48,8 +47,7 @@ class UploadPool:
             try:
                 digests = self._run(executor, objects)
             except BaseException:
-                with self.admission:
-                    self.stopped.set()
+                self.stopped.set()
                 raise
         self._progress()
         return digests
@@ -122,8 +120,7 @@ class UploadPool:
             written = self._write(item, raw)
             return None if written is None else (item.key, written, digest(raw))
         except BaseException as error:
-            with self.admission:
-                self.stopped.set()
+            self.stopped.set()
             if isinstance(error, ExportError):
                 raise ExportError(f"{error}: {item.key}") from None
             if isinstance(error, OSError):
@@ -142,10 +139,9 @@ class UploadPool:
             return 0
         if existing is not None and not item.overwrite:
             raise ExportError("Immutable JSON object differs from the export")
-        # Admission and failure share a lock; already admitted PUTs may finish.
-        with self.admission:
-            if self.stopped.is_set():
-                return None
+        # A PUT that passed this check before a failure still finishes and is read back.
+        if self.stopped.is_set():
+            return None
         if not self.store.put(
             item.key,
             raw,
