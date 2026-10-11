@@ -110,6 +110,31 @@ describe("createSnapshotClient", () => {
     expect(client.snapshot()).toBeNull()
   })
 
+  it.each([
+    { format: 3, kind: "incompatible" },
+    { format: 1, kind: "corrupt" },
+    { format: 0, kind: "corrupt" },
+    { format: -1, kind: "corrupt" },
+    { format: 2.5, kind: "corrupt" },
+    { format: 3.5, kind: "corrupt" },
+    { format: "3", kind: "corrupt" },
+    { format: null, kind: "corrupt" },
+    { format: true, kind: "corrupt" },
+    { format: undefined, kind: "corrupt" },
+  ])("classifies index format $format as $kind", async ({ format, kind }) => {
+    const served = serve("/cdn")
+    const path = "snapshots/versions/index.json"
+    const index = objectValue(parseJson(served.files.get(path) ?? ""))
+    served.files.set(
+      path,
+      new TextEncoder().encode(JSON.stringify({ ...index, index_format: format })),
+    )
+    const client = createSnapshotClient("/cdn", { fetch: served.fetcher })
+    await client.load()
+    expect(client.status()).toMatchObject({ state: "error", kind })
+    expect(client.snapshot()).toBeNull()
+  })
+
   it("retries a hash mismatch once, then reports corruption", async () => {
     const served = serve("/cdn")
     const manifestPath = built.manifestPath

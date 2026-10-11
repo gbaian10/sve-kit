@@ -149,12 +149,14 @@ export function createSnapshotClient(
 
   // Index formats are independent of the snapshot format and need their own admission check.
   const requireIndexFormat = (value: JsonObject, what: string): void => {
-    const format = integerValue(value["index_format"])
-    if (format !== INDEX_FORMAT) {
+    const format = value["index_format"]
+    if (typeof format === "number" && Number.isInteger(format) && format > INDEX_FORMAT) {
       throw new NoCompatibleVersion(
         `${what} uses an index format this version of the site cannot read`,
       )
     }
+    if (format !== INDEX_FORMAT)
+      throw new SnapshotError("shape", `${what} has an invalid index format`)
   }
 
   const chooseEntry = async (): Promise<{ chosen: JsonObject; source: "current" | "previous" }> => {
