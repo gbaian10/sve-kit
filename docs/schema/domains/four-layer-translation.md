@@ -366,7 +366,7 @@ arg 沿同一來源葉驗證，計入 required 引用閉包、render 依賴及�
 機械轉換保留原 target 的固定數量修飾，只替換原數字 placeholder，不從中文反推 mode、單位、值或來源位置。
 
 rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章合法域，不能把選詞或語義值複製到規則內。
-例如 zone.locative 的 hand／battlefield 分支各組合 Label 與「中」／「上」；quantity.classifier 依計數語境選中文量詞分支。
+例如 zone.locative 的 hand／battlefield 分支各組合 Label 與「中」／「上」；三個 quantity.classifier.* 形式依計數語境選中文量詞分支。
 形式可產生「手牌」＋「中」、「到」＋「戰場」＋「上」，或「加入」＋「手牌」、「回到」＋「手牌」。
 動詞融合形式只可在相符 frame 動作／目的地角色使用，不能把 add、return、draw、discard、destroy 都變成 move。
 keyword.display 可供括號，基礎名稱不含括號；別名與全名綁同概念，來源拼寫留 trace。
