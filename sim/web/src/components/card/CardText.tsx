@@ -67,6 +67,8 @@ export function CardText({
   const showOriginal =
     mode !== "translated" || !value.translated || value.selection?.["basis"] === "jp_source"
   const showTranslated = mode !== "original" && value.translated !== undefined
+  // The printed state describes the printed name and effect, never the flavor.
+  const printedState = field === "flavor" ? undefined : value.printedState
   return (
     <section
       className="mt-3 space-y-2"
@@ -74,10 +76,8 @@ export function CardText({
       data-field={field}
     >
       <h3 className="text-13 font-semibold text-text-3">{label ?? t(`card.field.${field}`)}</h3>
-      {value.printedState === "derived" && <p className="text-13">{t("card.printedDerived")}</p>}
-      {value.printedState === "unknown" && (
-        <p className="text-13">{t("card.printedUnconfirmed")}</p>
-      )}
+      {printedState === "derived" && <p className="text-13">{t("card.printedDerived")}</p>}
+      {printedState === "unknown" && <p className="text-13">{t("card.printedUnconfirmed")}</p>}
       <TextPurposeStatus readiness={readiness} />
       {showTranslated && (
         <>

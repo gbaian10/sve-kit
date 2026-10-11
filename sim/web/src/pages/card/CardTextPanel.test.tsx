@@ -107,6 +107,7 @@ describe("printed-text availability", () => {
     })
     expect(screen.getByText("Synthetic current wording")).toBeVisible()
     expect(screen.queryByRole("radiogroup", { name: "卡文版本" })).not.toBeInTheDocument()
+    expect(screen.queryByText("印刷文字尚未確認")).not.toBeInTheDocument()
   })
   it("offers a working switch when a verified printing actually has effect text", async () => {
     const props = await originWithPrintedText(true)
