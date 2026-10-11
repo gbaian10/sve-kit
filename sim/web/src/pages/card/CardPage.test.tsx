@@ -1,4 +1,4 @@
-import { act, screen, waitFor } from "@testing-library/react"
+import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -23,6 +23,16 @@ const state = vi.hoisted(() => ({
   doubleFace: false,
   order: null as { key: string; printingId: string }[] | null,
   multiplePrintings: false,
+  printingRows: null as
+    | {
+        id: string
+        card_id: string
+        region: string
+        card_no: string
+        rarity_code: string
+        premium: boolean
+      }[]
+    | null,
   translated: false,
   candidates: [] as { printing_id: string; revision_id: string | null }[],
   undated: [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }],
@@ -131,13 +141,14 @@ vi.mock("../../app/snapshot", () => {
           card: () => ({ id: "c:synthetic", home_set_id: "BP-SYNTHETIC" }),
           family: () => ({ id: "BP-SYNTHETIC", code: "bp-synthetic", public_code: "BP-SYN" }),
           printingsOf: () =>
-            state.multiplePrintings
+            state.printingRows ??
+            (state.multiplePrintings
               ? [
                   { ...printing(), card_no: "BP-SYNTHETIC" },
                   { ...printing(), id: "p:second", card_no: "BP-SECOND" },
                   { ...printing(), id: "p:third", card_no: "BP-THIRD" },
                 ]
-              : [printing()],
+              : [printing()]),
           printingByCardNo: (region: string) =>
             state.crossRegion && region === "jp" ? undefined : printing(),
           facesOf: () => [{ id: "f:synthetic" }, ...(state.doubleFace ? [{ id: "f:back" }] : [])],
@@ -203,6 +214,7 @@ vi.mock("../../app/snapshot", () => {
 beforeEach(() => {
   state.available = false
   state.multiplePrintings = false
+  state.printingRows = null
   state.translated = false
   state.candidates = [
     { printing_id: "p:synthetic", revision_id: "rev:other" },
@@ -438,5 +450,68 @@ describe("returning from printing changes", () => {
     )
     await userEvent.click(screen.getByRole("link", { name: "返回" }))
     expect(router.state.location.pathname).toBe("/cards")
+  })
+})
+
+describe("regional printing lists", () => {
+  it("renders JP and EN lists in rarity order with their normalized labels", async () => {
+    state.printingRows = [
+      {
+        id: "p:promo",
+        card_id: "c:synthetic",
+        region: "jp",
+        card_no: "PR-299",
+        rarity_code: "pr",
+        premium: false,
+      },
+      {
+        id: "p:en",
+        card_id: "c:synthetic",
+        region: "en",
+        card_no: "BP01-053EN",
+        rarity_code: "lg",
+        premium: false,
+      },
+      {
+        id: "p:sl",
+        card_id: "c:synthetic",
+        region: "jp",
+        card_no: "BP01-SL09",
+        rarity_code: "sl",
+        premium: false,
+      },
+      {
+        id: "p:reprint",
+        card_id: "c:synthetic",
+        region: "jp",
+        card_no: "EBD02-005",
+        rarity_code: "lg",
+        premium: false,
+      },
+      {
+        id: "p:synthetic",
+        card_id: "c:synthetic",
+        region: "jp",
+        card_no: "BP01-053",
+        rarity_code: "lg",
+        premium: false,
+      },
+    ]
+    await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+      initialEntries: ["/cards/BP01-053"],
+    })
+    const jp = screen.getByRole("list", { name: "JP" })
+    const en = screen.getByRole("list", { name: "EN" })
+    expect(
+      within(jp)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["BP01-053 (LG)", "EBD02-005 (LG)", "BP01-SL09 (SL)", "PR-299 (PR)"])
+    expect(
+      within(en)
+        .getAllByRole("link")
+        .map((link) => link.textContent),
+    ).toEqual(["BP01-053EN (LG)"])
+    expect(within(jp).getByRole("link", { current: "page" })).toHaveTextContent("BP01-053 (LG)")
   })
 })

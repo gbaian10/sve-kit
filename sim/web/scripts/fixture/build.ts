@@ -389,7 +389,7 @@ function addSets(builder: Builder, families: Record<string, Family>): void {
       const released = set.code === "pr" ? null : region === "jp" ? "2026-02-01" : "2026-04-01"
       builder.push("product", GLOBAL, "bootstrap", {
         id: `prod:${set.code}-${region}`,
-        family_id: id,
+        family_ids: [id],
         region,
         product_code:
           set.code === "pr" ? null : region === "jp" ? set.publicCode : `${set.publicCode}EN`,
