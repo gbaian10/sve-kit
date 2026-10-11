@@ -1,5 +1,5 @@
 import { BUILD_ID } from "./build-id"
-import { bodyHeaders, trimDataCaches } from "./cache-budget"
+import { bodyHeaders, readDataCacheBudget, trimDataCaches } from "./cache-budget"
 import { transferDigest } from "./integrity"
 
 // Browser storage can be cleared or damaged; a record is used only when its bytes still match.
@@ -13,6 +13,7 @@ export class VerifiedCache {
   lastRead = { readMs: 0, digestMs: 0 }
   private readonly prefix: string
   private readonly version: string
+  private readonly name: string
   private readonly cache: Promise<Cache | undefined>
 
   constructor(
@@ -23,11 +24,12 @@ export class VerifiedCache {
     build = BUILD_ID,
   ) {
     this.root = root
+    this.name = `sve-${kind}:${encodeURIComponent(root)}`
     this.storage = storage
     this.prefix = `${root}/__sve-verified/${kind}`
     this.version = `v${String(format)}/${encodeURIComponent(build)}`
     this.cache = storage
-      ? storage.open(`sve-${kind}:${encodeURIComponent(root)}`).then(
+      ? storage.open(this.name).then(
           (cache) => cache,
           () => undefined,
         )
@@ -95,15 +97,26 @@ export class VerifiedCache {
       await cache.delete(key)
       const response = () =>
         new Response(payload, { headers: { [DIGEST]: digest, ...bodyHeaders(payload.length) } })
-      if (this.storage) await trimDataCaches(this.storage, this.root)
+      let retried = false
       try {
         await cache.put(key, response())
       } catch {
         if (!this.storage) return
-        await trimDataCaches(this.storage, this.root, payload.length, true)
-        await cache.put(key, response())
+        const budget = await readDataCacheBudget(this.storage, this.root)
+        await budget.trim(payload.length, true)
+        const replacement = response()
+        await cache.put(key, replacement)
+        budget.record(
+          this.name,
+          cache,
+          key,
+          payload.length,
+          Number(replacement.headers.get("x-sve-touched")),
+        )
+        await budget.trim()
+        retried = true
       }
-      if (this.storage) await trimDataCaches(this.storage, this.root)
+      if (this.storage && !retried) await trimDataCaches(this.storage, this.root)
       // Sweep after insertion too: concurrent writers cannot leave orphaned records or grow a slot.
       await prune(await ownKeys(), 2)
     } catch {

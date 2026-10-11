@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { cardNoKey } from "../../domain/cardNo"
@@ -48,6 +48,7 @@ import { SearchEngine } from "./engine"
 import { SearchIndex } from "./index"
 import type { BootstrapPlan, SearchEvent, SearchRequest } from "./messages"
 import type { SearchTransportFactory } from "./session"
+import { ViewCache } from "./view"
 
 const built = await buildSnapshot({
   encodeImage: ({ seed }) => Promise.resolve(new TextEncoder().encode(String(seed))),
@@ -1654,4 +1655,36 @@ it("a pending visible preview neither blocks list queries nor publishes after it
     h.events.filter((event) => event.kind === "preview-result" && event.channelId === preview.id),
   ).toHaveLength(0)
   h.session.dispose()
+})
+
+it("memory and persistent view hits do not rewrite the completed view", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const h = harness(served, storage)
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  const write = vi.spyOn(ViewCache.prototype, "write")
+  try {
+    const page = { ...query, offset: 1, limit: 1 }
+    h.channel.view(page)
+    const options = h.session.createChannel()
+    options.view(page)
+    await expect
+      .poll(() => [h.status().result.phase, options.getStatus().result.phase], POLL)
+      .toEqual(["complete", "complete"])
+    expect(write).toHaveBeenCalledTimes(1)
+    write.mockClear()
+    h.channel.view(page, true)
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    await h.queried()
+    expect(write).not.toHaveBeenCalled()
+    const warm = harness(served, storage)
+    warm.channel.view(page)
+    warm.session.load(base, "jp", "preview")
+    await warm.settled()
+    await expect.poll(() => warm.status().result.phase, POLL).toBe("complete")
+    expect(write).not.toHaveBeenCalled()
+  } finally {
+    write.mockRestore()
+  }
 })

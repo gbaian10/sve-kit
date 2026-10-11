@@ -223,10 +223,13 @@ function useSearchView(query: SearchQuery) {
     channel.view(JSON.parse(key) as SearchQuery)
   }, [channel, key])
   const channelState = useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
-  const result =
-    JSON.stringify(channelState.lastInput) === key
-      ? channelState.result
-      : { phase: "pending" as const }
+  const matches = JSON.stringify(channelState.lastInput) === key
+  const result = !matches
+    ? { phase: "pending" as const }
+    : channelState.result.phase === "pending" &&
+        channelState.previous?.view?.query.edition === query.edition
+      ? channelState.previous
+      : channelState.result
   const view = result.phase === "complete" ? result.view : undefined
   const images = useMemo(() => (view ? viewImages(view) : undefined), [view])
   return { result, view, images, status }
@@ -291,7 +294,7 @@ export function useListView(query: SearchQuery, pages: number) {
       },
       start: (count: number) => {
         lifecycle.retain()
-        const shrinking = count < state.wanted
+        const changed = count !== state.wanted
         state.wanted = count
         while (channels.length < count) {
           const channel = session.createChannel()
@@ -299,8 +302,8 @@ export function useListView(query: SearchQuery, pages: number) {
           channels.push(channel)
           request(channel, channels.length - 1)
         }
-        // New pages report through their own channels; fewer pages only need a recount.
-        if (shrinking) update()
+        // Reused channels already have answers, so any page-count change needs a recount.
+        if (changed) update()
       },
       retry: () => {
         channels.slice(0, state.wanted).forEach(request)
@@ -825,5 +828,9 @@ export function useAbilityPreview(
   useEffect(() => {
     channel.preview(printingId, faceId, language, edition)
   }, [channel, printingId, faceId, language, edition])
-  return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus).result
+  const state = useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
+  // The channel identity includes the card, face, language and edition; only its data can change.
+  return state.result.phase === "pending" && state.previous && state.lastInput?.edition === edition
+    ? state.previous
+    : state.result
 }

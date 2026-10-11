@@ -1,9 +1,17 @@
-import { act, renderHook } from "@testing-library/react"
+import { act, render, renderHook, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+import { ClassQuickBar } from "../components/search/ClassQuickBar"
 import type { SearchEvent, SearchQuery, SearchRequest } from "../data"
 import { DEFAULT_QUERY } from "../domain/query/model"
-import { useListView, useSearch, useSearchReadiness } from "./snapshot"
+import { prefsStore } from "../settings"
+import {
+  useAbilityPreview,
+  useListView,
+  useSearch,
+  useSearchReadiness,
+  useSetOptions,
+} from "./snapshot"
 
 // Control the browser boundary; the real session still owns generations and query identities.
 const fake = vi.hoisted(() => ({
@@ -77,7 +85,7 @@ function answer() {
   })
 }
 /** Answers each channel's latest view request with one item named after its page offset. */
-function answerViews() {
+function answerViews(classes: NonNullable<ReturnType<typeof useSetOptions>["classes"]> = []) {
   const latest = new Map<number, Extract<SearchRequest, { kind: "view" }>>()
   for (const request of fake.requests)
     if (request.kind === "view") latest.set(request.channelId, request)
@@ -95,7 +103,7 @@ function answerViews() {
           offset,
           items: [{ key: `c:${String(offset)}`, printingId: "p", summary: undefined }],
         },
-        options: { classes: [], sets: [] },
+        options: { classes, sets: [] },
         faces: [],
       },
     })
@@ -107,6 +115,7 @@ beforeEach(() => {
     hookWorkers.at(-1)?.onerror?.()
   })
   fake.requests.length = 0
+  prefsStore.set({ cardEdition: "jp" })
   vi.stubGlobal("Worker", HookWorker)
 })
 afterEach(() => vi.unstubAllGlobals())
@@ -246,6 +255,9 @@ describe("Worker hooks", () => {
     rerender({ pages: 1 })
     expect(result.current.view?.page.items.map((item) => item.key)).toEqual(["c:0"])
     expect(fake.requests).toHaveLength(asked)
+    rerender({ pages: 2 })
+    expect(result.current.view?.page.items.map((item) => item.key)).toEqual(["c:0", "c:60"])
+    expect(fake.requests).toHaveLength(asked)
   })
   it("a newer data version keeps the shown pages until its own pages arrive", () => {
     const { result } = renderHook(() => useListView(query, 1))
@@ -266,4 +278,85 @@ describe("Worker hooks", () => {
     ready()
     expect(result.current).toEqual({ lastInput: null, result: { phase: "pending" } })
   })
+})
+
+it("the class quickbar keeps its cells during a same-edition version replacement", () => {
+  function QuickBar() {
+    const { classes } = useSetOptions()
+    return (
+      <ClassQuickBar
+        label="classes"
+        selected={[]}
+        onToggle={() => undefined}
+        classes={[
+          { code: "neutral", label: "neutral" },
+          ...(classes ?? []).map((item) => ({ code: item.code, label: item.name.original.text })),
+        ]}
+      />
+    )
+  }
+  render(<QuickBar />)
+  ready()
+  const classes = [
+    "forestcraft",
+    "swordcraft",
+    "runecraft",
+    "dragoncraft",
+    "abysscraft",
+    "havencraft",
+  ].map((code) => ({
+    id: code,
+    code,
+    name: { original: { lang: "ja" as const, text: code }, translations: {} },
+  }))
+  answerViews(classes)
+  const cells = () =>
+    screen.getByRole("group", { name: "classes" }).querySelectorAll("button[aria-pressed]")
+  expect(cells()).toHaveLength(7)
+  act(() => {
+    window.dispatchEvent(new Event("online"))
+  })
+  ready("v2")
+  expect(cells()).toHaveLength(7)
+  answerViews(classes.slice(0, 5))
+  expect(cells()).toHaveLength(6)
+  act(() => {
+    prefsStore.set({ cardEdition: "en" })
+  })
+  expect(cells()).toHaveLength(1)
+})
+
+it("visible ability previews stay complete during replacement but never cross editions", () => {
+  const { result, rerender } = renderHook(
+    ({ edition }: { edition: "jp" | "en" }) => useAbilityPreview("p", "f", "zh-Hant", edition),
+    { initialProps: { edition: "jp" } },
+  )
+  const answerPreview = (text: string) => {
+    const request = fake.requests.findLast((request) => request.kind === "preview")
+    if (request?.kind !== "preview") throw new Error("preview request missing")
+    emit({
+      kind: "preview-result",
+      generation: request.generation,
+      channelId: request.channelId,
+      queryId: request.queryId,
+      preview: { text, language: "zh-Hant" },
+    })
+  }
+  ready()
+  answerPreview("old synthetic ability")
+  act(() => {
+    window.dispatchEvent(new Event("online"))
+  })
+  ready("v2")
+  expect(result.current).toMatchObject({
+    phase: "complete",
+    preview: { text: "old synthetic ability" },
+  })
+  answerPreview("new synthetic ability")
+  expect(result.current).toMatchObject({
+    phase: "complete",
+    preview: { text: "new synthetic ability" },
+  })
+  rerender({ edition: "en" })
+  expect(result.current).toMatchObject({ phase: "error", error: { kind: "edition-not-ready" } })
 })

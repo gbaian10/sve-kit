@@ -55,6 +55,11 @@ function readRecord(bytes: Uint8Array, edition: Region) {
   }
 }
 
+interface CachedView {
+  readonly view: CompleteView
+  readonly stored: Promise<void>
+}
+
 /** Downloads share the app queue; decoding follows manifest order; a replacement load aborts and drains the previous staging job. */
 export class SearchEngine {
   private readonly emit: (event: SearchEvent) => void
@@ -77,8 +82,8 @@ export class SearchEngine {
         version: string
         blobs: SearchBlobs
         views: ViewCache
-        memory: Map<string, CompleteView>
-        building: Map<string, Promise<CompleteView | undefined>>
+        memory: Map<string, CachedView>
+        building: Map<string, Promise<CachedView | undefined>>
         signal: AbortSignal
       }
     | undefined
@@ -179,25 +184,27 @@ export class SearchEngine {
           let event: SearchEvent
           if (request.kind === "view") {
             const key = viewSlot(request.query)
-            let view = active.memory.get(key)
-            if (!view) {
+            let cached = active.memory.get(key)
+            if (!cached) {
               // Channels asking for one page at once (the list and its options) share one build.
               let building = active.building.get(key)
               if (!building) {
                 const { query } = request
-                building = (async () =>
-                  (await active.views.read(query, active.hash)) ??
-                  (index
-                    ? await completeView(
-                        active.request.base,
-                        query,
-                        index,
-                        active.files,
-                        active.version,
-                        active.blobs,
-                        active.signal,
-                      )
-                    : undefined))()
+                building = (async () => {
+                  const view = await active.views.read(query, active.hash)
+                  if (view) return { view, stored: Promise.resolve() }
+                  if (!index) return undefined
+                  const completed = await completeView(
+                    active.request.base,
+                    query,
+                    index,
+                    active.files,
+                    active.version,
+                    active.blobs,
+                    active.signal,
+                  )
+                  return { view: completed, stored: active.views.write(completed, active.hash) }
+                })()
                 const built = building
                 const drop = () => {
                   if (active.building.get(key) === built) active.building.delete(key)
@@ -205,15 +212,16 @@ export class SearchEngine {
                 built.then(drop, drop)
                 active.building.set(key, built)
               }
-              view = await building
+              cached = await building
             }
-            if (!view) return
-            active.memory.set(key, view)
+            if (!cached) return
+            const { view, stored } = cached
+            active.memory.set(key, cached)
             while (active.memory.size > 8)
               active.memory.delete(active.memory.keys().next().value ?? "")
             event = { kind: "view-result", ...identity, view }
             const completed = view
-            void active.views.write(completed, active.hash).then(async () => {
+            void stored.then(async () => {
               if (request.remember && this.active === active && this.rememberedRequest === request)
                 await active.views.remember(completed.query, active.hash)
             })
@@ -447,15 +455,15 @@ export class SearchEngine {
           version: "",
           blobs,
           views,
-          memory: new Map<string, CompleteView>(),
-          building: new Map<string, Promise<CompleteView | undefined>>(),
+          memory: new Map<string, CachedView>(),
+          building: new Map<string, Promise<CachedView | undefined>>(),
           signal: new AbortController().signal,
         }
         if (view && cachedEntry && hash === objectValue(cachedEntry["entry"])["manifest_sha256"]) {
           signal.throwIfAborted()
           context.dataVersion = stringValue(cachedEntry["dataVersion"])
           context.manifestFields = objectValue(cachedEntry["manifestFields"])
-          context.memory.set(viewSlot(fallbackQuery), view)
+          context.memory.set(viewSlot(fallbackQuery), { view, stored: Promise.resolve() })
           this.active = context
           this.ready(request, { ...emptyMetrics, wallMs: performance.now() - start }, false, cached)
         }
@@ -663,6 +671,7 @@ export class SearchEngine {
         signal,
       )
       signal.throwIfAborted()
+      const firstStored = views.write(firstView, manifestHash)
       this.active = {
         generation: request.generation,
         index,
@@ -674,7 +683,7 @@ export class SearchEngine {
         version,
         blobs,
         views,
-        memory: new Map([[viewSlot(firstView.query), firstView]]),
+        memory: new Map([[viewSlot(firstView.query), { view: firstView, stored: firstStored }]]),
         building: new Map(),
         signal: new AbortController().signal,
       }
@@ -700,7 +709,7 @@ export class SearchEngine {
         },
       })
       void this.flushQueries()
-      await views.write(firstView, manifestHash)
+      await firstStored
       await blobs.retainPlan(
         request.edition,
         [

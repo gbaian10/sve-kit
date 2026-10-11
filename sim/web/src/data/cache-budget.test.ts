@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { expect, it } from "vitest"
+import { expect, it, vi } from "vitest"
 
 import { memoryCache } from "../test-utils/cache"
 import { trimDataCaches, VIEW_BUDGET } from "./cache-budget"
@@ -45,4 +45,30 @@ it("the current generation cannot bypass the root budget when its pinned bodies 
     )
   await trimDataCaches(storage, root)
   expect((await cache.keys()).length).toBe(1)
+})
+
+it("evicts a legacy headerless record once without reading its body on later scans", async () => {
+  const storage = memoryCache()
+  const root = "https://cdn.test"
+  const cache = await storage.open(`sve-snapshot:${encodeURIComponent(root)}`)
+  const url = `${root}/legacy`
+  await cache.put(url, new Response(new Uint8Array(32 * 1024 * 1024)))
+  const open = storage.open.bind(storage)
+  const namespace = `sve-snapshot:${encodeURIComponent(root)}`
+  vi.spyOn(storage, "open").mockImplementation((name) =>
+    name === namespace ? Promise.resolve(cache) : open(name),
+  )
+  const matched = vi.spyOn(cache, "match")
+  const removed = vi.spyOn(cache, "delete")
+  const read = vi.spyOn(Response.prototype, "arrayBuffer")
+  try {
+    await trimDataCaches(storage, root)
+    expect(await cache.keys()).toEqual([])
+    await trimDataCaches(storage, root)
+    expect(matched).toHaveBeenCalledTimes(1)
+    expect(removed).toHaveBeenCalledTimes(1)
+    expect(read).not.toHaveBeenCalled()
+  } finally {
+    read.mockRestore()
+  }
 })

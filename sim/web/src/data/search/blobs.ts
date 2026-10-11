@@ -37,6 +37,10 @@ export class SearchBlobs {
     if (!cache) return
     const planPath = (region: Region) => new Request(`${this.base}/__sve-search-plan/${region}`).url
     try {
+      const writePlan = async (path: string, plans: unknown) => {
+        const bytes = new TextEncoder().encode(JSON.stringify(plans))
+        await cache.put(path, new Response(bytes, { headers: bodyHeaders(bytes.length) }))
+      }
       const current = [
         ...new Set(
           files.map((file) => new Request(`${this.base}/${stringValue(file["path"])}`).url),
@@ -58,7 +62,7 @@ export class SearchBlobs {
         ].slice(0, 2)
         const retained = new Set([generations, ...plans.flatMap((plan) => plan.paths)])
         for (const key of await cache.keys()) if (!retained.has(key.url)) await cache.delete(key)
-        await cache.put(generations, new Response(JSON.stringify(plans)))
+        await writePlan(generations, plans)
         if (this.storage) await trimDataCaches(this.storage, this.base)
         return
       }
@@ -71,7 +75,7 @@ export class SearchBlobs {
       const retained = new Set([...plans.flat(), ...other.flat(), planPath("jp"), planPath("en")])
       // Evict before writing metadata so a full cache can recover space for the next load.
       for (const key of await cache.keys()) if (!retained.has(key.url)) await cache.delete(key)
-      await cache.put(planPath(edition), new Response(JSON.stringify(plans)))
+      await writePlan(planPath(edition), plans)
       if (this.storage) await trimDataCaches(this.storage, this.base)
     } catch {
       this.persistent = false
