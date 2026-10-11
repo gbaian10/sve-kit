@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import {
   type Catalog,
@@ -104,6 +104,7 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
   const snapshot = client.snapshot()
   const [, setVersion] = useState(0)
   const [visible, setVisible] = useState<ReadonlySet<string>>(new Set())
+  const shownRef = useRef(visible)
   useEffect(() => {
     if (!ready || !snapshot) return
     const store = imageStore(snapshot)
@@ -171,17 +172,20 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
     }
     const collect = () => {
       pump()
-      if (active)
-        setVisible(
-          new Set(
-            [...onScreen]
-              .filter((node) => node.isConnected)
-              .map((node) => {
-                const face = faceOfNode(node)
-                return faceKeyOf(face.printingId, face.faceId)
-              }),
-          ),
-        )
+      if (!active) return
+      const next = new Set(
+        [...onScreen]
+          .filter((node) => node.isConnected)
+          .map((node) => {
+            const face = faceOfNode(node)
+            return faceKeyOf(face.printingId, face.faceId)
+          }),
+      )
+      // An unchanged on-screen set must not re-render the whole result list on every DOM mutation.
+      const shown = shownRef.current
+      if (next.size === shown.size && [...next].every((key) => shown.has(key))) return
+      shownRef.current = next
+      setVisible(next)
     }
     const schedule = () => {
       clearTimeout(timer)
@@ -195,13 +199,16 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
       schedule()
     }
     const supported = typeof IntersectionObserver !== "undefined"
+    let nearHeight = window.innerHeight
     // IntersectionObserver percentages use root width, so screen-height margins need pixels.
-    const createNearObserver = () =>
-      supported
+    const createNearObserver = () => {
+      nearHeight = window.innerHeight
+      return supported
         ? new IntersectionObserver(track(near), {
-            rootMargin: `${String(window.innerHeight * 0.5)}px 0px ${String(window.innerHeight * 1.5)}px 0px`,
+            rootMargin: `${String(nearHeight * 0.5)}px 0px ${String(nearHeight * 1.5)}px 0px`,
           })
         : undefined
+    }
     let nearObserver = createNearObserver()
     const screenObserver = supported ? new IntersectionObserver(track(onScreen)) : undefined
     const observed = new Set<Element>()
@@ -228,6 +235,8 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
       schedule()
     }
     const resize = () => {
+      // The margins depend on the height only; width-only resizes must not rebuild every target.
+      if (window.innerHeight === nearHeight) return
       nearObserver?.disconnect()
       near.clear()
       nearObserver = createNearObserver()

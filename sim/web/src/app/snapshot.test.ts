@@ -127,6 +127,40 @@ describe("viewport image continuity", () => {
     expect(resized?.targets.size).toBe(2)
   })
 
+  it("keeps the range observers when only the width changes", () => {
+    nodes(2)
+    const { client } = imageSnapshot(2)
+    vi.stubGlobal("innerHeight", 800)
+    renderHook(() => useImageIndex(client, true))
+    const before = Observer.instances.length
+    act(() => {
+      window.dispatchEvent(new Event("resize"))
+    })
+    expect(Observer.instances).toHaveLength(before)
+    expect(Observer.instances.every((o) => !o.disconnected)).toBe(true)
+  })
+
+  it("does not re-render while the on-screen set and the retained faces are unchanged", async () => {
+    const targets = nodes(2)
+    const { client } = imageSnapshot(2)
+    let renders = 0
+    renderHook(() => {
+      renders += 1
+      return useImageIndex(client, true)
+    })
+    act(() => {
+      emit(targets)
+    })
+    await collect()
+    await collect()
+    const settled = renders
+    act(() => {
+      emit(targets)
+    })
+    await collect()
+    expect(renders).toBe(settled)
+  })
+
   it("clears displayed URLs on snapshot replacement and ignores a pending old batch", async () => {
     const targets = nodes(2)
     const { client, snapshot, media } = imageSnapshot(2)
