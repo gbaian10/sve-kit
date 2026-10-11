@@ -36,7 +36,9 @@ export function AppShell() {
         </main>
         <Footer dataVersion={status.state === "ready" ? status.dataVersion : undefined} />
         <BottomNav />
-        {import.meta.env.DEV && <DevBadge client={client} />}
+        {(import.meta.env.DEV || import.meta.env.VITE_SVE_DEV_TOOLS === "1") && (
+          <DevBadge client={client} />
+        )}
       </div>
       <ScrollRestoration getKey={(location) => location.pathname + location.search} />
     </ToastProvider>

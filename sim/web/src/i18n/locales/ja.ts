@@ -167,5 +167,7 @@ export default {
     retry: "再試行",
     usePreview: "プレビューデータへ",
     useCdn: "本番データへ戻す",
+    clearLocal: "ローカルデータを消去",
+    insecure: "https 以外：キャッシュ無効",
   },
 } satisfies Messages
