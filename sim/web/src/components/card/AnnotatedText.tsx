@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import {
@@ -13,7 +13,59 @@ import {
 } from "../../data"
 import { cn } from "../ui/cn"
 import { Link } from "../ui/Link"
-import { InlineText } from "./InlineText"
+import { SymbolIcon } from "./InlineText"
+import { inlinePieces, type SymbolPiece } from "./textSymbols"
+
+interface Segment {
+  readonly text: string
+  readonly reference: JsonObject | null
+  readonly bold: boolean
+  readonly symbol?: SymbolPiece
+}
+
+// Annotation ranges and icon markers partition the text independently: a keyword range usually
+// covers only the word inside the braces. The icon stands for the whole marker, so it is drawn
+// once and takes over any explanation entry a range inside the marker carries.
+function layOut(
+  text: string,
+  runs: readonly {
+    readonly text: string
+    readonly reference?: JsonObject | null
+    readonly bold?: boolean | null
+  }[],
+): readonly Segment[] {
+  let offset = 0
+  const spans = runs.map((run) => {
+    const start = offset
+    offset += run.text.length
+    return { start, end: offset, reference: run.reference ?? null, bold: run.bold === true }
+  })
+  const segments: Segment[] = []
+  for (const piece of inlinePieces(text)) {
+    if (piece.kind === "symbol") {
+      const span = spans.find(
+        (candidate) =>
+          candidate.reference !== null &&
+          candidate.start < piece.end &&
+          candidate.end > piece.start,
+      )
+      segments.push({
+        text: piece.alt,
+        reference: span?.reference ?? null,
+        bold: false,
+        symbol: piece,
+      })
+      continue
+    }
+    for (const span of spans) {
+      const start = Math.max(span.start, piece.start)
+      const end = Math.min(span.end, piece.end)
+      if (start < end)
+        segments.push({ text: text.slice(start, end), reference: span.reference, bold: span.bold })
+    }
+  }
+  return segments
+}
 
 export function AnnotatedText({
   value,
@@ -56,29 +108,31 @@ export function AnnotatedText({
         .filter((value) => value !== undefined)
     : []
   const Text = heading ? "h2" : "p"
+  const text = stringValue(value.unit["text"])
+  const segments = useMemo(
+    () => layOut(text, annotationReady ? textRuns(value) : [{ text }]),
+    [text, value, annotationReady],
+  )
   return (
     <div>
       <Text lang={stringValue(value.unit["lang"])} className={cn("whitespace-pre-wrap", className)}>
-        {(annotationReady
-          ? textRuns(value)
-          : [{ text: stringValue(value.unit["text"]), reference: null, bold: false }]
-        ).map((run, index) => {
+        {segments.map((segment, index) => {
           const content =
-            emphasis && run.bold === true ? (
-              <strong>
-                <InlineText text={run.text} />
-              </strong>
+            segment.symbol !== undefined ? (
+              <SymbolIcon piece={segment.symbol} />
+            ) : emphasis && segment.bold ? (
+              <strong>{segment.text}</strong>
             ) : (
-              <InlineText text={run.text} />
+              segment.text
             )
-          return run.reference ? (
+          return segment.reference ? (
             <button
               key={index}
               type="button"
               className="inline cursor-pointer text-inherit underline decoration-dotted underline-offset-4"
               title={t("card.annotationReference")}
               onClick={() => {
-                setReference(run.reference ?? null)
+                setReference(segment.reference)
               }}
             >
               {content}

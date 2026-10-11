@@ -98,16 +98,22 @@ const COST_SPELLING = /^(?:コスト|消費)(\d{1,2}|X)$/
 const COST_STEM = /^(?:icon_cost(\d{2})|COST (X))$/
 const MARKER = /\{([^{}]*)\}/g
 
-export type InlinePiece =
-  | { readonly kind: "text"; readonly text: string }
-  | {
-      readonly kind: "symbol"
-      readonly symbol: TextSymbol
-      /** The text the marker stands for: what a copy of the text should contain. */
-      readonly alt: string
-      /** The alt without the EN site's square brackets, for the optional label beside the icon. */
-      readonly label: string
-    }
+interface Span {
+  /** UTF-16 offsets of the piece in the source text, so annotation ranges can be laid over it. */
+  readonly start: number
+  readonly end: number
+}
+
+export interface SymbolPiece extends Span {
+  readonly kind: "symbol"
+  readonly symbol: TextSymbol
+  /** The text the marker stands for: what a copy of the text should contain. */
+  readonly alt: string
+  /** The alt without the EN site's square brackets, for the optional label beside the icon. */
+  readonly label: string
+}
+
+export type InlinePiece = (Span & { readonly kind: "text"; readonly text: string }) | SymbolPiece
 
 function costSymbol(value: string): TextSymbol | undefined {
   if (value === "X") return { icon: costIcon(Number.NaN), kind: "cost" }
@@ -137,16 +143,26 @@ export function inlinePieces(text: string): readonly InlinePiece[] {
   for (const match of text.matchAll(MARKER)) {
     const resolved = resolve(match[1] ?? "")
     if (!resolved) continue
-    if (match.index > cursor) pieces.push({ kind: "text", text: text.slice(cursor, match.index) })
+    const end = match.index + match[0].length
+    if (match.index > cursor)
+      pieces.push({
+        kind: "text",
+        text: text.slice(cursor, match.index),
+        start: cursor,
+        end: match.index,
+      })
     pieces.push({
       kind: "symbol",
       symbol: resolved.symbol,
       alt: resolved.alt,
       label: resolved.alt.replace(/^\[(.*)\]$/, "$1"),
+      start: match.index,
+      end,
     })
-    cursor = match.index + match[0].length
+    cursor = end
   }
-  if (cursor < text.length) pieces.push({ kind: "text", text: text.slice(cursor) })
+  if (cursor < text.length)
+    pieces.push({ kind: "text", text: text.slice(cursor), start: cursor, end: text.length })
   return pieces
 }
 

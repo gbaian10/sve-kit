@@ -46,6 +46,44 @@ describe("annotation presentation", () => {
     expect(screen.getByRole("complementary")).toHaveTextContent("原始區域標籤")
   })
 
+  it("draws an annotated keyword marker as one official icon that still opens its explanation", async () => {
+    // The keyword range covers only the word inside the braces, as the real annotations do.
+    const value = {
+      unit: { text: "{ファンファーレ}{コスト1}：1枚引く。", lang: "ja" },
+      annotation: {
+        occurrences: [
+          {
+            ordinal: 0,
+            reference: { kind: "vocabulary", key: ["ability", "fanfare"] },
+            ranges: [{ start: 1, end: 8 }],
+            bold: true,
+          },
+        ],
+      },
+    }
+    await renderInRouter(
+      <AnnotatedText
+        value={value}
+        context={{
+          original: value,
+          concepts: [],
+          explanations: [],
+          cards: [],
+          vocabulary: [
+            { kind: "ability", code: "fanfare", unit: { text: "入場曲說明", lang: "ja" } },
+          ],
+        }}
+        emphasis
+      />,
+    )
+    const icons = screen.getAllByRole("img")
+    expect(icons.map((icon) => icon.getAttribute("alt"))).toEqual(["ファンファーレ", "コスト1"])
+    expect(screen.getByText("：1枚引く。")).toBeInTheDocument()
+    expect(screen.queryByText(/[{}]/)).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: "ファンファーレ" }))
+    expect(screen.getByRole("complementary")).toHaveTextContent("入場曲說明")
+  })
+
   it.each([
     [new SnapshotError("public-annotation/reference", "invalid reference"), "文字資料無法通過驗證"],
     [new Error("network unavailable"), "文字載入失敗，請稍後再試。"],
