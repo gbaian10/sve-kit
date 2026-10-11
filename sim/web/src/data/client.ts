@@ -11,7 +11,7 @@ import {
   stringValue,
 } from "./format-v3/json"
 import { validateMedia, validateMediaIdentities } from "./format-v3/media"
-import { validatePlacement } from "./format-v3/placement"
+import { placementChecker } from "./format-v3/placement"
 import { type Files, findBase, type Fragment, isCompatible, joinDetail } from "./format-v3/reader"
 import { validateDigitalLinks, validateImageRows } from "./format-v3/semantics"
 import { validateIndex2 } from "./index-entry"
@@ -312,9 +312,10 @@ export function createSnapshotClient(
           fragment.rows.map((row) => [stringValue(row["id"]), row["card_id"] ?? null] as const),
         ),
     )
+    const check = placementChecker(version, bootstrap, faceCards)
     let segment = performance.now()
     for (const fragment of bootstrap) {
-      validatePlacement([fragment], version, bootstrap, faceCards)
+      check([fragment])
       // Leave time for input and rendering between bounded validation segments.
       if (typeof Worker !== "undefined" && performance.now() - segment > 8) {
         await new Promise<void>((resolve) => setTimeout(resolve, 0))
@@ -402,6 +403,17 @@ export function createSnapshotClient(
     return faces
   }
 
+  // Detail files are checked against the same bootstrap every time; index it once per snapshot.
+  const checkers = new WeakMap<LoadedSnapshot, (fragments: readonly Fragment[]) => void>()
+  const checkerOf = (snapshot: LoadedSnapshot) => {
+    let check = checkers.get(snapshot)
+    if (!check) {
+      check = placementChecker(stringValue(snapshot.manifest["format_version"]), snapshot.bootstrap)
+      checkers.set(snapshot, check)
+    }
+    return check
+  }
+
   const loadFile = async (snapshot: LoadedSnapshot, key: string): Promise<readonly Fragment[]> => {
     const file = snapshot.files.get(key)
     if (!file) throw new SnapshotError("payload-set", `unknown file ${key}`)
@@ -426,7 +438,7 @@ export function createSnapshotClient(
     const result = await decode({ kind: "file", file, bytes: data, version })
     if (result.kind !== "fragments") throw new SnapshotError("shape", "expected fragments")
     const fragments = result.fragments
-    validatePlacement(fragments, version, snapshot.bootstrap)
+    checkerOf(snapshot)(fragments)
     if (role === "images") {
       const view: Record<string, JsonObject[]> = {}
       for (const fragment of [

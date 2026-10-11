@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest"
 
 import { type JsonObject } from "./json"
-import { validatePlacement } from "./placement"
+import { placementChecker, validatePlacement } from "./placement"
 import { type Fragment } from "./reader"
 import { bucket } from "./sha256"
 
@@ -76,5 +76,39 @@ describe("independent fixed placement matrix", () => {
     expect(() => {
       validatePlacement([fragment(table, part, home, width, [row], (correct + 1) % 64)], "3.0.0")
     }).toThrow("entity bucket mismatch")
+  })
+
+  it("checks many fragments against one bootstrap index", () => {
+    const home = bucket(["c:synthetic"], 64)
+    const faces = fragment(
+      "face",
+      "bootstrap",
+      "TEST",
+      64,
+      [{ id: "f:synthetic", card_id: "c:synthetic" }],
+      home,
+    )
+    const check = placementChecker("3.0.0", [faces])
+    const revision = (id: string, face: string) =>
+      fragment("face_revision", "history", "TEST", 32, [{ id, face_id: face }], home)
+    expect(() => {
+      check([revision("r:first", "f:synthetic")])
+      check([revision("r:second", "f:synthetic")])
+    }).not.toThrow()
+    expect(() => {
+      check([revision("r:orphan", "f:unknown")])
+    }).toThrow("missing card for entity bucket")
+    // Face rows in the checked fragments are seen as well as the indexed bootstrap.
+    const ownFace = fragment(
+      "face",
+      "bootstrap",
+      "TEST",
+      64,
+      [{ id: "f:own", card_id: "c:synthetic" }],
+      home,
+    )
+    expect(() => {
+      check([ownFace, revision("r:own", "f:own")])
+    }).not.toThrow()
   })
 })
