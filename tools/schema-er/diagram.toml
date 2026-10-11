@@ -23,6 +23,7 @@ tables = [
     "card_int_id",
     "product_family",
     "product",
+    "product_family_member",
     "printing_product",
     "printing_reference",
     "region_mapping_review",
@@ -289,7 +290,7 @@ tables = [
 [snapshot.references]
 "qa.current_version_id" = "qa_version"
 "stamp.series_code" = "vocabulary"          # export/snapshot-format.md §8
-family_id = "product_family"
+family_ids = "product_family"
 home_set_id = "product_family"
 name_concept_id = "annotation_concept"
 image_id = "image_asset"
