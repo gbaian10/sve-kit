@@ -127,13 +127,13 @@ semantics. Project table requirements remain in `docs/schema/build/build-db.md` 
 
 ## Optional T1 DDL and pipeline readiness
 
-`t1.compile_build(("cr",))` compiles the 41 T0 tables plus the two CR
-tables: 43 tables. The default selects only T0. Image metadata is supplied by
+`t1.compile_build(("cr",))` compiles the 42 T0 tables plus the two CR
+tables: 44 tables. The default selects only T0. Image metadata is supplied by
 the separate image index, without image tables in this database.
 DSL and keywords remain reserved, unavailable capabilities; disabled nullable
 references remain NULL-only. Enabling CR installs the existing
 `rules_profile_revision.cr_version_id` FK. This selection is smaller than the
-minimum 54-table DDL inventory.
+minimum 55-table DDL inventory.
 
 `Capability.implemented` means that DDL declarations exist. The separate
 `importer_ready` and `validator_ready` flags default to false.
@@ -210,8 +210,8 @@ concurrently. Source archives and frozen inputs are never replacement targets.
 ## Minimum T1 and optional EN groups
 
 `t1.compile_minimum()` selects T0 plus CR, errata, correction, QA and
-related: exactly 54 tables. `compile_minimum(include_en=True)` adds art and the
-three region review/divergence tables: exactly 58. The `en` group explicitly
+related: exactly 55 tables. `compile_minimum(include_en=True)` adds art and the
+three region review/divergence tables: exactly 59. The `en` group explicitly
 requires `art`; selecting `art` alone is also supported. No artist, baseline or DSL
 placeholder tables are created. All importer/validator readiness
 flags remain false. These counts attest DDL coverage, not release readiness.
