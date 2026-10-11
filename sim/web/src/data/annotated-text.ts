@@ -200,11 +200,21 @@ class PageClosure {
       kind === "face_revision" &&
       !this.rows.get(kind)?.has(canonicalText([value["id"] ?? null]))
     ) {
-      const card = this.rows.get("card")?.get(canonicalText([receiver?.cardId ?? null]))
+      const candidateFace = receiver
+        ? undefined
+        : [...(this.rows.get("face")?.values() ?? [])].find((face) =>
+            arrayValue(face["wording"]).some((raw) =>
+              arrayValue(objectValue(raw)["candidates"]).some(
+                (candidate) => objectValue(candidate)["revision_id"] === value["id"],
+              ),
+            ),
+          )
+      const cardId = receiver?.cardId ?? candidateFace?.["card_id"]
+      const card = this.rows.get("card")?.get(canonicalText([cardId ?? null]))
       if (!card) annotationFailure("owner")
       const physical = homeSetOwner(stringValue(card["home_set_id"]))
       const entity = [card["id"] ?? null]
-      // Same-face source owners can only live in this card's fixed bootstrap or history fragment.
+      // Source owners and listed candidates live in their card's fixed bootstrap or history fragment.
       for (const partition of ["bootstrap", "history"] as const) {
         await this.load(kind, [value["id"] ?? null], partition, physical, entity)
         if (this.rows.get(kind)?.has(canonicalText([value["id"] ?? null]))) break
