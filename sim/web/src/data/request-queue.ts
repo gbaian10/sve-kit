@@ -1,9 +1,10 @@
 import type { Fetcher } from "./cdn"
 
-// Real networks add hundreds of milliseconds per request, so startup needs several in flight;
-// background work never takes the last two slots, which stay free for visible work.
-const SLOTS = 8
-const BACKGROUND_SLOTS = 6
+// Each request costs a full round trip (about 134 ms to the nearest serving edge in measurement), and
+// startup needs about a hundred files, so few slots turn it into a dozen waves. HTTP/2 multiplexes
+// these on one connection. Background work never takes the last eight, kept free for visible work.
+const SLOTS = 32
+const BACKGROUND_SLOTS = 24
 
 /** One snapshot's network budget; some slots are reserved for visible work. */
 export function requestQueue(fetcher: Fetcher): {
