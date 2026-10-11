@@ -56,6 +56,7 @@ export default {
     randomPending: "カードデータのダウンロード後に使えます",
     searchPending: "カードデータをダウンロード中です。先に入力でき、完了後に自動で検索します。",
     searchFailed: "カードデータを読み込めなかったため、検索できません。",
+    recentUnavailable: "現在のデータには表示できる閲覧履歴のカードがありません。",
     recentLoading: "最近見たカードを読み込み中",
     sets: {
       title: "パック別・最新3弾",

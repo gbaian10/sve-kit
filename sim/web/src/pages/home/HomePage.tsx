@@ -39,9 +39,6 @@ function productFacts(snapshot: LoadedSnapshot): ProductFacts[] {
     }))
 }
 
-// The home page (design 00 R1, #519). The shell and the search paint at once and stay usable while
-// the catalog downloads; every block that needs data waits for the complete catalog instead of
-// showing partial numbers. Phones and the 820 tablet stack the blocks; desktop uses three columns.
 export function HomePage() {
   const { t } = useTranslation()
   const prefs = usePrefs()

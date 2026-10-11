@@ -18,9 +18,6 @@ export interface NewPackBannerProps {
   readonly locale: string
 }
 
-// The newest set with real counts only (#519): no planned total, so no denominator or percentage,
-// and nothing but "loading" until the set's cards are complete. Low-confidence names still count
-// as translated and are listed as awaiting proofreading, not as a finished translation.
 export function NewPackBanner({ pack, counts, countTranslations, locale }: NewPackBannerProps) {
   const { t } = useTranslation()
   const headingId = useId()

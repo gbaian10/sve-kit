@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react"
+import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest"
 
@@ -102,6 +102,51 @@ describe("home search", () => {
     })
   })
 
+  it("keeps IME confirmation keys inside the search input", async () => {
+    const { router } = await open()
+    const user = userEvent.setup()
+    const input = screen.getByRole("combobox")
+    await user.type(input, "bp01-51")
+    await screen.findByRole("listbox")
+    fireEvent.keyDown(input, { key: "ArrowDown", isComposing: true })
+    expect(input).not.toHaveAttribute("aria-activedescendant")
+    fireEvent.keyDown(input, { key: "Enter", isComposing: true })
+    expect(router.state.location.pathname).toBe("/")
+    await user.keyboard("{Enter}")
+    expect(router.state.location.pathname).toBe("/cards/BP01-051")
+  })
+
+  it("cancels an Enter waiting for debounce when the suggestions are dismissed", async () => {
+    const { router } = await open()
+    const user = userEvent.setup()
+    const input = screen.getByRole("combobox")
+    await user.type(input, "bp01-51{Enter}{Escape}")
+    await user.tab()
+    await user.click(input)
+    await screen.findByRole("listbox")
+    expect(router.state.location.pathname).toBe("/")
+  })
+
+  it("keeps the text when returning from a recent card or a shortcut", async () => {
+    recentStore.push("p:bp01-001")
+    const { router } = await open()
+    const user = userEvent.setup()
+    await user.type(screen.getByRole("combobox"), "bp01-51")
+    const recent = within(screen.getByRole("region", { name: "最近查看" }))
+    await user.click(recent.getByRole("link"))
+    expect(router.state.location.pathname).toBe("/cards/BP01-001")
+    await router.navigate(-1)
+    await waitFor(() => {
+      expect(screen.getByRole("combobox")).toHaveValue("bp01-51")
+    })
+    await user.click(screen.getByRole("combobox"))
+    await user.click(main().getByRole("link", { name: "進階搜尋" }))
+    await router.navigate(-1)
+    await waitFor(() => {
+      expect(screen.getByRole("combobox")).toHaveValue("bp01-51")
+    })
+  })
+
   it("takes the last input to the list with 'see all' and shows the empty list on no match", async () => {
     const { router } = await open()
     const user = userEvent.setup()
@@ -151,6 +196,16 @@ describe("recently viewed", () => {
     await userEvent.click(section.getByRole("button", { name: "清除" }))
     expect(recentStore.get()).toEqual([])
     expect(section.getByText(/還沒看過任何卡/u)).toBeVisible()
+  })
+
+  it("can clear history containing only unknown printing ids", async () => {
+    recentStore.push("p:unknown")
+    await open()
+    const recent = within(screen.getByRole("region", { name: "最近查看" }))
+    expect(recent.queryByRole("link")).toBeNull()
+    expect(recentStore.get()).toEqual(["p:unknown"])
+    await userEvent.click(recent.getByRole("button", { name: "清除" }))
+    expect(recentStore.get()).toEqual([])
   })
 
   it("keeps working for the visit when storage refuses writes", async () => {

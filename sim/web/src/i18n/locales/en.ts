@@ -56,6 +56,7 @@ export default {
     randomPending: "Available once the card data has downloaded",
     searchPending: "Downloading card data. You can type now; the search runs when it finishes.",
     searchFailed: "Card data failed to load, so search is unavailable.",
+    recentUnavailable: "No recently viewed cards are available in the current data.",
     recentLoading: "Loading recently viewed cards",
     sets: {
       title: "By set · latest three",

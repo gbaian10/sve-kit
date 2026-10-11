@@ -18,8 +18,7 @@ export interface RecentCardsProps {
   readonly images: ImageIndex | undefined
 }
 
-// Recently viewed cards from settings/recent.ts. A list that is still loading keeps every stored
-// id; ids the loaded catalog does not know are skipped, never deleted.
+// Unknown ids may belong to another snapshot, so resolving the list never deletes them.
 export function RecentCards({ rows, stored, images }: RecentCardsProps) {
   const { t } = useTranslation()
   const headingId = useId()
@@ -30,7 +29,7 @@ export function RecentCards({ rows, stored, images }: RecentCardsProps) {
         <h2 id={headingId} className="text-15 font-semibold">
           {t("search.recent")}
         </h2>
-        {rows !== null && rows.length > 0 && (
+        {rows !== null && stored > 0 && (
           <button
             type="button"
             onClick={() => {
@@ -43,7 +42,9 @@ export function RecentCards({ rows, stored, images }: RecentCardsProps) {
         )}
       </div>
       {count === 0 ? (
-        <p className="text-13 leading-relaxed text-text-3">{t("search.noRecent")}</p>
+        <p className="text-13 leading-relaxed text-text-3">
+          {stored > 0 ? t("home.recentUnavailable") : t("search.noRecent")}
+        </p>
       ) : rows === null ? (
         <ul
           aria-busy="true"

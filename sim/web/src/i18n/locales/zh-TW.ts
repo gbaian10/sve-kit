@@ -54,6 +54,7 @@ const zhTW = {
     randomPending: "卡片資料下載完成後才能使用",
     searchPending: "卡片資料下載中。可以先輸入，下載完成後會自動搜尋。",
     searchFailed: "卡片資料載入失敗，暫時無法搜尋。",
+    recentUnavailable: "目前資料沒有可顯示的最近查看卡片。",
     recentLoading: "最近查看載入中",
     sets: {
       title: "依卡包・最近三彈",

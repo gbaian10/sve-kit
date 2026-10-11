@@ -42,9 +42,6 @@ export interface HomeSearchProps {
   readonly nameOf: (summary: SuggestRow["summary"]) => DisplayedName
 }
 
-// The home search (design 00 R1): the /cards search bar and suggest list without the list below.
-// Typing works while the catalog downloads; the query only runs once it is complete, so there are
-// no suggestions, totals or empty results before then.
 export function HomeSearch({ catalog, failed, edition, images, recent, nameOf }: HomeSearchProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -117,7 +114,6 @@ export function HomeSearch({ catalog, failed, edition, images, recent, nameOf }:
     remember()
     void navigate(`/cards${querySearch({ ...DEFAULT_QUERY, text: typed })}`)
   }
-  // Enter opens the highlighted (else first) suggestion; with no match it shows the empty list.
   const activate = (index: number) => {
     if (rows.length > 0) openRow(index === -1 ? 0 : index)
     else seeAll()
@@ -132,6 +128,7 @@ export function HomeSearch({ catalog, failed, edition, images, recent, nameOf }:
   }, [debounced, complete])
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.nativeEvent.isComposing) return
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       if (rows.length === 0) return
       event.preventDefault()
@@ -141,6 +138,7 @@ export function HomeSearch({ catalog, failed, edition, images, recent, nameOf }:
       return
     }
     if (event.key === "Escape") {
+      armed.current = null
       if (focused) {
         event.preventDefault()
         setFocused(false)
@@ -207,7 +205,9 @@ export function HomeSearch({ catalog, failed, edition, images, recent, nameOf }:
             setFocused(true)
           }}
           onBlur={() => {
+            armed.current = null
             setFocused(false)
+            remember()
           }}
           inputRef={inputRef}
           listId={listId}
