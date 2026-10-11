@@ -52,7 +52,7 @@ function workerOf(root: SnapshotRoot): ActiveWorker {
             state: "ready",
             dataVersion: next.dataVersion ?? "",
             unconfirmed: next.unconfirmed ?? false,
-            ...(next.updating ? { updating: "index" as const } : {}),
+            ...(next.updating ? { updating: next.step ?? ("index" as const) } : {}),
             ...(next.error
               ? {
                   updateError: { kind: "network" as const, detail: next.error.message },
@@ -64,8 +64,10 @@ function workerOf(root: SnapshotRoot): ActiveWorker {
           ? { state: "error", kind: "network", detail: next.error?.message ?? "search failed" }
           : {
               state: "loading",
-              phase: next.progress ? "bootstrap" : "index",
-              ...(next.progress ? { done: next.progress.done, total: next.progress.total } : {}),
+              phase: next.step ?? "index",
+              ...(next.step === "bootstrap" && next.progress
+                ? { done: next.progress.done, total: next.progress.total }
+                : {}),
             }
     for (const listener of listeners) listener()
   })
@@ -172,7 +174,7 @@ export function useSearchReadiness(edition: Region) {
           loading: {
             ...status.loading,
             root,
-            step: status.progress ? ("bootstrap" as const) : ("index" as const),
+            step: status.step ?? ("index" as const),
             ...status.progress,
           },
         }

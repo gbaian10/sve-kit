@@ -64,7 +64,10 @@ export type PurposeResult =
       readonly items: readonly RecentSummary[]
       readonly faces?: readonly ViewFace[]
     }
+export type SearchStage = "index" | "manifest" | "config" | "bootstrap" | "search" | "images"
+
 type WorkerEvent =
+  | { readonly kind: "stage"; readonly generation: number; readonly step: SearchStage }
   | (PurposeResult & {
       readonly generation: number
       readonly channelId: number

@@ -19,7 +19,7 @@ import { MetadataBytes, type MetadataProgress } from "./metadata"
 import { appRequests, requestQueue } from "./request-queue"
 import { VerifiedCache } from "./verified-cache"
 
-type LoadPhase = "index" | "manifest" | "bootstrap"
+type LoadPhase = "index" | "manifest" | "config" | "bootstrap" | "search" | "images"
 type ErrorKind = "network" | "incompatible" | "corrupt"
 interface LoadFailure {
   readonly kind: ErrorKind

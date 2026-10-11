@@ -64,8 +64,12 @@ export async function trimDataCaches(
   let own = entries.filter((e) => e.root).reduce((n, e) => n + e.bytes, reserve)
   let views = entries.filter((e) => e.root && e.view).reduce((n, e) => n + e.bytes, 0)
   let reclaimed = 0
-  for (const e of entries) {
-    if (pinned(e)) continue
+  const eviction = [...entries].sort(
+    (a, b) => Number(pinned(a)) - Number(pinned(b)) || a.touched - b.touched,
+  )
+  for (const e of eviction) {
+    // An active generation that cannot fit must fall back to misses rather than exceed the budget.
+    if (pinned(e) && total <= ORIGIN_BUDGET && own <= ROOT_BUDGET && views <= VIEW_BUDGET) continue
     if (
       (!quota || reclaimed >= reserve) &&
       total <= ORIGIN_BUDGET &&

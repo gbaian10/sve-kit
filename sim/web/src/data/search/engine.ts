@@ -275,6 +275,7 @@ export class SearchEngine {
 
   private async prepare(request: LoadRequest, entry: JsonObject, signal: AbortSignal) {
     const manifestHash = stringValue(entry["manifest_sha256"])
+    this.emit({ kind: "stage", generation: request.generation, step: "manifest" })
     const manifestBytes = await fetchBytes(
       this.fetcher,
       `${request.base}/${stringValue(entry["manifest_path"])}`,
@@ -369,6 +370,7 @@ export class SearchEngine {
         stagingArrayBuffers: 0,
         stagingStringBytes: 0,
       }
+      this.emit({ kind: "stage", generation: request.generation, step: "index" })
       const entryPromise = this.resolve(request, signal)
       void entryPromise.catch(() => undefined)
       const adopted = await selection.read(`${request.entry}-${request.edition}`, "active")
@@ -511,6 +513,7 @@ export class SearchEngine {
         total: keys.length - 1,
         persistent: blobs.persistent,
       })
+      this.emit({ kind: "stage", generation: request.generation, step: "config" })
       let done = 0
       const fetched = keys.map(async (key) => {
         const file = files.get(key)
@@ -527,8 +530,11 @@ export class SearchEngine {
               persistent: blobs.persistent,
             })
         }
+        if (done === keys.length - 1 && !signal.aborted)
+          this.emit({ kind: "stage", generation: request.generation, step: "search" })
         return bytes
       })
+      this.emit({ kind: "stage", generation: request.generation, step: "bootstrap" })
       for (const pending of fetched) void pending.catch(() => undefined)
       for (const [ordinal, key] of keys.entries()) {
         signal.throwIfAborted()
@@ -557,6 +563,7 @@ export class SearchEngine {
       signal.throwIfAborted()
       if (!config) throw new SnapshotError("config-programs-count", "config missing")
       mark = performance.now()
+      this.emit({ kind: "stage", generation: request.generation, step: "search" })
       bootstrap.seal()
       const stagingAllocation = bootstrap.allocation()
       const index = new SearchIndex(bootstrap, request.edition)
@@ -570,6 +577,7 @@ export class SearchEngine {
           ),
         ),
       )
+      this.emit({ kind: "stage", generation: request.generation, step: "images" })
       const currentQuery =
         this.active?.request.edition === request.edition && this.rememberedRequest?.kind === "view"
           ? this.rememberedRequest.query

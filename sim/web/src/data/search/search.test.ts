@@ -1254,3 +1254,23 @@ it("remembers the current completed query for a view-first reload without metada
   release()
   await warm.settled()
 })
+
+it("separates config, bootstrap, index building and visible-image preparation", async () => {
+  const h = harness()
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  const steps = h.events.flatMap((event) => (event.kind === "stage" ? [event.step] : []))
+  expect(steps).toEqual(
+    expect.arrayContaining(["index", "manifest", "config", "bootstrap", "search", "images"]),
+  )
+  const progress = h.events.filter((event) => event.kind === "progress")
+  const files = built.manifest["files"] as JsonObject[]
+  const total = files.filter((file) => file["role"] === "bootstrap").length
+  expect(progress.every((event) => event.total === total)).toBe(true)
+  expect(progress.map((event) => event.done)).toEqual(
+    Array.from({ length: total + 1 }, (_, i) => i),
+  )
+  expect(
+    h.events.findLastIndex((event) => event.kind === "stage" && event.step === "images"),
+  ).toBeLessThan(h.events.findIndex((event) => event.kind === "ready"))
+})

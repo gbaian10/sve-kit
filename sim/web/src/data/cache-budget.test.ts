@@ -2,7 +2,7 @@
 import { expect, it } from "vitest"
 
 import { memoryCache } from "../test-utils/cache"
-import { VIEW_BUDGET } from "./cache-budget"
+import { trimDataCaches, VIEW_BUDGET } from "./cache-budget"
 import { VerifiedCache } from "./verified-cache"
 
 it("keeps the latest complete view, bounds all view slots together, and isolates another root", async () => {
@@ -29,4 +29,20 @@ it("retains only two generations across distinct query slots", async () => {
   expect(await cache.read("query-1", `sha256:${"1".repeat(64)}`)).toBeUndefined()
   expect(await cache.read("query-2", `sha256:${"2".repeat(64)}`)).toEqual(new Uint8Array([2]))
   expect(await cache.read("query-3", `sha256:${"3".repeat(64)}`)).toEqual(new Uint8Array([3]))
+})
+
+it("the current generation cannot bypass the root budget when its pinned bodies are too large", async () => {
+  const storage = memoryCache()
+  const root = "https://cdn.test/root"
+  const cache = await storage.open(`sve-search-index:${encodeURIComponent(root)}`)
+  const hash = `sha256%3A${"1".repeat(64)}`
+  for (const n of [1, 2])
+    await cache.put(
+      `${root}/index/${String(n)}/${hash}`,
+      new Response("x", {
+        headers: { "x-sve-bytes": String(40 * 1024 * 1024), "x-sve-touched": String(n) },
+      }),
+    )
+  await trimDataCaches(storage, root)
+  expect((await cache.keys()).length).toBe(1)
 })

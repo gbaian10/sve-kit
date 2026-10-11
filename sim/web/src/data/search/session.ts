@@ -8,6 +8,7 @@ import type {
   SearchEvent,
   SearchMetrics,
   SearchRequest,
+  SearchStage,
 } from "./messages"
 import { mainNetwork, type NetworkMessage } from "./network"
 import type { CompleteView, ViewFace } from "./view"
@@ -45,6 +46,7 @@ export interface SearchStatus {
   readonly root?: string
   readonly edition?: Region
   readonly loading?: { readonly root: string; readonly edition: Region }
+  readonly step?: SearchStage
   readonly updating: boolean
   readonly searchReady?: boolean
   readonly unconfirmed?: boolean
@@ -334,12 +336,13 @@ export class SearchSession {
     const generation = ++this.nextGeneration
     this.staging = generation
     this.loadRequest = { kind: "load", generation, base, edition, entry }
-    const { error: _error, progress: _progress, ...previous } = this.status
+    const { error: _error, progress: _progress, step: _step, ...previous } = this.status
     const active = previous.generation !== null
     this.publish({
       ...previous,
       phase: active ? "ready" : "downloading",
       updating: active,
+      step: "index",
       ...(active ? {} : { root: base }),
       loading: { root: base, edition },
     })
@@ -393,7 +396,9 @@ export class SearchSession {
       return
     }
     if (event.generation !== this.staging) return
-    if (event.kind === "progress") {
+    if (event.kind === "stage") {
+      this.publish({ ...this.status, step: event.step })
+    } else if (event.kind === "progress") {
       this.publish({
         ...this.status,
         progress: { done: event.done, total: event.total, persistent: event.persistent },
