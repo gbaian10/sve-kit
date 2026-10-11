@@ -59,10 +59,11 @@ export function CardImage({
         ? t("card.noImage")
         : publication === "pending" || availability === "unfetched"
           ? t("card.imagePending")
-          : images?.failed && asset === undefined
-            ? t("card.imageError")
-            : images === undefined || images.known?.(summary.printingId, summary.faceId) === false
-              ? t("card.imageLoading")
+          : images === undefined || images.known?.(summary.printingId, summary.faceId) === false
+            ? t("card.imageLoading")
+            : (images.failedFace?.(summary.printingId, summary.faceId) ?? images.failed) &&
+                asset === undefined
+              ? t("card.imageError")
               : undefined
   const showImage = source !== undefined && tag === undefined && (!dataSaver || imageWanted)
   const isLoaded = source !== undefined && loaded === source.src

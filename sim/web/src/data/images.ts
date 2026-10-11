@@ -21,6 +21,7 @@ export interface ImageIndex {
   readonly known?: (printingId: string, faceId: string) => boolean
   readonly eager?: (printingId: string, faceId: string) => boolean
   readonly failed?: boolean
+  readonly failedFace?: (printingId: string, faceId: string) => boolean
 }
 const faceKey = (printingId: string, faceId: string) => `${printingId}\u0000${faceId}`
 
@@ -52,6 +53,14 @@ function mediaLookup(snapshot: LoadedSnapshot): MediaLookup {
   }
   mediaLookups.set(snapshot, lookup)
   return lookup
+}
+
+/** Reject arbitrary DOM identities so retention is bounded by the snapshot's printing/face pairs. */
+export function isSnapshotImageFace(snapshot: LoadedSnapshot, face: ImageFace): boolean {
+  const lookup = mediaLookup(snapshot)
+  const printing = lookup.printings.get(face.printingId)
+  const row = lookup.faces.get(face.faceId)
+  return printing !== undefined && row !== undefined && printing.row["card_id"] === row["card_id"]
 }
 
 async function readMediaFaces(
@@ -122,7 +131,20 @@ interface FaceImage {
   readonly source: ImageSource | undefined
 }
 const faceCaches = new WeakMap<LoadedSnapshot, Map<string, FaceImage>>()
-const MAX_FACES = 64
+
+function faceCache(snapshot: LoadedSnapshot): Map<string, FaceImage> {
+  let cache = faceCaches.get(snapshot)
+  if (!cache) {
+    cache = new Map()
+    faceCaches.set(snapshot, cache)
+  }
+  return cache
+}
+
+/** Synchronous URLs for every decoded face in this snapshot, including across viewer mounts. */
+export function retainedImageIndex(snapshot: LoadedSnapshot): ImageIndex {
+  return indexOf(faceCache(snapshot))
+}
 
 function indexOf(rows: ReadonlyMap<string, FaceImage>): ImageIndex {
   return {
@@ -133,7 +155,7 @@ function indexOf(rows: ReadonlyMap<string, FaceImage>): ImageIndex {
   }
 }
 
-/** Keep overlapping faces during scrolling; only missing faces need new fragment decoding. */
+/** Retain declared faces until snapshot replacement; only missing faces need fragment decoding. */
 export async function loadImagePage(
   client: SnapshotClient,
   faces: readonly ImageFace[],
@@ -145,12 +167,11 @@ export async function loadImagePage(
     if (signal?.aborted || client.snapshot() !== snapshot) throw new Error("image page cancelled")
   }
   check()
-  let cache = faceCaches.get(snapshot)
-  if (!cache) {
-    cache = new Map()
-    faceCaches.set(snapshot, cache)
-  }
-  const missing = faces.filter((face) => !cache.has(faceKey(face.printingId, face.faceId)))
+  const cache = faceCache(snapshot)
+  const missing = faces.filter(
+    (face) =>
+      isSnapshotImageFace(snapshot, face) && !cache.has(faceKey(face.printingId, face.faceId)),
+  )
   if (missing.length) {
     const loaded = await readMediaFaces(client, missing, signal)
     check()
@@ -166,13 +187,6 @@ export async function loadImagePage(
     const entry = cache.get(key)
     if (!entry) continue
     selected.set(key, entry)
-    cache.delete(key)
-    cache.set(key, entry)
-  }
-  while (cache.size > MAX_FACES) {
-    const oldest = cache.keys().next().value
-    if (oldest === undefined) break
-    cache.delete(oldest)
   }
   check()
   return indexOf(selected)
