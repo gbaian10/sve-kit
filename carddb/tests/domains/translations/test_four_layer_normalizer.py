@@ -250,7 +250,7 @@ def test_forged_trace_and_missing_owner_use_cannot_pass_normalization_replay() -
     with pytest.raises(ValueError, match="complete exact source field"):
         field.verify(raw, (), (), {})
     forged = replace(field, parts=(replace(field.parts[0], canonical_source="異文"),))
-    with pytest.raises(ValueError, match="pinned normalization replay"):
+    with pytest.raises(ValueError, match="Frame canonical source hash mismatch"):
         forged.verify(raw, (frame,), (binding,), {})
 
 
@@ -275,7 +275,7 @@ def test_public_replay_rejects_utf16_coordinates_in_a_codepoint_trace() -> None:
     """FL-008/utf16_offset reaches the production replay boundary here."""
     raw = "仮😀２枚"
     _, frame, binding = bound_number(raw)
-    replay_part(raw, frame, binding, {})
+    replay_part(raw, frame, binding, {}, canonical_source="仮😀N枚")
     shifted = binding.trace[2].model_copy(update={"raw_span": Span(start=3, end=4)})
     invalid = rekey(
         binding.model_copy(
@@ -283,4 +283,4 @@ def test_public_replay_rejects_utf16_coordinates_in_a_codepoint_trace() -> None:
         )
     )
     with pytest.raises(ValueError, match="replayed exact source partition"):
-        replay_part(raw, frame, invalid, {})
+        replay_part(raw, frame, invalid, {}, canonical_source="仮😀N枚")

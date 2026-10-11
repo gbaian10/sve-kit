@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Literal
 from unicodedata import normalize
 
 from sve_carddb.contracts.four_layer import Constant, QuantitySpec, Span
-from sve_carddb.contracts.n0 import VERSION
 from sve_carddb.contracts.source_binding import SourceSpan, TracePiece, verify_partition
 from sve_carddb.core.json import digest
 from sve_carddb.domains.translations.four_layer_grammar import TOKEN_HEADER
@@ -23,6 +22,7 @@ if TYPE_CHECKING:
     )
 
 __all__ = ("VERSION", "SourceField", "SourcePart", "normalize_source", "replay_part")
+VERSION = "four-layer-jp-v2"
 _NAME = re.compile(r"『[^』]*』")
 _REMINDER = re.compile(r"（[^（）]*）")
 _NUMBER = re.compile(r"[0-9０-９]+")
@@ -144,16 +144,23 @@ class SourceField:
         frames: tuple[Frame, ...],
         bindings: tuple[SourceBinding, ...],
         domains: Mapping[str, ClosedDomain],
+        *,
+        normalizer_version: str = VERSION,
     ) -> None:
         """Every owner use replays its own field, even when its context is shared."""
         if len(frames) != len(self.parts) or len(bindings) != len(self.parts):
             raise ValueError("Bindings must cover the complete exact source field")
-        if normalize_source(raw, self.source) != self:
+        expected = normalize_source(raw, self.source)
+        if tuple((p.source_span, p.line_ordinal) for p in expected.parts) != tuple(
+            (p.source_span, p.line_ordinal) for p in self.parts
+        ):
             raise ValueError("Source field differs from pinned normalization replay")
         for part, frame, binding in zip(self.parts, frames, bindings, strict=True):
             if binding.source != self.source:
                 raise ValueError("Binding borrows another owner source descriptor")
-            part.verify(raw, frame, binding, domains)
+            part.verify(
+                raw, frame, binding, domains, normalizer_version=normalizer_version
+            )
 
 
 def replay_part(
@@ -161,6 +168,8 @@ def replay_part(
     frame: Frame,
     binding: SourceBinding,
     domains: Mapping[str, ClosedDomain],
+    *,
+    canonical_source: str,
 ) -> None:
     """Typed DB reads recheck a part's exact bytes; complete classification still belongs to B."""
     binding.source.verify(binding.source, raw)
@@ -187,6 +196,12 @@ def replay_part(
         source_trace(raw, span, units),
         units,
     )
+    if span.role == "body":
+        from sve_carddb.domains.translations.four_layer_n1_transform import (  # ruff: ignore[import-outside-top-level] -- transform operates on the common source units after normalization
+            replay_transformed,
+        )
+
+        part = replay_transformed(raw, part, frame, binding, canonical_source)
     part.verify(raw, frame, binding, domains)
 
 

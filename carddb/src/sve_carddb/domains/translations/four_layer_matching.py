@@ -4,9 +4,9 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.four_layer import hash_payload
-from sve_carddb.contracts.n0 import VERSION
 from sve_carddb.contracts.source_binding import SourceBinding
 from sve_carddb.core.json import canonical
+from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

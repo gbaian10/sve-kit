@@ -9,6 +9,7 @@ from sve_carddb.contracts.annotations import (
     RenderLeafOccurrence,
 )
 from sve_carddb.contracts.four_layer import (
+    SOURCE_UNION_FORMS,
     Bound,
     CardNameReference,
     CardNP,
@@ -28,6 +29,7 @@ from sve_carddb.contracts.four_layer import (
     Span,
     UnionNP,
     VocabularyReference,
+    ZoneMemberPart,
     hash_payload,
 )
 from sve_carddb.core.json import canonical, digest
@@ -263,6 +265,9 @@ def validate_form(form: FormDefinition) -> None:
             raise ValueError("Classifier form requires its exact typed role signature")
         cases = frozenset({"card", "object"})
         _literal_cases(form)
+    elif form.id in SOURCE_UNION_FORMS:
+        _source_union_form(form, signature)
+        cases = frozenset({"battlefield", "ex", "separator"})
     elif form.id == "zone.union_separator":
         if form.rule != "zone.union_separator.v2" or signature:
             raise ValueError(
@@ -293,6 +298,31 @@ def _label_form(
     ):
         raise ValueError("Label form must present its reference in every case")
     return cases
+
+
+def _source_union_form(
+    form: FormDefinition, signature: Mapping[str, tuple[str, str]]
+) -> None:
+    if form.rule != "zone.source_union.v1" or signature != {
+        "owner": ("Player", "source_owner"),
+        "zone": ("ZoneSet", "source_zone"),
+    }:
+        raise ValueError("Source union form requires its exact owner and zone roles")
+    for case in ("battlefield", "ex"):
+        labels = tuple(
+            part
+            for part in form.cases.get(case, ())
+            if not isinstance(part, LiteralNode)
+        )
+        if labels != (
+            LabelPart(kind="Label", arg="owner"),
+            ZoneMemberPart(kind="ZoneMember", arg="zone"),
+        ):
+            raise ValueError("Each source zone member must present owner and member")
+    if any(
+        not isinstance(part, LiteralNode) for part in form.cases.get("separator", ())
+    ):
+        raise ValueError("Source union separator supplies only language literals")
 
 
 def _constant_form(form: FormDefinition) -> None:
@@ -635,18 +665,7 @@ class _Output:
             item, node.args["zone"].slot
         ) != ("hand",):
             raise ValueError("Hand action form requires the singleton hand value")
-        if form.rule == "zone.case.v2":
-            zone = self.value(item, node.args["zone"].slot)
-            if not isinstance(zone, tuple):
-                raise ValueError("Zone form has a non-zone value")
-            case = zone[0] if len(zone) == 1 else "mixed"
-        elif form.rule == "quantity.classifier.v1":
-            case = _classifier(
-                self.value(item, node.args["kind"].slot),
-                self.value(item, node.args["zone"].slot),
-            )
-        else:
-            case = "default"
+        case = self.form_case(item, node, form)
         if case not in form.cases:
             raise ValueError("Typed form value is outside its registered cases")
         self.dependencies.append(
@@ -657,6 +676,9 @@ class _Output:
             }
         )
         self.quality.append((selected.origin, selected.low_confidence))
+        if form.rule == "zone.source_union.v1":
+            self.source_union(item, node, path, form)
+            return
         for index, part in enumerate(form.cases[case]):
             if isinstance(part, LabelPart):
                 self.leaf(item, node.args[part.arg].slot, (*path, index))
@@ -669,8 +691,56 @@ class _Output:
                 else:
                     raise TypeError("QuantityValue requires a constant quantity")
                 self.record_leaf(item, name, (*path, index), start)
-            else:
+            elif isinstance(part, LiteralNode):
                 self.text += part.text
+
+    def form_case(self, item: BoundTarget, node: FormNode, form: FormDefinition) -> str:
+        if form.rule == "zone.case.v2":
+            zone = self.value(item, node.args["zone"].slot)
+            if not isinstance(zone, tuple):
+                raise ValueError("Zone form has a non-zone value")
+            return zone[0] if len(zone) == 1 else "mixed"
+        if form.rule == "quantity.classifier.v1":
+            return _classifier(
+                self.value(item, node.args["kind"].slot),
+                self.value(item, node.args["zone"].slot),
+            )
+        return "battlefield" if form.rule == "zone.source_union.v1" else "default"
+
+    def source_union(
+        self,
+        item: BoundTarget,
+        node: FormNode,
+        path: tuple[int, ...],
+        form: FormDefinition,
+    ) -> None:
+        name = node.args["zone"].slot
+        if self.value(item, name) != ("battlefield", "ex"):
+            raise ValueError("Source union form requires the registered two-zone value")
+        for member_index, member in enumerate(("battlefield", "ex")):
+            if member_index:
+                for part in form.cases["separator"]:
+                    assert isinstance(part, LiteralNode)
+                    self.text += part.text
+            for index, part in enumerate(form.cases[member]):
+                member_path = (*path, member_index, index)
+                if isinstance(part, LabelPart):
+                    self.leaf(item, node.args[part.arg].slot, member_path)
+                elif isinstance(part, ZoneMemberPart):
+                    start = len(self.text)
+                    self.code("ZoneSet", member)
+                    self.record_leaf(item, name, member_path, start)
+                    reference = self.renderer.code_references["ZoneSet", member]
+                    self.actual.add(
+                        (
+                            name,
+                            "source_zone",
+                            canonical(reference.model_dump(mode="json")),
+                        )
+                    )
+                else:
+                    assert isinstance(part, LiteralNode)
+                    self.text += part.text
 
     def card(self, item: BoundTarget, node: CardNP, path: tuple[int, ...]) -> None:
         args = node.args

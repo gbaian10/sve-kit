@@ -186,7 +186,9 @@ def test_parameter_group_case(case: dict[str, JsonValue]) -> None:
         part = field.parts[0]
         found = selected.recognize(raw, field.source, part, field=field)
         assert not found.issues
-        definition, binding = found.bind(field.source, part)
+        definition, binding = found.bind(
+            field.source, part, normalizer_version="four-layer-jp-v1"
+        )
         selected.verify(raw, field, part, definition, binding)
         assert any(
             o.source_unit == expected["selection_unit"] for o in binding.occurrences

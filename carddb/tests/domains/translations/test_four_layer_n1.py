@@ -27,6 +27,7 @@ from sve_carddb.domains.translations.four_layer_derivation import (
     derive_source,
 )
 from sve_carddb.domains.translations.four_layer_matching import Frames
+from sve_carddb.domains.translations.four_layer_normalizer import replay_part
 from sve_carddb.domains.translations.recognition.rules import Rules
 
 from .test_four_layer_classification import classifier, source
@@ -877,3 +878,33 @@ def test_n1_quoted_granted_ability_supplies_no_outer_leaves(
     found = derive("相手のフォロワーすべては「" + ability + "」を得る。", engine)
     assert not {"source_owner", "source_zone"} & roles(found).keys()
     assert all(o.source_presence == "explicit" for o in found.recognized[0].occurrences)
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "自分の場か自分のEXエリアのフォロワー２枚を選ぶ。",
+        "自分のEXエリアや自分の場のフォロワー２枚を選ぶ。",
+        "相手の場のフォロワー２体を選ぶ。",
+        "自分の手札からフォロワー２枚を選ぶ。",
+        "手札に加える。",
+        "自分のデッキの一番上に置く。",
+        "自分のターンの開始時、仮。",
+        "【NC_７】仮。",
+        "【SC_７】仮。",
+    ],
+)
+def test_current_source_bindings_replay_through_the_storage_boundary(
+    engine: Classifier, raw: str
+) -> None:
+    derived = derive_source(raw, source(raw), engine)
+    for part in derived.field.parts:
+        frame, binding = derived.bind(part.ordinal)
+        derived.verify(raw, engine, frame, binding)
+        replay_part(
+            raw,
+            frame,
+            binding,
+            engine.domains,
+            canonical_source=part.canonical_source,
+        )

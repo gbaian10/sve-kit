@@ -8,8 +8,8 @@ from sve_carddb.domains.translations.four_layer_classification import (
     SourceReferences,
     Term,
 )
+from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_kinds import adopted_kinds
-from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 from sve_carddb.domains.translations.four_layer_sources import (
     card_source,
     semantic_context,
@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.text_observations.vocabulary import Vocabulary
     from sve_carddb.domains.translations.four_layer_matching import Frames, Matched
     from sve_carddb.domains.translations.four_layer_normalizer import SourceField
+    from sve_carddb.domains.translations.four_layer_semantics import CardContext
     from sve_carddb.domains.translations.four_layer_sources import CardSource
     from sve_carddb.domains.translations.inputs import Snapshot
     from sve_carddb.domains.translations.recognition.rules import Rules
@@ -59,6 +60,8 @@ class CompiledField:
     matches: tuple[Matched | None, ...]
     low_confidence: tuple[bool, ...]
     issues: tuple[str, ...]
+    classifier: Classifier | None = None
+    context: CardContext | None = None
 
     @property
     def complete(self) -> bool:
@@ -75,15 +78,13 @@ def compile_card_field(
 ) -> CompiledField:
     """Frozen inventory and exact owner checks precede normalization or target selection."""
     source = card_source(db, sources, descriptor)
-    field = normalize_source(source.text, descriptor)
     context = semantic_context(db, source)
+    derived = derive_source(source.text, descriptor, classifier, context=context)
+    field = derived.field
     matches: list[Matched | None] = []
     quality = []
     issues: set[str] = set()
-    for part in field.parts:
-        recognized = classifier.recognize(
-            source.text, descriptor, part, field=field, context=context
-        )
+    for part, recognized in zip(field.parts, derived.recognized, strict=True):
         quality.append(recognized.low_confidence)
         if recognized.issues:
             issues.update(recognized.issues)
@@ -98,5 +99,11 @@ def compile_card_field(
     if not field.parts:
         issues.add("empty_source_field")
     return CompiledField(
-        source, field, tuple(matches), tuple(quality), tuple(sorted(issues))
+        source,
+        field,
+        tuple(matches),
+        tuple(quality),
+        tuple(sorted(issues)),
+        classifier,
+        context,
     )

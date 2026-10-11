@@ -53,7 +53,9 @@ def test_source_replacement_inherits_one_adjacent_complete_action(
     part = field.parts[0]
     found = engine.recognize(raw, field.source, part)
     assert not found.issues
-    frame, binding = found.bind(field.source, part)
+    frame, binding = found.bind(
+        field.source, part, normalizer_version="four-layer-jp-v1"
+    )
     engine.verify(raw, field, part, frame, binding)
     leaf = frame.leaf_schema.slots[-1]
     assert leaf.role == role

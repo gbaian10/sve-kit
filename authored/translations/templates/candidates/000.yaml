@@ -946,7 +946,7 @@ records:
         - signed_numeric_requires_review
       role: body
       source_kind: effect
-      text: 使用這張卡片之際，【魔力連鎖_N】消費-N。【SC_N】轉變為-N。【SC_N】轉變為-N。
+      text: 使用這張卡片之際，【魔力連鎖_N】消費-N。【魔力連鎖_N】轉變為-N。【魔力連鎖_N】轉變為-N。
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -2709,7 +2709,7 @@ records:
         - numeric_identifier_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}指定敵方戰場上至多N個從者。【魔力連鎖_N】給予其N點傷害。【SC_N】給予敵方的全部主戰者N點傷害。自己的主戰者{生命值}+N。【SC_N】將自己墓場的全部『X』放置到EX區。【SC_N】自己戰場與自己EX區的全部『X』{攻擊力}+N/{生命值}+N。'
+      text: '{入場曲}指定敵方戰場上至多N個從者。【魔力連鎖_N】給予其N點傷害。【魔力連鎖_N】給予敵方的全部主戰者N點傷害。自己的主戰者{生命值}+N。【魔力連鎖_N】將自己墓場的全部『X』放置到EX區。【魔力連鎖_N】自己戰場與自己EX區的全部『X』{攻擊力}+N/{生命值}+N。'
     origin: machine
   - kind: template_translation_candidate
     data:
@@ -4516,7 +4516,7 @@ records:
         - numeric_identifier_requires_review
       role: body
       source_kind: effect
-      text: '{入場曲}從下列之中選擇N項。【N】指定自己墓場的N張『X』。將其放置到EX區。【NC_N】本回合，使用該卡之際，消費-N。【N】將自己牌堆頂的N張卡片放置到墓場。'
+      text: '{入場曲}從下列之中選擇N項。【N】指定自己墓場的N張『X』。將其放置到EX區。【死靈充能_N】本回合，使用該卡之際，消費-N。【N】將自己牌堆頂的N張卡片放置到墓場。'
     origin: machine
   - kind: template_translation_candidate
     data:

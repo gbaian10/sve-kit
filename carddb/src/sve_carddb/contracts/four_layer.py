@@ -643,9 +643,10 @@ def _form_slots(
             {
                 node.args[p.arg].slot
                 for p in parts
-                if isinstance(p, (LabelPart, QuantityValuePart))
+                if isinstance(p, (LabelPart, QuantityValuePart, ZoneMemberPart))
             }
-            for parts in form.cases.values()
+            for case, parts in form.cases.items()
+            if form.rule != "zone.source_union.v1" or case != "separator"
         )
     )
 
@@ -690,8 +691,23 @@ class QuantityValuePart(RecordData):
     arg: Code
 
 
+SOURCE_UNION_FORMS = frozenset(
+    {
+        "zone.source_union.locative_or",
+        "zone.source_union.or",
+        "zone.source_union.and",
+    }
+)
+
+
+class ZoneMemberPart(RecordData):
+    kind: Literal["ZoneMember"]
+    arg: Code
+
+
 FormPart = Annotated[
-    LiteralNode | LabelPart | QuantityValuePart, Field(discriminator="kind")
+    LiteralNode | LabelPart | QuantityValuePart | ZoneMemberPart,
+    Field(discriminator="kind"),
 ]
 
 
@@ -727,7 +743,7 @@ class FormDefinition(RecordData):
             part.arg not in names
             for parts in self.cases.values()
             for part in parts
-            if isinstance(part, (LabelPart, QuantityValuePart))
+            if isinstance(part, (LabelPart, QuantityValuePart, ZoneMemberPart))
         ):
             raise ValueError("Form part requires a signature argument")
         signature = {arg.name: arg.type for arg in self.signature}
@@ -739,6 +755,13 @@ class FormDefinition(RecordData):
             if isinstance(part, QuantityValuePart)
         ):
             raise ValueError("QuantityValue requires its constant quantity rule")
+        if any(
+            self.rule != "zone.source_union.v1" or signature[part.arg] != "ZoneSet"
+            for parts in self.cases.values()
+            for part in parts
+            if isinstance(part, ZoneMemberPart)
+        ):
+            raise ValueError("ZoneMember requires its closed source union rule")
         return self
 
     def verify_arguments(

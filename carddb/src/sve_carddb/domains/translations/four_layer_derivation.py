@@ -1,9 +1,10 @@
-"""Prepare N1 whole-line semantics without installing them in the N0 build."""
+"""Derive the current N1 source operands and closed whole-line semantics."""
 
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.four_layer import (
+    SOURCE_UNION_FORMS,
     CardNP,
     FaceRevisionOwner,
     FormNode,
@@ -31,6 +32,7 @@ from sve_carddb.domains.translations.four_layer_n1_leaves import (
 )
 from sve_carddb.domains.translations.four_layer_n1_transform import transform
 from sve_carddb.domains.translations.four_layer_normalizer import (
+    VERSION,
     SourceField,
     normalize_source,
 )
@@ -52,8 +54,6 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_semantics import CardContext
     from sve_carddb.domains.translations.recognition.models import Hint
 
-# This preparation version is deliberately absent from the authored reader.
-VERSION = "four-layer-jp-v2"
 _QUICK = "term:ability.quick"
 
 
@@ -422,6 +422,8 @@ def _verify_card_operands(
     found, _ = operands(part.canonical_source)
     found = tuple(preserve_modifiers(o, classifier) for o in found)
     for node in target.nodes:
+        if isinstance(node, FormNode) and node.form_id in SOURCE_UNION_FORMS:
+            _verify_source_union(part, binding, node, found)
         if isinstance(node, FormNode) and node.form_id in {
             "zone.add_to_hand",
             "zone.return_to_hand",
@@ -452,6 +454,38 @@ def _verify_card_operands(
                 raise ValueError(
                     "CardNP leaves do not belong to one supported source operand"
                 )
+
+
+def _verify_source_union(
+    part: SourcePart, binding: SourceBinding, node: FormNode, found: tuple[Operand, ...]
+) -> None:
+    def positions(name: str) -> tuple[Span, ...]:
+        return merged(
+            tuple(
+                span
+                for occurrence in binding.occurrences
+                if occurrence.slot == node.args[name].slot
+                for span in occurrence.raw_spans
+            )
+        )
+
+    def raw_spans(spans: tuple[Span, ...]) -> tuple[Span, ...]:
+        return merged(
+            tuple(
+                raw
+                for span in spans
+                for unit in part.units[span.start : span.end]
+                for raw in unit.origins
+            )
+        )
+
+    if not any(
+        operand.row.startswith("N1-SRC10.")
+        and positions("owner") == raw_spans(operand.owners)
+        and positions("zone") == raw_spans(operand.zone_spans)
+        for operand in found
+    ):
+        raise ValueError("Source union form must use one registered G10 operand")
 
 
 def _verify_hand_action(

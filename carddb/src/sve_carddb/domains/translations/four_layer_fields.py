@@ -14,6 +14,7 @@ from sve_carddb.contracts.four_layer import (
     hash_payload,
 )
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_identities import context_variant
 from sve_carddb.domains.translations.four_layer_render import BoundTarget, Result
 from sve_carddb.domains.translations.four_layer_storage import (
@@ -33,6 +34,26 @@ if TYPE_CHECKING:
         Renderer,
         SelectedTarget,
     )
+
+
+def _verify_targets(compiled: CompiledField, plan: tuple[BoundTarget, ...]) -> None:
+    if compiled.classifier is None:
+        return
+    derived = derive_source(
+        compiled.source.text,
+        compiled.source.descriptor,
+        compiled.classifier,
+        context=compiled.context,
+    )
+    for item in plan:
+        derived.verify(
+            compiled.source.text,
+            compiled.classifier,
+            item.frame,
+            item.binding,
+            context=compiled.context,
+            target=item.selected.target if item.selected is not None else None,
+        )
 
 
 def render_field(  # ruff: ignore[too-many-arguments] -- explicit suppression preserves validated source bindings without selecting translated text
@@ -75,6 +96,7 @@ def render_field(  # ruff: ignore[too-many-arguments] -- explicit suppression pr
         )
         for match, low in zip(matches, compiled.low_confidence, strict=True)
     )
+    _verify_targets(compiled, plan)
     result = (
         Result(None, ("suppressed_translation",))
         if suppress

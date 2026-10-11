@@ -150,7 +150,7 @@ N0 引用型別每槽恰用一個代碼，不將本次 catalog 的整個類別�
 | CardKind／vocabulary 引用 | counted_kind/filter_kind；vocabulary 的 kind=type，code 必存在 | FL-003／FL-004 |
 | Concept／TermReference | keyword/trait/ability/rule_term 各自有 category 與角色限制；`{kind:glossary,key:ID}` 或 `{kind:vocabulary,key:[kind,code]}` | FL-005／FL-018 |
 | CardName／`{kind:card_name,term_id:ID}` | 名稱概念 FK；整個名字是葉，不抽名字內的術語，不因同名猜 card／token 身分 | FL-013 |
-| DeckPosition／具名 Code | source_position／destination_position；容器固定為 deck，完整牌堆＋端點片語由一葉持有，不與 deck ZoneSet 重疊 | N1 準備登錄 |
+| DeckPosition／具名 Code | source_position／destination_position；容器固定為 deck，完整牌堆＋端點片語由一葉持有，不與 deck ZoneSet 重疊 | N1 正式登錄 |
 | Phase、Stat、TokenStatus／具名 Code | phase_trigger/phase_duration、stat_filter、token_filter 各自引用封閉登錄；token 不是 trait | FL-018／FL-021 |
 | QuantitySpec／下述物件 | selection_count、existence_count、set_extent、repeat_count 等依構造限制 | FL-004／FL-019 |
 | QuantityExpr／下述有限描述 | count_expression；符號 X、計數與算式不是一律 Nat，也不提早凍結 Live 值 | FL-019 |
@@ -234,9 +234,10 @@ pure_reminder 必須有完整具名提示文法及同欄的精確 body anchor；
 全部明示名稱、class、trait、kind 與數值均須唯一解析。
 此登錄描述可產生的有限構造，不表示已完成全庫或正式 workflow 的來源驗收。
 
-### 4.3 N1 準備入口的來源登錄
+### 4.3 N1 正式來源登錄
 
-`four_layer_derivation.derive_source` 使用準備版本 `four-layer-jp-v2`；正式 compile 與 authored reader 仍只使用／接受 v1。
+`four_layer_derivation.derive_source` 使用正式版本 `four-layer-jp-v2`；正式 compile、authored reader 與 DB reader 只接受 v2，不保留 v1 雙軌 reader。
+N0 的來源構造與數值規則是 N1 明列的既有基礎；歷史對帳使用切換前已保存的 N0 建置資料，不從新 frame 反推舊版。
 此入口沿相同 source units、分段、catalog、數值規則及來源驗證邊界產葉，不另建來源驗證器。
 只擴充精確 face_revision／printing_face 的 effect／section 中 role=body 的部分；name、label、layout、reminder、token_header
 及已 resolved 的完整進化／食事／憑依等入口保留 N0。未知整行可以新增合法葉，仍維持整行 pending。
@@ -246,7 +247,7 @@ pure_reminder 必須有完整具名提示文法及同欄的精確 body anchor；
 小型 Code 域採 `CodeDomain(type,codes)`，codes 為排序唯一的非空列舉，不把裸 self 字串誤當 descriptor ID。
 ZoneDomain 可附精確 combinations；N0 未附此欄位時沿用既有成員集合限制，不改既有 descriptor 的順序。
 
-| 具名域 | 準備入口的精確限制 |
+| 具名域 | 正式入口的精確限制 |
 | --- | --- |
 | zone.single.v1 | 恰七種單元素集合：battlefield、hand、deck、evolve_deck、graveyard、ex、banish。 |
 | zone.hand.v1 | 恰 `[hand]`；固定加入／放回手牌的目的區域。 |
@@ -261,7 +262,7 @@ Code 的概念對照為 Player.self/opponent → `term:player.self/opponent`、P
 ZoneKind 的 battlefield／hand／deck／evolve_deck／graveyard／ex／banish 依序對應
 `term:zone.battlefield`／`term:zone.hand`／`term:zone.deck`／`term:zone.evolve_deck`／`term:zone.cemetery`／`term:zone.ex`／`term:zone.banishment`。
 DeckPosition.top/bottom 對應完整 `term:zone.deck_top/deck_bottom`；TokenStatus.token 對應 `term:object.token`。
-這裡記錄來源型別含義；renderer v3 已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 仍維持 N0。
+這裡記錄來源型別含義；renderer v3 已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 使用 N1。
 
 P 為明示自分／相手，Z 為上列區域，DP 為完整デッキの上／下，PH 為具名階段。
 NP 以卡種、泛稱カード或完整 `『』` 名稱為核心；Q 沿既有合法數量與單位。
@@ -300,7 +301,7 @@ G10 的 zone occurrence 保留兩段 raw_spans；重複 owner 保留兩個明示
 selection 的の／から與 `NPをQ選ぶ`／`NP Q[を]選ぶ` 歸一只限 SRC01.select；真正直接移動的來源助詞不 alias。
 NC／ネクロチャージ、SC／スペルチェイン只在完整數字門檻頭歸一；コンボ／レッスン不新增別名。
 四種能力名使用 typed placeholder，原數值 N 保留；一般 keyword 與 braced ability（含 Quick）保留 canonical 拼寫。
-每個新葉可沿準備結果的 registry_rows 對回上列；沿用葉對回 N0。
+每個新葉可沿來源結果的 registry_rows 對回上列；沿用葉對回 N0。
 
 名稱／提示文保護與事件、歷史、receipt、回合、主戰者持有者、靜態期間等父語境排除先行。
 任何成對的「…」（含句點、冒號）都整段受保護，裡面不產外層葉；手牌費用與其他來源共用引號、父語境、並列阻擋及名詞起點檢查。
@@ -343,7 +344,7 @@ Node 的 kind 是上述四種唯一 discriminator；required 槽須由 LeafRef �
 CardNP 的 owner=Player（role 限 source_owner 或 counted_owner）、zone=ZoneSet（role 限 source_zone 或 counted_zone）、token=TokenStatus；class 為 Concept 的 vocabulary(class) 引用，
 traits 每項為 role=trait 的 Concept glossary 引用；class 的 role=class_filter。
 owner 與 zone 同時存在時，source_owner 只配 source_zone，counted_owner 只配 counted_zone；
-N1 準備來源驗證還須確認全部葉屬於同一合法 operand，不能跨用途借相同值；CardNP 必須涵蓋該 operand 的全部 kind／trait／class／token 篩選，不能把漏掉的 filter 在 NP 外另行引用以求通過。DeckPosition 用 flat target／Form，不冒充 zone。
+N1 來源驗證還須確認全部葉屬於同一合法 operand，不能跨用途借相同值；CardNP 必須涵蓋該 operand 的全部 kind／trait／class／token 篩選，不能把漏掉的 filter 在 NP 外另行引用以求通過。DeckPosition 用 flat target／Form，不冒充 zone。
 引用域也可使用已登錄的 `concept.trait.v1`／`vocabulary.class.v1`。
 目前 traits 限 0 或 1 項，不把 token／class 當 trait；多項篩選須先確認具名構造的 AND／OR 語義。
 
@@ -357,7 +358,7 @@ NP 不另占來源 span；它的葉各自有來源位置。NP 移除或新增只
 | lang | Lang；和 target 相同 | A/B/C；錯語言；FL-012 |
 | signature | 除 zone.union_separator 外非空 `{name:Code,type:TypeName,role:Code}` 陣列，name 唯一，type 引用 §4 葉型別，role 引用其角色 | A/B；參數不合；FL-004／FL-012 |
 | rule | Code；引用釘版 renderer 的有限規則，不接受程式 | A/B/C；未知或超域；FL-012 |
-| cases | 非空 `{case_code:[FormPart]}` mapping；case_code 限 rule 登錄的分支，FormPart 是 `{kind:Literal,text:Text}`／`{kind:Label,arg:Code}`／`{kind:QuantityValue,arg:Code}`，每分支有序 | A/B；分支缺失／未知、arg 不引用 signature 拒絕；基礎名稱來自當前選詞；FL-012／FL-015 |
+| cases | 非空 `{case_code:[FormPart]}` mapping；case_code 限 rule 登錄的分支，FormPart 是 `{kind:Literal,text:Text}`／`{kind:Label,arg:Code}`／`{kind:QuantityValue,arg:Code}`／`{kind:ZoneMember,arg:Code}`，每分支有序 | A/B；分支缺失／未知、arg 不引用 signature 拒絕；基礎名稱來自當前選詞；FL-012／FL-015 |
 
 QuantityValue 的 arg 必指本形式簽章中的 QuantitySpec，僅在 `quantity.constant_value.v1` 使用，輸入 expr 必為 constant。
 它只輸出 UInt 的十進位字串，不輸出 mode、單位或概念位置；all／any、bound／expression 均不適用。
@@ -372,7 +373,7 @@ rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章�
 keyword.display 可供括號，基礎名稱不含括號；別名與全名綁同概念，來源拼寫留 trace。
 形式內的 Label 產生概念範圍，Literal 後綴／括號不擴大該範圍。缺基礎選詞則整欄退回（FL-011），未知形式 ID 則結構拒絕。
 
-renderer 使用 `four-layer-renderer-v3`；正式來源 workflow 仍採 N0 v1，N1 v2 僅為準備入口。
+renderer 使用 `four-layer-renderer-v3`；正式來源 workflow、authored 與 DB reader 採 N1 v2。
 下列形式使用封閉 ID 與 type＋role 簽章；明示 Form 與 NP 隱式使用同一份 definition，不登錄舊 ID alias。
 
 | ID | signature（name:type/role） | rule／cases |
@@ -391,6 +392,19 @@ renderer 使用 `four-layer-renderer-v3`；正式來源 workflow 仍採 N0 v1，
 | quantity.classifier.counted_selection | kind:CardKind/counted_kind, quantity:QuantitySpec/selection_count, zone:ZoneSet/counted_zone | quantity.classifier.v1；card／object，僅 Literal |
 | quantity.classifier.counted_existence | kind:CardKind/counted_kind, quantity:QuantitySpec/existence_count, zone:ZoneSet/counted_zone | quantity.classifier.v1；card／object，僅 Literal |
 | zone.union_separator | 空 signature=[]，呼叫 args={} | zone.union_separator.v2；唯一 default，僅 Literal |
+| zone.source_union.locative_or；zone.source_union.or；zone.source_union.and | owner:Player/source_owner, zone:ZoneSet/source_zone | zone.source_union.v1；battlefield／ex／separator，只供同一 G10 operand |
+
+`zone.source_union.v1` 限來源 G10 的 `[battlefield,ex]` 聯集，依 canonical 順序逐成員輸出；
+每個成員 case 的非 Literal 部分必須依序恰為 `Label(owner)`、`ZoneMember(zone)`。
+ZoneMember 的 arg 只可指該簽章的 ZoneSet；它輸出目前成員的 typed 概念選詞，成員由 renderer 決定，target 不提供索引或常數。
+separator case 僅有 Literal；renderer 只驗結構，zh-Hant 定義中 locative_or 在 battlefield 後接「上」、成員間「或」，or 只接「或」，and 只接「與」。
+三者皆保留同一聯集及共同 owner，不能藉中文「與」推導兩區各選一次或日文 `と` 的獨立並列。
+G10 仍只接受既有封閉 `か`／`や` 構造，`と`／`または`／`および` 不因新 Form 而被納入。
+B 依原來源 operand 比對 owner 與 zone 的完整 raw spans，拒絕跨 operand、不同 owner 或非 G10 引用；
+A 驗 type＋role、封閉 cases、必呈現的兩參數；C 每次 owner Label 與每個 ZoneMember 各產實際概念 range、葉輸出路徑及必要引用。
+格後綴與連接詞不包進概念 range；重複 owner 的輸出仍指原同槽 occurrence，不新增來源槽、值或位置。
+未知 Form、錯角色、缺 owner／member／選詞、非二區值均拒絕或依既有缺詞規則整欄退回。
+既有空簽章 union separator 與 G10 語義維持原契約，新 Form 的完整 definition 參與 render 相依鍵。
 
 七個區域 Code 為 battlefield／hand／deck／evolve_deck／graveyard／ex／banish；mixed 逐成員引用。
 所有 label 形式在每個 case 必須有對應 Label，不能以空輸出或固定字替代引用。
@@ -406,7 +420,7 @@ ZoneSet 多成員按 canonical 排序顯示，每成員有自己的概念範圍�
 這些呈現改動不新增來源葉或放寬來源單位守衛；v3 使 dependency_key 與相依 tr: 更新，不改來源 frame／binding。
 固定案例見 [參數群組渲染案例](../../../carddb/tests/fixtures/parameter-groups/render-cases.json)。
 案例的 `parameter_group_render` 只驗 renderer 的隔離 typed fixture；`parameter_group_n0` 另從合成日文驗正常來源分類。
-N0 正文仍無可供 CardNP 使用的 counted_kind／ZoneSet／Player／TokenStatus 葉，因此不以 renderer 案例宣稱已完成真實來源的 NP 接入。
+N1 正文依 §4.3 的封閉來源構造提供 CardNP 的 counted_kind／ZoneSet／Player／TokenStatus 葉；仍只允許同一來源 operand、已涵蓋的修飾與角色，不以 generic renderer 案例擴大來源範圍。
 
 ### 5.1 原文單位與中文量詞是兩張表
 
@@ -522,7 +536,7 @@ scope 指同 frame 宣告的 ability／branch／sequence 作用域。A 驗簽章
 
 ## 8. 建置 DB、render projection 與依賴
 
-以下是[build-db §9.3](../build/build-db.md#93-四層資料契約)的邏輯列契約；N0 已接入正式 DDL 與建置邊界，實際儲存欄位見該文件 §9.1。
+以下是[build-db §9.3](../build/build-db.md#93-四層資料契約)的邏輯列契約；N1 已接入正式 DDL 與建置邊界，實際儲存欄位見該文件 §9.1。
 所有新 Json 欄均使用本文件具名型別，C 逐層驗證後才能交給其他層。
 現有 authored_source_id／record_key／origin／low_confidence 與真實 source_id 的型別及 nullable 保留。
 
@@ -569,7 +583,7 @@ NP 範圍不是 annotation，卡名內的同字不另套術語 annotation。form
 必要引用集合 E 逐 `(slot,role,reference)` 計算；ZoneSet 逐成員，CardName 是整名引用。
 先排除由來源規則產生、required=false 且 occurrences=[] 的純省略槽，其值仍必須存在。
 其餘明示結構／required 葉、四種門檻能力名，以及該用途實際選中的 label／variant 的 emphasis=true 或 origin=project／machine 都須引用。
-A 只計 LeafRef、Form 的實際 Label／QuantityValue 與 NP 展開的輸出；形式的讀值參數不等於呈現引用。
+A 只計 LeafRef、Form 的實際 Label／QuantityValue／ZoneMember 與 NP 展開的輸出；形式的讀值參數不等於呈現引用。
 E−A 必須為空；同字不同角色、卡名內同字與另一槽的引用不能補洞。重複呈現各保留 node_path／occurrence。
 缺必要或實際使用選詞沿 missing_term_translation 整欄 fallback；有 target 但漏 E 是結構錯誤，不能改叫缺譯。
 未用的純省略 label 不加品質或 fallback 依賴；emphasis／origin 是 render 條件，不入 frame hash。
@@ -603,6 +617,9 @@ interface_key 及 scopes/imports/exports 不入 render 依賴，相關引用仍�
 舊 T/C ID 與新 frame 的關係是多對多；不能依 hash 前綴、相同中文字、
 `supersedes_id` 線索或最大覆蓋率選一個新 ID。
 映射只在一次重建及當前裁定檢查使用，舊格式仍留 Git；不建長期相容 reader。
+版本唯一差異的自動映射須先移除 normalizer_version 後比完整 frame-v1 payload bytes，並確認 occurrences／values／scope／接口語義不變、新目標存在且唯一。
+其他 canonical／schema 改動依精確來源用途重建，不因中文相同授予語義等價。interface_key 重算，相依 DSL 只延續實際存在且先前合格、通過既有型別／來源／可見範圍檢查的用途；不捏造 reviewed。
+不能從新版本重算未知歷史域，原 reference pending 與裁定 strength 保留。
 已知舊域的資料接口由 #499 補上；正式 reader 不因保留舊引用而恢復舊翻譯格式。
 
 ### 9.1 裁定版本與引用來源
