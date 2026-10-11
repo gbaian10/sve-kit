@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Protocol
 from sve_carddb.build.source_rows import insert_raw_sources
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import SourceUse, input_record
-from sve_carddb.domains.products.families import populate as populate_families
+from sve_carddb.domains.products.families import populate as populate_members
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database
@@ -121,5 +121,5 @@ def populate_official_products(
                 "source_id": inclusion.page.source.id,
             },
         )
-    populate_families(db)
+    populate_members(db)
     return input_record(build, uses)

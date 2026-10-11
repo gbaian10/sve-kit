@@ -205,7 +205,10 @@ describe("home search", () => {
     )
     await user.click(random)
     expect(router.state.location.pathname).toMatch(/^\/cards\/(?:BP01|SD01)EN-/u)
-    expect(recentStore.get()).toHaveLength(1)
+    // EN printing IDs of the fixture end in `-en` or carry it after the set code (`p:bp01en-090`).
+    expect(recentStore.get()).toEqual([
+      expect.stringMatching(/^p:(?:bp01|sd01)(?:-\d+-en|en-\d+)$/u),
+    ])
   })
 })
 
