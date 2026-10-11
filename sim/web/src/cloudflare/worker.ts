@@ -90,6 +90,15 @@ async function clientResponse(
   return new Response(body, init)
 }
 
+async function store(cache: EdgeCache, key: Request, response: Response): Promise<void> {
+  try {
+    await cache.put(key, response)
+  } catch {
+    // A failed write only loses a future hit; release the tee branch so it stops buffering.
+    await response.body?.cancel().catch(() => undefined)
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: Context): Promise<Response> {
     const url = new URL(request.url)
@@ -166,7 +175,7 @@ export default {
           headers: cacheHeaders,
           encodeBody: "manual",
         }
-        ctx.waitUntil(edgeCache.put(cacheKey, new Response(copy.body, init)).catch(() => undefined))
+        ctx.waitUntil(store(edgeCache, cacheKey, new Response(copy.body, init)))
       }
       return response
     } catch {

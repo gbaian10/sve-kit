@@ -230,13 +230,18 @@ describe("development Worker", () => {
     },
   )
 
-  it.each(["lookup", "write", "unavailable"])(
+  it.each(["lookup", "write", "sync-write", "unavailable"])(
     "keeps serving R2 when the cache %s fails",
     async (operation) => {
       const f = fixture()
       if (operation === "lookup")
         edgeCache.match.mockRejectedValueOnce(new Error("cache unavailable"))
       if (operation === "write") edgeCache.put.mockRejectedValueOnce(new Error("cache unavailable"))
+      if (operation === "sync-write") {
+        edgeCache.put.mockImplementationOnce(() => {
+          throw new Error("cache unavailable")
+        })
+      }
       if (operation === "unavailable") vi.stubGlobal("caches", undefined)
       const response = await worker.fetch(request(`/cdn-preview/${BLOB}`), f.env, f.ctx)
       expect(response.status).toBe(200)

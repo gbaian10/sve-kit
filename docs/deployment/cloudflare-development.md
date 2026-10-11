@@ -151,9 +151,12 @@ HEAD 未命中僅讀 R2 metadata，不寫入空 body；304、404 與錯誤不寫
 快取只由 Worker 內部存取，Access 必須在 Worker 前驗證每次請求；命中不新增匿名入口，
 也不改變 §4 的全路徑 Access、別名關閉與 host gate 要求。內部的 public 快取回應不直接送給瀏覽器。
 依 [Cache API 官方文件](https://developers.cloudflare.com/workers/runtime-apis/cache/)，
-此快取只存在當次資料中心、不跨區複寫；**目前官方亦記載 Access 前方保護的 Worker 無法使用 Cache API**。
-查詢失敗會退回 R2，背景寫入失敗不影響回應；本機測試與離線打包只驗證程式行為，
-不證明 Access 開發網域能命中或已改善效能，須由維護者另行確認平台支援與線上命中。
+此快取只存在當次資料中心、不跨區複寫，各資料中心第一次讀取仍會回源 R2。
+官方文件對 Access 前方保護的 Worker 可能無法使用 Cache API 的限制敘述與實測不符，以實測為準：
+2026-10-11 在 Access 保護的開發網域上，第二次讀取同一 blob 的回應帶
+`server-timing: cfCacheStatus;desc="HIT"`，Worker 讀 R2 的 300～700 ms 消失。
+查詢失敗會退回 R2，背景寫入失敗不影響回應；本機測試只驗證程式行為，平台命中以線上實測為準。
+邊緣條目一年內不回源驗證，不要覆寫既有 blob／manifest key，內容改變須改用新的內容雜湊路徑。
 
 維護者以本機 Wrangler 登入或最小部署權限操作，登入方式／權限需依當下官方介面核對，
 未驗證，需維護者實測。部署登入只留本人本機，不把 R2 key pair 當部署 token，不交 CI／agent。
