@@ -361,7 +361,7 @@ describe("development Worker", () => {
       routes: [{ pattern: "dev.svekit.app", custom_domain: true }],
       r2_buckets: [{ binding: "PREVIEW_BUCKET", bucket_name: "svekit-dev" }],
       assets: {
-        directory: "./cloudflare/dev-assets",
+        directory: "./dist",
         binding: "ASSETS",
         not_found_handling: "single-page-application",
         run_worker_first: true,
