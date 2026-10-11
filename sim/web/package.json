@@ -19,7 +19,7 @@
     "knip": "bun run schema:compile && knip",
     "fixture:build": "bun run schema:compile && bun run scripts/fixture/main.ts",
     "schema:compile": "bun run scripts/schema/main.ts",
-    "deploy:dev": "wrangler deploy --config wrangler.dev.jsonc"
+    "deploy:dev": "VITE_CDN_BASE=/cdn-preview bun run build && wrangler deploy --config wrangler.dev.jsonc"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.3.0",

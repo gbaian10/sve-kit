@@ -120,7 +120,7 @@ Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另�
   "routes": [{ "pattern": "dev.svekit.app", "custom_domain": true }],
   "r2_buckets": [{ "binding": "PREVIEW_BUCKET", "bucket_name": "svekit-dev" }],
   "assets": {
-    "directory": "./cloudflare/dev-assets",
+    "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
     "run_worker_first": true
@@ -146,8 +146,8 @@ R2 壓縮旁檔依 [Response 官方文件](https://developers.cloudflare.com/wor
 mise exec -- bun run --cwd sim/web deploy:dev
 ```
 
-目前資源來自 `sim/web/cloudflare/dev-assets`，臨時頁面提供版本索引連結。
-之後接正式前端時，先執行既有 Vite build，再將 `assets.directory` 改成 `./dist`；
+`deploy:dev` 先以 `VITE_CDN_BASE=/cdn-preview` 執行既有 Vite build，再部署 `./dist`：
+前端的正式資料根指向同源 `/cdn-preview/`，讀開發桶的版本索引，與本機伺服器的 `/cdn` 分開。
 `dist` 只含前端程式與介面資源，不混 preview root、來源庫、卡圖、private 或 reports。
 SPA 設定未找到靜態檔案回 index.html；維護者登入後用
 `/cards` 及一條未對應實體檔的前端路由驗證 HTML／導航。資料路徑另驗 JSON、WebP 與缺件 404，
