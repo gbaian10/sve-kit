@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from sve_carddb.export.read_api import Export
 
 
-def upload_command(
+def upload_command(  # ruff: ignore[too-many-arguments] -- independent CLI options are resolved by Typer
     *,
     export_dir: Annotated[Path | None, typer.Option(envvar="SVE_EXPORT_DIR")] = None,
     cdn_base_url: Annotated[str | None, typer.Option()] = None,
@@ -27,6 +27,7 @@ def upload_command(
     skip_cdn_verify: Annotated[bool, typer.Option("--skip-cdn-verify")] = False,
     account_id: Annotated[str | None, typer.Option()] = None,
     bucket: Annotated[str | None, typer.Option()] = None,
+    jobs: Annotated[int, typer.Option(min=1, help="Concurrent object uploads.")] = 16,
 ) -> None:
     """Dry-run validates the export without credentials or network access."""
     export_dir = required_root(export_dir, "--export-dir", "SVE_EXPORT_DIR")
@@ -36,7 +37,7 @@ def upload_command(
         result = report(export)
         if execute:
             result = _execute(
-                export, None if skip_cdn_verify else root, account_id, bucket
+                export, None if skip_cdn_verify else root, account_id, bucket, jobs
             )
         typer.echo(json.dumps(result, sort_keys=True, separators=(",", ":")))
     except ExportError as error:
@@ -54,7 +55,11 @@ def _cdn(value: str | None, *, required: bool) -> str | None:
 
 
 def _execute(
-    export: Export, root: str | None, account_id: str | None, bucket: str | None
+    export: Export,
+    root: str | None,
+    account_id: str | None,
+    bucket: str | None,
+    jobs: int,
 ) -> dict[str, object]:
     credentials = Credentials.environment()
     account, target = target_values(account_id, bucket)
@@ -64,7 +69,13 @@ def _execute(
     ):
         store = R2Store(account, target, credentials, origin_client)
         cdn = None if root is None else CDNFreshness(root, client)
-        return upload(store, export, cdn) | {
+        return upload(
+            store,
+            export,
+            cdn,
+            jobs=jobs,
+            progress=lambda line: typer.echo(line, err=True),
+        ) | {
             "data_version": export.entry["data_version"],
             "manifest_sha256": export.entry["manifest_sha256"],
         }

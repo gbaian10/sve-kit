@@ -61,7 +61,7 @@ and bytes; how many objects already exist remotely is unknown offline.
 uv --directory publish run sve-publish upload \
   --export-dir /explicit/preview-root \
   --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" \
-  --skip-cdn-verify --execute
+  --jobs 16 --skip-cdn-verify --execute
 ```
 
 Target selection uses explicit `--account-id`/`--bucket`, or `R2_ACCOUNT_ID`/
@@ -88,6 +88,21 @@ The steps are:
    a browser); the output marks it as skipped.
 4. Check that the index is unchanged, write it with a conditional PUT, and read
    it back.
+
+### 並行度與執行時間
+
+`--jobs N` 設定物件工作池的上限，預設為 16，最小為 1；`--jobs 1` 依序處理。
+卡圖全部完成來源端讀回後才開始 JSON，index 仍最後以條件寫入更新並讀回。
+任一物件失敗就停止接納新的寫入，等待已接納的操作完成後回報失敗物件；
+尚在 GET 比對的其他物件不會再進入 PUT。修正原因後重跑，只補缺少或不同的物件。
+已開始的 PUT 仍可能成功，失敗不會回滾這些物件，也不會重送寫入。
+
+執行時進度寫到 stderr：每完成 100 個物件或約 5 秒回報完成數／總數與已寫入數，
+階段開始與結束也會回報；stdout 保留原本的最終 JSON 摘要。dry-run 的輸出與行為不變。
+每個變動物件仍需 GET → 條件 PUT → GET；首次數萬張卡圖的循序執行可能耗時數小時。
+並行度主要減少等待網路回應的時間，實際速度取決於頻寬、延遲、R2 限流及本機驗證；
+不能保證 16 倍加速。CDN 驗證仍循序執行，每個 URL 另有兩次 GET，
+提高 `--jobs` 不會加速此步驟。
 
 An unchanged rerun makes no PUT. After a failure, current is unchanged; run the
 same command again to upload what is missing. A failed image overwrite can leave

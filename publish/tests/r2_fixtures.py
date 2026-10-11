@@ -95,6 +95,9 @@ def reference_authorization(
 
 
 class LocalS3(ThreadingHTTPServer):
+    # The default listen backlog can reject a burst from sixteen upload workers.
+    request_queue_size = 64
+
     def __init__(self, state: ServerState) -> None:
         self.state = state
         super().__init__(("127.0.0.1", 0), Handler)

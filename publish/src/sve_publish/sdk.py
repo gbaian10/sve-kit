@@ -7,6 +7,7 @@ import re
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from http import HTTPStatus
+from threading import local
 from typing import TYPE_CHECKING, Protocol, cast, runtime_checkable
 from urllib.parse import urlsplit
 from xml.etree import ElementTree as ET  # ruff: ignore[suspicious-xml-etree-import] -- bounded UTF-8 inputs reject declarations before the domain checks
@@ -128,6 +129,14 @@ def _inventory_xml(data: bytes) -> None:
         raise BoundaryError("R2 inventory lacks a truncation flag")
 
 
+class OperationState(local):
+    """Custom SDK hooks must not share the retry gate between worker threads."""
+
+    def __init__(self) -> None:
+        self.operation = ""
+        self.sent = False
+
+
 @dataclass(repr=False)
 class Transport:
     """The SDK owns signing and XML parsing; this guard owns deployment policy."""
@@ -135,10 +144,11 @@ class Transport:
     account: str
     bucket: str
     session: URLLib3Session = field(
-        default_factory=lambda: URLLib3Session(verify=True, proxies={}, timeout=30)
+        default_factory=lambda: URLLib3Session(
+            verify=True, proxies={}, timeout=30, max_pool_connections=16
+        )
     )
-    operation: str = ""
-    sent: bool = False
+    state: OperationState = field(default_factory=OperationState)
 
     def begin(self, model: OperationModel, **_kwargs: object) -> None:
         """Reject nested SDK discovery operations and reset the one-send gate."""
@@ -149,15 +159,15 @@ class Transport:
             "DeleteObject",
         }:
             raise BoundaryError("Unexpected R2 SDK operation")
-        self.operation = model.name
-        self.sent = False
+        self.state.operation = model.name
+        self.state.sent = False
 
     def send(self, request: AWSPreparedRequest, **_kwargs: object) -> AWSResponse:
         """Bound parser inputs and refuse redirects, retries and other endpoints."""
         # Region redirects and special S3 retry handlers can bypass max_attempts.
         url = urlsplit(request.url)
         if (
-            self.sent
+            self.state.sent
             or url.scheme != "https"
             or url.netloc != self.account + ".r2.cloudflarestorage.com"
             or not (
@@ -167,19 +177,22 @@ class Transport:
             or url.fragment
         ):
             raise BoundaryError("R2 SDK attempted a retry or endpoint change")
-        self.sent = True
+        self.state.sent = True
         request.headers["Accept-Encoding"] = "identity"
         request.stream_output = True
         response = self.session.send(request)
-        if self.operation == "GetObject" and response.status_code == HTTPStatus.OK:
+        if (
+            self.state.operation == "GetObject"
+            and response.status_code == HTTPStatus.OK
+        ):
             return response
         raw: object = response.raw
         if not isinstance(raw, RawBody):
             raise BoundaryError("Invalid R2 response stream")
         accepted = {HTTPStatus.OK}
-        if self.operation == "PutObject":
+        if self.state.operation == "PutObject":
             accepted |= {HTTPStatus.CREATED, HTTPStatus.NO_CONTENT}
-        elif self.operation == "DeleteObject":
+        elif self.state.operation == "DeleteObject":
             accepted.add(HTTPStatus.NO_CONTENT)
         if response.status_code not in accepted:
             raw.close()
@@ -198,13 +211,16 @@ class Transport:
                         "RetryAttempts": 0,
                     },
                 },
-                self.operation,
+                self.state.operation,
             )
         try:
             data = bounded(raw, MAX_LIST)
         finally:
             raw.close()
-        if self.operation == "ListObjectsV2" and response.status_code == HTTPStatus.OK:
+        if (
+            self.state.operation == "ListObjectsV2"
+            and response.status_code == HTTPStatus.OK
+        ):
             _inventory_xml(data)
         headers = HTTPHeaders()
         for name in response.headers:

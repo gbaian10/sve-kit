@@ -192,7 +192,7 @@ gzip 與 `.br` 沒有獨立 hash，解碼核對其內容等於已驗證的 raw b
 uv --directory publish run sve-publish upload \
   --export-dir "$EXPORT_DIR" \
   --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" \
-  --skip-cdn-verify --execute
+  --jobs 16 --skip-cdn-verify --execute
 ```
 
 上傳依序做：
@@ -200,14 +200,18 @@ uv --directory publish run sve-publish upload \
 1. 讀遠端 `snapshots/versions/index.json`，決定新的 index：首次 revision=1、previous=null；
    之後 revision 加一，previous 是原本的 current。已是 current 就不改 index；
    同一 data_version 換了清單、或比 current 舊的匯出，直接拒絕。
-2. 先卡圖、後 JSON，逐檔 GET 遠端：bytes 與標頭都相同就算已讀回；否則條件 PUT
+2. 先卡圖、後 JSON，各階段以有上限的工作池並行處理物件；卡圖全部讀回完成才開始 JSON。
+   每個物件先 GET 遠端：bytes 與標頭都相同就算已讀回；否則條件 PUT
    （新 key 用 `If-None-Match: *`，覆寫卡圖用 `If-Match`），再 GET 一次比對。
    內容定址 JSON 已存在但不同時停止，不覆寫。
 3. CDN 驗證：每個帶 `?v=` 的卡圖完整 URL 各做兩次普通 GET。開發環境在 Access 之後，
    加 `--skip-cdn-verify` 略過這一步、改以瀏覽器檢查；來源端讀回照常執行，輸出會標示已略過。
 4. 確認 index 沒被改動後，以條件寫入更新 index，再讀回確認。
 
-條件或傳輸失敗就停止，不退回無條件 PUT，也不重送寫入；此時 current 不變。
+`--jobs N` 設定工作池上限，預設 16、最小 1；`--jobs 1` 為循序處理。
+條件或傳輸失敗就停止接納新寫入，等待已接納的操作完成後回報失敗物件，
+不退回無條件 PUT，也不重送寫入；此時不更新 index。
+已開始的 PUT 仍可能完成，尚在 GET 比對的物件不再進入 PUT；失敗不會回滾已完成物件。
 修正原因後重跑同一個命令，只會補傳缺少或不同的檔案。沒有變動的重跑不會發出任何 PUT。
 GC 為另外執行的 `sve-publish gc`，不在上傳後自動刪除，也不要在上傳期間執行。
 
@@ -222,6 +226,13 @@ GC 為另外執行的 `sve-publish gc`，不在上傳後自動刪除，也不要
 `--private-dir` 的 `media-state.json` 記錄卡圖版本的高水位與最新比較狀態，
 請隨既有備份保存；遺失後版本會從 1 重來，可能撞到已被快取的舊 URL。
 GC 的保留規則與執行方式見上述上傳文件。
+
+執行進度寫到 stderr，每完成 100 個物件或約 5 秒顯示完成數／總數與寫入數，
+各階段開始與結束也會回報；stdout 維持最後一份 JSON 摘要，dry-run 不增加進度輸出。
+首次上傳 74,100 張卡圖與 1,064 個 JSON，若全部為新物件，來源端約需 225,492 次物件請求，
+另有 index 請求。循序處理可能耗時數小時；預設 16 個 worker 可重疊等待網路回應的時間，
+實際時間仍受頻寬、延遲、R2 限流與本機驗證影響，不能保證 16 倍加速，需由維護者實測。
+離線對帳發生在工作池開始前；未略過的 CDN 驗證仍循序執行，`--jobs` 不加速該步驟。
 
 ## 9. 每個入口的未登入驗法與預期結果
 
