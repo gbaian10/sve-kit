@@ -318,7 +318,7 @@ export function CardsPage() {
                 className="h-1.5 w-full max-w-80 overflow-hidden rounded-full bg-surface-2"
               >
                 <div
-                  className="h-full rounded-full bg-accent transition-[width] duration-150"
+                  className="h-full rounded-full bg-accent"
                   style={{ width: `${String((download.done / download.total) * 100)}%` }}
                 />
               </div>
