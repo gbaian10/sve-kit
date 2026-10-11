@@ -5,7 +5,6 @@ import { createAnnotatedTextResolver } from "../annotated-text"
 import { createSnapshotClient, type SnapshotClient } from "../client"
 import { bucketOf, homeSetOwner } from "../locator"
 import { v3Fixture } from "../v3-fixture"
-import { validateAnnotations } from "./annotations"
 import {
   arrayValue,
   canonical,
@@ -14,19 +13,11 @@ import {
   objectValue,
   stringValue,
 } from "./json"
-import { expandNames, wholeName } from "./name-annotations"
-import { type Fragment, readSnapshot, type View } from "./reader"
+import { wholeName } from "./name-annotations"
+import { type Fragment } from "./reader"
 import { digest } from "./sha256"
 
 const fixture = () => objectValue(v3Fixture("whole-name-native.json"))
-function compactView(): View {
-  const view = objectValue(fixture()["expected"]) as View
-  view["annotation_set"] = []
-  view["field_annotation"] = []
-  for (const row of view["translation"] ?? []) row["annotation_set_id"] = null
-  return view
-}
-
 function origin() {
   const data = fixture(),
     manifest = objectValue(data["manifest"]),
@@ -112,23 +103,6 @@ async function sourceHistory() {
 }
 
 describe("whole names on exact source owners", () => {
-  it("restores the native producer's logical occurrences and permanent IDs", () => {
-    const data = fixture()
-    const payloads = new Map(
-      Object.entries(objectValue(data["payloads"])).map(([key, value]) => [key, canonical(value)]),
-    )
-    expect(canonicalText(readSnapshot(data["manifest"] ?? null, payloads))).toBe(
-      canonicalText(data["expected"] ?? null),
-    )
-    const view = compactView()
-    expandNames(view)
-    expect(view["annotation_set"]).toHaveLength(2)
-    expect(view["field_annotation"]).toHaveLength(1)
-    expect(view["translation"]?.[0]?.["annotation_set_id"]).toBe(
-      objectValue(data["expected"])["translation"] &&
-        (objectValue(data["expected"])["translation"] as JsonObject[])[0]?.["annotation_set_id"],
-    )
-  })
   it("uses scalar length for an exact unnormalized whole name", () => {
     const unit = { id: "t:ja:synthetic", text: "A😀Ｂé手牌" }
     expect(wholeName(unit, "term:whole")["occurrences"]).toEqual([
@@ -140,36 +114,6 @@ describe("whole names on exact source owners", () => {
       },
     ])
   })
-  it.each(["effect", "source", "concept", "receiver", "unused"])(
-    "rejects %s confusion",
-    (mutation) => {
-      const view = compactView()
-      const receiver = view["face_revision"]?.[0]
-      if (!receiver) throw new Error("missing test receiver")
-      const selection = objectValue(arrayValue(receiver["translations"])[0])
-      if (mutation === "effect") {
-        selection["field"] = "effect"
-        objectValue(selection["source"])["field"] = "effect"
-      }
-      if (mutation === "source")
-        objectValue(objectValue(selection["source"])["owner"])["id"] = "missing"
-      if (mutation === "concept") receiver["name_concept_id"] = null
-      if (mutation === "receiver") {
-        const donor = {
-          ...receiver,
-          id: "historical",
-          name_concept_id: "different",
-          translations: [],
-        }
-        view["face_revision"]?.push(donor)
-        objectValue(objectValue(selection["source"])["owner"])["id"] = "historical"
-      }
-      if (mutation === "unused") receiver["translations"] = []
-      expect(() => {
-        validateAnnotations(view, ["ja", "zh-Hant"])
-      }).toThrow()
-    },
-  )
   it("makes the partial annotated view ready after resolving its source and concepts", async () => {
     const { data, client } = origin()
     await client.load()

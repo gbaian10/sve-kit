@@ -1,7 +1,7 @@
 # 快照機器契約與共用樣本
 
-套件 Schema、Python reader 與 TS reader 使用唯一的 `3.0.0` profile，整合
-[公開 annotation 契約](public-annotation.md)的欄序、形狀、來源指標與語義檢查。
+套件 Schema、Python reader 與 TS 解碼器使用唯一的 `3.0.0` profile，整合
+[公開 annotation 契約](public-annotation.md)的欄序、形狀、來源指標；格式與語義檢查在匯出及上傳前離線執行。
 [public-annotation.schema.json](public-annotation.schema.json)及
 [固定案例](public-annotation-cases.json)仍供指定邊界的元件驗證，完整快照以套件 Schema 與共用 golden 驗收。
 基本目錄裝檔與容量量法依[容量契約](size-budget.md)，不以既有輸出或桌面測試代替手機驗收。
@@ -41,7 +41,7 @@ bootstrap／detail descriptor 與完整 tuple 一致，不輸出 translation.sta
 
 可直接以 `#/$defs/Manifest` 等片段作驗證入口。`x-columns`、`x-types`、`x-primary-key`、`x-fragments`、`x-tables` 是供固定 accessor 使用的註記；接受／拒絕 JSON 形狀使用標準 keywords。資料內 types 另以 const 驗完整 descriptor，不能讓 payload 的註記改變解碼方式。
 
-Schema 驗欄序、tuple 長度、required-nullable、額外欄及 enum。跨值比較（例如 minimum≤maximum）、排序、依賴 DAG、hash、引用閉包與 join 由 reader 驗證；不能只通過 JSON Schema 就宣稱整份快照可用。JSON number 在不同語言可能抹去 `1.0` 與 `1` 的差別，canonical bytes 邊界必須在失去原始表示前驗證。
+Schema 驗欄序、tuple 長度、required-nullable、額外欄及 enum。跨值比較（例如 minimum≤maximum）、排序、依賴 DAG、hash、引用閉包與 join 由 Python reader 驗證；不能只通過 JSON Schema 就宣稱整份快照可用。JSON number 在不同語言可能抹去 `1.0` 與 `1` 的差別，canonical bytes 邊界必須在失去原始表示前驗證。
 
 日期、時間、版本及 HTTPS URL 使用明確的 pattern，不依賴可選的 `format` assertion 或驗證器外掛。數字限定 ASCII；日期驗 Gregorian 閏年與月日，UTC 時間驗 00–23 時、00–59 分秒。URL 驗 URI 字元、percent encoding 與 authority（含 IPv6），Unicode 文字須先編碼為 URI；不得以瀏覽器的容錯正規化代替驗證。
 
@@ -90,19 +90,24 @@ uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 
 這是供契約驗收的小型記憶體 reader：回傳完整 logical objects，便於比對獨立 oracle。前端正式 store 仍須遵守 snapshot-format 的逐片解析／淘汰規則。壓縮傳輸長度、資產本體下載、兩版 changes 差異及建置端證據屬對應下載／發布流程的驗收，不由這個已解壓 bytes 入口代驗。
 
-## TS 端應驗項目
+## 驗證與瀏覽器讀取責任
 
-TS reader／harness 使用相同資源和樣本，不建立第二份 golden，也不依賴 Python producer。驗收至少包含：
+| 檢查 | 執行端／入口 |
+| --- | --- |
+| 嚴格 UTF-8 JSON、重複鍵、浮點／不安全整數、surrogate、canonical bytes | `core/json.py` 的 `parse`／`canonical`，`export/reader.py` 的 `_payload`；`read_api.py` 的 `_manifest` 驗 manifest 原始 bytes |
+| Schema、固定 descriptor／tuple、row_counts、檔案與依賴 DAG、引用閉包、join | Python `read_snapshot` 的 `_files`／`_container`／`_base`／`_join`／`_closure` |
+| owner／partition／bucket、跨列排序、圖片、數位同名、config、標註 | `export/semantics.py` 的 `validate_fragments`／`validate_view`／`validate_placement`／`validate_config`，`reader_media.py` 與 `reader_annotations.py` |
+| 匯出驗收 | `export/transport/__init__.py` 的 `Snapshot.verify` 比對完整 logical view；`export/preview/__init__.py` 的 `write_preview` 另驗 `read_text_all` 與分片等價 |
+| 上傳前離線驗收 | `read_api.load_export` 驗完整分片及資產；`sve_publish.commands.upload_command` 先取得此結果，再取得憑證與上傳 |
+| 瀏覽器下載／快取完整性 | `integrity.ts` 的 `transferDigest` 使用 WebCrypto；client／SearchBlobs／MetadataBytes 驗 hash 與 bytes，decoder 不重算；衍生快取紀錄另驗自身 hash |
+| 瀏覽器解碼與准入 | 原生 `JSON.parse`、固定 `x-columns`／`x-types` 解碼及 detail join；保留版本／最低 reader／能力判斷，解析或必要欄位使用失敗顯示載入錯誤 |
 
-- 載入同一 JSON Schema，逐項接受 schema-valid、拒絕 schema-invalid；固定欄序、每個 tuple 少格／多格、nullable 格不能省略、未知 enum 與額外物件鍵均拒絕。日期／URI 不依賴 format 外掛；拒絕非 ASCII 數字、不存在的日期、越界時間與未編碼 URI 字元。
-- 逐項比對固定 types，解碼巢狀 tuple；資料提供的 descriptor 不可重定義型別，缺漏、未知或循環引用不得接受。
-- 比對 vectors 的 canonical bytes／hash；拒絕重複 JSON 鍵、浮點表示、不安全整數、Bool 冒充整數、BOM、未配對 surrogate。排序依 Unicode code point，不能直接假定 JS UTF-16 預設排序等價。
-- 驗 files 的精確 key/hash、檔案大小、內容定址路徑、依賴 DAG、row_counts、format／最低 reader 版本／capabilities；缺 programs 失敗，非空 programs 失敗。
-- 套用 reader-invalid 全部反例；row_index 按已排序 base 定位且完全覆蓋，face_ordinal 取永久 face.ordinal，一對一合併並拒絕缺漏、越界、重複及錯 base。
-- 對照 current/history 集合、translation 的欄位分割與合併鍵、公開 ID／詞彙引用閉包；不得跨快照查最新目標補洞。另驗參數上下界、名稱唯一及排序，Spelling 必須引用已宣告且啟用對應域的參數，同一裁定的多語 hints 必須有完全相同的參數宣告。
-- 個別下載與 text_all 都恰等於 expected-logical；完整遍歷 46 集合，不忽略空集合、null 或巢狀陣列次序。對替代容器另驗 contains／members／依賴閉包，不能拿聯集逃避單檔 hash 驗證。
+TS 不再維護完整離線驗證器或只被反例測試呼叫的舊驗證程式；Schema／reader-invalid 反例由 Python 契約測試把關。
+Web 測試驗下載 hash 失敗、JSON 無法解析、必要欄位缺失的錯誤狀態，以及正常搜尋、合併、標註與圖片顯示。
+canonical 與 SHA-256 bucket 向量仍供 fixture 產製及按需定位驗收；payload 的 types 不改變固定解碼欄序。
 
-CI 路徑分流須讓 `carddb/src/sve_carddb/contracts/schema/**` 觸發 web 契約測試，讓 `tests/fixtures/snapshot-contract/**` 觸發 Python 與 web 共用契約測試；這些路徑亦供引擎測試接線使用。TS 實作與 CI job 的接線由各元件維護，這份文件只固定共用入口及驗收責任。
+`load_export` 目前對 `text_all` 驗外層 hash／長度及壓縮表示，沒有呼叫 `read_text_all` 驗成員與分片等價；該語義驗收目前由 `write_preview` 與 Python 契約測試執行。
+共用 schema／樣本變動仍須觸發 Python 契約測試與 Web 解碼／顯示測試。
 
 ## 數位名字政策的准入邊界
 
@@ -126,5 +131,5 @@ Python／TS 共用合成向量須覆蓋 int_id、f0／f1、JP／EN、手動版�
 pending／missing、尺寸不足與 srcset、同 image_id 多 printing、回復 bytes 不重用 v。
 新增 changes 的 PK／changed_fields 白名單；資料版次 A→B→C 只保 C／B，B.changes.from 不保留 A。
 另驗無相容 current／previous、本機 active、落後多版全量更新、下載中輪替導致缺檔後重抓 current。
-JSON hash／canonical／FK／base 驗證維持；圖片 SHA 由產製／發布端驗，不用歷史圖 hash 拒絕新 bytes。
+JSON hash 在瀏覽器下載邊界維持；canonical／FK／base 一致性由匯出與上傳前的 Python reader 驗證；圖片 SHA 由產製／發布端驗，不用歷史圖 hash 拒絕新 bytes。
 CDN query 分離已實測，但 browser／SW、新 v 負快取與發布中斷須在相應元件整合驗，不以 Schema 通過代替。

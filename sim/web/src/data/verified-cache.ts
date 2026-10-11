@@ -4,11 +4,8 @@ import { transferDigest } from "./integrity"
 // Browser storage can be cleared or damaged; a record is used only when its bytes still match.
 const DIGEST = "x-sve-sha256"
 
-/**
- * Results derived from a fully verified manifest, kept per root so reloading the same input skips
- * decoding and validation. Callers write only after every check passed; each slot keeps its current
- * and previous record. Unavailable storage, quota and unreadable records all mean a full rebuild.
- */
+// Store only successful decoding results; damaged or unreadable records require a full rebuild.
+// Root and build isolation lets reloads reuse the current result without repeating its decoding.
 export class VerifiedCache {
   private readonly prefix: string
   private readonly version: string

@@ -4,17 +4,8 @@ import { describe, expect, it } from "vitest"
 import { memoryCache } from "../test-utils/cache"
 import { type Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
-import {
-  canonical,
-  canonicalText,
-  type JsonObject,
-  objectValue,
-  stringValue,
-} from "./format-v3/json"
-import { validateMedia } from "./format-v3/media"
-import { readSnapshot } from "./format-v3/reader"
-import { validateConfig, validateDigitalLinks } from "./format-v3/semantics"
-import { imageUrl, mediaImageSource } from "./image-url"
+import { canonical, type JsonObject, objectValue, stringValue } from "./format-v3/json"
+import { mediaImageSource } from "./image-url"
 import { loadImagePage } from "./images"
 import { v3Fixture, v3Version } from "./v3-fixture"
 
@@ -41,19 +32,7 @@ function origin(first = v3Version()) {
 }
 const front = { printingId: "p:a", faceId: "f:a" }
 
-describe("2.0 shared contract and display projection", () => {
-  it("joins the independent shared golden and oracle without reinterpreting 1.x tuples", () => {
-    const manifest = objectValue(v3Fixture("manifest.json"))
-    const payloads = new Map(
-      (manifest["files"] as JsonObject[]).map((f) => [
-        stringValue(f["key"]),
-        canonical(v3Fixture(`payloads/${stringValue(f["sha256"]).slice(7)}.json`)),
-      ]),
-    )
-    expect(canonicalText(readSnapshot(manifest, payloads))).toBe(
-      canonicalText(v3Fixture("expected-logical.json")),
-    )
-  })
+describe("3.0 display projection", () => {
   it("uses the art token separately and emits only distinct width descriptors for tiny sources", () => {
     const row = (
       objectValue(v3Fixture("expected-logical.json"))["printing_image"] as JsonObject[]
@@ -82,18 +61,6 @@ describe("2.0 shared contract and display projection", () => {
       variants: (row["variants"] as JsonObject[]).map((v) => ({ ...v, width: 128, height: 64 })),
     }
     expect(mediaImageSource("/cdn", 1, 0, landscape, "card")?.height).toBe(64)
-  })
-  it.each([
-    [0, 0, "card_m", 1],
-    [1, -1, "card_m", 1],
-    [1, 0, "card_m", 0],
-    [1, 0, "unknown", 1],
-    [1.5, 0, "card_m", 1],
-    [1, 0, "card_m", 9007199254740992],
-  ])("rejects invalid URL components %j", (id, ordinal, size, version) => {
-    expect(() => imageUrl("https://cdn.test", id, ordinal, size, version)).toThrow(
-      "image-variant-unapproved",
-    )
   })
   it("fetches one home media file, never global source details, and preserves real width srcset", async () => {
     const served = origin()
@@ -144,39 +111,6 @@ describe("2.0 shared contract and display projection", () => {
     expect(details.some((f) => f.table === "image_asset")).toBe(true)
     expect(served.requests).toContain(file["path"])
   })
-  it("rejects extra source-detail dependencies even when all references and hashes are valid", async () => {
-    const version = v3Version(1, undefined, (manifest) => {
-      const files = manifest["files"] as JsonObject[]
-      const media = files.find((f) =>
-        (f["row_counts"] as JsonObject[]).some((c) => c["table"] === "printing_image"),
-      )
-      const other = files.find(
-        (f) =>
-          f["role"] === "bootstrap" &&
-          !(media?.["dependencies"] as JsonObject[]).some((d) => d["key"] === f["key"]),
-      )
-      if (!media || !other) throw new Error("missing candidate")
-      media["dependencies"] = [
-        ...(media["dependencies"] as JsonObject[]),
-        { key: other["key"] ?? null, sha256: other["sha256"] ?? null },
-      ].sort((a, b) => stringValue(a["key"]).localeCompare(stringValue(b["key"])))
-    })
-    const served = origin(version)
-    const client = createSnapshotClient("https://cdn.test", { fetch: served.fetcher })
-    await client.load()
-    expect(client.status()).toMatchObject({ state: "ready" })
-    await expect(loadImagePage(client, [front])).rejects.toThrow("dependency-closure")
-  })
-  it("rejects an absent media face rather than exposing a guessed URL", async () => {
-    const served = origin(
-      v3Version(1, (table, row) => {
-        if (table === "printing_image" && row[0] === "p:a" && row[1] === "f:a") row[1] = "f:absent"
-      }),
-    )
-    const client = createSnapshotClient("https://cdn.test", { fetch: served.fetcher })
-    await client.load()
-    await expect(loadImagePage(client, [front])).rejects.toThrow("printing-image-face")
-  })
   it.each(["missing", "pending"])(
     "clears an old ready image after adopting %s, without borrowing another printing",
     async (state) => {
@@ -226,92 +160,6 @@ describe("2.0 shared contract and display projection", () => {
         true,
       )
     }
-  })
-  it("requires both configured digital games in 2.0, even when there are no same_name links", () => {
-    const file = (objectValue(v3Fixture("manifest.json"))["files"] as JsonObject[]).find(
-      (f) => f["role"] === "config",
-    )
-    if (!file) throw new Error("missing config")
-    const config = objectValue(v3Fixture(`payloads/${stringValue(file["sha256"]).slice(7)}.json`))
-    expect(() => {
-      validateConfig(config, "3.0.0")
-    }).not.toThrow()
-    const endpoints = config["digital_endpoints"] as JsonObject[]
-    expect(() => {
-      validateConfig(
-        {
-          ...config,
-          digital_endpoints: endpoints.map((e, i) => ({ ...e, game: i === 0 ? "svwb" : "sv1" })),
-        },
-        "3.0.0",
-      )
-    }).toThrow("config-url-template")
-    for (const values of [
-      [],
-      endpoints.slice(0, 1),
-      [...endpoints, endpoints[0] ?? null],
-      [...endpoints].reverse(),
-    ])
-      expect(() => {
-        validateConfig({ ...config, digital_endpoints: values }, "3.0.0")
-      }).toThrow("config-url-template")
-    expect(() => {
-      validateConfig(
-        {
-          ...config,
-          digital_endpoints: endpoints.map((e) => ({ ...e, refresh_policy: "frozen" })),
-        },
-        "3.0.0",
-      )
-    }).toThrow("config-url-template")
-  })
-  it("rejects invalid versions/variants and malformed same_name, including duplicate human relation", () => {
-    const row = (
-      objectValue(v3Fixture("expected-logical.json"))["printing_image"] as JsonObject[]
-    )[0]
-    if (!row) throw new Error("missing media")
-    for (const value of [
-      { ...row, card_version: null },
-      { ...row, variants: [] },
-      { ...row, publication_state: "pending" },
-      {
-        ...row,
-        variants: [
-          ...(row["variants"] as JsonObject[]),
-          ...(row["variants"] as JsonObject[]).slice(0, 1),
-        ],
-      },
-    ])
-      expect(() => {
-        validateMedia(value)
-      }).toThrow()
-    const link = {
-      id: "dl:synthetic",
-      card_id: "c:a",
-      face_id: null,
-      digital_card_id: "dc:a",
-      digital_phase: null,
-      relation: "same_name",
-      effect_similarity: null,
-      review_level: "unreviewed",
-    }
-    expect(() => {
-      validateDigitalLinks({ digital_link: [link] })
-    }).not.toThrow()
-    for (const changed of [
-      { face_id: "f:a" },
-      { digital_phase: "base" },
-      { effect_similarity: "same" },
-      { review_level: "confirmed" },
-    ])
-      expect(() => {
-        validateDigitalLinks({ digital_link: [{ ...link, ...changed }] })
-      }).toThrow("schema")
-    expect(() => {
-      validateDigitalLinks({
-        digital_link: [link, { ...link, id: "dl:human", relation: "same_card" }],
-      })
-    }).toThrow("primary-key-duplicate")
   })
 })
 
@@ -399,25 +247,6 @@ describe("Index v2 finite window", () => {
       expect(client.status()).toMatchObject({ state: "ready", outdated: true })
     },
   )
-  it("records a valid incompatible revision so a later index cannot silently roll back", async () => {
-    const first = v3Version()
-    const served = origin(first)
-    const client = createSnapshotClient("https://cdn.test", { fetch: served.fetcher })
-    await client.load()
-    const active = client.snapshot()
-    served.setIndex({
-      index_format: 2,
-      revision: 4,
-      current: { ...first.entry, format_version: "9.0.0" },
-      previous: null,
-    })
-    await client.reload()
-    expect(client.status()).toMatchObject({ updateError: { kind: "incompatible" } })
-    served.setIndex({ index_format: 2, revision: 3, current: first.entry, previous: null })
-    await client.reload()
-    expect(client.snapshot()).toBe(active)
-    expect(client.status()).toMatchObject({ updateError: { kind: "corrupt" } })
-  })
   it("keeps the previous/outdated notice while a new current is still downloading", async () => {
     const first = v3Version()
     const served = origin(first)
@@ -510,44 +339,4 @@ describe("Index v2 finite window", () => {
       expect(client.snapshot()?.dataVersion).toBe(third.manifest["data_version"])
     },
   )
-  it("rejects a non-hash manifest path even when it serves the exact verified manifest bytes", async () => {
-    const first = v3Version()
-    const served = origin(first)
-    const alternate = `snapshots/manifests/${"0".repeat(64)}.json`
-    const bytes = first.files.get(stringValue(first.entry["manifest_path"]))
-    if (!bytes) throw new Error("missing manifest")
-    served.files.set(alternate, bytes)
-    served.setIndex({
-      index_format: 2,
-      revision: 1,
-      current: { ...first.entry, manifest_path: alternate },
-      previous: null,
-    })
-    const client = createSnapshotClient("https://cdn.test", { fetch: served.fetcher })
-    await client.load()
-    expect(client.snapshot()).toBeNull()
-    expect(client.status()).toMatchObject({ state: "error", kind: "corrupt" })
-    expect(served.requests).toEqual(["snapshots/versions/index.json"])
-  })
-  it("rejects an entry/manifest mismatch, repeated revision mutation and unknown index_format", async () => {
-    const first = v3Version()
-    const served = origin(first)
-    served.setIndex({
-      index_format: 2,
-      revision: 1,
-      current: { ...first.entry, published_at: "2026-10-04T01:00:02Z" },
-      previous: null,
-    })
-    const client = createSnapshotClient("https://cdn.test", { fetch: served.fetcher })
-    await client.load()
-    expect(client.status()).toMatchObject({ state: "error", kind: "corrupt" })
-    served.setIndex({ index_format: 2, revision: 2, current: first.entry, previous: null })
-    await client.retry()
-    served.setIndex({ index_format: 2, revision: 2, current: first.entry, previous: first.entry })
-    await client.reload()
-    expect(client.status()).toMatchObject({ updateError: { kind: "corrupt" } })
-    served.setIndex({ index_format: 3, revision: 3, current: first.entry, previous: null })
-    await client.reload()
-    expect(client.status()).toMatchObject({ updateError: { kind: "incompatible" } })
-  })
 })

@@ -185,7 +185,6 @@ const BUILD_ID_MODULE = path.join(import.meta.dirname, "src/data/build-id.ts")
 const BUILD_INPUTS = [
   path.join(import.meta.dirname, "src"),
   contractSchemaDir,
-  path.join(import.meta.dirname, "node_modules/.cache/sve-schema/validators.js"),
   ...[
     "bun.lock",
     "package.json",
@@ -230,39 +229,12 @@ function buildIdPlugin(inputs: readonly string[]): Plugin {
 const { cdn: cdnDir, preview: previewDir } = snapshotRoots(process.env)
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      "#snapshot-validators": path.resolve(
-        import.meta.dirname,
-        "node_modules/.cache/sve-schema/validators.js",
-      ),
-      "#snapshot-conformance": path.resolve(
-        import.meta.dirname,
-        "node_modules/.cache/sve-schema/conformance.cjs",
-      ),
-    },
-  },
   build: { license: { fileName: "third-party-licenses.md" } },
   // Lets the dev badge hide its root switch when no preview root is configured.
   define: {
     "import.meta.env.SVE_PREVIEW_CONFIGURED": JSON.stringify(previewDir === undefined ? "" : "1"),
   },
   plugins: [
-    {
-      name: "snapshot-validator-license",
-      apply: "build",
-      generateBundle() {
-        // Helpers are already bundled into generated standalone code, so package discovery misses them.
-        this.emitFile({
-          type: "asset",
-          fileName: "snapshot-validator-LICENSE.md",
-          source: readFileSync(
-            new URL("./node_modules/.cache/sve-schema/licenses.md", import.meta.url),
-            "utf8",
-          ),
-        })
-      },
-    },
     buildIdPlugin(BUILD_INPUTS),
     react(),
     tailwindcss(),

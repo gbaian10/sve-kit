@@ -1,6 +1,5 @@
 import type { LoadedSnapshot, SnapshotClient } from "./client"
 import { annotationLocations } from "./format-v3/annotation-placement"
-import { validateAnnotations } from "./format-v3/annotations"
 import {
   arrayValue,
   canonicalText,
@@ -47,7 +46,7 @@ export interface SelectedText {
 }
 
 export interface AnnotatedTextResolver {
-  /** Resolves only after the exact owner, ranges and reference closure have passed R. */
+  /** Resolves after the exact owner and its annotation references have been loaded. */
   readonly resolve: (pointer: JsonObject, targetLang: string) => Promise<SelectedText | null>
 }
 
@@ -69,7 +68,6 @@ function key(table: string, row: JsonObject): string {
 
 class PageClosure {
   readonly rows = new Map<string, Map<string, JsonObject>>()
-  readonly placements = new Map<string, Fragment>()
   readonly loaded = new Set<string>()
   readonly snapshot: LoadedSnapshot
   readonly client: SnapshotClient
@@ -102,7 +100,6 @@ class PageClosure {
       for (const row of fragment.rows) {
         const identity = key(fragment.table, row)
         rows.set(identity, row)
-        this.placements.set(canonicalText([fragment.table, identity]), fragment)
       }
       this.rows.set(fragment.table, rows)
     }
@@ -158,9 +155,6 @@ class PageClosure {
   virtualAnnotation(annotation: JsonObject): void {
     const sets = this.rows.get("annotation_set") ?? new Map<string, JsonObject>()
     const identity = canonicalText([annotation["id"] ?? null])
-    const previous = sets.get(identity)
-    if (previous && canonicalText(previous) !== canonicalText(annotation))
-      annotationFailure("identity")
     sets.set(identity, annotation)
     this.rows.set("annotation_set", sets)
   }
@@ -215,36 +209,14 @@ class PageClosure {
       ["face_revision", "printing_face"].includes(kind) ? location.entity : pk,
     )
     const unitId = this.textOwners().optionalPointer(pointer)
-    if (unitId === null) {
-      if (
-        this.rows.get("field_annotation")?.has(canonicalText(pk)) ||
-        arrayValue(this.owner(value).row["translations"]).some((raw) => {
-          const selection = objectValue(raw)
-          return selection["field"] === field && selection["ordinal"] === pointer["ordinal"]
-        })
-      )
-        annotationFailure("owner")
-      return null
-    }
+    if (unitId === null) return null
     await this.row("text_unit", unitId)
     const annotationRow = this.rows.get("field_annotation")?.get(canonicalText(pk))
-    if (annotationRow) {
-      const physical = this.placements.get(canonicalText(["field_annotation", canonicalText(pk)]))
-      if (
-        physical
-          ? physical.value["partition"] !== location.partition ||
-            canonicalText(physical.value["owner"] ?? null) !== canonicalText(location.physical)
-          : !(field === "name" && this.owner(value).row["name_concept_id"] != null)
-      )
-        annotationFailure("owner")
-    }
     let annotationId = annotationRow?.["annotation_set_id"] ?? null
     const concept = this.owner(value).row["name_concept_id"]
     if (field === "name" && pointer["ordinal"] === null && concept != null) {
       const unit = await this.row("text_unit", unitId)
       const annotation = wholeName(unit, stringValue(concept))
-      if (annotationId !== null && annotationId !== annotation["id"])
-        annotationFailure("text_identity")
       annotationId = annotation["id"] ?? null
       this.virtualAnnotation(annotation)
       const fields = this.rows.get("field_annotation") ?? new Map<string, JsonObject>()
@@ -273,7 +245,6 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
             value["ordinal"] === pointer["ordinal"] &&
             value["target_lang"] === targetLang,
         )
-      if (selected.length > 1) annotationFailure("duplicate_key")
       const selection = selected[0]
       const translation = selection
         ? { ...(await page.row("translation", selection["translation_id"] ?? null)) }
@@ -283,10 +254,7 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
       if (source === null) annotationFailure("owner")
       if (translation?.["annotation_kind"] === "whole_name" && selection) {
         const unit = await page.row("text_unit", translation["text_unit_id"] ?? null)
-        const annotation = wholeName(
-          unit,
-          translationNameConcept(page.textOwners(), receiver, selection),
-        )
+        const annotation = wholeName(unit, translationNameConcept(page.textOwners(), selection))
         page.virtualAnnotation(annotation)
         translation["annotation_set_id"] = annotation["id"] ?? null
       }
@@ -345,82 +313,6 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
           explanations.push({ reference: ref, row, unit })
         }
       if (translation) await page.row("text_unit", translation["text_unit_id"] ?? null)
-      const view: View = {}
-      const trim = (row: JsonObject): JsonObject => ({
-        ...row,
-        translations: [],
-        ...(Object.hasOwn(row, "name_concept_id") ? { name_concept_id: null } : {}),
-      })
-      const owners = pointers.map((value) => page.owner(objectValue(value["owner"])))
-      const cardIds = new Set([
-        ...owners.map((owner) => owner.cardId),
-        ...concepts.flatMap((concept) => arrayValue(concept["card_ids"])),
-      ])
-      view["card"] = [...(page.rows.get("card")?.values() ?? [])].filter((row) =>
-        cardIds.has(row["id"]),
-      )
-      view["face"] = [...(page.rows.get("face")?.values() ?? [])].filter((row) =>
-        owners.some((owner) => owner.faceId === row["id"]),
-      )
-      view["printing"] = []
-      for (const owner of owners) {
-        const kind = stringValue(owner.owner["kind"])
-        if (kind === "printing_face") {
-          const printing = page.rows
-            .get("printing")
-            ?.get(canonicalText([owner.owner["id"] ?? null]))
-          if (!printing) annotationFailure("owner")
-          const existing = view["printing"].find((row) => row["id"] === printing["id"])
-          if (existing) arrayValue(existing["faces"]).push(trim(owner.row))
-          else view["printing"].push({ ...printing, faces: [trim(owner.row)] })
-        } else {
-          view[kind] ??= []
-          if (!view[kind].some((row) => key(kind, row) === key(kind, owner.row)))
-            view[kind].push(trim(owner.row))
-        }
-      }
-      view["vocabulary"] = [...(page.rows.get("vocabulary")?.values() ?? [])].map(trim)
-      const textIds = new Set<JsonValue>([
-        original.unitId,
-        source.unitId,
-        translation?.["text_unit_id"] ?? null,
-        ...annotationRows.map((row) => row["text_unit_id"] ?? null),
-        ...explanations.map((value) => value.unit["id"] ?? null),
-      ])
-      view["text_unit"] = [...textIds]
-        .filter((id) => id !== null)
-        .map((id) => {
-          const row = page.rows.get("text_unit")?.get(canonicalText([id]))
-          if (!row) annotationFailure("reference")
-          return row
-        })
-      for (const explanation of explanations) {
-        const table = stringValue(explanation.reference["kind"])
-        view[table] ??= []
-        if (!view[table].some((row) => row["id"] === explanation.row["id"]))
-          view[table].push(trim(explanation.row))
-      }
-      for (const value of pointers) {
-        if (value["field"] === "name") {
-          const owner = new TextOwners(view).get(objectValue(value["owner"]))
-          owner.row["name_concept_id"] =
-            page.owner(objectValue(value["owner"])).row["name_concept_id"] ?? null
-        }
-      }
-      const selectedOwner = new TextOwners(view).get(objectValue(pointer["owner"]))
-      selectedOwner.row["translations"] = selection ? [selection] : []
-      view["field_annotation"] = [
-        ...new Map(fieldRows.map((row) => [key("field_annotation", row), row])).values(),
-      ]
-      view["annotation_set"] = annotationRows
-      view["annotation_concept"] = concepts
-      view["translation"] = translation ? [translation] : []
-      validateAnnotations(
-        view,
-        arrayValue(snapshot.config["languages"]).map((value) =>
-          stringValue(objectValue(value)["code"]),
-        ),
-      )
       const annotated = (unitId: JsonValue, id: JsonValue): AnnotatedText => {
         const unit = page.rows.get("text_unit")?.get(canonicalText([unitId]))
         if (!unit) annotationFailure("reference")

@@ -540,6 +540,28 @@ it("torn bytes cannot become active, and typing after failure keeps the error ex
   expect(h.status().result.phase).toBe("complete")
 })
 
+it.each(["{", "{}"])(
+  "a hash-verified unreadable manifest reports a load error (%s)",
+  async (text) => {
+    const served = origin()
+    const bytes = new TextEncoder().encode(text)
+    const hash = digest(bytes)
+    const path = `snapshots/manifests/${hash.slice(7)}.json`
+    served.files.set(path, bytes)
+    const fetcher: Fetcher = (url, init) =>
+      url.endsWith("snapshots/preview/current.json")
+        ? Promise.resolve(
+            new Response(canonical({ manifest_path: path, manifest_sha256: hash }).slice().buffer),
+          )
+        : served.fetcher(url, init)
+    const h = harness({ ...served, fetcher })
+    h.session.load(base, "jp", "preview")
+    await h.settled()
+    expect(h.status()).toMatchObject({ phase: "error", generation: null })
+    expect(h.events.some((event) => event.kind === "ready")).toBe(false)
+  },
+)
+
 it("facets whose closure is not loaded report an error instead of a partial count", async () => {
   const h = harness()
   h.session.load(base, "jp", "preview")

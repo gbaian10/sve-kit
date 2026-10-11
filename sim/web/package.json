@@ -5,27 +5,25 @@
   "type": "module",
   "packageManager": "bun@1.4.2",
   "scripts": {
-    "dev": "bun run schema:compile && vite",
-    "build": "bun run schema:compile && vite build",
-    "preview": "bun run schema:compile && vite preview",
-    "typecheck": "bun run schema:compile && tsc -b",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
     "lint": "bun run lint:js && bun run lint:css",
     "lint:js": "eslint --max-warnings=0 .",
     "lint:css": "stylelint \"src/**/*.css\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "bun run schema:compile && vitest run",
+    "test": "vitest run",
     "check": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run knip && bun run build",
-    "knip": "bun run schema:compile && knip",
-    "fixture:build": "bun run schema:compile && bun run scripts/fixture/main.ts",
-    "schema:compile": "bun run scripts/schema/main.ts",
+    "knip": "knip",
+    "fixture:build": "bun run scripts/fixture/main.ts",
     "deploy:dev": "VITE_CDN_BASE=/cdn-preview bun run build && wrangler deploy --config wrangler.dev.jsonc"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.3.0",
     "clsx": "^2.1.1",
     "i18next": "^26.4.2",
-    "jsonc-parser": "^3.3.1",
     "lru-cache": "^11.5.3",
     "lucide-react": "^1.48.0",
     "p-queue": "^9.3.3",
@@ -45,7 +43,6 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
-    "ajv": "^8.20.0",
     "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-better-tailwindcss": "^4.7.0",
@@ -70,6 +67,7 @@
     "typescript-eslint": "^8.70.1",
     "vite": "^8.3.1",
     "vitest": "^5.0.2",
-    "wrangler": "^4.147.0"
+    "wrangler": "^4.147.0",
+    "jsonc-parser": "^3.3.1"
   }
 }

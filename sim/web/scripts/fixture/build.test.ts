@@ -4,13 +4,13 @@ import { describe, expect, it } from "vitest"
 import {
   canonicalText,
   type JsonObject,
-  parseStrict,
+  parseJson,
   stringValue,
 } from "../../src/data/format-v3/json"
-import { readSnapshot } from "../../src/data/format-v3/reader"
 import { hex } from "../../src/data/format-v3/sha256"
 import { buildSnapshot, canonicalSize } from "./build"
 import { CARDS } from "./cards"
+import { snapshotView } from "./view"
 
 // Deterministic stand-in for the WebP encoder: the bytes only need to be unique per seed and size.
 const stubImage = ({ width, height, seed }: { width: number; height: number; seed: number }) =>
@@ -31,8 +31,8 @@ function payloadsOf(snapshot: Awaited<ReturnType<typeof buildSnapshot>>): Map<st
 describe("fixture snapshot", async () => {
   const snapshot = await buildSnapshot({ encodeImage: stubImage })
 
-  it("is accepted by the reader with every card present", () => {
-    const view = readSnapshot(snapshot.manifest, payloadsOf(snapshot))
+  it("decodes and joins every fixture card", () => {
+    const view = snapshotView(snapshot.manifest, payloadsOf(snapshot))
     expect(view["card"]).toHaveLength(CARDS.length)
     expect(view["printing"]?.length).toBe(CARDS.reduce((n, card) => n + card.printings.length, 0))
     expect(view["face_revision"]?.length).toBeGreaterThan(CARDS.length)
@@ -40,7 +40,7 @@ describe("fixture snapshot", async () => {
   })
 
   it("prints the wording each printing actually carried, not the latest revision", () => {
-    const view = readSnapshot(snapshot.manifest, payloadsOf(snapshot))
+    const view = snapshotView(snapshot.manifest, payloadsOf(snapshot))
     const revisions = new Map(
       (view["face_revision"] ?? []).map((row) => [stringValue(row["id"]), row]),
     )
@@ -78,7 +78,7 @@ describe("fixture snapshot", async () => {
   })
 
   it("selects the exact current JP owner for EN names and effects across errata", () => {
-    const view = readSnapshot(snapshot.manifest, payloadsOf(snapshot))
+    const view = snapshotView(snapshot.manifest, payloadsOf(snapshot))
     for (const [faceId, currentRevision] of [
       ["f:bp01-020", 2],
       ["f:bp01-021", 1],
@@ -104,13 +104,11 @@ describe("fixture snapshot", async () => {
   })
 
   it("publishes the current snapshot through index format 2", () => {
-    const index = parseStrict(
-      snapshot.files.get("snapshots/versions/index.json") ?? "",
-    ) as JsonObject
+    const index = parseJson(snapshot.files.get("snapshots/versions/index.json") ?? "") as JsonObject
     expect(index["index_format"]).toBe(2)
     expect(index["previous"]).toBeNull()
     expect((index["current"] as JsonObject)["manifest_path"]).toBe(snapshot.manifestPath)
-    expect(canonicalText(parseStrict(snapshot.files.get(snapshot.manifestPath) ?? ""))).toBe(
+    expect(canonicalText(parseJson(snapshot.files.get(snapshot.manifestPath) ?? ""))).toBe(
       canonicalText(snapshot.manifest),
     )
   })

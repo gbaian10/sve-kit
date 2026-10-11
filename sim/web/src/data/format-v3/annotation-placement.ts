@@ -1,13 +1,5 @@
 import { fail } from "./errors"
-import {
-  arrayValue,
-  canonicalText,
-  type JsonObject,
-  type JsonValue,
-  objectValue,
-  stringValue,
-} from "./json"
-import { wholeName } from "./name-annotations"
+import { arrayValue, type JsonObject, type JsonValue, objectValue, stringValue } from "./json"
 import type { Fragment, View } from "./reader"
 
 function displayRevisions(view: View): Set<JsonValue> {
@@ -67,58 +59,4 @@ export function annotationLocations(view: View, fragments: readonly Fragment[]) 
       partition,
     } as const
   }
-}
-
-export function validateAnnotationPlacement(view: View, fragments: readonly Fragment[]): void {
-  const locate = annotationLocations(view, fragments)
-  const annotations = new Set<JsonValue>()
-  for (const fragment of fragments) {
-    const part = fragment.value["partition"]
-    if (fragment.table === "field_annotation")
-      for (const row of fragment.rows) {
-        const owner = objectValue(row["owner"])
-        const location = locate(owner, stringValue(row["field"]), row["ordinal"] ?? null)
-        if (canonicalText(fragment.value["owner"] ?? null) !== canonicalText(location.physical))
-          fail("public-annotation/owner", "annotation fragment owner differs from source owner")
-        const expected = location.partition
-        if (part !== expected)
-          fail("fragment-profile", "original annotation column partition mismatch")
-        if (part === "bootstrap") annotations.add(row["annotation_set_id"] ?? null)
-      }
-    if (fragment.table === "translation" && part === "bootstrap")
-      for (const row of fragment.rows)
-        if (row["annotation_set_id"] !== null) annotations.add(row["annotation_set_id"] ?? null)
-  }
-  const texts = new Map((view["text_unit"] ?? []).map((row) => [row["id"], row]))
-  for (const row of view["face_revision"] ?? []) {
-    if (row["name_concept_id"] == null) continue
-    const location = locate({ kind: "face_revision", id: row["id"] ?? null }, "name")
-    const unit = texts.get(row["name_unit_id"])
-    if (location.partition === "bootstrap" && unit)
-      annotations.add(wholeName(unit, stringValue(row["name_concept_id"]))["id"] ?? null)
-  }
-  const concepts = new Set<JsonValue>()
-  for (const row of view["annotation_set"] ?? [])
-    if (annotations.has(row["id"] ?? null))
-      for (const occurrence of arrayValue(row["occurrences"])) {
-        const ref = objectValue(objectValue(occurrence)["reference"])
-        if (ref["kind"] !== "vocabulary")
-          concepts.add(ref[ref["kind"] === "card_name" ? "term_id" : "key"] ?? null)
-      }
-  const display = displayRevisions(view)
-  for (const row of view["face_revision"] ?? [])
-    if (display.has(row["id"] ?? null) && row["name_concept_id"] != null)
-      concepts.add(row["name_concept_id"])
-  for (const fragment of fragments)
-    if (["annotation_set", "annotation_concept"].includes(fragment.table)) {
-      const selected = fragment.table === "annotation_set" ? annotations : concepts
-      if (
-        fragment.rows.some(
-          (row) =>
-            fragment.value["partition"] !==
-            (selected.has(row["id"] ?? null) ? "bootstrap" : "detail"),
-        )
-      )
-        fail("fragment-profile", "annotation bootstrap closure partition mismatch")
-    }
 }

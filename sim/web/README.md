@@ -123,41 +123,21 @@ declares them (list a rule twice when it fires twice). Update the fixtures toget
 `src/data/format-v3/` is the pure core of the card-data reader: no `fetch`, no DOM. It follows
 [docs/schema/export/snapshot-format.md](../../docs/schema/export/snapshot-format.md),
 [snapshot-transport.md](../../docs/schema/export/snapshot-transport.md) and
-[snapshot-contract.md](../../docs/schema/export/snapshot-contract.md), and mirrors the Python reference
-reader in `carddb/src/sve_carddb/export/`.
+[snapshot-contract.md](../../docs/schema/export/snapshot-contract.md), and decodes the format validated offline by the Python reader in `carddb/src/sve_carddb/export/`.
 
-- `json.ts`: the strict JSON boundary (canonical-json-v1). Microsoft jsonc-parser visits decoded keys and tokens
-  with comments and trailing commas disabled; every parser error is rejected. The visitor rejects
-  duplicate keys, floating spellings, unsafe integers and lone surrogates before native `JSON.parse`
-  builds the value (including own `__proto__` keys and canonical negative zero); `canonical()` writes the exact bytes hashes refer to.
-- `sha256.ts`: synchronous SHA-256 and the `sha256-mod-v1` bucket function.
-- `schema.ts` + `validator.ts`: the published JSON Schema is loaded from `carddb/` at build time
-  (one source of truth, no copy). `scripts/schema/` compiles Ajv2020 standalone validators;
-  runtime dispatch never compiles schemas or uses `new Function`, including in the decode Worker.
-  Annotation keywords `x-columns`, `x-types`, `x-primary-key`, `x-fragments` and `x-tables` are
-  registered explicitly; any other unknown keyword fails the build. Only the seven reader
-  entry definitions are bundled; the conformance build also checks every named definition.
-  `schema.test.ts` runs shared positive and negative examples through standalone and live Ajv,
-  which must agree. Schema failures keep their `schema` code, while Ajv supplies the path and keyword.
-- `decode.ts`, `reader.ts`, `semantics.ts`: fixed accessors from `x-columns`/`x-types`,
-  manifest and container checks, `row_index`/`face_ordinal` joins, reference closure and the
-  cross-row rules JSON Schema cannot express. Every rejection is a `SnapshotError` with a fixed
-  `code`; tests match codes, never message text.
+- `json.ts`: native JSON parsing of published snapshots, plus canonical encoding for lookup keys
+  and synthetic fixtures. Format checks run offline in carddb and before publication.
+- `integrity.ts`: WebCrypto SHA-256 for downloaded and cached bytes; the decoder does not hash again.
+- `sha256.ts`: synchronous `sha256-mod-v1` lookup buckets and fixture production.
+- `schema.ts`: fixed column/type accessors from carddb's published schema; no runtime schema validator.
+- `decode.ts`, `reader.ts`: version admission, nested tuple decoding and detail joins. Parsing and
+  required-field errors become a failed load; no canonical, placement or cross-table validation runs.
 
-`v3-contract.test.ts` runs the shared schema, reader, index and image-URL vectors from
-`tests/fixtures/snapshot-contract/v3/`. The current golden manifest and payloads join into
-exactly `expected-logical.json`; text-all gives the same view. `contract.test.ts` covers
-additional transport errors (missing files, cycles and integrity failures), and
-`schema.test.ts` checks synthetic positive samples against standalone and live Ajv.
-
-The client supports only snapshot 3.0.0, including its capabilities and fixed band membership.
-Its strict JSON, Ajv, decoding and semantic
-checks are shared current-format logic, with no 1.0 or 1.1 reader or schema branches.
-Index v2 considers only current, previous and the local active snapshot; an incompatible
-current does not trigger a search through historical versions. An older usable snapshot has
+The client supports only snapshot 3.0.0, including its version and capabilities. Index v2
+considers only current, previous and the local active snapshot. An older usable snapshot has
 a visible notice, and having no compatible snapshot prompts an application update.
-It verifies and decodes in one Worker; an idle worker releases its parsing heap after one
-second. Node fixture scripts and tests use the same decoder without a Worker. Raw tuples
+Downloaded bytes are hashed before transfer to the decode Worker; an idle worker releases
+its parsing heap after one second. Tests use the same decoder without a Worker. Raw tuples
 are released after decoding, rather than kept alongside row objects.
 
 Image metadata uses the manifest's exact fragment locator: permanent printing owner and
@@ -168,7 +148,7 @@ debounced viewport change resolves new faces. Browsing does not need the on-dema
 `rules_name` or `face_rules_name` tables; any future construction consumer must load their
 detail files before claiming a result.
 
-In 2.0, home-set media files provide display state, dimensions and separate card/art version
+In 3.0, home-set media files provide display state, dimensions and separate card/art version
 tokens directly. Image URLs use the permanent printing integer ID and face ordinal, with
 the token in `?v=`; source-detail tables are optional on-demand data. Printing/face bootstrap
 lookups are indexed once per snapshot. Withdrawn, missing or unapproved media produce no image
@@ -289,14 +269,6 @@ Added once pages exist:
 - First-load size budget script
 - Component tests that the jsx-a11y component mapping (`CardImage`, `Link`, `Button`) matches the rendered DOM
 
-The package scripts compile schemas before dev, build, preview, typecheck, test, knip and fixture
-commands. Generated JavaScript lives only in `node_modules/.cache/sve-schema/`. Fixed Vite/TypeScript
-aliases use the committed `compiled-validators.d.ts`, so clean-checkout lint and type checking
-do not need generated files. Run `bun run schema:compile` before invoking Vite, Vitest or a
-fixture script directly.
-Generation uses Bun, Node APIs and Vite, without shell utilities or OS-specific dependencies.
-
-Production builds include `third-party-licenses.md` from Vite's dependency license reporting,
-and `snapshot-validator-LICENSE.md` for Ajv and its helpers already bundled into generated code.
+Production builds include `third-party-licenses.md` from Vite's dependency license reporting.
 The dependency report includes lru-cache's BlueOak-1.0.0 terms and the MIT notices for p-queue,
 p-timeout and eventemitter3; these third-party terms are not replaced by the project license.

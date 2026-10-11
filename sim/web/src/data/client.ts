@@ -1,21 +1,17 @@
+import { catalogOf } from "./catalog"
 import { fetchBytes, type Fetcher, NetworkError } from "./cdn"
 import { createDecoder } from "./format-v3/decoder"
 import { SnapshotError } from "./format-v3/errors"
 import {
   arrayValue,
-  canonicalText,
   integerValue,
   type JsonObject,
   type JsonValue,
   objectValue,
-  parseStrict,
+  parseJson,
   stringValue,
 } from "./format-v3/json"
-import { validateMedia, validateMediaIdentities } from "./format-v3/media"
-import { placementChecker } from "./format-v3/placement"
 import { type Files, findBase, type Fragment, isCompatible, joinDetail } from "./format-v3/reader"
-import { validateDigitalLinks, validateImageRows } from "./format-v3/semantics"
-import { validateIndex2 } from "./index-entry"
 import { transferDigest } from "./integrity"
 import { MetadataBytes, type MetadataProgress } from "./metadata"
 import { requestQueue } from "./request-queue"
@@ -85,16 +81,6 @@ const INDEX_FORMAT = 2
 const PREVIEW_POINTER = "snapshots/preview/current.json"
 // Bump whenever the stored snapshot record changes shape.
 const SNAPSHOT_RECORD_FORMAT = 1
-// An index entry must agree with its verified manifest on these fields (format §4.1).
-const ENTRY_FIELDS = [
-  "data_version",
-  "published_at",
-  "format_version",
-  "min_reader_version",
-  "required_capabilities",
-  "engine_support_target",
-] as const
-
 class NoCompatibleVersion extends Error {}
 
 function failureOf(error: unknown): LoadFailure {
@@ -106,58 +92,6 @@ function failureOf(error: unknown): LoadFailure {
       : { kind: "corrupt", detail: error.message }
   }
   return { kind: "corrupt", detail: error instanceof Error ? error.message : String(error) }
-}
-
-const mediaAnchors = new WeakMap<LoadedSnapshot, Map<string, Fragment>>()
-function mediaBootstrap(snapshot: LoadedSnapshot): Map<string, Fragment> {
-  const existing = mediaAnchors.get(snapshot)
-  if (existing) return existing
-  const anchors = new Map<string, Fragment>()
-  for (const fragment of snapshot.bootstrap) {
-    if (fragment.table !== "printing" && fragment.table !== "face") continue
-    for (const row of fragment.rows) {
-      const key = canonicalText([fragment.table, row["id"] ?? null])
-      if (anchors.has(key))
-        throw new SnapshotError("primary-key-duplicate", "duplicate media bootstrap target")
-      anchors.set(key, fragment)
-    }
-  }
-  mediaAnchors.set(snapshot, anchors)
-  return anchors
-}
-
-function validateMediaFile(fragments: readonly Fragment[], snapshot: LoadedSnapshot): void {
-  const media = fragments.filter((fragment) => fragment.table === "printing_image")
-  if (media.length === 0) return
-  const anchors = mediaBootstrap(snapshot)
-  const required = new Set([stringValue(objectValue(snapshot.manifest["config_ref"])["key"])])
-  for (const fragment of media) {
-    for (const row of fragment.rows) {
-      for (const [table, field] of [
-        ["printing", "printing_id"],
-        ["face", "face_id"],
-      ]) {
-        const base = anchors.get(canonicalText([table ?? null, row[field ?? ""] ?? null]))
-        if (!base) throw new SnapshotError("dangling-reference", "media bootstrap target missing")
-        if (
-          table === "printing" &&
-          canonicalText(base.value["owner"] ?? null) !==
-            canonicalText(fragment.value["owner"] ?? null)
-        )
-          throw new SnapshotError("printing-owner-conflict", "media differs from printing home_set")
-        required.add(base.file)
-      }
-    }
-  }
-  // Dependencies belong to the physical file, which can pack many logical media fragments.
-  const deps = arrayValue(snapshot.files.get(media[0]?.file ?? "")?.["dependencies"]).map((d) =>
-    stringValue(objectValue(d)["key"]),
-  )
-  if (canonicalText(deps) !== canonicalText([...required].sort()))
-    throw new SnapshotError(
-      "dependency-closure",
-      "media requires exact config/printing/face dependencies",
-    )
 }
 
 export function createSnapshotClient(
@@ -181,8 +115,6 @@ export function createSnapshotClient(
   let status: SnapshotStatus = { state: "idle" }
   let loaded: LoadedSnapshot | null = null
   let pending: Promise<void> | null = null
-  let lastRevision = -1
-  let lastIndex = ""
   let detailAbort = new AbortController()
   // Settled detail files in LRU order; requests still in flight live apart so eviction never
   // drops a promise other callers are waiting on.
@@ -211,10 +143,10 @@ export function createSnapshotClient(
     }
   }
 
-  // Only a newer integer format is "update the site"; anything else is a broken index (schema).
+  // Index formats are independent of the snapshot format and need their own admission check.
   const requireIndexFormat = (value: JsonObject, what: string): void => {
-    const format = value["index_format"]
-    if (typeof format === "number" && Number.isInteger(format) && format > INDEX_FORMAT) {
+    const format = integerValue(value["index_format"])
+    if (format !== INDEX_FORMAT) {
       throw new NoCompatibleVersion(
         `${what} uses an index format this version of the site cannot read`,
       )
@@ -224,7 +156,7 @@ export function createSnapshotClient(
   const chooseEntry = async (): Promise<{ chosen: JsonObject; source: "current" | "previous" }> => {
     if (entry === "preview") {
       const pointer = objectValue(
-        parseStrict(await fetchBytes(fetcher, url(PREVIEW_POINTER), { cache: "no-cache" })),
+        parseJson(await fetchBytes(fetcher, url(PREVIEW_POINTER), { cache: "no-cache" })),
       )
       return {
         chosen: {
@@ -235,26 +167,11 @@ export function createSnapshotClient(
       }
     }
     const index = objectValue(
-      parseStrict(await fetchBytes(fetcher, url(INDEX_PATH), { cache: "no-cache" })),
+      parseJson(await fetchBytes(fetcher, url(INDEX_PATH), { cache: "no-cache" })),
     )
     requireIndexFormat(index, "the version index")
-    validateIndex2(index)
-    const revision = integerValue(index["revision"])
-    if (revision < lastRevision)
-      throw new SnapshotError("blob-integrity", "version index revision went backwards")
-    const signature = canonicalText(index)
-    if (revision === lastRevision && lastIndex !== signature)
-      throw new SnapshotError("blob-integrity", "version index changed without a new revision")
     const current = objectValue(index["current"])
     const previous = index["previous"] === null ? null : objectValue(index["previous"])
-    if (
-      previous &&
-      (current["data_version"] === previous["data_version"] ||
-        stringValue(current["published_at"]) < stringValue(previous["published_at"]))
-    )
-      throw new SnapshotError("blob-integrity", "invalid current/previous ordering")
-    lastRevision = revision
-    lastIndex = signature
     for (const [source, candidate] of [
       ["current", current],
       ["previous", previous],
@@ -264,13 +181,6 @@ export function createSnapshotClient(
       }
     }
     throw new NoCompatibleVersion("no current or previous snapshot is compatible; update the site")
-  }
-
-  const checkEntry = (chosen: JsonObject, manifest: JsonObject): void => {
-    if (entry === "preview") return
-    for (const field of ENTRY_FIELDS)
-      if (canonicalText(chosen[field] ?? null) !== canonicalText(manifest[field] ?? null))
-        throw new SnapshotError("blob-integrity", "index entry differs from verified manifest")
   }
 
   // A record holds what one full download verified, so it replaces the manifest, every startup
@@ -285,7 +195,7 @@ export function createSnapshotClient(
         dataVersion: stringValue(manifest["data_version"]),
         manifestHash,
         manifest,
-        // Same map verifyManifest builds: sorted unique keys over the manifest's own file objects.
+        // Rebuild the manifest file lookup without downloading it again.
         files: new Map(
           arrayValue(manifest["files"]).map((item) => {
             const file = objectValue(item)
@@ -355,12 +265,10 @@ export function createSnapshotClient(
       previous.manifestHash === stringValue(chosen["manifest_sha256"]) &&
       (previous.entrySource ?? "current") === source
     ) {
-      checkEntry(chosen, previous.manifest)
       return previous
     }
     const restored = await restore(stringValue(chosen["manifest_sha256"]))
     if (restored) {
-      checkEntry(chosen, restored.manifest)
       return { ...restored, entrySource: source }
     }
     progress("manifest")
@@ -371,7 +279,6 @@ export function createSnapshotClient(
     const decodedManifest = await decode({ kind: "manifest", bytes: manifestBytes })
     if (decodedManifest.kind !== "manifest") throw new SnapshotError("shape", "expected manifest")
     const { manifest, files } = decodedManifest
-    checkEntry(chosen, manifest)
     const version = stringValue(manifest["format_version"])
     progress("bootstrap")
     const configKey = stringValue(objectValue(manifest["config_ref"])["key"])
@@ -391,27 +298,6 @@ export function createSnapshotClient(
       else throw new SnapshotError("shape", "unexpected startup payload")
     }
     if (!config) throw new SnapshotError("config-programs-count", "config file missing")
-    validateMediaIdentities({
-      printing: bootstrap.filter((f) => f.table === "printing").flatMap((f) => f.rows),
-      face: bootstrap.filter((f) => f.table === "face").flatMap((f) => f.rows),
-    })
-    const faceCards = new Map(
-      bootstrap
-        .filter((fragment) => fragment.table === "face")
-        .flatMap((fragment) =>
-          fragment.rows.map((row) => [stringValue(row["id"]), row["card_id"] ?? null] as const),
-        ),
-    )
-    const check = placementChecker(version, bootstrap, faceCards)
-    let segment = performance.now()
-    for (const fragment of bootstrap) {
-      check([fragment])
-      // Leave time for input and rendering between bounded validation segments.
-      if (typeof Worker !== "undefined" && performance.now() - segment > 8) {
-        await new Promise<void>((resolve) => setTimeout(resolve, 0))
-        segment = performance.now()
-      }
-    }
     const snapshot: LoadedSnapshot = {
       entrySource: source,
       dataVersion: stringValue(manifest["data_version"]),
@@ -421,7 +307,8 @@ export function createSnapshotClient(
       config,
       bootstrap,
     }
-    // Every startup file and check above passed, so the result can stand in for them next time.
+    catalogOf(snapshot)
+    // Cache only data whose catalog can be built, so malformed rows never become a stored success.
     void persist(snapshot).catch(() => undefined)
     return snapshot
   }
@@ -440,6 +327,7 @@ export function createSnapshotClient(
         })
         return
       }
+      catalogOf(candidate)
       metadata?.dispose()
       detailAbort.abort()
       decode.cancel()
@@ -504,17 +392,6 @@ export function createSnapshotClient(
     return faces
   }
 
-  // Detail files are checked against the same bootstrap every time; index it once per snapshot.
-  const checkers = new WeakMap<LoadedSnapshot, (fragments: readonly Fragment[]) => void>()
-  const checkerOf = (snapshot: LoadedSnapshot) => {
-    let check = checkers.get(snapshot)
-    if (!check) {
-      check = placementChecker(stringValue(snapshot.manifest["format_version"]), snapshot.bootstrap)
-      checkers.set(snapshot, check)
-    }
-    return check
-  }
-
   const loadFile = async (snapshot: LoadedSnapshot, key: string): Promise<readonly Fragment[]> => {
     const file = snapshot.files.get(key)
     if (!file) throw new SnapshotError("payload-set", `unknown file ${key}`)
@@ -539,30 +416,13 @@ export function createSnapshotClient(
     const result = await decode({ kind: "file", file, bytes: data, version })
     if (result.kind !== "fragments") throw new SnapshotError("shape", "expected fragments")
     const fragments = result.fragments
-    checkerOf(snapshot)(fragments)
-    if (role === "images") {
-      const view: Record<string, JsonObject[]> = {}
-      for (const fragment of [
-        ...(fragments.some((fragment) => fragment.table === "printing_image")
-          ? snapshot.bootstrap.filter((fragment) => fragment.table === "printing")
-          : []),
-        ...fragments,
-      ])
-        (view[fragment.table] ??= []).push(...fragment.rows)
-      validateImageRows(view)
-      for (const row of view["printing_image"] ?? []) validateMedia(row)
-      validateMediaFile(fragments, snapshot)
-    }
-    const digitalView: Record<string, JsonObject[]> = {}
-    for (const fragment of fragments) (digitalView[fragment.table] ??= []).push(...fragment.rows)
-    validateDigitalLinks(digitalView)
     if (!active()) throw new Error("snapshot replaced")
     const faces = fragments.some((fragment) => fragment.value["base"] !== null)
       ? facesOf(snapshot)
       : new Map<string, JsonObject>()
     return fragments.map((fragment) => {
       if (fragment.value["base"] === null) return fragment
-      const base = findBase(fragment, [...snapshot.bootstrap, ...fragments], snapshot.files)
+      const base = findBase(fragment, [...snapshot.bootstrap, ...fragments])
       return { ...fragment, rows: joinDetail(fragment, base, faces) }
     })
   }

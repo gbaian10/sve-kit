@@ -15,10 +15,6 @@
     "verbatimModuleSyntax": true,
     "noUncheckedSideEffectImports": true,
     "erasableSyntaxOnly": true,
-    "resolveJsonModule": true,
-    "paths": {
-      "#snapshot-validators": ["./node_modules/.cache/sve-schema/validators.js"],
-      "#snapshot-conformance": ["./node_modules/.cache/sve-schema/conformance.cjs"]
-    }
+    "resolveJsonModule": true
   }
 }

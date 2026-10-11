@@ -38,7 +38,7 @@ MiB = 1,048,576 bytes，KiB = 1,024 bytes。raw 是 canonical-json-v1 未壓縮 
 不自行發明「略超」的百分比硬門檻，不把跨過分界一律當停止條件，也不自行放寬分界。
 raw／gzip 另報基本目錄實測；不另設其啟動壓縮門檻。
 完整文字與單檔的上限仍是發布效能驗收門檻；超限須調整投影或固定配置，不能宣稱通過。
-容量不是快照格式或 reader 相容性條件；reader 核對實際 bytes、hash、結構與閉包，不以預算拒絕合法快照。
+容量不是快照格式或 reader 相容性條件；Python reader 核對實際 bytes、hash、結構與閉包，瀏覽器核對 bytes／hash 並判版本能力准入，不以預算拒絕合法快照。
 manifest、changes、text_all 的封套與整檔量另列，不套資料 File 的單檔上限，仍須量其解析記憶體。
 
 ## 容量帳與完整來源

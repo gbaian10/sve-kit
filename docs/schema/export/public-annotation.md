@@ -4,7 +4,7 @@
 它承接 [ADR-0016](../../adr/0016-four-layer-translation.md)、[四層共用契約 §8](../domains/four-layer-translation.md#8-建置-dbrender-projection-與依賴)
 及 [#198](https://github.com/gbaian10/sve-kit/issues/198)，不修改 frame、render 或 annotation 的身分配方。
 機器定義見 [Schema](public-annotation.schema.json)，固定正反例見[案例規格](public-annotation-cases.md)。
-producer、Python／TS reader 與 read_api 已切換為 3.0.0，Web 依精確 owner 讀取標註與來源對照。
+producer、Python reader、TS 解碼器與 read_api 已切換為 3.0.0，Web 依精確 owner 讀取標註與來源對照。
 本次 #498 已完成 N0 的原生四層 authored workflow、全庫機械重鍵與 3.0.0 producer／reader／Web 接線；固定案例本身仍不是實作驗收證據。既有容量依維護者豁免交付；基本目錄設計與容量量法依 [size-budget](size-budget.md)，不代表分段載入或手機效能已驗收。
 
 ## 1. 版本與驗證邊界
@@ -37,13 +37,15 @@ required_capabilities 恰為以下已排序且不重複的集合：
 | 驗證者 | 責任與失敗時點 |
 | --- | --- |
 | P：producer | 投影前重驗固定來源、同卡同面、freshness、逐 occurrence 與選詞；投影後驗 Schema、全部公開閉包、hash／分片／容量；錯資料不完成匯出 |
-| R：Python／TS reader | 各自驗 canonical bytes、版本、Schema、欄序、引用、text identity、座標與公開 owner 關係；不得依賴 producer 已驗而放行 |
-| W：Web | 只使用 R 已驗的文字與 annotation；依 UI／卡面／模式選列，不因 basis 推導 aligned、counterpart 或 DSL 支援 |
+| R：Python reader | 離線驗 canonical bytes、版本、Schema、欄序、引用、text identity、座標與公開 owner 關係；供匯出及上傳前把關 |
+| W：Web／TS 解碼器 | 信任匯出及上傳前已驗格式；下載／快取驗 SHA-256 與長度，保留版本能力准入；原生 JSON.parse 與固定欄序解碼，解析／必要欄位使用失敗顯示載入失敗；依 UI／卡面／模式選列，不因 basis 推導資格 |
 | U：read_api／publish | `sve_carddb.export.read_api.load_export` 沿 Python reader 驗完整公開根；publish 只消費此邊界結果，拒絕未支援版本／能力與不完整文字閉包 |
 
-reader 能驗公開資料中的一致性，不能重做未出貨的來源封存／人工對應／counterpart 決定。
+本文 R 的一致性拒絕要求指 Python 完整 reader；W 不重做嚴格 JSON、canonical、Schema、placement／bucket、標註座標或跨表驗證。
+
+Python reader 能驗公開資料中的一致性，不能重做未出貨的來源封存／人工對應／counterpart 決定。
 那些真實性由 P 驗；不能為了讓 R 重演採納而新增證據層。P-only 反例與 R 的可觀察反例在案例中分開。
-部分載入的 TS store 分別回報基本文字、日文依據與 annotation 的就緒狀態，依 §4.1；普通文字可先提供，完整來源／標註 view 在所需閉包驗畢後提供。
+部分載入的 TS store 分別回報基本文字、日文依據與 annotation 的就緒狀態，依 §4.1；普通文字可先提供，完整來源／標註 view 在所需閉包載入後提供。
 完整下載後缺引用是錯誤，不是缺譯；Python 完整 reader 與 U 必驗全閉包。
 
 ## 2. 公開型別、欄序與欄位責任
@@ -52,7 +54,7 @@ reader 能驗公開資料中的一致性，不能重做未出貨的來源封存�
 所有 object 都封閉，拒絕重複鍵與額外鍵。UInt 為 0..9007199254740991 的整數，Bool 不當 UInt。
 ID 是非空公開識別；Code 沿既有 ASCII 規則；Lang 須在本快照 language 登錄。
 未知 enum、字串數字、非 Bool 品質旗標、缺欄都拒絕。基礎 canonical、日期等仍依既有傳輸契約。
-本節的 PA 編號對應固定案例 group；表中 R 一律同時指 Python 與 TS。
+本節的 PA 編號對應固定案例 group；表中 R 指 Python 離線完整 reader。
 
 ### 2.1 tuple 白名單
 
@@ -266,10 +268,10 @@ W 仍按 card_engine_support 的 region override／shared／block 順序求資�
 | 狀態 | 合成例與 reader／Web 行為 |
 | --- | --- |
 | 基本文字就緒（ready） | EN receiver 的名稱／基本欄位、FieldTranslation 七格、translation 九格、source_unit_id 指向的字典文字及目標文字已驗；`jp_source` 的 JP source owner 尚未載入。可搜尋／呈現普通字串與 origin／authority／low_confidence，標「日文依據」，不聲稱已核完 JP owner 或完整標註 |
-| 日文依據／標註未備妥（pending） | 上例仍有完整 source pointer 或非 null annotation_set_id，但所需 JP owner／兩區 mapping slice、用途 set／concept 尚未下載驗畢。顯示「日文依據載入中／標註載入中」，不畫未驗 ranges、不造加粗／說明入口；不能當作缺譯、空 set、無術語或已確認 counterpart |
-| 完整檢視缺來源（錯誤） | 所需 owner、字典與標註候選檔及其依賴已全部載入驗畢，仍找不到 pointer 指定的 JP revision、原文或非 null set；完整 view 回 reference／owner／text_identity 錯誤，不降級 pending／缺譯或借 current／同字串用途補洞 |
+| 日文依據／標註未備妥（pending） | 上例仍有完整 source pointer 或非 null annotation_set_id，但所需 JP owner／兩區 mapping slice、用途 set／concept 尚未下載並核對 hash。顯示「日文依據載入中／標註載入中」，不畫尚未載入的 ranges、不造加粗／說明入口；不能當作缺譯、空 set、無術語或已確認 counterpart |
+| 完整檢視缺來源（錯誤） | 所需 owner、字典與標註候選檔及其依賴已全部載入並核對 hash，仍找不到 pointer 指定的 JP revision、原文或非 null set；完整 view 回實際引用／owner 讀取錯誤，不降級 pending／缺譯或借 current／同字串用途補洞 |
 
-前兩種可同時成立：名稱搜尋已就緒，而日文依據／標註未備妥。已載入資料顯示錯 card／face／語言、座標或 hash 時立即拒絕，不等全量才報錯。
+前兩種可同時成立：名稱搜尋已就緒，而日文依據／標註未備妥。card／face／語言與座標一致性在 P、Python R 與 U 離線拒絕；Web hash 不符或實際讀取失敗立即報錯，不等全量才報錯。
 基本目錄的整區名稱／卡號／基本 facet 索引完整後才開放搜尋，不以來源對照待載阻塞普通文字，也不將部分卡片當完整結果。
 效果全文與進階 facet 的搜尋須等各自整區閉包驗畢；未完成顯示該用途載入中，不傳部分結果。
 
@@ -279,8 +281,8 @@ W 仍按 card_engine_support 的 region override／shared／block 順序求資�
 這些是介面語意要求，不宣稱現有 TS store 已完成分段 API；Python `read_snapshot`、`read_api.load_export` 與 publish 仍驗全部公開閉包，缺來源即拒絕。
 
 `official_counterpart` 維持嚴格：P 的 fresh display_checks、同卡同面與精確用途、aligned／無相關 divergence，以及 R 的雙端原文、text identity、annotation 一致性均保留。
-未完成 counterpart 雙端與標註驗證時不能顯示為已確認的官方對照；可顯示接收端自身原文，對照用途保持 pending。
-`jp_source` 的普通字串可讀不授予 counterpart、aligned、機制或 DSL 資格；完整來源／標註 view 不放寬任何檢查。
+未載入 counterpart 雙端與標註閉包時不能顯示為已確認的官方對照；可顯示接收端自身原文，對照用途保持 pending。
+`jp_source` 的普通字串可讀不授予 counterpart、aligned、機制或 DSL 資格；完整來源／標註 view 的一致性仍由 P／Python R／U 離線把關。
 
 [#498](https://github.com/gbaian10/sve-kit/issues/498) 交付時量測容量用的 3.0.0 fixture，FieldTranslation 用途列為 own_source **9,950**、jp_source **5,423**、official_counterpart **0**。
 這是實際各文字 File 的用途列計數，不是唯一 translation 數，也不是三種 UI 語言完整驗收。
@@ -307,11 +309,11 @@ row_counts 只計 wire 實際儲存的非空集合及用途列；空集合不補
 非空集合變空時，原文用途以 changes 記錄用途列的 retired；譯文則記錄 translation.annotation_set_id 改為 null，
 並依既有閉包規則移除不再被引用的集合／概念；不能省略仍有其他用途的共享集合。
 
-| 欄位／資料 | P | Python R | TS R／W | read_api／publish |
+| 欄位／資料 | P | Python R | TS 解碼／W | read_api／publish |
 | --- | --- | --- | --- | --- |
-| format／minimum／capabilities／types | 同步產生並拒未知值 | 准入、完整 descriptor／tuple 檢查 | 准入及按需相同檢查；未支援不渲染新資料 | load_export 完整驗，publish 不另解碼或忽略能力 |
-| owner／field／ordinal／source／counterpart | 原來源、用途、face、freshness、採納門檻 | 公開鍵、模式、文字及語言交叉驗證 | 相同；按 receiver 取用，原文比較載入 source | 保留全部公開引用，驗全閉包 |
-| annotation id／text／ordinal／reference／ranges／bold | 從 occurrence 產生並重算 ID | scalar 座標、hash、排序、引用／重疊 | 相同；轉 UTF-16 後切字；bold 三態、使用者開關 | 同 Python 驗證，不以未渲染為由略過 |
+| format／minimum／capabilities／types | 同步產生並拒未知值 | 准入、完整 descriptor／tuple 檢查 | 版本能力准入、固定欄序解碼；未支援不渲染新資料 | load_export 完整驗，publish 不另解碼或忽略能力 |
+| owner／field／ordinal／source／counterpart | 原來源、用途、face、freshness、採納門檻 | 公開鍵、模式、文字及語言交叉驗證 | 按 receiver 取用，原文比較載入 source；一致性由 P／R／U 把關 | 保留全部公開引用，驗全閉包 |
+| annotation id／text／ordinal／reference／ranges／bold | 從 occurrence 產生並重算 ID | scalar 座標、hash、排序、引用／重疊 | 按已驗座標轉 UTF-16 後切字；bold 三態、使用者開關 | 同 Python 驗證，不以未渲染為由略過 |
 | concept.category／explanations／card_ids | 必要公開投影，無 DB FK | 複合引用、種類、排序及目標存在 | 說明／卡片入口，未下載保持未備妥 | 連正文閉包一起計入完整文字 |
 | translation source／target／origin／authority／confidence | 保留選用、品質與各自 annotation | exact 字串與來源語言交叉驗證 | 顯示來源／待校對／JP 依據；不猜規則資格 | 由同 reader 保證品質格未被省略 |
 | region_blocks／support／官方 counterpart | 沿既有區域資格投影 | 不從 basis 補造資格 | 依 support 合成有效狀態，JP 翻譯不解除 block | 不因 JP 翻譯重寫支援狀態 |
@@ -322,7 +324,7 @@ frame／template、dependency_key、adoption_no、decision／review 收據或候
 
 ## 6. 拒絕順序、固定案例與驗收界線
 
-P、完整 R、U 的共同錯誤分類如下；訊息文字不要求相同，不可用任意例外當預期拒絕。
+P、Python 完整 R、U 的共同錯誤分類如下；訊息文字不要求相同，不可用任意例外當預期拒絕。
 W-only 的語言／資格案例驗具體成功結果，P-only 的來源真實性案例驗來源檢查，不能誤稱 R 重驗了封存證據。
 
 | 分類（依驗證先後） | 拒絕內容 | 固定 group |

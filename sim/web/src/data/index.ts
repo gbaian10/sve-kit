@@ -20,7 +20,7 @@ export {
   canonicalText,
   type JsonObject,
   objectValue,
-  parseStrict,
+  parseJson,
   stringValue,
 } from "./format-v3/json"
 export { registerImageCache } from "./image-sw-registration"

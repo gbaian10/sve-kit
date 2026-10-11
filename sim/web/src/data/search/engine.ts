@@ -4,17 +4,13 @@ import { decodeMessage } from "../format-v3/decode-message"
 import { SnapshotError } from "../format-v3/errors"
 import {
   arrayValue,
-  canonicalText,
   integerValue,
   type JsonObject,
   objectValue,
-  parseStrict,
+  parseJson,
   stringValue,
 } from "../format-v3/json"
-import { validateMediaIdentities } from "../format-v3/media"
-import { validatePlacement } from "../format-v3/placement"
 import { isCompatible } from "../format-v3/reader"
-import { validateIndex2 } from "../index-entry"
 import { transferDigest } from "../integrity"
 import { VerifiedCache } from "../verified-cache"
 import { SearchBlobs } from "./blobs"
@@ -25,17 +21,7 @@ import type { BootstrapPlan, LoadRequest, SearchEvent, SearchRequest } from "./m
 
 const defaultPlan: BootstrapPlan = (_manifest, files) =>
   [...files].filter(([, file]) => file["role"] === "bootstrap").map(([key]) => key)
-// An index entry must agree with its manifest on these fields (format §4.1).
-const ENTRY_FIELDS = [
-  "data_version",
-  "published_at",
-  "format_version",
-  "min_reader_version",
-  "required_capabilities",
-  "engine_support_target",
-] as const
-
-/** A stored index with what the ready event and the index entry check need from its manifest. */
+/** A stored index with the metadata needed by the ready event. */
 function readRecord(bytes: Uint8Array, edition: Region) {
   const { header, arrays } = unpack(bytes)
   const record = objectValue(header)
@@ -45,7 +31,6 @@ function readRecord(bytes: Uint8Array, edition: Region) {
   return {
     index: new SearchIndex(image, edition),
     dataVersion: stringValue(record["dataVersion"]),
-    manifestFields: objectValue(record["manifestFields"]),
     files: integerValue(record["files"]),
   }
 }
@@ -149,7 +134,7 @@ export class SearchEngine {
 
   private async resolve(request: LoadRequest, signal: AbortSignal): Promise<JsonObject> {
     const pointer = objectValue(
-      parseStrict(
+      parseJson(
         await fetchBytes(
           this.fetcher,
           `${request.base}/snapshots/${request.entry === "preview" ? "preview/current.json" : "versions/index.json"}`,
@@ -158,19 +143,13 @@ export class SearchEngine {
       ),
     )
     if (request.entry === "preview") return pointer
-    validateIndex2(pointer)
+    if (integerValue(pointer["index_format"]) !== 2)
+      throw new SnapshotError("unsupported-version", "unsupported index format")
     const current = objectValue(pointer["current"])
     const previous = pointer["previous"] === null ? null : objectValue(pointer["previous"])
     const compatible = [current, previous].find((candidate) => candidate && isCompatible(candidate))
     if (!compatible) throw new SnapshotError("unsupported-version", "no compatible snapshot")
     return compatible
-  }
-
-  private checkEntry(request: LoadRequest, entry: JsonObject, manifest: JsonObject): void {
-    if (request.entry === "index")
-      for (const field of ENTRY_FIELDS)
-        if (canonicalText(entry[field] ?? null) !== canonicalText(manifest[field] ?? null))
-          throw new SnapshotError("blob-integrity", "index entry differs from manifest")
   }
 
   private async prepare(request: LoadRequest, entry: JsonObject, signal: AbortSignal) {
@@ -188,7 +167,6 @@ export class SearchEngine {
     const parseMs = performance.now() - mark
     if (decoded.kind !== "manifest") throw new SnapshotError("shape", "expected manifest")
     const { manifest, files } = decoded
-    this.checkEntry(request, entry, manifest)
     const version = stringValue(manifest["format_version"])
     const configKey = stringValue(objectValue(manifest["config_ref"])["key"])
     const keys = [
@@ -202,9 +180,6 @@ export class SearchEngine {
       keys,
       files: new Map(keys.map((key) => [key, files.get(key)] as const)),
       dataVersion: stringValue(manifest["data_version"]),
-      manifestFields: Object.fromEntries(
-        ENTRY_FIELDS.map((field) => [field, manifest[field] ?? null]),
-      ),
       parseMs,
       manifestRawBytes: manifestBytes.length,
     }
@@ -229,7 +204,6 @@ export class SearchEngine {
       return false
     }
     const parseMs = performance.now() - mark
-    this.checkEntry(request, entry, record.manifestFields)
     signal.throwIfAborted()
     this.active = { generation: request.generation, index: record.index }
     this.emit({
@@ -278,7 +252,6 @@ export class SearchEngine {
         keys,
         files,
         dataVersion,
-        manifestFields,
         manifestRawBytes,
         parseMs: manifestParseMs,
       } = await this.prepare(request, entry, signal)
@@ -286,7 +259,6 @@ export class SearchEngine {
       let mark = performance.now()
       const blobs = new SearchBlobs(request.base, this.fetcher, this.storage)
       let bootstrap: BootstrapColumns | undefined = new BootstrapColumns()
-      const faces = new Map<string, string>()
       let config: JsonObject | undefined
       let maxRawBytes = manifestRawBytes
       let firstFileMs = 0
@@ -322,13 +294,8 @@ export class SearchEngine {
         mark = performance.now()
         const result = decodeMessage({ kind: "file", bytes, file, version })
         if (key === configKey && result.kind === "config") config = result.value
-        else if (result.kind === "fragments") {
-          for (const fragment of result.fragments)
-            if (fragment.table === "face")
-              for (const row of fragment.rows)
-                faces.set(stringValue(row["id"]), stringValue(row["card_id"]))
-          validatePlacement(result.fragments, version, [], faces)
-        } else throw new SnapshotError("shape", "unexpected basic catalog payload")
+        else if (result.kind !== "fragments")
+          throw new SnapshotError("shape", "unexpected basic catalog payload")
         parseMs += performance.now() - mark
         mark = performance.now()
         if (result.kind === "fragments") bootstrap.ingest(result.fragments)
@@ -350,17 +317,12 @@ export class SearchEngine {
       signal.throwIfAborted()
       if (!config) throw new SnapshotError("config-programs-count", "config missing")
       mark = performance.now()
-      validateMediaIdentities({
-        printing: bootstrap.rows("printing"),
-        face: bootstrap.rows("face"),
-      })
       bootstrap.seal()
       const stagingAllocation = bootstrap.allocation()
       const index = new SearchIndex(bootstrap, request.edition)
       buildMs += performance.now() - mark
       signal.throwIfAborted()
       bootstrap = undefined
-      faces.clear()
       this.active = { generation: request.generation, index }
       this.emit({
         kind: "ready",
@@ -391,7 +353,7 @@ export class SearchEngine {
       await stored.write(
         request.edition,
         manifestHash,
-        pack({ dataVersion, manifestFields, files: keys.length }, [index.encode()]),
+        pack({ dataVersion, files: keys.length }, [index.encode()]),
       )
     } catch (error) {
       if (!signal.aborted)

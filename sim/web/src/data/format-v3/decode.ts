@@ -31,7 +31,7 @@ function decodeType(
   return value
 }
 
-/** A schema-validated tuple as an object keyed by the fixed column order, nested tuples included. */
+/** A published tuple as an object keyed by the fixed column order, nested tuples included. */
 export function decodeRow(
   name: string,
   value: JsonValue,
