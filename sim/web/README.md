@@ -152,7 +152,12 @@ viewer cannot schedule more. Only on-screen images are eager; prefetched images 
 Decoded face metadata and URLs accumulate in the data layer for the lifetime of a snapshot.
 Scrolling or remounting a viewer can read them synchronously, without a loading placeholder or
 another fragment read. Replacement snapshots start with an empty index, and a late old batch
-cannot populate the new one. Errors belong only to the affected faces.
+cannot populate the new one. Errors belong only to the affected faces. A failed face can retry
+when its slot re-enters the near range at least ten seconds after failure; remaining in range
+or receiving the initial callbacks of a resized observer does not trigger another attempt.
+Each batch has a thirty-second deadline: expiry marks its faces failed, releases its shared
+slot and cancels acceptance of late results. Started batches retain this deadline across
+viewer unmounts.
 
 Retention admits only printing/face pairs whose bootstrap rows belong to the same card,
 including known missing-media results. Its entry limit is therefore the finite number of

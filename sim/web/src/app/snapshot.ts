@@ -65,11 +65,13 @@ const FACE_CAP = 60
 const BATCH_SIZE = 12
 const CONCURRENCY = 2
 const COLLECT_DEBOUNCE_MS = 100
+const RETRY_COOLDOWN_MS = 10_000
+const BATCH_TIMEOUT_MS = 30_000
 
 interface ImageStore {
   running: number
   readonly listeners: Set<() => void>
-  readonly failed: Set<string>
+  readonly failed: Map<string, number>
   readonly inflight: Set<string>
 }
 const imageStores = new WeakMap<LoadedSnapshot, ImageStore>()
@@ -77,7 +79,7 @@ function imageStore(snapshot: LoadedSnapshot): ImageStore {
   let store = imageStores.get(snapshot)
   if (!store) {
     store = {
-      failed: new Set(),
+      failed: new Map(),
       inflight: new Set(),
       running: 0,
       listeners: new Set(),
@@ -139,7 +141,7 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
       for (const face of batch) {
         const key = faceKeyOf(face.printingId, face.faceId)
         store.inflight.delete(key)
-        if (failed) store.failed.add(key)
+        if (failed) store.failed.set(key, Date.now())
       }
       store.running -= 1
       for (const listener of store.listeners) listener()
@@ -160,12 +162,25 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
         if (batch.length === 0) return
         for (const face of batch) store.inflight.add(faceKeyOf(face.printingId, face.faceId))
         store.running += 1
-        void loadImagePage(client, batch).then(
+        const abort = new AbortController()
+        let settled = false
+        const finish = (failed: boolean) => {
+          if (settled) return
+          settled = true
+          clearTimeout(deadline)
+          settle(batch, failed)
+        }
+        const deadline = setTimeout(() => {
+          // Expired batches must not cache late results or release their shared slot twice.
+          abort.abort()
+          finish(true)
+        }, BATCH_TIMEOUT_MS)
+        void loadImagePage(client, batch, abort.signal).then(
           () => {
-            settle(batch, false)
+            finish(false)
           },
           () => {
-            settle(batch, true)
+            finish(true)
           },
         )
       }
@@ -191,20 +206,36 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
       clearTimeout(timer)
       timer = setTimeout(collect, COLLECT_DEBOUNCE_MS)
     }
-    const track = (set: Set<Element>) => (entries: IntersectionObserverEntry[]) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) set.add(entry.target)
-        else set.delete(entry.target)
+    const track =
+      (set: Set<Element>, retry = false, initial = new Set<Element>()) =>
+      (entries: IntersectionObserverEntry[]) => {
+        let retried = false
+        for (const entry of entries) {
+          const initializing = initial.delete(entry.target)
+          if (entry.isIntersecting) {
+            const entered = !set.has(entry.target)
+            set.add(entry.target)
+            if (retry && entered && !initializing) {
+              const face = faceOfNode(entry.target)
+              const key = faceKeyOf(face.printingId, face.faceId)
+              const failedAt = store.failed.get(key)
+              if (failedAt !== undefined && Date.now() - failedAt >= RETRY_COOLDOWN_MS) {
+                store.failed.delete(key)
+                retried = true
+              }
+            }
+          } else set.delete(entry.target)
+        }
+        if (retried) for (const listener of store.listeners) listener()
+        schedule()
       }
-      schedule()
-    }
     const supported = typeof IntersectionObserver !== "undefined"
     let nearHeight = window.innerHeight
     // IntersectionObserver percentages use root width, so screen-height margins need pixels.
-    const createNearObserver = () => {
+    const createNearObserver = (initial?: Set<Element>) => {
       nearHeight = window.innerHeight
       return supported
-        ? new IntersectionObserver(track(near), {
+        ? new IntersectionObserver(track(near, true, initial), {
             rootMargin: `${String(nearHeight * 0.5)}px 0px ${String(nearHeight * 1.5)}px 0px`,
           })
         : undefined
@@ -238,8 +269,8 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
       // The margins depend on the height only; width-only resizes must not rebuild every target.
       if (window.innerHeight === nearHeight) return
       nearObserver?.disconnect()
-      near.clear()
-      nearObserver = createNearObserver()
+      // Resize initialization is geometry reconciliation, not a scroll-triggered retry.
+      nearObserver = createNearObserver(new Set(observed))
       for (const node of observed) nearObserver?.observe(node)
       if (!supported) for (const node of observed) near.add(node)
       schedule()

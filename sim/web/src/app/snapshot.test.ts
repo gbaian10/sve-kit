@@ -318,4 +318,182 @@ describe("viewport image continuity", () => {
     expect(result.current?.known?.("p:1", "f:1")).toBe(false)
     expect(result.current?.failedFace?.("p:1", "f:1")).toBe(false)
   })
+
+  it("retries a failed face only after cooldown and a fresh near entry", async () => {
+    const targets = nodes(1)
+    const { client } = imageSnapshot(1)
+    const read = vi.spyOn(client, "fragments").mockRejectedValueOnce(new Error("temporary failure"))
+    const { result } = renderHook(() => useImageIndex(client, true))
+    const near = Observer.instances.find((o) => o.options?.rootMargin)
+    act(() => {
+      near?.emit(targets)
+    })
+    await collect()
+    expect(result.current?.failedFace?.("p:0", "f:0")).toBe(true)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5000)
+    })
+    act(() => {
+      near?.emit(targets, false)
+      near?.emit(targets)
+    })
+    await collect()
+    expect(read).toHaveBeenCalledOnce()
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(6000)
+    })
+    act(() => {
+      near?.emit(targets)
+    })
+    await collect()
+    expect(read).toHaveBeenCalledOnce()
+    expect(result.current?.failedFace?.("p:0", "f:0")).toBe(true)
+    act(() => {
+      near?.emit(targets, false)
+      near?.emit(targets)
+    })
+    await collect()
+    expect(read).toHaveBeenCalledTimes(2)
+    expect(result.current?.failedFace?.("p:0", "f:0")).toBe(false)
+    expect(result.current?.cardImage("p:0", "f:0")).toBeDefined()
+  })
+
+  it.each([true, false])(
+    "does not retry from resized observer initialization (was near: %s)",
+    async (wasNear) => {
+      const targets = nodes(1)
+      const { client } = imageSnapshot(1)
+      const read = vi
+        .spyOn(client, "fragments")
+        .mockRejectedValueOnce(new Error("temporary failure"))
+      vi.stubGlobal("innerHeight", 800)
+      const { result } = renderHook(() => useImageIndex(client, true))
+      const near = Observer.instances.find((o) => o.options?.rootMargin)
+      act(() => {
+        near?.emit(targets)
+      })
+      await collect()
+      if (!wasNear)
+        act(() => {
+          near?.emit(targets, false)
+        })
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(11000)
+      })
+      vi.stubGlobal("innerHeight", 900)
+      act(() => {
+        window.dispatchEvent(new Event("resize"))
+      })
+      const resized = Observer.instances.find((o) => !o.disconnected && o.options?.rootMargin)
+      act(() => {
+        resized?.emit(targets)
+      })
+      await collect()
+      expect(read).toHaveBeenCalledOnce()
+      expect(result.current?.failedFace?.("p:0", "f:0")).toBe(true)
+      act(() => {
+        resized?.emit(targets, false)
+        resized?.emit(targets)
+      })
+      await collect()
+      expect(read).toHaveBeenCalledTimes(2)
+      expect(result.current?.cardImage("p:0", "f:0")).toBeDefined()
+    },
+  )
+
+  it("times out stalled batches, releases slots, and ignores their late results", async () => {
+    const targets = nodes(60)
+    const { client, media } = imageSnapshot(60)
+    const finishes: Array<(fragments: readonly Fragment[]) => void> = []
+    const read = vi.spyOn(client, "fragments").mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finishes.push(resolve)
+        }),
+    )
+    const { result } = renderHook(() => useImageIndex(client, true))
+    act(() => {
+      emit(targets)
+    })
+    await collect()
+    expect(read).toHaveBeenCalledTimes(2)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(29000)
+    })
+    expect(read).toHaveBeenCalledTimes(2)
+    expect(result.current?.failedFace?.("p:0", "f:0")).toBe(false)
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000)
+    })
+    expect(read).toHaveBeenCalledTimes(4)
+    expect(result.current?.failedFace?.("p:0", "f:0")).toBe(true)
+    expect(result.current?.failedFace?.("p:12", "f:12")).toBe(true)
+    await act(async () => {
+      finishes[0]?.(media)
+      finishes[1]?.(media)
+      await Promise.resolve()
+    })
+    expect(read).toHaveBeenCalledTimes(4)
+    expect(result.current?.cardImage("p:0", "f:0")).toBeUndefined()
+    expect(result.current?.failedFace?.("p:0", "f:0")).toBe(true)
+    await act(async () => {
+      finishes[2]?.(media)
+      await Promise.resolve()
+    })
+    expect(read).toHaveBeenCalledTimes(5)
+    expect(result.current?.cardImage("p:24", "f:24")).toBeDefined()
+    await act(async () => {
+      finishes[3]?.(media)
+      finishes[4]?.(media)
+      await Promise.resolve()
+    })
+    expect(result.current?.cardImage("p:59", "f:59")).toBeDefined()
+    expect(read).toHaveBeenCalledTimes(5)
+  })
+
+  it("keeps a fresh retry in flight when its expired predecessor finishes late", async () => {
+    const targets = nodes(1)
+    const { client, media } = imageSnapshot(1)
+    const finishes: Array<(fragments: readonly Fragment[]) => void> = []
+    const read = vi.spyOn(client, "fragments").mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finishes.push(resolve)
+        }),
+    )
+    const { result } = renderHook(() => useImageIndex(client, true))
+    const near = Observer.instances.find((o) => o.options?.rootMargin)
+    act(() => {
+      near?.emit(targets)
+    })
+    await collect()
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(41000)
+    })
+    expect(result.current?.failedFace?.("p:0", "f:0")).toBe(true)
+    act(() => {
+      near?.emit(targets, false)
+      near?.emit(targets)
+    })
+    await collect()
+    expect(read).toHaveBeenCalledTimes(2)
+    expect(result.current?.failedFace?.("p:0", "f:0")).toBe(false)
+    await act(async () => {
+      finishes[0]?.(media)
+      await Promise.resolve()
+    })
+    expect(result.current?.failedFace?.("p:0", "f:0")).toBe(false)
+    expect(result.current?.cardImage("p:0", "f:0")).toBeUndefined()
+    act(() => {
+      near?.emit(targets)
+    })
+    await collect()
+    expect(read).toHaveBeenCalledTimes(2)
+    await act(async () => {
+      finishes[1]?.(media)
+      await Promise.resolve()
+    })
+    expect(result.current?.cardImage("p:0", "f:0")).toBeDefined()
+    expect(result.current?.failedFace?.("p:0", "f:0")).toBe(false)
+  })
 })
