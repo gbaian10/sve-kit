@@ -253,17 +253,28 @@ def _annotation_owners(
 
 
 def _annotation_partitions(view: View, fragments: list[Fragment]) -> None:
-    display = {
-        string(object_value(item)["revision_id"])
-        for face in view["face"]
-        for item in array(face["current"])
-    } | {
-        string(value["revision_id"])
-        for face in view["face"]
-        for raw in array(face["wording"])
-        for value in (object_value(object_value(raw)["display"]),)
-        if value["revision_id"] is not None
-    }
+    display = (
+        {
+            string(object_value(item)["revision_id"])
+            for face in view["face"]
+            for item in array(face["current"])
+        }
+        | {
+            string(value["revision_id"])
+            for face in view["face"]
+            for raw in array(face["wording"])
+            for value in (object_value(object_value(raw)["display"]),)
+            if value["revision_id"] is not None
+        }
+        | {
+            string(candidate["revision_id"])
+            for face in view["face"]
+            for raw in array(face["wording"])
+            for entry in array(object_value(raw)["candidates"])
+            for candidate in (object_value(entry),)
+            if candidate["revision_id"] is not None
+        }
+    )
     annotations: set[str] = set()
     for fragment in fragments:
         part = fragment.value["partition"]

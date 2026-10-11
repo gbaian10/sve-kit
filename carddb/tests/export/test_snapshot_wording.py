@@ -7,13 +7,59 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.core.json import array, object_value, parse, string
-from sve_carddb.export.reader import _container, _current
-from sve_carddb.export.semantics import _wording_display, validate_view
+from sve_carddb.export.reader import Fragment, _container, _current
+from sve_carddb.export.semantics import (
+    _annotation_partitions,
+    _wording_display,
+    validate_view,
+)
 
 from ..support.snapshot_contract_fixtures import fixture, payloads
 
 if TYPE_CHECKING:
-    from sve_carddb.export.reader import Fragment, Row, View
+    from sve_carddb.export.reader import Row, View
+
+
+@pytest.mark.parametrize(
+    ("field", "partition"), [("name", "bootstrap"), ("effect", "detail")]
+)
+def test_candidate_original_annotations_are_available_without_display_or_current(
+    field: str, partition: str
+) -> None:
+    view: View = {
+        "face": [
+            {
+                "current": [],
+                "wording": [
+                    {
+                        "display": {"revision_id": None},
+                        "candidates": [{"revision_id": "own"}, {"revision_id": None}],
+                    }
+                ],
+            }
+        ],
+        "face_revision": [{"id": "own", "name_concept_id": None}],
+        "text_unit": [],
+        "annotation_set": [],
+    }
+    fragment = Fragment(
+        "synthetic",
+        "field_annotation",
+        {"partition": partition},
+        [
+            {
+                "owner": {"kind": "face_revision", "id": "own"},
+                "field": field,
+                "annotation_set_id": "annotation",
+            }
+        ],
+    )
+    _annotation_partitions(view, [fragment])
+    fragment.value["partition"] = "history"
+    with pytest.raises(
+        ValueError, match="Original annotation column partition mismatch"
+    ):
+        _annotation_partitions(view, [fragment])
 
 
 def pending_view() -> tuple[View, Row, list[Fragment]]:
