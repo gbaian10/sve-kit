@@ -318,7 +318,7 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 ### 9.2 當前翻譯投影
 
 §9.1 的既有 DDL 透過 `build.t1.compile_build()` 編譯。
-建置 DB 版本為 8；annotation 三表隨 translation_names 能力編譯，名稱的已解析概念覆蓋完整原文與譯名，
+建置 DB 版本為 9；annotation 三表隨 translation_names 能力編譯，名稱的已解析概念覆蓋完整原文與譯名，
 無譯名時仍保留原文用途。名稱內不再抽術語，不能把缺概念的名字造為 CardName 引用。
 [翻譯契約](../domains/translation-contract.md)已描述四層目標行為，具體差異依 §9.3；typed frame、target 與 binding 已接入正式建置。
 模板功能、術語／名字／風味、owner/use、來源 hash 與跨區適用檢查保留。
@@ -579,13 +579,13 @@ SNC 最低資料仍為 `catalog_state`、`card_no_state`、`serial_total`、`lis
 
 ## 18. 實作分期
 
-完整邏輯契約不要求第一次查卡發布就實作所有能力；[implementation-tiers.md](implementation-tiers.md) 逐表分配唯一 tier 與啟用條件。首發明列 T0 41＋T1 必要子組 13＝54 表（含構築與 CR 引用），`identity_change` 先於第一次公開 `int_id`；必須同時滿足來源、永久身分、全部面、現行/印刷觀測、商品/路由、文字快照與缺 DSL 狀態；條件表沒上線時相關公開欄位為明定 null/空/unknown，不能假裝已完整或省掉 required 欄。
+完整邏輯契約不要求第一次查卡發布就實作所有能力；[implementation-tiers.md](implementation-tiers.md) 逐表分配唯一 tier 與啟用條件。首發明列 T0 42＋T1 必要子組 13＝55 表（含構築與 CR 引用），`identity_change` 先於第一次公開 `int_id`；必須同時滿足來源、永久身分、全部面、現行/印刷觀測、商品/路由、文字快照與缺 DSL 狀態；條件表沒上線時相關公開欄位為明定 null/空/unknown，不能假裝已完整或省掉 required 欄。
 
 跨 tier nullable FK 在未啟用該能力時必須為 null；非空 FK 的依賴 closure 必須一併啟用（tier 是最早實作時間，不是略過 FK 的許可）。若某批輸入有勘誤/更正/雙區/模板/禁限/DSL，就在發布前把對應組及引用閉包完成，不以「未實作」丟棄已知更正而出錯資料。可以先發布支援的資料子集並明示 coverage，但不能聲稱全庫能力通過。v1 延後的 event/signature 等尚未建表項仍留待未來設計，不建空表冒充完成。
 
 ### 18.1 DDL 能力與建置 schema 升版
 
-DDL 宣告可編譯、匯入器完成、領域驗證器完成是分開的狀態；能力可用須在完整依賴閉包內同時具備後兩者。跨表驗證查詢引用的表也屬必要依賴。只有 DDL 的能力不能列為預覽快照已啟用能力，更不能用空表數量代替正式首發 54 表及條件組的可用性驗收。
+DDL 宣告可編譯、匯入器完成、領域驗證器完成是分開的狀態；能力可用須在完整依賴閉包內同時具備後兩者。跨表驗證查詢引用的表也屬必要依賴。只有 DDL 的能力不能列為預覽快照已啟用能力，更不能用空表數量代替正式首發 55 表及條件組的可用性驗收。
 
 建置 SQLite 的 `PRAGMA user_version` 記錄實作宣告版號，與本文件的邏輯契約 v1、抓取 manifest schema、快照 format／data_version 分開。相同宣告版號仍可依能力選擇不同表集合。啟用新組或升版時，正常路徑是從釘住的輸入全量建置新檔，套用新 FK、CHECK 與跨表驗證，成功提交並關閉後才替換舊的建置產物；不複製未驗證的舊列，也不關閉 FK 作為升版捷徑。建立／匯入／驗證／替換失敗保留舊產物；呼叫端必須獨占離線目標並關閉所有連線，不對帶 SQLite sidecar 的目標替換。此流程不處理來源歸檔，也不代替正式發布交易。
 
@@ -601,7 +601,7 @@ digital_voice/card_voice與digital_art_link仍只驗自己的原合法證據，�
 
 ## 卡文依據判定
 
-建置 schema 8 新增 `face_wording`（PK face_id、region），記錄 classification、method、reason、
+建置 schema 9 新增 `face_wording`（PK face_id、region），記錄 classification、method、reason、
 comparison_hash、basis_printing_id、basis_released_on；依據版次引用 printing，卡面引用 face。
 `face_current.basis` 增加 latest_known_release，只有等價且可定位唯一依據時由日期證據建立；
 各 printing_face_observation 仍保留自己的 revision。契約與覆寫規則依
