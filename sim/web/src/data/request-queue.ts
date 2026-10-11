@@ -44,7 +44,7 @@ export function requestQueue(fetcher: Fetcher): {
           const bytes = await response.arrayBuffer()
           for (const waiter of job.waiters)
             waiter.resolve(
-              new Response(bytes.slice(0), { status: response.status, headers: response.headers }),
+              new Response(bytes, { status: response.status, headers: response.headers }),
             )
         })
         .catch((error: unknown) => {

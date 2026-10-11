@@ -3,11 +3,28 @@ import { type RefObject, useEffect, useState } from "react"
 // Sharing the observer avoids per-row work; pixel margins follow viewport height, not width.
 const callbacks = new Map<Element, () => void>()
 let observer: IntersectionObserver | undefined
+const pending = new Set<Element>()
+let timer: ReturnType<typeof setTimeout> | undefined
+
+function activate(): void {
+  timer = undefined
+  const node = pending.values().next().value
+  if (!node) return
+  pending.delete(node)
+  const onSeen = callbacks.get(node)
+  callbacks.delete(node)
+  onSeen?.()
+  release()
+  if (pending.size) timer = setTimeout(activate, 0)
+}
 
 function release(): void {
   if (callbacks.size !== 0) return
   observer?.disconnect()
   observer = undefined
+  pending.clear()
+  if (timer !== undefined) clearTimeout(timer)
+  timer = undefined
   window.removeEventListener("resize", resize)
 }
 
@@ -16,12 +33,12 @@ function createObserver(): IntersectionObserver {
     (entries) => {
       for (const entry of entries)
         if (entry.isIntersecting) {
-          const onSeen = callbacks.get(entry.target)
-          callbacks.delete(entry.target)
+          if (!callbacks.has(entry.target)) continue
+          pending.add(entry.target)
           observer?.unobserve(entry.target)
-          onSeen?.()
         }
-      release()
+      // A single intersection delivery can cover a whole screen of expensive previews.
+      if (timer === undefined) activate()
     },
     { rootMargin: `${String(window.innerHeight)}px 0px ${String(window.innerHeight)}px 0px` },
   )
@@ -46,6 +63,7 @@ function observe(node: Element, onSeen: () => void): () => void {
   observer.observe(node)
   return () => {
     callbacks.delete(node)
+    pending.delete(node)
     observer?.unobserve(node)
     release()
   }

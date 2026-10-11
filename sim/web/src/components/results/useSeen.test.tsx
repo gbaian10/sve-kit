@@ -74,3 +74,44 @@ it("shares a viewport-height preload margin, follows resizes and resolves each r
   })
   expect(observers).toHaveLength(2)
 })
+
+it("activates a screen of previews in separate tasks and cancels queued rows on unmount", async () => {
+  vi.useFakeTimers()
+  let notify: ((entries: { target: Element; isIntersecting: boolean }[]) => void) | undefined
+  vi.stubGlobal(
+    "IntersectionObserver",
+    class {
+      constructor(callback: (entries: { target: Element; isIntersecting: boolean }[]) => void) {
+        notify = callback
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  )
+  const view = render(
+    <>
+      <Preview name="First" />
+      <Preview name="Second" />
+      <Preview name="Third" />
+    </>,
+  )
+  const targets = ["First", "Second", "Third"].map((name) => screen.getByText(`${name}: waiting`))
+  act(() => {
+    notify?.(targets.map((target) => ({ target, isIntersecting: true })))
+  })
+  expect(screen.getByText("First: ready")).toBeVisible()
+  expect(screen.getByText("Second: waiting")).toBeVisible()
+  expect(screen.getByText("Third: waiting")).toBeVisible()
+  await act(async () => {
+    await vi.advanceTimersToNextTimerAsync()
+  })
+  expect(screen.getByText("Second: ready")).toBeVisible()
+  expect(screen.getByText("Third: waiting")).toBeVisible()
+  view.unmount()
+  await act(async () => {
+    await vi.runAllTimersAsync()
+  })
+  expect(screen.queryByText("Third: ready")).not.toBeInTheDocument()
+  vi.useRealTimers()
+})

@@ -1,0 +1,39 @@
+/* `--result-columns` is set on the grid with the theme's breakpoints, next to its column template. */
+[data-view="grid"] {
+  container-type: inline-size;
+}
+
+[data-view="grid"] > li,
+[data-view="table"] > li,
+[data-view="list"] > li {
+  content-visibility: auto;
+
+  /* Paint containment needs room for the existing outer highlight and focus outline. */
+  padding: 4px;
+  margin: -4px;
+
+  /* That padding overlaps the edge of the neighbouring row; only the link takes the pointer. */
+  pointer-events: none;
+}
+
+[data-view="grid"] > li > *,
+[data-view="table"] > li > *,
+[data-view="list"] > li > * {
+  pointer-events: auto;
+}
+
+[data-view="grid"] > li {
+  /* Estimate the portrait and name line; auto remembers measured multilingual heights. */
+  contain-intrinsic-block-size: auto
+    calc(
+      (100cqw - (var(--result-columns) - 1) * 0.75rem) / var(--result-columns) * 88 / 63 + 1.5rem
+    );
+}
+
+[data-view="table"] > li {
+  contain-intrinsic-block-size: auto 140px;
+}
+
+[data-view="list"] > li {
+  contain-intrinsic-block-size: auto 52px;
+}

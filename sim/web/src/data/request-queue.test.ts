@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { expect, it } from "vitest"
+import { expect, it, vi } from "vitest"
 
 import { requestQueue } from "./request-queue"
 
@@ -64,4 +64,23 @@ it("one consumer's cancellation leaves the shared download available to another"
   gate.resolve(undefined)
   expect(await (await retained).text()).toBe("valid")
   expect(calls).toBe(1)
+})
+
+it("copies the shared source into independently readable responses before publishing them", async () => {
+  const source = new Uint8Array([1, 2, 3])
+  const response = new Response(source, { status: 201, headers: { "x-shared": "yes" } })
+  vi.spyOn(response, "arrayBuffer").mockResolvedValue(source.buffer)
+  const fetcher = vi.fn(() => Promise.resolve(response))
+  const queue = requestQueue(fetcher)
+  const [first, second] = await Promise.all([
+    queue.foreground("https://test/shared-body"),
+    queue.background("https://test/shared-body"),
+  ])
+  // Response copies BufferSource at construction, before either consumer reads its body.
+  source.fill(9)
+  expect(new Uint8Array(await first.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]))
+  expect(new Uint8Array(await second.arrayBuffer())).toEqual(new Uint8Array([1, 2, 3]))
+  expect(first.status).toBe(201)
+  expect(second.headers.get("x-shared")).toBe("yes")
+  expect(fetcher).toHaveBeenCalledTimes(1)
 })
