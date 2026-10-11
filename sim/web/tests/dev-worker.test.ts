@@ -566,6 +566,45 @@ describe("development Worker", () => {
     },
   )
 
+  it.each([200, 304])("marks hashed build output immutable (%i)", async (status) => {
+    const f = fixture()
+    f.assets.mockResolvedValue(
+      new Response(status === 200 ? "export {}" : null, {
+        status,
+        headers: { "Content-Type": "text/javascript", "Cache-Control": "public, max-age=0" },
+      }),
+    )
+    const response = await worker.fetch(request("/assets/index-B0oVQuOp.js"), f.env, f.ctx)
+    expect(response.status).toBe(status)
+    expect(response.headers.get("Cache-Control")).toBe("private, max-age=31536000, immutable")
+    expect(response.headers.get("Content-Type")).toBe("text/javascript")
+  })
+
+  it.each(["/assets/index-B0oVQuOp.js", "/theme-boot.js", "/image-sw.js", "/assets/notes.js"])(
+    "leaves %s revalidating when it is not a hashed file",
+    async (path) => {
+      const f = fixture()
+      f.assets.mockResolvedValue(
+        new Response(path === "/assets/index-B0oVQuOp.js" ? "<html></html>" : "x", {
+          headers: {
+            "Content-Type": path === "/assets/index-B0oVQuOp.js" ? "text/html" : "text/javascript",
+            "Cache-Control": "public, max-age=0, must-revalidate",
+          },
+        }),
+      )
+      const response = await worker.fetch(request(path), f.env, f.ctx)
+      expect(response.headers.get("Cache-Control")).toBe("public, max-age=0, must-revalidate")
+    },
+  )
+
+  it("does not pin a missing hashed file", async () => {
+    const f = fixture()
+    f.assets.mockResolvedValue(new Response(null, { status: 404 }))
+    const response = await worker.fetch(request("/assets/index-B0oVQuOp.js"), f.env, f.ctx)
+    expect(response.status).toBe(404)
+    expect(response.headers.get("Cache-Control")).toBeNull()
+  })
+
   it.each([
     "https://old.workers.dev/",
     `https://old.workers.dev/cdn-preview/${INDEX}`,

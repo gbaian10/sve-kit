@@ -35,6 +35,9 @@ const JSON_KEY = /^snapshots\/(?:blobs|manifests)\/[0-9a-f]{64}\.json(?:\.(?:br|
 const IMAGE_KEY = /^images\/(?:card_[sml]|art_[sm])\/([1-9][0-9]*)(?:-f([1-9][0-9]*))?\.webp$/
 const BROWSER_CACHE_CONTROL = "X-Sve-Browser-Cache-Control"
 const EDGE_CACHE_CONTROL = "public, max-age=31536000, immutable"
+// Vite names its build output by content hash, so a reload need not revalidate these files.
+const HASHED_ASSET = /^\/assets\/[A-Za-z0-9_.-]+-[A-Za-z0-9_-]{8}\.[a-z0-9]+$/
+const HASHED_ASSET_CACHE_CONTROL = "private, max-age=31536000, immutable"
 
 function positiveInteger(value: string | null): boolean {
   if (value === null) return false
@@ -64,6 +67,21 @@ function matchesEtag(condition: string | null, etag: string): boolean {
   if (condition.trim() === "*") return true
   const tags = condition.matchAll(/(?:^|,)\s*(?:W\/)?("[^"]*")\s*(?=,|$)/g)
   return Array.from(tags).some((tag) => tag[1] === etag)
+}
+
+async function asset(request: Request, env: Env, pathname: string): Promise<Response> {
+  const response = await env.ASSETS.fetch(request)
+  // The single-page fallback answers a missing file with HTML, which must never be pinned.
+  const html = response.headers.get("Content-Type")?.startsWith("text/html") ?? false
+  if (!HASHED_ASSET.test(pathname) || html || (response.status !== 200 && response.status !== 304))
+    return response
+  const headers = new Headers(response.headers)
+  headers.set("Cache-Control", HASHED_ASSET_CACHE_CONTROL)
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  })
 }
 
 function failure(status: number): Response {
@@ -111,7 +129,7 @@ export default {
       pathname === "/cdn-preview" ||
       pathname.startsWith(PREFIX) ||
       /^\/cdn-preview[%\\]/.test(pathname)
-    if (!dataPath) return env.ASSETS.fetch(request)
+    if (!dataPath) return asset(request, env, pathname)
     if (request.method !== "GET" && request.method !== "HEAD") return failure(405)
     if (!pathname.startsWith(PREFIX)) return failure(404)
     const key = pathname.slice(PREFIX.length)
