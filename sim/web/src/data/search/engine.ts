@@ -1,9 +1,11 @@
+import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 import { fetchBytes, type Fetcher } from "../cdn"
 import { decodeMessage } from "../format-v3/decode-message"
 import { SnapshotError } from "../format-v3/errors"
 import {
   arrayValue,
+  canonicalText,
   integerValue,
   type JsonObject,
   objectValue,
@@ -18,7 +20,16 @@ import { SearchBlobs } from "./blobs"
 import { BootstrapColumns } from "./bootstrap"
 import { pack, unpack } from "./image"
 import { INDEX_IMAGE_FORMAT, SearchIndex, SearchQueryError } from "./index"
-import type { BootstrapPlan, LoadRequest, SearchEvent, SearchRequest } from "./messages"
+import type {
+  BootstrapPlan,
+  LoadRequest,
+  QueryRequest,
+  SearchEvent,
+  SearchMetrics,
+  SearchRequest,
+} from "./messages"
+import { PreviewReader } from "./preview"
+import { completeImages, type CompleteView, completeView, ViewCache, viewSlot } from "./view"
 
 const defaultPlan: BootstrapPlan = (_manifest, files) =>
   [...files].filter(([, file]) => file["role"] === "bootstrap").map(([key]) => key)
@@ -34,22 +45,55 @@ function readRecord(bytes: Uint8Array, edition: Region) {
     dataVersion: stringValue(record["dataVersion"]),
     manifestFields: objectValue(record["manifestFields"]),
     files: integerValue(record["files"]),
+    mediaFiles: new Map(
+      arrayValue(record["mediaFiles"]).map((value) => {
+        const file = objectValue(value)
+        return [stringValue(file["key"]), file] as const
+      }),
+    ),
+    version: stringValue(record["version"]),
   }
 }
 
-/** Fetch and parse are sequential; a replacement load aborts and drains the previous staging job. */
+interface CachedView {
+  readonly view: CompleteView
+  readonly stored: Promise<void>
+}
+
+/** Downloads share the app queue; decoding follows manifest order; a replacement load aborts and drains the previous staging job. */
 export class SearchEngine {
   private readonly emit: (event: SearchEvent) => void
   private readonly fetcher: Fetcher
+  private readonly backgroundFetch: Fetcher
   private readonly storage: CacheStorage | undefined
   private readonly plan: BootstrapPlan
   private readonly buildId: string | undefined
   private staging: { generation: number; abort: AbortController } | undefined
-  private active: { generation: number; index: SearchIndex } | undefined
+  private active:
+    | {
+        generation: number
+        previews?: Promise<PreviewReader>
+        index?: SearchIndex
+        request: LoadRequest
+        hash: string
+        dataVersion: string
+        manifestFields: JsonObject
+        files: Map<string, JsonObject>
+        version: string
+        blobs: SearchBlobs
+        views: ViewCache
+        memory: Map<string, CachedView>
+        building: Map<string, Promise<CachedView | undefined>>
+        signal: AbortSignal
+      }
+    | undefined
+  private revision = -1
+  private signature = ""
   private readonly queries = new Map<
     number,
-    { request: Extract<SearchRequest, { kind: "search" }>; settled: () => void }
+    { request: QueryRequest; settled: () => void; running?: boolean }
   >()
+  private rememberedRequest: QueryRequest | undefined
   private queryTimer: ReturnType<typeof setTimeout> | undefined
   private pending: Promise<void> = Promise.resolve()
 
@@ -57,13 +101,17 @@ export class SearchEngine {
     emit: (event: SearchEvent) => void,
     options: {
       fetch?: Fetcher
+      backgroundFetch?: Fetcher
       cacheStorage?: CacheStorage
       plan?: BootstrapPlan
       buildId?: string
     } = {},
   ) {
-    this.emit = emit
+    this.emit = (event) => {
+      emit({ ...event, sentAt: performance.timeOrigin + performance.now() })
+    }
     this.fetcher = options.fetch ?? ((url, init) => fetch(url, init))
+    this.backgroundFetch = options.backgroundFetch ?? this.fetcher
     this.storage = options.cacheStorage ?? globalThis.caches
     this.plan = options.plan ?? defaultPlan
     this.buildId = options.buildId
@@ -79,17 +127,25 @@ export class SearchEngine {
       this.queries.delete(request.channelId)
       return Promise.resolve()
     }
-    if (request.kind === "search") {
+    if (
+      request.kind === "search" ||
+      request.kind === "view" ||
+      request.kind === "suggest" ||
+      request.kind === "recent" ||
+      request.kind === "preview" ||
+      request.kind === "neighbours"
+    ) {
       if (this.active?.generation !== request.generation) return Promise.resolve()
       const previous = this.queries.get(request.channelId)
       if (previous && previous.request.queryId >= request.queryId) return Promise.resolve()
       previous?.settled()
+      if (request.kind === "view" && request.remember) this.rememberedRequest = request
       const result = new Promise<void>((settled) =>
         this.queries.set(request.channelId, { request, settled }),
       )
       // A task boundary admits queued messages before scanning; each channel keeps its latest input.
       this.queryTimer ??= setTimeout(() => {
-        this.flushQueries()
+        void this.flushQueries()
       }, 0)
       return result
     }
@@ -100,38 +156,160 @@ export class SearchEngine {
     return this.pending
   }
 
-  private flushQueries(): void {
+  private async flushQueries(): Promise<void> {
     this.queryTimer = undefined
-    const queries = [...this.queries.values()]
-    this.queries.clear()
-    for (const { request, settled } of queries) {
-      try {
-        if (this.active?.generation !== request.generation) continue
-        this.emit({
-          kind: "result",
-          generation: request.generation,
-          channelId: request.channelId,
-          queryId: request.queryId,
-          page: this.active.index.search(request.query),
-        })
-      } catch (error) {
-        this.emit({
-          kind: "query-error",
-          generation: request.generation,
-          channelId: request.channelId,
-          queryId: request.queryId,
-          error:
-            error instanceof SearchQueryError
-              ? error.failure
-              : {
-                  kind: "query-failed",
-                  message: error instanceof Error ? error.message : "search failed",
-                },
-        })
-      } finally {
-        settled()
-      }
-    }
+    const active = this.active
+    if (!active) return
+    await Promise.all(
+      [...this.queries].map(async ([channel, job]) => {
+        if (job.running) return
+        job.running = true
+        const { request, settled } = job
+        if (request.generation !== active.generation) {
+          this.queries.delete(channel)
+          settled()
+          return
+        }
+        if (!active.index && request.kind !== "view") {
+          job.running = false
+          return
+        }
+        try {
+          const index = active.index
+          const identity = {
+            generation: request.generation,
+            channelId: channel,
+            queryId: request.queryId,
+          }
+          let event: SearchEvent
+          if (request.kind === "view") {
+            const key = viewSlot(request.query)
+            let cached = active.memory.get(key)
+            if (!cached) {
+              // Channels asking for one page at once (the list and its options) share one build.
+              let building = active.building.get(key)
+              if (!building) {
+                const { query } = request
+                building = (async () => {
+                  const view = await active.views.read(query, active.hash)
+                  if (view) return { view, stored: Promise.resolve() }
+                  if (!index) return undefined
+                  const completed = await completeView(
+                    active.request.base,
+                    query,
+                    index,
+                    active.files,
+                    active.version,
+                    active.blobs,
+                    active.signal,
+                  )
+                  return { view: completed, stored: active.views.write(completed, active.hash) }
+                })()
+                const built = building
+                const drop = () => {
+                  if (active.building.get(key) === built) active.building.delete(key)
+                }
+                built.then(drop, drop)
+                active.building.set(key, built)
+              }
+              cached = await building
+            }
+            if (!cached) return
+            const { view, stored } = cached
+            active.memory.set(key, cached)
+            while (active.memory.size > 8)
+              active.memory.delete(active.memory.keys().next().value ?? "")
+            event = { kind: "view-result", ...identity, view }
+            const completed = view
+            void stored.then(async () => {
+              if (request.remember && this.active === active && this.rememberedRequest === request)
+                await active.views.remember(completed.query, active.hash)
+            })
+          } else if (request.kind === "suggest" || request.kind === "recent") {
+            if (!index) return
+            const result =
+              request.kind === "suggest"
+                ? { kind: "suggest-result" as const, ...index.suggest(request.text, request.limit) }
+                : { kind: "recent-result" as const, items: index.recent(request.printingIds) }
+            const faces = await completeImages(
+              active.request.base,
+              result.items.flatMap((item) => (item.summary ? [item.summary.printingId] : [])),
+              index,
+              active.files,
+              active.version,
+              active.blobs,
+              active.signal,
+            )
+            event = { ...result, ...identity, faces }
+          } else if (request.kind === "preview" && index) {
+            active.previews ??= (async () => {
+              const bytes = await fetchBytes(
+                this.fetcher,
+                `${active.request.base}/snapshots/manifests/${active.hash.slice(7)}.json`,
+                { signal: active.signal },
+              )
+              if ((await transferDigest(bytes)) !== active.hash)
+                throw new Error("preview manifest hash mismatch")
+              const decoded = decodeMessage({ kind: "manifest", bytes })
+              if (decoded.kind !== "manifest") throw new Error("preview manifest shape")
+              return new PreviewReader(
+                decoded.files,
+                integerValue(objectValue(decoded.manifest["partitioning"])["bucket_count"]),
+                active.version,
+                active.blobs,
+              )
+            })().catch((error: unknown) => {
+              delete active.previews
+              throw error
+            })
+            event = {
+              kind: "preview-result",
+              ...identity,
+              preview: await (
+                await active.previews
+              ).resolve(index, request.printingId, request.faceId, request.language, active.signal),
+            }
+          } else if (request.kind === "neighbours" && index) {
+            event = {
+              kind: "result",
+              ...identity,
+              page: index.neighbours(request.query, request.target, request.maxItems),
+            }
+          } else if (request.kind === "search")
+            event = {
+              kind: "result",
+              ...identity,
+              page: index ? index.search(request.query) : { total: 0, offset: 0, items: [] },
+            }
+          else return
+          if (this.active === active && this.queries.get(channel) === job) this.emit(event)
+        } catch (error) {
+          if (this.active === active && this.queries.get(channel) === job)
+            this.emit({
+              kind: "query-error",
+              generation: request.generation,
+              channelId: channel,
+              queryId: request.queryId,
+              error:
+                error instanceof SearchQueryError
+                  ? error.failure
+                  : {
+                      kind: "query-failed",
+                      message: error instanceof Error ? error.message : "query failed",
+                    },
+            })
+        } finally {
+          job.running = false
+          if (
+            active.index ||
+            (request.kind === "view" && active.memory.has(viewSlot(request.query)))
+          ) {
+            if (this.queries.get(channel) === job) this.queries.delete(channel)
+            settled()
+          }
+        }
+      }),
+    )
   }
 
   private async resolve(request: LoadRequest, signal: AbortSignal): Promise<JsonObject> {
@@ -150,11 +328,16 @@ export class SearchEngine {
     const { current, previous } = indexEntries(pointer)
     const compatible = [current, previous].find((candidate) => candidate && isCompatible(candidate))
     if (!compatible) throw new SnapshotError("unsupported-version", "no compatible snapshot")
-    return compatible
+    return {
+      ...compatible,
+      __revision: integerValue(pointer["revision"]),
+      __signature: canonicalText(pointer),
+    }
   }
 
   private async prepare(request: LoadRequest, entry: JsonObject, signal: AbortSignal) {
     const manifestHash = stringValue(entry["manifest_sha256"])
+    this.emit({ kind: "stage", generation: request.generation, step: "manifest" })
     const manifestBytes = await fetchBytes(
       this.fetcher,
       `${request.base}/${stringValue(entry["manifest_path"])}`,
@@ -180,7 +363,7 @@ export class SearchEngine {
       version,
       configKey,
       keys,
-      files: new Map(keys.map((key) => [key, files.get(key)] as const)),
+      files,
       dataVersion: stringValue(manifest["data_version"]),
       manifestFields: entryFields(manifest),
       parseMs,
@@ -188,67 +371,187 @@ export class SearchEngine {
     }
   }
 
-  // Reading the stored image replaces the manifest, every blob and the index build.
-  private async restore(
+  private ready(
     request: LoadRequest,
-    entry: JsonObject,
-    stored: VerifiedCache,
-    start: number,
-    signal: AbortSignal,
-  ): Promise<boolean> {
-    const bytes = await stored.read(request.edition, stringValue(entry["manifest_sha256"]))
-    if (!bytes) return false
-    const mark = performance.now()
-    let record: ReturnType<typeof readRecord>
-    try {
-      record = readRecord(bytes, request.edition)
-    } catch {
-      await stored.remove(request.edition, stringValue(entry["manifest_sha256"]))
-      return false
-    }
-    const parseMs = performance.now() - mark
-    if (request.entry === "index") checkEntry(entry, record.manifestFields)
-    signal.throwIfAborted()
-    this.active = { generation: request.generation, index: record.index }
+    metrics: SearchMetrics,
+    searchReady: boolean,
+    unconfirmed = false,
+  ): void {
+    const active = this.active
+    if (!active) return
     this.emit({
       kind: "ready",
       generation: request.generation,
       edition: request.edition,
       root: request.base,
-      dataVersion: record.dataVersion,
-      manifestHash: stringValue(entry["manifest_sha256"]),
-      metrics: {
-        restored: true,
-        files: record.files,
-        maxRawBytes: bytes.length,
-        parseMs,
-        buildMs: 0,
-        wallMs: performance.now() - start,
-        firstFileMs: 0,
-        firstSetMs: 0,
-        stagingArrayBuffers: 0,
-        stagingStringBytes: 0,
-        ...record.index.allocation(),
-      },
+      dataVersion: active.dataVersion,
+      manifestHash: active.hash,
+      searchReady,
+      unconfirmed,
+      metrics,
     })
-    return true
+    void this.flushQueries()
   }
 
   private async load(request: LoadRequest, signal: AbortSignal): Promise<void> {
     const start = performance.now()
     try {
       signal.throwIfAborted()
-      const entry = await this.resolve(request, signal)
-      // A custom plan picks other files from the same manifest, so only the default plan, which the
-      // build identity already covers, may share stored images.
+      const storage = this.plan === defaultPlan ? this.storage : undefined
       const stored = new VerifiedCache(
         request.base,
         "search-index",
         INDEX_IMAGE_FORMAT,
-        this.plan === defaultPlan ? this.storage : undefined,
+        storage,
         this.buildId,
       )
-      if (await this.restore(request, entry, stored, start, signal)) return
+      const selection = new VerifiedCache(
+        request.base,
+        "search-selection",
+        INDEX_IMAGE_FORMAT,
+        storage,
+        this.buildId,
+      )
+      const views = new ViewCache(request.base, storage, this.buildId)
+      const blobs = new SearchBlobs(request.base, this.fetcher, storage)
+      const startupBlobs = this.active
+        ? new SearchBlobs(request.base, this.backgroundFetch, storage)
+        : blobs
+      const emptyMetrics: SearchMetrics = {
+        restored: true,
+        files: 0,
+        maxRawBytes: 0,
+        parseMs: 0,
+        buildMs: 0,
+        wallMs: 0,
+        firstFileMs: 0,
+        firstSetMs: 0,
+        arrayBuffers: 0,
+        stringBytes: 0,
+        cards: 0,
+        stagingArrayBuffers: 0,
+        stagingStringBytes: 0,
+      }
+      this.emit({ kind: "stage", generation: request.generation, step: "index" })
+      const entryPromise = this.resolve(request, signal)
+      void entryPromise.catch(() => undefined)
+      const adopted = await selection.read(`${request.entry}-${request.edition}`, "active")
+      let cachedEntry: JsonObject | undefined
+      const publishStored = async (entry: JsonObject, cached: boolean): Promise<boolean> => {
+        const hash = stringValue(entry["manifest_sha256"])
+        const fallbackQuery = (await views.readCurrent(request.edition, hash)) ?? {
+          state: DEFAULT_QUERY,
+          edition: request.edition,
+          limit: 60,
+        }
+        const view = await views.read(fallbackQuery, hash)
+        const context = {
+          generation: request.generation,
+          request,
+          hash,
+          dataVersion: "",
+          manifestFields: {} as JsonObject,
+          files: new Map<string, JsonObject>(),
+          version: "",
+          blobs,
+          views,
+          memory: new Map<string, CachedView>(),
+          building: new Map<string, Promise<CachedView | undefined>>(),
+          signal: new AbortController().signal,
+        }
+        if (view && cachedEntry && hash === objectValue(cachedEntry["entry"])["manifest_sha256"]) {
+          signal.throwIfAborted()
+          context.dataVersion = stringValue(cachedEntry["dataVersion"])
+          context.manifestFields = objectValue(cachedEntry["manifestFields"])
+          context.memory.set(viewSlot(fallbackQuery), { view, stored: Promise.resolve() })
+          this.active = context
+          this.ready(request, { ...emptyMetrics, wallMs: performance.now() - start }, false, cached)
+        }
+        const bytes = await stored.read(request.edition, hash)
+        if (!bytes) return false
+        let record: ReturnType<typeof readRecord>
+        const mark = performance.now()
+        try {
+          record = readRecord(bytes, request.edition)
+        } catch {
+          await stored.remove(request.edition, hash)
+          return false
+        }
+        if (request.entry === "index") checkEntry(entry, record.manifestFields)
+        signal.throwIfAborted()
+        this.active = {
+          ...context,
+          index: record.index,
+          dataVersion: record.dataVersion,
+          manifestFields: record.manifestFields,
+          files: record.mediaFiles,
+          version: record.version,
+        }
+        this.ready(
+          request,
+          {
+            ...emptyMetrics,
+            files: record.files,
+            maxRawBytes: bytes.length,
+            cacheReadMs: stored.lastRead.readMs,
+            digestMs: stored.lastRead.digestMs,
+            parseMs: performance.now() - mark,
+            wallMs: performance.now() - start,
+            ...record.index.allocation(),
+          },
+          true,
+          cached,
+        )
+        return true
+      }
+      // Another edition or root is served from its own stored generation, like a cold start.
+      const sameSource = () =>
+        this.active?.request.base === request.base &&
+        this.active.request.edition === request.edition &&
+        this.active.request.entry === request.entry
+      if (adopted && !sameSource()) {
+        try {
+          cachedEntry = objectValue(parseJson(adopted))
+          // Each edition keeps its own selection; an older one must not lower the revision floor.
+          const revision = integerValue(cachedEntry["revision"])
+          if (revision > this.revision) {
+            this.revision = revision
+            this.signature = stringValue(cachedEntry["signature"])
+          }
+          await publishStored(objectValue(cachedEntry["entry"]), true)
+        } catch {
+          cachedEntry = undefined
+        }
+      }
+      const entry = await entryPromise
+      if (request.entry === "index") {
+        const revision = integerValue(entry["__revision"])
+        const signature = stringValue(entry["__signature"])
+        if (
+          revision < this.revision ||
+          (revision === this.revision && signature !== this.signature)
+        )
+          throw new SnapshotError("blob-integrity", "version index changed without a new revision")
+        this.revision = revision
+        this.signature = signature
+      }
+      if (
+        this.active?.index &&
+        sameSource() &&
+        this.active.hash === stringValue(entry["manifest_sha256"])
+      ) {
+        if (request.entry === "index") checkEntry(entry, this.active.manifestFields)
+        signal.throwIfAborted()
+        if (this.active.generation === request.generation)
+          this.emit({ kind: "checking", generation: request.generation })
+        else {
+          // A later check of an unchanged version carries the index over instead of rebuilding.
+          this.active = { ...this.active, generation: request.generation, request }
+          this.ready(request, { ...emptyMetrics, wallMs: performance.now() - start }, true)
+        }
+        return
+      }
+      if (!sameSource() && (await publishStored(entry, false))) return
       const {
         manifestHash,
         version,
@@ -262,7 +565,6 @@ export class SearchEngine {
       } = await this.prepare(request, entry, signal)
       let parseMs = manifestParseMs
       let mark = performance.now()
-      const blobs = new SearchBlobs(request.base, this.fetcher, this.storage)
       let bootstrap: BootstrapColumns | undefined = new BootstrapColumns()
       let config: JsonObject | undefined
       let maxRawBytes = manifestRawBytes
@@ -287,14 +589,39 @@ export class SearchEngine {
         kind: "progress",
         generation: request.generation,
         done: 0,
-        total: keys.length,
+        total: keys.length - 1,
         persistent: blobs.persistent,
       })
+      this.emit({ kind: "stage", generation: request.generation, step: "config" })
+      let done = 0
+      const fetched = keys.map(async (key) => {
+        const file = files.get(key)
+        if (!file) throw new Error("unknown bootstrap key")
+        const bytes = await startupBlobs.read(file, signal)
+        if (key !== configKey) {
+          done += 1
+          if (!signal.aborted)
+            this.emit({
+              kind: "progress",
+              generation: request.generation,
+              done,
+              total: keys.length - 1,
+              persistent: blobs.persistent,
+            })
+        }
+        if (done === keys.length - 1 && !signal.aborted)
+          this.emit({ kind: "stage", generation: request.generation, step: "search" })
+        return bytes
+      })
+      this.emit({ kind: "stage", generation: request.generation, step: "bootstrap" })
+      for (const pending of fetched) void pending.catch(() => undefined)
       for (const [ordinal, key] of keys.entries()) {
         signal.throwIfAborted()
         const file = files.get(key)
         if (!file) throw new SnapshotError("payload-set", "load plan references unknown file")
-        const bytes = await blobs.read(file, signal)
+        const promise = fetched[ordinal]
+        if (!promise) throw new Error("bootstrap request missing")
+        const bytes = await promise
         maxRawBytes = Math.max(maxRawBytes, bytes.length)
         mark = performance.now()
         const result = decodeMessage({ kind: "file", bytes, file, version })
@@ -311,24 +638,55 @@ export class SearchEngine {
           remainingSets.set(owner, remaining)
           if (!remaining && !firstSetMs) firstSetMs = performance.now() - start
         }
-        this.emit({
-          kind: "progress",
-          generation: request.generation,
-          done: ordinal + 1,
-          total: keys.length,
-          persistent: blobs.persistent,
-        })
       }
       signal.throwIfAborted()
       if (!config) throw new SnapshotError("config-programs-count", "config missing")
       mark = performance.now()
+      this.emit({ kind: "stage", generation: request.generation, step: "search" })
       bootstrap.seal()
       const stagingAllocation = bootstrap.allocation()
       const index = new SearchIndex(bootstrap, request.edition)
       buildMs += performance.now() - mark
       signal.throwIfAborted()
       bootstrap = undefined
-      this.active = { generation: request.generation, index }
+      const mediaFiles = new Map(
+        [...files].filter(([, file]) =>
+          arrayValue(file["row_counts"]).some(
+            (count) => objectValue(count)["table"] === "printing_image",
+          ),
+        ),
+      )
+      this.emit({ kind: "stage", generation: request.generation, step: "images" })
+      const currentQuery =
+        this.active?.request.edition === request.edition && this.rememberedRequest?.kind === "view"
+          ? this.rememberedRequest.query
+          : { state: DEFAULT_QUERY, edition: request.edition, limit: 60 }
+      const firstView = await completeView(
+        request.base,
+        currentQuery,
+        index,
+        mediaFiles,
+        version,
+        blobs,
+        signal,
+      )
+      signal.throwIfAborted()
+      const firstStored = views.write(firstView, manifestHash)
+      this.active = {
+        generation: request.generation,
+        index,
+        request,
+        hash: manifestHash,
+        dataVersion,
+        manifestFields,
+        files: mediaFiles,
+        version,
+        blobs,
+        views,
+        memory: new Map([[viewSlot(firstView.query), { view: firstView, stored: firstStored }]]),
+        building: new Map(),
+        signal: new AbortController().signal,
+      }
       this.emit({
         kind: "ready",
         generation: request.generation,
@@ -350,18 +708,59 @@ export class SearchEngine {
           ...index.allocation(),
         },
       })
+      void this.flushQueries()
+      await firstStored
       await blobs.retainPlan(
         request.edition,
-        [...files.values()].filter((file): file is JsonObject => file !== undefined),
+        [
+          ...new Set([
+            ...keys.flatMap((key) => {
+              const file = files.get(key)
+              return file ? [file] : []
+            }),
+            ...mediaFiles.values(),
+          ]),
+        ],
+        manifestHash,
       )
       // Written only now: every file passed its checks and this generation is already published.
       await stored.write(
         request.edition,
         manifestHash,
-        pack({ dataVersion, manifestFields, files: keys.length }, [index.encode()]),
+        pack(
+          {
+            dataVersion,
+            manifestFields,
+            files: keys.length,
+            mediaFiles: [...mediaFiles.values()],
+            version,
+          },
+          [index.encode()],
+        ),
       )
+      signal.throwIfAborted()
+      if (this.active.generation === request.generation)
+        await selection.write(
+          `${request.entry}-${request.edition}`,
+          "active",
+          new TextEncoder().encode(
+            JSON.stringify({
+              entry,
+              dataVersion,
+              manifestFields,
+              revision: this.revision,
+              signature: this.signature,
+            }),
+          ),
+        )
     } catch (error) {
-      if (!signal.aborted)
+      if (!signal.aborted && this.active?.generation === request.generation)
+        this.emit({
+          kind: "checking",
+          generation: request.generation,
+          error: error instanceof Error ? error.message : "update check failed",
+        })
+      else if (!signal.aborted)
         this.emit({
           kind: "error",
           generation: request.generation,

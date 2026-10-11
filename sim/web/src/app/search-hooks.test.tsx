@@ -1,211 +1,362 @@
-import { act, renderHook } from "@testing-library/react"
+import { act, render, renderHook, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import type { LoadedSnapshot, SearchQuery, SnapshotStatus } from "../data"
+import { ClassQuickBar } from "../components/search/ClassQuickBar"
+import type { SearchEvent, SearchQuery, SearchRequest } from "../data"
 import { DEFAULT_QUERY } from "../domain/query/model"
-import { useSearch, useSearchReadiness } from "./snapshot"
+import { prefsStore } from "../settings"
+import {
+  useAbilityPreview,
+  useListView,
+  useSearch,
+  useSearchReadiness,
+  useSetOptions,
+} from "./snapshot"
 
-// A controllable data boundary isolates the hooks' readiness and query behaviour.
-const fake = vi.hoisted(() => {
-  const listeners = new Set<() => void>()
-  const state = {
-    status: { state: "idle" } as SnapshotStatus,
-    snapshot: null as LoadedSnapshot | null,
-    retried: 0,
-    reloaded: 0,
-  }
-  const notify = () => {
-    for (const listener of listeners) listener()
-  }
-  const client = {
-    base: "/cdn",
-    status: () => state.status,
-    subscribe: (listener: () => void) => {
-      listeners.add(listener)
-      return () => {
-        listeners.delete(listener)
-      }
-    },
-    load: () => Promise.resolve(),
-    retry: () => {
-      state.retried += 1
-      return Promise.resolve()
-    },
-    reload: () => {
-      state.reloaded += 1
-      return Promise.resolve()
-    },
-    snapshot: () => state.snapshot,
-    metadataStatus: () => ({ state: "idle" as const, done: 0, total: 0, persistent: false }),
-    prefetchImages: () => Promise.resolve(),
-    cancelImagePrefetch: () => undefined,
-    fragments: () => Promise.reject(new Error("no")),
-  }
-  const set = (status: SnapshotStatus, snapshot: LoadedSnapshot | null) => {
-    state.status = status
-    state.snapshot = snapshot
-    notify()
-  }
-  return { state, client, set }
-})
-
+// Control the browser boundary; the real session still owns generations and query identities.
+const fake = vi.hoisted(() => ({
+  requests: [] as SearchRequest[],
+  client: { base: "/cdn", snapshot: () => null },
+}))
 vi.mock("../data", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../data")>()),
   snapshotClient: () => fake.client,
   useSnapshotRoot: () => "preview",
-  catalogOf: () => ({
-    results: (state: { readonly text: string }) =>
-      [
-        { key: "c:one", printingId: "p:one" },
-        { key: "c:two", printingId: "p:two" },
-      ].filter((hit) => state.text === "" || hit.key.includes(state.text)),
-    summary: (printingId: string) => ({ printingId, cardNo: printingId.toUpperCase() }),
-  }),
+  activeSnapshotRoot: () => "preview",
 }))
-
-const loaded = (dataVersion: string): LoadedSnapshot =>
-  ({ dataVersion, manifestHash: `sha256:${dataVersion}` }) as unknown as LoadedSnapshot
-
+const hookWorkers: HookWorker[] = []
+class HookWorker {
+  onmessage: ((event: MessageEvent<SearchEvent>) => void) | null = null
+  onerror: (() => void) | null = null
+  onmessageerror: (() => void) | null = null
+  constructor() {
+    hookWorkers.push(this)
+  }
+  postMessage(request: SearchRequest) {
+    fake.requests.push(request)
+  }
+  terminate() {}
+}
+function emit(event: SearchEvent) {
+  act(() => {
+    hookWorkers.at(-1)?.onmessage?.({ data: event } as MessageEvent<SearchEvent>)
+  })
+}
+function load() {
+  const request = fake.requests.findLast((request) => request.kind === "load")
+  if (request?.kind !== "load") throw new Error("load request missing")
+  return request
+}
+const metrics = {
+  restored: true,
+  files: 0,
+  maxRawBytes: 0,
+  parseMs: 0,
+  buildMs: 0,
+  wallMs: 0,
+  firstFileMs: 0,
+  firstSetMs: 0,
+  arrayBuffers: 0,
+  stringBytes: 0,
+  cards: 2,
+  stagingArrayBuffers: 0,
+  stagingStringBytes: 0,
+}
+function ready(version = "v1") {
+  emit({
+    kind: "ready",
+    generation: load().generation,
+    edition: "jp",
+    root: "/cdn",
+    dataVersion: version,
+    manifestHash: `sha256:${version}`,
+    metrics,
+  })
+}
+function answer() {
+  const request = fake.requests.findLast((request) => request.kind === "search")
+  if (request?.kind !== "search") throw new Error("search request missing")
+  emit({
+    kind: "result",
+    generation: request.generation,
+    channelId: request.channelId,
+    queryId: request.queryId,
+    page: { total: 2, offset: request.query.offset ?? 0, items: [] },
+  })
+}
+/** Answers each channel's latest view request with one item named after its page offset. */
+function answerViews(classes: NonNullable<ReturnType<typeof useSetOptions>["classes"]> = []) {
+  const latest = new Map<number, Extract<SearchRequest, { kind: "view" }>>()
+  for (const request of fake.requests)
+    if (request.kind === "view") latest.set(request.channelId, request)
+  for (const request of latest.values()) {
+    const offset = request.query.offset ?? 0
+    emit({
+      kind: "view-result",
+      generation: request.generation,
+      channelId: request.channelId,
+      queryId: request.queryId,
+      view: {
+        query: request.query,
+        page: {
+          total: 120,
+          offset,
+          items: [{ key: `c:${String(offset)}`, printingId: "p", summary: undefined }],
+        },
+        options: { classes, sets: [] },
+        faces: [],
+      },
+    })
+  }
+}
 const query: SearchQuery = { state: DEFAULT_QUERY, edition: "jp" }
-
 beforeEach(() => {
-  fake.set({ state: "idle" }, null)
-  fake.state.retried = 0
-  fake.state.reloaded = 0
+  act(() => {
+    hookWorkers.at(-1)?.onerror?.()
+  })
+  fake.requests.length = 0
+  prefsStore.set({ cardEdition: "jp" })
+  vi.stubGlobal("Worker", HookWorker)
 })
+afterEach(() => vi.unstubAllGlobals())
 
-afterEach(() => {
-  vi.clearAllMocks()
-})
-
-describe("useSearchReadiness", () => {
-  it("reports the download step, then the generation with its root, edition and version", () => {
-    fake.set({ state: "loading", phase: "manifest" }, null)
+describe("Worker hooks", () => {
+  it("maps root names explicitly and exposes Worker progress and generation", () => {
     const { result } = renderHook(() => useSearchReadiness("jp"))
     expect(result.current).toMatchObject({
       phase: "downloading",
       generation: null,
-      loading: { root: "preview", edition: "jp", step: "manifest" },
-      updating: false,
+      loading: { root: "preview", edition: "jp", step: "index" },
     })
-    act(() => {
-      fake.set({ state: "ready", dataVersion: "v1" }, loaded("v1"))
-    })
+    emit({ kind: "stage", generation: load().generation, step: "bootstrap" })
+    emit({ kind: "progress", generation: load().generation, done: 2, total: 84, persistent: true })
+    expect(result.current.loading).toMatchObject({ step: "bootstrap", done: 2, total: 84 })
+    ready()
     expect(result.current).toMatchObject({
       phase: "ready",
       root: "preview",
       edition: "jp",
       dataVersion: "v1",
-      manifestHash: "sha256:v1",
-      updating: false,
+      generation: load().generation,
     })
-    expect(result.current.generation).toBeTypeOf("number")
+    expect(fake.client.snapshot()).toBeNull()
   })
-
-  it("keeps the old generation queryable while an update downloads, and bumps it on a new snapshot", () => {
-    const v1 = loaded("v1")
-    fake.set({ state: "ready", dataVersion: "v1" }, v1)
+  it("keeps the active generation during a replacement load", () => {
     const { result } = renderHook(() => useSearchReadiness("jp"))
+    ready()
     const first = result.current.generation
     act(() => {
-      fake.set({ state: "ready", dataVersion: "v1", updating: "bootstrap" }, v1)
+      window.dispatchEvent(new Event("online"))
     })
+    emit({ kind: "stage", generation: load().generation, step: "bootstrap" })
     expect(result.current).toMatchObject({
       phase: "ready",
+      generation: first,
       updating: true,
-      loading: { step: "bootstrap" },
+      loading: { root: "preview", step: "bootstrap" },
     })
-    expect(result.current.generation).toBe(first)
-    act(() => {
-      fake.set({ state: "ready", dataVersion: "v2" }, loaded("v2"))
-    })
+    ready("v2")
+    expect(result.current.generation).toBe(load().generation)
     expect(result.current.generation).not.toBe(first)
   })
-
-  it("exposes a failed load with a retry that reaches the client", () => {
-    fake.set({ state: "error", kind: "network", detail: "offline" }, null)
+  it("reports a failed load and retries through the Worker", () => {
     const { result } = renderHook(() => useSearchReadiness("jp"))
+    emit({ kind: "error", generation: load().generation, message: "offline" })
     expect(result.current).toMatchObject({
       phase: "error",
-      error: { kind: "load-failed", message: "network: offline" },
+      error: { kind: "load-failed", message: "offline" },
     })
+    const first = load().generation
     act(() => {
       result.current.retry()
     })
-    expect(fake.state.retried).toBe(1)
-    act(() => {
-      fake.set(
-        { state: "ready", dataVersion: "v1", updateError: { kind: "corrupt", detail: "x" } },
-        loaded("v1"),
-      )
+    expect(load().generation).toBeGreaterThan(first)
+    expect(result.current.phase).toBe("downloading")
+  })
+  it("remembers pending input, then accepts only that channel's response", () => {
+    const { result, rerender } = renderHook<
+      ReturnType<typeof useSearch>,
+      { input: SearchQuery | null }
+    >(({ input }: { input: SearchQuery | null }) => useSearch(input), {
+      initialProps: { input: query },
     })
-    expect(result.current).toMatchObject({ phase: "ready", error: { kind: "load-failed" } })
-    act(() => {
-      result.current.retry()
+    expect(result.current).toEqual({ lastInput: query, result: { phase: "pending" } })
+    rerender({ input: null })
+    expect(result.current.lastInput).toEqual(query)
+    ready()
+    answer()
+    expect(result.current.result).toMatchObject({
+      phase: "complete",
+      root: "/cdn",
+      page: { total: 2, offset: 0 },
     })
-    expect(fake.state.reloaded).toBe(1)
+  })
+  it("passes bounded paging to the Worker", () => {
+    const { result } = renderHook(() => useSearch({ ...query, offset: 1, limit: 1 }))
+    ready()
+    const request = fake.requests.findLast((request) => request.kind === "search")
+    expect(request).toMatchObject({ query: { offset: 1, limit: 1 } })
+    answer()
+    expect(result.current.result).toMatchObject({
+      phase: "complete",
+      page: { total: 2, offset: 1 },
+    })
+  })
+  it("keeps typed query failures explicit", () => {
+    const { result } = renderHook(() =>
+      useSearch({ ...query, state: { ...DEFAULT_QUERY, sort: "cost" } }),
+    )
+    ready()
+    const request = fake.requests.findLast((request) => request.kind === "search")
+    if (request?.kind !== "search") throw new Error("request missing")
+    emit({
+      kind: "query-error",
+      generation: request.generation,
+      channelId: request.channelId,
+      queryId: request.queryId,
+      error: {
+        kind: "unsupported-query",
+        message: "requested search facet is not ready",
+        facets: ["sort"],
+      },
+    })
+    expect(result.current.result).toMatchObject({
+      phase: "error",
+      error: { kind: "unsupported-query", facets: ["sort"] },
+    })
+  })
+  it("a failed load cannot become an empty result", () => {
+    const { result } = renderHook(() => useSearch(query))
+    emit({ kind: "error", generation: load().generation, message: "offline" })
+    expect(result.current.result).toMatchObject({
+      phase: "error",
+      error: { kind: "load-unavailable", message: "offline" },
+    })
+  })
+  it("loading more keeps the shown page on screen and asks only for the new page", () => {
+    const { result, rerender } = renderHook(
+      ({ pages }: { pages: number }) => useListView(query, pages),
+      { initialProps: { pages: 1 } },
+    )
+    ready()
+    answerViews()
+    const shown = result.current.view
+    expect(shown?.page.items.map((item) => item.key)).toEqual(["c:0"])
+    const before = fake.requests.filter((request) => request.kind === "view").length
+    rerender({ pages: 2 })
+    expect(result.current.view).toBe(shown)
+    expect(fake.requests.filter((request) => request.kind === "view").slice(before)).toMatchObject([
+      { query: { offset: 60, limit: 60 } },
+    ])
+    answerViews()
+    expect(result.current.view?.page.items.map((item) => item.key)).toEqual(["c:0", "c:60"])
+    // Returning to fewer pages shows only those, without asking the Worker again.
+    const asked = fake.requests.length
+    rerender({ pages: 1 })
+    expect(result.current.view?.page.items.map((item) => item.key)).toEqual(["c:0"])
+    expect(fake.requests).toHaveLength(asked)
+    rerender({ pages: 2 })
+    expect(result.current.view?.page.items.map((item) => item.key)).toEqual(["c:0", "c:60"])
+    expect(fake.requests).toHaveLength(asked)
+  })
+  it("a newer data version keeps the shown pages until its own pages arrive", () => {
+    const { result } = renderHook(() => useListView(query, 1))
+    ready()
+    answerViews()
+    const shown = result.current.view
+    act(() => {
+      window.dispatchEvent(new Event("online"))
+    })
+    ready("v2")
+    expect(result.current.view).toBe(shown)
+    answerViews()
+    expect(result.current.view).toBeDefined()
+    expect(result.current.view).not.toBe(shown)
+  })
+  it("has no result without input", () => {
+    const { result } = renderHook(() => useSearch(null))
+    ready()
+    expect(result.current).toEqual({ lastInput: null, result: { phase: "pending" } })
   })
 })
 
-describe("useSearch", () => {
-  it("answers pending while downloading, keeps the input, and answers it once ready", () => {
-    fake.set({ state: "loading", phase: "bootstrap" }, null)
-    const initial: { readonly input: SearchQuery | null } = { input: query }
-    const { result, rerender } = renderHook((props) => useSearch(props.input), {
-      initialProps: initial,
-    })
-    expect(result.current).toEqual({ lastInput: query, result: { phase: "pending" } })
-    // The caller stops passing the query (e.g. a re-render without it): the input is remembered.
-    rerender({ input: null })
-    expect(result.current.lastInput).toEqual(query)
-    act(() => {
-      fake.set({ state: "ready", dataVersion: "v1" }, loaded("v1"))
-    })
-    expect(result.current.result).toMatchObject({
-      phase: "complete",
-      root: "preview",
-      page: { total: 2, offset: 0 },
-    })
-    const page = result.current.result.phase === "complete" ? result.current.result.page : null
-    expect(page?.items.map((item) => item.summary?.cardNo)).toEqual(["P:ONE", "P:TWO"])
-  })
-
-  it("pages with offset and limit and reports the full total", () => {
-    fake.set({ state: "ready", dataVersion: "v1" }, loaded("v1"))
-    const { result } = renderHook(() => useSearch({ ...query, offset: 1, limit: 1 }))
-    expect(result.current.result).toMatchObject({
-      phase: "complete",
-      page: { total: 2, offset: 1, items: [{ key: "c:two" }] },
-    })
-  })
-
-  it("rejects conditions the synchronous catalog cannot apply instead of ignoring them", () => {
-    fake.set({ state: "ready", dataVersion: "v1" }, loaded("v1"))
-    const { result } = renderHook(() =>
-      useSearch({ ...query, state: { ...DEFAULT_QUERY, cost: { max: 2 }, sort: "cost" } }),
+it("the class quickbar keeps its cells during a same-edition version replacement", () => {
+  function QuickBar() {
+    const { classes } = useSetOptions()
+    return (
+      <ClassQuickBar
+        label="classes"
+        selected={[]}
+        onToggle={() => undefined}
+        classes={[
+          { code: "neutral", label: "neutral" },
+          ...(classes ?? []).map((item) => ({ code: item.code, label: item.name.original.text })),
+        ]}
+      />
     )
-    expect(result.current.result).toEqual({
-      phase: "error",
-      error: {
-        kind: "unsupported-query",
-        message: "unsupported conditions",
-        facets: ["cost", "sort"],
-      },
-    })
+  }
+  render(<QuickBar />)
+  ready()
+  const classes = [
+    "forestcraft",
+    "swordcraft",
+    "runecraft",
+    "dragoncraft",
+    "abysscraft",
+    "havencraft",
+  ].map((code) => ({
+    id: code,
+    code,
+    name: { original: { lang: "ja" as const, text: code }, translations: {} },
+  }))
+  answerViews(classes)
+  const cells = () =>
+    screen.getByRole("group", { name: "classes" }).querySelectorAll("button[aria-pressed]")
+  expect(cells()).toHaveLength(7)
+  act(() => {
+    window.dispatchEvent(new Event("online"))
   })
+  ready("v2")
+  expect(cells()).toHaveLength(7)
+  answerViews(classes.slice(0, 5))
+  expect(cells()).toHaveLength(6)
+  act(() => {
+    prefsStore.set({ cardEdition: "en" })
+  })
+  expect(cells()).toHaveLength(1)
+})
 
-  it("reports a failed load as load-unavailable, not as an empty result", () => {
-    fake.set({ state: "error", kind: "network", detail: "offline" }, null)
-    const { result } = renderHook(() => useSearch(query))
-    expect(result.current.result).toEqual({
-      phase: "error",
-      error: { kind: "load-unavailable", message: "network: offline" },
+it("visible ability previews stay complete during replacement but never cross editions", () => {
+  const { result, rerender } = renderHook(
+    ({ edition }: { edition: "jp" | "en" }) => useAbilityPreview("p", "f", "zh-Hant", edition),
+    { initialProps: { edition: "jp" } },
+  )
+  const answerPreview = (text: string) => {
+    const request = fake.requests.findLast((request) => request.kind === "preview")
+    if (request?.kind !== "preview") throw new Error("preview request missing")
+    emit({
+      kind: "preview-result",
+      generation: request.generation,
+      channelId: request.channelId,
+      queryId: request.queryId,
+      preview: { text, language: "zh-Hant" },
     })
+  }
+  ready()
+  answerPreview("old synthetic ability")
+  act(() => {
+    window.dispatchEvent(new Event("online"))
   })
-
-  it("has no result without an input", () => {
-    fake.set({ state: "ready", dataVersion: "v1" }, loaded("v1"))
-    const { result } = renderHook(() => useSearch(null))
-    expect(result.current).toEqual({ lastInput: null, result: { phase: "pending" } })
+  ready("v2")
+  expect(result.current).toMatchObject({
+    phase: "complete",
+    preview: { text: "old synthetic ability" },
   })
+  answerPreview("new synthetic ability")
+  expect(result.current).toMatchObject({
+    phase: "complete",
+    preview: { text: "new synthetic ability" },
+  })
+  rerender({ edition: "en" })
+  expect(result.current).toMatchObject({ phase: "error", error: { kind: "edition-not-ready" } })
 })

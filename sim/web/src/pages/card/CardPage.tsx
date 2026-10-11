@@ -1,11 +1,17 @@
 import { ArrowLeft, ChevronLeft, ChevronRight, Link2 } from "lucide-react"
-import { useDeferredValue, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router"
 
 import { useDialogHistory } from "../../app/dialog-history"
 import { LIST_PAGE_SIZE } from "../../app/listEntryState"
-import { useCatalog, useImageIndex, useSearchReadiness } from "../../app/snapshot"
+import {
+  type SearchReadiness,
+  useCardSnapshot,
+  useImageIndex,
+  useNeighbours,
+  useSearchReadiness,
+} from "../../app/snapshot"
 import { StatusStrip } from "../../app/StatusStrip"
 import { CardImage } from "../../components/card/CardImage"
 import { CardNameHeading, PlainNameHeading } from "../../components/card/CardNameHeading"
@@ -22,7 +28,7 @@ import { type CardSummary, type Catalog, type Row, stringValue } from "../../dat
 import { classStyle } from "../../domain/classes"
 import { displayName, type NameSource, UI_TEXT_LANG } from "../../domain/nameDisplay"
 import { parseQuery } from "../../domain/query/codec"
-import type { Region, ResultItem, TextLang } from "../../domain/search"
+import type { Region, TextLang } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
@@ -75,10 +81,34 @@ function backFaceName(
 export function CardPage() {
   const { t } = useTranslation()
   const { cardNo, intId } = useParams()
-  const { catalog, client } = useCatalog()
+  const { catalog, client, status } = useCardSnapshot()
   const images = useImageIndex(client, catalog !== null)
   const prefs = usePrefs()
-  const readiness = useSearchReadiness(prefs.cardEdition)
+  const searchReadiness = useSearchReadiness(prefs.cardEdition)
+  const failure =
+    status.state === "error" ? status : status.state === "ready" ? status.updateError : undefined
+  const { error: _searchError, loading: _searchLoading, ...searchState } = searchReadiness
+  const readiness: SearchReadiness = {
+    ...searchState,
+    phase: status.state === "error" ? "error" : catalog ? "ready" : "downloading",
+    updating: status.state === "ready" && !!status.updating,
+    ...(failure ? { error: { kind: "load-failed" as const, message: failure.detail } } : {}),
+    ...(status.state === "loading"
+      ? {
+          loading: {
+            root: searchReadiness.root,
+            edition: prefs.cardEdition,
+            step: status.phase,
+            ...(status.total === undefined
+              ? {}
+              : { total: status.total, done: status.done ?? 0, persistent: true }),
+          },
+        }
+      : {}),
+    retry: () => {
+      void client.retry()
+    },
+  }
   const navigate = useNavigate()
   const location = useLocation()
   const toast = useToast()
@@ -111,26 +141,24 @@ export function CardPage() {
       : null
   const background = typeof entry?.["background"] === "string" ? entry["background"] : null
   const fromList = background !== null
-  // The list order is computed in a deferred render after the card has painted, so opening a
-  // card never waits for it; the buttons keep their place and enable once it is known.
-  const deferredCatalog = useDeferredValue(catalog, null)
   const pages = typeof entry?.["pages"] === "number" ? Math.max(1, entry["pages"]) : 1
-  const order = useMemo<readonly ResultItem[] | null>(() => {
-    if (!deferredCatalog) return null
-    const results = deferredCatalog.results(
-      parseQuery(new URLSearchParams(background ?? "")),
-      cardEdition,
-    )
-    return fromList ? results.slice(0, pages * LIST_PAGE_SIZE) : results
-  }, [deferredCatalog, background, cardEdition, fromList, pages])
-  const position =
-    order === null || printingId === null
-      ? -1
-      : order.findIndex((item) => item.printingId === printingId)
+  const neighbourQuery = useMemo(
+    () => ({ state: parseQuery(new URLSearchParams(background ?? "")), edition: cardEdition }),
+    [background, cardEdition],
+  )
+  const neighbourTarget = typeof entry?.["resultKey"] === "string" ? entry["resultKey"] : printingId
+  const neighbours = useNeighbours(
+    neighbourQuery,
+    neighbourTarget,
+    fromList ? pages * LIST_PAGE_SIZE : undefined,
+  )
+  const order = neighbours.result.phase === "complete" ? neighbours.result.page.items : []
+  const position = order.findIndex(
+    (item) => item.key === neighbourTarget || item.printingId === neighbourTarget,
+  )
   const neighbour = (step: -1 | 1) => {
-    const item = position < 0 ? undefined : order?.[position + step]
-    const target = item ? catalog?.summary(item.printingId) : undefined
-    return item && target ? { key: item.key, summary: target } : undefined
+    const item = position < 0 ? undefined : order[position + step]
+    return item?.summary ? { key: item.key, summary: item.summary } : undefined
   }
   const previous = neighbour(-1)
   const next = neighbour(1)
@@ -329,7 +357,7 @@ export function CardPage() {
                     {revision && (
                       <StatLine className="mt-1" cost={cost} attack={attack} defense={defense} />
                     )}
-                    {ordinal === 0 && (order === null || position >= 0) && (
+                    {ordinal === 0 && (neighbours.result.phase !== "complete" || position >= 0) && (
                       <div className="mt-2 flex gap-2">
                         <Button
                           className="h-10 gap-1 px-3 text-14"

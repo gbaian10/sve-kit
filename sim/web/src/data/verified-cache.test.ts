@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { memoryCache } from "../test-utils/cache"
 import { VerifiedCache } from "./verified-cache"
@@ -121,6 +121,8 @@ describe("VerifiedCache", () => {
       notify = resolve
     })
     const delayed = {
+      keys: storage.keys.bind(storage),
+      delete: storage.delete.bind(storage),
       open: async (name: string) => {
         const cache = await storage.open(name)
         return {
@@ -147,4 +149,43 @@ describe("VerifiedCache", () => {
     expect(text(await en.read("en", hash(1)))).toBe("en")
     expect(text(await jp.read("jp", hash(1)))).toBe("jp")
   })
+})
+
+it("scans automatic caches once for a successful write", async () => {
+  const storage = memoryCache()
+  const scan = vi.spyOn(storage, "keys")
+  await new VerifiedCache(root, "search-view", 1, storage, "build").write(
+    "jp",
+    hash(1),
+    bytes("ok"),
+  )
+  expect(scan).toHaveBeenCalledTimes(1)
+})
+
+it("a quota retry reuses one inventory and still enforces the view budget and generations", async () => {
+  const storage = memoryCache()
+  const name = `sve-search-view:${encodeURIComponent(root)}`
+  const cache = new VerifiedCache(root, "search-view", 1, storage, "build")
+  const payload = new Uint8Array(1024 * 1024)
+  await cache.write("old", hash(1), payload)
+  await cache.write("previous", hash(2), payload)
+  const namespace = await storage.open(name)
+  const open = storage.open.bind(storage)
+  vi.spyOn(storage, "open").mockImplementation((key) =>
+    key === name ? Promise.resolve(namespace) : open(key),
+  )
+  vi.spyOn(namespace, "put").mockRejectedValueOnce(new Error("quota"))
+  const scan = vi.spyOn(storage, "keys")
+  const next = new VerifiedCache(root, "search-view", 1, storage, "build")
+  await next.write("new", hash(3), payload)
+  expect(scan).toHaveBeenCalledTimes(1)
+  expect(await next.read("old", hash(1))).toBeUndefined()
+  expect((await next.read("new", hash(3)))?.length).toBe(payload.length)
+  const retained = await namespace.keys()
+  expect(retained.length).toBeLessThanOrEqual(2)
+  expect(
+    await Promise.all(
+      retained.map(async (key) => Number((await namespace.match(key))?.headers.get("x-sve-bytes"))),
+    ),
+  ).toEqual(expect.arrayContaining([payload.length]))
 })

@@ -1,10 +1,12 @@
 // @vitest-environment node
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
+import { cardNoKey } from "../../domain/cardNo"
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import { apply } from "../../domain/search"
 import { memoryCache } from "../../test-utils/cache"
+import { sharedAnnotatedTextResolver } from "../annotated-text"
 import { createCatalog } from "../catalog"
 import type { Fetcher } from "../cdn"
 import { createSnapshotClient } from "../client"
@@ -19,6 +21,25 @@ import {
   SearchSession,
   type SearchStatus,
 } from "../index"
+import { bucketOf } from "../locator"
+const numeric = new Intl.Collator("en", { numeric: true, sensitivity: "base" })
+function orderExpected(
+  catalog: ReturnType<typeof createCatalog>,
+  items: { key: string; printingId: string }[],
+) {
+  return items.sort((a, b) => {
+    const first = cardNoKey(catalog.summary(a.printingId)?.cardNo ?? "", catalog.sets)
+    const second = cardNoKey(catalog.summary(b.printingId)?.cardNo ?? "", catalog.sets)
+    if (!first || !second) return Number(second !== null) - Number(first !== null)
+    return (
+      numeric.compare(first.set, second.set) ||
+      numeric.compare(first.number, second.number) ||
+      numeric.compare(first.suffix.replace(/en$/u, ""), second.suffix.replace(/en$/u, "")) ||
+      a.key.localeCompare(b.key) ||
+      a.printingId.localeCompare(b.printingId)
+    )
+  })
+}
 type CombinedStatus = SearchStatus & SearchChannelStatus
 import { SearchBlobs } from "./blobs"
 import { BootstrapColumns } from "./bootstrap"
@@ -27,6 +48,7 @@ import { SearchEngine } from "./engine"
 import { SearchIndex } from "./index"
 import type { BootstrapPlan, SearchEvent, SearchRequest } from "./messages"
 import type { SearchTransportFactory } from "./session"
+import { ViewCache } from "./view"
 
 const built = await buildSnapshot({
   encodeImage: ({ seed }) => Promise.resolve(new TextEncoder().encode(String(seed))),
@@ -287,6 +309,7 @@ describe("complete Worker catalog generations", () => {
         const expected = catalog
           .results(state, "jp")
           .filter((item) => catalog.summary(item.printingId)?.region === "jp")
+        if (!text) orderExpected(catalog, expected)
         expect(result.page.total).toBe(expected.length)
         expect(result.page.items.map(({ key, printingId }) => ({ key, printingId }))).toEqual(
           expected.slice(0, 2),
@@ -579,8 +602,13 @@ it("an index entry that differs from its manifest is an error, also for a stored
     const h = harness(served, cacheStorage)
     h.session.load(base, "jp", "index")
     await h.settled()
-    expect(h.status()).toMatchObject({ phase: "error", generation: null })
-    expect(h.events.some((event) => event.kind === "ready")).toBe(false)
+    if (cacheStorage === storage) {
+      expect(h.status()).toMatchObject({ phase: "ready", unconfirmed: true })
+      expect(h.status().error?.message).toContain("revision")
+    } else {
+      expect(h.status()).toMatchObject({ phase: "error", generation: null })
+      expect(h.events.some((event) => event.kind === "ready")).toBe(false)
+    }
   }
 })
 
@@ -682,7 +710,7 @@ it("query failures are typed and isolated from other channels and load state", a
     [["rarities"], { rarities: ["legend"] }],
     [["altArtOnly"], { altArtOnly: true }],
     [["mechanics"], { mechanics: { quick: "has" } }],
-    [["unit"], { unit: "printing" }],
+    [["unit"], { unit: "art" }],
     [["sort"], { sort: "cost" }],
   ] as const) {
     h.channel.search({ ...query, state: { ...DEFAULT_QUERY, ...changes } })
@@ -843,6 +871,7 @@ it("typed matching preserves catalog ranking, canonical pagination and summaries
       const result = h.channel.getStatus().result
       if (result.phase !== "complete") throw new Error("missing result")
       const expected = apply(state, entries, { edition, sets: catalog.sets })
+      if (!text) orderExpected(catalog, expected)
       expect(result.page.total).toBe(expected.length)
       expect(result.page.items).toEqual(
         expected
@@ -1004,7 +1033,9 @@ it("a stored index image answers every query like the index it was encoded from"
 
 describe("persistent index images", () => {
   const readyMetrics = (events: SearchEvent[]) =>
-    events.flatMap((event) => (event.kind === "ready" ? [event.metrics] : []))
+    events.flatMap((event) =>
+      event.kind === "ready" && event.searchReady !== false ? [event.metrics] : [],
+    )
 
   it("a reload of the same manifest restores the index without the manifest or any blob", async () => {
     const storage = memoryCache()
@@ -1041,7 +1072,9 @@ describe("persistent index images", () => {
     const rebuilt = async (h: ReturnType<typeof harness>, edition: "jp" | "en") => {
       h.session.load(base, edition, "preview")
       await h.settled()
-      return readyMetrics(h.events).map((metrics) => metrics.restored)
+      return readyMetrics(h.events)
+        .slice(-1)
+        .map((metrics) => metrics.restored)
     }
     expect(await rebuilt(harness(served, storage, "other build"), "jp")).toEqual([false])
     expect(await rebuilt(harness(served, storage), "en")).toEqual([false])
@@ -1072,7 +1105,7 @@ describe("persistent index images", () => {
     second.session.load(base, "jp", "preview")
     second.channel.search(query)
     await second.settled()
-    expect(readyMetrics(second.events)).toMatchObject([{ restored: false }])
+    expect(readyMetrics(second.events).slice(-1)).toMatchObject([{ restored: false }])
     const before = first.status().result
     const after = second.status().result
     if (before.phase !== "complete" || after.phase !== "complete") throw new Error("missing result")
@@ -1105,4 +1138,553 @@ describe("persistent index images", () => {
     const namespace = await storage.open(`sve-search-index:${encodeURIComponent(base)}`)
     expect(await namespace.keys()).toEqual([])
   })
+})
+
+it("suggestions preserve exact printing and alias ranking, and recent summaries have explicit misses", async () => {
+  const h = harness()
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  h.channel.suggest("bp01-51", "jp")
+  await expect.poll(() => h.channel.getStatus().result.phase, POLL).toBe("complete")
+  const exact = h.channel.getStatus().result
+  expect(exact.phase === "complete" && exact.suggestions?.[0]).toMatchObject({
+    field: "cardNo",
+    rank: 0,
+    summary: { cardNo: "BP01-051", region: "jp" },
+  })
+  h.channel.suggest("テンプラー", "jp")
+  await expect.poll(() => h.channel.getStatus().result.phase, POLL).toBe("complete")
+  const alias = h.channel.getStatus().result
+  expect(alias.phase === "complete" && alias.suggestions?.[0]).toMatchObject({ field: "alias" })
+  h.channel.recent(
+    [
+      "p:does-not-exist",
+      ...(exact.phase === "complete"
+        ? (exact.suggestions?.map((item) => item.summary.printingId) ?? [])
+        : []),
+    ],
+    "jp",
+  )
+  await expect.poll(() => h.channel.getStatus().result.phase, POLL).toBe("complete")
+  const recent = h.channel.getStatus().result
+  expect(recent.phase === "complete" && recent.recent?.[0]).toEqual({
+    printingId: "p:does-not-exist",
+    state: "not-in-edition",
+  })
+  expect(recent.phase === "complete" && recent.recent?.[1]?.state).toBe("available")
+})
+
+it("a complete cached view and index are usable while the entry is blocked, without reading metadata", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const first = harness(served, storage)
+  first.session.load(base, "jp", "preview")
+  await first.settled()
+  const metadata = (built.manifest["files"] as JsonObject[]).filter((file) =>
+    (file["row_counts"] as JsonObject[]).some((row) => row["table"] === "printing_image"),
+  )
+  const blobs = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
+  for (const file of metadata) {
+    await blobs.delete(`${base}/${stringValue(file["path"])}`)
+    served.files.delete(stringValue(file["path"]))
+  }
+  served.requests.length = 0
+  const release = served.hold("snapshots/preview/current.json")
+  const warm = harness(served, storage)
+  warm.channel.view({ ...query, limit: 60 })
+  warm.session.load(base, "jp", "preview")
+  await expect.poll(() => warm.status().result.phase, POLL).toBe("complete")
+  const result = warm.status().result
+  if (result.phase !== "complete" || !result.view) throw new Error("view missing")
+  expect(result.view.faces.length).toBeGreaterThan(0)
+  expect(
+    result.view.faces.every(
+      (face) =>
+        face.source !== undefined ||
+        face.asset["availability"] !== "available" ||
+        face.asset["publication_state"] !== "approved",
+    ),
+  ).toBe(true)
+  expect(served.requests).toEqual(["snapshots/preview/current.json"])
+  expect(warm.status().unconfirmed).toBe(true)
+  await expect.poll(() => warm.status().searchReady, POLL).toBe(true)
+  release()
+  await warm.settled()
+  expect(warm.status().unconfirmed).toBe(false)
+})
+
+it("an index-only hit restores before the entry and completes images from verified metadata", async () => {
+  const storage = memoryCache()
+  const first = harness(origin(), storage)
+  first.session.load(base, "jp", "preview")
+  await first.settled()
+  await storage.delete(`sve-search-view:${encodeURIComponent(base)}`)
+  const served = origin()
+  const release = served.hold("snapshots/preview/current.json")
+  const warm = harness(served, storage)
+  warm.channel.view({ ...query, limit: 60 })
+  warm.session.load(base, "jp", "preview")
+  await expect.poll(() => warm.status().result.phase, POLL).toBe("complete")
+  expect(served.requests).toEqual(["snapshots/preview/current.json"])
+  release()
+  await warm.settled()
+})
+
+it("missing or half-written views recover and image errors cannot become an unavailable view", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const first = harness(served, storage)
+  first.session.load(base, "jp", "preview")
+  await first.settled()
+  const views = await storage.open(`sve-search-view:${encodeURIComponent(base)}`)
+  for (const key of await views.keys()) await views.put(key, new Response("{"))
+  const restored = harness(served, storage)
+  restored.channel.view({ ...query, limit: 60 })
+  restored.session.load(base, "jp", "preview")
+  await restored.settled()
+  await expect.poll(() => restored.status().result.phase, POLL).toBe("complete")
+  const blobs = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
+  await storage.delete(`sve-search-view:${encodeURIComponent(base)}`)
+  for (const file of built.manifest["files"] as JsonObject[])
+    if ((file["row_counts"] as JsonObject[]).some((row) => row["table"] === "printing_image")) {
+      await blobs.delete(`${base}/${stringValue(file["path"])}`)
+      served.files.set(stringValue(file["path"]), new Uint8Array([0]))
+    }
+  const broken = harness(served, storage)
+  broken.channel.view({ ...query, limit: 60 })
+  broken.session.load(base, "jp", "preview")
+  await broken.settled()
+  await expect.poll(() => broken.status().result.phase, POLL).toBe("error")
+})
+
+it("remembers the current completed query for a view-first reload without metadata", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const first = harness(served, storage)
+  first.session.load(base, "jp", "preview")
+  await first.settled()
+  const current = { ...query, state: { ...DEFAULT_QUERY, text: "bp01-001" }, limit: 60 }
+  first.channel.view(current, true)
+  await expect.poll(() => first.channel.getStatus().result.phase, POLL).toBe("complete")
+  const pointer = await storage.open(`sve-search-view-selection:${encodeURIComponent(base)}`)
+  await expect.poll(async () => (await pointer.keys()).length, POLL).toBe(1)
+  served.requests.length = 0
+  const release = served.hold("snapshots/preview/current.json")
+  const warm = harness(served, storage)
+  warm.channel.view(current)
+  warm.session.load(base, "jp", "preview")
+  await expect.poll(() => warm.channel.getStatus().result.phase, POLL).toBe("complete")
+  expect(served.requests).toEqual(["snapshots/preview/current.json"])
+  release()
+  await warm.settled()
+})
+
+it("a cached generation replaced by a newer network version re-queries its completed view", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const first = harness(served, storage)
+  first.session.load(base, "jp", "preview")
+  await first.settled()
+  served.update(2)
+  const warm = harness(served, storage)
+  warm.channel.view({ ...query, limit: 60 })
+  warm.session.load(base, "jp", "preview")
+  await warm.settled()
+  // The cached view came from the old manifest; the list must follow the version now active.
+  expect(warm.status().dataVersion).toBe("20261004T010002Z-0001")
+  await expect
+    .poll(() => {
+      const result = warm.status().result
+      return result.phase === "complete" && result.manifestHash === warm.status().manifestHash
+    }, POLL)
+    .toBe(true)
+  const kinds = warm.events.map((event) => event.kind)
+  expect(kinds.lastIndexOf("view-result")).toBeGreaterThan(kinds.lastIndexOf("ready"))
+})
+
+it("a later check of an unchanged version keeps completed answers and rebuilds nothing", async () => {
+  const h = harness()
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  h.channel.view({ ...query, limit: 60 })
+  await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+  const answered = h.status().result
+  const phases: string[] = []
+  h.channel.subscribe(() => phases.push(h.channel.getStatus().result.phase))
+  const generation = h.status().generation ?? 0
+  h.served.requests.length = 0
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  expect(h.served.requests).toEqual(["snapshots/preview/current.json"])
+  expect(h.events.findLast((event) => event.kind === "ready")).toMatchObject({
+    generation: generation + 1,
+    metrics: { restored: true },
+  })
+  expect(h.status()).toMatchObject({ phase: "ready", generation: generation + 1, updating: false })
+  expect(phases).not.toContain("pending")
+  expect(h.status().result).toBe(answered)
+})
+
+it("switching back to an edition restores its stored index and view instead of rebuilding", async () => {
+  const h = harness()
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  h.session.load(base, "en", "preview")
+  await h.settled()
+  h.served.requests.length = 0
+  const mark = h.events.length
+  h.session.load(base, "jp", "preview")
+  h.channel.view({ ...query, limit: 60 })
+  await h.settled()
+  await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+  expect(h.served.requests).toEqual(["snapshots/preview/current.json"])
+  const readies = h.events.slice(mark).filter((event) => event.kind === "ready")
+  expect(readies.length).toBeGreaterThan(0)
+  expect(readies.every((event) => event.metrics.restored)).toBe(true)
+  expect(h.status()).toMatchObject({ edition: "jp", searchReady: true, unconfirmed: false })
+})
+
+it("an older selection of the other edition cannot make an unchanged entry look rewritten", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const en = harness(served, storage)
+  en.session.load(base, "en", "index")
+  await en.settled()
+  const path = "snapshots/versions/index.json"
+  const index = objectValue(
+    JSON.parse(new TextDecoder().decode(served.files.get(path))) as JsonObject,
+  )
+  served.files.set(path, canonical({ ...index, revision: Number(index["revision"]) + 1 }))
+  const jp = harness(served, storage)
+  jp.session.load(base, "jp", "index")
+  await jp.settled()
+  const h = harness(served, storage)
+  h.session.load(base, "jp", "index")
+  await h.settled()
+  h.session.load(base, "en", "index")
+  await h.settled()
+  expect(h.status()).toMatchObject({ phase: "ready", edition: "en", unconfirmed: false })
+  expect(h.status().error).toBeUndefined()
+})
+
+it("channels asking for the same page at once share one image metadata read", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const first = harness(served, storage)
+  first.session.load(base, "jp", "preview")
+  await first.settled()
+  await storage.delete(`sve-search-view:${encodeURIComponent(base)}`)
+  const blobs = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
+  const metadata = (built.manifest["files"] as JsonObject[])
+    .filter((file) =>
+      (file["row_counts"] as JsonObject[]).some((row) => row["table"] === "printing_image"),
+    )
+    .map((file) => stringValue(file["path"]))
+  for (const path of metadata) await blobs.delete(`${base}/${path}`)
+  served.requests.length = 0
+  const warm = harness(served, storage)
+  const options = warm.session.createChannel()
+  warm.channel.view({ ...query, limit: 60 })
+  options.view({ ...query, limit: 60 })
+  warm.session.load(base, "jp", "preview")
+  await warm.settled()
+  await expect
+    .poll(() => [warm.status().result.phase, options.getStatus().result.phase], POLL)
+    .toEqual(["complete", "complete"])
+  const read = served.requests.filter((path) => metadata.includes(path))
+  expect(read.length).toBeGreaterThan(0)
+  expect(new Set(read).size).toBe(read.length)
+})
+
+it("separates config, bootstrap, index building and visible-image preparation", async () => {
+  const h = harness()
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  const steps = h.events.flatMap((event) => (event.kind === "stage" ? [event.step] : []))
+  expect(steps).toEqual(
+    expect.arrayContaining(["index", "manifest", "config", "bootstrap", "search", "images"]),
+  )
+  const progress = h.events.filter((event) => event.kind === "progress")
+  const files = built.manifest["files"] as JsonObject[]
+  const total = files.filter((file) => file["role"] === "bootstrap").length
+  expect(progress.every((event) => event.total === total)).toBe(true)
+  expect(progress.map((event) => event.done)).toEqual(
+    Array.from({ length: total + 1 }, (_, i) => i),
+  )
+  expect(
+    h.events.findLastIndex((event) => event.kind === "stage" && event.step === "images"),
+  ).toBeLessThan(h.events.findIndex((event) => event.kind === "ready"))
+})
+
+it("printing pages preserve every edition printing, independent numbering, filters and image-complete cache identity", async () => {
+  const served = origin()
+  const client = createSnapshotClient(base, {
+    fetch: served.fetcher,
+    cacheStorage: memoryCache(),
+  })
+  await client.load()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const catalog = createCatalog(snapshot)
+  for (const edition of ["jp", "en"] as const) {
+    const storage = memoryCache()
+    const h = harness(served, storage)
+    h.session.load(base, edition, "preview")
+    await h.settled()
+    const entries = catalog.entries.flatMap((entry) =>
+      entry.printings
+        .filter((p) => p.region === edition)
+        .map((p) => ({ ...entry, printings: [p], defaultPrinting: { [edition]: p.id } })),
+    )
+    expect(entries.length).toBeGreaterThanOrEqual(
+      new Set(entries.map((entry) => entry.cardId)).size,
+    )
+    for (const text of ["", "BP01", "BP01-001", "51", "試作", "missing"]) {
+      const state = { ...DEFAULT_QUERY, unit: "printing" as const, text }
+      h.channel.search({ ...query, edition, state, offset: 1, limit: 3 })
+      await h.queried()
+      const result = h.status().result
+      if (result.phase !== "complete") throw new Error("missing printing page")
+      const expected = apply(state, entries, { edition, sets: catalog.sets })
+      if (!text) orderExpected(catalog, expected)
+      expect(result.page.total).toBe(expected.length)
+      expect(result.page.items).toEqual(
+        expected.slice(1, 4).map((item) => ({
+          key: item.printingId,
+          printingId: item.printingId,
+          summary: catalog.summary(item.printingId),
+        })),
+      )
+    }
+    const state = {
+      ...DEFAULT_QUERY,
+      unit: "printing" as const,
+      classes: ["forestcraft"],
+      cost: { max: 1 },
+    }
+    h.channel.search({ ...query, edition, state })
+    await h.queried()
+    const filtered = h.status().result
+    if (filtered.phase !== "complete") throw new Error("missing filtered printings")
+    const expected = orderExpected(
+      catalog,
+      apply(state, entries, { edition, sets: catalog.sets }).filter((item) => {
+        const cost = catalog.summary(item.printingId)?.cost
+        return cost !== null && cost !== undefined && cost <= 1
+      }),
+    )
+    expect(filtered.page.total).toBe(expected.length)
+    expect(filtered.page.items.map((item) => item.printingId)).toEqual(
+      expected.map((item) => item.printingId),
+    )
+    const viewQuery = {
+      ...query,
+      edition,
+      state: { ...DEFAULT_QUERY, unit: "printing" as const },
+      limit: 60,
+    }
+    h.channel.view(viewQuery, true)
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const complete = h.status().result
+    if (complete.phase !== "complete" || !complete.view) throw new Error("missing printing view")
+    expect(complete.page.items.every((item) => item.key === item.printingId)).toBe(true)
+    expect(complete.view.faces.length).toBeGreaterThan(0)
+    const fresh = origin()
+    const release = fresh.hold("snapshots/preview/current.json")
+    const warm = harness(fresh, storage)
+    warm.channel.view(viewQuery)
+    warm.session.load(base, edition, "preview")
+    await expect.poll(() => warm.status().result.phase, POLL).toBe("complete")
+    expect(warm.status().result).toMatchObject({ page: complete.page, view: complete.view })
+    expect(fresh.requests).toEqual(["snapshots/preview/current.json"])
+    release()
+    await warm.settled()
+    h.session.dispose()
+    warm.session.dispose()
+  }
+})
+
+it("keeps two printings of one card as separate numbered items after index restore", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const owner = snapshot.bootstrap.find(
+    (fragment) =>
+      fragment.table === "printing" && fragment.rows.some((row) => row["region"] === "jp"),
+  )
+  const original = owner?.rows.find((row) => row["region"] === "jp")
+  if (!owner || !original) throw new Error("missing test printing")
+  const extra = { ...original, id: "p:synthetic-special", int_id: 9999999, card_no: "BP01-P01" }
+  const bootstrap = snapshot.bootstrap.map((fragment) =>
+    fragment === owner ? { ...fragment, rows: [...fragment.rows, extra] } : fragment,
+  )
+  const columns = new BootstrapColumns()
+  columns.ingest(bootstrap)
+  columns.seal()
+  const created = new SearchIndex(columns, "jp")
+  for (const index of [created, new SearchIndex(created.encode(), "jp")]) {
+    const cards = index.search(query)
+    const printings = index.search({ ...query, state: { ...DEFAULT_QUERY, unit: "printing" } })
+    expect(printings.total).toBe(
+      snapshot.bootstrap.flatMap((fragment) =>
+        fragment.table === "printing" ? fragment.rows.filter((row) => row["region"] === "jp") : [],
+      ).length + 1,
+    )
+    expect(
+      printings.items.filter((item) => item.summary?.cardId === original["card_id"]),
+    ).toHaveLength(
+      snapshot.bootstrap.flatMap((fragment) =>
+        fragment.table === "printing"
+          ? fragment.rows.filter(
+              (row) => row["region"] === "jp" && row["card_id"] === original["card_id"],
+            )
+          : [],
+      ).length + 1,
+    )
+    const extraItem = printings.items.find((item) => item.printingId === extra.id)
+    expect(extraItem).toMatchObject({ key: extra.id, summary: { cardNo: "BP01-P01" } })
+    expect(cards.items.some((item) => item.printingId === extra.id)).toBe(false)
+    expect(
+      index.search({ ...query, state: { ...DEFAULT_QUERY, unit: "printing", text: "BP01-P01" } })
+        .items,
+    ).toEqual([extraItem])
+  }
+})
+
+it.each(["jp", "en"] as const)(
+  "returns only the current card and its neighbours in %s, capped at the originating pages",
+  async (edition) => {
+    const h = harness()
+    h.session.load(base, edition, "preview")
+    await h.settled()
+    h.channel.search({ ...query, edition })
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const result = h.status().result
+    if (result.phase !== "complete") throw new Error("search pending")
+    const items = result.page.items
+    const target = items[4]
+    if (!target) throw new Error("missing neighbour target")
+    h.channel.neighbours({ ...query, edition }, target.key)
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    expect(h.status().result).toMatchObject({ page: { offset: 3, items: items.slice(3, 6) } })
+    h.channel.neighbours({ ...query, edition }, target.key, 5)
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    expect(h.status().result).toMatchObject({ page: { total: 5, items: items.slice(3, 5) } })
+    h.session.dispose()
+  },
+)
+
+it.each(["jp", "en"] as const)(
+  "resolves bounded visible effects against the full annotated-text oracle in %s",
+  async (edition) => {
+    const served = origin()
+    const client = createSnapshotClient(base, { fetch: served.fetcher })
+    await client.load()
+    const snapshot = client.snapshot()
+    if (!snapshot) throw new Error("oracle missing")
+    const catalog = createCatalog(snapshot)
+    const resolver = sharedAnnotatedTextResolver(client)
+    const h = harness(served)
+    h.session.load(base, edition, "preview")
+    await h.settled()
+    h.channel.search({ ...query, edition })
+    await expect.poll(() => h.status().result.phase, POLL).not.toBe("pending")
+    const page = h.status().result
+    if (page.phase !== "complete") throw new Error("list pending")
+    const targets = page.page.items
+      .slice(0, 8)
+      .flatMap((item) => (item.summary ? [item.summary] : []))
+    for (const summary of targets)
+      for (const language of ["ja", "en", "zh-Hant"]) {
+        const revision = catalog.index.displayRevision(summary.faceId, edition)
+        const selected = revision
+          ? await resolver.resolve(
+              {
+                owner: { kind: "face_revision", id: stringValue(revision["id"]) },
+                field: "effect",
+                ordinal: null,
+              },
+              language,
+            )
+          : null
+        const unit = selected ? (selected.translated ?? selected.original).unit : null
+        h.channel.preview(summary.printingId, summary.faceId, language, edition)
+        await expect.poll(() => h.status().result.phase, POLL).not.toBe("pending")
+        const result = h.status().result
+        if (result.phase !== "complete")
+          throw new Error(result.phase === "error" ? result.error.message : "preview pending")
+        expect(result.preview).toEqual(unit ? { text: unit["text"], language: unit["lang"] } : null)
+        expect(result.page.items).toHaveLength(0)
+      }
+    h.session.dispose()
+  },
+  30_000,
+)
+
+it("a pending visible preview neither blocks list queries nor publishes after its channel closes", async () => {
+  const h = harness()
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  h.channel.search(query)
+  await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+  const first = h.status().result
+  if (first.phase !== "complete") throw new Error("list pending")
+  const summary = first.page.items[0]?.summary
+  if (!summary) throw new Error("target missing")
+  const detail = (built.manifest["files"] as JsonObject[]).find((file) =>
+    (file["row_counts"] as JsonObject[]).some(
+      (count) =>
+        count["table"] === "face_revision" &&
+        count["partition"] === "detail" &&
+        count["bucket"] === bucketOf([summary.cardId], 64),
+    ),
+  )
+  if (!detail) throw new Error("preview detail missing")
+  const release = h.served.hold(stringValue(detail["path"]))
+  const preview = h.session.createChannel()
+  preview.preview(summary.printingId, summary.faceId, "zh-Hant", "jp")
+  await expect.poll(() => h.served.requests.includes(stringValue(detail["path"])), POLL).toBe(true)
+  h.channel.search({ ...query, state: { ...DEFAULT_QUERY, text: "BP01-051" } })
+  await expect.poll(() => h.channel.getStatus().result.phase, POLL).toBe("complete")
+  expect(preview.getStatus().result.phase).toBe("pending")
+  preview.dispose()
+  release()
+  await h.queried()
+  expect(
+    h.events.filter((event) => event.kind === "preview-result" && event.channelId === preview.id),
+  ).toHaveLength(0)
+  h.session.dispose()
+})
+
+it("memory and persistent view hits do not rewrite the completed view", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const h = harness(served, storage)
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  const write = vi.spyOn(ViewCache.prototype, "write")
+  try {
+    const page = { ...query, offset: 1, limit: 1 }
+    h.channel.view(page)
+    const options = h.session.createChannel()
+    options.view(page)
+    await expect
+      .poll(() => [h.status().result.phase, options.getStatus().result.phase], POLL)
+      .toEqual(["complete", "complete"])
+    expect(write).toHaveBeenCalledTimes(1)
+    write.mockClear()
+    h.channel.view(page, true)
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    await h.queried()
+    expect(write).not.toHaveBeenCalled()
+    const warm = harness(served, storage)
+    warm.channel.view(page)
+    warm.session.load(base, "jp", "preview")
+    await warm.settled()
+    await expect.poll(() => warm.status().result.phase, POLL).toBe("complete")
+    expect(write).not.toHaveBeenCalled()
+  } finally {
+    write.mockRestore()
+  }
 })

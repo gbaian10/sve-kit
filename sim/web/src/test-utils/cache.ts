@@ -1,5 +1,7 @@
 /** In-memory browser cache; namespace operations are observable without any network. */
 export function memoryCache(failWrites = false): CacheStorage {
+  const urlOf = (key: string | Request) =>
+    new URL(typeof key === "string" ? key : key.url, "https://cache.test").href
   const namespaces = new Map<string, Map<string, Response>>()
   return {
     keys: () => Promise.resolve([...namespaces.keys()]),
@@ -13,18 +15,17 @@ export function memoryCache(failWrites = false): CacheStorage {
       const cache = values
       return Promise.resolve({
         match: (key: string | Request, options?: CacheQueryOptions) => {
-          const url = typeof key === "string" ? key : key.url
+          const url = urlOf(key)
           const matched = options?.ignoreSearch
             ? [...cache.keys()].find((candidate) => candidate.split("?")[0] === url.split("?")[0])
             : url
           return Promise.resolve(cache.get(matched ?? "")?.clone())
         },
         keys: () => Promise.resolve([...cache.keys()].map((url) => new Request(url))),
-        delete: (key: string | Request) =>
-          Promise.resolve(cache.delete(typeof key === "string" ? key : key.url)),
+        delete: (key: string | Request) => Promise.resolve(cache.delete(urlOf(key))),
         put: (key: string | Request, response: Response) => {
           if (failWrites) return Promise.reject(new Error("quota"))
-          cache.set(typeof key === "string" ? key : key.url, response.clone())
+          cache.set(urlOf(key), response.clone())
           return Promise.resolve()
         },
       } as unknown as Cache)

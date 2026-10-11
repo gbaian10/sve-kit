@@ -1,18 +1,19 @@
-import { type KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
+import { type KeyboardEvent, useCallback, useId, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 
-import { type CardEntryState, LIST_PAGE_SIZE, useListEntryState } from "../../app/listEntryState"
+import { type CardEntryState, useListEntryState } from "../../app/listEntryState"
 import {
-  useCatalog,
-  useImageIndex,
+  useActiveSnapshot,
+  useListView,
+  useRecentSummaries,
   useSearch,
   useSearchReadiness,
-  warmTextResolver,
+  useSetOptions,
+  useWorkerSuggestions,
 } from "../../app/snapshot"
 import { StatusStrip } from "../../app/StatusStrip"
 import { useDebouncedValue } from "../../app/useDebouncedValue"
-import { MetadataStatus } from "../../components/card/MetadataStatus"
 import { CardGrid, type GridCell } from "../../components/results/CardGrid"
 import { CardList, CardTable } from "../../components/results/CardRows"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
@@ -29,7 +30,7 @@ import {
   type ImageSource,
   mediaImageSource,
   type SearchQuery,
-  stringValue,
+  viewImages,
 } from "../../data"
 import { quickBarClasses } from "../../domain/classes"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
@@ -42,30 +43,24 @@ import {
   toggleClass,
   VIEW_MODES,
 } from "../../domain/query/model"
-import type { Suggestion } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
 import { prefsStore, recentStore, usePrefs, useRecent } from "../../settings"
 
-const SUGGEST_LIMIT = 8
 const DEBOUNCE_MS = 150
 
 function cardPath(summary: CardSummary): string {
   return `/cards/${encodeURIComponent(summary.cardNo)}`
 }
 
-// The search page: the URL holds the query, the input holds what is being typed, and the suggest
-// list follows the typed text (debounced) until Enter or "see all" commits it to the URL. The
-// result list comes from the search hook; suggestions still read the catalog directly (they need
-// the matched field, which the hook's page items do not carry).
+// The URL holds committed conditions; the input draft drives independent Worker suggestions.
 export function CardsPage() {
   const { t } = useTranslation()
   const prefs = usePrefs()
   const uiLanguage = currentUiLanguage(prefs.uiLanguage)
   const textLang = UI_TEXT_LANG[uiLanguage]
   const edition = prefs.cardEdition
-  const { client, catalog } = useCatalog()
+  const { client } = useActiveSnapshot()
   const readiness = useSearchReadiness(edition)
-  const images = useImageIndex(client, catalog !== null)
   const [params, setParams] = useSearchParams()
   const query = useMemo(() => parseQuery(params), [params])
   const [entry, updateEntry] = useListEntryState()
@@ -104,39 +99,63 @@ export function CardsPage() {
     [uiLanguage, prefs.nameDisplay],
   )
 
-  const suggestions: Suggestion[] = useMemo(
-    () => (catalog && debounced !== "" ? catalog.suggest(debounced, edition, SUGGEST_LIMIT) : []),
-    [catalog, debounced, edition],
-  )
-  // Suggestions ignore the list's filters (architecture §2.2: a suggest background is `?q=` only),
-  // so "see all" counts and commits the typed text alone. It reads the input, not the debounced
-  // text, so a click during the debounce window keeps what was typed last.
+  const suggestionState = useWorkerSuggestions(debounced, edition)
+  const suggestionResult = suggestionState.result
+  const suggestionRows =
+    suggestionResult.phase === "complete" ? suggestionResult : suggestionState.previous
+  const recentResult = useRecentSummaries(recent, edition)
+  const { classes } = useSetOptions()
   const typed = input.trim()
-  // While the debounce is pending the list still shows the previous text's rows; picking one
-  // would open a card the new text may not match and rebuild the list URL from the old text.
-  // Compared untrimmed on both sides: `typed` is only for what "see all" commits.
-  const stale = input !== debounced
-  const suggestTotal = useMemo(
-    () =>
-      catalog && typed !== ""
-        ? catalog.results({ ...DEFAULT_QUERY, text: typed }, edition).length
-        : 0,
-    [catalog, typed, edition],
+  const stale =
+    input !== debounced ||
+    suggestionResult.phase !== "complete" ||
+    suggestionState.lastInput?.state.text !== debounced ||
+    suggestionState.lastInput.edition !== edition
+  const totalQuery = useMemo<SearchQuery | null>(
+    () => (typed ? { state: { ...DEFAULT_QUERY, text: typed }, edition, limit: 1 } : null),
+    [typed, edition],
   )
-  const rows: SuggestRow[] = useMemo(() => {
-    if (!catalog) return []
-    if (debounced !== "") {
-      return suggestions.flatMap((item) => {
-        const summary = catalog.summary(item.printingId)
-        return summary ? [{ summary, name: nameOf(summary), field: item.field }] : []
-      })
-    }
-    return recent.flatMap((printingId) => {
-      const summary = catalog.summary(printingId)
-      return summary ? [{ summary, name: nameOf(summary) }] : []
-    })
-  }, [catalog, debounced, suggestions, recent, nameOf])
-  const listOpen = focused && catalog !== null
+  const totalState = useSearch(totalQuery)
+  const suggestTotal =
+    totalState.result.phase === "complete" &&
+    totalState.lastInput?.state.text === typed &&
+    totalState.lastInput.edition === edition
+      ? totalState.result.page.total
+      : 0
+  const rows: SuggestRow[] = useMemo(
+    () =>
+      debounced !== ""
+        ? (suggestionRows?.suggestions ?? []).map((item) => ({
+            summary: item.summary,
+            name: nameOf(item.summary),
+            field: item.field,
+          }))
+        : recentResult.phase === "complete"
+          ? (recentResult.recent ?? []).flatMap((item) =>
+              item.summary ? [{ summary: item.summary, name: nameOf(item.summary) }] : [],
+            )
+          : [],
+    [debounced, suggestionRows, recentResult, nameOf],
+  )
+  const thumbnailFaces =
+    debounced !== ""
+      ? suggestionRows?.faces
+      : recentResult.phase === "complete"
+        ? recentResult.faces
+        : undefined
+  const suggestionImages = useMemo(
+    () =>
+      thumbnailFaces
+        ? viewImages({
+            query: { state: DEFAULT_QUERY, edition },
+            page: { items: [], total: 0, offset: 0 },
+            options: { classes: [], sets: [] },
+            faces: thumbnailFaces,
+          })
+        : undefined,
+    [thumbnailFaces, edition],
+  )
+  const listOpen = focused && readiness.phase === "ready"
 
   const pages = Math.max(1, entry.pages ?? 1)
   // The view is presentation only: switching it must not run the search again, so the query
@@ -145,44 +164,16 @@ export function CardsPage() {
   const conditionsKey = formatQuery(conditions).toString()
   const searchState = useMemo(() => parseQuery(new URLSearchParams(conditionsKey)), [conditionsKey])
   const searchQuery = useMemo<SearchQuery>(
-    () => ({ state: searchState, edition, offset: 0, limit: pages * LIST_PAGE_SIZE }),
-    [searchState, edition, pages],
+    () => ({ state: searchState, edition }),
+    [searchState, edition],
   )
-  const { result } = useSearch(searchQuery)
-  // Search opens once the full index is ready, but plain browsing must not wait for it: with no
-  // text or filters the worker returns the snapshot order, which the loaded catalog already has.
-  const browsing =
-    query.text === "" &&
-    activeFilterCount(query) === 0 &&
-    query.unit === "card" &&
-    query.sort === "no"
-  const page = useMemo(() => {
-    if (result.phase === "complete") return result.page
-    if (result.phase === "error" || !browsing || !catalog) return null
-    const items = catalog.results(searchState, edition)
-    return {
-      total: items.length,
-      offset: 0,
-      items: items.slice(0, pages * LIST_PAGE_SIZE).map((item) => ({
-        key: item.key,
-        printingId: item.printingId,
-        summary: catalog.summary(item.printingId),
-      })),
-    }
-  }, [result, browsing, catalog, searchState, edition, pages])
-  // Opening a card must not wait for the snapshot's text indexes: build them while idle.
-  useEffect(() => {
-    const first = page?.items[0]
-    if (!catalog || !first?.summary) return
-    const revision = catalog.index.displayRevision(first.summary.faceId, first.summary.region)
-    if (!revision) return
-    return warmTextResolver(
-      client,
-      { kind: "face_revision", id: stringValue(revision["id"]) },
-      "name",
-      UI_TEXT_LANG[uiLanguage],
-    )
-  }, [client, catalog, page, uiLanguage])
+  const {
+    view: listView,
+    images,
+    error: queryError,
+    retry: retryView,
+  } = useListView(searchQuery, pages)
+  const page = listView?.page ?? null
   const cells: GridCell[] = useMemo(() => {
     if (!page) return []
     return page.items.flatMap((item) => {
@@ -270,46 +261,36 @@ export function CardsPage() {
 
   const quickBar: QuickBarClass[] = useMemo(
     () =>
-      catalog
-        ? quickBarClasses(catalog.classCodes).map((code) => ({
-            code,
-            label:
-              code === NEUTRAL_CLASS ? t("search.neutral") : catalog.classLabel(code, textLang),
-          }))
-        : [],
-    [catalog, textLang, t],
+      quickBarClasses(classes?.map((item) => item.code) ?? []).map((code) => {
+        const option = classes?.find((item) => item.code === code)
+        return {
+          code,
+          label:
+            code === NEUTRAL_CLASS
+              ? t("search.neutral")
+              : (option?.name.translations[textLang] ?? option?.name.original.text ?? code),
+        }
+      }),
+    [classes, textLang, t],
   )
   const classLabel = (code: string) => quickBar.find((item) => item.code === code)?.label ?? code
   const filterCount = activeFilterCount(query)
   const hasConditions = query.text !== "" || filterCount > 0
   const view = chosenView ?? prefs.viewMode
-  const unsupported = result.phase === "error" && result.error.kind === "unsupported-query"
-  const pending = result.phase === "pending" && page === null
-  // The table's illustration crop comes from the same image metadata the card thumbnails use.
+  const unsupported = queryError?.kind === "unsupported-query"
+  const pending = !queryError && page === null
+  const faceMap = useMemo(
+    () => new Map(listView?.faces.map((face) => [`${face.printingId}\u0000${face.faceId}`, face])),
+    [listView],
+  )
   const artOf = useCallback(
     (cell: GridCell): ImageSource | undefined => {
-      const asset = images?.asset(cell.summary.printingId, cell.summary.faceId)
-      const printing = catalog?.index.printing(cell.summary.printingId)
-      const face = catalog?.index
-        .facesOf(cell.summary.cardId)
-        .find((row) => row["id"] === cell.summary.faceId)
-      if (!asset || !printing || !face || typeof printing["int_id"] !== "number") return undefined
-      return mediaImageSource(
-        client.base,
-        printing["int_id"],
-        typeof face["ordinal"] === "number" ? face["ordinal"] : 0,
-        asset,
-        "art",
-      )
+      const face = faceMap.get(`${cell.summary.printingId}\u0000${cell.summary.faceId}`)
+      return face
+        ? mediaImageSource(client.base, face.intId, face.ordinal, face.asset, "art")
+        : undefined
     },
-    [images, catalog, client],
-  )
-  const effectOwner = useCallback(
-    (cell: GridCell) => {
-      const revision = catalog?.index.displayRevision(cell.summary.faceId, cell.summary.region)
-      return revision ? { kind: "face_revision", id: stringValue(revision["id"]) } : null
-    },
-    [catalog],
+    [faceMap, client],
   )
 
   return (
@@ -342,7 +323,7 @@ export function CardsPage() {
               id={listId}
               rows={rows}
               activeIndex={active}
-              images={images}
+              images={suggestionImages}
               onPick={openSuggestion}
               onHover={setActive}
               stale={stale}
@@ -405,7 +386,6 @@ export function CardsPage() {
           </button>
         </div>
       )}
-      {catalog !== null && <MetadataStatus client={client} />}
       {unsupported && (
         <Notice
           tone="warning"
@@ -422,10 +402,19 @@ export function CardsPage() {
           }
         >
           {t("results.unsupported", {
-            facets: (result.error.facets ?? [])
+            facets: (queryError.facets ?? [])
               .map((facet) => t(`results.facet.${facet}`))
               .join("、"),
           })}
+        </Notice>
+      )}
+      {queryError && !unsupported && readiness.phase !== "error" && (
+        <Notice
+          tone="danger"
+          role="alert"
+          actions={<Button onClick={retryView}>{t("results.retry")}</Button>}
+        >
+          {t("results.loadFailed")}
         </Notice>
       )}
       {/* The status strip above says what is downloading; the list only shows its skeleton. */}
@@ -495,8 +484,6 @@ export function CardsPage() {
               cells={cells}
               images={images}
               onOpen={openCell}
-              client={client}
-              effectOwner={effectOwner}
               artOf={artOf}
               {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
             />

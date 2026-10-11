@@ -1,6 +1,7 @@
 import { LRUCache } from "lru-cache"
 import PQueue from "p-queue"
 
+import { bodyHeaders, trimDataCaches } from "./cache-budget"
 import { fetchBytes, type Fetcher } from "./cdn"
 import { SnapshotError } from "./format-v3/errors"
 import { integerValue, type JsonObject, stringValue } from "./format-v3/json"
@@ -46,6 +47,7 @@ export class MetadataBytes {
   private progress: MetadataProgress
   private cache: Promise<Cache | undefined>
 
+  private readonly storage: CacheStorage | undefined
   private readonly base: string
   private readonly files: ReadonlyMap<string, JsonObject>
   private readonly fetcher: Fetcher
@@ -62,6 +64,7 @@ export class MetadataBytes {
     backgroundFetch: Fetcher = fetcher,
     previousHash?: string,
   ) {
+    this.storage = storage
     this.base = base
     this.files = files
     this.fetcher = fetcher
@@ -210,7 +213,20 @@ export class MetadataBytes {
       if (this.disposed) throw new Error("snapshot replaced")
       if (cache) {
         try {
-          await cache.put(path, new Response(bytes.slice().buffer))
+          try {
+            await cache.put(
+              path,
+              new Response(bytes.slice().buffer, { headers: bodyHeaders(bytes.length) }),
+            )
+          } catch {
+            if (!this.storage) throw new Error("cache unavailable")
+            await trimDataCaches(this.storage, this.base, bytes.length, true)
+            await cache.put(
+              path,
+              new Response(bytes.slice().buffer, { headers: bodyHeaders(bytes.length) }),
+            )
+          }
+          if (this.storage) await trimDataCaches(this.storage, this.base)
         } catch {
           this.losePersistence()
         }
