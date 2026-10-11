@@ -20,6 +20,32 @@ interface TextProps {
   readonly edition: Region
 }
 
+function PrintingSections({
+  client,
+  edition,
+  revisionId,
+}: TextProps & { readonly revisionId: string }) {
+  const { value } = useAnnotatedText(
+    client,
+    { kind: "face_revision", id: revisionId },
+    "effect",
+    edition === "jp" ? "ja" : "en",
+    edition,
+  )
+  return (value?.originalSections ?? []).map(({ ordinal, label }) => (
+    <CardText
+      key={ordinal}
+      client={client}
+      edition={edition}
+      owner={{ kind: "face_revision", id: revisionId }}
+      field="section"
+      ordinal={ordinal}
+      label={label}
+      display="original"
+    />
+  ))
+}
+
 function CandidateText({
   candidate,
   selected,
@@ -49,12 +75,16 @@ function CandidateText({
         (candidate.revisionId === null ? (
           <p className="mt-2 text-14 text-text-2">{t("card.wording.unavailable")}</p>
         ) : (
-          <CardText
-            client={client}
-            edition={edition}
-            owner={{ kind: "face_revision", id: candidate.revisionId }}
-            field="effect"
-          />
+          <>
+            <CardText
+              client={client}
+              edition={edition}
+              owner={{ kind: "face_revision", id: candidate.revisionId }}
+              field="effect"
+              display="original"
+            />
+            <PrintingSections client={client} edition={edition} revisionId={candidate.revisionId} />
+          </>
         ))}
     </details>
   )
@@ -149,6 +179,7 @@ function PrintingWording({
         display={different ? "original" : undefined}
         label={different ? t("card.wording.printingOriginal") : undefined}
       />
+      <PrintingSections client={client} edition={edition} revisionId={ownRevisionId} />
       {different &&
         prefs.effectLanguage !== "original" &&
         (translation.readiness.basic === "ready" || translation.readiness.basic === "none") &&
@@ -232,24 +263,30 @@ export function CardWording({
   }
   if (!wording)
     return displayId ? (
-      <CardText
-        client={client}
-        edition={edition}
-        owner={{ kind: "face_revision", id: displayId }}
-        field="effect"
-      />
+      <>
+        <CardText
+          client={client}
+          edition={edition}
+          owner={{ kind: "face_revision", id: displayId }}
+          field="effect"
+        />
+        <PrintingSections client={client} edition={edition} revisionId={displayId} />
+      </>
     ) : (
       <p className="mt-3 text-14 text-text-2">{t("card.wording.unavailable")}</p>
     )
   if (ownId)
     return (
-      <CardText
-        client={client}
-        edition={edition}
-        owner={{ kind: "face_revision", id: ownId }}
-        field="effect"
-        display="original"
-      />
+      <>
+        <CardText
+          client={client}
+          edition={edition}
+          owner={{ kind: "face_revision", id: ownId }}
+          field="effect"
+          display="original"
+        />
+        <PrintingSections client={client} edition={edition} revisionId={ownId} />
+      </>
     )
   return (
     <section className="mt-4 space-y-2" aria-label={t("card.wording.different")}>

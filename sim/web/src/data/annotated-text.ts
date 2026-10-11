@@ -21,6 +21,7 @@ export interface AnnotatedText {
 }
 
 export interface SelectedText {
+  readonly originalSections?: readonly { readonly ordinal: number; readonly label?: string }[]
   readonly printedState?: string
   readonly original: AnnotatedText
   readonly translated?: AnnotatedText
@@ -437,6 +438,21 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
     const original = await page.original(pointer)
     if (original === null) return null
     const receiver = page.owner(objectValue(pointer["owner"]))
+    const sections =
+      pointer["field"] === "effect"
+        ? await Promise.all(
+            arrayValue(receiver.row["sections"] ?? []).map(async (raw) => {
+              const section = objectValue(raw)
+              const labelId = section["label_unit_id"]
+              return {
+                ordinal: integerValue(section["ordinal"]),
+                ...(labelId == null
+                  ? {}
+                  : { label: stringValue((await page.row("text_unit", labelId))["text"]) }),
+              }
+            }),
+          )
+        : []
     const selected = arrayValue(receiver.row["translations"])
       .map((value) => objectValue(value))
       .filter(
@@ -579,6 +595,7 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
       return { unit, annotation }
     }
     return {
+      ...(sections.length > 0 ? { originalSections: sections } : {}),
       ...(objectValue(pointer["owner"])["kind"] === "printing_face"
         ? { printedState: stringValue(receiver.row["printed_text_state"]) }
         : {}),

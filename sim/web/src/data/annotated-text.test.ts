@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import { annotatedOrigin } from "../test-utils/annotated-snapshot"
 import { createAnnotatedTextResolver, sharedAnnotatedTextResolver } from "./annotated-text"
-import { canonicalText, type JsonObject, objectValue } from "./format-v3/json"
+import { canonicalText, type JsonObject, objectValue, stringValue } from "./format-v3/json"
 
 async function historicalCandidateOrigin() {
   const { client } = await annotatedOrigin()
@@ -92,6 +92,41 @@ async function historicalCandidateOrigin() {
 }
 
 describe("the native C → P → R annotation slice", () => {
+  it("discovers and resolves a candidate's source sections with their original ordinals", async () => {
+    const { client, historyKey, revision } = await historicalCandidateOrigin()
+    const unitId = stringValue(revision["effect_unit_id"])
+    const source = {
+      ...client,
+      fragments: async (key: string) => {
+        const fragments = await client.fragments(key)
+        return key === historyKey
+          ? fragments.map((fragment) => ({
+              ...fragment,
+              rows: fragment.rows.map((row) => ({
+                ...row,
+                sections: [1, 3].map((ordinal) => ({
+                  ordinal,
+                  label_unit_id: ordinal === 3 ? unitId : null,
+                  text_unit_id: unitId,
+                })),
+              })),
+            }))
+          : fragments
+      },
+    }
+    const resolver = createAnnotatedTextResolver(source)
+    const owner = { kind: "face_revision", id: "historical" }
+    const effect = await resolver.resolve({ owner, field: "effect", ordinal: null }, "ja")
+    expect(effect?.originalSections).toEqual([
+      { ordinal: 1 },
+      { ordinal: 3, label: "Synthetic text" },
+    ])
+    for (const { ordinal } of effect?.originalSections ?? []) {
+      const section = await resolver.resolve({ owner, field: "section", ordinal }, "ja")
+      expect(section?.original.unit["text"]).toBe("Synthetic text")
+      expect(section?.translated).toBeUndefined()
+    }
+  })
   it("locates a direct historical candidate through its face without a translation receiver", async () => {
     const { client, requested, revision, historyKey } = await historicalCandidateOrigin()
     const resolver = createAnnotatedTextResolver(client)
