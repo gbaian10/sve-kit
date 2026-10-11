@@ -356,6 +356,8 @@ UI language × width (dark/light × zh-TW/ja/en × 390/820/1180/1440 by default,
 writes `report.json` next to the PNGs with the data version, manifest hash, browser, and per shot
 the viewport y of the first effect-text line (design 06: ≈300 at 390), horizontal page overflow,
 the overflow audit and the console error count. Card numbers and geometry only; no card text.
+`--home` adds the home page (with `--recent <printing id>` stored as recently viewed and
+`--home-query` typed into its search for a second shot); `--edition en` switches the card edition.
 
 ```bash
 bun run shots -- --base http://localhost:5173 --out /tmp/shots --query bp01 \

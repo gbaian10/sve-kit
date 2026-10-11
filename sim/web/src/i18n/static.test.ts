@@ -22,8 +22,10 @@ function flatten(tree: Tree, prefix = ""): Map<string, string> {
 
 // Segmented pills never wrap, so every `options.*` label must stay within this width in every
 // language; a CJK character is about 1 em wide, a Latin one about 0.55 em. Shorten the copy (or use
-// the language's own name, as the language picker does) rather than widening the control.
+// the language's own name, as the language picker does) rather than widening the control. The
+// home shortcuts share a third of a phone row each, so they get the same budget.
 const OPTION_BUDGET_EM = 6
+const SHORT_LABEL = /^(?:options\.|home\.shortcut\.)|^card\.(?:currentText|printedText)$/u
 // A whole segmented group must fit the 320px account menu (288px inside its padding): 13px text,
 // 24px horizontal padding per pill, 4px of group padding and border.
 const GROUP_BUDGET_PX = 288
@@ -76,11 +78,10 @@ describe("i18n static checks", () => {
     }
   })
 
-  it("keeps option labels short enough for segmented controls in every language", () => {
+  it("keeps option and shortcut labels short enough in every language", () => {
     for (const [lng, messages] of locales) {
       for (const [key, text] of messages) {
-        if (!key.startsWith("options.") && key !== "card.currentText" && key !== "card.printedText")
-          continue
+        if (!SHORT_LABEL.test(key)) continue
         expect(estimateEm(text), `${lng}:${key} ${JSON.stringify(text)}`).toBeLessThanOrEqual(
           OPTION_BUDGET_EM,
         )
