@@ -584,6 +584,70 @@ function purposesOf(
   }
 }
 
+/** Runs `task` after the next frame has painted; the returned function cancels it. */
+function afterPaint(task: () => void): () => void {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const frame = requestAnimationFrame(() => {
+    timer = setTimeout(task, 0)
+  })
+  return () => {
+    cancelAnimationFrame(frame)
+    if (timer !== undefined) clearTimeout(timer)
+  }
+}
+
+// Creating the shared resolver indexes the whole bootstrap (about 100 ms on real data) and the
+// first text it resolves builds the owner index on top. Neither may run inside a render or in the
+// effects React flushes before the paint that follows a tap, so renders only read a resolver that
+// already exists, and creation happens after paint or during idle time.
+const createdResolvers = new WeakSet<LoadedSnapshot>()
+
+function existingResolver(
+  client: SnapshotClient,
+  snapshot: LoadedSnapshot | null,
+): AnnotatedTextResolver | null {
+  return snapshot && createdResolvers.has(snapshot) ? sharedAnnotatedTextResolver(client) : null
+}
+
+function createResolver(client: SnapshotClient, snapshot: LoadedSnapshot): AnnotatedTextResolver {
+  const resolver = sharedAnnotatedTextResolver(client)
+  createdResolvers.add(snapshot)
+  return resolver
+}
+
+function whenIdle(task: () => void): () => void {
+  if (typeof requestIdleCallback === "function") {
+    const handle = requestIdleCallback(task, { timeout: 2000 })
+    return () => {
+      cancelIdleCallback(handle)
+    }
+  }
+  const timer = setTimeout(task, 300)
+  return () => {
+    clearTimeout(timer)
+  }
+}
+
+/**
+ * Builds the loaded snapshot's text indexes while the page is idle by resolving one text, so the
+ * first card opened from a list does not pay for them. Returns the cancel function.
+ */
+export function warmTextResolver(
+  client: SnapshotClient,
+  owner: JsonObject,
+  field: TextField,
+  language: string,
+): () => void {
+  const snapshot = client.snapshot()
+  if (!snapshot) return () => undefined
+  return whenIdle(() => {
+    if (client.snapshot() !== snapshot) return
+    void createResolver(client, snapshot)
+      .resolve({ owner, field, ordinal: null }, language)
+      .catch(() => undefined)
+  })
+}
+
 // A changed exact owner or edition must never display the previous identity's text.
 export function useAnnotatedText(
   client: SnapshotClient,
@@ -596,10 +660,6 @@ export function useAnnotatedText(
   const root = useSnapshotRoot()
   const snapshot = client.snapshot()
   const identity = canonicalText([owner, field, language, edition])
-  const resolver = useMemo(
-    () => sharedResolver ?? (snapshot ? sharedAnnotatedTextResolver(client) : null),
-    [client, snapshot, sharedResolver],
-  )
   const [loaded, setLoaded] = useState<{
     readonly snapshot: typeof snapshot
     readonly identity: string
@@ -607,9 +667,12 @@ export function useAnnotatedText(
     readonly error?: TextFailure
   }>()
   // A text resolved earlier for this snapshot renders final on the first pass.
-  const peeked = resolver?.peek({ owner, field, ordinal: null }, language)
+  const peeked = (sharedResolver ?? existingResolver(client, snapshot))?.peek(
+    { owner, field, ordinal: null },
+    language,
+  )
   useEffect(() => {
-    if (!resolver) return
+    if (!snapshot) return
     let active = true
     const [currentOwner, currentField, currentLanguage] = arrayValue(parseJson(identity))
     const pointer = {
@@ -617,27 +680,35 @@ export function useAnnotatedText(
       field: stringValue(currentField),
       ordinal: null,
     }
-    if (resolver.peek(pointer, stringValue(currentLanguage)) !== undefined) return
-    void resolver.resolve(pointer, stringValue(currentLanguage)).then(
-      (value) => {
-        if (active) setLoaded({ snapshot, identity, value })
-      },
-      (error: unknown) => {
-        if (active)
-          setLoaded({
-            snapshot,
-            identity,
-            error:
-              error instanceof SnapshotError
-                ? { kind: "validation", code: error.code, message: error.message }
-                : { kind: "load", message: error instanceof Error ? error.message : String(error) },
-          })
-      },
-    )
+    const existing = sharedResolver ?? existingResolver(client, snapshot)
+    if (existing?.peek(pointer, stringValue(currentLanguage)) !== undefined) return
+    const cancel = afterPaint(() => {
+      const resolver = sharedResolver ?? createResolver(client, snapshot)
+      void resolver.resolve(pointer, stringValue(currentLanguage)).then(
+        (value) => {
+          if (active) setLoaded({ snapshot, identity, value })
+        },
+        (error: unknown) => {
+          if (active)
+            setLoaded({
+              snapshot,
+              identity,
+              error:
+                error instanceof SnapshotError
+                  ? { kind: "validation", code: error.code, message: error.message }
+                  : {
+                      kind: "load",
+                      message: error instanceof Error ? error.message : String(error),
+                    },
+            })
+        },
+      )
+    })
     return () => {
       active = false
+      cancel()
     }
-  }, [resolver, snapshot, identity])
+  }, [client, sharedResolver, snapshot, identity])
   const settled =
     loaded?.snapshot === snapshot && loaded.identity === identity
       ? loaded

@@ -1,5 +1,5 @@
 import { ArrowLeft, ChevronLeft, ChevronRight, Link2 } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useDeferredValue, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router"
 
@@ -18,17 +18,11 @@ import { Dialog } from "../../components/ui/Dialog"
 import { Link } from "../../components/ui/Link"
 import { Segmented } from "../../components/ui/Segmented"
 import { useToast } from "../../components/ui/toast-context"
-import {
-  type CardSummary,
-  type Catalog,
-  type Row,
-  sharedAnnotatedTextResolver,
-  stringValue,
-} from "../../data"
+import { type CardSummary, type Catalog, type Row, stringValue } from "../../data"
 import { classStyle } from "../../domain/classes"
 import { displayName, type NameSource, UI_TEXT_LANG } from "../../domain/nameDisplay"
 import { parseQuery } from "../../domain/query/codec"
-import type { Region, TextLang } from "../../domain/search"
+import type { Region, ResultItem, TextLang } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
@@ -102,12 +96,6 @@ export function CardPage() {
   const { cardEdition } = prefs
   const uiLanguage = currentUiLanguage(prefs.uiLanguage)
   const textLang = UI_TEXT_LANG[uiLanguage]
-  const snapshot = client.snapshot()
-  const pageKey = cardNo ?? intId ?? ""
-  const resolver = useMemo(
-    () => (snapshot && pageKey ? sharedAnnotatedTextResolver(client) : null),
-    [client, snapshot, pageKey],
-  )
   const printing = cardNo
     ? (catalog?.index.printingByCardNo(cardEdition, cardNo) ??
       catalog?.index.printingByCardNo(cardEdition === "jp" ? "en" : "jp", cardNo))
@@ -130,17 +118,22 @@ export function CardPage() {
       : null
   const background = typeof entry?.["background"] === "string" ? entry["background"] : null
   const fromList = background !== null
-  const order = useMemo(
+  // The list order is computed in a deferred render after the card has painted, so opening a
+  // card never waits for it; the buttons keep their place and enable once it is known.
+  const deferredCatalog = useDeferredValue(catalog, null)
+  const order = useMemo<readonly ResultItem[] | null>(
     () =>
-      catalog
-        ? catalog.results(parseQuery(new URLSearchParams(background ?? "")), cardEdition)
-        : [],
-    [catalog, background, cardEdition],
+      deferredCatalog
+        ? deferredCatalog.results(parseQuery(new URLSearchParams(background ?? "")), cardEdition)
+        : null,
+    [deferredCatalog, background, cardEdition],
   )
   const position =
-    printingId === null ? -1 : order.findIndex((item) => item.printingId === printingId)
+    order === null || printingId === null
+      ? -1
+      : order.findIndex((item) => item.printingId === printingId)
   const neighbour = (step: -1 | 1) => {
-    const item = position < 0 ? undefined : order[position + step]
+    const item = position < 0 ? undefined : order?.[position + step]
     const target = item ? catalog?.summary(item.printingId) : undefined
     return item && target ? { key: item.key, summary: target } : undefined
   }
@@ -329,7 +322,7 @@ export function CardPage() {
                       <CardNameHeading
                         client={client}
                         edition={region}
-                        resolver={resolver}
+                        resolver={null}
                         owner={{ kind: "face_revision", id: stringValue(revision["id"]) }}
                         fallback={name}
                       />
@@ -347,32 +340,30 @@ export function CardPage() {
                     {revision && (
                       <StatLine className="mt-1" cost={cost} attack={attack} defense={defense} />
                     )}
-                    {ordinal === 0 &&
-                      position >= 0 &&
-                      (previous !== undefined || next !== undefined) && (
-                        <div className="mt-2 flex gap-2">
-                          <Button
-                            className="h-10 gap-1 px-3 text-14"
-                            disabled={previous === undefined}
-                            onClick={() => {
-                              if (previous) open(previous)
-                            }}
-                          >
-                            <ChevronLeft className="size-4.5" aria-hidden="true" />
-                            {t("cardPage.previous")}
-                          </Button>
-                          <Button
-                            className="h-10 gap-1 px-3 text-14"
-                            disabled={next === undefined}
-                            onClick={() => {
-                              if (next) open(next)
-                            }}
-                          >
-                            {t("cardPage.next")}
-                            <ChevronRight className="size-4.5" aria-hidden="true" />
-                          </Button>
-                        </div>
-                      )}
+                    {ordinal === 0 && (order === null || position >= 0) && (
+                      <div className="mt-2 flex gap-2">
+                        <Button
+                          className="h-10 gap-1 px-3 text-14"
+                          disabled={previous === undefined}
+                          onClick={() => {
+                            if (previous) open(previous)
+                          }}
+                        >
+                          <ChevronLeft className="size-4.5" aria-hidden="true" />
+                          {t("cardPage.previous")}
+                        </Button>
+                        <Button
+                          className="h-10 gap-1 px-3 text-14"
+                          disabled={next === undefined}
+                          onClick={() => {
+                            if (next) open(next)
+                          }}
+                        >
+                          {t("cardPage.next")}
+                          <ChevronRight className="size-4.5" aria-hidden="true" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
                 {faceSummary?.wordingPending && (
@@ -385,7 +376,7 @@ export function CardPage() {
                       key={field}
                       edition={region}
                       client={client}
-                      sharedResolver={resolver}
+                      sharedResolver={null}
                       owner={
                         textMode === "printed"
                           ? { kind: "printing_face", id: printing["id"] as string, face_id: faceId }

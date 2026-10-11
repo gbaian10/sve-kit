@@ -1,9 +1,15 @@
-import { type KeyboardEvent, useCallback, useId, useMemo, useRef, useState } from "react"
+import { type KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 
 import { type CardEntryState, useListEntryState } from "../../app/listEntryState"
-import { useCatalog, useImageIndex, useSearch, useSearchReadiness } from "../../app/snapshot"
+import {
+  useCatalog,
+  useImageIndex,
+  useSearch,
+  useSearchReadiness,
+  warmTextResolver,
+} from "../../app/snapshot"
 import { StatusStrip } from "../../app/StatusStrip"
 import { useDebouncedValue } from "../../app/useDebouncedValue"
 import { MetadataStatus } from "../../components/card/MetadataStatus"
@@ -154,6 +160,19 @@ export function CardsPage() {
       })),
     }
   }, [result, browsing, catalog, query, edition, pages])
+  // Opening a card must not wait for the snapshot's text indexes: build them while idle.
+  useEffect(() => {
+    const first = page?.items[0]
+    if (!catalog || !first?.summary) return
+    const revision = catalog.index.displayRevision(first.summary.faceId, first.summary.region)
+    if (!revision) return
+    return warmTextResolver(
+      client,
+      { kind: "face_revision", id: stringValue(revision["id"]) },
+      "name",
+      UI_TEXT_LANG[uiLanguage],
+    )
+  }, [client, catalog, page, uiLanguage])
   const cells: GridCell[] = useMemo(() => {
     if (!page) return []
     return page.items.flatMap((item) => {
