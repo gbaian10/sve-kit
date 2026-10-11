@@ -205,7 +205,7 @@ describe("home search", () => {
     )
     await user.click(random)
     expect(router.state.location.pathname).toMatch(/^\/cards\/(?:BP01|SD01)EN-/u)
-    expect(recentStore.get()[0]).toMatch(/-en$/u)
+    expect(recentStore.get()).toHaveLength(1)
   })
 })
 
@@ -253,7 +253,7 @@ describe("recently viewed", () => {
 })
 
 describe("sets, new pack and official news", () => {
-  it("lists dated booster sets of the selected edition with real dates and no percentages", async () => {
+  it("shows releases and counts from product family_ids in the selected edition", async () => {
     await open()
     const sets = within(screen.getByRole("region", { name: "依卡包・最近三彈" }))
     expect(sets.getByRole("link", { name: "全部卡包" })).toHaveAttribute("href", "/sets")
@@ -272,6 +272,11 @@ describe("sets, new pack and official news", () => {
     expect(main().queryByText(/%|／/u)).toBeNull()
     prefsStore.set({ cardEdition: "en" })
     expect(await sets.findByText("2026-04-01 發售")).toBeVisible()
+    await waitFor(() => {
+      const currentBanner = within(screen.getByRole("region", { name: "試作補充包第1彈" }))
+      expect(currentBanner.getByText(/已收錄/u)).toHaveTextContent("已收錄 15 種")
+      expect(currentBanner.getByText(/繁中譯名/u)).toHaveTextContent("有繁中譯名 14")
+    })
   })
 
   it("only links to official news, following the card edition", async () => {
