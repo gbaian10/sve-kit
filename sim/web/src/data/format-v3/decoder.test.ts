@@ -38,7 +38,7 @@ afterEach(() => {
   FakeWorker.instances = []
 })
 describe("decoder worker boundary", () => {
-  it("shares one worker for concurrent files, propagates validation errors, then releases idle heap", async () => {
+  it("shares one worker for concurrent files, propagates decoding errors, then releases idle heap", async () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] })
     vi.stubGlobal("Worker", FakeWorker)
     const decode = createDecoder()
@@ -73,10 +73,10 @@ describe("decoder worker boundary", () => {
     lateError?.()
     expect(current.terminated).toBe(false)
     current.onmessage?.({ data: { id: current.message?.id ?? -1, code: "shape" } })
-    await expect(next).rejects.toThrow("worker validation failed")
+    await expect(next).rejects.toThrow("worker decoding failed")
     decode.cancel()
   })
-  it("the workerless fixture path fails for the same schema reason", async () => {
+  it("the workerless path reports the same missing-field error", async () => {
     vi.stubGlobal("Worker", undefined)
     await expect(createDecoder()({ kind: "manifest", bytes: canonical({}) })).rejects.toThrow(
       "shape",

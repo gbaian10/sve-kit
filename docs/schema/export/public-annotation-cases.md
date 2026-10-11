@@ -8,7 +8,7 @@
 
 頂層恰有 `format:1,kind:public_annotation_contract_cases,fixtures,cases`。
 cases 每筆恰有 `{group,id,operation,input,expected}`；完整案例 ID 是 `group/id`，不得重用 ID 改變既有意思。
-expected 的 result 為 accept／reject，reject.reason 是固定責任分類，不要求 Python／TS 例外文字相同。
+expected 的 result 為 accept／reject，reject.reason 是固定責任分類，不要求各離線邊界的例外文字相同。
 accept 中列出的欄位都要逐值比對；不能只驗「沒有拋錯」。
 
 `input.fixture` 指 fixtures 的鍵。先展開 fixture，再深複製後依 `changes` 的 JSON Pointer→值替換；空 pointer 代表整個輸入。
@@ -22,7 +22,7 @@ input 其他欄位是操作參數，不混入公開列。含 raw_json 的案例�
 
 Schema 操作以 `#/$defs/<definition>` 驗個別元件；`Admission` 只驗 manifest 的三個准入欄，
 **不是完整 manifest**。Schema 本身採 Draft 2020-12，全部 `$ref` 在檔內，無線上載入。
-`x-columns`／`x-types` 固定新版 descriptor；reader 要比對兩者，不能只驗 tuple 的 JSON 型別。
+`x-columns`／`x-types` 固定新版 descriptor；Python reader 要比對兩者，不能只驗 tuple 的 JSON 型別。
 整數的 `1.0` 表示、surrogate、重複鍵與 canonical bytes 須在 JSON 值失去原表示前驗。
 Schema 不可代替跨列引用、座標上限／重疊、ordinal／集合排序及 hash 檢查。
 
@@ -65,9 +65,9 @@ read_projection 的 accept 結果是情境最後一個 FieldTranslation（一般
 source／target exact text ID；display 則按 input.receiver／ui_lang／mode 取用，逐值比對 expected。
 printed 的 mode 由 printing_face owner 表示；revision 由 face_revision 表示，不由當前 UI 名稱猜來源。
 
-[#498](https://github.com/gbaian10/sve-kit/issues/498) 的 Python `read_snapshot`／`read_text_all`、TS `readSnapshot`／`readTextAll` 與
+[#498](https://github.com/gbaian10/sve-kit/issues/498) 的 Python `read_snapshot`／`read_text_all` 與
 `sve_carddb.export.read_api.load_export` 必須讀取同一 cases 檔；publish 以本地已驗匯出根接線，無須外部上傳。
-read_projection 的成功例比對固定 expected 及分片／text_all 一致；所有失敗例在 Python／TS 分別命中相同原因類別。
+read_projection 的成功例比對固定 expected 及分片／text_all 一致；失敗例在 Python 離線邊界命中預期原因類別。Web 只測正常解碼／顯示、版本能力與 hash／解析失敗；完整 TS 格式驗證器及其反例測試已移除。
 不得只寫一個 fixture 自訂 validator、只跑 Schema 或只驗 JSON 能讀，就稱 #498 的 reader 測試通過。
 
 mutation 後 harness 重算合法外層 File bytes／hash／path／counts、dependencies、manifest 及 text_all，
@@ -110,5 +110,5 @@ display 的 grants_aligned／grants_official_counterpart 固定 false，表示�
 
 本單可檢查 Draft 2020-12 Schema 合法、每個 fixture pointer 可定位、ID 唯一、正反例的形狀、
 合成 text／annotation hash、Unicode 固定向量與計帳算術一致。
-這些只證明案例規格可讀且自洽；#498 已另以 N0 的 producer／Python／TS／Web／read_api／publish 實際測試驗證接線，
+這些只證明案例規格可讀且自洽；#498 已另以 N0 的 producer／Python／Web／read_api／publish 實際測試驗證接線，
 [#53](https://github.com/gbaian10/sve-kit/issues/53) 交全批與手機容量。規格合併與程式驗收必須分開記錄，不能以本文件取代後者。

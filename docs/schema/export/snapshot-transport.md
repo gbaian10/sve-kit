@@ -1,5 +1,10 @@
 # 卡表快照傳輸契約（3.0.0）
 
+本文的格式與一致性「驗證／拒絕」由 carddb 匯出、Python 完整 reader 與上傳前離線檢查執行。
+瀏覽器 runtime 信任這些已驗的自有公開 JSON，只在下載／快取邊界以 WebCrypto 驗未壓縮 bytes 的 SHA-256（同一份 bytes 不在 decoder 重算），並核對檔案長度；仍保留格式版本、最低 reader 版本與必要能力的准入，以及版本索引的常數成本一致性核對（[格式 §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)）。
+瀏覽器使用原生 `JSON.parse`，不重做嚴格 token 掃描、canonical 重編碼、Schema、descriptor、分片位置／bucket 或跨表一致性驗證。
+固定 schema 欄序只用於 tuple 解碼，bucket 只用於按需定位；JSON 語法錯誤與必要欄位使用時的例外均轉成資料載入失敗，更新失敗保留舊 active。
+
 本文件補足 [snapshot-format.md](snapshot-format.md) 的 JSON 容器、欄序與版本契約；公開邏輯欄位仍以該文件 §2 為唯一白名單。這些記錄不是新增的玩家集合或建置表。所有物件拒絕未列出的欄位；所有列出的欄位必須存在，`T?` 表示 `T` 或 JSON null，不能省略。空陣列表示已知無成員，來源是否完整另看 coverage。
 
 目前 producer／reader 支援 3.0.0；§4.4 的基本目錄裝檔及 role／partition 解耦為尚未發布的 3.0.0 設計要求，機器 Schema／producer／reader 尚未依該裝檔替換。圖片契約與配置見 §5.4。機器資源依 [snapshot-contract](snapshot-contract.md) 維護。
@@ -85,7 +90,7 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 - `{"nullable":{"scalar":"URL"}}`：明示允許 null。
 - `{"json":"CorrectionValue"}`：具名、由 format Schema 固定的 JSON 值，不是任意 JSON escape hatch。
 
-巢狀 Type 可遞迴組合；具名 tuple 引用圖不能有循環。producer 與 reader 都須比對 format 中的完整 descriptor，不能只信資料附的型別。未知名稱／欄序／欄型、缺 descriptor、tuple 長度不符及遞迴引用都拒絕。
+巢狀 Type 可遞迴組合；具名 tuple 引用圖不能有循環。producer 與 Python reader 都須比對 format 中的完整 descriptor，不能只信資料附的型別。未知名稱／欄序／欄型、缺 descriptor、tuple 長度不符及遞迴引用都拒絕。
 
 例如 `Section`：
 
@@ -357,7 +362,7 @@ config 與 programs 各一檔，key 分別為 `config`、`programs`。無列 buc
 
 3.0 reader 依 §5.4 只取可見面的卡包 media，圖片 blob 按可見面下載；全域來源詳情按需另取。必列實際 session／離線的 raw／br／gzip、檔數與 cache footprint。任何 metadata 若實際阻擋首屏，均加回 startup_by_region；未下載完整集合時不宣稱已完整離線。
 
-先驗 File bytes／hash，再按 manifest hash 與內容 hash 隔離保存 CacheStorage bytes；按頁解析仍驗 canonical／Schema／語意，不把已驗 bytes 當已解析資料。當頁取 printing_image 的狀態、尺寸與版本即可組 URL，不必另取 global asset／variant。同 File 的多 locator 去重，當頁優先於背景，整體最多 4 個 in-flight。切快照取消舊工作，舊回應不寫入新狀態；失敗／重試與尚未完整的進度明示，不標離線備妥。
+先驗 File bytes／hash，再按 manifest hash 與內容 hash 隔離保存 CacheStorage bytes；按頁以原生 JSON.parse 解碼，canonical／Schema／語意由匯出與上傳前的 Python reader 驗證。當頁取 printing_image 的狀態、尺寸與版本即可組 URL，不必另取 global asset／variant。同 File 的多 locator 去重，當頁優先於背景，整體最多 4 個 in-flight。切快照取消舊工作，舊回應不寫入新狀態；失敗／重試與尚未完整的進度明示，不標離線備妥。
 
 解析片的調度上限為 12 MiB raw 對應量與 64 檔，當頁 pin 到畫面移除；解析時只留下當頁所需 image 列，立即丟掉其他列與整片解碼物件，不建立全庫資產／variant Map。上一頁解除 pin 後即釋放不再使用的 image 列；列快取也須有界，連同 view／Map／暫存與 pinned 工作集量 JS heap；raw 調度量不能代替 48／80 MiB 手機驗收。已驗 bytes 可留在持久快取，換頁後重解析不需外部重抓；CacheStorage 不可用／quota 失敗／被清除時明示退化及實際成本。
 
@@ -368,7 +373,7 @@ config 與 programs 各一檔，key 分別為 `config`、`programs`。無列 buc
 format_version 與 min_reader_version 均為 `3.0.0`，完整八個 required_capabilities 依
 [公開 annotation §1](public-annotation.md#1-版本與驗證邊界)，空圖片、same_name 或 annotation 也不能省略。
 translation 在 bootstrap／detail 均為完整八欄；FieldTranslation 的七格欄序與 basis 依 §8。
-canonical、owner、分片鍵及裝檔規則沿前述配置，producer、Python／TS reader、共用 golden 與 Web 快照須同步。
+canonical、owner、分片鍵及裝檔規則沿前述配置，producer、Python reader、共用 golden 與 Web 解碼欄序須同步。
 
 所有容器、config、programs、text_all、changes 的 format_version 都必須一致；空圖片／same_name 也不省能力。
 索引以獨立 `index_format:2` 協商，形狀依 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)，不混同於 reader 契約版號。

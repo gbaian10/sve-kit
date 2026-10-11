@@ -1,5 +1,10 @@
 # 卡表快照格式 v3（3.0.0，N0 已交付）
 
+本文的格式與一致性「驗證／拒絕」由 carddb 匯出、Python 完整 reader 與上傳前離線檢查執行。
+瀏覽器 runtime 信任這些已驗的自有公開 JSON，只在下載／快取邊界以 WebCrypto 驗未壓縮 bytes 的 SHA-256（同一份 bytes 不在 decoder 重算），並核對檔案長度；仍保留格式版本、最低 reader 版本與必要能力的准入，以及版本索引的常數成本一致性核對（§4.1）。
+瀏覽器使用原生 `JSON.parse`，不重做嚴格 token 掃描、canonical 重編碼、Schema、descriptor、分片位置／bucket 或跨表一致性驗證。
+固定 schema 欄序只用於 tuple 解碼，bucket 只用於按需定位；JSON 語法錯誤與必要欄位使用時的例外均轉成資料載入失敗，更新失敗保留舊 active。
+
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
 專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../../quotations.md)。
 
@@ -181,7 +186,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 完整文字包 `text_all` 僅供完整下載/工具匯入，可串流讀；瀏覽器預設用分片。完整文字包與分片是替代下載方式，不雙倍下載。快照清單的 `text_all.contains` 列出全部 required text keys，closure hash 皆驗過才標「文字離線備妥」。首訪部分可讀狀態不等於 active 完整離線版。
 
-容量與量法依 [size-budget](size-budget.md)：全部文字分片＋manifest 的 raw ≤40 MiB；單一版本完整文字閉包（含共享、完整 JP source、counterpart、必要跨區檔、卡號索引、字典及實體重複裝檔）Brotli ≤8 MiB、gzip ≤10 MiB。基本目錄冷載 Brotli 2 MiB 為分界；基本目錄容器整檔 raw ≤2 MiB，詳情與其他資料檔 ≤512 KiB。手機目標是 main＋Worker 穩態合計 ≤48 MiB、更新峰值 ≤80 MiB、主線程單段 ≤50 ms、所選整區基本目錄完整解析累計 ≤1 秒；對象與量法以容量文件為準。這些是設計／發布效能驗收要求，reader 仍依實際 bytes、hash、欄序及閉包判相容性，不用預算數字拒收合法快照。
+容量與量法依 [size-budget](size-budget.md)：全部文字分片＋manifest 的 raw ≤40 MiB；單一版本完整文字閉包（含共享、完整 JP source、counterpart、必要跨區檔、卡號索引、字典及實體重複裝檔）Brotli ≤8 MiB、gzip ≤10 MiB。基本目錄冷載 Brotli 2 MiB 為分界；基本目錄容器整檔 raw ≤2 MiB，詳情與其他資料檔 ≤512 KiB。手機目標是 main＋Worker 穩態合計 ≤48 MiB、更新峰值 ≤80 MiB、主線程單段 ≤50 ms、所選整區基本目錄完整解析累計 ≤1 秒；對象與量法以容量文件為準。這些是設計／發布效能驗收要求，Python reader 依實際 bytes、hash、欄序及閉包驗證，瀏覽器依 bytes、hash 與版本能力判准入，不用預算數字拒收合法快照。
 
 ### 3.1 欄位主儲存與載入用途
 
@@ -240,6 +245,7 @@ Schema、欄序、golden 與 reader，不要求額外升版；正式凍結後才
 **卡圖 WebP 僅提供當前圖片，不保存歷史圖片版本。** previous 或更舊 metadata 中的圖片引用不使舊 WebP 成為必留資產；其 image hash／bytes 不構成永遠可取得同一圖片的承諾。圖片產製、來源核可、格式／尺寸／內容檢查仍在發布前驗證。新版快照須提供足以選取新圖片的版本 token 或新 path；client 啟用新版後，瀏覽器／CDN／SW 不得以舊版本圖片作快取回退。未完成下載顯示載入狀態，失敗明示，不以舊圖充作新版圖。
 
 版本入口是可更新的 current／previous 發布索引，revision 單調增加，不維護 append-only 全歷史 pages 或每代索引的公開歸檔。每個 entry 指向不可變 manifest 的 path／hash，並提供格式、最低 reader 版本與所需能力等准入資訊。data_version 不重用，同一版號不可改指另一份 manifest；上傳只能對照遠端 current／previous，不保存更早的歷史。索引必在新版所需內容及圖片新鮮度驗證完成後，以條件寫入原子切換；索引不得設為 immutable 快取。
+revision 的遞增與 entry／manifest 一致性由發布端產生並保證；瀏覽器另做不需逐列掃描的索引核對，不符即載入失敗，更新時保留舊 active。snapshot client 在同一工作階段內拒絕 revision 倒退及同 revision 的索引內容改變；client 與搜尋 Worker 都拒絕 current／previous 的 data_version 相同或 published_at 倒序，以及所選 entry 的 data_version、published_at、format_version、min_reader_version、required_capabilities、engine_support_target 與其 manifest（或本機沿用紀錄）不一致。這些只擋得住工作階段內的回退與 index／manifest 不同步；首次載入就拿到整份自洽的舊索引時，內容雜湊與上述核對都無法察覺，索引仍以 no-cache 取得。
 
 客戶端由 current 更新；若其本機版本恰為 previous，可使用對應 changes 摘要及未變 hash 重用分片。落後多版、所需舊片已回收或缺少相容前版時，直接取得 current 的完整所需閉包，不要求補齊歷史鏈；未知格式／能力時提示更新 reader，不猜讀。previous 是有限的過渡退路，不保證永遠有可供舊 reader 下載的相容版本。裝置已有的完整快照可在更新失敗時保留為本機 active 並明示時效，但不使伺服器延長歷史保留。
 
@@ -331,7 +337,7 @@ face_revision 的 name/effect/section 綁精確 revision；printing_face 的 nam
 不借 current；QA 的 question/answer、CR 的 effect、商品／vocabulary 的 label、keyword 的 label/effect/action_label
 都使用自身來源。只有卡片的 EN receiver 可用 jp_source，且 source 必為同種 owner、已確認同卡同面的有效 JP。
 EN effect 固定取完整 JP effect，jp_source 不產 section 列；官方 counterpart 另驗自己的雙端精確用途。
-P 驗 freshness／來源證據，Python／TS reader 驗公開引用與矛盾；不出貨 dependency、來源 FK 或採納過程資料。
+P 驗 freshness／來源證據，Python reader 驗公開引用與矛盾，Web 按已驗資料取用；不出貨 dependency、來源 FK 或採納過程資料。
 
 Spelling 與 RulingHint 的參數宣告、值域及拼法驗證依 [傳輸契約 §3.2](snapshot-transport.md#32-公開參數宣告)。`{Q}` 先登錄 literal、原樣文字顯示與複製，語意未查明前不賦予機制/引擎含義。文字 roundtrip 不以語意猜測為前提。
 
@@ -370,7 +376,7 @@ same_name 的公開欄位仍依 §2 的 digital_link 欄序：
 `id, card_id, face_id, digital_card_id, digital_phase, relation, effect_similarity, review_level`。
 face_id／digital_phase 皆 null、effect_similarity=null、review_level=unreviewed；
 它是一張實體卡到一個數位 game／official_id 的卡層連結，不展開面×phase。
-reader 必須拒絕 same_name 帶非 null 面／phase、效果相似度或非 unreviewed 的列。
+匯出與上傳前的 Python reader 必須拒絕 same_name 帶非 null 面／phase、效果相似度或非 unreviewed 的列。
 規則連結沒有真人決定，不能經全域 Source.review 投成人工確認；其他 relation 的 review 映射不變。
 畫面標「同名規則視為同卡，未逐筆確認」，不能拿它供官方取名、同概念、效果等義、DSL、art 或 voice。
 不增加 policy_checked、政策／收據欄位或新的公開 review_level。
@@ -398,7 +404,7 @@ digital_face／digital_text 留建置端，沒有資產採納就不出 digital a
 | --- | --- |
 | 未支援的格式，或缺該格式必要 capability／reader 契約版本不足 | 拒絕整份快照，不能丟掉列後降版；3.0 依完整八個能力檢查 |
 | 因零配對／空 annotation 省必要 capability，或 config／fragment／programs／text_all 版本與 manifest 不一致 | 拒絕，不因空列放寬准入，依 3.0.0 固定配置驗證 |
-| same_name 帶面／phase、effect_similarity、sampled／confirmed review | producer 與 reader 各自拒絕 |
+| same_name 帶面／phase、effect_similarity、sampled／confirmed review | producer 與 Python reader 各自拒絕 |
 | same_name 因不同面或 phase 重複出列，或同組真人與規則並存 | 拒絕重複規則列；建置端保留全部匹配來源，真人精確面的合法多筆沿自己的 subject |
 | digital_card／link／endpoint 引用缺目標，或把凍結目錄全部當必要閉包 | 拒絕缺引用；只投影實際有效關係所需內容 |
 | 同名連結被拿來授官方譯名、概念、圖或語音，或空 coverage 被說成無對應 | 不授權；各入口仍驗自己的採納／來源條件，未知如實呈現 |

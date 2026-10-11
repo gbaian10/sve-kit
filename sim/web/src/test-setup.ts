@@ -1,7 +1,14 @@
+/// <reference types="node" />
 import "@testing-library/jest-dom/vitest"
+
+import { webcrypto } from "node:crypto"
 
 import { cleanup } from "@testing-library/react"
 import { afterEach } from "vitest"
+
+// jsdom does not provide SubtleCrypto; tests use the same native SHA-256 boundary as browsers.
+if (!("subtle" in globalThis.crypto))
+  Object.defineProperty(globalThis, "crypto", { value: webcrypto, configurable: true })
 
 // Vitest runs without globals, so Testing Library cannot register this itself.
 afterEach(cleanup)

@@ -1,7 +1,5 @@
-import { type JsonObject, objectValue, parseStrict, stringValue } from "./json"
-import { type Fragment, readContainer, readPayload, verifyManifest } from "./reader"
-import { validate } from "./schema"
-import { validateConfig, validateFragments } from "./semantics"
+import { type JsonObject, objectValue, parseJson } from "./json"
+import { type Fragment, readContainer, readManifest } from "./reader"
 
 export type DecodeRequest =
   | { readonly kind: "manifest"; readonly bytes: Uint8Array }
@@ -20,17 +18,14 @@ export type DecodeResult =
   | { readonly kind: "config"; readonly value: JsonObject }
   | { readonly kind: "fragments"; readonly fragments: readonly Fragment[] }
 
-/** Same decoder in browsers, fixture scripts and tests; workers do not weaken validation. */
+/** Decodes published bytes after their caller has verified the content hash. */
 export function decodeMessage(request: DecodeRequest): DecodeResult {
   if (request.kind === "manifest")
-    return { kind: "manifest", ...verifyManifest(parseStrict(request.bytes)) }
-  const value = objectValue(readPayload(request.file, request.bytes))
+    return { kind: "manifest", ...readManifest(parseJson(request.bytes)) }
+  const value = objectValue(parseJson(request.bytes))
   if (request.file["role"] === "config") {
-    validate("Config", value, [stringValue(request.file["key"])], request.version)
-    validateConfig(value, request.version)
     return { kind: "config", value }
   }
   const fragments = readContainer(request.file, value, request.version)
-  validateFragments(fragments)
   return { kind: "fragments", fragments }
 }

@@ -5,7 +5,8 @@ import { buildSnapshot } from "../../scripts/fixture/build"
 import { memoryCache } from "../test-utils/cache"
 import { type Fetcher } from "./cdn"
 import { createSnapshotClient, type SnapshotStatus } from "./client"
-import { type JsonObject, parseStrict, stringValue } from "./format-v3/json"
+import { canonical, type JsonObject, objectValue, parseJson, stringValue } from "./format-v3/json"
+import { transferDigest } from "./integrity"
 
 const stubImage = ({ width, height, seed }: { width: number; height: number; seed: number }) =>
   Promise.resolve(
@@ -92,7 +93,7 @@ describe("createSnapshotClient", () => {
 
   it("reports incompatible when current and previous have no readable entry", async () => {
     const files = new Map(built.files)
-    const index = parseStrict(files.get("snapshots/versions/index.json") ?? "") as JsonObject
+    const index = parseJson(files.get("snapshots/versions/index.json") ?? "") as JsonObject
     files.set(
       "snapshots/versions/index.json",
       new TextEncoder().encode(
@@ -109,6 +110,31 @@ describe("createSnapshotClient", () => {
     expect(client.snapshot()).toBeNull()
   })
 
+  it.each([
+    { format: 3, kind: "incompatible" },
+    { format: 1, kind: "corrupt" },
+    { format: 0, kind: "corrupt" },
+    { format: -1, kind: "corrupt" },
+    { format: 2.5, kind: "corrupt" },
+    { format: 3.5, kind: "corrupt" },
+    { format: "3", kind: "corrupt" },
+    { format: null, kind: "corrupt" },
+    { format: true, kind: "corrupt" },
+    { format: undefined, kind: "corrupt" },
+  ])("classifies index format $format as $kind", async ({ format, kind }) => {
+    const served = serve("/cdn")
+    const path = "snapshots/versions/index.json"
+    const index = objectValue(parseJson(served.files.get(path) ?? ""))
+    served.files.set(
+      path,
+      new TextEncoder().encode(JSON.stringify({ ...index, index_format: format })),
+    )
+    const client = createSnapshotClient("/cdn", { fetch: served.fetcher })
+    await client.load()
+    expect(client.status()).toMatchObject({ state: "error", kind })
+    expect(client.snapshot()).toBeNull()
+  })
+
   it("retries a hash mismatch once, then reports corruption", async () => {
     const served = serve("/cdn")
     const manifestPath = built.manifestPath
@@ -118,6 +144,30 @@ describe("createSnapshotClient", () => {
     expect(client.status()).toMatchObject({ state: "error", kind: "corrupt" })
     expect(served.requests.filter((path) => path === manifestPath)).toHaveLength(2)
   })
+
+  it.each(["{", "{}"])(
+    "reports corrupt data when hash-verified manifest JSON cannot be read (%s)",
+    async (text) => {
+      const served = serve("/cdn")
+      const bytes = new TextEncoder().encode(text)
+      const hash = await transferDigest(bytes)
+      const path = `snapshots/manifests/${hash.slice(7)}.json`
+      served.files.set(path, bytes)
+      const index = objectValue(parseJson(served.files.get("snapshots/versions/index.json") ?? ""))
+      const current = objectValue(index["current"])
+      served.files.set(
+        "snapshots/versions/index.json",
+        canonical({
+          ...index,
+          current: { ...current, manifest_path: path, manifest_sha256: hash },
+        }),
+      )
+      const client = createSnapshotClient("/cdn", { fetch: served.fetcher })
+      await client.load()
+      expect(client.status()).toMatchObject({ state: "error", kind: "corrupt" })
+      expect(client.snapshot()).toBeNull()
+    },
+  )
 
   it("reports a network failure and recovers on retry", async () => {
     const served = serve("/cdn")
@@ -134,7 +184,7 @@ describe("createSnapshotClient", () => {
     const served = serve("/cdn")
     const client = createSnapshotClient("/cdn", { fetch: served.fetcher })
     await client.load()
-    const index = parseStrict(served.files.get("snapshots/versions/index.json") ?? "") as JsonObject
+    const index = parseJson(served.files.get("snapshots/versions/index.json") ?? "") as JsonObject
     served.files.set(
       "snapshots/versions/index.json",
       new TextEncoder().encode(JSON.stringify({ ...index, revision: 1 })),
@@ -211,7 +261,7 @@ describe("createSnapshotClient: reload and transport edge cases", () => {
     const client = createSnapshotClient("/cdn", { fetch: served.fetcher })
     await client.load()
     const before = client.snapshot()
-    const index = parseStrict(served.files.get("snapshots/versions/index.json") ?? "") as JsonObject
+    const index = parseJson(served.files.get("snapshots/versions/index.json") ?? "") as JsonObject
     served.files.set(
       "snapshots/versions/index.json",
       new TextEncoder().encode(JSON.stringify({ ...index, index_format: 3 })),
@@ -281,7 +331,7 @@ describe("createSnapshotClient: reload and transport edge cases", () => {
 
   it("treats a broken index_format as corrupt, not as an update prompt", async () => {
     const files = new Map(built.files)
-    const index = parseStrict(files.get("snapshots/versions/index.json") ?? "") as JsonObject
+    const index = parseJson(files.get("snapshots/versions/index.json") ?? "") as JsonObject
     const { index_format: _format, ...withoutFormat } = index
     files.set(
       "snapshots/versions/index.json",
@@ -294,7 +344,7 @@ describe("createSnapshotClient: reload and transport edge cases", () => {
 
   it("treats an unsupported index format as incompatible, not corrupt", async () => {
     const files = new Map(built.files)
-    const index = parseStrict(files.get("snapshots/versions/index.json") ?? "") as JsonObject
+    const index = parseJson(files.get("snapshots/versions/index.json") ?? "") as JsonObject
     files.set(
       "snapshots/versions/index.json",
       new TextEncoder().encode(JSON.stringify({ ...index, index_format: 3 })),
@@ -404,7 +454,7 @@ describe("createSnapshotClient: verified snapshot records", () => {
     await original.load()
     await persisted(storage)
     const served = serve(base)
-    const index = parseStrict(served.files.get(INDEX) ?? new Uint8Array()) as JsonObject
+    const index = parseJson(served.files.get(INDEX) ?? new Uint8Array()) as JsonObject
     const current = { ...(index["current"] as JsonObject), published_at: "2026-09-30T00:00:00Z" }
     served.files.set(INDEX, new TextEncoder().encode(JSON.stringify({ ...index, current })))
     const client = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
@@ -438,7 +488,7 @@ describe("createSnapshotClient: verified snapshot records", () => {
     })
     await client.load()
     const snapshot = client.snapshot()
-    const index = parseStrict(served.files.get(INDEX) ?? new Uint8Array()) as JsonObject
+    const index = parseJson(served.files.get(INDEX) ?? new Uint8Array()) as JsonObject
     const current = { ...(index["current"] as JsonObject), published_at: "2026-09-30T00:00:00Z" }
     served.files.set(
       INDEX,

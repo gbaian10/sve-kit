@@ -2,10 +2,10 @@
 import { describe, expect, it } from "vitest"
 
 import vectorsText from "../../../fixtures/canonical-vectors.json?raw"
-import { type JsonObject, parseStrict, utf8 } from "./json"
+import { type JsonObject, parseJson, utf8 } from "./json"
 import { bucket, digest, hex, sha256 } from "./sha256"
 
-const vectors = parseStrict(vectorsText) as JsonObject
+const vectors = parseJson(vectorsText) as JsonObject
 
 describe("sha256", () => {
   it.each([

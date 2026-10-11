@@ -1,8 +1,5 @@
-import { digest } from "./format-v3/sha256"
-
-/** WebCrypto is far faster than the JS fallback, although Chromium still hashes on the calling thread. */
+/** Hash exact downloaded or cached bytes with the browser’s native SHA-256 implementation. */
 export async function transferDigest(bytes: Uint8Array): Promise<string> {
-  if (typeof crypto === "undefined" || !("subtle" in crypto)) return digest(bytes)
   // Only a view of a shared buffer needs a private copy; WebCrypto reads other views directly.
   const data =
     bytes.buffer instanceof ArrayBuffer

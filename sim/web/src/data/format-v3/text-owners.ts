@@ -10,18 +10,7 @@ import {
 } from "./json"
 import type { View } from "./reader"
 
-export function annotationFailure(
-  reason:
-    | "enum"
-    | "duplicate_key"
-    | "reference"
-    | "ordering"
-    | "range"
-    | "owner"
-    | "text_identity"
-    | "identity"
-    | "basis",
-): never {
+export function annotationFailure(reason: "reference" | "owner"): never {
   return fail(`public-annotation/${reason}`, reason)
 }
 
@@ -43,38 +32,10 @@ const FIELDS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
   keyword: { [LABEL_FIELD]: "name_unit_id", effect: "definition_unit_id", action_label: "actions" },
 }
 
-function ownerKey(owner: JsonObject): string {
-  const kind = stringValue(owner["kind"])
-  const keys =
-    kind === "vocabulary"
-      ? ["kind", "vocabulary_kind", "code"]
-      : kind === "printing_face"
-        ? ["kind", "id", "face_id"]
-        : ["kind", "id"]
-  if (
-    !(kind in FIELDS) ||
-    Object.keys(owner).length !== keys.length ||
-    keys.some((k) => typeof owner[k] !== "string" || !owner[k])
-  )
-    annotationFailure("owner")
-  return canonicalText(owner)
-}
-
 export interface TextOwner {
   readonly owner: JsonObject
   readonly row: JsonObject
   readonly cardId?: string
-  readonly faceId?: string
-  readonly region?: string
-  readonly mappingState?: string
-}
-
-function mapping(card: JsonObject, region: string): string {
-  const rows = arrayValue(card["regions"])
-    .map((value) => objectValue(value))
-    .filter((r) => r["region"] === region)
-  if (rows.length !== 1) annotationFailure("owner")
-  return stringValue(rows[0]?.["mapping_state"])
 }
 
 export class TextOwners {
@@ -84,9 +45,7 @@ export class TextOwners {
     const cards = new Map((view["card"] ?? []).map((r) => [stringValue(r["id"]), r]))
     const faces = new Map((view["face"] ?? []).map((r) => [stringValue(r["id"]), r]))
     const add = (value: TextOwner): void => {
-      const key = ownerKey(value.owner)
-      if (this.byOwner.has(key)) annotationFailure("duplicate_key")
-      this.byOwner.set(key, value)
+      this.byOwner.set(canonicalText(value.owner), value)
     }
     for (const kind of ["qa_version", "cr_clause", "product_family", "product", "keyword"]) {
       for (const row of view[kind] ?? []) add({ owner: { kind, id: row["id"] ?? null }, row })
@@ -104,20 +63,15 @@ export class TextOwners {
       const face = faces.get(stringValue(row["face_id"]))
       const card = cards.get(stringValue(face?.["card_id"]))
       if (!face || !card) annotationFailure("owner")
-      const region = stringValue(row["region"])
       add({
         owner: { kind: "face_revision", id: row["id"] ?? null },
         row,
         cardId: stringValue(card["id"]),
-        faceId: stringValue(face["id"]),
-        region,
-        mappingState: mapping(card, region),
       })
     }
     for (const printing of view["printing"] ?? []) {
       const card = cards.get(stringValue(printing["card_id"]))
       if (!card) annotationFailure("owner")
-      const region = stringValue(printing["region"])
       for (const value of arrayValue(printing["faces"])) {
         const row = objectValue(value)
         add({
@@ -128,45 +82,30 @@ export class TextOwners {
           },
           row,
           cardId: stringValue(card["id"]),
-          faceId: stringValue(row["face_id"]),
-          region,
-          mappingState: mapping(card, region),
         })
       }
     }
   }
 
   get(owner: JsonObject): TextOwner {
-    const value = this.byOwner.get(ownerKey(owner))
+    const value = this.byOwner.get(canonicalText(owner))
     if (!value) annotationFailure("owner")
     return value
   }
 
-  pointer(pointer: JsonObject): string {
-    const value = this.optionalPointer(pointer)
-    if (value === null) annotationFailure("owner")
-    return value
-  }
-
   optionalPointer(pointer: JsonObject): string | null {
-    if (canonicalText(Object.keys(pointer).sort()) !== canonicalText(["field", "ordinal", "owner"]))
-      annotationFailure("owner")
     const owner = this.get(objectValue(pointer["owner"]))
     const name = stringValue(pointer["field"])
     const ordinal = pointer["ordinal"]
     const key = FIELDS[stringValue(owner.owner["kind"])]?.[name]
-    if (!key || ["section", "action_label"].includes(name) !== (ordinal !== null))
-      annotationFailure("owner")
+    if (!key) annotationFailure("owner")
     let value: JsonValue | undefined = owner.row[key]
     if (name === "section") {
-      const matches = arrayValue(value)
+      value = arrayValue(value)
         .map((value) => objectValue(value))
-        .filter((r) => r["ordinal"] === ordinal)
-      if (matches.length !== 1) annotationFailure("owner")
-      value = matches[0]?.["text_unit_id"]
+        .find((row) => row["ordinal"] === ordinal)?.["text_unit_id"]
     } else if (name === "action_label") {
       const index = integerValue(ordinal)
-      if (index < 0 || index >= arrayValue(value).length) annotationFailure("owner")
       value = objectValue(arrayValue(value)[index])["label_unit_id"]
     }
     if (value === undefined) annotationFailure("owner")

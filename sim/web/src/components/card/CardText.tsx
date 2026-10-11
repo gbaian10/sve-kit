@@ -8,7 +8,7 @@ import {
   createAnnotatedTextResolver,
   type JsonObject,
   objectValue,
-  parseStrict,
+  parseJson,
   type SelectedText,
   type SnapshotClient,
   SnapshotError,
@@ -46,7 +46,7 @@ export function CardText({
   useEffect(() => {
     if (!resolver) return
     let active = true
-    const [currentOwner, currentField, currentLanguage] = arrayValue(parseStrict(identity))
+    const [currentOwner, currentField, currentLanguage] = arrayValue(parseJson(identity))
     const pointer = {
       owner: objectValue(currentOwner),
       field: stringValue(currentField),

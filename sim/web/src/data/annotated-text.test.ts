@@ -3,16 +3,8 @@ import { describe, expect, it } from "vitest"
 
 import { annotatedOrigin } from "../test-utils/annotated-snapshot"
 import { createAnnotatedTextResolver } from "./annotated-text"
-import { canonicalText } from "./format-v3/json"
-import { readSnapshot } from "./format-v3/reader"
 
 describe("the native C → P → R annotation slice", () => {
-  it("reads the same nonempty snapshot produced from stored semantic positions", async () => {
-    const { fixture, manifest, payloads } = await annotatedOrigin()
-    expect(canonicalText(readSnapshot(manifest, payloads))).toBe(
-      canonicalText(fixture["expected"] ?? null),
-    )
-  })
   it("validates bootstrap name annotations and their explanation without loading unrelated files", async () => {
     const { client, requests } = await annotatedOrigin()
     await client.load()

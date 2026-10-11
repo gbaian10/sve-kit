@@ -1,8 +1,7 @@
 import type { LoadedSnapshot, SnapshotClient } from "./client"
 import type { Row } from "./format-v3/decode"
 import { SnapshotError } from "./format-v3/errors"
-import { arrayValue, integerValue, objectValue, stringValue } from "./format-v3/json"
-import { validateMedia } from "./format-v3/media"
+import { integerValue, objectValue, stringValue } from "./format-v3/json"
 import { mediaImageSource } from "./image-url"
 import { bucketOf, createLocator } from "./locator"
 
@@ -41,9 +40,6 @@ function mediaLookup(snapshot: LoadedSnapshot): MediaLookup {
     if (fragment.table !== "printing" && fragment.table !== "face") continue
     for (const row of fragment.rows) {
       const id = stringValue(row["id"])
-      const duplicate = fragment.table === "printing" ? printings.has(id) : faces.has(id)
-      if (duplicate)
-        throw new SnapshotError("primary-key-duplicate", "duplicate media bootstrap target")
       if (fragment.table === "printing")
         printings.set(id, { row, owner: objectValue(fragment.value["owner"]) })
       else faces.set(id, row)
@@ -101,16 +97,9 @@ async function readMediaFaces(
         const faceId = stringValue(row["face_id"])
         const key = faceKey(id, faceId)
         if (!wanted.has(key)) continue
-        validateMedia(row)
         const printing = printings.get(id)
         const face = faceRows.get(faceId)
-        if (
-          !printing ||
-          !face ||
-          face["card_id"] !== printing["card_id"] ||
-          !arrayValue(printing["faces"]).some((f) => objectValue(f)["face_id"] === faceId)
-        )
-          throw new SnapshotError("printing-image-face", "media is not a face of this printing")
+        if (!printing || !face) throw new Error("image bootstrap target missing")
         rows.set(key, {
           asset: row,
           source: mediaImageSource(

@@ -255,11 +255,5 @@ export default defineConfig(
     },
   },
 
-  {
-    // Snapshot fixtures exercise wire internals without adding test exports to the public barrel.
-    files: ["src/test-utils/public-annotation-cases.ts"],
-    rules: { "no-restricted-imports": "off" },
-  },
-
   prettier,
 )

@@ -1,7 +1,7 @@
 import { decodeMessage, type DecodeRequest, type DecodeResult } from "./decode-message"
 import { type ReaderErrorCode, SnapshotError } from "./errors"
 
-/** A single sequential worker avoids one schema/decoder heap per downloaded bucket. */
+/** A single sequential worker avoids one decoder heap per downloaded bucket. */
 interface Decoder {
   (request: DecodeRequest): Promise<DecodeResult>
   cancel: () => void
@@ -27,8 +27,8 @@ export function createDecoder(): Decoder {
       if (!pending) return
       waiting.delete(event.data.id)
       if (event.data.result) pending.resolve(event.data.result)
-      else pending.reject(new SnapshotError(event.data.code ?? "shape", "worker validation failed"))
-      // Idle workers must release their schema and parsing heap between page requests.
+      else pending.reject(new SnapshotError(event.data.code ?? "shape", "worker decoding failed"))
+      // Idle workers must release their parsing heap between page requests.
       if (waiting.size === 0)
         idle = setTimeout(() => {
           worker?.terminate()
