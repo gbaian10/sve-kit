@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { setActiveSnapshotRoot, type SnapshotClient, type SnapshotStatus } from "../data"
 import { renderInRouter } from "../test-utils"
@@ -36,6 +36,11 @@ afterEach(() => {
 })
 
 describe("DevBadge", () => {
+  // Whether `/cdn` is the committed fixture depends on the machine's export setup; pin it.
+  beforeEach(() => {
+    vi.stubEnv("SVE_CDN_IS_FIXTURE", "")
+  })
+
   it("shows the data version once ready", async () => {
     await renderInRouter(
       <DevBadge client={fakeClient({ state: "ready", dataVersion: "20260929T000000Z-0001" })} />,
@@ -96,5 +101,15 @@ describe("DevBadge", () => {
     await userEvent.click(screen.getByRole("button", { name: "改用預覽資料" }))
     expect(screen.getByRole("status")).toHaveTextContent("預覽")
     expect(screen.getByRole("button", { name: "改回正式資料" })).toBeInTheDocument()
+  })
+
+  it("calls a fixture-backed formal root what it is", async () => {
+    vi.stubEnv("SVE_PREVIEW_CONFIGURED", "1")
+    vi.stubEnv("SVE_CDN_IS_FIXTURE", "1")
+    await renderInRouter(<DevBadge client={fakeClient({ state: "idle" })} />)
+    expect(screen.getByRole("status")).toHaveTextContent("測試樣本（假資料）")
+    await userEvent.click(screen.getByRole("button", { name: "改用真實資料" }))
+    expect(screen.getByRole("status")).toHaveTextContent("預覽")
+    expect(screen.getByRole("button", { name: "改用測試樣本" })).toBeInTheDocument()
   })
 })
