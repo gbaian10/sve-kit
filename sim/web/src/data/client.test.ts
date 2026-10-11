@@ -155,6 +155,23 @@ describe("createSnapshotClient", () => {
     expect(client.status()).toMatchObject({ state: "ready" })
   })
 
+  it("rejects a version index whose revision went backwards", async () => {
+    const served = serve("/cdn")
+    const client = createSnapshotClient("/cdn", { fetch: served.fetcher })
+    await client.load()
+    const index = parseJson(served.files.get("snapshots/versions/index.json") ?? "") as JsonObject
+    served.files.set(
+      "snapshots/versions/index.json",
+      new TextEncoder().encode(JSON.stringify({ ...index, revision: 1 })),
+    )
+    await client.reload()
+    // A reload failure keeps the active snapshot; the regression shows up as the update error.
+    expect(client.status()).toMatchObject({
+      state: "ready",
+      updateError: { kind: "corrupt", detail: expect.stringContaining("backwards") as string },
+    })
+  })
+
   it("loads detail files on demand, joins them onto the bootstrap and keeps an LRU", async () => {
     const served = serve("/cdn")
     const client = createSnapshotClient("/cdn", { fetch: served.fetcher, detailCacheSize: 1 })
@@ -403,6 +420,24 @@ describe("createSnapshotClient: verified snapshot records", () => {
     expect(client.snapshot()).toStrictEqual(original.snapshot())
   })
 
+  it("still rejects an index entry that differs from the stored manifest", async () => {
+    const storage = memoryCache()
+    const original = createSnapshotClient(base, {
+      fetch: serve(base).fetcher,
+      cacheStorage: storage,
+    })
+    await original.load()
+    await persisted(storage)
+    const served = serve(base)
+    const index = parseJson(served.files.get(INDEX) ?? new Uint8Array()) as JsonObject
+    const current = { ...(index["current"] as JsonObject), published_at: "2026-09-30T00:00:00Z" }
+    served.files.set(INDEX, new TextEncoder().encode(JSON.stringify({ ...index, current })))
+    const client = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
+    await client.load()
+    expect(client.status()).toMatchObject({ state: "error", kind: "corrupt" })
+    expect(served.requests).toEqual([INDEX])
+  })
+
   it("stores nothing for a download that fails verification", async () => {
     const storage = memoryCache()
     const files = new Map(built.files)
@@ -418,5 +453,24 @@ describe("createSnapshotClient: verified snapshot records", () => {
     expect(client.status()).toMatchObject({ state: "error" })
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(await records(storage)).toEqual([])
+  })
+
+  it("rejects changed entry fields even when reusing the snapshot already in memory", async () => {
+    const served = serve(base)
+    const client = createSnapshotClient(base, {
+      fetch: served.fetcher,
+      cacheStorage: memoryCache(),
+    })
+    await client.load()
+    const snapshot = client.snapshot()
+    const index = parseJson(served.files.get(INDEX) ?? new Uint8Array()) as JsonObject
+    const current = { ...(index["current"] as JsonObject), published_at: "2026-09-30T00:00:00Z" }
+    served.files.set(
+      INDEX,
+      new TextEncoder().encode(JSON.stringify({ ...index, revision: 3, current })),
+    )
+    await client.reload()
+    expect(client.status()).toMatchObject({ state: "ready", updateError: { kind: "corrupt" } })
+    expect(client.snapshot()).toBe(snapshot)
   })
 })

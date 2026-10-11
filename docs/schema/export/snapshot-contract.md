@@ -101,6 +101,7 @@ uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 | 上傳前離線驗收 | `read_api.load_export` 驗完整分片及資產；`sve_publish.commands.upload_command` 先取得此結果，再取得憑證與上傳 |
 | 瀏覽器下載／快取完整性 | `integrity.ts` 的 `transferDigest` 使用 WebCrypto；client／SearchBlobs／MetadataBytes 驗 hash 與 bytes，decoder 不重算；衍生快取紀錄另驗自身 hash |
 | 瀏覽器解碼與准入 | 原生 `JSON.parse`、固定 `x-columns`／`x-types` 解碼及 detail join；保留版本／最低 reader／能力判斷，解析或必要欄位使用失敗顯示載入錯誤 |
+| 瀏覽器版本索引核對 | `index-entry.ts` 的 `indexEntries`／`checkEntry`：current／previous 順序、entry 與 manifest 六個准入欄位一致；client 另在工作階段內拒絕 revision 倒退與同 revision 內容改變 |
 
 TS 不再維護完整離線驗證器或只被反例測試呼叫的舊驗證程式；Schema／reader-invalid 反例由 Python 契約測試把關。
 Web 測試驗下載 hash 失敗、JSON 無法解析、必要欄位缺失的錯誤狀態，以及正常搜尋、合併、標註與圖片顯示。

@@ -134,7 +134,9 @@ declares them (list a rule twice when it fires twice). Update the fixtures toget
   required-field errors become a failed load; no canonical, placement or cross-table validation runs.
 
 The client supports only snapshot 3.0.0, including its version and capabilities. Index v2
-considers only current, previous and the local active snapshot. An older usable snapshot has
+considers only current, previous and the local active snapshot. Constant-cost index checks still
+reject a revision that goes back or changes content within a session, a current/previous pair out
+of order and an entry that differs from its manifest. An older usable snapshot has
 a visible notice, and having no compatible snapshot prompts an application update.
 Downloaded bytes are hashed before transfer to the decode Worker; an idle worker releases
 its parsing heap after one second. Tests use the same decoder without a Worker. Raw tuples

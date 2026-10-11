@@ -4,8 +4,15 @@ import { describe, expect, it } from "vitest"
 import { memoryCache } from "../test-utils/cache"
 import { type Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
-import { canonical, type JsonObject, objectValue, stringValue } from "./format-v3/json"
-import { mediaImageSource } from "./image-url"
+import {
+  arrayValue,
+  canonical,
+  integerValue,
+  type JsonObject,
+  objectValue,
+  stringValue,
+} from "./format-v3/json"
+import { imageUrl, mediaImageSource } from "./image-url"
 import { loadImagePage } from "./images"
 import { v3Fixture, v3Version } from "./v3-fixture"
 
@@ -33,6 +40,21 @@ function origin(first = v3Version()) {
 const front = { printingId: "p:a", faceId: "f:a" }
 
 describe("3.0 display projection", () => {
+  it.each(
+    arrayValue(v3Fixture("image-url-cases.json"))
+      .map((value) => objectValue(value))
+      .filter((item) => item["reject"] === undefined),
+  )("formats the shared image URL vector $case like the producer", (item) => {
+    expect(
+      imageUrl(
+        "https://cdn.test",
+        integerValue(item["int_id"]),
+        integerValue(item["ordinal"]),
+        stringValue(item["size"]),
+        integerValue(item["version"]),
+      ),
+    ).toBe(`https://cdn.test/${stringValue(item["url"])}`)
+  })
   it("uses the art token separately and emits only distinct width descriptors for tiny sources", () => {
     const row = (
       objectValue(v3Fixture("expected-logical.json"))["printing_image"] as JsonObject[]
@@ -339,4 +361,52 @@ describe("Index v2 finite window", () => {
       expect(client.snapshot()?.dataVersion).toBe(third.manifest["data_version"])
     },
   )
+  it("records a valid incompatible revision so a later index cannot silently roll back", async () => {
+    const first = v3Version()
+    const served = origin(first)
+    const client = createSnapshotClient("https://cdn.test", { fetch: served.fetcher })
+    await client.load()
+    const active = client.snapshot()
+    served.setIndex({
+      index_format: 2,
+      revision: 4,
+      current: { ...first.entry, format_version: "9.0.0" },
+      previous: null,
+    })
+    await client.reload()
+    expect(client.status()).toMatchObject({ updateError: { kind: "incompatible" } })
+    served.setIndex({ index_format: 2, revision: 3, current: first.entry, previous: null })
+    await client.reload()
+    expect(client.snapshot()).toBe(active)
+    expect(client.status()).toMatchObject({ updateError: { kind: "corrupt" } })
+  })
+  it("rejects an entry/manifest mismatch, a changed index under one revision and a bad order", async () => {
+    const first = v3Version()
+    const second = v3Version(2)
+    const served = origin(first)
+    for (const [path, bytes] of second.files) served.files.set(path, bytes)
+    served.setIndex({
+      index_format: 2,
+      revision: 1,
+      current: { ...first.entry, published_at: "2026-10-04T01:00:02Z" },
+      previous: null,
+    })
+    const client = createSnapshotClient("https://cdn.test", { fetch: served.fetcher })
+    await client.load()
+    expect(client.status()).toMatchObject({ state: "error", kind: "corrupt" })
+    served.setIndex({ index_format: 2, revision: 2, current: first.entry, previous: null })
+    await client.retry()
+    expect(client.status()).toMatchObject({ state: "ready" })
+    served.setIndex({ index_format: 2, revision: 2, current: second.entry, previous: first.entry })
+    await client.reload()
+    expect(client.status()).toMatchObject({
+      updateError: { kind: "corrupt", detail: expect.stringContaining("revision") as string },
+    })
+    served.setIndex({ index_format: 2, revision: 3, current: first.entry, previous: second.entry })
+    await client.reload()
+    expect(client.status()).toMatchObject({
+      updateError: { kind: "corrupt", detail: expect.stringContaining("ordering") as string },
+    })
+    expect(client.snapshot()?.dataVersion).toBe(first.entry["data_version"])
+  })
 })

@@ -562,6 +562,28 @@ it.each(["{", "{}"])(
   },
 )
 
+it("an index entry that differs from its manifest is an error, also for a stored image", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const first = harness(served, storage)
+  first.session.load(base, "jp", "index")
+  await first.settled()
+  expect(first.status()).toMatchObject({ phase: "ready" })
+  const path = "snapshots/versions/index.json"
+  const index = objectValue(
+    JSON.parse(new TextDecoder().decode(served.files.get(path))) as JsonObject,
+  )
+  const current = { ...objectValue(index["current"]), published_at: "2026-09-30T00:00:00Z" }
+  served.files.set(path, canonical({ ...index, current }))
+  for (const cacheStorage of [storage, memoryCache()]) {
+    const h = harness(served, cacheStorage)
+    h.session.load(base, "jp", "index")
+    await h.settled()
+    expect(h.status()).toMatchObject({ phase: "error", generation: null })
+    expect(h.events.some((event) => event.kind === "ready")).toBe(false)
+  }
+})
+
 it("facets whose closure is not loaded report an error instead of a partial count", async () => {
   const h = harness()
   h.session.load(base, "jp", "preview")

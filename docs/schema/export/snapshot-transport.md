@@ -1,7 +1,7 @@
 # 卡表快照傳輸契約（3.0.0）
 
 本文的格式與一致性「驗證／拒絕」由 carddb 匯出、Python 完整 reader 與上傳前離線檢查執行。
-瀏覽器 runtime 信任這些已驗的自有公開 JSON，只在下載／快取邊界以 WebCrypto 驗未壓縮 bytes 的 SHA-256（同一份 bytes 不在 decoder 重算），並核對檔案長度；仍保留格式版本、最低 reader 版本與必要能力的准入。
+瀏覽器 runtime 信任這些已驗的自有公開 JSON，只在下載／快取邊界以 WebCrypto 驗未壓縮 bytes 的 SHA-256（同一份 bytes 不在 decoder 重算），並核對檔案長度；仍保留格式版本、最低 reader 版本與必要能力的准入，以及版本索引的常數成本一致性核對（[格式 §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)）。
 瀏覽器使用原生 `JSON.parse`，不重做嚴格 token 掃描、canonical 重編碼、Schema、descriptor、分片位置／bucket 或跨表一致性驗證。
 固定 schema 欄序只用於 tuple 解碼，bucket 只用於按需定位；JSON 語法錯誤與必要欄位使用時的例外均轉成資料載入失敗，更新失敗保留舊 active。
 

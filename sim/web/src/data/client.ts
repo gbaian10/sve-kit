@@ -4,6 +4,7 @@ import { createDecoder } from "./format-v3/decoder"
 import { SnapshotError } from "./format-v3/errors"
 import {
   arrayValue,
+  canonicalText,
   integerValue,
   type JsonObject,
   type JsonValue,
@@ -12,6 +13,7 @@ import {
   stringValue,
 } from "./format-v3/json"
 import { type Files, findBase, type Fragment, isCompatible, joinDetail } from "./format-v3/reader"
+import { checkEntry, indexEntries } from "./index-entry"
 import { transferDigest } from "./integrity"
 import { MetadataBytes, type MetadataProgress } from "./metadata"
 import { requestQueue } from "./request-queue"
@@ -115,6 +117,8 @@ export function createSnapshotClient(
   let status: SnapshotStatus = { state: "idle" }
   let loaded: LoadedSnapshot | null = null
   let pending: Promise<void> | null = null
+  let lastRevision = -1
+  let lastIndex = ""
   let detailAbort = new AbortController()
   // Settled detail files in LRU order; requests still in flight live apart so eviction never
   // drops a promise other callers are waiting on.
@@ -170,8 +174,17 @@ export function createSnapshotClient(
       parseJson(await fetchBytes(fetcher, url(INDEX_PATH), { cache: "no-cache" })),
     )
     requireIndexFormat(index, "the version index")
-    const current = objectValue(index["current"])
-    const previous = index["previous"] === null ? null : objectValue(index["previous"])
+    // no-cache still lets a lagging CDN edge answer; within a session the index never goes back,
+    // and one revision always has the same content.
+    const revision = integerValue(index["revision"])
+    if (revision < lastRevision)
+      throw new SnapshotError("blob-integrity", "version index revision went backwards")
+    const signature = canonicalText(index)
+    if (revision === lastRevision && lastIndex !== signature)
+      throw new SnapshotError("blob-integrity", "version index changed without a new revision")
+    const { current, previous } = indexEntries(index)
+    lastRevision = revision
+    lastIndex = signature
     for (const [source, candidate] of [
       ["current", current],
       ["previous", previous],
@@ -181,6 +194,10 @@ export function createSnapshotClient(
       }
     }
     throw new NoCompatibleVersion("no current or previous snapshot is compatible; update the site")
+  }
+
+  const matchEntry = (chosen: JsonObject, manifest: JsonObject): void => {
+    if (entry === "index") checkEntry(chosen, manifest)
   }
 
   // A record holds what one full download verified, so it replaces the manifest, every startup
@@ -265,10 +282,12 @@ export function createSnapshotClient(
       previous.manifestHash === stringValue(chosen["manifest_sha256"]) &&
       (previous.entrySource ?? "current") === source
     ) {
+      matchEntry(chosen, previous.manifest)
       return previous
     }
     const restored = await restore(stringValue(chosen["manifest_sha256"]))
     if (restored) {
+      matchEntry(chosen, restored.manifest)
       return { ...restored, entrySource: source }
     }
     progress("manifest")
@@ -279,6 +298,7 @@ export function createSnapshotClient(
     const decodedManifest = await decode({ kind: "manifest", bytes: manifestBytes })
     if (decodedManifest.kind !== "manifest") throw new SnapshotError("shape", "expected manifest")
     const { manifest, files } = decodedManifest
+    matchEntry(chosen, manifest)
     const version = stringValue(manifest["format_version"])
     progress("bootstrap")
     const configKey = stringValue(objectValue(manifest["config_ref"])["key"])

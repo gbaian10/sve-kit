@@ -1,7 +1,7 @@
 # 卡表快照格式 v3（3.0.0，N0 已交付）
 
 本文的格式與一致性「驗證／拒絕」由 carddb 匯出、Python 完整 reader 與上傳前離線檢查執行。
-瀏覽器 runtime 信任這些已驗的自有公開 JSON，只在下載／快取邊界以 WebCrypto 驗未壓縮 bytes 的 SHA-256（同一份 bytes 不在 decoder 重算），並核對檔案長度；仍保留格式版本、最低 reader 版本與必要能力的准入。
+瀏覽器 runtime 信任這些已驗的自有公開 JSON，只在下載／快取邊界以 WebCrypto 驗未壓縮 bytes 的 SHA-256（同一份 bytes 不在 decoder 重算），並核對檔案長度；仍保留格式版本、最低 reader 版本與必要能力的准入，以及版本索引的常數成本一致性核對（§4.1）。
 瀏覽器使用原生 `JSON.parse`，不重做嚴格 token 掃描、canonical 重編碼、Schema、descriptor、分片位置／bucket 或跨表一致性驗證。
 固定 schema 欄序只用於 tuple 解碼，bucket 只用於按需定位；JSON 語法錯誤與必要欄位使用時的例外均轉成資料載入失敗，更新失敗保留舊 active。
 
@@ -245,7 +245,7 @@ Schema、欄序、golden 與 reader，不要求額外升版；正式凍結後才
 **卡圖 WebP 僅提供當前圖片，不保存歷史圖片版本。** previous 或更舊 metadata 中的圖片引用不使舊 WebP 成為必留資產；其 image hash／bytes 不構成永遠可取得同一圖片的承諾。圖片產製、來源核可、格式／尺寸／內容檢查仍在發布前驗證。新版快照須提供足以選取新圖片的版本 token 或新 path；client 啟用新版後，瀏覽器／CDN／SW 不得以舊版本圖片作快取回退。未完成下載顯示載入狀態，失敗明示，不以舊圖充作新版圖。
 
 版本入口是可更新的 current／previous 發布索引，revision 單調增加，不維護 append-only 全歷史 pages 或每代索引的公開歸檔。每個 entry 指向不可變 manifest 的 path／hash，並提供格式、最低 reader 版本與所需能力等准入資訊。data_version 不重用，同一版號不可改指另一份 manifest；上傳只能對照遠端 current／previous，不保存更早的歷史。索引必在新版所需內容及圖片新鮮度驗證完成後，以條件寫入原子切換；索引不得設為 immutable 快取。
-revision 的遞增與 entry／manifest 一致性由發布端負責；瀏覽器不再記錄 revision 高水位或比對同 revision 的索引內容。內容雜湊驗證不保證可變索引的新鮮度，索引仍以 no-cache 取得。
+revision 的遞增與 entry／manifest 一致性由發布端產生並保證；瀏覽器另做不需逐列掃描的索引核對，不符即載入失敗，更新時保留舊 active。snapshot client 在同一工作階段內拒絕 revision 倒退及同 revision 的索引內容改變；client 與搜尋 Worker 都拒絕 current／previous 的 data_version 相同或 published_at 倒序，以及所選 entry 的 data_version、published_at、format_version、min_reader_version、required_capabilities、engine_support_target 與其 manifest（或本機沿用紀錄）不一致。這些只擋得住工作階段內的回退與 index／manifest 不同步；首次載入就拿到整份自洽的舊索引時，內容雜湊與上述核對都無法察覺，索引仍以 no-cache 取得。
 
 客戶端由 current 更新；若其本機版本恰為 previous，可使用對應 changes 摘要及未變 hash 重用分片。落後多版、所需舊片已回收或缺少相容前版時，直接取得 current 的完整所需閉包，不要求補齊歷史鏈；未知格式／能力時提示更新 reader，不猜讀。previous 是有限的過渡退路，不保證永遠有可供舊 reader 下載的相容版本。裝置已有的完整快照可在更新失敗時保留為本機 active 並明示時效，但不使伺服器延長歷史保留。
 

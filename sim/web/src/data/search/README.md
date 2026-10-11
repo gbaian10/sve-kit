@@ -40,7 +40,8 @@ Worker 發出 error／messageerror 時會清掉不可用世代，下次 load 或
 完整世代讀取成功、發布 ready 之後，Worker 把索引（Uint32 欄位、字串池與當頁摘要欄）編碼成一份
 image，以 `src/data/verified-cache.ts` 存進 CacheStorage。下次載入時仍重新抓取 pointer 或版本
 索引並判版本能力准入；只要 manifest hash 對得上存好的 image，就直接讀回索引，不再抓 manifest、不讀任何 blob，也不重做
-解碼與逐檔雜湊；image 紀錄自己的 hash 仍須核對。格式與一致性由匯出／上傳前的 Python reader 驗證，瀏覽器不再做 canonical／schema／placement 重驗。
+解碼與逐檔雜湊；image 紀錄自己的 hash 仍須核對。版本索引的入口欄位仍與存下的 manifest 欄位比對，不一致照樣報錯。
+格式與一致性由匯出／上傳前的 Python reader 驗證，瀏覽器不再做 canonical／schema／placement 重驗。
 snapshot client 的啟動包（manifest、config、bootstrap 片段）用同一個模組存成 JSON 紀錄，行為相同；
 紀錄在畫面顯示後才分段序列化寫入。
 
