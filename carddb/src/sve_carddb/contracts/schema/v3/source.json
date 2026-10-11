@@ -5694,19 +5694,16 @@
             "scalar": "ID"
           }
         },
-        "family_id": {
+        "family_ids": {
           "schema": {
-            "anyOf": [
-              {
-                "$ref": "#/$defs/ID"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ID"
+            },
+            "uniqueItems": true
           },
           "descriptor": {
-            "nullable": {
+            "array": {
               "scalar": "ID"
             }
           }
@@ -9613,7 +9610,7 @@
         "id": {
           "from": "product"
         },
-        "family_id": {
+        "family_ids": {
           "from": "product"
         },
         "region": {

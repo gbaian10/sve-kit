@@ -48,9 +48,9 @@ def test_exact_inventory_and_optional_closure() -> None:
     assert {
         table.name for table in compile_build(("images", "cr")).tables
     } == base | expected
-    assert len(compile_build(("images", "cr")).tables) == 46
-    assert len(compile_build(("images",)).tables) == 44
-    assert len(compile_build(("cr",)).tables) == 42
+    assert len(compile_build(("images", "cr")).tables) == 47
+    assert len(compile_build(("images",)).tables) == 45
+    assert len(compile_build(("cr",)).tables) == 43
     assert {table.name for table in compile_build().tables} == base
     assert (
         compile_build(("images", "cr")).sql == compile_build(("cr", "images", "t0")).sql
@@ -67,9 +67,9 @@ def test_connected_graph_and_pragma_inventory() -> None:
             populate(db)
         for table in schema.tables:
             assert db.rows(table.name)
-        assert db._read("PRAGMA user_version") == ((7,),)
+        assert db._read("PRAGMA user_version") == ((8,),)
         assert db._read("SELECT count(*) FROM sqlite_schema WHERE type='table'") == (
-            (46,),
+            (47,),
         )
         assert db.rows("image_asset")[0].values["source_src_raw"] == "../source.png"
         assert db.rows("cr_clause")[0].values["number"] == "1.10.2"

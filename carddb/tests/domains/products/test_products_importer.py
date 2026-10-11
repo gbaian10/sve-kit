@@ -72,7 +72,10 @@ def test_confirmed_family_and_identity_are_one_graph(
             languages=LANGUAGES,
         )
         assert len(db.rows("product_family")) == 3
-        assert len(db.rows("text_unit")) == 1
+        assert {row.values["text"] for row in db.rows("text_unit")} == {
+            "Synthetic family",
+            "LG",
+        }
         assert len(db.rows("printing")) == 2
         assert {row.values["int_id"] for row in db.rows("card_int_id")} == {
             20001,

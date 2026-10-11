@@ -279,6 +279,15 @@ TABLES = (
         ),
     ),
     Table(
+        "product_family_member",
+        (Column("product_id", Kind.ID), Column("family_id", Kind.ID)),
+        ("product_id", "family_id"),
+        foreign_keys=(
+            ForeignKey(("product_id",), "product", ("id",)),
+            ForeignKey(("family_id",), "product_family", ("id",)),
+        ),
+    ),
+    Table(
         "printing",
         (
             Column("id", Kind.ID),

@@ -3461,14 +3461,11 @@
           "$ref": "#/$defs/ID"
         },
         {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/ID"
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ID"
+          },
+          "uniqueItems": true
         },
         {
           "$ref": "#/$defs/Region"
@@ -3536,7 +3533,7 @@
       "maxItems": 10,
       "x-columns": [
         "id",
-        "family_id",
+        "family_ids",
         "region",
         "product_code",
         "name_unit_id",
@@ -3551,7 +3548,7 @@
           "scalar": "ID"
         },
         {
-          "nullable": {
+          "array": {
             "scalar": "ID"
           }
         },
@@ -8652,14 +8649,11 @@
           "$ref": "#/$defs/ID"
         },
         {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/ID"
-            },
-            {
-              "type": "null"
-            }
-          ]
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ID"
+          },
+          "uniqueItems": true
         },
         {
           "$ref": "#/$defs/Region"
@@ -8727,7 +8721,7 @@
       "maxItems": 10,
       "x-columns": [
         "id",
-        "family_id",
+        "family_ids",
         "region",
         "product_code",
         "name_unit_id",
@@ -8742,7 +8736,7 @@
           "scalar": "ID"
         },
         {
-          "nullable": {
+          "array": {
             "scalar": "ID"
           }
         },
@@ -17499,7 +17493,7 @@
                     "items": {
                       "enum": [
                         "id",
-                        "family_id",
+                        "family_ids",
                         "region",
                         "product_code",
                         "name_unit_id",
@@ -19677,7 +19671,7 @@
                     "items": {
                       "enum": [
                         "id",
-                        "family_id",
+                        "family_ids",
                         "region",
                         "product_code",
                         "name_unit_id",
@@ -21893,7 +21887,7 @@
                     "items": {
                       "enum": [
                         "id",
-                        "family_id",
+                        "family_ids",
                         "region",
                         "product_code",
                         "name_unit_id",

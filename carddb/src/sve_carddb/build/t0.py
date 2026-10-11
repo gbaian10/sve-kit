@@ -20,5 +20,5 @@ REGISTRY = Registry(
 
 
 def compile_t0() -> CompiledSchema:
-    """Compile all forty T0 tables and their six named JSON column schemas."""
+    """Compile all forty-one T0 tables and their six named JSON column schemas."""
     return compile_schema(REGISTRY, ("t0",), schemas())
