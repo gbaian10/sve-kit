@@ -61,7 +61,7 @@ and bytes; how many objects already exist remotely is unknown offline.
 uv --directory publish run sve-publish upload \
   --export-dir /explicit/preview-root \
   --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" \
-  --skip-cdn-verify --execute
+  --jobs 16 --skip-cdn-verify --execute
 ```
 
 Target selection uses explicit `--account-id`/`--bucket`, or `R2_ACCOUNT_ID`/
@@ -88,6 +88,24 @@ The steps are:
    a browser); the output marks it as skipped.
 4. Check that the index is unchanged, write it with a conditional PUT, and read
    it back.
+
+### Concurrency and run time
+
+`--jobs N` caps the object worker pool (default 16, minimum 1); `--jobs 1`
+processes one object at a time. Every image is read back before any JSON object
+starts, and the index is still written last. After an object fails, no new PUT
+is admitted: workers that see the stop skip their PUT, operations that already
+passed the stop check may still write and finish their read-back, and then the
+failed key is reported. Nothing is rolled back or resent; rerun to fill in what
+is missing or different.
+
+Progress goes to stderr every 100 objects or about 5 seconds and at the start
+and end of each phase; stdout keeps the final JSON summary, and dry-run output
+is unchanged. Each changed object still needs GET, conditional PUT and read-back
+GET, so a first upload of tens of thousands of images can take hours one at a
+time. Workers overlap network waits; actual speed depends on bandwidth, latency,
+R2 rate limits and local checks. The CDN check stays sequential, so `--jobs`
+does not speed it up.
 
 An unchanged rerun makes no PUT. After a failure, current is unchanged; run the
 same command again to upload what is missing. A failed image overwrite can leave

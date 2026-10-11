@@ -232,7 +232,7 @@ def test_conflicting_immutable_json_is_never_overwritten(
     member = loaded.members[0]
     state.objects[member.key] = Stored(b"other", '"other"', member_headers(member))
     with pytest.raises(
-        ExportError, match=r"^Immutable JSON object differs from the export$"
+        ExportError, match=r"^Immutable JSON object differs from the export: "
     ):
         upload(store, loaded, None)
     assert state.objects[member.key].raw == b"other"
@@ -385,7 +385,7 @@ def test_cli_execute_verifies_cdn_and_prints_no_secrets(
         "--execute",
     )
     assert code == 0, output
-    result = json.loads(output)
+    result = json.loads(output.splitlines()[-1])
     assert result["mode"] == "execute"
     assert result["cdn_verification"] == "verified"
     assert "synthetic-secret" not in output
@@ -412,7 +412,9 @@ def test_skip_cdn_still_reads_every_object_back_from_origin(
         "--skip-cdn-verify",
     )
     assert code == 0, output
-    assert json.loads(output)["cdn_verification"] == "skipped"
+    assert json.loads(output.splitlines()[-1])["cdn_verification"] == "skipped"
+    assert "complete" in output
+    assert "written" in output
     assert not any(h.get("host") == "cdn.invalid" for _m, _p, h in state.requests)
     read = {p for m, p, _ in state.requests if m == "GET"}
     for key in [m.key for m in loaded.members] + [i.key for i in loaded.images]:

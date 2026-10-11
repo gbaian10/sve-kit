@@ -1,5 +1,6 @@
 """Upload one verified export: changed objects only, read back, CDN, index last."""
 
+from functools import partial
 from typing import TYPE_CHECKING
 
 from sve_carddb.export.read_api import (
@@ -15,8 +16,11 @@ from sve_carddb.export.read_api import (
 from sve_carddb.export.read_api import read_index as read_index_bytes
 
 from sve_publish.headers import IMAGE_HEADERS, INDEX_HEADERS, member_headers
+from sve_publish.parallel import UploadObject, UploadPool
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from pydantic import JsonValue
     from sve_carddb.export.read_api import Export
 
@@ -73,21 +77,29 @@ def _instant(value: JsonValue) -> tuple[str, str]:
 
 
 def upload(
-    store: R2Store, export: Export, cdn: CDNFreshness | None
+    store: R2Store,
+    export: Export,
+    cdn: CDNFreshness | None,
+    *,
+    jobs: int = 16,
+    progress: Callable[[str], None] | None = None,
 ) -> dict[str, object]:
     """Index is written last, so a failed run leaves the old current; rerun resumes."""
+    if jobs < 1:
+        raise ExportError("Upload jobs must be at least 1")
     remote = store.get(INDEX)
     index = next_index(read_index(remote), export.entry)
-    written = 0
-    digests: dict[str, str] = {}
-    for item in export.images:
-        raw = export.image(item)
-        digests[item.key] = digest(raw)
-        written += _sync(store, item.key, raw, IMAGE_HEADERS, overwrite=True)
-    for member in export.members:
-        written += _sync(
-            store, member.key, member.raw, member_headers(member), overwrite=False
+    pool = UploadPool(store, jobs, len(export.images) + len(export.members), progress)
+    digests = pool.sync(
+        UploadObject(item.key, partial(export.image, item), IMAGE_HEADERS, True)
+        for item in export.images
+    )
+    pool.sync(
+        UploadObject(
+            member.key, partial(bytes, member.raw), member_headers(member), False
         )
+        for member in export.members
+    )
     if cdn is not None:
         _verify_cdn(cdn, export, digests)
     if index is not None:
@@ -97,8 +109,8 @@ def upload(
         raise ExportError("Version index read-back differs from this export")
     return {
         "mode": "execute",
-        "written_files": written,
-        "unchanged_files": len(export.images) + len(export.members) - written,
+        "written_files": pool.written,
+        "unchanged_files": len(export.images) + len(export.members) - pool.written,
         "index": "unchanged" if index is None else "updated",
         "index_revision": final["revision"],
         "cdn_verification": "skipped" if cdn is None else "verified",
@@ -124,25 +136,6 @@ def _commit(store: R2Store, remote: Stored | None, index: dict[str, JsonValue]) 
         expected=None if remote is None else remote.etag,
     ):
         raise ExportError("Version index conditional write failed")
-
-
-def _sync(
-    store: R2Store, key: str, raw: bytes, headers: dict[str, str], *, overwrite: bool
-) -> int:
-    """Return 1 after a verified write; an identical object counts as read back."""
-    existing = store.get(key)
-    if existing is not None and existing.raw == raw and existing.headers == headers:
-        return 0
-    if existing is not None and not overwrite:
-        raise ExportError("Immutable JSON object differs from the export")
-    if not store.put(
-        key, raw, headers, expected=None if existing is None else existing.etag
-    ):
-        raise ExportError("Conditional PUT failed; the object changed concurrently")
-    stored = store.get(key)
-    if stored is None or stored.raw != raw or stored.headers != headers:
-        raise ExportError("Origin read-back differs from the export")
-    return 1
 
 
 def report(export: Export) -> dict[str, object]:
