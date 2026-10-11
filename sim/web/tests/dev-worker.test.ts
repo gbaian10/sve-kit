@@ -3,11 +3,12 @@ import { readFileSync } from "node:fs"
 import { brotliCompressSync, gzipSync } from "node:zlib"
 
 import { parse } from "jsonc-parser"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import worker from "../src/cloudflare/worker"
 
 type Env = Parameters<typeof worker.fetch>[1]
+type Context = Parameters<typeof worker.fetch>[2]
 type ReadObject = NonNullable<Awaited<ReturnType<Env["PREVIEW_BUCKET"]["get"]>>>
 const HASH = "a".repeat(64)
 const BLOB = `snapshots/blobs/${HASH}.json`
@@ -44,7 +45,10 @@ function fixture(bytes: Uint8Array = new TextEncoder().encode('{"synthetic":true
       ),
     )
   const env: Env = { PREVIEW_BUCKET: { get, head }, ASSETS: { fetch: assets } }
-  return { env, object, metadata, get, head, assets, cancel }
+  const pending: Promise<unknown>[] = []
+  const ctx: Context = { waitUntil: (promise) => pending.push(promise) }
+  const flush = () => Promise.all(pending)
+  return { env, ctx, flush, object, metadata, get, head, assets, cancel }
 }
 
 function request(path: string, init?: RequestInit): Request {
@@ -55,15 +59,215 @@ function request(path: string, init?: RequestInit): Request {
   return result
 }
 
+const entries = new Map<string, { bytes: ArrayBuffer; headers: Headers }>()
+const edgeCache = {
+  match: vi.fn((key: Request) => {
+    const entry = entries.get(key.url)
+    return Promise.resolve(
+      entry === undefined
+        ? undefined
+        : new Response(entry.bytes.slice(0), { headers: entry.headers }),
+    )
+  }),
+  put: vi.fn(async (key: Request, response: Response) => {
+    if (
+      key.method !== "GET" ||
+      response.status !== 200 ||
+      !response.headers.get("Cache-Control")?.startsWith("public,")
+    ) {
+      throw new Error("Uncacheable response")
+    }
+    entries.set(key.url, {
+      bytes: await response.arrayBuffer(),
+      headers: new Headers(response.headers),
+    })
+  }),
+}
+
+beforeEach(() => {
+  entries.clear()
+  edgeCache.match.mockClear()
+  edgeCache.put.mockClear()
+  vi.stubGlobal("caches", { default: edgeCache })
+})
+
 afterEach(() => {
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
 })
 
 describe("development Worker", () => {
+  it.each([
+    BLOB,
+    `${BLOB}.gz`,
+    `${BLOB}.br`,
+    `snapshots/manifests/${HASH}.json`,
+    `snapshots/manifests/${HASH}.json.gz`,
+    `snapshots/manifests/${HASH}.json.br`,
+  ])("serves immutable %s from the edge after an R2 miss", async (key) => {
+    const f = fixture()
+    const first = await worker.fetch(
+      request(`/cdn-preview/${key}?v=1`, { headers: { Cookie: "CF_Authorization=first" } }),
+      f.env,
+      f.ctx,
+    )
+    expect(first.status).toBe(200)
+    expect(first.headers.get("Cache-Control")).toBe(IMMUTABLE)
+    expect(await first.text()).toBe('{"synthetic":true}')
+    expect(f.get).toHaveBeenCalledExactlyOnceWith(key)
+    await f.flush()
+
+    f.get.mockRejectedValue(new Error("R2 must not be needed for a hit"))
+    const hit = await worker.fetch(
+      request(`/cdn-preview/${key}?v=2`, {
+        headers: { Cookie: "CF_Authorization=second", Range: "bytes=0-2" },
+      }),
+      f.env,
+      f.ctx,
+    )
+    expect(hit.status).toBe(200)
+    expect(await hit.text()).toBe('{"synthetic":true}')
+    expect(hit.headers.get("Cache-Control")).toBe(IMMUTABLE)
+    expect(hit.headers.get("Content-Type")).toBe("application/json; charset=utf-8")
+    expect(hit.headers.get("ETag")).toBe('"synthetic-etag"')
+    expect(hit.headers.get("X-Sve-Browser-Cache-Control")).toBeNull()
+    expect(f.get).toHaveBeenCalledTimes(1)
+    for (const [cacheRequest] of edgeCache.match.mock.calls) {
+      expect(cacheRequest.url).toBe(`https://dev.svekit.app/cdn-preview/${key}`)
+      expect(cacheRequest.method).toBe("GET")
+      expect([...cacheRequest.headers]).toEqual([])
+    }
+  })
+
+  it.each([INDEX, "images/card_m/20001.webp", "images/art_s/20001-f1.webp"])(
+    "reads updated %s from R2 even with a version query",
+    async (key) => {
+      const f = fixture()
+      f.get
+        .mockResolvedValueOnce(f.object)
+        .mockResolvedValueOnce(fixture(new TextEncoder().encode("updated")).object)
+      const first = await worker.fetch(request(`/cdn-preview/${key}?v=1`), f.env, f.ctx)
+      expect(await first.text()).toBe('{"synthetic":true}')
+      await f.flush()
+      const second = await worker.fetch(request(`/cdn-preview/${key}?v=1`), f.env, f.ctx)
+      expect(await second.text()).toBe("updated")
+      expect(f.get).toHaveBeenCalledTimes(2)
+      expect(edgeCache.match).not.toHaveBeenCalled()
+      expect(edgeCache.put).not.toHaveBeenCalled()
+    },
+  )
+
+  it.each(["GET", "HEAD"])(
+    "preserves conditions and compressed representations on cache hits (%s)",
+    async (method) => {
+      const json = '{"synthetic":true}'
+      const variants = [
+        { suffix: "", bytes: new TextEncoder().encode(json), encoding: undefined },
+        { suffix: ".gz", bytes: gzipSync(json), encoding: "gzip" },
+        { suffix: ".br", bytes: brotliCompressSync(json), encoding: "br" },
+      ]
+      for (const variant of variants) {
+        const f = fixture(variant.bytes)
+        if (variant.encoding !== undefined) f.metadata.contentEncoding = variant.encoding
+        f.object.httpEtag = `"etag${variant.suffix}"`
+        const first = await worker.fetch(
+          request(`/cdn-preview/${BLOB}${variant.suffix}`),
+          f.env,
+          f.ctx,
+        )
+        await first.arrayBuffer()
+        await f.flush()
+      }
+
+      const f = fixture()
+      f.get.mockRejectedValue(new Error("unexpected R2 read"))
+      f.head.mockRejectedValue(new Error("unexpected R2 metadata read"))
+      const options = vi.fn()
+      const OriginalResponse = Response
+      vi.stubGlobal(
+        "Response",
+        class extends OriginalResponse {
+          constructor(...args: ConstructorParameters<typeof OriginalResponse>) {
+            super(...args)
+            options(args[1])
+          }
+        },
+      )
+      for (const variant of variants) {
+        for (const condition of [
+          undefined,
+          '"different"',
+          `W/"etag${variant.suffix}"`,
+          `"other", "etag${variant.suffix}"`,
+          "*",
+        ]) {
+          const matches = condition !== undefined && condition !== '"different"'
+          const response = await worker.fetch(
+            request(`/cdn-preview/${BLOB}${variant.suffix}`, {
+              method,
+              headers: condition === undefined ? {} : { "If-None-Match": condition },
+            }),
+            f.env,
+            f.ctx,
+          )
+          expect(response.status).toBe(matches ? 304 : 200)
+          expect(response.headers.get("ETag")).toBe(`"etag${variant.suffix}"`)
+          expect(response.headers.get("Content-Encoding")).toBe(variant.encoding ?? null)
+          expect(response.headers.get("Cache-Control")).toBe(IMMUTABLE)
+          if (matches || method === "HEAD") expect(response.body).toBeNull()
+          else {
+            expect(new Uint8Array(await response.arrayBuffer())).toEqual(
+              new Uint8Array(variant.bytes),
+            )
+            expect(options).toHaveBeenLastCalledWith(
+              expect.objectContaining({ encodeBody: "manual" }),
+            )
+          }
+        }
+      }
+      expect(f.get).not.toHaveBeenCalled()
+      expect(f.head).not.toHaveBeenCalled()
+    },
+  )
+
+  it.each(["lookup", "write", "unavailable"])(
+    "keeps serving R2 when the cache %s fails",
+    async (operation) => {
+      const f = fixture()
+      if (operation === "lookup")
+        edgeCache.match.mockRejectedValueOnce(new Error("cache unavailable"))
+      if (operation === "write") edgeCache.put.mockRejectedValueOnce(new Error("cache unavailable"))
+      if (operation === "unavailable") vi.stubGlobal("caches", undefined)
+      const response = await worker.fetch(request(`/cdn-preview/${BLOB}`), f.env, f.ctx)
+      expect(response.status).toBe(200)
+      expect(await response.text()).toBe('{"synthetic":true}')
+      expect(response.headers.get("Cache-Control")).toBe(IMMUTABLE)
+      await expect(f.flush()).resolves.toBeDefined()
+    },
+  )
+
+  it("returns the R2 response while waitUntil keeps the cache write pending", async () => {
+    const f = fixture()
+    const write = Promise.withResolvers<undefined>()
+    edgeCache.put.mockImplementationOnce(() => write.promise)
+    try {
+      const response = await worker.fetch(request(`/cdn-preview/${BLOB}`), f.env, f.ctx)
+      expect(await response.text()).toBe('{"synthetic":true}')
+      const complete = vi.fn()
+      const background = f.flush().then(complete)
+      await Promise.resolve()
+      expect(complete).not.toHaveBeenCalled()
+      write.resolve(undefined)
+      await background
+      expect(complete).toHaveBeenCalledOnce()
+    } finally {
+      write.resolve(undefined)
+    }
+  })
+
   it.each(["POST", "PUT", "PATCH", "DELETE", "OPTIONS"])("rejects %s", async (method) => {
     const f = fixture()
-    const response = await worker.fetch(request(`/cdn-preview/${INDEX}`, { method }), f.env)
+    const response = await worker.fetch(request(`/cdn-preview/${INDEX}`, { method }), f.env, f.ctx)
     expect(response.status).toBe(405)
     expect(response.headers.get("Allow")).toBe("GET, HEAD")
     expect(response.headers.get("Cache-Control")).toBe("no-store")
@@ -71,6 +275,8 @@ describe("development Worker", () => {
     expect(f.get).not.toHaveBeenCalled()
     expect(f.head).not.toHaveBeenCalled()
     expect(f.assets).not.toHaveBeenCalled()
+    expect(edgeCache.match).not.toHaveBeenCalled()
+    expect(edgeCache.put).not.toHaveBeenCalled()
   })
 
   it.each([
@@ -88,7 +294,7 @@ describe("development Worker", () => {
     "images/art_m/9007199254740991.webp",
   ])("reads only the public key %s", async (key) => {
     const f = fixture()
-    const response = await worker.fetch(request(`/cdn-preview/${key}?v=3`), f.env)
+    const response = await worker.fetch(request(`/cdn-preview/${key}?v=3`), f.env, f.ctx)
     expect(response.status).toBe(200)
     expect(await response.text()).toBe('{"synthetic":true}')
     expect(f.get).toHaveBeenCalledExactlyOnceWith(key)
@@ -135,7 +341,7 @@ describe("development Worker", () => {
     `/cdn-preview\\snapshots/blobs/${HASH}.json`,
   ])("rejects the path %s without reading R2 or serving HTML", async (path) => {
     const f = fixture()
-    const response = await worker.fetch(request(path), f.env)
+    const response = await worker.fetch(request(path), f.env, f.ctx)
     expect(response.status).toBe(404)
     expect(response.headers.get("Cache-Control")).toBe("no-store")
     expect(response.headers.get("Content-Type")).toBeNull()
@@ -143,17 +349,20 @@ describe("development Worker", () => {
     expect(f.get).not.toHaveBeenCalled()
     expect(f.head).not.toHaveBeenCalled()
     expect(f.assets).not.toHaveBeenCalled()
+    expect(edgeCache.match).not.toHaveBeenCalled()
+    expect(edgeCache.put).not.toHaveBeenCalled()
   })
 
   it.each(["GET", "HEAD"])("returns an empty 404 for missing objects (%s)", async (method) => {
     const f = fixture()
     f.get.mockResolvedValue(null)
     f.head.mockResolvedValue(null)
-    const response = await worker.fetch(request(`/cdn-preview/${BLOB}`, { method }), f.env)
+    const response = await worker.fetch(request(`/cdn-preview/${BLOB}`, { method }), f.env, f.ctx)
     expect(response.status).toBe(404)
     expect(await response.text()).toBe("")
     expect(response.headers.get("Cache-Control")).toBe("no-store")
     expect(f.assets).not.toHaveBeenCalled()
+    expect(edgeCache.put).not.toHaveBeenCalled()
   })
 
   it.each(["gzip", "br"])(
@@ -177,7 +386,7 @@ describe("development Worker", () => {
         },
       )
       const suffix = encoding === "gzip" ? "gz" : "br"
-      const response = await worker.fetch(request(`/cdn-preview/${BLOB}.${suffix}`), f.env)
+      const response = await worker.fetch(request(`/cdn-preview/${BLOB}.${suffix}`), f.env, f.ctx)
       expect(response.status).toBe(200)
       expect(new Uint8Array(await response.arrayBuffer())).toEqual(new Uint8Array(bytes))
       expect(response.headers.get("Content-Type")).toBe("application/json")
@@ -190,7 +399,7 @@ describe("development Worker", () => {
   it("does not invent absent metadata", async () => {
     const f = fixture()
     delete f.object.httpMetadata
-    const response = await worker.fetch(request(`/cdn-preview/${BLOB}`), f.env)
+    const response = await worker.fetch(request(`/cdn-preview/${BLOB}`), f.env, f.ctx)
     expect(response.headers.get("Content-Type")).toBeNull()
     expect(response.headers.get("Content-Encoding")).toBeNull()
     expect(response.headers.get("ETag")).toBe('"synthetic-etag"')
@@ -206,12 +415,14 @@ describe("development Worker", () => {
           headers: { "If-None-Match": condition },
         }),
         f.env,
+        f.ctx,
       )
       expect(response.status).toBe(304)
       expect(response.body).toBeNull()
       expect(response.headers.get("ETag")).toBe('"synthetic-etag"')
       expect(response.headers.get("Cache-Control")).toBe(IMMUTABLE)
       expect(await f.object.body.getReader().read()).toEqual({ done: true, value: undefined })
+      expect(edgeCache.put).not.toHaveBeenCalled()
     },
   )
 
@@ -223,6 +434,7 @@ describe("development Worker", () => {
         headers: { "If-None-Match": '"other", W/"one,two"' },
       }),
       f.env,
+      f.ctx,
     )
     expect(response.status).toBe(304)
   })
@@ -236,6 +448,7 @@ describe("development Worker", () => {
           headers: { "If-None-Match": condition },
         }),
         f.env,
+        f.ctx,
       )
       expect(response.status).toBe(200)
       expect(await response.text()).toBe('{"synthetic":true}')
@@ -250,6 +463,7 @@ describe("development Worker", () => {
         headers: condition === undefined ? {} : { "If-None-Match": condition },
       }),
       f.env,
+      f.ctx,
     )
     expect(response.status).toBe(condition === undefined ? 200 : 304)
     expect(response.body).toBeNull()
@@ -258,6 +472,7 @@ describe("development Worker", () => {
     expect(response.headers.get("Cache-Control")).toBe(IMMUTABLE)
     expect(f.head).toHaveBeenCalledExactlyOnceWith(BLOB)
     expect(f.get).not.toHaveBeenCalled()
+    expect(edgeCache.put).not.toHaveBeenCalled()
   })
 
   it.each([
@@ -292,9 +507,17 @@ describe("development Worker", () => {
     const f = fixture()
     if (cache === undefined) delete f.metadata.cacheControl
     else f.metadata.cacheControl = cache
-    const response = await worker.fetch(request(`/cdn-preview/${key}`), f.env)
+    const response = await worker.fetch(request(`/cdn-preview/${key}`), f.env, f.ctx)
     expect(response.status).toBe(200)
     expect(response.headers.get("Cache-Control")).toBe(expected)
+    if (key.startsWith("snapshots/blobs/") || key.startsWith("snapshots/manifests/")) {
+      await response.arrayBuffer()
+      await f.flush()
+      const hit = await worker.fetch(request(`/cdn-preview/${key}`), f.env, f.ctx)
+      expect(hit.headers.get("Cache-Control")).toBe(expected)
+      expect(hit.headers.get("X-Sve-Browser-Cache-Control")).toBeNull()
+      expect(f.get).toHaveBeenCalledTimes(1)
+    }
   })
 
   it.each(["HEAD", "GET"])(
@@ -308,6 +531,7 @@ describe("development Worker", () => {
           headers: { "If-None-Match": f.object.httpEtag },
         }),
         f.env,
+        f.ctx,
       )
       expect(response.status).toBe(304)
       expect(response.headers.get("Cache-Control")).toBe("no-store")
@@ -317,11 +541,12 @@ describe("development Worker", () => {
   it("returns an empty uncached error when R2 fails", async () => {
     const f = fixture()
     f.get.mockRejectedValue(new Error("synthetic failure"))
-    const response = await worker.fetch(request(`/cdn-preview/${BLOB}`), f.env)
+    const response = await worker.fetch(request(`/cdn-preview/${BLOB}`), f.env, f.ctx)
     expect(response.status).toBe(502)
     expect(await response.text()).toBe("")
     expect(response.headers.get("Cache-Control")).toBe("no-store")
     expect(f.assets).not.toHaveBeenCalled()
+    expect(edgeCache.put).not.toHaveBeenCalled()
   })
 
   it.each(["/", "/cards", "/decks", "/play", "/cdn-preview-info"])(
@@ -329,7 +554,7 @@ describe("development Worker", () => {
     async (path) => {
       const f = fixture()
       const req = request(path)
-      const response = await worker.fetch(req, f.env)
+      const response = await worker.fetch(req, f.env, f.ctx)
       expect(response.headers.get("Content-Type")).toBe("text/html")
       expect(f.assets).toHaveBeenCalledExactlyOnceWith(req)
       expect(f.get).not.toHaveBeenCalled()
@@ -343,10 +568,12 @@ describe("development Worker", () => {
     "https://dev.svekit.app:8443/",
   ])("denies other origins on %s", async (url) => {
     const f = fixture()
-    const response = await worker.fetch(new Request(url), f.env)
+    const response = await worker.fetch(new Request(url), f.env, f.ctx)
     expect(response.status).toBe(404)
     expect(f.get).not.toHaveBeenCalled()
     expect(f.assets).not.toHaveBeenCalled()
+    expect(edgeCache.match).not.toHaveBeenCalled()
+    expect(edgeCache.put).not.toHaveBeenCalled()
   })
 
   it("keeps all routes behind the Worker and disables unprotected platform URLs", () => {
