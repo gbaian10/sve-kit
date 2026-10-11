@@ -579,8 +579,13 @@ it("an index entry that differs from its manifest is an error, also for a stored
     const h = harness(served, cacheStorage)
     h.session.load(base, "jp", "index")
     await h.settled()
-    expect(h.status()).toMatchObject({ phase: "error", generation: null })
-    expect(h.events.some((event) => event.kind === "ready")).toBe(false)
+    if (cacheStorage === storage) {
+      expect(h.status()).toMatchObject({ phase: "ready", unconfirmed: true })
+      expect(h.status().error?.message).toContain("revision")
+    } else {
+      expect(h.status()).toMatchObject({ phase: "error", generation: null })
+      expect(h.events.some((event) => event.kind === "ready")).toBe(false)
+    }
   }
 })
 
@@ -1004,7 +1009,9 @@ it("a stored index image answers every query like the index it was encoded from"
 
 describe("persistent index images", () => {
   const readyMetrics = (events: SearchEvent[]) =>
-    events.flatMap((event) => (event.kind === "ready" ? [event.metrics] : []))
+    events.flatMap((event) =>
+      event.kind === "ready" && event.searchReady !== false ? [event.metrics] : [],
+    )
 
   it("a reload of the same manifest restores the index without the manifest or any blob", async () => {
     const storage = memoryCache()
@@ -1041,7 +1048,9 @@ describe("persistent index images", () => {
     const rebuilt = async (h: ReturnType<typeof harness>, edition: "jp" | "en") => {
       h.session.load(base, edition, "preview")
       await h.settled()
-      return readyMetrics(h.events).map((metrics) => metrics.restored)
+      return readyMetrics(h.events)
+        .slice(-1)
+        .map((metrics) => metrics.restored)
     }
     expect(await rebuilt(harness(served, storage, "other build"), "jp")).toEqual([false])
     expect(await rebuilt(harness(served, storage), "en")).toEqual([false])
@@ -1072,7 +1081,7 @@ describe("persistent index images", () => {
     second.session.load(base, "jp", "preview")
     second.channel.search(query)
     await second.settled()
-    expect(readyMetrics(second.events)).toMatchObject([{ restored: false }])
+    expect(readyMetrics(second.events).slice(-1)).toMatchObject([{ restored: false }])
     const before = first.status().result
     const after = second.status().result
     if (before.phase !== "complete" || after.phase !== "complete") throw new Error("missing result")
@@ -1105,4 +1114,143 @@ describe("persistent index images", () => {
     const namespace = await storage.open(`sve-search-index:${encodeURIComponent(base)}`)
     expect(await namespace.keys()).toEqual([])
   })
+})
+
+it("suggestions preserve exact printing and alias ranking, and recent summaries have explicit misses", async () => {
+  const h = harness()
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  h.channel.suggest("bp01-51", "jp")
+  await expect.poll(() => h.channel.getStatus().result.phase, POLL).toBe("complete")
+  const exact = h.channel.getStatus().result
+  expect(exact.phase === "complete" && exact.suggestions?.[0]).toMatchObject({
+    field: "cardNo",
+    rank: 0,
+    summary: { cardNo: "BP01-051", region: "jp" },
+  })
+  h.channel.suggest("テンプラー", "jp")
+  await expect.poll(() => h.channel.getStatus().result.phase, POLL).toBe("complete")
+  const alias = h.channel.getStatus().result
+  expect(alias.phase === "complete" && alias.suggestions?.[0]).toMatchObject({ field: "alias" })
+  h.channel.recent(
+    [
+      "p:does-not-exist",
+      ...(exact.phase === "complete"
+        ? (exact.suggestions?.map((item) => item.summary.printingId) ?? [])
+        : []),
+    ],
+    "jp",
+  )
+  await expect.poll(() => h.channel.getStatus().result.phase, POLL).toBe("complete")
+  const recent = h.channel.getStatus().result
+  expect(recent.phase === "complete" && recent.recent?.[0]).toEqual({
+    printingId: "p:does-not-exist",
+    state: "not-in-edition",
+  })
+  expect(recent.phase === "complete" && recent.recent?.[1]?.state).toBe("available")
+})
+
+it("a complete cached view and index are usable while the entry is blocked, without reading metadata", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const first = harness(served, storage)
+  first.session.load(base, "jp", "preview")
+  await first.settled()
+  const metadata = (built.manifest["files"] as JsonObject[]).filter((file) =>
+    (file["row_counts"] as JsonObject[]).some((row) => row["table"] === "printing_image"),
+  )
+  const blobs = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
+  for (const file of metadata) {
+    await blobs.delete(`${base}/${stringValue(file["path"])}`)
+    served.files.delete(stringValue(file["path"]))
+  }
+  served.requests.length = 0
+  const release = served.hold("snapshots/preview/current.json")
+  const warm = harness(served, storage)
+  warm.channel.view({ ...query, limit: 60 })
+  warm.session.load(base, "jp", "preview")
+  await expect.poll(() => warm.status().result.phase, POLL).toBe("complete")
+  const result = warm.status().result
+  if (result.phase !== "complete" || !result.view) throw new Error("view missing")
+  expect(result.view.faces.length).toBeGreaterThan(0)
+  expect(
+    result.view.faces.every(
+      (face) =>
+        face.source !== undefined ||
+        face.asset["availability"] !== "available" ||
+        face.asset["publication_state"] !== "approved",
+    ),
+  ).toBe(true)
+  expect(served.requests).toEqual(["snapshots/preview/current.json"])
+  expect(warm.status().unconfirmed).toBe(true)
+  await expect.poll(() => warm.status().searchReady, POLL).toBe(true)
+  release()
+  await warm.settled()
+  expect(warm.status().unconfirmed).toBe(false)
+})
+
+it("an index-only hit restores before the entry and completes images from verified metadata", async () => {
+  const storage = memoryCache()
+  const first = harness(origin(), storage)
+  first.session.load(base, "jp", "preview")
+  await first.settled()
+  await storage.delete(`sve-search-view:${encodeURIComponent(base)}`)
+  const served = origin()
+  const release = served.hold("snapshots/preview/current.json")
+  const warm = harness(served, storage)
+  warm.channel.view({ ...query, limit: 60 })
+  warm.session.load(base, "jp", "preview")
+  await expect.poll(() => warm.status().result.phase, POLL).toBe("complete")
+  expect(served.requests).toEqual(["snapshots/preview/current.json"])
+  release()
+  await warm.settled()
+})
+
+it("missing or half-written views recover and image errors cannot become an unavailable view", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const first = harness(served, storage)
+  first.session.load(base, "jp", "preview")
+  await first.settled()
+  const views = await storage.open(`sve-search-view:${encodeURIComponent(base)}`)
+  for (const key of await views.keys()) await views.put(key, new Response("{"))
+  const restored = harness(served, storage)
+  restored.channel.view({ ...query, limit: 60 })
+  restored.session.load(base, "jp", "preview")
+  await restored.settled()
+  await expect.poll(() => restored.status().result.phase, POLL).toBe("complete")
+  const blobs = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
+  await storage.delete(`sve-search-view:${encodeURIComponent(base)}`)
+  for (const file of built.manifest["files"] as JsonObject[])
+    if ((file["row_counts"] as JsonObject[]).some((row) => row["table"] === "printing_image")) {
+      await blobs.delete(`${base}/${stringValue(file["path"])}`)
+      served.files.set(stringValue(file["path"]), new Uint8Array([0]))
+    }
+  const broken = harness(served, storage)
+  broken.channel.view({ ...query, limit: 60 })
+  broken.session.load(base, "jp", "preview")
+  await broken.settled()
+  await expect.poll(() => broken.status().result.phase, POLL).toBe("error")
+})
+
+it("remembers the current completed query for a view-first reload without metadata", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const first = harness(served, storage)
+  first.session.load(base, "jp", "preview")
+  await first.settled()
+  const current = { ...query, state: { ...DEFAULT_QUERY, text: "bp01-001" }, limit: 60 }
+  first.channel.view(current, true)
+  await expect.poll(() => first.channel.getStatus().result.phase, POLL).toBe("complete")
+  const pointer = await storage.open(`sve-search-view-selection:${encodeURIComponent(base)}`)
+  await expect.poll(async () => (await pointer.keys()).length, POLL).toBe(1)
+  served.requests.length = 0
+  const release = served.hold("snapshots/preview/current.json")
+  const warm = harness(served, storage)
+  warm.channel.view(current)
+  warm.session.load(base, "jp", "preview")
+  await expect.poll(() => warm.channel.getStatus().result.phase, POLL).toBe("complete")
+  expect(served.requests).toEqual(["snapshots/preview/current.json"])
+  release()
+  await warm.settled()
 })

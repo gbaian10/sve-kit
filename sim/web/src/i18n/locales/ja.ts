@@ -68,6 +68,15 @@ export default {
     neutral: "ニュートラル",
   },
   results: {
+    facet: {
+      types: "カードタイプ",
+      rarities: "レアリティ",
+      altArtOnly: "パラレルのみ",
+      mechanics: "能力",
+      unit: "表示単位",
+      sort: "並び順",
+    },
+    unsupported: "この検索条件はまだ使用できません。条件を変更または解除してください。",
     countUnit: "枚",
     sort: "並び順",
     sortDefault: "番号順",

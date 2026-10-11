@@ -1,11 +1,13 @@
 import { screen, within } from "@testing-library/react"
-import { afterEach, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
 import { arrayValue, type JsonObject, objectValue, stringValue } from "../../data"
 import { prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
+import { TestSearchWorker } from "../../test-utils/search-worker"
+beforeEach(() => vi.stubGlobal("Worker", TestSearchWorker))
 
 const built = await buildSnapshot({ encodeImage: () => Promise.resolve(new Uint8Array([1])) })
 const hash = async (bytes: Uint8Array) =>
@@ -94,10 +96,12 @@ it("shows how many startup files have arrived during a first download", async ()
   await renderRoutes(routes, { initialEntries: ["/cards"] })
   const bar = await screen.findByRole("progressbar", { name: "卡片資料下載進度" })
   await vi.waitFor(() => {
-    expect(bar.getAttribute("aria-valuenow")).toBe(String(startup.length - 1))
+    expect(bar.getAttribute("aria-valuenow")).toBe(String(startup.length - 2))
   })
-  expect(bar.getAttribute("aria-valuemax")).toBe(String(startup.length))
-  expect(screen.getByText(`${String(startup.length - 1)}/${String(startup.length)}`)).toBeTruthy()
+  expect(bar.getAttribute("aria-valuemax")).toBe(String(startup.length - 1))
+  expect(
+    screen.getByText(`${String(startup.length - 2)}/${String(startup.length - 1)}`),
+  ).toBeTruthy()
   release()
   await vi.waitFor(() => {
     expect(screen.queryByRole("progressbar")).toBeNull()

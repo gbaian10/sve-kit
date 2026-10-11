@@ -16,7 +16,7 @@ import { type Files, findBase, type Fragment, isCompatible, joinDetail } from ".
 import { checkEntry, indexEntries } from "./index-entry"
 import { transferDigest } from "./integrity"
 import { MetadataBytes, type MetadataProgress } from "./metadata"
-import { requestQueue } from "./request-queue"
+import { appRequests, requestQueue } from "./request-queue"
 import { VerifiedCache } from "./verified-cache"
 
 type LoadPhase = "index" | "manifest" | "bootstrap"
@@ -108,7 +108,7 @@ export function createSnapshotClient(
   base: string,
   options: SnapshotClientOptions = {},
 ): SnapshotClient {
-  const requests = requestQueue(options.fetch ?? ((url, init) => fetch(url, init)))
+  const requests = options.fetch ? requestQueue(options.fetch) : appRequests
   const fetcher = requests.foreground
   const entry = options.entry ?? "index"
   const decode = createDecoder()
@@ -329,7 +329,7 @@ export function createSnapshotClient(
     // A first download shows how many files have arrived, so a slow start reads as progress
     // rather than a stuck page. A background update keeps the old data and needs no count.
     let done = 0
-    const total = startup.length
+    const total = startup.filter(([, file]) => file["role"] === "bootstrap").length
     progress("bootstrap", { done, total })
     // One failed file cancels the rest of the batch, so a retry is not queued behind it.
     const batch = new AbortController()
@@ -342,8 +342,9 @@ export function createSnapshotClient(
           batch.signal,
         )
         const result = await decode({ kind: "file", file, bytes: data, version })
-        done += 1
-        if (!previous && !batch.signal.aborted) progress("bootstrap", { done, total })
+        if (file["role"] === "bootstrap") done += 1
+        if (!previous && !batch.signal.aborted && file["role"] === "bootstrap")
+          progress("bootstrap", { done, total })
         return { key, result }
       }),
     ).catch((error: unknown) => {

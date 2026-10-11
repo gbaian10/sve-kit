@@ -1,58 +1,54 @@
-# Worker 查卡介面
+# Worker search and complete list views
 
-`SearchSession` 擁有一個 Worker 與完整的索引世代。以 `createChannel()` 建立獨立的
-`SearchChannel`，建議清單與結果列表可共用同一份索引，各自訂閱 `getStatus`／`subscribe`。
-通道保存最後一筆輸入；下載完成前只有 pending，完整世代就緒後自動查詢。
-Worker 在 task 邊界合併每個通道尚未執行的查詢，只掃描最新 queryId；已開始的同步掃描不會中途搶占。
-關閉通道會丟棄該通道排隊中的查詢，其他通道繼續使用索引。
+`SearchSession` owns one Worker generation. Each `createChannel()` has its own last input,
+query ID and result. Channels support `search`, `view`, `suggest`, and a batch of at most 20
+recent printing summaries. Replies carry generation, channel ID and query ID; old replies
+cannot replace current results. Suggestions preserve exact printing identity and name/alias
+ranking. Missing recent IDs explicitly return `not-in-edition`.
 
-世代的 status 帶 `root`、`edition`、`generation`、`manifestHash` 與 `dataVersion`。
-更新期間這些欄位仍指向目前可查詢的世代，`loading` 表示正在下載的根與地區。
-結果也帶 root 與 generation，晚到的 queryId／generation 不會覆寫新結果。
-載入失敗保留舊索引；切換地區的查詢必須等該地區完整就緒。
-查詢的地區正在下載時結果為 pending，沒有任何載入會提供該地區時為 `edition-not-ready`，先查詢後載入也一樣。
-量測由建構子的 `onMetrics` callback 另取，不屬於公開 status。
+Search supports text, classes, printing home-set family codes and cost. Types, rarities,
+mechanics, alternate-art filtering, other units and other sorting return `unsupported-query`.
+The list shows only cards released in the selected edition. Names remain multilingual, and
+UI language is independent of card edition. Card detail retains its on-demand compatibility
+path; only the card page starts the full snapshot client.
 
-查詢錯誤與載入錯誤分開：通道結果的 `error.kind` 為 `unsupported-query`、
-`edition-not-ready`、`query-failed` 或 `load-unavailable`；不支援的條件列在 `facets`。
-世代的 `error.kind` 為 `load-failed`、`worker-failed` 或 `cancelled`。
-目前 Worker 支援文字、職業、版次所屬卡包、費用、卡片單位與卡號排序。
-**Worker 路徑對不支援的條件回 error；同步 Catalog 路徑會略過。**
-同步 Catalog 目前還會略過費用與卡包篩選，因此 V1 暫時 hook 不能宣稱兩條路徑已有相同語意。
-此差異不修改 `domain/search`。
+The Worker retains scalar index columns, a shared string pool, multilingual class/set
+options and image targets (printing ID, face ID, permanent integer ID, ordinal and owner).
+Only bounded pages and purpose-specific summaries return to the main thread. Set options
+come from product families and use natural family-code ordering, then permanent ID.
 
-查詢比對直接讀 Uint32 欄位與共用字串池，不把所有 entries 還原為物件。
-建索引逐卡處理，只保留所選地區的版次與摘要；跨地區名稱仍可比對。
-只有當頁命中會還原 `CardSummary`，不載入完整卡片詳細資料。
-現有 N0 輸入仍混放兩地區，完整讀取與內容雜湊核對後才投影；分包 plan 可由後續格式工作替換。
+A complete view contains its full query, offset, limit, total, ordered summaries, options,
+and every printing face's verified publication/availability state, card version, variants
+and image sources computed through `mediaImageSource`. A missing descriptor, hash failure,
+or missing available-image variants is an error, never a cached unavailable image.
+View hits read no printing-image metadata. Index-only hits complete the needed metadata
+through the same app request queue.
 
-CacheStorage 依 root 分 namespace，以內容定址跨版重用。完整世代發布後，保留 JP、EN
-各自目前與上一份不同的成功 plan 所需 blob，淘汰其餘 key；重複載入同一份 plan 不擠掉上一份。
-plan 記錄存在相同 cache，因此 Worker 重啟後仍可淘汰。快取無法使用或 quota 耗盡時可直接下載。
-不同頁籤同時寫同一 root 的 cache 沒有跨頁籤協調，可能造成重新下載；不影響內容驗證。
+Startup reads the verified active selection and matching view before awaiting the network
+entry. It then restores the index and checks the entry in the background. `searchReady`
+is separate from view availability. Failed checks preserve usable local data and expose
+its unconfirmed/stale status. Index entries still require capability admission, manifest
+field agreement and monotonic revision/content identity. Bodies are written before the
+active selection; missing or damaged bodies fall back to verified raw reconstruction.
 
-Worker 發出 error／messageerror 時會清掉不可用世代，下次 load 或 retry 建立新 Worker，從 cache 重建。
-瀏覽器因 OOM 殺掉 Worker 時**不保證觸發 onerror**，可能持續停在 downloading／pending；
-目前沒有 watchdog，手機驗收需觀察此限制。整個 Worker 終止後不能立即保留舊索引的可查詢性。
+Cache identity includes root, manifest hash, reader build and local format. View slots also
+include the normalizer version, selected-region policy and complete query. Multilingual
+names avoid a separate language-specific record. Index format is 2; view format is 1;
+the public snapshot wire format is unchanged. Automatic raw/index/view/metadata caches
+share 64 MiB per root and 128 MiB per origin. Views have a 2 MiB raw-body subquota; an
+oversized view stays usable in memory. Successful raw plans and verified records retain
+at most two generations. Quota failure gets one cleanup/retry, then memory fallback.
+CacheStorage has no multi-record transaction or cross-tab lock: eviction may cause a miss,
+which requires body verification and reconstruction rather than mixing generations.
 
-## 沿用已驗證的結果
+Client, Worker and metadata requests share one main-thread queue. It deduplicates body
+reads, cancels subscribers independently, promotes queued visible work, and holds permits
+until the response body finishes. Total concurrency is at most 32, background at most 24.
+Config is independent of bootstrap progress; each verified bootstrap key contributes once
+(the fixed real-data batch is 84). Bootstrap completion does not imply a complete view.
 
-完整世代讀取成功、發布 ready 之後，Worker 把索引（Uint32 欄位、字串池與當頁摘要欄）編碼成一份
-image，以 `src/data/verified-cache.ts` 存進 CacheStorage。下次載入時仍重新抓取 pointer 或版本
-索引並判版本能力准入；只要 manifest hash 對得上存好的 image，就直接讀回索引，不再抓 manifest、不讀任何 blob，也不重做
-解碼與逐檔雜湊；image 紀錄自己的 hash 仍須核對。版本索引的入口欄位仍與存下的 manifest 欄位比對，不一致照樣報錯。
-格式與一致性由匯出／上傳前的 Python reader 驗證，瀏覽器不再做 canonical／schema／placement 重驗。
-snapshot client 的啟動包（manifest、config、bootstrap 片段）用同一個模組存成 JSON 紀錄，行為相同；
-紀錄在畫面顯示後才分段序列化寫入。
-
-- 鍵：root（各自的 cache namespace）、種類、格式版本常數（`INDEX_IMAGE_FORMAT`、
-  `SNAPSHOT_RECORD_FORMAT`，改編碼必須遞增）、建置識別、slot（搜尋為地區）與 manifest hash，任一不同即不沿用。
-- 建置識別：`vite.config.ts` 的 `sve-build-id` plugin 把 `src/`（測試除外）、carddb 契約 schema、
-  `bun.lock`、套件與編譯設定的內容雜湊注入頁面和 Worker 的 `src/data/build-id.ts`。開發模式在這些檔案變動時重算並
-  讓該模組失效，重新整理後舊紀錄就不再命中；production 在建置時固定，來源沒變的部署會沿用使用者已存的紀錄。
-- 淘汰：每個 slot 保留最後寫入的兩份不同紀錄，同一份重複寫入不擠掉另一份；以 CacheStorage 的插入順序
-  淘汰該 slot 的最舊紀錄，寫入後再清理一次，並行寫入完成後最多兩份；其他 slot 與其他 root 不受影響。
-  同 slot 並行重寫時可能淘汰剛重寫的紀錄，下一次載入會退回完整下載與解碼，不影響內容正確性。
-- 完整性：紀錄附 SHA-256，讀回不符即刪除並當作未命中。讀回失敗、格式不符、quota 不足或儲存不可用
-  都安靜退回完整下載、hash 核對與解碼；載入失敗不寫入任何紀錄。
-- Chromium 的 `crypto.subtle.digest` 在呼叫端同步計算，大紀錄的雜湊會佔用該執行緒。
+React adapters in `app/snapshot.ts` expose `useSearchReadiness`, `useSearch`, `useSearchView`,
+`useListView`, `useWorkerSuggestions`, `useRecentSummaries` and `useSetOptions`.
+`useListView` requests bounded 60-card pages and returns a complete image adapter after all
+requested pages belong to the same generation. Pending and unsupported results remain
+explicit. `useCardSnapshot` is the temporary full-detail path for the card page.

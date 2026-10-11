@@ -1,4 +1,5 @@
 import { BUILD_ID } from "./build-id"
+import { bodyHeaders, trimDataCaches } from "./cache-budget"
 import { transferDigest } from "./integrity"
 
 // Browser storage can be cleared or damaged; a record is used only when its bytes still match.
@@ -7,6 +8,9 @@ const DIGEST = "x-sve-sha256"
 // Store only successful decoding results; damaged or unreadable records require a full rebuild.
 // Root and build isolation lets reloads reuse the current result without repeating its decoding.
 export class VerifiedCache {
+  private readonly root: string
+  private readonly storage: CacheStorage | undefined
+  lastRead = { readMs: 0, digestMs: 0 }
   private readonly prefix: string
   private readonly version: string
   private readonly cache: Promise<Cache | undefined>
@@ -18,6 +22,8 @@ export class VerifiedCache {
     storage: CacheStorage | undefined,
     build = BUILD_ID,
   ) {
+    this.root = root
+    this.storage = storage
     this.prefix = `${root}/__sve-verified/${kind}`
     this.version = `v${String(format)}/${encodeURIComponent(build)}`
     this.cache = storage
@@ -50,6 +56,7 @@ export class VerifiedCache {
   }
 
   async read(slot: string, manifestHash: string): Promise<Uint8Array | undefined> {
+    const start = performance.now()
     const cache = await this.cache
     if (!cache) return undefined
     try {
@@ -57,7 +64,10 @@ export class VerifiedCache {
       const response = await cache.match(key)
       if (!response) return undefined
       const payload = new Uint8Array(await response.arrayBuffer())
-      if (response.headers.get(DIGEST) === (await transferDigest(payload))) return payload
+      const mark = performance.now()
+      const digest = await transferDigest(payload)
+      this.lastRead = { readMs: mark - start, digestMs: performance.now() - mark }
+      if (response.headers.get(DIGEST) === digest) return payload
       await this.remove(slot, manifestHash)
     } catch {
       // An unreadable record is a miss; the caller rebuilds from verified input.
@@ -83,7 +93,17 @@ export class VerifiedCache {
       const digest = await transferDigest(payload)
       // Reinsert a reused record so it remains the current one in insertion order.
       await cache.delete(key)
-      await cache.put(key, new Response(payload, { headers: { [DIGEST]: digest } }))
+      const response = () =>
+        new Response(payload, { headers: { [DIGEST]: digest, ...bodyHeaders(payload.length) } })
+      if (this.storage) await trimDataCaches(this.storage, this.root)
+      try {
+        await cache.put(key, response())
+      } catch {
+        if (!this.storage) return
+        await trimDataCaches(this.storage, this.root, payload.length, true)
+        await cache.put(key, response())
+      }
+      if (this.storage) await trimDataCaches(this.storage, this.root)
       // Sweep after insertion too: concurrent writers cannot leave orphaned records or grow a slot.
       await prune(await ownKeys(), 2)
     } catch {

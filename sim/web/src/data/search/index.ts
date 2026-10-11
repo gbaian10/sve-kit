@@ -1,7 +1,7 @@
 import { cardNoKey, cardNoLookupKey } from "../../domain/cardNo"
 import { normalizeText } from "../../domain/normalize"
-import { NEUTRAL_CLASS, type QueryState } from "../../domain/query/model"
-import type { Region } from "../../domain/search"
+import { DEFAULT_QUERY, NEUTRAL_CLASS, type QueryState } from "../../domain/query/model"
+import type { MatchedField, Region, TextLang } from "../../domain/search"
 import { type CardSummary, catalogCards } from "../catalog"
 import {
   arrayValue,
@@ -19,6 +19,32 @@ export interface SearchQuery {
   readonly edition: Region
   readonly offset?: number
   readonly limit?: number
+}
+export interface SearchOption {
+  readonly id: string
+  readonly code: string
+  readonly name: CardSummary["name"]
+}
+export interface SearchOptions {
+  readonly classes: readonly SearchOption[]
+  readonly sets: readonly SearchOption[]
+}
+export interface ImageTarget {
+  readonly printingId: string
+  readonly faceId: string
+  readonly intId: number
+  readonly ordinal: number
+  readonly owner: string
+}
+export interface SuggestedSummary {
+  readonly summary: CardSummary
+  readonly field: MatchedField
+  readonly rank: number
+}
+export interface RecentSummary {
+  readonly printingId: string
+  readonly state: "available" | "not-in-edition"
+  readonly summary?: CardSummary
 }
 export interface SearchPage {
   readonly total: number
@@ -63,7 +89,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump whenever `encode` changes, so stored images in an older layout are never read. */
-export const INDEX_IMAGE_FORMAT = 1
+export const INDEX_IMAGE_FORMAT = 2
 
 interface Parts {
   readonly pool: StringPool
@@ -74,6 +100,8 @@ interface Parts {
   readonly aliases: Uint32Array
   readonly costs: Float64Array
   readonly sets: ReadonlySet<string>
+  readonly options: SearchOptions
+  readonly targets: Columns
 }
 
 function build(bootstrap: BootstrapColumns, edition: Region): Parts {
@@ -90,6 +118,45 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
         ] as [string, string][],
     ),
   )
+  const label = (row: JsonObject, field: string): CardSummary["name"] => {
+    const unit = index.textUnit(stringValue(row[field]))
+    const translations: Partial<Record<TextLang, string>> = {}
+    for (const item of arrayValue(row["translations"])) {
+      const ref = objectValue(item)
+      const translation = index.translation(stringValue(ref["translation_id"]))
+      const text = translation && index.textUnit(stringValue(translation["text_unit_id"]))
+      if (text)
+        translations[stringValue(ref["target_lang"]) as TextLang] = stringValue(text["text"])
+    }
+    return {
+      original: {
+        lang: (unit?.["lang"] ?? "ja") as TextLang,
+        text: unit ? stringValue(unit["text"]) : stringValue(row["code"]),
+      },
+      translations,
+    }
+  }
+  const option = (row: JsonObject, field: string): SearchOption => ({
+    id:
+      typeof row["id"] === "string"
+        ? row["id"]
+        : `${stringValue(row["kind"])}:${stringValue(row["code"])}`,
+    code: stringValue(row["code"]),
+    name: label(row, field),
+  })
+  const options: SearchOptions = {
+    classes: bootstrap
+      .rows("vocabulary")
+      .filter((row) => row["kind"] === "class" && row["active"] === true)
+      .map((row) => option(row, "label_unit_id")),
+    sets: index.families
+      .map((row) => option(row, "name_unit_id"))
+      .sort(
+        (a, b) => a.code.localeCompare(b.code, "en", { numeric: true }) || a.id.localeCompare(b.id),
+      ),
+  }
+  const targets = new Columns(pool)
+  let targetBatch: JsonObject[] = []
   const cards = uintColumns(CARD_COLUMNS)
   const printings = uintColumns(PRINTING_COLUMNS)
   const names: number[] = []
@@ -128,7 +195,23 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       printings.card.push(card)
       printings.summary.push(summary ? ++summaryCount : 0)
       costs.push(summary?.cost ?? Number.NaN)
-      if (summary) batch.push(summary)
+      if (summary) {
+        batch.push(summary)
+        const row = index.printing(printing.id)
+        targetBatch.push(
+          ...index.facesOf(entry.cardId).map((face) => ({
+            printingId: printing.id,
+            faceId: stringValue(face["id"]),
+            intId: integerValue(row?.["int_id"]),
+            ordinal: integerValue(face["ordinal"]),
+            owner: stringValue(row?.["home_set_id"]),
+          })),
+        )
+        if (targetBatch.length >= 256) {
+          targets.append(targetBatch)
+          targetBatch = []
+        }
+      }
       if (batch.length >= 256) {
         summaryColumns.append(batch as unknown as JsonObject[])
         batch = []
@@ -137,6 +220,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     cards.default.push(preferred)
   }
   summaryColumns.append(batch as unknown as JsonObject[])
+  targets.append(targetBatch)
   cards.printingStart.push(printings.id.length)
   cards.nameStart.push(names.length)
   cards.aliasStart.push(aliases.length)
@@ -150,6 +234,8 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     aliases: Uint32Array.from(aliases),
     costs: Float64Array.from(costs),
     sets,
+    options,
+    targets,
   }
 }
 
@@ -178,6 +264,22 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
   const names = take(Uint32Array)
   const aliases = take(Uint32Array)
   const costs = take(Float64Array)
+  const readColumns = (value: unknown) =>
+    Columns.restore(
+      pool,
+      arrayValue(value as never).map((value) => {
+        const block = objectValue(value)
+        return {
+          start: integerValue(block["start"]),
+          length: integerValue(block["length"]),
+          columns: arrayValue(block["columns"]).map((name): [string, Uint8Array, Uint32Array] => [
+            stringValue(name),
+            take(Uint8Array),
+            take(Uint32Array),
+          ]),
+        }
+      }),
+    )
   const summaries = Columns.restore(
     pool,
     arrayValue(image["blocks"]).map((value) => {
@@ -193,6 +295,8 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
       }
     }),
   )
+  const targets = readColumns(image["targets"])
+  const options = image["options"] as unknown as SearchOptions
   if (next !== arrays.length) throw new Error("index image has unread arrays")
   return {
     pool,
@@ -203,6 +307,8 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
     aliases,
     costs,
     sets: new Set(arrayValue(image["sets"]).map((value) => stringValue(value))),
+    options,
+    targets,
   }
 }
 
@@ -216,6 +322,9 @@ export class SearchIndex {
   private readonly aliases: Uint32Array
   private readonly costs: Float64Array
   private readonly sets: ReadonlySet<string>
+  readonly options: SearchOptions
+  private readonly targetGroups = new Map<string, number[]>()
+  private readonly targets: Columns
   private readonly edition: Region
 
   /** Builds from staged bootstrap columns, or restores the bytes `encode` produced. */
@@ -230,6 +339,14 @@ export class SearchIndex {
     this.aliases = parts.aliases
     this.costs = parts.costs
     this.sets = parts.sets
+    this.options = parts.options
+    this.targets = parts.targets
+    for (let ordinal = 0; ordinal < this.targets.length; ordinal += 1) {
+      const id = stringValue(this.targets.value(ordinal, "printingId"))
+      const group = this.targetGroups.get(id) ?? []
+      group.push(ordinal)
+      this.targetGroups.set(id, group)
+    }
   }
 
   /** Sealed columns and the string pool as one buffer; no row is decoded on either side. */
@@ -240,6 +357,12 @@ export class SearchIndex {
       {
         edition: this.edition,
         sets: [...this.sets],
+        options: this.options as unknown as JsonObject,
+        targets: this.targets.parts().map(({ start, length, columns }) => ({
+          start,
+          length,
+          columns: columns.map(([name]) => name),
+        })),
         strings: pool.values,
         blocks: blocks.map(({ start, length, columns }) => ({
           start,
@@ -256,6 +379,9 @@ export class SearchIndex {
         this.aliases,
         this.costs,
         ...blocks.flatMap(({ columns }) => columns.flatMap(([, kinds, values]) => [kinds, values])),
+        ...this.targets
+          .parts()
+          .flatMap(({ columns }) => columns.flatMap(([, kinds, values]) => [kinds, values])),
       ],
     )
   }
@@ -377,6 +503,71 @@ export class SearchIndex {
     }
   }
 
+  imageTargets(ids: readonly string[]): readonly ImageTarget[] {
+    return ids.flatMap((id) =>
+      (this.targetGroups.get(id) ?? []).map(
+        (ordinal) => this.targets.row(ordinal) as unknown as ImageTarget,
+      ),
+    )
+  }
+
+  recent(ids: readonly string[]): readonly RecentSummary[] {
+    return ids.slice(0, 20).map((printingId) => {
+      for (let p = 0; p < this.printings.id.length; p += 1) {
+        if (this.pool.get(this.printings.id[p] ?? 0) !== printingId) continue
+        const summary = this.printings.summary[p] ?? 0
+        if (summary)
+          return {
+            printingId,
+            state: "available",
+            summary: this.summaries.row(summary - 1) as unknown as CardSummary,
+          } as const
+      }
+      return { printingId, state: "not-in-edition" } as const
+    })
+  }
+
+  suggest(text: string, limit = 8): { total: number; items: readonly SuggestedSummary[] } {
+    if (!text) return { total: 0, items: [] }
+    const page = this.search({
+      state: { ...DEFAULT_QUERY, text },
+      edition: this.edition,
+      limit: Math.min(20, limit),
+    })
+    const flat = normalizeText(text)
+    const lookup = cardNoLookupKey(text, this.sets)
+    const digits = /^\d+$/u.test(flat) ? String(Number(flat)) : null
+    return {
+      total: page.total,
+      items: page.items.flatMap((item) => {
+        if (!item.summary) return []
+        const card = this.cards.id.findIndex((id) => this.pool.get(id) === item.key)
+        const printing = this.printings.id.findIndex((id) => this.pool.get(id) === item.printingId)
+        const exact =
+          (lookup !== null && this.pool.get(this.printings.lookup[printing] ?? 0) === lookup) ||
+          (digits !== null && this.pool.get(this.printings.number[printing] ?? 0) === digits)
+        const name = this.textRank(this.names, this.cards.nameStart, card, flat)
+        const alias = this.textRank(this.aliases, this.cards.aliasStart, card, flat)
+        const isNumber =
+          exact ||
+          this.pool.get(this.printings.flat[printing] ?? 0).startsWith(flat) ||
+          (digits !== null &&
+            this.pool.get(this.printings.number[printing] ?? 0).startsWith(digits)) ||
+          (cardNoKey(text, this.sets)?.set === this.pool.get(this.printings.set[printing] ?? 0) &&
+            this.pool
+              .get(this.printings.number[printing] ?? 0)
+              .startsWith(cardNoKey(text, this.sets)?.number ?? "!"))
+        return [
+          {
+            summary: item.summary,
+            field: isNumber ? "cardNo" : name <= alias ? "name" : "alias",
+            rank: exact ? 0 : isNumber ? 1 : Math.min(name, alias),
+          },
+        ]
+      }),
+    }
+  }
+
   private textRank(values: Uint32Array, offsets: Uint32Array, card: number, flat: string): number {
     let rank = 4
     for (let n = offsets[card] ?? 0; n < (offsets[card + 1] ?? 0); n += 1) {
@@ -394,6 +585,7 @@ export class SearchIndex {
   } {
     return {
       arrayBuffers:
+        this.targets.bytes() +
         this.summaries.bytes() +
         this.pool.bufferBytes() +
         [

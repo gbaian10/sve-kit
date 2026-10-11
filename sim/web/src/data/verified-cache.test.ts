@@ -121,6 +121,8 @@ describe("VerifiedCache", () => {
       notify = resolve
     })
     const delayed = {
+      keys: storage.keys.bind(storage),
+      delete: storage.delete.bind(storage),
       open: async (name: string) => {
         const cache = await storage.open(name)
         return {

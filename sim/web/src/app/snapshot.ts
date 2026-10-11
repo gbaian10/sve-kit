@@ -1,76 +1,313 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react"
 
 import {
-  type AnnotatedTextResolver,
-  arrayValue,
-  canonicalText,
+  activeSnapshotRoot,
   type Catalog,
   catalogOf,
   type ImageFace,
   type ImageIndex,
   isSnapshotImageFace,
-  type JsonObject,
   type LoadedSnapshot,
   loadImagePage,
-  objectValue,
-  parseJson,
-  type QueryFailure,
   retainedImageIndex,
-  type SearchPage,
+  type SearchChannel,
   type SearchQuery,
-  type SelectedText,
-  sharedAnnotatedTextResolver,
+  SearchSession,
+  type SearchStatus,
   type SnapshotClient,
   snapshotClient,
-  SnapshotError,
   type SnapshotRoot,
   type SnapshotStatus,
-  stringValue,
   useSnapshotRoot,
   useSnapshotStatus,
+  viewImages,
 } from "../data"
-import { DEFAULT_QUERY, type QueryState } from "../domain/query/model"
+import { DEFAULT_QUERY } from "../domain/query/model"
 import type { Region } from "../domain/search"
+import { usePrefs } from "../settings"
+
+performance.mark("sve-app-start")
 
 const FOCUS_CHECK_INTERVAL_MS = 60_000
 
-/** The snapshot every page reads: loading starts with the shell and follows the active root. */
+interface ActiveWorker {
+  readonly session: SearchSession
+  readonly client: SnapshotClient
+  start(edition: Region, force?: boolean): void
+}
+const workers = new Map<SnapshotRoot, ActiveWorker>()
+function workerOf(root: SnapshotRoot): ActiveWorker {
+  const existing = workers.get(root)
+  if (existing) return existing
+  const detail = snapshotClient(root)
+  const session = new SearchSession()
+  let edition: Region | undefined
+  let status: SnapshotStatus = { state: "idle" }
+  const listeners = new Set<() => void>()
+  session.subscribe(() => {
+    const next = session.getStatus()
+    status =
+      next.phase === "ready"
+        ? {
+            state: "ready",
+            dataVersion: next.dataVersion ?? "",
+            unconfirmed: next.unconfirmed ?? false,
+            ...(next.updating ? { updating: "index" as const } : {}),
+            ...(next.error
+              ? {
+                  updateError: { kind: "network" as const, detail: next.error.message },
+                  outdated: true,
+                }
+              : {}),
+          }
+        : next.phase === "error"
+          ? { state: "error", kind: "network", detail: next.error?.message ?? "search failed" }
+          : {
+              state: "loading",
+              phase: next.progress ? "bootstrap" : "index",
+              ...(next.progress ? { done: next.progress.done, total: next.progress.total } : {}),
+            }
+    for (const listener of listeners) listener()
+  })
+  const start = (next: Region, force = false) => {
+    if (!force && edition === next && status.state !== "error") return
+    edition = next
+    session.load(detail.base, next, root === "preview" ? "preview" : "index")
+  }
+  let lastCheck = Date.now()
+  const check = () => {
+    if (activeSnapshotRoot() !== root) return
+    lastCheck = Date.now()
+    start(edition ?? "jp", true)
+  }
+  window.addEventListener("online", check)
+  window.addEventListener("focus", () => {
+    if (Date.now() - lastCheck >= FOCUS_CHECK_INTERVAL_MS) check()
+  })
+  const client: SnapshotClient = {
+    ...detail,
+    status: () => status,
+    subscribe: (listener) => {
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    },
+    load: () => {
+      start(edition ?? "jp")
+      return Promise.resolve()
+    },
+    retry: () => {
+      start(edition ?? "jp", true)
+      return Promise.resolve()
+    },
+    reload: () => {
+      start(edition ?? "jp", true)
+      return Promise.resolve()
+    },
+  }
+  const worker = { session, client, start }
+  workers.set(root, worker)
+  return worker
+}
+
 export function useActiveSnapshot(): {
   readonly client: SnapshotClient
   readonly status: SnapshotStatus
   readonly root: SnapshotRoot
 } {
   const root = useSnapshotRoot()
-  const client = snapshotClient(root)
-  const status = useSnapshotStatus(client)
+  const { cardEdition } = usePrefs()
+  const worker = workerOf(root)
+  const status = useSnapshotStatus(worker.client)
   useEffect(() => {
-    void client.load()
-    // Switching back to the window only checks for a new version now and then, not on every focus.
-    let lastCheck = Date.now()
-    const check = () => {
-      lastCheck = Date.now()
-      void client.reload()
+    worker.start(cardEdition)
+  }, [worker, cardEdition])
+  return { client: worker.client, status, root }
+}
+
+function deferredDisposal(dispose: () => void) {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  return {
+    retain: () => {
+      clearTimeout(timer)
+    },
+    release: () => {
+      timer = setTimeout(dispose, 0)
+    },
+  }
+}
+function useWorkerChannel(): { channel: SearchChannel; status: SearchStatus } {
+  const { root } = useActiveSnapshot()
+  const { session } = workerOf(root)
+  const holder = useMemo(() => {
+    const channel = session.createChannel()
+    return {
+      channel,
+      ...deferredDisposal(() => {
+        channel.dispose()
+      }),
     }
-    const onFocus = () => {
-      if (Date.now() - lastCheck >= FOCUS_CHECK_INTERVAL_MS) check()
+  }, [session])
+  const { channel } = holder
+  useEffect(() => {
+    holder.retain()
+    return holder.release
+  }, [holder])
+  const status = useSyncExternalStore(session.subscribe, session.getStatus, session.getStatus)
+  return { channel, status }
+}
+export function useSearchReadiness(edition: Region) {
+  const { root, client } = useActiveSnapshot()
+  const { session } = workerOf(root)
+  const status = useSyncExternalStore(session.subscribe, session.getStatus, session.getStatus)
+  return {
+    ...status,
+    root,
+    edition: status.edition,
+    requestedEdition: edition,
+    retry: () => {
+      void client.retry()
+    },
+    ...(status.loading
+      ? {
+          loading: {
+            ...status.loading,
+            root,
+            step: status.progress ? ("bootstrap" as const) : ("index" as const),
+            ...status.progress,
+          },
+        }
+      : {}),
+  }
+}
+export function useSearch(query: SearchQuery | null) {
+  const { channel } = useWorkerChannel()
+  const key = query ? JSON.stringify(query) : null
+  useEffect(() => {
+    if (key) channel.search(JSON.parse(key) as SearchQuery)
+  }, [channel, key])
+  return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
+}
+export function useSearchView(query: SearchQuery) {
+  const { channel, status } = useWorkerChannel()
+  const key = JSON.stringify(query)
+  useEffect(() => {
+    channel.view(JSON.parse(key) as SearchQuery)
+  }, [channel, key])
+  const channelState = useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
+  const result =
+    JSON.stringify(channelState.lastInput) === key
+      ? channelState.result
+      : { phase: "pending" as const }
+  const view = result.phase === "complete" ? result.view : undefined
+  const images = useMemo(() => (view ? viewImages(view) : undefined), [view])
+  return { result, view, images, status }
+}
+export function useListView(query: SearchQuery, pages: number) {
+  const { root } = useActiveSnapshot()
+  const { session } = workerOf(root)
+  const key = JSON.stringify(query)
+  const store = useMemo(() => {
+    const channels = Array.from({ length: pages }, () => session.createChannel())
+    let value: { view?: import("../data").CompleteView; error?: import("../data").QueryFailure } =
+      {}
+    const listeners = new Set<() => void>()
+    const update = () => {
+      const results = channels.map((channel) => channel.getStatus().result)
+      const error = results.find((result) => result.phase === "error")
+      const complete = results.flatMap((result) =>
+        result.phase === "complete" && result.view ? [result.view] : [],
+      )
+      const first = complete[0]
+      value =
+        error?.phase === "error"
+          ? { error: error.error }
+          : complete.length === pages && first
+            ? {
+                view: {
+                  ...first,
+                  page: { ...first.page, items: complete.flatMap((view) => view.page.items) },
+                  faces: complete.flatMap((view) => view.faces),
+                },
+              }
+            : {}
+      for (const listener of listeners) listener()
     }
-    window.addEventListener("online", check)
-    window.addEventListener("focus", onFocus)
-    return () => {
-      window.removeEventListener("online", check)
-      window.removeEventListener("focus", onFocus)
+    const unsubs = channels.map((channel) => channel.subscribe(update))
+    const lifecycle = deferredDisposal(() => {
+      unsubs.forEach((unsub) => {
+        unsub()
+      })
+      channels.forEach((channel) => {
+        channel.dispose()
+      })
+    })
+    return {
+      get: () => value,
+      subscribe: (listener: () => void) => {
+        listeners.add(listener)
+        return () => listeners.delete(listener)
+      },
+      start: () => {
+        lifecycle.retain()
+        channels.forEach((channel, page) => {
+          channel.view(
+            { ...(JSON.parse(key) as SearchQuery), offset: page * 60, limit: 60 },
+            page === 0,
+          )
+        })
+      },
+      release: lifecycle.release,
     }
-  }, [client])
-  return { client, status, root }
+  }, [session, key, pages])
+  useEffect(() => {
+    store.start()
+    return store.release
+  }, [store])
+  const result = useSyncExternalStore(store.subscribe, store.get, store.get)
+  const images = useMemo(() => (result.view ? viewImages(result.view) : undefined), [result.view])
+  useEffect(() => {
+    if (result.view) performance.mark("sve-view-ready")
+  }, [result.view])
+  return { ...result, images, retry: store.start }
+}
+
+export function useWorkerSuggestions(text: string, edition: Region) {
+  const { channel } = useWorkerChannel()
+  useEffect(() => {
+    channel.suggest(text, edition)
+  }, [channel, text, edition])
+  return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
+}
+export function useRecentSummaries(ids: readonly string[], edition: Region) {
+  const { channel } = useWorkerChannel()
+  const key = JSON.stringify(ids)
+  useEffect(() => {
+    channel.recent(JSON.parse(key) as string[], edition)
+  }, [channel, key, edition])
+  return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus).result
+}
+export function useSetOptions() {
+  const { cardEdition } = usePrefs()
+  const { view, result, status } = useSearchView({
+    state: DEFAULT_QUERY,
+    edition: cardEdition,
+    limit: 60,
+  })
+  return { sets: view?.options.sets, classes: view?.options.classes, result, status }
 }
 
 /** The catalog of the loaded snapshot, or null while nothing is loaded yet. */
-export function useCatalog(): {
+export function useCardSnapshot(): {
   readonly client: SnapshotClient
   readonly status: SnapshotStatus
   readonly catalog: Catalog | null
 } {
-  const { client, status } = useActiveSnapshot()
+  const root = useSnapshotRoot()
+  const client = snapshotClient(root)
+  const status = useSnapshotStatus(client)
+  useEffect(() => {
+    void client.load()
+  }, [client])
   const snapshot = client.snapshot()
   return { client, status, catalog: snapshot ? catalogOf(snapshot) : null }
 }
@@ -321,424 +558,4 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
     eager: (printingId, faceId) => visible.has(faceKeyOf(printingId, faceId)),
     ...(store.failed.size > 0 ? { failed: true } : {}),
   }
-}
-
-// Keep Worker query shapes while V1 still reads the synchronous Catalog (see README search hooks).
-type UnsupportedFacet = NonNullable<QueryFailure["facets"]>[number] | "cost" | "sets"
-
-type StandInFailure = Omit<QueryFailure, "facets"> & {
-  readonly facets?: readonly UnsupportedFacet[]
-}
-
-interface SearchLoadFailure {
-  readonly kind: "load-failed" | "worker-failed" | "cancelled"
-  readonly message: string
-}
-
-type SearchLoadStep = "index" | "manifest" | "bootstrap"
-
-/** Readiness of the search generation: which root/edition can be queried, and what is loading. */
-export interface SearchReadiness {
-  readonly phase: "downloading" | "ready" | "error"
-  /** Increments whenever a different snapshot object becomes queryable; null before the first. */
-  readonly generation: number | null
-  /** The root and edition the current generation answers for (kept during a replacement load). */
-  readonly root?: SnapshotRoot
-  readonly edition?: Region
-  /**
-   * A root/edition being downloaded; `step` is the load phase. While the startup files of a first
-   * download arrive, `done` of `total` files have been received (no byte progress is reported).
-   */
-  readonly loading?: {
-    readonly root: SnapshotRoot
-    readonly edition: Region
-    readonly step: SearchLoadStep
-    readonly done?: number
-    readonly total?: number
-  }
-  /**
-   * True while a newer snapshot downloads behind a still-queryable generation. A background check
-   * of the version entry that may find nothing new is not an update.
-   */
-  readonly updating: boolean
-  readonly error?: SearchLoadFailure
-  readonly dataVersion?: string
-  readonly manifestHash?: string
-  /** Retries a failed load, or re-reads the entry after a failed update. */
-  readonly retry: () => void
-}
-
-type SearchResult =
-  | { readonly phase: "pending" }
-  | { readonly phase: "error"; readonly error: StandInFailure }
-  | {
-      readonly phase: "complete"
-      readonly generation: number
-      readonly root: SnapshotRoot
-      readonly page: SearchPage
-    }
-
-/** One query channel: the last input it was given and the result for exactly that input. */
-export interface SearchChannelState {
-  readonly lastInput: SearchQuery | null
-  readonly result: SearchResult
-}
-
-const generations = new WeakMap<LoadedSnapshot, number>()
-let nextGeneration = 0
-
-function generationOf(snapshot: LoadedSnapshot | null): number | null {
-  if (!snapshot) return null
-  let generation = generations.get(snapshot)
-  if (generation === undefined) {
-    nextGeneration += 1
-    generation = nextGeneration
-    generations.set(snapshot, generation)
-  }
-  return generation
-}
-
-function loadFailure(status: SnapshotStatus): SearchLoadFailure | undefined {
-  const failure =
-    status.state === "error" ? status : status.state === "ready" ? status.updateError : undefined
-  return failure && { kind: "load-failed", message: `${failure.kind}: ${failure.detail}` }
-}
-
-/** The search generation for the active root and the current card edition. */
-export function useSearchReadiness(edition: Region): SearchReadiness {
-  const { client, status, root } = useActiveSnapshot()
-  const snapshot = client.snapshot()
-  const generation = generationOf(snapshot)
-  const error = loadFailure(status)
-  return useMemo<SearchReadiness>(() => {
-    const retry = () => {
-      void (status.state === "error" ? client.retry() : client.reload())
-    }
-    const base = {
-      ...(snapshot
-        ? { root, edition, dataVersion: snapshot.dataVersion, manifestHash: snapshot.manifestHash }
-        : {}),
-      ...(error ? { error } : {}),
-      retry,
-    }
-    if (status.state === "error") return { ...base, phase: "error", generation, updating: false }
-    if (status.state === "ready" && snapshot) {
-      const updating = status.updating !== undefined && status.updating !== "index"
-      return {
-        ...base,
-        phase: "ready",
-        generation,
-        updating,
-        ...(updating ? { loading: { root, edition, step: status.updating } } : {}),
-      }
-    }
-    const files =
-      status.state === "loading" && status.total !== undefined && status.total > 0
-        ? { done: status.done ?? 0, total: status.total }
-        : {}
-    return {
-      ...base,
-      phase: "downloading",
-      generation,
-      updating: false,
-      loading: {
-        root,
-        edition,
-        step: status.state === "loading" ? status.phase : "index",
-        ...files,
-      },
-    }
-  }, [client, status, snapshot, root, edition, generation, error])
-}
-
-const FACETS: readonly UnsupportedFacet[] = [
-  "cost",
-  "sets",
-  "types",
-  "rarities",
-  "altArtOnly",
-  "mechanics",
-  "unit",
-  "sort",
-]
-
-// Reject unsupported facets so an unfiltered synchronous result cannot look complete.
-function unsupportedFacets(state: QueryState): UnsupportedFacet[] {
-  return FACETS.filter((facet) => {
-    switch (facet) {
-      case "cost":
-        return state.cost.min !== undefined || state.cost.max !== undefined
-      case "mechanics":
-        return Object.keys(state.mechanics).length > 0
-      case "altArtOnly":
-        return state.altArtOnly
-      case "unit":
-      case "sort":
-        return state[facet] !== DEFAULT_QUERY[facet]
-      default:
-        return state[facet].length > 0
-    }
-  })
-}
-
-function runQuery(catalog: Catalog, query: SearchQuery): SearchPage | StandInFailure {
-  const facets = unsupportedFacets(query.state)
-  if (facets.length > 0)
-    return { kind: "unsupported-query", message: "unsupported conditions", facets }
-  const hits = catalog.results(query.state, query.edition)
-  const offset = query.offset ?? 0
-  const slice =
-    query.limit === undefined ? hits.slice(offset) : hits.slice(offset, offset + query.limit)
-  return {
-    total: hits.length,
-    offset,
-    items: slice.map((hit) => ({ ...hit, summary: catalog.summary(hit.printingId) })),
-  }
-}
-
-// Retaining input across downloads prevents partial counts and false empty results.
-export function useSearch(query: SearchQuery | null): SearchChannelState {
-  const { client, status, root } = useActiveSnapshot()
-  const snapshot = client.snapshot()
-  const generation = generationOf(snapshot)
-  // Keep the pending input when a caller temporarily stops supplying it.
-  const [kept, setKept] = useState<SearchQuery | null>(query)
-  if (query !== null && query !== kept) setKept(query)
-  const lastInput = query ?? kept
-  const catalog = snapshot ? catalogOf(snapshot) : null
-  return useMemo<SearchChannelState>(() => {
-    if (lastInput === null) return { lastInput, result: { phase: "pending" } }
-    if (status.state === "error")
-      return {
-        lastInput,
-        result: {
-          phase: "error",
-          error: { kind: "load-unavailable", message: `${status.kind}: ${status.detail}` },
-        },
-      }
-    if (!catalog || generation === null) return { lastInput, result: { phase: "pending" } }
-    const outcome = runQuery(catalog, lastInput)
-    return {
-      lastInput,
-      result:
-        "kind" in outcome
-          ? { phase: "error", error: outcome }
-          : { phase: "complete", generation, root, page: outcome },
-    }
-  }, [lastInput, status, catalog, generation, root])
-}
-
-// Keep all purposes pending until the full V1 resolver settles (public-annotation §4.1).
-
-export type TextField = "name" | "effect" | "flavor"
-
-/** `none` = this purpose does not apply to the text (no JP source, no annotation set). */
-type TextPurposePhase = "pending" | "ready" | "none" | "error"
-
-interface TextFailure {
-  /** `validation`: the snapshot rejected the closure (a `public-annotation/*` code); `load`: transport. */
-  readonly kind: "validation" | "load"
-  readonly code?: string
-  readonly message: string
-}
-
-interface TextReadiness {
-  readonly root: SnapshotRoot
-  readonly generation: number | null
-  readonly dataVersion?: string
-  readonly manifestHash?: string
-  readonly edition: Region
-  readonly owner: JsonObject
-  /** V1 only consumes whole name/effect/flavor fields, not section paragraphs. */
-  readonly ordinal: null
-  readonly field: TextField
-  /** Target text language of the translation row (`zh-Hant`, `ja`, `en`). */
-  readonly language: string
-  /** Original and translated strings with origin/authority/low_confidence. */
-  readonly basic: TextPurposePhase
-  /** The JP owner a `jp_source` translation was made from. */
-  readonly source: TextPurposePhase
-  /** Ranges, concepts, vocabulary and explanations. */
-  readonly annotations: TextPurposePhase
-  readonly error?: TextFailure
-}
-
-export interface AnnotatedTextState {
-  readonly readiness: TextReadiness
-  /** Only set once `basic` is ready; null means the owner has no such field. */
-  readonly value: SelectedText | null
-}
-
-function purposesOf(
-  value: SelectedText | null,
-): Pick<TextReadiness, "basic" | "source" | "annotations"> {
-  if (value === null) return { basic: "none", source: "none", annotations: "none" }
-  const annotated = [value.original, value.translated, value.source].some(
-    (text) => text !== undefined && text.annotation !== null,
-  )
-  return {
-    basic: "ready",
-    source:
-      value.selection?.["basis"] === "jp_source" ? (value.source ? "ready" : "error") : "none",
-    annotations: annotated || value.concepts.length > 0 ? "ready" : "none",
-  }
-}
-
-/** Runs `task` after the next frame has painted; the returned function cancels it. */
-function afterPaint(task: () => void): () => void {
-  let timer: ReturnType<typeof setTimeout> | undefined
-  const frame = requestAnimationFrame(() => {
-    timer = setTimeout(task, 0)
-  })
-  return () => {
-    cancelAnimationFrame(frame)
-    if (timer !== undefined) clearTimeout(timer)
-  }
-}
-
-// Bootstrap indexing can delay a tap's next paint; render only existing resolvers and initialize
-// new ones after paint or during idle time.
-const createdResolvers = new WeakSet<LoadedSnapshot>()
-
-function existingResolver(
-  client: SnapshotClient,
-  snapshot: LoadedSnapshot | null,
-): AnnotatedTextResolver | null {
-  return snapshot && createdResolvers.has(snapshot) ? sharedAnnotatedTextResolver(client) : null
-}
-
-function createResolver(client: SnapshotClient, snapshot: LoadedSnapshot): AnnotatedTextResolver {
-  const resolver = sharedAnnotatedTextResolver(client)
-  createdResolvers.add(snapshot)
-  return resolver
-}
-
-function whenIdle(task: () => void): () => void {
-  if (typeof requestIdleCallback === "function") {
-    const handle = requestIdleCallback(task, { timeout: 2000 })
-    return () => {
-      cancelIdleCallback(handle)
-    }
-  }
-  const timer = setTimeout(task, 300)
-  return () => {
-    clearTimeout(timer)
-  }
-}
-
-/**
- * Builds the loaded snapshot's text indexes while the page is idle by resolving one text, so the
- * first card opened from a list does not pay for them. Returns the cancel function.
- */
-export function warmTextResolver(
-  client: SnapshotClient,
-  owner: JsonObject,
-  field: TextField,
-  language: string,
-): () => void {
-  const snapshot = client.snapshot()
-  if (!snapshot) return () => undefined
-  return whenIdle(() => {
-    if (client.snapshot() !== snapshot) return
-    void createResolver(client, snapshot)
-      .resolve({ owner, field, ordinal: null }, language)
-      .catch(() => undefined)
-  })
-}
-
-// A changed exact owner or edition must never display the previous identity's text.
-export function useAnnotatedText(
-  client: SnapshotClient,
-  owner: JsonObject,
-  field: TextField,
-  language: string,
-  edition: Region,
-  sharedResolver?: AnnotatedTextResolver | null,
-): AnnotatedTextState {
-  const root = useSnapshotRoot()
-  const snapshot = client.snapshot()
-  const identity = canonicalText([owner, field, language, edition])
-  const [loaded, setLoaded] = useState<{
-    readonly snapshot: typeof snapshot
-    readonly identity: string
-    readonly value?: SelectedText | null
-    readonly error?: TextFailure
-  }>()
-  // A text resolved earlier for this snapshot renders final on the first pass.
-  const peeked = (sharedResolver ?? existingResolver(client, snapshot))?.peek(
-    { owner, field, ordinal: null },
-    language,
-  )
-  useEffect(() => {
-    if (!snapshot) return
-    let active = true
-    const [currentOwner, currentField, currentLanguage] = arrayValue(parseJson(identity))
-    const pointer = {
-      owner: objectValue(currentOwner),
-      field: stringValue(currentField),
-      ordinal: null,
-    }
-    const existing = sharedResolver ?? existingResolver(client, snapshot)
-    if (existing?.peek(pointer, stringValue(currentLanguage)) !== undefined) return
-    const cancel = afterPaint(() => {
-      const resolver = sharedResolver ?? createResolver(client, snapshot)
-      void resolver.resolve(pointer, stringValue(currentLanguage)).then(
-        (value) => {
-          if (active) setLoaded({ snapshot, identity, value })
-        },
-        (error: unknown) => {
-          if (active)
-            setLoaded({
-              snapshot,
-              identity,
-              error:
-                error instanceof SnapshotError
-                  ? { kind: "validation", code: error.code, message: error.message }
-                  : {
-                      kind: "load",
-                      message: error instanceof Error ? error.message : String(error),
-                    },
-            })
-        },
-      )
-    })
-    return () => {
-      active = false
-      cancel()
-    }
-  }, [client, sharedResolver, snapshot, identity])
-  const settled =
-    loaded?.snapshot === snapshot && loaded.identity === identity
-      ? loaded
-      : peeked === undefined
-        ? undefined
-        : { snapshot, identity, value: peeked }
-  const base = {
-    root,
-    generation: generationOf(snapshot),
-    ...(snapshot ? { dataVersion: snapshot.dataVersion, manifestHash: snapshot.manifestHash } : {}),
-    owner,
-    ordinal: null,
-    field,
-    language,
-    edition,
-  }
-  if (settled === undefined)
-    return {
-      readiness: { ...base, basic: "pending", source: "pending", annotations: "pending" },
-      value: null,
-    }
-  if (settled.error)
-    return {
-      readiness: {
-        ...base,
-        basic: "error",
-        source: "error",
-        annotations: "error",
-        error: settled.error,
-      },
-      value: null,
-    }
-  const value = settled.value ?? null
-  return { readiness: { ...base, ...purposesOf(value) }, value }
 }

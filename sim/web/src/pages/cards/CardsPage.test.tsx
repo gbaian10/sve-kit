@@ -1,11 +1,13 @@
 import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest"
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
 import { DEFAULT_PREFS, prefsStore, recentStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
+import { TestSearchWorker } from "../../test-utils/search-worker"
+beforeEach(() => vi.stubGlobal("Worker", TestSearchWorker))
 
 // The page reads the fixture through the real client; fetch is answered from the in-memory build.
 const stubImage = ({ width, height, seed }: { width: number; height: number; seed: number }) =>

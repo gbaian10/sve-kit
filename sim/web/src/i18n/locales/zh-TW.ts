@@ -66,6 +66,15 @@ const zhTW = {
     neutral: "中立",
   },
   results: {
+    facet: {
+      types: "卡片類型",
+      rarities: "稀有度",
+      altArtOnly: "僅異圖",
+      mechanics: "能力",
+      unit: "結果單位",
+      sort: "排序方式",
+    },
+    unsupported: "這些搜尋條件尚未支援，請移除或修改條件。",
     countUnit: "張卡片",
     sort: "排序",
     sortDefault: "卡號",

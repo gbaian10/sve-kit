@@ -69,6 +69,16 @@ export default {
     neutral: "Neutral",
   },
   results: {
+    facet: {
+      types: "Card types",
+      rarities: "Rarities",
+      altArtOnly: "Alternate art only",
+      mechanics: "Mechanics",
+      unit: "Result unit",
+      sort: "Sort order",
+    },
+    unsupported:
+      "These search conditions are not supported yet. Remove or change them to continue.",
     countUnit: "cards",
     sort: "Sort",
     sortDefault: "Number",

@@ -1,6 +1,16 @@
+import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 import type { QueryFailure, SearchPage, SearchQuery } from "./index"
-import type { LoadRequest, SearchEvent, SearchMetrics, SearchRequest } from "./messages"
+import type { RecentSummary, SuggestedSummary } from "./index"
+import type {
+  LoadRequest,
+  PurposeRequest,
+  SearchEvent,
+  SearchMetrics,
+  SearchRequest,
+} from "./messages"
+import { mainNetwork, type NetworkMessage } from "./network"
+import type { CompleteView, ViewFace } from "./view"
 
 type SearchResult =
   | { readonly phase: "pending" }
@@ -11,10 +21,15 @@ type SearchResult =
       readonly generation: number
       readonly root: string
       readonly page: SearchPage
+      readonly view?: CompleteView
+      readonly suggestions?: readonly SuggestedSummary[]
+      readonly recent?: readonly RecentSummary[]
+      readonly faces?: readonly ViewFace[]
     }
 export interface SearchChannelStatus {
   readonly lastInput: SearchQuery | null
   readonly result: SearchResult
+  readonly previous?: Extract<SearchResult, { phase: "complete" }>
 }
 interface LoadFailure {
   readonly kind: "load-failed" | "worker-failed" | "cancelled"
@@ -31,6 +46,8 @@ export interface SearchStatus {
   readonly edition?: Region
   readonly loading?: { readonly root: string; readonly edition: Region }
   readonly updating: boolean
+  readonly searchReady?: boolean
+  readonly unconfirmed?: boolean
   readonly error?: LoadFailure
   readonly progress?: {
     readonly done: number
@@ -51,8 +68,15 @@ export type SearchTransportFactory = (
 
 const browserTransport: SearchTransportFactory = (receive, failed) => {
   const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" })
-  worker.onmessage = (event: MessageEvent<SearchEvent>) => {
-    receive(event.data)
+  const network = mainNetwork(worker)
+  worker.onmessage = (event: MessageEvent<SearchEvent | NetworkMessage>) => {
+    if (
+      event.data.kind === "fetch" ||
+      event.data.kind === "abort-fetch" ||
+      event.data.kind === "fetch-reply"
+    )
+      network.receive(event.data)
+    else receive(event.data)
   }
   worker.onerror = failed
   worker.onmessageerror = failed
@@ -61,6 +85,7 @@ const browserTransport: SearchTransportFactory = (receive, failed) => {
       worker.postMessage(request)
     },
     dispose: () => {
+      network.dispose()
       worker.terminate()
     },
   }
@@ -72,6 +97,9 @@ export interface SearchChannel {
   readonly getStatus: () => SearchChannelStatus
   readonly subscribe: (listener: () => void) => () => void
   search(query: SearchQuery): void
+  view(query: SearchQuery, remember?: boolean): void
+  suggest(text: string, edition: Region, limit?: number): void
+  recent(printingIds: readonly string[], edition: Region): void
   dispose(): void
 }
 interface ChannelOwner {
@@ -84,6 +112,7 @@ class Channel implements SearchChannel {
   private readonly listeners = new Set<() => void>()
   private status: SearchChannelStatus = { lastInput: null, result: { phase: "pending" } }
   private queryId = 0
+  private purpose: PurposeRequest | undefined
   private disposed = false
 
   private readonly owner: ChannelOwner
@@ -103,17 +132,44 @@ class Channel implements SearchChannel {
   }
   private publish(status: SearchChannelStatus): void {
     if (this.disposed) return
-    this.status = status
+    this.status =
+      status.result.phase === "pending" && this.status.result.phase === "complete"
+        ? { ...status, previous: this.status.result }
+        : status
     for (const listener of this.listeners) listener()
   }
+  view(query: SearchQuery, remember = false): void {
+    this.submit({ kind: "view", query, remember }, query)
+  }
+  suggest(text: string, edition: Region, limit = 8): void {
+    this.submit({ kind: "suggest", text, limit }, { state: { ...DEFAULT_QUERY, text }, edition })
+  }
+  recent(printingIds: readonly string[], edition: Region): void {
+    this.submit(
+      { kind: "recent", printingIds: printingIds.slice(0, 20) },
+      { state: DEFAULT_QUERY, edition },
+    )
+  }
   search(query: SearchQuery): void {
+    this.submit({ kind: "search", query }, query)
+  }
+  private submit(purpose: PurposeRequest, query: SearchQuery): void {
     if (this.disposed) return
+    this.purpose = purpose
     this.queryId += 1
     this.publish({ lastInput: structuredClone(query), result: { phase: "pending" } })
     this.refresh(false)
   }
   refresh(invalidate = true): void {
     if (this.disposed) return
+    const current = this.owner.status()
+    if (
+      invalidate &&
+      this.purpose?.kind === "view" &&
+      this.status.result.phase === "complete" &&
+      this.status.result.generation === current.generation
+    )
+      return
     if (invalidate) this.queryId += 1
     const status = this.owner.status()
     this.publish({
@@ -133,11 +189,10 @@ class Channel implements SearchChannel {
     this.checkAvailability()
     if (status.generation !== null && query && query.edition === status.edition)
       this.owner.send({
-        kind: "search",
+        ...(this.purpose ?? { kind: "search", query }),
         generation: status.generation,
         channelId: this.id,
         queryId: this.queryId,
-        query,
       })
   }
   checkAvailability(): void {
@@ -157,22 +212,43 @@ class Channel implements SearchChannel {
         },
       })
   }
-  receive(event: Extract<SearchEvent, { kind: "result" | "query-error" }>): void {
+  receive(
+    event: Extract<
+      SearchEvent,
+      { kind: "result" | "view-result" | "suggest-result" | "recent-result" | "query-error" }
+    >,
+  ): void {
     const status = this.owner.status()
     if (this.disposed || event.generation !== status.generation || event.queryId !== this.queryId)
       return
     this.publish({
       ...this.status,
       result:
-        event.kind === "result"
-          ? {
+        event.kind === "query-error"
+          ? { phase: "error", error: event.error }
+          : {
               phase: "complete",
               queryId: this.queryId,
               generation: event.generation,
               root: status.root ?? "",
-              page: event.page,
-            }
-          : { phase: "error", error: event.error },
+              page:
+                event.kind === "result"
+                  ? event.page
+                  : event.kind === "view-result"
+                    ? event.view.page
+                    : {
+                        total: event.kind === "suggest-result" ? event.total : event.items.length,
+                        offset: 0,
+                        items: [],
+                      },
+              ...(event.kind === "view-result"
+                ? { view: event.view }
+                : event.kind === "suggest-result"
+                  ? { suggestions: event.items, ...(event.faces ? { faces: event.faces } : {}) }
+                  : event.kind === "recent-result"
+                    ? { recent: event.items, ...(event.faces ? { faces: event.faces } : {}) }
+                    : {}),
+            },
     })
   }
   dispose(): void {
@@ -275,13 +351,29 @@ export class SearchSession {
   }
   private receive(event: SearchEvent): void {
     if (this.disposed) return
-    if (event.kind === "result" || event.kind === "query-error") {
+    if (
+      event.kind === "result" ||
+      event.kind === "query-error" ||
+      event.kind === "view-result" ||
+      event.kind === "suggest-result" ||
+      event.kind === "recent-result"
+    ) {
       this.channels.get(event.channelId)?.receive(event)
+      return
+    }
+    if (event.kind === "checking") {
+      if (event.generation !== this.status.generation) return
+      this.publish({
+        ...this.status,
+        unconfirmed: !!event.error,
+        updating: false,
+        ...(event.error ? { error: { kind: "load-failed", message: event.error } } : {}),
+      })
       return
     }
     if (event.kind === "ready") {
       // A ready can cross a cancel or a newer load; follow the generation the Worker actually uses.
-      if (this.status.generation !== null && event.generation <= this.status.generation) return
+      if (this.status.generation !== null && event.generation < this.status.generation) return
       if (event.generation === this.staging) this.staging = null
       const { progress, loading } = this.status
       this.publish({
@@ -293,6 +385,8 @@ export class SearchSession {
         ...(this.staging !== null ? { progress, loading } : {}),
         dataVersion: event.dataVersion,
         manifestHash: event.manifestHash,
+        searchReady: event.searchReady ?? true,
+        unconfirmed: event.unconfirmed ?? false,
       })
       this.refreshChannels()
       this.onMetrics?.(event.metrics)
