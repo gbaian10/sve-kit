@@ -261,7 +261,7 @@ Code 的概念對照為 Player.self/opponent → `term:player.self/opponent`、P
 ZoneKind 的 battlefield／hand／deck／evolve_deck／graveyard／ex／banish 依序對應
 `term:zone.battlefield`／`term:zone.hand`／`term:zone.deck`／`term:zone.evolve_deck`／`term:zone.cemetery`／`term:zone.ex`／`term:zone.banishment`。
 DeckPosition.top/bottom 對應完整 `term:zone.deck_top/deck_bottom`；TokenStatus.token 對應 `term:object.token`。
-這裡記錄來源型別含義；準備入口尚未接正式 renderer 的 Code→Reference、必要引用集合與新形式。
+這裡記錄來源型別含義；renderer v3 已接 Code→Reference、必要引用集合與新形式，正式來源 workflow 仍維持 N0。
 
 P 為明示自分／相手，Z 為上列區域，DP 為完整デッキの上／下，PH 為具名階段。
 NP 以卡種、泛稱カード或完整 `『』` 名稱為核心；Q 沿既有合法數量與單位。
@@ -343,7 +343,7 @@ Node 的 kind 是上述四種唯一 discriminator；required 槽須由 LeafRef �
 CardNP 的 owner=Player（role 限 source_owner 或 counted_owner）、zone=ZoneSet（role 限 source_zone 或 counted_zone）、token=TokenStatus；class 為 Concept 的 vocabulary(class) 引用，
 traits 每項為 role=trait 的 Concept glossary 引用；class 的 role=class_filter。
 owner 與 zone 同時存在時，source_owner 只配 source_zone，counted_owner 只配 counted_zone；
-N1 準備來源驗證還須確認全部葉屬於同一合法 operand，不能跨用途借相同值。DeckPosition 用 flat target／Form，不冒充 zone。
+N1 準備來源驗證還須確認全部葉屬於同一合法 operand，不能跨用途借相同值；CardNP 必須涵蓋該 operand 的全部 kind／trait／class／token 篩選，不能把漏掉的 filter 在 NP 外另行引用以求通過。DeckPosition 用 flat target／Form，不冒充 zone。
 引用域也可使用已登錄的 `concept.trait.v1`／`vocabulary.class.v1`。
 目前 traits 限 0 或 1 項，不把 token／class 當 trait；多項篩選須先確認具名構造的 AND／OR 語義。
 
@@ -353,9 +353,9 @@ NP 不另占來源 span；它的葉各自有來源位置。NP 移除或新增只
 
 | FormDefinition 欄位 | 型別／合法域與引用 | 驗證者；失敗／案例 |
 | --- | --- | --- |
-| id | Code；具名形式，如 zone.locative、zone.allative、zone.ablative、zone.add_to_hand、zone.return_to_hand、keyword.display、quantity.classifier | A/B/C；未知形式拒絕；FL-012 |
+| id | Code；具名形式，如 zone.locative、zone.allative、zone.ablative、zone.add_to_hand、zone.return_to_hand、keyword.display、quantity.classifier.source_selection | A/B/C；未知形式拒絕；FL-012 |
 | lang | Lang；和 target 相同 | A/B/C；錯語言；FL-012 |
-| signature | 非空 `{name:Code,type:TypeName,role:Code}` 陣列，name 唯一，type 引用 §4 葉型別，role 引用其角色 | A/B；參數不合；FL-004／FL-012 |
+| signature | 除 zone.union_separator 外非空 `{name:Code,type:TypeName,role:Code}` 陣列，name 唯一，type 引用 §4 葉型別，role 引用其角色 | A/B；參數不合；FL-004／FL-012 |
 | rule | Code；引用釘版 renderer 的有限規則，不接受程式 | A/B/C；未知或超域；FL-012 |
 | cases | 非空 `{case_code:[FormPart]}` mapping；case_code 限 rule 登錄的分支，FormPart 是 `{kind:Literal,text:Text}`／`{kind:Label,arg:Code}`／`{kind:QuantityValue,arg:Code}`，每分支有序 | A/B；分支缺失／未知、arg 不引用 signature 拒絕；基礎名稱來自當前選詞；FL-012／FL-015 |
 
@@ -372,17 +372,38 @@ rule 只依 typed args 選具名 case；cases 必完整涵蓋該 rule 的簽章�
 keyword.display 可供括號，基礎名稱不含括號；別名與全名綁同概念，來源拼寫留 trace。
 形式內的 Label 產生概念範圍，Literal 後綴／括號不擴大該範圍。缺基礎選詞則整欄退回（FL-011），未知形式 ID 則結構拒絕。
 
-CardNP 的區域詞尾使用同語言 `zone.card_np`（`zone.case.v1`），不由 renderer 在持有者與區域後一律補所有格。
-其 cases 包含單一區域與 `mixed`；詞尾與多區域的合計修飾由該語言的 Literal 表達。
-量詞使用既有 `quantity.classifier`，計數區域優先取 NP 自己的 zone，不能借用目的地區域。
-沒有 NP zone 時，只有唯一的 counted_zone 能提供語境，否則整欄退回。
-單一 trait 使用 `trait.filter`（`trait.filter.v1`），簽章恰為 trait:Concept/trait，default 必含 Label(trait)。
-class 與 token 仍各自顯示已綁葉，不在 trait 形式內藏入名稱。
+renderer 使用 `four-layer-renderer-v3`；正式來源 workflow 仍採 N0 v1，N1 v2 僅為準備入口。
+下列形式使用封閉 ID 與 type＋role 簽章；明示 Form 與 NP 隱式使用同一份 definition，不登錄舊 ID alias。
 
-ZoneSet 的多成員按 canonical 排序顯示，每個基礎名稱有自己的概念範圍。
-成員間使用同語言 `zone.union_separator`（`zone.union_separator.v1`）：簽章為 zone:ZoneSet、default 只含 Literal。
-連接詞與詞尾都不屬於任何成員的概念範圍；缺少必要 NP 形式或連接詞時整欄退回。
-這些是既有葉的呈現規則，沒有新增 N0 來源葉或放寬來源單位守衛。
+| ID | signature（name:type/role） | rule／cases |
+| --- | --- | --- |
+| zone.locative；zone.ablative | zone:ZoneSet/source_zone | zone.case.v2；七區域＋mixed |
+| zone.counted_locative | zone:ZoneSet/counted_zone | zone.case.v2；七區域＋mixed |
+| zone.allative | zone:ZoneSet/destination_zone | zone.case.v2；七區域＋mixed |
+| zone.add_to_hand；zone.return_to_hand | zone:ZoneSet/destination_zone | zone.hand_action.v1；default；值限 [hand]，N1 B 驗同一局部 add／return 動作 |
+| deck_position.ablative | position:DeckPosition/source_position | deck_position.display.v1；default |
+| deck_position.allative | position:DeckPosition/destination_position | deck_position.display.v1；default |
+| phase.trigger | phase:Phase/phase_trigger | phase.trigger.v1；default；無 duration producer |
+| ability.display；keyword.display | term:Concept/ability；term:Concept/keyword | ability.display.v1；keyword.display.v1；default |
+| trait.filter；class.filter | trait:Concept/trait；class:Concept/class_filter | trait.filter.v1；class.filter.v1；default |
+| owner.source_possessive；owner.counted_possessive | owner:Player/source_owner；owner:Player/counted_owner | owner.possessive.v1；default |
+| quantity.classifier.source_selection | kind:CardKind/counted_kind, quantity:QuantitySpec/selection_count, zone:ZoneSet/source_zone | quantity.classifier.v1；card／object，僅 Literal |
+| quantity.classifier.counted_selection | kind:CardKind/counted_kind, quantity:QuantitySpec/selection_count, zone:ZoneSet/counted_zone | quantity.classifier.v1；card／object，僅 Literal |
+| quantity.classifier.counted_existence | kind:CardKind/counted_kind, quantity:QuantitySpec/existence_count, zone:ZoneSet/counted_zone | quantity.classifier.v1；card／object，僅 Literal |
+| zone.union_separator | 空 signature=[]，呼叫 args={} | zone.union_separator.v2；唯一 default，僅 Literal |
+
+七個區域 Code 為 battlefield／hand／deck／evolve_deck／graveyard／ex／banish；mixed 逐成員引用。
+所有 label 形式在每個 case 必須有對應 Label，不能以空輸出或固定字替代引用。
+`zone.card_np`、單一 `quantity.classifier` 與 separator rule v1 已移除，使用處依來源角色改為上表 ID。
+CardNP 依自己的 zone role 選 locative；量詞依完整三參數 role tuple 派送，其他 tuple 結構拒絕。
+NP 無 zone 時只接受唯一 counted_zone 作量詞語境，不能借 destination_zone；無唯一語境沿 unresolved_classifier_context 整欄退回。
+all／any 不呼叫量詞形式；數字、來源 unit 與語義分類不因中文量詞重型別。
+
+owner＋zone 使用 owner label 接區域形式；只有 owner、沒有 NP zone 時依 role 使用 possessive。
+所有格／格助詞／量詞的 Literal 不包進概念 ranges。缺基礎選詞或必要隱式形式整欄退回。
+A 案省略 owner 不選用時不提供 args.owner，不產所有格形式或選詞品質依賴；選用時引用同槽。
+ZoneSet 多成員按 canonical 排序顯示，每成員有自己的概念範圍；空簽章 separator 不讀值、不計入必要引用。
+這些呈現改動不新增來源葉或放寬來源單位守衛；v3 使 dependency_key 與相依 tr: 更新，不改來源 frame／binding。
 固定案例見 [參數群組渲染案例](../../../carddb/tests/fixtures/parameter-groups/render-cases.json)。
 案例的 `parameter_group_render` 只驗 renderer 的隔離 typed fixture；`parameter_group_n0` 另從合成日文驗正常來源分類。
 N0 正文仍無可供 CardNP 使用的 counted_kind／ZoneSet／Player／TokenStatus 葉，因此不以 renderer 案例宣稱已完成真實來源的 NP 接入。
@@ -544,6 +565,17 @@ Annotation 的每欄如下；set 是 exact 文字的語義位置，binding 對�
 NP 範圍不是 annotation，卡名內的同字不另套術語 annotation。form 的括號／後綴通常不含在概念 range。
 `annotation_set.id = ann:`＋H(`{recipe:"annotation-v1",text_unit_id,occurrences}`)；完整內容相同才共用。
 純字串去重 text_unit 不代表共用 annotation_set；無翻譯時原文 set 仍存在，公開如何承載由 #496 決定。
+
+必要引用集合 E 逐 `(slot,role,reference)` 計算；ZoneSet 逐成員，CardName 是整名引用。
+先排除由來源規則產生、required=false 且 occurrences=[] 的純省略槽，其值仍必須存在。
+其餘明示結構／required 葉、四種門檻能力名，以及該用途實際選中的 label／variant 的 emphasis=true 或 origin=project／machine 都須引用。
+A 只計 LeafRef、Form 的實際 Label／QuantityValue 與 NP 展開的輸出；形式的讀值參數不等於呈現引用。
+E−A 必須為空；同字不同角色、卡名內同字與另一槽的引用不能補洞。重複呈現各保留 node_path／occurrence。
+缺必要或實際使用選詞沿 missing_term_translation 整欄 fallback；有 target 但漏 E 是結構錯誤，不能改叫缺譯。
+未用的純省略 label 不加品質或 fallback 依賴；emphasis／origin 是 render 條件，不入 frame hash。
+Code→Reference 固定對照：Player self／opponent→term:player.self／opponent；Phase start／main／end→term:phase.start／main／end；
+DeckPosition top／bottom→term:zone.deck_top／bottom；TokenStatus token→term:object.token。
+ZoneSet graveyard→term:zone.cemetery、banish→term:zone.banishment，其餘 Code 對應 `term:zone.<Code>`；不拿 Code 當中文。
 
 `render projection` 在建置內恰有 `{text:Text,annotation_set_id:ID,dependency_key:Hash}`，皆必填；
 set 引用上表、text 必相同，B/C 驗閉包（FL-014／FL-015）。

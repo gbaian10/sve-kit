@@ -111,7 +111,7 @@
         "nodes": [
           {
             "kind": "Form",
-            "form_id": "zone.locative",
+            "form_id": "zone.counted_locative",
             "args": {
               "zone": {
                 "slot": "zone"
@@ -119,16 +119,12 @@
             }
           },
           {
-            "kind": "Literal",
-            "text": "的"
-          },
-          {
             "kind": "LeafRef",
             "slot": "quantity"
           },
           {
             "kind": "Form",
-            "form_id": "quantity.classifier",
+            "form_id": "quantity.classifier.counted_selection",
             "args": {
               "zone": {
                 "slot": "zone"
@@ -283,7 +279,7 @@
         "nodes": [
           {
             "kind": "Form",
-            "form_id": "zone.locative",
+            "form_id": "zone.counted_locative",
             "args": {
               "zone": {
                 "slot": "zone"
@@ -291,16 +287,12 @@
             }
           },
           {
-            "kind": "Literal",
-            "text": "的"
-          },
-          {
             "kind": "LeafRef",
             "slot": "quantity"
           },
           {
             "kind": "Form",
-            "form_id": "quantity.classifier",
+            "form_id": "quantity.classifier.counted_selection",
             "args": {
               "zone": {
                 "slot": "zone"
@@ -429,7 +421,7 @@
                 "nodes": [
                   {
                     "kind": "Form",
-                    "form_id": "zone.locative",
+                    "form_id": "zone.counted_locative",
                     "args": {
                       "zone": {
                         "slot": "zone"
@@ -437,16 +429,12 @@
                     }
                   },
                   {
-                    "kind": "Literal",
-                    "text": "的"
-                  },
-                  {
                     "kind": "LeafRef",
                     "slot": "quantity"
                   },
                   {
                     "kind": "Form",
-                    "form_id": "quantity.classifier",
+                    "form_id": "quantity.classifier.counted_selection",
                     "args": {
                       "zone": {
                         "slot": "zone"
@@ -486,7 +474,7 @@
           "nodes": [
             {
               "kind": "Form",
-              "form_id": "zone.locative",
+              "form_id": "zone.counted_locative",
               "args": {
                 "zone": {
                   "slot": "zone"
@@ -494,16 +482,12 @@
               }
             },
             {
-              "kind": "Literal",
-              "text": "的"
-            },
-            {
               "kind": "LeafRef",
               "slot": "quantity"
             },
             {
               "kind": "Form",
-              "form_id": "quantity.classifier",
+              "form_id": "quantity.classifier.counted_selection",
               "args": {
                 "zone": {
                   "slot": "zone"
@@ -1343,7 +1327,7 @@
       "input": {
         "fixture": "target_base",
         "changes": {
-          "/target/nodes/4/slot": "missing"
+          "/target/nodes/3/slot": "missing"
         }
       },
       "expected": {
@@ -1677,7 +1661,7 @@
                 "nodes": [
                   {
                     "kind": "Form",
-                    "form_id": "zone.locative",
+                    "form_id": "zone.counted_locative",
                     "args": {
                       "zone": {
                         "slot": "zone"
@@ -1685,16 +1669,12 @@
                     }
                   },
                   {
-                    "kind": "Literal",
-                    "text": "的"
-                  },
-                  {
                     "kind": "LeafRef",
                     "slot": "quantity"
                   },
                   {
                     "kind": "Form",
-                    "form_id": "quantity.classifier",
+                    "form_id": "quantity.classifier.counted_selection",
                     "args": {
                       "zone": {
                         "slot": "zone"
@@ -1743,7 +1723,7 @@
                   "nodes": [
                     {
                       "kind": "Form",
-                      "form_id": "zone.locative",
+                      "form_id": "zone.counted_locative",
                       "args": {
                         "zone": {
                           "slot": "zone"
@@ -1751,16 +1731,12 @@
                       }
                     },
                     {
-                      "kind": "Literal",
-                      "text": "的"
-                    },
-                    {
                       "kind": "LeafRef",
                       "slot": "quantity"
                     },
                     {
                       "kind": "Form",
-                      "form_id": "quantity.classifier",
+                      "form_id": "quantity.classifier.counted_selection",
                       "args": {
                         "zone": {
                           "slot": "zone"
@@ -1793,7 +1769,7 @@
                   "nodes": [
                     {
                       "kind": "Form",
-                      "form_id": "zone.locative",
+                      "form_id": "zone.counted_locative",
                       "args": {
                         "zone": {
                           "slot": "zone"
@@ -1801,16 +1777,12 @@
                       }
                     },
                     {
-                      "kind": "Literal",
-                      "text": "的"
-                    },
-                    {
                       "kind": "LeafRef",
                       "slot": "quantity"
                     },
                     {
                       "kind": "Form",
-                      "form_id": "quantity.classifier",
+                      "form_id": "quantity.classifier.counted_selection",
                       "args": {
                         "zone": {
                           "slot": "zone"
@@ -1988,7 +1960,7 @@
       "id": "zone_locative",
       "operation": "form_signature",
       "input": {
-        "form": "zone.locative",
+        "form": "zone.counted_locative",
         "registered": true,
         "argument_type": "ZoneSet",
         "required_type": "ZoneSet",
@@ -2049,7 +2021,7 @@
       "id": "wrong_arg",
       "operation": "form_signature",
       "input": {
-        "form": "zone.locative",
+        "form": "zone.counted_locative",
         "argument_type": "Nat",
         "required_type": "ZoneSet"
       },
@@ -2063,7 +2035,7 @@
       "id": "wrong_lang",
       "operation": "form_signature",
       "input": {
-        "form": "zone.locative",
+        "form": "zone.counted_locative",
         "lang": "ja",
         "target_lang": "zh-Hant"
       },
@@ -2444,7 +2416,7 @@
       "id": "zone_locative",
       "operation": "zone_forms",
       "input": {
-        "form": "zone.locative",
+        "form": "zone.counted_locative",
         "zone": "hand",
         "labels": {
           "hand": "手牌",
@@ -3514,7 +3486,7 @@
       "id": "missing_form_case",
       "operation": "form_signature",
       "input": {
-        "form": "zone.locative",
+        "form": "zone.counted_locative",
         "registered": true,
         "valid_rule_cases": [
           "hand",
@@ -3543,7 +3515,7 @@
       "id": "unknown_form_case",
       "operation": "form_signature",
       "input": {
-        "form": "zone.locative",
+        "form": "zone.counted_locative",
         "registered": true,
         "valid_rule_cases": [
           "hand"
