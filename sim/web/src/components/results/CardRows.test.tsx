@@ -1,7 +1,7 @@
 import { act, screen } from "@testing-library/react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { renderInRouter } from "../../test-utils"
+import { renderInRouter, renderRoutes } from "../../test-utils"
 import type { GridCell } from "./CardGrid"
 import { CardList, CardTable } from "./CardRows"
 
@@ -14,6 +14,9 @@ beforeEach(() => {
       disconnect() {}
     },
   )
+})
+afterEach(() => {
+  vi.unstubAllGlobals()
 })
 
 const cell: GridCell = {
@@ -76,4 +79,32 @@ describe("table thumbnails", () => {
       "loading",
     )
   })
+})
+
+it("updates table labels and fallback thumbnails on language changes while retaining every row", async () => {
+  const cells = Array.from({ length: 60 }, (_, index) => ({
+    ...cell,
+    key: `synthetic-${String(index)}`,
+    to: `/cards/synthetic-${String(index)}`,
+  }))
+  const { i18n } = await renderRoutes([
+    {
+      path: "*",
+      element: (
+        <CardTable cells={cells} images={undefined} artOf={() => undefined} onOpen={vi.fn()} />
+      ),
+    },
+  ])
+  const links = screen.getAllByRole("link")
+  expect(links).toHaveLength(60)
+  expect(screen.getAllByText("費用")).toHaveLength(60)
+  await act(async () => {
+    await i18n.changeLanguage("en")
+  })
+  expect(screen.getAllByText("Cost")).toHaveLength(60)
+  expect(screen.queryByText("費用")).not.toBeInTheDocument()
+  expect(screen.queryByText("卡圖資訊載入中")).not.toBeInTheDocument()
+  expect(screen.queryByText("效果載入中")).not.toBeInTheDocument()
+  const updated = screen.getAllByRole("link")
+  for (const [index, link] of links.entries()) expect(updated[index]).toBe(link)
 })

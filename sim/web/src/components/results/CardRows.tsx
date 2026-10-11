@@ -1,5 +1,4 @@
-import { type MouseEvent, useRef } from "react"
-import { useTranslation } from "react-i18next"
+import { memo, type MouseEvent, useRef } from "react"
 import { useHref, useNavigate } from "react-router"
 
 import { useAbilityPreview } from "../../app/snapshot"
@@ -10,11 +9,11 @@ import { CLASS_ICON } from "../card/classIcons"
 import { InlineText } from "../card/InlineText"
 import { StatLine } from "../card/StatLine"
 import { costIcon, costIconNeedsNumber } from "../card/symbolIcons"
-import { useTextLanguage } from "../card/text-language"
 import { Badge } from "../ui/Badge"
 import { cn } from "../ui/cn"
 import { ArtThumb } from "./ArtThumb"
 import { type CardGridProps, type GridCell, NameNotices } from "./CardGrid"
+import { type ResultLabels, useResultLabels } from "./labels"
 import { isPlainClick } from "./plain-click"
 import { useSeen } from "./useSeen"
 
@@ -23,20 +22,30 @@ export interface CardRowsProps extends CardGridProps {
   readonly artOf: (cell: GridCell) => ImageSource | undefined
 }
 
-function Stat({ value, def = false }: { readonly value: number | null; readonly def?: boolean }) {
-  const { t } = useTranslation()
+function Stat({
+  value,
+  def = false,
+  labels,
+}: {
+  readonly value: number | null
+  readonly def?: boolean
+  readonly labels: ResultLabels
+}) {
   return (
     <span className={cn("text-14 font-semibold tabular-nums", def && "text-def")}>
-      {value === null ? t("cardPage.noValue") : value}
+      {value === null ? labels.noValue : value}
     </span>
   )
 }
 
-function Cost({ value }: { readonly value: number }) {
-  const { t } = useTranslation()
+function Cost({ value, labels }: { readonly value: number; readonly labels: ResultLabels }) {
   return (
     <span className="flex shrink-0 items-center gap-1 text-14 font-semibold tabular-nums">
-      <img src={costIcon(value)} alt={t("cardPage.costValue", { value })} className="size-5.5" />
+      <img
+        src={costIcon(value)}
+        alt={labels.t("cardPage.costValue", { value })}
+        className="size-5.5"
+      />
       {costIconNeedsNumber(value) && <span aria-hidden="true">{value}</span>}
     </span>
   )
@@ -85,14 +94,14 @@ function EffectPreview({
   printingId,
   faceId,
   edition,
+  labels,
 }: {
   readonly printingId: string
   readonly faceId: string
   readonly edition: Region
+  readonly labels: ResultLabels
 }) {
-  const { t } = useTranslation()
-  const language = useTextLanguage()
-  const result = useAbilityPreview(printingId, faceId, language, edition)
+  const result = useAbilityPreview(printingId, faceId, labels.language, edition)
   const unit = result.phase === "complete" ? result.preview : undefined
   return (
     <span
@@ -110,35 +119,42 @@ function EffectPreview({
           role={result.phase === "pending" ? "status" : undefined}
           className="text-13 text-text-3"
         >
-          {result.phase === "error" ? t("results.effectUnavailable") : t("results.effectPending")}
+          {result.phase === "error" ? labels.effectUnavailable : labels.effectPending}
         </span>
       )}
-      <span className="text-11 text-text-3">{t("results.abilityPreview")}</span>
+      <span className="text-11 text-text-3">{labels.abilityPreview}</span>
     </span>
   )
 }
 
 // Near-viewport previews limit text work while preserving the table layout (design 05, 02a).
-function TableRow({
+const TableRow = memo(function TableRow({
   cell,
   images,
   onOpen,
   highlighted,
-  art,
+  artOf,
+  labels,
 }: {
   readonly cell: GridCell
   readonly images: CardRowsProps["images"]
   readonly onOpen: CardRowsProps["onOpen"]
   readonly highlighted: boolean
-  readonly art: ImageSource | undefined
+  readonly artOf: CardRowsProps["artOf"]
+  readonly labels: ResultLabels
 }) {
-  const { t } = useTranslation()
   const ref = useRef<HTMLLIElement>(null)
   const seen = useSeen(ref)
   return (
     <li ref={ref} className="min-w-0">
       <RowLink cell={cell} onOpen={onOpen} highlighted={highlighted} className="flex-wrap py-2">
-        <ArtThumb summary={cell.summary} name={cell.name.primary} images={images} art={art} />
+        <ArtThumb
+          summary={cell.summary}
+          name={cell.name.primary}
+          images={images}
+          art={artOf(cell)}
+          labels={labels}
+        />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5 leading-tight">
           <span className="flex items-baseline gap-2">
             <span lang={cell.name.primary.lang} className="min-w-0 truncate text-15 font-semibold">
@@ -151,15 +167,16 @@ function TableRow({
               {cell.name.secondary.text}
             </span>
           )}
-          <NameNotices name={cell.name} />
+          <NameNotices name={cell.name} labels={labels} />
           <StatLine
+            labels={labels.stats}
             size="sm"
             cost={cell.summary.cost}
             attack={cell.summary.attack}
             defense={cell.summary.defense}
           />
           {cell.summary.wordingPending && (
-            <Badge className="mt-0.5 self-start">{t("card.wordingPending")}</Badge>
+            <Badge className="mt-0.5 self-start">{labels.wordingPending}</Badge>
           )}
         </span>
         <span className="basis-full pl-23">
@@ -168,20 +185,22 @@ function TableRow({
               printingId={cell.summary.printingId}
               faceId={cell.summary.faceId}
               edition={cell.summary.region}
+              labels={labels}
             />
           ) : (
             <span className="flex min-w-0 flex-col gap-0.5" data-preview="waiting">
-              <span className="text-13 text-text-3">{t("results.effectPending")}</span>
-              <span className="text-11 text-text-3">{t("results.abilityPreview")}</span>
+              <span className="text-13 text-text-3">{labels.effectPending}</span>
+              <span className="text-11 text-text-3">{labels.abilityPreview}</span>
             </span>
           )}
         </span>
       </RowLink>
     </li>
   )
-}
+})
 
 export function CardTable({ cells, images, onOpen, anchor, artOf }: CardRowsProps) {
+  const labels = useResultLabels()
   return (
     <ul data-view="table" className="flex flex-col">
       {cells.map((cell) => (
@@ -191,7 +210,8 @@ export function CardTable({ cells, images, onOpen, anchor, artOf }: CardRowsProp
           images={images}
           onOpen={onOpen}
           highlighted={anchor === cell.key}
-          art={artOf(cell)}
+          artOf={artOf}
+          labels={labels}
         />
       ))}
     </ul>
@@ -201,7 +221,7 @@ export function CardTable({ cells, images, onOpen, anchor, artOf }: CardRowsProp
 // List row (design 05, 02a): 52px base, a 3px class-coloured edge, 22px cost icon, name over
 // translation, attack/defense, chevron.
 export function CardList({ cells, onOpen, anchor }: Omit<CardRowsProps, "images" | "artOf">) {
-  const { t } = useTranslation()
+  const labels = useResultLabels()
   return (
     <ul data-view="list" className="flex flex-col">
       {cells.map((cell) => {
@@ -215,7 +235,7 @@ export function CardList({ cells, onOpen, anchor }: Omit<CardRowsProps, "images"
               className="min-h-13 border-l-3 border-l-class-current py-1 pr-2 pl-3"
             >
               {cell.summary.cost !== null ? (
-                <Cost value={cell.summary.cost} />
+                <Cost value={cell.summary.cost} labels={labels} />
               ) : (
                 <img src={CLASS_ICON[style]} alt="" className="size-5.5 shrink-0 object-contain" />
               )}
@@ -236,16 +256,16 @@ export function CardList({ cells, onOpen, anchor }: Omit<CardRowsProps, "images"
                     {cell.name.secondary.text}
                   </span>
                 )}
-                <NameNotices name={cell.name} />
+                <NameNotices name={cell.name} labels={labels} />
                 {cell.summary.wordingPending && (
-                  <Badge className="mt-0.5 self-start">{t("card.wordingPending")}</Badge>
+                  <Badge className="mt-0.5 self-start">{labels.wordingPending}</Badge>
                 )}
               </span>
               {cell.summary.attack !== null && cell.summary.defense !== null && (
                 <span className="flex shrink-0 items-baseline gap-0.5">
-                  <Stat value={cell.summary.attack} />
+                  <Stat value={cell.summary.attack} labels={labels} />
                   <span className="text-13 text-text-3">/</span>
-                  <Stat value={cell.summary.defense} def />
+                  <Stat value={cell.summary.defense} def labels={labels} />
                 </span>
               )}
               <svg

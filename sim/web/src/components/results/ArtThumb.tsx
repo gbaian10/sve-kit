@@ -3,6 +3,7 @@ import { useState } from "react"
 import type { CardSummary, ImageIndex, ImageSource } from "../../data"
 import type { DisplayedText } from "../../domain/nameDisplay"
 import { CardImage } from "../card/CardImage"
+import type { ResultLabels } from "./labels"
 
 // Missing or failed illustration crops fall back to the full-card thumbnail.
 export function ArtThumb({
@@ -10,11 +11,13 @@ export function ArtThumb({
   name,
   images,
   art,
+  labels,
 }: {
   readonly summary: CardSummary
   readonly name: DisplayedText
   readonly images: ImageIndex | undefined
   readonly art: ImageSource | undefined
+  readonly labels: ResultLabels
 }) {
   const [failed, setFailed] = useState("")
   if (art === undefined || failed === art.src)
@@ -26,6 +29,7 @@ export function ArtThumb({
         alt="redundant"
         sizes="48px"
         className="w-12 shrink-0 self-start"
+        translate={labels.t}
       />
     )
   return (

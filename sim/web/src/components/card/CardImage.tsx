@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -22,13 +23,35 @@ export interface CardImageProps {
   readonly sizes: string
   /** Must set the width (`w-full`, `w-8`); the height follows the 63:88 ratio. */
   readonly className: string
+  /** Lists share their translator instead of subscribing once per image. */
+  readonly translate?: TFunction
 }
 
 // A fixed slot prevents layout shifts while the image downloads or remains unavailable.
 const shownSources = new Set<string>()
 
-export function CardImage({ summary, name, images, alt, sizes, className }: CardImageProps) {
+export function CardImage(props: CardImageProps) {
+  return props.translate ? (
+    <ImageContent {...props} t={props.translate} />
+  ) : (
+    <LocalizedImage {...props} />
+  )
+}
+
+function LocalizedImage(props: CardImageProps) {
   const { t } = useTranslation()
+  return <ImageContent {...props} t={t} />
+}
+
+function ImageContent({
+  summary,
+  name,
+  images,
+  alt,
+  sizes,
+  className,
+  t,
+}: CardImageProps & { readonly t: TFunction }) {
   const [loaded, setLoaded] = useState("")
   const [failed, setFailed] = useState("")
   const asset = images?.asset(summary.printingId, summary.faceId)

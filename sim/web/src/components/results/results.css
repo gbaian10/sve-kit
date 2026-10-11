@@ -1,0 +1,49 @@
+[data-view="grid"] {
+  container-type: inline-size;
+
+  --result-columns: 2;
+}
+
+@media (width >= 768px) {
+  [data-view="grid"] {
+    --result-columns: 4;
+  }
+}
+
+@media (width >= 1024px) {
+  [data-view="grid"] {
+    --result-columns: 5;
+  }
+}
+
+@media (width >= 1280px) {
+  [data-view="grid"] {
+    --result-columns: 6;
+  }
+}
+
+[data-view="grid"] > li,
+[data-view="table"] > li,
+[data-view="list"] > li {
+  content-visibility: auto;
+
+  /* Paint containment needs room for the existing outer highlight and focus outline. */
+  padding: 4px;
+  margin: -4px;
+}
+
+[data-view="grid"] > li {
+  /* Estimate the portrait and name line; auto remembers measured multilingual heights. */
+  contain-intrinsic-block-size: auto
+    calc(
+      (100cqw - (var(--result-columns) - 1) * 0.75rem) / var(--result-columns) * 88 / 63 + 1.5rem
+    );
+}
+
+[data-view="table"] > li {
+  contain-intrinsic-block-size: auto 140px;
+}
+
+[data-view="list"] > li {
+  contain-intrinsic-block-size: auto 52px;
+}

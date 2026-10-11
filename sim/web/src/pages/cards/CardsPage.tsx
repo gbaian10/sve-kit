@@ -253,11 +253,14 @@ export function CardsPage() {
     inputRef.current?.blur()
     commit({ ...query, text: input })
   }
-  const openCell = (cell: GridCell) => {
-    // The anchor goes on the list's own entry first; the cell then pushes the card entry.
-    updateEntry({ anchor: cell.key, pages })
-    recentStore.push(cell.summary.printingId)
-  }
+  const openCell = useCallback(
+    (cell: GridCell) => {
+      // The anchor goes on the list's own entry first; the cell then pushes the card entry.
+      updateEntry({ anchor: cell.key, pages })
+      recentStore.push(cell.summary.printingId)
+    },
+    [updateEntry, pages],
+  )
 
   const quickBar: QuickBarClass[] = useMemo(
     () =>

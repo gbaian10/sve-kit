@@ -7,35 +7,56 @@ import { ATTACK_ICON, DEFENSE_ICON } from "./symbolIcons"
  * The official card page's one-line stats: a green cost dot, then the attack and defense icons,
  * each followed by its name and number. Names never break; a group that does not fit wraps whole.
  */
-export function StatLine({
-  cost,
-  attack,
-  defense,
-  size = "md",
-  className,
-}: {
+interface StatLineProps {
   readonly cost: number | null
   readonly attack: number | null
   readonly defense: number | null
   /** `sm` for list rows: 13px numbers, 16px icons. */
   readonly size?: "md" | "sm"
   readonly className?: string
-}) {
-  const small = size === "sm"
+  readonly labels?: { readonly cost: string; readonly attack: string; readonly defense: string }
+}
+
+export function StatLine(props: StatLineProps) {
+  return props.labels ? <Stats {...props} labels={props.labels} /> : <LocalizedStats {...props} />
+}
+
+function LocalizedStats(props: StatLineProps) {
   const { t } = useTranslation()
+  return (
+    <Stats
+      {...props}
+      labels={{
+        cost: t("cardPage.stats.cost"),
+        attack: t("cardPage.stats.attack"),
+        defense: t("cardPage.stats.defense"),
+      }}
+    />
+  )
+}
+
+function Stats({
+  cost,
+  attack,
+  defense,
+  size = "md",
+  className,
+  labels,
+}: StatLineProps & { readonly labels: NonNullable<StatLineProps["labels"]> }) {
+  const small = size === "sm"
   const stats = [
-    { key: "cost", icon: null, label: t("cardPage.stats.cost"), value: cost, tone: "text-success" },
+    { key: "cost", icon: null, label: labels.cost, value: cost, tone: "text-success" },
     {
       key: "attack",
       icon: ATTACK_ICON,
-      label: t("cardPage.stats.attack"),
+      label: labels.attack,
       value: attack,
       tone: "text-cost",
     },
     {
       key: "defense",
       icon: DEFENSE_ICON,
-      label: t("cardPage.stats.defense"),
+      label: labels.defense,
       value: defense,
       tone: "text-def",
     },

@@ -1,7 +1,8 @@
-import { screen } from "@testing-library/react"
+import { act, screen } from "@testing-library/react"
+import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-import { renderInRouter } from "../../test-utils"
+import { renderInRouter, renderRoutes } from "../../test-utils"
 import { CardGrid, type GridCell } from "./CardGrid"
 
 function cell(pending: boolean): GridCell {
@@ -88,4 +89,58 @@ describe("visible current translation quality", () => {
     expect(screen.queryByText("待校對")).not.toBeInTheDocument()
     expect(screen.queryByText("依日文原文翻譯")).not.toBeInTheDocument()
   })
+})
+
+it("keeps all results searchable and preserves shared cards when only part of a query changes", async () => {
+  const values = Array.from({ length: 60 }, (_, index) => ({
+    ...cell(false),
+    key: `synthetic-${String(index)}`,
+    to: `/cards/synthetic-${String(index)}`,
+  }))
+  const onOpen = vi.fn()
+  const changed = values.map((value, index) =>
+    index === 30 ? { ...value, key: "replacement", to: "/cards/replacement" } : value,
+  )
+  function Results() {
+    const [items, setItems] = useState(values)
+    return (
+      <>
+        <button
+          onClick={() => {
+            setItems(changed)
+          }}
+        >
+          Replace
+        </button>
+        <CardGrid cells={items} images={undefined} onOpen={onOpen} />
+      </>
+    )
+  }
+  await renderInRouter(<Results />)
+  const links = screen.getAllByRole("link")
+  expect(links).toHaveLength(60)
+  act(() => {
+    screen.getByRole("button", { name: "Replace" }).click()
+  })
+  const updated = screen.getAllByRole("link")
+  expect(updated.map((link) => link.getAttribute("href"))).toEqual(changed.map((value) => value.to))
+  expect(updated[0]).toBe(links[0])
+  expect(updated[59]).toBe(links[59])
+})
+
+it("updates shared labels and image states when the UI language changes without replacing the card", async () => {
+  const value = { ...cell(true), name: { ...cell(true).name, missingTranslation: true } }
+  const { i18n } = await renderRoutes([
+    { path: "*", element: <CardGrid cells={[value]} images={undefined} onOpen={vi.fn()} /> },
+  ])
+  const link = screen.getByRole("link")
+  expect(screen.getByText("尚無譯名")).toBeVisible()
+  await act(async () => {
+    await i18n.changeLanguage("en")
+  })
+  expect(screen.getByText("Wording pending")).toBeVisible()
+  expect(screen.queryByText("卡文未定")).not.toBeInTheDocument()
+  expect(screen.queryByText("尚無譯名")).not.toBeInTheDocument()
+  expect(screen.queryByText("卡圖資訊載入中")).not.toBeInTheDocument()
+  expect(screen.getByRole("link")).toBe(link)
 })

@@ -1,5 +1,6 @@
-import type { MouseEvent } from "react"
-import { useTranslation } from "react-i18next"
+import "./results.css"
+
+import { memo, type MouseEvent } from "react"
 import { useHref, useNavigate } from "react-router"
 
 import type { CardSummary, ImageIndex } from "../../data"
@@ -7,6 +8,7 @@ import type { DisplayedName } from "../../domain/nameDisplay"
 import { CardImage } from "../card/CardImage"
 import { Badge } from "../ui/Badge"
 import { cn } from "../ui/cn"
+import { type ResultLabels, useResultLabels } from "./labels"
 import { isPlainClick } from "./plain-click"
 
 export interface GridCell {
@@ -27,14 +29,19 @@ export interface CardGridProps {
 }
 
 /** Translation notices shared by the grid cell and the row shells; empty when there is none. */
-export function NameNotices({ name }: { readonly name: DisplayedName }) {
-  const { t } = useTranslation()
+export function NameNotices({
+  name,
+  labels,
+}: {
+  readonly name: DisplayedName
+  readonly labels: ResultLabels
+}) {
   if (!name.missingTranslation && !name.lowConfidence && !name.jpSource) return null
   return (
     <span className="flex flex-wrap gap-x-2 text-11 text-text-3">
-      {name.missingTranslation && <span>{t("card.noTranslation")}</span>}
-      {name.lowConfidence && <span>{t("card.translationProofreading")}</span>}
-      {name.jpSource && <span>{t("card.jpSource")}</span>}
+      {name.missingTranslation && <span>{labels.noTranslation}</span>}
+      {name.lowConfidence && <span>{labels.translationProofreading}</span>}
+      {name.jpSource && <span>{labels.jpSource}</span>}
     </span>
   )
 }
@@ -44,18 +51,19 @@ export function NameNotices({ name }: { readonly name: DisplayedName }) {
 const GRID_SIZES =
   "(min-width: 1440px) 200px, (min-width: 1000px) 20vw, (min-width: 600px) 25vw, 50vw"
 
-function CardCell({
+const CardCell = memo(function CardCell({
   cell,
   images,
   onOpen,
   highlighted,
+  labels,
 }: {
   readonly cell: GridCell
   readonly images: ImageIndex | undefined
   readonly onOpen: CardGridProps["onOpen"]
   readonly highlighted: boolean
+  readonly labels: ResultLabels
 }) {
-  const { t } = useTranslation()
   const navigate = useNavigate()
   const href = useHref(cell.to)
   return (
@@ -80,6 +88,7 @@ function CardCell({
         alt="redundant"
         sizes={GRID_SIZES}
         className="w-full"
+        translate={labels.t}
       />
       <span className="flex min-w-0 flex-col leading-tight">
         <span className="flex items-baseline gap-2">
@@ -98,16 +107,17 @@ function CardCell({
             {cell.name.secondary.text}
           </span>
         )}
-        <NameNotices name={cell.name} />
+        <NameNotices name={cell.name} labels={labels} />
         {cell.summary.wordingPending && (
-          <Badge className="mt-1 self-start">{t("card.wordingPending")}</Badge>
+          <Badge className="mt-1 self-start">{labels.wordingPending}</Badge>
         )}
       </span>
     </a>
   )
-}
+})
 
 export function CardGrid({ cells, images, onOpen, anchor }: CardGridProps) {
+  const labels = useResultLabels()
   return (
     <ul
       data-view="grid"
@@ -115,7 +125,13 @@ export function CardGrid({ cells, images, onOpen, anchor }: CardGridProps) {
     >
       {cells.map((cell) => (
         <li key={cell.key} className="min-w-0">
-          <CardCell cell={cell} images={images} onOpen={onOpen} highlighted={anchor === cell.key} />
+          <CardCell
+            cell={cell}
+            images={images}
+            onOpen={onOpen}
+            highlighted={anchor === cell.key}
+            labels={labels}
+          />
         </li>
       ))}
     </ul>
