@@ -3314,7 +3314,7 @@ records:
           - {kind: LeafRef, slot: leaf_4}
           - {kind: Literal, text: '}+'}
           - {kind: LeafRef, slot: leaf_5}
-          - {kind: Literal, text: 。【SC_}
+          - {kind: Literal, text: 。【魔力連鎖_}
           - {kind: LeafRef, slot: leaf_6}
           - {kind: Literal, text: 】這張卡片獲得【疾馳】。（如果自己墓場的法術為}
           - {args: {quantity: {slot: leaf_7}}, form_id: quantity.existence_count.value, kind: Form}
@@ -3322,7 +3322,7 @@ records:
           - {kind: LeafRef, slot: leaf_8}
           - {kind: Literal, text: 】之後的能力發動。如果為}
           - {args: {quantity: {slot: leaf_9}}, form_id: quantity.existence_count.value, kind: Form}
-          - {kind: Literal, text: 張以上，則【SC_}
+          - {kind: Literal, text: 張以上，則【魔力連鎖_}
           - {kind: LeafRef, slot: leaf_10}
           - {kind: Literal, text: 】之後的能力也會發動）}
     origin: machine
@@ -10893,7 +10893,7 @@ records:
           - {kind: LeafRef, slot: leaf_2}
           - {kind: Literal, text: 】轉變為}
           - {kind: LeafRef, slot: leaf_3}
-          - {kind: Literal, text: 點傷害。【SC_}
+          - {kind: Literal, text: 點傷害。【魔力連鎖_}
           - {kind: LeafRef, slot: leaf_4}
           - {kind: Literal, text: 】給予敵方的全部主戰者}
           - {kind: LeafRef, slot: leaf_5}
@@ -10903,7 +10903,7 @@ records:
           - {kind: LeafRef, slot: leaf_7}
           - {kind: Literal, text: 】之後的能力發動。如果為}
           - {args: {quantity: {slot: leaf_8}}, form_id: quantity.existence_count.value, kind: Form}
-          - {kind: Literal, text: 張以上，則【SC_}
+          - {kind: Literal, text: 張以上，則【魔力連鎖_}
           - {kind: LeafRef, slot: leaf_9}
           - {kind: Literal, text: 】之後的能力也會發動）}
     origin: machine
