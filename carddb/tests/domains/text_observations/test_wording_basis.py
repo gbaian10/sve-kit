@@ -63,6 +63,7 @@ def test_rule_conditions_numbers_and_signs_are_not_reminders(
         "stale",
         "same_day",
         "undated",
+        "ai_undated_pending",
         "errata",
         "manual_reject_auto",
         "manual_same_day",
@@ -82,6 +83,8 @@ def test_semantic_basis_requires_equivalence_and_unique_dated_content(
         comparison_hash=comparison_hash(contents),
         classification="errata"
         if mode in {"errata", "manual_reject_auto"}
+        else "pending_review"
+        if mode == "ai_undated_pending"
         else "same_effect",
         method="manual"
         if mode in {"manual", "manual_reject_auto", "manual_same_day"}
@@ -100,7 +103,10 @@ def test_semantic_basis_requires_equivalence_and_unique_dated_content(
             db, build=case.context(), vocabulary=case.vocabulary, published=()
         )
         for i, item in enumerate(group.observations):
-            if mode in {"undated", "manual_reject_auto"} and i == 1:
+            if (
+                mode in {"undated", "ai_undated_pending", "manual_reject_auto"}
+                and i == 1
+            ):
                 continue
             product(
                 db,
@@ -130,10 +136,16 @@ def test_semantic_basis_requires_equivalence_and_unique_dated_content(
         else:
             assert len(db.rows("face_current")) == 1
             expected = group.observations[
-                0 if mode in {"manual", "undated", "manual_same_day"} else 1
+                0
+                if mode
+                in {"manual", "undated", "ai_undated_pending", "manual_same_day"}
+                else 1
             ]
             assert assessment["basis_printing_id"] == expected.printing_id
             assert assessment["classification"] == "same_effect"
+            if mode == "ai_undated_pending":
+                assert assessment["method"] == "mechanical"
+                assert assessment["reason"] == "undated_difference_excluded"
 
 
 def test_authored_decisions_are_optional_and_duplicates_are_rejected(

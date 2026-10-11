@@ -416,11 +416,19 @@ def populate_wording_basis(db: Database, plan: TextPlan) -> None:
             if decision is not None:
                 if decision.comparison_hash != fingerprint:
                     raise ValueError("Stale wording decision")
-                classification, method, reason = (
-                    decision.classification,
-                    decision.method,
-                    decision.reason,
-                )
+                # An AI assessment of an undated difference cannot block dated equivalents.
+                if (
+                    decision.method == "manual"
+                    or classification != "same_effect"
+                    or equivalent(all_contents)
+                ):
+                    classification, method, reason = (
+                        decision.classification,
+                        decision.method,
+                        decision.reason,
+                    )
+                else:
+                    reason = "undated_difference_excluded"
             display, printing = _release_basis(view, decision, dates)
             if (
                 classification != "errata"
