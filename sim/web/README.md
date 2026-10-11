@@ -138,6 +138,25 @@ considers only current, previous and the local active snapshot. Constant-cost in
 reject a revision that goes back or changes content within a session, a current/previous pair out
 of order and an entry that differs from its manifest. An older usable snapshot has
 a visible notice, and having no compatible snapshot prompts an application update.
+Reloads first read a digest-checked selection record and its verified bootstrap record from
+CacheStorage, isolated by root, build identity and record format. Local data becomes `ready`
+with `unconfirmed: true` without waiting for the mutable index response; `load()` resolves at
+that point. The background check preserves the revision high-water mark and six manifest-field
+comparisons. An unchanged manifest keeps the catalog and detail caches; a different manifest
+replaces them only after verification. Offline or failed checks keep local data with an
+`outdated` notice and a classified `updateError`; successful checks clear `unconfirmed`.
+The selection records distinguish permanent indexes from preview pointers. Missing, damaged
+or unavailable storage uses the usual index-first load. `reload()` waits for an active
+background check, so callers can explicitly await confirmation. A reload requested while local
+records are being restored starts a fresh check after restoration and waits for its result.
+Unconfirmed local data whose check fails with a network error while the browser is online gets a
+notice that updates could not be checked; offline keeps the offline notice. Incompatible and
+corrupt errors keep their existing notices.
+
+The search Worker's persistent index still resolves its own pointer before restoring. It is
+not currently connected to the cards-page list, which uses the main-thread catalog; giving
+that Worker the same confirmation lifecycle requires extending its generation/status protocol.
+
 Downloaded bytes are hashed before transfer to the decode Worker; an idle worker releases
 its parsing heap after one second. Tests use the same decoder without a Worker. Raw tuples
 are released after decoding, rather than kept alongside row objects.
