@@ -1,4 +1,12 @@
-import { createReadStream, readFileSync, realpathSync, statSync } from "node:fs"
+import { createHash } from "node:crypto"
+import {
+  createReadStream,
+  existsSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  statSync,
+} from "node:fs"
 import { readFile } from "node:fs/promises"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import path from "node:path"
@@ -151,6 +159,74 @@ export function snapshotRoots(environment: NodeJS.ProcessEnv): { cdn: string; pr
   }
 }
 
+// Tests never ship, so editing one must not discard results cached by the browser.
+const isTestFile = (file: string) =>
+  /\.test\.[cm]?[jt]sx?$/.test(file) ||
+  file.split(path.sep).includes("test-utils") ||
+  path.basename(file) === "test-setup.ts"
+
+/** Content hash of every non-test file under the given files and directories; missing ones are skipped. */
+export function buildIdentity(inputs: readonly string[], base: string): string {
+  const files = inputs.flatMap((input) => {
+    if (!existsSync(input)) return []
+    if (!statSync(input).isDirectory()) return [input]
+    return readdirSync(input, { recursive: true, withFileTypes: true })
+      .filter((entry) => entry.isFile())
+      .map((entry) => path.join(entry.parentPath, entry.name))
+  })
+  const hash = createHash("sha256")
+  for (const file of files.filter((file) => !isTestFile(file)).sort()) {
+    hash.update(path.relative(base, file)).update("\0").update(readFileSync(file)).update("\0")
+  }
+  return hash.digest("hex").slice(0, 16)
+}
+
+const BUILD_ID_MODULE = path.join(import.meta.dirname, "src/data/build-id.ts")
+const BUILD_INPUTS = [
+  path.join(import.meta.dirname, "src"),
+  contractSchemaDir,
+  path.join(import.meta.dirname, "node_modules/.cache/sve-schema/validators.js"),
+  ...[
+    "bun.lock",
+    "package.json",
+    "vite.config.ts",
+    "tsconfig.json",
+    "tsconfig.base.json",
+    "tsconfig.app.json",
+    "tsconfig.node.json",
+  ].map((file) => path.join(import.meta.dirname, file)),
+]
+
+// Cached decoded snapshots are valid only for the code that verified them. A define would be fixed
+// for the whole dev session, so dev recomputes the hash on each edit and reloads this one module.
+function buildIdPlugin(inputs: readonly string[]): Plugin {
+  const compute = () => buildIdentity(inputs, import.meta.dirname)
+  let id = compute()
+  const tracked = (file: string) =>
+    !isTestFile(file) && inputs.some((input) => file === input || file.startsWith(input + path.sep))
+  return {
+    name: "sve-build-id",
+    enforce: "pre",
+    transform(code, moduleId) {
+      const [file, query = ""] = moduleId.split("?")
+      // `?raw` and `?url` imports read the file itself (the i18n usage test does); only the module
+      // that runs gets the value. HMR's `?t=` reloads still need it.
+      if (file !== BUILD_ID_MODULE || /(?:^|&)(?:raw|url)(?:[=&]|$)/.test(query)) return undefined
+      return { code: code.replace("= __SVE_BUILD_ID__", `= ${JSON.stringify(id)}`), map: null }
+    },
+    configureServer(server) {
+      server.watcher.add([...inputs])
+      server.watcher.on("all", (_event, file) => {
+        if (!tracked(file)) return
+        id = compute()
+        for (const environment of Object.values(server.environments))
+          for (const stale of environment.moduleGraph.getModulesByFile(BUILD_ID_MODULE) ?? [])
+            environment.moduleGraph.invalidateModule(stale)
+      })
+    },
+  }
+}
+
 const { cdn: cdnDir, preview: previewDir } = snapshotRoots(process.env)
 
 export default defineConfig({
@@ -187,6 +263,7 @@ export default defineConfig({
         })
       },
     },
+    buildIdPlugin(BUILD_INPUTS),
     react(),
     tailwindcss(),
     serveSnapshotRoot("/cdn", cdnDir),
@@ -202,6 +279,7 @@ export default defineConfig({
     },
   },
   worker: {
+    plugins: () => [buildIdPlugin(BUILD_INPUTS)],
     rollupOptions: {
       output: {
         entryFileNames: (chunk) =>

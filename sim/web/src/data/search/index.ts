@@ -3,9 +3,16 @@ import { normalizeText } from "../../domain/normalize"
 import { NEUTRAL_CLASS, type QueryState } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 import { type CardSummary, catalogCards } from "../catalog"
-import { type JsonObject, stringValue } from "../format-v3/json"
+import {
+  arrayValue,
+  integerValue,
+  type JsonObject,
+  objectValue,
+  stringValue,
+} from "../format-v3/json"
 import type { BootstrapColumns } from "./bootstrap"
 import { Columns, StringPool } from "./columns"
+import { pack, unpack } from "./image"
 
 export interface SearchQuery {
   readonly state: QueryState
@@ -55,10 +62,154 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
     Object.entries(columns).map(([key, values]) => [key, Uint32Array.from(values as number[])]),
   ) as Record<T, Uint32Array>
 
+/** Bump whenever `encode` changes, so stored images in an older layout are never read. */
+export const INDEX_IMAGE_FORMAT = 1
+
+interface Parts {
+  readonly pool: StringPool
+  readonly summaries: Columns
+  readonly cards: Record<(typeof CARD_COLUMNS)[number], Uint32Array>
+  readonly printings: Record<(typeof PRINTING_COLUMNS)[number], Uint32Array>
+  readonly names: Uint32Array
+  readonly aliases: Uint32Array
+  readonly costs: Float64Array
+  readonly sets: ReadonlySet<string>
+}
+
+function build(bootstrap: BootstrapColumns, edition: Region): Parts {
+  const pool = new StringPool()
+  const summaryColumns = new Columns(pool)
+  const index = bootstrap.index()
+  const sets = new Set(index.families.map((family) => stringValue(family["code"])))
+  const familyCodes = new Map(
+    index.families.flatMap(
+      (row) =>
+        [
+          [stringValue(row["id"]), stringValue(row["code"])],
+          [stringValue(row["public_code"]), stringValue(row["code"])],
+        ] as [string, string][],
+    ),
+  )
+  const cards = uintColumns(CARD_COLUMNS)
+  const printings = uintColumns(PRINTING_COLUMNS)
+  const names: number[] = []
+  const aliases: number[] = []
+  const costs: number[] = []
+  let batch: CardSummary[] = []
+  let summaryCount = 0
+  const intern = (value: string | null | undefined) => pool.intern(value ?? "")
+  intern("")
+  for (const { entry, summaries } of catalogCards(
+    index,
+    bootstrap.cards(),
+    bootstrap.rows("search_alias"),
+    sets,
+    edition,
+  )) {
+    const card = cards.id.length
+    cards.id.push(intern(entry.cardId))
+    cards.class.push(intern(entry.classCode ?? NEUTRAL_CLASS))
+    cards.printingStart.push(printings.id.length)
+    cards.nameStart.push(names.length)
+    cards.aliasStart.push(aliases.length)
+    names.push(...entry.names.map((name) => intern(name.normalized)))
+    aliases.push(...entry.aliases.map((name) => intern(name.normalized)))
+    let preferred = printings.id.length
+    for (const printing of entry.printings) {
+      if (printing.id === entry.defaultPrinting[edition]) preferred = printings.id.length
+      const summary = summaries.find((value) => value.printingId === printing.id)
+      printings.id.push(intern(printing.id))
+      printings.lookup.push(intern(printing.lookupKey))
+      printings.flat.push(intern(printing.flat))
+      printings.set.push(intern(printing.key?.set))
+      printings.number.push(intern(printing.key?.number))
+      const owner = index.printing(printing.id)?.["home_set_id"]
+      printings.owner.push(intern(typeof owner === "string" ? familyCodes.get(owner) : undefined))
+      printings.card.push(card)
+      printings.summary.push(summary ? ++summaryCount : 0)
+      costs.push(summary?.cost ?? Number.NaN)
+      if (summary) batch.push(summary)
+      if (batch.length >= 256) {
+        summaryColumns.append(batch as unknown as JsonObject[])
+        batch = []
+      }
+    }
+    cards.default.push(preferred)
+  }
+  summaryColumns.append(batch as unknown as JsonObject[])
+  cards.printingStart.push(printings.id.length)
+  cards.nameStart.push(names.length)
+  cards.aliasStart.push(aliases.length)
+  pool.seal()
+  return {
+    pool,
+    summaries: summaryColumns,
+    cards: seal(cards),
+    printings: seal(printings),
+    names: Uint32Array.from(names),
+    aliases: Uint32Array.from(aliases),
+    costs: Float64Array.from(costs),
+    sets,
+  }
+}
+
+// Images are digest-checked by the cache, so type checks here only guard against layout bugs.
+function restore(bytes: Uint8Array, edition: Region): Parts {
+  const { header, arrays } = unpack(bytes)
+  const image = objectValue(header)
+  if (image["edition"] !== edition) throw new Error("index image belongs to another edition")
+  let next = 0
+  const take = <T extends Uint8Array | Uint32Array | Float64Array>(
+    type: new (length: number) => T,
+  ): T => {
+    const array = arrays[next++]
+    if (!(array instanceof type)) throw new Error("index image array has the wrong type")
+    return array
+  }
+  const pool = StringPool.restore(
+    arrayValue(image["strings"]).map((value) => stringValue(value)),
+    take(Uint32Array),
+    take(Float64Array),
+  )
+  const columns = <T extends string>(names: readonly T[]) =>
+    Object.fromEntries(names.map((name) => [name, take(Uint32Array)])) as Record<T, Uint32Array>
+  const cards = columns(CARD_COLUMNS)
+  const printings = columns(PRINTING_COLUMNS)
+  const names = take(Uint32Array)
+  const aliases = take(Uint32Array)
+  const costs = take(Float64Array)
+  const summaries = Columns.restore(
+    pool,
+    arrayValue(image["blocks"]).map((value) => {
+      const block = objectValue(value)
+      return {
+        start: integerValue(block["start"]),
+        length: integerValue(block["length"]),
+        columns: arrayValue(block["columns"]).map((name): [string, Uint8Array, Uint32Array] => [
+          stringValue(name),
+          take(Uint8Array),
+          take(Uint32Array),
+        ]),
+      }
+    }),
+  )
+  if (next !== arrays.length) throw new Error("index image has unread arrays")
+  return {
+    pool,
+    summaries,
+    cards,
+    printings,
+    names,
+    aliases,
+    costs,
+    sets: new Set(arrayValue(image["sets"]).map((value) => stringValue(value))),
+  }
+}
+
 /** Matching reads scalar columns; summaries are decoded only for the requested page. */
 export class SearchIndex {
-  private readonly pool = new StringPool()
-  private readonly summaries = new Columns(this.pool)
+  private readonly pool: StringPool
+  private readonly summaries: Columns
   private readonly cards: Record<(typeof CARD_COLUMNS)[number], Uint32Array>
   private readonly printings: Record<(typeof PRINTING_COLUMNS)[number], Uint32Array>
   private readonly names: Uint32Array
@@ -67,75 +218,46 @@ export class SearchIndex {
   private readonly sets: ReadonlySet<string>
   private readonly edition: Region
 
-  constructor(bootstrap: BootstrapColumns, edition: Region) {
+  /** Builds from staged bootstrap columns, or restores the bytes `encode` produced. */
+  constructor(source: BootstrapColumns | Uint8Array, edition: Region) {
     this.edition = edition
-    const index = bootstrap.index()
-    this.sets = new Set(index.families.map((family) => stringValue(family["code"])))
-    const familyCodes = new Map(
-      index.families.flatMap(
-        (row) =>
-          [
-            [stringValue(row["id"]), stringValue(row["code"])],
-            [stringValue(row["public_code"]), stringValue(row["code"])],
-          ] as [string, string][],
-      ),
+    const parts = ArrayBuffer.isView(source) ? restore(source, edition) : build(source, edition)
+    this.pool = parts.pool
+    this.summaries = parts.summaries
+    this.cards = parts.cards
+    this.printings = parts.printings
+    this.names = parts.names
+    this.aliases = parts.aliases
+    this.costs = parts.costs
+    this.sets = parts.sets
+  }
+
+  /** Sealed columns and the string pool as one buffer; no row is decoded on either side. */
+  encode(): Uint8Array<ArrayBuffer> {
+    const pool = this.pool.parts()
+    const blocks = this.summaries.parts()
+    return pack(
+      {
+        edition: this.edition,
+        sets: [...this.sets],
+        strings: pool.values,
+        blocks: blocks.map(({ start, length, columns }) => ({
+          start,
+          length,
+          columns: columns.map(([name]) => name),
+        })),
+      },
+      [
+        pool.nodes,
+        pool.numbers,
+        ...CARD_COLUMNS.map((name) => this.cards[name]),
+        ...PRINTING_COLUMNS.map((name) => this.printings[name]),
+        this.names,
+        this.aliases,
+        this.costs,
+        ...blocks.flatMap(({ columns }) => columns.flatMap(([, kinds, values]) => [kinds, values])),
+      ],
     )
-    const cards = uintColumns(CARD_COLUMNS)
-    const printings = uintColumns(PRINTING_COLUMNS)
-    const names: number[] = []
-    const aliases: number[] = []
-    const costs: number[] = []
-    let batch: CardSummary[] = []
-    let summaryCount = 0
-    const intern = (value: string | null | undefined) => this.pool.intern(value ?? "")
-    intern("")
-    for (const { entry, summaries } of catalogCards(
-      index,
-      bootstrap.cards(),
-      bootstrap.rows("search_alias"),
-      this.sets,
-      edition,
-    )) {
-      const card = cards.id.length
-      cards.id.push(intern(entry.cardId))
-      cards.class.push(intern(entry.classCode ?? NEUTRAL_CLASS))
-      cards.printingStart.push(printings.id.length)
-      cards.nameStart.push(names.length)
-      cards.aliasStart.push(aliases.length)
-      names.push(...entry.names.map((name) => intern(name.normalized)))
-      aliases.push(...entry.aliases.map((name) => intern(name.normalized)))
-      let preferred = printings.id.length
-      for (const printing of entry.printings) {
-        if (printing.id === entry.defaultPrinting[edition]) preferred = printings.id.length
-        const summary = summaries.find((value) => value.printingId === printing.id)
-        printings.id.push(intern(printing.id))
-        printings.lookup.push(intern(printing.lookupKey))
-        printings.flat.push(intern(printing.flat))
-        printings.set.push(intern(printing.key?.set))
-        printings.number.push(intern(printing.key?.number))
-        const owner = index.printing(printing.id)?.["home_set_id"]
-        printings.owner.push(intern(typeof owner === "string" ? familyCodes.get(owner) : undefined))
-        printings.card.push(card)
-        printings.summary.push(summary ? ++summaryCount : 0)
-        costs.push(summary?.cost ?? Number.NaN)
-        if (summary) batch.push(summary)
-        if (batch.length >= 256) {
-          this.summaries.append(batch as unknown as JsonObject[])
-          batch = []
-        }
-      }
-      cards.default.push(preferred)
-    }
-    this.summaries.append(batch as unknown as JsonObject[])
-    cards.printingStart.push(printings.id.length)
-    cards.nameStart.push(names.length)
-    cards.aliasStart.push(aliases.length)
-    this.cards = seal(cards)
-    this.printings = seal(printings)
-    this.names = Uint32Array.from(names)
-    this.aliases = Uint32Array.from(aliases)
-    this.costs = Float64Array.from(costs)
-    this.pool.seal()
   }
 
   search(query: SearchQuery): SearchPage {

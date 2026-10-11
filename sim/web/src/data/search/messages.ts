@@ -23,6 +23,8 @@ export type SearchRequest =
     }
 
 export interface SearchMetrics {
+  /** The index came from the persistent copy of an earlier verified build; nothing was decoded. */
+  readonly restored: boolean
   readonly files: number
   readonly maxRawBytes: number
   readonly parseMs: number

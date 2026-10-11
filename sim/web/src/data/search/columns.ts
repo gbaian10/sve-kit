@@ -2,11 +2,11 @@ import type { JsonObject, JsonValue } from "../format-v3/json"
 
 /** Nested cells use numeric references so the same text has only one retained string. */
 export class StringPool {
-  private readonly values: string[] = []
+  private values: string[] = []
   private readonly ordinals = new Map<string, number>()
-  private nodes = new Uint32Array(1024)
+  private nodes: Uint32Array = new Uint32Array(1024)
   private used = 5
-  private numbers = new Float64Array(32)
+  private numbers: Float64Array = new Float64Array(32)
   private numberCount = 0
   private readonly stringNodes = new Map<number, number>()
 
@@ -111,6 +111,21 @@ export class StringPool {
     this.numbers = this.numbers.slice(0, this.numberCount)
     this.ordinals.clear()
     this.stringNodes.clear()
+  }
+
+  /** A sealed pool's contents; `restore` rebuilds a pool that decodes but no longer interns. */
+  parts(): { values: string[]; nodes: Uint32Array; numbers: Float64Array } {
+    return { values: this.values, nodes: this.nodes, numbers: this.numbers }
+  }
+
+  static restore(values: string[], nodes: Uint32Array, numbers: Float64Array): StringPool {
+    const pool = new StringPool()
+    pool.values = values
+    pool.nodes = nodes
+    pool.used = nodes.length
+    pool.numbers = numbers
+    pool.numberCount = numbers.length
+    return pool
   }
 
   bufferBytes(): number {
@@ -231,6 +246,28 @@ export class Columns {
 
   rows(): JsonObject[] {
     return [...this.iterate()]
+  }
+
+  /** Blocks without decoding any row, so a sealed table can be stored and restored as is. */
+  parts(): { start: number; length: number; columns: [string, Uint8Array, Uint32Array][] }[] {
+    return this.blocks.map((block) => ({
+      start: block.start,
+      length: block.length,
+      columns: [...block.columns].map(([name, column]) => [name, column.kinds, column.values]),
+    }))
+  }
+
+  static restore(pool: StringPool, blocks: ReturnType<Columns["parts"]>): Columns {
+    const columns = new Columns(pool)
+    for (const block of blocks) {
+      columns.blocks.push({
+        start: block.start,
+        length: block.length,
+        columns: new Map(block.columns.map(([name, kinds, values]) => [name, { kinds, values }])),
+      })
+      columns.length = block.start + block.length
+    }
+    return columns
   }
 
   bytes(): number {
