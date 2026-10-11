@@ -85,6 +85,7 @@ def rows() -> dict[str, dict[str, Value]]:
             "date_precision": "unknown",
             "source_id": "source",
         },
+        "product_family_member": {"product_id": "product", "family_id": "family"},
         "printing": {
             "id": "printing",
             "card_id": "card",

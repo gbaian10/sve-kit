@@ -1712,6 +1712,61 @@ describe("set releases and counts", () => {
     }
   })
 
+  it("retains all composite product families and their first dates across index restore", async () => {
+    const client = createSnapshotClient(base, { fetch: origin().fetcher })
+    await client.load()
+    const snapshot = client.snapshot()
+    if (!snapshot) throw new Error("missing snapshot")
+    const columns = new BootstrapColumns()
+    columns.ingest(
+      snapshot.bootstrap.map((fragment) =>
+        fragment.table === "product"
+          ? {
+              ...fragment,
+              rows: [
+                {
+                  family_ids: ["set:bp01", "set:sd01"],
+                  region: "en",
+                  released_on: "2026-05-01",
+                  date_precision: "day",
+                },
+                {
+                  family_ids: ["set:bp01"],
+                  region: "en",
+                  released_on: "2026-02-01",
+                  date_precision: "day",
+                },
+                {
+                  family_ids: ["set:sd01"],
+                  region: "en",
+                  released_on: "2026-08-01",
+                  date_precision: "day",
+                },
+                {
+                  family_ids: ["set:bp01", "set:sd01"],
+                  region: "jp",
+                  released_on: "2026-01-01",
+                  date_precision: "day",
+                },
+              ],
+            }
+          : fragment,
+      ),
+    )
+    columns.seal()
+    const created = new SearchIndex(columns, "en")
+    for (const index of [created, new SearchIndex(created.encode(), "en")]) {
+      expect(index.releases.find((set) => set.code === "bp01")?.releasedOn).toBe("2026-02-01")
+      expect(index.releases.find((set) => set.code === "sd01")?.releasedOn).toBe("2026-05-01")
+      expect(
+        index.count({ state: { ...DEFAULT_QUERY, sets: ["bp01"] }, edition: "en" }, "zh-Hant"),
+      ).toEqual({ cards: 15, translated: 14, proofreading: 0 })
+      expect(
+        index.count({ state: { ...DEFAULT_QUERY, sets: ["sd01"] }, edition: "en" }, "zh-Hant"),
+      ).toEqual({ cards: 2, translated: 2, proofreading: 0 })
+    }
+  })
+
   it("counts each card of a set once with its name translations, and returns no cards", async () => {
     const served = origin()
     const baseline = createSnapshotClient(base, { fetch: served.fetcher })

@@ -36,6 +36,7 @@ from sve_carddb.domains.registry.preview import (
     FrozenRegions,
     plan_preview,
 )
+from sve_carddb.domains.registry.rarity import populate as populate_rarities
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.rulings.reader import load as load_rulings
 from sve_carddb.domains.rulings.storage import PROFILE as RULING_PROFILE
@@ -507,6 +508,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 prepared=prepared,
                 sources=translation_sources,
             )
+            rarity_diagnostics = populate_rarities(db)
             extras = plan_card_extras(db, pages, errata=errata)
             # The parent record is private staging; only the complete context is emitted.
             context = BuildContext.from_inputs(
@@ -658,6 +660,17 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 and item.disposition != "included"
             ],
             "product_diagnostics": list(official.diagnostics),
+            "rarity_diagnostics": list[JsonValue](rarity_diagnostics),
+            "product_family_diagnostics": [
+                {
+                    "product_id": row["id"],
+                    "region": row["region"],
+                    "product_code": row["product_code"],
+                    "reason": "no_matching_code_or_printing_family",
+                }
+                for row in projection.tables["product"]
+                if not row["family_ids"]
+            ],
             "source_coverage": dict.fromkeys(
                 ("qa", "errata", "cr", "restriction", "images"), "unknown"
             ),

@@ -342,7 +342,6 @@ _REFERENCES = {
     "artist_id": "artist",
     "stamp_id": "stamp",
     "home_set_id": "product_family",
-    "family_id": "product_family",
     "product_id": "product",
     "translation_id": "translation",
     "qa_id": "qa",
@@ -362,6 +361,7 @@ _REFERENCES = {
     "image_id": "image_asset",
 }
 _ARRAY_REFERENCES = {
+    "family_ids": "product_family",
     "cards": "card",
     "debut_product_ids": "product",
     "active_scopes": "text_unit",

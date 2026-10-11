@@ -168,8 +168,11 @@ one confirmed family's `public_code` supplies that family's `kind`; `code` is
 not a fallback and compound codes are not split. Missing, ambiguous or unmatched
 codes retain the product with `product_type=NULL` and a `product_type_unknown`
 diagnostic. Proposed families never supply types. Titles, owners and card numbers
-are not type evidence. This lookup establishes no family relationship:
-`family_id` remains NULL. Official inclusions always use `other`, without
+are not type evidence. This lookup establishes no family relationship; families
+are inferred afterwards (see the snapshot contract for code and
+printing-membership precedence). `product_family_member` holds every inferred
+family (snapshot `family_ids`), and `family_id` is filled only when there is
+exactly one. Official inclusions always use `other`, without
 claiming packs, boxes, prizes, campaigns or redemption. Unknown dates remain
 unknown; month/year retain raw text with no complete day. The official
 `ProductData` permits a null type; `AuthoredProductData` in §10 input requires a

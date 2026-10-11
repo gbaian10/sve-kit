@@ -41,7 +41,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | `face` | `id, card_id, ordinal, side, current:[{region,revision_id,basis}], wording:[WordingView]` | 雙面切換，兩面算同一實物 |
 | `printing` | `id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence?, review_level, reference_urls:[url], variant_key, rarity_code?, rarity_raw, premium?, serial_total?, int_id, decklog_available, decklog_verification:unverified/verified, decklog_source_url?, decklog_checked_on?, faces:[PrintingFace]` | 每版次一格、版本區、分享碼解碼、圖像定位 |
 | `product_family` | `id, code, public_code, kind, name_unit_id, translations:[FieldTranslation]` | /sets 與 set 搜尋 |
-| `product` | `id, family_id?, region, product_code?, name_unit_id, product_type?, released_on?, date_precision, date_raw?, translations:[FieldTranslation]` | 單卡頁補充的商品名稱與日期 |
+| `product` | `id, family_ids:[ID], region, product_code?, name_unit_id, product_type?, released_on?, date_precision, date_raw?, translations:[FieldTranslation]` | 單卡頁補充的商品名稱與日期 |
 | `printing_product` | `printing_id, product_id, available_on?, date_precision?, date_raw?, inclusion_kind, note_unit_id?, first_inclusion_state` | 複合 `PK(printing_id,product_id)`；單卡頁列出 PR／再錄收錄；初收錄（首次／再錄）篩選 |
 | `identity_change` | `id, kind, old_card_id, new_card_id, printing_id?, data_version, reason` | 舊牌組身分修復提示、split 不猜 |
 | `art` | `id, card_id, face_id, classification, review_level, regions:[region], artists:[{artist_id,role}]` | 每圖一格、只看異畫、繪師瀏覽 |
@@ -110,6 +110,42 @@ producer 以來源／render occurrence 驗省略完整性；reader 不從缺列�
 translation 僅輸出上述欄位，用 `text_unit_id` 取譯文；同一 chosen translation 可供多個引用者。`origin` 固定為 `official/project/machine`，`authority` 維持 `sve_official/digital_official/unofficial`；數位官方名稱不因此取得實體官方 counterpart 資格。`low_confidence` 是必填 Bool，原樣保留 current producer 的結果；true 直接顯示譯文、標「待校對」並提供該 owner 的原文，false 不表示逐筆人工確認。不輸出或查詢舊 `status`，不把 false 轉成 reviewed，也不把所有 machine 改成 true。官英/官方日文 counterpart 由建置產生選用記錄（`origin=official, authority=sve_official`），無需人工 equivalence 表。繁中依據的 `source_unit_id` 仍是 JP 來源；JP 自身選用為 own_source、EN 接收為 jp_source。source 明指 JP 原文 owner，counterpart 在這兩種 basis 都為 null；舊 shared_jp／shared_jp_unchecked 拒絕。官方 counterpart 逐 owner 直接引用，不占共用 translation_selection。詞彙與商品標籤亦在引用者存 FieldTranslation，不以共享 `source_unit` 字串去猜唯一翻法。keyword action 用 `field=action_label`、ordinal 對應 actions 順序；其他標籤 field=label。
 
 `keyword.name_unit_id` 由建置資料庫的 `glossary_term.source_ja` 建文字單元，translations 選同概念多語名稱；`definition_unit_id` 另供說明。relation/action 篩選的三態必合併兩個稀疏集合：指定 relation/action 在 projection 集合內→present；無吻合但 `coverage.complete_all=true` 或 keyword 在依 `complete_mode` 解碼的 complete 集合→absent；否則 unknown。另一 relation 已 present 不能推本項 absent。未列 coverage 等於尚未檢查；`partial_keyword_ids` 不代表完整。只有 fresh 標籤進 projection，universe/source/producer 改版重算 coverage；EN region block 使不適用的 shared 結果 unknown。config.search 的版本必與 reader 能力匹配，normalized 別名與使用者輸入用同一規則。
+
+### 稀有度與商品卡包對應
+
+候選契約將 `product.family_id?` 改為 `family_ids:[ID]`；啟動包的同一欄位位置改存陣列，
+元素為已存在的 `product_family.id`，排序且不重複，空陣列表示未能對應並列入私人建置報告。
+依[候選期規則](snapshot-contract.md)，`format_version/min_reader_version` 維持 3.0.0；
+producer／reader／合成 fixture 同步更新，既有 preview 必須重新匯出，不新增相容路徑。
+商品代碼先與已確認卡包代碼作不分大小寫的精確比對；複合碼全部成分都能對應時取其聯集。
+集合商品可取同代碼加單一小寫字母尾碼的已確認子卡包，例如 DSD01→DSD01a、DSD01b。
+其餘沿明示家族或同區 `printing_product` 的 `printing.home_set_id` 推導，
+不拿 `card.home_set_id` 判斷再錄商品，也不推算新的商品收錄關係。
+首頁可沿 `family_ids` 與 `product_family.kind`，取得每區商品發售日；商品型別的原採納規則不變。
+
+官方版次的 `rarity_raw` 保持原值，`rarity_code` 使用以下共用代碼；字典標籤是 JP 卡面標籤（即代碼的大寫）：
+
+| JP 原值 | EN 原值 | 代碼 |
+| --- | --- | --- |
+| BR | Bronze | `br` |
+| SR | Silver | `sr` |
+| GR | Gold | `gr` |
+| LG | Legendary | `lg` |
+| SL | Super Legendary | `sl` |
+| UR | Ultimate | `ur` |
+| SP | Special | `sp` |
+| SSP | Super Special | `ssp` |
+| PR | Promo | `pr` |
+| - | - | null（`premium=null`） |
+| プレミアム | Premium | null（`premium=true`） |
+
+`X・プレミアム`／`X / Premium` 保留 X 的代碼並設 `premium=true`；已辨識的一般標籤設 `premium=false`。
+依[詞彙契約 §1、§4.1、§7](../domains/catalog-route-adoption.md)，單獨 Premium 不捏造基礎階級，「-」也不採為稀有度代碼，
+兩者 `rarity_code=null`，但不列為未辨識。
+未辨識拼法（例如「-・プレミアム」）保持 `rarity_code/premium=null`，私人建置報告逐版次列出原值與原因。
+版次列固定分 JP、EN 行，各行依 BR→SR→GR→LG→SL→UR→SP→SSP→單獨 premium→其他無代碼→PR；
+無代碼的排序位置由 `premium` 區分，不另造稀有度代碼。相同階級先一般版再 premium，接著依卡號自然排序、永久版次 ID 定序。
+此排序不推導 PR 的對應階級。
 
 ### 2.1 獨立影像清單與 DSL 附件
 

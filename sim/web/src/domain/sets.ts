@@ -10,8 +10,8 @@ export interface SetFacts {
 }
 
 export interface ProductFacts {
-  /** The set this product belongs to; null when the link is not recorded. */
-  readonly familyId: string | null
+  /** All sets this product belongs to; empty when no links are recorded. */
+  readonly familyIds: readonly string[]
   readonly region: string
   /** ISO day, or null when the product has no day-precision date. */
   readonly releasedOn: string | null
@@ -28,11 +28,12 @@ export function datedSets<T extends SetFacts>(
 ): (T & { readonly releasedOn: string })[] {
   const firstRelease = new Map<string, string>()
   for (const product of products) {
-    if (product.region !== region || product.familyId === null || product.releasedOn === null)
-      continue
-    const known = firstRelease.get(product.familyId)
-    if (known === undefined || product.releasedOn < known)
-      firstRelease.set(product.familyId, product.releasedOn)
+    if (product.region !== region || product.releasedOn === null) continue
+    for (const familyId of product.familyIds) {
+      const known = firstRelease.get(familyId)
+      if (known === undefined || product.releasedOn < known)
+        firstRelease.set(familyId, product.releasedOn)
+    }
   }
   return sets.flatMap((set) => {
     const releasedOn = firstRelease.get(set.id)

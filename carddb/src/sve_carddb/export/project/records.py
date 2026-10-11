@@ -67,6 +67,17 @@ def initial(source: Source) -> dict[str, list[Record]]:
     }
     for name in ("annotation_set", "annotation_concept", "field_annotation"):
         view[name] = []
+    for product in view["product"]:
+        identifier = product.pop("family_id")
+        members = source.matching(
+            "product_family_member", "product_id,family_id", product_id=product["id"]
+        )
+        product["family_ids"] = json_list(
+            sorted(
+                {string(row["family_id"]) for row in members}
+                | ({string(identifier)} if identifier is not None else set())
+            )
+        )
     return view
 
 

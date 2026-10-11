@@ -11,6 +11,7 @@ from sve_carddb.core.provenance import (
     SourceUse,
     input_record,
 )
+from sve_carddb.domains.registry.rarity import populate as populate_rarities
 from sve_carddb.domains.registry.records import (
     AllocationData,
     ArtData,
@@ -46,6 +47,7 @@ def populate_preview(
     inputs = populate_identity_rows(
         db, plan, authored_revision=authored_revision, build=build
     )
+    populate_rarities(db)
     populate_routes(db)
     return inputs
 

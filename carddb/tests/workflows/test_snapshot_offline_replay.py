@@ -299,7 +299,12 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
         assert len(db.rows("card")) == 2
         assert len(db.rows("printing")) == 2
         assert len(db.rows("language")) == 3
-        assert len(db.rows("vocabulary")) == 3
+        assert len(db.rows("vocabulary")) == 4
+        assert {
+            row.values["code"]
+            for row in db.rows("vocabulary")
+            if row.values["kind"] == "rarity"
+        } == {"lg"}
         for table in (
             "language",
             "vocabulary",
@@ -308,7 +313,9 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
         ):
             assert db.rows(table)
             assert all(
-                row.values["authored_source_id"] is not None for row in db.rows(table)
+                row.values["authored_source_id"] is not None
+                for row in db.rows(table)
+                if table != "vocabulary" or row.values["kind"] != "rarity"
             )
         assert {row.values["category"] for row in db.rows("decision")}.isdisjoint(
             {"language_adoption", "vocabulary_adoption", "glossary_translation"}

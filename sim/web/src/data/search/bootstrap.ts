@@ -33,7 +33,7 @@ const FIELDS: Readonly<Record<string, readonly string[]>> = {
     "name_unit_id",
     "translations",
   ],
-  product: ["family_id", "region", "released_on", "date_precision"],
+  product: ["family_ids", "region", "released_on", "date_precision"],
   text_unit: ["id", "lang", "text"],
   translation: ["id", "text_unit_id", "low_confidence"],
   search_alias: ["kind", "code", "lang", "text"],

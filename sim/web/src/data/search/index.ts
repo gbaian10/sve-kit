@@ -96,8 +96,8 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
     Object.entries(columns).map(([key, values]) => [key, Uint32Array.from(values as number[])]),
   ) as Record<T, Uint32Array>
 
-/** Bump whenever `encode` changes, so stored images in an older layout are never read. */
-export const INDEX_IMAGE_FORMAT = 4
+/** Bump when the stored layout or derived data changes, so older images are rebuilt. */
+export const INDEX_IMAGE_FORMAT = 5
 
 interface Parts {
   readonly pool: StringPool
@@ -172,7 +172,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
       kind: stringValue(row["kind"]),
     })),
     bootstrap.rows("product").map((row) => ({
-      familyId: typeof row["family_id"] === "string" ? row["family_id"] : null,
+      familyIds: arrayValue(row["family_ids"]).map((id) => stringValue(id)),
       region: stringValue(row["region"]),
       releasedOn:
         row["date_precision"] === "day" && typeof row["released_on"] === "string"

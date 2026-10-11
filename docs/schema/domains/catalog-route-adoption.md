@@ -103,6 +103,7 @@ special_kinds 必填；欄位缺漏是格式錯誤。
 停用映射不參與選用，但不可重用其 code 給另一概念。空陣列允許純介面 enum，但不能假稱已涵蓋官方原值。
 來源的未知符號（含 `-`）如何投影 null 須有欄位 recipe，不把它自動採為職業或稀有度 code。
 稀有度／premium 的拆解是釘住 recipe 的來源投影，不能讓 raw_mappings 改寫 premium；未知組合不猜。
+稀有度目前不建 raw_mappings，原值→code 的程式對照與改走 authored 採納的條件見 §7。
 技術預設 P3 分開篩選基礎 rarity 與 premium，顯示可組合；複合顯示別名不建立第二份稀有度真值。
 
 label 只保存一個基底原文／自撰標籤；其他語言的選詞放在同一記錄的 `value.translations`（`lang,text,origin,low_confidence`，不得為 ja），建置時寫成 vocabulary 的 label 翻譯；此處 origin／low_confidence 也可省略為 project／false，寫出端省略預設值。
@@ -237,7 +238,9 @@ build-db §15 已有順序：同卡同區 → 當前有效 override → card.hom
 
 所有含 プレミアム／Premium 的版次均排除一般候選，不能只保留拆出的 BR／SR／GR 來繞過 premium。
 只有 PR／Promo／「-」等非白名單版次的卡仍有預設版次，method=fallback；不因此隱藏卡片，
-也不宣稱 PR／Promo 在實物上全部有特殊加工。raw 原樣保留，穩定 code 仍按詞彙採納契約登錄，
+也不宣稱 PR／Promo 在實物上全部有特殊加工。raw 原樣保留；依 #555，稀有度原值→穩定 code 的對照由程式提供的配置
+（[rarity.py](../../../carddb/src/sve_carddb/domains/registry/rarity.py)）登錄，不經 authored 詞彙採納。
+日後若改走 authored 採納，須先移除程式對照，以免 `vocabulary(kind,code)` 主鍵衝突。
 新標籤／未核對的映射保持未知，不從卡號推分類。
 
 **卡框與標誌不在本次核可範圍**，依既有技術設計處理：要證實一般版，仍須 premium=false、

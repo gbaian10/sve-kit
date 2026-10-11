@@ -34,6 +34,7 @@ import { usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
 import { CardTextPanel } from "./CardTextPanel"
 import { CardWording } from "./CardWording"
+import { printingGroups } from "./printing-order"
 
 const ICON_BUTTON =
   "flex size-11 shrink-0 items-center justify-center rounded-button text-text-1 hover:bg-surface-2"
@@ -408,25 +409,39 @@ export function CardPage() {
           {printings.length > 1 && (
             <section className="mt-6" aria-label={t("cardPage.printings")}>
               <h3 className="text-13 font-semibold text-text-3">{t("cardPage.printings")}</h3>
-              <ul className="mt-1.5 flex flex-wrap gap-2">
-                {printings.map((row) => {
-                  const id = stringValue(row["id"])
-                  const no = stringValue(row["card_no"])
-                  return (
-                    <li key={id}>
-                      <RouterLink
-                        to={cardPath(no)}
-                        state={entry}
-                        replace
-                        aria-current={id === printingId ? "page" : undefined}
-                        className="inline-flex h-8 items-center rounded-pill border border-border px-2.5 font-mono text-13 hover:bg-surface-2 aria-[current=page]:border-accent aria-[current=page]:bg-accent-soft aria-[current=page]:font-semibold"
-                      >
-                        {no}
-                      </RouterLink>
-                    </li>
-                  )
-                })}
-              </ul>
+              {printingGroups(printings).map(
+                ({ region: printingRegion, printings: regionalPrintings }) => (
+                  <div key={printingRegion} className="mt-1.5 flex items-start gap-2">
+                    <span className="inline-flex h-8 items-center text-13 font-semibold text-text-3">
+                      {printingRegion.toUpperCase()}:
+                    </span>
+                    <ul aria-label={printingRegion.toUpperCase()} className="flex flex-wrap gap-2">
+                      {regionalPrintings.map((row) => {
+                        const id = stringValue(row["id"])
+                        const no = stringValue(row["card_no"])
+                        const rarity =
+                          typeof row["rarity_code"] === "string"
+                            ? row["rarity_code"].toUpperCase()
+                            : row["rarity_raw"]
+                        return (
+                          <li key={id}>
+                            <RouterLink
+                              to={cardPath(no)}
+                              state={entry}
+                              replace
+                              aria-current={id === printingId ? "page" : undefined}
+                              className="inline-flex h-8 items-center rounded-pill border border-border px-2.5 font-mono text-13 hover:bg-surface-2 aria-[current=page]:border-accent aria-[current=page]:bg-accent-soft aria-[current=page]:font-semibold"
+                            >
+                              {no}
+                              {typeof rarity === "string" && rarity !== "" && ` (${rarity})`}
+                            </RouterLink>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                ),
+              )}
             </section>
           )}
         </div>

@@ -95,7 +95,7 @@ def test_extraction_factory_rejects_missing_face_metadata(inputs: Inputs) -> Non
         CardEvidence.from_card(original.source, "jp", inputs.jp["BP02-071"], ())
 
 
-def test_premium_is_only_known_for_exact_pure_premium(
+def test_premium_labels_keep_a_base_tier_only_when_one_is_printed(
     tmp_path: Path, inputs: Inputs
 ) -> None:
     write_files(plan_files(tmp_path, build(inputs, {})))
@@ -112,7 +112,8 @@ def test_premium_is_only_known_for_exact_pure_premium(
         by_number = {row.values["card_no"]: row.values for row in db.rows("printing")}
         assert by_number["BP02-071"]["premium"] is True
         assert by_number["BP02-071"]["rarity_code"] is None
-        assert by_number["PR-001"]["premium"] is None
+        assert by_number["PR-001"]["premium"] is True
+        assert by_number["PR-001"]["rarity_code"] == "lg"
         assert by_number["PR-001"]["rarity_raw"] == "LG・プレミアム"
 
 

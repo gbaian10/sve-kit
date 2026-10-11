@@ -4,21 +4,21 @@ import { datedSets, packCounts, type ProductFacts, recentSets, type SetFacts } f
 
 const set = (id: string, kind = "booster"): SetFacts => ({ id, publicCode: id.toUpperCase(), kind })
 const product = (
-  familyId: string | null,
+  familyIds: readonly string[],
   region: string,
   releasedOn: string | null,
-): ProductFacts => ({ familyId, region, releasedOn })
+): ProductFacts => ({ familyIds, region, releasedOn })
 
 describe("datedSets and recentSets", () => {
   it("orders booster sets by their first known release in the region, newest first", () => {
     const sets = [set("s1"), set("s2"), set("s3"), set("s4"), set("deck", "deck")]
     const products = [
-      product("s1", "jp", "2026-01-10"),
-      product("s1", "jp", "2026-09-01"),
-      product("s2", "jp", "2026-03-01"),
-      product("s3", "jp", "2026-05-01"),
-      product("s4", "jp", "2026-02-01"),
-      product("deck", "jp", "2026-12-01"),
+      product(["s1"], "jp", "2026-01-10"),
+      product(["s1"], "jp", "2026-09-01"),
+      product(["s2"], "jp", "2026-03-01"),
+      product(["s3"], "jp", "2026-05-01"),
+      product(["s4"], "jp", "2026-02-01"),
+      product(["deck"], "jp", "2026-12-01"),
     ]
     expect(datedSets(sets, products, "jp")).toContainEqual({
       id: "s1",
@@ -44,15 +44,15 @@ describe("datedSets and recentSets", () => {
       ...["deck", "promo", "special", "special_pack", "other"].map((kind) => set(kind, kind)),
     ]
     const products = [
-      product("booster-old", "jp", "2026-03-01"),
-      product("booster-new", "jp", "2026-06-01"),
-      product("collaboration-old", "jp", "2026-04-01"),
-      product("collaboration-old", "jp", "2026-10-01"),
-      product("collaboration-new", "jp", "2026-07-01"),
-      product("collaboration-undated", "jp", null),
-      product("collaboration-en", "en", "2026-12-01"),
+      product(["booster-old"], "jp", "2026-03-01"),
+      product(["booster-new"], "jp", "2026-06-01"),
+      product(["collaboration-old"], "jp", "2026-04-01"),
+      product(["collaboration-old"], "jp", "2026-10-01"),
+      product(["collaboration-new"], "jp", "2026-07-01"),
+      product(["collaboration-undated"], "jp", null),
+      product(["collaboration-en"], "en", "2026-12-01"),
       ...["deck", "promo", "special", "special_pack", "other"].map((kind) =>
-        product(kind, "jp", "2026-12-01"),
+        product([kind], "jp", "2026-12-01"),
       ),
     ]
     expect(recentSets(datedSets(sets, products, "jp"), 3).map((item) => item.id)).toEqual([
@@ -62,18 +62,34 @@ describe("datedSets and recentSets", () => {
     ])
   })
 
+  it("dates every family of a composite product by the earliest regional product", () => {
+    const sets = [set("s1"), set("s2"), set("s3", "collaboration")]
+    const products = [
+      product(["s1", "s2"], "en", "2026-05-01"),
+      product(["s1"], "en", "2026-02-01"),
+      product(["s2"], "en", "2026-08-01"),
+      product(["s1", "s2"], "jp", "2026-01-01"),
+      product(["s3"], "en", "2026-04-01"),
+    ]
+    expect(recentSets(datedSets(sets, products, "en"), 3)).toEqual([
+      { ...sets[1], releasedOn: "2026-05-01" },
+      { ...sets[2], releasedOn: "2026-04-01" },
+      { ...sets[0], releasedOn: "2026-02-01" },
+    ])
+  })
+
   it("leaves out sets without a dated, linked product in that region", () => {
     const sets = [set("s1"), set("s2"), set("s3")]
     const products = [
-      product("s1", "en", "2026-04-01"),
-      product(null, "jp", "2026-08-01"),
-      product("s2", "jp", null),
-      product("s3", "jp", "2026-02-01"),
+      product(["s1"], "en", "2026-04-01"),
+      product([], "jp", "2026-08-01"),
+      product(["s2"], "jp", null),
+      product(["s3"], "jp", "2026-02-01"),
     ]
     expect(datedSets(sets, products, "jp")).toEqual([
       { id: "s3", publicCode: "S3", kind: "booster", releasedOn: "2026-02-01" },
     ])
-    expect(datedSets(sets, [product(null, "jp", "2026-08-01")], "jp")).toEqual([])
+    expect(datedSets(sets, [product([], "jp", "2026-08-01")], "jp")).toEqual([])
   })
 })
 

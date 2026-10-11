@@ -24,7 +24,6 @@ REFERENCES = {
     "artist_id": "artist",
     "stamp_id": "stamp",
     "home_set_id": "product_family",
-    "family_id": "product_family",
     "product_id": "product",
     "translation_id": "translation",
     "annotation_set_id": "annotation_set",
@@ -46,6 +45,7 @@ REFERENCES = {
     "image_id": "image_asset",
 }
 ARRAY_REFERENCES = {
+    "family_ids": "product_family",
     "cards": "card",
     "card_ids": "card",
     "debut_product_ids": "product",
