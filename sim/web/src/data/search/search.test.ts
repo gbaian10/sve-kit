@@ -1366,6 +1366,35 @@ it("an older selection of the other edition cannot make an unchanged entry look 
   expect(h.status().error).toBeUndefined()
 })
 
+it("channels asking for the same page at once share one image metadata read", async () => {
+  const storage = memoryCache()
+  const served = origin()
+  const first = harness(served, storage)
+  first.session.load(base, "jp", "preview")
+  await first.settled()
+  await storage.delete(`sve-search-view:${encodeURIComponent(base)}`)
+  const blobs = await storage.open(`sve-search-blobs:${encodeURIComponent(base)}`)
+  const metadata = (built.manifest["files"] as JsonObject[])
+    .filter((file) =>
+      (file["row_counts"] as JsonObject[]).some((row) => row["table"] === "printing_image"),
+    )
+    .map((file) => stringValue(file["path"]))
+  for (const path of metadata) await blobs.delete(`${base}/${path}`)
+  served.requests.length = 0
+  const warm = harness(served, storage)
+  const options = warm.session.createChannel()
+  warm.channel.view({ ...query, limit: 60 })
+  options.view({ ...query, limit: 60 })
+  warm.session.load(base, "jp", "preview")
+  await warm.settled()
+  await expect
+    .poll(() => [warm.status().result.phase, options.getStatus().result.phase], POLL)
+    .toEqual(["complete", "complete"])
+  const read = served.requests.filter((path) => metadata.includes(path))
+  expect(read.length).toBeGreaterThan(0)
+  expect(new Set(read).size).toBe(read.length)
+})
+
 it("separates config, bootstrap, index building and visible-image preparation", async () => {
   const h = harness()
   h.session.load(base, "jp", "preview")

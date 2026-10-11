@@ -78,6 +78,7 @@ export class SearchEngine {
         blobs: SearchBlobs
         views: ViewCache
         memory: Map<string, CompleteView>
+        building: Map<string, Promise<CompleteView | undefined>>
         signal: AbortSignal
       }
     | undefined
@@ -178,19 +179,34 @@ export class SearchEngine {
           let event: SearchEvent
           if (request.kind === "view") {
             const key = viewSlot(request.query)
-            let view =
-              active.memory.get(key) ?? (await active.views.read(request.query, active.hash))
-            if (!view && !active.index) return
-            if (!view && index)
-              view = await completeView(
-                active.request.base,
-                request.query,
-                index,
-                active.files,
-                active.version,
-                active.blobs,
-                active.signal,
-              )
+            let view = active.memory.get(key)
+            if (!view) {
+              // Channels asking for one page at once (the list and its options) share one build.
+              let building = active.building.get(key)
+              if (!building) {
+                const { query } = request
+                building = (async () =>
+                  (await active.views.read(query, active.hash)) ??
+                  (index
+                    ? await completeView(
+                        active.request.base,
+                        query,
+                        index,
+                        active.files,
+                        active.version,
+                        active.blobs,
+                        active.signal,
+                      )
+                    : undefined))()
+                const built = building
+                const drop = () => {
+                  if (active.building.get(key) === built) active.building.delete(key)
+                }
+                built.then(drop, drop)
+                active.building.set(key, built)
+              }
+              view = await building
+            }
             if (!view) return
             active.memory.set(key, view)
             while (active.memory.size > 8)
@@ -205,8 +221,8 @@ export class SearchEngine {
             if (!index) return
             const result =
               request.kind === "suggest"
-                ? index.suggest(request.text, request.limit)
-                : { items: index.recent(request.printingIds) }
+                ? { kind: "suggest-result" as const, ...index.suggest(request.text, request.limit) }
+                : { kind: "recent-result" as const, items: index.recent(request.printingIds) }
             const faces = await completeImages(
               active.request.base,
               result.items.flatMap((item) => (item.summary ? [item.summary.printingId] : [])),
@@ -216,20 +232,7 @@ export class SearchEngine {
               active.blobs,
               active.signal,
             )
-            event =
-              request.kind === "suggest"
-                ? {
-                    kind: "suggest-result",
-                    ...identity,
-                    ...index.suggest(request.text, request.limit),
-                    faces,
-                  }
-                : {
-                    kind: "recent-result",
-                    ...identity,
-                    items: index.recent(request.printingIds),
-                    faces,
-                  }
+            event = { ...result, ...identity, faces }
           } else if (request.kind === "preview" && index) {
             active.previews ??= (async () => {
               const bytes = await fetchBytes(
@@ -445,6 +448,7 @@ export class SearchEngine {
           blobs,
           views,
           memory: new Map<string, CompleteView>(),
+          building: new Map<string, Promise<CompleteView | undefined>>(),
           signal: new AbortController().signal,
         }
         if (view && cachedEntry && hash === objectValue(cachedEntry["entry"])["manifest_sha256"]) {
@@ -671,6 +675,7 @@ export class SearchEngine {
         blobs,
         views,
         memory: new Map([[viewSlot(firstView.query), firstView]]),
+        building: new Map(),
         signal: new AbortController().signal,
       }
       this.emit({
