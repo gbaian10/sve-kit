@@ -20,6 +20,7 @@ from sve_carddb.contracts.four_layer import (
     GlossaryReference,
     LabelPart,
     LeafRef,
+    LeafType,
     LiteralNode,
     QuantitySpec,
     QuantityValuePart,
@@ -34,16 +35,16 @@ from sve_carddb.core.json import canonical, digest
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from sve_carddb.contracts.four_layer import Frame, LeafType, Node, Reference, Target
+    from sve_carddb.contracts.four_layer import Frame, Node, Reference, Target
     from sve_carddb.contracts.source_binding import (
         ClosedDomain,
         SourceBinding,
         TypedValue,
     )
 
-RENDERER_VERSION = "four-layer-renderer-v2"
+RENDERER_VERSION = "four-layer-renderer-v3"
 ZONE_CASES = frozenset(
-    {"battlefield", "deck", "evolve_deck", "ex", "graveyard", "hand", "mixed"}
+    {"battlefield", "deck", "evolve_deck", "ex", "graveyard", "hand", "banish", "mixed"}
 )
 
 
@@ -166,72 +167,160 @@ class MissingValueError(Exception):
     """Only absent usable values cause whole-field fallback; invalid structure still fails."""
 
 
+# Role signatures are closed even when several IDs share one presentation rule.
+_LABEL_FORMS = {
+    "zone.locative": ("zone.case.v2", "zone", "ZoneSet", "source_zone"),
+    "zone.counted_locative": ("zone.case.v2", "zone", "ZoneSet", "counted_zone"),
+    "zone.ablative": ("zone.case.v2", "zone", "ZoneSet", "source_zone"),
+    "zone.allative": ("zone.case.v2", "zone", "ZoneSet", "destination_zone"),
+    "zone.add_to_hand": ("zone.hand_action.v1", "zone", "ZoneSet", "destination_zone"),
+    "zone.return_to_hand": (
+        "zone.hand_action.v1",
+        "zone",
+        "ZoneSet",
+        "destination_zone",
+    ),
+    "deck_position.ablative": (
+        "deck_position.display.v1",
+        "position",
+        "DeckPosition",
+        "source_position",
+    ),
+    "deck_position.allative": (
+        "deck_position.display.v1",
+        "position",
+        "DeckPosition",
+        "destination_position",
+    ),
+    "phase.trigger": ("phase.trigger.v1", "phase", "Phase", "phase_trigger"),
+    "ability.display": ("ability.display.v1", "term", "Concept", "ability"),
+    "keyword.display": ("keyword.display.v1", "term", "Concept", "keyword"),
+    "trait.filter": ("trait.filter.v1", "trait", "Concept", "trait"),
+    "class.filter": ("class.filter.v1", "class", "Concept", "class_filter"),
+    "owner.source_possessive": (
+        "owner.possessive.v1",
+        "owner",
+        "Player",
+        "source_owner",
+    ),
+    "owner.counted_possessive": (
+        "owner.possessive.v1",
+        "owner",
+        "Player",
+        "counted_owner",
+    ),
+}
+_CLASSIFIERS = {
+    (
+        "counted_kind",
+        "selection_count",
+        "source_zone",
+    ): "quantity.classifier.source_selection",
+    (
+        "counted_kind",
+        "selection_count",
+        "counted_zone",
+    ): "quantity.classifier.counted_selection",
+    (
+        "counted_kind",
+        "existence_count",
+        "counted_zone",
+    ): "quantity.classifier.counted_existence",
+}
+_CODE_TERMS: dict[LeafType, dict[str, str]] = {
+    "Player": {"self": "player.self", "opponent": "player.opponent"},
+    "ZoneSet": {
+        "battlefield": "zone.battlefield",
+        "deck": "zone.deck",
+        "evolve_deck": "zone.evolve_deck",
+        "ex": "zone.ex",
+        "graveyard": "zone.cemetery",
+        "hand": "zone.hand",
+        "banish": "zone.banishment",
+    },
+    "DeckPosition": {"top": "zone.deck_top", "bottom": "zone.deck_bottom"},
+    "Phase": {"start": "phase.start", "main": "phase.main", "end": "phase.end"},
+    "TokenStatus": {"token": "object.token"},
+}
+
+
 def validate_form(form: FormDefinition) -> None:
-    """Rules and branch sets are finite and pinned independently of editable Chinese parts."""
-    expected = {
-        "zone.case.v1": ZONE_CASES,
-        "keyword.display.v1": frozenset({"default"}),
-        "quantity.classifier.v1": frozenset({"card", "object"}),
-        "quantity.constant_value.v1": frozenset({"default"}),
-        "trait.filter.v1": frozenset({"default"}),
-        "zone.union_separator.v1": frozenset({"default"}),
-    }.get(form.rule)
-    if expected is None:
-        raise ValueError("Unknown four-layer form rule")
-    if set(form.cases) != expected:
+    """Finite rules retain exact roles and cannot hide a label in a literal-only case."""
+    signature = {a.name: (a.type, a.role) for a in form.signature}
+    if form.id in _LABEL_FORMS:
+        cases = _label_form(form, signature)
+    elif form.id in _CLASSIFIERS.values():
+        roles = next(
+            roles for roles, identifier in _CLASSIFIERS.items() if identifier == form.id
+        )
+        if form.rule != "quantity.classifier.v1" or signature != dict(
+            zip(
+                ("kind", "quantity", "zone"),
+                zip(("CardKind", "QuantitySpec", "ZoneSet"), roles, strict=True),
+                strict=True,
+            )
+        ):
+            raise ValueError("Classifier form requires its exact typed role signature")
+        cases = frozenset({"card", "object"})
+        _literal_cases(form)
+    elif form.id == "zone.union_separator":
+        if form.rule != "zone.union_separator.v2" or signature:
+            raise ValueError(
+                "Zone union separator requires an empty signature and rule v2"
+            )
+        cases = frozenset({"default"})
+        _literal_cases(form)
+    elif form.rule == "quantity.constant_value.v1":
+        _constant_form(form)
+        cases = frozenset({"default"})
+    else:
+        raise ValueError("Unknown four-layer form rule or ID")
+    if set(form.cases) != cases:
         raise ValueError("Form must contain exactly its registered rule cases")
-    types = {arg.name: arg.type for arg in form.signature}
-    _validate_filter_form(form)
-    if form.rule == "zone.case.v1" and types != {"zone": "ZoneSet"}:
-        raise ValueError("Zone form requires its exact typed signature")
-    if form.rule == "keyword.display.v1" and types != {"term": "Concept"}:
-        raise ValueError("Keyword form requires its exact typed signature")
-    if form.rule == "quantity.classifier.v1" and types != {
-        "kind": "CardKind",
-        "quantity": "QuantitySpec",
-        "zone": "ZoneSet",
-    }:
-        raise ValueError("Classifier form requires its exact typed signature")
-    if form.rule == "quantity.classifier.v1" and any(
-        isinstance(part, LabelPart) for parts in form.cases.values() for part in parts
+
+
+def _label_form(
+    form: FormDefinition, signature: Mapping[str, tuple[str, str]]
+) -> frozenset[str]:
+    rule, name, type_name, role = _LABEL_FORMS[form.id]
+    if form.rule != rule:
+        raise ValueError("Unknown four-layer form rule for this ID")
+    if signature != {name: (type_name, role)}:
+        raise ValueError("Label form requires its exact typed role signature")
+    cases = ZONE_CASES if rule == "zone.case.v2" else frozenset({"default"})
+    if any(
+        LabelPart(kind="Label", arg=name) not in parts for parts in form.cases.values()
+    ):
+        raise ValueError("Label form must present its reference in every case")
+    return cases
+
+
+def _constant_form(form: FormDefinition) -> None:
+    roles = {
+        "selection_count",
+        "choice_mode_count",
+        "existence_count",
+        "counter_amount",
+        "repeat_count",
+    }
+    if (
+        len(form.signature) != 1
+        or form.signature[0].type != "QuantitySpec"
+        or form.signature[0].role not in roles
+        or form.id != f"quantity.{form.signature[0].role}.value"
+        or form.cases.get("default")
+        != (QuantityValuePart(kind="QuantityValue", arg=form.signature[0].name),)
     ):
         raise ValueError(
-            "Classifier rule supplies a unit, not another copy of its arguments"
+            "Constant quantity form requires its exact role and value part"
         )
-    if form.rule == "quantity.constant_value.v1":
-        roles = {
-            "selection_count",
-            "choice_mode_count",
-            "existence_count",
-            "counter_amount",
-            "repeat_count",
-        }
-        if (
-            len(form.signature) != 1
-            or form.signature[0].type != "QuantitySpec"
-            or form.signature[0].role not in roles
-            or form.id != f"quantity.{form.signature[0].role}.value"
-            or form.cases["default"]
-            != (QuantityValuePart(kind="QuantityValue", arg=form.signature[0].name),)
-        ):
-            raise ValueError(
-                "Constant quantity form requires its exact role and value part"
-            )
 
 
-def _validate_filter_form(form: FormDefinition) -> None:
-    types = {arg.name: arg.type for arg in form.signature}
-    if form.rule == "zone.union_separator.v1" and (
-        types != {"zone": "ZoneSet"}
-        or any(not isinstance(p, LiteralNode) for p in form.cases["default"])
+def _literal_cases(form: FormDefinition) -> None:
+    if any(
+        not isinstance(p, LiteralNode) for parts in form.cases.values() for p in parts
     ):
-        raise ValueError("Zone union separator requires only language literals")
-    if form.rule == "trait.filter.v1" and (
-        {arg.name: (arg.type, arg.role) for arg in form.signature}
-        != {"trait": ("Concept", "trait")}
-        or not any(isinstance(p, LabelPart) for p in form.cases["default"])
-    ):
-        raise ValueError("Trait filter form requires its exact typed signature")
+        raise ValueError("Classifier and separator forms supply only language literals")
 
 
 class Renderer:
@@ -244,7 +333,11 @@ class Renderer:
         domains: Mapping[str, ClosedDomain] | None = None,
     ) -> None:
         self.labels = dict(labels)
-        self.code_references = dict(code_references)
+        self.code_references: dict[tuple[LeafType, str], Reference] = {
+            (type_name, code): GlossaryReference(kind="glossary", key="term:" + term)
+            for type_name, codes in _CODE_TERMS.items()
+            for code, term in codes.items()
+        } | dict(code_references)
         self.forms = dict(forms)
         self.domains = dict(domains or {})
         for key, value in self.labels.items():
@@ -256,6 +349,49 @@ class Renderer:
             if form_key != (selected_form.definition.id, selected_form.definition.lang):
                 raise ValueError("Selected form key differs from its identity")
             validate_form(selected_form.definition)
+
+    def references(self, item: BoundTarget, name: str) -> tuple[Reference, ...]:
+        """Resolve codes and references without searching translated text."""
+        slot = next(s for s in item.frame.leaf_schema.slots if s.name == name)
+        value = item.binding.values.get(name)
+        if isinstance(
+            value, (GlossaryReference, VocabularyReference, CardNameReference)
+        ):
+            return (value,)
+        codes = (
+            value
+            if isinstance(value, tuple)
+            else (value,)
+            if isinstance(value, str) and slot.type != "LiteralLayout"
+            else ()
+        )
+        result = []
+        for code in codes:
+            reference = self.code_references.get((slot.type, code))
+            if reference is None:
+                raise ValueError("Typed code lacks its registered concept reference")
+            result.append(reference)
+        return tuple(result)
+
+    def required_references(
+        self, item: BoundTarget, lang: str
+    ) -> frozenset[tuple[str, str, bytes]]:
+        """Keep equal concepts on different operands distinct; unused omitted owners stay optional."""
+        result = set()
+        for slot in item.frame.leaf_schema.slots:
+            if not slot.required and not slot.occurrences:
+                continue
+            for reference in self.references(item, slot.name):
+                key = canonical(reference.model_dump(mode="json"))
+                label = self.labels.get((key, lang))
+                if slot.required or (
+                    label is not None
+                    and (label.bold is True or label.origin in {"project", "machine"})
+                ):
+                    if label is None:
+                        raise MissingValueError("missing_term_translation")
+                    result.add((slot.name, slot.role, key))
+        return frozenset(result)
 
     def render(
         self, context_id: str, lang: str, plan: tuple[BoundTarget, ...]
@@ -299,8 +435,12 @@ class Renderer:
                         item.selected.low_confidence or item.source_low_confidence,
                     )
                 )
+                required = self.required_references(item, lang)
+                output.actual.clear()
                 for index, node in enumerate(item.selected.target.nodes):
                     output.node(item, node, (index,))
+                if required - output.actual:
+                    raise ValueError("Target is missing necessary concept references")
         except MissingValueError as error:
             return Result(None, (str(error),))
         return Result(output.finish(context_id), tuple(sorted(output.issues)))
@@ -333,6 +473,7 @@ class _Output:
         self.dependencies: list[object] = []
         self.quality: list[tuple[str, bool]] = []
         self.issues: set[str] = set()
+        self.actual: set[tuple[str, str, bytes]] = set()
 
     def node(self, item: BoundTarget, node: Node, path: tuple[int, ...]) -> None:
         if isinstance(node, LiteralNode):
@@ -403,7 +544,7 @@ class _Output:
         ):
             self.label(value)
         elif isinstance(value, tuple):
-            self.zones(item, name, value, path)
+            self.zones(item, value, path)
         elif isinstance(value, QuantitySpec):
             self.quantity(value)
         elif isinstance(value, (Bound, Constant, Expression)):
@@ -416,11 +557,14 @@ class _Output:
         else:
             raise ValueError("Typed leaf cannot be presented as a generic string")
         self.record_leaf(item, name, path, start)
+        self.actual.update(
+            (name, slot.role, canonical(r.model_dump(mode="json")))
+            for r in self.renderer.references(item, name)
+        )
 
     def zones(
         self,
         item: BoundTarget,
-        name: str,
         value: tuple[str, ...],
         path: tuple[int, ...],
     ) -> None:
@@ -431,7 +575,7 @@ class _Output:
                     FormNode(
                         kind="Form",
                         form_id="zone.union_separator",
-                        args={"zone": SlotRef(slot=name)},
+                        args={},
                     ),
                     (*path, index),
                     "missing_zone_union_separator",
@@ -487,7 +631,11 @@ class _Output:
         form.verify_arguments(
             node.args, {s.name: s for s in item.frame.leaf_schema.slots}
         )
-        if form.rule == "zone.case.v1":
+        if form.rule == "zone.hand_action.v1" and self.value(
+            item, node.args["zone"].slot
+        ) != ("hand",):
+            raise ValueError("Hand action form requires the singleton hand value")
+        if form.rule == "zone.case.v2":
             zone = self.value(item, node.args["zone"].slot)
             if not isinstance(zone, tuple):
                 raise ValueError("Zone form has a non-zone value")
@@ -526,43 +674,36 @@ class _Output:
 
     def card(self, item: BoundTarget, node: CardNP, path: tuple[int, ...]) -> None:
         args = node.args
+        slots = {s.name: s for s in item.frame.leaf_schema.slots}
         if args.owner is not None:
-            self.leaf(item, args.owner.slot, (*path, 0))
+            if args.zone is not None:
+                self.leaf(item, args.owner.slot, (*path, 0))
+            else:
+                role = slots[args.owner.slot].role
+                self.implicit_form(
+                    item,
+                    FormNode(
+                        kind="Form",
+                        form_id="owner." + role.removesuffix("_owner") + "_possessive",
+                        args={"owner": args.owner},
+                    ),
+                    (*path, 0),
+                    "missing_owner_possessive_form",
+                )
         if args.zone is not None:
-            self.implicit_form(
-                item,
-                FormNode(kind="Form", form_id="zone.card_np", args={"zone": args.zone}),
-                (*path, 1),
-                "missing_card_zone_form",
-            )
-        quantity = self.value(item, args.quantity.slot)
-        self.leaf(item, args.quantity.slot, (*path, 2, 0))
-        if isinstance(quantity, QuantitySpec) and quantity.mode not in {"all", "any"}:
-            zones = (
-                [args.zone.slot]
-                if args.zone is not None
-                else [
-                    slot.name
-                    for slot in item.frame.leaf_schema.slots
-                    if slot.type == "ZoneSet" and slot.role == "counted_zone"
-                ]
-            )
-            if len(zones) != 1:
-                raise MissingValueError("unresolved_classifier_context")
             self.implicit_form(
                 item,
                 FormNode(
                     kind="Form",
-                    form_id="quantity.classifier",
-                    args={
-                        "kind": args.kind,
-                        "quantity": args.quantity,
-                        "zone": SlotRef(slot=zones[0]),
-                    },
+                    form_id="zone.locative"
+                    if slots[args.zone.slot].role == "source_zone"
+                    else "zone.counted_locative",
+                    args={"zone": args.zone},
                 ),
-                (*path, 2, 1),
-                "missing_classifier_form",
+                (*path, 1),
+                "missing_card_zone_form",
             )
+        self.card_quantity(item, node, path)
         for index, ref in enumerate(args.traits):
             self.implicit_form(
                 item,
@@ -578,6 +719,47 @@ class _Output:
         for index, ref in enumerate(modifiers, start=len(args.traits)):
             self.leaf(item, ref.slot, (*path, 3, index))
         self.leaf(item, args.kind.slot, (*path, 4))
+
+    def card_quantity(
+        self, item: BoundTarget, node: CardNP, path: tuple[int, ...]
+    ) -> None:
+        args = node.args
+        slots = {s.name: s for s in item.frame.leaf_schema.slots}
+        quantity = self.value(item, args.quantity.slot)
+        self.leaf(item, args.quantity.slot, (*path, 2, 0))
+        if isinstance(quantity, QuantitySpec) and quantity.mode not in {"all", "any"}:
+            zones = (
+                [args.zone.slot]
+                if args.zone is not None
+                else [
+                    slot.name
+                    for slot in item.frame.leaf_schema.slots
+                    if slot.type == "ZoneSet" and slot.role == "counted_zone"
+                ]
+            )
+            if len(zones) != 1:
+                raise MissingValueError("unresolved_classifier_context")
+            roles = (
+                slots[args.kind.slot].role,
+                slots[args.quantity.slot].role,
+                slots[zones[0]].role,
+            )
+            if roles not in _CLASSIFIERS:
+                raise ValueError("CardNP has an unsupported classifier role tuple")
+            self.implicit_form(
+                item,
+                FormNode(
+                    kind="Form",
+                    form_id=_CLASSIFIERS[roles],
+                    args={
+                        "kind": args.kind,
+                        "quantity": args.quantity,
+                        "zone": SlotRef(slot=zones[0]),
+                    },
+                ),
+                (*path, 2, 1),
+                "missing_classifier_form",
+            )
 
     def finish(self, context_id: str) -> Rendered:
         text_id = "t:" + self.lang + ":" + digest(self.text.encode())[7:23]

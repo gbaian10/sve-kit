@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from sve_carddb.contracts.four_layer import (
     CardNP,
     FaceRevisionOwner,
+    FormNode,
     PrintingFaceOwner,
     Projection,
     UnionNP,
@@ -421,6 +422,11 @@ def _verify_card_operands(
     found, _ = operands(part.canonical_source)
     found = tuple(preserve_modifiers(o, classifier) for o in found)
     for node in target.nodes:
+        if isinstance(node, FormNode) and node.form_id in {
+            "zone.add_to_hand",
+            "zone.return_to_hand",
+        }:
+            _verify_hand_action(part, binding, node, found)
         cards = (
             (node,)
             if isinstance(node, CardNP)
@@ -448,6 +454,35 @@ def _verify_card_operands(
                 )
 
 
+def _verify_hand_action(
+    part: SourcePart, binding: SourceBinding, node: FormNode, found: tuple[Operand, ...]
+) -> None:
+    ref = node.args.get("zone")
+    if ref is None or binding.values.get(ref.slot) != ("hand",):
+        raise ValueError("Hand action form requires its destination leaf")
+    positions = tuple(
+        s for o in binding.occurrences if o.slot == ref.slot for s in o.raw_spans
+    )
+    row = (
+        "N1-SRC03.add_hand" if node.form_id == "zone.add_to_hand" else "N1-SRC03.return"
+    )
+    allowed = tuple(
+        s
+        for o in found
+        if o.row == row
+        for p in o.zone_spans
+        for u in part.units[p.start : p.end]
+        for s in u.origins
+    )
+    if not positions or not all(
+        any(s.start <= p.start < p.end <= s.end for s in merged(allowed))
+        for p in positions
+    ):
+        raise ValueError(
+            "Hand action form differs from the registered local source action"
+        )
+
+
 def _covers_operand(
     part: SourcePart, operand: Operand, positions: tuple[Span, ...]
 ) -> bool:
@@ -462,6 +497,22 @@ def _covers_operand(
             for s in u.origins
         )
     )
-    return bool(positions) and all(
-        any(s.start <= p.start < p.end <= s.end for s in spans) for p in positions
+    restrictions = tuple(
+        s
+        for item in operand.noun.filters
+        for unit in part.units[
+            item.span.start + (item.kind == "braced") : item.span.end
+            - (item.kind == "braced")
+        ]
+        for s in unit.origins
+    )
+    return (
+        bool(positions)
+        and all(
+            any(s.start <= p.start < p.end <= s.end for s in spans) for p in positions
+        )
+        and all(
+            any(p.start <= s.start < s.end <= p.end for p in positions)
+            for s in restrictions
+        )
     )

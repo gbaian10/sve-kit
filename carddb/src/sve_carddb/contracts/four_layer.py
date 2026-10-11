@@ -575,19 +575,7 @@ def _card_slots(node: CardNP, slots: Mapping[str, LeafSlot]) -> set[str]:
         for ref, expected in references
         if ref is not None
     )
-    if args.zone is not None and slots[args.zone.slot].role not in {
-        "source_zone",
-        "counted_zone",
-    }:
-        raise ValueError("CardNP requires a counted source zone")
-    if args.owner is not None:
-        owner_role = slots[args.owner.slot].role
-        if owner_role not in {"source_owner", "counted_owner"}:
-            raise ValueError("CardNP requires a source or counted owner")
-        if args.zone is not None and slots[args.zone.slot].role != owner_role.replace(
-            "_owner", "_zone"
-        ):
-            raise ValueError("CardNP owner and zone roles must belong to one operand")
+    _card_roles(node, slots)
     traits = tuple(ref.slot for ref in args.traits)
     if len(traits) > 1:
         raise ValueError("CardNP supports at most one proven trait filter")
@@ -602,6 +590,33 @@ def _card_slots(node: CardNP, slots: Mapping[str, LeafSlot]) -> set[str]:
     if args.class_ is not None:
         _class_domain(slots[args.class_.slot])
     return used
+
+
+def _card_roles(node: CardNP, slots: Mapping[str, LeafSlot]) -> None:
+    args = node.args
+    if slots[args.kind.slot].role != "counted_kind" or slots[
+        args.quantity.slot
+    ].role not in {"selection_count", "existence_count"}:
+        raise ValueError("CardNP requires counted kind and a supported quantity role")
+    if (
+        args.zone is not None
+        and slots[args.zone.slot].role == "source_zone"
+        and slots[args.quantity.slot].role != "selection_count"
+    ):
+        raise ValueError("CardNP has an unsupported classifier role tuple")
+    if args.zone is not None and slots[args.zone.slot].role not in {
+        "source_zone",
+        "counted_zone",
+    }:
+        raise ValueError("CardNP requires a counted source zone")
+    if args.owner is not None:
+        owner_role = slots[args.owner.slot].role
+        if owner_role not in {"source_owner", "counted_owner"}:
+            raise ValueError("CardNP requires a source or counted owner")
+        if args.zone is not None and slots[args.zone.slot].role != owner_role.replace(
+            "_owner", "_zone"
+        ):
+            raise ValueError("CardNP owner and zone roles must belong to one operand")
 
 
 def _class_domain(slot: LeafSlot) -> None:
@@ -622,7 +637,17 @@ def _form_slots(
     form = forms.get((node.form_id, lang))
     if form is None:
         raise ValueError("Target requires a form in its own language")
-    return form.verify_arguments(node.args, slots)
+    form.verify_arguments(node.args, slots)
+    return set.intersection(
+        *(
+            {
+                node.args[p.arg].slot
+                for p in parts
+                if isinstance(p, (LabelPart, QuantityValuePart))
+            }
+            for parts in form.cases.values()
+        )
+    )
 
 
 def _node_slots(
@@ -673,7 +698,7 @@ FormPart = Annotated[
 class FormDefinition(RecordData):
     id: Code
     lang: Lang
-    signature: Annotated[tuple[Signature, ...], Field(min_length=1)]
+    signature: tuple[Signature, ...]
     rule: Code
     cases: Annotated[
         dict[Code, Annotated[tuple[FormPart, ...], Field(min_length=1)]],
@@ -682,6 +707,19 @@ class FormDefinition(RecordData):
 
     @model_validator(mode="after")
     def _linked(self) -> Self:
+        if not self.signature and (
+            self.id != "zone.union_separator"
+            or self.rule != "zone.union_separator.v2"
+            or set(self.cases) != {"default"}
+            or any(
+                not isinstance(part, LiteralNode)
+                for parts in self.cases.values()
+                for part in parts
+            )
+        ):
+            raise ValueError(
+                "An empty signature is reserved for the literal zone union separator v2"
+            )
         names = tuple(arg.name for arg in self.signature)
         if len(names) != len(set(names)):
             raise ValueError("Form signature names must be unique")

@@ -126,7 +126,7 @@ def _present(value: dict[str, JsonValue]) -> dict[str, JsonValue]:
             domains=selected.domains,
         )
     elif action == "form":
-        form_key = ("zone.locative", "zh-Hant")
+        form_key = ("zone.counted_locative", "zh-Hant")
         original = selected.forms[form_key]
         data = original.definition.model_dump(mode="json")
         object_value(data["cases"])["hand"] = [

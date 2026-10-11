@@ -109,9 +109,9 @@ def forms() -> dict[tuple[str, str], Form]:
     locative = FormDefinition.model_validate_json(
         canonical(
             {
-                "id": "zone.locative",
+                "id": "zone.counted_locative",
                 "lang": "zh-Hant",
-                "rule": "zone.case.v1",
+                "rule": "zone.case.v2",
                 "signature": [
                     {"name": "zone", "type": "ZoneSet", "role": "counted_zone"}
                 ],
@@ -130,6 +130,7 @@ def forms() -> dict[tuple[str, str], Form]:
                         "ex",
                         "graveyard",
                         "hand",
+                        "banish",
                         "mixed",
                     )
                 },
@@ -139,7 +140,7 @@ def forms() -> dict[tuple[str, str], Form]:
     classifier = FormDefinition.model_validate_json(
         canonical(
             {
-                "id": "quantity.classifier",
+                "id": "quantity.classifier.counted_selection",
                 "lang": "zh-Hant",
                 "rule": "quantity.classifier.v1",
                 "signature": [
@@ -159,14 +160,13 @@ def forms() -> dict[tuple[str, str], Form]:
         )
     )
     card_zone = locative.model_dump(mode="json")
-    card_zone["id"] = "zone.card_np"
     card_zone["cases"] = {
         name: [*parts, {"kind": "Literal", "text": "的"}]
         for name, parts in object_value(card_zone["cases"]).items()
         if isinstance(parts, list)
     }
     grouped = FormDefinition.model_validate_json(canonical(card_zone))
-    return {(f.id, f.lang): Form(f) for f in (locative, classifier, grouped)}
+    return {(f.id, f.lang): Form(f) for f in (classifier, grouped)}
 
 
 def renderer(*, bold: bool = True, low: bool = False) -> Renderer:
@@ -207,14 +207,13 @@ def expanded_target() -> Target:
         [
             {
                 "kind": "Form",
-                "form_id": "zone.locative",
+                "form_id": "zone.counted_locative",
                 "args": {"zone": {"slot": "zone"}},
             },
-            {"kind": "Literal", "text": "的"},
             {"kind": "LeafRef", "slot": "quantity"},
             {
                 "kind": "Form",
-                "form_id": "quantity.classifier",
+                "form_id": "quantity.classifier.counted_selection",
                 "args": {
                     "kind": {"slot": "kind"},
                     "quantity": {"slot": "quantity"},
@@ -237,7 +236,7 @@ def test_forms_keep_only_base_labels_in_semantic_ranges() -> None:
         for a in rendered.annotation.occurrences
         for r in a.ranges
     ] == ["手牌", "從者"]
-    assert [o.node_path for o in rendered.occurrences()] == [(0, 0), (2,), (4,)]
+    assert [o.node_path for o in rendered.occurrences()] == [(0, 0), (1,), (3,)]
     assert [o.source_ordinals for o in rendered.occurrences()] == [(0,), (0,), (0,)]
 
 
@@ -431,7 +430,9 @@ def test_interface_description_does_not_change_render_identity() -> None:
 
 
 def test_form_rule_cases_are_closed_and_complete() -> None:
-    original = forms()["zone.locative", "zh-Hant"].definition.model_dump(mode="json")
+    original = forms()["zone.counted_locative", "zh-Hant"].definition.model_dump(
+        mode="json"
+    )
     for changed in (
         original | {"rule": "run.script"},
         original | {"cases": {"hand": original["cases"]["hand"]}},
@@ -440,3 +441,28 @@ def test_form_rule_cases_are_closed_and_complete() -> None:
             ValueError, match=r"Unknown four-layer|exactly its registered"
         ):
             validate_form(FormDefinition.model_validate_json(canonical(changed)))
+
+
+def test_renderer_v3_invalidates_v2_cache_with_identical_inputs() -> None:
+    definition, binding, _, _ = binding_sample()
+    item = BoundTarget(
+        definition,
+        binding,
+        SelectedTarget(target([{"kind": "LeafRef", "slot": "n"}])),
+    )
+    output = (
+        Renderer({}, {}, {}).render("context:version-test", "zh-Hant", (item,)).rendered
+    )
+    assert output is not None
+    assert output.text == "2"
+    # Captured from renderer v2 for these exact source, target and label inputs.
+    assert (
+        output.dependency_key
+        != "875144ae0c98e019f5490d1ac70690d3520789ecbcb0c73eb7d1849a19e9a152"
+    )
+    assert (
+        output.identity()[0]
+        != "tr:b3f8d220a8aa62b6260e18a82191b74d46dabf2d51eb38252f4aaff09154290c"
+    )
+    assert item.frame == definition
+    assert item.binding == binding
