@@ -90,6 +90,7 @@ export function CardText({
     }
   }
   const heading = label ?? t(field === "section" ? "card.originalText" : `card.field.${field}`)
+  const heading = label ?? (field === "section" ? t("card.originalText") : t(`card.field.${field}`))
   return (
     <section className="mt-3 space-y-2" aria-label={heading} data-field={field}>
       <h3 className="text-13 font-semibold text-text-3">{heading}</h3>
