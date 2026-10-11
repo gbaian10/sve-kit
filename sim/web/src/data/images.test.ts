@@ -2,11 +2,12 @@
 import { describe, expect, it, vi } from "vitest"
 
 import { memoryCache as storage } from "../test-utils/cache"
+import { imageSnapshot } from "../test-utils/image-snapshot"
 import type { Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
 import { canonical, type JsonObject, type JsonValue, stringValue } from "./format-v3/json"
 import { digest } from "./format-v3/sha256"
-import { loadImagePage } from "./images"
+import { loadImagePage, retainedImageIndex } from "./images"
 import { MetadataBytes } from "./metadata"
 import { requestQueue } from "./request-queue"
 
@@ -88,7 +89,7 @@ describe("page image metadata", () => {
     expect(served.paths).toHaveLength(done)
     expect(client.metadataStatus()).toMatchObject({ state: "complete", persistent: true })
   })
-  it("reuses decoded faces on overlapping pages and re-derives only evicted faces", async () => {
+  it("reuses decoded faces on overlapping pages and ignores undeclared identities", async () => {
     const served = serve()
     const client = createSnapshotClient("/cdn", {
       entry: "preview",
@@ -106,13 +107,41 @@ describe("page image metadata", () => {
     const overlapping = parse.mock.calls.length
     await loadImagePage(client, [face])
     expect(parse).toHaveBeenCalledTimes(overlapping)
-    // Known negative entries consume the same finite face budget as successful ones.
+    // Arbitrary identities must not displace declared faces or enter the retained index.
     for (let i = 0; i < 65; i += 1)
       await loadImagePage(client, [
         { printingId: `unbound${String(i)}`, faceId: `face${String(i)}` },
       ])
     await loadImagePage(client, [face])
-    expect(parse.mock.calls.length).toBeGreaterThan(overlapping)
+    expect(parse).toHaveBeenCalledTimes(overlapping)
+    const snapshot = client.snapshot()
+    if (!snapshot) throw new Error("snapshot missing")
+    expect(retainedImageIndex(snapshot).known?.("unbound0", "face0")).toBe(false)
+  })
+  it("keeps more than 64 declared faces without rereading and rejects cross-card pairs", async () => {
+    const { client, snapshot, faces } = imageSnapshot(80)
+    const read = vi.spyOn(client, "fragments")
+    for (let start = 0; start < faces.length; start += 12)
+      await loadImagePage(client, faces.slice(start, start + 12))
+    const reads = read.mock.calls.length
+    const retained = retainedImageIndex(snapshot)
+    expect(retained.cardImage("p:0", "f:0")?.src).toContain("/1.webp")
+    await loadImagePage(client, faces.slice(0, 2))
+    expect(read).toHaveBeenCalledTimes(reads)
+    await loadImagePage(client, [{ printingId: "p:0", faceId: "f:1" }])
+    expect(retained.known?.("p:0", "f:1")).toBe(false)
+    expect(read).toHaveBeenCalledTimes(reads)
+    expect(retainedImageIndex({ ...snapshot }).known?.("p:0", "f:0")).toBe(false)
+  })
+  it("retains a declared face with absent media as a known negative result", async () => {
+    const { client, snapshot, faces } = imageSnapshot(1)
+    const read = vi.spyOn(client, "fragments").mockResolvedValue([])
+    await loadImagePage(client, faces)
+    const retained = retainedImageIndex(snapshot)
+    expect(retained.known?.("p:0", "f:0")).toBe(true)
+    expect(retained.cardImage("p:0", "f:0")).toBeUndefined()
+    await loadImagePage(client, faces)
+    expect(read).toHaveBeenCalledOnce()
   })
   it("does not background-download anything without persistent storage", async () => {
     let requests = 0

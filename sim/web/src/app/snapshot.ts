@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import {
   type Catalog,
   catalogOf,
   type ImageFace,
   type ImageIndex,
+  isSnapshotImageFace,
   type LoadedSnapshot,
   loadImagePage,
+  retainedImageIndex,
   type SnapshotClient,
   snapshotClient,
   type SnapshotRoot,
@@ -58,100 +60,250 @@ export function useCatalog(): {
   return { client, status, catalog: snapshot ? catalogOf(snapshot) : null }
 }
 
-/** Only intersecting faces own decoded rows; leaving the viewport releases the previous page. */
+// Keep started image batches across navigation; only active viewers may schedule more (#511).
+const FACE_CAP = 60
+const BATCH_SIZE = 12
+const CONCURRENCY = 2
+const COLLECT_DEBOUNCE_MS = 100
+const RETRY_COOLDOWN_MS = 10_000
+const BATCH_TIMEOUT_MS = 30_000
+
+interface ImageStore {
+  running: number
+  readonly listeners: Set<() => void>
+  readonly failed: Map<string, number>
+  readonly inflight: Set<string>
+}
+const imageStores = new WeakMap<LoadedSnapshot, ImageStore>()
+function imageStore(snapshot: LoadedSnapshot): ImageStore {
+  let store = imageStores.get(snapshot)
+  if (!store) {
+    store = {
+      failed: new Map(),
+      inflight: new Set(),
+      running: 0,
+      listeners: new Set(),
+    }
+    imageStores.set(snapshot, store)
+  }
+  return store
+}
+const faceKeyOf = (printingId: string, faceId: string) => `${printingId}\u0000${faceId}`
+const faceOfNode = (node: Element): ImageFace => ({
+  printingId: node.getAttribute("data-image-printing") ?? "",
+  faceId: node.getAttribute("data-image-face") ?? "",
+})
+
+/** Distance from the viewport in px; 0 while any part of the box is on screen. */
+function viewportDistance(node: Element, viewportHeight: number): number {
+  const rect = node.getBoundingClientRect()
+  if (rect.bottom < 0) return -rect.bottom
+  if (rect.top > viewportHeight) return rect.top - viewportHeight
+  return 0
+}
+
 export function useImageIndex(client: SnapshotClient, ready: boolean): ImageIndex | undefined {
-  const [selection, setSelection] = useState("")
-  const [loaded, setLoaded] = useState<{
-    readonly snapshot: LoadedSnapshot
-    readonly selection: string
-    readonly index: ImageIndex
-  }>()
   const snapshot = client.snapshot()
+  const [, setVersion] = useState(0)
+  const [visible, setVisible] = useState<ReadonlySet<string>>(new Set())
+  const shownRef = useRef(visible)
   useEffect(() => {
     if (!ready || !snapshot) return
-    const visible = new Set<Element>()
+    const store = imageStore(snapshot)
+    const retained = retainedImageIndex(snapshot)
+    let active = true
+    const bump = () => {
+      if (active) setVersion((value) => value + 1)
+    }
+    const near = new Set<Element>()
+    const onScreen = new Set<Element>()
     let timer: ReturnType<typeof setTimeout> | undefined
-    const collect = () => {
-      const unique = new Set<string>()
-      const faces = [...visible]
+    // Recomputed from the current range at every start, so a batch never picks up faces that
+    // left the range while an earlier batch was in flight.
+    const wanted = (): ImageFace[] => {
+      const viewportHeight = window.innerHeight
+      const seen = new Set<string>()
+      return [...near]
         .filter((node) => node.isConnected)
-        .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)
-        .map((node) => ({
-          printingId: node.getAttribute("data-image-printing") ?? "",
-          faceId: node.getAttribute("data-image-face") ?? "",
-        }))
+        .map((node) => ({ node, distance: viewportDistance(node, viewportHeight) }))
+        .sort((a, b) => a.distance - b.distance)
+        .map(({ node }) => faceOfNode(node))
         .filter((face) => {
-          const key = JSON.stringify([face.printingId, face.faceId])
-          if (unique.has(key)) return false
-          unique.add(key)
+          if (!isSnapshotImageFace(snapshot, face)) return false
+          const key = faceKeyOf(face.printingId, face.faceId)
+          if (seen.has(key)) return false
+          seen.add(key)
           return true
         })
-        .slice(0, 24)
-      clearTimeout(timer)
-      timer = setTimeout(() => {
-        setSelection(JSON.stringify(faces))
-      }, 100)
+        .slice(0, FACE_CAP)
     }
-    const observer =
-      typeof IntersectionObserver === "undefined"
-        ? undefined
-        : new IntersectionObserver((entries) => {
-            for (const entry of entries) {
-              if (entry.isIntersecting) visible.add(entry.target)
-              else visible.delete(entry.target)
-            }
-            collect()
+    const settle = (batch: readonly ImageFace[], failed: boolean) => {
+      for (const face of batch) {
+        const key = faceKeyOf(face.printingId, face.faceId)
+        store.inflight.delete(key)
+        if (failed) store.failed.set(key, Date.now())
+      }
+      store.running -= 1
+      for (const listener of store.listeners) listener()
+    }
+    const pump = () => {
+      if (!active) return
+      while (store.running < CONCURRENCY) {
+        const batch = wanted()
+          .filter((face) => {
+            const key = faceKeyOf(face.printingId, face.faceId)
+            return (
+              !retained.known?.(face.printingId, face.faceId) &&
+              !store.inflight.has(key) &&
+              !store.failed.has(key)
+            )
           })
+          .slice(0, BATCH_SIZE)
+        if (batch.length === 0) return
+        for (const face of batch) store.inflight.add(faceKeyOf(face.printingId, face.faceId))
+        store.running += 1
+        const abort = new AbortController()
+        let settled = false
+        const finish = (failed: boolean) => {
+          if (settled) return
+          settled = true
+          clearTimeout(deadline)
+          settle(batch, failed)
+        }
+        const deadline = setTimeout(() => {
+          // Expired batches must not cache late results or release their shared slot twice.
+          abort.abort()
+          finish(true)
+        }, BATCH_TIMEOUT_MS)
+        void loadImagePage(client, batch, abort.signal).then(
+          () => {
+            finish(false)
+          },
+          () => {
+            finish(true)
+          },
+        )
+      }
+    }
+    const collect = () => {
+      pump()
+      if (!active) return
+      const next = new Set(
+        [...onScreen]
+          .filter((node) => node.isConnected)
+          .map((node) => {
+            const face = faceOfNode(node)
+            return faceKeyOf(face.printingId, face.faceId)
+          }),
+      )
+      // An unchanged on-screen set must not re-render the whole result list on every DOM mutation.
+      const shown = shownRef.current
+      if (next.size === shown.size && [...next].every((key) => shown.has(key))) return
+      shownRef.current = next
+      setVisible(next)
+    }
+    const schedule = () => {
+      clearTimeout(timer)
+      timer = setTimeout(collect, COLLECT_DEBOUNCE_MS)
+    }
+    const track =
+      (set: Set<Element>, retry = false, initial = new Set<Element>()) =>
+      (entries: IntersectionObserverEntry[]) => {
+        let retried = false
+        for (const entry of entries) {
+          const initializing = initial.delete(entry.target)
+          if (entry.isIntersecting) {
+            const entered = !set.has(entry.target)
+            set.add(entry.target)
+            if (retry && entered && !initializing) {
+              const face = faceOfNode(entry.target)
+              const key = faceKeyOf(face.printingId, face.faceId)
+              const failedAt = store.failed.get(key)
+              if (failedAt !== undefined && Date.now() - failedAt >= RETRY_COOLDOWN_MS) {
+                store.failed.delete(key)
+                retried = true
+              }
+            }
+          } else set.delete(entry.target)
+        }
+        if (retried) for (const listener of store.listeners) listener()
+        schedule()
+      }
+    const supported = typeof IntersectionObserver !== "undefined"
+    let nearHeight = window.innerHeight
+    // IntersectionObserver percentages use root width, so screen-height margins need pixels.
+    const createNearObserver = (initial?: Set<Element>) => {
+      nearHeight = window.innerHeight
+      return supported
+        ? new IntersectionObserver(track(near, true, initial), {
+            rootMargin: `${String(nearHeight * 0.5)}px 0px ${String(nearHeight * 1.5)}px 0px`,
+          })
+        : undefined
+    }
+    let nearObserver = createNearObserver()
+    const screenObserver = supported ? new IntersectionObserver(track(onScreen)) : undefined
     const observed = new Set<Element>()
     const scan = () => {
       for (const node of document.querySelectorAll("[data-image-face]")) {
         if (observed.has(node)) continue
         observed.add(node)
-        if (observer) observer.observe(node)
-        else visible.add(node)
+        if (nearObserver && screenObserver) {
+          nearObserver.observe(node)
+          screenObserver.observe(node)
+        } else {
+          near.add(node)
+          onScreen.add(node)
+        }
       }
       for (const node of observed)
         if (!node.isConnected) {
-          observer?.unobserve(node)
+          nearObserver?.unobserve(node)
+          screenObserver?.unobserve(node)
           observed.delete(node)
-          visible.delete(node)
+          near.delete(node)
+          onScreen.delete(node)
         }
-      collect()
+      schedule()
     }
+    const resize = () => {
+      // The margins depend on the height only; width-only resizes must not rebuild every target.
+      if (window.innerHeight === nearHeight) return
+      nearObserver?.disconnect()
+      // Resize initialization is geometry reconciliation, not a scroll-triggered retry.
+      nearObserver = createNearObserver(new Set(observed))
+      for (const node of observed) nearObserver?.observe(node)
+      if (!supported) for (const node of observed) near.add(node)
+      schedule()
+    }
+    const updated = () => {
+      bump()
+      pump()
+    }
+    store.listeners.add(updated)
+    window.addEventListener("resize", resize)
     const mutations = new MutationObserver(scan)
     mutations.observe(document.body, { childList: true, subtree: true })
     scan()
     return () => {
+      active = false
+      store.listeners.delete(updated)
+      window.removeEventListener("resize", resize)
       clearTimeout(timer)
-      observer?.disconnect()
+      nearObserver?.disconnect()
+      screenObserver?.disconnect()
       mutations.disconnect()
     }
-  }, [ready, snapshot])
-  useEffect(() => {
-    if (!ready || !snapshot || !selection) return
-    const abort = new AbortController()
-    const faces = JSON.parse(selection) as ImageFace[]
-    void loadImagePage(client, faces, abort.signal).then(
-      (index) => {
-        if (!abort.signal.aborted) setLoaded({ snapshot, selection, index })
-      },
-      () => {
-        if (!abort.signal.aborted)
-          setLoaded((previous) => ({
-            snapshot,
-            selection,
-            index: {
-              ...(previous?.snapshot === snapshot
-                ? previous.index
-                : { asset: () => undefined, cardImage: () => undefined }),
-              failed: true,
-            },
-          }))
-      },
-    )
-    return () => {
-      abort.abort()
-    }
-  }, [client, ready, snapshot, selection])
-  return loaded?.snapshot === snapshot ? loaded.index : undefined
+  }, [client, ready, snapshot])
+  if (!ready || !snapshot) return undefined
+  const store = imageStore(snapshot)
+  const retained = retainedImageIndex(snapshot)
+  return {
+    ...retained,
+    known: (printingId, faceId) =>
+      retained.known?.(printingId, faceId) === true ||
+      store.failed.has(faceKeyOf(printingId, faceId)),
+    failedFace: (printingId, faceId) => store.failed.has(faceKeyOf(printingId, faceId)),
+    eager: (printingId, faceId) => visible.has(faceKeyOf(printingId, faceId)),
+    ...(store.failed.size > 0 ? { failed: true } : {}),
+  }
 }

@@ -1,9 +1,11 @@
-import { act, screen } from "@testing-library/react"
-import { afterEach, describe, expect, it } from "vitest"
+import { act, screen, waitFor } from "@testing-library/react"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
+import { useImageIndex } from "../../app/snapshot"
 import type { CardSummary, ImageIndex } from "../../data"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
+import { imageSnapshot } from "../../test-utils/image-snapshot"
 import { CardImage } from "./CardImage"
 import { imageHeldBack } from "./image-state"
 
@@ -42,9 +44,74 @@ const images = (availability: string, publication = "approved"): ImageIndex => (
 
 afterEach(() => {
   prefsStore.set(DEFAULT_PREFS)
+  vi.restoreAllMocks()
+  vi.unstubAllGlobals()
 })
 
 describe("CardImage", () => {
+  it("returns to a decoded face with its URL and no loading placeholder in the same render", async () => {
+    vi.stubGlobal("IntersectionObserver", undefined)
+    const { client } = imageSnapshot(2)
+    const read = vi.spyOn(client, "fragments")
+    function Viewer({ id }: { readonly id: number }) {
+      const index = useImageIndex(client, true)
+      return (
+        <CardImage
+          summary={{ ...summary, printingId: `p:${String(id)}`, faceId: `f:${String(id)}` }}
+          name={name}
+          images={index}
+          alt="redundant"
+          sizes="50vw"
+          className="w-full"
+        />
+      )
+    }
+    const { rerender } = await renderInRouter(<Viewer id={0} />)
+    await waitFor(() => {
+      expect(document.querySelector("img[srcset]")).not.toBeNull()
+    })
+    rerender(<Viewer id={1} />)
+    await waitFor(() =>
+      expect(document.querySelector("img[srcset]")).toHaveAttribute(
+        "src",
+        "/cdn/images/card_l/2.webp?v=1",
+      ),
+    )
+    const reads = read.mock.calls.length
+    rerender(<Viewer id={0} />)
+    expect(document.querySelector("img[srcset]")).toHaveAttribute(
+      "src",
+      "/cdn/images/card_l/1.webp?v=1",
+    )
+    expect(screen.queryByText("卡圖資訊載入中")).not.toBeInTheDocument()
+    expect(read).toHaveBeenCalledTimes(reads)
+  })
+
+  it("shows an error only on the failed face while another face remains pending", async () => {
+    const failedIndex: ImageIndex = {
+      asset: () => undefined,
+      cardImage: () => undefined,
+      known: (printingId) => printingId === "failed",
+      failed: true,
+      failedFace: (printingId) => printingId === "failed",
+    }
+    const props = { summary, name, sizes: "50vw", className: "w-full" }
+    const { rerender } = await renderInRouter(
+      <CardImage {...props} alt="redundant" images={failedIndex} />,
+    )
+    expect(screen.getByText("卡圖資訊載入中")).toBeInTheDocument()
+    expect(screen.queryByText("卡圖資訊載入失敗")).not.toBeInTheDocument()
+    rerender(
+      <CardImage
+        {...props}
+        summary={{ ...summary, printingId: "failed" }}
+        alt="redundant"
+        images={failedIndex}
+      />,
+    )
+    expect(screen.getByText("卡圖資訊載入失敗")).toBeInTheDocument()
+    expect(screen.queryByText("卡圖資訊載入中")).not.toBeInTheDocument()
+  })
   it("removes a loaded old-v image once unpublished and shows failure instead of falling back to it", async () => {
     const old = images("available")
     const props = { summary, name, sizes: "50vw", className: "w-full" }

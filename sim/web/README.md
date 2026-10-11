@@ -143,12 +143,31 @@ its parsing heap after one second. Tests use the same decoder without a Worker. 
 are released after decoding, rather than kept alongside row objects.
 
 Image metadata uses the manifest's exact fragment locator: permanent printing owner and
-printing bucket select a home-set media file. At most 24 intersecting image slots own rows
-at once; other slots remain text cards until visible. Decoded files are discarded, retaining
-up to 64 recently used face results. Overlapping visible faces keep their images while a
-debounced viewport change resolves new faces. Browsing does not need the on-demand
-`rules_name` or `face_rules_name` tables; any future construction consumer must load their
-detail files before claiming a result.
+printing bucket select a home-set media file. The viewport hook prefetches half a viewport
+height above and one and a half below, using pixel margins rebuilt on resize. Faces nearest
+the viewport go first: at most 60 candidates, 12 faces per batch and two concurrent batches
+shared by viewers of the same snapshot. Started batches finish across navigation; an unmounted
+viewer cannot schedule more. Only on-screen images are eager; prefetched images remain lazy.
+
+Decoded face metadata and URLs accumulate in the data layer for the lifetime of a snapshot.
+Scrolling or remounting a viewer can read them synchronously, without a loading placeholder or
+another fragment read. Replacement snapshots start with an empty index, and a late old batch
+cannot populate the new one. Errors belong only to the affected faces. A failed face can retry
+when its slot re-enters the near range at least ten seconds after failure; remaining in range
+or receiving the initial callbacks of a resized observer does not trigger another attempt.
+Each batch has a thirty-second deadline: expiry marks its faces failed, releases its shared
+slot and cancels acceptance of late results. Started batches retain this deadline across
+viewer unmounts.
+
+Retention admits only printing/face pairs whose bootstrap rows belong to the same card,
+including known missing-media results. Its entry limit is therefore the finite number of
+such pairs in the active snapshot (roughly fifteen thousand), rather than arbitrary queried
+IDs. Each entry holds one media row and one set of URL/size values; it retains no image bytes
+or whole media fragments. Scheduling sets have the same identity bound. WeakMap ownership
+allows an old snapshot and its metadata to be collected once its started batches finish.
+The separate metadata byte cache retains its existing 12 MiB / 64-file RAM limit.
+Browsing does not need the on-demand `rules_name` or `face_rules_name` tables; any future
+construction consumer must load their detail files before claiming a result.
 
 In 3.0, home-set media files provide display state, dimensions and separate card/art version
 tokens directly. Image URLs use the permanent printing integer ID and face ordinal, with

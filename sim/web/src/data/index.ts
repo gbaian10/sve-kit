@@ -24,7 +24,13 @@ export {
   stringValue,
 } from "./format-v3/json"
 export { registerImageCache } from "./image-sw-registration"
-export { type ImageFace, type ImageIndex, loadImagePage } from "./images"
+export {
+  type ImageFace,
+  type ImageIndex,
+  isSnapshotImageFace,
+  loadImagePage,
+  retainedImageIndex,
+} from "./images"
 export {
   activeSnapshotRoot,
   setActiveSnapshotRoot,
