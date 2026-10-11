@@ -2,7 +2,7 @@ import path from "node:path"
 
 import { describe, expect, it } from "vitest"
 
-import { snapshotRoots } from "../vite.config"
+import { snapshotCacheControl, snapshotEncoding, snapshotRoots } from "../vite.config"
 
 describe("local snapshot roots", () => {
   it("uses the synthetic fixture when no export is configured", () => {
@@ -40,5 +40,35 @@ describe("local snapshot roots", () => {
     expect(() => snapshotRoots({ [name]: "relative" })).toThrow(
       `${name} must be an absolute path when set`,
     )
+  })
+})
+
+describe("dev snapshot responses", () => {
+  const blob = `snapshots/blobs/${"a".repeat(64)}.json`
+  const manifest = `snapshots/manifests/${"b".repeat(64)}.json`
+
+  it.each([
+    [blob, ""],
+    [manifest, ""],
+    ["images/card_m/12.webp", "?v=3"],
+  ])("caches content-addressed %s for good", (relative, search) => {
+    expect(snapshotCacheControl(relative, search)).toBe("public, max-age=31536000, immutable")
+  })
+
+  it.each([
+    ["snapshots/preview/current.json", ""],
+    ["snapshots/versions/index.json", ""],
+    ["images/card_m/12.webp", ""],
+    ["images/card_m/12.webp", "?v=0"],
+    ["snapshots/blobs/short.json", ""],
+  ])("never caches %s%s", (relative, search) => {
+    expect(snapshotCacheControl(relative, search)).toBe("no-store")
+  })
+
+  it("prefers Brotli, then gzip, then no encoding", () => {
+    expect(snapshotEncoding("gzip, deflate, br, zstd")).toBe("br")
+    expect(snapshotEncoding("gzip;q=1.0, identity")).toBe("gzip")
+    expect(snapshotEncoding("identity")).toBeUndefined()
+    expect(snapshotEncoding(undefined)).toBeUndefined()
   })
 })

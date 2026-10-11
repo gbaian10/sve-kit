@@ -1,6 +1,9 @@
 import { createReadStream, readFileSync, realpathSync, statSync } from "node:fs"
+import { readFile } from "node:fs/promises"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import path from "node:path"
+import { promisify } from "node:util"
+import { brotliCompress, constants as zlib, gzip } from "node:zlib"
 
 import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
@@ -14,6 +17,31 @@ const contractSchemaDir = path.resolve(
 )
 
 const MIME: Record<string, string> = { ".json": "application/json", ".webp": "image/webp" }
+
+// Content-addressed files and versioned image URLs never change at the same URL, like on the CDN;
+// pointers such as snapshots/preview/current.json must always be refetched.
+export function snapshotCacheControl(relative: string, search: string): string {
+  const immutable =
+    /^snapshots\/(blobs|manifests)\/[0-9a-f]{64}\.json$/.test(relative) ||
+    (relative.startsWith("images/") && /^\?v=[1-9][0-9]*$/.test(search))
+  return immutable ? "public, max-age=31536000, immutable" : "no-store"
+}
+
+export function snapshotEncoding(accept: string | undefined): "br" | "gzip" | undefined {
+  const offered = new Set((accept ?? "").split(",").map((token) => token.split(";")[0]?.trim()))
+  if (offered.has("br")) return "br"
+  if (offered.has("gzip")) return "gzip"
+  return undefined
+}
+
+const compressors = {
+  // Quality 9 keeps the first dev load quick; the CDN's quality 11 is only slightly smaller.
+  br: (data: Buffer) =>
+    promisify(brotliCompress)(data, { params: { [zlib.BROTLI_PARAM_QUALITY]: 9 } }),
+  gzip: (data: Buffer) => promisify(gzip)(data, { level: 9 }),
+}
+// Dev only: the CDN serves precompressed JSON, so compress each file once instead of per request.
+const compressed = new Map<string, Promise<Buffer>>()
 
 // Serves a snapshot root (the layout the CDN will have) under a URL prefix during dev/preview.
 function serveSnapshotRoot(prefix: string, dir: string | undefined): Plugin {
@@ -58,9 +86,34 @@ function serveSnapshotRoot(prefix: string, dir: string | undefined): Plugin {
       notFound(res)
       return
     }
+    const search = url.includes("?") ? url.slice(url.indexOf("?")) : ""
     res.setHeader("Content-Type", MIME[path.extname(file)] ?? "application/octet-stream")
-    res.setHeader("Cache-Control", "no-store")
-    createReadStream(file).pipe(res)
+    res.setHeader("Cache-Control", snapshotCacheControl(relative, search))
+    const encoding =
+      path.extname(file) === ".json" ? snapshotEncoding(req.headers["accept-encoding"]) : undefined
+    if (encoding === undefined) {
+      createReadStream(file).pipe(res)
+      return
+    }
+    const key = `${file}\0${String(statSync(file).mtimeMs)}\0${encoding}`
+    let body = compressed.get(key)
+    if (body === undefined) {
+      body = readFile(file).then(compressors[encoding])
+      compressed.set(key, body)
+    }
+    body.then(
+      (data) => {
+        res.setHeader("Content-Encoding", encoding)
+        res.setHeader("Vary", "Accept-Encoding")
+        res.setHeader("Content-Length", String(data.length))
+        res.end(data)
+      },
+      () => {
+        compressed.delete(key)
+        res.statusCode = 500
+        res.end()
+      },
+    )
   }
   return {
     name: `sve-serve-${prefix.slice(1)}`,
