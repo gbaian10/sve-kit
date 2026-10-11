@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { clearLocalData } from "./clear-local"
+import { clearLocalData, requestColdStart, runRequestedColdStart } from "./clear-local"
 
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -19,7 +19,13 @@ describe("clearLocalData", () => {
     vi.stubGlobal("indexedDB", {
       databases: () => Promise.resolve([{ name: "search" }, {}]),
       deleteDatabase: (name: string) => {
-        deleted.push(`db:${name}`)
+        const request: { onsuccess?: () => void } = {}
+        // The deletion only counts once the request reports success.
+        setTimeout(() => {
+          deleted.push(`db:${name}`)
+          request.onsuccess?.()
+        }, 5)
+        return request
       },
     })
     const unregister = vi.fn(() => Promise.resolve(true))
@@ -38,5 +44,21 @@ describe("clearLocalData", () => {
     expect(sessionStorage.length).toBe(0)
     Reflect.deleteProperty(navigator, "serviceWorker")
     localStorage.clear()
+  })
+
+  it("clears only at the start that follows a request", async () => {
+    const keys = vi.fn(() => Promise.resolve([]))
+    vi.stubGlobal("caches", { keys, delete: () => Promise.resolve(true) })
+    localStorage.setItem("sve-kit:index-revision", "3")
+    await runRequestedColdStart()
+    expect(keys).not.toHaveBeenCalled()
+    expect(localStorage.getItem("sve-kit:index-revision")).toBe("3")
+    requestColdStart()
+    await runRequestedColdStart()
+    expect(keys).toHaveBeenCalledOnce()
+    expect(localStorage.getItem("sve-kit:index-revision")).toBeNull()
+    expect(localStorage.getItem("sve-kit:cold-start")).toBeNull()
+    await runRequestedColdStart()
+    expect(keys).toHaveBeenCalledOnce()
   })
 })

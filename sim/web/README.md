@@ -14,7 +14,7 @@ run on the Bun runtime (see Known issues).
 cd sim/web
 bun install
 bun run dev                     # http://localhost:5173
-bun run dev -- --host 0.0.0.0   # also reachable from phones on the LAN
+bun run dev:lan                  # HTTPS on the LAN (self-signed); plain HTTP by IP has no WebCrypto or cache
 ```
 
 ## Scripts
