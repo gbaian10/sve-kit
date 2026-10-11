@@ -311,16 +311,22 @@ export function createSnapshotClient(
     const startup = [...files].filter(
       ([, file]) => file["role"] === "config" || file["role"] === "bootstrap",
     )
+    // One failed file cancels the rest of the batch, so a retry is not queued behind it.
+    const batch = new AbortController()
     const results = await Promise.all(
       startup.map(async ([key, file]) => {
         const data = await fetchVerified(
           stringValue(file["path"]),
           stringValue(file["sha256"]),
           integerValue(file["bytes"]),
+          batch.signal,
         )
         return { key, result: await decode({ kind: "file", file, bytes: data, version }) }
       }),
-    )
+    ).catch((error: unknown) => {
+      batch.abort()
+      throw error
+    })
     for (const { key, result } of results) {
       if (key === configKey && result.kind === "config") config = result.value
       else if (result.kind === "fragments") bootstrap.push(...result.fragments)

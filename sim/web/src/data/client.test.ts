@@ -61,6 +61,33 @@ function serve(base: string, files = new Map(built.files)): Served {
 }
 
 describe("createSnapshotClient", () => {
+  it("cancels the rest of the startup batch when one file fails", async () => {
+    const served = serve("/cdn")
+    const startupKeys = (built.manifest["files"] as JsonObject[])
+      .filter((file) => file["role"] === "bootstrap")
+      .map((file) => stringValue(file["path"]))
+    const [failing, ...held] = startupKeys
+    const cancelled: string[] = []
+    const fetcher: Fetcher = (url, init) => {
+      const path = url.slice("/cdn/".length)
+      if (path === failing) return Promise.reject(new TypeError("Failed to fetch"))
+      if (!held.includes(path)) return served.fetcher(url, init)
+      return new Promise((_, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          cancelled.push(path)
+          reject(new DOMException("aborted", "AbortError"))
+        })
+      })
+    }
+    const client = createSnapshotClient("/cdn", { fetch: fetcher })
+    await client.load()
+    expect(client.status().state).toBe("error")
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    // Every held request either started and was aborted or never left the queue.
+    expect(cancelled.length).toBeGreaterThan(0)
+    expect(cancelled.every((path) => held.includes(path))).toBe(true)
+  })
+
   it("fetches startup files together instead of one round trip at a time", async () => {
     const served = serve("/cdn")
     let inFlight = 0
