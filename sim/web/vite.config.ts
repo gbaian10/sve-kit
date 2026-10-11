@@ -208,7 +208,10 @@ function buildIdPlugin(inputs: readonly string[]): Plugin {
     name: "sve-build-id",
     enforce: "pre",
     transform(code, moduleId) {
-      if (moduleId.split("?")[0] !== BUILD_ID_MODULE) return undefined
+      const [file, query = ""] = moduleId.split("?")
+      // `?raw` and `?url` imports read the file itself (the i18n usage test does); only the module
+      // that runs gets the value. HMR's `?t=` reloads still need it.
+      if (file !== BUILD_ID_MODULE || /(?:^|&)(?:raw|url)(?:[=&]|$)/.test(query)) return undefined
       return { code: code.replace("= __SVE_BUILD_ID__", `= ${JSON.stringify(id)}`), map: null }
     },
     configureServer(server) {
