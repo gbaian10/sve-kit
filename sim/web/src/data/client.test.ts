@@ -61,6 +61,25 @@ function serve(base: string, files = new Map(built.files)): Served {
 }
 
 describe("createSnapshotClient", () => {
+  it("fetches startup files together instead of one round trip at a time", async () => {
+    const served = serve("/cdn")
+    let inFlight = 0
+    let peak = 0
+    const slow: Fetcher = async (url, init) => {
+      inFlight += 1
+      peak = Math.max(peak, inFlight)
+      await new Promise((resolve) => setTimeout(resolve, 5))
+      try {
+        return await served.fetcher(url, init)
+      } finally {
+        inFlight -= 1
+      }
+    }
+    const client = createSnapshotClient("/cdn", { fetch: slow })
+    await client.load()
+    expect(client.status().state).toBe("ready")
+    expect(peak).toBeGreaterThan(1)
+  })
   it("selects the current compatible snapshot and loads config plus bootstrap", async () => {
     const served = serve("/cdn")
     const client = createSnapshotClient("/cdn", { fetch: served.fetcher })

@@ -1,6 +1,11 @@
 import type { Fetcher } from "./cdn"
 
-/** One snapshot's network budget; one slot is reserved for visible work. */
+// Real networks add hundreds of milliseconds per request, so startup needs several in flight;
+// background work never takes the last two slots, which stay free for visible work.
+const SLOTS = 8
+const BACKGROUND_SLOTS = 6
+
+/** One snapshot's network budget; some slots are reserved for visible work. */
 export function requestQueue(fetcher: Fetcher): {
   readonly foreground: Fetcher
   readonly background: Fetcher
@@ -9,10 +14,10 @@ export function requestQueue(fetcher: Fetcher): {
   let running = 0
   let background = 0
   const pump = () => {
-    while (running < 4) {
+    while (running < SLOTS) {
       let index = queue.findIndex((job) => job.priority)
       if (index < 0) {
-        if (background >= 3) return
+        if (background >= BACKGROUND_SLOTS) return
         index = 0
       }
       const job = queue.splice(index, 1)[0]

@@ -306,15 +306,22 @@ export function createSnapshotClient(
     const configKey = stringValue(objectValue(manifest["config_ref"])["key"])
     const bootstrap: Fragment[] = []
     let config: JsonObject | null = null
-    for (const [key, file] of files) {
-      const role = file["role"]
-      if (role !== "config" && role !== "bootstrap") continue
-      const data = await fetchVerified(
-        stringValue(file["path"]),
-        stringValue(file["sha256"]),
-        integerValue(file["bytes"]),
-      )
-      const result = await decode({ kind: "file", file, bytes: data, version })
+    // Startup files are fetched together: one at a time cost a full round trip each, about a
+    // minute behind a real CDN. Results are applied in manifest order.
+    const startup = [...files].filter(
+      ([, file]) => file["role"] === "config" || file["role"] === "bootstrap",
+    )
+    const results = await Promise.all(
+      startup.map(async ([key, file]) => {
+        const data = await fetchVerified(
+          stringValue(file["path"]),
+          stringValue(file["sha256"]),
+          integerValue(file["bytes"]),
+        )
+        return { key, result: await decode({ kind: "file", file, bytes: data, version }) }
+      }),
+    )
+    for (const { key, result } of results) {
       if (key === configKey && result.kind === "config") config = result.value
       else if (result.kind === "fragments") bootstrap.push(...result.fragments)
       else throw new SnapshotError("shape", "unexpected startup payload")
