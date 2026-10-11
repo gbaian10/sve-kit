@@ -3063,7 +3063,8 @@
               "dated_effective",
               "latest_observed_no_errata",
               "latest_adopted_wording",
-              "reviewed_override"
+              "reviewed_override",
+              "latest_known_release"
             ]
           },
           "descriptor": {
@@ -3071,7 +3072,8 @@
               "dated_effective",
               "latest_observed_no_errata",
               "latest_adopted_wording",
-              "reviewed_override"
+              "reviewed_override",
+              "latest_known_release"
             ]
           }
         }
@@ -11050,6 +11052,84 @@
           "descriptor": {
             "nullable": {
               "ref": "CommonName"
+            }
+          }
+        },
+        "classification": {
+          "schema": {
+            "enum": [
+              "same_effect",
+              "pending_review",
+              "errata",
+              "unresolved"
+            ]
+          },
+          "descriptor": {
+            "enum": [
+              "same_effect",
+              "pending_review",
+              "errata",
+              "unresolved"
+            ]
+          }
+        },
+        "method": {
+          "schema": {
+            "enum": [
+              "mechanical",
+              "ai",
+              "manual",
+              "none"
+            ]
+          },
+          "descriptor": {
+            "enum": [
+              "mechanical",
+              "ai",
+              "manual",
+              "none"
+            ]
+          }
+        },
+        "reason": {
+          "schema": {
+            "$ref": "#/$defs/Text"
+          },
+          "descriptor": {
+            "scalar": "Text"
+          }
+        },
+        "basis_printing_id": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "scalar": "ID"
+            }
+          }
+        },
+        "basis_released_on": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Date"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "scalar": "Date"
             }
           }
         }

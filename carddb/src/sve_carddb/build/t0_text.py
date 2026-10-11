@@ -176,6 +176,7 @@ TABLES = (
                     "dated_effective",
                     "latest_observed_no_errata",
                     "latest_adopted_wording",
+                    "latest_known_release",
                     "reviewed_override",
                 ),
             ),
@@ -193,6 +194,28 @@ TABLES = (
             ForeignKey(("decision_id",), "decision", ("id",)),
         ),
         checks=(Check("basis != 'reviewed_override' OR decision_id IS NOT NULL"),),
+    ),
+    Table(
+        "face_wording",
+        (
+            Column("face_id", Kind.ID),
+            Column("region", Kind.TEXT, choices=("jp", "en")),
+            Column(
+                "classification",
+                Kind.TEXT,
+                choices=("same_effect", "pending_review", "errata", "unresolved"),
+            ),
+            Column("method", Kind.TEXT, choices=("mechanical", "ai", "manual", "none")),
+            Column("reason", Kind.TEXT),
+            Column("comparison_hash", Kind.TEXT, pattern=HASH),
+            Column("basis_printing_id", Kind.ID, nullable=True),
+            Column("basis_released_on", Kind.TEXT, nullable=True, pattern=DATE),
+        ),
+        ("face_id", "region"),
+        foreign_keys=(
+            ForeignKey(("face_id",), "face", ("id",)),
+            ForeignKey(("basis_printing_id",), "printing", ("id",)),
+        ),
     ),
     Table(
         "printing_face_observation",

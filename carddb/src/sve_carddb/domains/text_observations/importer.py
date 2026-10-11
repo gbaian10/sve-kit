@@ -16,7 +16,10 @@ from sve_carddb.domains.text_observations.configuration import text_configuratio
 from sve_carddb.domains.text_observations.intern import TextInterner
 from sve_carddb.domains.text_observations.models import candidate_revision_id
 from sve_carddb.domains.text_observations.type_binding import type_binding
-from sve_carddb.domains.text_observations.wording import mark_wording_pending
+from sve_carddb.domains.text_observations.wording import (
+    mark_wording_pending,
+    populate_wording_basis,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -339,5 +342,6 @@ def populate_text_observations(
     populate_corrections(db, plan, texts)
     if plan.corrections is not None:
         verify_corrections(db, plan, vocabulary)
+    populate_wording_basis(db, plan)
     mark_wording_pending(db, plan)
     return input_record(build, expected)

@@ -569,6 +569,40 @@ def _wording_display(
             raise ValueError("Display belongs to another face/region")
 
 
+def _wording_basis(face: Row, wording: Row, dates: dict[str, str | None]) -> None:
+    """Verify semantic selection independently of the producing database."""
+    identifier = wording["basis_printing_id"]
+    day = wording["basis_released_on"]
+    if wording["classification"] != "same_effect":
+        if identifier is not None or day is not None:
+            raise ValueError("Non-equivalent wording cannot have a shared basis")
+        return
+    if identifier is None:
+        raise ValueError("Equivalent wording requires a basis printing")
+    candidates = [object_value(item) for item in array(wording["candidates"])]
+    selected = [item for item in candidates if item["printing_id"] == identifier]
+    display = object_value(wording["display"])
+    if (
+        len(selected) != 1
+        or selected[0]["revision_id"] is None
+        or selected[0]["revision_id"] != display["revision_id"]
+        or display["basis"] != "current"
+    ):
+        raise ValueError("Shared wording basis disagrees with the selected observation")
+    if day != dates[string(identifier)]:
+        raise ValueError("Wording basis release day disagrees with product evidence")
+    if wording["method"] != "manual":
+        known = [dates[string(item["printing_id"])] for item in candidates]
+        if day is None or day != max(value for value in known if value is not None):
+            raise ValueError("Shared wording basis must use the latest known release")
+    if not any(
+        object_value(item)["revision_id"] == display["revision_id"]
+        and object_value(item)["region"] == wording["region"]
+        for item in array(face["current"])
+    ):
+        raise ValueError("Shared wording basis requires a current")
+
+
 def _wording(view: View) -> None:
     revisions = {string(row["id"]): row for row in view["face_revision"]}
     physical = _physical_observations(view, revisions)
@@ -611,6 +645,7 @@ def _wording(view: View) -> None:
             _wording_candidates(face, wording, physical, dates, revisions)
             if wording["common_name"] != common_name(wording, revisions):
                 raise ValueError("Pending common name differs from candidates")
+            _wording_basis(face, wording, dates)
 
 
 def validate_placement(view: View, manifest: Row, fragments: list[Fragment]) -> None:

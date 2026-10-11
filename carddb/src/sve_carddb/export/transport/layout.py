@@ -90,17 +90,28 @@ class Layout:
         self.revisions = {string(row["id"]): row for row in view["face_revision"]}
         self.printings = {string(row["id"]): row for row in view["printing"]}
         self.arts = {string(row["id"]): row for row in view["art"]}
-        self.display = {
-            string(object_value(item)["revision_id"])
-            for row in view["face"]
-            for item in array(row["current"])
-        } | {
-            string(display["revision_id"])
-            for row in view["face"]
-            for raw in array(row["wording"])
-            for display in (object_value(object_value(raw)["display"]),)
-            if display["revision_id"] is not None
-        }
+        self.display = (
+            {
+                string(object_value(item)["revision_id"])
+                for row in view["face"]
+                for item in array(row["current"])
+            }
+            | {
+                string(display["revision_id"])
+                for row in view["face"]
+                for raw in array(row["wording"])
+                for display in (object_value(object_value(raw)["display"]),)
+                if display["revision_id"] is not None
+            }
+            | {
+                string(candidate["revision_id"])
+                for row in view["face"]
+                for raw in array(row["wording"])
+                for entry in array(object_value(raw)["candidates"])
+                for candidate in (object_value(entry),)
+                if candidate["revision_id"] is not None
+            }
+        )
         if set(ownership.printing_home) != {row["id"] for row in view["printing"]}:
             raise ValueError("Exact public printing ownership required")
         homes = {row["id"] for row in view["product_family"]}

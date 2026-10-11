@@ -491,6 +491,13 @@ def _current(view: View, fragments: list[Fragment]) -> None:
         for raw in array(row["wording"])
         for display in (object_value(object_value(raw)["display"]),)
         if display["revision_id"] is not None
+    } | {
+        string(candidate["revision_id"])
+        for row in view["face"]
+        for raw in array(row["wording"])
+        for entry in array(object_value(raw)["candidates"])
+        for candidate in (object_value(entry),)
+        if candidate["revision_id"] is not None
     }
     current = {
         string(row["id"])

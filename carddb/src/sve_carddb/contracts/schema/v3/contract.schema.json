@@ -542,7 +542,8 @@
             "dated_effective",
             "latest_observed_no_errata",
             "latest_adopted_wording",
-            "reviewed_override"
+            "reviewed_override",
+            "latest_known_release"
           ]
         }
       ],
@@ -566,7 +567,8 @@
             "dated_effective",
             "latest_observed_no_errata",
             "latest_adopted_wording",
-            "reviewed_override"
+            "reviewed_override",
+            "latest_known_release"
           ]
         }
       ]
@@ -2869,18 +2871,62 @@
               "type": "null"
             }
           ]
+        },
+        {
+          "enum": [
+            "same_effect",
+            "pending_review",
+            "errata",
+            "unresolved"
+          ]
+        },
+        {
+          "enum": [
+            "mechanical",
+            "ai",
+            "manual",
+            "none"
+          ]
+        },
+        {
+          "$ref": "#/$defs/Text"
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 6,
-      "maxItems": 6,
+      "minItems": 11,
+      "maxItems": 11,
       "x-columns": [
         "region",
         "state",
         "display",
         "candidates",
         "undated_printing_ids",
-        "common_name"
+        "common_name",
+        "classification",
+        "method",
+        "reason",
+        "basis_printing_id",
+        "basis_released_on"
       ],
       "x-types": [
         {
@@ -2907,6 +2953,35 @@
         {
           "nullable": {
             "ref": "CommonName"
+          }
+        },
+        {
+          "enum": [
+            "same_effect",
+            "pending_review",
+            "errata",
+            "unresolved"
+          ]
+        },
+        {
+          "enum": [
+            "mechanical",
+            "ai",
+            "manual",
+            "none"
+          ]
+        },
+        {
+          "scalar": "Text"
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "Date"
           }
         }
       ]
@@ -14434,7 +14509,8 @@
                   "dated_effective",
                   "latest_observed_no_errata",
                   "latest_adopted_wording",
-                  "reviewed_override"
+                  "reviewed_override",
+                  "latest_known_release"
                 ]
               }
             ]
@@ -15368,7 +15444,12 @@
               "display",
               "candidates",
               "undated_printing_ids",
-              "common_name"
+              "common_name",
+              "classification",
+              "method",
+              "reason",
+              "basis_printing_id",
+              "basis_released_on"
             ],
             "items": [
               {
@@ -15395,6 +15476,35 @@
               {
                 "nullable": {
                   "ref": "CommonName"
+                }
+              },
+              {
+                "enum": [
+                  "same_effect",
+                  "pending_review",
+                  "errata",
+                  "unresolved"
+                ]
+              },
+              {
+                "enum": [
+                  "mechanical",
+                  "ai",
+                  "manual",
+                  "none"
+                ]
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "Date"
                 }
               }
             ]

@@ -52,6 +52,7 @@ from sve_carddb.domains.text_observations import (
     TextObservations,
 )
 from sve_carddb.domains.text_observations.composition import populate_text_preview
+from sve_carddb.domains.text_observations.equivalence import load_decisions
 from sve_carddb.domains.translations.corrected_sources import Corrections
 from sve_carddb.domains.translations.flavor import apply as apply_flavor
 from sve_carddb.domains.translations.flavor import load as load_flavor
@@ -378,6 +379,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             }
         ),
         images=image_index,
+        wording_decisions=load_decisions(authored_root(inputs.repo)),
     )
     texts = observations.plan
     mark("text observations (parse sources)")

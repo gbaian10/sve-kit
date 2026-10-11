@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.registry.preview import PreviewPlan
     from sve_carddb.domains.source_corrections.images import ImageProvider
     from sve_carddb.domains.source_corrections.plan import Application
+    from sve_carddb.domains.text_observations.equivalence import WordingDecision
     from sve_carddb.domains.text_observations.models import TextProvider
 
 
@@ -49,6 +50,7 @@ class TextPlan:
     unavailable: tuple[str, ...]
     diagnostic_exclusions: PreviewPlan
     corrections: tuple[Application, ...] | None = None
+    wording_decisions: tuple[WordingDecision, ...] = ()
 
     def candidates(self) -> tuple[FaceObservation, ...]:
         """Keep raw source observations immutable while exposing corrected candidates."""
@@ -112,6 +114,9 @@ class TextPlan:
     def configuration(self) -> dict[str, JsonValue]:
         """Pin the observation plan as hashes/identifiers, without any effect text."""
         return {
+            "wording_decisions": [
+                item.model_dump(mode="json") for item in self.wording_decisions
+            ],
             "regions": list[JsonValue](self.identity.regions),
             "observations_hash": digest(
                 canonical(
