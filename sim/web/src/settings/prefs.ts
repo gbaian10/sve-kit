@@ -38,7 +38,7 @@ export const DEFAULT_PREFS: Prefs = {
   uiLanguage: null,
   cardEdition: "jp",
   nameDisplay: "translated",
-  effectLanguage: "translated",
+  effectLanguage: "both",
   symbolLabels: false,
   termEmphasis: true,
   theme: "system",

@@ -1,0 +1,60 @@
+import { useTranslation } from "react-i18next"
+
+import { cn } from "../ui/cn"
+import { ATTACK_ICON, DEFENSE_ICON } from "./symbolIcons"
+
+/**
+ * The official card page's one-line stats: a green cost dot, then the attack and defense icons,
+ * each followed by its name and number. Names never break; a group that does not fit wraps whole.
+ */
+export function StatLine({
+  cost,
+  attack,
+  defense,
+  className,
+}: {
+  readonly cost: number | null
+  readonly attack: number | null
+  readonly defense: number | null
+  readonly className?: string
+}) {
+  const { t } = useTranslation()
+  const stats = [
+    { key: "cost", icon: null, label: t("cardPage.stats.cost"), value: cost, tone: "text-success" },
+    {
+      key: "attack",
+      icon: ATTACK_ICON,
+      label: t("cardPage.stats.attack"),
+      value: attack,
+      tone: "text-cost",
+    },
+    {
+      key: "defense",
+      icon: DEFENSE_ICON,
+      label: t("cardPage.stats.defense"),
+      value: defense,
+      tone: "text-def",
+    },
+  ].filter((stat) => stat.value !== null)
+  if (stats.length === 0) return null
+  return (
+    <p
+      className={cn("flex flex-wrap items-center gap-x-3 gap-y-1 text-15 tabular-nums", className)}
+    >
+      {stats.map((stat) => (
+        <span key={stat.key} className="inline-flex items-center gap-1 whitespace-nowrap">
+          {stat.icon === null ? (
+            <span
+              aria-hidden="true"
+              className="size-3.5 rounded-full bg-success ring-1 ring-text-1/30 ring-inset"
+            />
+          ) : (
+            <img src={stat.icon} alt="" className="size-4.5" />
+          )}
+          <span className={cn("text-14 font-bold", stat.tone)}>{stat.label}</span>
+          <b className="font-bold">{stat.value}</b>
+        </span>
+      ))}
+    </p>
+  )
+}

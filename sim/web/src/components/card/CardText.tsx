@@ -12,6 +12,7 @@ import { usePrefs } from "../../settings"
 import { AnnotatedText } from "./AnnotatedText"
 import { useTextLanguage } from "./text-language"
 import { TextPurposeStatus } from "./TextPurposeStatus"
+import { plainText } from "./textSymbols"
 import { TranslationSourceLine } from "./TranslationSourceLine"
 
 // Effect text is the reason the page exists: 16px at line-height 1.75, full width (design 06).
@@ -69,16 +70,6 @@ export function CardText({
         <p className="text-13">{t("card.printedUnconfirmed")}</p>
       )}
       <TextPurposeStatus readiness={readiness} />
-      {showOriginal && (
-        <div className={BODY}>
-          <AnnotatedText
-            value={value.original}
-            context={value}
-            emphasis={prefs.termEmphasis}
-            annotationReady={annotationReady}
-          />
-        </div>
-      )}
       {showTranslated && (
         <>
           <div className={BODY}>
@@ -107,6 +98,28 @@ export function CardText({
             )}
         </>
       )}
+      {/* Beside a translation the original is the reference copy: boxed and quieter, same flow. */}
+      {showOriginal && showTranslated && (
+        <div className="rounded-block border border-border bg-surface-1 px-3 py-2.5 text-14 leading-effect text-text-2">
+          <p className="mb-1 text-12 text-text-3">{t("card.originalText")}</p>
+          <AnnotatedText
+            value={value.original}
+            context={value}
+            emphasis={prefs.termEmphasis}
+            annotationReady={annotationReady}
+          />
+        </div>
+      )}
+      {showOriginal && !showTranslated && (
+        <div className={BODY}>
+          <AnnotatedText
+            value={value.original}
+            context={value}
+            emphasis={prefs.termEmphasis}
+            annotationReady={annotationReady}
+          />
+        </div>
+      )}
       {mode !== "original" &&
         !value.translated &&
         stringValue(value.original.unit["lang"]) !== language && (
@@ -117,10 +130,12 @@ export function CardText({
         className="h-9 rounded-control px-2 text-13 font-semibold text-accent-text hover:bg-surface-2"
         onClick={() => {
           void navigator.clipboard.writeText(
-            stringValue(
-              (mode !== "original" && value.translated ? value.translated : value.original).unit[
-                "text"
-              ],
+            plainText(
+              stringValue(
+                (mode !== "original" && value.translated ? value.translated : value.original).unit[
+                  "text"
+                ],
+              ),
             ),
           )
         }}

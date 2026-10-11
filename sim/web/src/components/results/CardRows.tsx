@@ -8,6 +8,7 @@ import { classStyle } from "../../domain/classes"
 import type { Region } from "../../domain/search"
 import { CardImage } from "../card/CardImage"
 import { CLASS_ICON } from "../card/classIcons"
+import { InlineText } from "../card/InlineText"
 import { costIcon, costIconNeedsNumber } from "../card/symbolIcons"
 import { useTextLanguage } from "../card/text-language"
 import { Badge } from "../ui/Badge"
@@ -99,7 +100,7 @@ function EffectPreview({
           lang={stringValue(unit["lang"])}
           className="line-clamp-2 text-13 leading-snug text-text-2"
         >
-          {stringValue(unit["text"])}
+          <InlineText text={stringValue(unit["text"])} />
         </span>
       ) : (
         <span

@@ -13,6 +13,7 @@ import {
 } from "../../data"
 import { cn } from "../ui/cn"
 import { Link } from "../ui/Link"
+import { InlineText } from "./InlineText"
 
 export function AnnotatedText({
   value,
@@ -62,7 +63,14 @@ export function AnnotatedText({
           ? textRuns(value)
           : [{ text: stringValue(value.unit["text"]), reference: null, bold: false }]
         ).map((run, index) => {
-          const content = emphasis && run.bold === true ? <strong>{run.text}</strong> : run.text
+          const content =
+            emphasis && run.bold === true ? (
+              <strong>
+                <InlineText text={run.text} />
+              </strong>
+            ) : (
+              <InlineText text={run.text} />
+            )
           return run.reference ? (
             <button
               key={index}

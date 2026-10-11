@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { ToastProvider } from "../../components/ui/Toast"
@@ -46,6 +47,14 @@ vi.mock("../../app/snapshot", () => {
     useCatalog: () => ({
       client: { snapshot: () => null },
       catalog: {
+        // Previous/next walk this order; the synthetic card is first, so only "next" is enabled.
+        results: () =>
+          state.doubleFace
+            ? [
+                { key: "c:synthetic", printingId: "p:synthetic" },
+                { key: "c:other", printingId: "p:synthetic" },
+              ]
+            : [],
         summary: () =>
           state.doubleFace
             ? {
@@ -254,9 +263,26 @@ describe("double-face headers", () => {
     })
     expect(screen.getByRole("heading", { level: 2, name: "Synthetic front" })).toBeVisible()
     expect(screen.getByRole("heading", { level: 2, name: "合成背面譯名" })).toBeVisible()
-    expect(screen.getByRole("img", { name: "合成背面譯名（BP-SYNTHETIC）" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "放大卡圖：合成背面譯名" })).toBeInTheDocument()
     expect(screen.getByText("待校對")).toBeVisible()
     expect(screen.getByText("依日文原文翻譯")).toBeVisible()
-    expect(screen.getAllByRole("img", { name: "費用 2" })).toHaveLength(2)
+    // The stat line names each value in text; cost has no icon, attack and defense do.
+    expect(screen.getAllByText("費用")).toHaveLength(2)
+    expect(screen.getAllByText("2")).toHaveLength(2)
+    expect(screen.queryByText("攻擊力")).not.toBeInTheDocument()
+  })
+  it("offers previous/next from the list order and enlarges the image in a dialog", async () => {
+    state.doubleFace = true
+    prefsStore.set({ uiLanguage: "zh-TW" })
+    await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    expect(screen.getByRole("button", { name: "上一張" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "下一張" })).toBeEnabled()
+    await userEvent.click(screen.getByRole("button", { name: "放大卡圖：Synthetic front" }))
+    const dialog = screen.getByRole("dialog", { name: "Synthetic front" })
+    expect(dialog).toBeVisible()
+    await userEvent.click(screen.getByRole("button", { name: "關閉" }))
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
   })
 })
