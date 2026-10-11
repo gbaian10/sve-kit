@@ -3,17 +3,22 @@ import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 
 import { type CardEntryState, useListEntryState } from "../../app/listEntryState"
-import { useCatalog, useImageIndex } from "../../app/snapshot"
+import { useCatalog, useImageIndex, useSearch, useSearchReadiness } from "../../app/snapshot"
+import { StatusStrip } from "../../app/StatusStrip"
 import { useDebouncedValue } from "../../app/useDebouncedValue"
 import { MetadataStatus } from "../../components/card/MetadataStatus"
 import { CardGrid, type GridCell } from "../../components/results/CardGrid"
+import { CardList, CardTable } from "../../components/results/CardRows"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
 import { ClassQuickBar, type QuickBarClass } from "../../components/search/ClassQuickBar"
 import { SearchBar } from "../../components/search/SearchBar"
 import { optionId } from "../../components/search/suggest-ids"
 import { SuggestList, type SuggestRow } from "../../components/search/SuggestList"
 import { Button } from "../../components/ui/Button"
-import type { CardSummary } from "../../data"
+import { Chip } from "../../components/ui/Chip"
+import { Notice } from "../../components/ui/Notice"
+import { Segmented } from "../../components/ui/Segmented"
+import { type CardSummary, type SearchQuery, stringValue } from "../../data"
 import { quickBarClasses } from "../../domain/classes"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
 import { formatQuery, parseQuery } from "../../domain/query/codec"
@@ -23,10 +28,11 @@ import {
   NEUTRAL_CLASS,
   type QueryState,
   toggleClass,
+  VIEW_MODES,
 } from "../../domain/query/model"
 import type { Suggestion } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
-import { recentStore, usePrefs, useRecent } from "../../settings"
+import { prefsStore, recentStore, usePrefs, useRecent } from "../../settings"
 
 const PAGE_SIZE = 60
 const SUGGEST_LIMIT = 8
@@ -37,14 +43,17 @@ function cardPath(summary: CardSummary): string {
 }
 
 // The search page: the URL holds the query, the input holds what is being typed, and the suggest
-// list follows the typed text (debounced) until Enter or "see all" commits it to the URL.
+// list follows the typed text (debounced) until Enter or "see all" commits it to the URL. The
+// result list comes from the search hook; suggestions still read the catalog directly (they need
+// the matched field, which the hook's page items do not carry).
 export function CardsPage() {
   const { t } = useTranslation()
   const prefs = usePrefs()
   const uiLanguage = currentUiLanguage(prefs.uiLanguage)
   const textLang = UI_TEXT_LANG[uiLanguage]
   const edition = prefs.cardEdition
-  const { client, status, catalog } = useCatalog()
+  const { client, catalog } = useCatalog()
+  const readiness = useSearchReadiness(edition)
   const images = useImageIndex(client, catalog !== null)
   const [params, setParams] = useSearchParams()
   const query = useMemo(() => parseQuery(params), [params])
@@ -118,26 +127,54 @@ export function CardsPage() {
   }, [catalog, debounced, suggestions, recent, nameOf])
   const listOpen = focused && catalog !== null
 
-  const results = useMemo(
-    () => (catalog ? catalog.results(query, edition) : []),
-    [catalog, query, edition],
-  )
   const pages = Math.max(1, entry.pages ?? 1)
-  const visible = useMemo(() => results.slice(0, pages * PAGE_SIZE), [results, pages])
+  const searchQuery = useMemo<SearchQuery>(
+    () => ({ state: query, edition, offset: 0, limit: pages * PAGE_SIZE }),
+    [query, edition, pages],
+  )
+  const { result } = useSearch(searchQuery)
+  // Search opens once the full index is ready, but plain browsing must not wait for it: with no
+  // text or filters the worker returns the snapshot order, which the loaded catalog already has.
+  const browsing =
+    query.text === "" &&
+    activeFilterCount(query) === 0 &&
+    query.unit === "card" &&
+    query.sort === "no"
+  const page = useMemo(() => {
+    if (result.phase === "complete") return result.page
+    if (result.phase === "error" || !browsing || !catalog) return null
+    const items = catalog.results(query, edition)
+    return {
+      total: items.length,
+      offset: 0,
+      items: items.slice(0, pages * PAGE_SIZE).map((item) => ({
+        key: item.key,
+        printingId: item.printingId,
+        summary: catalog.summary(item.printingId),
+      })),
+    }
+  }, [result, browsing, catalog, query, edition, pages])
   const cells: GridCell[] = useMemo(() => {
-    if (!catalog) return []
-    return visible.flatMap((item) => {
-      const summary = catalog.summary(item.printingId)
-      if (!summary) return []
+    if (!page) return []
+    return page.items.flatMap((item) => {
+      if (!item.summary) return []
       const state: CardEntryState = {
         background: location.search,
         source: "results",
         pages,
         resultKey: item.key,
       }
-      return [{ key: item.key, summary, name: nameOf(summary), to: cardPath(summary), state }]
+      return [
+        {
+          key: item.key,
+          summary: item.summary,
+          name: nameOf(item.summary),
+          to: cardPath(item.summary),
+          state,
+        },
+      ]
     })
-  }, [catalog, visible, location.search, pages, nameOf])
+  }, [page, location.search, pages, nameOf])
 
   const openSuggestion = (index: number) => {
     const row = rows[index]
@@ -213,20 +250,24 @@ export function CardsPage() {
         : [],
     [catalog, textLang, t],
   )
+  const classLabel = (code: string) => quickBar.find((item) => item.code === code)?.label ?? code
   const filterCount = activeFilterCount(query)
   const hasConditions = query.text !== "" || filterCount > 0
-  const failed = status.state === "error"
-  const loading = catalog === null && !failed
-  // A first download reports how many startup files have arrived (it can take seconds).
-  const download =
-    status.state === "loading" && status.total !== undefined && status.total > 0
-      ? { done: status.done ?? 0, total: status.total }
-      : null
+  const view = query.view ?? prefs.viewMode
+  const unsupported = result.phase === "error" && result.error.kind === "unsupported-query"
+  const pending = result.phase === "pending" && page === null
+  const effectOwner = useCallback(
+    (cell: GridCell) => {
+      const revision = catalog?.index.displayRevision(cell.summary.faceId, cell.summary.region)
+      return revision ? { kind: "face_revision", id: stringValue(revision["id"]) } : null
+    },
+    [catalog],
+  )
 
   return (
     <div className="flex flex-col gap-3 pt-2 pb-6">
       <h1 className="sr-only">{t("pages.cards")}</h1>
-      {catalog !== null && <MetadataStatus client={client} />}
+      <StatusStrip readiness={readiness} />
       <div className="relative z-20">
         <SearchBar
           value={input}
@@ -278,56 +319,70 @@ export function CardsPage() {
           }}
         />
       )}
-      {failed && (
+      {hasConditions && (
         <div
-          role="alert"
-          className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-block border border-danger bg-danger-soft px-4 py-3 text-14"
+          role="group"
+          aria-label={t("results.conditions")}
+          className="flex flex-wrap items-center gap-2"
         >
-          <span className="font-semibold text-danger">{t("results.loadFailed")}</span>
-          <span className="text-text-2">{t("results.loadFailedHint")}</span>
-          <Button
-            className="ml-auto h-9"
+          {query.text !== "" && (
+            <Chip
+              removeLabel={t("results.removeCondition", { label: query.text })}
+              onRemove={() => {
+                commit({ ...query, text: "" })
+              }}
+            >
+              {query.text}
+            </Chip>
+          )}
+          {query.classes.map((code) => (
+            <Chip
+              key={code}
+              removeLabel={t("results.removeCondition", { label: classLabel(code) })}
+              onRemove={() => {
+                commit(toggleClass(query, code))
+              }}
+            >
+              {classLabel(code)}
+            </Chip>
+          ))}
+          <button
+            type="button"
             onClick={() => {
-              void client.retry()
+              commit(DEFAULT_QUERY)
             }}
+            className="h-8 rounded-pill px-2 text-13 font-semibold text-accent-text hover:bg-surface-2"
           >
-            {t("results.retry")}
-          </Button>
+            {t("results.clearConditions")}
+          </button>
         </div>
       )}
-      {loading && (
-        <>
-          <div className="flex flex-col gap-1.5">
-            <p className="flex gap-2 text-13 text-text-3">
-              <span aria-live="polite">
-                {download ? t("results.downloading") : t("results.preparing")}
-              </span>
-              {download && (
-                <span aria-hidden="true" className="tabular-nums">
-                  {download.done}/{download.total}
-                </span>
-              )}
-            </p>
-            {download && (
-              <div
-                role="progressbar"
-                aria-label={t("results.downloadProgress")}
-                aria-valuemin={0}
-                aria-valuemax={download.total}
-                aria-valuenow={download.done}
-                className="h-1.5 w-full max-w-80 overflow-hidden rounded-full bg-surface-2"
-              >
-                <div
-                  className="h-full rounded-full bg-accent"
-                  style={{ width: `${String((download.done / download.total) * 100)}%` }}
-                />
-              </div>
-            )}
-          </div>
-          <SkeletonGrid />
-        </>
+      {catalog !== null && <MetadataStatus client={client} />}
+      {unsupported && (
+        <Notice
+          tone="warning"
+          role="alert"
+          actions={
+            <Button
+              className="h-9"
+              onClick={() => {
+                commit({ ...DEFAULT_QUERY, text: query.text, classes: query.classes })
+              }}
+            >
+              {t("results.clearAll")}
+            </Button>
+          }
+        >
+          {t("results.unsupported", {
+            facets: (result.error.facets ?? [])
+              .map((facet) => t(`results.facet.${facet}`))
+              .join("、"),
+          })}
+        </Notice>
       )}
-      {catalog !== null && results.length === 0 && (
+      {/* The status strip above says what is downloading; the list only shows its skeleton. */}
+      {pending && readiness.phase !== "error" && <SkeletonGrid />}
+      {page !== null && page.total === 0 && (
         <div className="flex flex-col items-center gap-3 rounded-block border border-dashed border-border-strong px-4 py-10 text-center">
           <p className="text-16 font-semibold">{t("results.empty")}</p>
           <p className="text-13 text-text-3">{t("results.emptyHint")}</p>
@@ -342,21 +397,65 @@ export function CardsPage() {
           )}
         </div>
       )}
-      {catalog !== null && results.length > 0 && (
+      {page !== null && page.total > 0 && (
         <>
-          <p className="text-13 text-text-2" aria-live="polite">
-            <b className="font-semibold text-text-1 tabular-nums">
-              {new Intl.NumberFormat(uiLanguage).format(results.length)}
-            </b>{" "}
-            {t("results.countUnit")}
-          </p>
-          <CardGrid
-            cells={cells}
-            images={images}
-            onOpen={openCell}
-            {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
-          />
-          {visible.length < results.length && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <p className="text-13 text-text-2" aria-live="polite">
+              <b className="font-semibold text-text-1 tabular-nums">
+                {new Intl.NumberFormat(uiLanguage).format(page.total)}
+              </b>{" "}
+              {t("results.countUnit")}
+            </p>
+            <div className="ml-auto flex items-center gap-2">
+              {/* Sorting arrives with the filter panel (V3); the control keeps its place and says so. */}
+              <button
+                type="button"
+                aria-disabled="true"
+                title={t("results.sortSoon")}
+                className="flex h-8 items-center gap-1 rounded-control border border-border bg-surface-1 px-2.5 text-13 text-text-3"
+              >
+                <span>{t("results.sort")}</span>
+                <span className="text-text-2">{t("results.sortDefault")}</span>
+              </button>
+              <Segmented
+                size="sm"
+                tone="accent"
+                label={t("results.view")}
+                options={VIEW_MODES.map((value) => ({ value, label: t(`options.view.${value}`) }))}
+                value={view}
+                onChange={(next) => {
+                  prefsStore.set({ viewMode: next })
+                  commit({ ...query, view: next })
+                }}
+              />
+            </div>
+          </div>
+          {view === "grid" && (
+            <CardGrid
+              cells={cells}
+              images={images}
+              onOpen={openCell}
+              {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
+            />
+          )}
+          {view === "table" && (
+            <CardTable
+              cells={cells}
+              images={images}
+              onOpen={openCell}
+              client={client}
+              effectOwner={effectOwner}
+              {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
+            />
+          )}
+          {view === "list" && (
+            <CardList
+              cells={cells}
+              onOpen={openCell}
+              {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
+            />
+          )}
+          {page.items.length < page.total && (
             <Button
               className="mx-auto mt-2 w-full max-w-80"
               onClick={() => {

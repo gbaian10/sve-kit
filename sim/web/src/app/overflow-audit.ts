@@ -47,6 +47,8 @@ export function findOverflow(root: Document, readStyle?: StyleReader): OverflowP
     const overflow = element.scrollWidth - element.clientWidth
     // Inline boxes report 0/0; visually hidden ones (sr-only) are a 1px clipped box on purpose.
     if (overflow <= SLACK || element.clientWidth <= 1 || !isVisible(element)) continue
+    // A control whose invisible hit area is wider than its box (data-hit-area) is not text overflow.
+    if (element.hasAttribute("data-hit-area")) continue
     const kind = classify(style(element))
     if (kind) problems.push({ kind, element, overflow })
   }

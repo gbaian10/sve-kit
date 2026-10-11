@@ -19,8 +19,9 @@ describe("route table", () => {
   it.each([
     ["/", "主頁"],
     ["/cards", "查卡"],
-    ["/cards/BP01-001-合成経路サンプル", "單卡"],
-    ["/cards/_provisional/12", "單卡"],
+    // The card page's heading is the card number itself (design 06), never a generic title.
+    ["/cards/BP01-001-合成経路サンプル", "BP01-001-合成経路サンプル"],
+    ["/cards/_provisional/12", "12"],
     ["/sets", "卡包"],
     ["/sets/BP01", "卡包"],
     ["/settings", "帳號與設定"],

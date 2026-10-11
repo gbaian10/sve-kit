@@ -11,16 +11,24 @@ import {
   stringValue,
   textRuns,
 } from "../../data"
+import { cn } from "../ui/cn"
 import { Link } from "../ui/Link"
 
 export function AnnotatedText({
   value,
   context,
   emphasis,
+  heading = false,
+  annotationReady = true,
+  className,
 }: {
   readonly value: TextValue
   readonly context: SelectedText
   readonly emphasis: boolean
+  /** Render the text as the page's card-name heading instead of a paragraph. */
+  readonly heading?: boolean
+  readonly annotationReady?: boolean
+  readonly className?: string
 }) {
   const { t } = useTranslation()
   const [reference, setReference] = useState<JsonObject | null>(null)
@@ -46,10 +54,14 @@ export function AnnotatedText({
         )
         .filter((value) => value !== undefined)
     : []
+  const Text = heading ? "h2" : "p"
   return (
     <div>
-      <p lang={stringValue(value.unit["lang"])} className="whitespace-pre-wrap">
-        {textRuns(value).map((run, index) => {
+      <Text lang={stringValue(value.unit["lang"])} className={cn("whitespace-pre-wrap", className)}>
+        {(annotationReady
+          ? textRuns(value)
+          : [{ text: stringValue(value.unit["text"]), reference: null, bold: false }]
+        ).map((run, index) => {
           const content = emphasis && run.bold === true ? <strong>{run.text}</strong> : run.text
           return run.reference ? (
             <button
@@ -67,8 +79,8 @@ export function AnnotatedText({
             <span key={index}>{content}</span>
           )
         })}
-      </p>
-      {reference && (
+      </Text>
+      {annotationReady && reference && (
         <aside
           aria-label={t("card.annotationReference")}
           className="mt-2 rounded-block bg-surface-2 p-3"

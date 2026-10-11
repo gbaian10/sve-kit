@@ -3,11 +3,9 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { useImageIndex } from "../../app/snapshot"
 import type { CardSummary, ImageIndex } from "../../data"
-import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { imageSnapshot } from "../../test-utils/image-snapshot"
 import { CardImage } from "./CardImage"
-import { imageHeldBack } from "./image-state"
 
 const summary: CardSummary = {
   cardId: "c:bp01-001",
@@ -43,7 +41,6 @@ const images = (availability: string, publication = "approved"): ImageIndex => (
 })
 
 afterEach(() => {
-  prefsStore.set(DEFAULT_PREFS)
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
 })
@@ -99,7 +96,8 @@ describe("CardImage", () => {
     const { rerender } = await renderInRouter(
       <CardImage {...props} alt="redundant" images={failedIndex} />,
     )
-    expect(screen.getByText("卡圖資訊載入中")).toBeInTheDocument()
+    // The placeholder tag and the screen-reader label both carry the state text.
+    expect(screen.getAllByText("卡圖資訊載入中").length).toBeGreaterThan(0)
     expect(screen.queryByText("卡圖資訊載入失敗")).not.toBeInTheDocument()
     rerender(
       <CardImage
@@ -109,7 +107,7 @@ describe("CardImage", () => {
         images={failedIndex}
       />,
     )
-    expect(screen.getByText("卡圖資訊載入失敗")).toBeInTheDocument()
+    expect(screen.getAllByText("卡圖資訊載入失敗").length).toBeGreaterThan(0)
     expect(screen.queryByText("卡圖資訊載入中")).not.toBeInTheDocument()
   })
   it("removes a loaded old-v image once unpublished and shows failure instead of falling back to it", async () => {
@@ -144,7 +142,7 @@ describe("CardImage", () => {
       replacement?.dispatchEvent(new Event("error"))
     })
     expect(document.querySelector("img[srcset]")).toBeNull()
-    expect(screen.getByText("卡圖載入失敗")).toBeInTheDocument()
+    expect(screen.getByText("卡圖載入失敗", { selector: ".sr-only" })).toBeInTheDocument()
   })
   it("names the card in identify mode and stays silent in redundant mode", async () => {
     await renderInRouter(
@@ -166,7 +164,7 @@ describe("CardImage", () => {
     expect(img).toHaveAttribute("loading", "lazy")
   })
 
-  it("keeps the text card until the image has loaded, then hides it", async () => {
+  it("keeps the placeholder until the image has loaded, then hides it", async () => {
     await renderInRouter(
       <CardImage
         summary={summary}
@@ -180,14 +178,16 @@ describe("CardImage", () => {
     const img = document.querySelector("img[srcset]")
     if (!img) throw new Error("no image")
     expect(img).toHaveAttribute("alt", "")
-    expect(screen.getByText("BP01-001", { selector: "[aria-hidden] *" })).toBeInTheDocument()
+    expect(screen.getByText("卡圖載入中", { selector: ".sr-only" })).toBeInTheDocument()
+    expect(document.querySelector("[aria-hidden] svg")).not.toBeNull()
     act(() => {
       img.dispatchEvent(new Event("load"))
     })
-    expect(screen.queryByText("BP01-001")).not.toBeInTheDocument()
+    expect(document.querySelector("[aria-hidden] svg")).toBeNull()
+    expect(screen.queryByText("卡圖載入中")).not.toBeInTheDocument()
   })
 
-  it("keeps a replacement image behind the text card until the new source loads", async () => {
+  it("keeps a replacement image behind the placeholder until the new source loads", async () => {
     const { rerender } = await renderInRouter(
       <CardImage
         summary={summary}
@@ -203,7 +203,7 @@ describe("CardImage", () => {
     act(() => {
       original.dispatchEvent(new Event("load"))
     })
-    expect(screen.queryByText("BP01-001")).not.toBeInTheDocument()
+    expect(document.querySelector("[aria-hidden] svg")).toBeNull()
     const changed: ImageIndex = {
       asset: images("available").asset,
       cardImage: () => ({
@@ -223,16 +223,16 @@ describe("CardImage", () => {
         className="w-full"
       />,
     )
-    expect(screen.getByText("BP01-001", { selector: "[aria-hidden] *" })).toBeInTheDocument()
+    expect(document.querySelector("[aria-hidden] svg")).not.toBeNull()
     const replacement = document.querySelector("img[srcset]")
     if (!replacement) throw new Error("no replacement")
     act(() => {
       replacement.dispatchEvent(new Event("load"))
     })
-    expect(screen.queryByText("BP01-001")).not.toBeInTheDocument()
+    expect(document.querySelector("[aria-hidden] svg")).toBeNull()
   })
 
-  it("shows the text card with a reason for missing and pending images", async () => {
+  it("shows the placeholder with a reason for missing and pending images", async () => {
     const { unmount } = await renderInRouter(
       <CardImage
         summary={summary}
@@ -243,7 +243,7 @@ describe("CardImage", () => {
         className="w-full"
       />,
     )
-    expect(screen.getByText("尚無卡圖")).toBeInTheDocument()
+    expect(screen.getByText("尚無卡圖", { selector: ".sr-only" })).toBeInTheDocument()
     unmount()
     const pending = await renderInRouter(
       <CardImage
@@ -255,38 +255,67 @@ describe("CardImage", () => {
         className="w-full"
       />,
     )
-    expect(screen.getByText("卡圖待確認")).toBeInTheDocument()
+    expect(screen.getByText("卡圖待確認", { selector: ".sr-only" })).toBeInTheDocument()
     expect(document.querySelector("img[srcset]")).toBeNull()
     pending.unmount()
   })
 
-  it("holds the image back in data-saver mode until the caller wants it", async () => {
-    prefsStore.set({ dataSaver: true })
-    const { rerender } = await renderInRouter(
+  it("keeps a landscape image whole instead of cropping it to the portrait slot", async () => {
+    const landscape: ImageIndex = {
+      asset: images("available").asset,
+      cardImage: () => ({
+        src: "/cdn/wide.webp",
+        srcSet: "/cdn/wide.webp 641w",
+        width: 641,
+        height: 459,
+      }),
+    }
+    await renderInRouter(
       <CardImage
         summary={summary}
         name={name}
-        images={images("available")}
+        images={landscape}
         alt="redundant"
         sizes="50vw"
         className="w-full"
       />,
     )
-    expect(document.querySelector("img[srcset]")).toBeNull()
-    expect(imageHeldBack(images("available"), summary)).toBe(true)
-    expect(imageHeldBack(images("missing"), summary)).toBe(false)
-    rerender(
-      <CardImage
-        summary={summary}
-        name={name}
-        images={images("available")}
-        alt="redundant"
-        sizes="50vw"
-        className="w-full"
-        imageWanted
-      />,
-    )
-    expect(document.querySelector("img[srcset]")).not.toBeNull()
+    expect(document.querySelector("img[srcset]")).toHaveClass("object-contain")
+  })
+
+  it("shows the shared placeholder, never the text card, in every non-image state", async () => {
+    const states: [ImageIndex | undefined, string][] = [
+      [undefined, "卡圖資訊載入中"],
+      [images("missing"), "尚無卡圖"],
+      [images("unfetched", "pending"), "卡圖待確認"],
+      [images("unfetched"), "卡圖未抓取"],
+      [
+        {
+          ...images("available"),
+          asset: () => undefined,
+          cardImage: () => undefined,
+          failed: true,
+        },
+        "卡圖資訊載入失敗",
+      ],
+    ]
+    for (const [index, tag] of states) {
+      const { unmount } = await renderInRouter(
+        <CardImage
+          summary={summary}
+          name={name}
+          images={index}
+          alt="redundant"
+          sizes="50vw"
+          className="w-full"
+        />,
+      )
+      expect(screen.getAllByText(tag)).toHaveLength(2)
+      expect(screen.getByText(tag, { selector: ".sr-only" })).not.toHaveAttribute("aria-hidden")
+      expect(document.querySelector("[aria-hidden] svg")).not.toBeNull()
+      expect(screen.queryByText("BP01-001")).not.toBeInTheDocument()
+      unmount()
+    }
   })
 
   it("names the card in identify mode even without a visible image", async () => {
@@ -303,7 +332,7 @@ describe("CardImage", () => {
     expect(screen.getByRole("img", { name: "試作見習兵（BP01-001）" })).toBeInTheDocument()
   })
 
-  it("shows the text card while the image index is still loading", async () => {
+  it("shows the placeholder while the image index is still loading", async () => {
     await renderInRouter(
       <CardImage
         summary={summary}
@@ -314,7 +343,52 @@ describe("CardImage", () => {
         className="w-full"
       />,
     )
-    expect(screen.getByText("試作見習兵")).toBeInTheDocument()
+    expect(screen.getByText("卡圖資訊載入中", { selector: ".sr-only" })).toBeInTheDocument()
     expect(document.querySelector("img[srcset]")).toBeNull()
   })
+})
+
+it("labels only the failed face while untouched faces remain loading", async () => {
+  const scoped = {
+    ...images("available"),
+    asset: () => undefined,
+    cardImage: () => undefined,
+    failed: true,
+    known: (printing: string) => printing === summary.printingId,
+    failedFace: (printing: string) => printing === summary.printingId,
+  }
+  const { rerender } = await renderInRouter(
+    <CardImage
+      summary={summary}
+      name={name}
+      images={scoped}
+      alt="redundant"
+      sizes="96px"
+      className="w-full"
+    />,
+  )
+  expect(screen.getByText("卡圖資訊載入失敗", { selector: ".sr-only" })).toBeInTheDocument()
+  rerender(
+    <CardImage
+      summary={{ ...summary, printingId: "p:unrequested" }}
+      name={name}
+      images={scoped}
+      alt="redundant"
+      sizes="96px"
+      className="w-full"
+    />,
+  )
+  expect(screen.queryByText("卡圖資訊載入失敗")).not.toBeInTheDocument()
+  expect(screen.getByText("卡圖資訊載入中", { selector: ".sr-only" })).toBeInTheDocument()
+  rerender(
+    <CardImage
+      summary={{ ...summary, printingId: "p:known-empty" }}
+      name={name}
+      images={{ ...scoped, known: () => true }}
+      alt="redundant"
+      sizes="96px"
+      className="w-full"
+    />,
+  )
+  expect(screen.queryByText("卡圖資訊載入失敗")).not.toBeInTheDocument()
 })

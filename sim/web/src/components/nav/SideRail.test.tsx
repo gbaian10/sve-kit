@@ -9,7 +9,7 @@ function Harness() {
 }
 
 describe("SideRail", () => {
-  it("stays a fixed 72px rail and marks only the active item", async () => {
+  it("is a 72px rail that expands to 200px only on xl, and marks only the active item", async () => {
     await renderRoutes([{ path: "*", element: <Harness /> }], { initialEntries: ["/sets"] })
     expect(screen.queryByRole("button", { name: /側欄/u })).not.toBeInTheDocument()
     for (const name of ["首頁", "查卡", "牌組"]) {
@@ -17,7 +17,9 @@ describe("SideRail", () => {
     }
     const aside = screen.getByRole("complementary")
     expect(aside.className).toContain("w-18")
-    expect(aside.className).not.toMatch(/w-50/u)
+    // 72px up to 1439px; the 200px expanded form only from the xl breakpoint (design 03c).
+    expect(aside.className).toContain("xl:w-50")
+    expect(aside.className).not.toMatch(/(?:^|\s)w-50/u)
   })
 
   it("exposes the logo link and leaves the account menu to the top bar", async () => {

@@ -13,20 +13,39 @@ run on the Bun runtime (see Known issues).
 ```bash
 cd sim/web
 bun install
-bun run dev                     # http://localhost:5173
+bun run dev                     # http://localhost:5173, synthetic fixture under /cdn
 bun run dev -- --host 0.0.0.0   # also reachable from phones on the LAN
 ```
 
+### Real data (3.0.0 preview export)
+
+Screens are developed and accepted against a real `3.0.0` preview export with real WebP images,
+never against the synthetic fixture. Point `SVE_PREVIEW_DIR` at the preview root (the directory
+that holds `snapshots/` and `images/`); its entry is `snapshots/preview/current.json`, not the
+formal version index. The dev server serves it under `/cdn-preview` and the dev badge shows
+「預覽資料」 with the data version.
+
+```bash
+SVE_EXPORT_DIR= SVE_PREVIEW_DIR=/path/to/preview-root bun run dev -- --host 0.0.0.0
+```
+
+In dev the app starts on the preview root on its own when a preview is configured **and** `/cdn`
+is still the fixture (`src/app/dev-root.ts`); an empty `SVE_EXPORT_DIR` forces the fixture when a
+shell profile sets a real export directory. With a real `/cdn` export the app starts on the formal
+root and the badge switches roots by hand. Only two derived flags reach browser code
+(`SVE_PREVIEW_CONFIGURED`, `SVE_CDN_IS_FIXTURE`); paths stay in the Vite server.
+
 ## Scripts
 
-| Script                 | What it does                                             |
-| ---------------------- | -------------------------------------------------------- |
-| `bun run check`        | Everything below, in order; run it before pushing        |
-| `bun run format:check` | Prettier (`bun run format` rewrites)                     |
-| `bun run lint`         | ESLint (`lint:js`) and Stylelint (`lint:css`)            |
-| `bun run typecheck`    | `tsc -b` with TypeScript 6                               |
-| `bun run test`         | Vitest, including the ESLint and Stylelint rule fixtures |
-| `bun run build`        | Production build into `dist/`                            |
+| Script                 | What it does                                              |
+| ---------------------- | --------------------------------------------------------- |
+| `bun run check`        | Everything below, in order; run it before pushing         |
+| `bun run format:check` | Prettier (`bun run format` rewrites)                      |
+| `bun run lint`         | ESLint (`lint:js`) and Stylelint (`lint:css`)             |
+| `bun run typecheck`    | `tsc -b` with TypeScript 6                                |
+| `bun run test`         | Vitest, including the ESLint and Stylelint rule fixtures  |
+| `bun run build`        | Production build into `dist/`                             |
+| `bun run shots`        | Manual: real-browser screenshots and geometry (see below) |
 
 `bun test` is Bun's own test runner and ignores the Vitest config. Always use `bun run test`.
 
@@ -66,8 +85,9 @@ agrees with `applyThemeAttributes`.
 ## Settings
 
 All user preferences live in one object stored under `localStorage["sve-kit:prefs"]`
-(`src/settings/prefs.ts`): UI language, card edition, name/effect display, symbol labels, theme,
-accent, ban region, data saver, grid density, view mode. Reading validates every field on its own
+(`src/settings/prefs.ts`): UI language, card edition, name/effect display, symbol labels, term
+emphasis, theme, accent, ban region, grid density, view mode. Fields a build no longer has (the
+removed `dataSaver`) are ignored on read without a version bump. Reading validates every field on its own
 and falls back to the default, so a stale or hand-edited value never breaks the app; reading and
 writing are wrapped in try/catch because even touching `localStorage` can throw. The object
 carries `v: 1`; a missing or different version is treated as another build's data and ignored
@@ -208,7 +228,7 @@ The application currently leaves the attribute unset. A browser that cannot regi
 module Service Worker continues through normal HTTP loading; CacheStorage is optional.
 
 After the catalog is ready, background work downloads **metadata bytes**, not all image
-blobs, only when persistent storage is available. Data saver delays that work. Storage loss
+blobs, only when persistent storage is available. Storage loss
 stops queued background work; without persistent storage only visible faces are fetched.
 When background work completes, its session cost includes every file containing `printing_image` rows.
 The progress surface offers pause/retry and distinguishes download completion from persistent
@@ -230,10 +250,11 @@ this is not a heap measurement or a physical-phone acceptance claim.
 ## Development snapshot
 
 `fixtures/snapshot/` is a small synthetic card-data snapshot in the exact layout the CDN will
-have (version index, manifest, canonical blobs, WebP placeholders). `bun run fixture:build`
+have (version index, manifest, canonical blobs, WebP placeholders). It exists for Vitest and for
+a dev server without real data; screens are never judged on it. `bun run fixture:build`
 regenerates it from `scripts/fixture/cards.ts` (about two dozen handwritten cards covering
 double faces, alternate printings, errata, Q&A, bans, the JP/EN mapping states and image
-states) through `scripts/fixture/build.ts`, which emits snapshot 2.0 with index format 2, 64 buckets,
+states) through `scripts/fixture/build.ts`, which emits snapshot 3.0.0 with index format 2, 64 buckets,
 fixed bands, five display sizes and permanent-ID image URLs, emits the column partitions, sorts every
 collection the way the reader requires and hashes every blob. The output is deterministic and
 the reader must accept it (`scripts/fixture/build.test.ts`), so a change to either the reader or
@@ -268,11 +289,35 @@ writes the anchor first, then pushes `/cards/:cardNo` with `{ background, source
 `src/app/listEntryState.test.tsx` pins that replace-then-push keeps both states in the data router.
 
 Each grid cell shows the name with the card number at the right of the same line (user request
-2026-09-29), then the translation line when the name display asks for one.
+2026-09-29), then the translation line when the name display asks for one. The `view` URL
+parameter (else the `viewMode` preference) picks the grid, the table rows (48×67 thumbnail, stats,
+a two-line effect preview labelled as incomplete) or the list rows (52px, class-coloured edge);
+the control row holds the result count, a sort placeholder and the view switch.
 
-`CardImage` is one fixed 63:88 slot: the text card (name, class frame, cost, number, stats) sits
-underneath and the image fades in over it; missing and pending images keep the text card with a
-reason, and data saver waits for a tap. Callers set the width (`w-full`, `w-8`).
+Image metadata for the list is fetched by `useImageIndex` (`src/app/snapshot.ts`) ahead of the
+viewport: slots within 1.5 screens below and 0.5 above are requested nearest-first in batches of 12
+(two in flight, at most 60 per pass), results are kept for the whole snapshot so scrolling back never
+refetches, and a batch that has started is never cancelled. Picture files themselves still load lazily.
+
+`CardImage` is one fixed 63:88 slot: the app's own placeholder mark (`CardPlaceholder`, not the
+official card back) sits underneath and the image fades in over it. Loading, missing, pending,
+unfetched and failed images all keep the placeholder with their own label; the name and number
+stay visible next to the slot. A landscape image is shown whole (`object-contain`) rather than
+cropped. Callers set the width (`w-full`, `w-8`).
+
+### Readiness and search hooks
+
+`src/app/snapshot.ts` defines what pages call: `useSearchReadiness(edition)` (phase
+`downloading | ready | error`, generation, root, edition, the loading step, data version,
+manifest hash, `retry`) and `useSearch(query)` (the last input and a result that is only
+`pending`, `error` or `complete` with a page). The shapes follow the Worker index's
+`SearchSession` status and `SearchChannel` result, so the call sites stay when the data layer
+swaps the implementation in. The current implementation is the V1 stand-in over the synchronous
+catalog: no index, cache, Worker or byte progress; the input is kept while the snapshot downloads
+and answered once, never as a partial list or a count. Conditions the catalog cannot apply (cost,
+sets, types, rarities, alt-art, mechanics, unit, sort) answer `unsupported-query` with the facets
+instead of being ignored. `StatusStrip` renders the readiness (download step, update, failure
+with retry) on the pages.
 
 The class quick bar shows labels only when an off-screen labelled copy fits the row width: the six
 classes of the physical game plus neutral. A class code the design does not know yet would use the
@@ -284,7 +329,9 @@ neutral colour and an initial.
 nothing uses. Delete what it reports together with the UI that stopped needing it; do not keep
 components or helpers "for later" — they come back from git history when their consumer lands.
 The only configured exceptions are in `knip.json`: the lint rule fixtures (input data, never
-imported) and the font package, which only CSS `@font-face` rules reference.
+imported) and the font package, which only CSS `@font-face` rules reference. The dependency-only
+PR that added Playwright listed it there too; the screenshot script now imports it, so that entry
+is gone.
 `src/i18n/usage.test.ts` does the same for locale keys: every key must appear in a source file,
 either as a string literal or under a template-literal prefix such as ``t(`nav.${key}`)``.
 
@@ -300,12 +347,29 @@ either as a string literal or under a template-literal prefix such as ``t(`nav.$
   the fixture tests. Its community `@types` package pulls in a second ESLint, so a local
   declaration lives in `types/`.
 
+## Screenshots and first-screen geometry
+
+`bun run shots` (`scripts/screenshots/main.ts`) drives a running dev server in headless Chromium
+through Playwright. It is a manual dev tool: not part of `bun run check`, never run in CI, never
+given synthetic data. It captures the card list and the given card pages for every theme ×
+UI language × width (dark/light × zh-TW/ja/en × 390/820/1180/1440 by default, filterable) and
+writes `report.json` next to the PNGs with the data version, manifest hash, browser, and per shot
+the viewport y of the first effect-text line (design 06: ≈300 at 390), horizontal page overflow,
+the overflow audit and the console error count. Card numbers and geometry only; no card text.
+
+```bash
+bun run shots -- --base http://localhost:5173 --out /tmp/shots --query bp01 \
+  --card ECP02-SP11 --card BP09-070 --themes dark --langs zh-TW --widths 390
+```
+
+Run `bunx playwright install chromium` once to download the browser. Linux screenshots do not
+stand in for the maintainer's phone: CJK font size and wrapping are judged on the device.
+
 ## Not set up yet
 
 Added once pages exist:
 
-- Playwright (size matrix, themes, keyboard) and `@axe-core/playwright`
-- knip
+- `@axe-core/playwright`
 - First-load size budget script
 - Component tests that the jsx-a11y component mapping (`CardImage`, `Link`, `Button`) matches the rendered DOM
 

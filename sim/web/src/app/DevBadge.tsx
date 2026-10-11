@@ -43,6 +43,7 @@ export function DevBadge({ client }: { readonly client: SnapshotClient }) {
     <div
       role="status"
       title={status.state === "ready" ? status.dataVersion : undefined}
+      data-manifest-hash={client.snapshot()?.manifestHash ?? ""}
       className="fixed right-2 bottom-24 z-40 flex max-w-[calc(100vw-1rem)] items-center gap-2 rounded-pill border border-border bg-surface-1 py-1 pr-1 pl-3 text-12 text-text-2 shadow-lg lg:bottom-3 phone-landscape:bottom-3"
     >
       <span className="shrink-0 font-semibold">{t(`dev.root.${root}`)}</span>

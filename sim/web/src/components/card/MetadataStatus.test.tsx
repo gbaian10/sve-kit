@@ -1,5 +1,4 @@
 import { screen, waitFor } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
@@ -39,7 +38,7 @@ describe("metadata progress", () => {
       complete: "Image metadata downloaded",
     },
   ])(
-    "data saver delays background fetch with retry and cache degradation ($language)",
+    "starts background fetch on its own with a persistent cache and reports completion ($language)",
     async ({ language, button, degraded, complete }) => {
       const client = createSnapshotClient("/cdn", {
         cacheStorage: memoryCache(),
@@ -52,15 +51,13 @@ describe("metadata progress", () => {
       })
       await client.load()
       const start = vi.spyOn(client, "prefetchImages")
-      prefsStore.set({ ...DEFAULT_PREFS, dataSaver: true })
       await renderInRouter(<MetadataStatus client={client} />, { language })
-      expect(start).not.toHaveBeenCalled()
-      expect(screen.queryByText(degraded)).not.toBeInTheDocument()
-      await userEvent.setup().click(screen.getByRole("button", { name: button }))
       expect(start).toHaveBeenCalledOnce()
+      expect(screen.queryByText(degraded)).not.toBeInTheDocument()
       await waitFor(() => {
         expect(screen.getByRole("status")).toHaveTextContent(complete)
       })
+      expect(screen.queryByRole("button", { name: button })).not.toBeInTheDocument()
     },
   )
   it.each(["zh-TW", "ja", "en"] as const)(

@@ -30,7 +30,6 @@ export interface Prefs {
   /** null = the theme's default accent. */
   readonly accent: Accent | null
   readonly banRegion: CardEdition
-  readonly dataSaver: boolean
   readonly gridDensity: GridDensity
   readonly viewMode: ViewMode
 }
@@ -45,7 +44,6 @@ export const DEFAULT_PREFS: Prefs = {
   theme: "system",
   accent: null,
   banRegion: "jp",
-  dataSaver: false,
   gridDensity: 2,
   viewMode: "grid",
 }
@@ -76,7 +74,6 @@ const guards: Guards = {
   theme: isThemePref,
   accent: isNullableAccent,
   banRegion: isCardEdition,
-  dataSaver: isBoolean,
   gridDensity: isGridDensity,
   viewMode: isViewMode,
 }
@@ -91,6 +88,8 @@ function resolveStorage(source: StorageSource): Storage {
 
 // Only the exact version this build writes is trusted; a missing or different `v` means another
 // build's layout, and guessing field by field could keep half of it. Same rule in theme-boot.js.
+// Fields this build no longer has (`dataSaver`, removed with the data-saver mode) are ignored
+// without a version bump: the whitelist below only reads the keys of DEFAULT_PREFS.
 function sanitize(raw: unknown): Prefs {
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return DEFAULT_PREFS
   const record = raw as Record<string, unknown>

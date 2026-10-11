@@ -1,132 +1,120 @@
-import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { useAnnotatedText } from "../../app/snapshot"
 import {
   type AnnotatedTextResolver,
-  arrayValue,
-  canonicalText,
-  createAnnotatedTextResolver,
   type JsonObject,
-  objectValue,
-  parseJson,
-  type SelectedText,
   type SnapshotClient,
-  SnapshotError,
   stringValue,
 } from "../../data"
+import type { Region } from "../../domain/search"
 import { usePrefs } from "../../settings"
 import { AnnotatedText } from "./AnnotatedText"
+import { useTextLanguage } from "./text-language"
+import { TextPurposeStatus } from "./TextPurposeStatus"
+import { TranslationSourceLine } from "./TranslationSourceLine"
+
+// Effect text is the reason the page exists: 16px at line-height 1.75, full width (design 06).
+const BODY = "text-16 leading-effect"
 
 export function CardText({
   client,
   owner,
   field,
+  edition,
   sharedResolver,
 }: {
   readonly sharedResolver?: AnnotatedTextResolver | null
   readonly client: SnapshotClient
+  readonly edition: Region
   readonly owner: JsonObject
   readonly field: "name" | "effect" | "flavor"
 }) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const prefs = usePrefs()
-  const snapshot = client.snapshot()
-  const language = i18n.resolvedLanguage === "zh-TW" ? "zh-Hant" : (i18n.resolvedLanguage ?? "ja")
-  const identity = canonicalText([owner, field, language])
-  const resolver = useMemo(
-    () => sharedResolver ?? (snapshot ? createAnnotatedTextResolver(client) : null),
-    [client, snapshot, sharedResolver],
+  const language = useTextLanguage()
+  const { readiness, value } = useAnnotatedText(
+    client,
+    owner,
+    field,
+    language,
+    edition,
+    sharedResolver,
   )
-  const [loaded, setLoaded] = useState<{
-    readonly snapshot: typeof snapshot
-    readonly identity: string
-    readonly value?: SelectedText | null
-    readonly failed?: "validation" | "network"
-  }>()
-  useEffect(() => {
-    if (!resolver) return
-    let active = true
-    const [currentOwner, currentField, currentLanguage] = arrayValue(parseJson(identity))
-    const pointer = {
-      owner: objectValue(currentOwner),
-      field: stringValue(currentField),
-      ordinal: null,
-    }
-    void resolver.resolve(pointer, stringValue(currentLanguage)).then(
-      (value) => {
-        if (active) setLoaded({ snapshot, identity, value })
-      },
-      (error: unknown) => {
-        if (active)
-          setLoaded({
-            snapshot,
-            identity,
-            failed: error instanceof SnapshotError ? "validation" : "network",
-          })
-      },
-    )
-    return () => {
-      active = false
-    }
-  }, [resolver, snapshot, identity])
-  if (loaded?.snapshot !== snapshot || loaded.identity !== identity)
-    return <p role="status">{t("card.annotationPending")}</p>
-  if (loaded.failed)
+  if (readiness.basic === "pending") return <p role="status">{t("card.annotationPending")}</p>
+  if (readiness.basic === "error")
     return (
       <p role="alert">
-        {loaded.failed === "validation" ? t("card.textFailed") : t("card.textLoadFailed")}
+        {readiness.error?.kind === "validation" ? t("card.textFailed") : t("card.textLoadFailed")}
       </p>
     )
-  const value = loaded.value
   if (!value) return <p>{t("card.textUnavailable")}</p>
+  // Leaders and some tokens have no effect text at all: say so instead of an empty section.
+  if (field === "effect" && stringValue(value.original.unit["text"]) === "" && !value.translated)
+    return (
+      <p className="mt-3 rounded-control border border-dashed border-border-strong px-3 py-3 text-center text-14 text-text-2">
+        {t("card.noEffect")}
+      </p>
+    )
+  const annotationReady = readiness.annotations === "ready" || readiness.annotations === "none"
   const mode = field === "name" ? prefs.nameDisplay : prefs.effectLanguage
   const showOriginal =
     mode !== "translated" || !value.translated || value.selection?.["basis"] === "jp_source"
   const showTranslated = mode !== "original" && value.translated !== undefined
-  const originLabel =
-    value.translation?.["origin"] === "official"
-      ? t("card.translationOrigin.official")
-      : value.translation?.["origin"] === "project"
-        ? t("card.translationOrigin.project")
-        : t("card.translationOrigin.machine")
-  const authorityLabel =
-    value.translation?.["authority"] === "sve_official"
-      ? t("card.translationAuthority.sve_official")
-      : value.translation?.["authority"] === "digital_official"
-        ? t("card.translationAuthority.digital_official")
-        : t("card.translationAuthority.unofficial")
   return (
-    <section className="mt-3 space-y-2" aria-label={t(`card.field.${field}`)}>
-      <h3 className="text-14 font-semibold">{t(`card.field.${field}`)}</h3>
-      {value.printedState === "derived" && <p>{t("card.printedDerived")}</p>}
-      {value.printedState === "unknown" && <p>{t("card.printedUnconfirmed")}</p>}
+    <section className="mt-3 space-y-2" aria-label={t(`card.field.${field}`)} data-field={field}>
+      <h3 className="text-13 font-semibold text-text-3">{t(`card.field.${field}`)}</h3>
+      {value.printedState === "derived" && <p className="text-13">{t("card.printedDerived")}</p>}
+      {value.printedState === "unknown" && (
+        <p className="text-13">{t("card.printedUnconfirmed")}</p>
+      )}
+      <TextPurposeStatus readiness={readiness} />
       {showOriginal && (
-        <AnnotatedText value={value.original} context={value} emphasis={prefs.termEmphasis} />
+        <div className={BODY}>
+          <AnnotatedText
+            value={value.original}
+            context={value}
+            emphasis={prefs.termEmphasis}
+            annotationReady={annotationReady}
+          />
+        </div>
       )}
       {showTranslated && (
         <>
-          <AnnotatedText value={value.translated} context={value} emphasis={prefs.termEmphasis} />
-          <p className="text-12 text-text-3">
-            {originLabel} · {authorityLabel}
-          </p>
-          {value.translation?.["low_confidence"] === true && (
-            <p>{t("card.translationProofreading")}</p>
-          )}
-          {value.selection?.["basis"] === "jp_source" && value.source && (
-            <details>
-              <summary>{t("card.jpSource")}</summary>
-              <AnnotatedText value={value.source} context={value} emphasis={prefs.termEmphasis} />
-            </details>
-          )}
+          <div className={BODY}>
+            <AnnotatedText
+              value={value.translated}
+              context={value}
+              emphasis={prefs.termEmphasis}
+              annotationReady={annotationReady}
+            />
+          </div>
+          <TranslationSourceLine value={value} />
+          {value.selection?.["basis"] === "jp_source" &&
+            readiness.source === "ready" &&
+            value.source && (
+              <details className="text-15">
+                <summary className="cursor-pointer text-13 text-text-2">
+                  {t("card.jpSource")}
+                </summary>
+                <AnnotatedText
+                  value={value.source}
+                  context={value}
+                  emphasis={prefs.termEmphasis}
+                  annotationReady={annotationReady}
+                />
+              </details>
+            )}
         </>
       )}
       {mode !== "original" &&
         !value.translated &&
         stringValue(value.original.unit["lang"]) !== language && (
-          <p>{t("card.translationMissing")}</p>
+          <p className="text-13 text-text-2">{t("card.translationMissing")}</p>
         )}
       <button
         type="button"
+        className="h-9 rounded-control px-2 text-13 font-semibold text-accent-text hover:bg-surface-2"
         onClick={() => {
           void navigator.clipboard.writeText(
             stringValue(

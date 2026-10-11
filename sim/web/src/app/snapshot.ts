@@ -1,21 +1,36 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import {
+  type AnnotatedTextResolver,
+  arrayValue,
+  canonicalText,
   type Catalog,
   catalogOf,
   type ImageFace,
   type ImageIndex,
   isSnapshotImageFace,
+  type JsonObject,
   type LoadedSnapshot,
   loadImagePage,
+  objectValue,
+  parseJson,
+  type QueryFailure,
   retainedImageIndex,
+  type SearchPage,
+  type SearchQuery,
+  type SelectedText,
+  sharedAnnotatedTextResolver,
   type SnapshotClient,
   snapshotClient,
+  SnapshotError,
   type SnapshotRoot,
   type SnapshotStatus,
+  stringValue,
   useSnapshotRoot,
   useSnapshotStatus,
 } from "../data"
+import { DEFAULT_QUERY, type QueryState } from "../domain/query/model"
+import type { Region } from "../domain/search"
 
 const FOCUS_CHECK_INTERVAL_MS = 60_000
 
@@ -306,4 +321,355 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
     eager: (printingId, faceId) => visible.has(faceKeyOf(printingId, faceId)),
     ...(store.failed.size > 0 ? { failed: true } : {}),
   }
+}
+
+// Keep Worker query shapes while V1 still reads the synchronous Catalog (see README search hooks).
+type UnsupportedFacet = NonNullable<QueryFailure["facets"]>[number] | "cost" | "sets"
+
+type StandInFailure = Omit<QueryFailure, "facets"> & {
+  readonly facets?: readonly UnsupportedFacet[]
+}
+
+interface SearchLoadFailure {
+  readonly kind: "load-failed" | "worker-failed" | "cancelled"
+  readonly message: string
+}
+
+type SearchLoadStep = "index" | "manifest" | "bootstrap"
+
+/** Readiness of the search generation: which root/edition can be queried, and what is loading. */
+export interface SearchReadiness {
+  readonly phase: "downloading" | "ready" | "error"
+  /** Increments whenever a different snapshot object becomes queryable; null before the first. */
+  readonly generation: number | null
+  /** The root and edition the current generation answers for (kept during a replacement load). */
+  readonly root?: SnapshotRoot
+  readonly edition?: Region
+  /**
+   * A root/edition being downloaded; `step` is the load phase. While the startup files of a first
+   * download arrive, `done` of `total` files have been received (no byte progress is reported).
+   */
+  readonly loading?: {
+    readonly root: SnapshotRoot
+    readonly edition: Region
+    readonly step: SearchLoadStep
+    readonly done?: number
+    readonly total?: number
+  }
+  /**
+   * True while a newer snapshot downloads behind a still-queryable generation. A background check
+   * of the version entry that may find nothing new is not an update.
+   */
+  readonly updating: boolean
+  readonly error?: SearchLoadFailure
+  readonly dataVersion?: string
+  readonly manifestHash?: string
+  /** Retries a failed load, or re-reads the entry after a failed update. */
+  readonly retry: () => void
+}
+
+type SearchResult =
+  | { readonly phase: "pending" }
+  | { readonly phase: "error"; readonly error: StandInFailure }
+  | {
+      readonly phase: "complete"
+      readonly generation: number
+      readonly root: SnapshotRoot
+      readonly page: SearchPage
+    }
+
+/** One query channel: the last input it was given and the result for exactly that input. */
+export interface SearchChannelState {
+  readonly lastInput: SearchQuery | null
+  readonly result: SearchResult
+}
+
+const generations = new WeakMap<LoadedSnapshot, number>()
+let nextGeneration = 0
+
+function generationOf(snapshot: LoadedSnapshot | null): number | null {
+  if (!snapshot) return null
+  let generation = generations.get(snapshot)
+  if (generation === undefined) {
+    nextGeneration += 1
+    generation = nextGeneration
+    generations.set(snapshot, generation)
+  }
+  return generation
+}
+
+function loadFailure(status: SnapshotStatus): SearchLoadFailure | undefined {
+  const failure =
+    status.state === "error" ? status : status.state === "ready" ? status.updateError : undefined
+  return failure && { kind: "load-failed", message: `${failure.kind}: ${failure.detail}` }
+}
+
+/** The search generation for the active root and the current card edition. */
+export function useSearchReadiness(edition: Region): SearchReadiness {
+  const { client, status, root } = useActiveSnapshot()
+  const snapshot = client.snapshot()
+  const generation = generationOf(snapshot)
+  const error = loadFailure(status)
+  return useMemo<SearchReadiness>(() => {
+    const retry = () => {
+      void (status.state === "error" ? client.retry() : client.reload())
+    }
+    const base = {
+      ...(snapshot
+        ? { root, edition, dataVersion: snapshot.dataVersion, manifestHash: snapshot.manifestHash }
+        : {}),
+      ...(error ? { error } : {}),
+      retry,
+    }
+    if (status.state === "error") return { ...base, phase: "error", generation, updating: false }
+    if (status.state === "ready" && snapshot) {
+      const updating = status.updating !== undefined && status.updating !== "index"
+      return {
+        ...base,
+        phase: "ready",
+        generation,
+        updating,
+        ...(updating ? { loading: { root, edition, step: status.updating } } : {}),
+      }
+    }
+    const files =
+      status.state === "loading" && status.total !== undefined && status.total > 0
+        ? { done: status.done ?? 0, total: status.total }
+        : {}
+    return {
+      ...base,
+      phase: "downloading",
+      generation,
+      updating: false,
+      loading: {
+        root,
+        edition,
+        step: status.state === "loading" ? status.phase : "index",
+        ...files,
+      },
+    }
+  }, [client, status, snapshot, root, edition, generation, error])
+}
+
+const FACETS: readonly UnsupportedFacet[] = [
+  "cost",
+  "sets",
+  "types",
+  "rarities",
+  "altArtOnly",
+  "mechanics",
+  "unit",
+  "sort",
+]
+
+// Reject unsupported facets so an unfiltered synchronous result cannot look complete.
+function unsupportedFacets(state: QueryState): UnsupportedFacet[] {
+  return FACETS.filter((facet) => {
+    switch (facet) {
+      case "cost":
+        return state.cost.min !== undefined || state.cost.max !== undefined
+      case "mechanics":
+        return Object.keys(state.mechanics).length > 0
+      case "altArtOnly":
+        return state.altArtOnly
+      case "unit":
+      case "sort":
+        return state[facet] !== DEFAULT_QUERY[facet]
+      default:
+        return state[facet].length > 0
+    }
+  })
+}
+
+function runQuery(catalog: Catalog, query: SearchQuery): SearchPage | StandInFailure {
+  const facets = unsupportedFacets(query.state)
+  if (facets.length > 0)
+    return { kind: "unsupported-query", message: "unsupported conditions", facets }
+  const hits = catalog.results(query.state, query.edition)
+  const offset = query.offset ?? 0
+  const slice =
+    query.limit === undefined ? hits.slice(offset) : hits.slice(offset, offset + query.limit)
+  return {
+    total: hits.length,
+    offset,
+    items: slice.map((hit) => ({ ...hit, summary: catalog.summary(hit.printingId) })),
+  }
+}
+
+// Retaining input across downloads prevents partial counts and false empty results.
+export function useSearch(query: SearchQuery | null): SearchChannelState {
+  const { client, status, root } = useActiveSnapshot()
+  const snapshot = client.snapshot()
+  const generation = generationOf(snapshot)
+  // Keep the pending input when a caller temporarily stops supplying it.
+  const [kept, setKept] = useState<SearchQuery | null>(query)
+  if (query !== null && query !== kept) setKept(query)
+  const lastInput = query ?? kept
+  const catalog = snapshot ? catalogOf(snapshot) : null
+  return useMemo<SearchChannelState>(() => {
+    if (lastInput === null) return { lastInput, result: { phase: "pending" } }
+    if (status.state === "error")
+      return {
+        lastInput,
+        result: {
+          phase: "error",
+          error: { kind: "load-unavailable", message: `${status.kind}: ${status.detail}` },
+        },
+      }
+    if (!catalog || generation === null) return { lastInput, result: { phase: "pending" } }
+    const outcome = runQuery(catalog, lastInput)
+    return {
+      lastInput,
+      result:
+        "kind" in outcome
+          ? { phase: "error", error: outcome }
+          : { phase: "complete", generation, root, page: outcome },
+    }
+  }, [lastInput, status, catalog, generation, root])
+}
+
+// Keep all purposes pending until the full V1 resolver settles (public-annotation §4.1).
+
+export type TextField = "name" | "effect" | "flavor"
+
+/** `none` = this purpose does not apply to the text (no JP source, no annotation set). */
+type TextPurposePhase = "pending" | "ready" | "none" | "error"
+
+interface TextFailure {
+  /** `validation`: the snapshot rejected the closure (a `public-annotation/*` code); `load`: transport. */
+  readonly kind: "validation" | "load"
+  readonly code?: string
+  readonly message: string
+}
+
+interface TextReadiness {
+  readonly root: SnapshotRoot
+  readonly generation: number | null
+  readonly dataVersion?: string
+  readonly manifestHash?: string
+  readonly edition: Region
+  readonly owner: JsonObject
+  /** V1 only consumes whole name/effect/flavor fields, not section paragraphs. */
+  readonly ordinal: null
+  readonly field: TextField
+  /** Target text language of the translation row (`zh-Hant`, `ja`, `en`). */
+  readonly language: string
+  /** Original and translated strings with origin/authority/low_confidence. */
+  readonly basic: TextPurposePhase
+  /** The JP owner a `jp_source` translation was made from. */
+  readonly source: TextPurposePhase
+  /** Ranges, concepts, vocabulary and explanations. */
+  readonly annotations: TextPurposePhase
+  readonly error?: TextFailure
+}
+
+export interface AnnotatedTextState {
+  readonly readiness: TextReadiness
+  /** Only set once `basic` is ready; null means the owner has no such field. */
+  readonly value: SelectedText | null
+}
+
+function purposesOf(
+  value: SelectedText | null,
+): Pick<TextReadiness, "basic" | "source" | "annotations"> {
+  if (value === null) return { basic: "none", source: "none", annotations: "none" }
+  const annotated = [value.original, value.translated, value.source].some(
+    (text) => text !== undefined && text.annotation !== null,
+  )
+  return {
+    basic: "ready",
+    source:
+      value.selection?.["basis"] === "jp_source" ? (value.source ? "ready" : "error") : "none",
+    annotations: annotated || value.concepts.length > 0 ? "ready" : "none",
+  }
+}
+
+// A changed exact owner or edition must never display the previous identity's text.
+export function useAnnotatedText(
+  client: SnapshotClient,
+  owner: JsonObject,
+  field: TextField,
+  language: string,
+  edition: Region,
+  sharedResolver?: AnnotatedTextResolver | null,
+): AnnotatedTextState {
+  const root = useSnapshotRoot()
+  const snapshot = client.snapshot()
+  const identity = canonicalText([owner, field, language, edition])
+  const resolver = useMemo(
+    () => sharedResolver ?? (snapshot ? sharedAnnotatedTextResolver(client) : null),
+    [client, snapshot, sharedResolver],
+  )
+  const [loaded, setLoaded] = useState<{
+    readonly snapshot: typeof snapshot
+    readonly identity: string
+    readonly value?: SelectedText | null
+    readonly error?: TextFailure
+  }>()
+  // A text resolved earlier for this snapshot renders final on the first pass.
+  const peeked = resolver?.peek({ owner, field, ordinal: null }, language)
+  useEffect(() => {
+    if (!resolver) return
+    let active = true
+    const [currentOwner, currentField, currentLanguage] = arrayValue(parseJson(identity))
+    const pointer = {
+      owner: objectValue(currentOwner),
+      field: stringValue(currentField),
+      ordinal: null,
+    }
+    if (resolver.peek(pointer, stringValue(currentLanguage)) !== undefined) return
+    void resolver.resolve(pointer, stringValue(currentLanguage)).then(
+      (value) => {
+        if (active) setLoaded({ snapshot, identity, value })
+      },
+      (error: unknown) => {
+        if (active)
+          setLoaded({
+            snapshot,
+            identity,
+            error:
+              error instanceof SnapshotError
+                ? { kind: "validation", code: error.code, message: error.message }
+                : { kind: "load", message: error instanceof Error ? error.message : String(error) },
+          })
+      },
+    )
+    return () => {
+      active = false
+    }
+  }, [resolver, snapshot, identity])
+  const settled =
+    loaded?.snapshot === snapshot && loaded.identity === identity
+      ? loaded
+      : peeked === undefined
+        ? undefined
+        : { snapshot, identity, value: peeked }
+  const base = {
+    root,
+    generation: generationOf(snapshot),
+    ...(snapshot ? { dataVersion: snapshot.dataVersion, manifestHash: snapshot.manifestHash } : {}),
+    owner,
+    ordinal: null,
+    field,
+    language,
+    edition,
+  }
+  if (settled === undefined)
+    return {
+      readiness: { ...base, basic: "pending", source: "pending", annotations: "pending" },
+      value: null,
+    }
+  if (settled.error)
+    return {
+      readiness: {
+        ...base,
+        basic: "error",
+        source: "error",
+        annotations: "error",
+        error: settled.error,
+      },
+      value: null,
+    }
+  const value = settled.value ?? null
+  return { readiness: { ...base, ...purposesOf(value) }, value }
 }

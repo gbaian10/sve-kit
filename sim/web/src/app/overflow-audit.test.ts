@@ -50,6 +50,15 @@ describe("findOverflow", () => {
     expect(panel.isConnected).toBe(true)
   })
 
+  it("ignores a control that declares a wider invisible hit area", () => {
+    const remove = box("button", { scroll: 44, client: 24 })
+    remove.setAttribute("data-hit-area", "")
+    box("button", { scroll: 44, client: 24 })
+    expect(findOverflow(document, readStyle).map(describeOverflow)).toEqual([
+      { kind: "visible", tag: "button", className: "", text: "", overflow: 20 },
+    ])
+  })
+
   it("ignores scroll areas, ellipsis truncation and one-pixel rounding", () => {
     box("div", { scroll: 500, client: 300, style: { overflowX: "auto" } })
     box("div", { scroll: 500, client: 300, style: { overflowX: "scroll" } })

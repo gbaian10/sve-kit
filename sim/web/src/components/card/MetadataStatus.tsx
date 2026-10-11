@@ -2,13 +2,11 @@ import { useEffect, useSyncExternalStore } from "react"
 import { useTranslation } from "react-i18next"
 
 import type { SnapshotClient } from "../../data"
-import { usePrefs } from "../../settings"
 import { Button } from "../ui/Button"
 
 /** This progress refers to metadata bytes, never to all picture blobs or verified offline text. */
 export function MetadataStatus({ client }: { readonly client: SnapshotClient }) {
   const { t } = useTranslation()
-  const { dataSaver } = usePrefs()
   const progress = useSyncExternalStore(
     client.subscribe,
     client.metadataStatus,
@@ -16,12 +14,12 @@ export function MetadataStatus({ client }: { readonly client: SnapshotClient }) 
   )
   const snapshot = client.snapshot()
   useEffect(() => {
-    if (snapshot && progress.persistent && !dataSaver) void client.prefetchImages()
-    if (snapshot && progress.persistent && !dataSaver)
+    if (snapshot && progress.persistent) void client.prefetchImages()
+    if (snapshot && progress.persistent)
       return () => {
         client.cancelImagePrefetch()
       }
-  }, [client, snapshot, dataSaver, progress.persistent])
+  }, [client, snapshot, progress.persistent])
   useEffect(
     () => () => {
       client.cancelImagePrefetch()

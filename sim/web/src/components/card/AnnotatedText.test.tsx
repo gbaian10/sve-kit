@@ -55,8 +55,9 @@ describe("annotation presentation", () => {
     const resolve = vi.fn().mockRejectedValue(error)
     await renderInRouter(
       <CardText
+        edition="jp"
         client={client}
-        sharedResolver={{ resolve }}
+        sharedResolver={{ resolve, peek: () => undefined }}
         owner={{ kind: "face_revision", id: "revision" }}
         field="name"
       />,
@@ -68,7 +69,7 @@ describe("annotation presentation", () => {
     const { client } = await annotatedOrigin()
     await client.load()
     const resolve = vi.fn().mockResolvedValue(null)
-    const sharedResolver = { resolve }
+    const sharedResolver = { resolve, peek: () => undefined }
     function Harness() {
       const [revision, setRevision] = useState(0)
       return (
@@ -81,6 +82,7 @@ describe("annotation presentation", () => {
             rerender {revision}
           </button>
           <CardText
+            edition="jp"
             client={client}
             sharedResolver={sharedResolver}
             owner={{ kind: "face_revision", id: "revision" }}
@@ -162,7 +164,12 @@ describe("annotation presentation", () => {
       value: { writeText: copy },
     })
     const { container } = await renderInRouter(
-      <CardText client={client} owner={{ kind: "face_revision", id: "revision" }} field="name" />,
+      <CardText
+        edition="jp"
+        client={client}
+        owner={{ kind: "face_revision", id: "revision" }}
+        field="name"
+      />,
     )
     expect(screen.getByRole("status")).toHaveTextContent("文字與標註載入中")
     await screen.findByText("translation")

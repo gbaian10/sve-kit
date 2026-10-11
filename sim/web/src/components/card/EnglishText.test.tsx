@@ -56,7 +56,7 @@ describe("English whole-field display exceptions", () => {
     })
     prefsStore.set({ effectLanguage: "both" })
     const { container } = await renderInRouter(
-      <CardText client={client} owner={owner} field="effect" />,
+      <CardText edition="en" client={client} owner={owner} field="effect" />,
     )
     expect(await screen.findByText("合成規則😀。")).toBeVisible()
     expect(screen.getByText("Rule.")).toBeVisible()
@@ -81,7 +81,7 @@ describe("English whole-field display exceptions", () => {
       value: { writeText: copy },
     })
     const { container } = await renderInRouter(
-      <CardText client={client} owner={owner} field="name" />,
+      <CardText edition="en" client={client} owner={owner} field="name" />,
     )
     expect(await screen.findByText("Reskin")).toBeVisible()
     expect(screen.getByText("缺少此語言譯文")).toBeVisible()

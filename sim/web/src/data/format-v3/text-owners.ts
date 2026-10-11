@@ -40,10 +40,18 @@ export interface TextOwner {
 
 export class TextOwners {
   readonly byOwner = new Map<string, TextOwner>()
+  private readonly cards = new Map<string, JsonObject>()
+  private readonly faces = new Map<string, JsonObject>()
 
   constructor(view: View) {
-    const cards = new Map((view["card"] ?? []).map((r) => [stringValue(r["id"]), r]))
-    const faces = new Map((view["face"] ?? []).map((r) => [stringValue(r["id"]), r]))
+    this.include(view)
+  }
+
+  /** Indexes rows not seen before; a row that replaces an indexed one needs a new instance. */
+  include(view: View): void {
+    const { cards, faces } = this
+    for (const row of view["card"] ?? []) cards.set(stringValue(row["id"]), row)
+    for (const row of view["face"] ?? []) faces.set(stringValue(row["id"]), row)
     const add = (value: TextOwner): void => {
       this.byOwner.set(canonicalText(value.owner), value)
     }

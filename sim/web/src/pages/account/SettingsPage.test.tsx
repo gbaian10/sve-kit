@@ -14,7 +14,6 @@ describe("SettingsPage", () => {
   it("shows the display settings and writes them to the preferences", async () => {
     await renderInRouter(<SettingsPage />)
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("帳號與設定")
-    await userEvent.click(screen.getByRole("switch", { name: "省流量" }))
     await userEvent.click(screen.getByRole("switch", { name: "圖示旁附名稱" }))
     await userEvent.click(screen.getByRole("radio", { name: "英文圈" }))
     await userEvent.click(
@@ -23,11 +22,14 @@ describe("SettingsPage", () => {
       }),
     )
     expect(readPrefs()).toMatchObject({
-      dataSaver: true,
       symbolLabels: true,
       banRegion: "en",
       effectLanguage: "both",
     })
-    expect(screen.getByRole("switch", { name: "省流量" })).toHaveAttribute("aria-checked", "true")
+    expect(screen.getByRole("switch", { name: "圖示旁附名稱" })).toHaveAttribute(
+      "aria-checked",
+      "true",
+    )
+    expect(screen.queryByRole("switch", { name: "省流量" })).not.toBeInTheDocument()
   })
 })

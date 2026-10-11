@@ -5,6 +5,7 @@ export {
   type AnnotatedTextResolver,
   createAnnotatedTextResolver,
   type SelectedText,
+  sharedAnnotatedTextResolver,
 } from "./annotated-text"
 export { type CardSummary, type Catalog, catalogOf } from "./catalog"
 export {
