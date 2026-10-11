@@ -62,3 +62,31 @@ it("marks offline active data without offering a network retry, and reacts to re
     online.mockRestore()
   }
 })
+
+it.each(UI_LANGUAGES)(
+  "shows background confirmation without claiming local data is older in %s",
+  async (language) => {
+    const { i18n } = await renderRoutes(
+      [
+        {
+          path: "*",
+          element: (
+            <SnapshotNotice
+              client={{} as SnapshotClient}
+              status={{
+                state: "ready",
+                dataVersion: "synthetic",
+                unconfirmed: true,
+                updating: "index",
+              }}
+            />
+          ),
+        },
+      ],
+      { language },
+    )
+    expect(screen.getByRole("status")).toHaveTextContent(i18n.t("snapshot.checking"))
+    expect(screen.getByRole("status")).not.toHaveTextContent(i18n.t("snapshot.stale"))
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
+  },
+)

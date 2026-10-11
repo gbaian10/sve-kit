@@ -436,10 +436,20 @@ describe("createSnapshotClient: verified snapshot records", () => {
   const namespace = (storage: CacheStorage) =>
     storage.open(`sve-snapshot:${encodeURIComponent(base)}`)
   const records = async (storage: CacheStorage) =>
-    (await (await namespace(storage)).keys()).filter((request) => !request.url.includes("/plans/"))
+    (await (await namespace(storage)).keys()).filter(
+      (request) => !request.url.includes("/plans/") && !request.url.includes("/adopted-"),
+    )
   // The record is written after the page had a chance to render, in short slices.
   const persisted = (storage: CacheStorage) =>
-    expect.poll(async () => (await records(storage)).length, { timeout: 10_000 }).toBe(1)
+    expect
+      .poll(
+        async () => {
+          const cache = await namespace(storage)
+          return (await cache.keys()).some((request) => request.url.includes("/adopted-index/"))
+        },
+        { timeout: 10_000 },
+      )
+      .toBe(true)
   const phases = (client: ReturnType<typeof createSnapshotClient>) => {
     const seen: string[] = []
     client.subscribe(() => {
@@ -462,11 +472,262 @@ describe("createSnapshotClient: verified snapshot records", () => {
     const seen = phases(client)
     await client.load()
     expect(served.requests).toEqual([INDEX])
-    expect(seen).toEqual(["index", "ready"])
+    expect(seen[0]).toBe("ready")
+    await client.reload()
     expect(client.status()).toEqual(original.status())
     expect(client.snapshot()).toStrictEqual(original.snapshot())
     expect(await client.fragments(textKey)).toStrictEqual(await original.fragments(textKey))
   })
+
+  it("publishes local data and resolves load before a held index can answer", async () => {
+    const storage = memoryCache()
+    const original = createSnapshotClient(base, {
+      fetch: serve(base).fetcher,
+      cacheStorage: storage,
+    })
+    await original.load()
+    await persisted(storage)
+    const served = serve(base)
+    let release: () => void = () => undefined
+    const held = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    const client = createSnapshotClient(base, {
+      cacheStorage: storage,
+      fetch: async (url, init) => {
+        if (url.endsWith(INDEX)) await held
+        return served.fetcher(url, init)
+      },
+    })
+    const seen: SnapshotStatus[] = []
+    client.subscribe(() => seen.push(client.status()))
+    await client.load()
+    expect(seen[0]).toMatchObject({ state: "ready", unconfirmed: true })
+    expect(client.snapshot()).toStrictEqual(original.snapshot())
+    expect(client.status()).toMatchObject({ state: "ready", updating: "index", unconfirmed: true })
+    const local = client.snapshot()
+    release()
+    await client.reload()
+    expect(served.requests).toEqual([INDEX])
+    expect(client.snapshot()).toBe(local)
+    expect(client.status()).toEqual({ state: "ready", dataVersion: local?.dataVersion })
+  })
+
+  it("keeps local data usable offline and clears its warning after reconnection", async () => {
+    const storage = memoryCache()
+    const original = createSnapshotClient(base, {
+      fetch: serve(base).fetcher,
+      cacheStorage: storage,
+    })
+    await original.load()
+    await persisted(storage)
+    const served = serve(base)
+    served.fail((path) => path === INDEX)
+    const client = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
+    await client.load()
+    await client.reload()
+    expect(client.snapshot()).toStrictEqual(original.snapshot())
+    expect(client.status()).toMatchObject({
+      state: "ready",
+      unconfirmed: true,
+      outdated: true,
+      updateError: { kind: "network" },
+    })
+    served.fail(() => false)
+    await client.reload()
+    expect(client.status()).toEqual(original.status())
+  })
+
+  it.each([
+    { change: { index_format: 3 }, kind: "incompatible" },
+    { change: { current: null }, kind: "corrupt" },
+    { change: { revision: 1 }, kind: "corrupt" },
+    { change: { revision: 2, extra: true }, kind: "corrupt" },
+  ])("reports $kind from background index validation", async ({ change, kind }) => {
+    const storage = memoryCache()
+    const original = createSnapshotClient(base, {
+      fetch: serve(base).fetcher,
+      cacheStorage: storage,
+    })
+    await original.load()
+    await persisted(storage)
+    const served = serve(base)
+    const index = objectValue(parseJson(served.files.get(INDEX) ?? ""))
+    served.files.set(INDEX, canonical({ ...index, ...change }))
+    const client = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
+    await client.load()
+    await client.reload()
+    expect(client.status()).toMatchObject({
+      state: "ready",
+      unconfirmed: true,
+      outdated: true,
+      updateError: { kind },
+    })
+    expect(client.snapshot()).toStrictEqual(original.snapshot())
+    expect(served.requests).toEqual([INDEX])
+  })
+
+  it("reports incompatible when neither indexed version can replace local data", async () => {
+    const storage = memoryCache()
+    const original = createSnapshotClient(base, {
+      fetch: serve(base).fetcher,
+      cacheStorage: storage,
+    })
+    await original.load()
+    await persisted(storage)
+    const served = serve(base)
+    const index = objectValue(parseJson(served.files.get(INDEX) ?? ""))
+    served.files.set(
+      INDEX,
+      canonical({
+        ...index,
+        revision: 3,
+        current: { ...objectValue(index["current"]), format_version: "4.0.0" },
+        previous: null,
+      }),
+    )
+    const client = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
+    await client.load()
+    await client.reload()
+    expect(client.status()).toMatchObject({
+      state: "ready",
+      outdated: true,
+      updateError: { kind: "incompatible" },
+    })
+    expect(client.snapshot()).toStrictEqual(original.snapshot())
+  })
+
+  it("keeps local data when the new manifest fails verification", async () => {
+    const storage = memoryCache()
+    const original = createSnapshotClient(base, {
+      fetch: serve(base).fetcher,
+      cacheStorage: storage,
+    })
+    await original.load()
+    await persisted(storage)
+    const served = serve(base)
+    const index = objectValue(parseJson(served.files.get(INDEX) ?? ""))
+    const hash = `sha256:${"0".repeat(64)}`
+    const path = `snapshots/manifests/${hash.slice(7)}.json`
+    served.files.set(path, canonical({}))
+    served.files.set(
+      INDEX,
+      canonical({
+        ...index,
+        revision: 3,
+        current: { ...objectValue(index["current"]), manifest_sha256: hash, manifest_path: path },
+      }),
+    )
+    const client = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
+    await client.load()
+    const local = client.snapshot()
+    await client.reload()
+    expect(client.status()).toMatchObject({
+      state: "ready",
+      outdated: true,
+      updateError: { kind: "corrupt" },
+    })
+    expect(client.snapshot()).toBe(local)
+    expect(await records(storage)).toHaveLength(1)
+  })
+
+  it("keeps the local snapshot until a newer background download is fully verified", async () => {
+    const storage = memoryCache()
+    const original = createSnapshotClient(base, {
+      fetch: serve(base).fetcher,
+      cacheStorage: storage,
+    })
+    await original.load()
+    await persisted(storage)
+    const served = serve(base)
+    const nextManifest = {
+      ...built.manifest,
+      data_version: "20260930T000000Z-0001",
+      published_at: "2026-09-30T00:00:00Z",
+    }
+    const bytes = canonical(nextManifest)
+    const hash = await transferDigest(bytes)
+    const path = `snapshots/manifests/${hash.slice(7)}.json`
+    served.files.set(path, bytes)
+    const index = objectValue(parseJson(served.files.get(INDEX) ?? ""))
+    const current = objectValue(index["current"])
+    served.files.set(
+      INDEX,
+      canonical({
+        ...index,
+        revision: 3,
+        previous: current,
+        current: {
+          ...current,
+          data_version: nextManifest.data_version,
+          published_at: nextManifest.published_at,
+          manifest_path: path,
+          manifest_sha256: hash,
+        },
+      }),
+    )
+    let release: () => void = () => undefined
+    const held = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    const client = createSnapshotClient(base, {
+      cacheStorage: storage,
+      fetch: async (url, init) => {
+        if (url.endsWith(path)) await held
+        return served.fetcher(url, init)
+      },
+    })
+    await client.load()
+    await expect.poll(() => client.status()).toMatchObject({ state: "ready", updating: "manifest" })
+    expect(client.snapshot()).toStrictEqual(original.snapshot())
+    release()
+    await client.reload()
+    expect(client.status()).toEqual({ state: "ready", dataVersion: nextManifest.data_version })
+    expect(client.snapshot()?.manifestHash).toBe(hash)
+    // The adopted selection on the next page is the completed new snapshot.
+    await expect
+      .poll(async () => {
+        const cache = await namespace(storage)
+        const key = (await cache.keys()).find((request) => request.url.includes("/adopted-index/"))
+        const response = key && (await cache.match(key))
+        if (!response) return undefined
+        return objectValue(parseJson(await response.text()))["manifestHash"]
+      })
+      .toBe(hash)
+    const next = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
+    await next.load()
+    expect(next.snapshot()?.manifestHash).toBe(hash)
+    await next.reload()
+  })
+
+  it.each(["missing", "damaged"])(
+    "falls back to the index when the selection is %s",
+    async (condition) => {
+      const storage = memoryCache()
+      const original = createSnapshotClient(base, {
+        fetch: serve(base).fetcher,
+        cacheStorage: storage,
+      })
+      await original.load()
+      await persisted(storage)
+      const cache = await namespace(storage)
+      const key = (await cache.keys()).find((request) => request.url.includes("/adopted-index/"))
+      if (!key) throw new Error("missing selection")
+      if (condition === "missing") await cache.delete(key)
+      else {
+        const response = await cache.match(key)
+        if (!response) throw new Error("missing selection response")
+        await cache.put(key, new Response("damaged", { headers: response.headers }))
+      }
+      const served = serve(base)
+      const client = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
+      const seen = phases(client)
+      await client.load()
+      expect(seen).toEqual(["index", "ready"])
+      expect(served.requests).toEqual([INDEX])
+      expect(client.status()).toEqual(original.status())
+    },
+  )
 
   it("a damaged record falls back to the full verified download", async () => {
     const storage = memoryCache()
@@ -502,10 +763,18 @@ describe("createSnapshotClient: verified snapshot records", () => {
     const served = serve(base)
     const index = parseJson(served.files.get(INDEX) ?? new Uint8Array()) as JsonObject
     const current = { ...(index["current"] as JsonObject), published_at: "2026-09-30T00:00:00Z" }
-    served.files.set(INDEX, new TextEncoder().encode(JSON.stringify({ ...index, current })))
+    served.files.set(
+      INDEX,
+      new TextEncoder().encode(JSON.stringify({ ...index, revision: 3, current })),
+    )
     const client = createSnapshotClient(base, { fetch: served.fetcher, cacheStorage: storage })
     await client.load()
-    expect(client.status()).toMatchObject({ state: "error", kind: "corrupt" })
+    await client.reload()
+    expect(client.status()).toMatchObject({
+      state: "ready",
+      unconfirmed: true,
+      updateError: { kind: "corrupt" },
+    })
     expect(served.requests).toEqual([INDEX])
   })
 

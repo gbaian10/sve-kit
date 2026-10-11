@@ -38,6 +38,8 @@ export type SnapshotStatus =
       readonly updating?: LoadPhase
       readonly updateError?: LoadFailure
       readonly outdated?: boolean
+      /** Local verified data has not yet been confirmed by the server this session. */
+      readonly unconfirmed?: boolean
     }
   | ({ readonly state: "error" } & LoadFailure)
 
@@ -64,7 +66,7 @@ export interface SnapshotClient {
   readonly base: string
   readonly status: () => SnapshotStatus
   readonly subscribe: (listener: () => void) => () => void
-  /** Starts loading unless already loading or ready; resolves when the status settles. */
+  /** Resolves when ready (including local data); server confirmation may still be running. */
   readonly load: () => Promise<void>
   readonly retry: () => Promise<void>
   /** Reads the version index again even when ready; the active snapshot only changes on success. */
@@ -159,11 +161,16 @@ export function createSnapshotClient(
       throw new SnapshotError("shape", `${what} has an invalid index format`)
   }
 
-  const chooseEntry = async (): Promise<{ chosen: JsonObject; source: "current" | "previous" }> => {
+  const requestEntry = (): Promise<Uint8Array> =>
+    fetchBytes(fetcher, url(entry === "preview" ? PREVIEW_POINTER : INDEX_PATH), {
+      cache: "no-cache",
+    })
+
+  const chooseEntry = async (
+    bytes: Promise<Uint8Array>,
+  ): Promise<{ chosen: JsonObject; source: "current" | "previous" }> => {
     if (entry === "preview") {
-      const pointer = objectValue(
-        parseJson(await fetchBytes(fetcher, url(PREVIEW_POINTER), { cache: "no-cache" })),
-      )
+      const pointer = objectValue(parseJson(await bytes))
       return {
         chosen: {
           manifest_path: pointer["manifest_path"] ?? null,
@@ -172,9 +179,7 @@ export function createSnapshotClient(
         source: "current",
       }
     }
-    const index = objectValue(
-      parseJson(await fetchBytes(fetcher, url(INDEX_PATH), { cache: "no-cache" })),
-    )
+    const index = objectValue(parseJson(await bytes))
     requireIndexFormat(index, "the version index")
     // no-cache still lets a lagging CDN edge answer; within a session the index never goes back,
     // and one revision always has the same content.
@@ -263,7 +268,10 @@ export function createSnapshotClient(
     await stored.write("snapshot", snapshot.manifestHash, payload)
   }
 
-  const download = async (previous: LoadedSnapshot | null): Promise<LoadedSnapshot> => {
+  const download = async (
+    previous: LoadedSnapshot | null,
+    entryBytes?: Promise<Uint8Array>,
+  ): Promise<LoadedSnapshot> => {
     const progress = (phase: LoadPhase) => {
       set(
         previous
@@ -277,7 +285,7 @@ export function createSnapshotClient(
       )
     }
     progress("index")
-    const { chosen, source } = await chooseEntry()
+    const { chosen, source } = await chooseEntry(entryBytes ?? requestEntry())
     // A check that finds the same manifest keeps the loaded snapshot and its caches as they are.
     if (
       previous &&
@@ -343,65 +351,101 @@ export function createSnapshotClient(
       bootstrap,
     }
     catalogOf(snapshot)
-    // Cache only data whose catalog can be built, so malformed rows never become a stored success.
-    void persist(snapshot).catch(() => undefined)
     return snapshot
   }
 
-  // The active snapshot only changes once a candidate is fully downloaded and verified; a failed
-  // reload keeps the previous one usable and reports the failure on the ready status.
-  const run = async (): Promise<void> => {
+  const adopt = (candidate: LoadedSnapshot): void => {
+    const previous = loaded
+    catalogOf(candidate)
+    metadata?.dispose()
+    detailAbort.abort()
+    decode.cancel()
+    detailAbort = new AbortController()
+    loaded = candidate
+    detailBytes = 0
+    metadata = new MetadataBytes(
+      base,
+      candidate.manifestHash,
+      new Map(
+        [...candidate.files].filter(
+          ([, file]) =>
+            file["role"] === "images" &&
+            arrayValue(file["row_counts"]).some(
+              (c) => objectValue(c)["table"] === "printing_image",
+            ),
+        ),
+      ),
+      fetcher,
+      () => {
+        for (const listener of listeners) listener()
+      },
+      options.cacheStorage ?? globalThis.caches,
+      requests.background,
+      previous?.manifestHash,
+    )
+    details = new Map()
+    inflight = new Map()
+  }
+
+  const remember = async (snapshot: LoadedSnapshot, writeSnapshot: boolean): Promise<void> => {
+    const selection = {
+      manifestHash: snapshot.manifestHash,
+      source: snapshot.entrySource ?? "current",
+      revision: lastRevision,
+      index: lastIndex,
+    }
+    if (writeSnapshot) await persist(snapshot)
+    // A slower serialization must not replace the selection of a newer adopted snapshot.
+    if (loaded !== snapshot || selection.revision !== lastRevision || selection.index !== lastIndex)
+      return
+    await stored.write(
+      `adopted-${entry}`,
+      "active",
+      new TextEncoder().encode(JSON.stringify(selection)),
+    )
+  }
+
+  const restoreAdopted = async (): Promise<LoadedSnapshot | undefined> => {
+    const bytes = await stored.read(`adopted-${entry}`, "active")
+    if (!bytes) return undefined
+    try {
+      const selection = objectValue(parseJson(bytes))
+      const source = stringValue(selection["source"])
+      if (source !== "current" && source !== "previous") return undefined
+      const revision = integerValue(selection["revision"])
+      const signature = stringValue(selection["index"])
+      const snapshot = await restore(stringValue(selection["manifestHash"]))
+      if (!snapshot) return undefined
+      const restored: LoadedSnapshot = { ...snapshot, entrySource: source }
+      catalogOf(restored)
+      lastRevision = revision
+      lastIndex = signature
+      return restored
+    } catch {
+      await stored.remove(`adopted-${entry}`, "active")
+      return undefined
+    }
+  }
+
+  // A failed background check leaves the verified local snapshot usable with an explicit error.
+  const run = async (entryBytes?: Promise<Uint8Array>): Promise<void> => {
     const previous = loaded
     try {
-      const candidate = await download(previous)
-      if (candidate === previous) {
-        set({
-          state: "ready",
-          dataVersion: previous.dataVersion,
-          ...(previous.entrySource === "previous" ? { outdated: true } : {}),
-        })
-        return
-      }
-      catalogOf(candidate)
-      metadata?.dispose()
-      detailAbort.abort()
-      decode.cancel()
-      detailAbort = new AbortController()
-      loaded = candidate
-      detailBytes = 0
-      metadata = new MetadataBytes(
-        base,
-        candidate.manifestHash,
-        new Map(
-          [...candidate.files].filter(
-            ([, file]) =>
-              file["role"] === "images" &&
-              arrayValue(file["row_counts"]).some(
-                (c) => objectValue(c)["table"] === "printing_image",
-              ),
-          ),
-        ),
-        fetcher,
-        () => {
-          for (const listener of listeners) listener()
-        },
-        options.cacheStorage ?? globalThis.caches,
-        requests.background,
-        previous?.manifestHash,
-      )
-      details = new Map()
-      inflight = new Map()
+      const candidate = await download(previous, entryBytes)
+      if (candidate !== previous) adopt(candidate)
       set({
         state: "ready",
         dataVersion: candidate.dataVersion,
         ...(candidate.entrySource === "previous" ? { outdated: true } : {}),
       })
+      void remember(candidate, candidate !== previous).catch(() => undefined)
     } catch (error) {
       const failure = failureOf(error)
       if (previous)
         set({
           state: "ready",
           dataVersion: previous.dataVersion,
+          ...(status.state === "ready" && status.unconfirmed ? { unconfirmed: true } : {}),
           outdated: true,
           updateError: failure,
         })
@@ -411,10 +455,27 @@ export function createSnapshotClient(
     }
   }
 
+  const start = async (): Promise<void> => {
+    const entryBytes = requestEntry()
+    // Network can fail before local storage finishes; run still classifies the original rejection.
+    void entryBytes.catch(() => undefined)
+    const cached = await restoreAdopted()
+    if (cached) {
+      adopt(cached)
+      set({
+        state: "ready",
+        dataVersion: cached.dataVersion,
+        unconfirmed: true,
+        ...(cached.entrySource === "previous" ? { outdated: true } : {}),
+      })
+      pending = run(entryBytes)
+    } else await run(entryBytes)
+  }
+
   const load = (): Promise<void> => {
-    if (pending) return pending
     if (status.state === "ready") return Promise.resolve()
-    pending = run()
+    if (pending) return pending
+    pending = start()
     return pending
   }
 

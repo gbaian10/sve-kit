@@ -149,6 +149,7 @@ export default {
     close: "Close",
   },
   snapshot: {
+    checking: "Using verified local data; checking for updates.",
     stale: "Using older local data; current images may be unavailable.",
     offline: "Offline: using local data; pictures may be outdated or unavailable.",
     updateApp: "Update the app to read the current snapshot.",
