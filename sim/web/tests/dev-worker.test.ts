@@ -597,6 +597,44 @@ describe("development Worker", () => {
     },
   )
 
+  it("keeps the body and other headers of a pinned file", async () => {
+    const f = fixture()
+    f.assets.mockResolvedValue(
+      new Response("body{}", {
+        headers: {
+          "Content-Type": "text/css",
+          "Content-Encoding": "br",
+          ETag: '"abc"',
+          "Cache-Control": "public, max-age=0",
+        },
+      }),
+    )
+    const response = await worker.fetch(request("/assets/index-DZgCgIGp.css"), f.env, f.ctx)
+    expect(await response.text()).toBe("body{}")
+    expect(response.headers.get("Content-Encoding")).toBe("br")
+    expect(response.headers.get("ETag")).toBe('"abc"')
+    expect(response.headers.get("Cache-Control")).toBe("private, max-age=31536000, immutable")
+  })
+
+  it("passes a partial response through unchanged", async () => {
+    const f = fixture()
+    f.assets.mockResolvedValue(
+      new Response("ab", {
+        status: 206,
+        headers: { "Content-Type": "font/woff2", "Cache-Control": "public, max-age=0" },
+      }),
+    )
+    const response = await worker.fetch(
+      request("/assets/ibm-plex-sans-latin-400-normal-CDDApCn2.woff2", {
+        headers: { Range: "bytes=0-1" },
+      }),
+      f.env,
+      f.ctx,
+    )
+    expect(response.status).toBe(206)
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=0")
+  })
+
   it("does not pin a missing hashed file", async () => {
     const f = fixture()
     f.assets.mockResolvedValue(new Response(null, { status: 404 }))
