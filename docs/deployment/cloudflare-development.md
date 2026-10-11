@@ -131,6 +131,8 @@ Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另�
 `main` 指向受審的 Worker entrypoint，`PREVIEW_BUCKET` 綁開發桶，`ASSETS` 提供前端。
 配置以 `assets.run_worker_first: true` 讓 handler 在 SPA fallback 之前驗 host，
 資料路徑讀 R2，其餘委派 `ASSETS.fetch`；所有靜態路徑亦會經過 Worker，可能有額外計費。
+`/assets/` 下以內容雜湊命名的建置輸出（200／304，且不是 SPA fallback 的 HTML）改為 `private, max-age=31536000, immutable`，
+重新整理時不必逐檔回源確認；`index.html` 與 `public/` 的固定檔名檔案維持平台預設的重新驗證。
 `/cdn-preview/` 僅接受 GET／HEAD 與 2.0 公開 JSON／五檔 WebP key，缺件或拒絕均不回 HTML；
 R2 壓縮旁檔依 [Response 官方文件](https://developers.cloudflare.com/workers/runtime-apis/response/)
 以 `encodeBody: "manual"` 保留 wire bytes。Access 保護與平台行為仍需維護者實測。

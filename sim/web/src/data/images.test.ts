@@ -392,17 +392,17 @@ describe("network scheduling", () => {
       })
       return new Response("{}")
     })
-    const background = Array.from({ length: 9 }, (_, i) =>
+    const background = Array.from({ length: 27 }, (_, i) =>
       queue.background(`background${String(i)}`),
     )
     await Promise.resolve()
-    expect(starts).toHaveLength(6)
+    expect(starts).toHaveLength(24)
     const visible = queue.foreground("visible")
     expect(starts).toEqual([
-      ...Array.from({ length: 6 }, (_, i) => `background${String(i)}`),
+      ...Array.from({ length: 24 }, (_, i) => `background${String(i)}`),
       "visible",
     ])
-    while (starts.length < 10 || release.length > 0) {
+    while (starts.length < 28 || release.length > 0) {
       release.splice(0).forEach((resolve) => {
         resolve()
       })
