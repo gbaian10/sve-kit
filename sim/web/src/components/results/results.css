@@ -1,25 +1,6 @@
+/* `--result-columns` is set on the grid with the theme's breakpoints, next to its column template. */
 [data-view="grid"] {
   container-type: inline-size;
-
-  --result-columns: 2;
-}
-
-@media (width >= 768px) {
-  [data-view="grid"] {
-    --result-columns: 4;
-  }
-}
-
-@media (width >= 1024px) {
-  [data-view="grid"] {
-    --result-columns: 5;
-  }
-}
-
-@media (width >= 1280px) {
-  [data-view="grid"] {
-    --result-columns: 6;
-  }
 }
 
 [data-view="grid"] > li,

@@ -119,9 +119,10 @@ const CardCell = memo(function CardCell({
 export function CardGrid({ cells, images, onOpen, anchor }: CardGridProps) {
   const labels = useResultLabels()
   return (
+    // One column count drives both the grid and the off-screen height estimate in results.css.
     <ul
       data-view="grid"
-      className="grid grid-cols-2 gap-x-3 gap-y-3.5 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+      className="grid grid-cols-[repeat(var(--result-columns),minmax(0,1fr))] gap-x-3 gap-y-3.5 [--result-columns:2] md:[--result-columns:4] lg:[--result-columns:5] xl:[--result-columns:6]"
     >
       {cells.map((cell) => (
         <li key={cell.key} className="min-w-0">
