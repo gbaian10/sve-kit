@@ -79,7 +79,9 @@ export default {
     loadFailed: "Loading failed",
     loadFailedHint: "Check the connection and try again.",
     retry: "Retry",
-    loading: "Loading",
+    preparing: "Checking for the latest data",
+    downloading: "Downloading card data",
+    downloadProgress: "Card data download progress",
   },
   metadata: {
     idle: "Image metadata not downloaded ({{done}}/{{total}})",

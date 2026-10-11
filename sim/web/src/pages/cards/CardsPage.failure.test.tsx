@@ -63,3 +63,43 @@ it.each(["hash mismatch", "invalid JSON", "missing card ID"])(
     expect(document.querySelector("a[data-result-key]")).toBeNull()
   },
 )
+
+it("shows how many startup files have arrived during a first download", async () => {
+  const startup = (built.manifest["files"] as JsonObject[]).filter(
+    (file) => file["role"] === "config" || file["role"] === "bootstrap",
+  )
+  const held = stringValue(startup[0]?.["path"])
+  // The page shares one client with the cases above, which published other indexes at the same
+  // revision; a newer revision is a legitimate new version rather than a changed old one.
+  const index = objectValue(
+    JSON.parse(
+      new TextDecoder().decode(built.files.get("snapshots/versions/index.json")),
+    ) as JsonObject,
+  )
+  index["revision"] = Number(index["revision"]) + 1
+  const files = new Map(built.files)
+  files.set("snapshots/versions/index.json", new TextEncoder().encode(JSON.stringify(index)))
+  let release = () => {}
+  const gate = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
+    const key = url.replace(/^.*\/cdn\//u, "")
+    if (key === held) await gate
+    const body = files.get(key)
+    return body ? new Response(body.slice().buffer) : new Response(null, { status: 404 })
+  })
+  prefsStore.set({ uiLanguage: "zh-TW" })
+  await renderRoutes(routes, { initialEntries: ["/cards"] })
+  const bar = await screen.findByRole("progressbar", { name: "卡片資料下載進度" })
+  await vi.waitFor(() => {
+    expect(bar.getAttribute("aria-valuenow")).toBe(String(startup.length - 1))
+  })
+  expect(bar.getAttribute("aria-valuemax")).toBe(String(startup.length))
+  expect(screen.getByText(`${String(startup.length - 1)}/${String(startup.length)}`)).toBeTruthy()
+  release()
+  await vi.waitFor(() => {
+    expect(screen.queryByRole("progressbar")).toBeNull()
+  })
+})

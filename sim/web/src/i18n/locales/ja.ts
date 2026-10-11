@@ -78,7 +78,9 @@ export default {
     loadFailed: "読み込みに失敗しました",
     loadFailedHint: "接続を確認して再試行してください。",
     retry: "再試行",
-    loading: "読み込み中",
+    preparing: "最新版を確認中",
+    downloading: "カードデータをダウンロード中",
+    downloadProgress: "カードデータのダウンロード進捗",
   },
   metadata: {
     idle: "画像情報は未取得（{{done}}/{{total}}）",

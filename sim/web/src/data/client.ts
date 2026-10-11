@@ -27,7 +27,13 @@ interface LoadFailure {
 }
 export type SnapshotStatus =
   | { readonly state: "idle" }
-  | { readonly state: "loading"; readonly phase: LoadPhase }
+  /** During the bootstrap phase of a first download, `done` of `total` startup files have arrived. */
+  | {
+      readonly state: "loading"
+      readonly phase: LoadPhase
+      readonly done?: number
+      readonly total?: number
+    }
   /**
    * `updating` is the phase of a reload while the previous snapshot stays active; `updateError`
    * is set when such a reload failed.
@@ -274,7 +280,7 @@ export function createSnapshotClient(
     previous: LoadedSnapshot | null,
     entryBytes?: Promise<Uint8Array>,
   ): Promise<{ readonly snapshot: LoadedSnapshot; readonly downloaded: boolean }> => {
-    const progress = (phase: LoadPhase) => {
+    const progress = (phase: LoadPhase, files?: { done: number; total: number }) => {
       set(
         previous
           ? {
@@ -283,7 +289,7 @@ export function createSnapshotClient(
               dataVersion: previous.dataVersion,
               updating: phase,
             }
-          : { state: "loading", phase },
+          : { state: "loading", phase, ...files },
       )
     }
     progress("index")
@@ -312,7 +318,6 @@ export function createSnapshotClient(
     const { manifest, files } = decodedManifest
     matchEntry(chosen, manifest)
     const version = stringValue(manifest["format_version"])
-    progress("bootstrap")
     const configKey = stringValue(objectValue(manifest["config_ref"])["key"])
     const bootstrap: Fragment[] = []
     let config: JsonObject | null = null
@@ -321,6 +326,11 @@ export function createSnapshotClient(
     const startup = [...files].filter(
       ([, file]) => file["role"] === "config" || file["role"] === "bootstrap",
     )
+    // A first download shows how many files have arrived, so a slow start reads as progress
+    // rather than a stuck page. A background update keeps the old data and needs no count.
+    let done = 0
+    const total = startup.length
+    progress("bootstrap", { done, total })
     // One failed file cancels the rest of the batch, so a retry is not queued behind it.
     const batch = new AbortController()
     const results = await Promise.all(
@@ -331,7 +341,10 @@ export function createSnapshotClient(
           integerValue(file["bytes"]),
           batch.signal,
         )
-        return { key, result: await decode({ kind: "file", file, bytes: data, version }) }
+        const result = await decode({ kind: "file", file, bytes: data, version })
+        done += 1
+        if (!previous && !batch.signal.aborted) progress("bootstrap", { done, total })
+        return { key, result }
       }),
     ).catch((error: unknown) => {
       batch.abort()

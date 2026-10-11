@@ -217,6 +217,11 @@ export function CardsPage() {
   const hasConditions = query.text !== "" || filterCount > 0
   const failed = status.state === "error"
   const loading = catalog === null && !failed
+  // A first download reports how many startup files have arrived (it can take seconds).
+  const download =
+    status.state === "loading" && status.total !== undefined && status.total > 0
+      ? { done: status.done ?? 0, total: status.total }
+      : null
 
   return (
     <div className="flex flex-col gap-3 pt-2 pb-6">
@@ -292,9 +297,33 @@ export function CardsPage() {
       )}
       {loading && (
         <>
-          <p className="text-13 text-text-3" aria-live="polite">
-            {t("results.loading")}
-          </p>
+          <div className="flex flex-col gap-1.5">
+            <p className="flex gap-2 text-13 text-text-3">
+              <span aria-live="polite">
+                {download ? t("results.downloading") : t("results.preparing")}
+              </span>
+              {download && (
+                <span aria-hidden="true" className="tabular-nums">
+                  {download.done}/{download.total}
+                </span>
+              )}
+            </p>
+            {download && (
+              <div
+                role="progressbar"
+                aria-label={t("results.downloadProgress")}
+                aria-valuemin={0}
+                aria-valuemax={download.total}
+                aria-valuenow={download.done}
+                className="h-1.5 w-full max-w-80 overflow-hidden rounded-full bg-surface-2"
+              >
+                <div
+                  className="h-full rounded-full bg-accent"
+                  style={{ width: `${String((download.done / download.total) * 100)}%` }}
+                />
+              </div>
+            )}
+          </div>
           <SkeletonGrid />
         </>
       )}
