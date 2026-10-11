@@ -442,7 +442,7 @@ describe("createSnapshotClient: verified snapshot records", () => {
     const current = { ...(index["current"] as JsonObject), published_at: "2026-09-30T00:00:00Z" }
     served.files.set(
       INDEX,
-      new TextEncoder().encode(JSON.stringify({ ...index, revision: 2, current })),
+      new TextEncoder().encode(JSON.stringify({ ...index, revision: 3, current })),
     )
     await client.reload()
     expect(client.status()).toMatchObject({ state: "ready", updateError: { kind: "corrupt" } })
