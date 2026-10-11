@@ -51,7 +51,7 @@ const compressors = {
 const compressed = new Map<string, Promise<Buffer>>()
 
 // Serves a snapshot root (the layout the CDN will have) under a URL prefix during dev/preview.
-function serveSnapshotRoot(prefix: string, dir: string | undefined): Plugin {
+export function serveSnapshotRoot(prefix: string, dir: string | undefined): Plugin {
   const root = dir === undefined ? undefined : realpathSync(path.resolve(dir))
   const notFound = (res: ServerResponse) => {
     res.statusCode = 404
