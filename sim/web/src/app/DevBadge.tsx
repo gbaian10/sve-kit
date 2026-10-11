@@ -8,13 +8,14 @@ import {
   useSnapshotStatus,
 } from "../data"
 import { formatDataVersion } from "../domain/dataVersion"
+import { clearLocalData } from "../settings"
 
 // The badge is 28px tall, so it has its own compact button instead of the 44px design buttons.
 const BUTTON =
   "h-7 shrink-0 rounded-button px-2 text-12 font-semibold whitespace-nowrap text-text-1 hover:bg-surface-2"
 
-// Dev only: which root is active, how far loading got, and a way to flip roots or retry without
-// touching the settings UI. Production builds never render it.
+// Dev and the development deployment only: which root is active, how far loading got, and a way
+// to flip roots, retry or start over cold without touching the settings UI. Production never has it.
 export function DevBadge({ client }: { readonly client: SnapshotClient }) {
   const { t } = useTranslation()
   const root = useSnapshotRoot()
@@ -57,6 +58,20 @@ export function DevBadge({ client }: { readonly client: SnapshotClient }) {
           {t("dev.retry")}
         </button>
       )}
+      {!window.isSecureContext && (
+        <span className="shrink-0 font-semibold text-danger">{t("dev.insecure")}</span>
+      )}
+      <button
+        type="button"
+        className={BUTTON}
+        onClick={() => {
+          void clearLocalData().then(() => {
+            location.reload()
+          })
+        }}
+      >
+        {t("dev.clearLocal")}
+      </button>
       {(import.meta.env.SVE_PREVIEW_CONFIGURED === "1" || root === "preview") && (
         <button
           type="button"

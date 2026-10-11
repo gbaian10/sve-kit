@@ -14,6 +14,7 @@ import { promisify } from "node:util"
 import { brotliCompress, constants as zlib, gzip } from "node:zlib"
 
 import tailwindcss from "@tailwindcss/vite"
+import basicSsl from "@vitejs/plugin-basic-ssl"
 import react from "@vitejs/plugin-react"
 import { type Plugin, searchForWorkspaceRoot } from "vite"
 import { defineConfig } from "vitest/config"
@@ -257,6 +258,9 @@ export default defineConfig({
   plugins: [
     buildIdPlugin(BUILD_INPUTS),
     inlineThemeBoot(),
+    // A LAN address over plain HTTP is not a secure context: no WebCrypto or CacheStorage, so
+    // every load would fail verification and never cache. `dev:lan` serves a self-signed HTTPS.
+    ...(process.env["SVE_DEV_HTTPS"] === "1" ? [basicSsl()] : []),
     react(),
     tailwindcss(),
     serveSnapshotRoot("/cdn", cdnDir),

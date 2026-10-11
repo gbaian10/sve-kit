@@ -215,6 +215,8 @@ const zhTW = {
     retry: "重試",
     usePreview: "改用預覽資料",
     useCdn: "改回正式資料",
+    clearLocal: "清除本機資料",
+    insecure: "非 https，快取停用",
   },
 } as const
 

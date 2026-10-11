@@ -6,6 +6,7 @@
   "packageManager": "bun@1.4.2",
   "scripts": {
     "dev": "vite",
+    "dev:lan": "SVE_DEV_HTTPS=1 vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b",
@@ -18,7 +19,7 @@
     "check": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run knip && bun run build",
     "knip": "knip",
     "fixture:build": "bun run scripts/fixture/main.ts",
-    "deploy:dev": "VITE_CDN_BASE=/cdn-preview bun run build && wrangler deploy --config wrangler.dev.jsonc",
+    "deploy:dev": "VITE_CDN_BASE=/cdn-preview VITE_SVE_DEV_TOOLS=1 bun run build && wrangler deploy --config wrangler.dev.jsonc",
     "shots": "bun run scripts/screenshots/main.ts"
   },
   "dependencies": {
@@ -43,6 +44,7 @@
     "@types/node": "^26.6.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
     "@vitejs/plugin-react": "^6.1.1",
     "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
