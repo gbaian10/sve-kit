@@ -7,6 +7,7 @@ import {
   type SnapshotClient,
   stringValue,
 } from "../../data"
+import type { NameDisplay } from "../../domain/nameDisplay"
 import type { Region } from "../../domain/search"
 import { usePrefs } from "../../settings"
 import { AnnotatedText } from "./AnnotatedText"
@@ -24,12 +25,16 @@ export function CardText({
   field,
   edition,
   sharedResolver,
+  display,
+  label,
 }: {
   readonly sharedResolver?: AnnotatedTextResolver | null
   readonly client: SnapshotClient
   readonly edition: Region
   readonly owner: JsonObject
   readonly field: "name" | "effect" | "flavor"
+  readonly display?: NameDisplay | undefined
+  readonly label?: string | undefined
 }) {
   const { t } = useTranslation()
   const prefs = usePrefs()
@@ -58,13 +63,17 @@ export function CardText({
       </p>
     )
   const annotationReady = readiness.annotations === "ready" || readiness.annotations === "none"
-  const mode = field === "name" ? prefs.nameDisplay : prefs.effectLanguage
+  const mode = display ?? (field === "name" ? prefs.nameDisplay : prefs.effectLanguage)
   const showOriginal =
     mode !== "translated" || !value.translated || value.selection?.["basis"] === "jp_source"
   const showTranslated = mode !== "original" && value.translated !== undefined
   return (
-    <section className="mt-3 space-y-2" aria-label={t(`card.field.${field}`)} data-field={field}>
-      <h3 className="text-13 font-semibold text-text-3">{t(`card.field.${field}`)}</h3>
+    <section
+      className="mt-3 space-y-2"
+      aria-label={label ?? t(`card.field.${field}`)}
+      data-field={field}
+    >
+      <h3 className="text-13 font-semibold text-text-3">{label ?? t(`card.field.${field}`)}</h3>
       {value.printedState === "derived" && <p className="text-13">{t("card.printedDerived")}</p>}
       {value.printedState === "unknown" && (
         <p className="text-13">{t("card.printedUnconfirmed")}</p>

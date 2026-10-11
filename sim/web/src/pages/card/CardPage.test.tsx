@@ -22,6 +22,9 @@ const state = vi.hoisted(() => ({
   crossRegion: false,
   doubleFace: false,
   order: null as { key: string; printingId: string }[] | null,
+  multiplePrintings: false,
+  translated: false,
+  candidates: [] as { printing_id: string; revision_id: string | null }[],
   undated: [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }],
   wording: vi.fn(),
 }))
@@ -35,9 +38,38 @@ vi.mock("../../app/snapshot", () => {
   return {
     useImageIndex: () => undefined,
     // The exact-owner name never resolves here, so the heading shows the catalog stand-in.
-    useAnnotatedText: () => ({
-      readiness: { basic: "pending", source: "pending", annotations: "pending" },
-      value: null,
+    useAnnotatedText: (_client: unknown, owner: { kind: string; id: string }, field: string) => ({
+      readiness: {
+        basic: field === "effect" ? "ready" : "pending",
+        source: "none",
+        annotations: "none",
+      },
+      value:
+        owner.kind === "face_revision" && field === "effect"
+          ? {
+              original: {
+                unit: {
+                  text:
+                    owner.id === "rev:other"
+                      ? "Synthetic older effect"
+                      : "Synthetic selected effect",
+                  lang: "ja",
+                },
+                annotation: null,
+              },
+              ...(state.translated
+                ? {
+                    translated: {
+                      unit: { text: "合成新版譯文", lang: "zh-Hant" },
+                      annotation: null,
+                    },
+                  }
+                : {}),
+              concepts: [],
+              explanations: [],
+              cards: [],
+            }
+          : null,
     }),
     useSearchReadiness: () => ({
       phase: "ready",
@@ -76,7 +108,14 @@ vi.mock("../../app/snapshot", () => {
           cards: [{ id: "c:synthetic" }],
           card: () => ({ id: "c:synthetic", home_set_id: "BP-SYNTHETIC" }),
           family: () => ({ id: "BP-SYNTHETIC", code: "bp-synthetic", public_code: "BP-SYN" }),
-          printingsOf: () => [printing()],
+          printingsOf: () =>
+            state.multiplePrintings
+              ? [
+                  { ...printing(), card_no: "BP-SYNTHETIC" },
+                  { ...printing(), id: "p:second", card_no: "BP-SECOND" },
+                  { ...printing(), id: "p:third", card_no: "BP-THIRD" },
+                ]
+              : [printing()],
           printingByCardNo: (region: string) =>
             state.crossRegion && region === "jp" ? undefined : printing(),
           facesOf: () => [{ id: "f:synthetic" }, ...(state.doubleFace ? [{ id: "f:back" }] : [])],
@@ -84,12 +123,14 @@ vi.mock("../../app/snapshot", () => {
             state.wording(face, region)
             return {
               display: {
+                revision_id: state.available ? "rev:synthetic" : null,
                 basis: state.current
                   ? "current"
                   : state.available
                     ? "latest_known_release"
                     : "candidates",
               },
+              candidates: state.candidates,
               undated_printing_ids: state.undated.map((printing) => printing.id),
             }
           },
@@ -112,7 +153,7 @@ vi.mock("../../app/snapshot", () => {
                       : [],
                 }
               : state.available
-                ? { name_unit_id: "t:synthetic" }
+                ? { id: "rev:synthetic", name_unit_id: "t:synthetic" }
                 : undefined,
           translation: () => ({ text_unit_id: "t:back-translated", low_confidence: true }),
           vocabulary: () => undefined,
@@ -127,7 +168,9 @@ vi.mock("../../app/snapshot", () => {
           }),
           printing: (id: string) => {
             const printing = state.undated.find((printing) => printing.id === id)
-            return printing ? { card_no: printing.cardNo } : undefined
+            return {
+              card_no: printing?.cardNo ?? (id === "p:synthetic" ? "BP-SYNTHETIC" : "BP-OTHER"),
+            }
           },
         },
       },
@@ -137,6 +180,12 @@ vi.mock("../../app/snapshot", () => {
 
 beforeEach(() => {
   state.available = false
+  state.multiplePrintings = false
+  state.translated = false
+  state.candidates = [
+    { printing_id: "p:synthetic", revision_id: "rev:other" },
+    { printing_id: "p:undated", revision_id: "rev:synthetic" },
+  ]
   state.current = false
   state.crossRegion = false
   state.doubleFace = false
@@ -149,96 +198,76 @@ afterEach(() => {
   prefsStore.set(DEFAULT_PREFS)
 })
 
-describe("pending wording on the card page", () => {
+describe("plain wording on the card page", () => {
   it.each([
-    ["zh-TW", "卡文未定", "依已知發售日暫顯"],
-    ["ja", "表記未定", "既知の発売日に基づく仮表示"],
-    ["en", "Wording pending", "Provisional display by known release date"],
+    ["zh-TW", "此卡各版次的卡文不同"],
+    ["ja", "このカードは版によってテキストが異なります"],
+    ["en", "This card has different text across printings"],
   ] as const)(
-    "shows visible pending and release-day labels in %s",
-    async (language, pending, provisional) => {
+    "groups candidates by text and initially opens the displayed wording in %s",
+    async (language, heading) => {
       state.available = true
-      await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+      state.current = true
+      state.candidates.push({ printing_id: "p:additional", revision_id: "rev:other" })
+      const { container } = await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
         initialEntries: ["/cards/BP-SYNTHETIC"],
         language,
       })
-      const section = screen.getByRole("region", { name: pending })
-      expect(screen.getByRole("heading", { name: pending })).toBeVisible()
-      expect(section).toHaveTextContent("Synthetic presentation name")
-      expect(screen.getByText(new RegExp(provisional))).toBeVisible()
-      expect(screen.getByText("PR-SYNTHETIC")).toHaveClass("whitespace-nowrap")
-      expect(screen.queryByText("p:undated")).not.toBeInTheDocument()
+      expect(screen.getByRole("heading", { name: heading })).toBeVisible()
+      expect(container.querySelectorAll("details")).toHaveLength(2)
+      expect(container.querySelectorAll("details[open]")).toHaveLength(1)
+      expect(screen.getByText("Synthetic selected effect")).toBeVisible()
+      expect(screen.queryByText("Synthetic older effect")).not.toBeInTheDocument()
+      expect(screen.getByText("BP-SYNTHETIC / BP-OTHER")).toBeVisible()
+      await userEvent.click(screen.getByText("BP-SYNTHETIC / BP-OTHER"))
+      expect(screen.getByText("Synthetic older effect")).toBeVisible()
+      expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument()
+      expect(container).not.toHaveTextContent(
+        /原文字段未知|印刷文字尚未確認|依已知發售日暫顯|日期未定版次/,
+      )
     },
   )
-  it.each([
-    ["zh-TW", "有多個候選，尚未選定"],
-    ["ja", "複数の候補があり、まだ選定されていません"],
-    ["en", "Multiple candidates; none selected yet"],
-  ] as const)("shows one honest unselected message in %s", async (language, unselected) => {
-    await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
-      initialEntries: ["/cards/BP-SYNTHETIC"],
-      language,
-    })
-    expect(screen.getAllByText(unselected)).toHaveLength(1)
-    expect(
-      screen.queryByText(/候選載入中|候補を読み込み中|Loading candidates/),
-    ).not.toBeInTheDocument()
-  })
-  it("keeps a valid current labelled as pending rather than provisional", async () => {
+  it("shows a printing's own original beside the latest translation and preserves the list on its source link", async () => {
     state.available = true
-    state.current = true
+    state.translated = true
+    state.undated = []
+    prefsStore.set({ effectLanguage: "translated" })
+    const { router } = await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    await act(() =>
+      router.navigate("/cards/BP-SYNTHETIC", {
+        replace: true,
+        state: { background: "?q=synthetic", source: "results", pages: 2, resultKey: "c:anchor" },
+      }),
+    )
+    expect(screen.getByText("Synthetic older effect")).toBeVisible()
+    expect(screen.getByText("合成新版譯文")).toBeVisible()
+    expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
+    expect(screen.getByText("此版次的原文")).toBeVisible()
+    expect(screen.getByText("繁中翻譯依據")).toBeVisible()
+    await userEvent.click(screen.getByRole("link", { name: "BP-OTHER" }))
+    expect(router.state.historyAction).toBe("REPLACE")
+    expect(router.state.location.state).toMatchObject({ background: "?q=synthetic", pages: 2 })
+  })
+  it("keeps all candidates when the printing has multiple observations", async () => {
+    state.available = true
+    state.translated = true
+    state.candidates.push({ printing_id: "p:synthetic", revision_id: "rev:synthetic" })
     await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
-    expect(screen.getByRole("heading", { name: "卡文未定" })).toBeVisible()
-    expect(screen.queryByText(/依已知發售日暫顯/)).not.toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "此卡各版次的卡文不同" })).toBeVisible()
+    expect(screen.queryByText("此版次的原文")).not.toBeInTheDocument()
   })
-  it.each(["zh-TW", "ja", "en"] as const)(
-    "uses equal grid tracks sized by the longest card number in %s",
-    async (language) => {
-      state.undated = [
-        { id: "p:suffix-a", cardNo: "BP01-002a" },
-        { id: "p:suffix-s", cardNo: "BP01-021S" },
-        { id: "p:short", cardNo: "BP01-01" },
-        { id: "p:long", cardNo: "PR-SYNTHETIC" },
-      ]
-      await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
-        initialEntries: ["/cards/BP-SYNTHETIC"],
-        language,
-      })
-      const grid = screen.getByRole("list")
-      expect(grid).toHaveClass("grid", "font-mono")
-      expect(grid).toHaveStyle({ gridTemplateColumns: "repeat(auto-fill, 12ch)" })
-      expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(
-        state.undated.map((printing) => printing.cardNo),
-      )
-      for (const item of screen.getAllByRole("listitem")) {
-        expect(item).toHaveClass("text-left", "whitespace-nowrap")
-      }
-    },
-  )
-  it.each(["zh-TW", "ja", "en"] as const)(
-    "reserves two columns for wide card-number symbols in %s",
-    async (language) => {
-      state.undated = [
-        { id: "p:ascii", cardNo: "BP01-002a" },
-        { id: "p:wide", cardNo: "BP01-021Ⓢ" },
-        { id: "p:short", cardNo: "BP01-01" },
-      ]
-      await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
-        initialEntries: ["/cards/BP-SYNTHETIC"],
-        language,
-      })
-      expect(screen.getByRole("list")).toHaveStyle({
-        gridTemplateColumns: "repeat(auto-fill, 10ch)",
-      })
-      expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(
-        state.undated.map((printing) => printing.cardNo),
-      )
-      expect(screen.getByText("BP01-021Ⓢ")).toHaveClass("text-left", "whitespace-nowrap")
-      expect(screen.queryByText("p:wide")).not.toBeInTheDocument()
-    },
-  )
+  it("does not claim an unknown candidate has no effect", async () => {
+    state.candidates = [{ printing_id: "p:synthetic", revision_id: null }]
+    await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    expect(screen.getByText("這些版次的卡文還在確認中")).toBeVisible()
+    expect(screen.queryByText("這張卡沒有效果文字")).not.toBeInTheDocument()
+  })
   it.each(["/cards/BP-SYNTHETIC", "/p/42"])(
     "uses the resolved printing's region for %s",
     async (path) => {
@@ -252,7 +281,7 @@ describe("pending wording on the card page", () => {
         { initialEntries: [path] },
       )
       expect(state.wording).toHaveBeenCalledWith("f:synthetic", "en")
-      expect(screen.getByText("Synthetic presentation name")).toBeVisible()
+      expect(screen.getByText("Synthetic selected effect")).toBeVisible()
     },
   )
 })
@@ -327,5 +356,55 @@ describe("double-face headers", () => {
     expect(dialog).toBeVisible()
     await userEvent.click(screen.getByRole("button", { name: "關閉" }))
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  })
+})
+
+describe("returning from printing changes", () => {
+  it.each(["button", "browser"] as const)(
+    "returns to the same list entry using %s back",
+    async (method) => {
+      state.multiplePrintings = true
+      const { router } = await renderRoutes(
+        [
+          { path: "/cards", element: <p>Synthetic list</p> },
+          { path: "/cards/:cardNo", ...card },
+        ],
+        { initialEntries: ["/cards?q=synthetic"] },
+      )
+      await act(() =>
+        router.navigate("/cards?q=synthetic", {
+          replace: true,
+          state: { pages: 2, anchor: "c:anchor" },
+        }),
+      )
+      const listKey = router.state.location.key
+      await act(() =>
+        router.navigate("/cards/BP-SYNTHETIC", {
+          state: { background: "?q=synthetic", source: "results", pages: 2, resultKey: "c:anchor" },
+        }),
+      )
+      await userEvent.click(screen.getByRole("link", { name: "BP-SECOND" }))
+      await userEvent.click(screen.getByRole("link", { name: "BP-THIRD" }))
+      expect(router.state.location.pathname).toBe("/cards/BP-THIRD")
+      if (method === "button") await userEvent.click(screen.getByRole("button", { name: "返回" }))
+      else await act(() => router.navigate(-1))
+      expect(router.state.location).toMatchObject({
+        pathname: "/cards",
+        search: "?q=synthetic",
+        key: listKey,
+        state: { pages: 2, anchor: "c:anchor" },
+      })
+    },
+  )
+  it("returns to /cards when opened directly", async () => {
+    const { router } = await renderRoutes(
+      [
+        { path: "/cards", element: <p>Synthetic list</p> },
+        { path: "/cards/:cardNo", ...card },
+      ],
+      { initialEntries: ["/cards/BP-SYNTHETIC"] },
+    )
+    await userEvent.click(screen.getByRole("link", { name: "返回" }))
+    expect(router.state.location.pathname).toBe("/cards")
   })
 })

@@ -9,7 +9,6 @@ import { useCatalog, useImageIndex, useSearchReadiness } from "../../app/snapsho
 import { StatusStrip } from "../../app/StatusStrip"
 import { CardImage } from "../../components/card/CardImage"
 import { CardNameHeading, PlainNameHeading } from "../../components/card/CardNameHeading"
-import { CardText } from "../../components/card/CardText"
 import { CLASS_ICON } from "../../components/card/classIcons"
 import { StatLine } from "../../components/card/StatLine"
 import { type VocabularyKind, vocabularyLabel } from "../../components/card/vocabulary"
@@ -18,7 +17,6 @@ import { Button } from "../../components/ui/Button"
 import { cn } from "../../components/ui/cn"
 import { Dialog } from "../../components/ui/Dialog"
 import { Link } from "../../components/ui/Link"
-import { Segmented } from "../../components/ui/Segmented"
 import { useToast } from "../../components/ui/toast-context"
 import { type CardSummary, type Catalog, type Row, stringValue } from "../../data"
 import { classStyle } from "../../domain/classes"
@@ -28,18 +26,9 @@ import type { Region, ResultItem, TextLang } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
+import { CardTextPanel } from "./CardTextPanel"
+import { CardWording } from "./CardWording"
 
-function cardNoColumns(cardNo: string): number {
-  // Symbols such as Ⓢ can use wide fallback glyphs despite the monospaced Latin digits.
-  return Array.from(cardNo).reduce(
-    (width, character) => width + (character.charCodeAt(0) <= 0x7f ? 1 : 2),
-    0,
-  )
-}
-
-// The header already shows the current name; the printed view adds the printed name and flavor.
-const CURRENT_FIELDS = ["effect"] as const
-const PRINTED_FIELDS = ["name", "effect", "flavor"] as const
 const ICON_BUTTON =
   "flex size-11 shrink-0 items-center justify-center rounded-button text-text-1 hover:bg-surface-2"
 // Phone: 72% of the width, as the reference sites do; tablet and desktop: the 340px column.
@@ -93,7 +82,6 @@ export function CardPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const toast = useToast()
-  const [textMode, setTextMode] = useState<"current" | "printed">("current")
   const [zoomed, setZoomed] = useState<string | null>(null)
   const closeZoom = useDialogHistory("card-zoom", zoomed !== null, () => {
     setZoomed(null)
@@ -302,12 +290,6 @@ export function CardPage() {
         </div>
         <div className="mt-4 min-w-0 lg:mt-1">
           {views.map(({ faceId, ordinal, wording, revision, faceSummary, name }) => {
-            const nameUnit = revision
-              ? catalog?.index.textUnit(revision["name_unit_id"] as string)?.["text"]
-              : undefined
-            const undated = ((wording?.["undated_printing_ids"] ?? []) as string[]).map(
-              (id) => (catalog?.index.printing(id)?.["card_no"] as string | undefined) ?? id,
-            )
             const classCode =
               typeof revision?.["class_code"] === "string" ? revision["class_code"] : null
             const typeCode =
@@ -373,63 +355,24 @@ export function CardPage() {
                     )}
                   </div>
                 )}
-                {faceSummary?.wordingPending && (
-                  <Badge className="mt-2">{t("card.wordingPending")}</Badge>
-                )}
-                {printing &&
-                  (textMode === "printed" || revision) &&
-                  (textMode === "printed" ? PRINTED_FIELDS : CURRENT_FIELDS).map((field) => (
-                    <CardText
-                      key={field}
-                      edition={region}
+                {printingId && catalog && (
+                  <CardTextPanel
+                    key={printingId}
+                    client={client}
+                    edition={region}
+                    printingId={printingId}
+                    faceId={faceId}
+                  >
+                    <CardWording
                       client={client}
-                      sharedResolver={null}
-                      owner={
-                        textMode === "printed"
-                          ? { kind: "printing_face", id: printing["id"] as string, face_id: faceId }
-                          : { kind: "face_revision", id: revision?.["id"] as string }
-                      }
-                      field={field}
+                      edition={region}
+                      catalog={catalog}
+                      printingId={printingId}
+                      wording={wording}
+                      revision={revision}
+                      entry={entry}
                     />
-                  ))}
-                {ordinal === 0 && printing && (
-                  <Segmented
-                    className="mt-4"
-                    size="sm"
-                    label={t("card.textMode")}
-                    options={[
-                      { value: "current", label: t("card.currentText") },
-                      { value: "printed", label: t("card.printedText") },
-                    ]}
-                    value={textMode}
-                    onChange={setTextMode}
-                  />
-                )}
-                {wording && (
-                  <section className="mt-4 space-y-2" aria-label={t("card.wordingPending")}>
-                    <h3 className="text-14 font-semibold">{t("card.wordingPending")}</h3>
-                    {typeof nameUnit === "string" && <p>{nameUnit}</p>}
-                    {(wording["display"] as Row)["basis"] === "latest_known_release" &&
-                      revision && <p>{t("card.provisionalWording")}</p>}
-                    {!revision && <p>{t("card.candidatesUnselected")}</p>}
-                    {undated.length > 0 && (
-                      <div className="space-y-1">
-                        <span>{t("card.undatedPrintings")}</span>
-                        <ul
-                          className="grid gap-x-3 gap-y-1 font-mono text-14"
-                          style={{
-                            gridTemplateColumns: `repeat(auto-fill, ${String(Math.max(...undated.map(cardNoColumns)))}ch)`,
-                          }}
-                        >
-                          {undated.map((cardNo) => (
-                            <li key={cardNo} className="text-left whitespace-nowrap">
-                              {cardNo}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </section>
+                  </CardTextPanel>
                 )}
               </section>
             )
@@ -446,6 +389,7 @@ export function CardPage() {
                       <RouterLink
                         to={cardPath(no)}
                         state={entry}
+                        replace
                         aria-current={id === printingId ? "page" : undefined}
                         className="inline-flex h-8 items-center rounded-pill border border-border px-2.5 font-mono text-13 hover:bg-surface-2 aria-[current=page]:border-accent aria-[current=page]:bg-accent-soft aria-[current=page]:font-semibold"
                       >
