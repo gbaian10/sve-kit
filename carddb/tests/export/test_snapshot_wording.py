@@ -167,6 +167,64 @@ def test_pending_display_rejects_independent_public_constraint(
         validate_view(view, manifest, fragments)
 
 
+def shared_basis_view(change: str | None = None) -> tuple[View, Row, list[Fragment]]:
+    view, manifest, fragments = pending_view()
+    face = view["face"][0]
+    face["current"] = [
+        {"region": "jp", "revision_id": "r:a2", "basis": "latest_known_release"}
+    ]
+    wording = object_value(array(face["wording"])[0])
+    wording.update(
+        display={"revision_id": "r:a2", "basis": "current"},
+        classification="same_effect",
+        method="ai",
+        reason="Synthetic equivalence",
+        basis_printing_id="p:a",
+        basis_released_on="2026-01-01",
+    )
+    view["card_engine_support"][0]["region_blocks"] = []
+    if change in {"newer_known", "manual_older"}:
+        inclusion = view["printing_product"][0].copy()
+        inclusion.update(
+            printing_id="p:b", available_on="2027-01-01", date_precision="day"
+        )
+        view["printing_product"].append(inclusion)
+        wording["undated_printing_ids"] = []
+        if change == "manual_older":
+            wording["method"] = "manual"
+    elif change == "errata":
+        wording["classification"] = "errata"
+    elif change == "no_basis":
+        wording.update(basis_printing_id=None, basis_released_on=None)
+    elif change == "undated_basis":
+        wording.update(basis_printing_id="p:b", basis_released_on=None)
+    elif change == "wrong_day":
+        wording["basis_released_on"] = "2025-12-31"
+    return view, manifest, fragments
+
+
+@pytest.mark.parametrize("change", [None, "manual_older"])
+def test_shared_basis_links_a_dated_observation_to_current(change: str | None) -> None:
+    validate_view(*shared_basis_view(change))
+
+
+@pytest.mark.parametrize(
+    ("change", "error"),
+    [
+        ("errata", "Non-equivalent wording cannot have a shared basis"),
+        ("no_basis", "requires a basis printing"),
+        ("undated_basis", "disagrees with the selected observation"),
+        ("wrong_day", "release day disagrees"),
+        ("newer_known", "must use the latest known release"),
+    ],
+)
+def test_shared_basis_rejects_independent_public_constraint(
+    change: str, error: str
+) -> None:
+    with pytest.raises(ValueError, match=error):
+        validate_view(*shared_basis_view(change))
+
+
 def test_same_day_exact_public_content_can_use_distinct_correction_revision_ids() -> (
     None
 ):

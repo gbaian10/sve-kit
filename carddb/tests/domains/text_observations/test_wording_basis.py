@@ -1,7 +1,7 @@
 """Semantic selection, chronology and stale decisions use synthetic source text."""
 
 from dataclasses import replace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import pytest
 
@@ -13,6 +13,7 @@ from sve_carddb.domains.text_observations.equivalence import (
     comparison_text,
     load_decisions,
 )
+from sve_carddb.domains.text_observations.models import candidate_revision_id
 from sve_carddb.domains.text_observations.wording import populate_wording_basis
 
 from ...support.source_correction_fixtures import make_correction_case
@@ -146,6 +147,105 @@ def test_semantic_basis_requires_equivalence_and_unique_dated_content(
             if mode == "ai_undated_pending":
                 assert assessment["method"] == "mechanical"
                 assert assessment["reason"] == "undated_difference_excluded"
+
+
+@pytest.mark.parametrize(
+    ("method", "classification", "error"),
+    [
+        ("ai", "same_effect", "Only manual decisions"),
+        ("manual", "errata", "Only equivalent wording"),
+    ],
+)
+def test_only_manual_equivalence_may_choose_a_basis(
+    method: Literal["ai", "manual"],
+    classification: Literal["same_effect", "errata"],
+    error: str,
+) -> None:
+    with pytest.raises(ValueError, match=error):
+        WordingDecision(
+            face_id="f:synthetic",
+            region="jp",
+            comparison_hash="sha256:" + "0" * 64,
+            classification=classification,
+            method=method,
+            reason="Synthetic review",
+            basis_printing_id="p:synthetic",
+        )
+
+
+@pytest.mark.parametrize(
+    "mode", ["current_preserved", "manual_overrides", "orphan", "unknown_basis"]
+)
+def test_adopted_current_wins_unless_a_manual_basis_is_locatable(
+    tmp_path: Path, inputs: Inputs, mode: str
+) -> None:
+    case = make_case(tmp_path / "authored", inputs, regions=("jp",))
+    group = case.plan.groups[0]
+    older, newer = group.observations[0], group.observations[1]
+    decision = WordingDecision(
+        face_id="f:synthetic" if mode == "orphan" else group.face_id,
+        region="jp",
+        comparison_hash=comparison_hash(tuple(i.content for i in group.observations)),
+        classification="same_effect",
+        method="ai" if mode == "current_preserved" else "manual",
+        reason="Synthetic reviewed equivalence",
+        basis_printing_id=None
+        if mode == "current_preserved"
+        else "p:synthetic"
+        if mode == "unknown_basis"
+        else older.printing_id,
+    )
+    with create_database(compile_build()) as db:
+        with db.transaction():
+            case.stage(db)
+        case.compose().import_into(
+            db, build=case.context(), vocabulary=case.vocabulary, published=()
+        )
+        for item in group.observations:
+            product(
+                db, item.printing_id, "2020-01-01" if item is older else "2026-01-01"
+            )
+        plan = replace(case.plan, wording_decisions=(decision,))
+        with db.transaction():
+            for row in db.rows("face_wording"):
+                db.delete(
+                    "face_wording",
+                    {key: row.values[key] for key in ("face_id", "region")},
+                )
+            db.insert(
+                "face_current",
+                {
+                    "face_id": group.face_id,
+                    "region": "jp",
+                    "revision_id": candidate_revision_id(newer),
+                    "basis": "latest_observed_no_errata",
+                    "decision_id": None,
+                },
+            )
+            if mode in {"orphan", "unknown_basis"}:
+                with pytest.raises(
+                    ValueError,
+                    match="no pending face/region"
+                    if mode == "orphan"
+                    else "no unique observation",
+                ):
+                    populate_wording_basis(db, plan)
+                return
+            populate_wording_basis(db, plan)
+        assessment = db.rows("face_wording")[0].values
+        (current,) = (row.values for row in db.rows("face_current"))
+        if mode == "current_preserved":
+            assert assessment["classification"] == "unresolved"
+            assert assessment["reason"] == "adopted_current_preserved"
+            assert assessment["basis_printing_id"] is None
+            assert current["revision_id"] == candidate_revision_id(newer)
+            assert current["basis"] == "latest_observed_no_errata"
+        else:
+            assert assessment["classification"] == "same_effect"
+            assert assessment["basis_printing_id"] == older.printing_id
+            assert assessment["basis_released_on"] == "2020-01-01"
+            assert current["revision_id"] == candidate_revision_id(older)
+            assert current["basis"] == "latest_known_release"
 
 
 def test_authored_decisions_are_optional_and_duplicates_are_rejected(
