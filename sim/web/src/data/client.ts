@@ -271,7 +271,7 @@ export function createSnapshotClient(
   const download = async (
     previous: LoadedSnapshot | null,
     entryBytes?: Promise<Uint8Array>,
-  ): Promise<LoadedSnapshot> => {
+  ): Promise<{ readonly snapshot: LoadedSnapshot; readonly downloaded: boolean }> => {
     const progress = (phase: LoadPhase) => {
       set(
         previous
@@ -293,12 +293,12 @@ export function createSnapshotClient(
       (previous.entrySource ?? "current") === source
     ) {
       matchEntry(chosen, previous.manifest)
-      return previous
+      return { snapshot: previous, downloaded: false }
     }
     const restored = await restore(stringValue(chosen["manifest_sha256"]))
     if (restored) {
       matchEntry(chosen, restored.manifest)
-      return { ...restored, entrySource: source }
+      return { snapshot: { ...restored, entrySource: source }, downloaded: false }
     }
     progress("manifest")
     const manifestBytes = await fetchVerified(
@@ -351,7 +351,7 @@ export function createSnapshotClient(
       bootstrap,
     }
     catalogOf(snapshot)
-    return snapshot
+    return { snapshot, downloaded: true }
   }
 
   const adopt = (candidate: LoadedSnapshot): void => {
@@ -431,14 +431,15 @@ export function createSnapshotClient(
   const run = async (entryBytes?: Promise<Uint8Array>): Promise<void> => {
     const previous = loaded
     try {
-      const candidate = await download(previous, entryBytes)
+      const { snapshot: candidate, downloaded } = await download(previous, entryBytes)
       if (candidate !== previous) adopt(candidate)
       set({
         state: "ready",
         dataVersion: candidate.dataVersion,
         ...(candidate.entrySource === "previous" ? { outdated: true } : {}),
       })
-      void remember(candidate, candidate !== previous).catch(() => undefined)
+      // A restored record is already stored; serializing tens of megabytes again only costs time.
+      void remember(candidate, downloaded).catch(() => undefined)
     } catch (error) {
       const failure = failureOf(error)
       if (previous)
