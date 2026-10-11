@@ -40,13 +40,12 @@ export function CardTextPanel({
           {printedEffect.value && (
             <CardText client={client} edition={edition} owner={owner} field="effect" />
           )}
-          {flavor.value && (
-            <CardText client={client} edition={edition} owner={owner} field="flavor" />
-          )}
         </>
       ) : (
         children
       )}
+      {/* Flavor belongs to this printing alone, so both views show it. */}
+      {flavor.value && <CardText client={client} edition={edition} owner={owner} field="flavor" />}
       {hasPrintedText && (
         <Segmented
           className="mt-4"
