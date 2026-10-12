@@ -41,7 +41,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 式神・從者進入自己的戰場時，使其獲得【
+            text: 式神・從者進入自己的戰場時，其具有【
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -55,7 +55,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 【進化時】破壞全部「本回合中受到過傷害的敵方戰場上的從者」。
+            text: 【進化時】破壞全部「本回合中曾受到傷害的敵方戰場上的從者」。
   - origin: machine
     kind: template_translation
     data:
@@ -141,18 +141,15 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 次，這張卡片受到能力傷害時，指定
+            text: 次，這張卡片受到能力傷害時，選擇
           - kind: LeafRef
             slot: leaf_1
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
             text: 上的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_4
+          - kind: LeafRef
+            slot: leaf_4
           - kind: Literal
             text: 個
           - kind: LeafRef
@@ -183,11 +180,8 @@ records:
             slot: leaf_2
           - kind: Literal
             text: 張卡片。可以從其中公開
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_5
+          - kind: LeafRef
+            slot: leaf_5
           - kind: Literal
             text: 張消費
           - kind: LeafRef
@@ -197,11 +191,11 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: '}卡片並增加到'
+            text: '}卡片，並加入'
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
-            text: 中。將其餘卡片以任意順序放置到
+            text: 。將其餘卡片以任意順序放置到
           - kind: LeafRef
             slot: leaf_7
           - kind: Literal
@@ -269,7 +263,7 @@ records:
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 張卡片。可以從其中將
+            text: 張卡片。可以將其中
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
@@ -303,11 +297,11 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: '}：這張卡片獲得【'
+            text: '}：這張卡片具有【'
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 】。（與擁有【
+            text: 】。（與具有【
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
@@ -358,21 +352,18 @@ records:
             slot: leaf_2
           - kind: Literal
             text: 張卡片。可以從其中公開
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_4
+          - kind: LeafRef
+            slot: leaf_4
           - kind: Literal
             text: 張{
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: '}法術並增加到'
+            text: '}法術，並加入'
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: 中。可以將
+            text: 。可以將其中
           - kind: LeafRef
             slot: leaf_7
           - kind: Literal
@@ -402,12 +393,9 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 次，自己的護符離開戰場時，指定敵方的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_1
+            text: 次，自己的護符離開戰場時，選擇敵方的
+          - kind: LeafRef
+            slot: leaf_1
           - kind: Literal
             text: 個從者。給予其
           - kind: LeafRef
@@ -497,18 +485,15 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 指定
+            text: 選擇
           - kind: LeafRef
             slot: leaf_0
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
             text: 上的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_3
+          - kind: LeafRef
+            slot: leaf_3
           - kind: Literal
             text: 個
           - kind: LeafRef
@@ -522,11 +507,11 @@ records:
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: _
+            text: ' '
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
-            text: 】使其失去全部能力。
+            text: 】其失去全部能力。
   - origin: machine
     kind: template_translation
     data:
@@ -568,7 +553,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: （仍會被交戰傷害破壞）
+            text: （仍會因交戰傷害而被破壞）
   - origin: machine
     kind: template_translation
     data:
@@ -578,21 +563,15 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 指定自己戰場上的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_0
+            text: 選擇自己戰場上的
+          - kind: LeafRef
+            slot: leaf_0
           - kind: Literal
             text: 個從者與敵方戰場上的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_1
+          - kind: LeafRef
+            slot: leaf_1
           - kind: Literal
-            text: 個從者。前者{
+            text: 個從者。使前者{
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -608,7 +587,7 @@ records:
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: 。給予後者與「前者的攻擊力」相同的傷害。
+            text: 。給予後者等同於「前者的攻擊力」的傷害。
   - origin: machine
     kind: template_translation
     data:
@@ -650,20 +629,22 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 指定
+            text: 選擇
           - kind: LeafRef
             slot: leaf_0
+          - kind: Literal
+            text: 的
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 的
+            text: 中的
           - kind: Form
             form_id: quantity.selection_count.value
             args:
               quantity:
                 slot: leaf_5
           - kind: Literal
-            text: 張原始消費
+            text: 張原始消費為
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -693,7 +674,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}如果為【真紅】狀態，則自己的主戰者{'
+            text: '}若處於【真紅】狀態，則自己的主戰者{'
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -701,7 +682,7 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 。抽取
+            text: 。抽
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
@@ -754,17 +735,14 @@ records:
             slot: leaf_3
           - kind: Literal
             text: 張卡片。可以從其中公開
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_4
+          - kind: LeafRef
+            slot: leaf_4
           - kind: Literal
-            text: 張Cute・卡片並增加到
+            text: 張Cute・卡片，並加入
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: 中。
+            text: 。
   - origin: machine
     kind: template_translation
     data:
@@ -910,17 +888,14 @@ records:
             slot: leaf_3
           - kind: Literal
             text: 張卡片。可以從其中公開
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_4
+          - kind: LeafRef
+            slot: leaf_4
           - kind: Literal
-            text: 張法術並增加到
+            text: 張法術，並加入
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: 中。
+            text: 。
   - origin: machine
     kind: template_translation
     data:
@@ -934,7 +909,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 次，這張卡片受到傷害時，抽取
+            text: 次，這張卡片受到傷害時，抽
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -966,7 +941,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 對戰開始時，後攻玩家持有
+            text: 對戰開始時，後攻玩家具有
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -980,12 +955,9 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 從自己的手牌捨棄這張卡片時，指定敵方戰場上的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_0
+            text: 從自己的手牌捨棄這張卡片時，選擇敵方戰場上的
+          - kind: LeafRef
+            slot: leaf_0
           - kind: Literal
             text: 個從者。給予其
           - kind: LeafRef
@@ -1270,12 +1242,9 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 【進化時】指定敵方的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_1
+            text: 【進化時】選擇敵方的
+          - kind: LeafRef
+            slot: leaf_1
           - kind: Literal
             text: 個生命值
           - kind: LeafRef
@@ -1323,22 +1292,19 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: _
+            text: ' '
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 】：指定
+            text: 】：選擇
           - kind: LeafRef
             slot: leaf_3
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
             text: 上的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_6
+          - kind: LeafRef
+            slot: leaf_6
           - kind: Literal
             text: 個
           - kind: LeafRef
@@ -1413,16 +1379,17 @@ records:
               quantity:
                 slot: leaf_3
           - kind: Literal
-            text: 張自然・卡片並增加到
+            text: 張自然・卡片，並加入
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: 中。將其餘卡片以任意順序放置到
+            text: 。將其餘卡片以任意順序放置到
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
             text: 。
   - origin: machine
+    low_confidence: true
     kind: template_translation
     data:
       template_id: frame:f74a553b43be21b57d97edc8383a6ab0ef10bd32dc1d13b942662878ae5aaea3
@@ -1435,7 +1402,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}指定'
+            text: '}選擇'
           - kind: LeafRef
             slot: leaf_1
           - kind: LeafRef
@@ -1456,7 +1423,7 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: 。將其重置。本回合，其無法攻擊對手。
+            text: 。將其重置。本回合，其無法攻擊敵方。
   - origin: machine
     kind: template_translation
     data:
@@ -1488,7 +1455,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}如果'
+            text: '}若'
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -1536,18 +1503,18 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: （如果自己的墓場有
+            text: （自己的墓場中有
           - kind: Form
             form_id: quantity.existence_count.value
             args:
               quantity:
                 slot: leaf_0
           - kind: Literal
-            text: 張以上的卡片，則【死靈充能_
+            text: '張以上的卡片時，【死靈充能 '
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 】後的能力發動）
+            text: 】之後的能力會生效）
   - origin: machine
     kind: template_translation
     data:
@@ -1637,11 +1604,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 【攻擊時】將這張卡片重置。此能力
+            text: 【攻擊時】將這張卡片重置。這個能力在
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 回合中至多發動
+            text: 回合中至多生效
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -1715,7 +1682,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 自己戰場上的從者進化時，這張卡片獲得【
+            text: 自己戰場上的從者進化時，這張卡片具有【
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -1733,13 +1700,13 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}指定'
+            text: '}選擇'
           - kind: LeafRef
             slot: leaf_1
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 上至多
+            text: 上的至多
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -1819,7 +1786,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}如果這張卡片是從手牌以外進入戰場的，則這張卡片{'
+            text: '}若這張卡片是從手牌以外進入戰場的，則這張卡片{'
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -1919,7 +1886,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 指定
+            text: 選擇
           - kind: LeafRef
             slot: leaf_0
           - kind: LeafRef
@@ -1936,7 +1903,7 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 。將其橫置。其在下一個其玩家的開始階段不會重置。抽取
+            text: 。將其橫置。其在其玩家的下一個開始階段不會重置。抽
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
@@ -1954,13 +1921,22 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}如果'
+            text: '}若'
           - kind: LeafRef
             slot: leaf_1
+          - kind: Literal
+            text: 的
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 的
+            text: 中有
+          - kind: Form
+            form_id: quantity.existence_count.value
+            args:
+              quantity:
+                slot: leaf_5
+          - kind: Literal
+            text: 張以上的
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
@@ -1968,14 +1944,7 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: 為
-          - kind: Form
-            form_id: quantity.existence_count.value
-            args:
-              quantity:
-                slot: leaf_5
-          - kind: Literal
-            text: 張以上，則將
+            text: ，則將
           - kind: LeafRef
             slot: leaf_7
           - kind: Literal
@@ -2039,12 +2008,9 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: '}：指定敵方的'
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_3
+            text: '}：選擇敵方的'
+          - kind: LeafRef
+            slot: leaf_3
           - kind: Literal
             text: 個從者。給予其
           - kind: LeafRef
@@ -2086,14 +2052,14 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: '}：指定自己的'
+            text: '}：選擇自己的'
           - kind: Form
             form_id: quantity.selection_count.value
             args:
               quantity:
                 slot: leaf_3
           - kind: Literal
-            text: 個「擁有【疾馳】或【守護】的從者」。使其{
+            text: 個「具有【疾馳】或【守護】的從者」。使其{
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
@@ -2140,11 +2106,11 @@ records:
               quantity:
                 slot: leaf_4
           - kind: Literal
-            text: 張絕傑・狂信・卡片並增加到
+            text: 張絕傑・狂信・卡片，並加入
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: 中。將其餘卡片以任意順序放置到
+            text: 。將其餘卡片以任意順序放置到
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
@@ -2170,7 +2136,7 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: '}並放置到墓場：可以將自己手牌中任意張數擁有【'
+            text: '}並放置到墓場：可以將自己的手牌中的任意數量具有【'
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
@@ -2230,7 +2196,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 到來時，將自己EX區的這張卡片放置到
+            text: 到來時，將自己的EX區中的這張卡片放置到
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -2248,7 +2214,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}：這張卡片進化。此能力在【真紅】狀態時可使用。'
+            text: '}：這張卡片進化。處於【真紅】狀態時，才可以使用這個能力。'
   - origin: machine
     kind: template_translation
     data:
@@ -2262,24 +2228,21 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}指定'
+            text: '}選擇'
           - kind: LeafRef
             slot: leaf_1
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
             text: 上的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_4
+          - kind: LeafRef
+            slot: leaf_4
           - kind: Literal
             text: 個
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 。給予其與「自己戰場上的其他Passion・從者的數量」相同的傷害。
+            text: 。給予其等同於「自己戰場上的其他Passion・從者數量」的傷害。
   - origin: machine
     kind: template_translation
     data:
@@ -2301,11 +2264,11 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 點傷害。抽取
+            text: 點傷害。抽
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 張卡片。此能力在本回合自己戰場上的從者曾進化的情況下可使用。
+            text: 張卡片。本回合，自己戰場上的從者曾進化時，才可以使用這個能力。
   - origin: machine
     kind: template_translation
     data:
@@ -2329,7 +2292,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 只要自己的墓場有『
+            text: 只要自己的墓場中有『
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -2337,7 +2300,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 』，這張卡片獲得【
+            text: 』，這張卡片就具有【
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -2351,18 +2314,15 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 指定自己的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_0
+            text: 選擇自己的
+          - kind: LeafRef
+            slot: leaf_0
           - kind: Literal
-            text: 個從者。使其獲得【
+            text: 個從者。其具有【
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 】。如果其為賽馬娘・從者，則使其{
+            text: 】。若其為賽馬娘・從者，則使其{
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -2388,11 +2348,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 只要這張卡片在戰場上，自己可在
+            text: 只要這張卡片在戰場上，自己在
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 回合中不限次數使用{進化}能力。
+            text: 回合中就可以使用{進化}能力任意次數。
   - origin: machine
     kind: template_translation
     data:
@@ -2419,11 +2379,11 @@ records:
               quantity:
                 slot: leaf_3
           - kind: Literal
-            text: 張Cute・卡片並增加到
+            text: 張Cute・卡片，並加入
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: 中。將其餘卡片以任意順序放置到
+            text: 。將其餘卡片以任意順序放置到
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
@@ -2459,7 +2419,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}自己戰場上的全部其他妖精・從者與自己EX區的全部妖精・從者{'
+            text: '}自己戰場上的全部其他妖精・從者與自己的EX區中的全部妖精・從者{'
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -2525,11 +2485,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 使用這張卡片之際，將
+            text: 使用這張卡片時，將
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 上
+            text: 上的
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
@@ -2545,7 +2505,7 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: ，或者，使EX區的
+            text: ，或使EX區中的
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
@@ -2616,13 +2576,13 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 【進化時】指定
+            text: 【進化時】選擇
           - kind: LeafRef
             slot: leaf_0
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 上至多
+            text: 上的至多
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -2643,7 +2603,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 對戰開始時，後攻玩家持有
+            text: 對戰開始時，後攻玩家具有
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -2707,11 +2667,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 【攻擊時】如果是對生命值
+            text: 【攻擊時】若攻擊對象為生命值
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 以下的從者的攻擊，則抽取
+            text: 以下的從者，則抽
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -2741,11 +2701,11 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: _
+            text: ' '
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 】：這張卡片獲得【
+            text: 】：這張卡片具有【
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
@@ -2763,14 +2723,14 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}：這張卡片進化。此能力在自己的手牌為'
+            text: '}：這張卡片進化。自己的手牌數量為'
           - kind: Form
             form_id: quantity.existence_count.value
             args:
               quantity:
                 slot: leaf_1
           - kind: Literal
-            text: 張時可使用。
+            text: 張時，才可以使用這個能力。
   - origin: machine
     kind: template_translation
     data:
@@ -2780,24 +2740,21 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 指定
+            text: 選擇
           - kind: LeafRef
             slot: leaf_0
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
             text: 上的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_3
+          - kind: LeafRef
+            slot: leaf_3
           - kind: Literal
             text: 個
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 。使其失去全部能力。將其攻擊力與生命值變為
+            text: 。其失去全部能力。將其攻擊力與生命值變為
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
@@ -2833,7 +2790,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}如果自己主戰者的生命值為'
+            text: '}若自己的主戰者的生命值為'
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -2855,7 +2812,6 @@ records:
           - kind: Literal
             text: 。
   - origin: machine
-    low_confidence: true
     kind: template_translation
     data:
       template_id: frame:fa291b3e09c6bf11d56c015dbfb3e74c09e9eb2be3b03fc61f5e4e89b764ac98
@@ -2864,7 +2820,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: （將這張卡片放置到裝備此卡的從者下方）
+            text: （將這張卡片放置在裝備這張卡片的從者下方）
   - origin: machine
     kind: template_translation
     data:
@@ -2878,17 +2834,17 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}使墓場的'
+            text: '}使墓場中的'
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 張陽炎・卡片消失：指定
+            text: 張陽炎・卡片消失：選擇
           - kind: LeafRef
             slot: leaf_2
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 上至多
+            text: 上的至多
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -2981,7 +2937,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: '}並放置到墓場：抽取'
+            text: '}並放置到墓場：抽'
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -2995,7 +2951,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 自己戰場上其他從者的{
+            text: 自己戰場上的其他從者的{
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -3064,7 +3020,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 』到戰場上。
+            text: 』。
   - origin: machine
     kind: template_translation
     data:
@@ -3074,7 +3030,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 自己的其他「擁有【疾馳】或【守護】的從者」攻擊時，給予敵方的全部主戰者
+            text: 自己的其他「具有【疾馳】或【守護】的從者」攻擊時，給予敵方的全部主戰者
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -3110,7 +3066,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}如果這張卡片是從手牌以外進入戰場，則這張卡片進化。'
+            text: '}若這張卡片是從手牌以外進入戰場的，則這張卡片進化。'
   - origin: machine
     kind: template_translation
     data:
@@ -3229,10 +3185,12 @@ records:
             text: '}並放置到墓場：將'
           - kind: LeafRef
             slot: leaf_2
+          - kind: Literal
+            text: 的
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 的
+            text: 中的
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
@@ -3244,11 +3202,11 @@ records:
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
-            text: 上。此能力在自己的戰場上有原始消費
+            text: 上。自己戰場上有原始消費
           - kind: LeafRef
             slot: leaf_7
           - kind: Literal
-            text: 以上的狂信・從者時可使用。
+            text: 以上的狂信・從者時，才可以使用這個能力。
   - origin: machine
     kind: template_translation
     data:
@@ -3267,7 +3225,6 @@ records:
           - kind: Literal
             text: 個從者。給予其X點傷害。X為「進入戰場的護符的消費」。
   - origin: machine
-    low_confidence: true
     kind: template_translation
     data:
       template_id: frame:faf62678152940e93be1aa53d1e1e3cab9d050338e0c85497192860bdb60b18c
@@ -3276,7 +3233,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: （這張卡片進入戰場時，或在自己的結束階段，可以將這張卡片橫置。敵方只能攻擊橫置狀態且持有【守護】的從者）
+            text: （這張卡片進入戰場時，或在自己的結束階段，可以將這張卡片橫置。敵方無法攻擊橫置狀態且具有【守護】的從者以外的對象）
   - origin: machine
     kind: template_translation
     data:
@@ -3290,7 +3247,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}指定自己戰場上的'
+            text: '}選擇自己戰場上的'
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -3317,7 +3274,7 @@ records:
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
-            text: ，並獲得【
+            text: ，並具有【
           - kind: LeafRef
             slot: leaf_7
           - kind: Literal
@@ -3410,11 +3367,11 @@ records:
               quantity:
                 slot: leaf_4
           - kind: Literal
-            text: 張機械・卡片並增加到
+            text: 張機械・卡片，並加入
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: 中。將其餘卡片以任意順序放置到
+            text: 。將其餘卡片以任意順序放置到
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
@@ -3428,7 +3385,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 這張卡片給予敵方的主戰者傷害時，指定
+            text: 這張卡片給予敵方的主戰者傷害時，選擇
           - kind: LeafRef
             slot: leaf_0
           - kind: LeafRef
@@ -3445,7 +3402,7 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 。將其破壞。抽取
+            text: 。將其破壞。抽
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
@@ -3463,7 +3420,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}指定敵方的'
+            text: '}選擇敵方的'
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -3634,7 +3591,6 @@ records:
           - kind: Literal
             text: 點傷害。
   - origin: machine
-    low_confidence: true
     kind: template_translation
     data:
       template_id: frame:fbb7966ddc8fcf35c6378b307dbd0ab56f9122853a2b60bce1e5f1cc917548a8
@@ -3643,7 +3599,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: （這張卡片進入戰場時，或在自己的結束階段，可以將這張卡片橫置。敵方只能攻擊橫置狀態且持有【守護】的從者）
+            text: （這張卡片進入戰場時，或在自己的結束階段，可以將這張卡片橫置。敵方無法攻擊橫置狀態且具有【守護】的從者以外的對象）
   - origin: machine
     kind: template_translation
     data:
@@ -3653,11 +3609,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 抽取
+            text: 抽
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 張卡片。給予敵方戰場上的全部從者與「自己的手牌張數」相同的傷害。
+            text: 張卡片。給予敵方戰場上的全部從者等同於「自己的手牌張數」的傷害。
   - origin: machine
     kind: template_translation
     data:
@@ -3682,17 +3638,14 @@ records:
             slot: leaf_3
           - kind: Literal
             text: 張卡片。可以從其中公開
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_4
+          - kind: LeafRef
+            slot: leaf_4
           - kind: Literal
-            text: 張偶像歌手・卡片並增加到
+            text: 張偶像歌手・卡片，並加入
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: 中。將其餘卡片以任意順序放置到
+            text: 。將其餘卡片以任意順序放置到
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
@@ -3752,11 +3705,11 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 】（擁有【
+            text: 】（具有【
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 】的從者，從進入戰場的回合起即可攻擊）
+            text: 】的從者從進入戰場的回合起，即可攻擊）
   - origin: machine
     kind: template_translation
     data:
@@ -3820,7 +3773,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 這張卡片從戰場返回手牌時，指定敵方的
+            text: 這張卡片從戰場返回手牌時，選擇敵方的
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -3932,13 +3885,22 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}如果'
+            text: '}若'
           - kind: LeafRef
             slot: leaf_1
+          - kind: Literal
+            text: 的
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 的
+            text: 中有
+          - kind: Form
+            form_id: quantity.existence_count.value
+            args:
+              quantity:
+                slot: leaf_5
+          - kind: Literal
+            text: 張以上的
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
@@ -3946,25 +3908,15 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: 為
-          - kind: Form
-            form_id: quantity.existence_count.value
-            args:
-              quantity:
-                slot: leaf_5
-          - kind: Literal
-            text: 張以上，則指定
+            text: ，則選擇
           - kind: LeafRef
             slot: leaf_6
           - kind: LeafRef
             slot: leaf_7
           - kind: Literal
             text: 上的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_9
+          - kind: LeafRef
+            slot: leaf_9
           - kind: Literal
             text: 個
           - kind: LeafRef
@@ -4041,7 +3993,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 點傷害。本回合，自己下一個使用的從者進入戰場時，使其{
+            text: 點傷害。本回合，自己下一次使用的從者進入戰場時，使其{
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -4077,21 +4029,15 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 指定敵方戰場上的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_0
+            text: 選擇敵方戰場上的
+          - kind: LeafRef
+            slot: leaf_0
           - kind: Literal
             text: 個從者與自己戰場上的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_1
+          - kind: LeafRef
+            slot: leaf_1
           - kind: Literal
-            text: 個透京・從者。將前者破壞。後者獲得【
+            text: 個透京・從者。將前者破壞。後者具有【
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -4258,7 +4204,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 對戰開始時，後攻玩家持有
+            text: 對戰開始時，後攻玩家具有
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -4276,15 +4222,15 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}使自己牌堆的上半部消失。給予敵方的全部主戰者與敵方戰場上的全部從者'
+            text: '}使自己的牌堆的上半部消失。給予敵方的全部主戰者與敵方戰場上的全部從者'
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 點傷害。如果藉此消失的卡片為
+            text: 點傷害。若藉此消失的卡片數量為
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 張以上，則轉變為
+            text: 張以上，則改為給予
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
@@ -4374,18 +4320,15 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: '}並放置到墓場：指定'
+            text: '}並放置到墓場：選擇'
           - kind: LeafRef
             slot: leaf_3
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
             text: 上的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_6
+          - kind: LeafRef
+            slot: leaf_6
           - kind: Literal
             text: 個
           - kind: LeafRef
@@ -4411,12 +4354,9 @@ records:
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
-            text: 張卡片。可以從其中將至多
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_3
+            text: 張卡片。可以將其中
+          - kind: LeafRef
+            slot: leaf_3
           - kind: Literal
             text: 張海洋・卡片放置到
           - kind: LeafRef
@@ -4426,7 +4366,7 @@ records:
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: 。本回合，使用該卡之際，消費-
+            text: 。本回合，使用該卡片時，消費-
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
@@ -4541,14 +4481,14 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}如果自己戰場與自己EX區的宴樂・卡片合計為'
+            text: '}若自己戰場上與自己EX區中合計有'
           - kind: Form
             form_id: quantity.existence_count.value
             args:
               quantity:
                 slot: leaf_1
           - kind: Literal
-            text: 張以上，則從自己的牌堆中搜尋
+            text: 張以上的宴樂・卡片，則從自己的牌堆中搜尋
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
@@ -4566,7 +4506,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: （持有【突進】的從者從進入戰場的回合起，即可攻擊敵方的從者）
+            text: （具有【突進】的從者從進入戰場的回合起，即可攻擊敵方的從者）
   - origin: machine
     kind: template_translation
     data:
@@ -4594,7 +4534,7 @@ records:
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
-            text: 。如果將Cute・卡片放置到墓場，則自己的主戰者{
+            text: 。若將Cute・卡片放置到墓場，則自己的主戰者{
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
@@ -4602,11 +4542,11 @@ records:
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
-            text: 。如果將Cool・卡片放置到墓場，則這張卡片獲得【
+            text: 。若將Cool・卡片放置到墓場，則這張卡片具有【
           - kind: LeafRef
             slot: leaf_7
           - kind: Literal
-            text: 】。如果將Passion・卡片放置到墓場，則這張卡片{
+            text: 】。若將Passion・卡片放置到墓場，則這張卡片{
           - kind: LeafRef
             slot: leaf_8
           - kind: Literal
@@ -4624,11 +4564,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 【進化時】敵方的全部玩家將自身戰場上攻擊力最高的
+            text: 【進化時】敵方的全部玩家將自身戰場上的
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 個從者放置到
+            text: 個攻擊力最高的從者放置到
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -4877,11 +4817,9 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: 到來時，如果
+            text: 到來時，若
           - kind: LeafRef
             slot: leaf_2
-          - kind: Literal
-            text: 的
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
@@ -4915,13 +4853,15 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: '}指定'
+            text: '}選擇'
           - kind: LeafRef
             slot: leaf_2
+          - kind: Literal
+            text: 的
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 的
+            text: 中的
           - kind: Form
             form_id: quantity.selection_count.value
             args:
@@ -4954,28 +4894,25 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}指定'
+            text: '}選擇'
           - kind: LeafRef
             slot: leaf_1
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
             text: 上的
-          - kind: Form
-            form_id: quantity.selection_count.value
-            args:
-              quantity:
-                slot: leaf_4
+          - kind: LeafRef
+            slot: leaf_4
           - kind: Literal
             text: 個
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: 。如果為【覺醒】狀態，則給予其
+            text: 。若處於【覺醒】狀態，則給予其
           - kind: LeafRef
             slot: leaf_5
           - kind: Literal
-            text: 點傷害。抽取
+            text: 點傷害。抽
           - kind: LeafRef
             slot: leaf_6
           - kind: Literal
@@ -4993,7 +4930,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 點傷害。抽取
+            text: 點傷害。抽
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -5007,7 +4944,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 對戰開始時，後攻玩家持有
+            text: 對戰開始時，後攻玩家具有
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
@@ -5061,7 +4998,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}如果自己的PP最大值為'
+            text: '}若自己的PP最大值為'
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -5073,7 +5010,7 @@ records:
           - kind: LeafRef
             slot: leaf_3
           - kind: Literal
-            text: ，並獲得【
+            text: ，並具有【
           - kind: LeafRef
             slot: leaf_4
           - kind: Literal
@@ -5088,11 +5025,11 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: （※如果自己的牌組構築為「卡片戰鬥!! 先導者」作品構築，則以從自己的牌堆中將
+            text: （※若自己的牌堆構築為「卡片戰鬥!! 先導者」作品構築，則以從自己的牌堆中將
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: 張持有【起始護符】的卡片召喚到戰場上的狀態開始對戰）
+            text: 張具有【起始護符】的卡片召喚到戰場上的狀態開始對戰）
   - origin: machine
     kind: template_translation
     data:
@@ -5206,7 +5143,7 @@ records:
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
-            text: '}如果這張卡片是因能力而進入戰場，則抽取'
+            text: '}若這張卡片是藉由能力進入戰場的，則抽'
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
@@ -5343,7 +5280,7 @@ records:
           - kind: LeafRef
             slot: leaf_1
           - kind: Literal
-            text: '}：抽取'
+            text: '}：抽'
           - kind: LeafRef
             slot: leaf_2
           - kind: Literal
@@ -5357,7 +5294,7 @@ records:
         format: 1
         nodes:
           - kind: Literal
-            text: 自己戰場上其他從者的{
+            text: 自己戰場上的其他從者的{
           - kind: LeafRef
             slot: leaf_0
           - kind: Literal
