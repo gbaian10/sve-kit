@@ -199,18 +199,22 @@ missing_effect 表示未知，不能顯示為沒有能力；correction_conflict 
 state 固定 pending，表示有比較資料，不表示效果一定未定；完全相同且無問題的 region 省略 wording。
 分類 classification 為 same_effect／pending_review／errata／unresolved；method 為 mechanical／ai／manual／none。
 reason 是判定或未定原因，AI 判定不等於真人核可。basis_printing_id 與 basis_released_on 只在 same_effect 時非空，
-日期依商品證據核對，人工指定日期不明版次時日期可 null。
+日期依商品證據核對，人工指定日期不明版次或以下空白原文例外時日期可 null。
 
 依據版本依以下規則產生，瀏覽器只消費結果：
 
-1. 比較有完整日精度發售／首次收錄日的版次；日期不明的 PR 或月年精度版次不參與，也不阻擋。
+1. 同一卡面／地區有非空主文時，空白版次不參與比較，也不能當共享依據；全部空白才維持空白。
+   缺來源的 null 不等於空白主文。非空版次通常比較完整日精度發售／首次收錄日；日期不明不參與，也不阻擋。
    precision 繼承、unknown 覆寫及多次收錄的最早日證明依商品契約；不以爬取時間、卡號或 ID 推斷年代。
 2. 只有效果相同才共用最新日期的卡文。機械比對只忽略空白、句子標點與已識別關鍵字的括號提醒，
    保留數字、算術符號、條件與其他資料欄。其他差異逐筆保存 AI 理由並交維護者確認；人工紀錄可覆寫。
 3. 最新日期的觀測須完整且 exact 相同；同日不同內容、缺來源或未解更正衝突維持 unresolved。
    手動指定唯一觀測的版次可解除日期歧義；紀錄綁定全部比較內容的 hash，來源改變即拒絕過期紀錄。
-4. same_effect 的依據寫入 face.current，basis=latest_known_release，供翻譯／DSL／搜尋使用；
-   display 同時指向它、basis=current。已採納勘誤或其他有效 current 優先，不能由機械結果覆寫。
+4. 空白與非空主文並存、卻沒有非空版次的完整日期時，比較全部非空主文；同效果才按候選穩定排序選依據，
+   `face.current.basis=latest_observed_no_errata`、`basis_released_on=null`，不推斷年代或製造日期。
+   其他非空版次仍依原有最新日與語意規則，詳見[卡文依據契約](../domains/wording-basis.md)。
+5. 一般 same_effect 的依據寫入 face.current，basis=latest_known_release，供翻譯／DSL／搜尋使用；
+   display 同時指向它、basis=current。已採納勘誤或其他有效的非空 current 優先，不能由機械結果覆寫；空白 current 在有非空主文時不保留。
    pending_review／errata 不建立共用 current；errata 保留給勘誤與印刷版本呈現，不冒充等價文字。
 
 candidates 恰列同 printing face 的 `{printing_id,revision_id?}` 觀測並穩定排序；
