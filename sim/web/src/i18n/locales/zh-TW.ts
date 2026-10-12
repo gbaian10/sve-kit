@@ -114,7 +114,7 @@ const zhTW = {
     clearConditions: "清除",
     unsupported: "這些條件還不能套用：{{facets}}",
     facet: {
-      cost: "費用",
+      cost: "消費",
       sets: "卡包",
       types: "種類",
       rarities: "稀有度",
@@ -214,7 +214,7 @@ const zhTW = {
     retry: "重試",
   },
   cardPage: {
-    costValue: "費用 {{value}}",
+    costValue: "消費 {{value}}",
     noValue: "—",
     previous: "上一張",
     next: "下一張",
@@ -225,7 +225,7 @@ const zhTW = {
     linkCopied: "已複製這張卡的連結",
     linkCopyFailed: "無法複製，請從網址列複製",
     set: "卡包 {{code}}",
-    stats: { cost: "費用", attack: "攻擊力", defense: "體力" },
+    stats: { cost: "消費", attack: "攻擊力", defense: "生命值" },
     separator: "・",
     backFace: "背面",
     notFound: "找不到這個卡號",

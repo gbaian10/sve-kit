@@ -6,6 +6,16 @@ const kinds = (text: string) =>
   inlinePieces(text).map((piece) => (piece.kind === "text" ? piece.text : `<${piece.alt}>`))
 
 describe("official text symbols", () => {
+  it("maps the Traditional Chinese Quick spelling to the Quick icon", () => {
+    const quick = inlinePieces("{Quick}")[0]
+    const japanese = inlinePieces("{クイック}")[0]
+    expect(quick?.kind).toBe("symbol")
+    expect(quick?.kind === "symbol" && quick.symbol.icon).toBe(
+      japanese?.kind === "symbol" ? japanese.symbol.icon : undefined,
+    )
+    expect(quick?.kind === "symbol" && quick.alt).toBe("Quick")
+  })
+
   it("maps the JP alt, the zh-Hant label and the EN stem of one icon to the same file", () => {
     const [ja, zh, en] = ["{ファンファーレ}", "{入場曲}", "{icon_fanfare|[fanfare]}"].map(
       (text) => {

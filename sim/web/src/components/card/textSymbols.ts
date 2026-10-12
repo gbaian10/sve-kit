@@ -63,7 +63,7 @@ const DEFINITIONS: readonly SymbolDefinition[] = [
     stems: ["icon_syokuzi", "icon_carrot"],
   },
   { icon: iconRide, kind: "keyword", spellings: ["憑依"], stems: ["ride", "icon_ride"] },
-  { icon: iconQuick, kind: "keyword", spellings: ["クイック"], stems: ["icon_quick"] },
+  { icon: iconQuick, kind: "keyword", spellings: ["クイック", "Quick"], stems: ["icon_quick"] },
   { icon: iconUB, kind: "keyword", spellings: ["UB"], stems: ["icon_UB"] },
   { icon: iconQ, kind: "keyword", spellings: ["Q"], stems: ["icon_q"] },
   { icon: ATTACK_ICON, kind: "stat", spellings: ["攻撃力", "攻擊力"], stems: ["icon_power"] },
