@@ -82,9 +82,9 @@ records:
   - face_id: f:bf1bf2e0d501578cb592c4deb9acac7d
     region: jp
     comparison_hash: sha256:0ec7bacd0a0b4e4ca5ffd69bd5d06a302ae56e3ea8283efe8d3907bc4e7f3476
-    classification: same_effect
-    method: ai
-    reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。
+    classification: errata
+    method: manual
+    reason: 維護者判定：語序變更改變選擇時機，無官方勘誤頁
   - face_id: f:dc7ac74e65a955b2a24f6fc55e71931c
     region: jp
     comparison_hash: sha256:1c29b1a41c2fa7a706320d90a83824cfb08907f102ae552a73f4c5f5e0fdc237

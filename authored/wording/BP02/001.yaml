@@ -64,9 +64,9 @@ records:
   - face_id: f:510b50eef64d5252b36cfc4ea25f69fc
     region: en
     comparison_hash: sha256:49d5cd60464facb93da58fde0f671a91eeccf8a5e1030c23bd34df7c0ad624ac
-    classification: pending_review
-    method: ai
-    reason: 搜尋牌庫後洗牌的明示步驟有增刪；未確認共通規則是否在全部版本強制補足，暫不核可等價。
+    classification: same_effect
+    method: manual
+    reason: 維護者判定：依綜合規則 5.8.2（日文 CR 1.27.0），搜尋牌堆後必須洗牌；英文補明洗牌步驟不改變效果。
   - face_id: f:5464c42531105d558eefba02239bb450
     region: en
     comparison_hash: sha256:46ba65c98f0d4a47a245444a99848d33b7464295d7738a86c83ccaf9c039f7cc
@@ -238,6 +238,6 @@ records:
   - face_id: f:fc260a47cb06514bac9fa2691751f2d5
     region: en
     comparison_hash: sha256:d81de76b4ecbd4c67bc25ba9d8178c208a78126d8d37eb9ef0f81144e720143f
-    classification: pending_review
-    method: ai
-    reason: 搜尋牌庫後洗牌的明示步驟有增刪；未確認共通規則是否在全部版本強制補足，暫不核可等價。
+    classification: same_effect
+    method: manual
+    reason: 維護者判定：依綜合規則 5.8.2（日文 CR 1.27.0），搜尋牌堆後必須洗牌；英文補明洗牌步驟不改變效果。

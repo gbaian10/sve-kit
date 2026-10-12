@@ -155,14 +155,14 @@ records:
     region: en
     comparison_hash: sha256:b0aeae8c5d77d10723fdd0e8dc1e13a220d6cddf1830bbbbbdddb18770efdb33
     classification: errata
-    method: ai
-    reason: 條件檢查與選擇對象的先後位置改變；條件未滿足時是否仍選擇對象可能不同。
+    method: manual
+    reason: 維護者判定：語序變更改變選擇時機，無官方勘誤頁
   - face_id: f:8bbc5eee22f85a4091f0d028fe6d21af
     region: jp
     comparison_hash: sha256:8604c16c89d351821ac6380e18f4c23ba4ce1213e8c37c15864cae76672ddc4b
     classification: errata
-    method: ai
-    reason: 條件檢查與選擇對象的先後位置改變；條件未滿足時是否仍選擇對象可能不同。
+    method: manual
+    reason: 維護者判定：語序變更改變選擇時機，無官方勘誤頁
   - face_id: f:9beb0e10ab3a5e0a883dc7edb17ca960
     region: en
     comparison_hash: sha256:931bf31055330d1c1edc3a7875684f1e46d1123d1be59f5b0065f02f93a557c4
