@@ -55,18 +55,15 @@ records:
         kind: authored
         text: 裝箱
       concept_evidence: []
-  - kind: glossary_choice
+  - origin: machine
+    kind: glossary_choice
     data:
       term_id: term:ability.choice
       lang: zh-Hant
       value:
         kind: authored
-        text: 命運抉擇
+        text: 抉擇
       concept_evidence: []
-      source_claim:
-        source_work: Shadowverse
-        source_urls: []
-        claimed_source: 數位版 sv1 的繁中術語主張
   - origin: official
     kind: glossary_choice
     data:
