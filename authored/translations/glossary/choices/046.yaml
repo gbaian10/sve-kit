@@ -1,13 +1,14 @@
 format: 3
 kind: translation_shard
 records:
-  - kind: glossary_choice
+  - origin: machine
+    kind: glossary_choice
     data:
       term_id: term:rule.instead
       lang: zh-Hant
       value:
         kind: authored
-        text: 轉變為
+        text: 改為
       concept_evidence: []
   - kind: glossary_choice
     data:

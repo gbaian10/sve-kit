@@ -231,21 +231,23 @@ records:
         source_work: Shadowverse
         source_urls: []
         claimed_source: 數位版 sv1 的繁中術語主張
-  - kind: glossary_choice
+  - origin: machine
+    kind: glossary_choice
     data:
       term_id: term:action.add_to_deck
       lang: zh-Hant
       value:
         kind: authored
-        text: 增加…到自己的牌堆中
+        text: 加入牌堆
       concept_evidence: []
-  - kind: glossary_choice
+  - origin: machine
+    kind: glossary_choice
     data:
       term_id: term:action.add_to_hand
       lang: zh-Hant
       value:
         kind: authored
-        text: 增加…到手牌中
+        text: 加入手牌
       concept_evidence: []
   - kind: glossary_choice
     data:
@@ -255,18 +257,15 @@ records:
         kind: authored
         text: 使…消失
       concept_evidence: []
-  - kind: glossary_choice
+  - origin: machine
+    kind: glossary_choice
     data:
       term_id: term:action.choose
       lang: zh-Hant
       value:
         kind: authored
-        text: 指定
+        text: 選擇
       concept_evidence: []
-      source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
   - kind: glossary_choice
     data:
       term_id: term:action.destroy
@@ -287,21 +286,23 @@ records:
         source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
         source_urls: []
         claimed_source: 數位版 both 的繁中術語主張
-  - kind: glossary_choice
+  - origin: machine
+    kind: glossary_choice
     data:
       term_id: term:action.distribute
       lang: zh-Hant
       value:
         kind: authored
-        text: 任意分配
+        text: 分配
       concept_evidence: []
-  - kind: glossary_choice
+  - origin: machine
+    kind: glossary_choice
     data:
       term_id: term:action.draw
       lang: zh-Hant
       value:
         kind: authored
-        text: 抽取1張卡片
+        text: 抽1張卡片
       concept_evidence: []
   - kind: glossary_choice
     data:

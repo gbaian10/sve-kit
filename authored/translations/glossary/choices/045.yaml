@@ -161,13 +161,14 @@ records:
         kind: authored
         text: 任意順序
       concept_evidence: []
-  - kind: glossary_choice
+  - origin: machine
+    kind: glossary_choice
     data:
       term_id: term:rule.can_attack
       lang: zh-Hant
       value:
         kind: authored
-        text: 可進行…次攻擊
+        text: 可以攻擊
       concept_evidence: []
   - kind: glossary_choice
     data:
@@ -213,13 +214,14 @@ records:
         source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
         source_urls: []
         claimed_source: 數位版 both 的繁中術語主張
-  - kind: glossary_choice
+  - origin: machine
+    kind: glossary_choice
     data:
       term_id: term:rule.has_ability
       lang: zh-Hant
       value:
         kind: authored
-        text: 獲得
+        text: 具有
       concept_evidence: []
   - kind: glossary_choice
     data:
