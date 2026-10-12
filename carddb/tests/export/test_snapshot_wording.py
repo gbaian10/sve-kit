@@ -283,3 +283,60 @@ def test_display_boundary_independently_of_partition_and_observation_checks(
         error = "another face/region"
     with pytest.raises(ValueError, match=error):
         _wording_display(face, wording, revisions, current, {"jp": ["wording_pending"]})
+
+
+@pytest.mark.parametrize(
+    "mode", ["undated_full", "older_full", "empty_basis", "no_empty"]
+)
+def test_shared_basis_excludes_empty_printings_without_inventing_a_date(
+    mode: str,
+) -> None:
+    view, manifest, fragments = shared_basis_view()
+    face = view["face"][0]
+    wording = object_value(array(face["wording"])[0])
+    if mode != "no_empty":
+        view["text_unit"].append(
+            {"id": "t:ja:e3b0c44298fc1c14", "lang": "ja", "text": ""}
+        )
+        old = next(row for row in view["face_revision"] if row["id"] == "r:a1")
+        old["effect_unit_id"] = "t:ja:e3b0c44298fc1c14"
+        array(wording["candidates"])[1] = {"printing_id": "p:b", "revision_id": "r:a1"}
+        physical = next(row for row in view["printing"] if row["id"] == "p:b")
+        object_value(array(physical["faces"])[0])["observations"] = [
+            {
+                "revision_id": "r:a1",
+                "state": "available",
+                "source_url": "https://example.invalid/blank",
+            }
+        ]
+        view["printing_product"].append(
+            view["printing_product"][0]
+            | {
+                "printing_id": "p:b",
+                "available_on": "2027-01-01",
+                "date_precision": "day",
+            }
+        )
+        wording["undated_printing_ids"] = []
+    if mode in {"undated_full", "no_empty"}:
+        view["product"][0].update(released_on=None, date_precision="unknown")
+        wording["basis_released_on"] = None
+        wording["undated_printing_ids"] = (
+            ["p:a"] if mode != "no_empty" else ["p:a", "p:b"]
+        )
+        object_value(array(face["current"])[0])["basis"] = "latest_observed_no_errata"
+    elif mode == "empty_basis":
+        wording.update(
+            basis_printing_id="p:b",
+            basis_released_on="2027-01-01",
+            display={"revision_id": "r:a1", "basis": "current"},
+        )
+        object_value(array(face["current"])[0])["revision_id"] = "r:a1"
+    if mode == "empty_basis":
+        with pytest.raises(ValueError, match="selected observation"):
+            validate_view(view, manifest, fragments)
+    elif mode == "no_empty":
+        with pytest.raises(ValueError, match="latest known release"):
+            validate_view(view, manifest, fragments)
+    else:
+        validate_view(view, manifest, fragments)

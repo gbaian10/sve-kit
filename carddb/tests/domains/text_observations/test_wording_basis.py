@@ -293,3 +293,118 @@ def test_undated_unreviewed_correction_does_not_block_a_dated_basis(
         )
         assert assessment["classification"] == "same_effect"
         assert assessment["basis_printing_id"] == known.printing_id
+
+
+@pytest.mark.parametrize(
+    ("mode", "empty_day", "full_day"),
+    [
+        ("undated_full", "2026-01-01", None),
+        ("ai_pending", "2026-01-01", None),
+        ("older_full", "2026-01-01", "2020-01-01"),
+        ("manual_empty", "2026-01-01", "2020-01-01"),
+        ("existing_empty_current", "2026-01-01", None),
+        ("all_empty", "2026-01-01", None),
+        ("nonempty_dates", "2020-01-01", "2026-01-01"),
+    ],
+)
+def test_shared_basis_uses_rules_text_instead_of_an_empty_printing(
+    tmp_path: Path,
+    inputs: Inputs,
+    mode: str,
+    empty_day: str,
+    full_day: str | None,
+) -> None:
+    inputs.jp["BP02-071"].faces[0].text = (
+        "Draw a card." if mode == "nonempty_dates" else ""
+    )
+    inputs.jp["PR-001"].faces[0].text = "" if mode == "all_empty" else "Draw a card;"
+    case = make_case(tmp_path / "authored", inputs, regions=("jp",))
+    group = case.plan.groups[0]
+    empty = next(o for o in group.observations if o.card_no == "BP02-071")
+    full = next(o for o in group.observations if o.card_no == "PR-001")
+    plan = (
+        replace(
+            case.plan,
+            wording_decisions=(
+                WordingDecision(
+                    face_id=group.face_id,
+                    region="jp",
+                    comparison_hash=comparison_hash(
+                        tuple(o.content for o in group.observations)
+                    ),
+                    classification="same_effect"
+                    if mode == "manual_empty"
+                    else "pending_review",
+                    method="manual" if mode == "manual_empty" else "ai",
+                    basis_printing_id=empty.printing_id
+                    if mode == "manual_empty"
+                    else None,
+                    reason="Synthetic blank and full-text difference",
+                ),
+            ),
+        )
+        if mode in {"ai_pending", "manual_empty"}
+        else case.plan
+    )
+    with create_database(compile_build()) as db:
+        with db.transaction():
+            case.stage(db)
+        case.compose().import_into(
+            db, build=case.context(), vocabulary=case.vocabulary, published=()
+        )
+        product(db, empty.printing_id, empty_day)
+        product(
+            db, full.printing_id, full_day, "unknown" if full_day is None else "day"
+        )
+        with db.transaction():
+            for row in db.rows("face_wording"):
+                db.delete(
+                    "face_wording",
+                    {key: row.values[key] for key in ("face_id", "region")},
+                )
+            if mode != "all_empty":
+                # Product evidence is added after the fixture's initial import.
+                for row in db.rows("face_current"):
+                    db.delete(
+                        "face_current",
+                        {key: row.values[key] for key in ("face_id", "region")},
+                    )
+            if mode == "existing_empty_current":
+                db.insert(
+                    "face_current",
+                    {
+                        "face_id": group.face_id,
+                        "region": "jp",
+                        "revision_id": candidate_revision_id(empty),
+                        "basis": "latest_observed_no_errata",
+                        "decision_id": None,
+                    },
+                )
+            if mode == "manual_empty":
+                with pytest.raises(ValueError, match="no unique observation"):
+                    populate_wording_basis(db, plan)
+                return
+            populate_wording_basis(db, plan)
+        (current,) = (row.values for row in db.rows("face_current"))
+        if mode == "all_empty":
+            revision = next(
+                row.values
+                for row in db.rows("face_revision")
+                if row.values["id"] == current["revision_id"]
+            )
+            assert any(
+                row.values["id"] == revision["effect_unit_id"]
+                and not row.values["text"]
+                for row in db.rows("text_unit")
+            )
+        else:
+            assert current["revision_id"] == candidate_revision_id(full)
+            assessment = db.rows("face_wording")[0].values
+            assert assessment["classification"] == "same_effect"
+            assert assessment["basis_printing_id"] == full.printing_id
+            assert assessment["basis_released_on"] == full_day
+            assert current["basis"] == (
+                "latest_observed_no_errata"
+                if full_day is None
+                else "latest_known_release"
+            )
