@@ -343,7 +343,7 @@ describe("double-face headers", () => {
     expect(screen.getByText("待校對")).toBeVisible()
     expect(screen.getByText("依日文原文翻譯")).toBeVisible()
     // The stat line names each value in text; cost has no icon, attack and defense do.
-    expect(screen.getAllByText("費用")).toHaveLength(2)
+    expect(screen.getAllByText("消費")).toHaveLength(2)
     expect(screen.getAllByText("2")).toHaveLength(2)
     expect(screen.queryByText("攻擊力")).not.toBeInTheDocument()
   })
