@@ -49,8 +49,7 @@ def test_named_field_count_requires_independent_kind_evidence(kind: str | None) 
 def test_token_trait_keeps_empty_or_heterogeneous_definitions_unresolved(
     kinds: tuple[str, ...],
 ) -> None:
-    engine = classifier()
-    engine.references.vocabulary = Vocabulary(
+    vocabulary = Vocabulary(
         bindings=(Binding(region="jp", kind="trait", code="synthetic", raw="仮族"),),
         terms=(
             VocabularyTerm(
@@ -61,7 +60,10 @@ def test_token_trait_keeps_empty_or_heterogeneous_definitions_unresolved(
             ),
         ),
     )
-    engine.references.kind_facts = KindFacts(token_traits=(("synthetic", kinds),))
+    engine = classifier(
+        vocabulary=vocabulary,
+        kind_facts=KindFacts(token_traits=(("synthetic", kinds),)),
+    )
     raw = "仮。自分の場の仮族・トークン２体を選ぶ。"
     field = normalize_source(raw, source(raw))
     part = field.parts[0]

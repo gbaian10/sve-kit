@@ -1,5 +1,6 @@
 """Exact source evidence and typed occurrences for four-layer build boundaries."""
 
+from functools import cached_property
 from itertools import pairwise
 from typing import TYPE_CHECKING, Annotated, Literal, Self
 
@@ -89,6 +90,22 @@ class ReferenceDomain(RecordData):
         "keyword", "ability", "rule_term", "trait", "class", "card_name", "type"
     ]
     references: tuple[Reference, ...]
+
+    @cached_property
+    def _reference_index(self) -> tuple[tuple[Reference, ...], frozenset[Reference]]:
+        return self.references, frozenset(self.references)
+
+    def contains(self, value: TypedValue) -> bool:
+        """Membership preserves reference kinds without changing serialized catalog order."""
+        if self._reference_index[0] is not self.references:
+            # model_copy can replace references while retaining cached attributes.
+            del self.__dict__["_reference_index"]
+        return (
+            isinstance(
+                value, (CardNameReference, GlossaryReference, VocabularyReference)
+            )
+            and value in self._reference_index[1]
+        )
 
     @model_validator(mode="after")
     def _catalog(self) -> Self:
@@ -297,7 +314,7 @@ def _registered_value(domain: ClosedDomain, value: TypedValue) -> None:
     elif isinstance(domain, QuantityDomain):
         _quantity_value(domain, value)
     elif isinstance(domain, ReferenceDomain):
-        if value not in domain.references:
+        if not domain.contains(value):
             raise ValueError("Reference is outside the active adopted catalog")
     elif not isinstance(value, str) or not value.isspace():
         raise ValueError("LiteralLayout must contain only source whitespace")

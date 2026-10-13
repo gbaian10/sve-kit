@@ -1,8 +1,10 @@
 """Derive typed leaves from pinned source grammar before matching authored frames."""
 
 import re
+from copy import deepcopy
 from dataclasses import dataclass
 from dataclasses import field as dataclass_field
+from types import MappingProxyType
 from typing import TYPE_CHECKING, override
 
 from sve_carddb.contracts.four_layer import (
@@ -197,10 +199,10 @@ class Classifier:
     def __init__(
         self, terms: tuple[Term, ...], references: SourceReferences, rules: Rules
     ) -> None:
-        self.terms = {term.id: term for term in terms}
+        self._terms = MappingProxyType({term.id: term for term in terms})
         if len(self.terms) != len(terms):
             raise ValueError("Source classifier terms must have unique IDs")
-        self.references = references
+        self._references = deepcopy(references)
         self.rules = rules
         expected: dict[str, list[tuple[str, str]]] = {}
         names: dict[str, list[str]] = {}
@@ -220,6 +222,17 @@ class Classifier:
             raise ValueError(
                 "Counted-kind evidence requires a current card-name reference"
             )
+        self._domains = MappingProxyType(self._build_domains())
+
+    @property
+    def terms(self) -> Mapping[str, Term]:
+        """The glossary stays fixed for this classifier's domain lifetime."""
+        return self._terms
+
+    @property
+    def references(self) -> SourceReferences:
+        """Caller mutations cannot replace this build's source catalog."""
+        return self._references
 
     def verify(
         self,
@@ -526,6 +539,9 @@ class Classifier:
     @property
     def domains(self) -> Mapping[str, ClosedDomain]:
         """Catalog membership is checked at binding time and never enters a frame hash."""
+        return self._domains
+
+    def _build_domains(self) -> dict[str, ClosedDomain]:
         result = {**DOMAINS, **N1_DOMAINS}
         for category in ("card_name", "keyword", "ability", "rule_term", "trait"):
             type_name = "CardName" if category == "card_name" else "Concept"

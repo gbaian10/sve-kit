@@ -12,6 +12,7 @@ from sve_carddb.contracts.four_layer import (
     Span,
     hash_payload,
 )
+from sve_carddb.contracts.source_binding import ReferenceDomain
 from sve_carddb.domains.translations.four_layer_classification import (
     Classifier,
     SourceReferences,
@@ -24,6 +25,8 @@ from .test_four_layer_normalizer import source as fixture_source
 
 if TYPE_CHECKING:
     from sve_carddb.contracts.source_binding import SourceDescriptor
+    from sve_carddb.domains.text_observations.vocabulary import Vocabulary
+    from sve_carddb.domains.translations.four_layer_kinds import KindFacts
 
 
 def source(raw: str, field: str = "effect") -> SourceDescriptor:
@@ -40,8 +43,17 @@ def source(raw: str, field: str = "effect") -> SourceDescriptor:
     )
 
 
-def classifier(terms: tuple[Term, ...] = (), extra: tuple[str, ...] = ()) -> Classifier:
+def classifier(
+    terms: tuple[Term, ...] = (),
+    extra: tuple[str, ...] = (),
+    *,
+    vocabulary: Vocabulary | None = None,
+    kind_facts: KindFacts | None = None,
+) -> Classifier:
     refs = SourceReferences()
+    refs.vocabulary = vocabulary
+    if kind_facts is not None:
+        refs.kind_facts = kind_facts
     for term in terms:
         refs.terms.setdefault(term.source_ja, []).append((term.id, term.category))
         if term.category == "card_name":
@@ -55,6 +67,45 @@ def classifier(terms: tuple[Term, ...] = (), extra: tuple[str, ...] = ()) -> Cla
         ),
     )
     return Classifier(terms, refs, rules)
+
+
+def test_domains_are_reused_with_ordered_build_local_references() -> None:
+    terms = (
+        Term("term:name.z", "card_name", "仮名乙"),
+        Term("term:name.a", "card_name", "仮名甲"),
+    )
+    engine = classifier(terms)
+    domains = engine.domains
+    assert engine.domains is domains
+    domain = domains["card_name.any.v1"]
+    assert isinstance(domain, ReferenceDomain)
+    assert domain.model_dump(mode="json") == {
+        "type": "CardName",
+        "category": "card_name",
+        "references": [
+            {"kind": "card_name", "term_id": "term:name.a"},
+            {"kind": "card_name", "term_id": "term:name.z"},
+        ],
+    }
+    assert classifier().domains["card_name.any.v1"] != domain
+
+
+def test_classifier_keeps_its_input_reference_snapshot() -> None:
+    term = Term("term:name.synthetic", "card_name", "仮名")
+    original = classifier((term,))
+    refs = original.references
+    engine = Classifier((term,), refs, original.rules)
+    refs.terms.clear()
+    refs.card_names.clear()
+    raw = term.source_ja
+    field = normalize_source(raw, source(raw, "name"))
+    frame, binding = engine.recognize(raw, field.source, field.parts[0]).bind(
+        field.source, field.parts[0]
+    )
+    field.verify(raw, (frame,), (binding,), engine.domains)
+    assert binding.values == {
+        "leaf_0": CardNameReference(kind="card_name", term_id=term.id)
+    }
 
 
 def test_card_name_is_protected_before_numeric_and_phase_recognition() -> None:
