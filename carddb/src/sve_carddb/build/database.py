@@ -42,14 +42,9 @@ def _raw_rows(value: object) -> tuple[tuple[SQLValue, ...], ...]:
     return tuple(result)
 
 
-def install_functions(
-    connection: sqlite3.Connection,
-    schema: CompiledSchema,
-    *,
-    reuse_validated: bool = False,
-) -> Rules:
+def install_functions(connection: sqlite3.Connection, schema: CompiledSchema) -> Rules:
     """Install deterministic CHECK functions before executing compiled DDL."""
-    rules = Rules(dict(schema.json_schemas), reuse_validated=reuse_validated)
+    rules = Rules(dict(schema.json_schemas))
     connection.create_function("sve_fullmatch", 2, fullmatch, deterministic=True)
     connection.create_function("sve_json_valid", 2, rules.sql_json, deterministic=True)
     connection.create_function(
@@ -265,7 +260,7 @@ class Database:
             raise ValueError("Search alias has no valid target")
 
     def rows(self, name: str) -> tuple[Row, ...]:
-        """Read declared columns in primary-key order through the typed boundary."""
+        """Read declared columns in primary-key order and validate every stored value."""
         return self.select(name, self.columns(name))
 
 
@@ -303,7 +298,7 @@ def create_database(
         ":memory:" if path is None else path, isolation_level=None
     )
     try:
-        rules = install_functions(connection, schema, reuse_validated=True)
+        rules = install_functions(connection, schema)
         connection.execute("PRAGMA foreign_keys = ON")
         database = Database(connection, schema, rules)
         with database.transaction():
