@@ -52,7 +52,7 @@ class Snapshot:
     manifest_blob: Blob
 
     def verify(self, projection: Projection) -> None:
-        """Require the independent reader's complete join to equal the logical view."""
+        """Require the reader's join to equal the logical view and the union to match it."""
         joined = read_snapshot(
             self.manifest, {key: blob.raw for key, blob in self.payloads.items()}
         )
