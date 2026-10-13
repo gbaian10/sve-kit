@@ -11,7 +11,7 @@ from sve_carddb.build.compiler import compile_schema
 from sve_carddb.build.t0 import REGISTRY, compile_t0
 from sve_carddb.build.t1 import compile_build
 
-from ..support.build_db_fixtures import seed
+from ..support.build_db_fixtures import rows, seed
 from ..support.build_db_t1_fixtures import populate
 
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ def test_rebuild_upgrades_offline_file_and_adds_real_cr_fk(tmp_path: Path) -> No
     assert list(tmp_path.iterdir()) == [path]
 
 
-@pytest.mark.parametrize("failure", ["body", "fk"])
+@pytest.mark.parametrize("failure", ["body", "fk", "query"])
 def test_rebuild_failure_preserves_previous_bytes(tmp_path: Path, failure: str) -> None:
     path = tmp_path / "build.sqlite"
     with create_database(compile_t0(), path) as db:
@@ -50,6 +50,11 @@ def test_rebuild_failure_preserves_previous_bytes(tmp_path: Path, failure: str) 
                 "rules_profile_revision",
                 {"id": "profile_revision"},
                 {"cr_version_id": "missing"},
+            )
+        else:
+            db.insert(
+                "rules_profile_revision",
+                rows()["rules_profile_revision"] | {"id": "overlapping_revision"},
             )
 
     with pytest.raises((RuntimeError, sqlite3.IntegrityError)):
