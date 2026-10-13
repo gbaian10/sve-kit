@@ -23,17 +23,11 @@ from sve_carddb.domains.translations.four_layer_authored import (
 )
 from sve_carddb.domains.translations.four_layer_classification import Term
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
-from sve_carddb.domains.translations.four_layer_render import (
-    BoundTarget,
-    Renderer,
-    SelectedTarget,
-)
 from sve_carddb.domains.translations.four_layer_storage import (
+    payload,
     read_annotation,
-    read_binding,
     read_forms,
     read_frame,
-    read_owned_render_occurrences,
     write_annotation,
     write_binding,
     write_form,
@@ -236,7 +230,18 @@ def test_frame_target_and_owner_binding_round_trip_through_actual_sqlite(
     )
     with db.transaction():
         write_binding(db, "use:synthetic", binding, {})
-    assert read_binding(db, binding.id, {}) == binding
+    values = payload(db.rows("text_template_binding")[0])
+    values.pop("use_id")
+    expected = binding.model_dump(mode="json")
+    occurrences = expected.pop("occurrences")
+    assert values == expected
+    leaves = []
+    for row in db.rows("binding_leaf_occurrence"):
+        leaf = payload(row)
+        leaf.pop("binding_id")
+        leaf.pop("position")
+        leaves.append(leaf)
+    assert leaves == occurrences
 
 
 @pytest.mark.parametrize(
@@ -336,7 +341,18 @@ def test_all_owner_kinds_round_trip_bindings(
         use.update(id="use:owner", context_id="context:owner", field=field, **columns)
         db.insert("translation_use", use)
         write_binding(db, "use:owner", binding, engine.domains)
-    assert read_binding(db, binding.id, engine.domains) == binding
+    values = payload(db.rows("text_template_binding")[0])
+    values.pop("use_id")
+    expected = binding.model_dump(mode="json")
+    occurrences = expected.pop("occurrences")
+    assert values == expected
+    leaves = []
+    for row in db.rows("binding_leaf_occurrence"):
+        leaf = payload(row)
+        leaf.pop("binding_id")
+        leaf.pop("position")
+        leaves.append(leaf)
+    assert leaves == occurrences
 
 
 def test_storage_rejects_a_forged_omission_on_an_explicit_number(
@@ -420,46 +436,6 @@ def test_valid_json_cannot_hide_required_leaves_in_literal_target(
         write_target(db, bad, "source")
 
 
-@pytest.mark.parametrize(
-    "corrupt", ["boolean_value", "missing_leaf", "position_gap", "stale_text"]
-)
-def test_typed_binding_read_rejects_corrupt_relational_values(
-    stored: tuple[Database, Frame, SourceBinding], corrupt: str
-) -> None:
-    db, _, binding = stored
-    with db.transaction():
-        write_binding(db, "use:synthetic", binding, {})
-    with db.transaction():
-        if corrupt == "boolean_value":
-            db.update(
-                "text_template_binding",
-                {"id": binding.id},
-                {"values": Json({"n": True})},
-            )
-        elif corrupt == "missing_leaf":
-            db.delete(
-                "binding_leaf_occurrence",
-                {"binding_id": binding.id, "slot": "n", "ordinal": 0},
-            )
-        elif corrupt == "position_gap":
-            db.update(
-                "binding_leaf_occurrence",
-                {"binding_id": binding.id, "slot": "n", "ordinal": 0},
-                {"position": 2},
-            )
-        else:
-            db.update(
-                "text_unit",
-                {"id": binding.source.source_unit_id},
-                {"text": "新版合成文字"},
-            )
-    with pytest.raises(
-        ValueError,
-        match=r"stored four-layer binding|positions must be continuous|stale exact bytes",
-    ):
-        read_binding(db, binding.id, {})
-
-
 def test_nested_json_extra_fields_are_rejected_before_insert(
     stored: tuple[Database, Frame, SourceBinding],
 ) -> None:
@@ -507,72 +483,6 @@ def test_pinned_form_rule_and_typed_signature_survive_sqlite(
         )
     with pytest.raises(ValueError, match="Invalid stored four-layer form"):
         read_forms(db)
-
-
-def test_render_leaf_source_links_and_unicode_bounds_are_checked(
-    stored: tuple[Database, Frame, SourceBinding],
-) -> None:
-    db, frame, binding = stored
-    rendered = Renderer({}, {}, {}).render(
-        "context:synthetic",
-        "zh-Hant",
-        (BoundTarget(frame, binding, SelectedTarget(default_target())),),
-    )
-    assert rendered.rendered is not None
-    expected = rendered.rendered
-    identifier, _ = expected.identity()
-    with db.transaction():
-        write_binding(db, "use:synthetic", binding, {})
-        db.insert(
-            "translation",
-            {
-                "id": identifier,
-                "context_id": "context:synthetic",
-                "target_lang": "zh-Hant",
-                "revision": 0,
-                "text": "仮😀2枚",
-                "tokens": None,
-                "origin": "project",
-                "authority": "unofficial",
-                "low_confidence": False,
-                "source_hash": "sha256:" + binding.source.source_hash,
-                "source_id": None,
-            },
-        )
-        db.insert(
-            "render_leaf_occurrence",
-            {
-                "translation_id": identifier,
-                "binding_id": binding.id,
-                "node_path": Json([1]),
-                "slot": "n",
-                "source_ordinals": Json([0]),
-                "ranges": Json([{"start": 2, "end": 3}]),
-            },
-        )
-    assert (
-        read_owned_render_occurrences(db, identifier, {}, expected=expected)[0]
-        .ranges[0]
-        .start
-        == 2
-    )
-    key: dict[str, Value] = {
-        "translation_id": identifier,
-        "binding_id": binding.id,
-        "node_path": Json([1]),
-    }
-    with db.transaction():
-        db.update("render_leaf_occurrence", key, {"source_ordinals": Json([1])})
-    with pytest.raises(ValueError, match="missing source occurrences"):
-        read_owned_render_occurrences(db, identifier, {}, expected=expected)
-    with db.transaction():
-        db.update(
-            "render_leaf_occurrence",
-            key,
-            {"source_ordinals": Json([0]), "ranges": Json([{"start": 2, "end": 20}])},
-        )
-    with pytest.raises(ValueError, match="exceeds exact translation text"):
-        read_owned_render_occurrences(db, identifier, {}, expected=expected)
 
 
 def annotation(reference: JsonValue, bold: bool | None = True) -> AnnotationSet:
@@ -679,75 +589,3 @@ def test_valid_binding_hash_does_not_authorize_a_forged_numeric_value(
     ):
         write_binding(db, "use:synthetic", forged, {})
     assert db.rows("text_template_binding") == ()
-
-
-def test_stored_render_rejects_a_missing_repeated_path(
-    stored: tuple[Database, Frame, SourceBinding],
-) -> None:
-    db, definition, binding = stored
-    slot = next(iter(binding.values))
-    target = Target.model_validate_json(
-        canonical(
-            {
-                "format": 1,
-                "nodes": [
-                    {"kind": "LeafRef", "slot": slot},
-                    {"kind": "Literal", "text": "😀"},
-                    {"kind": "LeafRef", "slot": slot},
-                ],
-            }
-        )
-    )
-    result = Renderer({}, {}, {}).render(
-        "context:synthetic",
-        "zh-Hant",
-        (BoundTarget(definition, binding, SelectedTarget(target)),),
-    )
-    assert result.rendered is not None
-    expected = result.rendered
-    identifier, _ = expected.identity()
-    with db.transaction():
-        write_binding(db, "use:synthetic", binding, {})
-        db.insert(
-            "translation",
-            {
-                "id": identifier,
-                "context_id": expected.context_id,
-                "target_lang": expected.target_lang,
-                "revision": 0,
-                "text": expected.text,
-                "tokens": None,
-                "origin": expected.origin,
-                "authority": "unofficial",
-                "low_confidence": expected.low_confidence,
-                "source_hash": "sha256:" + binding.source.source_hash,
-                "source_id": None,
-            },
-        )
-        for occurrence in expected.occurrences():
-            data = occurrence.model_dump(mode="json")
-            db.insert(
-                "render_leaf_occurrence",
-                {
-                    "translation_id": identifier,
-                    "binding_id": binding.id,
-                    "slot": occurrence.slot,
-                    "node_path": Json(data["node_path"]),
-                    "source_ordinals": Json(data["source_ordinals"]),
-                    "ranges": Json(data["ranges"]),
-                },
-            )
-    assert (
-        len(read_owned_render_occurrences(db, identifier, {}, expected=expected)) == 2
-    )
-    with db.transaction():
-        db.delete(
-            "render_leaf_occurrence",
-            {
-                "translation_id": identifier,
-                "binding_id": binding.id,
-                "node_path": Json([2]),
-            },
-        )
-    with pytest.raises(ValueError, match="render occurrence"):
-        read_owned_render_occurrences(db, identifier, {}, expected=expected)

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build import create_database
+from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField, Target
 from sve_carddb.core.json import canonical, digest
@@ -21,7 +21,6 @@ from sve_carddb.domains.translations.four_layer_build import Settings, apply
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 from sve_carddb.domains.translations.four_layer_pipeline import prepare_classifier
 from sve_carddb.domains.translations.four_layer_sources import descriptor
-from sve_carddb.domains.translations.four_layer_storage import read_binding
 from sve_carddb.domains.translations.inputs import load_glossary
 
 from ...support import digital_link_import_fixtures
@@ -206,10 +205,7 @@ def test_producer_uses_exact_owner_and_preserves_whole_field_fallback(  # ruff: 
             return
         bindings = db.rows("text_template_binding")
         assert len(bindings) == 1
-        assert (
-            read_binding(db, str(bindings[0].values["id"]), engine.domains).source
-            == source
-        )
+        assert bindings[0].values["source"] == Json(source.model_dump(mode="json"))
         if translated:
             value = db.rows("translation")[0].values
             assert (value["text"], value["origin"], value["low_confidence"]) == (

@@ -394,6 +394,19 @@ def test_read_boundary_rejects_corrupt_storage_and_disabled_enforcement() -> Non
             db.verify()
 
 
+def test_save_rejects_check_corruption_before_creating_a_bundle(tmp_path: Path) -> None:
+    with create_database(compiled()) as db:
+        with db.transaction():
+            db.insert("numbers", number_row())
+        db._connection.execute("PRAGMA ignore_check_constraints=ON")
+        db._connection.execute("UPDATE numbers SET flag=2")
+        db._connection.execute("PRAGMA ignore_check_constraints=OFF")
+        destination = tmp_path / "invalid.sqlite"
+        with pytest.raises(sqlite3.IntegrityError, match="Integrity"):
+            db.save(destination)
+        assert not destination.exists()
+
+
 @pytest.mark.parametrize(
     "raw", [None, [(1.5,)], [(b"bytes",)], [["list row"]], [(True,)]]
 )

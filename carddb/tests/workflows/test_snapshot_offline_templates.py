@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.build import Json
 from sve_carddb.build.database import open_database
 from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, compile_build
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField
@@ -22,7 +23,6 @@ from sve_carddb.domains.translations.four_layer_sources import (
     descriptor,
     semantic_context,
 )
-from sve_carddb.domains.translations.four_layer_storage import read_binding
 from sve_carddb.domains.translations.inputs import Snapshot, load_glossary
 from sve_carddb.domains.translations.recognition.rules import parse as parse_rules
 from sve_carddb.domains.translations.sources import Sources
@@ -243,8 +243,5 @@ def test_normal_offline_build_reads_authored_frames_and_keeps_whole_field_fallba
     with open_database(compile_build(SCHEMA), tmp_path / "after/build.sqlite") as db:
         bindings = db.rows("text_template_binding")
         assert len(bindings) == 1
-        assert (
-            read_binding(db, str(bindings[0].values["id"]), engine.domains).source
-            == source
-        )
+        assert bindings[0].values["source"] == Json(source.model_dump(mode="json"))
     assert "カード" not in canonical(report).decode()

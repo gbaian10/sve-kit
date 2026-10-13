@@ -10,16 +10,4 @@ def insert_exact(
     db: Database, table: str, values: dict[str, Value], keys: tuple[str, ...]
 ) -> None:
     """Reject conflicting repeat inserts instead of silently replacing prior evidence."""
-    previous = [
-        row.values
-        for row in db.select(
-            table, db.columns(table), where={key: values[key] for key in keys}
-        )
-    ]
-    if previous:
-        if previous != [{name: values.get(name) for name in db.columns(table)}] or (
-            set(values) - set(db.columns(table))
-        ):
-            raise ValueError("Conflicting catalog row")
-    else:
-        db.insert(table, values)
+    db.insert_exact(table, values, keys)

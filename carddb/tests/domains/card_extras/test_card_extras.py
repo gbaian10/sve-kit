@@ -21,6 +21,7 @@ from sve_carddb.domains.card_extras import (
     populate_card_extras,
     require_card_extras_ready,
 )
+from sve_carddb.domains.card_extras.importer import populate_planned_card_extras
 
 from ...support.card_extras_fixtures import context, page, seed, source
 
@@ -487,6 +488,17 @@ def test_stale_plan_and_wrong_configuration_fail_before_writes(db: Database) -> 
     with pytest.raises(ValueError, match="configuration mismatch"), db.transaction():
         populate_card_extras(db, plan, build=context(changed))
     assert not db.rows("qa")
+
+
+def test_planned_extras_keep_the_configuration_boundary(db: Database) -> None:
+    plan = plan_card_extras(db, (page(),))
+    with pytest.raises(ValueError, match="configuration mismatch"), db.transaction():
+        populate_planned_card_extras(db, plan, build=context(replace(plan, pages=())))
+    assert not db.rows("qa")
+    with db.transaction():
+        record = populate_planned_card_extras(db, plan, build=context(plan))
+    assert len(db.rows("qa_version")) == len(plan.questions)
+    assert record.uses == plan.source_uses()
 
 
 def _omit_use(build: BuildContext, uses: tuple[SourceUse, ...]) -> InputRecord:

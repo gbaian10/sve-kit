@@ -1,5 +1,7 @@
 """Bounded typed lookups preserve whitelists, NULL matching and exact inserts."""
 
+# ruff: file-ignore[pytest-raises-with-multiple-statements] -- rollback must cover both the initial insert and the conflicting repeat
+
 from typing import TYPE_CHECKING
 
 import pytest
@@ -101,3 +103,44 @@ def test_exact_insert_compares_omitted_nullable_columns(
             db.transaction(),
         ):
             insert_exact(db, "source_record", sparse, ("id",))
+
+
+def test_exact_inserts_follow_mutations_in_the_same_transaction(
+    t0_database_template: DatabaseTemplate,
+) -> None:
+    with t0_database_template.copy() as db, db.transaction():
+        values = dict(db.rows("source_record")[0].values)
+        insert_exact(db, "source_record", values, ("id",))
+        changed = values | {"authored_path": "synthetic/changed.yaml"}
+        db.update("source_record", {"id": values["id"]}, changed)
+        with pytest.raises(ValueError, match="Conflicting catalog row"):
+            insert_exact(db, "source_record", values, ("id",))
+        insert_exact(db, "source_record", changed, ("id",))
+        new = values | {"id": "new-source"}
+        insert_exact(db, "source_record", new, ("id",))
+        db.delete("source_record", {"id": "new-source"})
+        insert_exact(db, "source_record", new, ("id",))
+        direct = values | {"id": "direct-source"}
+        db.insert("source_record", direct)
+        with pytest.raises(ValueError, match="Conflicting catalog row"):
+            insert_exact(
+                db, "source_record", direct | {"authored_path": "other.yaml"}, ("id",)
+            )
+
+
+def test_exact_insert_can_retry_after_rollback(
+    t0_database_template: DatabaseTemplate,
+) -> None:
+    with t0_database_template.copy() as db:
+        values = dict(db.rows("source_record")[0].values) | {"id": "new-source"}
+        with (
+            pytest.raises(ValueError, match="Conflicting catalog row"),
+            db.transaction(),
+        ):
+            insert_exact(db, "source_record", values, ("id",))
+            insert_exact(
+                db, "source_record", values | {"authored_path": "other.yaml"}, ("id",)
+            )
+        with db.transaction():
+            insert_exact(db, "source_record", values, ("id",))
+        assert db.select("source_record", ("id",), where={"id": "new-source"})

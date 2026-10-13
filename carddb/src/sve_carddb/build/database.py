@@ -65,6 +65,9 @@ class Database:
         self._rules = rules
         self._version = schema.version
         self._query_checks = schema.query_checks
+        self._exact_rows: dict[
+            str, dict[tuple[SQLValue, ...], tuple[SQLValue, ...]]
+        ] = {}
 
     def _read(
         self, sql: str, parameters: tuple[SQLValue, ...] = ()
@@ -72,7 +75,7 @@ class Database:
         result: object = self._connection.execute(sql, parameters).fetchall()
         return _raw_rows(result)
 
-    def verify(self) -> None:
+    def verify(self, *, integrity: bool = True) -> None:
         """Fail on disabled foreign keys, dangling references or integrity errors."""
         if self._read("PRAGMA foreign_keys") != ((1,),):
             raise sqlite3.IntegrityError("Foreign key enforcement is disabled")
@@ -80,7 +83,7 @@ class Database:
             raise sqlite3.IntegrityError("CHECK constraint enforcement is disabled")
         if self._read("PRAGMA foreign_key_check"):
             raise sqlite3.IntegrityError("Foreign key check failed")
-        if self._read("PRAGMA integrity_check") != (("ok",),):
+        if integrity and self._read("PRAGMA integrity_check") != (("ok",),):
             raise sqlite3.IntegrityError("Integrity check failed")
         if self._read("PRAGMA user_version") != ((self._version,),):
             raise sqlite3.IntegrityError("Build schema version mismatch")
@@ -98,17 +101,20 @@ class Database:
         self._connection.execute("BEGIN")
         try:
             yield self
-            self.verify()
+            self.verify(integrity=False)
             self._connection.execute("COMMIT")
         except BaseException:
             if self._connection.in_transaction:
                 self._connection.execute("ROLLBACK")
             raise
+        finally:
+            self._exact_rows.clear()
 
     def save(self, path: Path) -> None:
         """Save the completed transaction without reconstructing domain rows."""
         if self._connection.in_transaction:
             raise RuntimeError("Cannot save an unfinished build transaction")
+        self.verify()
         with path.open("xb"):
             pass
         target = sqlite3.connect(path)
@@ -134,8 +140,18 @@ class Database:
         """Bind validated values; omitted fixed columns use their declared defaults."""
         table = self._writable(name)
         parameters = self._parameters(table, values)
+        self._insert(table, values, parameters)
+
+    def _insert(
+        self,
+        table: Table,
+        values: Mapping[str, Value],
+        parameters: tuple[SQLValue, ...],
+    ) -> None:
+        name = table.name
         if not values:
             self._connection.execute(f"INSERT INTO {identifier(name)} DEFAULT VALUES")
+            self._exact_rows.pop(name, None)
             return
         columns = ", ".join(map(identifier, values))
         placeholders = ", ".join("?" for _ in values)
@@ -143,6 +159,43 @@ class Database:
             f"INSERT INTO {identifier(name)} ({columns}) VALUES ({placeholders})",
             parameters,
         )
+        if name in self._exact_rows:
+            supplied = dict(zip(values, parameters, strict=True))
+            stored = tuple(
+                supplied.get(column.name, column.fixed) for column in table.columns
+            )
+            key = tuple(
+                supplied.get(column, table.column(column).fixed)
+                for column in table.primary_key
+            )
+            self._exact_rows[name][key] = stored
+
+    def insert_exact(
+        self, name: str, values: Mapping[str, Value], keys: tuple[str, ...]
+    ) -> None:
+        """Index validated rows once per transaction and compare conflicting identities."""
+        table = self._writable(name)
+        if set(keys) != set(table.primary_key):
+            raise ValueError("Exact insertion requires the complete primary key")
+        parameters = self._parameters(table, values)
+        if name not in self._exact_rows:
+            columns = ", ".join(identifier(column.name) for column in table.columns)
+            positions = tuple(
+                self.columns(name).index(column) for column in table.primary_key
+            )
+            index = {}
+            for row in self._read(f"SELECT {columns} FROM {identifier(name)}"):
+                for column, value in zip(table.columns, row, strict=True):
+                    decode(column, value, self._rules)
+                index[tuple(row[position] for position in positions)] = row
+            self._exact_rows[name] = index
+        supplied = dict(zip(values, parameters, strict=True))
+        key = tuple(supplied[column] for column in table.primary_key)
+        previous = self._exact_rows[name].get(key)
+        if previous is None:
+            self._insert(table, values, parameters)
+        elif previous != tuple(supplied.get(column.name) for column in table.columns):
+            raise ValueError("Conflicting catalog row")
 
     def _key(
         self, table: Table, key: Mapping[str, Value]
@@ -166,6 +219,7 @@ class Database:
             f"UPDATE {identifier(name)} SET {assignments} WHERE {where}",
             (*parameters, *key_values),
         )
+        self._exact_rows.pop(name, None)
 
     def delete(self, name: str, key: Mapping[str, Value]) -> None:
         """Delete by a complete key; referenced rows remain protected by RESTRICT."""
@@ -174,6 +228,7 @@ class Database:
         self._connection.execute(
             f"DELETE FROM {identifier(name)} WHERE {where}", parameters
         )
+        self._exact_rows.pop(name, None)
 
     def has_table(self, name: str) -> bool:
         """Report declared capability availability without probing SQLite internals."""

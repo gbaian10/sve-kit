@@ -2,12 +2,11 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.core.provenance import Source
-
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from sve_carddb.build import Database, Value
+    from sve_carddb.core.provenance import Source
 
 
 def source_values(source: Source) -> dict[str, Value]:
@@ -30,8 +29,7 @@ def source_values(source: Source) -> dict[str, Value]:
 def raw_values(sources: Iterable[Source]) -> dict[str, dict[str, Value]]:
     """Validate repeated version metadata before any database writes."""
     result: dict[str, dict[str, Value]] = {}
-    for original in sources:
-        source = Source.model_validate_json(original.model_dump_json())
+    for source in sources:
         values = source_values(source)
         if source.id in result and result[source.id] != values:
             raise ValueError("Conflicting raw source metadata")
@@ -42,11 +40,10 @@ def raw_values(sources: Iterable[Source]) -> dict[str, dict[str, Value]]:
 def insert_raw_sources(db: Database, sources: Iterable[Source]) -> None:
     """Reuse exact metadata only; never discard a conflicting version or its provenance."""
     required = raw_values(sources)
-    for source_id, values in required.items():
-        previous = db.select(
-            "source_record", db.columns("source_record"), where={"id": source_id}
-        )
-        if not previous:
-            db.insert("source_record", values)
-        elif previous[0].values != values:
-            raise ValueError("Conflicting raw source metadata")
+    for values in required.values():
+        try:
+            db.insert_exact("source_record", values, ("id",))
+        except ValueError as error:
+            if str(error) != "Conflicting catalog row":
+                raise
+            raise ValueError("Conflicting raw source metadata") from None

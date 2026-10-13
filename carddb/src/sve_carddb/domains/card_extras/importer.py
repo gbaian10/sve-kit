@@ -27,6 +27,13 @@ def populate_card_extras(
         db, plan.pages, errata=plan.errata, qa_pages=plan.qa_pages
     ):
         raise ValueError("Card extras plan differs from adopted identities")
+    return populate_planned_card_extras(db, plan, build=build)
+
+
+def populate_planned_card_extras(
+    db: Database, plan: ExtrasPlan, *, build: BuildContext
+) -> InputRecord:
+    """Consume the immutable result of planning against this build's adopted graph."""
     configuration = parse(build.configuration.encode())
     if (
         not isinstance(configuration, dict)
