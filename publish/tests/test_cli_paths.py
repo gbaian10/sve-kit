@@ -47,7 +47,8 @@ def test_upload_root_precedence(
 ) -> None:
     selected: list[Path] = []
 
-    def capture(root: Path) -> Export:
+    def capture(root: Path, *, image_root: Path | None) -> Export:
+        assert image_root is None
         selected.append(root)
         raise ExportError("synthetic stop before reading")
 
