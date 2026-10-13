@@ -25,7 +25,8 @@ def test_two_regions_keep_face_sections_source_pins_and_exact_numbers(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     store = _store(tmp_path)
-    english = page(double=True)
+    back_src = "../exact/SYNⓈ-01aEN.png?v=7"
+    english = page(double=True).replace(back_src.encode(), b"/synthetic/front .png", 1)
     _put(store, _resource(jp.card_url("SYN-01a"), "raw/jp.html", RAW, Kind.CARD), RAW)
     _put(
         store,
@@ -66,9 +67,11 @@ def test_two_regions_keep_face_sections_source_pins_and_exact_numbers(
     assert japanese.faces[0].flavor is not None
     assert not japanese.faces[0].flavor
     assert japanese.source.parser_version == "jp-text-pin"
+    assert japanese.image_src == ("/synthetic/exact-image.png",)
     english_card = provider.card("en", "SYNⓈ-01aEN")
     assert english_card is not None
     assert len(english_card.faces) == 2
+    assert english_card.image_src == ("/synthetic/front .png", back_src)
     assert english_card.faces[0].effect == "First {synthetic.badge|[badge]}\nNext"
     assert english_card.faces[0].sections == ("Auxiliary", "Last")
     assert english_card.faces[0].stats == ("-", "02", "X")
