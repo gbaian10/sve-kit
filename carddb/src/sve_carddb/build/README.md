@@ -158,7 +158,8 @@ not queries returning imported content.
 `integrity_check`, the build schema version check, then all selected query checks.
 `transaction()` invokes it with `integrity=False` **after the body, before COMMIT**,
 on the final graph. The full `integrity_check` runs on explicit verification and
-before `save()` persists a bundle; fresh builds rely on enforced CHECK constraints.
+before `save()` persists a bundle (`save()` repeats only the enforcement pragmas and
+`integrity_check`); fresh builds rely on enforced CHECK constraints.
 An insert, update or delete can temporarily violate a query check inside the
 transaction, allowing related rows to be repaired together. Updating an image,
 its decision or size configuration is checked even when no variant row changed.

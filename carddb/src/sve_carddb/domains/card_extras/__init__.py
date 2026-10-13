@@ -4,6 +4,7 @@ from sve_carddb.domains.card_extras.archive import FrozenCardExtras, parse_card_
 from sve_carddb.domains.card_extras.importer import (
     CardExtrasRestriction,
     populate_card_extras,
+    populate_planned_card_extras,
     require_card_extras_ready,
 )
 from sve_carddb.domains.card_extras.models import (
@@ -35,5 +36,6 @@ __all__ = [
     "parse_card_page",
     "plan_card_extras",
     "populate_card_extras",
+    "populate_planned_card_extras",
     "require_card_extras_ready",
 ]

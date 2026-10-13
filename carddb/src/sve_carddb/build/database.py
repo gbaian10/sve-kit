@@ -75,16 +75,23 @@ class Database:
         result: object = self._connection.execute(sql, parameters).fetchall()
         return _raw_rows(result)
 
-    def verify(self, *, integrity: bool = True) -> None:
-        """Fail on disabled foreign keys, dangling references or integrity errors."""
+    def _verify_enforcement(self) -> None:
         if self._read("PRAGMA foreign_keys") != ((1,),):
             raise sqlite3.IntegrityError("Foreign key enforcement is disabled")
         if self._read("PRAGMA ignore_check_constraints") != ((0,),):
             raise sqlite3.IntegrityError("CHECK constraint enforcement is disabled")
+
+    def _verify_integrity(self) -> None:
+        if self._read("PRAGMA integrity_check") != (("ok",),):
+            raise sqlite3.IntegrityError("Integrity check failed")
+
+    def verify(self, *, integrity: bool = True) -> None:
+        """Fail on disabled foreign keys, dangling references or integrity errors."""
+        self._verify_enforcement()
         if self._read("PRAGMA foreign_key_check"):
             raise sqlite3.IntegrityError("Foreign key check failed")
-        if integrity and self._read("PRAGMA integrity_check") != (("ok",),):
-            raise sqlite3.IntegrityError("Integrity check failed")
+        if integrity:
+            self._verify_integrity()
         if self._read("PRAGMA user_version") != ((self._version,),):
             raise sqlite3.IntegrityError("Build schema version mismatch")
         for check in self._query_checks:
@@ -114,7 +121,9 @@ class Database:
         """Save the completed transaction without reconstructing domain rows."""
         if self._connection.in_transaction:
             raise RuntimeError("Cannot save an unfinished build transaction")
-        self.verify()
+        # The last commit already verified the graph; only the physical check was skipped.
+        self._verify_enforcement()
+        self._verify_integrity()
         with path.open("xb"):
             pass
         target = sqlite3.connect(path)
@@ -178,17 +187,16 @@ class Database:
         if set(keys) != set(table.primary_key):
             raise ValueError("Exact insertion requires the complete primary key")
         parameters = self._parameters(table, values)
+        # Rows are compared as encoded SQL values, so an equal stored row needs no decode.
         if name not in self._exact_rows:
             columns = ", ".join(identifier(column.name) for column in table.columns)
             positions = tuple(
                 self.columns(name).index(column) for column in table.primary_key
             )
-            index = {}
-            for row in self._read(f"SELECT {columns} FROM {identifier(name)}"):
-                for column, value in zip(table.columns, row, strict=True):
-                    decode(column, value, self._rules)
-                index[tuple(row[position] for position in positions)] = row
-            self._exact_rows[name] = index
+            self._exact_rows[name] = {
+                tuple(row[position] for position in positions): row
+                for row in self._read(f"SELECT {columns} FROM {identifier(name)}")
+            }
         supplied = dict(zip(values, parameters, strict=True))
         key = tuple(supplied[column] for column in table.primary_key)
         previous = self._exact_rows[name].get(key)

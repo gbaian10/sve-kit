@@ -1,7 +1,5 @@
 """Bounded typed lookups preserve whitelists, NULL matching and exact inserts."""
 
-# ruff: file-ignore[pytest-raises-with-multiple-statements] -- rollback must cover both the initial insert and the conflicting repeat
-
 from typing import TYPE_CHECKING
 
 import pytest
@@ -9,7 +7,7 @@ import pytest
 from sve_carddb.build.rows import insert_exact
 
 if TYPE_CHECKING:
-    from sve_carddb.build import Value
+    from sve_carddb.build import Database, Value
 
     from ..support.database_fixtures import DatabaseTemplate
 
@@ -128,19 +126,22 @@ def test_exact_inserts_follow_mutations_in_the_same_transaction(
             )
 
 
+def _insert_then_conflict(db: Database, values: dict[str, Value]) -> None:
+    with db.transaction():
+        insert_exact(db, "source_record", values, ("id",))
+        insert_exact(
+            db, "source_record", values | {"authored_path": "other.yaml"}, ("id",)
+        )
+
+
 def test_exact_insert_can_retry_after_rollback(
     t0_database_template: DatabaseTemplate,
 ) -> None:
     with t0_database_template.copy() as db:
         values = dict(db.rows("source_record")[0].values) | {"id": "new-source"}
-        with (
-            pytest.raises(ValueError, match="Conflicting catalog row"),
-            db.transaction(),
-        ):
-            insert_exact(db, "source_record", values, ("id",))
-            insert_exact(
-                db, "source_record", values | {"authored_path": "other.yaml"}, ("id",)
-            )
+        with pytest.raises(ValueError, match="Conflicting catalog row"):
+            _insert_then_conflict(db, values)
+        assert not db.select("source_record", ("id",), where={"id": "new-source"})
         with db.transaction():
             insert_exact(db, "source_record", values, ("id",))
         assert db.select("source_record", ("id",), where={"id": "new-source"})

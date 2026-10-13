@@ -21,9 +21,9 @@ from sve_carddb.domains.card_extras import (
     FrozenCardExtras,
     applicable_reskin_regions,
     plan_card_extras,
+    populate_planned_card_extras,
     require_card_extras_ready,
 )
-from sve_carddb.domains.card_extras.importer import populate_planned_card_extras
 from sve_carddb.domains.products import (
     FrozenProducts,
     load_product_identities,

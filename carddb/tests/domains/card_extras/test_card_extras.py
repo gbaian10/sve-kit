@@ -19,9 +19,9 @@ from sve_carddb.domains.card_extras import (
     RelatedLink,
     plan_card_extras,
     populate_card_extras,
+    populate_planned_card_extras,
     require_card_extras_ready,
 )
-from sve_carddb.domains.card_extras.importer import populate_planned_card_extras
 
 from ...support.card_extras_fixtures import context, page, seed, source
 
