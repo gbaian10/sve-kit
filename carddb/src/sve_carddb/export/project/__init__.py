@@ -33,7 +33,7 @@ from sve_carddb.export.project.regions import (
     region_views,
     support,
 )
-from sve_carddb.export.project.shape import source_tuple
+from sve_carddb.export.project.shape import tuple_value
 from sve_carddb.export.project.source import Record, Source, json_list
 from sve_carddb.export.project.translations import Texts, keywords, translations
 from sve_carddb.export.semantics import ordered_rows, row_key, validate_view
@@ -99,7 +99,7 @@ def _validate(view: dict[str, list[Record]]) -> None:
         raise ValueError("Public collection whitelist mismatch")
     for table, rows in view.items():
         for row in rows:
-            source_tuple(table, row)
+            tuple_value(table, row)
     validate_closure(view)
     validate_identities(view)
 

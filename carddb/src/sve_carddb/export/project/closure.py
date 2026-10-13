@@ -42,7 +42,6 @@ REFERENCES = {
     "interaction_target_id": "digital_card",
     "voice_id": "voice",
     "keyword_id": "keyword",
-    "image_id": "image_asset",
 }
 ARRAY_REFERENCES = {
     "family_ids": "product_family",
@@ -111,8 +110,9 @@ def select_regions(view: dict[str, list[Record]], regions: tuple[str, ...]) -> N
             for row in view[table]
             if row["face_id"] in faces and row["region"] in regions
         ]
-    for table in ("printing_product", "printing_image"):
-        view[table] = [row for row in view[table] if row["printing_id"] in prints]
+    view["printing_product"] = [
+        row for row in view["printing_product"] if row["printing_id"] in prints
+    ]
     for table in (
         "product",
         "qa",
@@ -154,14 +154,10 @@ def prune(view: dict[str, list[Record]]) -> None:
         for row in rows:
             for table, identifier in references(row):
                 scoped.setdefault(table, set()).add(identifier)
-    for table in ("stamp", "image_asset", "digital_art", "voice"):
+    for table in ("stamp", "digital_art", "voice"):
         view[table] = [
             row for row in view[table] if row["id"] in scoped.get(table, set())
         ]
-    images = {row["id"] for row in view["image_asset"]}
-    view["image_variant"] = [
-        row for row in view["image_variant"] if row["image_id"] in images
-    ]
     digital = {
         row["digital_card_id"]
         for table in ("digital_art", "digital_link", "voice")
