@@ -1612,7 +1612,7 @@ def test_unapproved_image_with_variant_is_rejected_by_build_boundary(
         exercise()
 
 
-def test_offline_schema_version_is_verified_before_projection(
+def test_offline_schema_version_mismatch_fails_database_verification(
     tmp_path: Path, projection_schema: CompiledSchema
 ) -> None:
     path = tmp_path / "wrong-version.sqlite"
@@ -1624,7 +1624,7 @@ def test_offline_schema_version_is_verified_before_projection(
         open_database(projection_schema, path) as database,
         pytest.raises(sqlite3.IntegrityError, match="schema version mismatch"),
     ):
-        projected(database)
+        database.verify()
 
 
 def test_pipeline_checks_public_reference_closure(

@@ -11,8 +11,6 @@ from pydantic import JsonValue
 from sve_carddb.core.json import array, canonical, digest, object_value, string
 from sve_carddb.export.publication import require_preview
 from sve_carddb.export.read_api import POINTER
-from sve_carddb.export.reader import read_snapshot, read_text_all
-from sve_carddb.export.transport.compression import compress
 from sve_carddb.export.transport.measure import measure
 
 if TYPE_CHECKING:
@@ -71,52 +69,24 @@ def write_preview(
     brotli: Brotli | None = None,
     regions: tuple[str, ...] = ("jp",),
 ) -> dict[str, JsonValue]:
-    """Seal content-addressed transport and atomically switch only preview/current."""
+    """Write a verified exporter snapshot and switch preview/current last."""
     roots.verify()
     require_preview(snapshot.manifest, regions=regions)
-    joined = read_snapshot(
-        snapshot.manifest, {key: blob.raw for key, blob in snapshot.payloads.items()}
-    )
-    union_keys = {
-        string(object_value(item)["key"])
-        for item in array(object_value(snapshot.manifest["text_all"])["contains"])
-    }
-    if (
-        read_text_all(
-            snapshot.manifest,
-            snapshot.text_all.raw,
-            {
-                key: blob.raw
-                for key, blob in snapshot.payloads.items()
-                if key not in union_keys
-            },
-        )
-        != joined
-    ):
-        raise ValueError("Preview union and shards differ")
     descriptions = {
         string(object_value(item)["key"]): object_value(item)
         for item in array(snapshot.manifest["files"])
     }
     for key, blob in snapshot.payloads.items():
         path = string(descriptions[key]["path"])
-        if path != "snapshots/blobs/" + digest(blob.raw)[7:] + ".json":
-            raise ValueError("Preview requires content-addressed blob paths")
-        if digest(blob.raw) != descriptions[key]["sha256"]:
-            raise ValueError("Preview blob differs from manifest hash")
         write_artifact(roots, path, blob.raw, immutable=True)
         write_artifact(roots, path + ".gz", blob.gzip, immutable=True)
         _write_brotli(roots, path, blob.br)
     union = object_value(snapshot.manifest["text_all"])
-    if digest(snapshot.text_all.raw) != union["sha256"]:
-        raise ValueError("Preview text union differs from manifest hash")
     union_path = string(union["path"])
-    if union_path != "snapshots/blobs/" + digest(snapshot.text_all.raw)[7:] + ".json":
-        raise ValueError("Preview requires content-addressed union path")
     write_artifact(roots, union_path, snapshot.text_all.raw, immutable=True)
     write_artifact(roots, union_path + ".gz", snapshot.text_all.gzip, immutable=True)
     _write_brotli(roots, union_path, snapshot.text_all.br)
-    manifest = compress(canonical(snapshot.manifest), brotli)
+    manifest = snapshot.manifest_blob
     hashed = digest(manifest.raw)
     manifest_path = "snapshots/manifests/" + hashed[7:] + ".json"
     write_artifact(roots, manifest_path, manifest.raw, immutable=True)

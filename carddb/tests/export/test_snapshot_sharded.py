@@ -301,6 +301,10 @@ def test_capacity_counts_all_fragments_and_region_whole_files(
     for raw in array(report["shards"]):
         item = object_value(raw)
         local = [f for k, _, f in fragments(sharded) if k == item["key"]]
+        assert item["rows"] == sum(len(array(f["rows"])) for f in local)
+        assert item["owners"] == [
+            parse(raw) for raw in sorted({canonical(f["owner"]) for f in local})
+        ]
         assert item["buckets"] == sorted({integer(f["bucket"]) for f in local})
         assert item["partitions"] == sorted({string(f["partition"]) for f in local})
     image_blobs = [b for k, b in sharded.payloads.items() if k.startswith("images/")]

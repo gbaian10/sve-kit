@@ -25,8 +25,8 @@ def write(
 ) -> Report:
     """Store the current documents and their original applicability positions."""
     report = build(documents, rebuild)
-    frames = {row.values["id"] for row in db.rows("sentence_template")}
-    bindings = {row.values["id"] for row in db.rows("text_template_binding")}
+    frames = {row.values["id"] for row in db.select("sentence_template", ("id",))}
+    bindings = {row.values["id"] for row in db.select("text_template_binding", ("id",))}
     for resolution in report.resolutions:
         targets = resolution.candidates + (
             () if resolution.target is None else (resolution.target,)

@@ -97,7 +97,7 @@ uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 | 嚴格 UTF-8 JSON、重複鍵、浮點／不安全整數、surrogate、canonical bytes | `core/json.py` 的 `parse`／`canonical`，`export/reader.py` 的 `_payload`；`read_api.py` 的 `_manifest` 驗 manifest 原始 bytes |
 | Schema、固定 descriptor／tuple、row_counts、檔案與依賴 DAG、引用閉包、join | Python `read_snapshot` 的 `_files`／`_container`／`_base`／`_join`／`_closure` |
 | owner／partition／bucket、跨列排序、圖片、數位同名、config、標註 | `export/semantics.py` 的 `validate_fragments`／`validate_view`／`validate_placement`／`validate_config`，`reader_media.py` 與 `reader_annotations.py` |
-| 匯出驗收 | `export/transport/__init__.py` 的 `Snapshot.verify` 比對完整 logical view；`export/preview/__init__.py` 的 `write_preview` 另驗 `read_text_all` 與分片等價 |
+| 匯出驗收 | `export/transport/__init__.py` 的 `Snapshot.verify` 比對完整 logical view，再以 `text_all_payloads` 驗聯集成員、依賴及成員 canonical bytes 的 hash 與長度 |
 | 上傳前離線驗收 | `read_api.load_export` 驗完整分片及資產；`sve_publish.commands.upload_command` 先取得此結果，再取得憑證與上傳 |
 | 瀏覽器下載／快取完整性 | `integrity.ts` 的 `transferDigest` 使用 WebCrypto；client／SearchBlobs／MetadataBytes 驗 hash 與 bytes，decoder 不重算；衍生快取紀錄另驗自身 hash |
 | 瀏覽器解碼與准入 | 原生 `JSON.parse`、固定 `x-columns`／`x-types` 解碼及 detail join；保留版本／最低 reader／能力判斷，解析或必要欄位使用失敗顯示載入錯誤 |
@@ -107,7 +107,7 @@ TS 不再維護完整離線驗證器或只被反例測試呼叫的舊驗證程�
 Web 測試驗下載 hash 失敗、JSON 無法解析、必要欄位缺失的錯誤狀態，以及正常搜尋、合併、標註與圖片顯示。
 canonical 與 SHA-256 bucket 向量仍供 fixture 產製及按需定位驗收；payload 的 types 不改變固定解碼欄序。
 
-`load_export` 目前對 `text_all` 驗外層 hash／長度及壓縮表示，沒有呼叫 `read_text_all` 驗成員與分片等價；該語義驗收目前由 `write_preview` 與 Python 契約測試執行。
+`load_export` 目前對 `text_all` 驗外層 hash／長度及壓縮表示，沒有呼叫 `read_text_all` 驗成員與分片等價；該語義驗收目前由 `Snapshot.verify` 與 Python 契約測試執行。
 共用 schema／樣本變動仍須觸發 Python 契約測試與 Web 解碼／顯示測試。
 
 ## 數位名字政策的准入邊界

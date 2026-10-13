@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.snapshot import definition, tables, validate
-from sve_carddb.core.json import array, canonical, object_value, parse, string
+from sve_carddb.core.json import array, object_value, string
 from sve_carddb.domains.routes.defaults import select_defaults
 from sve_carddb.export.project.annotations import annotations
 from sve_carddb.export.project.closure import (
@@ -99,8 +99,7 @@ def _validate(view: dict[str, list[Record]]) -> None:
         raise ValueError("Public collection whitelist mismatch")
     for table, rows in view.items():
         for row in rows:
-            candidate = object_value(parse(canonical(row)))
-            source_tuple(table, candidate)
+            source_tuple(table, row)
     validate_closure(view)
     validate_identities(view)
 
@@ -171,7 +170,6 @@ def project(
     if type(decisions.private_digital) is not bool:
         raise ValueError("Private digital projection flag must be boolean")
     validate("Date", as_of)
-    db.verify()
     source = Source(db)
     view = initial(source)
     if publication_printings is not None:
