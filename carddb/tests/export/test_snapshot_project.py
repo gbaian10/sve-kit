@@ -1612,7 +1612,7 @@ def test_unapproved_image_with_variant_is_rejected_by_build_boundary(
         exercise()
 
 
-def test_offline_schema_version_is_verified_before_projection(
+def test_offline_schema_version_mismatch_fails_database_verification(
     tmp_path: Path, projection_schema: CompiledSchema
 ) -> None:
     path = tmp_path / "wrong-version.sqlite"
