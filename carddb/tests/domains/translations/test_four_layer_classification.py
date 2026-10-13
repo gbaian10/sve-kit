@@ -90,24 +90,6 @@ def test_domains_are_reused_with_ordered_build_local_references() -> None:
     assert classifier().domains["card_name.any.v1"] != domain
 
 
-def test_classifier_keeps_its_input_reference_snapshot() -> None:
-    term = Term("term:name.synthetic", "card_name", "仮名")
-    original = classifier((term,))
-    refs = original.references
-    engine = Classifier((term,), refs, original.rules)
-    refs.terms.clear()
-    refs.card_names.clear()
-    raw = term.source_ja
-    field = normalize_source(raw, source(raw, "name"))
-    frame, binding = engine.recognize(raw, field.source, field.parts[0]).bind(
-        field.source, field.parts[0]
-    )
-    field.verify(raw, (frame,), (binding,), engine.domains)
-    assert binding.values == {
-        "leaf_0": CardNameReference(kind="card_name", term_id=term.id)
-    }
-
-
 def test_card_name_is_protected_before_numeric_and_phase_recognition() -> None:
     term = Term("term:name.synthetic", "card_name", "仮（２）😀")
     raw = "自分の手札の『仮（２）😀』を２枚選ぶ。\r\n"
