@@ -3,7 +3,7 @@
 preview 供隔離開發使用，匯出器產出 3.0.0。圖片投影依 [圖片發布契約](../images/image-variants.md#20-圖片-url版本與新鮮度)
 與 [傳輸 §5.4](snapshot-transport.md#54-卡包-media-與-id-圖片)：從建置 hash path
 產生固定 ID key，卡包 media 提供版本／尺寸；圖片可受控覆寫，JSON 不可變。
-preview 的圖片版本狀態與快取放在公開根之外。`sve-publish upload` 直接上傳這個公開根，
+圖片流程獨立維護私有圖片索引、版本狀態與快取；文字匯出只產出 JSON。`sve-publish upload` 讀公開 JSON 根與明確指定的圖片根，
 在開發桶的 current／previous 索引寫入 `preview-` entry；這不是正式發布，不能把 preview 改名升格。
 
 preview 使用正式傳輸契約與共用匯出器，但不是正式發布。`data_version` 必須有
@@ -18,19 +18,15 @@ preview 使用正式傳輸契約與共用匯出器，但不是正式發布。`da
 SVE_EXPORT_DIR=/explicit/isolated/preview \
 SVE_CARDDB_PRIVATE_DIR=/private/preview-state \
 uv --directory carddb run sve-carddb snapshot export-offline --inputs /private/inputs.json \
-  --bundle-dir /private/bundle
+  --bundle-dir /private/bundle --image-index "/private/image-index/<sha256>.json"
 ```
 
-`--private-dir` 或 `SVE_CARDDB_PRIVATE_DIR` 必填（CLI 優先），放輸入記錄、報告與卡圖版本狀態，須與 preview 根互不包含；
-它跨次匯出沿用，請隨既有備份保存。
+`--private-dir` 或 `SVE_CARDDB_PRIVATE_DIR` 必填（CLI 優先），放文字輸入記錄與報告，須與 preview 根互不包含；
+圖片 producer 的私有根另外跨次沿用並備份。
 
-若要接入日英卡圖，同時提供已存在的 `--image-assets-dir /private/webp-library` 與
-`--image-cache-dir /private/recipe-cache`。前者指到含 `images/` 的那一層，後者指到含
-`image-variants/` 的那一層。通過來源批次／配方／hash／解碼尺寸驗證的快取直接重用；
-缺件或不符的來源當場轉檔，寫入這兩處，已存在的內容定址 blob 不改寫。
-`--workers` 預設 2、可設 1～4，輸出 bytes 與 worker 數無關。
-圖片庫與配方快取須為絕對路徑，不得彼此重疊，也不得與 preview、私有目錄、bundle、repo／封存庫或配方重疊；
-圖片根不可含 symlink。未提供這對選項時仍可建置文字 preview。
+先以 `sve-carddb images build-index` 產出圖片與私有索引，操作見[圖片索引契約](../images/image-index.md)。
+文字匯出以 `--image-index` 釘住內容定址索引，只核對 metadata，不需要掛載 PNG、WebP、轉檔快取或圖片版本狀態。
+不提供索引時只產出無圖片 metadata 的文字預覽；已採用的圖片校正仍須提供索引。
 
 也可用 `--preview-dir` 明確指定（優先於 `SVE_EXPORT_DIR`）；兩者至少提供一個，preview 沒有預設位置。
 `SVE_EXPORT_DIR` 指到含 `snapshots/` 的那一層，而非 `snapshots/` 或 `snapshots/preview/`。
@@ -50,7 +46,7 @@ bundle 不得與 repo、封存庫或配方重疊。root 內的輸出 symlink 不
 | `feedback_url`、`grammar_version`、`normalizer_version` | 公開 config；normalizer 應與目標前端一致 |
 | `name_policy` | 選填；目前只接受 `approved-frozen-v1` |
 
-建置只讀凍結批次與 authored，不開 live manifest、不抓官網。封存來源逐份驗 hash，
+建置只讀凍結批次與 authored，不開 live manifest、不抓官網。文字封存來源逐份驗 hash，圖片真實性由獨立 producer 驗證，
 輸入記錄驗 source-use 閉包，建置 DB 驗 FK／JSON，公開投影驗參照閉包；匯出後由
 獨立 reader 重接所有欄分工、位置引用與分片，完整文字包亦須等於分片結果。
 
@@ -66,7 +62,7 @@ bundle 不得與 repo、封存庫或配方重疊。root 內的輸出 symlink 不
 在 repo 外的執行目錄放 `recipe.json`，執行 `carddb/docker/export.sh <執行目錄>`。
 容器以呼叫者的 uid／gid 執行，repo／人寫資料與封存庫唯讀掛載；
 `EXPORT_CPUS`、`EXPORT_MEMORY` 設 CPU／記憶體硬上限，swap 停用。
-`EXPORT_IMAGES=0` 可略過圖片，`EXPORT_BROTLI=0` 略過 Brotli，`EXPORT_PROFILE=1` 啟用 py-spy。
+`SVE_IMAGE_INDEX` 指定索引檔；容器不掛載圖片庫或轉檔快取。`EXPORT_BROTLI=0` 略過 Brotli，`EXPORT_PROFILE=1` 啟用 py-spy。
 每完成一段即寫 stderr；`SVE_STAGE_LOG` 指定追加時間、CPU 與記憶體的 TSV，
 Docker wrapper 固定寫入執行目錄的 `stages.tsv`，中斷仍保留已完成段落。
 `SVE_PROFILE_FIELD_STRIDE=100` 讓日文套翻譯階段每 100 欄只處理 1 欄，供約 1% 取樣量測；
@@ -84,12 +80,8 @@ lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行�
 `sve-publish upload` 原樣上傳清單所列的 raw／gzip／br，不重壓；選檔、標頭與 CDN 驗證見
 [R2 上傳](../../../publish/README.md)，保留窗口見 [發布契約](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
 
-建置輸入的 WebP 使用內容定址 hash path；preview 輸出為固定 ID key。先驗證／寫入圖片，再寫 images
-分片與其餘快照成員；只複製公開 `printing_image` 引用且可用、核可的變體，不以來源 hash 當公開 URL。
-不複製原始 PNG、數位卡圖或圖片庫的其他檔案。切換前再驗公開資產的 hash、bytes 與
-實際解碼格式／尺寸；中斷可以留下未引用的完整資產。要以不同 bytes 覆寫既有卡圖前，
-先刪除 preview 指標，所以中斷後若曾覆寫卡圖，就沒有指標可供載入或上傳，須重跑匯出；
-沒有覆寫卡圖時，既有完整 preview 與指標不變。
+圖片 producer 寫固定 ID key，文字匯出只寫公開影像 metadata 及快照 JSON，完全不複製或驗讀 bitmap。
+預覽服務與上傳需另外接入成功圖片建置的圖片根；上傳使用 `--image-dir` 指定，仍全量核對圖片。
 
 清單存於 `snapshots/manifests/<sha256>.json`。所有不可變成員驗證／寫入後才原子更新
 `snapshots/preview/current.json`，內含 `manifest_path,manifest_sha256`。
@@ -98,11 +90,10 @@ lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行�
 
 私有目錄的 `reports/<manifest-hash>.json` 保存輸入 hash、地區範圍、逐表數量、真正排除清單、
 未定卡文數、容量及未完成的正式閘門；輸入記錄在 `inputs/<input-hash>.json`，
-卡圖版本狀態在 `media-state.json`。這些都不在 preview 根內，不會被 dev server 提供或上傳。
-含圖建置另記 `image_assets` 的來源／綁定／變體數，以及 `images` 的公開去重檔數／bytes。
-實際執行時間、快取命中與新轉檔數放在命令 stdout 的 `image_execution`，不混入不可變清單或
-報告，確保相同輸入重建的逐檔 bytes 一致。各圖的重用／轉檔時間是逐圖加總，多 worker 時會重疊，
-整體耗時看 `wall_milliseconds`。
+圖片版本狀態另由圖片 producer 的私有根保存。這些都不在 preview 根內，不會被 dev server 提供或上傳。
+含圖文字建置記錄 `image_index` 的 SHA-256；文字報告的 `images` 寫出檔數／bytes 皆為 0。
+圖片 CLI stdout 另記 `image_execution` 的快取命中、新轉檔數與 `written_images`，不混入快照清單。
+
 這些檔案與輸出都不進 git、Actions cache／artifact 或測試 fixture。
 容量設計依 [size-budget](size-budget.md)：全部文字分片＋manifest 的 raw ≤40 MiB；單一版本完整文字閉包 Brotli ≤8 MiB、gzip ≤10 MiB，含完整來源、counterpart、共享字典、卡號索引與必要跨區檔。
 text_all 的封套與整檔另報，不與分片重複加總；卡圖另計。

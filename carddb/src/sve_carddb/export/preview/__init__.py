@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.core.json import array, canonical, digest, object_value, string
-from sve_carddb.export.preview.media_state import commit
 from sve_carddb.export.publication import require_preview
 from sve_carddb.export.read_api import POINTER
 from sve_carddb.export.reader import read_snapshot, read_text_all
@@ -17,8 +16,6 @@ from sve_carddb.export.transport.compression import compress
 from sve_carddb.export.transport.measure import measure
 
 if TYPE_CHECKING:
-    from sve_carddb.export.media import MediaPlan
-    from sve_carddb.export.project.source import Record
     from sve_carddb.export.transport import Brotli, Snapshot
 
 
@@ -44,21 +41,11 @@ class Roots:
             raise ValueError("Preview destination escapes its root")
         return target
 
-    def verify_image_source(self, source: Path | None) -> None:
-        """A copied library must never become a preview output directory."""
-        if source is None:
-            return
-        root = source.resolve()
-        for output in (self.preview.resolve(), self.private.resolve()):
-            if output.is_relative_to(root) or root.is_relative_to(output):
-                raise ValueError(
-                    "Preview image input and output roots must be disjoint"
-                )
 
-
-def _write(
+def write_artifact(
     roots: Roots, path: str, raw: bytes, *, immutable: bool, private: bool = False
 ) -> None:
+    """Atomically write a confined artifact, preserving immutable bytes on retries."""
     target = roots.destination(path, private=private)
     target.parent.mkdir(parents=True, exist_ok=True)
     if immutable and target.exists():
@@ -76,20 +63,17 @@ def _write(
         Path(temporary).unlink(missing_ok=True)
 
 
-def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary binds explicit region, roots, codec and image provenance
+def write_preview(
     snapshot: Snapshot,
     roots: Roots,
     provenance: dict[str, JsonValue],
     *,
     brotli: Brotli | None = None,
-    image_source: Path | None = None,
     regions: tuple[str, ...] = ("jp",),
-    media_plan: MediaPlan | None = None,
 ) -> dict[str, JsonValue]:
     """Seal content-addressed transport and atomically switch only preview/current."""
     roots.verify()
     require_preview(snapshot.manifest, regions=regions)
-    roots.verify_image_source(image_source)
     joined = read_snapshot(
         snapshot.manifest, {key: blob.raw for key, blob in snapshot.payloads.items()}
     )
@@ -114,15 +98,14 @@ def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary bi
         string(object_value(item)["key"]): object_value(item)
         for item in array(snapshot.manifest["files"])
     }
-    image_report = _publish_images(joined, roots, image_source, media_plan)
     for key, blob in snapshot.payloads.items():
         path = string(descriptions[key]["path"])
         if path != "snapshots/blobs/" + digest(blob.raw)[7:] + ".json":
             raise ValueError("Preview requires content-addressed blob paths")
         if digest(blob.raw) != descriptions[key]["sha256"]:
             raise ValueError("Preview blob differs from manifest hash")
-        _write(roots, path, blob.raw, immutable=True)
-        _write(roots, path + ".gz", blob.gzip, immutable=True)
+        write_artifact(roots, path, blob.raw, immutable=True)
+        write_artifact(roots, path + ".gz", blob.gzip, immutable=True)
         _write_brotli(roots, path, blob.br)
     union = object_value(snapshot.manifest["text_all"])
     if digest(snapshot.text_all.raw) != union["sha256"]:
@@ -130,14 +113,14 @@ def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary bi
     union_path = string(union["path"])
     if union_path != "snapshots/blobs/" + digest(snapshot.text_all.raw)[7:] + ".json":
         raise ValueError("Preview requires content-addressed union path")
-    _write(roots, union_path, snapshot.text_all.raw, immutable=True)
-    _write(roots, union_path + ".gz", snapshot.text_all.gzip, immutable=True)
+    write_artifact(roots, union_path, snapshot.text_all.raw, immutable=True)
+    write_artifact(roots, union_path + ".gz", snapshot.text_all.gzip, immutable=True)
     _write_brotli(roots, union_path, snapshot.text_all.br)
     manifest = compress(canonical(snapshot.manifest), brotli)
     hashed = digest(manifest.raw)
     manifest_path = "snapshots/manifests/" + hashed[7:] + ".json"
-    _write(roots, manifest_path, manifest.raw, immutable=True)
-    _write(roots, manifest_path + ".gz", manifest.gzip, immutable=True)
+    write_artifact(roots, manifest_path, manifest.raw, immutable=True)
+    write_artifact(roots, manifest_path + ".gz", manifest.gzip, immutable=True)
     _write_brotli(roots, manifest_path, manifest.br)
     pointer: dict[str, JsonValue] = {
         "manifest_path": manifest_path,
@@ -147,53 +130,19 @@ def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary bi
         "pointer": pointer,
         "capacity": measure(snapshot, brotli=brotli),
         "compression_recipe": dict(snapshot.compression_recipe),
-        "images": image_report,
+        "images": {"unique_files": 0, "unique_bytes": 0},
     }
-    _write(
+    write_artifact(
         roots,
         "reports/" + hashed[7:] + ".json",
         canonical(report),
         immutable=True,
         private=True,
     )
-    commit(roots, _verify_written_images(roots, media_plan).state)
-    _write(roots, POINTER, canonical(pointer), immutable=False)
+    write_artifact(roots, POINTER, canonical(pointer), immutable=False)
     return report
 
 
 def _write_brotli(roots: Roots, path: str, raw: bytes | None) -> None:
     if raw is not None:
-        _write(roots, path + ".br", raw, immutable=True)
-
-
-def _verify_written_images(roots: Roots, media_plan: MediaPlan | None) -> MediaPlan:
-    if media_plan is None:
-        raise ValueError("Preview requires the matching verified media plan")
-    for asset in media_plan.assets:
-        raw = roots.destination(string(asset["path"])).read_bytes()
-        if digest(raw) != asset["sha256"] or len(raw) != asset["bytes"]:
-            raise ValueError("Written media differs from sealed plan")
-    return media_plan
-
-
-def _publish_images(
-    tables: dict[str, list[Record]],
-    roots: Roots,
-    image_source: Path | None,
-    media_plan: MediaPlan | None,
-) -> dict[str, JsonValue]:
-    if media_plan is None or media_plan.projection.tables != tables:
-        raise ValueError("Preview requires the matching verified media plan")
-    if media_plan.assets and image_source is None:
-        raise ValueError("Preview media requires an explicit asset source")
-    image_files, image_bytes = 0, 0
-    if image_source is not None:
-        for path, raw in media_plan.blobs(image_source):
-            target = roots.destination(path)
-            if target.exists() and target.read_bytes() != raw:
-                # The old pointer's versions no longer describe these bytes.
-                roots.destination(POINTER).unlink(missing_ok=True)
-            _write(roots, path, raw, immutable=False)
-            image_files += 1
-            image_bytes += len(raw)
-    return {"unique_files": image_files, "unique_bytes": image_bytes}
+        write_artifact(roots, path + ".br", raw, immutable=True)

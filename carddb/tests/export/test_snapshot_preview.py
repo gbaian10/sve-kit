@@ -12,7 +12,7 @@ from sve_carddb.build import create_database
 from sve_carddb.cli import app
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.export.media import prepare_media
-from sve_carddb.export.preview import Roots, _write, write_preview
+from sve_carddb.export.preview import Roots, write_artifact, write_preview
 from sve_carddb.export.project import Projection, project
 from sve_carddb.export.project.records import art_records, initial
 from sve_carddb.export.project.source import Source
@@ -30,7 +30,6 @@ from .test_snapshot_project import projected
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.export.media import MediaPlan
     from sve_carddb.export.transport import Snapshot
 
 
@@ -101,7 +100,7 @@ def test_symlinked_destinations_cannot_escape_preview(tmp_path: Path) -> None:
     (preview / "snapshots").symlink_to(outside, target_is_directory=True)
     roots = Roots(preview, tmp_path / "private")
     with pytest.raises(ValueError, match="escapes"):
-        _write(roots, "snapshots/preview/current.json", b"{}", immutable=False)
+        write_artifact(roots, "snapshots/preview/current.json", b"{}", immutable=False)
     with pytest.raises(ValueError, match="escapes"):
         roots.destination("../outside/index.json")
     assert list(outside.iterdir()) == []
@@ -115,7 +114,6 @@ def test_writer_reads_back_an_independent_join(
         exported,
         roots,
         {"input_sha256": "sha256:" + "a" * 64},
-        media_plan=preview_plan(exported),
     )
     pointer = object_value(
         parse((roots.preview / "snapshots/preview/current.json").read_bytes())
@@ -137,7 +135,6 @@ def test_writer_reads_back_an_independent_join(
             exported,
             roots,
             {"input_sha256": "sha256:" + "a" * 64},
-            media_plan=preview_plan(exported),
         )
         == report
     )
@@ -147,11 +144,15 @@ def test_failed_artifact_write_keeps_old_preview_pointer(
     exported: Snapshot, tmp_path: Path
 ) -> None:
     roots = Roots(tmp_path / "preview", tmp_path / "private")
-    _write(roots, "snapshots/preview/current.json", b"old preview", immutable=False)
+    write_artifact(
+        roots, "snapshots/preview/current.json", b"old preview", immutable=False
+    )
     first = object_value(array(exported.manifest["files"])[0])
-    _write(roots, string(first["path"]), b"corrupt existing bytes", immutable=True)
+    write_artifact(
+        roots, string(first["path"]), b"corrupt existing bytes", immutable=True
+    )
     with pytest.raises(ValueError, match="Immutable"):
-        write_preview(exported, roots, {}, media_plan=preview_plan(exported))
+        write_preview(exported, roots, {})
     assert (
         roots.preview / "snapshots/preview/current.json"
     ).read_bytes() == b"old preview"
@@ -191,16 +192,16 @@ def test_preview_pointer_follows_every_immutable_member(
             assert expected <= sealed
             assert all((roots.preview / member).is_file() for member in expected)
             assert (roots.private / "reports" / (manifest_hash + ".json")).is_file()
-            assert (roots.private / "media-state.json").is_file()
+            assert not (roots.private / "media-state.json").exists()
             pointer_written = True
         else:
             assert not pointer_written
-        _write(roots, path, raw, immutable=immutable, private=private)
+        write_artifact(roots, path, raw, immutable=immutable, private=private)
         if immutable and not private:
             sealed.add(path)
 
-    monkeypatch.setattr(writer_module, "_write", observed_write)
-    write_preview(exported, roots, {}, brotli=codec, media_plan=preview_plan(exported))
+    monkeypatch.setattr(writer_module, "write_artifact", observed_write)
+    write_preview(exported, roots, {}, brotli=codec)
     assert pointer_written
     public = {
         p.relative_to(roots.preview).as_posix()
@@ -218,18 +219,20 @@ def test_late_immutable_failure_preserves_old_pointer(
     late_member: str,
 ) -> None:
     roots = Roots(tmp_path / "preview", tmp_path / "private")
-    _write(roots, "snapshots/preview/current.json", b"old preview", immutable=False)
+    write_artifact(
+        roots, "snapshots/preview/current.json", b"old preview", immutable=False
+    )
 
     def failing_write(
         roots: Roots, path: str, raw: bytes, *, immutable: bool, private: bool = False
     ) -> None:
         if path.startswith(late_member):
             raise OSError("Synthetic late immutable failure")
-        _write(roots, path, raw, immutable=immutable, private=private)
+        write_artifact(roots, path, raw, immutable=immutable, private=private)
 
-    monkeypatch.setattr(writer_module, "_write", failing_write)
+    monkeypatch.setattr(writer_module, "write_artifact", failing_write)
     with pytest.raises(OSError, match="late immutable"):
-        write_preview(exported, roots, {}, media_plan=preview_plan(exported))
+        write_preview(exported, roots, {})
     assert (
         roots.preview / "snapshots/preview/current.json"
     ).read_bytes() == b"old preview"
@@ -351,11 +354,3 @@ def test_review_joins_follow_filtered_primary_keys() -> None:
         assert view["digital_link"][0]["review_level"] == "confirmed"
         assert view["art"][0]["review_level"] == "confirmed"
         assert view["digital_art_link"][0]["review_level"] == "confirmed"
-
-
-def preview_plan(snapshot: Snapshot) -> MediaPlan:
-    view = read_snapshot(
-        snapshot.manifest, {key: blob.raw for key, blob in snapshot.payloads.items()}
-    )
-    config = object_value(parse(snapshot.payloads["config"].raw))
-    return prepare_media(Projection(view, config, snapshot.manifest), None, revision=1)

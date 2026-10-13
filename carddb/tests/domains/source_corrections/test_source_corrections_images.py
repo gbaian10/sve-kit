@@ -74,3 +74,30 @@ class TestDefaultCorrectionInputs:
             plan_text_observations(
                 fixture.texts.identity, fixture.texts.provider, images=wrong
             )
+
+
+def test_daily_evidence_lookup_uses_verified_metadata_without_pngs(
+    tmp_path: Path,
+    default_correction_case: CorrectionCaseTemplate,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = default_correction_case.copy(tmp_path)
+    assert fixture.texts.plan.corrections is not None
+    evidence = fixture.texts.plan.corrections[0].data.evidence[0]
+    expected = fixture.images.image(evidence)
+    daily = FrozenImages(
+        fixture.image_store,
+        expected.archive.store_id,
+        expected.archive.batch_id,
+        sources=fixture.images.sources,
+        verify_raw=False,
+    )
+    read_bytes = type(tmp_path).read_bytes
+
+    def metadata_only(path: Path) -> bytes:
+        if path.suffix == ".raw":
+            raise AssertionError("Daily image evidence lookup must not read a PNG")
+        return read_bytes(path)
+
+    monkeypatch.setattr(type(tmp_path), "read_bytes", metadata_only)
+    assert daily.image(evidence) == expected

@@ -79,9 +79,6 @@ class PreviewRoots:
                 for other in resolved[index + 1 :]
             ):
                 raise ValueError("Image output, cache and input roots must not overlap")
-        for root in (self.preview, self.cache):
-            if root.exists() and any(path.is_symlink() for path in root.rglob("*")):
-                raise ValueError("Image output roots must not contain symlinks")
 
 
 @dataclass(frozen=True)
@@ -307,8 +304,11 @@ def build_regional_assets(
 
     def convert(version: str) -> EncodedImage:
         began = perf_counter()
-        source, raw, descriptor = images.read(
+        source, descriptor = images.metadata(
             version, parser_version=DEFAULT_RECIPE.version
+        )
+        raw = resolve_within(
+            images.root, PurePosixPath(images.entries[version].blob.path)
         )
         if (descriptor.provider, descriptor.kind, source.kind) != (
             region,
@@ -318,11 +318,16 @@ def build_regional_assets(
             raise ValueError(
                 f"{region.upper()} image batch contains another provider or source kind"
             )
+        source_bytes: bytes | Path = raw
+        if not checks.reuse:
+            source, source_bytes, descriptor = images.read(
+                version, parser_version=DEFAULT_RECIPE.version
+            )
         # Conversion only knows the resource URL; HTML src enters the DB from verified bindings.
         result = build_variants(
             ImageSource(
                 conversion_image_id(source.id),
-                raw,
+                source_bytes,
                 source.sha256.removeprefix("sha256:"),
                 source.url,
                 "sve_card",

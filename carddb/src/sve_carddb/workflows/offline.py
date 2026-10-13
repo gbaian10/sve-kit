@@ -42,7 +42,6 @@ from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.rulings.reader import load as load_rulings
 from sve_carddb.domains.rulings.storage import PROFILE as RULING_PROFILE
 from sve_carddb.domains.rulings.storage import write as write_rulings
-from sve_carddb.domains.source_corrections import FrozenImages
 from sve_carddb.domains.text_observations import (
     FrozenTexts,
     RegionalTexts,
@@ -64,27 +63,24 @@ from sve_carddb.domains.translations.models import EffectTerm, SourceValue
 from sve_carddb.domains.translations.names.resolve import prepare as prepare_names
 from sve_carddb.domains.translations.recognition.rules import load as load_rules
 from sve_carddb.domains.translations.sources import Sources as TranslationSources
+from sve_carddb.export.media_config import offline_configuration
 from sve_carddb.export.project import Decisions, Projection, Settings, project
 from sve_carddb.export.transport import Batch, Ownership
-from sve_carddb.images.checks import ImageChecks
-from sve_carddb.images.variants import DEFAULT_RECIPE
-from sve_carddb.workflows.offline_images import prepare_images
+from sve_carddb.ingest.archive.frozen_sources import FrozenBatches
 from sve_carddb.workflows.offline_names import composer
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database
-    from sve_carddb.core.provenance import InputRecord, Source
+    from sve_carddb.core.provenance import InputRecord
     from sve_carddb.domains.card_extras import ErrataPage, ExtrasPlan
     from sve_carddb.domains.catalog.adoption_importer import AdoptionInputs
     from sve_carddb.domains.catalog.loader import Prepared
-    from sve_carddb.domains.registry.records import CorrectionEvidence
     from sve_carddb.domains.registry.snapshot import RegistrySnapshot
     from sve_carddb.domains.translations.four_layer_authored import (
         Inputs as FrameInputs,
     )
     from sve_carddb.domains.translations.names.resolve import Names
-    from sve_carddb.images.assets import ImageBuild
-    from sve_carddb.ingest.archive.frozen_sources import FrozenBatches
+    from sve_carddb.export.image_index import ImageIndex
 
 
 # Templates and flavor translate Japanese source text into this display language.
@@ -133,23 +129,6 @@ class Built:
     ownership: Ownership
     input_content: bytes
     report: dict[str, JsonValue]
-
-
-class RegionalImages:
-    def __init__(self, inputs: Inputs, checks: ImageChecks) -> None:
-        self.providers = {
-            pin.region: FrozenImages(
-                inputs.archive,
-                inputs.store_id,
-                pin.image_batch,
-                sources=checks.batch(inputs.archive, inputs.store_id, pin.image_batch),
-            )
-            for pin in inputs.sources
-        }
-
-    def image(self, evidence: CorrectionEvidence) -> Source:
-        """Dispatch correction evidence only to its explicitly pinned regional batch."""
-        return self.providers[evidence.region].image(evidence)
 
 
 def require_offline_coverage(projection: Projection, *, errata: bool) -> None:
@@ -313,9 +292,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     *,
     errata: tuple[ErrataPage, ...] = (),
     bundle_dir: Path | None = None,
-    images: ImageBuild | None = None,
-    image_root: Path | None = None,
-    image_checks: ImageChecks | None = None,
+    image_index: ImageIndex | None = None,
 ) -> Built:
     """Build both regions from sealed sources, retaining every diagnostic source use."""
     from sve_carddb.domains.catalog.adoption_importer import AdoptionInputs  # ruff: ignore[import-outside-top-level] -- load after text modules initialize the shared interner
@@ -329,19 +306,16 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 )
     names = composer(inputs)
     mark("load names (composer)")
-    image_checks = image_checks or ImageChecks()
-    batches = image_checks.batches
-    mounted = prepare_images(inputs, images, image_root, image_checks)
-    mark("prepare images")
-    if (
-        mounted is not None
-        and bundle_dir is not None
-        and (
-            bundle_dir.resolve().is_relative_to(mounted.root.resolve())
-            or mounted.root.resolve().is_relative_to(bundle_dir.resolve())
-        )
-    ):
-        raise ValueError("Offline bundle and image assets must be disjoint")
+    batches = FrozenBatches()
+    if image_index is not None:
+        image_index.validate_tables()
+        if image_index.store_id != inputs.store_id or tuple(
+            (pin.region, pin.batch_id) for pin in image_index.pins
+        ) != tuple((pin.region, pin.image_batch) for pin in inputs.sources):
+            raise ValueError(
+                "Image index differs from the recipe's regional image pins"
+            )
+    mark("load image index metadata")
     en, jp = inputs.sources
     identity = plan_preview(
         authored_root(inputs.repo),
@@ -381,7 +355,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 for pin in inputs.sources
             }
         ),
-        images=RegionalImages(inputs, image_checks),
+        images=image_index,
     )
     texts = observations.plan
     mark("text observations (parse sources)")
@@ -450,8 +424,8 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     }
     if names is not None:
         configuration |= names.configuration(inputs)
-    if mounted is not None:
-        configuration["image_recipe"] = DEFAULT_RECIPE.version
+    if image_index is not None:
+        configuration["image_index"] = digest(image_index.content())
     context = BuildContext.from_inputs(inputs.revision, configuration)
     mark("adoptions + rulings + config")
     schema = compile_build(
@@ -485,7 +459,6 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         batches=batches,
         corrections=None if texts.corrections is None else Corrections(texts),
     )
-    image_report: dict[str, JsonValue] | None = None
     name_result = None
     mark("flavor + template inputs")
     with create_database(schema) as db:
@@ -584,10 +557,6 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     *name_sources.uses,
                 ),
             )
-            if mounted is not None:
-                record, image_report = mounted.populate(
-                    db, inputs, identity, context, record
-                )
         restrictions = require_card_extras_ready(
             db,
             tuple(
@@ -624,6 +593,12 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             publication_printings=printings,
         )
         require_offline_coverage(projection, errata=bool(errata))
+        if image_index is not None:
+            projection = image_index.attach(projection, texts)
+        else:
+            projection = replace(
+                projection, config=offline_configuration(projection.config)
+            )
         mark("project public tables")
         ownership = Ownership.from_database(db, projection)
         source_gaps = _source_gaps(db, extras)
@@ -709,13 +684,8 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         report["ruling_references"] = ruling_report.payload()
         if name_result is not None:
             report["name_application"] = name_result.report
-        if image_report is not None:
-            report["image_assets"] = image_report
-            report["incomplete_formal_gates"] = [
-                item
-                for item in array(report["incomplete_formal_gates"])
-                if item != "image publication (#35)"
-            ]
+        if image_index is not None:
+            report["image_index"] = digest(image_index.content())
         if bundle_dir is not None:
             mark("build report")
             save_build(db, bundle_dir, content, report)

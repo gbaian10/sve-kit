@@ -51,17 +51,16 @@ f0 省略，其他面用永久 face.ordinal；printing.int_id 永不重配，不
 五個 size_key 固定；int_id／ordinal／version 的 URL 向量須由 Python／TS 共用合成測試驗證。
 
 版本由 printing.home_set 的 printing_image media 列提供。card 三檔共用 card_version，art 兩檔共用 art_version。
-使用匯出端配發的單調正安全整數 revision，各組沿用最後變更號，不需每圖連號；純文字更新不全庫換 v。
+使用獨立圖片 producer 配發的單調正安全整數 revision，各組沿用最後變更號，不需每圖連號；純文字更新不全庫換 v。
 依輸出 bytes、尺寸、binding／可用性比較是否變更；crop 只換 art，組內一尺寸變更可使該組一起換 URL。
 缺圖或不再公開後恢復、改面與 A→B→A 回復均配新號，不能回用古老 v；舊 query 冷讀可能已快取較新的 bytes。
 輸出 recipe、瀏覽器時間及每次全庫 data_version 都不能直接代替此事件版本。
 
-配號狀態是匯出私有目錄裡的 `media-state.json`，只有兩項：高水位整數 H，與最近一次成功匯出的各組
-binding／指紋／版本。每次匯出先把 H 加一並寫回，失敗的匯出也消耗該號；成功時在切換 preview 指標前
-寫入本次各組狀態，下一次匯出就與它比較。比較基準是最近一次匯出、不是最近一次上傳，所以上傳失敗後
-另做的匯出只要換圖就拿新號；同一份匯出重跑上傳則沿用同號補傳。
-此檔不是 authored 人工輸入，也不放在公開根；請隨既有備份保存。遺失時會從 1 重新配號，
-可能撞到已被快取的舊 URL，應從備份還原而非刪除重來。
+配號狀態是圖片 producer 私有根裡的 `media-state.json`：高水位整數 H 與最近一次成功圖片建置的各組
+binding／指紋／版本。每次圖片建置先 reserve H+1，失敗也消耗該號；圖片及索引成功寫出後 commit。
+純文字匯出不配號、不讀寫 state，只讀已驗的[圖片索引](image-index.md)，所以重跑文字匯出不消耗圖版本。
+既有 state 須移入同一持久圖片私有根並備份；遺失時從備份還原，不能在另一台機器從 1 重新配號。
+圖片建置失敗時重跑成功後才可上傳；不得發布半組圖片或以文字匯出補配號。
 
 上傳流程（[R2 上傳](../../../publish/README.md)）：
 
@@ -74,7 +73,7 @@ binding／指紋／版本。每次匯出先把 H 加一並寫回，失敗的匯�
 
 同一組多尺寸覆寫並非跨物件原子交易；舊快照在寫入途中可能看到新舊尺寸混合，新快照只在全組就緒後發布。
 previous 的舊 v 冷讀拿到目前 bytes 可接受，metadata 不重寫，也不要求 origin 同時符合兩版圖片 hash。
-匯出要以不同 bytes 覆寫既有卡圖前先刪 preview 指標，中斷的匯出不會留下可上傳的舊指標。
+圖片 producer 的固定 key 與文字快照分開保存；只有成功圖片建置的索引與圖片根可交給上傳。
 
 新快照啟用後，browser 的 src／srcset 和 SW cache key 一律切新 v；SW 禁止 ignoreSearch 或只按 ID／尺寸匹配，
 舊 response 晚到不得回寫新版 view。新圖下載／decode 未完成顯示 placeholder，失敗明示，不拿舊 v 當 fallback。

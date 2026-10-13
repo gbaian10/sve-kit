@@ -40,15 +40,15 @@ unused entries; neither repeats card text.
 Translation parsers cover EN, JP, sv1 and svwb frozen projections; they do not
 grant digital same-card eligibility. Missing trait/title or other raw-field
 adoptions fail rather than generating codes.
-Image batches always verify authored correction evidence. Image publication is
-optional and requires the two explicit image roots below; EN card text remains
+The pinned image index supplies exact authored correction evidence. Image metadata is
+optional and requires an explicit index; EN card text remains
 the original EN observation, with no new translation workflow.
 
 ```bash
 sve-carddb snapshot export-offline --inputs recipe.json \
   --preview-dir /path/to/public-preview \
   --private-dir /path/to/preview-private \
-  --bundle-dir /path/to/private-build-bundle
+  --bundle-dir /path/to/private-build-bundle --image-index "/private/image-index/<sha256>.json"
 ```
 
 `--preview-dir` can read `SVE_EXPORT_DIR`; `--private-dir` can read
@@ -57,9 +57,9 @@ and both must be non-empty absolute paths. `--inputs` and `--bundle-dir` remain
 explicit. `SVE_PREVIEW_DIR` configures only the Web `/cdn-preview` root.
 
 All output roots must be disjoint from the protected repo, archive and recipe.
-`--preview-dir` receives only public snapshot files and images. `--private-dir`
+`--preview-dir` receives only public snapshot JSON files. `--private-dir`
 is a separate, persistent directory for `inputs/<hash>.json`,
-`reports/<manifest-hash>.json` and `media-state.json`; keep it and back it up.
+`reports/<manifest-hash>.json`; image state belongs to the independent image producer.
 The build directory is new and private. It contains `build.sqlite`, `inputs.json`
 and `report.json`. The database is backed up from the completed transaction, with
 no second population or build seal. Files are written in a temporary directory,
@@ -70,50 +70,22 @@ The build directory and private directory are never uploaded.
 This remains a `preview-` candidate, with no formal index or activation (#34).
 `export-offline` is the only export command. It selects EN and JP and permits
 card-page Q&A and related links. The recipe retains unknown source coverage: observations do not prove Q&A or
-errata completeness, nor CR/restriction coverage. Without explicit image roots,
+errata completeness, nor CR/restriction coverage. Without an explicit image index,
 no image publication is claimed.
 
 ## Regional preview images
 
-Pass an existing private image library and recipe cache directory together.
-For each pinned image batch, `export-offline` loads `authored/images/crops.yaml`
-from the working tree, so uncommitted box edits apply, and calls
-`build_regional_assets`. A verified five-size cache hit is reused; a missing or
-stale entry (new source bytes, crop box or recipe) is encoded into the library
-and cache. A new crop gets a new cache key, so an old crop is never substituted.
-Keep the JP and EN sealed batches independent, and retain each original PNG.
+Run `sve-carddb images build-index` independently, then supply its immutable index
+with `snapshot export-offline --image-index`. The text build checks the exact
+regional image pins, printing/face permanent identity and parsed original img src.
+It never opens PNGs, WebPs, conversion caches or media state. Image rows are joined
+after the text database projection, keeping that database free of image variants.
+The public media fields and event versions remain unchanged.
 
-```bash
-sve-carddb snapshot export-offline --inputs recipe.json \
-  --preview-dir /path/to/public-preview \
-  --private-dir /path/to/preview-private \
-  --bundle-dir /path/to/new-private-build-bundle \
-  --image-assets-dir /path/to/private-image-library \
-  --image-cache-dir /path/to/private-recipe-cache \
-  --workers 2
-```
-
-`--workers` defaults to 2 and accepts 1 to 4; output bytes do not depend on it.
-stdout `image_execution` reports wall time, cache hits, new encodings and the
-summed per-image reuse and encoding times, which overlap with several workers.
-The builder requires all current members of both pinned image batches,
-verifies PNG hashes and oriented dimensions, and binds pages using the region's
-extractor, exact original `img src` and adopted `source_face_map`. Card-number
-suffixes do not infer cross-region identity. Source uses are retained separately
-as `jp_image_link` / `en_image_link` and `jp_image_variant` / `en_image_variant`.
-
-Image rows belong to the same transaction. One command shares inspection results
-by unique blob through conversion, preparation and population. New commands verify
-external files again; source/crop applicability and actual output bytes are checked.
-Snapshot output
-copies only referenced content-addressed WebP blobs; orphan library entries,
-original PNGs and recipe caches stay private. Reports include applied/unused
-crops, annotation mismatches and verified reprint candidates in both regions.
-Available assets remove the image integration gate from this preview report;
-formal activation and source coverage still require their existing gates.
-`sve-publish upload` uploads the preview root's current manifest closure and images to
-the development bucket as a `preview-` index entry; see
-[the upload guide](../../../../publish/README.md).
+See the [image index contract](../../../../docs/schema/images/image-index.md) for
+producer roots, cache keys, complete verification and state migration. Publication
+still verifies all images; `sve-publish upload --image-dir` supplies the independent
+fixed-key image output.
 
 ## Supplemental capabilities
 
@@ -174,20 +146,14 @@ real-card, catalog and translation acceptance.
 
 Select `--format-version 3.0.0` to export printing-owned media with permanent
 image keys. The source library still uses verified content-addressed WebPs;
-the isolated preview writes only the five display sizes to
+the image producer writes the five display sizes to
 `images/<size>/<int_id>[-f<ordinal>].webp`. `display_url` selects the card or art
 version from media, never from the card number or an array position.
 
-`media-state.json` in the private directory holds the high-water revision and
-the last export's card/art comparison. Each export first raises the high-water
-mark, so a failed export never reuses its number, and records its own groups
-before switching the pointer. Pure text changes preserve both versions, art-only
-changes preserve the card version, and a removed, restored or rebound image gets
-the new revision. Exports into one private directory run one at a time. A missing
-state file starts again at revision 1, which would reuse URLs a bucket may
-already cache, so restore it from backup instead. Before overwriting an image
-with different bytes, the writer removes the preview pointer; an interrupted
-export leaves no pointer and must be rerun before uploading.
+The independent image producer owns persistent `media-state.json`, reserves before
+an image build and commits only after images and index are written. Pure text
+exports consume the index's versions without allocating or committing any state.
+Failed image builds burn their reservation; restore missing state from backup.
 
 3.0 supports the same-name wire capability and rejects malformed nonempty links.
 The existing offline recipe still keeps policy browsing private: its public

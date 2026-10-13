@@ -19,7 +19,8 @@ if TYPE_CHECKING:
 class ImageChecks:
     """Bound cached results to observed files and the current conversion command."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, reuse: bool = False) -> None:
+        self.reuse = reuse
         self.files: dict[
             Path, tuple[tuple[int, ...], tuple[int, str, str | None, tuple[int, int]]]
         ] = {}

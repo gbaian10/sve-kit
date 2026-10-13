@@ -145,11 +145,13 @@ class FrozenTexts:
         if region == "jp":
             record = official_jp.extract_card(raw, number=card_no)
             faces = tuple(jp_face(face) for face in record.faces)
+            image_src = tuple(face.image for face in record.faces)
             identity_card = jp_card(record)
             date_raw, errata = record.release_date, record.errata_url
         else:
             english = official_en.extract_card(raw, number=card_no)
             faces = tuple(en_face(face) for face in english.faces)
+            image_src = tuple(face.image for face in english.faces)
             identity_card = en_card(english)
             date_raw, errata = english.release_date, english.errata_url
         return TextCard(
@@ -158,6 +160,7 @@ class FrozenTexts:
                 canonical(observation(identity_card, region))
             ),
             faces=faces,
+            image_src=image_src,
             date_raw=date_raw,
             has_errata_link=errata is not None,
             effect_presence=tuple(

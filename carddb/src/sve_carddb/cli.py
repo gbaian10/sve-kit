@@ -96,6 +96,7 @@ from sve_carddb.parse.pages import official_svwb as svwb
 from sve_carddb.parse.pages.official_jp import parse_list_first
 from sve_carddb.workflows.export import app as snapshot_app
 from sve_carddb.workflows.extract import extract_cards
+from sve_carddb.workflows.image_index import app as images_app
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable, Generator
@@ -120,6 +121,7 @@ archive_app = typer.Typer(
 )
 app.add_typer(archive_app, name="archive")
 app.add_typer(snapshot_app, name="snapshot")
+app.add_typer(images_app, name="images")
 app.add_typer(source_import_app, name="source-import")
 
 console = Console(soft_wrap=True)

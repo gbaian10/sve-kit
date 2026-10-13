@@ -113,3 +113,50 @@ def test_shared_checks_fill_each_cache_root(tmp_path: Path) -> None:
     assert build_variants(
         item, blob_root=blobs, cache_root=second_cache, checks=checks
     ).cache_hit
+
+
+def test_immutable_cache_reuse_opens_no_png_or_webp(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    raw = png(160, 224)
+    original = source(raw)
+    path = tmp_path / "frozen.png"
+    path.write_bytes(raw)
+    item = replace(original, data=path)
+    first = build_variants(
+        item, blob_root=tmp_path / "library", cache_root=tmp_path / "cache"
+    )
+    read_bytes = type(path).read_bytes
+
+    def metadata_only(candidate: Path) -> bytes:
+        if candidate.suffix in {".png", ".webp"}:
+            raise AssertionError("Cache reuse must not read a bitmap")
+        return read_bytes(candidate)
+
+    monkeypatch.setattr(type(path), "read_bytes", metadata_only)
+    reused = build_variants(
+        item,
+        blob_root=tmp_path / "library",
+        cache_root=tmp_path / "cache",
+        checks=ImageChecks(reuse=True),
+    )
+    assert reused.cache_hit
+    assert reused.variants == first.variants
+
+
+def test_daily_image_source_checks_defer_equal_size_damage_to_scrub(
+    frozen: FrozenSources,
+) -> None:
+    from sve_carddb.ingest.archive.frozen_sources import FrozenSources  # ruff: ignore[import-outside-top-level] -- exercise the public image-only size-check boundary
+    from sve_carddb.ingest.archive.source_archive import ArchiveError  # ruff: ignore[import-outside-top-level] -- full verification must still detect the changed bytes
+
+    version = frozen.inventory.current[0].source_version_id
+    blob = frozen.root / frozen.entries[version].blob.path
+    raw = blob.read_bytes()
+    blob.write_bytes(raw[:-1] + bytes([raw[-1] ^ 1]))
+    daily = FrozenSources(
+        frozen.root, frozen.store_id, frozen.batch_id, verify_raw=False
+    )
+    assert daily.descriptor(version).raw_sha256 == frozen.descriptor(version).raw_sha256
+    with pytest.raises(ArchiveError):
+        FrozenSources(frozen.root, frozen.store_id, frozen.batch_id)

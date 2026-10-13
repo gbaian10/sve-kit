@@ -32,6 +32,4 @@ services:
       - ${EXPORT_RUN_DIR:?}:${EXPORT_RUN_DIR:?}
       - ${SVE_EXPORT_DIR:?}:${SVE_EXPORT_DIR:?}
       - ${SVE_CARDDB_PRIVATE_DIR:?}:${SVE_CARDDB_PRIVATE_DIR:?}
-      # Writable because a new pack adds WebP encodings here.
-      - ${SVE_IMAGE_ASSETS_DIR:?}:${SVE_IMAGE_ASSETS_DIR:?}
-      - ${SVE_IMAGE_CACHE_DIR:?}:${SVE_IMAGE_CACHE_DIR:?}
+      - ${SVE_IMAGE_INDEX:?}:${SVE_IMAGE_INDEX:?}:ro

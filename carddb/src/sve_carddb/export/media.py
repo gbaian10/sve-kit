@@ -149,13 +149,14 @@ def _tokens(
     return fingerprints, versions
 
 
-def prepare_media(  # ruff: ignore[too-many-locals] -- indexes, validated source rows and output descriptors are kept separate at this boundary
+def prepare_media(  # ruff: ignore[too-many-locals, complex-structure] -- indexes, validated source rows and output descriptors are kept separate at this boundary
     projection: Projection,
     source: Path | None,
     *,
     revision: int,
     previous: JsonValue = None,
     checks: ImageChecks | None = None,
+    verify_blobs: bool = True,
 ) -> MediaPlan:
     """Verify private content-addressed outputs, then compare each card/art group.
 
@@ -170,8 +171,9 @@ def prepare_media(  # ruff: ignore[too-many-locals] -- indexes, validated source
         raise ValueError("Media revision must advance the committed state")
     members = {} if not old else object_value(old["members"])
     # Decode each unique source once before accepting its filename digest as evidence.
-    for _path, _raw in image_blobs(projection.tables, source, checks=checks):
-        pass
+    if verify_blobs:
+        for _path, _raw in image_blobs(projection.tables, source, checks=checks):
+            pass
     prints = {string(r["id"]): r for r in projection.tables["printing"]}
     faces = {string(r["id"]): r for r in projection.tables["face"]}
     variants: dict[str, list[Record]] = {}

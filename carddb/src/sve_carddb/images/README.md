@@ -24,5 +24,8 @@ and `docs/schema/images/image-crop-overrides.md` (adopted crop boxes).
 Crops come from `sve_carddb.images.crops.load_image_crops`, which reads
 `authored/images/crops.yaml` from the working tree, and are selected by
 `(source_key, source_sha256)`. Reports never include official card text.
-The `export-offline` command is the only caller: it encodes whatever the cache
-lacks and wires the result into a snapshot preview; see [offline export](../export/OFFLINE.md).
+The independent `images build-index` command encodes cache misses and assigns
+media event versions. Text `snapshot export-offline --image-index` reads only its
+pinned metadata, without PNGs, WebPs, conversion caches or media state. Daily
+image builds reuse archived hashes with size checks; `--verify-all` performs a
+complete source and WebP scrub. See the [index contract](../../../../docs/schema/images/image-index.md).
