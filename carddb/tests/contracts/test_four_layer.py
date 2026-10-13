@@ -358,6 +358,7 @@ def test_reference_catalog_growth_preserves_frame_and_rejects_unadopted_values()
         )
         verify_value(slot, first, {"card_name.any.v1": domain})
         assert canonical(slot.model_dump(mode="json")) == before
+        assert ReferenceDomain.model_validate_json(domain.model_dump_json()) == domain
     for invalid in (other, GlossaryReference(kind="glossary", key="term:first")):
         with pytest.raises(ValueError, match="outside every registered"):
             verify_value(
@@ -379,6 +380,17 @@ def test_reference_catalog_growth_preserves_frame_and_rejects_unadopted_values()
                 VocabularyReference(kind="vocabulary", key=("class", "neutral")),
             ),
         )
+
+
+def test_reference_domain_copy_uses_its_replacement_catalog() -> None:
+    first = CardNameReference(kind="card_name", term_id="term:first")
+    other = CardNameReference(kind="card_name", term_id="term:other")
+    domain = ReferenceDomain(type="CardName", category="card_name", references=(first,))
+    assert domain.contains(first)
+    replacement = domain.model_copy(update={"references": (other,)})
+    assert replacement.contains(other)
+    assert not replacement.contains(first)
+    assert domain.contains(first)
 
 
 def test_constant_quantity_domain_rejects_all_and_bound_even_with_registered_import() -> (

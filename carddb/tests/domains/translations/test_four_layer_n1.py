@@ -54,18 +54,15 @@ def n1_classifier() -> Classifier:
             )
         ),
     )
-    result = classifier(
-        terms,
-        (
-            "braced_ability_reference",
-            "bracket_keyword_reference",
-            "keyword_threshold_combo",
-            "keyword_threshold_lesson",
-            "keyword_threshold_necrocharge",
-            "keyword_threshold_spell_chain",
-            "keyword_alias_nc",
-            "keyword_alias_sc",
-        ),
+    extra = (
+        "braced_ability_reference",
+        "bracket_keyword_reference",
+        "keyword_threshold_combo",
+        "keyword_threshold_lesson",
+        "keyword_threshold_necrocharge",
+        "keyword_threshold_spell_chain",
+        "keyword_alias_nc",
+        "keyword_alias_sc",
     )
     members = (
         ("type", "follower", "フォロワー"),
@@ -73,7 +70,7 @@ def n1_classifier() -> Classifier:
         ("type", "spell", "スペル"),
         ("class", "synthetic", "仮クラス"),
     )
-    result.references.vocabulary = Vocabulary(
+    vocabulary = Vocabulary(
         bindings=tuple(
             Binding(region="jp", kind=kind, code=code, raw=raw)
             for kind, code, raw in members
@@ -88,7 +85,7 @@ def n1_classifier() -> Classifier:
             for kind, code, raw in members
         ),
     )
-    return result
+    return classifier(terms, extra, vocabulary=vocabulary)
 
 
 @pytest.fixture

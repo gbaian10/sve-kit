@@ -43,8 +43,7 @@ def test_class_filter_accepts_complete_direct_kind_constructions(
 ) -> None:
     raw = f"仮。自分の墓場の{{仮クラス}}{separator}フォロワー{continuation}"
     field = normalize_source(raw, source(raw))
-    engine = classifier()
-    engine.references.vocabulary = Vocabulary(
+    vocabulary = Vocabulary(
         bindings=(
             Binding(region="jp", kind="class", raw="仮クラス", code="synthetic"),
         ),
@@ -56,6 +55,7 @@ def test_class_filter_accepts_complete_direct_kind_constructions(
             ),
         ),
     )
+    engine = classifier(vocabulary=vocabulary)
     part = field.parts[0]
     found = engine.recognize(raw, field.source, part)
     assert not found.issues
@@ -69,8 +69,7 @@ def test_class_filter_accepts_complete_direct_kind_constructions(
 def test_class_marker_without_a_complete_kind_filter_stays_unresolved() -> None:
     raw = "仮。{仮クラス}未知。"
     field = normalize_source(raw, source(raw))
-    engine = classifier()
-    engine.references.vocabulary = Vocabulary(
+    vocabulary = Vocabulary(
         bindings=(
             Binding(region="jp", kind="class", raw="仮クラス", code="synthetic"),
         ),
@@ -82,6 +81,7 @@ def test_class_marker_without_a_complete_kind_filter_stays_unresolved() -> None:
             ),
         ),
     )
+    engine = classifier(vocabulary=vocabulary)
     found = engine.recognize(raw, field.source, field.parts[0])
     assert "n0_vocabulary_construction_unresolved" in found.issues
 
@@ -279,13 +279,12 @@ def test_token_header_requires_every_declared_field_in_its_exact_catalog(
         "name": Term("term:name.synthetic", "card_name", "仮トークン😀"),
         "trait": Term("term:trait.synthetic", "trait", "仮種族"),
     }
-    engine = classifier(tuple(t for k, t in terms.items() if k != missing))
     vocabulary = {
         "class": Binding(region="jp", kind="class", raw="仮クラス", code="synthetic"),
         "kind": Binding(region="jp", kind="type", raw="フォロワー", code="follower"),
     }
     bindings = tuple(b for k, b in vocabulary.items() if k != missing)
-    engine.references.vocabulary = Vocabulary(
+    catalog = Vocabulary(
         bindings=bindings,
         terms=tuple(
             VocabularyTerm(
@@ -293,6 +292,9 @@ def test_token_header_requires_every_declared_field_in_its_exact_catalog(
             )
             for b in bindings
         ),
+    )
+    engine = classifier(
+        tuple(t for k, t in terms.items() if k != missing), vocabulary=catalog
     )
     part = next(p for p in field.parts if p.source_span.role == "token_header")
     found = engine.recognize(raw, field.source, part, field=field)

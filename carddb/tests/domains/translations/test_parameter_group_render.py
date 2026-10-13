@@ -169,9 +169,9 @@ def test_parameter_group_case(case: dict[str, JsonValue]) -> None:
     if case["operation"] == "parameter_group_n0":
         raw = string(value["source"])
         field = normalize_source(raw, source(raw))
-        selected = classifier()
+        vocabulary = None
         if value["class"]:
-            selected.references.vocabulary = Vocabulary(
+            vocabulary = Vocabulary(
                 bindings=(
                     Binding(region="jp", kind="class", raw="検査クラス", code="probe"),
                 ),
@@ -183,6 +183,7 @@ def test_parameter_group_case(case: dict[str, JsonValue]) -> None:
                     ),
                 ),
             )
+        selected = classifier(vocabulary=vocabulary)
         part = field.parts[0]
         found = selected.recognize(raw, field.source, part, field=field)
         assert not found.issues
