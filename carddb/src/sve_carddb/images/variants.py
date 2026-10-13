@@ -245,7 +245,6 @@ def _build_variants(
         if hashlib.sha256(raw).hexdigest() != source.source_sha256:
             raise ImageVariantError("Frozen source SHA-256 mismatch")
     image = _decode(raw)
-    checks.png["sha256:" + source.source_sha256] = "PNG", image.size
     crop = crop_box(image.width, image.height, override)
 
     generated: list[ImageVariant] = []

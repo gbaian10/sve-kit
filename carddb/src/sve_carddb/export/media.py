@@ -25,8 +25,6 @@ from sve_carddb.export.media_images import image_blobs
 from sve_carddb.export.media_urls import image_path, uint
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-
     from sve_carddb.export.project import Projection
     from sve_carddb.export.project.source import Record
     from sve_carddb.images.checks import ImageChecks
@@ -37,18 +35,6 @@ class MediaPlan:
     projection: Projection
     state: dict[str, JsonValue]
     assets: tuple[dict[str, JsonValue], ...]
-
-    def blobs(self, source: Path) -> Iterator[tuple[str, bytes]]:
-        """Recheck full bytes so a changed build cache cannot corrupt a sealed plan."""
-        from sve_carddb.ingest.archive.store import resolve_within  # ruff: ignore[import-outside-top-level] -- keep the read-only filesystem boundary local
-
-        for asset in self.assets:
-            raw = resolve_within(
-                source, PurePosixPath(string(asset["source"]))
-            ).read_bytes()
-            if digest(raw) != asset["sha256"] or len(raw) != integer(asset["bytes"]):
-                raise ValueError("Media plan source hash or bytes mismatch")
-            yield string(asset["path"]), raw
 
 
 _SUBJECT_ARITY = 2

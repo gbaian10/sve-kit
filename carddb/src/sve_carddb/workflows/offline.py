@@ -668,7 +668,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 "errata parsing and per-card corrected-text verification (#47)",
                 "complete source coverage",
                 "formal release gates (#34)",
-                "image publication (#35)",
+                *([] if image_index is not None else ["image publication (#35)"]),
                 "Web handoff and acceptance",
             ],
         }

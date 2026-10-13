@@ -19,7 +19,7 @@ uv --directory carddb run sve-carddb images build-index --inputs /private/inputs
 - `image-assets-dir`：內容定址 WebP，維持 `images/sha256/<prefix>/<hash>.webp`。
 - `image-cache-dir`：原圖 SHA-256＋裁切覆寫設定＋完整 recipe 的轉檔快取，查找先於 PNG 解碼。
 - `image-output-dir`：可供預覽及上傳的固定 ID key（含 `images/`）。只寫變動版本或缺少的檔案。
-- `private-dir`：持久 `media-state.json` 與 `image-index/<sha256>.json`，命令 stdout 回報完整索引路徑。
+- `private-dir`：持久 `media-state.json`、`image-index/<sha256>.json` 與本次裁切診斷 `image-report.json`。命令 stdout 的單行 JSON 回報完整索引路徑、執行計量及四項裁切診斷的摘要。報告格式與診斷規則見[裁切覆寫契約 §3](image-crop-overrides.md#3-解析建置驗證與報告)。
 
 日常圖片建置核對封存 raw 的存在及大小，命中快取時亦只核對 WebP 的存在／大小。
 新來源或快取未命中時讀取、驗 hash 及解碼；新寫出的固定 key 驗回 hash。
@@ -27,7 +27,9 @@ uv --directory carddb run sve-carddb images build-index --inputs /private/inputs
 同尺寸的靜默損壞可能延至完整查核才發現；來源封存、備份及 restore 的完整驗證不變，原 PNG 不刪除。
 
 首次改用本流程時，將既有成功匯出的 `media-state.json` 搬入指定圖片私有根並保留備份；
-由同一 producer 跨次沿用。未變圖片沿用原 v，裁切只影響 art 組；失敗配號不回收。
+`media-state.json` 是配號的唯一依據，換機器或換圖片私有根時必須一起搬並備份，由同一 producer 跨次沿用。
+缺 state 時命令會拒絕執行，只有明示 `--initial` 才可建立全新的配號狀態；已有 state 時也拒絕 `--initial`。
+未變圖片沿用原 v，裁切只影響 art 組；失敗配號不回收。
 圖片建置失敗時不得發布其部分寫出的圖片，須重跑成功後使用該次索引。若圖片根亦存有 preview 指標，
 覆寫不同 bytes 前先移除該指標，避免中斷後載入不完整的圖片組。
 

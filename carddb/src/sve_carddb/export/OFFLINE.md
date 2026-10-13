@@ -71,7 +71,9 @@ This remains a `preview-` candidate, with no formal index or activation (#34).
 `export-offline` is the only export command. It selects EN and JP and permits
 card-page Q&A and related links. The recipe retains unknown source coverage: observations do not prove Q&A or
 errata completeness, nor CR/restriction coverage. Without an explicit image index,
-no image publication is claimed.
+no image publication is claimed. With an image index, the private report omits
+`image publication (#35)` from `incomplete_formal_gates`, as in the image-enabled
+preview baseline; the remaining formal gates still apply.
 
 ## Regional preview images
 

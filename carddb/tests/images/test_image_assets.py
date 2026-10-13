@@ -11,12 +11,7 @@ import pytest
 from sve_carddb.core.json import object_value, parse
 from sve_carddb.core.regions import SourceRegion
 from sve_carddb.images import assets, variants
-from sve_carddb.images.assets import (
-    PreviewRoots,
-    build_regional_assets,
-    verify_asset_sources,
-    verify_assets,
-)
+from sve_carddb.images.assets import PreviewRoots, build_regional_assets, verify_assets
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.manifest import Kind, Manifest
 from sve_carddb.ingest.archive.source_archive import ArchiveError, seal_batch
@@ -86,18 +81,14 @@ def test_serial_parallel_resume_and_hashes_use_only_frozen_bytes(
     assert len(serial.images) == 3
     assert all(len(item.result.variants) == 5 for item in serial.images)
     assert serial.images[0].result.variants[0].format == "webp"
-    report = serial.report()
     blobs = bytes_by_path(serial, serial_roots.preview)
-    assert report["unique_webp_files"] == len(blobs)
-    assert report["unique_webp_bytes"] == sum(map(len, blobs.values()))
-    assert report["converted_variant_rows"] == 15
+    assert sum(len(item.result.variants) for item in serial.images) == 15
     for path, data in blobs.items():
         assert (
             path
             == f"images/sha256/{hashlib.sha256(data).hexdigest()[:2]}/{hashlib.sha256(data).hexdigest()}.webp"
         )
     assert not (serial_roots.preview / "snapshots").exists()
-    verify_asset_sources(serial, {frozen.store_id: frozen.root})
     assert before == {p: p.read_bytes() for p in frozen.root.rglob("*") if p.is_file()}
 
     def unexpected_encode(*_args: object, **_kwargs: object) -> bytes:
@@ -297,29 +288,6 @@ def test_independent_asset_tampering_is_rejected(  # ruff: ignore[complex-struct
         build = replace(build, images=(replace(item, result=result), *build.images[1:]))
     with pytest.raises((ValueError, FileNotFoundError)):
         verify_assets(build, output.preview)
-
-
-@pytest.mark.parametrize("case", ["raw-bytes", "source-width", "unconfigured"])
-def test_source_dimensions_and_raw_bytes_are_checked_independently(
-    empty_crops: ImageCrops, tmp_path: Path, frozen: FrozenSources, case: str
-) -> None:
-    build = build_regional_assets(
-        frozen, roots(tmp_path), region="jp", crops=empty_crops
-    )
-    item = build.images[0]
-    if case == "raw-bytes":
-        item = replace(item, raw_bytes=item.raw_bytes + 1)
-    elif case == "source-width":
-        item = replace(
-            item, result=replace(item.result, source_width=item.result.source_width + 1)
-        )
-    build = replace(build, images=(item, *build.images[1:]))
-    with pytest.raises(
-        ValueError, match=r"source bytes|not configured|crop box differs"
-    ):
-        verify_asset_sources(
-            build, {} if case == "unconfigured" else {frozen.store_id: frozen.root}
-        )
 
 
 def test_corrupt_archive_is_never_replaced_by_latest(

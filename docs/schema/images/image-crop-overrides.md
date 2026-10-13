@@ -45,13 +45,13 @@ region／card_no 不參與來源查找、跨區配對或採納判定；已驗證
 
 先完整驗證整個檔案，再大量轉檔；未被選中的列列為未使用，不是錯誤。`build_regional_assets(region=…)` 明示 `jp` 或 `en`，只接受相符地區的 image batch。頁面綁定使用該地區萃取器的原始 `<img src>` 與人工 source_face_map。
 
-日英 `snapshot export-offline` 的 Inputs.sources 分別釘兩區 card／image batch 與 parser version，成對提供 `--image-assets-dir`、`--image-cache-dir` 才納入影像。入口對每區呼叫上述 API：通過驗證的完整五檔快取直接沿用，缺檔或過時（來源、框或 recipe 改變）的來源當場產圖，寫入圖片庫與快取。建置須重驗各區目前批次的完整成員，影像綁定及來源使用閉包同時進入 staging／sealed DB 重播；詳細參數見[離線建置入口](../../../carddb/src/sve_carddb/export/OFFLINE.md)。正式發布仍依既有來源涵蓋與 readiness 門檻。
+`images build-index` 的 Inputs.sources 分別釘日英兩區 card／image batch 與 parser version，圖片庫、快取、固定 key 輸出根與圖片私有根彼此隔離。入口對每區呼叫上述 API：完整五檔快取命中時核對存在與大小，缺檔或過時（來源、覆寫或 recipe 改變）的來源當場產圖並完整驗回，寫入圖片庫與快取；`--verify-all` 另完整驗回 PNG 與 WebP。頁面綁定由 `media_projection` 的文字觀察、採納身分及 source_face_map 產生，不查文字 DB。詳細參數見[圖片索引契約](image-index.md)。正式發布仍依既有來源涵蓋與 readiness 門檻。
 
-`export-offline` 消費外部傳入的 `ImageBuild` 時，`verify_asset_sources` 從同一個裁切檔重算每個來源應用的框（覆寫或預設），與 `VariantSet.crop_box` 比對後才可填 DB／輸出公開清單。僅在 `build_regional_assets` 產圖側驗證不夠；來源、recipe、五檔 hash 都有效但仍使用舊框的結果也必須拒絕。
+文字 `snapshot export-offline --image-index` 只讀已釘選的圖片索引，不讀原圖、WebP、裁切檔、快取或圖片版本 state，不再負責產圖或來源驗回。
 
 裁切檔不寫入建置 context 的 configuration 或 dependencies：框改變時 art WebP 的 bytes 跟著改變，已由影像結果與 media 版本反映。純文字建置不讀裁切檔。
 
-建置報告不含卡片原文或私人路徑，至少列出：
+`images build-index` 把完整診斷寫到圖片私有根的 `image-report.json`（含本次索引的相對路徑與 `crops` 診斷），stdout 的單行 JSON 摘要另在 `crops` 列出下列四項的張數或列數。報告不含卡片原文或私人路徑，至少列出：
 
 - 套用覆寫的來源圖張數（按覆寫鍵去重，不把同圖多個 binding 重算）。
 - 未被本次選中來源用到的覆寫列：鍵與 region／card_no 標註。
@@ -74,7 +74,7 @@ region／card_no 不參與來源查找、跨區配對或採納判定；已驗證
 
 ## 5. 變體、快照與上傳的版本策略
 
-既有 recipe 已支援來源綁定的整數覆寫，新增採納資料不改 recipe_version；解碼、編碼、縮放或框演算法改變才按既有規則換 recipe。快取 key 包含來源 hash、實際框與完整 recipe：新框取得新 key，沒有新框結果時重新產製，不得借用舊框的完整五檔。
+既有 recipe 已支援來源綁定的整數覆寫，新增採納資料不改 recipe_version；解碼、編碼、縮放或框演算法改變才按既有規則換 recipe。快取 key 包含來源 hash、覆寫設定（無覆寫時為 null）與完整 recipe，命中時仍核對依尺寸算出的實際框：新框取得新 key，沒有新框結果時重新產製，不得借用舊框的完整五檔。
 
 新 key 下五檔會重新產製。在來源與 recipe 不變時，card 三檔輸入不變，內容定址後仍可共用原 blob；art 兩檔改為新 WebP hash／path。不改寫內容定址的建置 blob。`img:binding:` 不依賴裁切，來源／頁面 binding 不變時保持原值。2.0 的公開 key 固定、只換 art_version 並覆寫有變動的 art bytes，card 三檔版本沿用；欄序依 snapshot-format §2.1，不公開框。
 

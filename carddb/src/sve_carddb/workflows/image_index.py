@@ -32,7 +32,7 @@ from sve_carddb.export.image_index import (
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.media_urls import image_path
 from sve_carddb.export.preview import Roots
-from sve_carddb.export.preview.media_state import commit, reserve
+from sve_carddb.export.preview.media_state import STATE, commit, reserve
 from sve_carddb.export.project import Projection
 from sve_carddb.export.read_api import POINTER
 from sve_carddb.images.assets import (
@@ -42,6 +42,7 @@ from sve_carddb.images.assets import (
     build_regional_assets,
 )
 from sve_carddb.images.checks import ImageChecks
+from sve_carddb.images.crop_report import CropBinding, crop_report
 from sve_carddb.images.crops import load_image_crops
 from sve_carddb.images.variants import DEFAULT_RECIPE
 from sve_carddb.ingest.archive.frozen_sources import FrozenBatches, FrozenSources
@@ -83,7 +84,7 @@ class RegionalImages:
 
 def media_projection(  # ruff: ignore[too-many-locals] -- source bindings and public rows are built together before version allocation
     texts: TextPlan, images: ImageBuild
-) -> tuple[Projection, tuple[ImageBinding, ...]]:
+) -> tuple[Projection, tuple[ImageBinding, ...], tuple[CropBinding, ...]]:
     """Use the same source-bound image identity as the build database projection."""
     identity = texts.publication_identity()
     allocations = {
@@ -107,6 +108,7 @@ def media_projection(  # ruff: ignore[too-many-locals] -- source bindings and pu
     rows: list[Record] = []
     prints: list[Record] = []
     bindings: list[ImageBinding] = []
+    crop_bindings: list[CropBinding] = []
     ordinals = {face.id: face.ordinal for face in faces}
     for record in identity.included("printing"):
         data = record.data
@@ -163,6 +165,16 @@ def media_projection(  # ruff: ignore[too-many-locals] -- source bindings and pu
                 )
             )
             if item is not None:
+                crop_bindings.append(
+                    CropBinding(
+                        data.card_id,
+                        data.id,
+                        mapping.face_id,
+                        data.region,
+                        data.card_no,
+                        url,
+                    )
+                )
                 for variant in item.result.variants:
                     variants[image_id, variant.size_key] = {
                         "image_id": image_id,
@@ -182,8 +194,10 @@ def media_projection(  # ruff: ignore[too-many-locals] -- source bindings and pu
         ),
         "image_variant": [variants[key] for key in sorted(variants)],
     }
-    return Projection(tables, {}, {}), tuple(
-        sorted(bindings, key=lambda item: (item.printing_id, item.face_id))
+    return (
+        Projection(tables, {}, {}),
+        tuple(sorted(bindings, key=lambda item: (item.printing_id, item.face_id))),
+        tuple(sorted(crop_bindings, key=lambda item: (item.printing_id, item.face_id))),
     )
 
 
@@ -246,6 +260,9 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
     private_dir: Annotated[Path, typer.Option()],
     workers: Annotated[int, typer.Option(min=1, max=MAX_WORKERS)] = 2,
     verify_all: Annotated[bool, typer.Option()] = False,
+    initial: Annotated[
+        bool, typer.Option(help="Initialize a new image version state.")
+    ] = False,
 ) -> None:
     """Convert images and reserve event versions independently of text export."""
     recipe = Inputs.model_validate_json(inputs.read_bytes())
@@ -261,6 +278,13 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
                 protected.resolve()
             ) or protected.resolve().is_relative_to(output.resolve()):
                 raise ValueError("Image outputs overlap protected inputs")
+    state_exists = roots.destination(STATE, private=True).exists()
+    if initial == state_exists:
+        raise ValueError(
+            "--initial requires an absent media-state.json"
+            if state_exists
+            else "Missing media-state.json: restore image state or use --initial for a first build"
+        )
     checks = ImageChecks(reuse=not verify_all)
     batches = {
         pin.region: FrozenSources(
@@ -329,7 +353,8 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
         ),
         images=RegionalImages(recipe, batches, verify_all=verify_all),
     ).plan
-    projection, bindings = media_projection(texts, images)
+    projection, bindings, crop_bindings = media_projection(texts, images)
+    diagnostics = crop_report(crops, images, crop_bindings)
     revision, previous = reserve(roots)
     plan = prepare_media(
         projection,
@@ -367,12 +392,30 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
     content = index.content()
     path = "image-index/" + digest(content)[7:] + ".json"
     preview.write_artifact(roots, path, content, immutable=True, private=True)
+    preview.write_artifact(
+        roots,
+        "image-report.json",
+        canonical({"image_index": path, "crops": diagnostics}),
+        immutable=False,
+        private=True,
+    )
     commit(roots, plan.state)
     typer.echo(
         canonical(
             {
                 "image_index": str(roots.destination(path, private=True)),
                 "written_images": written,
+                "crops": {
+                    "applied_source_images": diagnostics["applied_source_images"],
+                    **{
+                        key: len(array(diagnostics[key]))
+                        for key in (
+                            "unused",
+                            "annotation_mismatches",
+                            "reprint_candidates",
+                        )
+                    },
+                },
                 "image_execution": dict[str, JsonValue](
                     images.execution() | {"workers": workers}
                 ),

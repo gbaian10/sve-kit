@@ -497,22 +497,6 @@ def test_two_printings_and_permanent_back_ordinal_share_source_not_target(
     assert len({string(a["sha256"]) for a in plan.assets}) == 3
 
 
-def test_byte_change_after_sealing_rejected_before_activation(
-    images: PublicImages, tmp_path: Path
-) -> None:
-    import shutil  # ruff: ignore[import-outside-top-level] -- isolate a mutable synthetic cache
-
-    library = tmp_path / "library"
-    shutil.copytree(images.library, library)
-    plan = prepare_media(images.projection, library, revision=7)
-    asset = plan.assets[0]
-    source = library / string(asset["source"])
-    content = source.read_bytes()
-    source.write_bytes(bytes([content[0] ^ 1]) + content[1:])
-    with pytest.raises(ValueError, match=r"^Media plan source hash or bytes mismatch$"):
-        list(plan.blobs(library))
-
-
 def test_media_uses_printing_home_not_card_home(images: PublicImages) -> None:
     from sve_carddb.export.transport import Ownership  # ruff: ignore[import-outside-top-level] -- independent build-only ownership input
 

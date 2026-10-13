@@ -8,11 +8,6 @@ import pytest
 from sve_carddb.core.json import digest
 from sve_carddb.images import checks as checks_module
 from sve_carddb.images import variants
-from sve_carddb.images.assets import (
-    PreviewRoots,
-    build_regional_assets,
-    verify_asset_sources,
-)
 from sve_carddb.images.checks import ImageChecks
 from sve_carddb.images.variants import build_variants
 
@@ -24,7 +19,6 @@ if TYPE_CHECKING:
 
     from PIL import Image
 
-    from sve_carddb.images.crops import ImageCrops
     from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
 
@@ -71,28 +65,6 @@ def test_unique_source_decode_and_shared_variant_inspection(
     with pytest.raises(OSError, match="cannot identify image"):
         checks.inspect(path)
     assert hashed == 3
-
-
-def test_image_stages_share_the_verified_source_batch(
-    frozen: FrozenSources,
-    empty_crops: ImageCrops,
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    checks = ImageChecks()
-    roots = PreviewRoots(tmp_path / "blobs", tmp_path / "cache")
-    assets = build_regional_assets(
-        frozen, roots, region="jp", crops=empty_crops, checks=checks
-    )
-    assert checks.batch(frozen.root, frozen.store_id, frozen.batch_id) is frozen
-
-    def unexpected(*_args: object, **_kwargs: object) -> None:
-        pytest.fail("Image verification must reuse this command's verified batch")
-
-    monkeypatch.setattr(checks_module, "FrozenSources", unexpected)
-    verify_asset_sources(
-        assets, {frozen.store_id: frozen.root}, crops=empty_crops, checks=checks
-    )
 
 
 def test_shared_checks_fill_each_cache_root(tmp_path: Path) -> None:

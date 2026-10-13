@@ -8,7 +8,7 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb.cli import app
-from sve_carddb.core.json import digest
+from sve_carddb.core.json import array, digest, object_value, parse
 from sve_carddb.domains.products import OfficialProducts, ProductIdentities
 from sve_carddb.export.image_index import MEDIA_TABLES, ImageIndex, ImagePin
 from sve_carddb.export.media import prepare_media
@@ -21,8 +21,8 @@ from sve_carddb.parse.pages.official_jp import image_url
 from sve_carddb.workflows import offline
 from sve_carddb.workflows.image_index import media_projection
 
-from ..images.test_image_assets_en import FRONT, EnglishImages
-from ..images.test_image_assets_en import english_images as english_images  # ruff: ignore[useless-import-alias] -- reuse one sealed EN baseline
+from ..support.english_image_fixtures import FRONT, EnglishImages
+from ..support.english_image_fixtures import english_images as english_images  # ruff: ignore[useless-import-alias] -- reuse one sealed EN baseline
 from ..support.image_crop_fixtures import install, record
 from .test_snapshot_offline import prepared as prepared  # ruff: ignore[useless-import-alias] -- reuse the existing regional text/adoption fixture
 
@@ -107,7 +107,7 @@ def regional_images(
 def make_index(
     case: Case, recipe: Inputs, assets: ImageBuild, library: Path
 ) -> ImageIndex:
-    projection, bindings = media_projection(case.compose().plan, assets)
+    projection, bindings, _ = media_projection(case.compose().plan, assets)
     plan = prepare_media(projection, library, revision=1)
     return ImageIndex(
         recipe=DEFAULT_RECIPE.version,
@@ -146,6 +146,9 @@ def test_bilingual_text_export_uses_index_without_any_images(
     assert not (tmp_path / "private/media-state.json").exists()
     built = offline.build(recipe, image_index=ImageIndex.read(path))
     assert built.projection.tables["printing_image"] == index.tables["printing_image"]
+    assert "image publication (#35)" not in array(
+        built.report["incomplete_formal_gates"]
+    )
     assert all(row["card_version"] == 1 for row in index.tables["printing_image"])
     assert (tmp_path / "preview/snapshots/preview/current.json").is_file()
 
@@ -203,7 +206,40 @@ def forbid_bitmap_reads(monkeypatch: pytest.MonkeyPatch, pngs: set[Path]) -> Non
     monkeypatch.setattr(Path, "read_bytes", guarded)
 
 
-def test_independent_image_cli_commits_index_and_reuses_versions(
+def diagnostic_crops(recipe: Inputs) -> None:
+    records = [
+        row.model_dump(mode="json") | {"card_no": "MISMATCH"}
+        for row in load_image_crops(recipe.repo / "authored").records.values()
+    ]
+    install(
+        recipe.repo / "authored",
+        [
+            *records,
+            records[0] | {"source_key": "sha256:" + "f" * 64, "card_no": "UNUSED"},
+        ],
+    )
+
+
+def assert_crop_report(private: Path, index: Path, stdout: str, root: Path) -> None:
+    raw = (private / "image-report.json").read_bytes()
+    report = object_value(parse(raw))
+    assert report["image_index"] == "image-index/" + index.name
+    crops = object_value(report["crops"])
+    assert crops["applied_source_images"] == 1
+    assert len(array(crops["unused"])) == 1
+    assert array(crops["annotation_mismatches"])
+    assert array(crops["reprint_candidates"])
+    assert str(root) not in raw.decode()
+    assert object_value(parse(stdout.encode()))["crops"] == {
+        "applied_source_images": 1,
+        **{
+            key: len(array(crops[key]))
+            for key in ("unused", "annotation_mismatches", "reprint_candidates")
+        },
+    }
+
+
+def test_independent_image_cli_requires_initial_state_and_reuses_versions(
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
     regional_images: tuple[Inputs, ImageBuild, PreviewRoots],
     tmp_path: Path,
@@ -238,11 +274,19 @@ def test_independent_image_cli_commits_index_and_reuses_versions(
         "--private-dir",
         str(private),
     ]
+    diagnostic_crops(recipe)
     runner = CliRunner()
     first = runner.invoke(app, arguments)
+    assert first.exit_code != 0
+    assert "Missing media-state.json" in str(first.exception)
+    assert not (private / "media-state.json").exists()
+    assert not output.exists()
+    first = runner.invoke(app, [*arguments, "--initial"])
     assert first.exit_code == 0, repr(first.exception)
     index = next((private / "image-index").glob("*.json"))
     before = index.read_bytes()
+    assert_crop_report(private, index, first.stdout, tmp_path)
+    report_before = (private / "image-report.json").read_bytes()
     forbid_bitmap_reads(
         monkeypatch,
         {
@@ -255,6 +299,11 @@ def test_independent_image_cli_commits_index_and_reuses_versions(
     assert '"new_encodings":0' in second.stdout
     assert '"written_images":0' in second.stdout
     assert index.read_bytes() == before
+    assert (private / "image-report.json").read_bytes() == report_before
+    assert_crop_report(private, index, second.stdout, tmp_path)
     assert len(list((private / "image-index").glob("*.json"))) == 1
     assert (private / "media-state.json").is_file()
     assert list(output.rglob("*.webp"))
+    first = runner.invoke(app, [*arguments, "--initial"])
+    assert first.exit_code != 0
+    assert "--initial requires an absent media-state.json" in str(first.exception)
