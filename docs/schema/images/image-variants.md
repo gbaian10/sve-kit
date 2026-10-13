@@ -32,7 +32,7 @@ art_s／art_m 由同一框分別縮放，輸出為 `4n×3n`，n 分別取 `min(k
 
 ## recipe、原圖與發布
 
-`image_size.is_original` 保留在建置 schema，表示「原始來源 bytes 的直接副本」；本契約五檔一律 false，card_l 即使與來源同尺寸也不是 original。公開 config.image_sizes 不投影 is_original，發布器拒絕任何 is_original=true 或 format 非 webp 的 variant；image_size 不是 source inventory，不為原 PNG 建公開檔位。
+固定五檔設定由圖片 recipe 與公開 config.image_sizes 定義，文字建置 DB 不另存 image_size。五檔均為重新編碼的 WebP，card_l 即使與來源同尺寸也不是原始 bytes 副本；發布器拒絕任何 is_original=true 或 format 非 webp 的 variant，不為原 PNG 建公開檔位。
 
 recipe 必須固定解碼／編碼器與底層 libwebp 版本、品質、色彩轉換、alpha、metadata 移除、縮放濾鏡、方向處理及以上取整規則。recipe_version 連到完整建置 recipe；相同來源 hash＋覆寫框＋recipe 必須產生相同 bytes，不以「品質約 80」作可重現性保證。recipe 變更產新的建置 hash/path 並重新分層抽驗版型、地區、來源寬度、文字邊、細線與臉部；不覆寫內容定址的建置 blob。不同檔位若產出完全相同 bytes 可共用建置 blob，但公開 2.0 的每版次／面／尺寸 key 仍各一份。
 

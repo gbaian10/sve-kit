@@ -7,7 +7,6 @@ from sve_carddb.build import (
     t1_cr,
     t1_en,
     t1_errata,
-    t1_images,
     t1_json,
     t1_qa,
     t1_related,
@@ -20,10 +19,9 @@ from sve_carddb.build.model import Capability
 from sve_carddb.build.registry import Registry
 from sve_carddb.build.t0_json import schemas
 
-SCHEMA_VERSION = 8
-MINIMUM_CAPABILITIES = ("t0", "images", "cr", "errata", "correction", "qa", "related")
+SCHEMA_VERSION = 9
+MINIMUM_CAPABILITIES = ("t0", "cr", "errata", "correction", "qa", "related")
 TABLES = (
-    *t1_images.TABLES,
     *t1_cr.TABLES,
     *t1_errata.TABLES,
     *t1_correction.TABLES,
@@ -40,7 +38,6 @@ REGISTRY = Registry(
     tables=(*t0.TABLES, *TABLES),
     capabilities=(
         Capability("t0", tuple(table.name for table in t0.TABLES)),
-        Capability("images", tuple(table.name for table in t1_images.TABLES)),
         Capability("cr", tuple(table.name for table in t1_cr.TABLES)),
         Capability("errata", tuple(table.name for table in t1_errata.TABLES)),
         Capability("correction", tuple(table.name for table in t1_correction.TABLES)),

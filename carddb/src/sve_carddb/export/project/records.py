@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.contracts.snapshot import definition
 from sve_carddb.core.json import array, integer, object_value, string
+from sve_carddb.export.image_index import MEDIA_TABLES
 from sve_carddb.export.project.source import Record, Source, json_list, pick
 
 if TYPE_CHECKING:
@@ -50,9 +51,6 @@ SCALARS = {
     "text_symbol": "id,code,parameter_schema,keyword_id,spellings,localizations",
     "card_route_alias": "namespace,old_key,target_namespace,target_key,reason",
     "route_override": "route_key,printing_id",
-    "image_asset": "id,source_src_raw,source_url,width,height",
-    "printing_image": "printing_id,face_id,image_id",
-    "image_variant": "image_id,size_key,format,path,width,height,bytes",
 }
 
 PRINT_FACE = "face_id,art_id,frame_code,signed,embellishment_state,printed_name_unit_id,printed_effect_unit_id,flavor_unit_id,printed_text_state"
@@ -65,7 +63,12 @@ def initial(source: Source) -> dict[str, list[Record]]:
         name: [dict(row) for row in source.rows(name, fields)]
         for name, fields in SCALARS.items()
     }
-    for name in ("annotation_set", "annotation_concept", "field_annotation"):
+    for name in (
+        *MEDIA_TABLES,
+        "annotation_set",
+        "annotation_concept",
+        "field_annotation",
+    ):
         view[name] = []
     for product in view["product"]:
         identifier = product.pop("family_id")

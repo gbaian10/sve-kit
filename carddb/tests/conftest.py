@@ -10,9 +10,6 @@ from typer import rich_utils
 from sve_carddb import cli
 from sve_carddb.ingest.archive.manifest import Manifest
 
-from .support.database_fixtures import (
-    image_parent_database_template as image_parent_database_template,  # ruff: ignore[useless-import-alias] -- register shared immutable database template
-)
 from .support.database_fixtures import t0_database_template as t0_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
 from .support.database_fixtures import t1_database_template as t1_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
 from .support.database_fixtures import t1b_database_template as t1b_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template

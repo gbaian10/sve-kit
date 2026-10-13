@@ -25,10 +25,6 @@ if TYPE_CHECKING:
     from ..support.database_fixtures import DatabaseTemplate
 
 MINIMUM_TABLES = {
-    "image_asset",
-    "printing_image",
-    "image_variant",
-    "image_size",
     "cr_version",
     "cr_clause",
     "errata",
@@ -66,7 +62,7 @@ def test_exact_minimum_inventory_and_real_rows(include_en: bool) -> None:
         | (EN_TABLES if include_en else set())
     )
     assert {table.name for table in schema.tables} == expected
-    assert len(schema.tables) == (62 if include_en else 58)
+    assert len(schema.tables) == (58 if include_en else 54)
     with create_database(schema) as database:
         with database.transaction():
             populate(database, include_en=include_en)

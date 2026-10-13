@@ -427,28 +427,25 @@ shared 預設、EN 真差異才 override；同樣的 region blocks 使共用機�
 
 ## 11. 圖像與配置
 
-| 表                   | 建置期欄位、鍵與約束                                                                                                                                                                                                                                                                                                                                                                           |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `image_asset`        | `id:ID PK,publication_state:pending\|approved,source_id→source_record,source_url:Text,source_src_raw:Text,content_hash:Hash?,mime:Text?,width:UInt?,height:UInt?,bytes:UInt?,availability:available\|missing\|unfetched`；C，`source_src_raw` 原樣保存 HTML img src，URL 解析相對路徑但不由卡號猜                                                                                              |
-| `printing_image`     | `printing_id,face_id→printing_face,image_id→image_asset`；`PK(printing_id,face_id)`，`FK(printing_id,face_id)→printing_face(printing_id,face_id)`；雙面每面一張，通用卡背屬 app shell                                                                                                                                                                                                          |
-| `image_variant`      | `image_id→image_asset,size_key:Code,format:Code,path:Text,width:UInt,height:UInt,bytes:UInt,sha256:Hash,recipe_version:Text` `PK(image_id,size_key,format)`，`FK(size_key)→image_size(key)`；D，寬高>0；只記公開衍生檔，不要求 original；直向與橫向均為固定五檔 WebP，裁切見下文                                                                                                               |
-| `image_size`         | `key:Code PK,purpose:Text,max_width:UInt?,max_height:UInt?,is_original:Bool`；A 設定，is_original 表示來源 bytes 直接副本；公開五檔均 false                                                                                                                                                                                                                                                    |
-| `shop_link_template` | `id:ID PK,name:Text,region:Region,url_template:Text,parameters:Json,feature_key:Text,enabled_dev:Bool,enabled_prod:Bool,decision_id→decision`；A，預設 true／false；只允許 HTTPS 及 `card_no` 等白名單參數，替換值逐個 URL encode                                                                                                                                                              |
+文字建置 DB 不保存圖片表。圖片流程獨立產製並驗證衍生檔，輸出
+[私有圖片索引](../images/image-index.md)；文字投影完成後由 `ImageIndex.attach` 加入
+`image_asset`、`printing_image`、`image_variant` 三種公開 media 列。
+這些名稱屬公開格式，不是本文件的建置表。
 
-`printing_image` 恰是一個 `printing_face` 的圖，不設 `card_front/card_back` role。雙面背面是另一 face，通用卡背屬前端固定資產。`source_src_raw` 從頁面原樣取，不能由卡號猜（既有 sv1 模板例外不擴張到 SVE）。unfetched 可有來源而無 blob，variants 空陣列；available 才要求尺寸/格式/hash。卡表快照的圖像 metadata 獨立，不把來源 manifest 或圖片本體塞進文字。
+| 表 | 建置期欄位、鍵與約束 |
+| --- | --- |
+| `shop_link_template` | `id:ID PK,name:Text,region:Region,url_template:Text,parameters:Json,feature_key:Text,enabled_dev:Bool,enabled_prod:Bool,decision_id→decision`；A，預設 true／false；只允許 HTTPS 及 `card_no` 等白名單參數，替換值逐個 URL encode |
 
-卡圖看過快取、牌組離線備妥只抓實選版次與雙面；未抓圖顯示文字；無全圖下載。語音按需。sprite 不入卡表，自製固定 UI 圖示屬 app shell，未來動態拼圖只用自己牌組與已公開對手卡。卡店僅 HTTPS 白名單參數模板，dev 開/prod 關，不抓價格。`image_size/language/digital_endpoint/shop` 設定合為卡表快照 config，不做客戶端小表 join。
+圖片索引以精確 printing／face 綁定每面卡圖，雙面各自處理；通用卡背屬 app shell。
+`source_src_raw` 從頁面原樣取，不能由卡號猜（既有 sv1 模板例外不擴張到 SVE）。
+文字端核對原始 img src、解析 URL、地區與永久 ID；圖片來源、尺寸、裁切、WebP bytes
+及版本由圖片流程負責，依 [卡圖衍生檔契約](../images/image-variants.md)。原 PNG 不公開。
 
-建置約束將上述來源狀態與公開衍生檔政策具體化如下：
-
-- `availability=available` 必須有 `content_hash/mime/width/height/bytes`，mime 非空、寬高為正；這些 metadata 不代替實際 bytes 解碼與比對。
-- approved 必須 available。
-- `image_variant.size_key` 以 FK 引用 `image_size.key`。每筆 variant 只能引用 available 且 approved 的 image_asset；pending／missing／unfetched 不得保有公開 variant 列。
-- 建置 variant 的 format 固定 webp，size 設定不得為 `is_original=true`；path 必須等於該列 sha256 推得的 `images/sha256/<前兩碼>/<64hex>.webp`。檔案實際 hash／尺寸／bytes 與完整檔位集合另由影像產製與發布驗證器核對。此 path 是建置內容定址位置；公開 ID key／query 由發布投影生成，不能把這個本機 path 當公開圖片 URL，見 [image-variants](../images/image-variants.md)。
-
-跨表條件在建置交易完成寫入後、提交前檢查最終資料圖；修改圖片或 image_size 同樣必須重驗，不能只在新增 variant 時檢查。任一條件失敗即回滾整筆交易；可以在同一交易中把圖片改回 pending 並刪除其 variants。已有 available／approved 來源但尚未產 variants 是合法的建置中間狀態，不代表影像發布閉包已完成。
-
-尺寸、橫向長邊、4:3 裁切及取整／覆寫依 [卡圖衍生檔契約](../images/image-variants.md)。原 PNG 不公開；`image_size.is_original` 不投影至 config，發布器拒收 true。card_l 同尺寸重新編碼仍為 false；recipe 與來源 hash 留建置端。
+卡圖看過快取、牌組離線備妥只抓實選版次與雙面；未抓圖顯示文字；無全圖下載。
+語音按需。sprite 不入卡表，自製固定 UI 圖示屬 app shell，未來動態拼圖只用自己牌組與已公開對手卡。
+卡店僅 HTTPS 白名單參數模板，dev 開/prod 關，不抓價格。
+`language/digital_endpoint/shop` 與公開契約的固定五檔 `image_sizes` 合為卡表快照 config，
+不做客戶端小表 join；文字 DB 不另存尺寸設定。
 
 ## 12. 建置品質與新卡包流程
 
@@ -557,7 +554,7 @@ official route 由 `card_no_state=official` 的 printing 自動推導，舊號/�
 
 ### 17.1 `mirror_reviewed`
 
-非官方卡圖須由人逐張確認來源與圖片內容後，才能鏡像至 R2、產生公開 `image_variant/path`；`sampled/model_reviewed` 不足以放行，圖片內容或來源換版需重新確認。目前只產生官方圖，建置資料庫沒有第三方來源或人工確認欄位；有第三方圖的產出端時再加入。
+非官方卡圖須由人逐張確認來源與圖片內容後，才能鏡像至 R2、產生公開 `image_variant/path`；`sampled/model_reviewed` 不足以放行，圖片內容或來源換版需重新確認。目前只產生官方圖，圖片索引沒有第三方來源或人工確認欄位；有第三方圖的產出端時再加入。
 
 `publication_state=pending` 時可保留來源 metadata 供查卡，但不出公開 variant/blob path、不 hotlink 來源圖；UI 顯示文字卡面與待確認標示。approved 才可由 R2 顯示與依既有按需規則快取。卡表快照保留 `image_asset.source_url`，狀態只放在 `printing_image` 的 media 列。
 
@@ -581,13 +578,13 @@ SNC 最低資料仍為 `catalog_state`、`card_no_state`、`serial_total`、`lis
 
 ## 18. 實作分期
 
-完整邏輯契約不要求第一次查卡發布就實作所有能力；[implementation-tiers.md](implementation-tiers.md) 逐表分配唯一 tier 與啟用條件。首發明列 T0 40＋T1 必要子組 17＝57 表（含構築與 CR 引用），`identity_change` 先於第一次公開 `int_id`；必須同時滿足來源、永久身分、全部面、現行/印刷觀測、商品/路由、文字快照與缺 DSL 狀態；條件表沒上線時相關公開欄位為明定 null/空/unknown，不能假裝已完整或省掉 required 欄。
+完整邏輯契約不要求第一次查卡發布就實作所有能力；[implementation-tiers.md](implementation-tiers.md) 逐表分配唯一 tier 與啟用條件。首發明列 T0 41＋T1 必要子組 13＝54 表（含構築與 CR 引用），`identity_change` 先於第一次公開 `int_id`；必須同時滿足來源、永久身分、全部面、現行/印刷觀測、商品/路由、文字快照與缺 DSL 狀態；條件表沒上線時相關公開欄位為明定 null/空/unknown，不能假裝已完整或省掉 required 欄。
 
 跨 tier nullable FK 在未啟用該能力時必須為 null；非空 FK 的依賴 closure 必須一併啟用（tier 是最早實作時間，不是略過 FK 的許可）。若某批輸入有勘誤/更正/雙區/模板/禁限/DSL，就在發布前把對應組及引用閉包完成，不以「未實作」丟棄已知更正而出錯資料。可以先發布支援的資料子集並明示 coverage，但不能聲稱全庫能力通過。v1 延後的 event/signature 等尚未建表項仍留待未來設計，不建空表冒充完成。
 
 ### 18.1 DDL 能力與建置 schema 升版
 
-DDL 宣告可編譯、匯入器完成、領域驗證器完成是分開的狀態；能力可用須在完整依賴閉包內同時具備後兩者。跨表驗證查詢引用的表也屬必要依賴。只有 DDL 的能力不能列為預覽快照已啟用能力，更不能用空表數量代替正式首發 57 表及條件組的可用性驗收。
+DDL 宣告可編譯、匯入器完成、領域驗證器完成是分開的狀態；能力可用須在完整依賴閉包內同時具備後兩者。跨表驗證查詢引用的表也屬必要依賴。只有 DDL 的能力不能列為預覽快照已啟用能力，更不能用空表數量代替正式首發 54 表及條件組的可用性驗收。
 
 建置 SQLite 的 `PRAGMA user_version` 記錄實作宣告版號，與本文件的邏輯契約 v1、抓取 manifest schema、快照 format／data_version 分開。相同宣告版號仍可依能力選擇不同表集合。啟用新組或升版時，正常路徑是從釘住的輸入全量建置新檔，套用新 FK、CHECK 與跨表驗證，成功提交並關閉後才替換舊的建置產物；不複製未驗證的舊列，也不關閉 FK 作為升版捷徑。建立／匯入／驗證／替換失敗保留舊產物；呼叫端必須獨占離線目標並關閉所有連線，不對帶 SQLite sidecar 的目標替換。此流程不處理來源歸檔，也不代替正式發布交易。
 

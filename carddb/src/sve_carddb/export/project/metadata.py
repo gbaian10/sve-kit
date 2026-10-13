@@ -25,9 +25,6 @@ def configuration(source: Source, settings: Settings) -> Record:
     sizes = object_value(
         object_value(definition("Config")["properties"])["image_sizes"]
     )["const"]
-    for size in source.rows("image_size", "key,purpose,max_width,max_height"):
-        if size not in array(sizes):
-            raise ValueError("Build image size differs from fixed public config")
     config: Record = {
         "format_version": MEDIA,
         "languages": json_list(

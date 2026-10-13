@@ -52,7 +52,7 @@ Schema descriptor 驗完整欄序、nullable、enum 與額外鍵，不以 SQL �
 | `digital_art.digital_card_id/phase`、link/voice 的 phase | `digital_face` 的 parent/phase | nullable phase 保留 null；數位資訊只留被實體關聯、圖、語音引用的閉包 |
 | `keyword.name_unit_id/actions` | 同概念 `glossary_term.source_ja` 與 mechanic_action | 明列 glossary 概念；符號不推測機制；無能力集合為 [] |
 | `mechanic_projection/card_mechanic_coverage` | 建置端新鮮投影直投，驗最短 include/exclude 編碼 | 缺 coverage 為未知；partial 不證明 absent；EN block 不計 full |
-| `image_asset.format`、影像 variants | source mime 的 format、已核可且 available 的公開衍生檔 | null mime→null format；pending 無 variants/path，保留來源；狀態只投影到 printing_image；不輸出原 PNG blob |
+| `image_asset`、`printing_image`、`image_variant` | `ImageIndex.attach` 加入已驗證、已配號的圖片索引公開列 | DB 投影時三集合為 []；接入索引後沿用既有公開 media 格式；不讀取 DB 圖片列、不輸出原 PNG blob |
 | config | language、digital_endpoint、shop_link_template、固定五檔 image sizes、明示 search/feedback 設定 | 缺 optional 能力陣列為 []；固定政策與大小仍完整；normalizer 不一致拒絕 |
 | metadata | source_coverage 的公開 windows、restriction_coverage、QA/errata ID 集合、mechanic universe/coverage | 不造 complete；window 只准 region:* 或此次公開 product；target 三欄全 null；未實作 review/translation coverage 為 [] |
 | `card_engine_support` | R1 每 card 一列 missing_dsl，包括墓碑；再附缺來源、未核對、divergence、wording 等區域 block | 無 DSL／program；`effective_support` 先 override、後 block；automatic=false；passed 被 block 降 reviewed |
@@ -102,5 +102,5 @@ uv --directory carddb run pytest tests/export/test_snapshot_project.py
 `tests/fixtures/snapshot-contract/v3/annotated-native.json` 固定非空 annotation 的 DB→投影→wire 結果，
 供 Python 與 Web 共同驗 exact text、ranges、說明引用及加粗呈現。
 區域反例分別覆蓋混合日期、未確認 mapping／release／role、角色衝突、未知代碼、divergence 範圍與 QA 現行版本。
-整體反例驗離線 DB 版號與 join 後的引用閉包；未核可圖帶 variant 則先由建置完整性約束拒絕。
+整體反例驗離線 DB 版號與 join 後的引用閉包；圖片狀態、版本與衍生檔閉包由獨立圖片流程及索引驗證。
 正式卡文不進 fixture 或回報；真實封存來源與合成資料的數量須分開記錄。

@@ -132,25 +132,6 @@ def _rulings(view: dict[str, list[Record]], decisions: Decisions) -> None:
             row["hints"] = []
 
 
-def _images(source: Source, view: dict[str, list[Record]]) -> None:
-    assets = source.index("image_asset", "id,mime,publication_state,availability")
-    for asset in view["image_asset"]:
-        mime = assets[string(asset["id"])]["mime"]
-        asset["format"] = None if mime is None else string(mime).removeprefix("image/")
-    for row in view["printing_image"]:
-        state = assets[string(row["image_id"])]
-        row["publication_state"] = state["publication_state"]
-        row["availability"] = state["availability"]
-    allowed = {
-        row["image_id"]
-        for row in view["printing_image"]
-        if row["publication_state"] == "approved" and row["availability"] == "available"
-    }
-    view["image_variant"] = [
-        row for row in view["image_variant"] if row["image_id"] in allowed
-    ]
-
-
 def project(
     db: Database,
     *,
@@ -214,7 +195,6 @@ def project(
     }
     region_views(source, view, as_of, dates, defaults)
     support(source, view, decisions)
-    _images(source, view)
     annotations(source, view, decisions)
     prune(view)
     _sort(view)

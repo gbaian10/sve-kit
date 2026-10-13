@@ -14,7 +14,7 @@ from sve_carddb.core.json import digest, parse
 from sve_carddb.export.project import Decisions, Settings
 
 from .build_db_fixtures import rows as core_rows
-from .build_db_t1_fixtures import rows as image_rows
+from .build_db_t1_fixtures import rows as cr_rows
 from .build_db_t1b_fixtures import rows as ancillary_rows
 
 if TYPE_CHECKING:
@@ -338,7 +338,7 @@ def schema(
 
 
 def populate(db: Database, *, ancillary: bool = True, future: bool = True) -> None:
-    values = core_rows() | (image_rows() | ancillary_rows() if ancillary else {})
+    values = core_rows() | (cr_rows() | ancillary_rows() if ancillary else {})
     for name, row in values.items():
         converted = {
             key: TEXT if value == "text" else value for key, value in row.items()

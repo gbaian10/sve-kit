@@ -15,6 +15,7 @@ from sve_carddb.export.reader import Fragment, read_snapshot
 from sve_carddb.export.semantics import validate_view
 from sve_carddb.export.transport import Batch, Ownership, export_snapshot
 
+from ..support.snapshot_media_fixtures import media_rows
 from ..support.snapshot_project_fixtures import TEXT, populate, schema
 from .test_snapshot_project import projected
 
@@ -87,17 +88,7 @@ def test_nonempty_original_and_target_annotations_use_complete_new_wire() -> Non
                 "card_ids": [],
             }
         ]
-        view = replace(
-            view,
-            tables=view.tables
-            | {
-                "printing_image": [
-                    row | {"availability": "unfetched", "publication_state": "pending"}
-                    for row in view.tables["printing_image"]
-                ],
-                "image_variant": [],
-            },
-        )
+        view = replace(view, tables=view.tables | media_rows())
         view = prepare_media(view, None, revision=1).projection
         snapshot = export_snapshot(
             view,

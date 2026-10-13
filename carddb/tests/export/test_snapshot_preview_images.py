@@ -19,6 +19,7 @@ from sve_carddb.export.transport import Ownership, export_snapshot
 from sve_carddb.images.variants import build_variants
 
 from ..images.test_image_variants import png, source
+from ..support.snapshot_media_fixtures import media_rows
 from ..support.snapshot_project_fixtures import populate, schema
 from .test_snapshot_export import BATCH
 from .test_snapshot_project import projected
@@ -60,20 +61,27 @@ def images(tmp_path_factory: pytest.TempPathFactory) -> PublicImages:
         with db.transaction():
             populate(db)
         projection = projected(db)
-        tables = projection.tables | {
-            "image_variant": [
-                {
-                    "image_id": "image",
-                    "size_key": v.size_key,
-                    "format": v.format,
-                    "path": v.path,
-                    "width": v.width,
-                    "height": v.height,
-                    "bytes": v.bytes,
-                }
-                for v in sorted(result.variants, key=lambda item: item.size_key)
-            ],
-        }
+        tables = (
+            projection.tables
+            | media_rows()
+            | {
+                "image_variant": [
+                    {
+                        "image_id": "image",
+                        "size_key": v.size_key,
+                        "format": v.format,
+                        "path": v.path,
+                        "width": v.width,
+                        "height": v.height,
+                        "bytes": v.bytes,
+                    }
+                    for v in sorted(result.variants, key=lambda item: item.size_key)
+                ],
+            }
+        )
+        tables["printing_image"][0].update(
+            publication_state="approved", availability="available"
+        )
         projection = replace(projection, tables=tables)
         return PublicImages(
             projection, Ownership.from_database(db, projection), root / "library"
