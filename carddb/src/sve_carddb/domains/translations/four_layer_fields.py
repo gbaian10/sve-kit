@@ -19,7 +19,6 @@ from sve_carddb.domains.translations.four_layer_identities import context_varian
 from sve_carddb.domains.translations.four_layer_render import BoundTarget, Result
 from sve_carddb.domains.translations.four_layer_storage import (
     read_annotation,
-    read_owned_render_occurrences,
     write_annotation,
     write_binding,
 )
@@ -220,7 +219,6 @@ def render_field(  # ruff: ignore[too-many-arguments] -- explicit suppression pr
         {"context_id": context_id, "target_lang": lang, "translation_id": identifier},
         ("context_id", "target_lang"),
     )
-    read_owned_render_occurrences(db, identifier, renderer.domains, rendered)
     return result
 
 

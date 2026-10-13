@@ -305,7 +305,6 @@ def write_binding(
             else:
                 raise ValueError("Unexpected scalar leaf occurrence column")
         db.insert("binding_leaf_occurrence", stored)
-    read_binding(db, binding.id, domains)
 
 
 def write_annotation(db: Database, annotation: AnnotationSet) -> None:
