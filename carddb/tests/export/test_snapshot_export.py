@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 from pydantic import JsonValue
 
 from sve_carddb.build import create_database
-from sve_carddb.core.json import array, canonical, object_value, parse, string
+from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.export.buckets import bucket
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.reader import read_text_all
@@ -80,6 +80,32 @@ def test_union_reader_equals_individual_shards(
         read_text_all(exported.manifest, exported.text_all.raw, attachments)
         == logical[0].tables
     )
+
+
+def test_union_member_change_cannot_hide_behind_a_valid_union_hash(
+    exported: Snapshot, logical: tuple[Projection, Ownership]
+) -> None:
+    value = object_value(parse(exported.text_all.raw))
+    member = next(
+        object_value(raw)
+        for raw in array(value["members"])
+        if object_value(raw)["key"] == "config"
+    )
+    object_value(member["payload"])["shop_links"] = []
+    raw = canonical(value)
+    hashed = digest(raw)
+    union = object_value(exported.manifest["text_all"]) | {
+        "sha256": hashed,
+        "path": "snapshots/blobs/" + hashed[7:] + ".json",
+        "bytes": len(raw),
+    }
+    broken = replace(
+        exported,
+        manifest=exported.manifest | {"text_all": union},
+        text_all=compress(raw, None),
+    )
+    with pytest.raises(ValueError, match="text_all member hash or length mismatch"):
+        broken.verify(logical[0])
 
 
 def test_clean_exports_are_exact_bytes(

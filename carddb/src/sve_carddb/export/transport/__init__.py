@@ -18,7 +18,7 @@ from sve_carddb.contracts.snapshot import (
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
 from sve_carddb.export.name_annotations import compact_names, whole_name
 from sve_carddb.export.project.source import json_list
-from sve_carddb.export.reader import read_snapshot
+from sve_carddb.export.reader import read_snapshot, text_all_payloads
 from sve_carddb.export.semantics import row_key
 from sve_carddb.export.transport.compression import Blob, Brotli, compress, recipe
 from sve_carddb.export.transport.layout import Group, Layout, Ownership, references
@@ -43,18 +43,20 @@ class Batch:
 
 @dataclass(frozen=True)
 class Snapshot:
-    """Complete in-memory candidate; the preview/publisher owns filesystem writes."""
+    """Verified exporter candidate; the preview writer reuses its sealed bytes."""
 
     manifest: Record
     payloads: dict[str, Blob]
     text_all: Blob
     compression_recipe: dict[str, str | int | None]
+    manifest_blob: Blob
 
     def verify(self, projection: Projection) -> None:
         """Require the independent reader's complete join to equal the logical view."""
         joined = read_snapshot(
             self.manifest, {key: blob.raw for key, blob in self.payloads.items()}
         )
+        text_all_payloads(self.manifest, self.text_all.raw)
         if joined != projection.tables:
             raise ValueError("Export join differs from public logical projection")
 
@@ -442,7 +444,13 @@ def export_snapshot(
         "changes_ref": None,
     }
     validate("Manifest", manifest, format_version)
-    result = Snapshot(manifest, files.payloads, union, recipe(brotli))
+    result = Snapshot(
+        manifest,
+        files.payloads,
+        union,
+        recipe(brotli),
+        compress(canonical(manifest), brotli),
+    )
     result.verify(projection)
     return result
 

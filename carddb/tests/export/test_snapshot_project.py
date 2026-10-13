@@ -1624,7 +1624,7 @@ def test_offline_schema_version_is_verified_before_projection(
         open_database(projection_schema, path) as database,
         pytest.raises(sqlite3.IntegrityError, match="schema version mismatch"),
     ):
-        projected(database)
+        database.verify()
 
 
 def test_pipeline_checks_public_reference_closure(

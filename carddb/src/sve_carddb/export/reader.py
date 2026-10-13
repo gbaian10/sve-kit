@@ -404,14 +404,7 @@ def _closure(view: View, manifest: Row) -> None:
     for rows in view.values():
         for row in rows:
             _walk(row, targets)
-    for card in view["card"]:
-        actual = [
-            row["id"]
-            for row in sorted(view["face"], key=lambda row: integer(row["ordinal"]))
-            if row["card_id"] == card["id"]
-        ]
-        if card["faces"] != actual:
-            raise ValueError("Card face closure mismatch")
+    _card_face_closure(view)
     for key in ("qa_card_ids", "errata_card_ids"):
         _ordered(array(manifest[key]))
         if any(string(item) not in targets["card"] for item in array(manifest[key])):
@@ -425,6 +418,18 @@ def _closure(view: View, manifest: Row) -> None:
         )
         if row["id"] != expected:
             raise ValueError("Text ID does not match exact text")
+
+
+def _card_face_closure(view: View) -> None:
+    card_faces: dict[str, list[Row]] = {}
+    for face in view["face"]:
+        card_faces.setdefault(string(face["card_id"]), []).append(face)
+    for faces in card_faces.values():
+        faces.sort(key=lambda row: integer(row["ordinal"]))
+    for card in view["card"]:
+        actual = [row["id"] for row in card_faces.get(string(card["id"]), [])]
+        if card["faces"] != actual:
+            raise ValueError("Card face closure mismatch")
 
 
 def _current(view: View, fragments: list[Fragment]) -> None:
@@ -531,14 +536,15 @@ def read_snapshot(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
         parse(payloads[string(object_value(manifest["config_ref"])["key"])])
     )
     validate_digital(view, config)
-    _unique(view)
+    # Whole-name expansion adds virtual annotation rows after the initial sort.
+    for table in ("annotation_set", "field_annotation"):
+        fields = array(definition(table)["x-primary-key"])
+        view[table].sort(key=lambda row: _key(row, fields))
     return view
 
 
-def read_text_all(
-    manifest_value: JsonValue, data: bytes, attachments: Mapping[str, bytes]
-) -> View:
-    """Validate alternative member bytes, then use the same independent reader."""
+def text_all_payloads(manifest_value: JsonValue, data: bytes) -> dict[str, bytes]:
+    """Validate union membership, dependencies and each canonical member hash."""
     manifest = object_value(manifest_value)
     validate("Manifest", manifest, string(manifest["format_version"]))
     description = object_value(manifest["text_all"])
@@ -567,9 +573,20 @@ def read_text_all(
     payloads = {
         string(member["key"]): canonical(member["payload"]) for member in members
     }
+    for key, raw in payloads.items():
+        if digest(raw) != files[key]["sha256"] or len(raw) != files[key]["bytes"]:
+            raise ValueError("text_all member hash or length mismatch")
+    return payloads
+
+
+def read_text_all(
+    manifest_value: JsonValue, data: bytes, attachments: Mapping[str, bytes]
+) -> View:
+    """Validate alternative member bytes, then use the same independent reader."""
+    payloads = text_all_payloads(manifest_value, data)
     if set(payloads) & set(attachments):
         raise ValueError("Duplicate alternative payload")
-    return read_snapshot(manifest, payloads | dict(attachments))
+    return read_snapshot(manifest_value, payloads | dict(attachments))
 
 
 def compatible(entry: Row) -> bool:

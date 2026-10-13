@@ -382,11 +382,14 @@ def validate_view(view: View, manifest: Row, fragments: list[Fragment]) -> None:
     for row in view["image_variant"]:
         if string(row["image_id"]) not in active:
             raise ValueError("Variant requires an approved available image")
+    printing_faces = {
+        string(printing["id"]): {
+            string(object_value(face)["face_id"]) for face in array(printing["faces"])
+        }
+        for printing in view["printing"]
+    }
     for row in view["printing_image"]:
-        printing = next(p for p in view["printing"] if p["id"] == row["printing_id"])
-        if row["face_id"] not in [
-            object_value(f)["face_id"] for f in array(printing["faces"])
-        ]:
+        if string(row["face_id"]) not in printing_faces[string(row["printing_id"])]:
             raise ValueError("Image references an absent printing face")
 
 

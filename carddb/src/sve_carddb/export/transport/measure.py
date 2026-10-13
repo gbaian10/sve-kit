@@ -43,7 +43,7 @@ def measure(
         None if brotli is None else brotli.version
     ):
         raise ValueError("Manifest measurement requires the same compressor recipe")
-    manifest = compress(canonical(snapshot.manifest), brotli)
+    manifest = snapshot.manifest_blob
     files = {
         string(object_value(item)["key"]): object_value(item)
         for item in array(snapshot.manifest["files"])
@@ -63,12 +63,7 @@ def measure(
     for key, blob in sorted(snapshot.payloads.items()):
         if files[key]["role"] in {"config", "programs"}:
             continue
-        payload = object_value(parse(blob.raw))
-        fragments = [
-            object_value(item)
-            for entries in object_value(payload["tables"]).values()
-            for item in array(entries)
-        ]
+        fragments = [object_value(item) for item in array(files[key]["row_counts"])]
         set_buckets: list[JsonValue] = json_list(
             sorted({integer(f["bucket"]) for f in fragments})
         )
@@ -85,7 +80,7 @@ def measure(
                 ],
                 "buckets": set_buckets,
                 "partitions": set_partitions,
-                "rows": sum(len(array(f["rows"])) for f in fragments),
+                "rows": sum(integer(f["count"]) for f in fragments),
                 **_sizes([blob]),
             }
         )
