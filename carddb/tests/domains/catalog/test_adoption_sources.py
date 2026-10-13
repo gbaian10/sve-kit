@@ -226,6 +226,31 @@ def test_same_page_locators_share_projection_and_keep_separate_evidence(
     }
 
 
+def test_each_review_context_records_its_own_source_use(
+    case: tuple[Case, Path, str],
+) -> None:
+    inputs, archive, version = case
+    sources = Sources({"test-store": archive}, inputs.repository, inputs.build())
+    review = ReviewContext.model_validate_json(canonical(inputs.review))
+    other = review.model_copy(
+        update={
+            "context": BuildContext.from_inputs(
+                review.context.program_revision, {"profile": "other"}
+            )
+        }
+    )
+    ref = SourceRef(
+        batch_id=review.source_batches[0].batch_id,
+        source_version_id=version,
+        parser="exact-json-v1",
+        locator="/faces/0/name",
+        text_hash=digest(b"Synthetic source name"),
+    )
+    for context in (review, other, review):
+        sources.identities.text(ref, context)
+    assert len(sources.identities.uses) == 2
+
+
 @pytest.mark.parametrize(
     ("mutation", "message"),
     [

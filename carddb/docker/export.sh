@@ -44,8 +44,11 @@ if [[ ${EXPORT_BROTLI:-1} == 1 ]]; then args+=(--brotli); fi
 entry=()
 if [[ ${EXPORT_PROFILE:-0} == 1 ]]; then
   # Collapsed stacks open in speedscope and are easy to rank; SIGINT makes py-spy write them.
+  # py-spy exits 0 whatever its target did, so the wrapped shell records the export's own status.
+  rm -f "$run_dir/exit-code"
   entry=(--entrypoint py-spy)
-  args=(record --format raw --rate 20 -o "$run_dir/profile.txt" -- python -c "from sve_carddb.cli import main; main()" "${args[@]}")
+  args=(record --subprocesses --format raw --rate 20 -o "$run_dir/profile.txt" -- sh -c
+    'python -c "from sve_carddb.cli import main; main()" "$@"; echo $? >"$0"' "$run_dir/exit-code" "${args[@]}")
 fi
 "${compose[@]}" run -d --name "$name" "${entry[@]}" export "${args[@]}" "$@" >/dev/null
 docker logs -f "$name" >"$run_dir/export.log" 2>&1 &
@@ -98,6 +101,11 @@ done
 
 # docker wait still yields the container's own exit code when the loop ended early.
 rc=$(docker wait "$name")
+if [[ ${EXPORT_PROFILE:-0} == 1 ]]; then
+  code=$(cat "$run_dir/exit-code" 2>/dev/null || true)
+  # Without a recorded status the container was killed before the export finished.
+  if [[ $code =~ ^[0-9]+$ ]]; then rc=$code; elif ((rc == 0)); then rc=1; fi
+fi
 wait "$logs" || true
 oom=$(docker inspect -f '{{.State.OOMKilled}}' "$name")
 awk -v rc="$rc" -v oom="$oom" -v el=$(($(date +%s) - started)) -v cpu="$cpu_total" -v pk="$peak" -v ap="$anon_peak" \

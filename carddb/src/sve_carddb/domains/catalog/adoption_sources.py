@@ -47,11 +47,10 @@ class AdoptionSources:
         self.repository = repository
         self.batches = batches or FrozenBatches()
         self.uses: list[SourceUse] = []
+        # The review is keyed by value, so locators share one build configuration.
         self.cache: dict[
-            tuple[bytes, bytes], tuple[LocalizedText, Source, JsonValue]
+            tuple[bytes, ReviewContext], tuple[LocalizedText, Source, JsonValue]
         ] = {}
-        # Sharing the serialized review avoids retaining its build configuration per locator.
-        self.review_keys: dict[ReviewContext, bytes] = {}
         # Different locators need the same parsed page.
         self.pages: dict[tuple[str, str, str], tuple[Source, str, JsonValue]] = {}
         self.current_registry = registry
@@ -70,11 +69,7 @@ class AdoptionSources:
         self, ref: SourceRef, review: ReviewContext
     ) -> tuple[LocalizedText, Source, JsonValue]:
         """Resolve JSON Pointer and hash the exact nonempty UTF-8 string."""
-        review_key = self.review_keys.get(review)
-        if review_key is None:
-            review_key = canonical(review.model_dump(mode="json"))
-            self.review_keys[review] = review_key
-        key = (canonical(ref.model_dump(mode="json")), review_key)
+        key = (canonical(ref.model_dump(mode="json")), review)
         if key not in self.cache:
             if ref.parser not in SOURCE_PARSERS:
                 raise ValueError("Unsupported source parser recipe")

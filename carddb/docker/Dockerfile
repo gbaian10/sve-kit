@@ -1,5 +1,5 @@
 # Runtime mounts keep code and data changes from invalidating dependency layers.
-FROM ghcr.io/astral-sh/uv:0.12.24-python3.14-trixie-slim
+FROM ghcr.io/astral-sh/uv:python3.14-trixie-slim
 
 # The environment must be readable by the caller's uid from Compose.
 ENV UV_PYTHON_DOWNLOADS=0 \
