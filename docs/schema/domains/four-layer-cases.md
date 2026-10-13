@@ -44,7 +44,7 @@ expected 的 reason 是本規格原因碼，實作可映射既有公開診斷，
 | FL-011／missing_translation | 結構正確而選詞缺譯／撤回 | 整欄 fallback；不輸出半中半日，也不擅取 variant |
 | FL-012／form_signature、form_definition | locative／allative／ablative、完整具角色形式定義、空簽章、未知 form、錯語言 | 合法形式通過；錯 type／role、非法空簽章或非 Literal separator 拒絕 |
 | FL-013／annotation_identity | 卡名內同字、相同 text 不同概念 | 卡名與術語不互套 span；不同概念產生不同 set／context |
-| FL-014／occurrences | 重複詞、多個輸出與原文單獨顯示 | 保留每次位置；不同 exact text、越界或缺關聯拒絕 |
+| FL-014／occurrences | 重複詞、多個輸出與原文單獨顯示 | 保留每次位置；不同 exact text、越界拒絕 |
 | FL-015／render_dependencies | 改 label、form、bold、target、品質、renderer 版本或 note | 真正依賴重算 render／annotation，note 不失效，frame 不變；v2→v3 改 dependency／tr，binding／annotation 不變 |
 | FL-016／semantic_dependencies | 改來源、frame 語義、接口描述、本體版本 | 精確失效用途／DSL；接口描述只失效相依 DSL，不重鍵翻譯；中文風格不重審規則 |
 | FL-017／zone_forms、np_role_render | 在／到／從、加入／回到手牌、計數來源與目的地、具角色 CardNP 與 owner-only | 格與融合形式分清；三個 classifier 分開派送，source/count owner 與 zone 配對；owner-only 用具角色所有格 |

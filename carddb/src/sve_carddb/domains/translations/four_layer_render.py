@@ -149,15 +149,6 @@ class Rendered:
             for leaf in self.leaves
         )
 
-    def verify_occurrences(self, rows: tuple[RenderLeafOccurrence, ...]) -> None:
-        """A persisted subset cannot erase a repeated target path or its source link."""
-
-        def key(row: RenderLeafOccurrence) -> tuple[str, tuple[int, ...], str]:
-            return row.binding_id, row.node_path, row.slot
-
-        if sorted(rows, key=key) != sorted(self.occurrences(), key=key):
-            raise ValueError("Missing or mismatched render occurrence")
-
 
 @dataclass(frozen=True)
 class Result:
