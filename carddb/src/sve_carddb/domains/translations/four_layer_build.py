@@ -1,5 +1,7 @@
 """Project authored frames only after replaying this build's exact Japanese owner fields."""
 
+import os
+import sys
 from collections import Counter
 from dataclasses import dataclass
 from dataclasses import field as dataclass_field
@@ -249,7 +251,16 @@ def _compile(
     pending: Counter[str] = Counter()
     total = 0
     details: dict[bytes, FieldReport] = {}
-    for field in owner_fields(db):
+    # Small samples make translation hot-path profiling practical before a full build.
+    stride = int(os.environ.get("SVE_PROFILE_FIELD_STRIDE") or 0)
+    if stride:
+        sys.stderr.write(
+            f"[warning] SVE_PROFILE_FIELD_STRIDE={stride}: sampling mode, "
+            "translations are incomplete; do not publish this output\n"
+        )
+    for index, field in enumerate(owner_fields(db)):
+        if stride and index % stride:
+            continue
         total += 1
         detail = FieldReport(field)
         details[canonical(field.model_dump(mode="json"))] = detail

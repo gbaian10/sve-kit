@@ -9,6 +9,7 @@ from sve_carddb.cli_paths import required_root
 from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.core.authored import authored_root
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.stage_log import mark
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.preview import Roots, _write, write_preview
 from sve_carddb.export.preview.media_state import reserve
@@ -70,6 +71,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
     roots = Roots(preview_dir, private_dir)
     recipe = Inputs.model_validate_json(inputs.read_bytes())
     verify_inputs(roots, recipe)
+    mark("load recipe + verify inputs")
     for protected in (recipe.repo, recipe.archive, inputs, preview_dir):
         output, source = bundle_dir.resolve(), protected.resolve()
         if output.is_relative_to(source) or source.is_relative_to(output):
@@ -107,6 +109,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
             tuple(item for part in regional for item in part.images),
             sum(part.elapsed_seconds for part in regional),
         )
+    mark("images (both regions)")
     built = build_offline(
         recipe,
         bundle_dir=bundle_dir,
@@ -142,10 +145,12 @@ def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] 
     checks: ImageChecks | None = None,
 ) -> None:
     def seal(plan: MediaPlan) -> None:
+        mark("prepare media")
         projection = plan.projection
         snapshot = export_snapshot(
             projection, built.ownership, batch, brotli=codec, format_version=version
         )
+        mark("export snapshot (shard + compress)")
         require_preview(snapshot.manifest, regions=batch.regions)
         _write(
             roots,
@@ -154,6 +159,7 @@ def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] 
             immutable=True,
             private=True,
         )
+        mark("write inputs record")
         report = write_preview(
             snapshot,
             roots,
@@ -163,6 +169,7 @@ def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] 
             regions=batch.regions,
             media_plan=plan,
         )
+        mark("write preview + verify")
         if image_execution is not None:
             report["image_execution"] = dict(image_execution)
         typer.echo(canonical(report).decode())

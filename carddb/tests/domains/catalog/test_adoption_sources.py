@@ -197,6 +197,60 @@ def test_identity_sources_are_stage_local(
     assert len(second.identities.uses) == 1
 
 
+def test_same_page_locators_share_projection_and_keep_separate_evidence(
+    case: tuple[Case, Path, str],
+) -> None:
+    inputs, archive, version = case
+    sources = Sources({"test-store": archive}, inputs.repository, inputs.build())
+    review = ReviewContext.model_validate_json(canonical(inputs.review))
+    references = tuple(
+        SourceRef(
+            batch_id=review.source_batches[0].batch_id,
+            source_version_id=version,
+            parser="exact-json-v1",
+            locator=locator,
+            text_hash=digest(text.encode()),
+        )
+        for locator, text in (
+            ("/faces/0/name", "Synthetic source name"),
+            ("/faces/0/card_type", "Synthetic source type"),
+        )
+    )
+    name, name_source, name_page = sources.identities.text(references[0], review)
+    kind, kind_source, kind_page = sources.identities.text(references[1], review)
+    assert (name.text, kind.text) == ("Synthetic source name", "Synthetic source type")
+    assert name_source == kind_source
+    assert name_page is kind_page
+    assert {use.locator for use in sources.identities.uses} == {
+        canonical(ref.model_dump(mode="json")).decode() for ref in references
+    }
+
+
+def test_each_review_context_records_its_own_source_use(
+    case: tuple[Case, Path, str],
+) -> None:
+    inputs, archive, version = case
+    sources = Sources({"test-store": archive}, inputs.repository, inputs.build())
+    review = ReviewContext.model_validate_json(canonical(inputs.review))
+    other = review.model_copy(
+        update={
+            "context": BuildContext.from_inputs(
+                review.context.program_revision, {"profile": "other"}
+            )
+        }
+    )
+    ref = SourceRef(
+        batch_id=review.source_batches[0].batch_id,
+        source_version_id=version,
+        parser="exact-json-v1",
+        locator="/faces/0/name",
+        text_hash=digest(b"Synthetic source name"),
+    )
+    for context in (review, other, review):
+        sources.identities.text(ref, context)
+    assert len(sources.identities.uses) == 2
+
+
 @pytest.mark.parametrize(
     ("mutation", "message"),
     [

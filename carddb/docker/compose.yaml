@@ -1,0 +1,37 @@
+# export.sh supplies the run directory and caller's ids.
+name: sve-carddb-export
+
+services:
+  export:
+    build:
+      context: ../..
+      dockerfile: carddb/docker/Dockerfile
+    image: sve-carddb-export:local
+    init: true
+    # py-spy samples the export through ptrace when EXPORT_PROFILE=1.
+    cap_add: [SYS_PTRACE]
+    # Host outputs must belong to the caller.
+    user: ${HOST_UID:?}:${HOST_GID:?}
+    # Equal memory and memswap limits prevent swap use.
+    cpus: ${EXPORT_CPUS:-2}
+    mem_limit: ${EXPORT_MEMORY:-16g}
+    memswap_limit: ${EXPORT_MEMORY:-16g}
+    working_dir: ${SVE_REPO:?}
+    environment:
+      # The caller's uid has no passwd entry in the image, so give home lookups a writable path.
+      HOME: /tmp
+      PYTHONPATH: ${SVE_REPO:?}/carddb/src
+      TMPDIR: ${EXPORT_RUN_DIR:?}/tmp
+      # Completed stages must survive the wrapper or container stopping.
+      SVE_STAGE_LOG: ${EXPORT_RUN_DIR:?}/stages.tsv
+      SVE_PROFILE_FIELD_STRIDE: ${SVE_PROFILE_FIELD_STRIDE:-}
+    # Same paths inside and out keep recipe paths valid; code, authored data and sources are read-only.
+    volumes:
+      - ${SVE_REPO:?}:${SVE_REPO:?}:ro
+      - ${SVE_ARCHIVE:?}:${SVE_ARCHIVE:?}:ro
+      - ${EXPORT_RUN_DIR:?}:${EXPORT_RUN_DIR:?}
+      - ${SVE_EXPORT_DIR:?}:${SVE_EXPORT_DIR:?}
+      - ${SVE_CARDDB_PRIVATE_DIR:?}:${SVE_CARDDB_PRIVATE_DIR:?}
+      # Writable because a new pack adds WebP encodings here.
+      - ${SVE_IMAGE_ASSETS_DIR:?}:${SVE_IMAGE_ASSETS_DIR:?}
+      - ${SVE_IMAGE_CACHE_DIR:?}:${SVE_IMAGE_CACHE_DIR:?}
