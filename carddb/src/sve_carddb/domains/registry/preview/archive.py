@@ -2,11 +2,11 @@
 
 from typing import TYPE_CHECKING
 
+from sve_carddb.domains import physical_sources
 from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
-from sve_carddb.domains.registry.projection import jp_card
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.source_archive import ArchiveError
-from sve_carddb.parse.pages.extract_jp import extract_card
+from sve_carddb.parse.pages import extract_jp
 from sve_carddb.parse.pages.official_jp import card_url
 
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 class FrozenJP:
-    """Pin current entries in one sealed batch; all later reads recheck hashes."""
+    """Pin current entries in one sealed batch and share verified page projections."""
 
     def __init__(
         self,
@@ -48,7 +48,7 @@ class FrozenJP:
         version = self._current.get(url)
         if version is None:
             return None
-        source, raw, descriptor = self._sources.read(
+        source, descriptor = self._sources.metadata(
             version, parser_version=self._parser_version
         )
         if (descriptor.provider, descriptor.kind, descriptor.url, source.kind) != (
@@ -58,10 +58,13 @@ class FrozenJP:
             "official_page",
         ):
             raise ArchiveError("Frozen evidence source identity mismatch")
-        record = extract_card(raw, number=card_no)
-        return CardEvidence.from_card(
+        page = physical_sources.page(
+            self._sources, version, region="jp", parser_version=self._parser_version
+        )
+        record = page.record
+        assert isinstance(record, extract_jp.CardRecord)
+        return CardEvidence(
             source,
-            "jp",
-            jp_card(record),
+            page.text.observation,
             tuple(FaceEvidence(face.rarity, face.illustrator) for face in record.faces),
         )

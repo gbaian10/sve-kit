@@ -2,7 +2,8 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.domains.products.official import PARSER, ProductPage, parse_products
+from sve_carddb.domains import physical_sources
+from sve_carddb.domains.products.official import PARSER, ProductPage
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 
 if TYPE_CHECKING:
@@ -26,10 +27,10 @@ class FrozenProducts:
         self.region = region
 
     def pages(self) -> tuple[ProductPage, ...]:
-        """Read only batch current entries, rechecking raw and descriptor on access."""
+        """Read current product projections from the shared verified physical pages."""
         pages: list[ProductPage] = []
         for entry in self.sources.inventory.current:
-            source, raw, descriptor = self.sources.read(
+            _, descriptor = self.sources.metadata(
                 entry.source_version_id, parser_version=PARSER
             )
             if (descriptor.provider, descriptor.kind, descriptor.url) != (
@@ -38,5 +39,12 @@ class FrozenProducts:
                 entry.url,
             ):
                 raise ValueError("Official product batch source identity mismatch")
-            pages.append(parse_products(raw, source, self.region))
+            page = physical_sources.page(
+                self.sources,
+                entry.source_version_id,
+                region=self.region,
+                parser_version=PARSER,
+            )
+            page.require_identity()
+            pages.append(page.products.get())
         return tuple(pages)

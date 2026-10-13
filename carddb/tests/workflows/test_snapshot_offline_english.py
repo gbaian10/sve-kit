@@ -7,19 +7,19 @@ import pytest
 from sve_carddb.build.database import open_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField
-from sve_carddb.core.json import array, canonical, digest, object_value, parse
+from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.core.provenance import InputRecord
 from sve_carddb.domains.catalog import adoption_importer
-from sve_carddb.domains.translations import sources as source_projection
 from sve_carddb.domains.translations.four_layer_authored import from_files
 from sve_carddb.domains.translations.four_layer_sources import descriptor
 from sve_carddb.domains.translations.inputs import Snapshot, load_glossary
-from sve_carddb.domains.translations.sources import Sources
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.reader import read_snapshot, read_text_all
 from sve_carddb.export.transport import export_snapshot
+from sve_carddb.workflows import offline
 from sve_carddb.workflows.offline import build
 
+from ..support.translation_source_fixtures import EnvelopeSources
 from .test_snapshot_offline import prepared as prepared  # ruff: ignore[useless-import-alias] -- reuse frozen regional fixture
 from .test_snapshot_offline_templates import RULE_CONTENT, SCHEMA
 from .test_snapshot_offline_templates import default_text_case as default_text_case  # ruff: ignore[useless-import-alias] -- reuse complete JP and EN source coverage
@@ -90,15 +90,7 @@ def install_inputs(root: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         adoption_importer, "AdoptionInputs", lambda *_args, **_kwargs: AdoptedInputs()
     )
 
-    def synthetic_project(
-        raw: bytes, _url: str, provider: str
-    ) -> tuple[str, JsonValue]:
-        # This shared fixture seals synthetic JSON envelopes instead of official HTML.
-        assert raw.startswith(b"<html>")
-        assert raw.endswith(b"</html>")
-        return ("ja" if provider == "jp" else "en"), parse(raw[6:-7])
-
-    monkeypatch.setattr(source_projection, "project", synthetic_project)
+    monkeypatch.setattr(offline, "TranslationSources", EnvelopeSources)
 
 
 @pytest.mark.parametrize(
@@ -139,7 +131,7 @@ def test_normal_build_selects_only_exact_confirmed_english_fields(  # ruff: igno
         if row["face_id"] == face["id"] and row["region"] == "en"
     )
     context = InputRecord.model_validate_json(before.input_content).context
-    sources = Sources({recipe.store_id: recipe.archive}, recipe.repo, context)
+    sources = EnvelopeSources({recipe.store_id: recipe.archive}, recipe.repo, context)
     with open_database(compile_build(SCHEMA), tmp_path / "before/build.sqlite") as db:
         source = descriptor(
             db,

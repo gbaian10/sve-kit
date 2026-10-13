@@ -348,7 +348,7 @@ def plan_text_observations(
         ):
             raise ValueError("Text source face map is incomplete")
         # Observations retain the verified fields without holding the whole raw page corpus.
-        kept = card.model_copy(update={"raw": None})
+        kept = card if card.raw is None else card.model_copy(update={"raw": None})
         observations.extend(
             FaceObservation(
                 card_id=data.card_id,

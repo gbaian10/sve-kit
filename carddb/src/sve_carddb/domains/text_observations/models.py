@@ -2,7 +2,7 @@
 
 from typing import Protocol
 
-from pydantic import Field, JsonValue
+from pydantic import Field, JsonValue, PrivateAttr
 
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import RecordData
@@ -67,6 +67,31 @@ class TextCard(RecordData):
     effect_presence: tuple[EffectPresence, ...] = ()
     raw: bytes | None = Field(default=None, exclude=True)
 
+    _verified: (
+        tuple[Source, Observation, tuple[FaceContent, ...], tuple[EffectPresence, ...]]
+        | None
+    ) = PrivateAttr(default=None)
+    _whitespace: tuple[str | None, ...] = PrivateAttr(default=())
+
+    def accept_extraction(self, whitespace: tuple[str | None, ...]) -> None:
+        """Retain the verified projection, allowing raw bytes and DOM to be released."""
+        self._verified = self.source, self.observation, self.faces, self.effect_presence
+        self._whitespace = whitespace
+
+    def verify_extraction(self) -> bool:
+        """Compare a reused projection with the values accepted at its source boundary."""
+        if self._verified is None:
+            return False
+        source, observation, faces, presence = self._verified
+        if (
+            self.source.model_copy(update={"parser_version": source.parser_version}),
+            self.observation,
+            self.faces,
+            self.effect_presence,
+        ) != (source, observation, faces, presence):
+            raise ValueError("Effect presence/extraction cannot be reproduced")
+        return True
+
     def projected(self, index: int) -> FaceContent:
         """Change only proven absence; unknown empty values remain deferred."""
         content = self.faces[index]
@@ -85,8 +110,12 @@ class TextCard(RecordData):
             and effect is not None
             and not effect
             and not content.sections
-            and self.raw is not None
         ):
+            if self._whitespace:
+                effect = self._whitespace[index] or effect
+                return content.model_copy(update={"effect": effect})
+            if self.raw is None:
+                return content
             face = select_all(parse(self.raw.decode()), ".cardlist-Detail_Box_Inner")[
                 index
             ]

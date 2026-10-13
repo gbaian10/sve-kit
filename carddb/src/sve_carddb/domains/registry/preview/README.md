@@ -8,8 +8,8 @@ build rows are selected by region.
 
 `FrozenJP(store, store_id, batch_id, parser_version=...)` verifies the sealed batch
 and its metadata/raw/immutable-manifest closure. It reads only pinned current
-entries in that batch, rechecking descriptor, first receipt and blob hashes on
-access. It never opens a live manifest, accesses latest cache or downloads data.
+entries in that batch. Descriptor, first receipt and consumed blob hashes are
+verified once per command; adapters share compact physical-page projections. It never opens a live manifest, accesses latest cache or downloads data.
 JP and EN extraction use `parse.pages.extract_jp` / `extract_en` and the explicit
 `domains.registry.projection` mapping for `registry-observation-v2`.
 Parsed traits and EN text/sections retain their values and source order;

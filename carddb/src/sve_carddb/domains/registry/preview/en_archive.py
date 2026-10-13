@@ -2,11 +2,11 @@
 
 from typing import TYPE_CHECKING
 
+from sve_carddb.domains import physical_sources
 from sve_carddb.domains.registry.preview.evidence import CardEvidence, FaceEvidence
-from sve_carddb.domains.registry.projection import en_card
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.source_archive import ArchiveError
-from sve_carddb.parse.pages.extract_en import extract_card
+from sve_carddb.parse.pages import extract_en
 from sve_carddb.parse.pages.official_en import card_url
 
 if TYPE_CHECKING:
@@ -47,7 +47,7 @@ class FrozenEN:
         version = self._current.get(url)
         if version is None:
             return None
-        source, raw, descriptor = self._sources.read(
+        source, descriptor = self._sources.metadata(
             version, parser_version=self._parser_version
         )
         if (descriptor.provider, descriptor.kind, descriptor.url, source.kind) != (
@@ -57,11 +57,14 @@ class FrozenEN:
             "official_page",
         ):
             raise ArchiveError("Frozen EN evidence source identity mismatch")
-        record = extract_card(raw, number=card_no)
-        return CardEvidence.from_card(
+        page = physical_sources.page(
+            self._sources, version, region="en", parser_version=self._parser_version
+        )
+        record = page.record
+        assert isinstance(record, extract_en.CardRecord)
+        return CardEvidence(
             source,
-            "en",
-            en_card(record),
+            page.text.observation,
             tuple(
                 FaceEvidence(face.info["Rarity"], face.illustrator)
                 for face in record.faces

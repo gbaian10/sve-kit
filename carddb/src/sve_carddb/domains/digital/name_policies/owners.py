@@ -32,6 +32,10 @@ def publication_owners(
             and item.content.effect is not None
         ):
             candidates.setdefault(candidate_revision_id(item), []).append(item)
+    observations: dict[tuple[str, str], list[FaceObservation]] = {}
+    for item in texts.observations:
+        if item.printing_id in published:
+            observations.setdefault((item.printing_id, item.face_id), []).append(item)
     result = []
     for row in db.rows("face_revision"):
         if row.values["region"] != "jp":
@@ -47,13 +51,7 @@ def publication_owners(
         owner = NameOwner(
             "printing_face", str(printing["id"]), str(row.values["face_id"])
         )
-        possible = [
-            item
-            for item in texts.observations
-            if item.printing_id == owner.identifier
-            and item.printing_id in published
-            and item.face_id == owner.face_id
-        ]
+        possible = observations.get((owner.identifier, owner.face_id or ""), [])
         result.append((owner, _owner(db, owner, possible)))
     return tuple(
         sorted(

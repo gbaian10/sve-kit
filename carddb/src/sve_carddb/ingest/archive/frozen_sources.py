@@ -3,7 +3,7 @@
 import re
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pydantic import ValidationError
 
@@ -18,7 +18,7 @@ from sve_carddb.ingest.archive.source_archive import (
 from sve_carddb.ingest.archive.store import resolve_within
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Callable, Mapping
 
 
 class FrozenSources:
@@ -38,6 +38,10 @@ class FrozenSources:
         self.root = root
         self.store_id = store_id
         self.batch_id = batch_id
+        self._metadata: dict[str, Source] = {}
+        self._descriptors: dict[str, Descriptor] = {}
+        self._verified: set[str] = set()
+        self._projections: dict[tuple[str, str], object] = {}
 
     def require_scope(self, root: Path, store_id: str, batch_id: str) -> None:
         """A shared reader must still belong to the caller's exact input pin."""
@@ -51,25 +55,32 @@ class FrozenSources:
     def read(
         self, version: str, *, parser_version: str
     ) -> tuple[Source, bytes, Descriptor]:
-        """Recheck pinned metadata/raw hashes; later receipts never replace first metadata."""
+        """Verify each newly consumed raw blob once, without retaining its bytes."""
         source, descriptor = self.metadata(version, parser_version=parser_version)
         entry = self.entries[version]
-        return source, self._bytes(entry.blob.path, entry.blob.sha256), descriptor
+        raw = resolve_within(self.root, PurePosixPath(entry.blob.path)).read_bytes()
+        if entry.blob.sha256 not in self._verified:
+            if digest(raw) != entry.blob.sha256:
+                raise ArchiveError("Frozen source content hash mismatch")
+            self._verified.add(entry.blob.sha256)
+        return source, raw, descriptor
 
     def metadata(
         self, version: str, *, parser_version: str
     ) -> tuple[Source, Descriptor]:
         """Resolve verified provenance without opening a frozen bitmap."""
+        if version in self._metadata:
+            source = self._metadata[version]
+            if source.parser_version == parser_version:
+                return source, self.descriptor(version)
+            return source.model_copy(
+                update={"parser_version": parser_version}
+            ), self.descriptor(version)
         entry = self.entries.get(version)
         if entry is None:
             raise ArchiveError("Source version is absent from pinned batch")
         try:
-            descriptor = Descriptor.model_validate_json(
-                self._bytes(
-                    f"descriptors/{entry.descriptor_sha256.removeprefix('sha256:')}.json",
-                    entry.descriptor_sha256,
-                )
-            )
+            descriptor = self.descriptor(version)
             receipt = Receipt.model_validate_json(
                 self._bytes(
                     f"receipts/{descriptor.first_receipt_id.removeprefix('sha256:')}.json",
@@ -101,10 +112,13 @@ class FrozenSources:
                 first_receipt_id=descriptor.first_receipt_id,
             ),
         )
+        self._metadata[version] = source
         return source, descriptor
 
     def descriptor(self, version: str) -> Descriptor:
-        """Read a hash-verified descriptor for an explicitly pinned inventory member."""
+        """Read each hash-verified descriptor once for this pinned inventory."""
+        if version in self._descriptors:
+            return self._descriptors[version]
         entry = self.entries.get(version)
         if entry is None:
             raise ArchiveError("Source version is absent from pinned batch")
@@ -118,7 +132,22 @@ class FrozenSources:
         )
         if descriptor.id != version or descriptor.raw_sha256 != entry.blob.sha256:
             raise ArchiveError("Frozen source identity mismatch")
+        self._descriptors[version] = descriptor
         return descriptor
+
+    def projection[T](
+        self,
+        version: str,
+        *,
+        parser_version: str,
+        extract: Callable[[Source, bytes, Descriptor], T],
+    ) -> T:
+        """Keep only a parser's projections within this exact root/store/batch."""
+        key = version, parser_version
+        if key not in self._projections:
+            source, raw, descriptor = self.read(version, parser_version=parser_version)
+            self._projections[key] = extract(source, raw, descriptor)
+        return cast("T", self._projections[key])
 
     def _bytes(self, relative: str, checksum: str) -> bytes:
         data = resolve_within(self.root, PurePosixPath(relative)).read_bytes()
@@ -128,7 +157,7 @@ class FrozenSources:
 
 
 class FrozenBatches:
-    """Own shared source readers for one command; raw reads always recheck hashes."""
+    """Own verified metadata and compact source projections for one command."""
 
     def __init__(self) -> None:
         self.batches: dict[tuple[Path, str, str], FrozenSources] = {}

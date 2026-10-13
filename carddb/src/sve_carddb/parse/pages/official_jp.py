@@ -194,6 +194,13 @@ def parse_card(
     The English site shares this layout; `page_dir` resolves its image paths.
     """
     tree = parse(decode_html(body, min_bytes=MIN_PAGE_BYTES))
+    return card_tree(tree, expected_number=expected_number, page_dir=page_dir)
+
+
+def card_tree(
+    tree: Queryable, *, expected_number: str, page_dir: str = CARD_DIR
+) -> CardPage:
+    """Validate physical page identity from a shared decoded DOM."""
     detail = require_one(tree, ".cardlist-Detail")
     number = _card_page_number(detail)
     if number != expected_number:

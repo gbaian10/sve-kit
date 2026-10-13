@@ -7,8 +7,9 @@ Protected fetching is a separate explicit adapter described below; none writes
 authored data.
 
 `FrozenCardExtras(store_root, store_id, batch_id).pages()` streams only current
-JP card pages in the pinned batch. Every read verifies the descriptor, receipt,
-raw hash, region, resource kind and physical card number. Its parser recipe is
+JP card pages in the pinned batch. Descriptor, receipt and consumed raw hashes
+are verified once per command. Shared page projections retain the region, resource
+kind and physical card-number checks. Its parser recipe is
 `official-card-extras-jp-v1`. The adapter transcribes Q&A text with the existing
 JP renderer, retains the original related href and resolves errata references.
 `parse_card_page(..., region="en")` uses the same typed input contract with the

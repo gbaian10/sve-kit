@@ -101,6 +101,11 @@ class CardRecord:
 def extract_card(body: bytes, *, number: str) -> CardRecord:
     """Transcribe a stored card page."""
     tree = parse(decode_html(body, min_bytes=MIN_PAGE_BYTES))
+    return extract_tree(tree, number=number)
+
+
+def extract_tree(tree: Queryable, *, number: str) -> CardRecord:
+    """Transcribe an already decoded page without retaining its DOM."""
     detail = require_one(tree, ".cardlist-Detail")
     faces = [
         _face(inner, number=number)

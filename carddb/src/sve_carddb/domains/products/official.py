@@ -15,7 +15,7 @@ from sve_carddb.domains.products.identity_models import (
     official_url,
 )
 from sve_carddb.ingest.http.validate import decode_html
-from sve_carddb.parse.html import attribute, parse, select_all
+from sve_carddb.parse.html import Queryable, attribute, parse, select_all
 from sve_carddb.parse.pages import official_en, official_jp
 
 if TYPE_CHECKING:
@@ -90,8 +90,15 @@ def parse_products(raw: bytes, source: Source, region: Region) -> ProductPage:
         raise ValueError("Official product page URL/region mismatch")
     if source.kind != "official_page":
         raise ValueError("Official product page requires HTML")
-    adapter.parse_card(raw, expected_number=numbers[0])
     tree = parse(decode_html(raw, min_bytes=official_jp.MIN_PAGE_BYTES))
+    official_jp.card_tree(tree, expected_number=numbers[0], page_dir=adapter.CARD_DIR)
+    return products_tree(tree, source, region, numbers[0])
+
+
+def products_tree(
+    tree: Queryable, source: Source, region: Region, number: str
+) -> ProductPage:
+    """Project product blocks from one validated physical page DOM."""
     blocks = tuple(
         _block(node, ordinal, source, region)
         for ordinal, node in enumerate(
@@ -100,7 +107,7 @@ def parse_products(raw: bytes, source: Source, region: Region) -> ProductPage:
     )
     if len(select_all(tree, ".cardlist-Detail_Products_Inner")) != len(blocks):
         raise ValueError("Unrecognized official product block layout")
-    return ProductPage(source, region, numbers[0], blocks)
+    return ProductPage(source, region, number, blocks)
 
 
 def _block(

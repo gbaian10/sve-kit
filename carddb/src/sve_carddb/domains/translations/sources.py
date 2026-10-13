@@ -8,6 +8,7 @@ from pydantic import JsonValue
 
 from sve_carddb.core.json import canonical, digest, object_value, parse
 from sve_carddb.core.provenance import SourceUse
+from sve_carddb.domains import physical_sources
 from sve_carddb.domains.catalog.adoption_sources import AdoptionSources
 from sve_carddb.domains.translations.corrected_sources import PARSER as CORRECTED_PARSER
 from sve_carddb.ingest.archive.frozen_sources import FrozenBatches, FrozenSources
@@ -200,14 +201,24 @@ class Sources:
             cache_recipe += ":" + self.corrections.pin
         cache_key = (batch_id, version, cache_recipe)
         if cache_key not in self.cache:
-            source, raw, descriptor = self.batch(batch_id).read(
-                version, parser_version=parser
-            )
+            batch = self.batch(batch_id)
+            source, descriptor = batch.metadata(version, parser_version=parser)
             if descriptor.provider != provider or descriptor.kind != (
                 "card" if provider in {"jp", "en"} else "api"
             ):
                 raise ValueError("Frozen evidence provider/kind mismatch")
-            lang, document = project(raw, source.url, provider)
+            if provider in {"jp", "en"}:
+                page = physical_sources.page(
+                    batch,
+                    version,
+                    region="jp" if provider == "jp" else "en",
+                    parser_version=parser,
+                )
+                lang = "ja" if provider == "jp" else "en"
+                document = parse(canonical(dataclasses.asdict(page.record)))
+            else:
+                _, raw, _ = batch.read(version, parser_version=parser)
+                lang, document = project(raw, source.url, provider)
             if parser == CORRECTED_PARSER:
                 assert self.corrections is not None
                 document = self.corrections.project(batch_id, version, document)
