@@ -357,7 +357,7 @@ def repeated() -> BoundTarget:
 
 
 def _occurrences(value: dict[str, JsonValue]) -> dict[str, JsonValue]:
-    if "target_paths" in value or "target_occurrences" in value:
+    if "target_paths" in value:
         selected = renderer()
         reference = GlossaryReference(
             kind="glossary", key=string(value.get("reference", "term:zone.hand"))
@@ -378,17 +378,14 @@ def _occurrences(value: dict[str, JsonValue]) -> dict[str, JsonValue]:
         )
         result = rendered(repeated(), selected)
         rows = result.occurrences()
-        if "render_occurrence_rows" in value:
-            result.verify_occurrences(rows[: integer(value["render_occurrence_rows"])])
-        else:
-            assert result.text == value["text"]
-            assert [list(row.node_path) for row in rows] == value["target_paths"]
-            assert [list(row.source_ordinals) for row in rows] == [
-                value["source_ordinals"]
-            ] * len(rows)
-            assert [
-                span.model_dump(mode="json") for row in rows for span in row.ranges
-            ] == value["ranges"]
+        assert result.text == value["text"]
+        assert [list(row.node_path) for row in rows] == value["target_paths"]
+        assert [list(row.source_ordinals) for row in rows] == [
+            value["source_ordinals"]
+        ] * len(rows)
+        assert [
+            span.model_dump(mode="json") for row in rows for span in row.ranges
+        ] == value["ranges"]
         return {
             "occurrence_count": len(result.annotation.occurrences),
             "dedup_term_count": len(
@@ -446,7 +443,6 @@ REASONS = {
     "unknown_concept": "outside every registered source domain",
     "annotation_text_mismatch": "text identity mismatch",
     "span_out_of_bounds": "outside exact text",
-    "missing_render_occurrence": "render occurrence",
     "form_role_mismatch": "typed role signature",
     "separator_signature_mismatch": "empty signature",
     "separator_literal_required": "Literal|literal",

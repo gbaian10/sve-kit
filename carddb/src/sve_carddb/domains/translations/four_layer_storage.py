@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.build import Json
-from sve_carddb.contracts.annotations import AnnotationSet, RenderLeafOccurrence
+from sve_carddb.contracts.annotations import AnnotationSet
 from sve_carddb.contracts.four_layer import (
     CardNameReference,
     FormDefinition,
@@ -12,8 +12,7 @@ from sve_carddb.contracts.four_layer import (
     OwnerField,
     VocabularyReference,
 )
-from sve_carddb.contracts.source_binding import SourceBinding
-from sve_carddb.core.json import canonical, integer, string
+from sve_carddb.core.json import canonical, string
 from sve_carddb.domains.translations.four_layer_authored import (
     FormRecord,
     FrameRecord,
@@ -29,8 +28,7 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.build import Database, Row, Value
-    from sve_carddb.contracts.source_binding import ClosedDomain
-    from sve_carddb.domains.translations.four_layer_render import Rendered
+    from sve_carddb.contracts.source_binding import ClosedDomain, SourceBinding
 
 
 @dataclass(frozen=True)
@@ -203,44 +201,6 @@ def use_field(row: Row) -> OwnerField:
     )
 
 
-def read_binding(
-    db: Database, identifier: str, domains: Mapping[str, ClosedDomain]
-) -> SourceBinding:
-    """A relational array index preserves interleaved omissions without invented source spans."""
-    data = payload(_one(db, "text_template_binding", {"id": identifier}))
-    use_id = string(data.pop("use_id"))
-    leaves = sorted(
-        (
-            payload(row)
-            for row in db.select(
-                "binding_leaf_occurrence",
-                db.columns("binding_leaf_occurrence"),
-                where={"binding_id": identifier},
-            )
-        ),
-        key=lambda leaf: integer(leaf["position"]),
-    )
-    if [leaf["position"] for leaf in leaves] != list(range(len(leaves))):
-        raise ValueError("Stored leaf occurrence positions must be continuous")
-    occurrences: list[JsonValue] = []
-    for leaf in leaves:
-        leaf.pop("binding_id")
-        leaf.pop("position")
-        occurrences.append(leaf)
-    data["occurrences"] = occurrences
-    try:
-        binding = SourceBinding.model_validate_json(canonical(data))
-        binding.verify(read_frame(db, binding.frame_id).frame, domains)
-    except ValueError, TypeError:
-        raise ValueError("Invalid stored four-layer binding") from None
-    raw = _verify_use(db, use_id, binding)
-    stored = read_frame(db, binding.frame_id)
-    replay_part(
-        raw, stored.frame, binding, domains, canonical_source=stored.canonical_source
-    )
-    return binding
-
-
 def _verify_use(db: Database, use_id: str, binding: SourceBinding) -> str:
     use = _one(db, "translation_use", {"id": use_id})
     if OwnerField(
@@ -363,63 +323,3 @@ def read_annotation(db: Database, identifier: str) -> AnnotationSet:
     except ValueError, TypeError:
         raise ValueError("Invalid stored annotation set") from None
     return result
-
-
-def read_owned_render_occurrences(
-    db: Database,
-    translation_id: str,
-    domains: Mapping[str, ClosedDomain],
-    expected: Rendered,
-) -> tuple[RenderLeafOccurrence, ...]:
-    """Read the source links belonging to this rendered owner."""
-    rows = tuple(
-        row
-        for binding_id in sorted({leaf.binding_id for leaf in expected.leaves})
-        for row in db.select(
-            "render_leaf_occurrence",
-            db.columns("render_leaf_occurrence"),
-            where={"translation_id": translation_id, "binding_id": binding_id},
-        )
-    )
-    return _render_rows(db, translation_id, domains, rows, expected)
-
-
-def _render_rows(
-    db: Database,
-    translation_id: str,
-    domains: Mapping[str, ClosedDomain],
-    rows: tuple[Row, ...],
-    expected: Rendered,
-) -> tuple[RenderLeafOccurrence, ...]:
-    translation = payload(_one(db, "translation", {"id": translation_id}))
-    text = string(translation["text"])
-    result = []
-    bindings: dict[str, SourceBinding] = {}
-    for row in rows:
-        try:
-            leaf = RenderLeafOccurrence.model_validate_json(canonical(payload(row)))
-        except ValueError, TypeError:
-            raise ValueError("Invalid stored render leaf occurrence") from None
-        if leaf.binding_id not in bindings:
-            bindings[leaf.binding_id] = read_binding(db, leaf.binding_id, domains)
-        binding = bindings[leaf.binding_id]
-        ordinals = {o.ordinal for o in binding.occurrences if o.slot == leaf.slot}
-        if leaf.slot not in binding.values or not set(leaf.source_ordinals) <= ordinals:
-            raise ValueError("Stored render leaf refers to missing source occurrences")
-        if any(span.end > len(text) for span in leaf.ranges):
-            raise ValueError("Stored render leaf exceeds exact translation text")
-        use = _one(
-            db,
-            "translation_use",
-            {
-                "id": _one(db, "text_template_binding", {"id": leaf.binding_id}).values[
-                    "use_id"
-                ]
-            },
-        )
-        if use.values["context_id"] != translation["context_id"]:
-            raise ValueError("Stored render leaf belongs to another source context")
-        result.append(leaf)
-    parsed = tuple(result)
-    expected.verify_occurrences(parsed)
-    return parsed

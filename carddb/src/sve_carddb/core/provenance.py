@@ -112,8 +112,12 @@ class InputRecord(RecordData):
     @model_validator(mode="after")
     def check_uses(self) -> InputRecord:
         """Reject noncanonical inventories rather than silently normalizing them."""
-        if self.uses != uses_sorted(self.uses):
-            raise ValueError("Build uses must be sorted and unique")
+        previous: bytes | None = None
+        for use in self.uses:
+            key = _use_key(use)
+            if previous is not None and key <= previous:
+                raise ValueError("Build uses must be sorted and unique")
+            previous = key
         return self
 
     def content(self) -> bytes:
@@ -123,4 +127,4 @@ class InputRecord(RecordData):
 
 def input_record(context: BuildContext, uses: Iterable[SourceUse]) -> InputRecord:
     """Summarize the sources consumed by this build."""
-    return InputRecord(context=context, uses=uses_sorted(uses))
+    return InputRecord.model_construct(context=context, uses=uses_sorted(uses))

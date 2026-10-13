@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.build import Json
 from sve_carddb.contracts.four_layer import GlossaryReference, Target
 from sve_carddb.core.json import canonical, object_value
 from sve_carddb.domains.translations.four_layer_authored import (
@@ -29,7 +30,6 @@ from sve_carddb.domains.translations.four_layer_render import (
 )
 from sve_carddb.domains.translations.four_layer_selection import Controls
 from sve_carddb.domains.translations.four_layer_sources import CardSource
-from sve_carddb.domains.translations.four_layer_storage import read_binding
 
 from ...support.digital_link_import_fixtures import make_fixture
 from ...support.translation_fixtures import choice, reference
@@ -192,7 +192,9 @@ def test_selected_wording_is_visible_only_after_a_context_override(
             )
         assert rendered.rendered is None
         assert rendered.issues == ("suppressed_translation",)
-        assert read_binding(db, binding.id, {}) == binding
+        assert db.rows("text_template_binding")[0].values["source"] == Json(
+            binding.source.model_dump(mode="json")
+        )
         assert db.rows("translation_selection") == ()
     assert (
         controls(named).select(field, renderer, default, "zh-Hant").targets == default

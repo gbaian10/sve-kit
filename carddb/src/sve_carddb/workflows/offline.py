@@ -21,7 +21,7 @@ from sve_carddb.domains.card_extras import (
     FrozenCardExtras,
     applicable_reskin_regions,
     plan_card_extras,
-    populate_card_extras,
+    populate_planned_card_extras,
     require_card_extras_ready,
 )
 from sve_carddb.domains.products import (
@@ -504,7 +504,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 },
             )
             name_sources = translation_sources.stage(context)
-            added = populate_card_extras(db, extras, build=context)
+            added = populate_planned_card_extras(db, extras, build=context)
             if names is not None:
                 replay = _current_names(adoptions, context, stores, db, name_sources)
                 assert replay is not None

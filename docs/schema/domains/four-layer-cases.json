@@ -2737,19 +2737,6 @@
       }
     },
     {
-      "group": "FL-014",
-      "id": "lost_source_link",
-      "operation": "occurrences",
-      "input": {
-        "target_occurrences": 2,
-        "render_occurrence_rows": 1
-      },
-      "expected": {
-        "result": "reject",
-        "reason": "missing_render_occurrence"
-      }
-    },
-    {
       "group": "FL-015",
       "id": "label",
       "operation": "render_dependencies",

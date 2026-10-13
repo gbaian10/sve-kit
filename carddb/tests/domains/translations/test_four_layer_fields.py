@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.build import Json
 from sve_carddb.contracts.four_layer import CardNameReference, Target
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_authored import (
@@ -23,8 +24,6 @@ from sve_carddb.domains.translations.four_layer_render import (
 from sve_carddb.domains.translations.four_layer_sources import CardSource
 from sve_carddb.domains.translations.four_layer_storage import (
     read_annotation,
-    read_binding,
-    read_owned_render_occurrences,
     write_frame,
     write_target,
 )
@@ -80,7 +79,9 @@ def test_whole_field_writes_selection_or_keeps_an_exact_source_fallback(
             "zh-Hant",
         )
     assert len(db.rows("text_template_binding")) == 1
-    assert read_binding(db, binding.id, {}) == binding
+    assert db.rows("text_template_binding")[0].values["source"] == Json(
+        binding.source.model_dump(mode="json")
+    )
     if translated:
         assert result.rendered is not None
         assert (
@@ -95,8 +96,10 @@ def test_whole_field_writes_selection_or_keeps_an_exact_source_fallback(
         )
         assert (
             len(
-                read_owned_render_occurrences(
-                    db, identifier, {}, expected=result.rendered
+                db.select(
+                    "render_leaf_occurrence",
+                    db.columns("render_leaf_occurrence"),
+                    where={"translation_id": identifier, "binding_id": binding.id},
                 )
             )
             == 1
@@ -344,16 +347,20 @@ def test_shared_render_keeps_each_owner_binding_and_verifies_each_output_path(  
     assert len(db.rows("translation_binding")) == 2
     assert (
         len(
-            read_owned_render_occurrences(
-                db, identifier, engine.domains, expected=first_result.rendered
+            db.select(
+                "render_leaf_occurrence",
+                db.columns("render_leaf_occurrence"),
+                where={"translation_id": identifier, "binding_id": first.id},
             )
         )
         == 1
     )
     assert (
         len(
-            read_owned_render_occurrences(
-                db, identifier, engine.domains, expected=second_result.rendered
+            db.select(
+                "render_leaf_occurrence",
+                db.columns("render_leaf_occurrence"),
+                where={"translation_id": identifier, "binding_id": second.id},
             )
         )
         == 1
