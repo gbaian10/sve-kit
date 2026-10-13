@@ -41,6 +41,7 @@ def test_profile_stride_limits_fields_only_when_configured(
     tmp_path: Path,
     compiled: CompiledSchema,
     monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
     stride: str | None,
 ) -> None:
     monkeypatch.delenv("SVE_PROFILE_FIELD_STRIDE", raising=False)
@@ -80,6 +81,7 @@ def test_profile_stride_limits_fields_only_when_configured(
             if isinstance(detail.field.owner, FaceRevisionOwner)
         } == expected
         assert report.reasons == {"unmatched_source_frame": len(expected)}
+    assert ("sampling mode" in capsys.readouterr().err) is (stride is not None)
 
 
 @pytest.mark.parametrize("translated", [True, False])
