@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 def upload_command(  # ruff: ignore[too-many-arguments] -- independent CLI options are resolved by Typer
     *,
     export_dir: Annotated[Path | None, typer.Option(envvar="SVE_EXPORT_DIR")] = None,
+    image_dir: Annotated[Path | None, typer.Option()] = None,
     cdn_base_url: Annotated[str | None, typer.Option()] = None,
     execute: Annotated[bool, typer.Option("--execute/--dry-run")] = False,
     skip_cdn_verify: Annotated[bool, typer.Option("--skip-cdn-verify")] = False,
@@ -33,7 +34,7 @@ def upload_command(  # ruff: ignore[too-many-arguments] -- independent CLI optio
     export_dir = required_root(export_dir, "--export-dir", "SVE_EXPORT_DIR")
     try:
         root = _cdn(cdn_base_url, required=execute and not skip_cdn_verify)
-        export = load_export(export_dir)
+        export = load_export(export_dir, image_root=image_dir)
         result = report(export)
         if execute:
             result = _execute(
