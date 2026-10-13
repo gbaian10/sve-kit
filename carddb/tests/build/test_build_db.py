@@ -7,7 +7,7 @@ from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 
 import pytest
-from jsonschema import SchemaError, ValidationError
+from jsonschema import Draft202012Validator, SchemaError, ValidationError
 from pydantic import JsonValue
 
 from sve_carddb.build import (
@@ -23,7 +23,7 @@ from sve_carddb.build import (
     compile_schema,
     create_database,
 )
-from sve_carddb.build.database import _raw_rows, install_functions
+from sve_carddb.build.database import _raw_rows, install_functions, open_database
 from sve_carddb.build.validation import BOUNDS, Rules, decode
 
 if TYPE_CHECKING:
@@ -661,3 +661,47 @@ def test_selected_predicates_use_canonical_json_and_boolean_encoding() -> None:
         assert not db.select(
             "numbers", ("id",), where={"flag": False, "payload": Json({"a": 2, "z": 1})}
         )
+
+
+def test_build_reads_reuse_validation_without_sharing_mutable_json(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    schema = compiled()
+    path = tmp_path / "build.sqlite"
+    document = Json({"n": 1})
+    with create_database(schema) as db:
+        with db.transaction():
+            db.insert("numbers", number_row() | {"document": document})
+        db.save(path)
+        assert isinstance(document.value, dict)
+        document.value["n"] = -1
+        with open_database(schema, path) as reader:
+            # A missing schema service must not affect reads of already validated build bytes.
+            def unavailable(*_args: object, **_kwargs: object) -> None:
+                raise RuntimeError("Schema validation unavailable")
+
+            monkeypatch.setattr(Draft202012Validator, "validate", unavailable)
+            stored = db.rows("numbers")[0].values["document"]
+            assert stored == Json({"n": 1})
+            assert isinstance(stored, Json)
+            assert isinstance(stored.value, dict)
+            stored.value["n"] = -1
+            assert db.rows("numbers")[0].values["document"] == Json({"n": 1})
+            with pytest.raises(RuntimeError, match="Schema validation unavailable"):
+                reader.rows("numbers")
+
+
+def test_build_and_persistent_reads_reject_unvalidated_json(tmp_path: Path) -> None:
+    schema = compiled()
+    path = tmp_path / "build.sqlite"
+    with create_database(schema, path) as db:
+        with db.transaction():
+            db.insert("numbers", number_row() | {"payload": Json({"n": -1})})
+        db._connection.execute("PRAGMA ignore_check_constraints = ON")
+        db._connection.execute("UPDATE numbers SET document=payload")
+        db._connection.execute("PRAGMA ignore_check_constraints = OFF")
+        with pytest.raises(ValidationError):
+            db.rows("numbers")
+    with open_database(schema, path) as reader:
+        with pytest.raises(ValidationError):
+            reader.rows("numbers")

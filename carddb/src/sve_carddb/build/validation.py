@@ -4,7 +4,7 @@ import re
 from typing import TYPE_CHECKING
 
 from jsonschema import Draft202012Validator, ValidationError
-from pydantic import JsonValue
+from pydantic import JsonValue, TypeAdapter
 
 from sve_carddb.build.model import Column, Json, Kind, Value
 from sve_carddb.core.json import SAFE_INTEGER, canonical, parse
@@ -18,6 +18,7 @@ BOUNDS = {
     Kind.UINT32: (0, 4294967295),
 }
 type SQLValue = str | int | None
+_JSON: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
 
 
 def _subschemas(value: dict[str, JsonValue]) -> Iterator[JsonValue]:
@@ -69,8 +70,13 @@ def _local_schema(value: JsonValue) -> None:
 class Rules:
     """Pin validators to serialized declarations; never fetch schemas from a URL."""
 
-    def __init__(self, schemas: Mapping[str, str]) -> None:
+    def __init__(
+        self, schemas: Mapping[str, str], *, reuse_validated: bool = False
+    ) -> None:
         self._validators: dict[str, Draft202012Validator] = {}
+        self._validated: set[tuple[str, str]] | None = (
+            set() if reuse_validated else None
+        )
         for name, data in schemas.items():
             value = parse(data.encode())
             if not isinstance(value, (dict, bool)):
@@ -83,6 +89,25 @@ class Rules:
         """Validate a named rule after checking canonical JSON scalar limits."""
         canonical(value)
         self._validators[name].validate(value)
+
+    def encode_json(self, name: str, value: JsonValue) -> str:
+        """Validate writes and remember only immutable, schema-specific bytes."""
+        data = canonical(value).decode()
+        self._validators[name].validate(value)
+        if self._validated is not None:
+            self._validated.add((name, data))
+        return data
+
+    def decode_json(self, name: str, data: str) -> JsonValue:
+        """Reuse exact validated bytes in a build; return independent JSON objects."""
+        if self._validated is not None and (name, data) in self._validated:
+            # Exact bytes passed scalar limits and schema checks; never share mutable values.
+            return _JSON.validate_json(data)
+        value = parse(data.encode())
+        self.validate(name, value)
+        if self._validated is not None:
+            self._validated.add((name, data))
+        return value
 
     def sql_json(self, name: object, data: object) -> int:
         """Return a fail-closed SQLite CHECK result for malformed JSON."""
@@ -137,8 +162,7 @@ def encode(column: Column, value: Value, rules: Rules) -> SQLValue:
             raise ValueError("Missing JSON schema")
         if not isinstance(value, Json):
             raise TypeError("JSON columns require an explicit Json value")
-        rules.validate(column.json_schema, value.value)
-        return canonical(value.value).decode()
+        return rules.encode_json(column.json_schema, value.value)
     return _text(column, value)
 
 
@@ -159,7 +183,7 @@ def decode(column: Column, value: object, rules: Rules) -> Value:
     if not isinstance(value, str):
         raise TypeError("SQLite returned a non-text storage class")
     if column.kind == Kind.JSON:
-        parsed = Json(parse(value.encode()))
-        encode(column, parsed, rules)
-        return parsed
+        if column.json_schema is None:
+            raise ValueError("Missing JSON schema")
+        return Json(rules.decode_json(column.json_schema, value))
     return _text(column, value)
