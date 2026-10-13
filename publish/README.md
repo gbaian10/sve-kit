@@ -171,3 +171,7 @@ carddb, including fork PRs.
 | `R2_DEV_BUCKET` | R2 bucket; overridden by `--bucket` | Remote operations only; no default |
 | `SVE_R2_ACCESS_KEY_ID` | R2 access credential | Remote operations only; no default |
 | `SVE_R2_SECRET_ACCESS_KEY` | R2 secret credential | Remote operations only; no default |
+
+Text exports contain no bitmap files. Pass `upload --image-dir /explicit/display-images`
+to use the fixed-key output of `sve-carddb images build-index` with its matching text export.
+Local validation, origin comparison and CDN verification still cover every image.

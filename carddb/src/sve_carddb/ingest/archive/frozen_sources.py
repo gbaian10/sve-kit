@@ -28,8 +28,10 @@ class FrozenSources:
         root, name = configured_batch(stores, batch_id)
         return cls(root, name, batch_id)
 
-    def __init__(self, root: Path, store_id: str, batch_id: str) -> None:
-        self.inventory = verify_batch(root, store_id, batch_id)
+    def __init__(
+        self, root: Path, store_id: str, batch_id: str, *, verify_raw: bool = True
+    ) -> None:
+        self.inventory = verify_batch(root, store_id, batch_id, verify_raw=verify_raw)
         self.entries = {
             entry.source_version_id: entry for entry in self.inventory.entries
         }
@@ -50,6 +52,14 @@ class FrozenSources:
         self, version: str, *, parser_version: str
     ) -> tuple[Source, bytes, Descriptor]:
         """Recheck pinned metadata/raw hashes; later receipts never replace first metadata."""
+        source, descriptor = self.metadata(version, parser_version=parser_version)
+        entry = self.entries[version]
+        return source, self._bytes(entry.blob.path, entry.blob.sha256), descriptor
+
+    def metadata(
+        self, version: str, *, parser_version: str
+    ) -> tuple[Source, Descriptor]:
+        """Resolve verified provenance without opening a frozen bitmap."""
         entry = self.entries.get(version)
         if entry is None:
             raise ArchiveError("Source version is absent from pinned batch")
@@ -70,7 +80,6 @@ class FrozenSources:
             raise ArchiveError("Invalid frozen source metadata") from None
         if descriptor.id != version or descriptor.raw_sha256 != entry.blob.sha256:
             raise ArchiveError("Frozen source identity mismatch")
-        raw = self._bytes(entry.blob.path, entry.blob.sha256)
         resource = receipt.resource
         instant = datetime.fromisoformat(resource.last_changed_at)
         if instant.tzinfo is None:
@@ -92,7 +101,7 @@ class FrozenSources:
                 first_receipt_id=descriptor.first_receipt_id,
             ),
         )
-        return source, raw, descriptor
+        return source, descriptor
 
     def descriptor(self, version: str) -> Descriptor:
         """Read a hash-verified descriptor for an explicitly pinned inventory member."""

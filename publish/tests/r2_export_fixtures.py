@@ -11,9 +11,10 @@ from PIL import Image
 from sve_carddb.contracts.profiles import MEDIA
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.preview import Roots, write_preview
-from sve_carddb.export.preview.media_state import reserve
+from sve_carddb.export.preview.media_state import commit, reserve
 from sve_carddb.export.transport import Batch, export_snapshot
 from sve_carddb.images.variants import build_variants
+from sve_carddb.workflows.image_index import write_images
 
 from .synthetic_images import PublicImages, source
 from .synthetic_images import images as images  # ruff: ignore[useless-import-alias] -- shared synthetic library
@@ -51,13 +52,13 @@ def export(
     snapshot = export_snapshot(
         plan.projection, images.ownership, batch, format_version=MEDIA, brotli=brotli
     )
+    write_images(plan, roots, library or images.library, previous)
+    commit(roots, plan.state)
     write_preview(
         snapshot,
         roots,
         {},
         brotli=brotli,
-        image_source=library or images.library,
-        media_plan=plan,
     )
 
 

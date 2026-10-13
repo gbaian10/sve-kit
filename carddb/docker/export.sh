@@ -36,10 +36,7 @@ fi
 "${compose[@]}" build --quiet export
 name=sve-export-$(date -u +%Y%m%dT%H%M%SZ)
 args=(snapshot export-offline --inputs "$run_dir/recipe.json" --bundle-dir "$run_dir/bundle"
-  --preview-dir "$SVE_EXPORT_DIR" --private-dir "$SVE_CARDDB_PRIVATE_DIR" --workers "${EXPORT_WORKERS:-2}")
-if [[ ${EXPORT_IMAGES:-1} == 1 ]]; then
-  args+=(--image-assets-dir "$SVE_IMAGE_ASSETS_DIR" --image-cache-dir "$SVE_IMAGE_CACHE_DIR")
-fi
+  --preview-dir "$SVE_EXPORT_DIR" --private-dir "$SVE_CARDDB_PRIVATE_DIR" --image-index "${SVE_IMAGE_INDEX:?}")
 if [[ ${EXPORT_BROTLI:-1} == 1 ]]; then args+=(--brotli); fi
 entry=()
 if [[ ${EXPORT_PROFILE:-0} == 1 ]]; then

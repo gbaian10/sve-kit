@@ -64,7 +64,7 @@ def png(
 def source(data: bytes, *, image_id: str = "img:jp:1") -> ImageSource:
     return ImageSource(
         image_id=image_id,
-        source_bytes=data,
+        data=data,
         source_sha256=hashlib.sha256(data).hexdigest(),
         source_src_raw=RAW_SRC,
         asset_kind="sve_card",

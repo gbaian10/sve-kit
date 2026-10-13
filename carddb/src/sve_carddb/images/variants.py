@@ -6,7 +6,7 @@ import re
 import tempfile
 from dataclasses import asdict, dataclass, replace
 from io import BytesIO
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from threading import RLock
 from typing import TYPE_CHECKING, Literal
 
@@ -15,7 +15,9 @@ from PIL import __version__ as pillow_version
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.paths import UnsafePathError
 from sve_carddb.images.checks import ImageChecks
+from sve_carddb.ingest.archive.store import resolve_within
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -54,7 +56,7 @@ SIZES = (
 @dataclass(frozen=True, slots=True)
 class ImageSource:
     image_id: str
-    source_bytes: bytes
+    data: bytes | Path
     source_sha256: str
     source_src_raw: str
     asset_kind: Literal["sve_card", "digital"]
@@ -224,24 +226,26 @@ def _build_variants(
     recipe: Recipe,
     checks: ImageChecks,
 ) -> VariantSet:
-    image = _decode(source.source_bytes)
-    checks.png["sha256:" + source.source_sha256] = "PNG", image.size
-    crop = crop_box(image.width, image.height, override)
     cache_key = digest(
         canonical(
             {
                 "source_sha256": source.source_sha256,
-                "crop": list(crop.bounds),
+                "override": None if override is None else list(override.bounds),
                 "recipe": recipe.definition(),
             }
         )
     ).removeprefix("sha256:")
-    cache_path = cache_root / "image-variants" / f"{cache_key}.json"
-    cached = _read_cache(
-        cache_path, source, image, crop, recipe, blob_root, checks=checks
-    )
+    cache_path = _within(cache_root, f"image-variants/{cache_key}.json")
+    cached = _read_cache(cache_path, source, override, recipe, blob_root, checks=checks)
     if cached is not None:
         return cached
+    raw = source.data
+    if isinstance(raw, Path):
+        raw = raw.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != source.source_sha256:
+            raise ImageVariantError("Frozen source SHA-256 mismatch")
+    image = _decode(raw)
+    crop = crop_box(image.width, image.height, override)
 
     generated: list[ImageVariant] = []
     for size in SIZES:
@@ -258,7 +262,7 @@ def _build_variants(
         encoded = _encode(pixels, recipe)
         checksum = hashlib.sha256(encoded).hexdigest()
         path = _blob_path(checksum)
-        _write_blob(blob_root / path, encoded, checksum)
+        _write_blob(_within(blob_root, path), encoded, checksum)
         generated.append(
             ImageVariant(
                 image_id=source.image_id,
@@ -298,8 +302,10 @@ def _validate_source(source: ImageSource) -> None:
     if source.publication_state != "approved" or source.availability != "available":
         msg = "only approved, available SVE card images can have public variants"
         raise ImageVariantError(msg)
-    checksum = hashlib.sha256(source.source_bytes).hexdigest()
-    if not _HASH.fullmatch(source.source_sha256) or checksum != source.source_sha256:
+    if not _HASH.fullmatch(source.source_sha256) or (
+        isinstance(source.data, bytes)
+        and hashlib.sha256(source.data).hexdigest() != source.source_sha256
+    ):
         msg = "source SHA-256 does not match the frozen image bytes"
         raise ImageVariantError(msg)
 
@@ -462,6 +468,18 @@ def _blob_path(checksum: str) -> str:
     return f"images/sha256/{checksum[:2]}/{checksum}.webp"
 
 
+def _within(root: Path, relative: str) -> Path:
+    try:
+        target = resolve_within(root, PurePosixPath(relative))
+    except UnsafePathError:
+        raise ImageVariantError(
+            "Image output path escapes its root through a symlink"
+        ) from None
+    if target != root / relative:
+        raise ImageVariantError("Image output path contains a symlink")
+    return target
+
+
 def _write_blob(path: Path, data: bytes, checksum: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temp_name = tempfile.mkstemp(prefix=".webp-", dir=path.parent)
@@ -486,11 +504,10 @@ def _verify_blob(path: Path, checksum: str, byte_count: int) -> None:
         raise ImageVariantError(msg)
 
 
-def _read_cache(  # ruff: ignore[too-many-arguments] -- source geometry, recipe and shared blob inspection determine a cache hit
+def _read_cache(
     path: Path,
     source: ImageSource,
-    image: Image.Image,
-    crop: CropBox,
+    override: CropBox | None,
     recipe: Recipe,
     blob_root: Path,
     *,
@@ -504,17 +521,25 @@ def _read_cache(  # ruff: ignore[too-many-arguments] -- source geometry, recipe 
         entry.cache_key != path.stem
         or entry.source_sha256 != source.source_sha256
         or entry.recipe_version != recipe.version
-        or entry.source_width != image.width
-        or entry.source_height != image.height
+        or min(entry.source_width, entry.source_height) <= 0
     ):
         return None
+    if not checks.reuse:
+        raw = source.data
+        if isinstance(raw, Path):
+            raw = raw.read_bytes()
+            if hashlib.sha256(raw).hexdigest() != source.source_sha256:
+                raise ImageVariantError("Frozen source SHA-256 mismatch")
+        if _decode(raw).size != (entry.source_width, entry.source_height):
+            raise ImageVariantError("Cached source dimensions differ from PNG")
+    crop = crop_box(entry.source_width, entry.source_height, override)
     if entry.crop != list(crop.bounds) or [
         item.size_key for item in entry.variants
     ] != [size.key for size in SIZES]:
         return None
     variants = _cached_variants(
         zip(entry.variants, SIZES, strict=True),
-        image,
+        (entry.source_width, entry.source_height),
         crop,
         source,
         recipe,
@@ -527,8 +552,8 @@ def _read_cache(  # ruff: ignore[too-many-arguments] -- source geometry, recipe 
         image_id=source.image_id,
         source_src_raw=source.source_src_raw,
         source_sha256=source.source_sha256,
-        source_width=image.width,
-        source_height=image.height,
+        source_width=entry.source_width,
+        source_height=entry.source_height,
         crop_box=crop,
         recipe_version=recipe.version,
         variants=tuple(variants),
@@ -538,7 +563,7 @@ def _read_cache(  # ruff: ignore[too-many-arguments] -- source geometry, recipe 
 
 def _cached_variants(  # ruff: ignore[too-many-arguments] -- each cache row is bound to source geometry and the command inspection cache
     entries: Iterable[tuple[_CachedVariant, SizeSpec]],
-    image: Image.Image,
+    source_dimensions: tuple[int, int],
     crop: CropBox,
     source: ImageSource,
     recipe: Recipe,
@@ -553,16 +578,23 @@ def _cached_variants(  # ruff: ignore[too-many-arguments] -- each cache row is b
         if size.purpose == "art":
             dimensions = _art_dimensions(crop, size)
         else:
-            dimensions = _card_dimensions(image.width, image.height, size)
+            dimensions = _card_dimensions(*source_dimensions, size)
         if (item.width, item.height) != dimensions:
             return None
-        blob = blob_root / _blob_path(item.sha256)
+        blob = _within(blob_root, _blob_path(item.sha256))
         if not blob.exists():
             return None
-        try:
-            byte_count, checksum, format_name, actual_dimensions = checks.inspect(blob)
-        except OSError:
-            raise ImageVariantError("Cached WebP blob is corrupt") from None
+        metadata: tuple[int, str, str | None, tuple[int, int]]
+        if checks.reuse:
+            if blob.is_symlink() or blob.stat().st_size != item.bytes:
+                raise ImageVariantError("Cached WebP size differs from metadata")
+            metadata = item.bytes, "sha256:" + item.sha256, "WEBP", dimensions
+        else:
+            try:
+                metadata = checks.inspect(blob)
+            except OSError:
+                raise ImageVariantError("Cached WebP blob is corrupt") from None
+        byte_count, checksum, format_name, actual_dimensions = metadata
         if (byte_count, checksum, format_name, actual_dimensions) != (
             item.bytes,
             "sha256:" + item.sha256,

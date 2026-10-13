@@ -10,14 +10,13 @@ from typing import TYPE_CHECKING
 import pytest
 from PIL import Image
 
-import sve_carddb.export.preview as writer_module
 from sve_carddb.build import create_database
 from sve_carddb.core.json import digest, integer, string
 from sve_carddb.export.media import MediaPlan, prepare_media
 from sve_carddb.export.media_images import image_blobs
-from sve_carddb.export.preview import Roots, _write, write_preview
+from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.transport import Ownership, export_snapshot
-from sve_carddb.images.variants import SIZES, build_variants
+from sve_carddb.images.variants import build_variants
 
 from ..images.test_image_variants import png, source
 from ..support.snapshot_project_fixtures import populate, schema
@@ -81,119 +80,14 @@ def images(tmp_path_factory: pytest.TempPathFactory) -> PublicImages:
         )
 
 
-def test_writer_publishes_only_listed_webps_and_consistent_art_contract(
-    images: PublicImages, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+def test_text_writer_needs_no_image_library(
+    images: PublicImages, tmp_path: Path
 ) -> None:
-    library = tmp_path / "library"
-    shutil.copytree(images.library, library)
-    (library / "original.png").write_bytes(png(8, 8))
-    (library / "digital.webp").write_bytes(b"synthetic digital image")
+    snapshot = images.snapshot()
     roots = Roots(tmp_path / "preview", tmp_path / "private")
-    plan = images.plan()
-    members = {
-        string(asset["path"]): (library / string(asset["source"])).read_bytes()
-        for asset in plan.assets
-    }
-    sealed: set[str] = set()
-
-    def observed(
-        roots: Roots, path: str, raw: bytes, *, immutable: bool, private: bool = False
-    ) -> None:
-        if path.startswith("snapshots/"):
-            assert set(members) <= sealed
-        _write(roots, path, raw, immutable=immutable, private=private)
-        sealed.add(path)
-
-    monkeypatch.setattr(writer_module, "_write", observed)
-    report = write_preview(
-        images.snapshot(), roots, {}, image_source=library, media_plan=images.plan()
-    )
-    assert report["images"] == {
-        "unique_files": len(members),
-        "unique_bytes": sum(map(len, members.values())),
-    }
-    assert {
-        p.relative_to(roots.preview).as_posix(): p.read_bytes()
-        for p in roots.preview.rglob("*.webp")
-    } == members
-    assert not list(roots.preview.rglob("*.png"))
-    assert not (roots.preview / "digital.webp").exists()
-    config = images.projection.config["image_sizes"]
-    assert config == [
-        {
-            "key": size.key,
-            "purpose": size.purpose,
-            "max_width": size.max_width,
-            "max_height": size.max_height,
-        }
-        for size in sorted(SIZES, key=lambda item: item.key)
-    ]
-    assert {row["size_key"] for row in images.projection.tables["image_variant"]} == {
-        size.key for size in SIZES
-    }
-    for row in images.projection.tables["image_variant"]:
-        if row["size_key"] in {"art_s", "art_m"}:
-            assert integer(row["width"]) * 3 == integer(row["height"]) * 4
-    again = Roots(tmp_path / "again", tmp_path / "again-private")
-    assert (
-        write_preview(
-            images.snapshot(), again, {}, image_source=library, media_plan=images.plan()
-        )
-        == report
-    )
-    assert {
-        p.relative_to(roots.preview): p.read_bytes()
-        for p in roots.preview.rglob("*")
-        if p.is_file()
-    } == {
-        p.relative_to(again.preview): p.read_bytes()
-        for p in again.preview.rglob("*")
-        if p.is_file()
-    }
-
-
-@pytest.mark.parametrize("state", ["unfetched", "missing", "pending"])
-def test_unavailable_or_unapproved_images_have_metadata_only(
-    images: PublicImages, tmp_path: Path, state: str
-) -> None:
-    tables = images.tables()
-    asset = tables["image_asset"][0]
-    field = "availability" if state in {"unfetched", "missing"} else "publication_state"
-    for row in tables["printing_image"]:
-        row[field] = state
-    tables["image_variant"] = []
-    roots = Roots(tmp_path / "preview", tmp_path / "private")
-    report = write_preview(
-        images.snapshot(tables), roots, {}, media_plan=images.plan(tables)
-    )
-    assert report["images"] == {"unique_files": 0, "unique_bytes": 0}
+    write_preview(snapshot, roots, {})
     assert not (roots.preview / "images").exists()
-    assert asset in tables["image_asset"]
-    tables["image_variant"] = images.tables()["image_variant"]
-    with pytest.raises(ValueError, match="Only approved available"):
-        list(image_blobs(tables, images.library))
-
-
-@pytest.mark.parametrize("missing", ["all", "art_s", "card_l"])
-def test_writer_refuses_incomplete_available_image_closure(
-    images: PublicImages, tmp_path: Path, missing: str
-) -> None:
-    tables = images.tables()
-    tables["image_variant"] = [
-        row
-        for row in tables["image_variant"]
-        if missing != "all" and row["size_key"] != missing
-    ]
-    roots = Roots(tmp_path / "preview", tmp_path / "private")
-    with pytest.raises(ValueError, match="all five sizes"):
-        write_preview(
-            images.snapshot(tables),
-            roots,
-            {},
-            image_source=images.library,
-            media_plan=images.plan(tables),
-        )
-    assert not roots.preview.exists()
+    assert not (roots.private / "media-state.json").exists()
 
 
 @pytest.mark.parametrize(
@@ -331,84 +225,3 @@ def test_equal_length_webp_tamper_requires_content_hash(
         ValueError, match=r"^Preview image hash, bytes, format or dimensions mismatch$"
     ):
         list(image_blobs(images.projection.tables, library))
-
-
-@pytest.mark.parametrize("failure", ["image", "manifest", "late-tamper"])
-def test_interruption_keeps_old_complete_preview(
-    images: PublicImages, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str
-) -> None:
-    roots = Roots(tmp_path / "preview", tmp_path / "private")
-    tables = images.tables()
-    tables["image_variant"] = []
-    for row in tables["printing_image"]:
-        row.update({"availability": "unfetched", "publication_state": "pending"})
-    write_preview(images.snapshot(tables), roots, {}, media_plan=images.plan(tables))
-    old = {p: p.read_bytes() for p in roots.preview.rglob("*") if p.is_file()}
-    calls = 0
-
-    def failing(
-        roots: Roots, path: str, raw: bytes, *, immutable: bool, private: bool = False
-    ) -> None:
-        nonlocal calls
-        if path.startswith("images/"):
-            calls += 1
-            if failure == "image" and calls == 2:
-                raise OSError("synthetic image interruption")
-        if failure == "manifest" and path.startswith("snapshots/manifests/"):
-            raise OSError("synthetic manifest interruption")
-        _write(roots, path, raw, immutable=immutable, private=private)
-        if failure == "late-tamper" and path.startswith("reports/"):
-            (
-                roots.preview
-                / string(images.projection.tables["image_variant"][0]["path"])
-            ).write_bytes(b"synthetic late corruption")
-
-    monkeypatch.setattr(writer_module, "_write", failing)
-    with pytest.raises((OSError, ValueError)):
-        write_preview(
-            images.snapshot(),
-            roots,
-            {},
-            image_source=images.library,
-            media_plan=images.plan(),
-        )
-    assert all(p.read_bytes() == raw for p, raw in old.items())
-    assert not (roots.preview / "snapshots/versions").exists()
-
-
-@pytest.mark.parametrize("relation", ["same", "input-child", "output-child"])
-def test_image_source_roots_must_be_disjoint(
-    images: PublicImages, tmp_path: Path, relation: str
-) -> None:
-    preview = tmp_path / "preview"
-    source = preview
-    if relation == "input-child":
-        source /= "library"
-    elif relation == "output-child":
-        preview /= "output"
-    with pytest.raises(ValueError, match="disjoint"):
-        write_preview(
-            images.snapshot(),
-            Roots(preview, tmp_path / "private"),
-            {},
-            image_source=source,
-            media_plan=images.plan(),
-        )
-    assert list(tmp_path.iterdir()) == []
-
-
-def test_writer_rejects_relative_preview_before_writes(
-    images: PublicImages, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.chdir(tmp_path)
-    with pytest.raises(
-        ValueError, match=r"^Preview and private roots must be absolute paths$"
-    ):
-        write_preview(
-            images.snapshot(),
-            Roots(Path("relative-preview"), tmp_path / "private"),
-            {},
-            image_source=images.library,
-            media_plan=images.plan(),
-        )
-    assert list(tmp_path.iterdir()) == []

@@ -40,6 +40,7 @@ pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+    from pathlib import Path
 
     from pydantic import JsonValue
     from sve_carddb.export.preview import Roots
@@ -308,7 +309,7 @@ def test_interrupted_image_overwrite_leaves_no_pointer_to_upload(
     import sve_carddb.export.preview as writer  # ruff: ignore[import-outside-top-level] -- fault only the output writer boundary
 
     export(images, roots, step=0)
-    original = writer._write
+    original = writer.write_artifact
 
     def interrupted(
         roots: Roots, path: str, raw: bytes, *, immutable: bool, private: bool = False
@@ -318,7 +319,7 @@ def test_interrupted_image_overwrite_leaves_no_pointer_to_upload(
             raise OSError("synthetic interruption")
         original(roots, path, raw, immutable=immutable, private=private)
 
-    monkeypatch.setattr(writer, "_write", interrupted)
+    monkeypatch.setattr(writer, "write_artifact", interrupted)
     with pytest.raises(OSError, match=r"^synthetic interruption$"):
         export(art_changed, roots, step=1, library=art_changed.library)
     assert not (roots.preview / POINTER).exists()
@@ -526,7 +527,7 @@ def test_pointer_failure_after_state_commit_preserves_safe_image_versions(
     store, state, _ = remote
     export(images, roots, step=0)
     upload(store, load_export(roots.preview), None)
-    original = writer._write
+    original = writer.write_artifact
 
     def interrupted(
         roots: Roots, path: str, raw: bytes, *, immutable: bool, private: bool = False
@@ -536,7 +537,7 @@ def test_pointer_failure_after_state_commit_preserves_safe_image_versions(
         original(roots, path, raw, immutable=immutable, private=private)
 
     with monkeypatch.context() as patch:
-        patch.setattr(writer, "_write", interrupted)
+        patch.setattr(writer, "write_artifact", interrupted)
         with pytest.raises(OSError, match=r"^synthetic pointer interruption$"):
             export(art_changed, roots, step=1)
     assert not (roots.preview / POINTER).exists()
@@ -621,3 +622,21 @@ def test_gzip_sibling_checks_decoded_bytes_without_recompression(
     else:
         with pytest.raises(ExportError, match=r"^Export gzip sibling"):
             load_export(roots.preview)
+
+
+def test_upload_reads_images_from_explicit_separate_root(
+    images: PublicImages, roots: Roots, tmp_path: Path
+) -> None:
+    import shutil  # ruff: ignore[import-outside-top-level] -- split the synthetic producer's image and text outputs
+
+    export(images, roots, step=0)
+    original = load_export(roots.preview)
+    image_root = tmp_path / "display-images"
+    image_root.mkdir()
+    shutil.move(str(roots.preview / "images"), image_root / "images")
+    separate = load_export(roots.preview, image_root=image_root)
+    assert separate.members == original.members
+    assert separate.images == original.images
+    assert all(separate.image(item) for item in separate.images)
+    with pytest.raises(ExportError):
+        load_export(roots.preview)

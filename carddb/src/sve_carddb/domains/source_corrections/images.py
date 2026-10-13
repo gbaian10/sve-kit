@@ -22,7 +22,7 @@ def evidence_url(evidence: CorrectionEvidence) -> str:
 
 class ImageProvider(Protocol):
     def image(self, evidence: CorrectionEvidence) -> Source:
-        """Verify bytes, regional identity, URL and metadata before returning a pin."""
+        """Resolve exact regional evidence verified by the image producer or frozen reader."""
         ...
 
 
@@ -34,8 +34,12 @@ class FrozenImages:
         batch_id: str,
         *,
         sources: FrozenSources | None = None,
+        verify_raw: bool = True,
     ) -> None:
-        self.sources = sources or FrozenSources(root, store_id, batch_id)
+        self.sources = sources or FrozenSources(
+            root, store_id, batch_id, verify_raw=verify_raw
+        )
+        self.verify_raw = verify_raw
         if (
             self.sources.root.resolve(),
             self.sources.store_id,
@@ -58,9 +62,14 @@ class FrozenImages:
         version = self.versions.get((evidence.region, url, evidence.sha256))
         if version is None:
             raise ValueError("Correction image evidence is absent from pinned batch")
-        source, _raw, descriptor = self.sources.read(
-            version, parser_version="correction-image-evidence-v1"
-        )
+        if self.verify_raw:
+            source, _raw, descriptor = self.sources.read(
+                version, parser_version="correction-image-evidence-v1"
+            )
+        else:
+            source, descriptor = self.sources.metadata(
+                version, parser_version="correction-image-evidence-v1"
+            )
         if (
             descriptor.provider,
             descriptor.kind,

@@ -8,16 +8,9 @@ from typing import TYPE_CHECKING
 import pytest
 from PIL import Image
 
-from sve_carddb.build import Row, create_database
-from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import array, object_value
-from sve_carddb.images.assets import (
-    ImageReference,
-    PreviewRoots,
-    build_regional_assets,
-    verify_asset_sources,
-)
-from sve_carddb.images.crop_report import crop_report
+from sve_carddb.images.assets import PreviewRoots, build_regional_assets
+from sve_carddb.images.crop_report import CropBinding, crop_report
 from sve_carddb.images.crops import image_source_key, load_image_crops
 from sve_carddb.images.variants import CropBox
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
@@ -72,7 +65,7 @@ def test_override_changes_only_art_and_keeps_orientation(
         FrozenSources, ImageCrops, ImageBuild, ImageBuild, PreviewRoots, PreviewRoots
     ],
 ) -> None:
-    frozen, crops, default, overridden, _, output = crop_assets
+    _, crops, default, overridden, _, output = crop_assets
     by_id = {item.result.image_id: item.result for item in default.images}
     for item in overridden.images:
         old = by_id[item.result.image_id]
@@ -97,37 +90,6 @@ def test_override_changes_only_art_and_keeps_orientation(
                 assert red[0] > red[2]
         else:
             assert item.result.variants == old.variants
-    verify_asset_sources(overridden, {frozen.store_id: frozen.root}, crops=crops)
-
-
-def test_consumer_rejects_old_default_and_forged_box_metadata(
-    crop_assets: tuple[
-        FrozenSources, ImageCrops, ImageBuild, ImageBuild, PreviewRoots, PreviewRoots
-    ],
-) -> None:
-    frozen, crops, default, overridden, _, _ = crop_assets
-    stores = {frozen.store_id: frozen.root}
-    with pytest.raises(
-        ValueError, match=r"^Image crop box differs from adopted source crop$"
-    ):
-        verify_asset_sources(default, stores, crops=crops)
-    with pytest.raises(
-        ValueError, match=r"^Image crop box differs from adopted source crop$"
-    ):
-        verify_asset_sources(overridden, stores)
-    forged = replace(
-        overridden,
-        images=tuple(
-            replace(item, result=replace(item.result, crop_box=CropBox(4, 25, 64, 48)))
-            if item.result.crop_box == CropBox(4, 24, 64, 48)
-            else item
-            for item in overridden.images
-        ),
-    )
-    with pytest.raises(
-        ValueError, match=r"^Image crop box differs from adopted source crop$"
-    ):
-        verify_asset_sources(forged, stores, crops=crops)
 
 
 def test_new_box_misses_cache_and_keeps_old_entries(
@@ -187,71 +149,34 @@ def test_report_uses_effective_owner_and_never_auto_inherits(
     crop_assets: tuple[
         FrozenSources, ImageCrops, ImageBuild, ImageBuild, PreviewRoots, PreviewRoots
     ],
-    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-
     _, crops, _, images, _, _ = crop_assets
     chosen = next(item for item in images.images if adopted(crops, item))
     other = next(item for item in images.images if item is not chosen)
     refs = (
-        ImageReference(
-            "first",
-            "face",
-            "TEST-001",
-            chosen.source,
-            chosen.source.url,
-            chosen.source.url,
-            "jp",
+        CropBinding("effective", "first", "face", "jp", "TEST-001", chosen.source.url),
+        CropBinding("effective", "reprint", "face", "jp", "TEST-002", other.source.url),
+        CropBinding(
+            "unrelated", "other-owner", "face", "jp", "TEST-003", other.source.url
         ),
-        ImageReference(
-            "reprint",
-            "face",
-            "TEST-002",
-            other.source,
-            other.source.url,
-            other.source.url,
-            "jp",
+        CropBinding(
+            "effective", "other-face", "back", "jp", "TEST-004", other.source.url
         ),
-        ImageReference(
-            "other-owner",
-            "face",
-            "TEST-003",
-            other.source,
-            other.source.url,
-            other.source.url,
-            "jp",
-        ),
-        ImageReference(
-            "other-face",
-            "back",
-            "TEST-004",
-            other.source,
-            other.source.url,
-            other.source.url,
-            "jp",
+        CropBinding(
+            "effective", "shared-source", "face", "jp", "TEST-001", chosen.source.url
         ),
     )
-
-    class Owners:
-        def select(self, *_args: object) -> tuple[Row, ...]:
-            return (
-                Row("printing", {"id": "first", "card_id": "effective"}),
-                Row("printing", {"id": "reprint", "card_id": "effective"}),
-                Row("printing", {"id": "other-owner", "card_id": "unrelated"}),
-                Row("printing", {"id": "other-face", "card_id": "effective"}),
-            )
-
-    with create_database(compile_build(("images",))) as db:
-        monkeypatch.setattr(db, "select", Owners().select)
-        result = crop_report(crops, images, refs, db)
+    result = crop_report(crops, images, refs)
     assert result["applied_source_images"] == 1
     assert len(array(result["unused"])) == 1
     assert [
         object_value(item)["printing_id"]
         for item in array(result["reprint_candidates"])
     ] == ["reprint"]
+    assert object_value(array(result["reprint_candidates"])[0])[
+        "other_printing_ids"
+    ] == ["first", "shared-source"]
     assert result["annotation_mismatches"] == []
-    # Labels do not govern selection or effective ownership.
     wrong = replace(
         crops,
         records={
@@ -259,42 +184,9 @@ def test_report_uses_effective_owner_and_never_auto_inherits(
             for key, r in crops.records.items()
         },
     )
-    with create_database(compile_build(("images",))) as db:
-        monkeypatch.setattr(db, "select", Owners().select)
-        reported = crop_report(wrong, images, refs, db)
-    assert len(array(reported["annotation_mismatches"])) == 1
+    reported = crop_report(wrong, images, refs)
+    assert len(array(reported["annotation_mismatches"])) == 2
     assert reported["reprint_candidates"] == result["reprint_candidates"]
-
-
-def _diagnostics(
-    crops: ImageCrops,
-    images: ImageBuild,
-    bindings: tuple[tuple[int, str, str], ...],
-    monkeypatch: pytest.MonkeyPatch,
-) -> dict[str, object]:
-    refs = tuple(
-        ImageReference(
-            printing,
-            "front",
-            "TEST-001",
-            images.images[index].source,
-            images.images[index].source.url,
-            images.images[index].source.url,
-            "jp",
-        )
-        for index, printing, _card in bindings
-    )
-
-    class Owners:
-        def select(self, *_args: object) -> tuple[Row, ...]:
-            return tuple(
-                Row("printing", {"id": printing, "card_id": card})
-                for _index, printing, card in bindings
-            )
-
-    with create_database(compile_build(("images",))) as db:
-        monkeypatch.setattr(db, "select", Owners().select)
-        return dict(crop_report(crops, images, refs, db))
 
 
 def test_two_adopted_printings_do_not_warn_about_each_other(
@@ -302,18 +194,16 @@ def test_two_adopted_printings_do_not_warn_about_each_other(
         FrozenSources, ImageCrops, ImageBuild, ImageBuild, PreviewRoots, PreviewRoots
     ],
     tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     frozen, _, _, images, _, _ = crop_assets
     rows = [record(frozen.descriptor(item.source.id)) for item in images.images[:2]]
     install(tmp_path / "authored", rows)
     crops = load_image_crops(tmp_path / "authored")
-    report = _diagnostics(
-        crops,
-        images,
-        ((0, "first", "same-card"), (1, "reprint", "same-card")),
-        monkeypatch,
+    refs = tuple(
+        CropBinding("same-card", str(i), "front", "jp", "TEST-001", item.source.url)
+        for i, item in enumerate(images.images[:2])
     )
+    report = crop_report(crops, images, refs)
     assert report["applied_source_images"] == 2
     assert report["reprint_candidates"] == []
 
@@ -322,26 +212,23 @@ def test_other_cards_adopted_printing_does_not_affect_this_card(
     crop_assets: tuple[
         FrozenSources, ImageCrops, ImageBuild, ImageBuild, PreviewRoots, PreviewRoots
     ],
-    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _, crops, _, images, _, _ = crop_assets
-    selected = next(
-        index for index, item in enumerate(images.images) if adopted(crops, item)
-    )
-    plain = next(index for index, item in enumerate(images.images) if index != selected)
-    report = _diagnostics(
-        crops,
-        images,
-        (
-            (selected, "adopted", "other-card"),
-            (plain, "unrelated", "this-card"),
-            (plain, "other-reprint", "other-card"),
+    chosen = next(item for item in images.images if adopted(crops, item))
+    other = next(item for item in images.images if item is not chosen)
+    refs = (
+        CropBinding(
+            "other-card", "adopted", "front", "jp", "TEST-001", chosen.source.url
         ),
-        monkeypatch,
+        CropBinding(
+            "this-card", "unrelated", "front", "jp", "TEST-001", other.source.url
+        ),
+        CropBinding(
+            "other-card", "other-reprint", "front", "jp", "TEST-001", other.source.url
+        ),
     )
-    candidates = report["reprint_candidates"]
-    assert isinstance(candidates, list)
+    report = crop_report(crops, images, refs)
     assert [
         (object_value(item)["printing_id"], object_value(item)["card_id"])
-        for item in candidates
+        for item in array(report["reprint_candidates"])
     ] == [("other-reprint", "other-card")]

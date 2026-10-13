@@ -10,19 +10,21 @@ and `docs/schema/images/image-crop-overrides.md` (adopted crop boxes).
   reads only `FrozenSources`, never live manifests or the network, and gives
   identical bytes for one to four workers. Roots must be absolute and disjoint;
   symlinks fail.
-- `plan_regional_images(db, plan, cards, region=)` reads each face's actual `img src`
-  through the adopted `source_face_map`, never from card numbers or face order.
-- `populate_assets(db, build, references, preview)` writes `image_asset`,
-  `image_variant` and `printing_image` rows. A URL absent from the image batch stays
-  pending/unfetched with no variants; corrupt archive bytes abort.
-- `verify_asset_sources(build, stores, crops=)` rechecks source size, oriented
-  dimensions and crop box against the sealed PNGs.
-- `crop_report(crops, build, references, db)` counts applied crop sources, lists
-  unused rows and annotation mismatches, and flags reprints of the same card/face
-  whose source has no crop. It never inherits a box or blocks a build.
+- `workflows.image_index.media_projection(texts, images)` binds each face's actual
+  `img src` through the adopted `source_face_map` and permanent printing/face IDs.
+  A URL absent from its regional image batch stays pending/unfetched with no variants.
+- `crop_report(crops, build, bindings)` counts applied crop sources, lists unused
+  rows and annotation mismatches, and flags verified reprints of the same card/face
+  whose source has no crop. Ownership comes from the media projection's adopted
+  identity. It never inherits a box or blocks a build. `images build-index` writes
+  all diagnostics to `image-report.json` under its private root and prints their
+  counts in the command's one-line JSON summary.
 
 Crops come from `sve_carddb.images.crops.load_image_crops`, which reads
 `authored/images/crops.yaml` from the working tree, and are selected by
 `(source_key, source_sha256)`. Reports never include official card text.
-The `export-offline` command is the only caller: it encodes whatever the cache
-lacks and wires the result into a snapshot preview; see [offline export](../export/OFFLINE.md).
+The independent `images build-index` command encodes cache misses and assigns
+media event versions. Text `snapshot export-offline --image-index` reads only its
+pinned metadata, without PNGs, WebPs, conversion caches or media state. Daily
+image builds reuse archived hashes with size checks; `--verify-all` performs a
+complete source and WebP scrub. See the [index contract](../../../../docs/schema/images/image-index.md).

@@ -988,8 +988,10 @@ def _rename_no_replace(source: Path, destination: Path) -> None:
         raise OSError(error, os.strerror(error), destination)
 
 
-def verify_batch(root: Path, store_id: str, batch_id: str) -> Inventory:
-    """Verify a sealed batch and every raw, receipt and manifest it references."""
+def verify_batch(  # ruff: ignore[complex-structure] -- sealed closure and image-only raw verification share one inventory boundary
+    root: Path, store_id: str, batch_id: str, *, verify_raw: bool = True
+) -> Inventory:
+    """Verify sealed closure; image-only consumers may defer complete raw hashing."""
     batch = root / "batches" / _hex(batch_id)
     _require_safe_file(root, batch / "seal.json")
     seal = _load_model(Seal, batch / "seal.json")
@@ -1048,10 +1050,19 @@ def verify_batch(root: Path, store_id: str, batch_id: str) -> Inventory:
     if any(item.source_version_id not in entries for item in inventory.current):
         msg = "current source has no archived entry"
         raise ArchiveError(msg)
+    if not verify_raw and any(item.kind != "image" for item in inventory.scope):
+        raise ArchiveError("Size-only source checks require an image-only batch")
     checked_blobs: set[str] = set()
     checked_manifests: set[str] = set()
     for entry in inventory.entries:
-        _verify_entry(root, store_id, entry, checked_blobs, checked_manifests)
+        _verify_entry(
+            root,
+            store_id,
+            entry,
+            checked_blobs,
+            checked_manifests,
+            verify_raw=verify_raw,
+        )
     _verify_history_gaps(root, inventory, historical)
     _require_hash(
         root,
@@ -1100,6 +1111,8 @@ def _verify_entry(
     entry: Entry,
     checked_blobs: set[str],
     checked_manifests: set[str],
+    *,
+    verify_raw: bool = True,
 ) -> None:
     if entry.blob.store_id != store_id or entry.blob.path != str(
         _blob_path(entry.blob.sha256)
@@ -1156,7 +1169,15 @@ def _verify_entry(
             )
             checked_manifests.add(manifest_hash)
     if entry.blob.sha256 not in checked_blobs:
-        _require_hash(root, root / entry.blob.path, entry.blob.sha256, entry.blob.bytes)
+        if verify_raw:
+            _require_hash(
+                root, root / entry.blob.path, entry.blob.sha256, entry.blob.bytes
+            )
+        else:
+            target = root / entry.blob.path
+            _require_safe_file(root, target)
+            if target.stat().st_size != entry.blob.bytes:
+                raise ArchiveError("Frozen image size differs from inventory")
         checked_blobs.add(entry.blob.sha256)
 
 

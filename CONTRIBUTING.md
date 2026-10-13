@@ -246,7 +246,7 @@ Web uses the synthetic fixture for an empty `SVE_EXPORT_DIR` and leaves
 an explicit CLI root when its environment value is empty; an empty CLI value is
 rejected. Non-empty roots must be absolute paths. Export keeps
 its existing resolved-path checks separating public output, private state and
-immutable inputs; reuse the same private root across exports and back it up.
+immutable inputs; image production uses a separate persistent private root for `media-state.json` and its backups.
 Missing configuration fails only commands that require it. Help, readers and
 synthetic tests work without private roots. CI sets its own required values in
 workflow steps and does not depend on local mise configuration.
@@ -255,7 +255,7 @@ workflow steps and does not depend on local mise configuration.
 | --- | --- | --- | --- |
 | `SVE_DATA_DIR` | Latest source cache and manifest | carddb crawler and manifest commands | Required for live-data commands; no default; pytest replaces it with a temporary root |
 | `SVE_EXPORT_DIR` | Public export root | carddb `snapshot export-offline` (`--preview-dir`), publish `upload` (`--export-dir`), Web `/cdn` | Export/upload require CLI or env; no default; Web uses synthetic fixture when unset or empty |
-| `SVE_CARDDB_PRIVATE_DIR` | Inputs, reports and persistent `media-state.json` | carddb `snapshot export-offline` (`--private-dir`) | CLI or env required; no default; recipe and `--bundle-dir` remain explicit |
+| `SVE_CARDDB_PRIVATE_DIR` | Text inputs and reports | carddb `snapshot export-offline` (`--private-dir`) | CLI or env required; no default; recipe and `--bundle-dir` remain explicit |
 | `SVE_PREVIEW_DIR` | Optional second local snapshot root | Web `/cdn-preview` | Optional; no default; unset or empty leaves the root unconfigured; exporter uses `SVE_EXPORT_DIR` |
 | `SVE_ARCHIVE_ROOT` | Immutable source store | carddb archive operations | Required when using archive configuration; no default |
 | `SVE_ARCHIVE_STORE_ID` | Archive store identity | carddb archive operations | Required by configured archive operations; no default |

@@ -171,7 +171,6 @@ def prepared(
         "FrozenRegions",
         "FrozenTexts",
         "FrozenProducts",
-        "RegionalImages",
     ):
         monkeypatch.setattr(offline, name, lambda *_args, **_kwargs: EmptySources())
     monkeypatch.setattr(
@@ -275,7 +274,6 @@ def test_regional_build_projects_qa_related_and_reskin_with_complete_sources(
         snapshot,
         Roots(tmp_path / "preview", tmp_path / "private"),
         built.report,
-        media_plan=prepare_media(built.projection, None, revision=1),
         regions=("en", "jp"),
     )
     assert report["pointer"]
@@ -494,7 +492,6 @@ def test_offline_cli_writes_private_bundle_and_dual_preview(
     assert {p.name for p in (tmp_path / "preview").iterdir()} == {"snapshots"}
     assert {p.name for p in (tmp_path / "private").iterdir()} == {
         "inputs",
-        "media-state.json",
         "reports",
     }
 

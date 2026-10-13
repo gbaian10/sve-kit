@@ -118,10 +118,13 @@ class Export:
     entry: dict[str, JsonValue]
     members: tuple[Member, ...]
     images: tuple[ImageFile, ...]
+    image_root: Path | None = None
 
     def image(self, item: ImageFile) -> bytes:
-        """Catch a stray file; the writer drops the pointer before overwriting images."""
-        raw = read_member(self.root, item.key)
+        """Re-read actual image bytes before every upload use."""
+        raw = read_member(
+            self.root if self.image_root is None else self.image_root, item.key
+        )
         if len(raw) != item.bytes:
             raise ExportError("Export image differs from its manifest metadata")
         try:
@@ -195,18 +198,20 @@ def image_files(tables: dict[str, list[Row]]) -> tuple[ImageFile, ...]:
     return tuple(result[k] for k in sorted(result))
 
 
-def load_export(root: Path) -> Export:
+def load_export(root: Path, *, image_root: Path | None = None) -> Export:
     """Validate the pointer's whole public closure before credentials or HTTP."""
     directory(root)
+    if image_root is not None:
+        directory(image_root)
     try:
-        return _load(root)
+        return _load(root, image_root)
     except ExportError:
         raise
     except ValueError, OSError, KeyError, TypeError, SchemaError:
         raise ExportError("Export validation failed") from None
 
 
-def _load(root: Path) -> Export:
+def _load(root: Path, image_root: Path | None) -> Export:
     path, raw, manifest = _manifest(root)
     members = list(
         _encoded(root, path, raw, gz=True, br=(root / (path + ".br")).exists())
@@ -229,6 +234,7 @@ def _load(root: Path) -> Export:
         | {"manifest_path": path, "manifest_sha256": digest(raw)},
         tuple(unique[k] for k in sorted(unique)),
         image_files(tables),
+        image_root,
     )
     for item in export.images:
         export.image(item)

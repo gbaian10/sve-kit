@@ -61,6 +61,7 @@ class TextCard(RecordData):
     source: Source
     observation: Observation
     faces: tuple[FaceContent, ...]
+    image_src: tuple[str, ...] = ()
     date_raw: str | None = None
     has_errata_link: bool = False
     effect_presence: tuple[EffectPresence, ...] = ()

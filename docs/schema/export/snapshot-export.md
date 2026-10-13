@@ -1,7 +1,7 @@
 # 公開快照候選匯出器
 
 匯出器產出 3.0.0，N0 已接線；圖片 URL、版本與新鮮度依 [圖片發布契約](../images/image-variants.md#20-圖片-url版本與新鮮度)
-與 [傳輸 §5.4](snapshot-transport.md#54-卡包-media-與-id-圖片)。預覽配號狀態與快取放在公開根之外，
+與 [傳輸 §5.4](snapshot-transport.md#54-卡包-media-與-id-圖片)。獨立圖片 producer 的配號狀態與快取放在公開根之外，文字匯出只讀[圖片索引](../images/image-index.md)，
 匯出不寫 current／previous 索引；開發桶的索引由上傳寫入，正式發布仍須另行建置並通過發布閘門。
 
 本文件說明 N0 已接線的 Python producer 邊界；基本目錄容器與新容量帳是 [size-budget](size-budget.md) 的設計要求，現有量測 API 尚未據此重寫；公開欄位與分片語意以
@@ -97,7 +97,7 @@ JP 量測不足以凍結正式配置；正式前還須量 EN、雙區與完整�
 `carddb` 的 `sve_carddb.export.read_api` 提供發布端使用的唯讀入口。
 `load_export(root)` 驗證 preview 指標、canonical JSON、檔名與內容 hash、完整分片引用、
 壓縮旁檔及圖片尺寸／格式，再回傳 `Export`。`members` 包含公開 key、原始 bytes 與
-`encoding`；`images` 包含永久 key、版本化 URL、尺寸與 bytes，`Export.image(item)`
+`encoding`；`images` 包含永久 key、版本化 URL、尺寸與 bytes，`load_export(root, image_root=...)` 可指定獨立固定 key 圖片根；`Export.image(item)`
 每次重新讀取並核對圖片。傳輸 header 由發布端決定。
 
 `read_index(raw)` 驗證 canonical 版本索引；`validate_index(value)` 驗證索引形狀。

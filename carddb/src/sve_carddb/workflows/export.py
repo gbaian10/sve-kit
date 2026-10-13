@@ -1,5 +1,6 @@
 """Explicit preview mode and fail-closed formal publication command boundary."""
 
+from dataclasses import replace
 from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] -- Typer resolves runtime annotations
 from typing import TYPE_CHECKING, Annotated
 
@@ -7,23 +8,14 @@ import typer
 
 from sve_carddb.cli_paths import required_root
 from sve_carddb.contracts.profiles import MEDIA, profile
-from sve_carddb.core.authored import authored_root
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.stage_log import mark
-from sve_carddb.export.media import prepare_media
-from sve_carddb.export.preview import Roots, _write, write_preview
-from sve_carddb.export.preview.media_state import reserve
+from sve_carddb.export.image_index import ImageIndex
+from sve_carddb.export.media_config import offline_configuration
+from sve_carddb.export.preview import Roots, write_artifact, write_preview
 from sve_carddb.export.publication import require_preview
 from sve_carddb.export.transport import export_snapshot
 from sve_carddb.export.transport.compression import python_brotli
-from sve_carddb.images.assets import (
-    MAX_WORKERS,
-    ImageBuild,
-    PreviewRoots,
-    build_regional_assets,
-)
-from sve_carddb.images.checks import ImageChecks
-from sve_carddb.images.crops import load_image_crops
 from sve_carddb.workflows.offline import Built, Inputs
 from sve_carddb.workflows.offline import build as build_offline
 
@@ -47,7 +39,7 @@ def verify_inputs(roots: Roots, inputs: Inputs) -> None:
 
 
 @app.command("export-offline")
-def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] -- CLI binds explicit recipe, isolated outputs, paired image roots, worker count and optional compressor
+def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] -- CLI binds explicit recipe, isolated outputs, pinned image metadata and optional compressor
     inputs: Annotated[Path, typer.Option(exists=True, dir_okay=False)],
     bundle_dir: Annotated[Path, typer.Option()],
     preview_dir: Annotated[Path | None, typer.Option(envvar="SVE_EXPORT_DIR")] = None,
@@ -55,13 +47,9 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
         Path | None, typer.Option(envvar="SVE_CARDDB_PRIVATE_DIR")
     ] = None,
     brotli: Annotated[bool, typer.Option("--brotli/--no-brotli")] = False,
-    image_assets_dir: Annotated[
-        Path | None, typer.Option(exists=True, file_okay=False)
+    image_index: Annotated[
+        Path | None, typer.Option(exists=True, dir_okay=False)
     ] = None,
-    image_cache_dir: Annotated[
-        Path | None, typer.Option(exists=True, file_okay=False)
-    ] = None,
-    workers: Annotated[int, typer.Option(min=1, max=MAX_WORKERS)] = 2,
     format_version: Annotated[str, typer.Option()] = MEDIA,
 ) -> None:
     """Export both launch regions to an isolated preview plus a verified private DB bundle."""
@@ -72,7 +60,13 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
     recipe = Inputs.model_validate_json(inputs.read_bytes())
     verify_inputs(roots, recipe)
     mark("load recipe + verify inputs")
-    for protected in (recipe.repo, recipe.archive, inputs, preview_dir):
+    for protected in (
+        recipe.repo,
+        recipe.archive,
+        inputs,
+        preview_dir,
+        *(() if image_index is None else (image_index,)),
+    ):
         output, source = bundle_dir.resolve(), protected.resolve()
         if output.is_relative_to(source) or source.is_relative_to(output):
             raise ValueError("Offline bundle must be disjoint from protected inputs")
@@ -81,106 +75,42 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
         for root in (preview_dir, private_dir)
     ):
         raise ValueError("Offline preview must be disjoint from recipe")
+    if image_index is not None and image_index.resolve().is_relative_to(
+        preview_dir.resolve()
+    ):
+        raise ValueError("Private image index must be outside the public output root")
     codec = python_brotli() if brotli else None
-    if (image_assets_dir is None) != (image_cache_dir is None):
-        raise typer.BadParameter(
-            "Image asset and cache roots must be provided together"
-        )
-    images = None
-    checks = ImageChecks()
-    if image_assets_dir is not None and image_cache_dir is not None:
-        image_roots = PreviewRoots(image_assets_dir, image_cache_dir)
-        image_roots.validate(
-            (recipe.archive, recipe.repo, preview_dir, private_dir, bundle_dir, inputs)
-        )
-        crops = load_image_crops(authored_root(recipe.repo))
-        regional = tuple(
-            build_regional_assets(
-                checks.batch(recipe.archive, recipe.store_id, pin.image_batch),
-                image_roots,
-                region=pin.region,
-                crops=crops,
-                workers=workers,
-                checks=checks,
-            )
-            for pin in recipe.sources
-        )
-        images = ImageBuild(
-            tuple(item for part in regional for item in part.images),
-            sum(part.elapsed_seconds for part in regional),
-        )
-    mark("images (both regions)")
-    built = build_offline(
-        recipe,
-        bundle_dir=bundle_dir,
-        images=images,
-        image_root=image_assets_dir,
-        image_checks=checks,
-    )
-    _finish(
-        built,
-        roots,
-        recipe.batch(),
-        codec,
-        image_assets_dir,
-        None if images is None else images.execution() | {"workers": workers},
-        format_version,
-        checks,
-    )
+    index = None if image_index is None else ImageIndex.read(image_index)
+    mark("load image index")
+    built = build_offline(recipe, bundle_dir=bundle_dir, image_index=index)
+    _finish(built, roots, recipe.batch(), codec, format_version)
 
 
 if TYPE_CHECKING:
-    from sve_carddb.export.media import MediaPlan
     from sve_carddb.export.transport import Batch
 
 
-def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] -- common sealing boundary receives the explicit codec, verified build, roots and profile
-    built: Built,
-    roots: Roots,
-    batch: Batch,
-    codec: Brotli | None,
-    image_source: Path | None,
-    image_execution: dict[str, int] | None,
-    version: str,
-    checks: ImageChecks | None = None,
+def _finish(
+    built: Built, roots: Roots, batch: Batch, codec: Brotli | None, version: str
 ) -> None:
-    def seal(plan: MediaPlan) -> None:
-        mark("prepare media")
-        projection = plan.projection
-        snapshot = export_snapshot(
-            projection, built.ownership, batch, brotli=codec, format_version=version
-        )
-        mark("export snapshot (shard + compress)")
-        require_preview(snapshot.manifest, regions=batch.regions)
-        _write(
-            roots,
-            "inputs/" + digest(built.input_content)[7:] + ".json",
-            built.input_content,
-            immutable=True,
-            private=True,
-        )
-        mark("write inputs record")
-        report = write_preview(
-            snapshot,
-            roots,
-            dict(built.report),
-            brotli=codec,
-            image_source=image_source,
-            regions=batch.regions,
-            media_plan=plan,
-        )
-        mark("write preview + verify")
-        if image_execution is not None:
-            report["image_execution"] = dict(image_execution)
-        typer.echo(canonical(report).decode())
-
-    revision, previous = reserve(roots)
-    seal(
-        prepare_media(
-            built.projection,
-            image_source,
-            revision=revision,
-            previous=previous,
-            checks=checks,
-        )
+    projection = replace(
+        built.projection, config=offline_configuration(built.projection.config)
     )
+    snapshot = export_snapshot(
+        projection, built.ownership, batch, brotli=codec, format_version=version
+    )
+    mark("export snapshot (shard + compress)")
+    require_preview(snapshot.manifest, regions=batch.regions)
+    write_artifact(
+        roots,
+        "inputs/" + digest(built.input_content)[7:] + ".json",
+        built.input_content,
+        immutable=True,
+        private=True,
+    )
+    mark("write inputs record")
+    report = write_preview(
+        snapshot, roots, dict(built.report), brotli=codec, regions=batch.regions
+    )
+    mark("write preview + verify")
+    typer.echo(canonical(report).decode())

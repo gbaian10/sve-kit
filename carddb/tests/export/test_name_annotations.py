@@ -81,7 +81,7 @@ def name_snapshot() -> tuple[Projection, Snapshot, MediaPlan]:
 
 
 def test_native_whole_name_round_trip_and_publish_boundary(tmp_path: Path) -> None:
-    projection, snapshot, plan = name_snapshot()
+    projection, snapshot, _plan = name_snapshot()
     assert projection.tables["face_revision"][0]["name_concept_id"] == "term"
     translation = projection.tables["translation"][0]
     assert translation["annotation_kind"] == "whole_name"
@@ -115,7 +115,7 @@ def test_native_whole_name_round_trip_and_publish_boundary(tmp_path: Path) -> No
                 "columns" not in object_value(fragment) for fragment in array(fragments)
             )
     roots = Roots(tmp_path / "public", tmp_path / "private")
-    write_preview(snapshot, roots, {}, media_plan=plan)
+    write_preview(snapshot, roots, {})
     load_export(roots.preview)
 
 
