@@ -36,6 +36,52 @@ if TYPE_CHECKING:
     from sve_carddb.build import CompiledSchema
 
 
+@pytest.mark.parametrize("stride", [None, "2"])
+def test_profile_stride_limits_fields_only_when_configured(
+    tmp_path: Path,
+    compiled: CompiledSchema,
+    monkeypatch: pytest.MonkeyPatch,
+    stride: str | None,
+) -> None:
+    monkeypatch.delenv("SVE_PROFILE_FIELD_STRIDE", raising=False)
+    if stride is not None:
+        monkeypatch.setenv("SVE_PROFILE_FIELD_STRIDE", stride)
+    fixture = make_fixture(tmp_path, dual=True)
+    (fixture.root / "authored/translations/glossary").mkdir(parents=True)
+    snapshot = load_glossary(fixture.root / "authored")
+    settings = Settings(
+        fixture.sources(),
+        Vocabulary(bindings=()),
+        classifier().rules,
+        fixture.jp.batch_id,
+        fixture.authored,
+        "zh-Hant",
+    )
+    with create_database(compiled) as db, template().copy() as baseline:
+        with db.transaction():
+            for table in compile_build(("t0", "translation_evidence")).tables:
+                for row in baseline.rows(table.name):
+                    db.insert(table.name, row.values)
+        fixture.publish(db)
+        with db.transaction():
+            unit = TextInterner(db).intern(
+                LocalizedText(lang="ja", text="Synthetic rule.")
+            )
+            for revision in ("link-revision", "other-link-revision-1"):
+                db.update("face_revision", {"id": revision}, {"effect_unit_id": unit})
+            report = apply(db, from_files(()), snapshot, settings)
+        expected = {"link-revision"}
+        if stride is None:
+            expected.add("other-link-revision-1")
+        assert report.fields == len(expected)
+        assert {
+            detail.field.owner.revision_id
+            for detail in report.details
+            if isinstance(detail.field.owner, FaceRevisionOwner)
+        } == expected
+        assert report.reasons == {"unmatched_source_frame": len(expected)}
+
+
 @pytest.mark.parametrize("translated", [True, False])
 @pytest.mark.parametrize("unused", [True, False])
 def test_producer_uses_exact_owner_and_preserves_whole_field_fallback(  # ruff: ignore[too-many-locals,too-many-statements] -- independent frozen source, authored inputs and actual DB results form the end-to-end assertion

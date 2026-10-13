@@ -47,7 +47,13 @@ class AdoptionSources:
         self.repository = repository
         self.batches = batches or FrozenBatches()
         self.uses: list[SourceUse] = []
-        self.cache: dict[bytes, tuple[LocalizedText, Source, JsonValue]] = {}
+        self.cache: dict[
+            tuple[bytes, bytes], tuple[LocalizedText, Source, JsonValue]
+        ] = {}
+        # Sharing the serialized review avoids retaining its build configuration per locator.
+        self.review_keys: dict[ReviewContext, bytes] = {}
+        # Different locators need the same parsed page.
+        self.pages: dict[tuple[str, str, str], tuple[Source, str, JsonValue]] = {}
         self.current_registry = registry
 
     def registry(self) -> RegistrySnapshot:
@@ -64,24 +70,35 @@ class AdoptionSources:
         self, ref: SourceRef, review: ReviewContext
     ) -> tuple[LocalizedText, Source, JsonValue]:
         """Resolve JSON Pointer and hash the exact nonempty UTF-8 string."""
-        key = canonical([ref.model_dump(mode="json"), review.model_dump(mode="json")])
+        review_key = self.review_keys.get(review)
+        if review_key is None:
+            review_key = canonical(review.model_dump(mode="json"))
+            self.review_keys[review] = review_key
+        key = (canonical(ref.model_dump(mode="json")), review_key)
         if key not in self.cache:
             if ref.parser not in SOURCE_PARSERS:
                 raise ValueError("Unsupported source parser recipe")
-            source, raw, descriptor = self.batch(ref.batch_id).read(
-                ref.source_version_id,
-                parser_version=ref.parser,
-            )
-            expected_provider = {
-                "official-jp-exact-v1": "jp",
-                "official-en-exact-v1": "en",
-            }.get(ref.parser)
-            if expected_provider is not None and (
-                descriptor.provider,
-                descriptor.kind,
-            ) != (expected_provider, "card"):
-                raise ValueError("Catalog source provider/kind mismatch")
-            projection = self._projection(ref.parser, raw, descriptor.url)
+            page = (ref.batch_id, ref.source_version_id, ref.parser)
+            if page not in self.pages:
+                source, raw, descriptor = self.batch(ref.batch_id).read(
+                    ref.source_version_id,
+                    parser_version=ref.parser,
+                )
+                expected_provider = {
+                    "official-jp-exact-v1": "jp",
+                    "official-en-exact-v1": "en",
+                }.get(ref.parser)
+                if expected_provider is not None and (
+                    descriptor.provider,
+                    descriptor.kind,
+                ) != (expected_provider, "card"):
+                    raise ValueError("Catalog source provider/kind mismatch")
+                self.pages[page] = (
+                    source,
+                    descriptor.provider,
+                    self._projection(ref.parser, raw, descriptor.url),
+                )
+            source, provider, projection = self.pages[page]
             value = pointer(projection, ref.locator)
             if (
                 not isinstance(value, str)
@@ -89,9 +106,9 @@ class AdoptionSources:
                 or digest(value.encode()) != ref.text_hash
             ):
                 raise ValueError("Source locator/exact text hash mismatch")
-            if descriptor.provider not in {"jp", "en"}:
+            if provider not in {"jp", "en"}:
                 raise ValueError("Source language cannot be determined")
-            lang = "ja" if descriptor.provider == "jp" else "en"
+            lang = "ja" if provider == "jp" else "en"
             self.cache[key] = LocalizedText(lang=lang, text=value), source, projection
             self._use(source, "catalog_exact_text", ref.model_dump(mode="json"))
         return self.cache[key]

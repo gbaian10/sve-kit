@@ -546,6 +546,7 @@ def test_absent_projection_is_preserved_when_source_correction_changes_type(
     application = plan.corrections[0]
     assert application.status == "applied"
     raw = application.observation
+    assert raw.card.raw is None
     candidate = next(
         item for item in plan.candidates() if item.printing_id == raw.printing_id
     )

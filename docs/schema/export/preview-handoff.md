@@ -60,6 +60,18 @@ bundle 不得與 repo、封存庫或配方重疊。root 內的輸出 symlink 不
 沒有 QA／勘誤／CR／禁限來源覆蓋的配方，清單窗口維持空集合，語意為 unknown；
 稀疏卡號列表不能證明「沒有勘誤／QA」，缺規則來源也不能宣稱合法。
 
+## Docker 與效能量測
+
+將 `carddb/docker/.env.example` 複製為同目錄的 `.env`，填入配方使用的絕對路徑；
+在 repo 外的執行目錄放 `recipe.json`，執行 `carddb/docker/export.sh <執行目錄>`。
+容器以呼叫者的 uid／gid 執行，repo／人寫資料與封存庫唯讀掛載；
+`EXPORT_CPUS`、`EXPORT_MEMORY` 設 CPU／記憶體硬上限，swap 停用。
+`EXPORT_IMAGES=0` 可略過圖片，`EXPORT_BROTLI=0` 略過 Brotli，`EXPORT_PROFILE=1` 啟用 py-spy。
+每完成一段即寫 stderr；`SVE_STAGE_LOG` 指定追加時間、CPU 與記憶體的 TSV，
+Docker wrapper 固定寫入執行目錄的 `stages.tsv`，中斷仍保留已完成段落。
+`SVE_PROFILE_FIELD_STRIDE=100` 讓日文套翻譯階段每 100 欄只處理 1 欄，供約 1% 取樣量測；
+未設定時處理全部欄位。取樣產物只供效能試跑，完整匯出須移除這個設定。
+
 ## 輸出與容量
 
 分片與完整文字包存於 `snapshots/blobs/<sha256>.json`，另存固定時間戳、等級 9 的

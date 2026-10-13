@@ -347,6 +347,8 @@ def plan_text_observations(
             range(len(card.faces))
         ):
             raise ValueError("Text source face map is incomplete")
+        # Observations retain the verified fields without holding the whole raw page corpus.
+        kept = card.model_copy(update={"raw": None})
         observations.extend(
             FaceObservation(
                 card_id=data.card_id,
@@ -355,7 +357,7 @@ def plan_text_observations(
                 region=data.region,
                 card_no=data.card_no,
                 source_index=mapping.source_index,
-                card=card,
+                card=kept,
                 content=card.projected(mapping.source_index),
             )
             for mapping in data.source_face_map

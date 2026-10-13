@@ -16,6 +16,7 @@ from sve_carddb.core.json import array, digest, object_value, parse
 from sve_carddb.core.models import Hash, Instant, RecordData, Text
 from sve_carddb.core.provenance import BuildContext, Revision, input_record
 from sve_carddb.core.regions import Region
+from sve_carddb.core.stage_log import mark
 from sve_carddb.domains.card_extras import (
     FrozenCardExtras,
     applicable_reskin_regions,
@@ -327,9 +328,11 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     "Offline bundle must be disjoint from immutable inputs"
                 )
     names = composer(inputs)
+    mark("load names (composer)")
     image_checks = image_checks or ImageChecks()
     batches = image_checks.batches
     mounted = prepare_images(inputs, images, image_root, image_checks)
+    mark("prepare images")
     if (
         mounted is not None
         and bundle_dir is not None
@@ -360,6 +363,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         ),
         regions=("en", "jp"),
     )
+    mark("plan preview identity")
     observations = TextObservations(
         identity,
         RegionalTexts(
@@ -380,6 +384,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         images=RegionalImages(inputs, image_checks),
     )
     texts = observations.plan
+    mark("text observations (parse sources)")
     publication = texts.publication_identity()
     printings = frozenset(
         record.data.id
@@ -421,6 +426,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             sources=batches.batch(inputs.archive, inputs.store_id, pin.card_batch),
         ).pages()
     )
+    mark("products + pages")
     adoptions = AdoptionInputs(
         authored_root(inputs.repo),
         inputs.repo,
@@ -447,6 +453,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     if mounted is not None:
         configuration["image_recipe"] = DEFAULT_RECIPE.version
     context = BuildContext.from_inputs(inputs.revision, configuration)
+    mark("adoptions + rulings + config")
     schema = compile_build(
         (
             *MINIMUM_CAPABILITIES,
@@ -457,9 +464,11 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             "rulings",
         )
     )
+    mark("compile schema")
     prepared = _prepare_catalog(
         adoptions, context, stores, identity.snapshot, batches=batches
     )
+    mark("prepare catalog")
     derived = prepared.projection
     if not {"en", "ja"} <= {language.code for language in derived.catalog.languages}:
         raise ValueError("Offline launch requires adopted EN and JA languages")
@@ -478,6 +487,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     )
     image_report: dict[str, JsonValue] | None = None
     name_result = None
+    mark("flavor + template inputs")
     with create_database(schema) as db:
         with db.transaction():
             parents = populate_text_preview(
@@ -493,6 +503,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 official=official,
                 batches=batches,
             )
+            mark("db: populate text preview")
             link_result = (
                 None
                 if names is None
@@ -500,6 +511,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     db, context=context, stores=stores, sources=translation_sources
                 )
             )
+            mark("db: name links")
             adopted = _populate_adoptions(
                 db,
                 adoptions,
@@ -508,6 +520,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 prepared=prepared,
                 sources=translation_sources,
             )
+            mark("db: adoptions")
             rarity_diagnostics = populate_rarities(db)
             extras = plan_card_extras(db, pages, errata=errata)
             # The parent record is private staging; only the complete context is emitted.
@@ -535,6 +548,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     links=link_result,
                     sources=name_sources,
                 )
+            mark("db: rarities + card extras + names")
             flavor_report = apply_flavor(db, flavor)
             translation = adoptions.translation_inputs()
             template_report = (
@@ -554,9 +568,11 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     ),
                 )
             )
+            mark("db: flavor + templates (translations)")
             link_uses = () if link_result is None else link_result.record.uses
             ruling_report = write_rulings(db, rulings, inputs.revision)
             name_uses = () if name_result is None else name_result.record.uses
+            mark("db: rulings")
             record = input_record(
                 context,
                 (
@@ -584,6 +600,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 )
             ),
         )
+        mark("restrictions")
         views = observations.views(db)
         decisions = replace(
             Decisions(),
@@ -595,6 +612,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             ),
             private_digital=names is not None,
         ).with_text_views(views.wording, views.observed)
+        mark("views + decisions")
         projection = project(
             db,
             regions=("en", "jp"),
@@ -606,8 +624,10 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             publication_printings=printings,
         )
         require_offline_coverage(projection, errata=bool(errata))
+        mark("project public tables")
         ownership = Ownership.from_database(db, projection)
         source_gaps = _source_gaps(db, extras)
+        mark("ownership + source gaps")
         content = record.content()
         report: dict[str, JsonValue] = {
             "input_sha256": digest(content),
@@ -697,5 +717,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 if item != "image publication (#35)"
             ]
         if bundle_dir is not None:
+            mark("build report")
             save_build(db, bundle_dir, content, report)
+        mark("save bundle")
         return Built(projection, ownership, content, report)
