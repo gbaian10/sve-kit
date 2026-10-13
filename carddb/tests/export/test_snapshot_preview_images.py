@@ -84,12 +84,8 @@ def test_text_writer_needs_no_image_library(
     images: PublicImages, tmp_path: Path
 ) -> None:
     snapshot = images.snapshot()
-    library = tmp_path / "unused-library"
-    shutil.copytree(images.library, library)
-    shutil.rmtree(library)
     roots = Roots(tmp_path / "preview", tmp_path / "private")
-    report = write_preview(snapshot, roots, {})
-    assert report["images"] == {"unique_files": 0, "unique_bytes": 0}
+    write_preview(snapshot, roots, {})
     assert not (roots.preview / "images").exists()
     assert not (roots.private / "media-state.json").exists()
 

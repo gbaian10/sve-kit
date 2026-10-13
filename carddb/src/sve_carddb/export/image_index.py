@@ -10,7 +10,6 @@ from sve_carddb.core.models import Hash, RecordData, Text
 from sve_carddb.core.provenance import Source
 from sve_carddb.core.regions import Region
 from sve_carddb.domains.source_corrections.images import evidence_url
-from sve_carddb.export.media_config import offline_configuration
 from sve_carddb.export.media_urls import image_path
 from sve_carddb.images.variants import DEFAULT_RECIPE, SIZES
 from sve_carddb.parse.pages.official_jp import image_url
@@ -193,8 +192,4 @@ class ImageIndex(RecordData):
                 raise ValueError(
                     "Image index resolved URL differs from parsed card page"
                 )
-        return replace(
-            projection,
-            tables=projection.tables | self.tables,
-            config=offline_configuration(projection.config),
-        )
+        return replace(projection, tables=projection.tables | self.tables)

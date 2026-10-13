@@ -63,7 +63,6 @@ from sve_carddb.domains.translations.models import EffectTerm, SourceValue
 from sve_carddb.domains.translations.names.resolve import prepare as prepare_names
 from sve_carddb.domains.translations.recognition.rules import load as load_rules
 from sve_carddb.domains.translations.sources import Sources as TranslationSources
-from sve_carddb.export.media_config import offline_configuration
 from sve_carddb.export.project import Decisions, Projection, Settings, project
 from sve_carddb.export.transport import Batch, Ownership
 from sve_carddb.ingest.archive.frozen_sources import FrozenBatches
@@ -595,10 +594,6 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         require_offline_coverage(projection, errata=bool(errata))
         if image_index is not None:
             projection = image_index.attach(projection, texts)
-        else:
-            projection = replace(
-                projection, config=offline_configuration(projection.config)
-            )
         mark("project public tables")
         ownership = Ownership.from_database(db, projection)
         source_gaps = _source_gaps(db, extras)

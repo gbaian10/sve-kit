@@ -91,7 +91,7 @@ lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行�
 私有目錄的 `reports/<manifest-hash>.json` 保存輸入 hash、地區範圍、逐表數量、真正排除清單、
 未定卡文數、容量及未完成的正式閘門；輸入記錄在 `inputs/<input-hash>.json`，
 圖片版本狀態另由圖片 producer 的私有根保存。這些都不在 preview 根內，不會被 dev server 提供或上傳。
-含圖文字建置記錄 `image_index` 的 SHA-256；文字報告的 `images` 寫出檔數／bytes 皆為 0。
+含圖文字建置記錄 `image_index` 的 SHA-256。
 圖片 CLI stdout 另記 `image_execution` 的快取命中、新轉檔數與 `written_images`，不混入快照清單。
 
 這些檔案與輸出都不進 git、Actions cache／artifact 或測試 fixture。

@@ -1,6 +1,7 @@
 """Bilingual text, verified image closure, private bundle and preview export."""
 
 import shutil
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
@@ -26,8 +27,6 @@ from ..support.image_crop_fixtures import install, record
 from .test_snapshot_offline import prepared as prepared  # ruff: ignore[useless-import-alias] -- reuse the existing regional text/adoption fixture
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from sve_carddb.domains.card_extras import CardPage
     from sve_carddb.workflows.offline import Inputs
 
@@ -193,6 +192,17 @@ def offline_arguments(recipe: Inputs, root: Path) -> list[str]:
     ]
 
 
+def forbid_bitmap_reads(monkeypatch: pytest.MonkeyPatch, pngs: set[Path]) -> None:
+    read_bytes = Path.read_bytes
+
+    def guarded(path: Path) -> bytes:
+        if path in pngs or path.suffix == ".webp":
+            raise AssertionError("An unchanged daily image build must not read bitmaps")
+        return read_bytes(path)
+
+    monkeypatch.setattr(Path, "read_bytes", guarded)
+
+
 def test_independent_image_cli_commits_index_and_reuses_versions(
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
     regional_images: tuple[Inputs, ImageBuild, PreviewRoots],
@@ -202,7 +212,7 @@ def test_independent_image_cli_commits_index_and_reuses_versions(
     from sve_carddb.workflows import image_index as producer  # ruff: ignore[import-outside-top-level] -- test the CLI's source adapters with the shared synthetic page provider
 
     case, _, _ = prepared
-    recipe, _, roots = regional_images
+    recipe, assets, roots = regional_images
     for name in ("FrozenEN", "FrozenJP", "FrozenRegions"):
         monkeypatch.setattr(producer, name, lambda *_args, **_kwargs: None)
     monkeypatch.setattr(
@@ -233,6 +243,13 @@ def test_independent_image_cli_commits_index_and_reuses_versions(
     assert first.exit_code == 0, repr(first.exception)
     index = next((private / "image-index").glob("*.json"))
     before = index.read_bytes()
+    forbid_bitmap_reads(
+        monkeypatch,
+        {
+            recipe.archive / item.source.raw_locator.split(":", 1)[1]
+            for item in assets.images
+        },
+    )
     second = runner.invoke(app, arguments)
     assert second.exit_code == 0, repr(second.exception)
     assert '"new_encodings":0' in second.stdout

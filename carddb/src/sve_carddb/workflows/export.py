@@ -1,5 +1,6 @@
 """Explicit preview mode and fail-closed formal publication command boundary."""
 
+from dataclasses import replace
 from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] -- Typer resolves runtime annotations
 from typing import TYPE_CHECKING, Annotated
 
@@ -10,6 +11,7 @@ from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.stage_log import mark
 from sve_carddb.export.image_index import ImageIndex
+from sve_carddb.export.media_config import offline_configuration
 from sve_carddb.export.preview import Roots, write_artifact, write_preview
 from sve_carddb.export.publication import require_preview
 from sve_carddb.export.transport import export_snapshot
@@ -91,8 +93,11 @@ if TYPE_CHECKING:
 def _finish(
     built: Built, roots: Roots, batch: Batch, codec: Brotli | None, version: str
 ) -> None:
+    projection = replace(
+        built.projection, config=offline_configuration(built.projection.config)
+    )
     snapshot = export_snapshot(
-        built.projection, built.ownership, batch, brotli=codec, format_version=version
+        projection, built.ownership, batch, brotli=codec, format_version=version
     )
     mark("export snapshot (shard + compress)")
     require_preview(snapshot.manifest, regions=batch.regions)

@@ -151,8 +151,7 @@ def test_project_export_and_preview(images: PublicImages, tmp_path: Path) -> Non
         for r in images.projection.tables["image_variant"]
     ]
     roots = Roots(tmp_path / "preview", tmp_path / "private")
-    report = write_preview(snapshot, roots, {})
-    assert report["images"] == {"unique_files": 0, "unique_bytes": 0}
+    write_preview(snapshot, roots, {})
     assert not (roots.preview / "images").exists()
     assert not (roots.private / "media-state.json").exists()
     files = {

@@ -130,7 +130,6 @@ def write_preview(
         "pointer": pointer,
         "capacity": measure(snapshot, brotli=brotli),
         "compression_recipe": dict(snapshot.compression_recipe),
-        "images": {"unique_files": 0, "unique_bytes": 0},
     }
     write_artifact(
         roots,

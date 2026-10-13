@@ -401,6 +401,9 @@ def verify_assets(
             expected_path = f"images/sha256/{variant.sha256[:2]}/{variant.sha256}.webp"
             if variant.path != expected_path:
                 raise ValueError("Image variant path is not content addressed")
+            if checks.reuse and result.cache_hit:
+                # The cache read already matched existence and size; --verify-all rereads bytes.
+                continue
             metadata = checks.inspect(
                 resolve_within(preview, PurePosixPath(variant.path))
             )
