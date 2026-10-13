@@ -29,6 +29,7 @@ from sve_carddb.export.transport.compression import compress
 from sve_carddb.export.transport.layout import Layout
 from sve_carddb.export.transport.measure import measure, update
 
+from ..support.snapshot_media_fixtures import media_rows
 from ..support.snapshot_project_fixtures import populate, schema
 from .test_snapshot_project import projected
 
@@ -41,17 +42,7 @@ def logical() -> tuple[Projection, Ownership]:
         with db.transaction():
             populate(db)
         projection = projected(db)
-        projection = replace(
-            projection,
-            tables=projection.tables
-            | {
-                "printing_image": [
-                    row | {"availability": "unfetched", "publication_state": "pending"}
-                    for row in projection.tables["printing_image"]
-                ],
-                "image_variant": [],
-            },
-        )
+        projection = replace(projection, tables=projection.tables | media_rows())
         prepared = prepare_media(projection, None, revision=1).projection
         return prepared, Ownership.from_database(db, projection)
 

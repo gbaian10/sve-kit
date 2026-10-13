@@ -3,6 +3,7 @@
 `images build-index` 獨立產圖、驗證圖片來源及裁切、配發事件版本，產出私有圖片索引。
 `snapshot export-offline --image-index` 只讀索引與文字來源，不開 PNG／WebP，不複製圖片，也不讀寫圖片版本狀態。
 公開影像清單的欄位、固定 ID key、五尺寸及 `?v=` 語意不變。
+文字建置 DB 不存圖片或尺寸表，公開 media 三集合由此索引加入文字投影。
 
 ## 圖片建置
 

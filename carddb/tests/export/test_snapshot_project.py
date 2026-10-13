@@ -77,7 +77,7 @@ def one(result: Projection, table: str, identifier: str | None = None) -> Record
     return next(row for row in rows if row.get("id", row.get("card_id")) == identifier)
 
 
-def test_all_collections_and_every_public_field_have_synthetic_rows(
+def test_text_collections_have_synthetic_rows_and_media_awaits_image_index(
     db: Database,
 ) -> None:
     result = projected(db)
@@ -86,7 +86,15 @@ def test_all_collections_and_every_public_field_have_synthetic_rows(
     assert all(
         rows
         for table, rows in result.tables.items()
-        if table not in {"annotation_set", "annotation_concept", "field_annotation"}
+        if table
+        not in {
+            "annotation_set",
+            "annotation_concept",
+            "field_annotation",
+            "image_asset",
+            "printing_image",
+            "image_variant",
+        }
     )
     assert one(result, "digital_art") == {
         "id": "digital-art",
@@ -101,7 +109,8 @@ def test_all_collections_and_every_public_field_have_synthetic_rows(
     assert one(result, "printing")["int_id"] == 20001
     assert one(result, "printing")["card_no"] == "TEST-001Ⓢa"
     assert one(result, "printing")["premium"] is None
-    assert one(result, "image_asset")["format"] == "png"
+    for table in ("image_asset", "printing_image", "image_variant"):
+        assert result.tables[table] == []
     assert one(result, "rules_profile")["revisions"] == [
         {
             "id": "profile_revision",
@@ -417,21 +426,6 @@ def test_historical_art_and_artist_are_pruned_with_tombstone(db: Database) -> No
     assert [row["id"] for row in result.tables["art"]] == ["art"]
     assert [row["id"] for row in result.tables["artist"]] == ["artist"]
     assert one(result, "art")["regions"] == ["jp"]
-
-
-def test_unpublished_image_cannot_expose_variants(db: Database) -> None:
-    with db.transaction():
-        db.update("image_asset", {"id": "image"}, {"publication_state": "pending"})
-        db.delete(
-            "image_variant",
-            {"image_id": "image", "size_key": "card_s", "format": "webp"},
-        )
-    result = projected(db)
-    assert (
-        one(result, "image_asset")["source_url"] == "https://example.invalid/source.png"
-    )
-    assert one(result, "printing_image")["publication_state"] == "pending"
-    assert result.tables["image_variant"] == []
 
 
 def pending() -> Record:
@@ -911,13 +905,6 @@ def test_missing_reskin_eligibility_does_not_imply_cross_region_rules(
 ) -> None:
     result = projected(db, replace(decisions(), related_regions={}))
     assert result.tables["card_related"] == []
-
-
-def test_invalid_image_size_config_fails_before_export(db: Database) -> None:
-    with db.transaction():
-        db.update("image_size", {"key": "card_s"}, {"max_width": 999})
-    with pytest.raises(ValueError, match="image size"):
-        projected(db)
 
 
 @pytest.mark.parametrize("regions", [(), ("en", "jp", "jp"), ("cn",), ("jp", "en")])
@@ -1598,18 +1585,6 @@ def test_qa_current_is_highest_revision_even_when_inserted_last(db: Database) ->
     result = projected(db)
     assert one(result, "qa")["current_version_id"] == "qa-new"
     assert {row["id"] for row in result.tables["qa_version"]} == {"qa_v", "qa-new"}
-
-
-def test_unapproved_image_with_variant_is_rejected_by_build_boundary(
-    db: Database,
-) -> None:
-    def exercise() -> None:
-        with db.transaction():
-            db.update("image_asset", {"id": "image"}, {"publication_state": "pending"})
-            projected(db)
-
-    with pytest.raises(sqlite3.IntegrityError, match="image_variant_publishable"):
-        exercise()
 
 
 def test_offline_schema_version_mismatch_fails_database_verification(

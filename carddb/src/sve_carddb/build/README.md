@@ -3,7 +3,7 @@
 This package compiles code-authored declarations into SQLite DDL and owns the
 SQLite boundary. The [product family staging importer](../domains/products/README.md)
 can supply verified family parents and compose with identity staging in one
-transaction. `t0.compile_t0()` supplies the forty production T0 tables from
+transaction. `t0.compile_t0()` supplies the 41 production T0 tables from
 `docs/schema/build/build-db.md`. The regional identity staging importer is described in
 [registry/preview](../domains/registry/preview/README.md); there is no complete build CLI.
 
@@ -126,12 +126,13 @@ semantics. Project table requirements remain in `docs/schema/build/build-db.md` 
 
 ## Optional T1 DDL and pipeline readiness
 
-`t1.compile_build(("images", "cr"))` compiles the forty T0 tables plus the four
-image and two CR tables: 46 tables. Selecting `images` alone closes to 44 tables;
-`cr` alone closes to 42. The default selects only T0. DSL and keywords remain
-reserved, unavailable capabilities; disabled nullable references remain NULL-only.
-Enabling CR installs the existing `rules_profile_revision.cr_version_id` FK.
-This selection is smaller than the minimum 57-table DDL inventory.
+`t1.compile_build(("cr",))` compiles the 41 T0 tables plus the two CR
+tables: 43 tables. The default selects only T0. Image metadata is supplied by
+the separate image index, without image tables in this database.
+DSL and keywords remain reserved, unavailable capabilities; disabled nullable
+references remain NULL-only. Enabling CR installs the existing
+`rules_profile_revision.cr_version_id` FK. This selection is smaller than the
+minimum 54-table DDL inventory.
 
 `Capability.implemented` means that DDL declarations exist. The separate
 `importer_ready` and `validator_ready` flags default to false.
@@ -161,8 +162,7 @@ on the final graph. The full `integrity_check` runs on explicit verification and
 before `save()` persists a bundle (`save()` repeats only the enforcement pragmas and
 `integrity_check`); fresh builds rely on enforced CHECK constraints.
 An insert, update or delete can temporarily violate a query check inside the
-transaction, allowing related rows to be repaired together. Updating an image,
-its decision or size configuration is checked even when no variant row changed.
+transaction, allowing related rows to be repaired together. Updating a parent is checked even when no child row changed.
 A failing query raises `sqlite3.IntegrityError` naming the check, without printing
 source rows. Any unhandled body, verification or commit failure rolls back the
 **whole transaction**, including parent updates and child writes. A caught
@@ -175,21 +175,14 @@ and are not contained in `CompiledSchema.sql`; external/raw SQL writers must not
 treat executing DDL alone as validated build creation. Use the Database API and
 run complete domain validation before publication.
 
-The image checks enforce publishable variant parents and non-original output
-settings. Row-local checks cover required source metadata, approved images being
-available, WebP format and hash-derived paths. Available/approved source metadata
-may have no variants yet. Physical source/bytes matching, decoding, exact
-recipe output and the complete five-size image set for both orientations still require the future
-importer/image builder/domain validator. SQL checks do not attest those facts.
-
 ## Schema version and rebuilds
 
 Compiled schemas carry a positive signed 32-bit `version`, stored in SQLite's
 `PRAGMA user_version` during creation and checked before every commit. Legacy
-`compile_t0()` uses version 1; the optional T1 registry uses version 5, including
-its T0-only selection. Version 2 introduced images/CR, version 3 the remaining T1
-groups, and version 4 adopted art-use verification. Version 5 adds the optional
-`translation_names` tables (`translation_use` and `translation_selection`). The
+`compile_t0()` uses version 1; the optional T1 registry uses version 9, including
+its T0-only selection. Version 9 removes the obsolete image tables; image
+metadata and size configuration belong to the image index and public contract.
+The
 version identifies the declaration generation; the selected capability closure
 determines the actual table set. It is independent
 of crawl-manifest schema versions and public snapshot format/data versions.
@@ -213,9 +206,9 @@ concurrently. Source archives and frozen inputs are never replacement targets.
 
 ## Minimum T1 and optional EN groups
 
-`t1.compile_minimum()` selects T0 plus images, CR, errata, correction, QA and
-related: exactly 57 tables. `compile_minimum(include_en=True)` adds art and the
-three region review/divergence tables: exactly 61. The `en` group explicitly
+`t1.compile_minimum()` selects T0 plus CR, errata, correction, QA and
+related: exactly 54 tables. `compile_minimum(include_en=True)` adds art and the
+three region review/divergence tables: exactly 58. The `en` group explicitly
 requires `art`; selecting `art` alone is also supported. No artist, baseline or DSL
 placeholder tables are created. All importer/validator readiness
 flags remain false. These counts attest DDL coverage, not release readiness.

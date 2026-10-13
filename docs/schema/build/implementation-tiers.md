@@ -1,27 +1,28 @@
 # 建置表實作分期
 
-這是邏輯契約的實作次序，不是要求第一次發布就完成 127 表，也不是整張表隨意缺失時繼續執行 FK。[build-db.md](build-db.md) §18 的能力/依賴閉包規則適用；一次只實作受支援的子集與其匯入器/驗證器，編譯該階段 DDL 時不產尚未啟用的 nullable FK 欄位約束，待啟用即用 migration 補齊約束與驗證全部現有列。公開 schema required 欄位仍完整，從未啟用能力輸出明定 null/空/unknown；不能改成任意省略。
+這是邏輯契約的實作次序，不是要求第一次發布就完成 123 表，也不是整張表隨意缺失時繼續執行 FK。[build-db.md](build-db.md) §18 的能力/依賴閉包規則適用；一次只實作受支援的子集與其匯入器/驗證器，編譯該階段 DDL 時不產尚未啟用的 nullable FK 欄位約束，待啟用即用 migration 補齊約束與驗證全部現有列。公開 schema required 欄位仍完整，從未啟用能力輸出明定 null/空/unknown；不能改成任意省略。
 
-首發實際集合＝T0 全部 41 表＋下列 T1 子組 17 表，共 58 表；不是只有文字查卡集合就宣稱建牌可用。`identity_change` 在**第一次公開 `int_id` 之前**啟用，沒有修復事件時可以空，但 schema/匯入/驗證不能延後。逐地區版次的 Decklog 可用性欄位屬 printing（T0）；暫定身分不擋建牌。未查證按官方卡表收錄預設，首發不假造 Decklog 查證。
+首發實際集合＝T0 全部 41 表＋下列 T1 子組 13 表，共 54 表；不是只有文字查卡集合就宣稱建牌可用。`identity_change` 在**第一次公開 `int_id` 之前**啟用，沒有修復事件時可以空，但 schema/匯入/驗證不能延後。逐地區版次的 Decklog 可用性欄位屬 printing（T0）；暫定身分不擋建牌。未查證按官方卡表收錄預設，首發不假造 Decklog 查證。
+
+圖片由獨立流程與[圖片索引](../images/image-index.md)提供，不列入文字建置表分期；公開 media 格式與固定五檔設定維持完整。
 
 | 首發 T1 子組       | 必須啟用的建置表                                                                                                                   |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| 圖像               | `image_asset`、`printing_image`、`image_variant`、`image_size`                                                                     |
 | 勘誤與已知來源更正 | errata、`errata_version`、`errata_change`、`errata_printing`、`source_correction`、`correction_evidence`、`correction_application` |
 | Q&A                | qa、`qa_version`、`qa_card`                                                                                                        |
 | 關聯               | `card_related`                                                                                                                     |
 | 構築引用的 CR      | `cr_version`、`cr_clause`                                                                                                          |
 
-T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction、`restriction_member`、`restriction_coverage`、`deck_role_override`、`identity_change`。`rules_name/face_rules_name` 原已在 T0。首發有已知規則/禁限須填入，覆蓋不足仍明示 unknown，不能捏造合法；`construction_rules_ref` 與非空 FK 的依賴一併提供。首發 `card_related` 支援已確認相關卡與追加區建議；未知 relation 不猜；有已核對的換皮資料時，`same_rules_reskin` 依 build-db §5 的採納與失效規則投影。EN/非官方 SNC/翻譯/裁定等若納入該次資料，再啟用對應條件組及完整非空引用閉包；57 是明列最低集合，不是略過實際資料依賴的上限。
+T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction、`restriction_member`、`restriction_coverage`、`deck_role_override`、`identity_change`。`rules_name/face_rules_name` 原已在 T0。首發有已知規則/禁限須填入，覆蓋不足仍明示 unknown，不能捏造合法；`construction_rules_ref` 與非空 FK 的依賴一併提供。首發 `card_related` 支援已確認相關卡與追加區建議；未知 relation 不猜；有已核對的換皮資料時，`same_rules_reskin` 依 build-db §5 的採納與失效規則投影。EN/非官方 SNC/翻譯/裁定等若納入該次資料，再啟用對應條件組及完整非空引用閉包；54 是明列最低集合，不是略過實際資料依賴的上限。
 
-若首發納入現有 EN 登錄，另啟用 `region_mapping_review`、`art`、`region_text_review`、`region_divergence`，最低集合成為 61 表；61 是含 EN 條件組的結果，不是所有發布無條件必建的數量，其他非空引用仍須補齊閉包。
+若首發納入現有 EN 登錄，另啟用 `region_mapping_review`、`art`、`region_text_review`、`region_divergence`，最低集合成為 58 表；58 是含 EN 條件組的結果，不是所有發布無條件必建的數量，其他非空引用仍須補齊閉包。
 
-目前不提供規則等義投影；身分分組不視為規則等義證明。`effect_set`／`keyword_registry` format 1 選定的 `astra/1` 原型不符合 [正式候選入口](../domains/authored-layout.md#7-dsl-與拒絕輸入) 與 DSL 1.0 Schema，不構成正式 DSL 候選；沒有正式候選的卡依 [build-db.md §10](build-db.md#10-dsl驗證與未實作卡片頁) 輸出 `missing_dsl`，`dsl_id/dsl_version` 為 null、`automatic=false`；未指定引擎時引擎目標為 null；公開 automatic 仍由支援狀態推導，不新增傳輸欄位。預覽快照通過其已啟用能力的驗證，不代表正式首發 57 表已驗收。
+目前不提供規則等義投影；身分分組不視為規則等義證明。`effect_set`／`keyword_registry` format 1 選定的 `astra/1` 原型不符合 [正式候選入口](../domains/authored-layout.md#7-dsl-與拒絕輸入) 與 DSL 1.0 Schema，不構成正式 DSL 候選；沒有正式候選的卡依 [build-db.md §10](build-db.md#10-dsl驗證與未實作卡片頁) 輸出 `missing_dsl`，`dsl_id/dsl_version` 為 null、`automatic=false`；未指定引擎時引擎目標為 null；公開 automatic 仍由支援狀態推導，不新增傳輸欄位。預覽快照通過其已啟用能力的驗證，不代表正式首發 54 表已驗收。
 
 | `tier` | 用途                               | 啟用/未啟用行為                                                                                                                                                                          | 表數 |
 | ------ | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | T0     | 查卡與構築共同必要集合             | 必做；缺 DSL 仍輸出 `missing_dsl`。建置資料庫的 `card_engine_support` 未啟用引擎時 dsl/load/engine 欄為 null；`printing_face.art_id=null`、加工未知、printed unknown，頁面仍能顯示原文。 | 41   |
-| T1     | 來源/策展資料到齊才啟用            | 有該類來源即在該批發布前完成；SNC 需要 references、非官方 metadata；EN 需要 mapping review/語義核對；已知更正/勘誤不能因 tier 而丟掉。                                                   | 30   |
+| T1     | 來源/策展資料到齊才啟用            | 有該類來源即在該批發布前完成；SNC 需要 references、非官方 metadata；EN 需要 mapping review/語義核對；已知更正/勘誤不能因 tier 而丟掉。                                                   | 26   |
 | T2     | 翻譯、數位、裁定有資料時           | 首個翻譯就做 context/template 引用閉包；數位/語音/裁定可獨立啟用，未上線則 unknown/無提示，不假造翻譯。                                                                                  | 39   |
 | T3     | 引擎/機制能力啟用前                | 首個 manual mechanism 可先做 keyword/action/coverage/projection 及其依賴；DSL/巨集/實跑子組有資料才做。沒實跑永不輸出 `engine_passed`，未檢查機制仍 unknown。                            | 17   |
 
@@ -135,10 +136,6 @@ T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction�
 | `mechanic_override`            | T3   |
 | `mechanic_projection`          | T3   |
 | `card_mechanic_coverage`       | T3   |
-| `image_asset`                  | T1   |
-| `printing_image`               | T1   |
-| `image_variant`                | T1   |
-| `image_size`                   | T1   |
 | `shop_link_template`           | T1   |
 | `build_issue`                  | T0   |
 | `source_correction`            | T1   |
@@ -161,7 +158,7 @@ T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction�
 
 ## 已核可同名瀏覽的條件組
 
-不改首發57最低集合或逐表權威tier列。發布 [same_name規則瀏覽](../domains/digital-name-policy.md) 時，
+不改首發54最低集合或逐表權威tier列。發布 [same_name規則瀏覽](../domains/digital-name-policy.md) 時，
 另啟用digital_card／digital_face／digital_text／digital_link／digital_endpoint五表及實際非空依賴：
-57＋5＝62，含EN的61＋5＝66；不是每批無條件需要62表。純名字政策不由此要求公開數位庫，翻譯依自己的閉包。
+54＋5＝59，含EN的58＋5＝63；不是每批無條件需要59表。純名字政策不由此要求公開數位庫，翻譯依自己的閉包。
 程式PR才同步枚舉、DDL與公開reader，並跑test_build_db_t0_inventory等實際能力測試；docs-only不改逐表分期。

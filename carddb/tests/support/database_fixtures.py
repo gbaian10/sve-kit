@@ -59,16 +59,8 @@ def t1b_database_template() -> DatabaseTemplate:
 
 @pytest.fixture(scope="session")
 def t1_database_template() -> DatabaseTemplate:
-    schema = compile_build(("images", "cr"))
+    schema = compile_build(("cr",))
     with create_database(schema) as database:
         with database.transaction():
             populate_t1(database)
-        return DatabaseTemplate(schema, database._connection.serialize())
-
-
-@pytest.fixture(scope="session")
-def image_parent_database_template() -> DatabaseTemplate:
-    schema = compile_build(("images",))
-    with create_database(schema) as database:
-        seed(database)
         return DatabaseTemplate(schema, database._connection.serialize())

@@ -11,7 +11,7 @@ from sve_carddb.build.compiler import compile_schema
 from sve_carddb.build.t0 import REGISTRY, compile_t0
 from sve_carddb.build.t1 import compile_build
 
-from ..support.build_db_fixtures import seed
+from ..support.build_db_fixtures import rows, seed
 from ..support.build_db_t1_fixtures import populate
 
 if TYPE_CHECKING:
@@ -23,10 +23,10 @@ def test_rebuild_upgrades_offline_file_and_adds_real_cr_fk(tmp_path: Path) -> No
     with create_database(compile_t0(), path) as db:
         seed(db)
     original = path.read_bytes()
-    rebuild_database(compile_build(("images", "cr")), path, populate)
+    rebuild_database(compile_build(("cr",)), path, populate)
     assert path.read_bytes() != original
     with sqlite3.connect(path) as connection:
-        assert connection.execute("PRAGMA user_version").fetchall() == [(8,)]
+        assert connection.execute("PRAGMA user_version").fetchall() == [(9,)]
         assert connection.execute(
             "SELECT cr_version_id FROM rules_profile_revision"
         ).fetchall() == [("cr",)]
@@ -52,10 +52,13 @@ def test_rebuild_failure_preserves_previous_bytes(tmp_path: Path, failure: str) 
                 {"cr_version_id": "missing"},
             )
         else:
-            db.update("image_asset", {"id": "image"}, {"publication_state": "pending"})
+            db.insert(
+                "rules_profile_revision",
+                rows()["rules_profile_revision"] | {"id": "overlapping_revision"},
+            )
 
     with pytest.raises((RuntimeError, sqlite3.IntegrityError)):
-        rebuild_database(compile_build(("images", "cr")), path, invalid)
+        rebuild_database(compile_build(("cr",)), path, invalid)
     assert path.read_bytes() == original
     assert list(tmp_path.iterdir()) == [path]
 
@@ -73,7 +76,7 @@ def test_replacement_failure_cleans_candidate(
 
     monkeypatch.setattr(Path, "replace", fail_replace)
     with pytest.raises(OSError, match="replacement"):
-        rebuild_database(compile_build(("images", "cr")), path, populate)
+        rebuild_database(compile_build(("cr",)), path, populate)
     assert path.read_bytes() == original
     assert list(tmp_path.iterdir()) == [path]
 
@@ -122,4 +125,4 @@ def test_schema_version_tampering_fails_verification() -> None:
             db.transaction(),
         ):
             db._connection.execute("PRAGMA user_version = 99")
-        assert db._read("PRAGMA user_version") == ((8,),)
+        assert db._read("PRAGMA user_version") == ((9,),)

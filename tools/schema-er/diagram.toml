@@ -174,12 +174,8 @@ tables = [
 
 [[build.groups]]
 key = "b11"
-title = "影像與更正"
+title = "來源更正"
 tables = [
-    "image_asset",
-    "printing_image",
-    "image_variant",
-    "image_size",
     "source_correction",
     "correction_evidence",
     "correction_application",

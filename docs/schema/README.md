@@ -31,9 +31,9 @@
 
 | 文件 | 內容 |
 | --- | --- |
-| [建置資料庫 schema](build/build-db.md) | 建置資料庫 126 表的完整邏輯契約：欄位、鍵、約束、採納政策、雜湊與發布閘門 |
+| [建置資料庫 schema](build/build-db.md) | 建置資料庫 123 表的完整邏輯契約：欄位、鍵、約束、採納政策、雜湊與發布閘門 |
 | [程式分層](build/code-layers.md) | carddb 內部層次與匯入邊界 |
-| [建置表實作分期](build/implementation-tiers.md) | 126 表各自的實作 tier（T0～T3）與首發必要集合 |
+| [建置表實作分期](build/implementation-tiers.md) | 123 表各自的實作 tier（T0～T3）與首發必要集合 |
 
 ### 資料領域（domains）
 
@@ -92,7 +92,7 @@ flowchart LR
 
 - **build-db.md 是建置資料庫的權威**；snapshot-format.md 只描述投影出來的公開欄位。表名相同不代表欄位相同，快照沒有列出的欄位一律不出貨。
 - 卡表快照依 `AGENTS.md` 是卡片資料的唯一權威；前端可以快取它，但不另外維護卡表。
-- implementation-tiers.md 的逐表分配必須與 build-db.md 的 126 表完全一致；authored-layout.md 說明 `authored/` 如何匯入建置資料庫。
+- implementation-tiers.md 的逐表分配必須與 build-db.md 的 123 表完全一致；authored-layout.md 說明 `authored/` 如何匯入建置資料庫。
 - 效果 DSL 的語法以 `dsl/` 的 JSON Schema 與 [`docs/dsl/`](../dsl/README.md) 為準，這裡只記錄 DSL 文件、審核與載入結果的資料表。
 
 ## ER 圖
@@ -107,7 +107,7 @@ uv run tools/schema-er/build_er.py --serve    # 產生後在 localhost:8000 提�
 
 輸出在 `tools/schema-er/out/`（不進 git）：`schema-er.html` 是單檔頁面，`parse-report.txt` 是解析報告，`schema-model.json` 是從 Markdown 讀出的中間資料（除錯用）。`--out <路徑>/schema-er.html` 改輸出位置，`--artifact` 省略 doctype 外殼。有任何欄位無法解析、PK 無法標記、FK 目標不存在或分組錯誤時，不產生 HTML 並以非零狀態結束；修改 `docs/schema/` 時 pre-commit 會跑一次確認能產出。分組與快照欄名的引用對應寫在 `tools/schema-er/diagram.toml`，新增表或集合時要一起登記。
 
-建置資料庫的 126 表分成 12 組（來源與確認、身分與商品、插畫與加工、文字與勘誤、跨區與構築、問答與裁定、數位與語音、翻譯依賴、DSL 證據、機制、影像與更正、顯示與路由）；3.0.0 卡表快照的 46 個集合（43 文字＋3 影像）分成 6 組。
+建置資料庫的 123 表分成 12 組（來源與確認、身分與商品、插畫與加工、文字與勘誤、跨區與構築、問答與裁定、數位與語音、翻譯依賴、DSL 證據、機制、來源更正、顯示與路由）；3.0.0 卡表快照的 46 個集合（43 文字＋3 影像）分成 6 組。
 圖中的箭頭表示「引用者 → 被引用者」，不是時序，也不表示基數；線條分三種：欄位宣告的 FK、約束 `FK(...)` 宣告的 FK（複合約束保留兩側完整欄組，以粗線標示）、依 `*_id` 欄名推斷的引用（卡表快照沒有 FK 記號，全部屬於這種，並包含內嵌陣列與物件裡的 ID）。正式的複合 FK、nullable 與部分唯一性以 build-db.md 為準；固定 `vocabulary` kind 的常數欄由 DDL 展開，不出現在邏輯表中。
 
 ## 資料未知與未啟用能力
