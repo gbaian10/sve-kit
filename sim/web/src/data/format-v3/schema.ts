@@ -6,8 +6,8 @@ import { arrayValue, type JsonObject, type JsonValue, objectValue, stringValue }
 const schemaRoot: JsonObject = objectValue(contract)
 const definitions = objectValue(schemaRoot["$defs"])
 
-export function definition(name: string, version = "3.0.0"): JsonObject {
-  if (version !== "3.0.0") fail("unsupported-version", "unsupported schema profile")
+export function definition(name: string, version = "4.0.0"): JsonObject {
+  if (version !== "4.0.0") fail("unsupported-version", "unsupported schema profile")
   const value = definitions[name]
   if (value === undefined) throw new Error(`unknown schema definition ${name}`)
   return objectValue(value)
@@ -18,7 +18,7 @@ function strings(value: JsonValue): string[] {
 }
 
 /** The immutable column order of a row or nested tuple. */
-export function columns(name: string, version = "3.0.0"): string[] {
+export function columns(name: string, version = "4.0.0"): string[] {
   return strings(definition(name, version)["x-columns"] ?? null)
 }
 
@@ -28,7 +28,7 @@ export function tables(): string[] {
 }
 
 /** A fragment's fixed row type, e.g. printing + detail -> printing_detail. */
-export function rowType(table: string, partition: string, version = "3.0.0"): string {
+export function rowType(table: string, partition: string, version = "4.0.0"): string {
   const mapping = objectValue(definition("Container", version)["x-fragments"] ?? null)
   return stringValue(objectValue(mapping[table] ?? null)[partition] ?? null)
 }
@@ -51,7 +51,7 @@ function references(kind: JsonObject, into: Set<string>, version: string): void 
 }
 
 /** Every nested descriptor a row type needs, from the fixed acyclic schema. */
-export function requiredTypes(name: string, version = "3.0.0"): Set<string> {
+export function requiredTypes(name: string, version = "4.0.0"): Set<string> {
   const result = new Set<string>()
   for (const item of arrayValue(definition(name, version)["x-types"] ?? null))
     references(objectValue(item), result, version)
