@@ -12,8 +12,6 @@ from sve_carddb.domains.translations.recognition.provenance import Unit, merged
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from sve_carddb.contracts.four_layer import Frame
-    from sve_carddb.contracts.source_binding import SourceBinding
     from sve_carddb.domains.translations.four_layer_n1 import Operand
     from sve_carddb.domains.translations.four_layer_n1_leaves import Leaf
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
@@ -229,99 +227,3 @@ def transform(
         ),
         tuple(item.row for item in leaves),
     )
-
-
-def replay_transformed(
-    raw: str,
-    part: SourcePart,
-    frame: Frame,
-    binding: SourceBinding,
-    canonical_source: str,
-) -> SourcePart:
-    """Storage reuses the finite transformation; complete catalog classification belongs to B."""
-    from sve_carddb.domains.translations.four_layer_n1 import operands  # ruff: ignore[import-outside-top-level] -- source replay follows normalization before applying operand aliases
-    from sve_carddb.domains.translations.four_layer_n1_leaves import Leaf  # ruff: ignore[import-outside-top-level] -- avoid the classifier/transform initialization cycle
-
-    def positions(spans: tuple[Span, ...]) -> tuple[Span, ...]:
-        return merged(
-            tuple(
-                Span(start=i, end=i + 1)
-                for i, unit in enumerate(part.units)
-                if any(
-                    a.start < b.end and b.start < a.end
-                    for a in unit.origins
-                    for b in spans
-                )
-            )
-        )
-
-    leaves = []
-    for slot in frame.leaf_schema.slots:
-        occurrences = tuple(o for o in binding.occurrences if o.slot == slot.name)
-        explicit = tuple(positions(o.raw_spans) for o in occurrences if o.raw_spans)
-        original_spans = tuple(
-            sorted(
-                {s for group in explicit for s in group}, key=lambda s: (s.start, s.end)
-            )
-        )
-        use = next(
-            (
-                o.raw_spans[0].start
-                for i, o in enumerate(binding.occurrences)
-                if o.slot != slot.name
-                and o.raw_spans
-                and i
-                > next(
-                    j
-                    for j, prior in enumerate(binding.occurrences)
-                    if prior.slot == slot.name
-                )
-            ),
-            len(raw),
-        )
-        abstract = bool(slot.occurrences) and all(
-            canonical_source[s.start : s.end] == "{" + slot.name + "}"
-            for s in slot.occurrences
-        )
-        leaves.append(
-            Leaf(
-                slot.model_copy(update={"occurrences": original_spans}),
-                binding.values[slot.name],
-                explicit,
-                "stored_source",
-                abstract,
-                occurrences[0].source_unit,
-                occurrences[0].resolution_rule,
-                use,
-            )
-        )
-    found, _ = operands(part.canonical_source)
-    aliases = tuple(
-        o
-        for o in found
-        if any(
-            leaf.slot.role == "source_zone"
-            and set(o.zone_spans) <= set(leaf.slot.occurrences)
-            for leaf in leaves
-        )
-    )
-    result, replayed, _ = transform(
-        raw,
-        part,
-        leaves,
-        aliases,
-        Recognized(
-            LeafSchema(format=2, slots=()),
-            {},
-            (),
-            (),
-            False,
-        ),
-    )
-    names = {f"leaf_{i}": leaf.slot.name for i, leaf in enumerate(leaves)}
-    occurrences = tuple(
-        o.model_copy(update={"slot": names[o.slot]}) for o in replayed.occurrences
-    )
-    if occurrences != binding.occurrences:
-        raise ValueError("Stored occurrences differ from transformed source")
-    return result

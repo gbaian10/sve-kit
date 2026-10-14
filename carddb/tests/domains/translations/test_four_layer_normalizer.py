@@ -27,7 +27,6 @@ from sve_carddb.domains.translations.four_layer_normalizer import (
     VERSION,
     SourceField,
     normalize_source,
-    replay_part,
 )
 
 
@@ -271,11 +270,10 @@ def test_normalized_numeric_placeholder_cannot_be_hidden_in_a_literal_target() -
         field.verify(raw, (frame,), (invalid,), {})
 
 
-def test_public_replay_rejects_utf16_coordinates_in_a_codepoint_trace() -> None:
-    """FL-008/utf16_offset reaches the production replay boundary here."""
+def test_source_field_verify_rejects_utf16_coordinates_in_a_codepoint_trace() -> None:
     raw = "仮😀２枚"
-    _, frame, binding = bound_number(raw)
-    replay_part(raw, frame, binding, {}, canonical_source="仮😀N枚")
+    field, frame, binding = bound_number(raw)
+    field.verify(raw, (frame,), (binding,), {})
     shifted = binding.trace[2].model_copy(update={"raw_span": Span(start=3, end=4)})
     invalid = rekey(
         binding.model_copy(
@@ -283,4 +281,4 @@ def test_public_replay_rejects_utf16_coordinates_in_a_codepoint_trace() -> None:
         )
     )
     with pytest.raises(ValueError, match="replayed exact source partition"):
-        replay_part(raw, frame, invalid, {}, canonical_source="仮😀N枚")
+        field.verify(raw, (frame,), (invalid,), {})
