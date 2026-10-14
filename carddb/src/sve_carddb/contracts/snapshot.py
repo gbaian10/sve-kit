@@ -41,21 +41,47 @@ def compile_validator(
     return validator
 
 
+def _error_locations(error: jsonschema_rs.ValidationError) -> str:
+    message = (
+        f"{error.kind.name}: path={error.instance_path!r}, "
+        f"schema_path={error.schema_path!r}"
+    )
+    if isinstance(
+        error.kind,
+        (
+            jsonschema_rs.ValidationErrorKind.AnyOf,
+            jsonschema_rs.ValidationErrorKind.OneOfNotValid,
+            jsonschema_rs.ValidationErrorKind.OneOfMultipleValid,
+        ),
+    ):
+        for branch in error.kind.context:
+            for child in branch:
+                message += "; " + _error_locations(child)
+    return message
+
+
 def validate_schema(
-    validator: jsonschema_rs.Draft202012Validator, value: JsonValue
+    validator: jsonschema_rs.Draft202012Validator,
+    value: JsonValue,
+    *,
+    hide_instance: bool = False,
 ) -> None:
     """Preserve the existing exception contract without revalidating failures."""
     try:
         validator.validate(value)
     except jsonschema_rs.ValidationError as error:
-        # Chaining would print Rust's rendering, which dumps the instance into logs.
-        raise ValidationError(
-            error.message,
+        failure = ValidationError(
+            _error_locations(error) if hide_instance else error.message,
             path=error.instance_path,
             schema_path=error.schema_path,
             validator=error.kind.name,
-            instance=error.instance,
-        ) from None
+            instance=None if hide_instance else error.instance,
+        )
+    else:
+        return
+    # Raised outside the handler: Rust's error renders the instance into logs and
+    # `from None` would still leave it reachable through `__context__`.
+    raise failure
 
 
 @cache
@@ -68,7 +94,9 @@ def _validator(name: str, format_version: str) -> jsonschema_rs.Draft202012Valid
 def validate(name: str, value: JsonValue, format_version: str = MEDIA) -> None:
     """Validate shape and primitive boundaries against a fixed definition."""
     canonical(value)
-    validate_schema(_validator(name, format_version), value)
+    validate_schema(
+        _validator(name, format_version), value, hide_instance=name == "Container"
+    )
 
 
 def columns(name: str, format_version: str = MEDIA) -> list[str]:
