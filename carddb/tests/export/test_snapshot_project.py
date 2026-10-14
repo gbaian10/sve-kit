@@ -28,6 +28,7 @@ from sve_carddb.export.project import (
 from sve_carddb.export.project.closure import validate_closure
 from sve_carddb.export.project.records import initial
 from sve_carddb.export.project.shape import tuple_value
+from sve_carddb.export.transport import Batch, Ownership, export_snapshot
 
 from ..support.build_db_fixtures import DATE
 from ..support.snapshot_project_fixtures import (
@@ -577,9 +578,48 @@ def test_scalar_nullability_is_schema_authoritative(db: Database) -> None:
     with db.transaction():
         db.update("product", {"id": "product"}, {"product_type": None})
     assert one(projected(db), "product")["product_type"] is None
-    record: Record = {"id": "synthetic", "lang": "ja", "text": None}
+
+
+@pytest.mark.parametrize(
+    ("table", "field"), [("printing", "int_id"), ("face_revision", "region")]
+)
+def test_split_rows_keep_full_logical_schema(
+    db: Database, table: str, field: str
+) -> None:
+    row = one(projected(db), table)
+    row[field] = None
     with pytest.raises(ValidationError):
-        tuple_value("text_unit", record)
+        tuple_value(table, row)
+
+
+@pytest.mark.parametrize(
+    ("table", "row"),
+    [
+        (
+            "annotation_concept",
+            {
+                "id": "term",
+                "category": "keyword",
+                "explanations": [],
+                "card_ids": ["card"],
+            },
+        ),
+        (
+            "field_annotation",
+            {
+                "owner": {"kind": "face_revision", "id": "revision"},
+                "field": "name",
+                "ordinal": 0,
+                "annotation_set_id": "ann:" + "a" * 64,
+            },
+        ),
+    ],
+)
+def test_annotation_rows_keep_logical_cross_field_schema(
+    table: str, row: Record
+) -> None:
+    with pytest.raises(ValidationError):
+        tuple_value(table, row)
 
 
 def test_database_explicit_select_validates_whitelist_and_storage(db: Database) -> None:
@@ -1360,17 +1400,16 @@ def test_counterpart_replaces_only_its_owner_common_selection(db: Database) -> N
     ]
 
 
-def test_logical_projection_runs_shared_a_semantic_checks(
-    db: Database, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    def broken(source: Source) -> dict[str, list[Record]]:
-        view = initial(source)
-        view["face_revision"][0]["type_code"] = "missing-vocabulary"
-        return view
-
-    monkeypatch.setattr("sve_carddb.export.project.initial", broken)
-    with pytest.raises(ValueError, match="Vocabulary reference"):
-        projected(db)
+def test_publication_rejects_projection_with_invalid_vocabulary(db: Database) -> None:
+    result = projected(db)
+    one(result, "face_revision")["type_code"] = "missing-vocabulary"
+    with pytest.raises(ValueError, match="Vocabulary reference") as caught:
+        export_snapshot(
+            result,
+            Ownership.from_database(db, result),
+            Batch("preview-20261002T010203Z-0001", "2026-10-02T01:02:03Z", ("jp",)),
+        )
+    assert any(entry.name == "read_snapshot" for entry in caught.traceback)
 
 
 def region(result: Projection, code: str = "jp") -> Record:

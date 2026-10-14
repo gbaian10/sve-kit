@@ -218,6 +218,20 @@ def test_producer_does_not_repair_invalid_public_view(
         export_snapshot(projection, ownership, BATCH)
 
 
+@pytest.mark.parametrize(
+    ("table", "field", "value"),
+    [("card", "layout", "invalid-layout"), ("text_unit", "text", None)],
+)
+def test_reader_rejects_projection_with_invalid_row_schema(
+    logical: tuple[Projection, Ownership], table: str, field: str, value: JsonValue
+) -> None:
+    projection, ownership = cloned(logical)
+    projection.tables[table][0][field] = value
+    with pytest.raises(ValidationError) as caught:
+        export_snapshot(projection, ownership, BATCH)
+    assert list(caught.value.absolute_path)[:2] == ["tables", table]
+
+
 def test_candidate_cannot_mint_a_formal_release(
     logical: tuple[Projection, Ownership],
 ) -> None:

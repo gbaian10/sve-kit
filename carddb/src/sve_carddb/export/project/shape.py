@@ -1,4 +1,4 @@
-"""Validate logical records against the same fixed descriptors as the wire contract."""
+"""Check logical fields and constraints not covered by wire row validation."""
 
 from pydantic import JsonValue
 
@@ -17,7 +17,7 @@ def _value(kind: dict[str, JsonValue], value: JsonValue) -> JsonValue:
 
 
 def tuple_value(name: str, record: dict[str, JsonValue]) -> list[JsonValue]:
-    """Use tuples only as an internal shape check, not a transport exporter."""
+    """Check field whitelists and logical constraints before wire partitioning."""
     names = columns(name)
     if set(record) != set(names):
         raise ValueError(f"Public field whitelist mismatch: {name}")
@@ -25,5 +25,7 @@ def tuple_value(name: str, record: dict[str, JsonValue]) -> list[JsonValue]:
         _value(object_value(kind), record[field])
         for field, kind in zip(names, array(definition(name)["x-types"]), strict=True)
     ]
-    validate(name, result)
+    # Split rows and logical-only allOf rules are not covered by Container validation.
+    if name in {"printing", "face_revision", "annotation_concept", "field_annotation"}:
+        validate(name, result)
     return result
