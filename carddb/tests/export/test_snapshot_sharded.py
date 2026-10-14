@@ -283,7 +283,7 @@ def test_capacity_counts_all_fragments_and_region_whole_files(
         len(b.raw) for b in initial
     )
     assert "bootstrap_br_1_mib" not in object_value(report["gates"])
-    assert "bootstrap_gzip_1_mib" not in object_value(report["gates"])
+    assert set(object_value(report["gates"])) == {"br_8_mib", "shards_512_kib"}
     for raw in array(report["shards"]):
         item = object_value(raw)
         local = [f for k, _, f in fragments(sharded) if k == item["key"]]

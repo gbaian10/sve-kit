@@ -3,7 +3,7 @@ import { createServer, type IncomingMessage, request, type ServerResponse } from
 import type { AddressInfo } from "node:net"
 import { tmpdir } from "node:os"
 import path from "node:path"
-import { brotliDecompressSync, gunzipSync } from "node:zlib"
+import { brotliDecompressSync } from "node:zlib"
 
 import { describe, expect, it } from "vitest"
 
@@ -75,15 +75,15 @@ describe("dev snapshot responses", () => {
     expect(snapshotCacheControl(relative, search)).toBe("no-store")
   })
 
-  it("prefers Brotli, then gzip, then no encoding", () => {
+  it("uses Brotli when accepted, otherwise no encoding", () => {
     expect(snapshotEncoding("gzip, deflate, br, zstd")).toBe("br")
-    expect(snapshotEncoding("gzip;q=1.0, identity")).toBe("gzip")
+    expect(snapshotEncoding("gzip;q=1.0, identity")).toBeUndefined()
     expect(snapshotEncoding("identity")).toBeUndefined()
     expect(snapshotEncoding(undefined)).toBeUndefined()
   })
 
   it("skips an encoding the client refuses with q=0", () => {
-    expect(snapshotEncoding("br;q=0, gzip")).toBe("gzip")
+    expect(snapshotEncoding("br;q=0, gzip")).toBeUndefined()
     expect(snapshotEncoding("br; q=0.0, gzip;q=0")).toBeUndefined()
     expect(snapshotEncoding("br;q=0.5")).toBe("br")
   })
@@ -137,9 +137,9 @@ describe("snapshot middleware", () => {
       expect(br.headers["vary"]).toBe("Accept-Encoding")
       expect(br.headers["cache-control"]).toBe("public, max-age=31536000, immutable")
       expect(brotliDecompressSync(br.body).toString()).toBe(json)
-      const gzip = await server.get(`/cdn/snapshots/blobs/${hash}.json`, "br;q=0, gzip")
-      expect(gzip.headers["content-encoding"]).toBe("gzip")
-      expect(gunzipSync(gzip.body).toString()).toBe(json)
+      const raw = await server.get(`/cdn/snapshots/blobs/${hash}.json`, "br;q=0, gzip")
+      expect(raw.headers["content-encoding"]).toBeUndefined()
+      expect(raw.body.toString()).toBe(json)
       const plain = await server.get(`/cdn/snapshots/blobs/${hash}.json`, "identity")
       expect(plain.headers["content-encoding"]).toBeUndefined()
       expect(plain.headers["vary"]).toBe("Accept-Encoding")

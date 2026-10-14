@@ -1,8 +1,8 @@
 """No external network: localhost S3 tests and redacted failure counterexamples."""
 
-import gzip
 from typing import TYPE_CHECKING
 
+import brotli
 import httpx
 import pytest
 from sve_carddb.export.read_api import ExportError
@@ -89,14 +89,14 @@ def test_compressed_sibling_get_preserves_wire_bytes(
     remote: tuple[R2Store, ServerState, Loopback],
 ) -> None:
     store, state, _ = remote
-    raw = gzip.compress(b"synthetic raw JSON", mtime=0)
-    state.objects[KEY + ".gz"] = Stored(
-        raw, '"compressed"', META | {"content-encoding": "gzip"}
+    raw = brotli.compress(b"synthetic raw JSON")
+    state.objects[KEY + ".br"] = Stored(
+        raw, '"compressed"', META | {"content-encoding": "br"}
     )
-    actual = store.get(KEY + ".gz")
+    actual = store.get(KEY + ".br")
     assert actual is not None
     assert actual.raw == raw
-    assert actual.headers == META | {"content-encoding": "gzip"}
+    assert actual.headers == META | {"content-encoding": "br"}
 
 
 def test_list_pagination_signs_exact_query_and_preserves_key_names(

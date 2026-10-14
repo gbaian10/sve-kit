@@ -176,7 +176,7 @@ def test_preview_pointer_follows_every_immutable_member(
     } | {
         "snapshots/manifests/" + manifest_hash + ".json",
     }
-    expected = raw_paths | {path + ".gz" for path in raw_paths}
+    expected = raw_paths
     if codec is not None:
         expected |= {path + ".br" for path in raw_paths}
     sealed: set[str] = set()

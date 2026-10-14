@@ -178,7 +178,6 @@ def _description(raw: bytes) -> Record:
 def _compressed_bytes(blob: Blob) -> Record:
     return {
         "br": None if blob.br is None else len(blob.br),
-        "gzip": len(blob.gzip),
     }
 
 

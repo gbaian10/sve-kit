@@ -22,7 +22,7 @@ N0 的 producer／reader 已接線；下列基本目錄裝檔與部分 reader �
 
 ## 預算
 
-MiB = 1,048,576 bytes，KiB = 1,024 bytes。raw 是 canonical-json-v1 未壓縮 bytes；Brotli quality 11，gzip level 9（mtime=0、無檔名），recipe 釘住壓縮器及版本。
+MiB = 1,048,576 bytes，KiB = 1,024 bytes。raw 是 canonical-json-v1 未壓縮 bytes；Brotli quality 11，recipe 釘住壓縮器及版本。
 多檔帳的壓縮量是各 File（含 manifest）各自壓縮後 bytes 的和，不以合併成單一串流的壓縮量代替。
 
 | 項目 | 門檻／分界 | 對象與量法 |
@@ -30,26 +30,25 @@ MiB = 1,048,576 bytes，KiB = 1,024 bytes。raw 是 canonical-json-v1 未壓縮 
 | 基本目錄冷載，依所選版本 | Brotli 2 MiB（2,097,152 bytes）分界 | 完整 manifest＋config＋整區基本目錄實際 File 及必要依賴；按 key 去重 |
 | 基本目錄容器 | 解壓後 ≤ 2 MiB | 穩定封存檔、最近包各自的檔與共用檔；整個 File 的 types、字典、fragment metadata、rows 都計入 |
 | 詳情與其他資料檔 | 解壓後 ≤ 512 KiB（524,288 bytes） | 基本目錄容器以外裝 fragment 的實際 File，含詳情、印刷擴充、history 與 images；整檔計，不只量單一 fragment；config／programs 另報 |
-| 全部文字 raw | ≤ 40 MiB（41,943,040 bytes） | 全部分片的 bootstrap／text／config 聯集＋manifest，兩區合計；changes 另報 |
+| 全部文字 raw | 每次報告、明顯成長時檢討 | 全部分片的 bootstrap／text／config 聯集＋manifest，兩區合計；changes 另報 |
 | 完整文字閉包，依單一版本 | Brotli ≤ 8 MiB（8,388,608 bytes） | 該區全部文字及其完整引用閉包＋manifest，含共享、JP 來源與必要跨區資料 |
-| 完整文字閉包，依單一版本 | gzip ≤ 10 MiB（10,485,760 bytes） | 與 Brotli 相同的實際 File 集合，不能改用只含顯示譯文的集合 |
 
 基本目錄略超 2 MiB 可接受，報精確 bytes、差額 `actual_br - 2,097,152` 與比例；明顯超出才交維護者看數字與改善方案。
 不自行發明「略超」的百分比硬門檻，不把跨過分界一律當停止條件，也不自行放寬分界。
-raw／gzip 另報基本目錄實測；不另設其啟動壓縮門檻。
+raw 另報基本目錄實測；不另設其啟動壓縮門檻。
 完整文字與單檔的上限仍是發布效能驗收門檻；超限須調整投影或固定配置，不能宣稱通過。
 容量不是快照格式或 reader 相容性條件；Python reader 核對實際 bytes、hash、結構與閉包，瀏覽器核對 bytes／hash 並判版本能力准入，不以預算拒絕合法快照。
 manifest、changes 的封套與整檔量另列，不套資料 File 的單檔上限，仍須量其解析記憶體。
 
 ## 容量帳與完整來源
 
-基本目錄、後續背景與各按需用途均列實際 File key 集合、raw／gzip／br、檔數及依賴。
+基本目錄、後續背景與各按需用途均列實際 File key 集合、raw／br、檔數及依賴。
 依單一版本計壓縮完整文字時，從該區所有文字用途取傳遞閉包，不限當前 UI 語言、current 或基本目錄：
 完整 source 原文 owner、text_unit、sections、annotation，official_counterpart 雙端，必要跨區 card／face／printing／revision、說明正文、卡號索引與所有字典都必須計入。
 EN 的 JP 依據即使平常按需才下載，仍屬 EN 完整文字帳。共享／混區 File 整檔計入每個需要它的版本，不按列數或語言比例分攤。
 
 同一用途帳內相同 File key 只加一次；相同文字／字典若實體重複裝在不同 File，每份都計，不能用邏輯去重掩蓋實際傳輸。
-全量 raw 帳對 files 中 role=bootstrap/text/config 的所有 File 按 key 去重，再加 manifest；其他用途不能改列 DSL／debug 逃避文字門檻。
+兩區全量 raw 每次報告、明顯成長時檢討；其容量帳對 files 中 role=bootstrap/text/config 的所有 File 按 key 去重，再加 manifest；其他用途不能改列 DSL／debug 逃避文字門檻。
 單區帳加 manifest 與 config 一次；兩個單區帳可能都包含同一共用檔，不能相加冒充全量。
 基本目錄是單區完整文字的子集，背景／按需增量扣除該 session 已取得的 key；不再把子集加進全量帳。
 

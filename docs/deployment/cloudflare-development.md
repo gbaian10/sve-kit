@@ -140,7 +140,7 @@ R2 壓縮旁檔依 [Response 官方文件](https://developers.cloudflare.com/wor
 物件缺少 Cache-Control 時退回 `private, no-cache`。
 
 Worker 對 `snapshots/blobs/<64 位小寫 hex>.json` 與
-`snapshots/manifests/<64 位小寫 hex>.json`（含 `.br`／`.gz` 旁檔）查詢
+`snapshots/manifests/<64 位小寫 hex>.json`（含 `.br` 旁檔）查詢
 `caches.default`，未命中時讀 R2，成功的 GET 以 `ctx.waitUntil` 寫入完整回應。
 這些 key 內容定址且不可變，內部快取使用 `public, max-age=31536000, immutable`；
 瀏覽器的 Cache-Control 另存於內部標頭，命中時還原並移除該標頭，維持上述 private 轉換與缺值退回。
@@ -200,9 +200,9 @@ uv --directory publish run sve-publish upload \
   --export-dir "$EXPORT_DIR" --dry-run
 ```
 
-dry-run 在本機驗證指標、清單 hash、Schema、每個分片的 hash／長度、gzip 與 `.br` 解碼、
+dry-run 在本機驗證指標、清單 hash、Schema、每個分片的 hash／長度、`.br` 解碼、
 reader 重接所需的引用閉包，以及每張卡圖的 bytes、WebP 格式與尺寸，再列出 JSON／卡圖的檔數與 bytes。
-gzip 與 `.br` 沒有獨立 hash，解碼核對其內容等於已驗證的 raw bytes，不重壓；`.br` 使用 lockfile 的 Python `brotli`。
+`.br` 沒有獨立 hash，解碼核對其內容等於已驗證的 raw bytes，不重壓；`.br` 使用 lockfile 的 Python `brotli`。
 離線數字是本機候選，遠端已有多少未知。dry-run 不讀憑證、不建立 HTTP client、不寫任何檔案。
 
 ## 7. 當次授權與上傳
