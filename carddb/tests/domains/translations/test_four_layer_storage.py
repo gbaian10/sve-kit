@@ -368,6 +368,24 @@ def test_binding_cannot_move_to_a_use_with_another_owner(
     assert db.rows("text_template_binding") == ()
 
 
+def test_write_frame_rejects_a_forged_content_hash_before_insert(
+    stored: tuple[Database, Frame, SourceBinding],
+) -> None:
+    db, frame, _ = stored
+    before = db.rows("sentence_template")
+    forged = frame.model_copy(
+        update={"id": "frame:" + "0" * 64, "content_hash": "0" * 64}
+    )
+    with pytest.raises(ValueError, match="semantic content hash mismatch"):
+        write_frame(
+            db,
+            FrameRecord(kind="sentence_template", data=forged),
+            "仮😀N枚",
+            "source",
+        )
+    assert db.rows("sentence_template") == before
+
+
 def test_valid_json_cannot_hide_required_leaves_in_literal_target(
     stored: tuple[Database, Frame, SourceBinding],
 ) -> None:
