@@ -48,8 +48,7 @@ and their card types, or a class and a trait, remain distinct. Their translated 
 live in the catalog vocabulary record's `value.translations`.
 
 Optional recognition rules live in `translations/parameter-rules/current.yaml`.
-`bracket_keyword_reference` controls body keyword references in the N1 preparation
-entry; `braced_ability_reference` also controls Quick there. These rules preserve
-`enabled` and `low_confidence`; fixed structural N1 rules have no YAML switch.
-The formal compiler and authored frame reader still use N0. See the
-[four-layer contract](../docs/schema/domains/four-layer-translation.md#43-n1-準備入口的來源登錄).
+`bracket_keyword_reference` controls body keyword references in N1 formal source
+registration; `braced_ability_reference` also controls Quick there. These rules preserve
+`enabled` and `low_confidence`; fixed structural N1 rules have no YAML switch. See the
+[four-layer contract](../docs/schema/domains/four-layer-translation.md#43-n1-正式來源登錄).
