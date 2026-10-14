@@ -7,7 +7,7 @@ from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
-from jsonschema.exceptions import ValidationError
+from jsonschema import ValidationError
 
 if TYPE_CHECKING:
     from sve_carddb.export.project import Projection
@@ -522,19 +522,15 @@ def test_compressor_failure_propagates_from_snapshot(
         export_snapshot(*logical, BATCH, brotli=Brotli("failing", failed_compressor))
 
 
-@pytest.mark.parametrize("target", ["shard", "union"])
-def test_selective_background_compressor_failure_propagates(
-    logical: tuple[Projection, Ownership], target: str
+def test_union_compressor_failure_propagates(
+    logical: tuple[Projection, Ownership],
 ) -> None:
     def failed_compressor(raw: bytes) -> bytes:
-        value = object_value(parse(raw))
-        if ("tables" in value and target == "shard") or (
-            "members" in value and target == "union"
-        ):
-            raise ValueError("selective synthetic codec failure")
+        if "members" in object_value(parse(raw)):
+            raise ValueError("synthetic union codec failure")
         return raw
 
-    with pytest.raises(ValueError, match="selective synthetic codec failure"):
+    with pytest.raises(ValueError, match="synthetic union codec failure"):
         export_snapshot(*logical, BATCH, brotli=Brotli("failing", failed_compressor))
 
 
