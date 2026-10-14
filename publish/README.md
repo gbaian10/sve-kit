@@ -15,8 +15,8 @@ does not make it formal.
 
 - `snapshots/manifests/<sha256>.json` and its `.gz`, plus `.br` when the export
   wrote one;
-- every payload, the text union and changes listed by the manifest, with the
-  `.gz`/`.br` siblings it declares;
+- every payload and changes listed by the manifest, with the `.gz`/`.br`
+  siblings it declares;
 - `images/<size>/<int_id>[-f<ordinal>].webp` for each available, approved
   printing face size listed in the manifest's media rows;
 - `snapshots/versions/index.json`, written last.
@@ -29,9 +29,7 @@ gzip/Brotli decoding, the reader join and each image's byte count, WebP format
 and dimensions. Symlinks and special files are refused. The join resolves the
 printing/face/media rows used to select image keys and checks their reference
 closure. Encoded siblings have no independent hash, so decoding checks that
-they carry the verified raw bytes; upload never recompresses them. The writer
-already checks the text union's equivalence to the shards. Upload checks its
-manifest hash and length without running a second full reader join.
+they carry the verified raw bytes; upload never recompresses them.
 
 Headers come from the contract, not from file extensions:
 
