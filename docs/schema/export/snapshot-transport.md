@@ -3,7 +3,7 @@
 本文的格式與一致性「驗證／拒絕」由 carddb 匯出、Python 完整 reader 與上傳前離線檢查執行。
 瀏覽器 runtime 信任這些已驗的自有公開 JSON，只在下載／快取邊界以 WebCrypto 驗未壓縮 bytes 的 SHA-256（同一份 bytes 不在 decoder 重算），並核對檔案長度；仍保留格式版本、最低 reader 版本與必要能力的准入，以及版本索引的常數成本一致性核對（[格式 §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)）。
 瀏覽器使用原生 `JSON.parse`，不重做嚴格 token 掃描、canonical 重編碼、Schema、descriptor、分片位置／bucket 或跨表一致性驗證。
-固定 schema 欄序只用於 tuple 解碼，bucket 只用於按需定位；JSON 語法錯誤與必要欄位使用時的例外均轉成資料載入失敗，更新失敗保留舊 active。
+固定 schema 欄序只用於 tuple 解碼，內部 hash bucket 只用於固定 band 分配與按需定位；JSON 語法錯誤與必要欄位使用時的例外均轉成資料載入失敗，更新失敗保留舊 active。
 
 本文件補足 [snapshot-format.md](snapshot-format.md) 的 JSON 容器、欄序與版本契約；公開邏輯欄位仍以該文件 §2 為唯一白名單。這些記錄不是新增的玩家集合或建置表。所有物件拒絕未列出的欄位；所有列出的欄位必須存在，`T?` 表示 `T` 或 JSON null，不能省略。空陣列表示已知無成員，來源是否完整另看 coverage。
 
@@ -328,7 +328,7 @@ catalog 不分帶，segment=`family-<永久家族>` 或 `shared`；背景再加 
 
 例外名單固定，新家族超過單檔上限即 producer 失敗，回報檔與差額，由人明示修改配置後重新驗收；不能每輪依大小自動分帶、greedy packing 或搬 owner。未發布 4.0 同步原地修訂，不加舊格式 fallback。
 
-先固定每個合併 fragment 的完整 PK 次序，再封存 catalog／print base bytes，最後產 row_index／exact base／dependencies。單張 image metadata 更新只改固定 physical band 與 manifest；binding 未變時，不因 hash 排序重排其他 image band。
+先固定每個合併 fragment 的完整 PK 次序，再定出 catalog／print base 的 bytes 與 hash，最後產 row_index／exact base／dependencies。單張 image metadata 更新只改固定 physical band 與 manifest；binding 未變時，不因 hash 排序重排其他 image band。
 
 ### 5.2 影像 metadata 的背景預取與逐頁解析
 

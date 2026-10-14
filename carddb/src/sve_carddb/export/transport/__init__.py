@@ -1,43 +1,28 @@
 """Export the public logical projection to immutable candidate transport blobs."""
 
 from concurrent.futures import Future, ThreadPoolExecutor
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
 from sve_carddb.contracts.profiles import MEDIA
 from sve_carddb.contracts.profiles import profile as profile_for
-from sve_carddb.contracts.snapshot import columns, definition, row_type, tables
+from sve_carddb.contracts.snapshot import definition, tables
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
-from sve_carddb.export.name_annotations import compact_names, whole_name
+from sve_carddb.export.name_annotations import compact_names
 from sve_carddb.export.project.source import json_list
 from sve_carddb.export.reader import join_payloads, read_snapshot, validate_manifest
-from sve_carddb.export.semantics import row_key
 from sve_carddb.export.transport.compression import Blob, Brotli, compress, recipe
-from sve_carddb.export.transport.family import FamilyLayout, Scope
+from sve_carddb.export.transport.family import FamilyLayout, Scope, file_reference
 from sve_carddb.export.transport.layout import Layout, Ownership
-from sve_carddb.export.transport.wire import container, encode
 
 if TYPE_CHECKING:
     from sve_carddb.export.project import Projection
 
 type Record = dict[str, JsonValue]
 
-__all__ = [
-    "Batch",
-    "Blob",
-    "Brotli",
-    "Ownership",
-    "Snapshot",
-    "columns",
-    "container",
-    "encode",
-    "export_snapshot",
-    "row_key",
-    "row_type",
-    "whole_name",
-]
+__all__ = ["Batch", "Blob", "Brotli", "Ownership", "Snapshot", "export_snapshot"]
 
 
 @dataclass(frozen=True)
@@ -58,7 +43,7 @@ class Snapshot:
     payloads: dict[str, Blob]
     compression_recipe: dict[str, str | int | None]
     manifest_blob: Blob
-    source_files: dict[str, frozenset[str]] = field(default_factory=dict)
+    source_files: dict[str, frozenset[str]]
 
     def verify(self, projection: Projection) -> None:
         """Require the reader's join to equal the logical view."""
@@ -75,10 +60,6 @@ class Snapshot:
             or self.compression_recipe != other.compression_recipe
         ):
             raise ValueError("Clean exports differ in payload or compression bytes")
-
-
-def _reference(file: Record) -> Record:
-    return {"key": file["key"], "sha256": file["sha256"]}
 
 
 def _description(raw: bytes) -> Record:
@@ -233,7 +214,7 @@ def export_snapshot(
             "min_reader_version": format_version,
             "required_capabilities": list(selected.capabilities),
             "files": [files.files[key] for key in sorted(files.files)],
-            "config_ref": _reference(config),
+            "config_ref": file_reference(config),
             "partitioning": partitioning,
             "changes_ref": None,
         }

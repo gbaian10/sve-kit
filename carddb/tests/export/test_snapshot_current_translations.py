@@ -6,13 +6,14 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build import create_database
-from sve_carddb.core.json import array, object_value
+from sve_carddb.core.json import array, object_value, string
 from sve_carddb.domains.translations.jp_sources import effect_bindings
 from sve_carddb.domains.translations.names.bindings import DisplayBinding
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.project import DisplayCheck, project
 from sve_carddb.export.reader import read_snapshot
 from sve_carddb.export.transport import Batch, Ownership, export_snapshot
+from sve_carddb.export.transport.measure import measure
 
 from ..support.snapshot_project_fixtures import (
     SETTINGS,
@@ -161,6 +162,13 @@ def test_unchecked_machine_translation_keeps_quality_and_source_closure(
     )
     payloads = {key: blob.raw for key, blob in exported.payloads.items()}
     assert read_snapshot(exported.manifest, payloads) == result.tables
+    # EN complete text adds only the JP files presenting the source owner, not JP printings or history.
+    complete = object_value(
+        object_value(measure(exported)["complete_text_by_region"])["en"]
+    )
+    jp = {string(k) for k in array(complete["keys"]) if "/jp/" in string(k)}
+    assert jp
+    assert {key.split("/")[0] for key in jp} <= {"catalog", "detail"}
 
 
 @pytest.mark.parametrize("field", ["name", "effect", "section"])

@@ -392,6 +392,7 @@ def test_matching_member_hash_cannot_bypass_payload_schema(member: str) -> None:
         {key: compress(value, None) for key, value in blobs.items()},
         {},
         compress(canonical(manifest), None),
+        {},
     )
     with pytest.raises(ValidationError):
         snapshot.verify(Projection({}, {}, {}))

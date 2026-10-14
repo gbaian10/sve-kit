@@ -3,7 +3,7 @@
 本文的格式與一致性「驗證／拒絕」由 carddb 匯出、Python 完整 reader 與上傳前離線檢查執行。
 瀏覽器 runtime 信任這些已驗的自有公開 JSON，只在下載／快取邊界以 WebCrypto 驗未壓縮 bytes 的 SHA-256（同一份 bytes 不在 decoder 重算），並核對檔案長度；仍保留格式版本、最低 reader 版本與必要能力的准入，以及版本索引的常數成本一致性核對（§4.1）。
 瀏覽器使用原生 `JSON.parse`，不重做嚴格 token 掃描、canonical 重編碼、Schema、descriptor、分片位置／bucket 或跨表一致性驗證。
-固定 schema 欄序只用於 tuple 解碼，內部 hash bucket 只用於固定背景 band 分配；JSON 語法錯誤與必要欄位使用時的例外均轉成資料載入失敗，更新失敗保留舊 active。
+固定 schema 欄序只用於 tuple 解碼，內部 hash bucket 只用於固定 band 分配與按需定位；JSON 語法錯誤與必要欄位使用時的例外均轉成資料載入失敗，更新失敗保留舊 active。
 
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
 專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../../quotations.md)。
@@ -237,9 +237,9 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 | `card_engine_support`、`mechanic_projection`、`card_mechanic_coverage` | 全部欄位；status/reasons 不複製進 `card_facet` | 無 |
 | `rules_name`、`face_rules_name` | 無 | 全部原欄位，global detail |
 | `rules_profile`、restriction、vocabulary、`search_alias`、keyword、stamp | 全部欄位 | 無 |
-| `text_unit` | 現行／暫顯名字、可用名字翻譯與 facet 字典引用的 ID 閉包；名稱字典隨 catalog 局部出貨，詳情暫沿全域 band；同 ID 副本完整同值 | 非上述閉包的其餘文字列 |
-| `translation` | 現行／暫顯 name 與 facet labels 使用的翻譯列 | 其餘翻譯列；同 ID 兩用途時歸啟動包，只存一次 |
-| `annotation_set`、`annotation_concept` | 可見名字／名稱翻譯／facet 必要閉包；同 ID 只存一次 | 其餘集合列；正文按需，全部文字檔合計含全部引用 |
+| `text_unit` | 現行／暫顯名字、可用名字翻譯與 facet 字典引用的 ID 閉包，隨各 catalog 局部出貨 | 全部文字列暫沿全域 band，含 catalog 已有的副本；同 ID 副本完整同值 |
+| `translation` | 現行／暫顯 name 與 facet labels 使用的翻譯列，隨各 catalog 局部出貨 | 全部翻譯列暫沿全域 band；同 ID 副本完整同值 |
+| `annotation_set`、`annotation_concept` | 可見名字／名稱翻譯／facet 必要的 annotation_set 隨各 catalog 局部出貨；annotation_concept 全部固定在共用 catalog | annotation_set 全部列暫沿全域 band；正文按需，全部文字檔合計含全部引用 |
 | `field_annotation` | 隨原文欄位；display name／字典／商品等 | 隨 effect／printing／QA／CR 等；非 display revision 的用途在 history，詳[位置分片](public-annotation.md#5-分片閉包與消費表) |
 | 其餘文字集合 | 無 | 完整白名單列 |
 
