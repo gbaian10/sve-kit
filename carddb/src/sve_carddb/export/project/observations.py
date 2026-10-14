@@ -260,18 +260,17 @@ def corrections(source: Source, view: dict[str, list[Record]]) -> None:
 
 
 def _wording_completeness(view: dict[str, list[Record]]) -> None:
-    observed = {
-        (object_value(raw)["face_id"], printing["region"])
-        for printing in view["printing"]
-        for raw in array(printing["faces"])
-        if array(object_value(raw)["observations"])
-    }
+    observed: dict[str, set[str]] = {}
+    for printing in view["printing"]:
+        for raw in array(printing["faces"]):
+            face = object_value(raw)
+            if array(face["observations"]):
+                observed.setdefault(string(face["face_id"]), set()).add(
+                    string(printing["region"])
+                )
     for face in view["face"]:
         known = {object_value(raw)["region"] for raw in array(face["current"])} | {
             object_value(raw)["region"] for raw in array(face["wording"])
         }
-        if any(
-            face_id == face["id"] and region not in known
-            for face_id, region in observed
-        ):
+        if not observed.get(string(face["id"]), set()) <= known:
             raise ValueError("Unadopted observations require wording projection")

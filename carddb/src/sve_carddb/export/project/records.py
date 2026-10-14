@@ -140,6 +140,7 @@ def printing_records(source: Source, view: dict[str, list[Record]]) -> None:
         for row in source.rows("card_int_id", "printing_id,int_id")
     }
     internal = source.index("printing", "id,decklog_source_id")
+    ordinals = {row["id"]: integer(row["ordinal"]) for row in view["face"]}
     for printing in view["printing"]:
         printing["int_id"] = integers[printing["id"]]
         details = internal[string(printing["id"])]
@@ -186,15 +187,17 @@ def printing_records(source: Source, view: dict[str, list[Record]]) -> None:
             face["translations"] = []
             face["corrections"] = []
             faces.append(face)
-        ordinals = {row["id"]: integer(row["ordinal"]) for row in view["face"]}
         faces.sort(key=lambda row: ordinals[string(row["face_id"])])
         printing["faces"] = list(faces)
 
 
 def ancillary_records(source: Source, view: dict[str, list[Record]]) -> None:
     """Project QA history, restrictions, CR and nested official errata evidence."""
+    versions_by_qa: dict[str, list[Record]] = {}
+    for version in view["qa_version"]:
+        versions_by_qa.setdefault(string(version["qa_id"]), []).append(version)
     for qa in view["qa"]:
-        versions = [row for row in view["qa_version"] if row["qa_id"] == qa["id"]]
+        versions = versions_by_qa.get(string(qa["id"]), [])
         qa["current_version_id"] = (
             max(versions, key=lambda row: integer(row["revision"]))["id"]
             if versions
