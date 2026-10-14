@@ -68,11 +68,12 @@ with create_database(schema) as db:
   installation rolls back DDL but can leave the newly created empty file.
 - All writes require `transaction()`. The entire transaction is rolled back on an
   unhandled body, verification or commit failure. Nested transactions are rejected.
-  Each commit runs foreign_key_check and integrity_check with enforcement enabled;
-  batch related rows in one transaction. Importers should use a few large
-  transactions: full verification scans the entire database on each commit.
+  Each commit confirms FK and CHECK enforcement, then runs foreign_key_check and
+  the selected cross-table checks; batch related rows in one transaction.
+  Importers should use a few large transactions: full verification scans the
+  entire database on each commit.
   There is no unchecked batch/commit mode, and the final transaction must pass
-  both checks. RESTRICT deletes/updates remain immediate,
+  these checks. RESTRICT deletes/updates remain immediate,
   while insert-time FK resolution is deferred. Reads return checked `Row` objects,
   never sqlite cursors or raw `Any`.
 
@@ -158,9 +159,11 @@ not queries returning imported content.
 `Database.verify()` runs FK/check-enforcement checks, `foreign_key_check`,
 `integrity_check`, the build schema version check, then all selected query checks.
 `transaction()` invokes it with `integrity=False` **after the body, before COMMIT**,
-on the final graph. The full `integrity_check` runs on explicit verification and
-before `save()` persists a bundle (`save()` repeats only the enforcement pragmas and
-`integrity_check`); fresh builds rely on enforced CHECK constraints.
+on the final graph. Explicit verification runs the full `integrity_check`.
+Before persisting a bundle, `save()` checks enforcement and runs `integrity_check`
+with CHECK constraints temporarily ignored: writes already enforce CHECK, while
+the save check retains page, index, UNIQUE and NOT NULL validation. CHECK enforcement
+is restored even if the check fails, and is verified again before backup.
 An insert, update or delete can temporarily violate a query check inside the
 transaction, allowing related rows to be repaired together. Updating a parent is checked even when no child row changed.
 A failing query raises `sqlite3.IntegrityError` naming the check, without printing
@@ -276,6 +279,7 @@ with create_database(schema) as db:
 
 The input record summarizes actual uses. Frozen raw and metadata checks occur at
 source reads; owners and references are validated by domain importers. Database
-transactions retain FK, STRICT and integrity checks. Saving backs up this same
+transactions retain FK, STRICT, CHECK and cross-table checks. Saving checks physical
+integrity without repeating CHECK validation, then backs up this same
 completed DB into a temporary directory, writes inputs/report, fsyncs and performs
 a no-overwrite rename. No build seal or second population is required.
