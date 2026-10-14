@@ -4659,49 +4659,42 @@
             "key": "config",
             "role": "config",
             "raw": 100,
-            "br": 50,
-            "gzip": 60
+            "br": 50
           },
           {
             "key": "names",
             "role": "bootstrap",
             "raw": 1000,
-            "br": 300,
-            "gzip": 400
+            "br": 300
           },
           {
             "key": "annotations",
             "role": "text",
             "raw": 2000,
-            "br": 500,
-            "gzip": 600
+            "br": 500
           },
           {
             "key": "explanations",
             "role": "text",
             "raw": 400,
-            "br": 100,
-            "gzip": 130
+            "br": 100
           },
           {
             "key": "media",
             "role": "images",
             "raw": 200,
-            "br": 70,
-            "gzip": 90
+            "br": 70
           },
           {
             "key": "programs",
             "role": "programs",
             "raw": 80,
-            "br": 40,
-            "gzip": 50
+            "br": 40
           }
         ],
         "manifest": {
           "raw": 500,
-          "br": 150,
-          "gzip": 170
+          "br": 150
         },
         "startup": {
           "jp": [
@@ -4718,27 +4711,23 @@
         },
         "annotation_increment": {
           "raw": 300,
-          "br": 70,
-          "gzip": 85
+          "br": 70
         }
       },
       "expected": {
         "result": "accept",
         "text_files": {
           "raw": 3500,
-          "br": 950,
-          "gzip": 1190
+          "br": 950
         },
         "startup_by_region": {
           "jp": {
             "raw": 1800,
-            "br": 570,
-            "gzip": 720
+            "br": 570
           },
           "en": {
             "raw": 1800,
-            "br": 570,
-            "gzip": 720
+            "br": 570
           }
         },
         "annotation_increment_already_in_files": true,

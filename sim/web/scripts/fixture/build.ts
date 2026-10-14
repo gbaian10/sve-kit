@@ -1498,7 +1498,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
       path,
       sha256: hash,
       bytes: bytes.length,
-      compressed_bytes: { br: null, gzip: null },
+      compressed_bytes: { br: null },
       key,
       role,
       row_counts: rowCounts,

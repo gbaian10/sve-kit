@@ -1,6 +1,5 @@
 """Typed SDK, native loopback transport and hostile ambient configuration."""
 
-import gzip
 import logging
 import os
 import sys
@@ -9,6 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, override
 from urllib.parse import urlsplit
 
+import brotli
 import httpx
 import pytest
 from botocore.awsrequest import AWSPreparedRequest, AWSRequest, AWSResponse
@@ -68,18 +68,18 @@ def test_native_sdk_keeps_conditions_and_exact_compressed_bytes(
         first = remote.get("synthetic.json")
         assert first is not None
         assert remote.put("synthetic.json", b"new", headers, expected=first.etag)
-        raw = gzip.compress(b"synthetic compressed sibling", mtime=0)
-        state.objects["synthetic.json.gz"] = Stored(
+        raw = brotli.compress(b"synthetic compressed sibling")
+        state.objects["synthetic.json.br"] = Stored(
             raw,
-            '"opaque-gzip"',
+            '"opaque-br"',
             {
-                "content-encoding": "gzip",
+                "content-encoding": "br",
                 "x-amz-meta-sha256": "synthetic-extra-metadata",
             },
         )
         assert R2Store(ACCOUNT, BUCKET, CREDENTIALS, client).get(
-            "synthetic.json.gz"
-        ) == Stored(raw, '"opaque-gzip"', {"content-encoding": "gzip"})
+            "synthetic.json.br"
+        ) == Stored(raw, '"opaque-br"', {"content-encoding": "br"})
         retries: object = vars(client.meta.config).get("retries")
         assert retries == {
             "total_max_attempts": 1,

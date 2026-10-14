@@ -70,14 +70,13 @@ Docker wrapper 固定寫入執行目錄的 `stages.tsv`，中斷仍保留已完�
 
 ## 輸出與容量
 
-分片存於 `snapshots/blobs/<sha256>.json`，另存固定時間戳、等級 9 的
-gzip。`snapshot export-offline` 可用 `--brotli` 額外產生 `.br`；
+分片存於 `snapshots/blobs/<sha256>.json`。`snapshot export-offline` 可用 `--brotli` 額外產生 `.br`；
 預設為 `--no-brotli`，br 數字為 null，不能宣稱通過 br 容量目標。
 啟用時直接使用 `uv.lock` 鎖定的 PyPI `brotli`，固定 generic mode、quality 11、
 lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行檔 hash。
 不再提供 `--brotli-command` 或呼叫外部 encoder，亦不需準備系統 libbrotli。
 
-`sve-publish upload` 原樣上傳清單所列的 raw／gzip／br，不重壓；選檔、標頭與 CDN 驗證見
+`sve-publish upload` 原樣上傳清單所列的 raw／br，不重壓；選檔、標頭與 CDN 驗證見
 [R2 上傳](../../../publish/README.md)，保留窗口見 [發布契約](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
 
 圖片 producer 寫固定 ID key，文字匯出只寫公開影像 metadata 及快照 JSON，完全不複製或驗讀 bitmap。
@@ -95,10 +94,10 @@ lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行�
 圖片 CLI stdout 另記 `image_execution` 的快取命中、新轉檔數與 `written_images`，不混入快照清單。
 
 這些檔案與輸出都不進 git、Actions cache／artifact 或測試 fixture。
-容量設計依 [size-budget](size-budget.md)：全部文字分片＋manifest 的 raw ≤40 MiB；單一版本完整文字閉包 Brotli ≤8 MiB、gzip ≤10 MiB，含完整來源、counterpart、共享字典、卡號索引與必要跨區檔。
+容量設計依 [size-budget](size-budget.md)：兩區全部文字分片＋manifest 的 raw 每次報告、明顯成長時檢討；單一版本完整文字閉包 Brotli ≤8 MiB，含完整來源、counterpart、共享字典、卡號索引與必要跨區檔。
 卡圖另計。
 基本目錄冷載依所選日版／英版各計完整 manifest＋config＋實際必載片及依賴，共用／混區 File 整檔計、不按語言比例分攤。
-Brotli 2 MiB 為分界，略超報精確差額、明顯超出才交維護者；raw／gzip 另報，不另設硬門檻。
+Brotli 2 MiB 為分界，略超報精確差額、明顯超出才交維護者；raw 另報，不另設硬門檻。
 基本目錄容器整檔 raw ≤2 MiB，詳情與其他資料檔 ≤512 KiB，含 types／字典／base metadata。
 N0 現有量測 API 與[傳輸 §5.1](snapshot-transport.md#51-固定配置) 的 bands 不代表已完成新裝檔或單區完整文字帳；不因容量減少 pending／名稱／facet／公開欄位。
 

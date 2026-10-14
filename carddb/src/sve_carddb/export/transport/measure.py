@@ -23,7 +23,6 @@ def _sizes(blobs: list[Blob]) -> dict[str, JsonValue]:
         "br": None
         if any(blob.br is None for blob in blobs)
         else sum(len(blob.br or b"") for blob in blobs),
-        "gzip": sum(len(blob.gzip) for blob in blobs),
     }
 
 
@@ -115,9 +114,7 @@ def measure(
         "shards": shards,
         "oversized_shards": oversized,
         "gates": {
-            "raw_40_mib": integer(full["raw"]) <= 40 * MIB,
             "br_8_mib": full["br"] is not None and integer(full["br"]) <= 8 * MIB,
-            "gzip_10_mib": integer(full["gzip"]) <= 10 * MIB,
             "shards_512_kib": not oversized,
         },
     }

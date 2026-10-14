@@ -1,9 +1,7 @@
 """Select and verify only the public closure of one export-offline preview root."""
 
-import gzip
 import re
 import stat
-import zlib
 from dataclasses import dataclass
 from io import BytesIO
 from typing import TYPE_CHECKING
@@ -64,9 +62,7 @@ __all__ = [
 
 POINTER = "snapshots/preview/current.json"
 INDEX = "snapshots/versions/index.json"
-JSON_KEY = re.compile(
-    r"snapshots/(?:blobs|manifests)/[0-9a-f]{64}\.json(?:\.(?:br|gz))?\Z"
-)
+JSON_KEY = re.compile(r"snapshots/(?:blobs|manifests)/[0-9a-f]{64}\.json(?:\.br)?\Z")
 IMAGE_KEY = re.compile(
     r"images/(?:card_[sml]|art_[sm])/[1-9][0-9]*(?:-f[1-9][0-9]*)?\.webp\Z"
 )
@@ -153,14 +149,13 @@ def closure(manifest_path: str, manifest: dict[str, JsonValue]) -> set[str]:
         or not manifest_path.endswith(".json")
     ):
         raise ExportError("Invalid public manifest path")
-    keys = {manifest_path, manifest_path + ".gz"}
+    keys = {manifest_path}
     for row in _descriptions(manifest):
         path = string(row["path"])
         keys.add(path)
         encodings = object_value(row["compressed_bytes"])
-        for encoding, suffix in (("gzip", ".gz"), ("br", ".br")):
-            if encodings[encoding] is not None:
-                keys.add(path + suffix)
+        if encodings["br"] is not None:
+            keys.add(path + ".br")
     return keys
 
 
@@ -213,9 +208,7 @@ def load_export(root: Path, *, image_root: Path | None = None) -> Export:
 
 def _load(root: Path, image_root: Path | None) -> Export:
     path, raw, manifest = _manifest(root)
-    members = list(
-        _encoded(root, path, raw, gz=True, br=(root / (path + ".br")).exists())
-    )
+    members = list(_encoded(root, path, raw, br=(root / (path + ".br")).exists()))
     blobs: dict[str, bytes] = {}
     for row in _descriptions(manifest):
         blobs[string(row["path"])], encoded = _blob(root, row)
@@ -267,11 +260,9 @@ def _blob(root: Path, row: dict[str, JsonValue]) -> tuple[bytes, tuple[Member, .
     if digest(raw) != row["sha256"] or len(raw) != row["bytes"]:
         raise ExportError("Export payload differs from its manifest")
     lengths = object_value(row["compressed_bytes"])
-    encoded = _encoded(
-        root, path, raw, gz=lengths["gzip"] is not None, br=lengths["br"] is not None
-    )
+    encoded = _encoded(root, path, raw, br=lengths["br"] is not None)
     actual = {m.key.removeprefix(path): len(m.raw) for m in encoded}
-    if (actual.get(".gz"), actual.get(".br")) != (lengths["gzip"], lengths["br"]):
+    if actual.get(".br") != lengths["br"]:
         raise ExportError("Export encoded length differs from its manifest")
     return raw, encoded
 
@@ -289,19 +280,8 @@ def _descriptions(manifest: dict[str, JsonValue]) -> list[dict[str, JsonValue]]:
     return rows
 
 
-def _encoded(
-    root: Path, path: str, raw: bytes, *, gz: bool, br: bool
-) -> tuple[Member, ...]:
+def _encoded(root: Path, path: str, raw: bytes, *, br: bool) -> tuple[Member, ...]:
     result = [Member(path, raw)]
-    if gz:
-        encoded = read_member(root, path + ".gz")
-        try:
-            with gzip.GzipFile(fileobj=BytesIO(encoded)) as stream:
-                if stream.read(len(raw) + 1) != raw:
-                    raise ExportError("Export gzip sibling differs from raw bytes")
-        except EOFError, OSError, zlib.error:
-            raise ExportError("Export gzip sibling is not readable") from None
-        result.append(Member(path + ".gz", encoded, "gzip"))
     if br:
         encoded = read_member(root, path + ".br")
         verify_brotli(encoded, raw)

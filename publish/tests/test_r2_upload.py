@@ -1,6 +1,5 @@
 """Upload of export-offline roots against the localhost S3/CDN server."""
 
-import gzip
 import json
 from copy import deepcopy
 from typing import TYPE_CHECKING
@@ -114,8 +113,7 @@ def test_first_upload_selects_only_the_public_closure_and_writes_index_last(
     }
     for member in loaded.members:
         assert state.objects[member.key].headers == member_headers(member)
-    gz = next(m for m in loaded.members if m.key.endswith(".gz"))
-    assert member_headers(gz)["content-encoding"] == "gzip"
+    assert all(m.encoding in {None, "br"} for m in loaded.members)
     image = state.objects[loaded.images[0].key]
     assert image.headers == {
         "content-type": "image/webp",
@@ -600,28 +598,6 @@ def test_index_cas_race_preserves_the_concurrent_index(
         upload(store, load_export(roots.preview), None)
     assert state.objects[INDEX].etag == '"concurrent"'
     assert state.objects[INDEX].raw == original_index.raw
-
-
-@pytest.mark.parametrize("encoding", ["truncated", "different", "valid"])
-def test_gzip_sibling_checks_decoded_bytes_without_recompression(
-    images: PublicImages, roots: Roots, encoding: str
-) -> None:
-    export(images, roots, step=0)
-    loaded = load_export(roots.preview)
-    path = string(loaded.entry["manifest_path"]) + ".gz"
-    raw = canonical(loaded.entry)
-    if encoding == "valid":
-        raw = (roots.preview / string(loaded.entry["manifest_path"])).read_bytes()
-    encoded = gzip.compress(raw, compresslevel=1, mtime=123)
-    if encoding == "truncated":
-        encoded = encoded[:-4]
-    (roots.preview / path).write_bytes(encoded)
-    if encoding == "valid":
-        member = next(m for m in load_export(roots.preview).members if m.key == path)
-        assert member.raw == encoded
-    else:
-        with pytest.raises(ExportError, match=r"^Export gzip sibling"):
-            load_export(roots.preview)
 
 
 def test_upload_reads_images_from_explicit_separate_root(

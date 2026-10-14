@@ -1,6 +1,5 @@
 """Exporter acceptance uses an independent reader and synthetic logical data."""
 
-import gzip
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from dataclasses import replace
@@ -96,7 +95,7 @@ def cloned(logical: tuple[Projection, Ownership]) -> tuple[Projection, Ownership
     ), ownership
 
 
-@pytest.mark.parametrize("encoding", ["raw", "br", "gzip"])
+@pytest.mark.parametrize("encoding", ["raw", "br"])
 def test_byte_comparison_catches_one_encoding_change(
     exported: Snapshot, encoding: str
 ) -> None:
@@ -354,48 +353,6 @@ def test_pending_display_name_and_facets_are_bootstrapped_without_current() -> N
     } == {"r:a1"}
 
 
-def test_gzip_roundtrip_and_header_are_deterministic(exported: Snapshot) -> None:
-    for blob in exported.payloads.values():
-        assert gzip.decompress(blob.gzip) == blob.raw
-        assert blob.gzip[3] == 0
-        assert blob.gzip[4:8] == b"\0\0\0\0"
-
-
-def test_gzip_timestamp_is_fixed_across_seconds(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    real_compress = gzip.compress
-    seconds = (1_735_689_600, 1_735_689_602)
-    clock = iter(seconds)
-    observed: list[int] = []
-
-    # Python defaults vary; require explicit mtime even when omitted means wall-clock time.
-    def wall_clock_compress(
-        data: bytes, compresslevel: int = 9, *, mtime: int | None = None
-    ) -> bytes:
-        now = next(clock)
-        observed.append(now)
-        return real_compress(
-            data, compresslevel=compresslevel, mtime=now if mtime is None else mtime
-        )
-
-    raw = b"synthetic cross-second gzip payload"
-    assert real_compress(raw, mtime=seconds[0]) != real_compress(raw, mtime=seconds[1])
-    monkeypatch.setattr(gzip, "compress", wall_clock_compress)
-    first = compress(raw, None)
-    second = compress(raw, None)
-    assert observed == list(seconds)
-    assert first.gzip == second.gzip
-    assert first.gzip[4:8] == second.gzip[4:8] == b"\0\0\0\0"
-
-
-def test_gzip_bytes_use_level_nine() -> None:
-    raw = b"synthetic repeated gzip payload " * 64
-    expected = gzip.compress(raw, compresslevel=9, mtime=0)
-    assert expected != gzip.compress(raw, compresslevel=6, mtime=0)
-    assert compress(raw, None).gzip == expected
-
-
 @pytest.mark.parametrize("table", ["printing", "printing_product"])
 def test_primary_key_boundary_rejects_duplicates(
     logical: tuple[Projection, Ownership], table: str
@@ -464,7 +421,6 @@ def test_snapshot_encodings_match_independent_serial_compression(
         assert description["sha256"] == digest(blob.raw)
         assert description["compressed_bytes"] == {
             "br": None if blob.br is None else len(blob.br),
-            "gzip": len(blob.gzip),
         }
 
 
@@ -537,7 +493,7 @@ def test_clean_comparison_rejects_recipe_change_even_with_same_bytes(
             replace(
                 exported,
                 compression_recipe=exported.compression_recipe
-                | {"gzip": "another-version"},
+                | {"brotli": "another-version"},
             )
         )
 

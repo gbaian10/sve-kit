@@ -20,8 +20,7 @@
 索引的 `Blob` 及建置用壓縮 recipe。寫檔、分配批次與發布由呼叫端負責；
 此函式不讀 live manifest、不抓來源、不更新版本索引。
 
-`Blob.raw` 是 canonical-json-v1 bytes；`br` 是可空 bytes，`gzip` 是固定 level 9、
-mtime=0、無 filename 的 bytes。沒有提供 Brotli 時，快照清單的 br 長度明示 null，
+`Blob.raw` 是 canonical-json-v1 bytes；`br` 是可空 bytes。沒有提供 Brotli 時，快照清單的 br 長度明示 null，
 容量量測也不宣稱 br 閘門通過。Brotli 由呼叫端提供釘住版本、固定 quality 11 的
 `Brotli(version, compress)`；版本與參數屬建置 recipe，不放進可重用的資料 payload。
 `sve_carddb.export.transport.compression.python_brotli()` 提供使用 `uv.lock` 鎖定的
@@ -37,7 +36,7 @@ preview CLI 的 `export`／`export-offline` 用 `--brotli` 啟用；預設 `--no
 整個 decoder 的記憶體上限；不先一次性配置整份不可信的解壓輸出。
 驗證不要求重現 producer 的壓縮 bytes，亦不取代 manifest 的長度／hash／閉包檢查。
 
-上傳讀回匯出根時保留既有 manifest／changes 的 raw、gzip、br 表示，
+上傳讀回匯出根時保留既有 manifest／changes 的 raw、br 表示，
 重驗後直接使用，不呼叫 producer 重壓，因此不需提供 producer codec。遠端不可變物件
 比對確切 bytes，不因兩份 `.br` 解壓內容相同就允許換編碼覆寫。
 
@@ -66,20 +65,20 @@ printing 與 display revision 的詳情片一對一提供每個 base row，保�
 未知 descriptor、缺 required、重複 PK、錯誤 base/dependency、循環、未閉合的公開引用、
 錯誤列位置與非法 pending 呈現都會失敗。
 
-`Snapshot.assert_identical` 比較兩次輸出的 raw/br/gzip 與 recipe；批次時間
+`Snapshot.assert_identical` 比較兩次輸出的 raw/br 與 recipe；批次時間
 及版號只影響快照清單，未變 payload bytes 可跨版重用。
 
-`export.transport.measure.measure` 目前回報 N0 的全文／啟動包 raw／br／gzip、逐片 metadata 與超限檔；它把 manifest／config 計入，排除 images／空 DSL。
+`export.transport.measure.measure` 目前回報 N0 的全文／啟動包 raw／br、逐片 metadata 與超限檔；它把 manifest／config 計入，排除 images／空 DSL。
 既有 `startup_by_region.jp`／`.en` 若仍載全部 bootstrap，兩區數字相同；其中 `target_br_1_mib`／`stop_for_maintainer` 沿用舊啟動目標與停點，不是現行分界。這些數字不是新基本目錄裝檔或單區完整文字帳的通過證據。
 
-修訂後的報告依 [size-budget](size-budget.md)：全量 raw（全部文字分片＋manifest）≤40 MiB，單一版本完整文字閉包 Brotli ≤8 MiB、gzip ≤10 MiB，基本目錄容器 raw ≤2 MiB，其他資料檔 ≤512 KiB。
+修訂後的報告依 [size-budget](size-budget.md)：兩區全量 raw（全部文字分片＋manifest）每次報告、明顯成長時檢討，單一版本完整文字閉包 Brotli ≤8 MiB，基本目錄容器 raw ≤2 MiB，其他資料檔 ≤512 KiB。
 基本目錄冷載逐區計完整 manifest＋config＋實際 File 與依賴；混區／共用 File 整檔計，不分攤語言比例。
 Brotli 2 MiB 是分界，略超報精確 bytes 差額與比例，明顯超出才交維護者，不當作 CI 硬閘門。
 source／counterpart、必要跨區檔、卡號索引與字典須完整計入單區全文；基本文字就緒而日文依據／標註未備妥時亦不免計。
 新量法不以舊豁免或現有 API 數字宣稱已驗收。
 
 逐檔 owner／bucket／partition 報所有 fragments 的集合，不只取第一個。
-另報全部 images metadata 的檔數／raw／br／gzip（不加進完整文字）；metadata 與
+另報全部 images metadata 的檔數／raw／br（不加進完整文字）；metadata 與
 圖片 blob 分列，當頁小型 row 集合不能冒充實際下載量。背景全量 metadata 的
 成本仍算首次 session／離線下載；實際成為首屏或基本目錄必載依賴者加回該冷載帳。
 

@@ -11,7 +11,7 @@ import { readFile } from "node:fs/promises"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import path from "node:path"
 import { promisify } from "node:util"
-import { brotliCompress, constants as zlib, gzip } from "node:zlib"
+import { brotliCompress, constants as zlib } from "node:zlib"
 
 import tailwindcss from "@tailwindcss/vite"
 import basicSsl from "@vitejs/plugin-basic-ssl"
@@ -36,7 +36,7 @@ export function snapshotCacheControl(relative: string, search: string): string {
   return immutable ? "public, max-age=31536000, immutable" : "no-store"
 }
 
-export function snapshotEncoding(accept: string | undefined): "br" | "gzip" | undefined {
+export function snapshotEncoding(accept: string | undefined): "br" | undefined {
   // q=0 means the client refuses that encoding.
   const offered = new Set(
     (accept ?? "")
@@ -46,16 +46,12 @@ export function snapshotEncoding(accept: string | undefined): "br" | "gzip" | un
       .map(([name]) => name),
   )
   if (offered.has("br")) return "br"
-  if (offered.has("gzip")) return "gzip"
   return undefined
 }
 
-const compressors = {
-  // Quality 9 keeps the first dev load quick; the CDN's quality 11 is only slightly smaller.
-  br: (data: Buffer) =>
-    promisify(brotliCompress)(data, { params: { [zlib.BROTLI_PARAM_QUALITY]: 9 } }),
-  gzip: (data: Buffer) => promisify(gzip)(data, { level: 9 }),
-}
+// Quality 9 keeps the first dev load quick; the CDN's quality 11 is only slightly smaller.
+const compressBrotli = (data: Buffer) =>
+  promisify(brotliCompress)(data, { params: { [zlib.BROTLI_PARAM_QUALITY]: 9 } })
 // Dev only: the CDN serves precompressed JSON, so compress each file once instead of per request.
 const compressed = new Map<string, Promise<Buffer>>()
 
@@ -113,10 +109,10 @@ export function serveSnapshotRoot(prefix: string, dir: string | undefined): Plug
       createReadStream(file).pipe(res)
       return
     }
-    const key = `${file}\0${String(statSync(file).mtimeMs)}\0${encoding}`
+    const key = `${file}\0${String(statSync(file).mtimeMs)}`
     let body = compressed.get(key)
     if (body === undefined) {
-      body = readFile(file).then(compressors[encoding])
+      body = readFile(file).then(compressBrotli)
       compressed.set(key, body)
     }
     body.then(

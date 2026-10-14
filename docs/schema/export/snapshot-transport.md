@@ -51,7 +51,7 @@ manifest 是一般 JSON object，不使用 tuple。完整欄位如下；引用�
 | qa_card_ids, errata_card_ids | `[ID]`，本次公開 card ID 的排序唯一集合，見 §6 |
 | changes_ref | `Blob?`，首版或預覽可 null；正式續版必填且指向 §7 的變動摘要 |
 
-`FileRef = {key:Text,sha256:Hash}`；必須同時吻合 files 中該 key 的 hash。`Blob = {path:Path,sha256:Hash,bytes:UInt,compressed_bytes:{br:UInt?,gzip:UInt?}}`，bytes > 0；壓縮值非 null 時亦 > 0。
+`FileRef = {key:Text,sha256:Hash}`；必須同時吻合 files 中該 key 的 hash。`Blob = {path:Path,sha256:Hash,bytes:UInt,compressed_bytes:{br:UInt?}}`，bytes > 0；壓縮值非 null 時亦 > 0。
 
 `File` 的完整形狀是 `{key,path,sha256,bytes,compressed_bytes,row_counts,dependencies,role}`。其中 Blob 五欄同上，另外：
 
@@ -60,7 +60,7 @@ manifest 是一般 JSON object，不使用 tuple。完整欄位如下；引用�
 - `row_counts` 是 `[{table:Code,owner:Owner,bucket:UInt,partition:Partition,count:UInt}]`，逐一對應容器 fragment（含零列），count 是該 fragment 的 rows 長度，不是 join 後實體數。config 為 []；programs 也為 []，entries 長度由附件驗證。
 - `dependencies` 是按 key 排序的唯一 `[FileRef]`；只表達解析／join 所需的先行檔案，須為 DAG，不包含所有邏輯 FK。所有邏輯 FK 的整體閉包仍由 producer 驗證，不能藉省 dependencies 規避。image 檔依賴 config，具有 base 的 fragment 所在 File 至少依賴其精確 base 檔；不能只由 role 推導依賴方向或把所有邏輯來源引用變成強制下載。
 
-JSON blob 使用 `snapshots/blobs/<64hex>.json`；br/gzip 分別在同 path 加 `.br`／`.gz`。br 固定品質 11、gzip 固定等級 9，gzip header mtime=0、無檔名；壓縮器及版本由 producer recipe 釘住，兩次 clean export 壓縮 bytes 須相同。null 表示沒有該表示，不能當作零 bytes。下載後先核實壓縮長度，解壓後核 canonical bytes 長度與 sha256；不是拿壓縮內容算 File.sha256。HTTP 自動解壓的 client 要在能觀測傳輸長度的層驗證，不能把已解壓長度拿來比 compressed_bytes。
+JSON blob 使用 `snapshots/blobs/<64hex>.json`；Brotli 表示在同 path 加 `.br`，固定品質 11；壓縮器及版本由 producer recipe 釘住，兩次 clean export 壓縮 bytes 須相同。null 表示沒有該表示，不能當作零 bytes。下載後先核實壓縮長度，解壓後核 canonical bytes 長度與 sha256；不是拿壓縮內容算 File.sha256。HTTP 自動解壓的 client 要在能觀測傳輸長度的層驗證，不能把已解壓長度拿來比 compressed_bytes。
 
 ## 3. config 與巢狀 tuple 型別
 
@@ -234,7 +234,7 @@ row_index 為從 0 起的 UInt，指 base fragment 已按 PK 排序的 rows。de
 
 文字檔由 files 中 role=bootstrap/text/config 的 File 組成；分片依賴閉包不能指向此集合外的檔案。圖片／AST 的公開 reference 由 producer 整體驗證，不是文字下載的強制依賴。需要全部文字的工具從 files 逐片取得，再走同一 reader join。文字離線備妥要求這些文字檔及其依賴全部驗過；只完成 bootstrap 不算。
 
-容量另計 manifest、config、changes 及其 QA／errata 摘要，不因 metadata 移出文字容器而免計；基本目錄冷載依所選日版／英版各計實際閉包與整檔 Brotli；raw／gzip 另報。完整文字 raw 計全部分片＋manifest，壓縮上限計單一版本的完整文字閉包，詳 [size-budget](size-budget.md)。
+容量另計 manifest、config、changes 及其 QA／errata 摘要，不因 metadata 移出文字容器而免計；基本目錄冷載依所選日版／英版各計實際閉包與整檔 Brotli；raw 另報。完整文字 raw 計全部分片＋manifest，壓縮上限計單一版本的完整文字閉包，詳 [size-budget](size-budget.md)。
 
 ### 4.3 檔案描述與容器對照例
 
@@ -267,7 +267,7 @@ row_index 為從 0 起的 UInt，指 base fragment 已按 PK 排序的 rows。de
 }
 ```
 
-對應 files 元素如下，hash 與 bytes 取上述值的 canonical 序列化；未提供壓縮表示時兩格皆 null：
+對應 files 元素如下，hash 與 bytes 取上述值的 canonical 序列化；未提供壓縮表示時 br 為 null：
 
 ```json
 {
@@ -276,8 +276,7 @@ row_index 為從 0 起的 UInt，指 base fragment 已按 PK 排序的 rows。de
   "sha256": "sha256:9573600ca4ad2525092454de3c277d89c469c220ac4b82e348eefea102ca847b",
   "bytes": 203,
   "compressed_bytes": {
-    "br": null,
-    "gzip": null
+    "br": null
   },
   "row_counts": [
     {
@@ -356,7 +355,7 @@ config 與 programs 各一檔，key 分別為 `config`、`programs`。無列 buc
 
 ### 5.2 影像 metadata 的背景預取與逐頁解析
 
-4.0 reader 依 §5.4 只取可見面的卡包 media，圖片 blob 按可見面下載；全域來源詳情按需另取。必列實際 session／離線的 raw／br／gzip、檔數與 cache footprint。任何 metadata 若實際阻擋首屏，均加回 startup_by_region；未下載完整集合時不宣稱已完整離線。
+4.0 reader 依 §5.4 只取可見面的卡包 media，圖片 blob 按可見面下載；全域來源詳情按需另取。必列實際 session／離線的 raw／br、檔數與 cache footprint。任何 metadata 若實際阻擋首屏，均加回 startup_by_region；未下載完整集合時不宣稱已完整離線。
 
 先驗 File bytes／hash，再按 manifest hash 與內容 hash 隔離保存 CacheStorage bytes；按頁以原生 JSON.parse 解碼，canonical／Schema／語意由匯出與上傳前的 Python reader 驗證。當頁取 printing_image 的狀態、尺寸與版本即可組 URL，不必另取 global asset／variant。同 File 的多 locator 去重，當頁優先於背景，整體最多 4 個 in-flight。切快照取消舊工作，舊回應不寫入新狀態；失敗／重試與尚未完整的進度明示，不標離線備妥。
 

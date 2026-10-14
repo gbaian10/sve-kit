@@ -79,13 +79,11 @@ def write_preview(
     for key, blob in snapshot.payloads.items():
         path = string(descriptions[key]["path"])
         write_artifact(roots, path, blob.raw, immutable=True)
-        write_artifact(roots, path + ".gz", blob.gzip, immutable=True)
         _write_brotli(roots, path, blob.br)
     manifest = snapshot.manifest_blob
     hashed = digest(manifest.raw)
     manifest_path = "snapshots/manifests/" + hashed[7:] + ".json"
     write_artifact(roots, manifest_path, manifest.raw, immutable=True)
-    write_artifact(roots, manifest_path + ".gz", manifest.gzip, immutable=True)
     _write_brotli(roots, manifest_path, manifest.br)
     pointer: dict[str, JsonValue] = {
         "manifest_path": manifest_path,

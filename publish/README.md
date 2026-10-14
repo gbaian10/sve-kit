@@ -13,9 +13,9 @@ does not make it formal.
 
 ## What is uploaded
 
-- `snapshots/manifests/<sha256>.json` and its `.gz`, plus `.br` when the export
+- `snapshots/manifests/<sha256>.json` and its `.br` when the export
   wrote one;
-- every payload and changes listed by the manifest, with the `.gz`/`.br`
+- every payload and changes listed by the manifest, with the `.br`
   siblings it declares;
 - `images/<size>/<int_id>[-f<ordinal>].webp` for each available, approved
   printing face size listed in the manifest's media rows;
@@ -25,7 +25,7 @@ Older blobs left in the export root, the private directory (`--private-dir`:
 inputs, reports, media state), the DB bundle, the image library and recipe cache
 are never read for upload. Before any credential or HTTP access, the command
 checks the pointer's manifest hash, the schema, every payload hash and length,
-gzip/Brotli decoding, the reader join and each image's byte count, WebP format
+Brotli decoding, the reader join and each image's byte count, WebP format
 and dimensions. Symlinks and special files are refused. The join resolves the
 printing/face/media rows used to select image keys and checks their reference
 closure. Encoded siblings have no independent hash, so decoding checks that
@@ -35,7 +35,7 @@ Headers come from the contract, not from file extensions:
 
 | Object | Content-Type | Cache-Control | Content-Encoding |
 | --- | --- | --- | --- |
-| JSON | `application/json` | `public,max-age=31536000,immutable` | none, `gzip` or `br` for siblings |
+| JSON | `application/json` | `public,max-age=31536000,immutable` | none or `br` for siblings |
 | WebP | `image/webp` | `public,max-age=86400,must-revalidate` | none |
 | index | `application/json` | `no-store` | none |
 

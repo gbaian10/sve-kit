@@ -1251,21 +1251,10 @@
                   "type": "null"
                 }
               ]
-            },
-            "gzip": {
-              "anyOf": [
-                {
-                  "$ref": "#/$defs/Positive"
-                },
-                {
-                  "type": "null"
-                }
-              ]
             }
           },
           "required": [
-            "br",
-            "gzip"
+            "br"
           ],
           "additionalProperties": false
         }
@@ -1302,21 +1291,10 @@
                   "type": "null"
                 }
               ]
-            },
-            "gzip": {
-              "anyOf": [
-                {
-                  "$ref": "#/$defs/Positive"
-                },
-                {
-                  "type": "null"
-                }
-              ]
             }
           },
           "required": [
-            "br",
-            "gzip"
+            "br"
           ],
           "additionalProperties": false
         },

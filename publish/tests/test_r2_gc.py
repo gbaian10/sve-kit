@@ -118,9 +118,15 @@ def test_missing_retained_member_stops_before_deletion(
     remote: tuple[R2Store, ServerState, Loopback],
 ) -> None:
     store, state, _ = remote
-    _first, second, _third = three_versions(images, roots, store)
+    _first, second, third = three_versions(images, roots, store)
     state.objects[STRAY] = Stored(b"stray", '"stray"', IMAGE_HEADERS)
-    del state.objects[second.members[-1].key]
+    current_members = {m.key for m in third.members}
+    missing = next(
+        m.key
+        for m in second.members
+        if m.key.startswith("snapshots/blobs/") and m.key not in current_members
+    )
+    del state.objects[missing]
     with pytest.raises(ExportError, match=r"^GC retained closure is incomplete$"):
         gc.collect(store, PUBLIC_PREFIXES, execute=True)
     assert STRAY in state.objects

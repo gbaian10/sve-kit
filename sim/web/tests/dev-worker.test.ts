@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { readFileSync } from "node:fs"
-import { brotliCompressSync, gzipSync } from "node:zlib"
+import { brotliCompressSync } from "node:zlib"
 
 import { parse } from "jsonc-parser"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
@@ -99,10 +99,8 @@ afterEach(() => {
 describe("development Worker", () => {
   it.each([
     BLOB,
-    `${BLOB}.gz`,
     `${BLOB}.br`,
     `snapshots/manifests/${HASH}.json`,
-    `snapshots/manifests/${HASH}.json.gz`,
     `snapshots/manifests/${HASH}.json.br`,
   ])("serves immutable %s from the edge after an R2 miss", async (key) => {
     const f = fixture()
@@ -163,7 +161,6 @@ describe("development Worker", () => {
       const json = '{"synthetic":true}'
       const variants = [
         { suffix: "", bytes: new TextEncoder().encode(json), encoding: undefined },
-        { suffix: ".gz", bytes: gzipSync(json), encoding: "gzip" },
         { suffix: ".br", bytes: brotliCompressSync(json), encoding: "br" },
       ]
       for (const variant of variants) {
@@ -286,10 +283,8 @@ describe("development Worker", () => {
 
   it.each([
     BLOB,
-    `${BLOB}.gz`,
     `${BLOB}.br`,
     `snapshots/manifests/${HASH}.json`,
-    `snapshots/manifests/${HASH}.json.gz`,
     `snapshots/manifests/${HASH}.json.br`,
     INDEX,
     "images/card_s/20001.webp",
@@ -315,6 +310,8 @@ describe("development Worker", () => {
     "/cdn-preview/sources/example.webp",
     "/cdn-preview/snapshots/preview/current.json",
     "/cdn-preview/snapshots/versions/index.json.gz",
+    `/cdn-preview/${BLOB}.gz`,
+    `/cdn-preview/snapshots/manifests/${HASH}.json.gz`,
     "/cdn-preview/snapshots/versions/index.json/secret",
     "/cdn-preview/snapshots/blobs/private.json",
     `/cdn-preview/snapshots/manifests/${HASH}.json/private`,
@@ -370,36 +367,30 @@ describe("development Worker", () => {
     expect(edgeCache.put).not.toHaveBeenCalled()
   })
 
-  it.each(["gzip", "br"])(
-    "preserves %s bytes and metadata with manual encoding",
-    async (encoding) => {
-      const bytes =
-        encoding === "gzip"
-          ? gzipSync('{"synthetic":true}')
-          : brotliCompressSync('{"synthetic":true}')
-      const f = fixture(bytes)
-      f.object.httpMetadata = { contentType: "application/json", contentEncoding: encoding }
-      const options = vi.fn()
-      const OriginalResponse = Response
-      vi.stubGlobal(
-        "Response",
-        class extends OriginalResponse {
-          constructor(...args: ConstructorParameters<typeof OriginalResponse>) {
-            super(...args)
-            options(args[1])
-          }
-        },
-      )
-      const suffix = encoding === "gzip" ? "gz" : "br"
-      const response = await worker.fetch(request(`/cdn-preview/${BLOB}.${suffix}`), f.env, f.ctx)
-      expect(response.status).toBe(200)
-      expect(new Uint8Array(await response.arrayBuffer())).toEqual(new Uint8Array(bytes))
-      expect(response.headers.get("Content-Type")).toBe("application/json")
-      expect(response.headers.get("Content-Encoding")).toBe(encoding)
-      expect(response.headers.get("ETag")).toBe('"synthetic-etag"')
-      expect(options).toHaveBeenCalledWith(expect.objectContaining({ encodeBody: "manual" }))
-    },
-  )
+  it("preserves Brotli bytes and metadata with manual encoding", async () => {
+    const encoding = "br"
+    const bytes = brotliCompressSync('{"synthetic":true}')
+    const f = fixture(bytes)
+    f.object.httpMetadata = { contentType: "application/json", contentEncoding: encoding }
+    const options = vi.fn()
+    const OriginalResponse = Response
+    vi.stubGlobal(
+      "Response",
+      class extends OriginalResponse {
+        constructor(...args: ConstructorParameters<typeof OriginalResponse>) {
+          super(...args)
+          options(args[1])
+        }
+      },
+    )
+    const response = await worker.fetch(request(`/cdn-preview/${BLOB}.br`), f.env, f.ctx)
+    expect(response.status).toBe(200)
+    expect(new Uint8Array(await response.arrayBuffer())).toEqual(new Uint8Array(bytes))
+    expect(response.headers.get("Content-Type")).toBe("application/json")
+    expect(response.headers.get("Content-Encoding")).toBe(encoding)
+    expect(response.headers.get("ETag")).toBe('"synthetic-etag"')
+    expect(options).toHaveBeenCalledWith(expect.objectContaining({ encodeBody: "manual" }))
+  })
 
   it("does not invent absent metadata", async () => {
     const f = fixture()

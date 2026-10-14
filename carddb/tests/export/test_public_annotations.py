@@ -343,7 +343,6 @@ def _accounting(
         return Blob(
             bytes(integer(sizes["raw"])),
             bytes(integer(sizes["br"])),
-            bytes(integer(sizes["gzip"])),
         )
 
     files = {
