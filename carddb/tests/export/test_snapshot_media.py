@@ -1,4 +1,4 @@
-"""Synthetic 3.0 media, revision and independent wire counterexamples."""
+"""Synthetic 4.0 media, revision and independent wire counterexamples."""
 
 from copy import deepcopy
 from dataclasses import replace

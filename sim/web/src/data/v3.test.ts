@@ -39,7 +39,7 @@ function origin(first = v3Version()) {
 }
 const front = { printingId: "p:a", faceId: "f:a" }
 
-describe("3.0 display projection", () => {
+describe("4.0 display projection", () => {
   it.each(
     arrayValue(v3Fixture("image-url-cases.json"))
       .map((value) => objectValue(value))
