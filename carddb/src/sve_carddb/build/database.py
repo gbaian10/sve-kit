@@ -123,7 +123,12 @@ class Database:
             raise RuntimeError("Cannot save an unfinished build transaction")
         # The last commit already verified the graph; only the physical check was skipped.
         self._verify_enforcement()
-        self._verify_integrity()
+        self._connection.execute("PRAGMA ignore_check_constraints = ON")
+        try:
+            self._verify_integrity()
+        finally:
+            self._connection.execute("PRAGMA ignore_check_constraints = OFF")
+        self._verify_enforcement()
         with path.open("xb"):
             pass
         target = sqlite3.connect(path)

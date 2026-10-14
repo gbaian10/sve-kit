@@ -29,21 +29,26 @@ def test_sqlite_page_corruption() -> None:
     with sqlite3.connect(":memory:", isolation_level=None) as connection:
         connection.execute("CREATE TABLE sample (value INTEGER)")
         connection.execute("INSERT INTO sample VALUES (1)")
-        page_size = connection.execute("PRAGMA page_size").fetchone()[0]
-        root = connection.execute(
-            "SELECT rootpage FROM sqlite_schema WHERE name = 'sample'"
-        ).fetchone()[0]
-        assert isinstance(page_size, int)
-        assert isinstance(root, int)
-        content = bytearray(connection.serialize())
-        # An invalid b-tree page type represents physical damage, independent of CHECK.
-        content[(root - 1) * page_size] = 0
+        content = _damaged_page(connection, "sample")
     for flag in ("ON", "OFF"):
         with sqlite3.connect(":memory:", isolation_level=None) as damaged:
-            damaged.deserialize(bytes(content))
+            damaged.deserialize(content)
             damaged.execute(f"PRAGMA ignore_check_constraints = {flag}")
             with pytest.raises(sqlite3.DatabaseError, match="malformed"):
                 damaged.execute("PRAGMA integrity_check").fetchall()
+
+
+def _damaged_page(connection: sqlite3.Connection, table: str) -> bytes:
+    page_size = connection.execute("PRAGMA page_size").fetchone()[0]
+    root = connection.execute(
+        "SELECT rootpage FROM sqlite_schema WHERE name = ?", (table,)
+    ).fetchone()[0]
+    assert isinstance(page_size, int)
+    assert isinstance(root, int)
+    content = bytearray(connection.serialize())
+    # An invalid b-tree page type represents physical damage, independent of CHECK.
+    content[(root - 1) * page_size] = 0
+    return bytes(content)
 
 
 def test_sqlite_index_corruption() -> None:
@@ -77,3 +82,24 @@ def test_save_restores_check_enforcement(tmp_path: Path) -> None:
             db._connection.execute("INSERT INTO node (id) VALUES ('')")
         with db.transaction():
             db.insert("node", {"id": "synthetic:b"})
+
+
+def test_failed_save_restores_check_enforcement(tmp_path: Path) -> None:
+    destination = tmp_path / "build.sqlite"
+    with create_database(compiled()) as db:
+        db._connection.deserialize(_damaged_page(db._connection, "node"))
+        with pytest.raises(sqlite3.DatabaseError, match="malformed"):
+            db.save(destination)
+        assert db._connection.execute("PRAGMA ignore_check_constraints").fetchall() == [
+            (0,)
+        ]
+    assert not destination.exists()
+
+
+def test_save_rejects_disabled_check_enforcement(tmp_path: Path) -> None:
+    destination = tmp_path / "build.sqlite"
+    with create_database(compiled()) as db:
+        db._connection.execute("PRAGMA ignore_check_constraints = ON")
+        with pytest.raises(sqlite3.IntegrityError, match="enforcement is disabled"):
+            db.save(destination)
+    assert not destination.exists()

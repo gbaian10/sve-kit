@@ -544,7 +544,7 @@ official route 由 `card_no_state=official` 的 printing 自動推導，舊號/�
 
 `region_text_review` 的規則來源變更須重驗；目前沒有規則等義投影可讓表記變更沿用舊資格。卡名／官英顯示選用另檢 exact 名稱來源，沒有 fresh aligned 不能以「沒有 divergence」當核對完成。
 
-建置資料庫開啟 `foreign_keys`，PK/UQ/CHECK、`foreign_key_check/integrity_check` 全過；對仍使用決定封套的入口驗批次成員 hash、跨區全筆確認、各面歸屬/數量、日期不重疊、永久配號/alias 無環、模板碰撞與依賴、逐字證據、DSL exact tuple、機制 freshness、圖片狀態。未採納資料依各自類別處理，不能假造 FK；§4 表記未定的觀測仍公開顯示，不能把診斷隔離集合當整卡排除閘門。
+建置資料庫開啟 `foreign_keys`，寫入時強制 PK/UQ/CHECK，提交前通過 `foreign_key_check` 與跨表驗證，並確認 FK/CHECK enforcement 啟用。`save()` 儲存前只驗實體結構：暫時以 `ignore_check_constraints=ON` 執行 `integrity_check`，保留頁面、索引、UNIQUE 與 NOT NULL 檢查，不重跑寫入時已通過的 CHECK；無論成功或失敗都恢復 CHECK enforcement，成功後再次確認 enforcement 才備份。顯式 `Database.verify()` 不略過 CHECK；外部讀取的型別與領域驗證仍保留。對仍使用決定封套的入口驗批次成員 hash、跨區全筆確認、各面歸屬/數量、日期不重疊、永久配號/alias 無環、模板碰撞與依賴、逐字證據、DSL exact tuple、機制 freshness、圖片狀態。未採納資料依各自類別處理，不能假造 FK；§4 表記未定的觀測仍公開顯示，不能把診斷隔離集合當整卡排除閘門。
 
 卡表快照由欄位白名單生成，驗 JSON Schema、引用閉包（包括 nested ID）、相容能力、完整文字包/分片等價、row counts/檔 hash、公開欄位無本機路徑/私密資料。不要把建置資料庫的 SQL 表直接 dump。機械驗證通過不表示卡片語意已由人確認；手機解析/常駐/更新峰值須另測。詳見 [snapshot-format.md](../export/snapshot-format.md) 與 [size-budget.md](../export/size-budget.md)。
 
