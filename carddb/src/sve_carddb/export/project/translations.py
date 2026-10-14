@@ -230,11 +230,11 @@ def _binding_identity(
 
 
 def _display_checks(
-    source: Source, use: Record, decisions: Decisions, identity: tuple[str, str, str]
+    source: Source,
+    use: Record,
+    checks: tuple[DisplayCheck, ...],
+    identity: tuple[str, str, str],
 ) -> tuple[DisplayCheck, ...]:
-    checks = tuple(
-        check for check in decisions.display_checks if check.source_use_id == use["id"]
-    )
     original_owner = _source_owner(source, _owner(use))
     if original_owner is None:
         return ()
@@ -278,32 +278,30 @@ def _counterpart_text(
 
 def _cross_region_allowed(
     source: Source,
-    view: dict[str, list[Record]],
+    owners: dict[tuple[str, ...], Record],
+    cards: dict[str, Record],
     use: Record,
     binding: DisplayBinding,
-    decisions: Decisions,
+    checks: tuple[DisplayCheck, ...],
 ) -> bool:
     identity = _binding_identity(source, use, binding)
-    if identity is None or not _confirmed_mapping(source, view, identity[0]):
+    if identity is None or not _confirmed_mapping(source, cards[identity[0]]):
         return False
-    checks = _display_checks(source, use, decisions, identity)
+    checks = _display_checks(source, use, checks, identity)
     if binding.basis == "official_counterpart":
         if _divergent(source, identity[0], string(use["field"])):
             return False
         return _counterpart_text(source, checks, binding)
     if use["field"] not in {"name", "effect", "flavor"} or use["ordinal"] is not None:
         return False
-    receiver = _owners(view)[binding.destination]
+    receiver = owners[binding.destination]
     return source_unit(receiver, string(use["field"]), None) is not None
 
 
-def _confirmed_mapping(
-    source: Source, view: dict[str, list[Record]], card_id: str
-) -> bool:
-    card = next(row for row in view["card"] if row["id"] == card_id)
+def _confirmed_mapping(source: Source, card: Record) -> bool:
     regions = {
         row["region"]
-        for row in source.matching("printing", "id,card_id,region", card_id=card_id)
+        for row in source.matching("printing", "id,card_id,region", card_id=card["id"])
     }
     return card["identity_state"] == "confirmed" and regions == {"jp", "en"}
 
@@ -325,9 +323,9 @@ class _SelectedTranslations:
         self.public = {string(row["id"]): row for row in view["translation"]}
         self.internal = source.index("translation", "id,context_id,text,source_hash")
         self.contexts = source.index("translation_context", "id,source_unit_id")
-        self.selections = source.rows(
-            "translation_selection", "context_id,target_lang,translation_id"
-        )
+        self.source = source
+        # Validate selections even when no public use reaches the indexed lookups.
+        source.rows("translation_selection", "context_id,target_lang,translation_id")
         self.texts = texts
 
     def append(
@@ -393,14 +391,12 @@ class _SelectedTranslations:
         counterpart: Record | None = None,
     ) -> None:
         """Official counterpart IDs do not occupy the common selection slot."""
-        selected = [
-            row
-            for row in self.selections
-            if (
-                row["context_id"] == use["context_id"]
-                and row["target_lang"] == binding.target_lang
-            )
-        ]
+        selected = self.source.matching(
+            "translation_selection",
+            "context_id,target_lang,translation_id",
+            context_id=use["context_id"],
+            target_lang=binding.target_lang,
+        )
         if binding.basis in {"official_counterpart", "own_source"}:
             if binding.translation_id is None:
                 raise ValueError(
@@ -437,6 +433,11 @@ def translations(  # ruff: ignore[complex-structure] -- own-source and cross-reg
     """Validate source ownership before deriving any cross-region display binding."""
     chosen = _SelectedTranslations(source, view, texts)
     owners = _owners(view)
+    cards = {string(row["id"]): row for row in view["card"]}
+    grouped_checks: dict[str, list[DisplayCheck]] = {}
+    for check in decisions.display_checks:
+        grouped_checks.setdefault(check.source_use_id, []).append(check)
+    checks_by_use = {key: tuple(checks) for key, checks in grouped_checks.items()}
     fields = "id,context_id,field,ordinal,face_revision_id,printing_id,face_id,qa_version_id,cr_clause_id,vocabulary_kind,vocabulary_code,keyword_id,product_family_id,product_id"
     uses = source.index("translation_use", fields)
     for use in uses.values():
@@ -446,9 +447,12 @@ def translations(  # ruff: ignore[complex-structure] -- own-source and cross-reg
         unit = chosen.contexts[string(use["context_id"])]["source_unit_id"]
         if source_unit(owner, string(use["field"]), use["ordinal"]) != unit:
             raise ValueError("Translation owner/context source mismatch")
-        for selected in chosen.selections:
-            if selected["context_id"] == use["context_id"]:
-                chosen.append(owner, use, selected, "own_source")
+        for selected in source.matching(
+            "translation_selection",
+            "context_id,target_lang,translation_id",
+            context_id=use["context_id"],
+        ):
+            chosen.append(owner, use, selected, "own_source")
     for binding in decisions.display_bindings:
         if binding.basis not in {
             "own_source",
@@ -468,9 +472,21 @@ def translations(  # ruff: ignore[complex-structure] -- own-source and cross-reg
             raise ValueError("Translation owner/context source mismatch")
         if binding.basis == "own_source":
             _direct_binding(chosen, owner, use, binding)
-        elif _cross_region_allowed(source, view, use, binding, decisions):
+        elif _cross_region_allowed(
+            source,
+            owners,
+            cards,
+            use,
+            binding,
+            checks_by_use.get(binding.source_use_id, ()),
+        ):
             chosen.bind(
-                owner, use, binding, _counterpart_pointer(use, binding, decisions)
+                owner,
+                use,
+                binding,
+                _counterpart_pointer(
+                    use, binding, checks_by_use.get(binding.source_use_id, ())
+                ),
             )
     used = {
         string(object_value(raw)["translation_id"])
@@ -500,19 +516,15 @@ def pointer(use: Record) -> Record:
 
 
 def _counterpart_pointer(
-    use: Record, binding: DisplayBinding, decisions: Decisions
+    use: Record, binding: DisplayBinding, checks: tuple[DisplayCheck, ...]
 ) -> Record | None:
     if binding.basis != "official_counterpart":
         return None
-    checks = [
-        check
-        for check in decisions.display_checks
-        if check.source_use_id == use["id"] and check.counterpart
-    ]
-    if len(checks) != 1:
+    peers = [check for check in checks if check.counterpart]
+    if len(peers) != 1:
         raise ValueError("Official counterpart requires one exact peer owner")
     return {
-        "owner": public_owner(checks[0].counterpart_owner),
+        "owner": public_owner(peers[0].counterpart_owner),
         "field": use["field"],
         "ordinal": use["ordinal"],
     }

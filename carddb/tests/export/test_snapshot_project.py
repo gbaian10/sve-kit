@@ -1535,6 +1535,84 @@ def test_conflicting_face_roles_are_unknown(db: Database) -> None:
     assert region(projected(db))["deck_role"] is None
 
 
+def test_card_faces_printings_and_roles_stay_with_their_card(db: Database) -> None:
+    dual_region(db)
+    with db.transaction():
+        db.delete("deck_role_override", {"card_id": "card", "region": "jp"})
+        db.delete(
+            "face_special_kind",
+            {"revision_id": "revision", "special_kind_code": "synthetic"},
+        )
+        db.insert(
+            "vocabulary",
+            {"kind": "type", "code": "leader", "label_unit_id": TEXT, "active": True},
+        )
+        db.insert("card", dict(db.rows("card")[0].values) | {"id": "leader-card"})
+        db.insert(
+            "face",
+            dict(db.rows("face")[0].values)
+            | {"id": "leader-face", "card_id": "leader-card"},
+        )
+        db.insert(
+            "face_revision",
+            dict(db.rows("face_revision")[0].values)
+            | {
+                "id": "leader-revision",
+                "face_id": "leader-face",
+                "type_code": "leader",
+            },
+        )
+        db.insert(
+            "face_current",
+            dict(db.rows("face_current")[0].values)
+            | {
+                "face_id": "leader-face",
+                "region": "jp",
+                "revision_id": "leader-revision",
+            },
+        )
+        db.insert(
+            "printing",
+            dict(db.rows("printing")[0].values)
+            | {
+                "id": "leader-printing",
+                "card_id": "leader-card",
+                "card_no": "TEST-LEADER",
+            },
+        )
+        db.insert("card_int_id", {"printing_id": "leader-printing", "int_id": 20003})
+        db.insert(
+            "printing_face",
+            dict(db.rows("printing_face")[0].values)
+            | {
+                "printing_id": "leader-printing",
+                "face_id": "leader-face",
+                "card_id": "leader-card",
+                "art_id": None,
+            },
+        )
+    result = dual_project(db, decisions())
+    assert one(result, "card", "card")["faces"] == ["face"]
+    leader = one(result, "card", "leader-card")
+    assert leader["faces"] == ["leader-face"]
+    assert [
+        (object_value(raw)["region"], object_value(raw)["deck_role"])
+        for raw in array(one(result, "card", "card")["regions"])
+    ] == [("en", "main"), ("jp", "main")]
+    assert [
+        (
+            object_value(raw)["region"],
+            object_value(raw)["release_state"],
+            object_value(raw)["mapping_state"],
+            object_value(raw)["deck_role"],
+        )
+        for raw in array(leader["regions"])
+    ] == [
+        ("en", "unknown", "unmapped", None),
+        ("jp", "released", "unmapped", "leader"),
+    ]
+
+
 @pytest.mark.parametrize("unknown", ["special_kind", "type"])
 def test_unknown_role_codes_remain_null(db: Database, unknown: str) -> None:
     with db.transaction():

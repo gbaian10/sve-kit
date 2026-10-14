@@ -99,7 +99,11 @@ def inclusions(source: Source, view: dict[str, list[Record]], dates: Dates) -> N
 
 
 def _role(
-    source: Source, card: Record, region: str, view: dict[str, list[Record]]
+    source: Source,
+    card: Record,
+    region: str,
+    faces: list[Record],
+    revisions: list[Record],
 ) -> str | None:
     for override in source.matching(
         "deck_role_override",
@@ -111,13 +115,12 @@ def _role(
             return string(override["role"])
     currents = {
         object_value(raw)["revision_id"]
-        for face in view["face"]
-        if face["card_id"] == card["id"]
+        for face in faces
         for raw in array(face["current"])
         if object_value(raw)["region"] == region
     }
     roles: set[str] = set()
-    for revision in view["face_revision"]:
+    for revision in revisions:
         if revision["id"] not in currents:
             continue
         kinds = set(map(string, array(revision["special_kinds"])))
@@ -137,6 +140,30 @@ def _role(
     return next(iter(roles)) if len(roles) == 1 else None
 
 
+def _card_rows(
+    view: dict[str, list[Record]],
+) -> dict[str, dict[str, list[Record]]]:
+    faces_by_card: dict[str, list[Record]] = {}
+    face_cards: dict[str, str] = {}
+    for face in view["face"]:
+        card_id = string(face["card_id"])
+        faces_by_card.setdefault(card_id, []).append(face)
+        face_cards[string(face["id"])] = card_id
+    prints_by_card: dict[str, list[Record]] = {}
+    for printing in view["printing"]:
+        prints_by_card.setdefault(string(printing["card_id"]), []).append(printing)
+    revisions_by_card: dict[str, list[Record]] = {}
+    for revision in view["face_revision"]:
+        revision_card = face_cards.get(string(revision["face_id"]))
+        if revision_card is not None:
+            revisions_by_card.setdefault(revision_card, []).append(revision)
+    return {
+        "face": faces_by_card,
+        "printing": prints_by_card,
+        "face_revision": revisions_by_card,
+    }
+
+
 def region_views(
     source: Source,
     view: dict[str, list[Record]],
@@ -145,13 +172,14 @@ def region_views(
     defaults: Mapping[tuple[str, str], DefaultPrinting],
 ) -> None:
     """No counterpart printing means unknown release, never confirmed non-release."""
+    by_card = _card_rows(view)
     for card in view["card"]:
-        own_faces = [face for face in view["face"] if face["card_id"] == card["id"]]
+        own_faces = by_card["face"].get(string(card["id"]), [])
         card["faces"] = [
             face["id"]
             for face in sorted(own_faces, key=lambda row: integer(row["ordinal"]))
         ]
-        all_prints = [row for row in view["printing"] if row["card_id"] == card["id"]]
+        all_prints = by_card["printing"].get(string(card["id"]), [])
         regions: list[Record] = []
         for region in ("en", "jp"):
             prints = [row for row in all_prints if row["region"] == region]
@@ -217,7 +245,13 @@ def region_views(
                     if default is None
                     else default.printing_id,
                     "default_method": None if default is None else default.method,
-                    "deck_role": _role(source, card, region, view),
+                    "deck_role": _role(
+                        source,
+                        card,
+                        region,
+                        own_faces,
+                        by_card["face_revision"].get(string(card["id"]), []),
+                    ),
                     "debut_product_ids": json_list(debut),
                     "debut_state": debut_state,
                 }
