@@ -268,3 +268,23 @@ def test_existing_primary_cannot_accumulate_a_new_name(db: Database) -> None:
     with pytest.raises(ValueError, match="Conflicting primary"), db.transaction():
         set_name(db, "jp", "Different")
         populate_rules_names(db)
+
+
+@pytest.mark.parametrize("role", ["collab", "treated_as"])
+def test_existing_special_name_is_not_a_conflicting_primary(
+    db: Database, role: Literal["collab", "treated_as"]
+) -> None:
+    binding = NameBinding(
+        face_id="face",
+        region="jp",
+        official_name="Synthetic special name",
+        role=role,
+        decision_id="decision",
+    )
+    with db.transaction():
+        register_name(db, binding)
+        assert populate_rules_names(db) == 1
+    assert {row.values["role"] for row in db.rows("face_rules_name")} == {
+        role,
+        "primary",
+    }

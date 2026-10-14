@@ -1,5 +1,8 @@
 """Exact raw-field bindings derived from adoptions or pinned for synthetic staging."""
 
+from collections import defaultdict
+from functools import cached_property
+
 from sve_carddb.core.models import RecordData
 from sve_carddb.core.regions import Region
 from sve_carddb.domains.catalog.models import Term
@@ -18,13 +21,16 @@ class Vocabulary(RecordData):
     bindings: tuple[Binding, ...]
     terms: tuple[Term, ...] = ()
 
+    @cached_property
+    def _by_key(self) -> dict[tuple[Region, str, str], list[Binding]]:
+        result: dict[tuple[Region, str, str], list[Binding]] = defaultdict(list)
+        for item in self.bindings:
+            result[item.region, item.kind, item.raw].append(item)
+        return result
+
     def lookup(self, region: Region, kind: str, raw: str) -> Binding:
         """Fail on unknown or ambiguous fields rather than deriving codes from text."""
-        found = [
-            item
-            for item in self.bindings
-            if (item.region, item.kind, item.raw) == (region, kind, raw)
-        ]
+        found = self._by_key.get((region, kind, raw), [])
         if len(found) != 1:
             candidates = sorted(
                 {item.code for item in self.bindings if item.kind == kind}

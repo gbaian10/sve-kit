@@ -38,10 +38,12 @@ def populate_rules_names(db: Database) -> int:
     texts = {row.values["id"]: row.values for row in db.rows("text_unit")}
     names = {row.values["id"]: row.values for row in db.rows("rules_name")}
     regional = {(row["region"], row["official_name"]): row for row in names.values()}
-    links = {
-        tuple(row.values[key] for key in ("face_id", "region", "rules_name_id", "role"))
-        for row in db.rows("face_rules_name")
-    }
+    primary: dict[tuple[Value, Value], set[Value]] = defaultdict(set)
+    for existing in db.rows("face_rules_name"):
+        if existing.values["role"] == "primary":
+            primary[existing.values["face_id"], existing.values["region"]].add(
+                existing.values["rules_name_id"]
+            )
     added = 0
     for row in _selected_names(db):
         revision = revisions[row["revision_id"]]
@@ -74,13 +76,10 @@ def populate_rules_names(db: Database) -> int:
             db.insert("rules_name", values)
             names[identifier] = values
             regional[key] = values
-        link = row["face_id"], region, identifier, "primary"
-        if any(
-            previous[0:2] == link[0:2] and previous[3] == "primary" and previous != link
-            for previous in links
-        ):
+        previous = primary[row["face_id"], region]
+        if previous and previous != {identifier}:
             raise ValueError("Conflicting primary construction name")
-        if link not in links:
+        if identifier not in previous:
             db.insert(
                 "face_rules_name",
                 {
@@ -91,7 +90,7 @@ def populate_rules_names(db: Database) -> int:
                     "decision_id": None,
                 },
             )
-            links.add(link)
+            previous.add(identifier)
             added += 1
     return added
 

@@ -1,5 +1,6 @@
 """Pin corrections separately from raw observations and compare corrected candidates."""
 
+from collections import defaultdict
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -224,10 +225,20 @@ def corrected_observations(
     observations: tuple[FaceObservation, ...], applications: tuple[Application, ...]
 ) -> tuple[FaceObservation, ...]:
     """Apply successful field-local replacements before hashes and candidate comparison."""
+    by_use: dict[tuple[str, str, str], list[Application]] = defaultdict(list)
+    for application in applications:
+        observation = application.observation
+        by_use[
+            observation.printing_id, observation.face_id, observation.card.source.id
+        ].append(application)
     result = []
     for item in observations:
         applied = tuple(
-            a for a in applications if a.observation == item and a.status == "applied"
+            a
+            for a in by_use.get(
+                (item.printing_id, item.face_id, item.card.source.id), ()
+            )
+            if a.observation == item and a.status == "applied"
         )
         fields = {
             "effect" if a.data.field == "effect" else "type_raw": a.data.corrected_value
