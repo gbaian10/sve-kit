@@ -850,245 +850,113 @@
       "errata_card_ids": [],
       "files": [
         {
-          "bytes": 205,
+          "bytes": 4077,
           "compressed_bytes": {
             "br": null
           },
-          "dependencies": [],
-          "key": "bootstrap/bootstrap/global/global/band/0",
-          "path": "snapshots/blobs/c27c4846d323fa1a08770ac40b5ca5dbe9b9cd2191fe39007d7b32df7c7f90c7.json",
-          "role": "bootstrap",
-          "row_counts": [
+          "dependencies": [
             {
-              "table": "text_unit",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 1,
-              "partition": "bootstrap",
-              "count": 1
+              "key": "catalog/shared/shared/0",
+              "sha256": "sha256:3d5ca10335eb62ae647528d467bd898569c164097c97212322c09892b0fbde9b"
             }
           ],
-          "sha256": "sha256:c27c4846d323fa1a08770ac40b5ca5dbe9b9cd2191fe39007d7b32df7c7f90c7"
+          "key": "catalog/jp/family-set%3Aa/0",
+          "path": "snapshots/blobs/7a75ba8cca6c5d13896340cdfe0e393237136642a7a6a0ffc5ddcd2bcd6bc34c.json",
+          "purpose": "catalog",
+          "region": "jp",
+          "role": "bootstrap",
+          "row_counts": [
+            [
+              "card",
+              "home_set",
+              "set:a",
+              "bootstrap",
+              "family-set:a",
+              1
+            ],
+            [
+              "face",
+              "home_set",
+              "set:a",
+              "bootstrap",
+              "family-set:a",
+              2
+            ],
+            [
+              "face_revision",
+              "home_set",
+              "set:a",
+              "bootstrap",
+              "family-set:a",
+              2
+            ],
+            [
+              "printing",
+              "home_set",
+              "set:a",
+              "bootstrap",
+              "family-set:a",
+              1
+            ],
+            [
+              "text_unit",
+              "global",
+              null,
+              "bootstrap",
+              "family-set:a",
+              3
+            ],
+            [
+              "translation",
+              "global",
+              null,
+              "bootstrap",
+              "family-set:a",
+              1
+            ]
+          ],
+          "segment": "family-set:a",
+          "sha256": "sha256:7a75ba8cca6c5d13896340cdfe0e393237136642a7a6a0ffc5ddcd2bcd6bc34c"
         },
         {
-          "bytes": 208,
+          "bytes": 1069,
           "compressed_bytes": {
             "br": null
           },
           "dependencies": [],
-          "key": "bootstrap/bootstrap/global/global/band/1",
-          "path": "snapshots/blobs/a79a1744f0d1572dce0e6f9cb179fc7e0ff925edeb1ea89d7c845e3a85882611.json",
+          "key": "catalog/shared/shared/0",
+          "path": "snapshots/blobs/3d5ca10335eb62ae647528d467bd898569c164097c97212322c09892b0fbde9b.json",
+          "purpose": "catalog",
+          "region": null,
           "role": "bootstrap",
           "row_counts": [
-            {
-              "table": "text_unit",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 9,
-              "partition": "bootstrap",
-              "count": 1
-            }
+            [
+              "product_family",
+              "global",
+              null,
+              "bootstrap",
+              "shared",
+              1
+            ],
+            [
+              "text_unit",
+              "global",
+              null,
+              "bootstrap",
+              "shared",
+              2
+            ],
+            [
+              "vocabulary",
+              "global",
+              null,
+              "bootstrap",
+              "shared",
+              1
+            ]
           ],
-          "sha256": "sha256:a79a1744f0d1572dce0e6f9cb179fc7e0ff925edeb1ea89d7c845e3a85882611"
-        },
-        {
-          "bytes": 275,
-          "compressed_bytes": {
-            "br": null
-          },
-          "dependencies": [],
-          "key": "bootstrap/bootstrap/global/global/band/2",
-          "path": "snapshots/blobs/19a544fd4040b792729035da645bd90cac4ab204d0f07fccfd80bb22e1ecb8d2.json",
-          "role": "bootstrap",
-          "row_counts": [
-            {
-              "table": "translation",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 23,
-              "partition": "bootstrap",
-              "count": 1
-            }
-          ],
-          "sha256": "sha256:19a544fd4040b792729035da645bd90cac4ab204d0f07fccfd80bb22e1ecb8d2"
-        },
-        {
-          "bytes": 1002,
-          "compressed_bytes": {
-            "br": null
-          },
-          "dependencies": [],
-          "key": "bootstrap/bootstrap/global/global/band/3",
-          "path": "snapshots/blobs/66a9645bbf8133bd04c3e308aa653edbfe61425cc9ad050b7d28ca181df9561f.json",
-          "role": "bootstrap",
-          "row_counts": [
-            {
-              "table": "product_family",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 24,
-              "partition": "bootstrap",
-              "count": 1
-            },
-            {
-              "table": "text_unit",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 28,
-              "partition": "bootstrap",
-              "count": 1
-            }
-          ],
-          "sha256": "sha256:66a9645bbf8133bd04c3e308aa653edbfe61425cc9ad050b7d28ca181df9561f"
-        },
-        {
-          "bytes": 356,
-          "compressed_bytes": {
-            "br": null
-          },
-          "dependencies": [],
-          "key": "bootstrap/bootstrap/global/global/band/4",
-          "path": "snapshots/blobs/dc430812a50b1423d75b39e8165a43f72e40afdb8522d8c628a09c3836ed58b7.json",
-          "role": "bootstrap",
-          "row_counts": [
-            {
-              "table": "text_unit",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 33,
-              "partition": "bootstrap",
-              "count": 1
-            },
-            {
-              "table": "text_unit",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 35,
-              "partition": "bootstrap",
-              "count": 1
-            }
-          ],
-          "sha256": "sha256:dc430812a50b1423d75b39e8165a43f72e40afdb8522d8c628a09c3836ed58b7"
-        },
-        {
-          "bytes": 1017,
-          "compressed_bytes": {
-            "br": null
-          },
-          "dependencies": [],
-          "key": "bootstrap/bootstrap/global/global/band/7",
-          "path": "snapshots/blobs/df7e106de65894919c1206010343328f3e335cd90d8c97510f7ae9384656bc37.json",
-          "role": "bootstrap",
-          "row_counts": [
-            {
-              "table": "product",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 59,
-              "partition": "bootstrap",
-              "count": 1
-            },
-            {
-              "table": "vocabulary",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 56,
-              "partition": "bootstrap",
-              "count": 1
-            }
-          ],
-          "sha256": "sha256:df7e106de65894919c1206010343328f3e335cd90d8c97510f7ae9384656bc37"
-        },
-        {
-          "bytes": 5149,
-          "compressed_bytes": {
-            "br": null
-          },
-          "dependencies": [],
-          "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-          "path": "snapshots/blobs/8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877.json",
-          "role": "bootstrap",
-          "row_counts": [
-            {
-              "table": "card",
-              "owner": {
-                "id": "set:a",
-                "kind": "home_set"
-              },
-              "bucket": 26,
-              "partition": "bootstrap",
-              "count": 1
-            },
-            {
-              "table": "card_engine_support",
-              "owner": {
-                "id": "set:a",
-                "kind": "home_set"
-              },
-              "bucket": 26,
-              "partition": "bootstrap",
-              "count": 1
-            },
-            {
-              "table": "face",
-              "owner": {
-                "id": "set:a",
-                "kind": "home_set"
-              },
-              "bucket": 26,
-              "partition": "bootstrap",
-              "count": 2
-            },
-            {
-              "table": "face_revision",
-              "owner": {
-                "id": "set:a",
-                "kind": "home_set"
-              },
-              "bucket": 26,
-              "partition": "bootstrap",
-              "count": 2
-            },
-            {
-              "table": "printing",
-              "owner": {
-                "id": "set:a",
-                "kind": "home_set"
-              },
-              "bucket": 29,
-              "partition": "bootstrap",
-              "count": 1
-            },
-            {
-              "table": "printing",
-              "owner": {
-                "id": "set:a",
-                "kind": "home_set"
-              },
-              "bucket": 43,
-              "partition": "bootstrap",
-              "count": 1
-            }
-          ],
-          "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877"
+          "segment": "shared",
+          "sha256": "sha256:3d5ca10335eb62ae647528d467bd898569c164097c97212322c09892b0fbde9b"
         },
         {
           "bytes": 1218,
@@ -1098,40 +966,506 @@
           "dependencies": [],
           "key": "config",
           "path": "snapshots/blobs/04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f.json",
+          "purpose": "config",
+          "region": null,
           "role": "config",
           "row_counts": [],
+          "segment": "shared",
           "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
         },
         {
-          "key": "images/detail/global/global/band/12",
-          "role": "images",
-          "row_counts": [
+          "bytes": 1746,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [
             {
-              "table": "image_asset",
-              "owner": {
-                "kind": "global",
-                "id": null
-              },
-              "bucket": 12,
-              "partition": "detail",
-              "count": 2
+              "key": "catalog/jp/family-set%3Aa/0",
+              "sha256": "sha256:7a75ba8cca6c5d13896340cdfe0e393237136642a7a6a0ffc5ddcd2bcd6bc34c"
             }
           ],
+          "key": "detail/jp/family-set%3Aa/0",
+          "path": "snapshots/blobs/38397884046812564236dfcf2298085397ddefb9e2e55aad06098e9c38270acc.json",
+          "purpose": "detail",
+          "region": "jp",
+          "role": "text",
+          "row_counts": [
+            [
+              "face_revision",
+              "home_set",
+              "set:a",
+              "detail",
+              "catalog:family-set:a",
+              2
+            ]
+          ],
+          "segment": "family-set:a:band-0",
+          "sha256": "sha256:38397884046812564236dfcf2298085397ddefb9e2e55aad06098e9c38270acc"
+        },
+        {
+          "bytes": 1037,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "detail/shared/shared/1",
+          "path": "snapshots/blobs/f8ed37c43da6f93104ed640af0c703a51988b9c9ec6d81b68aeda0c89cb810c1.json",
+          "purpose": "detail",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "ruling_revision",
+              "global",
+              null,
+              "detail",
+              "shared:band-1",
+              1
+            ]
+          ],
+          "segment": "shared:band-1",
+          "sha256": "sha256:f8ed37c43da6f93104ed640af0c703a51988b9c9ec6d81b68aeda0c89cb810c1"
+        },
+        {
+          "bytes": 794,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "detail/shared/shared/4",
+          "path": "snapshots/blobs/49474312bf23fa3bec784c0fcfa46d3e8c3fb4a3a73284db5e651f11babd5613.json",
+          "purpose": "detail",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "text_symbol",
+              "global",
+              null,
+              "detail",
+              "shared:band-4",
+              1
+            ]
+          ],
+          "segment": "shared:band-4",
+          "sha256": "sha256:49474312bf23fa3bec784c0fcfa46d3e8c3fb4a3a73284db5e651f11babd5613"
+        },
+        {
+          "bytes": 161,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "dictionary/shared/shared/0",
+          "path": "snapshots/blobs/b36e7220c1a52be9c1b616bf2470a86213c139ffb8bc0bc3df52c8ad38fca528.json",
+          "purpose": "dictionary",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "text_unit",
+              "global",
+              null,
+              "detail",
+              "shared:band-0",
+              1
+            ]
+          ],
+          "segment": "shared:band-0",
+          "sha256": "sha256:b36e7220c1a52be9c1b616bf2470a86213c139ffb8bc0bc3df52c8ad38fca528"
+        },
+        {
+          "bytes": 231,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "dictionary/shared/shared/11",
+          "path": "snapshots/blobs/a1b3cfc2ad5ad60dce2b3d0caad7476df9447d083b6c1e32bcdcb14c0c146174.json",
+          "purpose": "dictionary",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "translation",
+              "global",
+              null,
+              "detail",
+              "shared:band-11",
+              1
+            ]
+          ],
+          "segment": "shared:band-11",
+          "sha256": "sha256:a1b3cfc2ad5ad60dce2b3d0caad7476df9447d083b6c1e32bcdcb14c0c146174"
+        },
+        {
+          "bytes": 160,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "dictionary/shared/shared/14",
+          "path": "snapshots/blobs/1d9dc686eab26a9dfcf65fe1254337c2e0181e09f0e28391b58e13b731978739.json",
+          "purpose": "dictionary",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "text_unit",
+              "global",
+              null,
+              "detail",
+              "shared:band-14",
+              1
+            ]
+          ],
+          "segment": "shared:band-14",
+          "sha256": "sha256:1d9dc686eab26a9dfcf65fe1254337c2e0181e09f0e28391b58e13b731978739"
+        },
+        {
+          "bytes": 169,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "dictionary/shared/shared/15",
+          "path": "snapshots/blobs/026667e46acf984b413af93dffd56ab2b0b2962c90282e1dfb55d4e962668305.json",
+          "purpose": "dictionary",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "text_unit",
+              "global",
+              null,
+              "detail",
+              "shared:band-15",
+              1
+            ]
+          ],
+          "segment": "shared:band-15",
+          "sha256": "sha256:026667e46acf984b413af93dffd56ab2b0b2962c90282e1dfb55d4e962668305"
+        },
+        {
+          "bytes": 169,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "dictionary/shared/shared/16",
+          "path": "snapshots/blobs/b078af01626d36d41b52a0756d29ebe8b76bc756c9b06dd837ad936c90537496.json",
+          "purpose": "dictionary",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "text_unit",
+              "global",
+              null,
+              "detail",
+              "shared:band-16",
+              1
+            ]
+          ],
+          "segment": "shared:band-16",
+          "sha256": "sha256:b078af01626d36d41b52a0756d29ebe8b76bc756c9b06dd837ad936c90537496"
+        },
+        {
+          "bytes": 161,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "dictionary/shared/shared/17",
+          "path": "snapshots/blobs/ddc0b89e9e40aab83c367db826afc99f9fc6eb2d8913f9646cc70908686f1abd.json",
+          "purpose": "dictionary",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "text_unit",
+              "global",
+              null,
+              "detail",
+              "shared:band-17",
+              1
+            ]
+          ],
+          "segment": "shared:band-17",
+          "sha256": "sha256:ddc0b89e9e40aab83c367db826afc99f9fc6eb2d8913f9646cc70908686f1abd"
+        },
+        {
+          "bytes": 232,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "dictionary/shared/shared/18",
+          "path": "snapshots/blobs/894006185ec281084af4362f60c4d72339b3cca8ba418901a70e90e60db4c5fb.json",
+          "purpose": "dictionary",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "translation",
+              "global",
+              null,
+              "detail",
+              "shared:band-18",
+              1
+            ]
+          ],
+          "segment": "shared:band-18",
+          "sha256": "sha256:894006185ec281084af4362f60c4d72339b3cca8ba418901a70e90e60db4c5fb"
+        },
+        {
+          "bytes": 161,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "dictionary/shared/shared/19",
+          "path": "snapshots/blobs/a2992e0a1d2363e5fb3471b6dcedf83da8f4ac0b1a514368721e99edb1f92b3b.json",
+          "purpose": "dictionary",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "text_unit",
+              "global",
+              null,
+              "detail",
+              "shared:band-19",
+              1
+            ]
+          ],
+          "segment": "shared:band-19",
+          "sha256": "sha256:a2992e0a1d2363e5fb3471b6dcedf83da8f4ac0b1a514368721e99edb1f92b3b"
+        },
+        {
+          "bytes": 165,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "dictionary/shared/shared/23",
+          "path": "snapshots/blobs/d9f58ab0c56aba4e4e5c6da39619331e26958469d188c499074e54403eaf8bb2.json",
+          "purpose": "dictionary",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "text_unit",
+              "global",
+              null,
+              "detail",
+              "shared:band-23",
+              1
+            ]
+          ],
+          "segment": "shared:band-23",
+          "sha256": "sha256:d9f58ab0c56aba4e4e5c6da39619331e26958469d188c499074e54403eaf8bb2"
+        },
+        {
+          "bytes": 164,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "dictionary/shared/shared/4",
+          "path": "snapshots/blobs/f8e9a389664831a1ddf6631741d8a516129493b9e2ae5144530c71bfc1d2c6ff.json",
+          "purpose": "dictionary",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "text_unit",
+              "global",
+              null,
+              "detail",
+              "shared:band-4",
+              1
+            ]
+          ],
+          "segment": "shared:band-4",
+          "sha256": "sha256:f8e9a389664831a1ddf6631741d8a516129493b9e2ae5144530c71bfc1d2c6ff"
+        },
+        {
+          "bytes": 1265,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "engine/shared/family-set%3Aa/0",
+          "path": "snapshots/blobs/3632da8828f1475cd78843871cae7362bbee2bf1bcadb622b5de1871b301ac4b.json",
+          "purpose": "engine",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "card_engine_support",
+              "home_set",
+              "set:a",
+              "bootstrap",
+              "family-set:a:band-0",
+              1
+            ],
+            [
+              "digital_link",
+              "home_set",
+              "set:a",
+              "detail",
+              "family-set:a:band-0",
+              2
+            ]
+          ],
+          "segment": "family-set:a:band-0",
+          "sha256": "sha256:3632da8828f1475cd78843871cae7362bbee2bf1bcadb622b5de1871b301ac4b"
+        },
+        {
+          "bytes": 144,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "engine/shared/shared/4",
+          "path": "snapshots/blobs/f2a68b74a96d3c526e5f13a5929e3d9767829d5dfadca1f3770e2235e508c0ac.json",
+          "purpose": "engine",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "digital_card",
+              "global",
+              null,
+              "detail",
+              "shared:band-4",
+              1
+            ]
+          ],
+          "segment": "shared:band-4",
+          "sha256": "sha256:f2a68b74a96d3c526e5f13a5929e3d9767829d5dfadca1f3770e2235e508c0ac"
+        },
+        {
+          "bytes": 143,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "engine/shared/shared/6",
+          "path": "snapshots/blobs/86416fabec4105b1625a1d147da193819123e6e25acb221a7a61b3c8d91fa16a.json",
+          "purpose": "engine",
+          "region": null,
+          "role": "text",
+          "row_counts": [
+            [
+              "digital_card",
+              "global",
+              null,
+              "detail",
+              "shared:band-6",
+              1
+            ]
+          ],
+          "segment": "shared:band-6",
+          "sha256": "sha256:86416fabec4105b1625a1d147da193819123e6e25acb221a7a61b3c8d91fa16a"
+        },
+        {
+          "bytes": 1320,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "history/jp/family-set%3Aa/0",
+          "path": "snapshots/blobs/c58a740c647f22807a82a2ebccbec6ad1b74c740fd80e8e346ba9799f75cecc1.json",
+          "purpose": "history",
+          "region": "jp",
+          "role": "text",
+          "row_counts": [
+            [
+              "face_revision",
+              "home_set",
+              "set:a",
+              "history",
+              "family-set:a:band-0",
+              1
+            ]
+          ],
+          "segment": "family-set:a:band-0",
+          "sha256": "sha256:c58a740c647f22807a82a2ebccbec6ad1b74c740fd80e8e346ba9799f75cecc1"
+        },
+        {
+          "bytes": 491,
+          "compressed_bytes": {
+            "br": null
+          },
           "dependencies": [
+            {
+              "key": "catalog/jp/family-set%3Aa/0",
+              "sha256": "sha256:7a75ba8cca6c5d13896340cdfe0e393237136642a7a6a0ffc5ddcd2bcd6bc34c"
+            },
             {
               "key": "config",
               "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
             }
           ],
-          "path": "snapshots/blobs/e9d315b8016407e6ff5858c8994344225fc0447fef501f27ef2e993dec4a0ae6.json",
-          "sha256": "sha256:e9d315b8016407e6ff5858c8994344225fc0447fef501f27ef2e993dec4a0ae6",
-          "bytes": 319,
-          "compressed_bytes": {
-            "br": null
-          }
+          "key": "images/shared/family-set%3Aa/0",
+          "path": "snapshots/blobs/56762febfa5e84ace940106bc8cd4655037ef5a283a033775dba4a8b1cea23d0.json",
+          "purpose": "images",
+          "region": null,
+          "role": "images",
+          "row_counts": [
+            [
+              "printing_image",
+              "home_set",
+              "set:a",
+              "detail",
+              "family-set:a:band-0",
+              2
+            ]
+          ],
+          "segment": "family-set:a:band-0",
+          "sha256": "sha256:56762febfa5e84ace940106bc8cd4655037ef5a283a033775dba4a8b1cea23d0"
         },
         {
-          "bytes": 533,
+          "bytes": 493,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [
+            {
+              "key": "catalog/jp/family-set%3Aa/0",
+              "sha256": "sha256:7a75ba8cca6c5d13896340cdfe0e393237136642a7a6a0ffc5ddcd2bcd6bc34c"
+            },
+            {
+              "key": "config",
+              "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
+            },
+            {
+              "key": "print/jp/family-set%3Aa/0",
+              "sha256": "sha256:a9b7feaa23a2158e02d548559cf24d3c5fa1498a1b29c8dd44aebfc2b400a305"
+            }
+          ],
+          "key": "images/shared/family-set%3Aa/1",
+          "path": "snapshots/blobs/f559edac683c95fca25bce30c31634f491b7c73628e3efdf4e4dd2f0dd08794c.json",
+          "purpose": "images",
+          "region": null,
+          "role": "images",
+          "row_counts": [
+            [
+              "printing_image",
+              "home_set",
+              "set:a",
+              "detail",
+              "family-set:a:band-1",
+              2
+            ]
+          ],
+          "segment": "family-set:a:band-1",
+          "sha256": "sha256:f559edac683c95fca25bce30c31634f491b7c73628e3efdf4e4dd2f0dd08794c"
+        },
+        {
+          "bytes": 278,
           "compressed_bytes": {
             "br": null
           },
@@ -1141,96 +1475,149 @@
               "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
             }
           ],
-          "key": "images/detail/global/global/band/55",
-          "path": "snapshots/blobs/69e707fd6d2c96168c7484d9cb55bee17daabb8a1a5c1620b0cdf10fe176179c.json",
+          "key": "images/shared/shared/12",
+          "path": "snapshots/blobs/6577f223ca55bfb8604497fd36674e1a2903c3dd2b3bbe0e569a6bf098efdc85.json",
+          "purpose": "images",
+          "region": null,
           "role": "images",
           "row_counts": [
-            {
-              "table": "image_asset",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 55,
-              "partition": "detail",
-              "count": 1
-            },
-            {
-              "table": "image_variant",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 55,
-              "partition": "detail",
-              "count": 5
-            }
+            [
+              "image_asset",
+              "global",
+              null,
+              "detail",
+              "shared:band-12",
+              2
+            ]
           ],
-          "sha256": "sha256:69e707fd6d2c96168c7484d9cb55bee17daabb8a1a5c1620b0cdf10fe176179c"
+          "segment": "shared:band-12",
+          "sha256": "sha256:6577f223ca55bfb8604497fd36674e1a2903c3dd2b3bbe0e569a6bf098efdc85"
         },
         {
-          "key": "images/detail/home_set/set%3Aa/band/0",
-          "role": "images",
-          "row_counts": [
-            {
-              "table": "printing_image",
-              "owner": {
-                "kind": "home_set",
-                "id": "set:a"
-              },
-              "bucket": 29,
-              "partition": "detail",
-              "count": 2
-            }
-          ],
+          "bytes": 451,
+          "compressed_bytes": {
+            "br": null
+          },
           "dependencies": [
-            {
-              "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-              "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877"
-            },
             {
               "key": "config",
               "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
             }
           ],
-          "path": "snapshots/blobs/1ad784a109a8496e465d77aec8b84fe76d204bd080362d3d3e7fe689db5fbf2c.json",
-          "sha256": "sha256:1ad784a109a8496e465d77aec8b84fe76d204bd080362d3d3e7fe689db5fbf2c",
-          "bytes": 527,
-          "compressed_bytes": {
-            "br": null
-          }
-        },
-        {
-          "key": "images/detail/home_set/set%3Aa/band/1",
+          "key": "images/shared/shared/55",
+          "path": "snapshots/blobs/2d6bbeebdb4d9b284f341c8e305f4d395062cca857b4daaa6c15b75a3f9f9915.json",
+          "purpose": "images",
+          "region": null,
           "role": "images",
           "row_counts": [
-            {
-              "table": "printing_image",
-              "owner": {
-                "kind": "home_set",
-                "id": "set:a"
-              },
-              "bucket": 43,
-              "partition": "detail",
-              "count": 2
-            }
+            [
+              "image_asset",
+              "global",
+              null,
+              "detail",
+              "shared:band-55",
+              1
+            ],
+            [
+              "image_variant",
+              "global",
+              null,
+              "detail",
+              "shared:band-55",
+              5
+            ]
           ],
-          "dependencies": [
-            {
-              "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-              "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877"
-            },
-            {
-              "key": "config",
-              "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
-            }
-          ],
-          "path": "snapshots/blobs/e2148ed15439e4fa5803c289d889387a4b30e2d099f7ccef19143232f13cf522.json",
-          "sha256": "sha256:e2148ed15439e4fa5803c289d889387a4b30e2d099f7ccef19143232f13cf522",
-          "bytes": 529,
+          "segment": "shared:band-55",
+          "sha256": "sha256:2d6bbeebdb4d9b284f341c8e305f4d395062cca857b4daaa6c15b75a3f9f9915"
+        },
+        {
+          "bytes": 3014,
           "compressed_bytes": {
             "br": null
-          }
+          },
+          "dependencies": [
+            {
+              "key": "catalog/jp/family-set%3Aa/0",
+              "sha256": "sha256:7a75ba8cca6c5d13896340cdfe0e393237136642a7a6a0ffc5ddcd2bcd6bc34c"
+            },
+            {
+              "key": "print/jp/family-set%3Aa/0",
+              "sha256": "sha256:a9b7feaa23a2158e02d548559cf24d3c5fa1498a1b29c8dd44aebfc2b400a305"
+            }
+          ],
+          "key": "print-detail/jp/family-set%3Aa/0",
+          "path": "snapshots/blobs/3489c3c2cdfb81d8c06fcc7c6fa76fd78d4d2a9e651e048443ab48f7021206e7.json",
+          "purpose": "print-detail",
+          "region": "jp",
+          "role": "text",
+          "row_counts": [
+            [
+              "printing",
+              "home_set",
+              "set:a",
+              "detail",
+              "catalog:family-set:a",
+              1
+            ],
+            [
+              "printing",
+              "home_set",
+              "set:a",
+              "detail",
+              "print:family-set:a:band-0",
+              1
+            ]
+          ],
+          "segment": "family-set:a:band-0",
+          "sha256": "sha256:3489c3c2cdfb81d8c06fcc7c6fa76fd78d4d2a9e651e048443ab48f7021206e7"
+        },
+        {
+          "bytes": 790,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "print/jp/family-set%3Aa/0",
+          "path": "snapshots/blobs/a9b7feaa23a2158e02d548559cf24d3c5fa1498a1b29c8dd44aebfc2b400a305.json",
+          "purpose": "print",
+          "region": "jp",
+          "role": "text",
+          "row_counts": [
+            [
+              "printing",
+              "home_set",
+              "set:a",
+              "bootstrap",
+              "family-set:a:band-0",
+              1
+            ]
+          ],
+          "segment": "family-set:a:band-0",
+          "sha256": "sha256:a9b7feaa23a2158e02d548559cf24d3c5fa1498a1b29c8dd44aebfc2b400a305"
+        },
+        {
+          "bytes": 813,
+          "compressed_bytes": {
+            "br": null
+          },
+          "dependencies": [],
+          "key": "product/jp/shared/7",
+          "path": "snapshots/blobs/4717cf9ce52489d0e09890e47d8d4347248d89470e37645c82ac0ee56081040b.json",
+          "purpose": "product",
+          "region": "jp",
+          "role": "text",
+          "row_counts": [
+            [
+              "product",
+              "global",
+              null,
+              "bootstrap",
+              "shared:band-7",
+              1
+            ]
+          ],
+          "segment": "shared:band-7",
+          "sha256": "sha256:4717cf9ce52489d0e09890e47d8d4347248d89470e37645c82ac0ee56081040b"
         },
         {
           "bytes": 39,
@@ -1240,271 +1627,12 @@
           "dependencies": [],
           "key": "programs",
           "path": "snapshots/blobs/f5be6545c27acc96869379092ccb1f2e0d846a924b9aae9be125849260bcd921.json",
+          "purpose": "programs",
+          "region": null,
           "role": "programs",
           "row_counts": [],
+          "segment": "shared",
           "sha256": "sha256:f5be6545c27acc96869379092ccb1f2e0d846a924b9aae9be125849260bcd921"
-        },
-        {
-          "bytes": 210,
-          "compressed_bytes": {
-            "br": null
-          },
-          "dependencies": [],
-          "key": "text/detail/global/global/band/15",
-          "path": "snapshots/blobs/f4563dbc40ec658363f0a99570fc392f3c117b73abc65b66ee03174b89a8008c.json",
-          "role": "text",
-          "row_counts": [
-            {
-              "table": "text_unit",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 31,
-              "partition": "detail",
-              "count": 1
-            }
-          ],
-          "sha256": "sha256:f4563dbc40ec658363f0a99570fc392f3c117b73abc65b66ee03174b89a8008c"
-        },
-        {
-          "bytes": 1061,
-          "compressed_bytes": {
-            "br": null
-          },
-          "dependencies": [],
-          "key": "text/detail/global/global/band/18",
-          "path": "snapshots/blobs/a1ea4deefeedfb4adcd0534c6ed468d69ad13399c02b71051243aa6978651d4b.json",
-          "role": "text",
-          "row_counts": [
-            {
-              "table": "text_symbol",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 37,
-              "partition": "detail",
-              "count": 1
-            },
-            {
-              "table": "translation",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 36,
-              "partition": "detail",
-              "count": 1
-            }
-          ],
-          "sha256": "sha256:a1ea4deefeedfb4adcd0534c6ed468d69ad13399c02b71051243aa6978651d4b"
-        },
-        {
-          "bytes": 340,
-          "compressed_bytes": {
-            "br": null
-          },
-          "dependencies": [],
-          "key": "text/detail/global/global/band/19",
-          "path": "snapshots/blobs/7715267402cb4551c0f33220a50e5a787fff9723e5e99c065962a15b432c6ba6.json",
-          "role": "text",
-          "row_counts": [
-            {
-              "table": "text_unit",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 39,
-              "partition": "detail",
-              "count": 1
-            },
-            {
-              "table": "digital_card",
-              "owner": {
-                "kind": "global",
-                "id": null
-              },
-              "bucket": 39,
-              "partition": "detail",
-              "count": 1
-            }
-          ],
-          "sha256": "sha256:7715267402cb4551c0f33220a50e5a787fff9723e5e99c065962a15b432c6ba6"
-        },
-        {
-          "bytes": 206,
-          "compressed_bytes": {
-            "br": null
-          },
-          "dependencies": [],
-          "key": "text/detail/global/global/band/23",
-          "path": "snapshots/blobs/72fafd277a6f85d92fc144a143dcb7fd99ba094da6135fabe15e27a30fa236b9.json",
-          "role": "text",
-          "row_counts": [
-            {
-              "table": "text_unit",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 46,
-              "partition": "detail",
-              "count": 1
-            }
-          ],
-          "sha256": "sha256:72fafd277a6f85d92fc144a143dcb7fd99ba094da6135fabe15e27a30fa236b9"
-        },
-        {
-          "key": "text/detail/global/global/band/26",
-          "role": "text",
-          "row_counts": [
-            {
-              "table": "digital_card",
-              "owner": {
-                "kind": "global",
-                "id": null
-              },
-              "bucket": 52,
-              "partition": "detail",
-              "count": 1
-            }
-          ],
-          "dependencies": [
-            {
-              "key": "config",
-              "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
-            }
-          ],
-          "path": "snapshots/blobs/e330966b8ac83f0d7db1bc086a87ba61c62ac43976ba35db211c60eb7da29853.json",
-          "sha256": "sha256:e330966b8ac83f0d7db1bc086a87ba61c62ac43976ba35db211c60eb7da29853",
-          "bytes": 185,
-          "compressed_bytes": {
-            "br": null
-          }
-        },
-        {
-          "bytes": 1079,
-          "compressed_bytes": {
-            "br": null
-          },
-          "dependencies": [],
-          "key": "text/detail/global/global/band/6",
-          "path": "snapshots/blobs/bcf9f569fe1c8949b1d100899b313a70309d742d9078ef599e7988c8a5e6e5cd.json",
-          "role": "text",
-          "row_counts": [
-            {
-              "table": "ruling_revision",
-              "owner": {
-                "id": null,
-                "kind": "global"
-              },
-              "bucket": 13,
-              "partition": "detail",
-              "count": 1
-            }
-          ],
-          "sha256": "sha256:bcf9f569fe1c8949b1d100899b313a70309d742d9078ef599e7988c8a5e6e5cd"
-        },
-        {
-          "bytes": 3284,
-          "compressed_bytes": {
-            "br": null
-          },
-          "dependencies": [
-            {
-              "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-              "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877"
-            }
-          ],
-          "key": "text/detail/home_set/set%3Aa/band/0",
-          "path": "snapshots/blobs/62e1711b14089eab7926402a79c34f43da44e7860fa167a999435ccc96a3bfb2.json",
-          "role": "text",
-          "row_counts": [
-            {
-              "table": "face_revision",
-              "owner": {
-                "id": "set:a",
-                "kind": "home_set"
-              },
-              "bucket": 26,
-              "partition": "detail",
-              "count": 2
-            },
-            {
-              "table": "printing",
-              "owner": {
-                "id": "set:a",
-                "kind": "home_set"
-              },
-              "bucket": 29,
-              "partition": "detail",
-              "count": 1
-            },
-            {
-              "table": "digital_link",
-              "owner": {
-                "kind": "home_set",
-                "id": "set:a"
-              },
-              "bucket": 26,
-              "partition": "detail",
-              "count": 2
-            }
-          ],
-          "sha256": "sha256:62e1711b14089eab7926402a79c34f43da44e7860fa167a999435ccc96a3bfb2"
-        },
-        {
-          "bytes": 2587,
-          "compressed_bytes": {
-            "br": null
-          },
-          "dependencies": [
-            {
-              "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-              "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877"
-            }
-          ],
-          "key": "text/detail/home_set/set%3Aa/band/1",
-          "path": "snapshots/blobs/c36a6363c4f1b79add52ac5c694612432ab304530221459184dfad4960a89dfa.json",
-          "role": "text",
-          "row_counts": [
-            {
-              "table": "printing",
-              "owner": {
-                "id": "set:a",
-                "kind": "home_set"
-              },
-              "bucket": 43,
-              "partition": "detail",
-              "count": 1
-            }
-          ],
-          "sha256": "sha256:c36a6363c4f1b79add52ac5c694612432ab304530221459184dfad4960a89dfa"
-        },
-        {
-          "bytes": 1356,
-          "compressed_bytes": {
-            "br": null
-          },
-          "dependencies": [],
-          "key": "text/history/home_set/set%3Aa/band/0",
-          "path": "snapshots/blobs/f925d788909327103080d9cdf518613612344ecf7d4d1be9c20ee892c90c21ac.json",
-          "role": "text",
-          "row_counts": [
-            {
-              "table": "face_revision",
-              "owner": {
-                "id": "set:a",
-                "kind": "home_set"
-              },
-              "bucket": 26,
-              "partition": "history",
-              "count": 1
-            }
-          ],
-          "sha256": "sha256:f925d788909327103080d9cdf518613612344ecf7d4d1be9c20ee892c90c21ac"
         }
       ],
       "format_version": "4.0.0",

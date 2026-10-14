@@ -65,19 +65,23 @@ def _tuple(name: str, tuples: dict[str, JsonValue]) -> dict[str, JsonValue]:
 
 
 def _fragment(table: str, partition: str, name: str) -> dict[str, JsonValue]:
-    return _object(
-        {
-            "owner": _ref("Owner"),
-            "bucket": _ref("UInt"),
-            "partition": {"const": partition},
-            "base": (
+    return {
+        "type": "array",
+        "prefixItems": [
+            _ref("FragmentOwner"),
+            {"const": partition},
+            _ref("ID"),
+            (
                 _ref("Base")
                 if table in {"printing", "face_revision"} and partition == "detail"
                 else {"type": "null"}
             ),
-            "rows": {"type": "array", "items": _ref(name)},
-        }
-    )
+            {"type": "array", "items": _ref(name)},
+        ],
+        "minItems": 5,
+        "maxItems": 5,
+        "items": False,
+    }
 
 
 def _changes(

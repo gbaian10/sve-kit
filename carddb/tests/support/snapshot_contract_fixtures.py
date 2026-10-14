@@ -90,14 +90,19 @@ def _reseal(
                 rebind(child)
 
     # Rebind exact bootstrap pins before sealing dependent text and media files.
+    priority = {
+        "config": 0,
+        "programs": 0,
+        "catalog": 1,
+        "print": 3,
+        "region-state": 3,
+        "images": 5,
+    }
     order = sorted(
         files,
         key=lambda k: (
-            0
-            if files[k]["role"] in {"config", "programs", "bootstrap"}
-            else 2
-            if files[k]["role"] == "images"
-            else 1,
+            priority.get(string(files[k]["purpose"]), 4),
+            0 if files[k]["region"] is None else 1,
             k,
         ),
     )
@@ -114,15 +119,20 @@ def _reseal(
             path="snapshots/blobs/" + hashed[7:] + ".json",
         )
         files[key]["row_counts"] = [
-            {
-                "table": table,
-                **{f: fragment[f] for f in ("owner", "bucket", "partition")},
-                "count": len(array(fragment["rows"])),
-            }
+            [
+                table,
+                array(fragment[0])[0],
+                array(fragment[0])[1],
+                fragment[1],
+                fragment[2],
+                len(array(fragment[4])),
+            ]
             for table, entries in object_value(payload.get("tables", {})).items()
             for raw_fragment in array(entries)
-            for fragment in (object_value(raw_fragment),)
+            for fragment in (array(raw_fragment),)
         ]
         blobs[key] = raw
+    for file in files.values():
+        rebind(file["dependencies"])
     rebind(manifest["config_ref"])
     return blobs

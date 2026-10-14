@@ -1,5 +1,6 @@
 """Cross-row constraints that JSON Schema cannot express."""
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from urllib.parse import quote, urlsplit
 
@@ -53,6 +54,8 @@ def validate_fragments(fragments: list[Fragment]) -> None:
     """Validate sorting before any row_index can be interpreted."""
     groups: dict[tuple[str, str], list[Fragment]] = {}
     for fragment in fragments:
+        if fragment.table == "__catalog":
+            continue
         groups.setdefault((fragment.table, fragment.file), []).append(fragment)
         fields = (
             ["row_index"]
@@ -68,7 +71,7 @@ def validate_fragments(fragments: list[Fragment]) -> None:
             (
                 string(object_value(f.value["owner"])["kind"]),
                 row_key(object_value(f.value["owner"])["id"]),
-                integer(f.value["bucket"]),
+                string(f.value["segment"]),
                 string(f.value["partition"]),
             )
             for f in values
@@ -261,6 +264,8 @@ def _annotation_partitions(view: View, fragments: list[Fragment]) -> None:
     annotations: set[str] = set()
     for fragment in fragments:
         part = fragment.value["partition"]
+        if fragment.table == "annotation_concept" and part != "bootstrap":
+            raise ValueError("Annotation concept must use shared catalog partition")
         if fragment.table == "field_annotation":
             for row in fragment.rows:
                 owner = object_value(row["owner"])
@@ -306,14 +311,6 @@ def _annotation_partitions(view: View, fragments: list[Fragment]) -> None:
         for row in view["face_revision"]
         if row["id"] in display and row["name_concept_id"] is not None
     }
-    for fragment in fragments:
-        selected = annotations if fragment.table == "annotation_set" else concepts
-        if fragment.table in {"annotation_set", "annotation_concept"} and any(
-            fragment.value["partition"]
-            != ("bootstrap" if row["id"] in selected else "detail")
-            for row in fragment.rows
-        ):
-            raise ValueError("Annotation bootstrap closure partition mismatch")
 
 
 def _summaries(view: View, manifest: Row) -> None:
@@ -612,59 +609,285 @@ def _wording(view: View) -> None:
 
 
 def validate_placement(view: View, manifest: Row, fragments: list[Fragment]) -> None:
-    """Recompute entity buckets from joined identities, independently of the exporter."""
+    """Recompute physical membership independently of producer grouping."""
     selected = profile(string(manifest["format_version"]))
-    faces = {string(row["id"]): row for row in view["face"]}
-    revisions = {string(row["id"]): row for row in view["face_revision"]}
-    bases = {
+    files = {
+        string(object_value(f)["key"]): object_value(f)
+        for f in array(manifest["files"])
+    }
+    entities = (
+        {string(r["id"]): r for r in view["face"]},
+        {string(r["id"]): r for r in view["face_revision"]},
+        {string(r["id"]): string(r["region"]) for r in view["printing"]},
+    )
+    index = {
         (
             f.file,
             f.table,
             canonical(f.value["owner"]),
-            integer(f.value["bucket"]),
-        ): f.rows
+            string(f.value["segment"]),
+            string(f.value["partition"]),
+        ): f
         for f in fragments
-        if f.value["partition"] == "bootstrap"
     }
+    facts = _PlacementFacts.from_view(view)
+    sources = _source_locations(fragments, index)
     for fragment in fragments:
-        owner = object_value(fragment.value["owner"])
-        kind = string(owner["kind"])
-        identifier = string(owner["id"]) if owner["id"] is not None else ""
-        part = string(fragment.value["partition"])
-        role = (
-            "images"
-            if fragment.table in {"image_asset", "image_variant", "printing_image"}
-            else "bootstrap"
-            if part == "bootstrap"
-            else "text"
-        )
-        width = selected.width(role, part, kind, identifier)
-        band = integer(fragment.value["bucket"]) // width
-        key = "/".join(
-            (
-                role,
-                part,
-                kind,
-                quote(identifier, safe="") or "global",
-                "band",
-                str(band),
-            )
-        )
-        if fragment.file != key:
-            raise ValueError("File key does not match fixed band recipe")
-        rows = fragment.rows
-        if fragment.value["base"] is not None:
-            base = object_value(fragment.value["base"])
-            rows = bases[
-                string(object_value(base["file"])["key"]),
-                fragment.table,
-                canonical(base["owner"]),
-                integer(base["bucket"]),
-            ]
+        if fragment.table == "__catalog":
+            continue
+        file = files[fragment.file]
+        rows = _placed_rows(fragment, index)
         for row in rows:
-            key_values = _entity_key(fragment.table, row, faces, revisions)
-            if bucket(key_values, selected.buckets) != fragment.value["bucket"]:
-                raise ValueError("Fragment entity bucket does not match fixed profile")
+            _placement_purpose(fragment, row, file, facts)
+            _placement_region(fragment, row, file, entities[2])
+            if fragment.table == "field_annotation":
+                source = sources.get(
+                    (canonical(row["owner"]), string(fragment.value["partition"]))
+                )
+                if source != (fragment.file, fragment.value["segment"]):
+                    raise ValueError("Original annotation segment differs from source")
+                continue
+            expected_key, segment, expected_fragment = _expected_placement(
+                fragment, row, file, files, entities, selected.buckets
+            )
+            if fragment.file != expected_key or file["segment"] != segment:
+                raise ValueError("File key does not match fixed band recipe")
+            if fragment.value["segment"] != expected_fragment:
+                raise ValueError("Fragment segment differs from File scope")
+
+
+def _expected_placement(
+    fragment: Fragment,
+    row: Row,
+    file: Row,
+    files: dict[str, Row],
+    entities: tuple[dict[str, Row], dict[str, Row], dict[str, str]],
+    count: int,
+) -> tuple[str, str, str]:
+    purpose = string(file["purpose"])
+    owner = object_value(fragment.value["owner"])
+    family = string(owner["id"]) if owner["id"] is not None else ""
+    if purpose == "catalog" and fragment.table in {
+        "text_unit",
+        "translation",
+        "annotation_set",
+        "annotation_concept",
+    }:
+        family = (
+            string(file["segment"])[7:]
+            if string(file["segment"]).startswith("family-")
+            else ""
+        )
+    base = fragment.value["base"]
+    source_purpose = (
+        string(
+            files[string(object_value(object_value(base)["file"])["key"])]["purpose"]
+        )
+        if base is not None
+        else purpose
+    )
+    band = (
+        0
+        if source_purpose == "catalog"
+        else bucket(_entity_key(fragment.table, row, entities[0], entities[1]), count)
+        // _band_width(source_purpose, family)
+    )
+    segment = _physical_segment(purpose, family, band)
+    expected_fragment = (
+        source_purpose + ":" + string(object_value(base)["segment"])
+        if base is not None
+        else segment
+    )
+    return (
+        _physical_key(purpose, file["region"], family, band),
+        segment,
+        expected_fragment,
+    )
+
+
+def _band_width(purpose: str, family: str) -> int:
+    if purpose == "images":
+        return 32 if family else 1
+    if purpose == "dictionary":
+        return 2
+    return 32 if family in {"BP01", "CP04"} else 64 if family else 8
+
+
+def _physical_segment(purpose: str, family: str, band: int) -> str:
+    segment = "family-" + family if family else "shared"
+    return segment if purpose == "catalog" else segment + ":band-" + str(band)
+
+
+def _physical_key(purpose: str, region: JsonValue, family: str, band: int) -> str:
+    return "/".join(
+        (
+            purpose,
+            string(region) if region is not None else "shared",
+            "family-" + quote(family, safe="") if family else "shared",
+            str(band),
+        )
+    )
+
+
+def _placed_rows(
+    fragment: Fragment,
+    index: dict[tuple[str, str, bytes, str, str], Fragment],
+) -> list[Row]:
+    if fragment.value["base"] is None:
+        return fragment.rows
+    base = object_value(fragment.value["base"])
+    return index[
+        string(object_value(base["file"])["key"]),
+        fragment.table,
+        canonical(base["owner"]),
+        string(base["segment"]),
+        string(base["partition"]),
+    ].rows
+
+
+def _source_locations(
+    fragments: list[Fragment],
+    index: dict[tuple[str, str, bytes, str, str], Fragment],
+) -> dict[tuple[bytes, str], tuple[str, JsonValue]]:
+    locations: dict[tuple[bytes, str], tuple[str, JsonValue]] = {}
+    for fragment in fragments:
+        for row in _placed_rows(fragment, index):
+            for owner in _text_owner_keys(fragment.table, row):
+                locations[canonical(owner), string(fragment.value["partition"])] = (
+                    fragment.file,
+                    fragment.value["segment"],
+                )
+    return locations
+
+
+def _text_owner_keys(table: str, row: Row) -> list[Row]:
+    if table == "printing":
+        return [
+            {
+                "kind": "printing_face",
+                "id": row["id"],
+                "face_id": object_value(f)["face_id"],
+            }
+            for f in array(row["faces"])
+        ]
+    if table == "vocabulary":
+        return [
+            {"kind": "vocabulary", "vocabulary_kind": row["kind"], "code": row["code"]}
+        ]
+    if table in {
+        "face_revision",
+        "product",
+        "product_family",
+        "keyword",
+        "qa_version",
+        "cr_clause",
+    }:
+        return [{"kind": table, "id": row["id"]}]
+    return []
+
+
+@dataclass(frozen=True)
+class _PlacementFacts:
+    defaults: frozenset[JsonValue]
+    visible: frozenset[tuple[JsonValue, JsonValue]]
+
+    @classmethod
+    def from_view(cls, view: View) -> _PlacementFacts:
+        return cls(
+            frozenset(
+                object_value(r)["default_printing_id"]
+                for c in view["card"]
+                for r in array(c["regions"])
+            ),
+            frozenset((p["card_id"], p["region"]) for p in view["printing"]),
+        )
+
+
+def _placement_purpose(
+    fragment: Fragment, row: Row, file: Row, facts: _PlacementFacts
+) -> None:
+    table = fragment.table
+    purpose = file["purpose"]
+    part = fragment.value["partition"]
+    if table == "field_annotation":
+        return
+    if table in {"text_unit", "translation", "annotation_set"}:
+        if (purpose, part) not in {("catalog", "bootstrap"), ("dictionary", "detail")}:
+            raise ValueError("Dictionary partition differs from File scope")
+        return
+    if table == "annotation_concept":
+        if (
+            purpose != "catalog"
+            or file["region"] is not None
+            or file["segment"] != "shared"
+        ):
+            raise ValueError("Annotation concept requires shared catalog")
+        return
+    expected = (
+        "catalog"
+        if table
+        in {"card", "face", "product_family", "vocabulary", "keyword", "search_alias"}
+        else "product"
+        if table == "product"
+        else "images"
+        if table in {"image_asset", "image_variant", "printing_image"}
+        else "print"
+        if table in {"printing_product", "art", "artist", "stamp", "digital_art_link"}
+        else "engine"
+        if table
+        in {
+            "card_related",
+            "face_rules_name",
+            "card_engine_support",
+            "rules_name",
+            "rules_profile",
+            "restriction",
+            "mechanic_projection",
+            "card_mechanic_coverage",
+            "identity_change",
+            "digital_link",
+            "digital_link_coverage",
+            "digital_card",
+            "digital_art",
+            "voice",
+            "card_voice",
+            "card_route_alias",
+            "route_override",
+        }
+        else "detail"
+    )
+    if table == "face_revision":
+        expected = "catalog" if part == "bootstrap" else string(part)
+    elif table == "printing":
+        expected = (
+            "print-detail"
+            if part == "detail"
+            else "catalog"
+            if row["id"] in facts.defaults
+            else "print"
+        )
+    elif table in {"card", "face"}:
+        card_id = row["id"] if table == "card" else row["card_id"]
+        visible = (card_id, file["region"]) in facts.visible
+        expected = "catalog" if visible else "region-state"
+    if purpose != expected:
+        raise ValueError("Table purpose differs from File scope")
+
+
+def _placement_region(
+    fragment: Fragment, row: Row, file: Row, printing_regions: dict[str, str]
+) -> None:
+    if (
+        row.get("region") is not None
+        and row["region"] != file["region"]
+        and file["purpose"] != "images"
+    ):
+        raise ValueError("Row region differs from File scope")
+    if (
+        fragment.table == "printing_product"
+        and printing_regions[string(row["printing_id"])] != file["region"]
+    ):
+        raise ValueError("Printing product region differs from parent")
 
 
 def _entity_key(

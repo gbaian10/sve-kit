@@ -23,11 +23,10 @@ from sve_carddb.export.transport import (
     Ownership,
     Snapshot,
     _Files,
-    _ordered,
     export_snapshot,
 )
 from sve_carddb.export.transport.compression import compress, python_brotli
-from sve_carddb.export.transport.layout import Layout
+from sve_carddb.export.transport.layout import Layout, ordered
 from sve_carddb.export.transport.measure import measure, update
 
 from ..support.snapshot_media_fixtures import media_rows
@@ -122,7 +121,7 @@ def test_cross_shard_cycles_rejected(
 
     manifest = object_value(parse(canonical(exported.manifest)))
     files = {object_value(f)["key"]: object_value(f) for f in array(manifest["files"])}
-    bootstrap = next(key for key in files if string(key).startswith("bootstrap/"))
+    bootstrap = next(key for key in files if string(key).startswith("catalog/"))
     for key, target in (("config", bootstrap), (bootstrap, "config")):
         files[key]["dependencies"] = [
             {"key": target, "sha256": files[target]["sha256"]}
@@ -217,13 +216,13 @@ def test_order_changes_rebind_every_positional_detail(
     changed = export_snapshot(projection, Ownership(homes), BATCH)
     updates = update(exported, changed)
     assert any(
-        string(key).startswith("text/detail/home_set/")
+        string(key).startswith("print-detail/")
         for key in array(updates["changed_keys"])
     )
     keys = [
         string(key)
         for key in array(updates["changed_keys"])
-        if string(key).startswith("text/detail/home_set/")
+        if string(key).startswith("print-detail/")
     ]
     for key in keys:
         assert changed.payloads[key].raw != exported.payloads[key].raw
@@ -250,18 +249,21 @@ def test_inserting_a_sorted_base_row_shifts_old_indices(
     key = next(
         key
         for key in changed.payloads
-        if key.startswith("text/detail/home_set/")
+        if key.startswith("print-detail/")
         and "printing"
         in object_value(object_value(parse(changed.payloads[key].raw))["tables"])
     )
-    details = object_value(
+    details = array(
         array(
             object_value(object_value(parse(changed.payloads[key].raw))["tables"])[
                 "printing"
             ]
         )[0]
     )
-    assert [array(row)[0] for row in array(details["rows"])] == [0, 1]
+    # The inserted non-default row has its own print base; the default base remains in catalog.
+    assert [array(row)[0] for row in array(details[4])] == [0]
+    changed.verify(projection)
+    assert any(key.startswith("print/") for key in changed.payloads)
     assert changed.payloads[key].raw != exported.payloads[key].raw
 
 
@@ -289,18 +291,17 @@ def test_printing_uses_registered_home_even_when_card_has_another_home(
     boot = [
         object_value(object_value(parse(blob.raw))["tables"])
         for key, blob in result.payloads.items()
-        if key.startswith("bootstrap/")
+        if key.startswith("catalog/")
     ]
     printing = next(
-        object_value(array(value["printing"])[0])
-        for value in boot
-        if "printing" in value
+        array(array(value["printing"])[0]) for value in boot if "printing" in value
     )
-    card = next(
-        object_value(array(value["card"])[0]) for value in boot if "card" in value
+    card = next(array(array(value["card"])[0]) for value in boot if "card" in value)
+    assert (
+        object_value({"kind": array(printing[0])[0], "id": array(printing[0])[1]})["id"]
+        == "other_family"
     )
-    assert object_value(printing["owner"])["id"] == "other_family"
-    assert object_value(card["owner"])["id"] == "family"
+    assert array(card[0])[1] == "family"
 
 
 def test_pending_display_name_and_facets_are_bootstrapped_without_current() -> None:
@@ -319,14 +320,14 @@ def test_pending_display_name_and_facets_are_bootstrapped_without_current() -> N
     boot = [
         object_value(object_value(parse(blob.raw))["tables"])
         for key, blob in result.payloads.items()
-        if key.startswith("bootstrap/")
+        if key.startswith("catalog/")
     ]
     revision_rows = [
         array(row)
         for value in boot
         if "face_revision" in value
         for fragment in array(value["face_revision"])
-        for row in array(object_value(fragment)["rows"])
+        for row in array(array(fragment)[4])
     ]
     assert {row[0] for row in revision_rows} == {"r:a2", "r:b1"}
     # Names of non-display candidates remain on demand; only exact display names are mandatory.
@@ -335,7 +336,7 @@ def test_pending_display_name_and_facets_are_bootstrapped_without_current() -> N
         for value in boot
         if "text_unit" in value
         for fragment in array(value["text_unit"])
-        for row in array(object_value(fragment)["rows"])
+        for row in array(array(fragment)[4])
     ]
     name_ids = {row[3] for row in revision_rows}
     assert name_ids <= {row[0] for row in text_rows}
@@ -343,13 +344,13 @@ def test_pending_display_name_and_facets_are_bootstrapped_without_current() -> N
     history = [
         object_value(object_value(parse(blob.raw))["tables"])
         for key, blob in result.payloads.items()
-        if key.startswith("text/history/")
+        if key.startswith("history/")
     ]
     assert {
         array(row)[0]
         for value in history
         for fragment in array(value["face_revision"])
-        for row in array(object_value(fragment)["rows"])
+        for row in array(array(fragment)[4])
     } == {"r:a1"}
 
 
@@ -360,7 +361,7 @@ def test_primary_key_boundary_rejects_duplicates(
     rows = logical[0].tables[table]
     assert rows
     with pytest.raises(ValueError, match="Duplicate public primary key"):
-        _ordered(table, [*rows, rows[0].copy()])
+        ordered(table, [*rows, rows[0].copy()])
 
 
 def test_file_key_collision_preserves_the_first_payload() -> None:
@@ -455,16 +456,16 @@ def test_name_translation_and_facet_dictionary_closure(
 
     records: dict[str, list[dict[str, JsonValue]]] = {}
     for key, blob in exported.payloads.items():
-        if not key.startswith("bootstrap/"):
+        if not key.startswith("catalog/"):
             continue
         for table, fragments in object_value(
             object_value(parse(blob.raw))["tables"]
         ).items():
             for raw in array(fragments):
-                fragment = object_value(raw)
+                fragment = array(raw)
                 records.setdefault(table, []).extend(
                     decode(row_type(table, "bootstrap"), row)
-                    for row in array(fragment["rows"])
+                    for row in array(fragment[4])
                 )
     name_translations = {
         object_value(item)["translation_id"]
@@ -560,12 +561,10 @@ def test_single_oversized_fragment_is_reported_instead_of_silently_dropped(
     )
     projection.tables["text_unit"].sort(key=lambda row: string(row["id"]))
     physical["flavor_unit_id"] = identifier
-    result = export_snapshot(
-        projection, ownership, BATCH, format_version=format_version
-    )
-    report = measure(result)
-    assert object_value(report["gates"])["shards_512_kib"] is False
-    assert array(report["oversized_shards"])
+    with pytest.raises(
+        ValueError, match="Snapshot shard exceeds raw limit: dictionary/"
+    ):
+        export_snapshot(projection, ownership, BATCH, format_version=format_version)
 
 
 def test_extra_public_collection_is_rejected(

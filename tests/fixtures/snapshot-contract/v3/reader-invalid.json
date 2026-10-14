@@ -1,12 +1,12 @@
 [
   {
     "name": "available-missing-size",
-    "target": "images/detail/home_set/set%3Aa/band/0",
+    "target": "images/shared/family-set%3Aa/0",
     "path": [
       "tables",
       "printing_image",
       0,
-      "rows",
+      4,
       0,
       7
     ],
@@ -37,12 +37,12 @@
   },
   {
     "name": "available-reverse-size",
-    "target": "images/detail/home_set/set%3Aa/band/0",
+    "target": "images/shared/family-set%3Aa/0",
     "path": [
       "tables",
       "printing_image",
       0,
-      "rows",
+      4,
       0,
       7
     ],
@@ -78,12 +78,12 @@
   },
   {
     "name": "dimensions-disagree",
-    "target": "images/detail/home_set/set%3Aa/band/0",
+    "target": "images/shared/family-set%3Aa/0",
     "path": [
       "tables",
       "printing_image",
       0,
-      "rows",
+      4,
       0,
       7
     ],
@@ -119,12 +119,12 @@
   },
   {
     "name": "available-missing-version",
-    "target": "images/detail/home_set/set%3Aa/band/0",
+    "target": "images/shared/family-set%3Aa/0",
     "path": [
       "tables",
       "printing_image",
       0,
-      "rows",
+      4,
       0,
       5
     ],
@@ -134,12 +134,12 @@
   },
   {
     "name": "missing-has-card_version",
-    "target": "images/detail/home_set/set%3Aa/band/0",
+    "target": "images/shared/family-set%3Aa/0",
     "path": [
       "tables",
       "printing_image",
       0,
-      "rows",
+      4,
       1,
       5
     ],
@@ -149,12 +149,12 @@
   },
   {
     "name": "missing-has-art_version",
-    "target": "images/detail/home_set/set%3Aa/band/0",
+    "target": "images/shared/family-set%3Aa/0",
     "path": [
       "tables",
       "printing_image",
       0,
-      "rows",
+      4,
       1,
       6
     ],
@@ -164,12 +164,12 @@
   },
   {
     "name": "missing-has-variants",
-    "target": "images/detail/home_set/set%3Aa/band/0",
+    "target": "images/shared/family-set%3Aa/0",
     "path": [
       "tables",
       "printing_image",
       0,
-      "rows",
+      4,
       1,
       7
     ],
@@ -205,12 +205,12 @@
   },
   {
     "name": "pending-has-variants",
-    "target": "images/detail/home_set/set%3Aa/band/1",
+    "target": "images/shared/family-set%3Aa/1",
     "path": [
       "tables",
       "printing_image",
       0,
-      "rows",
+      4,
       1,
       7
     ],
@@ -246,12 +246,12 @@
   },
   {
     "name": "duplicate-int-id",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "print/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "printing",
-      1,
-      "rows",
+      0,
+      4,
       0,
       14
     ],
@@ -261,12 +261,12 @@
   },
   {
     "name": "duplicate-face-ordinal",
-    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+    "target": "catalog/jp/family-set%3Aa/0",
     "path": [
       "tables",
       "face",
       0,
-      "rows"
+      4
     ],
     "value": [
       [
@@ -333,12 +333,12 @@
     "error": "Face ordinals must be unique within their card",
     "setup": [
       {
-        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "target": "catalog/jp/family-set%3Aa/0",
         "path": [
           "tables",
           "card",
           0,
-          "rows",
+          4,
           0,
           4
         ],
@@ -353,12 +353,12 @@
   },
   {
     "name": "same-name-face_id-f:a",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "engine/shared/family-set%3Aa/0",
     "path": [
       "tables",
       "digital_link",
       0,
-      "rows",
+      4,
       0,
       2
     ],
@@ -368,12 +368,12 @@
   },
   {
     "name": "same-name-digital_phase-normal",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "engine/shared/family-set%3Aa/0",
     "path": [
       "tables",
       "digital_link",
       0,
-      "rows",
+      4,
       0,
       4
     ],
@@ -383,12 +383,12 @@
   },
   {
     "name": "same-name-effect_similarity-reworked",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "engine/shared/family-set%3Aa/0",
     "path": [
       "tables",
       "digital_link",
       0,
-      "rows",
+      4,
       0,
       6
     ],
@@ -398,12 +398,12 @@
   },
   {
     "name": "same-name-review_level-confirmed",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "engine/shared/family-set%3Aa/0",
     "path": [
       "tables",
       "digital_link",
       0,
-      "rows",
+      4,
       0,
       7
     ],
@@ -413,12 +413,12 @@
   },
   {
     "name": "same-name-review_level-sampled",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "engine/shared/family-set%3Aa/0",
     "path": [
       "tables",
       "digital_link",
       0,
-      "rows",
+      4,
       0,
       7
     ],
@@ -428,12 +428,12 @@
   },
   {
     "name": "same-name-duplicate-pair",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "engine/shared/family-set%3Aa/0",
     "path": [
       "tables",
       "digital_link",
       0,
-      "rows"
+      4
     ],
     "value": [
       [
@@ -472,12 +472,12 @@
   },
   {
     "name": "same-name-human-shadow",
-    "target": "text/detail/home_set/set%3Aa/band/0",
+    "target": "engine/shared/family-set%3Aa/0",
     "path": [
       "tables",
       "digital_link",
       0,
-      "rows"
+      4
     ],
     "value": [
       [
@@ -596,7 +596,7 @@
     "target": "manifest",
     "path": [
       "files",
-      10,
+      20,
       "dependencies"
     ],
     "value": [
@@ -613,21 +613,21 @@
     "target": "manifest",
     "path": [
       "files",
-      10,
+      20,
       "dependencies"
     ],
     "value": [
       {
-        "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-        "sha256": "sha256:8cde94cec35c584026a8486ea951745b3feb74c7ea1486e9092e3d0353664877"
+        "key": "catalog/jp/family-set%3Aa/0",
+        "sha256": "sha256:7a75ba8cca6c5d13896340cdfe0e393237136642a7a6a0ffc5ddcd2bcd6bc34c"
       },
       {
         "key": "config",
         "sha256": "sha256:04365c222760403e81d4e473c13be6050db28a6271b46997dd46fd9c9a853e7f"
       },
       {
-        "key": "images/detail/global/global/band/12",
-        "sha256": "sha256:e9d315b8016407e6ff5858c8994344225fc0447fef501f27ef2e993dec4a0ae6"
+        "key": "images/shared/shared/12",
+        "sha256": "sha256:6577f223ca55bfb8604497fd36674e1a2903c3dd2b3bbe0e569a6bf098efdc85"
       }
     ],
     "rehash": false,

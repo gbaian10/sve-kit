@@ -47,77 +47,116 @@ def measure(
         string(object_value(item)["key"]): object_value(item)
         for item in array(snapshot.manifest["files"])
     }
-    text = [
+
+    def closure(keys: set[str]) -> set[str]:
+        pending = list(keys)
+        while pending:
+            key = pending.pop()
+            for raw in array(files[key]["dependencies"]):
+                target = string(object_value(raw)["key"])
+                if target not in keys:
+                    keys.add(target)
+                    pending.append(target)
+        return keys
+
+    text = {
         key
-        for key in snapshot.payloads
-        if files[key]["role"] in {"bootstrap", "text", "config"}
-    ]
-    initial = [
-        key
-        for key in snapshot.payloads
-        if files[key]["role"] in {"bootstrap", "config"}
-    ]
-    shards: list[JsonValue] = []
-    oversized: list[JsonValue] = []
-    for key, blob in sorted(snapshot.payloads.items()):
-        if files[key]["role"] in {"config", "programs"}:
-            continue
-        fragments = [object_value(item) for item in array(files[key]["row_counts"])]
-        set_buckets: list[JsonValue] = json_list(
-            sorted({integer(f["bucket"]) for f in fragments})
-        )
-        set_partitions: list[JsonValue] = json_list(
-            sorted({string(f["partition"]) for f in fragments})
-        )
-        shards.append(
+        for key, file in files.items()
+        if file["role"] in {"bootstrap", "text", "config"}
+    }
+    source_files = snapshot.source_files
+    startup: dict[str, JsonValue] = {}
+    complete: dict[str, JsonValue] = {}
+    for raw_region in array(snapshot.manifest["regions"]):
+        region = string(raw_region)
+        initial = closure(
             {
-                "key": key,
-                "role": files[key]["role"],
-                "owners": [
-                    parse(value)
-                    for value in sorted({canonical(f["owner"]) for f in fragments})
-                ],
-                "buckets": set_buckets,
-                "partitions": set_partitions,
-                "rows": sum(integer(f["count"]) for f in fragments),
-                **_sizes([blob]),
+                key
+                for key, file in files.items()
+                if file["purpose"] == "config"
+                or (file["purpose"] == "catalog" and file["region"] in {region, None})
             }
         )
-        if len(blob.raw) > SHARD_LIMIT:
-            oversized.append(key)
-    full = accounted_sizes(snapshot.payloads, text, manifest=manifest)
-    bootstrap = accounted_sizes(snapshot.payloads, initial, manifest=manifest)
+        sizes = accounted_sizes(snapshot.payloads, initial, manifest=manifest)
+        startup[region] = sizes | {
+            "file_count": len(initial) + 1,
+            "keys": json_list(sorted(initial)),
+            "scope": "selected and shared catalog plus strong dependencies",
+            "target_br_1_mib": sizes["br"] is not None and integer(sizes["br"]) <= MIB,
+            "stop_for_maintainer": sizes["br"] is not None
+            and integer(sizes["br"]) > 2 * MIB,
+        }
+        c0 = closure({key for key in text if files[key]["region"] in {region, None}})
+        sources = {source for key in c0 for source in source_files.get(key, set())}
+        full = closure(c0 | sources)
+        complete[region] = accounted_sizes(
+            snapshot.payloads, full, manifest=manifest
+        ) | {"file_count": len(full) + 1, "keys": json_list(sorted(full))}
+    shards, oversized = _shards(snapshot, files)
     images = [
         blob
         for key, blob in snapshot.payloads.items()
         if files[key]["role"] == "images"
     ]
-    startup: dict[str, JsonValue] = {
-        string(region): bootstrap
-        | {
-            "file_count": len(initial) + 1,
-            "scope": "all bootstrap and dependency closure; shared/mixed files counted in full",
-            "target_br_1_mib": bootstrap["br"] is not None
-            and integer(bootstrap["br"]) <= MIB,
-            "stop_for_maintainer": bootstrap["br"] is not None
-            and integer(bootstrap["br"]) > 2 * MIB,
-        }
-        for region in array(snapshot.manifest["regions"])
-    }
     return {
-        "text_total": full,
-        "bootstrap": bootstrap,
+        "text_total": accounted_sizes(snapshot.payloads, text, manifest=manifest),
+        "bootstrap": accounted_sizes(
+            snapshot.payloads,
+            {
+                key
+                for key, file in files.items()
+                if file["purpose"] in {"catalog", "config"}
+            },
+            manifest=manifest,
+        ),
         "startup_by_region": startup,
+        "complete_text_by_region": complete,
         "images_metadata": {"file_count": len(images), **_sizes(images)},
         "manifest": _sizes([manifest]),
         "shard_count": len(shards),
         "shards": shards,
         "oversized_shards": oversized,
         "gates": {
-            "br_8_mib": full["br"] is not None and integer(full["br"]) <= 8 * MIB,
+            "br_8_mib": all(
+                object_value(v)["br"] is not None
+                and integer(object_value(v)["br"]) <= 8 * MIB
+                for v in complete.values()
+            ),
             "shards_512_kib": not oversized,
         },
     }
+
+
+def _shards(
+    snapshot: Snapshot, files: dict[str, dict[str, JsonValue]]
+) -> tuple[list[JsonValue], list[JsonValue]]:
+    shards: list[JsonValue] = []
+    oversized: list[JsonValue] = []
+    for key, blob in sorted(snapshot.payloads.items()):
+        file = files[key]
+        if file["role"] in {"config", "programs"}:
+            continue
+        counts = [array(c) for c in array(file["row_counts"])]
+        limit = 2 * MIB if file["purpose"] == "catalog" else SHARD_LIMIT
+        shards.append(
+            {
+                "key": key,
+                "role": file["role"],
+                "purpose": file["purpose"],
+                "region": file["region"],
+                "segment": file["segment"],
+                "owners": [
+                    parse(v) for v in sorted({canonical([c[1], c[2]]) for c in counts})
+                ],
+                "partitions": json_list(sorted({string(c[3]) for c in counts})),
+                "rows": sum(integer(c[5]) for c in counts),
+                "limit_raw": limit,
+                **_sizes([blob]),
+            }
+        )
+        if len(blob.raw) > limit:
+            oversized.append(key)
+    return shards, oversized
 
 
 def update(

@@ -518,7 +518,19 @@ def test_offline_cli_writes_private_bundle_and_dual_preview(
         )
     )
     startup = object_value(object_value(report["capacity"])["startup_by_region"])
-    assert startup["jp"] == startup["en"]
+    assert set(array(object_value(startup["jp"])["keys"])) == {
+        "catalog/jp/family-BP02/0",
+        "catalog/jp/family-PR/0",
+        "catalog/shared/shared/0",
+        "config",
+    }
+    assert set(array(object_value(startup["en"])["keys"])) == {
+        "catalog/en/family-BP02/0",
+        "catalog/en/family-GF01/0",
+        "catalog/shared/shared/0",
+        "config",
+    }
+    assert object_value(startup["jp"])["raw"] != object_value(startup["en"])["raw"]
 
 
 @pytest.mark.parametrize("protected", ["repo", "archive", "relative"])

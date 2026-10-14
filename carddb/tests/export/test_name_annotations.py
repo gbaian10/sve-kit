@@ -104,9 +104,7 @@ def test_native_whole_name_round_trip_and_publish_boundary(tmp_path: Path) -> No
     for blob in snapshot.payloads.values():
         value = object_value(parse(blob.raw))
         for fragments in object_value(value.get("tables", {})).values():
-            assert all(
-                "columns" not in object_value(fragment) for fragment in array(fragments)
-            )
+            assert all(len(array(fragment)) == 5 for fragment in array(fragments))
     roots = Roots(tmp_path / "public", tmp_path / "private")
     write_preview(snapshot, roots, {})
     load_export(roots.preview)

@@ -37,6 +37,7 @@ from sve_carddb.export.semantics import (
     validate_placement,
     validate_view,
 )
+from sve_carddb.export.text_owners import TextOwners
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -54,15 +55,20 @@ class Fragment:
     table: str
     value: Row
     rows: list[Row]
+    locators: Row | None = None
+    name_sources: list[JsonValue] | None = None
 
     @property
     def identity(self) -> bytes:
-        """The table/owner/bucket/partition identity."""
+        """The exact file and scope coordinate, never an internal hash bucket."""
         return canonical(
             [
                 self.table,
                 self.value["owner"],
-                self.value["bucket"],
+                self.file,
+                self.value["region"],
+                self.value["purpose"],
+                self.value["segment"],
                 self.value["partition"],
             ]
         )
@@ -123,25 +129,22 @@ def _container(file: Row, value: Row) -> list[Fragment]:
     counts: list[JsonValue] = []
     for table, entries in object_value(value["tables"]).items():
         for entry in array(entries):
-            fragment = object_value(entry)
+            packed = array(entry)
+            owner = array(packed[0])
+            fragment: Row = {
+                "owner": {"kind": owner[0], "id": owner[1]},
+                "partition": packed[1],
+                "segment": packed[2],
+                "base": packed[3],
+                "region": file["region"],
+                "purpose": file["purpose"],
+            }
             part = string(fragment["partition"])
-            role = (
-                "images"
-                if table in {"image_asset", "printing_image", "image_variant"}
-                else "bootstrap"
-                if part == "bootstrap"
-                else "text"
-            )
-            if (
-                role != file["role"]
-                or not 0 <= integer(fragment["bucket"]) < selected.buckets
-            ):
-                raise ValueError("Fragment role or bucket does not match profile")
+            if (file["purpose"] == "catalog") != (file["role"] == "bootstrap"):
+                raise ValueError("Fragment role does not match File scope")
             name = row_type(table, part, selected.version)
             used |= required_types(name, selected.version)
-            rows = [
-                decode(name, row, selected.version) for row in array(fragment["rows"])
-            ]
+            rows = [decode(name, row, selected.version) for row in array(packed[4])]
             if table == "translation" and any(
                 row["annotation_kind"] == "whole_name"
                 and row["annotation_set_id"] is not None
@@ -150,12 +153,29 @@ def _container(file: Row, value: Row) -> list[Fragment]:
                 raise ValueError("public-annotation/shape")
             result.append(Fragment(string(file["key"]), table, fragment, rows))
             counts.append(
-                {
-                    "table": table,
-                    **{key: fragment[key] for key in ("owner", "bucket", "partition")},
-                    "count": len(rows),
-                }
+                [table, owner[0], owner[1], part, fragment["segment"], len(rows)]
             )
+    if result:
+        result[0].locators = object_value(value.get("card_locators", {}))
+        result[0].name_sources = array(value.get("name_sources", []))
+    elif value.get("card_locators"):
+        result.append(
+            Fragment(
+                string(file["key"]),
+                "__catalog",
+                {
+                    "owner": {"kind": "global", "id": None},
+                    "partition": "bootstrap",
+                    "segment": file["segment"],
+                    "region": file["region"],
+                    "purpose": file["purpose"],
+                    "base": None,
+                },
+                [],
+                object_value(value["card_locators"]),
+                array(value.get("name_sources", [])),
+            )
+        )
     expected: Row = {name: descriptor(name, selected.version) for name in sorted(used)}
     if value["types"] != expected:
         raise ValueError("Missing, unused or altered nested descriptor")
@@ -205,10 +225,23 @@ def _base(
     ):
         raise ValueError("Missing or incorrect base dependency")
     if base["table"] != detail.table or any(
-        base[field] != detail.value[field] for field in ("owner", "bucket")
+        base[field] != detail.value[field] for field in ("owner",)
     ):
         raise ValueError("Base fragment identity mismatch")
-    identity = canonical([base["table"], base["owner"], base["bucket"], "bootstrap"])
+    source = files[key]
+    if source["region"] != files[detail.file]["region"]:
+        raise ValueError("Base region scope mismatch")
+    identity = canonical(
+        [
+            base["table"],
+            base["owner"],
+            key,
+            source["region"],
+            source["purpose"],
+            base["segment"],
+            base["partition"],
+        ]
+    )
     candidate = fragments.get((key, identity))
     if candidate is None:
         raise ValueError("Base fragment not found")
@@ -292,6 +325,8 @@ def _logical(fragments: list[Fragment], files: dict[str, Row]) -> View:
     }
     joined: set[bytes] = set()
     for fragment in fragments:
+        if fragment.table == "__catalog":
+            continue
         part = fragment.value["partition"]
         if fragment.table in {"printing", "face_revision"} and part != "history":
             if part == "bootstrap":
@@ -311,6 +346,7 @@ def _logical(fragments: list[Fragment], files: dict[str, Row]) -> View:
     }
     if joined != expected:
         raise ValueError("Missing detail fragment")
+    _merge_regional(view)
     return view
 
 
@@ -472,6 +508,23 @@ def _metadata(manifest: Row, files: dict[str, Row]) -> None:
         if file["role"] in {"bootstrap", "text", "config"}
     }
     for key, file in files.items():
+        purpose = string(file["purpose"])
+        expected_role = (
+            "bootstrap"
+            if purpose == "catalog"
+            else purpose
+            if purpose in {"config", "programs", "images"}
+            else "text"
+        )
+        if file["role"] != expected_role or (
+            purpose in {"config", "programs", "images", "dictionary"}
+            and file["region"] is not None
+        ):
+            raise ValueError("Invalid File scope")
+        if purpose in {"config", "programs"} and (
+            file["key"] != purpose or file["segment"] != "shared"
+        ):
+            raise ValueError("Invalid scalar File scope")
         dependencies = {
             string(object_value(dep)["key"]) for dep in array(file["dependencies"])
         }
@@ -534,6 +587,7 @@ def join_payloads(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
     _unique(view)
     _closure(view, manifest)
     _current(view, fragments)
+    _catalog_metadata(view, fragments, files)
     validate_view(view, manifest, fragments)
     validate_placement(view, manifest, fragments)
     validate_media(view, fragments, files, object_value(manifest["config_ref"]))
@@ -608,3 +662,130 @@ def read_index(value: JsonValue, manifests: Mapping[str, bytes]) -> Row:
         ):
             raise ValueError("Index entry differs from retained manifest")
     return index
+
+
+def _merge_regional(view: View) -> None:
+    for table, fields in (("card", ("regions",)), ("face", ("current", "wording"))):
+        merged: dict[str, Row] = {}
+        for row in view[table]:
+            key = string(row["id"])
+            if key not in merged:
+                merged[key] = row.copy()
+                continue
+            previous = merged[key]
+            if {k: v for k, v in row.items() if k not in fields} != {
+                k: v for k, v in previous.items() if k not in fields
+            }:
+                raise ValueError("Conflicting fixed regional fields")
+            for field in fields:
+                values = array(previous[field]) + array(row[field])
+                regions = [string(object_value(v)["region"]) for v in values]
+                if len(set(regions)) != len(regions):
+                    raise ValueError("Duplicate regional row")
+                previous[field] = sorted(
+                    values, key=lambda v: string(object_value(v)["region"])
+                )
+        view[table] = list(merged.values())
+    for table in ("text_unit", "translation", "annotation_set", "annotation_concept"):
+        merged = {}
+        for row in view[table]:
+            identifier = string(row["id"])
+            if identifier in merged and merged[identifier] != row:
+                raise ValueError("Conflicting dictionary copy")
+            merged[identifier] = row
+        view[table] = list(merged.values())
+
+
+class _CatalogMetadata:
+    def __init__(self, view: View, fragments: list[Fragment]) -> None:
+        self.owners = TextOwners(view)
+        self.printing = {string(row["id"]): row for row in view["printing"]}
+        self.homes = {
+            string(r["id"]): object_value(f.value["owner"])["id"]
+            for f in fragments
+            if f.table == "printing" and f.value["base"] is None
+            for r in f.rows
+        }
+        self.defaults = {
+            object_value(r)["default_printing_id"]
+            for c in view["card"]
+            for r in array(c["regions"])
+        } - {None}
+        self.located: set[str] = set()
+        self.catalog_defaults = {
+            r["id"]
+            for f in fragments
+            if f.table == "printing"
+            and f.value["base"] is None
+            and f.value["purpose"] == "catalog"
+            for r in f.rows
+        }
+
+    @staticmethod
+    def regional(fragment: Fragment, file: Row) -> None:
+        if fragment.table not in {"card", "face"}:
+            return
+        fields = ("regions",) if fragment.table == "card" else ("current", "wording")
+        if any(
+            object_value(v)["region"] != file["region"]
+            for row in fragment.rows
+            for field in fields
+            for v in array(row[field])
+        ):
+            raise ValueError("Regional row escapes File scope")
+
+    def locators(self, fragment: Fragment, file: Row) -> None:
+        for family, values in (fragment.locators or {}).items():
+            if file["purpose"] != "catalog" or file["segment"] != "family-" + family:
+                raise ValueError("Card locator scope mismatch")
+            rows = array(values)
+            if rows != sorted(rows, key=canonical):
+                raise ValueError("Card locators are out of order")
+            for raw in rows:
+                row = array(raw)
+                identifier = string(row[0])
+                actual = self.printing.get(identifier)
+                if (
+                    identifier in self.located
+                    or identifier in self.defaults
+                    or actual is None
+                    or row != [actual["id"], actual["card_id"], actual["card_no"]]
+                    or actual["region"] != file["region"]
+                ):
+                    raise ValueError("Card locator coverage mismatch")
+                if self.homes[identifier] != family:
+                    raise ValueError("Card locator owner mismatch")
+                self.located.add(identifier)
+
+    def sources(self, fragment: Fragment, file: Row) -> None:
+        keys: set[bytes] = set()
+        for raw in fragment.name_sources or []:
+            values = array(raw)
+            pointer = decode("PublicTextPointer", values[0])
+            owner = self.owners.get(object_value(pointer["owner"]))
+            key = canonical(pointer)
+            if (
+                key in keys
+                or self.owners.pointer(pointer) != values[1]
+                or owner.row.get("name_concept_id") != values[2]
+            ):
+                raise ValueError("Name source witness mismatch")
+            keys.add(key)
+            if file["purpose"] != "catalog":
+                raise ValueError("Name witness outside catalog")
+
+
+def _catalog_metadata(
+    view: View, fragments: list[Fragment], files: dict[str, Row]
+) -> None:
+    metadata = _CatalogMetadata(view, fragments)
+    for fragment in fragments:
+        file = files[fragment.file]
+        metadata.regional(fragment, file)
+        metadata.locators(fragment, file)
+        metadata.sources(fragment, file)
+    if (
+        metadata.catalog_defaults != metadata.defaults
+        or metadata.located | metadata.defaults != metadata.printing.keys()
+    ):
+        raise ValueError("Catalog printing coverage mismatch")
