@@ -522,19 +522,19 @@ def test_exact_fixed_band_width_matrix() -> None:
         starmap(
             selected.width,
             [
-                ("images", "detail", "global", ""),
-                ("images", "detail", "home_set", "BP01"),
-                ("bootstrap", "bootstrap", "global", ""),
-                ("bootstrap", "bootstrap", "home_set", "BP01"),
-                ("bootstrap", "bootstrap", "home_set", "CP04"),
-                ("bootstrap", "bootstrap", "home_set", "BP02"),
-                ("text", "detail", "global", ""),
-                ("text", "detail", "home_set", "BP02"),
-                ("text", "history", "global", ""),
-                ("text", "history", "home_set", "BP02"),
+                ("images", ""),
+                ("images", "BP01"),
+                ("images", "BP02"),
+                ("dictionary", ""),
+                ("print", ""),
+                ("print", "BP01"),
+                ("print", "CP04"),
+                ("print", "BP02"),
+                ("history", ""),
+                ("history", "BP02"),
             ],
         )
-    ) == [1, 32, 8, 32, 32, 64, 2, 32, 32, 32]
+    ) == [1, 32, 32, 2, 8, 32, 32, 64, 8, 64]
 
 
 def test_shared_full_sha_bucket_goldens() -> None:

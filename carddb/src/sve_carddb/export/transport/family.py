@@ -9,7 +9,7 @@ from pydantic import JsonValue
 from sve_carddb.contracts.snapshot import definition, row_type
 from sve_carddb.core.json import array, canonical, object_value, string
 from sve_carddb.export.project.closure import references as public_references
-from sve_carddb.export.text_owners import TextOwners
+from sve_carddb.export.text_owners import TextOwners, row_owners
 from sve_carddb.export.transport.layout import (
     IMAGE_TABLES,
     Layout,
@@ -151,18 +151,7 @@ class FamilyLayout:
     ) -> Scope:
         """Derive physical membership only from the fixed exception list."""
         group = self.layout.group(table, row, part)
-        width = (
-            self.layout.profile.width("images", part, group.kind, group.identifier)
-            if purpose == "images"
-            else 32
-            if group.identifier in {"BP01", "CP04"}
-            else 64
-            if group.identifier
-            else 8
-        )
-        # Detail dictionaries keep the established global physical bands until PR-4.
-        if purpose == "dictionary":
-            width = 2
+        width = self.layout.profile.width(purpose, group.identifier)
         return Scope(
             purpose,
             region,
@@ -562,33 +551,6 @@ class FamilyLayout:
         )
         context = Scope(purpose, info.region, family)
         return {context.key} if context in self.pieces else set()
-
-
-def row_owners(table: str, row: Row) -> list[Row]:
-    """Enumerate closed text owner keys, including composite printed faces."""
-    if table == "printing":
-        return [
-            {
-                "kind": "printing_face",
-                "id": row["id"],
-                "face_id": object_value(f)["face_id"],
-            }
-            for f in array(row["faces"])
-        ]
-    if table == "vocabulary":
-        return [
-            {"kind": "vocabulary", "vocabulary_kind": row["kind"], "code": row["code"]}
-        ]
-    if table in {
-        "face_revision",
-        "product",
-        "product_family",
-        "keyword",
-        "qa_version",
-        "cr_clause",
-    }:
-        return [{"kind": table, "id": row["id"]}]
-    return []
 
 
 def source_pointers(value: JsonValue) -> list[Row]:

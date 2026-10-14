@@ -4,7 +4,8 @@
 與 [傳輸 §5.4](snapshot-transport.md#54-卡包-media-與-id-圖片)。獨立圖片 producer 的配號狀態與快取放在公開根之外，文字匯出只讀[圖片索引](../images/image-index.md)，
 匯出不寫 current／previous 索引；開發桶的索引由上傳寫入，正式發布仍須另行建置並通過發布閘門。
 
-本文件說明 N0 已接線的 Python producer 邊界；基本目錄容器與新容量帳是 [size-budget](size-budget.md) 的設計要求，現有量測 API 尚未據此重寫；公開欄位與分片語意以
+本文件說明目前 4.0.0 的 Python producer 邊界。基本目錄按每包每區裝檔，容量依
+[size-budget](size-budget.md) 的單區冷載與一跳完整文字閉包計算；公開欄位與分片語意以
 [snapshot-format.md](snapshot-format.md)、[snapshot-transport.md](snapshot-transport.md)
 為準，機器契約以套件內 Schema 為準。
 
@@ -45,15 +46,28 @@ preview CLI 的 `export`／`export-offline` 用 `--brotli` 啟用；預設 `--no
 bucket 數只讀取目前候選 Schema 的 `bucket_count.const`，不接受呼叫端任選 N。
 分片鍵採 canonical 主實體／完整主鍵陣列與全 SHA-256；永久 ID 不縮短、不重配。
 現行加 pending 暫顯的 `display_ref` 決定 revision 的 bootstrap/detail；其餘完整列
-只進 history。text 與 translation 按名字、可用名字翻譯及啟動欄位的文字引用閉包分列。
+只進 history。名稱所需的 text、translation 與 annotation_set 在 catalog 裝局部副本；
+詳情字典仍沿全域固定 band 保存完整列。同 ID 的副本完整值須相等，不能省欄或換用途。
+annotation_concept 固定放共用 catalog，並帶所需 label 文字閉包。
 
-2.0 使用 [傳輸契約 §5.1](snapshot-transport.md#51-固定配置) 的 N=64、
-image 實體鍵與固定相鄰 bucket bands；BP01／CP04 是配置明列的 bootstrap 例外。
-同 role／partition／owner 的 band 合檔，不合併邏輯列，不按資料大小動態換 width 或跨 owner 填裝。
-同名兩表完整存於 detail，其他啟動欄位依既有閉包保留。
-N0 的逐片 raw 512 KiB 預檢由現有量測 API 明示；新契約基本目錄容器 ≤2 MiB、其他資料檔 ≤512 KiB，按整個實際容器量測。超過上限仍可作容量診斷的候選產物，
-不能宣稱正式通過、任選 bucket 數、重配 owner 或丟棄資料。base 檔案 bytes/hash
-變動時，相關詳情片必須以新 base hash 重建，即使 row_index 本身不變。
+4.0.0 使用 [傳輸契約 §5.1](snapshot-transport.md#51-固定配置) 的 N=64，
+每個 `(用途,地區,家族[,固定 band])` 一個家族檔。catalog 每包每區一檔；card／face
+按區拆列，沒有該區印刷的狀態放 region-state，完整 reader 依固定規則合回。
+default printing 的基本列進 catalog，其餘印刷的卡號定位三格按真正 printing home
+裝進 catalog，與 default 基本列的聯集恰好覆蓋全部印刷；其完整基本列在背景 print 檔。
+商品與引擎資料亦按用途放背景檔，不阻塞基本目錄冷載。
+
+背景一般家族 width=64，BP01／CP04 固定 width=32（兩帶），global width=8（八帶）；
+詳情全域字典 width=2（32 帶）。images 保留原 physical 成員：global width=1、
+home_set width=32。Python producer 與 reader 共用 contracts 的寬度表，
+各自計算分組與驗證；不按資料大小動態換 width，也不跨家族填裝。
+同一 File 的相同 fragment 身分按完整 PK 合併排序，先定出 catalog／print base bytes
+與 hash，再建立 row_index、exact base 與 dependencies。
+
+producer 按實際 File 預檢 raw 上限：catalog ≤2 MiB，其餘 fragment 容器 ≤512 KiB，
+types、字典、metadata 與 rows 全計入，config／programs 另報；超限直接失敗，不能任選 bucket 數、重配 owner
+或丟棄資料。base 檔案 bytes/hash 變動時，相關詳情片必須以新 base hash 重建，
+即使 row_index 本身不變。
 
 printing 與 display revision 的詳情片一對一提供每個 base row，保留 unknown/null
 值。printing 用永久 `face.ordinal`，不把陣列位置當 ordinal；revision 的 name 與
@@ -68,16 +82,23 @@ printing 與 display revision 的詳情片一對一提供每個 base row，保�
 `Snapshot.assert_identical` 比較兩次輸出的 raw/br 與 recipe；批次時間
 及版號只影響快照清單，未變 payload bytes 可跨版重用。
 
-`export.transport.measure.measure` 目前回報 N0 的全文／啟動包 raw／br、逐片 metadata 與超限檔；它把 manifest／config 計入，排除 images／空 DSL。
-既有 `startup_by_region.jp`／`.en` 若仍載全部 bootstrap，兩區數字相同；其中 `target_br_1_mib`／`stop_for_maintainer` 沿用舊啟動目標與停點，不是現行分界。這些數字不是新基本目錄裝檔或單區完整文字帳的通過證據。
+`export.transport.measure.measure` 依 [size-budget](size-budget.md) 回報
+`startup_by_region`、`complete_text_by_region`、`text_total`、`manifest` 與逐檔容量。
+基本目錄冷載逐區計完整 manifest＋config＋所選區及共用 catalog 的實際 File 與強依賴；
+共用檔整檔計，不分攤語言比例。Brotli 2 MiB 是分界，略超報精確 bytes 差額與比例，
+明顯超出才交維護者，不當作 CI 硬閘門。
 
-修訂後的報告依 [size-budget](size-budget.md)：兩區全量 raw（全部文字分片＋manifest）每次報告、明顯成長時檢討，單一版本完整文字閉包 Brotli ≤8 MiB，基本目錄容器 raw ≤2 MiB，其他資料檔 ≤512 KiB。
-基本目錄冷載逐區計完整 manifest＋config＋實際 File 與依賴；混區／共用 File 整檔計，不分攤語言比例。
-Brotli 2 MiB 是分界，略超報精確 bytes 差額與比例，明顯超出才交維護者，不當作 CI 硬閘門。
-source／counterpart、必要跨區檔、卡號索引與字典須完整計入單區全文；基本文字就緒而日文依據／標註未備妥時亦不免計。
-新量法不以舊豁免或現有 API 數字宣稱已驗收。
+單區完整文字採一跳閉包：C0 是所選區與共用的 bootstrap／text／config 加強依賴，
+再加入 C0 直接引用的 source／counterpart owner 所在檔及其呈現所需的卡片／面上下文，
+最後補齊聯集的強依賴。來源檔自身的其他來源引用不再遞移展開。
+Python 直接使用建置端 `Snapshot.source_files` 計算，不依賴公開 manifest 的 source_refs。
+單區完整文字 Brotli ≤8 MiB；兩區全部文字 raw（全部文字分片＋manifest）每次報告、
+明顯成長時檢討。基本文字就緒而日文依據／標註未備妥時亦不免計來源資料。
 
-逐檔 owner／bucket／partition 報所有 fragments 的集合，不只取第一個。
+manifest 的 raw／Brotli 獨立列出，亦計入各閉包；無 Brotli 表示時不宣稱壓縮閘門通過。
+逐檔報 purpose／region／segment，以及所有 fragments 的 owner／partition 集合與總列數，
+不只取第一個；逐檔 raw 上限依 catalog ≤2 MiB、其他 fragment 容器 ≤512 KiB 驗證。
+
 另報全部 images metadata 的檔數／raw／br（不加進完整文字）；metadata 與
 圖片 blob 分列，當頁小型 row 集合不能冒充實際下載量。背景全量 metadata 的
 成本仍算首次 session／離線下載；實際成為首屏或基本目錄必載依賴者加回該冷載帳。

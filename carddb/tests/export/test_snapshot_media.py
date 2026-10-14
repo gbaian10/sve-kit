@@ -77,8 +77,8 @@ def test_schema_regeneration_and_frozen_column_boundaries() -> None:
     assert columns("printing_image") == columns("printing_image", MEDIA)
     assert "path" not in columns("image_variant")
     assert "path" not in columns("image_variant", MEDIA)
-    assert profile(MEDIA).width("images", "detail", "home_set", "BP01") == 32
-    assert profile(MEDIA).width("images", "detail", "global", "") == 1
+    assert profile(MEDIA).width("images", "BP01") == 32
+    assert profile(MEDIA).width("images", "") == 1
 
 
 def test_shared_image_url_vectors() -> None:

@@ -12,8 +12,10 @@ from sve_carddb.core.json import array, canonical, digest, integer, object_value
 from sve_carddb.export.buckets import bucket
 from sve_carddb.export.name_annotations import whole_name
 from sve_carddb.export.reader_annotations import validate_annotations
+from sve_carddb.export.text_owners import row_owners
 
 if TYPE_CHECKING:
+    from sve_carddb.contracts.profiles import Profile
     from sve_carddb.export.reader import Fragment, Row, View
 
 _CARD_TABLES = {
@@ -648,7 +650,7 @@ def validate_placement(view: View, manifest: Row, fragments: list[Fragment]) -> 
                     raise ValueError("Original annotation segment differs from source")
                 continue
             expected_key, segment, expected_fragment = _expected_placement(
-                fragment, row, file, files, entities, selected.buckets
+                fragment, row, file, files, entities, selected
             )
             if fragment.file != expected_key or file["segment"] != segment:
                 raise ValueError("File key does not match fixed band recipe")
@@ -662,7 +664,7 @@ def _expected_placement(
     file: Row,
     files: dict[str, Row],
     entities: tuple[dict[str, Row], dict[str, Row], dict[str, str]],
-    count: int,
+    selected: Profile,
 ) -> tuple[str, str, str]:
     purpose = string(file["purpose"])
     owner = object_value(fragment.value["owner"])
@@ -689,8 +691,10 @@ def _expected_placement(
     band = (
         0
         if source_purpose == "catalog"
-        else bucket(_entity_key(fragment.table, row, entities[0], entities[1]), count)
-        // _band_width(source_purpose, family)
+        else bucket(
+            _entity_key(fragment.table, row, entities[0], entities[1]), selected.buckets
+        )
+        // selected.width(source_purpose, family)
     )
     segment = _physical_segment(purpose, family, band)
     expected_fragment = (
@@ -703,14 +707,6 @@ def _expected_placement(
         segment,
         expected_fragment,
     )
-
-
-def _band_width(purpose: str, family: str) -> int:
-    if purpose == "images":
-        return 32 if family else 1
-    if purpose == "dictionary":
-        return 2
-    return 32 if family in {"BP01", "CP04"} else 64 if family else 8
 
 
 def _physical_segment(purpose: str, family: str, band: int) -> str:
@@ -752,38 +748,12 @@ def _source_locations(
     locations: dict[tuple[bytes, str], tuple[str, JsonValue]] = {}
     for fragment in fragments:
         for row in _placed_rows(fragment, index):
-            for owner in _text_owner_keys(fragment.table, row):
+            for owner in row_owners(fragment.table, row):
                 locations[canonical(owner), string(fragment.value["partition"])] = (
                     fragment.file,
                     fragment.value["segment"],
                 )
     return locations
-
-
-def _text_owner_keys(table: str, row: Row) -> list[Row]:
-    if table == "printing":
-        return [
-            {
-                "kind": "printing_face",
-                "id": row["id"],
-                "face_id": object_value(f)["face_id"],
-            }
-            for f in array(row["faces"])
-        ]
-    if table == "vocabulary":
-        return [
-            {"kind": "vocabulary", "vocabulary_kind": row["kind"], "code": row["code"]}
-        ]
-    if table in {
-        "face_revision",
-        "product",
-        "product_family",
-        "keyword",
-        "qa_version",
-        "cr_clause",
-    }:
-        return [{"kind": table, "id": row["id"]}]
-    return []
 
 
 @dataclass(frozen=True)
