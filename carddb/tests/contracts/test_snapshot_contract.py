@@ -1,3 +1,4 @@
+# ruff: file-ignore[subclass-builtin] -- Built-in subclasses are deliberate canonical boundary inputs.
 """Consume shared, handwritten contract fixtures without a producer or database."""
 
 from pathlib import Path
@@ -31,6 +32,26 @@ from ..support.snapshot_contract_fixtures import (
     fixture,
     payloads,
 )
+
+
+class _StringSubclass(str):
+    __slots__ = ()
+
+
+class _IntegerSubclass(int):
+    pass
+
+
+class _FloatSubclass(float):
+    pass
+
+
+class _ListSubclass(list[JsonValue]):
+    pass
+
+
+class _DictSubclass(dict[str, JsonValue]):
+    pass
 
 
 def test_schema_is_valid_and_covers_every_collection() -> None:
@@ -271,11 +292,47 @@ def test_canonical_rejects_floating_point_numbers(value: float) -> None:
         canonical(value)
 
 
-@pytest.mark.parametrize("value", [(1, 2), {1, 2}, Path("synthetic")])
+@pytest.mark.parametrize(
+    "value",
+    [
+        (1, 2),
+        {1, 2},
+        Path("synthetic"),
+        _StringSubclass("synthetic"),
+        _IntegerSubclass(1),
+        _FloatSubclass(1.0),
+        _ListSubclass([1]),
+        _DictSubclass(key=1),
+    ],
+)
 def test_canonical_identifies_unsupported_types(value: object) -> None:
     with pytest.raises(
         TypeError, match=r"^Unsupported JSON type: " + type(value).__name__
     ):
+        canonical(cast("JsonValue", value))
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        {1: 2},
+        {_StringSubclass("key"): 1},
+        {"nested": [(1, 2)]},
+        {"nested": [9007199254740992]},
+        {"nested": ["\ud800"]},
+        {"\udfff": None},
+    ],
+    ids=[
+        "integer-key",
+        "subclass-key",
+        "tuple",
+        "unsafe",
+        "surrogate",
+        "surrogate-key",
+    ],
+)
+def test_canonical_rejects_invalid_nested_values(value: object) -> None:
+    with pytest.raises((TypeError, ValueError)):
         canonical(cast("JsonValue", value))
 
 
