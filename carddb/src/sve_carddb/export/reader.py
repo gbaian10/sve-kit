@@ -503,6 +503,12 @@ def read_snapshot(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
     Missing keys and invalid shapes intentionally propagate as errors; the reader
     never repairs a dependency or falls back to another snapshot.
     """
+    validate_manifest(manifest_value)
+    return join_payloads(manifest_value, payloads)
+
+
+def validate_manifest(manifest_value: JsonValue) -> None:
+    """Validate the complete manifest independently of payload decoding."""
     manifest = object_value(manifest_value)
     validate("Manifest", manifest, string(manifest["format_version"]))
     selected = profile(string(manifest["format_version"]))
@@ -527,6 +533,13 @@ def read_snapshot(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
             file["dependencies"]
         ):
             raise ValueError("Images must depend on config")
+
+
+def join_payloads(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> View:
+    """Verify and join raw payloads; callers must also validate the complete manifest."""
+    manifest = object_value(manifest_value)
+    selected = profile(string(manifest["format_version"]))
+    files = _files(manifest)
     fragments = _load(files, payloads, selected.version)
     validate_fragments(fragments)
     view = _logical(fragments, files)
@@ -563,6 +576,12 @@ def text_all_payloads(manifest_value: JsonValue, data: bytes) -> dict[str, bytes
     """Validate the union envelope and hashes; callers validate members via read_snapshot."""
     manifest = object_value(manifest_value)
     validate("Manifest", manifest, string(manifest["format_version"]))
+    return text_all_members(manifest, data)
+
+
+def text_all_members(manifest_value: JsonValue, data: bytes) -> dict[str, bytes]:
+    """Verify raw union members; callers must also validate the complete manifest."""
+    manifest = object_value(manifest_value)
     description = object_value(manifest["text_all"])
     value = object_value(_payload(description, data))
     version = string(manifest["format_version"])
