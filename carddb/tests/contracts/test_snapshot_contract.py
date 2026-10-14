@@ -2,6 +2,7 @@
 """Consume shared, handwritten contract fixtures without a producer or database."""
 
 from pathlib import Path
+from traceback import format_exception
 from typing import cast
 
 import pytest
@@ -149,6 +150,45 @@ def test_golden_join_matches_independent_logical_view() -> None:
     assert read_snapshot(fixture("manifest.json"), payloads()) == fixture(
         "expected-logical.json"
     )
+
+
+@pytest.mark.parametrize("failure", ["row", "fragment"])
+def test_reader_container_errors_hide_fragment_text(failure: str) -> None:
+    manifest = object_value(fixture("manifest.json"))
+    values = {key: parse(raw) for key, raw in payloads().items()}
+    fragment = next(
+        object_value(entry)
+        for value in values.values()
+        for entry in array(
+            object_value(object_value(value).get("tables", {})).get("text_unit", [])
+        )
+        if object_value(entry)["partition"] == "detail"
+    )
+    original = array(array(fragment["rows"])[0])
+    texts = [f"Synthetic private wording {index}" for index in range(51)]
+    rows: list[JsonValue] = [[*original[:2], text] for text in texts]
+    fragment["rows"] = rows
+    if failure == "row":
+        array(rows[25])[2] = None
+    else:
+        fragment["extra"] = "Synthetic unexpected value"
+    blobs = _reseal(manifest, values)
+
+    with pytest.raises(ValidationError) as caught:
+        read_snapshot(manifest, blobs)
+
+    error = caught.value
+    rendered = "".join(format_exception(error))
+    assert all(text not in rendered for text in texts)
+    assert "Synthetic unexpected value" not in rendered
+    assert error.instance is None
+    assert list(error.absolute_path)[:2] == ["tables", "text_unit"]
+    assert "schema_path=" in error.message
+    if failure == "row":
+        assert "'rows', 25, 2]" in error.message
+        assert "type:" in error.message
+    else:
+        assert "additionalProperties:" in error.message
 
 
 @pytest.mark.parametrize(
