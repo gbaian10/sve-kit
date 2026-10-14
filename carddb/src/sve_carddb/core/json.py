@@ -4,13 +4,21 @@ import hashlib
 import json
 from typing import TYPE_CHECKING, Never, cast
 
+import orjson
+
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from pydantic import JsonValue
 
 SAFE_INTEGER = 9007199254740991
-_ESCAPES = {i: f"\\u{i:04x}" for i in range(32)} | {34: '\\"', 92: "\\\\"}
+_SHORT_ESCAPES = (
+    (b"\\b", b"\\u0008"),
+    (b"\\t", b"\\u0009"),
+    (b"\\n", b"\\u000a"),
+    (b"\\f", b"\\u000c"),
+    (b"\\r", b"\\u000d"),
+)
 
 
 def object_value(value: JsonValue) -> dict[str, JsonValue]:
@@ -65,53 +73,43 @@ def parse(data: bytes) -> JsonValue:
             parse_constant=_reject_float,
         ),
     )
-    pending = [value]
-    while pending:
-        item = pending.pop()
-        if isinstance(item, str):
-            item.encode("utf-8")
-        elif type(item) is int:
-            integer(item)
-        elif isinstance(item, list):
-            pending.extend(item)
-        elif isinstance(item, dict):
-            pending.extend(item)
-            pending.extend(item.values())
+    _check(value)
     return value
 
 
-def _quoted(value: str) -> str:
-    value.encode("utf-8")
-    return '"' + value.translate(_ESCAPES) + '"'
-
-
-def _encode(value: JsonValue) -> str:
-    if value is None:
-        return "null"
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    if isinstance(value, str):
-        return _quoted(value)
-    if isinstance(value, int):
-        return str(integer(value))
-    if isinstance(value, list):
-        return "[" + ",".join(_encode(item) for item in value) + "]"
-    if isinstance(value, dict):
-        return (
-            "{"
-            + ",".join(
-                _quoted(key) + ":" + _encode(value[key]) for key in sorted(value)
-            )
-            + "}"
-        )
-    if isinstance(value, float):
-        raise ValueError("Floating point JSON is forbidden")  # ruff: ignore[type-check-without-type-error] -- JSON numbers are rejected by value under this recipe
-    raise TypeError("Unsupported JSON type: " + type(value).__name__)
+def _check(value: JsonValue) -> None:
+    pending = [value]
+    while pending:
+        item = pending.pop()
+        if item is None or type(item) is bool:
+            continue
+        if type(item) is str:
+            item.encode("utf-8")
+        elif type(item) is int:
+            integer(item)
+        elif type(item) is list:
+            pending.extend(item)
+        elif type(item) is dict:
+            for key in item:
+                if type(key) is not str:
+                    raise TypeError("Expected string key")
+                key.encode("utf-8")
+            pending.extend(item.values())
+        elif type(item) is float:
+            raise ValueError("Floating point JSON is forbidden")
+        else:
+            raise TypeError("Unsupported JSON type: " + type(item).__name__)
 
 
 def canonical(value: JsonValue) -> bytes:
     """Encode the contract's exact canonical bytes, including control escapes."""
-    return _encode(value).encode("utf-8")
+    _check(value)
+    data = orjson.dumps(value, option=orjson.OPT_SORT_KEYS | orjson.OPT_STRICT_INTEGER)
+    # JSON cannot contain literal NUL; protect paired backslashes before rewriting escapes.
+    data = data.replace(b"\\\\", b"\x00")
+    for short, long in _SHORT_ESCAPES:
+        data = data.replace(short, long)
+    return data.replace(b"\x00", b"\\\\")
 
 
 def digest(data: bytes) -> str:
