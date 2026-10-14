@@ -19,13 +19,14 @@ from sve_carddb.export.media import prepare_media
 from sve_carddb.export.reader import read_text_all
 from sve_carddb.export.transport import (
     Batch,
+    Brotli,
     Ownership,
     Snapshot,
     _Files,
     _ordered,
     export_snapshot,
 )
-from sve_carddb.export.transport.compression import compress
+from sve_carddb.export.transport.compression import compress, python_brotli
 from sve_carddb.export.transport.layout import Layout
 from sve_carddb.export.transport.measure import measure, update
 
@@ -443,11 +444,11 @@ def test_primary_key_boundary_rejects_duplicates(
 def test_file_key_collision_preserves_the_first_payload() -> None:
     files = _Files(None)
     first = files.add("config", "config", {"synthetic": "first"}, [])
-    original = files.payloads["config"]
+    original = files.raw["config"]
     with pytest.raises(ValueError, match="Duplicate logical file key"):
         files.add("config", "config", {"synthetic": "replacement"}, [])
     assert files.files == {"config": first}
-    assert files.payloads == {"config": original}
+    assert files.raw == {"config": original}
 
 
 def test_ownership_boundary_rejects_one_missing_printing(
@@ -467,8 +468,6 @@ def test_explicit_compressor_recipe_and_bytes_are_used(
 ) -> None:
     import zlib  # ruff: ignore[import-outside-top-level] -- a synthetic codec tests injection without adding a Brotli dependency
 
-    from sve_carddb.export.transport import Brotli  # ruff: ignore[import-outside-top-level] -- real Brotli q11 is exercised by the private capacity run
-
     codec = Brotli("synthetic-test-codec-v1", zlib.compress)
     first = export_snapshot(*logical, BATCH, brotli=codec)
     second = export_snapshot(*logical, BATCH, brotli=codec)
@@ -481,6 +480,43 @@ def test_explicit_compressor_recipe_and_bytes_are_used(
     assert object_value(measure(first, brotli=codec)["text_total"])["br"] is not None
     with pytest.raises(ValueError, match="same compressor recipe"):
         measure(first)
+
+
+@pytest.mark.parametrize("brotli_enabled", [False, True])
+def test_snapshot_encodings_match_independent_serial_compression(
+    logical: tuple[Projection, Ownership], brotli_enabled: bool
+) -> None:
+    codec = python_brotli() if brotli_enabled else None
+    result = export_snapshot(*logical, BATCH, brotli=codec)
+    blobs = [*result.payloads.values(), result.text_all, result.manifest_blob]
+    for blob in blobs:
+        assert blob == compress(blob.raw, codec)
+    assert result.manifest_blob.raw == canonical(result.manifest)
+    descriptions = [
+        *(object_value(file) for file in array(result.manifest["files"])),
+        object_value(result.manifest["text_all"]),
+    ]
+    for description in descriptions:
+        blob = (
+            result.payloads[string(description["key"])]
+            if "key" in description
+            else result.text_all
+        )
+        assert description["sha256"] == digest(blob.raw)
+        assert description["compressed_bytes"] == {
+            "br": None if blob.br is None else len(blob.br),
+            "gzip": len(blob.gzip),
+        }
+
+
+def test_compressor_failure_propagates_from_snapshot(
+    logical: tuple[Projection, Ownership],
+) -> None:
+    def failed_compressor(_raw: bytes) -> bytes:
+        raise ValueError("synthetic codec failure")
+
+    with pytest.raises(ValueError, match="synthetic codec failure"):
+        export_snapshot(*logical, BATCH, brotli=Brotli("failing", failed_compressor))
 
 
 def test_foreign_printing_home_is_rejected(
