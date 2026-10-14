@@ -136,7 +136,7 @@ class Sources:
             stores, repository, registry, batches=self.batches
         )
         self.identity_indexes: dict[bytes, RegistryIndex] = {}
-        self.context_keys: dict[BuildContext, bytes] = {}
+        self.context_keys: dict[BuildContext, tuple[bytes, str]] = {}
         self.cache: dict[tuple[str, str, str], tuple[str, JsonValue, Source]] = {}
         self.uses: list[SourceUse] = []
 
@@ -171,8 +171,14 @@ class Sources:
     def context_key(self, context: BuildContext) -> bytes:
         """Full immutable contexts distinguish inputs without quoting them for every owner."""
         if context not in self.context_keys:
-            self.context_keys[context] = canonical(context.model_dump(mode="json"))
-        return self.context_keys[context]
+            key = canonical(context.model_dump(mode="json"))
+            self.context_keys[context] = key, digest(key)
+        return self.context_keys[context][0]
+
+    def context_hash(self, context: BuildContext) -> str:
+        """Reuse the digest alongside its canonical key across owners and stages."""
+        self.context_key(context)
+        return self.context_keys[context][1]
 
     def document(self, ref: SourceRef) -> tuple[str, JsonValue, Source]:
         """Verify recipe, archive membership, metadata and raw before resolving text."""

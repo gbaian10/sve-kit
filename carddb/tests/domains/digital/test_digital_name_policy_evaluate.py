@@ -266,6 +266,25 @@ def test_unknown_printing_never_borrows_current(
     assert rule_links((evidence,), catalogues[1]) == ()
 
 
+def test_owner_context_hash_follows_stage_context(baseline: PolicyFixture) -> None:
+    sources = baseline.digital.sources()
+    contexts = (
+        sources.build,
+        sources.build.model_copy(update={"program_revision": "a" * 40}),
+    )
+    hashes = []
+    for context in contexts:
+        stage = sources.stage(context)
+        review = review_context(stage)
+        expected = digest(canonical(context.model_dump(mode="json")))
+        assert stage.context_key(context) == canonical(context.model_dump(mode="json"))
+        for state in ("known", "unknown"):
+            evidence = owner_text(baseline.owner(state=state), stage, review)
+            assert evidence.context_hash == expected
+        hashes.append(expected)
+    assert hashes[0] != hashes[1]
+
+
 @pytest.mark.parametrize(
     ("fault", "message"),
     [
