@@ -22,9 +22,11 @@ from sve_carddb.build import (
     Unique,
     compile_schema,
     create_database,
+    four_layer,
 )
 from sve_carddb.build.database import _raw_rows, install_functions
 from sve_carddb.build.validation import BOUNDS, Rules, decode
+from sve_carddb.core.json import canonical
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -676,3 +678,32 @@ def test_selected_predicates_use_canonical_json_and_boolean_encoding() -> None:
         assert not db.select(
             "numbers", ("id",), where={"flag": False, "payload": Json({"a": 2, "z": 1})}
         )
+
+
+def test_generated_strict_code_patterns_compile_and_reject_trailing_newlines() -> None:
+    rules = Rules(
+        {
+            name: canonical(value).decode()
+            for name, value in four_layer.schemas().items()
+        }
+    )
+    source: dict[str, JsonValue] = {
+        "source_lang": "ja",
+        "canonical_hash": "0" * 64,
+        "normalizer_version": "n0.v1",
+    }
+    rules.validate("FrameSource", source)
+    with pytest.raises(ValidationError):
+        rules.validate("FrameSource", source | {"normalizer_version": "n0.v1\n"})
+    rules.validate("FormCases", {"value": [{"kind": "Label", "arg": "count"}]})
+    with pytest.raises(ValidationError):
+        rules.validate("FormCases", {"value": [{"kind": "Label", "arg": "count\n"}]})
+
+
+def test_json_schema_errors_preserve_keyword_and_paths() -> None:
+    rules = Rules({"numbers": '{"type":"array","items":{"type":"integer"}}'})
+    with pytest.raises(ValidationError) as error:
+        rules.validate("numbers", ["synthetic"])
+    assert error.value.validator == "type"
+    assert list(error.value.path) == [0]
+    assert list(error.value.schema_path) == ["items", "type"]

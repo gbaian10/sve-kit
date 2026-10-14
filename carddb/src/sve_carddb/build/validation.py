@@ -7,10 +7,13 @@ from jsonschema import Draft202012Validator, ValidationError
 from pydantic import JsonValue
 
 from sve_carddb.build.model import Column, Json, Kind, Value
+from sve_carddb.contracts.snapshot import compile_validator, validate_schema
 from sve_carddb.core.json import SAFE_INTEGER, canonical, parse
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
+
+    import jsonschema_rs
 
 BOUNDS = {
     Kind.INT: (-SAFE_INTEGER, SAFE_INTEGER),
@@ -70,19 +73,19 @@ class Rules:
     """Pin validators to serialized declarations; never fetch schemas from a URL."""
 
     def __init__(self, schemas: Mapping[str, str]) -> None:
-        self._validators: dict[str, Draft202012Validator] = {}
+        self._validators: dict[str, jsonschema_rs.Draft202012Validator] = {}
         for name, data in schemas.items():
             value = parse(data.encode())
             if not isinstance(value, (dict, bool)):
                 raise TypeError("JSON schema must be an object or boolean")
             _local_schema(value)
             Draft202012Validator.check_schema(value)
-            self._validators[name] = Draft202012Validator(value)
+            self._validators[name] = compile_validator(value)
 
     def validate(self, name: str, value: JsonValue) -> None:
         """Validate a named rule after checking canonical JSON scalar limits."""
         canonical(value)
-        self._validators[name].validate(value)
+        validate_schema(self._validators[name], value)
 
     def sql_json(self, name: object, data: object) -> int:
         """Return a fail-closed SQLite CHECK result for malformed JSON."""
