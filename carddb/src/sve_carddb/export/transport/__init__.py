@@ -1,5 +1,6 @@
 """Export the public logical projection to immutable candidate transport blobs."""
 
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 from urllib.parse import quote
@@ -173,16 +174,19 @@ def _reference(file: Record) -> Record:
     return {"key": file["key"], "sha256": file["sha256"]}
 
 
-def _description(blob: Blob) -> Record:
-    hashed = digest(blob.raw)
+def _description(raw: bytes) -> Record:
+    hashed = digest(raw)
     return {
         "path": "snapshots/blobs/" + hashed[7:] + ".json",
         "sha256": hashed,
-        "bytes": len(blob.raw),
-        "compressed_bytes": {
-            "br": None if blob.br is None else len(blob.br),
-            "gzip": len(blob.gzip),
-        },
+        "bytes": len(raw),
+    }
+
+
+def _compressed_bytes(blob: Blob) -> Record:
+    return {
+        "br": None if blob.br is None else len(blob.br),
+        "gzip": len(blob.gzip),
     }
 
 
@@ -190,16 +194,17 @@ class _Files:
     def __init__(self, brotli: Brotli | None) -> None:
         self.brotli = brotli
         self.files: dict[str, Record] = {}
+        self.raw: dict[str, bytes] = {}
         self.payloads: dict[str, Blob] = {}
         self.values: dict[str, JsonValue] = {}
 
     def add(
         self, key: str, role: str, value: Record, dependencies: list[JsonValue]
     ) -> Record:
-        """Seal bytes before allowing other shards to bind their base hash."""
+        """Seal raw bytes so dependent shards can bind their base hash."""
         if key in self.files:
             raise ValueError("Duplicate logical file key")
-        blob = compress(canonical(value), self.brotli)
+        raw = canonical(value)
         counts: list[JsonValue] = [
             {
                 "table": table,
@@ -210,16 +215,31 @@ class _Files:
             for fragment in array(fragments)
             for f in (object_value(fragment),)
         ]
-        file = _description(blob) | {
+        file = _description(raw) | {
             "key": key,
             "role": role,
             "row_counts": counts,
             "dependencies": dependencies,
         }
         self.files[key] = file
-        self.payloads[key] = blob
+        self.raw[key] = raw
         self.values[key] = value
         return file
+
+    def _compress_payloads(self) -> dict[str, Blob]:
+        return {key: compress(raw, self.brotli) for key, raw in self.raw.items()}
+
+    def compress(self, text_all: bytes) -> Blob:
+        """Compress fixed groups, then fill the manifest's transfer lengths."""
+        # Threads share raw bytes and preserve the injected compressor without pickling.
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            union = pool.submit(compress, text_all, self.brotli)
+            payloads = pool.submit(self._compress_payloads)
+            self.payloads = payloads.result()
+            result = union.result()
+        for key, blob in self.payloads.items():
+            self.files[key]["compressed_bytes"] = _compressed_bytes(blob)
+        return result
 
 
 def _file_key(group: Group) -> str:
@@ -407,7 +427,7 @@ def export_snapshot(
         for key, file in sorted(files.files.items())
         if files.files[key]["role"] in {"bootstrap", "text", "config"}
     ]
-    union = compress(
+    union = files.compress(
         canonical(
             {
                 "format_version": format_version,
@@ -418,7 +438,6 @@ def export_snapshot(
                 ],
             }
         ),
-        brotli,
     )
     languages = json_list(
         sorted(
@@ -439,7 +458,8 @@ def export_snapshot(
         "required_capabilities": list(selected.capabilities),
         "files": [files.files[key] for key in sorted(files.files)],
         "config_ref": _reference(config),
-        "text_all": _description(union) | {"contains": contains},
+        "text_all": _description(union.raw)
+        | {"compressed_bytes": _compressed_bytes(union), "contains": contains},
         "partitioning": partitioning,
         "changes_ref": None,
     }
