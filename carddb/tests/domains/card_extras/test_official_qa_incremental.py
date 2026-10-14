@@ -401,7 +401,9 @@ def test_corrupt_frozen_raw_cannot_supply_coverage(
     entry = provider.sources.entries[source_id]
     (copied.root / entry.blob.path).write_bytes(b"Synthetic corrupt raw")
     with pytest.raises(ArchiveError, match="hash"):
-        provider.coverage(ROOT)
+        FrozenOfficialExtras(
+            copied.root, copied.store_id, sealed.batch, region="jp"
+        ).coverage(ROOT)
 
 
 def test_en_listing_detail_fake_server_contract(tmp_path: Path) -> None:

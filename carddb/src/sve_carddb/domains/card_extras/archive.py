@@ -6,11 +6,12 @@ from typing import TYPE_CHECKING
 from urllib.parse import parse_qsl, urljoin, urlsplit
 
 from sve_carddb.core.json import digest
+from sve_carddb.domains import physical_sources
 from sve_carddb.domains.card_extras.dates import parse_en_date
 from sve_carddb.domains.card_extras.models import CardPage, QAEntry, RelatedLink
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.http.validate import decode_html
-from sve_carddb.parse.html import attribute, parse, require_one, select_all
+from sve_carddb.parse.html import Queryable, attribute, parse, require_one, select_all
 from sve_carddb.parse.pages import official_en, official_jp
 from sve_carddb.parse.pages.extract_en import qa_text as en_qa_text
 from sve_carddb.parse.pages.extract_jp import qa_text
@@ -52,7 +53,6 @@ def card_number(url: str, region: Region) -> str | None:
 def parse_card_page(raw: bytes, source: Source, *, region: Region = "jp") -> CardPage:
     """Validate physical identity before transcribing regional supplemental blocks."""
     adapter = official_jp if region == "jp" else official_en
-    renderer = qa_text if region == "jp" else en_qa_text
     if source.sha256 != digest(raw) or source.parser_version != (
         PARSER if region == "jp" else EN_PARSER
     ):
@@ -64,8 +64,16 @@ def parse_card_page(raw: bytes, source: Source, *, region: Region = "jp") -> Car
         or source.kind != "official_page"
     ):
         raise ValueError("Card extras source URL/region/media mismatch")
-    adapter.parse_card(raw, expected_number=number)
     tree = parse(decode_html(raw, min_bytes=official_jp.MIN_PAGE_BYTES))
+    official_jp.card_tree(tree, expected_number=number, page_dir=adapter.CARD_DIR)
+    return extras_tree(tree, source, region=region, number=number)
+
+
+def extras_tree(
+    tree: Queryable, source: Source, *, region: Region, number: str
+) -> CardPage:
+    """Project supplemental blocks without reopening a validated physical page."""
+    renderer = qa_text if region == "jp" else en_qa_text
     nodes = select_all(
         tree,
         ".cardlist-Under .cardlist-Detail_QA .qa-List_Item"
@@ -147,9 +155,9 @@ class FrozenCardExtras:
         self.region = region
 
     def pages(self) -> Iterator[CardPage]:
-        """Stream one explicit region; each access rechecks raw and metadata hashes."""
+        """Stream one explicit region from shared verified physical page projections."""
         for entry in self.sources.inventory.current:
-            source, raw, descriptor = self.sources.read(
+            _, descriptor = self.sources.metadata(
                 entry.source_version_id,
                 parser_version=PARSER if self.region == "jp" else EN_PARSER,
             )
@@ -159,4 +167,11 @@ class FrozenCardExtras:
                 entry.url,
             ):
                 raise ValueError("Card extras batch source identity mismatch")
-            yield parse_card_page(raw, source, region=self.region)
+            page = physical_sources.page(
+                self.sources,
+                entry.source_version_id,
+                region=self.region,
+                parser_version=PARSER if self.region == "jp" else EN_PARSER,
+            )
+            page.require_identity()
+            yield page.extras.get()

@@ -2,10 +2,8 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.core.json import canonical, digest
-from sve_carddb.domains.registry.projection import en_card, jp_card
-from sve_carddb.domains.registry.records import Observation
-from sve_carddb.domains.registry.review import observation
+from sve_carddb.core.json import digest
+from sve_carddb.domains import physical_sources
 from sve_carddb.domains.text_observations.models import FaceContent, TextCard
 from sve_carddb.domains.text_observations.presence import detect_presence
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
@@ -53,6 +51,8 @@ def en_face(face: official_en.Face) -> FaceContent:
 
 def verify_card(card: TextCard) -> None:
     """Reproduce frozen extraction and every result before accepting projected text."""
+    if card.raw is None and card.verify_extraction():
+        return
     if card.raw is None:
         if card.effect_presence:
             raise ValueError("Effect presence has no frozen source bytes")
@@ -118,7 +118,7 @@ class FrozenTexts:
         return self._versions.get(url, ())
 
     def card(self, region: Region, card_no: str) -> TextCard | None:
-        """Recheck raw/version/receipt pins on each read; never visit live or latest."""
+        """Reuse verified frozen projections; never visit live or latest."""
         if region != self.region:
             return None
         url = (jp if region == "jp" else en).card_url(card_no)
@@ -132,7 +132,7 @@ class FrozenTexts:
         if region != self.region:
             raise ValueError("Frozen historical text region mismatch")
         url = (jp if region == "jp" else en).card_url(card_no)
-        source, raw, descriptor = self.sources.read(
+        source, descriptor = self.sources.metadata(
             version, parser_version=self.parser_version
         )
         if (descriptor.provider, descriptor.kind, descriptor.url, source.kind) != (
@@ -142,35 +142,13 @@ class FrozenTexts:
             "official_page",
         ):
             raise ValueError("Frozen text source identity/media mismatch")
-        if region == "jp":
-            record = official_jp.extract_card(raw, number=card_no)
-            faces = tuple(jp_face(face) for face in record.faces)
-            image_src = tuple(face.image for face in record.faces)
-            identity_card = jp_card(record)
-            date_raw, errata = record.release_date, record.errata_url
-        else:
-            english = official_en.extract_card(raw, number=card_no)
-            faces = tuple(en_face(face) for face in english.faces)
-            image_src = tuple(face.image for face in english.faces)
-            identity_card = en_card(english)
-            date_raw, errata = english.release_date, english.errata_url
-        return TextCard(
-            source=source,
-            observation=Observation.model_validate_json(
-                canonical(observation(identity_card, region))
-            ),
-            faces=faces,
-            image_src=image_src,
-            date_raw=date_raw,
-            has_errata_link=errata is not None,
-            effect_presence=tuple(
-                detect_presence(
-                    raw, source, region=region, number=card_no, source_index=index
-                )
-                for index in range(len(faces))
-            ),
-            raw=raw,
+        page = physical_sources.page(
+            self.sources, version, region=region, parser_version=self.parser_version
         )
+        text = page.text.get()
+        if text.source == source:
+            return text
+        return text.model_copy(update={"source": source})
 
 
 class RegionalTexts:

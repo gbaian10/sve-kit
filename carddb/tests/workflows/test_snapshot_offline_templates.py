@@ -8,10 +8,9 @@ from sve_carddb.build import Json
 from sve_carddb.build.database import open_database
 from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, compile_build
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField
-from sve_carddb.core.json import array, canonical, digest, object_value, parse
+from sve_carddb.core.json import array, canonical, digest, object_value
 from sve_carddb.core.provenance import InputRecord
 from sve_carddb.domains.catalog import adoption_importer
-from sve_carddb.domains.translations import sources as source_projection
 from sve_carddb.domains.translations.four_layer_authored import (
     FrameRecord,
     TargetRecord,
@@ -25,12 +24,13 @@ from sve_carddb.domains.translations.four_layer_sources import (
 )
 from sve_carddb.domains.translations.inputs import Snapshot, load_glossary
 from sve_carddb.domains.translations.recognition.rules import parse as parse_rules
-from sve_carddb.domains.translations.sources import Sources
+from sve_carddb.workflows import offline
 from sve_carddb.workflows.offline import build
 
 from ..domains.registry.test_registry import card, make_inputs
 from ..support.shared_case_fixtures import TextCaseTemplate
 from ..support.text_observation_fixtures import make_case
+from ..support.translation_source_fixtures import EnvelopeSources
 from .test_snapshot_offline import prepared as prepared  # ruff: ignore[useless-import-alias] -- retain the actual frozen regional composition fixture
 
 if TYPE_CHECKING:
@@ -117,18 +117,10 @@ def test_normal_offline_build_reads_authored_frames_and_keeps_whole_field_fallba
         adoption_importer, "AdoptionInputs", lambda *_args, **_kwargs: AdoptedInputs()
     )
 
-    def synthetic_project(
-        raw: bytes, _url: str, provider: str
-    ) -> tuple[str, JsonValue]:
-        # The shared fixture archives a synthetic JSON envelope, never an official HTML page.
-        assert raw.startswith(b"<html>")
-        assert raw.endswith(b"</html>")
-        return ("ja" if provider == "jp" else "en"), parse(raw[6:-7])
-
-    monkeypatch.setattr(source_projection, "project", synthetic_project)
+    monkeypatch.setattr(offline, "TranslationSources", EnvelopeSources)
     before = build(recipe, bundle_dir=tmp_path / "before")
     context = InputRecord.model_validate_json(before.input_content).context
-    sources = Sources({recipe.store_id: recipe.archive}, recipe.repo, context)
+    sources = EnvelopeSources({recipe.store_id: recipe.archive}, recipe.repo, context)
     rules = parse_rules(RULE_CONTENT)
     with open_database(compile_build(SCHEMA), tmp_path / "before/build.sqlite") as db:
         engine = prepare_classifier(

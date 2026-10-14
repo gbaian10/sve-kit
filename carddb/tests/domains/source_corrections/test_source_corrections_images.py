@@ -6,6 +6,7 @@ import pytest
 
 from sve_carddb.domains.source_corrections import FrozenImages
 from sve_carddb.domains.text_observations import plan_text_observations
+from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.source_archive import ArchiveError
 
 if TYPE_CHECKING:
@@ -57,6 +58,11 @@ class TestDefaultCorrectionInputs:
             + ".json"
         )
         (fixture.image_store / relative).write_bytes(b"Changed synthetic frozen bytes")
+        if part == "descriptor":
+            # A descriptor this command already verified is trusted; a fresh reader refuses it.
+            with pytest.raises(ArchiveError, match="hash"):
+                FrozenSources(sources.root, sources.store_id, sources.batch_id)
+            return
         with pytest.raises(ArchiveError, match="hash"):
             plan_text_observations(
                 fixture.texts.identity, fixture.texts.provider, images=fixture.images

@@ -69,6 +69,11 @@ def extract_card(body: bytes, *, number: str) -> CardRecord:
     """Validate exact page identity before transcribing all faces and page metadata."""
     en.parse_card(body, expected_number=number)
     tree = parse(decode_html(body, min_bytes=MIN_PAGE_BYTES))
+    return extract_tree(tree, number=number)
+
+
+def extract_tree(tree: Queryable, *, number: str) -> CardRecord:
+    """Transcribe an already decoded page without retaining its DOM."""
     detail = require_one(tree, ".cardlist-Detail")
     faces = [_face(inner) for inner in select_all(detail, ".cardlist-Detail_Box_Inner")]
     if not 1 <= len(faces) <= 2:  # ruff: ignore[magic-value-comparison] -- the registry permits one or two physical faces

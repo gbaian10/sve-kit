@@ -1,5 +1,6 @@
 """Verify current permanent identities against each frozen physical source face."""
 
+import re
 from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import canonical
@@ -18,7 +19,28 @@ class IdentityEvidence:
     def __init__(self, sources: Sources, authored_revision: str) -> None:
         self.sources = sources
         self.authored_revision = authored_revision
-        self.providers: dict[tuple[str, str], FrozenTexts] = {}
+        self.providers: dict[tuple[str, str, str], FrozenTexts] = {}
+        registry = self.registry()
+        self.cards = {
+            r.data.id: r.data
+            for r in registry.records.values()
+            if isinstance(r.data, CardData)
+        }
+        self.faces = {
+            r.data.id: r.data
+            for r in registry.records.values()
+            if isinstance(r.data, FaceData)
+        }
+        self.mappings: dict[tuple[str, str, int], list[tuple[PrintingData, str]]] = {}
+        for record in registry.records.values():
+            if isinstance(record.data, PrintingData):
+                printing = record.data
+                provider = official_jp if printing.region == "jp" else official_en
+                url = provider.card_url(printing.card_no)
+                for mapping in printing.source_face_map:
+                    self.mappings.setdefault(
+                        (printing.region, url, mapping.source_index), []
+                    ).append((printing, mapping.face_id))
         self.uses: list[SourceUse] = []
 
     def registry(self) -> RegistrySnapshot:
@@ -33,7 +55,6 @@ class IdentityEvidence:
         face_id: str | None = None,
     ) -> tuple[str, str, str, str]:
         """Bind raw URL, complete observation and physical source index to permanent keys."""
-        registry = self.registry()
         lang, text, source = self.sources.text(ref)
         expected_region = "jp" if lang == "ja" else "en"
         if ref.parser != "translation-" + expected_region + "-v1" or lang not in {
@@ -41,49 +62,29 @@ class IdentityEvidence:
             "en",
         }:
             raise ValueError("Name override must locate a physical name source")
-        mappings: list[tuple[PrintingData, int, str]] = []
-        for record in registry.records.values():
-            if not isinstance(record.data, PrintingData):
-                continue
-            printing = record.data
-            provider = official_jp if printing.region == "jp" else official_en
-            if (
-                printing.region != expected_region
-                or provider.card_url(printing.card_no) != source.url
-            ):
-                continue
-            mappings.extend(
-                (printing, mapping.source_index, mapping.face_id)
-                for mapping in printing.source_face_map
-                if ref.locator == f"/faces/{mapping.source_index}/name"
-            )
+        match = re.fullmatch(r"/faces/(0|[1-9][0-9]*)/name", ref.locator)
+        mappings = (
+            self.mappings.get((expected_region, source.url, int(match[1])), [])
+            if match
+            else []
+        )
         if len(mappings) != 1:
             raise ValueError(
                 "Name override frozen source has no unique physical face mapping"
             )
-        printing, _, face = mappings[0]
+        printing, face = mappings[0]
         if (card_id is not None and printing.card_id != card_id) or (
             face_id is not None and face != face_id
         ):
             raise ValueError(
                 "Name override frozen evidence belongs to another card or face"
             )
-        cards = {
-            r.data.id: r.data
-            for r in registry.records.values()
-            if isinstance(r.data, CardData)
-        }
-        faces = {
-            r.data.id: r.data
-            for r in registry.records.values()
-            if isinstance(r.data, FaceData)
-        }
         if (
-            cards[printing.card_id].identity_state != "confirmed"
-            or faces[face].card_id != printing.card_id
+            self.cards[printing.card_id].identity_state != "confirmed"
+            or self.faces[face].card_id != printing.card_id
         ):
             raise ValueError("Name override requires confirmed physical identity")
-        key = ref.batch_id, printing.region
+        key = ref.batch_id, printing.region, ref.parser
         if key not in self.providers:
             batch = self.sources.batch(ref.batch_id)
             self.providers[key] = FrozenTexts(
@@ -92,6 +93,7 @@ class IdentityEvidence:
                 ref.batch_id,
                 region=printing.region,
                 parser_version=ref.parser,
+                sources=batch,
             )
         frozen = self.providers[key].version(
             printing.region, printing.card_no, ref.source_version_id

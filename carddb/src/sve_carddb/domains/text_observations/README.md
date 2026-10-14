@@ -126,10 +126,13 @@ configuration and provenance. Populate text once inside the combined build
 transaction, then save that completed DB and its actual input record/report with
 `build.output.save`. Source reads verify archived raw hashes and metadata; domain
 planning verifies current source ownership and observation applicability. All adapters in an offline command share `FrozenSources` through one
-`FrozenBatches`; full batch closure is checked once, while each source read
-rechecks descriptor, first receipt and raw hashes. Reader sharing ends with the
-command. There
-is no separate expected-use comparison, build seal or second DB population.
+`FrozenBatches`; full batch closure is checked once. Metadata and each consumed
+raw blob are verified once per command. Physical pages share a compact projection
+keyed by the exact root, store, batch, version and extraction recipe. Raw bytes and
+DOMs are released after the page yields its identity, text, products and supplements.
+The command trusts previously verified immutable inputs; later in-place changes
+are detected by a fresh command or archive verification. There is no separate
+expected-use comparison, build seal or second DB population.
 
 ## Frozen effect presence
 
@@ -149,9 +152,11 @@ Known empty containers allow only plain div/p/span/br layout nodes. Whitespace i
 present text, and unknown icons, SVG, classes or styles never become empty text.
 The projection converts proven absence to an exact empty string; unproven empty
 values stay null. Sections and the original extractor hash remain unchanged.
-`verify_card` re-extracts the frozen bytes and reproduces all presence results
-before the observation plan can be imported. A self-consistent replacement hash
-cannot substitute for this verification.
+`verify_card` checks retained extraction values before the observation plan can
+be imported, without parsing or keeping the raw again. External cards carrying
+raw bytes still reproduce extraction and presence from those bytes. Serialized
+presence proofs without raw bytes or a retained extraction are rejected; a
+self-consistent replacement hash cannot substitute for the source boundary.
 
 Each frozen face contributes a separate F1 `effect_presence` use with the actual
 presence parser, complete reference locator and result hash, including deferred

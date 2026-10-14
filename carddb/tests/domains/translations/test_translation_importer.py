@@ -700,20 +700,20 @@ def test_source_recipe_and_descriptor_refusals(
         return
     sources = frozen.sources()
     if fault.startswith("descriptor"):
-        read = FrozenSources.read
+        metadata = FrozenSources.metadata
 
         def inconsistent_descriptor(
             self: FrozenSources, version: str, *, parser_version: str
-        ) -> tuple[Source, bytes, Descriptor]:
-            source, raw, descriptor = read(self, version, parser_version=parser_version)
+        ) -> tuple[Source, Descriptor]:
+            source, descriptor = metadata(self, version, parser_version=parser_version)
             descriptor = descriptor.model_copy(
                 update={"provider": "jp"}
                 if fault == "descriptor_provider"
                 else {"kind": "card"}
             )
-            return source, raw, descriptor
+            return source, descriptor
 
-        monkeypatch.setattr(FrozenSources, "read", inconsistent_descriptor)
+        monkeypatch.setattr(FrozenSources, "metadata", inconsistent_descriptor)
     with pytest.raises(ValueError, match="^" + message + "$"):
         sources.document(frozen.refs[0])
 

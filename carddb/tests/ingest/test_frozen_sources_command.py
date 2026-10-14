@@ -1,11 +1,14 @@
-"""Shared command readers still reject changed bytes and mismatched input pins."""
+"""Shared command readers retain verified projections and reject mismatched input pins."""
 
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
+from pydantic import TypeAdapter, ValidationError
 
 from sve_carddb.core.regions import SourceRegion
+from sve_carddb.domains.card_extras import FrozenCardExtras
+from sve_carddb.domains.physical_sources import _project
 from sve_carddb.domains.products import FrozenProducts
 from sve_carddb.domains.text_observations import FrozenTexts
 from sve_carddb.ingest.archive.frozen_sources import FrozenBatches
@@ -48,7 +51,7 @@ def command_sources(
 
 @pytest.mark.parametrize("changed", ["descriptor", "receipt", "raw"])
 @pytest.mark.parametrize("adapter", ["texts", "products"])
-def test_shared_adapters_recheck_every_source_read(
+def test_shared_adapters_reuse_verified_sources_within_one_command(
     command_sources: tuple[ArchiveStore, FrozenBatches, FrozenSources],
     changed: str,
     adapter: str,
@@ -65,8 +68,11 @@ def test_shared_adapters_recheck_every_source_read(
     products = FrozenProducts(
         store.root, store.store_id, sources.batch_id, region="en", sources=sources
     )
-    assert texts.card("en", "SYN-01") is not None
-    assert len(products.pages()) == 1
+    original = texts.card("en", "SYN-01")
+    original_products = products.pages()
+    assert original is not None
+    assert original.raw is None
+    assert len(original_products) == 1
     entry = sources.inventory.entries[0]
     if changed == "descriptor":
         target = store.root / "descriptors" / (entry.descriptor_sha256[7:] + ".json")
@@ -79,8 +85,9 @@ def test_shared_adapters_recheck_every_source_read(
     read = (
         (lambda: texts.card("en", "SYN-01")) if adapter == "texts" else products.pages
     )
-    with pytest.raises(ArchiveError, match="content hash mismatch"):
-        read()
+    assert read() == (original if adapter == "texts" else original_products)
+    with pytest.raises(ArchiveError):
+        FrozenBatches().batch(store.root, store.store_id, sources.batch_id)
 
 
 def test_shared_reader_rejects_version_from_another_batch(
@@ -115,3 +122,91 @@ def test_opened_batch_does_not_authorize_a_different_configured_store(
     store, readers, sources = command_sources
     with pytest.raises(ArchiveError, match="invalid archive blob locator"):
         readers.configured({"other-store": store.root}, sources.batch_id)
+
+
+def test_first_consumption_rejects_raw_changed_after_batch_verification(
+    command_sources: tuple[ArchiveStore, FrozenBatches, FrozenSources],
+) -> None:
+    store, _, sources = command_sources
+    entry = sources.inventory.entries[0]
+    (store.root / entry.blob.path).write_bytes(b"Synthetic damaged raw")
+    with pytest.raises(ArchiveError, match="content hash mismatch"):
+        FrozenTexts(
+            store.root,
+            store.store_id,
+            sources.batch_id,
+            region="en",
+            parser_version="official-en-exact-v1",
+            sources=sources,
+        ).card("en", "SYN-01")
+
+
+def test_adapters_share_page_projections_without_retaining_raw(
+    command_sources: tuple[ArchiveStore, FrozenBatches, FrozenSources],
+) -> None:
+    store, _, sources = command_sources
+    products = FrozenProducts(
+        store.root,
+        store.store_id,
+        sources.batch_id,
+        region="en",
+        sources=sources,
+    ).pages()
+    entry = sources.inventory.entries[0]
+    (store.root / entry.blob.path).unlink()
+    texts = FrozenTexts(
+        store.root,
+        store.store_id,
+        sources.batch_id,
+        region="en",
+        parser_version="alternate-provenance-pin",
+        sources=sources,
+    ).card("en", "SYN-01")
+    assert texts is not None
+    assert texts.raw is None
+    assert texts.source.parser_version == "alternate-provenance-pin"
+    supplements = tuple(
+        FrozenCardExtras(
+            store.root,
+            store.store_id,
+            sources.batch_id,
+            region="en",
+            sources=sources,
+        ).pages()
+    )
+    assert products[0].card_no == texts.observation.card_no == supplements[0].card_no
+    assert products[0].source.parser_version == "official-product-block-v1"
+    assert supplements[0].source.parser_version == "official-card-extras-en-v1"
+
+
+def test_english_text_rejects_page_showing_another_card(tmp_path: Path) -> None:
+    store = _store(tmp_path / "sources")
+    raw = page("en")
+    url = official_en.card_url("SYN-02")
+    _put(
+        store,
+        replace(_resource(url, "raw/en.html", raw, Kind.CARD), region=SourceRegion.EN),
+        raw,
+    )
+    batch = seal_batch(store, scope=(Scope(provider="en", kind="card"),))
+    texts = FrozenTexts(
+        store.root,
+        store.store_id,
+        batch.batch_id,
+        region="en",
+        parser_version="official-en-exact-v1",
+        sources=FrozenBatches().batch(store.root, store.store_id, batch.batch_id),
+    )
+    with pytest.raises(ValueError, match="page shows"):
+        texts.card("en", "SYN-02")
+
+
+def test_stored_projection_error_keeps_type_and_drops_traceback() -> None:
+    def fail() -> int:
+        return TypeAdapter(int).validate_python("not a number")
+
+    stored = _project(fail)
+    for _ in range(2):
+        with pytest.raises(ValidationError) as caught:
+            stored.get()
+        assert caught.value.__context__ is None

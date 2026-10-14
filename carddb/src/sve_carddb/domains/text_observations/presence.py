@@ -8,7 +8,7 @@ from pydantic import JsonValue, model_validator
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import Hash, RecordData, Text, UInt
 from sve_carddb.core.provenance import Version
-from sve_carddb.parse.html import attribute, parse, select_all, select_one
+from sve_carddb.parse.html import Queryable, attribute, parse, select_all, select_one
 
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode
@@ -189,6 +189,26 @@ def detect_presence(
 ) -> EffectPresence:
     """Require a whole page and every complete face before proving absence."""
     tree = parse(raw.decode("utf-8", errors="strict"))
+    return presence_tree(
+        tree,
+        source,
+        region=region,
+        number=number,
+        source_index=source_index,
+        complete=bool(re.search(rb"</body>\s*</html>\s*$", raw, re.IGNORECASE)),
+    )
+
+
+def presence_tree(
+    tree: Queryable,
+    source: Source,
+    *,
+    region: Region,
+    number: str,
+    source_index: int,
+    complete: bool,
+) -> EffectPresence:
+    """Use the shared DOM while retaining the full-page completeness requirement."""
     details = select_all(tree, ".cardlist-Detail")
     faces = select_all(tree, ".cardlist-Detail_Box_Inner")
     template: str | None = _TEMPLATE[region] if len(details) == 1 else None
@@ -204,7 +224,7 @@ def detect_presence(
     reason = "unrecognized_template"
     if template is not None:
         if (
-            not re.search(rb"</body>\s*</html>\s*$", raw, re.IGNORECASE)
+            not complete
             or not 1 <= len(faces) <= 2  # ruff: ignore[magic-value-comparison] -- official pages have one or two physical faces
             or not 0 <= source_index < len(faces)
             or any(not _complete(face, region, number) for face in faces)

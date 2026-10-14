@@ -1,6 +1,6 @@
 """Resolve names using the current identity and each owner's exact printed source."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
 from sve_carddb.domains.translations.glossary.records import (
@@ -36,41 +36,55 @@ class ResolvedName:
 class Names:
     snapshot: Snapshot
     originals: tuple[tuple[str, str], ...]
+    _originals: dict[str, list[str]] = field(init=False, default_factory=dict)
+    _concepts: dict[tuple[str, str, str, str], list[ConceptRecord]] = field(
+        init=False, default_factory=dict
+    )
+    _assignments: dict[tuple[NameOwner, str], list[AssignmentRecord]] = field(
+        init=False, default_factory=dict
+    )
+
+    def __post_init__(self) -> None:
+        """Preserve ordered candidates and exact owners while indexing once per build."""
+        for identifier, text in self.originals:
+            self._originals.setdefault(text, []).append(identifier)
+        for record in self.snapshot.current_records():
+            if isinstance(record, ConceptRecord):
+                subject = record.data.subject
+                key = (
+                    subject.card_id,
+                    subject.face_id,
+                    subject.source_lang,
+                    subject.source_hash,
+                )
+                self._concepts.setdefault(key, []).append(record)
+            elif isinstance(record, AssignmentRecord):
+                wire = record.data.owner
+                owner = (
+                    NameOwner("printing_face", wire.printing_id, wire.face_id)
+                    if isinstance(wire, PrintingOwner)
+                    else NameOwner("face_revision", wire.revision_id)
+                )
+                self._assignments.setdefault(
+                    (owner, record.data.source_hash), []
+                ).append(record)
 
     def resolve(self, db: Database, owner: NameOwner) -> ResolvedName | None:
         """A matching text cannot borrow another card's explicit assignment."""
         source = name_source(db, owner)
         if source is None:
             return None
-        records = self.snapshot.current_records()
-        candidates = [
-            identifier
-            for identifier, text in self.originals
-            if source.lang == "ja" and text == source.text
-        ]
+        candidates = (
+            list(self._originals.get(source.text, ())) if source.lang == "ja" else []
+        )
         hashes: list[str] = []
-        associations = [
-            r
-            for r in records
-            if isinstance(r, ConceptRecord)
-            and r.data.subject.model_dump(mode="json")
-            == {
-                "card_id": source.card_id,
-                "face_id": source.face_id,
-                "source_lang": source.lang,
-                "source_hash": source.source_hash,
-            }
-        ]
+        associations = self._concepts.get(
+            (source.card_id, source.face_id, source.lang, source.source_hash), []
+        )
         if associations and associations[0].data.term_id is not None:
             candidates = [associations[0].data.term_id]
             hashes.append(semantic_hash(associations[0]))
-        assignments = [
-            r
-            for r in records
-            if isinstance(r, AssignmentRecord)
-            and r.data.owner.model_dump(mode="json") == owner.payload()
-            and r.data.source_hash == source.source_hash
-        ]
+        assignments = self._assignments.get((owner, source.source_hash), [])
         variant = "default"
         if assignments and assignments[0].data.concept_key is not None:
             assignment = assignments[0]
@@ -82,8 +96,8 @@ class Names:
             candidates = [selected]
             variant = assignment.data.variant
             hashes.append(semantic_hash(assignment))
-        homonyms = sum(
-            text == source.text for _, text in self.originals if source.lang == "ja"
+        homonyms = (
+            len(self._originals.get(source.text, ())) if source.lang == "ja" else 0
         )
         if len(candidates) != 1 or (homonyms > 1 and variant == "default"):
             return ResolvedName(

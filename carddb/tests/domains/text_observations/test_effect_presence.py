@@ -183,7 +183,7 @@ def test_notice_template_accepts_only_pinned_terminal_block_after_valid_credit(
         ('<div class="mystery"></div>', "unknown", "ambiguous_container", None),
     ],
 )
-def test_projection_preserves_raw_and_requires_complete_evidence(
+def test_projection_preserves_extracted_content_and_requires_complete_evidence(
     tmp_path: Path,
     region: CardRegion,
     container: str,
@@ -196,7 +196,7 @@ def test_projection_preserves_raw_and_requires_complete_evidence(
     assert result.result.state == state
     assert result.result.reason_code == reason
     assert card.projected(0).effect == effect
-    assert card.raw is not None
+    assert card.raw is None
     assert result.result_hash == digest(
         canonical(result.result.model_dump(mode="json"))
     )
@@ -335,8 +335,9 @@ def test_required_status_is_checked_even_for_existing_empty_container(
     tmp_path: Path,
 ) -> None:
     card = card_from_raw(tmp_path, page("jp", '<div class="detail"></div>'))
-    assert card.raw is not None
-    raw = card.raw.replace(b'class="status"', b'class="lost-status"')
+    assert card.raw is None
+    original = page("jp", '<div class="detail"></div>')
+    raw = original.replace(b'class="status"', b'class="lost-status"')
     proof = detect_presence(
         raw, card.source, region="jp", number="SYN-01", source_index=0
     )
@@ -385,17 +386,18 @@ def test_omission_requires_clean_direct_text_and_terminal_credit(
     tmp_path: Path, change: str
 ) -> None:
     card = card_from_raw(tmp_path, page("jp"))
-    assert card.raw is not None
+    assert card.raw is None
+    original = page("jp")
     if change == "stray_text":
-        raw = card.raw.replace(
+        raw = original.replace(
             b'<div class="txt-Inner">', b'<div class="txt-Inner">Synthetic stray rule'
         )
     else:
-        raw = card.raw.replace(
+        raw = original.replace(
             b"</span></div></div></div></div>",
             b'</span></div><div class="speech"></div></div></div></div>',
         )
-    assert raw != card.raw
+    assert raw != original
     proof = detect_presence(
         raw, card.source, region="jp", number="SYN-01", source_index=0
     )
@@ -408,23 +410,24 @@ def test_each_completeness_constraint_independently_blocks_absence(
     tmp_path: Path, change: str
 ) -> None:
     card = card_from_raw(tmp_path, page("en", '<div class="detail"></div>'), "en")
-    assert card.raw is not None
+    assert card.raw is None
+    original = page("en", '<div class="detail"></div>')
     if change == "labels":
-        raw = card.raw.replace(b"<dt>Rarity</dt>", b"<dt>Synthetic label</dt>")
+        raw = original.replace(b"<dt>Rarity</dt>", b"<dt>Synthetic label</dt>")
     elif change in {"Cost", "Power", "Hp"}:
-        raw = card.raw.replace(
+        raw = original.replace(
             f"status-Item-{change}".encode(), b"status-Item-Synthetic"
         )
     elif change == "faces":
-        face = card.raw.split(b'<div class="cardlist-Detail">', 1)[1].split(
+        face = original.split(b'<div class="cardlist-Detail">', 1)[1].split(
             b"</div><!--", 1
         )[0]
-        raw = card.raw.replace(face, face * 3, 1)
+        raw = original.replace(face, face * 3, 1)
     else:
-        raw = card.raw.replace(
+        raw = original.replace(
             b"</div><!--", b'</div><div class="cardlist-Detail"></div><!--'
         )
-    assert raw != card.raw
+    assert raw != original
     proof = detect_presence(
         raw, card.source, region="en", number="SYN-01", source_index=0
     )
@@ -492,7 +495,7 @@ def test_configuration_pins_evidence_and_original_face_independently(
 def test_presence_without_frozen_bytes_is_rejected(tmp_path: Path) -> None:
     card = card_from_raw(tmp_path, page("jp"))
     with pytest.raises(ValueError, match="no frozen source bytes"):
-        verify_card(card.model_copy(update={"raw": None}))
+        verify_card(type(card).model_validate(card.model_dump()))
 
 
 def test_planning_verifies_card_before_processing_evidence(
