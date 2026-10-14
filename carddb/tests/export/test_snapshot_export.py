@@ -1,11 +1,13 @@
 """Exporter acceptance uses an independent reader and synthetic logical data."""
 
 import gzip
+from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
+from jsonschema import ValidationError
 
 if TYPE_CHECKING:
     from sve_carddb.export.project import Projection
@@ -442,13 +444,14 @@ def test_primary_key_boundary_rejects_duplicates(
 
 
 def test_file_key_collision_preserves_the_first_payload() -> None:
-    files = _Files(None)
-    first = files.add("config", "config", {"synthetic": "first"}, [])
-    original = files.raw["config"]
-    with pytest.raises(ValueError, match="Duplicate logical file key"):
-        files.add("config", "config", {"synthetic": "replacement"}, [])
-    assert files.files == {"config": first}
-    assert files.raw == {"config": original}
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        files = _Files(None, pool)
+        first = files.add("config", "config", {"synthetic": "first"}, [])
+        original = files.raw["config"]
+        with pytest.raises(ValueError, match="Duplicate logical file key"):
+            files.add("config", "config", {"synthetic": "replacement"}, [])
+        assert files.files == {"config": first}
+        assert files.raw == {"config": original}
 
 
 def test_ownership_boundary_rejects_one_missing_printing(
@@ -517,6 +520,25 @@ def test_compressor_failure_propagates_from_snapshot(
 
     with pytest.raises(ValueError, match="synthetic codec failure"):
         export_snapshot(*logical, BATCH, brotli=Brotli("failing", failed_compressor))
+
+
+def test_union_compressor_failure_propagates(
+    logical: tuple[Projection, Ownership],
+) -> None:
+    def failed_compressor(raw: bytes) -> bytes:
+        if "members" in object_value(parse(raw)):
+            raise ValueError("synthetic union codec failure")
+        return raw
+
+    with pytest.raises(ValueError, match="synthetic union codec failure"):
+        export_snapshot(*logical, BATCH, brotli=Brotli("failing", failed_compressor))
+
+
+def test_export_rejects_invalid_completed_manifest(
+    logical: tuple[Projection, Ownership],
+) -> None:
+    with pytest.raises(ValidationError):
+        export_snapshot(*logical, replace(BATCH, published_at="invalid"))
 
 
 def test_foreign_printing_home_is_rejected(

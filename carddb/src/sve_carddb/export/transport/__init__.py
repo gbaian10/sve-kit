@@ -1,6 +1,6 @@
 """Export the public logical projection to immutable candidate transport blobs."""
 
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 from urllib.parse import quote
@@ -9,17 +9,17 @@ from pydantic import JsonValue
 
 from sve_carddb.contracts.profiles import MEDIA
 from sve_carddb.contracts.profiles import profile as profile_for
-from sve_carddb.contracts.snapshot import (
-    columns,
-    definition,
-    row_type,
-    tables,
-    validate,
-)
+from sve_carddb.contracts.snapshot import columns, definition, row_type, tables
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
 from sve_carddb.export.name_annotations import compact_names, whole_name
 from sve_carddb.export.project.source import json_list
-from sve_carddb.export.reader import read_snapshot, text_all_payloads
+from sve_carddb.export.reader import (
+    join_payloads,
+    read_snapshot,
+    text_all_members,
+    text_all_payloads,
+    validate_manifest,
+)
 from sve_carddb.export.semantics import row_key
 from sve_carddb.export.transport.compression import Blob, Brotli, compress, recipe
 from sve_carddb.export.transport.layout import Group, Layout, Ownership, references
@@ -191,11 +191,12 @@ def _compressed_bytes(blob: Blob) -> Record:
 
 
 class _Files:
-    def __init__(self, brotli: Brotli | None) -> None:
+    def __init__(self, brotli: Brotli | None, pool: ThreadPoolExecutor) -> None:
         self.brotli = brotli
+        self.pool = pool
+        self.pending: dict[str, Future[Blob]] = {}
         self.files: dict[str, Record] = {}
         self.raw: dict[str, bytes] = {}
-        self.payloads: dict[str, Blob] = {}
         self.values: dict[str, JsonValue] = {}
 
     def add(
@@ -223,23 +224,45 @@ class _Files:
         }
         self.files[key] = file
         self.raw[key] = raw
+        self.pending[key] = self.pool.submit(compress, raw, self.brotli)
         self.values[key] = value
         return file
 
-    def _compress_payloads(self) -> dict[str, Blob]:
-        return {key: compress(raw, self.brotli) for key, raw in self.raw.items()}
-
-    def compress(self, text_all: bytes) -> Blob:
-        """Compress fixed groups, then fill the manifest's transfer lengths."""
-        # Threads share raw bytes and preserve the injected compressor without pickling.
-        with ThreadPoolExecutor(max_workers=2) as pool:
-            union = pool.submit(compress, text_all, self.brotli)
-            payloads = pool.submit(self._compress_payloads)
-            self.payloads = payloads.result()
-            result = union.result()
-        for key, blob in self.payloads.items():
-            self.files[key]["compressed_bytes"] = _compressed_bytes(blob)
-        return result
+    def snapshot(
+        self,
+        manifest: Record,
+        union_raw: bytes,
+        union_future: Future[Blob],
+        projection: Projection,
+    ) -> Snapshot:
+        """Join sealed raw bytes while compression fills only transfer lengths."""
+        joined = join_payloads(manifest, self.raw)
+        text_all_members(manifest, union_raw)
+        if joined != projection.tables:
+            raise ValueError("Export join differs from public logical projection")
+        payloads = {key: future.result() for key, future in self.pending.items()}
+        union = union_future.result()
+        complete = manifest | {
+            "files": [
+                object_value(file)
+                | {
+                    "compressed_bytes": _compressed_bytes(
+                        payloads[string(object_value(file)["key"])]
+                    )
+                }
+                for file in array(manifest["files"])
+            ],
+            "text_all": object_value(manifest["text_all"])
+            | {"compressed_bytes": _compressed_bytes(union)},
+        }
+        validate_manifest(complete)
+        return Snapshot(
+            complete,
+            payloads,
+            union,
+            recipe(self.brotli),
+            compress(canonical(complete), self.brotli),
+        )
 
 
 def _file_key(group: Group) -> str:
@@ -413,22 +436,32 @@ def export_snapshot(
     ):
         raise ValueError("Public region is outside the explicit manifest scope")
     layout = Layout(compact_names(projection.tables), ownership, count, format_version)
-    files = _Files(brotli)
-    config = files.add(
-        "config", "config", projection.config | {"format_version": format_version}, []
-    )
-    files.add(
-        "programs", "programs", {"format_version": format_version, "entries": []}, []
-    )
-    groups = _partition(layout)
-    _add_bands(layout, files, groups, config)
-    contains: list[JsonValue] = [
-        _reference(file)
-        for key, file in sorted(files.files.items())
-        if files.files[key]["role"] in {"bootstrap", "text", "config"}
-    ]
-    union = files.compress(
-        canonical(
+    # Separate lanes keep text_all from queuing behind the remaining shards.
+    with (
+        ThreadPoolExecutor(max_workers=1) as shards,
+        ThreadPoolExecutor(max_workers=1) as unions,
+    ):
+        files = _Files(brotli, shards)
+        config = files.add(
+            "config",
+            "config",
+            projection.config | {"format_version": format_version},
+            [],
+        )
+        files.add(
+            "programs",
+            "programs",
+            {"format_version": format_version, "entries": []},
+            [],
+        )
+        groups = _partition(layout)
+        _add_bands(layout, files, groups, config)
+        contains: list[JsonValue] = [
+            _reference(file)
+            for key, file in sorted(files.files.items())
+            if files.files[key]["role"] in {"bootstrap", "text", "config"}
+        ]
+        union_raw = canonical(
             {
                 "format_version": format_version,
                 "members": [
@@ -437,42 +470,32 @@ def export_snapshot(
                     for ref in contains
                 ],
             }
-        ),
-    )
-    languages = json_list(
-        sorted(
-            {
-                string(object_value(item)["code"])
-                for item in array(projection.config["languages"])
-            }
         )
-    )
-    partitioning: Record = {"algorithm": "sha256-mod-v1", "bucket_count": count}
-    manifest: Record = projection.metadata | {
-        "format_version": format_version,
-        "data_version": batch.data_version,
-        "published_at": batch.published_at,
-        "regions": list(batch.regions),
-        "languages": languages,
-        "min_reader_version": format_version,
-        "required_capabilities": list(selected.capabilities),
-        "files": [files.files[key] for key in sorted(files.files)],
-        "config_ref": _reference(config),
-        "text_all": _description(union.raw)
-        | {"compressed_bytes": _compressed_bytes(union), "contains": contains},
-        "partitioning": partitioning,
-        "changes_ref": None,
-    }
-    validate("Manifest", manifest, format_version)
-    result = Snapshot(
-        manifest,
-        files.payloads,
-        union,
-        recipe(brotli),
-        compress(canonical(manifest), brotli),
-    )
-    result.verify(projection)
-    return result
+        union_future = unions.submit(compress, union_raw, brotli)
+        languages = json_list(
+            sorted(
+                {
+                    string(object_value(item)["code"])
+                    for item in array(projection.config["languages"])
+                }
+            )
+        )
+        partitioning: Record = {"algorithm": "sha256-mod-v1", "bucket_count": count}
+        manifest: Record = projection.metadata | {
+            "format_version": format_version,
+            "data_version": batch.data_version,
+            "published_at": batch.published_at,
+            "regions": list(batch.regions),
+            "languages": languages,
+            "min_reader_version": format_version,
+            "required_capabilities": list(selected.capabilities),
+            "files": [files.files[key] for key in sorted(files.files)],
+            "config_ref": _reference(config),
+            "text_all": _description(union_raw) | {"contains": contains},
+            "partitioning": partitioning,
+            "changes_ref": None,
+        }
+        return files.snapshot(manifest, union_raw, union_future, projection)
 
 
 def _concept_references(row: Record) -> set[str]:
