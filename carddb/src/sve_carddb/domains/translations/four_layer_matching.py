@@ -17,11 +17,11 @@ if TYPE_CHECKING:
         Classifier,
         Recognized,
     )
+    from sve_carddb.domains.translations.four_layer_derivation import DerivedField
     from sve_carddb.domains.translations.four_layer_normalizer import (
         SourceField,
         SourcePart,
     )
-    from sve_carddb.domains.translations.four_layer_semantics import CardContext
 
 
 @dataclass(frozen=True)
@@ -58,23 +58,23 @@ class Frames:
     def match(
         self,
         raw: str,
-        field: SourceField,
-        part: SourcePart,
-        recognized: Recognized,
+        derived: DerivedField,
+        ordinal: int,
         classifier: Classifier,
-        *,
-        context: CardContext | None = None,
     ) -> Matched | None:
-        """Authored slot names and repeated occurrences cannot supply source roles or values."""
-        derived, _ = recognized.bind(
+        """Authored slot names cannot supply the derived source roles or values."""
+        field = derived.field
+        part = field.parts[ordinal]
+        recognized = derived.recognized[ordinal]
+        candidate_frame, _ = recognized.bind(
             field.source, part, normalizer_version=self.normalizer_version
         )
-        candidates = self.index.get(_key(derived), ())
+        candidates = self.index.get(_key(candidate_frame), ())
         matches = []
         for frame in candidates:
             binding = bind_recognized(frame, field, part, recognized)
             if binding is not None:
-                classifier.verify(raw, field, part, frame, binding, context=context)
+                derived.verify_binding(raw, classifier, frame, binding)
                 matches.append(Matched(frame, binding))
         if len(matches) > 1:
             raise ValueError("Ambiguous authored frames for exact source occurrence")

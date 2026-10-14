@@ -41,8 +41,6 @@ from sve_carddb.domains.translations.four_layer_numbers import (
     recognize_number,
 )
 from sve_carddb.domains.translations.four_layer_semantics import Classified
-from sve_carddb.domains.translations.recognition.candidate_matching import classify
-from sve_carddb.domains.translations.recognition.lexical import Part
 from sve_carddb.domains.translations.recognition.provenance import merged
 
 if TYPE_CHECKING:
@@ -52,9 +50,17 @@ if TYPE_CHECKING:
     from sve_carddb.domains.translations.four_layer_n1 import Operand
     from sve_carddb.domains.translations.four_layer_normalizer import SourcePart
     from sve_carddb.domains.translations.four_layer_semantics import CardContext
-    from sve_carddb.domains.translations.recognition.models import Hint
+    from sve_carddb.domains.translations.recognition.models import Candidate, Hint
 
 _QUICK = "term:ability.quick"
+
+
+@dataclass(frozen=True)
+class _PartAnalysis:
+    recognized: Recognized
+    candidate: Candidate
+    source_operands: tuple[Operand, ...]
+    attempts: tuple[Attempt, ...]
 
 
 @dataclass(frozen=True)
@@ -63,6 +69,8 @@ class DerivedField:
     recognized: tuple[Recognized, ...]
     registry_rows: tuple[tuple[str, ...], ...]
     attempts: tuple[tuple[Attempt, ...], ...]
+    original: SourceField
+    source_operands: tuple[tuple[Operand, ...], ...]
 
     def verify(
         self,
@@ -74,24 +82,36 @@ class DerivedField:
         context: CardContext | None = None,
         target: Target | None = None,
     ) -> None:
-        """Reconstruct current source evidence, including empty-span operands and union aliases."""
+        """Reconstruct current source evidence at the external raw boundary."""
         expected = derive_source(raw, self.field.source, classifier, context=context)
         if self.field != expected.field:
             raise ValueError(
                 "Source field differs from the current N1 partition and transformation"
             )
+        expected.verify_binding(raw, classifier, frame, binding, target=target)
+
+    def verify_binding(
+        self,
+        raw: str,
+        classifier: Classifier,
+        frame: Frame,
+        binding: SourceBinding,
+        *,
+        target: Target | None = None,
+    ) -> None:
+        """Use this field's derived evidence, including omitted operands and union aliases."""
         ordinal = binding.ordinal
-        if ordinal >= len(expected.field.parts):
+        if ordinal >= len(self.field.parts):
             raise ValueError("Binding ordinal lies outside the exact field")
-        part = expected.field.parts[ordinal]
-        found = expected.recognized[ordinal]
+        part = self.field.parts[ordinal]
+        found = self.recognized[ordinal]
         if found.issues:
             raise ValueError("Unresolved source leaves cannot verify a binding")
         part.verify(raw, frame, binding, classifier.domains, normalizer_version=VERSION)
         expected_frame, _ = found.bind(
-            expected.field.source, part, normalizer_version=VERSION
+            self.field.source, part, normalizer_version=VERSION
         )
-        reconstructed = bind_recognized(frame, expected.field, part, found)
+        reconstructed = bind_recognized(frame, self.field, part, found)
         if (
             reconstructed is None
             or reconstructed != binding
@@ -103,8 +123,12 @@ class DerivedField:
             )
 
         if target is not None:
-            original = normalize_source(raw, self.field.source).parts[ordinal]
-            _verify_card_operands(original, binding, target, classifier)
+            _verify_card_operands(
+                self.original.parts[ordinal],
+                binding,
+                target,
+                self.source_operands[ordinal],
+            )
 
     def bind(self, ordinal: int) -> tuple[Frame, SourceBinding]:
         """An unresolved line can translate precisely, but cannot share its semantic scope."""
@@ -139,9 +163,20 @@ def derive_source(
     recognized = []
     registry = []
     attempts = []
+    source_operands = []
     for part in field.parts:
         tried: tuple[Attempt, ...]
-        n0 = classifier.recognize(raw, source, part, field=field, context=context)
+        candidate = (
+            classifier.candidate(raw, part)
+            if part.source_span.role not in {"name", "label"}
+            else None
+        )
+        n0 = classifier.recognize_part(raw, field, part, candidate, context=context)
+        original_operands, operand_attempts = operands(part.canonical_source)
+        original_operands = tuple(
+            preserve_modifiers(o, classifier) for o in original_operands
+        )
+        source_operands.append(original_operands)
         if (
             part.source_span.role != "body"
             or source.field not in {"effect", "section"}
@@ -155,8 +190,14 @@ def derive_source(
                 (),
             )
         else:
+            assert candidate is not None
             updated, found, rows, tried = _body(
-                raw, field, part, n0, classifier, context
+                raw,
+                field,
+                part,
+                _PartAnalysis(n0, candidate, original_operands, operand_attempts),
+                classifier,
+                context,
             )
         parts.append(updated)
         recognized.append(found)
@@ -167,6 +208,8 @@ def derive_source(
         tuple(recognized),
         tuple(registry),
         tuple(attempts),
+        field,
+        tuple(source_operands),
     )
 
 
@@ -174,31 +217,20 @@ def _body(
     raw: str,
     field: SourceField,
     part: SourcePart,
-    n0: Recognized,
+    analysis: _PartAnalysis,
     classifier: Classifier,
     context: CardContext | None,
 ) -> tuple[SourcePart, Recognized, tuple[str, ...], tuple[Attempt, ...]]:
-    candidate, _ = classify(
-        raw,
-        Part(
-            part.source_span.role,
-            part.source_span.segments,
-            part.canonical_source,
-            part.units,
-        ),
-        classifier.references,
-        classifier.rules.enabled(),
-        units=part.units,
-    )
-    found, tried = operands(part.canonical_source)
+    n0 = analysis.recognized
+    found = analysis.source_operands
     found, additions, issues, dependencies = _source_additions(
         raw,
         part,
         classifier,
-        candidate.slots,
+        analysis.candidate.slots,
         tuple(o for o in found if valid_unit(o)),
     )
-    additions, inherited = _inherit(raw, field, part, n0, classifier, additions)
+    additions, inherited = _inherit(raw, field, part, analysis, classifier, additions)
     issues.update(inherited)
     state = _keyword_semantics(
         part.canonical_source, field, part, additions, classifier, context
@@ -218,7 +250,7 @@ def _body(
             state[0] if not issues else None,
         ),
     )
-    return *result, tried
+    return *result, analysis.attempts
 
 
 def _confidence(n0: Recognized, classifier: Classifier, dependencies: set[str]) -> bool:
@@ -238,7 +270,7 @@ def _source_additions(
     additions = []
     issues: set[str] = set()
     dependencies: set[str] = set()
-    for operand in (preserve_modifiers(o, classifier) for o in accepted):
+    for operand in accepted:
         evidence = filters(operand, classifier)
         if evidence is None:
             continue
@@ -283,23 +315,12 @@ def _inherit(
     raw: str,
     field: SourceField,
     part: SourcePart,
-    n0: Recognized,
+    analysis: _PartAnalysis,
     classifier: Classifier,
     additions: list[Leaf],
 ) -> tuple[list[Leaf], set[str]]:
-    candidate, _ = classify(
-        raw,
-        Part(
-            part.source_span.role,
-            part.source_span.segments,
-            part.canonical_source,
-            part.units,
-        ),
-        classifier.references,
-        classifier.rules.enabled(),
-        units=part.units,
-    )
-    hints = candidate.slots
+    n0 = analysis.recognized
+    hints = analysis.candidate.slots
     issues = set(n0.issues)
     # Repaired outer numbers must not hide another unresolved number in a retained modifier.
     repaired = {s for item in additions for s in item.slot.occurrences}
@@ -417,10 +438,8 @@ def _quick_issue(classifier: Classifier, leaves: list[Leaf]) -> str | None:
 
 
 def _verify_card_operands(
-    part: SourcePart, binding: SourceBinding, target: Target, classifier: Classifier
+    part: SourcePart, binding: SourceBinding, target: Target, found: tuple[Operand, ...]
 ) -> None:
-    found, _ = operands(part.canonical_source)
-    found = tuple(preserve_modifiers(o, classifier) for o in found)
     for node in target.nodes:
         if isinstance(node, FormNode) and node.form_id in SOURCE_UNION_FORMS:
             _verify_source_union(part, binding, node, found)

@@ -384,3 +384,29 @@ def test_production_reader_accepts_only_the_current_n1_frames() -> None:
         from_files(
             (("translations/templates/definitions/000.yaml", old_payload, old_payload),)
         )
+
+
+def test_retained_recognition_cannot_follow_changes_to_its_input_mapping() -> None:
+    raw = "{クイック}"
+    facts = context(raw)
+    engine = classifier((QUICK,))
+    derived = derive_source(raw, facts.source, engine, context=facts)
+    values = dict(derived.recognized[0].values)
+    retained = replace(derived.recognized[0], values=values)
+    values.clear()
+    frame, binding = retained.bind(derived.field.source, derived.field.parts[0])
+    assert binding.values == {
+        "leaf_0": GlossaryReference(kind="glossary", key=QUICK.id)
+    }
+    derived.verify_binding(raw, engine, frame, binding)
+
+
+def test_retained_field_rejects_a_binding_from_another_owner_with_equal_bytes() -> None:
+    raw = "{クイック}"
+    engine = classifier((QUICK,))
+    first = context(raw, "revision:first")
+    second = context(raw, "revision:second")
+    derived = derive_source(raw, first.source, engine, context=first)
+    frame, binding = derive_source(raw, second.source, engine, context=second).bind(0)
+    with pytest.raises(ValueError, match="complete current source construction"):
+        derived.verify_binding(raw, engine, frame, binding)

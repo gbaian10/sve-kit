@@ -18,6 +18,7 @@ from sve_carddb.domains.translations.four_layer_authored import (
     TemplateTarget,
 )
 from sve_carddb.domains.translations.four_layer_classification import Term
+from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_fields import render_field
 from sve_carddb.domains.translations.four_layer_matching import Frames, Matched
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
@@ -236,10 +237,11 @@ def test_term_pin_and_named_glossary_wording_use_the_exact_source_reference(  # 
     )
     field = CompiledField(
         CardSource(binding.source, raw, "card", "face", "source"),
-        normalized,
+        derive_source(raw, normalized.source, engine),
         (Matched(frame, binding),),
         (False,),
         (),
+        engine,
     )
     ref = GlossaryReference(kind="glossary", key=term.id)
     label = Label(ref, "zh-Hant", "合成攻擊值", "project", False, True)
@@ -303,10 +305,11 @@ def test_term_pin_and_named_glossary_wording_use_the_exact_source_reference(  # 
     unrelated = field.matches[0].binding.model_copy(update={"values": {}})
     foreign = field.__class__(
         field.source,
-        field.field,
+        field.derived,
         (Matched(frame, unrelated),),
         field.low_confidence,
         field.issues,
+        field.classifier,
     )
     with pytest.raises(ValueError, match="outside the exact source"):
         absent.select(foreign, renderer, {}, "zh-Hant")

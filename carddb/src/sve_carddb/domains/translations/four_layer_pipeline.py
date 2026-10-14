@@ -20,9 +20,9 @@ if TYPE_CHECKING:
     from sve_carddb.build import Database
     from sve_carddb.contracts.source_binding import SourceDescriptor
     from sve_carddb.domains.text_observations.vocabulary import Vocabulary
+    from sve_carddb.domains.translations.four_layer_derivation import DerivedField
     from sve_carddb.domains.translations.four_layer_matching import Frames, Matched
     from sve_carddb.domains.translations.four_layer_normalizer import SourceField
-    from sve_carddb.domains.translations.four_layer_semantics import CardContext
     from sve_carddb.domains.translations.four_layer_sources import CardSource
     from sve_carddb.domains.translations.inputs import Snapshot
     from sve_carddb.domains.translations.recognition.rules import Rules
@@ -56,12 +56,16 @@ def prepare_classifier(
 @dataclass(frozen=True)
 class CompiledField:
     source: CardSource
-    field: SourceField
+    derived: DerivedField
     matches: tuple[Matched | None, ...]
     low_confidence: tuple[bool, ...]
     issues: tuple[str, ...]
-    classifier: Classifier | None = None
-    context: CardContext | None = None
+    classifier: Classifier
+
+    @property
+    def field(self) -> SourceField:
+        """Expose the same partition used for source matching and target checks."""
+        return self.derived.field
 
     @property
     def complete(self) -> bool:
@@ -90,9 +94,7 @@ def compile_card_field(
             issues.update(recognized.issues)
             matches.append(None)
             continue
-        matched = frames.match(
-            source.text, field, part, recognized, classifier, context=context
-        )
+        matched = frames.match(source.text, derived, part.ordinal, classifier)
         if matched is None:
             issues.add("unmatched_source_frame")
         matches.append(matched)
@@ -100,10 +102,9 @@ def compile_card_field(
         issues.add("empty_source_field")
     return CompiledField(
         source,
-        field,
+        derived,
         tuple(matches),
         tuple(quality),
         tuple(sorted(issues)),
         classifier,
-        context,
     )
