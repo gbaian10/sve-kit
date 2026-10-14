@@ -98,6 +98,10 @@ def write_target(
     forms: Mapping[tuple[str, str], FormDefinition],
 ) -> None:
     """Validate targets against the frame and forms already checked on their writes."""
+    if frame.id != record.data.template_id:
+        raise ValueError(
+            "Target template differs from the frame it is verified against"
+        )
     if frame.source.source_lang == record.data.lang:
         raise ValueError("Stored target language must differ from source language")
     record.data.target.verify(frame.leaf_schema, record.data.lang, forms)

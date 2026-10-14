@@ -476,6 +476,29 @@ def test_target_cannot_use_its_frame_source_language(
     assert len(db.rows("template_translation")) == 1
 
 
+def test_target_must_belong_to_the_frame_it_is_verified_against(
+    stored: tuple[Database, Frame, SourceBinding],
+) -> None:
+    db, frame, _ = stored
+    target = TargetRecord.model_validate_json(
+        canonical(
+            {
+                "kind": "template_translation",
+                "data": {
+                    "template_id": "frame:" + "0" * 64,
+                    "lang": "zh-Hant",
+                    "target": default_target().model_dump(mode="json"),
+                },
+            }
+        )
+    )
+    with (
+        pytest.raises(ValueError, match="differs from the frame"),
+        db.transaction(),
+    ):
+        write_target(db, target, "source", frame=frame, forms={})
+
+
 def test_pinned_form_rule_and_typed_signature_survive_sqlite(
     stored: tuple[Database, Frame, SourceBinding],
 ) -> None:
