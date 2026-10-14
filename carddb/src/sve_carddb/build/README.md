@@ -68,10 +68,10 @@ with create_database(schema) as db:
   installation rolls back DDL but can leave the newly created empty file.
 - All writes require `transaction()`. The entire transaction is rolled back on an
   unhandled body, verification or commit failure. Nested transactions are rejected.
-  Each commit runs foreign_key_check and the selected cross-table checks with
-  FK and CHECK enforcement enabled;
-  batch related rows in one transaction. Importers should use a few large
-  transactions: full verification scans the entire database on each commit.
+  Each commit confirms FK and CHECK enforcement, then runs foreign_key_check and
+  the selected cross-table checks; batch related rows in one transaction.
+  Importers should use a few large transactions: full verification scans the
+  entire database on each commit.
   There is no unchecked batch/commit mode, and the final transaction must pass
   these checks. RESTRICT deletes/updates remain immediate,
   while insert-time FK resolution is deferred. Reads return checked `Row` objects,

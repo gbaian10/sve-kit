@@ -121,7 +121,7 @@ class Database:
         """Save the completed transaction without reconstructing domain rows."""
         if self._connection.in_transaction:
             raise RuntimeError("Cannot save an unfinished build transaction")
-        # The last commit already verified the graph; only the physical check was skipped.
+        # The last commit verified the graph and writes enforced CHECK; only the physical check remains.
         self._verify_enforcement()
         self._connection.execute("PRAGMA ignore_check_constraints = ON")
         try:
