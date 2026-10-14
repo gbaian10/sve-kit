@@ -108,8 +108,5 @@ export function createLocator(files: Files, onlyTables?: ReadonlySet<string>): L
     return keys.values().next().value
   }
 }
-export function bucketOf(primaryKey: readonly JsonValue[], bucketCount: number): number {
-  return bucket([...primaryKey], bucketCount)
-}
 export const GLOBAL_OWNER: JsonObject = { kind: "global", id: null }
 export const homeSetOwner = (id: string): JsonObject => ({ kind: "home_set", id })

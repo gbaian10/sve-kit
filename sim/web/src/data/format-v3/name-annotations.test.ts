@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import { createAnnotatedTextResolver } from "../annotated-text"
 import { createSnapshotClient, type SnapshotClient } from "../client"
-import { bucketOf, homeSetOwner } from "../locator"
+import { homeSetOwner } from "../locator"
 import { v3Fixture } from "../v3-fixture"
 import {
   arrayValue,
@@ -15,7 +15,7 @@ import {
 } from "./json"
 import { wholeName } from "./name-annotations"
 import { type Fragment, readContainer } from "./reader"
-import { digest } from "./sha256"
+import { bucket, digest } from "./sha256"
 
 const fixture = () => objectValue(v3Fixture("whole-name-native.json"))
 function origin() {
@@ -72,7 +72,6 @@ async function sourceHistory() {
   selection["basis"] = "jp_source"
   objectValue(objectValue(selection["source"])["owner"])["id"] = donor.id
   const owner = homeSetOwner(stringValue(card["home_set_id"]))
-  const bucket = bucketOf([card["id"] ?? null], 64)
   const historyKey = "history/jp/family-family/0"
   snapshot.files.set(historyKey, {
     key: historyKey,
@@ -113,7 +112,15 @@ async function sourceHistory() {
   const fragment: Fragment = {
     file: historyKey,
     table: "face_revision",
-    identity: canonicalText(["face_revision", owner, bucket, "history"]),
+    identity: canonicalText([
+      historyKey,
+      "face_revision",
+      owner,
+      "jp",
+      "history",
+      "family-family:band-0",
+      "history",
+    ]),
     value: {
       owner,
       region: "jp",
@@ -270,7 +277,7 @@ describe("whole names on exact source owners", () => {
       (row) => row["id"] ?? null,
     )
     for (const id of ids) {
-      const band = Math.floor(bucketOf([id], 64) / 2)
+      const band = Math.floor(bucket([id], 64) / 2)
       snapshot.files.set(`virtual-set-trap-${String(band)}`, {
         key: `virtual-set-trap-${String(band)}`,
         role: "text",

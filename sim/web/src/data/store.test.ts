@@ -6,7 +6,7 @@ import { type Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
 import { type JsonObject, type JsonValue, stringValue } from "./format-v3/json"
 import { loadImagePage } from "./images"
-import { bucketOf, createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
+import { createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
 import { createCardIndex } from "./store"
 import { createTextResolver } from "./text"
 
@@ -61,8 +61,6 @@ describe("locator", () => {
         partition: "detail",
       }),
     ).toBeUndefined()
-    expect(bucketOf(["c:example"], 4)).toBe(3)
-    expect(bucketOf(["c:example"], 1)).toBe(0)
   })
 
   it("finds a visible face in its catalog beside the same family's region-state", () => {
