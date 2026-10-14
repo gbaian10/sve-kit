@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "lint": "bun run lint:js && bun run lint:css",
-    "lint:js": "eslint --max-warnings=0 .",
+    "lint:js": "eslint --max-warnings=0 --no-warn-ignored",
     "lint:css": "stylelint \"src/**/*.css\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
