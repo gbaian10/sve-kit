@@ -4,11 +4,13 @@ This reference implementation accepts already decompressed bytes. It is not the
 browser's streaming store, a publisher, or a validator of build-only evidence.
 """
 
+from copy import deepcopy
 from dataclasses import dataclass
 from graphlib import CycleError, TopologicalSorter
 from operator import itemgetter
 from typing import TYPE_CHECKING
 
+from jsonschema import Draft202012Validator
 from pydantic import JsonValue
 
 from sve_carddb.contracts.profiles import MEDIA, profile
@@ -18,6 +20,7 @@ from sve_carddb.contracts.snapshot import (
     descriptor,
     required_types,
     row_type,
+    schema,
     tables,
     validate,
 )
@@ -190,7 +193,9 @@ def _load(
 
 
 def _base(
-    detail: Fragment, fragments: list[Fragment], files: dict[str, Row]
+    detail: Fragment,
+    fragments: dict[tuple[str, bytes], Fragment],
+    files: dict[str, Row],
 ) -> Fragment:
     base = object_value(detail.value["base"])
     reference = object_value(base["file"])
@@ -205,17 +210,11 @@ def _base(
         base[field] != detail.value[field] for field in ("owner", "bucket")
     ):
         raise ValueError("Base fragment identity mismatch")
-    candidates = [
-        f
-        for f in fragments
-        if f.file == key
-        and f.table == detail.table
-        and f.value["partition"] == "bootstrap"
-        and all(f.value[field] == base[field] for field in ("owner", "bucket"))
-    ]
-    if len(candidates) != 1:
+    identity = canonical([base["table"], base["owner"], base["bucket"], "bootstrap"])
+    candidate = fragments.get((key, identity))
+    if candidate is None:
         raise ValueError("Base fragment not found")
-    return candidates[0]
+    return candidate
 
 
 def _translations(left: JsonValue, right: JsonValue) -> list[JsonValue]:
@@ -289,6 +288,7 @@ def _join(detail: Fragment, base: Fragment, faces: dict[str, Row]) -> list[Row]:
 
 def _logical(fragments: list[Fragment], files: dict[str, Row]) -> View:
     view: View = {table: [] for table in tables()}
+    index = {(fragment.file, fragment.identity): fragment for fragment in fragments}
     faces = {
         string(row["id"]): row for f in fragments if f.table == "face" for row in f.rows
     }
@@ -298,7 +298,7 @@ def _logical(fragments: list[Fragment], files: dict[str, Row]) -> View:
         if fragment.table in {"printing", "face_revision"} and part != "history":
             if part == "bootstrap":
                 continue
-            base = _base(fragment, fragments, files)
+            base = _base(fragment, index, files)
             if base.identity in joined:
                 raise ValueError("Multiple details for one base")
             joined.add(base.identity)
@@ -544,12 +544,20 @@ def read_snapshot(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
 
 
 def text_all_payloads(manifest_value: JsonValue, data: bytes) -> dict[str, bytes]:
-    """Validate union membership, dependencies and each canonical member hash."""
+    """Validate the union envelope and hashes; callers validate members via read_snapshot."""
     manifest = object_value(manifest_value)
     validate("Manifest", manifest, string(manifest["format_version"]))
     description = object_value(manifest["text_all"])
     value = object_value(_payload(description, data))
-    validate("TextAll", value, string(manifest["format_version"]))
+    version = string(manifest["format_version"])
+    envelope = deepcopy(definition("TextAll", version))
+    members_schema = object_value(object_value(envelope["properties"])["members"])
+    member_schema = object_value(members_schema["items"])
+    # Matching hashes bind members to the payloads validated by read_snapshot.
+    object_value(member_schema["properties"])["payload"] = {}
+    selected = schema(version) | envelope
+    selected.pop("oneOf")
+    Draft202012Validator(selected).validate(value)
     if value["format_version"] != manifest["format_version"]:
         raise ValueError("TextAll format differs from manifest")
     files = _files(manifest)
@@ -563,9 +571,9 @@ def text_all_payloads(manifest_value: JsonValue, data: bytes) -> dict[str, bytes
     members = [object_value(item) for item in array(value["members"])]
     if [_reference(member) for member in members] != expected:
         raise ValueError("text_all members do not match contains")
+    keys = {string(item["key"]) for item in expected}
     if any(
-        string(object_value(dep)["key"])
-        not in {string(item["key"]) for item in expected}
+        string(object_value(dep)["key"]) not in keys
         for item in expected
         for dep in array(files[string(item["key"])]["dependencies"])
     ):

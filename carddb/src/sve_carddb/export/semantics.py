@@ -51,7 +51,9 @@ def ordered_rows(rows: list[Row], fields: list[str]) -> None:
 
 def validate_fragments(fragments: list[Fragment]) -> None:
     """Validate sorting before any row_index can be interpreted."""
+    groups: dict[tuple[str, str], list[Fragment]] = {}
     for fragment in fragments:
+        groups.setdefault((fragment.table, fragment.file), []).append(fragment)
         fields = (
             ["row_index"]
             if fragment.value["base"] is not None
@@ -61,24 +63,18 @@ def validate_fragments(fragments: list[Fragment]) -> None:
             ]
         )
         ordered_rows(fragment.rows, fields)
-    for table in {fragment.table for fragment in fragments}:
-        for file in {fragment.file for fragment in fragments}:
-            values = [
-                fragment
-                for fragment in fragments
-                if fragment.file == file and fragment.table == table
-            ]
-            keys = [
-                (
-                    string(object_value(f.value["owner"])["kind"]),
-                    row_key(object_value(f.value["owner"])["id"]),
-                    integer(f.value["bucket"]),
-                    string(f.value["partition"]),
-                )
-                for f in values
-            ]
-            if keys != sorted(keys):
-                raise ValueError("Fragments are out of order")
+    for values in groups.values():
+        keys = [
+            (
+                string(object_value(f.value["owner"])["kind"]),
+                row_key(object_value(f.value["owner"])["id"]),
+                integer(f.value["bucket"]),
+                string(f.value["partition"]),
+            )
+            for f in values
+        ]
+        if keys != sorted(keys):
+            raise ValueError("Fragments are out of order")
 
 
 def _parameter(value: Row) -> None:
