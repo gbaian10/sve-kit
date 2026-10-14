@@ -90,13 +90,21 @@ def write_form(db: Database, record: FormRecord, authored_source_id: str) -> Non
 
 
 def write_target(
-    db: Database, record: TargetRecord | TargetVariantRecord, authored_source_id: str
+    db: Database,
+    record: TargetRecord | TargetVariantRecord,
+    authored_source_id: str,
+    *,
+    frame: Frame,
+    forms: Mapping[tuple[str, str], FormDefinition],
 ) -> None:
-    """Targets use the same language-specific form closure on both sides of SQLite."""
-    frame = read_frame(db, record.data.template_id).frame
+    """Validate targets against the frame and forms already checked on their writes."""
+    if frame.id != record.data.template_id:
+        raise ValueError(
+            "Target template differs from the frame it is verified against"
+        )
     if frame.source.source_lang == record.data.lang:
         raise ValueError("Stored target language must differ from source language")
-    record.data.target.verify(frame.leaf_schema, record.data.lang, read_forms(db))
+    record.data.target.verify(frame.leaf_schema, record.data.lang, forms)
     db.insert(
         "template_translation",
         {
@@ -146,20 +154,6 @@ def read_frame(db: Database, identifier: str) -> StoredFrame:
     if interface != frame.projection.interface_key(frame.id):
         raise ValueError("Stored frame interface key differs from its projection")
     return StoredFrame(frame, source)
-
-
-def read_forms(db: Database) -> dict[tuple[str, str], FormDefinition]:
-    """Stored editable parts cannot change a pinned rule's branch set or signature."""
-    columns = ("id", "lang", "rule", "signature", "cases")
-    result = {}
-    for row in db.select("translation_form", columns):
-        try:
-            form = FormDefinition.model_validate_json(canonical(payload(row)))
-            validate_form(form)
-        except ValueError, TypeError:
-            raise ValueError("Invalid stored four-layer form") from None
-        result[form.id, form.lang] = form
-    return result
 
 
 def use_field(row: Row) -> OwnerField:

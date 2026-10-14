@@ -15,6 +15,7 @@ from sve_carddb.domains.translations.four_layer_authored import (
     FormRecord,
     FrameRecord,
     TargetRecord,
+    TargetVariantRecord,
     from_files,
 )
 from sve_carddb.domains.translations.four_layer_build import Settings, apply
@@ -302,6 +303,15 @@ def test_producer_stores_language_forms_before_targets_that_use_them(  # ruff: i
                 }
             )
         )
+        variant = TargetVariantRecord.model_validate_json(
+            canonical(
+                {
+                    "kind": "template_translation_variant",
+                    "data": target.data.model_dump(mode="json")
+                    | {"variant_key": "alternative"},
+                }
+            )
+        )
         files = []
         for path, record in (
             (
@@ -309,6 +319,7 @@ def test_producer_stores_language_forms_before_targets_that_use_them(  # ruff: i
                 FrameRecord(kind="sentence_template", data=frame),
             ),
             ("translations/templates/values/000.yaml", target),
+            ("translations/templates/values/001.yaml", variant),
             ("translations/forms/000.yaml", form),
         ):
             content = canonical(
@@ -336,3 +347,12 @@ def test_producer_stores_language_forms_before_targets_that_use_them(  # ruff: i
             )
         assert report.translated == 1
         assert db.rows("translation")[0].values["text"] == "最多重複2次。"
+        targets = db.rows("template_translation")
+        assert {row.values["variant_key"] for row in targets} == {
+            "default",
+            "alternative",
+        }
+        assert all(
+            row.values["target"] == Json(target.data.target.model_dump(mode="json"))
+            for row in targets
+        )

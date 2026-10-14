@@ -343,11 +343,18 @@ def _populate(
             forms[record.data.id, record.data.lang] = Form(
                 record.data, record.origin, record.low_confidence
             )
+    form_definitions = {key: form.definition for key, form in forms.items()}
     for record in inputs.records:
         if isinstance(record, (TargetRecord, TargetVariantRecord)):
             if record.data.template_id not in plan.canonical_sources:
                 continue
-            write_target(db, record, audit[record.record_key])
+            write_target(
+                db,
+                record,
+                audit[record.record_key],
+                frame=definitions[record.data.template_id].data,
+                forms=form_definitions,
+            )
             if isinstance(record, TargetRecord):
                 selected[record.data.template_id, record.data.lang] = SelectedTarget(
                     record.data.target, record.origin, record.low_confidence

@@ -17,7 +17,6 @@ from sve_carddb.contracts.four_layer import Target, hash_payload
 from sve_carddb.contracts.source_binding import LeafOccurrence, SourceDescriptor
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_authored import (
-    FormRecord,
     FrameRecord,
     TargetRecord,
 )
@@ -26,11 +25,9 @@ from sve_carddb.domains.translations.four_layer_normalizer import normalize_sour
 from sve_carddb.domains.translations.four_layer_storage import (
     payload,
     read_annotation,
-    read_forms,
     read_frame,
     write_annotation,
     write_binding,
-    write_form,
     write_frame,
     write_target,
 )
@@ -201,7 +198,7 @@ def stored(compiled: CompiledSchema) -> Iterator[tuple[Database, Frame, SourceBi
                     }
                 )
             )
-            write_target(db, selected, "source")
+            write_target(db, selected, "source", frame=frame, forms={})
         yield db, frame, binding
 
 
@@ -433,7 +430,7 @@ def test_valid_json_cannot_hide_required_leaves_in_literal_target(
         db.transaction(),
         pytest.raises(ValueError, match=r"[Ll]eaf|[Ll]iteral|[Pp]laceholder"),
     ):
-        write_target(db, bad, "source")
+        write_target(db, bad, "source", frame=frame, forms={})
 
 
 def test_nested_json_extra_fields_are_rejected_before_insert(
@@ -452,37 +449,51 @@ def test_nested_json_extra_fields_are_rejected_before_insert(
         )
 
 
-def test_pinned_form_rule_and_typed_signature_survive_sqlite(
+def test_target_cannot_use_its_frame_source_language(
     stored: tuple[Database, Frame, SourceBinding],
 ) -> None:
-    db, _, _ = stored
-    with db.transaction():
-        form = FormRecord.model_validate_json(
-            canonical(
-                {
-                    "kind": "translation_form",
-                    "data": {
-                        "id": "keyword.display",
-                        "lang": "zh-Hant",
-                        "rule": "keyword.display.v1",
-                        "signature": [
-                            {"name": "term", "type": "Concept", "role": "keyword"}
-                        ],
-                        "cases": {"default": [{"kind": "Label", "arg": "term"}]},
-                    },
-                }
-            )
+    db, frame, _ = stored
+    target = TargetRecord.model_validate_json(
+        canonical(
+            {
+                "kind": "template_translation",
+                "data": {
+                    "template_id": frame.id,
+                    "lang": frame.source.source_lang,
+                    "target": default_target().model_dump(mode="json"),
+                },
+            }
         )
-        write_form(db, form, "source")
-    assert read_forms(db)["keyword.display", "zh-Hant"].signature[0].type == "Concept"
-    with db.transaction():
-        db.update(
-            "translation_form",
-            {"id": "keyword.display", "lang": "zh-Hant"},
-            {"rule": "unknown.rule.v1"},
+    )
+    with (
+        pytest.raises(ValueError, match="language must differ"),
+        db.transaction(),
+    ):
+        write_target(db, target, "source", frame=frame, forms={})
+    assert len(db.rows("template_translation")) == 1
+
+
+def test_target_must_belong_to_the_frame_it_is_verified_against(
+    stored: tuple[Database, Frame, SourceBinding],
+) -> None:
+    db, frame, _ = stored
+    target = TargetRecord.model_validate_json(
+        canonical(
+            {
+                "kind": "template_translation",
+                "data": {
+                    "template_id": "frame:" + "0" * 64,
+                    "lang": "zh-Hant",
+                    "target": default_target().model_dump(mode="json"),
+                },
+            }
         )
-    with pytest.raises(ValueError, match="Invalid stored four-layer form"):
-        read_forms(db)
+    )
+    with (
+        pytest.raises(ValueError, match="differs from the frame"),
+        db.transaction(),
+    ):
+        write_target(db, target, "source", frame=frame, forms={})
 
 
 def annotation(reference: JsonValue, bold: bool | None = True) -> AnnotationSet:
