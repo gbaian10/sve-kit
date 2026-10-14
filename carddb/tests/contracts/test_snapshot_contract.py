@@ -244,8 +244,21 @@ def test_fixed_canonical_and_bucket_vectors() -> None:
         b"9007199254740992",
         b'"\\ud800"',
         b"\xef\xbb\xbf{}",
+        b'{"a":[9007199254740992]}',
+        b'{"a":["\\ud800"]}',
+        b'{"a":[{"\\udfff":null}]}',
     ],
-    ids=["duplicate", "float", "nan", "unsafe", "surrogate", "bom"],
+    ids=[
+        "duplicate",
+        "float",
+        "nan",
+        "unsafe",
+        "surrogate",
+        "bom",
+        "nested-unsafe",
+        "nested-surrogate",
+        "surrogate-key",
+    ],
 )
 def test_invalid_json_boundary(data: bytes) -> None:
     with pytest.raises((ValueError, UnicodeError)):
