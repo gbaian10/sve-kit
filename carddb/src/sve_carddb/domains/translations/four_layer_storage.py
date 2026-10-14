@@ -1,6 +1,5 @@
 """Typed relational reads reconstruct exact arrays before checking four-layer identities."""
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.build import Json
@@ -29,12 +28,6 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import Database, Row, Value
     from sve_carddb.contracts.source_binding import SourceBinding
-
-
-@dataclass(frozen=True)
-class StoredFrame:
-    frame: Frame
-    canonical_source: str
 
 
 def write_frame(
@@ -135,25 +128,6 @@ def _one(db: Database, table: str, where: Mapping[str, Value]) -> Row:
     if len(rows) != 1:
         raise ValueError("Four-layer row requires an exact existing primary key")
     return rows[0]
-
-
-def read_frame(db: Database, identifier: str) -> StoredFrame:
-    """Content and interface identities are checked independently on every typed read."""
-    data = payload(_one(db, "sentence_template", {"id": identifier}))
-    source = string(data.pop("canonical_source"))
-    interface = data.pop("interface_key")
-    for name in ("authored_source_id", "record_key", "origin", "low_confidence"):
-        data.pop(name)
-    try:
-        frame = Frame.model_validate_json(canonical(data))
-        frame.verify(source)
-    except ValueError, TypeError:
-        raise ValueError("Invalid stored four-layer frame") from None
-    if frame.source.normalizer_version != VERSION:
-        raise ValueError("Unsupported stored normalizer version")
-    if interface != frame.projection.interface_key(frame.id):
-        raise ValueError("Stored frame interface key differs from its projection")
-    return StoredFrame(frame, source)
 
 
 def use_field(row: Row) -> OwnerField:

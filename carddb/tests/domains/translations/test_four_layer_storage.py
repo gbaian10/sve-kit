@@ -25,7 +25,6 @@ from sve_carddb.domains.translations.four_layer_normalizer import normalize_sour
 from sve_carddb.domains.translations.four_layer_storage import (
     payload,
     read_annotation,
-    read_frame,
     write_annotation,
     write_binding,
     write_frame,
@@ -217,11 +216,10 @@ def default_target() -> Target:
     )
 
 
-def test_frame_target_and_owner_binding_round_trip_through_actual_sqlite(
+def test_frame_target_and_owner_binding_write_through_actual_sqlite(
     stored: tuple[Database, Frame, SourceBinding],
 ) -> None:
-    db, frame, binding = stored
-    assert read_frame(db, frame.id).frame == frame
+    db, _, binding = stored
     assert db.rows("template_translation")[0].values["target"] == Json(
         default_target().model_dump(mode="json")
     )
@@ -368,17 +366,6 @@ def test_binding_cannot_move_to_a_use_with_another_owner(
     with pytest.raises(ValueError, match="exact use owner"), db.transaction():
         write_binding(db, "use:other", binding)
     assert db.rows("text_template_binding") == ()
-
-
-@pytest.mark.parametrize("column", ["content_hash", "interface_key"])
-def test_frame_identity_and_interface_are_rechecked_on_read(
-    stored: tuple[Database, Frame, SourceBinding], column: str
-) -> None:
-    db, frame, _ = stored
-    with db.transaction():
-        db.update("sentence_template", {"id": frame.id}, {column: "0" * 64})
-    with pytest.raises(ValueError, match=r"stored four-layer frame|interface key"):
-        read_frame(db, frame.id)
 
 
 def test_valid_json_cannot_hide_required_leaves_in_literal_target(
