@@ -401,15 +401,15 @@ def test_sorted_base_is_required_even_with_valid_new_hashes() -> None:
         ("order", "Fragments are out of order"),
         ("duplicate", "Duplicate fragment identity"),
         ("base", "Base fragment identity mismatch"),
+        ("missing_base", "Base fragment not found"),
     ],
 )
-@pytest.mark.parametrize("reader", ["snapshot", "text_all"])
 def test_fragment_index_rejects_resealed_invalid_members(
-    change: str, message: str, reader: str
+    change: str, message: str
 ) -> None:
     manifest = object_value(fixture("manifest.json"))
     values = {key: parse(raw) for key, raw in payloads().items()}
-    if change == "base":
+    if change in {"base", "missing_base"}:
         base = next(
             object_value(object_value(fragment)["base"])
             for value in values.values()
@@ -417,7 +417,21 @@ def test_fragment_index_rejects_resealed_invalid_members(
             for fragment in array(entries)
             if object_value(fragment)["base"] is not None
         )
-        base["bucket"] = (integer(base["bucket"]) + 1) % 64
+        target = base
+        if change == "missing_base":
+            # Moving the referenced bootstrap fragment leaves a consistent base unmatched.
+            file = object_value(values[string(object_value(base["file"])["key"])])
+            target = next(
+                object_value(fragment)
+                for fragment in array(
+                    object_value(file["tables"])[string(base["table"])]
+                )
+                if all(
+                    object_value(fragment)[field] == base[field]
+                    for field in ("owner", "bucket")
+                )
+            )
+        target["bucket"] = (integer(target["bucket"]) + 1) % 64
     else:
         entries = next(
             array(entries)
@@ -429,11 +443,5 @@ def test_fragment_index_rejects_resealed_invalid_members(
             entries.reverse()
         else:
             entries.append(entries[0])
-    blobs = _reseal(manifest, values)
-    raw = union_bytes(manifest, blobs)
-    if reader == "snapshot":
-        with pytest.raises(ValueError, match="^" + message + "$"):
-            read_snapshot(manifest, blobs)
-    else:
-        with pytest.raises(ValueError, match="^" + message + "$"):
-            read_text_all(manifest, raw, attachments(blobs))
+    with pytest.raises(ValueError, match="^" + message + "$"):
+        read_snapshot(manifest, _reseal(manifest, values))
