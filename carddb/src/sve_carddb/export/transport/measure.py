@@ -38,7 +38,7 @@ def accounted_sizes(
 def measure(
     snapshot: Snapshot, *, brotli: Brotli | None = None
 ) -> dict[str, JsonValue]:
-    """Count metadata once, exclude text_all duplication, and expose failing gates."""
+    """Count metadata once and expose failing gates."""
     if snapshot.compression_recipe["brotli"] != (
         None if brotli is None else brotli.version
     ):
@@ -111,7 +111,6 @@ def measure(
         "startup_by_region": startup,
         "images_metadata": {"file_count": len(images), **_sizes(images)},
         "manifest": _sizes([manifest]),
-        "text_all": _sizes([snapshot.text_all]),
         "shard_count": len(shards),
         "shards": shards,
         "oversized_shards": oversized,

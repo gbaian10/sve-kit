@@ -11,7 +11,7 @@ from sve_carddb.domains.translations.jp_sources import effect_bindings
 from sve_carddb.domains.translations.names.bindings import DisplayBinding
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.project import DisplayCheck, project
-from sve_carddb.export.reader import read_snapshot, read_text_all
+from sve_carddb.export.reader import read_snapshot
 from sve_carddb.export.transport import Batch, Ownership, export_snapshot
 
 from ..support.snapshot_project_fixtures import (
@@ -161,15 +161,6 @@ def test_unchecked_machine_translation_keeps_quality_and_source_closure(
     )
     payloads = {key: blob.raw for key, blob in exported.payloads.items()}
     assert read_snapshot(exported.manifest, payloads) == result.tables
-    attachments = {
-        key: value
-        for key, value in payloads.items()
-        if key == "programs" or key.startswith("images/")
-    }
-    assert (
-        read_text_all(exported.manifest, exported.text_all.raw, attachments)
-        == result.tables
-    )
 
 
 @pytest.mark.parametrize("field", ["name", "effect", "section"])

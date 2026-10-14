@@ -48,7 +48,7 @@ bundle 不得與 repo、封存庫或配方重疊。root 內的輸出 symlink 不
 
 建置只讀凍結批次與 authored，不開 live manifest、不抓官網。文字封存來源逐份驗 hash，圖片真實性由獨立 producer 驗證，
 輸入記錄驗 source-use 閉包，建置 DB 驗 FK／JSON，公開投影驗參照閉包；匯出後由
-獨立 reader 重接所有欄分工、位置引用與分片，完整文字包亦須等於分片結果。
+獨立 reader 重接所有欄分工、位置引用與分片，結果須等於公開邏輯投影。
 
 公開版次取自 `TextPlan.publication_identity()`。診斷 staging 可以保留未核可父列，
 公開投影先以發布版次篩選再做區域閉包；不拿 `diagnostic_exclusions` 當發布名單。
@@ -70,7 +70,7 @@ Docker wrapper 固定寫入執行目錄的 `stages.tsv`，中斷仍保留已完�
 
 ## 輸出與容量
 
-分片與完整文字包存於 `snapshots/blobs/<sha256>.json`，另存固定時間戳、等級 9 的
+分片存於 `snapshots/blobs/<sha256>.json`，另存固定時間戳、等級 9 的
 gzip。`snapshot export-offline` 可用 `--brotli` 額外產生 `.br`；
 預設為 `--no-brotli`，br 數字為 null，不能宣稱通過 br 容量目標。
 啟用時直接使用 `uv.lock` 鎖定的 PyPI `brotli`，固定 generic mode、quality 11、
@@ -96,7 +96,7 @@ lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行�
 
 這些檔案與輸出都不進 git、Actions cache／artifact 或測試 fixture。
 容量設計依 [size-budget](size-budget.md)：全部文字分片＋manifest 的 raw ≤40 MiB；單一版本完整文字閉包 Brotli ≤8 MiB、gzip ≤10 MiB，含完整來源、counterpart、共享字典、卡號索引與必要跨區檔。
-text_all 的封套與整檔另報，不與分片重複加總；卡圖另計。
+卡圖另計。
 基本目錄冷載依所選日版／英版各計完整 manifest＋config＋實際必載片及依賴，共用／混區 File 整檔計、不按語言比例分攤。
 Brotli 2 MiB 為分界，略超報精確差額、明顯超出才交維護者；raw／gzip 另報，不另設硬門檻。
 基本目錄容器整檔 raw ≤2 MiB，詳情與其他資料檔 ≤512 KiB，含 types／字典／base metadata。

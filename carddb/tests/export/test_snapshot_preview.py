@@ -174,7 +174,6 @@ def test_preview_pointer_follows_every_immutable_member(
     raw_paths = {
         string(object_value(item)["path"]) for item in array(exported.manifest["files"])
     } | {
-        string(object_value(exported.manifest["text_all"])["path"]),
         "snapshots/manifests/" + manifest_hash + ".json",
     }
     expected = raw_paths | {path + ".gz" for path in raw_paths}

@@ -24,7 +24,7 @@ from sve_carddb.core.json import (
 )
 from sve_carddb.export.buckets import bucket
 from sve_carddb.export.project import Projection
-from sve_carddb.export.reader import read_snapshot, read_text_all
+from sve_carddb.export.reader import read_snapshot
 from sve_carddb.export.transport import Brotli, Ownership, Snapshot, export_snapshot
 from sve_carddb.export.transport.layout import Group, Layout
 from sve_carddb.export.transport.measure import measure, update
@@ -116,20 +116,6 @@ def test_independent_minor_golden(
     manifest, blobs, expected = golden
     assert (
         read_snapshot(manifest, blobs) == expected == fixture("expected-logical.json")
-    )
-    attachments = {
-        string(f["key"]): blobs[string(f["key"])]
-        for raw in array(manifest["files"])
-        for f in (object_value(raw),)
-        if f["role"] in {"images", "programs"}
-    }
-    assert (
-        read_text_all(
-            manifest,
-            canonical(parse((GOLDEN / "text-all.json").read_bytes())),
-            attachments,
-        )
-        == expected
     )
 
 

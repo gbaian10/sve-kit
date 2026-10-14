@@ -43,7 +43,6 @@ manifest 是一般 JSON object，不使用 tuple。完整欄位如下；引用�
 | engine_support_target | `{engine_version:Text?,engine_build_hash:Hash?,validation_policy_id:Code?}`，全 null 或全非 null |
 | files | `[File]`，按 key 排序且 key 唯一 |
 | config_ref | `FileRef`，恰指向唯一 role=config 的 File |
-| text_all | `TextAll?`，null 表示未提供替代下載容器，分片仍完整 |
 | partitioning | `{algorithm:"sha256-mod-v1",bucket_count:UInt}`，數目正值且符合此 format 固定配置，見 §5 |
 | coverage | §6 的 `Coverage` |
 | mechanic_universe_id | Hash；取 keyword 的 id/kind/definition_unit_id/actions，按 id 排序後的 canonical 陣列 |
@@ -196,7 +195,7 @@ DSL 程式包是物件 `{format_version,entries}`；兩鍵皆 required 且不得
 
 format_version=`4.0.0` 的支援 DSL 版本集合固定為空：唯一可接受的 entries 為 `[]`。任何非空 entries 都拒絕整包，即使封套完整也不放行；不忽略項目、不轉用 astra/1、不使用任意 JSON 的 ast 驗證替代正式 Schema。此規則是版本契約，不因執行環境裝有某個引擎或 Schema 而改變。沒有程式項目可供引用時，非 null ProgramRef 亦無法通過引用閉包驗證。
 
-此格式每份 manifest 必須恰有一個 role=programs 的 File，固定提供 format_version 與 manifest 相同且 entries=[] 的程式包（`{"format_version":"4.0.0","entries":[]}`）；row_counts 與 dependencies 都是 []，仍驗 canonical bytes、長度及 hash。不得以省略檔案表示沒有程式；reader 缺檔即拒收。此附件依 §4.2 不列入 text_all，下載文字分片不依賴它；驗完整快照時另外取得。
+此格式每份 manifest 必須恰有一個 role=programs 的 File，固定提供 format_version 與 manifest 相同且 entries=[] 的程式包（`{"format_version":"4.0.0","entries":[]}`）；row_counts 與 dependencies 都是 []，仍驗 canonical bytes、長度及 hash。不得以省略檔案表示沒有程式；reader 缺檔即拒收。下載文字分片不依賴此附件；驗完整快照時另外取得。
 
 啟用正式 DSL 1.0 時須由新的 format 配置至少升 minor，明列支援 DSL 版本到 `dsl/` Schema 資源的映射、所需 capability 與最低 reader 版本，並依 §1.1 協商；reader 使用釘住的權威資源驗 ast，且拒絕未展開的作者巨集。未知 DSL 版本仍拒絕整包，不改寫既有 `4.0.0` 的空集合。
 
@@ -206,7 +205,7 @@ format_version=`4.0.0` 的支援 DSL 版本集合固定為空：唯一可接受�
 
 `Fragment = {owner,bucket,partition,base,rows}`。`Owner = {kind:home_set/global,id:ID?}`；home_set 的 id 是永久 product_family ID，global 的 id 固定 null。`Partition = bootstrap/detail/history`。唯一 fragment 身分是 `(table_name,owner.kind,owner.id,bucket,partition)`，同一 manifest 的所有 files 合計不得重複；檔案如何將 fragments 裝在一起不影響這個身分。每表 fragments 依上述身分排序。
 
-role 與 partition 解耦：role 是下載類別，partition 是欄位切分身分。文字 role=bootstrap/text 可依固定裝檔配置裝入 bootstrap/detail/history fragments；不是允許每批任意混裝。原 partition=bootstrap 的商品／引擎／印刷擴充可在 role=text 的按需檔，role=bootstrap 也不代表屬於基本目錄或必載。images 仍只容三影像集合的 detail，config／programs 的形狀不變。display_ref 外的 face_revision 及其 field_annotation 用 history，其他集合內嵌的歷史沿完整列出貨；text_all 保留原 File 分組。
+role 與 partition 解耦：role 是下載類別，partition 是欄位切分身分。文字 role=bootstrap/text 可依固定裝檔配置裝入 bootstrap/detail/history fragments；不是允許每批任意混裝。原 partition=bootstrap 的商品／引擎／印刷擴充可在 role=text 的按需檔，role=bootstrap 也不代表屬於基本目錄或必載。images 仍只容三影像集合的 detail，config／programs 的形狀不變。display_ref 外的 face_revision 及其 field_annotation 用 history，其他集合內嵌的歷史沿完整列出貨。
 
 `base` 在 printing/detail 與 現行／暫顯 face_revision/detail 必填為 `{file:FileRef,table:Code,owner:Owner,bucket:UInt,partition:"bootstrap"}`；其他 fragment 一律 null。base 指精確檔案與 fragment，不允許指自己或跨 manifest。其 FileRef 必列在該 File.dependencies，owner、bucket、table 與 detail 相同。base 存在 payload 裡，故 bootstrap bytes/hash 變更必使相關 detail bytes/hash 變更，即使 row_index 數值恰好不變。
 
@@ -231,13 +230,11 @@ row_index 為從 0 起的 UInt，指 base fragment 已按 PK 排序的 rows。de
 
 例如 base 有依 ID 排序的兩列 revision，detail 的 `[1,...]` 只可指第二列。缺 base hash、hash 指舊片、index=2、重複 index=1、漏 index=0，或 printing 同一 face_ordinal 兩次，都必須拒收，不能 fallback 到最新 bootstrap。
 
-### 4.2 text_all 是容器聯集
+### 4.2 文字分片閉包
 
-`TextAll` 是 Blob 五欄加 `contains:[FileRef]`。contains 精確列出 files 中所有 role=bootstrap/text/config 的鍵與 hash，按 key 排序；不含 images、programs 或自身。分片依賴閉包不能指向此集合外的檔案，圖片／AST 的公開 reference 由 producer 整體驗證，不是文字離線下載的強制依賴。
+文字檔由 files 中 role=bootstrap/text/config 的 File 組成；分片依賴閉包不能指向此集合外的檔案。圖片／AST 的公開 reference 由 producer 整體驗證，不是文字下載的強制依賴。需要全部文字的工具從 files 逐片取得，再走同一 reader join。文字離線備妥要求這些文字檔及其依賴全部驗過；只完成 bootstrap 不算。
 
-完整文字包 payload 是 `{format_version,members:[{key,sha256,payload}]}`，按 key 排序。每個 payload 就是該 File 的 JSON 值（config 亦然），重新 canonical 序列化後 bytes/hash 須精確等於原 File；外層 Blob.sha256 驗整個聯集容器。members 與 contains 一對一，不能將 fragments 合併成全欄 rows、重新分配 row_index 或另放重複 config。reader 可從聯集還原與個別下載相同的驗證檔案，再走同一 join。
-
-text_all 是替代表示，不列入 files，不在容量合計重算。文字離線備妥要求整個 contains（未提供 text_all 時按相同規則從 files 推導）及其依賴均驗過；只完成 bootstrap 不算。容量另計 manifest、config、changes 及其 QA／errata 摘要，不因 metadata 移出文字容器而免計；基本目錄冷載依所選日版／英版各計實際閉包與整檔 Brotli；raw／gzip 另報。完整文字 raw 計全部分片＋manifest，壓縮上限計單一版本的完整文字閉包，詳 [size-budget](size-budget.md)。
+容量另計 manifest、config、changes 及其 QA／errata 摘要，不因 metadata 移出文字容器而免計；基本目錄冷載依所選日版／英版各計實際閉包與整檔 Brotli；raw／gzip 另報。完整文字 raw 計全部分片＋manifest，壓縮上限計單一版本的完整文字閉包，詳 [size-budget](size-budget.md)。
 
 ### 4.3 檔案描述與容器對照例
 
@@ -299,8 +296,6 @@ text_all 是替代表示，不列入 files，不在容量合計重算。文字�
 }
 ```
 
-text_all.contains 使用同一 key/sha256，其 members 的 payload 是上述整個容器；不能只抽出 rows 丟掉 fragment 身分。
-
 ### 4.4 基本目錄容器、共享字典與 base 身分
 
 基本目錄的下載單位為所選區的穩定封存檔、最近卡包各自一檔與共用檔；每個實際下載容器解壓後 ≤2 MiB。
@@ -355,9 +350,9 @@ image_asset 使用 `[id]`，image_variant 使用 `[image_id]`，兩者仍是 glo
 | text／detail／home_set | 32 |
 | text／history／global 或 home_set | 32 |
 
-config 與 programs 各一檔，key 分別為 `config`、`programs`。無列 bucket 可不出 fragment／檔案；相同 fragment 身分仍全庫唯一。基本目錄容器 ≤2 MiB（§4.4），其他資料檔仍 ≤512 KiB，含 types 與所有 fragments；manifest 與 text_all 另計。新增內容超標時停止驗收；已發布配置另提至少 minor 的固定配置修訂，尚未發布的 4.0.0 依 §1.1 同步原地修訂，不能在同版自動加例外、搬 owner、縮 width 或丟列。BP01／CP04 是釘住的永久 family ID，不是從卡號前綴作判斷。
+config 與 programs 各一檔，key 分別為 `config`、`programs`。無列 bucket 可不出 fragment／檔案；相同 fragment 身分仍全庫唯一。基本目錄容器 ≤2 MiB（§4.4），其他資料檔仍 ≤512 KiB，含 types 與所有 fragments；manifest 另計。新增內容超標時停止驗收；已發布配置另提至少 minor 的固定配置修訂，尚未發布的 4.0.0 依 §1.1 同步原地修訂，不能在同版自動加例外、搬 owner、縮 width 或丟列。BP01／CP04 是釘住的永久 family ID，不是從卡號前綴作判斷。
 
-先排定每個邏輯 fragment 的 PK 與 rows，裝 bootstrap 並取得實際 File hash，再重建 printing／display revision 的 row_index、base FileRef 與精確 dependencies；一個 detail File 可以依賴多個 bootstrap File，但每個 base 仍精確指相同 table／owner／bucket。types 只收必要且完整的引用閉包。完整文字包的 contains／members 仍是 config、bootstrap、text 的原 File 聯集，不產生另一份全欄卡表。單張 image metadata 更新只改其 global bucket 與 manifest；若 binding 未變，其他 image bucket 不因 hash 排序或插入重排。
+先排定每個邏輯 fragment 的 PK 與 rows，裝 bootstrap 並取得實際 File hash，再重建 printing／display revision 的 row_index、base FileRef 與精確 dependencies；一個 detail File 可以依賴多個 bootstrap File，但每個 base 仍精確指相同 table／owner／bucket。types 只收必要且完整的引用閉包。單張 image metadata 更新只改其 global bucket 與 manifest；若 binding 未變，其他 image bucket 不因 hash 排序或插入重排。
 
 ### 5.2 影像 metadata 的背景預取與逐頁解析
 
@@ -376,7 +371,7 @@ format_version 與 min_reader_version 均為 `4.0.0`，完整八個 required_cap
 translation 在 bootstrap／detail 均為完整八欄；FieldTranslation 的七格欄序與 basis 依 §8。
 canonical、owner、分片鍵及裝檔規則沿前述配置，producer、Python reader、共用 golden 與 Web 解碼欄序須同步。
 
-所有容器、config、programs、text_all、changes 的 format_version 都必須一致；空圖片／same_name 也不省能力。
+所有容器、config、programs、changes 的 format_version 都必須一致；空圖片／same_name 也不省能力。
 索引以獨立 `index_format:2` 協商，形狀依 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)，不混同於 reader 契約版號。
 producer 與 reader 須各自驗 same_name 的卡層 null、effect_similarity=null、review_level=unreviewed
 及完整公開引用閉包，不只驗 enum 合法。config.digital_endpoints 依 game 排序，
@@ -464,7 +459,7 @@ Translation 在 bootstrap／detail 都用完整九欄。所有內嵌 FieldTransl
 標註集合的 PK／欄序、欄位分割及 bucket 依公開 annotation §2／§5；field_annotation 的 history
 只用於非 display revision 的原文用途，base=null，完整 tuple，不套 face_revision 的 row_index。
 其他集合仍沿前述欄位分割，printing.faces 的 face_ordinal 與 translation 子陣列 join 鍵不變。
-text_all 包含全部 43 文字集合的原始 File 聯集；changes 依現行集合的 PK／欄位白名單。
+changes 依現行集合的 PK／欄位白名單。
 annotation_set／field_annotation 只產非空集合及用途列；row_counts 計實際列數，不為空集合建立 fragment。
 translation.annotation_kind=none 且 annotation_set_id=null 才表示空集合；whole_name 的 null 依公開 annotation §2.6 還原整名集合；缺 field_annotation 只有在對應分片完整驗畢後才可當空，
 非 null 引用缺目標仍拒絕。完整性由 producer 比對投影前 occurrence 保證，不能靠 reader 重造空 set ID。

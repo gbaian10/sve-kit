@@ -39,7 +39,7 @@ MiB = 1,048,576 bytes，KiB = 1,024 bytes。raw 是 canonical-json-v1 未壓縮 
 raw／gzip 另報基本目錄實測；不另設其啟動壓縮門檻。
 完整文字與單檔的上限仍是發布效能驗收門檻；超限須調整投影或固定配置，不能宣稱通過。
 容量不是快照格式或 reader 相容性條件；Python reader 核對實際 bytes、hash、結構與閉包，瀏覽器核對 bytes／hash 並判版本能力准入，不以預算拒絕合法快照。
-manifest、changes、text_all 的封套與整檔量另列，不套資料 File 的單檔上限，仍須量其解析記憶體。
+manifest、changes 的封套與整檔量另列，不套資料 File 的單檔上限，仍須量其解析記憶體。
 
 ## 容量帳與完整來源
 
@@ -53,7 +53,6 @@ EN 的 JP 依據即使平常按需才下載，仍屬 EN 完整文字帳。共享
 單區帳加 manifest 與 config 一次；兩個單區帳可能都包含同一共用檔，不能相加冒充全量。
 基本目錄是單區完整文字的子集，背景／按需增量扣除該 session 已取得的 key；不再把子集加進全量帳。
 
-text_all 是同批原 File 聯集的替代下載：另報封套與整檔 raw／gzip／br，不與分片重複加總，也不以單流較佳壓縮率代替分片門檻。
 annotation before／after 的 raw 增量、manifest／changes 摘要與分片重複 descriptor 另列；已含在 File 帳中的增量不重加。
 圖片 bitmap、語音與 DSL AST 不屬完整文字；images metadata 另報，實際進入某冷載用途者仍加進該用途帳。
 

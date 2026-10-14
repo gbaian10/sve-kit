@@ -35,14 +35,6 @@ def payloads() -> dict[str, bytes]:
     }
 
 
-def attachments(blobs: dict[str, bytes]) -> dict[str, bytes]:
-    return {
-        key: raw
-        for key, raw in blobs.items()
-        if key == "programs" or key.startswith("images/")
-    }
-
-
 def _replace(value: JsonValue, path: list[JsonValue], replacement: JsonValue) -> None:
     current = value
     for segment in path[:-1]:
@@ -133,5 +125,4 @@ def _reseal(
         ]
         blobs[key] = raw
     rebind(manifest["config_ref"])
-    rebind(manifest["text_all"])
     return blobs

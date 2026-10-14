@@ -1485,7 +1485,6 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
 
   const files = new Map<string, Uint8Array>()
   const fileRows: JsonObject[] = []
-  const payloads = new Map<string, JsonValue>()
   const register = (
     key: string,
     role: string,
@@ -1495,7 +1494,6 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
   ): JsonObject => {
     const { bytes, hash, path } = blob(value)
     files.set(path, bytes)
-    payloads.set(key, value)
     const row: JsonObject = {
       path,
       sha256: hash,
@@ -1581,20 +1579,6 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
   fileRows.sort((a, b) => compareCodePoints(stringValue(a["key"]), stringValue(b["key"])))
   for (const [path, bytes] of images) files.set(path, bytes)
 
-  const textKeys = fileRows
-    .filter((row) => ["bootstrap", "text", "config"].includes(stringValue(row["role"])))
-    .map((row) => stringValue(row["key"]))
-  const textAllValue: JsonObject = {
-    format_version: FORMAT,
-    members: textKeys.map((key) => ({
-      key,
-      sha256: fileRows.find((row) => row["key"] === key)?.["sha256"] ?? null,
-      payload: payloads.get(key) ?? null,
-    })),
-  }
-  const textAll = blob(textAllValue)
-  files.set(textAll.path, textAll.bytes)
-
   const view = (table: string, partition?: Partition): JsonObject[] =>
     fragments
       .filter((f) => f.table === table && (partition === undefined || f.partition === partition))
@@ -1651,16 +1635,6 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     },
     files: fileRows,
     config_ref: configRef,
-    text_all: {
-      path: textAll.path,
-      sha256: textAll.hash,
-      bytes: textAll.bytes.length,
-      compressed_bytes: { br: null, gzip: null },
-      contains: textKeys.map((key) => ({
-        key,
-        sha256: fileRows.find((row) => row["key"] === key)?.["sha256"] ?? null,
-      })),
-    },
     partitioning: { algorithm: "sha256-mod-v1", bucket_count: 64 },
     coverage: { reviews: [], translations: [], mechanics: [] },
     mechanic_universe_id: digest(canonical(keywordUniverse)),

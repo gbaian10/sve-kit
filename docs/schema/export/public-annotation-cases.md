@@ -65,12 +65,12 @@ read_projection 的 accept 結果是情境最後一個 FieldTranslation（一般
 source／target exact text ID；display 則按 input.receiver／ui_lang／mode 取用，逐值比對 expected。
 printed 的 mode 由 printing_face owner 表示；revision 由 face_revision 表示，不由當前 UI 名稱猜來源。
 
-[#498](https://github.com/gbaian10/sve-kit/issues/498) 的 Python `read_snapshot`／`read_text_all` 與
+[#498](https://github.com/gbaian10/sve-kit/issues/498) 的 Python `read_snapshot` 與
 `sve_carddb.export.read_api.load_export` 必須讀取同一 cases 檔；publish 以本地已驗匯出根接線，無須外部上傳。
-read_projection 的成功例比對固定 expected 及分片／text_all 一致；失敗例在 Python 離線邊界命中預期原因類別。Web 只測正常解碼／顯示、版本能力與 hash／解析失敗；完整 TS 格式驗證器及其反例測試已移除。
+read_projection 的成功例比對固定 expected 與分片重接結果一致；失敗例在 Python 離線邊界命中預期原因類別。Web 只測正常解碼／顯示、版本能力與 hash／解析失敗；完整 TS 格式驗證器及其反例測試已移除。
 不得只寫一個 fixture 自訂 validator、只跑 Schema 或只驗 JSON 能讀，就稱 #498 的 reader 測試通過。
 
-mutation 後 harness 重算合法外層 File bytes／hash／path／counts、dependencies、manifest 及 text_all，
+mutation 後 harness 重算合法外層 File bytes／hash／path／counts、dependencies、manifest，
 讓錯誤能進到指定欄位；不得重算被本例故意弄壞的 text ID 或 annotation ID。
 reason 按契約 §6 的目標責任判定；Schema 遇到已標明的 owner／range／basis 條件時映射到該分類。
 fixture 未按公開排序保存是為了固定 mutation 位置；裝檔時按 PK 排序，但 Annotation.ranges／occurrences 的壞次序不得修復。
@@ -89,7 +89,7 @@ fixture 未按公開排序保存是為了固定 mutation 位置；裝檔時按 P
 | PA-08／display、produce、schema | 無 aligned／已知 divergence 仍顯示 JP 繁中，完整 JP effect、規則限制保留；來源 freshness／採納只由 produce 驗；不造 aligned 欄 |
 | PA-09／unicode_ranges、canonical_bytes | 非 BMP、組合字元、CRLF、NFKC 改長度與 wrong text identity、未配對 surrogate；CP→UTF-16 固定邊界表及切片 |
 | PA-10／display、unicode_ranges、annotation_emphasis | 日／英 UI 不回繁中、無譯文非空原文位置仍在、空集合缺列／null、加粗開關、低信心、空字串與非法空字串 span |
-| PA-11／size_accounting | 以實際整檔按 key 去重；混區檔全額計各區、annotation／說明屬文字、media 計首屏、text_all 是替代、增量不重複加總 |
+| PA-11／size_accounting | 以實際整檔按 key 去重；混區檔全額計各區、annotation／說明屬文字、media 計首屏、增量不重複加總 |
 
 unicode_ranges 先驗 text identity／set 的 text 引用與 scalar 字串，再驗各 range／ordinal，最後驗 annotation hash。
 此操作的 annotation_set=null 表示未公開集合，只驗 exact text，切片為空；非 null set 仍須非空。

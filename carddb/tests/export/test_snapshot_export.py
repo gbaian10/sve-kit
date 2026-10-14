@@ -18,7 +18,6 @@ from sve_carddb.build import create_database
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.export.buckets import bucket
 from sve_carddb.export.media import prepare_media
-from sve_carddb.export.reader import read_text_all
 from sve_carddb.export.transport import (
     Batch,
     Brotli,
@@ -64,46 +63,6 @@ def test_join_equals_public_projection(
     exported.verify(logical[0])
 
 
-def test_union_reader_equals_individual_shards(
-    exported: Snapshot, logical: tuple[Projection, Ownership]
-) -> None:
-    attachments = {
-        key: blob.raw
-        for key, blob in exported.payloads.items()
-        if key == "programs" or key.startswith("images/")
-    }
-    assert (
-        read_text_all(exported.manifest, exported.text_all.raw, attachments)
-        == logical[0].tables
-    )
-
-
-def test_union_member_change_cannot_hide_behind_a_valid_union_hash(
-    exported: Snapshot, logical: tuple[Projection, Ownership]
-) -> None:
-    value = object_value(parse(exported.text_all.raw))
-    member = next(
-        object_value(raw)
-        for raw in array(value["members"])
-        if object_value(raw)["key"] == "config"
-    )
-    object_value(member["payload"])["shop_links"] = []
-    raw = canonical(value)
-    hashed = digest(raw)
-    union = object_value(exported.manifest["text_all"]) | {
-        "sha256": hashed,
-        "path": "snapshots/blobs/" + hashed[7:] + ".json",
-        "bytes": len(raw),
-    }
-    broken = replace(
-        exported,
-        manifest=exported.manifest | {"text_all": union},
-        text_all=compress(raw, None),
-    )
-    with pytest.raises(ValueError, match="text_all member hash or length mismatch"):
-        broken.verify(logical[0])
-
-
 def test_clean_exports_are_exact_bytes(
     exported: Snapshot, logical: tuple[Projection, Ownership]
 ) -> None:
@@ -147,18 +106,6 @@ def test_byte_comparison_catches_one_encoding_change(
     blobs[first] = replace(blobs[first], **{encoding: (original or b"") + b"changed"})
     with pytest.raises(ValueError, match="Clean exports differ"):
         exported.assert_identical(replace(exported, payloads=blobs))
-
-
-def test_union_bytes_are_also_compared(exported: Snapshot) -> None:
-    with pytest.raises(ValueError, match="Clean exports differ"):
-        exported.assert_identical(
-            replace(
-                exported,
-                text_all=replace(
-                    exported.text_all, raw=exported.text_all.raw + b"changed"
-                ),
-            )
-        )
 
 
 def test_independent_expected_join_detects_lost_field_value(
@@ -319,7 +266,7 @@ def test_inserting_a_sorted_base_row_shifts_old_indices(
     assert changed.payloads[key].raw != exported.payloads[key].raw
 
 
-def test_capacity_counts_metadata_and_never_double_counts_text_all(
+def test_capacity_counts_metadata_and_text_shards_once(
     exported: Snapshot,
 ) -> None:
     report = measure(exported)
@@ -408,7 +355,7 @@ def test_pending_display_name_and_facets_are_bootstrapped_without_current() -> N
 
 
 def test_gzip_roundtrip_and_header_are_deterministic(exported: Snapshot) -> None:
-    for blob in [*exported.payloads.values(), exported.text_all]:
+    for blob in exported.payloads.values():
         assert gzip.decompress(blob.gzip) == blob.raw
         assert blob.gzip[3] == 0
         assert blob.gzip[4:8] == b"\0\0\0\0"
@@ -507,20 +454,13 @@ def test_snapshot_encodings_match_independent_serial_compression(
 ) -> None:
     codec = python_brotli() if brotli_enabled else None
     result = export_snapshot(*logical, BATCH, brotli=codec)
-    blobs = [*result.payloads.values(), result.text_all, result.manifest_blob]
+    blobs = [*result.payloads.values(), result.manifest_blob]
     for blob in blobs:
         assert blob == compress(blob.raw, codec)
     assert result.manifest_blob.raw == canonical(result.manifest)
-    descriptions = [
-        *(object_value(file) for file in array(result.manifest["files"])),
-        object_value(result.manifest["text_all"]),
-    ]
-    for description in descriptions:
-        blob = (
-            result.payloads[string(description["key"])]
-            if "key" in description
-            else result.text_all
-        )
+    for file in array(result.manifest["files"]):
+        description = object_value(file)
+        blob = result.payloads[string(description["key"])]
         assert description["sha256"] == digest(blob.raw)
         assert description["compressed_bytes"] == {
             "br": None if blob.br is None else len(blob.br),
@@ -535,18 +475,6 @@ def test_compressor_failure_propagates_from_snapshot(
         raise ValueError("synthetic codec failure")
 
     with pytest.raises(ValueError, match="synthetic codec failure"):
-        export_snapshot(*logical, BATCH, brotli=Brotli("failing", failed_compressor))
-
-
-def test_union_compressor_failure_propagates(
-    logical: tuple[Projection, Ownership],
-) -> None:
-    def failed_compressor(raw: bytes) -> bytes:
-        if "members" in object_value(parse(raw)):
-            raise ValueError("synthetic union codec failure")
-        return raw
-
-    with pytest.raises(ValueError, match="synthetic union codec failure"):
         export_snapshot(*logical, BATCH, brotli=Brotli("failing", failed_compressor))
 
 

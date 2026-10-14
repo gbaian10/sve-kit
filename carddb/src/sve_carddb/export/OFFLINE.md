@@ -64,7 +64,7 @@ The build directory is new and private. It contains `build.sqlite`, `inputs.json
 and `report.json`. The database is backed up from the completed transaction, with
 no second population or build seal. Files are written in a temporary directory,
 fsynced and installed through a no-overwrite rename. The snapshot writer verifies
-both shard and text-union readback before switching the preview pointer.
+the shard join before switching the preview pointer.
 The build directory and private directory are never uploaded.
 
 This remains a `preview-` candidate, with no formal index or activation (#34).

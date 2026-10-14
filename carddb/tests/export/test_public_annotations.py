@@ -364,7 +364,6 @@ def _accounting(
             )
             for region, keys in object_value(value["startup"]).items()
         },
-        "text_all_counted_as_alternative": "text_all" not in text_keys,
         "annotation_increment_already_in_files": "annotation_increment"
         not in text_keys,
         "capacity_acceptance": "not_measured",

@@ -14,7 +14,7 @@ from sve_carddb.domains.translations.four_layer_authored import from_files
 from sve_carddb.domains.translations.four_layer_sources import descriptor
 from sve_carddb.domains.translations.inputs import Snapshot, load_glossary
 from sve_carddb.export.media import prepare_media
-from sve_carddb.export.reader import read_snapshot, read_text_all
+from sve_carddb.export.reader import read_snapshot
 from sve_carddb.export.transport import export_snapshot
 from sve_carddb.workflows import offline
 from sve_carddb.workflows.offline import build
@@ -240,18 +240,6 @@ def test_normal_build_selects_only_exact_confirmed_english_fields(  # ruff: igno
     )
     payloads = {key: blob.raw for key, blob in snapshot.payloads.items()}
     assert read_snapshot(snapshot.manifest, payloads) == after.projection.tables
-    assert (
-        read_text_all(
-            snapshot.manifest,
-            snapshot.text_all.raw,
-            {
-                key: value
-                for key, value in payloads.items()
-                if key == "programs" or key.startswith("images/")
-            },
-        )
-        == after.projection.tables
-    )
 
 
 def test_english_reader_rejects_missing_targets_and_omitted_required_references() -> (

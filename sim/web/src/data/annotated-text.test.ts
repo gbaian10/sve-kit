@@ -120,7 +120,6 @@ describe("the native C → P → R annotation slice", () => {
     expect(value?.original.annotation).toBeNull()
     expect(value?.translated).toBeUndefined()
     expect(requests.length).toBeGreaterThan(before)
-    expect(requests.some((path) => path.includes("text_all"))).toBe(false)
   })
   it("shares one resolver per loaded snapshot and resolves each text once", async () => {
     const { client, requests } = await annotatedOrigin()

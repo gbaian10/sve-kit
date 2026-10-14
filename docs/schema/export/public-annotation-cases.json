@@ -1180,7 +1180,6 @@
           "container": "4.0.0",
           "config": "2.0.0",
           "programs": "4.0.0",
-          "text_all": "4.0.0",
           "changes": "4.0.0",
           "index_entry": "4.0.0"
         }
@@ -4717,11 +4716,6 @@
             "media"
           ]
         },
-        "text_all": {
-          "raw": 3600,
-          "br": 900,
-          "gzip": 1100
-        },
         "annotation_increment": {
           "raw": 300,
           "br": 70,
@@ -4747,7 +4741,6 @@
             "gzip": 720
           }
         },
-        "text_all_counted_as_alternative": true,
         "annotation_increment_already_in_files": true,
         "capacity_acceptance": "not_measured"
       }
