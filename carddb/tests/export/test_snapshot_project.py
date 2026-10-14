@@ -475,7 +475,14 @@ def test_pending_old_current_preserved_without_blanket_pending_block(
         {"state": "settled"},
         {"raw_locator": "private"},
         {"undated_printing_ids": ["missing"]},
+        {"region": "en"},
         {"candidates": [{"printing_id": "printing", "revision_id": "missing"}]},
+        {
+            "candidates": [
+                {"printing_id": "printing", "revision_id": "revision"},
+                {"printing_id": "printing", "revision_id": "revision"},
+            ]
+        },
         {"display": {"revision_id": "revision", "basis": "current"}},
         {"display": {"revision_id": None, "basis": "latest_known_release"}},
     ],
@@ -1532,7 +1539,11 @@ def test_conflicting_face_roles_are_unknown(db: Database) -> None:
             dict(db.rows("printing_face")[0].values)
             | {"face_id": "back", "art_id": None},
         )
-    assert region(projected(db))["deck_role"] is None
+    result = projected(db)
+    assert region(result)["deck_role"] is None
+    assert [
+        object_value(raw)["face_id"] for raw in array(one(result, "printing")["faces"])
+    ] == ["face", "back"]
 
 
 def test_card_faces_printings_and_roles_stay_with_their_card(db: Database) -> None:
@@ -1611,6 +1622,11 @@ def test_card_faces_printings_and_roles_stay_with_their_card(db: Database) -> No
         ("en", "unknown", "unmapped", None),
         ("jp", "released", "unmapped", "leader"),
     ]
+    support = one(result, "card_engine_support", "leader-card")
+    assert "missing_region_source" in array(effective_support(support, "en")["reasons"])
+    assert "missing_region_source" not in array(
+        effective_support(support, "jp")["reasons"]
+    )
 
 
 @pytest.mark.parametrize("unknown", ["special_kind", "type"])
@@ -1660,9 +1676,30 @@ def test_qa_current_is_highest_revision_even_when_inserted_last(db: Database) ->
             "qa_version",
             dict(db.rows("qa_version")[0].values) | {"id": "qa-new", "revision": 7},
         )
+        for identifier in ("other-qa", "empty-qa"):
+            db.insert(
+                "qa",
+                dict(db.rows("qa")[0].values)
+                | {
+                    "id": identifier,
+                    "stable_source_key": identifier,
+                    "official_number": None,
+                },
+            )
+        db.insert(
+            "qa_version",
+            dict(db.rows("qa_version")[0].values)
+            | {"id": "other-version", "qa_id": "other-qa", "revision": 8},
+        )
     result = projected(db)
-    assert one(result, "qa")["current_version_id"] == "qa-new"
-    assert {row["id"] for row in result.tables["qa_version"]} == {"qa_v", "qa-new"}
+    assert one(result, "qa", "qa")["current_version_id"] == "qa-new"
+    assert one(result, "qa", "other-qa")["current_version_id"] == "other-version"
+    assert one(result, "qa", "empty-qa")["current_version_id"] is None
+    assert [row["id"] for row in result.tables["qa_version"]] == [
+        "other-version",
+        "qa-new",
+        "qa_v",
+    ]
 
 
 def test_offline_schema_version_mismatch_fails_database_verification(

@@ -572,6 +572,9 @@ def _wording_display(
 def _wording(view: View) -> None:
     revisions = {string(row["id"]): row for row in view["face_revision"]}
     physical = _physical_observations(view, revisions)
+    regions_by_face: dict[str, set[str]] = {}
+    for (_, face_id), (region, _) in physical.items():
+        regions_by_face.setdefault(face_id, set()).add(region)
     dates = _wording_dates(view)
     blocks = {
         string(row["card_id"]): {
@@ -589,11 +592,7 @@ def _wording(view: View) -> None:
             string(object_value(item)["region"]): object_value(item)
             for item in array(face["wording"])
         }
-        required = {
-            region
-            for (_, physical_face), (region, _) in physical.items()
-            if physical_face == face["id"]
-        }
+        required = regions_by_face.get(string(face["id"]), set())
         if (
             not required <= current.keys() | pending.keys()
             or not pending.keys() <= required

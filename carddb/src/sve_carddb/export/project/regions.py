@@ -275,9 +275,12 @@ def support(
         "ruling_revision_ids": [],
     }
     rows: list[Record] = []
+    faces_by_card: dict[str, list[Record]] = {}
+    for face in view["face"]:
+        faces_by_card.setdefault(string(face["card_id"]), []).append(face)
     for card in view["card"]:
         blocks: list[Record] = []
-        faces = [face for face in view["face"] if face["card_id"] == card["id"]]
+        faces = faces_by_card.get(string(card["id"]), [])
         for raw in array(card["regions"]):
             region = object_value(raw)
             code = string(region["region"])
