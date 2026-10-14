@@ -133,9 +133,7 @@ def owner_text(
     ):
         raise ValueError("Digital-name owner identity or parent card mismatch")
     if owner.state == "unknown":
-        return OwnerEvidence(
-            owner, None, (), digest(sources.context_key(review.context))
-        )
+        return OwnerEvidence(owner, None, (), sources.context_hash(review.context))
     ref = owner.name_ref
     assert ref is not None
     if ref.batch_id not in {b.batch_id for b in review.source_batches}:
@@ -166,9 +164,7 @@ def owner_text(
         locator=canonical(owner.model_dump(mode="json")).decode(),
     )
     sources.uses.append(use)
-    return OwnerEvidence(
-        owner, text, (use,), digest(sources.context_key(review.context))
-    )
+    return OwnerEvidence(owner, text, (use,), sources.context_hash(review.context))
 
 
 def name_result(evidence: OwnerEvidence, frozen: Catalogue) -> NamePolicyResult:

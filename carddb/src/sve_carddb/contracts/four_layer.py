@@ -3,7 +3,14 @@
 from itertools import pairwise
 from typing import TYPE_CHECKING, Annotated, Literal, Self
 
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    ConfigDict,
+    Field,
+    JsonValue,
+    TypeAdapter,
+    field_validator,
+    model_validator,
+)
 
 from sve_carddb.contracts.n0 import verify_frame
 from sve_carddb.core.json import canonical, digest
@@ -37,15 +44,12 @@ LeafType = Literal[
 PortType = Literal[
     "ObjectSet", "PlayerRef", "ReceiptId", "CapturedValue", "QuantityExpr"
 ]
+_ADAPTER: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
 
 
 def hash_payload(value: object) -> str:
     """The four-layer recipes use bare full SHA-256 rather than a transport prefix."""
-    from pydantic import JsonValue, TypeAdapter  # ruff: ignore[import-outside-top-level] -- accept only JSON before hashing
-
-    return digest(
-        canonical(TypeAdapter(JsonValue).validate_python(value, strict=True))
-    )[7:]
+    return digest(canonical(_ADAPTER.validate_python(value, strict=True)))[7:]
 
 
 class Span(RecordData):
