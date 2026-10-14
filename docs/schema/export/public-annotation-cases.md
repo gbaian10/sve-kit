@@ -40,7 +40,7 @@ PA-02 的 tuple 長度檢查另有必跑規則：列舉 Schema `$defs` 中**所�
 | fixture 欄位 | 內容／harness 責任 |
 | --- | --- |
 | languages | 本次合成 manifest 的語言登錄，source／target／text 的語言都必須在其中 |
-| admission | 完整三欄准入資料；read_projection 預設 reader 契約為 3.0.0，支援的格式／能力為契約 §1 的固定值 |
+| admission | 完整三欄准入資料；read_projection 預設 reader 契約為 4.0.0，支援的格式／能力為契約 §1 的固定值 |
 | text_units | `[id,lang,text]`；exact 身分，全部為合成文字 |
 | annotation_sets／field_annotations／translations／concepts／vocabulary | 對應公開表的完整 tuple；concepts 即 annotation_concept；陣列索引供 mutation 定位，不是公開 PK 排序 |
 | field_translations | `{receiver:PublicTextPointer,value:FieldTranslation}`；harness 把 value 放回 receiver 的公開父 owner.translations |
@@ -56,7 +56,7 @@ translations 為 `[[translation_id,annotation_set]]`。harness 把這些明列 o
 其他 produce 案例只針對 producer 表內的來源先決條件；不能以這些布林背景取代實作中的真實檢查。
 
 只有 fixture 明列的 owner／field／text 才存在；未列的不補默認文字或用途。
-harness 將使用到的情境嵌入隔離的完整 3.0 合成卡表，補齊既有格式必要的非本單欄位，按 PK 排序與裝檔。
+harness 將使用到的情境嵌入隔離的完整 4.0 合成卡表，補齊既有格式必要的非本單欄位，按 PK 排序與裝檔。
 未被情境使用的 scaffolding 不得改變 oracle；可用預先固定的最小 baseline，不能由 production producer 生成預期結果。
 測試選擇撤掉 translation 等列時，harness 同步裁掉純粹失去用途的 scaffolding 閉包，
 但不得刪掉本例故意引入的懸空引用或未被引用列、補回缺失目標或修復錯誤資料。

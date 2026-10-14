@@ -1,6 +1,6 @@
 # 快照機器契約與共用樣本
 
-套件 Schema、Python reader 與 TS 解碼器使用唯一的 `3.0.0` profile，整合
+套件 Schema、Python reader 與 TS 解碼器使用唯一的 `4.0.0` profile，整合
 [公開 annotation 契約](public-annotation.md)的欄序、形狀、來源指標；格式與語義檢查在匯出及上傳前離線執行。
 [public-annotation.schema.json](public-annotation.schema.json)及
 [固定案例](public-annotation-cases.json)仍供指定邊界的元件驗證，完整快照以套件 Schema 與共用 golden 驗收。
@@ -8,9 +8,9 @@
 
 欄位語意依 [快照格式](snapshot-format.md)，傳輸與版本規則依 [傳輸契約](snapshot-transport.md)。
 機器資源位於 `carddb/src/sve_carddb/contracts/schema/v3/contract.schema.json`，隨 carddb wheel 打包；
-採 JSON Schema Draft 2020-12，識別為 `urn:sve-kit:snapshot:3.0.0`，所有 `$ref` 都在檔內。
+採 JSON Schema Draft 2020-12，識別為 `urn:sve-kit:snapshot:4.0.0`，所有 `$ref` 都在檔內。
 
-此資源釘候選 format `3.0.0`、bucket_count=64；它是可核算的契約配置，不宣稱正式容量凍結。
+此資源釘候選 format `4.0.0`、bucket_count=64；它是可核算的契約配置，不宣稱正式容量凍結。
 正式配置仍依傳輸契約 §5 量測；更換配置須同步 Schema、樣本與 reader 支援表。
 公開 enum 是固定集合；正式凍結後，新增值須依傳輸契約 §1.1 升 minor 並提高 `min_reader_version`。
 候選期間直接同步 Schema 與 golden，不改變既有 enum 值的語義。
@@ -74,7 +74,7 @@ uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 
 樣本為便於審核的排版 JSON，manifest 的 hash／bytes 指向其 canonical 表示。Harness 先解析排版樣本並 canonical 序列化，交 reader 驗 bytes；不可更新 manifest 來掩蓋未預期差異。實際下載的 payload 直接驗收到的未壓縮 bytes，不先重序列化修復。`raw_json` 反例必須保留原字串，不先 parse/stringify 消除錯誤。
 
-reader-invalid 每例以 target（manifest 或 payload 邏輯鍵）、path（物件鍵／陣列位置序列）、value 指定替換；setup 是依序套用的前置變更。核心與圖片反例都定位到 3.0 的實際 fragments，不依賴舊版單檔位置。
+reader-invalid 每例以 target（manifest 或 payload 邏輯鍵）、path（物件鍵／陣列位置序列）、value 指定替換；setup 是依序套用的前置變更。核心與圖片反例都定位到 4.0 的實際 fragments，不依賴舊版單檔位置。
 測試 harness 重算受影響 File 的 hash／bytes／path／row_counts，並重釘原本有效的 FileRef；故意錯誤的 pin 不修復。manifest 本身的錯誤在重釘後套用，確保觸及該守門。rehash=false 保留目標原封套；不重建 text_all，這些反例使用個別下載入口。
 error 釘住預期失敗原因；其他 reader 不要求相同訊息文字。所有反例均須拒收，不得補值或 fallback。
 
@@ -118,7 +118,7 @@ canonical 與 SHA-256 bucket 向量仍供 fixture 產製及按需定位驗收；
 
 ## 圖片與有限保留的機器契約
 
-3.0 資源從 source descriptor 生成；共用 golden 位於 v3。
+4.0 資源從 source descriptor 生成；共用 golden 位於 v3。
 required_capabilities 已固定包含 digital-same-name-links-v1；即使 same_name 列為空，也不得省略能力、相關 Schema 或 reader 驗證。
 必要能力必須完整，不能裁掉已宣告能力以通過驗證。
 

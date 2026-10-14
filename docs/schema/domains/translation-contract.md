@@ -221,7 +221,7 @@ claimed_source 是選填的出處主張；沒有具體主張就省略，不用�
 缺資料不得借最新官網或個人檔補洞；來源歸檔完整性仍依[來源歸檔](../ingest/source-archive.md)。
 
 現有 export-offline 對 face_revision 與 printing_face 的 JP 主文／section 建置四層翻譯，
-並產生 3.0.0 公開 annotation。
+並產生 4.0.0 公開 annotation。
 每個來源 use 分別建 binding，source context 可共用，但 owner、field、面及所用原文均逐一驗證。
 效果／section 只要自己的原文有效即可套用，不等 printed_text_state；名稱仍只用該版已知 printed 字串。
 建置報告只列 ID、原因及欄位／退回計數，不輸出官方卡文。
@@ -289,7 +289,7 @@ JP 繁中依 §1 選用；EN 接收端只需有效且已確認同卡同面的 JP
 日英段落不同時取完整 JP effect 及其來源對照，不按 EN ordinal 貼 JP section，也不另翻 JP 沒有的 EN 段落。
 錯 card／face、錯欄位、缺來源、來源過期或仍 unmapped 時拒絕此選用；不能以同字串或低信心放行。
 
-公開 JP 依據 basis（jp_source）與來源閉包依[公開 annotation 契約](../export/public-annotation.md)，producer／reader 使用相同 3.0.0 profile。
+公開 JP 依據 basis（jp_source）與來源閉包依[公開 annotation 契約](../export/public-annotation.md)，producer／reader 使用相同 4.0.0 profile。
 它只說明繁中依據，不能產生 aligned review、機制或 DSL 資格。JP 來源註記只可套到 JP 原文，不能套 EN offsets。
 
 官方 counterpart 仍依有效 display_checks 逐 owner 產生 translation，直接供 FieldTranslation 引用，不占共用 selection；

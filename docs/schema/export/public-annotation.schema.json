@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:sve-kit:snapshot:public-annotation:3.0.0",
-  "$comment": "Component contract for the 3.0.0 design. Not a complete snapshot schema or an installed reader profile. Canonical bytes, identities, ranges and public reference semantics also require the checks in public-annotation.md.",
+  "$id": "urn:sve-kit:snapshot:public-annotation:4.0.0",
+  "$comment": "Component contract for the 4.0.0 design. Not a complete snapshot schema or an installed reader profile. Canonical bytes, identities, ranges and public reference semantics also require the checks in public-annotation.md.",
   "oneOf": [
     {
       "$ref": "#/$defs/Admission"
@@ -78,10 +78,10 @@
       "type": "object",
       "properties": {
         "format_version": {
-          "const": "3.0.0"
+          "const": "4.0.0"
         },
         "min_reader_version": {
-          "const": "3.0.0"
+          "const": "4.0.0"
         },
         "required_capabilities": {
           "const": [

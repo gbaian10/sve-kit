@@ -176,7 +176,7 @@ historical_same_url 僅用於同區同 kind、canonical requested URL 完全相�
 
 complete 必有完整兩模型核對及已解分歧、有效 baseline、四組分割與 href 分類全過、所有解除／更正統整、無 missing／unresolved／conflict。把 complete_listing=true 的 discovery 範圍按起點排序合併，必無縫涵蓋 `[baseline_through,knowledge_cutoff]`；範圍不銜接、必要後續分頁未取或公告日期邊界無法證明時為 partial。baseline_through 晚於 cutoff 或無範圍證據亦拒絕 complete；不以人寫「閉包完整」取代上述計算。原檔 hash 正確與來源數量只證明取得完整性，不能把數個正例推成「其他全部沒有」。
 
-as_of 是已核對且來源能支撐的日期，保守上限為 min(knowledge_cutoff 的 UTC 日、knowledge_cutoff 在 region_date_zone 的當地日)，且不早於 from_date；不得用公告在 UTC 之後的當地日期擴大範圍。即時查詢能力若尚未實作，不能宣稱有時間粒度保證；後續支援時另不得超過精確 cutoff；日期型查詢只聲稱該日截止已核對的資料，不保證抓取後同一天也沒有新公告，介面須顯示 cutoff。until=null 只表示沒有已知結束日，讀取最多到 min(coverage.as_of,snapshot.as_of)，超出知識日期一律 unknown；每逢新卡包重核的排程不會自動延長保證。
+as_of 是已核對且來源能支撐的日期，保守上限為 min(knowledge_cutoff 的 UTC 日、knowledge_cutoff 在 region_date_zone 的當地日)，且不早於 from_date；不得用公告在 UTC 之後的當地日期擴大範圍。即時查詢能力若尚未實作，不能宣稱有時間粒度保證；後續支援時另不得超過精確 cutoff；日期型查詢只聲稱該日截止已核對的資料，不保證抓取後同一天也沒有新公告，介面須顯示 cutoff。until=null 只表示沒有已知結束日，讀取最多到 min(coverage.as_of,snapshot.data_as_of)，超出知識日期一律 unknown；每逢新卡包重核的排程不會自動延長保證。
 
 來源缺口按通則判斷：入口落後於公告時，公告須納入 source_set／reconciliation，入口不作優先真值；無個別公告 href 時，可以經核對的完整入口作 baseline，但仍須另證適用期間的探索閉包。只有新聞第一頁而其最舊日期晚於基線時，範圍銜接失敗就是 partial；必要補抓須另有當次授權。已取得多頁且時間能銜接，也只具備核對條件，不能僅依標題判讀或頁數自動 complete。
 
