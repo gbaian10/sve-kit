@@ -49,11 +49,9 @@ export function snapshotEncoding(accept: string | undefined): "br" | undefined {
   return undefined
 }
 
-const compressors = {
-  // Quality 9 keeps the first dev load quick; the CDN's quality 11 is only slightly smaller.
-  br: (data: Buffer) =>
-    promisify(brotliCompress)(data, { params: { [zlib.BROTLI_PARAM_QUALITY]: 9 } }),
-}
+// Quality 9 keeps the first dev load quick; the CDN's quality 11 is only slightly smaller.
+const compressBrotli = (data: Buffer) =>
+  promisify(brotliCompress)(data, { params: { [zlib.BROTLI_PARAM_QUALITY]: 9 } })
 // Dev only: the CDN serves precompressed JSON, so compress each file once instead of per request.
 const compressed = new Map<string, Promise<Buffer>>()
 
@@ -111,10 +109,10 @@ export function serveSnapshotRoot(prefix: string, dir: string | undefined): Plug
       createReadStream(file).pipe(res)
       return
     }
-    const key = `${file}\0${String(statSync(file).mtimeMs)}\0${encoding}`
+    const key = `${file}\0${String(statSync(file).mtimeMs)}`
     let body = compressed.get(key)
     if (body === undefined) {
-      body = readFile(file).then(compressors[encoding])
+      body = readFile(file).then(compressBrotli)
       compressed.set(key, body)
     }
     body.then(
