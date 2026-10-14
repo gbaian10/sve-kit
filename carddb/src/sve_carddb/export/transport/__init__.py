@@ -415,7 +415,7 @@ def export_snapshot(
     ):
         raise ValueError("Public region is outside the explicit manifest scope")
     layout = Layout(compact_names(projection.tables), ownership, count, format_version)
-    with ThreadPoolExecutor(max_workers=1) as shards:
+    with ThreadPoolExecutor(max_workers=2) as shards:
         files = _Files(brotli, shards)
         config = files.add(
             "config",
