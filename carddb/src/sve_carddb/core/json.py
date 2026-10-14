@@ -2,15 +2,14 @@
 
 import hashlib
 import json
-from typing import TYPE_CHECKING
-
-from pydantic import JsonValue, TypeAdapter
+from typing import TYPE_CHECKING, Never, cast
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
+    from pydantic import JsonValue
+
 SAFE_INTEGER = 9007199254740991
-_ADAPTER: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
 _ESCAPES = {i: f"\\u{i:04x}" for i in range(32)} | {34: '\\"', 92: "\\\\"}
 
 
@@ -51,11 +50,33 @@ def _pairs(pairs: Iterable[tuple[str, JsonValue]]) -> dict[str, JsonValue]:
     return result
 
 
+def _reject_float(_value: str) -> Never:
+    raise ValueError("Floating point JSON is forbidden")
+
+
 def parse(data: bytes) -> JsonValue:
     """Decode UTF-8 JSON without duplicate keys, floats or non-finite values."""
-    raw: object = json.loads(data.decode("utf-8"), object_pairs_hook=_pairs)
-    value = _ADAPTER.validate_python(raw)
-    canonical(value)
+    value = cast(
+        "JsonValue",
+        json.loads(
+            data.decode("utf-8"),
+            object_pairs_hook=_pairs,
+            parse_float=_reject_float,
+            parse_constant=_reject_float,
+        ),
+    )
+    pending = [value]
+    while pending:
+        item = pending.pop()
+        if isinstance(item, str):
+            item.encode("utf-8")
+        elif type(item) is int:
+            integer(item)
+        elif isinstance(item, list):
+            pending.extend(item)
+        elif isinstance(item, dict):
+            pending.extend(item)
+            pending.extend(item.values())
     return value
 
 
