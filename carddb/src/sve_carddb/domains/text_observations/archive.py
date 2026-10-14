@@ -145,9 +145,10 @@ class FrozenTexts:
         page = physical_sources.page(
             self.sources, version, region=region, parser_version=self.parser_version
         )
-        if page.text.source == source:
-            return page.text
-        return page.text.model_copy(update={"source": source})
+        text = page.text.get()
+        if text.source == source:
+            return text
+        return text.model_copy(update={"source": source})
 
 
 class RegionalTexts:

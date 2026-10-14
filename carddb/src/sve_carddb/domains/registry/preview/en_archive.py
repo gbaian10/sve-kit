@@ -60,11 +60,11 @@ class FrozenEN:
         page = physical_sources.page(
             self._sources, version, region="en", parser_version=self._parser_version
         )
-        record = page.record
+        record = page.record.get()
         assert isinstance(record, extract_en.CardRecord)
         return CardEvidence(
             source,
-            page.text.observation,
+            page.observation.get(),
             tuple(
                 FaceEvidence(face.info["Rarity"], face.illustrator)
                 for face in record.faces

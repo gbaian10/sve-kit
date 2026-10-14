@@ -27,13 +27,12 @@ if TYPE_CHECKING:
 @dataclass(frozen=True, slots=True)
 class Projection[T]:
     value: T | None
-    error: tuple[type[ValueError | LookupError], str] | None = None
+    error: ValueError | LookupError | None = None
 
     def get(self) -> T:
         """An unused projection's layout must not impose another adapter's contract."""
         if self.error is not None:
-            error_type, message = self.error
-            raise error_type(message)
+            raise self.error.with_traceback(None)
         assert self.value is not None
         return self.value
 
@@ -43,25 +42,19 @@ def _project[T](extract: Callable[[], T]) -> Projection[T]:
         return Projection(extract())
     except (ValueError, LookupError) as error:
         # Tracebacks would keep this page's raw bytes and DOM alive in the cache.
-        return Projection(None, (type(error), str(error)))
+        error.__traceback__ = None
+        error.__context__ = error.__cause__ = None
+        return Projection(None, error)
 
 
 @dataclass(frozen=True, slots=True)
 class PhysicalPage:
-    content: Projection[tuple[TextCard, extract_jp.CardRecord | extract_en.CardRecord]]
+    record: Projection[extract_jp.CardRecord | extract_en.CardRecord]
+    observation: Projection[Observation]
+    text: Projection[TextCard]
     products: Projection[ProductPage]
     extras: Projection[CardPage]
     identity: Projection[bool]
-
-    @property
-    def text(self) -> TextCard:
-        """Expose only the text adapter's exact extraction contract."""
-        return self.content.get()[0]
-
-    @property
-    def record(self) -> extract_jp.CardRecord | extract_en.CardRecord:
-        """Name and registry adapters share the original extractor record."""
-        return self.content.get()[1]
 
     def require_identity(self) -> None:
         """Products and supplements require the printed physical page identity."""
@@ -99,9 +92,19 @@ def _extract(
         raise ValueError("Frozen physical page URL/region mismatch")
     tree = parse(decode_html(raw, min_bytes=official_jp.MIN_PAGE_BYTES))
     complete = bool(re.search(rb"</body>\s*</html>\s*$", raw, re.IGNORECASE))
+    record = _project(lambda: _record(tree, region=region, number=number))
+    observed = _project(lambda: _observation(record.get(), region))
     return PhysicalPage(
+        record,
+        observed,
         _project(
-            lambda: _text(tree, source, region=region, number=number, complete=complete)
+            lambda: _text(
+                tree,
+                record.get(),
+                observed.get(),
+                source,
+                complete=complete,
+            )
         ),
         _project(
             lambda: products.products_tree(
@@ -129,36 +132,61 @@ def _extract(
     )
 
 
+def _physical(tree: Queryable, *, region: Region, number: str) -> None:
+    adapter = official_jp if region == "jp" else official_en
+    official_jp.card_tree(tree, expected_number=number, page_dir=adapter.CARD_DIR)
+
+
 def _identity(tree: Queryable, source: Source, *, region: Region, number: str) -> bool:
     adapter = official_jp if region == "jp" else official_en
     if source.url != adapter.card_url(number):
         raise ValueError("Frozen physical page URL/region mismatch")
-    official_jp.card_tree(tree, expected_number=number, page_dir=adapter.CARD_DIR)
+    _physical(tree, region=region, number=number)
     return True
 
 
+def _record(
+    tree: Queryable, *, region: Region, number: str
+) -> extract_jp.CardRecord | extract_en.CardRecord:
+    if region == "jp":
+        return extract_jp.extract_tree(tree, number=number)
+    # The EN extractor validated the physical page identity before transcribing it.
+    _physical(tree, region=region, number=number)
+    return extract_en.extract_tree(tree, number=number)
+
+
+def _observation(
+    record: extract_jp.CardRecord | extract_en.CardRecord, region: Region
+) -> Observation:
+    identity = (
+        jp_card(record)
+        if isinstance(record, extract_jp.CardRecord)
+        else en_card(record)
+    )
+    return Observation.model_validate_json(canonical(observation(identity, region)))
+
+
 def _text(
-    tree: Queryable, source: Source, *, region: Region, number: str, complete: bool
-) -> tuple[TextCard, extract_jp.CardRecord | extract_en.CardRecord]:
+    tree: Queryable,
+    record: extract_jp.CardRecord | extract_en.CardRecord,
+    observed: Observation,
+    source: Source,
+    *,
+    complete: bool,
+) -> TextCard:
     from sve_carddb.domains.text_observations import archive as texts  # ruff: ignore[import-outside-top-level] -- avoid regional adapter initialization cycles
     from sve_carddb.domains.text_observations.models import TextCard  # ruff: ignore[import-outside-top-level] -- avoid regional adapter initialization cycles
     from sve_carddb.domains.text_observations.presence import presence_tree  # ruff: ignore[import-outside-top-level] -- avoid regional adapter initialization cycles
 
-    if region == "jp":
-        japanese = extract_jp.extract_tree(tree, number=number)
-        record: extract_jp.CardRecord | extract_en.CardRecord = japanese
-        faces = tuple(texts.jp_face(face) for face in japanese.faces)
-        identity = jp_card(japanese)
-    else:
-        english = extract_en.extract_tree(tree, number=number)
-        record = english
-        faces = tuple(texts.en_face(face) for face in english.faces)
-        identity = en_card(english)
+    faces = tuple(
+        texts.jp_face(face)
+        if isinstance(face, extract_jp.Face)
+        else texts.en_face(face)
+        for face in record.faces
+    )
     card = TextCard(
         source=source,
-        observation=Observation.model_validate_json(
-            canonical(observation(identity, region))
-        ),
+        observation=observed,
         faces=faces,
         image_src=tuple(face.image for face in record.faces),
         date_raw=record.release_date,
@@ -167,8 +195,8 @@ def _text(
             presence_tree(
                 tree,
                 source,
-                region=region,
-                number=number,
+                region=observed.region,
+                number=record.number,
                 source_index=index,
                 complete=complete,
             )
@@ -181,4 +209,4 @@ def _text(
         value = container.text() if container is not None else None
         whitespace.append(value if value and not value.strip() else None)
     card.accept_extraction(tuple(whitespace))
-    return card, record
+    return card

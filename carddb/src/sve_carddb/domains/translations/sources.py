@@ -215,7 +215,7 @@ class Sources:
                     parser_version=parser,
                 )
                 lang = "ja" if provider == "jp" else "en"
-                document = parse(canonical(dataclasses.asdict(page.record)))
+                document = parse(canonical(dataclasses.asdict(page.record.get())))
             else:
                 _, raw, _ = batch.read(version, parser_version=parser)
                 lang, document = project(raw, source.url, provider)

@@ -4,9 +4,11 @@ from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
+from pydantic import TypeAdapter, ValidationError
 
 from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.card_extras import FrozenCardExtras
+from sve_carddb.domains.physical_sources import _project
 from sve_carddb.domains.products import FrozenProducts
 from sve_carddb.domains.text_observations import FrozenTexts
 from sve_carddb.ingest.archive.frozen_sources import FrozenBatches
@@ -175,3 +177,36 @@ def test_adapters_share_page_projections_without_retaining_raw(
     assert products[0].card_no == texts.observation.card_no == supplements[0].card_no
     assert products[0].source.parser_version == "official-product-block-v1"
     assert supplements[0].source.parser_version == "official-card-extras-en-v1"
+
+
+def test_english_text_rejects_page_showing_another_card(tmp_path: Path) -> None:
+    store = _store(tmp_path / "sources")
+    raw = page("en")
+    url = official_en.card_url("SYN-02")
+    _put(
+        store,
+        replace(_resource(url, "raw/en.html", raw, Kind.CARD), region=SourceRegion.EN),
+        raw,
+    )
+    batch = seal_batch(store, scope=(Scope(provider="en", kind="card"),))
+    texts = FrozenTexts(
+        store.root,
+        store.store_id,
+        batch.batch_id,
+        region="en",
+        parser_version="official-en-exact-v1",
+        sources=FrozenBatches().batch(store.root, store.store_id, batch.batch_id),
+    )
+    with pytest.raises(ValueError, match="page shows"):
+        texts.card("en", "SYN-02")
+
+
+def test_stored_projection_error_keeps_type_and_drops_traceback() -> None:
+    def fail() -> int:
+        return TypeAdapter(int).validate_python("not a number")
+
+    stored = _project(fail)
+    for _ in range(2):
+        with pytest.raises(ValidationError) as caught:
+            stored.get()
+        assert caught.value.__context__ is None

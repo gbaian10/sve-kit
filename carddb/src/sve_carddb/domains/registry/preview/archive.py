@@ -61,10 +61,10 @@ class FrozenJP:
         page = physical_sources.page(
             self._sources, version, region="jp", parser_version=self._parser_version
         )
-        record = page.record
+        record = page.record.get()
         assert isinstance(record, extract_jp.CardRecord)
         return CardEvidence(
             source,
-            page.text.observation,
+            page.observation.get(),
             tuple(FaceEvidence(face.rarity, face.illustrator) for face in record.faces),
         )
