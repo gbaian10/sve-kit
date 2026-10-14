@@ -156,20 +156,6 @@ def read_frame(db: Database, identifier: str) -> StoredFrame:
     return StoredFrame(frame, source)
 
 
-def read_forms(db: Database) -> dict[tuple[str, str], FormDefinition]:
-    """Stored editable parts cannot change a pinned rule's branch set or signature."""
-    columns = ("id", "lang", "rule", "signature", "cases")
-    result = {}
-    for row in db.select("translation_form", columns):
-        try:
-            form = FormDefinition.model_validate_json(canonical(payload(row)))
-            validate_form(form)
-        except ValueError, TypeError:
-            raise ValueError("Invalid stored four-layer form") from None
-        result[form.id, form.lang] = form
-    return result
-
-
 def use_field(row: Row) -> OwnerField:
     """The exact translation-use columns select an owner; text equality is insufficient."""
     use = payload(row)

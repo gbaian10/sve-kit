@@ -17,7 +17,6 @@ from sve_carddb.contracts.four_layer import Target, hash_payload
 from sve_carddb.contracts.source_binding import LeafOccurrence, SourceDescriptor
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_authored import (
-    FormRecord,
     FrameRecord,
     TargetRecord,
 )
@@ -26,11 +25,9 @@ from sve_carddb.domains.translations.four_layer_normalizer import normalize_sour
 from sve_carddb.domains.translations.four_layer_storage import (
     payload,
     read_annotation,
-    read_forms,
     read_frame,
     write_annotation,
     write_binding,
-    write_form,
     write_frame,
     write_target,
 )
@@ -497,39 +494,6 @@ def test_target_must_belong_to_the_frame_it_is_verified_against(
         db.transaction(),
     ):
         write_target(db, target, "source", frame=frame, forms={})
-
-
-def test_pinned_form_rule_and_typed_signature_survive_sqlite(
-    stored: tuple[Database, Frame, SourceBinding],
-) -> None:
-    db, _, _ = stored
-    with db.transaction():
-        form = FormRecord.model_validate_json(
-            canonical(
-                {
-                    "kind": "translation_form",
-                    "data": {
-                        "id": "keyword.display",
-                        "lang": "zh-Hant",
-                        "rule": "keyword.display.v1",
-                        "signature": [
-                            {"name": "term", "type": "Concept", "role": "keyword"}
-                        ],
-                        "cases": {"default": [{"kind": "Label", "arg": "term"}]},
-                    },
-                }
-            )
-        )
-        write_form(db, form, "source")
-    assert read_forms(db)["keyword.display", "zh-Hant"].signature[0].type == "Concept"
-    with db.transaction():
-        db.update(
-            "translation_form",
-            {"id": "keyword.display", "lang": "zh-Hant"},
-            {"rule": "unknown.rule.v1"},
-        )
-    with pytest.raises(ValueError, match="Invalid stored four-layer form"):
-        read_forms(db)
 
 
 def annotation(reference: JsonValue, bold: bool | None = True) -> AnnotationSet:
