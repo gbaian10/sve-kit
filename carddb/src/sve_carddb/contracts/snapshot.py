@@ -29,6 +29,7 @@ def compile_validator(
     selected: dict[str, JsonValue] | bool,
 ) -> jsonschema_rs.Draft202012Validator:
     """Compile an offline schema with explicit constraints and the default regex backend."""
+    # The stub's constrained TypeVar accepts dict or bool, but not their union.
     if isinstance(selected, dict):
         validator = jsonschema_rs.Draft202012Validator(
             selected, validate_formats=False, offline=True
@@ -47,13 +48,14 @@ def validate_schema(
     try:
         validator.validate(value)
     except jsonschema_rs.ValidationError as error:
+        # Chaining would print Rust's rendering, which dumps the instance into logs.
         raise ValidationError(
             error.message,
             path=error.instance_path,
             schema_path=error.schema_path,
             validator=error.kind.name,
             instance=error.instance,
-        ) from error
+        ) from None
 
 
 @cache

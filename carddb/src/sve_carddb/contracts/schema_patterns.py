@@ -44,14 +44,14 @@ def _url() -> str:
 
 
 def patterns() -> dict[str, str]:
-    """Return ASCII patterns that have the same Python and ECMAScript meaning."""
+    """Return ASCII patterns that have the same Python, Rust and ECMAScript meaning."""
     compact_clock = r"(?:[01][0-9]|2[0-3])[0-5][0-9][0-5][0-9]"
     version = date_pattern("") + "T" + compact_clock + r"Z-(?!0000)[0-9]{4}"
     values = {
         "DataVersion": "(preview-)?" + version,
         "URL": _url(),
     }
-    # The end constraint is portable to Python and ECMAScript regex backends.
+    # Python's $ also matches before a final newline, and \Z is Python-only.
     return {"Date": DATE, "Instant": INSTANT} | {
         key: "^" + value + r"$(?![\s\S])" for key, value in values.items()
     }
