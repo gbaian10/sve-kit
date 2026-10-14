@@ -734,6 +734,7 @@ export class SearchEngine {
           ["print", "product"].includes(stringValue(file["purpose"])) &&
           (file["region"] === null || file["region"] === request.edition),
       )
+      let printingsApplied = false
       try {
         const parts = await Promise.all(
           backgroundFiles.map(async (file) =>
@@ -751,11 +752,14 @@ export class SearchEngine {
           background.seal()
           index = new SearchIndex(background, request.edition)
           active.index = index
+          printingsApplied = true
         }
       } catch {
         signal.throwIfAborted()
       }
       await firstStored
+      // A restored image is never supplemented again, so a catalog-only index is rebuilt next time.
+      if (!printingsApplied) return
       await blobs.retainPlan(
         request.edition,
         [

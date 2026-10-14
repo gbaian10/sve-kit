@@ -1099,6 +1099,29 @@ describe("persistent index images", () => {
     expect(after.page).toEqual(before.page)
   })
 
+  it("does not store a catalog-only index when the background printing download fails", async () => {
+    const storage = memoryCache()
+    const served = origin()
+    const product = (built.manifest["files"] as JsonObject[]).find(
+      (file) => file["purpose"] === "product" && file["region"] === "jp",
+    )
+    if (!product) throw new Error("fixture has no product file")
+    const path = stringValue(product["path"])
+    const bytes = served.files.get(path)
+    if (!bytes) throw new Error("product payload missing")
+    served.files.delete(path)
+    const first = harness(served, storage)
+    first.session.load(base, "jp", "preview")
+    await first.settled()
+    expect(first.status()).toMatchObject({ phase: "ready" })
+    served.files.set(path, bytes)
+    const second = harness(served, storage)
+    second.session.load(base, "jp", "preview")
+    await second.settled()
+    expect(readyMetrics(second.events).slice(-1)).toMatchObject([{ restored: false }])
+    expect(second.served.requests).toContain(path)
+  })
+
   it("rebuilds when the manifest, edition or build differs from the stored image", async () => {
     const storage = memoryCache()
     const served = origin()

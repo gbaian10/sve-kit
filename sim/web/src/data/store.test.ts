@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { type Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
-import { type JsonValue, stringValue } from "./format-v3/json"
+import { type JsonObject, type JsonValue, stringValue } from "./format-v3/json"
 import { loadImagePage } from "./images"
 import { bucketOf, createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
 import { createCardIndex } from "./store"
@@ -63,6 +63,34 @@ describe("locator", () => {
     ).toBeUndefined()
     expect(bucketOf(["c:example"], 4)).toBe(3)
     expect(bucketOf(["c:example"], 1)).toBe(0)
+  })
+
+  it("finds a visible face in its catalog beside the same family's region-state", () => {
+    const file = (key: string, purpose: string, segment: string): [string, JsonObject] => [
+      key,
+      {
+        key,
+        purpose,
+        region: "en",
+        segment,
+        row_counts: [["face", "home_set", "BP02", "bootstrap", segment, 1]],
+      },
+    ]
+    const locate = createLocator(
+      new Map([
+        file("catalog/en/family-BP02/0", "catalog", "family-BP02"),
+        file("region-state/en/family-BP02/0", "region-state", "family-BP02:band-0"),
+      ]),
+    )
+    expect(
+      locate({
+        table: "face",
+        owner: homeSetOwner("BP02"),
+        entityKey: ["c:bp02-001"],
+        region: "en",
+        partition: "bootstrap",
+      }),
+    ).toBe("catalog/en/family-BP02/0")
   })
 })
 

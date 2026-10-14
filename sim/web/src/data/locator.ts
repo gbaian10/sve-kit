@@ -56,6 +56,7 @@ export function createLocator(files: Files, onlyTables?: ReadonlySet<string>): L
         ]),
       )
     const family = ref.owner["id"]
+    // Card rows default to the catalog: region-state of the same family also holds card and face.
     const purpose =
       ref.purpose ??
       (ref.partition === "history"
@@ -64,11 +65,11 @@ export function createLocator(files: Files, onlyTables?: ReadonlySet<string>): L
           ? "dictionary"
           : ["image_asset", "image_variant", "printing_image"].includes(ref.table)
             ? "images"
-            : ref.table === "face_revision"
-              ? ref.partition === "bootstrap"
-                ? "catalog"
-                : "detail"
-              : undefined)
+            : ["card", "face", "face_revision"].includes(ref.table) && ref.partition === "bootstrap"
+              ? "catalog"
+              : ref.table === "face_revision"
+                ? "detail"
+                : undefined)
     const width =
       purpose === "images"
         ? family === null
