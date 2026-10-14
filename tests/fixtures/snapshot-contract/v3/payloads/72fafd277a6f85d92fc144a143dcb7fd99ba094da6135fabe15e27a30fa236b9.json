@@ -1,10 +1,10 @@
 {
-  "format_version": "3.0.0",
+  "format_version": "4.0.0",
   "tables": {
-    "digital_card": [
+    "text_unit": [
       {
         "base": null,
-        "bucket": 52,
+        "bucket": 46,
         "owner": {
           "id": null,
           "kind": "global"
@@ -12,9 +12,9 @@
         "partition": "detail",
         "rows": [
           [
-            "d:sv1",
-            "sv1",
-            "123456789"
+            "t:ja:4cae4ae84ce083d7",
+            "ja",
+            "Synthetic old rule"
           ]
         ]
       }

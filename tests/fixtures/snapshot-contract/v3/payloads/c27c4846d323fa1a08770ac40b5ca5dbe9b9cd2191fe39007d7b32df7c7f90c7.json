@@ -1,10 +1,10 @@
 {
-  "format_version": "3.0.0",
+  "format_version": "4.0.0",
   "tables": {
-    "translation": [
+    "text_unit": [
       {
         "base": null,
-        "bucket": 23,
+        "bucket": 1,
         "owner": {
           "id": null,
           "kind": "global"
@@ -12,15 +12,9 @@
         "partition": "bootstrap",
         "rows": [
           [
-            "tr:name",
             "t:ja:c011ad4340c14396",
-            "zh-Hant",
-            "t:zh-Hant:8967c9d899bcfc91",
-            "project",
-            "unofficial",
-            false,
-            null,
-            "none"
+            "ja",
+            "Synthetic front"
           ]
         ]
       }

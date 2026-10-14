@@ -1,4 +1,4 @@
-"""Shared independent 3.0 golden inputs and deliberate resealing for counterexamples."""
+"""Shared independent 4.0 golden inputs and deliberate resealing for counterexamples."""
 
 import json
 from pathlib import Path

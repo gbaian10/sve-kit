@@ -36,7 +36,9 @@ from ..support.snapshot_media_fixtures import media_rows
 from ..support.snapshot_project_fixtures import populate, schema
 from .test_snapshot_project import projected
 
-BATCH = Batch("preview-20261002T010203Z-0001", "2026-10-02T01:02:03Z", ("jp",))
+BATCH = Batch(
+    "preview-20261002T010203Z-0001", "2026-10-02T01:02:03Z", "2026-10-02", ("jp",)
+)
 
 
 @pytest.fixture(scope="module")
@@ -657,7 +659,7 @@ def test_extra_nested_audit_field_is_not_silently_removed() -> None:
         )
 
 
-@pytest.mark.parametrize("format_version", ["3.0.0"])
+@pytest.mark.parametrize("format_version", ["4.0.0"])
 def test_single_oversized_fragment_is_reported_instead_of_silently_dropped(
     format_version: str,
     logical: tuple[Projection, Ownership],

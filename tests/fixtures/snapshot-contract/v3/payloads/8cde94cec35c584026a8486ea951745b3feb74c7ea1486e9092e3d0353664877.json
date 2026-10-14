@@ -1,5 +1,5 @@
 {
-  "format_version": "3.0.0",
+  "format_version": "4.0.0",
   "tables": {
     "card": [
       {
@@ -25,7 +25,7 @@
                 "jp",
                 "released",
                 "unmapped",
-                "2026-09-29",
+                null,
                 null,
                 null,
                 "p:a",
@@ -502,7 +502,7 @@
         "region",
         "release_state",
         "mapping_state",
-        "as_of",
+        "availability_override_as_of",
         "mapping_as_of",
         "mapping_scope",
         "default_printing_id",
@@ -532,7 +532,9 @@
           ]
         },
         {
-          "scalar": "Date"
+          "nullable": {
+            "scalar": "Date"
+          }
         },
         {
           "nullable": {

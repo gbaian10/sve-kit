@@ -389,7 +389,7 @@
     "path": [
       "min_reader_version"
     ],
-    "value": "4.0.0",
+    "value": "99.0.0",
     "rehash": false
   },
   {
@@ -1216,7 +1216,7 @@
               "region",
               "release_state",
               "mapping_state",
-              "as_of",
+              "availability_override_as_of",
               "mapping_as_of",
               "mapping_scope",
               "default_printing_id",
@@ -1246,7 +1246,9 @@
                 ]
               },
               {
-                "scalar": "Date"
+                "nullable": {
+                  "scalar": "Date"
+                }
               },
               {
                 "nullable": {
@@ -1957,7 +1959,7 @@
               "region",
               "release_state",
               "mapping_state",
-              "as_of",
+              "availability_override_as_of",
               "mapping_as_of",
               "mapping_scope",
               "default_printing_id",
@@ -1987,7 +1989,9 @@
                 ]
               },
               {
-                "scalar": "Date"
+                "nullable": {
+                  "scalar": "Date"
+                }
               },
               {
                 "nullable": {
@@ -2651,7 +2655,7 @@
               "region",
               "release_state",
               "mapping_state",
-              "as_of",
+              "availability_override_as_of",
               "mapping_as_of",
               "mapping_scope",
               "default_printing_id",
@@ -2681,7 +2685,9 @@
                 ]
               },
               {
-                "scalar": "Date"
+                "nullable": {
+                  "scalar": "Date"
+                }
               },
               {
                 "nullable": {

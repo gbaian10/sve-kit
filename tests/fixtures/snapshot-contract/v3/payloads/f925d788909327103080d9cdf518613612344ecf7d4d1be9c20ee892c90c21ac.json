@@ -1,47 +1,85 @@
 {
-  "format_version": "3.0.0",
+  "format_version": "4.0.0",
   "tables": {
-    "product_family": [
+    "face_revision": [
       {
         "base": null,
-        "bucket": 24,
+        "bucket": 26,
         "owner": {
-          "id": null,
-          "kind": "global"
+          "id": "set:a",
+          "kind": "home_set"
         },
-        "partition": "bootstrap",
+        "partition": "history",
         "rows": [
           [
-            "set:a",
-            "synthetic",
-            "SYN",
-            "other",
-            "t:ja:90d435ce36c2c997",
-            []
-          ]
-        ]
-      }
-    ],
-    "text_unit": [
-      {
-        "base": null,
-        "bucket": 28,
-        "owner": {
-          "id": null,
-          "kind": "global"
-        },
-        "partition": "bootstrap",
-        "rows": [
-          [
-            "t:ja:90d435ce36c2c997",
-            "ja",
-            "Synthetic set"
+            "r:a1",
+            "f:a",
+            "jp",
+            1,
+            null,
+            null,
+            "unknown",
+            "initial",
+            "t:ja:c011ad4340c14396",
+            "t:ja:4cae4ae84ce083d7",
+            null,
+            "follower",
+            1,
+            1,
+            1,
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            null
           ]
         ]
       }
     ]
   },
   "types": {
+    "Correction": {
+      "columns": [
+        "field",
+        "corrected_from",
+        "is_corrected",
+        "reason",
+        "source_url"
+      ],
+      "items": [
+        {
+          "enum": [
+            "effect",
+            "name",
+            "card_type",
+            "flavor",
+            "cost",
+            "attack",
+            "defense",
+            "traits",
+            "titles",
+            "special_kinds",
+            "other"
+          ]
+        },
+        {
+          "json": "CorrectionValue"
+        },
+        {
+          "scalar": "Bool"
+        },
+        {
+          "scalar": "Text"
+        },
+        {
+          "nullable": {
+            "scalar": "URL"
+          }
+        }
+      ]
+    },
     "FieldTranslation": {
       "columns": [
         "field",
@@ -119,6 +157,24 @@
           "nullable": {
             "scalar": "UInt"
           }
+        }
+      ]
+    },
+    "Section": {
+      "columns": [
+        "ordinal",
+        "text_unit_id",
+        "kind"
+      ],
+      "items": [
+        {
+          "scalar": "UInt"
+        },
+        {
+          "scalar": "ID"
+        },
+        {
+          "scalar": "Code"
         }
       ]
     }

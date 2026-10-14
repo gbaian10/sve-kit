@@ -337,7 +337,7 @@ def test_canonical_rejects_invalid_nested_values(value: object) -> None:
 
 
 def test_resources_available_from_package() -> None:
-    assert schema()["$id"] == "urn:sve-kit:snapshot:3.0.0"
+    assert schema()["$id"] == "urn:sve-kit:snapshot:4.0.0"
     assert len(canonical(schema())) < 1024 * 1024
 
 

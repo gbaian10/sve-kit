@@ -1,4 +1,4 @@
-"""Shared independent 3.0 vectors for Python and TypeScript consumers."""
+"""Shared independent 4.0 vectors for Python and TypeScript consumers."""
 
 import json
 from copy import deepcopy

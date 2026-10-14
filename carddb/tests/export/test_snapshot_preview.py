@@ -290,7 +290,6 @@ def test_project_refuses_publication_printing_absent_from_build() -> None:
             project(
                 db,
                 regions=("jp",),
-                as_of="2026-10-02",
                 settings=SETTINGS,
                 publication_printings=frozenset({"missing-synthetic-printing"}),
             )

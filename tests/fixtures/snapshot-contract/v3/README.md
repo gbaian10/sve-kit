@@ -1,11 +1,11 @@
-# Synthetic snapshot 3.0 contract fixtures
+# Synthetic snapshot 4.0 contract fixtures
 
 These handwritten synthetic wire and logical examples contain no official card
 text or image binaries. Expected objects are independent of the exporter and
 reader. `index.json` lists the shared Python and TypeScript inputs. Core schema,
-reader, canonical and bucket vectors use the current 3.0 shape.
+reader, canonical and bucket vectors use the current 4.0 shape.
 
-The profile is format `3.0.0`, 64 buckets, with all eight required capabilities.
+The profile is format `4.0.0`, 64 buckets, with all eight required capabilities.
 JSON files are indented for review; manifest hashes and sizes describe
 canonical-json-v1 bytes. Load each payload through its manifest key and path.
 The golden must rejoin to `expected-logical.json` both from individual files and

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:sve-kit:snapshot:3.0.0",
-  "$comment": "Fixed 3.0.0 profile with public annotations and explicit Japanese translation sources. Generated from source.json.",
+  "$id": "urn:sve-kit:snapshot:4.0.0",
+  "$comment": "Fixed 4.0.0 profile with public annotations and explicit Japanese translation sources. Generated from source.json.",
   "$defs": {
     "ID": {
       "type": "string",
@@ -75,7 +75,7 @@
       "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
     },
     "Format": {
-      "const": "3.0.0"
+      "const": "4.0.0"
     },
     "ParameterSchema": {
       "type": "object",
@@ -357,7 +357,14 @@
           ]
         },
         {
-          "$ref": "#/$defs/Date"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         {
           "anyOf": [
@@ -439,7 +446,7 @@
         "region",
         "release_state",
         "mapping_state",
-        "as_of",
+        "availability_override_as_of",
         "mapping_as_of",
         "mapping_scope",
         "default_printing_id",
@@ -469,7 +476,9 @@
           ]
         },
         {
-          "scalar": "Date"
+          "nullable": {
+            "scalar": "Date"
+          }
         },
         {
           "nullable": {
@@ -14460,7 +14469,7 @@
               "region",
               "release_state",
               "mapping_state",
-              "as_of",
+              "availability_override_as_of",
               "mapping_as_of",
               "mapping_scope",
               "default_printing_id",
@@ -14490,7 +14499,9 @@
                 ]
               },
               {
-                "scalar": "Date"
+                "nullable": {
+                  "scalar": "Date"
+                }
               },
               {
                 "nullable": {
@@ -16869,6 +16880,9 @@
         "published_at": {
           "$ref": "#/$defs/Instant"
         },
+        "data_as_of": {
+          "$ref": "#/$defs/Date"
+        },
         "regions": {
           "type": "array",
           "items": {
@@ -16886,7 +16900,7 @@
           "uniqueItems": true
         },
         "min_reader_version": {
-          "const": "3.0.0"
+          "const": "4.0.0"
         },
         "required_capabilities": {
           "const": [
@@ -16983,6 +16997,7 @@
         "format_version",
         "data_version",
         "published_at",
+        "data_as_of",
         "regions",
         "languages",
         "min_reader_version",

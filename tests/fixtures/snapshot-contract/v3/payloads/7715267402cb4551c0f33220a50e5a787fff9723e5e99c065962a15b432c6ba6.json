@@ -1,36 +1,38 @@
 {
-  "format_version": "3.0.0",
+  "format_version": "4.0.0",
   "tables": {
+    "digital_card": [
+      {
+        "base": null,
+        "bucket": 39,
+        "owner": {
+          "id": null,
+          "kind": "global"
+        },
+        "partition": "detail",
+        "rows": [
+          [
+            "d:svwb",
+            "svwb",
+            "12345678"
+          ]
+        ]
+      }
+    ],
     "text_unit": [
       {
         "base": null,
-        "bucket": 33,
+        "bucket": 39,
         "owner": {
           "id": null,
           "kind": "global"
         },
-        "partition": "bootstrap",
+        "partition": "detail",
         "rows": [
           [
-            "t:zh-Hant:8967c9d899bcfc91",
-            "zh-Hant",
-            "合成名稱"
-          ]
-        ]
-      },
-      {
-        "base": null,
-        "bucket": 35,
-        "owner": {
-          "id": null,
-          "kind": "global"
-        },
-        "partition": "bootstrap",
-        "rows": [
-          [
-            "t:ja:d772c516f7ee6f94",
+            "t:ja:b17a760c59cb19db",
             "ja",
-            "Synthetic back"
+            "Synthetic rule"
           ]
         ]
       }

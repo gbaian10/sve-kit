@@ -93,9 +93,14 @@ def test_nonempty_original_and_target_annotations_use_complete_new_wire() -> Non
         snapshot = export_snapshot(
             view,
             Ownership.from_database(db, view),
-            Batch("preview-20261010T010203Z-0001", "2026-10-10T01:02:03Z", ("jp",)),
+            Batch(
+                "preview-20261010T010203Z-0001",
+                "2026-10-10T01:02:03Z",
+                "2026-10-10",
+                ("jp",),
+            ),
         )
-        assert snapshot.manifest["format_version"] == "3.0.0"
+        assert snapshot.manifest["format_version"] == "4.0.0"
         assert (
             read_snapshot(
                 snapshot.manifest,

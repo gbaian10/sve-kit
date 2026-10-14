@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-MEDIA = "3.0.0"
+MEDIA = "4.0.0"
 
 
 @dataclass(frozen=True)
