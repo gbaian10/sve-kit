@@ -1517,7 +1517,7 @@ def test_released_region_has_no_availability_override_date(db: Database) -> None
     with db.transaction():
         db.update(
             "region_availability_override",
-            {"card_id": "card", "region": "en"},
+            {"card_id": "card"},
             {"region": "jp"},
         )
     result = region(projected(db), "jp")
