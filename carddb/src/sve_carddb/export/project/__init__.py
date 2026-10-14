@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.contracts.snapshot import definition, tables, validate
+from sve_carddb.contracts.snapshot import definition, tables
 from sve_carddb.core.json import array, object_value, string
 from sve_carddb.domains.routes.defaults import select_defaults
 from sve_carddb.export.project.annotations import annotations
@@ -50,7 +50,6 @@ __all__ = [
     "display_text",
     "effective_support",
     "project",
-    "validate",
 ]
 
 
