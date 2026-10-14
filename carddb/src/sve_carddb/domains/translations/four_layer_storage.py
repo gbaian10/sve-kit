@@ -90,13 +90,17 @@ def write_form(db: Database, record: FormRecord, authored_source_id: str) -> Non
 
 
 def write_target(
-    db: Database, record: TargetRecord | TargetVariantRecord, authored_source_id: str
+    db: Database,
+    record: TargetRecord | TargetVariantRecord,
+    authored_source_id: str,
+    *,
+    frame: Frame,
+    forms: Mapping[tuple[str, str], FormDefinition],
 ) -> None:
-    """Targets use the same language-specific form closure on both sides of SQLite."""
-    frame = read_frame(db, record.data.template_id).frame
+    """Validate targets against the frame and forms already checked on their writes."""
     if frame.source.source_lang == record.data.lang:
         raise ValueError("Stored target language must differ from source language")
-    record.data.target.verify(frame.leaf_schema, record.data.lang, read_forms(db))
+    record.data.target.verify(frame.leaf_schema, record.data.lang, forms)
     db.insert(
         "template_translation",
         {

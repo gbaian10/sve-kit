@@ -201,7 +201,7 @@ def stored(compiled: CompiledSchema) -> Iterator[tuple[Database, Frame, SourceBi
                     }
                 )
             )
-            write_target(db, selected, "source")
+            write_target(db, selected, "source", frame=frame, forms={})
         yield db, frame, binding
 
 
@@ -433,7 +433,7 @@ def test_valid_json_cannot_hide_required_leaves_in_literal_target(
         db.transaction(),
         pytest.raises(ValueError, match=r"[Ll]eaf|[Ll]iteral|[Pp]laceholder"),
     ):
-        write_target(db, bad, "source")
+        write_target(db, bad, "source", frame=frame, forms={})
 
 
 def test_nested_json_extra_fields_are_rejected_before_insert(
@@ -450,6 +450,30 @@ def test_nested_json_extra_fields_are_rejected_before_insert(
                 )
             },
         )
+
+
+def test_target_cannot_use_its_frame_source_language(
+    stored: tuple[Database, Frame, SourceBinding],
+) -> None:
+    db, frame, _ = stored
+    target = TargetRecord.model_validate_json(
+        canonical(
+            {
+                "kind": "template_translation",
+                "data": {
+                    "template_id": frame.id,
+                    "lang": frame.source.source_lang,
+                    "target": default_target().model_dump(mode="json"),
+                },
+            }
+        )
+    )
+    with (
+        pytest.raises(ValueError, match="language must differ"),
+        db.transaction(),
+    ):
+        write_target(db, target, "source", frame=frame, forms={})
+    assert len(db.rows("template_translation")) == 1
 
 
 def test_pinned_form_rule_and_typed_signature_survive_sqlite(

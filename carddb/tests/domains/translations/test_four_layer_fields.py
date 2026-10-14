@@ -219,6 +219,8 @@ def test_name_with_digits_has_one_whole_reference_in_source_and_translation(  # 
                 )
             ),
             "source",
+            frame=frame,
+            forms={},
         )
         result = render_field(
             db,
@@ -310,6 +312,8 @@ def test_shared_render_keeps_each_owner_binding_and_verifies_each_output_path(  
                 )
             ),
             "source",
+            frame=frame,
+            forms={},
         )
         targets = {(frame.id, "zh-Hant"): SelectedTarget(target)}
         first_result = render_field(
