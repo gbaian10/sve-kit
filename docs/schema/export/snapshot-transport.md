@@ -232,7 +232,7 @@ row_index 為從 0 起的 UInt，指 base fragment 已按 PK 排序的 rows。de
 
 ### 4.2 文字分片閉包
 
-文字檔由 files 中 role=bootstrap/text/config 的 File 組成；分片依賴閉包不能指向此集合外的檔案。圖片／AST 的公開 reference 由 producer 整體驗證，不是文字下載的強制依賴。需要全部文字的工具從 files 逐片取得，再走同一 reader join。
+文字檔由 files 中 role=bootstrap/text/config 的 File 組成；分片依賴閉包不能指向此集合外的檔案。圖片／AST 的公開 reference 由 producer 整體驗證，不是文字下載的強制依賴。需要全部文字的工具從 files 逐片取得，再走同一 reader join。文字離線備妥要求這些文字檔及其依賴全部驗過；只完成 bootstrap 不算。
 
 容量另計 manifest、config、changes 及其 QA／errata 摘要，不因 metadata 移出文字容器而免計；基本目錄冷載依所選日版／英版各計實際閉包與整檔 Brotli；raw／gzip 另報。完整文字 raw 計全部分片＋manifest，壓縮上限計單一版本的完整文字閉包，詳 [size-budget](size-budget.md)。
 

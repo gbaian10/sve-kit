@@ -220,7 +220,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 **下載完成不等於全部常駐 JS heap。** Worker 逐檔解壓、驗證、解析及建立緊湊索引，主執行緒只取必要 view／結果 ID；詳情以 LRU 釋放，不把全庫物件傳回主端。全文搜尋先取得所選區該用途全部效果閉包，再回完整結果，不只掃已載入卡。持久 bytes 與衍生索引均可快取；IndexedDB 依根目錄、manifest hash、reader／normalizer 隔離，不能形成第二真值。儲存被拒時可重建記憶體索引並如實標示可用範圍。
 
-需要完整文字的工具依快照清單逐片讀取 files 中的文字檔及其依賴閉包，再重接同一份快照。
+需要完整文字的工具依快照清單逐片讀取 files 中的文字檔及其依賴閉包，再重接同一份快照。依[傳輸契約 §4.2](snapshot-transport.md#42-文字分片閉包)，全部文字檔及其依賴的 hash 皆驗過才標「文字離線備妥」；首訪部分可讀狀態不等於 active 完整離線版。
 
 容量與量法依 [size-budget](size-budget.md)：全部文字分片＋manifest 的 raw ≤40 MiB；單一版本完整文字閉包（含共享、完整 JP source、counterpart、必要跨區檔、卡號索引、字典及實體重複裝檔）Brotli ≤8 MiB、gzip ≤10 MiB。基本目錄冷載 Brotli 2 MiB 為分界；基本目錄容器整檔 raw ≤2 MiB，詳情與其他資料檔 ≤512 KiB。手機目標是 main＋Worker 穩態合計 ≤48 MiB、更新峰值 ≤80 MiB、主線程單段 ≤50 ms、所選整區基本目錄完整解析累計 ≤1 秒；對象與量法以容量文件為準。這些是設計／發布效能驗收要求，Python reader 依實際 bytes、hash、欄序及閉包驗證，瀏覽器依 bytes、hash 與版本能力判准入，不用預算數字拒收合法快照。
 
@@ -239,7 +239,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 | `rules_profile`、restriction、vocabulary、`search_alias`、keyword、stamp | 全部欄位 | 無 |
 | `text_unit` | 現行／暫顯名字、可用名字翻譯與 facet 字典引用的 ID 閉包；每個文字 ID 只在其固定 bucket 的啟動包或詳情分片一邊 | 非上述閉包的其餘文字列 |
 | `translation` | 現行／暫顯 name 與 facet labels 使用的翻譯列 | 其餘翻譯列；同 ID 兩用途時歸啟動包，只存一次 |
-| `annotation_set`、`annotation_concept` | 可見名字／名稱翻譯／facet 必要閉包；同 ID 只存一次 | 其餘集合列；正文按需，完整文字包含全部引用 |
+| `annotation_set`、`annotation_concept` | 可見名字／名稱翻譯／facet 必要閉包；同 ID 只存一次 | 其餘集合列；正文按需，全部文字檔合計含全部引用 |
 | `field_annotation` | 隨原文欄位；display name／字典／商品等 | 隨 effect／printing／QA／CR 等；非 display revision 的用途在 history，詳[位置分片](public-annotation.md#5-分片閉包與消費表) |
 | 其餘文字集合 | 無 | 完整白名單列 |
 
