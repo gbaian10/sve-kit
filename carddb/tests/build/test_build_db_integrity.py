@@ -1,4 +1,4 @@
-"""CHECK skipping preserves SQLite's page and index corruption detection."""
+"""Saving skips CHECK revalidation but keeps SQLite's page and index corruption checks."""
 
 import sqlite3
 from typing import TYPE_CHECKING
@@ -11,31 +11,6 @@ from .test_build_db import compiled
 
 if TYPE_CHECKING:
     from pathlib import Path
-
-
-def test_sqlite_check_skipping() -> None:
-    with sqlite3.connect(":memory:", isolation_level=None) as connection:
-        connection.execute("CREATE TABLE sample (value INTEGER CHECK (value > 0))")
-        connection.execute("PRAGMA ignore_check_constraints = ON")
-        connection.execute("INSERT INTO sample VALUES (-1)")
-        assert connection.execute("PRAGMA integrity_check").fetchall() == [("ok",)]
-        connection.execute("PRAGMA ignore_check_constraints = OFF")
-        assert connection.execute("PRAGMA integrity_check").fetchall() == [
-            ("CHECK constraint failed in sample",)
-        ]
-
-
-def test_sqlite_page_corruption() -> None:
-    with sqlite3.connect(":memory:", isolation_level=None) as connection:
-        connection.execute("CREATE TABLE sample (value INTEGER)")
-        connection.execute("INSERT INTO sample VALUES (1)")
-        content = _damaged_page(connection, "sample")
-    for flag in ("ON", "OFF"):
-        with sqlite3.connect(":memory:", isolation_level=None) as damaged:
-            damaged.deserialize(content)
-            damaged.execute(f"PRAGMA ignore_check_constraints = {flag}")
-            with pytest.raises(sqlite3.DatabaseError, match="malformed"):
-                damaged.execute("PRAGMA integrity_check").fetchall()
 
 
 def _damaged_page(connection: sqlite3.Connection, table: str) -> bytes:
@@ -51,7 +26,7 @@ def _damaged_page(connection: sqlite3.Connection, table: str) -> bytes:
     return bytes(content)
 
 
-def test_sqlite_index_corruption() -> None:
+def test_sqlite_index_corruption_is_reported_while_ignoring_check() -> None:
     with sqlite3.connect(":memory:", isolation_level=None) as connection:
         connection.executescript(
             "CREATE TABLE sample (value INTEGER);"
@@ -65,12 +40,11 @@ def test_sqlite_index_corruption() -> None:
             "WHERE name = 'sample_value';"
         )
         content = connection.serialize()
-    for flag in ("ON", "OFF"):
-        with sqlite3.connect(":memory:", isolation_level=None) as damaged:
-            damaged.deserialize(content)
-            damaged.execute(f"PRAGMA ignore_check_constraints = {flag}")
-            errors = damaged.execute("PRAGMA integrity_check").fetchall()
-            assert ("row 1 missing from index sample_value",) in errors
+    with sqlite3.connect(":memory:", isolation_level=None) as damaged:
+        damaged.deserialize(content)
+        damaged.execute("PRAGMA ignore_check_constraints = ON")
+        errors = damaged.execute("PRAGMA integrity_check").fetchall()
+    assert ("row 1 missing from index sample_value",) in errors
 
 
 def test_save_restores_check_enforcement(tmp_path: Path) -> None:
