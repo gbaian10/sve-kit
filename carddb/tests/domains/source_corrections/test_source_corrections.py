@@ -419,6 +419,46 @@ def test_conflict_closure_removes_routes_aliases_and_defaults_but_keeps_pending_
 
 
 class TestDefaultCorrectionInputs:
+    def test_candidate_corrections_require_full_observation_equality(
+        self, tmp_path: Path, default_correction_case: CorrectionCaseTemplate
+    ) -> None:
+        plan = default_correction_case.copy(tmp_path).texts.plan
+        assert plan.corrections is not None
+        application = plan.corrections[0]
+        raw = application.observation
+        same = raw.model_copy()
+        different = raw.model_copy(
+            update={"content": raw.content.model_copy(update={"effect": "Other rule."})}
+        )
+        candidates = replace(plan, observations=(same, different)).candidates()
+        assert candidates[0].content.effect == application.data.corrected_value
+        assert candidates[0].correction_keys == (application.key(),)
+        assert candidates[1] == different
+
+    def test_candidate_corrections_preserve_shared_observation_and_application_order(
+        self, tmp_path: Path, default_correction_case: CorrectionCaseTemplate
+    ) -> None:
+        plan = default_correction_case.copy(tmp_path).texts.plan
+        assert plan.corrections is not None
+        application = plan.corrections[0]
+        data = application.data.model_copy(
+            update={"field": "card_type", "corrected_value": "Synthetic type"}
+        )
+        other = replace(application, record=replace(application.record, data=data))
+        for applications in ((application, application), (other, application)):
+            candidate = replace(
+                plan,
+                observations=(application.observation,),
+                corrections=applications,
+            ).candidates()[0]
+            assert candidate.content.effect == application.data.corrected_value
+            assert candidate.content.type_raw == (
+                data.corrected_value
+                if other in applications
+                else application.observation.content.type_raw
+            )
+            assert candidate.correction_keys == tuple(a.key() for a in applications)
+
     def test_domain_verifier_rejects_physical_observation_pointing_to_corrected_revision(
         self, tmp_path: Path, default_correction_case: CorrectionCaseTemplate
     ) -> None:
