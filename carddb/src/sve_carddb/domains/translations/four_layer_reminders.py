@@ -4,7 +4,6 @@ import re
 from typing import TYPE_CHECKING
 from unicodedata import normalize
 
-from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 from sve_carddb.domains.translations.four_layer_units import count_context, source_unit
 
 if TYPE_CHECKING:
@@ -28,8 +27,6 @@ def mandatory_selection_context(
     """Neither a matching note string nor a nearby unrelated ability proves its counted set."""
     if field is None or part not in field.parts or part.source_span.role != "reminder":
         return None
-    if normalize_source(raw, field.source) != field:
-        raise ValueError("Reminder field differs from exact normalized source")
     reminder = _REMINDER.fullmatch(part.canonical_source)
     anchor = part.source_span.anchor
     if (

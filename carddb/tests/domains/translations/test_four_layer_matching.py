@@ -3,6 +3,7 @@
 import pytest
 
 from sve_carddb.contracts.four_layer import Frame, LeafSchema, hash_payload
+from sve_carddb.domains.translations.four_layer_derivation import derive_source
 from sve_carddb.domains.translations.four_layer_matching import Frames
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
 
@@ -53,8 +54,9 @@ def test_repeated_source_values_can_share_one_authored_leaf_without_losing_units
     field = normalize_source(raw, source(raw))
     part = field.parts[0]
     engine = classifier()
-    found = engine.recognize(raw, field.source, part, field=field)
-    matched = Frames((frame,)).match(raw, field, part, found, engine)
+    matched = Frames((frame,)).match(
+        raw, derive_source(raw, field.source, engine), part.ordinal, engine
+    )
     assert matched is not None
     assert tuple(matched.binding.values) == ("quantity",)
     assert [
@@ -79,9 +81,8 @@ def test_equal_spelling_cannot_merge_distinct_source_values_modes_or_roles(
     frame, _ = folded(raw)
     field = normalize_source(raw, source(raw))
     engine = classifier()
-    found = engine.recognize(raw, field.source, field.parts[0], field=field)
     with pytest.raises(ValueError, match="leaves differ"):
-        Frames((frame,)).match(raw, field, field.parts[0], found, engine)
+        Frames((frame,)).match(raw, derive_source(raw, field.source, engine), 0, engine)
 
 
 def test_pending_frame_cannot_be_selected_for_another_owner_with_equal_bytes() -> None:
@@ -95,8 +96,10 @@ def test_pending_frame_cannot_be_selected_for_another_owner_with_equal_bytes() -
     )
     field = normalize_source(raw, descriptor)
     engine = classifier()
-    found = engine.recognize(raw, descriptor, field.parts[0], field=field)
-    assert Frames((frame,)).match(raw, field, field.parts[0], found, engine) is None
+    assert (
+        Frames((frame,)).match(raw, derive_source(raw, field.source, engine), 0, engine)
+        is None
+    )
 
 
 def test_two_applicable_authored_slot_layouts_require_an_explicit_resolution() -> None:
@@ -105,6 +108,7 @@ def test_two_applicable_authored_slot_layouts_require_an_explicit_resolution() -
     separate, _ = folded(raw, split_roles=True)
     field = normalize_source(raw, source(raw))
     engine = classifier()
-    found = engine.recognize(raw, field.source, field.parts[0], field=field)
     with pytest.raises(ValueError, match="Ambiguous authored frames"):
-        Frames((shared, separate)).match(raw, field, field.parts[0], found, engine)
+        Frames((shared, separate)).match(
+            raw, derive_source(raw, field.source, engine), 0, engine
+        )

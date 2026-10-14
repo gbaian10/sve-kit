@@ -11,7 +11,15 @@ from sve_carddb.domains.translations.four_layer_authored import (
     FrameRecord,
     TargetRecord,
 )
-from sve_carddb.domains.translations.four_layer_classification import Term
+from sve_carddb.domains.translations.four_layer_classification import (
+    Classifier,
+    Recognized,
+    Term,
+)
+from sve_carddb.domains.translations.four_layer_derivation import (
+    DerivedField,
+    derive_source,
+)
 from sve_carddb.domains.translations.four_layer_fields import render_field
 from sve_carddb.domains.translations.four_layer_matching import Matched
 from sve_carddb.domains.translations.four_layer_normalizer import normalize_source
@@ -39,17 +47,38 @@ if TYPE_CHECKING:
     from sve_carddb.contracts.source_binding import SourceBinding
 
 
-def compiled_field(db: Database, frame: Frame, binding: SourceBinding) -> CompiledField:
+def compiled_field(
+    db: Database, frame: Frame, binding: SourceBinding, engine: Classifier | None = None
+) -> CompiledField:
     text = db.select(
         "text_unit", ("text",), where={"id": binding.source.source_unit_id}
     )[0].values["text"]
     assert isinstance(text, str)
+    if engine is None:
+        # Storage fixtures enter after compilation with their synthetic Nat/count role.
+        field = normalize_source(text, binding.source)
+        derived = DerivedField(
+            field,
+            (
+                Recognized(
+                    frame.leaf_schema, binding.values, binding.occurrences, (), False
+                ),
+            ),
+            ((),),
+            ((),),
+            field,
+            ((),),
+        )
+        engine = classifier()
+    else:
+        derived = derive_source(text, binding.source, engine)
     return CompiledField(
         CardSource(binding.source, text, "card", "face", "source"),
-        normalize_source(text, binding.source),
+        derived,
         (Matched(frame, binding),),
         (False,),
         (),
+        engine,
     )
 
 
@@ -116,7 +145,12 @@ def test_incomplete_field_does_not_activate_its_partial_bindings(
     db, frame, binding = stored
     partial = compiled_field(db, frame, binding)
     partial = CompiledField(
-        partial.source, partial.field, (None,), (False,), ("unmatched_source_frame",)
+        partial.source,
+        partial.derived,
+        (None,),
+        (False,),
+        ("unmatched_source_frame",),
+        partial.classifier,
     )
     with pytest.raises(ValueError, match="incomplete source field"), db.transaction():
         render_field(db, partial, Renderer({}, {}, {}), {}, "zh-Hant")
@@ -224,7 +258,7 @@ def test_name_with_digits_has_one_whole_reference_in_source_and_translation(  # 
         )
         result = render_field(
             db,
-            compiled_field(db, frame, binding),
+            compiled_field(db, frame, binding, engine),
             renderer,
             {(frame.id, "zh-Hant"): SelectedTarget(target)},
             "zh-Hant",
@@ -317,7 +351,7 @@ def test_shared_render_keeps_each_owner_binding_and_verifies_each_output_path(  
         )
         targets = {(frame.id, "zh-Hant"): SelectedTarget(target)}
         first_result = render_field(
-            db, compiled_field(db, frame, first), renderer, targets, "zh-Hant"
+            db, compiled_field(db, frame, first, engine), renderer, targets, "zh-Hant"
         )
         row = dict(
             db.select(
@@ -340,7 +374,7 @@ def test_shared_render_keeps_each_owner_binding_and_verifies_each_output_path(  
         )
         assert second_frame == frame
         second_result = render_field(
-            db, compiled_field(db, frame, second), renderer, targets, "zh-Hant"
+            db, compiled_field(db, frame, second, engine), renderer, targets, "zh-Hant"
         )
     assert first_result.rendered is not None
     assert second_result.rendered is not None

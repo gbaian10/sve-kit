@@ -32,7 +32,11 @@ from sve_carddb.contracts.source_binding import (
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_kinds import KindFacts
 from sve_carddb.domains.translations.four_layer_n1_leaves import DOMAINS as N1_DOMAINS
-from sve_carddb.domains.translations.four_layer_normalizer import VERSION, SourcePart
+from sve_carddb.domains.translations.four_layer_normalizer import (
+    VERSION,
+    SourcePart,
+    normalize_source,
+)
 from sve_carddb.domains.translations.four_layer_numbers import (
     number_issue,
     recognize_number,
@@ -125,6 +129,10 @@ class Recognized:
     issues: tuple[str, ...]
     low_confidence: bool
     semantics: Classified | None = None
+
+    def __post_init__(self) -> None:
+        """A caller must not alter retained source values through its original mapping."""
+        object.__setattr__(self, "values", MappingProxyType(dict(self.values)))
 
     def bind(
         self,
@@ -317,6 +325,45 @@ class Classifier:
         source.verify(source, raw)
         if field is not None and (field.source != source or part not in field.parts):
             raise ValueError("Source field belongs to another exact owner or part")
+        if (
+            field is not None
+            and part.source_span.role == "reminder"
+            and normalize_source(raw, source) != field
+        ):
+            raise ValueError("Reminder field differs from exact normalized source")
+        candidate = (
+            self.candidate(raw, part)
+            if part.source_span.role not in {"name", "label"}
+            else None
+        )
+        return self._recognize(
+            raw, source, part, candidate, context=context, field=field
+        )
+
+    def recognize_part(
+        self,
+        raw: str,
+        field: SourceField,
+        part: SourcePart,
+        candidate: Candidate | None,
+        *,
+        context: CardContext | None = None,
+    ) -> Recognized:
+        """Reuse the candidate from this field's first source partition."""
+        return self._recognize(
+            raw, field.source, part, candidate, context=context, field=field
+        )
+
+    def _recognize(
+        self,
+        raw: str,
+        source: SourceDescriptor,
+        part: SourcePart,
+        candidate: Candidate | None,
+        *,
+        context: CardContext | None = None,
+        field: SourceField | None = None,
+    ) -> Recognized:
         if part.source_span.role in {"name", "label"}:
             named = self._named(raw, part)
             return Recognized(
@@ -331,7 +378,7 @@ class Classifier:
                 if not named.issues
                 else None,
             )
-        candidate = self._candidate(raw, part)
+        assert candidate is not None
         issues = set(candidate.issues) - {
             "legacy_parenthesis_classification_requires_review"
         }
@@ -386,7 +433,8 @@ class Classifier:
             semantics,
         )
 
-    def _candidate(self, raw: str, part: SourcePart) -> Candidate:
+    def candidate(self, raw: str, part: SourcePart) -> Candidate:
+        """Keep N0 and N1 on the same original units and enabled grammar."""
         role = part.source_span.role
         if role not in {"body", "reminder", "token_header", "layout"}:
             raise ValueError("Unsupported parameter source role")
