@@ -24,7 +24,7 @@ from sve_carddb.export.media import prepare_media
 from sve_carddb.export.media_urls import MAX_SAFE, display_url, image_path, image_url
 from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.preview.media_state import STATE, commit, reserve
-from sve_carddb.export.reader import read_index, read_snapshot, read_text_all
+from sve_carddb.export.reader import read_index, read_snapshot
 from sve_carddb.export.transport import export_snapshot
 from sve_carddb.export.transport.measure import update
 from sve_carddb.export.transport.wire import encode
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
 GOLDEN = Path(__file__).resolve().parents[3] / "tests/fixtures/snapshot-contract/v3"
 
 
-def test_independent_v2_golden_and_union() -> None:
+def test_independent_golden() -> None:
     manifest = object_value(parse((GOLDEN / "manifest.json").read_bytes()))
     blobs = {
         string(f["key"]): canonical(
@@ -52,16 +52,6 @@ def test_independent_v2_golden_and_union() -> None:
     }
     expected = parse((GOLDEN / "expected-logical.json").read_bytes())
     assert read_snapshot(manifest, blobs) == expected
-    attachments = {
-        k: b for k, b in blobs.items() if k.startswith("images/") or k == "programs"
-    }
-    assert (
-        read_text_all(
-            manifest,
-            canonical(parse((GOLDEN / "text-all.json").read_bytes())),
-            attachments,
-        )
-    ) == expected
     assert len(array(object_value(expected)["printing_image"])) == 4
 
 

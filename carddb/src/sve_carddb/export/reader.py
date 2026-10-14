@@ -4,9 +4,7 @@ This reference implementation accepts already decompressed bytes. It is not the
 browser's streaming store, a publisher, or a validator of build-only evidence.
 """
 
-from copy import deepcopy
 from dataclasses import dataclass
-from functools import cache
 from graphlib import CycleError, TopologicalSorter
 from operator import itemgetter
 from typing import TYPE_CHECKING
@@ -15,16 +13,13 @@ from pydantic import JsonValue
 
 from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.contracts.snapshot import (
-    compile_validator,
     decode,
     definition,
     descriptor,
     required_types,
     row_type,
-    schema,
     tables,
     validate,
-    validate_schema,
 )
 from sve_carddb.core.json import (
     array,
@@ -46,7 +41,6 @@ from sve_carddb.export.semantics import (
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    import jsonschema_rs
 
 type Row = dict[str, JsonValue]
 type View = dict[str, list[Row]]
@@ -477,12 +471,6 @@ def _metadata(manifest: Row, files: dict[str, Row]) -> None:
         for key, file in files.items()
         if file["role"] in {"bootstrap", "text", "config"}
     }
-    if manifest["text_all"] is not None:
-        expected: list[JsonValue] = [
-            _reference(files[key]) for key in sorted(text_files)
-        ]
-        if object_value(manifest["text_all"])["contains"] != expected:
-            raise ValueError("text_all contains does not match files")
     for key, file in files.items():
         dependencies = {
             string(object_value(dep)["key"]) for dep in array(file["dependencies"])
@@ -558,71 +546,6 @@ def join_payloads(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
         fields = array(definition(table)["x-primary-key"])
         view[table].sort(key=lambda row: _key(row, fields))
     return view
-
-
-@cache
-def _text_all_validator(version: str) -> jsonschema_rs.Draft202012Validator:
-    envelope = deepcopy(definition("TextAll", version))
-    members_schema = object_value(object_value(envelope["properties"])["members"])
-    member_schema = object_value(members_schema["items"])
-    # Matching hashes bind members to the payloads validated by read_snapshot.
-    object_value(member_schema["properties"])["payload"] = {}
-    selected = schema(version) | envelope
-    selected.pop("oneOf")
-    return compile_validator(selected)
-
-
-def text_all_payloads(manifest_value: JsonValue, data: bytes) -> dict[str, bytes]:
-    """Validate the union envelope and hashes; callers validate members via read_snapshot."""
-    manifest = object_value(manifest_value)
-    validate("Manifest", manifest, string(manifest["format_version"]))
-    return text_all_members(manifest, data)
-
-
-def text_all_members(manifest_value: JsonValue, data: bytes) -> dict[str, bytes]:
-    """Verify raw union members; callers must also validate the complete manifest."""
-    manifest = object_value(manifest_value)
-    description = object_value(manifest["text_all"])
-    value = object_value(_payload(description, data))
-    version = string(manifest["format_version"])
-    validate_schema(_text_all_validator(version), value)
-    if value["format_version"] != manifest["format_version"]:
-        raise ValueError("TextAll format differs from manifest")
-    files = _files(manifest)
-    expected = [
-        _reference(file)
-        for file in files.values()
-        if file["role"] in {"bootstrap", "text", "config"}
-    ]
-    if description["contains"] != expected:
-        raise ValueError("text_all membership mismatch")
-    members = [object_value(item) for item in array(value["members"])]
-    if [_reference(member) for member in members] != expected:
-        raise ValueError("text_all members do not match contains")
-    keys = {string(item["key"]) for item in expected}
-    if any(
-        string(object_value(dep)["key"]) not in keys
-        for item in expected
-        for dep in array(files[string(item["key"])]["dependencies"])
-    ):
-        raise ValueError("text_all dependencies escape its closure")
-    payloads = {
-        string(member["key"]): canonical(member["payload"]) for member in members
-    }
-    for key, raw in payloads.items():
-        if digest(raw) != files[key]["sha256"] or len(raw) != files[key]["bytes"]:
-            raise ValueError("text_all member hash or length mismatch")
-    return payloads
-
-
-def read_text_all(
-    manifest_value: JsonValue, data: bytes, attachments: Mapping[str, bytes]
-) -> View:
-    """Validate alternative member bytes, then use the same independent reader."""
-    payloads = text_all_payloads(manifest_value, data)
-    if set(payloads) & set(attachments):
-        raise ValueError("Duplicate alternative payload")
-    return read_snapshot(manifest_value, payloads | dict(attachments))
 
 
 def compatible(entry: Row) -> bool:

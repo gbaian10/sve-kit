@@ -81,11 +81,6 @@ def write_preview(
         write_artifact(roots, path, blob.raw, immutable=True)
         write_artifact(roots, path + ".gz", blob.gzip, immutable=True)
         _write_brotli(roots, path, blob.br)
-    union = object_value(snapshot.manifest["text_all"])
-    union_path = string(union["path"])
-    write_artifact(roots, union_path, snapshot.text_all.raw, immutable=True)
-    write_artifact(roots, union_path + ".gz", snapshot.text_all.gzip, immutable=True)
-    _write_brotli(roots, union_path, snapshot.text_all.br)
     manifest = snapshot.manifest_blob
     hashed = digest(manifest.raw)
     manifest_path = "snapshots/manifests/" + hashed[7:] + ".json"

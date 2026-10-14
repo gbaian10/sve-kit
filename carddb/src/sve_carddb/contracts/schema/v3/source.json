@@ -17,9 +17,6 @@
         "$ref": "#/$defs/Programs"
       },
       {
-        "$ref": "#/$defs/TextAll"
-      },
-      {
         "$ref": "#/$defs/Changes"
       },
       {
@@ -248,7 +245,6 @@
     "Container",
     "Blob",
     "File",
-    "TextAllRef",
     "Target",
     "ReviewCoverage",
     "TranslationCoverage",
@@ -259,7 +255,6 @@
     "Manifest",
     "Config",
     "Programs",
-    "TextAll",
     "Changes",
     "Index",
     "ImageDisplayVariant",
@@ -1438,64 +1433,6 @@
       ],
       "additionalProperties": false
     },
-    "TextAllRef": {
-      "type": "object",
-      "properties": {
-        "path": {
-          "$ref": "#/$defs/Path"
-        },
-        "sha256": {
-          "$ref": "#/$defs/Hash"
-        },
-        "bytes": {
-          "$ref": "#/$defs/Positive"
-        },
-        "compressed_bytes": {
-          "type": "object",
-          "properties": {
-            "br": {
-              "anyOf": [
-                {
-                  "$ref": "#/$defs/Positive"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "gzip": {
-              "anyOf": [
-                {
-                  "$ref": "#/$defs/Positive"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          "required": [
-            "br",
-            "gzip"
-          ],
-          "additionalProperties": false
-        },
-        "contains": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/FileRef"
-          }
-        }
-      },
-      "required": [
-        "path",
-        "sha256",
-        "bytes",
-        "compressed_bytes",
-        "contains"
-      ],
-      "additionalProperties": false
-    },
     "Target": {
       "oneOf": [
         {
@@ -1844,16 +1781,6 @@
         "config_ref": {
           "$ref": "#/$defs/FileRef"
         },
-        "text_all": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/TextAllRef"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "partitioning": {
           "type": "object",
           "properties": {
@@ -1923,7 +1850,6 @@
         "engine_support_target",
         "files",
         "config_ref",
-        "text_all",
         "partitioning",
         "coverage",
         "mechanic_universe_id",
@@ -2144,49 +2070,6 @@
       "required": [
         "format_version",
         "entries"
-      ],
-      "additionalProperties": false
-    },
-    "TextAll": {
-      "type": "object",
-      "properties": {
-        "format_version": {
-          "$ref": "#/$defs/Format"
-        },
-        "members": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "key": {
-                "$ref": "#/$defs/ID"
-              },
-              "sha256": {
-                "$ref": "#/$defs/Hash"
-              },
-              "payload": {
-                "oneOf": [
-                  {
-                    "$ref": "#/$defs/Container"
-                  },
-                  {
-                    "$ref": "#/$defs/Config"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "key",
-              "sha256",
-              "payload"
-            ],
-            "additionalProperties": false
-          }
-        }
-      },
-      "required": [
-        "format_version",
-        "members"
       ],
       "additionalProperties": false
     },

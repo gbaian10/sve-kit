@@ -21,17 +21,11 @@ from sve_carddb.core.json import (
 )
 from sve_carddb.export.buckets import bucket
 from sve_carddb.export.project import Projection
-from sve_carddb.export.reader import read_snapshot, read_text_all
+from sve_carddb.export.reader import read_snapshot
 from sve_carddb.export.transport import Snapshot
 from sve_carddb.export.transport.compression import compress
 
-from ..support.snapshot_contract_fixtures import (
-    _replace,
-    _reseal,
-    attachments,
-    fixture,
-    payloads,
-)
+from ..support.snapshot_contract_fixtures import _replace, _reseal, fixture, payloads
 
 
 class _StringSubclass(str):
@@ -155,15 +149,6 @@ def test_golden_join_matches_independent_logical_view() -> None:
     assert read_snapshot(fixture("manifest.json"), payloads()) == fixture(
         "expected-logical.json"
     )
-
-
-def test_text_all_matches_individual_downloads() -> None:
-    blobs = payloads()
-    assert read_text_all(
-        fixture("manifest.json"),
-        canonical(fixture("text-all.json")),
-        attachments(blobs),
-    ) == fixture("expected-logical.json")
 
 
 @pytest.mark.parametrize(
@@ -359,45 +344,8 @@ def test_dangling_vocabulary_is_not_repaired() -> None:
         read_snapshot(manifest, _reseal(manifest, values))
 
 
-def test_text_all_cannot_silently_replace_member_content() -> None:
-    manifest = object_value(fixture("manifest.json"))
-    union = object_value(fixture("text-all.json"))
-    member = object_value(array(union["members"])[0])
-    object_value(member["payload"])["format_version"] = "1.0.0"
-    data = canonical(union)
-    description = object_value(manifest["text_all"])
-    hashed = digest(data)
-    description.update(
-        sha256=hashed, bytes=len(data), path="snapshots/blobs/" + hashed[7:] + ".json"
-    )
-    with pytest.raises(ValueError, match="text_all member hash or length mismatch"):
-        read_text_all(manifest, data, attachments(payloads()))
-
-
-def union_bytes(manifest: dict[str, JsonValue], blobs: dict[str, bytes]) -> bytes:
-    description = object_value(manifest["text_all"])
-    raw = canonical(
-        {
-            "format_version": manifest["format_version"],
-            "members": [
-                object_value(ref)
-                | {"payload": parse(blobs[string(object_value(ref)["key"])])}
-                for ref in array(description["contains"])
-            ],
-        }
-    )
-    hashed = digest(raw)
-    description.update(
-        sha256=hashed, bytes=len(raw), path="snapshots/blobs/" + hashed[7:] + ".json"
-    )
-    return raw
-
-
-@pytest.mark.parametrize("reader", ["snapshot", "text_all"])
 @pytest.mark.parametrize("member", ["config", "container"])
-def test_matching_member_hash_cannot_bypass_payload_schema(
-    reader: str, member: str
-) -> None:
+def test_matching_member_hash_cannot_bypass_payload_schema(member: str) -> None:
     manifest = object_value(fixture("manifest.json"))
     values = {key: parse(raw) for key, raw in payloads().items()}
     key = (
@@ -407,39 +355,14 @@ def test_matching_member_hash_cannot_bypass_payload_schema(
     )
     object_value(values[key])["unexpected"] = True
     blobs = _reseal(manifest, values)
-    raw = union_bytes(manifest, blobs)
-    if reader == "text_all":
-        with pytest.raises(ValidationError):
-            read_text_all(manifest, raw, attachments(blobs))
-    else:
-        snapshot = Snapshot(
-            manifest,
-            {key: compress(value, None) for key, value in blobs.items()},
-            compress(raw, None),
-            {},
-            compress(canonical(manifest), None),
-        )
-        with pytest.raises(ValidationError):
-            snapshot.verify(Projection({}, {}, {}))
-
-
-@pytest.mark.parametrize("field", ["union", "member", "missing_payload"])
-def test_text_all_envelope_still_rejects_invalid_shape(field: str) -> None:
-    manifest = object_value(fixture("manifest.json"))
-    union = object_value(fixture("text-all.json"))
-    if field == "union":
-        union["unexpected"] = True
-    elif field == "member":
-        object_value(array(union["members"])[0])["unexpected"] = True
-    else:
-        del object_value(array(union["members"])[0])["payload"]
-    raw = canonical(union)
-    hashed = digest(raw)
-    object_value(manifest["text_all"]).update(
-        sha256=hashed, bytes=len(raw), path="snapshots/blobs/" + hashed[7:] + ".json"
+    snapshot = Snapshot(
+        manifest,
+        {key: compress(value, None) for key, value in blobs.items()},
+        {},
+        compress(canonical(manifest), None),
     )
     with pytest.raises(ValidationError):
-        read_text_all(manifest, raw, attachments(payloads()))
+        snapshot.verify(Projection({}, {}, {}))
 
 
 def test_reader_minimum_version_is_fixed() -> None:

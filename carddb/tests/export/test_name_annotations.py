@@ -18,7 +18,7 @@ from sve_carddb.export.name_annotations import (
 )
 from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.read_api import load_export
-from sve_carddb.export.reader import read_snapshot, read_text_all
+from sve_carddb.export.reader import read_snapshot
 from sve_carddb.export.reader_annotations import validate_annotations
 from sve_carddb.export.transport import Batch, Ownership, export_snapshot
 
@@ -101,18 +101,6 @@ def test_native_whole_name_round_trip_and_publish_boundary(tmp_path: Path) -> No
     assert compact["translation"][0]["annotation_set_id"] is None
     payloads = {key: blob.raw for key, blob in snapshot.payloads.items()}
     assert read_snapshot(snapshot.manifest, payloads) == projection.tables
-    assert (
-        read_text_all(
-            snapshot.manifest,
-            snapshot.text_all.raw,
-            {
-                key: raw
-                for key, raw in payloads.items()
-                if key == "programs" or key.startswith("images/")
-            },
-        )
-        == projection.tables
-    )
     for blob in snapshot.payloads.values():
         value = object_value(parse(blob.raw))
         for fragments in object_value(value.get("tables", {})).values():

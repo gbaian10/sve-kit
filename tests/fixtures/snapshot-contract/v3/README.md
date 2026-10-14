@@ -8,8 +8,7 @@ reader, canonical and bucket vectors use the current 4.0 shape.
 The profile is format `4.0.0`, 64 buckets, with all eight required capabilities.
 JSON files are indented for review; manifest hashes and sizes describe
 canonical-json-v1 bytes. Load each payload through its manifest key and path.
-The golden must rejoin to `expected-logical.json` both from individual files and
-from `text-all.json` plus images/programs attachments.
+The golden must rejoin from individual files to `expected-logical.json`.
 
 The golden has permanent printing identities 1/2, front/back ordinals 0/1,
 separate card/art versions 7/11, and two available printing bindings sharing one
@@ -27,10 +26,9 @@ or a manifest file key. Integer path segments index arrays; strings index object
 For each case, copy the golden; apply setup then the primary replacement.
 Reseal payloads in config/programs/bootstrap, text, images order. Rebind embedded
 file/base references and manifest dependencies to the new hashes, update payload
-path, byte length and row counts, then rebind config_ref and text_all.contains.
+path, byte length and row counts, then rebind config_ref.
 Preserve dependency membership: resealing must not repair a missing/extra
-reference. These cases exercise the individual-file reader, so rebuilding the
-text union is unnecessary. The expected rejection must follow byte and shape
+reference. The expected rejection must follow byte and shape
 validation, not an unrelated stale hash. `error` identifies the Python message;
 TS must reject for the same reason without adopting Python exception wording.
 

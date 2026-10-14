@@ -13,13 +13,7 @@ from sve_carddb.contracts.snapshot import columns, definition, row_type, tables
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
 from sve_carddb.export.name_annotations import compact_names, whole_name
 from sve_carddb.export.project.source import json_list
-from sve_carddb.export.reader import (
-    join_payloads,
-    read_snapshot,
-    text_all_members,
-    text_all_payloads,
-    validate_manifest,
-)
+from sve_carddb.export.reader import join_payloads, read_snapshot, validate_manifest
 from sve_carddb.export.semantics import row_key
 from sve_carddb.export.transport.compression import Blob, Brotli, compress, recipe
 from sve_carddb.export.transport.layout import Group, Layout, Ownership, references
@@ -49,24 +43,21 @@ class Snapshot:
 
     manifest: Record
     payloads: dict[str, Blob]
-    text_all: Blob
     compression_recipe: dict[str, str | int | None]
     manifest_blob: Blob
 
     def verify(self, projection: Projection) -> None:
-        """Require the reader's join to equal the logical view and the union to match it."""
+        """Require the reader's join to equal the logical view."""
         joined = read_snapshot(
             self.manifest, {key: blob.raw for key, blob in self.payloads.items()}
         )
-        text_all_payloads(self.manifest, self.text_all.raw)
         if joined != projection.tables:
             raise ValueError("Export join differs from public logical projection")
 
     def assert_identical(self, other: Snapshot) -> None:
-        """Compare exact raw and compressed bytes, including the alternative union."""
+        """Compare exact raw and compressed payload bytes."""
         if (
             self.payloads != other.payloads
-            or self.text_all != other.text_all
             or self.compression_recipe != other.compression_recipe
         ):
             raise ValueError("Clean exports differ in payload or compression bytes")
@@ -198,7 +189,6 @@ class _Files:
         self.pending: dict[str, Future[Blob]] = {}
         self.files: dict[str, Record] = {}
         self.raw: dict[str, bytes] = {}
-        self.values: dict[str, JsonValue] = {}
 
     def add(
         self, key: str, role: str, value: Record, dependencies: list[JsonValue]
@@ -226,23 +216,14 @@ class _Files:
         self.files[key] = file
         self.raw[key] = raw
         self.pending[key] = self.pool.submit(compress, raw, self.brotli)
-        self.values[key] = value
         return file
 
-    def snapshot(
-        self,
-        manifest: Record,
-        union_raw: bytes,
-        union_future: Future[Blob],
-        projection: Projection,
-    ) -> Snapshot:
+    def snapshot(self, manifest: Record, projection: Projection) -> Snapshot:
         """Join sealed raw bytes while compression fills only transfer lengths."""
         joined = join_payloads(manifest, self.raw)
-        text_all_members(manifest, union_raw)
         if joined != projection.tables:
             raise ValueError("Export join differs from public logical projection")
         payloads = {key: future.result() for key, future in self.pending.items()}
-        union = union_future.result()
         complete = manifest | {
             "files": [
                 object_value(file)
@@ -253,14 +234,11 @@ class _Files:
                 }
                 for file in array(manifest["files"])
             ],
-            "text_all": object_value(manifest["text_all"])
-            | {"compressed_bytes": _compressed_bytes(union)},
         }
         validate_manifest(complete)
         return Snapshot(
             complete,
             payloads,
-            union,
             recipe(self.brotli),
             compress(canonical(complete), self.brotli),
         )
@@ -437,11 +415,7 @@ def export_snapshot(
     ):
         raise ValueError("Public region is outside the explicit manifest scope")
     layout = Layout(compact_names(projection.tables), ownership, count, format_version)
-    # Separate lanes keep text_all from queuing behind the remaining shards.
-    with (
-        ThreadPoolExecutor(max_workers=1) as shards,
-        ThreadPoolExecutor(max_workers=1) as unions,
-    ):
+    with ThreadPoolExecutor(max_workers=1) as shards:
         files = _Files(brotli, shards)
         config = files.add(
             "config",
@@ -457,22 +431,6 @@ def export_snapshot(
         )
         groups = _partition(layout)
         _add_bands(layout, files, groups, config)
-        contains: list[JsonValue] = [
-            _reference(file)
-            for key, file in sorted(files.files.items())
-            if files.files[key]["role"] in {"bootstrap", "text", "config"}
-        ]
-        union_raw = canonical(
-            {
-                "format_version": format_version,
-                "members": [
-                    object_value(ref)
-                    | {"payload": files.values[string(object_value(ref)["key"])]}
-                    for ref in contains
-                ],
-            }
-        )
-        union_future = unions.submit(compress, union_raw, brotli)
         languages = json_list(
             sorted(
                 {
@@ -493,11 +451,10 @@ def export_snapshot(
             "required_capabilities": list(selected.capabilities),
             "files": [files.files[key] for key in sorted(files.files)],
             "config_ref": _reference(config),
-            "text_all": _description(union_raw) | {"contains": contains},
             "partitioning": partitioning,
             "changes_ref": None,
         }
-        return files.snapshot(manifest, union_raw, union_future, projection)
+        return files.snapshot(manifest, projection)
 
 
 def _concept_references(row: Record) -> set[str]:

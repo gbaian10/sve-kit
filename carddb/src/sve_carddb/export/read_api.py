@@ -278,11 +278,8 @@ def _blob(root: Path, row: dict[str, JsonValue]) -> tuple[bytes, tuple[Member, .
 
 def _descriptions(manifest: dict[str, JsonValue]) -> list[dict[str, JsonValue]]:
     rows = [object_value(x) for x in array(manifest["files"])]
-    rows += [
-        object_value(manifest[f])
-        for f in ("text_all", "changes_ref")
-        if manifest[f] is not None
-    ]
+    if manifest["changes_ref"] is not None:
+        rows.append(object_value(manifest["changes_ref"]))
     for row in rows:
         if (
             string(row["path"])
