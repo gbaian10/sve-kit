@@ -85,6 +85,7 @@ def _target(value: dict[str, JsonValue]) -> dict[str, JsonValue]:
             if key in bound
         },
     )
+    domains = dict(renderer().domains)
     if "reference" in value:
         definition = deepcopy(
             object_value(object_value(CASES["fixtures"])["identity_base"])
@@ -101,11 +102,10 @@ def _target(value: dict[str, JsonValue]) -> dict[str, JsonValue]:
         values = object_value(item.binding.model_dump(mode="json")["values"])
         values[string(object_value(slots[0])["name"])] = value["reference"]
         item = rebind(item, frame(definition), values=values)
-        domains = dict(renderer().domains)
         domains["concept.rule_term.v1"] = ReferenceDomain(
             type="Concept", category="rule_term", references=()
         )
-        item.binding.verify(item.frame, domains)
+    item.binding.verify(item.frame, domains)
     rendered(item)
     return {}
 
