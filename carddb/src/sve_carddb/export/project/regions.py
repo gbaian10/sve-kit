@@ -167,7 +167,6 @@ def _card_rows(
 def region_views(
     source: Source,
     view: dict[str, list[Record]],
-    as_of: str,
     dates: Dates,
     defaults: Mapping[tuple[str, str], DefaultPrinting],
 ) -> None:
@@ -219,7 +218,7 @@ def region_views(
                 card_id=card["id"],
                 region=region,
             )
-            date = as_of
+            date: str | None = None
             if (
                 release == "unknown"
                 and overrides
@@ -236,7 +235,7 @@ def region_views(
                     "region": region,
                     "release_state": release,
                     "mapping_state": mapping,
-                    "as_of": date,
+                    "availability_override_as_of": date,
                     "mapping_as_of": None if review is None else review["as_of"],
                     "mapping_scope": None
                     if review is None

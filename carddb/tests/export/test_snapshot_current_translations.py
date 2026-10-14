@@ -122,7 +122,6 @@ def test_unchecked_machine_translation_keeps_quality_and_source_closure(
     result = project(
         db,
         regions=regions,
-        as_of="2026-10-01",
         settings=SETTINGS,
         decisions=jp_source(),
     )
@@ -153,7 +152,12 @@ def test_unchecked_machine_translation_keeps_quality_and_source_closure(
     exported = export_snapshot(
         result,
         Ownership.from_database(db, result),
-        Batch("preview-20261005T010203Z-0001", "2026-10-05T01:02:03Z", regions),
+        Batch(
+            "preview-20261005T010203Z-0001",
+            "2026-10-05T01:02:03Z",
+            "2026-10-01",
+            regions,
+        ),
     )
     payloads = {key: blob.raw for key, blob in exported.payloads.items()}
     assert read_snapshot(exported.manifest, payloads) == result.tables
@@ -362,7 +366,6 @@ def test_jp_translation_rejects_a_snapshot_missing_the_exact_donor_owner(
     result = project(
         db,
         regions=("en",),
-        as_of="2026-10-01",
         settings=SETTINGS,
         decisions=jp_source(),
     )
@@ -370,7 +373,12 @@ def test_jp_translation_rejects_a_snapshot_missing_the_exact_donor_owner(
         export_snapshot(
             result,
             Ownership.from_database(db, result),
-            Batch("preview-20261002T010203Z-0001", "2026-10-02T01:02:03Z", ("en",)),
+            Batch(
+                "preview-20261002T010203Z-0001",
+                "2026-10-02T01:02:03Z",
+                "2026-10-01",
+                ("en",),
+            ),
         )
 
 

@@ -36,7 +36,7 @@ export function decodeRow(
   name: string,
   value: JsonValue,
   path: JsonPath = [],
-  version = "3.0.0",
+  version = "4.0.0",
 ): Row {
   const kinds = arrayValue(definition(name, version)["x-types"] ?? null)
   const names = columns(name, version)

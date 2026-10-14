@@ -29,7 +29,7 @@ version; identical public version labels with different sources remain distinct.
 Official dates and source URLs are preserved without inferring missing dates.
 
 `resolve_construction` requires explicit `on_date`, `as_of` and `supported_refs`.
-The caller takes `as_of` from the pinned snapshot publication UTC date and supplies
+The caller takes `as_of` from the pinned snapshot manifest `data_as_of` and supplies
 only versioned algorithm references that its evaluator actually supports. This
 package preserves the opaque `construction_rules_ref`; it has no built-in list
 of accepted refs. An absent or unsupported ref, absent copy limit or revision,

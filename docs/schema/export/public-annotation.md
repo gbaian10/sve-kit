@@ -1,15 +1,15 @@
 # 公開 annotation 與 JP 依據契約
 
-本文件定義 [#496](https://github.com/gbaian10/sve-kit/issues/496) 的 **3.0.0 目標契約**。
+本文件定義 [#496](https://github.com/gbaian10/sve-kit/issues/496) 的公開 annotation 契約，目前採 **4.0.0 候選格式**。
 它承接 [ADR-0016](../../adr/0016-four-layer-translation.md)、[四層共用契約 §8](../domains/four-layer-translation.md#8-建置-dbrender-projection-與依賴)
 及 [#198](https://github.com/gbaian10/sve-kit/issues/198)，不修改 frame、render 或 annotation 的身分配方。
 機器定義見 [Schema](public-annotation.schema.json)，固定正反例見[案例規格](public-annotation-cases.md)。
-producer、Python reader、TS 解碼器與 read_api 已切換為 3.0.0，Web 依精確 owner 讀取標註與來源對照。
-本次 #498 已完成 N0 的原生四層 authored workflow、全庫機械重鍵與 3.0.0 producer／reader／Web 接線；固定案例本身仍不是實作驗收證據。既有容量依維護者豁免交付；基本目錄設計與容量量法依 [size-budget](size-budget.md)，不代表分段載入或手機效能已驗收。
+producer、Python reader、TS 解碼器與 read_api 已切換為 4.0.0，Web 依精確 owner 讀取標註與來源對照。
+先前 #498 已完成 N0 的原生四層 authored workflow、全庫機械重鍵與當時 3.0.0 的 producer／reader／Web 接線；固定案例本身仍不是實作驗收證據。既有容量依維護者豁免交付；基本目錄設計與容量量法依 [size-budget](size-budget.md)，不代表分段載入或手機效能已驗收。
 
 ## 1. 版本與驗證邊界
 
-`format_version=min_reader_version=3.0.0`。新增必要 annotation，改變 Translation／FieldTranslation／cr_clause
+`format_version=min_reader_version=4.0.0`。新增必要 annotation，改變 Translation／FieldTranslation／cr_clause
 欄序並移除 basis 值，依[傳輸契約 §1.1](snapshot-transport.md#11-版本與相容判斷)升 major。
 所有 manifest、config、container、programs、text_all、changes 與 index entry 宣告同步；
 `index_format=2` 不變。空 annotation 或無繁中列的快照仍須宣告全部能力。
@@ -29,7 +29,7 @@ required_capabilities 恰為以下已排序且不重複的集合：
 ]
 ```
 
-3.0 reader 只接受明示支援的 3.0.0；不把 2.0、未知 minor／major 或未支援能力降級成普通文字。
+4.0 reader 只接受明示支援的 4.0.0；不把 2.0、未知 minor／major 或未支援能力降級成普通文字。
 新版 producer 不產 `shared_jp`／`shared_jp_unchecked`，reader 亦拒絕這兩個舊值。
 切換時一次替換 producer／reader／共用 golden，不保留永久雙格式路徑，不回寫歷史快照。
 更新失敗維持已驗且相容的本機 active；不把不相容 previous 自動升版。
@@ -349,6 +349,6 @@ JSON object 的重複鍵仍歸 wire，occurrence ordinal 與 range 次序仍依 
 案例 mutation 可以故意不重算 ID，用來證明先抓目標錯誤；完整 reader harness 必重釘有效的外層檔案 bytes/hash
 以到達該語義邊界，不能因外層 hash 失敗就算通過。
 
-容量依 [size-budget](size-budget.md#30-annotation-與-jp-來源的計帳)逐項計入；
+容量依 [size-budget](size-budget.md#40-annotation-與-jp-來源的計帳)逐項計入；
 N0 已量測既有完整文字、單片與 JP／EN 啟動，超標依維護者豁免交付；修訂後按單區完整文字閉包、基本目錄容器及其他資料檔量測，不沿用舊帳當新配置通過。
 本單只驗 Schema 與案例可讀／一致；不得把合成小樣本或既有 2.0 數字當成新格式容量通過。

@@ -40,6 +40,7 @@ def export(
     batch = Batch(
         "preview-" + moment.strftime("%Y%m%dT%H%M%SZ") + "-0001",
         moment.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "2026-10-02",
         ("jp",),
     )
     revision, previous = reserve(roots)

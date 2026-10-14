@@ -73,7 +73,7 @@ function page(extra: number) {
   }
   // The page API consumes an already-validated client, independently of byte decoding.
   const snapshot = {
-    manifest: { format_version: "3.0.0", partitioning: { bucket_count: 64 } },
+    manifest: { format_version: "4.0.0", partitioning: { bucket_count: 64 } },
     bootstrap,
     files,
   } as unknown as LoadedSnapshot

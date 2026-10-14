@@ -133,7 +133,7 @@ formal release gates and the separate Web consumer acceptance.
 ## Validation boundary
 
 The native synthetic CLI test seals JP and EN card pages, registers two separate
-card identities and product families, and exports a 3.0 preview and private
+card identities and product families, and exports a 4.0 preview and private
 SQLite bundle using format 2 catalog and current glossary inputs. It uses the
 actual frozen providers, compiler and catalog composition without adapters or
 monkeypatching. Assertions cover both regions, physical card rows, current
@@ -144,9 +144,9 @@ keys, exact source evidence and owner mismatches. Supplemental tests exercise ca
 observations with mocked catalog composition. Synthetic tests do not claim complete
 real-card, catalog and translation acceptance.
 
-## 3.0 media previews
+## 4.0 media previews
 
-Select `--format-version 3.0.0` to export printing-owned media with permanent
+Select `--format-version 4.0.0` to export printing-owned media with permanent
 image keys. The source library still uses verified content-addressed WebPs;
 the image producer writes the five display sizes to
 `images/<size>/<int_id>[-f<ordinal>].webp`. `display_url` selects the card or art
@@ -157,9 +157,9 @@ an image build and commits only after images and index are written. Pure text
 exports consume the index's versions without allocating or committing any state.
 Failed image builds burn their reservation; restore missing state from backup.
 
-3.0 supports the same-name wire capability and rejects malformed nonempty links.
+4.0 supports the same-name wire capability and rejects malformed nonempty links.
 The existing offline recipe still keeps policy browsing private: its public
 same-name links are empty. This preview does not certify policy browsing or
 formal release readiness; policy links and the digital endpoint DB integration
-remain separate. The 3.0 offline config itself always contains the two game URL
+remain separate. The 4.0 offline config itself always contains the two game URL
 templates, with unknown service status; this does not perform a health check.

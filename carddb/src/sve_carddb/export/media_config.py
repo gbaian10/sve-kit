@@ -1,4 +1,4 @@
-"""Fixed offline endpoint configuration for the 3.0 candidate producer."""
+"""Fixed offline endpoint configuration for the 4.0 candidate producer."""
 
 from typing import TYPE_CHECKING
 

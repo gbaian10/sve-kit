@@ -1,6 +1,6 @@
 # 公開邏輯投影
 
-`project(db, regions=..., as_of=..., settings=..., decisions=...)` 讀已驗證的建置 DB，
+`project(db, regions=..., settings=..., decisions=...)` 讀已驗證的建置 DB，
 回傳 `Projection.tables/config/metadata`。`tables` 恰有 43 個文字集合與 3 個影像集合，
 即使未啟用也保留空陣列。這是 join 後的公開邏輯物件，不是分片、tuple 快照或發布器；
 輸入批次／採納／freshness 的 domain 驗證仍由建置器負責。
@@ -11,7 +11,6 @@ from sve_carddb.export.project import Decisions, Settings, project
 result = project(
     database,
     regions=("jp",),
-    as_of="2026-10-01",
     settings=Settings(
         catalog_feedback_url="https://example.invalid/feedback",
         grammar_version="card-query-v1",
@@ -92,7 +91,7 @@ logical Schema；其他相同形狀的 row 不在投影重驗。完整 wire Sche
 - `general_evidence`：printing ID → 路由建置器的 `GeneralEvidence`，原樣傳給唯一的預設版次選取器；
   不由卡號、字串猜加工，不把未知分類補成已確認一般版。
 
-投影沿 3.0.0 機器契約檢查 `face.wording`、PrintingFace.observations、annotation 與來源指標的完整欄序及閉包。
+投影沿 4.0.0 機器契約檢查 `face.wording`、PrintingFace.observations、annotation 與來源指標的完整欄序及閉包。
 `Projection` 仍須經 `export_snapshot` 的 reader 驗證，才能作為完整候選快照；
 實際 File、partition、hash、下載閉包、Schema 與公開 view 規則在該發布邊界檢查。
 

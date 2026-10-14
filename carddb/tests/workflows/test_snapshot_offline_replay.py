@@ -244,7 +244,7 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
             for region in ("en", "jp")
         ),
         revision=commit(root),
-        as_of="2026-10-02",
+        as_of="2026-10-01",
         data_version="preview-20261002T010203Z-0001",
         published_at="2026-10-02T01:02:03Z",
         feedback_url="https://example.invalid/feedback",
@@ -259,7 +259,7 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
             "snapshot",
             "export-offline",
             "--format-version",
-            "3.0.0",
+            "4.0.0",
             "--inputs",
             str(path),
             "--preview-dir",
@@ -283,7 +283,8 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
     manifest = object_value(
         parse((tmp_path / "preview" / str(pointer["manifest_path"])).read_bytes())
     )
-    assert manifest["format_version"] == "3.0.0"
+    assert manifest["format_version"] == "4.0.0"
+    assert manifest["data_as_of"] == "2026-10-01"
     assert manifest["regions"] == ["en", "jp"]
     record = InputRecord.model_validate_json(
         (tmp_path / "bundle/inputs.json").read_bytes()

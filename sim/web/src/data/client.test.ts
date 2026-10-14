@@ -168,7 +168,7 @@ describe("createSnapshotClient", () => {
       new TextEncoder().encode(
         JSON.stringify({
           ...index,
-          current: { ...(index["current"] as JsonObject), format_version: "4.0.0" },
+          current: { ...(index["current"] as JsonObject), format_version: "99.0.0" },
           previous: null,
         }),
       ),
@@ -779,7 +779,7 @@ describe("createSnapshotClient: verified snapshot records", () => {
       canonical({
         ...index,
         revision: 3,
-        current: { ...objectValue(index["current"]), format_version: "4.0.0" },
+        current: { ...objectValue(index["current"]), format_version: "99.0.0" },
         previous: null,
       }),
     )

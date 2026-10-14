@@ -119,7 +119,7 @@ class Inputs(RecordData):
 
     def batch(self) -> Batch:
         """Keep the launch scope explicit rather than deriving it from loaded rows."""
-        return Batch(self.data_version, self.published_at, ("en", "jp"))
+        return Batch(self.data_version, self.published_at, self.as_of, ("en", "jp"))
 
 
 @dataclass(frozen=True)
@@ -584,7 +584,6 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         projection = project(
             db,
             regions=("en", "jp"),
-            as_of=inputs.as_of,
             settings=Settings(
                 inputs.feedback_url, inputs.grammar_version, inputs.normalizer_version
             ),

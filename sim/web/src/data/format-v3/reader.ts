@@ -12,9 +12,9 @@ import {
 } from "./json"
 import { rowType } from "./schema"
 
-const FORMAT = "3.0.0"
+const FORMAT = "4.0.0"
 /** This reader's own contract version (transport §1.1), independent of the web app version. */
-const READER_CONTRACT_VERSION = "3.0.0"
+const READER_CONTRACT_VERSION = "4.0.0"
 const CAPABILITIES: readonly string[] = [
   "column-partition-v1",
   "fragment-container-v1",
@@ -81,7 +81,7 @@ export function readManifest(value: JsonValue): { manifest: JsonObject; files: F
   return { manifest, files }
 }
 
-export function readContainer(file: JsonObject, value: JsonObject, version = "3.0.0"): Fragment[] {
+export function readContainer(file: JsonObject, value: JsonObject, version = "4.0.0"): Fragment[] {
   const key = stringValue(file["key"])
   return Object.entries(objectValue(value["tables"])).flatMap(([table, entries]) =>
     arrayValue(entries).map((entry) => {

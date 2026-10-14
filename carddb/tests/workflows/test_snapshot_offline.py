@@ -438,7 +438,7 @@ def test_offline_coverage_remains_unknown(
 
 
 @pytest.mark.parametrize("source", ["env", "cli", "cli-over-env"])
-@pytest.mark.parametrize("format_version", ["3.0.0"])
+@pytest.mark.parametrize("format_version", ["4.0.0"])
 @pytest.mark.parametrize("with_brotli", [False, True])
 def test_offline_cli_writes_private_bundle_and_dual_preview(
     source: str,
@@ -738,7 +738,6 @@ def test_composer_checks_coverage_before_returning_or_publishing(
         db: Database,
         *,
         regions: tuple[str, ...],
-        as_of: str,
         settings: Settings,
         decisions: Decisions,
         publication_printings: frozenset[str] | None = None,
@@ -746,7 +745,6 @@ def test_composer_checks_coverage_before_returning_or_publishing(
         projection = project(
             db,
             regions=regions,
-            as_of=as_of,
             settings=settings,
             decisions=decisions,
             publication_printings=publication_printings,

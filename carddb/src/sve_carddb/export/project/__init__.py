@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.contracts.snapshot import definition, tables, validate
+from sve_carddb.contracts.snapshot import definition, tables
 from sve_carddb.core.json import array, object_value, string
 from sve_carddb.domains.routes.defaults import select_defaults
 from sve_carddb.export.project.annotations import annotations
@@ -136,7 +136,6 @@ def project(
     db: Database,
     *,
     regions: tuple[str, ...],
-    as_of: str,
     settings: Settings,
     decisions: Decisions = Decisions(),
     publication_printings: frozenset[str] | None = None,
@@ -150,7 +149,6 @@ def project(
         raise ValueError("Explicit sorted nonempty regions required")
     if type(decisions.private_digital) is not bool:
         raise ValueError("Private digital projection flag must be boolean")
-    validate("Date", as_of)
     source = Source(db)
     view = initial(source)
     if publication_printings is not None:
@@ -193,7 +191,7 @@ def project(
         for item in select_defaults(db, general_evidence=decisions.general_evidence)
         if item.printing_id in public_prints
     }
-    region_views(source, view, as_of, dates, defaults)
+    region_views(source, view, dates, defaults)
     support(source, view, decisions)
     annotations(source, view, decisions)
     prune(view)

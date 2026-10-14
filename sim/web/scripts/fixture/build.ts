@@ -52,7 +52,7 @@ export interface BuiltSnapshot {
   readonly counts: Readonly<Record<string, number>>
 }
 
-const FORMAT = "3.0.0"
+const FORMAT = "4.0.0"
 const AS_OF = "2026-09-29"
 const IMAGE_SIZES = [
   { key: "art_m", purpose: "art", max_width: 384, max_height: 288 },
@@ -955,7 +955,7 @@ async function addCard(ctx: CardContext): Promise<void> {
       region,
       release_state: "released",
       mapping_state: mapping,
-      as_of: AS_OF,
+      availability_override_as_of: null,
       mapping_as_of: mapping === "confirmed_none" || mapping === "pending" ? "2026-09-01" : null,
       mapping_scope: mapping === "confirmed_none" ? "BP01EN" : null,
       default_printing_id: first?.id ?? null,
@@ -1630,9 +1630,10 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     format_version: FORMAT,
     data_version: dataVersion,
     published_at: publishedAt,
+    data_as_of: AS_OF,
     regions,
     languages,
-    min_reader_version: "3.0.0",
+    min_reader_version: "4.0.0",
     required_capabilities: [
       "column-partition-v1",
       "digital-same-name-links-v1",
@@ -1707,7 +1708,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     data_version: dataVersion,
     published_at: publishedAt,
     format_version: FORMAT,
-    min_reader_version: "3.0.0",
+    min_reader_version: "4.0.0",
     required_capabilities: [
       "column-partition-v1",
       "digital-same-name-links-v1",

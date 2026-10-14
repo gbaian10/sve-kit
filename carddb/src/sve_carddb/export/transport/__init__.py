@@ -39,6 +39,7 @@ class Batch:
 
     data_version: str
     published_at: str
+    data_as_of: str
     regions: tuple[str, ...]
 
 
@@ -485,6 +486,7 @@ def export_snapshot(
             "format_version": format_version,
             "data_version": batch.data_version,
             "published_at": batch.published_at,
+            "data_as_of": batch.data_as_of,
             "regions": list(batch.regions),
             "languages": languages,
             "min_reader_version": format_version,

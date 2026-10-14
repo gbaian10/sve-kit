@@ -78,7 +78,7 @@ reader 保留 TypedArray、緊湊欄式 store 與唯一字串池；view 只持 I
 影像 metadata 的 12 MiB raw 對應量／64 檔調度上限不等於 heap，基本目錄容器 2 MiB 也不等於 JS 配置量。
 桌面 tuple heap、下載壓縮率、合成案例或 ID URL 不能證明手機通過。
 
-## 3.0 annotation 與 JP 來源的計帳
+## 4.0 annotation 與 JP 來源的計帳
 
 [公開 annotation 契約](public-annotation.md)的必要資料全部屬完整文字預算：
 annotation_set 的 ID／exact text／occurrences／ranges／bold、field_annotation 的 owner／field／ordinal、

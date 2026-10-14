@@ -16,7 +16,7 @@ it("reads the committed version index, manifest and payloads with the current re
   const index = objectValue(parseJson(await readCommitted("snapshots/versions/index.json")))
   expect(index["index_format"]).toBe(2)
   const entry = objectValue(index["current"])
-  expect(entry["format_version"]).toBe("3.0.0")
+  expect(entry["format_version"]).toBe("4.0.0")
   const manifestBytes = await readCommitted(stringValue(entry["manifest_path"]))
   expect(digest(manifestBytes)).toBe(entry["manifest_sha256"])
   const manifest = objectValue(parseJson(manifestBytes))

@@ -64,7 +64,6 @@ def projected(db: Database, chosen: Decisions | None = None) -> Projection:
     return project(
         db,
         regions=("jp",),
-        as_of="2026-10-01",
         settings=SETTINGS,
         decisions=decisions() if chosen is None else chosen,
     )
@@ -959,7 +958,7 @@ def test_region_scope_must_be_explicit_and_canonical(
     db: Database, regions: tuple[str, ...]
 ) -> None:
     with pytest.raises(ValueError, match="regions required"):
-        project(db, regions=regions, as_of="2026-10-01", settings=SETTINGS)
+        project(db, regions=regions, settings=SETTINGS)
 
 
 def test_observation_state_whitelist_and_missing_effect_are_not_empty_text(
@@ -1141,7 +1140,6 @@ def dual_project(db: Database, chosen: Decisions) -> Projection:
     return project(
         db,
         regions=("en", "jp"),
-        as_of="2026-10-01",
         settings=SETTINGS,
         decisions=chosen,
     )
@@ -1407,7 +1405,12 @@ def test_publication_rejects_projection_with_invalid_vocabulary(db: Database) ->
         export_snapshot(
             result,
             Ownership.from_database(db, result),
-            Batch("preview-20261002T010203Z-0001", "2026-10-02T01:02:03Z", ("jp",)),
+            Batch(
+                "preview-20261002T010203Z-0001",
+                "2026-10-02T01:02:03Z",
+                "2026-10-02",
+                ("jp",),
+            ),
         )
 
 
@@ -1502,6 +1505,24 @@ def test_mapping_review_state_is_projected(db: Database, state: str) -> None:
             {"state": state},
         )
     assert region(projected(db))["mapping_state"] == state
+
+
+def test_confirmed_availability_override_preserves_its_date(db: Database) -> None:
+    result = region(projected(db), "en")
+    assert result["release_state"] == "announced"
+    assert result["availability_override_as_of"] == DATE
+
+
+def test_released_region_has_no_availability_override_date(db: Database) -> None:
+    with db.transaction():
+        db.update(
+            "region_availability_override",
+            {"card_id": "card"},
+            {"region": "jp"},
+        )
+    result = region(projected(db), "jp")
+    assert result["release_state"] == "released"
+    assert result["availability_override_as_of"] is None
 
 
 @pytest.mark.parametrize("level", ["proposed", "model_reviewed", "sampled"])

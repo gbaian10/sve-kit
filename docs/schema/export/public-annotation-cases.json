@@ -9,8 +9,8 @@
         "zh-Hant"
       ],
       "admission": {
-        "format_version": "3.0.0",
-        "min_reader_version": "3.0.0",
+        "format_version": "4.0.0",
+        "min_reader_version": "4.0.0",
         "required_capabilities": [
           "column-partition-v1",
           "digital-same-name-links-v1",
@@ -893,8 +893,8 @@
       "operation": "admission",
       "input": {
         "value": {
-          "format_version": "3.0.0",
-          "min_reader_version": "3.0.0",
+          "format_version": "4.0.0",
+          "min_reader_version": "4.0.0",
           "required_capabilities": [
             "column-partition-v1",
             "digital-same-name-links-v1",
@@ -906,9 +906,9 @@
             "rules-name-on-demand-v1"
           ]
         },
-        "reader_version": "3.0.0",
+        "reader_version": "4.0.0",
         "supported_formats": [
-          "3.0.0"
+          "4.0.0"
         ],
         "supported_capabilities": [
           "column-partition-v1",
@@ -932,7 +932,7 @@
       "input": {
         "fixture": "jp_en",
         "changes": {
-          "/admission/format_version": "4.0.0"
+          "/admission/format_version": "99.0.0"
         }
       },
       "expected": {
@@ -1088,8 +1088,8 @@
       "operation": "admission",
       "input": {
         "value": {
-          "format_version": "3.0.0",
-          "min_reader_version": "3.0.0",
+          "format_version": "4.0.0",
+          "min_reader_version": "4.0.0",
           "required_capabilities": [
             "column-partition-v1",
             "digital-same-name-links-v1",
@@ -1125,8 +1125,8 @@
       "operation": "admission",
       "input": {
         "value": {
-          "format_version": "3.0.0",
-          "min_reader_version": "3.0.0",
+          "format_version": "4.0.0",
+          "min_reader_version": "4.0.0",
           "required_capabilities": [
             "column-partition-v1",
             "digital-same-name-links-v1",
@@ -1138,9 +1138,9 @@
             "rules-name-on-demand-v1"
           ]
         },
-        "reader_version": "3.0.0",
+        "reader_version": "4.0.0",
         "supported_formats": [
-          "3.0.0"
+          "4.0.0"
         ],
         "supported_capabilities": [
           "column-partition-v1",
@@ -1163,8 +1163,8 @@
       "operation": "envelope_versions",
       "input": {
         "admission": {
-          "format_version": "3.0.0",
-          "min_reader_version": "3.0.0",
+          "format_version": "4.0.0",
+          "min_reader_version": "4.0.0",
           "required_capabilities": [
             "column-partition-v1",
             "digital-same-name-links-v1",
@@ -1177,12 +1177,12 @@
           ]
         },
         "members": {
-          "container": "3.0.0",
+          "container": "4.0.0",
           "config": "2.0.0",
-          "programs": "3.0.0",
-          "text_all": "3.0.0",
-          "changes": "3.0.0",
-          "index_entry": "3.0.0"
+          "programs": "4.0.0",
+          "text_all": "4.0.0",
+          "changes": "4.0.0",
+          "index_entry": "4.0.0"
         }
       },
       "expected": {

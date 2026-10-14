@@ -75,7 +75,12 @@ def name_snapshot() -> tuple[Projection, Snapshot, MediaPlan]:
         snapshot = export_snapshot(
             projection,
             ownership,
-            Batch("preview-20261011T010203Z-0001", "2026-10-11T01:02:03Z", ("jp",)),
+            Batch(
+                "preview-20261011T010203Z-0001",
+                "2026-10-11T01:02:03Z",
+                "2026-10-11",
+                ("jp",),
+            ),
         )
         return projection, snapshot, plan
 
