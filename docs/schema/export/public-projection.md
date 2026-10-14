@@ -25,10 +25,14 @@ result = project(
 
 `records.SCALARS` 逐集合列出同名直投的每個 scalar 欄；`source.Source` 僅經
 `Database.select` 讀明列欄位。未列建置欄位不會帶出，包括作者、raw locator、來源 ID、
-逐列 hash、載入報告與 template dependencies。所有公開物件及內嵌欄位再經固定的
-Schema descriptor 驗完整欄序、nullable、enum 與額外鍵，不以 SQL 表名當出貨宣告。
-引用閉包與 metadata 完成後再共用 A 的跨列語意檢查（詞彙、摘要、nested、符號／提示參數）；
-分片 owner 的驗證留給匯出階段。
+逐列 hash、載入報告與 template dependencies。所有公開物件及內嵌欄位以固定的
+Schema descriptor 檢查完整欄序及額外鍵，不以 SQL 表名當出貨宣告。
+投影保留公開引用閉包、face 身分及 text ID 檢查。`printing`、`face_revision` 因 wire
+拆欄位，`annotation_concept`、`field_annotation` 因 logical-only `allOf`，仍驗完整
+logical Schema；其他相同形狀的 row 不在投影重驗。完整 wire Schema 與跨列語意檢查
+（詞彙、摘要、nested、符號／提示參數、分片 owner）由匯出器的獨立 reader 在
+實際 Container、完整 manifest 與 fragments 上驗證；讀回 join 必須等於公開投影，
+否則 `export_snapshot` 不回傳候選快照。
 
 | 公開欄位 | 來源／投影規則 | 空、未知與未啟用能力 |
 | --- | --- | --- |
@@ -88,8 +92,9 @@ Schema descriptor 驗完整欄序、nullable、enum 與額外鍵，不以 SQL �
 - `general_evidence`：printing ID → 路由建置器的 `GeneralEvidence`，原樣傳給唯一的預設版次選取器；
   不由卡號、字串猜加工，不把未知分類補成已確認一般版。
 
-投影沿 3.0.0 機器契約驗 `face.wording`、PrintingFace.observations、annotation 與來源指標的完整欄序及閉包。
-logical projection 通過後，匯出器與 reader 仍須分別驗實際 File、partition、hash 與下載閉包。
+投影沿 3.0.0 機器契約檢查 `face.wording`、PrintingFace.observations、annotation 與來源指標的完整欄序及閉包。
+`Projection` 仍須經 `export_snapshot` 的 reader 驗證，才能作為完整候選快照；
+實際 File、partition、hash、下載閉包、Schema 與公開 view 規則在該發布邊界檢查。
 
 ## 驗證
 

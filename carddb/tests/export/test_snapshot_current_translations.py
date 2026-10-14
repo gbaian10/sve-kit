@@ -359,13 +359,18 @@ def test_jp_translation_rejects_a_snapshot_missing_the_exact_donor_owner(
     with db.transaction():
         db.delete("ruling_evidence", {"id": "evidence"})
         db.delete("route_override", {"route_key": "TEST-001%E2%93%88a"})
+    result = project(
+        db,
+        regions=("en",),
+        as_of="2026-10-01",
+        settings=SETTINGS,
+        decisions=jp_source(),
+    )
     with pytest.raises(ValueError, match="public-annotation/owner"):
-        project(
-            db,
-            regions=("en",),
-            as_of="2026-10-01",
-            settings=SETTINGS,
-            decisions=jp_source(),
+        export_snapshot(
+            result,
+            Ownership.from_database(db, result),
+            Batch("preview-20261002T010203Z-0001", "2026-10-02T01:02:03Z", ("en",)),
         )
 
 

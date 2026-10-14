@@ -36,7 +36,7 @@ from sve_carddb.export.project.regions import (
 from sve_carddb.export.project.shape import tuple_value
 from sve_carddb.export.project.source import Record, Source, json_list
 from sve_carddb.export.project.translations import Texts, keywords, translations
-from sve_carddb.export.semantics import ordered_rows, row_key, validate_view
+from sve_carddb.export.semantics import ordered_rows, row_key
 
 if TYPE_CHECKING:
     from sve_carddb.build import Database
@@ -203,8 +203,4 @@ def project(
     metadata = summaries(source, view, regions, decisions)
     if decisions.private_digital:
         config["digital_endpoints"] = []
-    languages = tuple(
-        string(object_value(lang)["code"]) for lang in array(config["languages"])
-    )
-    validate_view(view, metadata | {"languages": list(languages)}, [])
     return Projection(view, config, metadata)
