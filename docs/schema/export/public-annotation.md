@@ -290,7 +290,7 @@ W 仍按 card_engine_support 的 region override／shared／block 順序求資�
 
 ## 5. 分片、閉包與消費表
 
-N0 的 N=64、band widths 與 base／row_index 沿既有配置；基本目錄的家族檔／共用檔及共享字典要求依[傳輸 §4.4](snapshot-transport.md#44-基本目錄容器共享字典與-base-身分)。
+N=64、固定 band 與 base／row_index 依[傳輸 §5.1](snapshot-transport.md#51-固定配置)；基本目錄的家族檔／共用檔及共享字典要求依[傳輸 §4.4](snapshot-transport.md#44-基本目錄容器共享字典與-base-身分)。
 role 表示下載類別，partition 表示欄位分割身分，兩者解耦；不因改裝檔省略公開欄位或永久 ID。
 annotation_set／annotation_concept 用 global owner；名稱 annotation_set 隨 catalog 局部出貨，annotation_concept 固定放共用 catalog；
 annotation_set 全部列另存全域 detail band。同 ID 副本須完整同值，不能隨最後使用者搬 owner。
