@@ -1,4 +1,4 @@
-"""Independent 3.0 cross-file media checks, without a producer or build DB."""
+"""Independent 4.0 cross-file media checks, without a producer or build DB."""
 
 from typing import TYPE_CHECKING
 
