@@ -284,7 +284,7 @@ W 仍按 card_engine_support 的 region override／shared／block 順序求資�
 未載入 counterpart 雙端與標註閉包時不能顯示為已確認的官方對照；可顯示接收端自身原文，對照用途保持 pending。
 `jp_source` 的普通字串可讀不授予 counterpart、aligned、機制或 DSL 資格；完整來源／標註 view 的一致性仍由 P／Python R／U 離線把關。
 
-[#498](https://github.com/gbaian10/sve-kit/issues/498) 交付時量測容量用的 4.0.0 fixture，FieldTranslation 用途列為 own_source **9,950**、jp_source **5,423**、official_counterpart **0**。
+[#498](https://github.com/gbaian10/sve-kit/issues/498) 交付時量測容量用的 3.0.0 fixture，FieldTranslation 用途列為 own_source **9,950**、jp_source **5,423**、official_counterpart **0**。
 這是實際各文字 File 的用途列計數，不是唯一 translation 數，也不是三種 UI 語言完整驗收。
 零 counterpart 未驗真實雙端官方對照；本 fixture 的語言／owner／效果標註覆蓋不能當全三語或手機驗收，合成正反例另依[案例規格](public-annotation-cases.md)。
 

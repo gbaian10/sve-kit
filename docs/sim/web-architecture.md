@@ -7,7 +7,7 @@
 資料契約以 [`docs/schema/export/snapshot-format.md`](../schema/export/snapshot-format.md) 為準。
 共用尺寸見 §7、§8；色彩值見進版控的 [`tokens.css`](../../sim/web/src/styles/tokens.css)。
 
-`sim/web` 是查卡、建牌、對戰共用的前端（`AGENTS.md`）。本文涵蓋查卡需要的架構；建牌與對戰只預留接點。基本目錄載入、Worker 與手機門檻為設計要求；現有 N0 已接線的 3.0 reader 不代表下列分段載入已完成。
+`sim/web` 是查卡、建牌、對戰共用的前端（`AGENTS.md`）。本文涵蓋查卡需要的架構；建牌與對戰只預留接點。基本目錄載入、Worker 與手機門檻為設計要求；現有 N0 已接線的 4.0 reader 不代表下列分段載入已完成。
 
 ## 1. 目錄與邊界
 
@@ -155,7 +155,7 @@ interface QueryState {
 每個用途各自 loading／ready／error；失敗可重試
 ```
 
-- 目前 3.0 reader 的完整版本／minimum／八個 capabilities 依[公開 annotation §1](../schema/export/public-annotation.md#1-版本與驗證邊界)，不只宣告 column-partition-v1；index_format=2 只取 current／previous 或本機已驗相容 active。
+- 目前 4.0 reader 的完整版本／minimum／八個 capabilities 依[公開 annotation §1](../schema/export/public-annotation.md#1-版本與驗證邊界)，不只宣告 column-partition-v1；index_format=2 只取 current／previous 或本機已驗相容 active。
 - 索引先驗形狀，以 entry.manifest_sha256 驗完整清單，再以 File.sha256 驗解壓後 canonical bytes；不以未驗 manifest 決定可用閉包，不取舊 pages。
 - 首頁顯示後背景下載所選 jp／en 整區基本目錄；所有連線同一政策，不設省流量模式。下載中可打字並顯示「資料下載中」，整區驗畢及索引完成後自動搜尋一次，不顯示部分結果。
 - 卡名／卡號、基本數值與基本 facet 先可用；稀有度、異圖與完整印刷版本之後背景補齊。相應條件未備妥時提示載入中，不能用部分版次輸出完整搜尋結果。全文與其他進階用途須等其整區閉包驗畢。
@@ -300,9 +300,9 @@ interface QueryState {
 - **上線**：登入、PWA（Service Worker、CacheStorage、IndexedDB 索引持久化，namespace 帶根目錄與 `data_version`）、正式部署
   （`VITE_CDN_BASE` 指向 CDN 網域）。
 
-## 快照 3.0 與圖片更新邊界
+## 快照 4.0 與圖片更新邊界
 
-現行 reader 僅支援 3.0；圖片沿用 [傳輸契約 §5.4](../schema/export/snapshot-transport.md#54-卡包-media-與-id-圖片) 的卡包 media 與 Index v2。
+現行 reader 僅支援 4.0；圖片沿用 [傳輸契約 §5.4](../schema/export/snapshot-transport.md#54-卡包-media-與-id-圖片) 的卡包 media 與 Index v2。
 公開 annotation 與 JP 來源閉包依 [公開 annotation 契約](../schema/export/public-annotation.md)，不能只放寬版本範圍。
 卡包 media 提供 card／art 版本與實際尺寸，int_id＋永久 face.ordinal＋size 直接組背景圖片 URL；玩家頁面路由不變。
 切新快照時更新 src／srcset、取消舊工作、拒絕晚到舊 response；SW 以完整含 v URL 匹配，不忽略 query 或回退舊圖。

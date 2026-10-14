@@ -17,9 +17,9 @@ bun run dev                     # http://localhost:5173, synthetic fixture under
 bun run dev:lan                 # HTTPS on the LAN (self-signed); plain HTTP by IP has no WebCrypto or cache
 ```
 
-### Real data (3.0.0 preview export)
+### Real data (4.0.0 preview export)
 
-Screens are developed and accepted against a real `3.0.0` preview export with real WebP images,
+Screens are developed and accepted against a real `4.0.0` preview export with real WebP images,
 never against the synthetic fixture. Point `SVE_PREVIEW_DIR` at the preview root (the directory
 that holds `snapshots/` and `images/`); its entry is `snapshots/preview/current.json`, not the
 formal version index. The dev server serves it under `/cdn-preview` and the dev badge shows
@@ -153,7 +153,7 @@ declares them (list a rule twice when it fires twice). Update the fixtures toget
 - `decode.ts`, `reader.ts`: version admission, nested tuple decoding and detail joins. Parsing and
   required-field errors become a failed load; no canonical, placement or cross-table validation runs.
 
-The client supports only snapshot 3.0.0, including its version and capabilities. Index v2
+The client supports only snapshot 4.0.0, including its version and capabilities. Index v2
 considers only current, previous and the local active snapshot. Constant-cost index checks still
 reject a revision that goes back or changes content within a session, a current/previous pair out
 of order and an entry that differs from its manifest. An older usable snapshot has
@@ -208,7 +208,7 @@ The separate metadata byte cache retains its existing 12 MiB / 64-file RAM limit
 Browsing does not need the on-demand `rules_name` or `face_rules_name` tables; any future
 construction consumer must load their detail files before claiming a result.
 
-In 3.0, home-set media files provide display state, dimensions and separate card/art version
+In 4.0, home-set media files provide display state, dimensions and separate card/art version
 tokens directly. Image URLs use the permanent printing integer ID and face ordinal, with
 the token in `?v=`; source-detail tables are optional on-demand data. Printing/face bootstrap
 lookups are indexed once per snapshot. Withdrawn, missing or unapproved media produce no image
@@ -254,7 +254,7 @@ have (version index, manifest, canonical blobs, WebP placeholders). It exists fo
 a dev server without real data; screens are never judged on it. `bun run fixture:build`
 regenerates it from `scripts/fixture/cards.ts` (about two dozen handwritten cards covering
 double faces, alternate printings, errata, Q&A, bans, the JP/EN mapping states and image
-states) through `scripts/fixture/build.ts`, which emits snapshot 3.0.0 with index format 2, 64 buckets,
+states) through `scripts/fixture/build.ts`, which emits snapshot 4.0.0 with index format 2, 64 buckets,
 fixed bands, five display sizes and permanent-ID image URLs, emits the column partitions, sorts every
 collection the way the reader requires and hashes every blob. The output is deterministic and
 the reader must accept it (`scripts/fixture/build.test.ts`), so a change to either the reader or
