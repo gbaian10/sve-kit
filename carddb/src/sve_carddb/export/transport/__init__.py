@@ -256,23 +256,6 @@ class _Files:
             | {"compressed_bytes": _compressed_bytes(union)},
         }
         validate_manifest(complete)
-        skeleton = complete | {
-            "files": [
-                {
-                    key: value
-                    for key, value in object_value(file).items()
-                    if key != "compressed_bytes"
-                }
-                for file in array(complete["files"])
-            ],
-            "text_all": {
-                key: value
-                for key, value in object_value(complete["text_all"]).items()
-                if key != "compressed_bytes"
-            },
-        }
-        if skeleton != manifest:
-            raise ValueError("Completed manifest differs from verified skeleton")
         return Snapshot(
             complete,
             payloads,
