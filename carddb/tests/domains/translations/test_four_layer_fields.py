@@ -1,11 +1,19 @@
 """Whole fields persist typed bindings, exact selections and owner-specific output paths."""
 
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
 
 from sve_carddb.build import Json
-from sve_carddb.contracts.four_layer import CardNameReference, Target
+from sve_carddb.contracts.four_layer import (
+    CardArgs,
+    CardNameReference,
+    CardNP,
+    SlotRef,
+    Target,
+)
+from sve_carddb.contracts.source_binding import LeafOccurrence
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_authored import (
     FrameRecord,
@@ -36,7 +44,9 @@ from sve_carddb.domains.translations.four_layer_storage import (
     write_target,
 )
 
-from .test_four_layer_classification import classifier
+from .test_four_layer_classification import classifier, source
+from .test_four_layer_n1 import n1_classifier
+from .test_four_layer_normalizer import rekey
 from .test_four_layer_storage import compiled as compiled  # ruff: ignore[useless-import-alias] -- shared actual SQLite fixture
 from .test_four_layer_storage import default_target
 from .test_four_layer_storage import stored as stored  # ruff: ignore[useless-import-alias] -- shared exact source fixture
@@ -69,7 +79,6 @@ def compiled_field(
             field,
             ((),),
         )
-        engine = classifier()
     else:
         derived = derive_source(text, binding.source, engine)
     return CompiledField(
@@ -78,7 +87,6 @@ def compiled_field(
         (Matched(frame, binding),),
         (False,),
         (),
-        engine,
     )
 
 
@@ -150,7 +158,6 @@ def test_incomplete_field_does_not_activate_its_partial_bindings(
         (None,),
         (False,),
         ("unmatched_source_frame",),
-        partial.classifier,
     )
     with pytest.raises(ValueError, match="incomplete source field"), db.transaction():
         render_field(db, partial, Renderer({}, {}, {}), {}, "zh-Hant")
@@ -403,3 +410,131 @@ def test_shared_render_keeps_each_owner_binding_and_verifies_each_output_path(  
         )
         == 1
     )
+
+
+def test_whole_field_rejects_a_forged_omission_on_an_explicit_number(
+    stored: tuple[Database, Frame, SourceBinding],
+) -> None:
+    db, frame, binding = stored
+    omitted = LeafOccurrence(
+        slot="n",
+        ordinal=1,
+        raw_spans=(),
+        canonical_spans=(),
+        source_unit=None,
+        source_presence="omitted",
+        resolution_rule="fixture.antecedent.v1",
+    )
+    mixed = rekey(
+        binding.model_copy(update={"occurrences": (*binding.occurrences, omitted)})
+    )
+    with db.transaction():
+        db.delete("translation_use", {"id": "use:synthetic"})
+        with pytest.raises(ValueError, match="occurrence"):
+            render_field(
+                db,
+                compiled_field(db, frame, mixed),
+                Renderer({}, {}, {}),
+                {},
+                "zh-Hant",
+            )
+    assert db.rows("text_template_binding") == ()
+
+
+def test_valid_binding_hash_does_not_authorize_a_forged_numeric_value(
+    stored: tuple[Database, Frame, SourceBinding],
+) -> None:
+    db, frame, binding = stored
+    forged = rekey(binding.model_copy(update={"values": {"n": 9}}))
+    with db.transaction():
+        db.delete("translation_use", {"id": "use:synthetic"})
+        with pytest.raises(ValueError, match="Numeric leaf value differs"):
+            render_field(
+                db,
+                compiled_field(db, frame, forged),
+                Renderer({}, {}, {}),
+                {},
+                "zh-Hant",
+            )
+    assert db.rows("text_template_binding") == ()
+
+
+def test_whole_field_rejects_a_binding_from_another_owner_with_equal_bytes(
+    stored: tuple[Database, Frame, SourceBinding],
+) -> None:
+    db, frame, binding = stored
+    compiled = compiled_field(db, frame, binding)
+    borrowed = rekey(
+        binding.model_copy(
+            update={
+                "source": binding.source.model_copy(
+                    update={
+                        "owner": binding.source.owner.model_copy(
+                            update={"revision_id": "revision:other"}
+                        )
+                    }
+                )
+            }
+        )
+    )
+    compiled = replace(compiled, matches=(Matched(frame, borrowed),))
+    with (
+        pytest.raises(ValueError, match="another owner source descriptor"),
+        db.transaction(),
+    ):
+        render_field(db, compiled, Renderer({}, {}, {}), {}, "zh-Hant")
+    assert db.rows("text_template_binding") == ()
+
+
+def test_whole_field_rechecks_a_mutated_binding_value_before_writing(
+    stored: tuple[Database, Frame, SourceBinding],
+) -> None:
+    db, frame, binding = stored
+    compiled = compiled_field(db, frame, binding)
+    binding.values["n"] = 9
+    with pytest.raises(ValueError, match="Binding identity"), db.transaction():
+        render_field(db, compiled, Renderer({}, {}, {}), {}, "zh-Hant")
+    assert db.rows("text_template_binding") == ()
+
+
+def test_suppression_still_rejects_a_target_borrowing_another_source_operand(
+    stored: tuple[Database, Frame, SourceBinding],
+) -> None:
+    db, _, _ = stored
+    raw = "自分の墓場のフォロワー７枚を選ぶ。相手の墓場のフォロワー７枚を選ぶ。"
+    engine = n1_classifier()
+    descriptor = source(raw)
+    derived = derive_source(raw, descriptor, engine)
+    frame, binding = derived.bind(0)
+    first, second = frame.leaf_schema.slots[:4], frame.leaf_schema.slots[4:8]
+    borrowed = CardNP(
+        kind="NP",
+        constructor="CardNP",
+        args=CardArgs(
+            kind=SlotRef(slot=first[2].name),
+            quantity=SlotRef(slot=first[3].name),
+            owner=SlotRef(slot=second[0].name),
+            zone=SlotRef(slot=first[1].name),
+        ),
+    )
+    compiled = CompiledField(
+        CardSource(descriptor, raw, "card", "face", "source"),
+        derived,
+        (Matched(frame, binding),),
+        (False,),
+        (),
+    )
+    selected = SelectedTarget(Target(format=1, nodes=(borrowed,)))
+    with (
+        pytest.raises(ValueError, match="one supported source operand"),
+        db.transaction(),
+    ):
+        render_field(
+            db,
+            compiled,
+            Renderer({}, {}, {}, domains=engine.domains),
+            {(frame.id, "zh-Hant"): selected},
+            "zh-Hant",
+            suppress=True,
+        )
+    assert db.rows("text_template_binding") == ()

@@ -37,13 +37,8 @@ if TYPE_CHECKING:
 def _verify_targets(compiled: CompiledField, plan: tuple[BoundTarget, ...]) -> None:
     derived = compiled.derived
     for item in plan:
-        derived.verify_binding(
-            compiled.source.text,
-            compiled.classifier,
-            item.frame,
-            item.binding,
-            target=item.selected.target if item.selected is not None else None,
-        )
+        if item.selected is not None:
+            derived.verify_target(item.binding, item.selected.target)
 
 
 def render_field(  # ruff: ignore[too-many-arguments] -- explicit suppression preserves validated source bindings without selecting translated text
@@ -104,7 +99,7 @@ def render_field(  # ruff: ignore[too-many-arguments] -- explicit suppression pr
     )
     use_id = write_use(db, compiled.source.descriptor, context_id)
     for binding in bindings:
-        write_binding(db, use_id, binding, renderer.domains)
+        write_binding(db, use_id, binding)
     original = _source_annotation(
         db, bindings, compiled.source.descriptor.source_unit_id
     )

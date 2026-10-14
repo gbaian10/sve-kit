@@ -62,6 +62,13 @@ class SourcePart:
         self._verify_replacements(frame)
         slots = {slot.name: slot for slot in frame.leaf_schema.slots}
         for occurrence in binding.occurrences:
+            if (
+                occurrence.source_presence == "omitted"
+                and slots[occurrence.slot].occurrences
+            ):
+                raise ValueError(
+                    "Explicit source leaf cannot have an omitted occurrence"
+                )
             origins = merged(
                 tuple(
                     origin

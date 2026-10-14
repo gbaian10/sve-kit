@@ -123,12 +123,17 @@ class DerivedField:
             )
 
         if target is not None:
-            _verify_card_operands(
-                self.original.parts[ordinal],
-                binding,
-                target,
-                self.source_operands[ordinal],
-            )
+            self.verify_target(binding, target)
+
+    def verify_target(self, binding: SourceBinding, target: Target) -> None:
+        """Check each selected target against this occurrence's source operands."""
+        ordinal = binding.ordinal
+        _verify_card_operands(
+            self.original.parts[ordinal],
+            binding,
+            target,
+            self.source_operands[ordinal],
+        )
 
     def bind(self, ordinal: int) -> tuple[Frame, SourceBinding]:
         """An unresolved line can translate precisely, but cannot share its semantic scope."""
