@@ -1627,6 +1627,12 @@ def test_card_faces_printings_and_roles_stay_with_their_card(db: Database) -> No
     assert "missing_region_source" not in array(
         effective_support(support, "jp")["reasons"]
     )
+    # The leader face has no English current; it must not leak into the main card.
+    main = one(result, "card_engine_support", "card")
+    for code in ("en", "jp"):
+        assert "missing_region_source" not in array(
+            effective_support(main, code)["reasons"]
+        )
 
 
 @pytest.mark.parametrize("unknown", ["special_kind", "type"])
