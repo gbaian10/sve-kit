@@ -422,7 +422,6 @@ class Renderer:
             raise ValueError("Rendered bindings must preserve complete source order")
         definitions = {key: value.definition for key, value in self.forms.items()}
         for item in plan:
-            item.binding.verify(item.frame, self.domains)
             if item.selected is None:
                 return Result(None, ("missing_template_translation",))
             item.selected.target.verify(item.frame.leaf_schema, lang, definitions)

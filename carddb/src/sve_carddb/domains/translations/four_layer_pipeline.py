@@ -60,7 +60,6 @@ class CompiledField:
     matches: tuple[Matched | None, ...]
     low_confidence: tuple[bool, ...]
     issues: tuple[str, ...]
-    classifier: Classifier
 
     @property
     def field(self) -> SourceField:
@@ -94,7 +93,7 @@ def compile_card_field(
             issues.update(recognized.issues)
             matches.append(None)
             continue
-        matched = frames.match(source.text, derived, part.ordinal, classifier)
+        matched = frames.match(derived, part.ordinal)
         if matched is None:
             issues.add("unmatched_source_frame")
         matches.append(matched)
@@ -106,5 +105,4 @@ def compile_card_field(
         tuple(matches),
         tuple(quality),
         tuple(sorted(issues)),
-        classifier,
     )

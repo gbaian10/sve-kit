@@ -522,9 +522,7 @@ def test_n1_matching_keeps_independent_empty_span_slots(engine: Classifier) -> N
     found = derive(raw, engine)
     frame, _ = found.bind(0)
     assert sum(not s.required for s in frame.leaf_schema.slots) == 2
-    matched = Frames((frame,), normalizer_version="four-layer-jp-v2").match(
-        raw, found, 0, engine
-    )
+    matched = Frames((frame,), normalizer_version="four-layer-jp-v2").match(found, 0)
     assert matched is not None
     assert list(matched.binding.values.values()).count("self") == 3
 

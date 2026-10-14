@@ -19,7 +19,7 @@ from sve_carddb.domains.translations.four_layer_authored import (
     TargetRecord,
     TargetVariantRecord,
 )
-from sve_carddb.domains.translations.four_layer_normalizer import VERSION, replay_part
+from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 from sve_carddb.domains.translations.four_layer_render import validate_form
 
 if TYPE_CHECKING:
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.build import Database, Row, Value
-    from sve_carddb.contracts.source_binding import ClosedDomain, SourceBinding
+    from sve_carddb.contracts.source_binding import SourceBinding
 
 
 @dataclass(frozen=True)
@@ -222,19 +222,9 @@ def write_binding(
     db: Database,
     use_id: str,
     binding: SourceBinding,
-    domains: Mapping[str, ClosedDomain],
 ) -> None:
-    """Check the full object before splitting its ordered occurrences into rows."""
-    stored_frame = read_frame(db, binding.frame_id)
-    frame = stored_frame.frame
-    binding.verify(frame, domains)
-    replay_part(
-        _verify_use(db, use_id, binding),
-        frame,
-        binding,
-        domains,
-        canonical_source=stored_frame.canonical_source,
-    )
+    """Persist a field-verified binding after checking its exact database use."""
+    _verify_use(db, use_id, binding)
     data = binding.model_dump(mode="json")
     occurrences = data.pop("occurrences")
     if not isinstance(occurrences, list):

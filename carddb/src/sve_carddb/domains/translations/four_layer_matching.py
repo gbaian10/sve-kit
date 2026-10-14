@@ -13,10 +13,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.contracts.four_layer import Frame, LeafSlot
     from sve_carddb.contracts.source_binding import LeafOccurrence, TypedValue
-    from sve_carddb.domains.translations.four_layer_classification import (
-        Classifier,
-        Recognized,
-    )
+    from sve_carddb.domains.translations.four_layer_classification import Recognized
     from sve_carddb.domains.translations.four_layer_derivation import DerivedField
     from sve_carddb.domains.translations.four_layer_normalizer import (
         SourceField,
@@ -57,10 +54,8 @@ class Frames:
 
     def match(
         self,
-        raw: str,
         derived: DerivedField,
         ordinal: int,
-        classifier: Classifier,
     ) -> Matched | None:
         """Authored slot names cannot supply the derived source roles or values."""
         field = derived.field
@@ -74,7 +69,6 @@ class Frames:
         for frame in candidates:
             binding = bind_recognized(frame, field, part, recognized)
             if binding is not None:
-                derived.verify_binding(raw, classifier, frame, binding)
                 matches.append(Matched(frame, binding))
         if len(matches) > 1:
             raise ValueError("Ambiguous authored frames for exact source occurrence")

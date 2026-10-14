@@ -55,7 +55,7 @@ def test_repeated_source_values_can_share_one_authored_leaf_without_losing_units
     part = field.parts[0]
     engine = classifier()
     matched = Frames((frame,)).match(
-        raw, derive_source(raw, field.source, engine), part.ordinal, engine
+        derive_source(raw, field.source, engine), part.ordinal
     )
     assert matched is not None
     assert tuple(matched.binding.values) == ("quantity",)
@@ -82,7 +82,7 @@ def test_equal_spelling_cannot_merge_distinct_source_values_modes_or_roles(
     field = normalize_source(raw, source(raw))
     engine = classifier()
     with pytest.raises(ValueError, match="leaves differ"):
-        Frames((frame,)).match(raw, derive_source(raw, field.source, engine), 0, engine)
+        Frames((frame,)).match(derive_source(raw, field.source, engine), 0)
 
 
 def test_pending_frame_cannot_be_selected_for_another_owner_with_equal_bytes() -> None:
@@ -96,10 +96,7 @@ def test_pending_frame_cannot_be_selected_for_another_owner_with_equal_bytes() -
     )
     field = normalize_source(raw, descriptor)
     engine = classifier()
-    assert (
-        Frames((frame,)).match(raw, derive_source(raw, field.source, engine), 0, engine)
-        is None
-    )
+    assert Frames((frame,)).match(derive_source(raw, field.source, engine), 0) is None
 
 
 def test_two_applicable_authored_slot_layouts_require_an_explicit_resolution() -> None:
@@ -109,6 +106,4 @@ def test_two_applicable_authored_slot_layouts_require_an_explicit_resolution() -
     field = normalize_source(raw, source(raw))
     engine = classifier()
     with pytest.raises(ValueError, match="Ambiguous authored frames"):
-        Frames((shared, separate)).match(
-            raw, derive_source(raw, field.source, engine), 0, engine
-        )
+        Frames((shared, separate)).match(derive_source(raw, field.source, engine), 0)

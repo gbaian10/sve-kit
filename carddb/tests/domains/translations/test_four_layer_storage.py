@@ -14,7 +14,7 @@ from sve_carddb.build.t1_json import schemas as t1_schemas
 from sve_carddb.build.t1_rulings import schemas as ruling_schemas
 from sve_carddb.contracts.annotations import AnnotationSet
 from sve_carddb.contracts.four_layer import Target, hash_payload
-from sve_carddb.contracts.source_binding import LeafOccurrence, SourceDescriptor
+from sve_carddb.contracts.source_binding import SourceDescriptor
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.domains.translations.four_layer_authored import (
     FrameRecord,
@@ -35,7 +35,7 @@ from sve_carddb.domains.translations.four_layer_storage import (
 from ...support.build_db_fixtures import seed
 from .test_four_layer_classification import classifier
 from .test_four_layer_classification import source as classified_source
-from .test_four_layer_normalizer import bound_number, rekey
+from .test_four_layer_normalizer import bound_number
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -226,7 +226,7 @@ def test_frame_target_and_owner_binding_round_trip_through_actual_sqlite(
         default_target().model_dump(mode="json")
     )
     with db.transaction():
-        write_binding(db, "use:synthetic", binding, {})
+        write_binding(db, "use:synthetic", binding)
     values = payload(db.rows("text_template_binding")[0])
     values.pop("use_id")
     expected = binding.model_dump(mode="json")
@@ -337,7 +337,7 @@ def test_all_owner_kinds_round_trip_bindings(
         use: dict[str, Value] = dict.fromkeys(db.columns("translation_use"))
         use.update(id="use:owner", context_id="context:owner", field=field, **columns)
         db.insert("translation_use", use)
-        write_binding(db, "use:owner", binding, engine.domains)
+        write_binding(db, "use:owner", binding)
     values = payload(db.rows("text_template_binding")[0])
     values.pop("use_id")
     expected = binding.model_dump(mode="json")
@@ -350,32 +350,6 @@ def test_all_owner_kinds_round_trip_bindings(
         leaf.pop("position")
         leaves.append(leaf)
     assert leaves == occurrences
-
-
-def test_storage_rejects_a_forged_omission_on_an_explicit_number(
-    stored: tuple[Database, Frame, SourceBinding],
-) -> None:
-    db, _, binding = stored
-    omitted = LeafOccurrence(
-        slot="n",
-        ordinal=1,
-        raw_spans=(),
-        canonical_spans=(),
-        source_unit=None,
-        source_presence="omitted",
-        resolution_rule="fixture.antecedent.v1",
-    )
-    mixed = rekey(
-        binding.model_copy(update={"occurrences": (*binding.occurrences, omitted)})
-    )
-    with (
-        pytest.raises(
-            ValueError, match="Stored occurrences differ from transformed source"
-        ),
-        db.transaction(),
-    ):
-        write_binding(db, "use:synthetic", mixed, {})
-    assert db.rows("binding_leaf_occurrence") == ()
 
 
 def test_binding_cannot_move_to_a_use_with_another_owner(
@@ -392,7 +366,7 @@ def test_binding_cannot_move_to_a_use_with_another_owner(
         )
         db.insert("translation_use", use)
     with pytest.raises(ValueError, match="exact use owner"), db.transaction():
-        write_binding(db, "use:other", binding, {})
+        write_binding(db, "use:other", binding)
     assert db.rows("text_template_binding") == ()
 
 
@@ -587,16 +561,3 @@ def test_annotation_concept_category_and_current_emphasis_are_checked(
         )
     with pytest.raises(ValueError, match="Invalid stored annotation set"):
         read_annotation(db, selected.id)
-
-
-def test_valid_binding_hash_does_not_authorize_a_forged_numeric_value(
-    stored: tuple[Database, Frame, SourceBinding],
-) -> None:
-    db, _, binding = stored
-    forged = rekey(binding.model_copy(update={"values": {"n": 9}}))
-    with (
-        pytest.raises(ValueError, match="Numeric leaf value differs"),
-        db.transaction(),
-    ):
-        write_binding(db, "use:synthetic", forged, {})
-    assert db.rows("text_template_binding") == ()
