@@ -3,7 +3,8 @@
 from functools import cache
 from importlib.resources import files
 
-from jsonschema import Draft202012Validator
+import jsonschema_rs
+from jsonschema import ValidationError
 from pydantic import JsonValue
 
 from sve_carddb.contracts.profiles import MEDIA, profile
@@ -24,12 +25,48 @@ def definition(name: str, format_version: str = MEDIA) -> dict[str, JsonValue]:
     return object_value(object_value(schema(format_version)["$defs"])[name])
 
 
+def compile_validator(
+    selected: dict[str, JsonValue] | bool,
+) -> jsonschema_rs.Draft202012Validator:
+    """Compile an offline schema with explicit constraints and the default regex backend."""
+    if isinstance(selected, dict):
+        validator = jsonschema_rs.Draft202012Validator(
+            selected, validate_formats=False, offline=True
+        )
+    else:
+        validator = jsonschema_rs.Draft202012Validator(
+            selected, validate_formats=False, offline=True
+        )
+    return validator
+
+
+def validate_schema(
+    validator: jsonschema_rs.Draft202012Validator, value: JsonValue
+) -> None:
+    """Preserve the existing exception contract without revalidating failures."""
+    try:
+        validator.validate(value)
+    except jsonschema_rs.ValidationError as error:
+        raise ValidationError(
+            error.message,
+            path=error.instance_path,
+            schema_path=error.schema_path,
+            validator=error.kind.name,
+            instance=error.instance,
+        ) from error
+
+
+@cache
+def _validator(name: str, format_version: str) -> jsonschema_rs.Draft202012Validator:
+    selected = schema(format_version) | {"$ref": "#/$defs/" + name}
+    selected.pop("oneOf")
+    return compile_validator(selected)
+
+
 def validate(name: str, value: JsonValue, format_version: str = MEDIA) -> None:
     """Validate shape and primitive boundaries against a fixed definition."""
     canonical(value)
-    selected = schema(format_version) | {"$ref": "#/$defs/" + name}
-    selected.pop("oneOf")
-    Draft202012Validator(selected).validate(value)
+    validate_schema(_validator(name, format_version), value)
 
 
 def columns(name: str, format_version: str = MEDIA) -> list[str]:

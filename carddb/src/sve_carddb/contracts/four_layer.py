@@ -14,9 +14,9 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
-Code = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.-]*\Z")]
-Hash = Annotated[str, Field(pattern=r"^[0-9a-f]{64}\Z")]
-FrameId = Annotated[str, Field(pattern=r"^frame:[0-9a-f]{64}\Z")]
+Code = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.-]*$(?![\s\S])")]
+Hash = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$(?![\s\S])")]
+FrameId = Annotated[str, Field(pattern=r"^frame:[0-9a-f]{64}$(?![\s\S])")]
 Id = Annotated[str, Field(min_length=1)]
 Lang = Annotated[str, Field(pattern=r"^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*\Z")]
 Role = Literal["body", "reminder", "token_header", "layout", "name", "label"]

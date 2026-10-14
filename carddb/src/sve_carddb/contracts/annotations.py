@@ -72,9 +72,9 @@ class AnnotationSet(RecordData):
 
 class RenderLeafOccurrence(RecordData):
     translation_id: Id
-    binding_id: Annotated[str, Field(pattern=r"^bind:[0-9a-f]{64}\Z")]
+    binding_id: Annotated[str, Field(pattern=r"^bind:[0-9a-f]{64}$(?![\s\S])")]
     node_path: Annotated[tuple[UInt, ...], Field(min_length=1)]
-    slot: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.-]*\Z")]
+    slot: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.-]*$(?![\s\S])")]
     source_ordinals: Annotated[tuple[UInt, ...], Field(min_length=1)]
     ranges: Annotated[tuple[Span, ...], Field(min_length=1)]
 

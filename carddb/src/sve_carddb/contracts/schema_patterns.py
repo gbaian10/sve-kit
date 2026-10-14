@@ -51,7 +51,7 @@ def patterns() -> dict[str, str]:
         "DataVersion": "(preview-)?" + version,
         "URL": _url(),
     }
-    # Both regex engines allow $ before a trailing newline; require absolute end.
+    # The end constraint is portable to Python and ECMAScript regex backends.
     return {"Date": DATE, "Instant": INSTANT} | {
         key: "^" + value + r"$(?![\s\S])" for key, value in values.items()
     }

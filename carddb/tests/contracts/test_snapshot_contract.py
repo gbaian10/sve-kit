@@ -458,3 +458,11 @@ def test_fragment_index_rejects_resealed_invalid_members(
             entries.append(entries[0])
     with pytest.raises(ValueError, match="^" + message + "$"):
         read_snapshot(manifest, _reseal(manifest, values))
+
+
+@pytest.mark.parametrize("value", [".\n", "foo/..\n"])
+def test_path_rejects_dot_segments_before_trailing_newline(value: str) -> None:
+    with pytest.raises(ValidationError) as error:
+        validate("Path", value)
+    assert error.value.validator == "pattern"
+    assert list(error.value.path) == []

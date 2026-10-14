@@ -17,7 +17,7 @@ PATH_COMPONENTS = 4
 MIN_AMBIGUOUS_CANDIDATES = 2
 
 Revision = Annotated[int, Field(ge=1, le=9007199254740991)]
-RulingId = Annotated[str, Field(pattern=r"^R-[0-9]{4,}\Z")]
+RulingId = Annotated[str, Field(pattern=r"^R-[0-9]{4,}$(?![\s\S])")]
 
 
 class Evidence(RecordData):

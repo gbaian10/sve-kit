@@ -6,15 +6,16 @@ browser's streaming store, a publisher, or a validator of build-only evidence.
 
 from copy import deepcopy
 from dataclasses import dataclass
+from functools import cache
 from graphlib import CycleError, TopologicalSorter
 from operator import itemgetter
 from typing import TYPE_CHECKING
 
-from jsonschema import Draft202012Validator
 from pydantic import JsonValue
 
 from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.contracts.snapshot import (
+    compile_validator,
     decode,
     definition,
     descriptor,
@@ -23,6 +24,7 @@ from sve_carddb.contracts.snapshot import (
     schema,
     tables,
     validate,
+    validate_schema,
 )
 from sve_carddb.core.json import (
     array,
@@ -43,6 +45,8 @@ from sve_carddb.export.semantics import (
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
+
+    import jsonschema_rs
 
 type Row = dict[str, JsonValue]
 type View = dict[str, list[Row]]
@@ -543,13 +547,8 @@ def read_snapshot(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
     return view
 
 
-def text_all_payloads(manifest_value: JsonValue, data: bytes) -> dict[str, bytes]:
-    """Validate the union envelope and hashes; callers validate members via read_snapshot."""
-    manifest = object_value(manifest_value)
-    validate("Manifest", manifest, string(manifest["format_version"]))
-    description = object_value(manifest["text_all"])
-    value = object_value(_payload(description, data))
-    version = string(manifest["format_version"])
+@cache
+def _text_all_validator(version: str) -> jsonschema_rs.Draft202012Validator:
     envelope = deepcopy(definition("TextAll", version))
     members_schema = object_value(object_value(envelope["properties"])["members"])
     member_schema = object_value(members_schema["items"])
@@ -557,7 +556,17 @@ def text_all_payloads(manifest_value: JsonValue, data: bytes) -> dict[str, bytes
     object_value(member_schema["properties"])["payload"] = {}
     selected = schema(version) | envelope
     selected.pop("oneOf")
-    Draft202012Validator(selected).validate(value)
+    return compile_validator(selected)
+
+
+def text_all_payloads(manifest_value: JsonValue, data: bytes) -> dict[str, bytes]:
+    """Validate the union envelope and hashes; callers validate members via read_snapshot."""
+    manifest = object_value(manifest_value)
+    validate("Manifest", manifest, string(manifest["format_version"]))
+    description = object_value(manifest["text_all"])
+    value = object_value(_payload(description, data))
+    version = string(manifest["format_version"])
+    validate_schema(_text_all_validator(version), value)
     if value["format_version"] != manifest["format_version"]:
         raise ValueError("TextAll format differs from manifest")
     files = _files(manifest)
