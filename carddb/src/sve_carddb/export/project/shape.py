@@ -1,4 +1,4 @@
-"""Check logical fields and constraints not covered by wire row validation."""
+"""Check logical fields and validate selected rows before wire partitioning."""
 
 from pydantic import JsonValue
 
@@ -25,7 +25,8 @@ def tuple_value(name: str, record: dict[str, JsonValue]) -> list[JsonValue]:
         _value(object_value(kind), record[field])
         for field, kind in zip(names, array(definition(name)["x-types"]), strict=True)
     ]
-    # Split rows and logical-only allOf rules are not covered by Container validation.
+    # Validate these logical rows early to report a single failing value
+    # instead of the reader's whole fragment.
     if name in {"printing", "face_revision", "annotation_concept", "field_annotation"}:
         validate(name, result)
     return result
