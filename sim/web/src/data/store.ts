@@ -1,6 +1,7 @@
 import type { LoadedSnapshot } from "./client"
 import type { Row } from "./format-v3/decode"
 import { integerValue, stringValue } from "./format-v3/json"
+import { mergedRows } from "./format-v3/reader"
 
 /** Bootstrap-only lookups every page needs; detail rows are fetched through the client. */
 export interface CardIndex {
@@ -41,13 +42,18 @@ function group(rows: readonly Row[], field: string): Map<string, Row[]> {
 }
 
 export function createCardIndex(snapshot: LoadedSnapshot): CardIndex {
-  const rows = (table: string): Row[] =>
-    snapshot.bootstrap
-      .filter((fragment) => fragment.table === table)
-      .flatMap((fragment) => fragment.rows)
+  const rows = (table: string): Row[] => mergedRows(snapshot.bootstrap, table)
   const cards = rows("card")
   const faces = rows("face")
-  const printings = rows("printing")
+  const printingRows = rows("printing")
+  const printingIds = new Set(printingRows.map((row) => stringValue(row["id"])))
+  const printings = [
+    ...printingRows,
+    ...snapshot.bootstrap
+      .filter((f) => f.table === "card_locator")
+      .flatMap((f) => f.rows)
+      .filter((row) => !printingIds.has(stringValue(row["id"]))),
+  ]
   const revisions = rows("face_revision")
   const families = rows("product_family")
   const cardMap = byId(cards)

@@ -1,6 +1,7 @@
 import type { Row } from "../format-v3/decode"
 import { integerValue, objectValue, stringValue } from "../format-v3/json"
-import type { Fragment } from "../format-v3/reader"
+import { canonicalText } from "../format-v3/json"
+import { type Fragment, mergedRows, validateCatalog } from "../format-v3/reader"
 import type { CardIndex } from "../store"
 import { Columns, StringPool } from "./columns"
 
@@ -68,16 +69,57 @@ function project(table: string, row: Row): Row {
 export class BootstrapColumns {
   readonly pool = new StringPool(false)
   private readonly tables = new Map<string, Columns>()
+  private staged: Fragment[] = []
+  private readonly regional = new Map<string, Row>()
+  private readonly dictionary = new Map<string, string>()
 
   ingest(fragments: readonly Fragment[]): void {
     // One block per table and file: a fragment often holds only a couple of rows, and a block
     // per fragment costs more in typed-array headers than the rows themselves.
+    this.staged.push(...fragments)
     const tables = new Map<string, Row[]>()
     for (const fragment of fragments) {
+      if (fragment.table === "card_locator") {
+        for (const row of fragment.rows) {
+          let table = this.tables.get("printing")
+          if (!table) {
+            table = new Columns(this.pool)
+            this.tables.set("printing", table)
+          }
+          table.append([project("printing", row)])
+        }
+        continue
+      }
       if (!TABLES.has(fragment.table)) continue
       const rows = tables.get(fragment.table) ?? []
       tables.set(fragment.table, rows)
-      for (const row of fragment.rows)
+      for (let row of fragment.rows) {
+        if (fragment.table === "card" || fragment.table === "face") {
+          const key = `${fragment.table}/${stringValue(row["id"])}`
+          const previous = this.regional.get(key)
+          if (previous) {
+            if (canonicalText(previous) === canonicalText(row)) continue
+            row =
+              mergedRows(
+                [
+                  { ...fragment, rows: [previous] },
+                  { ...fragment, rows: [row] },
+                ],
+                fragment.table,
+              )[0] ?? row
+          }
+          this.regional.set(key, row)
+        }
+        if (["text_unit", "translation"].includes(fragment.table)) {
+          const key = `${fragment.table}/${stringValue(row["id"])}`
+          const bytes = canonicalText(row)
+          const previous = this.dictionary.get(key)
+          if (previous !== undefined) {
+            if (previous !== bytes) throw new Error("conflicting catalog dictionary copy")
+            continue
+          }
+          this.dictionary.set(key, bytes)
+        }
         rows.push(
           project(
             fragment.table,
@@ -86,6 +128,7 @@ export class BootstrapColumns {
               : row,
           ),
         )
+      }
     }
     for (const [name, rows] of tables) {
       let table = this.tables.get(name)
@@ -98,11 +141,18 @@ export class BootstrapColumns {
   }
 
   seal(): void {
+    validateCatalog(this.staged)
+    this.staged = []
+    this.dictionary.clear()
+    this.regional.clear()
     this.pool.seal()
   }
 
   *cards(): Generator<Row> {
-    yield* this.tables.get("card")?.iterate() ?? []
+    const rows = this.tables.get("card")?.rows() ?? []
+    const unique = new Map<string, Row>()
+    for (const row of rows) unique.set(stringValue(row["id"]), row)
+    yield* unique.values()
   }
 
   allocation(): { readonly arrayBuffers: number; readonly stringBytes: number } {
@@ -138,6 +188,15 @@ export class BootstrapColumns {
           grouped.set(card, list)
         }
       }
+      // Background printing rows replace locator rows with the same permanent ID.
+      for (const [card, list] of grouped)
+        grouped.set(
+          card,
+          list.filter((ordinal) => {
+            const id = values?.value(ordinal, "id")
+            return typeof id !== "string" || map.get(id) === ordinal
+          }),
+        )
       maps.set(name, map)
       groups.set(name, grouped)
     }
@@ -156,7 +215,9 @@ export class BootstrapColumns {
       ((get("face", faceId)?.["wording"] ?? []) as Row[]).find((row) => row["region"] === region)
     return {
       get cards() {
-        return table("card")?.rows() ?? []
+        return [...(maps.get("card")?.values() ?? [])].map(
+          (ordinal) => table("card")?.row(ordinal) ?? {},
+        )
       },
       get families() {
         return table("product_family")?.rows() ?? []

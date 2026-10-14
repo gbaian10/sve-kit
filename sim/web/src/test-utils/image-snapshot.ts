@@ -39,14 +39,15 @@ export function imageSnapshot(count: number) {
       [
         "media",
         {
+          key: "media",
+          sha256: "synthetic",
+          purpose: "images",
+          region: null,
+          segment: "family-set:test:band-0",
           bytes: count * 200,
-          row_counts: Array.from({ length: 64 }, (_, bucket) => ({
-            table: "printing_image",
-            owner,
-            bucket,
-            partition: "detail",
-            count,
-          })),
+          row_counts: [
+            ["printing_image", owner.kind, owner.id, "detail", "family-set:test:band-0", count],
+          ],
         },
       ],
     ]),

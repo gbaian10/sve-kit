@@ -12,7 +12,7 @@ import {
   parseJson,
   stringValue,
 } from "../format-v3/json"
-import { isCompatible } from "../format-v3/reader"
+import { catalogKeys, isCompatible } from "../format-v3/reader"
 import { checkEntry, entryFields, indexEntries } from "../index-entry"
 import { transferDigest } from "../integrity"
 import { VerifiedCache } from "../verified-cache"
@@ -31,8 +31,7 @@ import type {
 import { PreviewReader } from "./preview"
 import { completeImages, type CompleteView, completeView, ViewCache, viewSlot } from "./view"
 
-const defaultPlan: BootstrapPlan = (_manifest, files) =>
-  [...files].filter(([, file]) => file["role"] === "bootstrap").map(([key]) => key)
+const defaultPlan: BootstrapPlan = (_manifest, files, region) => catalogKeys(files, region)
 /** A stored index with what the ready event and the index entry check need from its manifest. */
 function readRecord(bytes: Uint8Array, edition: Region) {
   const { header, arrays } = unpack(bytes)
@@ -585,7 +584,7 @@ export class SearchEngine {
       const ownersOf = (file: JsonObject) =>
         new Set(
           arrayValue(file["row_counts"])
-            .map((count) => objectValue(objectValue(count)["owner"]))
+            .map((count) => ({ kind: arrayValue(count)[1], id: arrayValue(count)[2] }))
             .filter((owner) => owner["kind"] === "home_set")
             .map((owner) => stringValue(owner["id"])),
         )
@@ -655,17 +654,26 @@ export class SearchEngine {
       this.emit({ kind: "stage", generation: request.generation, step: "search" })
       bootstrap.seal()
       const stagingAllocation = bootstrap.allocation()
-      const index = new SearchIndex(bootstrap, request.edition)
+      let index = new SearchIndex(bootstrap, request.edition)
       buildMs += performance.now() - mark
       signal.throwIfAborted()
+      const background = bootstrap
       bootstrap = undefined
       const mediaFiles = new Map(
         [...files].filter(([, file]) =>
-          arrayValue(file["row_counts"]).some(
-            (count) => objectValue(count)["table"] === "printing_image",
-          ),
+          arrayValue(file["row_counts"]).some((count) => arrayValue(count)[0] === "printing_image"),
         ),
       )
+      for (const file of [...mediaFiles.values()]) {
+        for (const raw of arrayValue(file["dependencies"])) {
+          const ref = objectValue(raw)
+          const key = stringValue(ref["key"])
+          const dependency = files.get(key)
+          if (!dependency || dependency["sha256"] !== ref["sha256"])
+            throw new SnapshotError("shape", "media dependency")
+          mediaFiles.set(key, dependency)
+        }
+      }
       this.emit({ kind: "stage", generation: request.generation, step: "images" })
       const currentQuery =
         this.active?.request.edition === request.edition && this.rememberedRequest?.kind === "view"
@@ -719,6 +727,34 @@ export class SearchEngine {
         },
       })
       void this.flushQueries()
+      const active = this.active
+      const backgroundBlobs = new SearchBlobs(request.base, this.backgroundFetch, this.storage)
+      const backgroundFiles = [...files.values()].filter(
+        (file) =>
+          ["print", "product"].includes(stringValue(file["purpose"])) &&
+          (file["region"] === null || file["region"] === request.edition),
+      )
+      try {
+        const parts = await Promise.all(
+          backgroundFiles.map(async (file) =>
+            decodeMessage({
+              kind: "file",
+              file,
+              bytes: await backgroundBlobs.read(file, signal),
+              version,
+            }),
+          ),
+        )
+        signal.throwIfAborted()
+        if (this.active === active) {
+          for (const part of parts) if (part.kind === "fragments") background.ingest(part.fragments)
+          background.seal()
+          index = new SearchIndex(background, request.edition)
+          active.index = index
+        }
+      } catch {
+        signal.throwIfAborted()
+      }
       await firstStored
       await blobs.retainPlan(
         request.edition,
@@ -729,6 +765,7 @@ export class SearchEngine {
               return file ? [file] : []
             }),
             ...mediaFiles.values(),
+            ...backgroundFiles,
           ]),
         ],
         manifestHash,

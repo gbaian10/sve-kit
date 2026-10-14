@@ -86,6 +86,7 @@ function workerOf(root: SnapshotRoot): ActiveWorker {
   const start = (next: Region, force = false) => {
     if (!force && edition === next && status.state !== "error") return
     edition = next
+    detail.setRegion?.(next)
     session.load(detail.base, next, root === "preview" ? "preview" : "index")
   }
   let lastCheck = Date.now()
@@ -374,10 +375,13 @@ export function useCardSnapshot(): {
   const root = useSnapshotRoot()
   const client = snapshotClient(root)
   const status = useSnapshotStatus(client)
-  useEffect(() => {
-    void client.load()
-  }, [client])
   const snapshot = client.snapshot()
+  useEffect(() => {
+    void client
+      .load()
+      .then(() => client.prefetchPrintings?.())
+      .catch(() => undefined)
+  }, [client, snapshot?.region])
   return { client, status, catalog: snapshot ? catalogOf(snapshot) : null }
 }
 

@@ -16,6 +16,7 @@ import {
 import type { LoadedSnapshot } from "./client"
 import type { Row } from "./format-v3/decode"
 import { integerValue, type JsonObject, type JsonValue, stringValue } from "./format-v3/json"
+import { mergedRows } from "./format-v3/reader"
 import { type CardIndex, createCardIndex } from "./store"
 
 /** What a list cell or suggestion row shows for one card without loading any detail file. */
@@ -221,10 +222,7 @@ export function* catalogCards(
 
 export function createCatalog(snapshot: LoadedSnapshot): Catalog {
   const index = createCardIndex(snapshot)
-  const rows = (table: string): Row[] =>
-    snapshot.bootstrap
-      .filter((fragment) => fragment.table === table)
-      .flatMap((fragment) => fragment.rows)
+  const rows = (table: string): Row[] => mergedRows(snapshot.bootstrap, table)
   return catalogFromIndex(index, rows, snapshot.config)
 }
 

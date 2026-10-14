@@ -3,7 +3,7 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
-import { arrayValue, type JsonObject, objectValue, stringValue } from "../../data"
+import { arrayValue, type JsonObject, type JsonValue, objectValue, stringValue } from "../../data"
 import { prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 import { TestSearchWorker } from "../../test-utils/search-worker"
@@ -23,14 +23,15 @@ it.each(["hash mismatch", "invalid JSON", "missing card ID"])(
       const file = (manifest["files"] as JsonObject[]).find(
         (file) =>
           file["role"] === "bootstrap" &&
-          (file["row_counts"] as JsonObject[]).some((count) => count["table"] === "card"),
+          file["region"] === "jp" &&
+          (file["row_counts"] as JsonValue[][]).some((count) => count[0] === "card"),
       )
       if (!file) throw new Error("missing synthetic card file")
       const body = objectValue(
         JSON.parse(new TextDecoder().decode(files.get(stringValue(file["path"])))) as JsonObject,
       )
-      const fragment = objectValue(arrayValue(objectValue(body["tables"])["card"])[0])
-      arrayValue(arrayValue(fragment["rows"])[0])[0] = null
+      const fragment = arrayValue(arrayValue(objectValue(body["tables"])["card"])[0])
+      arrayValue(arrayValue(fragment[4])[0])[0] = null
       const bytes = new TextEncoder().encode(JSON.stringify(body))
       file["sha256"] = await hash(bytes)
       file["bytes"] = bytes.length
@@ -68,7 +69,9 @@ it.each(["hash mismatch", "invalid JSON", "missing card ID"])(
 
 it("shows how many startup files have arrived during a first download", async () => {
   const startup = (built.manifest["files"] as JsonObject[]).filter(
-    (file) => file["role"] === "config" || file["role"] === "bootstrap",
+    (file) =>
+      file["role"] === "config" ||
+      (file["purpose"] === "catalog" && (file["region"] === "jp" || file["region"] === null)),
   )
   const held = stringValue(startup[0]?.["path"])
   // The page shares one client with the cases above, which published other indexes at the same

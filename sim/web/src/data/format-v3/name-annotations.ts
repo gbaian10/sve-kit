@@ -21,6 +21,5 @@ export function wholeName(unit: JsonObject, concept: string): JsonObject {
 
 export function translationNameConcept(owners: TextOwners, value: JsonObject): string {
   const pointer = objectValue(value["source"])
-  const source = owners.get(objectValue(pointer["owner"]))
-  return stringValue(source.row["name_concept_id"])
+  return owners.sourceNameConcept(pointer)
 }

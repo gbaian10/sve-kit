@@ -1,6 +1,12 @@
 import { decodeMessage } from "../../src/data/format-v3/decode-message"
 import { type JsonObject, stringValue } from "../../src/data/format-v3/json"
-import { findBase, type Fragment, joinDetail, type View } from "../../src/data/format-v3/reader"
+import {
+  findBase,
+  type Fragment,
+  joinDetail,
+  mergedRows,
+  type View,
+} from "../../src/data/format-v3/reader"
 
 /** Assemble fixture rows through the same decoding and detail joins as the browser. */
 export function snapshotView(
@@ -31,14 +37,22 @@ export function snapshotView(
       .filter((fragment) => fragment.value["base"] !== null)
       .map((fragment) => findBase(fragment, fragments)),
   )
-  const view: View = {}
-  for (const fragment of fragments) {
-    if (bases.has(fragment)) continue
-    const rows =
-      fragment.value["base"] === null
-        ? fragment.rows
-        : joinDetail(fragment, findBase(fragment, fragments), faces)
-    ;(view[fragment.table] ??= []).push(...rows)
-  }
-  return view
+  const joined = fragments
+    .filter(
+      (fragment) =>
+        !bases.has(fragment) && !["card_locator", "__name_sources"].includes(fragment.table),
+    )
+    .map((fragment) => ({
+      ...fragment,
+      rows:
+        fragment.value["base"] === null
+          ? fragment.rows
+          : joinDetail(fragment, findBase(fragment, fragments), faces),
+    }))
+  return Object.fromEntries(
+    [...new Set(joined.map((fragment) => fragment.table))].map((table) => [
+      table,
+      mergedRows(joined, table),
+    ]),
+  )
 }

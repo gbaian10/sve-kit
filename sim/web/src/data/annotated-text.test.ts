@@ -10,11 +10,18 @@ async function historicalCandidateOrigin() {
   await client.load()
   const loaded = client.snapshot()
   if (!loaded) throw new Error("synthetic snapshot missing")
-  const detail = await client.fragments("text/detail/home_set/family/band/0")
+  const detail = await client.fragments("detail/jp/family-family/0")
   const revision = detail.find((fragment) => fragment.table === "face_revision")
   if (!revision) throw new Error("synthetic revision missing")
-  const historyKey = "history/history/home_set/family/band/0"
-  const historyValue: JsonObject = { ...revision.value, base: null, partition: "history" }
+  const historyKey = "history/jp/family-family/0"
+  const historyValue: JsonObject = {
+    ...revision.value,
+    base: null,
+    partition: "history",
+    purpose: "history",
+    region: "jp",
+    segment: "family-family:band-0",
+  }
   const history = {
     ...revision,
     file: historyKey,
@@ -23,13 +30,27 @@ async function historicalCandidateOrigin() {
     identity: canonicalText([
       "face_revision",
       historyValue["owner"] ?? null,
-      historyValue["bucket"] ?? null,
+      historyValue["segment"] ?? null,
       "history",
     ]),
   }
   const files = new Map(loaded.files)
   files.set(historyKey, {
-    row_counts: [{ ...historyValue, table: "face_revision", count: revision.rows.length }],
+    key: historyKey,
+    role: "text",
+    purpose: "history",
+    region: "jp",
+    segment: "family-family:band-0",
+    row_counts: [
+      [
+        "face_revision",
+        "home_set",
+        "family",
+        "history",
+        "family-family:band-0",
+        revision.rows.length,
+      ],
+    ],
   })
   const snapshot = {
     ...loaded,

@@ -1,5 +1,6 @@
 import {
   canonical,
+  canonicalText,
   compareCodePoints,
   type JsonObject,
   type JsonValue,
@@ -105,6 +106,11 @@ interface Fragment {
   readonly partition: Partition
   readonly rows: JsonObject[]
   readonly bucket?: number
+  readonly purpose?: string
+  readonly region?: string | null
+  readonly segment?: string
+  readonly baseKey?: string
+  readonly baseSegment?: string
 }
 
 /** Accumulates logical rows per (table, owner, partition) and assembles the transport files. */
@@ -1186,86 +1192,45 @@ interface FileSpec {
 }
 
 function fileKeyFor(fragment: Fragment): string {
-  const role = ["image_asset", "printing_image", "image_variant"].includes(fragment.table)
-    ? "images"
-    : fragment.partition === "bootstrap"
-      ? "bootstrap"
-      : "text"
-  const global = fragment.owner.kind === "global"
-  const width =
-    role === "images"
-      ? global
-        ? 1
-        : 32
-      : role === "bootstrap"
-        ? global
-          ? 8
-          : ["BP01", "CP04"].includes(fragment.owner.id)
-            ? 32
-            : 64
-        : global && fragment.partition === "detail"
-          ? 2
-          : 32
-  const id = encodeURIComponent(fragment.owner.id ?? "").replace(
-    /[!'()*]/g,
-    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
-  )
-  return `${role}/${fragment.partition}/${fragment.owner.kind}/${id || "global"}/band/${String(Math.floor((fragment.bucket ?? 0) / width))}`
+  const purpose = fragment.purpose ?? "catalog"
+  const segment = fragment.segment ?? "shared"
+  const family = fragment.owner.id
+    ? `family-${encodeURIComponent(fragment.owner.id)}`
+    : segment.startsWith("family-") && purpose === "catalog"
+      ? `family-${encodeURIComponent(segment.slice(7))}`
+      : "shared"
+  const band = purpose === "catalog" ? "0" : (/:band-([0-9]+)$/.exec(segment)?.[1] ?? "0")
+  return `${purpose}/${fragment.region ?? "shared"}/${family}/${band}`
 }
-
-const orderOwner = byFields(["kind", "id", "bucket", "partition"])
 
 function buildContainer(
   spec: FileSpec,
   bootstrapRefs: ReadonlyMap<string, JsonObject>,
 ): JsonObject {
   const types = new Set<string>()
-  const tableFragments = new Map<string, JsonObject[]>()
+  const tableFragments = new Map<string, JsonValue[]>()
   for (const fragment of spec.fragments) {
     const name = rowType(fragment.table, fragment.partition)
     for (const nested of requiredTypes(name)) types.add(nested)
-    const withBase =
-      fragment.partition === "detail" &&
-      (fragment.table === "printing" || fragment.table === "face_revision")
-    const rows = fragment.rows.map((row) => encodeRow(name, row))
-    const bootstrapRef = bootstrapRefs.get(fileKeyFor({ ...fragment, partition: "bootstrap" }))
-    const base =
-      withBase && bootstrapRef
-        ? {
-            file: bootstrapRef,
-            table: fragment.table,
-            owner: fragment.owner,
-            bucket: fragment.bucket ?? 0,
-            partition: "bootstrap",
-          }
-        : null
-    const entry: JsonObject = {
-      owner: fragment.owner,
-      bucket: fragment.bucket ?? 0,
-      partition: fragment.partition,
+    const source = fragment.baseKey ? bootstrapRefs.get(fragment.baseKey) : undefined
+    if (fragment.baseKey && !source) throw new Error("fixture exact base missing")
+    const base = source
+      ? {
+          file: source,
+          table: fragment.table,
+          owner: fragment.owner,
+          partition: "bootstrap",
+          segment: fragment.baseSegment ?? null,
+        }
+      : null
+    const entry: JsonValue[] = [
+      [fragment.owner.kind, fragment.owner.id],
+      fragment.partition,
+      fragment.segment ?? "shared",
       base,
-      rows,
-    }
+      fragment.rows.map((row) => encodeRow(name, row)),
+    ]
     tableFragments.set(fragment.table, [...(tableFragments.get(fragment.table) ?? []), entry])
-  }
-  const tablesOut: JsonObject = {}
-  for (const table of tables()) {
-    const list = tableFragments.get(table)
-    if (!list) continue
-    tablesOut[table] = [...list].sort((a, b) =>
-      orderOwner(
-        {
-          ...(a["owner"] as JsonObject),
-          bucket: a["bucket"] ?? 0,
-          partition: a["partition"] ?? null,
-        },
-        {
-          ...(b["owner"] as JsonObject),
-          bucket: b["bucket"] ?? 0,
-          partition: b["partition"] ?? null,
-        },
-      ),
-    )
   }
   const typesOut: JsonObject = {}
   for (const name of [...types].sort(compareCodePoints))
@@ -1273,7 +1238,269 @@ function buildContainer(
       columns: definition(name)["x-columns"] ?? null,
       items: definition(name)["x-types"] ?? null,
     }
-  return { format_version: FORMAT, types: typesOut, tables: tablesOut }
+  return {
+    format_version: FORMAT,
+    types: typesOut,
+    tables: Object.fromEntries([...tableFragments].sort(([a], [b]) => compareCodePoints(a, b))),
+  }
+}
+
+function familyFragments(input: Iterable<Fragment>): Fragment[] {
+  const original = [...input]
+  const rowsOf = (table: string) => original.filter((f) => f.table === table).flatMap((f) => f.rows)
+  const prints = new Map(rowsOf("printing").map((r) => [stringValue(r["id"]), r]))
+  const cards = new Map(rowsOf("card").map((r) => [stringValue(r["id"]), r]))
+  const faces = new Map(rowsOf("face").map((r) => [stringValue(r["id"]), r]))
+  const visible = new Map<string, Set<string>>()
+  for (const printing of prints.values()) {
+    const card = stringValue(printing["card_id"])
+    const values = visible.get(card) ?? new Set<string>()
+    values.add(stringValue(printing["region"]))
+    visible.set(card, values)
+  }
+  const defaults = new Set(
+    [...cards.values()].flatMap((r) =>
+      (r["regions"] as JsonObject[]).map((v) => v["default_printing_id"]),
+    ),
+  )
+  const dictionaries = new Set(["text_unit", "translation", "annotation_set", "annotation_concept"])
+  const dictionary = new Map(
+    [...dictionaries].map((t) => [t, new Map(rowsOf(t).map((r) => [stringValue(r["id"]), r]))]),
+  )
+  const groups = new Map<string, Fragment>()
+  const add = (fragment: Fragment) => {
+    const key = canonicalText([
+      fileKeyFor(fragment),
+      fragment.table,
+      fragment.owner,
+      fragment.partition,
+      fragment.segment ?? null,
+    ])
+    const previous = groups.get(key)
+    groups.set(
+      key,
+      previous ? { ...previous, rows: [...previous.rows, ...fragment.rows] } : fragment,
+    )
+  }
+  for (const fragment of original)
+    for (const row of fragment.rows) {
+      const table = fragment.table
+      let purpose = ["image_asset", "image_variant", "printing_image"].includes(table)
+        ? "images"
+        : table === "annotation_concept"
+          ? "catalog"
+          : dictionaries.has(table)
+            ? "dictionary"
+            : fragment.partition === "history"
+              ? "history"
+              : [
+                    "card",
+                    "face",
+                    "face_revision",
+                    "product_family",
+                    "vocabulary",
+                    "keyword",
+                    "search_alias",
+                  ].includes(table)
+                ? "catalog"
+                : table === "printing"
+                  ? defaults.has(row["id"])
+                    ? "catalog"
+                    : "print"
+                  : ["printing_product", "art", "artist", "stamp", "digital_art_link"].includes(
+                        table,
+                      )
+                    ? "print"
+                    : table === "product"
+                      ? "product"
+                      : [
+                            "card_related",
+                            "face_rules_name",
+                            "card_engine_support",
+                            "rules_name",
+                            "rules_profile",
+                            "restriction",
+                            "mechanic_projection",
+                            "card_mechanic_coverage",
+                            "identity_change",
+                            "digital_link",
+                            "digital_link_coverage",
+                            "digital_card",
+                            "digital_art",
+                            "voice",
+                            "card_voice",
+                            "card_route_alias",
+                            "route_override",
+                          ].includes(table)
+                        ? "engine"
+                        : "detail"
+      const parent =
+        typeof row["printing_id"] === "string" ? prints.get(row["printing_id"]) : undefined
+      const region =
+        purpose === "images" || dictionaries.has(table)
+          ? null
+          : typeof row["region"] === "string"
+            ? row["region"]
+            : parent
+              ? stringValue(parent["region"])
+              : null
+      const family = fragment.owner.id ? `family-${fragment.owner.id}` : "shared"
+      const entity =
+        table === "face_revision"
+          ? faces.get(stringValue(row["face_id"]))?.["card_id"]
+          : table === "card"
+            ? row["id"]
+            : table === "printing"
+              ? row["id"]
+              : (row["printing_id"] ??
+                row["card_id"] ??
+                row["from_card_id"] ??
+                row["art_id"] ??
+                row["image_id"])
+      const key =
+        entity !== undefined ? [entity ?? null] : primaryKey(table).map((k) => row[k] ?? null)
+      const width =
+        purpose === "images"
+          ? fragment.owner.id
+            ? 32
+            : 1
+          : purpose === "dictionary"
+            ? 2
+            : fragment.owner.id
+              ? ["BP01", "CP04"].includes(fragment.owner.id)
+                ? 32
+                : 64
+              : 8
+      const band = purpose === "catalog" ? 0 : Math.floor(bucket(key, 64) / width)
+      const segment = purpose === "catalog" ? family : `${family}:band-${String(band)}`
+      const part = dictionaries.has(table)
+        ? table === "annotation_concept"
+          ? "bootstrap"
+          : "detail"
+        : fragment.partition
+      const base = { ...fragment, purpose, region, segment, partition: part, rows: [row] }
+      if (table === "card" || table === "face") {
+        const cardId = table === "card" ? stringValue(row["id"]) : stringValue(row["card_id"])
+        const card = cards.get(cardId)
+        for (const value of (card?.["regions"] ?? []) as JsonObject[]) {
+          const selected = stringValue(value["region"])
+          purpose = visible.get(cardId)?.has(selected) ? "catalog" : "region-state"
+          const scoped = { ...row }
+          for (const field of table === "card" ? ["regions"] : ["current", "wording"])
+            scoped[field] = (row[field] as JsonObject[]).filter((r) => r["region"] === selected)
+          add({
+            ...base,
+            purpose,
+            region: selected,
+            segment:
+              purpose === "catalog"
+                ? family
+                : `${family}:band-${String(Math.floor(bucket([cardId], 64) / (fragment.owner.id ? (["BP01", "CP04"].includes(fragment.owner.id) ? 32 : 64) : 8)))}`,
+            rows: [scoped],
+          })
+        }
+      } else add(base)
+    }
+  const split: Fragment[] = []
+  for (const fragment of groups.values()) {
+    const sorted = sortRows(fragment.rows, primaryKey(fragment.table))
+    if (
+      ["printing", "face_revision"].includes(fragment.table) &&
+      fragment.partition === "bootstrap"
+    ) {
+      split.push({
+        ...fragment,
+        rows: sorted.map((row) => {
+          const { faces_detail: _detail, ...rest } = row
+          return fragment.table === "face_revision"
+            ? {
+                ...rest,
+                translations: (row["translations"] as JsonObject[]).filter(
+                  (r) => r["field"] === "name",
+                ),
+              }
+            : rest
+        }),
+      })
+      split.push({
+        ...fragment,
+        purpose: fragment.table === "printing" ? "print-detail" : "detail",
+        partition: "detail",
+        baseKey: fileKeyFor(fragment),
+        baseSegment: fragment.segment ?? "shared",
+        segment: `${fragment.purpose ?? "catalog"}:${fragment.segment ?? "shared"}`,
+        rows: sorted.map((row, i) =>
+          fragment.table === "printing"
+            ? { row_index: i, faces: row["faces_detail"] ?? [] }
+            : {
+                ...row,
+                row_index: i,
+                translations: (row["translations"] as JsonObject[]).filter(
+                  (r) => r["field"] !== "name",
+                ),
+              },
+        ),
+      })
+    } else split.push({ ...fragment, rows: sorted })
+  }
+  const catalogs = new Map<string, Fragment[]>()
+  for (const fragment of split)
+    if (fragment.purpose === "catalog")
+      catalogs.set(fileKeyFor(fragment), [...(catalogs.get(fileKeyFor(fragment)) ?? []), fragment])
+  const added: Fragment[] = []
+  for (const fragments of catalogs.values()) {
+    const sample = fragments[0]
+    if (!sample) continue
+    const selected = new Map<string, Map<string, JsonObject>>()
+    const queue = fragments.flatMap((f) => f.rows)
+    const visit = (value: JsonValue) => {
+      if (Array.isArray(value)) {
+        for (const v of value) visit(v)
+        return
+      }
+      if (value === null || typeof value !== "object") return
+      for (const [field, item] of Object.entries(value)) {
+        const target = field.endsWith("_unit_id")
+          ? "text_unit"
+          : field === "translation_id"
+            ? "translation"
+            : field === "annotation_set_id"
+              ? "annotation_set"
+              : undefined
+        if (target && typeof item === "string") {
+          const rows = selected.get(target) ?? new Map<string, JsonObject>()
+          if (!rows.has(item)) {
+            const row = dictionary.get(target)?.get(item)
+            if (!row) throw new Error("fixture dictionary reference")
+            rows.set(item, row)
+            selected.set(target, rows)
+            queue.push(row)
+          }
+        }
+        visit(item)
+      }
+    }
+    while (queue.length) {
+      const row = queue.pop()
+      if (row) visit(row)
+    }
+    for (const [table, values] of selected)
+      added.push({
+        ...sample,
+        table,
+        owner: GLOBAL,
+        partition: "bootstrap",
+        rows: sortRows([...values.values()], primaryKey(table)),
+      })
+  }
+  return [...split, ...added].sort(
+    (a, b) =>
+      compareCodePoints(a.table, b.table) ||
+      compareCodePoints(a.owner.kind, b.owner.kind) ||
+      compareCodePoints(a.owner.id ?? "", b.owner.id ?? "") ||
+      compareCodePoints(a.partition, b.partition) ||
+      compareCodePoints(a.segment ?? "", b.segment ?? ""),
+  )
 }
 
 function blob(value: JsonValue): { bytes: Uint8Array; hash: string; path: string } {
@@ -1353,97 +1580,24 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     builder.push("translation", GLOBAL, bootstrap === true ? "bootstrap" : "detail", rest)
   }
 
-  const cardsByFace = new Map(
-    fragmentsOf(builder, "face").map((row) => [stringValue(row["id"]), row["card_id"] ?? null]),
-  )
-  const cardTables = new Set([
-    "card",
-    "face",
-    "face_revision",
-    "card_engine_support",
-    "mechanic_projection",
-    "card_mechanic_coverage",
-    "card_related",
-    "digital_link",
-    "digital_link_coverage",
-    "card_voice",
-  ])
-  const printTables = new Set(["printing", "printing_product", "printing_image"])
-  const artTables = new Set(["art", "digital_art_link"])
-  const grouped: Fragment[] = []
-  for (const fragment of builder.fragments.values()) {
-    const bins = new Map<number, JsonObject[]>()
-    for (const row of fragment.rows) {
-      const values = cardTables.has(fragment.table)
-        ? [
-            fragment.table === "card"
-              ? row["id"]
-              : fragment.table === "face_revision"
-                ? cardsByFace.get(stringValue(row["face_id"]))
-                : fragment.table === "card_related"
-                  ? row["from_card_id"]
-                  : row["card_id"],
-          ]
-        : printTables.has(fragment.table)
-          ? [row[fragment.table === "printing" ? "id" : "printing_id"]]
-          : artTables.has(fragment.table)
-            ? [row[fragment.table === "art" ? "id" : "art_id"]]
-            : ["image_asset", "image_variant"].includes(fragment.table)
-              ? [row[fragment.table === "image_asset" ? "id" : "image_id"]]
-              : primaryKey(fragment.table).map((key) => row[key])
-      const number = bucket(
-        values.map((value) => value ?? null),
-        64,
-      )
-      bins.set(number, [...(bins.get(number) ?? []), row])
-    }
-    for (const [number, rows] of bins) grouped.push({ ...fragment, bucket: number, rows })
-  }
-  const fragments: Fragment[] = []
-  for (const fragment of grouped) {
-    const sorted = sortRows(fragment.rows, primaryKey(fragment.table))
-    if (fragment.table === "printing") {
-      fragments.push({
-        ...fragment,
-        rows: sorted.map(({ faces_detail: _detail, ...rest }) => rest),
-      })
-      fragments.push({
-        ...fragment,
-        partition: "detail",
-        rows: sorted.map((row, index) => ({ row_index: index, faces: row["faces_detail"] ?? [] })),
-      })
-    } else if (fragment.table === "face_revision" && fragment.partition === "bootstrap") {
-      fragments.push({
-        ...fragment,
-        rows: sorted.map((row) => ({
-          ...row,
-          translations: (row["translations"] as JsonObject[]).filter(
-            (item) => item["field"] === "name",
-          ),
-        })),
-      })
-      fragments.push({
-        ...fragment,
-        partition: "detail",
-        rows: sorted.map((row, index) => ({
-          ...row,
-          row_index: index,
-          translations: (row["translations"] as JsonObject[]).filter(
-            (item) => item["field"] !== "name",
-          ),
-        })),
-      })
-    } else {
-      fragments.push({ ...fragment, rows: sorted })
-    }
-  }
+  const fragments = familyFragments(builder.fragments.values())
 
+  const locatorRows = new Map<string, { family: string; rows: JsonValue[] }>()
+  for (const fragment of fragments)
+    if (fragment.purpose === "print" && fragment.table === "printing") {
+      const key = `catalog/${fragment.region ?? "shared"}/family-${encodeURIComponent(fragment.owner.id ?? "")}/0`
+      const entry = locatorRows.get(key) ?? { family: fragment.owner.id ?? "", rows: [] }
+      entry.rows.push(
+        ...fragment.rows.map((r) => [r["id"] ?? null, r["card_id"] ?? null, r["card_no"] ?? null]),
+      )
+      locatorRows.set(key, entry)
+    }
   const specs = new Map<string, FileSpec>()
   for (const fragment of fragments) {
     const key = fileKeyFor(fragment)
     const role = key.startsWith("images/")
       ? "images"
-      : key.startsWith("bootstrap/")
+      : key.startsWith("catalog/")
         ? "bootstrap"
         : "text"
     const spec = specs.get(key) ?? { key, role, fragments: [], dependencies: [] }
@@ -1451,6 +1605,8 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     specs.set(key, spec)
   }
 
+  for (const key of locatorRows.keys())
+    if (!specs.has(key)) specs.set(key, { key, role: "bootstrap", fragments: [], dependencies: [] })
   const config: JsonObject = {
     format_version: FORMAT,
     languages: [
@@ -1489,7 +1645,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     key: string,
     role: string,
     value: JsonValue,
-    rowCounts: JsonObject[],
+    rowCounts: JsonValue[],
     dependencies: JsonObject[],
   ): JsonObject => {
     const { bytes, hash, path } = blob(value)
@@ -1501,39 +1657,50 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
       compressed_bytes: { br: null },
       key,
       role,
+      purpose: role === "config" || role === "programs" ? role : (key.split("/")[0] ?? null),
+      region:
+        key.split("/")[1] === "shared" || !key.includes("/") ? null : (key.split("/")[1] ?? null),
+      segment: !key.includes("/")
+        ? "shared"
+        : key.split("/")[0] === "catalog"
+          ? decodeURIComponent(key.split("/")[2] ?? "shared")
+          : `${decodeURIComponent(key.split("/")[2] ?? "shared")}:band-${key.split("/")[3] ?? "0"}`,
       row_counts: rowCounts,
       dependencies,
     }
     fileRows.push(row)
     return { key, sha256: hash }
   }
-  const counts = (container: JsonObject): JsonObject[] => {
-    const out: JsonObject[] = []
-    for (const [table, list] of Object.entries(objectValue(container["tables"]))) {
-      for (const fragment of list as JsonObject[]) {
-        out.push({
-          table,
-          owner: fragment["owner"] ?? null,
-          bucket: fragment["bucket"] ?? null,
-          partition: fragment["partition"] ?? null,
-          count: (fragment["rows"] as JsonValue[]).length,
-        })
-      }
-    }
-    return out
-  }
+  const counts = (container: JsonObject): JsonValue[] =>
+    Object.entries(objectValue(container["tables"])).flatMap(([table, list]) =>
+      (list as JsonValue[][]).map((f) => [
+        table,
+        (f[0] as JsonValue[])[0] ?? null,
+        (f[0] as JsonValue[])[1] ?? null,
+        f[1] ?? null,
+        f[2] ?? null,
+        (f[4] as JsonValue[]).length,
+      ]),
+    )
   const configRef = register("config", "config", config, [], [])
   register("programs", "programs", programs, [], [])
   const bootstrapRefs = new Map<string, JsonObject>()
   for (const key of [...specs.keys()].sort(compareCodePoints)) {
     const spec = specs.get(key)
-    if (!spec || spec.role !== "bootstrap") continue
+    if (!spec || (spec.role !== "bootstrap" && !key.startsWith("print/"))) continue
     const container = buildContainer(spec, bootstrapRefs)
+    const locators = locatorRows.get(key)
+    if (locators)
+      container["card_locators"] = {
+        [locators.family]: locators.rows.sort((a, b) =>
+          compareCodePoints(stringValue((a as JsonValue[])[0]), stringValue((b as JsonValue[])[0])),
+        ),
+      }
     bootstrapRefs.set(key, register(key, spec.role, container, counts(container), []))
   }
   const anchors = new Map<string, string>()
   for (const [key, spec] of specs) {
-    if (spec.role !== "bootstrap") continue
+    if (spec.role !== "bootstrap" && !key.startsWith("print/")) continue
     for (const fragment of spec.fragments)
       if (["printing", "face"].includes(fragment.table))
         for (const row of fragment.rows)
@@ -1541,7 +1708,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
   }
   for (const key of [...specs.keys()].sort(compareCodePoints)) {
     const spec = specs.get(key)
-    if (!spec || spec.role === "bootstrap") continue
+    if (!spec || spec.role === "bootstrap" || key.startsWith("print/")) continue
     const container = buildContainer(spec, bootstrapRefs)
     const dependencies = new Map<string, JsonObject>()
     if (spec.role === "images") dependencies.set("config", configRef)
@@ -1562,7 +1729,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
         fragment.partition === "detail" &&
         ["printing", "face_revision"].includes(fragment.table)
       ) {
-        const base = fileKeyFor({ ...fragment, partition: "bootstrap" })
+        const base = fragment.baseKey ?? ""
         const ref = bootstrapRefs.get(base)
         if (!ref) throw new Error("missing detail base")
         dependencies.set(base, ref)
@@ -1707,7 +1874,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
   )
 
   const countsOut: Record<string, number> = {}
-  for (const table of tables()) countsOut[table] = view(table).length
+  for (const table of tables()) countsOut[table] = fragmentsOf(builder, table).length
   return { files, manifest, manifestPath, counts: countsOut }
 }
 

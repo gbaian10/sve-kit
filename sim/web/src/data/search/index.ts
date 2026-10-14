@@ -228,7 +228,7 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
           ...index.facesOf(entry.cardId).map((face) => ({
             printingId: printing.id,
             faceId: stringValue(face["id"]),
-            intId: integerValue(row?.["int_id"]),
+            intId: typeof row?.["int_id"] === "number" ? integerValue(row["int_id"]) : 0,
             ordinal: integerValue(face["ordinal"]),
             owner: stringValue(row?.["home_set_id"]),
           })),

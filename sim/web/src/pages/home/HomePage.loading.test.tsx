@@ -19,7 +19,7 @@ afterAll(() => {
 
 it("keeps the typed text and stored recent ids during a download, then searches once", async () => {
   const startup = (built.manifest["files"] as JsonObject[]).filter(
-    (file) => file["role"] === "bootstrap",
+    (file) => file["purpose"] === "catalog" && (file["region"] === "jp" || file["region"] === null),
   )
   const held = stringValue(startup[0]?.["path"])
   let release = () => {}

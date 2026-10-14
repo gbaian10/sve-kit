@@ -35,11 +35,13 @@ const FIELDS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
 export interface TextOwner {
   readonly owner: JsonObject
   readonly row: JsonObject
+  readonly region?: string
   readonly cardId?: string
 }
 
 export class TextOwners {
   readonly byOwner = new Map<string, TextOwner>()
+  private readonly witnesses = new Map<string, JsonObject>()
   private readonly cards = new Map<string, JsonObject>()
   private readonly faces = new Map<string, JsonObject>()
 
@@ -69,12 +71,14 @@ export class TextOwners {
       })
     for (const row of view["face_revision"] ?? []) {
       const face = faces.get(stringValue(row["face_id"]))
-      const card = cards.get(stringValue(face?.["card_id"]))
-      if (!face || !card) annotationFailure("owner")
+      if (!face) annotationFailure("owner")
+      const card = cards.get(stringValue(face["card_id"]))
+      if (!card) annotationFailure("owner")
       add({
         owner: { kind: "face_revision", id: row["id"] ?? null },
         row,
         cardId: stringValue(card["id"]),
+        ...(typeof row["region"] === "string" ? { region: row["region"] } : {}),
       })
     }
     for (const printing of view["printing"] ?? []) {
@@ -90,9 +94,32 @@ export class TextOwners {
           },
           row,
           cardId: stringValue(card["id"]),
+          ...(typeof printing["region"] === "string" ? { region: printing["region"] } : {}),
         })
       }
     }
+  }
+
+  includeNameSources(sources: readonly JsonObject[]): void {
+    for (const source of sources) {
+      const pointer = objectValue(source["pointer"])
+      const key = canonicalText(pointer)
+      const previous = this.witnesses.get(key)
+      if (previous && canonicalText(previous) !== canonicalText(source)) annotationFailure("owner")
+      const owner = this.byOwner.get(canonicalText(pointer["owner"] ?? null))
+      if (
+        owner &&
+        (this.optionalPointer(pointer) !== source["text_unit_id"] ||
+          (owner.row["name_concept_id"] ?? null) !== source["name_concept_id"])
+      )
+        annotationFailure("owner")
+      this.witnesses.set(key, source)
+    }
+  }
+  sourceNameConcept(pointer: JsonObject): string {
+    const owner = this.byOwner.get(canonicalText(pointer["owner"] ?? null))
+    if (owner) return stringValue(owner.row["name_concept_id"])
+    return stringValue(this.witnesses.get(canonicalText(pointer))?.["name_concept_id"])
   }
 
   get(owner: JsonObject): TextOwner {
@@ -102,6 +129,9 @@ export class TextOwners {
   }
 
   optionalPointer(pointer: JsonObject): string | null {
+    const source = this.witnesses.get(canonicalText(pointer))
+    if (!this.byOwner.has(canonicalText(pointer["owner"] ?? null)) && source)
+      return stringValue(source["text_unit_id"])
     const owner = this.get(objectValue(pointer["owner"]))
     const name = stringValue(pointer["field"])
     const ordinal = pointer["ordinal"]

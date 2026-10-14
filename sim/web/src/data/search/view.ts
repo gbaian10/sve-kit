@@ -3,6 +3,7 @@ import { VIEW_BUDGET } from "../cache-budget"
 import type { Row } from "../format-v3/decode"
 import { decodeMessage } from "../format-v3/decode-message"
 import {
+  arrayValue,
   canonicalText,
   integerValue,
   type JsonObject,
@@ -13,7 +14,7 @@ import {
 import type { Files } from "../format-v3/reader"
 import { mediaImageSource } from "../image-url"
 import type { ImageIndex, ImageSource } from "../images"
-import { bucketOf, createLocator, homeSetOwner } from "../locator"
+import { createLocator, homeSetOwner } from "../locator"
 import { VerifiedCache } from "../verified-cache"
 import type { SearchBlobs } from "./blobs"
 import type { SearchIndex, SearchOptions, SearchPage, SearchQuery } from "./index"
@@ -140,7 +141,7 @@ export async function completeImages(
       locate({
         table: "printing_image",
         owner: homeSetOwner(target.owner),
-        bucket: bucketOf([target.printingId], 64),
+        entityKey: [target.printingId],
         partition: "detail",
       }),
     ),
@@ -163,7 +164,41 @@ export async function completeImages(
     }),
   )
   signal.throwIfAborted()
+  const integers = new Map<string, number>()
+  const baseKeys = new Set<string>()
+  for (const target of targets) {
+    if (target.intId) continue
+    for (const file of needed)
+      for (const raw of arrayValue(file?.["dependencies"] ?? [])) {
+        const ref = objectValue(raw)
+        const key = stringValue(ref["key"])
+        const base = files.get(key)
+        if (base && arrayValue(base["row_counts"]).some((c) => arrayValue(c)[0] === "printing")) {
+          if (base["sha256"] !== ref["sha256"]) throw new Error("printing exact dependency hash")
+          baseKeys.add(key)
+        }
+      }
+  }
+  await Promise.all(
+    [...baseKeys].map(async (key) => {
+      const file = files.get(key)
+      if (!file) throw new Error("printing base missing")
+      const decoded = decodeMessage({
+        kind: "file",
+        file,
+        bytes: await blobs.read(file, signal),
+        version,
+      })
+      if (decoded.kind !== "fragments") throw new Error("printing base shape")
+      for (const fragment of decoded.fragments)
+        if (fragment.table === "printing")
+          for (const row of fragment.rows)
+            integers.set(stringValue(row["id"]), integerValue(row["int_id"]))
+    }),
+  )
   const faces = targets.map((target) => {
+    const intId = target.intId || integers.get(target.printingId)
+    if (!intId) throw new Error("printing image identity missing")
     const row = rows.get(`${target.printingId}\u0000${target.faceId}`)
     if (!row) throw new Error("image metadata face missing")
     const asset = {
@@ -173,10 +208,10 @@ export async function completeImages(
       art_version: row["art_version"] ?? null,
       variants: row["variants"] ?? [],
     }
-    const source = mediaImageSource(root, target.intId, target.ordinal, asset, "card")
+    const source = mediaImageSource(root, intId, target.ordinal, asset, "card")
     if (!source && row["publication_state"] === "approved" && row["availability"] === "available")
       throw new Error("available image has no variants")
-    return { ...target, asset, ...(source ? { source } : {}) }
+    return { ...target, intId, asset, ...(source ? { source } : {}) }
   })
   return faces
 }

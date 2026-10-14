@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { type Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
-import { type JsonObject, stringValue } from "./format-v3/json"
+import { type JsonValue, stringValue } from "./format-v3/json"
 import { loadImagePage } from "./images"
 import { bucketOf, createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
 import { createCardIndex } from "./store"
@@ -26,6 +26,11 @@ const fetcher: Fetcher = (url) => {
 }
 const client = createSnapshotClient("/cdn", { fetch: fetcher })
 await client.load()
+await client.prefetchPrintings?.()
+await client.selectRegion?.("en")
+await client.prefetchPrintings?.()
+await client.selectRegion?.("jp")
+await client.prefetchPrintings?.()
 const snapshot = client.snapshot()
 if (!snapshot) throw new Error("fixture did not load")
 const index = createCardIndex(snapshot)
@@ -34,13 +39,16 @@ describe("locator", () => {
   it("maps every fragment identity to exactly one file", () => {
     const locate = createLocator(snapshot.files)
     for (const [key, file] of snapshot.files) {
-      for (const row of file["row_counts"] as JsonObject[]) {
+      for (const row of file["row_counts"] as JsonValue[][]) {
         expect(
           locate({
-            table: stringValue(row["table"]),
-            owner: row["owner"] as JsonObject,
-            bucket: Number(row["bucket"]),
-            partition: row["partition"] as "bootstrap" | "detail" | "history",
+            table: stringValue(row[0]),
+            owner: { kind: row[1] ?? null, id: row[2] ?? null },
+            purpose: stringValue(file["purpose"]),
+            region: file["region"] as string | null,
+            segment: stringValue(row[4]),
+            entityKey: [],
+            partition: row[3] as "bootstrap" | "detail" | "history",
           }),
         ).toBe(key)
       }
@@ -49,7 +57,7 @@ describe("locator", () => {
       locate({
         table: "printing",
         owner: homeSetOwner("set:nope"),
-        bucket: 0,
+        entityKey: [],
         partition: "detail",
       }),
     ).toBeUndefined()
@@ -72,7 +80,7 @@ describe("card index", () => {
     expect(index.textUnit(stringValue(revision?.["name_unit_id"]))?.["text"]).toBe("試作の見習い兵")
     expect(index.vocabulary("class", "royal")?.["active"]).toBe(true)
     expect(index.keyword("kw:fanfare")?.["code"]).toBe("fanfare")
-    expect(index.support("c:bp01-020")?.["shared"]).toMatchObject({ status: "load_rejected" })
+    expect(index.support("c:bp01-020")).toBeUndefined()
     expect(index.family("set:bp01")?.["public_code"]).toBe("BP01")
     expect(index.product("prod:bp01-jp")?.["region"]).toBe("jp")
     expect(index.currentRevision("f:bp01en-090", "jp")).toBeUndefined()
@@ -89,7 +97,8 @@ describe("text resolver", () => {
       createLocator(snapshot.files)({
         table: "face_revision",
         owner: homeSetOwner("set:bp01"),
-        bucket: bucketOf(["c:bp01-001"], 64),
+        entityKey: ["c:bp01-001"],
+        region: "jp",
         partition: "detail",
       }) ?? "",
     )
@@ -98,7 +107,7 @@ describe("text resolver", () => {
       .flatMap((fragment) => fragment.rows)
       .find((row) => row["id"] === revision?.["id"])
     const effectUnit = stringValue(full?.["effect_unit_id"])
-    expect(text.textOf(effectUnit)).toBeUndefined()
+    expect(text.textOf(effectUnit)).toBe("【ファンファーレ】自分のリーダーを1回復する。")
     await text.ensure([effectUnit, nameUnit])
     expect(text.textOf(effectUnit)).toBe("【ファンファーレ】自分のリーダーを1回復する。")
     expect(
@@ -109,12 +118,12 @@ describe("text resolver", () => {
             createLocator(snapshot.files)({
               table: "text_unit",
               owner: GLOBAL_OWNER,
-              bucket: bucketOf([effectUnit], 64),
+              entityKey: [effectUnit],
               partition: "detail",
             }) ?? "",
           )?.["path"],
       ),
-    ).toHaveLength(1)
+    ).toHaveLength(0)
   })
 })
 

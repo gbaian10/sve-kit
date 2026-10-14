@@ -15,6 +15,7 @@ afterEach(() => prefsStore.set(DEFAULT_PREFS))
 // the complete-EN fallback case of the same exact owner.
 async function englishOrigin() {
   const origin = await annotatedOrigin(fixture)
+  origin.client.setRegion?.("en")
   return { ...origin, owner: objectValue(fixture["owner"]) }
 }
 
