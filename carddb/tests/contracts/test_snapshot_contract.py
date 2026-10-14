@@ -182,6 +182,8 @@ def test_reader_container_errors_hide_fragment_text(failure: str) -> None:
     assert all(text not in rendered for text in texts)
     assert "Synthetic unexpected value" not in rendered
     assert error.instance is None
+    assert error.__cause__ is None
+    assert error.__context__ is None
     assert list(error.absolute_path)[:2] == ["tables", "text_unit"]
     assert "schema_path=" in error.message
     if failure == "row":

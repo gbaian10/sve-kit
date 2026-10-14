@@ -70,14 +70,18 @@ def validate_schema(
     try:
         validator.validate(value)
     except jsonschema_rs.ValidationError as error:
-        # Chaining would print Rust's rendering, which dumps the instance into logs.
-        raise ValidationError(
+        failure = ValidationError(
             _error_locations(error) if hide_instance else error.message,
             path=error.instance_path,
             schema_path=error.schema_path,
             validator=error.kind.name,
             instance=None if hide_instance else error.instance,
-        ) from None
+        )
+    else:
+        return
+    # Raised outside the handler: Rust's error renders the instance into logs and
+    # `from None` would still leave it reachable through `__context__`.
+    raise failure
 
 
 @cache
