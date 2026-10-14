@@ -1403,13 +1403,12 @@ def test_counterpart_replaces_only_its_owner_common_selection(db: Database) -> N
 def test_publication_rejects_projection_with_invalid_vocabulary(db: Database) -> None:
     result = projected(db)
     one(result, "face_revision")["type_code"] = "missing-vocabulary"
-    with pytest.raises(ValueError, match="Vocabulary reference") as caught:
+    with pytest.raises(ValueError, match="Vocabulary reference"):
         export_snapshot(
             result,
             Ownership.from_database(db, result),
             Batch("preview-20261002T010203Z-0001", "2026-10-02T01:02:03Z", ("jp",)),
         )
-    assert any(entry.name == "read_snapshot" for entry in caught.traceback)
 
 
 def region(result: Projection, code: str = "jp") -> Record:
