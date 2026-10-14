@@ -31,7 +31,7 @@ def stored(request: pytest.FixtureRequest) -> tuple[Database, Frame, SourceBindi
     parent: tuple[Database, Frame, SourceBinding] = request.getfixturevalue("unbound")
     db, _, binding = parent
     with db.transaction():
-        write_binding(db, "use:synthetic", binding, {})
+        write_binding(db, "use:synthetic", binding)
     return parent
 
 

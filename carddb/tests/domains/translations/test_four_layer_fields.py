@@ -430,7 +430,7 @@ def test_whole_field_rejects_a_forged_omission_on_an_explicit_number(
     )
     with db.transaction():
         db.delete("translation_use", {"id": "use:synthetic"})
-        with pytest.raises(ValueError, match="occurrence"):
+        with pytest.raises(ValueError, match="cannot have an omitted occurrence"):
             render_field(
                 db,
                 compiled_field(db, frame, mixed),
