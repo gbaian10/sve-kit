@@ -36,7 +36,7 @@ bootstrap／detail descriptor 與完整 tuple 一致，不輸出 translation.sta
 | 集合名、`集合名_partition` | 完整邏輯 row tuple、各欄位分割 row tuple |
 | RegionView、PrintingFace、Section 等 | 固定巢狀 tuple，含 PrintingFaceBootstrap／Detail |
 | ParameterSchema、CorrectionValue | 保留為 JSON 的有限值域；field 與更正值另於所屬 tuple 綁定 |
-| Programs、TextAll | 空程式包及文字容器聯集 |
+| Programs | 空程式包 |
 | Changes、Index、IndexEntry | 變動摘要與 index_format=2 的 current／previous 入口 |
 
 可直接以 `#/$defs/Manifest` 等片段作驗證入口。`x-columns`、`x-types`、`x-primary-key`、`x-fragments`、`x-tables` 是供固定 accessor 使用的註記；接受／拒絕 JSON 形狀使用標準 keywords。資料內 types 另以 const 驗完整 descriptor，不能讓 payload 的註記改變解碼方式。
@@ -66,7 +66,6 @@ uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 | --- | --- |
 | manifest.json、payloads/*.json | bootstrap、detail、history、config、images、空 programs；雙面、兩版次、跨片翻譯、印刷面 sections／更正、五種 image_variant、text_symbol／多語 hints |
 | expected-logical.json | join 後全部 46 集合；未使用集合為 []，無 row_index／face_ordinal |
-| text-all.json | 與個別文字下載得到相同 logical view |
 | schema-valid.json | 各集合／巢狀型別與附屬容器的正例；形狀例不要求獨立形成引用閉包 |
 | schema-invalid-core.json、schema-invalid.json | 共用核心與圖片形狀反例，含非法日期／時間、非 ASCII 數字與 URI；有 raw_json 時先驗原始 JSON bytes 邊界 |
 | reader-invalid-core.json、reader-invalid.json | 核心與圖片反例：依賴 hash、row_index、face_ordinal、descriptor、欄序、引用、參數域與多語宣告不一致等反例 |
@@ -75,7 +74,7 @@ uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 樣本為便於審核的排版 JSON，manifest 的 hash／bytes 指向其 canonical 表示。Harness 先解析排版樣本並 canonical 序列化，交 reader 驗 bytes；不可更新 manifest 來掩蓋未預期差異。實際下載的 payload 直接驗收到的未壓縮 bytes，不先重序列化修復。`raw_json` 反例必須保留原字串，不先 parse/stringify 消除錯誤。
 
 reader-invalid 每例以 target（manifest 或 payload 邏輯鍵）、path（物件鍵／陣列位置序列）、value 指定替換；setup 是依序套用的前置變更。核心與圖片反例都定位到 4.0 的實際 fragments，不依賴舊版單檔位置。
-測試 harness 重算受影響 File 的 hash／bytes／path／row_counts，並重釘原本有效的 FileRef；故意錯誤的 pin 不修復。manifest 本身的錯誤在重釘後套用，確保觸及該守門。rehash=false 保留目標原封套；不重建 text_all，這些反例使用個別下載入口。
+測試 harness 重算受影響 File 的 hash／bytes／path／row_counts，並重釘原本有效的 FileRef；故意錯誤的 pin 不修復。manifest 本身的錯誤在重釘後套用，確保觸及該守門。rehash=false 保留目標原封套；這些反例使用個別下載入口。
 error 釘住預期失敗原因；其他 reader 不要求相同訊息文字。所有反例均須拒收，不得補值或 fallback。
 
 ## Python 獨立 reader
@@ -86,7 +85,7 @@ error 釘住預期失敗原因；其他 reader 不要求相同訊息文字。所
 uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 ```
 
-`sve_carddb.export.reader.read_snapshot(manifest_value, payloads)` 接受已解析的 manifest 與邏輯鍵→未壓縮 canonical bytes；`read_text_all` 驗聯集後走相同 join。Schema 由套件資源讀取，不在執行期解析 Markdown、不抓網路、不寫版本索引。
+`sve_carddb.export.reader.read_snapshot(manifest_value, payloads)` 接受已解析的 manifest 與邏輯鍵→未壓縮 canonical bytes。Schema 由套件資源讀取，不在執行期解析 Markdown、不抓網路、不寫版本索引。
 
 這是供契約驗收的小型記憶體 reader：回傳完整 logical objects，便於比對獨立 oracle。前端正式 store 仍須遵守 snapshot-format 的逐片解析／淘汰規則。壓縮傳輸長度、資產本體下載、兩版 changes 差異及建置端證據屬對應下載／發布流程的驗收，不由這個已解壓 bytes 入口代驗。
 
@@ -97,7 +96,7 @@ uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 | 嚴格 UTF-8 JSON、重複鍵、浮點／不安全整數、surrogate、canonical bytes | `core/json.py` 的 `parse`／`canonical`，`export/reader.py` 的 `_payload`；`read_api.py` 的 `_manifest` 驗 manifest 原始 bytes |
 | Schema、固定 descriptor／tuple、row_counts、檔案與依賴 DAG、引用閉包、join | Python `read_snapshot` 的 `_files`／`_container`／`_base`／`_join`／`_closure` |
 | owner／partition／bucket、跨列排序、圖片、數位同名、config、標註 | `export/semantics.py` 的 `validate_fragments`／`validate_view`／`validate_placement`／`validate_config`，`reader_media.py` 與 `reader_annotations.py` |
-| 匯出驗收 | `export/transport/__init__.py` 的 `Snapshot.verify` 比對完整 logical view，再以 `text_all_payloads` 驗聯集成員、依賴及成員 canonical bytes 的 hash 與長度 |
+| 匯出驗收 | `export/transport/__init__.py` 的 `Snapshot.verify` 比對完整 logical view，並驗分片、依賴及 canonical bytes 的 hash 與長度 |
 | 上傳前離線驗收 | `read_api.load_export` 驗完整分片及資產；`sve_publish.commands.upload_command` 先取得此結果，再取得憑證與上傳 |
 | 瀏覽器下載／快取完整性 | `integrity.ts` 的 `transferDigest` 使用 WebCrypto；client／SearchBlobs／MetadataBytes 驗 hash 與 bytes，decoder 不重算；衍生快取紀錄另驗自身 hash |
 | 瀏覽器解碼與准入 | 原生 `JSON.parse`、固定 `x-columns`／`x-types` 解碼及 detail join；保留版本／最低 reader／能力判斷，解析或必要欄位使用失敗顯示載入錯誤 |
@@ -107,7 +106,6 @@ TS 不再維護完整離線驗證器或只被反例測試呼叫的舊驗證程�
 Web 測試驗下載 hash 失敗、JSON 無法解析、必要欄位缺失的錯誤狀態，以及正常搜尋、合併、標註與圖片顯示。
 canonical 與 SHA-256 bucket 向量仍供 fixture 產製及按需定位驗收；payload 的 types 不改變固定解碼欄序。
 
-`load_export` 目前對 `text_all` 驗外層 hash／長度及壓縮表示，沒有呼叫 `read_text_all` 驗成員與分片等價；該語義驗收目前由 `Snapshot.verify` 與 Python 契約測試執行。
 共用 schema／樣本變動仍須觸發 Python 契約測試與 Web 解碼／顯示測試。
 
 ## 數位名字政策的准入邊界

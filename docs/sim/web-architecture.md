@@ -160,7 +160,7 @@ interface QueryState {
 - 首頁顯示後背景下載所選 jp／en 整區基本目錄；所有連線同一政策，不設省流量模式。下載中可打字並顯示「資料下載中」，整區驗畢及索引完成後自動搜尋一次，不顯示部分結果。
 - 卡名／卡號、基本數值與基本 facet 先可用；稀有度、異圖與完整印刷版本之後背景補齊。相應條件未備妥時提示載入中，不能用部分版次輸出完整搜尋結果。全文與其他進階用途須等其整區閉包驗畢。
 - 另一區只在切換或對照時下載；不因 UI 語言切換改 card edition，亦不以字串可讀宣稱雙區來源已驗。單卡深連結可先載當頁完整用途，不宣稱整區搜尋 ready。
-- 網路／Service Worker 處理取得、驗 bytes 與持久快取；Worker 逐容器解壓、驗證、解析、建立索引；main 接收必要 view、進度與完整結果。原始 tuple／解碼字串建立緊湊 store 後釋放，詳情用有界 LRU，不把 text_all 一次 JSON.parse 到 main。
+- 網路／Service Worker 處理取得、驗 bytes 與持久快取；Worker 逐容器解壓、驗證、解析、建立索引；main 接收必要 view、進度與完整結果。原始 tuple／解碼字串建立緊湊 store 後釋放，詳情用有界 LRU。
 - 現有 PWA 前只靠 HTTP 快取；Service Worker／CacheStorage 的上述分工是設計要求，不宣稱已實作。快取不可用時保持明確用途狀態並重新下載，不要求整庫離線預取。
 - 持久 bytes 以根目錄及內容定址 URL 重用，衍生索引以 manifest／reader／normalizer 隔離。切快照／版本／查詢取消舊工作，拒絕晚到回應；部分用途 ready 不等於完整離線 active。
 - `data/` 公開呼叫採 async，提供用途所需 keys、載入／解析進度與分開的文字／來源／標註狀態；未知分母不造百分比。基本文字就緒、日文依據／標註未備妥、完整檢視缺來源（錯誤）依[公開 annotation §4.1](../schema/export/public-annotation.md#41-三種就緒狀態與部分-reader)。

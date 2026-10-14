@@ -19,7 +19,7 @@
 
 ## 1. 快照清單（manifest）、版本與容器
 
-`format_version` 是傳輸格式 SemVer；`data_version` 是資料批次識別，正式版表示 UTC 發布批次，`preview-` 前綴保留給不發布的預覽批次、不得用於正式版；`dsl_version` 是 DSL 主版.次版，不能混用。快照清單一份釘住 `format_version,data_version,published_at,data_as_of,regions,languages,min_reader_version,required_capabilities,engine_support_target,files,config_ref,text_all,partitioning,coverage,mechanic_universe_id,restriction_coverage,source_windows,qa_card_ids,errata_card_ids,changes_ref`；完整型別及命名規則見 [傳輸契約 §1–2](snapshot-transport.md#2-快照清單與檔案描述)。
+`format_version` 是傳輸格式 SemVer；`data_version` 是資料批次識別，正式版表示 UTC 發布批次，`preview-` 前綴保留給不發布的預覽批次、不得用於正式版；`dsl_version` 是 DSL 主版.次版，不能混用。快照清單一份釘住 `format_version,data_version,published_at,data_as_of,regions,languages,min_reader_version,required_capabilities,engine_support_target,files,config_ref,partitioning,coverage,mechanic_universe_id,restriction_coverage,source_windows,qa_card_ids,errata_card_ids,changes_ref`；完整型別及命名規則見 [傳輸契約 §1–2](snapshot-transport.md#2-快照清單與檔案描述)。
 
 `engine_support_target` 恰含 `engine_version,engine_build_hash,validation_policy_id`，三欄全 null 或全有值；逐卡狀態不重複它。files 的完整形狀、hash／壓縮大小及依賴規則見 [傳輸契約 §2](snapshot-transport.md#2-快照清單與檔案描述)。
 
@@ -27,7 +27,7 @@
 
 巢狀的 RegionView/PrintingFace/Section/FieldTranslation/Correction/Support 等記錄同樣用 tuple，types 以具名型別→columns 順序及引用型別描述（固定於 format）供載入器驗列長度；producer 以本文件的具名型別作型別名。`parameter_schema/corrected_from` 等值保持受限 JSON，不轉成位置陣列，值域依 [傳輸契約 §3.2–3.3](snapshot-transport.md#32-公開參數宣告)。純 ID/code 陣列亦保持原樣。每個容器只附用到的巢狀 types，各型別一份，producer 驗其與 format 定義一致；consumer 不執行資料提供的轉換程式。
 
-reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；啟動包轉 typed 索引後釋放原 tuples，只在畫面當前項目建立 view，不能全量展開成物件再多存一份。這項編碼主要節省未壓縮傳輸/快取大小；原型量測顯示 heap 並未因此降低，記憶體要靠 §3 的逐片解析/淘汰。每表按穩定主鍵排序、集合陣列按 ID/code 排序、有序段落保留 ordinal。payload 不含 `data_version/published_at/data_as_of`，未變內容跨版 bytes/hash 完全相同。完整文字包是同一分片 payload 的容器聯集，不能另做另一套 carddb。公共永久 ID 保持不透明字串；text ID 固定為 `t:{lang}:{sha256(exact UTF-8 text)[:16]}`，同一份快照內同鍵不同內容即停止匯出，不能重配舊鍵或自動加長，快照不附完整 hash。不另保存跨版本的已發布文字鍵索引（[ADR-0015](../../adr/0015-upload-from-export.md)）。
+reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；啟動包轉 typed 索引後釋放原 tuples，只在畫面當前項目建立 view，不能全量展開成物件再多存一份。這項編碼主要節省未壓縮傳輸/快取大小；原型量測顯示 heap 並未因此降低，記憶體要靠 §3 的逐片解析/淘汰。每表按穩定主鍵排序、集合陣列按 ID/code 排序、有序段落保留 ordinal。payload 不含 `data_version/published_at/data_as_of`，未變內容跨版 bytes/hash 完全相同。公共永久 ID 保持不透明字串；text ID 固定為 `t:{lang}:{sha256(exact UTF-8 text)[:16]}`，同一份快照內同鍵不同內容即停止匯出，不能重配舊鍵或自動加長，快照不附完整 hash。不另保存跨版本的已發布文字鍵索引（[ADR-0015](../../adr/0015-upload-from-export.md)）。
 
 下面列出的欄位全部存在，`?` 表示可 null，不表示任意省略。內嵌同型陣列可以空；未知與空的規則在 [build-db.md](../build/build-db.md) 定義。顯示 label 參照 `text_unit`，介面通用提示留 app i18n。枚舉值與型別沿建置資料庫同名定義，投影新增型別於下節明列；不可帶出建置資料庫未列欄位。
 
@@ -220,7 +220,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 **下載完成不等於全部常駐 JS heap。** Worker 逐檔解壓、驗證、解析及建立緊湊索引，主執行緒只取必要 view／結果 ID；詳情以 LRU 釋放，不把全庫物件傳回主端。全文搜尋先取得所選區該用途全部效果閉包，再回完整結果，不只掃已載入卡。持久 bytes 與衍生索引均可快取；IndexedDB 依根目錄、manifest hash、reader／normalizer 隔離，不能形成第二真值。儲存被拒時可重建記憶體索引並如實標示可用範圍。
 
-完整文字包 `text_all` 僅供完整下載/工具匯入，可串流讀；瀏覽器預設用分片。完整文字包與分片是替代下載方式，不雙倍下載。快照清單的 `text_all.contains` 列出全部 required text keys，closure hash 皆驗過才標「文字離線備妥」。首訪部分可讀狀態不等於 active 完整離線版。
+需要完整文字的工具依快照清單逐片讀取 files 中的文字檔及其依賴閉包，再重接同一份快照。
 
 容量與量法依 [size-budget](size-budget.md)：全部文字分片＋manifest 的 raw ≤40 MiB；單一版本完整文字閉包（含共享、完整 JP source、counterpart、必要跨區檔、卡號索引、字典及實體重複裝檔）Brotli ≤8 MiB、gzip ≤10 MiB。基本目錄冷載 Brotli 2 MiB 為分界；基本目錄容器整檔 raw ≤2 MiB，詳情與其他資料檔 ≤512 KiB。手機目標是 main＋Worker 穩態合計 ≤48 MiB、更新峰值 ≤80 MiB、主線程單段 ≤50 ms、所選整區基本目錄完整解析累計 ≤1 秒；對象與量法以容量文件為準。這些是設計／發布效能驗收要求，Python reader 依實際 bytes、hash、欄序及閉包驗證，瀏覽器依 bytes、hash 與版本能力判准入，不用預算數字拒收合法快照。
 
@@ -245,7 +245,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 `rules_name`／`face_rules_name` 的全部欄位唯一存於 global detail，依 [傳輸契約 §5.1](snapshot-transport.md#51-固定配置) 定位。兩表的 PK、欄序、型別及邏輯參照不變，也沒有 row_index/base。名稱搜尋與一般 facet 仍用 current／display 的名稱閉包；同名規則／構築功能按需取兩表，未完成須標「規則資料載入中／未備妥」，不能當作沒有同名限制或完整合法性。商品收錄、完整 printing 裝飾與 support 可背景／按需；保留其完整欄位與邏輯參照。
 
-表中 `id/face_id` 是 join 後欄名；詳情分片傳輸以 `row_index/face_ordinal` 取代這些重複鍵。`row_index` 是該啟動包欄位分割已排序 rows 的位置，不是永久 ID；快照清單 dependencies 必釘精確啟動包 key/hash，錯版本/越界/同 ordinal 重複皆拒絕。當啟動包排序改變，相關詳情分片必重建，不能沿用舊 `row_index`；這會增加更新片數，是省去複本鍵的明示取捨。display_ref 外的 `face_revision`（含其餘候選）使用獨立的 history 分片與完整列，不混在現行／暫顯詳情分片的 columns。欄位分割的 columns/type 白名單由 format 固定，files.role 指下載類別，與欄位 partition 解耦，`row_counts` 按欄位分割實際列數計；producer 另外驗 join 後邏輯主鍵唯一、必填欄齊與無欄位重複。printing.faces 兩片以 `(printing.id,face_id)` 一對一合併；translation 子陣列按 `field/ordinal/target_lang` 合併且不重複。完整文字包只是這些欄位分割的容器聯集，仍維持分割，不額外打包全欄複本。owner/bucket 穩定，不因分片切換改永久 ID；字典選用狀態變更可讓該 bucket 的欄位分割內容更新。
+表中 `id/face_id` 是 join 後欄名；詳情分片傳輸以 `row_index/face_ordinal` 取代這些重複鍵。`row_index` 是該啟動包欄位分割已排序 rows 的位置，不是永久 ID；快照清單 dependencies 必釘精確啟動包 key/hash，錯版本/越界/同 ordinal 重複皆拒絕。當啟動包排序改變，相關詳情分片必重建，不能沿用舊 `row_index`；這會增加更新片數，是省去複本鍵的明示取捨。display_ref 外的 `face_revision`（含其餘候選）使用獨立的 history 分片與完整列，不混在現行／暫顯詳情分片的 columns。欄位分割的 columns/type 白名單由 format 固定，files.role 指下載類別，與欄位 partition 解耦，`row_counts` 按欄位分割實際列數計；producer 另外驗 join 後邏輯主鍵唯一、必填欄齊與無欄位重複。printing.faces 兩片以 `(printing.id,face_id)` 一對一合併；translation 子陣列按 `field/ordinal/target_lang` 合併且不重複。owner/bucket 穩定，不因分片切換改永久 ID；字典選用狀態變更可讓該 bucket 的欄位分割內容更新。
 
 `card_facet/printing_facet/rules_facet` 只是 reader 建出的索引視圖，**不出貨三份 facet 列**。職業/作品/類型/數值/特性從現行 `face_revision`；無 current 的表記未定依 §2.3 的暫顯／候選及未定 facet 規則，不因此隱藏卡片；稀有度/標誌/圖從 printing 與裝飾片；三語名字從 name 的 `FieldTranslation→translation→text_unit`，缺譯 state=missing 並回原文；引擎五態按 `Support/region_blocks` 推導。Q&A/errata 的存在與否用快照清單的兩個稀疏 card ID 集合 `qa_card_ids/errata_card_ids`，加 `source_windows` 覆蓋判 present/absent/unknown，無閉包不能假 absent。兩集合是唯一額外 facet 摘要，容量另量。`rules_facet` 從已下載 rules/profile/restriction 與指定日期計算，不存第二份每卡/賽制摘要；也不能把單卡摘要當整副牌合法性。
 
@@ -255,7 +255,7 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 `complete_mode=include/exclude` 先在快照清單 keyword universe U 解碼 complete；`partial_mode` 再於 `U\complete` 解碼 partial。各集合選較短的正集/補集，同長選 include，列表長度不得超過其基底一半；兩集合解碼後互斥。`complete_all=true` 時 mode 皆 include、列表皆空。未知=`U\(complete∪partial)`，不因壓縮改成 absent。這個編碼也需 column-partition-v1 reader 能力，不能讓舊 reader 把補集當正集。
 
-快照清單必填 `data_as_of: Date`，取輸入 recipe 宣告的資料基準日，與 `published_at` 發布時間分開。它不是單卡最後修改日或來源核對的「知識截至」，不保證該日前所有來源完整收錄；完整性仍依 source_windows 等證據判斷。此日期只在 manifest，不進 config、資料分片或完整文字包；單純改日期不改這些檔案的 bytes。
+快照清單必填 `data_as_of: Date`，取輸入 recipe 宣告的資料基準日，與 `published_at` 發布時間分開。它不是單卡最後修改日或來源核對的「知識截至」，不保證該日前所有來源完整收錄；完整性仍依 source_windows 等證據判斷。此日期只在 manifest，不進 config或資料分片；單純改日期不改這些檔案的 bytes。
 
 ## 4. 更新、相容性與離線
 
@@ -278,7 +278,7 @@ Schema、欄序、golden 與 reader，不要求額外升版；正式凍結後才
 
 ### 4.1 發布窗口、圖片新鮮度與回收
 
-公開 CDN 的卡表快照只保留**最新版（current）及其直接前一發布版（previous）**，previous 僅供更新過渡。首次發布 previous 為 null。每一保留版本的清單、文字／其他分片、完整文字包（若有）、config、影像 metadata、programs、changes 及所列壓縮表示，均保留其必要 JSON／檔案閉包；共同內容依 hash 去重。清單及內容定址 JSON 一經寫入不可覆寫，但輪替出保留窗口後可依引用集合回收。「內容不可變」不表示「永久保存」。
+公開 CDN 的卡表快照只保留**最新版（current）及其直接前一發布版（previous）**，previous 僅供更新過渡。首次發布 previous 為 null。每一保留版本的清單、文字／其他分片、config、影像 metadata、programs、changes 及所列壓縮表示，均保留其必要 JSON／檔案閉包；共同內容依 hash 去重。清單及內容定址 JSON 一經寫入不可覆寫，但輪替出保留窗口後可依引用集合回收。「內容不可變」不表示「永久保存」。
 
 **卡圖 WebP 僅提供當前圖片，不保存歷史圖片版本。** previous 或更舊 metadata 中的圖片引用不使舊 WebP 成為必留資產；其 image hash／bytes 不構成永遠可取得同一圖片的承諾。圖片產製、來源核可、格式／尺寸／內容檢查仍在發布前驗證。新版快照須提供足以選取新圖片的版本 token 或新 path；client 啟用新版後，瀏覽器／CDN／SW 不得以舊版本圖片作快取回退。未完成下載顯示載入狀態，失敗明示，不以舊圖充作新版圖。
 
@@ -342,7 +342,7 @@ changes 是相鄰發布摘要，不是重建鏈。previous manifest 引用的 ch
 
 ## 7. 發布閘門與變動報告
 
-除了建置資料庫完整性，卡表快照需驗：所有表與內嵌 reference 有公開目標；43 個文字集合＋3 個影像集合逐欄白名單；current/translation 選用/region blocks 完整；每卡 support 恰一列；所有非 passed 有原因；passed 的建置資料庫證據吻合；完整文字包/分片/啟動包語義等價；bytes/hash/count/依賴 closure 正確；無來源本機路徑、作者候選 YAML、逐列稽核 hash。
+除了建置資料庫完整性，卡表快照需驗：所有表與內嵌 reference 有公開目標；43 個文字集合＋3 個影像集合逐欄白名單；current/translation 選用/region blocks 完整；每卡 support 恰一列；所有非 passed 有原因；passed 的建置資料庫證據吻合；分片重接與公開邏輯投影等價；bytes/hash/count/依賴 closure 正確；無來源本機路徑、作者候選 YAML、逐列稽核 hash。
 
 changes 是內容定址的公開摘要 `{format_version,from_data_version,to_data_version,added,modified,retired,errata,new_qa_versions,identity_changes,coverage_changes,support_changes}`，元素型別與複合主鍵表示見 [傳輸契約 §7](snapshot-transport.md#7-changes-元素)；建置待辦與原報告留建置資料庫。只是抓取時間/ETag 改變而內容相同不列修改。引擎版本/政策變化即使卡文不動仍發布新 `support/data_version`。
 
@@ -443,7 +443,7 @@ digital_face／digital_text 留建置端，沒有資產採納就不出 digital a
 | 驗收反例 | 結果 |
 | --- | --- |
 | 未支援的格式，或缺該格式必要 capability／reader 契約版本不足 | 拒絕整份快照，不能丟掉列後降版；4.0 依完整八個能力檢查 |
-| 因零配對／空 annotation 省必要 capability，或 config／fragment／programs／text_all 版本與 manifest 不一致 | 拒絕，不因空列放寬准入，依 4.0.0 固定配置驗證 |
+| 因零配對／空 annotation 省必要 capability，或 config／fragment／programs 版本與 manifest 不一致 | 拒絕，不因空列放寬准入，依 4.0.0 固定配置驗證 |
 | same_name 帶面／phase、effect_similarity、sampled／confirmed review | producer 與 Python reader 各自拒絕 |
 | same_name 因不同面或 phase 重複出列，或同組真人與規則並存 | 拒絕重複規則列；建置端保留全部匹配來源，真人精確面的合法多筆沿自己的 subject |
 | digital_card／link／endpoint 引用缺目標，或把凍結目錄全部當必要閉包 | 拒絕缺引用；只投影實際有效關係所需內容 |

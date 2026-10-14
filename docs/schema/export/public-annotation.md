@@ -11,7 +11,7 @@ producer、Python reader、TS 解碼器與 read_api 已切換為 4.0.0，Web 依
 
 `format_version=min_reader_version=4.0.0`。新增必要 annotation，改變 Translation／FieldTranslation／cr_clause
 欄序並移除 basis 值，依[傳輸契約 §1.1](snapshot-transport.md#11-版本與相容判斷)升 major。
-所有 manifest、config、container、programs、text_all、changes 與 index entry 宣告同步；
+所有 manifest、config、container、programs、changes 與 index entry 宣告同步；
 `index_format=2` 不變。空 annotation 或無繁中列的快照仍須宣告全部能力。
 
 required_capabilities 恰為以下已排序且不重複的集合：
@@ -303,7 +303,7 @@ printing 字段為 detail；keyword／vocabulary／商品為 bootstrap；QA／CR
 基本目錄的原文、譯文與 facet 字串及必要字典計入基本目錄冷載；來源／annotation 可按 §4.1 延後，實際成必載依賴者仍整檔計入。
 說明正文、JP source 比較或 printed／history 等基本目錄以外的欄位可以按需載入，不藉 reference 讓基本目錄強制依賴按需檔。
 這些邏輯引用由 P／完整 R／U 驗閉包，W 在使用來源對照／說明前載入且驗到目的欄位。
-完整文字包包含三個新集合及所有必要文字／說明閉包；分片與 text_all 的 decoded logical view 相同。
+文字分片包含三個新集合及所有必要文字／說明閉包；重接後的 decoded logical view 與公開邏輯投影相同。
 所有新集合納入 row_counts、types、changes 的 PK／changed_fields 白名單、檔案 hash 與完整文字離線 ready 判定。
 row_counts 只計 wire 實際儲存的非空集合及用途列；空集合不補列、不產生僅為保存空集合的 fragment。
 非空集合變空時，原文用途以 changes 記錄用途列的 retired；譯文則記錄 translation.annotation_set_id 改為 null，

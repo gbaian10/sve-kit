@@ -15,9 +15,9 @@
 透過已驗證 SQLite 邊界讀取永久 `printing.home_set_id`；不能從卡號、商品收錄或
 `card.home_set_id` 補猜版次歸屬，也不把此建置欄加入公開列。
 
-`Batch` 只提供 `data_version,published_at,regions`，格式與完整快照清單由 Schema
+`Batch` 只提供 `data_version,published_at,data_as_of,regions`，格式與完整快照清單由 Schema
 驗證。此候選匯出器只接受 `preview-` 批次。回傳 `Snapshot` 包含快照清單、按 key
-索引的 `Blob`、`text_all` 及建置用壓縮 recipe。寫檔、分配批次與發布由呼叫端負責；
+索引的 `Blob` 及建置用壓縮 recipe。寫檔、分配批次與發布由呼叫端負責；
 此函式不讀 live manifest、不抓來源、不更新版本索引。
 
 `Blob.raw` 是 canonical-json-v1 bytes；`br` 是可空 bytes，`gzip` 是固定 level 9、
@@ -64,20 +64,19 @@ printing 與 display revision 的詳情片一對一提供每個 base row，保�
 
 匯出完成必須通過交付點 A 的獨立 `read_snapshot`，再與輸入 logical view 逐欄相等。
 未知 descriptor、缺 required、重複 PK、錯誤 base/dependency、循環、未閉合的公開引用、
-錯誤列位置與非法 pending 呈現都會失敗。`text_all` 保留原 File 分組、member bytes
-與 hash，透過同一 reader join，不另出全欄複本。
+錯誤列位置與非法 pending 呈現都會失敗。
 
-`Snapshot.assert_identical` 比較兩次輸出的 raw/br/gzip、文字聯集與 recipe；批次時間
+`Snapshot.assert_identical` 比較兩次輸出的 raw/br/gzip 與 recipe；批次時間
 及版號只影響快照清單，未變 payload bytes 可跨版重用。
 
-`export.transport.measure.measure` 目前回報 N0 的全文／啟動包 raw／br／gzip、逐片 metadata 與超限檔；它把 manifest／config 計入，排除 images／空 DSL 與替代 text_all 重複量。
+`export.transport.measure.measure` 目前回報 N0 的全文／啟動包 raw／br／gzip、逐片 metadata 與超限檔；它把 manifest／config 計入，排除 images／空 DSL。
 既有 `startup_by_region.jp`／`.en` 若仍載全部 bootstrap，兩區數字相同；其中 `target_br_1_mib`／`stop_for_maintainer` 沿用舊啟動目標與停點，不是現行分界。這些數字不是新基本目錄裝檔或單區完整文字帳的通過證據。
 
 修訂後的報告依 [size-budget](size-budget.md)：全量 raw（全部文字分片＋manifest）≤40 MiB，單一版本完整文字閉包 Brotli ≤8 MiB、gzip ≤10 MiB，基本目錄容器 raw ≤2 MiB，其他資料檔 ≤512 KiB。
 基本目錄冷載逐區計完整 manifest＋config＋實際 File 與依賴；混區／共用 File 整檔計，不分攤語言比例。
 Brotli 2 MiB 是分界，略超報精確 bytes 差額與比例，明顯超出才交維護者，不當作 CI 硬閘門。
 source／counterpart、必要跨區檔、卡號索引與字典須完整計入單區全文；基本文字就緒而日文依據／標註未備妥時亦不免計。
-text_all 整檔與封套另報，不與分片重加；新量法不以舊豁免或現有 API 數字宣稱已驗收。
+新量法不以舊豁免或現有 API 數字宣稱已驗收。
 
 逐檔 owner／bucket／partition 報所有 fragments 的集合，不只取第一個。
 另報全部 images metadata 的檔數／raw／br／gzip（不加進完整文字）；metadata 與
@@ -85,8 +84,7 @@ text_all 整檔與封套另報，不與分片重加；新量法不以舊豁免�
 成本仍算首次 session／離線下載；實際成為首屏或基本目錄必載依賴者加回該冷載帳。
 
 `export.transport.measure.update` 比較不可變 payload bytes，列出變更檔鍵與替換下載量（含新
-快照清單）；base hash 變動即使 row_index 不變也會重建詳情片。選用 `text_all` 更新
-時應另計整個聯集，不能與個別分片同時計算。
+快照清單）；base hash 變動即使 row_index 不變也會重建詳情片。
 
 JP 量測不足以凍結正式配置；正式前還須量 EN、雙區與完整三語名字／facet 閉包，
 包含零 pending、實際分布、全 pending、最大片與增量重建量。手機的 48/80 MiB
