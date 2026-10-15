@@ -2,7 +2,7 @@ import { type MouseEvent, useId } from "react"
 import { useTranslation } from "react-i18next"
 import { useHref, useNavigate } from "react-router"
 
-import type { CardEntryState } from "../../app/listEntryState"
+import { type CardEntryState, routeState } from "../../app/listEntryState"
 import { CardImage } from "../../components/card/CardImage"
 import { isPlainClick } from "../../components/results/plain-click"
 import type { SuggestRow } from "../../components/search/SuggestList"
@@ -111,16 +111,7 @@ function RecentLink({
           source: "results",
           pages: 1,
           resultKey: row.summary.cardId,
-          ...(row.summary.route
-            ? {
-                route: {
-                  ...row.summary.route,
-                  cardId: row.summary.cardId,
-                  printingId: row.summary.printingId,
-                  region: row.summary.region,
-                },
-              }
-            : {}),
+          ...routeState(row.summary),
         }
         void navigate(to, { state })
       }}

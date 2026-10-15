@@ -95,18 +95,13 @@ export class ViewCache {
   }
 }
 
+/** Image metadata follows visible slots on its own channel, so a view carries no faces. */
 export function completeView(
-  _root: string,
   query: SearchQuery,
   index: SearchIndex,
-  _files: Files,
-  _version: string,
-  _blobs: SearchBlobs,
-  _signal: AbortSignal,
   eligible?: ReadonlySet<string>,
-): Promise<CompleteView> {
-  const page = index.search(query, eligible)
-  return Promise.resolve({ query, page, faces: [], options: index.options })
+): CompleteView {
+  return { query, page: index.search(query, eligible), faces: [], options: index.options }
 }
 
 export async function completeImages(

@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { useCardSnapshot } from "../../app/snapshot"
 import { ToastProvider } from "../../components/ui/Toast"
 import { stringValue } from "../../data"
+import { CardRouteError } from "../../domain/cardRoute"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 import { CardView } from "./CardPage"
@@ -556,5 +557,37 @@ describe("regional printing lists", () => {
         .map((link) => link.textContent),
     ).toEqual(["BP01-053EN (LG)"])
     expect(within(jp).getByRole("link", { current: "page" })).toHaveTextContent("BP01-053 (LG)")
+  })
+})
+
+describe("route failures", () => {
+  function Rejected({ kind }: { readonly kind: CardRouteError["kind"] }) {
+    const { client, status } = useCardSnapshot()
+    return (
+      <CardView
+        client={client}
+        status={status}
+        catalog={null}
+        resolved={undefined}
+        routeError={new CardRouteError(kind, "synthetic route failure")}
+      />
+    )
+  }
+  it.each<[CardRouteError["kind"], string]>([
+    ["invalid", "找不到這個卡號"],
+    ["not-found", "找不到這個卡號"],
+    ["needs-update", "卡表需要更新"],
+    ["reference", "無法定位卡片"],
+  ])("a %s route shows %s", async (kind, heading) => {
+    prefsStore.set({ uiLanguage: "zh-TW" })
+    const element = (
+      <ToastProvider>
+        <Rejected kind={kind} />
+      </ToastProvider>
+    )
+    await renderRoutes([{ path: "/cards/:cardNo", element }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    expect(screen.getByRole("heading", { level: 1, name: heading })).toBeVisible()
   })
 })

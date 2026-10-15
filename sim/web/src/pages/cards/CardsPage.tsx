@@ -2,7 +2,7 @@ import { type KeyboardEvent, useCallback, useId, useMemo, useRef, useState } fro
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router"
 
-import { type CardEntryState, useListEntryState } from "../../app/listEntryState"
+import { type CardEntryState, routeState, useListEntryState } from "../../app/listEntryState"
 import {
   useListView,
   useRecentSummaries,
@@ -29,7 +29,7 @@ import { type CardSummary, type ImageSource, type SearchQuery, viewImages } from
 import { printingPath } from "../../domain/cardRoute"
 import { quickBarClasses } from "../../domain/classes"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
-import { formatQuery, parseQuery } from "../../domain/query/codec"
+import { formatQuery, parseQuery, querySearch } from "../../domain/query/codec"
 import {
   activeFilterCount,
   DEFAULT_QUERY,
@@ -65,6 +65,8 @@ export function CardsPage() {
   }, [params, set, code])
   const urlParams = (next: QueryState) => {
     const result = formatQuery(next)
+    // A set page's own set is implied by its path, so each state keeps one URL.
+    if (set && next.sets.length === 1 && next.sets[0] === set.code) result.delete("set")
     if (edition === "en") result.set("ed", "en")
     return result
   }
@@ -189,18 +191,9 @@ export function CardsPage() {
     return page.items.flatMap((item) => {
       if (!item.summary) return []
       const state: CardEntryState = {
-        background: location.search,
-        backgroundPath: location.pathname,
-        ...(item.summary.route
-          ? {
-              route: {
-                ...item.summary.route,
-                cardId: item.summary.cardId,
-                printingId: item.summary.printingId,
-                region: item.summary.region,
-              },
-            }
-          : {}),
+        // The card page rebuilds the sequence from this string alone, so a set page names its set.
+        background: code ? querySearch(searchState) : location.search,
+        ...routeState(item.summary),
         source: "results",
         pages,
         resultKey: item.key,
@@ -215,7 +208,7 @@ export function CardsPage() {
         },
       ]
     })
-  }, [page, location.search, location.pathname, pages, nameOf])
+  }, [page, location.search, code, searchState, pages, nameOf])
 
   const openSuggestion = (index: number) => {
     const row = rows[index]
@@ -234,16 +227,7 @@ export function CardsPage() {
       source: fromSuggest ? "suggest" : "results",
       pages: 1,
       resultKey: row.summary.cardId,
-      ...(row.summary.route
-        ? {
-            route: {
-              ...row.summary.route,
-              cardId: row.summary.cardId,
-              printingId: row.summary.printingId,
-              region: row.summary.region,
-            },
-          }
-        : {}),
+      ...routeState(row.summary),
     }
     recentStore.push(row.summary.printingId)
     setEdit(null)

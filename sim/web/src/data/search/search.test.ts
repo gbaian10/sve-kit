@@ -1962,3 +1962,22 @@ it("effect URLs wait for the whole regional closure and return the same cold and
   const warm = h.status().result
   expect(warm.phase === "complete" && warm.page).toEqual(cold.page)
 })
+
+it("an unchanged-version check during the background download still completes printing facets", async () => {
+  const h = harness()
+  const print = (built.manifest["files"] as JsonObject[]).find(
+    (file) => file["purpose"] === "print" && file["region"] === "jp",
+  )
+  if (!print) throw new Error("print fixture missing")
+  const release = h.served.hold(stringValue(print["path"]))
+  const readies = () => h.events.filter((event) => event.kind === "ready").length
+  h.session.load(base, "jp", "preview")
+  await expect.poll(readies, POLL).toBe(1)
+  // A focus, online or retry check aborts the running background download.
+  h.session.load(base, "jp", "preview")
+  release()
+  await expect.poll(readies, POLL).toBe(2)
+  h.channel.search({ ...query, state: { ...DEFAULT_QUERY, rarities: ["legend"] } })
+  await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+  await h.settled()
+}, 30_000)

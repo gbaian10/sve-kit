@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router"
 
 import { useDialogHistory } from "../../app/dialog-history"
-import { LIST_PAGE_SIZE } from "../../app/listEntryState"
+import { LIST_PAGE_SIZE, routeState } from "../../app/listEntryState"
 import {
   type SearchReadiness,
   useCardSnapshot,
@@ -52,8 +52,6 @@ const ICON_BUTTON =
 // Phone: 72% of the width, as the reference sites do; tablet and desktop: the 340px column.
 const IMAGE_SLOT = "w-[72%] max-w-85 lg:w-full lg:max-w-none"
 const IMAGE_SIZES = "(min-width: 600px) 340px, 72vw"
-
-const cardPath = (cardNo: string): string => `/cards/${encodeURIComponent(cardNo)}`
 
 // Catalog summaries only cover front faces; each back face needs its own selected name.
 function backFaceName(
@@ -257,22 +255,9 @@ export function CardView({
       void navigate(canonical, { replace: true, state: location.state as unknown })
   }, [canonical, summary?.cardNoState, location.pathname, location.state, navigate])
   const open = (target: NonNullable<typeof previous>) => {
-    void navigate(cardPath(target.summary.cardNo), {
+    void navigate(printingPath(target.summary), {
       replace: true,
-      state: {
-        ...entry,
-        resultKey: target.key,
-        ...(target.summary.route
-          ? {
-              route: {
-                ...target.summary.route,
-                cardId: target.summary.cardId,
-                printingId: target.summary.printingId,
-                region: target.summary.region,
-              },
-            }
-          : {}),
-      },
+      state: { ...entry, resultKey: target.key, ...routeState(target.summary) },
     })
   }
   useEffect(() => {
@@ -315,19 +300,20 @@ export function CardView({
     codes.map((code) => label("trait", code)).join(joiner)
 
   if (routeError || (catalog !== null && !printing)) {
+    const kind = routeError instanceof CardRouteError ? routeError.kind : undefined
+    // A key the route contract rejects names no card, the same as an unknown number.
+    const missing = kind === "not-found" || kind === "invalid"
     return (
       <>
         <PageTitle>
-          {routeError instanceof CardRouteError && routeError.kind === "needs-update"
+          {kind === "needs-update"
             ? t("cardPage.needsUpdate")
-            : routeError instanceof CardRouteError && routeError.kind === "not-found"
+            : missing
               ? t("cardPage.notFound")
               : t("cardPage.routeFailed")}
         </PageTitle>
         <p role="alert" className="text-15 text-text-2">
-          {routeError instanceof CardRouteError && routeError.kind === "not-found"
-            ? t("cardPage.notFoundHint")
-            : t("cardPage.routeFailedHint")}
+          {missing ? t("cardPage.notFoundHint") : t("cardPage.routeFailedHint")}
         </p>
         {onRetry && (
           <Button className="mt-4" onClick={onRetry}>
@@ -542,6 +528,13 @@ export function CardView({
                       {regionalPrintings.map((row) => {
                         const id = stringValue(row["id"])
                         const no = stringValue(row["card_no"])
+                        const path = printingPath({
+                          cardNo: no,
+                          ...(typeof row["card_no_state"] === "string"
+                            ? { cardNoState: row["card_no_state"] }
+                            : {}),
+                          ...(typeof row["int_id"] === "number" ? { intId: row["int_id"] } : {}),
+                        })
                         const rarity =
                           typeof row["rarity_code"] === "string"
                             ? row["rarity_code"].toUpperCase()
@@ -549,7 +542,7 @@ export function CardView({
                         return (
                           <li key={id}>
                             <RouterLink
-                              to={cardPath(no)}
+                              to={path}
                               state={{
                                 ...entry,
                                 route: {

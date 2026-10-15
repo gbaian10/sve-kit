@@ -83,20 +83,33 @@ export async function locateCard(
       bootstrap: [...snapshot.bootstrap, ...parts.filter((f) => !present.has(f.identity))],
     }
   }
-  if (input.namespace === "provisional") {
-    // int_id is deliberately absent from locator triples; read its authoritative printing rows.
-    await supplement(
-      [...snapshot.files].filter(([, file]) => file["purpose"] === "print").map(([key]) => key),
-    )
+  // Only the requested key and its own alias chain can name the card; other aliases stay unloaded.
+  const keys = [input.key]
+  for (let key = input.key; ;) {
+    const alias = aliases.find((a) => a.namespace === "official" && a.oldKey === key)
+    if (!alias || alias.targetNamespace !== "official" || keys.includes(alias.targetKey)) break
+    keys.push(alias.targetKey)
+    key = alias.targetKey
   }
-  if (input.namespace === "official") {
-    const keys = new Set([input.key, ...aliases.map((alias) => alias.targetKey)])
+  // Locator triples omit card_no_state and int_id, so candidates are completed from their owners.
+  const prepare = async (): Promise<void> => {
+    const region = snapshot.region ?? "jp"
+    if (input.namespace === "provisional") {
+      await supplement(
+        [...snapshot.files]
+          .filter(
+            ([, file]) => file["purpose"] === "print" && (file["region"] ?? region) === region,
+          )
+          .map(([key]) => key),
+      )
+      return
+    }
     const locate = createLocator(snapshot.files)
     const files = new Set<string>()
     for (const candidate of records(snapshot)) {
       if (
         candidate.intId !== undefined ||
-        ![...keys].some((key) => routeFold(key) === routeFold(candidate.cardNo))
+        !keys.some((key) => routeFold(key) === routeFold(candidate.cardNo))
       )
         continue
       const key = locate({
@@ -112,6 +125,7 @@ export async function locateCard(
     }
     await supplement([...files])
   }
+  await prepare()
   let printing: RoutePrinting
   try {
     if (input.hint) {
@@ -121,8 +135,11 @@ export async function locateCard(
         (input.namespace === "official"
           ? hinted.cardNo !== input.key
           : String(hinted.intId) !== input.key)
-      )
-        throw new CardRouteError("reference", "navigation printing does not match route")
+      ) {
+        // History state can outlive a data update that renumbered the card; the URL key decides.
+        const { hint: _stale, ...cold } = input
+        return await locateCard(client, cold)
+      }
       printing = hinted
     } else printing = resolveRoute(input, records(snapshot), aliases, overrides)
   } catch (error) {
@@ -138,10 +155,7 @@ export async function locateCard(
     if (!next || next.manifestHash !== snapshot.manifestHash)
       throw new CardRouteError("reference", "route lookup changed snapshot")
     snapshot = next
-    if (input.namespace === "provisional")
-      await supplement(
-        [...snapshot.files].filter(([, file]) => file["purpose"] === "print").map(([key]) => key),
-      )
+    await prepare()
     printing = resolveRoute(input, records(snapshot), aliases, overrides)
   }
   if (

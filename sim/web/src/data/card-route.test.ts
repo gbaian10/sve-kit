@@ -43,6 +43,29 @@ describe("catalog-based cold card routes", () => {
       .map((file) => file["path"])
     expect(h.requests.some((path) => jpOnly.includes(path))).toBe(false)
   })
+  it("follows the URL key when navigation state predates a renumbering", async () => {
+    const h = client()
+    const current = await locateCard(h.client, { namespace: "official", key: "BP01-002a" })
+    const result = await locateCard(h.client, {
+      namespace: "official",
+      key: "BP01-002A",
+      hint: current.printing,
+    })
+    expect(result.printing.id).toBe(current.printing.id)
+  })
+  it("reads printing integers of the first region only before falling back", async () => {
+    const h = client()
+    const { printing } = await locateCard(h.client, { namespace: "official", key: "BP01-002a" })
+    const result = await locateCard(h.client, {
+      namespace: "provisional",
+      key: String(printing.intId),
+    })
+    expect(result.printing.id).toBe(printing.id)
+    const en = [...(h.client.snapshot()?.files.values() ?? [])]
+      .filter((file) => file["region"] === "en")
+      .map((file) => file["path"])
+    expect(h.requests.some((path) => en.includes(path))).toBe(false)
+  })
   it("rejects an incorrect navigation owner and corrupt bytes as data errors", async () => {
     const h = client()
     const result = await locateCard(h.client, { namespace: "official", key: "BP01-002" })

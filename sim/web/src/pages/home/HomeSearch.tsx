@@ -11,7 +11,7 @@ import {
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink, useLocation, useNavigate } from "react-router"
 
-import type { CardEntryState } from "../../app/listEntryState"
+import { type CardEntryState, routeState } from "../../app/listEntryState"
 import { useSearch, useWorkerSuggestions } from "../../app/snapshot"
 import { useDebouncedValue } from "../../app/useDebouncedValue"
 import logo from "../../assets/official/logo/head-left.png"
@@ -152,32 +152,11 @@ export function HomeSearch({
             source: "suggest",
             pages: 1,
             resultKey: row.summary.cardId,
-            ...(row.summary.route
-              ? {
-                  route: {
-                    ...row.summary.route,
-                    cardId: row.summary.cardId,
-                    printingId: row.summary.printingId,
-                    region: row.summary.region,
-                  },
-                }
-              : {}),
           }
-    const withRoute = row.summary.route
-      ? {
-          ...state,
-          route: {
-            ...row.summary.route,
-            cardId: row.summary.cardId,
-            printingId: row.summary.printingId,
-            region: row.summary.region,
-          },
-        }
-      : state
     recentStore.push(row.summary.printingId)
     setFocused(false)
     remember()
-    void navigate(cardPath(row.summary), { state: withRoute })
+    void navigate(cardPath(row.summary), { state: { ...state, ...routeState(row.summary) } })
   }
   const seeAll = () => {
     setFocused(false)
@@ -247,16 +226,7 @@ export function HomeSearch({
       source: "results",
       pages: 1,
       resultKey: randomItem.key,
-      ...(summary.route
-        ? {
-            route: {
-              ...summary.route,
-              cardId: summary.cardId,
-              printingId: summary.printingId,
-              region: summary.region,
-            },
-          }
-        : {}),
+      ...routeState(summary),
     }
     void navigate(cardPath(summary), { state })
   }

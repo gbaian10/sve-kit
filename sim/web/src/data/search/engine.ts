@@ -241,16 +241,7 @@ export class SearchEngine {
                   const view = await active.views.read(query, active.hash)
                   if (view) return { view, stored: Promise.resolve() }
                   if (!index) return undefined
-                  const completed = await completeView(
-                    active.request.base,
-                    query,
-                    index,
-                    active.files,
-                    active.version,
-                    active.blobs,
-                    active.signal,
-                    eligible,
-                  )
+                  const completed = completeView(query, index, eligible)
                   return { view: completed, stored: active.views.write(completed, active.hash) }
                 })()
                 const built = building
@@ -608,8 +599,10 @@ export class SearchEngine {
         this.revision = revision
         this.signature = signature
       }
+      // A new load aborts the previous background download, so only a complete index carries over.
       if (
         this.active?.index &&
+        !this.active.printings &&
         sameSource() &&
         this.active.hash === stringValue(entry["manifest_sha256"])
       ) {
@@ -741,7 +734,7 @@ export class SearchEngine {
       const printingsGate = Promise.withResolvers<undefined>()
       void printingsGate.promise.catch(() => undefined)
       const controller = new AbortController()
-      const active = {
+      const active: NonNullable<SearchEngine["active"]> = {
         printings: printingsGate.promise,
         generation: request.generation,
         index,
@@ -808,6 +801,8 @@ export class SearchEngine {
           active.memory.clear()
           printingsApplied = true
           printingsGate.resolve(undefined)
+          // Like a restored image, the context is now complete and an unchanged check may keep it.
+          delete active.printings
           this.emit({ kind: "background-ready", generation: request.generation })
         }
       } catch (error) {

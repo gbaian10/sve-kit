@@ -55,6 +55,28 @@ describe("CardsPage", () => {
     )
   })
 
+  it("keeps a set page's own set out of its URL but in the sequence a card walks", async () => {
+    const { router } = await open("/sets/BP01")
+    const user = userEvent.setup()
+    const openFirst = async () => {
+      const cell = await waitFor(() => {
+        const links = screen.getAllByRole("link").filter((a) => a.hasAttribute("data-result-key"))
+        expect(links.length).toBeGreaterThan(0)
+        return links[0]
+      })
+      if (!cell) throw new Error("missing result cell")
+      await user.click(cell)
+      const { background } = router.state.location.state as { background: string }
+      return Object.fromEntries(new URLSearchParams(background))
+    }
+    expect(await openFirst()).toEqual({ set: "bp01" })
+    await act(() => router.navigate(-1))
+    await user.click(await screen.findByRole("button", { name: "主教" }))
+    expect(router.state.location.pathname).toBe("/sets/BP01")
+    expect(router.state.location.search).toBe("?class=bishop")
+    expect(await openFirst()).toEqual({ class: "bishop", set: "bp01" })
+  })
+
   it("preserves loaded pages and the anchor when switching views", async () => {
     const { router } = await open("/cards?class=bishop")
     const entry = { pages: 3, anchor: "c:bp01-051" }
