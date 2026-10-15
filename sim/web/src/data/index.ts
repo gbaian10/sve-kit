@@ -7,6 +7,7 @@ export {
   type SelectedText,
   sharedAnnotatedTextResolver,
 } from "./annotated-text"
+export { locateCard, type LocatedCard } from "./card-route"
 export { type CardSummary, type Catalog, catalogOf } from "./catalog"
 export {
   createSnapshotClient,
@@ -26,7 +27,6 @@ export {
   stringValue,
 } from "./format-v3/json"
 export { registerImageCache } from "./image-sw-registration"
-export { mediaImageSource } from "./image-url"
 export {
   type ImageFace,
   type ImageIndex,

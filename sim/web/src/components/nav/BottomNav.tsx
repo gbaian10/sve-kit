@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next"
 import { NavLink } from "react-router"
 
+import { useRouteEdition } from "../../app/snapshot"
+import { editionUrl } from "../../domain/query/codec"
 import { cn } from "../ui/cn"
 import { BottomBar } from "./BottomBar"
 import { NAV_ITEMS } from "./nav-items"
@@ -10,6 +12,7 @@ import { NAV_ITEMS } from "./nav-items"
 // same items to a 64px rail on the left (design §11) so the short viewport keeps its height.
 export function BottomNav() {
   const { t } = useTranslation()
+  const edition = useRouteEdition()
   return (
     <BottomBar className="lg:hidden phone-landscape:inset-y-0 phone-landscape:right-auto phone-landscape:w-16 phone-landscape:border-t-0 phone-landscape:border-r phone-landscape:pb-0">
       <nav aria-label={t("nav.primary")} className="phone-landscape:h-full">
@@ -17,7 +20,7 @@ export function BottomNav() {
           {NAV_ITEMS.map(({ key, to, Icon, end }) => (
             <li key={key} className="flex flex-1 phone-landscape:flex-none">
               <NavLink
-                to={to}
+                to={to === "/cards" || to === "/sets" ? editionUrl(to, edition) : to}
                 end={end}
                 className="flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 text-11 text-text-2 phone-landscape:h-14"
               >

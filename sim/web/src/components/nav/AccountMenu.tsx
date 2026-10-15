@@ -1,8 +1,9 @@
 import { Check, UserRound } from "lucide-react"
 import { type KeyboardEvent, useId, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router"
+import { useLocation, useNavigate } from "react-router"
 
+import { useRouteEdition } from "../../app/snapshot"
 import { useSystemDark } from "../../app/useSystemDark"
 import { type Accent, ACCENTS, resolveTheme, THEME_PREFS } from "../../domain/theme"
 import { currentUiLanguage, UI_LANGUAGES } from "../../i18n"
@@ -67,6 +68,8 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
   const { t } = useTranslation()
   const prefs = usePrefs()
   const navigate = useNavigate()
+  const location = useLocation()
+  const edition = useRouteEdition()
   const textDisplayOptions = TEXT_DISPLAYS.map((value) => ({
     value,
     label: t(`options.nameDisplay.${value}`),
@@ -82,8 +85,20 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
           size="sm"
           label={t("account.cardEdition")}
           options={CARD_EDITIONS.map((value) => ({ value, label: t(`options.edition.${value}`) }))}
-          value={prefs.cardEdition}
-          onChange={(cardEdition) => prefsStore.set({ cardEdition })}
+          value={edition}
+          onChange={(cardEdition) => {
+            prefsStore.set({ cardEdition })
+            if (
+              location.pathname === "/cards" ||
+              location.pathname === "/sets" ||
+              location.pathname.startsWith("/sets/")
+            ) {
+              const params = new URLSearchParams(location.search)
+              if (cardEdition === "en") params.set("ed", "en")
+              else params.delete("ed")
+              void navigate({ pathname: location.pathname, search: params.toString() })
+            }
+          }}
         />
       </SettingRow>
       <SettingRow size="sm" label={t("account.nameDisplay")}>

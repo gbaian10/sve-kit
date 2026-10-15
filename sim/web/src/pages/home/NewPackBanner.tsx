@@ -2,6 +2,7 @@ import { useId } from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink } from "react-router"
 
+import { useRouteEdition } from "../../app/snapshot"
 import type { PackCounts } from "../../domain/sets"
 import { type SetEntry, setPath } from "./home-model"
 
@@ -20,6 +21,7 @@ export interface NewPackBannerProps {
 
 export function NewPackBanner({ pack, counts, countTranslations, locale }: NewPackBannerProps) {
   const { t } = useTranslation()
+  const edition = useRouteEdition()
   const headingId = useId()
   const number = new Intl.NumberFormat(locale)
   return (
@@ -41,7 +43,7 @@ export function NewPackBanner({ pack, counts, countTranslations, locale }: NewPa
           </h2>
         </div>
         <RouterLink
-          to={setPath(pack.publicCode)}
+          to={setPath(pack.publicCode, edition)}
           className="flex h-9 shrink-0 items-center rounded-control border border-border-strong px-3 text-13 font-semibold text-text-1 hover:bg-surface-2"
         >
           {t("home.pack.open")}

@@ -20,6 +20,7 @@ export const routes: RouteObject[] = [
       { index: true, Component: HomePage },
       { path: "cards", Component: CardsPage },
       { path: "cards/_provisional/:intId", Component: CardPage },
+      { path: "cards/unimplemented", Component: NotFoundPage },
       { path: "cards/:cardNo/:slug?", Component: CardPage },
       { path: "sets", Component: SetsPage },
       { path: "sets/:code", Component: SetPage },

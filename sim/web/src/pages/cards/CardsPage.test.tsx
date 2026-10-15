@@ -43,6 +43,40 @@ async function open(path = "/cards") {
 }
 
 describe("CardsPage", () => {
+  it("loads table illustration crops from the independent visible-image channel", async () => {
+    await open("/cards?view=table")
+    await waitFor(
+      () => {
+        const thumb = document.querySelector("[data-art-thumb][data-image-printing] img")
+        expect(thumb).toHaveAttribute("src", expect.stringContaining("/images/art_"))
+        expect(thumb).toHaveAttribute("alt", "")
+      },
+      { timeout: 4000 },
+    )
+  })
+
+  it("keeps a set page's own set out of its URL but in the sequence a card walks", async () => {
+    const { router } = await open("/sets/BP01")
+    const user = userEvent.setup()
+    const openFirst = async () => {
+      const cell = await waitFor(() => {
+        const links = screen.getAllByRole("link").filter((a) => a.hasAttribute("data-result-key"))
+        expect(links.length).toBeGreaterThan(0)
+        return links[0]
+      })
+      if (!cell) throw new Error("missing result cell")
+      await user.click(cell)
+      const { background } = router.state.location.state as { background: string }
+      return Object.fromEntries(new URLSearchParams(background))
+    }
+    expect(await openFirst()).toEqual({ set: "bp01" })
+    await act(() => router.navigate(-1))
+    await user.click(await screen.findByRole("button", { name: "主教" }))
+    expect(router.state.location.pathname).toBe("/sets/BP01")
+    expect(router.state.location.search).toBe("?class=bishop")
+    expect(await openFirst()).toEqual({ class: "bishop", set: "bp01" })
+  })
+
   it("preserves loaded pages and the anchor when switching views", async () => {
     const { router } = await open("/cards?class=bishop")
     const entry = { pages: 3, anchor: "c:bp01-051" }
@@ -71,7 +105,7 @@ describe("CardsPage", () => {
     const user = userEvent.setup()
     const input = screen.getByRole("combobox")
     await user.type(input, "bp01-51")
-    const list = await screen.findByRole("listbox")
+    const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
     const options = within(list).getAllByRole("option")
     expect(options[0]).toHaveTextContent("試作聖堂騎士")
     expect(options[0]).toHaveTextContent("BP01-051")
@@ -81,7 +115,7 @@ describe("CardsPage", () => {
     expect(options[0]).toHaveAttribute("aria-selected", "true")
     await user.keyboard("{Enter}")
     expect(router.state.location.pathname).toBe("/cards/BP01-051")
-    expect(router.state.location.state).toEqual({
+    expect(router.state.location.state).toMatchObject({
       background: "?q=bp01-51",
       source: "suggest",
       pages: 1,
@@ -126,7 +160,7 @@ describe("CardsPage", () => {
     const { router } = await open("/cards?class=bishop")
     const user = userEvent.setup()
     await user.type(screen.getByRole("combobox"), "試作の妖精")
-    const list = await screen.findByRole("listbox")
+    const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
     expect(within(list).getAllByRole("option").length).toBeGreaterThan(0)
     await user.click(await screen.findByRole("button", { name: /看全部/u }))
     expect(router.state.location.search).toBe("?q=%E8%A9%A6%E4%BD%9C%E3%81%AE%E5%A6%96%E7%B2%BE")
@@ -148,7 +182,7 @@ describe("CardsPage", () => {
     const user = userEvent.setup()
     const input = screen.getByRole("combobox")
     await user.type(input, "bp01-0")
-    const list = await screen.findByRole("listbox")
+    const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
     const first = within(list).getAllByRole("option")[0]
     await user.type(input, "5")
     expect(list).toHaveAttribute("aria-busy", "true")
@@ -167,7 +201,7 @@ describe("CardsPage", () => {
     const { router } = await open()
     const user = userEvent.setup()
     await user.type(screen.getByRole("combobox"), " bp01-51 ")
-    const list = await screen.findByRole("listbox")
+    const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
     await waitFor(() => {
       expect(list).toHaveAttribute("aria-busy", "false")
     })

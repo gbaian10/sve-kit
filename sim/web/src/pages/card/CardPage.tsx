@@ -4,12 +4,13 @@ import { useTranslation } from "react-i18next"
 import { Link as RouterLink, useLocation, useNavigate, useParams } from "react-router"
 
 import { useDialogHistory } from "../../app/dialog-history"
-import { LIST_PAGE_SIZE } from "../../app/listEntryState"
+import { LIST_PAGE_SIZE, routeState } from "../../app/listEntryState"
 import {
   type SearchReadiness,
   useCardSnapshot,
   useImageIndex,
   useNeighbours,
+  useRouteEdition,
   useSearchReadiness,
 } from "../../app/snapshot"
 import { StatusStrip } from "../../app/StatusStrip"
@@ -24,7 +25,17 @@ import { cn } from "../../components/ui/cn"
 import { Dialog } from "../../components/ui/Dialog"
 import { Link } from "../../components/ui/Link"
 import { useToast } from "../../components/ui/toast-context"
-import { type CardSummary, type Catalog, type Row, stringValue } from "../../data"
+import {
+  type CardSummary,
+  type Catalog,
+  locateCard,
+  type LocatedCard,
+  type Row,
+  type SnapshotClient,
+  type SnapshotStatus,
+  stringValue,
+} from "../../data"
+import { CardRouteError, printingPath } from "../../domain/cardRoute"
 import { classStyle } from "../../domain/classes"
 import { displayName, type NameSource, UI_TEXT_LANG } from "../../domain/nameDisplay"
 import { parseQuery } from "../../domain/query/codec"
@@ -41,8 +52,6 @@ const ICON_BUTTON =
 // Phone: 72% of the width, as the reference sites do; tablet and desktop: the 340px column.
 const IMAGE_SLOT = "w-[72%] max-w-85 lg:w-full lg:max-w-none"
 const IMAGE_SIZES = "(min-width: 600px) 340px, 72vw"
-
-const cardPath = (cardNo: string): string => `/cards/${encodeURIComponent(cardNo)}`
 
 // Catalog summaries only cover front faces; each back face needs its own selected name.
 function backFaceName(
@@ -80,12 +89,93 @@ function backFaceName(
 }
 
 export function CardPage() {
+  const { cardNo, intId } = useParams()
+  const { client, status } = useCardSnapshot()
+  const edition = useRouteEdition()
+  const location = useLocation()
+  const [attempt, setAttempt] = useState(0)
+  const inputKey = `${cardNo === undefined ? "provisional" : "official"}/${cardNo ?? intId ?? ""}`
+  const [located, setLocated] = useState<{
+    key: string
+    value?: LocatedCard
+    error?: unknown
+  } | null>(null)
+  const manifestHash = client.snapshot()?.manifestHash
+  const routeKey = JSON.stringify((location.state as { route?: unknown } | null)?.route ?? null)
+  useEffect(() => {
+    if (!manifestHash) return
+    let active = true
+    const hint = JSON.parse(routeKey) as {
+      cardId: string
+      printingId: string
+      cardOwner: string
+      printingOwner: string
+      region: Region
+    } | null
+    void locateCard(client, {
+      namespace: cardNo === undefined ? "provisional" : "official",
+      key: cardNo ?? intId ?? "",
+      edition,
+      ...(hint ? { hint: { ...hint, id: hint.printingId } } : {}),
+    }).then(
+      (value) => {
+        if (active) setLocated({ key: inputKey, value })
+      },
+      (error: unknown) => {
+        if (active) setLocated({ key: inputKey, error })
+      },
+    )
+    return () => {
+      active = false
+    }
+  }, [client, manifestHash, inputKey, cardNo, intId, routeKey, attempt, edition])
+  const result = located?.key === inputKey ? located : null
+  const catalog = result?.value?.catalog ?? null
+  const routeError = result?.error
+  const resolved = result?.value?.printing
+  const pageClient = useMemo(() => {
+    const value = result?.value
+    return value ? { ...client, snapshot: () => value.snapshot } : client
+  }, [client, result?.value])
+  return (
+    <CardView
+      client={pageClient}
+      status={status}
+      catalog={catalog}
+      resolved={resolved}
+      routeError={routeError}
+      onRetry={() => {
+        void client.reload().then(() => {
+          setAttempt((value) => value + 1)
+        })
+      }}
+    />
+  )
+}
+
+export function CardView({
+  client,
+  status,
+  catalog,
+  resolved,
+  routeError,
+  onRetry,
+}: {
+  readonly client: SnapshotClient
+  readonly status: SnapshotStatus
+  readonly catalog: Catalog | null
+  readonly resolved: LocatedCard["printing"] | undefined
+  readonly onRetry?: () => void
+  readonly routeError?: unknown
+}) {
   const { t } = useTranslation()
   const { cardNo, intId } = useParams()
-  const { catalog, client, status } = useCardSnapshot()
+  const location = useLocation()
+  const navigate = useNavigate()
   const images = useImageIndex(client, catalog !== null)
   const prefs = usePrefs()
-  const searchReadiness = useSearchReadiness(prefs.cardEdition)
+  const cardEdition = resolved?.region ?? prefs.cardEdition
+  const searchReadiness = useSearchReadiness(cardEdition)
   const failure =
     status.state === "error" ? status : status.state === "ready" ? status.updateError : undefined
   const { error: _searchError, loading: _searchLoading, ...searchState } = searchReadiness
@@ -98,7 +188,7 @@ export function CardPage() {
       ? {
           loading: {
             root: searchReadiness.root,
-            edition: prefs.cardEdition,
+            edition: cardEdition,
             step: status.phase,
             ...(status.total === undefined
               ? {}
@@ -110,22 +200,14 @@ export function CardPage() {
       void client.retry()
     },
   }
-  const navigate = useNavigate()
-  const location = useLocation()
   const toast = useToast()
   const [zoomed, setZoomed] = useState<string | null>(null)
   const closeZoom = useDialogHistory("card-zoom", zoomed !== null, () => {
     setZoomed(null)
   })
-  const { cardEdition } = prefs
   const uiLanguage = currentUiLanguage(prefs.uiLanguage)
   const textLang = UI_TEXT_LANG[uiLanguage]
-  const printing = cardNo
-    ? (catalog?.index.printingByCardNo(cardEdition, cardNo) ??
-      catalog?.index.printingByCardNo(cardEdition === "jp" ? "en" : "jp", cardNo))
-    : catalog?.index.cards
-        .flatMap((card) => catalog.index.printingsOf(card["id"] as string))
-        .find((row) => typeof row["int_id"] === "number" && String(row["int_id"]) === intId)
+  const printing = resolved ? catalog?.index.printing(resolved.id) : undefined
   const printingId = printing ? stringValue(printing["id"]) : null
   const region = (printing?.["region"] as Region | undefined) ?? cardEdition
   const faces = printing ? (catalog?.index.facesOf(printing["card_id"] as string) ?? []) : []
@@ -149,8 +231,8 @@ export function CardPage() {
   )
   const neighbourTarget = typeof entry?.["resultKey"] === "string" ? entry["resultKey"] : printingId
   const neighbours = useNeighbours(
-    neighbourQuery,
-    neighbourTarget,
+    fromList ? neighbourQuery : null,
+    fromList ? neighbourTarget : null,
     fromList ? pages * LIST_PAGE_SIZE : undefined,
   )
   const order = neighbours.result.phase === "complete" ? neighbours.result.page.items : []
@@ -161,12 +243,21 @@ export function CardPage() {
     const item = position < 0 ? undefined : order[position + step]
     return item?.summary ? { key: item.key, summary: item.summary } : undefined
   }
-  const previous = neighbour(-1)
-  const next = neighbour(1)
+  const previous = fromList ? neighbour(-1) : undefined
+  const next = fromList ? neighbour(1) : undefined
+  const canonical = summary
+    ? summary.cardNoState === "provisional"
+      ? printingPath(summary)
+      : `${printingPath(summary)}/${encodeURIComponent(summary.name.original.text)}`
+    : null
+  useEffect(() => {
+    if (canonical && location.pathname !== canonical)
+      void navigate(canonical, { replace: true, state: location.state as unknown })
+  }, [canonical, summary?.cardNoState, location.pathname, location.state, navigate])
   const open = (target: NonNullable<typeof previous>) => {
-    void navigate(cardPath(target.summary.cardNo), {
+    void navigate(printingPath(target.summary), {
       replace: true,
-      state: { ...entry, resultKey: target.key },
+      state: { ...entry, resultKey: target.key, ...routeState(target.summary) },
     })
   }
   useEffect(() => {
@@ -208,11 +299,27 @@ export function CardPage() {
   const traitLabels = (codes: readonly string[]) =>
     codes.map((code) => label("trait", code)).join(joiner)
 
-  if (catalog !== null && !printing) {
+  if (routeError || (catalog !== null && !printing)) {
+    const kind = routeError instanceof CardRouteError ? routeError.kind : undefined
+    // A key the route contract rejects names no card, the same as an unknown number.
+    const missing = kind === "not-found" || kind === "invalid"
     return (
       <>
-        <PageTitle>{t("cardPage.notFound")}</PageTitle>
-        <p className="text-15 text-text-2">{t("cardPage.notFoundHint")}</p>
+        <PageTitle>
+          {kind === "needs-update"
+            ? t("cardPage.needsUpdate")
+            : missing
+              ? t("cardPage.notFound")
+              : t("cardPage.routeFailed")}
+        </PageTitle>
+        <p role="alert" className="text-15 text-text-2">
+          {missing ? t("cardPage.notFoundHint") : t("cardPage.routeFailedHint")}
+        </p>
+        {onRetry && (
+          <Button className="mt-4" onClick={onRetry}>
+            {t("status.retry")}
+          </Button>
+        )}
         <p className="mt-4">
           <Link to="/cards">{t("nav.cards")}</Link>
         </p>
@@ -256,7 +363,7 @@ export function CardPage() {
           </button>
         ) : (
           <RouterLink
-            to="/cards"
+            to={region === "en" ? "/cards?ed=en" : "/cards"}
             aria-label={t("cardPage.back")}
             title={t("cardPage.back")}
             className={ICON_BUTTON}
@@ -266,7 +373,7 @@ export function CardPage() {
         )}
         {setCode !== undefined && (
           <RouterLink
-            to={`/sets/${encodeURIComponent(setCode)}`}
+            to={`/sets/${encodeURIComponent(setCode)}${region === "en" ? "?ed=en" : ""}`}
             aria-label={t("cardPage.set", { code: setCode })}
             className="flex h-7 shrink-0 items-center rounded-sm bg-surface-2 px-2 text-12 font-semibold text-text-2 hover:bg-surface-3"
           >
@@ -358,30 +465,32 @@ export function CardPage() {
                     {revision && (
                       <StatLine className="mt-1" cost={cost} attack={attack} defense={defense} />
                     )}
-                    {ordinal === 0 && (neighbours.result.phase !== "complete" || position >= 0) && (
-                      <div className="mt-2 flex gap-2">
-                        <Button
-                          className="h-10 gap-1 px-3 text-14"
-                          disabled={previous === undefined}
-                          onClick={() => {
-                            if (previous) open(previous)
-                          }}
-                        >
-                          <ChevronLeft className="size-4.5" aria-hidden="true" />
-                          {t("cardPage.previous")}
-                        </Button>
-                        <Button
-                          className="h-10 gap-1 px-3 text-14"
-                          disabled={next === undefined}
-                          onClick={() => {
-                            if (next) open(next)
-                          }}
-                        >
-                          {t("cardPage.next")}
-                          <ChevronRight className="size-4.5" aria-hidden="true" />
-                        </Button>
-                      </div>
-                    )}
+                    {fromList &&
+                      ordinal === 0 &&
+                      (neighbours.result.phase !== "complete" || position >= 0) && (
+                        <div className="mt-2 flex gap-2">
+                          <Button
+                            className="h-10 gap-1 px-3 text-14"
+                            disabled={previous === undefined}
+                            onClick={() => {
+                              if (previous) open(previous)
+                            }}
+                          >
+                            <ChevronLeft className="size-4.5" aria-hidden="true" />
+                            {t("cardPage.previous")}
+                          </Button>
+                          <Button
+                            className="h-10 gap-1 px-3 text-14"
+                            disabled={next === undefined}
+                            onClick={() => {
+                              if (next) open(next)
+                            }}
+                          >
+                            {t("cardPage.next")}
+                            <ChevronRight className="size-4.5" aria-hidden="true" />
+                          </Button>
+                        </div>
+                      )}
                   </div>
                 )}
                 {printingId && catalog && (
@@ -419,6 +528,13 @@ export function CardPage() {
                       {regionalPrintings.map((row) => {
                         const id = stringValue(row["id"])
                         const no = stringValue(row["card_no"])
+                        const path = printingPath({
+                          cardNo: no,
+                          ...(typeof row["card_no_state"] === "string"
+                            ? { cardNoState: row["card_no_state"] }
+                            : {}),
+                          ...(typeof row["int_id"] === "number" ? { intId: row["int_id"] } : {}),
+                        })
                         const rarity =
                           typeof row["rarity_code"] === "string"
                             ? row["rarity_code"].toUpperCase()
@@ -426,8 +542,17 @@ export function CardPage() {
                         return (
                           <li key={id}>
                             <RouterLink
-                              to={cardPath(no)}
-                              state={entry}
+                              to={path}
+                              state={{
+                                ...entry,
+                                route: {
+                                  cardId: stringValue(row["card_id"]),
+                                  printingId: id,
+                                  cardOwner: stringValue(card?.["home_set_id"]),
+                                  printingOwner: stringValue(row["home_set_id"]),
+                                  region: printingRegion,
+                                },
+                              }}
                               replace
                               aria-current={id === printingId ? "page" : undefined}
                               className="inline-flex h-8 items-center rounded-pill border border-border px-2.5 font-mono text-13 hover:bg-surface-2 aria-[current=page]:border-accent aria-[current=page]:bg-accent-soft aria-[current=page]:font-semibold"

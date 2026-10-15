@@ -20,6 +20,7 @@ export interface LoadRequest {
   readonly entry: "index" | "preview"
 }
 export type PurposeRequest =
+  | { readonly kind: "images"; readonly printingIds: readonly string[] }
   | {
       readonly kind: "neighbours"
       readonly query: SearchQuery
@@ -72,6 +73,7 @@ export interface AbilityPreview {
   readonly language: string
 }
 type PurposeResult =
+  | { readonly kind: "images-result"; readonly faces: readonly ViewFace[] }
   | { readonly kind: "preview-result"; readonly preview: AbilityPreview | null }
   | { readonly kind: "view-result"; readonly view: CompleteView }
   | {
@@ -90,6 +92,15 @@ type PurposeResult =
 export type SearchStage = "index" | "manifest" | "config" | "bootstrap" | "search" | "images"
 
 type WorkerEvent =
+  | { readonly kind: "background-ready"; readonly generation: number }
+  | {
+      readonly kind: "query-progress"
+      readonly generation: number
+      readonly channelId: number
+      readonly queryId: number
+      readonly done: number
+      readonly total: number
+    }
   | { readonly kind: "stage"; readonly generation: number; readonly step: SearchStage }
   | (PurposeResult & {
       readonly generation: number

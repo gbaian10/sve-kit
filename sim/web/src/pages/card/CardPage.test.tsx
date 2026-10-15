@@ -1,11 +1,46 @@
 import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import { useParams } from "react-router"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+import { useCardSnapshot } from "../../app/snapshot"
 import { ToastProvider } from "../../components/ui/Toast"
+import { stringValue } from "../../data"
+import { CardRouteError } from "../../domain/cardRoute"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
-import { CardPage } from "./CardPage"
+import { CardView } from "./CardPage"
+
+function CardPage() {
+  const { catalog, client, status } = useCardSnapshot()
+  const { cardNo, intId } = useParams()
+  const row = cardNo
+    ? (catalog?.index.printingByCardNo("jp", cardNo) ??
+      catalog?.index.printingByCardNo("en", cardNo))
+    : catalog?.index
+        .printingsOf("c:synthetic")
+        .find((row) => typeof row["int_id"] === "number" && String(row["int_id"]) === intId)
+  return (
+    <CardView
+      client={client}
+      status={status}
+      catalog={catalog}
+      resolved={
+        row
+          ? {
+              id: stringValue(row["id"]),
+              cardId: "c:synthetic",
+              cardOwner: "BP-SYNTHETIC",
+              printingOwner: "BP-SYNTHETIC",
+              region: row["region"] === "en" ? "en" : "jp",
+              cardNo: cardNo ?? "BP-SYNTHETIC",
+              cardNoState: "official",
+            }
+          : undefined
+      }
+    />
+  )
+}
 
 // The page shows a toast after copying its link, so it needs the shell's provider around it.
 const card = {
@@ -27,6 +62,7 @@ const state = vi.hoisted(() => ({
     | {
         id: string
         card_id: string
+        home_set_id?: string
         region: string
         card_no: string
         rarity_code: string
@@ -41,6 +77,7 @@ const state = vi.hoisted(() => ({
 vi.mock("../../app/snapshot", () => {
   const printing = () => ({
     id: "p:synthetic",
+    home_set_id: "BP-SYNTHETIC",
     card_id: "c:synthetic",
     region: state.crossRegion ? "en" : "jp",
     int_id: 42,
@@ -200,9 +237,11 @@ vi.mock("../../app/snapshot", () => {
                   : "Synthetic presentation name",
           }),
           printing: (id: string) => {
-            const printing = state.undated.find((printing) => printing.id === id)
+            const undated = state.undated.find((printing) => printing.id === id)
             return {
-              card_no: printing?.cardNo ?? (id === "p:synthetic" ? "BP-SYNTHETIC" : "BP-OTHER"),
+              ...printing(),
+              home_set_id: "BP-SYNTHETIC",
+              card_no: undated?.cardNo ?? (id === "p:synthetic" ? "BP-SYNTHETIC" : "BP-OTHER"),
             }
           },
         },
@@ -243,7 +282,7 @@ describe("plain wording on the card page", () => {
       state.available = true
       state.current = true
       state.candidates.push({ printing_id: "p:additional", revision_id: "rev:other" })
-      const { container } = await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+      const { container } = await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
         initialEntries: ["/cards/BP-SYNTHETIC"],
         language,
       })
@@ -266,7 +305,7 @@ describe("plain wording on the card page", () => {
     state.translated = true
     state.undated = []
     prefsStore.set({ effectLanguage: "translated" })
-    const { router } = await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+    const { router } = await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
     await act(() =>
@@ -288,14 +327,14 @@ describe("plain wording on the card page", () => {
     state.available = true
     state.translated = true
     state.candidates.push({ printing_id: "p:synthetic", revision_id: "rev:synthetic" })
-    await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+    await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
     expect(screen.getByRole("heading", { name: "此卡各版次的卡文不同" })).toBeVisible()
     expect(screen.queryByText("此版次的原文")).not.toBeInTheDocument()
   })
   it("opens this printing's own wording when no wording is displayed yet", async () => {
-    const { container } = await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+    const { container } = await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
     expect(container.querySelectorAll("details")).toHaveLength(2)
@@ -306,7 +345,7 @@ describe("plain wording on the card page", () => {
   })
   it("does not claim an unknown candidate has no effect", async () => {
     state.candidates = [{ printing_id: "p:synthetic", revision_id: null }]
-    await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+    await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
     expect(screen.getByText("這些版次的卡文還在確認中")).toBeVisible()
@@ -319,8 +358,8 @@ describe("plain wording on the card page", () => {
       state.available = true
       await renderRoutes(
         [
-          { path: "/cards/:cardNo", ...card },
-          { path: "/p/:intId", ...card },
+          { path: "/cards/:cardNo/:slug?", ...card },
+          { path: "/p/:intId/:slug?", ...card },
         ],
         { initialEntries: [path] },
       )
@@ -334,7 +373,7 @@ describe("double-face headers", () => {
   it("shows each face's own name and preserves the back translation quality", async () => {
     state.doubleFace = true
     prefsStore.set({ uiLanguage: "zh-TW", nameDisplay: "translated" })
-    await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+    await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
     expect(screen.getByRole("heading", { level: 2, name: "Synthetic front" })).toBeVisible()
@@ -354,10 +393,10 @@ describe("double-face headers", () => {
       printingId: index === 59 ? "p:synthetic" : `p:${String(index)}`,
     }))
     prefsStore.set({ uiLanguage: "zh-TW" })
-    const { router } = await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+    const { router } = await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
-    expect(screen.getByRole("button", { name: "下一張" })).toBeEnabled()
+    expect(screen.queryByRole("button", { name: "下一張" })).not.toBeInTheDocument()
     await act(() =>
       router.navigate("/cards/BP-SYNTHETIC", {
         replace: true,
@@ -373,7 +412,7 @@ describe("double-face headers", () => {
     const { router } = await renderRoutes(
       [
         { path: "/cards", element: <p>Synthetic list</p> },
-        { path: "/cards/:cardNo", ...card },
+        { path: "/cards/:cardNo/:slug?", ...card },
       ],
       { initialEntries: ["/cards", "/cards/BP-SYNTHETIC"] },
     )
@@ -383,15 +422,20 @@ describe("double-face headers", () => {
     })
     await act(() => router.navigate(-1))
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument())
-    expect(router.state.location.pathname).toBe("/cards/BP-SYNTHETIC")
+    expect(router.state.location.pathname).toBe("/cards/BP-SYNTHETIC/Synthetic%20front")
     await act(() => router.navigate(-1))
     expect(screen.getByText("Synthetic list")).toBeVisible()
   })
   it("offers previous/next from the list order and enlarges the image in a dialog", async () => {
     state.doubleFace = true
     prefsStore.set({ uiLanguage: "zh-TW" })
-    await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
-      initialEntries: ["/cards/BP-SYNTHETIC"],
+    await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+      initialEntries: [
+        {
+          pathname: "/cards/BP-SYNTHETIC",
+          state: { background: "", source: "results", pages: 1, resultKey: "c:synthetic" },
+        },
+      ],
     })
     expect(screen.getByRole("button", { name: "上一張" })).toBeDisabled()
     expect(screen.getByRole("button", { name: "下一張" })).toBeEnabled()
@@ -411,7 +455,7 @@ describe("returning from printing changes", () => {
       const { router } = await renderRoutes(
         [
           { path: "/cards", element: <p>Synthetic list</p> },
-          { path: "/cards/:cardNo", ...card },
+          { path: "/cards/:cardNo/:slug?", ...card },
         ],
         { initialEntries: ["/cards?q=synthetic"] },
       )
@@ -444,7 +488,7 @@ describe("returning from printing changes", () => {
     const { router } = await renderRoutes(
       [
         { path: "/cards", element: <p>Synthetic list</p> },
-        { path: "/cards/:cardNo", ...card },
+        { path: "/cards/:cardNo/:slug?", ...card },
       ],
       { initialEntries: ["/cards/BP-SYNTHETIC"] },
     )
@@ -496,8 +540,8 @@ describe("regional printing lists", () => {
         rarity_code: "lg",
         premium: false,
       },
-    ]
-    await renderRoutes([{ path: "/cards/:cardNo", ...card }], {
+    ].map((row) => ({ ...row, home_set_id: "BP-SYNTHETIC" }))
+    await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
       initialEntries: ["/cards/BP01-053"],
     })
     const jp = screen.getByRole("list", { name: "JP" })
@@ -513,5 +557,37 @@ describe("regional printing lists", () => {
         .map((link) => link.textContent),
     ).toEqual(["BP01-053EN (LG)"])
     expect(within(jp).getByRole("link", { current: "page" })).toHaveTextContent("BP01-053 (LG)")
+  })
+})
+
+describe("route failures", () => {
+  function Rejected({ kind }: { readonly kind: CardRouteError["kind"] }) {
+    const { client, status } = useCardSnapshot()
+    return (
+      <CardView
+        client={client}
+        status={status}
+        catalog={null}
+        resolved={undefined}
+        routeError={new CardRouteError(kind, "synthetic route failure")}
+      />
+    )
+  }
+  it.each<[CardRouteError["kind"], string]>([
+    ["invalid", "找不到這個卡號"],
+    ["not-found", "找不到這個卡號"],
+    ["needs-update", "卡表需要更新"],
+    ["reference", "無法定位卡片"],
+  ])("a %s route shows %s", async (kind, heading) => {
+    prefsStore.set({ uiLanguage: "zh-TW" })
+    const element = (
+      <ToastProvider>
+        <Rejected kind={kind} />
+      </ToastProvider>
+    )
+    await renderRoutes([{ path: "/cards/:cardNo", element }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    expect(screen.getByRole("heading", { level: 1, name: heading })).toBeVisible()
   })
 })

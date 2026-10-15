@@ -40,7 +40,7 @@ export interface SearchEntry {
   readonly defaultPrinting: Partial<Record<Region, string>>
 }
 
-export type MatchedField = "cardNo" | "name" | "alias"
+export type MatchedField = "cardNo" | "name" | "alias" | "effect"
 
 export interface Match {
   readonly field: MatchedField

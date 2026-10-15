@@ -18,6 +18,7 @@ import { transferDigest } from "../integrity"
 import { VerifiedCache } from "../verified-cache"
 import { SearchBlobs } from "./blobs"
 import { BootstrapColumns } from "./bootstrap"
+import { EffectIndex, effectTerm } from "./effects"
 import { pack, unpack } from "./image"
 import { INDEX_IMAGE_FORMAT, SearchIndex, SearchQueryError } from "./index"
 import type {
@@ -71,6 +72,8 @@ export class SearchEngine {
   private active:
     | {
         generation: number
+        effects?: Promise<EffectIndex>
+        printings?: Promise<void>
         previews?: Promise<PreviewReader>
         index?: SearchIndex
         request: LoadRequest
@@ -84,6 +87,7 @@ export class SearchEngine {
         memory: Map<string, CachedView>
         building: Map<string, Promise<CachedView | undefined>>
         signal: AbortSignal
+        controller: AbortController
       }
     | undefined
   private revision = -1
@@ -134,7 +138,8 @@ export class SearchEngine {
       request.kind === "preview" ||
       request.kind === "neighbours" ||
       request.kind === "releases" ||
-      request.kind === "count"
+      request.kind === "count" ||
+      request.kind === "images"
     ) {
       if (this.active?.generation !== request.generation) return Promise.resolve()
       const previous = this.queries.get(request.channelId)
@@ -176,7 +181,48 @@ export class SearchEngine {
           return
         }
         try {
+          if (
+            (request.kind === "search" ||
+              request.kind === "view" ||
+              request.kind === "neighbours" ||
+              request.kind === "count") &&
+            (request.query.state.rarities.length ||
+              request.query.state.altArtOnly ||
+              request.query.state.unit === "art")
+          )
+            await active.printings
           const index = active.index
+          let eligible: ReadonlySet<string> | undefined
+          if (index && ("query" in request || request.kind === "suggest")) {
+            const term = effectTerm(
+              request.kind === "suggest" ? request.text : request.query.state.text,
+            )
+            if (term !== undefined) {
+              active.effects ??= EffectIndex.build(
+                active.files,
+                active.request.edition,
+                active.version,
+                active.blobs,
+                index,
+                active.signal,
+                (done, total) => {
+                  if (this.active === active && this.queries.get(channel) === job)
+                    this.emit({
+                      kind: "query-progress",
+                      generation: request.generation,
+                      channelId: channel,
+                      queryId: request.queryId,
+                      done,
+                      total,
+                    })
+                },
+              ).catch((error: unknown) => {
+                delete active.effects
+                throw error
+              })
+              eligible = (await active.effects).matching(term)
+            }
+          }
           const identity = {
             generation: request.generation,
             channelId: channel,
@@ -195,15 +241,7 @@ export class SearchEngine {
                   const view = await active.views.read(query, active.hash)
                   if (view) return { view, stored: Promise.resolve() }
                   if (!index) return undefined
-                  const completed = await completeView(
-                    active.request.base,
-                    query,
-                    index,
-                    active.files,
-                    active.version,
-                    active.blobs,
-                    active.signal,
-                  )
+                  const completed = completeView(query, index, eligible)
                   return { view: completed, stored: active.views.write(completed, active.hash) }
                 })()
                 const built = building
@@ -226,22 +264,30 @@ export class SearchEngine {
               if (request.remember && this.active === active && this.rememberedRequest === request)
                 await active.views.remember(completed.query, active.hash)
             })
+          } else if (request.kind === "images" && index) {
+            event = {
+              kind: "images-result",
+              ...identity,
+              faces: await completeImages(
+                active.request.base,
+                request.printingIds,
+                index,
+                active.files,
+                active.version,
+                active.blobs,
+                active.signal,
+              ),
+            }
           } else if (request.kind === "suggest" || request.kind === "recent") {
             if (!index) return
             const result =
               request.kind === "suggest"
-                ? { kind: "suggest-result" as const, ...index.suggest(request.text, request.limit) }
+                ? {
+                    kind: "suggest-result" as const,
+                    ...index.suggest(request.text, request.limit, eligible),
+                  }
                 : { kind: "recent-result" as const, items: index.recent(request.printingIds) }
-            const faces = await completeImages(
-              active.request.base,
-              result.items.flatMap((item) => (item.summary ? [item.summary.printingId] : [])),
-              index,
-              active.files,
-              active.version,
-              active.blobs,
-              active.signal,
-            )
-            event = { ...result, ...identity, faces }
+            event = { ...result, ...identity }
           } else if (request.kind === "preview" && index) {
             active.previews ??= (async () => {
               const bytes = await fetchBytes(
@@ -282,13 +328,15 @@ export class SearchEngine {
             event = {
               kind: "result",
               ...identity,
-              page: index.neighbours(request.query, request.target, request.maxItems),
+              page: index.neighbours(request.query, request.target, request.maxItems, eligible),
             }
           } else if (request.kind === "search")
             event = {
               kind: "result",
               ...identity,
-              page: index ? index.search(request.query) : { total: 0, offset: 0, items: [] },
+              page: index
+                ? index.search(request.query, eligible)
+                : { total: 0, offset: 0, items: [] },
             }
           else return
           if (this.active === active && this.queries.get(channel) === job) this.emit(event)
@@ -380,6 +428,11 @@ export class SearchEngine {
     }
   }
 
+  private adopt(active: NonNullable<SearchEngine["active"]>): void {
+    if (this.active?.controller !== active.controller) this.active?.controller.abort()
+    this.active = active
+  }
+
   private ready(
     request: LoadRequest,
     metrics: SearchMetrics,
@@ -454,6 +507,7 @@ export class SearchEngine {
           limit: 60,
         }
         const view = await views.read(fallbackQuery, hash)
+        const controller = new AbortController()
         const context = {
           generation: request.generation,
           request,
@@ -466,14 +520,15 @@ export class SearchEngine {
           views,
           memory: new Map<string, CachedView>(),
           building: new Map<string, Promise<CachedView | undefined>>(),
-          signal: new AbortController().signal,
+          signal: controller.signal,
+          controller,
         }
         if (view && cachedEntry && hash === objectValue(cachedEntry["entry"])["manifest_sha256"]) {
           signal.throwIfAborted()
           context.dataVersion = stringValue(cachedEntry["dataVersion"])
           context.manifestFields = objectValue(cachedEntry["manifestFields"])
           context.memory.set(viewSlot(fallbackQuery), { view, stored: Promise.resolve() })
-          this.active = context
+          this.adopt(context)
           this.ready(request, { ...emptyMetrics, wallMs: performance.now() - start }, false, cached)
         }
         const bytes = await stored.read(request.edition, hash)
@@ -488,14 +543,14 @@ export class SearchEngine {
         }
         if (request.entry === "index") checkEntry(entry, record.manifestFields)
         signal.throwIfAborted()
-        this.active = {
+        this.adopt({
           ...context,
           index: record.index,
           dataVersion: record.dataVersion,
           manifestFields: record.manifestFields,
           files: record.mediaFiles,
           version: record.version,
-        }
+        })
         this.ready(
           request,
           {
@@ -544,8 +599,10 @@ export class SearchEngine {
         this.revision = revision
         this.signature = signature
       }
+      // A new load aborts the previous background download, so only a complete index carries over.
       if (
         this.active?.index &&
+        !this.active.printings &&
         sameSource() &&
         this.active.hash === stringValue(entry["manifest_sha256"])
       ) {
@@ -555,7 +612,7 @@ export class SearchEngine {
           this.emit({ kind: "checking", generation: request.generation })
         else {
           // A later check of an unchanged version carries the index over instead of rebuilding.
-          this.active = { ...this.active, generation: request.generation, request }
+          this.adopt({ ...this.active, generation: request.generation, request })
           this.ready(request, { ...emptyMetrics, wallMs: performance.now() - start }, true)
         }
         return
@@ -674,37 +731,27 @@ export class SearchEngine {
           mediaFiles.set(key, dependency)
         }
       }
-      this.emit({ kind: "stage", generation: request.generation, step: "images" })
-      const currentQuery =
-        this.active?.request.edition === request.edition && this.rememberedRequest?.kind === "view"
-          ? this.rememberedRequest.query
-          : { state: DEFAULT_QUERY, edition: request.edition, limit: 60 }
-      const firstView = await completeView(
-        request.base,
-        currentQuery,
-        index,
-        mediaFiles,
-        version,
-        blobs,
-        signal,
-      )
-      signal.throwIfAborted()
-      const firstStored = views.write(firstView, manifestHash)
-      this.active = {
+      const printingsGate = Promise.withResolvers<undefined>()
+      void printingsGate.promise.catch(() => undefined)
+      const controller = new AbortController()
+      const active: NonNullable<SearchEngine["active"]> = {
+        printings: printingsGate.promise,
         generation: request.generation,
         index,
         request,
         hash: manifestHash,
         dataVersion,
         manifestFields,
-        files: mediaFiles,
+        files,
         version,
         blobs,
         views,
-        memory: new Map([[viewSlot(firstView.query), { view: firstView, stored: firstStored }]]),
+        memory: new Map(),
         building: new Map(),
-        signal: new AbortController().signal,
+        signal: controller.signal,
+        controller,
       }
+      this.adopt(active)
       this.emit({
         kind: "ready",
         generation: request.generation,
@@ -727,7 +774,6 @@ export class SearchEngine {
         },
       })
       void this.flushQueries()
-      const active = this.active
       const backgroundBlobs = new SearchBlobs(request.base, this.backgroundFetch, this.storage)
       const backgroundFiles = [...files.values()].filter(
         (file) =>
@@ -752,12 +798,17 @@ export class SearchEngine {
           background.seal()
           index = new SearchIndex(background, request.edition)
           active.index = index
+          active.memory.clear()
           printingsApplied = true
+          printingsGate.resolve(undefined)
+          // Like a restored image, the context is now complete and an unchanged check may keep it.
+          delete active.printings
+          this.emit({ kind: "background-ready", generation: request.generation })
         }
-      } catch {
+      } catch (error) {
+        printingsGate.reject(error)
         signal.throwIfAborted()
       }
-      await firstStored
       // A restored image is never supplemented again, so a catalog-only index is rebuilt next time.
       if (!printingsApplied) return
       await blobs.retainPlan(
@@ -783,14 +834,14 @@ export class SearchEngine {
             dataVersion,
             manifestFields,
             files: keys.length,
-            mediaFiles: [...mediaFiles.values()],
+            mediaFiles: [...files.values()],
             version,
           },
           [index.encode()],
         ),
       )
       signal.throwIfAborted()
-      if (this.active.generation === request.generation)
+      if (this.active?.generation === request.generation)
         await selection.write(
           `${request.entry}-${request.edition}`,
           "active",

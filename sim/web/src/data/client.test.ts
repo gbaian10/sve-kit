@@ -121,6 +121,34 @@ describe("createSnapshotClient", () => {
     ).toBeTypeOf("number")
   })
 
+  it("awaits an edition switch already started by the app before resolving a card", async () => {
+    const served = serve("/cdn")
+    const gate = Promise.withResolvers<undefined>()
+    const target = (built.manifest["files"] as JsonObject[]).find(
+      (file) => file["purpose"] === "catalog" && file["region"] === "en",
+    )
+    if (!target) throw new Error("missing EN catalog")
+    const path = stringValue(target["path"])
+    let requested = false
+    const client = createSnapshotClient("/cdn", {
+      cacheStorage: memoryCache(),
+      fetch: async (url, init) => {
+        if (url.endsWith(path)) {
+          requested = true
+          await gate.promise
+        }
+        return served.fetcher(url, init)
+      },
+    })
+    await client.load()
+    client.setRegion?.("en")
+    await expect.poll(() => requested).toBe(true)
+    const selected = client.selectRegion?.("en")
+    gate.resolve(undefined)
+    await selected
+    expect(client.snapshot()?.region).toBe("en")
+  })
+
   it("retains finite regional rows across same-version switches without duplicating background printings", async () => {
     const client = createSnapshotClient("/cdn", {
       fetch: serve("/cdn").fetcher,

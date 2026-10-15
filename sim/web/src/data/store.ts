@@ -45,7 +45,19 @@ export function createCardIndex(snapshot: LoadedSnapshot): CardIndex {
   const rows = (table: string): Row[] => mergedRows(snapshot.bootstrap, table)
   const cards = rows("card")
   const faces = rows("face")
-  const printingRows = rows("printing")
+  const printingOwners = new Map(
+    snapshot.bootstrap
+      .filter((fragment) => fragment.table === "printing")
+      .flatMap((fragment) =>
+        fragment.rows.map(
+          (row) => [stringValue(row["id"]), (fragment.value["owner"] as Row)["id"]] as const,
+        ),
+      ),
+  )
+  const printingRows: Row[] = rows("printing").map((row) => ({
+    ...row,
+    home_set_id: printingOwners.get(stringValue(row["id"])) ?? null,
+  }))
   const printingIds = new Set(printingRows.map((row) => stringValue(row["id"])))
   const printings = [
     ...printingRows,

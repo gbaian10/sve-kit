@@ -1,12 +1,12 @@
 import { type KeyboardEvent, useCallback, useId, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useLocation, useNavigate, useSearchParams } from "react-router"
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router"
 
-import { type CardEntryState, useListEntryState } from "../../app/listEntryState"
+import { type CardEntryState, routeState, useListEntryState } from "../../app/listEntryState"
 import {
-  useActiveSnapshot,
   useListView,
   useRecentSummaries,
+  useRouteEdition,
   useSearch,
   useSearchReadiness,
   useSetOptions,
@@ -25,16 +25,11 @@ import { Button } from "../../components/ui/Button"
 import { Chip } from "../../components/ui/Chip"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
-import {
-  type CardSummary,
-  type ImageSource,
-  mediaImageSource,
-  type SearchQuery,
-  viewImages,
-} from "../../data"
+import { type CardSummary, type ImageSource, type SearchQuery, viewImages } from "../../data"
+import { printingPath } from "../../domain/cardRoute"
 import { quickBarClasses } from "../../domain/classes"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
-import { formatQuery, parseQuery } from "../../domain/query/codec"
+import { formatQuery, parseQuery, querySearch } from "../../domain/query/codec"
 import {
   activeFilterCount,
   DEFAULT_QUERY,
@@ -49,7 +44,7 @@ import { prefsStore, recentStore, usePrefs, useRecent } from "../../settings"
 const DEBOUNCE_MS = 150
 
 function cardPath(summary: CardSummary): string {
-  return `/cards/${encodeURIComponent(summary.cardNo)}`
+  return printingPath(summary)
 }
 
 // The URL holds committed conditions; the input draft drives independent Worker suggestions.
@@ -58,11 +53,23 @@ export function CardsPage() {
   const prefs = usePrefs()
   const uiLanguage = currentUiLanguage(prefs.uiLanguage)
   const textLang = UI_TEXT_LANG[uiLanguage]
-  const edition = prefs.cardEdition
-  const { client } = useActiveSnapshot()
+  const edition = useRouteEdition()
   const readiness = useSearchReadiness(edition)
   const [params, setParams] = useSearchParams()
-  const query = useMemo(() => parseQuery(params), [params])
+  const { code } = useParams()
+  const { sets } = useSetOptions()
+  const set = code ? sets?.find((set) => set.publicCode === code) : undefined
+  const query = useMemo(() => {
+    const parsed = parseQuery(params)
+    return code && !params.has("set") ? { ...parsed, sets: [set?.code ?? "_unresolved"] } : parsed
+  }, [params, set, code])
+  const urlParams = (next: QueryState) => {
+    const result = formatQuery(next)
+    // A set page's own set is implied by its path, so each state keeps one URL.
+    if (set && next.sets.length === 1 && next.sets[0] === set.code) result.delete("set")
+    if (edition === "en") result.set("ed", "en")
+    return result
+  }
   const [entry, updateEntry] = useListEntryState()
   const navigate = useNavigate()
   const location = useLocation()
@@ -92,7 +99,7 @@ export function CardsPage() {
 
   const commit = (next: QueryState) => {
     setEdit(null)
-    setParams(formatQuery(next))
+    setParams(urlParams(next))
   }
   const nameOf = useCallback(
     (summary: CardSummary) => displayName(summary.name, uiLanguage, prefs.nameDisplay),
@@ -155,7 +162,11 @@ export function CardsPage() {
         : undefined,
     [thumbnailFaces, edition],
   )
-  const listOpen = focused && readiness.phase === "ready"
+  const listOpen =
+    focused &&
+    readiness.phase === "ready" &&
+    readiness.edition === edition &&
+    readiness.searchReady !== false
 
   const pages = Math.max(1, entry.pages ?? 1)
   // The view is presentation only: switching it must not run the search again, so the query
@@ -171,6 +182,7 @@ export function CardsPage() {
     view: listView,
     images,
     error: queryError,
+    progress,
     retry: retryView,
   } = useListView(searchQuery, pages)
   const page = listView?.page ?? null
@@ -179,7 +191,9 @@ export function CardsPage() {
     return page.items.flatMap((item) => {
       if (!item.summary) return []
       const state: CardEntryState = {
-        background: location.search,
+        // The card page rebuilds the sequence from this string alone, so a set page names its set.
+        background: code ? querySearch(searchState) : location.search,
+        ...routeState(item.summary),
         source: "results",
         pages,
         resultKey: item.key,
@@ -194,7 +208,7 @@ export function CardsPage() {
         },
       ]
     })
-  }, [page, location.search, pages, nameOf])
+  }, [page, location.search, code, searchState, pages, nameOf])
 
   const openSuggestion = (index: number) => {
     const row = rows[index]
@@ -202,7 +216,9 @@ export function CardsPage() {
     // Not stale here, so `typed` is the debounced text trimmed: the list URL never carries spaces.
     const fromSuggest = typed !== ""
     // The typed text becomes the list's URL first, so back returns to it with the string kept.
-    const background = fromSuggest ? `?q=${encodeURIComponent(typed)}` : location.search
+    const background = fromSuggest
+      ? `?${urlParams({ ...DEFAULT_QUERY, text: typed }).toString()}`
+      : location.search
     if (fromSuggest && background !== location.search) {
       void navigate(location.pathname + background, { replace: true, state: { pages: 1 } })
     }
@@ -211,6 +227,7 @@ export function CardsPage() {
       source: fromSuggest ? "suggest" : "results",
       pages: 1,
       resultKey: row.summary.cardId,
+      ...routeState(row.summary),
     }
     recentStore.push(row.summary.printingId)
     setEdit(null)
@@ -282,23 +299,21 @@ export function CardsPage() {
   const view = chosenView ?? prefs.viewMode
   const unsupported = queryError?.kind === "unsupported-query"
   const pending = !queryError && page === null
-  const faceMap = useMemo(
-    () => new Map(listView?.faces.map((face) => [`${face.printingId}\u0000${face.faceId}`, face])),
-    [listView],
-  )
   const artOf = useCallback(
-    (cell: GridCell): ImageSource | undefined => {
-      const face = faceMap.get(`${cell.summary.printingId}\u0000${cell.summary.faceId}`)
-      return face
-        ? mediaImageSource(client.base, face.intId, face.ordinal, face.asset, "art")
-        : undefined
-    },
-    [faceMap, client],
+    (cell: GridCell): ImageSource | undefined =>
+      images?.artImage?.(cell.summary.printingId, cell.summary.faceId),
+    [images],
   )
 
   return (
     <div className="flex flex-col gap-3 pt-2 pb-6">
-      <h1 className="sr-only">{t("pages.cards")}</h1>
+      {code ? (
+        <h1 className="text-20 font-semibold">
+          {set ? (set.name.translations[textLang] ?? set.name.original.text) : code}
+        </h1>
+      ) : (
+        <h1 className="sr-only">{t("pages.cards")}</h1>
+      )}
       <StatusStrip readiness={readiness} />
       <div className="relative z-20">
         <SearchBar
@@ -320,6 +335,11 @@ export function CardsPage() {
           {...(active >= 0 ? { activeOptionId: optionId(listId, active) } : {})}
           filterCount={filterCount}
         />
+        {focused && !listOpen && readiness.phase !== "error" && (
+          <p role="status" className="mt-2 text-13 text-text-2">
+            {t("home.searchPending")}
+          </p>
+        )}
         {listOpen && (
           <div className="absolute inset-x-0 top-full mt-1">
             <SuggestList
@@ -415,13 +435,32 @@ export function CardsPage() {
         <Notice
           tone="danger"
           role="alert"
-          actions={<Button onClick={retryView}>{t("results.retry")}</Button>}
+          actions={
+            <Button
+              onClick={() => {
+                retryView()
+                // A failed background closure is fetched again only by a new load.
+                readiness.retry()
+              }}
+            >
+              {t("results.retry")}
+            </Button>
+          }
         >
           {t("results.loadFailed")}
         </Notice>
       )}
       {/* The status strip above says what is downloading; the list only shows its skeleton. */}
-      {pending && readiness.phase !== "error" && <SkeletonGrid />}
+      {pending && readiness.phase !== "error" && (
+        <>
+          {readiness.phase === "ready" && (
+            <p role="status" className="text-13 text-text-2">
+              {progress ? t("results.searchProgress", progress) : t("results.dependenciesPending")}
+            </p>
+          )}
+          <SkeletonGrid />
+        </>
+      )}
       {page !== null && page.total === 0 && (
         <div className="flex flex-col items-center gap-3 rounded-block border border-dashed border-border-strong px-4 py-10 text-center">
           <p className="text-16 font-semibold">{t("results.empty")}</p>
@@ -466,7 +505,7 @@ export function CardsPage() {
                 onChange={(next) => {
                   prefsStore.set({ viewMode: next })
                   setEdit(null)
-                  setParams(formatQuery({ ...query, view: next }), {
+                  setParams(urlParams({ ...query, view: next }), {
                     state: entry,
                     preventScrollReset: true,
                   })

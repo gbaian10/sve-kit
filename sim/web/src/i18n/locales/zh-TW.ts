@@ -96,11 +96,13 @@ const zhTW = {
     clearRecent: "清除",
     noRecent: "還沒看過任何卡。打卡號的一部分或卡名的兩個字就會出現建議。",
     matched: "符合：{{field}}",
-    field: { cardNo: "卡號", name: "卡名", alias: "別名" },
+    field: { effect: "效果", cardNo: "卡號", name: "卡名", alias: "別名" },
     classes: "職業",
     neutral: "中立",
   },
   results: {
+    searchProgress: "效果掃描中（{{done}}/{{total}}）",
+    dependenciesPending: "資料下載中，完成後套用目前條件。",
     countUnit: "張卡片",
     sort: "排序",
     sortDefault: "卡號",
@@ -213,7 +215,15 @@ const zhTW = {
     loadFailedHint: "請檢查連線後重試。",
     retry: "重試",
   },
+  sets: {
+    kind: { booster: "補充包", collaboration: "合作包", special_pack: "特殊卡包", promo: "PR" },
+    specialProducts: "預組與特別商品",
+  },
   cardPage: {
+    needsUpdate: "卡表需要更新",
+    routeFailed: "無法定位卡片",
+    routeFailedHint: "卡片資料不完整或載入失敗，請更新資料後重試。",
+
     costValue: "消費 {{value}}",
     noValue: "—",
     previous: "上一張",

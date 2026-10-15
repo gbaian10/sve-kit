@@ -26,6 +26,9 @@ export interface CardSummary {
   readonly faceId: string
   readonly cardNo: string
   readonly region: Region
+  readonly route?: { readonly cardOwner: string; readonly printingOwner: string }
+  readonly intId?: number
+  readonly cardNoState?: string
   readonly classCode: string | null
   readonly name: NameSource
   readonly cost: number | null
@@ -173,6 +176,14 @@ export function* catalogCards(
           faceId,
           cardNo: stringValue(printing["card_no"]),
           region,
+          route: {
+            cardOwner: stringValue(card["home_set_id"]),
+            printingOwner: stringValue(printing["home_set_id"]),
+          },
+          ...(typeof printing["int_id"] === "number" ? { intId: printing["int_id"] } : {}),
+          ...(typeof printing["card_no_state"] === "string"
+            ? { cardNoState: printing["card_no_state"] }
+            : {}),
           classCode: typeof code === "string" ? code : null,
           name,
           cost: nullableInteger(revision?.["cost"]),
