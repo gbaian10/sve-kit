@@ -99,11 +99,13 @@ export default {
     clearRecent: "クリア",
     noRecent: "まだカードを見ていません。番号の一部か名前の2文字で候補が出ます。",
     matched: "一致：{{field}}",
-    field: { cardNo: "番号", name: "名前", alias: "別名" },
+    field: { effect: "効果", cardNo: "番号", name: "名前", alias: "別名" },
     classes: "クラス",
     neutral: "ニュートラル",
   },
   results: {
+    searchProgress: "効果を検索中（{{done}}/{{total}}）",
+    dependenciesPending: "データのダウンロード後に現在の条件を適用します。",
     countUnit: "枚",
     sort: "並び順",
     sortDefault: "番号順",
@@ -216,7 +218,20 @@ export default {
     loadFailedHint: "接続を確認して再試行してください。",
     retry: "再試行",
   },
+  sets: {
+    kind: {
+      booster: "ブースター",
+      collaboration: "コラボパック",
+      special_pack: "スペシャルパック",
+      promo: "PR",
+    },
+    specialProducts: "構築済みデッキ・特別商品",
+  },
   cardPage: {
+    needsUpdate: "カードデータの更新が必要です",
+    routeFailed: "カードを読み込めません",
+    routeFailedHint: "カードデータが不完全か、読み込みに失敗しました。更新して再試行してください。",
+
     costValue: "コスト {{value}}",
     noValue: "—",
     previous: "前のカード",

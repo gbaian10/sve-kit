@@ -19,7 +19,11 @@ export function CardPlaceholder({ tag, pulse = false, className }: CardPlacehold
         className,
       )}
     >
-      <svg viewBox="0 0 63 88" className="w-[46%] fill-none stroke-current" strokeWidth="2">
+      <svg
+        viewBox="0 0 63 88"
+        className="absolute inset-0 size-full fill-none stroke-current"
+        strokeWidth="2"
+      >
         <rect x="7" y="4" width="49" height="80" rx="6" className="stroke-border-strong" />
         <rect x="13" y="12" width="37" height="34" rx="3" className="fill-surface-3 stroke-none" />
         <path d="M31.5 20 40 30l-8.5 10L23 30z" className="fill-surface-1 stroke-border-strong" />
@@ -30,7 +34,7 @@ export function CardPlaceholder({ tag, pulse = false, className }: CardPlacehold
         />
       </svg>
       {tag !== undefined && (
-        <span className="max-w-[90%] truncate rounded-badge bg-surface-3 px-1.5 py-0.5 text-center text-[min(3vw,11px)] text-text-2">
+        <span className="relative mt-auto mb-[12%] max-w-[90%] truncate rounded-badge bg-surface-3 px-1.5 py-0.5 text-center text-[min(3vw,11px)] text-text-2">
           {tag}
         </span>
       )}

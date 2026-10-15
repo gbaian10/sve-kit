@@ -11,6 +11,14 @@ export interface ListEntryState {
 
 /** What a card entry receives from the list or suggest list that opened it. */
 export interface CardEntryState {
+  readonly backgroundPath?: string
+  readonly route?: {
+    readonly cardId: string
+    readonly printingId: string
+    readonly cardOwner: string
+    readonly printingOwner: string
+    readonly region: "jp" | "en"
+  }
   readonly background: string
   readonly source: "results" | "suggest"
   readonly pages: number

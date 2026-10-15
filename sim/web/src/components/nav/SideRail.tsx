@@ -1,13 +1,16 @@
 import { useTranslation } from "react-i18next"
 import { NavLink } from "react-router"
 
+import { useRouteEdition } from "../../app/snapshot"
 import logo from "../../assets/official/logo/head-left.png"
+import { editionUrl } from "../../domain/query/codec"
 import { cn } from "../ui/cn"
 import { NAV_ITEMS } from "./nav-items"
 
 // Keep the account avatar in the top bar across layouts (user decision 2026-09-29).
 export function SideRail() {
   const { t } = useTranslation()
+  const edition = useRouteEdition()
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-18 flex-col border-r border-border bg-side py-3 lg:flex xl:w-50">
       <NavLink
@@ -28,7 +31,7 @@ export function SideRail() {
           {NAV_ITEMS.map(({ key, to, Icon, end }) => (
             <li key={key}>
               <NavLink
-                to={to}
+                to={to === "/cards" || to === "/sets" ? editionUrl(to, edition) : to}
                 end={end}
                 className={({ isActive }) =>
                   cn(

@@ -99,11 +99,13 @@ export default {
     noRecent:
       "No cards viewed yet. Type part of a number or two letters of a name for suggestions.",
     matched: "Matched: {{field}}",
-    field: { cardNo: "number", name: "name", alias: "alias" },
+    field: { effect: "Effect", cardNo: "number", name: "name", alias: "alias" },
     classes: "Class",
     neutral: "Neutral",
   },
   results: {
+    searchProgress: "Scanning effects ({{done}}/{{total}})",
+    dependenciesPending: "Downloading data. Your conditions will apply when it is ready.",
     countUnit: "cards",
     sort: "Sort",
     sortDefault: "Number",
@@ -220,7 +222,20 @@ export default {
     loadFailedHint: "Check the connection and retry.",
     retry: "Retry",
   },
+  sets: {
+    kind: {
+      booster: "Boosters",
+      collaboration: "Collaborations",
+      special_pack: "Special packs",
+      promo: "Promos",
+    },
+    specialProducts: "Decks and special products",
+  },
   cardPage: {
+    needsUpdate: "Card data needs updating",
+    routeFailed: "Unable to locate card",
+    routeFailedHint: "Card data is incomplete or failed to load. Update the data and try again.",
+
     costValue: "Cost {{value}}",
     noValue: "—",
     previous: "Previous",

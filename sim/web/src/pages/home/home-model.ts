@@ -1,4 +1,5 @@
 import { type CardSummary, type CompleteView, type ImageIndex, viewImages } from "../../data"
+import { printingPath } from "../../domain/cardRoute"
 import type { DisplayedText, NameSource } from "../../domain/nameDisplay"
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region, TextLang } from "../../domain/search"
@@ -14,11 +15,11 @@ export interface SetEntry {
 }
 
 export function cardPath(summary: CardSummary): string {
-  return `/cards/${encodeURIComponent(summary.cardNo)}`
+  return printingPath(summary)
 }
 
-export function setPath(publicCode: string): string {
-  return `/sets/${encodeURIComponent(publicCode)}`
+export function setPath(publicCode: string, edition: Region = "jp"): string {
+  return `/sets/${encodeURIComponent(publicCode)}${edition === "en" ? "?ed=en" : ""}`
 }
 
 /** A set name in the interface's text language, else the original. */

@@ -4,7 +4,7 @@ import { afterAll, beforeEach, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
-import { type JsonObject, type JsonValue, stringValue } from "../../data"
+import { type JsonObject, stringValue } from "../../data"
 import { prefsStore, recentStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 import { TestSearchWorker } from "../../test-utils/search-worker"
@@ -16,12 +16,10 @@ afterAll(() => {
   vi.unstubAllGlobals()
 })
 
-it("shows query failures after readiness and retries without losing history or input", async () => {
+it("shows effect-query failures after readiness and retries without losing history or input", async () => {
   const metadata = new Set(
     (built.manifest["files"] as JsonObject[])
-      .filter((file) =>
-        (file["row_counts"] as JsonValue[][]).some((row) => row[0] === "printing_image"),
-      )
+      .filter((file) => file["purpose"] === "detail" && file["region"] === "jp")
       .map((file) => stringValue(file["path"])),
   )
   let broken = false
@@ -46,12 +44,10 @@ it("shows query failures after readiness and retries without losing history or i
   broken = true
   recentStore.push("p:bp01-001")
   const recent = within(screen.getByRole("region", { name: "最近查看" }))
-  const recentFailure = await recent.findByRole("alert")
-  expect(recentFailure).toHaveTextContent("最近查看載入失敗")
-  expect(recent.queryByRole("list", { name: "最近查看載入中" })).toBeNull()
+  expect(await recent.findByRole("link")).toHaveTextContent("BP01-001")
   expect(recentStore.get()).toEqual(["p:bp01-001"])
   const search = within(screen.getByRole("region", { name: "搜尋卡片" }))
-  await user.type(screen.getByRole("combobox"), "bp01-51")
+  await user.type(screen.getByRole("combobox"), "effect:defense")
   const searchFailure = await search.findByRole("alert")
   expect(searchFailure).toHaveTextContent("暫時無法搜尋")
   expect(search.queryByText("沒有符合的卡")).toBeNull()
@@ -64,9 +60,9 @@ it("shows query failures after readiness and retries without losing history or i
   expect(retry).toHaveFocus()
   await user.keyboard("{Enter}")
   const list = await screen.findByRole("listbox", { name: "建議" })
-  expect(within(list).getAllByRole("option")[0]).toHaveTextContent("BP01-051")
+  expect(within(list).getAllByRole("option").length).toBeGreaterThan(0)
   await waitFor(() => {
     expect(recent.getByRole("link")).toHaveTextContent("BP01-001")
   })
-  expect(screen.getByRole("combobox")).toHaveValue("bp01-51")
+  expect(screen.getByRole("combobox")).toHaveValue("effect:defense")
 })

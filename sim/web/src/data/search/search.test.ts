@@ -617,20 +617,27 @@ it("an index entry that differs from its manifest is an error, also for a stored
   }
 })
 
-it("facets whose closure is not loaded report an error instead of a partial count", async () => {
+it("rarity queries use the completed printing closure", async () => {
   const h = harness()
   h.session.load(base, "jp", "preview")
   await h.settled()
   h.channel.search({ ...query, state: { ...DEFAULT_QUERY, rarities: ["legend"] } })
   await h.queried()
-  expect(h.status().result).toEqual({
-    phase: "error",
-    error: {
-      kind: "unsupported-query",
-      message: "requested search facet is not ready",
-      facets: ["rarities"],
-    },
-  })
+  const result = h.status().result
+  expect(result.phase).toBe("complete")
+  if (result.phase !== "complete") throw new Error("missing rarity results")
+  const client = createSnapshotClient(base, { fetch: h.served.fetcher })
+  await client.load()
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing oracle")
+  const catalog = createCatalog(snapshot)
+  expect(result.page.total).toBeGreaterThan(0)
+  expect(
+    result.page.items.every(
+      (item) => catalog.index.printing(item.printingId)?.["rarity_code"] === "legend",
+    ),
+  ).toBe(true)
 })
 
 it("set filters follow the printing owner dictionary and open a matching printing", async () => {
@@ -716,12 +723,8 @@ it("query failures are typed and isolated from other channels and load state", a
   h.session.load(base, "jp", "preview")
   await h.settled()
   for (const [facets, changes] of [
-    [["types"], { types: ["follower"] }],
-    [["rarities"], { rarities: ["legend"] }],
-    [["altArtOnly"], { altArtOnly: true }],
     [["mechanics"], { mechanics: { quick: "has" } }],
-    [["unit"], { unit: "art" }],
-    [["sort"], { sort: "cost" }],
+    [["sort"], { sort: "date" }],
   ] as const) {
     h.channel.search({ ...query, state: { ...DEFAULT_QUERY, ...changes } })
     other.search(query)
@@ -1255,7 +1258,7 @@ it("a complete cached view and index are usable while the entry is blocked, with
   await expect.poll(() => warm.status().result.phase, POLL).toBe("complete")
   const result = warm.status().result
   if (result.phase !== "complete" || !result.view) throw new Error("view missing")
-  expect(result.view.faces.length).toBeGreaterThan(0)
+  expect(result.view.faces).toEqual([])
   expect(
     result.view.faces.every(
       (face) =>
@@ -1289,7 +1292,7 @@ it("an index-only hit restores before the entry and completes images from verifi
   await warm.settled()
 })
 
-it("missing or half-written views recover and image errors cannot become an unavailable view", async () => {
+it("missing views recover and image errors stay separate from usable search results", async () => {
   const storage = memoryCache()
   const served = origin()
   const first = harness(served, storage)
@@ -1313,7 +1316,16 @@ it("missing or half-written views recover and image errors cannot become an unav
   broken.channel.view({ ...query, limit: 60 })
   broken.session.load(base, "jp", "preview")
   await broken.settled()
-  await expect.poll(() => broken.status().result.phase, POLL).toBe("error")
+  await expect.poll(() => broken.status().result.phase, POLL).toBe("complete")
+  const result = broken.status().result
+  if (result.phase !== "complete") throw new Error("missing search result")
+  const images = broken.session.createChannel()
+  images.images(
+    result.page.items.map((item) => item.printingId),
+    "jp",
+  )
+  await expect.poll(() => images.getStatus().result.phase, POLL).toBe("error")
+  expect(broken.status().result.phase).toBe("complete")
 })
 
 it("remembers the current completed query for a view-first reload without metadata", async () => {
@@ -1426,7 +1438,7 @@ it("an older selection of the other edition cannot make an unchanged entry look 
   expect(h.status().error).toBeUndefined()
 })
 
-it("channels asking for the same page at once share one image metadata read", async () => {
+it("visible-image channels share metadata while search channels do not request it", async () => {
   const storage = memoryCache()
   const served = origin()
   const first = harness(served, storage)
@@ -1450,6 +1462,15 @@ it("channels asking for the same page at once share one image metadata read", as
   await expect
     .poll(() => [warm.status().result.phase, options.getStatus().result.phase], POLL)
     .toEqual(["complete", "complete"])
+  expect(served.requests.filter((path) => metadata.includes(path))).toEqual([])
+  const result = warm.status().result
+  if (result.phase !== "complete") throw new Error("missing search results")
+  const ids = result.page.items.slice(0, 2).map((item) => item.printingId)
+  warm.channel.images(ids, "jp")
+  options.images(ids, "jp")
+  await expect
+    .poll(() => [warm.status().result.phase, options.getStatus().result.phase], POLL)
+    .toEqual(["complete", "complete"])
   const read = served.requests.filter((path) => metadata.includes(path))
   expect(read.length).toBeGreaterThan(0)
   expect(new Set(read).size).toBe(read.length)
@@ -1461,7 +1482,7 @@ it("separates config, bootstrap, index building and visible-image preparation", 
   await h.settled()
   const steps = h.events.flatMap((event) => (event.kind === "stage" ? [event.step] : []))
   expect(steps).toEqual(
-    expect.arrayContaining(["index", "manifest", "config", "bootstrap", "search", "images"]),
+    expect.arrayContaining(["index", "manifest", "config", "bootstrap", "search"]),
   )
   const progress = h.events.filter((event) => event.kind === "progress")
   const files = built.manifest["files"] as JsonObject[]
@@ -1477,7 +1498,7 @@ it("separates config, bootstrap, index building and visible-image preparation", 
   ).toBeLessThan(h.events.findIndex((event) => event.kind === "ready"))
 })
 
-it("printing pages preserve every edition printing, independent numbering, filters and image-complete cache identity", async () => {
+it("printing pages preserve every edition printing, numbering, filters and cache identity", async () => {
   const served = origin()
   const client = createSnapshotClient(base, {
     fetch: served.fetcher,
@@ -1559,7 +1580,13 @@ it("printing pages preserve every edition printing, independent numbering, filte
     const complete = h.status().result
     if (complete.phase !== "complete" || !complete.view) throw new Error("missing printing view")
     expect(complete.page.items.every((item) => item.key === item.printingId)).toBe(true)
-    expect(complete.view.faces.length).toBeGreaterThan(0)
+    expect(complete.view.faces).toEqual([])
+    const imageChannel = h.session.createChannel()
+    imageChannel.images(
+      complete.page.items.map((item) => item.printingId),
+      edition,
+    )
+    await expect.poll(() => imageChannel.getStatus().result.phase, POLL).toBe("complete")
     const fresh = origin()
     const release = fresh.hold("snapshots/preview/current.json")
     const warm = harness(fresh, storage)
@@ -1906,4 +1933,32 @@ describe("set releases and counts", () => {
     if (printings.phase !== "complete") throw new Error("missing counts")
     expect(printings.counts?.cards).toBe(cards.length)
   })
+})
+
+it("effect URLs wait for the whole regional closure and return the same cold and warm answer", async () => {
+  const served = origin()
+  const h = harness(served)
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  const file = (built.manifest["files"] as JsonObject[]).find(
+    (file) => file["purpose"] === "detail" && file["region"] === "jp",
+  )
+  if (!file) throw new Error("detail fixture missing")
+  const path = stringValue(file["path"])
+  const release = served.hold(path)
+  const advanced = { ...query, state: { ...DEFAULT_QUERY, text: "effect:defense" } }
+  h.channel.search(advanced)
+  await expect.poll(() => served.requests.includes(path), POLL).toBe(true)
+  expect(h.status().result.phase).toBe("pending")
+  release()
+  await expect.poll(() => h.status().result.phase, POLL).not.toBe("pending")
+  const cold = h.status().result
+  if (cold.phase !== "complete")
+    throw new Error(cold.phase === "error" ? cold.error.message : "effect search pending")
+  expect(cold.page.total).toBeGreaterThan(0)
+  expect(h.events.some((event) => event.kind === "query-progress")).toBe(true)
+  h.channel.search(advanced)
+  await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+  const warm = h.status().result
+  expect(warm.phase === "complete" && warm.page).toEqual(cold.page)
 })

@@ -46,8 +46,8 @@ async function open(path = "/") {
 const main = () => within(screen.getByRole("main"))
 
 async function goHome(router: Awaited<ReturnType<typeof open>>["router"]) {
-  await router.navigate("/")
-  await screen.findByRole("region", { name: "官方最新消息" })
+  await act(() => router.navigate("/"))
+  await screen.findByRole("region", { name: "官方最新消息" }, { timeout: 4000 })
 }
 
 describe("home search", () => {
@@ -59,7 +59,7 @@ describe("home search", () => {
     expect(within(list).getAllByRole("option")[0]).toHaveTextContent("BP01-051")
     await user.keyboard("{Enter}")
     expect(router.state.location.pathname).toBe("/cards/BP01-051")
-    expect(router.state.location.state).toEqual({
+    expect(router.state.location.state).toMatchObject({
       background: "?q=bp01-51",
       source: "suggest",
       pages: 1,

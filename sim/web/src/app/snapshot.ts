@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react"
+import { useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react"
+import { UNSAFE_LocationContext } from "react-router"
 
 import {
   activeSnapshotRoot,
@@ -124,13 +125,34 @@ function workerOf(root: SnapshotRoot): ActiveWorker {
   return worker
 }
 
+export function useRouteEdition(): Region {
+  const context = useContext(UNSAFE_LocationContext) as {
+    location: { pathname: string; search: string; state: unknown }
+  } | null
+  const location = context?.location
+  const { cardEdition } = usePrefs()
+  const pathname = location?.pathname ?? "/"
+  const search = location?.search ?? ""
+  if (pathname === "/cards" || pathname === "/sets" || pathname.startsWith("/sets/"))
+    return new URLSearchParams(search).get("ed") === "en" ? "en" : "jp"
+  if (pathname.startsWith("/cards/")) {
+    const params = new URLSearchParams(search)
+    if (params.has("ed")) return params.get("ed") === "en" ? "en" : "jp"
+    const state = location?.state as { route?: { region?: string } } | null
+    if (state?.route?.region === "jp" || state?.route?.region === "en") return state.route.region
+    // This only schedules the first catalog. Route resolution still checks the exact raw key.
+    return /en(?:-|$)/iu.test(pathname.split("/")[2] ?? "") ? "en" : "jp"
+  }
+  return cardEdition
+}
+
 export function useActiveSnapshot(): {
   readonly client: SnapshotClient
   readonly status: SnapshotStatus
   readonly root: SnapshotRoot
 } {
   const root = useSnapshotRoot()
-  const { cardEdition } = usePrefs()
+  const cardEdition = useRouteEdition()
   const worker = workerOf(root)
   const status = useSnapshotStatus(worker.client)
   useEffect(() => {
@@ -244,7 +266,14 @@ export function useListView(query: SearchQuery, pages: number) {
   const store = useMemo(() => {
     const channels: SearchChannel[] = []
     const unsubs: (() => void)[] = []
-    const state: { wanted: number; value: { view?: CompleteView; error?: QueryFailure } } = {
+    const state: {
+      wanted: number
+      value: {
+        view?: CompleteView
+        error?: QueryFailure
+        progress?: { done: number; total: number }
+      }
+    } = {
       wanted: 0,
       value: {},
     }
@@ -257,10 +286,19 @@ export function useListView(query: SearchQuery, pages: number) {
         result.phase === "complete" && result.view ? [result.view] : [],
       )
       const first = complete[0]
+      const provenance = results[0]
+      const coherent = results.every(
+        (result) =>
+          result.phase === "complete" &&
+          provenance?.phase === "complete" &&
+          result.manifestHash === provenance.manifestHash &&
+          result.root === provenance.root,
+      )
+      const progress = channels[0]?.getStatus().queryProgress
       state.value =
         error?.phase === "error"
           ? { error: error.error }
-          : complete.length === wanted && first
+          : complete.length === wanted && first && coherent
             ? {
                 view: {
                   ...first,
@@ -268,9 +306,7 @@ export function useListView(query: SearchQuery, pages: number) {
                   faces: complete.flatMap((view) => view.faces),
                 },
               }
-            : value.error
-              ? {}
-              : value
+            : { ...(value.error ? {} : value), ...(progress ? { progress } : {}) }
       for (const listener of listeners) listener()
     }
     const request = (channel: SearchChannel, page: number) => {
@@ -317,11 +353,89 @@ export function useListView(query: SearchQuery, pages: number) {
     return store.release
   }, [store, pages])
   const result = useSyncExternalStore(store.subscribe, store.get, store.get)
-  const images = useMemo(() => (result.view ? viewImages(result.view) : undefined), [result.view])
+  const images = useVisibleResultImages(result.view)
   useEffect(() => {
     if (result.view) performance.mark("sve-view-ready")
   }, [result.view])
   return { ...result, images, retry: store.retry }
+}
+
+/** Image metadata is independent of search readiness and follows visible card slots. */
+function useVisibleResultImages(view: CompleteView | undefined) {
+  const { channel, status } = useWorkerChannel(JSON.stringify(view?.query ?? null))
+  const state = useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus)
+  const [wanted, setWanted] = useState<readonly string[]>([])
+  const key = view
+    ? JSON.stringify([view.query, view.page.items.map((item) => item.printingId)])
+    : ""
+  useEffect(() => {
+    if (!view) return
+    const visible = new Set<Element>()
+    const scan = () => {
+      const ids = [
+        ...new Set(
+          [...visible]
+            .filter((node) => node.isConnected)
+            .map((node) => node.getAttribute("data-image-printing") ?? ""),
+        ),
+      ]
+        .filter(Boolean)
+        .sort()
+      setWanted((previous) => (JSON.stringify(previous) === JSON.stringify(ids) ? previous : ids))
+    }
+    const observer =
+      typeof IntersectionObserver === "undefined"
+        ? undefined
+        : new IntersectionObserver((entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) visible.add(entry.target)
+              else visible.delete(entry.target)
+            }
+            scan()
+          })
+    const observed = new Set<Element>()
+    const scanNodes = () => {
+      for (const node of document.querySelectorAll("[data-image-printing]")) {
+        if (observed.has(node)) continue
+        observed.add(node)
+        if (observer) observer.observe(node)
+        else visible.add(node)
+      }
+      for (const node of observed) {
+        if (node.isConnected) continue
+        observer?.unobserve(node)
+        observed.delete(node)
+        visible.delete(node)
+      }
+      if (!observer) scan()
+    }
+    const mutations = new MutationObserver(scanNodes)
+    mutations.observe(document.body, { childList: true, subtree: true })
+    scanNodes()
+    return () => {
+      observer?.disconnect()
+      mutations.disconnect()
+    }
+  }, [key, view])
+  const edition = view?.query.edition
+  const ids = JSON.stringify(wanted)
+  useEffect(() => {
+    if (edition && wanted.length) channel.images(JSON.parse(ids) as string[], edition)
+  }, [channel, ids, edition, wanted.length])
+  const faces =
+    state.result.phase === "complete"
+      ? state.result.faces
+      : state.previous &&
+          state.previous.manifestHash === status.manifestHash &&
+          state.previous.root === status.root
+        ? state.previous.faces
+        : undefined
+  const failed = state.result.phase === "error"
+  return useMemo(() => {
+    if (!view) return undefined
+    const images = viewImages({ ...view, faces: faces ?? [] })
+    return failed ? { ...images, failed: true, known: () => true } : images
+  }, [view, faces, failed])
 }
 
 export function useWorkerSuggestions(text: string, edition: Region) {
@@ -340,7 +454,7 @@ export function useRecentSummaries(ids: readonly string[], edition: Region) {
   return useSyncExternalStore(channel.subscribe, channel.getStatus, channel.getStatus).result
 }
 export function useSetOptions() {
-  const { cardEdition } = usePrefs()
+  const cardEdition = useRouteEdition()
   const { view, result, status } = useSearchView({
     state: DEFAULT_QUERY,
     edition: cardEdition,
@@ -376,12 +490,10 @@ export function useCardSnapshot(): {
   const client = snapshotClient(root)
   const status = useSnapshotStatus(client)
   const snapshot = client.snapshot()
+  const edition = useRouteEdition()
   useEffect(() => {
-    void client
-      .load()
-      .then(() => client.prefetchPrintings?.())
-      .catch(() => undefined)
-  }, [client, snapshot?.region])
+    void (client.selectRegion?.(edition) ?? client.load()).catch(() => undefined)
+  }, [client, edition])
   return { client, status, catalog: snapshot ? catalogOf(snapshot) : null }
 }
 

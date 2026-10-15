@@ -19,7 +19,7 @@ import { VerifiedCache } from "../verified-cache"
 import type { SearchBlobs } from "./blobs"
 import type { SearchIndex, SearchOptions, SearchPage, SearchQuery } from "./index"
 
-const VIEW_FORMAT = 2
+const VIEW_FORMAT = 3
 const REGION_POLICY = "selected-region"
 export interface ViewFace {
   readonly printingId: string
@@ -28,6 +28,7 @@ export interface ViewFace {
   readonly ordinal: number
   readonly asset: Row
   readonly source?: ImageSource
+  readonly artSource?: ImageSource
 }
 export interface CompleteView {
   readonly query: SearchQuery
@@ -45,12 +46,11 @@ export const viewSlot = (query: SearchQuery): string =>
 export function viewImages(view: CompleteView): ImageIndex {
   const faces = new Map(view.faces.map((face) => [`${face.printingId}\u0000${face.faceId}`, face]))
   const get = (printing: string, face: string) => faces.get(`${printing}\u0000${face}`)
-  const eager = new Set(view.page.items.slice(0, 24).map((item) => item.printingId))
   return {
     known: (printing, face) => get(printing, face) !== undefined,
-    eager: (printing, face) => eager.has(printing) && get(printing, face)?.ordinal === 0,
     asset: (printing, face) => get(printing, face)?.asset,
     cardImage: (printing, face) => get(printing, face)?.source,
+    artImage: (printing, face) => get(printing, face)?.artSource,
   }
 }
 export class ViewCache {
@@ -84,14 +84,6 @@ export class ViewCache {
       if (!Array.isArray(record["faces"])) return undefined
       const view = record as unknown as CompleteView
       if (viewSlot(view.query) !== viewSlot(query)) return undefined
-      for (const item of view.page.items)
-        if (
-          !item.summary ||
-          !view.faces.some(
-            (face) => face.printingId === item.printingId && face.faceId === item.summary?.faceId,
-          )
-        )
-          return undefined
       return view
     } catch {
       return undefined
@@ -103,26 +95,18 @@ export class ViewCache {
   }
 }
 
-export async function completeView(
-  root: string,
+export function completeView(
+  _root: string,
   query: SearchQuery,
   index: SearchIndex,
-  files: Files,
-  version: string,
-  blobs: SearchBlobs,
-  signal: AbortSignal,
+  _files: Files,
+  _version: string,
+  _blobs: SearchBlobs,
+  _signal: AbortSignal,
+  eligible?: ReadonlySet<string>,
 ): Promise<CompleteView> {
-  const page = index.search(query)
-  const faces = await completeImages(
-    root,
-    page.items.map((item) => item.printingId),
-    index,
-    files,
-    version,
-    blobs,
-    signal,
-  )
-  return { query, page, faces, options: index.options }
+  const page = index.search(query, eligible)
+  return Promise.resolve({ query, page, faces: [], options: index.options })
 }
 
 export async function completeImages(
@@ -202,6 +186,7 @@ export async function completeImages(
     const row = rows.get(`${target.printingId}\u0000${target.faceId}`)
     if (!row) throw new Error("image metadata face missing")
     const asset = {
+      rarity_code: target.rarityCode ?? null,
       publication_state: row["publication_state"] ?? null,
       availability: row["availability"] ?? null,
       card_version: row["card_version"] ?? null,
@@ -209,9 +194,16 @@ export async function completeImages(
       variants: row["variants"] ?? [],
     }
     const source = mediaImageSource(root, intId, target.ordinal, asset, "card")
+    const artSource = mediaImageSource(root, intId, target.ordinal, asset, "art")
     if (!source && row["publication_state"] === "approved" && row["availability"] === "available")
       throw new Error("available image has no variants")
-    return { ...target, intId, asset, ...(source ? { source } : {}) }
+    return {
+      ...target,
+      intId,
+      asset,
+      ...(source ? { source } : {}),
+      ...(artSource ? { artSource } : {}),
+    }
   })
   return faces
 }

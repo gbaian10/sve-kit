@@ -17,6 +17,7 @@ export interface ImageFace {
 }
 export interface ImageIndex {
   readonly cardImage: (printingId: string, faceId: string) => ImageSource | undefined
+  readonly artImage?: (printingId: string, faceId: string) => ImageSource | undefined
   readonly asset: (printingId: string, faceId: string) => Row | undefined
   readonly known?: (printingId: string, faceId: string) => boolean
   readonly eager?: (printingId: string, faceId: string) => boolean

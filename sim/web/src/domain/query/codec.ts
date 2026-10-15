@@ -103,3 +103,12 @@ export function querySearch(state: QueryState): string {
   const text = formatQuery(state).toString()
   return text === "" ? "" : `?${text}`
 }
+
+/** Lists use JP unless their own URL explicitly selects EN. */
+export function editionUrl(path: string, edition: "jp" | "en"): string {
+  const [pathname = "", search = ""] = path.split("?", 2)
+  const params = new URLSearchParams(search)
+  if (edition === "en") params.set("ed", "en")
+  else params.delete("ed")
+  return `${pathname}${params.size ? `?${params.toString()}` : ""}`
+}

@@ -3,8 +3,10 @@ import { useId } from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink } from "react-router"
 
+import { useRouteEdition } from "../../app/snapshot"
 import { Button } from "../../components/ui/Button"
 import { Link } from "../../components/ui/Link"
+import { editionUrl } from "../../domain/query/codec"
 import { RECENT_SET_LIMIT, type SetEntry, setPath } from "./home-model"
 
 // Only known release dates decide which booster and collaboration sets are newest.
@@ -18,6 +20,7 @@ export function SetEntries({
   readonly onRetry?: () => void
 }) {
   const { t } = useTranslation()
+  const edition = useRouteEdition()
   const headingId = useId()
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-2">
@@ -25,7 +28,10 @@ export function SetEntries({
         <h2 id={headingId} className="text-15 font-semibold">
           {t("home.sets.title")}
         </h2>
-        <Link to="/sets" className="flex h-8 shrink-0 items-center gap-0.5 text-13 font-semibold">
+        <Link
+          to={editionUrl("/sets", edition)}
+          className="flex h-8 shrink-0 items-center gap-0.5 text-13 font-semibold"
+        >
           <span>{t("home.sets.all")}</span>
           <ChevronRight className="size-4" aria-hidden="true" />
         </Link>
@@ -51,7 +57,7 @@ export function SetEntries({
             {sets.map((set) => (
               <li key={set.publicCode}>
                 <RouterLink
-                  to={setPath(set.publicCode)}
+                  to={setPath(set.publicCode, edition)}
                   className="flex min-h-14 items-center gap-3 rounded-button border border-border bg-surface-1 px-3 py-1.5 text-text-1 hover:bg-surface-2"
                 >
                   <span className="w-14 shrink-0 font-sans text-14 font-bold tabular-nums">

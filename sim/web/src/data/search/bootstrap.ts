@@ -21,7 +21,18 @@ const TABLES = new Set([
 const FIELDS: Readonly<Record<string, readonly string[]>> = {
   card: ["id", "home_set_id", "regions"],
   face: ["id", "card_id", "ordinal", "current", "wording"],
-  printing: ["id", "card_id", "region", "card_no", "int_id", "home_set_id"],
+  printing: [
+    "id",
+    "card_id",
+    "region",
+    "card_no",
+    "int_id",
+    "home_set_id",
+    "card_no_state",
+    "rarity_code",
+    "faces",
+    "variant_key",
+  ],
   face_revision: [
     "id",
     "face_id",

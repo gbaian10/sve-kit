@@ -111,6 +111,16 @@ function RecentLink({
           source: "results",
           pages: 1,
           resultKey: row.summary.cardId,
+          ...(row.summary.route
+            ? {
+                route: {
+                  ...row.summary.route,
+                  cardId: row.summary.cardId,
+                  printingId: row.summary.printingId,
+                  region: row.summary.region,
+                },
+              }
+            : {}),
         }
         void navigate(to, { state })
       }}

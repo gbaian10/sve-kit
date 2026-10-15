@@ -1,13 +1,18 @@
 import { render, type RenderResult } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { I18nextProvider } from "react-i18next"
-import { createMemoryRouter, type RouteObject, RouterProvider } from "react-router"
+import {
+  createMemoryRouter,
+  type InitialEntry,
+  type RouteObject,
+  RouterProvider,
+} from "react-router"
 
 import { ToastProvider } from "./components/ui/Toast"
 import { createI18n, type UiLanguage } from "./i18n"
 
 export interface RenderRoutesOptions {
-  readonly initialEntries?: readonly string[]
+  readonly initialEntries?: readonly InitialEntry[]
   readonly language?: UiLanguage
 }
 

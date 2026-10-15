@@ -38,6 +38,7 @@ export interface SearchChannelStatus {
   readonly lastInput: SearchQuery | null
   readonly result: SearchResult
   readonly previous?: Extract<SearchResult, { phase: "complete" }>
+  readonly queryProgress?: { readonly done: number; readonly total: number }
 }
 interface LoadFailure {
   readonly kind: "load-failed" | "worker-failed" | "cancelled"
@@ -105,6 +106,7 @@ export interface SearchChannel {
   readonly id: number
   readonly getStatus: () => SearchChannelStatus
   readonly subscribe: (listener: () => void) => () => void
+  images(printingIds: readonly string[], edition: Region): void
   neighbours(query: SearchQuery, target: string, maxItems?: number): void
   preview(printingId: string, faceId: string, language: string, edition: Region): void
   search(query: SearchQuery): void
@@ -169,6 +171,9 @@ class Channel implements SearchChannel {
   count(query: SearchQuery, language: TextLang): void {
     this.submit({ kind: "count", query, language }, query)
   }
+  images(printingIds: readonly string[], edition: Region): void {
+    this.submit({ kind: "images", printingIds }, { state: DEFAULT_QUERY, edition })
+  }
   neighbours(query: SearchQuery, target: string, maxItems?: number): void {
     this.submit(
       { kind: "neighbours", query, target, ...(maxItems === undefined ? {} : { maxItems }) },
@@ -229,6 +234,14 @@ class Channel implements SearchChannel {
         queryId: this.queryId,
       })
   }
+  supplemented(): void {
+    if (
+      this.purpose &&
+      this.status.lastInput &&
+      ["view", "recent", "suggest", "releases", "count", "images"].includes(this.purpose.kind)
+    )
+      this.submit(this.purpose, this.status.lastInput)
+  }
   checkAvailability(): void {
     const status = this.owner.status()
     const query = this.status.lastInput
@@ -258,6 +271,8 @@ class Channel implements SearchChannel {
           | "preview-result"
           | "releases-result"
           | "count-result"
+          | "query-progress"
+          | "images-result"
           | "query-error"
       }
     >,
@@ -265,8 +280,12 @@ class Channel implements SearchChannel {
     const status = this.owner.status()
     if (this.disposed || event.generation !== status.generation || event.queryId !== this.queryId)
       return
+    if (event.kind === "query-progress") {
+      this.publish({ ...this.status, queryProgress: { done: event.done, total: event.total } })
+      return
+    }
     this.publish({
-      ...this.status,
+      lastInput: this.status.lastInput,
       result:
         event.kind === "query-error"
           ? { phase: "error", error: event.error }
@@ -293,19 +312,21 @@ class Channel implements SearchChannel {
                         offset: 0,
                         items: [],
                       },
-              ...(event.kind === "view-result"
-                ? { view: event.view }
-                : event.kind === "suggest-result"
-                  ? { suggestions: event.items, ...(event.faces ? { faces: event.faces } : {}) }
-                  : event.kind === "recent-result"
-                    ? { recent: event.items, ...(event.faces ? { faces: event.faces } : {}) }
-                    : event.kind === "preview-result"
-                      ? { preview: event.preview }
-                      : event.kind === "releases-result"
-                        ? { releases: event.releases }
-                        : event.kind === "count-result"
-                          ? { counts: event.counts }
-                          : {}),
+              ...(event.kind === "images-result"
+                ? { faces: event.faces }
+                : event.kind === "view-result"
+                  ? { view: event.view }
+                  : event.kind === "suggest-result"
+                    ? { suggestions: event.items, ...(event.faces ? { faces: event.faces } : {}) }
+                    : event.kind === "recent-result"
+                      ? { recent: event.items, ...(event.faces ? { faces: event.faces } : {}) }
+                      : event.kind === "preview-result"
+                        ? { preview: event.preview }
+                        : event.kind === "releases-result"
+                          ? { releases: event.releases }
+                          : event.kind === "count-result"
+                            ? { counts: event.counts }
+                            : {}),
             },
     })
   }
@@ -418,9 +439,16 @@ export class SearchSession {
       event.kind === "recent-result" ||
       event.kind === "preview-result" ||
       event.kind === "releases-result" ||
-      event.kind === "count-result"
+      event.kind === "count-result" ||
+      event.kind === "query-progress" ||
+      event.kind === "images-result"
     ) {
       this.channels.get(event.channelId)?.receive(event)
+      return
+    }
+    if (event.kind === "background-ready") {
+      if (event.generation === this.status.generation)
+        for (const channel of this.channels.values()) channel.supplemented()
       return
     }
     if (event.kind === "checking") {

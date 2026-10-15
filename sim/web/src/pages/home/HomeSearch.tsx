@@ -21,7 +21,7 @@ import { SuggestList, type SuggestRow } from "../../components/search/SuggestLis
 import { Button } from "../../components/ui/Button"
 import type { ImageIndex, SearchQuery } from "../../data"
 import type { DisplayedName } from "../../domain/nameDisplay"
-import { querySearch } from "../../domain/query/codec"
+import { editionUrl, querySearch } from "../../domain/query/codec"
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
 import { recentStore } from "../../settings"
@@ -145,20 +145,44 @@ export function HomeSearch({
       settled === ""
         ? { background: "", source: "results", pages: 1, resultKey: row.summary.cardId }
         : {
-            background: querySearch({ ...DEFAULT_QUERY, text: settled }),
+            background: editionUrl(
+              `/cards${querySearch({ ...DEFAULT_QUERY, text: settled })}`,
+              edition,
+            ).slice(6),
             source: "suggest",
             pages: 1,
             resultKey: row.summary.cardId,
+            ...(row.summary.route
+              ? {
+                  route: {
+                    ...row.summary.route,
+                    cardId: row.summary.cardId,
+                    printingId: row.summary.printingId,
+                    region: row.summary.region,
+                  },
+                }
+              : {}),
           }
+    const withRoute = row.summary.route
+      ? {
+          ...state,
+          route: {
+            ...row.summary.route,
+            cardId: row.summary.cardId,
+            printingId: row.summary.printingId,
+            region: row.summary.region,
+          },
+        }
+      : state
     recentStore.push(row.summary.printingId)
     setFocused(false)
     remember()
-    void navigate(cardPath(row.summary), { state })
+    void navigate(cardPath(row.summary), { state: withRoute })
   }
   const seeAll = () => {
     setFocused(false)
     remember()
-    void navigate(`/cards${querySearch({ ...DEFAULT_QUERY, text: typed })}`)
+    void navigate(editionUrl(`/cards${querySearch({ ...DEFAULT_QUERY, text: typed })}`, edition))
   }
   const activate = (index: number) => {
     if (rows.length > 0) openRow(index === -1 ? 0 : index)
@@ -223,6 +247,16 @@ export function HomeSearch({
       source: "results",
       pages: 1,
       resultKey: randomItem.key,
+      ...(summary.route
+        ? {
+            route: {
+              ...summary.route,
+              cardId: summary.cardId,
+              printingId: summary.printingId,
+              region: summary.region,
+            },
+          }
+        : {}),
     }
     void navigate(cardPath(summary), { state })
   }
@@ -255,7 +289,8 @@ export function HomeSearch({
           expanded={listOpen}
           {...(listOpen && active >= 0 ? { activeOptionId: optionId(listId, active) } : {})}
         />
-        {(queryFailed || (focused && (!ready || failed))) && (
+        {(queryFailed ||
+          (focused && (!ready || failed || (settled.startsWith("effect:") && !complete)))) && (
           <div className="absolute inset-x-0 top-full mt-1">
             <div
               role={queryFailed ? "alert" : "status"}
@@ -306,11 +341,11 @@ export function HomeSearch({
         aria-label={t("home.shortcuts")}
         className="grid w-full grid-cols-3 gap-2 lg:flex lg:w-auto"
       >
-        <RouterLink to="/cards" className={SHORTCUT}>
+        <RouterLink to={editionUrl("/cards", edition)} className={SHORTCUT}>
           <SlidersHorizontal className="size-4 shrink-0" aria-hidden="true" />
           <span className="truncate">{t("home.shortcut.advanced")}</span>
         </RouterLink>
-        <RouterLink to="/sets" className={SHORTCUT}>
+        <RouterLink to={editionUrl("/sets", edition)} className={SHORTCUT}>
           <Layers className="size-4 shrink-0" aria-hidden="true" />
           <span className="truncate">{t("home.shortcut.sets")}</span>
         </RouterLink>

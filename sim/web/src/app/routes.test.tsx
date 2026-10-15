@@ -26,7 +26,7 @@ describe("route table", () => {
     ["/cards/BP01-001-合成経路サンプル", "BP01-001-合成経路サンプル"],
     ["/cards/_provisional/12", "12"],
     ["/sets", "卡包"],
-    ["/sets/BP01", "卡包"],
+    ["/sets/BP01", "BP01"],
     ["/settings", "帳號與設定"],
     ["/decks", "牌組"],
     ["/nope/nothing", "找不到這一頁"],

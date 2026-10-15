@@ -35,6 +35,8 @@ export function ArtThumb({
   return (
     <span
       data-art-thumb
+      data-image-printing={summary.printingId}
+      data-image-face={summary.faceId}
       className="relative block aspect-[4/3] w-20 shrink-0 self-start overflow-hidden rounded-sm border border-border bg-surface-2"
     >
       <img

@@ -11,6 +11,7 @@ export class SearchBlobs {
   private readonly base: string
   private readonly fetcher: Fetcher
   private readonly cache: Promise<Cache | undefined>
+  private readonly inflight = new Map<string, Promise<Uint8Array>>()
   persistent = false
 
   constructor(base: string, fetcher: Fetcher, storage?: CacheStorage) {
@@ -82,7 +83,15 @@ export class SearchBlobs {
     }
   }
 
-  async read(file: JsonObject, signal: AbortSignal): Promise<Uint8Array> {
+  read(file: JsonObject, signal: AbortSignal): Promise<Uint8Array> {
+    const key = stringValue(file["sha256"])
+    const previous = this.inflight.get(key)
+    if (previous) return previous
+    const pending = this.readFile(file, signal).finally(() => this.inflight.delete(key))
+    this.inflight.set(key, pending)
+    return pending
+  }
+  private async readFile(file: JsonObject, signal: AbortSignal): Promise<Uint8Array> {
     const path = `${this.base}/${stringValue(file["path"])}`
     const expected = stringValue(file["sha256"])
     const valid = async (data: Uint8Array) =>

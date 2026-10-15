@@ -285,7 +285,7 @@ in #4; change `createCatalog` if the exporter settles on another form.
 
 The list keeps `pages` and `anchor` on its own history entry through `useListEntryState()`
 (router `navigate(..., { replace: true, state })`, never `history.replaceState`). Opening a card
-writes the anchor first, then pushes `/cards/:cardNo` with `{ background, source, pages, resultKey }`;
+writes the anchor first, then pushes `/cards/:cardNo` with `{ background, source, pages, resultKey, route }`; `route` carries the printing and card IDs, each owner, and the region.
 `src/app/listEntryState.test.tsx` pins that replace-then-push keeps both states in the data router.
 
 Each grid cell shows the name with the card number at the right of the same line (user request
@@ -294,10 +294,12 @@ parameter (else the `viewMode` preference) picks the grid, the table rows (48×6
 a two-line effect preview labelled as incomplete) or the list rows (52px, class-coloured edge);
 the control row holds the result count, a sort placeholder and the view switch.
 
-Image metadata for the list is fetched by `useImageIndex` (`src/app/snapshot.ts`) ahead of the
-viewport: slots within 1.5 screens below and 0.5 above are requested nearest-first in batches of 12
-(two in flight, at most 60 per pass), results are kept for the whole snapshot so scrolling back never
-refetches, and a batch that has started is never cancelled. Picture files themselves still load lazily.
+List views become usable after the selected region's whole catalog is verified and indexed in
+the Worker. `useListView` publishes names and numbers independently of image metadata;
+`useVisibleResultImages` requests metadata for slots reported visible by IntersectionObserver.
+Only those slots get image URLs, and the browser loads their picture files lazily. Image failures
+leave searchable, clickable cards in place. The card page retains the bounded `useImageIndex`
+queue (12 faces per batch, two batches in flight, at most 60 faces per pass).
 
 `CardImage` is one fixed 63:88 slot: the app's own placeholder mark (`CardPlaceholder`, not the
 official card back) sits underneath and the image fades in over it. Loading, missing, pending,
@@ -312,12 +314,26 @@ cropped. Callers set the width (`w-full`, `w-8`).
 manifest hash, `retry`) and `useSearch(query)` (the last input and a result that is only
 `pending`, `error` or `complete` with a page). The shapes follow the Worker index's
 `SearchSession` status and `SearchChannel` result, so the call sites stay when the data layer
-swaps the implementation in. The current implementation is the V1 stand-in over the synchronous
-catalog: no index, cache, Worker or byte progress; the input is kept while the snapshot downloads
-and answered once, never as a partial list or a count. Conditions the catalog cannot apply (cost,
-sets, types, rarities, alt-art, mechanics, unit, sort) answer `unsupported-query` with the facets
-instead of being ignored. `StatusStrip` renders the readiness (download step, update, failure
-with retry) on the pages.
+swaps the implementation in. The Worker builds compact indexes from the regional catalog and
+retains complete answers while a replacement snapshot downloads. It discards late responses from
+older generations and query IDs. Inputs stay editable during download; results, suggestions and
+counts wait for the complete selected region.
+
+Rarity and alternate-art queries wait for the regional printing closure. `q=effect:…` requests an
+effect search over every regional detail/history file and its dictionary dependencies; progress is
+reported while the closure loads, and the Worker returns only the complete answer. The effect
+search includes supplied original and translated effects and readable wording candidates.
+Unsupported mechanics and release-date sorting produce explicit `unsupported-query` errors.
+`StatusStrip` renders download, update and retry states. Image readiness never gates search.
+
+List and set URLs default to JP; `?ed=en` selects EN before the first request. UI language stays
+out of the URL. `/sets/:publicCode` resolves the public family code and applies its archive code as
+the default set filter. Normal card links preserve raw card numbers; provisional links use the
+permanent integer. The route reader checks permanent aliases and variant overrides and replaces
+missing or incorrect slugs with the original name. Cold links reuse catalog locator triples;
+provisional lookup reads authoritative printing integers. No additional card-number wire is
+produced. An EN spelling is only a first-download hint; exact rows determine the region, with a
+second regional catalog required when the first cannot resolve an external key.
 
 The class quick bar shows labels only when an off-screen labelled copy fits the row width: the six
 classes of the physical game plus neutral. A class code the design does not know yet would use the

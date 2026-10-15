@@ -735,9 +735,12 @@ export function createSnapshotClient(
       else region = next
     },
     selectRegion: async (next) => {
-      if (next === region) return load()
+      const changed = next !== region
       region = next
-      await reload()
+      if (changed) await reload()
+      else await (pending ?? startup ?? load())
+      // An earlier download may have captured the previous region before this selection arrived.
+      if (loaded && region === next && loaded.region !== next) await reload()
     },
     snapshot: () => loaded,
     fragments,

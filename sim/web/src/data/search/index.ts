@@ -25,6 +25,8 @@ export interface SearchQuery {
 interface SearchOption {
   readonly id: string
   readonly code: string
+  readonly kind?: string
+  readonly publicCode?: string
   readonly name: CardSummary["name"]
 }
 export interface SearchOptions {
@@ -43,6 +45,7 @@ export interface ImageTarget {
   readonly intId: number
   readonly ordinal: number
   readonly owner: string
+  readonly rarityCode?: string
 }
 export interface SuggestedSummary {
   readonly summary: CardSummary
@@ -88,6 +91,10 @@ const PRINTING_COLUMNS = [
   "owner",
   "card",
   "summary",
+  "type",
+  "rarity",
+  "art",
+  "alt",
 ] as const
 const uintColumns = <T extends string>(names: readonly T[]) =>
   Object.fromEntries(names.map((name) => [name, [] as number[]])) as Record<T, number[]>
@@ -97,7 +104,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 5
+export const INDEX_IMAGE_FORMAT = 7
 
 interface Parts {
   readonly pool: StringPool
@@ -152,14 +159,23 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
         ? row["id"]
         : `${stringValue(row["kind"])}:${stringValue(row["code"])}`,
     code: stringValue(row["code"]),
+    ...(typeof row["public_code"] === "string" ? { publicCode: row["public_code"] } : {}),
+    ...(typeof row["kind"] === "string" ? { kind: row["kind"] } : {}),
     name: label(row, field),
   })
+  const editionOwners = new Set(
+    bootstrap
+      .rows("printing")
+      .filter((row) => row["region"] === edition)
+      .map((row) => stringValue(row["home_set_id"])),
+  )
   const options: SearchOptions = {
     classes: bootstrap
       .rows("vocabulary")
       .filter((row) => row["kind"] === "class" && row["active"] === true)
       .map((row) => option(row, "label_unit_id")),
     sets: index.families
+      .filter((row) => editionOwners.has(stringValue(row["id"])))
       .map((row) => option(row, "name_unit_id"))
       .sort(
         (a, b) => a.code.localeCompare(b.code, "en", { numeric: true }) || a.id.localeCompare(b.id),
@@ -211,6 +227,25 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
     for (const printing of entry.printings) {
       if (printing.id === entry.defaultPrinting[edition]) preferred = printings.id.length
       const summary = summaries.find((value) => value.printingId === printing.id)
+      const fullPrinting = index.printing(printing.id)
+      const front = index.facesOf(entry.cardId)[0]
+      const revision = front ? index.displayRevision(stringValue(front["id"]), edition) : undefined
+      const arts = (row: JsonObject | undefined) => {
+        const first = Array.isArray(row?.["faces"]) ? row["faces"][0] : undefined
+        return first ? stringValue(objectValue(first)["art_id"] ?? "") : ""
+      }
+      const art = arts(fullPrinting)
+      const defaultArt = arts(index.printing(entry.defaultPrinting[edition] ?? ""))
+      printings.type.push(
+        intern(typeof revision?.["type_code"] === "string" ? revision["type_code"] : ""),
+      )
+      printings.rarity.push(
+        intern(
+          typeof fullPrinting?.["rarity_code"] === "string" ? fullPrinting["rarity_code"] : "",
+        ),
+      )
+      printings.art.push(intern(art || printing.id))
+      printings.alt.push(Number(!!art && !!defaultArt && art !== defaultArt))
       printings.id.push(intern(printing.id))
       printings.lookup.push(intern(printing.lookupKey))
       printings.flat.push(intern(printing.flat))
@@ -227,6 +262,10 @@ function build(bootstrap: BootstrapColumns, edition: Region): Parts {
         targetBatch.push(
           ...index.facesOf(entry.cardId).map((face) => ({
             printingId: printing.id,
+            ...(typeof fullPrinting?.["rarity_code"] === "string"
+              ? { rarityCode: fullPrinting["rarity_code"] }
+              : {}),
+            cardId: entry.cardId,
             faceId: stringValue(face["id"]),
             intId: typeof row?.["int_id"] === "number" ? integerValue(row["int_id"]) : 0,
             ordinal: integerValue(face["ordinal"]),
@@ -366,6 +405,7 @@ export class SearchIndex {
   readonly releases: readonly SetRelease[]
   private readonly targetGroups = new Map<string, number[]>()
   private readonly targets: Columns
+  private readonly faceCards = new Map<string, string>()
   private readonly edition: Region
 
   /** Builds from staged bootstrap columns, or restores the bytes `encode` produced. */
@@ -389,6 +429,10 @@ export class SearchIndex {
       const group = this.targetGroups.get(id) ?? []
       group.push(ordinal)
       this.targetGroups.set(id, group)
+      this.faceCards.set(
+        stringValue(this.targets.value(ordinal, "faceId")),
+        stringValue(this.targets.value(ordinal, "cardId")),
+      )
     }
   }
 
@@ -431,17 +475,13 @@ export class SearchIndex {
     )
   }
 
-  private matches(query: SearchQuery): number[] {
+  private matches(query: SearchQuery, eligible?: ReadonlySet<string>): number[] {
     if (query.edition !== this.edition)
       throw new SearchQueryError({ kind: "edition-not-ready", message: "edition is not ready" })
-    const { state } = query
+    const state = eligible ? { ...query.state, text: "" } : query.state
     const facets: UnsupportedFacet[] = []
-    if (state.types.length) facets.push("types")
-    if (state.rarities.length) facets.push("rarities")
-    if (state.altArtOnly) facets.push("altArtOnly")
     if (Object.keys(state.mechanics).length) facets.push("mechanics")
-    if (state.unit === "art") facets.push("unit")
-    if (state.sort !== "no") facets.push("sort")
+
     if (facets.length)
       throw new SearchQueryError({
         kind: "unsupported-query",
@@ -454,7 +494,13 @@ export class SearchIndex {
     const digits = /^\d+$/u.test(flat) ? String(Number(flat)) : null
     const buckets: number[][] = [[], [], [], []]
     const allowed = (printing: number) =>
-      !state.sets.length || state.sets.includes(this.pool.get(this.printings.owner[printing] ?? 0))
+      (!state.sets.length ||
+        state.sets.includes(this.pool.get(this.printings.owner[printing] ?? 0))) &&
+      (!state.types.length ||
+        state.types.includes(this.pool.get(this.printings.type[printing] ?? 0))) &&
+      (!state.rarities.length ||
+        state.rarities.includes(this.pool.get(this.printings.rarity[printing] ?? 0))) &&
+      (!state.altArtOnly || this.printings.alt[printing] === 1)
     const upper = state.cost.max !== undefined && state.cost.max < 7 ? state.cost.max : undefined
     const costAllowed = (printing: number) => {
       const cost = this.costs[printing] ?? Number.NaN
@@ -466,6 +512,7 @@ export class SearchIndex {
       )
     }
     for (let card = 0; card < this.cards.id.length; card += 1) {
+      if (eligible && !eligible.has(this.pool.get(this.cards.id[card] ?? 0))) continue
       if (
         state.classes.length &&
         !state.classes.includes(this.pool.get(this.cards.class[card] ?? 0))
@@ -473,7 +520,7 @@ export class SearchIndex {
         continue
       const start = this.cards.printingStart[card] ?? 0
       const end = this.cards.printingStart[card + 1] ?? start
-      if (state.unit === "printing") {
+      if (state.unit === "printing" || state.unit === "art") {
         const nameRank =
           state.text === ""
             ? 0
@@ -564,8 +611,56 @@ export class SearchIndex {
       if (!costAllowed(printing)) continue
       buckets[rank]?.push(printing)
     }
-    const matches = buckets.flat()
+    let matches = buckets.flat()
     if (state.text === "") matches.sort((a, b) => (this.order[a] ?? 0) - (this.order[b] ?? 0))
+    if (state.unit === "art") {
+      const representatives = new Map<number, number>()
+      for (const printing of matches) {
+        const art = this.printings.art[printing] ?? 0
+        const card = this.printings.card[printing] ?? 0
+        if (
+          !representatives.has(art) ||
+          (state.text === "" && this.cards.default[card] === printing)
+        )
+          representatives.set(art, printing)
+      }
+      matches = matches.filter(
+        (printing) => representatives.get(this.printings.art[printing] ?? 0) === printing,
+      )
+    }
+    if (state.sort !== "no") {
+      const summary = (p: number) =>
+        this.summaries.row((this.printings.summary[p] ?? 1) - 1) as unknown as CardSummary
+      const value = (p: number): number | string | null => {
+        const row = summary(p)
+        if (state.sort === "name") return row.name.original.text
+        if (state.sort === "cost") return row.cost
+        if (state.sort === "atk") return row.attack
+        if (state.sort === "def") return row.defense
+        return null
+      }
+      if (state.sort === "date")
+        throw new SearchQueryError({
+          kind: "unsupported-query",
+          message: "release-date sorting is not ready",
+          facets: ["sort"],
+        })
+      matches.sort((a, b) => {
+        const first = value(a),
+          second = value(b)
+        return (
+          (first === null && second === null
+            ? 0
+            : first === null
+              ? 1
+              : second === null
+                ? -1
+                : typeof first === "string" && typeof second === "string"
+                  ? first.localeCompare(second)
+                  : Number(first) - Number(second)) || (this.order[a] ?? 0) - (this.order[b] ?? 0)
+        )
+      })
+    }
     return matches
   }
 
@@ -574,15 +669,19 @@ export class SearchIndex {
     const summary = this.printings.summary[printing] ?? 0
     return {
       key: this.pool.get(
-        state.unit === "printing" ? (this.printings.id[printing] ?? 0) : (this.cards.id[card] ?? 0),
+        state.unit === "printing"
+          ? (this.printings.id[printing] ?? 0)
+          : state.unit === "art"
+            ? (this.printings.art[printing] ?? 0)
+            : (this.cards.id[card] ?? 0),
       ),
       printingId: this.pool.get(this.printings.id[printing] ?? 0),
       summary: summary ? (this.summaries.row(summary - 1) as unknown as CardSummary) : undefined,
     }
   }
 
-  search(query: SearchQuery): SearchPage {
-    const matches = this.matches(query)
+  search(query: SearchQuery, eligible?: ReadonlySet<string>): SearchPage {
+    const matches = this.matches(query, eligible)
     const offset = Math.max(0, Math.trunc(query.offset ?? 0))
     const limit = Math.max(1, Math.min(100, Math.trunc(query.limit ?? 24)))
     return {
@@ -609,14 +708,20 @@ export class SearchIndex {
     )
   }
 
-  neighbours(query: SearchQuery, target: string, maxItems?: number): SearchPage {
-    const matches = this.matches(query).slice(
+  neighbours(
+    query: SearchQuery,
+    target: string,
+    maxItems?: number,
+    eligible?: ReadonlySet<string>,
+  ): SearchPage {
+    const matches = this.matches(query, eligible).slice(
       0,
       maxItems === undefined ? undefined : Math.max(1, Math.trunc(maxItems)),
     )
     const position = matches.findIndex(
       (p) =>
         this.pool.get(this.printings.id[p] ?? 0) === target ||
+        (query.state.unit === "art" && this.pool.get(this.printings.art[p] ?? 0) === target) ||
         (query.state.unit === "card" &&
           this.pool.get(this.cards.id[this.printings.card[p] ?? 0] ?? 0) === target),
     )
@@ -631,6 +736,9 @@ export class SearchIndex {
     }
   }
 
+  cardForFace(faceId: string): string | undefined {
+    return this.faceCards.get(faceId)
+  }
   imageTargets(ids: readonly string[]): readonly ImageTarget[] {
     return ids.flatMap((id) =>
       (this.targetGroups.get(id) ?? []).map(
@@ -655,7 +763,20 @@ export class SearchIndex {
     })
   }
 
-  suggest(text: string, limit = 8): { total: number; items: readonly SuggestedSummary[] } {
+  suggest(
+    text: string,
+    limit = 8,
+    eligible?: ReadonlySet<string>,
+  ): { total: number; items: readonly SuggestedSummary[] } {
+    if (eligible) {
+      const page = this.search({ state: DEFAULT_QUERY, edition: this.edition, limit }, eligible)
+      return {
+        total: page.total,
+        items: page.items.flatMap((item) =>
+          item.summary ? [{ summary: item.summary, field: "effect" as const, rank: 0 }] : [],
+        ),
+      }
+    }
     if (!text) return { total: 0, items: [] }
     const page = this.search({
       state: { ...DEFAULT_QUERY, text },
