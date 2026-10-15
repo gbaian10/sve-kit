@@ -61,27 +61,23 @@ export function createLocator(files: Files, onlyTables?: ReadonlySet<string>): L
       ref.purpose ??
       (ref.partition === "history"
         ? "history"
-        : ["text_unit", "translation", "annotation_set"].includes(ref.table)
-          ? "dictionary"
-          : ["image_asset", "image_variant", "printing_image"].includes(ref.table)
-            ? "images"
-            : ["card", "face", "face_revision"].includes(ref.table) && ref.partition === "bootstrap"
-              ? "catalog"
-              : ref.table === "face_revision"
-                ? "detail"
-                : undefined)
+        : ["image_asset", "image_variant", "printing_image"].includes(ref.table)
+          ? "images"
+          : ["card", "face", "face_revision"].includes(ref.table) && ref.partition === "bootstrap"
+            ? "catalog"
+            : ref.table === "face_revision"
+              ? "detail"
+              : undefined)
     const width =
       purpose === "images"
         ? family === null
           ? 1
           : 32
-        : purpose === "dictionary"
-          ? 2
-          : family === null
-            ? 8
-            : ["BP01", "CP04"].includes(stringValue(family))
-              ? 32
-              : 64
+        : family === null
+          ? 8
+          : ["BP01", "CP04"].includes(stringValue(family))
+            ? 32
+            : 64
     const band = Math.floor(bucket([...ref.entityKey], 64) / width)
     const matching = entries.filter(
       ({ file, count }) =>

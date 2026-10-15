@@ -10,7 +10,7 @@ import {
 const canonical = (value: Parameters<typeof canonicalText>[0]) =>
   new TextEncoder().encode(canonicalText(value))
 
-export async function annotatedOrigin(input: JsonObject = fixtureJson) {
+export async function annotatedOrigin(input: JsonObject = fixtureJson, region: "jp" | "en" = "jp") {
   const fixture = objectValue(input)
   const manifest = objectValue(fixture["manifest"])
   const payloads = new Map(
@@ -37,6 +37,7 @@ export async function annotatedOrigin(input: JsonObject = fixtureJson) {
   const requests: string[] = []
   const client = createSnapshotClient("/cdn", {
     entry: "preview",
+    region,
     fetch: (url) => {
       const path = url.slice("/cdn/".length)
       requests.push(path)

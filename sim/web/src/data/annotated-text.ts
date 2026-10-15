@@ -25,6 +25,8 @@ export interface SelectedText {
   readonly original: AnnotatedText
   readonly translated?: AnnotatedText
   readonly source?: AnnotatedText
+  readonly sourceSections?: readonly AnnotatedText[]
+  readonly counterpart?: AnnotatedText
   readonly selection?: JsonObject
   readonly translation?: JsonObject
   readonly vocabulary?: readonly {
@@ -72,6 +74,7 @@ class PageClosure {
   readonly rows = new Map<string, Map<string, JsonObject>>()
   readonly loaded = new Set<string>()
   private readonly loading = new Map<string, Promise<void>>()
+  private readonly selectionFiles = new Map<string, Set<string>>()
   readonly snapshot: LoadedSnapshot
   readonly client: SnapshotClient
   readonly locate: ReturnType<typeof createLocator>
@@ -97,6 +100,7 @@ class PageClosure {
       const rows = this.rows.get(fragment.table) ?? new Map<string, JsonObject>()
       let replaced = false
       for (let row of fragment.rows) {
+        this.indexSelections(row, fragment.file)
         const identity = key(fragment.table, row)
         const previous = rows.get(identity)
         if (
@@ -112,6 +116,14 @@ class PageClosure {
               ],
               fragment.table,
             )[0] ?? row
+        if (
+          previous &&
+          ["text_unit", "translation", "annotation_set", "annotation_concept"].includes(
+            fragment.table,
+          ) &&
+          canonicalText(previous) !== canonicalText(row)
+        )
+          annotationFailure("reference")
         replaced ||= rows.has(identity)
         rows.set(identity, row)
       }
@@ -166,39 +178,70 @@ class PageClosure {
       ...(purpose || basic ? { purpose: purpose ?? "print-detail" } : {}),
       partition,
     })
-    // A missing logical fragment is empty only after consulting this verified manifest.
-    if (file === undefined || this.loaded.has(file)) return
-    // Texts resolved together share this closure; a second caller waits for the same file
-    // instead of adding its rows twice.
+    if (file !== undefined) await this.loadFile(file)
+  }
+
+  async loadFile(file: string): Promise<void> {
+    if (this.loaded.has(file)) return
     let running = this.loading.get(file)
     if (!running) {
-      running = this.client
-        .fragments(file)
-        .then(async (fragments) => {
-          for (const fragment of fragments) {
-            if (fragment.value["base"] == null) continue
-            const baseKey = stringValue(
-              objectValue(objectValue(fragment.value["base"])["file"])["key"],
-            )
-            if (!this.loaded.has(baseKey)) {
-              this.add(await this.client.fragments(baseKey))
-              this.loaded.add(baseKey)
-            }
-          }
-          if (this.client.snapshot()?.manifestHash !== this.snapshot.manifestHash)
-            throw new Error("snapshot replaced")
-          this.add(fragments)
-          this.loaded.add(file)
-        })
-        .finally(() => this.loading.delete(file))
+      running = (async () => {
+        const descriptor = this.snapshot.files.get(file)
+        if (!descriptor) annotationFailure("reference")
+        for (const raw of arrayValue(descriptor["dependencies"] ?? [])) {
+          const ref = objectValue(raw)
+          const target = stringValue(ref["key"])
+          if (this.snapshot.files.get(target)?.["sha256"] !== ref["sha256"])
+            annotationFailure("reference")
+          if (this.snapshot.files.get(target)?.["role"] !== "config") await this.loadFile(target)
+        }
+        const fragments = await this.client.fragments(file)
+        if (this.client.snapshot()?.manifestHash !== this.snapshot.manifestHash)
+          throw new Error("snapshot replaced")
+        this.add(fragments)
+        this.loaded.add(file)
+      })().finally(() => this.loading.delete(file))
       this.loading.set(file, running)
     }
     await running
   }
 
+  private indexSelections(value: JsonValue, file: string): void {
+    if (Array.isArray(value)) {
+      for (const item of value) this.indexSelections(item, file)
+    } else if (value !== null && typeof value === "object") {
+      if ("translation_id" in value && "source" in value) {
+        const identity = canonicalText(value)
+        const files = this.selectionFiles.get(identity) ?? new Set<string>()
+        files.add(file)
+        this.selectionFiles.set(identity, files)
+      }
+      for (const item of Object.values(value)) this.indexSelections(item, file)
+    }
+  }
+
+  async sources(selection: JsonObject): Promise<void> {
+    const origins = this.selectionFiles.get(canonicalText(selection))
+    if (!origins?.size) annotationFailure("owner")
+    const targets = new Set<string>()
+    for (const origin of origins)
+      for (const raw of arrayValue(this.snapshot.files.get(origin)?.["source_refs"])) {
+        const ref = objectValue(raw)
+        const key = stringValue(ref["key"])
+        if (this.snapshot.files.get(key)?.["sha256"] !== ref["sha256"])
+          annotationFailure("reference")
+        targets.add(key)
+      }
+    await Promise.all([...targets].map((key) => this.loadFile(key)))
+  }
+
   async row(table: string, id: JsonValue): Promise<JsonObject> {
     const identity = canonicalText([id])
-    if (!this.rows.get(table)?.has(identity)) await this.load(table, [id], "detail")
+    if (
+      !this.rows.get(table)?.has(identity) &&
+      !["text_unit", "translation", "annotation_set", "annotation_concept"].includes(table)
+    )
+      await this.load(table, [id], "detail")
     const row = this.rows.get(table)?.get(identity)
     if (!row) annotationFailure("reference")
     return row
@@ -395,16 +438,33 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
       : undefined
     const sourcePointer = selection ? objectValue(selection["source"]) : pointer
     const receiverRegion = receiver.region ?? snapshot.region
-    const sourceRegion =
-      selection?.["basis"] === "jp_source"
-        ? "jp"
-        : selection?.["basis"] === "official_counterpart"
-          ? receiverRegion === "jp"
-            ? "en"
-            : "jp"
-          : receiverRegion
+    const sourceRegion = selection?.["basis"] === "jp_source" ? "jp" : receiverRegion
+    if (selection && pointer["field"] !== "name") {
+      await page.sources(selection)
+      page.textOwners().optionalPointer(sourcePointer)
+    }
     const source = await page.original(sourcePointer, receiver, sourceRegion)
     if (source === null) annotationFailure("owner")
+    if (translation && translation["source_unit_id"] !== source.unitId)
+      annotationFailure("reference")
+    if (selection) {
+      const basis = selection["basis"]
+      if (basis !== "jp_source" && canonicalText(sourcePointer) !== canonicalText(pointer))
+        annotationFailure("owner")
+      const donor = page.textOwners().byOwner.get(canonicalText(sourcePointer["owner"] ?? null))
+      if (basis === "jp_source" && donor) {
+        if (
+          receiver.region !== "en" ||
+          donor.region !== "jp" ||
+          receiver.cardId === undefined ||
+          receiver.cardId !== donor.cardId ||
+          receiver.owner["kind"] !== donor.owner["kind"] ||
+          receiver.row["face_id"] !== donor.row["face_id"] ||
+          sourcePointer["field"] !== pointer["field"]
+        )
+          annotationFailure("owner")
+      }
+    }
     if (translation?.["annotation_kind"] === "whole_name" && selection) {
       const unit = await page.row("text_unit", translation["text_unit_id"] ?? null)
       const annotation = wholeName(unit, translationNameConcept(page.textOwners(), selection))
@@ -412,10 +472,42 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
       translation["annotation_set_id"] = annotation["id"] ?? null
     }
     const pointers = [pointer, sourcePointer]
+    let counterpart: { unitId: string; annotationId: JsonValue } | null = null
     if (selection?.["counterpart"] !== null && selection?.["counterpart"] !== undefined) {
-      const counterpart = objectValue(selection["counterpart"])
-      await page.original(counterpart, receiver, receiverRegion === "jp" ? "en" : "jp")
-      pointers.push(counterpart)
+      const pointer = objectValue(selection["counterpart"])
+      if (pointer["field"] !== "name") page.textOwners().optionalPointer(pointer)
+      counterpart = await page.original(pointer, receiver, receiverRegion === "jp" ? "en" : "jp")
+      if (counterpart === null) annotationFailure("owner")
+      const donor = page.owner(objectValue(pointer["owner"]))
+      if (
+        receiver.cardId === undefined ||
+        receiver.cardId !== donor.cardId ||
+        receiver.owner["kind"] !== donor.owner["kind"] ||
+        receiver.row["face_id"] !== donor.row["face_id"] ||
+        receiver.region === donor.region
+      )
+        annotationFailure("owner")
+      if (
+        translation?.["text_unit_id"] !== counterpart.unitId ||
+        translation["annotation_set_id"] !== counterpart.annotationId
+      )
+        annotationFailure("reference")
+      pointers.push(pointer)
+    }
+    const sourceSections = []
+    if (selection && sourcePointer["field"] !== "name") {
+      const sourceOwner = page.owner(objectValue(sourcePointer["owner"]))
+      for (const raw of arrayValue(sourceOwner.row["sections"] ?? [])) {
+        const pointer = {
+          owner: sourcePointer["owner"] ?? null,
+          field: "section",
+          ordinal: objectValue(raw)["ordinal"] ?? null,
+        }
+        const section = await page.original(pointer, receiver, sourceRegion)
+        if (section === null) annotationFailure("owner")
+        sourceSections.push(section)
+        pointers.push(pointer)
+      }
     }
     const fieldRows = pointers.flatMap((value) => {
       const row = page.rows
@@ -465,10 +557,13 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
     const annotated = (unitId: JsonValue, id: JsonValue): AnnotatedText => {
       const unit = page.rows.get("text_unit")?.get(canonicalText([unitId]))
       if (!unit) annotationFailure("reference")
-      return {
-        unit,
-        annotation: id === null ? null : (annotationRows.find((row) => row["id"] === id) ?? null),
-      }
+      const annotation = id === null ? null : annotationRows.find((row) => row["id"] === id)
+      if (
+        annotation === undefined ||
+        (annotation !== null && annotation["text_unit_id"] !== unitId)
+      )
+        annotationFailure("reference")
+      return { unit, annotation }
     }
     return {
       ...(objectValue(pointer["owner"])["kind"] === "printing_face"
@@ -485,6 +580,12 @@ export function createAnnotatedTextResolver(client: SnapshotClient): AnnotatedTe
             selection,
             translation,
           }
+        : {}),
+      ...(selection
+        ? { sourceSections: sourceSections.map((s) => annotated(s.unitId, s.annotationId)) }
+        : {}),
+      ...(counterpart
+        ? { counterpart: annotated(counterpart.unitId, counterpart.annotationId) }
         : {}),
       concepts,
       vocabulary: [...(page.rows.get("vocabulary")?.values() ?? [])].flatMap((row) => {

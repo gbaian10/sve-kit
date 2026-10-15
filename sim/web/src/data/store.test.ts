@@ -2,13 +2,13 @@
 import { describe, expect, it } from "vitest"
 
 import { buildSnapshot } from "../../scripts/fixture/build"
+import { createAnnotatedTextResolver } from "./annotated-text"
 import { type Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
 import { type JsonObject, type JsonValue, stringValue } from "./format-v3/json"
 import { loadImagePage } from "./images"
-import { createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
+import { createLocator, homeSetOwner } from "./locator"
 import { createCardIndex } from "./store"
-import { createTextResolver } from "./text"
 
 const stubImage = ({ width, height, seed }: { width: number; height: number; seed: number }) =>
   Promise.resolve(
@@ -113,43 +113,18 @@ describe("card index", () => {
   })
 })
 
-describe("text resolver", () => {
-  it("answers bootstrap names at once and effects after loading their detail file", async () => {
-    const text = createTextResolver(client, index)
+describe("file-local text", () => {
+  it("resolves an effect through its exact owner without a global dictionary lookup", async () => {
     const revision = index.currentRevision("f:bp01-001", "jp")
-    const nameUnit = stringValue(revision?.["name_unit_id"])
-    expect(text.textOf(nameUnit)).toBe("試作の見習い兵")
-    const detail = await client.fragments(
-      createLocator(snapshot.files)({
-        table: "face_revision",
-        owner: homeSetOwner("set:bp01"),
-        entityKey: ["c:bp01-001"],
-        region: "jp",
-        partition: "detail",
-      }) ?? "",
+    const result = await createAnnotatedTextResolver(client).resolve(
+      {
+        owner: { kind: "face_revision", id: revision?.["id"] ?? null },
+        field: "effect",
+        ordinal: null,
+      },
+      "ja",
     )
-    const full = detail
-      .filter((fragment) => fragment.table === "face_revision")
-      .flatMap((fragment) => fragment.rows)
-      .find((row) => row["id"] === revision?.["id"])
-    const effectUnit = stringValue(full?.["effect_unit_id"])
-    expect(text.textOf(effectUnit)).toBe("【ファンファーレ】自分のリーダーを1回復する。")
-    await text.ensure([effectUnit, nameUnit])
-    expect(text.textOf(effectUnit)).toBe("【ファンファーレ】自分のリーダーを1回復する。")
-    expect(
-      requests.filter(
-        (path) =>
-          path ===
-          snapshot.files.get(
-            createLocator(snapshot.files)({
-              table: "text_unit",
-              owner: GLOBAL_OWNER,
-              entityKey: [effectUnit],
-              partition: "detail",
-            }) ?? "",
-          )?.["path"],
-      ),
-    ).toHaveLength(0)
+    expect(result?.original.unit["text"]).toBe("【ファンファーレ】自分のリーダーを1回復する。")
   })
 })
 

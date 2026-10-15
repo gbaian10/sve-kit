@@ -88,7 +88,7 @@ export function readManifest(value: JsonValue): { manifest: JsonObject; files: F
     "history",
     "engine",
     "region-state",
-    "dictionary",
+    "translation",
     "images",
     "config",
     "programs",
@@ -100,10 +100,54 @@ export function readManifest(value: JsonValue): { manifest: JsonObject; files: F
       ![null, "jp", "en"].includes(file["region"] as string | null)
     )
       fail("shape", "unknown File scope")
-    if ((file["purpose"] === "catalog") !== (file["role"] === "bootstrap"))
-      fail("shape", "catalog File role")
+    const purpose = stringValue(file["purpose"])
+    const role =
+      purpose === "catalog"
+        ? "bootstrap"
+        : ["config", "programs", "images"].includes(purpose)
+          ? purpose
+          : "text"
+    if (file["role"] !== role) fail("shape", "File role differs from purpose")
+    if (
+      ["config", "programs", "images", "translation"].includes(purpose) &&
+      file["region"] !== null
+    )
+      fail("shape", "shared File region scope")
     stringValue(file["segment"])
   }
+  for (const file of files.values()) {
+    for (const field of ["dependencies", "source_refs"]) {
+      const refs = arrayValue(file[field])
+      const keys = refs.map((raw) => stringValue(objectValue(raw)["key"]))
+      if (
+        keys.length !== new Set(keys).size ||
+        keys.some((key, i) => key !== [...keys].sort(compareCodePoints)[i])
+      )
+        fail("shape", "file references must be sorted and unique")
+      for (const raw of refs) {
+        const ref = objectValue(raw)
+        const target = files.get(stringValue(ref["key"]))
+        if (
+          !target ||
+          target["sha256"] !== ref["sha256"] ||
+          (field === "source_refs" && !["text", "bootstrap"].includes(stringValue(target["role"])))
+        )
+          fail("shape", "invalid exact file reference")
+      }
+    }
+  }
+  const visited = new Set<string>()
+  const visiting = new Set<string>()
+  const visit = (key: string): void => {
+    if (visiting.has(key)) fail("shape", "cyclic dependencies")
+    if (visited.has(key)) return
+    visiting.add(key)
+    for (const raw of arrayValue(files.get(key)?.["dependencies"]))
+      visit(stringValue(objectValue(raw)["key"]))
+    visiting.delete(key)
+    visited.add(key)
+  }
+  for (const key of files.keys()) visit(key)
   return { manifest, files }
 }
 
@@ -137,6 +181,21 @@ export function readContainer(file: JsonObject, value: JsonObject, version = "4.
           purpose: file["purpose"] ?? null,
         }
         counts.push([table, owner[0] ?? null, owner[1] ?? null, partition, segment, rows.length])
+        for (const row of rows) {
+          if (
+            row["region"] !== undefined &&
+            row["region"] !== file["region"] &&
+            file["purpose"] !== "images"
+          )
+            fail("shape", "row region differs from File scope")
+          for (const field of table === "card"
+            ? ["regions"]
+            : table === "face"
+              ? ["current", "wording"]
+              : [])
+            if (arrayValue(row[field]).some((raw) => objectValue(raw)["region"] !== file["region"]))
+              fail("shape", "regional row escapes File scope")
+        }
         const keys = rows.map((row) =>
           canonicalText(
             (metadata["base"] === null ? primaryKey(table) : ["row_index"]).map(

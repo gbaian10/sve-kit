@@ -1,13 +1,14 @@
 import { decodeMessage } from "../format-v3/decode-message"
 import {
   arrayValue,
+  canonicalText,
   integerValue,
   type JsonObject,
   objectValue,
   stringValue,
 } from "../format-v3/json"
 import { type Files, findBase, type Fragment, joinDetail } from "../format-v3/reader"
-import { createLocator, GLOBAL_OWNER, homeSetOwner } from "../locator"
+import { createLocator, homeSetOwner } from "../locator"
 import type { SearchBlobs } from "./blobs"
 import type { SearchIndex } from "./index"
 import type { AbilityPreview } from "./messages"
@@ -34,18 +35,45 @@ export class PreviewReader {
     table: string,
     id: string,
     signal: AbortSignal,
-    owner = GLOBAL_OWNER,
-    entity = id,
+    owner: JsonObject,
+    entity: string,
     partition: "bootstrap" | "detail" = "detail",
-  ): Promise<JsonObject | undefined> {
+  ): Promise<{ row: JsonObject; file: string } | undefined> {
     const key = this.locate({ table, owner, entityKey: [entity], region: this.region, partition })
     if (!key) return undefined
     const fragments = await this.fragments(key, signal)
     signal.throwIfAborted()
-    return fragments
+    const row = fragments
       .filter((fragment) => fragment.table === table)
       .flatMap((fragment) => fragment.rows)
       .find((row) => row["id"] === id)
+    return row ? { row, file: key } : undefined
+  }
+  private async dictionary(
+    table: string,
+    id: string,
+    origin: string,
+    signal: AbortSignal,
+  ): Promise<JsonObject | undefined> {
+    let result: JsonObject | undefined
+    const pending = [origin]
+    const visited = new Set<string>()
+    while (pending.length) {
+      const key = pending.pop()
+      if (key === undefined || visited.has(key)) continue
+      visited.add(key)
+      for (const fragment of await this.fragments(key, signal))
+        if (fragment.table === table)
+          for (const row of fragment.rows)
+            if (row["id"] === id) {
+              if (result && canonicalText(result) !== canonicalText(row))
+                throw new Error("conflicting preview dictionary copy")
+              result = row
+            }
+      for (const raw of arrayValue(this.files.get(key)?.["dependencies"]))
+        pending.push(stringValue(objectValue(raw)["key"]))
+    }
+    return result
   }
   private async fragments(key: string, signal: AbortSignal): Promise<readonly Fragment[]> {
     const file = this.files.get(key)
@@ -91,7 +119,8 @@ export class PreviewReader {
     if (!summary || !target) throw new Error("preview face is not in this edition")
     this.region = summary.region
     const owner = homeSetOwner(target.owner)
-    const face = await this.row("face", faceId, signal, owner, summary.cardId, "bootstrap")
+    const locatedFace = await this.row("face", faceId, signal, owner, summary.cardId, "bootstrap")
+    const face = locatedFace?.row
     if (!face) throw new Error("preview face missing")
     const current = arrayValue(face["current"])
       .map((value) => objectValue(value))
@@ -104,8 +133,9 @@ export class PreviewReader {
       (wording ? objectValue(wording["display"])["revision_id"] : undefined)
     let value: AbilityPreview | null = null
     if (typeof revisionId === "string") {
-      const revision = await this.row("face_revision", revisionId, signal, owner, summary.cardId)
-      if (!revision) throw new Error("preview revision missing")
+      const located = await this.row("face_revision", revisionId, signal, owner, summary.cardId)
+      if (!located) throw new Error("preview revision missing")
+      const revision = located.row
       let unitId = revision["effect_unit_id"]
       if (typeof unitId === "string") {
         const selection = arrayValue(revision["translations"])
@@ -117,16 +147,17 @@ export class PreviewReader {
               row["target_lang"] === language,
           )
         if (selection) {
-          const translation = await this.row(
+          const translation = await this.dictionary(
             "translation",
             stringValue(selection["translation_id"]),
+            located.file,
             signal,
           )
           if (!translation) throw new Error("preview translation missing")
           unitId = translation["text_unit_id"]
         }
         if (typeof unitId !== "string") throw new Error("preview text pointer missing")
-        const unit = await this.row("text_unit", unitId, signal)
+        const unit = await this.dictionary("text_unit", unitId, located.file, signal)
         if (!unit) throw new Error("preview text missing")
         value = { text: stringValue(unit["text"]), language: stringValue(unit["lang"]) }
       }
