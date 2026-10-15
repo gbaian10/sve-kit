@@ -145,7 +145,7 @@ export async function locateCard(
   } catch (error) {
     if (
       !(error instanceof CardRouteError) ||
-      !["not-found", "needs-update", "reference"].includes(error.kind) ||
+      !["not-found", "target-not-found", "needs-update"].includes(error.kind) ||
       input.hint
     )
       throw error
@@ -156,7 +156,13 @@ export async function locateCard(
       throw new CardRouteError("reference", "route lookup changed snapshot")
     snapshot = next
     await prepare()
-    printing = resolveRoute(input, records(snapshot), aliases, overrides)
+    try {
+      printing = resolveRoute(input, records(snapshot), aliases, overrides)
+    } catch (error) {
+      if (error instanceof CardRouteError && error.kind === "target-not-found")
+        throw new CardRouteError("reference", error.message)
+      throw error
+    }
   }
   if (
     input.hint &&

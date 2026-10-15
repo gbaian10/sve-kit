@@ -97,6 +97,9 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
               if (cardEdition === "en") params.set("ed", "en")
               else params.delete("ed")
               void navigate({ pathname: location.pathname, search: params.toString() })
+            } else if (location.pathname.startsWith("/cards/")) {
+              // A card URL identifies a fixed printing; edition browsing starts at its list.
+              void navigate(cardEdition === "en" ? "/cards?ed=en" : "/cards")
             }
           }}
         />

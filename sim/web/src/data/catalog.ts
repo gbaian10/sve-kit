@@ -34,6 +34,7 @@ export interface CardSummary {
   readonly cost: number | null
   readonly attack: number | null
   readonly defense: number | null
+  readonly rarity?: NameSource
   readonly wordingPending?: boolean
 }
 
@@ -72,15 +73,19 @@ function translationText(index: CardIndex, translationId: string): string | unde
   return unit ? stringValue(unit["text"]) : undefined
 }
 
-function nameOf(index: CardIndex, revision: Row): NameSource | undefined {
-  const unit = index.textUnit(stringValue(revision["name_unit_id"]))
+function nameOf(
+  index: CardIndex,
+  revision: Row,
+  field: "name" | "label" = "name",
+): NameSource | undefined {
+  const unit = index.textUnit(stringValue(revision[`${field}_unit_id`]))
   if (!unit) return undefined
   const lang = stringValue(unit["lang"])
   if (!isTextLang(lang)) return undefined
   const translations: Partial<Record<TextLang, string>> = {}
   const translationQuality: NonNullable<NameSource["translationQuality"]> = {}
   for (const entry of revision["translations"] as Row[]) {
-    if (entry["field"] !== "name") continue
+    if (entry["field"] !== field) continue
     const target = stringValue(entry["target_lang"])
     const text = translationText(index, stringValue(entry["translation_id"]))
     if (isTextLang(target) && text !== undefined) {
@@ -170,8 +175,13 @@ export function* catalogCards(
       if (edition !== undefined && region !== edition) continue
       for (const printing of index.printingsOf(cardId)) {
         if (printing["region"] !== region) continue
+        const rarityCode = printing["rarity_code"]
+        const rarity =
+          typeof rarityCode === "string" ? index.vocabulary("rarity", rarityCode) : undefined
+        const rarityName = rarity ? nameOf(index, rarity, "label") : undefined
         summaries.push({
           cardId,
+          ...(rarityName ? { rarity: rarityName } : {}),
           printingId: stringValue(printing["id"]),
           faceId,
           cardNo: stringValue(printing["card_no"]),

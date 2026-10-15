@@ -59,6 +59,41 @@ describe("permanent card routes", () => {
     ).toThrow(/cyclic/u)
     expect(official(row.cardNo, [row], [alias(row.cardNo, "GONE-001")])).toBe(row)
   })
+  it.each([
+    {
+      aliases: [alias("OLD-001", "NEW-001")],
+      overrides: new Map<string, string>(),
+      key: "OLD-001",
+    },
+    { aliases: [], overrides: new Map([["NEW-001", "p:other-region"]]), key: "NEW-001" },
+  ])(
+    "distinguishes a target absent from this region from a corrupt reference ($key)",
+    ({ aliases, overrides, key }) => {
+      expect(() => official(key, [], aliases, overrides)).toThrow(
+        expect.objectContaining({ kind: "target-not-found" }),
+      )
+    },
+  )
+  it("keeps cyclic aliases, conflicting aliases and mismatched overrides as reference errors", () => {
+    expect(() => official("OLD-001", [], [alias("OLD-001", "OLD-001")])).toThrow(
+      expect.objectContaining({ kind: "reference" }),
+    )
+    expect(() =>
+      official("OLD-001", [], [alias("OLD-001", "NEW-001"), alias("OLD-001", "OTHER-001")]),
+    ).toThrow(expect.objectContaining({ kind: "reference" }))
+    const row = printing("OTHER-001")
+    expect(() => official("NEW-001", [row], [], new Map([["NEW-001", row.id]]))).toThrow(
+      expect.objectContaining({ kind: "reference" }),
+    )
+    expect(() =>
+      resolveRoute(
+        { namespace: "provisional", key: "42" },
+        [row, printing("NEW-001")],
+        [],
+        new Map(),
+      ),
+    ).toThrow(expect.objectContaining({ kind: "reference" }))
+  })
   it("allows only a unique folded key and gives exact raw spelling priority", () => {
     const first = printing("PR-001Ⓢ")
     const other = printing("PR-001S", { id: "p:other", region: "en" })

@@ -1,4 +1,6 @@
 import { renderHook } from "@testing-library/react"
+import { createElement, type ReactNode } from "react"
+import { MemoryRouter } from "react-router"
 import { afterEach, expect, it, vi } from "vitest"
 
 import { TestSearchWorker } from "../test-utils/search-worker"
@@ -13,7 +15,9 @@ it("starts the Worker without loading a full snapshot and rate limits focus chec
   vi.useFakeTimers({ now: 0, toFake: ["Date"] })
   vi.stubGlobal("Worker", TestSearchWorker)
   const sent = vi.spyOn(TestSearchWorker.prototype, "postMessage")
-  const { result } = renderHook(() => useActiveSnapshot())
+  const { result } = renderHook(() => useActiveSnapshot(), {
+    wrapper: ({ children }: { children: ReactNode }) => createElement(MemoryRouter, null, children),
+  })
   expect(result.current.client.snapshot()).toBeNull()
   const loads = () => sent.mock.calls.filter(([request]) => request.kind === "load").length
   expect(loads()).toBe(1)

@@ -61,7 +61,7 @@ export function CardsPage() {
   const set = code ? sets?.find((set) => set.publicCode === code) : undefined
   const query = useMemo(() => {
     const parsed = parseQuery(params)
-    return code && !params.has("set") ? { ...parsed, sets: [set?.code ?? "_unresolved"] } : parsed
+    return code && !params.has("set") ? { ...parsed, sets: set ? [set.code] : [] } : parsed
   }, [params, set, code])
   const urlParams = (next: QueryState) => {
     const result = formatQuery(next)
@@ -181,6 +181,7 @@ export function CardsPage() {
   const {
     view: listView,
     images,
+    imageRoot,
     error: queryError,
     progress,
     retry: retryView,
@@ -305,8 +306,24 @@ export function CardsPage() {
     [images],
   )
 
+  if (code && !set) {
+    return (
+      <div ref={imageRoot} className="flex flex-col gap-3 pt-2 pb-6">
+        <h1 className="text-20 font-semibold">{code}</h1>
+        <StatusStrip readiness={readiness} />
+        {sets ? (
+          <Notice tone="info" role="status">
+            {t("sets.notFound")}
+          </Notice>
+        ) : (
+          <SkeletonGrid />
+        )}
+      </div>
+    )
+  }
+
   return (
-    <div className="flex flex-col gap-3 pt-2 pb-6">
+    <div ref={imageRoot} className="flex flex-col gap-3 pt-2 pb-6">
       {code ? (
         <h1 className="text-20 font-semibold">
           {set ? (set.name.translations[textLang] ?? set.name.original.text) : code}

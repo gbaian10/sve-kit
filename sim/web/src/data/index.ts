@@ -52,5 +52,5 @@ export {
   SearchSession,
   type SearchStatus,
 } from "./search/session"
-export { type CompleteView, viewImages } from "./search/view"
+export { type CompleteView, type ViewFace, viewImages } from "./search/view"
 export { textRuns } from "./text-runs"

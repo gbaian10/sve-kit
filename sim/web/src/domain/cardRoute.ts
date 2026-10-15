@@ -17,7 +17,8 @@ export interface RouteAlias {
   readonly targetKey: string
 }
 export class CardRouteError extends Error {
-  readonly kind: "not-found" | "needs-update" | "ambiguous" | "invalid" | "reference"
+  readonly kind:
+    "not-found" | "target-not-found" | "needs-update" | "ambiguous" | "invalid" | "reference"
   constructor(kind: CardRouteError["kind"], message: string) {
     super(message)
     this.kind = kind
@@ -53,8 +54,12 @@ export function resolveRoute(
     )
     if (namespace === "official" && overrides.has(key)) {
       const selected = matches.find((p) => p.id === overrides.get(key))
-      if (!selected)
-        throw new CardRouteError("reference", "route override has no matching printing")
+      if (!selected) {
+        const kind = printings.some((p) => p.id === overrides.get(key))
+          ? "reference"
+          : "target-not-found"
+        throw new CardRouteError(kind, "route override has no matching printing")
+      }
       return selected
     }
     if (matches.length > 1) throw new CardRouteError("ambiguous", "card route is ambiguous")
@@ -76,7 +81,8 @@ export function resolveRoute(
     namespace = alias.targetNamespace
     key = alias.targetKey
   }
-  if (seen.size > 1) throw new CardRouteError("reference", "card route alias target is missing")
+  if (seen.size > 1)
+    throw new CardRouteError("target-not-found", "card route alias target is missing")
   if (namespace === "provisional") {
     if (!/^[1-9][0-9]*$/u.test(key) || Number(key) > 0xffffffff)
       throw new CardRouteError("invalid", "invalid printing integer")

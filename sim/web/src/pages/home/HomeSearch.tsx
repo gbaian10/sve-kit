@@ -143,12 +143,14 @@ export function HomeSearch({
     if (!row || stale) return
     const state: CardEntryState =
       settled === ""
-        ? { background: "", source: "results", pages: 1, resultKey: row.summary.cardId }
+        ? {
+            background: editionUrl("", edition),
+            source: "results",
+            pages: 1,
+            resultKey: row.summary.cardId,
+          }
         : {
-            background: editionUrl(
-              `/cards${querySearch({ ...DEFAULT_QUERY, text: settled })}`,
-              edition,
-            ).slice(6),
+            background: editionUrl(querySearch({ ...DEFAULT_QUERY, text: settled }), edition),
             source: "suggest",
             pages: 1,
             resultKey: row.summary.cardId,

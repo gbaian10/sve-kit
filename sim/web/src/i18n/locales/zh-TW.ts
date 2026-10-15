@@ -216,6 +216,7 @@ const zhTW = {
     retry: "重試",
   },
   sets: {
+    notFound: "找不到這個卡包",
     kind: { booster: "補充包", collaboration: "合作包", special_pack: "特殊卡包", promo: "PR" },
     specialProducts: "預組與特別商品",
   },

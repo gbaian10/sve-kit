@@ -2003,3 +2003,50 @@ it("a failed background printing closure is downloaded again by the next check",
   h.channel.search(rarity)
   await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
 }, 30_000)
+
+it.each(["jp", "en"] as const)(
+  "sorts names using the %s edition even on a Swedish host",
+  async (edition) => {
+    const client = createSnapshotClient(base, { fetch: origin().fetcher, region: edition })
+    await client.load()
+    const snapshot = client.snapshot()
+    if (!snapshot) throw new Error("missing snapshot")
+    const names = edition === "jp" ? ["安", "悪"] : ["z", "ä"]
+    const columns = new BootstrapColumns()
+    const replacements = new Map<string, string>()
+    const replace = (row: JsonObject) => {
+      const id = stringValue(row["id"])
+      if (!replacements.has(id)) replacements.set(id, names[replacements.size % 2] ?? "")
+      return { ...row, text: replacements.get(id) ?? "" }
+    }
+    columns.ingest(
+      snapshot.bootstrap.map((fragment) =>
+        fragment.table === "text_unit"
+          ? {
+              ...fragment,
+              rows: fragment.rows.map(replace),
+            }
+          : fragment,
+      ),
+    )
+    columns.seal()
+    const index = new SearchIndex(columns, edition)
+    const host = vi.spyOn(String.prototype, "localeCompare").mockImplementation(function (
+      this: string,
+      other,
+      locales,
+      options,
+    ) {
+      return new Intl.Collator(locales ?? "sv", options).compare(this, other)
+    })
+    try {
+      const page = index.search({ ...query, edition, state: { ...DEFAULT_QUERY, sort: "name" } })
+      const actual = page.items.map((item) => item.summary?.name.original.text)
+      expect(actual).toContain(names[0])
+      expect(actual).toContain(names[1])
+      expect(actual.indexOf(names[1])).toBeLessThan(actual.indexOf(names[0]))
+    } finally {
+      host.mockRestore()
+    }
+  },
+)

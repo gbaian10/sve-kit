@@ -66,7 +66,11 @@ const CardCell = memo(function CardCell({
 }) {
   const navigate = useNavigate()
   const href = useHref(cell.to)
-  const rarity = images?.asset(cell.summary.printingId, cell.summary.faceId)?.["rarity_code"]
+  const rarity = cell.summary.rarity
+  const rarityLabel =
+    Object.entries(rarity?.translations ?? {}).find(([lang]) => lang === labels.language)?.[1] ??
+    rarity?.original.text ??
+    ""
   return (
     <a
       href={href}
@@ -92,9 +96,7 @@ const CardCell = memo(function CardCell({
         translate={labels.t}
       />
       <span className="flex min-w-0 flex-col leading-tight">
-        <span className="h-4 text-11 font-semibold text-text-3">
-          {typeof rarity === "string" ? rarity.toUpperCase() : ""}
-        </span>
+        <span className="h-4 text-11 font-semibold text-text-3">{rarityLabel}</span>
         <span className="flex items-baseline gap-2">
           <span
             lang={cell.name.primary.lang}
