@@ -1981,3 +1981,25 @@ it("an unchanged-version check during the background download still completes pr
   await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
   await h.settled()
 }, 30_000)
+
+it("a failed background printing closure is downloaded again by the next check", async () => {
+  const h = harness()
+  const print = (built.manifest["files"] as JsonObject[]).find(
+    (file) => file["purpose"] === "print" && file["region"] === "jp",
+  )
+  if (!print) throw new Error("print fixture missing")
+  const path = stringValue(print["path"])
+  const bytes = h.served.files.get(path)
+  if (!bytes) throw new Error("print bytes missing")
+  h.served.files.delete(path)
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  const rarity = { ...query, state: { ...DEFAULT_QUERY, rarities: ["legend"] } }
+  h.channel.search(rarity)
+  await expect.poll(() => h.status().result.phase, POLL).toBe("error")
+  h.served.files.set(path, bytes)
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  h.channel.search(rarity)
+  await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+}, 30_000)

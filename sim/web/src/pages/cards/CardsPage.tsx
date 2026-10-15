@@ -435,7 +435,17 @@ export function CardsPage() {
         <Notice
           tone="danger"
           role="alert"
-          actions={<Button onClick={retryView}>{t("results.retry")}</Button>}
+          actions={
+            <Button
+              onClick={() => {
+                retryView()
+                // A failed background closure is fetched again only by a new load.
+                readiness.retry()
+              }}
+            >
+              {t("results.retry")}
+            </Button>
+          }
         >
           {t("results.loadFailed")}
         </Notice>
